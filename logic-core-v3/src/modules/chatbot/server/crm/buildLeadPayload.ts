@@ -1,20 +1,21 @@
 import type { ChatbotLead } from '@prisma/client'
 
 /**
- * B5.8 — Payload que se manda a n8n cuando se captura un lead.
+ * B5.8 / EV.5 — Payload que se manda a n8n cuando se captura un lead.
  *
- * Solo campos legibles y útiles para que el cliente arme su flujo en n8n.
+ * v2.0 (EV.5): SUPERSET estricto de v1.0. Todos los campos v1 se conservan
+ * con el mismo nombre, tipo y semántica. Se AGREGAN: `_version` bumpeado a
+ * "2.0", `verticalPack` (clave del pack del bot), y `signalsV2` (señales del
+ * pack con puntos — desde `ChatbotLead.signals` EV.2). Un workflow n8n que hoy
+ * lee el payload v1 sigue funcionando sin tocar nada.
+ *
  * NO incluye:
- *  - scoreSignals raw (jerga interna, lógica nuestra de scoring B5.4).
- *  - internalNotes (notas privadas del dueño en su dashboard).
+ *  - scoreSignals raw (jerga interna de scoring B5.4).
+ *  - internalNotes (notas privadas del dueño).
  *  - notificationSent / notificationSentAt (estado interno de emails).
  *  - updatedAt (estado interno).
- *
- * Versionado: el payload lleva `_version`. Si más adelante cambiamos el shape
- * (ej. dividimos `contact` en sub-objetos, agregamos `appointment` estructurado),
- * lo hacemos bumpeando la versión para no romper los flujos n8n del cliente.
  */
-const PAYLOAD_VERSION = '1.0' as const
+const PAYLOAD_VERSION = '2.0' as const
 
 export interface LeadWebhookPayload {
   _version: typeof PAYLOAD_VERSION
@@ -33,6 +34,7 @@ export interface LeadWebhookPayload {
   message: string | null
   classification: ChatbotLead['classification']
   category: ChatbotLead['category']
+  /** Señales legacy — 4 booleanos v1, intactos para retro-compatibilidad. */
   signals: {
     requestedAppointment: boolean
     mentionedFinancing: boolean
@@ -40,6 +42,13 @@ export interface LeadWebhookPayload {
     askedSpecificModel: boolean
   }
   channel: string | null
+  /** EV.5 v2 — clave del pack vertical del bot que capturó el lead. */
+  verticalPack: string
+  /**
+   * EV.5 v2 — señales del pack con puntos, desde ChatbotLead.signals (EV.2).
+   * null para leads capturados antes de EV.3 (dual-write no aplicado aún).
+   */
+  signalsV2: Record<string, { value: boolean; points: number }> | null
 }
 
 type LeadInput = Pick<
@@ -58,6 +67,7 @@ type LeadInput = Pick<
   | 'askedSpecificModel'
   | 'channel'
   | 'capturedAt'
+  | 'signals' // EV.5 — Json? desde EV.2; null en leads legacy pre-EV.3
 >
 
 interface OrgInput {
@@ -65,7 +75,11 @@ interface OrgInput {
   slug: string
 }
 
-export function buildLeadPayload(lead: LeadInput, org: OrgInput): LeadWebhookPayload {
+export function buildLeadPayload(
+  lead: LeadInput,
+  org: OrgInput,
+  verticalPack = 'base',
+): LeadWebhookPayload {
   return {
     _version: PAYLOAD_VERSION,
     leadId: lead.id,
@@ -83,6 +97,7 @@ export function buildLeadPayload(lead: LeadInput, org: OrgInput): LeadWebhookPay
     message: lead.message,
     classification: lead.classification,
     category: lead.category,
+    // Señales legacy — mismo shape que v1 (retro-compatible).
     signals: {
       requestedAppointment: lead.requestedAppointment,
       mentionedFinancing: lead.mentionedFinancing,
@@ -90,5 +105,11 @@ export function buildLeadPayload(lead: LeadInput, org: OrgInput): LeadWebhookPay
       askedSpecificModel: lead.askedSpecificModel,
     },
     channel: lead.channel,
+    // EV.5 v2 additions.
+    verticalPack,
+    // ChatbotLead.signals es JsonValue. En runtime es el output de buildSignalsSnapshot:
+    // Record<string, {value: boolean; points: number}>. Cast necesario al cruzar
+    // el boundary de Prisma Json → tipo de dominio.
+    signalsV2: lead.signals as unknown as Record<string, { value: boolean; points: number }> | null,
   }
 }

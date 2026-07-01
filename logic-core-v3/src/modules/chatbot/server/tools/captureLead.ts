@@ -7,6 +7,7 @@ import { logChatbotEvent } from '../logging'
 import { sendLeadNotificationEmail } from '../notifications'
 import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
 import { getVerticalPack } from '../verticals'
+import type { VerticalToolCopy } from '../verticals/types'
 import { syncLeadToCrm } from '../crm'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
@@ -47,8 +48,11 @@ export const LEAD_CATEGORIES = [
   'other',
 ] as const
 
-export const captureLeadInputSchema = z
-  .object({
+// EV.5 — Esquema parametrizado: los ejemplos de dominio vienen del toolCopy del
+// pack vertical. `captureLeadInputSchema` exportado usa el pack base para inferencia
+// de tipo (z.infer ignora los describes — tipo resultante es idéntico en todo pack).
+function buildCaptureLeadSchema(toolCopy: VerticalToolCopy) {
+  return z.object({
     name: z.string().min(2).max(100).describe(
       'Nombre del usuario como se identificó'
     ),
@@ -77,20 +81,24 @@ export const captureLeadInputSchema = z
       'true SOLO si pidió cita/visita/test drive/turno (palabras como "agendar", "ir a verlo", "test drive", "turno").'
     ),
     mentionedFinancing: z.boolean().default(false).describe(
-      'true SOLO si mencionó financiación/cuotas/crédito/prendario/leasing. false si nunca lo tocó.'
+      'true SOLO si mencionó financiación/cuotas/crédito/leasing. false si nunca lo tocó.'
     ),
     mentionedTradeIn: z.boolean().default(false).describe(
       'true SOLO si mencionó entregar un usado en parte de pago/tasación. false si nunca lo dijo.'
     ),
+    // EV.5 — ejemplo de dominio desde el toolCopy del pack del bot.
     askedSpecificModel: z.boolean().default(false).describe(
-      'true SOLO si nombró un modelo concreto (ej. "Corolla XEi", "Hilux SRV"). false si fue genérico ("un 0KM", "algo familiar").'
+      `true SOLO si mencionó un modelo o servicio concreto (ej. ${toolCopy.specificModelExamples}). false si fue genérico.`
     ),
   })
+}
+
 // SEC-LLM-03 / invalid-phone — SIN `.refine(phone || email)` a propósito: la
 // exigencia de "al menos un canal de contacto usable" se evalúa dentro del
 // execute (formato + pertenencia). Si falla, el execute devuelve un re-ask
 // graceful en lugar de dejar que Zod rechace el input y rompa el stream del SDK.
 
+export const captureLeadInputSchema = buildCaptureLeadSchema(getVerticalPack('base').toolCopy)
 export type CaptureLeadInput = z.infer<typeof captureLeadInputSchema>
 
 export const CAPTURE_LEAD_DESCRIPTION = `Guarda los datos de contacto del usuario en el sistema.
@@ -543,9 +551,10 @@ async function captureLeadExecute(
  * Builds the capture_lead tool bound to the given context.
  */
 export function buildCaptureLeadTool(ctx: ToolCallContext) {
+  const { toolCopy } = getVerticalPack(ctx.verticalPack ?? 'base')
   return tool({
     description: CAPTURE_LEAD_DESCRIPTION,
-    inputSchema: captureLeadInputSchema,
+    inputSchema: buildCaptureLeadSchema(toolCopy),
     execute: async (input: CaptureLeadInput) => captureLeadExecute(input, ctx),
   })
 }

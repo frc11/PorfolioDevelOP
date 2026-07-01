@@ -102,6 +102,15 @@ export interface LeadForCsv {
   status: ChatbotLeadStatus
   effectiveClassification: EffectiveClassification
   category: LeadCategory
+  /** EV.5 — clave del pack vertical del bot. Opcional: undefined/null → no se muestra. */
+  verticalPack?: string | null
+  /**
+   * EV.5 — señales del pack con puntos (desde ChatbotLead.signals EV.2).
+   * null para leads legacy pre-EV.3 (antes del dual-write). Se exporta como JSON
+   * en una columna única: convención más simple que columnas dinámicas, ya que
+   * las claves de señal varían por pack. El receptor (dueño / n8n) parsea el JSON.
+   */
+  signalsV2?: Record<string, { value: boolean; points: number }> | null
 }
 
 export interface BuildLeadsCsvOptions {
@@ -135,6 +144,8 @@ export function buildLeadsCsv(
         'Qué pidió',
         'Mensaje',
         'Motivo de descarte',
+        'Pack vertical',   // EV.5
+        'Señales del pack', // EV.5 — JSON: {señal: {value, points}}
         'Fecha de contacto',
       ]
     : [
@@ -146,12 +157,18 @@ export function buildLeadsCsv(
         // Columna de priorización solo si el plan la incluye.
         ...(includeClassification ? ['Qué tan listo está'] : []),
         'Estado',
+        'Pack vertical',   // EV.5
+        'Señales del pack', // EV.5 — JSON: {señal: {value, points}}
         'Fecha de contacto',
       ]
 
   const lines: string[] = [rowToCsv(headers)]
 
   for (const lead of leads) {
+    // EV.5 — columnas de pack vertical y señales (presentes en ambos modos).
+    const packCell = lead.verticalPack ?? ''
+    const signalsCell = lead.signalsV2 ? JSON.stringify(lead.signalsV2) : ''
+
     if (opts.includesDq) {
       lines.push(
         rowToCsv([
@@ -161,6 +178,8 @@ export function buildLeadsCsv(
           labelIntent(lead.intent),
           lead.message,
           labelCategory(lead.category),
+          packCell,
+          signalsCell,
           formatCapturedAt(lead.capturedAt),
         ]),
       )
@@ -176,6 +195,8 @@ export function buildLeadsCsv(
             ? [labelClassification(lead.effectiveClassification)]
             : []),
           labelStatus(lead.status),
+          packCell,
+          signalsCell,
           formatCapturedAt(lead.capturedAt),
         ]),
       )

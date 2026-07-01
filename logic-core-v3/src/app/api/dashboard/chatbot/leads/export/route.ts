@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server'
 import type { ChatbotLeadStatus } from '@prisma/client'
 import { logAdminAction } from '@/lib/audit-log'
+import { prisma } from '@/lib/prisma'
 import { getClientChatbotSession } from '@/modules/chatbot/server/admin/getClientSession'
 import { listLeadsForDashboard } from '@/modules/chatbot/server/admin/multiTenantQueries'
 import {
@@ -139,6 +140,15 @@ export async function GET(request: NextRequest) {
       ? enriched
       : enriched.filter((l) => l.effectiveClassification === classFilter)
 
+  // EV.5 — resolver verticalPack por botConfigId (1 query para el set de bots únicos).
+  // ChatbotLead.signals (Json?) ya viene en los rows desde findMany (campo escalar).
+  const uniqueBotConfigIds = [...new Set(filteredByClass.map((l) => l.botConfigId))]
+  const botConfigs = await prisma.botConfig.findMany({
+    where: { id: { in: uniqueBotConfigIds } },
+    select: { id: true, verticalPack: true },
+  })
+  const packByBotId = new Map(botConfigs.map((b) => [b.id, b.verticalPack]))
+
   const csvRows: LeadForCsv[] = filteredByClass.map((l) => ({
     name: l.name,
     email: l.email,
@@ -149,6 +159,8 @@ export async function GET(request: NextRequest) {
     status: l.status,
     effectiveClassification: l.effectiveClassification,
     category: l.category,
+    verticalPack: packByBotId.get(l.botConfigId) ?? 'base', // EV.5
+    signalsV2: l.signals as LeadForCsv['signalsV2'],         // EV.5
   }))
 
   const csv = buildLeadsCsv(csvRows, {

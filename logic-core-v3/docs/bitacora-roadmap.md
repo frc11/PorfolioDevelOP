@@ -11460,3 +11460,132 @@ Las `<a>` de tel/mail tenían un hover propio celeste `transition-colors hover:b
 ### Archivos
 
 - **Modificado:** `src/modules/chatbot/components/dashboard/LeadDetail.tsx` (6 hovers: barra de clase, Qué le interesa, tel, email, Por qué calificado, Señales de interés; celeste de tel/mail reemplazado por `adminHoverCls`).
+
+---
+## ✅ EV.5 — Tool copy desde pack + payload n8n v2 (superset) + CSV con señales   ·   2026-06-30
+
+Sprint de cierre del bloque EV. Tres entregables: desacople del tool copy de los archivos de tool hacia los packs verticales; superset backward-compatible del payload n8n (v1 ⊆ v2); y extensión del CSV de export con columnas de pack y señales.
+
+### A. Tool copy desacoplado de los archivos de tool
+
+**Problema previo.** Los strings de ejemplos del LLM ("Corolla XEi", "Hilux SRV") y los mensajes de WhatsApp pre-llenados vivían hardcodeados en `captureLead.ts` y `showWhatsappHandoff.ts`. Cada cambio de vertical requería tocar los tools.
+
+**Solución.** `VerticalToolCopy` (3 campos: `specificModelExamples`, `prefilledMessageExample`, `topicSummaryExample`) se rellena en cada pack. Los tools leen el pack del contexto y llaman a las factories `buildCaptureLeadSchema(toolCopy)` / `buildHandoffSchema(toolCopy)` en cada request.
+
+**Valores por pack (VERBATIM para usados, MATERIAL para agencia/base):**
+
+| Pack | specificModelExamples | prefilledMessageExample |
+|------|---|---|
+| `usados` | `"Corolla XEi", "Hilux SRV"` (verbatim from source) | Hola, soy Juan. Estoy buscando un Corolla XEi 0KM… |
+| `agencia` | `"una página web para mi negocio", "un chatbot con IA para atender clientes"` | Hola! Estuve hablando con el asistente de develOP — me interesa [servicio] para mi [rubro]… |
+| `base` | `"uno de sus productos", "el servicio que ofrecen"` | Hola! Vengo del asistente de la web — quería consultar por [tema] |
+
+**Grep de cierre** — patrón `Corolla|Hilux|prendario` en `src/modules/chatbot/server/tools/`: **0 matches**. El desacople cerró.
+
+### B. Payload n8n v2 — superset estricto de v1
+
+**Diff v1 → v2 (campo por campo):**
+
+| Campo | v1 | v2 |
+|---|---|---|
+| `_version` | `"1.0"` | `"2.0"` ← bumpeado |
+| `leadId` | ✅ igual | ✅ igual |
+| `capturedAt` | ✅ igual | ✅ igual |
+| `organization.id` | ✅ igual | ✅ igual |
+| `organization.slug` | ✅ igual | ✅ igual |
+| `contact.name/email/phone` | ✅ igual | ✅ igual |
+| `intent` | ✅ igual | ✅ igual |
+| `message` | ✅ igual | ✅ igual |
+| `classification` | ✅ igual | ✅ igual |
+| `category` | ✅ igual | ✅ igual |
+| `signals` | ✅ igual (booleans planos) | ✅ igual |
+| `channel` | ✅ igual | ✅ igual |
+| `verticalPack` | ❌ no existía | ✅ NUEVO |
+| `signalsV2` | ❌ no existía | ✅ NUEVO — `{key: {value, points}}` \| `null` |
+
+Un workflow n8n que hoy lee v1 **no se rompe**: todos los campos que accede siguen estando, en las mismas posiciones, con los mismos tipos. Los campos v2 son adiciones.
+
+**signalsV2 = null** para leads legacy (pre-EV.3, antes del dual-write). El receptor debe chequear null antes de parsear.
+
+### C. CSV de export — columnas EV.5
+
+Dos columnas nuevas en ambos modos (DQ y comercial), insertadas antes de "Fecha de contacto":
+
+- **Pack vertical** — clave del pack (`base` / `usados` / `agencia`). Vacío si no aplica.
+- **Señales del pack** — JSON de `signalsV2` (`{"requestedAppointment":{"value":true,"points":40},...}`). Vacío para leads legacy.
+
+**Decisión de formato:** columna JSON única vs. columnas dinámicas por señal. Se eligió JSON porque las claves de señal varían por pack — columnas dinámicas producirían headers distintos por export. El receptor (dueño / n8n) parsea el JSON. Más simple y estable.
+
+**Implementación:** la route de export hace una segunda query para resolver `verticalPack` por `botConfigId` único — sin tocar `multiTenantQueries.ts` (5 call sites, incluye páginas de UI).
+
+### Resultados — suite de tests EV completa
+
+```
+[EV.1 invariant] ✓  Packs registrados: 3
+[EV.2 invariant] ✓  Bots: botA(agencia), botB(usados), botC(base), botDesconocido
+[EV.3 invariant] ✓  Verbatim usados≡legacy, fallback a base, dual-write, ambas penalties
+[EV.3 golden]    ✓  Paridad exacta. Score: 120/120, Decay: 88/88, Total: 208 casos verdes
+[EV.4 invariant] ✓  28 frases + 3 neutras + 5 FP-guards; agencia: 5 dorados + 5 claves verbatim
+[EV.5 superset]  ✓  11 campos v1 en v2 (superset OK); signalsV2=null legacy; default base
+```
+
+Build: exit 0 — "✓ Compiled successfully in 22.0s". TypeScript: solo baseline pre-existente (`searchconsole.ts:119`).
+
+### Estado del smoke
+
+- **Agencia (develop):** smoke listo en `scripts/ev5-smoke.mjs`. Requiere dev server + `verticalPack='agencia'` en DB. Gate: Franco corre el smoke y lee transcripts en `docs/ev5-transcripts/`.
+- **Usados (sanmiguel):** PENDIENTE — bot inexistente en DB al cierre de EV.5. Cobertura: `npm run test:ev5` cubre payload v2 + signalsV2 sin necesidad del bot.
+
+### Flags para Franco
+
+- 🚩 **DB backfill pendiente:** `UPDATE chatbot_bot_config SET "verticalPack"='usados' WHERE slug='sanmiguel'` y `='agencia' WHERE slug='develop'`. Sin esto, el scoring de EV.3 y los intents de EV.4/5 no aplican en producción.
+- 🚩 **Commit EV.5 pendiente:** todos los cambios del sprint están sin commitear.
+- 🚩 **n8n workflow update (no urgente):** el workflow existente sigue funcionando (superset). Actualizar para leer `signalsV2` cuando sea conveniente.
+
+### Archivos
+
+**Modificados:**
+- `src/modules/chatbot/server/verticals/packs/usados.ts` — `toolCopy` verbatim (Corolla/Hilux)
+- `src/modules/chatbot/server/verticals/packs/agencia.ts` — `toolCopy` desde MATERIAL
+- `src/modules/chatbot/server/verticals/packs/base.ts` — `toolCopy` genérico desde MATERIAL
+- `src/modules/chatbot/server/tools/captureLead.ts` — factory `buildCaptureLeadSchema`, export estático para tipos
+- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts` — factory `buildHandoffSchema`, export estático para tipos
+- `src/modules/chatbot/server/crm/buildLeadPayload.ts` — v2 superset (`verticalPack`, `signalsV2`, `_version: "2.0"`)
+- `src/modules/chatbot/server/crm/syncLeadToCrm.ts` — pasa `verticalPack` al build
+- `src/modules/chatbot/server/leads/csv/buildLeadsCsv.ts` — 2 columnas EV.5
+- `src/app/api/dashboard/chatbot/leads/export/route.ts` — query secundaria de `verticalPack`
+- `package.json` — script `test:ev5`
+
+**Creados:**
+- `src/modules/chatbot/server/verticals/__tests__/ev5.superset.invariant.ts` — 11 aserciones superset
+- `scripts/ev5-smoke.mjs` — smoke de captura agencia (+ README usados pendiente)
+
+---
+## ✅ BLOQUE EV — Motor comercial vertical del chatbot   ·   2026-06-30
+
+Cierre del bloque EV completo (5 sprints, mayo–junio 2026). Objetivo: hacer que el chatbot entienda en qué vertical opera cada bot, score sus leads con señales específicas del dominio, y entregue esa información estructurada al CRM.
+
+### Qué entregó el bloque EV
+
+| Sprint | Entregable | Estado |
+|---|---|---|
+| **EV.1** | Registry de packs verticales (`base` / `usados` / `agencia`). `getVerticalPack(key)` con fallback a `base` + warn. Campo `verticalPack` en `BotConfig`. | ✅ completo |
+| **EV.2** | Campo `signals: Json?` en `ChatbotLead`. Scoring por pack (usados: 7 señales, agencia: adaptación). `buildSignals()` tipado por pack. | ✅ completo |
+| **EV.3** | Dual-write de signals en `captureLead.execute`. Scorer invariante: 208 casos (120 score + 88 decay) todos verdes. Verbatim usados ≡ legacy. | ✅ completo |
+| **EV.4** | Intents verticales: `financing_inquiry`, `trade_in_inquiry`, `appointment_request`, `service_inquiry`, `price`. 28 frases + FP-guards por pack. 5 dorados agencia verbatim. | ✅ completo |
+| **EV.5** | Tool copy por pack (desacople strings LLM). Payload n8n v2 (superset). CSV con `verticalPack` + `signalsV2`. | ✅ completo |
+
+### Invariantes y tests vivos al cierre
+
+- `npm run test:ev1` — 3 packs registrados
+- `npm run test:ev2` — scoring por bot, fallback, dual-write, penalties
+- `npm run test:ev3` + `test:ev3:golden` — 208 casos golden, verbatim usados≡legacy
+- `npm run test:ev4` — 28 frases + FP-guards + dorados agencia
+- `npm run test:ev5` — superset v1⊆v2, signalsV2 shape, null legacy, default base
+
+### Pendientes fuera del bloque
+
+- **DB backfill `verticalPack`** — precondición de producción (ver flags EV.5).
+- **Smoke de usados** — bot `sanmiguel` no existe en DB; smoke agencia listo.
+- **n8n update opcional** — el workflow existente sigue funcionando (superset); puede leer `signalsV2` cuando se actualice.
+- **Botón "Exportar CSV" en la UI del dashboard** — la route existe y está lista; la UI visual del botón queda para un sprint futuro de dashboard.

@@ -79,7 +79,15 @@ export const AGENCIA_PACK: VerticalPack = {
     },
   ],
 
-  // EV.5 afina copy de tools y widget; por ahora reusa los genéricos de base.
-  toolCopy: BASE_PACK.toolCopy,
+  // EV.5 — Tool copy propio de la agencia develOP (redactado del MATERIAL EV.5).
+  // No hereda de base: los ejemplos de una agencia digital son distintos a los
+  // genéricos (sin rubro) y a los de una concesionaria de autos.
+  toolCopy: {
+    specificModelExamples: '"una página web para mi negocio", "un chatbot con IA para atender clientes"',
+    prefilledMessageExample:
+      'Hola! Estuve hablando con el asistente de develOP — me interesa [servicio] para mi [rubro], ¿coordinamos una llamada?',
+    topicSummaryExample:
+      'Visitante interesado en servicios de develOP (web / IA / automatización), consultó por proceso, plazos y presupuesto.',
+  },
   widgetCopy: BASE_PACK.widgetCopy,
 } satisfies VerticalPack

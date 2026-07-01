@@ -77,12 +77,15 @@ export const BASE_PACK: VerticalPack = {
     },
   ],
 
+  // EV.5 — Tool copy genérico sin rubro (MATERIAL EV.5). Es la red de seguridad
+  // del registry: ningún ejemplo de dominio para no generar ruido en un bot
+  // desconocido. Si el pack correcto está configurado en DB, este copy no aplica.
   toolCopy: {
-    specificModelExamples: 'un producto o servicio concreto',
+    specificModelExamples: '"uno de sus productos", "el servicio que ofrecen"',
     prefilledMessageExample:
-      'Hola, soy [nombre]. Quisiera recibir más información sobre sus servicios y coordinar los próximos pasos.',
+      'Hola! Vengo del asistente de la web — quería consultar por [tema]',
     topicSummaryExample:
-      'Visitante interesado en los servicios del negocio, preguntó por precios y disponibilidad.',
+      'Visitante consultó por información general sobre el negocio y sus servicios.',
   },
 
   widgetCopy: {

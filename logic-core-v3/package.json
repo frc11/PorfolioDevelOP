@@ -28,6 +28,7 @@
     "test:ev3:golden": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts",
     "test:ev3": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.invariant.ts",
     "test:ev4": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev4.invariant.ts",
+    "test:ev5": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev5.superset.invariant.ts",
     "check:invariant:security": "ts-node src/lib/security/idor-tokens.invariant.ts",
     "check:invariant:lead-scoring": "npx tsx src/lib/plan/lead-scoring-gate.invariant.ts",
     "check:invariant:dates-ar": "npx tsx src/lib/dates-ar.invariant.ts",

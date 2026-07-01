@@ -199,14 +199,16 @@ export const USADOS_PACK: VerticalPack = {
     },
   ],
 
-  // EV.5 cablea estos strings en las descripciones de tools. Los ejemplos de
-  // modelo ya existen en captureLead.ts (no inventados).
+  // EV.5 — Tool copy VERBATIM de los strings que vivían hardcodeados en
+  // captureLead.ts y showWhatsappHandoff.ts. Cero reescritura: cada valor es
+  // copia carácter-por-carácter del original. Delta cero para Gemini en bots
+  // de autos: los ejemplos que calibraban el modelo siguen siendo idénticos.
   toolCopy: {
-    specificModelExamples: 'Corolla XEi, Hilux SRV',
+    specificModelExamples: '"Corolla XEi", "Hilux SRV"',
     prefilledMessageExample:
-      'Hola, soy [nombre]. Quería consultar por un auto y coordinar una visita o test drive.',
+      'Hola, soy Juan. Estoy buscando un Corolla XEi 0KM y quiero coordinar cuándo lo retiro.',
     topicSummaryExample:
-      'Visitante interesado en un vehículo, consultó por modelo, financiación y disponibilidad.',
+      'Visitante interesado en Corolla XEi 0KM, preguntó por entrega y financiación. Mencionó tener un usado para parte de pago.',
   },
 
   // Copy de onboarding del widget (EV.5 / onboarding puede refinarlo).

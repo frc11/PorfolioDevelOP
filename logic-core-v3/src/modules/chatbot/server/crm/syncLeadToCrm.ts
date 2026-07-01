@@ -41,6 +41,7 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
       include: {
         botConfig: {
           select: {
+            verticalPack: true, // EV.5 — para payload v2
             organization: {
               select: { id: true, slug: true },
             },
@@ -85,7 +86,8 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
     })
 
     // 5. POST con retries. Payload sanitizado (sin scoreSignals/internalNotes).
-    const payload = buildLeadPayload(lead, { id: org.id, slug: org.slug })
+    // EV.5: v2 incluye verticalPack + signalsV2 (superset de v1).
+    const payload = buildLeadPayload(lead, { id: org.id, slug: org.slug }, lead.botConfig.verticalPack)
 
     const hasSecret =
       integration.secretHeaderName !== null &&
