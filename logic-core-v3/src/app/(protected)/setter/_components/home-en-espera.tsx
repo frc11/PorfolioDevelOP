@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { CheckCircle2, CalendarClock, Hourglass, Pin } from 'lucide-react'
 
 /**
@@ -80,6 +81,16 @@ export function HomeEnEspera({ enEspera, pausados, fijados }: HomeEnEsperaProps)
         )}
 
         <p className="text-xs text-zinc-600">Tu cartera completa está más abajo.</p>
+
+        {/* Mientras no hay nada en la cola, adelantar trabajo propio SÍ tiene
+            sentido. Link sobrio (no cyan): respeta la disciplina B9 — el acento
+            queda para el foco accionable, no para una salida secundaria. */}
+        <Link
+          href="/setter/nuevo"
+          className="mt-1 text-xs font-medium text-zinc-400 underline-offset-4 transition-colors hover:text-zinc-200 hover:underline"
+        >
+          ¿Querés adelantar? Cargá un prospecto nuevo
+        </Link>
       </div>
     </section>
   )

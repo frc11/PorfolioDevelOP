@@ -2,6 +2,38 @@ name: E2E tests
 on: [push, pull_request]
 
 jobs:
+  # Invariantes puras del dominio LeadOS (gates + aislamiento). Sin DB ni server:
+  # ts-node sobre módulos `@/`-free. Baratas y deterministas → primera línea.
+  invariants:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run check:invariants
+
+  # Integración de la lógica de LeadOS contra una DB de test dedicada (gates de la
+  # máquina de stage, rechazo de envío-demo, anti-bypass del self-check, alta/
+  # importación con dedup global cross-setter). Sin server Next: Prisma directo.
+  leados-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+      - run: npm run test:leados
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+
   test:
     runs-on: ubuntu-latest
     steps:

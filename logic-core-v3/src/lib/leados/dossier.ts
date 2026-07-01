@@ -21,11 +21,13 @@ import {
   BriefSchema,
   EvaluacionSchema,
   FichaSchema,
+  ProgresoSchema,
   RechazosSchema,
   SelfCheckSchema,
   type Brief,
   type Evaluacion,
   type Ficha,
+  type Progreso,
   type Rechazo,
   type SelfCheck,
 } from '@/lib/leados/contracts'
@@ -348,6 +350,38 @@ export async function saveOwnedSelfCheck(
   const updated = await prisma.osLeadDossier.updateMany({
     where: { leadId: dossier.leadId, stage: 'CONSTRUCCION' },
     data: { selfCheckJson: parsed as Prisma.InputJsonValue },
+  })
+  if (updated.count === 0) {
+    throw new DossierTransitionError('El dossier cambió de stage durante el guardado — recargá')
+  }
+  return prisma.osLeadDossier.findUnique({ where: { leadId: dossier.leadId } })
+}
+
+/**
+ * E.1 — Guardado del progreso del checklist de Construcción. Espejo EXACTO de
+ * `saveOwnedSelfCheck`: ownership arriba (`getOwnedDossier`) + guard optimista
+ * por stage, y NUNCA toca `stage` (el write es solo `progresoJson`). Solo
+ * durante CONSTRUCCION.
+ *
+ * Es un CHECKLIST auto-reportado, NO un gate: `progresoJson` jamás se cablea a
+ * la transición CONSTRUCCION→EN_REVISION — ese gate sigue siendo draftUrl +
+ * `selfCheckAprobado`, intacto. El re-loop RECHAZADA→CONSTRUCCION lo PRESERVA
+ * (`transitionDossier` no lo resetea). `null` si el lead no es del setter.
+ */
+export async function saveOwnedProgreso(
+  leadId: string,
+  userId: string,
+  progreso: Progreso,
+): Promise<OsLeadDossier | null> {
+  const dossier = await getOwnedDossier(leadId, userId)
+  if (!dossier) return null
+  if (dossier.stage !== 'CONSTRUCCION') {
+    throw new DossierTransitionError('El progreso se registra durante la construcción')
+  }
+  const parsed = ProgresoSchema.parse(progreso)
+  const updated = await prisma.osLeadDossier.updateMany({
+    where: { leadId: dossier.leadId, stage: 'CONSTRUCCION' },
+    data: { progresoJson: parsed as Prisma.InputJsonValue },
   })
   if (updated.count === 0) {
     throw new DossierTransitionError('El dossier cambió de stage durante el guardado — recargá')

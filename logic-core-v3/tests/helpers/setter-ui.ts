@@ -51,3 +51,26 @@ export async function expectToast(page: Page, text: string | RegExp): Promise<vo
   const { expect } = await import('@playwright/test')
   await expect(firstVisible(page.getByText(text))).toBeVisible({ timeout: 15_000 })
 }
+
+/**
+ * LeadOS 2.1a — La cartera completa quedó SECUNDARIA al foco: vive colapsada bajo
+ * el toggle "Ver toda la cartera". El buscador, los filtros, el orden y las cards
+ * (con sus palancas pin/snooze/nota) NO están en el DOM hasta expandir. Todo test
+ * que maneje la cartera (buscar / filtrar / fijar / anotar) debe expandirla
+ * primero — sino la acción agota el timeout sobre un elemento que no existe.
+ *
+ * Centraliza acá la expansión para que el swap del home (kanban → foco) no se
+ * filtre como ruido de timeout en cada sub-test. Idempotente: si ya está abierta
+ * (lo dice `aria-expanded`), no re-clickea. Devuelve recién cuando el buscador
+ * está montado y visible (señal de que el cuerpo ya hidrató).
+ */
+export async function expandCartera(page: Page): Promise<void> {
+  const toggle = firstVisible(page.getByRole('button', { name: 'Ver toda la cartera' }))
+  await toggle.waitFor({ state: 'visible' })
+  if ((await toggle.getAttribute('aria-expanded')) !== 'true') {
+    await toggle.click()
+  }
+  await firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' })).waitFor({
+    state: 'visible',
+  })
+}

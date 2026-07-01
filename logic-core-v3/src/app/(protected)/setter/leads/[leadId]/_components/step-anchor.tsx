@@ -20,6 +20,11 @@ type StepAnchorProps = {
    * marco y el cartel comparten color. NO toca el scroll ni el gateo del step.
    */
   frameTone?: 'foco' | 'neutral' | 'none'
+  /**
+   * Marca esta sección como destino de un `StepLink` (`data-step`). Solo
+   * presentación: no toca el scroll-on-mount (eso lo decide `active`) ni el gateo.
+   */
+  anchorId?: string
   children: ReactNode
 }
 
@@ -34,7 +39,7 @@ type StepAnchorProps = {
  *   es no-op → solo se enfoca la copia visible. No depende de `id`/getElementById.
  * - `scroll-mt` da aire arriba de la cabecera al aterrizar en el paso activo.
  */
-export function StepAnchor({ active, leadId, frameTone = 'foco', children }: StepAnchorProps) {
+export function StepAnchor({ active, leadId, frameTone = 'foco', anchorId, children }: StepAnchorProps) {
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -54,7 +59,12 @@ export function StepAnchor({ active, leadId, frameTone = 'foco', children }: Ste
   const enmarcado = active && frameTone !== 'none'
 
   return (
-    <div ref={ref} className="scroll-mt-24" aria-current={active ? 'step' : undefined}>
+    <div
+      ref={ref}
+      data-step={anchorId}
+      className="scroll-mt-24"
+      aria-current={active ? 'step' : undefined}
+    >
       {enmarcado ? (
         <div
           className={cn(

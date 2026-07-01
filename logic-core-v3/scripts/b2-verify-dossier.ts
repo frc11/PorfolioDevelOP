@@ -1,6 +1,13 @@
 /**
  * B2 — Verificación del modelo de producción del dossier (LeadOS).
  *
+ * NOTA (Sprint 5.3): estos checks ya corren como REGRESIÓN DURABLE, wired a la
+ * suite, en `tests/leados/dossier-gates.spec.ts` (config
+ * `playwright.leados.config.ts`, `npm run test:leados`) — sin el host-gate de
+ * abajo y contra la DB de la config (Neon dev en local, DB de test en CI). Este
+ * script queda como herramienta manual de dev (una pasada rápida con `npx tsx`
+ * contra la branch dev); la fuente de verdad de regresión es el spec.
+ *
  * Corre SOLO contra la branch Neon dev (host check abajo). Qué hace:
  *   1. Upsertea el setter QA (idéntico a B1) y crea 3 leads temporales suyos.
  *   2. Unicidad 1:1: `ensureOwnedDossier` es idempotente y el unique de DB

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, mintSessionCookie, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible } from '../helpers/setter-ui'
+import { firstVisible, expandCartera } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createSetter,
@@ -43,7 +43,10 @@ test('F1 · empty state: setter sin leads renderiza su mensaje (no crash)', asyn
 
   const res = await page.goto('/setter', { waitUntil: 'domcontentloaded' })
   expect(res?.status()).toBeLessThan(400)
-  await expect(firstVisible(page.getByText(/Nada para trabajar ahora mismo/i))).toBeVisible()
+  // Setter con CERO leads → `HomeEmpty` ("Tu cartera está vacía"), distinto del
+  // "Nada para trabajar ahora mismo" del 2.1b (que es TENER leads pero ninguno en
+  // la cola de foco). El swap del home separó ambos estados.
+  await expect(firstVisible(page.getByText(/Tu cartera está vacía/i))).toBeVisible()
   expectNoConsoleErrors(guard)
 })
 
@@ -51,6 +54,8 @@ test('F2 · empty state: búsqueda sin resultados', async ({ page }) => {
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
+  // El buscador se mudó a la cartera secundaria (2.1a) → expandir primero.
+  await expandCartera(page)
   await firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' })).fill('zzz-no-existe-este-lead-qqq')
   await expect(firstVisible(page.getByText('Ningún lead coincide con eso.'))).toBeVisible()
 })

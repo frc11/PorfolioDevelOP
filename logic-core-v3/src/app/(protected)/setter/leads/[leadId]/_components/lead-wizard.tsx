@@ -132,7 +132,10 @@ export function LeadWizard({ data }: { data: WizardData }) {
     describirFoco(stage, gateAbierto).tono === 'foco' ? 'foco' : 'neutral'
 
   return (
-    <div className="space-y-5">
+    // `data-lead-wizard`: raíz de ESTA copia del wizard. Los `StepLink` resuelven su
+    // destino dentro de ella, así la duplicación responsive del shell no ambigua a
+    // qué copia saltar. Solo presentación.
+    <div data-lead-wizard className="space-y-5">
       <DossierStepper stage={stage} />
 
       <PasoActualBanner stage={stage} gateAbierto={gateAbierto} />
@@ -173,7 +176,11 @@ export function LeadWizard({ data }: { data: WizardData }) {
         </Callout>
       )}
 
-      <FichaStep leadId={lead.id} lead={lead} ficha={ficha} editable={fichaEditable} />
+      {/* Destino del `StepLink` del gate de la evaluación (ficha sin señal mínima).
+          `active={false}` → solo marca, sin enfocar al abrir ni enmarcar. */}
+      <StepAnchor active={false} leadId={lead.id} frameTone="none" anchorId="ficha">
+        <FichaStep leadId={lead.id} lead={lead} ficha={ficha} editable={fichaEditable} />
+      </StepAnchor>
 
       <StepAnchor active={anchor === 'evaluacion'} leadId={lead.id} frameTone={frameTono}>
         <EvaluacionStep
@@ -191,24 +198,32 @@ export function LeadWizard({ data }: { data: WizardData }) {
           evaluación — el opener sale apenas hay veredicto, y la producción
           (brief → construcción → draft → self-check) se abre recién cuando la
           conversación lo habilita. */}
+      {/* Destino del `StepLink` del gate del brief (esperando el primer contacto). */}
       {!descartado && (
-        <OpenerStep
-          leadId={lead.id}
-          lead={lead}
-          stage={stage}
-          status={lead.status}
-          caliente={lead.caliente}
-          ficha={ficha}
-          evaluacion={evaluacion}
-          contactos={outreach.contactos}
-          ultimoContacto={outreach.ultimoContacto}
-          proximoToque={outreach.proximoToque}
-          dmsHoy={outreach.dmsHoy}
-        />
+        <StepAnchor active={false} leadId={lead.id} frameTone="none" anchorId="opener">
+          <OpenerStep
+            leadId={lead.id}
+            lead={lead}
+            stage={stage}
+            status={lead.status}
+            caliente={lead.caliente}
+            ficha={ficha}
+            evaluacion={evaluacion}
+            contactos={outreach.contactos}
+            ultimoContacto={outreach.ultimoContacto}
+            proximoToque={outreach.proximoToque}
+            dmsHoy={outreach.dmsHoy}
+          />
+        </StepAnchor>
       )}
 
       {!descartado && (
-        <StepAnchor active={anchor === 'seguimiento'} leadId={lead.id} frameTone={frameTono}>
+        <StepAnchor
+          active={anchor === 'seguimiento'}
+          leadId={lead.id}
+          frameTone={frameTono}
+          anchorId="seguimiento"
+        >
           <SeguimientoStep
             leadId={lead.id}
             lead={lead}
@@ -268,7 +283,12 @@ export function LeadWizard({ data }: { data: WizardData }) {
         </StepAnchor>
       )}
 
-      {!descartado && <DraftStep leadId={lead.id} stage={stage} draftUrl={draftUrl} />}
+      {/* Destino del `StepLink` del self-check (gate "publicá el draft primero"). */}
+      {!descartado && (
+        <StepAnchor active={false} leadId={lead.id} frameTone="none" anchorId="draft">
+          <DraftStep leadId={lead.id} stage={stage} draftUrl={draftUrl} />
+        </StepAnchor>
+      )}
 
       {!descartado && (
         <SelfCheckStep
