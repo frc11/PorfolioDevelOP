@@ -429,6 +429,9 @@ model Organization {
   businessMetrics   BusinessMetric[]
   pageViews         PageView[]
   panelAnnouncements PanelAnnouncement[]
+  referralCode       ReferralCode?
+  referralsMade      Referral[]           @relation("ReferralsMade")
+  referralsReceived  Referral[]           @relation("ReferralsReceived")
 }
 
 // Histórico semanal del executive brief. Aditivo al cache vigente en Organization
@@ -661,6 +664,10 @@ model ContactSubmission {
   read       Boolean  @default(false)
   leadStatus String?  @default("NUEVO")
   leadNotes  String?  @db.Text
+  // P5.4 — atribución de referidos: código que trajo a este negocio entrante. String
+  // suelto (NO FK): un código inválido/typo no rompe el insert; el match contra
+  // ReferralCode.code se resuelve al convertir. null = orgánico (sin referido).
+  referralCode String?
   createdAt  DateTime @default(now())
 }
 
@@ -1769,4 +1776,45 @@ model PanelAnnouncementRead {
 
   @@unique([announcementId, userId])
   @@index([userId])
+}
+
+// Estado del flujo de un referido: nace PENDING (solo email), pasa a CONVERTED cuando
+// el negocio referido se vuelve org cliente, y a REWARDED cuando se acredita el mes
+// bonificado al que refirió.
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+  REWARDED
+}
+
+// Código de referido de una org (1:1: un solo código por org, organizationId @unique).
+// "Recomendá develOP a otro negocio → un mes bonificado." `code` es único global y es lo
+// que el negocio referido tipea al contactar (queda en ContactSubmission.referralCode).
+model ReferralCode {
+  id             String       @id @default(cuid())
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  code           String       @unique
+  createdAt      DateTime     @default(now())
+}
+
+// Un referido concreto: una org (referrer) trae a otro negocio. `referredEmail` se conoce
+// desde el inicio; `referredOrgId` se completa al convertir. `rewardedAt` marca cuándo se
+// acreditó la bonificación. Dos relaciones a Organization (referrer/referred) → nombradas
+// para desambiguar.
+model Referral {
+  id            String         @id @default(cuid())
+  referrerOrgId String
+  referrer      Organization   @relation("ReferralsMade", fields: [referrerOrgId], references: [id], onDelete: Cascade)
+  referredEmail String?
+  referredOrgId String?
+  referred      Organization?  @relation("ReferralsReceived", fields: [referredOrgId], references: [id], onDelete: SetNull)
+  status        ReferralStatus @default(PENDING)
+  createdAt     DateTime       @default(now())
+  rewardedAt    DateTime?
+
+  @@index([referrerOrgId])
+  @@index([referredOrgId])
+  @@index([status])
+  @@index([referredEmail])
 }
