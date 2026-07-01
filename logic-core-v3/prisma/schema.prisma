@@ -948,6 +948,12 @@ model OsLeadDossier {
   evaluacionJson Json?
   briefJson      Json?
   selfCheckJson  Json?
+  // E.1: progreso del checklist de Construcción (CHECKLIST auto-reportado por el
+  // setter, NO gate — jamás se cablea a la transición EN_REVISION). null =
+  // checklist fresco (sin backfill: es progreso, no gate). Hermano de
+  // selfCheckJson/agendaJson; contrato ProgresoSchema. Se PRESERVA en el re-loop
+  // RECHAZADA→CONSTRUCCION (transitionDossier no lo resetea).
+  progresoJson   Json?
   draftUrl       String?
   rechazos       Json?
   finalUrl       String? // B5: URL permanente que registra el admin al aprobar (el panel no publica)

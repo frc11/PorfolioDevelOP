@@ -19,7 +19,7 @@ import {
   PLANTILLAS_FOLLOW_UP,
   STATUS_LABELS,
 } from '@/lib/leados/flow'
-import { GUIA_ENVIO } from '@/lib/leados/guidance-content'
+import { GUIA_ENVIO, GUIA_SEGUIMIENTO } from '@/lib/leados/guidance-content'
 import {
   enviarDemoAprobada,
   registrarResultado,
@@ -34,6 +34,7 @@ import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
+import { StepLink } from './step-nav'
 
 type SeguimientoStepProps = {
   leadId: string
@@ -142,9 +143,7 @@ export function SeguimientoStep({
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">
-            Seguimiento y envío de la demo
-          </h2>
+          <h2 className="text-base font-semibold text-zinc-400">{GUIA_SEGUIMIENTO.titulo}</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           Se abre cuando registrás el primer contacto (el opener). Acá vas a seguir la
@@ -203,17 +202,27 @@ export function SeguimientoStep({
 
   return (
     <Card padding="lg" className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-zinc-100">
-          Seguimiento y envío de la demo
-        </h2>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_SEGUIMIENTO.titulo}</h2>
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
+            <LineaRicaText linea={GUIA_SEGUIMIENTO.intro} />
+          </p>
+        </div>
         <Badge tone="zinc" variant="outline">
           {STATUS_LABELS[status]}
         </Badge>
       </div>
 
-      {/* Estado de la cadencia — la calcula la maquinaria, acá solo se muestra */}
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500">
+      {/* Seguimiento guiado: qué hacer cuando responde / cuando no (3.6). */}
+      <TeachPanel id="seguimiento" />
+
+      {/* Estado de la cadencia — la calcula la maquinaria, acá solo se muestra.
+          `data-step="cadencia"`: destino del salto desde el gate del envío. */}
+      <div
+        data-step="cadencia"
+        className="flex scroll-mt-24 flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500"
+      >
         <span className="flex items-center gap-1.5">
           <CalendarClock size={13} strokeWidth={1.5} />
           Toques de follow-up: <span className="font-semibold text-zinc-300">{cadencia.toquesHechos} de {PLANTILLAS_FOLLOW_UP.length}</span>
@@ -232,6 +241,16 @@ export function SeguimientoStep({
         {cadencia.agotada && !respondio && status !== 'POSTERGADO' && (
           <span className="text-amber-300/90">
             Cadencia completa — sin más toques: si no respondió, el lead se enfría solo.
+          </span>
+        )}
+        {/* El ritmo de la cadencia (3.6): mientras hay toques por delante. El
+            cierre lo cubre la línea ámbar de arriba — no se repiten. */}
+        {!respondio && status !== 'POSTERGADO' && !cadencia.agotada && (
+          <span className="w-full leading-relaxed text-zinc-500">
+            <LineaRicaText
+              linea={GUIA_SEGUIMIENTO.cadencia}
+              emphasisClassName="font-semibold text-zinc-400"
+            />
           </span>
         )}
       </div>
@@ -276,17 +295,22 @@ export function SeguimientoStep({
         // Gate proactivo del envío (flujo invertido): el «todavía no» dice CUÁL de
         // las dos condiciones del gate falta — el componente deriva el caso; el
         // criterio sigue en `gateEnvioDemo` (flow.ts) y la action lo re-valida.
-        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-400">
-          <LineaRicaText
-            linea={
-              stage === 'APROBADA'
-                ? GUIA_ENVIO.espera.aprobadaSinEnganche
-                : respondio
-                  ? GUIA_ENVIO.espera.engancheSinAprobar
-                  : GUIA_ENVIO.espera.niEngancheNiAprobada
-            }
-          />
-        </p>
+        <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+          <p className="text-xs leading-relaxed text-zinc-400">
+            <LineaRicaText
+              linea={
+                stage === 'APROBADA'
+                  ? GUIA_ENVIO.espera.aprobadaSinEnganche
+                  : respondio
+                    ? GUIA_ENVIO.espera.engancheSinAprobar
+                    : GUIA_ENVIO.espera.niEngancheNiAprobada
+              }
+            />
+          </p>
+          {/* El envío espera un evento externo (Franco aprueba · el negocio engancha):
+              lo accionable mientras tanto es seguir la cadencia de follow-up de arriba. */}
+          <StepLink to="cadencia">Ir a la cadencia de follow-up</StepLink>
+        </div>
       )}
 
       {/* ── Registrar lo que pasó ────────────────────────────────────────────── */}
@@ -340,6 +364,14 @@ export function SeguimientoStep({
           )}
 
           {error && <p className="text-xs text-red-400">{error}</p>}
+
+          {/* El botón se habilita al elegir una opción: sin esto, queda disabled
+              sin explicación (gap 3.6). */}
+          {resultado === null && (
+            <p className="text-[11px] leading-relaxed text-zinc-500">
+              Elegí arriba qué pasó en la conversación para habilitar el registro.
+            </p>
+          )}
 
           <Button
             onClick={registrar}

@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible, fieldControl, pickSelect, expectToast } from '../helpers/setter-ui'
+import { firstVisible, fieldControl, pickSelect, expectToast, vis } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createLead,
-  simulateLeadResponded,
+  fichaConSenal,
   getDossier,
   countNoticesFor,
   prisma,
@@ -21,17 +21,22 @@ import {
  * cambios de copy); además se chequean señales clave de UI. El camino principal
  * es AVANZAR (gate cerrado hasta respuesta); DESCARTADA y rechazo-admin van como
  * leads aparte. Agenda se verifica por seed (depende de Cal.com externo).
+ *
+ * 5.5 — Cada test AUTO-PROVISIONA su propio lead en el stage que necesita
+ * (seed directo del stage = legítimo en setup, el helper lo documenta). Antes el
+ * grupo era `describe.serial` sobre UN lead compartido que progresaba de test en
+ * test: un fallo temprano (p.ej. B3 por copy-drift) marcaba B4-B8 como "did not
+ * run" y enmascaraba el corazón del flujo. Sin dependencia entre tests, un fallo
+ * aislado ya no cascada — cada B verifica su tramo por sí solo. Corre en 1 worker
+ * sin paralelismo (playwright.setter.config), así el orden se conserva.
  */
 
 const tracker: SmokeTracker = newTracker()
 let setterId: string
-let leadId: string
 
 test.beforeAll(async () => {
   const setter = await getSetterQa()
   setterId = setter.id
-  const lead = await createLead(tracker, { setterId, businessName: 'Flujo Completo', stage: 'FICHA' })
-  leadId = lead.id
 })
 
 test.afterAll(async () => {
@@ -39,8 +44,9 @@ test.afterAll(async () => {
   await disconnect()
 })
 
-test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío)', () => {
+test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () => {
   test('B1 · FICHA: nudge de calidad advisory + señal + guardado persiste', async ({ page }) => {
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B1 Ficha', stage: 'FICHA' })
     const guard = attachConsoleGuard(page)
     page.on('dialog', (d) => d.accept().catch(() => undefined)) // unsaved-guard beforeunload
 
@@ -74,6 +80,10 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
   })
 
   test('B2 · EVALUACIÓN: registrar (AVANZAR) transiciona FICHA→EVALUADA', async ({ page }) => {
+    // Lead en FICHA con señal ya sembrada (habilita el form de evaluación).
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B2 Eval', stage: 'FICHA' })
+    await prisma.osLeadDossier.update({ where: { leadId }, data: { fichaJson: fichaConSenal() } })
+
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
@@ -91,19 +101,31 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
   })
 
   test('B3 · OPENER: rechaza link (hard-block) + registra + idempotencia', async ({ page }) => {
+    // Lead ya EVALUADO (no respondió → opener activo, 0 contactos).
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B3 Opener', stage: 'EVALUADA' })
+
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
     const opener = firstVisible(fieldControl(page, 'Tu opener'))
-    // 🔴 ASSERT CRÍTICO: meter un link → error + botón deshabilitado.
-    await opener.fill('Mirá esta demo: https://ejemplo.com')
-    await expect(firstVisible(page.getByText(/El opener va SIN link/i))).toBeVisible()
     const registrar = firstVisible(page.getByRole('button', { name: /Ya lo mandé en Instagram — registrar/i }))
-    await expect(registrar).toBeDisabled()
+    // Alerta del gate ACOTADA al wizard: el único role="alert" dentro de
+    // `[data-lead-wizard]` es la caja del gate del opener (hay otro role="alert"
+    // global —del toaster— fuera del wizard, por eso se acota). El texto exacto
+    // vive en guidance-content (GUIA_OPENER.gate) y ya driftó una vez → se asserta
+    // el COMPORTAMIENTO, no la frase.
+    const gateAlert = vis(page.locator('[data-lead-wizard]').getByRole('alert'))
 
-    // Opener válido (sin link).
+    // 🔴 ASSERT CRÍTICO — COMPORTAMIENTO del gate `contieneLink`: un link BLOQUEA
+    // (botón deshabilitado) y hace visible la alerta del gate.
+    await opener.fill('Mirá esta demo: https://ejemplo.com')
+    await expect(registrar).toBeDisabled()
+    await expect(gateAlert).toHaveCount(1)
+
+    // Opener válido (sin link): el gate se levanta (alerta se va) y el registro se habilita.
     await opener.fill('Hola! Vi que no contestan los DMs y se les escapan pedidos. Tengo algo concreto, ¿te muestro?')
     await expect(registrar).toBeEnabled()
+    await expect(gateAlert).toHaveCount(0)
     await registrar.click()
     await expectToast(page, /Opener registrado/i)
 
@@ -119,8 +141,8 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
   })
 
   test('B4 · respuesta del negocio abre el BRIEF (gate) + transición EVALUADA→BRIEF', async ({ page }) => {
-    // Simular que el negocio respondió (abre gateBriefAbierto).
-    await simulateLeadResponded(leadId)
+    // Lead EVALUADO que YA respondió (status RESPONDIO abre gateBriefAbierto).
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B4 Brief', stage: 'EVALUADA', status: 'RESPONDIO' })
 
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
@@ -138,6 +160,9 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
   })
 
   test('B5 · CONSTRUCCIÓN: arrancar + escalar "me trabé" persiste', async ({ page }) => {
+    // Lead en BRIEF (respondió) → listo para arrancar la construcción.
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B5 Construccion', stage: 'BRIEF', status: 'RESPONDIO' })
+
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
@@ -151,13 +176,27 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
       .fill('Probé el shell pero no me cierra la sección de reseñas en mobile.')
     await firstVisible(page.getByRole('button', { name: 'Enviar aviso' })).click()
 
-    // DB: escaladoAt marcado + UI "Ya avisaste a Franco".
+    // Verdad durable: el escalamiento quedó marcado en el dossier (la action
+    // awaitea el write antes de responder). El modal de escalamiento NO hace
+    // router.refresh() —a diferencia de las transiciones de stage—: el aviso es un
+    // canal lateral que no cambia la etapa, y la confirmación en vivo es el toast.
+    // Por eso el banner "Ya avisaste a Franco" recién aparece en la próxima carga.
+    // [OUT-OF-SCOPE, reportado a Franco: si se quisiera feedback en vivo del banner,
+    //  EscalarModal debería refrescar; hoy es por diseño, no un bug.]
+    await expect(async () => {
+      expect((await getDossier(leadId))?.escaladoAt, 'escaladoAt marcado').not.toBeNull()
+    }).toPass({ timeout: 15_000 })
+
+    await page.reload({ waitUntil: 'domcontentloaded' })
     await expect(firstVisible(page.getByText('Ya avisaste a Franco'))).toBeVisible()
-    const dossier = await getDossier(leadId)
-    expect(dossier?.escaladoAt, 'escaladoAt marcado').not.toBeNull()
   })
 
   test('B6 · DRAFT + SELF-CHECK + enviar a revisión (CONSTRUCCION→EN_REVISION) + reset escalado', async ({ page }) => {
+    // Lead en CONSTRUCCION con un escalamiento vigente sembrado — para que la
+    // aserción "escalado se LIMPIA en la transición" tenga algo real que limpiar.
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B6 Revision', stage: 'CONSTRUCCION', status: 'RESPONDIO' })
+    await prisma.osLeadDossier.update({ where: { leadId }, data: { escaladoAt: new Date() } })
+
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
@@ -197,6 +236,9 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
   })
 
   test('B7 · ADMIN aprueba la demo → EN_REVISION→APROBADA + novedad dirigida al setter', async ({ page }) => {
+    // Lead en EN_REVISION (respondió) → el admin lo aprueba.
+    const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B7 Aprobar', stage: 'EN_REVISION', status: 'RESPONDIO' })
+
     await qaLogin(page, 'super-admin')
     const res = await page.goto(`/admin/leados/${leadId}`, { waitUntil: 'domcontentloaded' })
     expect(res?.status(), 'GET /admin/leados/[id]').toBeLessThan(400)
@@ -205,18 +247,28 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
     await firstVisible(page.getByLabel('URL permanente')).fill('https://flujo-completo.develop.com.ar')
     await firstVisible(page.getByRole('button', { name: /Confirmar aprobación/i })).click()
 
+    // stage + novedad en el MISMO retry: el aviso al setter es fire-and-forget
+    // DESPUÉS del commit del stage (revision.actions), así que la novedad puede
+    // aparecer un tick más tarde que APROBADA — asertar ambas juntas evita el race.
     await expect(async () => {
       const dossier = await getDossier(leadId)
       expect(dossier?.stage).toBe('APROBADA')
       expect(dossier?.finalUrl).toBeTruthy()
+      const aprobadas = await countNoticesFor(setterId, 'DEMO_APROBADA')
+      expect(aprobadas, 'novedad "Franco aprobó tu demo" emitida').toBeGreaterThanOrEqual(1)
     }).toPass({ timeout: 15_000 })
-
-    // Novedad dirigida al setter dueño.
-    const aprobadas = await countNoticesFor(setterId, 'DEMO_APROBADA')
-    expect(aprobadas, 'novedad "Franco aprobó tu demo" emitida').toBeGreaterThanOrEqual(1)
   })
 
   test('B8 · SEGUIMIENTO: enviar el link (acá SÍ va) crea la demo + idempotencia', async ({ page }) => {
+    // Lead APROBADO con finalUrl y que respondió → gate del envío abierto.
+    const { id: leadId } = await createLead(tracker, {
+      setterId,
+      businessName: 'B8 Envio',
+      stage: 'APROBADA',
+      status: 'RESPONDIO',
+      finalUrl: 'https://flujo-completo.develop.com.ar',
+    })
+
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
@@ -243,8 +295,7 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
 // ── Ramas aparte (lead propio cada una) ──────────────────────────────────────
 
 test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al veredicto', async ({ page }) => {
-  const setter = await getSetterQa()
-  const lead = await createLead(tracker, { setterId: setter.id, businessName: 'Para Descartar', stage: 'FICHA' })
+  const lead = await createLead(tracker, { setterId, businessName: 'Para Descartar', stage: 'FICHA' })
   // Sembrar señal de ficha vía DB para llegar directo a la evaluación.
   await prisma.osLeadDossier.update({
     where: { leadId: lead.id },
@@ -273,8 +324,7 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
 })
 
 test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió cambios"', async ({ page }) => {
-  const setter = await getSetterQa()
-  const lead = await createLead(tracker, { setterId: setter.id, businessName: 'Para Rechazar', stage: 'EN_REVISION', status: 'RESPONDIO' })
+  const lead = await createLead(tracker, { setterId, businessName: 'Para Rechazar', stage: 'EN_REVISION', status: 'RESPONDIO' })
 
   await qaLogin(page, 'super-admin')
   await page.goto(`/admin/leados/${lead.id}`, { waitUntil: 'domcontentloaded' })
@@ -285,15 +335,18 @@ test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió 
   await firstVisible(page.getByLabel('Arreglo concreto (qué hacer)')).fill('Reemplazar placeholders por nombre y fotos reales del negocio.')
   await firstVisible(page.getByRole('button', { name: /Confirmar rechazo/i })).click()
 
+  // stage + novedad en el MISMO retry: `avisarDecisionAlSetter` es fire-and-forget
+  // DESPUÉS del commit de la transición (revision.actions), así que el stage se ve
+  // en DB un tick antes que la novedad. Asertarlas juntas dentro del toPass mata la
+  // flakiness (la cuenta suelta afuera leía 0 bajo carga del suite).
   await expect(async () => {
     expect((await getDossier(lead.id))?.stage, 'reject → RECHAZADA (no CONSTRUCCION)').toBe('RECHAZADA')
+    expect(await countNoticesFor(setterId, 'DEMO_RECHAZADA')).toBeGreaterThanOrEqual(1)
   }).toPass({ timeout: 15_000 })
-  expect(await countNoticesFor(setter.id, 'DEMO_RECHAZADA')).toBeGreaterThanOrEqual(1)
 })
 
 test('B11 · AGENDA: un lead con reunión agendada refleja "Reunión agendada" (seed)', async ({ page }) => {
-  const setter = await getSetterQa()
-  const lead = await createLead(tracker, { setterId: setter.id, businessName: 'Con Reunion', stage: 'APROBADA', status: 'CALL_AGENDADA', finalUrl: 'https://x.dev' })
+  const lead = await createLead(tracker, { setterId, businessName: 'Con Reunion', stage: 'APROBADA', status: 'CALL_AGENDADA', finalUrl: 'https://x.dev' })
   await prisma.osLeadDossier.update({ where: { leadId: lead.id }, data: { agendaJson: agendaAgendadaJson() } })
 
   await qaLogin(page, 'setter')

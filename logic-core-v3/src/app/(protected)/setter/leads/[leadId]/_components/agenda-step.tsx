@@ -16,14 +16,16 @@ import { Badge, Button, Card, Field, Input } from '@/components/ui'
 import type { Agenda, Ficha } from '@/lib/leados/contracts'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
 import { formatFechaHora, reunionAgendada } from '@/lib/leados/flow'
+import { GUIA_AGENDA } from '@/lib/leados/guidance-content'
 import {
   confirmarReunion,
   ofrecerHorarios,
 } from '@/app/(protected)/setter/_actions/agenda.actions'
 import { ConfirmarReunionSchema } from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
+import { StepLink } from './step-nav'
 
 type AgendaStepProps = {
   leadId: string
@@ -127,13 +129,27 @@ export function AgendaStep({
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Agendar la reunión</h2>
+          <h2 className="text-base font-semibold text-zinc-400">{GUIA_AGENDA.titulo}</h2>
         </div>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-          {status === 'CALL_AGENDADA'
-            ? 'Este lead figura con reunión agendada (registrada por otra vía). El booking con horarios reales vive en este paso para los próximos.'
-            : 'Se abre cuando el negocio respondió (en «Seguimiento») y en la conversación acepta reunirse. Acá le ofrecés horarios reales de la agenda de Franco y confirmás el booking.'}
-        </p>
+        {/* CALL_AGENDADA: caso borde (reunión por otra vía), no el gate. El resto
+            es la espera del gate RESPONDIO — se EXPLICA, no se frustra (3.6). */}
+        {status === 'CALL_AGENDADA' ? (
+          <p className="mt-2 text-xs leading-relaxed text-zinc-600">
+            Este lead figura con reunión agendada (registrada por otra vía). El booking con
+            horarios reales vive en este paso para los próximos.
+          </p>
+        ) : (
+          <>
+            <p className="mt-2 text-xs font-semibold text-zinc-300">{GUIA_AGENDA.gate.titulo}</p>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
+              <LineaRicaText linea={GUIA_AGENDA.gate.detalle} />
+            </p>
+            {/* La salida del gate: marcar «Respondió» vive en Seguimiento. */}
+            <div className="mt-3">
+              <StepLink to="seguimiento">Ir a Seguimiento</StepLink>
+            </div>
+          </>
+        )}
       </Card>
     )
   }
@@ -187,8 +203,13 @@ export function AgendaStep({
 
   return (
     <Card padding="lg" className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-zinc-100">Agendar la reunión</h2>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_AGENDA.titulo}</h2>
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
+            <LineaRicaText linea={GUIA_AGENDA.intro} />
+          </p>
+        </div>
         {/* B8A-II: el paso se abre con RESPONDIO, no con un "aceptó" confirmado.
             La etiqueta dice disponibilidad, no afirma un hecho que no verificamos. */}
         <Badge tone="cyan" variant="soft">
@@ -197,6 +218,16 @@ export function AgendaStep({
       </div>
 
       <TeachPanel id="traspaso" />
+
+      {/* Cómo agendar, paso a paso (3.6) — el orden real de la pantalla. */}
+      <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
+        {GUIA_AGENDA.pasos.map((paso, index) => (
+          <li key={paso} className="flex gap-2">
+            <span className="font-semibold text-cyan-300/80">{index + 1}.</span>
+            {paso}
+          </li>
+        ))}
+      </ol>
 
       {/* ── Primero: confirmar que habla con el decisor (ficha del Paso 1) ── */}
       <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 transition-colors hover:bg-white/[0.05]">

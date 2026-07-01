@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible } from '../helpers/setter-ui'
+import { firstVisible, expandCartera } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createLead,
@@ -81,18 +81,23 @@ test('A2 · navegación + rail de herramientas + aria-current activo', async ({ 
   await expect(firstVisible(page.getByRole('navigation', { name: 'Herramientas externas del setter' }))).toBeVisible()
 })
 
-test('A3 · scoreboard, cartera, continuá, y colas recorribles', async ({ page }) => {
+test('A3 · foco accionable (modo dirección) + cartera secundaria con búsqueda', async ({ page }) => {
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
-  // Scoreboard "De un vistazo".
-  await expect(firstVisible(page.getByRole('region', { name: 'Resumen de tu cartera, de solo lectura' }))).toBeVisible()
-  // Toolbar (búsqueda).
+  // 2.1a — el home es "modo dirección": UN lead accionable de protagonista. La
+  // siembra tiene leads en FICHA → la cola `trabajar` no está vacía → hay foco.
+  // (El viejo tablero — scoreboard "Resumen de tu cartera", cola "Para trabajar
+  // ahora", link "Continuá donde dejaste" — lo barrió 2.1a.)
+  await expect(firstVisible(page.getByRole('region', { name: 'Tu foco ahora' }))).toBeVisible()
+  // El CTA que abre el lead protagonista en su detalle.
+  await expect(firstVisible(page.getByRole('button', { name: 'Ir a trabajarlo' }))).toBeVisible()
+
+  // La cartera completa quedó SECUNDARIA (colapsada): el toggle existe y, al
+  // expandir, surfacea el buscador (que se mudó adentro del CarteraView).
+  await expect(firstVisible(page.getByRole('button', { name: 'Ver toda la cartera' }))).toBeVisible()
+  await expandCartera(page)
   await expect(firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' }))).toBeVisible()
-  // Cola "Para trabajar ahora".
-  await expect(firstVisible(page.getByRole('region', { name: 'Para trabajar ahora' }))).toBeVisible()
-  // "Continuá donde dejaste".
-  await expect(firstVisible(page.getByRole('link', { name: /^Continuá donde dejaste:/i }))).toBeVisible()
 })
 
 test('A4 · paneles de cabina: Novedades, Tu semana, Mis números, badge topbar', async ({ page }) => {

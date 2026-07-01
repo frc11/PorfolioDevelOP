@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible } from '../helpers/setter-ui'
+import { firstVisible, expandCartera } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createLead,
@@ -54,6 +54,8 @@ test('D1 · búsqueda acento-insensible surfacea el lead acentuado', async ({ pa
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
+  // El buscador vive en la cartera secundaria (2.1a) → expandir primero.
+  await expandCartera(page)
   await firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' })).fill('cafeteria nandu')
   // El lead "Cafetería Ñandú" aparece pese a buscar sin tildes ni ñ.
   await expect(firstVisible(page.getByText(ACCENT_NAME))).toBeVisible()
@@ -64,7 +66,9 @@ test('D2 · pin / snooze / nota persisten (palancas privadas del setter)', async
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
-  // Acotar a la card objetivo vía la búsqueda.
+  // Las palancas (pin/snooze/nota) viven en las cards de la cartera secundaria
+  // (2.1a) → expandir, y recién ahí acotar a la card objetivo vía la búsqueda.
+  await expandCartera(page)
   await firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' })).fill('Palancas Target')
   await expect(firstVisible(page.getByText('SMOKE-SETTER Palancas Target', { exact: false }))).toBeVisible()
 
@@ -85,36 +89,56 @@ test('D2 · pin / snooze / nota persisten (palancas privadas del setter)', async
   }).toPass({ timeout: 10_000 })
 })
 
-test('D3 · recorrido prev/next por la cola sin volver al home', async ({ page }) => {
+test('D3 · modo dirección reemplaza el recorrido kanban: foco + "Saltar" / "Ir a trabajarlo"', async ({ page }) => {
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
-  // "Recorrer" la cola "Para trabajar ahora" (>=2 leads) → abre el primero con ?cola.
-  await firstVisible(page.getByRole('link', { name: /Recorrer/i }).first()).click()
-  await expect(page).toHaveURL(/\/setter\/leads\/.+\?cola=/)
+  // 2.1a borró el recorrido kanban (link "Recorrer" / strip "Siguiente:" / ?cola=).
+  // El modo dirección entrega UN lead de foco a la vez, con dos salidas: "Saltar"
+  // (correr al próximo SIN salir del home) e "Ir a trabajarlo" (abrir su detalle).
+  await expect(firstVisible(page.getByRole('region', { name: 'Tu foco ahora' }))).toBeVisible()
 
-  // Strip de recorrido con "Siguiente" → navega al próximo sin volver al home.
-  const siguiente = page.getByRole('link', { name: /^Siguiente:/i })
-  if (await siguiente.count()) {
-    const before = page.url()
-    await firstVisible(siguiente).click()
-    await expect(page).toHaveURL(/\/setter\/leads\/.+\?cola=/)
-    expect(page.url(), 'cambió de lead, no volvió al home').not.toBe(before)
+  // "Saltar" corre al próximo sin abandonar el home: no vuelve a un tablero ni
+  // navega a un detalle — sigue en /setter. Solo si hay próximo (botón habilitado:
+  // depende de cuántos accionables tenga la cartera de setter-qa en el momento).
+  const saltar = firstVisible(page.getByRole('button', { name: 'Saltar' }))
+  if (await saltar.isEnabled()) {
+    await saltar.click()
+    await expect(page).toHaveURL(/\/setter$/)
+    await expect(firstVisible(page.getByRole('region', { name: 'Tu foco ahora' }))).toBeVisible()
   }
+
+  // Recarga limpia: "Saltar" dispara una transición (todos los botones del foco
+  // comparten `disabled={isPending}` mientras corre el refresh) → arrancar de cero
+  // evita la carrera contra ese pending al clickear el siguiente botón.
+  await page.goto('/setter', { waitUntil: 'domcontentloaded' })
+
+  // "Ir a trabajarlo" ancla el foco (sticky D7) y abre su detalle — el reemplazo
+  // directo del viejo "Recorrer".
+  const trabajar = firstVisible(page.getByRole('button', { name: 'Ir a trabajarlo' }))
+  await expect(trabajar).toBeEnabled()
+  await trabajar.click()
+  await expect(page).toHaveURL(/\/setter\/leads\/.+/)
 })
 
 test('D4 · atajos de teclado: ? abre ayuda; NO dispara escribiendo en un input', async ({ page }) => {
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
+  // El buscador (input de escritura, donde se prueba la guarda) vive en la
+  // cartera secundaria (2.1a) → expandir primero.
+  await expandCartera(page)
   // Guarda: con foco en el buscador, "?" NO abre la ayuda.
   const search = firstVisible(page.getByRole('searchbox', { name: 'Buscar en tu cartera' }))
   await search.click()
   await page.keyboard.press('?')
   await expect(page.getByRole('dialog', { name: 'Atajos de teclado' }), 'no abre escribiendo').toHaveCount(0)
 
-  // Con foco fuera de inputs, "?" sí abre el diálogo de ayuda.
-  await page.locator('body').click({ position: { x: 5, y: 5 } })
+  // Con foco fuera de inputs, "?" sí abre el diálogo. Sacamos el foco del buscador
+  // con blur (el foco recae en body → `esEditable` da false → el atajo corre).
+  // Antes se clickeaba `body` en (5,5); con la cartera expandida la página es alta
+  // y ese click se volvía inestable — blur es quirúrgico y no depende del layout.
+  await search.blur()
   await page.keyboard.press('?')
   await expect(firstVisible(page.getByRole('dialog', { name: 'Atajos de teclado' }))).toBeVisible()
 })

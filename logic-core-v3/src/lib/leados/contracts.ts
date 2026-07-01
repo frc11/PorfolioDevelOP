@@ -86,6 +86,39 @@ export const SelfCheckSchema = z.object({
   softFlags: z.array(z.string().trim().min(1)),
 })
 
+// ── E.1: progreso del checklist de Construcción (auto-reportado, NO gate) ────
+
+/**
+ * IDs ESTABLES de las fases de la Construcción — la llave del progreso
+ * persistido. id-keyed a propósito (NO índices): reordenar o reetiquetar
+ * `SHELL_CONSTRUCCION` (flow-content.ts) NO corrompe un progreso ya guardado.
+ * `ShellFase.id` calza 1:1 contra estos ids por `satisfies`.
+ */
+export const FASE_IDS = [
+  'estructura',
+  'personalizacion',
+  'assets',
+  'cta',
+  'calidad',
+  'mobile',
+] as const
+
+export type FaseId = (typeof FASE_IDS)[number]
+
+/**
+ * Progreso del checklist de Construcción — CHECKLIST auto-reportado por el
+ * setter, NUNCA un gate: `progresoJson` jamás se cablea a la transición
+ * EN_REVISION (el único gate sigue siendo draftUrl + `selfCheckAprobado`). En
+ * el dossier, `null` = checklist fresco (sin backfill); acá el default es
+ * `{ completadas: [] }`. `marcadas` estampa cuándo se marcó cada fase (ISO) —
+ * dato de diagnóstico id-keyed, no una condición de nada.
+ */
+export const ProgresoSchema = z.object({
+  completadas: z.array(z.enum(FASE_IDS)).default([]),
+  faseActual: z.enum(FASE_IDS).optional(),
+  marcadas: z.record(z.enum(FASE_IDS), z.string().datetime()).optional(),
+})
+
 // ── Historial de rechazos del admin (solo lo escribe transitionDossier) ─────
 
 export const RechazoSchema = z.object({
@@ -141,6 +174,7 @@ export type Ficha = z.infer<typeof FichaSchema>
 export type Evaluacion = z.infer<typeof EvaluacionSchema>
 export type Brief = z.infer<typeof BriefSchema>
 export type SelfCheck = z.infer<typeof SelfCheckSchema>
+export type Progreso = z.infer<typeof ProgresoSchema>
 export type Rechazo = z.infer<typeof RechazoSchema>
 export type Agenda = z.infer<typeof AgendaSchema>
 export type ResultadoReunion = (typeof RESULTADO_REUNION_VALUES)[number]

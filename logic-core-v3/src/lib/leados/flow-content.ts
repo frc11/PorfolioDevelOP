@@ -22,10 +22,17 @@
  * re-exporta.
  */
 import type { DossierStage, LeadStatus } from '@prisma/client'
+import type { FaseId } from './contracts'
 
 // ── B4: shell de construcción (Claude Design) ────────────────────────────────
 
 export type ShellFase = {
+  /**
+   * E.1: id ESTABLE de la fase, atado al enum `FaseId` (contracts.ts). Es la
+   * llave del progreso persistido (`progresoJson`): reordenar este array no
+   * corrompe un progreso ya guardado. El `<ol>` sigue mostrando por posición.
+   */
+  id: FaseId
   titulo: string
   detalle: string
   items: string[]
@@ -42,6 +49,7 @@ export type ShellFase = {
  */
 export const SHELL_CONSTRUCCION: ShellFase[] = [
   {
+    id: 'estructura',
     titulo: 'Estructura',
     detalle: 'Generá el esqueleto de la demo en Claude Design a partir del brief.',
     items: [
@@ -51,6 +59,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     ],
   },
   {
+    id: 'personalizacion',
     titulo: 'Personalización con datos del negocio',
     detalle: 'Reemplazá todo texto genérico por la realidad del negocio.',
     items: [
@@ -60,6 +69,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     ],
   },
   {
+    id: 'assets',
     titulo: 'Assets reales',
     detalle: 'Logo y fotos del negocio, no placeholders. Este sub-paso no se saltea.',
     items: [
@@ -69,6 +79,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     ],
   },
   {
+    id: 'cta',
     titulo: 'CTA de WhatsApp',
     detalle: 'El botón de contacto es el corazón comercial de la demo.',
     items: [
@@ -78,6 +89,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     ],
   },
   {
+    id: 'calidad',
     titulo: 'Calidad y motion',
     detalle: 'El pulido que separa una demo creíble de una plantilla.',
     items: [
@@ -87,6 +99,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     ],
   },
   {
+    id: 'mobile',
     titulo: 'Mobile',
     detalle: 'La mayoría de los dueños la van a abrir desde el celular.',
     items: [

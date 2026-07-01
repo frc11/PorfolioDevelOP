@@ -31,6 +31,69 @@ export function ownedListWhere(userId: string): Prisma.OsLeadWhereInput {
 }
 
 /**
+ * Campos de alta que el setter SÍ controla: lo que sabe del negocio que cargó.
+ * Explícitamente SIN `assignedToId`, `caliente` ni `source` — esos los fija el
+ * sistema en `ownedLeadCreateData`, nunca el cliente. Es el contrato de entrada
+ * del alta propia (A.1): el output del `NuevoProspectoSchema` calza con este shape.
+ */
+export type OwnedLeadFields = {
+  businessName: string
+  contactName?: string
+  phone?: string
+  email?: string
+  industry?: string
+  zone?: string
+  instagramUrl?: string
+  currentWebUrl?: string
+  notes?: string
+}
+
+/**
+ * Marca de la SEGUNDA fuente de leads: auto-cargado por el setter. La otra fuente
+ * es la asignación de Franco (que además marca `caliente`). No cambia el modelo de
+ * dos fuentes — solo deja el origen anotado, como hacen 'Chatbot' / 'Inbound'.
+ */
+export const FUENTE_SETTER = 'Setter'
+
+/**
+ * Datos de alta de un lead PROPIO del setter — el espejo de ESCRITURA de
+ * `ownedLeadWhere`/`ownedListWhere`. La misma frontera de aislamiento (el dueño
+ * es `assignedToId`), ahora aplicada al CREAR:
+ *
+ *   1. `assignedToId` se DERIVA del `userId` de la sesión, SIEMPRE — jamás de un
+ *      campo del cliente. El registro se arma campo por campo (no `...fields`), así
+ *      que un `assignedToId` inyectado en `fields` ni se lee: el dueño se fuerza.
+ *      Es el anti-IDOR de escritura — el setter no puede crear un lead de otro.
+ *   2. `caliente: false`: el lead entra FRÍO. El caliente lo marca Franco al
+ *      asignar (admin-1b), nunca el setter al cargar.
+ *   3. `source`: marca la segunda fuente.
+ *
+ * El estado inicial (status PROSPECTO, dossier FICHA lazy) sale de los defaults de
+ * Prisma — un lead así entra a la cola `trabajar` del foco como cualquier otro.
+ * Verificado, sin DB, por `alta-propia.invariant.ts`.
+ */
+export function ownedLeadCreateData(
+  fields: OwnedLeadFields,
+  userId: string,
+): Prisma.OsLeadUncheckedCreateInput {
+  return {
+    businessName: fields.businessName,
+    contactName: fields.contactName,
+    phone: fields.phone,
+    email: fields.email,
+    industry: fields.industry,
+    zone: fields.zone,
+    instagramUrl: fields.instagramUrl,
+    currentWebUrl: fields.currentWebUrl,
+    notes: fields.notes,
+    // ── Reglas del SISTEMA (no del cliente) ──
+    assignedToId: userId,
+    caliente: false,
+    source: FUENTE_SETTER,
+  }
+}
+
+/**
  * Filtro del meta PRIVADO del setter (pin / snooze / nota propia): SOLO la fila
  * de ESTE setter. Es la garantía de privacidad a nivel lectura — usado tanto en
  * el `include` de la lista como en cualquier acceso al meta. Otro setter, aunque

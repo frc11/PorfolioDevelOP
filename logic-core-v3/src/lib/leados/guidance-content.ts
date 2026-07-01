@@ -179,6 +179,13 @@ export type PasoGuia = {
   intro?: LineaRica
   /** Instructivo ordenado (how-to mecánico, ej. publicar el draft). El componente lo dibuja como `<ol>`. [3.4] */
   pasos?: readonly string[]
+  /**
+   * Explicación del RITMO de la cadencia de toques — las PALABRAS, no el cálculo.
+   * El cómputo de fechas (+2/+2/+3 y el corte) vive en `follow-up.ts` y manda; acá
+   * solo se hace legible para el setter. Lo pinta el seguimiento como pie del
+   * recuadro de cadencia. [3.6]
+   */
+  cadencia?: LineaRica
   /** Estimación de tiempo, si el paso la muestra. */
   duracion?: string
   /** El porqué ampliado del paso — material de enseñanza. [teach · 1.1] */
@@ -466,7 +473,9 @@ export const GUIA_BRIEF = {
  * lógica — acá solo el porqué y los ejemplos, editables por Franco.
  */
 export const GUIA_CONSTRUCCION = {
-  titulo: 'Construcción de la demo',
+  // El «Paso 4 —» queda en la fuente única: el rail numera la fase y el h2 del
+  // step lo refleja sin hardcodearlo en el componente (3.7, single-source).
+  titulo: 'Paso 4 — Construcción de la demo',
   intro: [
     'La demo se construye en ',
     { enfasis: 'Claude Design' },
@@ -614,6 +623,58 @@ export const GUIA_OPENER = {
   ],
 } satisfies PasoGuia
 
+// ── Contenido: Paso 7 · Seguimiento de la conversación ───────────────────────
+
+/**
+ * Guía del seguimiento (la conversación después del opener). El setter registra
+ * cada toque y la maquinaria mueve estado + cadencia —él nunca calcula fechas—.
+ * `intro` encuadra el paso; `cadencia` explica el ritmo +2/+2/+3-stop (el cálculo
+ * vive en `follow-up.ts`, acá solo las palabras); `porque`/`ejemplos` enseñan qué
+ * hacer cuando el negocio responde y cuando no. El envío del link (momento bisagra)
+ * tiene su propia guía en `GUIA_ENVIO`; las objeciones, en `GUIA_OBJECIONES`.
+ */
+export const GUIA_SEGUIMIENTO = {
+  titulo: 'Seguimiento y envío de la demo',
+  intro: [
+    'Después del opener, registrás acá ',
+    { enfasis: 'cada toque de la conversación' },
+    '. La maquinaria mueve el estado y la cadencia sola — vos no calculás la próxima fecha, solo marcás lo que pasó.',
+  ],
+  cadencia: [
+    'Tres toques y para: el primero a los ',
+    { enfasis: '2 días' },
+    ', el segundo otros 2, el tercero a los 3. Si tras los tres no contesta, ',
+    { enfasis: 'el lead se enfría' },
+    ' — sin más insistencia.',
+  ],
+  porque: [
+    [
+      'Si el negocio ',
+      { enfasis: 'responde' },
+      ', cambia el rumbo: marcás «Respondió», se frena el follow-up y se abre la producción de la demo (Paso 3). De ahí en más el objetivo es uno solo: la reunión.',
+    ],
+    [
+      'Si ',
+      { enfasis: 'no responde' },
+      ', registrás el toque y listo: la cadencia agenda el próximo sola. No lo persigas a diario ni le adelantes el link para «tentarlo» — eso quema el lead.',
+    ],
+  ],
+  ejemplos: [
+    {
+      tema: 'Cuando responde',
+      asiSi: 'Contesta «contame más» → marcás «Respondió», se abre el brief y enfocás en cerrar la reunión.',
+      asiNo: 'Seguís mandando follow-ups genéricos como si no hubiera contestado.',
+      porque: 'Marcar «Respondió» frena la cadencia y abre la demo; ignorarlo te deja insistiendo de más.',
+    },
+    {
+      tema: 'Cuando no responde',
+      asiSi: 'Registrás «No respondió» y dejás que la cadencia agende el toque a los 2 días.',
+      asiNo: 'Le escribís todos los días o le adelantás el link para apurar.',
+      porque: 'Tres toques espaciados respetan al negocio; el acoso (o el link suelto) lo espanta.',
+    },
+  ],
+} satisfies PasoGuia
+
 const GUIA_OBJECIONES = {
   titulo: 'Objeciones de precio',
   porque: [
@@ -660,6 +721,38 @@ const GUIA_TRASPASO = {
       porque: 'La primera deja a Franco listo para cerrar; la segunda lo obliga a empezar de cero.',
     },
   ],
+} satisfies PasoGuia
+
+// ── Contenido: Paso 10 · Agendar la reunión ──────────────────────────────────
+
+/**
+ * Guía de la agenda (Paso 10). `intro` encuadra el momento; `pasos` es el how-to
+ * mecánico (confirmar decisor → buscar horarios → ofrecer → marcar el elegido →
+ * confirmar con notas); `gate` explica por qué el paso espera hasta RESPONDIO —el
+ * criterio sigue en `agenda.actions.ts: gateAgenda` y manda—. La enseñanza del
+ * traspaso (por qué las notas, hablar con quien decide) vive en `GUIA_TRASPASO`.
+ */
+export const GUIA_AGENDA = {
+  titulo: 'Agendar la reunión',
+  intro: [
+    'Cuando la charla llega a ',
+    { enfasis: '«sí, reunámonos»' },
+    ', ofrecés 3 horarios reales de la agenda de Franco y confirmás el booking. La confirmación y el recordatorio al prospecto los manda Cal.com solo.',
+  ],
+  pasos: [
+    'Confirmá que hablás con quien decide (el dueño): agendar con alguien que no decide quema un turno de Franco.',
+    'Tocá «Buscar horarios libres de Franco» — trae 3 horarios reales de su agenda.',
+    'Pasale los 3 al prospecto (el bloque ya los arma) y esperá que elija uno.',
+    'Marcá el horario elegido, completá nombre, email y las notas de traspaso, y confirmá.',
+  ],
+  gate: {
+    titulo: 'Se agenda cuando el negocio respondió y acepta reunirse',
+    detalle: [
+      'No lo dispara un trigger automático: el paso se abre cuando ',
+      { enfasis: 'marcás «Respondió» en «Seguimiento»' },
+      ' y en la charla el negocio acepta la reunión. Hasta entonces espera — agendar antes sería ofrecer un turno que nadie pidió.',
+    ],
+  },
 } satisfies PasoGuia
 
 // ── Contenido: tras la construcción · En revisión + envío del link ───────────
@@ -843,6 +936,8 @@ export const GUIA_PASOS: Partial<Record<GuiaPasoId, PasoGuia>> = {
   draft: GUIA_DRAFT,
   selfCheck: GUIA_SELF_CHECK,
   opener: GUIA_OPENER,
+  seguimiento: GUIA_SEGUIMIENTO,
   objeciones: GUIA_OBJECIONES,
+  agenda: GUIA_AGENDA,
   traspaso: GUIA_TRASPASO,
 }

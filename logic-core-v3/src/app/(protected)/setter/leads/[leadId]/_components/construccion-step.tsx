@@ -12,6 +12,7 @@ import {
   Lock,
   OctagonAlert,
   Save,
+  Sparkles,
 } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Callout, Card } from '@/components/ui'
@@ -19,6 +20,7 @@ import type { Brief, Ficha, Rechazo } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { SHELL_CONSTRUCCION } from '@/lib/leados/flow'
 import { GUIA_CONSTRUCCION } from '@/lib/leados/guidance-content'
+import { PROMPTS_DISENIO } from '@/lib/leados/prompts-disenio'
 import { formatEspera } from '@/lib/leados/revision'
 import {
   iniciarConstruccion,
@@ -180,6 +182,37 @@ function MaterialesNegocio({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha 
   )
 }
 
+/**
+ * B4·A — Los prompts de diseño prefijados, copiables a Claude Design para pulir
+ * la demo ya armada (estética, mobile, motion). Estándar y lead-agnósticos: el
+ * contenido vive en `PROMPTS_DISENIO` (editable por Franco en un solo archivo);
+ * acá solo se pintan con `CopyBlock` tal cual — un prompt por bloque.
+ */
+function PromptsDisenio() {
+  return (
+    <div className="space-y-3">
+      <div className="space-y-1">
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
+          <Sparkles size={14} strokeWidth={1.5} className="shrink-0 text-cyan-300" />
+          Prompts de diseño — pulí la demo en Claude Design
+        </p>
+        <p className="text-[11px] text-zinc-500">
+          Prompts estándar, sin datos del negocio: cuando la demo ya está armada, copiá el que
+          necesites y pegalo como mensaje en Claude Design.
+        </p>
+      </div>
+      {PROMPTS_DISENIO.map((prompt) => (
+        <CopyBlock
+          key={prompt.id}
+          titulo={prompt.titulo}
+          instruccion={prompt.instruccion}
+          texto={prompt.prompt}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function ConstruccionStep({
   leadId,
   lead,
@@ -212,7 +245,7 @@ export function ConstruccionStep({
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 4 — Construcción de la demo</h2>
+          <h2 className="text-base font-semibold text-zinc-400">{GUIA_CONSTRUCCION.titulo}</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
           Se habilita cuando el brief queda guardado y verificado.
@@ -226,7 +259,7 @@ export function ConstruccionStep({
     return (
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 4 — Construcción de la demo</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_CONSTRUCCION.titulo}</h2>
           <BadgeProvisorio />
         </div>
         <UrgenciaBanner respondioDesde={respondioDesde} />
@@ -250,7 +283,7 @@ export function ConstruccionStep({
     return (
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 4 — Construcción de la demo</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_CONSTRUCCION.titulo}</h2>
           <Badge tone="rose" variant="soft">Correcciones pendientes</Badge>
         </div>
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
@@ -278,7 +311,7 @@ export function ConstruccionStep({
     return (
       <Card padding="lg" className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 4 — Construcción de la demo</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_CONSTRUCCION.titulo}</h2>
           <BadgeProvisorio />
         </div>
 
@@ -330,6 +363,8 @@ export function ConstruccionStep({
           ))}
         </ol>
 
+        <PromptsDisenio />
+
         <p className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500">
           <Save size={13} strokeWidth={1.5} className="shrink-0 text-zinc-400" />
           Claude Design no guarda solo: antes de cambiar de pestaña o cerrar, guardá (o exportá) lo
@@ -361,7 +396,7 @@ export function ConstruccionStep({
   // ── EN_REVISION / APROBADA / DESCARTADA: resumen mínimo ───────────────────
   return (
     <Card variant="subtle" padding="lg">
-      <h2 className="text-base font-semibold text-zinc-300">Paso 4 — Construcción de la demo</h2>
+      <h2 className="text-base font-semibold text-zinc-300">{GUIA_CONSTRUCCION.titulo}</h2>
       <p className="mt-2 text-xs leading-relaxed text-zinc-500">
         Demo construida. El dossier ya avanzó a la etapa siguiente.
       </p>

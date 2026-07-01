@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, mintSessionCookie, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible } from '../helpers/setter-ui'
+import { firstVisible, expandCartera } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createSetter,
@@ -53,14 +53,27 @@ test('C1 · A no ve la cartera de B; abrir un lead ajeno da 404 sin leak', async
   await qaLogin(page, 'setter')
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
+  // La cartera completa (donde figura el lead de A) quedó secundaria/colapsada
+  // tras 2.1a → expandir para poder afirmar visibilidad. El aislamiento (B no
+  // aparece) se sigue verificando sobre TODA la página, abierta o no.
+  await expandCartera(page)
   await expect(firstVisible(page.getByText(A_ONLY))).toBeVisible()
   await expect(page.getByText(B_ONLY), 'A no ve el lead de B').toHaveCount(0)
 
-  // Abrir el lead de B → 404 idéntico a un id random (sin leak de existencia).
-  const foreign = await page.goto(`/setter/leads/${bLeadId}`, { waitUntil: 'domcontentloaded' })
-  const random = await page.goto('/setter/leads/clrandomrandomrandomrand00', { waitUntil: 'domcontentloaded' })
-  expect(foreign?.status(), 'lead ajeno → 404').toBe(404)
-  expect(random?.status(), 'mismo status que un id inexistente').toBe(foreign?.status())
+  // Abrir el lead de B → not-found del setter, indistinguible de un id inexistente
+  // (sin leak de existencia ni del negocio ajeno). El route hace `notFound()`; la
+  // garantía de aislamiento se verifica por CONTENIDO, no por status HTTP: una page
+  // `force-dynamic` ya flusheó el 200 OK antes de que notFound() corte el stream
+  // (comportamiento de Next), así que el status es 200 aunque la UI sea la de
+  // "no encontrado". Lo que importa: el negocio ajeno NUNCA se renderiza.
+  await page.goto(`/setter/leads/${bLeadId}`, { waitUntil: 'domcontentloaded' })
+  await expect(firstVisible(page.getByText('Ese lead no está en tu cartera'))).toBeVisible()
+  await expect(page.getByText(B_ONLY), 'el negocio ajeno nunca se renderiza').toHaveCount(0)
+
+  // Un id inexistente da EXACTAMENTE el mismo not-found → no se filtra la
+  // distinción "existe pero es ajeno" vs "no existe".
+  await page.goto('/setter/leads/clrandomrandomrandomrand00', { waitUntil: 'domcontentloaded' })
+  await expect(firstVisible(page.getByText('Ese lead no está en tu cartera'))).toBeVisible()
   expectNoConsoleErrors(guard)
 })
 
@@ -71,8 +84,12 @@ test('C2 · B (2º setter) ve SOLO lo suyo; no abre el lead de A', async ({ page
   await expect(firstVisible(page.getByText(B_ONLY))).toBeVisible()
   await expect(page.getByText(A_ONLY), 'B no ve el lead de A').toHaveCount(0)
 
-  const foreign = await page.goto(`/setter/leads/${aLeadId}`, { waitUntil: 'domcontentloaded' })
-  expect(foreign?.status(), 'B no abre el lead de A').toBe(404)
+  // B no abre el lead de A: `notFound()` del setter, sin leakear el negocio de A.
+  // (Status 200 y no 404 por el streaming de la page force-dynamic — Next; el
+  // aislamiento se verifica por contenido, igual que en C1.)
+  await page.goto(`/setter/leads/${aLeadId}`, { waitUntil: 'domcontentloaded' })
+  await expect(firstVisible(page.getByText('Ese lead no está en tu cartera'))).toBeVisible()
+  await expect(page.getByText(A_ONLY), 'B nunca ve el negocio de A').toHaveCount(0)
 })
 
 test('C3 · la nota privada de A no la hereda B al reasignar el lead', async ({ page, baseURL }) => {

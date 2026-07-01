@@ -15,6 +15,7 @@ import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { cn } from '@/lib/utils'
+import { StepLink } from './step-nav'
 
 const VEREDICTO_LABELS = {
   DESCARTAR: 'Descartar',
@@ -60,7 +61,7 @@ export function EvaluacionStep({
     return (
       <Card padding="lg" className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-100">Paso 2 — Evaluación</h2>
+          <h2 className="text-base font-semibold text-zinc-100">{GUIA_EVALUACION.titulo}</h2>
           <div className="flex items-center gap-2">
             <Badge tone={evaluacion.score >= 4 ? 'amber' : evaluacion.score === 3 ? 'blue' : 'zinc'} variant="soft" size="md">
               Score {evaluacion.score}/5
@@ -102,17 +103,34 @@ export function EvaluacionStep({
   }
 
   // ── Bloqueado: la ficha todavía no tiene señal mínima ──────────────────────
-  if (!habilitado || fichaFaltantes(ficha).length > 0) {
+  const faltantesFicha = fichaFaltantes(ficha)
+  if (!habilitado || faltantesFicha.length > 0) {
     return (
       <Card variant="subtle" padding="lg">
         <div className="flex items-center gap-2.5">
           <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Paso 2 — Evaluación</h2>
+          <h2 className="text-base font-semibold text-zinc-400">{GUIA_EVALUACION.titulo}</h2>
         </div>
         <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-          Se habilita cuando la ficha tiene la señal mínima (mirá el detalle de lo que falta en
-          el paso 1) y la guardás.
+          Se habilita cuando la ficha tiene la señal mínima y la guardás.
         </p>
+        {/* El detalle concreto sube ACÁ (antes era un puntero ciego «mirá el paso 1»):
+            las mismas líneas que valida la ficha, con un salto directo para completarlas. */}
+        {faltantesFicha.length > 0 && (
+          <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-500/[0.06] p-3">
+            <p className="text-xs font-semibold text-amber-300">Falta señal en la ficha:</p>
+            <ul className="mt-1.5 space-y-1">
+              {faltantesFicha.map((faltante) => (
+                <li key={faltante} className="text-xs leading-relaxed text-amber-200/80">
+                  · {faltante}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="mt-3">
+          <StepLink to="ficha">Ir a la ficha (Paso 1)</StepLink>
+        </div>
       </Card>
     )
   }

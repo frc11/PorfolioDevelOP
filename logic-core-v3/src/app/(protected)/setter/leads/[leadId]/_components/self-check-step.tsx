@@ -9,12 +9,15 @@ import { Badge, Button, Callout, Card, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow'
 import { GUIA_SELF_CHECK } from '@/lib/leados/guidance-content'
+import { promptParaHardCheck } from '@/lib/leados/prompts-disenio'
 import {
   enviarARevision,
   guardarSelfCheck,
 } from '@/app/(protected)/setter/_actions/dossier.actions'
+import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { SelfCheckEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { StepLink } from './step-nav'
 
 type SelfCheckStepProps = {
   leadId: string
@@ -111,9 +114,13 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
         </div>
         <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-400">
-          Publicá el draft primero (el paso de arriba): el self-check se hace mirando la demo
-          publicada, no el export local. Apenas guardes el link, este paso se abre.
+          Publicá el draft primero: el self-check se hace mirando la demo publicada, no el export
+          local. Apenas guardes el link, este paso se abre.
         </p>
+        {/* «El paso de arriba» pasa de prosa a salto directo al paso de publicar el draft. */}
+        <div className="mt-3">
+          <StepLink to="draft">Ir a publicar el draft</StepLink>
+        </div>
       </Card>
     )
   }
@@ -161,6 +168,12 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
         </p>
         {HARD_CHECKS.map((check) => {
           const ok = duros[check.id]
+          // 4·B: el hard-block en rojo que se arregla refinando la demo ofrece,
+          // además del arreglo humano, su prompt copiable a Claude Design. Mapeo
+          // parcial y editable (prompts-disenio.ts); sin prompt mapeado → solo el
+          // arreglo, como antes. NO toca el gate: es un atajo de arreglo, no un
+          // bypass (el botón sigue disabled hasta 6/6, el server re-valida igual).
+          const promptArreglo = ok ? null : promptParaHardCheck(check.id)
           return (
             <div
               key={check.id}
@@ -194,6 +207,15 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
                   label={check.nombre}
                 />
               </div>
+              {promptArreglo && (
+                <div className="mt-3">
+                  <CopyBlock
+                    titulo={promptArreglo.titulo}
+                    instruccion={promptArreglo.instruccion}
+                    texto={promptArreglo.prompt}
+                  />
+                </div>
+              )}
             </div>
           )
         })}

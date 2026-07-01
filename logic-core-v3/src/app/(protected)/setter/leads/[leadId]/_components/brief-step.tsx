@@ -19,6 +19,7 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
+import { StepLink } from './step-nav'
 
 type BriefStepProps = {
   leadId: string
@@ -171,6 +172,11 @@ export function BriefStep({
         <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
           <LineaRicaText linea={GUIA_BRIEF.gate.detalle} />
         </p>
+        {/* La salida del gate: mientras se espera la respuesta, lo accionable es el
+            opener (antes solo lo nombraba la prosa). */}
+        <div className="mt-3">
+          <StepLink to="opener">Ir al opener</StepLink>
+        </div>
       </Card>
     )
   }
