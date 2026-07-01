@@ -16,9 +16,8 @@ import {
 } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Callout, Card } from '@/components/ui'
-import type { Brief, Ficha, Rechazo } from '@/lib/leados/contracts'
+import type { Brief, Ficha, Progreso, Rechazo } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
-import { SHELL_CONSTRUCCION } from '@/lib/leados/flow'
 import { GUIA_CONSTRUCCION } from '@/lib/leados/guidance-content'
 import { PROMPTS_DISENIO } from '@/lib/leados/prompts-disenio'
 import { formatEspera } from '@/lib/leados/revision'
@@ -29,6 +28,7 @@ import {
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
+import { ChecklistConstruccion } from './checklist-construccion'
 import { EscalarModal } from './escalar-modal'
 
 type ConstruccionStepProps = {
@@ -44,6 +44,9 @@ type ConstruccionStepProps = {
   respondioDesde: string | null
   /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
   escaladoAt: string | null
+  /** E.2: progreso del checklist de construcción (qué fases marcó el setter).
+   * Viene de `progresoJson` → sobrevive refresh. Fresco = `{ completadas: [] }`. */
+  progreso: Progreso
 }
 
 /** Badge fijo del paso: la secuencia del shell es provisoria por diseño. */
@@ -222,6 +225,7 @@ export function ConstruccionStep({
   ultimoRechazo,
   respondioDesde,
   escaladoAt,
+  progreso,
 }: ConstruccionStepProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -320,8 +324,10 @@ export function ConstruccionStep({
         {ultimoRechazo && <GuiaRetrabajo rechazo={ultimoRechazo} />}
 
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-          Construí en Claude Design siguiendo estas fases en orden. La secuencia es preliminar:
-          se va a refinar cuando se validen las primeras demos reales.
+          Construí en Claude Design fase por fase. En el checklist de abajo, la fase en curso
+          queda destacada con sus sub-pasos a la vista; tildá cada una al terminarla (podés
+          destildar si volvés atrás — el orden no es rígido). La secuencia es preliminar: se va
+          a refinar cuando se validen las primeras demos reales.
         </p>
 
         <TeachPanel id="construccion" />
@@ -338,30 +344,7 @@ export function ConstruccionStep({
 
         <MaterialesNegocio lead={lead} ficha={ficha} />
 
-        <ol className="space-y-3">
-          {SHELL_CONSTRUCCION.map((fase, index) => (
-            <li
-              key={fase.titulo}
-              className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4"
-            >
-              <p className="text-sm font-semibold text-zinc-200">
-                <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500/15 text-[11px] font-bold text-cyan-300">
-                  {index + 1}
-                </span>
-                {fase.titulo}
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">{fase.detalle}</p>
-              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-zinc-400">
-                {fase.items.map((item) => (
-                  <li key={item} className="flex gap-2">
-                    <span className="text-zinc-600">·</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ol>
+        <ChecklistConstruccion leadId={leadId} completadas={progreso.completadas} />
 
         <PromptsDisenio />
 

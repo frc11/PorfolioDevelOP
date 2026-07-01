@@ -17,6 +17,7 @@ import {
   parseBrief,
   parseEvaluacion,
   parseFicha,
+  parseProgreso,
   parseSelfCheck,
   ultimoRechazo,
   STAGE_LABELS,
@@ -105,6 +106,9 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
     brief: parseBrief(dossier?.briefJson ?? null),
     draftUrl: dossier?.draftUrl ?? null,
     selfCheck: parseSelfCheck(dossier?.selfCheckJson ?? null),
+    // E.2: progreso del checklist de construcción. Nunca null (fresco =
+    // `{ completadas: [] }`) — es un auto-reporte, no un gate.
+    progreso: parseProgreso(dossier?.progresoJson ?? null),
     // B4: proxy de "desde cuándo espera" = último write comercial del lead
     // (mismo criterio que B5 usa updatedAt del dossier para la cola).
     respondioDesde: leadRespondio(lead.status) ? lead.updatedAt.toISOString() : null,

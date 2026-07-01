@@ -3,7 +3,15 @@
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Hammer, OctagonAlert } from 'lucide-react'
 import { Callout, Card } from '@/components/ui'
-import type { Agenda, Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
+import type {
+  Agenda,
+  Brief,
+  Evaluacion,
+  Ficha,
+  Progreso,
+  Rechazo,
+  SelfCheck,
+} from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_REVISION } from '@/lib/leados/guidance-content'
@@ -41,6 +49,9 @@ export type WizardData = {
   /** B4: draft publicado y self-check guardado (acciones de la construcción). */
   draftUrl: string | null
   selfCheck: SelfCheck | null
+  /** E.2: progreso del checklist de construcción (fases marcadas). Auto-reporte,
+   * no gate — persistido en `progresoJson`. Fresco = `{ completadas: [] }`. */
+  progreso: Progreso
   /** B4: ISO de la última movida comercial si el lead respondió; null si no. */
   respondioDesde: string | null
   /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
@@ -109,6 +120,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
     ultimoRechazo,
     agenda,
     outreach,
+    progreso,
   } = data
   const gateAbierto = gateBriefAbierto(lead.status, lead.caliente)
   const fichaEditable = stage === null || stage === 'FICHA'
@@ -279,6 +291,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
             ultimoRechazo={ultimoRechazo}
             respondioDesde={respondioDesde}
             escaladoAt={escaladoAt}
+            progreso={progreso}
           />
         </StepAnchor>
       )}

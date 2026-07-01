@@ -27,12 +27,14 @@ import {
   BriefSchema,
   EvaluacionSchema,
   FichaSchema,
+  ProgresoSchema,
   RechazosSchema,
   SelfCheckSchema,
   type Agenda,
   type Brief,
   type Evaluacion,
   type Ficha,
+  type Progreso,
   type Rechazo,
   type SelfCheck,
 } from './contracts.ts'
@@ -118,6 +120,17 @@ export function parseBrief(json: unknown): Brief | null {
 export function parseSelfCheck(json: unknown): SelfCheck | null {
   const parsed = SelfCheckSchema.safeParse(json)
   return parsed.success ? parsed.data : null
+}
+
+/**
+ * E.1/E.2 — Progreso del checklist de Construcción. A diferencia del resto de
+ * los blobs NO devuelve `null`: un `progresoJson` ausente o inválido equivale a
+ * un checklist FRESCO (`{ completadas: [] }`), estado legítimo por diseño (es un
+ * auto-reporte, NO un gate — ver `progreso-isolation.invariant.ts`).
+ */
+export function parseProgreso(json: unknown): Progreso {
+  const parsed = ProgresoSchema.safeParse(json)
+  return parsed.success ? parsed.data : { completadas: [] }
 }
 
 export function parseRechazos(json: unknown): Rechazo[] {

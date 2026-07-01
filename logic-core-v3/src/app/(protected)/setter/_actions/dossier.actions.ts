@@ -16,7 +16,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireSetter } from '@/lib/auth-guards'
 import { fail, ok, type ActionResult } from '@/lib/action-utils'
-import { FichaSchema, type Brief } from '@/lib/leados/contracts'
+import { FichaSchema, ProgresoSchema, type Brief, type FaseId } from '@/lib/leados/contracts'
 import {
   DossierTransitionError,
   getOwnedDossier,
@@ -24,6 +24,7 @@ import {
   saveOwnedBrief,
   saveOwnedDraftUrl,
   saveOwnedFicha,
+  saveOwnedProgreso,
   saveOwnedSelfCheck,
   transitionDossier,
 } from '@/lib/leados/dossier'
@@ -263,6 +264,37 @@ export async function reabrirConstruccion(
     return ok({ stage: 'CONSTRUCCION' })
   } catch (error) {
     return mapError(error, 'No se pudo reabrir la construcción')
+  }
+}
+
+/**
+ * Paso 4 (checklist) — Persiste el progreso del shell de construcción: qué fases
+ * marcó el setter como hechas. Es un AUTO-REPORTE, NO un gate — `saveOwnedProgreso`
+ * escribe SOLO `progresoJson` (nunca toca `stage`), así que el envío a revisión
+ * sigue colgando de draft + self-check, intacto. El cliente manda el set completo
+ * de fases hechas; el server lo re-valida contra `FASE_IDS` (una fase inventada
+ * rebota) antes de persistir. El re-loop RECHAZADA→CONSTRUCCION lo preserva.
+ */
+export async function guardarProgreso(
+  leadIdRaw: unknown,
+  inputRaw: unknown,
+): Promise<ActionResult<{ completadas: FaseId[] }>> {
+  try {
+    const userId = await requireSetter()
+
+    const leadId = LeadIdSchema.safeParse(leadIdRaw)
+    if (!leadId.success) return fail('Lead inválido')
+
+    const input = ProgresoSchema.safeParse(inputRaw)
+    if (!input.success) return fail('Progreso inválido')
+
+    const dossier = await saveOwnedProgreso(leadId.data, userId, input.data)
+    if (!dossier) return fail('Lead no encontrado')
+
+    revalidarSetter(leadId.data)
+    return ok({ completadas: input.data.completadas })
+  } catch (error) {
+    return mapError(error, 'No se pudo guardar el progreso')
   }
 }
 
