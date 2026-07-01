@@ -311,6 +311,7 @@ model User {
   osTimeEntries     OsTimeEntry[]        @relation("OsTimeEntryUser")
   osLeadSetterMetas OsLeadSetterMeta[]   @relation("OsLeadSetterMetaOwner")
   osSetterNotices   OsSetterNotice[]     @relation("OsSetterNoticeRecipient")
+  panelAnnouncementReads PanelAnnouncementRead[]
 }
 
 model PasswordResetToken {
@@ -427,6 +428,7 @@ model Organization {
   weeklyReportLogs  WeeklyReportLog[]
   businessMetrics   BusinessMetric[]
   pageViews         PageView[]
+  panelAnnouncements PanelAnnouncement[]
 }
 
 // Histórico semanal del executive brief. Aditivo al cache vigente en Organization
@@ -1720,4 +1722,51 @@ model RateLimit {
 
   @@index([expiresAt])
   @@map("rate_limit")
+}
+
+// Alcance de un anuncio del panel. ALL = broadcast a todas las orgs; ORG = acotado a
+// una org (requiere organizationId). El aislamiento por org queda por diseño en el
+// modelo, no en el código que lo consuma.
+enum PanelAnnouncementAudience {
+  ALL
+  ORG
+}
+
+// Novedades broadcast del panel del cliente (ej. "Nuevo: ahora ves de dónde vienen tus
+// leads"). A diferencia de Notification (1:1 por usuario, userId NOT NULL — individual),
+// un PanelAnnouncement se publica UNA vez y lo ven muchos usuarios (1:N). El "visto" por
+// usuario vive en PanelAnnouncementRead. Aislamiento por diseño: audience=ALL llega a
+// todas las orgs; audience=ORG se limita a `organizationId`.
+model PanelAnnouncement {
+  id             String                    @id @default(cuid())
+  title          String
+  body           String                    @db.Text
+  audience       PanelAnnouncementAudience @default(ALL)
+  organizationId String?
+  organization   Organization?             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  publishedAt    DateTime                  @default(now())
+  expiresAt      DateTime?
+  createdAt      DateTime                  @default(now())
+
+  reads PanelAnnouncementRead[]
+
+  // Feed del panel: novedades vigentes ordenadas por publicación. Filtro típico:
+  // (audience/organizationId) + expiresAt, ordenado por publishedAt desc.
+  @@index([publishedAt(sort: Desc)])
+  @@index([organizationId])
+}
+
+// "Visto/no visto" de un anuncio por usuario. Ausencia de fila = no visto; presencia =
+// visto (readAt). Único por (announcement, user): marcar visto es idempotente. Cascade
+// si se borra el anuncio o el usuario.
+model PanelAnnouncementRead {
+  id             String            @id @default(cuid())
+  announcementId String
+  announcement   PanelAnnouncement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime          @default(now())
+
+  @@unique([announcementId, userId])
+  @@index([userId])
 }
