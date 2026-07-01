@@ -11720,3 +11720,54 @@ Re-verificado tras los fixes: invariantes ✅, `tsc` sin errores nuevos, `npm ru
 - **[nit, no corregido — decisión de producto]** Un módulo `DEPRECATED` que una org todavía posee (`OrganizationModule` ACTIVE/PAUSED) desaparece de "Tus módulos", porque la query de catálogo filtra `status in (ACTIVE, COMING_SOON)`. Alcanzable solo por edición directa de DB (no hay UI que setee DEPRECATED). Excluir DEPRECATED protege a la vez de mostrarlo como contratable (`classifyModuleState` mapearía un DEPRECATED sin tenencia a `available`). Si se decide honrar "ya lo tenés" para discontinuados, incluir DEPRECATED en la query **y** extender `classifyModuleState` para no ofrecer un DEPRECATED sin tenencia (actualizando el invariante). Flag a Franco.
 - No se removieron los `ContactSubmission` de upsell del listado inbound (siguen siendo contactos legítimos); el tab Demanda es la vista dedicada, no un filtro que los oculte de inbound.
 - Verificación visual y de tono: la hace el humano (no autoconfirmada).
+
+---
+
+## ✅ P5.3 — Feed de novedades del panel + publisher admin   ·   2026-07-01
+
+**Objetivo:** que develOP anuncie cada feature nueva en el panel del cliente (badge + lista, "el panel crece con vos") y tenga una superficie admin para publicarlas. Broadcast (todas las orgs) o segmentado (una org). Cero migraciones (el schema `PanelAnnouncement`/`PanelAnnouncementRead` ya estaba aplicado).
+
+### Dónde vive
+
+```
+src/lib/announcements/visibility.ts                PURO: isAnnouncementVisibleTo / selectVisible / countUnread (anti-IDOR + caducidad)
+src/lib/announcements/get-announcements-for-org.ts  data: fetch SEPARADO (no el take:5), org-scoped, read por usuario
+src/lib/announcements/announcements.invariant.ts    test: broadcast, ORG anti-IDOR, caducidad, no leídas
+src/lib/actions/announcements.ts                    'marcar vistas' (session-scoped, idempotente)
+src/components/dashboard/AnnouncementsFeed.tsx       feed cliente (badge violeta + panel portaleado)
+src/app/(protected)/admin/announcements/**           publisher: page + form + lista + actions + schema
+```
+Editados: `dashboard/layout.tsx` (+fetch), `DashboardLayoutClient.tsx` (+feed junto a la campana), `admin/_components/admin-sidebar.tsx` (+link "Novedades").
+
+### 1) Visto/no visto + badge
+
+`PanelAnnouncementRead` (una fila por announcement×user, unique). El feed anota cada item con `read = reads.length > 0` (relación filtrada por `userId`). El badge = no leídas; **se apaga al abrir** el panel: `markAnnouncementsSeenAction` hace `createMany({ skipDuplicates })` de las vigentes visibles (idempotente por el unique), optimista en cliente + `router.refresh()`. Badge violeta (novedad/insight, B13) para distinguirlo del cyan de notificaciones.
+
+### 2) El límite del take:5
+
+El `NotificationCenter` hidrata `take:5` en `layout.tsx`. El feed de novedades **no** se cuelga de eso: `getAnnouncementsForOrg` es un fetch aparte con su propio tope (`ANNOUNCEMENT_FEED_LIMIT = 20`), agregado al `Promise.all` del layout como una entrada nueva e independiente. Sin cache por org (depende del `userId`).
+
+### 3) Aislamiento (anti-IDOR)
+
+La visibilidad es un predicado PURO (`isAnnouncementVisibleTo`): ALL → todos; ORG → **solo** si `organizationId` = org de la sesión; caducada → nunca. La query del feed y `markAnnouncementsSeenAction` espejan ese `where` (`OR[{audience:ALL},{audience:ORG,organizationId}]` + `expiresAt`), y el org sale de la **sesión**, nunca de un param. Un cliente jamás ve ni marca una novedad ORG de otra org. Testeado (invariante bloque 2 y 4).
+
+### 4) Publisher admin
+
+`/admin/announcements` (link nuevo en sidebar → Clientes). Form (título, cuerpo, alcance ALL/ORG, caducidad opcional); con ORG aparece el select de organización (requerido, validado contra org existente). `createAnnouncementAction` + `deleteAnnouncementAction` con `requireSuperAdmin` + Zod (`CreateAnnouncementSchema`, compartido cliente/servidor). Lista de publicadas con badges (alcance/caducidad/lecturas) y retiro con **confirmación de 2 pasos** (destructivo → cascade borra las lecturas). Solo esa superficie admin.
+
+### Tests / verificación
+
+- `npm run check:invariant:announcements` → ✅ (broadcast ALL, ORG anti-IDOR, caducidad, no leídas).
+- `tsc --noEmit` → sin errores nuevos (baseline `searchconsole.ts:119`).
+- `npm run build` → OK (`/admin/announcements` + `/dashboard` compilados). Nota: la 1ª corrida crasheó con exit 134 (SIGABRT nativo de V8, no error de código); re-corrida con `--max-old-space-size=6144` → OK. Era presión de memoria del entorno.
+
+### Decisiones (no especificadas en el prompt)
+
+- **Feed como afordancia del topbar** (ícono Sparkles + panel portaleado), gemelo del `NotificationCenter`, visible en todo `/dashboard/*` — no una sección solo-home. Se replicó el patrón de posicionamiento portaleado (el header tiene backdrop-blur → containing block; el panel se ancla al viewport).
+- **Marcar-todo-al-abrir** en vez de marcar por item: es lo que pedía "el badge se apaga al ver"; idempotente vía el unique.
+- **Retiro (delete) en vez de solo expirar**: `deleteMany` (no explota si no existe) + cascade a `PanelAnnouncementRead`. Con confirmación en UI.
+
+### Pendiente / fuera de scope
+
+- Verificación visual y de tono: la hace el humano (no autoconfirmada). El subagente `visual-qa` volvió a quedar **bloqueado por tooling** (sin `preview_*`); receta manual: `npm run start:qa` (:3001) o `dev`, `POST /api/qa/login` con persona cliente para `/dashboard` y super-admin para `/admin/announcements`.
+- Sin "marcar por item" ni historial paginado de novedades (el tope de 20 en el feed alcanza hoy; si crecen, paginar como el historial de notificaciones).

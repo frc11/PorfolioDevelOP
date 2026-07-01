@@ -11,6 +11,7 @@ import { unstable_noStore as noStore, unstable_cache } from 'next/cache'
 import { countHotNewLeadsForOrg } from '@/modules/chatbot/index.server'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
+import { getAnnouncementsForOrg } from '@/lib/announcements/get-announcements-for-org'
 
 export const dynamic = 'force-dynamic'
 
@@ -90,18 +91,26 @@ export default async function DashboardLayout({
     redirect(session?.user?.role === 'SUPER_ADMIN' ? '/admin/clients' : '/login')
   }
 
-  const [client, unreadMessages, hotLeadsCount, notifications, activeModulesData, plan] = await Promise.all([
-    getCachedOrgMeta(organizationId),
-    getCachedUnreadMessages(organizationId),
-    getCachedHotLeadsCount(organizationId),
-    prisma.notification.findMany({
-      where: { organizationId },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-    }),
-    getCachedActiveModules(organizationId),
-    getPlanForOrg(organizationId),
-  ])
+  const userId = session?.user?.id ?? null
+
+  const [client, unreadMessages, hotLeadsCount, notifications, activeModulesData, plan, announcements] =
+    await Promise.all([
+      getCachedOrgMeta(organizationId),
+      getCachedUnreadMessages(organizationId),
+      getCachedHotLeadsCount(organizationId),
+      prisma.notification.findMany({
+        where: { organizationId },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      }),
+      getCachedActiveModules(organizationId),
+      getPlanForOrg(organizationId),
+      // P5.3 — Feed de novedades: fetch SEPARADO (no se cuelga del take:5 de arriba).
+      // Depende del userId (visto/no visto por usuario) → sin cache por org.
+      userId
+        ? getAnnouncementsForOrg(organizationId, userId)
+        : Promise.resolve({ items: [], unreadCount: 0 }),
+    ])
 
   const activeModuleSlugs = activeModulesData.map((m) => m.module.slug)
 
@@ -126,6 +135,8 @@ export default async function DashboardLayout({
       hotLeadsCount={visibleHotLeadsCount}
       activeModuleSlugs={activeModuleSlugs}
       notifications={notifications}
+      announcements={announcements.items}
+      announcementsUnread={announcements.unreadCount}
       userDisplayName={
         preview
           ? `${session?.user?.name ?? session?.user?.email ?? 'Admin'} · soporte`

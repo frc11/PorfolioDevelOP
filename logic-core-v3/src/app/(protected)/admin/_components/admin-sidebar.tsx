@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LifeBuoy,
   type LucideIcon,
+  Megaphone,
   MessageCircle,
   Settings,
   History,
@@ -76,6 +77,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin/clients', label: 'Clientes', icon: Building2 },
       { href: '/admin/tickets', label: 'Tickets', icon: LifeBuoy },
       { href: '/admin/messages', label: 'Mensajes', icon: MessageCircle },
+      { href: '/admin/announcements', label: 'Novedades', icon: Megaphone },
     ],
   },
   {
