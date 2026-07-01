@@ -16,6 +16,7 @@ import {
   CalendarDays,
   Bot,
   Gauge,
+  Gift,
   type LucideIcon,
 } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -62,6 +63,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Cuenta',
     items: [
       { href: '/dashboard/plan', label: 'Mi plan', icon: Gauge },
+      { href: '/dashboard/referidos', label: 'Recomendá y ganá', icon: Gift },
       { href: '/dashboard/cuenta', label: 'Mi cuenta', icon: Settings },
     ],
   },

@@ -9,6 +9,7 @@ import {
   Flame,
   FolderKanban,
   LayoutDashboard,
+  Gift,
   LifeBuoy,
   type LucideIcon,
   Megaphone,
@@ -78,6 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin/tickets', label: 'Tickets', icon: LifeBuoy },
       { href: '/admin/messages', label: 'Mensajes', icon: MessageCircle },
       { href: '/admin/announcements', label: 'Novedades', icon: Megaphone },
+      { href: '/admin/referrals', label: 'Referidos', icon: Gift },
     ],
   },
   {

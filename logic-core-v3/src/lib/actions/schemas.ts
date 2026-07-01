@@ -54,6 +54,8 @@ export const ContactFormSchema = z.object({
   company: z.string().trim().optional().nullable(),
   service: z.string().trim().optional().nullable(),
   message: z.string().trim().min(10, 'El mensaje debe tener al menos 10 caracteres.'),
+  // P5.5 — código de referido que trajo a este negocio (viene del link /contact?ref=...).
+  referralCode: z.string().trim().max(64, 'Código inválido.').optional().nullable(),
 })
 
 export const TaskApprovalSchema = z.object({

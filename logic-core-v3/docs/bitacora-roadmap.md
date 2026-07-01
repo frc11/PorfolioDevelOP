@@ -11771,3 +11771,72 @@ La visibilidad es un predicado PURO (`isAnnouncementVisibleTo`): ALL → todos; 
 
 - Verificación visual y de tono: la hace el humano (no autoconfirmada). El subagente `visual-qa` volvió a quedar **bloqueado por tooling** (sin `preview_*`); receta manual: `npm run start:qa` (:3001) o `dev`, `POST /api/qa/login` con persona cliente para `/dashboard` y super-admin para `/admin/announcements`.
 - Sin "marcar por item" ni historial paginado de novedades (el tope de 20 en el feed alcanza hoy; si crecen, paginar como el historial de notificaciones).
+
+---
+
+## ✅ P5.5 — Sistema de referidos (recomendá develOP → un mes bonificado)   ·   2026-07-01
+
+**Objetivo:** el cliente genera/copia su código o link de referido, el sistema trackea cuando un negocio entra con ese código, y avisa a develOP para que confirme la conversión y aplique el beneficio. **Beneficio (definido por Franco): 1 mes bonificado al referente; conversión = el referido contrata un plan pago, la confirma develOP.** Cero migraciones (schema `ReferralCode`/`Referral` ya aplicado).
+
+### Dónde vive
+
+```
+src/lib/referrals/code.ts            PURO: normalize + generateCandidate + buildReferralLink
+src/lib/referrals/attribution.ts      PURO: decideReferralAttribution (núcleo anti-abuso)
+src/lib/referrals/referrals.service.ts data: get-or-create código, listar (org-scoped), atribuir + avisar
+src/lib/referrals/referrals.invariant.ts test: generación, atribución, anti-abuso
+src/lib/actions/referrals.ts          'use server': generar mi código (session-scoped)
+src/components/dashboard/ReferralPanel.tsx  UI cliente (código + link + copiar + generar)
+src/app/(protected)/dashboard/referidos/**  página cliente + estado de referidos
+src/app/(protected)/admin/referrals/**       admin: lista + marcar convertido/bonificado
+```
+Editados: `lib/actions/schemas.ts` (+`referralCode` en ContactFormSchema), `lib/actions/contact.ts` (atribución tras el alta), `app/contact/page.tsx` (captura `?ref` en input oculto), `SidebarNav.tsx` + `admin-sidebar.tsx` (links).
+
+### 1) Generación (cliente, org-scoped)
+
+`getOrCreateReferralCodeForOrg(orgId)` — 1:1 por org (`ReferralCode.organizationId @unique`), idempotente, con reintento ante colisión de `code`. El código es prefijo legible (≤6 del nombre/slug) + sufijo aleatorio (`randomBytes`). El orgId sale de la **sesión** (`generateMyReferralCodeAction`), nunca de un param. El link es `/contact?ref=CODE`.
+
+### 2) Tracking + aviso a develOP
+
+El link lleva al form público `/contact`, que ahora captura `?ref` en un input oculto (sin `useSearchParams` → sin Suspense boundary). `contactFormAction` persiste `ContactSubmission.referralCode` y llama a `attributeReferralFromContact` (resiliente: nunca tumba el alta del contacto). Éste resuelve código→org, reúne hechos y delega en `decideReferralAttribution`; si atribuye, crea el `Referral` (PENDING) y **avisa a develOP** (`sendAgencyAlert` LEAD_EXTERNAL + Notification al SUPER_ADMIN con link a `/admin/referrals`).
+
+### 3) Guardas anti-abuso (documentadas, testeadas)
+
+`decideReferralAttribution` (pura) rechaza con razón explícita:
+- **`unknown_code`** — el código no existe (bloquea códigos inventados).
+- **`self_referral`** — el email referido es de un miembro de la propia org que refiere (auto-referido), case-insensitive.
+- **`existing_customer`** — el email ya es un usuario/cliente existente (no es un negocio nuevo traído).
+- **`duplicate`** — esa org ya refirió a ese email (no inflar con reenvíos).
+
+### 4) Recompensa (registrada, la confirma develOP)
+
+El beneficio **no se auto-aplica** (es movimiento de facturación). `/admin/referrals` lista los referidos; develOP marca **PENDING → CONVERTED** (contrató plan) y **CONVERTED → REWARDED** (mes acreditado, set `rewardedAt`). Transiciones atómicas con `updateMany({ where: { status } })` (sin read-then-write). El cliente ve el estado en `/dashboard/referidos`.
+
+### Tests / verificación
+
+- `npm run check:invariant:referrals` → ✅ (generación determinista + link; atribución de referido externo; anti-abuso: auto-referido/código falso/cliente existente/duplicado rechazados).
+- `tsc --noEmit` → sin errores nuevos (baseline `searchconsole.ts:119`).
+- `npm run build` → OK (`/dashboard/referidos` + `/admin/referrals` compilados; heap subido a 6 GB por el OOM transitorio ya visto en P5.3).
+
+### Decisiones (no especificadas / confirmadas por Franco)
+
+- **Beneficio + conversión** confirmados con Franco vía pregunta (el placeholder del prompt vino sin completar): 1 mes al referente; conversión = plan pago confirmado por develOP.
+- **`ContactSubmission.referralCode` es string suelto** (no FK): un código con typo no rompe el alta; el match se hace al atribuir.
+- **"Cliente existente" = el email ya es un `User`** en el sistema → no cuenta como referido nuevo.
+
+### Pendiente / fuera de scope
+
+- Verificación visual y de tono: la hace el humano (no autoconfirmada). `visual-qa` sigue **bloqueado por tooling** (sin `preview_*`); receta: `npm run start:qa`, `/api/qa/login` (persona cliente → `/dashboard/referidos`; super-admin → `/admin/referrals`), y `/contact?ref=CODE`.
+- Sin notificación al cliente al convertir/bonificar (lo ve en su panel). Sin auto-aplicación del mes (deliberado: lo hace develOP en facturación).
+
+---
+
+## 🏁 Cierre del BLOQUE P5 — Motor comercial
+
+Bloque P5 completo. Recorrido:
+- **P5.1** — Motor de recomendaciones por reglas ("Ideas para crecer") en el home.
+- **P5.2** — Vitrina de servicios en 3 estados + demanda medida (tab admin) + dedup del upsell.
+- **P5.3a / P5.3** — Schema + feed de novedades del panel (broadcast) + publisher admin.
+- **P5.4a / P5.5** — Schema + sistema de referidos (código/link, tracking, anti-abuso, admin de conversión).
+
+Patrón transversal del bloque: lógica pura testeable por invariante (cero DB) + capa de datos org-scoped + superficie admin, reusando el flujo de upsell/alertas existente. Dos migraciones (P5.3a, P5.4a) quedaron **editadas en schema pero aplicadas a mano por el humano** (protocolo de branch compartida). Verificación visual/tono de todo el bloque: pendiente del humano (el `visual-qa` de este entorno no tuvo preview tools).
