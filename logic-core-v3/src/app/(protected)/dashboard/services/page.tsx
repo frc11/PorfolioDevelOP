@@ -9,6 +9,7 @@ import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWra
 import { PageHeader } from '@/components/ui'
 import { EmptyStateMuted, emptyMutedCtaCls } from '@/components/ui/EmptyStateMuted'
 import { adminHoverCls } from '@/lib/hover'
+import { buildShowroom } from '@/lib/modules/showroom'
 import { prisma } from '@/lib/prisma'
 import { resolveOrgId } from '@/lib/preview'
 
@@ -168,7 +169,7 @@ export default async function ServicesPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
-  const [services, catalogModules] = await Promise.all([
+  const [services, catalogModules, orgModules] = await Promise.all([
     prisma.service.findMany({
       where: { organizationId },
       orderBy: { startDate: 'asc' },
@@ -179,11 +180,20 @@ export default async function ServicesPage() {
       },
       orderBy: { sortOrder: 'asc' },
     }),
+    // Join P5.2: los módulos de ESTA org (moduleId → estado) para distinguir en la
+    // vitrina "ya lo tenés" de "disponible para contratar". Org-scoped por el where.
+    prisma.organizationModule.findMany({
+      where: { organizationId },
+      select: { moduleId: true, status: true },
+    }),
   ])
 
   const activeCount = services.filter((service) => service.status === 'ACTIVE').length
-  const activeModules = catalogModules.filter((moduleData) => moduleData.status === 'ACTIVE')
-  const comingSoonModules = catalogModules.filter((moduleData) => moduleData.status === 'COMING_SOON')
+
+  // Tres estados por módulo (owned / available / coming_soon) a partir del cruce
+  // catálogo × tenencia de la org. Lógica pura y testeada (module-showroom).
+  const orgStatusByModuleId = new Map(orgModules.map((orgModule) => [orgModule.moduleId, orgModule.status]))
+  const { owned, available, comingSoon } = buildShowroom(catalogModules, orgStatusByModuleId)
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -243,6 +253,35 @@ export default async function ServicesPage() {
         </FadeIn>
       )}
 
+      {/* P5.2 — "Tus módulos": lo que la org ya tiene ACTIVO/PAUSADO. Se muestra como
+          tenencia (no se ofrece contratar de nuevo). Solo aparece si hay alguno. */}
+      {owned.length > 0 && (
+        <FadeIn delay={0.09}>
+          <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
+              Tus módulos
+            </p>
+            <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {owned.map((moduleData) => (
+                <StaggerItem key={moduleData.slug}>
+                  <PremiumModuleCard
+                    slug={moduleData.slug}
+                    name={moduleData.name}
+                    shortDescription={moduleData.shortDescription}
+                    tier={moduleData.tier}
+                    priceMonthlyUsd={moduleData.priceMonthlyUsd}
+                    iconName={moduleData.iconName}
+                    accentColor={moduleData.accentColor}
+                    showroomState="owned"
+                    orgModuleStatus={orgStatusByModuleId.get(moduleData.id) ?? null}
+                  />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          </section>
+        </FadeIn>
+      )}
+
       <FadeIn delay={0.12}>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2.5">
@@ -265,14 +304,14 @@ export default async function ServicesPage() {
         </div>
       </FadeIn>
 
-      {activeModules.length > 0 && (
+      {available.length > 0 && (
         <FadeIn delay={0.18}>
           <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
               Disponibles
             </p>
             <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activeModules.map((moduleData) => (
+              {available.map((moduleData) => (
                 <StaggerItem key={moduleData.slug}>
                   <PremiumModuleCard
                     slug={moduleData.slug}
@@ -282,7 +321,7 @@ export default async function ServicesPage() {
                     priceMonthlyUsd={moduleData.priceMonthlyUsd}
                     iconName={moduleData.iconName}
                     accentColor={moduleData.accentColor}
-                    status={moduleData.status}
+                    showroomState="available"
                   />
                 </StaggerItem>
               ))}
@@ -291,14 +330,14 @@ export default async function ServicesPage() {
         </FadeIn>
       )}
 
-      {comingSoonModules.length > 0 && (
+      {comingSoon.length > 0 && (
         <FadeIn delay={0.24}>
           <section className="rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-400">
               Próximamente
             </p>
             <StaggerContainer className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {comingSoonModules.map((moduleData) => (
+              {comingSoon.map((moduleData) => (
                 <StaggerItem key={moduleData.slug}>
                   <PremiumModuleCard
                     slug={moduleData.slug}
@@ -308,7 +347,7 @@ export default async function ServicesPage() {
                     priceMonthlyUsd={moduleData.priceMonthlyUsd}
                     iconName={moduleData.iconName}
                     accentColor={moduleData.accentColor}
-                    status={moduleData.status}
+                    showroomState="coming_soon"
                   />
                 </StaggerItem>
               ))}

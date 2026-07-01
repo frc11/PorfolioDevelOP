@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import type { ReactNode } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   AlertCircle,
+  Bell,
   Bot,
   Calendar,
   CheckCircle2,
@@ -20,11 +22,12 @@ import {
   Unlock,
   Users,
 } from 'lucide-react'
-import type { PremiumModuleStatus, PremiumModuleTier } from '@prisma/client'
+import type { OrganizationModuleStatus, PremiumModuleTier } from '@prisma/client'
 import type { LucideIcon } from 'lucide-react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 import { adminHoverCls } from '@/lib/hover'
 import { useTransitionContext } from '@/context/TransitionContext'
+import type { ShowroomState } from '@/lib/modules/showroom'
 import { ServiceDetailModal } from './ServiceDetailModal'
 
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -82,10 +85,87 @@ export interface PremiumModuleCardProps {
   priceMonthlyUsd: number
   iconName: string
   accentColor: string
-  status: PremiumModuleStatus
+  /** Estado de este módulo PARA esta org (join catálogo × OrganizationModule). */
+  showroomState: ShowroomState
+  /** Estado del módulo en la org, sólo relevante cuando `showroomState === 'owned'`
+   *  (distingue Activo de Pausado en el pill). */
+  orgModuleStatus?: OrganizationModuleStatus | null
 }
 
 type ReqStatus = 'idle' | 'success' | 'error'
+
+/**
+ * Botón de solicitud animado (idle → loading → success). Compartido por el CTA de
+ * "Desbloquear" (available) y el de "Avisame cuando esté" (coming_soon): mismo
+ * comportamiento visual, distinto copy — sin duplicar el bloque de AnimatePresence.
+ */
+function RequestButton({
+  isPending,
+  isSuccess,
+  onClick,
+  idleIcon,
+  idleLabel,
+  loadingLabel,
+  successLabel,
+}: {
+  isPending: boolean
+  isSuccess: boolean
+  onClick: () => void
+  idleIcon: ReactNode
+  idleLabel: string
+  loadingLabel: string
+  successLabel: string
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      disabled={isPending || isSuccess}
+      whileTap={!isPending && !isSuccess ? { scale: 0.97 } : undefined}
+      className={[
+        'flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition-all duration-300',
+        isSuccess
+          ? 'cursor-default border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
+          : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50',
+      ].join(' ')}
+    >
+      <AnimatePresence mode="wait">
+        {isPending ? (
+          <motion.span
+            key="loading"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="flex items-center gap-2"
+          >
+            <Loader2 size={11} className="animate-spin" />
+            {loadingLabel}
+          </motion.span>
+        ) : isSuccess ? (
+          <motion.span
+            key="success"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2"
+          >
+            <CheckCircle2 size={11} />
+            {successLabel}
+          </motion.span>
+        ) : (
+          <motion.span
+            key="idle"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="flex items-center gap-2"
+          >
+            {idleIcon}
+            {idleLabel}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  )
+}
 
 export function PremiumModuleCard({
   slug,
@@ -95,7 +175,8 @@ export function PremiumModuleCard({
   priceMonthlyUsd,
   iconName,
   accentColor,
-  status,
+  showroomState,
+  orgModuleStatus,
 }: PremiumModuleCardProps) {
   const [reqStatus, setReqStatus] = useState<ReqStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -104,12 +185,17 @@ export function PremiumModuleCard({
   const { triggerTransition } = useTransitionContext()
 
   const Icon = ICON_MAP[iconName] ?? Bot
-  const isComingSoon = status === 'COMING_SOON'
+  const isOwned = showroomState === 'owned'
+  const isComingSoon = showroomState === 'coming_soon'
   const isSuccess = reqStatus === 'success'
   const longDescription = PRESET_MODULE_DETAILS[slug] ?? GENERIC_MODULE_DETAIL
 
-  const handleUnlock = () => {
-    if (isPending || isSuccess || isComingSoon) return
+  // Un solo flujo de solicitud, reusa `requestUpsellAction` (upsell.ts) — no reinventa
+  // el upsell. `available` navega al chat post-solicitud; `coming_soon` solo registra
+  // interés (demanda medida) y se queda con la confirmación inline: no se puede
+  // "contratar" algo que no existe todavía, así que no manda a hablar de contratación.
+  const submitInterest = (navigateAfter: boolean) => {
+    if (isPending || isSuccess) return
 
     setErrorMsg(null)
     startTransition(async () => {
@@ -117,8 +203,10 @@ export function PremiumModuleCard({
 
       if (result.success) {
         setReqStatus('success')
-        const params = new URLSearchParams({ context: 'modulo', moduleName: name })
-        triggerTransition(`/dashboard/messages?${params.toString()}`)
+        if (navigateAfter) {
+          const params = new URLSearchParams({ context: 'modulo', moduleName: name })
+          triggerTransition(`/dashboard/messages?${params.toString()}`)
+        }
         return
       }
 
@@ -131,14 +219,23 @@ export function PremiumModuleCard({
     })
   }
 
+  const ownedPill =
+    orgModuleStatus === 'PAUSED'
+      ? { label: 'Pausado', cls: 'border-amber-400/25 bg-amber-500/10 text-amber-300', dot: 'bg-amber-400', ping: false }
+      : { label: 'Activo', cls: 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400', dot: 'bg-emerald-400', ping: true }
+
   return (
     <div
       className={[
         'relative flex h-full min-h-[260px] flex-col gap-4 overflow-hidden rounded-[24px] border p-5 backdrop-blur-xl',
-        isSuccess
+        isOwned || (isSuccess && !isComingSoon)
           ? 'border-emerald-500/25 bg-emerald-500/[0.03]'
           : isComingSoon
-            ? 'border-white/10 bg-black/20 opacity-90'
+            ? // coming_soon: al registrar interés se queda en su lenguaje ámbar (coherente
+              // con el badge "Próximamente" y el botón "Te avisamos"), sin el dim de "no disponible".
+              isSuccess
+              ? 'border-amber-400/25 bg-amber-500/[0.05]'
+              : 'border-white/10 bg-black/20 opacity-90'
             : `border-white/10 bg-black/20 ${adminHoverCls}`,
       ].join(' ')}
     >
@@ -168,25 +265,42 @@ export function PremiumModuleCard({
           </div>
         </div>
 
-        <span
-          className={[
-            'flex w-fit flex-shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.16em]',
-            isComingSoon
-              ? 'border-amber-400/20 bg-amber-500/10 text-amber-200'
-              : 'border-white/10 bg-white/5 text-zinc-300',
-          ].join(' ')}
-        >
-          {isComingSoon ? null : <Lock size={9} />}
-          {isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}
-        </span>
+        {isOwned ? (
+          <span
+            className={[
+              'flex w-fit flex-shrink-0 items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.16em]',
+              ownedPill.cls,
+            ].join(' ')}
+          >
+            <span className="relative flex h-1.5 w-1.5">
+              {ownedPill.ping && (
+                <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${ownedPill.dot}`} />
+              )}
+              <span className={`relative inline-flex h-1.5 w-1.5 rounded-full ${ownedPill.dot}`} />
+            </span>
+            {ownedPill.label}
+          </span>
+        ) : (
+          <span
+            className={[
+              'flex w-fit flex-shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] uppercase tracking-[0.16em]',
+              isComingSoon
+                ? 'border-amber-400/20 bg-amber-500/10 text-amber-200'
+                : 'border-white/10 bg-white/5 text-zinc-300',
+            ].join(' ')}
+          >
+            {isComingSoon ? null : <Lock size={9} />}
+            {isComingSoon ? 'Próximamente Q3 2026' : 'Premium'}
+          </span>
+        )}
       </div>
 
       <p className="relative z-10 text-sm leading-6 text-zinc-400">{shortDescription}</p>
 
-      {isComingSoon ? (
+      {isOwned ? (
         <div className="relative z-10 mt-auto flex flex-col gap-2.5">
-          <div className="rounded-xl border border-amber-500/15 bg-amber-500/[0.05] px-3.5 py-3 text-xs font-medium text-amber-200">
-            Estamos preparando este módulo para el catálogo comercial.
+          <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/[0.05] px-3.5 py-3 text-xs font-medium text-emerald-200/90">
+            Ya lo tenés {orgModuleStatus === 'PAUSED' ? 'contratado (pausado)' : 'activo'} en tu cuenta.
           </div>
           <button
             type="button"
@@ -196,6 +310,43 @@ export function PremiumModuleCard({
             <Info size={11} strokeWidth={1.5} />
             Ver detalles
           </button>
+        </div>
+      ) : isComingSoon ? (
+        <div className="relative z-10 mt-auto flex flex-col gap-2.5">
+          <div className="rounded-xl border border-amber-500/15 bg-amber-500/[0.05] px-3.5 py-3 text-xs font-medium text-amber-200">
+            Todavía no está disponible para contratar. Dejanos tu interés y te avisamos apenas lo lancemos.
+          </div>
+
+          {reqStatus === 'error' && errorMsg && (
+            <p className="flex items-center gap-1.5 text-[11px] font-medium text-red-400">
+              <AlertCircle size={11} />
+              {errorMsg}
+            </p>
+          )}
+
+          {/* Ver detalles (compacto) + CTA de demanda. El CTA registra interés vía el
+              mismo flujo de upsell — NO promete fecha ni cobra: es "avisame". */}
+          <div className="flex items-stretch gap-2.5">
+            <button
+              type="button"
+              onClick={() => setDetailOpen(true)}
+              aria-label={`Ver detalles de ${name}`}
+              title="Ver detalles"
+              className="flex w-11 flex-shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-400 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+            >
+              <Info size={15} strokeWidth={1.5} />
+            </button>
+
+            <RequestButton
+              isPending={isPending}
+              isSuccess={isSuccess}
+              onClick={() => submitInterest(false)}
+              idleIcon={<Bell size={11} />}
+              idleLabel="Avisame cuando esté"
+              loadingLabel="Registrando interés..."
+              successLabel="Te avisamos"
+            />
+          </div>
         </div>
       ) : (
         <>
@@ -242,53 +393,15 @@ export function PremiumModuleCard({
               <Info size={15} strokeWidth={1.5} />
             </button>
 
-            <motion.button
-              onClick={handleUnlock}
-              disabled={isPending || isSuccess}
-              whileTap={!isPending && !isSuccess ? { scale: 0.97 } : undefined}
-              className={[
-                'flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] transition-all duration-300',
-                isSuccess
-                  ? 'cursor-default border-emerald-500/25 bg-emerald-500/10 text-emerald-400'
-                  : 'border-white/[0.08] bg-white/[0.03] text-zinc-300 hover:border-white/15 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-50',
-              ].join(' ')}
-            >
-              <AnimatePresence mode="wait">
-                {isPending ? (
-                  <motion.span
-                    key="loading"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="flex items-center gap-2"
-                  >
-                    <Loader2 size={11} className="animate-spin" />
-                    Enviando solicitud...
-                  </motion.span>
-                ) : isSuccess ? (
-                  <motion.span
-                    key="success"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-2"
-                  >
-                    <CheckCircle2 size={11} />
-                    Solicitud enviada
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="idle"
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    className="flex items-center gap-2"
-                  >
-                    <Unlock size={11} />
-                    Desbloquear Módulo
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
+            <RequestButton
+              isPending={isPending}
+              isSuccess={isSuccess}
+              onClick={() => submitInterest(true)}
+              idleIcon={<Unlock size={11} />}
+              idleLabel="Desbloquear Módulo"
+              loadingLabel="Enviando solicitud..."
+              successLabel="Solicitud enviada"
+            />
           </div>
         </>
       )}
@@ -304,6 +417,7 @@ export function PremiumModuleCard({
         priceMonthlyUsd={priceMonthlyUsd}
         tierLabel={TIER_LABELS[tier]}
         isComingSoon={isComingSoon}
+        isOwned={isOwned}
       />
     </div>
   )

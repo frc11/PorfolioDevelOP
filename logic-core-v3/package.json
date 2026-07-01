@@ -36,6 +36,8 @@
     "check:invariant:home-metrics": "npx tsx src/lib/dashboard/home-metrics-logic.invariant.ts",
     "check:invariant:lead-detail": "npx tsx src/modules/chatbot/lead-detail-presentation.invariant.ts",
     "check:invariant:recommendations": "npx tsx src/lib/recommendations/recommendations.invariant.ts",
+    "check:invariant:modules": "npx tsx src/lib/modules/modules.invariant.ts",
+    "check:invariant:upsell-dedup": "npx tsx src/lib/upsell/dedup.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

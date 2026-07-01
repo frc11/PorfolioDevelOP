@@ -11648,3 +11648,75 @@ El CTA llama a `requestUpsellAction(featureKey, featureName)` (ya org-scoped por
 
 - Señal CARA "fuera de horario" (`EXTRACT(HOUR)` sobre `capturedAt`) diferida a v2 — no implementada.
 - Verificación visual y de tono: la hace el humano (no autoconfirmada).
+
+---
+
+## ✅ P5.2 — Vitrina de servicios + demanda medida   ·   2026-06-30
+
+**Objetivo:** convertir `/dashboard/services` de lista a vitrina con "demanda medida": los módulos futuros (COMING_SOON) llevan un CTA "avisame cuando esté" que registra interés **antes** de construir. El panel se vuelve instrumento de validación. Cero migraciones, cero `any`.
+
+### Dónde vive
+
+```
+src/lib/modules/showroom.ts          classifyModuleState + buildShowroom (3 estados, PURO, anti-IDOR estructural)
+src/lib/modules/demand.ts            rankModuleDemand + serializeModuleDemand (ranking admin, PURO)
+src/lib/modules/modules.invariant.ts   test: 3 estados org-scoped, demanda≠tenencia, ranking determinista
+src/lib/upsell/dedup.ts              shouldCreateUpsellSubmission + UPSELL_DEDUP_WINDOW_MS (PURO)
+src/lib/upsell/dedup.invariant.ts    test: rage-click no duplica, interés renovado sí
+```
+Editados: `src/lib/actions/upsell.ts` (gate del ContactSubmission), `src/components/dashboard/PremiumModuleCard.tsx` (3 estados + CTA), `src/app/(protected)/dashboard/services/page.tsx` (join), `src/app/(protected)/admin/leads/{page.tsx,_actions/module-demand.actions.ts,_components/module-demand-table.tsx}`.
+
+### 1) Join + tres estados
+
+`services/page.tsx` ahora trae también `organizationModule.findMany({ where: { organizationId } })` (org-scoped) y cruza catálogo × tenencia con `buildShowroom`. Cada módulo cae en un estado:
+
+| Estado | Condición | En la vitrina |
+|---|---|---|
+| `owned` | OrganizationModule `ACTIVE` o `PAUSED` | Sección **"Tus módulos"**, pill Activo/Pausado, sin precio ni CTA de contratar (honestidad: no se ofrece lo que ya tiene) |
+| `available` | catálogo `ACTIVE` y la org no lo tiene | Sección **"Disponibles"**, precio + "Desbloquear" (flujo intacto) |
+| `coming_soon` | catálogo `COMING_SOON` | Sección **"Próximamente"**, CTA de demanda (ver abajo) |
+
+🔴 **Demanda ≠ tenencia:** un `OrganizationModule` **INACTIVE** (lo que crea una solicitud de upsell) **no** cuenta como `owned` → sigue siendo available/coming_soon. Registrar interés nunca marca el módulo como contratado. Testeado.
+
+### 2) "Avisame cuando esté" (demanda medida)
+
+La card COMING_SOON gana un CTA (`Bell` "Avisame cuando esté") que reusa `requestUpsellAction(slug, name)` — **no** reinventa el upsell. Claramente etiquetado "todavía no está disponible para contratar", sin precio, sin prometer fecha. A diferencia de `available`, **no navega** al chat post-solicitud (no se puede "contratar" lo que no existe): confirma inline con "Te avisamos". El registro cae en `OrganizationModule` (crea la fila INACTIVE + `upsellRequestCount`), que alimenta el ranking admin.
+
+### 3) Dedup del upsell (`upsell.ts`)
+
+Antes, **cada** click creaba un `ContactSubmission` + alerta + notificaciones (5 clicks = 5 leads inbound idénticos). El contador `OrganizationModule.upsellRequestCount` ya deduplica por fila vía el `@@unique([organizationId, moduleId])` y **no se toca** — el agujero era solo el lado ContactSubmission/notificación. Ahora ese bloque se gatea con `shouldCreateUpsellSubmission(lastSubmission.createdAt, now)` (pura, ventana 24h): dentro de la ventana el click es idempotente (no spamea, pero igual devuelve success). Dedup por `(email de la sesión, featureKey)` → auto-scopeado al propio cliente, sin IDOR.
+
+### 4) Contraparte admin — tab "Demanda"
+
+Nuevo tab en `/admin/leads?tab=demand` (los upsells ya no quedan solo mezclados en inbound). `listModuleDemand()` (server action, `requireSuperAdmin`) agrega los `OrganizationModule` con `upsellRequestCount > 0`; `rankModuleDemand` los ordena por **orgs distintas** (señal principal, robusta al rage-click de un cliente), luego solicitudes totales, luego nombre. `ModuleDemandTable` (Server Component, `<details>` nativo, cero JS) lista módulo → cuántos clientes, cuántas solicitudes, última, y expande a **quién** lo pidió. Ranking legible y no efímero: qué construir/ofrecer después.
+
+### Tests / verificación
+
+- `npm run check:invariant:modules` → ✅ (3 estados, demanda≠tenencia, org-scoped no cruza tenant, ranking determinista).
+- `npm run check:invariant:upsell-dedup` → ✅ (primera crea, rage-click no duplica, interés renovado fuera de ventana sí).
+- `tsc --noEmit` → sin errores nuevos (único: baseline `searchconsole.ts:119`).
+- `npm run build` → OK.
+
+### Decisiones (no especificadas en el prompt)
+
+- **PAUSED cuenta como `owned`** (además de ACTIVE): mostrar "Desbloquear" a quien ya tiene el módulo pausado sería la misma quema de confianza que ofrecer lo contratado. El pill distingue Activo/Pausado.
+- **Contador intacto, dedup solo en ContactSubmission** (según el prompt). Para que el ranking no sufra el ruido del contador, la señal **principal** del admin es *orgs distintas*, no *solicitudes totales*.
+- **Ventana de dedup 24h**: cubre rage-click y revisita del día sin silenciar interés renovado días después (que sí vale como lead nuevo).
+- **Admin como tab, no ruta nueva**: mantiene "si tocás /admin, solo esa superficie" y de-mezcla los upsells del inbound en su propio lugar.
+
+### Revisión adversarial (post-implementación)
+
+Panel de reviewers + verificación adversarial sobre las superficies de integración (las funciones puras ya las cubren los invariantes). 5 hallazgos, 4 confirmados (1 falso positivo descartado). Corregidos 3:
+
+- **[FIX] Carrera TOCTOU en el upsert de `OrganizationModule`** (`upsell.ts`): el `findFirst`→`create` (check-then-act, sin transacción) podía reventar con P2002 ante dos clicks concurrentes sobre un módulo aún sin fila — justo el rage-click que el sprint amortigua — perdiendo ese incremento del contador. Reemplazado por `upsert` atómico sobre el unique compuesto `organizationId_moduleId` (en Neon = `INSERT ... ON CONFLICT DO UPDATE`). Misma semántica secuencial, sin la ventana de carrera.
+- **[FIX] Honestidad en el modal de un módulo `owned`**: la card owned oculta el precio, pero el modal compartido lo reintroducía ("Desde $X USD/mes") a quien ya tiene el módulo. Se agregó `isOwned` a `ServiceDetailModal` → muestra "Ya lo tenés activo en tu cuenta" en vez de precio.
+- **[FIX] Coherencia del éxito en `coming_soon`**: al registrar interés, el frame pasaba a verde mientras el badge seguía ámbar "Próximamente". Ahora el éxito de coming_soon se queda en lenguaje ámbar (coherente con el badge y el botón "Te avisamos"), sin el dim de "no disponible".
+- **[FALSO POSITIVO]** Un segundo hallazgo sobre el dedup ("silencia un lead legítimo") se verificó como no reproducible y se descartó.
+
+Re-verificado tras los fixes: invariantes ✅, `tsc` sin errores nuevos, `npm run build` OK.
+
+### Pendiente / fuera de scope
+
+- **[nit, no corregido — decisión de producto]** Un módulo `DEPRECATED` que una org todavía posee (`OrganizationModule` ACTIVE/PAUSED) desaparece de "Tus módulos", porque la query de catálogo filtra `status in (ACTIVE, COMING_SOON)`. Alcanzable solo por edición directa de DB (no hay UI que setee DEPRECATED). Excluir DEPRECATED protege a la vez de mostrarlo como contratable (`classifyModuleState` mapearía un DEPRECATED sin tenencia a `available`). Si se decide honrar "ya lo tenés" para discontinuados, incluir DEPRECATED en la query **y** extender `classifyModuleState` para no ofrecer un DEPRECATED sin tenencia (actualizando el invariante). Flag a Franco.
+- No se removieron los `ContactSubmission` de upsell del listado inbound (siguen siendo contactos legítimos); el tab Demanda es la vista dedicada, no un filtro que los oculte de inbound.
+- Verificación visual y de tono: la hace el humano (no autoconfirmada).

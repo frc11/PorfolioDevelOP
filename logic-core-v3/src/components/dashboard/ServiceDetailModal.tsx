@@ -33,6 +33,9 @@ export interface ServiceDetailModalProps {
   tierLabel: string
   /** Si el módulo aún no está a la venta → footer "Próximamente" en vez de precio. */
   isComingSoon: boolean
+  /** Si la org ya tiene el módulo → no mostrar precio (paridad con la card owned:
+   *  no se ofrece contratar lo que ya es suyo). */
+  isOwned?: boolean
 }
 
 /**
@@ -57,6 +60,7 @@ export function ServiceDetailModal({
   priceMonthlyUsd,
   tierLabel,
   isComingSoon,
+  isOwned = false,
 }: ServiceDetailModalProps) {
   const isClient = useIsClient()
   const reduced = useReducedMotion()
@@ -204,6 +208,10 @@ export function ServiceDetailModal({
                 <p className="text-xs font-medium leading-6 text-amber-200/90">
                   Estamos preparando este módulo para el catálogo comercial. Te avisamos apenas esté
                   disponible para contratar.
+                </p>
+              ) : isOwned ? (
+                <p className="text-xs font-medium leading-6 text-emerald-200/90">
+                  Ya lo tenés activo en tu cuenta.
                 </p>
               ) : (
                 <div>

@@ -10,7 +10,9 @@ import {
   type PipelineStatus,
 } from './_components/lead-pipeline.shared'
 import { OutboundLeadsView } from './_components/outbound-leads-view'
+import { ModuleDemandTable } from './_components/module-demand-table'
 import { listInboundLeads } from './_actions/inbound.actions'
+import { listModuleDemand } from './_actions/module-demand.actions'
 
 // Fix Next 16 + unstable_cache (hallazgo B3): el cache serializa los Date a
 // strings, así que `.toISOString()` explotaba en los hits. La serialización
@@ -57,7 +59,7 @@ const getLeads = unstable_cache(
 
 export const dynamic = 'force-dynamic'
 
-type LeadTab = 'outbound' | 'inbound'
+type LeadTab = 'outbound' | 'inbound' | 'demand'
 
 type LeadRow = Prisma.OsLeadGetPayload<{
   include: {
@@ -107,17 +109,20 @@ export default async function AgencyOsLeadsPage({
   searchParams: Promise<{ tab?: string; period?: string; from?: string; to?: string }>
 }) {
   const { tab, period, from, to } = await searchParams
-  const activeTab: LeadTab = tab === 'inbound' ? 'inbound' : 'outbound'
+  const activeTab: LeadTab =
+    tab === 'inbound' ? 'inbound' : tab === 'demand' ? 'demand' : 'outbound'
 
-  const [leads, inboundResult] = await Promise.all([
+  const [leads, inboundResult, demandResult] = await Promise.all([
     getLeads(),
     activeTab === 'inbound'
       ? listInboundLeads({ period, from, to })
       : Promise.resolve(null),
+    activeTab === 'demand' ? listModuleDemand() : Promise.resolve(null),
   ])
 
   const inboundLeads = inboundResult?.success ? inboundResult.data : []
   const totalInboundLeads = inboundLeads.length
+  const moduleDemand = demandResult?.success ? demandResult.data : []
 
   return (
     <section className="space-y-6">
@@ -132,7 +137,9 @@ export default async function AgencyOsLeadsPage({
           <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-400">
             {activeTab === 'outbound'
               ? 'Seguimiento visual de prospectos, demos y cierres con prioridad operativa sobre cada lead.'
-              : 'Formularios entrantes del portal que pueden convertirse al pipeline comercial interno.'}
+              : activeTab === 'inbound'
+                ? 'Formularios entrantes del portal que pueden convertirse al pipeline comercial interno.'
+                : 'Módulos que los clientes piden desde su panel: qué construir y ofrecer después, rankeado por demanda.'}
           </p>
         </div>
 
@@ -141,6 +148,12 @@ export default async function AgencyOsLeadsPage({
             <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
               <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Leads inbound</p>
               <p className="mt-1 text-xl font-semibold text-white">{totalInboundLeads}</p>
+            </div>
+          ) : null}
+          {activeTab === 'demand' ? (
+            <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-right">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Módulos pedidos</p>
+              <p className="mt-1 text-xl font-semibold text-white">{moduleDemand.length}</p>
             </div>
           ) : null}
           {activeTab === 'outbound' ? <LeadForm /> : null}
@@ -171,11 +184,30 @@ export default async function AgencyOsLeadsPage({
           >
             Inbound
           </Link>
+          <Link
+            href="/admin/leads?tab=demand"
+            className={[
+              'inline-flex items-center rounded-2xl px-4 py-3 text-sm font-medium transition-colors',
+              activeTab === 'demand'
+                ? 'bg-cyan-500/15 text-cyan-100'
+                : 'text-zinc-400 hover:bg-white/5 hover:text-zinc-200',
+            ].join(' ')}
+          >
+            Demanda
+          </Link>
         </div>
       </div>
 
       {activeTab === 'outbound' ? (
         <OutboundLeadsView leads={leads} />
+      ) : activeTab === 'demand' ? (
+        demandResult?.success ? (
+          <ModuleDemandTable demand={demandResult.data} />
+        ) : (
+          <div className="rounded-[28px] border border-rose-400/20 bg-rose-500/10 p-5 text-sm text-rose-200">
+            {demandResult?.error ?? 'No se pudo cargar la demanda de módulos.'}
+          </div>
+        )
       ) : inboundResult?.success ? (
         <InboundLeadsTable leads={inboundResult.data} />
       ) : (
