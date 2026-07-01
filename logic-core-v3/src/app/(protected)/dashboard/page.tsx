@@ -7,6 +7,7 @@ import { LeadFunnel } from '@/components/dashboard/home/LeadFunnel'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
+import { Recommendations } from '@/components/dashboard/home/Recommendations'
 import { Badge, Card, LoadingState, PageHeader } from '@/components/ui'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getAttentionItems } from '@/lib/dashboard/attention'
@@ -17,6 +18,7 @@ import { getHealthScore } from '@/lib/health-score'
 import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
+import { getRecommendationsForOrg } from '@/lib/recommendations/get-recommendations-for-org'
 import { resolveOrgId } from '@/lib/preview'
 import { prisma } from '@/lib/prisma'
 import { unstable_cache } from 'next/cache'
@@ -67,6 +69,13 @@ export default async function DashboardPage() {
       {/* Resumen ejecutivo IA — valorado, se mantiene visible pero secundario. */}
       <Suspense fallback={<BriefSkeleton />}>
         <BriefServerWrapper organizationId={organizationId} />
+      </Suspense>
+
+      {/* P5.1 — Ideas para crecer: consejo de negocio por reglas (no IA) sobre
+          datos reales de la org, que cierra en un tap contra el upsell existente.
+          Error-safe (como el brief): nunca tumba el home. */}
+      <Suspense fallback={<RecommendationsSkeleton />}>
+        <RecommendationsServerWrapper organizationId={organizationId} />
       </Suspense>
 
       {/* "Tu cuenta" — estado e indicadores de la cuenta, jerarquía menor. Antes
@@ -219,6 +228,35 @@ function BriefEmptyState() {
         </p>
       </div>
     </Card>
+  )
+}
+
+// P5.1 — Motor de recomendaciones por reglas. Error-safe: si la lectura de
+// señales falla, cae a lista vacía (el componente muestra el estado vacío honesto)
+// en vez de romper el home. El JSX se arma FUERA del try (regla react-hooks).
+async function RecommendationsServerWrapper({ organizationId }: { organizationId: string }) {
+  let recommendations: Awaited<ReturnType<typeof getRecommendationsForOrg>> = []
+  try {
+    recommendations = await getRecommendationsForOrg(organizationId)
+  } catch (err) {
+    console.error('[Recommendations] Server wrapper failed:', err)
+    recommendations = []
+  }
+
+  return <Recommendations recommendations={recommendations} />
+}
+
+function RecommendationsSkeleton() {
+  return (
+    <div className="space-y-3">
+      <div className="h-3 w-32 rounded bg-white/[0.05] animate-pulse" />
+      {[0, 1].map((item) => (
+        <div
+          key={item}
+          className="h-24 rounded-2xl border border-white/[0.06] bg-white/[0.015] animate-pulse"
+        />
+      ))}
+    </div>
   )
 }
 

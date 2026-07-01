@@ -11589,3 +11589,62 @@ Cierre del bloque EV completo (5 sprints, mayo–junio 2026). Objetivo: hacer qu
 - **Smoke de usados** — bot `sanmiguel` no existe en DB; smoke agencia listo.
 - **n8n update opcional** — el workflow existente sigue funcionando (superset); puede leer `signalsV2` cuando se actualice.
 - **Botón "Exportar CSV" en la UI del dashboard** — la route existe y está lista; la UI visual del botón queda para un sprint futuro de dashboard.
+
+---
+## ✅ P5.1 — Motor de recomendaciones por reglas (Ideas para crecer)   ·   2026-06-30
+
+Capa nueva sobre el home del cliente: un motor de recomendaciones **POR REGLAS (no IA)** que lee **datos reales ya org-scoped** de la org, los presenta como consejo de negocio en lenguaje de dueño (B13 "aire Apple") y cierra en **un tap** contra el upsell existente (`requestUpsellAction`). Cero migraciones, cero cómputo caro, cero `any`.
+
+### Dónde vive el motor
+
+```
+src/lib/recommendations/
+├── types.ts                          # tipos puros del dominio (Signals, Rule, Recommendation, Cta)
+├── rules.ts                          # set declarativo + evaluateRules / selectVisible / computeRecommendations (PURO)
+├── get-recommendations-for-org.ts    # capa de datos: arma las señales org-scoped y llama al motor puro
+└── recommendations.invariant.ts      # invariante ejecutable (npm run check:invariant:recommendations)
+src/components/dashboard/home/Recommendations.tsx   # UI B13 + CTA que dispara requestUpsellAction
+```
+
+Separación estricta: la **lógica de reglas es pura** (sin Prisma ni reloj → testeable y determinista); la **capa de datos** reusa helpers canónicos y no duplica queries; la **UI** solo renderiza recomendaciones ya construidas. Las reglas ven SOLO el objeto `RecommendationSignals` → estructuralmente no pueden cruzar tenant.
+
+### Reglas v1 (solo señales baratas) y umbrales
+
+| Regla | Dispara cuando | Umbral de muestra (🔴) | Cierra en |
+|---|---|---|---|
+| `connect-gbp` | ficha de Google NO conectada | leads 30d ≥ **10** | `requestUpsellAction('conexion-google-business', …)` → messages `context=activacion` |
+| `reviews-engine` | ficha conectada + reseñas < **10** + módulo no activo | leads 30d ≥ **10** | `requestUpsellAction('motor-resenas', …)` → messages `context=modulo` |
+| `hot-leads-crm` | plan sin CRM | leads calientes ≥ **5** | `requestUpsellAction('plan-upgrade-business', …)` |
+| `executive-report` | plan sin reportes | conversaciones ≥ **20** **o** leads 30d ≥ **10** | `requestUpsellAction('plan-upgrade-pro', …)` |
+
+- **Umbrales elegidos:** el piso de leads (10) es el **mismo bar** que `CATEGORY_MIN_SAMPLE` del análisis mensual — consistencia con la sufficiency ya definida en el repo. Reseñas < 10 = reputación sin construir; 5 calientes / 20 conversaciones = actividad que justifica seguimiento / resumen. **Nada dispara por debajo de su umbral** (recomendar sobre 3 leads es consejo trucho).
+- **Honestidad:** cada regla mapea una señal presente → solución pertinente. `connect-gbp` y `reviews-engine` son **mutuamente excluyentes** por `gbpConnected` (conectar la ficha es prerequisito de las reseñas), así que nunca se empuja lo mismo dos veces ni se upsellea un módulo ya activo.
+- **Tope + rotación:** `MAX_VISIBLE_RECOMMENDATIONS = 3`. La #1 por prioridad queda fija (lo más urgente siempre visible) y el resto rota por **semilla semanal AR** (`startOfWeekAR`) para no mostrar siempre lo mismo cuando hay más candidatas que el tope. Como todas las candidatas ya pasaron umbral + condición, cualquier subconjunto mostrado es honesto.
+
+### Señales reutilizadas (cero queries nuevas de peso)
+
+`getMonthlyAnalysisForOrg` (leads 30d + hasBot) · `getOrgUsageSnapshot` (conversaciones del mes + plan efectivo: reportsEnabled/crmEnabled) · `getActiveModuleSlugs` · `countHotNewLeadsForOrg` · un `findUnique` mínimo de `Organization` para `googleReviewsCount` + `gbpConnectedAt`. Todo org-scoped por herencia (cada helper filtra por la org / su botConfig).
+
+### UI
+
+Sección **"Ideas para crecer"** en el home (`dashboard/page.tsx`), con el mismo patrón `<Suspense>` + `ServerWrapper` error-safe del resto de los bloques (nunca tumba el home). Tarjetas B13 sentence case, color con significado (cyan=conectar, ámbar=reseñas, verde=leads calientes, violet=reporte), `FadeIn` (respeta `prefers-reduced-motion`), CTA en un tap. **Si no dispara ninguna → `EmptyStateMuted` honesto**, nunca una recomendación inventada.
+
+### Cierre del upsell (reusa lo existente)
+
+El CTA llama a `requestUpsellAction(featureKey, featureName)` (ya org-scoped por sesión — el cliente no pasa orgId) y navega imperativamente a `/dashboard/messages?context=…` con `window.location.assign` (patrón probado de `UpgradeCtaButton`, inmune a la carrera con el `revalidatePath` de la acción). No se reinventó el upsell: se reusa el flujo que persiste `OrganizationModule.upsellRequestCount` + `ContactSubmission` + avisa al admin.
+
+### Tests / verificación
+
+- `npm run check:invariant:recommendations` → **verde** (umbrales por regla en el borde, pertinencia, mutua exclusión gbp/reseñas, anti-IDOR estructural — resultado independiente del `organizationId` y CTA sin org —, tope + rotación sin inventar/duplicar, empty state).
+- `./node_modules/.bin/tsc.cmd --noEmit` → **sin errores nuevos** (único error preexistente: `searchconsole.ts`, baseline ignorado).
+
+### Decisiones (no especificadas en el prompt)
+
+- Regla extra #4: `hot-leads-crm` (leads calientes ≥5 + plan sin CRM → seguimiento/Business), además de las 3 pedidas.
+- Navegación del CTA por `window.location.assign` en vez de `triggerTransition` (regla de navegación de portales del CLAUDE.md: el Shutter no existe en portales; imperativa post-submit; además inmune al revalidate del action).
+- Empty state se muestra SIEMPRE que no dispare ninguna regla (filosofía B12.7: mejor un vacío honesto que un hueco).
+
+### Pendiente / fuera de scope
+
+- Señal CARA "fuera de horario" (`EXTRACT(HOUR)` sobre `capturedAt`) diferida a v2 — no implementada.
+- Verificación visual y de tono: la hace el humano (no autoconfirmada).
