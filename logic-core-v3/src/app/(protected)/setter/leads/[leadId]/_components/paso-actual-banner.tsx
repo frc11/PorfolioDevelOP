@@ -1,5 +1,5 @@
 import type { DossierStage } from '@prisma/client'
-import { ArrowRight, CheckCircle2, Hourglass, Target, type LucideIcon } from 'lucide-react'
+import { ArrowRight, CheckCircle2, Hourglass, Send, Target, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
@@ -29,8 +29,16 @@ type FocoDescriptor = {
  * que el cartel se apaga a `espera` para no mandar a hacer algo que todavía no se puede.
  * Exhaustivo por stage: un stage nuevo rompe el build hasta describirse acá (mismo
  * candado que `pasoActual`).
+ *
+ * `openerPendiente` (B6.1): en EVALUADA con el gate cerrado y sin primer contacto, el
+ * paso real es MANDAR el opener, no el brief bloqueado — el shell lo calcula y lo pasa
+ * (igual que `gateAbierto`), sin re-derivarlo acá.
  */
-export function describirFoco(stage: DossierStage | null, gateAbierto: boolean): FocoDescriptor {
+export function describirFoco(
+  stage: DossierStage | null,
+  gateAbierto: boolean,
+  openerPendiente: boolean,
+): FocoDescriptor {
   switch (stage) {
     case null:
     case 'FICHA':
@@ -42,6 +50,19 @@ export function describirFoco(stage: DossierStage | null, gateAbierto: boolean):
         detalle: 'Completá los datos del lead para poder evaluarlo.',
       }
     case 'EVALUADA':
+      // Con el gate cerrado y sin primer contacto, la acción REAL es mandar el opener:
+      // el brief de abajo está bloqueado hasta que el lead responda, así que dirigir ahí
+      // (o decir "esperá") saltea lo único accionable. `openerPendiente` lo decide el shell.
+      if (openerPendiente) {
+        return {
+          tono: 'foco',
+          icon: Send,
+          eyebrow: 'Tu paso ahora',
+          titulo: 'Mandá el primer mensaje (opener)',
+          detalle:
+            'Escribí el opener y registralo — el brief se abre cuando el negocio responda.',
+        }
+      }
       // El brief se habilita cuando el lead responde el primer contacto (o si es
       // caliente). Sin gate, el step de abajo está bloqueado → cartel en espera, sin
       // mandar a "generá el brief" todavía.
@@ -163,11 +184,13 @@ const TONO_STYLES: Record<
 export function PasoActualBanner({
   stage,
   gateAbierto,
+  openerPendiente,
 }: {
   stage: DossierStage | null
   gateAbierto: boolean
+  openerPendiente: boolean
 }) {
-  const foco = describirFoco(stage, gateAbierto)
+  const foco = describirFoco(stage, gateAbierto, openerPendiente)
   const styles = TONO_STYLES[foco.tono]
   const Icon = foco.icon
 

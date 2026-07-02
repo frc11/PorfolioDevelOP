@@ -74,7 +74,7 @@ export type WizardData = {
 }
 
 /** Secciones del wizard a las que se puede aterrizar el foco al abrir el lead. */
-type StepAnchorId = 'evaluacion' | 'brief' | 'construccion' | 'seguimiento'
+type StepAnchorId = 'evaluacion' | 'opener' | 'brief' | 'construccion' | 'seguimiento'
 
 /**
  * Qué sección enfocar al abrir, derivado del paso canónico (`pasoActual`) — sin
@@ -89,8 +89,12 @@ type StepAnchorId = 'evaluacion' | 'brief' | 'construccion' | 'seguimiento'
  * Descartado: brief/construcción/seguimiento no se renderizan → el foco útil es
  * el veredicto («evaluacion»).
  */
-function anchorActivo(stage: DossierStage | null): StepAnchorId | null {
+function anchorActivo(stage: DossierStage | null, openerPendiente: boolean): StepAnchorId | null {
   if (stage === 'DESCARTADA') return 'evaluacion'
+  // B6.1: EVALUADA con gate cerrado y sin primer contacto → el paso activo es el opener,
+  // no el Brief (bloqueado hasta que el lead responda). Interceptar acá evita que el
+  // scroll aterrice en un paso que el setter todavía no puede tocar.
+  if (openerPendiente) return 'opener'
   switch (pasoActual(stage)) {
     // DESCARTADA también cae en 2 vía `pasoActual`, pero se intercepta arriba
     // (su «brief» no se renderiza) — acá el 2 es solo EVALUADA.
@@ -134,14 +138,18 @@ export function LeadWizard({ data }: { data: WizardData }) {
       : stage === 'APROBADA'
         ? GUIA_REVISION.aprobada
         : undefined
+  // B6.1: EVALUADA + gate cerrado + sin primer contacto → el paso REAL es mandar el
+  // opener, no el Brief (bloqueado). Reencauza scroll + cartel + marco al opener. Fuera
+  // de ese caso (gate abierto, u opener ya mandado) rige la dirección por stage de siempre.
+  const openerPendiente = stage === 'EVALUADA' && !gateAbierto && outreach.contactos === 0
   // Al abrir, caer en el paso activo (no arriba de todo). El paso lo decide el
   // stepper canónico; acá solo se aterriza el foco (ver `StepAnchor`).
-  const anchor = anchorActivo(stage)
+  const anchor = anchorActivo(stage, openerPendiente)
   // El marco del paso activo comparte tono con el cartel de dirección (misma fuente:
-  // `stage` + el `gateAbierto` que el shell ya calculó). cyan solo si hay trabajo del
-  // setter AHORA; neutral en revisión/descartado o si falta que el lead responda.
+  // `stage` + `gateAbierto` + `openerPendiente`, que el shell ya calculó). cyan solo si
+  // hay trabajo del setter AHORA; neutral en revisión/descartado o si falta que responda.
   const frameTono: 'foco' | 'neutral' =
-    describirFoco(stage, gateAbierto).tono === 'foco' ? 'foco' : 'neutral'
+    describirFoco(stage, gateAbierto, openerPendiente).tono === 'foco' ? 'foco' : 'neutral'
 
   return (
     // `data-lead-wizard`: raíz de ESTA copia del wizard. Los `StepLink` resuelven su
@@ -150,7 +158,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
     <div data-lead-wizard className="space-y-5">
       <DossierStepper stage={stage} />
 
-      <PasoActualBanner stage={stage} gateAbierto={gateAbierto} />
+      <PasoActualBanner stage={stage} gateAbierto={gateAbierto} openerPendiente={openerPendiente} />
 
       {stage === 'RECHAZADA' && ultimoRechazo && (
         <Callout
@@ -210,9 +218,15 @@ export function LeadWizard({ data }: { data: WizardData }) {
           evaluación — el opener sale apenas hay veredicto, y la producción
           (brief → construcción → draft → self-check) se abre recién cuando la
           conversación lo habilita. */}
-      {/* Destino del `StepLink` del gate del brief (esperando el primer contacto). */}
+      {/* Destino del `StepLink` del gate del brief + (B6.1) paso activo cuando el opener
+          está pendiente: ahí aterriza el scroll y se enmarca, en vez del Brief bloqueado. */}
       {!descartado && (
-        <StepAnchor active={false} leadId={lead.id} frameTone="none" anchorId="opener">
+        <StepAnchor
+          active={anchor === 'opener'}
+          leadId={lead.id}
+          frameTone={anchor === 'opener' ? frameTono : 'none'}
+          anchorId="opener"
+        >
           <OpenerStep
             leadId={lead.id}
             lead={lead}

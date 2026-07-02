@@ -6,6 +6,7 @@ import {
   newTracker,
   teardown,
   disconnect,
+  selfCheckAprobadoJson,
   SMOKE_TAG,
   type SmokeTracker,
 } from '../helpers/setter-db'
@@ -18,6 +19,8 @@ import {
   transitionDossier,
   DossierTransitionError,
 } from '../../src/lib/leados/dossier'
+import { parseProgreso, parseSelfCheck, selfCheckAprobado } from '../../src/lib/leados/flow'
+import { FASE_IDS } from '../../src/lib/leados/contracts'
 
 /**
  * COSECHA DE DURABILIDAD (Sprint 5.3) — `scripts/b2-verify-dossier.ts` era un
@@ -213,6 +216,54 @@ test('RECHAZADA exige motivo, appendea al historial y el re-loop preserva la his
   const aprobado = await transitionDossier(leadId, { to: 'APROBADA' })
   expect(aprobado.stage).toBe('APROBADA')
   expect(Array.isArray(aprobado.rechazos) ? aprobado.rechazos.length : 0, 'los 2 rechazos sobreviven hasta APROBADA').toBe(2)
+})
+
+test('B6.2 · el re-loop RECHAZADA→CONSTRUCCION resetea el self-check (GATE) y preserva fases + draft', async () => {
+  // Camino hasta CONSTRUCCION con el gate del brief abierto (RESPONDIO).
+  const leadId = await createBareLead({ status: 'RESPONDIO', caliente: false })
+  await hastaEvaluada(leadId, 3, 'AVANZAR')
+  await transitionDossier(leadId, { to: 'BRIEF' })
+  await transitionDossier(leadId, { to: 'CONSTRUCCION' })
+
+  // Estado de una construcción lista para enviar: draft + self-check aprobado +
+  // checklist de fases con progreso. Sembrado directo (legítimo en setup de test).
+  const marcadas = [FASE_IDS[0], FASE_IDS[2]]
+  await prisma.osLeadDossier.update({
+    where: { leadId },
+    data: {
+      draftUrl: 'https://demo-v1.netlify.app',
+      selfCheckJson: selfCheckAprobadoJson(),
+      progresoJson: { completadas: marcadas },
+    },
+  })
+
+  await transitionDossier(leadId, { to: 'EN_REVISION' })
+  // ANTI-REGRESIÓN: el self-check SOBREVIVE a EN_REVISION — el admin lo lee en la
+  // superficie de revisión. El reset es SOLO del re-loop, no de toda transición.
+  const enRevision = await getOwnedDossier(leadId, setterId)
+  expect(
+    selfCheckAprobado(parseSelfCheck(enRevision?.selfCheckJson)),
+    'el self-check sigue disponible en EN_REVISION (no se limpia fuera del re-loop)',
+  ).toBe(true)
+
+  // Re-loop: rechazo + reabrir.
+  await transitionDossier(leadId, { to: 'RECHAZADA', motivo: 'Hero flojo' })
+  const reabierto = await transitionDossier(leadId, { to: 'CONSTRUCCION' })
+  expect(reabierto.stage, 'reabrió en CONSTRUCCION').toBe('CONSTRUCCION')
+
+  // B6.2 — El self-check se RESETEA: gate cerrado, el setter re-verifica antes de reenviar.
+  expect(parseSelfCheck(reabierto.selfCheckJson), 'selfCheckJson queda vacío tras el re-loop').toBeNull()
+  expect(
+    selfCheckAprobado(parseSelfCheck(reabierto.selfCheckJson)),
+    'el gate del self-check vuelve a cerrado tras el re-loop',
+  ).toBe(false)
+
+  // ...y el resto del progreso se PRESERVA: fases (auto-reporte) + draft (la demo).
+  expect(
+    [...parseProgreso(reabierto.progresoJson).completadas].sort(),
+    'las fases del checklist sobreviven el re-loop',
+  ).toEqual([...marcadas].sort())
+  expect(reabierto.draftUrl, 'el draft se preserva en el re-loop').toBe('https://demo-v1.netlify.app')
 })
 
 test('cascade: borrar el lead borra su dossier', async () => {

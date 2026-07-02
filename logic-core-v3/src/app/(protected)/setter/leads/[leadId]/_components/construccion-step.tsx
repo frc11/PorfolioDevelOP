@@ -290,6 +290,11 @@ export function ConstruccionStep({
           <h2 className="text-base font-semibold text-zinc-100">{GUIA_CONSTRUCCION.titulo}</h2>
           <Badge tone="rose" variant="soft">Correcciones pendientes</Badge>
         </div>
+        {/* B6.1: la nota de Franco, acá donde el auto-scroll aterriza al reabrir el lead
+            (el paso activo es Construcción). Antes solo vivía en el Callout del tope del
+            wizard, a 2+ pantallas del aterrizaje — el setter caía sin verla. Es el MISMO
+            GuiaRetrabajo que ya muestra la rama CONSTRUCCION tras reabrir. */}
+        {ultimoRechazo && <GuiaRetrabajo rechazo={ultimoRechazo} />}
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
           Reabrí la construcción para rehacer lo que Franco marcó (lo tenés arriba). Después volvés
           a publicar el draft y a pasar el self-check antes de reenviar — el historial de rechazos

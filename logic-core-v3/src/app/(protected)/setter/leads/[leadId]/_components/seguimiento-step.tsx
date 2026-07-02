@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { CalendarClock, CheckCircle2, Lock, Rocket, Send } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
-import { Badge, Button, Card, Field, Input } from '@/components/ui'
+import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
 import {
   buildDemoMensajeBlock,
   buildObjecionInputBlock,
@@ -32,7 +32,6 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
 import { StepLink } from './step-nav'
 

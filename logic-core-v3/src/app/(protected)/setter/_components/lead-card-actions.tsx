@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { CalendarClock, Pin, PinOff, Play, StickyNote, X } from 'lucide-react'
-import { Button, Field, Input } from '@/components/ui'
+import { Button, Field, Input, TextArea } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { formatFechaCorta } from '@/lib/leados/flow'
 import {
@@ -14,7 +14,6 @@ import {
   reanudarLead,
 } from '@/app/(protected)/setter/_actions/cartera.actions'
 import { NOTA_MAX } from '@/app/(protected)/setter/_actions/cartera.schemas'
-import { TextArea } from './text-area'
 
 type Panel = 'none' | 'snooze' | 'note'
 

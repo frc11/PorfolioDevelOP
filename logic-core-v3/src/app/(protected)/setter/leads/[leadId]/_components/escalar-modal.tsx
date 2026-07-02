@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { LifeBuoy } from 'lucide-react'
-import { Button, Field, Modal } from '@/components/ui'
+import { Button, Field, Modal, TextArea } from '@/components/ui'
 import { escalarConstruccion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EscalamientoInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
 /**
  * B4 — Capa "si se traba": botón + modal de escalamiento a Franco. La action
@@ -23,6 +23,7 @@ export function EscalarModal({
   leadId: string
   reescalar?: boolean
 }) {
+  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [descripcion, setDescripcion] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +45,11 @@ export function EscalarModal({
       }
       setOpen(false)
       setDescripcion('')
+      // La marca de escalado (`escaladoAt`) vive en las props que baja el server
+      // component; sin refresh el banner "Ya avisaste a Franco" recién aparecía
+      // tras un reload manual (hallazgo 5.5). Refrescamos para reflejar el estado
+      // al instante — la action no revalida el path, el refresh cierra ese hueco.
+      router.refresh()
       if (result.data.enviado) {
         toast.success(
           'Le avisamos a Franco por Telegram y quedó registrado en el panel. Seguí con otro lead mientras te responde.',

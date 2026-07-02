@@ -12,7 +12,7 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 import type { LeadStatus } from '@prisma/client'
-import { Badge, Button, Card, Field, Input } from '@/components/ui'
+import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
 import type { Agenda, Ficha } from '@/lib/leados/contracts'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
 import { formatFechaHora, reunionAgendada } from '@/lib/leados/flow'
@@ -24,7 +24,6 @@ import {
 import { ConfirmarReunionSchema } from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { StepLink } from './step-nav'
 
 type AgendaStepProps = {

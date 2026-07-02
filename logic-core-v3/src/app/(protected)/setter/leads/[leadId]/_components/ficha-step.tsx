@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Eye, Save, Timer } from 'lucide-react'
-import { Button, Card, Field, Select } from '@/components/ui'
+import { Button, Card, Field, Select, TextArea } from '@/components/ui'
 import { FichaSchema, type Ficha } from '@/lib/leados/contracts'
 import { buildFichaCopyBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { campoFichaFlojo } from '@/lib/leados/ficha-calidad'
@@ -17,7 +17,6 @@ import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-st
 import { CampoMejora } from '@/app/(protected)/setter/_components/campo-mejora'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { FichaEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
 type FichaFormState = {
   igManejadoPor: '' | 'DUENO' | 'CM' | 'NO_SABE'

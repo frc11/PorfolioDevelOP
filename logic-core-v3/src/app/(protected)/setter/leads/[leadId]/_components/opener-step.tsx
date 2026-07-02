@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Flame, Lock, MessageCircle, Send } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
-import { Badge, Button, Card, Field } from '@/components/ui'
+import { Badge, Button, Card, Field, TextArea } from '@/components/ui'
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildOpenerInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import {
@@ -21,7 +21,6 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 
 type OpenerStepProps = {

@@ -532,3 +532,148 @@
 - ✅ Diff **surgical/additive**: `schema.prisma` +6, `contracts.ts` +34, `flow-content.ts` +13, `dossier.ts` +34, `package.json` +2 (mías) + migración + invariante nuevos. Nada más tocado; `transitionDossier`/`selfCheckAprobado`/`gateEnvioDemo` intactos.
 
 **Lo que queda (no bloqueante, para Franco):** (a) La suite de flujo **browser 5.5** (`01-flow`, `test:setter`) NO se corrió acá (necesita chromium + prod-QA `start:qa` + el bounce AUTH_URL:3001); E.1 es **cero-UI/aditivo** → no puede afectar el wizard, y el core puro (`flow.invariant`) + el comportamiento del dossier (leados 18/18) están verdes. (b) El **drift PRE-EXISTENTE del lane chatbot** (7 columnas) queda flagueado: es del lane disjunto (dashboard/chatbot), NO de leados; reconciliarlo (con una migración aditiva propia o dropeando columnas) es decisión de Franco, fuera del scope de E.1. (c) **E.2** —la UI de fases-una-a-la-vez que CONSUME `progresoJson` (`saveOwnedProgreso` + explotar el `<ol>` a checklist persistido)— es el próximo paso: E.1 dejó la base verificada contra la columna vertebral.
+
+---
+
+## B1.A — Promover `TextArea` al kit UI (primitiva de formulario en su lugar correcto) · 2026-07-01
+
+**Por qué.** La `TextArea` del wizard ya era una **primitiva consolidada** (18 usos en 9 archivos, 16+ dentro de `<Field>`, cero `<textarea>` crudo suelto) pero vivía en `setter/_components/text-area.tsx`. Su propio comentario lo delataba (*"el kit no trae una"*). El problema era de **UBICACIÓN, no de diseño**: es un primitivo de formulario genérico, hermano de `Input`. Sprint **mecánico/presentacional, riesgo ~0** — mové-de-archivo + barrel + imports. NO toca flujo/estado/contenido(FG)/dual-copy/StepAnchor.
+
+**Qué hace.**
+- **MOVER.** `setter/_components/text-area.tsx` → `components/ui/Textarea.tsx` (junto a `Input`). API EXACTA (mismas props: `invalid?` + `TextareaHTMLAttributes`), símbolo `TextArea` sin cambios. **Server-safe** (función plana, sin `'use client'`/`forwardRef`) — se mantiene como estaba, que es lo que pide "primitivo del kit"; no se agregó `forwardRef` (sería rediseño y forzaría `'use client'`; ningún uso pasa `ref`).
+- **BARREL.** `export { TextArea } from './Textarea'` en `components/ui/index.ts` (alfabético, entre `Tabs` y `Toggle`).
+- **REPUNTE (opción preferida, kit limpio para el handoff).** Los **9 archivos** que importaban de `_components/text-area` ahora importan `TextArea` del **barrel** `@/components/ui`. Los 9 YA importaban del barrel → se **fusionó** `TextArea` en el import existente (alfabético) y se borró la línea suelta. **Cero imports mixtos** (todos del kit, ninguno del shim; no se dejó shim). Archivos: `ficha`/`opener`/`brief`/`evaluacion`/`agenda`/`seguimiento`-step, `escalar-modal`, `lead-card-actions`, `nuevo-prospecto-form`.
+- **ESTILO.** Borde/focus/error ya eran **idénticos** a `Input` (no había qué alinear). El único delta es `placeholder:text-zinc-600` (vs `-500` de `Input`), NO listado en el align y fuera del "sin cambiar el look percibido" → se preservó tal cual. **Cero cambio visual** por construcción (mové de archivo).
+
+**Decisiones / líneas de límite.**
+- **Promoción, no rediseño (línea roja).** Componente byte-idéntico salvo el comentario stale. No `forwardRef`, no `'use client'`, no tocar el placeholder. Los `<Field>` que envuelven las `TextArea` quedan igual.
+- **Barrel sobre shim.** Se eligió repuntar los 9 imports (deja `_components/` sin el primitivo, kit limpio) en vez de dejar un re-export shim. Regla respetada: **no imports mixtos**.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores en los 11 archivos tocados** (Textarea.tsx + index.ts + 9 consumidores). El resto del proyecto: 1 error AMBIENTE pre-existente y ajeno (`src/lib/searchconsole.ts:119`, conflicto de tipos `google-auth-library`/`google-gax`) — verificado presente en HEAD limpio, NO mío.
+- ✅ **Drift Prisma ambiente resuelto en el entorno, no en el schema.** El `tsc` inicial tiró 19 errores del lane chatbot/dashboard (`verticalPack`/`averageTicketUsd`/`firstContactedAt`/`signals`); el schema YA declara esos campos → era **cliente Prisma stale**. `npx prisma generate` (solo `node_modules`, NO toca schema/DB, NO `migrate reset`) los limpió 18/19. Sprint **sin cambios de schema**, como corresponde.
+- ✅ `npm run build` → exit 0, compiló `/setter`, `/setter/leads/[leadId]`, `/setter/nuevo` (`ignoreBuildErrors: true` salta el 1 ambiente).
+- ✅ `npm run test:leados` → **21/21** contra Neon dev.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): incluye B1–B11 del wizard (ficha/opener/brief/agenda/evaluación/seguimiento renderizando la `TextArea` movida) + alta/import del nuevo-prospecto. Cero regresión perceptual.
+- ✅ Diff **surgical**: 1 archivo nuevo (`Textarea.tsx`), 1 borrado (`text-area.tsx`), `index.ts` +1, 9 consumidores +0/−0 neto en líneas (import fusionado − import suelto). `git status` = exactamente el scope.
+
+**Lo que queda (para Franco):** (a) **Drift PRE-EXISTENTE del lane chatbot** (las 7 columnas físicas) sigue flagueado como en E.1 — ajeno a este sprint, decisión de reconciliación de Franco. (b) Pasada **perceptual** opcional: la `TextArea` se ve igual por construcción (byte-idéntica) y los 39 tests de setter la ejercitan, pero si Franco quiere un ojo humano sobre los formularios del wizard, queda anotado (no bloqueante).
+
+---
+
+## B6.1 — La dirección del wizard apunta a la ACCIÓN pendiente, no al paso-por-stage bloqueado · 2026-07-01
+
+**Por qué.** El auto-scroll y el cartel «Tu paso ahora» derivaban el paso activo del `stage` (vía `pasoActual`), pero eso dejaba al setter mirando lo equivocado en dos estados concretos (medido en el proof-e2e):
+- **EVALUADA con gate cerrado** (esperando respuesta): scroll + cartel iban al **Brief bloqueado** y **salteaban el opener**, que es la acción realmente pendiente. El cartel decía «esperá la respuesta» sin mandar a mandar el primer contacto.
+- **RECHAZADA**: el scroll saltaba a Construcción (~2200px) y dejaba la nota de Franco (el Callout de retrabajo) 2+ pantallas arriba del viewport. La tarjeta decía «lo tenés arriba», pero el auto-scroll ya te había sacado de arriba.
+
+**Qué hace.** Dos correcciones quirúrgicas, layered sobre `pasoActual` (NO se re-implementa el flujo, NO se toca gate/transición/§3):
+- **Fix 1 — EVALUADA + opener pendiente → el opener es el paso activo.** El shell calcula `openerPendiente = stage==='EVALUADA' && !gateAbierto && outreach.contactos===0` (exactamente el caso en que el Brief está bloqueado *y* no salió el primer contacto) y lo pasa a `anchorActivo` y a `describirFoco` (igual que `gateAbierto`, sin re-derivarlo). Con eso: el `StepAnchor` del opener pasa a `active` (ahí aterriza el scroll + se enmarca en cyan) y el cartel dice **«Mandá el primer mensaje (opener)»** en tono `foco`, no «esperá la respuesta». Acotado a **gate cerrado**: EVALUADA con gate abierto (respondió/caliente) sigue apuntando al Brief — ese camino ya funcionaba.
+- **Fix 2 — RECHAZADA → la nota de Franco donde el setter aterriza.** La rama `RECHAZADA` de `construccion-step.tsx` ahora renderiza el **mismo `GuiaRetrabajo`** que la rama `CONSTRUCCION` ya mostraba tras reabrir. Como el auto-scroll aterriza en Construcción (paso activo, sin cambios), la nota cae **junto** al punto de aterrizaje. El «lo tenés arriba» ahora apunta a la guía inline directamente encima del párrafo. La opción que **menos toca el `StepAnchor`** (cero cambios al scroll/anchor de RECHAZADA).
+
+**Archivos (3, todos presentacionales del wizard):** `paso-actual-banner.tsx` (`describirFoco`/`PasoActualBanner` reciben `openerPendiente`; rama EVALUADA + ícono `Send`), `lead-wizard.tsx` (deriva `openerPendiente`, lo pasa a `anchorActivo`/`describirFoco`/banner; `StepAnchorId` suma `'opener'`; el `StepAnchor` del opener se activa/enmarca), `construccion-step.tsx` (rama RECHAZADA renderiza `GuiaRetrabajo`).
+
+**Decisiones / líneas de límite.**
+- **Fix acotado a gate cerrado** (no a todo «EVALUADA sin opener»): el problema es el **Brief bloqueado**. Con gate abierto (caliente/respondió) el Brief SÍ es accionable → dirigir ahí es correcto (camino preventivo del caliente, intacto).
+- **`StepAnchor` intacto**: no se tocó su lógica de scroll ni el dual-copy (scoped por `offsetParent`, nunca global-by-id). Solo cambia qué sección recibe `active`/`frameTone` desde el shell.
+- **Duplicación benigna en RECHAZADA**: el Callout rico del tope (`lead-wizard`) coexiste con el `GuiaRetrabajo` inline (compacto). Nunca se ven juntos (2+ pantallas de distancia) y espeja el patrón que ya existía en CONSTRUCCION. Se prefirió AGREGAR la guía inline antes que mover/remover el Callout del tope (menos superficie tocada).
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores en los 3 archivos tocados**. Único error del repo: el AMBIENTE pre-existente y ajeno `src/lib/searchconsole.ts:119` (`google-auth-library`/`google-gax`), el mismo flagueado en B1.A — NO mío.
+- ✅ `npm run check:invariants` → verde (lógica pura de `lib/leados`, no la toca este sprint).
+- ✅ `npm run test:leados` → **21/21** (Neon dev).
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001), incluye **B3 opener** (el form del opener sigue funcionando con el marco activo nuevo) y **B10 rechazo** + el recorrido **B1–B11** (ficha→evaluación→construcción→aprobada avanza sin regresión).
+- ✅ **Pasada perceptual + geométrica** (`scripts/qa-corridas/_verify-b61.ts`, desktop 1440×900 + mobile 390×844, contra los leads `QA-W` del seed V-1), screenshots en `docs/proof-screenshots/b6-1/`:
+  - **Caso 1** (`QA-W Evaluada Gate Cerrado`): cartel = «Mandá el primer mensaje (opener)» (sin «esperá la respuesta»); el opener aterriza **dentro** del viewport (y=217 desktop / y=265 mobile).
+  - **Caso 2** (`QA-W Rechazada`): la «Guía de retrabajo — lo que Franco pidió corregir» aterriza **dentro** del viewport (y=270 / y=351), enmarcada como paso activo.
+  - **Regresión A** (`QA-W Evaluada Gate Abierto`): sigue en «Brief de diseño» (fix acotado, gate abierto intacto).
+  - **Regresión B** (`QA-W Construccion`): «Seguí construyendo la demo» sin cambios.
+
+**Lo que queda (para Franco):** (a) el error de tipos AMBIENTE de `searchconsole.ts` sigue pre-existente y ajeno (decisión de reconciliación de deps, fuera de scope). (b) El sub-caso EVALUADA gate-cerrado con opener YA mandado (contactos>0, esperando respuesta) mantiene su comportamiento previo (cartel «espera», scroll al Brief): no estaba en el alcance de los dos casos rotos; si se quiere reencauzarlo a «Seguimiento», es un sprint aparte.
+
+---
+
+## B6.2 — El re-loop RECHAZADA→CONSTRUCCION resetea el self-check (gate), preservando fases + draft · 2026-07-01
+
+**Por qué.** El proof-e2e del re-loop de rechazo (corrida C, `scripts/qa-corridas/rejection-reloop.ts`) mostró una tensión: preservar TODO el progreso al reabrir un rechazo ayuda en una parte y confunde en otra.
+- **El checklist de fases (auto-reporte) preservado AYUDA:** el setter retoma sabiendo que la base está hecha. Se mantiene (decisión de E.1/E.4, ya con su invariante `progreso`).
+- **El self-check preservado CONFUNDE:** al reabrir, los 6 hard-checks + «Enviar a revisión» quedaban como antes del rechazo (6/6 en verde). Un setter podía reenviar SIN corregir nada real. La distinción es de naturaleza: el checklist de fases es **auto-reporte** (preservar = bien); el self-check es un **GATE** (preservar = deja saltear la corrección).
+
+**Qué hace.** Reset QUIRÚRGICO del self-check acotado al único loop-back, layered sobre `transitionDossier` (NO se re-implementa la máquina, NO se toca el gate ni `enviarARevision`):
+- **`escalamiento.ts` (donde vive `ESCALADO_RESET`):** dos primitivas puras nuevas — `esReloopRechazo(from, to)` (el único loop-back: `RECHAZADA→CONSTRUCCION`) y `RELOOP_RESET = { selfCheckJson: Prisma.DbNull }` (limpia SOLO el self-check; `Json?` en null exige `Prisma.DbNull`, no `null` literal — mismo criterio que `agendaJson`).
+- **`transitionDossier` (dossier.ts):** el `data` de la transición ahora es `{ stage, ...ESCALADO_RESET, ...(esReloopRechazo(from, to) ? RELOOP_RESET : {}) }`. Al reabrir un rechazo, además del escalado se limpia `selfCheckJson` → `selfCheckAprobado` vuelve a `false` → el setter re-verifica los 6 antes de reenviar. En la UI eso ya cae solo: `durosIniciales(null)` deja los 6 toggles en rojo y «Enviar a revisión» queda `disabled` hasta 6/6.
+
+**Decisiones / líneas de límite.**
+- **NO se agregó `selfCheckJson` a `ESCALADO_RESET` (línea roja invertida).** El pedido literal («agregar al `ESCALADO_RESET`») habría sido una REGRESIÓN: `ESCALADO_RESET` se mergea en CADA transición, así que borraría el self-check también en `CONSTRUCCION→EN_REVISION` — donde DEBE sobrevivir, porque el admin lo lee en la superficie de revisión (`SelfCheckPanel`, `exigible` en EN_REVISION/APROBADA muestra un Callout de anomalía si falta). Además rompería el invariante existente `escalamiento` (que fija `ESCALADO_RESET === {escaladoAt, escaladoNota}`). Por eso el reset se **acota** al re-loop vía `esReloopRechazo`, cumpliendo el intent (que RECHAZADA→CONSTRUCCION limpie el self-check) sin la regresión.
+- **El GATE no cambia.** Sigue siendo `draftUrl` + `selfCheckAprobado`. Solo que al limpiar `selfCheckJson`, `selfCheckAprobado` vuelve a `false` hasta la re-verificación. `enviarARevision` y `selfCheckAprobado` **intactos** (verificados verdes).
+- **Preserva `progresoJson` y `draftUrl`** — `RELOOP_RESET` toca SOLO `selfCheckJson` (la ausencia de clave = zero-touch). El re-loop sigue siendo el **único** loop-back.
+- **No toca schema.** Solo se limpia una columna existente en una transición existente.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx prisma migrate status` → up to date (**77 migs**); sprint sin cambios de schema.
+- ✅ `npm run check:invariants` → **15/15 OK** (los 14 previos + **`reloop-selfcheck`** nuevo). El invariante `escalamiento` (que fija `ESCALADO_RESET`) sigue verde: confirma que NO se contaminó el reset global.
+- ✅ `npm run test:leados` → **22/22** (Neon dev): incluye el **test nuevo B6.2** (`el re-loop RECHAZADA→CONSTRUCCION resetea el self-check y preserva fases + draft` — prueba también que el self-check SOBREVIVE a EN_REVISION, la anti-regresión, contra la DB real) + el `progreso`-preservado del re-loop SIGUE verde (sin cambios) + los `selfcheck-anti-bypass` (el gate) intactos.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): B6 (draft+self-check+enviar, self-check llega a EN_REVISION) y B10 (rechazo) sin regresión.
+- ✅ `npx tsc --noEmit` → **0 errores nuevos** en los archivos tocados (único error tsc = PRE-EXISTENTE y ajeno: `src/lib/searchconsole.ts:119`, SEO/`google-auth-library`, el mismo flagueado en B1.A/B6.1 — NO mío).
+- ✅ Diff **surgical/additive**: `escalamiento.ts` (+`esReloopRechazo`/`RELOOP_RESET`/import valor `Prisma`), `dossier.ts` (import + 1 línea en el spread de `data`), `reloop-selfcheck-reset.invariant.ts` (NUEVO), `package.json` (+2), `tests/leados/dossier-gates.spec.ts` (imports + 1 test). `transitionDossier`/`selfCheckAprobado`/`enviarARevision`/`ESCALADO_RESET` intactos.
+
+**Lo que queda (para Franco):** (a) El guion manual `scripts/qa-corridas/rejection-reloop.ts` (corrida C, **untracked**) se actualizó a la conducta nueva (pasos [12]/[14]: el self-check llega VACÍO tras reabrir y el setter re-verifica los 6) pero **NO se re-corrió** acá (necesita `start:qa` + el seed V-1 `QA-W`) — queda para regenerar los screenshots de `corrida-2` cuando quieras el ojo humano. (b) **Pasada perceptual del wizard = B6.6** (fuera de este sprint, que es lógica de transición): el core está cubierto por el test DB nuevo + los 39 de setter, pero el recorrido visual del re-loop (self-check vacío, botón disabled hasta 6/6) lo cierra B6.6. (c) El error de tipos AMBIENTE de `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## B6.3 — Acceso persistente a «Cargar prospecto» en el rail del setter (visible con cartera activa) · 2026-07-02
+
+**Por qué.** El proof-e2e mostró que el único acceso a `/setter/nuevo` (alta individual + puerta a la importación por lista) vivía dentro de estados de cartera VACÍA: `home-empty.tsx` (empty state) y el link sobrio de `home-en-espera.tsx` (todo en espera). Un setter con cartera ACTIVA —el estado real de trabajo— no tenía dónde cargar sus propios prospectos sin ir por URL directa. Confirmado en código (rail/foco/cartera: cero menciones de «Cargar/Importar» fuera del vacío) y contra el build (SSR de `/setter` con foco activo no traía ningún CTA de alta).
+
+**Qué hace.** Un botón persistente **«Cargar prospecto»** al TOPE del rail del setter (`setter-nav.tsx`), presente en TODA la zona `/setter` (incluida la cartera activa), sin scroll. Navega por `triggerTransition('/setter/nuevo')` — desde donde ya se llega tanto al alta individual como a la importación (el link «¿Tenés una lista?» vive en `/setter/nuevo`). Presentacional puro: no toca flujo, estado ni gates.
+
+**Decisiones / líneas de límite.**
+- **Rail, no home/foco.** El rail es fijo y visible sin scrollear en todos los estados (vacío / foco / en-espera / detalle de lead); un CTA en el home solo cubriría el home. La línea B6.3 pedía «SIEMPRE visible» → el rail lo garantiza estructuralmente.
+- **FUERA de `NAV_ITEMS`, no adentro.** `NAV_ITEMS` son *hubs* con activo por subárbol (`startsWith('/setter/…')`): meter `/setter/nuevo` ahí habría prendido DOS `aria-current="page"` a la vez (Cartera + Cargar) en `/setter/nuevo`. Es una **acción**, no un destino de barra → botón propio (cyan sobrio, `bg-cyan-400/15`) antes del `<nav>`, sin `aria-current`. Los asserts de nav (`filter hasText 'Cartera'`, `button[aria-current="page"]`) quedan intactos.
+- **`triggerTransition`, como el resto del rail** (decisión cerrada · CLAUDE.md para la zona setter): consistente con `NAV_ITEMS`; cierra el drawer mobile vía `onNavigate`.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores** en el archivo tocado. Único error del repo = pre-existente y ajeno `src/lib/searchconsole.ts:119` (`google-auth-library`) — NO mío.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): el botón nuevo NO rompió A2 (nav + rail + aria-current) ni F6 (a11y landmarks / aria-current en el destino activo).
+- ✅ `npm run test:leados` → **22/22** y `npm run check:invariants` → **15/15** (sin cambios de lógica).
+- ✅ **Proof SSR autenticado** (setter-qa, cookie `__Secure-authjs.session-token` minteada como el helper e2e) contra el build en `:3001`: `/setter` → **200**, «Cargar prospecto» **server-rendered** al TOPE del rail (precede a «Tus herramientas»), con la home «Tu día» (cartera ACTIVA, no el empty state).
+
+**Lo que queda (para Franco):** (a) **Pasada perceptual del home = B6.6** (fuera de este sprint): el CTA está probado presente y posicionado por SSR + los 39 de setter, pero el ojo humano (contraste, peso visual del cyan en el rail) lo cierra B6.6. (b) `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## B6.5 — Tres fixes menores acotados (router.refresh escalado · puente self-check→prompt · CTA del home sobre el fold) · 2026-07-02
+
+**1. `EscalarModal` — `router.refresh()` tras escalar (hallazgo 5.5).**
+- *Por qué.* La marca `escaladoAt` que enciende el banner «Ya avisaste a Franco» (`construccion-step.tsx`) baja por props del server component; la action `escalarConstruccion` NO revalida el path → el banner recién aparecía tras un reload manual.
+- *Qué hace.* `escalar-modal.tsx` (client) ahora importa `useRouter` y llama `router.refresh()` tras el éxito (después de cerrar el modal y limpiar el textarea, antes del toast). El server re-renderiza con `escaladoAt` poblado → el banner aparece al instante. No toca la action, el gate ni la notificación por Telegram.
+
+**2. Puente self-check→prompt (`HARD_CHECK_PROMPT` en `prompts-disenio.ts`).**
+- *Hallazgo tras verificar el código.* El pedido asumía un techo de ~3/6 «porque hay 3 prompts» (estetica/mobile/motion). Pero el mapeo es por **correspondencia hard-check→prompt**, no por conteo de prompts. Los 6 hard-blocks (`carga`, `mobile`, `sinRelleno`, `linksWhatsapp`, `datosReales`, `fielAlBrief`) son gates **funcionales/de contenido**; el único que corresponde a un prompt de diseño lead-agnóstico es `mobile` (→ ya mapeado). `estetica` («pulí la estética» — explícitamente *«no reescribas los textos»*) y `motion` («animaciones/estados») NO casan con ningún hard-block: `estetica`/`motion` en realidad corresponden a los **SOFT-checks** (`coloresDeMas`, `fuenteDefault`, `imagenesDeformadas`…), que son otra superficie (no bloquean; los lee el ADMIN en revisión, no el setter en el self-check).
+- *Decisión (línea roja «no fuerces los que no tienen prompt»).* Mapear `sinRelleno`/`datosReales`/`fielAlBrief` a `estetica` sería **activamente erróneo** (el prompt estetica se niega a tocar el texto/contenido, que es justo lo que esos checks piden) y `carga`/`linksWhatsapp` a `motion` es un sinsentido. El techo real es **1/6**, ya cubierto. **Sin cambio de código** en item 2 — el mapa ya está en su cobertura honesta; la cabecera del propio archivo ya documentaba el porqué de cada no-mapeo. Surface, no fuerzo.
+
+**3. Onboarding vs CTA del home (proof S3).**
+- *Por qué.* La tarjeta pedagógica `OnboardingHint` («Cómo funciona tu día», buena — se queda) se renderizaba ARRIBA de la acción, empujando el CTA («Ir a trabajarlo» / «Cargar prospecto») fuera del fold para el setter nuevo.
+- *Qué hace.* `page.tsx`: se movió `<OnboardingHint />` de ANTES a DESPUÉS del branch de acción (foco / en-espera / vacío). La acción queda pegada al header (sobre el fold); la guía baja íntegra —cero pérdida de contenido pedagógico— y su copy («Arriba está el que toca ahora») ahora describe literalmente el foco que quedó por encima. Sigue descartable (localStorage): el que ya la cerró no la ve.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores** en los archivos tocados (único = pre-existente/ajeno `searchconsole.ts:119`).
+- ✅ `npm run test:setter` → **39/39** (prod-QA:3001): B5 (escalar «me trabé» persiste) y B6 (draft+self-check+enviar + **reset escalado**) verdes → el `router.refresh()` no rompió el flujo de escalamiento.
+- ✅ `npm run test:leados` → **22/22** y `npm run check:invariants` → **15/15** (item 2 sin cambios; items 1 y 3 son UI, no tocan `lib/leados`).
+- ✅ Diff surgical: `escalar-modal.tsx` (+import `useRouter`, +`const router`, +`router.refresh()`), `page.tsx` (reordenado `OnboardingHint`). `prompts-disenio.ts` **sin tocar** (item 2 = no-op justificado).
+
+**Lo que queda (para Franco):** (a) **Item 2:** si querés cobertura >1/6, el camino correcto es enganchar `estetica`/`motion` a los **SOFT-checks** (su superficie natural), no forzar los hard-blocks — es un sprint aparte porque toca otra superficie (revisión del admin) y sumaría un mapa nuevo, fuera de lo «acotado» de B6.5. (b) **Pasada perceptual home/wizard = B6.6**: el `router.refresh()` y el reorden están cubiertos por los 39 de setter, pero el ojo humano (banner al instante sin parpadeo, CTA sobre el fold en 1440 y 390) lo cierra B6.6. (c) `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## AUD-1 — Auditoría read-only del setter vs Brief de Visión v2 · 2026-07-02
+
+**Qué se hizo.** Auditoría estática read-only del repo completo contra el **Brief de Visión v2** (02/07/2026): verificación del gating de aislamiento (meta-chequeo), cobertura sección por sección §2–§9, fase "fuera del guion" con lentes propias, y verificación adversarial independiente de cada hallazgo (evidencia archivo:línea releída una por una). Cero modificaciones al repo salvo las dos escrituras autorizadas del Cierre (este append + el informe).
+
+**Veredicto de gating (una línea).** **GATEA — con perímetro acotado:** los tests de aislamiento ejercitan el mecanismo real (ownership 100% capa aplicación, sin RLS) con identidad de sesión real y asserts por contenido que fallarían ante una fuga de lectura o del chokepoint compartido de ownership; la denegación de MUTACIÓN cruzada solo está testeada en 2 de ~19 funciones de escritura (progreso y alta) — el resto se sostiene por consistencia de patrón verificada por lectura, no por tests.
+
+**Informe.** `AUDITORIA-VS-BRIEF-2026-07.md` (raíz del repo): 29 divergencias verificadas (2 sev 4 — wizard página-larga §3 y fuga de nomenclatura "caliente" §5 —, 9 sev 3, 13 sev 2, 5 sev 1), §6 y §9 **sin divergencias** (línea inviolable del envío verificada server-side + invariante), las 4 decisiones fijadas del §8 **cumplen**.
+
+**Queda para verificación humana (del informe, sección 6):** (a) links de herramientas externas (§12.3) cargados en producción (`herramientas.ts` / badge "pendiente" del rail); (b) prueba dinámica que cierre el perímetro del gating: sesión real de setter B disparando las server actions de dossier/outreach/agenda/cartera/foco con `leadId` de A (denegación + fila intacta); (c) lectura y triage del informe por Franco — nada de lo propuesto se ejecutó.
+
+**DoD estándar — N/A declarados.** `npx tsc --noEmit` **N/A**: no se tocó código (y rige la regla 2 de no-ejecución de la auditoría). `npx prisma generate` **N/A**: no se tocó el schema.
