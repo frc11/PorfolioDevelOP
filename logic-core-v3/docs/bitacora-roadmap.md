@@ -11923,4 +11923,73 @@ Patrón transversal del bloque: lógica pura testeable por invariante (cero DB) 
 ### Pendiente del humano
 - Correr `npm run test:e2e` (requiere `npm run build` primero) y confirmar que las 5 aserciones del spec nuevo pasan, en particular el caso del segmento `%20` (no verificado empíricamente).
 - Disparar el botón real contra una org de QA (Pro/Business, con `BREVO_API_KEY` configurada) y confirmar que el mail llega — el envío real no se auto-confirmó (regla del harness: el humano verifica).
+
+## ✅ P2.B.2 — Reporte "a medida" (frecuencia + cantidad de leads, configurable por el dueño)
+
+**Qué cierra:** hoy el Executive Weekly Report se manda siempre semanal (cron fijo) con siempre 3 leads destacados (hardcodeado en `top-hot-leads.ts`) — sin ninguna UI cliente. P2.B.2 cierra la promesa de "reporte a medida": el dueño elige frecuencia (Cada semana / Cada 15 días / No recibir) y cantidad de leads destacados (3/5/10) desde `/dashboard/cuenta/perfil`. Defaults (`WEEKLY`, `3`) preservan el comportamiento actual para cualquier org que no toque la config.
+
+> ⚠️ A diferencia de P2.B.1, en este sprint **`build.ts`/`send.ts`/`top-hot-leads.ts` SÍ estaban en scope** (la regla de esta vez solo prohibía tocar el motor del brief de IA y el template del mail). Se tocaron los 3, de forma quirúrgica.
+
+### Relevamiento (antes de tocar código)
+- **Patrón calcado:** `saveAverageTicket` (`business-profile.actions.ts`) — objeto tipado + Zod + `resolveOrgId()` + `{ok}|{error}`; cliente `MoneyEstimate.tsx` (`useTransition` + toast `sonner`). Confirmado que `updateNotificationPrefsAction` (FormData sin Zod, sin impersonation) NO era el patrón a usar.
+- **Ubicación UI:** card nueva en el tab "Perfil" (no 4to tab — `CuentaTabs.tsx` solo tiene Perfil/Facturación/Bóveda; las cards viven fuera de la ruta, en `src/components/dashboard/`). Insertada en la columna derecha entre "Preferencias de notificaciones" e "Información del plan".
+- **Hallazgo del gate de plan:** el gate real en `build.ts` es literal (`plan.key !== 'PRO' && plan.key !== 'BUSINESS'`) — **no** usa el helper `planAllows(plan,'reports')` ya existente (ese lee `Plan.reportsEnabled`, columna de DB independiente del `plan.key` que un admin podría desincronizar). Para garantizar "el mismo gate del reporte", la UI calca el chequeo literal (`src/lib/reports/executive-weekly/report-eligible-plan.ts`, nuevo) en vez de reusar `planAllows` — no se puede importar desde `build.ts` sin acoplar capas, documentado con comentario explícito de que ambos deben mantenerse sincronizados a mano.
+- **Cantidad de leads** solo tiene efecto para plan `BUSINESS` (Pro nunca ve `topHotLeads`) — el Select de cantidad se oculta para Pro dentro de la misma card (solo ve el de frecuencia).
+
+### Decisión — relación con `executiveReportOptOut` (llevada al usuario, no autodecidida)
+`executiveReportOptOut` es un campo **unidireccional**: solo se setea a `true` desde el link de 1-click unsubscribe del mail (`/api/email/unsubscribe-executive/route.ts`); no existía NINGÚN camino de vuelta en el repo. Se presentaron 3 opciones (conviven+sync / el enum absorbe con migración de datos / conviven sin sync) — **elegida: conviven + sync al reactivar**. Implementado así:
+- `build.ts` bloquea el envío si `executiveReportOptOut === true` **O** `executiveReportFrequency === 'DISABLED'` (mismo `reason: 'OPTOUT'`, sin agregar un nuevo `BuildSkipReason`).
+- La action nueva, si el dueño elige una frecuencia activa (≠ DISABLED), limpia `executiveReportOptOut = false` — primer y único camino de reactivación tras un unsubscribe por mail.
+- La UI muestra el estado **efectivo**: si `executiveReportOptOut === true`, el Select de frecuencia se ve en "No recibir" aunque la columna `executiveReportFrequency` diga otra cosa — nunca miente.
+- El endpoint de unsubscribe (`unsubscribe-executive/route.ts`) **no se tocó**.
+
+### Schema — migración aditiva (editada, NO aplicada)
+Dos campos nuevos en `Organization` + un enum nuevo. `prisma migrate dev` **no se corrió** — el SQL de abajo es la predicción de lo que Prisma generaría a partir del diff de schema (mismo estilo que la migración B6.2 existente), para que el humano lo revise y aplique en la branch Neon compartida:
+
+```sql
+-- CreateEnum
+CREATE TYPE "ExecutiveReportFrequency" AS ENUM ('WEEKLY', 'BIWEEKLY', 'DISABLED');
+
+-- AlterTable
+ALTER TABLE "Organization" ADD COLUMN     "executiveReportFrequency" "ExecutiveReportFrequency" NOT NULL DEFAULT 'WEEKLY',
+ADD COLUMN     "executiveReportLeadCount" INTEGER NOT NULL DEFAULT 3;
+```
+
+Cero columnas existentes modificadas/dropeadas. Cero backfill de datos (la decisión de arriba no lo necesita).
+
+### Motor del reporte — cambios quirúrgicos
+- **`top-hot-leads.ts`** — `getTopHotLeadsForWeek` gana un 5to parámetro opcional `leadCount = 3` (mismo default que el hardcode anterior); `.slice(0, 3)` → `.slice(0, safeLeadCount)`, con un clamp defensivo (entero positivo, tope 50) porque la columna `Int` no tiene constraint de DB y `.slice(0, n<=0)` en JS no tira error — devuelve resultados raros en silencio.
+- **`build.ts`** — suma `executiveReportFrequency`/`executiveReportLeadCount` al `select`; el chequeo de OPTOUT ahora es el OR de arriba; pasa `org.executiveReportLeadCount` a `getTopHotLeadsForWeek` (solo para BUSINESS, mismo gate que ya existía).
+- **`send.ts`** — nueva función `isDueThisWeek(orgId, frequency, now)`: para `BIWEEKLY`, busca el último `WeeklyReportLog` con `status:'SENT'` y compara días transcurridos (≥13) — **ancla en la última fecha REAL de envío, no en paridad de semana ISO/calendario** (una org recién pasada a quincenal no queda bloqueada por una razón arbitraria sin relación a cuándo activó la config). `WEEKLY` siempre está due (cero cambio de comportamiento). Nuevo contador `skippedFrequency` en el resultado (no genera un `WeeklyReportLog` — no es un "no se pudo", es "no le toca esta semana").
+- **`send-manual.ts` — NO tocado.** Decisión: la cadencia quincenal solo aplica al cron automático; un click del botón admin es una orden explícita, no debería competir con la cadencia. El bloqueo por `DISABLED`/opt-out SÍ lo hereda gratis (pasa por `build.ts`).
+
+### Server action + UI
+- **`executive-report-prefs.schemas.ts`** (nuevo, separado de la action a propósito: un archivo `'use server'` solo puede exportar funciones async, no puede exportar el Zod schema) — `z.nativeEnum(ExecutiveReportFrequency)` + `z.union([z.literal(3),z.literal(5),z.literal(10)])`.
+- **`executive-report-prefs.actions.ts`** (nuevo) — `saveExecutiveReportPrefs`, calca `saveAverageTicket` 1:1.
+- **`ExecutiveReportPrefsForm.tsx`** (nuevo, cliente) — dos `<Select>` compartidos (`@/components/ui/Select`, el que tiene trigger+listbox portaleado, no nativo), aplican al instante (sin botón "Guardar" — UX de selector, no de formulario largo), `useTransition` + toast `sonner`. Lenguaje de dueño: "Cada semana"/"Cada 15 días"/"No recibir", "N leads destacados" — cero mención de WEEKLY/BIWEEKLY/DISABLED.
+- **`perfil/page.tsx`** (modificado) — card "Reporte ejecutivo semanal" entre notificaciones y plan, gateada por `reportEligiblePlan(plan.key)` (oculta del todo para Starter, sin teaser — así lo pedía la regla).
+
+### Tests
+- `report-eligible-plan.invariant.ts` (`npm run check:invariant:executive-report-plan`) — el gate de plan de la UI coincide con PRO/BUSINESS de `build.ts` para las 3 tiers.
+- `executive-report-prefs.invariant.ts` (`npm run check:invariant:executive-report-prefs`) — Zod acepta las 3 frecuencias × 3 cantidades, rechaza cualquier otro valor (incluye "razonables" como 7).
+- `tests/e2e/42-client-executive-report-prefs.spec.ts` (Playwright, patrón `15-client-personalization.spec.ts` + helper `pickSelect`/`expectToast` de `tests/helpers/setter-ui.ts`) — cambiar frecuencia/cantidad y persistir; **anti-IDOR** (otra org no se toca, verificado por snapshot antes/después); UI honesta con el opt-out viejo (se ve "No recibir", reactivar lo limpia); card ausente si el plan no es elegible. Las ramas "ve la card"/"no ve la card" se auto-`test.skip()` según el plan REAL de la fixture `sanmiguel` (no se muta el plan en runtime: `getPlanForOrg` cachea 60s en memoria del server, un proceso separado del test — mutar ahí produciría flakiness sin invalidar ese cache).
+- `tests/integration/executive-report-lead-count.spec.ts` (mismo patrón que `alerts-detector.spec.ts`, no está en el `testDir` de Playwright — correr explícito) — siembra 12 leads `hot` con scores distintos y verifica que `getTopHotLeadsForWeek(...,5)`/`(...,10)`/`(...)` (default) devuelven exactamente 5/10/3.
+
+### Archivos
+- **Creados:** `src/lib/reports/executive-weekly/report-eligible-plan.ts` (+ `.invariant.ts`), `src/app/(protected)/dashboard/_actions/executive-report-prefs.{schemas,actions}.ts` (+ `.invariant.ts`), `src/components/dashboard/ExecutiveReportPrefsForm.tsx`, `tests/e2e/42-client-executive-report-prefs.spec.ts`, `tests/integration/executive-report-lead-count.spec.ts`.
+- **Modificados:** `prisma/schema.prisma` (enum + 2 campos, editado y PARADO — sin migrar), `src/lib/reports/executive-weekly/{top-hot-leads,build,send}.ts`, `src/app/(protected)/dashboard/cuenta/perfil/page.tsx`, `package.json` (2 scripts de invariante nuevos).
+- **NO tocados:** `src/lib/reports/executive-weekly/send-manual.ts` (decisión explícita arriba) · `src/lib/ai/executive-brief.ts` (motor del brief) · `src/lib/email/templates/executive-weekly.ts` (template del mail) · `src/app/api/email/unsubscribe-executive/route.ts` · `src/lib/plan/plan-allows.ts` · `vercel.json`/`netlify.toml` · `/admin/**`.
+
+### Verificación
+`eslint` verde en los 12 archivos tocados/creados · `npx tsc --noEmit` sin errores nuevos (1 pre-existente en `searchconsole.ts:119`, ajeno) — confirmado que el enum `ExecutiveReportFrequency` y los campos nuevos SÍ están en los tipos generados (`grep` de 145 ocurrencias en `node_modules/.prisma/client/index.d.ts`) · `npm run build` NO corrido (excluido del gate por instrucción explícita) · sin migraciones aplicadas · sin commits.
+
+**Gotcha de entorno — `prisma generate` parcialmente bloqueado:** 3 procesos `node.exe` ya estaban corriendo al empezar el sprint (uno con ~3.5GB de memoria, probablemente un dev server activo). `npx prisma generate` falló 3 veces con `EPERM` al renombrar el binario nativo `query_engine-windows.dll.node` (lock de Windows). Los **tipos TypeScript sí se regeneraron** (Prisma los escribe antes de tocar el binario nativo) — por eso `tsc --noEmit` ve el schema nuevo correctamente. El **binario nativo del query engine sigue viejo** hasta que se libere el lock: cualquier query REAL contra los campos nuevos (server corriendo, o los tests nuevos) puede fallar en runtime hasta que se cierre el proceso que tiene el lock y se corra `npx prisma generate` de nuevo con éxito. No maté procesos sin preguntar (podía ser tu propio dev server probando el botón de P2.B.1).
+
+### Pendiente del humano
+1. **Revisar y aplicar la migración** (SQL de arriba) en la branch Neon compartida con Franco.
+2. **Cerrar el proceso que tiene lockeado el query engine** (o confirmar que es seguro matarlo) y correr `npx prisma generate` hasta que termine sin error — recién ahí los tests nuevos y el server pueden usar los campos nuevos en runtime.
+3. Correr `npm run check:invariant:executive-report-plan` y `npm run check:invariant:executive-report-prefs` (verdes esperados, sin DB).
+4. Correr `npx playwright test tests/e2e/42-client-executive-report-prefs.spec.ts` y `npx playwright test tests/integration/executive-report-lead-count.spec.ts` (requieren DB + migración aplicada + query engine regenerado; el primero también requiere el server levantado).
+5. Verificación visual humana de la card nueva en `/dashboard/cuenta/perfil` (desktop + mobile) — no autoconfirmada.
+6. Decidir si vale la pena, en un sprint aparte, que la cadencia quincenal también aplique al botón manual de admin (hoy deliberadamente no la respeta — ver decisión arriba).
 - Decidir si el botón debería moverse/copiarse a `/admin/settings/reports` además de la ficha de la org (quedó únicamente en la ficha, `admin/clients/[clientId]`, por default razonado en el sprint — no se preguntó explícitamente).

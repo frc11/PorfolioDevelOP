@@ -11,6 +11,7 @@ import {
   PlanInfoSection,
   DangerZone,
 } from '@/components/dashboard/ProfileForms'
+import { ExecutiveReportPrefsForm } from '@/components/dashboard/ExecutiveReportPrefsForm'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { Card, CardTitle } from '@/components/ui'
 import Link from 'next/link'
@@ -19,12 +20,16 @@ import {
   Phone,
   Lock,
   Bell,
+  Mail,
   CreditCard,
   AlertTriangle,
   Eye,
   ChevronRight,
 } from 'lucide-react'
 import type { NotificationPrefs } from '@/lib/actions/profile'
+import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
+import { reportEligiblePlan, businessOnlyReportSection } from '@/lib/reports/executive-weekly/report-eligible-plan'
+import { ExecutiveReportPrefsSchema } from '@/app/(protected)/dashboard/_actions/executive-report-prefs.schemas'
 
 // ─── Section card ─────────────────────────────────────────────────────────────
 // Receta admin: <Card variant="elevated" padding="lg"> + label CardTitle.
@@ -81,6 +86,9 @@ export default async function ProfilePage() {
       avatarInitials: true,
       whatsapp: true,
       notificationPrefs: true,
+      executiveReportFrequency: true,
+      executiveReportLeadCount: true,
+      executiveReportOptOut: true,
       subscription: {
         select: {
           plan: { select: { name: true } },
@@ -178,6 +186,24 @@ export default async function ProfilePage() {
       DEFAULT_PREFS.emailNotificationsOnMessage,
   }
 
+  // P2.B.2 — mismo gate que el motor del reporte (build.ts: plan PRO/BUSINESS).
+  // "leads destacados" es exclusivo BUSINESS. La frecuencia EFECTIVA respeta el
+  // opt-out del mail: si se dio de baja por el link, el Select muestra "No
+  // recibir" aunque la columna diga otra cosa — la UI nunca miente.
+  const effectivePlan = await getPlanForOrg(organizationId)
+  const showReportCard = reportEligiblePlan(effectivePlan.key)
+  const showLeadCount = businessOnlyReportSection(effectivePlan.key)
+  const effectiveReportFrequency = org.executiveReportOptOut
+    ? ('DISABLED' as const)
+    : org.executiveReportFrequency
+  // Defensivo: la columna es un Int sin constraint de DB — si alguna vez
+  // tiene un valor fuera de {3,5,10} (edición manual, dato legado), el Select
+  // cae a 3 en vez de romper. Reusa el mismo schema que valida la escritura.
+  const leadCountParsed = ExecutiveReportPrefsSchema.shape.leadCount.safeParse(
+    org.executiveReportLeadCount,
+  )
+  const effectiveLeadCount = leadCountParsed.success ? leadCountParsed.data : 3
+
   // Serialize plan data (no Date objects to client)
   const plan = org.subscription
     ? {
@@ -268,6 +294,21 @@ export default async function ProfilePage() {
               <NotificationPrefsForm initialPrefs={notifPrefs} />
             </SectionCard>
           </FadeIn>
+
+          {showReportCard && (
+            <FadeIn delay={0.22}>
+              <SectionCard
+                title="Reporte ejecutivo semanal"
+                icon={<Mail size={14} strokeWidth={1.5} className="text-cyan-400" />}
+              >
+                <ExecutiveReportPrefsForm
+                  initialFrequency={effectiveReportFrequency}
+                  initialLeadCount={effectiveLeadCount}
+                  showLeadCount={showLeadCount}
+                />
+              </SectionCard>
+            </FadeIn>
+          )}
 
           <FadeIn delay={0.24} className="lg:flex-1">
             <SectionCard

@@ -386,6 +386,16 @@ model Organization {
   // flag antes de mandar.
   executiveReportOptOut Boolean @default(false)
 
+  // P2.B.2 — reporte "a medida": el dueño elige frecuencia y cuántos leads
+  // destacados ve, desde /dashboard/cuenta/perfil. Defaults preservan el
+  // comportamiento actual (semanal, 3 leads). `executiveReportFrequency`
+  // convive con `executiveReportOptOut` de arriba (no lo reemplaza): el envío
+  // se bloquea si CUALQUIERA de los dos lo indica. Elegir una frecuencia
+  // activa desde el dashboard limpia `executiveReportOptOut` — es el único
+  // camino de vuelta tras un unsubscribe por mail.
+  executiveReportFrequency ExecutiveReportFrequency @default(WEEKLY)
+  executiveReportLeadCount Int                       @default(3)
+
   // Client profile (admin-managed). city la captura el creador pero hoy la
   // action no la persiste; internalNotes se muestra en OverviewTab (hoy placeholder).
   city          String?
@@ -468,6 +478,15 @@ enum WeeklyReportStatus {
   SKIPPED_OPTOUT
   SKIPPED_NO_RECIPIENT
   SKIPPED_NO_DATA
+}
+
+// P2.B.2 — frecuencia de envío elegida por el dueño para el reporte ejecutivo
+// semanal. DISABLED convive con `Organization.executiveReportOptOut` (ver
+// comentario en el campo) — ambos bloquean el envío, ninguno reemplaza al otro.
+enum ExecutiveReportFrequency {
+  WEEKLY
+  BIWEEKLY
+  DISABLED
 }
 
 model WeeklyReportLog {
