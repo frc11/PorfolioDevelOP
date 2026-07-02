@@ -11840,3 +11840,45 @@ Bloque P5 completo. Recorrido:
 - **P5.4a / P5.5** — Schema + sistema de referidos (código/link, tracking, anti-abuso, admin de conversión).
 
 Patrón transversal del bloque: lógica pura testeable por invariante (cero DB) + capa de datos org-scoped + superficie admin, reusando el flujo de upsell/alertas existente. Dos migraciones (P5.3a, P5.4a) quedaron **editadas en schema pero aplicadas a mano por el humano** (protocolo de branch compartida). Verificación visual/tono de todo el bloque: pendiente del humano (el `visual-qa` de este entorno no tuvo preview tools).
+
+---
+
+## ✅ P2.A — Aviso de lead al cliente (email "nuevo lead" + "lead caliente")
+
+**Qué cierra:** la promesa comercial "te avisa cuando hay alguien listo para comprar". Hasta ahora el bot capturaba el lead y notificaba **al equipo develOP** (push de Telegram en el hook), pero **al dueño del negocio** el aviso por email era una base incompleta. P2.A lo completa: todos los planes reciben un email factual de "nuevo lead"; Pro/Business reciben además el aviso **destacado** de "lead caliente". **Cero migraciones** (`migrate status` up to date — todos los campos ya existían).
+
+> ⚠️ **Se tocó el runtime del bot** (hook post-captura de `captureLead`). Anotado acá para el registro compartido con el chat Chatbot. El toque es mínimo y quirúrgico: se reemplazó el bloque de email ad-hoc por una llamada al servicio nuevo; **no se tocaron** prompts, scoring, KB ni el push de Telegram interno (queda intacto).
+
+### Relevamiento (lo que ya existía y se reusó)
+- **Hook:** `captureLead.ts` → `notifyClient()` (fire-and-forget vía `void notifyClient()`), post-captura **y** post-clasificación (`classification` ya calculado). Ahí ya vivían el push de Telegram interno y un email al cliente **sobre Resend** (una sola plantilla, sin gate por plan, sin cap).
+- **Gate de clasificación por plan:** `planAllows(plan, 'leadScoring')` (`src/lib/plan/plan-allows.ts:33`) → `insightEnabled` = {Starter:false, Pro:true, Business:true}. Es la dimensión exacta que pedía el diseño.
+- **Remitente transaccional:** `sendTransactionalEmail` de `@/lib/email/brevo-service` (Brevo) — el mismo que usan forgot-password, onboarding, reportes ejecutivos y resend-credentials. Remitente **`develOP <hola@develop.com.ar>`** (`BREVO_FROM_NAME`/`BREVO_FROM_EMAIL`). El email de lead legado iba por **Resend** — era el outlier del repo; el flujo real de lead pasó a Brevo.
+- **Destinatario:** `Organization.leadNotificationEmail`; si es `null`, fallback al dueño (primer `OrgMember` con rol `ADMIN` → `User.email`). Configurable después; default sensato ahora. `leadNotificationMode = DISABLED` apaga el aviso.
+- **Cap anti-spam:** `checkRateLimit` (tabla Neon atómica) — misma infra que auth/CRM. Sin cola nueva, sin cron.
+
+### Servicio nuevo (decisión pura separada del envío)
+`src/lib/client-notifications/` — el runtime solo llama a `notifyClientOfLead(...)`.
+- **`decide.ts` (puro):** `decideLeadNotification({classification, hasLeadScoring})` → `dq`=no-avisa; `hot`+Pro/Business=template **caliente** que **saltea el cap**; resto (warm/cold, o hot en Starter)=**normal** sujeto al cap. `resolveDelivery({bypassCap, capAllowed, digestAllowed})` → `individual | digest | suppress`. `digestCountWhere(orgId, since)` → filtro org-scoped del conteo del digest.
+- **`templates.ts` (puro):** dos plantillas HTML robustas para Gmail mobile (tablas + estilos inline, sentence case, lenguaje de dueño, cero jerga) + digest. Asunto normal factual (`Nuevo interesado: Juan · quiere comprar`); asunto caliente con lenguaje de clasificación (`Lead caliente: Juan · quiere comprar`). El lenguaje de "caliente" aparece **solo** en el template hot (Pro+). Link directo al lead (`/dashboard/chatbot/leads/[id]`).
+- **`notify.ts` (orquestador):** resuelve destinatario → gate de plan → decisión → cap/digest → envío Brevo → marca `notificationSent`. **Nunca lanza** (try/catch interno + el helper Brevo devuelve `{ok:false}` en vez de throw).
+
+### Anti-spam + digest
+- `leadNotifyPerOrg` = **5 avisos/org/hora**. Superado el tope, en vez de silenciar se manda **un** digest agrupado (`leadDigestPerOrg` = 1/hora): *"Tenés N leads nuevos en la última hora"* (N contado org-scoped, excluyendo `dq`). Más leads en esa hora → suprimidos (ya se digesteó). **El cap NO aplica al caliente en Pro+** (un caliente siempre avisa).
+
+### El mail nunca rompe la captura (fire-and-forget, 4 capas)
+1. El lead se persiste (`$transaction`) **antes** de notificar. 2. `notifyClientOfLead` tiene try/catch propio y retorna `void`. 3. `sendTransactionalEmail` devuelve `{ok:false}` en error, no lanza. 4. Se invoca dentro del `notifyClient()` (ya con try/catch) vía `void`. Un Brevo caído deja el lead guardado + `notificationSent=false`.
+
+### Tests
+`src/lib/client-notifications/client-notifications.invariant.ts` (`npm run check:invariant:client-notifications`, **verde**): decisión por plan (dq no avisa; hot solo destacado en Pro+; hot en Starter cae a normal sin lenguaje de clasificación; warm/cold normales); cap→digest→suppress; **aislamiento multi-tenant** del conteo del digest (org A nunca cuenta leads de org B); lenguaje de "caliente" acotado al template hot. El "un fallo de envío no rompe la captura" queda garantizado por diseño (las 4 capas de arriba) + el contrato de `sendTransactionalEmail`.
+
+### Archivos
+- **Creados:** `src/lib/client-notifications/{decide,templates,notify,index}.ts` + `client-notifications.invariant.ts`.
+- **Modificados:** `src/modules/chatbot/server/tools/captureLead.ts` (hook: bloque de email → `notifyClientOfLead`, Telegram intacto), `src/lib/rate-limit/presets.ts` (`leadNotifyPerOrg` + `leadDigestPerOrg`), `package.json` (script del invariante).
+
+### Verificación
+`npm run check:invariant:client-notifications` verde · `npm run build` exit 0 · `npx tsc --noEmit` sin errores nuevos (queda 1 pre-existente en `searchconsole.ts`, ajeno) · `npx prisma migrate status` up to date (cero migraciones).
+
+### Pendiente del humano (CHECKPOINT P2.A — requiere runtime real)
+- Disparar una conversación de prueba contra un bot de QA que capture un lead → confirmar que el mail llega al destinatario de QA (**usar mail de prueba, nunca de cliente real**) y se lee bien en el celular, con el link al lead. Probar el caso **caliente** con un org Pro/Business de QA (aviso destacado). Ajustar el tono/asunto si hace falta (es texto).
+- **Deuda menor (fuera de scope, no tocada):** el botón admin "Test email" (`sendTestNotification.ts`) sigue usando la plantilla legada por **Resend** — el test no refleja 1:1 el mail real (ahora Brevo). Consolidarlo en un sprint aparte para no tocar la superficie admin acá.
+- **Env vars requeridas en runtime:** `BREVO_API_KEY`, `BREVO_FROM_NAME`, `BREVO_FROM_EMAIL`, `NEXT_PUBLIC_APP_URL` (para el link al lead).

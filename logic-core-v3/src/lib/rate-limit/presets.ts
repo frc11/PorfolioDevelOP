@@ -44,6 +44,17 @@ export const RATE_LIMIT_PRESETS = {
   // form más de 5 veces en 15 minutos. Clave: IP hasheada (no controlable
   // por el atacante — no se expone ningún campo del FormData).
   contactFormPerIp: { limit: 5, windowMs: 15 * 60_000 },
+
+  // ── Aviso de lead al cliente (P2.A) ───────────────────────────────────────
+  // Anti-spam del email "nuevo lead" al dueño: máximo 5 avisos individuales por
+  // org por hora. Superado el tope, el aviso se AGRUPA en un digest (no se
+  // silencia). Clave: orgId (no sensible). NO aplica a leads calientes en Pro+
+  // (un caliente siempre avisa — saltea el cap). Ver `client-notifications`.
+  leadNotifyPerOrg: { limit: 5, windowMs: 60 * 60_000 },
+  // El digest en sí se limita a 1 por org por hora: una vez superado el cap de
+  // individuales, se manda UN solo resumen agrupado — los leads siguientes de
+  // esa hora no vuelven a disparar mail (evita spamear con un digest por lead).
+  leadDigestPerOrg: { limit: 1, windowMs: 60 * 60_000 },
 } as const
 
 export type RateLimitScope = keyof typeof RATE_LIMIT_PRESETS
