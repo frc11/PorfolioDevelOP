@@ -5,6 +5,7 @@ import { ResendCredentialsButton } from '../ResendCredentialsButton'
 import { InternalNotesCard } from '../InternalNotesCard'
 import { PlanAssignmentCard } from '../PlanAssignmentCard'
 import { BillingOverrideCard } from '../BillingOverrideCard'
+import { ExecutiveReportCard } from '../ExecutiveReportCard'
 
 interface OverviewTabProps {
   clientId: string
@@ -70,6 +71,7 @@ export async function OverviewTab({ clientId }: OverviewTabProps) {
 
       <PlanAssignmentCard clientId={clientId} />
       <BillingOverrideCard clientId={clientId} />
+      <ExecutiveReportCard clientId={clientId} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card variant="elevated" padding="lg">

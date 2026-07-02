@@ -11882,3 +11882,45 @@ Patrón transversal del bloque: lógica pura testeable por invariante (cero DB) 
 - Disparar una conversación de prueba contra un bot de QA que capture un lead → confirmar que el mail llega al destinatario de QA (**usar mail de prueba, nunca de cliente real**) y se lee bien en el celular, con el link al lead. Probar el caso **caliente** con un org Pro/Business de QA (aviso destacado). Ajustar el tono/asunto si hace falta (es texto).
 - **Deuda menor (fuera de scope, no tocada):** el botón admin "Test email" (`sendTestNotification.ts`) sigue usando la plantilla legada por **Resend** — el test no refleja 1:1 el mail real (ahora Brevo). Consolidarlo en un sprint aparte para no tocar la superficie admin acá.
 - **Env vars requeridas en runtime:** `BREVO_API_KEY`, `BREVO_FROM_NAME`, `BREVO_FROM_EMAIL`, `NEXT_PUBLIC_APP_URL` (para el link al lead).
+
+## ✅ P2.B.1 — Botón admin "Enviar reporte ahora" (Executive Weekly Report, 1 org)
+
+**Qué cierra:** el Executive Weekly Report (Sistema A: brief IA + métricas + top-3-hot-leads Business, cron lunes 9am AR) solo se disparaba por cron — no había forma de verificar o reintentar el envío para una org puntual sin esperar a la semana siguiente. P2.B.1 agrega ESE trigger manual, admin-only, para una org a la vez. Cero migraciones (no hacía falta schema nuevo).
+
+> ⚠️ **NO se tocó el motor del reporte** (`build.ts`/`send.ts`/`top-hot-leads.ts`/`executive-brief.ts`) — regla no-negociable del sprint. Ver el gotcha de idempotencia abajo: es la razón de que exista un archivo `send-manual.ts` en vez de extender `send.ts`.
+
+### Relevamiento (antes de tocar código)
+- **`buildExecutiveWeeklyReport(organizationId, now?)`** (`build.ts:63`) — devuelve `{ok:true, data, recipient} | {ok:false, reason: BuildSkipReason}`, nunca lanza para los casos de gating (PLAN/OPTOUT/NO_RECIPIENT/NO_DATA). Segura de invocar tal cual.
+- **`sendExecutiveWeeklyReports(now?)`** (`send.ts:37`) — **sin parámetro para acotar a 1 org** (siempre `findMany` de TODAS las orgs elegibles) y **sin unidad de trabajo por-org extraíble**: todo vive inline en un `for`.
+- **Patrón `ResendCredentialsButton`** calcado 1:1: máquina de estados, confirmación de 2 pasos inline, `fetch` sin body, endpoint hermano con guard→rate-limit→Zod→lógica→audit.
+
+### GOTCHA — idempotencia sin bypass (decisión llevada al humano, no autodecidida)
+`send.ts:67-75` chequea `WeeklyReportLog` por `(organizationId, periodKey)`: si `status === 'SENT'`, hace `continue` — **bloqueo duro, sin flag de force**. `periodKey` es por semana ISO completa (lunes-domingo), así que aplica cualquier día de esa semana. Se llevó la decisión al humano con 3 opciones (no tocar el motor / tocar send.ts mínimamente / parar). **Elegida: no tocar el motor.** Consecuencia aceptada: el botón funciona para orgs que todavía NO recibieron el reporte esta semana (nuevas, `FAILED`, `SKIPPED_*`); si ya está `SENT`, el botón lo informa (estado `already_sent`) y **no reenvía** — mismo comportamiento que el cron hoy.
+
+### Función nueva (fuera del motor, mismo comportamiento)
+`src/lib/reports/executive-weekly/send-manual.ts` — `sendExecutiveWeeklyReportManual(organizationId, now?)`. Reimplementa la MISMA secuencia que el loop de `send.ts` (idempotencia → build → Brevo → upsert de log) pero para 1 sola org, incluyendo el mismo bloqueo duro en `SENT`. Costo aceptado: ~20 líneas de orquestación duplicadas fuera del motor — es el precio de no tocarlo.
+
+### Superficie admin
+- **Route:** `POST /api/admin/clients/[organizationId]/send-executive-report` — orden calcado de `resend-credentials/route.ts`: `requireSuperAdmin()` canónico (`src/lib/auth-guards.ts`, NO el del módulo chatbot) → `applyAuthRateLimit` → Zod (`OrganizationIdSchema`, reusado de `@/lib/actions/schemas`, sin crear uno nuevo) → `sendExecutiveWeeklyReportManual` → `logAdminAction`. 404 limpio si la org no existe; 200 con `{ok:false, reason}` para los demás casos de no-envío (mismo criterio que el sibling).
+- **Rate-limit nuevo:** `sendExecutiveReportNowPerAdmin` = 5/admin/5min (`presets.ts` + union type en `auth-rate-limit.ts`).
+- **Audit log:** `actionType: 'EMAIL_SENT'` (no existe un valor dedicado tipo `REPORT_SENT` en el enum `AuditActionType` — se usó el más cercano semánticamente para evitar una migración fuera de scope).
+- **UI:** `SendExecutiveReportButton.tsx` (estados `idle/confirming/loading/success/already_sent/skipped/error`) dentro de `ExecutiveReportCard.tsx`, montada en `OverviewTab.tsx` junto a `PlanAssignmentCard`/`BillingOverrideCard` (acciones a nivel-org ya existentes en esa ficha) — no en el header persistente ni adentro de la card de contacto (esas son user-level, no org-level).
+
+### Gotcha de TypeScript encontrado (no relacionado al motor, documentado por si reaparece)
+`requireSuperAdmin()` de `auth-guards.ts` no tiene tipo de retorno explícito. Al importarlo y capturar su valor de retorno **desde otro archivo**, TypeScript infiere `Promise<string>` en vez del objeto `session.user` real (confirmado con un diagnóstico aislado: `Awaited<ReturnType<typeof auth>>` colapsa a `NextMiddleware` por el `React.cache()` sobre el `auth` multi-overload de NextAuth v5 — la inferencia cross-file agarra el ÚLTIMO overload, no el que realmente se llama). Dentro del propio `auth-guards.ts` no pasa nada raro (el narrowing local es correcto). Workaround usado, sin tocar `auth-guards.ts`: la route llama `requireSuperAdmin()` solo por su efecto de lanzar/gatear, y separadamente llama `auth()` de nuevo (memoizado por `React.cache`, sin costo extra) para leer los campos de sesión. Si un futuro sprint necesita el valor de retorno de `requireSuperAdmin()` en otro archivo, va a pisar el mismo problema — la solución de raíz sería anotar el tipo de retorno explícito en `auth-guards.ts`, no tocado acá por estar fuera de scope.
+
+### Tests
+`tests/e2e/41-admin-executive-report-send-now.spec.ts` (Playwright, patrón `19-security.spec.ts`/`alerts-detector.spec.ts` — único mecanismo de test real en el repo, no hay Jest/Vitest/mocks). Usa un `organizationId` inexistente a propósito: llega a `NOT_FOUND` antes de tocar `buildExecutiveWeeklyReport`/Brevo, cero mails reales. Cubre: rechaza sin sesión (401/403) · rechaza sesión no-SUPER_ADMIN (403) · valida `organizationId` inválido (400, segmento `%20`) · org inexistente da 404 limpio · rate-limit corta al 6to intento (429), con limpieza previa de la tabla `rate_limit` para determinismo. **NO ejecutado** (requiere `npm run build && npm run test:e2e` contra server real — fuera del gate de este sprint, que definió tsc+lint, no build). El caso del segmento `%20` tampoco fue verificado empíricamente contra un server corriendo — está escrito según el comportamiento esperado de Next.js routing + Zod `.trim().min(1)`, a confirmar cuando el humano corra la suite.
+
+### Archivos
+- **Creados:** `src/lib/reports/executive-weekly/send-manual.ts`, `src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts`, `src/app/(protected)/admin/clients/[clientId]/_components/{SendExecutiveReportButton,ExecutiveReportCard}.tsx`, `tests/e2e/41-admin-executive-report-send-now.spec.ts`.
+- **Modificados:** `src/lib/security/auth-rate-limit.ts` (scope nuevo en el union type), `src/lib/rate-limit/presets.ts` (preset `sendExecutiveReportNowPerAdmin`), `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx` (mount de `ExecutiveReportCard`).
+- **NO tocados** (a propósito): `build.ts`, `send.ts`, `top-hot-leads.ts`, `executive-brief.ts` (motor del reporte) · `vercel.json`/`netlify.toml` (crons) · Sistema B (`/admin/settings/reports`, `sendWeeklyReports`) · Sistema C (insights) · `auth-guards.ts` (ver gotcha de TS arriba) · `/dashboard/**`.
+
+### Verificación
+`npx tsc --noEmit` sin errores nuevos (1 pre-existente en `searchconsole.ts:119`, ajeno) · `eslint` verde en los 8 archivos tocados/creados · `npm run build` NO corrido (excluido del gate de este sprint por instrucción explícita) · sin migraciones (no aplica `prisma migrate status`) · sin commits (los deja el humano tras verificar).
+
+### Pendiente del humano
+- Correr `npm run test:e2e` (requiere `npm run build` primero) y confirmar que las 5 aserciones del spec nuevo pasan, en particular el caso del segmento `%20` (no verificado empíricamente).
+- Disparar el botón real contra una org de QA (Pro/Business, con `BREVO_API_KEY` configurada) y confirmar que el mail llega — el envío real no se auto-confirmó (regla del harness: el humano verifica).
+- Decidir si el botón debería moverse/copiarse a `/admin/settings/reports` además de la ficha de la org (quedó únicamente en la ficha, `admin/clients/[clientId]`, por default razonado en el sprint — no se preguntó explícitamente).

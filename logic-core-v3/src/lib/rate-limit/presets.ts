@@ -14,6 +14,10 @@ export const RATE_LIMIT_PRESETS = {
   resetPasswordPerIp: { limit: 10, windowMs: 15 * 60_000 },
   // Admin: re-envío de credenciales (anti doble-click y anti cuenta comprometida).
   resendCredentialsPerAdmin: { limit: 10, windowMs: 60 * 60_000 },
+  // Admin: envío manual del reporte ejecutivo semanal, 1 org por click (P2.B.1).
+  // Cada click intenta mandar un mail real por Brevo — anti doble-click y anti
+  // abuso de cuenta admin comprometida. Precedente: resendCredentialsPerAdmin.
+  sendExecutiveReportNowPerAdmin: { limit: 5, windowMs: 5 * 60_000 },
 
   // ── Chatbot ─────────────────────────────────────────────────────────────
   // Capa CORS (route handler) — clave: origin + IP hasheada (no sessionId,

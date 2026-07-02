@@ -14,6 +14,7 @@ type AuthRateLimitScope = Extract<
   | 'forgotPasswordPerEmail'
   | 'resetPasswordPerIp'
   | 'resendCredentialsPerAdmin'
+  | 'sendExecutiveReportNowPerAdmin'
 >
 
 export type AuthRateLimitOutcome =
