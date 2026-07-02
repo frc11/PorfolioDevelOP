@@ -69,3 +69,7 @@ backups/
 scripts/_p[0-9][0-9]-*
 # Lane Resultados — seed efímero de QA para /analisis (no se mergea)
 scripts/dev/_seed-resultados-qa.ts
+
+# Screenshots de verificación QA (proof-e2e por sprint) — artefactos locales
+# de consulta, no código/documentación permanente; no van al historial de git.
+docs/proof-screenshots/
