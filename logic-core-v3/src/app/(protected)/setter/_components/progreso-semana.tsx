@@ -1,4 +1,4 @@
-import { CalendarCheck2, MessageSquare, Send, type LucideIcon } from 'lucide-react'
+import { Archive, CalendarCheck2, MessageSquare, Send, type LucideIcon } from 'lucide-react'
 import type { ProgresoSemana as ProgresoSemanaData } from '@/lib/leados/progreso'
 
 type Item = { icon: LucideIcon; valor: number; label: string }
@@ -29,6 +29,13 @@ export function ProgresoSemana({ progreso }: { progreso: ProgresoSemanaData }) {
       icon: CalendarCheck2,
       valor: progreso.reuniones,
       label: progreso.reuniones === 1 ? 'reunión agendada' : 'reuniones agendadas',
+    },
+    {
+      // A-09: el descarte/pérdida honesta también es trabajo hecho — antes no
+      // sumaba a ningún número de "Tu semana".
+      icon: Archive,
+      valor: progreso.archivados,
+      label: progreso.archivados === 1 ? 'negocio filtrado o cerrado' : 'negocios filtrados o cerrados',
     },
   ].filter((item) => item.valor > 0)
 

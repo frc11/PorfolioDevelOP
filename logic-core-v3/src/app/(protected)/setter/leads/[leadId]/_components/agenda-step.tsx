@@ -8,6 +8,7 @@ import {
   CalendarSearch,
   CheckCircle2,
   Lock,
+  Phone,
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react'
@@ -34,6 +35,8 @@ type AgendaStepProps = {
   /** Prefill del attendee: datos cargados del lead. */
   contactName: string | null
   leadEmail: string | null
+  /** A-14: re-servido acá — a mano para confirmar o recordarle la reunión. */
+  leadPhone: string | null
 }
 
 /** Recordatorio del decisor según la ficha del Paso 1 — el gancho pedido. */
@@ -62,6 +65,7 @@ export function AgendaStep({
   agenda,
   contactName,
   leadEmail,
+  leadPhone,
 }: AgendaStepProps) {
   const router = useRouter()
   const [decisorOk, setDecisorOk] = useState(false)
@@ -96,7 +100,8 @@ export function AgendaStep({
           {agenda.attendee && (
             <p>
               <span className="font-semibold text-zinc-300">Con:</span> {agenda.attendee.nombre}{' '}
-              ({agenda.attendee.email})
+              ({agenda.attendee.email}
+              {leadPhone ? ` · ${leadPhone}` : ''})
             </p>
           )}
           {agenda.notasTraspaso && (
@@ -215,6 +220,14 @@ export function AgendaStep({
           Listo para agendar
         </Badge>
       </div>
+
+      {/* A-14: el teléfono a mano para confirmar el horario elegido. */}
+      {leadPhone && (
+        <p className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <Phone size={12} strokeWidth={1.5} className="shrink-0" />
+          {leadPhone}
+        </p>
+      )}
 
       <TeachPanel id="traspaso" />
 

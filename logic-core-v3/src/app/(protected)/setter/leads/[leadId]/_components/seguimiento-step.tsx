@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CalendarClock, CheckCircle2, Lock, Rocket, Send } from 'lucide-react'
+import { CalendarClock, CheckCircle2, Lock, Phone, Rocket, Send } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
 import {
@@ -38,6 +38,9 @@ import { StepLink } from './step-nav'
 type SeguimientoStepProps = {
   leadId: string
   lead: CopyBlockLead
+  /** A-14: re-servido acá para no obligar al setter a volver a Ficha en medio
+   * de la conversación. */
+  leadPhone: string | null
   stage: DossierStage | null
   status: LeadStatus
   /** admin-1b: campo persistido que marca Franco — habilita el envío preventivo. */
@@ -110,6 +113,7 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
 export function SeguimientoStep({
   leadId,
   lead,
+  leadPhone,
   stage,
   status,
   caliente,
@@ -212,6 +216,15 @@ export function SeguimientoStep({
           {STATUS_LABELS[status]}
         </Badge>
       </div>
+
+      {/* A-14: el teléfono a mano mientras se sigue la conversación — sin
+          volver a scrollear al header. */}
+      {leadPhone && (
+        <p className="flex items-center gap-1.5 text-xs text-zinc-500">
+          <Phone size={12} strokeWidth={1.5} className="shrink-0" />
+          {leadPhone}
+        </p>
+      )}
 
       {/* Seguimiento guiado: qué hacer cuando responde / cuando no (3.6). */}
       <TeachPanel id="seguimiento" />

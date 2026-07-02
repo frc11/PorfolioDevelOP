@@ -36,6 +36,7 @@ function lead(id: string): HomeLead {
     ficha: null,
     evaluacion: null,
     ultimoRechazo: null,
+    agenda: null,
     contactos: 0,
     followUpVencido: false,
     postergadoVencido: false,

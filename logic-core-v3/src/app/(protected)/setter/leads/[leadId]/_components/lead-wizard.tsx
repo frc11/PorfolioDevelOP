@@ -33,6 +33,9 @@ export type WizardLead = CopyBlockLead & {
   id: string
   status: LeadStatus
   contactName: string | null
+  /** A-14: re-servido en el header y en seguimiento/agenda — el setter nunca
+   * tiene que volver a Ficha para encontrar el número. */
+  phone: string | null
   /** B7: prefill del attendee del booking (Cal.com exige email). */
   email: string | null
   notes: string | null
@@ -253,6 +256,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
           <SeguimientoStep
             leadId={lead.id}
             lead={lead}
+            leadPhone={lead.phone}
             stage={stage}
             status={lead.status}
             caliente={lead.caliente}
@@ -277,6 +281,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
           agenda={agenda}
           contactName={lead.contactName}
           leadEmail={lead.email}
+          leadPhone={lead.phone}
         />
       )}
 

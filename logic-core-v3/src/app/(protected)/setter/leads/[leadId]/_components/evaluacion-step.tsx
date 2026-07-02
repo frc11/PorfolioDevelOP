@@ -9,6 +9,7 @@ import { Badge, Button, Card, Field, Modal, Select, TextArea } from '@/component
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { fichaFaltantes, gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
@@ -54,6 +55,18 @@ export function EvaluacionStep({
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+
+  // A-24: a diferencia de Ficha/Brief (autosave), la Evaluación es un
+  // formulario de una sola pasada sin borrador — cerrar la pestaña a mitad
+  // del razonamiento lo pierde entero. `formVisible` espeja las mismas dos
+  // condiciones que gobiernan los early-return de abajo (ya evaluado / ficha
+  // sin señal mínima): la guardia solo debe correr en el tramo editable real.
+  const faltantesFicha = fichaFaltantes(ficha)
+  const formVisible = !evaluacion && habilitado && faltantesFicha.length === 0
+  const hayCambiosSinGuardar =
+    formVisible &&
+    (score !== null || veredicto !== '' || razonamiento.trim() !== '' || motivoDescarte.trim() !== '')
+  useUnsavedGuard(hayCambiosSinGuardar)
 
   // ── Resumen: evaluación ya registrada ──────────────────────────────────────
   if (evaluacion) {
@@ -102,7 +115,6 @@ export function EvaluacionStep({
   }
 
   // ── Bloqueado: la ficha todavía no tiene señal mínima ──────────────────────
-  const faltantesFicha = fichaFaltantes(ficha)
   if (!habilitado || faltantesFicha.length > 0) {
     return (
       <Card variant="subtle" padding="lg">
