@@ -1,8 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useMemo, useState } from 'react'
 import { CheckCircle2, Hourglass, Lock, PencilLine } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
@@ -11,6 +9,7 @@ import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildBriefInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
 import { useAutosave } from '@/lib/use-autosave'
+import { erroresPorCampo, useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { BriefInputSchema, type BriefInput } from '@/app/(protected)/setter/_actions/dossier.schemas'
@@ -76,13 +75,12 @@ export function BriefStep({
   brief,
   gateAbierto,
 }: BriefStepProps) {
-  const router = useRouter()
   const [form, setForm] = useState<BriefFormState>(() => estadoInicial(brief, lead.businessName))
   const [errors, setErrors] = useState<FormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [editando, setEditando] = useState(false)
   const [sanityOk, setSanityOk] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  const { isPending, run } = useStepAction()
 
   // El form se muestra en la captura inicial (EVALUADA con gate abierto) o al
   // re-pegar desde el sanity-check (BRIEF + editando).
@@ -117,27 +115,18 @@ export function BriefStep({
     setServerError(null)
     const parsed = BriefInputSchema.safeParse(aPayloadBrief(form))
     if (!parsed.success) {
-      const nuevos: FormErrors = {}
-      for (const issue of parsed.error.issues) {
-        const campo = issue.path[0] as keyof FormErrors | undefined
-        if (campo && !nuevos[campo]) nuevos[campo] = issue.message
-      }
-      setErrors(nuevos)
+      setErrors(erroresPorCampo<keyof FormErrors>(parsed.error))
       return
     }
     setErrors({})
-    startTransition(async () => {
-      const result = await guardarBrief(leadId, parsed.data)
-      if (!result.success) {
-        setServerError(result.error)
-        toast.error(result.error)
-        return
-      }
-      toast.success('Brief guardado — dale una leída antes de seguir.')
-      autosave.markSaved()
-      setEditando(false)
-      setSanityOk(false)
-      router.refresh()
+    run(() => guardarBrief(leadId, parsed.data), {
+      onError: setServerError,
+      onSuccess: () => {
+        autosave.markSaved()
+        setEditando(false)
+        setSanityOk(false)
+      },
+      successToast: 'Brief guardado — dale una leída antes de seguir.',
     })
   }
 

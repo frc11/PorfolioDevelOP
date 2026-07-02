@@ -1,8 +1,6 @@
 'use client'
 
-import { useSyncExternalStore, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useSyncExternalStore } from 'react'
 import {
   AlarmClock,
   ExternalLink,
@@ -21,6 +19,7 @@ import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-bl
 import { GUIA_CONSTRUCCION } from '@/lib/leados/guidance-content'
 import { PROMPTS_DISENIO } from '@/lib/leados/prompts-disenio'
 import { formatEspera } from '@/lib/leados/revision'
+import { useStepAction } from '@/lib/use-step-action'
 import {
   iniciarConstruccion,
   reabrirConstruccion,
@@ -227,20 +226,11 @@ export function ConstruccionStep({
   escaladoAt,
   progreso,
 }: ConstruccionStepProps) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const { isPending, run } = useStepAction()
   const hidratado = useHidratado()
 
   const transicionar = (action: typeof iniciarConstruccion, mensajeOk: string) => {
-    startTransition(async () => {
-      const result = await action(leadId)
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      toast.success(mensajeOk)
-      router.refresh()
-    })
+    run(() => action(leadId), { successToast: mensajeOk })
   }
 
   // ── Antes del brief: paso apagado ──────────────────────────────────────────

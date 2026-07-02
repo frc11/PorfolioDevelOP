@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import { CalendarClock, CheckCircle2, Lock, Phone, Rocket, Send } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
@@ -20,6 +18,7 @@ import {
   STATUS_LABELS,
 } from '@/lib/leados/flow'
 import { GUIA_ENVIO, GUIA_SEGUIMIENTO } from '@/lib/leados/guidance-content'
+import { useStepAction } from '@/lib/use-step-action'
 import {
   enviarDemoAprobada,
   registrarResultado,
@@ -125,13 +124,12 @@ export function SeguimientoStep({
   demoEnviadaAt,
   dmsHoy,
 }: SeguimientoStepProps) {
-  const router = useRouter()
   const [resultado, setResultado] = useState<ResultadoContacto | null>(null)
   const [nota, setNota] = useState('')
   const [fechaReactivacion, setFechaReactivacion] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const [enviandoDemo, startEnvioDemo] = useTransition()
+  const registro = useStepAction()
+  const envio = useStepAction()
 
   const respondio = leadRespondio(status)
   const demoEnviada = Boolean(demoEnviadaAt)
@@ -168,34 +166,23 @@ export function SeguimientoStep({
       setError(parsed.error.issues[0]?.message ?? 'Revisá lo que registraste')
       return
     }
-    startTransition(async () => {
-      const result = await registrarResultado(leadId, parsed.data)
-      if (!result.success) {
-        setError(result.error)
-        toast.error(result.error)
-        return
-      }
-      toast.success(toastDeResultado(result.data.resultado, result.data.proximoToque))
-      setResultado(null)
-      setNota('')
-      setFechaReactivacion('')
-      router.refresh()
+    registro.run(() => registrarResultado(leadId, parsed.data), {
+      onError: setError,
+      onSuccess: () => {
+        setResultado(null)
+        setNota('')
+        setFechaReactivacion('')
+      },
+      successToast: (data) => toastDeResultado(data.resultado, data.proximoToque),
     })
   }
 
   const registrarEnvioDemo = () => {
-    startEnvioDemo(async () => {
-      const result = await enviarDemoAprobada(leadId)
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      toast.success(
-        result.data.yaEnviada
+    envio.run(() => enviarDemoAprobada(leadId), {
+      successToast: (data) =>
+        data.yaEnviada
           ? 'Ese envío ya estaba registrado — no se duplica nada.'
           : 'Demo enviada registrada 🚀 — ahora el objetivo es la reunión.',
-      )
-      router.refresh()
     })
   }
 
@@ -297,7 +284,7 @@ export function SeguimientoStep({
           />
           <Button
             onClick={registrarEnvioDemo}
-            loading={enviandoDemo}
+            loading={envio.isPending}
             icon={<Send size={14} strokeWidth={1.5} />}
           >
             Ya la envié — registrar
@@ -387,7 +374,7 @@ export function SeguimientoStep({
 
           <Button
             onClick={registrar}
-            loading={isPending}
+            loading={registro.isPending}
             disabled={resultado === null}
             variant="secondary"
           >

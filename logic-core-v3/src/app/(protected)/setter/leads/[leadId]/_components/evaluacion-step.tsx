@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import { Flame, GraduationCap, Lock } from 'lucide-react'
 import type { LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Modal, Select, TextArea } from '@/components/ui'
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { fichaFaltantes, gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
+import { erroresPorCampo, useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
@@ -46,7 +45,6 @@ export function EvaluacionStep({
   habilitado,
   descartado,
 }: EvaluacionStepProps) {
-  const router = useRouter()
   const [score, setScore] = useState<number | null>(evaluacion?.score ?? null)
   const [veredicto, setVeredicto] = useState<string>(evaluacion?.veredicto ?? '')
   const [razonamiento, setRazonamiento] = useState(evaluacion?.razonamiento ?? '')
@@ -54,7 +52,7 @@ export function EvaluacionStep({
   const [errors, setErrors] = useState<FormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmOpen, setConfirmOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
+  const { isPending, run } = useStepAction()
 
   // A-24: a diferencia de Ficha/Brief (autosave), la Evaluación es un
   // formulario de una sola pasada sin borrador — cerrar la pestaña a mitad
@@ -157,11 +155,7 @@ export function EvaluacionStep({
     }
     const parsed = EvaluacionInputSchema.safeParse(payload)
     if (!parsed.success) {
-      const nuevos: FormErrors = {}
-      for (const issue of parsed.error.issues) {
-        const campo = issue.path[0] as keyof FormErrors | undefined
-        if (campo && !nuevos[campo]) nuevos[campo] = issue.message
-      }
+      const nuevos = erroresPorCampo<keyof FormErrors>(parsed.error)
       setErrors(nuevos)
       // Si lo único que falta es el motivo del descarte, lo pide el modal
       if (nuevos.motivoDescarte && !nuevos.score && !nuevos.veredicto && !nuevos.razonamiento) {
@@ -171,22 +165,15 @@ export function EvaluacionStep({
     }
 
     setErrors({})
-    startTransition(async () => {
-      const result = await registrarEvaluacion(leadId, parsed.data)
-      if (!result.success) {
-        setServerError(result.error)
-        toast.error(result.error)
-        return
-      }
-      setConfirmOpen(false)
-      if (result.data.descartado) {
-        toast.success('Lead descartado. Bien filtrado: a otra cosa.')
-      } else if (result.data.gateAbierto) {
-        toast.success('Evaluación registrada — el brief quedó habilitado.')
-      } else {
-        toast.success('Evaluación registrada. El brief arranca cuando el negocio responda.')
-      }
-      router.refresh()
+    run(() => registrarEvaluacion(leadId, parsed.data), {
+      onError: setServerError,
+      onSuccess: () => setConfirmOpen(false),
+      successToast: (data) =>
+        data.descartado
+          ? 'Lead descartado. Bien filtrado: a otra cosa.'
+          : data.gateAbierto
+            ? 'Evaluación registrada — el brief quedó habilitado.'
+            : 'Evaluación registrada. El brief arranca cuando el negocio responda.',
     })
   }
 
@@ -201,12 +188,7 @@ export function EvaluacionStep({
         motivoDescarte: 'pendiente',
       })
       if (!base.success) {
-        const nuevos: FormErrors = {}
-        for (const issue of base.error.issues) {
-          const campo = issue.path[0] as keyof FormErrors | undefined
-          if (campo && !nuevos[campo]) nuevos[campo] = issue.message
-        }
-        setErrors(nuevos)
+        setErrors(erroresPorCampo<keyof FormErrors>(base.error))
         return
       }
       setErrors({})

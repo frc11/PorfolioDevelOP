@@ -711,3 +711,44 @@
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 2.3 / BLOQUE 2: cerró verde. A-14: ok · A-24: ok · A-09: ok.
 Desvíos: ninguno de fondo — el catch-up de commits pendientes (B1.A/B6.1-B6.5/AUD-1, seis sprints previos sin commitear) se resolvió con un commit aparte antes de arrancar 2.3, y `docs/proof-screenshots/` se gitignoró (159MB de PNGs de corridas QA previas) en vez de commitearse. Pendiente: nada de este sprint; queda anotado (b) de arriba para cuando Franco quiera la pasada perceptual humana.
+
+## Sprint 3.1 — Hook `useStepAction`: el ciclo submit de los steps, en un solo lugar (BLOQUE 3 de remediación post-auditoría · A-16) · 2026-07-02
+
+**Hallazgo (A-16).** El mismo ciclo submit copy-pasteado en los steps del wizard: el mapeo `ZodError → FormErrors` idéntico 3 veces (Evaluación ×2, Brief ×1) y el ciclo `startTransition → action → toast → router.refresh()` en 7 transiciones de 5 archivos. El Bloque 4/5 va a multiplicar pantallas — cada una repetiría este boilerplate.
+
+**Qué se hizo.** Se extrajo el ciclo a `src/lib/use-step-action.ts` (hermano de `use-autosave.ts` / `use-unsaved-guard.ts`), con dos exports:
+- `useStepAction()` → `{ isPending, run }`: ejecuta la server action dentro de la transición; ante `!result.success` corre `onError` (estado propio del step) + `toast.error(result.error)`; ante éxito corre `onSuccess`, el toast de éxito (`successToast`: string fijo o función del payload — omitido = sin toast) y `router.refresh()` (`refresh: false` lo apaga). El hook NO homogeneiza: todo lo que variaba entra por parámetro.
+- `erroresPorCampo<Campo>(zodError)`: el loop compartido «primer mensaje por campo, solo `path[0]`» que los steps con errores per-campo copiaban idéntico.
+
+**Censo (Fase 1) — 9 call-sites en los 5 archivos listados, 9 migrados:**
+
+| Call-site | Action | Particularidades preservadas por parámetro |
+|---|---|---|
+| Evaluación · `enviar` | `registrarEvaluacion` | `setServerError` en `onError`; cierre del modal en `onSuccess`; toast condicional en 3 variantes (`descartado`/`gateAbierto`/espera) |
+| Evaluación · `intentarEnviar` | — (solo validación) | sin transición: solo adopta `erroresPorCampo`; la apertura del modal ante «solo falta `motivoDescarte`» queda EN el step |
+| Brief · `guardar` | `guardarBrief` | `setServerError`; `autosave.markSaved()` + `setEditando(false)` + `setSanityOk(false)` en `onSuccess`; toast fijo |
+| Construcción · `transicionar` (×2: iniciar/reabrir) | `iniciarConstruccion`/`reabrirConstruccion` | sin estado de error propio (solo toast); mensaje de éxito por parámetro — el helper local quedó de 10 líneas a 1 |
+| Agenda · `buscarHorarios` | `ofrecerHorarios` | **variación**: SIN toast de éxito y SIN refresh (solo carga slots) → `successToast` omitido + `refresh: false` |
+| Agenda · `confirmar` | `confirmarReunion` | **variación**: reset condicional de slots cuando el error dice «se acaba de ocupar» — preservado dentro de `onError`; toast derivado del slot confirmado |
+| Seguimiento · `registrar` | `registrarResultado` | limpieza del form (resultado/nota/fecha) en `onSuccess`; toast derivado vía `toastDeResultado` |
+| Seguimiento · `registrarEnvioDemo` | `enviarDemoAprobada` | sin estado de error propio; toast derivado de `yaEnviada` |
+
+El mapeo Zod «primer issue → string único» de Agenda·`confirmar` y Seguimiento·`registrar` es OTRO patrón (no per-campo): se queda en el step tal cual, no se forzó al helper.
+
+**Decisiones / líneas de límite.**
+- **Orden interno del bloque de éxito.** El hook fija `onSuccess → toast → refresh`. En el original, Evaluación seteaba estado antes del toast y Brief/Seguimiento al revés — todo dentro del mismo bloque síncrono post-`await` (batching de React + toast imperativo), sin diferencia observable. Anotado por transparencia, no es un cambio de comportamiento.
+- **El barrido encontró el mismo ciclo FUERA del scope listado** (~10 componentes: `ficha-step`, `opener-step`, `draft-step`, `self-check-step`, `escalar-modal`, `checklist-construccion`, `nuevo-prospecto-form`, `importar-prospectos-form`, `foco-surface`, `lead-card-actions`, `novedades-marcar-visto`). NO se tocaron (regla 2: solo los listados): quedan como candidatos de adopción incremental para cuando cada uno se pise por otra razón.
+- **Cero cambios de copy/motor**: los strings de todos los toasts se movieron carácter por carácter; `dossier.ts`, actions y schemas sin tocar.
+
+**Verde (chequeado, no asumido) — idéntico a la línea base del cierre de 2.3.**
+- ✅ `npx tsc --noEmit` → **0 errores**.
+- ✅ `npm run test:leados` → **22/22** (== línea base 22/22).
+- ✅ `npm run build` + `npm run test:setter` → **39/39** (== línea base 39/39) — el recorrido browser contra prod-QA:3001 ejercita los mismos submits migrados (evaluación, brief, seguimiento, claim del envío-demo).
+- ✅ `npx prisma migrate status` → «Database schema is up to date».
+- ✅ Diff neto en steps: **68+/129−** (5 archivos) + el hook nuevo (~90 líneas con doc). Sin push (regla 4).
+
+**Desvío de forma (Fase 0).** Los «commits de 2.1, 2.2 y 2.3» no existen como tres commits: el Bloque 2 completo aterrizó en UNO (`6dd4946`, A-14/A-24/A-09 — el título lista los tres entregables). Se verificó el contenido en los archivos (guardia A-24 presente en Evaluación, etc.) y se consideró cumplido el gate.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.1: cerró verde. Call-sites migrados: 9 de 9 censados (7 transiciones + 2 sitios de mapeo Zod per-campo); variaciones preservadas: búsqueda de horarios sin toast/refresh, reset condicional de slots en el error de confirmar, modal de descarte de Evaluación, post-éxitos propios de Brief/Seguimiento.
+Comportamiento cambiado: ninguno — suites idénticas (22/22 y 39/39, iguales a la línea base de 2.3). Desvíos: solo de forma — el gate de Fase 0 pedía los commits 2.1/2.2/2.3 y el Bloque 2 está en un único commit (6dd4946); verificado por contenido. Pendiente: nada; queda anotado el mismo ciclo en ~10 componentes fuera del scope listado como adopción incremental futura.

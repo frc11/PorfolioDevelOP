@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import {
   CalendarCheck2,
   CalendarSearch,
@@ -18,6 +16,7 @@ import type { Agenda, Ficha } from '@/lib/leados/contracts'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
 import { formatFechaHora, reunionAgendada } from '@/lib/leados/flow'
 import { GUIA_AGENDA } from '@/lib/leados/guidance-content'
+import { useStepAction } from '@/lib/use-step-action'
 import {
   confirmarReunion,
   ofrecerHorarios,
@@ -67,7 +66,6 @@ export function AgendaStep({
   leadEmail,
   leadPhone,
 }: AgendaStepProps) {
-  const router = useRouter()
   const [decisorOk, setDecisorOk] = useState(false)
   const [slots, setSlots] = useState<string[] | null>(null)
   const [slotElegido, setSlotElegido] = useState<string | null>(null)
@@ -75,8 +73,8 @@ export function AgendaStep({
   const [email, setEmail] = useState(leadEmail ?? '')
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [buscando, startBusqueda] = useTransition()
-  const [confirmando, startConfirmacion] = useTransition()
+  const busqueda = useStepAction()
+  const confirmacion = useStepAction()
 
   const agendada = reunionAgendada(agenda)
 
@@ -161,14 +159,12 @@ export function AgendaStep({
   const buscarHorarios = () => {
     setError(null)
     setSlotElegido(null)
-    startBusqueda(async () => {
-      const result = await ofrecerHorarios(leadId)
-      if (!result.success) {
-        setError(result.error)
-        toast.error(result.error)
-        return
-      }
-      setSlots(result.data.slots)
+    // Variación preservada: la búsqueda solo carga slots — sin toast de éxito
+    // y sin refresh (no hay mutación que re-derivar).
+    busqueda.run(() => ofrecerHorarios(leadId), {
+      onError: setError,
+      onSuccess: (data) => setSlots(data.slots),
+      refresh: false,
     })
   }
 
@@ -186,22 +182,17 @@ export function AgendaStep({
       setError(parsed.error.issues[0]?.message ?? 'Revisá los datos de la reunión')
       return
     }
-    startConfirmacion(async () => {
-      const result = await confirmarReunion(leadId, parsed.data)
-      if (!result.success) {
-        setError(result.error)
-        toast.error(result.error)
+    confirmacion.run(() => confirmarReunion(leadId, parsed.data), {
+      onError: (mensaje) => {
+        setError(mensaje)
         // Si el horario se pisó, la oferta vieja ya no vale: a re-ofrecer.
-        if (result.error.includes('se acaba de ocupar')) {
+        if (mensaje.includes('se acaba de ocupar')) {
           setSlots(null)
           setSlotElegido(null)
         }
-        return
-      }
-      toast.success(
-        `Reunión agendada 🎯 — ${formatFechaHora(result.data.slotStart)}. Franco ya tiene tus notas.`,
-      )
-      router.refresh()
+      },
+      successToast: (data) =>
+        `Reunión agendada 🎯 — ${formatFechaHora(data.slotStart)}. Franco ya tiene tus notas.`,
     })
   }
 
@@ -264,7 +255,7 @@ export function AgendaStep({
       {slots === null ? (
         <Button
           onClick={buscarHorarios}
-          loading={buscando}
+          loading={busqueda.isPending}
           disabled={!decisorOk}
           icon={<CalendarSearch size={14} strokeWidth={1.5} />}
         >
@@ -280,7 +271,7 @@ export function AgendaStep({
               variant="secondary"
               size="sm"
               onClick={buscarHorarios}
-              loading={buscando}
+              loading={busqueda.isPending}
               icon={<RefreshCw size={13} strokeWidth={1.5} />}
             >
               Buscar de nuevo
@@ -361,8 +352,8 @@ export function AgendaStep({
 
               <Button
                 onClick={confirmar}
-                loading={confirmando}
-                disabled={confirmando}
+                loading={confirmacion.isPending}
+                disabled={confirmacion.isPending}
                 icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
               >
                 Confirmar y agendar
