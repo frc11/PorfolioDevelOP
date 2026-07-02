@@ -46,6 +46,7 @@
     "check:invariant:upsell-dedup": "npx tsx src/lib/upsell/dedup.invariant.ts",
     "check:invariant:announcements": "npx tsx src/lib/announcements/announcements.invariant.ts",
     "check:invariant:referrals": "npx tsx src/lib/referrals/referrals.invariant.ts",
+    "check:invariant:client-notifications": "npx tsx src/lib/client-notifications/client-notifications.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
