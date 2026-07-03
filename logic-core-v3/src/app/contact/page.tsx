@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { ArrowUpRight, CheckCircle, Mail, MapPin, MessageCircle, PhoneCall, Send, ShieldCheck, TimerReset } from 'lucide-react';
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { submitContactForm } from '@/lib/actions/contact';
 import type { ActionResult } from '@/lib/actions/schemas';
 
@@ -64,6 +64,15 @@ function getPhoneContact() {
 
 export default function ContactPage() {
   const [state, action, isPending] = useActionState<ActionResult | null, FormData>(submitContactForm, null);
+
+  // P5.5 — captura del código de referido del link (/contact?ref=CODE) sin useSearchParams
+  // (evita el Suspense boundary): lo leemos del querystring en el cliente y lo mandamos
+  // como campo oculto del form.
+  const [referralCode, setReferralCode] = useState('');
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref) setReferralCode(ref);
+  }, []);
 
   useEffect(() => {
     const htmlOverflow = document.documentElement.style.overflow;
@@ -137,6 +146,7 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form action={action} className="grid grid-cols-2 gap-2">
+                  <input type="hidden" name="referralCode" value={referralCode} />
                   <div className="col-span-1">
                     <label className="mb-1 block text-[10px] font-mono uppercase tracking-[0.18em] text-[#8deef5]/60">Nombre *</label>
                     <input

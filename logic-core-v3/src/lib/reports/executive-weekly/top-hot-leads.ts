@@ -39,9 +39,11 @@ function truncate(text: string, max: number): string {
 }
 
 /**
- * Devuelve los top 3 leads de la semana (ranqueados por score EFECTIVO con
+ * Devuelve los top N leads de la semana (ranqueados por score EFECTIVO con
  * decay) para una org. Pensado para la sección Business-only del reporte
- * ejecutivo semanal.
+ * ejecutivo semanal. N es configurable por el dueño (P2.B.2,
+ * `Organization.executiveReportLeadCount`) — default 3, mismo comportamiento
+ * que antes de parametrizarlo.
  *
  * Reglas críticas:
  * - 🔴 USA `getEffectiveScore` (decay incluido). El crudo persistido NO refleja
@@ -56,7 +58,14 @@ export async function getTopHotLeadsForWeek(
   weekStart: Date,
   weekEnd: Date,
   now: Date = new Date(),
+  leadCount: number = 3,
 ): Promise<TopHotLeadItem[]> {
+  // Defensivo: la columna Organization.executiveReportLeadCount es un Int sin
+  // constraint de DB. Si llega un valor fuera de rango (dato legado, edición
+  // manual), caemos a 3 en vez de un `.slice(0, n<=0)` silenciosamente vacío/raro.
+  const safeLeadCount =
+    Number.isInteger(leadCount) && leadCount > 0 ? Math.min(leadCount, 50) : 3
+
   const rows = await prisma.chatbotLead.findMany({
     where: {
       botConfig: { organizationId },
@@ -117,7 +126,7 @@ export async function getTopHotLeadsForWeek(
       }
       return b.row.capturedAt.getTime() - a.row.capturedAt.getTime()
     })
-    .slice(0, 3)
+    .slice(0, safeLeadCount)
 
   return ranked.map((r) => {
     const heat = HEAT_BY_CLASS[r.effectiveClassification]

@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { Menu, X, LogOut } from 'lucide-react'
 import { SidebarNav } from './SidebarNav'
 import { NotificationCenter } from './NotificationCenter'
+import { AnnouncementsFeed } from './AnnouncementsFeed'
 import { PageTransition } from './PageTransition'
 import { ScrollTopOnNavigate } from './ScrollTopOnNavigate'
 import { signOutAction } from '@/actions/auth-actions'
 import { VersionBadge } from '@/components/layout/VersionBadge'
 import { zIndex } from '@/lib/design-tokens'
 import type { Notification } from '@prisma/client'
+import type { AnnouncementFeedItem } from '@/lib/announcements/get-announcements-for-org'
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
@@ -19,6 +21,8 @@ interface DashboardLayoutClientProps {
   hotLeadsCount?: number
   activeModuleSlugs: string[]
   notifications: Notification[]
+  announcements: AnnouncementFeedItem[]
+  announcementsUnread: number
   userDisplayName?: string
 }
 
@@ -30,6 +34,8 @@ export function DashboardLayoutClient({
   hotLeadsCount = 0,
   activeModuleSlugs,
   notifications,
+  announcements,
+  announcementsUnread,
   userDisplayName,
 }: DashboardLayoutClientProps) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -136,6 +142,8 @@ export function DashboardLayoutClient({
                   {userDisplayName}
                 </span>
               )}
+
+              <AnnouncementsFeed initialItems={announcements} initialUnread={announcementsUnread} />
 
               <NotificationCenter initialNotifications={notifications} />
 

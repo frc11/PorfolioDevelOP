@@ -29,8 +29,8 @@ export async function sendTransactionalEmail(
       htmlContent: input.htmlContent,
       textContent: input.textContent,
       sender: {
-        name: process.env.BREVO_FROM_NAME ?? 'develOP',
-        email: process.env.BREVO_FROM_EMAIL ?? 'hola@develop.com.ar',
+        name: process.env.BREVO_FROM_NAME ?? 'DevelOP',
+        email: process.env.BREVO_FROM_EMAIL ?? 'valenolme2@gmail.com',
       },
       to: [input.to],
       headers: input.headers,

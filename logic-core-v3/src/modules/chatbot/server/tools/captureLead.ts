@@ -4,7 +4,7 @@ import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logChatbotEvent } from '../logging'
-import { sendLeadNotificationEmail } from '../notifications'
+import { notifyClientOfLead } from '@/lib/client-notifications'
 import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
 import { getVerticalPack } from '../verticals'
 import type { VerticalToolCopy } from '../verticals/types'
@@ -434,35 +434,30 @@ async function captureLeadExecute(
           console.error('[captureLead] Telegram notify failed:', err)
         })
 
-        // Email to client — only if configured and not disabled
-        if (!org.leadNotificationEmail || org.leadNotificationMode === 'DISABLED') return
-
-        if (org.leadNotificationMode === 'IMMEDIATE') {
-          const notification = await sendLeadNotificationEmail({
-            to: org.leadNotificationEmail,
-            organizationName: org.companyName,
-            botName: bot.botName,
-            lead: {
-              name: input.name,
-              email,
-              phone,
-              intent: input.intent,
-              message: input.contextSummary,
-              createdAt: result.capturedAt,
-            },
-            dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/dashboard/chatbot/leads`,
-          })
-
-          if (notification.ok) {
-            await prisma.chatbotLead.update({
-              where: { id: result.id },
-              data: {
-                notificationSent: true,
-                notificationSentAt: new Date(),
-              },
-            })
-          }
-        }
+        // P2.A — Aviso al CLIENTE por email. Servicio dedicado que decide
+        // normal vs. caliente (gate por plan `leadScoring`), aplica el cap
+        // anti-spam + digest, resuelve destinatario (leadNotificationEmail →
+        // dueño) y marca el lead como notificado. Nunca lanza: el lead ya está
+        // guardado (paso 4), así que un mail caído no afecta la respuesta del bot.
+        await notifyClientOfLead({
+          organizationId: org.id,
+          organization: {
+            companyName: org.companyName,
+            leadNotificationEmail: org.leadNotificationEmail,
+            leadNotificationMode: org.leadNotificationMode,
+          },
+          botName: bot.botName,
+          leadId: result.id,
+          classification,
+          lead: {
+            name: input.name,
+            email,
+            phone,
+            intent: input.intent,
+            message: input.contextSummary,
+            capturedAt: result.capturedAt,
+          },
+        })
       } catch (error) {
         console.error('[captureLead] Notification failed but lead was saved', error)
       }

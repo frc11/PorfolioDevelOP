@@ -11720,3 +11720,420 @@ Re-verificado tras los fixes: invariantes ✅, `tsc` sin errores nuevos, `npm ru
 - **[nit, no corregido — decisión de producto]** Un módulo `DEPRECATED` que una org todavía posee (`OrganizationModule` ACTIVE/PAUSED) desaparece de "Tus módulos", porque la query de catálogo filtra `status in (ACTIVE, COMING_SOON)`. Alcanzable solo por edición directa de DB (no hay UI que setee DEPRECATED). Excluir DEPRECATED protege a la vez de mostrarlo como contratable (`classifyModuleState` mapearía un DEPRECATED sin tenencia a `available`). Si se decide honrar "ya lo tenés" para discontinuados, incluir DEPRECATED en la query **y** extender `classifyModuleState` para no ofrecer un DEPRECATED sin tenencia (actualizando el invariante). Flag a Franco.
 - No se removieron los `ContactSubmission` de upsell del listado inbound (siguen siendo contactos legítimos); el tab Demanda es la vista dedicada, no un filtro que los oculte de inbound.
 - Verificación visual y de tono: la hace el humano (no autoconfirmada).
+
+---
+
+## ✅ P5.3 — Feed de novedades del panel + publisher admin   ·   2026-07-01
+
+**Objetivo:** que develOP anuncie cada feature nueva en el panel del cliente (badge + lista, "el panel crece con vos") y tenga una superficie admin para publicarlas. Broadcast (todas las orgs) o segmentado (una org). Cero migraciones (el schema `PanelAnnouncement`/`PanelAnnouncementRead` ya estaba aplicado).
+
+### Dónde vive
+
+```
+src/lib/announcements/visibility.ts                PURO: isAnnouncementVisibleTo / selectVisible / countUnread (anti-IDOR + caducidad)
+src/lib/announcements/get-announcements-for-org.ts  data: fetch SEPARADO (no el take:5), org-scoped, read por usuario
+src/lib/announcements/announcements.invariant.ts    test: broadcast, ORG anti-IDOR, caducidad, no leídas
+src/lib/actions/announcements.ts                    'marcar vistas' (session-scoped, idempotente)
+src/components/dashboard/AnnouncementsFeed.tsx       feed cliente (badge violeta + panel portaleado)
+src/app/(protected)/admin/announcements/**           publisher: page + form + lista + actions + schema
+```
+Editados: `dashboard/layout.tsx` (+fetch), `DashboardLayoutClient.tsx` (+feed junto a la campana), `admin/_components/admin-sidebar.tsx` (+link "Novedades").
+
+### 1) Visto/no visto + badge
+
+`PanelAnnouncementRead` (una fila por announcement×user, unique). El feed anota cada item con `read = reads.length > 0` (relación filtrada por `userId`). El badge = no leídas; **se apaga al abrir** el panel: `markAnnouncementsSeenAction` hace `createMany({ skipDuplicates })` de las vigentes visibles (idempotente por el unique), optimista en cliente + `router.refresh()`. Badge violeta (novedad/insight, B13) para distinguirlo del cyan de notificaciones.
+
+### 2) El límite del take:5
+
+El `NotificationCenter` hidrata `take:5` en `layout.tsx`. El feed de novedades **no** se cuelga de eso: `getAnnouncementsForOrg` es un fetch aparte con su propio tope (`ANNOUNCEMENT_FEED_LIMIT = 20`), agregado al `Promise.all` del layout como una entrada nueva e independiente. Sin cache por org (depende del `userId`).
+
+### 3) Aislamiento (anti-IDOR)
+
+La visibilidad es un predicado PURO (`isAnnouncementVisibleTo`): ALL → todos; ORG → **solo** si `organizationId` = org de la sesión; caducada → nunca. La query del feed y `markAnnouncementsSeenAction` espejan ese `where` (`OR[{audience:ALL},{audience:ORG,organizationId}]` + `expiresAt`), y el org sale de la **sesión**, nunca de un param. Un cliente jamás ve ni marca una novedad ORG de otra org. Testeado (invariante bloque 2 y 4).
+
+### 4) Publisher admin
+
+`/admin/announcements` (link nuevo en sidebar → Clientes). Form (título, cuerpo, alcance ALL/ORG, caducidad opcional); con ORG aparece el select de organización (requerido, validado contra org existente). `createAnnouncementAction` + `deleteAnnouncementAction` con `requireSuperAdmin` + Zod (`CreateAnnouncementSchema`, compartido cliente/servidor). Lista de publicadas con badges (alcance/caducidad/lecturas) y retiro con **confirmación de 2 pasos** (destructivo → cascade borra las lecturas). Solo esa superficie admin.
+
+### Tests / verificación
+
+- `npm run check:invariant:announcements` → ✅ (broadcast ALL, ORG anti-IDOR, caducidad, no leídas).
+- `tsc --noEmit` → sin errores nuevos (baseline `searchconsole.ts:119`).
+- `npm run build` → OK (`/admin/announcements` + `/dashboard` compilados). Nota: la 1ª corrida crasheó con exit 134 (SIGABRT nativo de V8, no error de código); re-corrida con `--max-old-space-size=6144` → OK. Era presión de memoria del entorno.
+
+### Decisiones (no especificadas en el prompt)
+
+- **Feed como afordancia del topbar** (ícono Sparkles + panel portaleado), gemelo del `NotificationCenter`, visible en todo `/dashboard/*` — no una sección solo-home. Se replicó el patrón de posicionamiento portaleado (el header tiene backdrop-blur → containing block; el panel se ancla al viewport).
+- **Marcar-todo-al-abrir** en vez de marcar por item: es lo que pedía "el badge se apaga al ver"; idempotente vía el unique.
+- **Retiro (delete) en vez de solo expirar**: `deleteMany` (no explota si no existe) + cascade a `PanelAnnouncementRead`. Con confirmación en UI.
+
+### Pendiente / fuera de scope
+
+- Verificación visual y de tono: la hace el humano (no autoconfirmada). El subagente `visual-qa` volvió a quedar **bloqueado por tooling** (sin `preview_*`); receta manual: `npm run start:qa` (:3001) o `dev`, `POST /api/qa/login` con persona cliente para `/dashboard` y super-admin para `/admin/announcements`.
+- Sin "marcar por item" ni historial paginado de novedades (el tope de 20 en el feed alcanza hoy; si crecen, paginar como el historial de notificaciones).
+
+---
+
+## ✅ P5.5 — Sistema de referidos (recomendá develOP → un mes bonificado)   ·   2026-07-01
+
+**Objetivo:** el cliente genera/copia su código o link de referido, el sistema trackea cuando un negocio entra con ese código, y avisa a develOP para que confirme la conversión y aplique el beneficio. **Beneficio (definido por Franco): 1 mes bonificado al referente; conversión = el referido contrata un plan pago, la confirma develOP.** Cero migraciones (schema `ReferralCode`/`Referral` ya aplicado).
+
+### Dónde vive
+
+```
+src/lib/referrals/code.ts            PURO: normalize + generateCandidate + buildReferralLink
+src/lib/referrals/attribution.ts      PURO: decideReferralAttribution (núcleo anti-abuso)
+src/lib/referrals/referrals.service.ts data: get-or-create código, listar (org-scoped), atribuir + avisar
+src/lib/referrals/referrals.invariant.ts test: generación, atribución, anti-abuso
+src/lib/actions/referrals.ts          'use server': generar mi código (session-scoped)
+src/components/dashboard/ReferralPanel.tsx  UI cliente (código + link + copiar + generar)
+src/app/(protected)/dashboard/referidos/**  página cliente + estado de referidos
+src/app/(protected)/admin/referrals/**       admin: lista + marcar convertido/bonificado
+```
+Editados: `lib/actions/schemas.ts` (+`referralCode` en ContactFormSchema), `lib/actions/contact.ts` (atribución tras el alta), `app/contact/page.tsx` (captura `?ref` en input oculto), `SidebarNav.tsx` + `admin-sidebar.tsx` (links).
+
+### 1) Generación (cliente, org-scoped)
+
+`getOrCreateReferralCodeForOrg(orgId)` — 1:1 por org (`ReferralCode.organizationId @unique`), idempotente, con reintento ante colisión de `code`. El código es prefijo legible (≤6 del nombre/slug) + sufijo aleatorio (`randomBytes`). El orgId sale de la **sesión** (`generateMyReferralCodeAction`), nunca de un param. El link es `/contact?ref=CODE`.
+
+### 2) Tracking + aviso a develOP
+
+El link lleva al form público `/contact`, que ahora captura `?ref` en un input oculto (sin `useSearchParams` → sin Suspense boundary). `contactFormAction` persiste `ContactSubmission.referralCode` y llama a `attributeReferralFromContact` (resiliente: nunca tumba el alta del contacto). Éste resuelve código→org, reúne hechos y delega en `decideReferralAttribution`; si atribuye, crea el `Referral` (PENDING) y **avisa a develOP** (`sendAgencyAlert` LEAD_EXTERNAL + Notification al SUPER_ADMIN con link a `/admin/referrals`).
+
+### 3) Guardas anti-abuso (documentadas, testeadas)
+
+`decideReferralAttribution` (pura) rechaza con razón explícita:
+- **`unknown_code`** — el código no existe (bloquea códigos inventados).
+- **`self_referral`** — el email referido es de un miembro de la propia org que refiere (auto-referido), case-insensitive.
+- **`existing_customer`** — el email ya es un usuario/cliente existente (no es un negocio nuevo traído).
+- **`duplicate`** — esa org ya refirió a ese email (no inflar con reenvíos).
+
+### 4) Recompensa (registrada, la confirma develOP)
+
+El beneficio **no se auto-aplica** (es movimiento de facturación). `/admin/referrals` lista los referidos; develOP marca **PENDING → CONVERTED** (contrató plan) y **CONVERTED → REWARDED** (mes acreditado, set `rewardedAt`). Transiciones atómicas con `updateMany({ where: { status } })` (sin read-then-write). El cliente ve el estado en `/dashboard/referidos`.
+
+### Tests / verificación
+
+- `npm run check:invariant:referrals` → ✅ (generación determinista + link; atribución de referido externo; anti-abuso: auto-referido/código falso/cliente existente/duplicado rechazados).
+- `tsc --noEmit` → sin errores nuevos (baseline `searchconsole.ts:119`).
+- `npm run build` → OK (`/dashboard/referidos` + `/admin/referrals` compilados; heap subido a 6 GB por el OOM transitorio ya visto en P5.3).
+
+### Decisiones (no especificadas / confirmadas por Franco)
+
+- **Beneficio + conversión** confirmados con Franco vía pregunta (el placeholder del prompt vino sin completar): 1 mes al referente; conversión = plan pago confirmado por develOP.
+- **`ContactSubmission.referralCode` es string suelto** (no FK): un código con typo no rompe el alta; el match se hace al atribuir.
+- **"Cliente existente" = el email ya es un `User`** en el sistema → no cuenta como referido nuevo.
+
+### Pendiente / fuera de scope
+
+- Verificación visual y de tono: la hace el humano (no autoconfirmada). `visual-qa` sigue **bloqueado por tooling** (sin `preview_*`); receta: `npm run start:qa`, `/api/qa/login` (persona cliente → `/dashboard/referidos`; super-admin → `/admin/referrals`), y `/contact?ref=CODE`.
+- Sin notificación al cliente al convertir/bonificar (lo ve en su panel). Sin auto-aplicación del mes (deliberado: lo hace develOP en facturación).
+
+---
+
+## 🏁 Cierre del BLOQUE P5 — Motor comercial
+
+Bloque P5 completo. Recorrido:
+- **P5.1** — Motor de recomendaciones por reglas ("Ideas para crecer") en el home.
+- **P5.2** — Vitrina de servicios en 3 estados + demanda medida (tab admin) + dedup del upsell.
+- **P5.3a / P5.3** — Schema + feed de novedades del panel (broadcast) + publisher admin.
+- **P5.4a / P5.5** — Schema + sistema de referidos (código/link, tracking, anti-abuso, admin de conversión).
+
+Patrón transversal del bloque: lógica pura testeable por invariante (cero DB) + capa de datos org-scoped + superficie admin, reusando el flujo de upsell/alertas existente. Dos migraciones (P5.3a, P5.4a) quedaron **editadas en schema pero aplicadas a mano por el humano** (protocolo de branch compartida). Verificación visual/tono de todo el bloque: pendiente del humano (el `visual-qa` de este entorno no tuvo preview tools).
+
+---
+
+## ✅ P2.A — Aviso de lead al cliente (email "nuevo lead" + "lead caliente")
+
+**Qué cierra:** la promesa comercial "te avisa cuando hay alguien listo para comprar". Hasta ahora el bot capturaba el lead y notificaba **al equipo develOP** (push de Telegram en el hook), pero **al dueño del negocio** el aviso por email era una base incompleta. P2.A lo completa: todos los planes reciben un email factual de "nuevo lead"; Pro/Business reciben además el aviso **destacado** de "lead caliente". **Cero migraciones** (`migrate status` up to date — todos los campos ya existían).
+
+> ⚠️ **Se tocó el runtime del bot** (hook post-captura de `captureLead`). Anotado acá para el registro compartido con el chat Chatbot. El toque es mínimo y quirúrgico: se reemplazó el bloque de email ad-hoc por una llamada al servicio nuevo; **no se tocaron** prompts, scoring, KB ni el push de Telegram interno (queda intacto).
+
+### Relevamiento (lo que ya existía y se reusó)
+- **Hook:** `captureLead.ts` → `notifyClient()` (fire-and-forget vía `void notifyClient()`), post-captura **y** post-clasificación (`classification` ya calculado). Ahí ya vivían el push de Telegram interno y un email al cliente **sobre Resend** (una sola plantilla, sin gate por plan, sin cap).
+- **Gate de clasificación por plan:** `planAllows(plan, 'leadScoring')` (`src/lib/plan/plan-allows.ts:33`) → `insightEnabled` = {Starter:false, Pro:true, Business:true}. Es la dimensión exacta que pedía el diseño.
+- **Remitente transaccional:** `sendTransactionalEmail` de `@/lib/email/brevo-service` (Brevo) — el mismo que usan forgot-password, onboarding, reportes ejecutivos y resend-credentials. Remitente **`develOP <hola@develop.com.ar>`** (`BREVO_FROM_NAME`/`BREVO_FROM_EMAIL`). El email de lead legado iba por **Resend** — era el outlier del repo; el flujo real de lead pasó a Brevo.
+- **Destinatario:** `Organization.leadNotificationEmail`; si es `null`, fallback al dueño (primer `OrgMember` con rol `ADMIN` → `User.email`). Configurable después; default sensato ahora. `leadNotificationMode = DISABLED` apaga el aviso.
+- **Cap anti-spam:** `checkRateLimit` (tabla Neon atómica) — misma infra que auth/CRM. Sin cola nueva, sin cron.
+
+### Servicio nuevo (decisión pura separada del envío)
+`src/lib/client-notifications/` — el runtime solo llama a `notifyClientOfLead(...)`.
+- **`decide.ts` (puro):** `decideLeadNotification({classification, hasLeadScoring})` → `dq`=no-avisa; `hot`+Pro/Business=template **caliente** que **saltea el cap**; resto (warm/cold, o hot en Starter)=**normal** sujeto al cap. `resolveDelivery({bypassCap, capAllowed, digestAllowed})` → `individual | digest | suppress`. `digestCountWhere(orgId, since)` → filtro org-scoped del conteo del digest.
+- **`templates.ts` (puro):** dos plantillas HTML robustas para Gmail mobile (tablas + estilos inline, sentence case, lenguaje de dueño, cero jerga) + digest. Asunto normal factual (`Nuevo interesado: Juan · quiere comprar`); asunto caliente con lenguaje de clasificación (`Lead caliente: Juan · quiere comprar`). El lenguaje de "caliente" aparece **solo** en el template hot (Pro+). Link directo al lead (`/dashboard/chatbot/leads/[id]`).
+- **`notify.ts` (orquestador):** resuelve destinatario → gate de plan → decisión → cap/digest → envío Brevo → marca `notificationSent`. **Nunca lanza** (try/catch interno + el helper Brevo devuelve `{ok:false}` en vez de throw).
+
+### Anti-spam + digest
+- `leadNotifyPerOrg` = **5 avisos/org/hora**. Superado el tope, en vez de silenciar se manda **un** digest agrupado (`leadDigestPerOrg` = 1/hora): *"Tenés N leads nuevos en la última hora"* (N contado org-scoped, excluyendo `dq`). Más leads en esa hora → suprimidos (ya se digesteó). **El cap NO aplica al caliente en Pro+** (un caliente siempre avisa).
+
+### El mail nunca rompe la captura (fire-and-forget, 4 capas)
+1. El lead se persiste (`$transaction`) **antes** de notificar. 2. `notifyClientOfLead` tiene try/catch propio y retorna `void`. 3. `sendTransactionalEmail` devuelve `{ok:false}` en error, no lanza. 4. Se invoca dentro del `notifyClient()` (ya con try/catch) vía `void`. Un Brevo caído deja el lead guardado + `notificationSent=false`.
+
+### Tests
+`src/lib/client-notifications/client-notifications.invariant.ts` (`npm run check:invariant:client-notifications`, **verde**): decisión por plan (dq no avisa; hot solo destacado en Pro+; hot en Starter cae a normal sin lenguaje de clasificación; warm/cold normales); cap→digest→suppress; **aislamiento multi-tenant** del conteo del digest (org A nunca cuenta leads de org B); lenguaje de "caliente" acotado al template hot. El "un fallo de envío no rompe la captura" queda garantizado por diseño (las 4 capas de arriba) + el contrato de `sendTransactionalEmail`.
+
+### Archivos
+- **Creados:** `src/lib/client-notifications/{decide,templates,notify,index}.ts` + `client-notifications.invariant.ts`.
+- **Modificados:** `src/modules/chatbot/server/tools/captureLead.ts` (hook: bloque de email → `notifyClientOfLead`, Telegram intacto), `src/lib/rate-limit/presets.ts` (`leadNotifyPerOrg` + `leadDigestPerOrg`), `package.json` (script del invariante).
+
+### Verificación
+`npm run check:invariant:client-notifications` verde · `npm run build` exit 0 · `npx tsc --noEmit` sin errores nuevos (queda 1 pre-existente en `searchconsole.ts`, ajeno) · `npx prisma migrate status` up to date (cero migraciones).
+
+### Pendiente del humano (CHECKPOINT P2.A — requiere runtime real)
+- Disparar una conversación de prueba contra un bot de QA que capture un lead → confirmar que el mail llega al destinatario de QA (**usar mail de prueba, nunca de cliente real**) y se lee bien en el celular, con el link al lead. Probar el caso **caliente** con un org Pro/Business de QA (aviso destacado). Ajustar el tono/asunto si hace falta (es texto).
+- **Deuda menor (fuera de scope, no tocada):** el botón admin "Test email" (`sendTestNotification.ts`) sigue usando la plantilla legada por **Resend** — el test no refleja 1:1 el mail real (ahora Brevo). Consolidarlo en un sprint aparte para no tocar la superficie admin acá.
+- **Env vars requeridas en runtime:** `BREVO_API_KEY`, `BREVO_FROM_NAME`, `BREVO_FROM_EMAIL`, `NEXT_PUBLIC_APP_URL` (para el link al lead).
+
+## ✅ P2.B.1 — Botón admin "Enviar reporte ahora" (Executive Weekly Report, 1 org)
+
+**Qué cierra:** el Executive Weekly Report (Sistema A: brief IA + métricas + top-3-hot-leads Business, cron lunes 9am AR) solo se disparaba por cron — no había forma de verificar o reintentar el envío para una org puntual sin esperar a la semana siguiente. P2.B.1 agrega ESE trigger manual, admin-only, para una org a la vez. Cero migraciones (no hacía falta schema nuevo).
+
+> ⚠️ **NO se tocó el motor del reporte** (`build.ts`/`send.ts`/`top-hot-leads.ts`/`executive-brief.ts`) — regla no-negociable del sprint. Ver el gotcha de idempotencia abajo: es la razón de que exista un archivo `send-manual.ts` en vez de extender `send.ts`.
+
+### Relevamiento (antes de tocar código)
+- **`buildExecutiveWeeklyReport(organizationId, now?)`** (`build.ts:63`) — devuelve `{ok:true, data, recipient} | {ok:false, reason: BuildSkipReason}`, nunca lanza para los casos de gating (PLAN/OPTOUT/NO_RECIPIENT/NO_DATA). Segura de invocar tal cual.
+- **`sendExecutiveWeeklyReports(now?)`** (`send.ts:37`) — **sin parámetro para acotar a 1 org** (siempre `findMany` de TODAS las orgs elegibles) y **sin unidad de trabajo por-org extraíble**: todo vive inline en un `for`.
+- **Patrón `ResendCredentialsButton`** calcado 1:1: máquina de estados, confirmación de 2 pasos inline, `fetch` sin body, endpoint hermano con guard→rate-limit→Zod→lógica→audit.
+
+### GOTCHA — idempotencia sin bypass (decisión llevada al humano, no autodecidida)
+`send.ts:67-75` chequea `WeeklyReportLog` por `(organizationId, periodKey)`: si `status === 'SENT'`, hace `continue` — **bloqueo duro, sin flag de force**. `periodKey` es por semana ISO completa (lunes-domingo), así que aplica cualquier día de esa semana. Se llevó la decisión al humano con 3 opciones (no tocar el motor / tocar send.ts mínimamente / parar). **Elegida: no tocar el motor.** Consecuencia aceptada: el botón funciona para orgs que todavía NO recibieron el reporte esta semana (nuevas, `FAILED`, `SKIPPED_*`); si ya está `SENT`, el botón lo informa (estado `already_sent`) y **no reenvía** — mismo comportamiento que el cron hoy.
+
+### Función nueva (fuera del motor, mismo comportamiento)
+`src/lib/reports/executive-weekly/send-manual.ts` — `sendExecutiveWeeklyReportManual(organizationId, now?)`. Reimplementa la MISMA secuencia que el loop de `send.ts` (idempotencia → build → Brevo → upsert de log) pero para 1 sola org, incluyendo el mismo bloqueo duro en `SENT`. Costo aceptado: ~20 líneas de orquestación duplicadas fuera del motor — es el precio de no tocarlo.
+
+### Superficie admin
+- **Route:** `POST /api/admin/clients/[organizationId]/send-executive-report` — orden calcado de `resend-credentials/route.ts`: `requireSuperAdmin()` canónico (`src/lib/auth-guards.ts`, NO el del módulo chatbot) → `applyAuthRateLimit` → Zod (`OrganizationIdSchema`, reusado de `@/lib/actions/schemas`, sin crear uno nuevo) → `sendExecutiveWeeklyReportManual` → `logAdminAction`. 404 limpio si la org no existe; 200 con `{ok:false, reason}` para los demás casos de no-envío (mismo criterio que el sibling).
+- **Rate-limit nuevo:** `sendExecutiveReportNowPerAdmin` = 5/admin/5min (`presets.ts` + union type en `auth-rate-limit.ts`).
+- **Audit log:** `actionType: 'EMAIL_SENT'` (no existe un valor dedicado tipo `REPORT_SENT` en el enum `AuditActionType` — se usó el más cercano semánticamente para evitar una migración fuera de scope).
+- **UI:** `SendExecutiveReportButton.tsx` (estados `idle/confirming/loading/success/already_sent/skipped/error`) dentro de `ExecutiveReportCard.tsx`, montada en `OverviewTab.tsx` junto a `PlanAssignmentCard`/`BillingOverrideCard` (acciones a nivel-org ya existentes en esa ficha) — no en el header persistente ni adentro de la card de contacto (esas son user-level, no org-level).
+
+### Gotcha de TypeScript encontrado (no relacionado al motor, documentado por si reaparece)
+`requireSuperAdmin()` de `auth-guards.ts` no tiene tipo de retorno explícito. Al importarlo y capturar su valor de retorno **desde otro archivo**, TypeScript infiere `Promise<string>` en vez del objeto `session.user` real (confirmado con un diagnóstico aislado: `Awaited<ReturnType<typeof auth>>` colapsa a `NextMiddleware` por el `React.cache()` sobre el `auth` multi-overload de NextAuth v5 — la inferencia cross-file agarra el ÚLTIMO overload, no el que realmente se llama). Dentro del propio `auth-guards.ts` no pasa nada raro (el narrowing local es correcto). Workaround usado, sin tocar `auth-guards.ts`: la route llama `requireSuperAdmin()` solo por su efecto de lanzar/gatear, y separadamente llama `auth()` de nuevo (memoizado por `React.cache`, sin costo extra) para leer los campos de sesión. Si un futuro sprint necesita el valor de retorno de `requireSuperAdmin()` en otro archivo, va a pisar el mismo problema — la solución de raíz sería anotar el tipo de retorno explícito en `auth-guards.ts`, no tocado acá por estar fuera de scope.
+
+### Tests
+`tests/e2e/41-admin-executive-report-send-now.spec.ts` (Playwright, patrón `19-security.spec.ts`/`alerts-detector.spec.ts` — único mecanismo de test real en el repo, no hay Jest/Vitest/mocks). Usa un `organizationId` inexistente a propósito: llega a `NOT_FOUND` antes de tocar `buildExecutiveWeeklyReport`/Brevo, cero mails reales. Cubre: rechaza sin sesión (401/403) · rechaza sesión no-SUPER_ADMIN (403) · valida `organizationId` inválido (400, segmento `%20`) · org inexistente da 404 limpio · rate-limit corta al 6to intento (429), con limpieza previa de la tabla `rate_limit` para determinismo. **NO ejecutado** (requiere `npm run build && npm run test:e2e` contra server real — fuera del gate de este sprint, que definió tsc+lint, no build). El caso del segmento `%20` tampoco fue verificado empíricamente contra un server corriendo — está escrito según el comportamiento esperado de Next.js routing + Zod `.trim().min(1)`, a confirmar cuando el humano corra la suite.
+
+### Archivos
+- **Creados:** `src/lib/reports/executive-weekly/send-manual.ts`, `src/app/api/admin/clients/[organizationId]/send-executive-report/route.ts`, `src/app/(protected)/admin/clients/[clientId]/_components/{SendExecutiveReportButton,ExecutiveReportCard}.tsx`, `tests/e2e/41-admin-executive-report-send-now.spec.ts`.
+- **Modificados:** `src/lib/security/auth-rate-limit.ts` (scope nuevo en el union type), `src/lib/rate-limit/presets.ts` (preset `sendExecutiveReportNowPerAdmin`), `src/app/(protected)/admin/clients/[clientId]/_components/tabs/OverviewTab.tsx` (mount de `ExecutiveReportCard`).
+- **NO tocados** (a propósito): `build.ts`, `send.ts`, `top-hot-leads.ts`, `executive-brief.ts` (motor del reporte) · `vercel.json`/`netlify.toml` (crons) · Sistema B (`/admin/settings/reports`, `sendWeeklyReports`) · Sistema C (insights) · `auth-guards.ts` (ver gotcha de TS arriba) · `/dashboard/**`.
+
+### Verificación
+`npx tsc --noEmit` sin errores nuevos (1 pre-existente en `searchconsole.ts:119`, ajeno) · `eslint` verde en los 8 archivos tocados/creados · `npm run build` NO corrido (excluido del gate de este sprint por instrucción explícita) · sin migraciones (no aplica `prisma migrate status`) · sin commits (los deja el humano tras verificar).
+
+### Pendiente del humano
+- Correr `npm run test:e2e` (requiere `npm run build` primero) y confirmar que las 5 aserciones del spec nuevo pasan, en particular el caso del segmento `%20` (no verificado empíricamente).
+- Disparar el botón real contra una org de QA (Pro/Business, con `BREVO_API_KEY` configurada) y confirmar que el mail llega — el envío real no se auto-confirmó (regla del harness: el humano verifica).
+
+## ✅ P2.B.2 — Reporte "a medida" (frecuencia + cantidad de leads, configurable por el dueño)
+
+**Qué cierra:** hoy el Executive Weekly Report se manda siempre semanal (cron fijo) con siempre 3 leads destacados (hardcodeado en `top-hot-leads.ts`) — sin ninguna UI cliente. P2.B.2 cierra la promesa de "reporte a medida": el dueño elige frecuencia (Cada semana / Cada 15 días / No recibir) y cantidad de leads destacados (3/5/10) desde `/dashboard/cuenta/perfil`. Defaults (`WEEKLY`, `3`) preservan el comportamiento actual para cualquier org que no toque la config.
+
+> ⚠️ A diferencia de P2.B.1, en este sprint **`build.ts`/`send.ts`/`top-hot-leads.ts` SÍ estaban en scope** (la regla de esta vez solo prohibía tocar el motor del brief de IA y el template del mail). Se tocaron los 3, de forma quirúrgica.
+
+### Relevamiento (antes de tocar código)
+- **Patrón calcado:** `saveAverageTicket` (`business-profile.actions.ts`) — objeto tipado + Zod + `resolveOrgId()` + `{ok}|{error}`; cliente `MoneyEstimate.tsx` (`useTransition` + toast `sonner`). Confirmado que `updateNotificationPrefsAction` (FormData sin Zod, sin impersonation) NO era el patrón a usar.
+- **Ubicación UI:** card nueva en el tab "Perfil" (no 4to tab — `CuentaTabs.tsx` solo tiene Perfil/Facturación/Bóveda; las cards viven fuera de la ruta, en `src/components/dashboard/`). Insertada en la columna derecha entre "Preferencias de notificaciones" e "Información del plan".
+- **Hallazgo del gate de plan:** el gate real en `build.ts` es literal (`plan.key !== 'PRO' && plan.key !== 'BUSINESS'`) — **no** usa el helper `planAllows(plan,'reports')` ya existente (ese lee `Plan.reportsEnabled`, columna de DB independiente del `plan.key` que un admin podría desincronizar). Para garantizar "el mismo gate del reporte", la UI calca el chequeo literal (`src/lib/reports/executive-weekly/report-eligible-plan.ts`, nuevo) en vez de reusar `planAllows` — no se puede importar desde `build.ts` sin acoplar capas, documentado con comentario explícito de que ambos deben mantenerse sincronizados a mano.
+- **Cantidad de leads** solo tiene efecto para plan `BUSINESS` (Pro nunca ve `topHotLeads`) — el Select de cantidad se oculta para Pro dentro de la misma card (solo ve el de frecuencia).
+
+### Decisión — relación con `executiveReportOptOut` (llevada al usuario, no autodecidida)
+`executiveReportOptOut` es un campo **unidireccional**: solo se setea a `true` desde el link de 1-click unsubscribe del mail (`/api/email/unsubscribe-executive/route.ts`); no existía NINGÚN camino de vuelta en el repo. Se presentaron 3 opciones (conviven+sync / el enum absorbe con migración de datos / conviven sin sync) — **elegida: conviven + sync al reactivar**. Implementado así:
+- `build.ts` bloquea el envío si `executiveReportOptOut === true` **O** `executiveReportFrequency === 'DISABLED'` (mismo `reason: 'OPTOUT'`, sin agregar un nuevo `BuildSkipReason`).
+- La action nueva, si el dueño elige una frecuencia activa (≠ DISABLED), limpia `executiveReportOptOut = false` — primer y único camino de reactivación tras un unsubscribe por mail.
+- La UI muestra el estado **efectivo**: si `executiveReportOptOut === true`, el Select de frecuencia se ve en "No recibir" aunque la columna `executiveReportFrequency` diga otra cosa — nunca miente.
+- El endpoint de unsubscribe (`unsubscribe-executive/route.ts`) **no se tocó**.
+
+### Schema — migración aditiva (editada, NO aplicada)
+Dos campos nuevos en `Organization` + un enum nuevo. `prisma migrate dev` **no se corrió** — el SQL de abajo es la predicción de lo que Prisma generaría a partir del diff de schema (mismo estilo que la migración B6.2 existente), para que el humano lo revise y aplique en la branch Neon compartida:
+
+```sql
+-- CreateEnum
+CREATE TYPE "ExecutiveReportFrequency" AS ENUM ('WEEKLY', 'BIWEEKLY', 'DISABLED');
+
+-- AlterTable
+ALTER TABLE "Organization" ADD COLUMN     "executiveReportFrequency" "ExecutiveReportFrequency" NOT NULL DEFAULT 'WEEKLY',
+ADD COLUMN     "executiveReportLeadCount" INTEGER NOT NULL DEFAULT 3;
+```
+
+Cero columnas existentes modificadas/dropeadas. Cero backfill de datos (la decisión de arriba no lo necesita).
+
+### Motor del reporte — cambios quirúrgicos
+- **`top-hot-leads.ts`** — `getTopHotLeadsForWeek` gana un 5to parámetro opcional `leadCount = 3` (mismo default que el hardcode anterior); `.slice(0, 3)` → `.slice(0, safeLeadCount)`, con un clamp defensivo (entero positivo, tope 50) porque la columna `Int` no tiene constraint de DB y `.slice(0, n<=0)` en JS no tira error — devuelve resultados raros en silencio.
+- **`build.ts`** — suma `executiveReportFrequency`/`executiveReportLeadCount` al `select`; el chequeo de OPTOUT ahora es el OR de arriba; pasa `org.executiveReportLeadCount` a `getTopHotLeadsForWeek` (solo para BUSINESS, mismo gate que ya existía).
+- **`send.ts`** — nueva función `isDueThisWeek(orgId, frequency, now)`: para `BIWEEKLY`, busca el último `WeeklyReportLog` con `status:'SENT'` y compara días transcurridos (≥13) — **ancla en la última fecha REAL de envío, no en paridad de semana ISO/calendario** (una org recién pasada a quincenal no queda bloqueada por una razón arbitraria sin relación a cuándo activó la config). `WEEKLY` siempre está due (cero cambio de comportamiento). Nuevo contador `skippedFrequency` en el resultado (no genera un `WeeklyReportLog` — no es un "no se pudo", es "no le toca esta semana").
+- **`send-manual.ts` — NO tocado.** Decisión: la cadencia quincenal solo aplica al cron automático; un click del botón admin es una orden explícita, no debería competir con la cadencia. El bloqueo por `DISABLED`/opt-out SÍ lo hereda gratis (pasa por `build.ts`).
+
+### Server action + UI
+- **`executive-report-prefs.schemas.ts`** (nuevo, separado de la action a propósito: un archivo `'use server'` solo puede exportar funciones async, no puede exportar el Zod schema) — `z.nativeEnum(ExecutiveReportFrequency)` + `z.union([z.literal(3),z.literal(5),z.literal(10)])`.
+- **`executive-report-prefs.actions.ts`** (nuevo) — `saveExecutiveReportPrefs`, calca `saveAverageTicket` 1:1.
+- **`ExecutiveReportPrefsForm.tsx`** (nuevo, cliente) — dos `<Select>` compartidos (`@/components/ui/Select`, el que tiene trigger+listbox portaleado, no nativo), aplican al instante (sin botón "Guardar" — UX de selector, no de formulario largo), `useTransition` + toast `sonner`. Lenguaje de dueño: "Cada semana"/"Cada 15 días"/"No recibir", "N leads destacados" — cero mención de WEEKLY/BIWEEKLY/DISABLED.
+- **`perfil/page.tsx`** (modificado) — card "Reporte ejecutivo semanal" entre notificaciones y plan, gateada por `reportEligiblePlan(plan.key)` (oculta del todo para Starter, sin teaser — así lo pedía la regla).
+
+### Tests
+- `report-eligible-plan.invariant.ts` (`npm run check:invariant:executive-report-plan`) — el gate de plan de la UI coincide con PRO/BUSINESS de `build.ts` para las 3 tiers.
+- `executive-report-prefs.invariant.ts` (`npm run check:invariant:executive-report-prefs`) — Zod acepta las 3 frecuencias × 3 cantidades, rechaza cualquier otro valor (incluye "razonables" como 7).
+- `tests/e2e/42-client-executive-report-prefs.spec.ts` (Playwright, patrón `15-client-personalization.spec.ts` + helper `pickSelect`/`expectToast` de `tests/helpers/setter-ui.ts`) — cambiar frecuencia/cantidad y persistir; **anti-IDOR** (otra org no se toca, verificado por snapshot antes/después); UI honesta con el opt-out viejo (se ve "No recibir", reactivar lo limpia); card ausente si el plan no es elegible. Las ramas "ve la card"/"no ve la card" se auto-`test.skip()` según el plan REAL de la fixture `sanmiguel` (no se muta el plan en runtime: `getPlanForOrg` cachea 60s en memoria del server, un proceso separado del test — mutar ahí produciría flakiness sin invalidar ese cache).
+- `tests/integration/executive-report-lead-count.spec.ts` (mismo patrón que `alerts-detector.spec.ts`, no está en el `testDir` de Playwright — correr explícito) — siembra 12 leads `hot` con scores distintos y verifica que `getTopHotLeadsForWeek(...,5)`/`(...,10)`/`(...)` (default) devuelven exactamente 5/10/3.
+
+### Archivos
+- **Creados:** `src/lib/reports/executive-weekly/report-eligible-plan.ts` (+ `.invariant.ts`), `src/app/(protected)/dashboard/_actions/executive-report-prefs.{schemas,actions}.ts` (+ `.invariant.ts`), `src/components/dashboard/ExecutiveReportPrefsForm.tsx`, `tests/e2e/42-client-executive-report-prefs.spec.ts`, `tests/integration/executive-report-lead-count.spec.ts`.
+- **Modificados:** `prisma/schema.prisma` (enum + 2 campos, editado y PARADO — sin migrar), `src/lib/reports/executive-weekly/{top-hot-leads,build,send}.ts`, `src/app/(protected)/dashboard/cuenta/perfil/page.tsx`, `package.json` (2 scripts de invariante nuevos).
+- **NO tocados:** `src/lib/reports/executive-weekly/send-manual.ts` (decisión explícita arriba) · `src/lib/ai/executive-brief.ts` (motor del brief) · `src/lib/email/templates/executive-weekly.ts` (template del mail) · `src/app/api/email/unsubscribe-executive/route.ts` · `src/lib/plan/plan-allows.ts` · `vercel.json`/`netlify.toml` · `/admin/**`.
+
+### Verificación
+`eslint` verde en los 12 archivos tocados/creados · `npx tsc --noEmit` sin errores nuevos (1 pre-existente en `searchconsole.ts:119`, ajeno) — confirmado que el enum `ExecutiveReportFrequency` y los campos nuevos SÍ están en los tipos generados (`grep` de 145 ocurrencias en `node_modules/.prisma/client/index.d.ts`) · `npm run build` NO corrido (excluido del gate por instrucción explícita) · sin migraciones aplicadas · sin commits.
+
+**Gotcha de entorno — `prisma generate` parcialmente bloqueado:** 3 procesos `node.exe` ya estaban corriendo al empezar el sprint (uno con ~3.5GB de memoria, probablemente un dev server activo). `npx prisma generate` falló 3 veces con `EPERM` al renombrar el binario nativo `query_engine-windows.dll.node` (lock de Windows). Los **tipos TypeScript sí se regeneraron** (Prisma los escribe antes de tocar el binario nativo) — por eso `tsc --noEmit` ve el schema nuevo correctamente. El **binario nativo del query engine sigue viejo** hasta que se libere el lock: cualquier query REAL contra los campos nuevos (server corriendo, o los tests nuevos) puede fallar en runtime hasta que se cierre el proceso que tiene el lock y se corra `npx prisma generate` de nuevo con éxito. No maté procesos sin preguntar (podía ser tu propio dev server probando el botón de P2.B.1).
+
+### Pendiente del humano
+1. **Revisar y aplicar la migración** (SQL de arriba) en la branch Neon compartida con Franco.
+2. **Cerrar el proceso que tiene lockeado el query engine** (o confirmar que es seguro matarlo) y correr `npx prisma generate` hasta que termine sin error — recién ahí los tests nuevos y el server pueden usar los campos nuevos en runtime.
+3. Correr `npm run check:invariant:executive-report-plan` y `npm run check:invariant:executive-report-prefs` (verdes esperados, sin DB).
+4. Correr `npx playwright test tests/e2e/42-client-executive-report-prefs.spec.ts` y `npx playwright test tests/integration/executive-report-lead-count.spec.ts` (requieren DB + migración aplicada + query engine regenerado; el primero también requiere el server levantado).
+5. Verificación visual humana de la card nueva en `/dashboard/cuenta/perfil` (desktop + mobile) — no autoconfirmada.
+6. Decidir si vale la pena, en un sprint aparte, que la cadencia quincenal también aplique al botón manual de admin (hoy deliberadamente no la respeta — ver decisión arriba).
+- Decidir si el botón debería moverse/copiarse a `/admin/settings/reports` además de la ficha de la org (quedó únicamente en la ficha, `admin/clients/[clientId]`, por default razonado en el sprint — no se preguntó explícitamente).
+
+---
+
+## ✅ FIX-BRIEF
+
+**Qué cierra:** el brief de IA (arriba en el mail del Executive Weekly Report) afirmaba tendencias que **contradecían** las 4 cards de métricas duras de abajo. Caso real verificado en producción: el brief decía "tu Health Score escaló a 80 y duplicamos los leads" mientras la card de Health mostraba ↓ −4 pts; y citaba "salud comercial en 58%", un número que no aparece en ninguna card. Cuando el texto se contradice con el dato, el dueño no cree ninguno — rompía la confianza en todo el mail.
+
+> ⚠️ Cambio quirúrgico de **generación**, no de reporte. NO se tocó el template del mail, ni `send.ts`, ni el cron, ni el motor de envío, ni Sistema B/C. Solo qué datos recibe Gemini + qué puede afirmar + el manejo de cache.
+
+### Relevamiento — 3 causas, todas en `generateBriefText` (`executive-brief.ts`)
+1. **Tendencia de Health FALSA.** El prompt le pasaba a Gemini `healthScore.trend.value`, que sale de `computeTrend()` (`health-score.ts:456`): `((hashStringToNumber(orgId) % 21) - 10)` — un **placeholder determinístico por hash del `organizationId`**, sin ninguna relación con la variación real ("stable placeholder until we have score history in DB", comentario línea 454). La **card**, en cambio, calcula el delta REAL en `build.ts:141` (`current.healthScores.total − previous.healthScores.total`, de snapshots). Dos fuentes desconectadas → contradicción sistemática. Por eso "escaló" con la card en ↓.
+2. **Mensajes y Tareas sin tendencia.** El prompt viejo pasaba solo el valor de "Mensajes respondidos" y "Tareas completadas", sin delta — el brief estaba **ciego** a si subieron o bajaron, aunque la card sí muestra ese %.
+3. **Sub-dimensiones filtradas.** El prompt pasaba `dimensions[0/1/2].score` (Salud Digital/Comercial/Operativa). Ninguna es una card. De ahí el "58%" (= `dimensions[1].score`, Salud Comercial) que el dueño leía y no podía verificar.
+
+Confirmado además: **cero tests** sobre el brief/cache hoy (primer test que se agrega). Cache = 3 columnas en `Organization` (`cachedExecutiveBrief*`), key = `organizationId` + TTL 7 días, **input-insensitive** (cambiar los datos NO invalida el cache; sirve el viejo hasta que expira, se regenera manual, o lo pisa el cron del lunes).
+
+### Qué recibía Gemini — antes vs después
+**Antes** (valores absolutos + trend falso + métricas no mostradas):
+```
+- Health Score: 80/100 (tendencia: +7 vs semana anterior)   ← +7 = hash(orgId), FALSO
+- Salud Digital: 72/100                                       ← no es card
+- Salud Comercial: 58/100                                     ← no es card → el "58%"
+- Salud Operativa: 64/100                                     ← no es card
+- Leads esta semana: 8 (+100%)
+- Mensajes respondidos: 25                                    ← sin delta
+- Tareas completadas: 5                                       ← sin delta
+```
+**Después** (exactamente los 4 números de las cards, con dirección PRE-INTERPRETADA para que el modelo no lea mal el signo):
+```
+Datos de la semana (son EXACTAMENTE los números que el dueño ve en las tarjetas del mail; los únicos que podés comentar):
+- Health Score: 76/100 — bajó 4 puntos vs la semana anterior.
+- Leads: 8 — subió 100% vs la semana anterior.
+- Conversaciones: 25 — bajó 12% vs la semana anterior.
+- Tareas: 5 — subió 25% vs la semana anterior.
+```
+El delta de Health se calcula ahora **idéntico a la card**: `healthScore.total − (snapshot previo)`, replicando la regla de `build.ts` (`getBriefHistory` → snapshot del período anterior) incluso ante regeneraciones intra-semana (`pickPreviousHealthTotal` saltea el snapshot de la semana en curso). Leads/Conversaciones/Tareas ya salían del mismo `weekResults` que la card — ahora también se les pasa su `trend`. Las sub-dimensiones ya no se pasan: el brief no puede citar lo que no recibe.
+
+### Cómo se restringió qué afirma (system prompt endurecido)
+Bloque **VERACIDAD (no negociable)**: comentar SOLO los números de la lista; prohibido inventar/estimar/citar cualquier métrica o cifra fuera de ella; **respetar EXACTAMENTE la dirección** de cada dato (si bajó, no decir que subió/escaló/creció/duplicó); no afirmar ninguna tendencia sin respaldo. Bloque **TONO SEGÚN LOS DATOS**: métrica en baja = oportunidad honesta, nunca reproche ni disfraz; semana floja = corto y honesto (D5). El system prompt es una constante exportada (`BRIEF_SYSTEM_PROMPT`) para que el invariante rompa si alguien borra esas reglas.
+
+### Cómo se resolvió el cache
+El cache es por `organizationId` + TTL 7 días, sin hash del input → un brief pre-fix seguiría sirviéndose hasta 7 días. Solución **sin migración**: constante `BRIEF_LOGIC_CUTOFF` + `isBriefCacheCurrent(cachedAt)` (se apoyan en la columna existente `cachedExecutiveBriefAt`). Todo brief con `cachedExecutiveBriefAt` anterior al corte se trata como **stale** y se regenera con la lógica nueva. Se aplica en los DOS caminos de lectura:
+- **`getExecutiveBrief`** (dashboard + fallback de build): se suma la condición al gate de cache.
+- **`build.ts`** (lectura directa `org.cachedExecutiveBrief` para el mail): si no es current, se trata como ausente y cae a `getExecutiveBrief`, que regenera. **Sin esto el mail enviaría el brief viejo** (build lee la columna directo, no pasa por el gate de `getExecutiveBrief`) — por eso se tocó `build.ts`, encuadrado en el mandato explícito de "manejo de cache", no en send/template/cron.
+
+Es **auto-limpiante**: tras la primera regeneración post-corte, `cachedExecutiveBriefAt` supera el corte y el guard no vuelve a dispararse. El cron `regenerate-briefs` (lunes 10:00) regenera todo incondicionalmente, así que no hay thundering-herd; las únicas regeneraciones "extra" son lazy, por-org, en la primera vista de dashboard o el primer envío entre deploy y lunes. Si el deploy es posterior al 2026-07-02, subir la fecha del corte a la del deploy.
+
+### Tests
+- **`src/lib/ai/executive-brief-input.invariant.ts`** (`npm run check:invariant:brief-input`, puro, sin DB/LLM) — bloquea lo determinístico: (1) `cardHealthDelta` == fórmula de la card, incluida la semántica `null`; (2) `pickPreviousHealthTotal` replica el "previous" de la card aún en regeneración; (3) con deltas negativos el input dice "bajó ..." y **nunca** matchea `subió|escaló|creció|duplic|mejoró`; (4) no filtra `Salud (Digital|Comercial|Operativa)` y hay exactamente 4 líneas de métrica; (5) primera medición → "sin comparación", sin dirección; (6) el system prompt conserva las reglas anti-invención; (7) `isBriefCacheCurrent` corta bien viejo/nuevo. **Verde.**
+- **Output vivo de Gemini → lo verifica el humano** (no determinístico, requiere generación real). Ver Pendiente.
+
+### Archivos
+- **Creados:** `src/lib/ai/executive-brief-input.ts` (módulo puro: arma el input desde los números de las cards + system prompt endurecido + corte de cache) · `src/lib/ai/executive-brief-input.invariant.ts`.
+- **Modificados:** `src/lib/ai/executive-brief.ts` (`generateBriefText` reescrito: prompt/input nuevos, `getPreviousHealthTotal`, `now` propagado a los 3 call sites, corte en el gate de cache, borrados `formatTrendValue`/`formatTrendPercent` que quedaron sin uso) · `src/lib/reports/executive-weekly/build.ts` (guard de frescura de cache en la lectura del brief) · `package.json` (script `check:invariant:brief-input`).
+- **NO tocados (fuera de scope, confirmado):** `src/lib/email/templates/executive-weekly.ts` (template) · `src/lib/reports/executive-weekly/send.ts` · `send-manual.ts` · cron `regenerate-briefs`/`send-executive-reports` · `src/lib/health-score.ts` (el `computeTrend` placeholder sigue ahí — ver Pendiente) · `getWeekResults` · `getBriefHistory` · Sistema B/C.
+
+### Verificación
+`eslint` verde en los 4 archivos tocados · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único error: el baseline `searchconsole.ts:119`, ajeno) · invariante nuevo verde · `npm run build` NO corrido (excluido del gate) · **sin commits**.
+
+### Pendiente del humano
+1. **Disparar un reporte real** (regenerar el brief de una org Pro/Business y enviarse el mail, o mirarlo en el dashboard) y confirmar a ojo que el brief ya no contradice las cards y no cita números que no estén en ellas. Es la única verificación del output vivo — no se autoconfirma.
+2. **Commitear** cuando la verificación del punto 1 dé OK (lo hacés vos).
+3. *(Deuda técnica, fuera de este fix)* `computeTrend` en `health-score.ts` sigue siendo un placeholder por hash — ya no afecta el brief (el brief ahora usa el delta de snapshots), pero **el widget de Health Score en el dashboard todavía muestra ese trend falso**. Vale un sprint aparte para calcular el trend real ahí también (o marcarlo como "sin histórico aún" hasta tener la serie).
+
+---
+
+## ✅ P2.C
+
+**Qué cierra:** "Descargá el informe del mes" — PDF de 1 página (natural, sin forzar corte) descargable desde `/dashboard/resultados/analisis`, pensado para que el dueño se lo reenvíe a un socio o contador. Cierra la última promesa pendiente de la propuesta comercial.
+
+### Fase 1 — Diagnóstico (motor PDF)
+Se encontraron **DOS** motores PDF, ambos compilan limpio, **ambos 100% huérfanos** (grep exhaustivo en `src/`: cero archivos fuera de ellos mismos los referencian):
+- **Motor A** (`ExecutiveReportTemplate.tsx` + `DownloadReportButton.tsx`, `src/components/dashboard/`) — `html2canvas`+`jsPDF` client-side (screenshot de un div), imports dinámicos ya lazy (correcto), pero **datos 100% mock** (compañía y cifras hardcodeadas) y estilo oscuro/glossy "AI Executive Brief" que **contradice "marca sobria"**.
+- **Motor B** (`MonthlyReport.tsx` + `/api/reports/monthly/route.ts`, ya existente) — `@react-pdf/renderer` v4.3.2 server-side (`renderToBuffer`, PDF vectorial real), auth+org-scoping ya sólidos (aunque acepta `organizationId` de query validado contra sesión, no `resolveOrgId()` puro), estilo blanco/negro/cian ya sobrio — pero dominio de contenido equivocado (analytics/SEO/proyecto, no leads/categorías/embudo).
+
+**Decisión (reportada, sin fork bloqueante):** se reusa el **motor B** (`@react-pdf/renderer`, cero dependencia nueva) por ser PDF vectorial real (texto seleccionable — mejor para reenviar a un contador) y visualmente ya sobrio. NO se reusa su contenido (dominio distinto) ni su ruta (el gate de org debía ser `resolveOrgId()` puro). Ambos huérfanos quedan **intactos, sin tocar** — limpieza de código muerto fuera de scope.
+
+**Bundle:** no aplica el riesgo de "lazy import" — el PDF se genera en un Route Handler (`runtime='nodejs'`), 100% server; `@react-pdf/renderer` estructuralmente nunca llega al bundle del cliente. Verificado con grep: la única mención de `@react-pdf/renderer` en el componente cliente (`DownloadMonthlyReportButton.tsx`) es un comentario explicativo, cero import real.
+
+**P0.2 (`getMonthlyAnalysisForOrg`) ya calcula, org-scoped:** categorías top, insights rankeados, serie de conversaciones mensual con variación — reusados 100%, cero recálculo. Sin aggregación mensual previa: leads-del-mes-con-delta y embudo-del-mes — resueltos reusando las funciones PURAS `computeLeadsDelta`/`buildFunnel` (`home-metrics-logic.ts`, ya usadas por el home semanal) alimentadas con datos acotados al MES (`monthRangeAR`/`previousRangeForPeriod('month')` de `dates-ar.ts`) en vez de a la semana.
+
+**Nota de diseño:** `deltaPhrase` (al lado de `computeLeadsDelta`) hardcodea "vs la semana pasada" — se decidió **no tocar** ese archivo compartido/en vivo (alimenta el widget "Qué pasó con tus leads" del home) por una diferencia de copy; se escribió `monthlyLeadsPhrase` nueva en el módulo del PDF, reusando solo la aritmética (`computeLeadsDelta`), no el string.
+
+### Datos — módulo puro + orquestador
+- **`monthly-report-data.ts`** (puro, sin Prisma/Date) — `ClientMonthlyReportData` como **unión discriminada por `hasBot`**: cuando es `false`, el objeto NO tiene ningún campo de datos (TypeScript lo impide en vez de permitir ceros/nulls inventados); cuando es `true`, `leads`/`series`/`categories`/`funnel` quedan narrowed a no-nulos sin asserts `!`. `series`/`categories` pasan **tal cual** de P0.2 (misma `sufficient`/`current===null`, nunca puede divergir de lo que ve la tab). `topInsight = insights[0] ?? null` ("si existe", nunca se inventa uno).
+- **`get-client-monthly-report-data.ts`** (I/O, Prisma) — recibe `organizationId` ya resuelto por el caller (mismo contrato que `getMonthlyAnalysisForOrg`, nunca de un parámetro); llama `getMonthlyAnalysisForOrg` sin cambios, suma 2 `count()` (mes actual/anterior) + 1 `findMany()` (filas del embudo) acotados con `dates-ar`. Año/mes para el label sale de `startOfMonthAR(now).getUTCMonth/FullYear()` — cero aritmética de TZ nueva.
+
+### PDF — `ClientMonthlyReportPdf.tsx`
+1 página A4 (crece a 2 solo si el contenido real lo exige — sin forzar corte): header sobrio (nombre + mes + "Generado el" vía `formatDateAR`) → Los números del mes (Leads + Conversaciones, cada uno con su delta) → Qué pasó con tus leads (embudo 3 pasos) → Qué pregunta tu gente (categorías) → Lo que descubrimos este mes (el insight, si existe) → footer sobrio "Reporte generado por develOP". Cero cifras infladas tipo ROI/horas-ahorradas (el motor A mock las inventaba; acá se omiten por no tener fuente real). Degradación honesta en 3 niveles, todos ya decididos por P0.2 (reusados, no reinventados): sin bot → 1 mensaje de activación; categorías con muestra insuficiente → mensaje de calibrando; actividad real en cero → números reales en cero con copy calmo, nunca ocultos ni disfrazados.
+
+### Ruta + botón
+- **`/api/reports/client-monthly/route.ts`** (nuevo) — `runtime='nodejs'`, `resolveOrgId()` puro (401 si no hay sesión) — **cero parámetro de query/body para identificar la org**, a diferencia de la ruta vieja: no hay superficie donde inyectar el id de otra organización. Re-chequea `planAllows(plan,'insight')` server-side (403) — mismo gate que la tab, nunca confía en que el botón se ocultó bien. `Content-Disposition: attachment`.
+- **`DownloadMonthlyReportButton.tsx`** (nuevo, cliente) — sin librería de PDF importada: solo `fetch` + blob + descarga vía `<a download>`. Loading (`Loader2`), error (`toast.error` de `sonner`), `aria-label`, `strokeWidth={1.5}`.
+- **`analisis/page.tsx`** (modificado) — botón inyectado en el `action` de `PageHeader`, condicionado al mismo `showAnalysis` (=`planAllows(plan,'insight')`) que ya gatea la tab — plan no elegible: **cero botón, sin teaser**.
+
+### Tests
+- **`monthly-report-data.invariant.ts`** (`npm run check:invariant:client-monthly-report`, puro) — sin bot (objeto sin campos de datos) · mes flojo (ceros honestos, sin inventar, degradación de categorías/serie idéntica a P0.2) · mes completo (delta con dirección correcta) · `monthlyLeadsPhrase` nunca insinúa dirección equivocada. **Verde.**
+- **`tests/integration/client-monthly-report.spec.ts`** (Prisma real + `renderToBuffer` real, no está en el `testDir` de Playwright — correr explícito) — mes completo (7 leads sembrados, embudo consistente con el conteo — `funnel.total === leads.current`, mismo where clause) y mes flojo (ancla `now` sintética en enero 2020, sin sembrar ni limpiar nada — ventana sin actividad de ningún fixture) — ambos renderizan el PDF real sin crashear.
+- **`tests/e2e/43-client-monthly-report-download.spec.ts`** — sin sesión → 401 · con sesión + plan elegible → PDF real (firma `%PDF-`), pasar `?organizationId=`/`?clientId=` arbitrarios no tiene ningún efecto (anti-IDOR — no hay superficie que inyectar) · plan no elegible → 403. Ramas plan-elegible/no-elegible con `test.skip()` adaptativo según el plan REAL de la fixture `sanmiguel` (mismo motivo que en P2.B.2: `getPlanForOrg` cachea 60s en memoria de un proceso separado del test).
+
+### Archivos
+- **Creados:** `src/lib/reports/client-monthly/{monthly-report-data.ts, monthly-report-data.invariant.ts, get-client-monthly-report-data.ts, ClientMonthlyReportPdf.tsx}` · `src/app/api/reports/client-monthly/route.ts` · `src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx` · `tests/integration/client-monthly-report.spec.ts` · `tests/e2e/43-client-monthly-report-download.spec.ts`.
+- **Modificados:** `src/app/(protected)/dashboard/resultados/analisis/page.tsx` (import + botón en `PageHeader.action`) · `package.json` (script `check:invariant:client-monthly-report`).
+- **NO tocados:** `src/components/dashboard/{ExecutiveReportTemplate,DownloadReportButton}.tsx` (motor A, huérfano) · `src/lib/reports/MonthlyReport.tsx` + `src/app/api/reports/monthly/route.ts` (motor B original, huérfano) · `src/lib/dashboard/home-metrics-logic.ts` (`deltaPhrase` sin tocar, ver nota de diseño) · `getMonthlyAnalysisForOrg.ts`/`monthly-analysis.ts` (P0.2, cero recálculo) · motor del reporte semanal/brief/crons (Sistema A) · Sistema B/C.
+
+### Verificación
+`eslint` verde en los 9 archivos tocados/creados · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único error: baseline `searchconsole.ts:119`, ajeno) — confirmado con la unión discriminada narrowing limpio, sin asserts `!` · invariante nuevo verde · bundle: verificado por grep (no por build completo — "build no es gate") que `@react-pdf/renderer` no tiene ningún import real fuera de los 2 archivos server-only nuevos · sin migraciones (no aplicaba) · **sin commits**.
+
+### Pendiente del humano
+1. **Descargar y abrir el PDF real** (desktop + mobile, o al menos 2 lectores de PDF distintos) para una org Pro/Business con datos reales — confirmar que se ve bien en 1 página, que el embudo/categorías/insight reflejan lo mismo que la tab `/dashboard/resultados/analisis`, y que el tono "sobrio" es el esperado. No autoconfirmado.
+2. Correr `npm run check:invariant:client-monthly-report` (verde esperado, sin DB).
+3. Correr `npx playwright test tests/integration/client-monthly-report.spec.ts` y `npx playwright test tests/e2e/43-client-monthly-report-download.spec.ts` (ambos requieren DB; el segundo requiere el server levantado).
+4. **Commitear** cuando 1-3 den OK (lo hacés vos).
+5. *(Fuera de scope, a criterio)* limpieza de código muerto: motor A (`ExecutiveReportTemplate`/`DownloadReportButton`, mock, huérfano) y la ruta analytics huérfana (`MonthlyReport.tsx`/`/api/reports/monthly`) — ninguno se tocó ni se borró, ambos siguen ahí sin uso.
+
+---
+
+## ✅ P2.C-fix-signo
+
+**Qué cierra:** fix del bug de formato encontrado en el PDF mensual (P2.C) — el delta negativo de leads se veía como "18vs el mes pasado" (sin signo, sin espacio) en vez de "-18 vs el mes pasado". Causa raíz ya trazada en una auditoría previa (read-only, sin código): el signo negativo usaba el carácter Unicode `−` (MINUS SIGN, U+2212) en vez del guion ASCII `-` (U+002D). `@react-pdf/renderer` con Helvetica no-incrustada no tiene glifo para U+2212 en su tabla `WIN_ANSI_MAP` (`node_modules/@react-pdf/pdfkit/lib/pdfkit.js:2929-2957`); el fallback sin mapear serializa el code point crudo truncado a 1 byte (`8722 mod 256 = 0x12`, un carácter de control), que resuelve a glifo `.notdef` con ancho 0 → invisible. Los datos (counts, deltas) siempre fueron correctos — el bug era 100% de codificación de un carácter.
+
+### Cambio quirúrgico
+Se reemplazó el carácter, nada más — cero cambios en lógica de delta, queries o layout:
+- **`src/lib/reports/client-monthly/monthly-report-data.ts:61`** (`monthlyLeadsPhrase`, P2.C) — `'−'` → `'-'`.
+- **`src/lib/dashboard/home-metrics-logic.ts:48`** (`deltaPhrase`) — mismo carácter, mismo bug, ya en producción en el widget del home "Qué pasó con tus leads" para cualquier delta negativo (fuera del scope de P2.C, pero idéntico origen — se corrigió de paso por ser trivial e idéntico).
+
+### Barrido acotado
+Grep de `−` (U+2212) en todo `src/`: además de los dos casos de arriba, aparece en comentarios de código (JSDoc/inline, no user-facing — `executive-brief-input.ts:10`, `ev3.invariant.ts:213,233`, `captureLead.ts:306-307`, `calculateLeadScore.ts:32-33`) y en copy estático hardcodeado de landing pages de marketing (`SocialProofAutomation.tsx`, `TestimoniosIA.tsx`, `PortfolioWebCases.tsx`, `SocialProofSoftware.tsx`, `ShowcaseSoftware.tsx`, `VaultSoftware.tsx` — todos `resultValue`/`change`/toggle de acordeón, texto fijo tipo "−80%" renderizado en HTML de navegador, que sí tiene el glifo). Ninguno de estos es una frase de delta calculada que pueda terminar en un PDF/fuente estándar — se reportan, no se tocan, sin necesidad de pregunta adicional (no son ambiguos: son copy fijo de marketing, no cálculos de delta).
+
+### Tests
+- **`home-metrics-logic.invariant.ts`** (sección 2, LEADS + variación) — se agregó: delta negativo produce guion ASCII (`charCodeAt(0) === 45`) y nunca contiene el MINUS SIGN Unicode. Delta positivo sigue `'+4 vs...'`, cero sigue `'igual que la semana pasada'`, sin mes previo sigue `'primeros de la semana'` — sin cambios.
+- **`monthly-report-data.invariant.ts`** (secciones 4 y 5) — mismo patrón: `monthlyLeadsPhrase`/`buildMonthlyReportLeadsNumber` con delta negativo (incluido el caso real de Matsu, -18) producen guion ASCII, nunca U+2212. Positivo/cero/sin-base sin cambios.
+- Ambos invariantes **verdes**.
+
+### Archivos
+- **Modificados:** `src/lib/reports/client-monthly/monthly-report-data.ts` · `src/lib/reports/client-monthly/monthly-report-data.invariant.ts` · `src/lib/dashboard/home-metrics-logic.ts` · `src/lib/dashboard/home-metrics-logic.invariant.ts`.
+- **NO tocados:** resto del PDF (template/layout/ruta), el brief, Sistema B/C, copy de marketing (barrido, sin cambios).
+
+### Verificación
+`eslint` verde en los 4 archivos · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · los 2 invariantes corren verdes · verificación de bytes: el string fijo ahora codifica `0x2d` (guion ASCII, con glifo real en Helvetica) en vez de `0x12` (control, `.notdef`) — chequeado a nivel de string/char-code, NO se abrió el PDF renderizado (reservado para el humano) · sin migraciones · **sin commits**.
+
+### Pendiente del humano
+1. **Descargar el PDF real** de una org con delta negativo (ej. Matsu) y confirmar que ahora se lee "-18 vs el mes pasado" legible.
+2. **Commitear** cuando el punto 1 dé OK.

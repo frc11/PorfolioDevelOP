@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getBriefHistory } from '@/lib/ai/brief-history'
+import { isBriefCacheCurrent } from '@/lib/ai/executive-brief-input'
 import { getHealthScore } from '@/lib/health-score'
 import { getWeekResults } from '@/lib/dashboard/week-results'
 import { startOfTodayInAR } from '@/lib/tz-ar'
@@ -70,6 +71,8 @@ export async function buildExecutiveWeeklyReport(
       id: true,
       companyName: true,
       executiveReportOptOut: true,
+      executiveReportFrequency: true,
+      executiveReportLeadCount: true,
       cachedExecutiveBrief: true,
       cachedExecutiveBriefAt: true,
       members: {
@@ -89,7 +92,11 @@ export async function buildExecutiveWeeklyReport(
     return { ok: false, reason: 'PLAN' }
   }
 
-  if (org.executiveReportOptOut) {
+  // P2.B.2 — DISABLED convive con el opt-out del mail (1-click unsubscribe):
+  // cualquiera de los dos bloquea el envío. Se reusa el mismo reason 'OPTOUT'
+  // (desde la óptica del destinatario, ambos significan "no quiere esto"; ver
+  // gotcha de idempotencia/naming en la bitácora P2.B.2).
+  if (org.executiveReportOptOut || org.executiveReportFrequency === 'DISABLED') {
     return { ok: false, reason: 'OPTOUT' }
   }
 
@@ -98,11 +105,13 @@ export async function buildExecutiveWeeklyReport(
     return { ok: false, reason: 'NO_RECIPIENT' }
   }
 
-  // Brief: reusamos el cache vigente. Si no está o está vacío, fallback a
-  // `getExecutiveBrief` que internamente decide regenerar — corre UNA vez por
-  // org (recovery, no es el path normal: el cron `regenerate-briefs` debería
-  // haber corrido más temprano el mismo lunes).
-  let briefText = org.cachedExecutiveBrief?.trim() || ''
+  // Brief: reusamos el cache vigente. Si no está, está vacío, o se generó con la
+  // lógica vieja (FIX-BRIEF: un brief pre-corte podía contradecir las cards), se
+  // trata como ausente y cae a `getExecutiveBrief`, que regenera con la lógica
+  // actual — corre UNA vez por org (recovery; el path normal es el cron
+  // `regenerate-briefs`, que corre más temprano el mismo lunes).
+  const cachedBriefIsCurrent = isBriefCacheCurrent(org.cachedExecutiveBriefAt)
+  let briefText = cachedBriefIsCurrent ? org.cachedExecutiveBrief?.trim() || '' : ''
   if (!briefText) {
     const res = await getExecutiveBrief(organizationId)
     if (!res || !res.text.trim()) return { ok: false, reason: 'NO_DATA' }
@@ -139,11 +148,18 @@ export async function buildExecutiveWeeklyReport(
 
   const weekRange = lastFullWeekRangeAR(now)
 
-  // B6.3 — Sección extra para Business: top 3 leads más calientes (ranqueados
-  // por score EFECTIVO con decay, NO crudo). Pro/Starter no la ven.
+  // B6.3 — Sección extra para Business: top N leads más calientes (ranqueados
+  // por score EFECTIVO con decay, NO crudo). Pro/Starter no la ven. N sale de
+  // la config del dueño (P2.B.2, default 3 — mismo comportamiento que antes).
   const topHotLeads =
     plan.key === 'BUSINESS'
-      ? await getTopHotLeadsForWeek(organizationId, weekRange.start, weekRange.end, now)
+      ? await getTopHotLeadsForWeek(
+          organizationId,
+          weekRange.start,
+          weekRange.end,
+          now,
+          org.executiveReportLeadCount,
+        )
       : undefined
 
   const data: ExecutiveWeeklyEmailInput = {

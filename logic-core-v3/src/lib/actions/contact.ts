@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { sendLeadToN8n } from '@/lib/n8n'
 import { sendAgencyAlert } from '@/lib/alerts'
+import { attributeReferralFromContact } from '@/lib/referrals/referrals.service'
 import { requireSuperAdmin } from '@/lib/auth-guards'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
@@ -38,11 +39,14 @@ export async function contactFormAction(
     company: formData.get('company'),
     service: formData.get('service'),
     message: formData.get('message'),
+    referralCode: formData.get('referralCode'),
   })
 
   if (!parsed.success) {
     return { success: false, error: parsed.error.issues[0]?.message }
   }
+
+  const referralCode = parsed.data.referralCode?.trim() || null
 
   const payload = {
     name: parsed.data.name,
@@ -51,12 +55,19 @@ export async function contactFormAction(
     company: parsed.data.company?.trim() || null,
     service: parsed.data.service?.trim() || null,
     message: parsed.data.message,
+    referralCode,
   }
 
   try {
     await prisma.contactSubmission.create({
       data: payload,
     })
+
+    // P5.5 — atribución de referido (si vino con código). Resiliente: nunca tumba el
+    // alta del contacto; las guardas anti-abuso viven en el servicio.
+    if (referralCode) {
+      await attributeReferralFromContact({ code: referralCode, referredEmail: payload.email })
+    }
 
     sendAgencyAlert({
       type: 'LEAD_EXTERNAL',
