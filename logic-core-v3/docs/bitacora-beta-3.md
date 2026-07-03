@@ -840,3 +840,32 @@ Comportamiento cambiado: ninguno — suites idénticas a la línea base (22/22 l
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 4.2 / BLOQUE 4: cerró verde. M1: operativa en `/setter/leads/[leadId]/manual/m1` con el patrón completo (instrucción de una línea, contexto/munición/registro, gate con faltantes existentes, autosave+guardia, indicador por fase, avance y atrás derivados).
 Patrón para el Bloque 5: confirmado — extraer cuerpo de registro a `<x>-form.tsx` compartido + chrome del wizard intacto + módulo `m<N>-*.tsx` de slots + despacho por id (5 pasos documentados en la bitácora). Desvíos: ninguno de código; nota QA-infra (dev:qa se navega por `localhost`, no `127.0.0.1` — hidratación) documentada en memoria. Pendiente: la costura `posicionDe`→`derivarPasoDelLead` (viva desde 4.1, fuera del scope M1) — primer candidato del Bloque 5.
+
+---
+
+## Sprint 5.0 — Costura de derivaciones + salud del árbol post-lanes (pre-arranque BLOQUE 5) · 2026-07-03
+
+**Qué se hizo.** Cierra la costura anotada tres veces (4.1 → 3.2 → 4.2): `posicionDe` (`manual.ts`) re-derivaba a mano, con su propio switch, exactamente lo que `derivarPasoDelLead` (`paso.ts`, A-29) ya resuelve para EVALUADA — abierto / espera / opener pendiente. Ahora `posicionDe` computa `gateAbierto`/`openerPendiente` UNA vez al tope de la función, llama a `derivarPasoDelLead(stage, gateAbierto, openerPendiente)`, y la rama EVALUADA lee `paso.anchor === 'opener'` / `paso.foco.tono === 'foco'` en vez de re-invocar `gateBriefAbierto(...)` y el proxy `contactos === 0` para `openerPendiente`. Commit `2e75007`, 1 archivo, +24/−11.
+
+**Lo que NO se tocó, a propósito.** La rama APROBADA sigue llamando a `gateEnvioDemo` directo: exige `finalUrl` (la URL que el admin registra AL APROBAR, en la MISMA transición — ver `aprobarRevision` en `revision.actions.ts`), un factor que `derivarPasoDelLead`/`gateAbierto` no reciben. En todo estado alcanzable ambos coinciden (finalUrl siempre viaja junto con APROBADA), pero leer el `gateAbierto` genérico ahí habría cambiado el comportamiento en el borde teórico finalUrl=null — no era la duplicación que A-29 eliminó (acá no se re-deriva el mismo hecho: se deriva uno DISTINTO que el wizard no necesita). Las demás ramas (FICHA/null, DESCARTADA, BRIEF/CONSTRUCCION, RECHAZADA, EN_REVISION) no llamaban a ningún gate compartido — son navegación de pantallas (progreso/draft/checklist) sin equivalente en el rail de 5 pasos del wizard; nada que re-basar ahí.
+
+**Diff de comportamiento nulo, probado exhaustivamente (no asumido).** Oráculo temporal (`_costura-oracle.ts` + snapshot `manual.OLD.ts` de HEAD, ambos vía ts-node, borrados al cerrar la fase — no viajan en el commit): corrió `derivarPantalla` VIEJA vs NUEVA sobre **331.776 combinaciones** ({9 stages × 8 status} × caliente × contactos × followUpVencido × followUpCount × draftUrl × demoEnviada × finalUrl × agenda × progreso × ficha) — **0 mismatches**.
+
+**Fase 1 — Salud del árbol post-lanes.**
+- ✅ Fase 0: git limpio, `npx tsc --noEmit` → 0 errores, commits de 3.2 (`2d8a3bc`/`af561ec`) / 4.1 (`8781724`) / 4.2 (`a8e7747`/`ff08411`) presentes en el log.
+- ✅ `npm run check:invariants` → 15/15 OK.
+- ✅ `npm run test:leados` → 22/22 (== línea base).
+- ✅ `npm run build` + `npm run test:setter` → 39/39 (== línea base).
+- ⚠️ `npm run test:e2e` (batería global, re-verificada de punta a punta): **21 passed / 27 failed / 7 skipped** (14.9m). Las 27 fallas están TODAS en `tests/e2e` (lanes dashboard/cliente/admin) — ninguna toca `/setter` ni `/manual`. Patrón dominante: timeout de `submitLogin`/`waitForURL` en `tests/helpers/auth.ts:12` (login de cliente/admin no completa en 45s), que arrastra en cascada a client-login, chatbot-section, perf, personalization, bulk-actions, idor-optout, mobile-responsive, performance, visual-regression (7 specs) y el onboarding E2E completo. Es la MISMA roja pre-existente que 4.1 y 4.2 ya habían registrado (mismos specs: 11/12/13/14/15/16/20/21/22/30) — no la introdujo este sprint, no es de la superficie setter/manual. Por regla 2 del sprint: se reporta, no se toca.
+
+**Fase 2 — Costura.** Ver "Qué se hizo" arriba. No se re-corrió a mano la matriz de 28 vivo del 4.1: nada de lo que esas 28 comprobaciones ejercitan cambió (el oráculo de 331.776 combos las cubre con margen) y `test:setter` 39/39 ejercita en runtime real el mismo camino EVALUADA→brief/opener/espera contra prod-QA.
+
+**Fase 3 — Verificación.** tsc 0 errores + invariantes 15/15 + test:leados 22/22 + test:setter 39/39, todos re-corridos DESPUÉS del edit — idénticos a la línea base.
+
+**Fase 4 — Commit.** `2e75007` — `refactor(manual): posicionDe deriva de derivarPasoDelLead — una sola fuente del paso`. Diff-stat: 1 archivo, +24/−11. Sin push (regla 3).
+
+**CIERRE DE LA COSTURA.** La anotada tres veces (4.1 → 3.2 → 4.2) queda resuelta: `pasoActual`/`describirFoco`/`anchorActivo` (A-29, unificadas en `derivarPasoDelLead`) y la porción de `posicionDe` que las duplicaba (EVALUADA) ahora comparten una sola fuente. Lo que queda deliberadamente aparte (APROBADA vía `gateEnvioDemo`, y la navegación fina de FICHA/BRIEF-CONSTRUCCION/RECHAZADA) no es duplicación — es información que el mapa de 16 pantallas necesita y que el rail de 5 pasos no.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 5.0: cerró verde. Derivación única: sí — `posicionDe` (rama EVALUADA) ahora lee `derivarPasoDelLead` en vez de re-derivar `gateBriefAbierto`/`openerPendiente`; probado sin diffs sobre 331.776 combinaciones (oráculo temporal, no committeado). E2e roja: existía y sigue existiendo — es 100% de lanes ajenos (dashboard/cliente/admin, specs 11/12/13/14/15/16/20/21/22/30, timeout de login en `tests/helpers/auth.ts`), la misma que 4.1/4.2 ya habían registrado; no es del setter/manual, no se tocó.
+Desvíos: ninguno de código — la rama APROBADA (`gateEnvioDemo`, exige `finalUrl`) se dejó a propósito sin re-basar porque deriva un factor que `derivarPasoDelLead` no recibe (re-basarla habría sido un cambio de comportamiento real en el borde finalUrl=null). Pendiente: nada del Bloque 5; el árbol del setter queda con una sola fuente del paso, listo para que el Bloque 5 arranque sobre verde propio (la e2e global es tarea de otro lane).
