@@ -1,27 +1,17 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
-import { Flame, Lock, MessageCircle, Send } from 'lucide-react'
+import { Flame, Lock } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
-import { Badge, Button, Card, Field, TextArea } from '@/components/ui'
+import { Badge, Card } from '@/components/ui'
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildOpenerInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
-import {
-  CANAL_INSTAGRAM,
-  contieneLink,
-  formatFechaCorta,
-  leadRespondio,
-} from '@/lib/leados/flow'
+import { leadRespondio } from '@/lib/leados/flow'
 import { GUIA_OPENER } from '@/lib/leados/guidance-content'
-import { registrarOpener } from '@/app/(protected)/setter/_actions/outreach.actions'
-import { OpenerInputSchema } from '@/app/(protected)/setter/_actions/outreach.schemas'
 import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
+import { OpenerForm, OpenerResumen } from './opener-form'
 
 type OpenerStepProps = {
   leadId: string
@@ -45,6 +35,11 @@ type OpenerStepProps = {
  * link, en vivo y server-side). El envío es 100% manual — copiar y pegar en
  * Instagram — y al marcarlo se registra el contacto y la maquinaria arma el
  * follow-up sola.
+ *
+ * El CHROME del wizard (intro, teach, canal, el bloque del Gem) vive acá; el
+ * núcleo de escritura y el resumen «Enviado» son piezas compartidas
+ * (`OpenerForm`/`OpenerResumen`) para que el manual (M4) sea otra presentación
+ * del MISMO camino — comportamiento idéntico, suites como testigo.
  */
 export function OpenerStep({
   leadId,
@@ -59,11 +54,6 @@ export function OpenerStep({
   proximoToque,
   dmsHoy,
 }: OpenerStepProps) {
-  const router = useRouter()
-  const [mensaje, setMensaje] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
-
   // ── Antes de la evaluación: paso apagado ───────────────────────────────────
   if (stage === null || stage === 'FICHA') {
     return (
@@ -83,28 +73,7 @@ export function OpenerStep({
 
   // ── Opener ya registrado: resumen y a otra cosa ────────────────────────────
   if (contactos > 0) {
-    return (
-      <Card variant="subtle" padding="lg">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <MessageCircle size={15} strokeWidth={1.5} className="text-zinc-500" />
-            <h2 className="text-base font-semibold text-zinc-300">
-              Primer contacto (opener)
-            </h2>
-          </div>
-          <Badge tone="emerald" variant="soft">
-            Enviado
-          </Badge>
-        </div>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-          Primer contacto registrado{ultimoContacto ? ` el ${formatFechaCorta(ultimoContacto)}` : ''}.
-          {proximoToque
-            ? ` Próximo toque: ${formatFechaCorta(proximoToque)}.`
-            : ''}{' '}
-          La conversación sigue en «Seguimiento».
-        </p>
-      </Card>
-    )
+    return <OpenerResumen ultimoContacto={ultimoContacto} proximoToque={proximoToque} />
   }
 
   // ── El lead ya respondió sin opener registrado (movida del admin) ──────────
@@ -120,34 +89,6 @@ export function OpenerStep({
         </p>
       </Card>
     )
-  }
-
-  const largo = mensaje.trim().length
-  const pasadoDeLargo = largo > CANAL_INSTAGRAM.openerMaxCaracteres
-  const tieneLink = contieneLink(mensaje)
-  const listoParaCopiar = largo >= 10 && !tieneLink
-
-  const registrar = () => {
-    setError(null)
-    const parsed = OpenerInputSchema.safeParse({ mensaje })
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Revisá el texto del opener')
-      return
-    }
-    startTransition(async () => {
-      const result = await registrarOpener(leadId, parsed.data)
-      if (!result.success) {
-        setError(result.error)
-        toast.error(result.error)
-        return
-      }
-      toast.success(
-        result.data.proximoToque
-          ? `Opener registrado — próximo toque el ${formatFechaCorta(result.data.proximoToque)}.`
-          : 'Opener registrado — quedó en seguimiento.',
-      )
-      router.refresh()
-    })
   }
 
   // ── Activo: armar, copiar, mandar a mano, registrar ────────────────────────
@@ -190,51 +131,7 @@ export function OpenerStep({
         />
       )}
 
-      <Field
-        label="Tu opener (el texto que vas a pegar en Instagram)"
-        required
-        error={error ?? undefined}
-        hint={
-          pasadoDeLargo
-            ? `Llevás ${largo} caracteres — el recomendado es menos de ${CANAL_INSTAGRAM.openerMaxCaracteres}. Podés seguir, pero corto convierte mejor.`
-            : `Menos de ${CANAL_INSTAGRAM.openerMaxCaracteres} caracteres. Que nombre algo real del negocio.`
-        }
-      >
-        <TextArea
-          value={mensaje}
-          onChange={(event) => setMensaje(event.target.value)}
-          invalid={Boolean(error) || tieneLink}
-          rows={4}
-        />
-      </Field>
-
-      {tieneLink && (
-        <div className="rounded-xl border border-rose-400/25 bg-rose-500/[0.06] p-3" role="alert">
-          <p className="text-xs font-semibold text-rose-300">{GUIA_OPENER.gate.titulo}</p>
-          <p className="mt-1 text-xs leading-relaxed text-rose-200/90">
-            <LineaRicaText linea={GUIA_OPENER.gate.detalle} emphasisClassName="font-semibold text-rose-100" />
-          </p>
-        </div>
-      )}
-
-      {listoParaCopiar && (
-        <CopyBlock
-          titulo="Tu opener, listo para pegar"
-          instruccion="Copialo, mandalo por DM en Instagram, y volvé a marcarlo acá."
-          texto={mensaje.trim()}
-        />
-      )}
-
-      <GuardrailRol compacto />
-
-      <Button
-        onClick={registrar}
-        loading={isPending}
-        disabled={tieneLink}
-        icon={<Send size={14} strokeWidth={1.5} />}
-      >
-        Ya lo mandé en Instagram — registrar
-      </Button>
+      <OpenerForm leadId={leadId} />
     </Card>
   )
 }

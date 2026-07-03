@@ -7,6 +7,7 @@ import { EstadoManual } from '../_components/estado-manual'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
 import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
+import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -127,7 +128,26 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                 />
               ),
             }
-          : {}
+          : pantalla.id === 'm4'
+            ? {
+                contexto: (
+                  <M4Contexto
+                    lead={manual.leadCopy}
+                    ficha={manual.ficha}
+                    evaluacion={manual.evaluacion}
+                  />
+                ),
+                municion: <M4Municion />,
+                captura: (
+                  <M4Registro
+                    leadId={leadId}
+                    openerEnviado={manual.openerEnviado}
+                    ultimoContacto={manual.ultimoContacto}
+                    proximoToque={manual.proximoToque}
+                  />
+                ),
+              }
+            : {}
 
   return (
     <PantallaManual

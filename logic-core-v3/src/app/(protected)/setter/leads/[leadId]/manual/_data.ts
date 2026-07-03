@@ -42,6 +42,11 @@ export type ManualDelLead = {
    * score 3 (`gateBriefAbierto`): status del lead + campo caliente de Franco. */
   leadStatus: LeadStatus
   caliente: boolean
+  /** M4 — el primer contacto (opener) ya está registrado (mismo proxy que el
+   * wizard: `contactos > 0`); con esto el registro cae en el resumen «Enviado». */
+  openerEnviado: boolean
+  /** M4 — ISO del último contacto registrado — la fecha del resumen «Enviado». */
+  ultimoContacto: string | null
 }
 
 /**
@@ -69,6 +74,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
 
   const stage = dossier?.stage ?? null
   const ficha = parseFicha(dossier?.fichaJson ?? null)
+  // Contactos comerciales (opener incluido): alimenta la derivación Y el proxy
+  // `openerEnviado` de M4 — una sola lectura de `actividades`.
+  const contactos = actividades?.length ?? 0
 
   const posicion = derivarPantalla({
     stage,
@@ -79,7 +87,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     draftUrl: dossier?.draftUrl ?? null,
     progreso: parseProgreso(dossier?.progresoJson ?? null),
     agenda: parseAgenda(dossier?.agendaJson ?? null),
-    contactos: actividades?.length ?? 0,
+    contactos,
     followUpCount: countFollowUps(actividades ?? []),
     followUpVencido,
     finalUrl: dossier?.finalUrl ?? null,
@@ -105,5 +113,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     evaluacion: parseEvaluacion(dossier?.evaluacionJson ?? null),
     leadStatus: lead.status,
     caliente: lead.caliente,
+    openerEnviado: contactos > 0,
+    ultimoContacto: actividades?.[0]?.createdAt.toISOString() ?? null,
   }
 }
