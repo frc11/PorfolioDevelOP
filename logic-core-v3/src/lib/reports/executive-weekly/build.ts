@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { getExecutiveBrief } from '@/lib/ai/executive-brief'
 import { getBriefHistory } from '@/lib/ai/brief-history'
+import { isBriefCacheCurrent } from '@/lib/ai/executive-brief-input'
 import { getHealthScore } from '@/lib/health-score'
 import { getWeekResults } from '@/lib/dashboard/week-results'
 import { startOfTodayInAR } from '@/lib/tz-ar'
@@ -104,11 +105,13 @@ export async function buildExecutiveWeeklyReport(
     return { ok: false, reason: 'NO_RECIPIENT' }
   }
 
-  // Brief: reusamos el cache vigente. Si no está o está vacío, fallback a
-  // `getExecutiveBrief` que internamente decide regenerar — corre UNA vez por
-  // org (recovery, no es el path normal: el cron `regenerate-briefs` debería
-  // haber corrido más temprano el mismo lunes).
-  let briefText = org.cachedExecutiveBrief?.trim() || ''
+  // Brief: reusamos el cache vigente. Si no está, está vacío, o se generó con la
+  // lógica vieja (FIX-BRIEF: un brief pre-corte podía contradecir las cards), se
+  // trata como ausente y cae a `getExecutiveBrief`, que regenera con la lógica
+  // actual — corre UNA vez por org (recovery; el path normal es el cron
+  // `regenerate-briefs`, que corre más temprano el mismo lunes).
+  const cachedBriefIsCurrent = isBriefCacheCurrent(org.cachedExecutiveBriefAt)
+  let briefText = cachedBriefIsCurrent ? org.cachedExecutiveBrief?.trim() || '' : ''
   if (!briefText) {
     const res = await getExecutiveBrief(organizationId)
     if (!res || !res.text.trim()) return { ok: false, reason: 'NO_DATA' }

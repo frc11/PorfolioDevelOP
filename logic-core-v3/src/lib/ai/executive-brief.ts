@@ -1,5 +1,13 @@
 import { Prisma } from '@prisma/client'
 import { generateText } from 'ai'
+import { getBriefHistory } from '@/lib/ai/brief-history'
+import {
+  BRIEF_SYSTEM_PROMPT,
+  buildBriefMetricsInput,
+  buildBriefUserPrompt,
+  isBriefCacheCurrent,
+  pickPreviousHealthTotal,
+} from '@/lib/ai/executive-brief-input'
 import { getWeekResults, type WeekResultsData } from '@/lib/dashboard/week-results'
 import { getHealthScore, type HealthScoreResult } from '@/lib/health-score'
 import { prisma } from '@/lib/prisma'
@@ -70,6 +78,9 @@ export async function getExecutiveBrief(
       org.cachedExecutiveBrief &&
       org.cachedExecutiveBriefAt &&
       cacheAge < CACHE_TTL_DAYS &&
+      // FIX-BRIEF — no servir un brief generado con la lógica vieja (podía
+      // contradecir las cards): se trata como stale y cae a regeneración.
+      isBriefCacheCurrent(org.cachedExecutiveBriefAt) &&
       isBriefValid(org.cachedExecutiveBrief)
     ) {
       return {
@@ -85,6 +96,7 @@ export async function getExecutiveBrief(
       const generation = await generateBriefText(
         organizationId,
         org.companyName ?? 'tu negocio',
+        now,
       )
 
       if (!generation || !isBriefValid(generation.text)) {
@@ -170,7 +182,7 @@ export async function regenerateExecutiveBrief(
   }
 
   try {
-    const generation = await generateBriefText(organizationId, org.companyName)
+    const generation = await generateBriefText(organizationId, org.companyName, now)
 
     if (!isBriefValid(generation.text)) {
       console.warn(
@@ -221,7 +233,8 @@ export async function refreshExecutiveBriefCache(
 
   if (!org) throw new Error(`Organization ${organizationId} not found`)
 
-  const generation = await generateBriefText(organizationId, org.companyName)
+  const now = new Date()
+  const generation = await generateBriefText(organizationId, org.companyName, now)
 
   if (!isBriefValid(generation.text)) {
     console.warn(
@@ -229,8 +242,6 @@ export async function refreshExecutiveBriefCache(
     )
     throw new Error(`Generated invalid executive brief for organization ${organizationId}`)
   }
-
-  const now = new Date()
 
   await prisma.organization.update({
     where: { id: organizationId },
@@ -261,50 +272,59 @@ type BriefGeneration = {
 async function generateBriefText(
   organizationId: string,
   companyName: string,
+  now: Date,
 ): Promise<BriefGeneration> {
   const [healthScore, weekResults] = await Promise.all([
     getHealthScore(organizationId),
     getWeekResults(organizationId),
   ])
 
-  const systemPrompt = `Sos el asistente ejecutivo de develOP, una agencia argentina de tecnologia y automatizaciones.
-Tu trabajo es escribir un resumen ejecutivo SEMANAL del negocio digital del cliente, en espanol rioplatense, dirigido al dueno del negocio, no a un tecnico.
+  // FIX-BRIEF — El delta de Health que ve el dueño en la card se calcula contra
+  // el snapshot de la semana anterior (build.ts), NO contra `healthScore.trend`
+  // (hoy un placeholder por hash del orgId, sin relación con la realidad).
+  // Replicamos ESE cálculo para que el número que ve Gemini sea idéntico al de
+  // la card y no pueda contradecirla. Leads/Conversaciones/Tareas ya salen del
+  // mismo `weekResults` que la card, con sus tendencias reales.
+  const previousHealthTotal = await getPreviousHealthTotal(organizationId, getISOWeekKeyAR(now))
 
-REGLAS:
-- Maximo 3 oraciones, total 280 caracteres aprox.
-- Lenguaje claro, sin jerga tecnica.
-- Si hay buenas noticias, abrirlas con energia.
-- Si hay puntos criticos, mencionarlos sin alarmar.
-- Cerrar con una recomendacion accionable o un dato esperanzador.
-- NO usar emojis. NO usar exclamaciones salvo que sea muy positivo.
-- Tono directo, premium, como un consultor que conoce al cliente.`
-
-  const userPrompt = `Cliente: ${companyName}
-
-Datos de esta semana:
-- Health Score: ${healthScore.total}/100 (tendencia: ${formatTrendValue(healthScore.trend.value)} vs semana anterior)
-- Salud Digital: ${healthScore.dimensions[0].score}/100
-- Salud Comercial: ${healthScore.dimensions[1].score}/100
-- Salud Operativa: ${healthScore.dimensions[2].score}/100
-
-Resultados:
-- Leads esta semana: ${weekResults.leads.value} ${formatTrendPercent(weekResults.leads.trend)}
-- Mensajes respondidos: ${weekResults.messagesAnswered.value}
-- Tareas completadas: ${weekResults.tasksCompleted.value}
-
-Genera el resumen ejecutivo de la semana.`
+  const metrics = buildBriefMetricsInput({
+    healthTotal: healthScore.total,
+    previousHealthTotal,
+    leads: weekResults.leads,
+    conversations: weekResults.messagesAnswered,
+    tasks: weekResults.tasksCompleted,
+  })
 
   const provider = getLLMProvider('google')
   const model = provider.getModel(BRIEF_MODEL)
 
   const { text } = await generateText({
     model,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }],
+    system: BRIEF_SYSTEM_PROMPT,
+    messages: [{ role: 'user', content: buildBriefUserPrompt({ companyName, metrics }) }],
     maxOutputTokens: BRIEF_MAX_OUTPUT_TOKENS,
   })
 
   return { text: text.trim(), healthScore, weekResults }
+}
+
+/**
+ * Total de Health de la semana anterior, con la MISMA regla que la card
+ * (build.ts usa el snapshot previo de `getBriefHistory`). Delega la selección
+ * pura a `pickPreviousHealthTotal` para que quede testeada por invariante.
+ */
+async function getPreviousHealthTotal(
+  organizationId: string,
+  currentPeriodKey: string,
+): Promise<number | null> {
+  const history = await getBriefHistory(organizationId, 2)
+  return pickPreviousHealthTotal(
+    history.map((snapshot) => ({
+      periodKey: snapshot.periodKey,
+      healthTotal: snapshot.healthScores.total,
+    })),
+    currentPeriodKey,
+  )
 }
 
 // Persiste un snapshot semanal del brief para histórico/comparaciones. Aditivo
@@ -366,13 +386,4 @@ function formatWaitTime(minutesLeft: number): string {
 
 function getRegenerationsLeft(regenerations: number): number {
   return Math.max(0, REGENERATION_LIMIT - regenerations)
-}
-
-function formatTrendValue(value: number): string {
-  return value > 0 ? `+${value}` : String(value)
-}
-
-function formatTrendPercent(value: number | null): string {
-  if (value === null) return ''
-  return `(${value > 0 ? '+' : ''}${value}%)`
 }
