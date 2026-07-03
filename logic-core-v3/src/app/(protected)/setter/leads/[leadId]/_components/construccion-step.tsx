@@ -37,6 +37,9 @@ type ConstruccionStepProps = {
   respondioDesde: string | null
   /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
   escaladoAt: string | null
+  /** A-23: la nota del escalamiento vigente — se re-sirve a su AUTOR (antes solo
+   * la veía el admin) y prefillea el modal al re-escalar. null si no escaló. */
+  escaladoNota: string | null
   /** E.2: progreso del checklist de construcción (qué fases marcó el setter).
    * Viene de `progresoJson` → sobrevive refresh. Fresco = `{ completadas: [] }`. */
   progreso: Progreso
@@ -51,6 +54,7 @@ export function ConstruccionStep({
   ultimoRechazo,
   respondioDesde,
   escaladoAt,
+  escaladoNota,
   progreso,
 }: ConstruccionStepProps) {
   const { isPending, run } = useStepAction()
@@ -177,16 +181,30 @@ export function ConstruccionStep({
         </p>
 
         {escaladoAt ? (
-          <div className="flex flex-col gap-3 rounded-xl border border-rose-400/20 bg-rose-500/[0.06] p-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="flex items-start gap-2 text-xs leading-relaxed text-rose-100">
-              <LifeBuoy size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-rose-300" />
-              <span>
-                <span className="font-semibold">Ya avisaste a Franco</span>
-                {esperaEscalado ? ` (hace ${esperaEscalado})` : ''}. Está al tanto — seguí con
-                otro lead mientras te responde.
-              </span>
-            </p>
-            <EscalarModal leadId={leadId} reescalar />
+          <div className="rounded-xl border border-rose-400/20 bg-rose-500/[0.06] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="flex items-start gap-2 text-xs leading-relaxed text-rose-100">
+                <LifeBuoy size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-rose-300" />
+                <span>
+                  <span className="font-semibold">Ya avisaste a Franco</span>
+                  {esperaEscalado ? ` (hace ${esperaEscalado})` : ''}. Está al tanto — seguí con
+                  otro lead mientras te responde.
+                </span>
+              </p>
+              <EscalarModal leadId={leadId} reescalar notaPrevia={escaladoNota} />
+            </div>
+            {/* A-23: la nota se re-sirve a su autor (colapsable) — antes solo la veía
+                el admin; el modal de re-escalar arranca prefilleado con ella. */}
+            {escaladoNota && (
+              <details className="mt-3">
+                <summary className="cursor-pointer text-[11px] font-medium text-rose-200/80 transition-colors hover:text-rose-100">
+                  Ver lo que le dijiste
+                </summary>
+                <p className="mt-1.5 whitespace-pre-wrap rounded-lg border border-rose-400/15 bg-rose-500/[0.04] p-3 text-xs leading-relaxed text-rose-100/90">
+                  {escaladoNota}
+                </p>
+              </details>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-between gap-3 border-t border-white/[0.06] pt-4">

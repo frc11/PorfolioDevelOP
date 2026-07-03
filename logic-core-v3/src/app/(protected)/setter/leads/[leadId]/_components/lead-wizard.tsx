@@ -60,6 +60,9 @@ export type WizardData = {
   respondioDesde: string | null
   /** B-beta: ISO del escalamiento "me trabé" vigente; null si no escaló. */
   escaladoAt: string | null
+  /** A-23: la nota del escalamiento vigente — re-servida a su autor y prefill del
+   * re-escalar (antes solo la veía el admin). null si no escaló. */
+  escaladoNota: string | null
   /** B5: último rechazo del admin — guía de retrabajo cuando stage=RECHAZADA. */
   ultimoRechazo: Rechazo | null
   /** B7: reunión agendada vía Cal.com (uid + traspaso) — acción «Agendar la reunión». */
@@ -88,6 +91,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
     selfCheck,
     respondioDesde,
     escaladoAt,
+    escaladoNota,
     ultimoRechazo,
     agenda,
     outreach,
@@ -275,6 +279,7 @@ export function LeadWizard({ data }: { data: WizardData }) {
             ultimoRechazo={ultimoRechazo}
             respondioDesde={respondioDesde}
             escaladoAt={escaladoAt}
+            escaladoNota={escaladoNota}
             progreso={progreso}
           />
         </StepAnchor>

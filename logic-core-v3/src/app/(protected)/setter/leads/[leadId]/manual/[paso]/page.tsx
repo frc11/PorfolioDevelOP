@@ -1,13 +1,23 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import { OctagonAlert } from 'lucide-react'
-import { Callout } from '@/components/ui'
-import { esPantallaId, PANTALLAS, rutaManual } from '@/lib/leados/manual'
+import {
+  esPantallaId,
+  faseDePantallaConstruccion,
+  PANTALLAS,
+  rutaManual,
+} from '@/lib/leados/manual'
+import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
 import { EstadoManual } from '../_components/estado-manual'
+import {
+  ConstruccionContexto,
+  ConstruccionMunicion,
+  ConstruccionRegistro,
+} from '../_components/m-construccion'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
 import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
+import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -43,6 +53,9 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   if (!accesible) redirect(destinoActual)
 
   const pantalla = PANTALLAS[paso]
+  // FaseId de la fase de Construcción detrás de esta pantalla (m7–m12), o null.
+  // Narrowea a `FaseId` dentro de la rama de slots — sin non-null assertion.
+  const faseConstruccion = faseDePantallaConstruccion(pantalla.id)
 
   if (pantalla.tipo === 'estado') {
     return (
@@ -56,40 +69,19 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
     )
   }
 
-  // Reentrada M-R: la nota de Franco AL FRENTE, antes de la instrucción —
-  // checklist y borrador siguen como estaban (el motor los preservó).
+  // Reentrada M-R: la nota de Franco AL FRENTE, antes de la instrucción. Es el
+  // MISMO `GuiaRetrabajo` compartido que muestra el aterrizaje del wizard (una
+  // sola fuente de la nota, no un Callout duplicado) + el recordatorio de que el
+  // motor preservó checklist y borrador y reseteó el chequeo final.
   const notaRechazo =
     pantalla.tipo === 'reentrada' && manual.rechazo ? (
-      <Callout
-        tone="danger"
-        accent
-        icon={OctagonAlert}
-        title={<span className="text-base">Franco pidió correcciones</span>}
-        className="p-5 text-sm shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
-      >
-        <div className="space-y-1.5 leading-relaxed text-zinc-200">
-          <p>
-            <span className="font-semibold text-rose-200">Qué está mal:</span>{' '}
-            {manual.rechazo.motivo}
-          </p>
-          {manual.rechazo.donde && (
-            <p>
-              <span className="font-semibold text-rose-200">Dónde:</span>{' '}
-              {manual.rechazo.donde}
-            </p>
-          )}
-          {manual.rechazo.arreglo && (
-            <p className="whitespace-pre-wrap">
-              <span className="font-semibold text-rose-200">Arreglo concreto:</span>{' '}
-              {manual.rechazo.arreglo}
-            </p>
-          )}
-        </div>
-        <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y
-          volvé a pasar el chequeo final (se reseteó).
+      <div className="space-y-2">
+        <GuiaRetrabajo rechazo={manual.rechazo} />
+        <p className="px-1 text-xs leading-relaxed text-zinc-400">
+          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y volvé a
+          pasar el chequeo final (se reseteó).
         </p>
-      </Callout>
+      </div>
     ) : undefined
 
   // Slots por pantalla migrada — cada módulo m<N>-*.tsx llena los tres del
@@ -147,7 +139,58 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                   />
                 ),
               }
-            : {}
+            : pantalla.id === 'm6'
+              ? {
+                  contexto: (
+                    <M6Contexto
+                      lead={manual.leadCopy}
+                      ficha={manual.ficha}
+                      evaluacion={manual.evaluacion}
+                    />
+                  ),
+                  municion: <M6Municion />,
+                  captura: (
+                    <M6Registro
+                      leadId={leadId}
+                      businessName={manual.lead.businessName}
+                      brief={manual.brief}
+                      capturando={manual.stage === 'EVALUADA'}
+                    />
+                  ),
+                }
+              : faseConstruccion
+                ? {
+                    contexto: (
+                      <ConstruccionContexto
+                        lead={manual.leadCopy}
+                        brief={manual.brief}
+                        ficha={manual.ficha}
+                      />
+                    ),
+                    municion: <ConstruccionMunicion faseId={faseConstruccion} />,
+                    captura: (
+                      <ConstruccionRegistro
+                        leadId={leadId}
+                        faseId={faseConstruccion}
+                        titulo={pantalla.corto}
+                        completadas={manual.progreso.completadas}
+                      />
+                    ),
+                  }
+                : pantalla.id === 'mr'
+                  ? {
+                      // Reentrada: el brief re-servido para retrabajar contra él
+                      // (las fases se alcanzan por `NavConstruccion`); la nota de
+                      // Franco va como `encabezado`, arriba de la instrucción.
+                      contexto: (
+                        <ConstruccionContexto
+                          lead={manual.leadCopy}
+                          brief={manual.brief}
+                          ficha={manual.ficha}
+                        />
+                      ),
+                    }
+                  : {}
 
   return (
     <PantallaManual

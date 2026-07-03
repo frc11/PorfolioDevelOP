@@ -118,6 +118,9 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
     // B-beta: marca del escalamiento "me trabé" — para que el setter vea que ya
     // avisó a Franco y no re-escale. null = sin pedido vigente.
     escaladoAt: dossier?.escaladoAt?.toISOString() ?? null,
+    // A-23: la nota del escalamiento — se re-sirve a su autor (banner colapsable)
+    // y prefillea el re-escalar. Antes solo la leía el admin.
+    escaladoNota: dossier?.escaladoNota ?? null,
     ultimoRechazo: ultimoRechazo(dossier?.rechazos ?? null),
     // B7: la reunión agendada (booking Cal.com + traspaso) — Paso 10.
     agenda: parseAgenda(dossier?.agendaJson ?? null),

@@ -1,11 +1,12 @@
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
-import type { Evaluacion, Ficha, Rechazo } from '@/lib/leados/contracts'
+import type { Brief, Evaluacion, Ficha, Progreso, Rechazo } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
   parseAgenda,
+  parseBrief,
   parseEvaluacion,
   parseFicha,
   parseProgreso,
@@ -42,6 +43,13 @@ export type ManualDelLead = {
    * score 3 (`gateBriefAbierto`): status del lead + campo caliente de Franco. */
   leadStatus: LeadStatus
   caliente: boolean
+  /** M6 — el brief guardado, parseado con el MISMO contrato que el wizard
+   * (`parseBrief`); null mientras no se armó. Alimenta la captura vs. la
+   * consulta de M6 y el bloque de Construcción (M7–M12 / M-R). */
+  brief: Brief | null
+  /** M7–M12 — el checklist de Construcción (auto-reporte, jamás gate); el MISMO
+   * `progresoJson` que consume el wizard. Fresco = `{ completadas: [] }`. */
+  progreso: Progreso
   /** M4 — el primer contacto (opener) ya está registrado (mismo proxy que el
    * wizard: `contactos > 0`); con esto el registro cae en el resumen «Enviado». */
   openerEnviado: boolean
@@ -74,6 +82,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
 
   const stage = dossier?.stage ?? null
   const ficha = parseFicha(dossier?.fichaJson ?? null)
+  // Hoisted: el checklist alimenta la derivación (completadas) Y se re-sirve a
+  // las pantallas de Construcción (M7–M12). Una sola lectura de `progresoJson`.
+  const progreso = parseProgreso(dossier?.progresoJson ?? null)
   // Contactos comerciales (opener incluido): alimenta la derivación Y el proxy
   // `openerEnviado` de M4 — una sola lectura de `actividades`.
   const contactos = actividades?.length ?? 0
@@ -85,7 +96,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     caliente: lead.caliente,
     ficha,
     draftUrl: dossier?.draftUrl ?? null,
-    progreso: parseProgreso(dossier?.progresoJson ?? null),
+    progreso,
     agenda: parseAgenda(dossier?.agendaJson ?? null),
     contactos,
     followUpCount: countFollowUps(actividades ?? []),
@@ -113,6 +124,8 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     evaluacion: parseEvaluacion(dossier?.evaluacionJson ?? null),
     leadStatus: lead.status,
     caliente: lead.caliente,
+    brief: parseBrief(dossier?.briefJson ?? null),
+    progreso,
     openerEnviado: contactos > 0,
     ultimoContacto: actividades?.[0]?.createdAt.toISOString() ?? null,
   }
