@@ -49,6 +49,8 @@
     "check:invariant:client-notifications": "npx tsx src/lib/client-notifications/client-notifications.invariant.ts",
     "check:invariant:executive-report-plan": "npx tsx src/lib/reports/executive-weekly/report-eligible-plan.invariant.ts",
     "check:invariant:executive-report-prefs": "npx tsx \"src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts\"",
+    "check:invariant:brief-input": "npx tsx src/lib/ai/executive-brief-input.invariant.ts",
+    "check:invariant:client-monthly-report": "npx tsx src/lib/reports/client-monthly/monthly-report-data.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

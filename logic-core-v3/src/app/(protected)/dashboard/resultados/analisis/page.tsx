@@ -11,6 +11,7 @@ import { AnalysisTeaser } from '@/components/dashboard/results/analysis/Analysis
 import { DiscoveriesSection } from '@/components/dashboard/results/analysis/DiscoveriesSection'
 import { MonthTrendSection } from '@/components/dashboard/results/analysis/MonthTrendSection'
 import { CategoriesSection } from '@/components/dashboard/results/analysis/CategoriesSection'
+import { DownloadMonthlyReportButton } from '@/components/dashboard/results/analysis/DownloadMonthlyReportButton'
 import {
   ResultEmptyState,
   resultEmptyCtaCls,
@@ -41,6 +42,7 @@ export default async function AnalisisPage() {
         title="Análisis de tu negocio"
         description="Lo que develOP descubre cada mes con la actividad de tu asistente"
         icon={Sparkles}
+        action={showAnalysis ? <DownloadMonthlyReportButton /> : undefined}
       />
 
       {!showAnalysis ? (
