@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs'
 import * as React from 'react'
 import type { OrgRole, Role } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth-cookies'
 
 const LOGIN_PATH = '/login'
@@ -95,54 +95,28 @@ const nextAuthResult = NextAuth({
   pages: { signIn: LOGIN_PATH },
   providers: [
     Resend({
-      from: 'develOP <noreply@develop.com.ar>',
+      // El magic link ahora se manda por Brevo (sendVerificationRequest, abajo); el
+      // remitente lo resuelve brevo-service desde BREVO_FROM_EMAIL (verificado). El
+      // provider Resend se conserva por su id 'resend' — lo usa signIn('resend').
       async sendVerificationRequest({ identifier: email, url }) {
-        await sendEmail({
-          to: email,
+        // `url` es el token de acceso generado por NextAuth (URL-encodeado, confiable):
+        // se inserta EXACTO en el href, sin escapar ni reconstruir.
+        await sendTransactionalEmail({
+          to: { email },
           subject: 'Tu acceso a develOP',
-          react: React.createElement(
-            'div',
-            {
-              style: {
-                fontFamily: 'Arial, sans-serif',
-                color: '#111827',
-                lineHeight: 1.6,
-              },
-            },
-            React.createElement('h1', { style: { fontSize: '20px' } }, 'Ingresá a develOP'),
-            React.createElement(
-              'p',
-              null,
-              'Usá este enlace seguro para acceder al portal de clientes:'
-            ),
-            React.createElement(
-              'p',
-              null,
-              React.createElement(
-                'a',
-                {
-                  href: url,
-                  style: {
-                    display: 'inline-block',
-                    padding: '12px 18px',
-                    background: '#06b6d4',
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    borderRadius: '8px',
-                    fontWeight: 'bold',
-                  },
-                },
-                'Ingresar ahora'
-              )
-            ),
-            React.createElement(
-              'p',
-              { style: { fontSize: '12px', color: '#6b7280' } },
-              'Si no solicitaste este acceso, podés ignorar este email.'
-            )
-          ),
+          htmlContent: `<!DOCTYPE html>
+<html lang="es"><body style="margin:0;padding:0;background:#f4f4f5;">
+  <div style="font-family:Arial,sans-serif;color:#111827;line-height:1.6;max-width:480px;margin:0 auto;padding:32px 24px;">
+    <h1 style="font-size:20px;margin:0 0 16px;">Ingresá a develOP</h1>
+    <p style="margin:0 0 16px;">Usá este enlace seguro para acceder al portal de clientes:</p>
+    <p style="margin:0 0 24px;">
+      <a href="${url}" style="display:inline-block;padding:12px 18px;background:#06b6d4;color:#ffffff;text-decoration:none;border-radius:8px;font-weight:bold;">Ingresar ahora</a>
+    </p>
+    <p style="font-size:12px;color:#6b7280;margin:0;">Si no solicitaste este acceso, podés ignorar este email.</p>
+  </div>
+</body></html>`,
+          textContent: `Ingresá a develOP\n\nUsá este enlace seguro para acceder al portal de clientes:\n${url}\n\nSi no solicitaste este acceso, podés ignorar este email.`,
         })
-
       },
     }),
     Google({
@@ -199,7 +173,7 @@ const nextAuthResult = NextAuth({
   callbacks: {
     async signIn({ user, email }) {
       if (email?.verificationRequest) {
-        const requestedEmail = (email as { email?: string } | undefined)?.email?.trim().toLowerCase()
+        const requestedEmail = user?.email?.trim().toLowerCase()
         if (!requestedEmail) {
           return false
         }

@@ -12262,3 +12262,32 @@ Confirmado: `resend` en `package.json` y `RESEND_API_KEY` siguen en uso por `ema
 1. **No autoconfirmado — visibilidad:** abrir `/login` en **desktop y mobile** y confirmar, **en reposo y sin foco**, que se ven Email + Contraseña (tab Contraseña) y "Tu email" (tab Magic Link), y que **alternar tabs** los deja visibles cada vez. (No verificable por preview acá.)
 2. Confirmar que el floating label, el ojo del password y el borde en foco siguen andando igual.
 3. **Commitear** cuando 1 dé OK (lo hacés vos).
+
+## ✅ MAGIC-BREVO — magic link migrado a Brevo
+
+**Qué corrige:** el login por **magic link** fallaba (AccessDenied en el envío) porque el mail salía por **Resend desde un dominio no verificado**. El resto del portal ya manda por Brevo (P2: leads, reportes) con un remitente verificado. Este sprint migra **solo** el envío del magic link de Resend a Brevo, reusando `sendTransactionalEmail` (`@/lib/email/brevo-service`). Sprint **plan-first** (auth.ts es el archivo más sensible del repo): se entregó plan, el humano lo aprobó con ajustes, se ejecutó.
+
+### Discrepancia con el diagnóstico (relevada y confirmada por el humano)
+El brief daba el `from` culpable como `noreply@develop.com.ar` — **ese string no existe en el repo** (grep global, cero matches). Lo real: (1) el provider tenía un `from` **muerto** en `auth.ts:98` (`'develOP <onboarding@resend.dev >'`, sandbox de Resend + typo), no usado porque el `sendVerificationRequest` custom llamaba a `sendEmail`; (2) el `from` **real** en el cable era `email.ts:21` → `'develOP Agency <hello@develop-agency.com>'` (dominio `develop-agency.com`). El humano confirmó que el fix es el mismo (enrutar por el sender verificado de Brevo), sea cual sea el dominio malo. Se **eliminó** el `from` muerto de paso.
+
+### Mecánica NextAuth v5 (confirmada en `@auth/core/providers/resend.js`)
+El provider Resend tiene `id: "resend"` hardcodeado y acepta un `sendVerificationRequest` custom que **reemplaza por completo** el transporte (el `fetch` a `api.resend.com` del default nunca corre). Por eso: (a) `signIn('resend')` de `actions.ts:146` sigue andando sin cambios (el id no cambia); (b) usar Brevo adentro es válido — de hecho ya era el patrón (antes el custom llamaba a `sendEmail`); (c) `apiKey`/`from` del provider son irrelevantes en este path. **No se cambió el nombre del provider.**
+
+### El cambio (único archivo: `src/auth.ts`)
+- **`:11`** import: `import { sendEmail } from '@/lib/email'` → `import { sendTransactionalEmail } from '@/lib/email/brevo-service'`. (`import * as React` se conserva — lo usa `React.cache` en `:301`.)
+- **`:98`** — se **eliminó** el `from` muerto del provider (dead code), reemplazado por un comentario que aclara que el envío es por Brevo y que el provider se conserva por su id `'resend'`.
+- **`sendVerificationRequest`** — cuerpo migrado: se sacó `sendEmail` + el `React.createElement` (template como árbol React); ahora `sendTransactionalEmail({ to:{email}, subject:'Tu acceso a develOP', htmlContent, textContent })`. El `from` lo resuelve brevo-service desde `BREVO_FROM_EMAIL` (verificado). **Port fiel** — no se inspecciona el resultado (mismo control-flow que `sendEmail`, que se tragaba los errores); el manejo mejorado (throw on fail) queda para un sprint propio.
+
+### Template portado (React → HTML string, patrón D3')
+Mismo `<h1>Ingresá a develOP</h1>`, misma copia, mismo botón cyan `#06b6d4` "Ingresar ahora", mismo disclaimer, subject idéntico. **La `url`** (token de acceso de NextAuth, URL-encodeado y confiable) se inserta **exacta** en `href="${url}"`, sin escapar ni reconstruir. **Se agregó `textContent`** (plaintext con la url) — mejora deliverability de un mail de acceso (aprobado).
+
+### Qué queda INTACTO
+Provider **Credentials** · provider **Google** · **PrismaAdapter** · **todos los callbacks** — `signIn` (incl. la rama `email.verificationRequest` que valida que el email exista antes de mandar, seguridad correcta), `jwt` (SEC-AUTH-03), `session`, `redirect` · **cookies** (SEC-MISC-02) · **sesión JWT** · `signIn('resend')` de `actions.ts` · **`email.ts`** (invites/tickets siguen en Resend, fuera de scope) · **`RESEND_API_KEY`** sigue necesaria (la usa email.ts). Cero `any`, cero migraciones, sin git.
+
+### Verificación
+`.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — el `to:{email}` matchea la firma de Brevo y `sendEmail` quedó eliminado sin referencias colgadas · `eslint src/auth.ts`: **0 errores**, 1 warning **pre-existente y ajeno** (`getPostLoginPath` unused, `:65` — dead code sin callers; grep confirma 1 sola ocurrencia, su propia definición; **NO tocado**, fuera del scope del provider Resend) · build no corrido (fuera de gate) · sin commits. **UI:** no aplica visual-qa — sprint de auth/backend, no toca pantallas (`page.tsx` del login intacto).
+
+### Pendiente del humano
+1. **No autoconfirmado — envío real:** (a) pedir un magic link a un mail **registrado** y confirmar que **llega por Brevo**; (b) que el **link del mail loguee** de verdad; (c) que **login por contraseña y Google** sigan andando (no se tocó su código).
+2. **Commitear** cuando (a-c) den OK (lo hacés vos).
+3. *(Follow-up opcional)* dead code `getPostLoginPath` en `auth.ts:65` — candidato de limpieza en un sprint propio.
