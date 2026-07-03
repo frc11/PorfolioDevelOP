@@ -12238,3 +12238,27 @@ Confirmado: `resend` en `package.json` y `RESEND_API_KEY` siguen en uso por `ema
 2. Correr `npm run check:invariant:notifications-brevo` (verde esperado, sin DB).
 3. **Decidir sobre notify-message:** migrarlo a Brevo en un sprint propio (resolvería el `⚠️` de dominio no verificado) o dejarlo en Resend.
 4. **Commitear** cuando 1-2 den OK (lo hacés vos).
+
+## ✅ D-AUTH — inputs del login visibles (opacity heredado)
+
+**Qué corrige (P0):** en `/login` los tres inputs (Email, Contraseña, "Tu email" del Magic Link) se renderizaban en el DOM pero eran **invisibles en reposo** — el wrapper quedaba pegado en `opacity: 0; transform: translateY(16px)`. Efecto: la pantalla de ingreso al portal mostraba el card, las tabs y los labels, pero no los campos; había que tipear a ciegas. Confirmado por inspección del DOM antes del fix.
+
+### Causa raíz
+`FloatingField` (dentro de `src/app/login/page.tsx`) era un `motion.div` con `variants={itemVariants}` (`hidden:{opacity:0,y:16}` / `visible:{opacity:1,y:0}`). Se pintaba por **propagación** del label `"visible"` desde `LoginForm` (`initial="hidden" animate="visible"`). Los hermanos **directos** de `LoginForm` (logo, card, footer) reciben esa propagación y animan bien. Pero los `FloatingField` viven **dentro** de los tabs del `AnimatePresence` (`motion.div` `key="password-tab"` / `key="magic-tab"`), que animan por **objeto** (`animate={{opacity,x}}`), no por label de variante. Esa frontera no emite ningún `"visible"` al contexto → el `FloatingField` con `variants` no tiene label que resolver y cae en su default `hidden` → `opacity 0`. La cadena se corta exactamente en el borde del tab.
+
+### El fix (quirúrgico, local a `FloatingField`)
+- **Antes:** `<motion.div variants={itemVariants} className="relative">`
+- **Después:** `<motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{duration:0.5, ease:[0.16,1,0.3,1]}} className="relative">`
+- **Por qué rompe la dependencia:** con `initial`/`animate` propios, `FloatingField` ya **no depende** de que un ancestro le propague `"visible"`. Se anima solo al montar (mismo fade + subida de 16px) y termina **SIEMPRE** en `opacity 1`, esté en la tab que esté. Como cada tab del `AnimatePresence` monta fresco, sus inputs corren su entrada propia cada vez que se abre la tab → quedan visibles al alternar Contraseña ↔ Magic Link.
+- **Mismos valores/easing que `itemVariants`** (`opacity 0→1`, `y 16→0`, `duration 0.5`, `ease [0.16,1,0.3,1]`): la estética de entrada no cambia, solo el **disparador** (propio, no propagado). Comentario inline agregado explicando el porqué.
+
+### Qué NO se tocó
+`itemVariants` sigue igual (lo usan logo/card/footer, que animan bien por propagación) · `containerVariants`/stagger de `LoginForm` · el `AnimatePresence` de los tabs y sus transiciones · el indicador deslizante del tab switcher · el floating label, el visor de password (Eye/EyeOff) y el borde cyan en foco/valor (solo cambió el wrapper de animación) · el server action (`actions.ts`), el magic-link y la lógica de sign-in. `motion/react` (nunca framer-motion). Cero `any`, cero migraciones, sin git. Fuera de scope y NO tocado: el "No se pudo generar el Magic Link" y el magic-link-por-consola (config de mail, aparte).
+
+### Verificación
+`eslint src/app/login/page.tsx`: **limpio** (cero findings) · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `npm run build` NO corrido (excluido del gate) · sin commits. **visual-qa** despachado (estándar de UI, `/login` desktop+mobile) pero **no pudo levantar el preview**: las herramientas `preview_*` no están registradas en este harness (el subagente quedó read-only). No es un veredicto de la UI — la verificación visual pasa al humano (ya previsto en el plan del sprint).
+
+### Pendiente del humano
+1. **No autoconfirmado — visibilidad:** abrir `/login` en **desktop y mobile** y confirmar, **en reposo y sin foco**, que se ven Email + Contraseña (tab Contraseña) y "Tu email" (tab Magic Link), y que **alternar tabs** los deja visibles cada vez. (No verificable por preview acá.)
+2. Confirmar que el floating label, el ojo del password y el borde en foco siguen andando igual.
+3. **Commitear** cuando 1 dé OK (lo hacés vos).
