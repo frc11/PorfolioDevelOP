@@ -70,7 +70,7 @@ export async function sendTestNotification(input: z.infer<typeof SendTestNotific
   if (!result.ok) {
     return {
       success: false,
-      error: 'skipped' in result && result.skipped ? 'RESEND_API_KEY no configurada' : 'No se pudo enviar el email',
+      error: 'skipped' in result && result.skipped ? 'Email no configurado (BREVO_API_KEY)' : 'No se pudo enviar el email',
     }
   }
 

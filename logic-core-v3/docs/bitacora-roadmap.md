@@ -12179,3 +12179,62 @@ Al tocar el archivo, lint marcó un `any` preexistente en la misma función, **s
 2. **No autoconfirmado:** el disparo real del cron en producción (requiere el cron vivo + `CRON_SECRET` + datos reales) — la lógica del guard queda cubierta por test, pero el comportamiento end-to-end del endpoint no se ejecutó acá.
 3. Decidir si el hallazgo colateral (`org: any` enmascarando `org.name` inexistente en `Organization`) se atiende en el mismo bloque de saneamiento de deuda técnica que motivó la auditoría D1-D5, o aparte.
 4. **Commitear** cuando 1-2 den OK (lo hacés vos).
+
+---
+
+## ✅ D3' — migrar Test email + insights a Brevo
+
+**Qué cierra:** el repo tenía **dos motores de mail** conviviendo — Brevo (transaccional canónico, `sendTransactionalEmail` en `src/lib/email/brevo-service.ts`, ya en 12+ flujos de producción) y Resend (legado, 4 módulos). Este sprint consolida **dos** usos de Resend sobre Brevo (el botón admin "Test email" y el mail de insights del Sistema C), dejando los otros dos intactos (auth/soporte). No es un refactor del sistema de mail: son 2 reemplazos de motor puntuales + el fix de paso de `org.name` (D4).
+
+### Relevamiento (paso 0)
+Mapa de los 4 módulos Resend (subagente `Explore`, read-only):
+- **`src/lib/email.ts`** (`sendEmail({to,subject,react})`, React-email) — sirve **magic-link** (`auth.ts:100`), el **provider NextAuth Resend** (`auth.ts:97`), **agency-actions** (`agency-actions.ts:78`), **tickets** (`tickets/actions.ts:157`) e **invites** (`settings.ts:194`). ← NO TOCAR (auth/soporte).
+- **`src/lib/email/notify-message.ts`** (`notifyClientOfNewMessage`) — mail "Nuevo mensaje de X en tu panel". Disparo: server action de admin al mandar un mensaje en el panel (`messages.ts:57`, `message.actions.ts:193`) vía `queueAdminMessageEmail` (`admin-message-notification.ts:42`, fire-and-forget). Respeta opt-out `emailNotificationsOnMessage`. ← **RECOMENDACIÓN: dejar en Resend este sprint** (ver abajo).
+- **`sendLeadNotification.ts`** — único caller runtime: la server action `sendTestNotification.ts:40` (botón "Test email" admin, `BotConfigEditor.tsx:156`). NO está en el flujo real de leads (ese ya es Brevo, `notify.ts` ← `captureLead.ts:442`). ← MIGRADO.
+- **`sendInsightsNotification.ts`** — único caller: `generate-insights/route.ts:64`. ← MIGRADO.
+
+Firma destino confirmada: `sendTransactionalEmail({ to: {email, name?}, subject, htmlContent, textContent?, headers? })` → `{ok:true, messageId} | {ok:false, error}`, sender interno vía `BREVO_FROM_NAME`/`BREVO_FROM_EMAIL`, nunca throwea (devuelve `EMAIL_NOT_CONFIGURED` si falta la key). Los dos templates a migrar ya eran **HTML string** (no React-email), así que el porteo fue directo, sin traducir JSX.
+
+### Migración — Test email (`sendLeadNotification.ts`)
+- **`:1`** import: `import { Resend } from 'resend'` → `import { sendTransactionalEmail } from '@/lib/email/brevo-service'` (mismo path que los 10+ flujos Brevo).
+- **cuerpo:** se sacó `new Resend(...)` + `resend.emails.send({from,to,subject,html})` y su guard `if (!RESEND_API_KEY)`; ahora `sendTransactionalEmail({ to: {email: input.to}, subject, htmlContent: html })`. El `from` (antes `RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'`) lo resuelve Brevo internamente (`BREVO_FROM_*`) — mismo sender verificado que el resto de producción. Ahora el Test email prueba **el mismo motor** (Brevo) que usan los leads reales; antes probaba Resend, un path que producción no usa.
+- **Contrato preservado:** el caller (`sendTestNotification.ts`) lee `result.ok`, `result.skipped` y `result.emailId`. Se mantiene idéntico: `{ok:true, emailId: result.messageId}` en éxito, `{ok:false, skipped:true}` cuando Brevo no está configurado (mapeado desde `EMAIL_NOT_CONFIGURED`), `{ok:false, error}` en cualquier otro fallo. tsc confirma que el narrowing del caller sigue compilando sin cambiar su lógica.
+- **`renderLeadNotificationHtml`** ahora exportado (para el test puro). Template **sin cambios** (mismo HTML, mismo `escapeHtml`/`escapeAttribute`).
+- **`sendTestNotification.ts:73`** (consecuencia directa): el mensaje de error del botón decía `'RESEND_API_KEY no configurada'` — falso tras la migración; ahora `'Email no configurado (BREVO_API_KEY)'`. Único cambio en el caller, honestidad del feedback.
+
+### Migración — insights (`sendInsightsNotification.ts`)
+- **`:1`** import: Resend → `sendTransactionalEmail` de brevo-service.
+- **cuerpo:** se sacó `new Resend`/`emails.send`/guard RESEND; ahora `sendTransactionalEmail({ to: {email: input.to}, subject, htmlContent })`. `from` (antes hardcode `insights@develop.com.ar`) → Brevo interno.
+- **`renderInsightsNotificationHtml`** extraído a función exportada (antes el HTML era inline dentro del async) — habilita el test puro y espeja la estructura del sibling de leads. **HTML verbatim**, incluida la pluralización `oportunidad/oportunidades` y el footer.
+- Retorno: `{ok:true}` | `{ok:false, error}` (se soltó el `skipped`, que nadie leía — el cron no inspecciona el retorno, solo `try/catch` + `emails_sent++`).
+
+### Corrección de paso — `companyName` (bug D4)
+- **`generate-insights/route.ts:66`** — `organizationName: org.companyName ?? org.name` → `organizationName: org.companyName`. `org.name` no existe en el modelo `Organization` (solo `companyName`, no-nullable) — el fallback era código muerto que referenciaba un campo inexistente, enmascarado por el `org: any` de `:58`. **Matiz honesto:** como `companyName` nunca es null, el nombre **no** salía vacío en la práctica (a diferencia de lo que anticipaba el brief); pero la referencia rota se elimina igual, y ahora el mail de insights arma el nombre solo desde `companyName`.
+- **El `any` de `:58` NO se tocó** (regla explícita del sprint: "no refactorizar el any de todo el cron"). Queda como excepción sancionada — su error de lint (`no-explicit-any`) es baseline conocido, ya documentado en el cierre D4. Esto cierra la mitad `org.name` del hallazgo colateral de D4; la mitad `any` sigue como candidato de deuda técnica.
+
+### notify-message — dejado en Resend (recomendación)
+Es un mail **de producto** (no auth), mismo patrón trivial — migrable. Aun así, **recomiendo dejarlo en Resend este sprint** y migrarlo en uno propio, por: (1) es un subsistema distinto (mensajería del panel) con su propio opt-out y disparo en vivo, fuera del núcleo de dos módulos del sprint; (2) el plan de verificación de este sprint (Test email / insights / regresión de magic-link) **no incluye** un check del mail de mensajería — migrarlo ahora agregaría una superficie que el humano no está preparado para verificar en esta pasada; (3) "ante la duda, dejalo". Nota para el follow-up: `notify-message.ts:51` tiene un `⚠️ ajustar al dominio real verificado en Resend` sobre su `from` (`hola@develop.com.ar`) — migrarlo a Brevo resolvería de paso ese TODO de dominio no verificado. **Decisión final del humano.**
+
+### Resend sigue necesario (no se sacó del `package.json` ni del `.env`)
+Confirmado: `resend` en `package.json` y `RESEND_API_KEY` siguen en uso por `email.ts` (magic-link + provider NextAuth + agency + tickets + invites) y `notify-message.ts`. Sacarlo **rompería el login**. `RESEND_FROM_EMAIL` queda sin referencias en código (solo lo usaba `sendLeadNotification`) pero se deja en `.env` (no se toca env).
+
+### Tests
+**`notifications-brevo.invariant.ts`** (nuevo, puro, `npm run check:invariant:notifications-brevo`) — sin red ni DB; borra `BREVO_API_KEY`/`RESEND_API_KEY` antes de enviar (lectura lazy) para forzar el path no-configurado:
+- **insights:** el render arma el nombre del negocio y **nunca** emite `"undefined"` (regresión del bug `org.name`); conteo, bot, link y pluralización `oportunidad/oportunidades` presentes.
+- **lead:** campos preservados, filas email/teléfono se omiten cuando son null (sin `"undefined"`), y el mensaje del lead se **escapa** (`<b>` → `&lt;b&gt;`, XSS-safe preservado).
+- **motor Brevo:** `sendInsightsNotificationEmail` devuelve `error === 'EMAIL_NOT_CONFIGURED'` (firma de brevo-service, no de Resend) y `sendLeadNotificationEmail` devuelve `skipped:true` (contrato del botón, mapeado desde ese mismo error) — prueba determinística de que ambos enrutan por Brevo, sin tocar la red. **Verde.**
+- No existían tests previos de estos módulos — se creó, no había nada que extender.
+
+### Archivos
+- **Modificados:** `sendLeadNotification.ts`, `sendInsightsNotification.ts` (Resend→Brevo + render exportado) · `generate-insights/route.ts:66` (companyName) · `sendTestNotification.ts:73` (mensaje de motor) · `package.json` (script del invariante).
+- **Creados:** `src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts`.
+- **NO tocados:** `email.ts` (auth/soporte, sigue en Resend) · `notify-message.ts` (dejado, recomendación arriba) · el `any` de `route.ts:58` · el guard D4 (`route.ts:39-44`) · la generación de insights · la resolución de destinatario (solo cambió el motor) · deps de `package.json` / `.env`.
+
+### Verificación
+`eslint` sobre los 5 archivos tocados: **1 error preexistente y ajeno** (`route.ts:58` `no-explicit-any`, el `any` sancionado), **cero errores nuevos** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — confirma que el contrato preservado del botón sigue compilando · invariante nuevo **verde** (enrutamiento Brevo + contenido) · `npm run build` NO corrido (excluido del gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — envío real:** (a) mandar un **Test email** desde el botón admin y confirmar que llega **por Brevo**; (b) disparar el cron de insights y confirmar que el mail llega por Brevo **con el nombre del negocio correcto**; (c) hacer un **login por magic-link** para confirmar que **auth no se rompió** (sigue en Resend). Requieren Brevo/Resend vivos + trigger — no se ejecutaron acá.
+2. Correr `npm run check:invariant:notifications-brevo` (verde esperado, sin DB).
+3. **Decidir sobre notify-message:** migrarlo a Brevo en un sprint propio (resolvería el `⚠️` de dominio no verificado) o dejarlo en Resend.
+4. **Commitear** cuando 1-2 den OK (lo hacés vos).

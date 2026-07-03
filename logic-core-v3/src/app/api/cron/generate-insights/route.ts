@@ -63,7 +63,7 @@ export async function POST(req: Request) {
           try {
             await sendInsightsNotificationEmail({
               to: org.leadNotificationEmail,
-              organizationName: org.companyName ?? org.name,
+              organizationName: org.companyName,
               botName: bot.botName,
               insightsCount: result.insights.length,
               dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,

@@ -51,6 +51,7 @@
     "check:invariant:executive-report-prefs": "npx tsx \"src/app/(protected)/dashboard/_actions/executive-report-prefs.invariant.ts\"",
     "check:invariant:brief-input": "npx tsx src/lib/ai/executive-brief-input.invariant.ts",
     "check:invariant:client-monthly-report": "npx tsx src/lib/reports/client-monthly/monthly-report-data.invariant.ts",
+    "check:invariant:notifications-brevo": "npx tsx src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
