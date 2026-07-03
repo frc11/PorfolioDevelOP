@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
-import { LayoutDashboard, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, UserPlus, type LucideIcon } from 'lucide-react'
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import { useTransitionContext } from '@/context/TransitionContext'
 import { ToolsRail } from './tools-rail'
@@ -46,6 +46,28 @@ export function SetterNav({ onNavigate }: SetterNavProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-3 py-4">
+        {/* Acción primaria persistente: cargar un prospecto propio. Vive fuera de
+            NAV_ITEMS (que son hubs con activo por subárbol) porque es una acción,
+            no un destino de barra. Clave del B6.3: visible en TODA la zona /setter
+            —también con cartera activa—, no solo en el vacío; antes el único acceso
+            a /setter/nuevo aparecía en el empty-state. Desde /setter/nuevo se llega
+            además a la importación por lista. Navega por triggerTransition como el
+            resto del rail (decisión cerrada · CLAUDE.md); cierra el drawer mobile. */}
+        <button
+          type="button"
+          onClick={() => handleNavigate('/setter/nuevo')}
+          className="group mb-3 flex w-full items-center gap-2 rounded-md bg-cyan-400/15 px-3 py-2.5 text-sm font-medium text-cyan-300 transition-colors duration-200 hover:bg-cyan-400/25 motion-reduce:transition-none"
+        >
+          <UserPlus
+            className={[
+              'h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none',
+              reduced ? '' : 'group-hover:scale-105',
+            ].join(' ')}
+            strokeWidth={1.5}
+          />
+          <span>Cargar prospecto</span>
+        </button>
+
         <nav aria-label="Navegación del setter" className="space-y-1">
           <div className="px-3 pb-1 pt-3">
             <p className="text-[11px] font-medium tracking-tight text-zinc-500">

@@ -315,6 +315,9 @@ export type HomeLeadInput = {
   evaluacion: Evaluacion | null
   /** B5: último rechazo del admin — el card RECHAZADA lo muestra completo. */
   ultimoRechazo: Rechazo | null
+  /** A-09: la reunión agendada (booking + resultado post-reunión del admin) —
+   * fuente de la nota de PERDIDO en el archivo categorizado. */
+  agenda: Agenda | null
   /** B6: contactos reales registrados (opener + toques) — 0 = opener pendiente. */
   contactos: number
   /** B6: el toque agendado por la maquinaria ya venció (nextFollowUpAt <= ahora). */
@@ -600,15 +603,43 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
 /** Órdenes elegibles. `colas` = vista agrupada por defecto; el resto, lista plana. */
 export type OrdenCartera = 'colas' | 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
 
-/** Vista de un lead para el filtro por estado (la cola que el setter ve). */
-export type VistaCartera = HomeGroupKey | 'pausados'
+/** Vista de un lead para el filtro por estado (la cola que el setter ve). A-09:
+ * el archivo se filtra por causa real, no como bloque único sin categoría. */
+export type VistaCartera = Exclude<HomeGroupKey, 'archivo'> | `archivo-${ArchivoCausa}` | 'pausados'
 export type EstadoFiltro = 'todos' | VistaCartera
 
 /** En qué cola cae el lead a ojos del setter (snooze pesa sobre la cola natural). */
 export function vistaDeLead(lead: HomeLead): VistaCartera {
-  if (lead.grupo === 'archivo') return 'archivo'
+  if (lead.grupo === 'archivo') return `archivo-${archivoCausaDe(lead)}`
   if (lead.snoozed) return 'pausados'
   return lead.grupo
+}
+
+/**
+ * A-09: por qué causa real cayó el lead al archivo — DESCARTADA (evaluación
+ * previa a la demo; motivo SIEMPRE persistido, `transitionDossier` lo exige)
+ * o PERDIDO (post-reunión; nota del admin opcional, la deja `resultado` de la
+ * agenda). Deriva sobre datos ya persistidos — presentación/agregación pura,
+ * el gate/transición que los escribe no se toca.
+ */
+export type ArchivoCausa = 'descartado' | 'perdido'
+
+function archivoCausaDe(lead: HomeLead): ArchivoCausa {
+  return lead.stage === 'DESCARTADA' ? 'descartado' : 'perdido'
+}
+
+export function archivoMotivo(
+  lead: HomeLead,
+): { causa: ArchivoCausa; motivo: string | null } | null {
+  if (lead.grupo !== 'archivo') return null
+  const causa = archivoCausaDe(lead)
+  return {
+    causa,
+    motivo:
+      causa === 'descartado'
+        ? (lead.evaluacion?.motivoDescarte ?? null)
+        : (lead.agenda?.resultado?.nota ?? null),
+  }
 }
 
 /** Normaliza para búsqueda: sin acentos, minúsculas (es-AR escribe con y sin tilde). */

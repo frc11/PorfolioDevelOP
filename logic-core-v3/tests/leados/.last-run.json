@@ -2,12 +2,12 @@
   "config": {
     "argv": [
       "C:\\Program Files\\nodejs\\node.exe",
-      "C:\\PorfolioDevelOP\\logic-core-v3\\node_modules\\@playwright\\test\\cli.js",
+      "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\node_modules\\@playwright\\test\\cli.js",
       "test",
       "--config=playwright.leados.config.ts"
     ],
-    "configFile": "C:\\PorfolioDevelOP\\logic-core-v3\\playwright.leados.config.ts",
-    "rootDir": "C:/PorfolioDevelOP/logic-core-v3/tests/leados",
+    "configFile": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\playwright.leados.config.ts",
+    "rootDir": "C:/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/tests/leados",
     "failOnFlakyTests": false,
     "forbidOnly": false,
     "fullyParallel": false,
@@ -23,7 +23,7 @@
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "C:/PorfolioDevelOP/logic-core-v3/test-results",
+        "outputDir": "C:/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/test-results",
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
@@ -31,7 +31,7 @@
         },
         "id": "",
         "name": "",
-        "testDir": "C:/PorfolioDevelOP/logic-core-v3/tests/leados",
+        "testDir": "C:/Users/franc/Desktop/PorfolioDevelOP/logic-core-v3/tests/leados",
         "testIgnore": [],
         "testMatch": [
           "**/*.@(spec|test).?(c|m)[jt]s?(x)"
@@ -87,12 +87,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1205,
+                  "duration": 859,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:06.069Z",
+                  "startTime": "2026-07-03T16:12:37.655Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -121,12 +121,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1355,
+                  "duration": 960,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:08.262Z",
+                  "startTime": "2026-07-03T16:12:39.916Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -163,12 +163,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1647,
+                  "duration": 1186,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:10.270Z",
+                  "startTime": "2026-07-03T16:12:41.451Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -178,7 +178,7 @@
           ],
           "id": "49be05b28467d04959fd-88afedf87a41a48b4a64",
           "file": "dossier-gates.spec.ts",
-          "line": 105,
+          "line": 108,
           "column": 5
         },
         {
@@ -197,12 +197,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 730,
+                  "duration": 787,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:12.804Z",
+                  "startTime": "2026-07-03T16:12:43.272Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -212,7 +212,7 @@
           ],
           "id": "49be05b28467d04959fd-ce86150d86c4fe9d02a1",
           "file": "dossier-gates.spec.ts",
-          "line": 124,
+          "line": 127,
           "column": 5
         },
         {
@@ -231,12 +231,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1021,
+                  "duration": 731,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:13.542Z",
+                  "startTime": "2026-07-03T16:12:44.071Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -246,7 +246,7 @@
           ],
           "id": "49be05b28467d04959fd-3279c723c25e495b8a2d",
           "file": "dossier-gates.spec.ts",
-          "line": 132,
+          "line": 135,
           "column": 5
         },
         {
@@ -265,12 +265,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1872,
+                  "duration": 1688,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:14.570Z",
+                  "startTime": "2026-07-03T16:12:44.813Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -280,7 +280,7 @@
           ],
           "id": "49be05b28467d04959fd-f0b355b4cd869b0b42c1",
           "file": "dossier-gates.spec.ts",
-          "line": 146,
+          "line": 149,
           "column": 5
         },
         {
@@ -299,12 +299,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1432,
+                  "duration": 1042,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:16.450Z",
+                  "startTime": "2026-07-03T16:12:46.513Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -314,7 +314,7 @@
           ],
           "id": "49be05b28467d04959fd-562b5dd1933be792f45f",
           "file": "dossier-gates.spec.ts",
-          "line": 159,
+          "line": 162,
           "column": 5
         },
         {
@@ -333,12 +333,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1850,
+                  "duration": 1256,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:17.889Z",
+                  "startTime": "2026-07-03T16:12:47.566Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -348,7 +348,7 @@
           ],
           "id": "49be05b28467d04959fd-5a1e57750780dfd9da7d",
           "file": "dossier-gates.spec.ts",
-          "line": 167,
+          "line": 170,
           "column": 5
         },
         {
@@ -367,12 +367,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 5966,
+                  "duration": 4246,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:19.746Z",
+                  "startTime": "2026-07-03T16:12:48.834Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -382,7 +382,41 @@
           ],
           "id": "49be05b28467d04959fd-eddc1135fa93c4398961",
           "file": "dossier-gates.spec.ts",
-          "line": 185,
+          "line": 188,
+          "column": 5
+        },
+        {
+          "title": "B6.2 · el re-loop RECHAZADA→CONSTRUCCION resetea el self-check (GATE) y preserva fases + draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2712,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-03T16:12:53.094Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49be05b28467d04959fd-8baecb27d262aca98a16",
+          "file": "dossier-gates.spec.ts",
+          "line": 221,
           "column": 5
         },
         {
@@ -401,12 +435,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1110,
+                  "duration": 644,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:25.724Z",
+                  "startTime": "2026-07-03T16:12:55.821Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -416,7 +450,7 @@
           ],
           "id": "49be05b28467d04959fd-3c23581797cbff1154c0",
           "file": "dossier-gates.spec.ts",
-          "line": 218,
+          "line": 269,
           "column": 5
         }
       ]
@@ -443,12 +477,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1416,
+                  "duration": 955,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:27.525Z",
+                  "startTime": "2026-07-03T16:12:56.965Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -477,12 +511,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 810,
+                  "duration": 665,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:29.639Z",
+                  "startTime": "2026-07-03T16:12:58.445Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -511,12 +545,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 939,
+                  "duration": 670,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:30.458Z",
+                  "startTime": "2026-07-03T16:12:59.120Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -545,12 +579,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1,
+                  "duration": 5,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:31.404Z",
+                  "startTime": "2026-07-03T16:12:59.800Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -587,12 +621,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2193,
+                  "duration": 1521,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:32.037Z",
+                  "startTime": "2026-07-03T16:13:00.270Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -621,12 +655,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2362,
+                  "duration": 1706,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:35.095Z",
+                  "startTime": "2026-07-03T16:13:02.393Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -655,12 +689,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1362,
+                  "duration": 839,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:37.465Z",
+                  "startTime": "2026-07-03T16:13:04.108Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -697,12 +731,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1010,
+                  "duration": 693,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:39.541Z",
+                  "startTime": "2026-07-03T16:13:05.445Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -731,12 +765,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1755,
+                  "duration": 1324,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:41.334Z",
+                  "startTime": "2026-07-03T16:13:06.687Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -765,12 +799,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 1576,
+                  "duration": 1140,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:43.096Z",
+                  "startTime": "2026-07-03T16:13:08.019Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -799,12 +833,12 @@
                   "workerIndex": 0,
                   "parallelIndex": 0,
                   "status": "passed",
-                  "duration": 2502,
+                  "duration": 1648,
                   "errors": [],
                   "stdout": [],
                   "stderr": [],
                   "retry": 0,
-                  "startTime": "2026-07-01T04:55:44.679Z",
+                  "startTime": "2026-07-03T16:13:09.166Z",
                   "annotations": [],
                   "attachments": []
                 }
@@ -822,9 +856,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-07-01T04:55:05.439Z",
-    "duration": 42400.501,
-    "expected": 21,
+    "startTime": "2026-07-03T16:12:37.107Z",
+    "duration": 34211.578,
+    "expected": 22,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0

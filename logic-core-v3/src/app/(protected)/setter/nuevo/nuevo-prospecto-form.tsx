@@ -4,10 +4,9 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
-import { Button, Card, Field, Input } from '@/components/ui'
+import { Button, Card, Field, Input, TextArea } from '@/components/ui'
 import { cargarProspecto } from '@/app/(protected)/setter/_actions/prospecto.actions'
 import { NuevoProspectoSchema } from '@/app/(protected)/setter/_actions/prospecto.schemas'
-import { TextArea } from '@/app/(protected)/setter/_components/text-area'
 
 type FormState = {
   businessName: string

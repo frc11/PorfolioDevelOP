@@ -1,131 +1,5 @@
-import type { DossierStage } from '@prisma/client'
-import { ArrowRight, CheckCircle2, Hourglass, Target, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-/**
- * Tono del cartel: `foco` = hay trabajo del setter AHORA (cyan, protagonista, la
- * disciplina B9 reserva el cyan a lo accionable); `espera` = la pelota la tiene
- * Franco (revisión) o falta una condición externa (que el lead responda) —
- * informativo, sin color; `cerrado` = el lead terminó.
- */
-type FocoTono = 'foco' | 'espera' | 'cerrado'
-
-type FocoDescriptor = {
-  tono: FocoTono
-  icon: LucideIcon
-  eyebrow: string
-  titulo: string
-  detalle: string
-}
-
-/**
- * Verbaliza el paso activo del dossier para un setter NO-técnico — el cartel de
- * "modo dirección" del wizard (hermano liviano del `FocoSurface` del home). Deriva
- * del `stage` (la misma fuente de verdad que `pasoActual` lee para el rail y el
- * scroll, así nunca contradice "dónde está el lead") más `gateAbierto`, que el shell
- * YA calcula (`gateBriefAbierto(status, caliente)`): NO lo re-deriva, lo recibe. Ese
- * gate distingue las dos fases que dependen de una condición externa — en EVALUADA y
- * APROBADA el step de abajo se bloquea hasta que el lead responde (o es caliente), así
- * que el cartel se apaga a `espera` para no mandar a hacer algo que todavía no se puede.
- * Exhaustivo por stage: un stage nuevo rompe el build hasta describirse acá (mismo
- * candado que `pasoActual`).
- */
-export function describirFoco(stage: DossierStage | null, gateAbierto: boolean): FocoDescriptor {
-  switch (stage) {
-    case null:
-    case 'FICHA':
-      return {
-        tono: 'foco',
-        icon: Target,
-        eyebrow: 'Tu paso ahora',
-        titulo: 'Cargá la ficha del negocio',
-        detalle: 'Completá los datos del lead para poder evaluarlo.',
-      }
-    case 'EVALUADA':
-      // El brief se habilita cuando el lead responde el primer contacto (o si es
-      // caliente). Sin gate, el step de abajo está bloqueado → cartel en espera, sin
-      // mandar a "generá el brief" todavía.
-      return gateAbierto
-        ? {
-            tono: 'foco',
-            icon: ArrowRight,
-            eyebrow: 'Tu paso ahora',
-            titulo: 'Brief de diseño',
-            detalle: 'Es el próximo paso: generá el brief con el Gem y traé la respuesta acá.',
-          }
-        : {
-            tono: 'espera',
-            icon: Hourglass,
-            eyebrow: 'En espera',
-            titulo: 'Brief de diseño',
-            detalle: 'El lead avanza — esperá la respuesta del primer contacto para arrancar el brief.',
-          }
-    case 'BRIEF':
-      return {
-        tono: 'foco',
-        icon: ArrowRight,
-        eyebrow: 'Tu paso ahora',
-        titulo: 'Construí la demo',
-        detalle: 'Tenés el brief guardado — arrancá la construcción de la demo.',
-      }
-    case 'CONSTRUCCION':
-      return {
-        tono: 'foco',
-        icon: ArrowRight,
-        eyebrow: 'Tu paso ahora',
-        titulo: 'Seguí construyendo la demo',
-        detalle: 'Publicá el draft y pasá el self-check para mandarla a revisión.',
-      }
-    case 'RECHAZADA':
-      return {
-        tono: 'foco',
-        icon: ArrowRight,
-        eyebrow: 'Tu paso ahora',
-        titulo: 'Aplicá las correcciones de Franco',
-        detalle: 'Rehacé lo que marcó y volvé a pasar por draft y self-check.',
-      }
-    case 'EN_REVISION':
-      return {
-        tono: 'espera',
-        icon: Hourglass,
-        eyebrow: 'En revisión',
-        titulo: 'Franco está revisando tu demo',
-        detalle: 'No hay nada que hacer ahora — te avisamos cuando la apruebe o pida cambios.',
-      }
-    case 'APROBADA':
-      // El envío del link también espera a que el lead responda (o sea caliente):
-      // el step de Seguimiento lo libera con esa condición, no apenas se aprueba.
-      return gateAbierto
-        ? {
-            tono: 'foco',
-            icon: ArrowRight,
-            eyebrow: 'Tu paso ahora',
-            titulo: 'Enviá el link de la demo',
-            detalle: 'La demo está aprobada — mandá el link y seguí el contacto en «Seguimiento».',
-          }
-        : {
-            tono: 'espera',
-            icon: Hourglass,
-            eyebrow: 'En espera',
-            titulo: 'Demo aprobada',
-            detalle: 'El link se libera cuando el negocio responda (o si el lead fuera caliente).',
-          }
-    case 'DESCARTADA':
-      return {
-        tono: 'cerrado',
-        icon: CheckCircle2,
-        eyebrow: 'Resultado',
-        titulo: 'Lead descartado',
-        detalle: 'La evaluación lo descartó — el trabajo de este lead terminó.',
-      }
-    default: {
-      // Exhaustividad: si se agrega un stage al enum y no se describe acá, esto NO
-      // compila (stage deja de ser `never`) — el build avisa antes que el runtime.
-      const _exhaustivo: never = stage
-      throw new Error(`describirFoco: stage no contemplado: ${String(_exhaustivo)}`)
-    }
-  }
-}
+import type { FocoDescriptor, FocoTono } from '@/lib/leados/paso'
 
 const TONO_STYLES: Record<
   FocoTono,
@@ -158,16 +32,11 @@ const TONO_STYLES: Record<
 
 /**
  * Cartel de dirección del wizard: arriba de todo (bajo el rail), le dice al setter
- * QUÉ está pasando con ESTE lead AHORA, en una línea. Solo presentación.
+ * QUÉ está pasando con ESTE lead AHORA, en una línea. Solo presentación — el
+ * descriptor viene de `derivarPasoDelLead` (A-29, `@/lib/leados/paso`), la única
+ * derivación del paso, llamada una vez por el shell.
  */
-export function PasoActualBanner({
-  stage,
-  gateAbierto,
-}: {
-  stage: DossierStage | null
-  gateAbierto: boolean
-}) {
-  const foco = describirFoco(stage, gateAbierto)
+export function PasoActualBanner({ foco }: { foco: FocoDescriptor }) {
   const styles = TONO_STYLES[foco.tono]
   const Icon = foco.icon
 

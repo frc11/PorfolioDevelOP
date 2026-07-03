@@ -23,7 +23,9 @@ const ESTADO_OPCIONES: { value: EstadoFiltro; label: string }[] = [
   { value: 'revision', label: 'Esperando revisión' },
   { value: 'agendadas', label: 'Agendadas' },
   { value: 'pausados', label: 'Pausados por vos' },
-  { value: 'archivo', label: 'Descartados y perdidos' },
+  // A-09: el archivo se filtra por causa real, no como bloque único.
+  { value: 'archivo-descartado', label: 'Descartados (antes de la demo)' },
+  { value: 'archivo-perdido', label: 'Perdidos (post-reunión)' },
 ]
 
 const ORDEN_OPCIONES: { value: OrdenCartera; label: string }[] = [

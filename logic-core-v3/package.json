@@ -15,7 +15,7 @@
     "seed:agency-os-v2": "ts-node prisma/seed-agency-os.ts",
     "migrate:os-v2": "ts-node prisma/migrate-os-to-unified.ts",
     "seed:latency": "ts-node --transpile-only scripts/dev/seed-latency.ts",
-    "check:invariants": "npm run check:invariant && npm run check:invariant:setter-meta && npm run check:invariant:escalamiento && npm run check:invariant:novedades && npm run check:invariant:mis-numeros && npm run check:invariant:timeline && npm run check:invariant:foco && npm run check:invariant:flow && npm run check:invariant:alta-propia && npm run check:invariant:prospecto-import && npm run check:invariant:gate-envio && npm run check:invariant:self-check && npm run check:invariant:progreso && npm run check:invariant:security",
+    "check:invariants": "npm run check:invariant && npm run check:invariant:setter-meta && npm run check:invariant:escalamiento && npm run check:invariant:novedades && npm run check:invariant:mis-numeros && npm run check:invariant:timeline && npm run check:invariant:foco && npm run check:invariant:flow && npm run check:invariant:alta-propia && npm run check:invariant:prospecto-import && npm run check:invariant:gate-envio && npm run check:invariant:self-check && npm run check:invariant:progreso && npm run check:invariant:reloop-selfcheck && npm run check:invariant:security",
     "check:invariant": "ts-node src/lib/leados/assignment-trail.invariant.ts",
     "check:invariant:setter-meta": "ts-node src/lib/leados/setter-meta.invariant.ts",
     "check:invariant:escalamiento": "ts-node src/lib/leados/escalamiento.invariant.ts",
@@ -29,6 +29,7 @@
     "check:invariant:gate-envio": "ts-node src/lib/leados/gate-envio-demo.invariant.ts",
     "check:invariant:self-check": "ts-node src/lib/leados/self-check-gate.invariant.ts",
     "check:invariant:progreso": "ts-node src/lib/leados/progreso-isolation.invariant.ts",
+    "check:invariant:reloop-selfcheck": "ts-node src/lib/leados/reloop-selfcheck-reset.invariant.ts",
     "test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",
     "test:ev2": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts",
     "test:ev3:golden": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts",
@@ -86,7 +87,7 @@
     "date-fns": "^4.1.0",
     "diff": "^9.0.0",
     "emoji-picker-react": "4.19.1",
-    "google-auth-library": "^10.6.2",
+    "google-auth-library": "^10.9.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lenis": "^1.3.17",
@@ -116,6 +117,9 @@
       "module": "CommonJS",
       "moduleResolution": "node"
     }
+  },
+  "overrides": {
+    "google-auth-library": "^10.9.0"
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.2.7",

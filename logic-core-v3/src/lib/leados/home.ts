@@ -11,6 +11,7 @@
  */
 import {
   clasificarLead,
+  parseAgenda,
   parseEvaluacion,
   parseFicha,
   ultimoRechazo,
@@ -37,6 +38,9 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
       ficha: parseFicha(lead.dossier?.fichaJson ?? null),
       evaluacion: parseEvaluacion(lead.dossier?.evaluacionJson ?? null),
       ultimoRechazo: ultimoRechazo(lead.dossier?.rechazos ?? null),
+      // A-09: fuente de la nota de PERDIDO en el archivo categorizado (cero
+      // queries nuevas — el dossier ya viene incluido).
+      agenda: parseAgenda(lead.dossier?.agendaJson ?? null),
       // B6: estado de la conversación de outreach (derivado, cero campos nuevos).
       contactos: lead._count.activities,
       followUpVencido:

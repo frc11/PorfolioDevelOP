@@ -88,6 +88,9 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
       id: lead.id,
       businessName: lead.businessName,
       contactName: lead.contactName,
+      // A-14: el teléfono se captura en el alta y no volvía a mostrarse en
+      // ningún lado del panel — se re-sirve igual que el resto del contacto.
+      phone: lead.phone,
       industry: lead.industry,
       zone: lead.zone,
       instagramUrl: lead.instagramUrl,
@@ -148,7 +151,9 @@ export default async function SetterLeadPage({ params }: SetterLeadPageProps) {
     { label: 'Google Maps', href: lead.googleMapsUrl },
   ].filter((link): link is { label: string; href: string } => Boolean(link.href))
 
-  const meta = [lead.contactName, lead.industry, lead.zone].filter(Boolean).join(' · ')
+  const meta = [lead.contactName, lead.phone, lead.industry, lead.zone]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
     <div className="space-y-6">

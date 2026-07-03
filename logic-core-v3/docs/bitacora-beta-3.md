@@ -532,3 +532,340 @@
 - ✅ Diff **surgical/additive**: `schema.prisma` +6, `contracts.ts` +34, `flow-content.ts` +13, `dossier.ts` +34, `package.json` +2 (mías) + migración + invariante nuevos. Nada más tocado; `transitionDossier`/`selfCheckAprobado`/`gateEnvioDemo` intactos.
 
 **Lo que queda (no bloqueante, para Franco):** (a) La suite de flujo **browser 5.5** (`01-flow`, `test:setter`) NO se corrió acá (necesita chromium + prod-QA `start:qa` + el bounce AUTH_URL:3001); E.1 es **cero-UI/aditivo** → no puede afectar el wizard, y el core puro (`flow.invariant`) + el comportamiento del dossier (leados 18/18) están verdes. (b) El **drift PRE-EXISTENTE del lane chatbot** (7 columnas) queda flagueado: es del lane disjunto (dashboard/chatbot), NO de leados; reconciliarlo (con una migración aditiva propia o dropeando columnas) es decisión de Franco, fuera del scope de E.1. (c) **E.2** —la UI de fases-una-a-la-vez que CONSUME `progresoJson` (`saveOwnedProgreso` + explotar el `<ol>` a checklist persistido)— es el próximo paso: E.1 dejó la base verificada contra la columna vertebral.
+
+---
+
+## B1.A — Promover `TextArea` al kit UI (primitiva de formulario en su lugar correcto) · 2026-07-01
+
+**Por qué.** La `TextArea` del wizard ya era una **primitiva consolidada** (18 usos en 9 archivos, 16+ dentro de `<Field>`, cero `<textarea>` crudo suelto) pero vivía en `setter/_components/text-area.tsx`. Su propio comentario lo delataba (*"el kit no trae una"*). El problema era de **UBICACIÓN, no de diseño**: es un primitivo de formulario genérico, hermano de `Input`. Sprint **mecánico/presentacional, riesgo ~0** — mové-de-archivo + barrel + imports. NO toca flujo/estado/contenido(FG)/dual-copy/StepAnchor.
+
+**Qué hace.**
+- **MOVER.** `setter/_components/text-area.tsx` → `components/ui/Textarea.tsx` (junto a `Input`). API EXACTA (mismas props: `invalid?` + `TextareaHTMLAttributes`), símbolo `TextArea` sin cambios. **Server-safe** (función plana, sin `'use client'`/`forwardRef`) — se mantiene como estaba, que es lo que pide "primitivo del kit"; no se agregó `forwardRef` (sería rediseño y forzaría `'use client'`; ningún uso pasa `ref`).
+- **BARREL.** `export { TextArea } from './Textarea'` en `components/ui/index.ts` (alfabético, entre `Tabs` y `Toggle`).
+- **REPUNTE (opción preferida, kit limpio para el handoff).** Los **9 archivos** que importaban de `_components/text-area` ahora importan `TextArea` del **barrel** `@/components/ui`. Los 9 YA importaban del barrel → se **fusionó** `TextArea` en el import existente (alfabético) y se borró la línea suelta. **Cero imports mixtos** (todos del kit, ninguno del shim; no se dejó shim). Archivos: `ficha`/`opener`/`brief`/`evaluacion`/`agenda`/`seguimiento`-step, `escalar-modal`, `lead-card-actions`, `nuevo-prospecto-form`.
+- **ESTILO.** Borde/focus/error ya eran **idénticos** a `Input` (no había qué alinear). El único delta es `placeholder:text-zinc-600` (vs `-500` de `Input`), NO listado en el align y fuera del "sin cambiar el look percibido" → se preservó tal cual. **Cero cambio visual** por construcción (mové de archivo).
+
+**Decisiones / líneas de límite.**
+- **Promoción, no rediseño (línea roja).** Componente byte-idéntico salvo el comentario stale. No `forwardRef`, no `'use client'`, no tocar el placeholder. Los `<Field>` que envuelven las `TextArea` quedan igual.
+- **Barrel sobre shim.** Se eligió repuntar los 9 imports (deja `_components/` sin el primitivo, kit limpio) en vez de dejar un re-export shim. Regla respetada: **no imports mixtos**.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores en los 11 archivos tocados** (Textarea.tsx + index.ts + 9 consumidores). El resto del proyecto: 1 error AMBIENTE pre-existente y ajeno (`src/lib/searchconsole.ts:119`, conflicto de tipos `google-auth-library`/`google-gax`) — verificado presente en HEAD limpio, NO mío.
+- ✅ **Drift Prisma ambiente resuelto en el entorno, no en el schema.** El `tsc` inicial tiró 19 errores del lane chatbot/dashboard (`verticalPack`/`averageTicketUsd`/`firstContactedAt`/`signals`); el schema YA declara esos campos → era **cliente Prisma stale**. `npx prisma generate` (solo `node_modules`, NO toca schema/DB, NO `migrate reset`) los limpió 18/19. Sprint **sin cambios de schema**, como corresponde.
+- ✅ `npm run build` → exit 0, compiló `/setter`, `/setter/leads/[leadId]`, `/setter/nuevo` (`ignoreBuildErrors: true` salta el 1 ambiente).
+- ✅ `npm run test:leados` → **21/21** contra Neon dev.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): incluye B1–B11 del wizard (ficha/opener/brief/agenda/evaluación/seguimiento renderizando la `TextArea` movida) + alta/import del nuevo-prospecto. Cero regresión perceptual.
+- ✅ Diff **surgical**: 1 archivo nuevo (`Textarea.tsx`), 1 borrado (`text-area.tsx`), `index.ts` +1, 9 consumidores +0/−0 neto en líneas (import fusionado − import suelto). `git status` = exactamente el scope.
+
+**Lo que queda (para Franco):** (a) **Drift PRE-EXISTENTE del lane chatbot** (las 7 columnas físicas) sigue flagueado como en E.1 — ajeno a este sprint, decisión de reconciliación de Franco. (b) Pasada **perceptual** opcional: la `TextArea` se ve igual por construcción (byte-idéntica) y los 39 tests de setter la ejercitan, pero si Franco quiere un ojo humano sobre los formularios del wizard, queda anotado (no bloqueante).
+
+---
+
+## B6.1 — La dirección del wizard apunta a la ACCIÓN pendiente, no al paso-por-stage bloqueado · 2026-07-01
+
+**Por qué.** El auto-scroll y el cartel «Tu paso ahora» derivaban el paso activo del `stage` (vía `pasoActual`), pero eso dejaba al setter mirando lo equivocado en dos estados concretos (medido en el proof-e2e):
+- **EVALUADA con gate cerrado** (esperando respuesta): scroll + cartel iban al **Brief bloqueado** y **salteaban el opener**, que es la acción realmente pendiente. El cartel decía «esperá la respuesta» sin mandar a mandar el primer contacto.
+- **RECHAZADA**: el scroll saltaba a Construcción (~2200px) y dejaba la nota de Franco (el Callout de retrabajo) 2+ pantallas arriba del viewport. La tarjeta decía «lo tenés arriba», pero el auto-scroll ya te había sacado de arriba.
+
+**Qué hace.** Dos correcciones quirúrgicas, layered sobre `pasoActual` (NO se re-implementa el flujo, NO se toca gate/transición/§3):
+- **Fix 1 — EVALUADA + opener pendiente → el opener es el paso activo.** El shell calcula `openerPendiente = stage==='EVALUADA' && !gateAbierto && outreach.contactos===0` (exactamente el caso en que el Brief está bloqueado *y* no salió el primer contacto) y lo pasa a `anchorActivo` y a `describirFoco` (igual que `gateAbierto`, sin re-derivarlo). Con eso: el `StepAnchor` del opener pasa a `active` (ahí aterriza el scroll + se enmarca en cyan) y el cartel dice **«Mandá el primer mensaje (opener)»** en tono `foco`, no «esperá la respuesta». Acotado a **gate cerrado**: EVALUADA con gate abierto (respondió/caliente) sigue apuntando al Brief — ese camino ya funcionaba.
+- **Fix 2 — RECHAZADA → la nota de Franco donde el setter aterriza.** La rama `RECHAZADA` de `construccion-step.tsx` ahora renderiza el **mismo `GuiaRetrabajo`** que la rama `CONSTRUCCION` ya mostraba tras reabrir. Como el auto-scroll aterriza en Construcción (paso activo, sin cambios), la nota cae **junto** al punto de aterrizaje. El «lo tenés arriba» ahora apunta a la guía inline directamente encima del párrafo. La opción que **menos toca el `StepAnchor`** (cero cambios al scroll/anchor de RECHAZADA).
+
+**Archivos (3, todos presentacionales del wizard):** `paso-actual-banner.tsx` (`describirFoco`/`PasoActualBanner` reciben `openerPendiente`; rama EVALUADA + ícono `Send`), `lead-wizard.tsx` (deriva `openerPendiente`, lo pasa a `anchorActivo`/`describirFoco`/banner; `StepAnchorId` suma `'opener'`; el `StepAnchor` del opener se activa/enmarca), `construccion-step.tsx` (rama RECHAZADA renderiza `GuiaRetrabajo`).
+
+**Decisiones / líneas de límite.**
+- **Fix acotado a gate cerrado** (no a todo «EVALUADA sin opener»): el problema es el **Brief bloqueado**. Con gate abierto (caliente/respondió) el Brief SÍ es accionable → dirigir ahí es correcto (camino preventivo del caliente, intacto).
+- **`StepAnchor` intacto**: no se tocó su lógica de scroll ni el dual-copy (scoped por `offsetParent`, nunca global-by-id). Solo cambia qué sección recibe `active`/`frameTone` desde el shell.
+- **Duplicación benigna en RECHAZADA**: el Callout rico del tope (`lead-wizard`) coexiste con el `GuiaRetrabajo` inline (compacto). Nunca se ven juntos (2+ pantallas de distancia) y espeja el patrón que ya existía en CONSTRUCCION. Se prefirió AGREGAR la guía inline antes que mover/remover el Callout del tope (menos superficie tocada).
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores en los 3 archivos tocados**. Único error del repo: el AMBIENTE pre-existente y ajeno `src/lib/searchconsole.ts:119` (`google-auth-library`/`google-gax`), el mismo flagueado en B1.A — NO mío.
+- ✅ `npm run check:invariants` → verde (lógica pura de `lib/leados`, no la toca este sprint).
+- ✅ `npm run test:leados` → **21/21** (Neon dev).
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001), incluye **B3 opener** (el form del opener sigue funcionando con el marco activo nuevo) y **B10 rechazo** + el recorrido **B1–B11** (ficha→evaluación→construcción→aprobada avanza sin regresión).
+- ✅ **Pasada perceptual + geométrica** (`scripts/qa-corridas/_verify-b61.ts`, desktop 1440×900 + mobile 390×844, contra los leads `QA-W` del seed V-1), screenshots en `docs/proof-screenshots/b6-1/`:
+  - **Caso 1** (`QA-W Evaluada Gate Cerrado`): cartel = «Mandá el primer mensaje (opener)» (sin «esperá la respuesta»); el opener aterriza **dentro** del viewport (y=217 desktop / y=265 mobile).
+  - **Caso 2** (`QA-W Rechazada`): la «Guía de retrabajo — lo que Franco pidió corregir» aterriza **dentro** del viewport (y=270 / y=351), enmarcada como paso activo.
+  - **Regresión A** (`QA-W Evaluada Gate Abierto`): sigue en «Brief de diseño» (fix acotado, gate abierto intacto).
+  - **Regresión B** (`QA-W Construccion`): «Seguí construyendo la demo» sin cambios.
+
+**Lo que queda (para Franco):** (a) el error de tipos AMBIENTE de `searchconsole.ts` sigue pre-existente y ajeno (decisión de reconciliación de deps, fuera de scope). (b) El sub-caso EVALUADA gate-cerrado con opener YA mandado (contactos>0, esperando respuesta) mantiene su comportamiento previo (cartel «espera», scroll al Brief): no estaba en el alcance de los dos casos rotos; si se quiere reencauzarlo a «Seguimiento», es un sprint aparte.
+
+---
+
+## B6.2 — El re-loop RECHAZADA→CONSTRUCCION resetea el self-check (gate), preservando fases + draft · 2026-07-01
+
+**Por qué.** El proof-e2e del re-loop de rechazo (corrida C, `scripts/qa-corridas/rejection-reloop.ts`) mostró una tensión: preservar TODO el progreso al reabrir un rechazo ayuda en una parte y confunde en otra.
+- **El checklist de fases (auto-reporte) preservado AYUDA:** el setter retoma sabiendo que la base está hecha. Se mantiene (decisión de E.1/E.4, ya con su invariante `progreso`).
+- **El self-check preservado CONFUNDE:** al reabrir, los 6 hard-checks + «Enviar a revisión» quedaban como antes del rechazo (6/6 en verde). Un setter podía reenviar SIN corregir nada real. La distinción es de naturaleza: el checklist de fases es **auto-reporte** (preservar = bien); el self-check es un **GATE** (preservar = deja saltear la corrección).
+
+**Qué hace.** Reset QUIRÚRGICO del self-check acotado al único loop-back, layered sobre `transitionDossier` (NO se re-implementa la máquina, NO se toca el gate ni `enviarARevision`):
+- **`escalamiento.ts` (donde vive `ESCALADO_RESET`):** dos primitivas puras nuevas — `esReloopRechazo(from, to)` (el único loop-back: `RECHAZADA→CONSTRUCCION`) y `RELOOP_RESET = { selfCheckJson: Prisma.DbNull }` (limpia SOLO el self-check; `Json?` en null exige `Prisma.DbNull`, no `null` literal — mismo criterio que `agendaJson`).
+- **`transitionDossier` (dossier.ts):** el `data` de la transición ahora es `{ stage, ...ESCALADO_RESET, ...(esReloopRechazo(from, to) ? RELOOP_RESET : {}) }`. Al reabrir un rechazo, además del escalado se limpia `selfCheckJson` → `selfCheckAprobado` vuelve a `false` → el setter re-verifica los 6 antes de reenviar. En la UI eso ya cae solo: `durosIniciales(null)` deja los 6 toggles en rojo y «Enviar a revisión» queda `disabled` hasta 6/6.
+
+**Decisiones / líneas de límite.**
+- **NO se agregó `selfCheckJson` a `ESCALADO_RESET` (línea roja invertida).** El pedido literal («agregar al `ESCALADO_RESET`») habría sido una REGRESIÓN: `ESCALADO_RESET` se mergea en CADA transición, así que borraría el self-check también en `CONSTRUCCION→EN_REVISION` — donde DEBE sobrevivir, porque el admin lo lee en la superficie de revisión (`SelfCheckPanel`, `exigible` en EN_REVISION/APROBADA muestra un Callout de anomalía si falta). Además rompería el invariante existente `escalamiento` (que fija `ESCALADO_RESET === {escaladoAt, escaladoNota}`). Por eso el reset se **acota** al re-loop vía `esReloopRechazo`, cumpliendo el intent (que RECHAZADA→CONSTRUCCION limpie el self-check) sin la regresión.
+- **El GATE no cambia.** Sigue siendo `draftUrl` + `selfCheckAprobado`. Solo que al limpiar `selfCheckJson`, `selfCheckAprobado` vuelve a `false` hasta la re-verificación. `enviarARevision` y `selfCheckAprobado` **intactos** (verificados verdes).
+- **Preserva `progresoJson` y `draftUrl`** — `RELOOP_RESET` toca SOLO `selfCheckJson` (la ausencia de clave = zero-touch). El re-loop sigue siendo el **único** loop-back.
+- **No toca schema.** Solo se limpia una columna existente en una transición existente.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx prisma migrate status` → up to date (**77 migs**); sprint sin cambios de schema.
+- ✅ `npm run check:invariants` → **15/15 OK** (los 14 previos + **`reloop-selfcheck`** nuevo). El invariante `escalamiento` (que fija `ESCALADO_RESET`) sigue verde: confirma que NO se contaminó el reset global.
+- ✅ `npm run test:leados` → **22/22** (Neon dev): incluye el **test nuevo B6.2** (`el re-loop RECHAZADA→CONSTRUCCION resetea el self-check y preserva fases + draft` — prueba también que el self-check SOBREVIVE a EN_REVISION, la anti-regresión, contra la DB real) + el `progreso`-preservado del re-loop SIGUE verde (sin cambios) + los `selfcheck-anti-bypass` (el gate) intactos.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): B6 (draft+self-check+enviar, self-check llega a EN_REVISION) y B10 (rechazo) sin regresión.
+- ✅ `npx tsc --noEmit` → **0 errores nuevos** en los archivos tocados (único error tsc = PRE-EXISTENTE y ajeno: `src/lib/searchconsole.ts:119`, SEO/`google-auth-library`, el mismo flagueado en B1.A/B6.1 — NO mío).
+- ✅ Diff **surgical/additive**: `escalamiento.ts` (+`esReloopRechazo`/`RELOOP_RESET`/import valor `Prisma`), `dossier.ts` (import + 1 línea en el spread de `data`), `reloop-selfcheck-reset.invariant.ts` (NUEVO), `package.json` (+2), `tests/leados/dossier-gates.spec.ts` (imports + 1 test). `transitionDossier`/`selfCheckAprobado`/`enviarARevision`/`ESCALADO_RESET` intactos.
+
+**Lo que queda (para Franco):** (a) El guion manual `scripts/qa-corridas/rejection-reloop.ts` (corrida C, **untracked**) se actualizó a la conducta nueva (pasos [12]/[14]: el self-check llega VACÍO tras reabrir y el setter re-verifica los 6) pero **NO se re-corrió** acá (necesita `start:qa` + el seed V-1 `QA-W`) — queda para regenerar los screenshots de `corrida-2` cuando quieras el ojo humano. (b) **Pasada perceptual del wizard = B6.6** (fuera de este sprint, que es lógica de transición): el core está cubierto por el test DB nuevo + los 39 de setter, pero el recorrido visual del re-loop (self-check vacío, botón disabled hasta 6/6) lo cierra B6.6. (c) El error de tipos AMBIENTE de `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## B6.3 — Acceso persistente a «Cargar prospecto» en el rail del setter (visible con cartera activa) · 2026-07-02
+
+**Por qué.** El proof-e2e mostró que el único acceso a `/setter/nuevo` (alta individual + puerta a la importación por lista) vivía dentro de estados de cartera VACÍA: `home-empty.tsx` (empty state) y el link sobrio de `home-en-espera.tsx` (todo en espera). Un setter con cartera ACTIVA —el estado real de trabajo— no tenía dónde cargar sus propios prospectos sin ir por URL directa. Confirmado en código (rail/foco/cartera: cero menciones de «Cargar/Importar» fuera del vacío) y contra el build (SSR de `/setter` con foco activo no traía ningún CTA de alta).
+
+**Qué hace.** Un botón persistente **«Cargar prospecto»** al TOPE del rail del setter (`setter-nav.tsx`), presente en TODA la zona `/setter` (incluida la cartera activa), sin scroll. Navega por `triggerTransition('/setter/nuevo')` — desde donde ya se llega tanto al alta individual como a la importación (el link «¿Tenés una lista?» vive en `/setter/nuevo`). Presentacional puro: no toca flujo, estado ni gates.
+
+**Decisiones / líneas de límite.**
+- **Rail, no home/foco.** El rail es fijo y visible sin scrollear en todos los estados (vacío / foco / en-espera / detalle de lead); un CTA en el home solo cubriría el home. La línea B6.3 pedía «SIEMPRE visible» → el rail lo garantiza estructuralmente.
+- **FUERA de `NAV_ITEMS`, no adentro.** `NAV_ITEMS` son *hubs* con activo por subárbol (`startsWith('/setter/…')`): meter `/setter/nuevo` ahí habría prendido DOS `aria-current="page"` a la vez (Cartera + Cargar) en `/setter/nuevo`. Es una **acción**, no un destino de barra → botón propio (cyan sobrio, `bg-cyan-400/15`) antes del `<nav>`, sin `aria-current`. Los asserts de nav (`filter hasText 'Cartera'`, `button[aria-current="page"]`) quedan intactos.
+- **`triggerTransition`, como el resto del rail** (decisión cerrada · CLAUDE.md para la zona setter): consistente con `NAV_ITEMS`; cierra el drawer mobile vía `onNavigate`.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores** en el archivo tocado. Único error del repo = pre-existente y ajeno `src/lib/searchconsole.ts:119` (`google-auth-library`) — NO mío.
+- ✅ `npm run test:setter` → **39/39** (browser, prod-QA:3001): el botón nuevo NO rompió A2 (nav + rail + aria-current) ni F6 (a11y landmarks / aria-current en el destino activo).
+- ✅ `npm run test:leados` → **22/22** y `npm run check:invariants` → **15/15** (sin cambios de lógica).
+- ✅ **Proof SSR autenticado** (setter-qa, cookie `__Secure-authjs.session-token` minteada como el helper e2e) contra el build en `:3001`: `/setter` → **200**, «Cargar prospecto» **server-rendered** al TOPE del rail (precede a «Tus herramientas»), con la home «Tu día» (cartera ACTIVA, no el empty state).
+
+**Lo que queda (para Franco):** (a) **Pasada perceptual del home = B6.6** (fuera de este sprint): el CTA está probado presente y posicionado por SSR + los 39 de setter, pero el ojo humano (contraste, peso visual del cyan en el rail) lo cierra B6.6. (b) `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## B6.5 — Tres fixes menores acotados (router.refresh escalado · puente self-check→prompt · CTA del home sobre el fold) · 2026-07-02
+
+**1. `EscalarModal` — `router.refresh()` tras escalar (hallazgo 5.5).**
+- *Por qué.* La marca `escaladoAt` que enciende el banner «Ya avisaste a Franco» (`construccion-step.tsx`) baja por props del server component; la action `escalarConstruccion` NO revalida el path → el banner recién aparecía tras un reload manual.
+- *Qué hace.* `escalar-modal.tsx` (client) ahora importa `useRouter` y llama `router.refresh()` tras el éxito (después de cerrar el modal y limpiar el textarea, antes del toast). El server re-renderiza con `escaladoAt` poblado → el banner aparece al instante. No toca la action, el gate ni la notificación por Telegram.
+
+**2. Puente self-check→prompt (`HARD_CHECK_PROMPT` en `prompts-disenio.ts`).**
+- *Hallazgo tras verificar el código.* El pedido asumía un techo de ~3/6 «porque hay 3 prompts» (estetica/mobile/motion). Pero el mapeo es por **correspondencia hard-check→prompt**, no por conteo de prompts. Los 6 hard-blocks (`carga`, `mobile`, `sinRelleno`, `linksWhatsapp`, `datosReales`, `fielAlBrief`) son gates **funcionales/de contenido**; el único que corresponde a un prompt de diseño lead-agnóstico es `mobile` (→ ya mapeado). `estetica` («pulí la estética» — explícitamente *«no reescribas los textos»*) y `motion` («animaciones/estados») NO casan con ningún hard-block: `estetica`/`motion` en realidad corresponden a los **SOFT-checks** (`coloresDeMas`, `fuenteDefault`, `imagenesDeformadas`…), que son otra superficie (no bloquean; los lee el ADMIN en revisión, no el setter en el self-check).
+- *Decisión (línea roja «no fuerces los que no tienen prompt»).* Mapear `sinRelleno`/`datosReales`/`fielAlBrief` a `estetica` sería **activamente erróneo** (el prompt estetica se niega a tocar el texto/contenido, que es justo lo que esos checks piden) y `carga`/`linksWhatsapp` a `motion` es un sinsentido. El techo real es **1/6**, ya cubierto. **Sin cambio de código** en item 2 — el mapa ya está en su cobertura honesta; la cabecera del propio archivo ya documentaba el porqué de cada no-mapeo. Surface, no fuerzo.
+
+**3. Onboarding vs CTA del home (proof S3).**
+- *Por qué.* La tarjeta pedagógica `OnboardingHint` («Cómo funciona tu día», buena — se queda) se renderizaba ARRIBA de la acción, empujando el CTA («Ir a trabajarlo» / «Cargar prospecto») fuera del fold para el setter nuevo.
+- *Qué hace.* `page.tsx`: se movió `<OnboardingHint />` de ANTES a DESPUÉS del branch de acción (foco / en-espera / vacío). La acción queda pegada al header (sobre el fold); la guía baja íntegra —cero pérdida de contenido pedagógico— y su copy («Arriba está el que toca ahora») ahora describe literalmente el foco que quedó por encima. Sigue descartable (localStorage): el que ya la cerró no la ve.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores** en los archivos tocados (único = pre-existente/ajeno `searchconsole.ts:119`).
+- ✅ `npm run test:setter` → **39/39** (prod-QA:3001): B5 (escalar «me trabé» persiste) y B6 (draft+self-check+enviar + **reset escalado**) verdes → el `router.refresh()` no rompió el flujo de escalamiento.
+- ✅ `npm run test:leados` → **22/22** y `npm run check:invariants` → **15/15** (item 2 sin cambios; items 1 y 3 son UI, no tocan `lib/leados`).
+- ✅ Diff surgical: `escalar-modal.tsx` (+import `useRouter`, +`const router`, +`router.refresh()`), `page.tsx` (reordenado `OnboardingHint`). `prompts-disenio.ts` **sin tocar** (item 2 = no-op justificado).
+
+**Lo que queda (para Franco):** (a) **Item 2:** si querés cobertura >1/6, el camino correcto es enganchar `estetica`/`motion` a los **SOFT-checks** (su superficie natural), no forzar los hard-blocks — es un sprint aparte porque toca otra superficie (revisión del admin) y sumaría un mapa nuevo, fuera de lo «acotado» de B6.5. (b) **Pasada perceptual home/wizard = B6.6**: el `router.refresh()` y el reorden están cubiertos por los 39 de setter, pero el ojo humano (banner al instante sin parpadeo, CTA sobre el fold en 1440 y 390) lo cierra B6.6. (c) `searchconsole.ts` sigue pre-existente y ajeno.
+
+---
+
+## AUD-1 — Auditoría read-only del setter vs Brief de Visión v2 · 2026-07-02
+
+**Qué se hizo.** Auditoría estática read-only del repo completo contra el **Brief de Visión v2** (02/07/2026): verificación del gating de aislamiento (meta-chequeo), cobertura sección por sección §2–§9, fase "fuera del guion" con lentes propias, y verificación adversarial independiente de cada hallazgo (evidencia archivo:línea releída una por una). Cero modificaciones al repo salvo las dos escrituras autorizadas del Cierre (este append + el informe).
+
+**Veredicto de gating (una línea).** **GATEA — con perímetro acotado:** los tests de aislamiento ejercitan el mecanismo real (ownership 100% capa aplicación, sin RLS) con identidad de sesión real y asserts por contenido que fallarían ante una fuga de lectura o del chokepoint compartido de ownership; la denegación de MUTACIÓN cruzada solo está testeada en 2 de ~19 funciones de escritura (progreso y alta) — el resto se sostiene por consistencia de patrón verificada por lectura, no por tests.
+
+**Informe.** `AUDITORIA-VS-BRIEF-2026-07.md` (raíz del repo): 29 divergencias verificadas (2 sev 4 — wizard página-larga §3 y fuga de nomenclatura "caliente" §5 —, 9 sev 3, 13 sev 2, 5 sev 1), §6 y §9 **sin divergencias** (línea inviolable del envío verificada server-side + invariante), las 4 decisiones fijadas del §8 **cumplen**.
+
+**Queda para verificación humana (del informe, sección 6):** (a) links de herramientas externas (§12.3) cargados en producción (`herramientas.ts` / badge "pendiente" del rail); (b) prueba dinámica que cierre el perímetro del gating: sesión real de setter B disparando las server actions de dossier/outreach/agenda/cartera/foco con `leadId` de A (denegación + fila intacta); (c) lectura y triage del informe por Franco — nada de lo propuesto se ejecutó.
+
+**DoD estándar — N/A declarados.** `npx tsc --noEmit` **N/A**: no se tocó código (y rige la regla 2 de no-ejecución de la auditoría). `npx prisma generate` **N/A**: no se tocó el schema.
+
+---
+
+## Sprint 2.3 — Datos que vuelven: teléfono re-servido, evaluación protegida, archivo categorizado que suma (cierre del BLOQUE 2 de remediación post-auditoría · A-14/A-24/A-09) · 2026-07-02
+
+**Por qué.** Tres hallazgos de `AUDITORIA-VS-BRIEF-2026-07.md` (AUD-1), independientes entre sí, todos de la misma naturaleza: dato que YA existe en el motor pero nunca se expone o nunca se protege en la superficie del setter.
+- **A-14 (§3, re-servido):** el teléfono se captura en el alta (`nuevo-prospecto-form.tsx`) y `OsLead.phone` viaja completo en `getOwnedLead` (sin `select`), pero `page.tsx` lo omitía del objeto `lead` de `WizardData` — no se mostraba en ningún lado del panel.
+- **A-24 (§1/§3):** Ficha y Brief tienen `useUnsavedGuard` (autosave); Evaluación no — es un formulario de una sola pasada sin borrador, así que cerrar la pestaña a mitad del razonamiento lo perdía entero.
+- **A-09 (§5):** PERDIDO (status) y DESCARTADA (stage) colapsaban en un único grupo `archivo` sin categoría (`flow.ts`); el motivo real de la caída ya está persistido y `dossier.ts` lo EXIGE en la transición EVALUADA→DESCARTADA (`motivoDescarte`, `contracts.ts:52`), pero nunca se exponía; y ningún archivado sumaba a "Tu semana" (`progreso.ts`) pese a que el propio copy de Evaluación ya dice "el descarte honesto es trabajo bien hecho".
+
+**Qué hace.** Los tres, capa de presentación/derivación pura — cero cambios a transiciones, gates o schema:
+- **A-14.** `page.tsx` agrega `phone: lead.phone` al objeto `lead` (dato ya traído, sin query nueva) y lo suma a la línea de `meta` del header. `WizardLead` (`lead-wizard.tsx`) suma el campo y lo pasa como `leadPhone` a `SeguimientoStep` y `AgendaStep` (mismo patrón que `contactName`/`leadEmail`, no el objeto `lead` completo). Se re-sirve con ícono `Phone`: en el header, al tope de Seguimiento y al tope de Agenda (+ en el resumen "Con:" de una reunión ya agendada).
+- **A-24.** `evaluacion-step.tsx`: se hoisteó `faltantesFicha`/`fichaFaltantes(ficha)` antes de los early-return (para no violar rules-of-hooks) y se agregó `formVisible = !evaluacion && habilitado && faltantesFicha.length === 0` + `hayCambiosSinGuardar` (true si `score`/`veredicto`/`razonamiento`/`motivoDescarte` tienen contenido Y el form sigue editable) → `useUnsavedGuard(hayCambiosSinGuardar)`. Mismo hook que Ficha/Brief; acá sin autosave que lo alimente, se deriva del estado del form directamente.
+- **A-09.** `flow.ts` suma `agenda: Agenda | null` a `HomeLeadInput` (parseado en `home.ts` vía `parseAgenda(dossier.agendaJson)`, dossier ya incluido — cero queries nuevas) y una función pura nueva `archivoMotivo(lead)`: distingue `descartado` (stage DESCARTADA, motivo = `evaluacion.motivoDescarte`, SIEMPRE presente por el gate de `dossier.ts`) de `perdido` (status PERDIDO, motivo = `agenda.resultado.nota`, OPCIONAL — el schema no lo exige, así que puede venir `null`). `VistaCartera` pasa de `HomeGroupKey | 'pausados'` a `Exclude<HomeGroupKey, 'archivo'> | 'archivo-descartado' | 'archivo-perdido' | 'pausados'` (el `HomeGroupKey`/`grupoPara` del home NO se toca — el `'archivo'` bare sigue existiendo ahí; solo la vista de la cartera se subdivide). `cartera-toolbar.tsx` reemplaza el filtro único "Descartados y perdidos" por dos opciones ("Descartados (antes de la demo)" / "Perdidos (post-reunión)"); `home-sections.tsx` (`LeadCard`) muestra el motivo real cuando existe ("Motivo:" / "Nota del cierre:"). `progreso.ts` suma `archivados` a `ProgresoSemana` (descartado por `evaluacionJson.fecha`, perdido por `agenda.resultado.fecha`, ambos dentro de la ventana de 7 días) y lo entra al `total` (para que un setter que solo descartó/perdió esta semana deje de ver "Tu semana" oculta); `progreso-semana.tsx` agrega el ítem "N negocios filtrados o cerrados".
+
+**Decisiones / líneas de límite.**
+- **PERDIDO no fuerza un motivo que no está garantizado.** El pedido cita `contracts.ts:52`/`dossier.ts:193-205` como evidencia de que el motivo "ya está persistido" — pero eso aplica solo a `motivoDescarte` (DESCARTADA, exigido por la transición). La nota de PERDIDO (`agenda.resultado.nota`) es `textoLibre` opcional en `AgendaSchema`; `archivoMotivo` lo refleja devolviendo `motivo: null` cuando no existe, en vez de inventar un texto o forzar el campo a requerido (eso sí sería tocar el contrato, fuera de scope).
+- **No se tocó `HomeGroupKey`/`grupoPara`/`agruparParaHome`** (la partición del home/foco): la subcategorización vive SOLO en `VistaCartera`/`vistaDeLead`/`archivoMotivo`, la capa que ya era exclusiva del filtro de la cartera secundaria. El home sigue viendo un solo `'archivo'` internamente (sin cambio de comportamiento en foco/en-espera).
+- **`archivados` SÍ suma al `total` de `ProgresoSemana`** (no es un contador aparte): si no sumara, un setter que solo filtró/cerró leads esta semana seguiría viendo la sección "Tu semana" oculta (`total === 0`) — exactamente el síntoma que A-09 pedía corregir ("que sume a la sensación de progreso").
+- **`mis-numeros.ts` no se tocó.** El hallazgo lo cita como evidencia del gap (`activos` excluye PERDIDO), pero el fix pedido explícitamente apunta a "Tu semana" (`progreso.ts`), no a "Mis números" — cambiar la semántica de `activos` (leads vivos en cartera, un concepto distinto) hubiera sido una regresión de alcance no pedida.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores** (incluye dos fixtures de invariante que construían `HomeLeadInput` a mano — `flow.invariant.ts`, `foco.invariant.ts` — actualizados con `agenda: null`).
+- ✅ `npm run check:invariants` → **15/15 OK** (sin cambios de invariante nuevos; los existentes — incluido `reloop-selfcheck` de B6.2 — siguen verdes, confirmando que la derivación nueva no tocó ninguna transición).
+- ✅ `npm run test:leados` → **22/22** (Neon dev, sin cambios de comportamiento en el motor).
+- ✅ `npm run build` + `npm run test:setter` → **39/39** (browser, prod-QA:3001) — cero regresión en el recorrido B1–B11, aislamiento, cabina, admin, claim atómico.
+- ✅ **Verificación en vivo** (prod-QA:3001, sesión real `setter-qa` vía `/api/qa/login` + `preview_*`): header/Seguimiento/Agenda muestran el teléfono con ícono cuando el lead lo tiene (probado seteando y revirtiendo el campo en un lead propio, sin dejar rastro); el filtro de la cartera lista las dos opciones nuevas ("Descartados (antes de la demo)" / "Perdidos (post-reunión)"); las cards de archivo muestran "Motivo: …" en los DESCARTADA reales del seed y correctamente NO muestran nada en el PERDIDO del seed (sin nota persistida) — sin errores de consola. Un script ad-hoc (`assert.strict`, borrado tras correr) confirmó `vistaDeLead`/`archivoMotivo`/`filtrarYOrdenarCartera` puros contra fixtures propios (descartado/perdido-con-nota/perdido-sin-nota/activo). La guardia de Evaluación se probó disparando un `beforeunload` sintético: `defaultPrevented=true` con el razonamiento tipeado, `false` con el campo vacío.
+- ✅ Diff **surgical/additive**: 13 archivos de código (`flow.ts` +37/−, `home.ts` +4, `progreso.ts` +29/−, `cartera-toolbar.tsx` +4/−, `home-sections.tsx` +12, `progreso-semana.tsx` +9/−, `page.tsx` +7/−, `lead-wizard.tsx` +5, `seguimiento-step.tsx`/`agenda-step.tsx` +15/− c/u, `evaluacion-step.tsx` +14/−, dos invariantes +1 línea c/u). `dossier.ts`, `escalamiento.ts`, `schema.prisma` **sin tocar** — motor intacto.
+
+**Lo que queda (para Franco):** (a) si en algún momento se quiere garantizar también un motivo para PERDIDO, el camino correcto es volver `agenda.resultado.nota` obligatorio en `AgendaSchema` — decisión de contrato, fuera de esta capa de presentación. (b) Pasada perceptual humana de las tres superficies (contraste del ícono de teléfono, peso visual del "Motivo:" en la card) queda para cuando Franco la quiera — cubierta acá por la verificación en vivo + los 39 de setter, no por un ojo humano.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 2.3 / BLOQUE 2: cerró verde. A-14: ok · A-24: ok · A-09: ok.
+Desvíos: ninguno de fondo — el catch-up de commits pendientes (B1.A/B6.1-B6.5/AUD-1, seis sprints previos sin commitear) se resolvió con un commit aparte antes de arrancar 2.3, y `docs/proof-screenshots/` se gitignoró (159MB de PNGs de corridas QA previas) en vez de commitearse. Pendiente: nada de este sprint; queda anotado (b) de arriba para cuando Franco quiera la pasada perceptual humana.
+
+## Sprint 3.1 — Hook `useStepAction`: el ciclo submit de los steps, en un solo lugar (BLOQUE 3 de remediación post-auditoría · A-16) · 2026-07-02
+
+**Hallazgo (A-16).** El mismo ciclo submit copy-pasteado en los steps del wizard: el mapeo `ZodError → FormErrors` idéntico 3 veces (Evaluación ×2, Brief ×1) y el ciclo `startTransition → action → toast → router.refresh()` en 7 transiciones de 5 archivos. El Bloque 4/5 va a multiplicar pantallas — cada una repetiría este boilerplate.
+
+**Qué se hizo.** Se extrajo el ciclo a `src/lib/use-step-action.ts` (hermano de `use-autosave.ts` / `use-unsaved-guard.ts`), con dos exports:
+- `useStepAction()` → `{ isPending, run }`: ejecuta la server action dentro de la transición; ante `!result.success` corre `onError` (estado propio del step) + `toast.error(result.error)`; ante éxito corre `onSuccess`, el toast de éxito (`successToast`: string fijo o función del payload — omitido = sin toast) y `router.refresh()` (`refresh: false` lo apaga). El hook NO homogeneiza: todo lo que variaba entra por parámetro.
+- `erroresPorCampo<Campo>(zodError)`: el loop compartido «primer mensaje por campo, solo `path[0]`» que los steps con errores per-campo copiaban idéntico.
+
+**Censo (Fase 1) — 9 call-sites en los 5 archivos listados, 9 migrados:**
+
+| Call-site | Action | Particularidades preservadas por parámetro |
+|---|---|---|
+| Evaluación · `enviar` | `registrarEvaluacion` | `setServerError` en `onError`; cierre del modal en `onSuccess`; toast condicional en 3 variantes (`descartado`/`gateAbierto`/espera) |
+| Evaluación · `intentarEnviar` | — (solo validación) | sin transición: solo adopta `erroresPorCampo`; la apertura del modal ante «solo falta `motivoDescarte`» queda EN el step |
+| Brief · `guardar` | `guardarBrief` | `setServerError`; `autosave.markSaved()` + `setEditando(false)` + `setSanityOk(false)` en `onSuccess`; toast fijo |
+| Construcción · `transicionar` (×2: iniciar/reabrir) | `iniciarConstruccion`/`reabrirConstruccion` | sin estado de error propio (solo toast); mensaje de éxito por parámetro — el helper local quedó de 10 líneas a 1 |
+| Agenda · `buscarHorarios` | `ofrecerHorarios` | **variación**: SIN toast de éxito y SIN refresh (solo carga slots) → `successToast` omitido + `refresh: false` |
+| Agenda · `confirmar` | `confirmarReunion` | **variación**: reset condicional de slots cuando el error dice «se acaba de ocupar» — preservado dentro de `onError`; toast derivado del slot confirmado |
+| Seguimiento · `registrar` | `registrarResultado` | limpieza del form (resultado/nota/fecha) en `onSuccess`; toast derivado vía `toastDeResultado` |
+| Seguimiento · `registrarEnvioDemo` | `enviarDemoAprobada` | sin estado de error propio; toast derivado de `yaEnviada` |
+
+El mapeo Zod «primer issue → string único» de Agenda·`confirmar` y Seguimiento·`registrar` es OTRO patrón (no per-campo): se queda en el step tal cual, no se forzó al helper.
+
+**Decisiones / líneas de límite.**
+- **Orden interno del bloque de éxito.** El hook fija `onSuccess → toast → refresh`. En el original, Evaluación seteaba estado antes del toast y Brief/Seguimiento al revés — todo dentro del mismo bloque síncrono post-`await` (batching de React + toast imperativo), sin diferencia observable. Anotado por transparencia, no es un cambio de comportamiento.
+- **El barrido encontró el mismo ciclo FUERA del scope listado** (~10 componentes: `ficha-step`, `opener-step`, `draft-step`, `self-check-step`, `escalar-modal`, `checklist-construccion`, `nuevo-prospecto-form`, `importar-prospectos-form`, `foco-surface`, `lead-card-actions`, `novedades-marcar-visto`). NO se tocaron (regla 2: solo los listados): quedan como candidatos de adopción incremental para cuando cada uno se pise por otra razón.
+- **Cero cambios de copy/motor**: los strings de todos los toasts se movieron carácter por carácter; `dossier.ts`, actions y schemas sin tocar.
+
+**Verde (chequeado, no asumido) — idéntico a la línea base del cierre de 2.3.**
+- ✅ `npx tsc --noEmit` → **0 errores**.
+- ✅ `npm run test:leados` → **22/22** (== línea base 22/22).
+- ✅ `npm run build` + `npm run test:setter` → **39/39** (== línea base 39/39) — el recorrido browser contra prod-QA:3001 ejercita los mismos submits migrados (evaluación, brief, seguimiento, claim del envío-demo).
+- ✅ `npx prisma migrate status` → «Database schema is up to date».
+- ✅ Diff neto en steps: **68+/129−** (5 archivos) + el hook nuevo (~90 líneas con doc). Sin push (regla 4).
+
+**Desvío de forma (Fase 0).** Los «commits de 2.1, 2.2 y 2.3» no existen como tres commits: el Bloque 2 completo aterrizó en UNO (`6dd4946`, A-14/A-24/A-09 — el título lista los tres entregables). Se verificó el contenido en los archivos (guardia A-24 presente en Evaluación, etc.) y se consideró cumplido el gate.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.1: cerró verde. Call-sites migrados: 9 de 9 censados (7 transiciones + 2 sitios de mapeo Zod per-campo); variaciones preservadas: búsqueda de horarios sin toast/refresh, reset condicional de slots en el error de confirmar, modal de descarte de Evaluación, post-éxitos propios de Brief/Seguimiento.
+Comportamiento cambiado: ninguno — suites idénticas (22/22 y 39/39, iguales a la línea base de 2.3). Desvíos: solo de forma — el gate de Fase 0 pedía los commits 2.1/2.2/2.3 y el Bloque 2 está en un único commit (6dd4946); verificado por contenido. Pendiente: nada; queda anotado el mismo ciclo en ~10 componentes fuera del scope listado como adopción incremental futura.
+
+## Sprint 4.1 — Esqueleto del manual paso-por-pantalla en ruta paralela (BLOQUE 4 · mapa v1) · 2026-07-03
+
+**Qué se hizo.** La infraestructura del manual del mapa v1 (16 pantallas + 2 estados + 1 reentrada), en ruta PARALELA al wizard — `/setter/leads/[leadId]/manual/[paso]` — sin tocar ni importar nada del wizard viejo (convive hasta el corte del Bloque 5). Todo server components; 9 archivos nuevos, cero modificados:
+
+- `src/lib/leados/manual.ts` — el registro de pantallas (ids `m1…m16` + `mr` + `espera`/`revision`, títulos-instrucción del mapa, fases con indicador "paso N de M" POR FASE; m7–m12 toman título/bajada de `SHELL_CONSTRUCCION`, única copia editable) y `derivarPantalla(input) → { actual, completadas[], habilitadas[] }`: la derivación de posición a granularidad de pantalla, pura, SIN persistir posición — se re-deriva en cada request de stage + datos capturados + checklist, con los MISMOS gates del motor (`gateBriefAbierto`, `gateEnvioDemo`, `cadenciaInfo`, `fichaTieneSenal`, `reunionAgendada`). Exhaustiva por stage (un stage nuevo rompe el build). Invariante interna: la `actual` siempre es accesible (sin loops de redirect).
+- `manual/_data.ts` — carga owned con los MISMOS caminos que el wizard (`getOwnedLead` → 404 sin leakear, `getOwnedDossier`, `listOwnedLeadActivities`, `countFollowUps`); reloj request-time para `followUpVencido`. Solo lectura: el manual no escribe ni transiciona nada.
+- `manual/page.tsx` — entrada sin pantalla: re-deriva y `redirect()` a la actual. `manual/[paso]/page.tsx` — la GUARDIA como servidor, no CSS: id desconocido → actual; pantalla ni habilitada ni completada (el futuro) → `redirect()` a la actual, sin renderizarse ni como fachada; completadas navegables sin resetear nada.
+- `_components/pantalla-manual.tsx` — el layout-tipo con slots: instrucción (una línea, protagonista; marco cyan solo si es el paso de ahora — disciplina B9), zona de contexto re-servido, zona de munición (bloque copiable / link externo), zona de registro, avance ("Ir a tu paso actual" cuando no estás parado en él) y navegación atrás. Los slots vacíos muestran placeholder honesto (la pantalla real los llena al migrar) — nunca zonas en blanco.
+- `_components/manual-nav.tsx` — cabecera común + chips de completadas (atrás siempre libre) + el rail de las 6 fases de Construcción con navegación LIBRE entre todas (auto-reporte, jamás gates — §6-3).
+- `_components/estado-manual.tsx` — las dos pantallas de estado (espera con "próximo toque el X" desde `nextFollowUpAt`; revisión), tono zinc sin checklist ni indicador; desde espera se puede saltar a m5 si algo pasa antes.
+- Reentrada M-R: aterrizaje en `mr` con la nota de Franco al frente (Callout danger con motivo/dónde/arreglo desde `ultimoRechazo`); checklist y borrador preservados (motor `RELOOP_RESET`), chequeo final reseteado → m14 vuelve a ser futuro.
+- `manual/loading.tsx` + `manual/error.tsx` — estados completos del shell (skeleton que espeja el layout-tipo; boundary con logger+Sentry `setter-manual` y salida al lead).
+
+**Supuestos del mapa (Fase 1 — mapa vs repo).** Confirmados; ninguna diferencia estructural. Ajustes MENORES adoptados del motor: (a) la derivación previa se llama `pasoActual` (dossier-stepper), no `derivarPasoDelLead` — `derivarPantalla` nació en lib espejando su mapeo stage→paso, sin importar el wizard; (b) el gate de M3 exige score+veredicto+razonamiento (el mapa decía score+razonamiento); (c) APROBADA-sin-condición-de-envío (falta respuesta o `finalUrl`) no está explícita en el mapa — re-usa el estado ESPERA con m5 alcanzable (mismo tono "falta condición externa"); (d) la evaluación ocurre con stage=FICHA (registrar el veredicto ES la transición): m2/m3 se habilitan con la señal de la ficha, y m3 queda alcanzable desde m2 (tarea externa con vuelta; no hay dato que persista "fui al Evaluador" — la posición no se guarda). DESCARTADA (terminal de archivo, sin pantalla en el mapa) deriva a m3 completada.
+
+**Decisiones / líneas de límite.**
+- **El motor no se tocó y el wizard no se tocó** — cero diffs en tracked files; el manual ni importa de `[leadId]/_components/`. La dependencia es SOLO `flow.ts`/`contracts.ts`/`flow-content.ts` (lib estable committeada) + los reads owned.
+- **Navegación libre de Construcción es real**: m7–m12 SIEMPRE habilitadas en BRIEF/CONSTRUCCION/RECHAZADA, en cualquier orden. Los que sí condicionan: m13 recién en CONSTRUCCION (el motor solo acepta draft ahí) y m14 solo con draft publicado — gates del motor, no del checklist.
+- **`habilitadas` y `completadas` pueden solaparse** (m5 es por-toque, repetible en APROBADA post-envío) — documentado en el tipo.
+- **Sin push** (regla 6).
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores**. ✅ eslint sobre los 9 archivos nuevos → **0 problemas** (el `npm run lint` global arrastra ~101 errores pre-existentes de lanes ajenos — intactos, no son de este sprint).
+- ✅ `npm run check:invariants` → **15/15 OK** (incluido `reloop-selfcheck`, que confirma lo que la derivación asume del re-loop).
+- ✅ `npm run test:leados` → **22/22**. ✅ `npm run build` → verde, con `/setter/leads/[leadId]/manual` y `/manual/[paso]` en el árbol (ƒ dynamic). ✅ `npx prisma migrate status` → al día (77). ✅ `npm run test:setter` → **39/39** (== línea base) — el wizard viejo intacto también en runtime.
+- ✅ **Matriz de guardias en vivo: 28/28 PASS** (prod-QA :3001, sesión real setter-qa vía `/api/qa/login`, SSR por curl con cookie cruda, sobre los 13 leads QA-W del seed V-1): la entrada `/manual` re-deriva bien en los 11 estados (m1/m2/m4/m6/revision/m15/espera/mr/m3); el futuro redirige server-side (m14 en FICHA→m1 · m6 con gate cerrado→m4 · m13 en BRIEF→m7 · m15 en EN_REVISION→revision · m14 en RECHAZADA→mr por el reset); atrás libre (m1 completada navegable en EVALUADA); navegación libre real entre fases (m9/m12 en BRIEF, m8 en re-loop); m14 habilitada con draft; estados renderizan con su tono; M-R con la nota de Franco al frente; id basura → actual; lead ajeno/inexistente → 404 por contenido (sin leakear).
+- ⚠️ `npm run test:e2e` (batería global, EXTRA a las dos suites del cierre): **21 passed / 7 skipped**, con fallas SOLO en lanes ajenos al setter (specs 11-client-login/12-client-chatbot/13-client-perf/15-personalization/16-admin-bulk/20-idor-mobile/21-performance/22-visual-regression/30-onboarding) — los mismos que ya estaban rojos en la línea base pre-existente de esa suite, corridos además bajo doble carga de CPU (el lane A-29 compilando en paralelo, 14.9m vs ~6m normales). Cero specs de setter en la lista de fallas; la batería del wizard es `test:setter` (39/39 arriba). La e2e global necesita su propia pasada de mantenimiento — fuera de scope (lanes dashboard/cliente).
+
+**Colisión de lane detectada al cierre (para coordinación).** Durante la verificación final de ESTE sprint apareció trabajo en vivo de OTRA sesión sobre el mismo árbol (mtimes 04:08–04:11): `src/lib/leados/paso.ts` (A-29 — unifica `pasoActual`/`describirFoco`/`anchorActivo` en `derivarPasoDelLead`), `guia-retrabajo.tsx`, `prompts-disenio.tsx` y otros, más 4 archivos del wizard modificados sin commitear. Es exactamente la "3.2" que la Fase 0 de este sprint no encontró en el log (por eso `derivarPantalla` se construyó autosuficiente sobre `flow.ts`, espejando el mapeo de `pasoActual` — divergencia menor ya anotada). Cero solapamiento de archivos entre ambos lanes; el commit de 4.1 es quirúrgico (solo sus 9 archivos + bitácora + last-runs). **Follow-up de una costura**: cuando A-29 commitee, re-basar el switch por stage de `posicionDe` (manual.ts) sobre `derivarPasoDelLead` para que la fuente del "paso del lead" vuelva a ser una sola.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 4.1: cerró verde. Supuestos del mapa: confirmados sin diferencias estructurales; ajustes menores: (a) la derivación se llama `pasoActual`, no `derivarPasoDelLead` — `derivarPantalla` nació en lib sin importar el wizard; (b) gate de M3 = score+veredicto+razonamiento; (c) APROBADA-sin-condición-de-envío re-usa el estado ESPERA; (d) evaluación ocurre con stage=FICHA y m3 queda alcanzable desde m2 (externa con vuelta).
+Ruta paralela: navegable, guardias probadas en vivo 28/28 (redirect server-side del futuro, atrás libre, navegación libre m7–m12, estados, M-R con nota al frente, 404 de ownership). Desvíos: colisión de lane al cierre — A-29 (`derivarPasoDelLead`) aterrizó EN PARALELO sin commitear mientras 4.1 verificaba; sin solapamiento de archivos; queda el follow-up de una costura (re-basar `posicionDe` sobre `derivarPasoDelLead` cuando A-29 commitee). Pendiente: nada del esqueleto; la e2e global (lanes dashboard/cliente) sigue roja pre-existente, fuera de scope.
+
+---
+
+## Sprint 3.2 — Auxiliares de los steps extraídos + derivación única del paso (BLOQUE 3 de remediación post-auditoría · A-26, A-29) · 2026-07-03
+
+**A-26 — 5 auxiliares a archivos hermanos (+1 forzado por dependencia).** Los 5 componentes auxiliares inline de `construccion-step.tsx` (383→210 líneas) salieron a archivos hermanos en `_components/` del lead, movidos carácter por carácter: `badge-provisorio.tsx` · `urgencia-banner.tsx` · `guia-retrabajo.tsx` (candidato directo a la pantalla M-R del mapa v1) · `materiales-negocio.tsx` · `prompts-disenio.tsx`. Ninguno dependía de estado/closure local del step — todos ya recibían props o nada. Excepción anotada (Fase 1): `useHidratado` es un hook local compartido por `UrgenciaBanner` Y el body del step; extraer el banner sin extraer el hook creaba un import circular → salió como 6º archivo `use-hidratado.ts` (mismo patrón que `use-step-action.ts` del 3.1).
+
+**A-29 — comparación celda por celda ANTES de unificar; después, una sola derivación.** `pasoActual` × `describirFoco` × `anchorActivo` comparadas por stage (y por gate/opener donde aplican): **sin discrepancias reales**. El único caso asimétrico —EVALUADA + opener pendiente, donde banner y anchor dirigen al opener mientras el rail marca «Brief»— NO es divergencia: el rail de 5 pasos no tiene un paso Opener en su codominio, y ambos consumidores conservan hoy (y conservan tras unificar) exactamente su salida. Con eso, las tres derivaciones se movieron VERBATIM a `src/lib/leados/paso.ts` (hermano de `flow.ts`, módulo de dominio de experiencia) como funciones privadas; el único export de lógica es `derivarPasoDelLead(stage, gateAbierto, openerPendiente)` → `{ indice, foco, anchor }`. `lead-wizard` la llama UNA vez y reparte las tres caras: `indice` → `DossierStepper` (ahora recibe `actual` por prop, ya no deriva) · `foco` → `PasoActualBanner` (ahora presentación pura, recibe el descriptor) + el tono del marco del step activo · `anchor` → `StepAnchor`. Los tipos `FocoTono`/`FocoDescriptor`/`StepAnchorId` viven en `paso.ts` y se re-consumen desde ahí.
+
+**Verde (chequeado, no asumido) — idéntico a la línea base del 3.1.**
+- ✅ `npx tsc --noEmit` → **0 errores** (corrido después de TODOS los edits).
+- ✅ `npm run test:leados` → **22/22** (== línea base).
+- ✅ `npm run build` + `npm run test:setter` → **39/39** (== línea base) — el recorrido browser contra prod-QA:3001 ejercita rail + cartel + aterrizaje + construcción re-derivados desde `derivarPasoDelLead`.
+- ✅ `npm run check:invariants` → **15/15 OK**.
+- ✅ `npx prisma migrate status` → «Database schema is up to date» (77).
+- Diff del commit `2d8a3bc`: **11 archivos, 473+/414−** (los +473 son los 7 archivos nuevos con su doc; el neto en los 4 tocados es −377). Sin push (regla 4).
+
+**Concurrencia con el lane 4.1 (desvío operativo, resuelto limpio).** Este sprint corrió EN PARALELO con la sesión del Bloque 4.1 (`manual/`). Fase 0 encontró git no-limpio por archivos de ESE lane (disjuntos — no se tocaron ni se comitearon). El `npm run build` + `test:setter` se difirieron hasta que el `next start` de esa sesión (:3000, arrancado 4:11) terminó solo, para no pisarle `.next` en caliente (waiter sobre las conexiones del puerto). Su commit (`8781724`) aterrizó primero; el de 3.2 (`2d8a3bc`) se hizo por pathspec literal para no arrastrar su índice — historia linear, cero entrelazado. Esta entrada viaja en un commit docs aparte porque la bitácora ya viajó en el commit de 4.1. **Queda viva la costura que 4.1 anotó**: re-basar el switch por stage de `posicionDe` (`manual.ts`) sobre `derivarPasoDelLead` — ahora posible porque A-29 ya está commiteado; es scope del lane 4.x, no de este sprint.
+
+**CIERRE DEL BLOQUE 3.** 3.1 (`useStepAction` — el ciclo submit) + 3.2 (auxiliares + `derivarPasoDelLead` — las piezas y la posición): el corte del wizard del Bloque 4/5 queda abaratado — submit, auxiliares y derivación del paso son piezas únicas reutilizables por pantalla.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.2 / BLOQUE 3: cerró verde. Auxiliares extraídos: 5 (+1: el hook compartido `use-hidratado.ts`, forzado por dependencia — anotado). Derivación: unificada en `derivarPasoDelLead` (`src/lib/leados/paso.ts`) alimentando stepper, anchor y banner desde una sola llamada del shell; comparación celda-por-celda sin discrepancias (el caso EVALUADA+opener es asimetría de granularidad del rail, no divergencia — cada consumidor conserva su salida exacta).
+Comportamiento cambiado: ninguno — suites idénticas a la línea base (22/22 leados, 39/39 setter) + 15/15 invariantes + tsc 0 errores. Desvíos: operativos por el lane 4.1 en paralelo — Fase 0 con git no-limpio por archivos ajenos disjuntos (no tocados), build/test:setter diferidos hasta que su server :3000 terminó, commit por pathspec literal, bitácora en commit docs aparte (la de 4.1 viajó en SU commit). Pendiente: nada de este sprint; queda la costura anotada por 4.1 (re-basar `posicionDe` de `manual.ts` sobre `derivarPasoDelLead`), scope del lane 4.x.
+
+---
+
+## Sprint 4.2 — Pantalla M1 Ficha: piloto del patrón del manual (BLOQUE 4 · mapa v1) · 2026-07-03
+
+**Qué se hizo.** La PRIMERA pantalla real del manual — M1 «Cargá los datos del negocio» — montada sobre el layout-tipo del 4.1, re-empaquetando la lógica existente del `ficha-step` SIN lógica de negocio nueva. Commit `a8e7747`: 2 archivos nuevos + 3 tocados (neto −186 en los tocados).
+
+- `_components/ficha-form.tsx` (nuevo) — el CUERPO de registro de la ficha extraído VERBATIM de `FichaStep`: estado del form, nudges de calidad (`campoFichaFlojo`), gate visible con faltantes (`fichaFaltantes`, mismos mensajes), guardar + autosave (`useAutosave` sobre `guardarFicha` — parcial-safe, jamás transiciona stage, ownership adentro) + guardia de salida (`useUnsavedGuard`). Un solo camino de escritura para las dos presentaciones.
+- `_components/ficha-step.tsx` — queda como CHROME del wizard (Card + encabezado + `FichaEjemplo` + `CopyBlock` al completar) alrededor de `<FichaForm>`; la rama congelada (details solo-lectura) intacta. Comportamiento idéntico — suites como testigo.
+- `manual/_data.ts` — suma lo que M1 re-sirve: `leadCopy` (identidad + links, mismo shape del wizard), `ficha` y `fichaEditable` (MISMA regla del wizard: editable hasta que la evaluación quede registrada).
+- `manual/_components/m1-ficha.tsx` (nuevo) — llena los TRES slots del layout-tipo: contexto (rubro·zona + links del alta, con vacío honesto si el alta no trajo links), munición (`FichaEjemplo`, la misma pieza), registro (`FichaForm` vivo, o la vista congelada existente de `FichaStep` post-evaluación).
+- `manual/[paso]/page.tsx` — despacho de slots por `pantalla.id`; la guardia, el indicador «Ficha — paso 1 de 1», el avance («Ir a tu paso actual» apenas la derivación mueve la actual) y el atrás libre ya los pone el esqueleto — cero código nuevo de navegación.
+
+**El patrón (para repetir en cada tramo del Bloque 5).**
+1. Extraer de `<x>-step.tsx` el cuerpo de registro (estado + hooks + action + gate, verbatim) a `_components/<x>-form.tsx`; el step del wizard queda como chrome alrededor — comportamiento idéntico, suites como testigo.
+2. Sumar a `manual/_data.ts` SOLO los datos que la pantalla re-sirve, espejando las reglas del wizard (ej. `fichaEditable`), nunca inventando reglas nuevas.
+3. Crear `manual/_components/m<N>-<tarea>.tsx` que llena los tres slots: contexto re-servido / munición / registro (el form compartido; el estado congelado reusa la vista solo-lectura que ya exista).
+4. Despachar los slots por `pantalla.id` en `manual/[paso]/page.tsx` — guardia, indicador, avance y atrás ya vienen del layout-tipo + `derivarPantalla`; si la pantalla pide navegación propia, sospechar.
+5. Verificar las DOS presentaciones (wizard intacto + pantalla nueva) y el recorrido completo: entrar → completar → gate → avanzar → atrás sin reset.
+
+**Verde (chequeado, no asumido).**
+- ✅ `npx tsc --noEmit` → **0 errores**. ✅ `npm run check:invariants` → **15/15 OK**. ✅ `npm run test:leados` → **22/22**. ✅ `npm run build` → verde. ✅ `npm run test:setter` → **39/39** (== línea base) — el wizard viejo intacto también en runtime. ✅ `npx prisma migrate status` → al día (77).
+- ✅ **Recorrido browser de M1 completo** (dev:qa :3002, sesión real setter-qa vía `/api/qa/login`, sobre los leads QA-W del seed V-1, restaurado al cierre): lead nuevo («QA-W Ficha Incompleta») aterriza en m1 con «Tu paso ahora» + gate ámbar con los 2 faltantes existentes → completar en vivo flipea el gate a «✓ Señal mínima lista» sin recargar → «Guardar ficha» avanza la derivación (badge «Completada», sección Avance → m2 «Evaluación — paso 1 de 2») → atrás por el chip de Completadas re-sirve el form con TODO lo guardado, editable, sin reset → pedir m6 (futuro) redirige server-side a la actual (m2) → la variante congelada (lead post-evaluación) muestra el details solo-lectura sin form. Wizard viejo verificado con la misma data: chrome completo (Paso 1 — Ficha de observación, ejemplo, copy block) y los mismos valores. Capturas desktop (1600) + mobile (480) limpias.
+- Nota QA-infra (no del sprint): en dev:qa el browser de preview debe navegar por `localhost` — con `127.0.0.1`, Next 16 dev bloquea sus dev-resources cross-origin y la página queda SIN hidratar (forms muertos sin error de consola). Documentado en memoria; `allowedDevOrigins` no se tocó (fuera de scope).
+
+**CIERRE DEL BLOQUE 4.** 4.1 (esqueleto: registro de pantallas + `derivarPantalla` + layout-tipo + guardias) + 4·A/B/C (prompts de diseño + puente self-check→prompt + deep-links) + 4.2 (M1, piloto del patrón): el manual tiene infraestructura, munición y su primera pantalla real. Los tramos del Bloque 5 repiten el patrón de arriba pantalla por pantalla hasta el corte. **Costura viva** (anotada desde 4.1, fuera del scope de M1): re-basar el switch por stage de `posicionDe` (`manual.ts`) sobre `derivarPasoDelLead` (`paso.ts`, ya commiteado por A-29) — candidato natural al primer tramo del Bloque 5.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 4.2 / BLOQUE 4: cerró verde. M1: operativa en `/setter/leads/[leadId]/manual/m1` con el patrón completo (instrucción de una línea, contexto/munición/registro, gate con faltantes existentes, autosave+guardia, indicador por fase, avance y atrás derivados).
+Patrón para el Bloque 5: confirmado — extraer cuerpo de registro a `<x>-form.tsx` compartido + chrome del wizard intacto + módulo `m<N>-*.tsx` de slots + despacho por id (5 pasos documentados en la bitácora). Desvíos: ninguno de código; nota QA-infra (dev:qa se navega por `localhost`, no `127.0.0.1` — hidratación) documentada en memoria. Pendiente: la costura `posicionDe`→`derivarPasoDelLead` (viva desde 4.1, fuera del scope M1) — primer candidato del Bloque 5.
+
+---
+
+## Sprint 5.0 — Costura de derivaciones + salud del árbol post-lanes (pre-arranque BLOQUE 5) · 2026-07-03
+
+**Qué se hizo.** Cierra la costura anotada tres veces (4.1 → 3.2 → 4.2): `posicionDe` (`manual.ts`) re-derivaba a mano, con su propio switch, exactamente lo que `derivarPasoDelLead` (`paso.ts`, A-29) ya resuelve para EVALUADA — abierto / espera / opener pendiente. Ahora `posicionDe` computa `gateAbierto`/`openerPendiente` UNA vez al tope de la función, llama a `derivarPasoDelLead(stage, gateAbierto, openerPendiente)`, y la rama EVALUADA lee `paso.anchor === 'opener'` / `paso.foco.tono === 'foco'` en vez de re-invocar `gateBriefAbierto(...)` y el proxy `contactos === 0` para `openerPendiente`. Commit `2e75007`, 1 archivo, +24/−11.
+
+**Lo que NO se tocó, a propósito.** La rama APROBADA sigue llamando a `gateEnvioDemo` directo: exige `finalUrl` (la URL que el admin registra AL APROBAR, en la MISMA transición — ver `aprobarRevision` en `revision.actions.ts`), un factor que `derivarPasoDelLead`/`gateAbierto` no reciben. En todo estado alcanzable ambos coinciden (finalUrl siempre viaja junto con APROBADA), pero leer el `gateAbierto` genérico ahí habría cambiado el comportamiento en el borde teórico finalUrl=null — no era la duplicación que A-29 eliminó (acá no se re-deriva el mismo hecho: se deriva uno DISTINTO que el wizard no necesita). Las demás ramas (FICHA/null, DESCARTADA, BRIEF/CONSTRUCCION, RECHAZADA, EN_REVISION) no llamaban a ningún gate compartido — son navegación de pantallas (progreso/draft/checklist) sin equivalente en el rail de 5 pasos del wizard; nada que re-basar ahí.
+
+**Diff de comportamiento nulo, probado exhaustivamente (no asumido).** Oráculo temporal (`_costura-oracle.ts` + snapshot `manual.OLD.ts` de HEAD, ambos vía ts-node, borrados al cerrar la fase — no viajan en el commit): corrió `derivarPantalla` VIEJA vs NUEVA sobre **331.776 combinaciones** ({9 stages × 8 status} × caliente × contactos × followUpVencido × followUpCount × draftUrl × demoEnviada × finalUrl × agenda × progreso × ficha) — **0 mismatches**.
+
+**Fase 1 — Salud del árbol post-lanes.**
+- ✅ Fase 0: git limpio, `npx tsc --noEmit` → 0 errores, commits de 3.2 (`2d8a3bc`/`af561ec`) / 4.1 (`8781724`) / 4.2 (`a8e7747`/`ff08411`) presentes en el log.
+- ✅ `npm run check:invariants` → 15/15 OK.
+- ✅ `npm run test:leados` → 22/22 (== línea base).
+- ✅ `npm run build` + `npm run test:setter` → 39/39 (== línea base).
+- ⚠️ `npm run test:e2e` (batería global, re-verificada de punta a punta): **21 passed / 27 failed / 7 skipped** (14.9m). Las 27 fallas están TODAS en `tests/e2e` (lanes dashboard/cliente/admin) — ninguna toca `/setter` ni `/manual`. Patrón dominante: timeout de `submitLogin`/`waitForURL` en `tests/helpers/auth.ts:12` (login de cliente/admin no completa en 45s), que arrastra en cascada a client-login, chatbot-section, perf, personalization, bulk-actions, idor-optout, mobile-responsive, performance, visual-regression (7 specs) y el onboarding E2E completo. Es la MISMA roja pre-existente que 4.1 y 4.2 ya habían registrado (mismos specs: 11/12/13/14/15/16/20/21/22/30) — no la introdujo este sprint, no es de la superficie setter/manual. Por regla 2 del sprint: se reporta, no se toca.
+
+**Fase 2 — Costura.** Ver "Qué se hizo" arriba. No se re-corrió a mano la matriz de 28 vivo del 4.1: nada de lo que esas 28 comprobaciones ejercitan cambió (el oráculo de 331.776 combos las cubre con margen) y `test:setter` 39/39 ejercita en runtime real el mismo camino EVALUADA→brief/opener/espera contra prod-QA.
+
+**Fase 3 — Verificación.** tsc 0 errores + invariantes 15/15 + test:leados 22/22 + test:setter 39/39, todos re-corridos DESPUÉS del edit — idénticos a la línea base.
+
+**Fase 4 — Commit.** `2e75007` — `refactor(manual): posicionDe deriva de derivarPasoDelLead — una sola fuente del paso`. Diff-stat: 1 archivo, +24/−11. Sin push (regla 3).
+
+**CIERRE DE LA COSTURA.** La anotada tres veces (4.1 → 3.2 → 4.2) queda resuelta: `pasoActual`/`describirFoco`/`anchorActivo` (A-29, unificadas en `derivarPasoDelLead`) y la porción de `posicionDe` que las duplicaba (EVALUADA) ahora comparten una sola fuente. Lo que queda deliberadamente aparte (APROBADA vía `gateEnvioDemo`, y la navegación fina de FICHA/BRIEF-CONSTRUCCION/RECHAZADA) no es duplicación — es información que el mapa de 16 pantallas necesita y que el rail de 5 pasos no.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 5.0: cerró verde. Derivación única: sí — `posicionDe` (rama EVALUADA) ahora lee `derivarPasoDelLead` en vez de re-derivar `gateBriefAbierto`/`openerPendiente`; probado sin diffs sobre 331.776 combinaciones (oráculo temporal, no committeado). E2e roja: existía y sigue existiendo — es 100% de lanes ajenos (dashboard/cliente/admin, specs 11/12/13/14/15/16/20/21/22/30, timeout de login en `tests/helpers/auth.ts`), la misma que 4.1/4.2 ya habían registrado; no es del setter/manual, no se tocó.
+Desvíos: ninguno de código — la rama APROBADA (`gateEnvioDemo`, exige `finalUrl`) se dejó a propósito sin re-basar porque deriva un factor que `derivarPasoDelLead` no recibe (re-basarla habría sido un cambio de comportamiento real en el borde finalUrl=null). Pendiente: nada del Bloque 5; el árbol del setter queda con una sola fuente del paso, listo para que el Bloque 5 arranque sobre verde propio (la e2e global es tarea de otro lane).

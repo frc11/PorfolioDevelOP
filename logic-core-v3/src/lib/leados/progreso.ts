@@ -18,7 +18,7 @@
  */
 import { prisma } from '@/lib/prisma'
 import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
-import { AgendaSchema } from '@/lib/leados/contracts'
+import { AgendaSchema, EvaluacionSchema } from '@/lib/leados/contracts'
 import type { OwnedLeadWithDossier } from '@/lib/leados/ownership'
 
 /** Días de la ventana móvil de la señal. */
@@ -31,6 +31,13 @@ export type ProgresoSemana = {
   demos: number
   /** Reuniones que el setter agendó en la ventana (`agendaJson.agendadaAt`, AGENDADA). */
   reuniones: number
+  /**
+   * A-09: leads archivados en la ventana — descartados (evaluación,
+   * `evaluacionJson.fecha`) o perdidos (post-reunión, `resultado.fecha`). El
+   * descarte/pérdida honesta es trabajo hecho (mismo criterio que ya usa el
+   * copy de Evaluación) y antes no sumaba a ningún número.
+   */
+  archivados: number
   /** Total — atajo para decidir si la señal se muestra (0 ⇒ oculta, sin ceros que culpen). */
   total: number
   /** Días de la ventana, para el copy ("últimos 7 días"). */
@@ -54,6 +61,7 @@ export function derivarProgresoSemana(
   const desde = inicioVentana(ahora, PROGRESO_VENTANA_DIAS)
   let demos = 0
   let reuniones = 0
+  let archivados = 0
 
   for (const lead of leads) {
     const dossier = lead.dossier
@@ -67,10 +75,25 @@ export function derivarProgresoSemana(
     if (agenda.success && agenda.data.estado === 'AGENDADA' && agenda.data.agendadaAt) {
       if (new Date(agenda.data.agendadaAt) >= desde) reuniones += 1
     }
+
+    // A-09: descartado (evaluación) o perdido (post-reunión) en la ventana —
+    // cada lead cuenta una sola vez, por el eje que corresponda.
+    if (dossier.stage === 'DESCARTADA') {
+      const evaluacion = EvaluacionSchema.safeParse(dossier.evaluacionJson)
+      if (evaluacion.success && evaluacion.data.fecha && new Date(evaluacion.data.fecha) >= desde) {
+        archivados += 1
+      }
+    } else if (
+      lead.status === 'PERDIDO' &&
+      agenda.success &&
+      agenda.data.resultado?.tipo === 'PERDIDO'
+    ) {
+      if (new Date(agenda.data.resultado.fecha) >= desde) archivados += 1
+    }
   }
 
-  const total = contactos + demos + reuniones
-  return { contactos, demos, reuniones, total, dias: PROGRESO_VENTANA_DIAS }
+  const total = contactos + demos + reuniones + archivados
+  return { contactos, demos, reuniones, archivados, total, dias: PROGRESO_VENTANA_DIAS }
 }
 
 /**

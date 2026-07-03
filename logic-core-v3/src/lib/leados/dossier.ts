@@ -32,7 +32,12 @@ import {
   type SelfCheck,
 } from '@/lib/leados/contracts'
 import { gateBriefAbierto } from '@/lib/leados/flow'
-import { buildEscaladoPatch, ESCALADO_RESET } from '@/lib/leados/escalamiento'
+import {
+  buildEscaladoPatch,
+  esReloopRechazo,
+  ESCALADO_RESET,
+  RELOOP_RESET,
+} from '@/lib/leados/escalamiento'
 
 /**
  * Transiciones legales de la máquina de producción. Ninguna otra existe.
@@ -146,9 +151,17 @@ export async function transitionDossier(
   // El escalamiento "me trabé" es de la CONSTRUCCION vigente: cualquier cambio
   // de stage lo resuelve/invalida (ESCALADO_RESET — aditivo, no altera ninguna
   // transición legal). Así no sobrevive a un re-loop RECHAZADA→CONSTRUCCION.
+  //
+  // B6.2: SOLO en el re-loop RECHAZADA→CONSTRUCCION se agrega RELOOP_RESET, que
+  // limpia el self-check (GATE) → `selfCheckAprobado` vuelve a false y el setter
+  // RE-verifica antes de reenviar. NO se aplica en las demás transiciones: en
+  // CONSTRUCCION→EN_REVISION el self-check DEBE sobrevivir para la superficie de
+  // revisión del admin. PRESERVA `progresoJson` (fases) y `draftUrl` (la demo) —
+  // RELOOP_RESET solo toca `selfCheckJson`.
   const data: Prisma.OsLeadDossierUpdateManyMutationInput = {
     stage: input.to,
     ...ESCALADO_RESET,
+    ...(esReloopRechazo(from, input.to) ? RELOOP_RESET : {}),
   }
 
   switch (input.to) {

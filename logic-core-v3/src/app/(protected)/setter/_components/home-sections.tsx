@@ -12,6 +12,7 @@ import { Badge, Callout, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { stageTone } from '@/lib/leados-ui'
 import {
+  archivoMotivo,
   formatFechaCorta,
   motivoOrden,
   STAGE_LABELS,
@@ -40,6 +41,8 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
   // (mismos tiers que el sort), no lo recalcula. Neutral por disciplina B9:
   // es informativo, el cyan queda para lo accionable.
   const ordenLabel = motivoOrden(lead)
+  // A-09: por qué causa real está archivado — visible sin abrir el lead.
+  const archivo = archivoMotivo(lead)
 
   return (
     <Card
@@ -91,6 +94,15 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
         </div>
 
         {meta && <p className="mt-1 truncate text-xs text-zinc-600">{meta}</p>}
+
+        {archivo?.motivo && (
+          <p className="mt-1.5 line-clamp-2 text-[11px] leading-relaxed text-zinc-500">
+            <span className="font-semibold text-zinc-400">
+              {archivo.causa === 'descartado' ? 'Motivo:' : 'Nota del cierre:'}
+            </span>{' '}
+            {archivo.motivo}
+          </p>
+        )}
 
         {lead.snoozed && lead.snoozedUntil && (
           <p className="mt-2 inline-flex items-center gap-1 rounded-md bg-white/[0.03] px-1.5 py-0.5 text-[11px] font-medium text-zinc-400">

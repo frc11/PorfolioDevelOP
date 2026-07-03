@@ -5,7 +5,7 @@ interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   invalid?: boolean
 }
 
-/** Espejo del Input del kit UI en versión textarea (el kit no trae una). */
+/** Espejo del Input del kit UI en versión textarea. */
 export function TextArea({ invalid, className, ...props }: TextAreaProps) {
   return (
     <textarea

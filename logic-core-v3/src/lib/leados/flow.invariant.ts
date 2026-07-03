@@ -44,6 +44,7 @@ function postergado(postergadoVencido: boolean): HomeLeadInput {
     ficha: null,
     evaluacion: null,
     ultimoRechazo: null,
+    agenda: null,
     contactos: 1,
     followUpVencido: false,
     postergadoVencido,
