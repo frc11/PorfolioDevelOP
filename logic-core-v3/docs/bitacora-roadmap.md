@@ -12137,3 +12137,45 @@ Grep de `−` (U+2212) en todo `src/`: además de los dos casos de arriba, apare
 ### Pendiente del humano
 1. **Descargar el PDF real** de una org con delta negativo (ej. Matsu) y confirmar que ahora se lee "-18 vs el mes pasado" legible.
 2. **Commitear** cuando el punto 1 dé OK.
+
+---
+
+## ✅ D4 — guard anti-spam cron insights
+
+**Qué cierra:** el guard anti-spam de `generate-insights/route.ts` (cron que genera insights por bot vía IA y manda mail de aviso) tenía `pendingCount` **hardcodeado a `0`**, con la query real comentada al lado, nunca ejecutada — confirmado previamente en la auditoría read-only D1-D5 (ítem D4). Con `pendingCount` fijo en `0`, la condición `pendingCount >= 5` **nunca** era verdadera → el guard **jamás** salteaba, aunque un bot tuviera backlog de insights PENDING sin revisar. Riesgo real: sobre-generación/sobre-envío de mails de insights, no falta de envío.
+
+### Relevamiento (antes de tocar)
+- `route.ts:39` — confirmado el hardcode: `const pendingCount = 0 // await prisma.chatbotInsight.count({ where: { botConfigId: bot.id, status: 'PENDING' } })`. La query comentada cuenta PENDING **por bot** (`botConfigId: bot.id`) — mismo scope que la variable `bot` del loop (`bots = await prisma.botConfig.findMany({ where: { isActive: true }, ... })`, `route.ts:21`).
+- Query real ya existente que matchea ese scope exacto: **`getInsightsCountForBot(botConfigId)`** (`src/modules/chatbot/server/insights/queries.ts:36-47`) — recibe `botConfigId` directo (mismo shape que `bot.id`, sin resolución adicional), hace `groupBy` por `status` y devuelve `Record<string, number>` (ej. `{ PENDING: 3, APPLIED: 1 }`). Ya estaba re-exportada por el barrel `@/modules/chatbot/index.server`, que `route.ts` ya importaba (para `generateInsightsForBot`) — no hizo falta agregar un import nuevo, solo sumar el nombre al existente.
+- Se descartó `getPendingInsightsByOrgSlug` (mismo archivo) por dos motivos: recibe `orgSlug` (obligaría a resolver org→bot de nuevo cuando el loop ya tiene `bot.id` a mano) y devuelve el `findMany` completo de filas (con `orderBy`), más pesado que un conteo cuando solo hace falta el número.
+- Conclusión: la query existente matchea **exactamente** el scope que el guard necesita (bot-scoped) — se reusó tal cual, sin adaptar su lógica interna.
+
+### Cambio quirúrgico
+Solo esto, nada más — sin tocar generación de insights, template de mail, umbral, ni otro cron:
+- **`src/app/api/cron/generate-insights/route.ts:3`** — import: se sumó `getInsightsCountForBot` al import ya existente de `@/modules/chatbot/index.server`.
+- **`src/app/api/cron/generate-insights/route.ts:39-40`** (antes 38-39) — `const pendingCount = 0 // ...` → `const pendingCounts = await getInsightsCountForBot(bot.id)` + `const pendingCount = pendingCounts.PENDING ?? 0`. El `?? 0` no es cosmético: `groupBy` omite del resultado los status sin filas (un bot con cero PENDING no trae la key `PENDING` en absoluto), así que sin el fallback `pendingCount` sería `undefined` en ese caso — mismo comportamiento final por coincidencia (`undefined >= 5` también da `false`), pero incorrecto de fondo. El umbral (`>= 5`) no se tocó.
+
+### Hallazgo colateral — NO tocado, fuera de scope
+Al tocar el archivo, lint marcó un `any` preexistente en la misma función, **sin relación** con el guard: `route.ts:58` (antes :57), `const org: any = bot.organization`, dentro del bloque de envío de mail. Es preexistente (no introducido por este cambio — el diff solo desplazó la línea). Se investigó por qué existía el `any` en vez de dejar que TypeScript infiera el tipo de `bot.organization` (que Prisma ya tipa correctamente vía el `include: { organization: true }` de la query de arriba): **enmascara un acceso a `org.name`, un campo que no existe en el modelo `Organization`** (`prisma/schema.prisma:332-345` solo tiene `companyName`, no `name`) — línea `organizationName: org.companyName ?? org.name`. Como `companyName` es `String` no-nullable, el fallback a `org.name` hoy es código muerto en la práctica (nunca se alcanza), pero si `org: any` se sacara sin más, tsc rompería ahí mismo. No se tocó: corregirlo bien requiere decidir qué debería pasar si `companyName` viniera vacío, y eso excede el "cambio quirúrgico" de este sprint (toca el bloque de armado del mail, protegido explícitamente de refactor). Queda reportado como candidato para el bloque de saneamiento de deuda técnica (mismo paraguas que la auditoría D1-D5).
+
+### Tests
+**`tests/integration/generate-insights-pending-guard.spec.ts`** (nuevo — Prisma real, mismo criterio que `client-monthly-report.spec.ts`: NO está en el `testDir` de Playwright, correr explícito):
+- `>= 5 PENDING` → `pendingCount` cruza el umbral (equivalente a "el guard saltearía").
+- `< 5 PENDING` → `pendingCount` no cruza el umbral (equivalente a "el guard procede"); se saltea a sí mismo (`test.skip`) si el bot de prueba ya tiene `>= 5` PENDING reales en la BD (no se puede aislar el caso sin tocar datos reales).
+- **Aislamiento:** insertar PENDING en un bot A no mueve el count de un bot B — requiere 2 bots en la BD, si no hay, `test.skip`.
+- Se testeó la función de conteo (`getInsightsCountForBot`, el punto de integración real con Prisma) en vez de extraer la comparación `pendingCount >= 5` a una función aparte — es una comparación de una sola línea, extraerla sería una abstracción sin necesidad real.
+- No existían tests previos de `getInsightsCountForBot` — no había nada que extender.
+
+### Archivos
+- **Modificados:** `src/app/api/cron/generate-insights/route.ts` (import + reemplazo del hardcode, líneas indicadas arriba).
+- **Creados:** `tests/integration/generate-insights-pending-guard.spec.ts`.
+- **NO tocados:** generación de insights (`generateInsights.ts`), template/envío de mail (`sendInsightsNotification.ts`), el umbral `5`, cualquier otro cron, y el `any`/`org.name` señalado arriba (reportado, no corregido).
+
+### Verificación
+`eslint` sobre los 2 archivos tocados: **1 error preexistente y ajeno** (`route.ts:58`, `@typescript-eslint/no-explicit-any` — ver hallazgo colateral arriba), **cero errores nuevos** introducidos por este diff · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline ya conocido `searchconsole.ts:119`, ajeno) · `npx prisma migrate status`: schema al día, sin drift (no aplicaba migración, es lógica de conteo) · `npm run build` NO corrido (excluido del gate para este sprint) · sin commits.
+
+### Pendiente del humano
+1. **Correr el test de integración** (`npx playwright test tests/integration/generate-insights-pending-guard.spec.ts`) contra la BD real — requiere al menos 1 bot para los dos primeros casos y 2 bots para el de aislamiento; los casos sin datos suficientes se saltean solos (`test.skip`), no fallan en falso.
+2. **No autoconfirmado:** el disparo real del cron en producción (requiere el cron vivo + `CRON_SECRET` + datos reales) — la lógica del guard queda cubierta por test, pero el comportamiento end-to-end del endpoint no se ejecutó acá.
+3. Decidir si el hallazgo colateral (`org: any` enmascarando `org.name` inexistente en `Organization`) se atiende en el mismo bloque de saneamiento de deuda técnica que motivó la auditoría D1-D5, o aparte.
+4. **Commitear** cuando 1-2 den OK (lo hacés vos).
