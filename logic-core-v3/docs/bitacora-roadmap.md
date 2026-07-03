@@ -11993,3 +11993,147 @@ Cero columnas existentes modificadas/dropeadas. Cero backfill de datos (la decis
 5. Verificación visual humana de la card nueva en `/dashboard/cuenta/perfil` (desktop + mobile) — no autoconfirmada.
 6. Decidir si vale la pena, en un sprint aparte, que la cadencia quincenal también aplique al botón manual de admin (hoy deliberadamente no la respeta — ver decisión arriba).
 - Decidir si el botón debería moverse/copiarse a `/admin/settings/reports` además de la ficha de la org (quedó únicamente en la ficha, `admin/clients/[clientId]`, por default razonado en el sprint — no se preguntó explícitamente).
+
+---
+
+## ✅ FIX-BRIEF
+
+**Qué cierra:** el brief de IA (arriba en el mail del Executive Weekly Report) afirmaba tendencias que **contradecían** las 4 cards de métricas duras de abajo. Caso real verificado en producción: el brief decía "tu Health Score escaló a 80 y duplicamos los leads" mientras la card de Health mostraba ↓ −4 pts; y citaba "salud comercial en 58%", un número que no aparece en ninguna card. Cuando el texto se contradice con el dato, el dueño no cree ninguno — rompía la confianza en todo el mail.
+
+> ⚠️ Cambio quirúrgico de **generación**, no de reporte. NO se tocó el template del mail, ni `send.ts`, ni el cron, ni el motor de envío, ni Sistema B/C. Solo qué datos recibe Gemini + qué puede afirmar + el manejo de cache.
+
+### Relevamiento — 3 causas, todas en `generateBriefText` (`executive-brief.ts`)
+1. **Tendencia de Health FALSA.** El prompt le pasaba a Gemini `healthScore.trend.value`, que sale de `computeTrend()` (`health-score.ts:456`): `((hashStringToNumber(orgId) % 21) - 10)` — un **placeholder determinístico por hash del `organizationId`**, sin ninguna relación con la variación real ("stable placeholder until we have score history in DB", comentario línea 454). La **card**, en cambio, calcula el delta REAL en `build.ts:141` (`current.healthScores.total − previous.healthScores.total`, de snapshots). Dos fuentes desconectadas → contradicción sistemática. Por eso "escaló" con la card en ↓.
+2. **Mensajes y Tareas sin tendencia.** El prompt viejo pasaba solo el valor de "Mensajes respondidos" y "Tareas completadas", sin delta — el brief estaba **ciego** a si subieron o bajaron, aunque la card sí muestra ese %.
+3. **Sub-dimensiones filtradas.** El prompt pasaba `dimensions[0/1/2].score` (Salud Digital/Comercial/Operativa). Ninguna es una card. De ahí el "58%" (= `dimensions[1].score`, Salud Comercial) que el dueño leía y no podía verificar.
+
+Confirmado además: **cero tests** sobre el brief/cache hoy (primer test que se agrega). Cache = 3 columnas en `Organization` (`cachedExecutiveBrief*`), key = `organizationId` + TTL 7 días, **input-insensitive** (cambiar los datos NO invalida el cache; sirve el viejo hasta que expira, se regenera manual, o lo pisa el cron del lunes).
+
+### Qué recibía Gemini — antes vs después
+**Antes** (valores absolutos + trend falso + métricas no mostradas):
+```
+- Health Score: 80/100 (tendencia: +7 vs semana anterior)   ← +7 = hash(orgId), FALSO
+- Salud Digital: 72/100                                       ← no es card
+- Salud Comercial: 58/100                                     ← no es card → el "58%"
+- Salud Operativa: 64/100                                     ← no es card
+- Leads esta semana: 8 (+100%)
+- Mensajes respondidos: 25                                    ← sin delta
+- Tareas completadas: 5                                       ← sin delta
+```
+**Después** (exactamente los 4 números de las cards, con dirección PRE-INTERPRETADA para que el modelo no lea mal el signo):
+```
+Datos de la semana (son EXACTAMENTE los números que el dueño ve en las tarjetas del mail; los únicos que podés comentar):
+- Health Score: 76/100 — bajó 4 puntos vs la semana anterior.
+- Leads: 8 — subió 100% vs la semana anterior.
+- Conversaciones: 25 — bajó 12% vs la semana anterior.
+- Tareas: 5 — subió 25% vs la semana anterior.
+```
+El delta de Health se calcula ahora **idéntico a la card**: `healthScore.total − (snapshot previo)`, replicando la regla de `build.ts` (`getBriefHistory` → snapshot del período anterior) incluso ante regeneraciones intra-semana (`pickPreviousHealthTotal` saltea el snapshot de la semana en curso). Leads/Conversaciones/Tareas ya salían del mismo `weekResults` que la card — ahora también se les pasa su `trend`. Las sub-dimensiones ya no se pasan: el brief no puede citar lo que no recibe.
+
+### Cómo se restringió qué afirma (system prompt endurecido)
+Bloque **VERACIDAD (no negociable)**: comentar SOLO los números de la lista; prohibido inventar/estimar/citar cualquier métrica o cifra fuera de ella; **respetar EXACTAMENTE la dirección** de cada dato (si bajó, no decir que subió/escaló/creció/duplicó); no afirmar ninguna tendencia sin respaldo. Bloque **TONO SEGÚN LOS DATOS**: métrica en baja = oportunidad honesta, nunca reproche ni disfraz; semana floja = corto y honesto (D5). El system prompt es una constante exportada (`BRIEF_SYSTEM_PROMPT`) para que el invariante rompa si alguien borra esas reglas.
+
+### Cómo se resolvió el cache
+El cache es por `organizationId` + TTL 7 días, sin hash del input → un brief pre-fix seguiría sirviéndose hasta 7 días. Solución **sin migración**: constante `BRIEF_LOGIC_CUTOFF` + `isBriefCacheCurrent(cachedAt)` (se apoyan en la columna existente `cachedExecutiveBriefAt`). Todo brief con `cachedExecutiveBriefAt` anterior al corte se trata como **stale** y se regenera con la lógica nueva. Se aplica en los DOS caminos de lectura:
+- **`getExecutiveBrief`** (dashboard + fallback de build): se suma la condición al gate de cache.
+- **`build.ts`** (lectura directa `org.cachedExecutiveBrief` para el mail): si no es current, se trata como ausente y cae a `getExecutiveBrief`, que regenera. **Sin esto el mail enviaría el brief viejo** (build lee la columna directo, no pasa por el gate de `getExecutiveBrief`) — por eso se tocó `build.ts`, encuadrado en el mandato explícito de "manejo de cache", no en send/template/cron.
+
+Es **auto-limpiante**: tras la primera regeneración post-corte, `cachedExecutiveBriefAt` supera el corte y el guard no vuelve a dispararse. El cron `regenerate-briefs` (lunes 10:00) regenera todo incondicionalmente, así que no hay thundering-herd; las únicas regeneraciones "extra" son lazy, por-org, en la primera vista de dashboard o el primer envío entre deploy y lunes. Si el deploy es posterior al 2026-07-02, subir la fecha del corte a la del deploy.
+
+### Tests
+- **`src/lib/ai/executive-brief-input.invariant.ts`** (`npm run check:invariant:brief-input`, puro, sin DB/LLM) — bloquea lo determinístico: (1) `cardHealthDelta` == fórmula de la card, incluida la semántica `null`; (2) `pickPreviousHealthTotal` replica el "previous" de la card aún en regeneración; (3) con deltas negativos el input dice "bajó ..." y **nunca** matchea `subió|escaló|creció|duplic|mejoró`; (4) no filtra `Salud (Digital|Comercial|Operativa)` y hay exactamente 4 líneas de métrica; (5) primera medición → "sin comparación", sin dirección; (6) el system prompt conserva las reglas anti-invención; (7) `isBriefCacheCurrent` corta bien viejo/nuevo. **Verde.**
+- **Output vivo de Gemini → lo verifica el humano** (no determinístico, requiere generación real). Ver Pendiente.
+
+### Archivos
+- **Creados:** `src/lib/ai/executive-brief-input.ts` (módulo puro: arma el input desde los números de las cards + system prompt endurecido + corte de cache) · `src/lib/ai/executive-brief-input.invariant.ts`.
+- **Modificados:** `src/lib/ai/executive-brief.ts` (`generateBriefText` reescrito: prompt/input nuevos, `getPreviousHealthTotal`, `now` propagado a los 3 call sites, corte en el gate de cache, borrados `formatTrendValue`/`formatTrendPercent` que quedaron sin uso) · `src/lib/reports/executive-weekly/build.ts` (guard de frescura de cache en la lectura del brief) · `package.json` (script `check:invariant:brief-input`).
+- **NO tocados (fuera de scope, confirmado):** `src/lib/email/templates/executive-weekly.ts` (template) · `src/lib/reports/executive-weekly/send.ts` · `send-manual.ts` · cron `regenerate-briefs`/`send-executive-reports` · `src/lib/health-score.ts` (el `computeTrend` placeholder sigue ahí — ver Pendiente) · `getWeekResults` · `getBriefHistory` · Sistema B/C.
+
+### Verificación
+`eslint` verde en los 4 archivos tocados · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único error: el baseline `searchconsole.ts:119`, ajeno) · invariante nuevo verde · `npm run build` NO corrido (excluido del gate) · **sin commits**.
+
+### Pendiente del humano
+1. **Disparar un reporte real** (regenerar el brief de una org Pro/Business y enviarse el mail, o mirarlo en el dashboard) y confirmar a ojo que el brief ya no contradice las cards y no cita números que no estén en ellas. Es la única verificación del output vivo — no se autoconfirma.
+2. **Commitear** cuando la verificación del punto 1 dé OK (lo hacés vos).
+3. *(Deuda técnica, fuera de este fix)* `computeTrend` en `health-score.ts` sigue siendo un placeholder por hash — ya no afecta el brief (el brief ahora usa el delta de snapshots), pero **el widget de Health Score en el dashboard todavía muestra ese trend falso**. Vale un sprint aparte para calcular el trend real ahí también (o marcarlo como "sin histórico aún" hasta tener la serie).
+
+---
+
+## ✅ P2.C
+
+**Qué cierra:** "Descargá el informe del mes" — PDF de 1 página (natural, sin forzar corte) descargable desde `/dashboard/resultados/analisis`, pensado para que el dueño se lo reenvíe a un socio o contador. Cierra la última promesa pendiente de la propuesta comercial.
+
+### Fase 1 — Diagnóstico (motor PDF)
+Se encontraron **DOS** motores PDF, ambos compilan limpio, **ambos 100% huérfanos** (grep exhaustivo en `src/`: cero archivos fuera de ellos mismos los referencian):
+- **Motor A** (`ExecutiveReportTemplate.tsx` + `DownloadReportButton.tsx`, `src/components/dashboard/`) — `html2canvas`+`jsPDF` client-side (screenshot de un div), imports dinámicos ya lazy (correcto), pero **datos 100% mock** (compañía y cifras hardcodeadas) y estilo oscuro/glossy "AI Executive Brief" que **contradice "marca sobria"**.
+- **Motor B** (`MonthlyReport.tsx` + `/api/reports/monthly/route.ts`, ya existente) — `@react-pdf/renderer` v4.3.2 server-side (`renderToBuffer`, PDF vectorial real), auth+org-scoping ya sólidos (aunque acepta `organizationId` de query validado contra sesión, no `resolveOrgId()` puro), estilo blanco/negro/cian ya sobrio — pero dominio de contenido equivocado (analytics/SEO/proyecto, no leads/categorías/embudo).
+
+**Decisión (reportada, sin fork bloqueante):** se reusa el **motor B** (`@react-pdf/renderer`, cero dependencia nueva) por ser PDF vectorial real (texto seleccionable — mejor para reenviar a un contador) y visualmente ya sobrio. NO se reusa su contenido (dominio distinto) ni su ruta (el gate de org debía ser `resolveOrgId()` puro). Ambos huérfanos quedan **intactos, sin tocar** — limpieza de código muerto fuera de scope.
+
+**Bundle:** no aplica el riesgo de "lazy import" — el PDF se genera en un Route Handler (`runtime='nodejs'`), 100% server; `@react-pdf/renderer` estructuralmente nunca llega al bundle del cliente. Verificado con grep: la única mención de `@react-pdf/renderer` en el componente cliente (`DownloadMonthlyReportButton.tsx`) es un comentario explicativo, cero import real.
+
+**P0.2 (`getMonthlyAnalysisForOrg`) ya calcula, org-scoped:** categorías top, insights rankeados, serie de conversaciones mensual con variación — reusados 100%, cero recálculo. Sin aggregación mensual previa: leads-del-mes-con-delta y embudo-del-mes — resueltos reusando las funciones PURAS `computeLeadsDelta`/`buildFunnel` (`home-metrics-logic.ts`, ya usadas por el home semanal) alimentadas con datos acotados al MES (`monthRangeAR`/`previousRangeForPeriod('month')` de `dates-ar.ts`) en vez de a la semana.
+
+**Nota de diseño:** `deltaPhrase` (al lado de `computeLeadsDelta`) hardcodea "vs la semana pasada" — se decidió **no tocar** ese archivo compartido/en vivo (alimenta el widget "Qué pasó con tus leads" del home) por una diferencia de copy; se escribió `monthlyLeadsPhrase` nueva en el módulo del PDF, reusando solo la aritmética (`computeLeadsDelta`), no el string.
+
+### Datos — módulo puro + orquestador
+- **`monthly-report-data.ts`** (puro, sin Prisma/Date) — `ClientMonthlyReportData` como **unión discriminada por `hasBot`**: cuando es `false`, el objeto NO tiene ningún campo de datos (TypeScript lo impide en vez de permitir ceros/nulls inventados); cuando es `true`, `leads`/`series`/`categories`/`funnel` quedan narrowed a no-nulos sin asserts `!`. `series`/`categories` pasan **tal cual** de P0.2 (misma `sufficient`/`current===null`, nunca puede divergir de lo que ve la tab). `topInsight = insights[0] ?? null` ("si existe", nunca se inventa uno).
+- **`get-client-monthly-report-data.ts`** (I/O, Prisma) — recibe `organizationId` ya resuelto por el caller (mismo contrato que `getMonthlyAnalysisForOrg`, nunca de un parámetro); llama `getMonthlyAnalysisForOrg` sin cambios, suma 2 `count()` (mes actual/anterior) + 1 `findMany()` (filas del embudo) acotados con `dates-ar`. Año/mes para el label sale de `startOfMonthAR(now).getUTCMonth/FullYear()` — cero aritmética de TZ nueva.
+
+### PDF — `ClientMonthlyReportPdf.tsx`
+1 página A4 (crece a 2 solo si el contenido real lo exige — sin forzar corte): header sobrio (nombre + mes + "Generado el" vía `formatDateAR`) → Los números del mes (Leads + Conversaciones, cada uno con su delta) → Qué pasó con tus leads (embudo 3 pasos) → Qué pregunta tu gente (categorías) → Lo que descubrimos este mes (el insight, si existe) → footer sobrio "Reporte generado por develOP". Cero cifras infladas tipo ROI/horas-ahorradas (el motor A mock las inventaba; acá se omiten por no tener fuente real). Degradación honesta en 3 niveles, todos ya decididos por P0.2 (reusados, no reinventados): sin bot → 1 mensaje de activación; categorías con muestra insuficiente → mensaje de calibrando; actividad real en cero → números reales en cero con copy calmo, nunca ocultos ni disfrazados.
+
+### Ruta + botón
+- **`/api/reports/client-monthly/route.ts`** (nuevo) — `runtime='nodejs'`, `resolveOrgId()` puro (401 si no hay sesión) — **cero parámetro de query/body para identificar la org**, a diferencia de la ruta vieja: no hay superficie donde inyectar el id de otra organización. Re-chequea `planAllows(plan,'insight')` server-side (403) — mismo gate que la tab, nunca confía en que el botón se ocultó bien. `Content-Disposition: attachment`.
+- **`DownloadMonthlyReportButton.tsx`** (nuevo, cliente) — sin librería de PDF importada: solo `fetch` + blob + descarga vía `<a download>`. Loading (`Loader2`), error (`toast.error` de `sonner`), `aria-label`, `strokeWidth={1.5}`.
+- **`analisis/page.tsx`** (modificado) — botón inyectado en el `action` de `PageHeader`, condicionado al mismo `showAnalysis` (=`planAllows(plan,'insight')`) que ya gatea la tab — plan no elegible: **cero botón, sin teaser**.
+
+### Tests
+- **`monthly-report-data.invariant.ts`** (`npm run check:invariant:client-monthly-report`, puro) — sin bot (objeto sin campos de datos) · mes flojo (ceros honestos, sin inventar, degradación de categorías/serie idéntica a P0.2) · mes completo (delta con dirección correcta) · `monthlyLeadsPhrase` nunca insinúa dirección equivocada. **Verde.**
+- **`tests/integration/client-monthly-report.spec.ts`** (Prisma real + `renderToBuffer` real, no está en el `testDir` de Playwright — correr explícito) — mes completo (7 leads sembrados, embudo consistente con el conteo — `funnel.total === leads.current`, mismo where clause) y mes flojo (ancla `now` sintética en enero 2020, sin sembrar ni limpiar nada — ventana sin actividad de ningún fixture) — ambos renderizan el PDF real sin crashear.
+- **`tests/e2e/43-client-monthly-report-download.spec.ts`** — sin sesión → 401 · con sesión + plan elegible → PDF real (firma `%PDF-`), pasar `?organizationId=`/`?clientId=` arbitrarios no tiene ningún efecto (anti-IDOR — no hay superficie que inyectar) · plan no elegible → 403. Ramas plan-elegible/no-elegible con `test.skip()` adaptativo según el plan REAL de la fixture `sanmiguel` (mismo motivo que en P2.B.2: `getPlanForOrg` cachea 60s en memoria de un proceso separado del test).
+
+### Archivos
+- **Creados:** `src/lib/reports/client-monthly/{monthly-report-data.ts, monthly-report-data.invariant.ts, get-client-monthly-report-data.ts, ClientMonthlyReportPdf.tsx}` · `src/app/api/reports/client-monthly/route.ts` · `src/components/dashboard/results/analysis/DownloadMonthlyReportButton.tsx` · `tests/integration/client-monthly-report.spec.ts` · `tests/e2e/43-client-monthly-report-download.spec.ts`.
+- **Modificados:** `src/app/(protected)/dashboard/resultados/analisis/page.tsx` (import + botón en `PageHeader.action`) · `package.json` (script `check:invariant:client-monthly-report`).
+- **NO tocados:** `src/components/dashboard/{ExecutiveReportTemplate,DownloadReportButton}.tsx` (motor A, huérfano) · `src/lib/reports/MonthlyReport.tsx` + `src/app/api/reports/monthly/route.ts` (motor B original, huérfano) · `src/lib/dashboard/home-metrics-logic.ts` (`deltaPhrase` sin tocar, ver nota de diseño) · `getMonthlyAnalysisForOrg.ts`/`monthly-analysis.ts` (P0.2, cero recálculo) · motor del reporte semanal/brief/crons (Sistema A) · Sistema B/C.
+
+### Verificación
+`eslint` verde en los 9 archivos tocados/creados · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único error: baseline `searchconsole.ts:119`, ajeno) — confirmado con la unión discriminada narrowing limpio, sin asserts `!` · invariante nuevo verde · bundle: verificado por grep (no por build completo — "build no es gate") que `@react-pdf/renderer` no tiene ningún import real fuera de los 2 archivos server-only nuevos · sin migraciones (no aplicaba) · **sin commits**.
+
+### Pendiente del humano
+1. **Descargar y abrir el PDF real** (desktop + mobile, o al menos 2 lectores de PDF distintos) para una org Pro/Business con datos reales — confirmar que se ve bien en 1 página, que el embudo/categorías/insight reflejan lo mismo que la tab `/dashboard/resultados/analisis`, y que el tono "sobrio" es el esperado. No autoconfirmado.
+2. Correr `npm run check:invariant:client-monthly-report` (verde esperado, sin DB).
+3. Correr `npx playwright test tests/integration/client-monthly-report.spec.ts` y `npx playwright test tests/e2e/43-client-monthly-report-download.spec.ts` (ambos requieren DB; el segundo requiere el server levantado).
+4. **Commitear** cuando 1-3 den OK (lo hacés vos).
+5. *(Fuera de scope, a criterio)* limpieza de código muerto: motor A (`ExecutiveReportTemplate`/`DownloadReportButton`, mock, huérfano) y la ruta analytics huérfana (`MonthlyReport.tsx`/`/api/reports/monthly`) — ninguno se tocó ni se borró, ambos siguen ahí sin uso.
+
+---
+
+## ✅ P2.C-fix-signo
+
+**Qué cierra:** fix del bug de formato encontrado en el PDF mensual (P2.C) — el delta negativo de leads se veía como "18vs el mes pasado" (sin signo, sin espacio) en vez de "-18 vs el mes pasado". Causa raíz ya trazada en una auditoría previa (read-only, sin código): el signo negativo usaba el carácter Unicode `−` (MINUS SIGN, U+2212) en vez del guion ASCII `-` (U+002D). `@react-pdf/renderer` con Helvetica no-incrustada no tiene glifo para U+2212 en su tabla `WIN_ANSI_MAP` (`node_modules/@react-pdf/pdfkit/lib/pdfkit.js:2929-2957`); el fallback sin mapear serializa el code point crudo truncado a 1 byte (`8722 mod 256 = 0x12`, un carácter de control), que resuelve a glifo `.notdef` con ancho 0 → invisible. Los datos (counts, deltas) siempre fueron correctos — el bug era 100% de codificación de un carácter.
+
+### Cambio quirúrgico
+Se reemplazó el carácter, nada más — cero cambios en lógica de delta, queries o layout:
+- **`src/lib/reports/client-monthly/monthly-report-data.ts:61`** (`monthlyLeadsPhrase`, P2.C) — `'−'` → `'-'`.
+- **`src/lib/dashboard/home-metrics-logic.ts:48`** (`deltaPhrase`) — mismo carácter, mismo bug, ya en producción en el widget del home "Qué pasó con tus leads" para cualquier delta negativo (fuera del scope de P2.C, pero idéntico origen — se corrigió de paso por ser trivial e idéntico).
+
+### Barrido acotado
+Grep de `−` (U+2212) en todo `src/`: además de los dos casos de arriba, aparece en comentarios de código (JSDoc/inline, no user-facing — `executive-brief-input.ts:10`, `ev3.invariant.ts:213,233`, `captureLead.ts:306-307`, `calculateLeadScore.ts:32-33`) y en copy estático hardcodeado de landing pages de marketing (`SocialProofAutomation.tsx`, `TestimoniosIA.tsx`, `PortfolioWebCases.tsx`, `SocialProofSoftware.tsx`, `ShowcaseSoftware.tsx`, `VaultSoftware.tsx` — todos `resultValue`/`change`/toggle de acordeón, texto fijo tipo "−80%" renderizado en HTML de navegador, que sí tiene el glifo). Ninguno de estos es una frase de delta calculada que pueda terminar en un PDF/fuente estándar — se reportan, no se tocan, sin necesidad de pregunta adicional (no son ambiguos: son copy fijo de marketing, no cálculos de delta).
+
+### Tests
+- **`home-metrics-logic.invariant.ts`** (sección 2, LEADS + variación) — se agregó: delta negativo produce guion ASCII (`charCodeAt(0) === 45`) y nunca contiene el MINUS SIGN Unicode. Delta positivo sigue `'+4 vs...'`, cero sigue `'igual que la semana pasada'`, sin mes previo sigue `'primeros de la semana'` — sin cambios.
+- **`monthly-report-data.invariant.ts`** (secciones 4 y 5) — mismo patrón: `monthlyLeadsPhrase`/`buildMonthlyReportLeadsNumber` con delta negativo (incluido el caso real de Matsu, -18) producen guion ASCII, nunca U+2212. Positivo/cero/sin-base sin cambios.
+- Ambos invariantes **verdes**.
+
+### Archivos
+- **Modificados:** `src/lib/reports/client-monthly/monthly-report-data.ts` · `src/lib/reports/client-monthly/monthly-report-data.invariant.ts` · `src/lib/dashboard/home-metrics-logic.ts` · `src/lib/dashboard/home-metrics-logic.invariant.ts`.
+- **NO tocados:** resto del PDF (template/layout/ruta), el brief, Sistema B/C, copy de marketing (barrido, sin cambios).
+
+### Verificación
+`eslint` verde en los 4 archivos · `node_modules/.bin/tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · los 2 invariantes corren verdes · verificación de bytes: el string fijo ahora codifica `0x2d` (guion ASCII, con glifo real en Helvetica) en vez de `0x12` (control, `.notdef`) — chequeado a nivel de string/char-code, NO se abrió el PDF renderizado (reservado para el humano) · sin migraciones · **sin commits**.
+
+### Pendiente del humano
+1. **Descargar el PDF real** de una org con delta negativo (ej. Matsu) y confirmar que ahora se lee "-18 vs el mes pasado" legible.
+2. **Commitear** cuando el punto 1 dé OK.

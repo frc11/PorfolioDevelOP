@@ -58,10 +58,19 @@ const DAY = 86_400_000
 {
   assert.deepEqual(computeLeadsDelta(12, 8), { current: 12, previous: 8, delta: 4 })
   assert.equal(deltaPhrase(computeLeadsDelta(12, 8)), '+4 vs la semana pasada')
-  assert.equal(deltaPhrase(computeLeadsDelta(8, 12)), '−4 vs la semana pasada')
   assert.equal(deltaPhrase(computeLeadsDelta(5, 5)), 'igual que la semana pasada')
   assert.equal(deltaPhrase(computeLeadsDelta(3, 0)), 'primeros de la semana')
   assert.equal(deltaPhrase(computeLeadsDelta(0, 0)), null, '0/0 no genera frase (empty state)')
+
+  // P2.C-fix-signo — el signo negativo debe ser el guion ASCII (U+002D), NUNCA
+  // el MINUS SIGN Unicode (U+2212): ese carácter no tiene glifo en fuentes
+  // estándar no incrustadas (Helvetica en @react-pdf/renderer) y se renderiza
+  // invisible con ancho 0 — rompía "−18 vs..." en el PDF mensual (P2.C).
+  const negativePhrase = deltaPhrase(computeLeadsDelta(8, 12))
+  assert.equal(negativePhrase, '-4 vs la semana pasada')
+  assert.ok(negativePhrase?.includes('-4'), 'debe llevar el guion ASCII pegado al número')
+  assert.equal(negativePhrase?.charCodeAt(0), 45, 'guion ASCII (U+002D), no MINUS SIGN')
+  assert.ok(!negativePhrase?.includes('−'), 'nunca el MINUS SIGN Unicode (U+2212)')
 }
 
 // ── 3. PLATA: ticket null → null (setup); cargado → cálculo ───────────────────
