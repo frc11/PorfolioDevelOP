@@ -15,16 +15,17 @@ import type {
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_REVISION } from '@/lib/leados/guidance-content'
+import { derivarPasoDelLead } from '@/lib/leados/paso'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { AgendaStep } from './agenda-step'
 import { BriefStep } from './brief-step'
 import { ConstruccionStep } from './construccion-step'
-import { DossierStepper, pasoActual } from './dossier-stepper'
+import { DossierStepper } from './dossier-stepper'
 import { DraftStep } from './draft-step'
 import { EvaluacionStep } from './evaluacion-step'
 import { FichaStep } from './ficha-step'
 import { OpenerStep } from './opener-step'
-import { describirFoco, PasoActualBanner } from './paso-actual-banner'
+import { PasoActualBanner } from './paso-actual-banner'
 import { SeguimientoStep } from './seguimiento-step'
 import { SelfCheckStep } from './self-check-step'
 import { StepAnchor } from './step-anchor'
@@ -76,43 +77,6 @@ export type WizardData = {
   }
 }
 
-/** Secciones del wizard a las que se puede aterrizar el foco al abrir el lead. */
-type StepAnchorId = 'evaluacion' | 'opener' | 'brief' | 'construccion' | 'seguimiento'
-
-/**
- * Qué sección enfocar al abrir, derivado del paso canónico (`pasoActual`) — sin
- * re-implementar el flujo. `null` = no scrollear (lead nuevo o sin sección útil):
- * se queda en el tope natural, con la cabecera del lead a la vista.
- *
- * Mapa índice→sección (índice = SIGUIENTE paso accionable, ver `pasoActual`):
- *  0 Ficha → null (lead nuevo, tope natural)   ·   2 Brief → «brief»
- *  3 Construcción → «construccion»   ·   4 Revisión (EN_REVISION) → «construccion»
- *    (no hay step del setter; su build entregado vive ahí)
- *  5 (APROBADA) → «seguimiento» (el envío del link vive ahí)
- * Descartado: brief/construcción/seguimiento no se renderizan → el foco útil es
- * el veredicto («evaluacion»).
- */
-function anchorActivo(stage: DossierStage | null, openerPendiente: boolean): StepAnchorId | null {
-  if (stage === 'DESCARTADA') return 'evaluacion'
-  // B6.1: EVALUADA con gate cerrado y sin primer contacto → el paso activo es el opener,
-  // no el Brief (bloqueado hasta que el lead responda). Interceptar acá evita que el
-  // scroll aterrice en un paso que el setter todavía no puede tocar.
-  if (openerPendiente) return 'opener'
-  switch (pasoActual(stage)) {
-    // DESCARTADA también cae en 2 vía `pasoActual`, pero se intercepta arriba
-    // (su «brief» no se renderiza) — acá el 2 es solo EVALUADA.
-    case 2:
-      return 'brief'
-    case 3:
-    case 4:
-      return 'construccion'
-    case 5:
-      return 'seguimiento'
-    default:
-      return null
-  }
-}
-
 export function LeadWizard({ data }: { data: WizardData }) {
   const {
     lead,
@@ -145,23 +109,24 @@ export function LeadWizard({ data }: { data: WizardData }) {
   // opener, no el Brief (bloqueado). Reencauza scroll + cartel + marco al opener. Fuera
   // de ese caso (gate abierto, u opener ya mandado) rige la dirección por stage de siempre.
   const openerPendiente = stage === 'EVALUADA' && !gateAbierto && outreach.contactos === 0
-  // Al abrir, caer en el paso activo (no arriba de todo). El paso lo decide el
-  // stepper canónico; acá solo se aterriza el foco (ver `StepAnchor`).
-  const anchor = anchorActivo(stage, openerPendiente)
-  // El marco del paso activo comparte tono con el cartel de dirección (misma fuente:
-  // `stage` + `gateAbierto` + `openerPendiente`, que el shell ya calculó). cyan solo si
-  // hay trabajo del setter AHORA; neutral en revisión/descartado o si falta que responda.
-  const frameTono: 'foco' | 'neutral' =
-    describirFoco(stage, gateAbierto, openerPendiente).tono === 'foco' ? 'foco' : 'neutral'
+  // A-29: la ÚNICA derivación del paso, llamada UNA vez — reparte rail (stepper),
+  // cartel (banner) y aterrizaje (anchor) desde el mismo hecho, sin re-derivar.
+  const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)
+  // Al abrir, caer en el paso activo (no arriba de todo) — ver `StepAnchor`.
+  const anchor = paso.anchor
+  // El marco del paso activo comparte tono con el cartel de dirección (misma fuente).
+  // cyan solo si hay trabajo del setter AHORA; neutral en revisión/descartado o si
+  // falta que responda.
+  const frameTono: 'foco' | 'neutral' = paso.foco.tono === 'foco' ? 'foco' : 'neutral'
 
   return (
     // `data-lead-wizard`: raíz de ESTA copia del wizard. Los `StepLink` resuelven su
     // destino dentro de ella, así la duplicación responsive del shell no ambigua a
     // qué copia saltar. Solo presentación.
     <div data-lead-wizard className="space-y-5">
-      <DossierStepper stage={stage} />
+      <DossierStepper stage={stage} actual={paso.indice} />
 
-      <PasoActualBanner stage={stage} gateAbierto={gateAbierto} openerPendiente={openerPendiente} />
+      <PasoActualBanner foco={paso.foco} />
 
       {stage === 'RECHAZADA' && ultimoRechazo && (
         <Callout

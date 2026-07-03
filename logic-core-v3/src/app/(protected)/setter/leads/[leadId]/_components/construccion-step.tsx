@@ -1,23 +1,11 @@
 'use client'
 
-import { useSyncExternalStore } from 'react'
-import {
-  AlarmClock,
-  ExternalLink,
-  Hammer,
-  Images,
-  LifeBuoy,
-  Lock,
-  OctagonAlert,
-  Save,
-  Sparkles,
-} from 'lucide-react'
+import { Hammer, LifeBuoy, Lock, Save } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
-import { Badge, Button, Callout, Card } from '@/components/ui'
+import { Badge, Button, Card } from '@/components/ui'
 import type { Brief, Ficha, Progreso, Rechazo } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { GUIA_CONSTRUCCION } from '@/lib/leados/guidance-content'
-import { PROMPTS_DISENIO } from '@/lib/leados/prompts-disenio'
 import { formatEspera } from '@/lib/leados/revision'
 import { useStepAction } from '@/lib/use-step-action'
 import {
@@ -27,8 +15,14 @@ import {
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
+import { BadgeProvisorio } from './badge-provisorio'
 import { ChecklistConstruccion } from './checklist-construccion'
 import { EscalarModal } from './escalar-modal'
+import { GuiaRetrabajo } from './guia-retrabajo'
+import { MaterialesNegocio } from './materiales-negocio'
+import { PromptsDisenio } from './prompts-disenio'
+import { UrgenciaBanner } from './urgencia-banner'
+import { useHidratado } from './use-hidratado'
 
 type ConstruccionStepProps = {
   leadId: string
@@ -46,173 +40,6 @@ type ConstruccionStepProps = {
   /** E.2: progreso del checklist de construcción (qué fases marcó el setter).
    * Viene de `progresoJson` → sobrevive refresh. Fresco = `{ completadas: [] }`. */
   progreso: Progreso
-}
-
-/** Badge fijo del paso: la secuencia del shell es provisoria por diseño. */
-function BadgeProvisorio() {
-  return (
-    <Badge tone="amber" variant="outline">
-      Guía preliminar — en validación
-    </Badge>
-  )
-}
-
-/**
- * "Ya montó" hidratación-safe vía `useSyncExternalStore` con snapshots estables
- * (true en cliente, false en server). Es la forma correcta de diferir un cálculo
- * dependiente del reloj del cliente SIN setState-dentro-de-effect (que dispara
- * cascading renders — regla `react-hooks/set-state-in-effect`). Server y primer
- * render de cliente coinciden en `false` (sin hydration mismatch); recién después
- * de hidratar pasa a `true` y se calcula el "hace X".
- */
-const subscribeNoop = () => () => {}
-function useHidratado(): boolean {
-  return useSyncExternalStore(
-    subscribeNoop,
-    () => true,
-    () => false,
-  )
-}
-
-/**
- * Turnaround visible: el lead respondió y está esperando la demo. La condición
- * de diseño del tramo es resolverse en horas, no días. El "hace X" depende del
- * reloj del cliente → se difiere a post-hidratación con `useHidratado`.
- */
-function UrgenciaBanner({ respondioDesde }: { respondioDesde: string | null }) {
-  const hidratado = useHidratado()
-  if (!respondioDesde) return null
-  const espera = hidratado ? formatEspera(new Date(respondioDesde), new Date()) : null
-  return (
-    <Callout tone="warning" icon={AlarmClock}>
-      <span className="font-medium">
-        El negocio respondió y está esperando{espera ? ` (última movida ${espera})` : ''}. Este
-        tramo se resuelve en horas, no días.
-      </span>
-    </Callout>
-  )
-}
-
-/** Último rechazo completo como guía de retrabajo dentro del paso. */
-function GuiaRetrabajo({ rechazo }: { rechazo: Rechazo }) {
-  return (
-    <Callout
-      tone="danger"
-      accent
-      icon={OctagonAlert}
-      title="Guía de retrabajo — lo que Franco pidió corregir"
-    >
-      <div className="space-y-1.5 text-zinc-300">
-        <p>
-          <span className="font-semibold text-rose-200">Qué:</span> {rechazo.motivo}
-        </p>
-        {rechazo.donde && (
-          <p>
-            <span className="font-semibold text-rose-200">Dónde:</span> {rechazo.donde}
-          </p>
-        )}
-        {rechazo.arreglo && (
-          <p className="whitespace-pre-wrap">
-            <span className="font-semibold text-rose-200">Arreglo:</span> {rechazo.arreglo}
-          </p>
-        )}
-      </div>
-    </Callout>
-  )
-}
-
-/**
- * B8A-II: los materiales reales del negocio, a mano en el paso donde se
- * construye (antes vivían sólo en el header del lead y en la ficha colapsada,
- * a un scroll largo). Los links abren el origen para bajar logo y fotos; las
- * reseñas y el tono se leen acá y además viajan en el bloque pegable.
- */
-function MaterialesNegocio({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha | null }) {
-  const assets = [
-    { label: 'Instagram', href: lead.instagramUrl },
-    { label: 'Google Maps', href: lead.googleMapsUrl },
-    { label: 'Web actual', href: lead.currentWebUrl },
-  ].filter((a): a is { label: string; href: string } => Boolean(a.href))
-
-  if (assets.length === 0 && !ficha?.resenas && !ficha?.contenidoReal) return null
-
-  return (
-    <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.04] p-4">
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
-        <Images size={14} strokeWidth={1.5} className="shrink-0 text-zinc-400" />
-        Materiales reales del negocio — usalos, nada de placeholders
-      </p>
-
-      {assets.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-[11px] text-zinc-500">Bajá el logo y 3–5 fotos del feed de:</p>
-          <div className="flex flex-wrap gap-2">
-            {assets.map((asset) => (
-              <a
-                key={asset.label}
-                href={asset.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-zinc-300 transition-colors hover:bg-white/[0.07] hover:text-white"
-              >
-                <ExternalLink size={11} strokeWidth={1.5} />
-                {asset.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {ficha?.resenas && (
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-zinc-400">Reseñas reales (prueba social)</p>
-          <p className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-400">
-            {ficha.resenas}
-          </p>
-        </div>
-      )}
-
-      {ficha?.contenidoReal && (
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold text-zinc-400">Contenido y tono</p>
-          <p className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-400">
-            {ficha.contenidoReal}
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/**
- * B4·A — Los prompts de diseño prefijados, copiables a Claude Design para pulir
- * la demo ya armada (estética, mobile, motion). Estándar y lead-agnósticos: el
- * contenido vive en `PROMPTS_DISENIO` (editable por Franco en un solo archivo);
- * acá solo se pintan con `CopyBlock` tal cual — un prompt por bloque.
- */
-function PromptsDisenio() {
-  return (
-    <div className="space-y-3">
-      <div className="space-y-1">
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-100">
-          <Sparkles size={14} strokeWidth={1.5} className="shrink-0 text-cyan-300" />
-          Prompts de diseño — pulí la demo en Claude Design
-        </p>
-        <p className="text-[11px] text-zinc-500">
-          Prompts estándar, sin datos del negocio: cuando la demo ya está armada, copiá el que
-          necesites y pegalo como mensaje en Claude Design.
-        </p>
-      </div>
-      {PROMPTS_DISENIO.map((prompt) => (
-        <CopyBlock
-          key={prompt.id}
-          titulo={prompt.titulo}
-          instruccion={prompt.instruccion}
-          texto={prompt.prompt}
-        />
-      ))}
-    </div>
-  )
 }
 
 export function ConstruccionStep({

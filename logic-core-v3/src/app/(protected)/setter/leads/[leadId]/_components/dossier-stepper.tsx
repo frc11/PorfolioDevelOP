@@ -9,32 +9,17 @@ type PasoEstado = 'hecho' | 'actual' | 'pendiente' | 'bloqueado'
 const PASOS = ['Ficha', 'Evaluación', 'Brief', 'Construcción', 'Revisión'] as const
 
 /**
- * Índice del paso "actual" según el stage del dossier. El `stage` nombra el hito
- * cumplido; el índice apunta al SIGUIENTE paso accionable. Fuente única de "dónde
- * está el lead" — la reusa el aterrizaje al abrir (`step-anchor`) para no re-derivar
- * el flujo ni tocar gates.
+ * A-29: el índice del paso actual ya no se deriva acá — viene de
+ * `derivarPasoDelLead` (`@/lib/leados/paso`), la única derivación, vía el shell.
+ * `stage` queda solo para el modo descartado (rail bloqueado desde el veredicto).
  */
-export function pasoActual(stage: DossierStage | null): number {
-  switch (stage) {
-    case null:
-    case 'FICHA':
-      return 0
-    case 'EVALUADA':
-    case 'DESCARTADA':
-      return 2
-    case 'BRIEF':
-    case 'CONSTRUCCION':
-    case 'RECHAZADA':
-      return 3
-    case 'EN_REVISION':
-      return 4
-    case 'APROBADA':
-      return 5
-  }
-}
-
-export function DossierStepper({ stage }: { stage: DossierStage | null }) {
-  const actual = pasoActual(stage)
+export function DossierStepper({
+  stage,
+  actual,
+}: {
+  stage: DossierStage | null
+  actual: number
+}) {
   const descartado = stage === 'DESCARTADA'
 
   return (
