@@ -38,10 +38,6 @@ export type HealthScoreResult = {
   connectedSources: number
   totalSources: number
   dimensions: [HealthScoreDimension, HealthScoreDimension, HealthScoreDimension]
-  trend: {
-    value: number
-    direction: 'up' | 'down' | 'flat'
-  }
   computedAt: Date
   cachedFrom: Date | null
 }
@@ -114,8 +110,6 @@ async function computeHealthScoreInternal(organizationId: string): Promise<Healt
           activeDimensions.reduce((sum, d) => sum + d.score * d.weight, 0) / totalWeight,
         )
 
-  const trend = computeTrend(organizationId, total)
-
   return {
     total,
     level,
@@ -123,7 +117,6 @@ async function computeHealthScoreInternal(organizationId: string): Promise<Healt
     connectedSources: connectedCount,
     totalSources: totalCount,
     dimensions,
-    trend,
     computedAt: new Date(),
     cachedFrom: null,
   }
@@ -451,27 +444,3 @@ async function computeBillingScore(organizationId: string): Promise<number | nul
   return 70
 }
 
-// ─── Trend (stable placeholder until we have score history in DB) ─────────────
-
-function computeTrend(
-  organizationId: string,
-  currentScore: number,
-): { value: number; direction: 'up' | 'down' | 'flat' } {
-  void currentScore
-
-  const seed = hashStringToNumber(organizationId)
-  // Produces a stable -10..+10 value unique per org
-  const trendValue = ((seed % 21) - 10) as number
-  const direction: 'up' | 'down' | 'flat' =
-    trendValue > 1 ? 'up' : trendValue < -1 ? 'down' : 'flat'
-  return { value: trendValue, direction }
-}
-
-function hashStringToNumber(str: string): number {
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i)
-    hash |= 0
-  }
-  return Math.abs(hash)
-}

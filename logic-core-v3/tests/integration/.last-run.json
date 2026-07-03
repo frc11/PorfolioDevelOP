@@ -1,0 +1,250 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\PorfolioDevelOP\\logic-core-v3\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=playwright.integration.config.ts"
+    ],
+    "configFile": "C:\\PorfolioDevelOP\\logic-core-v3\\playwright.integration.config.ts",
+    "rootDir": "C:/PorfolioDevelOP/logic-core-v3/tests/integration",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/PorfolioDevelOP/logic-core-v3/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/PorfolioDevelOP/logic-core-v3/tests/integration",
+        "testIgnore": [
+          "**/alerts-detector.spec.ts"
+        ],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/integration/.last-run.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "executive-report-lead-count.spec.ts",
+      "file": "executive-report-lead-count.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "getTopHotLeadsForWeek — cantidad configurable (P2.B.2)",
+          "file": "executive-report-lead-count.spec.ts",
+          "line": 20,
+          "column": 6,
+          "specs": [
+            {
+              "title": "devuelve exactamente N leads según el parámetro leadCount (default 3, igual que antes de P2.B.2)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2377,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-03T16:25:13.691Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "7d7b4f7d1ecb9cbfccca-74107a57c40f8e3a71fd",
+              "file": "executive-report-lead-count.spec.ts",
+              "line": 26,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "generate-insights-pending-guard.spec.ts",
+      "file": "generate-insights-pending-guard.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Guard anti-spam del cron de insights (D4)",
+          "file": "generate-insights-pending-guard.spec.ts",
+          "line": 39,
+          "column": 6,
+          "specs": [
+            {
+              "title": "bot con >= 5 PENDING → pendingCount cruza el umbral (el guard saltearía)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2410,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-03T16:25:16.264Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c0e1af9ab514e0f8a9ea-6cc20bf4bed7a3bfd75f",
+              "file": "generate-insights-pending-guard.spec.ts",
+              "line": 45,
+              "column": 7
+            },
+            {
+              "title": "bot con < 5 PENDING → pendingCount no cruza el umbral (el guard procede)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 697,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-03T16:25:18.688Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c0e1af9ab514e0f8a9ea-bc2852db516c88be400e",
+              "file": "generate-insights-pending-guard.spec.ts",
+              "line": 67,
+              "column": 7
+            },
+            {
+              "title": "aislamiento: el PENDING count de un bot no incluye el de otro bot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 892,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-03T16:25:19.399Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c0e1af9ab514e0f8a9ea-6a196eff18a7e377eda4",
+              "file": "generate-insights-pending-guard.spec.ts",
+              "line": 94,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-03T16:25:13.152Z",
+    "duration": 7300.976000000001,
+    "expected": 4,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

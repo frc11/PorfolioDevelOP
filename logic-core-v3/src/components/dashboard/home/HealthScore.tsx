@@ -9,7 +9,7 @@
  * Renders three distinct states:
  *   ONBOARDING — pulsing rings, no score, calibration messaging
  *   PARTIAL    — live rings + score + partial-data disclaimer
- *   COMPLETE   — full live rings + score + trend
+ *   COMPLETE   — full live rings + score
  *
  * This component is PURE PRESENTATIONAL — all computation happens server-side
  * in getHealthScore(). No fetches or calculations run in the client.
@@ -94,9 +94,9 @@ function HealthScoreActive({ data }: { data: HealthScoreResult }) {
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-cyan-400">
                 Health Score
               </span>
-              {/* S4 — TrendChip oculto (Opción B): computeTrend() en
-                  lib/health-score.ts es un hash del orgId (dato FALSO), no se
-                  muestra como métrica real. Revivir cuando exista history real
+              {/* S4 — Sin TrendChip: HealthScoreResult no trae trend (D1: se
+                  eliminó el placeholder por hash, no había forma de calcular
+                  uno real). Agregar cuando exista history real
                   (HealthScoreSnapshot, lane de datos aparte). */}
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
@@ -391,9 +391,9 @@ function scoreToTitle(score: number): string {
   return 'Tu negocio digital tiene oportunidades urgentes.'
 }
 
-// S4b — El subtítulo ya no usa data.trend.value: computeTrend() es un hash del
-// orgId (dato FALSO). Queda solo la lectura del score real (data.total). La
-// coletilla semanal ("Subió/Estable esta semana") se revive con history real.
+// S4b — El subtítulo no depende de un trend (D1: HealthScoreResult ya no lo
+// trae). Queda solo la lectura del score real (data.total). La coletilla
+// semanal ("Subió/Estable esta semana") se agrega cuando exista history real.
 function scoreToSubtitle(score: number): string {
   if (score >= 75) return 'Estás por encima del promedio.'
   if (score >= 60) return 'Performance sólida con áreas de mejora.'

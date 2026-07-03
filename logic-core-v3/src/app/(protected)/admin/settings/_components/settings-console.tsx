@@ -15,6 +15,7 @@ import { toast } from 'sonner'
 import { Field, Input } from '@/components/ui'
 import type { PremiumFeatureKey } from '@/lib/premium-features'
 import { adminHoverCls } from '@/lib/hover'
+import { maskSecret } from '@/lib/mask-secret'
 import {
   updateModulePricing,
   updateSettings,
@@ -54,14 +55,6 @@ type SettingsConsoleProps = {
 
 function cn(...values: Array<string | false | null | undefined>) {
   return values.filter(Boolean).join(' ')
-}
-
-function maskFromInput(value: string) {
-  if (!value) {
-    return null
-  }
-
-  return `••••••••${value.slice(-4)}`
 }
 
 // Oculta las flechas (spin buttons) nativas de los inputs number, localizado.
@@ -127,7 +120,7 @@ export function SettingsConsole({
       }
 
       if (draft.osTelegramBotToken.trim()) {
-        setMaskedToken(maskFromInput(draft.osTelegramBotToken.trim()))
+        setMaskedToken(maskSecret(draft.osTelegramBotToken.trim()))
       }
 
       setDraft((current) => ({
