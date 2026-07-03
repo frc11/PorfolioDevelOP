@@ -4,6 +4,7 @@ import { OctagonAlert } from 'lucide-react'
 import { Callout } from '@/components/ui'
 import { esPantallaId, PANTALLAS, rutaManual } from '@/lib/leados/manual'
 import { EstadoManual } from '../_components/estado-manual'
+import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -88,6 +89,24 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
       </Callout>
     ) : undefined
 
+  // Slots por pantalla migrada — cada módulo m<N>-*.tsx llena los tres del
+  // layout-tipo; las pantallas sin migrar muestran los placeholders honestos.
+  const slots =
+    pantalla.id === 'm1'
+      ? {
+          contexto: <M1Contexto lead={manual.leadCopy} />,
+          municion: <M1Municion />,
+          captura: (
+            <M1Registro
+              leadId={leadId}
+              lead={manual.leadCopy}
+              ficha={manual.ficha}
+              editable={manual.fichaEditable}
+            />
+          ),
+        }
+      : {}
+
   return (
     <PantallaManual
       leadId={leadId}
@@ -95,6 +114,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
       pantalla={pantalla}
       posicion={posicion}
       encabezado={notaRechazo}
+      {...slots}
     />
   )
 }

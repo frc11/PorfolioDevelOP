@@ -1,7 +1,8 @@
 import type { DossierStage } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
-import type { Rechazo } from '@/lib/leados/contracts'
+import type { Ficha, Rechazo } from '@/lib/leados/contracts'
+import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
   parseAgenda,
@@ -26,6 +27,13 @@ export type ManualDelLead = {
   proximoToque: string | null
   /** Último rechazo de Franco — la nota al frente de la reentrada M-R. */
   rechazo: Rechazo | null
+  /** M1 — identidad + links del negocio (mismo shape que consume el wizard). */
+  leadCopy: CopyBlockLead
+  /** M1 — la ficha guardada, re-servida tal cual llega al wizard. */
+  ficha: Ficha | null
+  /** M1 — MISMA regla que `fichaEditable` del wizard: editable hasta que la
+   * evaluación quede registrada (después, congelada). */
+  fichaEditable: boolean
 }
 
 /**
@@ -51,12 +59,15 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     ? lead.nextFollowUpAt.getTime() <= Date.now()
     : false
 
+  const stage = dossier?.stage ?? null
+  const ficha = parseFicha(dossier?.fichaJson ?? null)
+
   const posicion = derivarPantalla({
-    stage: dossier?.stage ?? null,
+    stage,
     status: lead.status,
     // El campo crudo que marca Franco — mismo criterio que el gate del wizard.
     caliente: lead.caliente,
-    ficha: parseFicha(dossier?.fichaJson ?? null),
+    ficha,
     draftUrl: dossier?.draftUrl ?? null,
     progreso: parseProgreso(dossier?.progresoJson ?? null),
     agenda: parseAgenda(dossier?.agendaJson ?? null),
@@ -69,9 +80,19 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
 
   return {
     lead: { id: lead.id, businessName: lead.businessName },
-    stage: dossier?.stage ?? null,
+    stage,
     posicion,
     proximoToque: lead.nextFollowUpAt?.toISOString() ?? null,
     rechazo: ultimoRechazo(dossier?.rechazos ?? null),
+    leadCopy: {
+      businessName: lead.businessName,
+      industry: lead.industry,
+      zone: lead.zone,
+      instagramUrl: lead.instagramUrl,
+      currentWebUrl: lead.currentWebUrl,
+      googleMapsUrl: lead.googleMapsUrl,
+    },
+    ficha,
+    fichaEditable: stage === null || stage === 'FICHA',
   }
 }
