@@ -5,6 +5,8 @@ import { Callout } from '@/components/ui'
 import { esPantallaId, PANTALLAS, rutaManual } from '@/lib/leados/manual'
 import { EstadoManual } from '../_components/estado-manual'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
+import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
+import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -105,7 +107,27 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
             />
           ),
         }
-      : {}
+      : pantalla.id === 'm2'
+        ? {
+            contexto: <M2Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
+            municion: <M2Municion />,
+            captura: <M2Registro leadId={leadId} evaluada={manual.evaluacion !== null} />,
+          }
+        : pantalla.id === 'm3'
+          ? {
+              contexto: <M3Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
+              municion: <M3Municion />,
+              captura: (
+                <M3Registro
+                  leadId={leadId}
+                  leadStatus={manual.leadStatus}
+                  caliente={manual.caliente}
+                  evaluacion={manual.evaluacion}
+                  descartado={manual.stage === 'DESCARTADA'}
+                />
+              ),
+            }
+          : {}
 
   return (
     <PantallaManual

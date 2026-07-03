@@ -1,11 +1,12 @@
-import type { DossierStage } from '@prisma/client'
+import type { DossierStage, LeadStatus } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
-import type { Ficha, Rechazo } from '@/lib/leados/contracts'
+import type { Evaluacion, Ficha, Rechazo } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
   parseAgenda,
+  parseEvaluacion,
   parseFicha,
   parseProgreso,
   ultimoRechazo,
@@ -34,6 +35,13 @@ export type ManualDelLead = {
   /** M1 — MISMA regla que `fichaEditable` del wizard: editable hasta que la
    * evaluación quede registrada (después, congelada). */
   fichaEditable: boolean
+  /** M2/M3 — la evaluación registrada, parseada con el MISMO contrato que el
+   * wizard (`parseEvaluacion`); null mientras el veredicto no se transcribió. */
+  evaluacion: Evaluacion | null
+  /** M3 — los MISMOS datos que el wizard pasa al registro para la nota de
+   * score 3 (`gateBriefAbierto`): status del lead + campo caliente de Franco. */
+  leadStatus: LeadStatus
+  caliente: boolean
 }
 
 /**
@@ -94,5 +102,8 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     },
     ficha,
     fichaEditable: stage === null || stage === 'FICHA',
+    evaluacion: parseEvaluacion(dossier?.evaluacionJson ?? null),
+    leadStatus: lead.status,
+    caliente: lead.caliente,
   }
 }
