@@ -12290,4 +12290,114 @@ Provider **Credentials** · provider **Google** · **PrismaAdapter** · **todos 
 ### Pendiente del humano
 1. **No autoconfirmado — envío real:** (a) pedir un magic link a un mail **registrado** y confirmar que **llega por Brevo**; (b) que el **link del mail loguee** de verdad; (c) que **login por contraseña y Google** sigan andando (no se tocó su código).
 2. **Commitear** cuando (a-c) den OK (lo hacés vos).
+
+## ✅ D5' — Consolidar SOLO duplicación byte-idéntica (máscara Telegram + dropdown período)
+
+**Qué hace:** sprint de saneamiento de deuda, refactor puro sin cambio de comportamiento. Una auditoría previa había clasificado 2 candidatos "seguros de consolidar" (máscara del token de Telegram, dropdown de período) y una familia de 6 copias deliberadamente divergentes (`date-preset-filter`, prohibida de tocar). Regla central del sprint: relevar equivalencia ANTES de tocar nada — "duplicado" y "casi idéntico" no garantizan "igual".
+
+### Veredicto 1 — Máscara del token de Telegram: **CONSOLIDABLE** ✅
+Dos copias localizadas: `maskFromInput` (cliente, `settings-console.tsx:59`) y `maskSecret` (server, `settings.actions.ts:17`). Comparadas línea a línea: mismo falsy-check → `null`, mismo `` `••••••••${value.slice(-4)}` `` (8 bullets confirmados por conteo exacto en ambas copias), mismo comportamiento en edge cases (string vacío → `null`; token más corto que 4 caracteres → `slice(-4)` devuelve el string completo sin padding, igual en ambas). Única diferencia: el tipo del parámetro (`string` en cliente vs `string | null | undefined` en server) — puramente de tipos, no de comportamiento. Ambas **puras** (sin `prisma`, sin `window`/`document`, sin env). Verificado que son las únicas 2 copias del repo (grep de la firma `slice(-4)` + `••••` no encontró una tercera).
+
+**Consolidado en `src/lib/mask-secret.ts`** (función pura, firma `(value: string | null | undefined) => string | null`, compatible con ambos call sites — el `string` del cliente es subtipo válido). Reemplazadas las 2 copias:
+- `settings.actions.ts`: import agregado, función local `maskSecret` (líneas 17-24) eliminada, call site (`:109`) intacto.
+- `settings-console.tsx`: import agregado, función local `maskFromInput` (líneas 59-65) eliminada, call site (`:123`) actualizado a `maskSecret(...)` con el mismo argumento.
+
+Test puro en `src/lib/mask-secret.invariant.ts` (patrón repo, `npx tsx` + `assert`): token largo, token corto (<4 chars, sin padding), string vacío, `null`, `undefined` — los 5 casos que cubrían ambas copias originales. Script `check:invariant:mask-secret` agregado a `package.json` (sin tocar el aggregate `check:invariants`, seguí el precedente de `notifications-brevo` que tampoco está agregado ahí).
+
+### Veredicto 2 — Dropdown de período: **NO CONSOLIDAR** ❌ (misma trampa que date-preset-filter)
+Relevamiento exhaustivo (glob de nombres `*dropdown*`/`*period*` en todo `src/`, no solo grep de contenido): el **único** par de "dropdown de período casi idéntico" que existe en el repo es `ProjectsPeriodDropdown` (`admin/projects/_components/projects-period-dropdown.tsx`) y `AuditPeriodFilter` (`admin/audit-log/_components/audit-period-filter.tsx`). Comparten shell casi byte a byte: mismo `calcPosition`/`PanelPosition`/`PANEL_WIDTH`/`PANEL_MAX_H`, mismo portal a `document.body`, mismo trigger (Calendar + ChevronDown), mismo criterio de click-outside/Escape/scroll/resize.
+
+**Pero `audit-period-filter.tsx` es explícitamente uno de los 6 miembros de la familia `date-preset-filter`** que este mismo sprint tiene prohibido tocar (es el "Audit" de "Leads/Alertas/Actividad/Audit/otros"). Confirmado independientemente por el propio código — comentario in-file: *"Réplica LOCAL del look del dropdown de proyectos (NO se importa nada de projects/)"* — la misma filosofía "replicar, no importar" que `ticket-date-filter.tsx` ("tickets se mantiene aislado") y `ActivityDateFilter.tsx` ("replica el UX de Leads sin importar sus componentes"). Divergencias funcionales reales más allá del look: `ProjectsPeriodDropdown` es genérico y parametrizado (`label`/`ariaLabel`/`options` como props, reusado 2 veces en la misma barra con semánticas **opuestas** — `Inicio` interpreta el período hacia atrás, `Entrega` hacia adelante, ver comentario en `projects-filters.ts:28-29`); `AuditPeriodFilter` hardcodea `label="Fecha"`, `ariaLabel` y sus propias `AUDIT_PERIOD_OPTIONS`/tipo `AuditPeriod` (no importa `PeriodValue` de projects). Consolidarlos exigiría cambiar la firma pública de `AuditPeriodFilter` — prohibido por el sprint.
+
+**Conclusión:** el candidato "dropdown de período" señalado por la auditoría previa, al relevarlo, resulta ser el mismo par ya cubierto por la exclusión `date-preset-filter`. Se deja **intacto**, igual que el resto de la familia — no es un descuido, es la misma decisión de diseño deliberada. No se creó ningún componente compartido para este candidato.
+
+### `date-preset-filter` — confirmado INTACTO
+Las 6 copias (`ticket-date-filter.tsx`, `ActivityDateFilter.tsx`/`activityFilters.ts`, `audit-period-filter.tsx`/`audit-filters.ts`, `alerts-date-filter.tsx`/`alerts-filters.ts`, `inbound-period-filter.tsx`, `projects-period-dropdown.tsx`/`projects-filters.ts`) **no aparecen** en el `git status` de este sprint — cero tocadas, cero re-auditadas más allá de la lectura necesaria para confirmar el veredicto del dropdown.
+
+### Verificación
+`git status --porcelain`: exactamente 3 modificados (`package.json`, `settings.actions.ts`, `settings-console.tsx`) + 2 nuevos (`mask-secret.ts`, `mask-secret.invariant.ts`) — ninguna de las 6 copias de `date-preset-filter` tocada · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `eslint` sobre los 4 archivos tocados/creados: **0 errores, 0 warnings** · `npm run check:invariant:mask-secret`: **verde** · grep de `maskSecret(`/`maskFromInput(` confirma exactamente 2 call sites (los originales), cero referencias colgantes · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — visual:** abrir `/admin/settings` y confirmar que el campo del token de Telegram se ve y funciona igual que antes (placeholder con el token enmascarado, texto "Actual: ••••••••XXXX" al guardar un token nuevo).
+2. **Commitear** cuando 1 dé OK (lo hacés vos).
 3. *(Follow-up opcional)* dead code `getPostLoginPath` en `auth.ts:65` — candidato de limpieza en un sprint propio.
+
+## ✅ D1 — computeTrend zombie eliminado
+
+**Qué hace:** sprint de saneamiento, eliminación de código muerto. `computeTrend()` en `health-score.ts` calculaba un "trend" -10..+10 vía hash determinístico del `organizationId` — un placeholder sin relación con la realidad. El mail ya no lo usaba (FIX-BRIEF lo desconectó, usa el delta real de snapshots) y el widget de Health ya lo ocultaba (comentario in-code "S4"). Se seguía calculando en cada `getHealthScore()` sin mostrarse en ningún lado. Regla central del sprint: no borrar el campo `trend` del tipo hasta confirmar cero consumidores vivos en TODO el repo.
+
+### Paso 0 — Relevamiento de consumidores (antes de borrar)
+Grep exhaustivo de `computeTrend` / `.trend` / `trend:` en **todo el repo**, no solo `src/`: incluyó `tests/` completo (e2e, integration, setter, leados), `scripts/`, `prisma/`. Hallazgos:
+- `computeTrend` se llamaba en **un solo lugar**: `health-score.ts:117`, solo para poblar el campo `trend` del objeto devuelto — nunca se leía después.
+- El campo `trend` de `HealthScoreResult`, fuera de `health-score.ts`, solo aparece mencionado en **2 comentarios** (prosa, no código ejecutable): `HealthScore.tsx` (docblock + comentario "S4" del chip oculto) y `executive-brief.ts:283` (comentario que documenta que el brief usa su propio delta de snapshots, NO `healthScore.trend`). Ninguno de los dos LEE `.trend` — ambos explican por qué no se usa.
+- Los 3 consumidores reales de `getHealthScore()` en todo el repo, confirmados leyendo cada call site: `executive-brief.ts:278` (usa `.total`), `reports/executive-weekly/build.ts:132` (usa `.total` vía `liveHealth?.total`), `dashboard/page.tsx:171` (pasa el objeto entero a `<HealthScore data={data}/>`, que tampoco lee `.trend` en su render — verificado leyendo el componente completo). Ninguno toca `.trend`.
+- `tests/`, `scripts/`, `prisma/`: cero menciones de `trend` relacionadas con Health Score. El único hit en `scripts/` es `calcTrend` en `seed-matsu-week-results.ts`, función no relacionada (trend semanal de leads/mensajes de `week-results.ts`, un concepto distinto). No existe `health-score.invariant.ts` ni ningún test que tipe o lea el campo.
+- **Veredicto: cero consumidores vivos de `.trend` en todo el repo.** Seguro borrar función + campo.
+
+### Paso 1 — Borrado
+- `health-score.ts`: eliminada `computeTrend()` (líneas 456-468) y su helper exclusivo `hashStringToNumber()` (líneas 470-477 — confirmado sin otro caller vía grep, solo lo llamaba `computeTrend`). Eliminada la llamada `const trend = computeTrend(organizationId, total)` dentro de `computeHealthScoreInternal()`. Eliminado el campo `trend: { value, direction }` de `HealthScoreResult` y del objeto de retorno.
+- `HealthScore.tsx`: limpiados los 3 rastros huérfanos que documentaban el ocultamiento de un campo que ya no existe — el docblock (`COMPLETE — full live rings + score + trend` → sin "+ trend"), el comentario "S4" junto al header (ya no referencia el ahora-inexistente `computeTrend()`/`lib/health-score.ts`) y el comentario "S4b" sobre el subtítulo. Los 3 son comentarios puros — cero JSX/lógica de render tocada; diff confirmado comment-only.
+
+### Qué NO se tocó
+- La lógica REAL de delta de Health (snapshots — `getPreviousHealthTotal`, `getBriefHistory`, `healthScores.total`, la que usa el mail vía FIX-BRIEF) — intacta, no es el zombie.
+- El resto del cálculo de health-score (las 3 dimensiones, sus pesos, cada `compute*Score` sub-helper) — intacto.
+- `executive-brief.ts:283`: su comentario menciona `healthScore.trend` en pasado ("hoy un placeholder..."). Quedó con redacción levemente desactualizada, pero su afirmación central (el brief NO usa ese campo, calcula su propio delta) sigue siendo cierta — ahora trivialmente. Fuera del scope literal del sprint ("el widget"); se deja como observación menor, no se tocó.
+
+### Verificación
+`.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — confirma además que ningún otro archivo del repo intentaba leer `.trend` de un `HealthScoreResult` tipado (hubiera fallado con "property does not exist") · `eslint src/lib/health-score.ts src/components/dashboard/home/HealthScore.tsx`: **0 errores, 0 warnings** · no existe `health-score.invariant.ts`; `tests/e2e/04-health.spec.ts` es un endpoint no relacionado (`/api/chatbot/develop/health`, health-check del chatbot, no el widget del dashboard) — confirmado leyéndolo completo · `git status --porcelain`: solo `health-score.ts` y `HealthScore.tsx` modificados por este sprint (además de los archivos de D5' aún pendientes de commit) · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — visual:** abrir `/dashboard` (home del cliente) y confirmar que el widget de Health Score se ve idéntico a antes (rings + score numérico presentes; nunca mostraba el trend, así que no debería haber ninguna diferencia visible).
+2. **Commitear** cuando (1) dé OK (lo hacés vos).
+
+## ✅ D6 — infra tests de integración
+
+Config dedicada para que `tests/integration/` corra con un comando estándar,
+cargando `DATABASE_URL` sola. Corrida retroactiva de los 4 specs — 2 nunca
+habían corrido nunca (`client-monthly-report.spec.ts` de P2.C, y el de D4
+recién vuelto de su ubicación provisional).
+
+### Relevamiento (patrón calcado)
+- `playwright.config.ts` (e2e): `testDir: tests/e2e`, sin `dotenv` — no hace falta porque `next start`/`next dev` cargan `.env.local` solos (Prisma corre dentro del server Next, no en el proceso de Playwright).
+- `playwright.setter.config.ts` / `playwright.leados.config.ts`: ambos cargan env igual — `dotenv.config({ path: '.env.local' })` **inline arriba del archivo**, no un `globalSetup` separado — porque instancian `PrismaClient` directo en el proceso de test. `leados` en particular no tiene `webServer` (Prisma + lógica pura, sin HTTP) — el sibling más parecido a lo que necesitaba `tests/integration/`.
+- `dotenv` ya es devDependency (`^17.4.2`, usado por setter/leados) — no hizo falta instalar nada.
+- Inventario de `tests/integration/` (3 specs) + confirmación de que `generate-insights-pending-guard.spec.ts` (D4) seguía en `tests/e2e/` (parche manual pendiente de revertir):
+  - `alerts-detector.spec.ts` (R22): Prisma directo **+ HTTP** a `/api/cron/detect-bot-issues` y `/api/admin/alerts/trigger-detector` (rutas relativas vía el fixture `request` de Playwright). Su propio header ya avisa: "Require a live database and a running Next.js server".
+  - `executive-report-lead-count.spec.ts` (P2.B.2): Prisma directo, sin HTTP.
+  - `client-monthly-report.spec.ts` (P2.C): Prisma directo + render real de PDF (`@react-pdf/renderer`), sin HTTP.
+  - `generate-insights-pending-guard.spec.ts` (D4, en `tests/e2e/`): Prisma directo, sin HTTP.
+- **Hallazgo no anticipado por el brief:** los 4 specs NO son estrictamente "read-only" — los 4 escriben filas propias con un TAG único (`P2C-MONTHLYREPORT-TEST`, `D4-PENDINGGUARD-TEST`, etc.) y las borran en `finally`. Es un patrón seguro (auto-contenido, no toca datos reales), pero no es "solo `findFirst`/`findMany`" — se documentó así, con precisión, en el comentario de la config nueva en vez de repetir literalmente "read-only".
+- **Segundo hallazgo no anticipado:** `alerts-detector.spec.ts` tiene un perfil de runtime distinto a los otros 3 — necesita `baseURL` + servidor Next corriendo; los otros 3 son Prisma-puro en proceso, cero servidor. Esto es una tensión de diseño que el brief no resolvía explícitamente (decía calcar setter *y* leados, pero setter trae `webServer` y leados no). Se priorizó el perfil de leados (liviano, sin build) porque cubre 3 de 4 specs y es el patrón que el brief cita como referencia de "sin servidor HTTP" — el costo es que `alerts-detector.spec.ts` no corre bajo esta config. Detalle del impacto abajo.
+
+### Paso 1 — Config + script
+- **Creado** `playwright.integration.config.ts`: calca el mecanismo de `leados` (`dotenv.config()` inline, sin `globalSetup`), `testDir: ./tests/integration`, sin `webServer`. Comentario explícito documentando: el mecanismo de carga de env, la ausencia de `webServer` y por qué, la excepción conocida de `alerts-detector.spec.ts`, y la naturaleza real (no read-only) de los datos de test.
+- **Agregado** script `"test:integration": "playwright test --config=playwright.integration.config.ts"` a `package.json`, al lado de `test:setter`/`test:leados`.
+
+### Paso 2 — Spec de D4 recuperado
+- Movido `generate-insights-pending-guard.spec.ts` de `tests/e2e/` a `tests/integration/` (operación de filesystem, sin `git mv`, sin editar contenido). Confirmado con `Glob`: 4 specs en `tests/integration/`, cero remanente en `tests/e2e/`.
+
+### Paso 3 — Corrida retroactiva (`npm run test:integration`, 14 tests, 26.4s)
+
+| Spec | Resultado | Detalle |
+|---|---|---|
+| `alerts-detector.spec.ts` | **7 failed, 1 skipped** | Los 7 fallos: `TypeError: apiRequestContext.get/post: Invalid URL` exactamente en cada `request.get('/api/cron/detect-bot-issues', ...)` / `request.post('/api/admin/alerts/trigger-detector')` — sin `baseURL` configurado (a propósito, ver Relevamiento), Playwright no puede resolver la ruta relativa. Falla 100% consistente en las 7 (mismo error, mismo root cause) — no es flaky ni depende de datos. El 1 skip (`CLIENT_NO_ACTIVITY`) es el propio `test.skip()` del spec por estado de datos ("Bot tiene conversaciones recientes") — no relacionado a la config. |
+| `executive-report-lead-count.spec.ts` (P2.B.2) | **1 passed** (2.0s) | Ghost test resuelto — corre limpio. |
+| `client-monthly-report.spec.ts` (P2.C) | **2 failed** — **NUNCA había corrido antes de hoy** | `TypeError: Cannot read properties of null (reading 'props')` dentro de `@react-pdf/renderer`'s `render()` (`index.js:39`), originado en `Error: Objects are not valid as a React child (found: object with keys {__pw_type, type, props, key})` dentro de `@react-pdf/reconciler`. La clave `__pw_type` sugiere que el propio transform de Playwright para compilar `.spec.ts` interfiere con `React.createElement` de un modo que el reconciler custom de `@react-pdf/renderer` no reconoce como elemento válido — **hipótesis no confirmada, no investigada más a fondo** (fuera de la regla "no arreglar, reportar"). Ambos tests (mes completo y mes flojo) fallan en el mismo punto (la llamada a `renderToBuffer`), después de que las aserciones de datos (`data.funnel`, `data.leads`, etc.) ya pasaron — la lógica de `getClientMonthlyReportData` en sí no mostró problemas, el fallo es específicamente en el render del PDF bajo Playwright. |
+| `generate-insights-pending-guard.spec.ts` (D4) | **3 passed** (1.4s, 0.6s, 0.8s) | Recuperado de `tests/e2e/`, corre limpio bajo la config nueva. Cierra la tarea pendiente #19 ("Escribir test de integración del guard anti-spam"), abierta desde D4. |
+
+**Total: 4 passed, 9 failed, 1 skipped, 0 flaky.** Ningún test se tocó ni se intentó arreglar — reportado tal cual salió.
+
+### Qué NO se tocó (ni se arregló)
+- Ningún spec de `tests/integration/` — ni siquiera los que fallan. Cero intento de fix a ciegas.
+- `playwright.config.ts` (e2e) — intacto, no se modificó.
+- El contenido de `generate-insights-pending-guard.spec.ts` — solo se movió el archivo, cero edición.
+- La decisión sobre `alerts-detector.spec.ts` (agregar `webServer` dedicado, aceptar que no corra bajo el comando estándar, o separarlo a su propia config con perfil propio) — queda para vos, ver "Pendiente del humano".
+
+### Verificación
+`.\node_modules\.bin\eslint.cmd playwright.integration.config.ts tests/integration/generate-insights-pending-guard.spec.ts`: **0 errores, 0 warnings** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `npm run test:integration` corrido y reportado arriba · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **Decidir sobre `alerts-detector.spec.ts`:** tiene un perfil de runtime distinto a los otros 3 specs (necesita servidor + `baseURL`). Opciones: (a) agregarle un `webServer` dedicado estilo `setter` (implica build+start solo para este spec, o un config separado con su propio perfil, tipo "tests/http-integration"); (b) aceptar que no corre bajo `test:integration` y se sigue corriendo manual contra un server ya levantado; (c) otra. No se decidió — se priorizó no bloquear a los otros 3 specs con infraestructura pesada no pedida explícitamente.
+2. **Investigar (si interesa) el fallo de `client-monthly-report.spec.ts`:** es la primera vez que corre — el fallo del PDF (`__pw_type` / reconciler de `@react-pdf/renderer`) es nuevo, no reportado antes. Puede ser: (a) un bug real en `ClientMonthlyReportPdf.tsx` que solo se manifiesta con ciertos datos, (b) una incompatibilidad entre el transform de Playwright y el reconciler custom de `@react-pdf` (afectaría solo al test, no a producción, donde el PDF se genera fuera de Playwright), o (c) otra causa. Se necesita decidir cuál antes de tocar nada — no se investigó más profundo por regla explícita del sprint.
+3. Tarea stale #19 ("Escribir test de integración del guard anti-spam") puede cerrarse — el spec de D4 ahora corre y pasa.
+4. **Commitear** cuando revises el estado de los specs (lo hacés vos).
