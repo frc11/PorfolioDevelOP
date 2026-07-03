@@ -45,7 +45,7 @@ export function deltaPhrase(d: LeadsDelta): string | null {
   if (d.previous === 0 && d.current === 0) return null
   if (d.previous === 0) return 'primeros de la semana'
   if (d.delta === 0) return 'igual que la semana pasada'
-  const signo = d.delta > 0 ? '+' : '−'
+  const signo = d.delta > 0 ? '+' : '-'
   return `${signo}${Math.abs(d.delta)} vs la semana pasada`
 }
 
