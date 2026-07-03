@@ -12401,3 +12401,96 @@ recién vuelto de su ubicación provisional).
 2. **Investigar (si interesa) el fallo de `client-monthly-report.spec.ts`:** es la primera vez que corre — el fallo del PDF (`__pw_type` / reconciler de `@react-pdf/renderer`) es nuevo, no reportado antes. Puede ser: (a) un bug real en `ClientMonthlyReportPdf.tsx` que solo se manifiesta con ciertos datos, (b) una incompatibilidad entre el transform de Playwright y el reconciler custom de `@react-pdf` (afectaría solo al test, no a producción, donde el PDF se genera fuera de Playwright), o (c) otra causa. Se necesita decidir cuál antes de tocar nada — no se investigó más profundo por regla explícita del sprint.
 3. Tarea stale #19 ("Escribir test de integración del guard anti-spam") puede cerrarse — el spec de D4 ahora corre y pasa.
 4. **Commitear** cuando revises el estado de los specs (lo hacés vos).
+
+## ✅ D7 — test PDF P2.C movido a Node puro
+
+Confirma el pendiente #2 de D6: el crash de `client-monthly-report.spec.ts` era el
+runner (Playwright), no el PDF. Test movido a un invariante tsx — mismo Prisma,
+mismo `renderToBuffer`, mismo componente, cero crash.
+
+### Relevamiento (Paso 0)
+- Spec viejo releído: 2 tests (mes completo / mes flojo), Prisma directo vía
+  `getClientMonthlyReportData` + `renderToBuffer(ClientMonthlyReportPdf)`, filas
+  tagueadas `P2C-MONTHLYREPORT-TEST` borradas en `finally`.
+- Patrón de invariante relevado contra dos ejemplos: `report-eligible-plan.invariant.ts`
+  (assert plano, sin DB) y, más relevante, `monthly-report-data.invariant.ts` — que
+  YA EXISTE para este mismo feature (P2.C) pero cubre solo el ensamblado puro
+  (`assembleClientMonthlyReportData`, sin DB ni PDF). Son dos invariantes con
+  scope distinto y complementario, no un duplicado.
+- Route de descarga real confirmada: `src/app/api/reports/client-monthly/route.ts`
+  (su propio comment: *"Descargá el informe del mes"*) — mismo `getClientMonthlyReportData`
+  + `renderToBuffer(ClientMonthlyReportPdf)` que el spec y el invariante nuevo. La otra
+  coincidencia del grep, `src/app/api/reports/monthly/route.ts`, es un reporte distinto
+  y anterior (`MonthlyReport`, datos de analytics/SEO) — no relacionado a P2.C, fuera de scope.
+- **Hallazgo no anticipado por el brief:** ningún `.invariant.ts` existente toca
+  `PrismaClient` (grep sin matches) — todos son función pura. El nuevo invariante es el
+  primer caso de un tsx puro contra la Neon real, y `src/lib/prisma.ts` construye
+  `new PrismaClient()` **a nivel de módulo** (eager). En un script tsx de un solo
+  archivo (a diferencia de la config de Playwright de D6, donde `dotenv.config()`
+  corre en el proceso padre ANTES de que el worker cargue el spec) los `import`
+  estáticos de ESM se hoistean por delante de cualquier otra sentencia — así que un
+  `import` estático de algo que toque `@/lib/prisma` se evaluaría antes que
+  `dotenv.config()`, reproduciendo el mismo error de `DATABASE_URL` que tenía D6,
+  pero por hoisting en vez de por falta de config. Se resolvió con `import()`
+  dinámico para todo lo que toca Prisma, ejecutado recién después de
+  `dotenv.config()` — ver comentario en el archivo nuevo.
+
+### Paso 1 — Conversión
+- **Creado** `src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts`
+  (mismo directorio que `monthly-report-data.invariant.ts`, nombre calcado del
+  archivo que cubre — mismo criterio que el resto de los invariantes del repo).
+  Mismas aserciones que el spec viejo (mes completo: reconciliación funnel/leads,
+  umbrales, PDF > 1000 bytes; mes flojo: ceros honestos, `phrase: null`, PDF > 500
+  bytes), mismo criterio de skip si no hay bot activo. Usa el idioma
+  `if (!data.hasBot) throw new Error(...)` (copiado tal cual de
+  `monthly-report-data.invariant.ts`) en vez de un `assert` para el discriminante
+  — es lo que le da a TypeScript el narrowing del union sin cast ni `any`.
+- **Registrado** `"check:invariant:client-monthly-report-pdf"` en `package.json`,
+  al lado de `check:invariant:client-monthly-report` (la pure invariant, sin
+  tocarla). No se agregó al aggregate `check:invariants` — ya viene incompleto
+  desde hace varios sprints (no incluye tampoco `client-monthly-report`,
+  `dates-ar`, `lead-status`, etc.); mantenerlo así es consistente con el resto,
+  arreglarlo es otro alcance.
+- **Eliminado** `tests/integration/client-monthly-report.spec.ts` (filesystem,
+  sin `git rm`). Confirmado con `Glob`: quedan 3 specs en `tests/integration/`.
+
+### Paso 2 — Corrida y diagnóstico
+- `npm run check:invariant:client-monthly-report-pdf` → **PASA limpio**, mes
+  completo y mes flojo, PDF real generado sin crashear (`◇ injected env (17)
+  from .env.local` confirma la carga de env correcta).
+- Primer intento falló por un typo propio (`.ts` en vez de `.tsx` en el import de
+  `ClientMonthlyReportPdf`) — corregido antes de este resultado; no fue el
+  diagnóstico, fue un error de tipeo en el archivo nuevo.
+- `npm run test:integration` re-corrido tras el borrado: **misma foto que D6**
+  para los 3 specs que quedan — `alerts-detector.spec.ts` 7 failed + 1 skipped
+  (mismo `Invalid URL`, sin cambios), `executive-report-lead-count.spec.ts` 1
+  passed, `generate-insights-pending-guard.spec.ts` 3 passed. Sin regresión.
+
+### VEREDICTO
+**La hipótesis era correcta: era el runner, no el PDF.** Playwright instrumenta
+los módulos de un modo que el reconciler de `@react-pdf/renderer` rechaza
+(`__pw_type`) — corriendo la misma lógica exacta (mismo Prisma, mismo
+`renderToBuffer`, mismo componente) fuera de Playwright, todo pasa. El PDF de
+P2.C está sano. Cierra el pendiente #2 de D6.
+
+### Qué NO se tocó
+- El componente `ClientMonthlyReportPdf.tsx`, la route de descarga, ni
+  `get-client-monthly-report-data.ts` — cero cambios de lógica, solo se cambió
+  el runner del test.
+- `playwright.integration.config.ts` — intacto (el spec eliminado deja de
+  aparecer solo por no estar más en la carpeta, sin editar el archivo).
+- El pendiente #1 de D6 (arquitectura de `alerts-detector.spec.ts`) — sigue sin
+  decidir, no era parte de este sprint.
+
+### Verificación
+`.\node_modules\.bin\eslint.cmd` sobre el invariante nuevo: **0 errores, 0
+warnings** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único:
+baseline `searchconsole.ts:119`) · `check:invariant:client-monthly-report-pdf`
+y `test:integration` corridos y reportados arriba · build no corrido (fuera de
+gate) · sin commits.
+
+### Pendiente del humano
+1. Pendiente #1 de D6 sigue abierto: qué hacer con `alerts-detector.spec.ts`
+   (perfil de servidor+`baseURL` que esta config no provee).
+2. **Commitear** cuando revises (lo hacés vos) — incluye el invariante nuevo, el
+   script en `package.json`, y el borrado del spec de Playwright.

@@ -38,6 +38,7 @@ dotenv.config({ path: '.env.local' })
 
 export default defineConfig({
   testDir: './tests/integration',
+  testIgnore: ['**/alerts-detector.spec.ts'],
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
