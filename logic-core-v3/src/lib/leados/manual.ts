@@ -29,6 +29,7 @@ import {
   gateEnvioDemo,
   reunionAgendada,
 } from './flow.ts'
+import { derivarPasoDelLead } from './paso.ts'
 
 // ── El registro de pantallas (mapa v1) ───────────────────────────────────────
 
@@ -456,15 +457,26 @@ function completadasDe(input: DerivacionManualInput): PantallaId[] {
 
 /**
  * Actual + habilitadas por stage. Espeja el mapeo de `pasoActual` (rail del
- * wizard) llevado a granularidad de pantalla — misma fuente de verdad (stage),
- * refinada con los MISMOS gates del motor (`gateBriefAbierto`, `gateEnvioDemo`,
- * `cadenciaInfo`) que el wizard ya calcula. Exhaustivo por stage: un stage
- * nuevo rompe el build hasta contemplarse acá (mismo candado que el wizard).
+ * wizard) llevado a granularidad de pantalla — misma fuente de verdad (stage).
+ *
+ * EVALUADA (5.0): lee la rama abierto/espera/opener directo de
+ * `derivarPasoDelLead` (A-29) en vez de re-derivar `gateBriefAbierto` y el
+ * proxy de `openerPendiente` a mano — mismo cálculo que arma el cartel del
+ * wizard, así el manual y el wizard NUNCA pueden desincronizarse sobre "¿está
+ * abierto el brief?". APROBADA sigue llamando a `gateEnvioDemo` directo a
+ * propósito: exige `finalUrl` (la URL que registra el admin al aprobar), un
+ * factor que `derivarPasoDelLead` no recibe — leerlo del `gateAbierto`
+ * genérico cambiaría el comportamiento en el borde finalUrl=null, así que esa
+ * rama no se toca. Exhaustivo por stage: un stage nuevo rompe el build hasta
+ * contemplarse acá (mismo candado que el wizard).
  */
 function posicionDe(
   input: DerivacionManualInput,
 ): { actual: PantallaId; habilitadas: PantallaId[] } {
   const { stage } = input
+  const gateAbierto = gateBriefAbierto(input.status, input.caliente)
+  const openerPendiente = stage === 'EVALUADA' && !gateAbierto && input.contactos === 0
+  const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)
   switch (stage) {
     case null:
     case 'FICHA': {
@@ -482,15 +494,16 @@ function posicionDe(
       // hay pantallas por delante.
       return { actual: 'm3', habilitadas: [] }
     case 'EVALUADA': {
-      if (gateBriefAbierto(input.status, input.caliente)) {
-        return { actual: 'm6', habilitadas: ['m6'] }
-      }
-      if (input.contactos === 0) {
+      if (paso.anchor === 'opener') {
         return { actual: 'm4', habilitadas: ['m4'] }
       }
-      // Toque vencido o cadencia agotada (estructura de cierre) → m5. Si no,
-      // estado de espera con m5 alcanzable: una respuesta puede llegar antes
-      // del toque y hay que poder registrarla.
+      if (paso.foco.tono === 'foco') {
+        return { actual: 'm6', habilitadas: ['m6'] }
+      }
+      // anchor === 'brief' con tono 'espera': gate cerrado y opener ya
+      // mandado. Toque vencido o cadencia agotada (estructura de cierre) →
+      // m5. Si no, estado de espera con m5 alcanzable: una respuesta puede
+      // llegar antes del toque y hay que poder registrarla.
       const cadencia = cadenciaInfo(input.followUpCount)
       const toqueAhora = input.followUpVencido || cadencia.agotada
       return toqueAhora
