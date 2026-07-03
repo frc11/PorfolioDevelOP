@@ -1,0 +1,77 @@
+import type { DossierStage } from '@prisma/client'
+import { requireSetter } from '@/lib/auth-guards'
+import { countFollowUps } from '@/lib/follow-up'
+import type { Rechazo } from '@/lib/leados/contracts'
+import { getOwnedDossier } from '@/lib/leados/dossier'
+import {
+  parseAgenda,
+  parseFicha,
+  parseProgreso,
+  ultimoRechazo,
+} from '@/lib/leados/flow'
+import { derivarPantalla, type PosicionManual } from '@/lib/leados/manual'
+import { listOwnedLeadActivities } from '@/lib/leados/outreach'
+import { getOwnedLead } from '@/lib/leados/ownership'
+
+/**
+ * Lo que las pantallas del manual necesitan del lead: identidad mínima, la
+ * posición derivada y los datos que los estados/reentrada muestran. Crece a
+ * medida que las pantallas reales migren (cada sprint suma lo suyo).
+ */
+export type ManualDelLead = {
+  lead: { id: string; businessName: string }
+  stage: DossierStage | null
+  posicion: PosicionManual
+  /** ISO del próximo toque agendado (estado de espera) — null si no hay. */
+  proximoToque: string | null
+  /** Último rechazo de Franco — la nota al frente de la reentrada M-R. */
+  rechazo: Rechazo | null
+}
+
+/**
+ * Carga owned del manual — MISMA materia prima y MISMOS caminos que la página
+ * del wizard (`getOwnedLead` + `getOwnedDossier` + actividades comerciales):
+ * lead ajeno o inexistente → null (la página lo vuelve 404, sin leakear). El
+ * manual solo LEE; acá no se escribe ni transiciona nada.
+ */
+export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead | null> {
+  const userId = await requireSetter()
+
+  const lead = await getOwnedLead(leadId, userId)
+  if (!lead) return null
+
+  const [dossier, actividades] = await Promise.all([
+    getOwnedDossier(leadId, userId),
+    listOwnedLeadActivities(leadId, userId),
+  ])
+
+  // Reloj request-time, fuera del render (mismo criterio que el home usa para
+  // `followUpVencido`): el toque agendado ya venció.
+  const followUpVencido = lead.nextFollowUpAt
+    ? lead.nextFollowUpAt.getTime() <= Date.now()
+    : false
+
+  const posicion = derivarPantalla({
+    stage: dossier?.stage ?? null,
+    status: lead.status,
+    // El campo crudo que marca Franco — mismo criterio que el gate del wizard.
+    caliente: lead.caliente,
+    ficha: parseFicha(dossier?.fichaJson ?? null),
+    draftUrl: dossier?.draftUrl ?? null,
+    progreso: parseProgreso(dossier?.progresoJson ?? null),
+    agenda: parseAgenda(dossier?.agendaJson ?? null),
+    contactos: actividades?.length ?? 0,
+    followUpCount: countFollowUps(actividades ?? []),
+    followUpVencido,
+    finalUrl: dossier?.finalUrl ?? null,
+    demoEnviada: Boolean(dossier?.enviadaAt),
+  })
+
+  return {
+    lead: { id: lead.id, businessName: lead.businessName },
+    stage: dossier?.stage ?? null,
+    posicion,
+    proximoToque: lead.nextFollowUpAt?.toISOString() ?? null,
+    rechazo: ultimoRechazo(dossier?.rechazos ?? null),
+  }
+}
