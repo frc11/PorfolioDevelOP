@@ -1,7 +1,7 @@
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
-import type { Brief, Evaluacion, Ficha, Progreso, Rechazo } from '@/lib/leados/contracts'
+import type { Brief, Evaluacion, Ficha, Progreso, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
@@ -10,6 +10,7 @@ import {
   parseEvaluacion,
   parseFicha,
   parseProgreso,
+  parseSelfCheck,
   ultimoRechazo,
 } from '@/lib/leados/flow'
 import { derivarPantalla, type PosicionManual } from '@/lib/leados/manual'
@@ -55,6 +56,20 @@ export type ManualDelLead = {
   openerEnviado: boolean
   /** M4 — ISO del último contacto registrado — la fecha del resumen «Enviado». */
   ultimoContacto: string | null
+  /** M13 — el link del borrador publicado (Netlify Drop). null hasta publicarlo:
+   * alimenta la captura vs. el resumen de M13, y se muestra A LA VISTA en M14
+   * (cierra A-04). Mismo campo `dossier.draftUrl` que consume el wizard. */
+  draftUrl: string | null
+  /** M14 — el self-check guardado (hard-blocks + flags de diseño), parseado con
+   * el MISMO contrato que el wizard (`parseSelfCheck`); null hasta guardarlo. */
+  selfCheck: SelfCheck | null
+  /** M15 — la URL permanente que registra el admin al aprobar (el link que se
+   * manda al negocio); null hasta que Franco aprueba. Es el `finalUrl` del gate
+   * de envío (`gateEnvioDemo`), no el borrador. */
+  finalUrl: string | null
+  /** M15 — ISO del envío de la demo aprobada (`dossier.enviadaAt`); null si no se
+   * envió. Alimenta el estado «enviada» de M15 (mismo proxy que el wizard). */
+  demoEnviadaAt: string | null
 }
 
 /**
@@ -128,5 +143,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     progreso,
     openerEnviado: contactos > 0,
     ultimoContacto: actividades?.[0]?.createdAt.toISOString() ?? null,
+    draftUrl: dossier?.draftUrl ?? null,
+    selfCheck: parseSelfCheck(dossier?.selfCheckJson ?? null),
+    finalUrl: dossier?.finalUrl ?? null,
+    demoEnviadaAt: dossier?.enviadaAt?.toISOString() ?? null,
   }
 }

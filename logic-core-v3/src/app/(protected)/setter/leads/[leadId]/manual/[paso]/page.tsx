@@ -18,6 +18,9 @@ import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
 import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
 import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
+import { M13Contexto, M13Municion, M13Registro } from '../_components/m13-borrador'
+import { M14Contexto, M14Municion, M14Registro } from '../_components/m14-chequeo'
+import { M15Contexto, M15Municion, M15Registro } from '../_components/m15-envio'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -190,7 +193,51 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                         />
                       ),
                     }
-                  : {}
+                  : pantalla.id === 'm13'
+                    ? {
+                        contexto: <M13Contexto brief={manual.brief} />,
+                        municion: <M13Municion />,
+                        captura: (
+                          <M13Registro
+                            leadId={leadId}
+                            stage={manual.stage}
+                            draftUrl={manual.draftUrl}
+                          />
+                        ),
+                      }
+                    : pantalla.id === 'm14'
+                      ? {
+                          contexto: (
+                            <M14Contexto draftUrl={manual.draftUrl} brief={manual.brief} />
+                          ),
+                          municion: <M14Municion />,
+                          captura: (
+                            <M14Registro
+                              leadId={leadId}
+                              stage={manual.stage}
+                              draftUrl={manual.draftUrl}
+                              selfCheck={manual.selfCheck}
+                              brief={manual.brief}
+                            />
+                          ),
+                        }
+                      : pantalla.id === 'm15'
+                        ? {
+                            contexto: <M15Contexto finalUrl={manual.finalUrl} />,
+                            municion: <M15Municion />,
+                            captura: (
+                              <M15Registro
+                                leadId={leadId}
+                                lead={manual.leadCopy}
+                                stage={manual.stage}
+                                status={manual.leadStatus}
+                                caliente={manual.caliente}
+                                finalUrl={manual.finalUrl}
+                                demoEnviadaAt={manual.demoEnviadaAt}
+                              />
+                            ),
+                          }
+                        : {}
 
   return (
     <PantallaManual
