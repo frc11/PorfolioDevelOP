@@ -1,7 +1,7 @@
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
-import type { Brief, Evaluacion, Ficha, Progreso, Rechazo, SelfCheck } from '@/lib/leados/contracts'
+import type { Agenda, Brief, Evaluacion, Ficha, Progreso, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
@@ -70,6 +70,24 @@ export type ManualDelLead = {
   /** M15 — ISO del envío de la demo aprobada (`dossier.enviadaAt`); null si no se
    * envió. Alimenta el estado «enviada» de M15 (mismo proxy que el wizard). */
   demoEnviadaAt: string | null
+  /** M5 — conteo de SIN_RESPUESTA (opener incluido) que alimenta `cadenciaInfo`
+   * (toques hechos, próximo toque, cadencia agotada). MISMO `countFollowUps` que
+   * la maquinaria; el manual solo PRESENTA la cadencia, jamás la calcula. */
+  followUpCount: number
+  /** M5 — ISO de la reactivación de un lead POSTERGADO (`lead.reactivateAt`); null
+   * si no está postergado. El panel lo retoma en esa fecha por el reloj existente
+   * — el manual solo lo muestra, no re-implementa ese regreso al foco. */
+  reactivateAt: string | null
+  /** M5/M16 — teléfono del lead (A-14): re-servido para seguir la conversación o
+   * coordinar el horario sin volver a la ficha. Mismo `lead.phone` que el wizard. */
+  leadPhone: string | null
+  /** M16 — el booking parseado (`parseAgenda`); null hasta agendar. `reunionAgendada`
+   * decide si ya hay reunión (mismo contrato que consume el wizard). */
+  agenda: Agenda | null
+  /** M16 — prefill del attendee de Cal.com: nombre de contacto del lead. `lead.contactName`. */
+  contactName: string | null
+  /** M16 — prefill del attendee: email del lead (ahí llega la confirmación de Cal.com). `lead.email`. */
+  leadEmail: string | null
 }
 
 /**
@@ -103,6 +121,12 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   // Contactos comerciales (opener incluido): alimenta la derivación Y el proxy
   // `openerEnviado` de M4 — una sola lectura de `actividades`.
   const contactos = actividades?.length ?? 0
+  // Hoisted: el conteo de SIN_RESPUESTA alimenta la derivación (cadencia) Y la
+  // presentación de M5 (toques / próximo toque / agotada). Una sola pasada.
+  const followUpCount = countFollowUps(actividades ?? [])
+  // Hoisted: el booking alimenta la derivación (m16 completada) Y el resumen del
+  // traspaso de M16. Un solo parse de `agendaJson`.
+  const agenda = parseAgenda(dossier?.agendaJson ?? null)
 
   const posicion = derivarPantalla({
     stage,
@@ -112,9 +136,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     ficha,
     draftUrl: dossier?.draftUrl ?? null,
     progreso,
-    agenda: parseAgenda(dossier?.agendaJson ?? null),
+    agenda,
     contactos,
-    followUpCount: countFollowUps(actividades ?? []),
+    followUpCount,
     followUpVencido,
     finalUrl: dossier?.finalUrl ?? null,
     demoEnviada: Boolean(dossier?.enviadaAt),
@@ -147,5 +171,11 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     selfCheck: parseSelfCheck(dossier?.selfCheckJson ?? null),
     finalUrl: dossier?.finalUrl ?? null,
     demoEnviadaAt: dossier?.enviadaAt?.toISOString() ?? null,
+    followUpCount,
+    reactivateAt: lead.reactivateAt?.toISOString() ?? null,
+    leadPhone: lead.phone,
+    agenda,
+    contactName: lead.contactName,
+    leadEmail: lead.email,
   }
 }

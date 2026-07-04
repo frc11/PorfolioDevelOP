@@ -1,0 +1,162 @@
+import { CalendarClock, Phone } from 'lucide-react'
+import type { LeadStatus } from '@prisma/client'
+import { Badge } from '@/components/ui'
+import {
+  cadenciaInfo,
+  formatFechaCorta,
+  leadRespondio,
+  PLANTILLAS_FOLLOW_UP,
+  STATUS_LABELS,
+} from '@/lib/leados/flow'
+import { GUIA_SEGUIMIENTO } from '@/lib/leados/guidance-content'
+import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { SeguimientoForm } from './seguimiento-form'
+
+/**
+ * M5 — «Registrá lo que pasó» (5.5, tramo Seguimiento). PRESENTACIÓN del toque
+ * de la conversación: la cadencia (+2/+2/+3-stop) la calcula `follow-up.ts` y la
+ * lee `cadenciaInfo` (flow.ts) — el manual solo la muestra, jamás la re-calcula.
+ *   - contexto: el estado de la cadencia (toques hechos, próximo toque, cadencia
+ *     agotada) + el teléfono a mano (A-14) + el estado del lead;
+ *   - munición: el mensaje base del próximo toque (templado, sin link), o —cuando
+ *     la cadencia se agotó— la nota de cierre (no se ofrece un «no respondió» más);
+ *   - registro: el form compartido del write-path (`registrarResultado`).
+ * La estructura de cadencia agotada (al tercer toque sin respuesta, encausa al
+ * cierre) es la del 2.x: `cadencia.agotada` ⇒ sin próximo toque; el cierre a
+ * PERDIDO lo decide Franco desde admin, no el manual.
+ */
+
+/** Contexto: el estado de la cadencia (la maquinaria la calcula; acá solo se
+ * muestra) + el teléfono re-servido + el estado del lead. */
+export function M5Contexto({
+  status,
+  followUpCount,
+  proximoToque,
+  reactivateAt,
+  leadPhone,
+}: {
+  status: LeadStatus
+  followUpCount: number
+  proximoToque: string | null
+  reactivateAt: string | null
+  leadPhone: string | null
+}) {
+  const respondio = leadRespondio(status)
+  const cadencia = cadenciaInfo(followUpCount)
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        {/* A-14: el teléfono a mano mientras seguís la conversación. */}
+        {leadPhone ? (
+          <p className="flex items-center gap-1.5 text-xs text-zinc-500">
+            <Phone size={12} strokeWidth={1.5} className="shrink-0" />
+            {leadPhone}
+          </p>
+        ) : (
+          <span />
+        )}
+        <Badge tone="zinc" variant="outline">
+          {STATUS_LABELS[status]}
+        </Badge>
+      </div>
+
+      {/* El recuadro de cadencia: la calcula la maquinaria, acá solo se muestra. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500">
+        <span className="flex items-center gap-1.5">
+          <CalendarClock size={13} strokeWidth={1.5} />
+          Toques de follow-up:{' '}
+          <span className="font-semibold text-zinc-300">
+            {cadencia.toquesHechos} de {PLANTILLAS_FOLLOW_UP.length}
+          </span>
+        </span>
+        {status === 'POSTERGADO' && reactivateAt ? (
+          <span>
+            Postergado — se retoma el{' '}
+            <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
+          </span>
+        ) : proximoToque && !respondio ? (
+          <span>
+            Próximo toque:{' '}
+            <span className="font-semibold text-zinc-300">{formatFechaCorta(proximoToque)}</span>
+          </span>
+        ) : null}
+        {/* Cadencia agotada (estructura de cierre del 2.x): sin más toques. El
+            cierre lo cubre esta línea ámbar — no se repite abajo. */}
+        {cadencia.agotada && !respondio && status !== 'POSTERGADO' && (
+          <span className="w-full text-amber-300/90">
+            Cadencia completa — sin más toques: si no respondió, el lead se enfría solo. El cierre
+            lo decide Franco.
+          </span>
+        )}
+        {/* El ritmo de la cadencia (3.6): mientras hay toques por delante. */}
+        {!respondio && status !== 'POSTERGADO' && !cadencia.agotada && (
+          <span className="w-full leading-relaxed text-zinc-500">
+            <LineaRicaText
+              linea={GUIA_SEGUIMIENTO.cadencia}
+              emphasisClassName="font-semibold text-zinc-400"
+            />
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/** Munición: el mensaje base del próximo toque (templado, sin link) cuando hay
+ * uno pendiente; cuando la cadencia se agotó (o el negocio respondió / está
+ * postergado) no hay nada que mandar — se dice por qué, encausando al cierre. */
+export function M5Municion({
+  status,
+  followUpCount,
+}: {
+  status: LeadStatus
+  followUpCount: number
+}) {
+  const respondio = leadRespondio(status)
+  const cadencia = cadenciaInfo(followUpCount)
+
+  if (respondio) {
+    return (
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        El negocio respondió: la cadencia se frenó. De acá el objetivo es uno solo — la reunión, que
+        se agenda en «Agendá la reunión».
+      </p>
+    )
+  }
+
+  if (status === 'POSTERGADO') {
+    return (
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        Contacto postergado — el panel lo retoma en la fecha que marcaste. No hay toque para mandar
+        hasta entonces.
+      </p>
+    )
+  }
+
+  // Cadencia agotada: sin próximo toque. NO se ofrece un «no respondió» más — el
+  // lead se enfría y el cierre lo decide Franco (estructura de cierre del 2.x).
+  if (cadencia.agotada || cadencia.proximoToque === null) {
+    return (
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        La cadencia se completó: no queda un próximo toque para mandar. Si no respondió, el lead se
+        enfría — el cierre lo decide Franco.
+      </p>
+    )
+  }
+
+  return (
+    <CopyBlock
+      titulo={`Mensaje base del toque ${cadencia.proximoToque} de ${PLANTILLAS_FOLLOW_UP.length}`}
+      instruccion="Adaptalo al negocio antes de mandarlo — templado, sin link y sin precio."
+      texto={PLANTILLAS_FOLLOW_UP[cadencia.proximoToque - 1]}
+    />
+  )
+}
+
+/** Registro: el form compartido del write-path (mismas 4 opciones, misma action
+ * y schema que el seguimiento del wizard). */
+export function M5Registro({ leadId }: { leadId: string }) {
+  return <SeguimientoForm leadId={leadId} />
+}

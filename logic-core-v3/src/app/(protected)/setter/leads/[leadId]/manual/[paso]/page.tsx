@@ -17,10 +17,12 @@ import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
 import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
+import { M5Contexto, M5Municion, M5Registro } from '../_components/m5-seguimiento'
 import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
 import { M13Contexto, M13Municion, M13Registro } from '../_components/m13-borrador'
 import { M14Contexto, M14Municion, M14Registro } from '../_components/m14-chequeo'
 import { M15Contexto, M15Municion, M15Registro } from '../_components/m15-envio'
+import { M16Contexto, M16Municion, M16Registro } from '../_components/m16-agenda'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -237,7 +239,47 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                               />
                             ),
                           }
-                        : {}
+                        : pantalla.id === 'm5'
+                          ? {
+                              contexto: (
+                                <M5Contexto
+                                  status={manual.leadStatus}
+                                  followUpCount={manual.followUpCount}
+                                  proximoToque={manual.proximoToque}
+                                  reactivateAt={manual.reactivateAt}
+                                  leadPhone={manual.leadPhone}
+                                />
+                              ),
+                              municion: (
+                                <M5Municion
+                                  status={manual.leadStatus}
+                                  followUpCount={manual.followUpCount}
+                                />
+                              ),
+                              captura: <M5Registro leadId={leadId} />,
+                            }
+                          : pantalla.id === 'm16'
+                            ? {
+                                contexto: (
+                                  <M16Contexto
+                                    status={manual.leadStatus}
+                                    leadPhone={manual.leadPhone}
+                                  />
+                                ),
+                                municion: <M16Municion />,
+                                captura: (
+                                  <M16Registro
+                                    leadId={leadId}
+                                    status={manual.leadStatus}
+                                    ficha={manual.ficha}
+                                    agenda={manual.agenda}
+                                    contactName={manual.contactName}
+                                    leadEmail={manual.leadEmail}
+                                    leadPhone={manual.leadPhone}
+                                  />
+                                ),
+                              }
+                            : {}
 
   return (
     <PantallaManual
