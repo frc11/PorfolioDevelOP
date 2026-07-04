@@ -16,7 +16,6 @@ import { HomeEmpty } from './_components/home-empty'
 import { HomeEnEspera } from './_components/home-en-espera'
 import { MisNumeros } from './_components/mis-numeros'
 import { NovedadesPanel } from './_components/novedades-panel'
-import { OnboardingHint } from './_components/onboarding-hint'
 import { ProgresoSemana } from './_components/progreso-semana'
 
 export const metadata: Metadata = {
@@ -78,7 +77,7 @@ export default async function SetterHomePage() {
       {/* El foco es el protagonista: un negocio accionable a la vez (2.1). Si no
           hay accionables, el "todo en espera" reemplaza al foco (no al home).
           B6.5: va PRIMERO —pegado al header— para que su CTA ("Ir a trabajarlo" /
-          "Cargar prospecto") quede sobre el fold; la guía pedagógica pasó abajo. */}
+          "Cargar prospecto") quede sobre el fold. */}
       {homeLeads.length === 0 ? (
         <HomeEmpty />
       ) : foco.foco ? (
@@ -92,12 +91,6 @@ export default async function SetterHomePage() {
       ) : (
         <HomeEnEspera enEspera={enEspera} pausados={pausados} fijados={fijados} />
       )}
-
-      {/* Guía descartable para el setter nuevo. B6.5: se movió DEBAJO de la acción
-          —antes empujaba el CTA fuera del fold— sin perder contenido pedagógico.
-          Su copy ("Arriba está el que toca ahora") ahora describe literalmente el
-          foco que quedó por encima. Descartable: el setter que ya la cerró no la ve. */}
-      <OnboardingHint />
 
       {/* 2.2 / A-06 — Secundario al foco pero presente: los handoffs recientes
           INFORMAN, y su "Abrir" ANCLA el lead como foco (mismo mecanismo que "Ir a
