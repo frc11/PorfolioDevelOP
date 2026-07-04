@@ -29,7 +29,16 @@ import {
  * run" y enmascaraba el corazón del flujo. Sin dependencia entre tests, un fallo
  * aislado ya no cascada — cada B verifica su tramo por sí solo. Corre en 1 worker
  * sin paralelismo (playwright.setter.config), así el orden se conserva.
+ *
+ * 5.6 — EL CORTE: la raíz del lead sirve el manual (pantallas m1–m16). MISMA
+ * sustancia (gates, transiciones, aislamiento — los asserts duros en DB no se
+ * tocaron), NUEVA navegación: la raíz aterriza en la pantalla derivada y los
+ * tramos que viven en otra pantalla navegan por URL (`pantalla()`), que además
+ * ES una aserción — la guardia del server redirige lo no habilitado.
  */
+
+/** URL de una pantalla del manual — la guardia del server la valida al navegar. */
+const pantalla = (leadId: string, paso: string) => `/setter/leads/${leadId}/manual/${paso}`
 
 const tracker: SmokeTracker = newTracker()
 let setterId: string
@@ -85,7 +94,9 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await prisma.osLeadDossier.update({ where: { leadId }, data: { fichaJson: fichaConSenal() } })
 
     await qaLogin(page, 'setter')
-    await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
+    // 5.6: con señal, la raíz aterriza en m2 (llevar la ficha al Evaluador); el
+    // veredicto se transcribe en m3 — habilitada por la derivación (tarea con vuelta).
+    await page.goto(pantalla(leadId, 'm3'), { waitUntil: 'domcontentloaded' })
 
     // El form de evaluación está habilitado (la ficha tiene señal).
     await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' })
@@ -109,12 +120,12 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
 
     const opener = firstVisible(fieldControl(page, 'Tu opener'))
     const registrar = firstVisible(page.getByRole('button', { name: /Ya lo mandé en Instagram — registrar/i }))
-    // Alerta del gate ACOTADA al wizard: el único role="alert" dentro de
-    // `[data-lead-wizard]` es la caja del gate del opener (hay otro role="alert"
-    // global —del toaster— fuera del wizard, por eso se acota). El texto exacto
+    // Alerta del gate ACOTADA a la zona Registro del manual (5.6): el único
+    // role="alert" ahí es la caja del gate del opener (hay otro role="alert"
+    // global —del toaster— fuera de la zona, por eso se acota). El texto exacto
     // vive en guidance-content (GUIA_OPENER.gate) y ya driftó una vez → se asserta
     // el COMPORTAMIENTO, no la frase.
-    const gateAlert = vis(page.locator('[data-lead-wizard]').getByRole('alert'))
+    const gateAlert = vis(page.locator('section[aria-label="Registro"]').getByRole('alert'))
 
     // 🔴 ASSERT CRÍTICO — COMPORTAMIENTO del gate `contieneLink`: un link BLOQUEA
     // (botón deshabilitado) y hace visible la alerta del gate.
@@ -133,8 +144,9 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     const count1 = await prisma.osLeadActivity.count({ where: { leadId, channel: { not: 'SISTEMA' } } })
     expect(count1, '1 contacto tras el opener').toBe(1)
 
-    // Idempotencia: al recargar ya figura "Enviado" y no se puede re-registrar.
-    await page.reload({ waitUntil: 'domcontentloaded' })
+    // Idempotencia: la posición re-deriva a la espera (la raíz ya no aterriza en
+    // m4); m4 queda COMPLETADA y de consulta — figura "Enviado", sin re-registro.
+    await page.goto(pantalla(leadId, 'm4'), { waitUntil: 'domcontentloaded' })
     await expect(firstVisible(page.getByText('Enviado'))).toBeVisible()
     const count2 = await prisma.osLeadActivity.count({ where: { leadId, channel: { not: 'SISTEMA' } } })
     expect(count2, 'sigue habiendo 1 contacto').toBe(1)
@@ -198,14 +210,19 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await prisma.osLeadDossier.update({ where: { leadId }, data: { escaladoAt: new Date() } })
 
     await qaLogin(page, 'setter')
-    await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
+    // 5.6: el borrador vive en m13 (habilitada en CONSTRUCCION sin draft; la
+    // raíz aterriza en la primera fase sin tildar).
+    await page.goto(pantalla(leadId, 'm13'), { waitUntil: 'domcontentloaded' })
 
-    // Draft: URL + confirmación + guardar.
-    await firstVisible(fieldControl(page, 'URL del draft')).fill('https://smoke-demo.netlify.app')
+    // Borrador (el «draft» del wizard, vocabulario 2.x): URL + confirmación + guardar.
+    await firstVisible(fieldControl(page, 'URL del borrador')).fill('https://smoke-demo.netlify.app')
     await firstVisible(page.getByRole('switch', { name: /Confirmo que abrí el link y carga/i })).click()
-    await firstVisible(page.getByRole('button', { name: 'Guardar draft' })).click()
-    await expectToast(page, /Draft guardado/i)
+    await firstVisible(page.getByRole('button', { name: 'Guardar borrador' })).click()
+    await expectToast(page, /Borrador guardado/i)
     expect((await getDossier(leadId))?.draftUrl).toBeTruthy()
+
+    // El chequeo final vive en m14 (se habilita con el borrador publicado).
+    await page.goto(pantalla(leadId, 'm14'), { waitUntil: 'domcontentloaded' })
 
     // Self-check: TeachPanel + ejemplo presentes.
     await expect(firstVisible(page.getByText('¿Por qué importa?'))).toBeVisible()
@@ -222,7 +239,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     ]) {
       await firstVisible(page.getByRole('switch', { name: nombre })).click()
     }
-    await firstVisible(page.getByRole('button', { name: 'Guardar self-check' })).click()
+    await firstVisible(page.getByRole('button', { name: 'Guardar el chequeo' })).click()
 
     // Enviar a revisión (gate: draft + self-check aprobado).
     const enviar = firstVisible(page.getByRole('button', { name: 'Enviar a revisión' }))
@@ -303,7 +320,8 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
   })
 
   await qaLogin(page, 'setter')
-  await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
+  // 5.6: el veredicto se transcribe en m3 (habilitada — la ficha tiene señal).
+  await page.goto(pantalla(lead.id, 'm3'), { waitUntil: 'domcontentloaded' })
 
   await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' }).getByRole('radio', { name: '2' })).click()
   await pickSelect(page, 'Veredicto del Evaluador', /^Descartar$/i)
@@ -318,9 +336,14 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
     expect((await getDossier(lead.id))?.stage).toBe('DESCARTADA')
   }).toPass({ timeout: 15_000 })
 
-  // Wizard colapsa: el self-check NO se renderiza para un lead descartado.
-  await page.reload({ waitUntil: 'domcontentloaded' })
+  // El manual colapsa al veredicto: DESCARTADA es terminal — la raíz aterriza en
+  // m3 (sin pantallas por delante) y nada de producción se renderiza.
+  await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/m3$/)
   await expect(page.getByRole('heading', { name: 'Self-check' })).toHaveCount(0)
+  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige a m3.
+  await page.goto(pantalla(lead.id, 'm14'), { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/m3$/)
 })
 
 test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió cambios"', async ({ page }) => {
@@ -350,7 +373,10 @@ test('B11 · AGENDA: un lead con reunión agendada refleja "Reunión agendada" (
   await prisma.osLeadDossier.update({ where: { leadId: lead.id }, data: { agendaJson: agendaAgendadaJson() } })
 
   await qaLogin(page, 'setter')
-  await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
+  // 5.6: la agenda vive en m16 — COMPLETADA con la reunión agendada (navegable
+  // de consulta; la raíz aterriza en el envío/espera según el gate).
+  await page.goto(pantalla(lead.id, 'm16'), { waitUntil: 'domcontentloaded' })
 
-  await expect(firstVisible(page.getByRole('heading', { name: 'Reunión agendada' }))).toBeVisible()
+  await expect(page).toHaveURL(/\/manual\/m16$/)
+  await expect(firstVisible(page.getByText('Reunión agendada'))).toBeVisible()
 })

@@ -7,7 +7,10 @@ import {
   rutaManual,
 } from '@/lib/leados/manual'
 import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
+import { UrgenciaBanner } from '../../_components/urgencia-banner'
+import { ReabrirConstruccion } from '../_components/construccion-ctas'
 import { EstadoManual } from '../_components/estado-manual'
+import { HistorialDelLead } from '../_components/historial-lead'
 import {
   ConstruccionContexto,
   ConstruccionMunicion,
@@ -23,6 +26,7 @@ import { M13Contexto, M13Municion, M13Registro } from '../_components/m13-borrad
 import { M14Contexto, M14Municion, M14Registro } from '../_components/m14-chequeo'
 import { M15Contexto, M15Municion, M15Registro } from '../_components/m15-envio'
 import { M16Contexto, M16Municion, M16Registro } from '../_components/m16-agenda'
+import type { CabeceraLead } from '../_components/manual-nav'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -62,15 +66,34 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   // Narrowea a `FaseId` dentro de la rama de slots — sin non-null assertion.
   const faseConstruccion = faseDePantallaConstruccion(pantalla.id)
 
+  // 5.6 — El contexto de cabecera que la página del wizard mostraba: badges,
+  // links externos, notas y el rastro de asignación. El manual ES la experiencia.
+  const cabecera: CabeceraLead = {
+    lead: manual.leadCopy,
+    status: manual.leadStatus,
+    stage: manual.stage,
+    caliente: manual.calienteBadge,
+    contactName: manual.contactName,
+    phone: manual.leadPhone,
+    notas: manual.notas,
+    asignadoEl: manual.asignadoEl,
+  }
+
+  // 5.6 — La memoria del lead, al pie de toda pantalla (colapsable).
+  const historial = <HistorialDelLead events={manual.timeline} />
+
   if (pantalla.tipo === 'estado') {
     return (
-      <EstadoManual
-        leadId={leadId}
-        businessName={manual.lead.businessName}
-        tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
-        proximoToque={manual.proximoToque}
-        posicion={posicion}
-      />
+      <div className="space-y-5">
+        <EstadoManual
+          leadId={leadId}
+          cabecera={cabecera}
+          tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
+          proximoToque={manual.proximoToque}
+          posicion={posicion}
+        />
+        {historial}
+      </div>
     )
   }
 
@@ -87,6 +110,15 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
           pasar el chequeo final (se reseteó).
         </p>
       </div>
+    ) : undefined
+
+  // 5.6 — Turnaround visible en las fases (el banner del wizard): el negocio
+  // respondió y está esperando la demo. Null-safe: sin respuesta no renderiza.
+  const encabezado =
+    pantalla.tipo === 'reentrada' ? (
+      notaRechazo
+    ) : faseConstruccion ? (
+      <UrgenciaBanner respondioDesde={manual.respondioDesde} />
     ) : undefined
 
   // Slots por pantalla migrada — cada módulo m<N>-*.tsx llena los tres del
@@ -134,7 +166,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                     evaluacion={manual.evaluacion}
                   />
                 ),
-                municion: <M4Municion />,
+                municion: <M4Municion dmsHoy={manual.dmsHoy} />,
                 captura: (
                   <M4Registro
                     leadId={leadId}
@@ -160,6 +192,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                       businessName={manual.lead.businessName}
                       brief={manual.brief}
                       capturando={manual.stage === 'EVALUADA'}
+                      stage={manual.stage}
                     />
                   ),
                 }
@@ -179,6 +212,9 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                         faseId={faseConstruccion}
                         titulo={pantalla.corto}
                         completadas={manual.progreso.completadas}
+                        stage={manual.stage}
+                        escaladoAt={manual.escaladoAt}
+                        escaladoNota={manual.escaladoNota}
                       />
                     ),
                   }
@@ -193,6 +229,19 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                           brief={manual.brief}
                           ficha={manual.ficha}
                         />
+                      ),
+                      // 5.6 — El re-loop necesita SU transición: reabrir la
+                      // construcción (RECHAZADA→CONSTRUCCION, action intacta del
+                      // wizard). Sin esto, el chequeo final queda futuro para siempre.
+                      captura: (
+                        <div className="space-y-3">
+                          <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
+                            Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
+                            arriba). Después volvés a publicar el borrador y a pasar el chequeo
+                            final antes de reenviar — el historial de rechazos se conserva.
+                          </p>
+                          <ReabrirConstruccion leadId={leadId} />
+                        </div>
                       ),
                     }
                   : pantalla.id === 'm13'
@@ -254,6 +303,8 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                                 <M5Municion
                                   status={manual.leadStatus}
                                   followUpCount={manual.followUpCount}
+                                  lead={manual.leadCopy}
+                                  dmsHoy={manual.dmsHoy}
                                 />
                               ),
                               captura: <M5Registro leadId={leadId} />,
@@ -282,13 +333,16 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                             : {}
 
   return (
-    <PantallaManual
-      leadId={leadId}
-      businessName={manual.lead.businessName}
-      pantalla={pantalla}
-      posicion={posicion}
-      encabezado={notaRechazo}
-      {...slots}
-    />
+    <div className="space-y-5">
+      <PantallaManual
+        leadId={leadId}
+        cabecera={cabecera}
+        pantalla={pantalla}
+        posicion={posicion}
+        encabezado={encabezado}
+        {...slots}
+      />
+      {historial}
+    </div>
   )
 }

@@ -9,11 +9,10 @@ import type { FaseId } from '@/lib/leados/contracts'
 import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actions'
 
 /**
- * M7–M12 — el tilde de auto-reporte de UNA fase. Reusa el MISMO camino de
- * escritura que el checklist del wizard (`guardarProgreso → saveOwnedProgreso →
- * progresoJson`): el manual explota el checklist 6-en-uno en una pantalla por
- * fase, y cada una lleva SU tilde. El `ChecklistConstruccion` del wizard queda
- * intacto.
+ * M7–M12 — el tilde de auto-reporte de UNA fase. El MISMO camino de escritura
+ * que tenía el checklist 6-en-uno del wizard (`guardarProgreso →
+ * saveOwnedProgreso → progresoJson`), explotado en una pantalla por fase, cada
+ * una con SU tilde. Desde el corte 5.6 esta es la única presentación.
  *
  * NO es un gate (§6-3 del brief): tildar no bloquea nada ni hace avanzar —
  * `progresoJson` jamás se cablea a la transición. El único gate de Construcción

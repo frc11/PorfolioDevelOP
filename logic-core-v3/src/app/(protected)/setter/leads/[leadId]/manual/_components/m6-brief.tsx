@@ -1,8 +1,10 @@
+import type { DossierStage } from '@prisma/client'
 import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildBriefInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { BriefForm, BriefResumen } from '../../_components/brief-form'
+import { BriefSanity } from './brief-sanity'
 
 /**
  * M6 — «Armá el brief» (5.3, tramo Brief del patrón 4.2/5.1/5.2). Con la ficha y
@@ -57,22 +59,30 @@ export function M6Municion() {
   return <ToolGuide id="gemDiseno" />
 }
 
-/** Registro: el form compartido del brief (captura, EVALUADA) o el brief
- * guardado de consulta (`BriefResumen`, al volver desde BRIEF+). */
+/** Registro: el form compartido del brief (captura, EVALUADA), el sanity-check
+ * del wizard mientras el dossier sigue en BRIEF (5.6: ¿quedó genérico? →
+ * re-pegar reabre el MISMO form), o el brief de consulta (`BriefResumen`) en
+ * los stages posteriores. */
 export function M6Registro({
   leadId,
   businessName,
   brief,
   capturando,
+  stage,
 }: {
   leadId: string
   businessName: string
   brief: Brief | null
   /** true en la captura (stage EVALUADA); false al volver a la pantalla completada. */
   capturando: boolean
+  stage: DossierStage | null
 }) {
   if (!capturando && brief) {
-    return <BriefResumen brief={brief} />
+    return stage === 'BRIEF' ? (
+      <BriefSanity leadId={leadId} businessName={businessName} brief={brief} />
+    ) : (
+      <BriefResumen brief={brief} />
+    )
   }
   // El form solo llega acá en el tramo editable real: la guardia del server no
   // habilita m6 como captura fuera de EVALUADA con gate abierto.

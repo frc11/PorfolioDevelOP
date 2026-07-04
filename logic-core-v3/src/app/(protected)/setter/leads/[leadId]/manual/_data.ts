@@ -3,8 +3,10 @@ import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
 import type { Agenda, Brief, Evaluacion, Ficha, Progreso, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { getUltimaAsignacion } from '@/lib/leados/assignment-trail'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import {
+  leadRespondio,
   parseAgenda,
   parseBrief,
   parseEvaluacion,
@@ -14,8 +16,11 @@ import {
   ultimoRechazo,
 } from '@/lib/leados/flow'
 import { derivarPantalla, type PosicionManual } from '@/lib/leados/manual'
-import { listOwnedLeadActivities } from '@/lib/leados/outreach'
+import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
 import { getOwnedLead } from '@/lib/leados/ownership'
+import { esCaliente } from '@/lib/leados/revision'
+import { listOwnedLeadTimeline } from '@/lib/leados/timeline'
+import type { LeadTimelineEvent } from '../_components/lead-timeline'
 
 /**
  * Lo que las pantallas del manual necesitan del lead: identidad mínima, la
@@ -88,6 +93,25 @@ export type ManualDelLead = {
   contactName: string | null
   /** M16 — prefill del attendee: email del lead (ahí llega la confirmación de Cal.com). `lead.email`. */
   leadEmail: string | null
+  /** Cabecera (5.6) — las notas del lead que la página del wizard mostraba en su header. */
+  notas: string | null
+  /** Cabecera (5.6) — ISO de la última asignación (el cartel «te asignaron este lead»). */
+  asignadoEl: string | null
+  /** Cabecera (5.6) — el badge caliente CON guardrail de stage (`esCaliente`), a diferencia
+   * de `caliente` (campo crudo que alimenta los gates). */
+  calienteBadge: boolean
+  /** Historial (5.6) — la cronología COMPLETA (incluye SISTEMA) serializada para el pie de
+   * cada pantalla. NO alimenta `contactos`/cadencia — esos siguen leyendo `actividades`. */
+  timeline: LeadTimelineEvent[]
+  /** M7–M12 — turnaround visible (UrgenciaBanner): ISO de la última movida comercial si el
+   * lead respondió; null si no. Mismo proxy que usaba el wizard (B4). */
+  respondioDesde: string | null
+  /** M7–M12 — marca del escalamiento «me trabé» vigente (B-beta); null si no escaló. */
+  escaladoAt: string | null
+  /** M7–M12 — la nota del escalamiento (A-23): se re-sirve a su autor y prefillea el re-escalar. */
+  escaladoNota: string | null
+  /** M4/M5 — DMs comerciales de hoy del setter: alimenta `CanalSeguridad` (el freno anti-spam). */
+  dmsHoy: number
 }
 
 /**
@@ -102,9 +126,15 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   const lead = await getOwnedLead(leadId, userId)
   if (!lead) return null
 
-  const [dossier, actividades] = await Promise.all([
+  const [dossier, actividades, dmsHoy, ultimaAsignacion, timeline] = await Promise.all([
     getOwnedDossier(leadId, userId),
     listOwnedLeadActivities(leadId, userId),
+    contarDmsHoy(userId),
+    getUltimaAsignacion(leadId, userId),
+    // Lectura separada: el historial COMPLETO (incluye SISTEMA) para el pie de
+    // cada pantalla. NO alimenta `contactos`/cadencia — esos siguen leyendo
+    // `actividades` (solo comercial). Mostrar la reasignación no abre Seguimiento.
+    listOwnedLeadTimeline(leadId, userId),
   ])
 
   // Reloj request-time, fuera del render (mismo criterio que el home usa para
@@ -177,5 +207,23 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     agenda,
     contactName: lead.contactName,
     leadEmail: lead.email,
+    notas: lead.notes,
+    asignadoEl: ultimaAsignacion?.createdAt.toISOString() ?? null,
+    // El badge de la cabecera conserva el guardrail de stage (un DESCARTADA
+    // nunca es caliente) — mismo criterio que tenía el header del wizard.
+    calienteBadge: esCaliente(lead.caliente, stage),
+    // Serialización para el client boundary (Dates → ISO; sin email del performer).
+    timeline: (timeline ?? []).map((evento) => ({
+      id: evento.id,
+      channel: evento.channel,
+      result: evento.result,
+      notes: evento.notes,
+      createdAt: evento.createdAt.toISOString(),
+      performedByName: evento.performedBy?.name ?? null,
+    })),
+    respondioDesde: leadRespondio(lead.status) ? lead.updatedAt.toISOString() : null,
+    escaladoAt: dossier?.escaladoAt?.toISOString() ?? null,
+    escaladoNota: dossier?.escaladoNota ?? null,
+    dmsHoy,
   }
 }

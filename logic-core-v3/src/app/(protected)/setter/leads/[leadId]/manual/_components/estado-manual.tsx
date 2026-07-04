@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { ArrowRight, Hourglass } from 'lucide-react'
 import { formatFechaCorta } from '@/lib/leados/flow'
 import { rutaManual, type PosicionManual } from '@/lib/leados/manual'
-import { ManualHeader, NavAtras } from './manual-nav'
+import { ManualHeader, NavAtras, type CabeceraLead } from './manual-nav'
 
 type EstadoManualProps = {
   leadId: string
-  businessName: string
+  /** El contexto de cabecera del lead (5.6) — badges, links, notas, asignación. */
+  cabecera: CabeceraLead
   tipo: 'espera' | 'revision'
   /** ISO del próximo toque agendado — solo lo usa el estado de espera. */
   proximoToque: string | null
@@ -22,7 +23,7 @@ type EstadoManualProps = {
  */
 export function EstadoManual({
   leadId,
-  businessName,
+  cabecera,
   tipo,
   proximoToque,
   posicion,
@@ -37,7 +38,7 @@ export function EstadoManual({
 
   return (
     <div className="space-y-5">
-      <ManualHeader leadId={leadId} businessName={businessName} />
+      <ManualHeader cabecera={cabecera} />
 
       <section
         aria-label={esEspera ? 'Esperando respuesta del negocio' : 'Demo en revisión'}
@@ -48,9 +49,10 @@ export function EstadoManual({
           <Hourglass size={13} strokeWidth={1.5} aria-hidden className="shrink-0" />
           {esEspera ? 'En espera' : 'En revisión'}
         </p>
-        <h1 className="mt-2 text-xl font-black leading-tight tracking-tight text-zinc-100 sm:text-2xl">
+        {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
+        <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-zinc-100 sm:text-2xl">
           {esEspera ? 'Esperando respuesta del negocio' : 'Franco está revisando tu demo'}
-        </h1>
+        </h2>
         <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">{detalle}</p>
 
         {puedeRegistrar && (

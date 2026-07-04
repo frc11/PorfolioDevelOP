@@ -1,5 +1,6 @@
 import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { buildOpenerInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { OpenerForm, OpenerResumen } from '../../_components/opener-form'
@@ -53,9 +54,16 @@ export function M4Contexto({
   )
 }
 
-/** Munición: el Gem de outreach — link + qué es / qué le das (fuente `herramientas.ts`). */
-export function M4Municion() {
-  return <ToolGuide id="gemOutreach" />
+/** Munición: el Gem de outreach — link + qué es / qué le das (fuente
+ * `herramientas.ts`) + el freno anti-spam del canal (5.6: `CanalSeguridad`,
+ * la misma pieza que mostraba el paso del wizard antes de mandar el opener). */
+export function M4Municion({ dmsHoy }: { dmsHoy: number }) {
+  return (
+    <div className="space-y-4">
+      <ToolGuide id="gemOutreach" />
+      <CanalSeguridad dmsHoy={dmsHoy} />
+    </div>
+  )
 }
 
 /** Registro: el form compartido del opener (vivo) o el «Enviado» (congelado al

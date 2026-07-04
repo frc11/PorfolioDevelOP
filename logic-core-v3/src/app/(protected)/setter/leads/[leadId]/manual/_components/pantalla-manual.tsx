@@ -9,7 +9,7 @@ import {
   type PantallaDef,
   type PosicionManual,
 } from '@/lib/leados/manual'
-import { ManualHeader, NavAtras, NavConstruccion } from './manual-nav'
+import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './manual-nav'
 
 /**
  * Zona-slot del layout-tipo. Con contenido lo enmarca; sin contenido muestra el
@@ -53,7 +53,8 @@ function Zona({
 
 type PantallaManualProps = {
   leadId: string
-  businessName: string
+  /** El contexto de cabecera del lead (5.6) — badges, links, notas, asignación. */
+  cabecera: CabeceraLead
   pantalla: PantallaDef
   posicion: PosicionManual
   /** Reentrada M-R: la nota de Franco va AL FRENTE, antes de la instrucción. */
@@ -73,7 +74,7 @@ type PantallaManualProps = {
  */
 export function PantallaManual({
   leadId,
-  businessName,
+  cabecera,
   pantalla,
   posicion,
   encabezado,
@@ -92,7 +93,7 @@ export function PantallaManual({
 
   return (
     <div className="space-y-5">
-      <ManualHeader leadId={leadId} businessName={businessName} />
+      <ManualHeader cabecera={cabecera} />
 
       {encabezado}
 
@@ -145,9 +146,10 @@ export function PantallaManual({
           )}
         </div>
 
-        <h1 className="mt-2 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
+        {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
+        <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
           {pantalla.titulo}
-        </h1>
+        </h2>
         {pantalla.detalle && (
           <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">
             {pantalla.detalle}

@@ -1,8 +1,8 @@
 import Link from 'next/link'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2, GraduationCap } from 'lucide-react'
 import type { Ficha } from '@/lib/leados/contracts'
 import { buildFichaCopyBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
-import { GUIA_FICHA } from '@/lib/leados/guidance-content'
+import { GUIA_EVALUACION, GUIA_FICHA } from '@/lib/leados/guidance-content'
 import { rutaManual } from '@/lib/leados/manual'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
@@ -44,9 +44,29 @@ export function M2Contexto({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha 
   )
 }
 
-/** Munición: la herramienta externa del viaje — link + qué es / qué le das. */
+/** Munición: la herramienta externa del viaje — link + qué es / qué le das — y
+ * la tabla de criterios del Evaluador (5.6: la misma pieza que mostraba el paso
+ * del wizard — saber QUÉ mira el Gem antes de llevarle la ficha). */
 export function M2Municion() {
-  return <ToolGuide id="evaluador" />
+  return (
+    <div className="space-y-4">
+      <ToolGuide id="evaluador" />
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <GraduationCap size={12} strokeWidth={1.5} />
+          Qué mira el Evaluador (y por qué importa)
+        </p>
+        <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+          {GUIA_EVALUACION.criterios.map((criterio) => (
+            <li key={criterio.nombre} className="text-[11px] leading-relaxed text-zinc-500">
+              <span className="font-semibold text-zinc-400">{criterio.nombre}:</span>{' '}
+              {criterio.porQue}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
 }
 
 /** Registro: la vuelta. Sin estado ni gates — solo el salto a m3. */

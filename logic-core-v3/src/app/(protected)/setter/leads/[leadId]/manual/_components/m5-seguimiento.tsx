@@ -1,6 +1,7 @@
 import { CalendarClock, Phone } from 'lucide-react'
 import type { LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
+import { buildObjecionInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import {
   cadenciaInfo,
   formatFechaCorta,
@@ -9,8 +10,11 @@ import {
   STATUS_LABELS,
 } from '@/lib/leados/flow'
 import { GUIA_SEGUIMIENTO } from '@/lib/leados/guidance-content'
+import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-seguridad'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
+import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
+import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
 import { SeguimientoForm } from './seguimiento-form'
 
 /**
@@ -106,52 +110,75 @@ export function M5Contexto({
 
 /** Munición: el mensaje base del próximo toque (templado, sin link) cuando hay
  * uno pendiente; cuando la cadencia se agotó (o el negocio respondió / está
- * postergado) no hay nada que mandar — se dice por qué, encausando al cierre. */
+ * postergado) no hay nada que mandar — se dice por qué, encausando al cierre.
+ * Debajo, los guardrails del canal que el corte 5.6 trae del wizard: el freno
+ * anti-spam (`CanalSeguridad`), el límite de rol (`GuardrailRol`) y el flujo de
+ * objeciones (el Gem deflecta a reunión: nunca cotiza). */
 export function M5Municion({
   status,
   followUpCount,
+  lead,
+  dmsHoy,
 }: {
   status: LeadStatus
   followUpCount: number
+  lead: CopyBlockLead
+  dmsHoy: number
 }) {
   const respondio = leadRespondio(status)
   const cadencia = cadenciaInfo(followUpCount)
 
-  if (respondio) {
-    return (
-      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        El negocio respondió: la cadencia se frenó. De acá el objetivo es uno solo — la reunión, que
-        se agenda en «Agendá la reunión».
-      </p>
-    )
-  }
-
-  if (status === 'POSTERGADO') {
-    return (
-      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        Contacto postergado — el panel lo retoma en la fecha que marcaste. No hay toque para mandar
-        hasta entonces.
-      </p>
-    )
-  }
-
-  // Cadencia agotada: sin próximo toque. NO se ofrece un «no respondió» más — el
-  // lead se enfría y el cierre lo decide Franco (estructura de cierre del 2.x).
-  if (cadencia.agotada || cadencia.proximoToque === null) {
-    return (
-      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        La cadencia se completó: no queda un próximo toque para mandar. Si no respondió, el lead se
-        enfría — el cierre lo decide Franco.
-      </p>
-    )
-  }
-
-  return (
+  const mensajeToque = respondio ? (
+    <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+      El negocio respondió: la cadencia se frenó. De acá el objetivo es uno solo — la reunión, que
+      se agenda en «Agendá la reunión».
+    </p>
+  ) : status === 'POSTERGADO' ? (
+    <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+      Contacto postergado — el panel lo retoma en la fecha que marcaste. No hay toque para mandar
+      hasta entonces.
+    </p>
+  ) : cadencia.agotada || cadencia.proximoToque === null ? (
+    // Cadencia agotada: sin próximo toque. NO se ofrece un «no respondió» más — el
+    // lead se enfría y el cierre lo decide Franco (estructura de cierre del 2.x).
+    <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+      La cadencia se completó: no queda un próximo toque para mandar. Si no respondió, el lead se
+      enfría — el cierre lo decide Franco.
+    </p>
+  ) : (
     <CopyBlock
       titulo={`Mensaje base del toque ${cadencia.proximoToque} de ${PLANTILLAS_FOLLOW_UP.length}`}
       instruccion="Adaptalo al negocio antes de mandarlo — templado, sin link y sin precio."
       texto={PLANTILLAS_FOLLOW_UP[cadencia.proximoToque - 1]}
     />
+  )
+
+  return (
+    <div className="space-y-4">
+      {mensajeToque}
+
+      <CanalSeguridad dmsHoy={dmsHoy} />
+
+      <GuardrailRol />
+
+      <details>
+        <summary className="cursor-pointer text-xs font-medium text-zinc-500 hover:text-zinc-300">
+          ¿Te tiraron una objeción? Armá el input del Gem
+        </summary>
+        <div className="mt-3 space-y-3">
+          <TeachPanel id="objeciones" collapsible={false} />
+          <CopyBlock
+            titulo="Bloque para el Gem de outreach — objeciones"
+            instruccion="Pegale la objeción al final. El Gem deflecta a reunión: nunca cotiza."
+            texto={buildObjecionInputBlock(lead)}
+          />
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
+            <HerramientaLauncher id="gemOutreach" />
+          </div>
+        </div>
+      </details>
+    </div>
   )
 }
 

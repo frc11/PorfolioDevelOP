@@ -1,9 +1,13 @@
+import type { DossierStage } from '@prisma/client'
 import type { Brief, FaseId, Ficha } from '@/lib/leados/contracts'
 import { buildConstruccionBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { SHELL_CONSTRUCCION } from '@/lib/leados/flow'
 import { promptsParaFase } from '@/lib/leados/prompts-disenio'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
+import { BadgeProvisorio } from '../../_components/badge-provisorio'
+import { ArrancarConstruccion } from './construccion-ctas'
+import { EscalamientoConstruccion } from './escalamiento-construccion'
 import { FaseAutoReporte } from './fase-auto-reporte'
 
 /**
@@ -59,6 +63,8 @@ export function ConstruccionMunicion({ faseId }: { faseId: FaseId }) {
   const prompts = promptsParaFase(faseId)
   return (
     <div className="space-y-4">
+      {/* 5.6: el badge del wizard — la secuencia del shell es provisoria por diseño. */}
+      <BadgeProvisorio />
       {fase && fase.items.length > 0 && (
         <div className="space-y-2">
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
@@ -95,24 +101,53 @@ export function ConstruccionMunicion({ faseId }: { faseId: FaseId }) {
 }
 
 /** Registro: el tilde de auto-reporte de la fase (mismo camino que el checklist
- * del wizard, sin gatear nada). */
+ * del wizard, sin gatear nada) + las capas que el corte 5.6 trae del wizard:
+ * el CTA «Arrancar construcción» mientras el dossier sigue en BRIEF (sin la
+ * transición, el borrador m13 nunca se habilita — el tilde NO se bloquea, §6-3)
+ * y la capa de escalamiento «me trabé» en CONSTRUCCION. */
 export function ConstruccionRegistro({
   leadId,
   faseId,
   titulo,
   completadas,
+  stage,
+  escaladoAt,
+  escaladoNota,
 }: {
   leadId: string
   faseId: FaseId
   titulo: string
   completadas: FaseId[]
+  stage: DossierStage | null
+  escaladoAt: string | null
+  escaladoNota: string | null
 }) {
   return (
-    <FaseAutoReporte
-      leadId={leadId}
-      faseId={faseId}
-      titulo={titulo}
-      completadas={completadas}
-    />
+    <div className="space-y-4">
+      {stage === 'BRIEF' && (
+        <div className="space-y-3 rounded-xl border border-cyan-400/20 bg-cyan-500/[0.05] p-4">
+          <p className="max-w-xl text-xs leading-relaxed text-zinc-300">
+            El brief está listo — arrancá la construcción para habilitar el registro del
+            borrador. Tildar fases no la arranca sola.
+          </p>
+          <ArrancarConstruccion leadId={leadId} />
+        </div>
+      )}
+
+      <FaseAutoReporte
+        leadId={leadId}
+        faseId={faseId}
+        titulo={titulo}
+        completadas={completadas}
+      />
+
+      {stage === 'CONSTRUCCION' && (
+        <EscalamientoConstruccion
+          leadId={leadId}
+          escaladoAt={escaladoAt}
+          escaladoNota={escaladoNota}
+        />
+      )}
+    </div>
   )
 }

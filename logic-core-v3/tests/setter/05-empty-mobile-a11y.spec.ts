@@ -64,6 +64,8 @@ test('F3 · empty state: timeline de un lead sin movimientos', async ({ page }) 
   await qaLogin(page, 'setter')
   await page.goto(`/setter/leads/${freshLeadId}`, { waitUntil: 'domcontentloaded' })
 
+  // 5.6: el historial vive al pie del manual (colapsable) — abrirlo muestra el vacío.
+  await firstVisible(page.getByText('Ver historial del lead')).click()
   await expect(firstVisible(page.getByText(/Todavía sin movimientos registrados/i))).toBeVisible()
 })
 
@@ -89,7 +91,10 @@ test('F5 · mobile (~390px): abrir un lead no desborda', async ({ page }) => {
   await qaLogin(page, 'setter')
   await page.goto(`/setter/leads/${freshLeadId}`, { waitUntil: 'domcontentloaded' })
 
-  await expect(firstVisible(page.getByRole('list', { name: 'Pasos del dossier' }))).toBeVisible()
+  // 5.6: la raíz sirve el manual — la instrucción protagonista renderiza en mobile.
+  await expect(
+    firstVisible(page.locator('section[aria-label="Instrucción de esta pantalla"]')),
+  ).toBeVisible()
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   )
