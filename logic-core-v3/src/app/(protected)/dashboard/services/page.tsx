@@ -322,6 +322,9 @@ export default async function ServicesPage() {
                     iconName={moduleData.iconName}
                     accentColor={moduleData.accentColor}
                     showroomState="available"
+                    salesRouteHref={
+                      moduleData.slug === 'motor-resenas' ? '/dashboard/modules/motor-resenas' : undefined
+                    }
                   />
                 </StaggerItem>
               ))}

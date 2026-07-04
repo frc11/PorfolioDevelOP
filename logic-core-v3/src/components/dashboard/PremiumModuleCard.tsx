@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from 'react'
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'motion/react'
 import {
   AlertCircle,
+  ArrowRight,
   Bell,
   Bot,
   Calendar,
@@ -26,7 +28,6 @@ import type { OrganizationModuleStatus, PremiumModuleTier } from '@prisma/client
 import type { LucideIcon } from 'lucide-react'
 import { requestUpsellAction } from '@/lib/actions/upsell'
 import { adminHoverCls } from '@/lib/hover'
-import { useTransitionContext } from '@/context/TransitionContext'
 import type { ShowroomState } from '@/lib/modules/showroom'
 import { ServiceDetailModal } from './ServiceDetailModal'
 
@@ -90,6 +91,9 @@ export interface PremiumModuleCardProps {
   /** Estado del módulo en la org, sólo relevante cuando `showroomState === 'owned'`
    *  (distingue Activo de Pausado en el pill). */
   orgModuleStatus?: OrganizationModuleStatus | null
+  /** Si está seteado, el CTA de la rama `available` navega acá (Link) en vez de pedir
+   *  inline — para módulos con su propia superficie de venta dedicada (ej. LockedView). */
+  salesRouteHref?: string
 }
 
 type ReqStatus = 'idle' | 'success' | 'error'
@@ -177,12 +181,12 @@ export function PremiumModuleCard({
   accentColor,
   showroomState,
   orgModuleStatus,
+  salesRouteHref,
 }: PremiumModuleCardProps) {
   const [reqStatus, setReqStatus] = useState<ReqStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const { triggerTransition } = useTransitionContext()
 
   const Icon = ICON_MAP[iconName] ?? Bot
   const isOwned = showroomState === 'owned'
@@ -205,7 +209,10 @@ export function PremiumModuleCard({
         setReqStatus('success')
         if (navigateAfter) {
           const params = new URLSearchParams({ context: 'modulo', moduleName: name })
-          triggerTransition(`/dashboard/messages?${params.toString()}`)
+          // Navegación HARD (no triggerTransition — no aplica en portales, ni router.push):
+          // requestUpsellAction hace revalidatePath('/dashboard') al final, lo que cancela
+          // una navegación soft en curso. Mismo fix que UpgradeCtaButton.tsx/Recommendations.tsx.
+          window.location.assign(`/dashboard/messages?${params.toString()}`)
         }
         return
       }
@@ -393,15 +400,25 @@ export function PremiumModuleCard({
               <Info size={15} strokeWidth={1.5} />
             </button>
 
-            <RequestButton
-              isPending={isPending}
-              isSuccess={isSuccess}
-              onClick={() => submitInterest(true)}
-              idleIcon={<Unlock size={11} />}
-              idleLabel="Desbloquear Módulo"
-              loadingLabel="Enviando solicitud..."
-              successLabel="Solicitud enviada"
-            />
+            {salesRouteHref ? (
+              <Link
+                href={salesRouteHref}
+                className="flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] py-2.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-300 transition-all duration-300 hover:border-white/15 hover:bg-white/[0.06] hover:text-white"
+              >
+                Ver módulo
+                <ArrowRight size={11} strokeWidth={1.5} aria-hidden="true" />
+              </Link>
+            ) : (
+              <RequestButton
+                isPending={isPending}
+                isSuccess={isSuccess}
+                onClick={() => submitInterest(true)}
+                idleIcon={<Unlock size={11} />}
+                idleLabel="Desbloquear Módulo"
+                loadingLabel="Enviando solicitud..."
+                successLabel="Solicitud enviada"
+              />
+            )}
           </div>
         </>
       )}

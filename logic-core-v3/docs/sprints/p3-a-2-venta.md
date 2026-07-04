@@ -133,7 +133,7 @@ estructural de que se filtre el `priceMonthlyUsd=60` que la vitrina sí muestra.
   en un sprint aparte.
 - Selector de sucursal para `CONNECTED_NO_LOCATION('multiple')` — diferido por el brief.
 - `PremiumModuleCard` usa `triggerTransition` en portal (contradice CLAUDE.md) — el código nuevo
-  NO lo imitó; migrarlo es otro alcance.
+  NO lo imitó; migrarlo es otro alcance. **Resuelto en P3-A.2-acceso (ver abajo).**
 
 ## Archivos
 
@@ -152,3 +152,78 @@ estructural de que se filtre el `priceMonthlyUsd=60` que la vitrina sí muestra.
    honesta. El visual-qa headless no corrió (sin herramientas de preview en la sesión).
 2. **`[FALTA:precio]`**: cerrarlo antes de mostrarle la pantalla a un cliente real.
 3. **Commitear** cuando revises (lo hacés vos): 4 nuevos + 3 edits.
+
+---
+
+## P3-A.2-acceso — La vitrina lleva al LockedView (2026-07-04)
+
+### Objetivo
+
+La vitrina de `/dashboard/services` pedía `motor-resenas` inline ("Desbloquear Módulo" →
+`requestUpsellAction`) sin pasar nunca por el `LockedView` de arriba — dos puntos de pedido para
+el mismo módulo, y la pantalla de venta dedicada quedaba inalcanzable desde la vitrina. Este
+sub-sprint conecta la vitrina al LockedView como único camino de descubrimiento y deja el pedido
+viviendo solo ahí, para `motor-resenas` exclusivamente.
+
+### Qué se hizo
+
+- **`PremiumModuleCard.tsx`** (compartido por los 4 módulos vendibles del catálogo): nuevo prop
+  opcional `salesRouteHref`. Seteado, la rama `available` reemplaza el botón de pedido por un
+  `<Link>` ("Ver módulo" + `ArrowRight`) que navega ahí, con la misma paridad visual (mismas
+  clases) que el botón que reemplaza. Sin el prop (resto del catálogo), sin cambios de
+  comportamiento.
+- **`services/page.tsx`**: pasa `salesRouteHref="/dashboard/modules/motor-resenas"` SOLO para
+  `slug === 'motor-resenas'`. Los otros 3 módulos "available" (`email-marketing-pro`,
+  `agenda-inteligente`, `tienda-conectada`) no tienen ruta/LockedView propia todavía → siguen
+  pidiendo inline sin cambios. No se generaliza el patrón: no es una decisión de scope, es que no
+  hay destino para ellos.
+- **Efecto**: `requestUpsellAction` para `motor-resenas` deja de ser alcanzable desde la vitrina.
+  Único call site que queda para este módulo: `LockedView.tsx:68` (confirmado por grep + lectura
+  de código — la rama `available` de la card SIEMPRE renderiza el `<Link>` para este slug, nunca
+  el `RequestButton`; `motor-resenas` tampoco puede caer en `coming_soon`, su catálogo es
+  `ACTIVE`).
+- **Modal de info (`ServiceDetailModal.tsx`)**: confirmado sin CTA de pedido — no requirió cambios
+  (la cláusula del brief que pedía aplicar el mismo criterio ahí no tenía nada sobre lo cual
+  aplicarse).
+- **Bugfix incorporado** (a pedido explícito del usuario, alcance ampliado a los demás módulos
+  "available", no solo `motor-resenas`): el hallazgo ya anotado arriba (`triggerTransition` en
+  portal) se corrigió acá. `submitInterest` ahora navega con `window.location.assign()`
+  post-éxito — mismo patrón que `UpgradeCtaButton.tsx`/`Recommendations.tsx`, que evita la carrera
+  con el `revalidatePath('/dashboard')` de `requestUpsellAction`. Se eliminó el import de
+  `useTransitionContext`, sin otros usos en el archivo tras el cambio.
+
+### Verificación
+
+- ✅ `npx tsc --noEmit` → sin errores nuevos (único: baseline `searchconsole.ts:119`).
+- ✅ ESLint sobre los 2 archivos tocados → 0 errores/warnings.
+- ✅ Grep de `requestUpsellAction` → un solo call site alcanzable para `motor-resenas`
+  (`LockedView.tsx:68`); los demás call sites son de otras features (plan-upgrade,
+  recomendaciones, SEO), no tocados.
+- ⚠️ **Visual-qa NO ejecutable en esta sesión** (mismo límite que GATE E arriba: sin herramientas
+  de preview). El subagente hizo una lectura estática del código y confirmó JSX/props correctos
+  contra los archivos reales. Se intentó además una verificación en vivo por fuera del subagente:
+  había un `next dev` propio ya corriendo en `:3000` (PID ajeno a esta sesión) sin
+  `QA_ALLOW_LOCALHOST=1`, y reiniciarlo para habilitar el bypass de `/api/qa/login` requería matar
+  ese proceso — se le preguntó al usuario cómo proceder y no hubo respuesta a tiempo, así que
+  **no se tocó su servidor ya corriendo** y la verificación visual pixel-perfect queda
+  **DECLARADA para el humano en `:3000`** (fallback previsto por el propio brief; no es
+  regresión).
+- Build NO es gate (per brief). Sin cambios de schema.
+
+### Archivos
+
+**Editados (2):** `src/components/dashboard/PremiumModuleCard.tsx` ·
+`src/app/(protected)/dashboard/services/page.tsx`
+
+### Pendiente del humano (Valentino)
+
+1. En `:3000`, como cliente sin el módulo (ej. `cliente@sanmiguel.com`, que no tiene ningún
+   `OrganizationModule` seedeado): vitrina → "Ver módulo" → LockedView → pedir ahí. Confirmar que
+   es el único camino de pedido y que no quedó ningún botón de pedir para `motor-resenas` en la
+   vitrina (card ni modal).
+2. Confirmar que los otros módulos "available" (ej. `email-marketing-pro`) siguen mostrando
+   "Desbloquear Módulo" sin cambios, y que tras pedir exitosamente la navegación a
+   `/dashboard/messages` ocurre igual (ahora es un hard reload vía `window.location.assign`, no
+   una transición suave — esperado, no es bug).
+3. Revisar mobile además de desktop.
+4. **Commitear** cuando revises: 2 archivos editados.
