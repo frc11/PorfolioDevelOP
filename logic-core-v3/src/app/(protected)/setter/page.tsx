@@ -99,10 +99,11 @@ export default async function SetterHomePage() {
           foco que quedó por encima. Descartable: el setter que ya la cerró no la ve. */}
       <OnboardingHint />
 
-      {/* 2.2 — Secundario al foco pero presente: los handoffs recientes como
-          atajos directos al lead en su paso (DEMO_RECHAZADA → corrección;
-          DEMO_APROBADA → envío del link). Deduplicado contra el foco. Vive fuera
-          del branch de leads: un saliente sin cartera igual ve "te sacaron el lead". */}
+      {/* 2.2 / A-06 — Secundario al foco pero presente: los handoffs recientes
+          INFORMAN, y su "Abrir" ANCLA el lead como foco (mismo mecanismo que "Ir a
+          trabajarlo"), no es un atajo que reconstituye una cola paralela.
+          Deduplicado contra el foco. Vive fuera del branch de leads: un saliente
+          sin cartera igual ve "te sacaron el lead". */}
       <NovedadesPanel novedades={novedades} />
 
       {homeLeads.length > 0 && (

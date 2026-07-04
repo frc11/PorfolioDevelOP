@@ -105,9 +105,18 @@ test('A4 · paneles de cabina: Novedades, Tu semana, Mis números, badge topbar'
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
   // Novedades (hay un aviso sembrado).
-  await expect(firstVisible(page.getByRole('region', { name: 'Novedades de tu cartera' }))).toBeVisible()
+  const novedades = firstVisible(page.getByRole('region', { name: 'Novedades de tu cartera' }))
+  await expect(novedades).toBeVisible()
   await expect(firstVisible(page.getByText('Tus demos esperando a Franco'))).toBeVisible()
   await expect(firstVisible(page.getByRole('button', { name: /Marcar como vistas/i }))).toBeVisible()
+
+  // A-06: novedades INFORMA, no reconstituye una segunda cola. La cola en revisión
+  // es un RESUMEN (no una lista navegable) que deriva a la cartera, y el "Abrir" de
+  // un aviso es un BOTÓN que ancla el foco (no un link directo). Guarda dura: la
+  // región NO contiene NINGÚN link — si reapareciera una cola navegable, esto rompe.
+  await expect(novedades.getByRole('link')).toHaveCount(0)
+  await expect(firstVisible(page.getByText(/esperando revisión de Franco/i))).toBeVisible()
+  await expect(firstVisible(page.getByText(/filtro «Esperando revisión»/i))).toBeVisible()
   // Badge del topbar (novedades sin ver).
   await expect(firstVisible(page.getByRole('link', { name: /novedades sin ver/i }))).toBeVisible()
   // "Tu semana" (hay un contacto reciente sembrado).

@@ -10,9 +10,10 @@
  *     (`contarNovedadesSinLeer`), ambos resilientes (un fallo de lectura no
  *     blanquea la cartera);
  *   - la marca "visto" (`marcarNovedadesVistas`);
- *   - la derivación LIVE de "tu demo en cola hace X" (`derivarDemosEnCola`), que
- *     NO es un evento sino el estado vigente de las demos EN_REVISION del setter
- *     (lo que Franco ya ve del otro lado vía pipeline/revision).
+ *   - el RESUMEN LIVE de la cola en revisión (`derivarColaRevision`), que NO es un
+ *     evento sino el estado vigente de las demos EN_REVISION del setter (lo que
+ *     Franco ya ve del otro lado vía pipeline/revision). A-06: es un agregado que
+ *     informa, no una segunda cola de leads navegables en paralelo al foco.
  *
  * Aislamiento (regla de oro): toda lectura del feed filtra por `setterId`
  * (`ownSetterNoticeWhere`) y la derivación de la cola por `assignedToId` (los
@@ -120,68 +121,79 @@ export type AvisoView = {
   body: string
   /** "hace 20 min" / "hace 3 h" — antigüedad del aviso. */
   hace: string
-  /** Link al lead, o null cuando ya no es abrible (reasignación-saliente). */
-  href: string | null
+  /**
+   * A-06 — el lead que "Abrir" ANCLA como foco (no un href de navegación
+   * directa): abrir desde un aviso pasa por el MISMO mecanismo del foco, no
+   * reconstituye una segunda cola. `null` cuando no hay lead abrible
+   * (reasignación-saliente: el setter ya no es dueño → el aviso solo informa).
+   */
+  leadId: string | null
 }
 
-export type DemoEnColaView = {
-  leadId: string
-  businessName: string
-  /** Hace cuánto la demo espera revisión de Franco (lo que él ve del otro lado). */
+/**
+ * A-06 — RESUMEN (no lista navegable) de las demos del setter EN_REVISION.
+ * Antes era una segunda cola: cada demo un link directo al lead, en paralelo al
+ * foco. Ahora informa cuántas esperan a Franco y hace cuánto la más vieja; el
+ * acceso a esas demos es por la cartera (filtro «Esperando revisión»), no por una
+ * cola propia. `null` = ninguna en revisión (el bloque no se muestra).
+ */
+export type ColaRevisionResumen = {
+  total: number
+  /** Hace cuánto espera la demo MÁS vieja (la que más urge que Franco mire). */
   hace: string
-  href: string
 }
 
 export type NovedadesView = {
   avisos: AvisoView[]
-  enCola: DemoEnColaView[]
+  /** Resumen de la cola en revisión, o null si no hay ninguna. */
+  revision: ColaRevisionResumen | null
   /** Avisos sin leer (badge). Puede superar `avisos.length` (que está capado). */
   totalSinLeer: number
 }
 
-/** Link del aviso: el saliente NUNCA linkea (el setter no es dueño); el resto sí. */
-function hrefNovedad(kind: OsSetterNoticeKind, leadId: string | null): string | null {
+/**
+ * Lead que "Abrir" ancla como foco: el saliente NUNCA abre (el setter ya no es
+ * dueño → sólo informa); el resto sí. Mismo criterio de "abrible" que antes
+ * decidía el link directo, ahora al servicio del anclaje del foco.
+ */
+function leadAbrible(kind: OsSetterNoticeKind, leadId: string | null): string | null {
   if (kind === 'LEAD_REASIGNADO_SALIENTE' || !leadId) return null
-  return `/setter/leads/${leadId}`
+  return leadId
 }
 
 /**
- * Demos del setter EN_REVISION, de la que más espera a la que menos. Derivada
- * (cero campos nuevos) de los leads YA filtrados por `assignedToId`
- * (`listOwnedLeads`): el aislamiento de la cola es el de la cartera. El proxy de
- * "desde cuándo espera" es `dossier.updatedAt` — la transición a EN_REVISION es
- * su último write, mismo criterio que `ordenarCola` (revision.ts). Pura: `ahora`
- * se inyecta.
+ * Resumen de las demos del setter EN_REVISION: cuántas y hace cuánto la más
+ * vieja. Derivado (cero campos nuevos) de los leads YA filtrados por
+ * `assignedToId` (`listOwnedLeads`): el aislamiento es el de la cartera. El proxy
+ * de "desde cuándo espera" es `dossier.updatedAt` — la transición a EN_REVISION
+ * es su último write, mismo criterio que `ordenarCola` (revision.ts). A-06: ya no
+ * emite una lista navegable — sólo el agregado. Pura: `ahora` se inyecta.
  */
-export function derivarDemosEnCola(
+export function derivarColaRevision(
   leads: OwnedLeadWithDossier[],
   ahora: Date,
-): DemoEnColaView[] {
-  const enCola: { leadId: string; businessName: string; esperaDesde: Date }[] = []
+): ColaRevisionResumen | null {
+  let total = 0
+  let esperaMasVieja: Date | null = null
   for (const lead of leads) {
     const dossier = lead.dossier
     if (dossier?.stage === 'EN_REVISION') {
-      enCola.push({
-        leadId: lead.id,
-        businessName: lead.businessName,
-        esperaDesde: dossier.updatedAt,
-      })
+      total += 1
+      if (!esperaMasVieja || dossier.updatedAt < esperaMasVieja) {
+        esperaMasVieja = dossier.updatedAt
+      }
     }
   }
-  enCola.sort((a, b) => a.esperaDesde.getTime() - b.esperaDesde.getTime())
-  return enCola.map((demo) => ({
-    leadId: demo.leadId,
-    businessName: demo.businessName,
-    hace: formatEspera(demo.esperaDesde, ahora),
-    href: `/setter/leads/${demo.leadId}`,
-  }))
+  if (total === 0 || !esperaMasVieja) return null
+  return { total, hace: formatEspera(esperaMasVieja, ahora) }
 }
 
 /**
- * El panorama de novedades del home: avisos dirigidos sin leer + las demos en
- * cola (live). Recibe los leads YA cargados (`listOwnedLeads` en el page) para no
- * pegarle dos veces a la cartera. Resiliente: si la lectura de avisos falla, la
- * cola (derivada de los leads) igual se muestra y la cartera no se rompe.
+ * El panorama de novedades del home: avisos dirigidos sin leer + el resumen de la
+ * cola en revisión (live). Recibe los leads YA cargados (`listOwnedLeads` en el
+ * page) para no pegarle dos veces a la cartera. Resiliente: si la lectura de
+ * avisos falla, el resumen (derivado de los leads) igual se muestra y la cartera
+ * no se rompe.
  *
  * 2.2 — `excludeLeadId` deduplica contra el foco: el aviso cuyo lead YA es el
  * protagonista del home (el foco, arriba) NO se repite en la lista. Es solo
@@ -194,7 +206,7 @@ export async function getNovedadesSetter(
   opts?: { excludeLeadId?: string | null },
 ): Promise<NovedadesView> {
   const ahora = new Date()
-  const enCola = derivarDemosEnCola(leads, ahora)
+  const revision = derivarColaRevision(leads, ahora)
   const excluido = opts?.excludeLeadId ?? null
 
   try {
@@ -227,13 +239,13 @@ export async function getNovedadesSetter(
       title: row.title,
       body: row.body,
       hace: formatEspera(row.createdAt, ahora),
-      href: hrefNovedad(row.kind, row.leadId),
+      leadId: leadAbrible(row.kind, row.leadId),
     }))
 
-    return { avisos, enCola, totalSinLeer }
+    return { avisos, revision, totalSinLeer }
   } catch (error) {
     console.error('[novedades] fallo no fatal al leer avisos:', error)
-    return { avisos: [], enCola, totalSinLeer: 0 }
+    return { avisos: [], revision, totalSinLeer: 0 }
   }
 }
 
