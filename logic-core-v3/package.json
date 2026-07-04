@@ -45,6 +45,7 @@
     "check:invariant:recommendations": "npx tsx src/lib/recommendations/recommendations.invariant.ts",
     "check:invariant:gbp-connection": "npx tsx src/lib/integrations/gbp-connection.invariant.ts",
     "check:invariant:modules": "npx tsx src/lib/modules/modules.invariant.ts",
+    "check:invariant:motor-resenas-view": "npx tsx src/lib/modules/motor-resenas-view.invariant.ts",
     "check:invariant:upsell-dedup": "npx tsx src/lib/upsell/dedup.invariant.ts",
     "check:invariant:announcements": "npx tsx src/lib/announcements/announcements.invariant.ts",
     "check:invariant:referrals": "npx tsx src/lib/referrals/referrals.invariant.ts",

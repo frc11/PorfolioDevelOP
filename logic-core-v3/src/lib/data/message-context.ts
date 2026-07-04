@@ -17,6 +17,12 @@ export const MESSAGE_CONTEXTS: Record<string, string> = {
   proyecto:
     'Hola! Quería consultarles sobre el estado de mi proyecto. ¿Pueden actualizarme?',
 
+  // P3-A.2 — CTA del estado "conectando" del módulo de reseñas (la conexión GBP
+  // la hace develOP). `?context=gbp` ya era la convención en esa ruta, pero la
+  // key no existía → composer vacío. Ahora prefillea.
+  gbp:
+    'Hola! Quería saber cómo viene la conexión de mi Google Business Profile para el módulo de reseñas. ¿Me actualizan?',
+
   // MS-3 — pre-fill cuando el cliente llega desde el CTA dorado del dashboard
   // de planes. El lead ya quedó registrado en `requestUpsellAction` ANTES del
   // redirect; este mensaje es para que el cliente no escriba de cero si decide

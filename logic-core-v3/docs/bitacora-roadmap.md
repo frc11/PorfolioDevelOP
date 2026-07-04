@@ -12602,3 +12602,69 @@ este fix. Anotado, no implementado.
 1. **Commitear** cuando revises (lo hacés vos): 3 edits de lógica (`types.ts`, `rules.ts`,
    `get-recommendations-for-org.ts`) + 1 edit de test (`recommendations.invariant.ts`).
 2. Si se decide corregir el borde análogo de `motor-resenas/page.tsx:157`, es un ajuste aparte.
+   *(Cerrado por P3-A.2, abajo.)*
+
+---
+
+## ✅ P3-A.2 — Superficie de venta del módulo de reseñas + estados honestos
+
+**Objetivo:** la vista operativa de `motor-resenas` ya existía y P3-A.1 cerró el backend de
+conexión, pero un cliente SIN el módulo recibía `redirect('/dashboard')` duro (no había pantalla
+de venta) y uno CON el módulo sin conexión operativa veía una card gateada por tokens crudos.
+Este sprint construye la superficie de venta + los estados honestos módulo × conexión.
+Fuente de verdad detallada: `docs/sprints/p3-a-2-venta.md`.
+
+### Los 3 estados (módulo × conexión)
+`resolveMotorResenasView` (**puro**, `src/lib/modules/motor-resenas-view.ts`) sobre
+`isModuleActive` × `deriveConnectionStatus` (P3-A.1 — criterio unificado, reemplaza el
+`gbpConnected` local por tokens de `page.tsx:157`, el último criterio propio del repo):
+- Sin módulo → **`locked`**: LockedView de venta (la conexión NUNCA desbloquea — gating comercial).
+- Módulo activo + conexión no operativa (`NOT_CONNECTED` o `CONNECTED_NO_LOCATION`) →
+  **`connecting`**: "develOP está terminando de conectar tu Google… no tenés que hacer nada".
+  NUNCA la vista operativa vacía (comprado ≠ operativo).
+- Módulo activo + `OPERATIONAL` → **`operational`**: la vista existente, intacta.
+
+### Qué se construyó
+- **LockedView** (client): venta en lenguaje de dueño, 3 features REALES (sin números inventados),
+  precio **`[FALTA:precio]` visible** (pricing no cerrado; el componente NO tiene acceso al
+  catálogo — no puede filtrarse el 60 de la vitrina), CTA → `requestUpsellAction('motor-resenas',
+  'Motor de Reseñas Automático')` REUSADA tal cual (org de la SESIÓN, anti-IDOR; dedup 24h
+  server-side). **"Ya lo pediste" persistente** vía `OrganizationModule.upsellRequestCount > 0`
+  (query lazy server-side) → sin botón de re-pedido, no se puede spamear. Variante **`isPaused`**
+  honesta (hallazgo: PAUSED caía en venta). Success inline + `<Link>` a mensajes (sin
+  `triggerTransition` — no aplica en portales).
+- **ConnectingState** (server-safe): card cyan molde OnboardingStatusCard, badge "En curso",
+  link `?context=gbp` (key agregada a `message-context.ts` — era una key MUERTA que el CTA viejo
+  ya usaba en vano: composer vacío).
+- **page.tsx**: switch de 3 ramas con PageHeader idéntico; murieron el redirect, la card bespoke
+  "GBP no conectado" y los selects muertos. `AskReviewSection` (QR) queda en connecting +
+  operational (funciona sin GBP); no en locked. Empty operativo enriquecido con CTA ancla al QR
+  ("Pedir mi primera reseña").
+- **Registro admin: confirmado existente, cero código** — los pedidos caen solos en
+  `/admin/leads?tab=demand` + Inbound + webhook + notificación (P5.2).
+
+### Test
+`check:invariant:motor-resenas-view` (nuevo): truth table 2×3 completa · gating (sin módulo jamás
+operativa) · honestidad (activo + no operativa → connecting) · composición end-to-end con
+`deriveConnectionStatus` (los 8 combos crudos = el cableado exacto de la página) · determinismo.
+
+### Verificación
+Invariante nuevo **verde** · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0 errores en tocados · vecinos re-corridos verdes
+(`gbp-connection`, `modules`, `upsell-dedup`) · `prisma migrate status` up to date (sin
+migración) · **build fuera de gate** · sin commits.
+⚠️ **visual-qa NO ejecutable**: el subagente no tenía las herramientas de preview en esta sesión
+(ni llegó al timeout conocido del preloader). Inspección estática ✅ / cero ❌. **Verificación
+visual pixel-perfect DECLARADA para el humano en `:3000`** (fallback previsto por el brief).
+
+### Fuera de scope (anotado)
+Vitrina muestra `priceMonthlyUsd=60` con pricing "no cerrado" · CTA en preview de admin falla
+honesto "Sesión inválida." (precedente P5.2) · selector de sucursal para
+`CONNECTED_NO_LOCATION('multiple')` (diferido) · `PremiumModuleCard` usa `triggerTransition` en
+portal (el código nuevo no lo imitó; migrarlo es otro alcance).
+
+### Pendiente del humano
+1. **Recorrer en `:3000` los 3 estados como dueño** (desktop + mobile) — el visual-qa headless no
+   corrió. Confirmar que la copy vende y es honesta.
+2. **`[FALTA:precio]`**: cerrarlo antes de mostrarle la pantalla a un cliente real.
+3. **Commitear** cuando revises (lo hacés vos): 4 archivos nuevos + 3 edits.

@@ -1,60 +1,22 @@
 import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
-import { Star, MessageCircle } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { resolveOrgId } from '@/lib/preview'
 import { isModuleActive } from '@/lib/modules/check-activation'
+import { resolveMotorResenasView } from '@/lib/modules/motor-resenas-view'
+import { deriveConnectionStatus } from '@/lib/integrations/gbp-connection-logic'
 import { listReviews } from '@/lib/integrations/google-business-profile'
 import { prisma } from '@/lib/prisma'
 import { PageHeader } from '@/components/ui'
-import { EmptyStateMuted } from '@/components/ui/EmptyStateMuted'
+import { EmptyStateMuted, emptyMutedCtaSecondaryCls } from '@/components/ui/EmptyStateMuted'
 import { ReviewItem } from './_components/ReviewItem'
 import { AskReviewSection } from './_components/AskReviewSection'
+import { ConnectingState } from './_components/ConnectingState'
+import { LockedView } from './_components/LockedView'
 
 export const dynamic = 'force-dynamic'
 
-async function ReviewsList({
-  organizationId,
-  gbpConnected,
-}: {
-  organizationId: string
-  gbpConnected: boolean
-}) {
-  if (!gbpConnected) {
-    return (
-      <div
-        style={{
-          background: 'rgba(255,255,255,0.025)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '12px',
-        }}
-        className="px-5 py-12 text-center"
-      >
-        <div className="mx-auto flex max-w-sm flex-col items-center">
-          <div
-            className="flex h-14 w-14 items-center justify-center rounded-2xl"
-            style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}
-          >
-            <Star size={24} strokeWidth={1.5} className="text-cyan-400" />
-          </div>
-          <p className="mt-4 text-sm font-bold text-zinc-300">Google Business Profile no conectado</p>
-          <p className="mt-2 text-xs leading-relaxed text-zinc-500">
-            Para ver y responder reseñas necesitás conectar tu cuenta de Google Business Profile.
-            Tu equipo de develOP puede hacerlo por vos.
-          </p>
-          <a
-            href="/dashboard/messages?context=gbp"
-            className="mt-5 inline-flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-black uppercase tracking-widest text-cyan-300 transition hover:bg-cyan-500/20"
-          >
-            <MessageCircle size={13} strokeWidth={1.5} />
-            Hablar con develOP
-          </a>
-        </div>
-      </div>
-    )
-  }
-
+async function ReviewsList({ organizationId }: { organizationId: string }) {
   const reviews = await listReviews(organizationId)
 
   if (reviews.length === 0) {
@@ -62,8 +24,12 @@ async function ReviewsList({
       <EmptyStateMuted
         icon={Star}
         title="Sin reseñas todavía"
-        description="Cuando recibas reseñas en tu perfil de Google Business van a aparecer acá para que puedas responderlas."
-      />
+        description="Tu Google ya está conectado. Cuando lleguen reseñas van a aparecer acá para responderlas; mientras tanto podés pedir la primera con el QR de acá abajo."
+      >
+        <a href="#pedir-resenas" className={emptyMutedCtaSecondaryCls}>
+          Pedir mi primera reseña
+        </a>
+      </EmptyStateMuted>
     )
   }
 
@@ -140,21 +106,30 @@ export default async function MotorResenasPage() {
   const organizationId = await resolveOrgId()
   if (!organizationId) redirect('/login')
 
-  const isActive = await isModuleActive(organizationId, 'motor-resenas')
-  if (!isActive) redirect('/dashboard')
-
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: {
-      companyName: true,
-      googleMapsPlaceId: true,
-      gbpAccessToken: true,
-      gbpRefreshToken: true,
-    },
-  })
+  const [moduleActive, org] = await Promise.all([
+    isModuleActive(organizationId, 'motor-resenas'),
+    prisma.organization.findUnique({
+      where: { id: organizationId },
+      select: { googleMapsPlaceId: true, gbpConnectedAt: true, gbpLocationId: true },
+    }),
+  ])
   if (!org) redirect('/login')
 
-  const gbpConnected = !!(org.gbpAccessToken && org.gbpRefreshToken)
+  // Estado unificado P3-A.1 (deriveConnectionStatus): mismo criterio de "operativo"
+  // que el motor de reglas — reemplaza el gbpConnected local por tokens crudos.
+  const view = resolveMotorResenasView({
+    moduleActive,
+    connection: deriveConnectionStatus(org),
+  })
+
+  // "Ya lo pediste" solo interesa en la vista de venta (lazy: no se paga en las otras).
+  const demand =
+    view === 'locked'
+      ? await prisma.organizationModule.findFirst({
+          where: { organizationId, module: { slug: 'motor-resenas' } },
+          select: { status: true, upsellRequestCount: true },
+        })
+      : null
 
   return (
     <div className="flex flex-col gap-6">
@@ -166,13 +141,26 @@ export default async function MotorResenasPage() {
         accent="amber"
       />
 
-      {/* Reviews */}
-      <Suspense fallback={<ReviewsSkeleton />}>
-        <ReviewsList organizationId={organizationId} gbpConnected={gbpConnected} />
-      </Suspense>
+      {view === 'locked' ? (
+        <LockedView
+          alreadyRequested={(demand?.upsellRequestCount ?? 0) > 0}
+          isPaused={demand?.status === 'PAUSED'}
+        />
+      ) : view === 'connecting' ? (
+        <ConnectingState />
+      ) : (
+        <Suspense fallback={<ReviewsSkeleton />}>
+          <ReviewsList organizationId={organizationId} />
+        </Suspense>
+      )}
 
-      {/* Ask review section */}
-      <AskReviewSection placeId={org.googleMapsPlaceId} />
+      {/* El QR usa googleMapsPlaceId (independiente de la conexión GBP): vale en
+          connecting y operational; a quien no contrató no se le regala la herramienta. */}
+      {view !== 'locked' && (
+        <div id="pedir-resenas">
+          <AskReviewSection placeId={org.googleMapsPlaceId} />
+        </div>
+      )}
     </div>
   )
 }
