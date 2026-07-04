@@ -65,7 +65,7 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
     : null
 
   return (
-    <header className="space-y-3">
+    <header className="space-y-2 sm:space-y-3">
       <Link
         href="/setter"
         className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
@@ -74,7 +74,9 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
         Volver a tu cartera
       </Link>
 
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+      {/* Eyebrow redundante en mobile: la instrucción de abajo ya nombra el paso.
+          Se oculta en mobile para subir la acción hacia el fold (7.1). */}
+      <p className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 sm:block">
         Manual paso a paso
       </p>
 
