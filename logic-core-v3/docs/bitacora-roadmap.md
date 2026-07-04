@@ -12494,3 +12494,52 @@ gate) · sin commits.
    (perfil de servidor+`baseURL` que esta config no provee).
 2. **Commitear** cuando revises (lo hacés vos) — incluye el invariante nuevo, el
    script en `package.json`, y el borrado del spec de Playwright.
+
+---
+
+## ✅ P3-A.1 — Eslabón backend de la conexión Google Business Profile
+
+**Objetivo:** cerrar el hueco entre "tokens GBP guardados" y "cliente v4 usable" —
+descubrir account+location de Google y persistirlos, con estados de conexión honestos y
+el fill one-shot de rating/count. Solo backend + servicios server; la UI es P3-A.2.
+Fuente de verdad detallada: `docs/sprints/p3-a-1-gbp-connection.md`.
+
+### Qué cerró
+- **Descubrimiento + persistencia:** el callback (`google-business/callback/route.ts`),
+  tras persistir tokens, llama `connectGbpForOrg(orgId)` (best-effort) que lista
+  accounts/locations (Account Management + Business Information **v1**, `fetch` crudo,
+  reusando el Bearer del cliente OAuth existente) y persiste `gbpAccountId`/`gbpLocationId`
+  según cardinalidad. Antes: `route.ts:38-46` escribía solo 4 tokens y nadie poblaba los IDs.
+- **Cardinalidad (1:1):** 1 location → `OPERATIONAL`; >1 → `CONNECTED_NO_LOCATION('multiple')`
+  (elección espera al selector de P3-A.2, **sin** variante admin); 0 → `...('none')`.
+  Reconectar reemplaza, no acumula.
+- **Puente v1→v4 (crítico):** el cliente v4 interpola `gbpLocationId` como path COMPLETO
+  (`google-business-profile.ts:154,:297`), así que se persiste `accounts/{a}/locations/{l}`
+  (`composeLocationResourceName`) — la Business Information v1 devuelve `locations/{id}` pelado.
+- **Servicios P3-A.2:** `listAvailableLocations()` / `setActiveLocation(id)` (`src/lib/actions/
+  gbp-connection.ts`, `'use server'`), org de la SESIÓN nunca de un parámetro (anti-IDOR),
+  membership validada server-side.
+- **Rating one-shot best-effort:** `fetchGoogleRatingSnapshot` reusa los agregados del endpoint
+  v4 de reviews; escribe `googleRating`(null si count 0)/`googleReviewsCount`/`googleRatingUpdatedAt`
+  solo en OPERATIONAL. Falla → queda OPERATIONAL, conserva valor previo. Sin cron.
+
+### 🚩 Deuda SEC (flag, no se toca acá)
+Tokens OAuth en **claro** (patrón existente GBP/Tiendanube/Cal.com). Encriptación =
+sprint SEC dedicado.
+
+### Arquitectura
+3 capas: núcleo puro (`gbp-connection-logic.ts`, único import del invariante) · I/O fetch v1
+(`gbp-discovery.ts`) · wiring con prisma (`gbp-connection.ts`). Cliente GBP tocado solo aditivo
+(`getGbpAccessToken` + `fetchGoogleRatingSnapshot`). **Sin migración** (los 10 campos ya existían).
+
+### Verificación
+`check:invariant:gbp-connection` **verde** (cardinalidad/aislamiento anti-IDOR/best-effort/
+reconexión, con mock por DI) · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0/0 en los 8 archivos tocados · `prisma migrate status` up to
+date · **build fuera de gate** · sin commits.
+
+### Pendiente
+1. **Verificación viva PENDIENTE** — no hay cuenta GBP de prueba; el OAuth vivo + locations reales
+   no se ejercieron. No afirmar "funciona en vivo".
+2. **Commitear** cuando revises (lo hacés vos): 5 archivos nuevos + 4 edits + script en package.json.
+3. Próximo: **P3-A.2** (UI self-service: botón, wizard, selector sobre los servicios nuevos).

@@ -99,6 +99,50 @@ async function getAuthedClient(organizationId: string) {
   return oauth2Client
 }
 
+/**
+ * P3-A.1 — Accessor del access token de la org, reusando `getAuthedClient` (mantiene el
+ * auto-refresh). Lo consume la capa de descubrimiento (`gbp-discovery`) para el Bearer de
+ * la Account Management / Business Information API, sin re-implementar la carga de tokens.
+ */
+export async function getGbpAccessToken(organizationId: string): Promise<string | null> {
+  const client = await getAuthedClient(organizationId)
+  return client?.credentials.access_token ?? null
+}
+
+/**
+ * P3-A.1 — One-shot best-effort de rating/count: los agregados salen del MISMO endpoint v4
+ * de reviews que ya usa el cliente (`totalReviewCount`/`averageRating` son top-level). Devuelve
+ * null si no hay conexión/location o si la API falla — el caller lo trata como best-effort
+ * (no rompe la conexión, conserva el valor previo).
+ */
+export async function fetchGoogleRatingSnapshot(
+  organizationId: string,
+): Promise<{ rating: number; count: number } | null> {
+  const oauth2Client = await getAuthedClient(organizationId)
+  if (!oauth2Client) return null
+
+  const org = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { gbpLocationId: true },
+  })
+  if (!org?.gbpLocationId) return null
+
+  try {
+    const res = await fetch(
+      `https://mybusiness.googleapis.com/v4/${org.gbpLocationId}/reviews?pageSize=1`,
+      { headers: { Authorization: `Bearer ${oauth2Client.credentials.access_token}` } },
+    )
+    if (!res.ok) return null
+
+    const data = parseReviewsResponse(await res.json())
+    if (typeof data.totalReviewCount !== 'number') return null
+    return { rating: data.averageRating ?? 0, count: data.totalReviewCount }
+  } catch (err) {
+    console.error('[GBP] fetchGoogleRatingSnapshot error:', err)
+    return null
+  }
+}
+
 export type GBPLocationMetrics = {
   totalReviews: number
   averageRating: number
