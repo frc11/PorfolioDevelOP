@@ -156,7 +156,11 @@ export function SeguimientoForm({ leadId }: { leadId: string }) {
         </Field>
       )}
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-red-400">
+          {error}
+        </p>
+      )}
 
       {/* El botón se habilita al elegir una opción: sin esto queda disabled sin
           explicación (gap 3.6, mismo criterio que el seguimiento del wizard). */}

@@ -197,7 +197,11 @@ export function BriefForm({
         </Field>
       </div>
 
-      {serverError && <p className="text-xs text-red-400">{serverError}</p>}
+      {serverError && (
+        <p role="alert" className="text-xs text-red-400">
+          {serverError}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <Button onClick={guardar} loading={isPending}>
