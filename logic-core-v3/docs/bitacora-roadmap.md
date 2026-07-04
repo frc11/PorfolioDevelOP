@@ -12543,3 +12543,62 @@ date · **build fuera de gate** · sin commits.
    no se ejercieron. No afirmar "funciona en vivo".
 2. **Commitear** cuando revises (lo hacés vos): 5 archivos nuevos + 4 edits + script en package.json.
 3. Próximo: **P3-A.2** (UI self-service: botón, wizard, selector sobre los servicios nuevos).
+
+---
+
+## ✅ P5.1-fix-reviews-rule — Borde CONNECTED_NO_LOCATION en reviewsEngineRule
+
+**Objetivo:** tras P3-A.1, `gbpConnectedAt` se setea también cuando la conexión queda
+`CONNECTED_NO_LOCATION` (0 o >1 sucursales, sin `gbpLocationId` resuelto) — `reviewsEngineRule`
+(P5.1) disparaba igual, recomendando activar el Motor de Reseñas sin location operativa para que el
+cliente v4 tenga con qué operar. Corregir SOLO ese borde, sin tocar el resto del motor.
+
+### Relevamiento (antes de tocar)
+- `reviewsEngineRule.matches` (`rules.ts:70-74`, antes del fix) disparaba con `s.gbpConnected &&
+  googleReviewsCount < 10 && !activeModuleSlugs.includes('motor-resenas')`.
+- `gbpConnected` viene de `get-recommendations-for-org.ts:49` (antes): `Boolean(org?.gbpConnectedAt)`
+  — SOLO mira `gbpConnectedAt`, nunca `gbpLocationId`. Por eso no distinguía `OPERATIONAL` de
+  `CONNECTED_NO_LOCATION` (P3-A.1 setea `gbpConnectedAt` en ambos casos).
+- Intención original de la regla (comentario `rules.ts:60-65`): disparar cuando "la ficha ya está
+  conectada". P5.1 es anterior a P3-A.1 — esa distinción no existía todavía, así que `gbpConnectedAt`
+  era la única proxy disponible. El fix no cambia el propósito de la regla; corrige la proxy con el
+  criterio que P3-A.1 ya formalizó.
+
+### Qué corrigió
+- **Nueva señal `gbpOperational`** en `RecommendationSignals` (`types.ts`) — `true` SOLO si
+  `deriveConnectionStatus({ gbpConnectedAt, gbpLocationId }) === 'OPERATIONAL'` (P3-A.1,
+  `gbp-connection-logic.ts` — **reusada tal cual, sin reimplementar el criterio**).
+  `get-recommendations-for-org.ts` ahora también selecciona `gbpLocationId` en el `findUnique` y
+  calcula el campo con esa función.
+- **`reviewsEngineRule.matches`** (`rules.ts:70-74`) ahora exige `s.gbpConnected && s.gbpOperational
+  && ...` — se AGREGÓ el segundo conjunto, no se removió el primero (el resto de la regla, intacto:
+  mismo umbral de leads, mismo check de módulo activo, mismo copy/CTA/priority).
+- **`gbpConnected` no se tocó** (sigue siendo `Boolean(gbpConnectedAt)`) → `connectGbpRule` y las
+  demás reglas quedan **exactamente igual** que antes (cero edits en su código). Efecto neto para
+  una org `CONNECTED_NO_LOCATION`: ni `connect-gbp` ni `reviews-engine` disparan — hueco intencional
+  (la recomendación "elegí tu sucursal" es contenido de P3-A.2, fuera de este fix).
+
+### Test
+`recommendations.invariant.ts`: `gbpOperational: true` agregado a `baseSignals` (default sano) + 2
+aserciones nuevas en el bloque 2 (reviews-engine) — NO dispara con `gbpOperational: false` (conectada
+sin location, el borde corregido) y SIGUE disparando igual que antes con `gbpOperational: true`
+(resto del comportamiento intacto). Los bloques 1/3/8/10 (connect-gbp, XOR, anti-IDOR, motor
+completo) corren sin modificar y siguen verdes.
+
+### Verificación
+`check:invariant:recommendations` **verde** · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0/0 en los 4 archivos tocados (`types.ts`, `rules.ts`,
+`get-recommendations-for-org.ts`, `recommendations.invariant.ts`) · `prisma migrate status` up to
+date (sin migración, no se tocó el schema) · **build fuera de gate** · sin commits.
+
+### Flag fuera de scope (no tocado)
+`motor-resenas/page.tsx:157` calcula su propio `gbpConnected` local (`!!(gbpAccessToken &&
+gbpRefreshToken)`, tokens crudos — no pasa por `deriveConnectionStatus`) para gatear la UI de la
+lista de reseñas. Mismo tipo de borde potencial (`CONNECTED_NO_LOCATION` mostraría la lista sin
+location operativa) pero es una regla de UI, no del motor de recomendaciones — fuera del alcance de
+este fix. Anotado, no implementado.
+
+### Pendiente del humano
+1. **Commitear** cuando revises (lo hacés vos): 3 edits de lógica (`types.ts`, `rules.ts`,
+   `get-recommendations-for-org.ts`) + 1 edit de test (`recommendations.invariant.ts`).
+2. Si se decide corregir el borde análogo de `motor-resenas/page.tsx:157`, es un ajuste aparte.
