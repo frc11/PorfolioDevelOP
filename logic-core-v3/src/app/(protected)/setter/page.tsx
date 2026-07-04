@@ -31,8 +31,9 @@ export default async function SetterHomePage() {
   const homeLeads = buildHomeLeads(leads)
 
   // Modo dirección (2.1a): el home entrega UN lead accionable por vez. La cola
-  // "trabajar" ya viene ordenada (respondió → caliente → resto); `seleccionarFoco`
-  // elige cuál es el foco respetando el sticky (D7) que dejó la cookie.
+  // "trabajar" ya viene ordenada (A-05: fijado primero, después respondió →
+  // caliente → resto); `seleccionarFoco` elige cuál es el foco respetando el
+  // sticky (D7) que dejó la cookie.
   const particion = particionarCartera(homeLeads)
   const stickyId = await leerFocoLeadId()
   const foco = seleccionarFoco(particion.grupos.trabajar, stickyId)
@@ -41,8 +42,9 @@ export default async function SetterHomePage() {
   // hay leads, mostramos dónde quedó el trabajo. Las tres cuentas son DISJUNTAS
   // por construcción de la partición: `enEspera` = en vuelo no accionable
   // (seguimiento/revisión/agendadas); `pausados` = los que el setter pausó;
-  // `fijados` = los que el setter fijó (un fijado accionable queda fuera del foco
-  // por diseño 2.1a, así que hay que contarlo para no afirmar "0 leads activos").
+  // `fijados` = fijados NO accionables (A-05: el fijado accionable ya es foco —
+  // no llega acá; el pin ordena la cola, no la excluye. Un fijado en vuelo sí
+  // queda esperando y se cuenta para no afirmar "0 leads activos").
   const enEspera =
     particion.grupos.seguimiento.length +
     particion.grupos.revision.length +

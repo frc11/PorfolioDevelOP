@@ -10,9 +10,11 @@ import { CheckCircle2, CalendarClock, Hourglass, Pin } from 'lucide-react'
  * puro (sin interacción): presenta los conteos que ya calculó la page desde la
  * partición de la cartera.
  *
- * Las tres cuentas son disjuntas (partición). `fijados` importa: un fijado
- * accionable queda FUERA del foco por diseño (2.1a), así que sin contarlo el
- * estado afirmaría "no hay leads activos" cuando sí los hay (en la cartera, abajo).
+ * Las tres cuentas son disjuntas (partición). `fijados` acá son fijados que NO
+ * son accionables (en vuelo o fijado+pausado): desde A-05 el fijado ACCIONABLE ya
+ * es el foco (el pin ordena la cola, no la excluye), así que si esta pantalla se
+ * muestra, ninguno de los fijados tenía nada para hacer ahora — pero siguen
+ * contando para no afirmar "no hay leads activos" cuando sí los hay (cartera abajo).
  *
  * Paleta NEUTRA a propósito (disciplina B9): el cyan queda para lo accionable, y
  * acá no hay nada que accionar.
@@ -22,7 +24,8 @@ type HomeEnEsperaProps = {
   enEspera: number
   /** Pausados por el propio setter (snooze personal vigente). */
   pausados: number
-  /** Fijados por el setter — quedan fuera del foco aunque sean accionables. */
+  /** Fijados por el setter que NO son accionables (en vuelo) — A-05: el fijado
+   * accionable ya es el foco, no llega a esta pantalla. */
   fijados: number
 }
 
