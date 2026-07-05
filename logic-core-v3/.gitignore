@@ -73,3 +73,7 @@ scripts/dev/_seed-resultados-qa.ts
 # Screenshots de verificación QA (proof-e2e por sprint) — artefactos locales
 # de consulta, no código/documentación permanente; no van al historial de git.
 docs/proof-screenshots/
+
+# Evals — resultados crudos del corredor de conversaciones doradas (Q1.1).
+# Cada corrida vuelca respuestas capturadas; son artefactos, no código.
+src/modules/chatbot/evals/results/

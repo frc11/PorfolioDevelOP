@@ -12839,3 +12839,63 @@ visual **declarada para el humano** (abajo). El render es aditivo y espeja un pa
    `?utm_campaign=...`, o una fila de seed puntual).
 3. **Commitear** cuando revises (lo hacés vos).
 
+---
+## ✅ Q1.1 — Corredor de conversaciones doradas (ejecuta y captura, NO evalúa)   ·   2026-07-05
+
+Primer harness de regresión conversacional del chatbot: ejecuta conversaciones scripteadas contra
+bots QA **reales** (Gemini real, sin mocks) y **captura** las respuestas crudas para evaluación
+posterior. **NO evalúa ni puntúa** — el scoring es **Q1.2**; las `expectations` de cada escenario
+viajan verbatim al output, sin tocarse.
+
+### Qué entregó
+- **Corredor** (`src/modules/chatbot/evals/`): POST real a `/api/chatbot/{slug}/chat` por turno.
+  Consumo del stream = drenar el SSE (dispara el `onFinish` del server) y leer texto + toolCalls
+  **canónicos desde la DB** (`ChatMessage.content`/`.toolCalls` con `input`) — patrón
+  `scripts/regression/run-baseline.ts`, más fiable que parsear el SSE. Intent reconstruido offline
+  (`detectIntent` del pack; no viaja en el wire). Pacing global 2.5 s + backoff 429. Vuelca a
+  `results/<ISO>.json`.
+- **36 escenarios** (12 arquetipos × 3 packs) en JSON de datos versionado (`scenarios/*.json`),
+  validados con Zod. Arquetipos: caliente, explorador, fuera-de-KB, inyección de prompt, precio,
+  humano + 6 del rubro por pack (usados: permuta+financiación, modelo+test drive, etc.).
+- **3 bots QA dedicados** (`seed-eval-bots.ts`, idempotente, dev-only): `qaseed-evals-{base,usados,agencia}`,
+  `isActive:true`, `verticalPack` correcto, plan **BUSINESS** (4 tools + quota 5000), KB liviana por
+  vertical (incl. `forbiddenStatements`). NUNCA toca bots demo (sanmiguel/develop) ni cliente (matsu).
+- **Cleanup** (`cleanup.ts`): borra por prefijo `sessionId` `evals-` en transacción
+  (`ChatbotEvent → ChatbotLead → Conversation`, cascade a `ChatMessage`) + reset de `QuotaUsage` de
+  los bots QA (la quota no se reembolsa al borrar). Guard de host dev-only. `--keep` salta el cleanup.
+- **Comandos**: `npm run evals` (`--pack`, `--keep`) · `npm run evals:seed` (`--teardown`) ·
+  `npm run evals:purge` (`--dry`, `--reset-quota`).
+
+### Archivos
+Nuevos (11): `src/modules/chatbot/evals/{shared,types,client,capture,seed-eval-bots,cleanup,runner}.ts`,
+`scenarios/{base,usados,agencia}.json`, `README.md`. Editados: `package.json` (3 scripts) · `.gitignore`
+(`results/`). Plan + log: `docs/sprints/q1-1-harness.md`. **Cero** migración, **cero** cambio de
+runtime/packs/scoring/prompts/schema.
+
+### Verificación
+`tsc --noEmit` sin errores nuevos (único ruido: `.next/dev/types/validator.ts` generado, ajeno) · cero
+`any` · `eslint` sobre `evals/` → **limpio** · `npm run evals:seed` → **OK** (3 bots creados vs schema
+real, plan BUSINESS) · `npm run evals:purge --dry` → **OK** (host guard + Prisma + query de purga, 0
+filas) · runner front-half → **OK** (carga + Zod de los 36 escenarios + verify de los 3 bots + abort en
+preflight, **sin LLM ni writes**). **Smoke real** — `npm run evals --pack base` (12 conversaciones,
+Gemini real) → **OK**: pipeline completo (POST → stream → readback DB → captura → JSON → cleanup); 13/14
+turnos capturados + 1 timeout de persistencia **capturado honestamente** como `error` (no crashea); DB
+limpia post-run (`evals:purge --dry` → 0 filas). Hallazgo: en turnos con tool y sin texto final,
+`assistantText` (DB) puede venir vacío mientras `wireText` (SSE) trae el texto visible — por eso se
+capturan ambos.
+
+### Pendiente del humano (Valentino) — verificación declarada
+1. Levantar `npm run dev:qa` (:3002, `QA_ALLOW_LOCALHOST=1`), luego `npm run evals` una vez → ver que
+   las **36 conversaciones se ejecutan y se capturan** (NO que estén "bien" — eso es Q1.2) y que el
+   cleanup dejó la DB limpia (`npm run evals:purge -- --dry` → 0 filas). Los 3 bots QA ya quedaron
+   seedeados y el pack `base` ya se corrió en vivo en esta sesión (12 conversaciones OK); faltan las
+   corridas en vivo de `usados` y `agencia`.
+2. **Commitear** cuando revises (lo hacés vos).
+
+### Fuera de scope (anotado, no implementado)
+- Backfill `verticalPack` de bots reales (`develop`→agencia, `matsu`→usados) sigue siendo gate abierto —
+  ajeno a Q1.1.
+- Quota: corridas repetidas consumen `QuotaUsage` mensual de los bots QA; mitigado por plan de quota
+  alta + reset en cleanup.
+- No-determinismo del LLM: la captura de tools no es determinística; Q1.2 define tolerancias.
+
