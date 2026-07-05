@@ -33,6 +33,23 @@ export function parseToolCalls(raw: Prisma.JsonValue | null | undefined): ToolCa
 }
 
 /**
+ * Ventana de gracia del poll — NO es "cuánto tarda el bot en responder".
+ * `onFinish` (handleChatRequest.ts) persiste el ChatMessage del assistant
+ * ANTES de que el stream HTTP pueda cerrar: el `flush()` interno del SDK
+ * (ai@6) awaitea el callback `onFinish` completo (éxito o excepción
+ * atrapada) antes de soltar el EOF — verificado en
+ * node_modules/ai/dist/index.js. Para cuando `postTurn` ya devolvió acá en
+ * el harness, la fila o YA está escrita o NUNCA va a aparecer: no hay nada
+ * que "esperar más" del LLM. Este valor cubre SOLO la latencia incidental
+ * de la query propia del poll (Neon/pool de conexiones) — por eso 10s
+ * alcanza sobrando. NO subir esto a 30s "por las dudas": si un escenario
+ * que hoy pasa empieza a necesitar más que esto, es señal de un problema
+ * real (DB/conexión), no un timeout mal calibrado. Ver
+ * docs/sprints/q1-1-harness.md (bug del bot, no del harness).
+ */
+const ASSISTANT_MESSAGE_POLL_TIMEOUT_MS = 10_000
+
+/**
  * Poll hasta que `onFinish` haya persistido el assistant message N-ésimo
  * (`expectedAssistantCount`), o hasta el timeout. Devuelve `null` si no
  * apareció — el caller lo reporta como fallo del turno (sin reintentar).
@@ -41,7 +58,7 @@ export async function waitForAssistantMessage(
   prisma: PrismaClient,
   sessionId: string,
   expectedAssistantCount: number,
-  timeoutMs = 30_000,
+  timeoutMs = ASSISTANT_MESSAGE_POLL_TIMEOUT_MS,
 ): Promise<{ content: string; toolCalls: ToolCallRecord[]; conversationId: string } | null> {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {

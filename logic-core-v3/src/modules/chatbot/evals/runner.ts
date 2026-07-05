@@ -163,7 +163,11 @@ async function runScenario(ctx: RunCtx, scenario: Scenario): Promise<CapturedSce
   const sessionId = `${SESSION_PREFIX}${scenario.id}-${Date.now()}`
   const messages: ChatMessageInput[] = []
   const turns: CapturedTurn[] = []
-  let assistantCount = 0
+  // Cuántas filas ASSISTANT confirmamos persistidas (no cuántos turnos
+  // intentamos): un turno que timeoutea nunca deja fila, así que el próximo
+  // turno exitoso sigue pidiendo esta misma posición acumulada, no la
+  // siguiente. Ver el branch de timeout más abajo.
+  let confirmedAssistantCount = 0
   let scenarioError: string | null = null
 
   console.log(`▶  [${scenario.pack}] ${scenario.id}`)
@@ -200,22 +204,36 @@ async function runScenario(ctx: RunCtx, scenario: Scenario): Promise<CapturedSce
 
     if (res.status !== 200) {
       turn.error = `HTTP ${res.status}: ${JSON.stringify(res.errorBody)}`
-      scenarioError = turn.error
+      // `??`, no `=`: con el continue de abajo, el escenario puede ya traer
+      // un error previo (timeout) — no lo pisamos.
+      scenarioError = scenarioError ?? turn.error
       turns.push(turn)
       console.log(`   ✗ turno ${i + 1}: ${turn.error}`)
       break
     }
 
-    assistantCount++
-    const persisted = await waitForAssistantMessage(ctx.prisma, sessionId, assistantCount)
+    const expectedAssistantCount = confirmedAssistantCount + 1
+    const persisted = await waitForAssistantMessage(ctx.prisma, sessionId, expectedAssistantCount)
     if (!persisted) {
+      // Bug de bot (onFinish no persistió — ver docs/sprints/q1-1-harness.md),
+      // no del harness. NO abortamos el resto del escenario: el turno queda
+      // marcado con error (no-evaluable para Q1.2) pero seguimos con los
+      // turnos siguientes para no perder visibilidad de, ej., el turno de
+      // captura de lead que viene después de este.
       turn.error = 'timeout esperando persistencia del assistant message'
-      scenarioError = turn.error
+      scenarioError = scenarioError ?? turn.error
+      // No hay forma de saber si el asistente real dijo algo (wireText
+      // también viene vacío acá) — empujamos texto vacío solo para mantener
+      // la alternancia user/assistant que Gemini/Vertex espera (mismo
+      // criterio que useChatbot.ts en el cliente real), no para simular una
+      // respuesta que no podemos confirmar.
+      messages.push({ role: 'assistant', content: '' })
       turns.push(turn)
       console.log(`   ✗ turno ${i + 1}: ${turn.error}`)
-      break
+      continue
     }
 
+    confirmedAssistantCount = expectedAssistantCount
     turn.assistantText = persisted.content
     turn.toolCalls = persisted.toolCalls
     messages.push({ role: 'assistant', content: persisted.content })

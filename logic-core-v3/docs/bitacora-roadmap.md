@@ -12962,3 +12962,57 @@ perceptualmente (sin ANTHROPIC_API_KEY)" y siguió — degradación con gracia v
   `unknown`) son señal blanda del matcher de intents del pack, **no** un bug — Valentino decide si ajusta
   los escenarios o los patrones del pack.
 
+---
+
+## ✅ Q1.1-fix — Readback timeout en turnos lentos (`*-hot`)   ·   2026-07-05
+
+Diagnóstico + fix del timeout de persistencia del corredor Q1.1 (3 escenarios no-evaluables por
+`"timeout esperando persistencia del assistant message"` en toda corrida completa: `base-hot`,
+`usados-hot`, `agencia-hot`). **Harness-only** — no se tocó el bot; el diagnóstico concluyó bug del
+bot (no del harness), así que el fix es de robustez del harness + hallazgo anotado para un sprint
+futuro.
+
+### Diagnóstico
+La hipótesis original ("un turno tool-only no persiste texto") era **falsa** — el write del
+`ChatMessage` en `onFinish` es incondicional. Hallazgo estructural clave (verificado en el código
+fuente instalado de `ai@6.0.214`): el stream HTTP no puede cerrar hasta que `onFinish` (con toda su
+cadena de persistencia) termine — para cuando el harness empieza a pollear, la fila **ya está
+escrita o nunca va a aparecer**; 30s de espera eran, en la práctica, siempre tiempo muerto. Con una
+re-corrida usando `--keep` (antes imposible: el propio cleanup del harness purgaba la evidencia de
+toda corrida previa) se confirmó que el turno que falla queda con **cero `ChatbotEvent` de cualquier
+tipo** — ni siquiera `chat.persist_error`, que el catch de `onFinish` loguea explícitamente al
+fallar — apuntando a una falla transitoria de conexión/pool (Neon) que tumba toda la request, no una
+única línea que tira y se atrapa limpio. Refutado también que sea específico de `capture_lead` o de
+los escenarios "hot": la re-corrida golpeó 5 escenarios distintos y no relacionados, y `agencia-hot`
+(que había fallado antes) esta vez completó sus 2 turnos limpio con `capture_lead` disparando bien.
+Es intermitente a nivel de infraestructura, no determinístico por contenido.
+
+### Fix (`src/modules/chatbot/evals/`, 2 archivos)
+1. `capture.ts`: timeout de persistencia 30s → 10s (constante nombrada + comentario del porqué).
+2. `runner.ts`: un timeout ya no aborta el resto del escenario (`break`→`continue`) — recupera
+   visibilidad de los turnos siguientes. Requirió `confirmedAssistantCount` (solo avanza en éxito
+   confirmado, si no el turno siguiente pediría la posición equivocada y timeotearía siempre) +
+   decidir qué empujar al historial (`{role:'assistant', content:''}` — el server usa el array del
+   cliente **verbatim**, sin reconstruir de la DB, así que la alternancia user/assistant importa).
+
+### Verificación
+Corrida completa (36 escenarios, `--keep`): **43→44 turnos** (exactamente +1 — `agencia-hot` ahora
+completa su 2º turno). Comparación automatizada contra la corrida base: de 36, 4 difieren en
+presencia de error, y los 4 consistentes con la intermitencia ya confirmada (2 golpes nuevos
+aleatorios + recuperación completa de `agencia-hot`) — **cero diferencias atribuibles al cambio de
+código**. `tsc --noEmit` sin errores nuevos (baseline `searchconsole.ts:119`); lint limpio. Nota
+completa con el detalle del diagnóstico: `docs/sprints/q1-1-harness.md` (addendum al final).
+
+### Pendiente / hallazgo para sprint futuro (bot, NO harness)
+`handleChatRequest.ts`'s `onFinish` traga excepciones de su cadena de persistencia sin re-lanzar —
+si la DB falla para esa request puntual, el visitante recibe HTTP 200 normal y el turno se pierde
+sin ningún rastro (tasa observada ~11-14% de turnos bajo carga secuencial sostenida). Requiere un
+sprint dedicado al bot (`onError` en `streamText`, decidir si reintentar persistencia o garantizar
+que el logueo del fallo sobreviva). **No implementado en este sprint** (harness-only, por regla).
+
+### Fuera de scope (anotado)
+- No se tocó `handleChatRequest.ts` ni runtime/packs/scoring/prompts/schema del bot.
+- No se implementó reintento del turno (arriesga duplicar leads sintéticos y enmascarar el bug).
+- `evals/scoring/` (Q1.2) no se tocó — su regla de "escenario con error → no-evaluable entero" ya
+  maneja esto correctamente.
+
