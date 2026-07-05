@@ -101,4 +101,16 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 
 ---
 
+## UTM.1 — Deuda de seguimiento (identificada en investigación read-only post-P4.1)
+
+### UTM — embed directo sin atribución (deuda, no urgente)
+- **Sprint origen:** UTM.1 (2026-07-04) — deuda identificada en investigación read-only de seguimiento a P4.1
+- **Qué:** `/embed/[slug]` abierto como documento top-level (iframe a mano, o link directo compartido) no recibe el `postMessage develop:init` → `attribution` queda `undefined` → la sesión entera va sin UTM/referrer, en silencio. Producción usa `widget.js` (no afectado). Fix: fallback en `ChatbotEmbed` que lea `location.search` propio cuando no llega el handshake. Microsprint chico. Evidencia: `ChatbotEmbed.tsx:64-84`, `useChatbot.ts:123-135`.
+
+### UTM — punto ciego de tests (camino cliente)
+- **Sprint origen:** UTM.1 (2026-07-04) — deuda identificada en investigación read-only de seguimiento a P4.1
+- **Qué:** Ningún test ejercita el camino real del cliente: handshake iframe → `parseAttribution` → `firstTouchRef` → body del request. `utm1-smoke.mjs` fabrica el body a mano; la verificación de UTM.1 invoca `capture_lead` directo. Ambos bypassean la capa que falló en prueba manual (abrir `/embed` pelado). Si se toca widget/embed, ese camino no tiene red automatizada.
+
+---
+
 *Convenio: cuando una pendiente se ejecuta, se moverá a `bitacora-roadmap.md` como su propio sprint cerrado y se borrará de acá. No se acumulan entradas resueltas.*

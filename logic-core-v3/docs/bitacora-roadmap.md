@@ -12832,11 +12832,10 @@ visual **declarada para el humano** (abajo). El render es aditivo y espeja un pa
 (`LeadOrigins`/celda "Origen").
 
 ### Pendiente del humano (Valentino)
-1. **Verificación visual en `:3000`** (queda para vos, ❓ a confirmar): detalle de un lead **con**
-   y **sin** campaña + el desglose del home. Confirmar lenguaje de dueño (nada de `utm_*` crudo) y
-   que los null se ven honestos ("Sin campaña" / empty state), no vacíos.
+1. **Verificación visual — parcial (cerrada así a propósito).** En `:3000` se verificó el caso **"sin campaña"** (celda "Sin campaña" en el detalle + empty state del home). El caso **"con campaña"** (barras del desglose + celda con nombre real + suma que reconcilia) **NO se verificó visualmente**: los leads con `utmCampaign` capturados por `LogicCompanion` quedaron en un org no navegable, y no se forzó un lead de prueba. Queda cubierto **solo** por el invariante `tallyCampaigns` (garantía de suma). No es tarea pendiente — es una decisión consciente de cerrar con esta cobertura. Se confirmará visualmente cuando exista el primer lead con campaña en un org navegable (tráfico real con `widget.js`, o al cerrar el fallback de `/embed`).
 2. ⚠ El seed de QA (`scripts/dev/qa-seed-leads.ts:186`) puebla solo `utmSource`, **no**
    `utmCampaign` → los leads seedeados muestran "Sin campaña" y el home muestra el empty state.
    Para ver el caso **con** campaña hace falta un lead con `utmCampaign` (widget real con
    `?utm_campaign=...`, o una fila de seed puntual).
 3. **Commitear** cuando revises (lo hacés vos).
+
