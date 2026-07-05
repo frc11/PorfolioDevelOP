@@ -12899,3 +12899,66 @@ capturan ambos.
   alta + reset en cleanup.
 - No-determinismo del LLM: la captura de tools no es determinística; Q1.2 define tolerancias.
 
+---
+
+## ✅ Q1.2 — Evaluación de la batería: asserts duros + juez LLM   ·   2026-07-05
+
+Capa de evaluación sobre el output de Q1.1: lee un `results/<ISO>.json` y produce un **veredicto por
+escenario + resumen de corrida**. **Solo lee** el corredor de Q1.1 (no lo toca). División estricta
+(decisión B): **asserts DUROS** (determinísticos, sin LLM/red) para lo binario; **juez LLM (Opus)**
+solo para lo perceptual (tono es-AR, loreteo). El juez evalúa, no arregla.
+
+### Qué entregó
+- **Evaluador** (`src/modules/chatbot/evals/scoring/`):
+  - **Asserts duros** (`hard-asserts.ts`, puro/determinístico): `capture_lead` ⇒ `shouldCaptureLead`;
+    `show_whatsapp_handoff`/`offer_handoff_options` ⇒ `shouldHandoff` (cualquiera); `mustNotClaim` por
+    substring (case/acento-insensitive) sobre el texto resuelto; `expectedIntent` vs
+    `intentDetectedOffline` (best-effort). Siempre 4 outcomes/escenario (`skip` si la expectation está
+    ausente → los totales por categoría suman los evaluables).
+  - **🔴 Resolución de texto** (`resolve.ts`): `wireText` con fallback a `assistantText` — nunca
+    `assistantText` pelado (Q1.1 mostró que viene vacío en turnos tool-only).
+  - **🔴 No-evaluables**: escenario con `error` de Q1.1 (o todos sus turnos rotos/degradados) sale
+    entero de asserts y juez, a un bloque aparte con motivo. No cuenta ni pass ni fail — no se penaliza
+    al bot por un timeout de persistencia del harness.
+  - **Juez LLM** (`judge.ts` + `rubric.ts`): raw `@anthropic-ai/sdk` (patrón `src/lib/ai/results-insights.ts`;
+    el provider AI-SDK `AnthropicProvider` del chatbot es un **stub que tira** — no se usa). Modelo
+    `claude-opus-4-8`, configurable por `EVALS_JUDGE_MODEL`. Rúbrica FIJA (2 ejes 1-5 + nota, con
+    ejemplos bueno/malo). Parser tolerante (`parse-verdict.ts`: fences ```json, prosa, `safeParse` Zod).
+    Degrada con gracia: sin key / error API / respuesta no parseable → "no evaluado perceptualmente",
+    nunca rompe la corrida. Los no-evaluables NO se mandan al juez.
+  - **Reporte** (`report.ts`): consola + `reports/<ISO>.md`, tres bloques separados (asserts duros ·
+    juez perceptual · no-evaluables aparte).
+- **Comandos**: `npm run evals:score` (`--file <p>`, `--no-judge`) · `npm run test:q12` (unit invariante).
+
+### Archivos
+Nuevos (10): `scoring/{types,resolve,hard-asserts,parse-verdict,rubric,judge,load,report,evaluate}.ts`
++ `__tests__/q1-2.invariant.ts`. Editados: `package.json` (2 scripts) · `.gitignore` (`reports/`).
+Plan + log: `docs/sprints/q1-2-scoring.md`. **Cero** migración, **cero** `any`, **cero** cambio de
+runtime/packs/scoring del bot ni del corredor de Q1.1 (solo lee su output).
+
+### Verificación
+`tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · `eslint` sobre lo tocado →
+**limpio** · `npm run test:q12` → **OK** (resolución de texto, evaluabilidad, asserts
+captura/handoff/mustNotClaim/intent, y parser del juez con respuesta buena y mal formada). **Corrida
+real** sobre el `results/*.json` de Q1.1 (12 escenarios `base`): **11 evaluables, 1 no-evaluable**.
+Chequeo clave: **`base-hot` cae en "No evaluables"** (timeout de persistencia de Q1.1), **NO** como
+fallo de `shouldCaptureLead`. Asserts: captura 3✓, handoff 3✓, mustNotClaim 4✓, intent 2✓/3✗
+(best-effort). `--no-judge` = 100% determinístico, sin red. **Juez**: en este entorno **falta
+`ANTHROPIC_API_KEY`** en `.env.local` → el reporte marcó los 11 evaluables como "no evaluado
+perceptualmente (sin ANTHROPIC_API_KEY)" y siguió — degradación con gracia verificada en vivo.
+
+### Pendiente del humano (Valentino) — verificación declarada
+1. Setear `ANTHROPIC_API_KEY` en `.env.local` y correr `npm run evals:score` → leer los veredictos de
+   **tono** del juez (Opus) y juzgar si tienen sentido. Sin el key, el juez se omite (los asserts corren
+   igual).
+2. Confirmar en el reporte que **los escenarios con `error` de Q1.1 quedan no-evaluables, no como
+   fallos** (ya verificado con `base-hot`).
+3. **Commitear** cuando revises (lo hacés vos).
+
+### Fuera de scope (anotado)
+- `mustNotClaim` es substring literal (no semántico); el "claim" sutil lo cubre parcialmente el eje de
+  tono del juez — mejora futura.
+- `expectedIntent` best-effort: los 3 fails de `base` (esperaban `consultation`, offline detectó
+  `unknown`) son señal blanda del matcher de intents del pack, **no** un bug — Valentino decide si ajusta
+  los escenarios o los patrones del pack.
+

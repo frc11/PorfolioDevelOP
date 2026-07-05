@@ -77,3 +77,5 @@ docs/proof-screenshots/
 # Evals — resultados crudos del corredor de conversaciones doradas (Q1.1).
 # Cada corrida vuelca respuestas capturadas; son artefactos, no código.
 src/modules/chatbot/evals/results/
+# Evals — reportes de evaluación (Q1.2). Combinan asserts + juez; artefactos.
+src/modules/chatbot/evals/reports/
