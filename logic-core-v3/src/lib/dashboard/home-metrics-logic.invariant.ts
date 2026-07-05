@@ -27,6 +27,8 @@ import {
   buildFunnel,
   categorizeOrigin,
   tallyOrigins,
+  campaignLabel,
+  tallyCampaigns,
 } from './home-metrics-logic.ts'
 import { weekRangeAR, previousRangeForPeriod } from '@/lib/dates-ar'
 import { planAllows } from '@/lib/plan/plan-allows'
@@ -197,6 +199,64 @@ const DAY = 86_400_000
   assert.equal(sum, many.length, 'la suma de buckets == total de leads (los % reconcilian con el hero)')
   assert.ok(t.some((b) => b.label === 'Otros'), "'Otros' nunca se descarta (se pliega, no se cae)")
   assert.equal(t[0].label, 'Google', 'el más fuerte queda primero')
+}
+
+// ── 10. CAMPAÑA: humanización honesta del utm_campaign (P4.1) ──────────────────
+{
+  const cl = campaignLabel
+  assert.equal(cl('promo_diciembre'), 'Promo Diciembre', 'snake_case → Título legible para el dueño')
+  assert.equal(cl('launch_q3'), 'Launch Q3', 'tokens cortos también se capitalizan (q3 → Q3)')
+  assert.equal(cl('black-friday-2025'), 'Black Friday 2025', 'kebab-case + números')
+  assert.equal(cl('  Verano.2026  '), 'Verano 2026', 'trim + separador punto')
+  assert.equal(cl('PROMO'), 'Promo', 'normaliza mayúsculas gritadas')
+  // Sin campaña → null (la vista muestra "Sin campaña", NUNCA inventa un valor).
+  assert.equal(cl(null), null, 'null → null')
+  assert.equal(cl(''), null, 'vacío → null')
+  assert.equal(cl('   '), null, 'solo espacios → null')
+  assert.equal(cl('___'), null, 'solo separadores → null')
+  // Cap defensivo de largo (no rompe el layout de las barras/celda).
+  const long = cl('a'.repeat(80))
+  assert.ok(long != null && long.length <= 48, 'cap a 48 chars')
+  assert.ok(long != null && long.endsWith('…'), 'trunca con elipsis')
+}
+
+// ── 11. tallyCampaigns: cuenta reales, aparta "sin campaña", suma preservada ───
+{
+  const items = [
+    'promo_diciembre', 'promo_diciembre', 'Promo-Diciembre', // 3 → mismo bucket (case/sep-insensitive)
+    'launch_q3', // 1
+    null, null, '', '   ', // 4 sin campaña
+  ]
+  const b = tallyCampaigns(items)
+  assert.equal(b.campaigns[0].label, 'Promo Diciembre', 'la campaña más fuerte primero')
+  assert.equal(b.campaigns[0].count, 3, 'agrupa variantes del mismo slug (case/separador)')
+  assert.equal(b.campaigns[1].label, 'Launch Q3')
+  assert.equal(b.noCampaign, 4, 'null/vacío/espacios → sin campaña (no es un bucket real)')
+  // GARANTÍA de suma: reconcilia con "Leads esta semana" del hero.
+  const sum = b.campaigns.reduce((acc, c) => acc + c.count, 0) + b.noCampaign
+  assert.equal(sum, items.length, 'sum(campaigns) + noCampaign == total de leads')
+  assert.equal(b.total, items.length, 'total expuesto == total de leads')
+
+  // Todas sin campaña → campaigns:[] (dispara el empty state "Todavía sin campañas").
+  const allNull = tallyCampaigns([null, null, null])
+  assert.deepEqual(allNull.campaigns, [], 'sin campañas reales → [] (empty state)')
+  assert.equal(allNull.noCampaign, 3)
+  assert.equal(allNull.total, 3)
+
+  // Vacío total.
+  assert.deepEqual(
+    tallyCampaigns([]),
+    { campaigns: [], noCampaign: 0, total: 0 },
+    'vacío → todo en cero',
+  )
+
+  // topN: la cola de campañas reales se pliega en 'Otras campañas' sin perder la suma.
+  const many = ['c1', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', null]
+  const t = tallyCampaigns(many, 3) // 7 campañas reales distintas, topN=3
+  assert.ok(t.campaigns.length <= 3, 'respeta topN')
+  assert.ok(t.campaigns.some((c) => c.label === 'Otras campañas'), "cola plegada en 'Otras campañas'")
+  const sum2 = t.campaigns.reduce((acc, c) => acc + c.count, 0) + t.noCampaign
+  assert.equal(sum2, many.length, 'suma preservada con fold + sin campaña')
 }
 
 console.log('✓ home-metrics-logic invariants OK')

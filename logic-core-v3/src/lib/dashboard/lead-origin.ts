@@ -93,3 +93,28 @@ export function siteHost(siteUrl: string | null): string | null {
     return siteUrl.toLowerCase().replace(/^https?:\/\//, '').split('/')[0] || null
   }
 }
+
+// ── Campaña: ¿de qué campaña vino? (dimensión hermana del origen, P4.1) ─────────
+// El origen dice el CANAL (Google/Instagram/...); la campaña dice la ACCIÓN de
+// marketing concreta. Vive acá, junto a categorizeOrigin, para que la atribución
+// tenga una sola fuente de verdad (no un mapeo paralelo).
+
+/**
+ * Nombre de campaña legible para el dueño a partir del utm_campaign crudo. NUNCA
+ * se muestra el slug técnico: `promo_diciembre` → "Promo Diciembre",
+ * `launch_q3` → "Launch Q3". Sin campaña (null / vacío / solo separadores) →
+ * null (la vista lo trata como "Sin campaña", honesto, nunca inventado).
+ */
+export function campaignLabel(utmCampaign: string | null): string | null {
+  if (!utmCampaign) return null
+  const words = utmCampaign
+    .trim()
+    .toLowerCase()
+    .split(/[\s._+-]+/)
+    .filter((w) => w.length > 0)
+  if (words.length === 0) return null
+  const label = words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  // Cap defensivo para no romper el layout de las barras/celda (el sanitizer de
+  // captura ya corta a 255; acá es tope de presentación).
+  return label.length > 48 ? `${label.slice(0, 47).trimEnd()}…` : label
+}

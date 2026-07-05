@@ -15,7 +15,7 @@ import type {
 import { LeadDetail } from '@/modules/chatbot/components/dashboard/LeadDetail'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
-import { categorizeOrigin, siteHost } from '@/lib/dashboard/lead-origin'
+import { categorizeOrigin, siteHost, campaignLabel } from '@/lib/dashboard/lead-origin'
 
 export const dynamic = 'force-dynamic'
 
@@ -84,6 +84,11 @@ export default async function LeadDetailPage({ params }: PageProps) {
     siteHost(session.organization.siteUrl),
   )
 
+  // P4.1 — Campaña legible reusando el mapeo compartido (lead-origin.ts). El
+  // utm_campaign ya viene cargado en `lead` (getLeadByIdForOrg usa include).
+  // null (sin campaña / lead pre-UTM.1) → el componente muestra "Sin campaña".
+  const campaign = campaignLabel(lead.utmCampaign)
+
   return (
     <LeadDetail
       lead={lead}
@@ -92,6 +97,7 @@ export default async function LeadDetailPage({ params }: PageProps) {
       botSlug={session.organization.slug}
       showScoring={showScoring}
       originLabel={originLabel}
+      campaignLabel={campaign}
     />
   )
 }

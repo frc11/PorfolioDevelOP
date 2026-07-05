@@ -12773,3 +12773,70 @@ aditivo (pegado arriba), sin `DROP`/`ALTER` destructivo, sin backfill.
 3. **Avisar al frente panel** que la captura de UTM está viva → P4.1 puede consumirla (dashboard
    `lead-origin.ts`/`LeadDetail.tsx` ya leían estos campos, siempre `null` hasta ahora).
 4. **Commitear** cuando revises (lo hacés vos).
+
+---
+## ✅ P4.1 — Render de atribución por campaña (UTM) en el panel   ·   2026-07-04
+
+**Objetivo:** UTM.1 dejó `ChatbotLead.utmCampaign` capturado y persistido, pero como **dato
+dormido** — ningún read-path lo mostraba al dueño. Este sprint lo consume: campaña en el detalle
+del lead + desglose por campaña en el home. Solo render — cero runtime, cero captura, cero
+migración. Fuente de verdad detallada: `docs/sprints/p4-1-render-utm.md`.
+
+### Principio rector: EXTENDER, no duplicar
+La dimensión de campaña se agregó a `lead-origin.ts` (junto a `categorizeOrigin`), NO en un
+módulo paralelo → una sola fuente de verdad de atribución. El home reusa el mismo servicio
+org-scoped (`getHomeBusinessMetrics`/`businessWhere`): se sumó `utmCampaign` al `select` que ya
+corría + un `tallyCampaigns` hermano de `tallyOrigins`. El detalle no necesitó cambio de query
+(`lead.utmCampaign` ya venía por `include` en `getLeadByIdForOrg`).
+
+### Decisiones (con Valentino, antes de escribir)
+1. Label de "sin campaña" = **"Sin campaña"** (no "Directo/Otros" — es otra dimensión que el
+   "Directo" del origen). El `utm_campaign` crudo jamás se muestra.
+2. Home sin campañas → **estado vacío honesto** ("Todavía sin campañas"), como Origen/Embudo.
+
+### Qué se construyó
+- **`lead-origin.ts`**: `campaignLabel()` puro — humaniza el slug (`promo_diciembre` → "Promo
+  Diciembre", `launch_q3` → "Launch Q3"); `null`/vacío/solo-separadores → `null`; cap 48 chars.
+- **`home-metrics-logic.ts`**: `CampaignBucket`/`CampaignBreakdown` + `tallyCampaigns()` hermano
+  de `tallyOrigins`. Agrupa por label humanizado; `null` → `noCampaign` (apartado); cola > topN
+  → "Otras campañas". **Garantía de suma**: `sum(campaigns)+noCampaign == items.length`. Re-exporta
+  `campaignLabel`.
+- **`home-metrics.ts`**: `utmCampaign: true` al `select` de `periodLeads` (única línea de query),
+  `campaigns` en `HomeBusinessMetrics`, `tallyCampaigns(periodLeads.map(l => l.utmCampaign))`.
+- **`LeadCampaigns.tsx`** (nuevo, server component, espejo de `LeadOrigins`): tarjeta "Campañas"
+  a lo ancho debajo de Origen|Embudo; empty state honesto; barras cian por campaña + renglón
+  muted "Sin campaña".
+- **`SectionEmptyState.tsx`**: `variant='campaign'` → ícono `Megaphone`.
+- **`dashboard/page.tsx`**: render de `<LeadCampaigns>`.
+- **`leads/[id]/page.tsx`** + **`LeadDetail.tsx`**: prop `campaignLabel` + celda "Campaña"
+  (ícono `Megaphone`) en la grilla "Cómo llegó"; `null` → "Sin campaña".
+
+### Archivos (9)
+Modificados: `lead-origin.ts`, `home-metrics-logic.ts`, `home-metrics.ts`, `SectionEmptyState.tsx`,
+`dashboard/page.tsx`, `chatbot/leads/[id]/page.tsx`, `LeadDetail.tsx`,
+`home-metrics-logic.invariant.ts`. Creado: `home/LeadCampaigns.tsx`.
+
+### Tests
+`home-metrics-logic.invariant.ts` §10 (`campaignLabel`: humanización + null honesto + cap) y §11
+(`tallyCampaigns`: agrupa variantes, aparta null, **suma preservada**, all-null → empty state,
+fold en "Otras campañas"). `npm run check:invariant:home-metrics` → **✓ verde**.
+
+### Verificación
+`tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · cero `any` · `eslint`
+sobre los 9 archivos → **limpio** (sin output) · sin migración, sin cambio de runtime/captura.
+
+**⚠️ visual-qa NO ejecutado en esta sesión:** el subagente reportó que las herramientas de preview
+(`preview_start`/`preview_screenshot`/etc.) no estaban disponibles en su entorno (solo Read/Glob/
+Grep). No es regresión ni bug de código. Fallback sancionado (CLAUDE.md + plan): verificación
+visual **declarada para el humano** (abajo). El render es aditivo y espeja un patrón ya testeado
+(`LeadOrigins`/celda "Origen").
+
+### Pendiente del humano (Valentino)
+1. **Verificación visual en `:3000`** (queda para vos, ❓ a confirmar): detalle de un lead **con**
+   y **sin** campaña + el desglose del home. Confirmar lenguaje de dueño (nada de `utm_*` crudo) y
+   que los null se ven honestos ("Sin campaña" / empty state), no vacíos.
+2. ⚠ El seed de QA (`scripts/dev/qa-seed-leads.ts:186`) puebla solo `utmSource`, **no**
+   `utmCampaign` → los leads seedeados muestran "Sin campaña" y el home muestra el empty state.
+   Para ver el caso **con** campaña hace falta un lead con `utmCampaign` (widget real con
+   `?utm_campaign=...`, o una fila de seed puntual).
+3. **Commitear** cuando revises (lo hacés vos).

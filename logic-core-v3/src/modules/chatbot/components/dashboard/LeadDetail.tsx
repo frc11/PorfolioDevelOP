@@ -20,6 +20,7 @@ import {
   Bot,
   Save,
   Compass,
+  Megaphone,
   Sparkles,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/Badge'
@@ -85,6 +86,10 @@ interface LeadDetailProps {
   /** P1.D — Origen legible ya calculado en el server (mapeo compartido
    *  lead-origin.ts). Dato factual → visible en todos los planes. */
   originLabel: string
+  /** P4.1 — Campaña legible ya humanizada en el server (lead-origin.ts →
+   *  campaignLabel). null = lead sin campaña etiquetada → se muestra "Sin
+   *  campaña". Dato factual → visible en todos los planes. */
+  campaignLabel: string | null
 }
 
 const STATUS_BADGE: Record<ChatbotLeadStatus, { variant: 'default' | 'warning' | 'success' | 'info' | 'danger' | 'brand'; label: string }> = {
@@ -142,7 +147,7 @@ const CLASS_CONFIG: Record<Classification, {
 // Etiquetas de intención: ahora vienen del mapa compartido (lead-intent-labels),
 // con keys alineadas al enum real. Ver P1-fix.
 
-export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, originLabel }: LeadDetailProps) {
+export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, originLabel, campaignLabel }: LeadDetailProps) {
   const [status, setStatus] = useState<ChatbotLeadStatus>(lead.status)
   const [notes, setNotes] = useState(lead.internalNotes ?? '')
   const [isPending, startTransition] = useTransition()
@@ -325,6 +330,13 @@ export function LeadDetail({ lead, enriched, messages, botSlug, showScoring, ori
             <dd className="mt-0.5 flex items-center gap-1.5 text-sm text-zinc-300">
               <Compass className="h-3.5 w-3.5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
               <span>{originLabel}{chLabel ? ` · ${chLabel}` : ''}</span>
+            </dd>
+          </div>
+          <div>
+            <dt className="text-[10px] uppercase tracking-[0.24em] text-zinc-500">Campaña</dt>
+            <dd className="mt-0.5 flex items-center gap-1.5 text-sm text-zinc-300">
+              <Megaphone className="h-3.5 w-3.5 shrink-0 text-zinc-500" strokeWidth={1.5} aria-hidden />
+              <span>{campaignLabel ?? 'Sin campaña'}</span>
             </dd>
           </div>
           <div>

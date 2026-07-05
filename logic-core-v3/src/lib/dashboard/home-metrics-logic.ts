@@ -7,12 +7,13 @@
 
 import { weekRangeAR, previousRangeForPeriod, type UTCRange } from '@/lib/dates-ar'
 import { statusImpliesContact } from '@/modules/chatbot/lead-status-rules'
-import { categorizeOrigin, type OriginLabel, type OriginInput } from './lead-origin'
+import { categorizeOrigin, campaignLabel, type OriginLabel, type OriginInput } from './lead-origin'
 import type { ChatbotLeadStatus } from '@prisma/client'
 
-// El mapeo de origen se extrajo a ./lead-origin (P1.D) para compartirlo con el
-// detalle del lead. Se re-exporta para no romper a quien lo importaba desde acá.
-export { categorizeOrigin } from './lead-origin'
+// El mapeo de origen/campaña se extrajo a ./lead-origin (P1.D / P4.1) para
+// compartirlo con el detalle del lead. Se re-exporta para no romper a quien lo
+// importaba desde acá y para que la agregación de abajo tenga una sola fuente.
+export { categorizeOrigin, campaignLabel } from './lead-origin'
 export type { OriginLabel, OriginInput } from './lead-origin'
 
 // ── Período del home: SEMANA AR, actual vs anterior equivalente ────────────────
@@ -174,4 +175,60 @@ export function tallyOrigins(
   const result: OriginBucket[] = [...keep]
   if (otros > 0) result.push({ label: 'Otros', count: otros })
   return result
+}
+
+// ── Campaña: ¿qué campaña te trajo cada lead? (P4.1) ──────────────────────────
+// Dimensión hermana del origen. El label legible sale de `campaignLabel`
+// (./lead-origin, fuente única); acá queda solo la agregación del home. Los
+// leads sin campaña etiquetada (la mayoría hoy) NO se mezclan con las campañas
+// reales: se cuentan aparte en `noCampaign` para poder mostrar un estado honesto
+// ("Sin campaña" / "Todavía sin campañas") en vez de una campaña inventada.
+
+export interface CampaignBucket {
+  label: string
+  count: number
+}
+
+export interface CampaignBreakdown {
+  /** Campañas reales, orden desc. La cola más allá de topN se pliega en 'Otras campañas'. */
+  campaigns: CampaignBucket[]
+  /** Leads sin campaña etiquetada (utm_campaign null/vacío o solo separadores). */
+  noCampaign: number
+  /** sum(campaigns) + noCampaign == cantidad de leads del período (reconcilia con el hero). */
+  total: number
+}
+
+/**
+ * Agrega los utm_campaign crudos de una lista de leads. Agrupa por label
+ * humanizado (así `promo_dic` y `Promo-Dic` caen en el mismo bucket). Garantía
+ * de suma como en `tallyOrigins`: sum(campaigns) + noCampaign == items.length.
+ */
+export function tallyCampaigns(rawCampaigns: (string | null)[], topN: number = 5): CampaignBreakdown {
+  const counts = new Map<string, number>()
+  let noCampaign = 0
+  for (const raw of rawCampaigns) {
+    const label = campaignLabel(raw)
+    if (label == null) {
+      noCampaign++
+      continue
+    }
+    counts.set(label, (counts.get(label) ?? 0) + 1)
+  }
+
+  const named = Array.from(counts.entries())
+    .map(([label, count]) => ({ label, count }))
+    .sort((a, b) => b.count - a.count)
+
+  let campaigns: CampaignBucket[]
+  if (named.length <= topN) {
+    campaigns = named
+  } else {
+    // Recorte preservando la suma: top (topN-1) + el resto plegado en 'Otras campañas'.
+    const keep = named.slice(0, Math.max(0, topN - 1))
+    const folded = named.slice(Math.max(0, topN - 1)).reduce((acc, b) => acc + b.count, 0)
+    campaigns = folded > 0 ? [...keep, { label: 'Otras campañas', count: folded }] : keep
+  }
+
+  const total = named.reduce((acc, b) => acc + b.count, 0) + noCampaign
+  return { campaigns, noCampaign, total }
 }

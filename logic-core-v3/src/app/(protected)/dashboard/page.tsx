@@ -4,6 +4,7 @@ import { HealthScore } from '@/components/dashboard/home/HealthScore'
 import { BusinessHero } from '@/components/dashboard/home/BusinessHero'
 import { LeadOrigins } from '@/components/dashboard/home/LeadOrigins'
 import { LeadFunnel } from '@/components/dashboard/home/LeadFunnel'
+import { LeadCampaigns } from '@/components/dashboard/home/LeadCampaigns'
 import { OnboardingStatusCard } from '@/components/dashboard/OnboardingStatusCard'
 import { UsageMeter } from '@/components/dashboard/plan/UsageMeter'
 import { WeekResultsGrid } from '@/components/dashboard/home/WeekResultsGrid'
@@ -131,6 +132,7 @@ async function BusinessResultsServerWrapper({ organizationId }: { organizationId
         <LeadOrigins origins={metrics.origins} />
         <LeadFunnel funnel={metrics.funnel} />
       </div>
+      <LeadCampaigns campaigns={metrics.campaigns} />
     </div>
   )
 }

@@ -13,10 +13,12 @@ import {
   computeVelocity,
   buildFunnel,
   tallyOrigins,
+  tallyCampaigns,
   type LeadsDelta,
   type Velocity,
   type Funnel,
   type OriginBucket,
+  type CampaignBreakdown,
 } from './home-metrics-logic'
 import type { UTCRange } from '@/lib/dates-ar'
 
@@ -40,6 +42,7 @@ export interface HomeBusinessMetrics {
   velocity: Velocity
   funnel: Funnel
   origins: OriginBucket[]
+  campaigns: CampaignBreakdown
   semaforo: HomeSemaforo
 }
 
@@ -106,6 +109,7 @@ export async function getHomeBusinessMetrics(
         firstContactedAt: true,
         capturedAt: true,
         utmSource: true,
+        utmCampaign: true,
         conversation: { select: { referrerUrl: true } },
       },
     }),
@@ -126,12 +130,15 @@ export async function getHomeBusinessMetrics(
     })),
     ownHost,
   )
+  // Campaña: misma query org-scoped y mismo período que el resto (no se re-consulta).
+  const campaigns = tallyCampaigns(periodLeads.map((l) => l.utmCampaign))
 
   return {
     leads: computeLeadsDelta(leadsCurrent, leadsPrevious),
     velocity,
     funnel,
     origins,
+    campaigns,
     semaforo: { enabled: opts.includeClassification, hotCount, top },
   }
 }
