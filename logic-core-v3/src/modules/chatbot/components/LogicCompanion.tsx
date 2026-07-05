@@ -12,6 +12,7 @@ import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
 import { useChatbotSounds } from '../hooks/useChatbotSounds'
 import type { ToolCallInUIMessage } from './chat/types'
+import { parseAttribution } from '../shared/attribution'
 import {
   CHROME_REVEAL_OFFSET_PX,
   CHROME_REVEAL_DURATION_MS,
@@ -37,7 +38,18 @@ interface LogicCompanionProps {
 
 export function LogicCompanion({ slug }: LogicCompanionProps) {
   const pathname = usePathname() ?? '/'
-  const chatbot = useChatbot({ slug, currentPath: pathname })
+  // UTM.1 — same-origin (sin iframe de por medio): la URL real de esta carga
+  // de página está disponible directo. Deps vacías a propósito — resuelto
+  // UNA vez por mount, para no recalcular first-touch en cada cambio de ruta
+  // client-side (ver nota de first-touch en useChatbot.ts).
+  const attribution = useMemo(
+    () =>
+      typeof window === 'undefined'
+        ? undefined
+        : parseAttribution(window.location.href, document.referrer || null),
+    [],
+  )
+  const chatbot = useChatbot({ slug, currentPath: pathname, attribution })
   const sounds = useChatbotSounds()
   const reducedMotion = useReducedMotion()
 

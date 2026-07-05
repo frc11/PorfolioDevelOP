@@ -7,6 +7,7 @@ import type { PublicBotConfig } from '../shared/publicConfig'
 import { prefetchBotConfig } from '../shared/configCache'
 import type { UIChatMessage, ToolCallInUIMessage } from '../components/chat/types'
 import type { NeuroAvatarState } from '../components/avatar'
+import type { ParsedAttribution } from '../shared/attribution'
 
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return 'ssr-placeholder'
@@ -21,9 +22,41 @@ function getOrCreateSessionId(): string {
   }
 }
 
+const FIRST_TOUCH_STORAGE_KEY = 'chatbot:firstTouch'
+
+/** UTM.1 — atribución first-touch ya cacheada en esta sesión de tab, si hay. */
+function readCachedFirstTouch(): ParsedAttribution | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const raw = window.sessionStorage.getItem(FIRST_TOUCH_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as ParsedAttribution) : null
+  } catch {
+    return null
+  }
+}
+
+/** UTM.1 — persiste el first-touch UNA sola vez (llamar solo si no hay cache). */
+function writeCachedFirstTouch(value: ParsedAttribution): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.sessionStorage.setItem(FIRST_TOUCH_STORAGE_KEY, JSON.stringify(value))
+  } catch {
+    // sessionStorage deshabilitado (private mode) — igual se manda en este
+    // request, solo no sobrevive un remount de esta sesión.
+  }
+}
+
 export interface UseChatbotOptions {
   slug: string
   currentPath: string
+  /**
+   * UTM.1 — candidato de atribución first-touch para ESTE mount. `undefined`
+   * = todavía no resuelto (caso embed: espera el handshake postMessage del
+   * padre — ver ChatbotEmbed.tsx). Un valor resuelto — incluso uno todo-null
+   * (tráfico directo) — es lo que puede cachearse como first-touch si todavía
+   * no hay nada guardado.
+   */
+  attribution?: ParsedAttribution
 }
 
 // Estados degradados que el widget muestra como derivación digna a WhatsApp.
@@ -78,12 +111,28 @@ export interface UseChatbotReturn {
   navigateTo: (path: string) => void
 }
 
-export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbotReturn {
+export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions): UseChatbotReturn {
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   const sessionIdRef = useRef<string>(getOrCreateSessionId())
+  // UTM.1 — first-touch resuelto (de cache o del `attribution` candidato).
+  // null = todavía no resuelto. Ver readCachedFirstTouch/writeCachedFirstTouch
+  // arriba: se cachea UNA sola vez, nunca se pisa dentro de esta sesión de tab.
+  const firstTouchRef = useRef<ParsedAttribution | null>(null)
+  useEffect(() => {
+    if (firstTouchRef.current !== null) return
+    const cached = readCachedFirstTouch()
+    if (cached) {
+      firstTouchRef.current = cached
+      return
+    }
+    if (attribution) {
+      firstTouchRef.current = attribution
+      writeCachedFirstTouch(attribution)
+    }
+  }, [attribution])
   // Proactive teaser opener: the question text the bot "asked" via the tooltip.
   // Sent to the backend with the visitor's FIRST reply only (then cleared), so
   // the model gets the context once without re-applying it to every later turn.
@@ -212,6 +261,7 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
           // only; read-and-clear here so later turns don't re-apply it.
           const opener = proactiveOpenerRef.current
           proactiveOpenerRef.current = null
+          const ft = firstTouchRef.current
           return {
             body: {
               ...body,
@@ -224,6 +274,14 @@ export function useChatbot({ slug, currentPath }: UseChatbotOptions): UseChatbot
               sessionId: sessionIdRef.current,
               currentPath,
               ...(opener ? { proactiveOpener: opener } : {}),
+              // UTM.1 — se manda en cada turno; el servidor solo actúa sobre
+              // esto al crear la conversación (mismo trato que currentPath/
+              // referrer hoy), así que re-enviarlo en turnos posteriores es
+              // inofensivo.
+              ...(ft?.referrer ? { referrer: ft.referrer } : {}),
+              ...(ft?.utmSource ? { utmSource: ft.utmSource } : {}),
+              ...(ft?.utmMedium ? { utmMedium: ft.utmMedium } : {}),
+              ...(ft?.utmCampaign ? { utmCampaign: ft.utmCampaign } : {}),
             },
           }
         },

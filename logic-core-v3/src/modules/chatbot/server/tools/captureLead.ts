@@ -374,6 +374,11 @@ async function captureLeadExecute(
           askedSpecificModel: input.askedSpecificModel,
           providedPhone,
           providedEmail,
+          // UTM.1 — copiado 1:1 desde ctx (que a su vez viene de Conversation,
+          // ver handleChatRequest.ts). NUNCA se deriva de nada del LLM/input.
+          utmSource: ctx.utmSource ?? null,
+          utmMedium: ctx.utmMedium ?? null,
+          utmCampaign: ctx.utmCampaign ?? null,
           // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
           // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
           signals: signalsSnapshot as unknown as Prisma.InputJsonValue,

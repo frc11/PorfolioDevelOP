@@ -12668,3 +12668,108 @@ portal (el código nuevo no lo imitó; migrarlo es otro alcance).
    corrió. Confirmar que la copy vende y es honesta.
 2. **`[FALTA:precio]`**: cerrarlo antes de mostrarle la pantalla a un cliente real.
 3. **Commitear** cuando revises (lo hacés vos): 4 archivos nuevos + 3 edits.
+
+## ✅ UTM.1 — Captura de atribución first-touch (widget → conversación → lead)
+
+**Objetivo:** EV.2 dejó `ChatbotLead.utmSource/utmMedium/utmCampaign` migradas pero 100% muertas
+(el comentario del propio schema decía "se capturan al inicio de la sesión desde la URL del
+widget" — nunca se construyó). Este sprint cierra ese camino completo con semántica first-touch:
+el primer set de UTM/referrer con que llegó el visitante vale, y no se pisa con navegación
+posterior. Fuente de verdad detallada: `docs/sprints/utm-1-captura.md`.
+
+### Rama elegida (paso 0)
+**(b) — migración aditiva en `Conversation`.** Ni `referrerUrl` ni `currentPath` preservaban el
+query string completo (`currentPath` llega como pathname de `usePathname()` o literal `'/'`
+hardcodeado en el embed; `referrer` era un campo Zod aceptado pero que ningún cliente mandaba
+nunca — dead code desde que se agregó). `ChatbotLead` ya tenía las columnas UTM desde
+EV.2 (migración `20260629195726_ev2_vertical_pack_signals_utm`, que nunca tocó
+`chatbot_conversation`) — no necesitó migración nueva, solo el write-site.
+
+**Complicación no anticipada en el brief:** la mayoría del tráfico real no es el sitio propio de
+develOP sino el widget embebido en sitios de clientes (`public/widget.js` + iframe en
+`/embed/[slug]`). Ese iframe corre en el origin de develop.com.ar — leer `window.location` ahí
+adentro nunca ve la URL real del sitio del cliente. `widget.js` ya mandaba `parentUrl` (URL
+completa del padre, con query string) vía `postMessage`, pero `ChatbotEmbed.tsx` lo descartaba.
+
+### Qué se construyó
+- **Migración aditiva** `utm1_add_conversation_utm_fields`: `Conversation.utmSource/utmMedium/
+  utmCampaign String?` (SQL 100% `ADD COLUMN`, nullable, sin default — sin backfill).
+- **`shared/attribution.ts`** (nuevo): `parseAttribution()` (extrae utm_source/medium/campaign +
+  referrer de una URL cruda) y `sanitizeAttributionField()` (strip de caracteres de control +
+  cap de longitud + colapso a `undefined` si queda vacío — nunca persiste `""`). Un solo lugar,
+  usado por cliente, servidor y tests.
+- **`resolver.ts`**: `getOrCreateConversation` escribe los UTM SOLO en el branch `create` (igual
+  que `referrerUrl`) — nunca en el `update` de una conversación existente. Esa es la garantía
+  completa de first-touch del sprint.
+- **`handleChatRequest.ts`**: Zod sanitiza `utmSource/utmMedium/utmCampaign` (cap 255) y —
+  extensión acordada— también `referrer` (cap 500, ya existente pero nunca sanitizado contra
+  caracteres de control). Sanitización silenciosa (strip, nunca rechaza la request). Threading a
+  `getOrCreateConversation` desde `body.*`, pero a `ToolCallContext`/`getTools()` desde
+  `conversation.*` (la fila YA persistida) — **no** desde `body.*`, porque un mensaje posterior en
+  la misma conversación podría traer UTMs distintos que el resolver ignora; usar `body.*` ahí
+  habría filtrado atribución incorrecta hacia `capture_lead`.
+- **`captureLead.ts`**: copia 1:1 `ctx.utmSource/utmMedium/utmCampaign` al `chatbotLead.create()`.
+- **Cliente**: `useChatbot.ts` (nuevo option `attribution`, cache first-touch en
+  `sessionStorage['chatbot:firstTouch']`, mismo patrón que `sessionId` — resuelve una vez, nunca
+  pisa); `LogicCompanion.tsx` (lectura directa de `window.location.href`/`document.referrer`,
+  same-origin, memoizada una vez por mount); `ChatbotEmbed.tsx` (nuevo estado poblado desde el
+  handshake `postMessage` ya existente, leyendo `parentUrl`/`referrer`); `widget.js` (una línea:
+  suma `referrer: document.referrer` al `postMessage` que ya mandaba `parentUrl`).
+
+### Tests
+`test:utm1` (invariant puro, cero DB — Zod + sanitización): válido pasa verbatim, >255 recorta,
+caracteres de control se limpian, solo-control-chars colapsa a `undefined`, sin UTMs sigue
+válido. `scripts/utm1-verify-attribution.ts` (DB real, sin LLM — invoca `buildCaptureLeadTool`
+directo): first-touch no se pisa, lead hereda UTMs, tráfico directo → `null` nunca inventado.
+**5/5 checks OK.**
+
+### Smoke (paso 5)
+`scripts/utm1-smoke.mjs` — POST real a `/chat` (turno 1 con UTMs A, turno 2 mismo sessionId con
+UTMs B, turno 3 con señal de contacto) + lectura Prisma directa. **6/6 checks OK**, `capture_lead`
+disparado naturalmente por el LLM. Fila de `ChatbotLead` resultante:
+```json
+{
+  "id": "cmr6zsfbx001vuphs23v76e9q",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "launch_q3",
+  "capturedAt": "2026-07-04T23:27:23.037Z"
+}
+```
+El script limpia sus propias filas al terminar (`--keep` para inspección manual).
+
+### Verificación
+`tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · `eslint` en los 9
+archivos tocados/creados: 3 errores + 1 warning, **los 4 confirmados preexistentes** (comparados
+contra la versión en `HEAD` de cada archivo — mismo hallazgo, misma línea lógica, ninguno
+introducido por este sprint) · EV1–EV5 verdes · `prisma migrate status` limpio · `npm run build`
+verde (necesitó `NODE_OPTIONS=--max-old-space-size=6144` — el heap default del entorno quedó
+corto para este build; no es un error de código, el build falla igual en la rama sin tocar).
+
+**⚠️ Migración aplicada sobre la branch Neon compartida — requiere aviso al socio.** SQL 100%
+aditivo (pegado arriba), sin `DROP`/`ALTER` destructivo, sin backfill.
+
+### Fuera de scope (anotado, no implementado)
+- `ChatbotEmbed.tsx` hardcodea `currentPath: '/'` (bug preexistente, no relacionado a UTM —
+  la iframe no tiene visibilidad del path real del cliente tampoco).
+- `Conversation.sessionId` es `@unique` **global** (no `@@unique([botConfigId, sessionId])`) —
+  preexistente; implica que la garantía first-touch es efectivamente por tab de navegador, no
+  por bot.
+- Cache de 1h de `/widget.js` (`next.config.ts`): durante esa ventana, embeds con copia vieja
+  cacheada no mandan `referrer` (pero sí `parentUrl`, que ya iba antes de este sprint) — impacto
+  parcial, acotado a 1 hora.
+- Race real: `ChatbotEmbed.tsx` abre el chat inmediatamente al montar, independiente de que el
+  handshake `postMessage` haya llegado. Un visitante muy rápido podría mandar el primer mensaje
+  antes de que la atribución resuelva, quedando esa sesión fijada en "sin atribución" pese a que
+  los datos reales llegan un instante después. Aceptado como best-effort (atribución, no lógica
+  crítica) — no se ingenierizó una solución.
+
+### Pendiente del humano
+1. **Avisar al socio** de la migración aditiva sobre la branch Neon compartida (SQL en este
+   entry).
+2. Este sprint es 100% backend + lógica de cliente, sin pantallas nuevas — no requirió
+   `visual-qa`. Si se quiere confirmar visualmente, probar el widget propio en `:3000` con
+   `?utm_source=...` en la URL, y el embed en un sitio de prueba vía `widget.js`.
+3. **Avisar al frente panel** que la captura de UTM está viva → P4.1 puede consumirla (dashboard
+   `lead-origin.ts`/`LeadDetail.tsx` ya leían estos campos, siempre `null` hasta ahora).
+4. **Commitear** cuando revises (lo hacés vos).

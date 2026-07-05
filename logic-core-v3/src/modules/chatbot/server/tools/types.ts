@@ -27,6 +27,15 @@ export interface ToolCallContext {
    */
   visitorIpHash?: string
   visitorUserAgent?: string
+  /**
+   * UTM.1 — Atribución de primer contacto, copiada desde Conversation
+   * (resuelta una sola vez en getOrCreateConversation, ver resolver.ts).
+   * `undefined` = sin atribución (tráfico directo) — captureLead debe
+   * persistir eso como `null`, nunca inventar un placeholder.
+   */
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
 }
 
 /**
