@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 
 interface LeadNotificationInput {
   to: string
@@ -16,30 +16,29 @@ interface LeadNotificationInput {
 }
 
 export async function sendLeadNotificationEmail(input: LeadNotificationInput) {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('[notifications] RESEND_API_KEY no configurada, skipping email')
-    return { ok: false, skipped: true }
+  const html = renderLeadNotificationHtml(input)
+
+  const result = await sendTransactionalEmail({
+    to: { email: input.to },
+    subject: `Nuevo lead: ${input.lead.name}`,
+    htmlContent: html,
+  })
+
+  if (!result.ok) {
+    // Motor no configurado (falta BREVO_API_KEY) → se preserva el contrato
+    // "skipped" que el botón admin (sendTestNotification) ya interpreta;
+    // cualquier otro fallo de envío se reporta como error.
+    if (result.error === 'EMAIL_NOT_CONFIGURED') {
+      return { ok: false, skipped: true }
+    }
+    console.error('[notifications] Failed to send lead notification', result.error)
+    return { ok: false, error: result.error }
   }
 
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    const html = renderLeadNotificationHtml(input)
-
-    const result = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL ?? 'develOP <onboarding@resend.dev>',
-      to: input.to,
-      subject: `Nuevo lead: ${input.lead.name}`,
-      html,
-    })
-
-    return { ok: true, emailId: result.data?.id }
-  } catch (error) {
-    console.error('[notifications] Failed to send lead notification', error)
-    return { ok: false, error: String(error) }
-  }
+  return { ok: true, emailId: result.messageId }
 }
 
-function renderLeadNotificationHtml(input: LeadNotificationInput): string {
+export function renderLeadNotificationHtml(input: LeadNotificationInput): string {
   const { organizationName, botName, lead, dashboardUrl } = input
   const emailRow = lead.email
     ? `<p style="margin:6px 0;color:#334155;"><strong>Email:</strong> ${escapeHtml(lead.email)}</p>`

@@ -5,6 +5,7 @@ import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
 import { getVerticalPack } from '../verticals'
 import { prisma } from '@/lib/prisma'
+import { sanitizeAttributionField } from '../../shared/attribution'
 
 import {
   resolveBotBySlug,
@@ -30,11 +31,26 @@ import { logChatbotEvent } from '../logging'
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 
+// UTM.1 — Los campos de atribución (referrer + utm_*) son input del
+// visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
+// se quitan caracteres de control y se recorta a `maxLength`. Nunca rechazan
+// la request (sanitización silenciosa, no validación estricta) — son datos
+// de atribución best-effort, no lógica crítica.
+const attributionField = (maxLength: number) =>
+  z
+    .string()
+    .nullish()
+    .transform((val) => (val == null ? undefined : sanitizeAttributionField(val, maxLength)))
+
 /**
  * Body schema for POST /api/chatbot/[slug]/chat.
  * Validates incoming requests from the frontend.
+ *
+ * Exportado (UTM.1) para que el invariant de sanitización de atribución
+ * pueda testear el schema real vía requestBodySchema.parse(...), no solo
+ * las funciones puras de shared/attribution.ts.
  */
-const requestBodySchema = z.object({
+export const requestBodySchema = z.object({
   messages: z
     .array(
       z.object({
@@ -46,11 +62,16 @@ const requestBodySchema = z.object({
     .max(50),
   sessionId: z.string().min(1).max(200),
   currentPath: z.string().max(500).optional(),
-  referrer: z.string().max(500).optional(),
+  referrer: attributionField(500),
   // Proactive teaser question the bot "asked" via the tooltip. Client-supplied →
   // VALIDATED server-side against the bot's configured proactivePrompts before it
   // is trusted into the system prompt. Never enters the conversation as a turn.
   proactiveOpener: z.string().max(500).optional(),
+  // UTM.1 — first-touch, ver getOrCreateConversation (resolver.ts) para la
+  // semántica de "se persisten una sola vez".
+  utmSource: attributionField(255),
+  utmMedium: attributionField(255),
+  utmCampaign: attributionField(255),
 })
 
 type RequestBody = z.infer<typeof requestBodySchema>
@@ -315,6 +336,9 @@ export async function handleChatRequest(
         referrer: body.referrer,
         visitorIpHash: ipHash,
         visitorUserAgent: userAgent,
+        utmSource: body.utmSource,
+        utmMedium: body.utmMedium,
+        utmCampaign: body.utmCampaign,
       })
       timings.conv_only_ms = Date.now() - t
       return r
@@ -547,6 +571,14 @@ export async function handleChatRequest(
       verticalPack: bot.verticalPack,
       visitorIpHash: ipHash,
       visitorUserAgent: userAgent,
+      // UTM.1 — desde la fila YA resuelta de `conversation` (autoritativa),
+      // NUNCA desde `body.utm*`: en un mensaje #2+ de una conversación
+      // existente, el body de ESE request puede traer UTMs distintos (u
+      // ninguno) que el resolver ignora — usar `body.*` acá filtraría
+      // atribución incorrecta hacia capture_lead.
+      utmSource: conversation.utmSource ?? undefined,
+      utmMedium: conversation.utmMedium ?? undefined,
+      utmCampaign: conversation.utmCampaign ?? undefined,
     },
     plan.tools,
   )

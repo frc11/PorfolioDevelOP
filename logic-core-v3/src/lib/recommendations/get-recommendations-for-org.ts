@@ -12,6 +12,7 @@ import { getOrgUsageSnapshot } from '@/lib/plan/get-org-usage'
 import { getActiveModuleSlugs } from '@/lib/premium-modules'
 import { getMonthlyAnalysisForOrg } from '@/modules/chatbot/server/analysis/getMonthlyAnalysisForOrg'
 import { countHotNewLeadsForOrg } from '@/modules/chatbot/server/admin/multiTenantQueries'
+import { deriveConnectionStatus } from '@/lib/integrations/gbp-connection-logic'
 import { computeRecommendations } from './rules'
 import type { Recommendation, RecommendationSignals } from './types'
 
@@ -35,9 +36,12 @@ export async function getRecommendationsForOrg(
     countHotNewLeadsForOrg(organizationId),
     prisma.organization.findUnique({
       where: { id: organizationId },
-      select: { googleReviewsCount: true, gbpConnectedAt: true },
+      select: { googleReviewsCount: true, gbpConnectedAt: true, gbpLocationId: true },
     }),
   ])
+
+  const gbpConnectedAt = org?.gbpConnectedAt ?? null
+  const gbpLocationId = org?.gbpLocationId ?? null
 
   const signals: RecommendationSignals = {
     organizationId,
@@ -46,7 +50,8 @@ export async function getRecommendationsForOrg(
     conversationsThisMonth: usage.conversationsUsed,
     hotLeads,
     googleReviewsCount: org?.googleReviewsCount ?? 0,
-    gbpConnected: Boolean(org?.gbpConnectedAt),
+    gbpConnected: Boolean(gbpConnectedAt),
+    gbpOperational: deriveConnectionStatus({ gbpConnectedAt, gbpLocationId }) === 'OPERATIONAL',
     activeModuleSlugs,
     plan: {
       key: usage.plan.key,

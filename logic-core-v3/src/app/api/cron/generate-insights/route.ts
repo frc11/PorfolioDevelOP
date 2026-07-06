@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { generateInsightsForBot } from '@/modules/chatbot/index.server'
+import { generateInsightsForBot, getInsightsCountForBot } from '@/modules/chatbot/index.server'
 import { logChatbotEvent } from '@/modules/chatbot/server/logging'
 import { sendInsightsNotificationEmail } from '@/modules/chatbot/server/notifications/sendInsightsNotification'
 
@@ -36,7 +36,8 @@ export async function POST(req: Request) {
   for (const bot of bots) {
     try {
       // Skipear si ya tiene mucho PENDING acumulado
-      const pendingCount = 0 // await prisma.chatbotInsight.count({ where: { botConfigId: bot.id, status: 'PENDING' } })
+      const pendingCounts = await getInsightsCountForBot(bot.id)
+      const pendingCount = pendingCounts.PENDING ?? 0
       if (pendingCount >= 5) {
         results.skipped_pending_overload++
         continue
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
           try {
             await sendInsightsNotificationEmail({
               to: org.leadNotificationEmail,
-              organizationName: org.companyName ?? org.name,
+              organizationName: org.companyName,
               botName: bot.botName,
               insightsCount: result.insights.length,
               dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/chatbot`,

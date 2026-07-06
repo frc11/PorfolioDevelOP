@@ -47,6 +47,12 @@ export const UpsellRequestSchema = z.object({
   featureName: z.string().trim().min(1, 'Nombre de feature inválido.'),
 })
 
+// P3-A.1 — id de location GBP para setActiveLocation. Acepta id pelado o resource name;
+// la validación real de pertenencia es server-side (re-descubre con los tokens de la org).
+export const SetActiveLocationSchema = z.object({
+  locationId: z.string().trim().min(1, 'Ubicación inválida.').max(200, 'Ubicación inválida.'),
+})
+
 export const ContactFormSchema = z.object({
   name: z.string().trim().min(2, 'Nombre inválido.'),
   email: z.string().trim().email('El email no es válido.'),

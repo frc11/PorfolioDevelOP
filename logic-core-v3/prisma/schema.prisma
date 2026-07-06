@@ -1359,6 +1359,15 @@ model Conversation {
   ipHash      String?
   userAgent   String? @db.Text
   referrerUrl String?
+
+  // UTM.1 — Atribución de primer contacto (first-touch). Se escriben UNA
+  // sola vez, en el create de getOrCreateConversation (mismo patrón que
+  // referrerUrl arriba) — NUNCA en el update de una conversación existente.
+  // null = tráfico directo/sin UTM, nunca inventado.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+
   currentPath String?
 
   // Lifecycle

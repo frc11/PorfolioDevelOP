@@ -12137,3 +12137,639 @@ Grep de `−` (U+2212) en todo `src/`: además de los dos casos de arriba, apare
 ### Pendiente del humano
 1. **Descargar el PDF real** de una org con delta negativo (ej. Matsu) y confirmar que ahora se lee "-18 vs el mes pasado" legible.
 2. **Commitear** cuando el punto 1 dé OK.
+
+---
+
+## ✅ D4 — guard anti-spam cron insights
+
+**Qué cierra:** el guard anti-spam de `generate-insights/route.ts` (cron que genera insights por bot vía IA y manda mail de aviso) tenía `pendingCount` **hardcodeado a `0`**, con la query real comentada al lado, nunca ejecutada — confirmado previamente en la auditoría read-only D1-D5 (ítem D4). Con `pendingCount` fijo en `0`, la condición `pendingCount >= 5` **nunca** era verdadera → el guard **jamás** salteaba, aunque un bot tuviera backlog de insights PENDING sin revisar. Riesgo real: sobre-generación/sobre-envío de mails de insights, no falta de envío.
+
+### Relevamiento (antes de tocar)
+- `route.ts:39` — confirmado el hardcode: `const pendingCount = 0 // await prisma.chatbotInsight.count({ where: { botConfigId: bot.id, status: 'PENDING' } })`. La query comentada cuenta PENDING **por bot** (`botConfigId: bot.id`) — mismo scope que la variable `bot` del loop (`bots = await prisma.botConfig.findMany({ where: { isActive: true }, ... })`, `route.ts:21`).
+- Query real ya existente que matchea ese scope exacto: **`getInsightsCountForBot(botConfigId)`** (`src/modules/chatbot/server/insights/queries.ts:36-47`) — recibe `botConfigId` directo (mismo shape que `bot.id`, sin resolución adicional), hace `groupBy` por `status` y devuelve `Record<string, number>` (ej. `{ PENDING: 3, APPLIED: 1 }`). Ya estaba re-exportada por el barrel `@/modules/chatbot/index.server`, que `route.ts` ya importaba (para `generateInsightsForBot`) — no hizo falta agregar un import nuevo, solo sumar el nombre al existente.
+- Se descartó `getPendingInsightsByOrgSlug` (mismo archivo) por dos motivos: recibe `orgSlug` (obligaría a resolver org→bot de nuevo cuando el loop ya tiene `bot.id` a mano) y devuelve el `findMany` completo de filas (con `orderBy`), más pesado que un conteo cuando solo hace falta el número.
+- Conclusión: la query existente matchea **exactamente** el scope que el guard necesita (bot-scoped) — se reusó tal cual, sin adaptar su lógica interna.
+
+### Cambio quirúrgico
+Solo esto, nada más — sin tocar generación de insights, template de mail, umbral, ni otro cron:
+- **`src/app/api/cron/generate-insights/route.ts:3`** — import: se sumó `getInsightsCountForBot` al import ya existente de `@/modules/chatbot/index.server`.
+- **`src/app/api/cron/generate-insights/route.ts:39-40`** (antes 38-39) — `const pendingCount = 0 // ...` → `const pendingCounts = await getInsightsCountForBot(bot.id)` + `const pendingCount = pendingCounts.PENDING ?? 0`. El `?? 0` no es cosmético: `groupBy` omite del resultado los status sin filas (un bot con cero PENDING no trae la key `PENDING` en absoluto), así que sin el fallback `pendingCount` sería `undefined` en ese caso — mismo comportamiento final por coincidencia (`undefined >= 5` también da `false`), pero incorrecto de fondo. El umbral (`>= 5`) no se tocó.
+
+### Hallazgo colateral — NO tocado, fuera de scope
+Al tocar el archivo, lint marcó un `any` preexistente en la misma función, **sin relación** con el guard: `route.ts:58` (antes :57), `const org: any = bot.organization`, dentro del bloque de envío de mail. Es preexistente (no introducido por este cambio — el diff solo desplazó la línea). Se investigó por qué existía el `any` en vez de dejar que TypeScript infiera el tipo de `bot.organization` (que Prisma ya tipa correctamente vía el `include: { organization: true }` de la query de arriba): **enmascara un acceso a `org.name`, un campo que no existe en el modelo `Organization`** (`prisma/schema.prisma:332-345` solo tiene `companyName`, no `name`) — línea `organizationName: org.companyName ?? org.name`. Como `companyName` es `String` no-nullable, el fallback a `org.name` hoy es código muerto en la práctica (nunca se alcanza), pero si `org: any` se sacara sin más, tsc rompería ahí mismo. No se tocó: corregirlo bien requiere decidir qué debería pasar si `companyName` viniera vacío, y eso excede el "cambio quirúrgico" de este sprint (toca el bloque de armado del mail, protegido explícitamente de refactor). Queda reportado como candidato para el bloque de saneamiento de deuda técnica (mismo paraguas que la auditoría D1-D5).
+
+### Tests
+**`tests/integration/generate-insights-pending-guard.spec.ts`** (nuevo — Prisma real, mismo criterio que `client-monthly-report.spec.ts`: NO está en el `testDir` de Playwright, correr explícito):
+- `>= 5 PENDING` → `pendingCount` cruza el umbral (equivalente a "el guard saltearía").
+- `< 5 PENDING` → `pendingCount` no cruza el umbral (equivalente a "el guard procede"); se saltea a sí mismo (`test.skip`) si el bot de prueba ya tiene `>= 5` PENDING reales en la BD (no se puede aislar el caso sin tocar datos reales).
+- **Aislamiento:** insertar PENDING en un bot A no mueve el count de un bot B — requiere 2 bots en la BD, si no hay, `test.skip`.
+- Se testeó la función de conteo (`getInsightsCountForBot`, el punto de integración real con Prisma) en vez de extraer la comparación `pendingCount >= 5` a una función aparte — es una comparación de una sola línea, extraerla sería una abstracción sin necesidad real.
+- No existían tests previos de `getInsightsCountForBot` — no había nada que extender.
+
+### Archivos
+- **Modificados:** `src/app/api/cron/generate-insights/route.ts` (import + reemplazo del hardcode, líneas indicadas arriba).
+- **Creados:** `tests/integration/generate-insights-pending-guard.spec.ts`.
+- **NO tocados:** generación de insights (`generateInsights.ts`), template/envío de mail (`sendInsightsNotification.ts`), el umbral `5`, cualquier otro cron, y el `any`/`org.name` señalado arriba (reportado, no corregido).
+
+### Verificación
+`eslint` sobre los 2 archivos tocados: **1 error preexistente y ajeno** (`route.ts:58`, `@typescript-eslint/no-explicit-any` — ver hallazgo colateral arriba), **cero errores nuevos** introducidos por este diff · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline ya conocido `searchconsole.ts:119`, ajeno) · `npx prisma migrate status`: schema al día, sin drift (no aplicaba migración, es lógica de conteo) · `npm run build` NO corrido (excluido del gate para este sprint) · sin commits.
+
+### Pendiente del humano
+1. **Correr el test de integración** (`npx playwright test tests/integration/generate-insights-pending-guard.spec.ts`) contra la BD real — requiere al menos 1 bot para los dos primeros casos y 2 bots para el de aislamiento; los casos sin datos suficientes se saltean solos (`test.skip`), no fallan en falso.
+2. **No autoconfirmado:** el disparo real del cron en producción (requiere el cron vivo + `CRON_SECRET` + datos reales) — la lógica del guard queda cubierta por test, pero el comportamiento end-to-end del endpoint no se ejecutó acá.
+3. Decidir si el hallazgo colateral (`org: any` enmascarando `org.name` inexistente en `Organization`) se atiende en el mismo bloque de saneamiento de deuda técnica que motivó la auditoría D1-D5, o aparte.
+4. **Commitear** cuando 1-2 den OK (lo hacés vos).
+
+---
+
+## ✅ D3' — migrar Test email + insights a Brevo
+
+**Qué cierra:** el repo tenía **dos motores de mail** conviviendo — Brevo (transaccional canónico, `sendTransactionalEmail` en `src/lib/email/brevo-service.ts`, ya en 12+ flujos de producción) y Resend (legado, 4 módulos). Este sprint consolida **dos** usos de Resend sobre Brevo (el botón admin "Test email" y el mail de insights del Sistema C), dejando los otros dos intactos (auth/soporte). No es un refactor del sistema de mail: son 2 reemplazos de motor puntuales + el fix de paso de `org.name` (D4).
+
+### Relevamiento (paso 0)
+Mapa de los 4 módulos Resend (subagente `Explore`, read-only):
+- **`src/lib/email.ts`** (`sendEmail({to,subject,react})`, React-email) — sirve **magic-link** (`auth.ts:100`), el **provider NextAuth Resend** (`auth.ts:97`), **agency-actions** (`agency-actions.ts:78`), **tickets** (`tickets/actions.ts:157`) e **invites** (`settings.ts:194`). ← NO TOCAR (auth/soporte).
+- **`src/lib/email/notify-message.ts`** (`notifyClientOfNewMessage`) — mail "Nuevo mensaje de X en tu panel". Disparo: server action de admin al mandar un mensaje en el panel (`messages.ts:57`, `message.actions.ts:193`) vía `queueAdminMessageEmail` (`admin-message-notification.ts:42`, fire-and-forget). Respeta opt-out `emailNotificationsOnMessage`. ← **RECOMENDACIÓN: dejar en Resend este sprint** (ver abajo).
+- **`sendLeadNotification.ts`** — único caller runtime: la server action `sendTestNotification.ts:40` (botón "Test email" admin, `BotConfigEditor.tsx:156`). NO está en el flujo real de leads (ese ya es Brevo, `notify.ts` ← `captureLead.ts:442`). ← MIGRADO.
+- **`sendInsightsNotification.ts`** — único caller: `generate-insights/route.ts:64`. ← MIGRADO.
+
+Firma destino confirmada: `sendTransactionalEmail({ to: {email, name?}, subject, htmlContent, textContent?, headers? })` → `{ok:true, messageId} | {ok:false, error}`, sender interno vía `BREVO_FROM_NAME`/`BREVO_FROM_EMAIL`, nunca throwea (devuelve `EMAIL_NOT_CONFIGURED` si falta la key). Los dos templates a migrar ya eran **HTML string** (no React-email), así que el porteo fue directo, sin traducir JSX.
+
+### Migración — Test email (`sendLeadNotification.ts`)
+- **`:1`** import: `import { Resend } from 'resend'` → `import { sendTransactionalEmail } from '@/lib/email/brevo-service'` (mismo path que los 10+ flujos Brevo).
+- **cuerpo:** se sacó `new Resend(...)` + `resend.emails.send({from,to,subject,html})` y su guard `if (!RESEND_API_KEY)`; ahora `sendTransactionalEmail({ to: {email: input.to}, subject, htmlContent: html })`. El `from` (antes `RESEND_FROM_EMAIL ?? 'onboarding@resend.dev'`) lo resuelve Brevo internamente (`BREVO_FROM_*`) — mismo sender verificado que el resto de producción. Ahora el Test email prueba **el mismo motor** (Brevo) que usan los leads reales; antes probaba Resend, un path que producción no usa.
+- **Contrato preservado:** el caller (`sendTestNotification.ts`) lee `result.ok`, `result.skipped` y `result.emailId`. Se mantiene idéntico: `{ok:true, emailId: result.messageId}` en éxito, `{ok:false, skipped:true}` cuando Brevo no está configurado (mapeado desde `EMAIL_NOT_CONFIGURED`), `{ok:false, error}` en cualquier otro fallo. tsc confirma que el narrowing del caller sigue compilando sin cambiar su lógica.
+- **`renderLeadNotificationHtml`** ahora exportado (para el test puro). Template **sin cambios** (mismo HTML, mismo `escapeHtml`/`escapeAttribute`).
+- **`sendTestNotification.ts:73`** (consecuencia directa): el mensaje de error del botón decía `'RESEND_API_KEY no configurada'` — falso tras la migración; ahora `'Email no configurado (BREVO_API_KEY)'`. Único cambio en el caller, honestidad del feedback.
+
+### Migración — insights (`sendInsightsNotification.ts`)
+- **`:1`** import: Resend → `sendTransactionalEmail` de brevo-service.
+- **cuerpo:** se sacó `new Resend`/`emails.send`/guard RESEND; ahora `sendTransactionalEmail({ to: {email: input.to}, subject, htmlContent })`. `from` (antes hardcode `insights@develop.com.ar`) → Brevo interno.
+- **`renderInsightsNotificationHtml`** extraído a función exportada (antes el HTML era inline dentro del async) — habilita el test puro y espeja la estructura del sibling de leads. **HTML verbatim**, incluida la pluralización `oportunidad/oportunidades` y el footer.
+- Retorno: `{ok:true}` | `{ok:false, error}` (se soltó el `skipped`, que nadie leía — el cron no inspecciona el retorno, solo `try/catch` + `emails_sent++`).
+
+### Corrección de paso — `companyName` (bug D4)
+- **`generate-insights/route.ts:66`** — `organizationName: org.companyName ?? org.name` → `organizationName: org.companyName`. `org.name` no existe en el modelo `Organization` (solo `companyName`, no-nullable) — el fallback era código muerto que referenciaba un campo inexistente, enmascarado por el `org: any` de `:58`. **Matiz honesto:** como `companyName` nunca es null, el nombre **no** salía vacío en la práctica (a diferencia de lo que anticipaba el brief); pero la referencia rota se elimina igual, y ahora el mail de insights arma el nombre solo desde `companyName`.
+- **El `any` de `:58` NO se tocó** (regla explícita del sprint: "no refactorizar el any de todo el cron"). Queda como excepción sancionada — su error de lint (`no-explicit-any`) es baseline conocido, ya documentado en el cierre D4. Esto cierra la mitad `org.name` del hallazgo colateral de D4; la mitad `any` sigue como candidato de deuda técnica.
+
+### notify-message — dejado en Resend (recomendación)
+Es un mail **de producto** (no auth), mismo patrón trivial — migrable. Aun así, **recomiendo dejarlo en Resend este sprint** y migrarlo en uno propio, por: (1) es un subsistema distinto (mensajería del panel) con su propio opt-out y disparo en vivo, fuera del núcleo de dos módulos del sprint; (2) el plan de verificación de este sprint (Test email / insights / regresión de magic-link) **no incluye** un check del mail de mensajería — migrarlo ahora agregaría una superficie que el humano no está preparado para verificar en esta pasada; (3) "ante la duda, dejalo". Nota para el follow-up: `notify-message.ts:51` tiene un `⚠️ ajustar al dominio real verificado en Resend` sobre su `from` (`hola@develop.com.ar`) — migrarlo a Brevo resolvería de paso ese TODO de dominio no verificado. **Decisión final del humano.**
+
+### Resend sigue necesario (no se sacó del `package.json` ni del `.env`)
+Confirmado: `resend` en `package.json` y `RESEND_API_KEY` siguen en uso por `email.ts` (magic-link + provider NextAuth + agency + tickets + invites) y `notify-message.ts`. Sacarlo **rompería el login**. `RESEND_FROM_EMAIL` queda sin referencias en código (solo lo usaba `sendLeadNotification`) pero se deja en `.env` (no se toca env).
+
+### Tests
+**`notifications-brevo.invariant.ts`** (nuevo, puro, `npm run check:invariant:notifications-brevo`) — sin red ni DB; borra `BREVO_API_KEY`/`RESEND_API_KEY` antes de enviar (lectura lazy) para forzar el path no-configurado:
+- **insights:** el render arma el nombre del negocio y **nunca** emite `"undefined"` (regresión del bug `org.name`); conteo, bot, link y pluralización `oportunidad/oportunidades` presentes.
+- **lead:** campos preservados, filas email/teléfono se omiten cuando son null (sin `"undefined"`), y el mensaje del lead se **escapa** (`<b>` → `&lt;b&gt;`, XSS-safe preservado).
+- **motor Brevo:** `sendInsightsNotificationEmail` devuelve `error === 'EMAIL_NOT_CONFIGURED'` (firma de brevo-service, no de Resend) y `sendLeadNotificationEmail` devuelve `skipped:true` (contrato del botón, mapeado desde ese mismo error) — prueba determinística de que ambos enrutan por Brevo, sin tocar la red. **Verde.**
+- No existían tests previos de estos módulos — se creó, no había nada que extender.
+
+### Archivos
+- **Modificados:** `sendLeadNotification.ts`, `sendInsightsNotification.ts` (Resend→Brevo + render exportado) · `generate-insights/route.ts:66` (companyName) · `sendTestNotification.ts:73` (mensaje de motor) · `package.json` (script del invariante).
+- **Creados:** `src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts`.
+- **NO tocados:** `email.ts` (auth/soporte, sigue en Resend) · `notify-message.ts` (dejado, recomendación arriba) · el `any` de `route.ts:58` · el guard D4 (`route.ts:39-44`) · la generación de insights · la resolución de destinatario (solo cambió el motor) · deps de `package.json` / `.env`.
+
+### Verificación
+`eslint` sobre los 5 archivos tocados: **1 error preexistente y ajeno** (`route.ts:58` `no-explicit-any`, el `any` sancionado), **cero errores nuevos** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — confirma que el contrato preservado del botón sigue compilando · invariante nuevo **verde** (enrutamiento Brevo + contenido) · `npm run build` NO corrido (excluido del gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — envío real:** (a) mandar un **Test email** desde el botón admin y confirmar que llega **por Brevo**; (b) disparar el cron de insights y confirmar que el mail llega por Brevo **con el nombre del negocio correcto**; (c) hacer un **login por magic-link** para confirmar que **auth no se rompió** (sigue en Resend). Requieren Brevo/Resend vivos + trigger — no se ejecutaron acá.
+2. Correr `npm run check:invariant:notifications-brevo` (verde esperado, sin DB).
+3. **Decidir sobre notify-message:** migrarlo a Brevo en un sprint propio (resolvería el `⚠️` de dominio no verificado) o dejarlo en Resend.
+4. **Commitear** cuando 1-2 den OK (lo hacés vos).
+
+## ✅ D-AUTH — inputs del login visibles (opacity heredado)
+
+**Qué corrige (P0):** en `/login` los tres inputs (Email, Contraseña, "Tu email" del Magic Link) se renderizaban en el DOM pero eran **invisibles en reposo** — el wrapper quedaba pegado en `opacity: 0; transform: translateY(16px)`. Efecto: la pantalla de ingreso al portal mostraba el card, las tabs y los labels, pero no los campos; había que tipear a ciegas. Confirmado por inspección del DOM antes del fix.
+
+### Causa raíz
+`FloatingField` (dentro de `src/app/login/page.tsx`) era un `motion.div` con `variants={itemVariants}` (`hidden:{opacity:0,y:16}` / `visible:{opacity:1,y:0}`). Se pintaba por **propagación** del label `"visible"` desde `LoginForm` (`initial="hidden" animate="visible"`). Los hermanos **directos** de `LoginForm` (logo, card, footer) reciben esa propagación y animan bien. Pero los `FloatingField` viven **dentro** de los tabs del `AnimatePresence` (`motion.div` `key="password-tab"` / `key="magic-tab"`), que animan por **objeto** (`animate={{opacity,x}}`), no por label de variante. Esa frontera no emite ningún `"visible"` al contexto → el `FloatingField` con `variants` no tiene label que resolver y cae en su default `hidden` → `opacity 0`. La cadena se corta exactamente en el borde del tab.
+
+### El fix (quirúrgico, local a `FloatingField`)
+- **Antes:** `<motion.div variants={itemVariants} className="relative">`
+- **Después:** `<motion.div initial={{opacity:0,y:16}} animate={{opacity:1,y:0}} transition={{duration:0.5, ease:[0.16,1,0.3,1]}} className="relative">`
+- **Por qué rompe la dependencia:** con `initial`/`animate` propios, `FloatingField` ya **no depende** de que un ancestro le propague `"visible"`. Se anima solo al montar (mismo fade + subida de 16px) y termina **SIEMPRE** en `opacity 1`, esté en la tab que esté. Como cada tab del `AnimatePresence` monta fresco, sus inputs corren su entrada propia cada vez que se abre la tab → quedan visibles al alternar Contraseña ↔ Magic Link.
+- **Mismos valores/easing que `itemVariants`** (`opacity 0→1`, `y 16→0`, `duration 0.5`, `ease [0.16,1,0.3,1]`): la estética de entrada no cambia, solo el **disparador** (propio, no propagado). Comentario inline agregado explicando el porqué.
+
+### Qué NO se tocó
+`itemVariants` sigue igual (lo usan logo/card/footer, que animan bien por propagación) · `containerVariants`/stagger de `LoginForm` · el `AnimatePresence` de los tabs y sus transiciones · el indicador deslizante del tab switcher · el floating label, el visor de password (Eye/EyeOff) y el borde cyan en foco/valor (solo cambió el wrapper de animación) · el server action (`actions.ts`), el magic-link y la lógica de sign-in. `motion/react` (nunca framer-motion). Cero `any`, cero migraciones, sin git. Fuera de scope y NO tocado: el "No se pudo generar el Magic Link" y el magic-link-por-consola (config de mail, aparte).
+
+### Verificación
+`eslint src/app/login/page.tsx`: **limpio** (cero findings) · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `npm run build` NO corrido (excluido del gate) · sin commits. **visual-qa** despachado (estándar de UI, `/login` desktop+mobile) pero **no pudo levantar el preview**: las herramientas `preview_*` no están registradas en este harness (el subagente quedó read-only). No es un veredicto de la UI — la verificación visual pasa al humano (ya previsto en el plan del sprint).
+
+### Pendiente del humano
+1. **No autoconfirmado — visibilidad:** abrir `/login` en **desktop y mobile** y confirmar, **en reposo y sin foco**, que se ven Email + Contraseña (tab Contraseña) y "Tu email" (tab Magic Link), y que **alternar tabs** los deja visibles cada vez. (No verificable por preview acá.)
+2. Confirmar que el floating label, el ojo del password y el borde en foco siguen andando igual.
+3. **Commitear** cuando 1 dé OK (lo hacés vos).
+
+## ✅ MAGIC-BREVO — magic link migrado a Brevo
+
+**Qué corrige:** el login por **magic link** fallaba (AccessDenied en el envío) porque el mail salía por **Resend desde un dominio no verificado**. El resto del portal ya manda por Brevo (P2: leads, reportes) con un remitente verificado. Este sprint migra **solo** el envío del magic link de Resend a Brevo, reusando `sendTransactionalEmail` (`@/lib/email/brevo-service`). Sprint **plan-first** (auth.ts es el archivo más sensible del repo): se entregó plan, el humano lo aprobó con ajustes, se ejecutó.
+
+### Discrepancia con el diagnóstico (relevada y confirmada por el humano)
+El brief daba el `from` culpable como `noreply@develop.com.ar` — **ese string no existe en el repo** (grep global, cero matches). Lo real: (1) el provider tenía un `from` **muerto** en `auth.ts:98` (`'develOP <onboarding@resend.dev >'`, sandbox de Resend + typo), no usado porque el `sendVerificationRequest` custom llamaba a `sendEmail`; (2) el `from` **real** en el cable era `email.ts:21` → `'develOP Agency <hello@develop-agency.com>'` (dominio `develop-agency.com`). El humano confirmó que el fix es el mismo (enrutar por el sender verificado de Brevo), sea cual sea el dominio malo. Se **eliminó** el `from` muerto de paso.
+
+### Mecánica NextAuth v5 (confirmada en `@auth/core/providers/resend.js`)
+El provider Resend tiene `id: "resend"` hardcodeado y acepta un `sendVerificationRequest` custom que **reemplaza por completo** el transporte (el `fetch` a `api.resend.com` del default nunca corre). Por eso: (a) `signIn('resend')` de `actions.ts:146` sigue andando sin cambios (el id no cambia); (b) usar Brevo adentro es válido — de hecho ya era el patrón (antes el custom llamaba a `sendEmail`); (c) `apiKey`/`from` del provider son irrelevantes en este path. **No se cambió el nombre del provider.**
+
+### El cambio (único archivo: `src/auth.ts`)
+- **`:11`** import: `import { sendEmail } from '@/lib/email'` → `import { sendTransactionalEmail } from '@/lib/email/brevo-service'`. (`import * as React` se conserva — lo usa `React.cache` en `:301`.)
+- **`:98`** — se **eliminó** el `from` muerto del provider (dead code), reemplazado por un comentario que aclara que el envío es por Brevo y que el provider se conserva por su id `'resend'`.
+- **`sendVerificationRequest`** — cuerpo migrado: se sacó `sendEmail` + el `React.createElement` (template como árbol React); ahora `sendTransactionalEmail({ to:{email}, subject:'Tu acceso a develOP', htmlContent, textContent })`. El `from` lo resuelve brevo-service desde `BREVO_FROM_EMAIL` (verificado). **Port fiel** — no se inspecciona el resultado (mismo control-flow que `sendEmail`, que se tragaba los errores); el manejo mejorado (throw on fail) queda para un sprint propio.
+
+### Template portado (React → HTML string, patrón D3')
+Mismo `<h1>Ingresá a develOP</h1>`, misma copia, mismo botón cyan `#06b6d4` "Ingresar ahora", mismo disclaimer, subject idéntico. **La `url`** (token de acceso de NextAuth, URL-encodeado y confiable) se inserta **exacta** en `href="${url}"`, sin escapar ni reconstruir. **Se agregó `textContent`** (plaintext con la url) — mejora deliverability de un mail de acceso (aprobado).
+
+### Qué queda INTACTO
+Provider **Credentials** · provider **Google** · **PrismaAdapter** · **todos los callbacks** — `signIn` (incl. la rama `email.verificationRequest` que valida que el email exista antes de mandar, seguridad correcta), `jwt` (SEC-AUTH-03), `session`, `redirect` · **cookies** (SEC-MISC-02) · **sesión JWT** · `signIn('resend')` de `actions.ts` · **`email.ts`** (invites/tickets siguen en Resend, fuera de scope) · **`RESEND_API_KEY`** sigue necesaria (la usa email.ts). Cero `any`, cero migraciones, sin git.
+
+### Verificación
+`.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — el `to:{email}` matchea la firma de Brevo y `sendEmail` quedó eliminado sin referencias colgadas · `eslint src/auth.ts`: **0 errores**, 1 warning **pre-existente y ajeno** (`getPostLoginPath` unused, `:65` — dead code sin callers; grep confirma 1 sola ocurrencia, su propia definición; **NO tocado**, fuera del scope del provider Resend) · build no corrido (fuera de gate) · sin commits. **UI:** no aplica visual-qa — sprint de auth/backend, no toca pantallas (`page.tsx` del login intacto).
+
+### Pendiente del humano
+1. **No autoconfirmado — envío real:** (a) pedir un magic link a un mail **registrado** y confirmar que **llega por Brevo**; (b) que el **link del mail loguee** de verdad; (c) que **login por contraseña y Google** sigan andando (no se tocó su código).
+2. **Commitear** cuando (a-c) den OK (lo hacés vos).
+
+## ✅ D5' — Consolidar SOLO duplicación byte-idéntica (máscara Telegram + dropdown período)
+
+**Qué hace:** sprint de saneamiento de deuda, refactor puro sin cambio de comportamiento. Una auditoría previa había clasificado 2 candidatos "seguros de consolidar" (máscara del token de Telegram, dropdown de período) y una familia de 6 copias deliberadamente divergentes (`date-preset-filter`, prohibida de tocar). Regla central del sprint: relevar equivalencia ANTES de tocar nada — "duplicado" y "casi idéntico" no garantizan "igual".
+
+### Veredicto 1 — Máscara del token de Telegram: **CONSOLIDABLE** ✅
+Dos copias localizadas: `maskFromInput` (cliente, `settings-console.tsx:59`) y `maskSecret` (server, `settings.actions.ts:17`). Comparadas línea a línea: mismo falsy-check → `null`, mismo `` `••••••••${value.slice(-4)}` `` (8 bullets confirmados por conteo exacto en ambas copias), mismo comportamiento en edge cases (string vacío → `null`; token más corto que 4 caracteres → `slice(-4)` devuelve el string completo sin padding, igual en ambas). Única diferencia: el tipo del parámetro (`string` en cliente vs `string | null | undefined` en server) — puramente de tipos, no de comportamiento. Ambas **puras** (sin `prisma`, sin `window`/`document`, sin env). Verificado que son las únicas 2 copias del repo (grep de la firma `slice(-4)` + `••••` no encontró una tercera).
+
+**Consolidado en `src/lib/mask-secret.ts`** (función pura, firma `(value: string | null | undefined) => string | null`, compatible con ambos call sites — el `string` del cliente es subtipo válido). Reemplazadas las 2 copias:
+- `settings.actions.ts`: import agregado, función local `maskSecret` (líneas 17-24) eliminada, call site (`:109`) intacto.
+- `settings-console.tsx`: import agregado, función local `maskFromInput` (líneas 59-65) eliminada, call site (`:123`) actualizado a `maskSecret(...)` con el mismo argumento.
+
+Test puro en `src/lib/mask-secret.invariant.ts` (patrón repo, `npx tsx` + `assert`): token largo, token corto (<4 chars, sin padding), string vacío, `null`, `undefined` — los 5 casos que cubrían ambas copias originales. Script `check:invariant:mask-secret` agregado a `package.json` (sin tocar el aggregate `check:invariants`, seguí el precedente de `notifications-brevo` que tampoco está agregado ahí).
+
+### Veredicto 2 — Dropdown de período: **NO CONSOLIDAR** ❌ (misma trampa que date-preset-filter)
+Relevamiento exhaustivo (glob de nombres `*dropdown*`/`*period*` en todo `src/`, no solo grep de contenido): el **único** par de "dropdown de período casi idéntico" que existe en el repo es `ProjectsPeriodDropdown` (`admin/projects/_components/projects-period-dropdown.tsx`) y `AuditPeriodFilter` (`admin/audit-log/_components/audit-period-filter.tsx`). Comparten shell casi byte a byte: mismo `calcPosition`/`PanelPosition`/`PANEL_WIDTH`/`PANEL_MAX_H`, mismo portal a `document.body`, mismo trigger (Calendar + ChevronDown), mismo criterio de click-outside/Escape/scroll/resize.
+
+**Pero `audit-period-filter.tsx` es explícitamente uno de los 6 miembros de la familia `date-preset-filter`** que este mismo sprint tiene prohibido tocar (es el "Audit" de "Leads/Alertas/Actividad/Audit/otros"). Confirmado independientemente por el propio código — comentario in-file: *"Réplica LOCAL del look del dropdown de proyectos (NO se importa nada de projects/)"* — la misma filosofía "replicar, no importar" que `ticket-date-filter.tsx` ("tickets se mantiene aislado") y `ActivityDateFilter.tsx` ("replica el UX de Leads sin importar sus componentes"). Divergencias funcionales reales más allá del look: `ProjectsPeriodDropdown` es genérico y parametrizado (`label`/`ariaLabel`/`options` como props, reusado 2 veces en la misma barra con semánticas **opuestas** — `Inicio` interpreta el período hacia atrás, `Entrega` hacia adelante, ver comentario en `projects-filters.ts:28-29`); `AuditPeriodFilter` hardcodea `label="Fecha"`, `ariaLabel` y sus propias `AUDIT_PERIOD_OPTIONS`/tipo `AuditPeriod` (no importa `PeriodValue` de projects). Consolidarlos exigiría cambiar la firma pública de `AuditPeriodFilter` — prohibido por el sprint.
+
+**Conclusión:** el candidato "dropdown de período" señalado por la auditoría previa, al relevarlo, resulta ser el mismo par ya cubierto por la exclusión `date-preset-filter`. Se deja **intacto**, igual que el resto de la familia — no es un descuido, es la misma decisión de diseño deliberada. No se creó ningún componente compartido para este candidato.
+
+### `date-preset-filter` — confirmado INTACTO
+Las 6 copias (`ticket-date-filter.tsx`, `ActivityDateFilter.tsx`/`activityFilters.ts`, `audit-period-filter.tsx`/`audit-filters.ts`, `alerts-date-filter.tsx`/`alerts-filters.ts`, `inbound-period-filter.tsx`, `projects-period-dropdown.tsx`/`projects-filters.ts`) **no aparecen** en el `git status` de este sprint — cero tocadas, cero re-auditadas más allá de la lectura necesaria para confirmar el veredicto del dropdown.
+
+### Verificación
+`git status --porcelain`: exactamente 3 modificados (`package.json`, `settings.actions.ts`, `settings-console.tsx`) + 2 nuevos (`mask-secret.ts`, `mask-secret.invariant.ts`) — ninguna de las 6 copias de `date-preset-filter` tocada · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `eslint` sobre los 4 archivos tocados/creados: **0 errores, 0 warnings** · `npm run check:invariant:mask-secret`: **verde** · grep de `maskSecret(`/`maskFromInput(` confirma exactamente 2 call sites (los originales), cero referencias colgantes · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — visual:** abrir `/admin/settings` y confirmar que el campo del token de Telegram se ve y funciona igual que antes (placeholder con el token enmascarado, texto "Actual: ••••••••XXXX" al guardar un token nuevo).
+2. **Commitear** cuando 1 dé OK (lo hacés vos).
+3. *(Follow-up opcional)* dead code `getPostLoginPath` en `auth.ts:65` — candidato de limpieza en un sprint propio.
+
+## ✅ D1 — computeTrend zombie eliminado
+
+**Qué hace:** sprint de saneamiento, eliminación de código muerto. `computeTrend()` en `health-score.ts` calculaba un "trend" -10..+10 vía hash determinístico del `organizationId` — un placeholder sin relación con la realidad. El mail ya no lo usaba (FIX-BRIEF lo desconectó, usa el delta real de snapshots) y el widget de Health ya lo ocultaba (comentario in-code "S4"). Se seguía calculando en cada `getHealthScore()` sin mostrarse en ningún lado. Regla central del sprint: no borrar el campo `trend` del tipo hasta confirmar cero consumidores vivos en TODO el repo.
+
+### Paso 0 — Relevamiento de consumidores (antes de borrar)
+Grep exhaustivo de `computeTrend` / `.trend` / `trend:` en **todo el repo**, no solo `src/`: incluyó `tests/` completo (e2e, integration, setter, leados), `scripts/`, `prisma/`. Hallazgos:
+- `computeTrend` se llamaba en **un solo lugar**: `health-score.ts:117`, solo para poblar el campo `trend` del objeto devuelto — nunca se leía después.
+- El campo `trend` de `HealthScoreResult`, fuera de `health-score.ts`, solo aparece mencionado en **2 comentarios** (prosa, no código ejecutable): `HealthScore.tsx` (docblock + comentario "S4" del chip oculto) y `executive-brief.ts:283` (comentario que documenta que el brief usa su propio delta de snapshots, NO `healthScore.trend`). Ninguno de los dos LEE `.trend` — ambos explican por qué no se usa.
+- Los 3 consumidores reales de `getHealthScore()` en todo el repo, confirmados leyendo cada call site: `executive-brief.ts:278` (usa `.total`), `reports/executive-weekly/build.ts:132` (usa `.total` vía `liveHealth?.total`), `dashboard/page.tsx:171` (pasa el objeto entero a `<HealthScore data={data}/>`, que tampoco lee `.trend` en su render — verificado leyendo el componente completo). Ninguno toca `.trend`.
+- `tests/`, `scripts/`, `prisma/`: cero menciones de `trend` relacionadas con Health Score. El único hit en `scripts/` es `calcTrend` en `seed-matsu-week-results.ts`, función no relacionada (trend semanal de leads/mensajes de `week-results.ts`, un concepto distinto). No existe `health-score.invariant.ts` ni ningún test que tipe o lea el campo.
+- **Veredicto: cero consumidores vivos de `.trend` en todo el repo.** Seguro borrar función + campo.
+
+### Paso 1 — Borrado
+- `health-score.ts`: eliminada `computeTrend()` (líneas 456-468) y su helper exclusivo `hashStringToNumber()` (líneas 470-477 — confirmado sin otro caller vía grep, solo lo llamaba `computeTrend`). Eliminada la llamada `const trend = computeTrend(organizationId, total)` dentro de `computeHealthScoreInternal()`. Eliminado el campo `trend: { value, direction }` de `HealthScoreResult` y del objeto de retorno.
+- `HealthScore.tsx`: limpiados los 3 rastros huérfanos que documentaban el ocultamiento de un campo que ya no existe — el docblock (`COMPLETE — full live rings + score + trend` → sin "+ trend"), el comentario "S4" junto al header (ya no referencia el ahora-inexistente `computeTrend()`/`lib/health-score.ts`) y el comentario "S4b" sobre el subtítulo. Los 3 son comentarios puros — cero JSX/lógica de render tocada; diff confirmado comment-only.
+
+### Qué NO se tocó
+- La lógica REAL de delta de Health (snapshots — `getPreviousHealthTotal`, `getBriefHistory`, `healthScores.total`, la que usa el mail vía FIX-BRIEF) — intacta, no es el zombie.
+- El resto del cálculo de health-score (las 3 dimensiones, sus pesos, cada `compute*Score` sub-helper) — intacto.
+- `executive-brief.ts:283`: su comentario menciona `healthScore.trend` en pasado ("hoy un placeholder..."). Quedó con redacción levemente desactualizada, pero su afirmación central (el brief NO usa ese campo, calcula su propio delta) sigue siendo cierta — ahora trivialmente. Fuera del scope literal del sprint ("el widget"); se deja como observación menor, no se tocó.
+
+### Verificación
+`.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) — confirma además que ningún otro archivo del repo intentaba leer `.trend` de un `HealthScoreResult` tipado (hubiera fallado con "property does not exist") · `eslint src/lib/health-score.ts src/components/dashboard/home/HealthScore.tsx`: **0 errores, 0 warnings** · no existe `health-score.invariant.ts`; `tests/e2e/04-health.spec.ts` es un endpoint no relacionado (`/api/chatbot/develop/health`, health-check del chatbot, no el widget del dashboard) — confirmado leyéndolo completo · `git status --porcelain`: solo `health-score.ts` y `HealthScore.tsx` modificados por este sprint (además de los archivos de D5' aún pendientes de commit) · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **No autoconfirmado — visual:** abrir `/dashboard` (home del cliente) y confirmar que el widget de Health Score se ve idéntico a antes (rings + score numérico presentes; nunca mostraba el trend, así que no debería haber ninguna diferencia visible).
+2. **Commitear** cuando (1) dé OK (lo hacés vos).
+
+## ✅ D6 — infra tests de integración
+
+Config dedicada para que `tests/integration/` corra con un comando estándar,
+cargando `DATABASE_URL` sola. Corrida retroactiva de los 4 specs — 2 nunca
+habían corrido nunca (`client-monthly-report.spec.ts` de P2.C, y el de D4
+recién vuelto de su ubicación provisional).
+
+### Relevamiento (patrón calcado)
+- `playwright.config.ts` (e2e): `testDir: tests/e2e`, sin `dotenv` — no hace falta porque `next start`/`next dev` cargan `.env.local` solos (Prisma corre dentro del server Next, no en el proceso de Playwright).
+- `playwright.setter.config.ts` / `playwright.leados.config.ts`: ambos cargan env igual — `dotenv.config({ path: '.env.local' })` **inline arriba del archivo**, no un `globalSetup` separado — porque instancian `PrismaClient` directo en el proceso de test. `leados` en particular no tiene `webServer` (Prisma + lógica pura, sin HTTP) — el sibling más parecido a lo que necesitaba `tests/integration/`.
+- `dotenv` ya es devDependency (`^17.4.2`, usado por setter/leados) — no hizo falta instalar nada.
+- Inventario de `tests/integration/` (3 specs) + confirmación de que `generate-insights-pending-guard.spec.ts` (D4) seguía en `tests/e2e/` (parche manual pendiente de revertir):
+  - `alerts-detector.spec.ts` (R22): Prisma directo **+ HTTP** a `/api/cron/detect-bot-issues` y `/api/admin/alerts/trigger-detector` (rutas relativas vía el fixture `request` de Playwright). Su propio header ya avisa: "Require a live database and a running Next.js server".
+  - `executive-report-lead-count.spec.ts` (P2.B.2): Prisma directo, sin HTTP.
+  - `client-monthly-report.spec.ts` (P2.C): Prisma directo + render real de PDF (`@react-pdf/renderer`), sin HTTP.
+  - `generate-insights-pending-guard.spec.ts` (D4, en `tests/e2e/`): Prisma directo, sin HTTP.
+- **Hallazgo no anticipado por el brief:** los 4 specs NO son estrictamente "read-only" — los 4 escriben filas propias con un TAG único (`P2C-MONTHLYREPORT-TEST`, `D4-PENDINGGUARD-TEST`, etc.) y las borran en `finally`. Es un patrón seguro (auto-contenido, no toca datos reales), pero no es "solo `findFirst`/`findMany`" — se documentó así, con precisión, en el comentario de la config nueva en vez de repetir literalmente "read-only".
+- **Segundo hallazgo no anticipado:** `alerts-detector.spec.ts` tiene un perfil de runtime distinto a los otros 3 — necesita `baseURL` + servidor Next corriendo; los otros 3 son Prisma-puro en proceso, cero servidor. Esto es una tensión de diseño que el brief no resolvía explícitamente (decía calcar setter *y* leados, pero setter trae `webServer` y leados no). Se priorizó el perfil de leados (liviano, sin build) porque cubre 3 de 4 specs y es el patrón que el brief cita como referencia de "sin servidor HTTP" — el costo es que `alerts-detector.spec.ts` no corre bajo esta config. Detalle del impacto abajo.
+
+### Paso 1 — Config + script
+- **Creado** `playwright.integration.config.ts`: calca el mecanismo de `leados` (`dotenv.config()` inline, sin `globalSetup`), `testDir: ./tests/integration`, sin `webServer`. Comentario explícito documentando: el mecanismo de carga de env, la ausencia de `webServer` y por qué, la excepción conocida de `alerts-detector.spec.ts`, y la naturaleza real (no read-only) de los datos de test.
+- **Agregado** script `"test:integration": "playwright test --config=playwright.integration.config.ts"` a `package.json`, al lado de `test:setter`/`test:leados`.
+
+### Paso 2 — Spec de D4 recuperado
+- Movido `generate-insights-pending-guard.spec.ts` de `tests/e2e/` a `tests/integration/` (operación de filesystem, sin `git mv`, sin editar contenido). Confirmado con `Glob`: 4 specs en `tests/integration/`, cero remanente en `tests/e2e/`.
+
+### Paso 3 — Corrida retroactiva (`npm run test:integration`, 14 tests, 26.4s)
+
+| Spec | Resultado | Detalle |
+|---|---|---|
+| `alerts-detector.spec.ts` | **7 failed, 1 skipped** | Los 7 fallos: `TypeError: apiRequestContext.get/post: Invalid URL` exactamente en cada `request.get('/api/cron/detect-bot-issues', ...)` / `request.post('/api/admin/alerts/trigger-detector')` — sin `baseURL` configurado (a propósito, ver Relevamiento), Playwright no puede resolver la ruta relativa. Falla 100% consistente en las 7 (mismo error, mismo root cause) — no es flaky ni depende de datos. El 1 skip (`CLIENT_NO_ACTIVITY`) es el propio `test.skip()` del spec por estado de datos ("Bot tiene conversaciones recientes") — no relacionado a la config. |
+| `executive-report-lead-count.spec.ts` (P2.B.2) | **1 passed** (2.0s) | Ghost test resuelto — corre limpio. |
+| `client-monthly-report.spec.ts` (P2.C) | **2 failed** — **NUNCA había corrido antes de hoy** | `TypeError: Cannot read properties of null (reading 'props')` dentro de `@react-pdf/renderer`'s `render()` (`index.js:39`), originado en `Error: Objects are not valid as a React child (found: object with keys {__pw_type, type, props, key})` dentro de `@react-pdf/reconciler`. La clave `__pw_type` sugiere que el propio transform de Playwright para compilar `.spec.ts` interfiere con `React.createElement` de un modo que el reconciler custom de `@react-pdf/renderer` no reconoce como elemento válido — **hipótesis no confirmada, no investigada más a fondo** (fuera de la regla "no arreglar, reportar"). Ambos tests (mes completo y mes flojo) fallan en el mismo punto (la llamada a `renderToBuffer`), después de que las aserciones de datos (`data.funnel`, `data.leads`, etc.) ya pasaron — la lógica de `getClientMonthlyReportData` en sí no mostró problemas, el fallo es específicamente en el render del PDF bajo Playwright. |
+| `generate-insights-pending-guard.spec.ts` (D4) | **3 passed** (1.4s, 0.6s, 0.8s) | Recuperado de `tests/e2e/`, corre limpio bajo la config nueva. Cierra la tarea pendiente #19 ("Escribir test de integración del guard anti-spam"), abierta desde D4. |
+
+**Total: 4 passed, 9 failed, 1 skipped, 0 flaky.** Ningún test se tocó ni se intentó arreglar — reportado tal cual salió.
+
+### Qué NO se tocó (ni se arregló)
+- Ningún spec de `tests/integration/` — ni siquiera los que fallan. Cero intento de fix a ciegas.
+- `playwright.config.ts` (e2e) — intacto, no se modificó.
+- El contenido de `generate-insights-pending-guard.spec.ts` — solo se movió el archivo, cero edición.
+- La decisión sobre `alerts-detector.spec.ts` (agregar `webServer` dedicado, aceptar que no corra bajo el comando estándar, o separarlo a su propia config con perfil propio) — queda para vos, ver "Pendiente del humano".
+
+### Verificación
+`.\node_modules\.bin\eslint.cmd playwright.integration.config.ts tests/integration/generate-insights-pending-guard.spec.ts`: **0 errores, 0 warnings** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único: baseline `searchconsole.ts:119`) · `npm run test:integration` corrido y reportado arriba · build no corrido (fuera de gate) · sin commits.
+
+### Pendiente del humano
+1. **Decidir sobre `alerts-detector.spec.ts`:** tiene un perfil de runtime distinto a los otros 3 specs (necesita servidor + `baseURL`). Opciones: (a) agregarle un `webServer` dedicado estilo `setter` (implica build+start solo para este spec, o un config separado con su propio perfil, tipo "tests/http-integration"); (b) aceptar que no corre bajo `test:integration` y se sigue corriendo manual contra un server ya levantado; (c) otra. No se decidió — se priorizó no bloquear a los otros 3 specs con infraestructura pesada no pedida explícitamente.
+2. **Investigar (si interesa) el fallo de `client-monthly-report.spec.ts`:** es la primera vez que corre — el fallo del PDF (`__pw_type` / reconciler de `@react-pdf/renderer`) es nuevo, no reportado antes. Puede ser: (a) un bug real en `ClientMonthlyReportPdf.tsx` que solo se manifiesta con ciertos datos, (b) una incompatibilidad entre el transform de Playwright y el reconciler custom de `@react-pdf` (afectaría solo al test, no a producción, donde el PDF se genera fuera de Playwright), o (c) otra causa. Se necesita decidir cuál antes de tocar nada — no se investigó más profundo por regla explícita del sprint.
+3. Tarea stale #19 ("Escribir test de integración del guard anti-spam") puede cerrarse — el spec de D4 ahora corre y pasa.
+4. **Commitear** cuando revises el estado de los specs (lo hacés vos).
+
+## ✅ D7 — test PDF P2.C movido a Node puro
+
+Confirma el pendiente #2 de D6: el crash de `client-monthly-report.spec.ts` era el
+runner (Playwright), no el PDF. Test movido a un invariante tsx — mismo Prisma,
+mismo `renderToBuffer`, mismo componente, cero crash.
+
+### Relevamiento (Paso 0)
+- Spec viejo releído: 2 tests (mes completo / mes flojo), Prisma directo vía
+  `getClientMonthlyReportData` + `renderToBuffer(ClientMonthlyReportPdf)`, filas
+  tagueadas `P2C-MONTHLYREPORT-TEST` borradas en `finally`.
+- Patrón de invariante relevado contra dos ejemplos: `report-eligible-plan.invariant.ts`
+  (assert plano, sin DB) y, más relevante, `monthly-report-data.invariant.ts` — que
+  YA EXISTE para este mismo feature (P2.C) pero cubre solo el ensamblado puro
+  (`assembleClientMonthlyReportData`, sin DB ni PDF). Son dos invariantes con
+  scope distinto y complementario, no un duplicado.
+- Route de descarga real confirmada: `src/app/api/reports/client-monthly/route.ts`
+  (su propio comment: *"Descargá el informe del mes"*) — mismo `getClientMonthlyReportData`
+  + `renderToBuffer(ClientMonthlyReportPdf)` que el spec y el invariante nuevo. La otra
+  coincidencia del grep, `src/app/api/reports/monthly/route.ts`, es un reporte distinto
+  y anterior (`MonthlyReport`, datos de analytics/SEO) — no relacionado a P2.C, fuera de scope.
+- **Hallazgo no anticipado por el brief:** ningún `.invariant.ts` existente toca
+  `PrismaClient` (grep sin matches) — todos son función pura. El nuevo invariante es el
+  primer caso de un tsx puro contra la Neon real, y `src/lib/prisma.ts` construye
+  `new PrismaClient()` **a nivel de módulo** (eager). En un script tsx de un solo
+  archivo (a diferencia de la config de Playwright de D6, donde `dotenv.config()`
+  corre en el proceso padre ANTES de que el worker cargue el spec) los `import`
+  estáticos de ESM se hoistean por delante de cualquier otra sentencia — así que un
+  `import` estático de algo que toque `@/lib/prisma` se evaluaría antes que
+  `dotenv.config()`, reproduciendo el mismo error de `DATABASE_URL` que tenía D6,
+  pero por hoisting en vez de por falta de config. Se resolvió con `import()`
+  dinámico para todo lo que toca Prisma, ejecutado recién después de
+  `dotenv.config()` — ver comentario en el archivo nuevo.
+
+### Paso 1 — Conversión
+- **Creado** `src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts`
+  (mismo directorio que `monthly-report-data.invariant.ts`, nombre calcado del
+  archivo que cubre — mismo criterio que el resto de los invariantes del repo).
+  Mismas aserciones que el spec viejo (mes completo: reconciliación funnel/leads,
+  umbrales, PDF > 1000 bytes; mes flojo: ceros honestos, `phrase: null`, PDF > 500
+  bytes), mismo criterio de skip si no hay bot activo. Usa el idioma
+  `if (!data.hasBot) throw new Error(...)` (copiado tal cual de
+  `monthly-report-data.invariant.ts`) en vez de un `assert` para el discriminante
+  — es lo que le da a TypeScript el narrowing del union sin cast ni `any`.
+- **Registrado** `"check:invariant:client-monthly-report-pdf"` en `package.json`,
+  al lado de `check:invariant:client-monthly-report` (la pure invariant, sin
+  tocarla). No se agregó al aggregate `check:invariants` — ya viene incompleto
+  desde hace varios sprints (no incluye tampoco `client-monthly-report`,
+  `dates-ar`, `lead-status`, etc.); mantenerlo así es consistente con el resto,
+  arreglarlo es otro alcance.
+- **Eliminado** `tests/integration/client-monthly-report.spec.ts` (filesystem,
+  sin `git rm`). Confirmado con `Glob`: quedan 3 specs en `tests/integration/`.
+
+### Paso 2 — Corrida y diagnóstico
+- `npm run check:invariant:client-monthly-report-pdf` → **PASA limpio**, mes
+  completo y mes flojo, PDF real generado sin crashear (`◇ injected env (17)
+  from .env.local` confirma la carga de env correcta).
+- Primer intento falló por un typo propio (`.ts` en vez de `.tsx` en el import de
+  `ClientMonthlyReportPdf`) — corregido antes de este resultado; no fue el
+  diagnóstico, fue un error de tipeo en el archivo nuevo.
+- `npm run test:integration` re-corrido tras el borrado: **misma foto que D6**
+  para los 3 specs que quedan — `alerts-detector.spec.ts` 7 failed + 1 skipped
+  (mismo `Invalid URL`, sin cambios), `executive-report-lead-count.spec.ts` 1
+  passed, `generate-insights-pending-guard.spec.ts` 3 passed. Sin regresión.
+
+### VEREDICTO
+**La hipótesis era correcta: era el runner, no el PDF.** Playwright instrumenta
+los módulos de un modo que el reconciler de `@react-pdf/renderer` rechaza
+(`__pw_type`) — corriendo la misma lógica exacta (mismo Prisma, mismo
+`renderToBuffer`, mismo componente) fuera de Playwright, todo pasa. El PDF de
+P2.C está sano. Cierra el pendiente #2 de D6.
+
+### Qué NO se tocó
+- El componente `ClientMonthlyReportPdf.tsx`, la route de descarga, ni
+  `get-client-monthly-report-data.ts` — cero cambios de lógica, solo se cambió
+  el runner del test.
+- `playwright.integration.config.ts` — intacto (el spec eliminado deja de
+  aparecer solo por no estar más en la carpeta, sin editar el archivo).
+- El pendiente #1 de D6 (arquitectura de `alerts-detector.spec.ts`) — sigue sin
+  decidir, no era parte de este sprint.
+
+### Verificación
+`.\node_modules\.bin\eslint.cmd` sobre el invariante nuevo: **0 errores, 0
+warnings** · `.\node_modules\.bin\tsc.cmd --noEmit`: sin errores nuevos (único:
+baseline `searchconsole.ts:119`) · `check:invariant:client-monthly-report-pdf`
+y `test:integration` corridos y reportados arriba · build no corrido (fuera de
+gate) · sin commits.
+
+### Pendiente del humano
+1. Pendiente #1 de D6 sigue abierto: qué hacer con `alerts-detector.spec.ts`
+   (perfil de servidor+`baseURL` que esta config no provee).
+2. **Commitear** cuando revises (lo hacés vos) — incluye el invariante nuevo, el
+   script en `package.json`, y el borrado del spec de Playwright.
+
+---
+
+## ✅ P3-A.1 — Eslabón backend de la conexión Google Business Profile
+
+**Objetivo:** cerrar el hueco entre "tokens GBP guardados" y "cliente v4 usable" —
+descubrir account+location de Google y persistirlos, con estados de conexión honestos y
+el fill one-shot de rating/count. Solo backend + servicios server; la UI es P3-A.2.
+Fuente de verdad detallada: `docs/sprints/p3-a-1-gbp-connection.md`.
+
+### Qué cerró
+- **Descubrimiento + persistencia:** el callback (`google-business/callback/route.ts`),
+  tras persistir tokens, llama `connectGbpForOrg(orgId)` (best-effort) que lista
+  accounts/locations (Account Management + Business Information **v1**, `fetch` crudo,
+  reusando el Bearer del cliente OAuth existente) y persiste `gbpAccountId`/`gbpLocationId`
+  según cardinalidad. Antes: `route.ts:38-46` escribía solo 4 tokens y nadie poblaba los IDs.
+- **Cardinalidad (1:1):** 1 location → `OPERATIONAL`; >1 → `CONNECTED_NO_LOCATION('multiple')`
+  (elección espera al selector de P3-A.2, **sin** variante admin); 0 → `...('none')`.
+  Reconectar reemplaza, no acumula.
+- **Puente v1→v4 (crítico):** el cliente v4 interpola `gbpLocationId` como path COMPLETO
+  (`google-business-profile.ts:154,:297`), así que se persiste `accounts/{a}/locations/{l}`
+  (`composeLocationResourceName`) — la Business Information v1 devuelve `locations/{id}` pelado.
+- **Servicios P3-A.2:** `listAvailableLocations()` / `setActiveLocation(id)` (`src/lib/actions/
+  gbp-connection.ts`, `'use server'`), org de la SESIÓN nunca de un parámetro (anti-IDOR),
+  membership validada server-side.
+- **Rating one-shot best-effort:** `fetchGoogleRatingSnapshot` reusa los agregados del endpoint
+  v4 de reviews; escribe `googleRating`(null si count 0)/`googleReviewsCount`/`googleRatingUpdatedAt`
+  solo en OPERATIONAL. Falla → queda OPERATIONAL, conserva valor previo. Sin cron.
+
+### 🚩 Deuda SEC (flag, no se toca acá)
+Tokens OAuth en **claro** (patrón existente GBP/Tiendanube/Cal.com). Encriptación =
+sprint SEC dedicado.
+
+### Arquitectura
+3 capas: núcleo puro (`gbp-connection-logic.ts`, único import del invariante) · I/O fetch v1
+(`gbp-discovery.ts`) · wiring con prisma (`gbp-connection.ts`). Cliente GBP tocado solo aditivo
+(`getGbpAccessToken` + `fetchGoogleRatingSnapshot`). **Sin migración** (los 10 campos ya existían).
+
+### Verificación
+`check:invariant:gbp-connection` **verde** (cardinalidad/aislamiento anti-IDOR/best-effort/
+reconexión, con mock por DI) · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0/0 en los 8 archivos tocados · `prisma migrate status` up to
+date · **build fuera de gate** · sin commits.
+
+### Pendiente
+1. **Verificación viva PENDIENTE** — no hay cuenta GBP de prueba; el OAuth vivo + locations reales
+   no se ejercieron. No afirmar "funciona en vivo".
+2. **Commitear** cuando revises (lo hacés vos): 5 archivos nuevos + 4 edits + script en package.json.
+3. Próximo: **P3-A.2** (UI self-service: botón, wizard, selector sobre los servicios nuevos).
+
+---
+
+## ✅ P5.1-fix-reviews-rule — Borde CONNECTED_NO_LOCATION en reviewsEngineRule
+
+**Objetivo:** tras P3-A.1, `gbpConnectedAt` se setea también cuando la conexión queda
+`CONNECTED_NO_LOCATION` (0 o >1 sucursales, sin `gbpLocationId` resuelto) — `reviewsEngineRule`
+(P5.1) disparaba igual, recomendando activar el Motor de Reseñas sin location operativa para que el
+cliente v4 tenga con qué operar. Corregir SOLO ese borde, sin tocar el resto del motor.
+
+### Relevamiento (antes de tocar)
+- `reviewsEngineRule.matches` (`rules.ts:70-74`, antes del fix) disparaba con `s.gbpConnected &&
+  googleReviewsCount < 10 && !activeModuleSlugs.includes('motor-resenas')`.
+- `gbpConnected` viene de `get-recommendations-for-org.ts:49` (antes): `Boolean(org?.gbpConnectedAt)`
+  — SOLO mira `gbpConnectedAt`, nunca `gbpLocationId`. Por eso no distinguía `OPERATIONAL` de
+  `CONNECTED_NO_LOCATION` (P3-A.1 setea `gbpConnectedAt` en ambos casos).
+- Intención original de la regla (comentario `rules.ts:60-65`): disparar cuando "la ficha ya está
+  conectada". P5.1 es anterior a P3-A.1 — esa distinción no existía todavía, así que `gbpConnectedAt`
+  era la única proxy disponible. El fix no cambia el propósito de la regla; corrige la proxy con el
+  criterio que P3-A.1 ya formalizó.
+
+### Qué corrigió
+- **Nueva señal `gbpOperational`** en `RecommendationSignals` (`types.ts`) — `true` SOLO si
+  `deriveConnectionStatus({ gbpConnectedAt, gbpLocationId }) === 'OPERATIONAL'` (P3-A.1,
+  `gbp-connection-logic.ts` — **reusada tal cual, sin reimplementar el criterio**).
+  `get-recommendations-for-org.ts` ahora también selecciona `gbpLocationId` en el `findUnique` y
+  calcula el campo con esa función.
+- **`reviewsEngineRule.matches`** (`rules.ts:70-74`) ahora exige `s.gbpConnected && s.gbpOperational
+  && ...` — se AGREGÓ el segundo conjunto, no se removió el primero (el resto de la regla, intacto:
+  mismo umbral de leads, mismo check de módulo activo, mismo copy/CTA/priority).
+- **`gbpConnected` no se tocó** (sigue siendo `Boolean(gbpConnectedAt)`) → `connectGbpRule` y las
+  demás reglas quedan **exactamente igual** que antes (cero edits en su código). Efecto neto para
+  una org `CONNECTED_NO_LOCATION`: ni `connect-gbp` ni `reviews-engine` disparan — hueco intencional
+  (la recomendación "elegí tu sucursal" es contenido de P3-A.2, fuera de este fix).
+
+### Test
+`recommendations.invariant.ts`: `gbpOperational: true` agregado a `baseSignals` (default sano) + 2
+aserciones nuevas en el bloque 2 (reviews-engine) — NO dispara con `gbpOperational: false` (conectada
+sin location, el borde corregido) y SIGUE disparando igual que antes con `gbpOperational: true`
+(resto del comportamiento intacto). Los bloques 1/3/8/10 (connect-gbp, XOR, anti-IDOR, motor
+completo) corren sin modificar y siguen verdes.
+
+### Verificación
+`check:invariant:recommendations` **verde** · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0/0 en los 4 archivos tocados (`types.ts`, `rules.ts`,
+`get-recommendations-for-org.ts`, `recommendations.invariant.ts`) · `prisma migrate status` up to
+date (sin migración, no se tocó el schema) · **build fuera de gate** · sin commits.
+
+### Flag fuera de scope (no tocado)
+`motor-resenas/page.tsx:157` calcula su propio `gbpConnected` local (`!!(gbpAccessToken &&
+gbpRefreshToken)`, tokens crudos — no pasa por `deriveConnectionStatus`) para gatear la UI de la
+lista de reseñas. Mismo tipo de borde potencial (`CONNECTED_NO_LOCATION` mostraría la lista sin
+location operativa) pero es una regla de UI, no del motor de recomendaciones — fuera del alcance de
+este fix. Anotado, no implementado.
+
+### Pendiente del humano
+1. **Commitear** cuando revises (lo hacés vos): 3 edits de lógica (`types.ts`, `rules.ts`,
+   `get-recommendations-for-org.ts`) + 1 edit de test (`recommendations.invariant.ts`).
+2. Si se decide corregir el borde análogo de `motor-resenas/page.tsx:157`, es un ajuste aparte.
+   *(Cerrado por P3-A.2, abajo.)*
+
+---
+
+## ✅ P3-A.2 — Superficie de venta del módulo de reseñas + estados honestos
+
+**Objetivo:** la vista operativa de `motor-resenas` ya existía y P3-A.1 cerró el backend de
+conexión, pero un cliente SIN el módulo recibía `redirect('/dashboard')` duro (no había pantalla
+de venta) y uno CON el módulo sin conexión operativa veía una card gateada por tokens crudos.
+Este sprint construye la superficie de venta + los estados honestos módulo × conexión.
+Fuente de verdad detallada: `docs/sprints/p3-a-2-venta.md`.
+
+### Los 3 estados (módulo × conexión)
+`resolveMotorResenasView` (**puro**, `src/lib/modules/motor-resenas-view.ts`) sobre
+`isModuleActive` × `deriveConnectionStatus` (P3-A.1 — criterio unificado, reemplaza el
+`gbpConnected` local por tokens de `page.tsx:157`, el último criterio propio del repo):
+- Sin módulo → **`locked`**: LockedView de venta (la conexión NUNCA desbloquea — gating comercial).
+- Módulo activo + conexión no operativa (`NOT_CONNECTED` o `CONNECTED_NO_LOCATION`) →
+  **`connecting`**: "develOP está terminando de conectar tu Google… no tenés que hacer nada".
+  NUNCA la vista operativa vacía (comprado ≠ operativo).
+- Módulo activo + `OPERATIONAL` → **`operational`**: la vista existente, intacta.
+
+### Qué se construyó
+- **LockedView** (client): venta en lenguaje de dueño, 3 features REALES (sin números inventados),
+  precio **`[FALTA:precio]` visible** (pricing no cerrado; el componente NO tiene acceso al
+  catálogo — no puede filtrarse el 60 de la vitrina), CTA → `requestUpsellAction('motor-resenas',
+  'Motor de Reseñas Automático')` REUSADA tal cual (org de la SESIÓN, anti-IDOR; dedup 24h
+  server-side). **"Ya lo pediste" persistente** vía `OrganizationModule.upsellRequestCount > 0`
+  (query lazy server-side) → sin botón de re-pedido, no se puede spamear. Variante **`isPaused`**
+  honesta (hallazgo: PAUSED caía en venta). Success inline + `<Link>` a mensajes (sin
+  `triggerTransition` — no aplica en portales).
+- **ConnectingState** (server-safe): card cyan molde OnboardingStatusCard, badge "En curso",
+  link `?context=gbp` (key agregada a `message-context.ts` — era una key MUERTA que el CTA viejo
+  ya usaba en vano: composer vacío).
+- **page.tsx**: switch de 3 ramas con PageHeader idéntico; murieron el redirect, la card bespoke
+  "GBP no conectado" y los selects muertos. `AskReviewSection` (QR) queda en connecting +
+  operational (funciona sin GBP); no en locked. Empty operativo enriquecido con CTA ancla al QR
+  ("Pedir mi primera reseña").
+- **Registro admin: confirmado existente, cero código** — los pedidos caen solos en
+  `/admin/leads?tab=demand` + Inbound + webhook + notificación (P5.2).
+
+### Test
+`check:invariant:motor-resenas-view` (nuevo): truth table 2×3 completa · gating (sin módulo jamás
+operativa) · honestidad (activo + no operativa → connecting) · composición end-to-end con
+`deriveConnectionStatus` (los 8 combos crudos = el cableado exacto de la página) · determinismo.
+
+### Verificación
+Invariante nuevo **verde** · `tsc --noEmit` sin errores nuevos (único: baseline
+`searchconsole.ts:119`) · `eslint` 0 errores en tocados · vecinos re-corridos verdes
+(`gbp-connection`, `modules`, `upsell-dedup`) · `prisma migrate status` up to date (sin
+migración) · **build fuera de gate** · sin commits.
+⚠️ **visual-qa NO ejecutable**: el subagente no tenía las herramientas de preview en esta sesión
+(ni llegó al timeout conocido del preloader). Inspección estática ✅ / cero ❌. **Verificación
+visual pixel-perfect DECLARADA para el humano en `:3000`** (fallback previsto por el brief).
+
+### Fuera de scope (anotado)
+Vitrina muestra `priceMonthlyUsd=60` con pricing "no cerrado" · CTA en preview de admin falla
+honesto "Sesión inválida." (precedente P5.2) · selector de sucursal para
+`CONNECTED_NO_LOCATION('multiple')` (diferido) · `PremiumModuleCard` usa `triggerTransition` en
+portal (el código nuevo no lo imitó; migrarlo es otro alcance).
+
+### Pendiente del humano
+1. **Recorrer en `:3000` los 3 estados como dueño** (desktop + mobile) — el visual-qa headless no
+   corrió. Confirmar que la copy vende y es honesta.
+2. **`[FALTA:precio]`**: cerrarlo antes de mostrarle la pantalla a un cliente real.
+3. **Commitear** cuando revises (lo hacés vos): 4 archivos nuevos + 3 edits.
+
+## ✅ UTM.1 — Captura de atribución first-touch (widget → conversación → lead)
+
+**Objetivo:** EV.2 dejó `ChatbotLead.utmSource/utmMedium/utmCampaign` migradas pero 100% muertas
+(el comentario del propio schema decía "se capturan al inicio de la sesión desde la URL del
+widget" — nunca se construyó). Este sprint cierra ese camino completo con semántica first-touch:
+el primer set de UTM/referrer con que llegó el visitante vale, y no se pisa con navegación
+posterior. Fuente de verdad detallada: `docs/sprints/utm-1-captura.md`.
+
+### Rama elegida (paso 0)
+**(b) — migración aditiva en `Conversation`.** Ni `referrerUrl` ni `currentPath` preservaban el
+query string completo (`currentPath` llega como pathname de `usePathname()` o literal `'/'`
+hardcodeado en el embed; `referrer` era un campo Zod aceptado pero que ningún cliente mandaba
+nunca — dead code desde que se agregó). `ChatbotLead` ya tenía las columnas UTM desde
+EV.2 (migración `20260629195726_ev2_vertical_pack_signals_utm`, que nunca tocó
+`chatbot_conversation`) — no necesitó migración nueva, solo el write-site.
+
+**Complicación no anticipada en el brief:** la mayoría del tráfico real no es el sitio propio de
+develOP sino el widget embebido en sitios de clientes (`public/widget.js` + iframe en
+`/embed/[slug]`). Ese iframe corre en el origin de develop.com.ar — leer `window.location` ahí
+adentro nunca ve la URL real del sitio del cliente. `widget.js` ya mandaba `parentUrl` (URL
+completa del padre, con query string) vía `postMessage`, pero `ChatbotEmbed.tsx` lo descartaba.
+
+### Qué se construyó
+- **Migración aditiva** `utm1_add_conversation_utm_fields`: `Conversation.utmSource/utmMedium/
+  utmCampaign String?` (SQL 100% `ADD COLUMN`, nullable, sin default — sin backfill).
+- **`shared/attribution.ts`** (nuevo): `parseAttribution()` (extrae utm_source/medium/campaign +
+  referrer de una URL cruda) y `sanitizeAttributionField()` (strip de caracteres de control +
+  cap de longitud + colapso a `undefined` si queda vacío — nunca persiste `""`). Un solo lugar,
+  usado por cliente, servidor y tests.
+- **`resolver.ts`**: `getOrCreateConversation` escribe los UTM SOLO en el branch `create` (igual
+  que `referrerUrl`) — nunca en el `update` de una conversación existente. Esa es la garantía
+  completa de first-touch del sprint.
+- **`handleChatRequest.ts`**: Zod sanitiza `utmSource/utmMedium/utmCampaign` (cap 255) y —
+  extensión acordada— también `referrer` (cap 500, ya existente pero nunca sanitizado contra
+  caracteres de control). Sanitización silenciosa (strip, nunca rechaza la request). Threading a
+  `getOrCreateConversation` desde `body.*`, pero a `ToolCallContext`/`getTools()` desde
+  `conversation.*` (la fila YA persistida) — **no** desde `body.*`, porque un mensaje posterior en
+  la misma conversación podría traer UTMs distintos que el resolver ignora; usar `body.*` ahí
+  habría filtrado atribución incorrecta hacia `capture_lead`.
+- **`captureLead.ts`**: copia 1:1 `ctx.utmSource/utmMedium/utmCampaign` al `chatbotLead.create()`.
+- **Cliente**: `useChatbot.ts` (nuevo option `attribution`, cache first-touch en
+  `sessionStorage['chatbot:firstTouch']`, mismo patrón que `sessionId` — resuelve una vez, nunca
+  pisa); `LogicCompanion.tsx` (lectura directa de `window.location.href`/`document.referrer`,
+  same-origin, memoizada una vez por mount); `ChatbotEmbed.tsx` (nuevo estado poblado desde el
+  handshake `postMessage` ya existente, leyendo `parentUrl`/`referrer`); `widget.js` (una línea:
+  suma `referrer: document.referrer` al `postMessage` que ya mandaba `parentUrl`).
+
+### Tests
+`test:utm1` (invariant puro, cero DB — Zod + sanitización): válido pasa verbatim, >255 recorta,
+caracteres de control se limpian, solo-control-chars colapsa a `undefined`, sin UTMs sigue
+válido. `scripts/utm1-verify-attribution.ts` (DB real, sin LLM — invoca `buildCaptureLeadTool`
+directo): first-touch no se pisa, lead hereda UTMs, tráfico directo → `null` nunca inventado.
+**5/5 checks OK.**
+
+### Smoke (paso 5)
+`scripts/utm1-smoke.mjs` — POST real a `/chat` (turno 1 con UTMs A, turno 2 mismo sessionId con
+UTMs B, turno 3 con señal de contacto) + lectura Prisma directa. **6/6 checks OK**, `capture_lead`
+disparado naturalmente por el LLM. Fila de `ChatbotLead` resultante:
+```json
+{
+  "id": "cmr6zsfbx001vuphs23v76e9q",
+  "utmSource": "google",
+  "utmMedium": "cpc",
+  "utmCampaign": "launch_q3",
+  "capturedAt": "2026-07-04T23:27:23.037Z"
+}
+```
+El script limpia sus propias filas al terminar (`--keep` para inspección manual).
+
+### Verificación
+`tsc --noEmit` sin errores nuevos (único: baseline `searchconsole.ts:119`) · `eslint` en los 9
+archivos tocados/creados: 3 errores + 1 warning, **los 4 confirmados preexistentes** (comparados
+contra la versión en `HEAD` de cada archivo — mismo hallazgo, misma línea lógica, ninguno
+introducido por este sprint) · EV1–EV5 verdes · `prisma migrate status` limpio · `npm run build`
+verde (necesitó `NODE_OPTIONS=--max-old-space-size=6144` — el heap default del entorno quedó
+corto para este build; no es un error de código, el build falla igual en la rama sin tocar).
+
+**⚠️ Migración aplicada sobre la branch Neon compartida — requiere aviso al socio.** SQL 100%
+aditivo (pegado arriba), sin `DROP`/`ALTER` destructivo, sin backfill.
+
+### Fuera de scope (anotado, no implementado)
+- `ChatbotEmbed.tsx` hardcodea `currentPath: '/'` (bug preexistente, no relacionado a UTM —
+  la iframe no tiene visibilidad del path real del cliente tampoco).
+- `Conversation.sessionId` es `@unique` **global** (no `@@unique([botConfigId, sessionId])`) —
+  preexistente; implica que la garantía first-touch es efectivamente por tab de navegador, no
+  por bot.
+- Cache de 1h de `/widget.js` (`next.config.ts`): durante esa ventana, embeds con copia vieja
+  cacheada no mandan `referrer` (pero sí `parentUrl`, que ya iba antes de este sprint) — impacto
+  parcial, acotado a 1 hora.
+- Race real: `ChatbotEmbed.tsx` abre el chat inmediatamente al montar, independiente de que el
+  handshake `postMessage` haya llegado. Un visitante muy rápido podría mandar el primer mensaje
+  antes de que la atribución resuelva, quedando esa sesión fijada en "sin atribución" pese a que
+  los datos reales llegan un instante después. Aceptado como best-effort (atribución, no lógica
+  crítica) — no se ingenierizó una solución.
+
+### Pendiente del humano
+1. **Avisar al socio** de la migración aditiva sobre la branch Neon compartida (SQL en este
+   entry).
+2. Este sprint es 100% backend + lógica de cliente, sin pantallas nuevas — no requirió
+   `visual-qa`. Si se quiere confirmar visualmente, probar el widget propio en `:3000` con
+   `?utm_source=...` en la URL, y el embed en un sitio de prueba vía `widget.js`.
+3. **Avisar al frente panel** que la captura de UTM está viva → P4.1 puede consumirla (dashboard
+   `lead-origin.ts`/`LeadDetail.tsx` ya leían estos campos, siempre `null` hasta ahora).
+4. **Commitear** cuando revises (lo hacés vos).

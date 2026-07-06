@@ -39,6 +39,7 @@ function baseSignals(overrides: Partial<RecommendationSignals> = {}): Recommenda
     hotLeads: 0,
     googleReviewsCount: 50, // reputación ya construida → no dispara reseñas
     gbpConnected: true, // ficha conectada → no dispara connect-gbp
+    gbpOperational: true, // P3-A.1: y con location resuelta (OPERATIONAL)
     activeModuleSlugs: [],
     plan: { key: 'BUSINESS', reportsEnabled: true, crmEnabled: true }, // plan tope → no upsell
     ...overrides,
@@ -91,6 +92,22 @@ const fires = (signals: RecommendationSignals, id: string) =>
     fires({ ...fireIt, activeModuleSlugs: [MODULE_MOTOR_RESENAS] }, 'reviews-engine'),
     false,
     'reseñas NO dispara si el módulo ya está activo',
+  )
+  // P3-A.1 fix: conectada (gbpConnected=true, hay tokens) pero SIN location
+  // operativa (CONNECTED_NO_LOCATION — 0 o >1 sucursales sin elegir) → NO
+  // dispara. Recomendar el módulo sin `gbpLocationId` resuelto es incoherente:
+  // el cliente v4 no tiene location para operar.
+  assert.equal(
+    fires({ ...fireIt, gbpOperational: false }, 'reviews-engine'),
+    false,
+    'reseñas NO dispara si la ficha está conectada pero sin location operativa (CONNECTED_NO_LOCATION)',
+  )
+  // Mismo estado no cambia el resto del comportamiento: con location operativa
+  // (el resto de las condiciones intactas) sigue disparando igual que antes.
+  assert.equal(
+    fires({ ...fireIt, gbpOperational: true }, 'reviews-engine'),
+    true,
+    'reseñas sigue disparando igual que antes cuando la location SÍ es operativa',
   )
 }
 

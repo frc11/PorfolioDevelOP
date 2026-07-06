@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 
 interface InsightsNotificationInput {
   to: string
@@ -9,13 +9,24 @@ interface InsightsNotificationInput {
 }
 
 export async function sendInsightsNotificationEmail(input: InsightsNotificationInput) {
-  if (!process.env.RESEND_API_KEY) {
-    return { ok: false, skipped: true }
+  const result = await sendTransactionalEmail({
+    to: { email: input.to },
+    subject: `${input.insightsCount} insights nuevos para ${input.botName}`,
+    htmlContent: renderInsightsNotificationHtml(input),
+  })
+
+  if (!result.ok) {
+    console.error('[notifications] Failed to send insights email', result.error)
+    return { ok: false, error: result.error }
   }
 
-  const { to, organizationName, botName, insightsCount, dashboardUrl } = input
+  return { ok: true }
+}
 
-  const html = `
+export function renderInsightsNotificationHtml(input: InsightsNotificationInput): string {
+  const { organizationName, botName, insightsCount, dashboardUrl } = input
+
+  return `
     <!DOCTYPE html>
     <html>
       <body style="font-family: -apple-system, sans-serif; background: #f5f5f5; padding: 24px;">
@@ -44,18 +55,4 @@ export async function sendInsightsNotificationEmail(input: InsightsNotificationI
       </body>
     </html>
   `
-
-  try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: 'develOP <insights@develop.com.ar>',
-      to,
-      subject: `${insightsCount} insights nuevos para ${botName}`,
-      html,
-    })
-    return { ok: true }
-  } catch (error) {
-    console.error('[notifications] Failed to send insights email', error)
-    return { ok: false, error: String(error) }
-  }
 }

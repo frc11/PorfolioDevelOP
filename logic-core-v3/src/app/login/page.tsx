@@ -58,7 +58,18 @@ function FloatingField({
   const inputType = isPassword ? (show ? 'text' : 'password') : type
 
   return (
-    <motion.div variants={itemVariants} className="relative">
+    // Entrada propia (fade + subida de 16px), NO por propagación de variants. El
+    // FloatingField vive dentro de los tabs del AnimatePresence, que animan por
+    // objeto (animate={{opacity,x}}) y no propagan el label "visible" de
+    // itemVariants: eso dejaba al input pegado en su estado hidden (opacity 0).
+    // Con initial/animate propios termina SIEMPRE en opacity 1, en cualquier tab.
+    // Mismos valores y easing que itemVariants para no cambiar la estética.
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      className="relative"
+    >
       <input
         id={id}
         name={id}

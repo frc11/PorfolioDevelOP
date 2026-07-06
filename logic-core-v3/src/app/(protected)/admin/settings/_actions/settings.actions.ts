@@ -8,20 +8,12 @@ import {
   DEFAULT_AGENCY_SETTINGS,
 } from '@/lib/agency-settings'
 import { type PremiumFeatureKey } from '@/lib/premium-features'
+import { maskSecret } from '@/lib/mask-secret'
 
 import {
   UpdateModulePricingSchema,
   UpdateSettingsSchema,
 } from './settings.schemas'
-
-function maskSecret(value: string | null | undefined) {
-  if (!value) {
-    return null
-  }
-
-  const suffix = value.slice(-4)
-  return `••••••••${suffix}`
-}
 
 function normalizeNullableString(value: string | null | undefined) {
   const trimmed = value?.trim()

@@ -58,15 +58,18 @@ const connectGbpRule: RecommendationRule = {
 }
 
 /**
- * 2) Motor de Reseñas. Dispara cuando hay tráfico, la ficha ya está conectada,
- *    hay pocas (o ninguna) reseña y el módulo no está activo. Capitaliza clientes
- *    contentos que hoy no dejan reseña.
+ * 2) Motor de Reseñas. Dispara cuando hay tráfico, la ficha ya está conectada
+ *    Y OPERATIVA (P3-A.1: location resuelta — CONNECTED_NO_LOCATION, conectada
+ *    sin location por 0 o >1 sucursales sin elegir, NO cuenta: el cliente v4
+ *    necesita `gbpLocationId` para operar), hay pocas (o ninguna) reseña y el
+ *    módulo no está activo. Capitaliza clientes contentos que hoy no dejan reseña.
  */
 const reviewsEngineRule: RecommendationRule = {
   id: 'reviews-engine',
   hasEnoughData: (s) => s.hasBot && s.leadsLast30d >= THRESHOLDS.MIN_LEADS_30D,
   matches: (s) =>
     s.gbpConnected &&
+    s.gbpOperational &&
     s.googleReviewsCount < THRESHOLDS.LOW_REVIEWS_MAX &&
     !s.activeModuleSlugs.includes(MODULE_MOTOR_RESENAS),
   build: (s) => {

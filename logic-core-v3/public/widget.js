@@ -133,7 +133,9 @@
     iframe.addEventListener('load', function () {
       if (iframe.contentWindow) {
         iframe.contentWindow.postMessage(
-          { type: 'develop:init', parentUrl: window.location.href },
+          // UTM.1 — referrer sumado para atribución first-touch (parentUrl ya
+          // se mandaba antes de este sprint).
+          { type: 'develop:init', parentUrl: window.location.href, referrer: document.referrer },
           BASE_URL
         )
       }

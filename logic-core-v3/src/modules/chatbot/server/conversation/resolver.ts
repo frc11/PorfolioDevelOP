@@ -48,6 +48,10 @@ export interface GetOrCreateConversationInput {
   referrer?: string
   visitorIpHash?: string
   visitorUserAgent?: string
+  // UTM.1 — first-touch: solo se usan en el create{} de abajo, ver nota ahí.
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
 }
 
 export interface GetOrCreateConversationResult {
@@ -89,6 +93,12 @@ export async function getOrCreateConversation(
       sessionId: input.sessionId,
       currentPath: input.currentPath ?? null,
       referrerUrl: input.referrer ?? null,
+      // UTM.1 — first-touch: create-only, igual que referrerUrl arriba.
+      // NUNCA agregar esto al update{} del branch `existing` de más arriba —
+      // eso rompería en silencio la semántica de "primer contacto".
+      utmSource: input.utmSource ?? null,
+      utmMedium: input.utmMedium ?? null,
+      utmCampaign: input.utmCampaign ?? null,
       ipHash: input.visitorIpHash ?? null,
       userAgent: input.visitorUserAgent ?? null,
       startedAt: now,

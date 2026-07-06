@@ -9,6 +9,7 @@ import { useChatbotSounds } from '../../hooks/useChatbotSounds'
 import { renderToolCall } from '../tool-cards'
 import { ChatHeader } from '../chat/ChatHeader'
 import { DegradedBanner } from '../chat/DegradedBanner'
+import { parseAttribution, EMPTY_ATTRIBUTION, type ParsedAttribution } from '../../shared/attribution'
 
 interface ChatbotEmbedProps {
   slug: string
@@ -16,7 +17,12 @@ interface ChatbotEmbedProps {
 }
 
 export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
-  const chatbot = useChatbot({ slug, currentPath: '/' })
+  // UTM.1 — resuelto de forma async, recién cuando llega el handshake
+  // postMessage del padre (widget.js) — ver handleMessage más abajo.
+  // undefined = todavía pendiente; useChatbot lo cachea la primera vez que
+  // deja de serlo.
+  const [attribution, setAttribution] = useState<ParsedAttribution | undefined>(undefined)
+  const chatbot = useChatbot({ slug, currentPath: '/', attribution })
   const sounds = useChatbotSounds()
   const parentOriginRef = useRef<string>('*')
   const [input, setInput] = useState('')
@@ -61,6 +67,19 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
         window.parent.postMessage(
           { type: 'develop:ready', botSlug: slug },
           event.origin,
+        )
+
+        // UTM.1 — parentUrl ya se manda hoy desde widget.js; referrer es
+        // nuevo este sprint. Un widget.js viejo cacheado (ver riesgo #1 del
+        // plan) puede no mandar ninguno de los dos — se resuelve con
+        // gracia: EMPTY_ATTRIBUTION en vez de dejar `attribution` pendiente
+        // para siempre en esa carga de página.
+        const parentUrl =
+          typeof event.data.parentUrl === 'string' ? event.data.parentUrl : null
+        const parentReferrer =
+          typeof event.data.referrer === 'string' ? event.data.referrer : null
+        setAttribution(
+          parentUrl ? parseAttribution(parentUrl, parentReferrer) : EMPTY_ATTRIBUTION,
         )
       }
     }

@@ -26,8 +26,15 @@ export interface RecommendationSignals {
   hotLeads: number
   /** Reseñas de Google conocidas (0 si no hay dato). */
   googleReviewsCount: number
-  /** `true` si la ficha de Google Business está conectada. */
+  /** `true` si la ficha de Google Business está conectada (tokens presentes). */
   gbpConnected: boolean
+  /**
+   * P3-A.1: `true` SOLO si la conexión quedó OPERATIONAL (location resuelta).
+   * `false` en CONNECTED_NO_LOCATION (conectada pero sin location operativa —
+   * 0 o >1 sucursales sin elegir). Ver `deriveConnectionStatus` en
+   * `gbp-connection-logic.ts` — mismo criterio, reusado.
+   */
+  gbpOperational: boolean
   /** Slugs de los módulos premium ACTIVE de la org. */
   activeModuleSlugs: string[]
   /** Dimensiones del plan efectivo que las reglas necesitan. */
