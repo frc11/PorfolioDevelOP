@@ -13016,3 +13016,72 @@ que el logueo del fallo sobreviva). **No implementado en este sprint** (harness-
 - `evals/scoring/` (Q1.2) no se tocó — su regla de "escenario con error → no-evaluable entero" ya
   maneja esto correctamente.
 
+---
+
+## ✅ INFRA.1 — Rastro off-Neon de toda falla de persistencia + `onError` + `.code`/`.cause`   ·   2026-07-05
+
+Cierre del hallazgo que dejó abierto Q1.1-fix (arriba, "Pendiente / hallazgo para sprint futuro"):
+`onFinish` perdía turnos **sin rastro** cuando la conexión Prisma moría contra Neon mid-request
+(~11-14% bajo carga). **Solo observabilidad** — NO se tocó la conexión a Neon ni se intentó que el
+write no falle (eso es INFRA.2, causa raíz). Objetivo: que ninguna falla de persistencia sea
+silenciosa, y capturar el `.code`/`.cause` que INFRA.2 necesita para discriminar la hipótesis real.
+
+### Diagnóstico (Paso 0)
+El `catch (persistError)` (`handleChatRequest.ts:821`) tenía 3 canales y los 3 morían o no
+diagnosticaban en el modo de fallo real (Neon caída para esa request):
+1. `chatbotError` → sí escribía a stderr (sobrevive), pero solo `{ name, message, stack }`
+   (`logger.ts:62-65`) — **sin** el `.code` de Prisma ni el `.cause` de undici. Rastro no accionable.
+2. `await logChatbotEvent` → write Prisma a la **misma Neon caída**; `persistentLogger.ts:54-64`
+   traga su propia excepción y nunca relanza → cero filas.
+3. `Sentry.captureException` → `NEXT_PUBLIC_SENTRY_DSN` ausente en prod (OPTIONAL en `check-env.js`)
+   → no-op silencioso.
+Además: **sin `onError` en `streamText`** → errores mid-stream (Vertex, throws en tools) los
+enmascara `toUIMessageStreamResponse()` como 200 e invisibles server-side. Ningún helper del repo
+leía `.code`/`.cause` (hubo que construir el extractor). Firma real en dev (de `run-baseline.ts`):
+`terminated` directo de Prisma **o** `fetch failed` con el socket error en `e.cause` (undici).
+
+### Fix (`src/modules/chatbot/server/`, 3 archivos + 1 test)
+- `logging/logger.ts` (+): `extractDbErrorInfo(error)` — desenvuelve `PrismaClientKnownRequestError.code`
+  (P1017/P2024/P1001) + `error.cause` (message/code de undici), cero `any`; y `logPersistFailure(event,
+  error, fields)` — **sink off-Neon garantizado**: una línea JSON a stderr (Netlify Function Logs), no
+  toca Prisma, no depende de Sentry, nunca lanza → es el rastro que no puede morir con la conexión.
+- `logging/index.ts`: exporta ambas del barrel.
+- `chat/handleChatRequest.ts`: (a) `onError` nuevo en `streamText` → `chat.stream_error`; (b) sink como
+  **primera acción** del `catch` de persistencia (`chat.persist_failed`, con `.code`/`.cause` +
+  conversationId/botSlug/botConfigId/turnIndex), manteniendo `logChatbotEvent` como best-effort
+  después (por si Neon volvió) y el Sentry explícito; (c) mismo patrón en el `catch` top-level
+  (`chat.unhandled_failed`). Reemplaza a `chatbotError` en ambos catches (quedaba sin `.code`/`.cause`).
+- `logging/__tests__/persist-failure-sink.invariant.ts` (nuevo): el gate.
+
+**Mapa de nombres de evento** (para filtros de log): stderr `error.chat.persist_error` →
+`chat.persist_failed`, `error.chat.unhandled_error` → `chat.unhandled_failed`, nuevo
+`chat.stream_error`. Los event types de **DB** (`chat.persist_error`, `chat.unhandled_error`) se
+mantienen vía `logChatbotEvent` — no desaparece ningún término del stream de `chatbot_events`.
+
+### Verificación
+- **Gate** (`npm run test:infra1`): 5/5 checks. Prueba que el sink emite la línea estructurada con
+  `prismaCode` (P1017 / P2024) y `causeMessage`/`causeCode` (undici `terminated`/`UND_ERR_SOCKET`),
+  que nunca lanza, y que un no-Error no lo rompe. Como el sink no tiene dependencia de DB, testearlo
+  aislado **es** probar que el rastro sobrevive a la conexión muerta (no hay conexión que lo afecte).
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`).
+- `eslint` sobre tocados: 0 errores. 1 warning **pre-existente** (`toolResults` sin usar en el
+  destructure de `onFinish`, no introducido por INFRA.1 — solo se corrió de L694 a L708 al insertar
+  `onError` arriba).
+- `git diff`: 5 archivos, **`lib/prisma.ts` NO tocado** (config de conexión intacta, como manda el scope).
+
+### Pendiente / verificación humana (Valentino)
+- **`[FALTA:sentry-dsn]`**: el canal Sentry (secundario, best-effort) solo funciona si se setea
+  `NEXT_PUBLIC_SENTRY_DSN` en Netlify (hoy ausente). El sink **primario** (stderr) no necesita config
+  y funciona ya.
+- Con tráfico real: grepear `chat.persist_failed` en Netlify Function Logs y leer `prismaCode` /
+  `causeMessage` — **esa es la firma real de prod que decide INFRA.2** (terminated vs pool vs
+  prepared-stmt vs connect).
+
+### Fuera de scope (anotado)
+- **INFRA.2 (causa raíz)**: no se tocó `lib/prisma.ts`, connection string, pooler, `DIRECT_URL` ni
+  `connection_limit`; no se agregó reintento del write. Solo observabilidad.
+- **Paso 4 diferido**: los `console.error` fire-and-forget de `captureLead.ts` (`notifyClient`,
+  `syncLeadToCrm`) siguen en texto plano — follow-up barato; el módulo ya emite `capture_lead.*`
+  estructurado, así que sus fallos igual imprimen.
+- Warning pre-existente `toolResults` sin usar (`onFinish`): no se tocó (fuera de objetivo).
+

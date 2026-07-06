@@ -25,8 +25,8 @@ import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 import { hashIp, validateAssistantOutput } from '../safety'
 import { chatbotLog } from '../logging'
-import { chatbotDebug, chatbotError } from '../logging'
-import { logChatbotEvent } from '../logging'
+import { chatbotDebug } from '../logging'
+import { logChatbotEvent, logPersistFailure } from '../logging'
 // LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
@@ -691,6 +691,20 @@ export async function handleChatRequest(
         ttfbAt = Date.now()
       }
     },
+    onError: ({ error }) => {
+      // INFRA.1 — falla mid-stream (Vertex, throw en un tool): hoy la enmascara
+      // toUIMessageStreamResponse() como 200 y queda invisible server-side.
+      // Sink off-Neon garantizado (stderr) + Sentry best-effort.
+      logPersistFailure('chat.stream_error', error, {
+        conversationId: conversation.id,
+        botSlug: slug,
+        botConfigId: resolvedBot.id,
+      })
+      Sentry.captureException(error, {
+        tags: { module: 'chatbot', stage: 'stream' },
+        extra: { conversationId: conversation.id, botSlug: slug },
+      })
+    },
     onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
       const llmDoneAt = Date.now()
       timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
@@ -819,7 +833,18 @@ export async function handleChatRequest(
           },
         })
       } catch (persistError) {
-        chatbotError('chat.persist_error', persistError, { conversationId: conversation.id })
+        // INFRA.1 — Sink off-Neon PRIMERO, antes de cualquier write a Neon.
+        // stderr estructurado con .code/.cause: el rastro que sobrevive a la
+        // conexión muerta (Netlify Function Logs). Reemplaza al chatbotError
+        // previo, que solo registraba name/message/stack (sin .code/.cause).
+        logPersistFailure('chat.persist_failed', persistError, {
+          conversationId: conversation.id,
+          botSlug: slug,
+          botConfigId: resolvedBot.id,
+          turnIndex: Math.floor((conversation.messageCount ?? 0) / 2),
+        })
+        // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
+        // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza.
         await logChatbotEvent({
           botConfigId: resolvedBot.id,
           type: 'chat.persist_error',
@@ -827,7 +852,7 @@ export async function handleChatRequest(
           message: persistError instanceof Error ? persistError.message : 'unknown',
           conversationId: conversation.id,
         })
-        // B14.5 — Sentry para errores inesperados del runtime del bot.
+        // B14.5 — Sentry best-effort (no-op sin NEXT_PUBLIC_SENTRY_DSN → [FALTA:sentry-dsn]).
         // El scrub-pii del beforeSend limpia antes de mandar.
         Sentry.captureException(persistError, {
           tags: { module: 'chatbot', stage: 'persist' },
@@ -840,7 +865,13 @@ export async function handleChatRequest(
   return result.toUIMessageStreamResponse()
 
   } catch (unhandledError) {
-    chatbotError('chat.unhandled_error', unhandledError, { slug })
+    // INFRA.1 — Sink off-Neon PRIMERO (mismo patrón silencioso: el logChatbotEvent
+    // de abajo también moriría con Neon caída). Reemplaza al chatbotError previo.
+    logPersistFailure('chat.unhandled_failed', unhandledError, {
+      botSlug: slug,
+      botConfigId: bot?.id ?? null,
+      stage: 'unhandled',
+    })
     if (bot) {
       await logChatbotEvent({
         botConfigId: bot.id,
