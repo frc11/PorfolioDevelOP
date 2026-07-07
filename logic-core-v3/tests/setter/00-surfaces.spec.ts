@@ -105,9 +105,18 @@ test('A4 · paneles de cabina: Novedades, Tu semana, Mis números, badge topbar'
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
   // Novedades (hay un aviso sembrado).
-  await expect(firstVisible(page.getByRole('region', { name: 'Novedades de tu cartera' }))).toBeVisible()
+  const novedades = firstVisible(page.getByRole('region', { name: 'Novedades de tu cartera' }))
+  await expect(novedades).toBeVisible()
   await expect(firstVisible(page.getByText('Tus demos esperando a Franco'))).toBeVisible()
   await expect(firstVisible(page.getByRole('button', { name: /Marcar como vistas/i }))).toBeVisible()
+
+  // A-06: novedades INFORMA, no reconstituye una segunda cola. La cola en revisión
+  // es un RESUMEN (no una lista navegable) que deriva a la cartera, y el "Abrir" de
+  // un aviso es un BOTÓN que ancla el foco (no un link directo). Guarda dura: la
+  // región NO contiene NINGÚN link — si reapareciera una cola navegable, esto rompe.
+  await expect(novedades.getByRole('link')).toHaveCount(0)
+  await expect(firstVisible(page.getByText(/esperando revisión de Franco/i))).toBeVisible()
+  await expect(firstVisible(page.getByText(/filtro «Esperando revisión»/i))).toBeVisible()
   // Badge del topbar (novedades sin ver).
   await expect(firstVisible(page.getByRole('link', { name: /novedades sin ver/i }))).toBeVisible()
   // "Tu semana" (hay un contacto reciente sembrado).
@@ -116,16 +125,22 @@ test('A4 · paneles de cabina: Novedades, Tu semana, Mis números, badge topbar'
   await expect(firstVisible(page.getByRole('region', { name: 'Mis números' }))).toBeVisible()
 })
 
-test('A5 · detalle de lead: wizard (stepper) + timeline cargan sin errores', async ({ page }) => {
+test('A5 · detalle de lead: el manual (instrucción + historial) carga sin errores', async ({ page }) => {
   const guard = attachConsoleGuard(page)
   await qaLogin(page, 'setter')
 
   const res = await page.goto(`/setter/leads/${leadEvalId}`, { waitUntil: 'domcontentloaded' })
   expect(res?.status(), 'GET /setter/leads/[id] status').toBeLessThan(400)
 
-  // Stepper canónico de 5 pasos.
-  await expect(firstVisible(page.getByRole('list', { name: 'Pasos del dossier' }))).toBeVisible()
-  // Timeline / historial.
+  // 5.6: la raíz sirve el manual — la URL final ES una aserción de posición
+  // (el server derivó la pantalla actual y aterrizó ahí).
+  await expect(page).toHaveURL(/\/manual\/(m\d+|mr|espera|revision)$/)
+  // La instrucción protagonista del layout-tipo.
+  await expect(
+    firstVisible(page.locator('section[aria-label="Instrucción de esta pantalla"]')),
+  ).toBeVisible()
+  // Historial al pie (colapsable): abrirlo muestra el timeline completo.
+  await firstVisible(page.getByText('Ver historial del lead')).click()
   await expect(firstVisible(page.getByRole('heading', { name: 'Historial del lead' }))).toBeVisible()
   // Cabecera del lead.
   await expect(firstVisible(page.getByRole('link', { name: /Volver a tu cartera/i }))).toBeVisible()

@@ -9,7 +9,7 @@ import {
   type PantallaDef,
   type PosicionManual,
 } from '@/lib/leados/manual'
-import { ManualHeader, NavAtras, NavConstruccion } from './manual-nav'
+import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './manual-nav'
 
 /**
  * Zona-slot del layout-tipo. Con contenido lo enmarca; sin contenido muestra el
@@ -53,7 +53,8 @@ function Zona({
 
 type PantallaManualProps = {
   leadId: string
-  businessName: string
+  /** El contexto de cabecera del lead (5.6) — badges, links, notas, asignación. */
+  cabecera: CabeceraLead
   pantalla: PantallaDef
   posicion: PosicionManual
   /** Reentrada M-R: la nota de Franco va AL FRENTE, antes de la instrucción. */
@@ -73,7 +74,7 @@ type PantallaManualProps = {
  */
 export function PantallaManual({
   leadId,
-  businessName,
+  cabecera,
   pantalla,
   posicion,
   encabezado,
@@ -85,10 +86,14 @@ export function PantallaManual({
   const completada = posicion.completadas.includes(pantalla.id)
   const indicador = indicadorDeFase(pantalla.id)
   const esConstruccion = pantalla.fase === 'construccion'
+  // La reentrada (M-R) YA está migrada y no lleva munición ni registro propios
+  // (el retrabajo va en las fases): sus zonas vacías se ocultan en vez de mostrar
+  // el placeholder "sin migrar". Las pantallas 'manual' sin migrar sí lo muestran.
+  const esReentrada = pantalla.tipo === 'reentrada'
 
   return (
     <div className="space-y-5">
-      <ManualHeader leadId={leadId} businessName={businessName} />
+      <ManualHeader cabecera={cabecera} />
 
       {encabezado}
 
@@ -141,9 +146,10 @@ export function PantallaManual({
           )}
         </div>
 
-        <h1 className="mt-2 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
+        {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
+        <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
           {pantalla.titulo}
-        </h1>
+        </h2>
         {pantalla.detalle && (
           <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">
             {pantalla.detalle}
@@ -151,25 +157,32 @@ export function PantallaManual({
         )}
       </section>
 
-      {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan. */}
-      <Zona
-        etiqueta="Contexto del lead"
-        pendiente="Acá se re-sirve lo ya capturado que esta tarea necesita (ficha, evaluación o brief según la pantalla) — llega con la migración de esta pantalla."
-      >
-        {contexto}
-      </Zona>
-      <Zona
-        etiqueta="Munición"
-        pendiente="Acá va el bloque copiable o el link a la herramienta externa de esta tarea — llega con la migración de esta pantalla."
-      >
-        {municion}
-      </Zona>
-      <Zona
-        etiqueta="Registro"
-        pendiente="Acá se registra el resultado de la tarea (form, checks o tilde de avance) — mientras esta pantalla no migre, el registro sigue viviendo en el wizard del lead."
-      >
-        {captura}
-      </Zona>
+      {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan.
+          En la reentrada, solo las que tienen contenido (sin placeholders). */}
+      {(contexto || !esReentrada) && (
+        <Zona
+          etiqueta="Contexto del lead"
+          pendiente="Acá se re-sirve lo ya capturado que esta tarea necesita (ficha, evaluación o brief según la pantalla) — llega con la migración de esta pantalla."
+        >
+          {contexto}
+        </Zona>
+      )}
+      {(municion || !esReentrada) && (
+        <Zona
+          etiqueta="Munición"
+          pendiente="Acá va el bloque copiable o el link a la herramienta externa de esta tarea — llega con la migración de esta pantalla."
+        >
+          {municion}
+        </Zona>
+      )}
+      {(captura || !esReentrada) && (
+        <Zona
+          etiqueta="Registro"
+          pendiente="Acá se registra el resultado de la tarea (form, checks o tilde de avance) — mientras esta pantalla no migre, el registro sigue viviendo en el wizard del lead."
+        >
+          {captura}
+        </Zona>
+      )}
 
       {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
       {!esActual && (

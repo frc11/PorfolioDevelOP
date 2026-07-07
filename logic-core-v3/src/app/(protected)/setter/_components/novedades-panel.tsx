@@ -1,8 +1,6 @@
-import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
 import {
   ArrowLeftRight,
-  ArrowRight,
   Bell,
   CheckCircle2,
   Clock3,
@@ -12,13 +10,19 @@ import {
 import type { OsSetterNoticeKind } from '@prisma/client'
 import { cn } from '@/lib/utils'
 import type { AvisoView, NovedadesView } from '@/lib/leados/novedades'
+import { AbrirFocoButton } from './novedades-abrir-foco'
 import { MarcarVistoButton } from './novedades-marcar-visto'
 
 /**
  * "Novedades": el setter dejó de volver a ciegas. Reúne dos cosas distintas:
  *   - los AVISOS dirigidos sin leer (te asignaron / Franco aprobó-rechazó / te
  *     sacaron un lead) → "qué cambió desde tu última visita", con badge;
- *   - las demos EN COLA (live) → "hace cuánto esperás a Franco" (lo que él ve).
+ *   - el RESUMEN de la cola en revisión (live) → "cuántas demos esperan a Franco
+ *     y hace cuánto la más vieja".
+ * A-06: ambas INFORMAN, no reconstituyen una segunda cola. El "Abrir" de un aviso
+ * ANCLA el lead como foco (mismo mecanismo que "Ir a trabajarlo"), y la revisión
+ * es un agregado — a esas demos se llega por la cartera (filtro «Esperando
+ * revisión»), no por una lista navegable propia.
  * Server component: la data llega ya formateada desde `getNovedadesSetter`. Si no
  * hay nada que mostrar, no renderiza (cero ruido). El acento cyan queda para lo
  * accionable; cada tipo lleva su color semántico en el borde.
@@ -64,15 +68,10 @@ function AvisoItem({ aviso }: { aviso: AvisoView }) {
           <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{aviso.body}</p>
           <div className="mt-1.5 flex items-center gap-3">
             <span className="text-[11px] tabular-nums text-zinc-600">{aviso.hace}</span>
-            {aviso.href && (
-              <Link
-                href={aviso.href}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-cyan-300 outline-none transition-colors hover:text-cyan-200 focus-visible:ring-2 focus-visible:ring-cyan-400/40"
-              >
-                Abrir
-                <ArrowRight size={11} strokeWidth={1.5} aria-hidden />
-              </Link>
-            )}
+            {/* A-06: "Abrir" ANCLA el lead como foco y navega — no es un link
+                directo que reconstituye una cola paralela. El saliente (sin
+                `leadId`) no ofrece acción: solo informa. */}
+            {aviso.leadId && <AbrirFocoButton leadId={aviso.leadId} />}
           </div>
         </div>
       </div>
@@ -81,10 +80,10 @@ function AvisoItem({ aviso }: { aviso: AvisoView }) {
 }
 
 export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
-  const { avisos, enCola, totalSinLeer } = novedades
+  const { avisos, revision, totalSinLeer } = novedades
 
   // Nada que mostrar → el panel desaparece (no es una superficie permanente).
-  if (avisos.length === 0 && enCola.length === 0) return null
+  if (avisos.length === 0 && !revision) return null
 
   return (
     <section
@@ -116,34 +115,34 @@ export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
         </ul>
       )}
 
-      {enCola.length > 0 && (
+      {/* A-06: RESUMEN, no lista navegable. Informa cuántas demos esperan a Franco
+          y hace cuánto la más vieja; a esas demos se llega por la cartera (filtro
+          «Esperando revisión», abajo en esta misma página), no por una cola
+          propia que compita con el foco. */}
+      {revision && (
         <div className={cn('space-y-2', avisos.length > 0 && 'mt-4')}>
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
             Tus demos esperando a Franco
           </p>
-          <ul className="space-y-1.5">
-            {enCola.map((demo) => (
-              <li key={demo.leadId}>
-                <Link
-                  href={demo.href}
-                  className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2 text-xs outline-none transition-colors hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-cyan-400/40"
-                >
-                  <Clock3
-                    size={13}
-                    strokeWidth={1.5}
-                    aria-hidden
-                    className="shrink-0 text-violet-300"
-                  />
-                  <span className="min-w-0 flex-1 truncate text-zinc-200">
-                    {demo.businessName}
-                  </span>
-                  <span className="shrink-0 text-[11px] tabular-nums text-zinc-500">
-                    en cola {demo.hace}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-start gap-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+            <Clock3
+              size={13}
+              strokeWidth={1.5}
+              aria-hidden
+              className="mt-0.5 shrink-0 text-violet-300"
+            />
+            <p className="text-xs leading-relaxed text-zinc-400">
+              <span className="font-semibold text-zinc-200">
+                {revision.total} {revision.total === 1 ? 'demo' : 'demos'}
+              </span>{' '}
+              esperando revisión de Franco ·{' '}
+              {revision.total === 1 ? 'hace' : 'la más vieja hace'}{' '}
+              <span className="tabular-nums">{revision.hace}</span>.
+              <span className="mt-0.5 block text-zinc-600">
+                Las ves en tu cartera → filtro «Esperando revisión».
+              </span>
+            </p>
+          </div>
         </div>
       )}
     </section>

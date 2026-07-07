@@ -177,6 +177,18 @@ export function buildConstruccionBlock(
     seccion('NOTAS DE MARCA', brief.notasMarca),
     seccion('RESEÑAS REALES (usalas textuales como prueba social)', ficha?.resenas),
     seccion('CONTENIDO Y TONO REAL (logo / fotos / estilo)', ficha?.contenidoReal),
+    // A-21 (5.3): las señales operativas (horarios, delivery, turnos) son material
+    // de demo — moldean la sección de horarios, la disponibilidad y el CTA. Antes
+    // solo viajaban al Evaluador vía `buildFichaCopyBlock`; se re-sirven acá a Claude
+    // Design tras verificar que NO hay evidencia (código ni bitácora) de que su
+    // exclusividad al Evaluador fuera intencional — la propia ficha ya las lleva al
+    // Gem de diseño/outreach vía `buildBriefInputBlock`, así que la ausencia acá era
+    // estructural, no una decisión. (`otros` y `referenciasFicha` del mismo hallazgo
+    // quedan fuera de este scope.)
+    seccion(
+      'SEÑALES OPERATIVAS (horarios, delivery, turnos — reflejalos en la demo)',
+      ficha?.senalesOperativas,
+    ),
     seccion('DE DÓNDE BAJAR EL LOGO Y LAS FOTOS REALES', assets || undefined),
     seccion('BRIEF COMPLETO DEL GEM DE DISEÑO', brief.pegadoGem),
   ]

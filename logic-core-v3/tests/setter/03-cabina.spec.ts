@@ -147,11 +147,20 @@ test('D5 · timeline muestra SISTEMA pero NO cuenta como contacto (Seguimiento c
   await qaLogin(page, 'setter')
   await page.goto(`/setter/leads/${sistemaLeadId}`, { waitUntil: 'domcontentloaded' })
 
-  // El timeline muestra el evento SISTEMA (reasignación).
+  // 5.6: el historial vive al pie de cada pantalla del manual (colapsable).
+  // El timeline muestra el evento SISTEMA (reasignación) marcado como tal.
+  await firstVisible(page.getByText('Ver historial del lead')).click()
   await expect(firstVisible(page.getByText(/Reasignado:/))).toBeVisible()
+  await expect(
+    firstVisible(page.getByText('Evento del sistema — no cuenta como contacto comercial')),
+  ).toBeVisible()
 
-  // PERO Seguimiento sigue cerrado: el evento SISTEMA no es un contacto comercial.
-  await expect(firstVisible(page.getByText(/Se abre cuando registrás el primer contacto/i))).toBeVisible()
+  // PERO Seguimiento sigue cerrado: el evento SISTEMA no es un contacto comercial
+  // — con 0 contactos, la posición es el opener (m4) y m5 NO es alcanzable: la
+  // guardia del server redirige el intento de entrar.
+  await expect(page).toHaveURL(/\/manual\/m4$/)
+  await page.goto(`/setter/leads/${sistemaLeadId}/manual/m5`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/m4$/)
 
   // DB: 0 contactos comerciales (el SISTEMA no cuenta).
   const comerciales = await prisma.osLeadActivity.count({ where: { leadId: sistemaLeadId, channel: { not: 'SISTEMA' } } })

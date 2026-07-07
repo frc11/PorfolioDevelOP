@@ -1,10 +1,32 @@
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
-import { OctagonAlert } from 'lucide-react'
-import { Callout } from '@/components/ui'
-import { esPantallaId, PANTALLAS, rutaManual } from '@/lib/leados/manual'
+import {
+  esPantallaId,
+  faseDePantallaConstruccion,
+  PANTALLAS,
+  rutaManual,
+} from '@/lib/leados/manual'
+import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
+import { UrgenciaBanner } from '../../_components/urgencia-banner'
+import { ReabrirConstruccion } from '../_components/construccion-ctas'
 import { EstadoManual } from '../_components/estado-manual'
+import { HistorialDelLead } from '../_components/historial-lead'
+import {
+  ConstruccionContexto,
+  ConstruccionMunicion,
+  ConstruccionRegistro,
+} from '../_components/m-construccion'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
+import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
+import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
+import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
+import { M5Contexto, M5Municion, M5Registro } from '../_components/m5-seguimiento'
+import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
+import { M13Contexto, M13Municion, M13Registro } from '../_components/m13-borrador'
+import { M14Contexto, M14Municion, M14Registro } from '../_components/m14-chequeo'
+import { M15Contexto, M15Municion, M15Registro } from '../_components/m15-envio'
+import { M16Contexto, M16Municion, M16Registro } from '../_components/m16-agenda'
+import type { CabeceraLead } from '../_components/manual-nav'
 import { PantallaManual } from '../_components/pantalla-manual'
 import { cargarManualDelLead } from '../_data'
 
@@ -40,53 +62,63 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   if (!accesible) redirect(destinoActual)
 
   const pantalla = PANTALLAS[paso]
+  // FaseId de la fase de Construcción detrás de esta pantalla (m7–m12), o null.
+  // Narrowea a `FaseId` dentro de la rama de slots — sin non-null assertion.
+  const faseConstruccion = faseDePantallaConstruccion(pantalla.id)
+
+  // 5.6 — El contexto de cabecera que la página del wizard mostraba: badges,
+  // links externos, notas y el rastro de asignación. El manual ES la experiencia.
+  const cabecera: CabeceraLead = {
+    lead: manual.leadCopy,
+    status: manual.leadStatus,
+    stage: manual.stage,
+    caliente: manual.calienteBadge,
+    contactName: manual.contactName,
+    phone: manual.leadPhone,
+    notas: manual.notas,
+    asignadoEl: manual.asignadoEl,
+  }
+
+  // 5.6 — La memoria del lead, al pie de toda pantalla (colapsable).
+  const historial = <HistorialDelLead events={manual.timeline} />
 
   if (pantalla.tipo === 'estado') {
     return (
-      <EstadoManual
-        leadId={leadId}
-        businessName={manual.lead.businessName}
-        tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
-        proximoToque={manual.proximoToque}
-        posicion={posicion}
-      />
+      <div className="space-y-5">
+        <EstadoManual
+          leadId={leadId}
+          cabecera={cabecera}
+          tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
+          proximoToque={manual.proximoToque}
+          posicion={posicion}
+        />
+        {historial}
+      </div>
     )
   }
 
-  // Reentrada M-R: la nota de Franco AL FRENTE, antes de la instrucción —
-  // checklist y borrador siguen como estaban (el motor los preservó).
+  // Reentrada M-R: la nota de Franco AL FRENTE, antes de la instrucción. Es el
+  // MISMO `GuiaRetrabajo` compartido que muestra el aterrizaje del wizard (una
+  // sola fuente de la nota, no un Callout duplicado) + el recordatorio de que el
+  // motor preservó checklist y borrador y reseteó el chequeo final.
   const notaRechazo =
     pantalla.tipo === 'reentrada' && manual.rechazo ? (
-      <Callout
-        tone="danger"
-        accent
-        icon={OctagonAlert}
-        title={<span className="text-base">Franco pidió correcciones</span>}
-        className="p-5 text-sm shadow-[0_16px_40px_rgba(0,0,0,0.4)]"
-      >
-        <div className="space-y-1.5 leading-relaxed text-zinc-200">
-          <p>
-            <span className="font-semibold text-rose-200">Qué está mal:</span>{' '}
-            {manual.rechazo.motivo}
-          </p>
-          {manual.rechazo.donde && (
-            <p>
-              <span className="font-semibold text-rose-200">Dónde:</span>{' '}
-              {manual.rechazo.donde}
-            </p>
-          )}
-          {manual.rechazo.arreglo && (
-            <p className="whitespace-pre-wrap">
-              <span className="font-semibold text-rose-200">Arreglo concreto:</span>{' '}
-              {manual.rechazo.arreglo}
-            </p>
-          )}
-        </div>
-        <p className="mt-3 text-xs leading-relaxed text-zinc-400">
-          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y
-          volvé a pasar el chequeo final (se reseteó).
+      <div className="space-y-2">
+        <GuiaRetrabajo rechazo={manual.rechazo} />
+        <p className="px-1 text-xs leading-relaxed text-zinc-400">
+          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y volvé a
+          pasar el chequeo final (se reseteó).
         </p>
-      </Callout>
+      </div>
+    ) : undefined
+
+  // 5.6 — Turnaround visible en las fases (el banner del wizard): el negocio
+  // respondió y está esperando la demo. Null-safe: sin respuesta no renderiza.
+  const encabezado =
+    pantalla.tipo === 'reentrada' ? (
+      notaRechazo
+    ) : faseConstruccion ? (
+      <UrgenciaBanner respondioDesde={manual.respondioDesde} />
     ) : undefined
 
   // Slots por pantalla migrada — cada módulo m<N>-*.tsx llena los tres del
@@ -105,16 +137,212 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
             />
           ),
         }
-      : {}
+      : pantalla.id === 'm2'
+        ? {
+            contexto: <M2Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
+            municion: <M2Municion />,
+            captura: <M2Registro leadId={leadId} evaluada={manual.evaluacion !== null} />,
+          }
+        : pantalla.id === 'm3'
+          ? {
+              contexto: <M3Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
+              municion: <M3Municion />,
+              captura: (
+                <M3Registro
+                  leadId={leadId}
+                  leadStatus={manual.leadStatus}
+                  caliente={manual.caliente}
+                  evaluacion={manual.evaluacion}
+                  descartado={manual.stage === 'DESCARTADA'}
+                />
+              ),
+            }
+          : pantalla.id === 'm4'
+            ? {
+                contexto: (
+                  <M4Contexto
+                    lead={manual.leadCopy}
+                    ficha={manual.ficha}
+                    evaluacion={manual.evaluacion}
+                  />
+                ),
+                municion: <M4Municion dmsHoy={manual.dmsHoy} />,
+                captura: (
+                  <M4Registro
+                    leadId={leadId}
+                    openerEnviado={manual.openerEnviado}
+                    ultimoContacto={manual.ultimoContacto}
+                    proximoToque={manual.proximoToque}
+                  />
+                ),
+              }
+            : pantalla.id === 'm6'
+              ? {
+                  contexto: (
+                    <M6Contexto
+                      lead={manual.leadCopy}
+                      ficha={manual.ficha}
+                      evaluacion={manual.evaluacion}
+                    />
+                  ),
+                  municion: <M6Municion />,
+                  captura: (
+                    <M6Registro
+                      leadId={leadId}
+                      businessName={manual.lead.businessName}
+                      brief={manual.brief}
+                      capturando={manual.stage === 'EVALUADA'}
+                      stage={manual.stage}
+                    />
+                  ),
+                }
+              : faseConstruccion
+                ? {
+                    contexto: (
+                      <ConstruccionContexto
+                        lead={manual.leadCopy}
+                        brief={manual.brief}
+                        ficha={manual.ficha}
+                      />
+                    ),
+                    municion: <ConstruccionMunicion faseId={faseConstruccion} />,
+                    captura: (
+                      <ConstruccionRegistro
+                        leadId={leadId}
+                        faseId={faseConstruccion}
+                        titulo={pantalla.corto}
+                        completadas={manual.progreso.completadas}
+                        stage={manual.stage}
+                        escaladoAt={manual.escaladoAt}
+                        escaladoNota={manual.escaladoNota}
+                      />
+                    ),
+                  }
+                : pantalla.id === 'mr'
+                  ? {
+                      // Reentrada: el brief re-servido para retrabajar contra él
+                      // (las fases se alcanzan por `NavConstruccion`); la nota de
+                      // Franco va como `encabezado`, arriba de la instrucción.
+                      contexto: (
+                        <ConstruccionContexto
+                          lead={manual.leadCopy}
+                          brief={manual.brief}
+                          ficha={manual.ficha}
+                        />
+                      ),
+                      // 5.6 — El re-loop necesita SU transición: reabrir la
+                      // construcción (RECHAZADA→CONSTRUCCION, action intacta del
+                      // wizard). Sin esto, el chequeo final queda futuro para siempre.
+                      captura: (
+                        <div className="space-y-3">
+                          <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
+                            Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
+                            arriba). Después volvés a publicar el borrador y a pasar el chequeo
+                            final antes de reenviar — el historial de rechazos se conserva.
+                          </p>
+                          <ReabrirConstruccion leadId={leadId} />
+                        </div>
+                      ),
+                    }
+                  : pantalla.id === 'm13'
+                    ? {
+                        contexto: <M13Contexto brief={manual.brief} />,
+                        municion: <M13Municion />,
+                        captura: (
+                          <M13Registro
+                            leadId={leadId}
+                            stage={manual.stage}
+                            draftUrl={manual.draftUrl}
+                          />
+                        ),
+                      }
+                    : pantalla.id === 'm14'
+                      ? {
+                          contexto: (
+                            <M14Contexto draftUrl={manual.draftUrl} brief={manual.brief} />
+                          ),
+                          municion: <M14Municion />,
+                          captura: (
+                            <M14Registro
+                              leadId={leadId}
+                              stage={manual.stage}
+                              draftUrl={manual.draftUrl}
+                              selfCheck={manual.selfCheck}
+                              brief={manual.brief}
+                            />
+                          ),
+                        }
+                      : pantalla.id === 'm15'
+                        ? {
+                            contexto: <M15Contexto finalUrl={manual.finalUrl} />,
+                            municion: <M15Municion />,
+                            captura: (
+                              <M15Registro
+                                leadId={leadId}
+                                lead={manual.leadCopy}
+                                stage={manual.stage}
+                                status={manual.leadStatus}
+                                caliente={manual.caliente}
+                                finalUrl={manual.finalUrl}
+                                demoEnviadaAt={manual.demoEnviadaAt}
+                              />
+                            ),
+                          }
+                        : pantalla.id === 'm5'
+                          ? {
+                              contexto: (
+                                <M5Contexto
+                                  status={manual.leadStatus}
+                                  followUpCount={manual.followUpCount}
+                                  proximoToque={manual.proximoToque}
+                                  reactivateAt={manual.reactivateAt}
+                                  leadPhone={manual.leadPhone}
+                                />
+                              ),
+                              municion: (
+                                <M5Municion
+                                  status={manual.leadStatus}
+                                  followUpCount={manual.followUpCount}
+                                  lead={manual.leadCopy}
+                                  dmsHoy={manual.dmsHoy}
+                                />
+                              ),
+                              captura: <M5Registro leadId={leadId} />,
+                            }
+                          : pantalla.id === 'm16'
+                            ? {
+                                contexto: (
+                                  <M16Contexto
+                                    status={manual.leadStatus}
+                                    leadPhone={manual.leadPhone}
+                                  />
+                                ),
+                                municion: <M16Municion />,
+                                captura: (
+                                  <M16Registro
+                                    leadId={leadId}
+                                    status={manual.leadStatus}
+                                    ficha={manual.ficha}
+                                    agenda={manual.agenda}
+                                    contactName={manual.contactName}
+                                    leadEmail={manual.leadEmail}
+                                    leadPhone={manual.leadPhone}
+                                  />
+                                ),
+                              }
+                            : {}
 
   return (
-    <PantallaManual
-      leadId={leadId}
-      businessName={manual.lead.businessName}
-      pantalla={pantalla}
-      posicion={posicion}
-      encabezado={notaRechazo}
-      {...slots}
-    />
+    <div className="space-y-5">
+      <PantallaManual
+        leadId={leadId}
+        cabecera={cabecera}
+        pantalla={pantalla}
+        posicion={posicion}
+        encabezado={encabezado}
+        {...slots}
+      />
+      {historial}
+    </div>
   )
 }

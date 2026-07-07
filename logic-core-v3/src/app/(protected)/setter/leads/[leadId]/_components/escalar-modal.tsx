@@ -19,13 +19,17 @@ import { EscalamientoInputSchema } from '@/app/(protected)/setter/_actions/dossi
 export function EscalarModal({
   leadId,
   reescalar = false,
+  notaPrevia = null,
 }: {
   leadId: string
   reescalar?: boolean
+  /** A-23: la última nota de escalado. Al re-escalar prefillea el modal, así el
+   * setter edita/completa sobre lo que ya avisó en vez de arrancar en blanco. */
+  notaPrevia?: string | null
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
-  const [descripcion, setDescripcion] = useState('')
+  const [descripcion, setDescripcion] = useState(reescalar ? (notaPrevia ?? '') : '')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 

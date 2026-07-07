@@ -152,3 +152,45 @@ export function promptParaHardCheck(hardCheckId: string): PromptDisenio | null {
   if (promptId === undefined) return null
   return PROMPTS_DISENIO.find((prompt) => prompt.id === promptId) ?? null
 }
+
+// ── Bloque 5.3 — puente fase de Construcción → prompts de diseño (cierra A-10) ─
+
+/**
+ * Mapeo editable `FaseId` → prompts de esta librería. El puente del tramo 5.3:
+ * cada pantalla de Construcción del manual (M7–M12) renderiza —DENTRO de la fase
+ * que lo usa— el prompt prefijado que la resuelve, en vez de listar los tres
+ * genéricamente al final del paso (lo que hacía `<PromptsDisenio />` en el wizard;
+ * hallazgo A-10 de la auditoría: "el checklist y los prompts viven desconectados
+ * dentro del mismo paso"). Solo dos fases se pulen con un prompt lead-agnóstico:
+ *   - `calidad` → 'estetica' + 'motion'  (paleta/jerarquía/espaciado + motion/estados).
+ *   - `mobile`  → 'mobile'               (responsive).
+ * Las otras cuatro (estructura/personalización/assets/cta) NO tienen prompt: o son
+ * estructurales, o necesitan datos del negocio (no lead-agnósticas). Sin entrada,
+ * la fase muestra solo sus items.
+ *
+ * MISMO precedente que `HARD_CHECK_PROMPT` (el patrón que la auditoría señala como
+ * ya probado en el repo): las claves se tipan `string` a propósito —sin acoplar
+ * esta capa de DIRECCIÓN de diseño al enum `FaseId` de `contracts`—; los valores
+ * se tipan `PromptDisenioId` (un typo NO compila). Una clave con typo queda inerte:
+ * nunca matchea una fase. CRECER LA COBERTURA = editar una línea acá apuntando a
+ * `PromptDisenioId` existentes (si el prompt no existe, primero se agrega arriba).
+ */
+export const FASE_PROMPTS: Readonly<Record<string, readonly PromptDisenioId[]>> = {
+  calidad: ['estetica', 'motion'],
+  mobile: ['mobile'],
+}
+
+/**
+ * Los prompts de diseño mapeados a una fase de Construcción, en orden de
+ * presentación (`[]` si la fase no tiene). Puro y lead-agnóstico: lo usa la
+ * pantalla de la fase (M7–M12) para ofrecer, junto a los items de la fase, el
+ * prompt copiable a Claude Design que la resuelve. NO toca el checklist ni ningún
+ * gate: es solo la DIRECCIÓN de diseño, servida donde se usa.
+ */
+export function promptsParaFase(faseId: string): PromptDisenio[] {
+  const ids = FASE_PROMPTS[faseId]
+  if (ids === undefined) return []
+  return ids
+    .map((id) => PROMPTS_DISENIO.find((prompt) => prompt.id === id))
+    .filter((prompt): prompt is PromptDisenio => prompt !== undefined)
+}

@@ -1,6 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, Check, ExternalLink, Flame } from 'lucide-react'
+import type { DossierStage, LeadStatus } from '@prisma/client'
+import { Badge } from '@/components/ui'
 import { cn } from '@/lib/utils'
+import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { STAGE_LABELS, STATUS_LABELS } from '@/lib/leados/flow'
 import {
   PANTALLAS,
   PANTALLAS_CONSTRUCCION,
@@ -9,36 +13,133 @@ import {
   type PosicionManual,
 } from '@/lib/leados/manual'
 
+const STATUS_TONES: Record<LeadStatus, 'cyan' | 'emerald' | 'amber' | 'rose' | 'violet' | 'zinc' | 'blue'> = {
+  PROSPECTO: 'cyan',
+  DEMO_ENVIADA: 'violet',
+  VIO_VIDEO: 'emerald',
+  RESPONDIO: 'blue',
+  CALL_AGENDADA: 'amber',
+  CERRADO: 'emerald',
+  PERDIDO: 'rose',
+  POSTERGADO: 'zinc',
+}
+
+/** El contexto de cabecera que la página del wizard mostraba y el manual hereda
+ * con el corte 5.6: badges, links externos, notas y el rastro de asignación. */
+export type CabeceraLead = {
+  lead: CopyBlockLead
+  status: LeadStatus
+  stage: DossierStage | null
+  /** Ya con guardrail de stage (`esCaliente`) — listo para el badge. */
+  caliente: boolean
+  contactName: string | null
+  phone: string | null
+  notas: string | null
+  /** ISO de la última asignación; null si no hay rastro. */
+  asignadoEl: string | null
+}
+
 /**
- * Cabecera común de toda pantalla del manual: volver al lead + contexto de
- * dónde estoy (manual · negocio). El link vuelve al wizard clásico — el manual
- * es una ruta PARALELA, no lo reemplaza hasta el corte del Bloque 5.
+ * Cabecera común de toda pantalla del manual (5.6: el manual ES la experiencia
+ * del lead): la salida es la cartera, y el contexto completo del lead — badges
+ * de estado, links externos, notas y el cartel de asignación — vive acá, como
+ * vivía en el header de la página del wizard.
  */
-export function ManualHeader({
-  leadId,
-  businessName,
-}: {
-  leadId: string
-  businessName: string
-}) {
+export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
+  const { lead, status, stage, caliente, contactName, phone, notas, asignadoEl } = cabecera
+
+  const links = [
+    { label: 'Instagram', href: lead.instagramUrl },
+    { label: 'Web actual', href: lead.currentWebUrl },
+    { label: 'Google Maps', href: lead.googleMapsUrl },
+  ].filter((link): link is { label: string; href: string } => Boolean(link.href))
+
+  const meta = [contactName, phone, lead.industry, lead.zone].filter(Boolean).join(' · ')
+
+  const fechaAsignacion = asignadoEl
+    ? new Intl.DateTimeFormat('es-AR', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(new Date(asignadoEl))
+    : null
+
   return (
-    <header className="space-y-2">
+    <header className="space-y-2 sm:space-y-3">
       <Link
-        href={`/setter/leads/${leadId}`}
+        href="/setter"
         className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
       >
         <ArrowLeft size={13} strokeWidth={1.5} aria-hidden />
-        Volver al lead
+        Volver a tu cartera
       </Link>
-      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-          Manual paso a paso
-        </p>
-        <span aria-hidden className="text-zinc-700">
-          ·
-        </span>
-        <p className="text-sm font-semibold text-zinc-300">{businessName}</p>
+
+      {/* Eyebrow redundante en mobile: la instrucción de abajo ya nombra el paso.
+          Se oculta en mobile para subir la acción hacia el fold (7.1). */}
+      <p className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 sm:block">
+        Manual paso a paso
+      </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
+          {lead.businessName}
+        </h1>
+        <div className="flex items-center gap-1.5">
+          {caliente && (
+            <Badge tone="amber" variant="soft" pulse icon={<Flame size={10} strokeWidth={1.5} />}>
+              Caliente
+            </Badge>
+          )}
+          <Badge tone={STATUS_TONES[status]} variant="soft">
+            {STATUS_LABELS[status]}
+          </Badge>
+          {stage && (
+            <Badge tone="zinc" variant="outline">
+              {STAGE_LABELS[stage]}
+            </Badge>
+          )}
+        </div>
       </div>
+
+      {meta && <p className="text-sm text-zinc-500">{meta}</p>}
+
+      {links.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] font-medium text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-zinc-200"
+            >
+              <ExternalLink size={11} strokeWidth={1.5} />
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
+
+      {notas && (
+        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
+          <span className="font-semibold text-zinc-400">Notas del lead:</span> {notas}
+        </p>
+      )}
+
+      {fechaAsignacion && (
+        <p className="flex items-center gap-2 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.05] px-3 py-2 text-xs text-cyan-200/90">
+          <ArrowLeftRight
+            size={13}
+            strokeWidth={1.5}
+            aria-hidden
+            className="shrink-0 text-cyan-300"
+          />
+          <span>
+            Te asignaron este lead{' '}
+            <span className="font-semibold text-cyan-100">el {fechaAsignacion}</span>
+          </span>
+        </p>
+      )}
     </header>
   )
 }

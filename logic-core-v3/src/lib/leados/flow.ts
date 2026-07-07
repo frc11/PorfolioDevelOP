@@ -472,19 +472,20 @@ function proximaAccionPara(
 
 /**
  * B-beta — Rótulo INFORMATIVO de por qué una card ocupa su lugar en el carril
- * "trabajar". NO recalcula el orden: lee los MISMOS tres tiers que la función
- * `urgencia` de agruparParaHome (respondió → caliente → resto), traducidos al
- * idioma del setter. Solo aplica a "trabajar" — el único lane ordenado por
- * urgencia; los demás van por antigüedad, ya visible en la meta "hace X días".
- * Devuelve null cuando no hay rótulo que mostrar.
+ * "trabajar". NO recalcula el orden: lee los MISMOS criterios que ordenan la
+ * cola (`ordenFoco`: fijado primero, después respondió → caliente → resto),
+ * traducidos al idioma del setter. Solo aplica a "trabajar" — el único lane
+ * ordenado por prioridad; los demás van por antigüedad, ya visible en la meta
+ * "hace X días". Devuelve null cuando no hay rótulo que mostrar.
  *
- * MANTENER EN SINCRONÍA con `urgencia`: si cambian los tiers del sort, cambian
- * estas ramas. Es deliberado que el criterio (el sort) y su traducción (este
- * rótulo) sean dos lecturas de la misma regla, no una sola: tocar el sort está
- * fuera de alcance acá.
+ * MANTENER EN SINCRONÍA con `ordenFoco`: si cambian los tiers del sort, cambian
+ * estas ramas. A-05: el pin es el tier de más peso (sube el fijado a la cima), así
+ * que su rótulo va PRIMERO — sin él, un fijado que es foco mostraría su tier de
+ * urgencia ("Por orden de llegada") y mentiría sobre por qué está arriba.
  */
 export function motivoOrden(lead: HomeLead): string | null {
   if (lead.grupo !== 'trabajar') return null
+  if (lead.pinned) return 'Fijado por vos — va primero'
   if (leadRespondio(lead.status)) return 'Respondió — va primero'
   if (lead.caliente) return 'Caliente — va antes del resto'
   return 'Por orden de llegada'
@@ -544,9 +545,25 @@ function ordenUrgencia(a: HomeLead, b: HomeLead): number {
   return urgenciaTier(a) - urgenciaTier(b) || a.createdAt.getTime() - b.createdAt.getTime()
 }
 
+/**
+ * A-05 — Comparador del foco (cola `trabajar`): el fijado va PRIMERO, y a
+ * igualdad de pin, manda la urgencia. El pin es preferencia de ORDEN, no
+ * exclusión: sube el lead a la cima de la cola accionable en vez de sacarlo de
+ * ella (mismo patrón `Number(b.pinned) - Number(a.pinned)` que
+ * `filtrarYOrdenarCartera`, donde el fijado ya flotaba arriba).
+ */
+function ordenFoco(a: HomeLead, b: HomeLead): number {
+  return Number(b.pinned) - Number(a.pinned) || ordenUrgencia(a, b)
+}
+
 /** Partición de la cartera con la organización propia del setter por encima. */
 export type CarteraParticion = {
-  /** Fijados por el setter — flotan arriba, sacados de su cola natural. */
+  /**
+   * A-05: fijados que NO son accionables (en vuelo: seguimiento/revisión/
+   * agendadas, o fijado+pausado) — flotan aparte porque no hay foco que ordenar.
+   * El fijado ACCIONABLE ya no cae acá: entra a `grupos.trabajar` en la cima
+   * (el pin ordena el foco, no lo excluye).
+   */
   fijados: HomeLead[]
   /** Pausados por el setter (snooze personal vigente) — fuera de las colas. */
   pausados: HomeLead[]
@@ -558,17 +575,21 @@ export type CarteraParticion = {
  * Reordena la cartera YA clasificada con las palancas propias del setter. La
  * precedencia es deliberada:
  *   - archivo (perdido/descartada) manda: ni pin ni snooze lo rescatan de ahí;
- *   - fijado → fijados (flota arriba: prioridad explícita del setter);
+ *   - fijado ACCIONABLE y vigente → `grupos.trabajar` en la CIMA (A-05: el pin
+ *     ordena el foco, no lo excluye — ver `ordenFoco`);
+ *   - fijado NO accionable (en vuelo) o fijado+pausado → fijados (flota aparte);
  *   - pausado → pausados (lo escondió hasta una fecha que él eligió);
  *   - el resto cae en su cola natural.
  * Puro: no mira el reloj — `snoozed`/`pinned` ya vienen resueltos en el input.
  *
- * Nota (2.3 — pin en MODO DIRECCIÓN): que un fijado accionable quede FUERA del
- * foco (sale de la cola `trabajar`) es organización-de-cartera, no foco. Si su
- * única accionable está fijada, el home cae en "todo en espera" (2.1b ya lo
- * cuenta honesto). Si el pin debería poder SER foco —revertir esta exclusión— es
- * decisión pendiente de Franco (flagueada en bitácora 2.1b). 2.3 lo DEJA como
- * está: el pin sigue sacando el lead de su cola natural.
+ * A-05 (pin en MODO DIRECCIÓN — decisión de Franco, revierte la exclusión 2.1a):
+ * un fijado accionable ya NO sale de la cola `trabajar`; sube a su cima y puede
+ * SER el foco. Antes quedaba fuera y, si era la única accionable, el home caía en
+ * "todo en espera" con un fijado esperando — elegir/fijar dejaba el foco
+ * falsamente vacío. Ahora el pin es preferencia de ORDEN dentro de la cola
+ * accionable. El `!lead.snoozed` es la guarda mínima: una pausa personal vigente
+ * gana al pin (un lead que el setter escondió no debe saltar al foco); ese fijado
+ * pausado cae en `fijados`, como cualquier fijado no accionable.
  */
 export function particionarCartera(leads: HomeLead[]): CarteraParticion {
   const fijados: HomeLead[] = []
@@ -583,7 +604,13 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
   for (const lead of leads) {
     if (lead.grupo === 'archivo') {
       grupos.archivo.push(lead)
+    } else if (lead.pinned && lead.grupo === 'trabajar' && !lead.snoozed) {
+      // A-05: el fijado accionable y vigente entra al foco (la cima la fija
+      // `ordenFoco`, abajo) en vez de excluirse en `fijados`.
+      grupos.trabajar.push(lead)
     } else if (lead.pinned) {
+      // Fijado no accionable (en vuelo) o fijado+pausado: flota aparte — no hay
+      // foco que ordenar. (Se preserva la precedencia pin>snooze de la cartera.)
       fijados.push(lead)
     } else if (lead.snoozed) {
       pausados.push(lead)
@@ -592,7 +619,8 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
     }
   }
   fijados.sort(ordenUrgencia)
-  grupos.trabajar.sort(ordenUrgencia)
+  // A-05: fijado primero (si lo hay), después la urgencia de siempre.
+  grupos.trabajar.sort(ordenFoco)
   // Pausados: el que despierta antes, primero.
   pausados.sort(
     (a, b) => (a.snoozedUntil?.getTime() ?? 0) - (b.snoozedUntil?.getTime() ?? 0),

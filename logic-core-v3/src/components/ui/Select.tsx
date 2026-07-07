@@ -20,6 +20,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { ChevronDown, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useIsClient } from '@/lib/use-is-client'
+import { useFieldControl } from './field-context'
 
 interface SelectOption {
   value: string
@@ -116,6 +117,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     },
     ref,
   ) => {
+    // Asociación con el Field contenedor; el caller siempre gana sobre el contexto.
+    const field = useFieldControl()
     const normalized = useMemo(() => normalizeOptions(options, children), [options, children])
     const isControlled = selectProps.value !== undefined
 
@@ -313,7 +316,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <button
           ref={buttonRef}
           type="button"
-          id={id}
+          id={id ?? field.controlId}
           title={title}
           disabled={selectProps.disabled}
           aria-haspopup="listbox"
@@ -321,11 +324,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           aria-controls={listboxId}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledby}
-          aria-describedby={ariaDescribedby}
+          aria-describedby={ariaDescribedby ?? field.describedBy}
           onClick={() => (open ? setOpen(false) : openPanel())}
           onKeyDown={handleButtonKeyDown}
           className={cn(
-            'w-full appearance-none rounded-xl border bg-white/[0.02] pl-3 py-2 text-sm text-zinc-200 transition-colors focus:outline-none text-left disabled:cursor-not-allowed disabled:opacity-50',
+            'w-full appearance-none rounded-xl border bg-white/[0.02] pl-3 py-2 text-sm text-zinc-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50 text-left disabled:cursor-not-allowed disabled:opacity-50',
             invalid
               ? 'border-red-400/40 focus:border-red-400/60'
               : 'border-white/10 focus:border-cyan-400/30',

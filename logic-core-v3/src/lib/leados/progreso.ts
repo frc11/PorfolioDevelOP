@@ -14,7 +14,7 @@
  *
  * Ventana MÓVIL de 7 días (no semana calendario): evita el cero-lunes que se
  * sentiría vacío y castigador; siempre refleja el laburo reciente. Pura: `ahora`
- * se inyecta (espejo de `derivarDemosEnCola`).
+ * se inyecta (espejo de `derivarColaRevision`).
  */
 import { prisma } from '@/lib/prisma'
 import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
@@ -51,7 +51,7 @@ function inicioVentana(ahora: Date, dias: number): Date {
 /**
  * Deriva demos enviadas + reuniones agendadas dentro de la ventana, EN MEMORIA,
  * de los leads ya cargados. `contactos` llega contado de la DB. Pura — `ahora`
- * inyectado, sin acceso a Neon (testeable como `derivarDemosEnCola`).
+ * inyectado, sin acceso a Neon (testeable como `derivarColaRevision`).
  */
 export function derivarProgresoSemana(
   leads: OwnedLeadWithDossier[],

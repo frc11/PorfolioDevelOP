@@ -3,29 +3,27 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckCircle2, Eye, Lock, Save, SendHorizonal, ShieldCheck, Wrench } from 'lucide-react'
-import type { DossierStage } from '@prisma/client'
-import { Badge, Button, Callout, Card, Toggle } from '@/components/ui'
+import { CheckCircle2, Eye, Save, SendHorizonal, ShieldCheck, Wrench } from 'lucide-react'
+import { Button, Callout, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow'
 import { GUIA_SELF_CHECK } from '@/lib/leados/guidance-content'
 import { promptParaHardCheck } from '@/lib/leados/prompts-disenio'
-import {
-  enviarARevision,
-  guardarSelfCheck,
-} from '@/app/(protected)/setter/_actions/dossier.actions'
+import { enviarARevision, guardarSelfCheck } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { SelfCheckEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
-import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { StepLink } from './step-nav'
+import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 
-type SelfCheckStepProps = {
-  leadId: string
-  stage: DossierStage | null
-  draftUrl: string | null
-  selfCheck: SelfCheck | null
-  brief: Brief | null
-}
+/**
+ * M14 — el chequeo final (5.4, tramo Chequeo). Presentación del manual sobre el
+ * MISMO gate de Construcción del wizard: mismas listas (`HARD_CHECKS` /
+ * `SOFT_CHECKS`), mismo puente check-fallado→prompt (`promptParaHardCheck`,
+ * parcial y editable), y las MISMAS actions (`guardarSelfCheck`,
+ * `enviarARevision` — que re-valida `selfCheckAprobado` server-side; la UI nunca
+ * es el gate). El chrome (cómo chequear, el borrador a la vista, el brief) vive en
+ * el módulo `m14-chequeo`; acá solo el núcleo: la grilla de dos niveles y el envío
+ * a revisión. Los 6 obligatorios en verde habilitan el botón — es EL gate de
+ * Construcción; las fases (M7–M12) siguen sin gatear.
+ */
 
 /** Estado inicial de los duros: lo guardado, mapeado por nombre vigente. */
 function durosIniciales(selfCheck: SelfCheck | null): Record<string, boolean> {
@@ -44,7 +42,15 @@ function softIniciales(selfCheck: SelfCheck | null): string[] {
   )
 }
 
-export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: SelfCheckStepProps) {
+export function ChequeoForm({
+  leadId,
+  selfCheck,
+  brief,
+}: {
+  leadId: string
+  selfCheck: SelfCheck | null
+  brief: Brief | null
+}) {
   const router = useRouter()
   const [duros, setDuros] = useState<Record<string, boolean>>(() => durosIniciales(selfCheck))
   const [softIds, setSoftIds] = useState<string[]>(() => softIniciales(selfCheck))
@@ -63,8 +69,8 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
       }
       toast.success(
         result.data.aprobado
-          ? 'Self-check aprobado — podés enviar a revisión.'
-          : 'Self-check guardado. Quedan puntos en rojo: arreglalos antes de enviar.',
+          ? 'Chequeo aprobado — podés enviar a revisión.'
+          : 'Chequeo guardado. Quedan puntos en rojo: arreglalos antes de enviar.',
       )
       router.refresh()
     })
@@ -72,8 +78,8 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
 
   const enviar = () => {
     startTransition(async () => {
-      // Guarda el estado actual primero (soft-flags frescos) y después envía:
-      // el server re-valida los hard-blocks contra la DB, no contra la UI.
+      // Guarda el estado actual primero (flags frescos) y después envía: el server
+      // re-valida los hard-blocks contra la DB, no contra la UI.
       const guardado = await guardarSelfCheck(leadId, payload())
       if (!guardado.success) {
         toast.error(guardado.error)
@@ -89,77 +95,11 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
     })
   }
 
-  // ── Apagado: antes de construcción o sin draft publicado ───────────────────
-  if (stage !== 'CONSTRUCCION' && stage !== 'EN_REVISION' && stage !== 'APROBADA') {
-    return (
-      <Card variant="subtle" padding="lg">
-        <div className="flex items-center gap-2.5">
-          <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">Self-check</h2>
-        </div>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-          Se habilita con la demo construida y el draft publicado.
-        </p>
-      </Card>
-    )
-  }
-
-  // Gate proactivo (1/2): sin draft no hay demo que revisar → el paso se bloquea
-  // con el motivo, no es un rebote mudo. El server re-valida igual en el envío.
-  if (stage === 'CONSTRUCCION' && !draftUrl) {
-    return (
-      <Card variant="subtle" padding="lg">
-        <div className="flex items-center gap-2.5">
-          <Lock size={15} strokeWidth={1.5} className="text-zinc-500" />
-          <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
-        </div>
-        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-400">
-          Publicá el draft primero: el self-check se hace mirando la demo publicada, no el export
-          local. Apenas guardes el link, este paso se abre.
-        </p>
-        {/* «El paso de arriba» pasa de prosa a salto directo al paso de publicar el draft. */}
-        <div className="mt-3">
-          <StepLink to="draft">Ir a publicar el draft</StepLink>
-        </div>
-      </Card>
-    )
-  }
-
-  // ── EN_REVISION / APROBADA: resumen read-only de lo enviado ────────────────
-  if (stage !== 'CONSTRUCCION') {
-    return (
-      <Card variant="subtle" padding="lg" className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold text-zinc-300">Self-check</h2>
-          <Badge tone="emerald" variant="soft">Enviado a revisión</Badge>
-        </div>
-        {selfCheck && (
-          <p className="text-xs leading-relaxed text-zinc-500">
-            {selfCheck.itemsDuros.filter((item) => item.ok).length} puntos obligatorios en verde
-            {selfCheck.softFlags.length > 0
-              ? ` · ${selfCheck.softFlags.length} flag(s) de diseño marcados para Franco`
-              : ' · sin flags de diseño'}
-            .
-          </p>
-        )}
-      </Card>
-    )
-  }
-
-  // ── CONSTRUCCION con draft: el gate de dos niveles ─────────────────────────
   return (
-    <Card padding="lg" className="space-y-5">
-      <div>
-        <h2 className="text-base font-semibold text-zinc-100">Self-check</h2>
-        <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-          <LineaRicaText linea={GUIA_SELF_CHECK.intro} />
-        </p>
-      </div>
-
-      <TeachPanel id="selfCheck" />
-
-      {/* Referencia: cómo queda un self-check terminado bien hecho, para comparar. */}
-      <SelfCheckEjemplo />
+    <div className="space-y-5">
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        <LineaRicaText linea={GUIA_SELF_CHECK.intro} />
+      </p>
 
       <div className="space-y-2 rounded-2xl border border-white/[0.07] bg-white/[0.01] p-4">
         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-300">
@@ -168,25 +108,25 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
         </p>
         {HARD_CHECKS.map((check) => {
           const ok = duros[check.id]
-          // 4·B: el hard-block en rojo que se arregla refinando la demo ofrece,
-          // además del arreglo humano, su prompt copiable a Claude Design. Mapeo
-          // parcial y editable (prompts-disenio.ts); sin prompt mapeado → solo el
-          // arreglo, como antes. NO toca el gate: es un atajo de arreglo, no un
-          // bypass (el botón sigue disabled hasta 6/6, el server re-valida igual).
+          // Puente 4·B: el hard-block en rojo que se arregla refinando la demo
+          // ofrece, además del arreglo humano, su prompt copiable a Claude Design.
+          // Mapeo parcial y editable (`prompts-disenio.ts`); sin prompt mapeado →
+          // solo el arreglo. NO toca el gate: es un atajo, no un bypass (el botón
+          // sigue disabled hasta 6/6 y el server re-valida igual).
           const promptArreglo = ok ? null : promptParaHardCheck(check.id)
           return (
             <div
               key={check.id}
               className={`rounded-xl border p-3.5 transition-colors ${
-                ok ? 'border-emerald-400/20 bg-emerald-500/[0.04]' : 'border-white/[0.06] bg-white/[0.02]'
+                ok
+                  ? 'border-emerald-400/20 bg-emerald-500/[0.04]'
+                  : 'border-white/[0.06] bg-white/[0.02]'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-zinc-200">{check.nombre}</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">
-                    {check.comoVerificar}
-                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-zinc-500">{check.comoVerificar}</p>
                   {check.id === 'fielAlBrief' && brief && brief.secciones.length > 0 && (
                     <p className="mt-1 text-xs text-zinc-500">
                       <span className="font-semibold text-zinc-400">El brief pedía:</span>{' '}
@@ -230,10 +170,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           Marcá las que veas en la demo. Ser honesto acá juega a favor: Franco las revisa igual.
         </p>
         {SOFT_CHECKS.map((soft) => (
-          <label
-            key={soft.id}
-            className="flex cursor-pointer items-center justify-between gap-3 py-1"
-          >
+          <label key={soft.id} className="flex cursor-pointer items-center justify-between gap-3 py-1">
             <span className="text-xs text-zinc-300">{soft.etiqueta}</span>
             <Toggle
               checked={softIds.includes(soft.id)}
@@ -255,9 +192,8 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           </span>
         </Callout>
       ) : (
-        // Gate proactivo (2/2): el botón de envío queda disabled CON el motivo al
-        // lado (cuántos faltan + el porqué), no un disabled mudo. El server
-        // re-valida selfCheckAprobado en el envío.
+        // Gate proactivo: el botón queda disabled CON el motivo al lado (cuántos
+        // faltan + el porqué), no un disabled mudo. El server re-valida igual.
         <Callout tone="neutral" title={GUIA_SELF_CHECK.gate.titulo}>
           <span>
             {faltantesDuros === 1
@@ -276,7 +212,7 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           loading={isPending}
           icon={<Save size={14} strokeWidth={1.5} />}
         >
-          Guardar self-check
+          Guardar el chequeo
         </Button>
         <Button
           onClick={enviar}
@@ -287,6 +223,6 @@ export function SelfCheckStep({ leadId, stage, draftUrl, selfCheck, brief }: Sel
           Enviar a revisión
         </Button>
       </div>
-    </Card>
+    </div>
   )
 }

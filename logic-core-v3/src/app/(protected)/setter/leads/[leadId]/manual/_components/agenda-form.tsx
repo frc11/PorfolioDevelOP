@@ -1,44 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  CalendarCheck2,
-  CalendarSearch,
-  CheckCircle2,
-  Lock,
-  Phone,
-  RefreshCw,
-  ShieldCheck,
-} from 'lucide-react'
-import type { LeadStatus } from '@prisma/client'
-import { Badge, Button, Card, Field, Input, TextArea } from '@/components/ui'
-import type { Agenda, Ficha } from '@/lib/leados/contracts'
+import { CalendarCheck2, CalendarSearch, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Button, Field, Input, TextArea } from '@/components/ui'
+import type { Ficha } from '@/lib/leados/contracts'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
-import { formatFechaHora, reunionAgendada } from '@/lib/leados/flow'
-import { GUIA_AGENDA } from '@/lib/leados/guidance-content'
-import { useStepAction } from '@/lib/use-step-action'
+import { formatFechaHora } from '@/lib/leados/flow'
 import {
   confirmarReunion,
   ofrecerHorarios,
 } from '@/app/(protected)/setter/_actions/agenda.actions'
 import { ConfirmarReunionSchema } from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
-import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { StepLink } from './step-nav'
+import { useStepAction } from '@/lib/use-step-action'
 
-type AgendaStepProps = {
-  leadId: string
-  status: LeadStatus
-  ficha: Ficha | null
-  agenda: Agenda | null
-  /** Prefill del attendee: datos cargados del lead. */
-  contactName: string | null
-  leadEmail: string | null
-  /** A-14: re-servido acá — a mano para confirmar o recordarle la reunión. */
-  leadPhone: string | null
-}
+/**
+ * M16 — El BOOKING de la reunión (5.5, tramo Agenda). Es el MISMO camino de
+ * escritura del wizard (`ofrecerHorarios`/`confirmarReunion` — ownership, gate
+ * RESPONDIO, claim atómico, re-validación fresca del slot y booking real en
+ * Cal.com adentro; `ConfirmarReunionSchema`, notas de traspaso obligatorias):
+ * el manual y el wizard son dos presentaciones del mismo write-path (precedente
+ * 5.4 — `agenda.actions.ts` no se toca). La confirmación y el recordatorio al
+ * prospecto los manda Cal.com nativo. El componente llega solo con el gate ya
+ * abierto (RESPONDIO, sin reunión): los otros estados los presenta M16Registro.
+ */
 
-/** Recordatorio del decisor según la ficha del Paso 1 — el gancho pedido. */
+/** Recordatorio del decisor según la ficha del Paso 1 — el mismo gancho del
+ * wizard: la reunión es con quien DECIDE (un CM no cierra). Va pegado al
+ * checkbox del decisor, que es donde el setter lo necesita. */
 function hintDecisor(ficha: Ficha | null): string {
   switch (ficha?.identidad?.igManejadoPor) {
     case 'DUENO':
@@ -50,22 +39,17 @@ function hintDecisor(ficha: Ficha | null): string {
   }
 }
 
-/**
- * Agendar la reunión: cuando la conversación llega a "sí,
- * reunámonos", el setter confirma que habla con el decisor, ofrece 3
- * horarios REALES de la agenda de Franco (Cal.com, huso BA) y confirma el
- * booking con las notas de traspaso obligatorias. La confirmación al
- * prospecto y el recordatorio los manda Cal.com nativo.
- */
-export function AgendaStep({
+export function AgendaForm({
   leadId,
-  status,
   ficha,
-  agenda,
   contactName,
   leadEmail,
-  leadPhone,
-}: AgendaStepProps) {
+}: {
+  leadId: string
+  ficha: Ficha | null
+  contactName: string | null
+  leadEmail: string | null
+}) {
   const [decisorOk, setDecisorOk] = useState(false)
   const [slots, setSlots] = useState<string[] | null>(null)
   const [slotElegido, setSlotElegido] = useState<string | null>(null)
@@ -76,91 +60,10 @@ export function AgendaStep({
   const busqueda = useStepAction()
   const confirmacion = useStepAction()
 
-  const agendada = reunionAgendada(agenda)
-
-  // ── Reunión ya agendada: el resumen del traspaso ───────────────────────────
-  if (agendada && agenda) {
-    return (
-      <Card padding="lg" className="space-y-4 border-emerald-400/20">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <CalendarCheck2 size={15} strokeWidth={1.5} className="text-emerald-400" />
-            <h2 className="text-base font-semibold text-zinc-100">
-              Reunión agendada
-            </h2>
-          </div>
-          <Badge tone="emerald" variant="soft">
-            {agenda.slotStart ? formatFechaHora(agenda.slotStart) : 'Confirmada'}
-          </Badge>
-        </div>
-
-        <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-400">
-          {agenda.attendee && (
-            <p>
-              <span className="font-semibold text-zinc-300">Con:</span> {agenda.attendee.nombre}{' '}
-              ({agenda.attendee.email}
-              {leadPhone ? ` · ${leadPhone}` : ''})
-            </p>
-          )}
-          {agenda.notasTraspaso && (
-            <p className="whitespace-pre-wrap">
-              <span className="font-semibold text-zinc-300">Tu traspaso:</span>{' '}
-              {agenda.notasTraspaso}
-            </p>
-          )}
-          {agenda.calBookingUid && (
-            <p className="text-zinc-600">Booking Cal.com: {agenda.calBookingUid}</p>
-          )}
-        </div>
-
-        <p className="flex items-start gap-2 text-xs leading-relaxed text-zinc-500">
-          <CheckCircle2 size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-emerald-400" />
-          <span>
-            El evento quedó en el calendario de Franco y Cal.com le mandó la confirmación y el
-            recordatorio al prospecto. Franco ya recibió tus notas de traspaso — la reunión la
-            cierra él.
-          </span>
-        </p>
-      </Card>
-    )
-  }
-
-  // ── Paso apagado: la conversación todavía no habilita agendar ──────────────
-  if (status !== 'RESPONDIO') {
-    return (
-      <Card variant="subtle" padding="lg">
-        <div className="flex items-center gap-2.5">
-          <Lock size={15} strokeWidth={1.5} className="text-zinc-600" />
-          <h2 className="text-base font-semibold text-zinc-400">{GUIA_AGENDA.titulo}</h2>
-        </div>
-        {/* CALL_AGENDADA: caso borde (reunión por otra vía), no el gate. El resto
-            es la espera del gate RESPONDIO — se EXPLICA, no se frustra (3.6). */}
-        {status === 'CALL_AGENDADA' ? (
-          <p className="mt-2 text-xs leading-relaxed text-zinc-600">
-            Este lead figura con reunión agendada (registrada por otra vía). El booking con
-            horarios reales vive en este paso para los próximos.
-          </p>
-        ) : (
-          <>
-            <p className="mt-2 text-xs font-semibold text-zinc-300">{GUIA_AGENDA.gate.titulo}</p>
-            <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
-              <LineaRicaText linea={GUIA_AGENDA.gate.detalle} />
-            </p>
-            {/* La salida del gate: marcar «Respondió» vive en Seguimiento. */}
-            <div className="mt-3">
-              <StepLink to="seguimiento">Ir a Seguimiento</StepLink>
-            </div>
-          </>
-        )}
-      </Card>
-    )
-  }
-
   const buscarHorarios = () => {
     setError(null)
     setSlotElegido(null)
-    // Variación preservada: la búsqueda solo carga slots — sin toast de éxito
-    // y sin refresh (no hay mutación que re-derivar).
+    // La búsqueda solo carga slots: sin toast y sin refresh (no muta nada).
     busqueda.run(() => ofrecerHorarios(leadId), {
       onError: setError,
       onSuccess: (data) => setSlots(data.slots),
@@ -197,41 +100,7 @@ export function AgendaStep({
   }
 
   return (
-    <Card padding="lg" className="space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-zinc-100">{GUIA_AGENDA.titulo}</h2>
-          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-500">
-            <LineaRicaText linea={GUIA_AGENDA.intro} />
-          </p>
-        </div>
-        {/* B8A-II: el paso se abre con RESPONDIO, no con un "aceptó" confirmado.
-            La etiqueta dice disponibilidad, no afirma un hecho que no verificamos. */}
-        <Badge tone="cyan" variant="soft">
-          Listo para agendar
-        </Badge>
-      </div>
-
-      {/* A-14: el teléfono a mano para confirmar el horario elegido. */}
-      {leadPhone && (
-        <p className="flex items-center gap-1.5 text-xs text-zinc-500">
-          <Phone size={12} strokeWidth={1.5} className="shrink-0" />
-          {leadPhone}
-        </p>
-      )}
-
-      <TeachPanel id="traspaso" />
-
-      {/* Cómo agendar, paso a paso (3.6) — el orden real de la pantalla. */}
-      <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
-        {GUIA_AGENDA.pasos.map((paso, index) => (
-          <li key={paso} className="flex gap-2">
-            <span className="font-semibold text-cyan-300/80">{index + 1}.</span>
-            {paso}
-          </li>
-        ))}
-      </ol>
-
+    <div className="space-y-4">
       {/* ── Primero: confirmar que habla con el decisor (ficha del Paso 1) ── */}
       <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 transition-colors hover:bg-white/[0.05]">
         <input
@@ -285,9 +154,7 @@ export function AgendaStep({
           />
 
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-zinc-300">
-              Cuando elija, marcá el horario acá
-            </p>
+            <p className="text-xs font-semibold text-zinc-300">Cuando elija, marcá el horario acá</p>
             <div className="grid gap-2 sm:grid-cols-3">
               {slots.map((slot) => {
                 const seleccionado = slotElegido === slot
@@ -314,8 +181,8 @@ export function AgendaStep({
           {slotElegido !== null && (
             <div className="space-y-3 rounded-2xl border border-cyan-400/25 bg-cyan-500/[0.04] p-4">
               <p className="text-xs font-semibold text-cyan-300">
-                Confirmar {formatFechaHora(slotElegido)} — el evento se crea en el calendario
-                real de Franco y Cal.com le manda la confirmación al prospecto.
+                Confirmar {formatFechaHora(slotElegido)} — el evento se crea en el calendario real de
+                Franco y Cal.com le manda la confirmación al prospecto.
               </p>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -326,7 +193,11 @@ export function AgendaStep({
                     placeholder="Como para saludarlo al entrar"
                   />
                 </Field>
-                <Field label="Email del prospecto" required hint="Ahí le llega la confirmación de Cal.com.">
+                <Field
+                  label="Email del prospecto"
+                  required
+                  hint="Ahí le llega la confirmación de Cal.com."
+                >
                   <Input
                     type="email"
                     value={email}
@@ -341,11 +212,7 @@ export function AgendaStep({
                 required
                 hint="Qué le duele, qué espera de la reunión, qué tono tiene, qué NO decirle. Sin esto no se agenda."
               >
-                <TextArea
-                  value={notas}
-                  onChange={(event) => setNotas(event.target.value)}
-                  rows={4}
-                />
+                <TextArea value={notas} onChange={(event) => setNotas(event.target.value)} rows={4} />
               </Field>
 
               {error && <p className="text-xs text-red-400">{error}</p>}
@@ -366,6 +233,6 @@ export function AgendaStep({
       )}
 
       {error && slots === null && <p className="text-xs text-red-400">{error}</p>}
-    </Card>
+    </div>
   )
 }
