@@ -19,6 +19,12 @@ interface ChatHeaderProps {
    * esta fase. Si se omite (p. ej. el embed), cae a `isStreaming`.
    */
   isTyping?: boolean
+  /**
+   * INFRA.2 — true mientras el widget reintenta el POST a /chat tras un fallo
+   * transitorio (cold-start de Neon). Muestra un estado soft "Conectando…" + punto
+   * ámbar, con prioridad sobre "Escribiendo…"/"En línea".
+   */
+  reconnecting?: boolean
 }
 
 export function ChatHeader({
@@ -29,6 +35,7 @@ export function ChatHeader({
   muted,
   onToggleMute,
   isTyping,
+  reconnecting,
 }: ChatHeaderProps) {
   // Fase real: si el panel reporta el typewriter (`isTyping`) lo usamos como
   // fuente de verdad; si no, retrocompatibilidad con el viejo `isStreaming`.
@@ -70,13 +77,15 @@ export function ChatHeader({
         <div className="flex items-center gap-1.5 text-[11px] text-white/60">
           <motion.span
             animate={{
-              backgroundColor: typing
-                ? config.accentColor
-                : 'rgba(34,197,94,0.9)',
+              backgroundColor: reconnecting
+                ? 'rgba(245,158,11,0.9)'
+                : typing
+                  ? config.accentColor
+                  : 'rgba(34,197,94,0.9)',
             }}
             className="w-1.5 h-1.5 rounded-full"
           />
-          <span>{typing ? 'Escribiendo…' : 'En línea'}</span>
+          <span>{reconnecting ? 'Conectando…' : typing ? 'Escribiendo…' : 'En línea'}</span>
         </div>
       </div>
       {onToggleMute && (

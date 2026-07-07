@@ -126,6 +126,8 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             onClose={chatbot.close}
             onQuickReply={chatbot.sendMessage}
             degradedInfo={chatbot.degradedInfo}
+            reconnecting={chatbot.reconnecting}
+            inputLockedByDegrade={chatbot.inputLockedByDegrade}
             renderToolCall={(tc: ToolCallInUIMessage) =>
               renderToolCall(tc, chatbot.config!, {
                 onSelectWhatsapp: chatbot.triggerWhatsappHandoff,

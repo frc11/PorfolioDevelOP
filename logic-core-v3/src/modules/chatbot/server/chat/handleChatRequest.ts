@@ -6,6 +6,7 @@ import { detectIntent } from '../intent'
 import { getVerticalPack } from '../verticals'
 import { prisma } from '@/lib/prisma'
 import { sanitizeAttributionField } from '../../shared/attribution'
+import { shouldSkipUserPersist } from './dedup'
 
 import {
   resolveBotBySlug,
@@ -506,13 +507,26 @@ export async function handleChatRequest(
     return Response.json({ error: 'No user message found' }, { status: 400 })
   }
 
-  await prisma.chatMessage.create({
-    data: {
-      conversationId: conversation.id,
-      role: 'USER',
-      content: lastUserMessage.content,
-    },
+  // INFRA.2 — Idempotencia ante el retry del widget: si el mismo mensaje USER quedó
+  // como cola SIN responder (un intento previo lo persistió pero murió antes del
+  // onFinish del assistant), NO lo duplicamos. Dedupe leyendo solo columnas existentes
+  // (sin migración) vía la cola de la conversación; la corrección la da el chequeo de
+  // "cola USER sin responder" (una re-pregunta legítima ya tiene un ASSISTANT después y
+  // NO se saltea). Ver shouldSkipUserPersist.
+  const tail = await prisma.chatMessage.findFirst({
+    where: { conversationId: conversation.id },
+    orderBy: { createdAt: 'desc' },
+    select: { role: true, content: true, createdAt: true },
   })
+  if (!shouldSkipUserPersist(tail, lastUserMessage.content, new Date())) {
+    await prisma.chatMessage.create({
+      data: {
+        conversationId: conversation.id,
+        role: 'USER',
+        content: lastUserMessage.content,
+      },
+    })
+  }
   mark('user_msg_persist_ms')
 
   // ─── 7. Intent detection & Build system prompt ────────────────

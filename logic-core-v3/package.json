@@ -38,6 +38,7 @@
     "test:ev5": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev5.superset.invariant.ts",
     "test:utm1": "npx tsx src/modules/chatbot/server/chat/__tests__/utm-attribution.invariant.ts",
     "test:infra1": "npx tsx src/modules/chatbot/server/logging/__tests__/persist-failure-sink.invariant.ts",
+    "test:infra2": "npx tsx src/modules/chatbot/server/chat/__tests__/user-persist-dedup.invariant.ts && npx tsx src/modules/chatbot/shared/__tests__/chat-retry-policy.invariant.ts",
     "test:q12": "npx tsx src/modules/chatbot/evals/__tests__/q1-2.invariant.ts",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",

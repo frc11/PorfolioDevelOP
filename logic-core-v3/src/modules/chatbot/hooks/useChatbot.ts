@@ -8,6 +8,17 @@ import { prefetchBotConfig } from '../shared/configCache'
 import type { UIChatMessage, ToolCallInUIMessage } from '../components/chat/types'
 import type { NeuroAvatarState } from '../components/avatar'
 import type { ParsedAttribution } from '../shared/attribution'
+import {
+  classifyStatus,
+  shouldRetry,
+  backoffForAttempt,
+  type FetchOutcome,
+} from '../shared/chatRetryPolicy'
+
+/** Narrow a parsed JSON value to an indexable record sin usar `any`. */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
 
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return 'ssr-placeholder'
@@ -59,21 +70,24 @@ export interface UseChatbotOptions {
   attribution?: ParsedAttribution
 }
 
-// Estados degradados que el widget muestra como derivación digna a WhatsApp.
+// Estados degradados que el widget muestra en lugar de un error técnico crudo.
 //
 //  - quota_exhausted / domain_overflow: vienen del payload de /chat
-//    (handleChatRequest.ts:83-101). Reactivos a cada request.
+//    (handleChatRequest.ts). Reactivos a cada request; derivan a WhatsApp.
 //  - bot_paused: viene del /config cuando `BotConfig.isActive = false`
 //    (B8.3). Persistente — al reabrir el panel sigue mostrándose, hasta
-//    que el cliente recargue la página o el admin reactive el bot.
-//  - provider_error: el SDK de chat falló (5xx, red, Vertex caído). El
-//    widget NO debe quedar mostrando un error técnico — degrada a la
-//    misma tarjeta de WhatsApp usando el contacto del config ya cargado.
+//    que el cliente recargue la página o el admin reactive el bot. Deriva a WhatsApp.
+//  - connection_failed: INFRA.2 — el POST a /chat falló de forma transitoria (red /
+//    timeout / 5xx) y el widget AGOTÓ sus reintentos (ver chatRetryPolicy). NO es un
+//    handoff a WhatsApp: es un estado honesto "probá de nuevo" con el input HABILITADO
+//    para reintentar a mano (no bloquea el input — ver inputLockedByDegrade). El
+//    reintento server-side es idempotente, así que reenviar no duplica el turno.
+//    Supersede al viejo `provider_error` (que degradaba a WhatsApp al primer fallo).
 export type DegradedReason =
   | 'quota_exhausted'
   | 'domain_overflow'
   | 'bot_paused'
-  | 'provider_error'
+  | 'connection_failed'
 
 export interface DegradedInfo {
   reason: DegradedReason
@@ -83,8 +97,7 @@ export interface DegradedInfo {
   companyName: string | null
 }
 
-const PROVIDER_ERROR_MESSAGE =
-  'Estamos teniendo una dificultad técnica para responder en este momento. Seguí la conversación por WhatsApp y te contestamos enseguida.'
+const CONNECTION_ERROR_MESSAGE = 'No pudimos conectar. Probá de nuevo en un momento.'
 
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
@@ -104,6 +117,10 @@ export interface UseChatbotReturn {
   avatarState: NeuroAvatarState
   degradedMode: boolean
   degradedInfo: DegradedInfo | null
+  /** INFRA.2 — true mientras se reintenta el POST a /chat (cold-start). Estado soft del header. */
+  reconnecting: boolean
+  /** INFRA.2 — true si el degradado actual BLOQUEA el input (todos menos connection_failed). */
+  inputLockedByDegrade: boolean
   sendMessage: (text: string) => void
   acceptProactivePrompt: (prompt: string) => void
   triggerWhatsappHandoff: () => void
@@ -116,6 +133,11 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   const [isLoading, setIsLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
+  // INFRA.2 — true mientras el widget reintenta un POST a /chat tras un fallo
+  // transitorio (cold-start de Neon). Enriquece el header ("Conectando…") sin
+  // bloquear nada extra: el input ya queda deshabilitado porque el SDK sigue en
+  // 'submitted' mientras el transport await-ea el retry.
+  const [reconnecting, setReconnecting] = useState(false)
   const sessionIdRef = useRef<string>(getOrCreateSessionId())
   // UTM.1 — first-touch resuelto (de cache o del `attribution` candidato).
   // null = todavía no resuelto. Ver readCachedFirstTouch/writeCachedFirstTouch
@@ -141,12 +163,6 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   // can strip exactly THAT bubble if the visitor closes without replying — never
   // an older proactive bubble that was already answered (legitimate history).
   const proactiveBubbleIdRef = useRef<string | null>(null)
-  // Mirror of `config` for use inside the transport's `fetch` (whose closure
-  // is created once and would otherwise capture a stale `null` config).
-  const configRef = useRef<PublicBotConfig | null>(null)
-  useEffect(() => {
-    configRef.current = config
-  }, [config])
 
   useEffect(() => {
     let cancelled = false
@@ -185,17 +201,21 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
       new DefaultChatTransport({
         api: `/api/chatbot/${slug}/chat`,
         fetch: async (input, init) => {
-          // B8.3 — provider_error: cualquier 5xx o falla de red del endpoint
-          // de chat se reescribe a una respuesta degradada con CTA WhatsApp,
-          // usando el contacto del config que ya cargamos. El visitante NUNCA
-          // ve un error técnico (modo "cero-Vertex": si Vertex/Gemini cae,
-          // esto cubre la UX sin un kill switch dedicado).
-          const buildProviderErrorStream = (): Response => {
-            const cfg = configRef.current
+          // INFRA.2 — Reintento acotado para el cold-start de Neon (branch free): un
+          // fallo transitorio (red / timeout / 5xx) suele ser la DB dormida, y el 2º
+          // request pega contra la DB ya despierta. Reintentamos hasta agotar el
+          // presupuesto (chatRetryPolicy) con backoff; SOLO transitorios, NUNCA 4xx.
+          // La idempotencia server-side del user message garantiza que el reintento no
+          // duplique el turno. Al agotar, degradamos a un estado honesto "probá de
+          // nuevo" (connection_failed) con el input habilitado para reintentar a mano.
+          // `fetch` resuelve al llegar los HEADERS (antes del 1er byte), así que este
+          // wrapper solo captura fallos pre-primer-byte — justo el caso cold-start; una
+          // caída mid-stream queda enmascarada como 200 (INFRA.1/INFRA.3), no acá.
+          const buildConnectionErrorStream = (): Response => {
             setDegradedInfo({
-              reason: 'provider_error',
-              message: PROVIDER_ERROR_MESSAGE,
-              whatsappNumber: cfg?.whatsappNumber ?? null,
+              reason: 'connection_failed',
+              message: CONNECTION_ERROR_MESSAGE,
+              whatsappNumber: null,
               whatsappMessage: null,
               companyName: null,
             })
@@ -204,55 +224,84 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
               headers: { 'content-type': 'text/event-stream' },
             })
           }
+          const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
-          let response: Response
-          try {
-            response = await fetch(input, init)
-          } catch {
-            return buildProviderErrorStream()
-          }
-          if (response.status >= 500) {
-            return buildProviderErrorStream()
-          }
-          // Clone so we can read body without consuming for the SDK
-          if (response.headers.get('content-type')?.includes('application/json')) {
+          let attemptsMade = 0
+          for (;;) {
+            attemptsMade += 1
+            let response: Response | null = null
+            let outcome: FetchOutcome
             try {
-              const cloned = response.clone()
-              const data = await cloned.json()
-              if (data?.mode === 'degraded') {
-                // MS-2: capturamos el payload completo del backend (B4.5) para
-                // que el widget pueda armar el handoff a WhatsApp con la info
-                // real del bot (número, mensaje pre-armado, nombre de la org).
-                // Si algún campo no viene, normalizamos a null sin romper.
-                const reason: DegradedReason =
-                  data.reason === 'domain_overflow' ? 'domain_overflow' : 'quota_exhausted'
-                setDegradedInfo({
-                  reason,
-                  message: typeof data.message === 'string' ? data.message : '',
-                  whatsappNumber:
-                    typeof data.whatsappNumber === 'string' && data.whatsappNumber.length > 0
-                      ? data.whatsappNumber
-                      : null,
-                  whatsappMessage:
-                    typeof data.whatsappMessage === 'string' && data.whatsappMessage.length > 0
-                      ? data.whatsappMessage
-                      : null,
-                  companyName:
-                    typeof data.companyName === 'string' && data.companyName.length > 0
-                      ? data.companyName
-                      : null,
-                })
-                // Return an empty stream so the SDK doesn't error
-                return new Response('', {
-                  status: 200,
-                  headers: { 'content-type': 'text/event-stream' },
-                })
-              }
+              response = await fetch(input, init)
+              outcome = classifyStatus(response.status, response.headers.get('retry-after'))
             } catch {
-              // Not JSON, pass through
+              outcome = { kind: 'network-error' }
             }
+
+            // Éxito (2xx). Incluye el 200 con JSON `mode:'degraded'` del backend (cuota /
+            // dominio): ese payload arma el handoff a WhatsApp, igual que antes.
+            if (outcome.kind === 'success' && response) {
+              setReconnecting(false)
+              // Clone so we can read body without consuming for the SDK
+              if (response.headers.get('content-type')?.includes('application/json')) {
+                try {
+                  const cloned = response.clone()
+                  const data: unknown = await cloned.json()
+                  if (isRecord(data) && data.mode === 'degraded') {
+                    // MS-2: capturamos el payload completo del backend (B4.5) para armar
+                    // el handoff a WhatsApp con la info real del bot. Campos faltantes →
+                    // null sin romper.
+                    const reason: DegradedReason =
+                      data.reason === 'domain_overflow' ? 'domain_overflow' : 'quota_exhausted'
+                    setDegradedInfo({
+                      reason,
+                      message: typeof data.message === 'string' ? data.message : '',
+                      whatsappNumber:
+                        typeof data.whatsappNumber === 'string' && data.whatsappNumber.length > 0
+                          ? data.whatsappNumber
+                          : null,
+                      whatsappMessage:
+                        typeof data.whatsappMessage === 'string' && data.whatsappMessage.length > 0
+                          ? data.whatsappMessage
+                          : null,
+                      companyName:
+                        typeof data.companyName === 'string' && data.companyName.length > 0
+                          ? data.companyName
+                          : null,
+                    })
+                    // Return an empty stream so the SDK doesn't error
+                    return new Response('', {
+                      status: 200,
+                      headers: { 'content-type': 'text/event-stream' },
+                    })
+                  }
+                } catch {
+                  // Not JSON, pass through
+                }
+              }
+              return response
+            }
+
+            // 4xx (incl. 429): NUNCA reintentar. Pasa tal cual al SDK (se respeta el
+            // Retry-After por NO martillar, no como retry ciego).
+            if (outcome.kind === 'client-error' && response) {
+              setReconnecting(false)
+              return response
+            }
+
+            // Transitorio (red / 5xx) con presupuesto → reintentar con backoff. El
+            // intento fallido igual dejó su rastro en el sink off-Neon (INFRA.1); el
+            // reintento es un POST adicional y no oculta esa telemetría.
+            if (shouldRetry(outcome, attemptsMade)) {
+              setReconnecting(true)
+              await sleep(backoffForAttempt(attemptsMade))
+              continue
+            }
+
+            // Agotado → estado honesto "probá de nuevo".
+            setReconnecting(false)
+            return buildConnectionErrorStream()
           }
-          return response
         },
         prepareSendMessagesRequest: ({ messages: msgs, body }) => {
           // The proactive teaser bubble is UI-only — it must NEVER be sent as a
@@ -345,6 +394,10 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
 
   const sendMessage = useCallback(
     (text: string) => {
+      // INFRA.2 — al reenviar tras un connection_failed (input habilitado para
+      // reintentar a mano), limpiar el degrade reactivo para que el nuevo intento
+      // arranque limpio. `bot_paused` es persistente (viene del config) y NO se limpia.
+      setDegradedInfo((prev) => (prev?.reason === 'bot_paused' ? prev : null))
       // Setear el flag ANTES de delegar al SDK garantiza que "Pensando" /
       // avatar thinking aparezcan en el mismo frame del Enter — sin gap.
       setPendingSubmit(true)
@@ -420,6 +473,12 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   // entero para armar el handoff a WhatsApp.
   const degradedMode = degradedInfo !== null
 
+  // INFRA.2 — Cuáles degradados BLOQUEAN el input. connection_failed NO bloquea:
+  // es "probá de nuevo", el visitante reintenta a mano. Los demás (cuota, dominio,
+  // bot pausado) son terminales → input deshabilitado (el único CTA es WhatsApp).
+  const inputLockedByDegrade =
+    degradedInfo !== null && degradedInfo.reason !== 'connection_failed'
+
   // "Conversación activa" = al menos un mensaje REAL en la sesión actual (en
   // memoria, se reinicia al recargar). Las burbujas proactive-* son el teaser
   // efímero y NO cuentan (si contaran, el teaser se auto-bloquearía).
@@ -428,6 +487,7 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   return {
     config, isLoading, isOpen, open, close, toggle,
     messages, hasConversation, isStreaming, avatarState, degradedMode, degradedInfo,
+    reconnecting, inputLockedByDegrade,
     sendMessage, acceptProactivePrompt,
     triggerWhatsappHandoff, triggerCallbackHandoff, navigateTo,
   }

@@ -13085,3 +13085,68 @@ mantienen vía `logChatbotEvent` — no desaparece ningún término del stream d
   estructurado, así que sus fallos igual imprimen.
 - Warning pre-existente `toolResults` sin usar (`onFinish`): no se tocó (fuera de objetivo).
 
+---
+
+## ✅ INFRA.2 — Idempotencia del user message + retry del widget para el cold-start   ·   2026-07-06
+
+**Re-scope del track INFRA:** INFRA.1 y su memoria llamaban "INFRA.2" a la *causa raíz de
+conexión*. Este sprint re-escopa: **INFRA.2 = idempotencia + retry del widget** (recuperar el
+cold-start), y la causa raíz de conexión (`lib/prisma.ts`, pooler, `onFinish` retry) pasa a
+**INFRA.3** (sigue gated en la firma real de prod + Sentry DSN). Ver `docs/sprints/infra-2-cold-start-retry.md`.
+
+Neon free autosuspende; el cold-start (14–30s) excede el límite de la función (Netlify free ~10s)
+y el turno se pierde (INFRA.1 dejó el rastro). Defensa del free tier: el **widget reintenta** el
+POST a `/chat` (el 2º pega contra la DB ya despierta), y el server es **idempotente** para que el
+reintento no duplique el mensaje del visitante. **NO se tocó la conexión a Neon ni el schema.**
+
+### Server — idempotencia sin migración (`dedup.ts` + guard en `handleChatRequest.ts`)
+`shouldSkipUserPersist(tail, content, now, 90_000)` — puro, clock-inyectado. Dedup por la **cola
+sin responder** (orphaned tail): saltea el `create` del USER solo si la cola es USER + mismo
+contenido + dentro de ventana. Una re-pregunta legítima ("ok"/"dale" dos veces, ya respondida)
+tiene un ASSISTANT en la cola → NO se saltea (no corrompe el transcript). Lee solo columnas
+existentes (`findFirst orderBy createdAt desc`) → **sin `@@unique`, sin migración**. La ventana
+(90s) es solo el borde anti-huérfano-viejo; la corrección la da el rol de la cola. `messageCount`
+sin doble-conteo (el increment vive en `onFinish`).
+
+### Cliente — retry acotado (`chatRetryPolicy.ts` + loop en el transport de `useChatbot.ts`)
+Política pura: `classifyStatus`/`shouldRetry`/`backoffForAttempt`/`parseRetryAfterMs`. Máx 3
+intentos (1+2), backoff 2s/4s. Reintenta SOLO transitorios (network-error / 5xx); 4xx (incl. 429)
+pasa tal cual (Retry-After honrado por no martillar). En reintento → `reconnecting=true`
+("Conectando…" + punto ámbar en `ChatHeader`). Al agotar → nuevo degrade `connection_failed`
+(banner ámbar `WifiOff` "No pudimos conectar. Probá de nuevo en un momento.", **input habilitado**
+para reintentar a mano vía `inputLockedByDegrade`). **Sin timeout de cliente en v1** (lo corta la
+plataforma; evita el race de doble-respuesta). `sessionId` estable entre retries → el 2º POST reusa
+la conversación. `connection_failed` **supersede** al viejo `provider_error` (que degradaba a
+WhatsApp al primer fallo); ⚠ consecuencia deliberada: una caída **sostenida pre-stream** del
+proveedor ahora muestra "probá de nuevo" en vez del handoff a WhatsApp.
+
+### Coherencia INFRA.1 + edge
+El retry es un POST independiente: el intento-1 fallido sigue logueando en el sink off-Neon
+(`chat.*`), correlacionable por `conversationId`/`sessionId`. La caída **mid-stream** (headers ya
+flusheados) NO la cubre el retry → INFRA.1/INFRA.3. Doble-respuesta **inalcanzable** (el retry solo
+dispara pre-1er-byte, mutuamente excluyente con `onFinish` completado) salvo que se agregue un
+timeout < `maxDuration` — por eso v1 va sin timeout.
+
+### Verificación
+- **Gate** `npm run test:infra2`: 2 suites verdes — dedup (7 casos: cola vacía crea, cola respondida
+  no pierde re-preguntas, orphaned-tail dentro/fuera de ventana, 3-retry→1 fila) + retry
+  (clasificación 2xx/5xx/4xx, 429 nunca, acotado a 3, backoff clamp, Retry-After).
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`).
+- `eslint` (tocados): cero errores nuevos; 3 issues **pre-existentes** en regiones NO tocadas
+  (`ChatbotEmbed:295`, `useChatbot:354`, `handleChatRequest:722` — probado por los rangos de hunk).
+- `git diff`: **`lib/prisma.ts` y `prisma/schema.prisma` NO tocados** (sin migración, conexión intacta).
+- **visual-qa**: bloqueo de entorno (MCP de preview/browser no cableado en el subagente; dev server
+  abajo). Happy-path del widget + los estados nuevos (reconnecting / connection_failed, que requieren
+  inyectar un 5xx) → **verificación humana en :3000**.
+
+### Pendiente / verificación humana (Valentino)
+En `:3000`, **simular un 5xx** (no "Neon dormido", que en `next dev` no corta): ver que el widget
+muestra "Conectando…", reintenta y se recupera sin error crudo ni mensaje duplicado; que un lead
+capturado en el reintento no se duplica; y confirmar el estado `connection_failed` (input habilitado).
+
+### Fuera de scope
+- **INFRA.3** (causa raíz de conexión): `lib/prisma.ts`/pooler/`DIRECT_URL`/`onFinish` retry
+  intactos, gated en la firma real de prod + Sentry DSN.
+- **Race write-write residual**: cerrarlo del todo requiere `@@unique` → migración → flageado, no diseñado.
+- 3 issues de lint pre-existentes: no se tocaron (fuera de objetivo).
+

@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageCircle, ExternalLink } from 'lucide-react'
+import { MessageCircle, ExternalLink, WifiOff } from 'lucide-react'
 import { motion } from 'motion/react'
 import type { DegradedInfo } from '../../hooks/useChatbot'
 
@@ -15,6 +15,68 @@ interface DegradedBannerProps {
 // un error técnico — esto rinde una derivación digna a WhatsApp con la info
 // real del bot.
 export function DegradedBanner({ info }: DegradedBannerProps) {
+  // INFRA.2 — connection_failed NO es un handoff a WhatsApp: es un estado honesto
+  // "probá de nuevo" tras agotar los reintentos del cold-start. El input queda
+  // habilitado (ver inputLockedByDegrade), así que invitamos a reintentar a mano.
+  if (info.reason === 'connection_failed') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 8, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        role="status"
+        aria-live="polite"
+        style={{
+          background: 'rgba(245, 158, 11, 0.07)',
+          border: '1px solid rgba(245, 158, 11, 0.24)',
+          borderRadius: '14px',
+          padding: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '11px',
+          maxWidth: '90%',
+          alignSelf: 'flex-start',
+          boxShadow: '0 4px 18px rgba(245, 158, 11, 0.08)',
+        }}
+      >
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            borderRadius: '50%',
+            background: 'rgba(245, 158, 11, 0.16)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <WifiOff size={16} strokeWidth={1.5} color="rgba(245, 158, 11, 0.95)" />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <div
+            style={{
+              fontSize: '13px',
+              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.94)',
+            }}
+          >
+            {info.message}
+          </div>
+          <div
+            style={{
+              fontSize: '12px',
+              color: 'rgba(255, 255, 255, 0.62)',
+              lineHeight: 1.5,
+            }}
+          >
+            Escribí de nuevo y seguimos.
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
+
   const cleanNumber = info.whatsappNumber?.replace(/\D/g, '') ?? ''
   const prefilledMessage =
     info.whatsappMessage && info.whatsappMessage.length > 0

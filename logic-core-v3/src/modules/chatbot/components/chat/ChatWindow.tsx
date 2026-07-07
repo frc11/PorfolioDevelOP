@@ -77,6 +77,10 @@ export interface ChatWindowProps {
   onQuickReply: (text: string) => void
   /** Full payload for B8.3 — rendered as DegradedBanner with WhatsApp CTA. */
   degradedInfo?: DegradedInfo | null
+  /** INFRA.2 — true mientras se reintenta el POST a /chat (cold-start). Header soft. */
+  reconnecting?: boolean
+  /** INFRA.2 — true si el degradado BLOQUEA el input (todos menos connection_failed). */
+  inputLockedByDegrade?: boolean
   renderToolCall?: (toolCall: ToolCallInUIMessage) => React.ReactNode
   muted?: boolean
   onToggleMute?: () => void
@@ -91,11 +95,18 @@ export function ChatWindow({
   onClose,
   onQuickReply,
   degradedInfo,
+  reconnecting,
+  inputLockedByDegrade,
   renderToolCall,
   muted,
   onToggleMute,
 }: ChatWindowProps) {
   const degraded = !!degradedInfo
+  // INFRA.2 — El input se bloquea solo en degradados terminales; connection_failed
+  // deja el input habilitado (probá de nuevo a mano). `degraded` sigue gobernando el
+  // banner, el empty-state y los quick-replies. Fallback a `degraded` si el padre no
+  // pasa la prop (retrocompat).
+  const inputLocked = inputLockedByDegrade ?? degraded
   const [ar, ag, ab] = hexToRgb(config.accentColor) ?? ACCENT_FALLBACK
   const secondaryRgb = config.accentSecondary ? hexToRgb(config.accentSecondary) : null
   // Chips: secundario si existe, accent si no — paridad con BotConfigPreview.
@@ -240,6 +251,7 @@ export function ChatWindow({
                 avatarState={avatarState}
                 isStreaming={isStreaming}
                 isTyping={isTyping}
+                reconnecting={reconnecting}
                 onClose={onClose}
                 muted={muted}
                 onToggleMute={onToggleMute}
@@ -526,7 +538,7 @@ export function ChatWindow({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault()
-                        if (input.trim() && !botBusy && !degraded) {
+                        if (input.trim() && !botBusy && !inputLocked) {
                           const form = e.currentTarget.closest('form')
                           if (form) form.requestSubmit()
                         }
@@ -542,7 +554,7 @@ export function ChatWindow({
                       refocusOnDoneRef.current = false
                     }}
                     placeholder={
-                      degraded
+                      inputLocked
                         ? 'Continuá la conversación por WhatsApp'
                         : botBusy
                           ? 'Esperá a que termine de responder…'
@@ -553,7 +565,7 @@ export function ChatWindow({
                     // degradado sí queda disabled (estado terminal). El guard de
                     // onKeyDown/handleFormSubmit impide enviar mientras botBusy.
                     readOnly={botBusy}
-                    disabled={degraded}
+                    disabled={inputLocked}
                     rows={1}
                     inputMode="text"
                     autoCapitalize="sentences"
@@ -619,7 +631,7 @@ export function ChatWindow({
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.94 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                  disabled={botBusy || degraded || !input.trim()}
+                  disabled={botBusy || inputLocked || !input.trim()}
                   style={{
                     width: '40px', height: '40px',
                     borderRadius: '50%',
@@ -627,16 +639,16 @@ export function ChatWindow({
                     // No inline cursor: falls back to the global `button { cursor: none }`
                     // on desktop so the custom cursor shows (disabled state is conveyed
                     // by the dimmed background, not an OS not-allowed cursor).
-                    background: botBusy || degraded || !input.trim()
+                    background: botBusy || inputLocked || !input.trim()
                       ? 'rgba(255,255,255,0.05)'
                       : `linear-gradient(135deg, rgba(${ar},${ag},${ab},0.85), rgba(${ar},${ag},${ab},0.65))`,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     flexShrink: 0,
-                    boxShadow: botBusy || degraded || !input.trim() ? 'none' : `0 0 16px rgba(${ar},${ag},${ab},0.3), 0 2px 8px rgba(0,0,0,0.3)`,
+                    boxShadow: botBusy || inputLocked || !input.trim() ? 'none' : `0 0 16px rgba(${ar},${ag},${ab},0.3), 0 2px 8px rgba(0,0,0,0.3)`,
                     transition: 'all 200ms',
-                    color: botBusy || degraded || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
+                    color: botBusy || inputLocked || !input.trim() ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.95)',
                   }}
                   aria-label="Send message"
                 >

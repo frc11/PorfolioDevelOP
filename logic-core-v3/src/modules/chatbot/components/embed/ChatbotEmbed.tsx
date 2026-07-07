@@ -116,7 +116,10 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
 
   const send = useCallback(() => {
     const text = input.trim()
-    if (!text || chatbot.isStreaming || chatbot.degradedInfo) return
+    // INFRA.2 — connection_failed deja el input habilitado para reintentar a mano, así
+    // que el guard mira inputLockedByDegrade (no degradedInfo): los degradados
+    // terminales (cuota/dominio/pausado) sí bloquean el envío.
+    if (!text || chatbot.isStreaming || chatbot.inputLockedByDegrade) return
     // First real user gesture inside the iframe — unlocks the message chime.
     sounds.markInteraction()
     chatbot.sendMessage(text)
@@ -135,8 +138,10 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
   }
 
   const isThinking = chatbot.isStreaming
-  const isDegraded = chatbot.degradedInfo !== null
-  const inputDisabled = isThinking || isDegraded
+  // INFRA.2 — connection_failed NO bloquea el input (se reintenta a mano); los demás
+  // degradados (cuota/dominio/pausado) sí. `chatbot.degradedInfo` sigue gobernando el
+  // banner y los thinking-dots; el input y su placeholder miran inputLockedByDegrade.
+  const inputDisabled = isThinking || chatbot.inputLockedByDegrade
 
   if (chatbot.isLoading || !chatbot.config) {
     return (
@@ -185,6 +190,7 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
         config={config}
         avatarState={chatbot.avatarState}
         isStreaming={chatbot.isStreaming}
+        reconnecting={chatbot.reconnecting}
         onClose={() => notifyParent('close')}
         muted={sounds.muted}
         onToggleMute={sounds.toggleMute}
@@ -456,7 +462,7 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
               e.currentTarget.style.height = e.currentTarget.scrollHeight + 'px'
             }}
             onKeyDown={handleKeyDown}
-            placeholder={isDegraded ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
+            placeholder={chatbot.inputLockedByDegrade ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
             disabled={inputDisabled}
             rows={1}
             inputMode="text"
