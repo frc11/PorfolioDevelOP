@@ -348,3 +348,119 @@ Dev-only (filtrables): SEED 6, EVAL-CLEANUP 6, EVAL 4, SEED-EVAL 2.
 - Correr las suites de comportamiento ev1–ev5 / ev3:golden / utm1 (necesitan dev server
   + ANTHROPIC_API_KEY, gated en esta sesión) para confirmar comportamiento preservado.
 - Resolver los 2 PENDIENTE-DECISIÓN (latencia/actividad: scopear a 'develop' o re-enmarcar).
+
+## B1-S1 — Adaptador BSP de entrada: webhook 360dialog con auth, idempotencia e identidad BSUID-first (2026-07-09)
+
+**Qué se hizo:**
+- Endpoint público `POST /api/motor/webhook/[channelToken]` (route FINO, patrón del
+  chat route: rate limit por canal → delegación al módulo). SIN handler GET: 360dialog
+  no usa challenge de verificación (el webhook se registra vía su API, no en Meta).
+- Pipeline en `src/modules/motor/adapters/whatsapp/inbound/`: `auth.ts` (verificador
+  con la cita de la doc), `resolve-channel.ts` (LA única `unsafeGlobalQuery` del sprint,
+  reason `TENANT-RESOLUTION: webhook inbound`), `payload.ts` (Zod estricto del subset
+  consumido + clasificador), `handle-message.ts` (idempotencia + tx scoped),
+  `handle-status.ts`, `process.ts` (orquestador), `handle-request.ts`, `index.ts`.
+- Dominio en `src/modules/motor/domain/`: `bsuid.ts` (detección de formato — PROHIBIDO
+  asumir E.164), `channel-credentials.ts` (token de URL + secret hasheado, timing-safe),
+  `identity.ts` (resolución BSUID-first + user_id_update), `prisma-errors.ts` (P2002).
+- Schema ADITIVO: `WabaChannel.channelToken` (@unique — el SEGUNDO unique global
+  deliberado del bloque: el webhook llega pre-tenant y el token ES la clave de
+  resolución canal→org) + `webhookSecretHash`; tabla nueva
+  `motor_contact_identity_transition`. Migración
+  `20260709163143_b1s1_webhook_credentials_and_identity_transitions`.
+- Registry del helper: accessor scoped `contactIdentityTransition` (parentCheck estilo
+  chatbot — ver decisión abajo). Preset `motorWebhookPerChannel` 600/min por canal.
+- Suite `tests/integration/motor-inbound.spec.ts` (11 tests, a–k) + fixtures realistas
+  en `tests/integration/fixtures/motor-inbound-payloads.ts`. Invocan el route handler
+  REAL con `Request` estándar contra la Neon dev; estándar B0 (seed parte del test,
+  FALLA explícito si falta, teardown por id exacto, prohibido skip).
+
+**Mecanismo de auth encontrado (paso 0, con citas):**
+- **Elegido: header secreto propio por canal** (`Authorization: Bearer <secret>`), lo
+  más fuerte disponible en el plan actual (cliente directo de la Messaging API). El
+  webhook se configura con headers custom que 360dialog reenvía en cada POST:
+  `POST https://waba-v2.360dialog.io/v1/configs/webhook` body `{ "url": ..., "headers": ... }`
+  — cita: docs.360dialog.com/docs/messaging-api/api-reference/webhooks ("Partners can
+  set http headers that they want to receive in webhook requests") y
+  docs.360dialog.com/docs/messaging/webhook (ejemplo con header Authorization; "Meta
+  retries failed webhooks for up to 7 days using exponential backoff"; 200 esperado
+  dentro de 5s).
+- `X-Hub-Signature-256` de Meta NO se reenvía al cliente (la suscripción ante Meta es
+  de 360dialog; esa firma usa el app secret de ellos). No hay hub.challenge.
+- SÍ existe firma HMAC-SHA256 propia del BSP (`x-360dialog-signature`, platform secret)
+  pero es EXCLUSIVA del plan partner (el secret se genera en el Partner Hub) — cita:
+  docs.360dialog.com/partner/onboarding/webhook-events-and-setup/signature-validation.
+  **Riesgo residual a planificación:** el header estático autentica el origen pero no
+  la integridad por-payload; si la cuenta migra a partner, `auth.ts` es el ÚNICO punto
+  a reemplazar por verificación HMAC del raw body.
+- Implementación: secret por canal persistido SOLO como SHA-256 (`webhookSecretHash`),
+  comparación timing-safe, fail-closed (canal sin hash rechaza todo), token opaco de
+  256 bits en la URL como segundo factor independiente, rate limit por canal ANTES de
+  tocar la DB, shape estricto, y cross-check `metadata.phone_number_id` vs canal.
+
+**Decisiones de diseño de identidad:**
+- BSUID (`user_id`) = clave primaria de matching. Reconciliación por `waId` SOLO sobre
+  filas con `reconciledAt` null: una fila ya reconciliada a OTRO BSUID no se pisa (un
+  número reciclado puede ser hoy de otra persona). Alta race-safe vía
+  `upsertByExternalId`. Aprendizaje lateral: si la fila no conocía el teléfono y vino,
+  se guarda.
+- `user_id_update` → **tabla de historial** (`ContactIdentityTransition`) y no un campo:
+  (1) un contacto puede transicionar más de una vez; (2) el evento puede llegar sin
+  identidad conocida (fila con `contactIdentityId` null — el dato no se tira); (3) es
+  auditoría de reconciliación. FK a ContactIdentity SIMPLE y nullable (Prisma no admite
+  FK compuesta con pata opcional) → el guard cross-org del create es un parentCheck en
+  el registry (patrón chatbot), `onDelete: SetNull` preserva el log.
+- Al migrar el BSUID se **ANULA `waId`**: el evento significa "cambió de número" y el
+  número viejo puede estar reasignado — conservarlo arriesga enviarle a un desconocido
+  en B1-S2. Conflicto (ya existe identidad con el ID nuevo) → transición marcada
+  `user_id_update:conflict`, CERO merges destructivos. Corre SIN transacción a
+  propósito (tras una violación de constraint Postgres aborta la tx — 25P02 — y el
+  registro del conflicto fallaría); cada paso es idempotente y el retry re-entra limpio.
+- Los ids de `user_id_update` se validan contra el patrón BSUID (reescriben identidades
+  existentes); el path de mensajes queda tolerante (crear identidad es aditivo).
+- Statuses: monotónico SENT→DELIVERED→READ (stale se descarta, nada retrocede), FAILED
+  terminal con detalle del error del BSP (truncado a 500), SOLO mensajes OUT y scoped
+  por org (el wamid de otra org no se alcanza — probado en test h).
+
+**Limitaciones conocidas (aceptadas y por qué):**
+- Sin unique parcial de conversación OPEN en DB: una carrera de dos mensajes DISTINTOS
+  concurrentes puede dejar dos conversaciones (elección determinística por
+  `createdAt asc` las re-unifica hacia adelante). Un índice parcial requeriría SQL
+  fuera del schema Prisma = drift físico — no se paga ese precio por una carrera de
+  ventana mínima.
+- La forma EXACTA del payload vivo de `user_id_update` queda por confirmar contra el
+  sandbox (el parser acepta la variante canónica `old_user_id`/`new_user_id`).
+- Las corridas de `/code-review`, revisión TS y `/security-review` con subagentes
+  murieron por límite de sesión → revisión ejecutada INLINE por el padre (3 fixes
+  aplicados: guard de `object` del envelope, `waId` null en migración de BSUID,
+  patrón BSUID en `user_id_update`). Re-correr los agentes dedicados post-reset es
+  opcional.
+- Hallazgo FUERA de scope (B0, no tocado): en `registry.ts`, `crmSyncAttemptConfig`
+  omite `CRM_SYNC_ATTEMPT_REPARENT` de `forbiddenUpdateKeys` (los tipos SÍ lo prohíben
+  — divergencia tipo/runtime) y eso genera el único warning de eslint del árbol.
+
+**Cierre del sprint:**
+- `npx tsc --noEmit`: 0 errores (el error preexistente de searchconsole.ts del baseline
+  B0 ya no existe en esta rama).
+- eslint sobre los archivos del sprint: 0 errores, 0 warnings (el único warning del
+  árbol es el preexistente de B0 en registry.ts, ver hallazgo).
+- `npm run build`: PASS, exit 0.
+- Migración aplicada con `prisma migrate diff --from-schema-datasource` +
+  `migrate deploy` (`migrate dev` es interactivo y la sesión no tenía TTY; precedente
+  en el repo: `20260630000000_add_dossier_progreso`). `migrate status`: 83 migraciones,
+  al día. Drift-cero verificado: `migrate diff` datasource→schema devuelve "empty
+  migration".
+- Suite de integración COMPLETA: **30/30 PASS** (11 motor-inbound nuevas + 8
+  motor-isolation B0 + 8 chatbot-isolation B0 + 3 restantes), 30.5s contra Neon dev.
+
+**Queda para verificación humana (pedido del sprint, NO delegado al reporte):**
+- Disparar un webhook REAL desde el sandbox/número de prueba de 360dialog contra un
+  entorno de dev y ver la fila creada (el fixture no reemplaza al payload vivo).
+  Requiere: sembrar un WabaChannel real con credenciales
+  (`generateChannelWebhookCredentials()`), configurar el webhook en 360dialog con
+  `{ "url": "https://<host>/api/motor/webhook/<channelToken>", "headers": { "Authorization": "Bearer <webhookSecret>" } }`.
+- Confirmar contra el payload vivo la forma real de `user_id_update` y de los mensajes
+  BSUID-only.
+- Decidir si se evalúa upgrade a partner de 360dialog para habilitar la firma HMAC
+  (`x-360dialog-signature`) — hoy la auth es header estático (fuerte, pero sin
+  integridad por-payload).

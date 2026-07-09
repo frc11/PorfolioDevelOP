@@ -31,7 +31,12 @@ agrega en sprints posteriores (ver `docs/motor-whatsapp/bitacora.md`).
 ```
 src/modules/motor/
   adapters/   # integraciones externas (360dialog, webhooks BSP)
+    whatsapp/inbound/   # B1-S1: auth del webhook, clasificación, persistencia
   domain/     # tipos y reglas de negocio puras
+    bsuid.ts                # detección de formato BSUID/teléfono
+    channel-credentials.ts  # token de URL + secret del webhook (hash)
+    identity.ts             # resolución BSUID-first + user_id_update
+    prisma-errors.ts        # clasificación de P2002 (idempotencia)
   services/   # orquestación, casos de uso
   types/      # tipos compartidos del módulo
 ```
@@ -40,3 +45,7 @@ src/modules/motor/
 
 - B0-S1: esqueleto del módulo, frontera de imports y registro. Sin
   lógica de negocio.
+- B1-S1: adaptador BSP de ENTRADA — webhook autenticado
+  (`/api/motor/webhook/[channelToken]`), resolución de identidad
+  BSUID-first, idempotencia por wamid, statuses y `user_id_update`.
+  El envío es B1-S2.

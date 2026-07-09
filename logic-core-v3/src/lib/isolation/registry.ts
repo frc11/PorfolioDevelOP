@@ -20,6 +20,7 @@ import type {
   ChatbotInsight,
   ChatbotLead,
   ContactIdentity,
+  ContactIdentityTransition,
   Conversation,
   CrmIntegration,
   CrmSyncAttempt,
@@ -39,7 +40,9 @@ import { IsolationError, IsolationNotFoundError, ScopedModelDelegate, type Model
 // de forbiddenCreateKeys/forbiddenUpdateKeys.
 
 const WABA_CHANNEL_NESTED = ['organization', 'conversations'] as const
-const CONTACT_IDENTITY_NESTED = ['organization', 'conversations'] as const
+const CONTACT_IDENTITY_NESTED = ['organization', 'conversations', 'transitions'] as const
+const CONTACT_IDENTITY_TRANSITION_NESTED = ['organization', 'contactIdentity'] as const
+const CONTACT_IDENTITY_TRANSITION_REPARENT = ['contactIdentityId'] as const
 const MOTOR_CONVERSATION_NESTED = ['organization', 'contactIdentity', 'wabaChannel', 'messages'] as const
 const MOTOR_CONVERSATION_REPARENT = ['contactIdentityId', 'wabaChannelId'] as const
 const MOTOR_MESSAGE_NESTED = ['organization', 'conversation'] as const
@@ -93,6 +96,17 @@ type ContactIdentityCreate = Omit<
 type ContactIdentityUpdate = Omit<
   Prisma.ContactIdentityUncheckedUpdateInput,
   Keys<typeof CONTACT_IDENTITY_NESTED> | 'organizationId' | 'id'
+>
+type ContactIdentityTransitionCreate = Omit<
+  Prisma.ContactIdentityTransitionUncheckedCreateInput,
+  Keys<typeof CONTACT_IDENTITY_TRANSITION_NESTED> | 'organizationId'
+>
+type ContactIdentityTransitionUpdate = Omit<
+  Prisma.ContactIdentityTransitionUncheckedUpdateInput,
+  | Keys<typeof CONTACT_IDENTITY_TRANSITION_NESTED>
+  | Keys<typeof CONTACT_IDENTITY_TRANSITION_REPARENT>
+  | 'organizationId'
+  | 'id'
 >
 type MotorConversationCreate = Omit<
   Prisma.MotorConversationUncheckedCreateInput,
@@ -197,6 +211,31 @@ const contactIdentityConfig: ModelIsolationConfig = {
   parentChecks: [],
   forbiddenCreateKeys: CONTACT_IDENTITY_NESTED,
   forbiddenUpdateKeys: [...CONTACT_IDENTITY_NESTED, 'organizationId'],
+}
+
+// B1-S1: historial de transiciones de identidad (user_id_update del BSP).
+// organizationId propio, pero la FK a ContactIdentity es SIMPLE y nullable
+// (Prisma no admite FKs compuestas con una pata opcional) → el guard
+// cross-org del create es un parentCheck estilo chatbot, no la FK compuesta
+// del resto del motor. contactIdentityId es opcional: se verifica solo si
+// viene (el evento puede llegar sin identidad conocida).
+const contactIdentityTransitionConfig: ModelIsolationConfig = {
+  model: 'contactIdentityTransition',
+  scopeWhere: (organizationId) => ({ organizationId }),
+  hasOrganizationId: true,
+  parentChecks: [
+    {
+      field: 'contactIdentityId',
+      find: (client, organizationId, id) =>
+        client.contactIdentity.findFirst({ where: { id, organizationId }, select: { id: true } }),
+    },
+  ],
+  forbiddenCreateKeys: CONTACT_IDENTITY_TRANSITION_NESTED,
+  forbiddenUpdateKeys: [
+    ...CONTACT_IDENTITY_TRANSITION_NESTED,
+    ...CONTACT_IDENTITY_TRANSITION_REPARENT,
+    'organizationId',
+  ],
 }
 
 const motorConversationConfig: ModelIsolationConfig = {
@@ -605,6 +644,12 @@ function buildAccessors(organizationId: string, client: ScopeClient) {
       contactIdentityConfig,
       client,
     ),
+    contactIdentityTransition: new ScopedModelDelegate<
+      typeof prisma.contactIdentityTransition,
+      ContactIdentityTransition,
+      ContactIdentityTransitionCreate,
+      ContactIdentityTransitionUpdate
+    >(client.contactIdentityTransition, organizationId, contactIdentityTransitionConfig, client),
     motorConversation: new ScopedModelDelegate<
       typeof prisma.motorConversation,
       MotorConversation,

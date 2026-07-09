@@ -442,10 +442,11 @@ model Organization {
   referralCode       ReferralCode?
   referralsMade      Referral[]           @relation("ReferralsMade")
   referralsReceived  Referral[]           @relation("ReferralsReceived")
-  wabaChannels       WabaChannel[]
-  contactIdentities  ContactIdentity[]
-  motorConversations MotorConversation[]
-  motorMessages      MotorMessage[]
+  wabaChannels                WabaChannel[]
+  contactIdentities           ContactIdentity[]
+  motorConversations          MotorConversation[]
+  motorMessages               MotorMessage[]
+  contactIdentityTransitions  ContactIdentityTransition[]
 }
 
 // Histórico semanal del executive brief. Aditivo al cache vigente en Organization
@@ -1915,6 +1916,20 @@ model WabaChannel {
   status             WabaChannelStatus @default(ACTIVE)
   provider           String            @default("D360")
 
+  // B1-S1 — credenciales del webhook entrante, par por canal:
+  // channelToken identifica el canal en la URL del webhook sin exponer ids
+  // internos (64 hex de crypto.randomBytes(32)). Es el SEGUNDO unique global
+  // deliberado del bloque (junto a providerMessageId): el webhook llega
+  // PRE-tenant y el token ES la clave de resolución canal→org — un unique
+  // por org no puede resolver una org que todavía no se conoce.
+  // webhookSecretHash es el SHA-256 del Bearer secret que 360dialog reenvía
+  // en el header Authorization (configurado con el webhook vía
+  // POST /v1/configs/webhook { url, headers }). El secret NUNCA se persiste
+  // en claro. Nullables (migración aditiva): un canal sin credenciales NO
+  // acepta webhooks — el endpoint falla cerrado.
+  channelToken      String? @unique
+  webhookSecretHash String?
+
   conversations MotorConversation[]
 
   createdAt DateTime @default(now())
@@ -1942,6 +1957,7 @@ model ContactIdentity {
   reconciledAt DateTime?
 
   conversations MotorConversation[]
+  transitions   ContactIdentityTransition[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2006,4 +2022,38 @@ model MotorMessage {
   @@index([organizationId, createdAt])
   @@index([organizationId, conversationId, createdAt])
   @@map("motor_message")
+}
+
+// B1-S1 — Historial append-only de transiciones de identidad del contacto
+// (evento `user_id_update` del BSP: el usuario cambió de número y Meta emite
+// el user_id viejo y el nuevo). Es TABLA y no un campo en ContactIdentity
+// porque: (1) un contacto puede transicionar más de una vez — un campo
+// "previousExternalId" pierde historial en el segundo cambio; (2) el evento
+// puede llegar sin que el ID viejo matchee ninguna identidad conocida
+// (contactIdentityId null) y el dato NO se descarta; (3) es rastro de
+// auditoría para soporte/debug de reconciliación sin ensuciar la fila caliente.
+// La FK a ContactIdentity es SIMPLE y no compuesta como el resto del motor:
+// Prisma no admite FKs compuestas con una pata nullable (organizationId NOT
+// NULL + contactIdentityId nullable). El guard cross-org del create lo pone
+// el helper de aislamiento (parentCheck, patrón chatbot) y onDelete: SetNull
+// preserva el log si la identidad se borra — el cascade por organizationId
+// sigue limpiando todo al borrar la org.
+model ContactIdentityTransition {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  contactIdentityId String?
+  contactIdentity   ContactIdentity? @relation(fields: [contactIdentityId], references: [id], onDelete: SetNull)
+
+  channelType    MotorChannelType
+  fromExternalId String
+  toExternalId   String
+  source         String
+
+  createdAt DateTime @default(now())
+
+  @@index([organizationId, contactIdentityId])
+  @@index([organizationId, createdAt])
+  @@map("motor_contact_identity_transition")
 }
