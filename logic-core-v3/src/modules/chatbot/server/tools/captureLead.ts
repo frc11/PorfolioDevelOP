@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { z } from 'zod'
 import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { logChatbotEvent } from '../logging'
 import { notifyClientOfLead } from '@/lib/client-notifications'
 import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
@@ -196,9 +196,10 @@ async function captureLeadExecute(
   input: CaptureLeadInput,
   ctx: ToolCallContext
 ): Promise<ToolExecuteResult<CaptureLeadResult>> {
+  const scope = forOrg(ctx.organizationId)
   try {
     // 1. Check if a lead already exists for this conversation
-    const existing = await prisma.chatbotLead.findUnique({
+    const existing = await scope.chatbotLead.findFirst({
       where: { conversationId: ctx.conversationId },
     })
 
@@ -226,7 +227,7 @@ async function captureLeadExecute(
     //    por ése (no perdemos el lead). Si no queda ninguno → re-ask graceful (el bot
     //    repregunta en vez de enmudecer por un throw del SDK).
     const visitorMessages = (
-      await prisma.chatMessage.findMany({
+      await scope.chatMessage.findMany({
         where: { conversationId: ctx.conversationId, role: 'USER' },
         select: { content: true },
       })
@@ -281,6 +282,7 @@ async function captureLeadExecute(
         }),
       )
       await logChatbotEvent({
+        organizationId: ctx.organizationId,
         botConfigId: ctx.botConfigId,
         type: 'tool.lead_reask',
         level: 'warn',
@@ -355,47 +357,42 @@ async function captureLeadExecute(
     // 4. Create the lead and update conversation in a transaction.
     //    B5.1: providedPhone/providedEmail SE DERIVAN del input — no del LLM.
     //    El bot no puede inflar esto: si no mandó phone, providedPhone=false. Estructural.
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await scope.$transaction(async (tx) => {
       const lead = await tx.chatbotLead.create({
-        data: {
-          botConfigId: ctx.botConfigId,
-          conversationId: ctx.conversationId,
-          name: input.name,
-          email,
-          phone,
-          intent: intentEnum,
-          message: input.contextSummary,
-          status: 'NEW',
-          // B5.1 — Señales estructuradas (columnas legacy — el panel las muestra).
-          category: input.category,
-          requestedAppointment: input.requestedAppointment,
-          mentionedFinancing: input.mentionedFinancing,
-          mentionedTradeIn: input.mentionedTradeIn,
-          askedSpecificModel: input.askedSpecificModel,
-          providedPhone,
-          providedEmail,
-          // UTM.1 — copiado 1:1 desde ctx (que a su vez viene de Conversation,
-          // ver handleChatRequest.ts). NUNCA se deriva de nada del LLM/input.
-          utmSource: ctx.utmSource ?? null,
-          utmMedium: ctx.utmMedium ?? null,
-          utmCampaign: ctx.utmCampaign ?? null,
-          // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
-          // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
-          signals: signalsSnapshot as unknown as Prisma.InputJsonValue,
-          // B5.2 — Score heurístico calculado server-side (cero LLM).
-          score,
-          classification,
-          // `scoreSignals` es `ScoredSignal[]` (JSON-serializable estructuralmente).
-          // Cast en el boundary Prisma porque `keyof LeadSignals` no es asignable
-          // a InputJsonValue sin perder tipo en el dominio.
-          scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
-        },
+        botConfigId: ctx.botConfigId,
+        conversationId: ctx.conversationId,
+        name: input.name,
+        email,
+        phone,
+        intent: intentEnum,
+        message: input.contextSummary,
+        status: 'NEW',
+        // B5.1 — Señales estructuradas (columnas legacy — el panel las muestra).
+        category: input.category,
+        requestedAppointment: input.requestedAppointment,
+        mentionedFinancing: input.mentionedFinancing,
+        mentionedTradeIn: input.mentionedTradeIn,
+        askedSpecificModel: input.askedSpecificModel,
+        providedPhone,
+        providedEmail,
+        // UTM.1 — copiado 1:1 desde ctx (que a su vez viene de Conversation,
+        // ver handleChatRequest.ts). NUNCA se deriva de nada del LLM/input.
+        utmSource: ctx.utmSource ?? null,
+        utmMedium: ctx.utmMedium ?? null,
+        utmCampaign: ctx.utmCampaign ?? null,
+        // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
+        // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
+        signals: signalsSnapshot as unknown as Prisma.InputJsonValue,
+        // B5.2 — Score heurístico calculado server-side (cero LLM).
+        score,
+        classification,
+        // `scoreSignals` es `ScoredSignal[]` (JSON-serializable estructuralmente).
+        // Cast en el boundary Prisma porque `keyof LeadSignals` no es asignable
+        // a InputJsonValue sin perder tipo en el dominio.
+        scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
       })
 
-      await tx.conversation.update({
-        where: { id: ctx.conversationId },
-        data: { leadCaptured: true },
-      })
+      await tx.conversation.update(ctx.conversationId, { leadCaptured: true })
 
       return lead
     })
@@ -403,10 +400,9 @@ async function captureLeadExecute(
     // 5. Notify the client without blocking the bot response.
     async function notifyClient() {
       try {
-        const bot = await prisma.botConfig.findUnique({
-          where: { id: ctx.botConfigId },
-          include: { organization: true },
-        })
+        // La org del scope tiene un único bot (BotConfig.organizationId @unique);
+        // findFirst scoped lo devuelve con su organización incluida.
+        const bot = await scope.botConfig.findFirst({ include: { organization: true } })
 
         const org = bot?.organization
         if (!bot || !org) return
@@ -497,6 +493,7 @@ async function captureLeadExecute(
     )
 
     await logChatbotEvent({
+      organizationId: ctx.organizationId,
       botConfigId: ctx.botConfigId,
       type: 'tool.lead_captured',
       level: 'info',

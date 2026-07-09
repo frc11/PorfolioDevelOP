@@ -13,7 +13,7 @@
  *  - De QuotaUsage solo sale `conversationsCount`. tokens/costUsd son
  *    internos y NUNCA se seleccionan.
  */
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { startOfDateRange } from '@/lib/tz-ar'
 import {
   buildConversationSeries,
@@ -48,18 +48,17 @@ const SERIES_MONTHS = 6
 export async function getMonthlyAnalysisForOrg(
   organizationId: string,
 ): Promise<MonthlyAnalysisData> {
-  // Raíz del scoping: el bot de ESTA org. Si no hay, no hay datos que mostrar.
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { botConfig: { select: { id: true } } },
-  })
-  const botConfigId = org?.botConfig?.id
+  // Raíz del scoping: el bot de ESTA org (el helper fija el tenant). Si no hay
+  // bot, no hay datos que mostrar.
+  const scope = forOrg(organizationId)
+  const bot = await scope.botConfig.findFirst({ select: { id: true } })
+  const botConfigId = bot?.id
   if (!botConfigId) return EMPTY
 
   const windowStart = startOfDateRange('30d')
 
   const [insightRows, usageRows, categoryGroups] = await Promise.all([
-    prisma.chatbotInsight.findMany({
+    scope.chatbotInsight.findMany({
       where: { botConfigId, status: { in: ['PENDING', 'APPLIED'] } },
       orderBy: { createdAt: 'desc' },
       take: 20, // rankInsights corta a MAX_INSIGHTS_SHOWN; traemos margen para ordenar
@@ -74,14 +73,14 @@ export async function getMonthlyAnalysisForOrg(
         createdAt: true,
       },
     }),
-    prisma.quotaUsage.findMany({
+    scope.quotaUsage.findMany({
       where: { botConfigId },
       orderBy: [{ year: 'desc' }, { month: 'desc' }],
       take: SERIES_MONTHS,
       // SOLO conteos. tokensIn/tokensOut/costUsd son internos — jamás salen de acá.
       select: { year: true, month: true, conversationsCount: true },
     }),
-    prisma.chatbotLead.groupBy({
+    scope.chatbotLead.groupBy({
       by: ['category'],
       where: {
         botConfigId,

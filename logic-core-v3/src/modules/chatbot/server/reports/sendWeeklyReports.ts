@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { sendTransactionalEmail } from '@/lib/email/brevo-service'
 import { buildWeeklyReport } from './buildWeeklyReport'
 import { weeklyReportEmail } from '@/lib/email/templates/weekly-report'
@@ -12,20 +12,25 @@ export interface SendWeeklyReportsResult {
 }
 
 export async function sendWeeklyReports(): Promise<SendWeeklyReportsResult> {
-  const activeBots = await prisma.botConfig.findMany({
-    where: { isActive: true },
-    include: {
-      organization: {
+  // PLATFORM-CRON: barre TODOS los bots activos de TODAS las orgs (cron semanal).
+  const activeBots = await unsafeGlobalQuery(
+    'PLATFORM-CRON: todos los bots activos de todas las orgs para el reporte semanal',
+    (c) =>
+      c.botConfig.findMany({
+        where: { isActive: true },
         include: {
-          members: {
-            where: { role: 'ADMIN' },
-            include: { user: { select: { email: true, name: true } } },
-            take: 1,
+          organization: {
+            include: {
+              members: {
+                where: { role: 'ADMIN' },
+                include: { user: { select: { email: true, name: true } } },
+                take: 1,
+              },
+            },
           },
         },
-      },
-    },
-  })
+      }),
+  )
 
   const results: SendWeeklyReportsResult = {
     total: activeBots.length,
@@ -43,7 +48,7 @@ export async function sendWeeklyReports(): Promise<SendWeeklyReportsResult> {
         continue
       }
 
-      const reportData = await buildWeeklyReport(bot.id)
+      const reportData = await buildWeeklyReport(bot.organizationId, bot.id)
       if (!reportData) {
         results.skipped++
         continue
@@ -63,15 +68,13 @@ export async function sendWeeklyReports(): Promise<SendWeeklyReportsResult> {
 
       if (result.ok) {
         results.sent++
-        await prisma.chatbotEvent
-          .create({
-            data: {
-              botConfigId: bot.id,
-              type: 'REPORT.WEEKLY_SENT',
-              level: 'INFO',
-              message: `Weekly report sent to ${primary.email}`,
-              metadata: { recipientEmail: primary.email },
-            },
+        await forOrg(bot.organizationId)
+          .chatbotEvent.create({
+            botConfigId: bot.id,
+            type: 'REPORT.WEEKLY_SENT',
+            level: 'INFO',
+            message: `Weekly report sent to ${primary.email}`,
+            metadata: { recipientEmail: primary.email },
           })
           .catch(() => {})
       } else {

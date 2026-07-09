@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import type { PausedInfo, PublicBotConfig } from '../../shared/publicConfig'
 import type { QuickReply, ProactivePromptsMap, RouteColorMap } from '../../shared/types'
 
@@ -67,7 +67,12 @@ function normalizeQuickReplies(value: unknown): QuickReply[] {
  * ever leaves the database layer.
  */
 export async function getPublicConfig(slug: string): Promise<PublicBotConfig | null> {
-  const bot = await prisma.botConfig.findUnique({
+  // PUBLIC-CONFIG: config pública del widget resuelta por slug — sin sesión ni
+  // tenant (el widget corre en el sitio del cliente, anónimo). Global por diseño.
+  const bot = await unsafeGlobalQuery(
+    'PUBLIC-CONFIG: config pública del widget por slug (anónimo, sin sesión de tenant)',
+    (c) =>
+      c.botConfig.findUnique({
     where: { slug },
     select: {
       botName: true,
@@ -91,7 +96,8 @@ export async function getPublicConfig(slug: string): Promise<PublicBotConfig | n
       whatsappNumber: true,
       organization: { select: { companyName: true } },
     },
-  })
+      }),
+  )
 
   if (!bot) return null
 

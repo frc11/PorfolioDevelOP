@@ -13150,3 +13150,119 @@ capturado en el reintento no se duplica; y confirmar el estado `connection_faile
 - **Race write-write residual**: cerrarlo del todo requiere `@@unique` → migración → flageado, no diseñado.
 - 3 issues de lint pre-existentes: no se tocaron (fuera de objetivo).
 
+---
+
+## ✅ COST-1 — Modelo/provider efectivo unificado (ejecución + costo) + WARN en vez de $0 silencioso   ·   2026-07-07
+
+El costo por turno leía `resolvedBot.llmModel` (campo legacy de `BotConfig`) mientras la
+ejecución real usaba `plan.llmModel` — podían divergir. Si el modelo efectivo no existía en la
+tabla de precios, el costo se registraba en **$0 en silencio**; y un `BotConfig.llmProvider`
+no-Google (Anthropic/OpenAI, stubs en MVP) hacía `throw` en `getModel` → **500** en el 100% de
+los turnos de ese bot. Este sprint unifica el par (provider, modelo) efectivo en un único punto
+de resolución, reusado tanto para ejecutar como para costear, y hace que un par inválido degrade
+con **WARN** — nunca `$0` silencioso ni 500.
+
+### Descubrimiento (Paso 0) — 2 correcciones al ticket original
+- Los números de línea del ticket (`~606-607` costo, `~771-776` ejecución) estaban invertidos:
+  `606-607` era la ejecución (`getModel`) y `771-776` el cálculo de costo. El resto de las líneas
+  citadas (google.ts ~93-95, anthropic.ts ~17-19) coincidían.
+- El archivo de precios no vive en `llm/pricing/costs.ts` (no existe ese directorio) sino en
+  `pricing/costs.ts`, hermano de `llm/`.
+- **Decisión no especificada en el ticket**: el ticket sugería colgar el WARN de "el sink
+  estructurado / `logChatbotEvent`, coherente con `chat.persist_failed`/`chat.stream_error`" —
+  pero esos dos eventos puntuales los emite `logPersistFailure` (INFRA.1, sink a stderr
+  garantizado, pensado para cuando Neon mismo está caída), **no** `logChatbotEvent`
+  (persiste a la tabla `chatbotEvent`, usado para warnings de negocio como
+  `chat.quota_exceeded`). Un modelo/provider mal configurado es un problema de **config**, no de
+  conexión — más cercano a `chat.quota_exceeded` que a una falla de infra — y además se quiere
+  **medible por volumen** (el propio ticket lo pide para la verificación humana). Se usó
+  `logChatbotEvent` con `type: 'chat.cost_model_unknown'`, `level: 'warn'`, tal como sugería el
+  ticket para el nombre del evento.
+
+### Fix — punto único de resolución (`llm/resolveEffectiveModel.ts`, nuevo)
+`resolveEffectiveModel(requestedProvider, requestedModel, getProvider?)` intenta
+`getProvider(requestedProvider).getModel(requestedModel)`; si lanza `ProviderNotImplementedError`
+o `ModelNotSupportedError` (los dos tipos que el repo ya usa para exactamente estos dos casos),
+devuelve el fallback `(FALLBACK_PROVIDER='google', FALLBACK_MODEL_ID='gemini-2.5-flash')` con
+`degraded: true` en vez de relanzar; cualquier otro error (infra real, no config) se relanza tal
+cual — no se enmascara. Tercer parámetro inyectable (default: la factory real
+`getLLMProvider`) para poder testear sin credenciales de Vertex — mismo idioma que el
+clock-injection de `dedup.ts` (INFRA.2).
+
+`handleChatRequest.ts`: se resuelve **una sola vez** en `:609` (reemplaza el
+`getLLMProvider(...)`+`provider.getModel(...)` de antes) y el resultado (`effectiveModel`) se
+reusa en `:795-796` dentro de `calculateCost` (reemplaza `resolvedBot.llmProvider`/
+`resolvedBot.llmModel`). `calculateCost` (`pricing/costs.ts`) **no se tocó** — sigue recibiendo
+`(provider, modelId)`, ahora siempre el par efectivo. `incrementQuota`, el log
+`chat.llm_request_finished` y el evento `chat.message_completed` heredan el costo correcto sin
+cambios propios (leen `costBreakdown.totalUsd`).
+
+Camino feliz (Google + modelo conocido) **sin cambios de comportamiento**: `resolveEffectiveModel`
+es passthrough exacto cuando el par ya es válido, y el provider no cambia nunca (`resolvedBot`
+=== `bot`, mismo campo `llmProvider` que ya usaba la ejecución). El costo numérico hoy es
+idéntico al de antes porque `plan.llmModel` y `BotConfig.llmModel` coinciden en los 3 planes
+sembrados (`'gemini-2.5-flash'`) — es un hecho de los datos actuales, no una garantía de código:
+el objetivo del sprint es justamente que el costo siga al modelo real aunque en el futuro
+diverjan.
+
+### WARN — `chat.cost_model_unknown`
+Emitido en `handleChatRequest.ts:611-628`, inmediatamente después de resolver, solo si
+`degraded === true` (cubre ambos triggers: provider stub y modelo desconocido — es la misma
+rama). Shape (vía `logChatbotEvent`, ya usado para `chat.quota_exceeded` con el mismo `level:
+'warn'`):
+```ts
+{
+  botConfigId, type: 'chat.cost_model_unknown', level: 'warn',
+  message: `Provider/modelo solicitado ".../..." no disponible — degradando a ".../..."`,
+  conversationId,
+  metadata: { requestedProvider, requestedModel, effectiveProvider, effectiveModel, planKey },
+}
+```
+Al no inventar canal nuevo, hereda gratis: log a consola (`chatbotLog`) + fila en
+`chatbotEvent` (dashboard admin) + nunca lanza (persistencia es best-effort, como todo
+`logChatbotEvent`).
+
+### Verificación
+- **Gate nuevo** (`npm run test:cost1` → `llm/__tests__/resolve-effective-model.invariant.ts`,
+  8 checks): camino feliz passthrough; provider stub (Anthropic y OpenAI) degrada sin throw;
+  modelo desconocido con provider válido degrada sin throw; el par degradado es siempre conocido
+  para su propio provider (nunca costo 0 por mismatch); error no relacionado se relanza (no se
+  enmascara); y **`calculateCost` real** (provider Anthropic, sin credenciales — no requiere
+  GCP/Vertex) contra un par correcto (costo no-cero, `$6` para 1M/1M tokens con el pricing real
+  de `ANTHROPIC_MODELS`) y un par mezclado (modelo de otro provider → `$0`, el bug que este
+  sprint corrige en el flujo real). El camino 100%-Google con credenciales reales queda fuera del
+  invariant (`GoogleProvider` exige `CHATBOT_GCP_PROJECT_ID` en el constructor) — por eso la
+  inyección de provider en `resolveEffectiveModel`.
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`, el único que aparece).
+- `eslint` (archivos tocados): 0 errores, 2 warnings, ambos **pre-existentes**: `toolResults` sin
+  usar en el destructure de `onFinish` (mismo warning de siempre, corrido de línea otra vez por
+  las inserciones arriba) y `_modelId` sin usar en el stub fake del test — mismo patrón exacto
+  (sin `argsIgnorePattern` para `_`) que ya warnea, sin tocarlos, en `anthropic.ts:17` y
+  `openai.ts:11`.
+- `test:utm1` (otro invariant que importa de `handleChatRequest.ts`) corrido como smoke test:
+  sigue verde.
+- `git status`: 5 archivos (`resolveEffectiveModel.ts` + `llm/__tests__/` nuevos;
+  `handleChatRequest.ts` +33/-5; `llm/index.ts` +6; `package.json` +1 script). Nada fuera de
+  `llm/`, `chat/handleChatRequest.ts` y `package.json`.
+
+### Pendiente / verificación humana (Valentino)
+- **SELECT comparativo en prod** (`Conversation`/`QuotaUsage`: `estimatedCostUsd`/`costUsd`
+  reciente vs. modelo del plan) → confirmar costo ≠ `$0` y correspondiente al modelo efectivo.
+- **Medir volumen de `chat.cost_model_unknown`** en `chatbotEvent` (`type = 'chat.cost_model_unknown'`)
+  para dimensionar cuántos bots tienen hoy un `llmProvider`/`llmModel` desalineado del plan.
+- No hay golden-suite ni visual-qa (no es multi-tenant ni visual) — el cierre real es el SELECT.
+
+### Fuera de scope (anotado, no implementado)
+- **Backfill**: filas ya escritas de `Conversation`/`QuotaUsage` no se tocaron.
+- **Admin/dashboard**: ningún select ni UI tocado — `BotConfig.llmProvider`/`llmModel` siguen
+  editables como antes, simplemente ya no manejan el costo/ejecución en runtime.
+- **CO-9** (unificar el default de modelo ×7): no tocado.
+- **Migración**: `prisma/schema.prisma` intacto.
+- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `demo-chat/[slug]/route.ts`,
+  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo
+  hardcodeado (no vienen de `plan.llmModel` ni alimentan costo de turno) — confirmado por grep,
+  no tocados.
+- El log `chat.llm_request_start` sigue mostrando el par **solicitado** (no el efectivo) — el WARN
+  nuevo ya deja rastro explícito del degrade con ambos pares; tocar ese log ampliaba el diff sin
+  necesidad.
+

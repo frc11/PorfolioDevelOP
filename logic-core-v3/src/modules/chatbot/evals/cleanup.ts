@@ -13,7 +13,7 @@
  */
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import type { PrismaClient } from '@prisma/client'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { EVAL_BOT_SLUGS, SESSION_PREFIX, guardDevHost, hasFlag } from './shared'
 
 export interface PurgeResult {
@@ -25,17 +25,19 @@ export interface PurgeResult {
 }
 
 /** Ids de los 3 bots QA (por slug). Vacío si el seed no corrió aún. */
-async function evalBotIds(prisma: PrismaClient): Promise<string[]> {
+async function evalBotIds(): Promise<string[]> {
   const slugs = Object.values(EVAL_BOT_SLUGS).map((b) => b.botSlug)
-  const bots = await prisma.botConfig.findMany({
-    where: { slug: { in: slugs } },
-    select: { id: true },
-  })
+  const bots = await unsafeGlobalQuery(
+    'EVAL-CLEANUP: ids de los bots QA por slug (dev-only, cross-org por naturaleza)',
+    (c) => c.botConfig.findMany({ where: { slug: { in: slugs } }, select: { id: true } }),
+  )
   return bots.map((b) => b.id)
 }
 
+// Dev-only: la purga opera por prefijo de sessionId a través de TODAS las orgs de
+// eval (namespaced con `evals-`). Es global por naturaleza — de ahí unsafeGlobalQuery
+// con prefijo EVAL-CLEANUP (filtrable en el grep de superficie global del runtime).
 export async function purgeEvalRows(
-  prisma: PrismaClient,
   opts: { dryRun?: boolean; resetQuota?: boolean } = {},
 ): Promise<PurgeResult> {
   const empty: PurgeResult = {
@@ -46,10 +48,14 @@ export async function purgeEvalRows(
     quotaRowsDeleted: 0,
   }
 
-  const targets = await prisma.conversation.findMany({
-    where: { sessionId: { startsWith: SESSION_PREFIX } },
-    select: { id: true, sessionId: true },
-  })
+  const targets = await unsafeGlobalQuery(
+    'EVAL-CLEANUP: conversaciones de eval por prefijo de sessionId (dev-only)',
+    (c) =>
+      c.conversation.findMany({
+        where: { sessionId: { startsWith: SESSION_PREFIX } },
+        select: { id: true, sessionId: true },
+      }),
+  )
 
   // Defensa: cada fila target DEBE arrancar con el prefijo (bug en el filtro
   // borraría datos reales).
@@ -62,40 +68,45 @@ export async function purgeEvalRows(
   }
   const conversationIds = targets.map((c) => c.id)
 
-  const [events, leads, messages] = await Promise.all([
-    conversationIds.length
-      ? prisma.chatbotEvent.count({ where: { conversationId: { in: conversationIds } } })
-      : Promise.resolve(0),
-    conversationIds.length
-      ? prisma.chatbotLead.count({ where: { conversationId: { in: conversationIds } } })
-      : Promise.resolve(0),
-    conversationIds.length
-      ? prisma.chatMessage.count({ where: { conversationId: { in: conversationIds } } })
-      : Promise.resolve(0),
-  ])
+  const [events, leads, messages] = conversationIds.length
+    ? await unsafeGlobalQuery('EVAL-CLEANUP: conteos de filas de eval a purgar (dev-only)', (c) =>
+        Promise.all([
+          c.chatbotEvent.count({ where: { conversationId: { in: conversationIds } } }),
+          c.chatbotLead.count({ where: { conversationId: { in: conversationIds } } }),
+          c.chatMessage.count({ where: { conversationId: { in: conversationIds } } }),
+        ]),
+      )
+    : [0, 0, 0]
 
   if (opts.dryRun) {
     return { ...empty, conversations: conversationIds.length, leads, events, messages }
   }
 
   if (conversationIds.length) {
-    await prisma.$transaction([
-      prisma.chatbotEvent.deleteMany({ where: { conversationId: { in: conversationIds } } }),
-      prisma.chatbotLead.deleteMany({ where: { conversationId: { in: conversationIds } } }),
-      prisma.conversation.deleteMany({
-        where: {
-          id: { in: conversationIds },
-          sessionId: { startsWith: SESSION_PREFIX }, // doble cinturón
-        },
-      }),
-    ])
+    await unsafeGlobalQuery(
+      'EVAL-CLEANUP: purga transaccional de eventos/leads/conversaciones de eval (dev-only)',
+      (client) =>
+        client.$transaction([
+          client.chatbotEvent.deleteMany({ where: { conversationId: { in: conversationIds } } }),
+          client.chatbotLead.deleteMany({ where: { conversationId: { in: conversationIds } } }),
+          client.conversation.deleteMany({
+            where: {
+              id: { in: conversationIds },
+              sessionId: { startsWith: SESSION_PREFIX }, // doble cinturón
+            },
+          }),
+        ]),
+    )
   }
 
   let quotaRowsDeleted = 0
   if (opts.resetQuota) {
-    const botIds = await evalBotIds(prisma)
+    const botIds = await evalBotIds()
     if (botIds.length) {
-      const del = await prisma.quotaUsage.deleteMany({ where: { botConfigId: { in: botIds } } })
+      const del = await unsafeGlobalQuery(
+        'EVAL-CLEANUP: reset de QuotaUsage de los bots QA (dev-only)',
+        (c) => c.quotaUsage.deleteMany({ where: { botConfigId: { in: botIds } } }),
+      )
       quotaRowsDeleted = del.count
     }
   }
@@ -120,21 +131,19 @@ async function main(): Promise<void> {
   const dryRun = hasFlag('--dry')
   const resetQuota = hasFlag('--reset-quota')
 
-  const { PrismaClient } = await import('@prisma/client')
-  const prisma = new PrismaClient()
   try {
     console.log(
       `🧹 Purga de evals (prefijo "${SESSION_PREFIX}")  ·  modo: ${dryRun ? 'DRY RUN' : 'EJECUTAR'}` +
         `${resetQuota ? '  ·  +reset QuotaUsage' : ''}`,
     )
-    const r = await purgeEvalRows(prisma, { dryRun, resetQuota })
+    const r = await purgeEvalRows({ dryRun, resetQuota })
     console.log(
       `  conversations=${r.conversations}  leads=${r.leads}  events=${r.events}  messages=${r.messages}` +
         (resetQuota ? `  quotaRowsDeleted=${r.quotaRowsDeleted}` : ''),
     )
     console.log(dryRun ? '  (dry run — no se borró nada)' : '✓ Purga completa.')
   } finally {
-    await prisma.$disconnect()
+    await unsafeGlobalQuery('EVAL-CLEANUP: cerrar la conexión del script de dev', (c) => c.$disconnect())
   }
 }
 

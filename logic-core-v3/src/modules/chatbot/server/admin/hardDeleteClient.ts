@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { Prisma } from '@prisma/client'
 import { revalidatePath, revalidateTag } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
@@ -111,7 +111,12 @@ export async function getClientDeletionSummary(
   const parsed = InputSchema.safeParse(input)
   if (!parsed.success) throw new Error('Datos inválidos.')
 
-  const summary = await gatherDeletionSummary(prisma, parsed.data.organizationId)
+  // TENANT-MGMT: resumen de borrado — cruza modelos org-owned y NO org-owned
+  // (OsLead sobrevive a la cascada); inherentemente de plataforma.
+  const summary = await unsafeGlobalQuery(
+    'TENANT-MGMT: resumen de hard-delete del cliente (cross-model, incluye OsLead preservado)',
+    (c) => gatherDeletionSummary(c, parsed.data.organizationId),
+  )
   if (!summary) throw new Error('Cliente no encontrado.')
 
   return { ok: true as const, summary }
@@ -123,15 +128,21 @@ export async function hardDeleteClient(input: z.infer<typeof InputSchema>) {
   if (!parsed.success) throw new Error('Datos inválidos.')
   const { organizationId } = parsed.data
 
-  const summary = await prisma.$transaction(
-    async (tx) => {
-      const s = await gatherDeletionSummary(tx, organizationId)
-      if (!s) throw new Error('Cliente no encontrado.')
-      // Cascada del schema borra todo lo propio. OsLead sobrevive (no es org-owned).
-      await tx.organization.delete({ where: { id: organizationId } })
-      return s
-    },
-    { timeout: 60000 },
+  // TENANT-MGMT: hard-delete irreversible del Organization; la cascada del schema
+  // borra todo lo propio del cliente. Operación destructiva de plataforma.
+  const summary = await unsafeGlobalQuery(
+    'TENANT-MGMT: hard-delete del cliente (cascade org→hijos, super-admin)',
+    (client) =>
+      client.$transaction(
+        async (tx) => {
+          const s = await gatherDeletionSummary(tx, organizationId)
+          if (!s) throw new Error('Cliente no encontrado.')
+          // Cascada del schema borra todo lo propio. OsLead sobrevive (no es org-owned).
+          await tx.organization.delete({ where: { id: organizationId } })
+          return s
+        },
+        { timeout: 60000 },
+      ),
   )
 
   // Detalle de lo borrado con labels legibles (lo expande el AuditLogClient).

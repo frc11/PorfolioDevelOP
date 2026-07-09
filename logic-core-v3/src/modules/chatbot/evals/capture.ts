@@ -5,7 +5,8 @@
  * Patrón `scripts/regression/run-baseline.ts` (`waitForAssistantMessage` +
  * `parseToolCalls`).
  */
-import type { PrismaClient, Prisma } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import type { LeadSnapshot, ToolCallRecord } from './types'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
@@ -55,20 +56,24 @@ const ASSISTANT_MESSAGE_POLL_TIMEOUT_MS = 10_000
  * apareció — el caller lo reporta como fallo del turno (sin reintentar).
  */
 export async function waitForAssistantMessage(
-  prisma: PrismaClient,
   sessionId: string,
   expectedAssistantCount: number,
   timeoutMs = ASSISTANT_MESSAGE_POLL_TIMEOUT_MS,
 ): Promise<{ content: string; toolCalls: ToolCallRecord[]; conversationId: string } | null> {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
-    const conv = await prisma.conversation.findUnique({
-      where: { sessionId },
-      include: {
-        // El rol persistido es UPPERCASE (`ChatMessageRole.ASSISTANT`).
-        messages: { where: { role: 'ASSISTANT' }, orderBy: { createdAt: 'asc' } },
-      },
-    })
+    // EVAL: lectura por sessionId (unique global) — harness dev-only.
+    const conv = await unsafeGlobalQuery(
+      'EVAL: poll del assistant message por sessionId (harness dev-only)',
+      (c) =>
+        c.conversation.findUnique({
+          where: { sessionId },
+          include: {
+            // El rol persistido es UPPERCASE (`ChatMessageRole.ASSISTANT`).
+            messages: { where: { role: 'ASSISTANT' }, orderBy: { createdAt: 'asc' } },
+          },
+        }),
+    )
     if (conv && conv.messages.length >= expectedAssistantCount) {
       const msg = conv.messages[expectedAssistantCount - 1]
       return {
@@ -84,13 +89,12 @@ export async function waitForAssistantMessage(
 
 /** Snapshot final: conversationId + lead capturado (si lo hubo). */
 export async function readConversationSnapshot(
-  prisma: PrismaClient,
   sessionId: string,
 ): Promise<{ conversationId: string | null; lead: LeadSnapshot | null }> {
-  const conv = await prisma.conversation.findUnique({
-    where: { sessionId },
-    include: { lead: true },
-  })
+  const conv = await unsafeGlobalQuery(
+    'EVAL: snapshot final de la conversación por sessionId (harness dev-only)',
+    (c) => c.conversation.findUnique({ where: { sessionId }, include: { lead: true } }),
+  )
   if (!conv) return { conversationId: null, lead: null }
   const lead: LeadSnapshot | null = conv.lead
     ? {

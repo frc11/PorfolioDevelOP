@@ -19,12 +19,13 @@
  *
  * Errores en el envío NO bloquean el flujo del bot (best-effort log).
  */
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { sendAgencyAlert } from '@/lib/alerts'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import { chatbotError } from '../logging'
 
 export interface TriggerUpsellAlertInput {
+  organizationId: string
   botConfigId: string
   organizationName: string
   planKey: string
@@ -45,20 +46,16 @@ export interface TriggerUpsellAlertInput {
 export async function triggerUpsellAlertIfFirst(
   input: TriggerUpsellAlertInput,
 ): Promise<boolean> {
-  // UPDATE conditional atómico: setea degradedAt solo si era null.
-  // Postgres serializa por fila durante el UPDATE — concurrent calls no
-  // disparan doble alerta.
-  const affected = await prisma.$executeRaw`
-    UPDATE "chatbot_quota_usage"
-    SET "degradedAt" = NOW(),
-        "updatedAt" = NOW()
-    WHERE "botConfigId" = ${input.botConfigId}
-      AND "year" = ${input.year}
-      AND "month" = ${input.month}
-      AND "degradedAt" IS NULL
-  `
+  // Marca degradedAt atómicamente solo si era null (row-lock de Postgres →
+  // concurrent calls no disparan doble alerta). El guard de org va embebido en
+  // el SQL del accessor scoped. true solo la primera vez del período.
+  const marked = await forOrg(input.organizationId).quotaUsage.markDegradedIfFirst({
+    botConfigId: input.botConfigId,
+    year: input.year,
+    month: input.month,
+  })
 
-  if (affected !== 1) return false
+  if (!marked) return false
 
   const periodLabel = `${input.year}-${String(input.month).padStart(2, '0')}`
   const detail =

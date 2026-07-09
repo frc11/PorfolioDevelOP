@@ -36,14 +36,14 @@ export async function POST(req: Request) {
   for (const bot of bots) {
     try {
       // Skipear si ya tiene mucho PENDING acumulado
-      const pendingCounts = await getInsightsCountForBot(bot.id)
+      const pendingCounts = await getInsightsCountForBot(bot.organization.id, bot.id)
       const pendingCount = pendingCounts.PENDING ?? 0
       if (pendingCount >= 5) {
         results.skipped_pending_overload++
         continue
       }
 
-      const result = await generateInsightsForBot(bot.id)
+      const result = await generateInsightsForBot(bot.organization.id, bot.id)
       results.processed++
 
       if (result && 'insufficient' in result && result.insufficient) {
@@ -77,6 +77,7 @@ export async function POST(req: Request) {
     } catch (err) {
       console.error(`[cron] Failed for bot ${bot.id}`, err)
       await logChatbotEvent({
+        organizationId: bot.organization.id,
         botConfigId: bot.id,
         type: 'cron.generate_insights_failed',
         level: 'error',

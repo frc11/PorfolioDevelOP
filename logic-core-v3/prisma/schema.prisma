@@ -442,6 +442,10 @@ model Organization {
   referralCode       ReferralCode?
   referralsMade      Referral[]           @relation("ReferralsMade")
   referralsReceived  Referral[]           @relation("ReferralsReceived")
+  wabaChannels       WabaChannel[]
+  contactIdentities  ContactIdentity[]
+  motorConversations MotorConversation[]
+  motorMessages      MotorMessage[]
 }
 
 // Histórico semanal del executive brief. Aditivo al cache vigente en Organization
@@ -1845,4 +1849,161 @@ model Referral {
   @@index([referredOrgId])
   @@index([status])
   @@index([referredEmail])
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Motor WhatsApp (B0) — schema RLS-ready. Bitácora: docs/motor-whatsapp/bitacora.md
+//
+// Reglas transversales del bloque:
+//   1. organizationId NOT NULL en las CUATRO tablas (aunque sea derivable por
+//      FK) y siempre cubierto por un índice cuya PRIMERA columna es
+//      organizationId — condición para políticas RLS futuras.
+//   2. Ninguna FK cruza organizaciones: las FKs internas del motor son
+//      COMPUESTAS (organizationId, id), así la DB rechaza una referencia
+//      cross-org aunque el código se saltee el helper. El aislamiento no
+//      depende solo de la convención.
+//   3. Toda query de app sobre estos modelos pasa por src/lib/isolation/
+//      (forOrg / unsafeGlobalQuery) — prisma directo solo dentro del helper.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Canal por el que llega una identidad de contacto. Solo WHATSAPP por ahora;
+// el enum existe para que ContactIdentity no asuma el canal (multi-canal futuro).
+enum MotorChannelType {
+  WHATSAPP
+}
+
+enum WabaChannelStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+}
+
+enum MotorConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum MotorMessageDirection {
+  IN
+  OUT
+}
+
+// Ciclo de vida de un mensaje: RECEIVED es el estado terminal de los IN; el
+// resto es el pipeline de los OUT (PENDING → SENT → DELIVERED → READ, o
+// FAILED). Sin default: quien escribe siempre conoce dirección y estado inicial.
+enum MotorMessageStatus {
+  PENDING
+  SENT
+  DELIVERED
+  READ
+  FAILED
+  RECEIVED
+}
+
+// Canal de WhatsApp Business de una organización vía BSP (360dialog).
+// phoneNumberId único POR ORG (compuesto, no global) — regla del bloque: nada
+// del motor es único global salvo la idempotencia del provider (MotorMessage).
+model WabaChannel {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Identidad del canal en el BSP.
+  phoneNumberId      String
+  wabaId             String
+  displayPhoneNumber String
+  status             WabaChannelStatus @default(ACTIVE)
+  provider           String            @default("D360")
+
+  conversations MotorConversation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, phoneNumberId])
+  // Target de las FKs compuestas org-safe (regla transversal 2).
+  @@unique([organizationId, id])
+  @@map("motor_waba_channel")
+}
+
+// Identidad BSUID-first de un contacto: externalId es el BSUID cuando exista;
+// hasta la migración de Meta puede contener el waId. waId queda como dato de
+// transición y reconciledAt marca cuándo se pasó de waId a BSUID.
+// El unique es COMPUESTO (org, canal, externalId) — NUNCA global sobre
+// externalId: la misma identidad externa puede existir en dos orgs sin colisión.
+model ContactIdentity {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  channelType  MotorChannelType
+  externalId   String
+  waId         String?
+  reconciledAt DateTime?
+
+  conversations MotorConversation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, channelType, externalId])
+  @@unique([organizationId, id])
+  @@map("motor_contact_identity")
+}
+
+// Conversación del motor. lastInboundAt es la base del cálculo de la ventana
+// de 24h (null = sin inbound todavía, ej. conversación iniciada por template).
+// La ventana NO se persiste: se deriva de lastInboundAt al momento de enviar.
+// Las FKs a identidad y canal son compuestas: una conversación no puede
+// apuntar a una identidad o canal de otra organización.
+model MotorConversation {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  contactIdentityId String
+  contactIdentity   ContactIdentity @relation(fields: [organizationId, contactIdentityId], references: [organizationId, id], onDelete: Cascade)
+
+  wabaChannelId String
+  wabaChannel   WabaChannel @relation(fields: [organizationId, wabaChannelId], references: [organizationId, id], onDelete: Cascade)
+
+  status        MotorConversationStatus @default(OPEN)
+  lastInboundAt DateTime?
+
+  messages MotorMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, id])
+  @@index([organizationId, contactIdentityId])
+  @@index([organizationId, wabaChannelId])
+  @@map("motor_conversation")
+}
+
+// Mensaje del motor. providerMessageId (wamid) es el ÚNICO unique global del
+// bloque: idempotencia contra retries del BSP (nullable: los OUT no lo tienen
+// hasta que el BSP responde). organizationId denormalizado + índices org-first:
+// los reads calientes y las políticas RLS futuras filtran por org sin joins.
+model MotorMessage {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  conversationId String
+  conversation   MotorConversation @relation(fields: [organizationId, conversationId], references: [organizationId, id], onDelete: Cascade)
+
+  direction         MotorMessageDirection
+  body              String                @db.Text
+  messageType       String
+  providerMessageId String?               @unique
+  status            MotorMessageStatus
+  error             String?               @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, conversationId, createdAt])
+  @@map("motor_message")
 }

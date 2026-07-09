@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { logger } from '@/lib/logger'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
@@ -35,20 +35,26 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
   const { leadId, trigger = 'auto' } = input
 
   try {
-    // 1. Leer lead + org. Esta es la única fuente de verdad para tenant.
-    const lead = await prisma.chatbotLead.findUnique({
-      where: { id: leadId },
-      include: {
-        botConfig: {
-          select: {
-            verticalPack: true, // EV.5 — para payload v2
-            organization: {
-              select: { id: true, slug: true },
+    // 1. Leer lead + org. TENANT-RESOLUTION: el leadId (system-generated en
+    //    captureLead) es la fuente de verdad del tenant — se resuelve la org
+    //    DESDE el lead, jamás de fuera. A partir de acá todo va scoped a esa org.
+    const lead = await unsafeGlobalQuery(
+      'TENANT-RESOLUTION: leadId → org para el sync a CRM (la org se deriva del lead, no del caller)',
+      (c) =>
+        c.chatbotLead.findUnique({
+          where: { id: leadId },
+          include: {
+            botConfig: {
+              select: {
+                verticalPack: true, // EV.5 — para payload v2
+                organization: {
+                  select: { id: true, slug: true },
+                },
+              },
             },
           },
-        },
-      },
-    })
+        }),
+    )
 
     if (!lead || !lead.botConfig?.organization) {
       logger.warn('[crm.sync] lead or org not found, skipping', { leadId, trigger })
@@ -56,6 +62,7 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
     }
 
     const org = lead.botConfig.organization
+    const scope = forOrg(org.id)
 
     // 2. Plan gate (defensa en profundidad — la UI ya gatekeepa).
     const plan = await getPlanForOrg(org.id)
@@ -65,9 +72,7 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
     }
 
     // 3. Integration activa?
-    const integration = await prisma.crmIntegration.findUnique({
-      where: { organizationId: org.id },
-    })
+    const integration = await scope.crmIntegration.findFirst()
     if (!integration || !integration.enabled) {
       // Skip silencioso: no configurada o apagada.
       return
@@ -75,14 +80,13 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
 
     // 4. Crear attempt PENDING. attemptNumber se actualiza al final con el
     //    número real de intentos que terminó haciendo postToN8nWithRetry.
-    const attempt = await prisma.crmSyncAttempt.create({
-      data: {
-        leadId,
-        integrationId: integration.id,
-        organizationId: org.id,
-        status: 'PENDING',
-        attemptNumber: 1,
-      },
+    //    organizationId lo fija el scope; los parentChecks verifican que lead e
+    //    integration sean de la org (nunca cross-org).
+    const attempt = await scope.crmSyncAttempt.create({
+      leadId,
+      integrationId: integration.id,
+      status: 'PENDING',
+      attemptNumber: 1,
     })
 
     // 5. POST con retries. Payload sanitizado (sin scoreSignals/internalNotes).
@@ -112,26 +116,21 @@ export async function syncLeadToCrm(input: SyncLeadToCrmInput): Promise<void> {
 
     const completedAt = new Date()
 
-    // 6. Persistir resultado: attempt + integration.lastSync/lastError en una tx.
-    await prisma.$transaction([
-      prisma.crmSyncAttempt.update({
-        where: { id: attempt.id },
-        data: {
-          status: result.ok ? 'SUCCESS' : 'FAILED',
-          attemptNumber: result.attemptsUsed,
-          httpStatus: result.httpStatus,
-          errorMessage: result.errorMessage,
-          completedAt,
-          durationMs: result.durationMs,
-        },
-      }),
-      prisma.crmIntegration.update({
-        where: { id: integration.id },
-        data: result.ok
-          ? { lastSyncAt: completedAt }
-          : { lastErrorAt: completedAt, lastErrorMessage: result.errorMessage },
-      }),
-    ])
+    // 6. Persistir resultado: attempt + integration.lastSync/lastError en una tx
+    //    scoped (ambos updates por id llevan guard atómico { id, organizationId }).
+    await scope.$transaction(async (tx) => {
+      await tx.crmSyncAttempt.update(attempt.id, {
+        status: result.ok ? 'SUCCESS' : 'FAILED',
+        attemptNumber: result.attemptsUsed,
+        httpStatus: result.httpStatus,
+        errorMessage: result.errorMessage,
+        completedAt,
+        durationMs: result.durationMs,
+      })
+      await tx.crmIntegration.update(integration.id, result.ok
+        ? { lastSyncAt: completedAt }
+        : { lastErrorAt: completedAt, lastErrorMessage: result.errorMessage })
+    })
 
     // 7. Log estructurado — NO PII. orgId/integrationId/leadId/status/httpStatus
     //    son metadata operativa, no datos del lead. payload no se loguea.

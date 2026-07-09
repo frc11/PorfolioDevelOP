@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { checkChatbotEnv } from '../config/envValidator'
 import { getLLMProvider } from '../llm'
 import { chatbotDebug, chatbotError } from '../logging'
@@ -28,7 +28,8 @@ export async function checkChatbotHealth(slug: string = 'develop'): Promise<Heal
   let dbCheck: HealthCheckResult['checks']['database'] = { ok: false }
   try {
     const start = Date.now()
-    await prisma.$queryRaw`SELECT 1`
+    // PLATFORM-HEALTH: liveness de la DB, sin eje de tenant.
+    await unsafeGlobalQuery('PLATFORM-HEALTH: liveness de la DB (SELECT 1), sin tenant', (c) => c.$queryRaw`SELECT 1`)
     dbCheck = { ok: true, latencyMs: Date.now() - start }
   } catch (error) {
     dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }
@@ -59,10 +60,16 @@ export async function checkChatbotHealth(slug: string = 'develop'): Promise<Heal
   // 4. Bot config
   let botCheck: HealthCheckResult['checks']['bot'] = { ok: false }
   try {
-    const bot = await prisma.botConfig.findUnique({
-      where: { slug },
-      select: { slug: true, botName: true, isActive: true },
-    })
+    // PLATFORM-HEALTH: lookup del bot por slug para el health check (default
+    // 'develop'). Diagnóstico de plataforma resuelto por clave pública, sin tenant.
+    const bot = await unsafeGlobalQuery(
+      'PLATFORM-HEALTH: lookup del bot por slug para el health check (default develOP)',
+      (c) =>
+        c.botConfig.findUnique({
+          where: { slug },
+          select: { slug: true, botName: true, isActive: true },
+        }),
+    )
     if (!bot) {
       botCheck = { ok: false, error: `Bot with slug "${slug}" not found` }
     } else if (!bot.isActive) {

@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 import { avatarImageUrlSchema } from './avatarImageUrlSchema'
@@ -32,7 +32,11 @@ async function findUniqueSlug(base: string): Promise<string> {
   const safeBase = base || 'cliente'
   let candidate = safeBase
   let n = 0
-  while (await prisma.organization.findUnique({ where: { slug: candidate } })) {
+  while (
+    await unsafeGlobalQuery('SLUG-UNIQUENESS: disponibilidad del slug de org (global @unique)', (c) =>
+      c.organization.findUnique({ where: { slug: candidate } }),
+    )
+  ) {
     n++
     candidate = `${safeBase}-${n}`
     if (n > 100) throw new Error('Cannot find unique slug')
@@ -53,16 +57,20 @@ export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInp
 
   const uniqueSlug = await findUniqueSlug(slugify(parsed.orgName))
 
-  const existingUser = await prisma.user.findUnique({
-    where: { email: parsed.userEmail },
-    select: { id: true },
-  })
+  const existingUser = await unsafeGlobalQuery(
+    'TENANT-MGMT: unicidad global de email de usuario al alta de cliente (User.email @unique)',
+    (c) => c.user.findUnique({ where: { email: parsed.userEmail }, select: { id: true } }),
+  )
   if (existingUser) throw new Error(`El email ${parsed.userEmail} ya está registrado en el sistema.`)
 
   const tempPassword = generateTempPassword()
   const passwordHash = await bcrypt.hash(tempPassword, 10)
 
-  const created = await prisma.$transaction(async (tx) => {
+  // TENANT-MGMT: provisioning de un tenant NUEVO (Organization + User + OrgMember).
+  // No hay org que scopear todavía — es la creación del tenant en sí.
+  const created = await unsafeGlobalQuery(
+    'TENANT-MGMT: alta de tenant nuevo (org + user admin + membership), sin org previa que scopear',
+    (client) => client.$transaction(async (tx) => {
     const org = await tx.organization.create({
       data: {
         companyName: parsed.orgName,
@@ -97,7 +105,8 @@ export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInp
     })
 
     return { org, clientUser }
-  }, { timeout: 30000 })
+    }, { timeout: 30000 }),
+  )
 
   await logAdminAction({
     userId: admin.id ?? 'unknown',

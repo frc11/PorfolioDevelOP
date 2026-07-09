@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { logAdminAction } from '@/lib/audit-log'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { syncLeadToCrm } from '@/modules/chatbot/server/crm'
@@ -50,11 +50,8 @@ export async function retryCrmSync(input: RetryCrmSyncInput) {
     }
   }
 
-  const lead = await prisma.chatbotLead.findFirst({
-    where: {
-      id: leadId,
-      botConfig: { organizationId },
-    },
+  const lead = await forOrg(organizationId).chatbotLead.findFirst({
+    where: { id: leadId },
     select: { id: true },
   })
 

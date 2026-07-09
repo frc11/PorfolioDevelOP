@@ -1,9 +1,10 @@
 import type { BotAlertSeverity, BotAlertType, Prisma } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { sendTransactionalEmail } from '@/lib/integrations/brevo'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 
 interface DetectedIssue {
+  organizationId: string
   botConfigId: string
   type: BotAlertType
   severity: BotAlertSeverity
@@ -23,26 +24,33 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
   const oneDayAgo = new Date(now.getTime() - ONE_DAY_MS)
   const sevenDaysAgo = new Date(now.getTime() - SEVEN_DAYS_MS)
 
-  const bots = await prisma.botConfig.findMany({
-    include: {
-      organization: { select: { id: true, companyName: true, slug: true } },
-    },
-  })
+  // PLATFORM-CRON: escanea TODOS los bots de todas las orgs (detector global).
+  const bots = await unsafeGlobalQuery(
+    'PLATFORM-CRON: todos los bots de todas las orgs para el detector de incidencias',
+    (c) =>
+      c.botConfig.findMany({
+        include: {
+          organization: { select: { id: true, companyName: true, slug: true } },
+        },
+      }),
+  )
 
   for (const bot of bots) {
     const orgName = bot.organization.companyName
     const orgSlug = bot.organization.slug
+    const organizationId = bot.organization.id
+    // Todas las lecturas por-bot van scopeadas a la org del bot.
+    const scope = forOrg(organizationId)
 
     if (!bot.isActive) {
-      const trafficWhileInactive = await prisma.conversation.count({
-        where: {
-          botConfigId: bot.id,
-          startedAt: { gte: oneDayAgo },
-        },
+      const trafficWhileInactive = await scope.conversation.count({
+        botConfigId: bot.id,
+        startedAt: { gte: oneDayAgo },
       })
 
       if (trafficWhileInactive > 0) {
         issues.push({
+          organizationId,
           botConfigId: bot.id,
           type: 'BOT_INACTIVE_WITH_TRAFFIC',
           severity: 'HIGH',
@@ -55,18 +63,11 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       continue
     }
 
-    const usage = await prisma.quotaUsage.findUnique({
-      where: {
-        botConfigId_year_month: {
-          botConfigId: bot.id,
-          year: now.getFullYear(),
-          month: now.getMonth() + 1,
-        },
-      },
-    })
+    const usage = await scope.quotaUsage.findByPeriod(bot.id, now.getFullYear(), now.getMonth() + 1)
 
     if (usage && usage.conversationsCount >= bot.monthlyQuota) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'QUOTA_EXHAUSTED',
         severity: 'WARNING',
@@ -81,7 +82,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       })
     }
 
-    const consecutiveProviderErrors = await prisma.chatbotEvent.findMany({
+    const consecutiveProviderErrors = await scope.chatbotEvent.findMany({
       where: {
         botConfigId: bot.id,
         level: 'ERROR',
@@ -98,6 +99,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
 
     if (consecutiveProviderErrors.length >= 3) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'LLM_PROVIDER_ERROR',
         severity: 'CRITICAL',
@@ -112,7 +114,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       })
     }
 
-    const completedEvents = await prisma.chatbotEvent.findMany({
+    const completedEvents = await scope.chatbotEvent.findMany({
       where: {
         botConfigId: bot.id,
         type: 'chat.message_completed',
@@ -129,6 +131,7 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
 
     if (p95 !== null && p95 > 10_000) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'LATENCY_DEGRADED',
         severity: 'HIGH',
@@ -138,16 +141,15 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       })
     }
 
-    const insightsFailures = await prisma.chatbotEvent.count({
-      where: {
-        botConfigId: bot.id,
-        type: 'cron.generate_insights_failed',
-        createdAt: { gte: oneDayAgo },
-      },
+    const insightsFailures = await scope.chatbotEvent.count({
+      botConfigId: bot.id,
+      type: 'cron.generate_insights_failed',
+      createdAt: { gte: oneDayAgo },
     })
 
     if (insightsFailures > 0) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'CRON_INSIGHTS_FAILED',
         severity: 'WARNING',
@@ -157,16 +159,15 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       })
     }
 
-    const activityErrors = await prisma.chatbotEvent.count({
-      where: {
-        botConfigId: bot.id,
-        level: 'ERROR',
-        createdAt: { gte: oneHourAgo },
-      },
+    const activityErrors = await scope.chatbotEvent.count({
+      botConfigId: bot.id,
+      level: 'ERROR',
+      createdAt: { gte: oneHourAgo },
     })
 
     if (activityErrors >= 5) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'ACTIVITY_ERRORS_SPIKE',
         severity: 'HIGH',
@@ -176,15 +177,14 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
       })
     }
 
-    const recentActivity = await prisma.conversation.count({
-      where: {
-        botConfigId: bot.id,
-        startedAt: { gte: sevenDaysAgo },
-      },
+    const recentActivity = await scope.conversation.count({
+      botConfigId: bot.id,
+      startedAt: { gte: sevenDaysAgo },
     })
 
     if (recentActivity === 0) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'CLIENT_NO_ACTIVITY',
         severity: 'INFO',
@@ -195,16 +195,15 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
     }
 
     // DOMAIN_NOT_AUTHORIZED_SPIKE: 10+ bloqueos de origin en las últimas 24h
-    const domainBlockCount = await prisma.chatbotEvent.count({
-      where: {
-        botConfigId: bot.id,
-        type: 'SECURITY.BLOCKED_ORIGIN',
-        createdAt: { gte: oneDayAgo },
-      },
+    const domainBlockCount = await scope.chatbotEvent.count({
+      botConfigId: bot.id,
+      type: 'SECURITY.BLOCKED_ORIGIN',
+      createdAt: { gte: oneDayAgo },
     })
 
     if (domainBlockCount >= 10) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'DOMAIN_NOT_AUTHORIZED_SPIKE' as BotAlertType,
         severity: 'INFO',
@@ -215,16 +214,15 @@ export async function detectBotIssues(): Promise<DetectedIssue[]> {
     }
 
     // LEAD_CAPTURE_FAILURE: 3+ errores de capture_lead en la última hora
-    const leadCaptureErrors = await prisma.chatbotEvent.count({
-      where: {
-        botConfigId: bot.id,
-        type: 'capture_lead.error',
-        createdAt: { gte: oneHourAgo },
-      },
+    const leadCaptureErrors = await scope.chatbotEvent.count({
+      botConfigId: bot.id,
+      type: 'capture_lead.error',
+      createdAt: { gte: oneHourAgo },
     })
 
     if (leadCaptureErrors >= 3) {
       issues.push({
+        organizationId,
         botConfigId: bot.id,
         type: 'LEAD_CAPTURE_FAILURE' as BotAlertType,
         severity: 'HIGH',
@@ -242,7 +240,10 @@ export async function persistAndNotifyIssues(issues: DetectedIssue[]): Promise<n
   let created = 0
 
   for (const issue of issues) {
-    const existing = await prisma.botAlert.findFirst({
+    // Escritura de alertas scopeada a la org del bot (issue.organizationId lo
+    // fija detectBotIssues desde bot.organization.id).
+    const scope = forOrg(issue.organizationId)
+    const existing = await scope.botAlert.findFirst({
       where: {
         botConfigId: issue.botConfigId,
         type: issue.type,
@@ -253,24 +254,19 @@ export async function persistAndNotifyIssues(issues: DetectedIssue[]): Promise<n
 
     if (existing) continue
 
-    const alert = await prisma.botAlert.create({
-      data: {
-        botConfigId: issue.botConfigId,
-        type: issue.type,
-        severity: issue.severity,
-        title: issue.title,
-        description: issue.description,
-        metadata: issue.metadata as Prisma.InputJsonObject,
-      },
+    const alert = await scope.botAlert.create({
+      botConfigId: issue.botConfigId,
+      type: issue.type,
+      severity: issue.severity,
+      title: issue.title,
+      description: issue.description,
+      metadata: issue.metadata as Prisma.InputJsonObject,
     })
     created++
 
     const emailResult = await sendAlertEmail(issue)
     if (emailResult.sent) {
-      await prisma.botAlert.update({
-        where: { id: alert.id },
-        data: { emailSent: true, emailSentAt: new Date() },
-      })
+      await scope.botAlert.update(alert.id, { emailSent: true, emailSentAt: new Date() })
     }
 
     if (issue.severity === 'CRITICAL' || issue.severity === 'HIGH') {

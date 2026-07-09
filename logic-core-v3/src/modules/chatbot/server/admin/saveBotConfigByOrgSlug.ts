@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { revalidatePath } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
@@ -76,10 +76,11 @@ export async function saveBotConfigByOrgSlug(
 
   const { orgSlug, allowedDomains, ...data } = parsed.data
 
-  const org = await prisma.organization.findUnique({
-    where: { slug: orgSlug },
-    include: { botConfig: true },
-  })
+  // TENANT-RESOLUTION: org+bot por slug (super-admin edita por slug).
+  const org = await unsafeGlobalQuery(
+    'TENANT-RESOLUTION: org+bot por slug para editar config (super-admin)',
+    (c) => c.organization.findUnique({ where: { slug: orgSlug }, include: { botConfig: true } }),
+  )
 
   if (!org?.botConfig) {
     return { success: false, error: 'Bot not found for this org' }
@@ -88,25 +89,32 @@ export async function saveBotConfigByOrgSlug(
   try {
     const { leadNotificationEmail, leadNotificationMode, ...botData } = data
     const before = org.botConfig
-    const [after] = await prisma.$transaction([
-      prisma.botConfig.update({
-        where: { id: org.botConfig.id },
-        data: {
-          ...botData,
-          allowedDomains,
-          quickReplies: botData.quickReplies as unknown as object,
-          proactivePrompts: botData.proactivePrompts as unknown as object,
-          routeColorMap: botData.routeColorMap as unknown as object,
-        },
-      }),
-      prisma.organization.update({
-        where: { id: org.id },
-        data: {
-          leadNotificationEmail,
-          leadNotificationMode,
-        },
-      }),
-    ])
+    const botConfigId = org.botConfig.id
+    // ADMIN cross-model tx: BotConfig (cubierto) + Organization (NO cubierto).
+    // Super-admin; atómico y greppable vía este reason.
+    const [after] = await unsafeGlobalQuery(
+      'ADMIN: tx de update de config del bot + notif settings de la org (super-admin, cross-model BotConfig+Organization)',
+      (client) =>
+        client.$transaction([
+          client.botConfig.update({
+            where: { id: botConfigId },
+            data: {
+              ...botData,
+              allowedDomains,
+              quickReplies: botData.quickReplies as unknown as object,
+              proactivePrompts: botData.proactivePrompts as unknown as object,
+              routeColorMap: botData.routeColorMap as unknown as object,
+            },
+          }),
+          client.organization.update({
+            where: { id: org.id },
+            data: {
+              leadNotificationEmail,
+              leadNotificationMode,
+            },
+          }),
+        ]),
+    )
 
     invalidateBotCache(org.botConfig.slug)
 

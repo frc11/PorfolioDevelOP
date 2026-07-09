@@ -15,3 +15,9 @@ export {
 } from './types'
 export { getLLMProvider, resetProviderCache } from './factory'
 export { normalizeLlmProvider } from './providerMapper'
+export {
+  resolveEffectiveModel,
+  FALLBACK_PROVIDER,
+  FALLBACK_MODEL_ID,
+} from './resolveEffectiveModel'
+export type { EffectiveModel } from './resolveEffectiveModel'

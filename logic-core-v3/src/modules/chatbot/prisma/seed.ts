@@ -11,10 +11,8 @@
  * website (MVP scope).
  */
 
-import { PrismaClient } from '@prisma/client'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { DEVELOP_PROACTIVE_PROMPTS } from './developProactivePrompts'
-
-const prisma = new PrismaClient()
 
 // ────────────────────────────────────────────────────────────────
 // DEVELOP BOT — content
@@ -256,18 +254,23 @@ async function seed() {
 
   // 1. Asegurar que existe la organización de develOP
   // Si no existe, la crea con valores mínimos. Si existe, la deja como está.
-  const developOrg = await prisma.organization.upsert({
-    where: { slug: 'develop' },
-    update: {},
-    create: {
-      companyName: 'develOP',
-      slug: 'develop',
-    },
-  })
+  // SEED: alta del bot público develOP (org + bot + KB) — script de dev, sin
+  // sesión de tenant; provisioning por el escape explícito con prefijo SEED.
+  const developOrg = await unsafeGlobalQuery('SEED: upsert de la org develOP (script de dev)', (c) =>
+    c.organization.upsert({
+      where: { slug: 'develop' },
+      update: {},
+      create: {
+        companyName: 'develOP',
+        slug: 'develop',
+      },
+    }),
+  )
   console.log(`✓ Organization develOP: ${developOrg.id}`)
 
   // 2. Upsert BotConfig
-  const botConfig = await prisma.botConfig.upsert({
+  const botConfig = await unsafeGlobalQuery('SEED: upsert del bot develOP (script de dev)', (c) =>
+    c.botConfig.upsert({
     where: { organizationId: developOrg.id },
     update: {
       // Update mantiene el id pero refresca todo el contenido
@@ -331,11 +334,13 @@ async function seed() {
       monthlyQuota: DEVELOP_BOT_CONFIG.monthlyQuota,
       industry: DEVELOP_BOT_CONFIG.industry,
     },
-  })
+    }),
+  )
   console.log(`✓ BotConfig "develop": ${botConfig.id}`)
 
   // 3. Upsert KnowledgeBase
-  const kb = await prisma.knowledgeBase.upsert({
+  const kb = await unsafeGlobalQuery('SEED: upsert de la KB del bot develOP (script de dev)', (c) =>
+    c.knowledgeBase.upsert({
     where: { botConfigId: botConfig.id },
     update: {
       businessInfo: DEVELOP_KB.businessInfo,
@@ -356,7 +361,8 @@ async function seed() {
       toneExamples: DEVELOP_KB.toneExamples,
       forbiddenStatements: DEVELOP_KB.forbiddenStatements,
     },
-  })
+    }),
+  )
   console.log(`✓ KnowledgeBase: ${kb.id}`)
 
   console.log('\n🌱 Seeding completed successfully.\n')
@@ -368,5 +374,5 @@ seed()
     process.exit(1)
   })
   .finally(async () => {
-    await prisma.$disconnect()
+    await unsafeGlobalQuery('SEED: cerrar la conexión del script de dev', (c) => c.$disconnect())
   })

@@ -14,6 +14,7 @@
  * Precondición: el Plan BUSINESS debe existir (lo siembra
  * `npx tsx prisma/seeds/sync-plans.ts`). Si falta, aborta con instrucción.
  */
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { EVAL_BOT_SLUGS, TARGET_PLAN_KEY, guardDevHost, hasFlag, type EvalPackKey } from './shared'
 
 interface KbSeed {
@@ -128,86 +129,91 @@ async function main(): Promise<void> {
   loadEnv({ path: '.env' })
   guardDevHost()
 
-  const { PrismaClient } = await import('@prisma/client')
-  const prisma = new PrismaClient()
-
   try {
-    if (hasFlag('--teardown')) {
-      const orgSlugs = Object.values(EVAL_BOT_SLUGS).map((b) => b.orgSlug)
-      const del = await prisma.organization.deleteMany({ where: { slug: { in: orgSlugs } } })
-      console.log(`🧹 Teardown: ${del.count} org(s) QA borradas (cascade: bots, subs, convs, leads, quota).`)
-      return
-    }
+    // SEED-EVAL: provisioning de las orgs/bots QA (dev-only). Toca Organization/
+    // Plan/Subscription (no cubiertos por el helper) además de BotConfig/KB, así que
+    // todo el bloque va por el escape explícito con prefijo SEED-EVAL.
+    await unsafeGlobalQuery(
+      'SEED-EVAL: alta/teardown de las orgs y bots QA del harness (dev-only)',
+      async (c) => {
+        if (hasFlag('--teardown')) {
+          const orgSlugs = Object.values(EVAL_BOT_SLUGS).map((b) => b.orgSlug)
+          const del = await c.organization.deleteMany({ where: { slug: { in: orgSlugs } } })
+          console.log(`🧹 Teardown: ${del.count} org(s) QA borradas (cascade: bots, subs, convs, leads, quota).`)
+          return
+        }
 
-    const businessPlan = await prisma.plan.findUnique({ where: { key: TARGET_PLAN_KEY } })
-    if (!businessPlan) {
-      console.error(
-        `[evals:seed] ABORT: Plan ${TARGET_PLAN_KEY} no existe. Corré \`npx tsx prisma/seeds/sync-plans.ts\` primero.`,
-      )
-      process.exit(1)
-    }
+        const businessPlan = await c.plan.findUnique({ where: { key: TARGET_PLAN_KEY } })
+        if (!businessPlan) {
+          console.error(
+            `[evals:seed] ABORT: Plan ${TARGET_PLAN_KEY} no existe. Corré \`npx tsx prisma/seeds/sync-plans.ts\` primero.`,
+          )
+          process.exit(1)
+        }
 
-    for (const seed of SEEDS) {
-      const { orgSlug, botSlug } = EVAL_BOT_SLUGS[seed.pack]
+        for (const seed of SEEDS) {
+          const { orgSlug, botSlug } = EVAL_BOT_SLUGS[seed.pack]
 
-      const org = await prisma.organization.upsert({
-        where: { slug: orgSlug },
-        update: { companyName: seed.orgName },
-        create: { slug: orgSlug, companyName: seed.orgName },
-        select: { id: true },
-      })
+          const org = await c.organization.upsert({
+            where: { slug: orgSlug },
+            update: { companyName: seed.orgName },
+            create: { slug: orgSlug, companyName: seed.orgName },
+            select: { id: true },
+          })
 
-      await prisma.subscription.upsert({
-        where: { organizationId: org.id },
-        update: { planId: businessPlan.id, status: 'ACTIVE', price: Number(businessPlan.monthlyPrice), currency: 'USD' },
-        create: {
-          organizationId: org.id,
-          planId: businessPlan.id,
-          status: 'ACTIVE',
-          price: Number(businessPlan.monthlyPrice),
-          currency: 'USD',
-        },
-      })
+          await c.subscription.upsert({
+            where: { organizationId: org.id },
+            update: { planId: businessPlan.id, status: 'ACTIVE', price: Number(businessPlan.monthlyPrice), currency: 'USD' },
+            create: {
+              organizationId: org.id,
+              planId: businessPlan.id,
+              status: 'ACTIVE',
+              price: Number(businessPlan.monthlyPrice),
+              currency: 'USD',
+            },
+          })
 
-      const bot = await prisma.botConfig.upsert({
-        where: { organizationId: org.id },
-        update: {
-          slug: botSlug,
-          verticalPack: seed.pack,
-          isActive: true,
-          whatsappNumber: seed.whatsappNumber,
-          whatsappMessage: seed.whatsappMessage,
-          allowedDomains: seed.allowedDomains,
-        },
-        create: {
-          organizationId: org.id,
-          slug: botSlug,
-          botName: seed.botName,
-          isActive: true,
-          tone: 'informal_rioplatense',
-          welcomeMessage: seed.welcomeMessage,
-          industry: seed.industry,
-          allowedDomains: seed.allowedDomains,
-          whatsappNumber: seed.whatsappNumber,
-          whatsappMessage: seed.whatsappMessage,
-          monthlyQuota: 100_000,
-          verticalPack: seed.pack,
-        },
-        select: { id: true },
-      })
+          const bot = await c.botConfig.upsert({
+            where: { organizationId: org.id },
+            update: {
+              slug: botSlug,
+              verticalPack: seed.pack,
+              isActive: true,
+              whatsappNumber: seed.whatsappNumber,
+              whatsappMessage: seed.whatsappMessage,
+              allowedDomains: seed.allowedDomains,
+            },
+            create: {
+              organizationId: org.id,
+              slug: botSlug,
+              botName: seed.botName,
+              isActive: true,
+              tone: 'informal_rioplatense',
+              welcomeMessage: seed.welcomeMessage,
+              industry: seed.industry,
+              allowedDomains: seed.allowedDomains,
+              whatsappNumber: seed.whatsappNumber,
+              whatsappMessage: seed.whatsappMessage,
+              monthlyQuota: 100_000,
+              verticalPack: seed.pack,
+            },
+            select: { id: true },
+          })
 
-      await prisma.knowledgeBase.upsert({
-        where: { botConfigId: bot.id },
-        update: seed.kb,
-        create: { botConfigId: bot.id, ...seed.kb },
-      })
+          await c.knowledgeBase.upsert({
+            where: { botConfigId: bot.id },
+            update: seed.kb,
+            create: { botConfigId: bot.id, ...seed.kb },
+          })
 
-      console.log(`✓ ${seed.pack.padEnd(7)} → slug ${botSlug} (org ${orgSlug}, plan ${businessPlan.key}, isActive:true)`)
-    }
+          console.log(`✓ ${seed.pack.padEnd(7)} → slug ${botSlug} (org ${orgSlug}, plan ${businessPlan.key}, isActive:true)`)
+        }
 
-    console.log(`\n✓ 3 bots QA listos. Levantá el dev con \`npm run dev:qa\` y corré \`npm run evals\`.`)
+        console.log(`\n✓ 3 bots QA listos. Levantá el dev con \`npm run dev:qa\` y corré \`npm run evals\`.`)
+      },
+    )
   } finally {
-    await prisma.$disconnect()
+    await unsafeGlobalQuery('SEED-EVAL: cerrar la conexión del script de dev', (c) => c.$disconnect())
   }
 }
 

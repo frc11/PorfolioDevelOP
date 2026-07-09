@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { logAdminAction } from '@/lib/audit-log'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { testN8nConnection } from '@/modules/chatbot/server/crm'
@@ -48,9 +48,7 @@ export async function testCrmConnection(input: TestCrmConnectionInput) {
     }
   }
 
-  const integration = await prisma.crmIntegration.findUnique({
-    where: { organizationId },
-  })
+  const integration = await forOrg(organizationId).crmIntegration.findFirst()
 
   if (!integration) {
     return {

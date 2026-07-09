@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { logChatbotEvent } from '../logging'
@@ -20,8 +20,11 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
 
   const parsed = UpdateLeadStatusSchema.parse(input)
 
-  // Confirmar que el lead pertenece a la org del usuario
-  const lead = await prisma.chatbotLead.findUnique({
+  const scope = forOrg(session.organization.id)
+
+  // El helper scoped ya garantiza pertenencia: un lead de otra org devuelve null.
+  // leadBelongsToOrg queda como defensa en profundidad (siempre true acá).
+  const lead = await scope.chatbotLead.findFirst({
     where: { id: parsed.leadId },
     include: { botConfig: true },
   })
@@ -36,14 +39,11 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
   // "deshacer" (volver a NEW) lo preserva. Ver lead-status-rules.ts.
   const sealFirstContact = shouldSealFirstContact(parsed.status, lead.firstContactedAt)
 
-  const updatedLead = await prisma.chatbotLead.update({
-    where: { id: parsed.leadId },
-    data: {
-      status: parsed.status,
-      internalNotes: parsed.notes ?? lead.internalNotes,
-      lastStatusChangeAt: new Date(),
-      ...(sealFirstContact ? { firstContactedAt: new Date() } : {}),
-    },
+  const updatedLead = await scope.chatbotLead.update(parsed.leadId, {
+    status: parsed.status,
+    internalNotes: parsed.notes ?? lead.internalNotes,
+    lastStatusChangeAt: new Date(),
+    ...(sealFirstContact ? { firstContactedAt: new Date() } : {}),
   })
 
   const { botConfig, ...leadBeforeForDiff } = lead
@@ -67,6 +67,7 @@ export async function updateLeadStatus(input: z.infer<typeof UpdateLeadStatusSch
   })
 
   await logChatbotEvent({
+    organizationId: session.organization.id,
     botConfigId: lead.botConfigId,
     type: 'lead.status_changed',
     level: 'info',

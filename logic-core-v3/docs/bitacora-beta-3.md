@@ -1194,3 +1194,19 @@ Sprint 7.3 / BLOQUE 7 / PROYECTO: **cerró verde**. Frentes: aislamiento [ok] ·
 Regresiones halladas: **ninguna** (0 reclamadas, 0 confirmadas; el crítico levantó 4 gaps de evidencia-por-proxy, todos cerrados — 2 en vivo, 1 por corrida, 1 corrección de doc). Corrida completa verde: tsc 0 · invariantes 16/16 · leados 22/22 · build ✅ · setter 39/39 (recorrido punta-a-punta + aislamiento cruzado en vivo + re-loop, corrida limpia) · migrate 80. Cierra además el pendiente de 7.2 (build + test:setter + a11y en browser).
 Pendientes post-proyecto: los 39 (b) del smoke-test 7.0, los TODOs de `herramientas.ts` (links de Franco), el vocabulario muerto del wizard en mensajes de error, las pantallas de Construcción bajo el fold en mobile, e higiene de tooling. Ninguno es regresión.
 Veredicto: **el rediseño cumple el brief.** Motor intacto, preservación intacta, experiencia del setter entregada.
+
+---
+
+## AUD-2 — Auditoría de cierre: ¿la herramienta cumple la visión? · 2026-07-07
+
+**Qué se hizo.** La auditoría espejo de AUD-1 (apertura): read-only estricto sobre TODA la superficie del setter post-corte (manual 16 pantallas + mr + estados, home/foco/novedades, cartera/archivo, alta/importación, métricas, escalamiento, rails), con 6 subagentes de lectura por lente + consolidación. Veredicto de cumplimiento §0–§11, bugs que el verde no atrapa, propuestas de profundización dentro de los guardarraíles, diseño propuesto de la fase PRE, y **el backlog único de continuidad** con fichas ejecutables para modelos más baratos. Nada se implementó (regla 1); dos únicas escrituras: el informe + este append.
+
+**Veredicto en una línea.** **El rediseño cerró el gap estructural — la visión se cumple en la arquitectura (4 CUMPLE · 7 PARCIAL · 0 NO); lo que traba la semana del setter ya no es la estructura sino tres cosas acotadas: las 4 herramientas sin link (decisión de Franco), el vocabulario muerto del wizard en el copy más visible, y datos viciados que hacen que el foco sirva leads muertos como trabajo.**
+
+**Informe (documento de continuidad del proyecto):** `docs/auditorias/AUDITORIA-CIERRE-2026-07.md` — cumplimiento sección por sección con evidencia, 26 hallazgos C-xx (2 sev-4 de comportamiento nuevos: `os-commercial.ts:68-76` no limpia `nextFollowUpAt` al agotarse la cadencia → lead muerto eterno en el foco; `posicionDe` no contempla status PERDIDO → el manual deriva vivo un negocio cerrado), 10 propuestas PR-x con checklist de guardarraíles saldado, diseño de PRE (4 pantallas, insumo Bloque 8), y el backlog único: **40 ítems = 3 P1 (con ficha ejecutable) · 10 P2 (ídem) · 17 P3 · 10 DECISIÓN-Franco**, con orden de ataque y dependencias.
+
+**Nota metodológica.** La vara (`docs/brief-vision-flujo-setter.md` v2.1) sigue sin existir en el repo — reconstruida desde AUD-1 + la instrucción + esta bitácora; confirmar con Franco dónde vive el archivo (pendiente que arrastran 7.0/7.3).
+
+**Queda para humano: todo.** Nada del backlog se ejecuta desde acá; es insumo de decisión de Franco. La decisión más urgente no es código: cargar las 4 URLs de `herramientas.ts` (§12.3) destraba la ejecutabilidad real de ~11 pantallas.
+
+**PROYECTO DE REDISEÑO: CERRADO CON AUDITORÍA ESPEJO.** AUD-1 (2026-07-02, midió el gap) → Bloques 2–7 (lo cerraron) → AUD-2 (2026-07-07, verificó el cierre y dejó marcado el camino).

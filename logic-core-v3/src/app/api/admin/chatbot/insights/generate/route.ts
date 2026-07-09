@@ -21,6 +21,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'Bot not found' }, { status: 404 })
   }
 
-  const result = await generateInsightsForBot(bot.id)
+  const result = await generateInsightsForBot(bot.organizationId, bot.id)
   return NextResponse.json(result)
 }

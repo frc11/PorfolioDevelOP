@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { revalidatePath } from 'next/cache'
 import { getClientChatbotSession } from '../admin/getClientSession'
 import { logChatbotEvent } from '../logging'
@@ -18,7 +18,11 @@ export async function actOnInsight(input: z.infer<typeof InsightActionSchema>) {
 
   const parsed = InsightActionSchema.parse(input)
 
-  const insight = await prisma.chatbotInsight.findUnique({
+  const scope = forOrg(session.organization.id)
+
+  // Scoped por org: un insight de otra org devuelve null (el chequeo de
+  // pertenencia queda enforced por el helper, no por código de aplicación).
+  const insight = await scope.chatbotInsight.findFirst({
     where: { id: parsed.insightId },
     include: { botConfig: true },
   })
@@ -30,16 +34,14 @@ export async function actOnInsight(input: z.infer<typeof InsightActionSchema>) {
   const newStatus = parsed.action === 'APPLY' ? 'APPLIED' : 'DISMISSED'
   const timestamp = new Date()
 
-  await prisma.chatbotInsight.update({
-    where: { id: parsed.insightId },
-    data: {
-      status: newStatus,
-      appliedAt: newStatus === 'APPLIED' ? timestamp : null,
-      dismissedAt: newStatus === 'DISMISSED' ? timestamp : null,
-    },
+  await scope.chatbotInsight.update(parsed.insightId, {
+    status: newStatus,
+    appliedAt: newStatus === 'APPLIED' ? timestamp : null,
+    dismissedAt: newStatus === 'DISMISSED' ? timestamp : null,
   })
 
   await logChatbotEvent({
+    organizationId: session.organization.id,
     botConfigId: insight.botConfigId,
     type: `insight.${parsed.action.toLowerCase()}d`,
     level: 'info',

@@ -1,12 +1,22 @@
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 
 export async function getActivityChartData() {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
 
-  const events = await prisma.chatbotEvent.findMany({
-    where: { createdAt: { gte: sevenDaysAgo } },
-    select: { createdAt: true },
-  })
+  // PENDIENTE-DECISIÓN: esta función agrega ChatbotEvent de TODAS las orgs, pero
+  // su única página (/admin/chatbot/activity) está enmarcada como la actividad
+  // del bot propio de develOP ('develop'), y el stream de eventos que la acompaña
+  // SÍ está scopeado a ese bot. O se scopea al bot 'develop' (por-org) o se
+  // re-enmarca la página como panel de plataforma. Queda global explícito hasta
+  // que planificación decida. Ver reporte B0-S3.
+  const events = await unsafeGlobalQuery(
+    'PENDIENTE-DECISIÓN: chart de actividad agrega eventos de todas las orgs en una página enmarcada como el bot develOP — scopear o re-enmarcar (ver B0-S3)',
+    (c) =>
+      c.chatbotEvent.findMany({
+        where: { createdAt: { gte: sevenDaysAgo } },
+        select: { createdAt: true },
+      }),
+  )
 
   const byDay = new Map<string, number>()
   for (let i = 6; i >= 0; i--) {

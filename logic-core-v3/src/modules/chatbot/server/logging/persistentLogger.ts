@@ -1,5 +1,5 @@
 import { ChatbotEventLevel } from '@prisma/client'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { chatbotLog } from './logger'
 
 // B11.4 — mantenemos la API lowercase para no romper los ~15 callsites
@@ -21,6 +21,7 @@ const LEVEL_TO_ENUM: Record<'info' | 'warn' | 'error', ChatbotEventLevel> = {
  * If persistence fails, falls back to console-only logging — never throws.
  */
 export async function logChatbotEvent(params: {
+  organizationId: string
   botConfigId: string
   type: string
   level: 'info' | 'warn' | 'error'
@@ -39,17 +40,16 @@ export async function logChatbotEvent(params: {
     params.level
   )
 
-  // Persist to BD (fire and forget — don't block the request)
+  // Persist to BD (fire and forget — don't block the request). El create
+  // scoped verifica que el bot (y la conversación, si viene) sean de la org.
   try {
-    await prisma.chatbotEvent.create({
-      data: {
-        botConfigId: params.botConfigId,
-        type: params.type,
-        level: LEVEL_TO_ENUM[params.level],
-        message: params.message,
-        conversationId: params.conversationId ?? null,
-        metadata: (params.metadata ?? null) as never,
-      },
+    await forOrg(params.organizationId).chatbotEvent.create({
+      botConfigId: params.botConfigId,
+      type: params.type,
+      level: LEVEL_TO_ENUM[params.level],
+      message: params.message,
+      conversationId: params.conversationId ?? null,
+      metadata: (params.metadata ?? null) as never,
     })
   } catch (error) {
     // Persistence failure should not break the chat flow
@@ -70,8 +70,11 @@ export async function logChatbotEvent(params: {
  */
 export async function cleanupOldEvents(maxAgeDays: number = 30): Promise<number> {
   const threshold = new Date(Date.now() - maxAgeDays * 24 * 60 * 60 * 1000)
-  const result = await prisma.chatbotEvent.deleteMany({
-    where: { createdAt: { lt: threshold } },
-  })
+  // PLATFORM-MAINTENANCE: purga global de chatbot_events por antigüedad
+  // (cron/manual). No tiene eje de tenant — barre todas las orgs por diseño.
+  const result = await unsafeGlobalQuery(
+    'PLATFORM-MAINTENANCE: purga de chatbot_events por antigüedad, sin eje de tenant (cron/manual)',
+    (c) => c.chatbotEvent.deleteMany({ where: { createdAt: { lt: threshold } } }),
+  )
   return result.count
 }

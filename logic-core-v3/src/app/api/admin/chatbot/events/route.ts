@@ -14,12 +14,12 @@ export async function GET(request: Request) {
   const slug = url.searchParams.get('slug') ?? 'develop'
   const since = url.searchParams.get('since')
 
-  const bot = await prisma.botConfig.findUnique({ where: { slug }, select: { id: true } })
+  const bot = await prisma.botConfig.findUnique({ where: { slug }, select: { id: true, organizationId: true } })
   if (!bot) return Response.json({ events: [] })
 
   const events = since
-    ? await listEventsSince(bot.id, new Date(since))
-    : await listRecentEvents(bot.id)
+    ? await listEventsSince(bot.organizationId, bot.id, new Date(since))
+    : await listRecentEvents(bot.organizationId, bot.id)
 
   return Response.json({
     events: events.map((e) => ({

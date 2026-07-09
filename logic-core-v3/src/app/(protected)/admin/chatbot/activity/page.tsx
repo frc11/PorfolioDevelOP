@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ActivityPage() {
   const [bot, chartData] = await Promise.all([
-    prisma.botConfig.findUnique({ where: { slug: 'develop' }, select: { id: true } }),
+    prisma.botConfig.findUnique({ where: { slug: 'develop' }, select: { id: true, organizationId: true } }),
     getActivityChartData(),
   ])
 
@@ -16,7 +16,7 @@ export default async function ActivityPage() {
 
   // Pool client-side para "Cargar más" (se muestran 50 y se revelan +50). Solo el arg;
   // queries.ts no se toca. La tab por-bot de chatbots/[botId] mantiene su propio take.
-  const events = await listRecentEvents(bot.id, 250)
+  const events = await listRecentEvents(bot.organizationId, bot.id, 250)
 
   return (
     <div className="space-y-6">

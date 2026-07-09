@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { excludeDqWhere } from '@/modules/chatbot/server/scoring'
 
 export interface WeeklyReportData {
@@ -23,8 +23,9 @@ export interface WeeklyReportData {
   summary: string
 }
 
-export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData | null> {
-  const bot = await prisma.botConfig.findUnique({
+export async function buildWeeklyReport(organizationId: string, botId: string): Promise<WeeklyReportData | null> {
+  const scope = forOrg(organizationId)
+  const bot = await scope.botConfig.findFirst({
     where: { id: botId },
     include: {
       organization: { select: { companyName: true } },
@@ -46,20 +47,16 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
     completedEventsThisWeek,
     completedEventsPrevWeek,
   ] = await Promise.all([
-    prisma.conversation.count({
-      where: {
-        botConfigId: bot.id,
-        startedAt: { gte: weekStart, lte: weekEnd },
-      },
+    scope.conversation.count({
+      botConfigId: bot.id,
+      startedAt: { gte: weekStart, lte: weekEnd },
     }),
-    prisma.conversation.count({
-      where: {
-        botConfigId: bot.id,
-        startedAt: { gte: prevWeekStart, lt: weekStart },
-      },
+    scope.conversation.count({
+      botConfigId: bot.id,
+      startedAt: { gte: prevWeekStart, lt: weekStart },
     }),
     // B5.3 — leads del reporte semanal excluyen DQ (no ensucia métricas del cliente)
-    prisma.chatbotLead.findMany({
+    scope.chatbotLead.findMany({
       where: {
         botConfigId: bot.id,
         capturedAt: { gte: weekStart, lte: weekEnd },
@@ -69,14 +66,12 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
       orderBy: { capturedAt: 'desc' },
       take: 10,
     }),
-    prisma.chatbotLead.count({
-      where: {
-        botConfigId: bot.id,
-        capturedAt: { gte: prevWeekStart, lt: weekStart },
-        ...excludeDqWhere(),
-      },
+    scope.chatbotLead.count({
+      botConfigId: bot.id,
+      capturedAt: { gte: prevWeekStart, lt: weekStart },
+      ...excludeDqWhere(),
     }),
-    prisma.chatMessage.findMany({
+    scope.chatMessage.findMany({
       where: {
         conversation: {
           botConfigId: bot.id,
@@ -87,7 +82,7 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
       select: { content: true },
       take: 100,
     }),
-    prisma.chatbotEvent.findMany({
+    scope.chatbotEvent.findMany({
       where: {
         botConfigId: bot.id,
         type: 'chat.message_completed',
@@ -96,7 +91,7 @@ export async function buildWeeklyReport(botId: string): Promise<WeeklyReportData
       select: { metadata: true },
       take: 500,
     }),
-    prisma.chatbotEvent.findMany({
+    scope.chatbotEvent.findMany({
       where: {
         botConfigId: bot.id,
         type: 'chat.message_completed',

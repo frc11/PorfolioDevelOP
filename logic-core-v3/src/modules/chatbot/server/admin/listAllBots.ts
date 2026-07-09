@@ -1,8 +1,10 @@
 import { cache } from 'react'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 
 export const listAllBots = cache(async () => {
-  return prisma.botConfig.findMany({
+  // PLATFORM-AGG: listado de todos los bots de todas las orgs (admin develOP).
+  return unsafeGlobalQuery('PLATFORM-AGG: listado de todos los bots/orgs para el admin develOP', (c) =>
+    c.botConfig.findMany({
     select: {
       id: true,
       slug: true,
@@ -27,7 +29,8 @@ export const listAllBots = cache(async () => {
       },
     },
     orderBy: { updatedAt: 'desc' },
-  })
+    }),
+  )
 })
 
 export type BotListItem = Awaited<ReturnType<typeof listAllBots>>[number]

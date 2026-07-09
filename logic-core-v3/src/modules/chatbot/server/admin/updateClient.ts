@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 import { avatarImageUrlSchema } from './avatarImageUrlSchema'
@@ -37,25 +37,31 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
   if (!result.success) throw new Error(zodErrorToMessage(result.error))
   const parsed = result.data
 
-  const org = await prisma.organization.findUnique({
-    where: { id: parsed.organizationId },
-    select: {
-      id: true,
-      companyName: true,
-      city: true,
-      internalNotes: true,
-      avatarImageUrl: true,
-      avatarEmoji: true,
-      avatarInitials: true,
-      siteUrl: true,
-      members: {
-        where: { role: 'ADMIN' },
-        orderBy: { joinedAt: 'asc' },
-        take: 1,
-        select: { user: { select: { id: true, email: true, name: true, phone: true } } },
-      },
-    },
-  })
+  // TENANT-MGMT: Organization + User admin (tenant raíz y su dueño, no cubiertos
+  // por el helper) — edición de datos del cliente por super-admin.
+  const org = await unsafeGlobalQuery(
+    'TENANT-MGMT: lectura de org + user admin para editar datos del cliente (super-admin)',
+    (c) =>
+      c.organization.findUnique({
+        where: { id: parsed.organizationId },
+        select: {
+          id: true,
+          companyName: true,
+          city: true,
+          internalNotes: true,
+          avatarImageUrl: true,
+          avatarEmoji: true,
+          avatarInitials: true,
+          siteUrl: true,
+          members: {
+            where: { role: 'ADMIN' },
+            orderBy: { joinedAt: 'asc' },
+            take: 1,
+            select: { user: { select: { id: true, email: true, name: true, phone: true } } },
+          },
+        },
+      }),
+  )
   if (!org) throw new Error('Cliente no encontrado.')
 
   const adminUser = org.members[0]?.user ?? null
@@ -64,16 +70,18 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
   // Email único: si cambia, no debe pisar el de otro usuario (User.email es @unique).
   const nextEmail = parsed.userEmail.toLowerCase()
   if (nextEmail !== adminUser.email.toLowerCase()) {
-    const clash = await prisma.user.findUnique({
-      where: { email: nextEmail },
-      select: { id: true },
-    })
+    const clash = await unsafeGlobalQuery(
+      'TENANT-MGMT: chequeo de unicidad global de email de usuario (User.email @unique)',
+      (c) => c.user.findUnique({ where: { email: nextEmail }, select: { id: true } }),
+    )
     if (clash && clash.id !== adminUser.id) {
       throw new Error(`El email ${nextEmail} ya está registrado en otro usuario.`)
     }
   }
 
-  const updated = await prisma.$transaction(async (tx) => {
+  const updated = await unsafeGlobalQuery(
+    'TENANT-MGMT: tx de update de org + user admin del cliente (super-admin)',
+    (client) => client.$transaction(async (tx) => {
     const nextOrg = await tx.organization.update({
       where: { id: org.id },
       data: {
@@ -106,7 +114,8 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
       select: { id: true, email: true, name: true, phone: true },
     })
     return { nextOrg, nextUser }
-  }, { timeout: 30000 })
+    }, { timeout: 30000 }),
+  )
 
   await logAdminAction({
     userId: admin.id ?? 'unknown',
