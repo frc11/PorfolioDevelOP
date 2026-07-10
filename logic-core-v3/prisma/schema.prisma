@@ -537,6 +537,8 @@ model Service {
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }
 
 model Project {
@@ -594,6 +596,8 @@ model Message {
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt(sort: Desc)])
 }
 
 model Plan {
@@ -674,6 +678,8 @@ model Invoice {
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }
 
 model ContactSubmission {
@@ -692,6 +698,10 @@ model ContactSubmission {
   // ReferralCode.code se resuelve al convertir. null = orgánico (sin referido).
   referralCode String?
   createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([read])
+  @@index([referralCode])
 }
 
 model Notification {
