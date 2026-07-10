@@ -102,6 +102,10 @@ const CONNECTION_ERROR_MESSAGE = 'No pudimos conectar. Probá de nuevo en un mom
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
   isLoading: boolean
+  /** RE-2 — true si `/config` no pudo cargar tras agotar los reintentos automáticos. */
+  configError: boolean
+  /** RE-2 — redispara el fetch de `/config` desde cero (reintento manual). */
+  retryLoadConfig: () => void
   isOpen: boolean
   open: () => void
   close: () => void
@@ -131,6 +135,21 @@ export interface UseChatbotReturn {
 export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions): UseChatbotReturn {
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  // RE-2 — true si /config agotó los reintentos automáticos sin éxito (estado
+  // terminal, distinto de "todavía cargando"). `configLoadAttempt` es un contador
+  // de invalidación puro: bumpearlo re-ejecuta el efecto de carga de abajo sin
+  // que el efecto necesite leer su valor.
+  const [configError, setConfigError] = useState(false)
+  const [configLoadAttempt, setConfigLoadAttempt] = useState(0)
+  // El reset a "cargando" vive en este handler (evento de click), no en el
+  // cuerpo del efecto de abajo — un setState síncrono al inicio de un efecto
+  // dispara cascading renders innecesarios (react-hooks/set-state-in-effect);
+  // acá es la reacción directa a la acción del usuario.
+  const retryLoadConfig = useCallback(() => {
+    setIsLoading(true)
+    setConfigError(false)
+    setConfigLoadAttempt((n) => n + 1)
+  }, [])
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   // INFRA.2 — true mientras el widget reintenta un POST a /chat tras un fallo
@@ -168,10 +187,16 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
     let cancelled = false
     // Reuse the config warmed by ChatWidgetMount during the intro (shared cache,
     // dedup'd by slug) so the launcher isn't blocked on a cold fetch at reveal.
+    // RE-2 — prefetchBotConfig ya reintenta internamente (chatRetryPolicy) y solo
+    // cachea éxitos: `data === null` acá significa "reintentos agotados", no
+    // "todavía sin resolver". `configLoadAttempt` en las deps re-dispara este
+    // efecto desde `retryLoadConfig` (que ya puso isLoading/configError en el
+    // estado "cargando" ANTES de bumpear el contador — ver el handler arriba).
     prefetchBotConfig(slug)
       .then((data) => {
         if (cancelled) return
         setConfig(data)
+        setConfigError(data === null)
         // B8.3 — bot pausado llega vía config.paused (en lugar del viejo 404
         // silencioso). Lo proyectamos al mismo carril de `degradedInfo` que
         // los degradados de /chat para que ChatWindow/ChatbotEmbed lo rendericen
@@ -189,12 +214,13 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
       })
       .catch(() => {
         if (cancelled) return
+        setConfigError(true)
         setIsLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [slug])
+  }, [slug, configLoadAttempt])
 
   const transport = useMemo(
     () =>
@@ -485,7 +511,7 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   const hasConversation = messages.some((m) => !m.id.startsWith('proactive-'))
 
   return {
-    config, isLoading, isOpen, open, close, toggle,
+    config, isLoading, configError, retryLoadConfig, isOpen, open, close, toggle,
     messages, hasConversation, isStreaming, avatarState, degradedMode, degradedInfo,
     reconnecting, inputLockedByDegrade,
     sendMessage, acceptProactivePrompt,

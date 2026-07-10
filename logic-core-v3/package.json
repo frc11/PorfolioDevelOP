@@ -41,6 +41,7 @@
     "test:infra1": "npx tsx src/modules/chatbot/server/logging/__tests__/persist-failure-sink.invariant.ts",
     "test:infra2": "npx tsx src/modules/chatbot/server/chat/__tests__/user-persist-dedup.invariant.ts && npx tsx src/modules/chatbot/shared/__tests__/chat-retry-policy.invariant.ts",
     "test:cost1": "npx tsx src/modules/chatbot/server/llm/__tests__/resolve-effective-model.invariant.ts",
+    "test:re2": "npx tsx src/modules/chatbot/shared/__tests__/config-cache.invariant.ts",
     "test:q12": "npx tsx src/modules/chatbot/evals/__tests__/q1-2.invariant.ts",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",
