@@ -14,6 +14,7 @@
 import { logger } from '@/lib/logger'
 import type { OrgScope } from '@/lib/isolation'
 import { applyUserIdUpdate } from '@/modules/motor/domain/identity'
+import { handleAccountUpdate, handlePhoneQualityUpdate, handleTemplateStatusUpdate } from './handle-health'
 import { handleInboundMessage } from './handle-message'
 import { handleStatusUpdate } from './handle-status'
 import { classifyChange, type InboundEvent, type MessagesValue, type WebhookEnvelope } from './payload'
@@ -25,6 +26,8 @@ export interface InboundProcessSummary {
   statusesApplied: number
   statusesSkipped: number
   transitions: number
+  /** B1-S3 — eventos de salud (plantilla/tier/estado) que sí escribieron algo. */
+  healthApplied: number
   ignored: number
   skipped: number
 }
@@ -35,6 +38,7 @@ const EMPTY_SUMMARY: InboundProcessSummary = Object.freeze({
   statusesApplied: 0,
   statusesSkipped: 0,
   transitions: 0,
+  healthApplied: 0,
   ignored: 0,
   skipped: 0,
 })
@@ -101,6 +105,30 @@ async function applyEvent(
     })
     logger.info('motor-inbound: user_id_update registrado', { channelId: channel.id, outcome })
     return addTo(summary, 'transitions')
+  }
+  if (event.kind === 'template_status_update') {
+    const outcome = await handleTemplateStatusUpdate(scope, channel, event)
+    logger.info('motor-inbound: message_template_status_update procesado', {
+      channelId: channel.id,
+      outcome,
+      event: event.event,
+    })
+    return addTo(summary, outcome === 'applied' ? 'healthApplied' : 'ignored')
+  }
+  if (event.kind === 'phone_quality_update') {
+    const outcome = await handlePhoneQualityUpdate(scope, channel, event)
+    logger.info('motor-inbound: phone_number_quality_update procesado', {
+      channelId: channel.id,
+      outcome,
+      event: event.event,
+      currentLimit: event.currentLimit,
+    })
+    return addTo(summary, outcome === 'tier-applied' ? 'healthApplied' : 'ignored')
+  }
+  if (event.kind === 'account_update') {
+    const outcome = await handleAccountUpdate(scope, channel, event)
+    logger.info('motor-inbound: account_update procesado', { channelId: channel.id, outcome, event: event.event })
+    return addTo(summary, outcome === 'applied' ? 'healthApplied' : 'ignored')
   }
   return applyMessagesEvent(scope, channel, event.value, summary)
 }

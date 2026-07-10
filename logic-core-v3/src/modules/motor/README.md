@@ -31,13 +31,16 @@ agrega en sprints posteriores (ver `docs/motor-whatsapp/bitacora.md`).
 ```
 src/modules/motor/
   adapters/   # integraciones externas (360dialog, webhooks BSP)
-    whatsapp/inbound/   # B1-S1: auth del webhook, clasificación, persistencia
+    whatsapp/inbound/   # B1-S1: auth, clasificación, persistencia; B1-S3: salud
+    whatsapp/outbound/  # B1-S2: cliente HTTP de envío (D360-API-KEY)
   domain/     # tipos y reglas de negocio puras
     bsuid.ts                # detección de formato BSUID/teléfono
     channel-credentials.ts  # token de URL + secret del webhook (hash)
     identity.ts             # resolución BSUID-first + user_id_update
     prisma-errors.ts        # clasificación de P2002 (idempotencia)
+    window.ts               # B1-S2: ventana de 24h (dominio puro)
   services/   # orquestación, casos de uso
+    sendMessage.ts          # B1-S2: única puerta de salida del motor
   types/      # tipos compartidos del módulo
 ```
 
@@ -48,4 +51,13 @@ src/modules/motor/
 - B1-S1: adaptador BSP de ENTRADA — webhook autenticado
   (`/api/motor/webhook/[channelToken]`), resolución de identidad
   BSUID-first, idempotencia por wamid, statuses y `user_id_update`.
-  El envío es B1-S2.
+- B1-S2: adaptador BSP de SALIDA — `sendMessage.ts`, ventana de 24h,
+  `MotorTemplate`, cifrado de la API key del canal.
+- B1-S3: salud del canal — el mismo webhook de entrada ahora clasifica
+  `message_template_status_update` (ciclo de vida completo, incluye
+  `PAUSED`), `phone_number_quality_update` (solo el tier de mensajería;
+  el color de calidad queda sin implementar por falta de shape
+  confirmado — ver `docs/motor-whatsapp/bitacora.md`) y `account_update`
+  (estado del número vía whitelist de eventos). `MotorAlert` es el
+  registro consultable de las alertas que dispara (rechazo de plantilla,
+  número restringido/baneado); el transporte (email/WhatsApp) es B3.

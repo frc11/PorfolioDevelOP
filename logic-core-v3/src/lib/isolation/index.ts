@@ -36,9 +36,9 @@
  *     unsafeGlobalQuery(reason, fn). `grep -r unsafeGlobal src/` enumera
  *     todos los accesos cross-org del repo.
  *
- * Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage
- * (motor) + BotConfig, Conversation, ChatMessage, ChatbotLead, CrmIntegration
- * (chatbot, port en B0-S3). Fuera de este directorio, prisma directo sobre
+ * Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage,
+ * MotorTemplate, MotorAlert (motor) + BotConfig, Conversation, ChatMessage,
+ * ChatbotLead, CrmIntegration (chatbot, port en B0-S3). Fuera de este directorio, prisma directo sobre
  * estos modelos solo queda en el código legacy del chatbot hasta B0-S3;
  * LeadOS conserva su helper propio (otro eje de aislamiento, no se toca).
  *

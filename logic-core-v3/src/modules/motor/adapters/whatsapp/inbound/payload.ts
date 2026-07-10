@@ -16,6 +16,22 @@
  * Un change que no parsea se clasifica 'invalid' y se saltea con log — nunca
  * tumba el batch entero ni provoca un 4xx/5xx que dispare el retry del BSP
  * por un evento que jamás va a parsear.
+ *
+ * B1-S3 — eventos de SALUD (quality/tier/estado del número, ciclo de vida de
+ * plantillas). Confianza de shape por evento (fuentes en
+ * docs/motor-whatsapp/bitacora.md, sección "Fuentes de los shapes de eventos
+ * de salud"):
+ *   - `message_template_status_update`: CONFIRMADO contra la referencia de
+ *     Meta Cloud API (field, value.event, message_template_id/name/language,
+ *     reason) — se parsea completo.
+ *   - `phone_number_quality_update`: solo `current_limit` (el tier) está
+ *     confirmado. El color de calidad (GREEN/YELLOW/RED) no tiene shape
+ *     confirmado en ninguna doc accesible (ni 360dialog ni Meta de forma
+ *     consistente) — el schema NO lo declara; el handler solo loguea `event`.
+ *   - `account_update`: la LISTA de valores de `event` está confirmada
+ *     (enum literal de la doc de Meta); las formas anidadas
+ *     (ban_info/restriction_info/violation_info) no lo están — el schema
+ *     solo toma `event`, nunca inventa un campo anidado.
  */
 import { z } from 'zod'
 import { classifyContactAddress, isBsuid } from '@/modules/motor/domain/bsuid'
@@ -90,6 +106,29 @@ const userIdUpdateValueSchema = z.object({
   }),
 })
 
+// B1-S3 — shape confirmado (message_template_id puede llegar number o string
+// según el proxy del BSP; se normaliza a string en classifyChange).
+const templateStatusUpdateValueSchema = z.object({
+  event: z.string().min(1),
+  message_template_id: z.union([z.string(), z.number()]).optional(),
+  message_template_name: z.string().optional(),
+  message_template_language: z.string().optional(),
+  reason: z.string().nullable().optional(),
+})
+
+// B1-S3 — solo `current_limit` (tier) tiene shape confirmado; el color de
+// calidad no se declara acá a propósito (ver docstring del archivo).
+const phoneNumberQualityUpdateValueSchema = z.object({
+  event: z.string().optional(),
+  current_limit: z.string().optional(),
+})
+
+// B1-S3 — solo `event` tiene shape confirmado (lista de literales de la doc
+// de Meta); las formas anidadas no se declaran a propósito.
+const accountUpdateValueSchema = z.object({
+  event: z.string().optional(),
+})
+
 const changeSchema = z.object({ field: z.string(), value: z.unknown() })
 
 export const webhookEnvelopeSchema = z.object({
@@ -112,6 +151,16 @@ export type StatusEventError = z.infer<typeof statusErrorSchema>
 export type InboundEvent =
   | { kind: 'messages'; value: MessagesValue }
   | { kind: 'user_id_update'; oldExternalId: string; newExternalId: string; phoneNumberId: string | null }
+  | {
+      kind: 'template_status_update'
+      event: string
+      templateId: string | null
+      name: string | null
+      language: string | null
+      reason: string | null
+    }
+  | { kind: 'phone_quality_update'; event: string | null; currentLimit: string | null }
+  | { kind: 'account_update'; event: string | null }
   | { kind: 'other'; field: string }
   | { kind: 'invalid'; field: string }
 
@@ -135,6 +184,32 @@ export function classifyChange(change: { field: string; value?: unknown }): Inbo
       newExternalId: parsed.data.user_id_update.new_user_id,
       phoneNumberId: parsed.data.metadata?.phone_number_id ?? null,
     }
+  }
+  if (change.field === 'message_template_status_update') {
+    const parsed = templateStatusUpdateValueSchema.safeParse(change.value)
+    if (!parsed.success) return { kind: 'invalid', field: change.field }
+    return {
+      kind: 'template_status_update',
+      event: parsed.data.event,
+      templateId: parsed.data.message_template_id !== undefined ? String(parsed.data.message_template_id) : null,
+      name: parsed.data.message_template_name ?? null,
+      language: parsed.data.message_template_language ?? null,
+      reason: parsed.data.reason ?? null,
+    }
+  }
+  if (change.field === 'phone_number_quality_update') {
+    const parsed = phoneNumberQualityUpdateValueSchema.safeParse(change.value)
+    if (!parsed.success) return { kind: 'invalid', field: change.field }
+    return {
+      kind: 'phone_quality_update',
+      event: parsed.data.event ?? null,
+      currentLimit: parsed.data.current_limit ?? null,
+    }
+  }
+  if (change.field === 'account_update') {
+    const parsed = accountUpdateValueSchema.safeParse(change.value)
+    if (!parsed.success) return { kind: 'invalid', field: change.field }
+    return { kind: 'account_update', event: parsed.data.event ?? null }
   }
   return { kind: 'other', field: change.field }
 }

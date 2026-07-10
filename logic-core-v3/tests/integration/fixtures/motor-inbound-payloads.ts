@@ -189,6 +189,89 @@ export function userIdUpdatePayload(input: UserIdUpdateFixture): Record<string, 
   }
 }
 
+// B1-S3 — eventos de SALUD. Ninguno de los tres trae phone_number_id/org en
+// su value (shape confirmado — ver payload.ts): el canal se resuelve por el
+// token de la URL, no por el payload, así que estos fixtures no lo necesitan.
+
+export interface TemplateStatusUpdateFixture {
+  event: string
+  templateId?: string
+  name?: string
+  language?: string
+  reason?: string | null
+}
+
+export function templateStatusUpdatePayload(input: TemplateStatusUpdateFixture): Record<string, unknown> {
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: '102290129340398',
+        changes: [
+          {
+            value: {
+              event: input.event,
+              message_template_id: input.templateId,
+              message_template_name: input.name,
+              message_template_language: input.language,
+              reason: input.reason ?? null,
+            },
+            field: 'message_template_status_update',
+          },
+        ],
+      },
+    ],
+  }
+}
+
+export interface PhoneQualityUpdateFixture {
+  event?: string
+  currentLimit?: string
+}
+
+/** Solo current_limit tiene shape confirmado (ver payload.ts) — event queda libre. */
+export function phoneQualityUpdatePayload(input: PhoneQualityUpdateFixture): Record<string, unknown> {
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: '102290129340398',
+        changes: [
+          {
+            value: {
+              display_phone_number: '15550783881',
+              event: input.event ?? 'THROUGHPUT_UPGRADE',
+              current_limit: input.currentLimit,
+            },
+            field: 'phone_number_quality_update',
+          },
+        ],
+      },
+    ],
+  }
+}
+
+export interface AccountUpdateFixture {
+  event: string
+}
+
+export function accountUpdatePayload(input: AccountUpdateFixture): Record<string, unknown> {
+  return {
+    object: 'whatsapp_business_account',
+    entry: [
+      {
+        id: '102290129340398',
+        changes: [
+          {
+            value: { event: input.event },
+            field: 'account_update',
+          },
+        ],
+      },
+    ],
+  }
+}
+
 /** Evento real de otro producto de la Cloud API que B1-S1 no maneja. */
 export function unknownEventPayload(phoneNumberId: string): Record<string, unknown> {
   return {
