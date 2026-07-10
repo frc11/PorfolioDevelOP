@@ -13266,3 +13266,116 @@ Al no inventar canal nuevo, hereda gratis: log a consola (`chatbotLog`) + fila e
   nuevo ya deja rastro explícito del degrade con ambos pares; tocar ese log ampliaba el diff sin
   necesidad.
 
+---
+
+## ✅ RE-2 — El widget no muere en spinner eterno si /config falla   ·   2026-07-10
+
+Cuando `/config` fallaba (red, o cold-start de Neon), el widget quedaba en `config=null` +
+`isLoading=false`: spinner de pulso **infinito** en el embed, y en el on-site (`LogicCompanion`)
+directamente **ausencia total** — el launcher nunca aparecía, sin ningún indicio de que algo
+falló. Peor: `configCache` guardaba la promesa resuelta a `null` **sin TTL**, así que ni un
+remount se recuperaba — envenenado hasta reciclar la lambda. Este sprint: reintento automático
+(reusando `chatRetryPolicy.ts` de INFRA.2 tal cual, sin tocarlo) + estado de error explícito con
+reintento manual, en ambos renders + el cache deja de envenenarse.
+
+### Descubrimiento (Paso 0) — 3 correcciones al ticket
+- El fetch de `/config` **no vive en `ChatbotEmbed.tsx`** (el ticket lo ubicaba ahí, ~146-170):
+  esas líneas son el *loading gate* (el spinner), no el fetch. El fetch entero vive en
+  `useChatbot.ts` (`hooks/useChatbot.ts`, no `**/useChatbot.ts` genérico), vía `configCache.ts` —
+  **un solo punto**, compartido por AMBOS renders (`ChatbotEmbed` y `LogicCompanion`, el on-site,
+  vía `LogicCompanion.tsx`). El fix del fetch/cache es entonces un punto único; solo el RENDER del
+  estado de error difiere entre los dos.
+- Pieza no mencionada por el ticket: `ChatWidgetMount.tsx` llama `prefetchBotConfig` directo para
+  precalentar el cache durante el intro, antes de que exista `useChatbot`. Se beneficia gratis del
+  fix de `configCache.ts` sin tocarlo (mismo punto único).
+- El "patrón visual `connection_failed`" son **dos** piezas coordinadas, no una: el dot+texto
+  "Conectando…" en `ChatHeader.tsx` (mid-retry) y el banner con `WifiOff` en `DegradedBanner.tsx`
+  (terminal) — **ninguna de las dos tiene botón de reintento** ya construido; el botón es un
+  elemento nuevo (`ConfigLoadError`), reusando el lenguaje (ámbar + `WifiOff`), no JSX existente.
+
+### Fix — cache + retry (`configCache.ts`, único punto)
+`prefetchBotConfig` ya no resuelve el fetch crudo: ahora reintenta con las funciones puras
+EXISTENTES de `chatRetryPolicy.ts` (`classifyStatus`, `shouldRetry`, `backoffForAttempt` —
+**cero cambios** a ese archivo, ya era 100% genérico pese al nombre/comentarios "de chat") —
+solo transitorios (red/5xx), backoff real 2s/4s, acotado a `CHAT_RETRY_MAX_ATTEMPTS=3`. Si agota
+sin éxito, la promesa se resuelve a `null` **y la entrada se borra del `Map`** (antes quedaba
+cacheada para siempre) — el próximo `prefetchBotConfig(slug)` (remount o retry manual) vuelve a
+fetchear desde cero. Un éxito sigue cacheado para siempre (sin TTL nuevo, como pedía el ticket).
+
+### Fix — estado de error + reintento (`useChatbot.ts` + ambos renders)
+Nuevo `configError: boolean` + `retryLoadConfig(): void` en `UseChatbotReturn`. El reset a
+"cargando" (`setIsLoading(true)` + `setConfigError(false)`) vive en `retryLoadConfig` (el
+**handler** del click), no en el cuerpo del efecto — evita el `react-hooks/set-state-in-effect`
+que un `setState` síncrono al inicio de un efecto dispararía; el efecto solo actualiza estado
+desde dentro de `.then()`/`.catch()`, igual que el código original. `configLoadAttempt` (contador
+puro) en las deps del efecto es lo que lo re-dispara desde el handler.
+
+`ConfigLoadError.tsx` (nuevo, `components/chat/`): contenido sin wrapper de layout (ícono
+`WifiOff` en círculo ámbar + texto + botón "Reintentar"), sin `config` disponible en este estado
+(no hay `accentColor`/`avatarStyle` para tematizarlo). Cada render lo posiciona a su manera:
+- `ChatbotEmbed.tsx`: gate dividido en dos (antes uno combinado) — spinner mientras `isLoading`;
+  panel centrado con `ConfigLoadError` si `!config` después.
+- `LogicCompanion.tsx`: `return null` mientras `isLoading` (igual que antes); si `!config` después,
+  tarjeta flotante en la MISMA posición fija del launcher (esquina inferior derecha — sin `config`
+  no hay `position` del bot para elegir izquierda/derecha, se usa el default).
+Sin motion/hover ni tematización — el ticket excluye estética/branding explícitamente (plano EST).
+
+### Verificación
+- **Gate nuevo** (`npm run test:re2` → `shared/__tests__/config-cache.invariant.ts`, 6 checks,
+  ~10s de pared por el backoff REAL — sin librería de mocks, se stubea `globalThis.fetch` con el
+  mismo idioma que `captureStderr` en `persist-failure-sink.invariant.ts`): éxito 1er intento;
+  éxito cacheado sin TTL (2ª llamada no fetchea); 503 una vez → reintenta y resuelve; 503×3 agota →
+  `null` **y el próximo llamado al mismo slug vuelve a fetchear** (el criterio de aceptación
+  central, verificado con un 2º stub); 404 nunca reintenta; red caída se trata como transitorio
+  igual que 5xx.
+- Smoke visual propio (browser real, dev server local): camino feliz on-site (`/`) sin
+  regresión — launcher, teaser, panel de chat abren igual que antes. `ConfigLoadError` verificado
+  en una ruta de preview temporal (`dev-preview-re2`, **borrada** al cerrar, junto con el stub de
+  tipos que Next generó en `.next/` mientras existió) — ambas variantes (panel/flotante) legibles,
+  botón clickeable (contador de clicks confirmó el handler). **No se pudo forzar un fallo real de
+  red contra `/config`** sin tocar el endpoint server-side (prohibido) ni tener intercepción de red
+  en las herramientas de browser disponibles — la lógica de retry/backoff/no-envenenamiento queda
+  probada por el gate (mismo módulo real, no una reimplementación) en vez de por observación en
+  vivo.
+- **visual-qa**: bloqueo de entorno — el subagente no tuvo cableado el MCP de preview en esta
+  sesión (mismo bloqueo exacto que INFRA.2 ya documentó: "MCP de preview/browser no cableado").
+  No es un hallazgo de este sprint, es un gap de entorno recurrente.
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`, el único que aparece).
+- `eslint` (archivos tocados): 0 errores nuevos; 2 errores **pre-existentes** (regla
+  `react-hooks/refs` en `ChatbotEmbed.tsx:316` y `react-hooks/set-state-in-effect` en
+  `useChatbot.ts:380`) — ambos son EXACTAMENTE los 2 de los 3 que INFRA.2 ya documentó
+  (`ChatbotEmbed:295`, `useChatbot:354`), corridos de línea por las inserciones de este sprint
+  (+21 y +25 líneas respectivamente) — confirmado por contenido, no solo por proximidad de línea.
+  Un tercer error nuevo (`useChatbot.ts:182`, el `setIsLoading(true)` síncrono que sí introduje) se
+  identificó y se corrigió moviendo el reset al handler (ver arriba) — no quedó pendiente.
+- `git status`: 7 archivos (`configCache.ts`, `useChatbot.ts`, `ChatbotEmbed.tsx`,
+  `LogicCompanion.tsx` modificados; `ConfigLoadError.tsx` + `config-cache.invariant.ts` nuevos;
+  `package.json` +1 script). Nada fuera de `src/modules/chatbot/` — nunca se tocó `/api/chatbot/
+  [slug]/config/route.ts`, `getPublicConfig`, `/admin`, `/dashboard`, ni `chatRetryPolicy.ts`.
+
+### Pendiente / verificación humana (Valentino)
+- **La coreografía real**: levantar el bot con Neon dormida DE VERDAD (cold-start real, no mock) y
+  grabar el auto-retry disparándose (header pasaría a "Conectando…" si tocara ese mismo camino de
+  `reconnecting` — **nota**: el retry de `/config` NO usa `reconnecting`/`ChatHeader`, ese estado
+  es específico del POST de `/chat`; durante el retry de `/config` el widget simplemente sigue en
+  el spinner de `isLoading`, sin texto "Conectando…" — flagueado por si se esperaba ese lenguaje
+  también acá) y recuperándose sin intervención. El mock del smoke NO sustituye esto.
+- Confirmar visualmente en un entorno con el MCP de preview cableado (desktop+mobile reales) — la
+  verificación de este sprint fue con browser real pero sesión propia, no vía el subagente
+  mandatado.
+- No es multi-tenant → sin golden-suite, como anticipaba el ticket.
+
+### Fuera de scope (anotado, no implementado)
+- **`/config` server-side / `getPublicConfig`**: intactos.
+- **Packs/scoring/runtime del chat**: intactos.
+- **`/admin` y `/dashboard`**: intactos.
+- **`chatRetryPolicy.ts`**: cero cambios — ya era reusable tal cual, sin necesitar extracción.
+- **Estética/branding/theme del widget**: `ConfigLoadError` es deliberadamente simple (el ticket
+  lo excluye — plano EST).
+- **El texto "Conectando…" del header durante el retry de `/config`**: no se agregó — ver nota en
+  "Pendiente" arriba; el header (`reconnecting`) es un concepto separado del POST de `/chat`, y
+  extenderlo al `/config` no estaba en el pedido explícito del ticket (que solo pide "estado de
+  error breve" al agotar, no un estado intermedio con texto durante el retry).
+- Los 2 issues de lint pre-existentes (ref-in-render, set-state-in-effect): no se tocaron, son de
+  regiones/efectos que este sprint no toca funcionalmente.
+
