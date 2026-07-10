@@ -302,6 +302,17 @@ test.describe('B0-S3 — aislamiento multi-tenant del chatbot (A vs B)', () => {
       IsolationError,
     )
 
+    // Re-parenting por update: el guard runtime debe ESPEJAR el Omit del tipo
+    // (no pueden divergir). Un bypass de tipos que intente saltar el CrmSyncAttempt
+    // a otro lead/integración se rechaza en el guard de claves, ANTES de tocar la DB
+    // — por eso se afirma el mensaje del guard, no un IsolationNotFoundError genérico.
+    await expect(
+      forOrg(a.orgId).crmSyncAttempt.update('cualquier-id', { leadId: 'otro-lead' } as never),
+    ).rejects.toThrow(/la clave "leadId" no se acepta/)
+    await expect(
+      forOrg(a.orgId).crmSyncAttempt.update('cualquier-id', { integrationId: 'otra-integracion' } as never),
+    ).rejects.toThrow(/la clave "integrationId" no se acepta/)
+
     // Cursor: ancla la paginación por unique GLOBAL (oráculo cross-org) — rechazado.
     await expect(
       forOrg(a.orgId).chatMessage.findMany({ cursor: { id: b.userMessageId }, orderBy: { createdAt: 'asc' } } as never),
@@ -328,6 +339,10 @@ function garantiasDeTiposChatbot(scope: OrgScope): void {
   void scope.conversation.update('un-id', { botConfigId: 'otro-bot' })
   // @ts-expect-error — update no permite re-parenting: conversationId del mensaje es inmutable vía helper
   void scope.chatMessage.update('un-id', { conversationId: 'otra-conversacion' })
+  // @ts-expect-error — update no permite re-parenting: leadId del CrmSyncAttempt es inmutable vía helper
+  void scope.crmSyncAttempt.update('un-id', { leadId: 'otro-lead' })
+  // @ts-expect-error — update no permite re-parenting: integrationId del CrmSyncAttempt es inmutable vía helper
+  void scope.crmSyncAttempt.update('un-id', { integrationId: 'otra-integracion' })
   // @ts-expect-error — nested writes prohibidos: los mensajes entran por su propio accessor
   void scope.conversation.create({ botConfigId: 'x', sessionId: 'x', messages: { create: [] } })
   // @ts-expect-error — unsafeGlobalQuery exige reason como primer argumento

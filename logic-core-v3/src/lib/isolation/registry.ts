@@ -410,7 +410,7 @@ const crmSyncAttemptConfig: ModelIsolationConfig = {
     },
   ],
   forbiddenCreateKeys: CRM_SYNC_ATTEMPT_NESTED,
-  forbiddenUpdateKeys: [...CRM_SYNC_ATTEMPT_NESTED, 'organizationId'],
+  forbiddenUpdateKeys: [...CRM_SYNC_ATTEMPT_NESTED, ...CRM_SYNC_ATTEMPT_REPARENT, 'organizationId'],
 }
 
 // ─── Accessor extendido: ContactIdentity ─────────────────────────────────────
