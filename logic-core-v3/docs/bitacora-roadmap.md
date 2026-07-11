@@ -13834,3 +13834,118 @@ sin infraestructura.
 Por test: `npm run test:cost2b` — el caso `'GOOGLE'` ya no throwea. No es visual ni conductual (el
 endpoint no tiene caller ni UI).
 
+---
+
+## ✅ CRON-2 — Scheduled function real para cleanup-old-events; mecanismo de Netlify Functions verificado con un cron   ·   2026-07-11
+
+Prod no ejecuta ninguno de los 3 crons declarados en `netlify.toml` (`generate-insights-cron`,
+`send-weekly-reports-cron`, `cleanup-old-events-cron`) — el dashboard de Netlify muestra 0
+scheduled functions, solo el "Next.js Server Handler". Causa: `netlify.toml` declara
+`[functions.X].schedule` para nombres de function que no existen como archivos reales — no había
+`netlify/functions/` en el repo. Con Next Runtime v5, nombrar una ruta de Next en `netlify.toml`
+no la agenda; hace falta una Netlify Function real que corra en el schedule y le pegue por HTTP a
+la ruta de Next. Este sprint arma el mecanismo con **un solo cron** — `cleanup-old-events`
+(T0.2, el más simple, `GET` sin body) — dejándolo listo para verificar en prod. Los otros 2 crons
+ya declarados (`generate-insights-cron`, `send-weekly-reports-cron`) y los otros crons del repo
+quedan fantasma, para replicar este mismo patrón en un sprint posterior.
+
+### Descubrimiento (Paso 0)
+- **Precondición cumplida**: `git status` en el worktree, working tree limpio — `netlify.toml`
+  sin cambios sin commitear (no hay pisada de trabajo del Panel). Branch `runtime/mejoras`, al día
+  con `origin`.
+- **`netlify.toml` ya tenía la entrada correcta para `cleanup-old-events-cron`** — esto corrige el
+  supuesto del ticket. T0.2 (hoy mismo, sesión anterior) ya había agregado
+  `[functions."cleanup-old-events-cron"] schedule = "0 6 * * *"` como parte de "cablear el cron".
+  El nombre y el horario ya eran exactamente los correctos — Netlify deriva el nombre de una
+  function de su filename bajo `netlify/functions/`, así que no había nada que "corregir o
+  reemplazar" en el contenido de la entrada: estaba bien escrita, solo huérfana (sin archivo real
+  detrás). **Consecuencia: Paso 2 del ticket (cirugía en `netlify.toml`) resultó en cero diff** —
+  crear el archivo de la function con el nombre exacto (`cleanup-old-events-cron.ts`) fue la
+  corrección completa. Confirmado con `Read` de `netlify.toml` antes y después: archivo idéntico,
+  sin tocar.
+- **`src/app/api/cron/cleanup-old-events/route.ts`**: solo `GET`, `force-dynamic`. Auth vía
+  `getProvidedCronSecret(request)` (exportada, sin helper compartido — ver nota de T0.2, duplicada
+  4 veces en el repo): primero `Authorization: Bearer <secret>`, si no matchea ese esquema cae a
+  `X-Cron-Secret`. Falla cerrado si `CRON_SECRET` no está seteada. `.env.example` documenta el
+  header esperado como `Authorization: Bearer <CRON_SECRET>` — se usó ese, no el fallback.
+- **URL del sitio**: barrido del repo entero — no hay ni un solo uso de las env vars nativas de
+  Netlify (`URL`, `DEPLOY_URL`, `SITE_URL`); la convención establecida en 22 archivos es
+  `NEXT_PUBLIC_APP_URL` (manual, documentada como "URL pública canónica de la app" en
+  `.env.example`). Se optó por `process.env.URL` (nativa de Netlify) en vez de
+  `NEXT_PUBLIC_APP_URL` para esta function puntual — la regla del ticket la nombra explícitamente
+  ("resuelve desde el entorno de Netlify"), y a diferencia de `NEXT_PUBLIC_APP_URL` (config manual,
+  pensada para uso client-facing) no depende de que alguien la haya seteado bien en el dashboard
+  para este propósito: Netlify la inyecta sola, siempre apunta al dominio primario real del sitio.
+- **`@netlify/functions`**: no está instalado (`package.json` sin ninguna referencia `@netlify/*`
+  salvo el plugin declarado sin versión en `netlify.toml`). Se decidió NO instalarlo — el único uso
+  típico del paquete acá sería tipar los parámetros `event`/`context` del handler clásico, pero
+  esta function no lee ninguno de los dos (solo hace un `fetch` y devuelve `{statusCode, body}`),
+  así que un handler sin parámetros no necesita esos tipos y queda con cero `any` sin depender de
+  nada nuevo (regla del repo: no agregar dependencia sin chequear alternativa nativa — acá la
+  alternativa es simplemente no tipar lo que no se usa).
+- **`tsconfig.json`**: `include` es `**/*.ts` sin exclusión para `netlify/**` — la function nueva
+  SÍ pasa por `tsc --noEmit` en modo strict real, no es un blind spot.
+- **`vercel.json`**: confirmado que sigue con su propio set de 3 crons distinto y desincronizado
+  (ya documentado en T0.2) — no tocado, informativo.
+
+### Implementación
+- **`netlify/functions/cleanup-old-events-cron.ts`** (nuevo): handler sin parámetros (no usa
+  `event`/`context`, cero import de `@netlify/functions`). Lee `process.env.URL` y
+  `process.env.CRON_SECRET`; si falta cualquiera de los dos, `console.error` claro + `500` (no
+  intenta el fetch con `undefined`, no falla silencioso). Si están, `fetch` a
+  `${URL}/api/cron/cleanup-old-events` con header `Authorization: Bearer ${CRON_SECRET}`. Loguea el
+  body de la respuesta tanto en éxito como en error (`console.log`/`console.error`) para que quede
+  visible en los logs de Netlify. Catch alrededor del fetch con el mismo patrón de
+  `error instanceof Error ? error.message : 'unknown error'` que ya usa la propia ruta T0.2 —
+  consistencia con el estilo existente, no un patrón nuevo.
+- **`netlify.toml`**: sin cambios (ver Descubrimiento — la entrada ya estaba completa y correcta).
+  Function bundler ya configurado repo-wide (`[functions] node_bundler = "esbuild"`), sin
+  `directory` override — usa el default `netlify/functions/`, que es donde se creó el archivo.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **`generate-insights-cron` y `send-weekly-reports-cron`**: siguen declaradas en `netlify.toml`
+  sin function real — fantasma, igual que antes de este sprint. Quedan, junto con
+  `regenerate-briefs`, `send-executive-reports` y `detect-bot-issues` (los otros 5 crons de
+  runtime), para replicar este mismo patrón en un sprint posterior una vez confirmado en prod.
+- **`alerts` y `os-follow-up`**: no tocados — son superficie del Panel/LeadOS, fuera de este sprint.
+- **`src/app/api/cron/cleanup-old-events/route.ts`**: cero líneas tocadas — la function nueva solo
+  le pega por HTTP, no cambia su lógica ni su auth.
+- **`vercel.json`**: no tocado.
+- **`@netlify/functions`**: no instalado (decisión explicada arriba, no un olvido).
+- Sin migración, sin `git`, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
+
+### Controles de cierre
+- `.\node_modules\.bin\tsc.cmd --noEmit` (PowerShell, comando único, desde
+  `logic-core-runtime\logic-core-v3`): **0 errores**, antes y después del cambio (baseline ya
+  estaba limpio — a diferencia de COST-2b, esta corrida tampoco mostró el `searchconsole.ts:119`
+  que documentaban COST-1/COST-2).
+- `eslint` sobre el único archivo tocado (`netlify/functions/cleanup-old-events-cron.ts`): 0
+  errores, 0 warnings.
+- No se corrió `git` (regla del sprint) — el archivo nuevo queda sin stagear, a criterio de
+  Valentino cuándo commitearlo.
+- `npx prisma migrate status`: no corrido — este sprint no toca schema ni tiene motivo para
+  revisar drift de migraciones (cero cambios de Prisma).
+
+### Verificación declarada (Valentino, cuando quiera) — el cierre real de este sprint
+El agente no puede confirmar esto — implementado, NO verificado hasta que se vea en prod:
+1. Deploy a producción (**published**, no preview — las scheduled functions de Netlify solo
+   disparan en published deploys).
+2. Netlify → sitio → **Functions**: debería aparecer `cleanup-old-events-cron` con badge
+   **Scheduled**.
+3. Botón **"Run now"** para forzar una invocación sin esperar las 6am UTC / 3am Argentina.
+4. Logs de la function: buscar `[cleanup-old-events-cron] OK: ...` (éxito) o el mensaje de error
+   correspondiente:
+   - `401` / body con `Unauthorized` → la ruta rechazó el secret. Más probable: `CRON_SECRET` no
+     está disponible en el contexto **Functions** de Netlify (puede estar seteada solo para
+     Builds/la app Next.js) — revisar Site settings → Environment variables → contexto de la var.
+   - `500` con `"Missing URL or CRON_SECRET environment variable"` → alguna de las dos no está en
+     el entorno de la function.
+5. Confirmar que la ruta corrió de verdad, no solo que el fetch devolvió 200: log de T0.2 del lado
+   de la ruta, o una query a `chatbotEvent` que muestre que se podó lo viejo (mismo criterio de
+   verificación que ya usó T0.2).
+
+Hasta que Valentino vea una invocación real con badge Scheduled + Run now + ejecución confirmada,
+CRON-2 está implementado, no verificado — `tsc`/`eslint` en verde no cierra esto, es prod o nada.
+
+---
+
