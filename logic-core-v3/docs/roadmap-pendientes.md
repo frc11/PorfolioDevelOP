@@ -107,6 +107,7 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 ### UTM — embed directo sin atribución (deuda, no urgente)
 - **Sprint origen:** UTM.1 (2026-07-04) — deuda identificada en investigación read-only de seguimiento a P4.1
 - **Qué:** `/embed/[slug]` abierto como documento top-level (iframe a mano, o link directo compartido) no recibe el `postMessage develop:init` → `attribution` queda `undefined` → la sesión entera va sin UTM/referrer, en silencio. Producción usa `widget.js` (no afectado). Fix: fallback en `ChatbotEmbed` que lea `location.search` propio cuando no llega el handshake. Microsprint chico. Evidencia: `ChatbotEmbed.tsx:64-84`, `useChatbot.ts:123-135`.
+- **Nota de cruce:** Distinto del hallazgo **RE-1** de la auditoría (init-request sin handler → race de atribución). RE-1 es un sprint aparte, aún no corrido; comparte archivos con RE-2/C0.2, tenerlo en cuenta al secuenciar.
 
 ### UTM — punto ciego de tests (camino cliente)
 - **Sprint origen:** UTM.1 (2026-07-04) — deuda identificada en investigación read-only de seguimiento a P4.1
@@ -120,14 +121,12 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 - **Sprint origen:** COST-1 (2026-07-10)
 - **Estado:** Implementado, gate de lógica verde (8/8 checks, `tsc`/lint OK). NO verificado contra datos reales — el bug era invisible al build, no se cierra por tsc verde.
 - **Qué falta para cerrar:** (1) SELECT comparativo en PROD sobre `Conversation`/`QuotaUsage` — `estimatedCostUsd`/`costUsd` reciente vs el modelo del plan; confirmar que el costo registrado es ≠ $0 y corresponde al modelo efectivo. (2) Medir el volumen de eventos `chat.cost_model_unknown` en `chatbotEvent` para dimensionar qué tan extendido estaba el mismatch en prod.
-- **Notas:** Al verificar, anotar el resultado en la entrada `## ✅ COST-1` de la bitácora y borrar esta pendiente.
+- **Notas:** Al verificar, anotar el resultado en la entrada de COST-1 en la bitácora y borrar esta pendiente.
 
-### Chequeos abiertos de cobertura (dos `rg`, baratos)
-- **Sprint origen:** COST-1 (2026-07-10)
-- **Qué:** El fix protege `handleChatRequest`, pero el fallback vive en el call-site (`resolveEffectiveModel`), no en el provider. Quedan dos huecos posibles a confirmar por lectura:
-  - **(a) Otros call-sites de `getModel`** fuera de `resolveEffectiveModel.ts` que sigan tirando 500 con un provider stub (`rg "getModel|ProviderNotImplementedError" src/`) — p.ej. `smokeTest`, insights, brief, si resuelven modelo por su cuenta.
-  - **(b) El WARN cubre registry, no pricing:** son dos tablas distintas (registry de modelos en `google.ts` vs tabla de precios en `pricing/costs.ts`). Un modelo presente en el registry pero ausente en pricing sigue devolviendo $0 sin disparar WARN (`rg "cost_model_unknown" src/` y ver contra qué valida).
-- **Cuándo prioritarlo:** Junto con la verificación en prod de arriba, o antes si el volumen de WARN sale bajo y sospechás falsos negativos.
+### Chequeos de cobertura — RESUELTOS por las pasadas read-only 2026-07-11
+- **Sprint origen:** COST-1 (2026-07-10), cerrados en investigación read-only (2026-07-11)
+- **(a) Otros call-sites de `getModel`:** confirmado. El runtime de cada turno, insights, brief, smoke-test y reportes están protegidos (hardcodeo `'google'` + try/catch). Único gap real: `demo-chat/[slug]/route.ts` → ver COST-2b abajo. Cerrado como investigación.
+- **(b) WARN registry vs pricing:** la hipótesis "son dos tablas distintas" era **falsa para Google** — `getModel`/`estimateCost`/`listModels` leen el mismo objeto `GOOGLE_MODELS`, y TS strict hace imposible un modelo sin precio. El escenario hipotetizado NO es alcanzable. El gap real que sí apareció (clave≠id en el breakdown) se cerró en **COST-2** (ya commiteado).
 
 ---
 
@@ -136,8 +135,9 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 ### Verificación visual + coreografía con Neon dormida
 - **Sprint origen:** RE-2 (2026-07-10)
 - **Estado:** Implementado, gate de lógica verde (6/6, `tsc`/lint OK, el no-envenenamiento del cache testeado contra el módulo real). NO verificado visualmente.
-- **Qué falta para cerrar:** (1) Visual-qa del estado de error/reintento en desktop + mobile, en ambos render (embed + on-site) — bloqueado hoy por el MCP de preview sin cablear (ver Gaps de entorno). (2) Coreografía real con Neon dormida DE VERDAD (cold-start real, no mock): ver el auto-retry disparándose y recuperándose, por grabación. El mock del smoke no sustituye esto ("verde ≠ se ve").
-- **Notas:** Al verificar, anotar en la entrada `## ✅ RE-2` y borrar esta pendiente.
+- **Qué falta para cerrar:** (1) Visual-qa del estado de error/reintento en desktop + mobile, en ambos render (embed + on-site) — bloqueado por el MCP de preview sin cablear (ver Gaps de entorno). (2) Coreografía real con Neon dormida DE VERDAD (cold-start real, no mock): ver el auto-retry disparándose y recuperándose, por grabación. El mock del smoke no sustituye esto ("verde ≠ se ve").
+- **⚠️ Riesgo de contaminación:** la verificación manual previa se hizo (en parte) contra un dev server colgado a nivel proceso desde el commit `dd5da60` (ver Gaps). Rehacer en un server sano — lo poco que se miró puede no ser válido.
+- **Notas:** Al verificar, anotar en la entrada de RE-2 y borrar esta pendiente.
 
 ### Decisión diferida: microcopy durante el retry de `/config`
 - **Sprint origen:** RE-2 (2026-07-10)
@@ -146,12 +146,46 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 
 ---
 
-## Deuda técnica abierta por COST-1 (detalle de bloques en `docs/consolidacion-planoA-runtime.md`)
+## C0.2 — La conversación larga no muere muda (implementado, verificación pendiente)
 
-### `chat.cost_model_unknown` refuerza la urgencia de T0.2
+### Conversación real de 30+ turnos con el widget
+- **Sprint origen:** C0.2 (2026-07-11)
+- **Estado:** Implementado y verificado con smoke de 22 turnos + body fabricado (recorte, degradación al turno 21). NO verificado con el widget real en conversación larga por Valentino. El smoke propio de CC corrió sobre el server colgado `dd5da60` (más razón para rehacerlo).
+- **Qué falta para cerrar:** conversación de 30+ turnos con el widget de verdad en `:3000` (server sano): que fluya sin cortes ni 400, que al ~turno 21 aparezca el cartel de WhatsApp con el input bloqueado, y que una charla corta se sienta idéntica a siempre.
+- **Notas:** Se verifica junto con RE-2 (conviven en el widget). Al cerrar, anotar en la entrada de C0.2 y borrar esta pendiente.
+
+---
+
+## COST-2b — `demo-chat` route: camino feliz roto (código muerto)
+
+- **Sprint origen:** investigación read-only de COST-1 (2026-07-11)
+- **Qué:** `app/api/admin/chatbot/demo-chat/[slug]/route.ts` (líneas ~45,47) hace `getLLMProvider(bot.llmProvider as ...)` + `provider.getModel(bot.llmModel)` con valores dinámicos de la DB, **sin** `normalizeLlmProvider` ni `resolveEffectiveModel`, y **sin** try/catch. El enum Prisma devuelve `'GOOGLE'` (mayúsculas), el switch de `getLLMProvider` matchea `'google'` (minúsculas) case-sensitive → **throwea para el 100% de los bots**, no solo los stub — el camino feliz está roto, no un edge case. El cast `as` le miente al compilador; `normalizeLlmProvider` existe justo para esto.
+- **Por qué se postpuso:** Es **código muerto** — `grep -ri "demo-chat"` no encuentra ningún caller (ni UI ni fetch), y está tras `requireSuperAdmin()`. Endpoint roto que nadie llama = deuda latente, no fuga. No amerita sprint propio urgente.
+- **Cuándo prioritarlo:** Cuando algún sprint toque ese endpoint, o cuando se cablee un preview de demo. Fix mecánico: reemplazar por `resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)` (el patrón de `handleChatRequest.ts:694-695`), que de paso le da el degrade-con-WARN en vez de 500 crudo. La investigación ya está hecha.
+- **Corrección de registro:** la nota "modelo hardcodeado" que COST-1 dejó sobre este archivo en la bitácora es **falsa** — el modelo es dinámico desde la DB, el problema es el cast sin normalizar. Corregir esa nota si se toca la bitácora.
+
+---
+
+## COST-2c — Breakdown input/output y validación de providers reales (latente)
+
+- **Sprint origen:** investigación read-only de COST-1 + cierre de COST-2 (2026-07-11)
+- **Qué:** (1) `costs.ts` en la rama `!modelInfo` ya devuelve el `total` autoritativo (COST-2), pero el split `inputUsd/outputUsd` cae a 0/0 — honesto pero no exacto; si algún consumidor necesita el split fino ahí, falta. (2) Cuando se implemente `getModel` real de Anthropic/OpenAI (hoy stubs que tiran `ProviderNotImplementedError`), debe validar contra la misma tabla que `estimateCost`/`listModels` (como Google), para no abrir una tercera fuente de verdad desalineable.
+- **Por qué se postpuso:** Ambos son latentes, no fugas activas. El split 0/0 solo importa si un consumidor lee input/output por separado en el caso degradado; los providers reales no existen aún.
+- **Cuándo prioritarlo:** (1) si un reporte necesita el desglose fino; (2) cuando se implemente Anthropic/OpenAI de verdad.
+
+---
+
+## Corrección de registro (línea vieja de este doc)
+
+- **Frase "son dos tablas distintas" (registry vs pricing):** era engañosa para Google — es el mismo objeto `GOOGLE_MODELS` leído tres veces, no dos tablas desincronizables. Las únicas tablas genuinamente separadas (Anthropic/OpenAI) no pueden producir el mismatch porque su `getModel` nunca dice "sí" a nada (stubs). Cerrado en COST-2. Esta corrección reemplaza cualquier versión previa de esa nota.
+
+---
+
+## Deuda técnica abierta por COST-1
+
+### `chat.cost_model_unknown` refuerza la urgencia de T0.2 — SALDADO
 - **Sprint origen:** COST-1 (2026-07-10)
-- **Qué:** El WARN nuevo (`chat.cost_model_unknown`) puede dispararse por turno en un bot mal configurado, y se persiste en `chatbotEvent` — la tabla de crecimiento más rápido. T0.2 (cron `cleanupOldEvents`, aún sin hacer) pasa de "higiene" a tener un evento más que la alimenta.
-- **Cuándo prioritarlo:** Cuando se corra T0.2, este evento es parte del argumento.
+- **Qué:** El WARN nuevo (`chat.cost_model_unknown`) puede dispararse por turno en un bot mal configurado, y se persiste en `chatbotEvent`. **T0.2 ya cableó el cron `cleanupOldEvents`** (retención 30d), así que el crecimiento está acotado. Queda como contexto histórico; el riesgo agudo se cerró.
 
 ### `logChatbotEvent` await-eado = instancia de C3.6
 - **Sprint origen:** COST-1 (2026-07-10)
@@ -160,20 +194,56 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 
 ---
 
+## Deuda técnica abierta por T0.2
+
+### Configs de cron desincronizadas (`netlify.toml` vs `vercel.json`)
+- **Sprint origen:** T0.2 (2026-07-11)
+- **Qué:** El repo tiene 7 crons: 2 en `netlify.toml` y otros 3 en `vercel.json` — dos sets de config distintos y desincronizados. `cleanup-old-events` se agregó a `netlify.toml`. No se resolvió cuál es la fuente de verdad ni si los de `vercel.json` corren en el deploy actual (Netlify).
+- **Cuándo prioritarlo:** Antes de confiar en cualquier cron para algo crítico — hay que saber cuáles agenda efectivamente el deploy de producción. Candidato a un microsprint de consolidación (read-only + limpiar la config muerta).
+
+### Helper de auth de crons duplicado 4×
+- **Sprint origen:** T0.2 (2026-07-11)
+- **Qué:** La verificación de `CRON_SECRET` está copiada en cada ruta de cron (4ª vez con `cleanup-old-events`, a propósito para no tocar archivos ajenos al sprint). Extraerlo a un helper compartido tocaría los otros crons.
+- **Cuándo prioritarlo:** Cuando se consoliden las configs de cron (arriba) o se toque otro cron — hacerlo de paso.
+
+### Índice con `createdAt` líder para `ChatbotEvent`
+- **Sprint origen:** T0.2 (2026-07-11)
+- **Qué:** Ninguno de los 3 índices de `ChatbotEvent` tiene `createdAt` como columna líder, así que el `deleteMany` del cron de limpieza no puede usar índice de plano. A 172 filas no importa; si la tabla crece mucho antes de que el cron corra seguido, un índice `(createdAt)` lo justificaría.
+- **Cuándo prioritarlo:** Si `chatbotEvent` crece a decenas de miles de filas. Sería migración aditiva (coordinar con Franco, branch compartida).
+
+---
+
 ## Gaps de entorno (bloquean verificación, no build)
 
 ### MCP de preview sin cablear para el subagente visual-qa
-- **Sprint origen:** INFRA.2, repetido en RE-2 (2026-07-10)
-- **Qué:** El subagente visual-qa no tiene el MCP de preview conectado, así que no puede capturar el estado renderizado en desktop/mobile. Ya lo documentó INFRA.2; RE-2 lo volvió a chocar. Todo sprint con superficie visual queda cojo hasta resolverlo — la verificación de reposo cae sobre Valentino a mano.
-- **Cuándo prioritarlo:** ANTES de C0.2 (conversación no muere muda), que es visual y de negocio. Entrar a C0.2 con el visual-qa roto es fabricar el tercer sprint cojo seguido.
-- **Notas:** Es config de entorno/herramienta, no código del proyecto.
+- **Sprint origen:** INFRA.2, repetido en RE-2/C0.2 (2026-07-11)
+- **Qué:** El subagente visual-qa no tiene el MCP de preview conectado, así que no puede capturar el estado renderizado en desktop/mobile. Ya lo documentó INFRA.2; RE-2 y C0.2 lo volvieron a chocar. Todo sprint con superficie visual queda cojo hasta resolverlo — la verificación de reposo cae sobre Valentino a mano.
+- **Cuándo prioritarlo:** ANTES del próximo sprint visual pesado. Es config de entorno/herramienta, no código del proyecto.
+
+### Dev server colgado a nivel proceso (`dd5da60`) — contaminó verificaciones
+- **Sprint origen:** detectado en C0.2 (2026-07-11)
+- **Qué:** El dev server en `:3000` estaba colgado ("Jest worker exceptions") desde el commit `dd5da60` — TODA ruta API devolvía 500. Cualquier verificación manual hecha en `:3000` desde ese commit (parte de RE-2, quizás COST-1) puede ser inválida. CC lo reinició en su sesión, pero puede recaer.
+- **Cuándo prioritarlo:** Como precondición de la tanda de verificación de RE-2/C0.2/COST-1 — levantar un server sano (ahora en el worktree `runtime/mejoras`) antes de dar por buena cualquier verificación.
+
+### Encoding roto en `docs/bitacora-roadmap.md`
+- **Sprint origen:** detectado al commitear COST-2 (2026-07-11)
+- **Qué:** La bitácora tiene caracteres mal codificados (`Ô£à` en vez de `✅`, `ÔÇö` en vez de `—`) — se escribió sin UTF-8. No rompe nada funcional; es cosmético. Molesta al leer.
+- **Cuándo prioritarlo:** En una pasada de limpieza cuando se toque la bitácora por otra cosa. No amerita sprint propio.
+
+---
+
+## Nota de proceso (git) — 2026-07-11
+
+- **COST-2 quedó en dos commits** por un staging parcial: `e0d2ac0` se llevó solo docs+`package.json` (los `git add -p`), y el código (`costs.ts` + 3 providers + test) quedó afuera hasta un segundo commit `3819c7a`. Lección: en commits multi-archivo, `git add` de los archivos enteros PRIMERO, `git status` para confirmar staged, y recién ahí los `-p` de los compartidos. Y `git show <commit> --stat` después de cada commit importante para cazar un commit al que le falta la mitad.
+- **Working tree compartido resuelto:** el chat Panel commiteó PD-1 (`b06ca12`) sobre la rama `b0-isolation-motor-chatbot` mientras el runtime trabajaba sobre el mismo checkout. Se separó en worktree `runtime/mejoras` (`../logic-core-runtime/logic-core-v3`). De acá en más: runtime en ese worktree, Panel en el original. No volver a compartir carpeta+rama entre sesiones.
 
 ---
 
 ## Punteros a la consolidación (detalle en `docs/consolidacion-planoA-runtime.md`)
 
-- **Carril seguridad (lo corre Franco, aparte del flujo de sprints):** RT-2 (`/smoke` sin auth quema Gemini), RE-13 (`/health` expone internals), RE-16 (SSRF/DNS-rebinding en `postToN8n` — ya listado arriba en B5.8), RE-7 (atribución spoofeable por cualquier origin), RT-13 (sessionId adivinable → secuestro intra-tenant), CO-7 + PD-1 (cripto en reposo: tokens OAuth de terceros / credenciales de onboarding en texto plano), A.4 (secret en history sin purga).
-- **Decisiones abiertas que gatean bloques:** T0.1 (`/smoke` gate: runtime vs carril Franco), firma real de prod (gatea el cluster onFinish: INFRA.3 + RB.3 + MH.2), fork de historial (gatea C0.2: slice mínimo vs reconstruir desde `ChatMessage`).
+- **Carril seguridad (lo corre Franco, aparte del flujo de sprints):** RT-2 (`/smoke` sin auth quema Gemini), RE-13 (`/health` expone internals), RE-16 (SSRF/DNS-rebinding en `postToN8n` — ya listado arriba en B5.8), RE-7 (atribución spoofeable por cualquier origin), RT-13 (sessionId adivinable → secuestro intra-tenant), CO-7 + PD-1 (cripto en reposo: tokens OAuth de terceros / credenciales de onboarding en texto plano; PD-1.1/PD-1.3a ya commiteado por el chat Panel en `b06ca12`), A.4 (secret en history sin purga).
+- **Decisiones abiertas que gatean bloques:** T0.1 (`/smoke` gate: runtime vs carril Franco), firma real de prod (gatea el cluster onFinish: INFRA.3 + RB.3 + MH.2 — sin decidir en toda la sesión), fork de historial (ya decidido para C0.2: slice mínimo; la reconstrucción DB-autoritativa queda para E2).
+- **Drift de migraciones (bloqueante de sprints con migración):** la DB de dev tiene 3 migraciones del motor B1 que la rama de runtime no conoce + `add_portal_indexes` local sin aplicar. Conciliar con Franco (revisión de SQL, jamás `reset`) ANTES de C3.2 o cualquier bloque con migración.
 - El detalle, veredictos y orden de ejecución de las mejoras del runtime viven en `consolidacion-planoA-runtime.md`. Esta lista solo puntea; no dupliques el detalle acá para no crear dos fuentes.
 
 ---
