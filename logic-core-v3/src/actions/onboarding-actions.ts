@@ -6,6 +6,8 @@ import { resolveOrgId } from '@/lib/preview'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
+import { CredentialEncryptionError } from '@/lib/crypto/credential-cipher'
+import { encryptCredentialForStorage } from '@/lib/crypto/encrypt-for-storage'
 
 // P1-12: convierte el valor de FormData a string sin un `as` que enmascare el
 // tipo real (FormDataEntryValue puede ser File). No-string → ''.
@@ -32,6 +34,15 @@ interface OnboardingData {
   domainCredentials?: string
   socialCredentials?: string
 }
+
+const OnboardingDataSchema = z.object({
+  primaryColor: z.string().max(100).optional(),
+  secondaryColor: z.string().max(100).optional(),
+  toneOfVoice: z.string().max(2000).optional(),
+  targetAudience: z.string().max(2000).optional(),
+  domainCredentials: z.string().max(5000).optional(),
+  socialCredentials: z.string().max(5000).optional(),
+})
 
 // ─── Save profile from bienvenida wizard ──────────────────────────────────────
 
@@ -77,56 +88,64 @@ export async function saveOnboardingProfile(
 // ─── Complete full onboarding (brand + access) ────────────────────────────────
 
 export async function completeOnboardingAction(data: OnboardingData) {
-  const session = await auth()
+  await auth()
   const organizationId = await resolveOrgId()
   
   if (!organizationId) {
     return { success: false, error: 'No autorizado' }
   }
 
+  const parsed = OnboardingDataSchema.safeParse(data)
+  if (!parsed.success) {
+    return { success: false, error: 'Datos de onboarding inválidos.' }
+  }
+  const input = parsed.data
+
   try {
     await prisma.$transaction(async (tx) => {
       // 1. Guardar Brand Profile
-      if (data.primaryColor || data.secondaryColor || data.toneOfVoice || data.targetAudience) {
+      if (input.primaryColor || input.secondaryColor || input.toneOfVoice || input.targetAudience) {
         await tx.clientBrandProfile.upsert({
           where: { organizationId },
           update: {
-            primaryColor: data.primaryColor,
-            secondaryColor: data.secondaryColor,
-            toneOfVoice: data.toneOfVoice,
-            targetAudience: data.targetAudience,
+            primaryColor: input.primaryColor,
+            secondaryColor: input.secondaryColor,
+            toneOfVoice: input.toneOfVoice,
+            targetAudience: input.targetAudience,
           },
           create: {
             organizationId,
-            primaryColor: data.primaryColor,
-            secondaryColor: data.secondaryColor,
-            toneOfVoice: data.toneOfVoice,
-            targetAudience: data.targetAudience,
+            primaryColor: input.primaryColor,
+            secondaryColor: input.secondaryColor,
+            toneOfVoice: input.toneOfVoice,
+            targetAudience: input.targetAudience,
           }
         })
       }
 
-      // 2. Guardar Credenciales Técnicas en Bóveda si existen
-      if (data.domainCredentials) {
+      // 2. Guardar Credenciales Técnicas en Bóveda si existen — SIEMPRE
+      // cifradas (PD-1.2). Si el cifrado lanza (key ausente), el throw aborta
+      // la $transaction entera: no queda nada a medio guardar.
+      if (input.domainCredentials) {
         await tx.clientAsset.create({
           data: {
             organizationId,
             name: 'Credenciales de Dominio/Hosting',
-            url: 'ENCRIPTADO_EN_TEXTO',
+            url: '',
             type: 'ACCESS',
-            description: data.domainCredentials
+            description: encryptCredentialForStorage(input.domainCredentials)
           }
         })
       }
 
-      if (data.socialCredentials) {
+      if (input.socialCredentials) {
         await tx.clientAsset.create({
           data: {
             organizationId,
             name: 'Credenciales de Redes Sociales',
-            url: 'ENCRIPTADO_EN_TEXTO',
+            url: '',
             type: 'ACCESS',
-            description: data.socialCredentials
+            description: encryptCredentialForStorage(input.socialCredentials)
           }
         })
       }
@@ -142,6 +161,12 @@ export async function completeOnboardingAction(data: OnboardingData) {
     revalidatePath('/dashboard', 'layout')
     return { success: true }
   } catch (error) {
+    if (error instanceof CredentialEncryptionError) {
+      return {
+        success: false,
+        error: 'El cifrado de credenciales no está configurado. No se guardó nada.',
+      }
+    }
     console.error('Error in completeOnboardingAction:', error)
     return { success: false, error: 'Ocurrió un error al procesar el onboarding.' }
   }

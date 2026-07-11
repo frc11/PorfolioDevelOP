@@ -4,12 +4,14 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { AssetType } from '@prisma/client'
+import { z } from 'zod'
 import { sendEmail } from '@/lib/email'
 import { ActionRequiredEmail } from '@/emails/ActionRequiredEmail'
 import {
   assertProjectBelongsToOrg,
   ResourceNotOwnedError,
 } from '@/lib/auth/assert-ownership'
+import { encryptCredentialForStorage } from '@/lib/crypto/encrypt-for-storage'
 
 export async function createTaskForClientAction(
   projectId: string,
@@ -91,6 +93,14 @@ export async function createTaskForClientAction(
   return { success: true }
 }
 
+const CreateClientAssetSchema = z.object({
+  organizationId: z.string().min(1),
+  name: z.string().min(1).max(200),
+  url: z.string().max(2000),
+  type: z.nativeEnum(AssetType),
+  description: z.string().max(5000).optional(),
+})
+
 export async function createClientAssetAction(
   organizationId: string,
   data: { name: string; url: string; type: AssetType; description?: string }
@@ -100,13 +110,27 @@ export async function createClientAssetAction(
     throw new Error('Unauthorized')
   }
 
+  // Se lanza en vez de retornar {success:false}: VaultManager no inspecciona
+  // el retorno y limpiaría el form como si hubiera guardado; el throw cae en
+  // su catch y lo evita.
+  const parsed = CreateClientAssetSchema.safeParse({ organizationId, ...data })
+  if (!parsed.success) {
+    throw new Error('Datos de asset inválidos')
+  }
+  const input = parsed.data
+
   await prisma.clientAsset.create({
     data: {
-      organizationId,
-      name: data.name,
-      url: data.url,
-      type: data.type,
-      description: data.description
+      organizationId: input.organizationId,
+      name: input.name,
+      url: input.url,
+      type: input.type,
+      // Solo ACCESS es credencial y se cifra (PD-1.2); otros types son texto
+      // libre no-credencial y quedan en claro.
+      description:
+        input.type === 'ACCESS' && input.description
+          ? encryptCredentialForStorage(input.description)
+          : input.description,
     }
   })
 
