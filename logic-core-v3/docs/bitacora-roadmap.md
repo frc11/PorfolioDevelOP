@@ -13379,3 +13379,244 @@ Sin motion/hover ni tematización — el ticket excluye estética/branding expl�
 - Los 2 issues de lint pre-existentes (ref-in-render, set-state-in-effect): no se tocaron, son de
   regiones/efectos que este sprint no toca funcionalmente.
 
+## ✅ C0.2 — La conversación larga no muere muda (recorte server + ventana widget + degradación digna)   ·   2026-07-10
+
+Hoy una conversación larga moría de tres formas: el schema del body rechazaba con **400 al mensaje
+51** (`.max(50)` duro), el historial COMPLETO se re-mandaba a Vertex cada turno (amplificación
+lineal de costo), y el soft-cap de 15 turnos era solo una sugerencia al modelo, no un gate. Las
+conversaciones largas son las que compran — este sprint garantiza que NUNCA terminen en un 400 ni
+en un turno mudo: el server recorta (no rechaza), el widget manda una ventana deslizante, y al
+tope la sesión se cierra con dignidad (CTA a WhatsApp si está configurado). NO reconstruye el
+historial desde la DB (eso es E2) — es el fix mínimo que para la sangre.
+
+### Descubrimiento (Paso 0) — todo coincidió con la auditoría del 2026-07-07
+- Schema en `handleChatRequest.ts` (`.min(1).max(50)`, 8000 chars/mensaje); el parse rechazaba con
+  400 (`chat.bad_request`). El armado del historial a Vertex mandaba `body.messages` ENTERO (map
+  directo dentro de `streamText`).
+- Soft-cap 15: `SOFT_CAP_THRESHOLD` en `prompts/sections.ts` — solo texto del prompt, sin gate.
+- Punto de envío del widget: **UNO solo** — `prepareSendMessagesRequest` en `useChatbot.ts`
+  (DefaultChatTransport); LogicCompanion (on-site) y ChatbotEmbed comparten el hook, así que la
+  ventana se aplica UNA vez y cubre ambos renders sin riesgo de desincronizarse. Mandaba TODO el
+  historial acumulado (solo filtraba burbujas `proactive-*`).
+- `Conversation.messageCount` ya venía resuelto en el request (+2 por turno exitoso en onFinish) →
+  el hard-cap se evalúa con **cero query extra**.
+- El patrón de degradación B4.2/B4.5 (`degradedResponse` server + `DegradedBanner` cliente) ya
+  resolvía el caso "sin WhatsApp" (mensaje digno en itálica) — se reusó tal cual, sin tocarlo.
+
+### La pieza nueva: `shared/historyPolicy.ts` (pura, isomórfica)
+Constantes + `trimHistory()` compartidas por server y widget (mismo patrón que
+`chatRetryPolicy.ts`): cliente y server recortan con EXACTAMENTE la misma lógica.
+- `HISTORY_WINDOW_MESSAGES = 30` (~15 turnos del visitante ≈ el horizonte del soft-cap; más atrás
+  el contexto aporta poco a la venta y el costo de re-mandarlo crece lineal por turno). El server
+  recorta a lo mismo → sobre tráfico sano el recorte server es idempotente (defensa, no camino
+  activo).
+- `MAX_MESSAGES_SHAPE = 50` — el `.max(50)` queda como validación de FORMA, como pedía el ticket:
+  entre la ventana del widget (30) y el hard-cap (que degrada y bloquea el input alrededor del
+  mensaje ~41), ningún cliente legítimo — ni un tab viejo pre-deploy que acumule todo — llega a
+  50 items. Superarlo = payload absurdo = 400 legítimo.
+- `MAX_MESSAGE_CHARS = 4000` (antes 8000): ~2.5-3× el reply real más largo del bot (formato corto
+  mobile forzado por prompt). Margen amplio DELIBERADO, no percentil justo: un mensaje del
+  historial que exceda el cap deja la conversación en 400 hasta que sale de la ventana — la
+  asimetría favorece el margen. El mismo valor va como `maxLength` de los DOS textareas
+  (ChatWindow + ChatbotEmbed): el cliente no puede producir un mensaje que el server rechace.
+- `HARD_CAP_MESSAGES = 40` (≈20 turnos del visitante, sobre `messageCount`): 5 turnos de pista
+  después del soft-cap para que el modelo oriente el cierre antes de la pared.
+- **Invariante dura de `trimHistory`**: el último `user` (el turno en curso) queda SIEMPRE en la
+  ventana — si `slice(-N)` se lo comiera (cola patológica de mensajes no-user), la ventana se
+  ancla en él. Además deja la ventana **user-led** (Gemini/Vertex lo requiere — el mismo motivo
+  por el que el widget filtra las `proactive-*`). Camino corto: un array ≤ ventana vuelve por la
+  MISMA referencia (cero cambio de comportamiento).
+
+### Server — recorta, no rechaza (+ gate del hard-cap)
+- `requestBodySchema` (`handleChatRequest.ts:61`): `.max(MAX_MESSAGES_SHAPE)` +
+  `.transform(trimHistory)` — el recorte vive EN el schema (un solo choke point): `body.messages`
+  aguas abajo YA es la ventana; el map a Vertex (`:789`) y `lastUserMessage` no cambiaron ni una
+  línea. Superar la ventana recorta; superar la forma sigue siendo 400.
+- **Gate 5.c** (`handleChatRequest.ts:543`, después de la reserva de cuota, antes del persist):
+  `messageCount >= 40` → `degradedResponse('conversation_limit')` con el WhatsApp del bot; sin
+  WhatsApp configurado → mensaje digno alternativo ("escribinos por los canales del sitio"). Cero
+  costo de LLM, nada se persiste → `messageCount` queda congelado y el estado degradado es
+  ESTABLE en todos los turnos siguientes. Telemetría: `chat.gating_conversation_limit` (chatbotLog
+  + chatbot_events, mismo patrón que domain_overflow).
+- Observabilidad del recorte: `request_parsed` ahora loguea `receivedMessageCount` (largo crudo
+  del body) además del `messageCount` ya recortado.
+
+### Widget — ventana deslizante + reason nuevo (ambos renders)
+- `prepareSendMessagesRequest` (`useChatbot.ts:358`): el array filtrado+mapeado pasa por
+  `trimHistory(..., HISTORY_WINDOW_MESSAGES)` — un solo punto, cubre on-site y embed.
+- `DegradedReason` del cliente suma `'conversation_limit'` (antes cualquier reason desconocido se
+  coercionaba a `quota_exhausted`); va por el mismo carril de render existente (DegradedBanner
+  verde + CTA WhatsApp, input bloqueado por `inputLockedByDegrade` — terminal, como cuota).
+
+### Soft-cap (`sections.ts`) — de sugerencia pasiva a orientar el cierre
+La línea del soft-cap (≥15 turnos) ahora pide activamente CERRAR (capture_lead si faltan datos +
+proponer `show_whatsapp_handoff`) y le da al modelo la pista concreta de la pared: "cerca del
+turno ${HARD_CAP_MESSAGES/2} la sesión automática se cierra sola y deriva a WhatsApp". Sigue
+siendo soft (el modelo decide) — el gate real es el 5.c del server.
+
+### Verificación
+- **Gate nuevo** `npm run test:c02` (`server/chat/__tests__/history-window.invariant.ts`, idioma
+  node:assert + tsx del repo): camino corto por MISMA referencia; recorte conserva último user +
+  user-led + sufijo contiguo (cronología intacta); caso patológico anclado en el turno en curso;
+  array sin user no lanza (slice plano, el handler decide como siempre); **el schema trunca en
+  vez de 400** (body de 45 msgs parsea → ≤30, último user exacto); la forma sigue viva (51 items
+  rechaza; 4001 chars rechaza, 4000 pasa); paridad deep-equal del camino corto a través del
+  schema. Verde, junto con `test:utm1` (mismo schema real) y `test:infra2` sin regresión.
+- **Smoke conductual real** (dev :3000, bot `qaseed-evals-usados`, Vertex real; script turno a
+  turno replicando la ventana del widget; corrido en dos tramos sobre la MISMA conversación
+  — t1-16 y t17-22 retomada por reinicio de sesión): 22 turnos, `sin_400=true`. Desde t16 el body
+  enviado ya viaja recortado (`sent=29`). **t18 con body de 35 mensajes (>ventana, simulando un
+  widget viejo que acumula): 200 stream** — el server recortó en vez de rechazar y el bot
+  respondió coherente al turno en curso (recorte conservó el último user). **t21
+  (messageCount=40): degradación EXACTA en el turno diseñado** — `mode=degraded
+  reason=conversation_limit ctaWhatsapp=true whatsappNumber=configurado`. t22: degradado estable
+  (2º consecutivo, nada se persiste). Camino corto (t1-t3): streams normales, paridad.
+- **Visual (browser real)**: embed `/embed/qaseed-evals-usados` verificado ida y vuelta (welcome,
+  textarea con `maxLength` acepta texto normal, envío, respuesta real renderizada; consola sin
+  errores). On-site: launcher + teaser proactivo presentes; la apertura del panel no se pudo
+  automatizar a ciegas (screenshots denegados por permisos del extension en localhost; clicks por
+  ref no landan en esta app) — no es un hallazgo del sprint. **visual-qa (subagente): mismo
+  bloqueo de entorno recurrente que INFRA.2/RE-2** (MCP de preview no cableado); lo reportó
+  honesto en vez de inventar resultados.
+- `tsc --noEmit`: idéntico al baseline (solo `searchconsole.ts:119`). `eslint` (7 archivos
+  tocados): 0 errores nuevos; los 2 pre-existentes ya documentados por RE-2 (ref-in-render en
+  ChatbotEmbed, set-state-in-effect en useChatbot), corridos de línea por las inserciones.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **Reconstrucción del historial desde ChatMessage (E2)**: NO — el server sigue confiando en la
+  ventana que manda el cliente; solo la acota. Qué historial es "autoritativo" queda igual.
+- Packs/scoring/intents intactos; de prompts, SOLO la línea del soft-cap (manejo de cap). /admin
+  y /dashboard intactos. Sin migraciones (`schema.prisma` intacto). Frozen files intactos.
+- El mensaje del visitante del turno degradado NO se persiste (consistente con los degradados de
+  cuota/dominio existentes) — el CTA lo mueve a WhatsApp; asumido y documentado.
+- Tab viejo pre-deploy con una conversación local YA >50 mensajes: sigue 400eando como hoy hasta
+  recargar (se auto-sana; ningún cliente post-deploy puede volver a ese estado).
+
+### Hallazgos de entorno (no del sprint)
+- El dev server que corría en :3000 estaba colgado a nivel proceso ("Jest worker encountered 2
+  child process exceptions", release `dd5da60` anterior al HEAD): TODA ruta API devolvía 500 con
+  HTML de error. Se reinició (fix trivial) — si reaparece, es reciclar el proceso, no un bug.
+- `prisma migrate status` reporta drift entre ramas: local tiene
+  `20260710203413_add_portal_indexes` sin aplicar y la DB de dev tiene 3 migraciones del motor B1
+  (`b1s1/b1s2/b1s3`) que no existen en esta rama. No bloquea este sprint (cero cambios de schema)
+  — a conciliar cuando se mergeen las ramas. Jamás `migrate reset`.
+
+### Verificación humana pendiente (Valentino)
+La conversación real de 30+ turnos en :3000 con el widget de verdad es el cierre real — el smoke
+scripted prueba el contrato HTTP, no la experiencia. Ver: (1) que una charla larga fluya sin
+cortes ni errores visibles, (2) el cartel de WhatsApp al tope (~turno 21) con el input bloqueado
+y el placeholder "Continuá la conversación por WhatsApp", (3) una charla corta idéntica a
+siempre. No es multi-tenant → sin golden-suite.
+
+## ✅ T0.2 — Cron de `cleanupOldEvents` cableado (frena el crecimiento de `chatbot_events`)   ·   2026-07-11
+
+`cleanupOldEvents(maxAgeDays=30)` existía desde hace tiempo pero **no estaba wireada a ningún
+cron** — la tabla `chatbot_events` crecía sin poda (380 filas al empezar, 208 con más de 30 días,
+la más vieja del 15/05). COST-1 le agregó `chat.cost_model_unknown`, emisible por turno en un bot
+mal configurado — más motivo para frenar esto ya. Este sprint cablea la ruta, la agenda en
+Netlify y la testea; la función de borrado en sí queda intacta, cero líneas tocadas.
+
+### Descubrimiento (Paso 0) — 2 correcciones al ticket
+- **"Los dos crons ya existentes" no son los únicos 2 crons del repo** — hay 7 rutas bajo
+  `src/app/api/cron/`, pero solo 2 están registradas como Netlify Scheduled Functions en
+  `netlify.toml` (`generate-insights-cron` 0 9 * * *, `send-weekly-reports-cron` 0 12 * * MON) —
+  esos son, en efecto, los que invocan `generateInsightsForBot`/`buildWeeklyReport`, así que el
+  ticket señalaba bien el par correcto. Ojo aparte: **`vercel.json` registra otros 3 crons
+  distintos** (`os-follow-up`, `regenerate-briefs`, `send-executive-reports`) — dato reportado,
+  no tocado (netlify.toml es la config activa: `[build]`/`[[plugins]] @netlify/plugin-nextjs` +
+  toda la doc de deploy apunta a Netlify).
+- **`generateInsightsForBot` NO lee `chatbotEvent`** — el ticket pedía la ventana de "insights...
+  sobre chatbotEvent", pero esa función solo consulta `Conversation`/`ChatMessage` (ventana de 30
+  días, tabla distinta). El único lector real de `chatbotEvent` entre los dos nombrados es
+  `buildWeeklyReport`, con ventana máxima de **14 días** (`prevWeekStart`). Barrido rápido de los
+  otros lectores de `chatbotEvent` en el repo (`detectBotIssues` ≤7d, `getLatencyHistory` default
+  24h, `getActivityChartData` 7d, `listEventsSince`/`listRecentEvents` acotados por `take`, no por
+  ventana fija) confirma que 14 días es el techo real hoy.
+- **Auth NO es uniforme en el repo** — hay 3 variantes conviviendo. Los 2 crons "de referencia"
+  (`generate-insights`, `send-weekly-reports`) usan el patrón viejo `authHeader !== 'Bearer '+secret`
+  (sin trim, sin guard de secret vacío). Pero el patrón MÁS RECIENTE, ya duplicado 3 veces
+  (`regenerate-briefs`, `send-executive-reports`, `os-follow-up`), es un helper local
+  `getProvidedCronSecret()` con `.trim()` + fallback a `X-Cron-Secret` + `if (!expectedSecret ||
+  provided !== expectedSecret)`. El ticket pide explícito "si falta el secret, abortar/fallar
+  seguro, no autenticar Bearer undefined" — el patrón viejo NO garantiza eso por diseño (solo lo
+  evita por accidente porque `undefined !== 'Bearer undefined'`). Se clonó el patrón NUEVO
+  (duplicado una 4ª vez, sin tocar los 3 archivos que ya lo tienen — fuera de scope extraer un
+  helper compartido, ver abajo).
+
+### Implementación
+- **`src/app/api/cron/cleanup-old-events/route.ts`** (nuevo): `GET`, `force-dynamic`, mismo shape
+  de respuesta que el resto (`{ ok, ... }` / 401 / 500). `RETENTION_DAYS = 30` local, pasado
+  explícito a `cleanupOldEvents(RETENTION_DAYS)` — no se tocó `persistentLogger.ts` ni un carácter.
+  `getProvidedCronSecret` exportada (no solo local) para que el invariant la testee sin invocar el
+  camino feliz completo.
+- **Retención elegida: 30 días** (el default existente de la función). Margen 2x+ sobre la
+  ventana real más larga que lee `chatbotEvent` (14 días, `buildWeeklyReport`) — verificado con
+  filas sintéticas a 14d en el test de integración, no solo por lectura de código.
+- **`netlify.toml`**: `[functions."cleanup-old-events-cron"] schedule = "0 6 * * *"` — diario,
+  6am UTC (3am Argentina), no colisiona con los otros 2 horarios agendados. Diario en vez de
+  semanal: el motivo del sprint (COST-1 puede spamear `chat.cost_model_unknown` por turno en un
+  bot mal configurado) pide poda frecuente, no dejar crecer una semana entera entre pasadas.
+
+### Tests (los 3 que pedía el ticket, separados por lo que cada uno necesita)
+- **(a) "sin CRON_SECRET válido → rechaza"** — `cleanup-old-events-auth.invariant.ts` (nuevo,
+  `npm run test:t02`), **cero DB**: importa `GET`/`getProvidedCronSecret` directo del route y los
+  ejercita con `Request` sintéticos — el branch de auth retorna ANTES de tocar `cleanupOldEvents`,
+  así que esto es seguro sin red ni DB. 10 aserciones, incluye el caso literal que pide el ticket
+  (`CRON_SECRET` sin setear + header `Authorization: Bearer undefined` → 401, no autentica).
+- **(b) + (c) "borra solo lo viejo" / "no toca la ventana de métricas"** —
+  `tests/integration/cleanup-old-events-retention.spec.ts` (nuevo, `npm run test:integration`,
+  sigue el patrón de `alerts-detector.spec.ts`: `PrismaClient` directo, org/bot dedicados con slug
+  fijo — upsert, filas tageadas para limpieza inequívoca en `finally`). Llama `cleanupOldEvents`
+  EN PROCESO (sin HTTP — coincide con el diseño de `playwright.integration.config.ts`, que de
+  hecho EXCLUYE a `alerts-detector.spec.ts` por pegarle a HTTP real sin `baseURL`). 5 filas con
+  antigüedad controlada: 40d y 31d (fuera de retención → borradas), 29d y 2d (dentro → sobreviven),
+  y una a **14d exactos — el límite real de `buildWeeklyReport`** (sobrevive, prueba (c) contra el
+  número real descubierto en Paso 0, no un standin arbitrario). 2/2 tests verdes.
+  ⚠️ **Efecto de lado real, no simulado**: `cleanupOldEvents` es una purga GLOBAL sin eje de
+  tenant (por diseño — `ChatbotEvent` no tiene `organizationId` directo). Correr este test para
+  verificar (b)/(c) contra la función real **purga también los datos reales del bot >30 días**, no
+  solo las filas sintéticas del test. Antes de correrlo se contó la DB (380 filas, 208 >30 días,
+  la más vieja del 15/05) y se preguntó a Valentino si correrlo ahora — confirmó que sí. Post-run:
+  172 filas, 0 elegibles, la más vieja ahora del 11/06. Documentado acá para que quede el rastro de
+  una decisión que, por diseño de la función, no podía tomar solo.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **`cleanupOldEvents`/`persistentLogger.ts`**: intacto, cero cambios — solo se le pasa el
+  parámetro que ya aceptaba.
+- **Los otros 6 crons**: intactos. El helper `getProvidedCronSecret` queda duplicado una 4ª vez a
+  propósito — extraerlo a `src/lib/security/cron-auth.ts` compartido y migrar los 3 archivos que
+  ya lo tienen sería una buena limpieza, pero toca "otros crons" (prohibido este sprint). Anotado,
+  no implementado.
+- **`vercel.json`**: no tocado — coexiste con `netlify.toml` registrando un set distinto de crons;
+  discrepancia pre-existente, fuera del alcance de "cablear un cron nuevo en el mecanismo ya usado
+  por los 2 de referencia".
+- **Performance del `deleteMany` global**: ninguno de los 3 índices de `ChatbotEvent` tiene
+  `createdAt` como columna líder (todos lo tienen 2º/3º) — un `deleteMany({ createdAt: { lt } })`
+  puro no puede usar ninguno de plano. A 172 filas no importa; si la tabla crece mucho antes de la
+  próxima pasada diaria, podría justificar un índice — no es una migración de este sprint (NO
+  migración, regla dura).
+- Sin migración, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
+
+### Controles de cierre
+- `npm run test:t02`: 10/10 ✓ (invariant, cero DB).
+- `npm run test:integration -- cleanup-old-events-retention.spec.ts`: 2/2 ✓ (real DB, purga real
+  confirmada — ver arriba).
+- `tsc --noEmit`: idéntico al baseline (solo `searchconsole.ts:119`).
+- `eslint` (3 archivos tocados/creados): 0 errores, 0 warnings.
+- `npx prisma migrate status` (Paso 0, informativo): mismo drift ya documentado por C0.2
+  (`add_portal_indexes` local sin aplicar + 3 migraciones `b1s*` del motor en la DB que no están en
+  esta rama) — no bloquea, cero cambios de schema en este sprint.
+
+### Verificación declarada (Valentino, cuando quiera)
+Disparar el cron real (`GET /api/cron/cleanup-old-events` con el `CRON_SECRET` de verdad) y
+confirmar en logs/DB que borra viejos y respeta la retención — la purga de las 208 filas
+dev/QA acumuladas ya se hizo hoy (ver arriba, con tu confirmación) como parte de correr el test de
+integración, así que esta verificación es más bien contra el PRÓXIMO ciclo de acumulación o
+contra el cron ya desplegado en Netlify una vez mergeado. No es visual ni conductual.
+
+### Nota fuera de scope (detectada, no tocada)
+Working tree tiene cambios sin commitear de OTRO sprint (PD-1, "Onboarding Vault — cifrado de
+credenciales") que no son de T0.2: `.env.example` (bloque `ONBOARDING_SECRET_KEY`), `src/lib/crypto/`
+y `docs/audit-PD1-cifrado-onboarding.md`. No se tocaron ni se commitearon — quedan ahí para cuando
+corresponda cerrarlos por su cuenta.
+
