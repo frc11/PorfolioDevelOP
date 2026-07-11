@@ -22,6 +22,7 @@ import type { LucideIcon } from 'lucide-react'
 import { FadeIn } from '@/components/dashboard/FadeIn'
 import { StaggerContainer, StaggerItem } from '@/components/dashboard/StaggerWrapper'
 import { VaultRevealButton } from '@/components/dashboard/VaultRevealButton'
+import { resolveCredentialDisplay } from '@/lib/crypto/resolve-credential'
 import { VaultRequestModal } from '@/components/dashboard/VaultRequestModal'
 import { Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -125,6 +126,10 @@ export default async function VaultPage() {
             const cfg = TYPE_CONFIG[asset.type]
             const Icon = cfg.icon
             const isAccess = asset.type === 'ACCESS'
+            const credential =
+              isAccess && asset.description
+                ? resolveCredentialDisplay(asset.description)
+                : null
 
             return (
               <StaggerItem key={asset.id}>
@@ -169,11 +174,22 @@ export default async function VaultPage() {
                     </div>
                   </div>
 
-                  {/* Description */}
-                  {asset.description && (
-                    <p className="line-clamp-2 text-xs leading-relaxed text-zinc-500">
-                      {asset.description}
-                    </p>
+                  {/* Description — para ACCESS es la credencial: enmascarada, jamás en claro */}
+                  {isAccess ? (
+                    credential &&
+                    (credential.error ? (
+                      <p className="text-xs leading-relaxed text-red-400/60">
+                        No se pudo mostrar esta credencial.
+                      </p>
+                    ) : (
+                      <VaultRevealButton value={credential.value} />
+                    ))
+                  ) : (
+                    asset.description && (
+                      <p className="line-clamp-2 text-xs leading-relaxed text-zinc-500">
+                        {asset.description}
+                      </p>
+                    )
                   )}
 
                   {/* Footer: date + access button */}
