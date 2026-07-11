@@ -1,0 +1,391 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\franc\\Desktop\\wt-gs-aislamiento\\logic-core-v3\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=playwright.golden.config.ts"
+    ],
+    "configFile": "C:\\Users\\franc\\Desktop\\wt-gs-aislamiento\\logic-core-v3\\playwright.golden.config.ts",
+    "rootDir": "C:/Users/franc/Desktop/wt-gs-aislamiento/logic-core-v3/tests/golden",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/franc/Desktop/wt-gs-aislamiento/logic-core-v3/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "C:/Users/franc/Desktop/wt-gs-aislamiento/logic-core-v3/tests/golden",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "tests/golden/.last-run.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.61.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "isolation-http.spec.ts",
+      "file": "isolation-http.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "@isolation read · /api/reports/monthly con organizationId ajeno → 403",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2721,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:34.387Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-00e384870e19e0ad50be",
+          "file": "isolation-http.spec.ts",
+          "line": 116,
+          "column": 5
+        },
+        {
+          "title": "@isolation read · /api/dashboard/chatbot/leads/export nunca incluye leads de otra org",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2233,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:41.549Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-2b77a91827f62c4568e2",
+          "file": "isolation-http.spec.ts",
+          "line": 131,
+          "column": 5
+        },
+        {
+          "title": "@isolation read · ticket page: abrir un ticket de otra org NO renderiza sus datos",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1969,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:43.807Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-90b5577877e1cc40b1b6",
+          "file": "isolation-http.spec.ts",
+          "line": 145,
+          "column": 5
+        },
+        {
+          "title": "@isolation enum · ticket ajeno y ticket inexistente dan EXACTAMENTE el mismo resultado",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1457,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:45.817Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-741e6ce5344431b2b450",
+          "file": "isolation-http.spec.ts",
+          "line": 164,
+          "column": 5
+        },
+        {
+          "title": "@isolation write · /api/track ignora el organizationId del body (atribuye a la org de la sesión)",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 898,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:47.360Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-6217e6b6d25e73a84342",
+          "file": "isolation-http.spec.ts",
+          "line": 183,
+          "column": 5
+        },
+        {
+          "title": "@isolation impersonation · scopeada a la org impersonada; forjar la cookie no da scope; al salir vuelve",
+          "ok": true,
+          "tags": [
+            "isolation"
+          ],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "desktop",
+              "projectName": "desktop",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1524,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-07-11T18:48:48.304Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "761243cbbbaf840a713e-0ce19caba27c9bf3aced",
+          "file": "isolation-http.spec.ts",
+          "line": 202,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "isolation-queries.spec.ts",
+      "file": "isolation-queries.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "@isolation queries · leads y conversaciones scopeadas por org",
+          "file": "isolation-queries.spec.ts",
+          "line": 35,
+          "column": 6,
+          "specs": [
+            {
+              "title": "listLeadsForDashboard: cada org ve SOLO sus leads (ninguno del vecino)",
+              "ok": true,
+              "tags": [
+                "isolation"
+              ],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1035,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-11T18:48:50.632Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "56f50af78118eef0943b-bcfa0de6f192ec28de23",
+              "file": "isolation-queries.spec.ts",
+              "line": 36,
+              "column": 7
+            },
+            {
+              "title": "getConversationMessagesForOrg: un conversationId ajeno devuelve [] (anti-IDOR)",
+              "ok": true,
+              "tags": [
+                "isolation"
+              ],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 331,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-11T18:48:54.482Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "56f50af78118eef0943b-6c4cecc2a6cbd9200f70",
+              "file": "isolation-queries.spec.ts",
+              "line": 54,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-07-11T18:48:32.159Z",
+    "duration": 23118.425,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

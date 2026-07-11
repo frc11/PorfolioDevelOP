@@ -13167,3 +13167,60 @@ capturado en el reintento no se duplica; y confirmar el estado `connection_faile
 
 **Restricciones respetadas:** cambio quirúrgico (el guard, nada más — sin tocar la firma de `runPreflightChecks`, sin tocar el caller, sin nuevo endpoint). Rama `chore/gs-aislamiento` (worktree aislado `wt-gs-aislamiento`, NO la rama actualmente checkouteada en el worktree principal — evita el hazard de índice compartido con WIP ajeno). **NO mergeada** — GS.1 corre sobre esta misma rama.
 
+---
+## GS.1 — Golden Suite de aislamiento multi-tenant   ·   2026-07-11
+
+**Propósito:** la red permanente del negocio — *los datos de una org jamás son visibles ni mutables desde otra*. Suite en rojo = frenar todo refactor. Sobre GS.0 (`30c4ffd`), misma rama.
+
+**Arquitectura (spec del baseline, lente SEC §6):** híbrido con peso en Playwright + invariantes puros. **Cero harness nuevo de auth**: se reusa el patrón ya probado del setter (`tests/helpers/setter-auth.ts`) — minteo de cookie de sesión client-side con el mismo `AUTH_SECRET`+salt que lee el server prod. El aislamiento se **siembra por Prisma** (SETUP) pero se **afirma por la CAPA DE LA APP** (API route / server component / query org-scopeada del producto), nunca por Prisma con permisos de admin. Config dedicada `playwright.golden.config.ts` (prod-QA `next start` en :3007, tag `@isolation`, un solo comando `npm run test:isolation`).
+
+**Entregable — 8 tests Playwright + 1 invariante puro (12 aserciones):**
+
+| # | Capa | Test | Recurso / propiedad |
+|---|---|---|---|
+| 1 | HTTP | `reports/monthly` con `organizationId` ajeno → **403** | reportes de otra org |
+| 2 | HTTP | `leads/export` — el CSV incluye el lead propio, **nunca** el del vecino | leads |
+| 3 | HTTP | ticket page — un ticket de otra org **no renderiza** su título | soporte |
+| 4 | HTTP | **enumeración** — ticket ajeno e inexistente dan idéntica respuesta | soporte |
+| 5 | HTTP | `/api/track` **ignora** el `organizationId` del body (atribuye a la sesión) | mutación de métricas |
+| 6 | HTTP | **impersonation** scopeada a la org impersonada; cookie forjada no da scope; al salir vuelve | impersonation |
+| 7 | proceso | `listLeadsForDashboard(org)` — cada org ve solo sus leads | leads (query) |
+| 8 | proceso | `getConversationMessagesForOrg(convAjena, org)` → `[]` (anti-IDOR) | conversaciones (query) |
+| INV | puro | `callerCanAccessOrg` (bypass SUPER_ADMIN + scope estricto) + `resolveScopedOrgId` (matriz completa) | primitivas de scoping |
+
+**Protocolo anti-falso-verde — 8 guards saboteados, 100% demostrados sensibles** (sabotaje temporal, sin commitear; verificado `git diff` limpio):
+
+| Guard saboteado | Archivo:línea | Test que lo detecta | Saboteado→falló | Restaurado→pasó |
+|---|---|---|---|---|
+| `callerCanAccessOrg` (retorno de scope) | `lib/auth/assert-ownership.ts:88` | INV | ✅ | ✅ |
+| `resolveScopedOrgId` (rechazo de mismatch) | `lib/security/org-scope.ts:25` | INV | ✅ | ✅ |
+| `listLeadsForDashboard` (`botConfig:{organizationId}`) | `modules/chatbot/server/admin/multiTenantQueries.ts:81` | #7 | ✅ | ✅ |
+| `getConversationMessagesForOrg` (`conversation:{botConfig:{organizationId}}`) | `…/multiTenantQueries.ts:183` | #8 | ✅ | ✅ |
+| condición 403 cross-org de reports | `api/reports/monthly/route.ts:47` | #1 | ✅ (dev) | ✅ (dev) |
+| rama ORG_MEMBER de track (deriva org de la sesión) | `api/track/route.ts:24-27` | #5 | ✅ (prod) | ✅ (prod 8/8) |
+| `findUnique({where:{id,organizationId}})` del ticket | `dashboard/soporte/[ticketId]/page.tsx:61` | #3/#4/#6 | ✅ (dev) | ✅ (dev) |
+| verificación de firma de impersonation (`jwtVerify`) | `lib/impersonation.ts:33` | #6 | ✅ (dev) | ✅ (dev) |
+
+> Los guards HTTP (5-8) se sabotearon contra un `next dev` (hot-reload, sin re-build por sabotaje); el minteo mintea AMBOS nombres de cookie (`__Secure-…` prod / `…` dev) para que la MISMA suite corra en los dos. `track` (#5→G6) es **dev-flaky** (race compile-on-demand vs read-back del PageView) → su sabotaje se demostró en el build de **prod** (autoritativo). El resto de la suite pasa 8/8 en prod-QA.
+
+**Verde (gate):**
+- ✅ Suite 8/8 verde en prod-QA + invariante verde (`npm run test:isolation`, `check:invariant:tenant-isolation` sumado a `check:invariants`).
+- ✅ Tabla de sabotaje completa (8/8 sensibles).
+- ✅ `npx tsc --noEmit` → 0 errores. `npm run build` (`--webpack`) → exit 0. `prisma migrate status` → up to date (81 migs).
+- ✅ **Cero sabotajes residuales** (`grep -rn SABOTAGE src/` → nada; `git diff` de producto = vacío; solo archivos de test nuevos).
+
+**Hallazgos de PASO 0 (para Franco):**
+- **`/api/qa/login` gateado a no-prod** — triple guard intacto (`QA_ALLOW_LOCALHOST` + host localhost + no-Netlify/no-Vercel-prod). ✅ no es hallazgo.
+- **`client-b` (`qa-cliente-b@develop.test`) NO existe en la DB de dev.** El spec pedía checkpoint-a-Franco para seedear; el seed completo está **bloqueado** igual (exige `SEED_*_PASSWORD` que no tengo) y tiene blast-radius sobre la Neon compartida. Se optó por el patrón ya probado del repo (`tests/setter/02-isolation.spec.ts`): **tenants sembrados en `beforeAll` y borrados en `afterAll`** por TAG — determinista, CI-robusto, sin depender de una persona que hoy falta.
+- **Drift de `client-a`:** su membership resuelve a la org **"Org Duplicada E2E"**, no a la San Miguel del seed. No afecta la suite (los tenants son sembrados y auto-contenidos), pero es señal de que el seed y la DB de dev divergieron.
+
+**Fuera de scope (para la auditoría O4):**
+- **Mutación cross-org de tickets** (`replyToTicketAction` / `resolveTicketClientAction`): el guard existe y está mapeado (`assertTicketBelongsToOrg`, `where:{id,organizationId}`) y comparte patrón con el invariante `callerCanAccessOrg`, pero **no** tiene un test HTTP dedicado (invocar una server action por HTTP crudo es frágil). La LECTURA cross-org del ticket SÍ está cubierta (#3).
+- **KB / documentos** y **settings de org**: la KB cuelga del `botConfig` (org-scopeada, cubierta indirectamente por #7/#8); no hay un test de una ruta KB/settings dedicada por-id.
+- **`capture_lead` validación de org** (chatbot): no testeado — requiere simular el tool-call del LLM; `botConfigId` es server-side (la auditoría lo marca cerrado).
+- **`/api/chatbot/[slug]/chat` aislamiento por Origin** (`validateOrigin`): no testeado (bonus no implementado).
+- **`runPreflightChecks` (GS.0):** su guard se ejercita indirectamente por el invariante (mismo `callerCanAccessOrg`), sin un test HTTP que dispare el action-id sin sesión.
+- **Motor 360dialog:** no está en esta rama — auditar cuando mergee.
+
+**Archivos:** `playwright.golden.config.ts`, `tests/golden/{helpers/golden-fixtures.ts,isolation-http.spec.ts,isolation-queries.spec.ts}`, `src/lib/security/tenant-isolation.invariant.ts`, `package.json` (scripts `check:invariant:tenant-isolation`, `start:qa:golden`, `test:golden`, `test:isolation`; el invariante sumado a `check:invariants`). **Cero archivos de producto tocados.** NO mergeada.
+
