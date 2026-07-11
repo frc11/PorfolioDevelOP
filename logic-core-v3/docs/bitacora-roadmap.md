@@ -13150,3 +13150,35 @@ capturado en el reintento no se duplica; y confirmar el estado `connection_faile
 - **Race write-write residual**: cerrarlo del todo requiere `@@unique` → migración → flageado, no diseñado.
 - 3 issues de lint pre-existentes: no se tocaron (fuera de objetivo).
 
+
+---
+## ✅ AUDITORÍA MAESTRA — 7 lentes, una corrida   ·   2026-07-10
+
+**Auditado sobre `6254428` (origin/main del 2026-07-10, rama caliente).** Corrida READ-ONLY en worktree aislado, rama `chore/auditoria-maestra` (NO mergear: el valor es el reporte). Reporte completo con evidencia archivo:línea, INSUMOS PARA SPRINTS por hallazgo P0/P1 y tabla-programa consolidada: **`docs/baselines/2026-07-auditoria-maestra.md`**.
+
+**Totales: 12 P0 · 38 P1 · 33 P2.** Los 12 P0 en una línea c/u:
+
+- **DR-01 (DATOS)** — HOY NO HAY BACKUP: `db-backup.yml` bien diseñado pero 44/44 corridas fallidas por 2 secrets sin cargar; Neon Free ≈6h de ventana; cualquier pérdida >6h es irreversible. Fix = 2 secrets + 1 run.
+- **RESIL-01** — chat sin time-box de LLM: hasta 9 llamadas Vertex/turno y minutos de "Pensando" si Vertex cuelga; el carril degradado ya existe y no se usa.
+- **RESIL-02** — post-stream fire-and-forget en serverless: sync CRM/notis mueren al congelarse la lambda; outbox a medio construir (el lead no se pierde; el CRM del cliente sí).
+- **RESIL-03 / OBS-02** — `netlify.toml:25-29` agenda 2 functions que NO existen; los 7 crons reales dependen de un scheduler externo no versionado ni monitoreado (falla = silencio).
+- **OBS-01** — Sentry cableado end-to-end pero posiblemente no-op: `NEXT_PUBLIC_SENTRY_DSN` sin valor en ningún env local; una env var separa "ciego" de "observado".
+- **OBS-03** — cero uptime externo (los probes ya existen: `/api/version`, `/health`).
+- **PERF-01** — three.js en el grafo compartido: TBT mobile home 8.57s, login paga 4.9s sin 3D visible; LCP mobile 7-9s transversal por ~700-790KB gz de JS.
+- **PERF-02** — `/web-development` 14.66MB de carga fría (9.5MB imágenes externas sin `next/image` + video 2.5MB).
+- **PERF-03** — HDRI 1.6MB confirmado (self-host o Lightformers).
+- **LEG-01 (CALIDAD)** — captura activa de PII (chat + /contact) con CERO piezas legales en el app (sin política, sin ToS, sin aviso pre-captura) — deber de información Ley 25.326.
+- **A11Y-01 (CALIDAD)** — widget del chatbot no operable por teclado (launcher no abre con Enter/Space, sin focus trap, Escape no cierra): el canal primario de conversión, inaccesible.
+
+**Por lente (cierres que pedían entrada propia, consolidados acá):**
+- **SEC (0 P0 · 7 P1 · 11 P2)** — ledger de 39 hallazgos previos reconciliado: lo grande CERRADO-VERIFICADO; 7 P1 nuevos/residuales (smoke endpoint LLM público sin rate-limit; `runPreflightChecks` sin guard = 4ª instancia P0-6; 3 crons fail-open con `CRON_SECRET` ausente; magic-link sin RL; login RL in-memory; SSRF n8n sin re-resolución DNS; disclosure IA/PII inexistente). Multi-tenant: aislamiento por disciplina (`where organizationId` + `assert*BelongsToOrg`), impersonation jose respeta scope. Golden suite 3.4: Playwright con personas `client-a`/`client-b` de `/api/qa/login` + invariants — cero harness nuevo. `npm audit --omit=dev`: 0 critical/high.
+- **PERF (3 P0 · 7 P1 · 3 P2)** — baseline NUEVA (la 2026-06 no existía). CLS ≈ 0 en todo el sitio (excelente); dashboard desktop 88-89 sano. Driver del LCP mobile = JS compartido, no imágenes. Caveat: el preloader se bypassea con `navigator.webdriver` → CWV medidos sin preloader; experiencia real medida aparte. 36 corridas Lighthouse + 7 HARs archivados.
+- **ARQ (0 P0 · 4 P1 · 3 P2)** — 22 ciclos (16 conocidos + 6 NUEVOS en `lead-pipeline`), 100% type-only, una sola receta (extraer `types.ts`); barrel cliente del chatbot con 1 consumidor (eliminar); 205 exports muertos-a-nivel-barrel; contrato de frontera del README muerto (103 deep-imports). Candado 4.5 verificado contra el código actual. Next 16 --webpack ya no imprime First Load JS: tabla anti-boundary aproximada por manifests (script reproducible).
+- **Sprint O1.0 (DATOS+DR)** — backup activo: **NO** (44/44 fallidas, secrets `DIRECT_DATABASE_URL_PROD` + `BACKUP_GPG_PASSPHRASE` faltantes). Ventana PITR: Neon Free ≈6h/1GB, exacta a confirmar por Franco. Migraciones: 81 locales todas aplicadas, 0 fallidas → no hay `migrate resolve` pendiente; **13 destructivas** inventariadas (drop `Subscription.planName` = `20260605225019`); drift dev↔main fuera del motor = cero; deploy NO corre migraciones (manuales, post-push). DR propuesto 2 capas: RPO ≤24h catástrofe / ~0 error lógico · RTO ≤1h.
+- **Sprint O2.0 (RESILIENCIA)** — ~13 dependencias externas inventariadas; 5 superficies FATAL casi sin protección (Vertex chat, Neon, next-auth portal, Brevo magic-link, widget `/config` fail-silencioso). Chatbot streamea SSE (background function descartada); `maxDuration=30` declarado; budget real: solo cabe **1 retry time-boxeado (~10s) pre-stream** — el resto es degradar rápido. Idempotencia post-INFRA.2 sólida (dedup user-msg, cuota, capture_lead); residual: dedup por `leadId` no exigido a los n8n de clientes. Sprints O2.1 LLM · O2.2 outbox/cron resync · O2.5 crons · O2.3 Neon · O2.4 widget+timeouts.
+- **Sprint O3.0 (OBSERVABILIDAD)** — corrección al framing: NO es ciego de nacimiento (Sentry cableado + logger chatbot INFRA.1 + tokens/costo por turno en Prisma + detector de alertas con Brevo/Telegram + backup con restore-test). Stack recomendado: **quedarse con Sentry** (webpack OK) + UptimeRobot free + Healthchecks.io free (dead-man's-switch de crons, Telegram nativo); **diferir Langfuse** (la telemetría Prisma propia cubre ~70% con residencia local; si se adopta: cloud EU + masking; self-host solo por exigencia contractual). Decisión PII documentada. Costo/conversación (O3.2): extender `ChatMessage` + `endedAt` + tabla mínima `AgencyLlmUsage`; costo/cliente ya joinable hoy.
+- **Sprint O5.0 (CALIDAD, solo lo robusto al diseño)** — 2 P0 arriba (LEG-01, A11Y-01). SEO: OG images 404, robots/sitemap 404, `lang="en"` en sitio castellano. Compat: sin detección WebGL ni poster (gap directo con P5.1); contenido vendedor 100% SSR verificado por curl. Legal: retención indefinida sin TTL ni canal ARCO; cruce con los 18 docs externos pendiente de Franco. Cero hallazgos dependientes del diseño visual.
+
+**Decisiones humanas pendientes (top):** secrets del backup (¡primero!), plan Neon/PITR, DSN Sentry en prod, scheduler real de crons + netlify.toml fantasma, plan Netlify (timeout), piezas legales + TTL retención, SSRF (lookup vs pinning), Langfuse diferir/adoptar, umbral USD de gasto LLM. Tabla completa en el baseline.
+
+**Limitaciones:** motor 360dialog no está en main (re-auditar SEC al merge); DB medida contra branch dev; PERF/CALIDAD = datos LAB (documentado); `/security-scan` ECC = corrida separada; sin lector de pantalla real. `git status -s` de la corrida: limpio (solo estos docs).
