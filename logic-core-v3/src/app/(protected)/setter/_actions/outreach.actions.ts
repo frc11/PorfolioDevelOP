@@ -100,12 +100,12 @@ export async function registrarOpener(
     const lead = await getOwnedLead(leadId.data, userId)
     if (!lead) return fail('Lead no encontrado')
     if (leadRespondio(lead.status)) {
-      return fail('Este lead ya respondió — registrá la conversación en el Paso 9')
+      return fail('Este lead ya respondió — registrá la conversación en Seguimiento')
     }
 
     const dossier = await getOwnedDossier(leadId.data, userId)
     if (!dossier || dossier.stage === 'FICHA') {
-      return fail('Primero evaluá el lead (Paso 2) — el opener sale con veredicto')
+      return fail('Primero evaluá el lead (Evaluación) — el opener sale con veredicto')
     }
     if (dossier.stage === 'DESCARTADA') {
       return fail('Este lead quedó descartado en la evaluación')
@@ -114,7 +114,7 @@ export async function registrarOpener(
     const actividades = await listOwnedLeadActivities(leadId.data, userId)
     if (actividades === null) return fail('Lead no encontrado')
     if (actividades.length > 0) {
-      return fail('El primer contacto ya está registrado — seguí en el Paso 9')
+      return fail('El primer contacto ya está registrado — seguí en Seguimiento')
     }
 
     await registrarContactoComercial({
@@ -162,7 +162,7 @@ export async function registrarResultado(
     const actividades = await listOwnedLeadActivities(leadId.data, userId)
     if (actividades === null) return fail('Lead no encontrado')
     if (actividades.length === 0) {
-      return fail('Primero registrá el opener (Paso 7) — ahí arranca la conversación')
+      return fail('Primero registrá el opener (Opener) — ahí arranca la conversación')
     }
 
     const { resultado, nota, reactivateAt } = input.data
@@ -170,7 +170,7 @@ export async function registrarResultado(
     // B7: CALL_AGENDADA ya no entra a mano por acá — el estado lo mueve SOLO
     // el booking confirmado por Cal.com (Paso 10, confirmarReunion).
     if (resultado === 'CALL_AGENDADA') {
-      return fail('La reunión se agenda en el Paso 10 con horarios reales — ahí se mueve el estado')
+      return fail('La reunión se agenda en Agenda con horarios reales — ahí se mueve el estado')
     }
 
     await registrarContactoComercial({

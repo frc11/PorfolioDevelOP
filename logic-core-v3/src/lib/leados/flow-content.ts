@@ -131,38 +131,38 @@ export const HARD_CHECKS: HardCheck[] = [
   {
     id: 'carga',
     nombre: 'La demo carga',
-    comoVerificar: 'Abrí la URL del draft en otra pestaña (mejor en incógnito).',
-    arreglo: 'Si no carga, volvé al Paso 5 y re-publicá el index.html en Netlify Drop.',
+    comoVerificar: 'Abrí la URL del borrador en otra pestaña (mejor en incógnito).',
+    arreglo: 'Si no carga, volvé a Borrador y re-publicá el index.html en Netlify Drop.',
   },
   {
     id: 'mobile',
     nombre: 'Se ve bien en tu celular',
     comoVerificar: 'Abrila en TU celular y recorrela entera: que no se rompa nada.',
-    arreglo: 'Volvé a Claude Design (Paso 4, fase Mobile), ajustá y re-publicá el draft.',
+    arreglo: 'Volvé a Claude Design (Construcción, fase Mobile), ajustá y re-publicá el borrador.',
   },
   {
     id: 'sinRelleno',
     nombre: 'No hay lorem ipsum ni textos de relleno',
     comoVerificar: 'Leé toda la página de punta a punta buscando texto inventado o genérico.',
-    arreglo: 'Reemplazá cada relleno con datos reales del negocio (Paso 4, fase Personalización).',
+    arreglo: 'Reemplazá cada relleno con datos reales del negocio (Construcción, fase Personalización).',
   },
   {
     id: 'linksWhatsapp',
     nombre: 'Los links y el botón de WhatsApp funcionan',
     comoVerificar: 'Tocá cada link y el botón de WhatsApp: tiene que abrir el chat correcto.',
-    arreglo: 'Corregí los links rotos en Claude Design (Paso 4, fase CTA) y re-publicá.',
+    arreglo: 'Corregí los links rotos en Claude Design (Construcción, fase CTA) y re-publicá.',
   },
   {
     id: 'datosReales',
     nombre: 'Usa los datos y assets reales del negocio',
     comoVerificar: 'Logo, fotos, nombre y dirección reales — nada de placeholders ni stock.',
-    arreglo: 'Insertá los assets del negocio (Paso 4, fase Assets reales) y re-publicá.',
+    arreglo: 'Insertá los assets del negocio (Construcción, fase Assets reales) y re-publicá.',
   },
   {
     id: 'fielAlBrief',
     nombre: 'La demo dice lo que el brief pedía',
     comoVerificar: 'Compará sección por sección contra el brief: ¿está todo lo que pedía?',
-    arreglo: 'Volvé al Paso 4 con el brief al lado y completá lo que falta.',
+    arreglo: 'Volvé a Construcción con el brief al lado y completá lo que falta.',
   },
 ]
 
@@ -179,7 +179,7 @@ export type SoftCheck = {
 export const SOFT_CHECKS: SoftCheck[] = [
   { id: 'coloresDeMas', etiqueta: 'Tiene más de 3 colores' },
   { id: 'fuenteDefault', etiqueta: 'La fuente parece la default, sin intención' },
-  { id: 'glassNavbar', etiqueta: 'Glassmorphism en la navbar' },
+  { id: 'glassNavbar', etiqueta: 'Efecto vidrio (blur) en la navbar' },
   { id: 'imagenesDeformadas', etiqueta: 'Hay imágenes deformadas o estiradas' },
 ]
 
@@ -258,7 +258,7 @@ export const PLANTILLAS_FOLLOW_UP: string[] = [
 export const STATUS_LABELS: Record<LeadStatus, string> = {
   PROSPECTO: 'Prospecto',
   DEMO_ENVIADA: 'Demo enviada',
-  VIO_VIDEO: 'Vio el video',
+  VIO_VIDEO: 'En conversación',
   RESPONDIO: 'Respondió',
   CALL_AGENDADA: 'Reunión agendada',
   CERRADO: 'Cerrado',

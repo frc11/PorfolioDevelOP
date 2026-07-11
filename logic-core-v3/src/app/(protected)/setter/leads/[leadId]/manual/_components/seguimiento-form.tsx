@@ -33,14 +33,14 @@ type OpcionResultado = {
 const OPCIONES: OpcionResultado[] = [
   {
     valor: 'SIN_RESPUESTA',
-    etiqueta: 'No respondió — mandé un follow-up',
+    etiqueta: 'No respondió — mandé un toque',
     detalle: 'Registra el toque; la fecha del próximo la calcula el sistema solo.',
   },
   {
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
     detalle:
-      'Abre la producción de la demo (Brief) y frena el follow-up. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
+      'Abre la producción de la demo (Brief) y frena los toques. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
   },
   {
     valor: 'POSTERGADO',
@@ -58,14 +58,14 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
   switch (resultado) {
     case 'SIN_RESPUESTA':
       return proximoToque
-        ? 'Toque registrado — el próximo follow-up ya quedó agendado.'
+        ? 'Toque registrado — el próximo toque ya quedó agendado.'
         : 'Toque registrado — la cadencia ya cortó: sin más toques automáticos.'
     case 'RESPONDIO':
       return 'Respondió 🎉 — se abrió el brief. A producir la demo.'
     case 'POSTERGADO':
       return 'Postergado — el panel lo retoma en la fecha que marcaste.'
     default:
-      return 'Registrado. Franco lo ve en el pipeline y decide el cierre.'
+      return 'Registrado. Franco lo ve en el panel y decide el cierre.'
   }
 }
 

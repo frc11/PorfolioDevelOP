@@ -70,7 +70,7 @@ export function M5Contexto({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500">
         <span className="flex items-center gap-1.5">
           <CalendarClock size={13} strokeWidth={1.5} />
-          Toques de follow-up:{' '}
+          Toques:{' '}
           <span className="font-semibold text-zinc-300">
             {cadencia.toquesHechos} de {PLANTILLAS_FOLLOW_UP.length}
           </span>
