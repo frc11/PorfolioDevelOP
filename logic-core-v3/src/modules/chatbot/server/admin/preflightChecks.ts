@@ -1,6 +1,8 @@
 'use server'
 
+import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { callerCanAccessOrg } from '@/lib/auth/assert-ownership'
 
 export interface PreflightCheck {
   id: string
@@ -13,12 +15,17 @@ export interface PreflightCheck {
 export async function runPreflightChecks(botId: string): Promise<PreflightCheck[]> {
   const checks: PreflightCheck[] = []
 
+  const session = await auth()
+
   const bot = await prisma.botConfig.findUnique({
     where: { id: botId },
     include: { knowledgeBase: true, organization: true },
   })
 
-  if (!bot) {
+  // P0-6: scoping defensivo, mismo patrón que BotDetailPage (:64). SUPER_ADMIN
+  // ve cualquier org (no-op); no leakeamos existencia del bot a otra org, por
+  // eso el mismo mensaje genérico que el caso !bot.
+  if (!bot || !session?.user || !callerCanAccessOrg(session.user, bot.organization.id)) {
     return [{
       id: 'bot_exists',
       label: 'Bot existe',

@@ -13150,3 +13150,20 @@ capturado en el reintento no se duplica; y confirmar el estado `connection_faile
 - **Race write-write residual**: cerrarlo del todo requiere `@@unique` → migración → flageado, no diseñado.
 - 3 issues de lint pre-existentes: no se tocaron (fuera de objetivo).
 
+---
+## GS.0 — Guard de `runPreflightChecks` (4ª instancia P0-6)   ·   2026-07-11
+
+**Hallazgo (`docs/baselines/2026-07-auditoria-maestra.md:149,220-222`, lente SEC):** `runPreflightChecks(botId)` — `modules/chatbot/server/admin/preflightChecks.ts` — es un `'use server'` sin ningún guard, invocable directo desde el bundle con un `botId` arbitrario, bypaseando el `callerCanAccessOrg` que `BotDetailPage` (`admin/chatbots/[botId]/page.tsx:64`) ya aplica a nivel página. Única mutación/lectura sin guard detectada en la superficie viva (SEC-02) — 4ª instancia del patrón P0-6 (las otras 3: `assertTicketBelongsToOrg`, `assertProjectBelongsToOrg`, `callerCanAccessOrg` en `BotDetailPage`, todas en `src/lib/auth/assert-ownership.ts`).
+
+**Fix (1 archivo, guard mínimo):** `preflightChecks.ts` — se agregó `await auth()` + `callerCanAccessOrg(session.user, bot.organization.id)` **dentro** de `runPreflightChecks`, mismo helper y mismo shape de `bot.organization` que `page.tsx` (ambos hacen un único `findUnique({ include: { organization: true } })` sobre `BotConfig` — la firma de `callerCanAccessOrg` está pensada exactamente para este caso: "recurso ya cargado, sin segundo query"). `!bot || !session?.user || !callerCanAccessOrg(...)` devuelve el mismo mensaje genérico (`bot_exists: fail, 'Bot no encontrado'`) que el caso `!bot` — no se leakea existencia del bot a otra org, mismo criterio que `page.tsx:64-66`.
+
+**Callers:** único call-site — `BotDetailClient.tsx:140` (`runPreflightChecks(bot.id)`, cliente dentro de `(protected)/admin/...`). No pasa contexto de org porque el guard ahora resuelve `auth()` internamente, igual que `page.tsx`; no requirió cambios en el caller.
+
+**Verde:**
+- ✅ `npx tsc --noEmit` (worktree aislado `chore/gs-aislamiento` sobre `origin/main` @ `6254428`) → 0 errores.
+- ✅ `npm run build` (`--webpack`) → exit 0, todas las rutas admin compilan incl. `/admin/chatbots/[botId]`.
+- ✅ `npx prisma migrate status` → up to date (81 migraciones, sin drift).
+- ✅ Tests existentes que toquen `preflight*`: **ninguno** (`grep -ri preflight` sobre `tests/` → 0 archivos) — nada que romper, gate trivialmente satisfecho.
+
+**Restricciones respetadas:** cambio quirúrgico (el guard, nada más — sin tocar la firma de `runPreflightChecks`, sin tocar el caller, sin nuevo endpoint). Rama `chore/gs-aislamiento` (worktree aislado `wt-gs-aislamiento`, NO la rama actualmente checkouteada en el worktree principal — evita el hazard de índice compartido con WIP ajeno). **NO mergeada** — GS.1 corre sobre esta misma rama.
+
