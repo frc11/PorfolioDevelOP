@@ -1238,3 +1238,28 @@ Veredicto: **el rediseño cumple el brief.** Motor intacto, preservación intact
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 1.1: cerró verde. (1) 72 strings / 18 archivos. (2) Los 3 greps de éxito dan 0 hits en copy visible (solo sobreviven comentarios/tests/payloads-munición/campos internos, todos exentos por regla). (3) tsc limpio en el diff propio (motor ajeno rojo por el lane paralelo, no tocado) · test:leados 22/22 · test:setter 39/39, sin specs que actualizar. (4) 3 casos frontera documentados arriba, ninguno tocado. (5) Terreno raro: el `npx tsc --noEmit` global pasó de verde (Fase 0) a rojo-en-motor durante la sesión — otra sesión (BSP-outbound) escribiendo en paralelo sobre `src/modules/motor/**`, confirmado por `git status` (archivos ajenos, prohibidos por el encargo). Commit local hecho, sin push.
+
+---
+
+## Sprint R — Recuperación de terreno del lane LeadOS · 2026-07-11
+
+**Por qué.** Tres sesiones frenaron en Fase 0 con diagnósticos contradictorios sobre el mismo índice: no se sabía si el Sprint 1.1 ("una sola lengua", ~72 strings/19 archivos del setter) seguía absorbido en el commit ajeno `44e25be`, si un reset lo había deshecho a medias, o si lo staged era ruido CRLF por worktrees. Sprint R: forense read-only primero, acción por árbol de decisión pre-autorizado después. Nada se pusheó, nada se borró del working tree.
+
+**El diagnóstico real (forense Fase 1):**
+- **Rama/worktree:** `b1-s2-bsp-outbound` en el worktree principal `C:/Users/franc/Desktop/PorfolioDevelOP`. (Otras 4 worktrees vivas — 2 sesiones setter paralelas en `claude/priceless-nobel` [`seguimiento-step.tsx`] y `claude/sad-burnell` [`01-flow.spec.ts`], `chore/auditoria-maestra`, y una detached — ninguna toca los 19 archivos de 1.1; solo se miraron.)
+- **`44e25be` existe pero está HUÉRFANO:** `git branch --contains 44e25be` → vacío. Un reset movió el puntero de la rama y lo dejó fuera de toda historia. Su **mensaje** es de isolation ("fix(isolation): re-parenting de CrmSyncAttempt"), pero su **diff** es en realidad el barrido de vocabulario de 1.1 sobre los 19 archivos (setter/leados + esta bitácora) — el 1.1 quedó absorbido bajo un mensaje ajeno, y el reset lo devolvió al índice.
+- **1.1 NO estaba en la historia:** HEAD (`58eb285`) conservaba la copy vieja ("Paso 9", "draft", "self-check", "follow-up" en los literales `proximaAccion` de `flow.ts`, etc.).
+- **Lo staged = 1.1 real, byte-idéntico a `44e25be`:** `diff` entre `git diff --cached` y `git show 44e25be` → vacío (EXIT 0). Copy real (strings), **no CRLF** — insertions/deletions asimétricas (100/72), bitácora +28/-0. `core.autocrlf=true` y existe `logic-core-v3/.gitattributes`, pero el diff no era renormalización de fin de línea.
+- **(d) El isolation fix del lane BSP está ENTERO en HEAD:** `src/lib/isolation/registry.ts:450` incluye `...CRM_SYNC_ATTEMPT_REPARENT` en `forbiddenUpdateKeys` (guard runtime = Omit del tipo), entró vía `aa176f7` (B0). `0216bf8` (el commit del fix en el lane b1-s1) no es ancestro de esta rama, pero el guard llegó por otra vía y está presente. El fix no dependía de `44e25be`.
+
+**Caso del árbol aplicado: CASO B** — 1.1 no en la historia + lo staged son los cambios reales de 1.1.
+- Verificación previa: `npx tsc --noEmit` → EXIT 0 (programa entero limpio, motor incluido — hoy el lane motor typechea verde). Greps de éxito sobre lo staged: 0 hits de "Paso N"/jerga en copy user-facing de los 19 archivos; todo el residuo es clase-exenta por la regla de 1.1 (comentarios `/** */`//`, paths de import `follow-up`, keys de tipo `| 'draft'`, y `dossier.ts`/`notify.ts`/`*.invariant.ts` fuera de scope).
+- `git diff --cached --name-only`: **0 archivos del lane motor staged** — nada que des-stagear.
+- Commit (solo staged, sin `-a`, con guarda anti-carrera de índice compartido verificando el set antes/después): **`612c4ee`** — "sprint 1.1 — una sola lengua…", 19 files, 100/72 (idéntico a `44e25be`). `motor-files-captured=0`.
+- **CRLF:** `core.autocrlf=true` en este worktree + `logic-core-v3/.gitattributes` presente. NO fue la causa del diff staged (era copy real). NO se renormalizó el repo — eso queda como decisión de Franco.
+
+**Estado final:**
+- Working tree zona setter LIMPIO. Sucio permitido, listado (lane motor/test/audit): `chatbot-isolation.spec.ts`, `tests/*/.last-run.json` (×3), `?? audit/`, `?? docs/audit-chatbot-runtime.md`.
+- `npx tsc --noEmit` → verde. `git log`: `612c4ee` (1.1) sobre `58eb285` (B1-S3). Grep de éxito sobre HEAD: 0 `proximaAccion: '…Paso N'` en `flow.ts`.
+
+**BASE DECLARADA DEL LANE LeadOS:** worktree `C:/Users/franc/Desktop/PorfolioDevelOP`, rama **`b1-s2-bsp-outbound`**. De acá en más, los sprints de LeadOS corren SOLO en esta rama+worktree (donde ahora vive 1.1 = `612c4ee`). Nota de contexto para Franco: esta rama arrastra también los commits del lane motor (B1-S1/S2/S3); 1.1 quedó apilado encima. La separación de lanes en ramas distintas, si se quiere, es decisión de Franco — no se ejecutó desde acá.
