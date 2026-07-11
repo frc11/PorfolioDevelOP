@@ -1,6 +1,6 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 
 export interface PreflightCheck {
   id: string
@@ -13,10 +13,16 @@ export interface PreflightCheck {
 export async function runPreflightChecks(botId: string): Promise<PreflightCheck[]> {
   const checks: PreflightCheck[] = []
 
-  const bot = await prisma.botConfig.findUnique({
-    where: { id: botId },
-    include: { knowledgeBase: true, organization: true },
-  })
+  // ADMIN: preflight de un bot puntual por id para SUPER_ADMIN (opera cross-org).
+  // Point-read por PK — no hay superficie de listado cross-tenant.
+  const bot = await unsafeGlobalQuery(
+    'ADMIN: preflight — lectura del bot por id (super-admin, cualquier org)',
+    (c) =>
+      c.botConfig.findUnique({
+        where: { id: botId },
+        include: { knowledgeBase: true, organization: true },
+      }),
+  )
 
   if (!bot) {
     return [{

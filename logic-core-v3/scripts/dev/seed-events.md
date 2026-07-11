@@ -10,7 +10,8 @@ No toca `queries.ts`, el filtro/`ActivityLog.tsx`, ni el schema.
 ## Mapeo de filtros (verificado en código, ANTES de seedear)
 
 El filtrado es **client-side** en `ActivityLog.tsx:126-132`, sobre el array de eventos
-(la página carga los 50 más recientes del bot vía `listRecentEvents(bot.id, 50)`).
+(la página carga los 50 más recientes del bot vía `listRecentEvents(organizationId, bot.id, 50)`
+— B0-S3 antepuso `organizationId` para el scope de aislamiento).
 
 ### Filtro TIPO — `EVENT_TYPES` (ActivityLog.tsx:37-44)
 Predicado: `e.type.toLowerCase().includes(typeFilter)` → **substring**, case-insensitive,

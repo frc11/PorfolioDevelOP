@@ -15,7 +15,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import type { PrismaClient } from '@prisma/client'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { detectIntent } from '../server/intent/detectIntent'
 import { getVerticalPack } from '../server/verticals/registry'
 import { postTurn, type ChatMessageInput, type PostTurnResult } from './client'
@@ -76,23 +76,26 @@ async function loadScenarios(packs: readonly EvalPackKey[]): Promise<Scenario[]>
 
 /** Verifica (Prisma) que los 3 bots existen, activos y con el pack correcto. */
 async function verifyBots(
-  prisma: PrismaClient,
   packs: readonly EvalPackKey[],
 ): Promise<Record<string, BotMeta>> {
   const bots: Record<string, BotMeta> = {}
   for (const pack of packs) {
     const { botSlug } = EVAL_BOT_SLUGS[pack]
-    const bot = await prisma.botConfig.findUnique({
-      where: { slug: botSlug },
-      select: {
-        id: true,
-        isActive: true,
-        verticalPack: true,
-        organization: {
-          select: { subscription: { select: { plan: { select: { key: true, quota: true } } } } },
-        },
-      },
-    })
+    const bot = await unsafeGlobalQuery(
+      'EVAL: verificar el bot QA por slug (harness dev-only)',
+      (c) =>
+        c.botConfig.findUnique({
+          where: { slug: botSlug },
+          select: {
+            id: true,
+            isActive: true,
+            verticalPack: true,
+            organization: {
+              select: { subscription: { select: { plan: { select: { key: true, quota: true } } } } },
+            },
+          },
+        }),
+    )
     if (!bot) {
       console.error(`[evals] ABORT: bot QA "${botSlug}" no existe. Corré \`npm run evals:seed\`.`)
       process.exit(1)
@@ -129,7 +132,6 @@ async function pingServer(baseUrl: string, origin: string, slug: string): Promis
 }
 
 interface RunCtx {
-  prisma: PrismaClient
   baseUrl: string
   origin: string
   /** Devuelve una promesa que resuelve cuando pasó el gap mínimo desde el último POST. */
@@ -213,7 +215,7 @@ async function runScenario(ctx: RunCtx, scenario: Scenario): Promise<CapturedSce
     }
 
     const expectedAssistantCount = confirmedAssistantCount + 1
-    const persisted = await waitForAssistantMessage(ctx.prisma, sessionId, expectedAssistantCount)
+    const persisted = await waitForAssistantMessage(sessionId, expectedAssistantCount)
     if (!persisted) {
       // Bug de bot (onFinish no persistió — ver docs/sprints/q1-1-harness.md),
       // no del harness. NO abortamos el resto del escenario: el turno queda
@@ -243,7 +245,7 @@ async function runScenario(ctx: RunCtx, scenario: Scenario): Promise<CapturedSce
     )
   }
 
-  const snapshot = await readConversationSnapshot(ctx.prisma, sessionId)
+  const snapshot = await readConversationSnapshot(sessionId)
 
   return {
     id: scenario.id,
@@ -287,12 +289,9 @@ async function main(): Promise<void> {
   const baseUrl = DEFAULT_BASE_URL
   const origin = DEFAULT_ORIGIN
 
-  const { PrismaClient } = await import('@prisma/client')
-  const prisma = new PrismaClient()
-
   try {
     const scenarios = await loadScenarios(packs)
-    const bots = await verifyBots(prisma, packs)
+    const bots = await verifyBots(packs)
 
     // Preflight: dev server arriba.
     const probeSlug = bots[packs[0]].slug
@@ -309,7 +308,7 @@ async function main(): Promise<void> {
     )
 
     const startedAt = new Date()
-    const ctx: RunCtx = { prisma, baseUrl, origin, pace: makePacer(MIN_GAP_MS) }
+    const ctx: RunCtx = { baseUrl, origin, pace: makePacer(MIN_GAP_MS) }
     const captured: CapturedScenario[] = []
     for (const scenario of scenarios) {
       captured.push(await runScenario(ctx, scenario))
@@ -350,14 +349,14 @@ async function main(): Promise<void> {
     if (keep) {
       console.log('\n[evals] --keep: no se limpia (filas evals- quedan para inspección).')
     } else {
-      const purge = await purgeEvalRows(prisma, { resetQuota: true })
+      const purge = await purgeEvalRows({ resetQuota: true })
       console.log(
         `\n[evals] Cleanup: ${purge.conversations} conversation(s), ${purge.leads} lead(s), ` +
           `${purge.events} event(s) borrados; QuotaUsage reset (${purge.quotaRowsDeleted} fila/s).`,
       )
     }
   } finally {
-    await prisma.$disconnect()
+    await unsafeGlobalQuery('EVAL: cerrar la conexión del harness dev-only', (c) => c.$disconnect())
   }
 }
 

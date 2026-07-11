@@ -1,7 +1,7 @@
 import { Check, MessageCircle, PauseCircle } from 'lucide-react'
 import Link from 'next/link'
 import { resolveOrgId } from '@/lib/preview'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { Card } from '@/components/ui/Card'
@@ -24,8 +24,9 @@ export async function CrmStatusIndicator() {
   const plan = await getPlanForOrg(organizationId)
   if (!planAllows(plan, 'crm')) return null
 
-  const integration = await prisma.crmIntegration.findUnique({
-    where: { organizationId },
+  // crmIntegration scopea por organizationId (@unique == el scope): findFirst
+  // devuelve la integración de la org o null.
+  const integration = await forOrg(organizationId).crmIntegration.findFirst({
     select: { enabled: true },
   })
 

@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 
 export interface LatencyPoint {
   hour: string
@@ -65,14 +65,23 @@ export async function getLatencyHistory(
 ): Promise<LatencyHistoryResult> {
   const since = new Date(Date.now() - hoursBack * 60 * 60 * 1000)
 
-  const events = await prisma.chatbotEvent.findMany({
-    where: {
-      createdAt: { gte: since },
-      type: 'chat.message_completed',
-    },
-    select: { createdAt: true, metadata: true },
-    take: 2000,
-  })
+  // PENDIENTE-DECISIÓN: agrega latencia (chat.message_completed) de TODAS las
+  // orgs, pero su única página (/admin/chatbot/health) está enmarcada como el
+  // health del bot propio de develOP (el verdict corre sobre checkChatbotHealth
+  // ('develop')). O se scopea al bot 'develop' o se re-enmarca como SLO de
+  // plataforma. Queda global explícito hasta que planificación decida. Ver B0-S3.
+  const events = await unsafeGlobalQuery(
+    'PENDIENTE-DECISIÓN: latencia P50/P95 agrega eventos de todas las orgs en una página enmarcada como el health del bot develOP — scopear o re-enmarcar (ver B0-S3)',
+    (c) =>
+      c.chatbotEvent.findMany({
+        where: {
+          createdAt: { gte: since },
+          type: 'chat.message_completed',
+        },
+        select: { createdAt: true, metadata: true },
+        take: 2000,
+      }),
+  )
 
   const byHour = emptyBuckets(hoursBack)
   const allSamples: number[] = []

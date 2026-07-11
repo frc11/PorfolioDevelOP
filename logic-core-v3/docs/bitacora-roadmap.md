@@ -13150,3 +13150,232 @@ capturado en el reintento no se duplica; y confirmar el estado `connection_faile
 - **Race write-write residual**: cerrarlo del todo requiere `@@unique` → migración → flageado, no diseñado.
 - 3 issues de lint pre-existentes: no se tocaron (fuera de objetivo).
 
+---
+
+## ✅ COST-1 — Modelo/provider efectivo unificado (ejecución + costo) + WARN en vez de $0 silencioso   ·   2026-07-07
+
+El costo por turno leía `resolvedBot.llmModel` (campo legacy de `BotConfig`) mientras la
+ejecución real usaba `plan.llmModel` — podían divergir. Si el modelo efectivo no existía en la
+tabla de precios, el costo se registraba en **$0 en silencio**; y un `BotConfig.llmProvider`
+no-Google (Anthropic/OpenAI, stubs en MVP) hacía `throw` en `getModel` → **500** en el 100% de
+los turnos de ese bot. Este sprint unifica el par (provider, modelo) efectivo en un único punto
+de resolución, reusado tanto para ejecutar como para costear, y hace que un par inválido degrade
+con **WARN** — nunca `$0` silencioso ni 500.
+
+### Descubrimiento (Paso 0) — 2 correcciones al ticket original
+- Los números de línea del ticket (`~606-607` costo, `~771-776` ejecución) estaban invertidos:
+  `606-607` era la ejecución (`getModel`) y `771-776` el cálculo de costo. El resto de las líneas
+  citadas (google.ts ~93-95, anthropic.ts ~17-19) coincidían.
+- El archivo de precios no vive en `llm/pricing/costs.ts` (no existe ese directorio) sino en
+  `pricing/costs.ts`, hermano de `llm/`.
+- **Decisión no especificada en el ticket**: el ticket sugería colgar el WARN de "el sink
+  estructurado / `logChatbotEvent`, coherente con `chat.persist_failed`/`chat.stream_error`" —
+  pero esos dos eventos puntuales los emite `logPersistFailure` (INFRA.1, sink a stderr
+  garantizado, pensado para cuando Neon mismo está caída), **no** `logChatbotEvent`
+  (persiste a la tabla `chatbotEvent`, usado para warnings de negocio como
+  `chat.quota_exceeded`). Un modelo/provider mal configurado es un problema de **config**, no de
+  conexión — más cercano a `chat.quota_exceeded` que a una falla de infra — y además se quiere
+  **medible por volumen** (el propio ticket lo pide para la verificación humana). Se usó
+  `logChatbotEvent` con `type: 'chat.cost_model_unknown'`, `level: 'warn'`, tal como sugería el
+  ticket para el nombre del evento.
+
+### Fix — punto único de resolución (`llm/resolveEffectiveModel.ts`, nuevo)
+`resolveEffectiveModel(requestedProvider, requestedModel, getProvider?)` intenta
+`getProvider(requestedProvider).getModel(requestedModel)`; si lanza `ProviderNotImplementedError`
+o `ModelNotSupportedError` (los dos tipos que el repo ya usa para exactamente estos dos casos),
+devuelve el fallback `(FALLBACK_PROVIDER='google', FALLBACK_MODEL_ID='gemini-2.5-flash')` con
+`degraded: true` en vez de relanzar; cualquier otro error (infra real, no config) se relanza tal
+cual — no se enmascara. Tercer parámetro inyectable (default: la factory real
+`getLLMProvider`) para poder testear sin credenciales de Vertex — mismo idioma que el
+clock-injection de `dedup.ts` (INFRA.2).
+
+`handleChatRequest.ts`: se resuelve **una sola vez** en `:609` (reemplaza el
+`getLLMProvider(...)`+`provider.getModel(...)` de antes) y el resultado (`effectiveModel`) se
+reusa en `:795-796` dentro de `calculateCost` (reemplaza `resolvedBot.llmProvider`/
+`resolvedBot.llmModel`). `calculateCost` (`pricing/costs.ts`) **no se tocó** — sigue recibiendo
+`(provider, modelId)`, ahora siempre el par efectivo. `incrementQuota`, el log
+`chat.llm_request_finished` y el evento `chat.message_completed` heredan el costo correcto sin
+cambios propios (leen `costBreakdown.totalUsd`).
+
+Camino feliz (Google + modelo conocido) **sin cambios de comportamiento**: `resolveEffectiveModel`
+es passthrough exacto cuando el par ya es válido, y el provider no cambia nunca (`resolvedBot`
+=== `bot`, mismo campo `llmProvider` que ya usaba la ejecución). El costo numérico hoy es
+idéntico al de antes porque `plan.llmModel` y `BotConfig.llmModel` coinciden en los 3 planes
+sembrados (`'gemini-2.5-flash'`) — es un hecho de los datos actuales, no una garantía de código:
+el objetivo del sprint es justamente que el costo siga al modelo real aunque en el futuro
+diverjan.
+
+### WARN — `chat.cost_model_unknown`
+Emitido en `handleChatRequest.ts:611-628`, inmediatamente después de resolver, solo si
+`degraded === true` (cubre ambos triggers: provider stub y modelo desconocido — es la misma
+rama). Shape (vía `logChatbotEvent`, ya usado para `chat.quota_exceeded` con el mismo `level:
+'warn'`):
+```ts
+{
+  botConfigId, type: 'chat.cost_model_unknown', level: 'warn',
+  message: `Provider/modelo solicitado ".../..." no disponible — degradando a ".../..."`,
+  conversationId,
+  metadata: { requestedProvider, requestedModel, effectiveProvider, effectiveModel, planKey },
+}
+```
+Al no inventar canal nuevo, hereda gratis: log a consola (`chatbotLog`) + fila en
+`chatbotEvent` (dashboard admin) + nunca lanza (persistencia es best-effort, como todo
+`logChatbotEvent`).
+
+### Verificación
+- **Gate nuevo** (`npm run test:cost1` → `llm/__tests__/resolve-effective-model.invariant.ts`,
+  8 checks): camino feliz passthrough; provider stub (Anthropic y OpenAI) degrada sin throw;
+  modelo desconocido con provider válido degrada sin throw; el par degradado es siempre conocido
+  para su propio provider (nunca costo 0 por mismatch); error no relacionado se relanza (no se
+  enmascara); y **`calculateCost` real** (provider Anthropic, sin credenciales — no requiere
+  GCP/Vertex) contra un par correcto (costo no-cero, `$6` para 1M/1M tokens con el pricing real
+  de `ANTHROPIC_MODELS`) y un par mezclado (modelo de otro provider → `$0`, el bug que este
+  sprint corrige en el flujo real). El camino 100%-Google con credenciales reales queda fuera del
+  invariant (`GoogleProvider` exige `CHATBOT_GCP_PROJECT_ID` en el constructor) — por eso la
+  inyección de provider en `resolveEffectiveModel`.
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`, el único que aparece).
+- `eslint` (archivos tocados): 0 errores, 2 warnings, ambos **pre-existentes**: `toolResults` sin
+  usar en el destructure de `onFinish` (mismo warning de siempre, corrido de línea otra vez por
+  las inserciones arriba) y `_modelId` sin usar en el stub fake del test — mismo patrón exacto
+  (sin `argsIgnorePattern` para `_`) que ya warnea, sin tocarlos, en `anthropic.ts:17` y
+  `openai.ts:11`.
+- `test:utm1` (otro invariant que importa de `handleChatRequest.ts`) corrido como smoke test:
+  sigue verde.
+- `git status`: 5 archivos (`resolveEffectiveModel.ts` + `llm/__tests__/` nuevos;
+  `handleChatRequest.ts` +33/-5; `llm/index.ts` +6; `package.json` +1 script). Nada fuera de
+  `llm/`, `chat/handleChatRequest.ts` y `package.json`.
+
+### Pendiente / verificación humana (Valentino)
+- **SELECT comparativo en prod** (`Conversation`/`QuotaUsage`: `estimatedCostUsd`/`costUsd`
+  reciente vs. modelo del plan) → confirmar costo ≠ `$0` y correspondiente al modelo efectivo.
+- **Medir volumen de `chat.cost_model_unknown`** en `chatbotEvent` (`type = 'chat.cost_model_unknown'`)
+  para dimensionar cuántos bots tienen hoy un `llmProvider`/`llmModel` desalineado del plan.
+- No hay golden-suite ni visual-qa (no es multi-tenant ni visual) — el cierre real es el SELECT.
+
+### Fuera de scope (anotado, no implementado)
+- **Backfill**: filas ya escritas de `Conversation`/`QuotaUsage` no se tocaron.
+- **Admin/dashboard**: ningún select ni UI tocado — `BotConfig.llmProvider`/`llmModel` siguen
+  editables como antes, simplemente ya no manejan el costo/ejecución en runtime.
+- **CO-9** (unificar el default de modelo ×7): no tocado.
+- **Migración**: `prisma/schema.prisma` intacto.
+- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `demo-chat/[slug]/route.ts`,
+  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo
+  hardcodeado (no vienen de `plan.llmModel` ni alimentan costo de turno) — confirmado por grep,
+  no tocados.
+- El log `chat.llm_request_start` sigue mostrando el par **solicitado** (no el efectivo) — el WARN
+  nuevo ya deja rastro explícito del degrade con ambos pares; tocar ese log ampliaba el diff sin
+  necesidad.
+
+---
+
+## ✅ RE-2 — El widget no muere en spinner eterno si /config falla   ·   2026-07-10
+
+Cuando `/config` fallaba (red, o cold-start de Neon), el widget quedaba en `config=null` +
+`isLoading=false`: spinner de pulso **infinito** en el embed, y en el on-site (`LogicCompanion`)
+directamente **ausencia total** — el launcher nunca aparecía, sin ningún indicio de que algo
+falló. Peor: `configCache` guardaba la promesa resuelta a `null` **sin TTL**, así que ni un
+remount se recuperaba — envenenado hasta reciclar la lambda. Este sprint: reintento automático
+(reusando `chatRetryPolicy.ts` de INFRA.2 tal cual, sin tocarlo) + estado de error explícito con
+reintento manual, en ambos renders + el cache deja de envenenarse.
+
+### Descubrimiento (Paso 0) — 3 correcciones al ticket
+- El fetch de `/config` **no vive en `ChatbotEmbed.tsx`** (el ticket lo ubicaba ahí, ~146-170):
+  esas líneas son el *loading gate* (el spinner), no el fetch. El fetch entero vive en
+  `useChatbot.ts` (`hooks/useChatbot.ts`, no `**/useChatbot.ts` genérico), vía `configCache.ts` —
+  **un solo punto**, compartido por AMBOS renders (`ChatbotEmbed` y `LogicCompanion`, el on-site,
+  vía `LogicCompanion.tsx`). El fix del fetch/cache es entonces un punto único; solo el RENDER del
+  estado de error difiere entre los dos.
+- Pieza no mencionada por el ticket: `ChatWidgetMount.tsx` llama `prefetchBotConfig` directo para
+  precalentar el cache durante el intro, antes de que exista `useChatbot`. Se beneficia gratis del
+  fix de `configCache.ts` sin tocarlo (mismo punto único).
+- El "patrón visual `connection_failed`" son **dos** piezas coordinadas, no una: el dot+texto
+  "Conectando…" en `ChatHeader.tsx` (mid-retry) y el banner con `WifiOff` en `DegradedBanner.tsx`
+  (terminal) — **ninguna de las dos tiene botón de reintento** ya construido; el botón es un
+  elemento nuevo (`ConfigLoadError`), reusando el lenguaje (ámbar + `WifiOff`), no JSX existente.
+
+### Fix — cache + retry (`configCache.ts`, único punto)
+`prefetchBotConfig` ya no resuelve el fetch crudo: ahora reintenta con las funciones puras
+EXISTENTES de `chatRetryPolicy.ts` (`classifyStatus`, `shouldRetry`, `backoffForAttempt` —
+**cero cambios** a ese archivo, ya era 100% genérico pese al nombre/comentarios "de chat") —
+solo transitorios (red/5xx), backoff real 2s/4s, acotado a `CHAT_RETRY_MAX_ATTEMPTS=3`. Si agota
+sin éxito, la promesa se resuelve a `null` **y la entrada se borra del `Map`** (antes quedaba
+cacheada para siempre) — el próximo `prefetchBotConfig(slug)` (remount o retry manual) vuelve a
+fetchear desde cero. Un éxito sigue cacheado para siempre (sin TTL nuevo, como pedía el ticket).
+
+### Fix — estado de error + reintento (`useChatbot.ts` + ambos renders)
+Nuevo `configError: boolean` + `retryLoadConfig(): void` en `UseChatbotReturn`. El reset a
+"cargando" (`setIsLoading(true)` + `setConfigError(false)`) vive en `retryLoadConfig` (el
+**handler** del click), no en el cuerpo del efecto — evita el `react-hooks/set-state-in-effect`
+que un `setState` síncrono al inicio de un efecto dispararía; el efecto solo actualiza estado
+desde dentro de `.then()`/`.catch()`, igual que el código original. `configLoadAttempt` (contador
+puro) en las deps del efecto es lo que lo re-dispara desde el handler.
+
+`ConfigLoadError.tsx` (nuevo, `components/chat/`): contenido sin wrapper de layout (ícono
+`WifiOff` en círculo ámbar + texto + botón "Reintentar"), sin `config` disponible en este estado
+(no hay `accentColor`/`avatarStyle` para tematizarlo). Cada render lo posiciona a su manera:
+- `ChatbotEmbed.tsx`: gate dividido en dos (antes uno combinado) — spinner mientras `isLoading`;
+  panel centrado con `ConfigLoadError` si `!config` después.
+- `LogicCompanion.tsx`: `return null` mientras `isLoading` (igual que antes); si `!config` después,
+  tarjeta flotante en la MISMA posición fija del launcher (esquina inferior derecha — sin `config`
+  no hay `position` del bot para elegir izquierda/derecha, se usa el default).
+Sin motion/hover ni tematización — el ticket excluye estética/branding explícitamente (plano EST).
+
+### Verificación
+- **Gate nuevo** (`npm run test:re2` → `shared/__tests__/config-cache.invariant.ts`, 6 checks,
+  ~10s de pared por el backoff REAL — sin librería de mocks, se stubea `globalThis.fetch` con el
+  mismo idioma que `captureStderr` en `persist-failure-sink.invariant.ts`): éxito 1er intento;
+  éxito cacheado sin TTL (2ª llamada no fetchea); 503 una vez → reintenta y resuelve; 503×3 agota →
+  `null` **y el próximo llamado al mismo slug vuelve a fetchear** (el criterio de aceptación
+  central, verificado con un 2º stub); 404 nunca reintenta; red caída se trata como transitorio
+  igual que 5xx.
+- Smoke visual propio (browser real, dev server local): camino feliz on-site (`/`) sin
+  regresión — launcher, teaser, panel de chat abren igual que antes. `ConfigLoadError` verificado
+  en una ruta de preview temporal (`dev-preview-re2`, **borrada** al cerrar, junto con el stub de
+  tipos que Next generó en `.next/` mientras existió) — ambas variantes (panel/flotante) legibles,
+  botón clickeable (contador de clicks confirmó el handler). **No se pudo forzar un fallo real de
+  red contra `/config`** sin tocar el endpoint server-side (prohibido) ni tener intercepción de red
+  en las herramientas de browser disponibles — la lógica de retry/backoff/no-envenenamiento queda
+  probada por el gate (mismo módulo real, no una reimplementación) en vez de por observación en
+  vivo.
+- **visual-qa**: bloqueo de entorno — el subagente no tuvo cableado el MCP de preview en esta
+  sesión (mismo bloqueo exacto que INFRA.2 ya documentó: "MCP de preview/browser no cableado").
+  No es un hallazgo de este sprint, es un gap de entorno recurrente.
+- `tsc --noEmit`: sin errores nuevos (baseline `searchconsole.ts:119`, el único que aparece).
+- `eslint` (archivos tocados): 0 errores nuevos; 2 errores **pre-existentes** (regla
+  `react-hooks/refs` en `ChatbotEmbed.tsx:316` y `react-hooks/set-state-in-effect` en
+  `useChatbot.ts:380`) — ambos son EXACTAMENTE los 2 de los 3 que INFRA.2 ya documentó
+  (`ChatbotEmbed:295`, `useChatbot:354`), corridos de línea por las inserciones de este sprint
+  (+21 y +25 líneas respectivamente) — confirmado por contenido, no solo por proximidad de línea.
+  Un tercer error nuevo (`useChatbot.ts:182`, el `setIsLoading(true)` síncrono que sí introduje) se
+  identificó y se corrigió moviendo el reset al handler (ver arriba) — no quedó pendiente.
+- `git status`: 7 archivos (`configCache.ts`, `useChatbot.ts`, `ChatbotEmbed.tsx`,
+  `LogicCompanion.tsx` modificados; `ConfigLoadError.tsx` + `config-cache.invariant.ts` nuevos;
+  `package.json` +1 script). Nada fuera de `src/modules/chatbot/` — nunca se tocó `/api/chatbot/
+  [slug]/config/route.ts`, `getPublicConfig`, `/admin`, `/dashboard`, ni `chatRetryPolicy.ts`.
+
+### Pendiente / verificación humana (Valentino)
+- **La coreografía real**: levantar el bot con Neon dormida DE VERDAD (cold-start real, no mock) y
+  grabar el auto-retry disparándose (header pasaría a "Conectando…" si tocara ese mismo camino de
+  `reconnecting` — **nota**: el retry de `/config` NO usa `reconnecting`/`ChatHeader`, ese estado
+  es específico del POST de `/chat`; durante el retry de `/config` el widget simplemente sigue en
+  el spinner de `isLoading`, sin texto "Conectando…" — flagueado por si se esperaba ese lenguaje
+  también acá) y recuperándose sin intervención. El mock del smoke NO sustituye esto.
+- Confirmar visualmente en un entorno con el MCP de preview cableado (desktop+mobile reales) — la
+  verificación de este sprint fue con browser real pero sesión propia, no vía el subagente
+  mandatado.
+- No es multi-tenant → sin golden-suite, como anticipaba el ticket.
+
+### Fuera de scope (anotado, no implementado)
+- **`/config` server-side / `getPublicConfig`**: intactos.
+- **Packs/scoring/runtime del chat**: intactos.
+- **`/admin` y `/dashboard`**: intactos.
+- **`chatRetryPolicy.ts`**: cero cambios — ya era reusable tal cual, sin necesitar extracción.
+- **Estética/branding/theme del widget**: `ConfigLoadError` es deliberadamente simple (el ticket
+  lo excluye — plano EST).
+- **El texto "Conectando…" del header durante el retry de `/config`**: no se agregó — ver nota en
+  "Pendiente" arriba; el header (`reconnecting`) es un concepto separado del POST de `/chat`, y
+  extenderlo al `/config` no estaba en el pedido explícito del ticket (que solo pide "estado de
+  error breve" al agotar, no un estado intermedio con texto durante el retry).
+- Los 2 issues de lint pre-existentes (ref-in-render, set-state-in-effect): no se tocaron, son de
+  regiones/efectos que este sprint no toca funcionalmente.
+

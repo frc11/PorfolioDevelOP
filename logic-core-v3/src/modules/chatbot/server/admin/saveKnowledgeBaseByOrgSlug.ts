@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { revalidatePath } from 'next/cache'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { invalidateBotCache } from '../conversation'
@@ -29,10 +29,15 @@ export async function saveKnowledgeBaseByOrgSlug(
 
   const { orgSlug, ...data } = parsed.data
 
-  const org = await prisma.organization.findUnique({
-    where: { slug: orgSlug },
-    include: { botConfig: { include: { knowledgeBase: true } } },
-  })
+  // TENANT-RESOLUTION: org+bot+KB por slug (super-admin edita por slug).
+  const org = await unsafeGlobalQuery(
+    'TENANT-RESOLUTION: org+bot+KB por slug para editar la KB (super-admin)',
+    (c) =>
+      c.organization.findUnique({
+        where: { slug: orgSlug },
+        include: { botConfig: { include: { knowledgeBase: true } } },
+      }),
+  )
 
   if (!org?.botConfig?.knowledgeBase) {
     return { success: false, error: 'Bot/KB not found for this org' }
@@ -40,10 +45,7 @@ export async function saveKnowledgeBaseByOrgSlug(
 
   try {
     const before = org.botConfig.knowledgeBase
-    const after = await prisma.knowledgeBase.update({
-      where: { id: org.botConfig.knowledgeBase.id },
-      data,
-    })
+    const after = await forOrg(org.id).knowledgeBase.update(org.botConfig.knowledgeBase.id, data)
 
     invalidateBotCache(org.botConfig.slug)
 

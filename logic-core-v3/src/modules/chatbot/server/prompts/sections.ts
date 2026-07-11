@@ -1,5 +1,6 @@
 import type { BuildSystemPromptInput } from './types'
 import { formatTone, kbSection } from './helpers'
+import { HARD_CAP_MESSAGES } from '../../shared/historyPolicy'
 
 /**
  * The 9 sections of the system prompt.
@@ -178,8 +179,11 @@ Patrón: una sola línea seca, volvés al scope, no justificás largo. Variá la
 
 /**
  * B4.5 — Umbral del soft-cap. A partir de este nro de turnos del visitante,
- * el prompt sugiere al modelo evaluar `show_whatsapp_handoff`. Es soft:
- * el modelo decide si la sesión amerita derivar o si vale la pena seguir.
+ * el prompt orienta al modelo a CERRAR (capturar datos pendientes / proponer
+ * `show_whatsapp_handoff`). Es soft: el modelo decide si la sesión amerita
+ * derivar o si vale la pena seguir. C0.2 le suma la pista concreta: al llegar
+ * al hard-cap (HARD_CAP_MESSAGES/2 turnos, gate server-side en
+ * handleChatRequest) la sesión se cierra sola con derivación a WhatsApp.
  */
 const SOFT_CAP_THRESHOLD = 15
 
@@ -201,7 +205,7 @@ Usá esto para:
 - Combinar fecha + horarios de KB si te preguntan "¿están abiertos ahora?".${
     softCapHit
       ? `
-- Sesión ya larga (${turns} turnos): si el flujo está empantanado o el visitante repite preguntas, es buen momento para sugerir derivar al equipo humano con \`show_whatsapp_handoff\` (proponé la opción con naturalidad, NO la fuerces si la conversación está fluyendo).`
+- Sesión ya larga (${turns} turnos): orientá el cierre — si faltan datos de contacto pedilos (capture_lead) y proponé seguir con el equipo humano con \`show_whatsapp_handoff\`. No cortes seco una conversación que fluye, pero tampoco la estires: cerca del turno ${HARD_CAP_MESSAGES / 2} la sesión automática se cierra sola y deriva a WhatsApp.`
       : ''
   }`
 }

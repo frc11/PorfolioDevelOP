@@ -9,6 +9,7 @@ import type { PublicBotConfig } from '../../shared/publicConfig'
 import type { NeuroAvatarState } from '../avatar'
 import type { DegradedInfo } from '../../hooks/useChatbot'
 import { CHATBOT_Z_INDEX } from '../../shared/zIndex'
+import { MAX_MESSAGE_CHARS } from '../../shared/historyPolicy'
 import { ChatHeader } from './ChatHeader'
 import { DegradedBanner } from './DegradedBanner'
 import { ThinkingAvatar } from './ThinkingAvatar'
@@ -567,6 +568,9 @@ export function ChatWindow({
                     readOnly={botBusy}
                     disabled={inputLocked}
                     rows={1}
+                    // C0.2 — mismo tope que el schema del server (forma): el
+                    // cliente nunca produce un mensaje que /chat rechazaría.
+                    maxLength={MAX_MESSAGE_CHARS}
                     inputMode="text"
                     autoCapitalize="sentences"
                     autoCorrect="on"

@@ -1,6 +1,6 @@
 import { Lock, Send } from 'lucide-react'
 import { adminHoverCls } from '@/lib/hover'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import { Card } from '@/components/ui/Card'
@@ -61,8 +61,7 @@ export async function CrmIntegrationAdminCard({
   }
 
   const [integration, history] = await Promise.all([
-    prisma.crmIntegration.findUnique({
-      where: { organizationId },
+    forOrg(organizationId).crmIntegration.findFirst({
       select: {
         webhookUrl: true,
         enabled: true,

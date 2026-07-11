@@ -4,7 +4,7 @@ import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
 import { getVerticalPack } from '../verticals'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { sanitizeAttributionField } from '../../shared/attribution'
 import { shouldSkipUserPersist } from './dedup'
 
@@ -14,7 +14,7 @@ import {
 } from '../conversation'
 import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
 import { getTools } from '../tools'
-import { getLLMProvider, normalizeLlmProvider } from '../llm'
+import { normalizeLlmProvider, resolveEffectiveModel } from '../llm'
 import { calculateCost } from '../pricing'
 import {
   checkQuota,
@@ -31,6 +31,13 @@ import { logChatbotEvent, logPersistFailure } from '../logging'
 // LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
+import {
+  trimHistory,
+  HISTORY_WINDOW_MESSAGES,
+  MAX_MESSAGES_SHAPE,
+  MAX_MESSAGE_CHARS,
+  HARD_CAP_MESSAGES,
+} from '../../shared/historyPolicy'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -52,15 +59,23 @@ const attributionField = (maxLength: number) =>
  * las funciones puras de shared/attribution.ts.
  */
 export const requestBodySchema = z.object({
+  // C0.2 — una conversación larga NUNCA muere en 400 por longitud:
+  //  - Camino normal: recorte, no rechazo. El transform aplica trimHistory —
+  //    los últimos HISTORY_WINDOW_MESSAGES, con el último 'user' (el turno en
+  //    curso) SIEMPRE preservado y la ventana user-led. `body.messages` aguas
+  //    abajo ya es la ventana recortada.
+  //  - min/max quedan solo como validación de FORMA (payload absurdo que
+  //    ningún widget real produce — ver historyPolicy.ts). Superarlos sí es 400.
   messages: z
     .array(
       z.object({
         role: z.enum(['user', 'assistant', 'system']),
-        content: z.string().max(8000),
+        content: z.string().max(MAX_MESSAGE_CHARS),
       })
     )
     .min(1)
-    .max(50),
+    .max(MAX_MESSAGES_SHAPE)
+    .transform((msgs) => trimHistory(msgs, HISTORY_WINDOW_MESSAGES)),
   sessionId: z.string().min(1).max(200),
   currentPath: z.string().max(500).optional(),
   referrer: attributionField(500),
@@ -99,6 +114,19 @@ function collectProactivePrompts(raw: unknown): Set<string> {
 }
 
 /**
+ * C0.2 — Largo del array `messages` del body CRUDO (antes del recorte del
+ * transform del schema), solo para telemetría: permite ver cuánto recorta la
+ * ventana server sobre tráfico real. Defensivo contra cualquier shape.
+ */
+function countRawMessages(json: unknown): number | null {
+  if (json && typeof json === 'object') {
+    const messages = (json as { messages?: unknown }).messages
+    if (Array.isArray(messages)) return messages.length
+  }
+  return null
+}
+
+/**
  * Best-effort extraction of client IP from request headers.
  * Returns "unknown" if no header is available (e.g. local dev).
  */
@@ -123,7 +151,7 @@ function extractClientIp(request: Request): string {
  * directamente. La `reason` permite distinguir downstream (telemetría,
  * UI texto distinto en el widget si quisiera).
  */
-type DegradedReason = 'quota_exhausted' | 'domain_overflow'
+type DegradedReason = 'quota_exhausted' | 'domain_overflow' | 'conversation_limit'
 
 interface DegradedContext {
   whatsappNumber: string | null
@@ -239,8 +267,10 @@ export async function handleChatRequest(
 
   // ─── 1. Parse and validate body ───────────────────────────────
   let body: RequestBody
+  let receivedMessageCount: number | null = null
   try {
-    const json = await request.json()
+    const json: unknown = await request.json()
+    receivedMessageCount = countRawMessages(json)
     body = requestBodySchema.parse(json)
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'invalid body'
@@ -251,7 +281,10 @@ export async function handleChatRequest(
 
   chatbotDebug('request_parsed', {
     slug,
+    // C0.2 — messageCount ya es la ventana recortada (transform del schema);
+    // receivedMessageCount es lo que llegó del cliente antes del recorte.
     messageCount: body.messages.length,
+    receivedMessageCount,
     sessionId: body.sessionId,
     currentPath: body.currentPath,
   })
@@ -263,6 +296,10 @@ export async function handleChatRequest(
     return Response.json({ error: 'Bot not found or inactive' }, { status: 404 })
   }
   const resolvedBot = bot; // non-null reference for callbacks
+  // B0-S3 — org del tenant (BotConfig.organizationId, ya incluido por
+  // resolveBotBySlug). Fija el scope de aislamiento de todo el request.
+  const orgId = resolvedBot.organization.id
+  const scope = forOrg(orgId)
 
   if (!bot.knowledgeBase) {
     chatbotLog('chat.bot_no_kb', { slug, botConfigId: bot.id }, 'error')
@@ -324,13 +361,14 @@ export async function handleChatRequest(
       const t = Date.now()
       // Lectura optimista contra QuotaUsage. El cap real lo enforce el
       // tryReserveConversation atómico de abajo cuando aplica.
-      const r = await checkQuota(bot.id, Number.MAX_SAFE_INTEGER)
+      const r = await checkQuota(orgId, bot.id, Number.MAX_SAFE_INTEGER)
       timings.quota_only_ms = Date.now() - t
       return r
     })(),
     (async () => {
       const t = Date.now()
       const r = await getOrCreateConversation({
+        organizationId: orgId,
         botConfigId: bot.id,
         sessionId: body.sessionId,
         currentPath: body.currentPath,
@@ -378,6 +416,7 @@ export async function handleChatRequest(
       'warn',
     )
     await logChatbotEvent({
+      organizationId: orgId,
       botConfigId: bot.id,
       type: 'chat.gating_domain_overflow',
       level: 'warn',
@@ -413,6 +452,7 @@ export async function handleChatRequest(
       'warn',
     )
     await logChatbotEvent({
+      organizationId: orgId,
       botConfigId: bot.id,
       type: 'chat.quota_exceeded',
       level: 'warn',
@@ -427,6 +467,7 @@ export async function handleChatRequest(
     })
     // B4.5: alerta de upsell idempotente (1 por bot/mes via degradedAt atómico).
     await triggerUpsellAlertIfFirst({
+      organizationId: orgId,
       botConfigId: bot.id,
       organizationName: bot.organization.companyName,
       planKey: plan.key,
@@ -451,7 +492,7 @@ export async function handleChatRequest(
   // existente no incrementa el contador, así que no necesita reserve).
   // Cubre el race TOCTOU exacto en el último cupo del mes.
   if (isNewConversation) {
-    const reserve = await tryReserveConversation(bot.id, plan.quota)
+    const reserve = await tryReserveConversation(orgId, bot.id, plan.quota)
     if (!reserve.reserved) {
       chatbotLog(
         'chat.quota_reserve_failed',
@@ -465,6 +506,7 @@ export async function handleChatRequest(
         'warn',
       )
       await logChatbotEvent({
+        organizationId: orgId,
         botConfigId: bot.id,
         type: 'chat.quota_exceeded',
         level: 'warn',
@@ -475,6 +517,7 @@ export async function handleChatRequest(
       // B4.5: el race TOCTOU también dispara el upsell alert (cubre el caso del
       // último cupo cuando concurrent requests pegan al mismo tiempo).
       await triggerUpsellAlertIfFirst({
+        organizationId: orgId,
         botConfigId: bot.id,
         organizationName: bot.organization.companyName,
         planKey: plan.key,
@@ -497,6 +540,50 @@ export async function handleChatRequest(
     timings.quota_reserve_ms = Date.now() - stepStart
   }
 
+  // ─── 5.c Gating: tope duro de conversación (C0.2) ─────────────
+  // A partir de HARD_CAP_MESSAGES mensajes persistidos (~20 turnos del
+  // visitante), la conversación automática se cierra con dignidad: respuesta
+  // canned + CTA a WhatsApp si el bot lo tiene configurado — NUNCA un 400 ni
+  // un turno mudo, y cero costo de LLM. Se evalúa sobre
+  // Conversation.messageCount (autoritativo, ya resuelto en este request —
+  // cero query extra), como GATE — no como sugerencia al modelo (eso es el
+  // soft-cap de sections.ts). No se persiste el mensaje ni se incrementan
+  // contadores → el estado degradado es estable en los turnos siguientes.
+  // Solo alcanzable en conversaciones existentes (una nueva arranca en 0).
+  if ((conversation.messageCount ?? 0) >= HARD_CAP_MESSAGES) {
+    chatbotLog(
+      'chat.gating_conversation_limit',
+      {
+        slug,
+        botConfigId: bot.id,
+        conversationId: conversation.id,
+        messageCount: conversation.messageCount,
+        hardCap: HARD_CAP_MESSAGES,
+      },
+      'warn',
+    )
+    await logChatbotEvent({
+      organizationId: orgId,
+      botConfigId: bot.id,
+      type: 'chat.gating_conversation_limit',
+      level: 'warn',
+      message: `Conversación al tope (${conversation.messageCount}/${HARD_CAP_MESSAGES} mensajes) — respuesta degradada${bot.whatsappNumber ? ' con CTA a WhatsApp' : ''}`,
+      conversationId: conversation.id,
+      metadata: { messageCount: conversation.messageCount, hardCap: HARD_CAP_MESSAGES },
+    })
+    return degradedResponse(
+      bot.whatsappNumber
+        ? 'Llegamos al tope de esta conversación automática. Te derivo con el equipo por WhatsApp así seguimos personalmente y sin demoras.'
+        : 'Llegamos al tope de esta conversación automática. Escribinos por los canales de contacto del sitio y el equipo te sigue personalmente.',
+      'conversation_limit',
+      {
+        whatsappNumber: bot.whatsappNumber,
+        whatsappMessage: bot.whatsappMessage,
+        companyName: bot.organization.companyName,
+      },
+    )
+  }
+
   // ─── 6. Persist user message ──────────────────────────────────
   const lastUserMessage = [...body.messages]
     .reverse()
@@ -513,18 +600,16 @@ export async function handleChatRequest(
   // (sin migración) vía la cola de la conversación; la corrección la da el chequeo de
   // "cola USER sin responder" (una re-pregunta legítima ya tiene un ASSISTANT después y
   // NO se saltea). Ver shouldSkipUserPersist.
-  const tail = await prisma.chatMessage.findFirst({
+  const tail = await scope.chatMessage.findFirst({
     where: { conversationId: conversation.id },
     orderBy: { createdAt: 'desc' },
     select: { role: true, content: true, createdAt: true },
   })
   if (!shouldSkipUserPersist(tail, lastUserMessage.content, new Date())) {
-    await prisma.chatMessage.create({
-      data: {
-        conversationId: conversation.id,
-        role: 'USER',
-        content: lastUserMessage.content,
-      },
+    await scope.chatMessage.create({
+      conversationId: conversation.id,
+      role: 'USER',
+      content: lastUserMessage.content,
     })
   }
   mark('user_msg_persist_ms')
@@ -603,8 +688,30 @@ export async function handleChatRequest(
   //   plan.llmModel ya es 'gemini-2.5-flash' en los 3 planes sembrados.
   //   bot.llmProvider sigue siendo del BotConfig (no hay dimensión
   //   provider en Plan todavía — toda la flota usa 'google' hoy).
-  const provider = getLLMProvider(normalizeLlmProvider(bot.llmProvider))
-  const model = provider.getModel(plan.llmModel)
+  // COST-1 — par (provider, modelo) efectivo resuelto UNA vez; se reusa
+  // más abajo en calculateCost (antes el costo leía resolvedBot.llmModel
+  // por su lado y podía divergir de lo que esta línea ejecuta).
+  const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)
+  const model = effectiveModel.model
+  if (effectiveModel.degraded) {
+    await logChatbotEvent({
+      organizationId: orgId,
+      botConfigId: bot.id,
+      type: 'chat.cost_model_unknown',
+      level: 'warn',
+      message:
+        `Provider/modelo solicitado "${effectiveModel.requestedProvider}/${effectiveModel.requestedModel}" ` +
+        `no disponible — degradando a "${effectiveModel.provider}/${effectiveModel.modelId}"`,
+      conversationId: conversation.id,
+      metadata: {
+        requestedProvider: effectiveModel.requestedProvider,
+        requestedModel: effectiveModel.requestedModel,
+        effectiveProvider: effectiveModel.provider,
+        effectiveModel: effectiveModel.modelId,
+        planKey: plan.key,
+      },
+    })
+  }
 
   chatbotLog('chat.llm_request_start', {
     slug,
@@ -756,6 +863,7 @@ export async function handleChatRequest(
             'warn'
           )
           await logChatbotEvent({
+            organizationId: orgId,
             botConfigId: resolvedBot.id,
             type: 'chat.validation_warnings',
             level: 'warn',
@@ -768,37 +876,34 @@ export async function handleChatRequest(
         // MS-1: tokens y tool calls agregados desde todos los steps (ver bloque arriba).
         const tokensIn = totalIn
         const tokensOut = totalOut
+        // COST-1 — mismo par efectivo que ejecutó la respuesta (arriba), no
+        // resolvedBot.llmProvider/llmModel (legacy, podía divergir de plan.llmModel).
         const costBreakdown = calculateCost(
-          normalizeLlmProvider(resolvedBot.llmProvider),
-          resolvedBot.llmModel,
+          effectiveModel.provider,
+          effectiveModel.modelId,
           tokensIn,
           tokensOut
         )
 
         // Persist assistant message + tool calls (all steps).
-        await prisma.chatMessage.create({
-          data: {
-            conversationId: conversation.id,
-            role: 'ASSISTANT',
-            content: text,
-            tokensIn,
-            tokensOut,
-            toolCalls: allToolCalls.length > 0
-              ? (allToolCalls as unknown as object)
-              : undefined,
-          },
+        await scope.chatMessage.create({
+          conversationId: conversation.id,
+          role: 'ASSISTANT',
+          content: text,
+          tokensIn,
+          tokensOut,
+          toolCalls: allToolCalls.length > 0
+            ? (allToolCalls as unknown as object)
+            : undefined,
         })
 
         // Update Conversation aggregate metrics
-        await prisma.conversation.update({
-          where: { id: conversation.id },
-          data: {
-            messageCount: { increment: 2 },  // user + assistant
-            tokensIn: { increment: tokensIn },
-            tokensOut: { increment: tokensOut },
-            estimatedCostUsd: { increment: costBreakdown.totalUsd },
-            lastMessageAt: new Date(),
-          },
+        await scope.conversation.update(conversation.id, {
+          messageCount: { increment: 2 },  // user + assistant
+          tokensIn: { increment: tokensIn },
+          tokensOut: { increment: tokensOut },
+          estimatedCostUsd: { increment: costBreakdown.totalUsd },
+          lastMessageAt: new Date(),
         })
 
         // Update QuotaUsage for current period.
@@ -807,6 +912,7 @@ export async function handleChatRequest(
         // false siempre para evitar double-count del counter. Tokens y cost
         // se siguen acumulando normalmente.
         await incrementQuota({
+          organizationId: orgId,
           botConfigId: resolvedBot.id,
           isNewConversation: false,
           messagesAdded: 2,
@@ -831,6 +937,7 @@ export async function handleChatRequest(
         })
 
         await logChatbotEvent({
+          organizationId: orgId,
           botConfigId: resolvedBot.id,
           type: 'chat.message_completed',
           level: 'info',
@@ -860,6 +967,7 @@ export async function handleChatRequest(
         // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
         // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza.
         await logChatbotEvent({
+          organizationId: orgId,
           botConfigId: resolvedBot.id,
           type: 'chat.persist_error',
           level: 'error',
@@ -888,6 +996,9 @@ export async function handleChatRequest(
     })
     if (bot) {
       await logChatbotEvent({
+        // orgId (declarado dentro del try tras resolver el bot) no está en scope
+        // en este catch externo; la org sale del propio bot ya resuelto.
+        organizationId: bot.organization.id,
         botConfigId: bot.id,
         type: 'chat.unhandled_error',
         level: 'error',

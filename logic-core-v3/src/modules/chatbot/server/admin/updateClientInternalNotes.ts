@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { logAdminAction } from '@/lib/audit-log'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
@@ -24,16 +24,18 @@ export async function updateClientInternalNotes(
   const { organizationId, internalNotes } = result.data
   const nextNotes = internalNotes && internalNotes.trim() !== '' ? internalNotes : null
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true, companyName: true, internalNotes: true },
-  })
+  // TENANT-MGMT: notas internas del Organization (tenant raíz, no cubierto por
+  // el helper) — administración de plataforma por super-admin.
+  const org = await unsafeGlobalQuery(
+    'TENANT-MGMT: lectura de org para editar notas internas (super-admin)',
+    (c) => c.organization.findUnique({ where: { id: organizationId }, select: { id: true, companyName: true, internalNotes: true } }),
+  )
   if (!org) throw new Error('Cliente no encontrado.')
 
-  await prisma.organization.update({
-    where: { id: org.id },
-    data: { internalNotes: nextNotes },
-  })
+  await unsafeGlobalQuery(
+    'TENANT-MGMT: update de notas internas de la org (super-admin)',
+    (c) => c.organization.update({ where: { id: org.id }, data: { internalNotes: nextNotes } }),
+  )
 
   await logAdminAction({
     userId: admin.id ?? 'unknown',

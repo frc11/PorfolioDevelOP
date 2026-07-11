@@ -1,7 +1,10 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 
-export async function listLeadsForBot(botConfigId: string, limit: number = 50) {
-  return prisma.chatbotLead.findMany({
+// Admin bot-detail: cada función recibe el organizationId del bot (resuelto por
+// el caller admin) y scopea vía el helper. El botConfigId sigue acotando al bot.
+
+export async function listLeadsForBot(organizationId: string, botConfigId: string, limit: number = 50) {
+  return forOrg(organizationId).chatbotLead.findMany({
     where: { botConfigId },
     orderBy: { capturedAt: 'desc' },
     take: limit,
@@ -13,8 +16,8 @@ export async function listLeadsForBot(botConfigId: string, limit: number = 50) {
   })
 }
 
-export async function listConversationsForBot(botConfigId: string, limit: number = 50) {
-  return prisma.conversation.findMany({
+export async function listConversationsForBot(organizationId: string, botConfigId: string, limit: number = 50) {
+  return forOrg(organizationId).conversation.findMany({
     where: { botConfigId },
     orderBy: { lastMessageAt: 'desc' },
     take: limit,
@@ -25,21 +28,13 @@ export async function listConversationsForBot(botConfigId: string, limit: number
   })
 }
 
-export async function getMonthlyUsageForBot(botConfigId: string) {
+export async function getMonthlyUsageForBot(organizationId: string, botConfigId: string) {
   const now = new Date()
-  return prisma.quotaUsage.findUnique({
-    where: {
-      botConfigId_year_month: {
-        botConfigId,
-        year: now.getUTCFullYear(),
-        month: now.getUTCMonth() + 1,
-      },
-    },
-  })
+  return forOrg(organizationId).quotaUsage.findByPeriod(botConfigId, now.getUTCFullYear(), now.getUTCMonth() + 1)
 }
 
-export async function listRecentEvents(botConfigId: string, limit: number = 100) {
-  return prisma.chatbotEvent.findMany({
+export async function listRecentEvents(organizationId: string, botConfigId: string, limit: number = 100) {
+  return forOrg(organizationId).chatbotEvent.findMany({
     where: { botConfigId },
     orderBy: { createdAt: 'desc' },
     take: limit,
@@ -49,8 +44,13 @@ export async function listRecentEvents(botConfigId: string, limit: number = 100)
   })
 }
 
-export async function listEventsSince(botConfigId: string, since: Date, limit: number = 50) {
-  return prisma.chatbotEvent.findMany({
+export async function listEventsSince(
+  organizationId: string,
+  botConfigId: string,
+  since: Date,
+  limit: number = 50,
+) {
+  return forOrg(organizationId).chatbotEvent.findMany({
     where: { botConfigId, createdAt: { gt: since } },
     orderBy: { createdAt: 'asc' },
     take: limit,

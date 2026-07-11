@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { auth } from '@/auth'
 import { logAdminAction } from '@/lib/audit-log'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { resolveOrgId } from '@/lib/preview'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 import { CLIENT_AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
@@ -72,9 +72,9 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
     }
   }
 
-  const bot = await prisma.botConfig.findUnique({
-    where: { organizationId: orgId },
-  })
+  const scope = forOrg(orgId)
+  // La org tiene un único bot (BotConfig.organizationId @unique): findFirst scoped.
+  const bot = await scope.botConfig.findFirst()
 
   if (!bot) {
     return { ok: false as const, error: 'No tenes bot configurado' }
@@ -92,9 +92,7 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
   }
 
   const data = parsed.data
-  const updated = await prisma.botConfig.update({
-    where: { id: bot.id },
-    data: {
+  const updated = await scope.botConfig.update(bot.id, {
       ...(data.accentColor !== undefined ? { accentColor: data.accentColor } : {}),
       ...(data.accentSecondary !== undefined ? { accentSecondary: data.accentSecondary } : {}),
       ...(data.chatSurfaceTint !== undefined ? { chatSurfaceTint: data.chatSurfaceTint } : {}),
@@ -106,7 +104,6 @@ export async function updateBotAppearance(input: UpdateBotAppearanceInput) {
       ...(data.quickReplies !== undefined
         ? { quickReplies: toPublicQuickReplies(data.quickReplies) as object }
         : {}),
-    },
   })
 
   invalidateBotCache(updated.slug)

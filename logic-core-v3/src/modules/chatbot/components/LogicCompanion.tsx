@@ -7,6 +7,7 @@ import { AvatarRenderer, getAvatarRenderSize } from './avatar'
 import { deriveBusinessInitials } from '../shared/businessInitials'
 import { CHATBOT_Z_INDEX } from '../shared/zIndex'
 import { ChatWindow } from './chat/ChatWindow'
+import { ConfigLoadError } from './chat/ConfigLoadError'
 import { ProactiveTooltip } from './tooltip'
 import { renderToolCall } from './tool-cards'
 import { useChatbot } from '../hooks/useChatbot'
@@ -91,7 +92,33 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
     ]
   }, [chatbot.config?.botName])
 
-  if (chatbot.isLoading || !chatbot.config) return null
+  if (chatbot.isLoading) return null
+
+  // RE-2 — isLoading=false + config=null = /config agotó sus reintentos
+  // automáticos (chatRetryPolicy vía prefetchBotConfig). Antes el launcher
+  // simplemente no aparecía nunca (return null indistinguible del loading);
+  // ahora un affordance mínimo con reintento manual, en la misma posición
+  // fija donde iría el launcher. Sin `config`, no hay accentColor/avatarStyle/
+  // position del bot disponibles — se usa el default (esquina inferior derecha).
+  if (!chatbot.config) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 'max(24px, env(safe-area-inset-bottom))',
+          right: 'max(24px, env(safe-area-inset-right))',
+          zIndex: CHATBOT_Z_INDEX.bubble,
+          maxWidth: '240px',
+          borderRadius: '16px',
+          background: 'rgba(11,14,28,0.96)',
+          border: '1px solid rgba(245, 158, 11, 0.24)',
+          boxShadow: '0 8px 28px rgba(0,0,0,0.35)',
+        }}
+      >
+        <ConfigLoadError onRetry={chatbot.retryLoadConfig} />
+      </div>
+    )
+  }
 
   // Respect safe-area-inset on iPhone notch / Android gesture nav. The bubble
   // should never sit *under* the home indicator on a 14 Pro or behind the

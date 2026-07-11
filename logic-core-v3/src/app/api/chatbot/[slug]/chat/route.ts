@@ -3,7 +3,7 @@ import { handleChatRequest } from '@/modules/chatbot/index.server'
 import { validateOrigin } from '@/lib/security/validate-origin'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -47,16 +47,14 @@ export async function POST(
       `[Security] Blocked ${origin ?? 'no-origin'} for bot ${slug}: ${validation.reason}`,
     )
 
-    if (validation.botConfigId) {
-      prisma.chatbotEvent
-        .create({
-          data: {
-            botConfigId: validation.botConfigId,
-            type: 'SECURITY.BLOCKED_ORIGIN',
-            level: 'WARN',
-            message: `Blocked request from ${origin ?? 'no-origin'}`,
-            metadata: { origin, reason: validation.reason },
-          },
+    if (validation.botConfigId && validation.organizationId) {
+      forOrg(validation.organizationId)
+        .chatbotEvent.create({
+          botConfigId: validation.botConfigId,
+          type: 'SECURITY.BLOCKED_ORIGIN',
+          level: 'WARN',
+          message: `Blocked request from ${origin ?? 'no-origin'}`,
+          metadata: { origin, reason: validation.reason },
         })
         .catch(() => {})
     }

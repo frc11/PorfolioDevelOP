@@ -10,6 +10,9 @@ export interface ValidateOriginResult {
   allowed: boolean
   reason?: string
   botConfigId?: string
+  // B0-S3 — org del bot (resuelta por slug junto al botConfigId). Permite al
+  // caller loguear el evento de seguridad vía el helper de aislamiento scoped.
+  organizationId?: string
 }
 
 /**
@@ -57,7 +60,7 @@ export async function validateOrigin(
 
   const bot = await prisma.botConfig.findUnique({
     where: { slug: botSlug },
-    select: { id: true, allowedDomains: true, isActive: true },
+    select: { id: true, organizationId: true, allowedDomains: true, isActive: true },
   })
 
   if (!bot) return { allowed: false, reason: 'bot_not_found' }
@@ -68,18 +71,18 @@ export async function validateOrigin(
     origin === 'https://develop.com.ar' ||
     origin === 'https://www.develop.com.ar'
   ) {
-    return { allowed: true, botConfigId: bot.id }
+    return { allowed: true, botConfigId: bot.id, organizationId: bot.organizationId }
   }
 
   // Sin dominios configurados → bloquea en prod
   if (bot.allowedDomains.length === 0) {
-    return { allowed: false, reason: 'no_domains_configured', botConfigId: bot.id }
+    return { allowed: false, reason: 'no_domains_configured', botConfigId: bot.id, organizationId: bot.organizationId }
   }
 
   // Match exacto o subdominio (delegado al matcher compartido)
   if (originMatchesAllowed(origin, bot.allowedDomains)) {
-    return { allowed: true, botConfigId: bot.id }
+    return { allowed: true, botConfigId: bot.id, organizationId: bot.organizationId }
   }
 
-  return { allowed: false, reason: 'domain_not_allowed', botConfigId: bot.id }
+  return { allowed: false, reason: 'domain_not_allowed', botConfigId: bot.id, organizationId: bot.organizationId }
 }

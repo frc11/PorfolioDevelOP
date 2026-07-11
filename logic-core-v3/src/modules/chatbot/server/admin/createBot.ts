@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { slugify } from '@/lib/slugify'
 import { logAdminAction } from '@/lib/audit-log'
 import { getTemplate } from '@/modules/chatbot/components/admin/onboarding/kb-templates'
@@ -12,7 +12,13 @@ const KNOWN_INDUSTRIES: Industry[] = [
 async function findUniqueBotSlug(base: string): Promise<string> {
   let candidate = base
   let n = 0
-  while (await prisma.botConfig.findUnique({ where: { slug: candidate } })) {
+  // SLUG-UNIQUENESS: el slug del bot es global (BotConfig.slug @unique) — la
+  // verificación de disponibilidad no tiene eje de tenant.
+  while (
+    await unsafeGlobalQuery('SLUG-UNIQUENESS: disponibilidad del slug del bot (global @unique)', (c) =>
+      c.botConfig.findUnique({ where: { slug: candidate } }),
+    )
+  ) {
     n++
     candidate = `${base}-${n}`
     if (n > 100) throw new Error('Cannot find unique bot slug')
@@ -33,15 +39,15 @@ export interface CreateBotInput {
 }
 
 export async function createBot(input: CreateBotInput) {
-  const org = await prisma.organization.findUnique({
-    where: { id: input.organizationId },
-    select: { id: true, companyName: true },
-  })
+  // TENANT-MGMT: existencia de la org (tenant raíz, no cubierto por el helper).
+  const org = await unsafeGlobalQuery(
+    'TENANT-MGMT: existencia de la org antes de crearle un bot (super-admin)',
+    (c) => c.organization.findUnique({ where: { id: input.organizationId }, select: { id: true, companyName: true } }),
+  )
   if (!org) throw new Error('Organization no encontrada')
 
-  const existingBot = await prisma.botConfig.findUnique({
-    where: { organizationId: input.organizationId },
-  })
+  const scope = forOrg(input.organizationId)
+  const existingBot = await scope.botConfig.findFirst()
   if (existingBot) throw new Error('Esta organización ya tiene un chatbot configurado')
 
   const resolvedIndustry: Industry = KNOWN_INDUSTRIES.includes(input.industry as Industry)
@@ -51,10 +57,10 @@ export async function createBot(input: CreateBotInput) {
   const slug = await findUniqueBotSlug(slugify(input.botName))
   const template = getTemplate(resolvedIndustry)
 
-  const bot = await prisma.$transaction(async (tx) => {
+  // Bot + KB en una transacción scoped. organizationId lo inyecta el scope; el
+  // parentCheck de la KB corre sobre el `tx` y ve el bot recién creado.
+  const bot = await scope.$transaction(async (tx) => {
     const newBot = await tx.botConfig.create({
-      data: {
-        organizationId: input.organizationId,
         slug,
         botName: input.botName,
         industry: resolvedIndustry,
@@ -82,20 +88,17 @@ export async function createBot(input: CreateBotInput) {
         llmModel: 'gemini-2.5-flash',
         monthlyQuota: 1000,
         whatsappNumber: input.whatsappNumber || null,
-      },
     })
 
     await tx.knowledgeBase.create({
-      data: {
-        botConfigId: newBot.id,
-        businessInfo: template.businessInfo,
-        servicesOrProducts: template.servicesOrProducts,
-        faq: template.faq,
-        policies: template.policies,
-        salesGuidance: template.salesGuidance,
-        toneExamples: template.toneExamples,
-        forbiddenStatements: template.forbiddenStatements,
-      },
+      botConfigId: newBot.id,
+      businessInfo: template.businessInfo,
+      servicesOrProducts: template.servicesOrProducts,
+      faq: template.faq,
+      policies: template.policies,
+      salesGuidance: template.salesGuidance,
+      toneExamples: template.toneExamples,
+      forbiddenStatements: template.forbiddenStatements,
     })
 
     return newBot

@@ -2,7 +2,7 @@
 
 import { z } from 'zod'
 import { logAdminAction } from '@/lib/audit-log'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
 import { sendLeadNotificationEmail } from '../notifications'
@@ -32,10 +32,16 @@ export async function sendTestNotification(input: z.infer<typeof SendTestNotific
 
   // Datos reales de la org/bot para un preview realista. Si el slug no
   // matchea, el test de entrega igual sale con los nombres genéricos.
-  const bot = await prisma.botConfig.findFirst({
-    where: { organization: { slug: parsed.data.orgSlug } },
-    select: { botName: true, organization: { select: { id: true, companyName: true } } },
-  })
+  // TENANT-RESOLUTION: bot+org por slug para armar un preview realista del email
+  // (super-admin). Si el slug no matchea, el envío usa nombres genéricos.
+  const bot = await unsafeGlobalQuery(
+    'TENANT-RESOLUTION: bot+org por slug para el preview del email de prueba (super-admin)',
+    (c) =>
+      c.botConfig.findFirst({
+        where: { organization: { slug: parsed.data.orgSlug } },
+        select: { botName: true, organization: { select: { id: true, companyName: true } } },
+      }),
+  )
 
   const result = await sendLeadNotificationEmail({
     to: parsed.data.email,

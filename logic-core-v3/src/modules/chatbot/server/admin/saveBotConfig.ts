@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
 import { chatbotLog } from '../logging'
@@ -82,42 +82,53 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
   }
   try {
     const { botConfigId, leadNotificationEmail, leadNotificationMode, allowedDomains, ...data } = parsed.data
-    const before = await prisma.botConfig.findUnique({
-      where: { id: botConfigId },
-      include: {
-        organization: {
-          select: { leadNotificationEmail: true, leadNotificationMode: true },
-        },
-      },
-    })
+    const before = await unsafeGlobalQuery(
+      'ADMIN: lectura del bot + notif settings de su org para editar config (super-admin, cualquier org)',
+      (c) =>
+        c.botConfig.findUnique({
+          where: { id: botConfigId },
+          include: {
+            organization: {
+              select: { leadNotificationEmail: true, leadNotificationMode: true },
+            },
+          },
+        }),
+    )
 
     if (!before) {
       return { success: false, error: 'Bot not found' }
     }
 
-    const after = await prisma.$transaction(async (tx) => {
-      const bot = await tx.botConfig.update({
-        where: { id: botConfigId },
-        data: {
-          ...data,
-          allowedDomains,
-          quickReplies: data.quickReplies as unknown as object,
-          proactivePrompts: data.proactivePrompts as unknown as object,
-          routeColorMap: data.routeColorMap as unknown as object,
-        },
-      })
+    // ADMIN cross-model tx: BotConfig (cubierto) + Organization (NO cubierto por
+    // el helper) se actualizan atómicamente. Super-admin edita un bot puntual por
+    // id (cualquier org). El escape queda greppable con este reason.
+    const after = await unsafeGlobalQuery(
+      'ADMIN: tx de update de config del bot + notif settings de la org (super-admin, cross-model BotConfig+Organization)',
+      (client) =>
+        client.$transaction(async (tx) => {
+          const bot = await tx.botConfig.update({
+            where: { id: botConfigId },
+            data: {
+              ...data,
+              allowedDomains,
+              quickReplies: data.quickReplies as unknown as object,
+              proactivePrompts: data.proactivePrompts as unknown as object,
+              routeColorMap: data.routeColorMap as unknown as object,
+            },
+          })
 
-      const organization = await tx.organization.update({
-        where: { id: bot.organizationId },
-        data: {
-          leadNotificationEmail,
-          leadNotificationMode,
-        },
-        select: { leadNotificationEmail: true, leadNotificationMode: true },
-      })
+          const organization = await tx.organization.update({
+            where: { id: bot.organizationId },
+            data: {
+              leadNotificationEmail,
+              leadNotificationMode,
+            },
+            select: { leadNotificationEmail: true, leadNotificationMode: true },
+          })
 
-      return { ...bot, organization }
-    })
+          return { ...bot, organization }
+        }),
+    )
 
     invalidateBotCache(after.slug)
 

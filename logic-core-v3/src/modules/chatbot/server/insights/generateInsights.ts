@@ -1,6 +1,6 @@
 import { generateObject } from 'ai'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getLLMProvider } from '../llm'
 import { chatbotDebug, chatbotError } from '../logging'
 
@@ -22,11 +22,12 @@ const InsightsResponseSchema = z.object({
   insights: z.array(InsightSchema).min(0).max(5),
 })
 
-export async function generateInsightsForBot(botConfigId: string) {
+export async function generateInsightsForBot(organizationId: string, botConfigId: string) {
+  const scope = forOrg(organizationId)
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-  const conversations = await prisma.conversation.findMany({
+  const conversations = await scope.conversation.findMany({
     where: {
       botConfigId,
       startedAt: { gte: thirtyDaysAgo },
@@ -45,8 +46,8 @@ export async function generateInsightsForBot(botConfigId: string) {
     return { insufficient: true, conversationCount: conversations.length }
   }
 
-  const bot = await prisma.botConfig.findUnique({
-    where: { id: botConfigId },
+  // La org tiene un único bot; findFirst scoped lo trae con KB y organización.
+  const bot = await scope.botConfig.findFirst({
     include: { knowledgeBase: true, organization: true },
   })
 
@@ -114,16 +115,14 @@ Quick replies actuales: ${JSON.stringify(bot.quickReplies)}`
 
     const created = await Promise.all(
       object.insights.map((insight) =>
-        prisma.chatbotInsight.create({
-          data: {
-            botConfigId,
-            category: insight.category,
-            title: insight.title,
-            description: insight.description,
-            suggestedAction: insight.suggestedAction,
-            evidenceCount: insight.evidenceCount,
-            status: 'PENDING',
-          },
+        scope.chatbotInsight.create({
+          botConfigId,
+          category: insight.category,
+          title: insight.title,
+          description: insight.description,
+          suggestedAction: insight.suggestedAction,
+          evidenceCount: insight.evidenceCount,
+          status: 'PENDING',
         })
       )
     )

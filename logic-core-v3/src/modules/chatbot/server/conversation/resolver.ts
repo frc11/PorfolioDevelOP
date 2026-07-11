@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import type { BotConfig, KnowledgeBase, Conversation } from '@prisma/client'
 
 type BotConfigWithRelations = BotConfig & {
@@ -18,15 +18,21 @@ export async function resolveBotBySlug(slug: string): Promise<BotConfigWithRelat
   const cached = botCache.get(slug)
   if (cached && cached.expiresAt > Date.now()) return cached.data
 
-  const bot = await prisma.botConfig.findUnique({
-    where: { slug },
-    include: {
-      knowledgeBase: true,
-      organization: {
-        select: { id: true, companyName: true },
-      },
-    },
-  })
+  // TENANT-RESOLUTION: el slug público es la clave de entrada del widget; resolver
+  // el bot (y su org) por slug es global por naturaleza — el tenant se descubre acá.
+  const bot = await unsafeGlobalQuery(
+    'TENANT-RESOLUTION: resolución pública del bot por slug (punto de entrada del widget)',
+    (c) =>
+      c.botConfig.findUnique({
+        where: { slug },
+        include: {
+          knowledgeBase: true,
+          organization: {
+            select: { id: true, companyName: true },
+          },
+        },
+      }),
+  )
 
   if (!bot || !bot.isActive || !bot.knowledgeBase) {
     return null
@@ -42,6 +48,7 @@ export function invalidateBotCache(slug: string): void {
 }
 
 export interface GetOrCreateConversationInput {
+  organizationId: string
   botConfigId: string
   sessionId: string
   currentPath?: string
@@ -67,7 +74,9 @@ export interface GetOrCreateConversationResult {
 export async function getOrCreateConversation(
   input: GetOrCreateConversationInput
 ): Promise<GetOrCreateConversationResult> {
-  const existing = await prisma.conversation.findFirst({
+  const scope = forOrg(input.organizationId)
+
+  const existing = await scope.conversation.findFirst({
     where: {
       botConfigId: input.botConfigId,
       sessionId: input.sessionId,
@@ -77,33 +86,28 @@ export async function getOrCreateConversation(
   const now = new Date()
 
   if (existing) {
-    const conversation = await prisma.conversation.update({
-      where: { id: existing.id },
-      data: {
-        lastMessageAt: now,
-        ...(input.currentPath ? { currentPath: input.currentPath } : {}),
-      },
+    const conversation = await scope.conversation.update(existing.id, {
+      lastMessageAt: now,
+      ...(input.currentPath ? { currentPath: input.currentPath } : {}),
     })
     return { conversation, isNew: false }
   }
 
-  const conversation = await prisma.conversation.create({
-    data: {
-      botConfigId: input.botConfigId,
-      sessionId: input.sessionId,
-      currentPath: input.currentPath ?? null,
-      referrerUrl: input.referrer ?? null,
-      // UTM.1 — first-touch: create-only, igual que referrerUrl arriba.
-      // NUNCA agregar esto al update{} del branch `existing` de más arriba —
-      // eso rompería en silencio la semántica de "primer contacto".
-      utmSource: input.utmSource ?? null,
-      utmMedium: input.utmMedium ?? null,
-      utmCampaign: input.utmCampaign ?? null,
-      ipHash: input.visitorIpHash ?? null,
-      userAgent: input.visitorUserAgent ?? null,
-      startedAt: now,
-      lastMessageAt: now,
-    },
+  const conversation = await scope.conversation.create({
+    botConfigId: input.botConfigId,
+    sessionId: input.sessionId,
+    currentPath: input.currentPath ?? null,
+    referrerUrl: input.referrer ?? null,
+    // UTM.1 — first-touch: create-only, igual que referrerUrl arriba.
+    // NUNCA agregar esto al update{} del branch `existing` de más arriba —
+    // eso rompería en silencio la semántica de "primer contacto".
+    utmSource: input.utmSource ?? null,
+    utmMedium: input.utmMedium ?? null,
+    utmCampaign: input.utmCampaign ?? null,
+    ipHash: input.visitorIpHash ?? null,
+    userAgent: input.visitorUserAgent ?? null,
+    startedAt: now,
+    lastMessageAt: now,
   })
   return { conversation, isNew: true }
 }

@@ -14,6 +14,7 @@ import {
   backoffForAttempt,
   type FetchOutcome,
 } from '../shared/chatRetryPolicy'
+import { trimHistory, HISTORY_WINDOW_MESSAGES } from '../shared/historyPolicy'
 
 /** Narrow a parsed JSON value to an indexable record sin usar `any`. */
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -83,9 +84,13 @@ export interface UseChatbotOptions {
 //    para reintentar a mano (no bloquea el input — ver inputLockedByDegrade). El
 //    reintento server-side es idempotente, así que reenviar no duplica el turno.
 //    Supersede al viejo `provider_error` (que degradaba a WhatsApp al primer fallo).
+//  - conversation_limit: C0.2 — la conversación llegó al hard-cap server-side
+//    (HARD_CAP_MESSAGES en historyPolicy). Terminal para ESTA conversación;
+//    deriva a WhatsApp si el bot lo tiene configurado.
 export type DegradedReason =
   | 'quota_exhausted'
   | 'domain_overflow'
+  | 'conversation_limit'
   | 'bot_paused'
   | 'connection_failed'
 
@@ -102,6 +107,10 @@ const CONNECTION_ERROR_MESSAGE = 'No pudimos conectar. Probá de nuevo en un mom
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
   isLoading: boolean
+  /** RE-2 — true si `/config` no pudo cargar tras agotar los reintentos automáticos. */
+  configError: boolean
+  /** RE-2 — redispara el fetch de `/config` desde cero (reintento manual). */
+  retryLoadConfig: () => void
   isOpen: boolean
   open: () => void
   close: () => void
@@ -131,6 +140,21 @@ export interface UseChatbotReturn {
 export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions): UseChatbotReturn {
   const [config, setConfig] = useState<PublicBotConfig | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  // RE-2 — true si /config agotó los reintentos automáticos sin éxito (estado
+  // terminal, distinto de "todavía cargando"). `configLoadAttempt` es un contador
+  // de invalidación puro: bumpearlo re-ejecuta el efecto de carga de abajo sin
+  // que el efecto necesite leer su valor.
+  const [configError, setConfigError] = useState(false)
+  const [configLoadAttempt, setConfigLoadAttempt] = useState(0)
+  // El reset a "cargando" vive en este handler (evento de click), no en el
+  // cuerpo del efecto de abajo — un setState síncrono al inicio de un efecto
+  // dispara cascading renders innecesarios (react-hooks/set-state-in-effect);
+  // acá es la reacción directa a la acción del usuario.
+  const retryLoadConfig = useCallback(() => {
+    setIsLoading(true)
+    setConfigError(false)
+    setConfigLoadAttempt((n) => n + 1)
+  }, [])
   const [isOpen, setIsOpen] = useState(false)
   const [degradedInfo, setDegradedInfo] = useState<DegradedInfo | null>(null)
   // INFRA.2 — true mientras el widget reintenta un POST a /chat tras un fallo
@@ -168,10 +192,16 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
     let cancelled = false
     // Reuse the config warmed by ChatWidgetMount during the intro (shared cache,
     // dedup'd by slug) so the launcher isn't blocked on a cold fetch at reveal.
+    // RE-2 — prefetchBotConfig ya reintenta internamente (chatRetryPolicy) y solo
+    // cachea éxitos: `data === null` acá significa "reintentos agotados", no
+    // "todavía sin resolver". `configLoadAttempt` en las deps re-dispara este
+    // efecto desde `retryLoadConfig` (que ya puso isLoading/configError en el
+    // estado "cargando" ANTES de bumpear el contador — ver el handler arriba).
     prefetchBotConfig(slug)
       .then((data) => {
         if (cancelled) return
         setConfig(data)
+        setConfigError(data === null)
         // B8.3 — bot pausado llega vía config.paused (en lugar del viejo 404
         // silencioso). Lo proyectamos al mismo carril de `degradedInfo` que
         // los degradados de /chat para que ChatWindow/ChatbotEmbed lo rendericen
@@ -189,12 +219,13 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
       })
       .catch(() => {
         if (cancelled) return
+        setConfigError(true)
         setIsLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [slug])
+  }, [slug, configLoadAttempt])
 
   const transport = useMemo(
     () =>
@@ -252,7 +283,11 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
                     // el handoff a WhatsApp con la info real del bot. Campos faltantes →
                     // null sin romper.
                     const reason: DegradedReason =
-                      data.reason === 'domain_overflow' ? 'domain_overflow' : 'quota_exhausted'
+                      data.reason === 'domain_overflow'
+                        ? 'domain_overflow'
+                        : data.reason === 'conversation_limit'
+                          ? 'conversation_limit'
+                          : 'quota_exhausted'
                     setDegradedInfo({
                       reason,
                       message: typeof data.message === 'string' ? data.message : '',
@@ -314,12 +349,21 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
           return {
             body: {
               ...body,
-              messages: msgs
-                .filter((m) => !m.id.startsWith('proactive-'))
-                .map((m) => ({
-                  role: m.role,
-                  content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
-                })),
+              // C0.2 — ventana deslizante: se mandan solo los últimos
+              // HISTORY_WINDOW_MESSAGES, no todo el historial acumulado (el
+              // costo por turno crecía lineal y al mensaje 51 el server
+              // rechazaba). trimHistory preserva SIEMPRE el último 'user' (el
+              // turno en curso) y mantiene el array user-led. Cubre AMBOS
+              // renders (on-site y embed): los dos mandan por este transport.
+              messages: trimHistory(
+                msgs
+                  .filter((m) => !m.id.startsWith('proactive-'))
+                  .map((m) => ({
+                    role: m.role,
+                    content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
+                  })),
+                HISTORY_WINDOW_MESSAGES,
+              ),
               sessionId: sessionIdRef.current,
               currentPath,
               ...(opener ? { proactiveOpener: opener } : {}),
@@ -485,7 +529,7 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   const hasConversation = messages.some((m) => !m.id.startsWith('proactive-'))
 
   return {
-    config, isLoading, isOpen, open, close, toggle,
+    config, isLoading, configError, retryLoadConfig, isOpen, open, close, toggle,
     messages, hasConversation, isStreaming, avatarState, degradedMode, degradedInfo,
     reconnecting, inputLockedByDegrade,
     sendMessage, acceptProactivePrompt,

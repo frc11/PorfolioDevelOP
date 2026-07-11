@@ -33,30 +33,27 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
   const { botId } = await params
   const { tab } = await searchParams
 
-  const [bot, rawEvents, monthlyUsage, rawLeads, rawConversations] = await Promise.all([
-    prisma.botConfig.findUnique({
-      where: { id: botId },
-      include: {
-        organization: {
-          select: {
-            id: true,
-            companyName: true,
-            slug: true,
-            leadNotificationEmail: true,
-            leadNotificationMode: true,
-          },
-        },
-        knowledgeBase: true,
-        _count: {
-          select: { conversations: true, leads: true, events: true },
+  // B0-S3: el bot (y su org) se resuelve ANTES de las queries scoped — necesitan
+  // el organizationId para el helper de aislamiento. El guard de acceso corre
+  // acá, antes de tocar datos del bot.
+  const bot = await prisma.botConfig.findUnique({
+    where: { id: botId },
+    include: {
+      organization: {
+        select: {
+          id: true,
+          companyName: true,
+          slug: true,
+          leadNotificationEmail: true,
+          leadNotificationMode: true,
         },
       },
-    }),
-    listRecentEvents(botId, 100),
-    getMonthlyUsageForBot(botId),
-    listLeadsForBot(botId, 100),
-    listConversationsForBot(botId, 100),
-  ])
+      knowledgeBase: true,
+      _count: {
+        select: { conversations: true, leads: true, events: true },
+      },
+    },
+  })
 
   // P0-6: scoping defensivo. SUPER_ADMIN ve cualquier org (no-op); cualquier
   // otro rol futuro queda atado a su propia org. notFound() para no leakear la
@@ -64,6 +61,14 @@ export default async function BotDetailPage({ params, searchParams }: Props) {
   if (!bot || !callerCanAccessOrg(session.user, bot.organization.id)) {
     notFound()
   }
+
+  const orgId = bot.organization.id
+  const [rawEvents, monthlyUsage, rawLeads, rawConversations] = await Promise.all([
+    listRecentEvents(orgId, botId, 100),
+    getMonthlyUsageForBot(orgId, botId),
+    listLeadsForBot(orgId, botId, 100),
+    listConversationsForBot(orgId, botId, 100),
+  ])
 
   const activeTab: TabId = (VALID_TABS as readonly string[]).includes(tab ?? '')
     ? (tab as TabId)

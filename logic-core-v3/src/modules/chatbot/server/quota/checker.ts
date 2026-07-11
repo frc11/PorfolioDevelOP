@@ -1,9 +1,13 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 
 /**
  * Quota tracking is per (BotConfig, year-month).
  *
  * The "period" key is "YYYY-MM" (UTC). One QuotaUsage row per month.
+ *
+ * B0-S3: todo acceso a QuotaUsage pasa por el helper de aislamiento scoped por
+ * org (forOrg(organizationId).quotaUsage). Verifica que el bot pertenezca a la
+ * org y las mutaciones atómicas llevan el guard de org embebido en el SQL.
  */
 
 function currentPeriodKey(date: Date = new Date()) {
@@ -26,16 +30,13 @@ export interface QuotaCheckResult {
  * Does NOT increment counters — that's done after the message is processed.
  */
 export async function checkQuota(
+  organizationId: string,
   botConfigId: string,
   monthlyQuota: number
 ): Promise<QuotaCheckResult> {
   const { year, month } = currentPeriodKey()
 
-  const usage = await prisma.quotaUsage.findUnique({
-    where: {
-      botConfigId_year_month: { botConfigId, year, month },
-    },
-  })
+  const usage = await forOrg(organizationId).quotaUsage.findByPeriod(botConfigId, year, month)
 
   const conversationsUsed = usage?.conversationsCount ?? 0
 
@@ -49,6 +50,7 @@ export async function checkQuota(
 }
 
 export interface QuotaIncrementInput {
+  organizationId: string
   botConfigId: string
   isNewConversation: boolean
   messagesAdded: number
@@ -63,23 +65,18 @@ export interface QuotaIncrementInput {
 export async function incrementQuota(input: QuotaIncrementInput): Promise<void> {
   const { year, month } = currentPeriodKey()
 
-  await prisma.quotaUsage.upsert({
-    where: {
-      botConfigId_year_month: { botConfigId: input.botConfigId, year, month },
-    },
+  await forOrg(input.organizationId).quotaUsage.upsertPeriod({
+    botConfigId: input.botConfigId,
+    year,
+    month,
     create: {
-      botConfigId: input.botConfigId,
-      year,
-      month,
       conversationsCount: input.isNewConversation ? 1 : 0,
       tokensIn: input.tokensIn,
       tokensOut: input.tokensOut,
       costUsd: input.costUsd,
     },
     update: {
-      conversationsCount: input.isNewConversation
-        ? { increment: 1 }
-        : undefined,
+      conversationsCount: input.isNewConversation ? { increment: 1 } : undefined,
       tokensIn: { increment: input.tokensIn },
       tokensOut: { increment: input.tokensOut },
       costUsd: { increment: input.costUsd },
@@ -119,42 +116,26 @@ export interface QuotaReserveResult {
  * pasarse con `isNewConversation: false` para no double-count.
  */
 export async function tryReserveConversation(
+  organizationId: string,
   botConfigId: string,
   monthlyQuota: number,
 ): Promise<QuotaReserveResult> {
   const { year, month } = currentPeriodKey()
 
-  // 1) Asegurar que existe el row del período (insertar con count=0 si no existe).
-  //    El UPDATE conditional de abajo no afecta filas inexistentes, así que necesitamos
-  //    la fila creada antes. `upsert` con `update: {}` es no-op en update path → idempotente.
-  await prisma.quotaUsage.upsert({
-    where: { botConfigId_year_month: { botConfigId, year, month } },
-    create: { botConfigId, year, month },
-    update: {},
-  })
-
-  // 2) UPDATE conditional atómico: incrementa solo si está por debajo del límite.
-  //    PostgreSQL serializa por fila (locked during UPDATE), así que múltiples requests
-  //    concurrentes no pueden incrementar más allá del límite.
-  const affected = await prisma.$executeRaw`
-    UPDATE "chatbot_quota_usage"
-    SET "conversationsCount" = "conversationsCount" + 1,
-        "updatedAt" = NOW()
-    WHERE "botConfigId" = ${botConfigId}
-      AND "year" = ${year}
-      AND "month" = ${month}
-      AND "conversationsCount" < ${monthlyQuota}
-  `
-
-  // 3) Re-leer el contador actual para devolver al caller.
-  const usage = await prisma.quotaUsage.findUnique({
-    where: { botConfigId_year_month: { botConfigId, year, month } },
-    select: { conversationsCount: true },
+  // La reserva atómica (asegurar fila + UPDATE conditional con row-lock de
+  // Postgres + re-lectura) vive en el accessor scoped. El guard de org va
+  // EMBEBIDO en el SQL (EXISTS sobre chatbot_bot_config), preservando la
+  // garantía TOCTOU: N reservas concurrentes nunca exceden monthlyQuota.
+  const { reserved, conversationsUsed } = await forOrg(organizationId).quotaUsage.reserveConversation({
+    botConfigId,
+    year,
+    month,
+    monthlyQuota,
   })
 
   return {
-    reserved: affected === 1,
-    conversationsUsed: usage?.conversationsCount ?? 0,
+    reserved,
+    conversationsUsed,
     conversationsLimit: monthlyQuota,
     year,
     month,

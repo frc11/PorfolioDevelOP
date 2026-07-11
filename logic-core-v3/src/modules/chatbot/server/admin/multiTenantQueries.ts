@@ -1,20 +1,20 @@
 import { unstable_cache } from 'next/cache'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import type { Prisma, ChatbotLeadStatus } from '@prisma/client'
 import { excludeDqWhere } from '../scoring/dqFilter'
 import { startOfDateRange, type DateRange } from '@/lib/tz-ar'
 
 export async function getBotByOrgSlug(orgSlug: string) {
-  const organization = await prisma.organization.findUnique({
-    where: { slug: orgSlug },
-    include: {
-      botConfig: {
-        include: {
-          knowledgeBase: true,
-        },
-      },
-    },
-  })
+  // TENANT-RESOLUTION: org+bot por slug (Organization no está cubierta por el
+  // helper). El id de la org resultante alimenta los accessors scoped de abajo.
+  const organization = await unsafeGlobalQuery(
+    'TENANT-RESOLUTION: org+bot por slug para el dashboard/admin del chatbot',
+    (c) =>
+      c.organization.findUnique({
+        where: { slug: orgSlug },
+        include: { botConfig: { include: { knowledgeBase: true } } },
+      }),
+  )
 
   if (!organization || !organization.botConfig) return null
 
@@ -30,7 +30,7 @@ export async function listLeadsByOrgSlug(orgSlug: string, limit: number = 50) {
       const botInfo = await getBotByOrgSlug(orgSlug)
       if (!botInfo) return []
 
-      const rows = await prisma.chatbotLead.findMany({
+      const rows = await forOrg(botInfo.organization.id).chatbotLead.findMany({
         where: { botConfigId: botInfo.bot.id },
         orderBy: { capturedAt: 'desc' },
         take: limit,
@@ -77,9 +77,9 @@ export async function listLeadsForDashboard(
   filters: LeadDashboardFilters = {},
   limit: number = 200,
 ) {
-  const where: Prisma.ChatbotLeadWhereInput = {
-    botConfig: { organizationId },
-  }
+  // El scope (forOrg) agrega el filtro botConfig:{organizationId}; el `where`
+  // acá solo lleva los filtros de la vista (nunca el eje de tenant).
+  const where: Prisma.ChatbotLeadWhereInput = {}
 
   if (filters.onlyDq) {
     where.classification = 'dq'
@@ -98,7 +98,7 @@ export async function listLeadsForDashboard(
     }
   }
 
-  const rows = await prisma.chatbotLead.findMany({
+  const rows = await forOrg(organizationId).chatbotLead.findMany({
     where,
     // El orden final por score efectivo se hace EN MEMORIA (page.tsx) porque el
     // efectivo = score crudo × decay temporal, y el decay no está en DB.
@@ -127,12 +127,7 @@ export async function listLeadsForDashboard(
  * @@index([botConfigId, classification, capturedAt(sort: Desc)]) — pega justo.
  */
 export async function countDqLeadsForOrg(organizationId: string): Promise<number> {
-  return prisma.chatbotLead.count({
-    where: {
-      botConfig: { organizationId },
-      classification: 'dq',
-    },
-  })
+  return forOrg(organizationId).chatbotLead.count({ classification: 'dq' })
 }
 
 // B5.7 — cuenta de leads "hot + sin contactar" para el badge de notificación
@@ -143,24 +138,15 @@ export async function countDqLeadsForOrg(organizationId: string): Promise<number
 // indica trabajo pendiente, no calidad actual. El efectivo correcto se ve al
 // abrir la lista.
 export async function countHotNewLeadsForOrg(organizationId: string): Promise<number> {
-  return prisma.chatbotLead.count({
-    where: {
-      botConfig: { organizationId },
-      status: 'NEW',
-      classification: 'hot',
-    },
-  })
+  return forOrg(organizationId).chatbotLead.count({ status: 'NEW', classification: 'hot' })
 }
 
 // B5.6 — fetch de un lead por id con anti-IDOR. Devuelve null si el lead no existe
 // o pertenece a otra org. Prisma compone el filtro relacional en una sola query,
 // así un atacante que adivine ids ajenos recibe null (no 403, no leak de existencia).
 export async function getLeadByIdForOrg(leadId: string, organizationId: string) {
-  return prisma.chatbotLead.findFirst({
-    where: {
-      id: leadId,
-      botConfig: { organizationId },
-    },
+  return forOrg(organizationId).chatbotLead.findFirst({
+    where: { id: leadId },
     include: {
       conversation: {
         select: { id: true, sessionId: true, currentPath: true, referrerUrl: true, startedAt: true, lastMessageAt: true, messageCount: true },
@@ -177,11 +163,8 @@ export async function getConversationMessagesForOrg(
   organizationId: string,
   limit: number = 50,
 ) {
-  return prisma.chatMessage.findMany({
-    where: {
-      conversationId,
-      conversation: { botConfig: { organizationId } },
-    },
+  return forOrg(organizationId).chatMessage.findMany({
+    where: { conversationId },
     orderBy: { createdAt: 'asc' },
     take: Math.min(Math.max(limit, 1), 200),
     select: { id: true, role: true, content: true, createdAt: true },
@@ -192,8 +175,9 @@ export async function listConversationsByOrgSlug(orgSlug: string, limit: number 
   const botInfo = await getBotByOrgSlug(orgSlug)
   if (!botInfo) return { items: [], total: 0 }
 
+  const scope = forOrg(botInfo.organization.id)
   const [rows, total] = await Promise.all([
-    prisma.conversation.findMany({
+    scope.conversation.findMany({
       where: { botConfigId: botInfo.bot.id },
       orderBy: { lastMessageAt: 'desc' },
       take: limit,
@@ -202,7 +186,7 @@ export async function listConversationsByOrgSlug(orgSlug: string, limit: number 
         _count: { select: { messages: true } },
       },
     }),
-    prisma.conversation.count({ where: { botConfigId: botInfo.bot.id } }),
+    scope.conversation.count({ botConfigId: botInfo.bot.id }),
   ])
 
   const items = rows.map((r) => ({
@@ -228,7 +212,7 @@ export async function listRecentHandoffsByOrgSlug(
   const botInfo = await getBotByOrgSlug(orgSlug)
   if (!botInfo) return []
 
-  const rows = await prisma.chatbotEvent.findMany({
+  const rows = await forOrg(botInfo.organization.id).chatbotEvent.findMany({
     where: {
       botConfigId: botInfo.bot.id,
       type: 'handoff.whatsapp',
@@ -262,15 +246,11 @@ export async function getUsageByOrgSlug(orgSlug: string) {
       if (!botInfo) return null
 
       const now = new Date()
-      return prisma.quotaUsage.findUnique({
-        where: {
-          botConfigId_year_month: {
-            botConfigId: botInfo.bot.id,
-            year: now.getUTCFullYear(),
-            month: now.getUTCMonth() + 1,
-          },
-        },
-      })
+      return forOrg(botInfo.organization.id).quotaUsage.findByPeriod(
+        botInfo.bot.id,
+        now.getUTCFullYear(),
+        now.getUTCMonth() + 1,
+      )
     },
     ['chatbot-usage', orgSlug],
     { revalidate: 300, tags: [`chatbot-usage:${orgSlug}`] }

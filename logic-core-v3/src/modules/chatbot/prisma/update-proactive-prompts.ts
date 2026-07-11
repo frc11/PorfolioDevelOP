@@ -11,21 +11,25 @@
  * Correr con:
  *   npx tsx src/modules/chatbot/prisma/update-proactive-prompts.ts
  */
-import { PrismaClient, Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { unsafeGlobalQuery } from '@/lib/isolation'
 import { DEVELOP_PROACTIVE_PROMPTS } from './developProactivePrompts'
-
-const prisma = new PrismaClient()
 
 const BOT_SLUG = 'develop'
 
 async function main() {
-  const updated = await prisma.botConfig.update({
-    where: { slug: BOT_SLUG },
-    data: {
-      proactivePrompts: DEVELOP_PROACTIVE_PROMPTS as Prisma.InputJsonValue,
-    },
-    select: { id: true, slug: true },
-  })
+  // SEED: actualiza el bot develOP por slug (script de dev, sin sesión de tenant).
+  const updated = await unsafeGlobalQuery(
+    'SEED: update de proactivePrompts del bot develOP por slug (script de dev)',
+    (c) =>
+      c.botConfig.update({
+        where: { slug: BOT_SLUG },
+        data: {
+          proactivePrompts: DEVELOP_PROACTIVE_PROMPTS as Prisma.InputJsonValue,
+        },
+        select: { id: true, slug: true },
+      }),
+  )
 
   const sections = Object.keys(DEVELOP_PROACTIVE_PROMPTS)
   const total = Object.values(DEVELOP_PROACTIVE_PROMPTS).reduce(
@@ -52,5 +56,5 @@ main()
     process.exitCode = 1
   })
   .finally(async () => {
-    await prisma.$disconnect()
+    await unsafeGlobalQuery('SEED: cerrar la conexión del script de dev', (c) => c.$disconnect())
   })

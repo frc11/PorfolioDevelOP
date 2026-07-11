@@ -1,6 +1,6 @@
 import { tool } from 'ai'
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { logChatbotEvent } from '../logging'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext } from './types'
@@ -90,9 +90,9 @@ interface ChannelLite {
   hadLead: boolean
 }
 
-async function checkLeadStatus(conversationId: string): Promise<ChannelLite> {
+async function checkLeadStatus(organizationId: string, conversationId: string): Promise<ChannelLite> {
   try {
-    const conv = await prisma.conversation.findUnique({
+    const conv = await forOrg(organizationId).conversation.findFirst({
       where: { id: conversationId },
       select: { leadCaptured: true },
     })
@@ -106,12 +106,13 @@ async function showWhatsappHandoffExecute(
   input: ShowWhatsappHandoffInput,
   ctx: ToolCallContext
 ): Promise<{ success: boolean }> {
-  const { hadLead } = await checkLeadStatus(ctx.conversationId)
+  const { hadLead } = await checkLeadStatus(ctx.organizationId, ctx.conversationId)
 
   const derivedReason =
     input.reason ?? `intent=${input.intent}: ${input.topicSummary.slice(0, 140)}`
 
   await logChatbotEvent({
+    organizationId: ctx.organizationId,
     botConfigId: ctx.botConfigId,
     type: 'handoff.whatsapp',
     level: 'info',

@@ -9,7 +9,9 @@ import { useChatbotSounds } from '../../hooks/useChatbotSounds'
 import { renderToolCall } from '../tool-cards'
 import { ChatHeader } from '../chat/ChatHeader'
 import { DegradedBanner } from '../chat/DegradedBanner'
+import { ConfigLoadError } from '../chat/ConfigLoadError'
 import { parseAttribution, EMPTY_ATTRIBUTION, type ParsedAttribution } from '../../shared/attribution'
+import { MAX_MESSAGE_CHARS } from '../../shared/historyPolicy'
 
 interface ChatbotEmbedProps {
   slug: string
@@ -143,7 +145,7 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
   // banner y los thinking-dots; el input y su placeholder miran inputLockedByDegrade.
   const inputDisabled = isThinking || chatbot.inputLockedByDegrade
 
-  if (chatbot.isLoading || !chatbot.config) {
+  if (chatbot.isLoading) {
     return (
       <div
         style={{
@@ -165,6 +167,26 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
           animate={{ scale: [1, 1.4, 1], opacity: [0.5, 1, 0.5] }}
           transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
         />
+      </div>
+    )
+  }
+
+  // RE-2 — isLoading=false + config=null = /config agotó sus reintentos
+  // automáticos (chatRetryPolicy vía prefetchBotConfig). Nunca spinner infinito:
+  // estado de error explícito con reintento manual.
+  if (!chatbot.config) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100dvh',
+          background: 'linear-gradient(180deg, #0b0e1c 0%, #060812 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <ConfigLoadError onRetry={chatbot.retryLoadConfig} />
       </div>
     )
   }
@@ -465,6 +487,9 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             placeholder={chatbot.inputLockedByDegrade ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
             disabled={inputDisabled}
             rows={1}
+            // C0.2 — mismo tope que el schema del server (forma): el cliente
+            // nunca produce un mensaje que /chat rechazaría.
+            maxLength={MAX_MESSAGE_CHARS}
             inputMode="text"
             autoCapitalize="sentences"
             autoCorrect="on"

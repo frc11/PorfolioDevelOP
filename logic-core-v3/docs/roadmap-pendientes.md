@@ -19,6 +19,7 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 - **Por qué se postpuso:** Complejidad sustancial para un escenario de amenaza específico (atacante con cuenta comprometida que registra dominio malicioso). El audit log de cambios al webhook URL ya da rastro, y el operador puede detectar el ataque post-facto.
 - **Cuándo prioritarlo:** Antes de aceptar clientes que manejen datos sensibles regulados (salud, financiero) — el threat model crece. O si se detecta intento real.
 - **Implementación:** En `postToN8n.singlePost`, antes del fetch hacer `dns.lookup(parsed.hostname)` (con timeout corto) y volver a validar la IP resuelta contra la blacklist de `validateWebhookUrl`. Cachear resolución por unos segundos para no spamear DNS.
+- **Nota de cruce:** Esta pendiente = el hallazgo **RE-16** de la auditoría 2026-07-07 (SSRF residual en `postToN8n`). Vive en el carril de seguridad que corre Franco (ver Punteros al final).
 
 ### Vista admin read-only del CrmIntegration por org
 - **Sprint origen:** B5.8 (2026-05-24)
@@ -110,6 +111,70 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 ### UTM — punto ciego de tests (camino cliente)
 - **Sprint origen:** UTM.1 (2026-07-04) — deuda identificada en investigación read-only de seguimiento a P4.1
 - **Qué:** Ningún test ejercita el camino real del cliente: handshake iframe → `parseAttribution` → `firstTouchRef` → body del request. `utm1-smoke.mjs` fabrica el body a mano; la verificación de UTM.1 invoca `capture_lead` directo. Ambos bypassean la capa que falló en prueba manual (abrir `/embed` pelado). Si se toca widget/embed, ese camino no tiene red automatizada.
+
+---
+
+## COST-1 — Telemetría de costo con modelo efectivo (implementado, verificación pendiente)
+
+### Verificación en prod del costo real (SELECT + volumen de WARN)
+- **Sprint origen:** COST-1 (2026-07-10)
+- **Estado:** Implementado, gate de lógica verde (8/8 checks, `tsc`/lint OK). NO verificado contra datos reales — el bug era invisible al build, no se cierra por tsc verde.
+- **Qué falta para cerrar:** (1) SELECT comparativo en PROD sobre `Conversation`/`QuotaUsage` — `estimatedCostUsd`/`costUsd` reciente vs el modelo del plan; confirmar que el costo registrado es ≠ $0 y corresponde al modelo efectivo. (2) Medir el volumen de eventos `chat.cost_model_unknown` en `chatbotEvent` para dimensionar qué tan extendido estaba el mismatch en prod.
+- **Notas:** Al verificar, anotar el resultado en la entrada `## ✅ COST-1` de la bitácora y borrar esta pendiente.
+
+### Chequeos abiertos de cobertura (dos `rg`, baratos)
+- **Sprint origen:** COST-1 (2026-07-10)
+- **Qué:** El fix protege `handleChatRequest`, pero el fallback vive en el call-site (`resolveEffectiveModel`), no en el provider. Quedan dos huecos posibles a confirmar por lectura:
+  - **(a) Otros call-sites de `getModel`** fuera de `resolveEffectiveModel.ts` que sigan tirando 500 con un provider stub (`rg "getModel|ProviderNotImplementedError" src/`) — p.ej. `smokeTest`, insights, brief, si resuelven modelo por su cuenta.
+  - **(b) El WARN cubre registry, no pricing:** son dos tablas distintas (registry de modelos en `google.ts` vs tabla de precios en `pricing/costs.ts`). Un modelo presente en el registry pero ausente en pricing sigue devolviendo $0 sin disparar WARN (`rg "cost_model_unknown" src/` y ver contra qué valida).
+- **Cuándo prioritarlo:** Junto con la verificación en prod de arriba, o antes si el volumen de WARN sale bajo y sospechás falsos negativos.
+
+---
+
+## RE-2 — Resiliencia de carga del widget (implementado, verificación pendiente)
+
+### Verificación visual + coreografía con Neon dormida
+- **Sprint origen:** RE-2 (2026-07-10)
+- **Estado:** Implementado, gate de lógica verde (6/6, `tsc`/lint OK, el no-envenenamiento del cache testeado contra el módulo real). NO verificado visualmente.
+- **Qué falta para cerrar:** (1) Visual-qa del estado de error/reintento en desktop + mobile, en ambos render (embed + on-site) — bloqueado hoy por el MCP de preview sin cablear (ver Gaps de entorno). (2) Coreografía real con Neon dormida DE VERDAD (cold-start real, no mock): ver el auto-retry disparándose y recuperándose, por grabación. El mock del smoke no sustituye esto ("verde ≠ se ve").
+- **Notas:** Al verificar, anotar en la entrada `## ✅ RE-2` y borrar esta pendiente.
+
+### Decisión diferida: microcopy durante el retry de `/config`
+- **Sprint origen:** RE-2 (2026-07-10)
+- **Qué:** Mientras `/config` reintenta, el widget muestra el spinner normal, sin texto. Se evaluó un microcopy tipo "cargando…". Decisión: NO agregarlo por ahora (spinner solo); el estado "Conectando…" queda reservado al POST de `/chat` de INFRA.2, no a la carga de config — no fundir los dos vocabularios.
+- **Cuándo prioritarlo:** Revisar CON la grabación de Neon dormida en mano — si el spinner se siente muerto durante los 2s/4s de backoff real, ahí se evalúa un microcopy. No antes, sin el dato.
+
+---
+
+## Deuda técnica abierta por COST-1 (detalle de bloques en `docs/consolidacion-planoA-runtime.md`)
+
+### `chat.cost_model_unknown` refuerza la urgencia de T0.2
+- **Sprint origen:** COST-1 (2026-07-10)
+- **Qué:** El WARN nuevo (`chat.cost_model_unknown`) puede dispararse por turno en un bot mal configurado, y se persiste en `chatbotEvent` — la tabla de crecimiento más rápido. T0.2 (cron `cleanupOldEvents`, aún sin hacer) pasa de "higiene" a tener un evento más que la alimenta.
+- **Cuándo prioritarlo:** Cuando se corra T0.2, este evento es parte del argumento.
+
+### `logChatbotEvent` await-eado = instancia de C3.6
+- **Sprint origen:** COST-1 (2026-07-10)
+- **Qué:** COST-1 emite el WARN vía `logChatbotEvent`, que hoy NO es fire-and-forget (persiste a `chatbotEvent` de forma bloqueante). En un bot roto eso es un write extra a Neon en cada turno, en el hot path que sufre el cold-start. Es exactamente C3.6 (hacer `logChatbotEvent` fire-and-forget en el gating).
+- **Cuándo prioritarlo:** Se salda cuando se toque el handler por el cluster onFinish (donde vive C3.6 como regla "dejar mejor lo que se toca").
+
+---
+
+## Gaps de entorno (bloquean verificación, no build)
+
+### MCP de preview sin cablear para el subagente visual-qa
+- **Sprint origen:** INFRA.2, repetido en RE-2 (2026-07-10)
+- **Qué:** El subagente visual-qa no tiene el MCP de preview conectado, así que no puede capturar el estado renderizado en desktop/mobile. Ya lo documentó INFRA.2; RE-2 lo volvió a chocar. Todo sprint con superficie visual queda cojo hasta resolverlo — la verificación de reposo cae sobre Valentino a mano.
+- **Cuándo prioritarlo:** ANTES de C0.2 (conversación no muere muda), que es visual y de negocio. Entrar a C0.2 con el visual-qa roto es fabricar el tercer sprint cojo seguido.
+- **Notas:** Es config de entorno/herramienta, no código del proyecto.
+
+---
+
+## Punteros a la consolidación (detalle en `docs/consolidacion-planoA-runtime.md`)
+
+- **Carril seguridad (lo corre Franco, aparte del flujo de sprints):** RT-2 (`/smoke` sin auth quema Gemini), RE-13 (`/health` expone internals), RE-16 (SSRF/DNS-rebinding en `postToN8n` — ya listado arriba en B5.8), RE-7 (atribución spoofeable por cualquier origin), RT-13 (sessionId adivinable → secuestro intra-tenant), CO-7 + PD-1 (cripto en reposo: tokens OAuth de terceros / credenciales de onboarding en texto plano), A.4 (secret en history sin purga).
+- **Decisiones abiertas que gatean bloques:** T0.1 (`/smoke` gate: runtime vs carril Franco), firma real de prod (gatea el cluster onFinish: INFRA.3 + RB.3 + MH.2), fork de historial (gatea C0.2: slice mínimo vs reconstruir desde `ChatMessage`).
+- El detalle, veredictos y orden de ejecución de las mejoras del runtime viven en `consolidacion-planoA-runtime.md`. Esta lista solo puntea; no dupliques el detalle acá para no crear dos fuentes.
 
 ---
 

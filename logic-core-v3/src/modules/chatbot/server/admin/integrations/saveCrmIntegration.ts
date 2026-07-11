@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { logAdminAction } from '@/lib/audit-log'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { getPlanForOrg } from '@/lib/plan/get-plan-for-org'
 import { planAllows } from '@/lib/plan/plan-allows'
 import {
@@ -39,10 +39,12 @@ export async function saveCrmIntegration(input: SaveCrmIntegrationInput) {
   }
   const { organizationId, ...data } = parsed.data
 
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true },
-  })
+  // TENANT-MGMT: verificar existencia de la org (Organization no está cubierta
+  // por el helper — es el tenant raíz; su lectura por id es admin de plataforma).
+  const org = await unsafeGlobalQuery(
+    'TENANT-MGMT: existencia de la org antes de configurar su integración CRM',
+    (c) => c.organization.findUnique({ where: { id: organizationId }, select: { id: true } }),
+  )
   if (!org) {
     return { ok: false as const, error: 'Organización no encontrada' }
   }
@@ -75,9 +77,8 @@ export async function saveCrmIntegration(input: SaveCrmIntegrationInput) {
     }
   }
 
-  const existing = await prisma.crmIntegration.findUnique({
-    where: { organizationId },
-  })
+  const scope = forOrg(organizationId)
+  const existing = await scope.crmIntegration.findFirst()
 
   const before = existing
     ? {
@@ -122,10 +123,10 @@ export async function saveCrmIntegration(input: SaveCrmIntegrationInput) {
     }
   }
 
-  const integration = await prisma.crmIntegration.upsert({
-    where: { organizationId },
+  // Upsert scoped: where {organizationId} == el scope (organizationId @unique);
+  // el create fija organizationId desde el scope (no del caller).
+  const integration = await scope.crmIntegration.upsertForScope({
     create: {
-      organizationId,
       webhookUrl: data.webhookUrl,
       enabled: data.enabled,
       ...secretFields,

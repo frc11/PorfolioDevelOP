@@ -1,7 +1,7 @@
 'use server'
 
 import { z } from 'zod'
-import { prisma } from '@/lib/prisma'
+import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { chatbotLog } from '../logging'
 import { invalidateBotCache } from '../conversation'
@@ -27,43 +27,56 @@ export async function saveKnowledgeBase(input: KnowledgeBaseInput): Promise<{ su
     return { success: false, error: 'Invalid input: ' + parsed.error.message }
   }
   try {
-    const before = await prisma.knowledgeBase.findUnique({
+    // TENANT-RESOLUTION: el super-admin edita por botConfigId; resolvemos org +
+    // metadata del bot para scopear la escritura y para el audit log.
+    const bot = await unsafeGlobalQuery(
+      'TENANT-RESOLUTION: botConfigId→org+meta para editar la KB (super-admin)',
+      (c) =>
+        c.botConfig.findUnique({
+          where: { id: parsed.data.botConfigId },
+          select: { botName: true, slug: true, organizationId: true },
+        }),
+    )
+    if (!bot) {
+      return { success: false, error: 'Bot no encontrado' }
+    }
+
+    const scope = forOrg(bot.organizationId)
+    const before = await scope.knowledgeBase.findFirst({
       where: { botConfigId: parsed.data.botConfigId },
     })
+    if (!before) {
+      return { success: false, error: 'Knowledge base no encontrada' }
+    }
 
-    const after = await prisma.knowledgeBase.update({
-      where: { botConfigId: parsed.data.botConfigId },
-      data: {
-        businessInfo: parsed.data.businessInfo,
-        servicesOrProducts: parsed.data.servicesOrProducts,
-        faq: parsed.data.faq,
-        policies: parsed.data.policies,
-        salesGuidance: parsed.data.salesGuidance,
-        toneExamples: parsed.data.toneExamples,
-        forbiddenStatements: parsed.data.forbiddenStatements,
-      },
-      include: { botConfig: { select: { botName: true, slug: true, organizationId: true } } },
+    const after = await scope.knowledgeBase.update(before.id, {
+      businessInfo: parsed.data.businessInfo,
+      servicesOrProducts: parsed.data.servicesOrProducts,
+      faq: parsed.data.faq,
+      policies: parsed.data.policies,
+      salesGuidance: parsed.data.salesGuidance,
+      toneExamples: parsed.data.toneExamples,
+      forbiddenStatements: parsed.data.forbiddenStatements,
     })
 
-    invalidateBotCache(after.botConfig.slug)
+    invalidateBotCache(bot.slug)
 
-    if (before) {
-      const { botConfig, ...afterForDiff } = after
+    {
       await logAdminAction({
         userId: user.id ?? 'unknown',
         userEmail: user.email,
         userName: user.name,
         actionType: 'KB_UPDATED',
-        action: `Actualizo KB del bot "${after.botConfig.botName}"`,
+        action: `Actualizo KB del bot "${bot.botName}"`,
         targetType: 'KnowledgeBase',
         targetId: after.id,
         diff: computeDiff(
           omitAuditNoise(before as unknown as Record<string, unknown>),
-          omitAuditNoise(afterForDiff as unknown as Record<string, unknown>),
+          omitAuditNoise(after as unknown as Record<string, unknown>),
         ),
         metadata: {
           botConfigId: parsed.data.botConfigId,
-          organizationId: after.botConfig.organizationId,
+          organizationId: bot.organizationId,
         },
       })
     }

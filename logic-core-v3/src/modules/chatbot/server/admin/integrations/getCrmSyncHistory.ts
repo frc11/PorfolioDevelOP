@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { forOrg } from '@/lib/isolation'
 import { getEffectiveSyncStatus } from '@/modules/chatbot/server/crm'
 import type { CrmSyncStatus } from '@prisma/client'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
@@ -65,11 +65,8 @@ export async function getLeadSyncHistory(
 > {
   await requireSuperAdmin()
 
-  const attempts = await prisma.crmSyncAttempt.findMany({
-    where: {
-      leadId,
-      organizationId,
-    },
+  const attempts = await forOrg(organizationId).crmSyncAttempt.findMany({
+    where: { leadId },
     orderBy: { attemptedAt: 'desc' },
     take: 20,
     select: ATTEMPT_SELECT,
@@ -93,15 +90,32 @@ export async function getOrgSyncHistory(query: OrgSyncHistoryQuery): Promise<
 
   const { organizationId } = query
   const limit = Math.min(Math.max(query.limit ?? 20, 1), 100)
+  const scope = forOrg(organizationId)
 
-  const attempts = await prisma.crmSyncAttempt.findMany({
+  // El helper prohíbe `cursor` (ancla por unique global → oráculo cross-org).
+  // Se reemplaza por paginación KEYSET scoped sobre (attemptedAt, id): se
+  // resuelve el ancla DENTRO de la org y se filtra por la tupla ordenada.
+  const anchor = query.cursor
+    ? await scope.crmSyncAttempt.findFirst({
+        where: { id: query.cursor },
+        select: { attemptedAt: true, id: true },
+      })
+    : null
+
+  const attempts = await scope.crmSyncAttempt.findMany({
     where: {
-      organizationId,
       ...(query.statusFilter ? { status: query.statusFilter } : {}),
+      ...(anchor
+        ? {
+            OR: [
+              { attemptedAt: { lt: anchor.attemptedAt } },
+              { attemptedAt: anchor.attemptedAt, id: { lt: anchor.id } },
+            ],
+          }
+        : {}),
     },
-    orderBy: { attemptedAt: 'desc' },
+    orderBy: [{ attemptedAt: 'desc' }, { id: 'desc' }],
     take: limit + 1,
-    ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
     select: ATTEMPT_SELECT,
   })
 
