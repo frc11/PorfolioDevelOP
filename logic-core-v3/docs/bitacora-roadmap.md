@@ -13258,10 +13258,15 @@ Al no inventar canal nuevo, hereda gratis: log a consola (`chatbotLog`) + fila e
   editables como antes, simplemente ya no manejan el costo/ejecución en runtime.
 - **CO-9** (unificar el default de modelo ×7): no tocado.
 - **Migración**: `prisma/schema.prisma` intacto.
-- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `demo-chat/[slug]/route.ts`,
-  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo
-  hardcodeado (no vienen de `plan.llmModel` ni alimentan costo de turno) — confirmado por grep,
-  no tocados.
+- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `generateInsights.ts`,
+  `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo hardcodeado (no vienen de
+  `plan.llmModel` ni alimentan costo de turno) — confirmado por grep, no tocados.
+- **Corrección (COST-2b, 2026-07-11)**: `demo-chat/[slug]/route.ts` estaba agrupado acá por error —
+  su modelo NO era hardcodeado, venía dinámico de `bot.llmModel` (DB). El problema real era el
+  *provider*: `getLLMProvider(bot.llmProvider as 'google' | 'anthropic' | 'openai')`, un cast que
+  mentía al compilador — el enum Prisma llega en mayúsculas (`'GOOGLE'`) y el switch de
+  `getLLMProvider` compara en minúsculas → throw para el 100% de los bots. Fix en COST-2b (ver
+  entrada al final del archivo).
 - El log `chat.llm_request_start` sigue mostrando el par **solicitado** (no el efectivo) — el WARN
   nuevo ya deja rastro explícito del degrade con ambos pares; tocar ese log ampliaba el diff sin
   necesidad.
@@ -13669,8 +13674,10 @@ ni de valores.
   `ProviderNotImplementedError`), debe validar el modelo contra la misma tabla que
   `estimateCost`/`listModels` — igual que ya hace `GoogleProvider.getModel` contra `GOOGLE_MODELS`
   — para no abrir una tercera fuente de verdad desalineable. No implementado, solo anotado acá.
-- **`demo-chat/[slug]/route.ts`**: no tocado (modelo hardcodeado, código no alimentado por
-  `plan.llmModel`, ya señalado como fuera de scope por el discovery de COST-1).
+- **`demo-chat/[slug]/route.ts`**: no tocado por COST-2 (fuera del scope de breakdown de costo — este
+  endpoint no llama `calculateCost`). **Corrección (COST-2b, 2026-07-11)**: la caracterización
+  "modelo hardcodeado" heredada de COST-1 era falsa — ver corrección en la entrada de COST-1 y el
+  fix real en COST-2b (entrada al final del archivo).
 - Sin migración, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
 - Fuera de `pricing/`, `llm/providers/` y el test nuevo: nada tocado (packs/scoring/widget/admin/
   dashboard intactos).
@@ -13730,4 +13737,100 @@ archivos más del mismo sprint PD-1, modificados (no por COST-2):
 `components/dashboard/VaultRevealButton.tsx` — consistente con que hay otro trabajo en curso sobre
 el mismo working tree, en paralelo a esta sesión. No se tocaron, no se commitearon, no se
 inspeccionaron sus diffs (fuera de scope de COST-2).
+
+---
+
+## ✅ COST-2b — demo-chat resuelve modelo/provider con el patrón seguro (sin cast, sin throw)   ·   2026-07-11
+
+El endpoint `demo-chat/[slug]/route.ts` (preview de bot para superadmin, tras `requireSuperAdmin()`,
+sin caller real — código muerto hoy, confirmado por grep) resolvía el par provider/modelo con
+`getLLMProvider(bot.llmProvider as 'google' | 'anthropic' | 'openai')` + `provider.getModel(bot.llmModel)`:
+un cast que le mentía al compilador. El enum Prisma `LlmProvider` llega en runtime en mayúsculas
+(`'GOOGLE'`/`'ANTHROPIC'`/`'OPENAI'`) pero el `switch` case-sensitive de `getLLMProvider` compara en
+minúsculas — caía siempre al `default` y throweaba `Unknown LLM provider: GOOGLE`, para el 100% de
+los bots (camino feliz roto, no un edge case). El modelo (`bot.llmModel`) sí era dinámico desde la
+DB — la nota de COST-1/COST-2 que decía "modelo hardcodeado" sobre este archivo era falsa (corregida
+arriba, en ambas entradas); el problema real era solo el cast del provider.
+
+### Descubrimiento (Paso 0) — coincide con el ticket
+- Resolución cruda confirmada en `route.ts:45,47` (línea 45 el cast, línea 47 el `getModel`), sin
+  `normalizeLlmProvider` ni `try/catch` — exactamente como describía el ticket.
+- Patrón de referencia confirmado en `handleChatRequest.ts:694-695` (COST-1):
+  `resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)` — ahí el modelo viene
+  de `plan.llmModel` (B4.2, no hay concepto de "plan" en demo-chat); acá se mantiene `bot.llmModel`,
+  como ya usaba el endpoint.
+- `resolveEffectiveModel(requestedProvider, requestedModel, getProvider?)` devuelve
+  `EffectiveModel { provider, modelId, model, degraded, requestedProvider, requestedModel }` — `model`
+  ya es el `LanguageModel` resuelto (mismo valor que antes devolvía `provider.getModel(...)` directo),
+  así que aguas abajo solo cambia de dónde sale `model`.
+- `normalizeLlmProvider(provider: LlmProvider): LLMProviderName` es la única traducción
+  mayúsculas→minúsculas del repo — reemplaza el cast 1:1.
+
+### Fix (Paso 1) — una línea, sin revivir el endpoint
+`route.ts`: el import de `getLLMProvider` pasa a `normalizeLlmProvider` + `resolveEffectiveModel`
+(mismo barrel, `@/modules/chatbot/server/llm`). Las dos líneas `getLLMProvider(bot.llmProvider as
+...)` + `provider.getModel(bot.llmModel)` se reemplazan por `const effectiveModel =
+resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)` y `model:
+effectiveModel.model` en el `streamText(...)`. Cast `as` eliminado, no reemplazado por otro. Nada
+más del handler (auth, zod, prisma query, armado de `system`/`messages`, streaming) se tocó.
+
+**Decisión: sin WARN de degrade en este endpoint (documentado, no omitido).** El runtime real
+(`handleChatRequest.ts`, COST-1) loguea el degrade vía `logChatbotEvent` (persiste a
+`chatbot_events`, pensado para "eventos user-facing" del dashboard de actividad). Evalué alinear
+demo-chat 1:1 y decidí no hacerlo:
+1. Este archivo no tenía NINGÚN logging antes del fix — agregarlo sería una capacidad nueva, no un
+   swap de la resolución (contra el "NADA más" del ticket).
+2. Es un endpoint muerto, admin-only, sin conversación real asociada — un preview de superadmin no
+   es la clase de evento que `logChatbotEvent` documenta como su caso de uso.
+3. Persistir a `chatbot_events` de la org mezclaría actividad sintética de preview con analítica
+   real de conversaciones — riesgo de ruido en el dashboard de actividad (Panel, fuera de la
+   frontera de este sprint).
+
+El beneficio de seguridad (degradar en vez de tirar 500) queda de todos modos — es inherente a
+`resolveEffectiveModel`, no depende de loguear el degrade. `effectiveModel.degraded` queda
+disponible si en el futuro se decide instrumentar esto.
+
+### Pendiente / fuera de scope (anotado, no implementado)
+- **No se revivió el endpoint**: sigue muerto tras `requireSuperAdmin()`, sin caller, sin UI
+  cableada. No se cruzó a Panel (`/admin`, `/dashboard`).
+- **No se tocó** `resolveEffectiveModel`, `normalizeLlmProvider`, `getLLMProvider`, ni el WARN de
+  COST-1 — solo consumidos.
+- **No se tocó** cómo el endpoint arma `system`/`messages`/streaming — solo la resolución.
+- Los otros 4 archivos que COST-1 agrupó junto a demo-chat (`test-prompt/route.ts`,
+  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`) no se re-verificaron en
+  este sprint — la corrección de la nota falsa aplica solo a `demo-chat/[slug]/route.ts`, que es lo
+  que este sprint confirmó de primera mano.
+
+### Tests — nuevo invariant, los 2 casos que pedía el ticket
+`demo-chat-model-resolution.invariant.ts` (nuevo, `npm run test:cost2b`, 2 checks, cero DB/red/
+credenciales — mismo mecanismo de inyección de provider fake que
+`resolve-effective-model.invariant.ts` de COST-1, vía el 3er parámetro de `resolveEffectiveModel`):
+- `LlmProvider.GOOGLE` (enum Prisma real, mayúsculas — el valor exacto que rompía el 100% de los
+  bots pre-fix) → `normalizeLlmProvider` da `'google'`, `resolveEffectiveModel` resuelve sin throw,
+  `degraded=false`.
+- `LlmProvider.ANTHROPIC` (provider stub, no implementado) → degrada a Google (`degraded=true`,
+  fallback correcto), sin throw/500.
+
+No se invocó el handler `POST` completo (auth real, DB real, `streamText` real): el fix es solo la
+línea de resolución, y este repo no tiene mocking de Prisma/NextAuth para invariants — mismo criterio
+que ya usa `cleanup-old-events-auth.invariant.ts` (T0.2) para no tocar DB real en un test que corre
+sin infraestructura.
+
+### Controles de cierre
+- `npm run test:cost2b`: 2/2 ✓.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: **0 errores** — el baseline de `searchconsole.ts:119`
+  (`@googleapis/webmasters`) que documentaban COST-1/COST-2 no apareció en esta corrida (entorno o
+  estado del paquete pudo cambiar entre sesiones; no investigado, fuera de scope de COST-2b). En
+  cualquier caso: cero errores nuevos.
+- `eslint` (2 archivos: `route.ts` + el invariant nuevo): 0 errores, 1 warning pre-existente
+  (`_modelId` sin usar en el stub fake del test — mismo patrón exacto, sin `argsIgnorePattern` para
+  `_`, ya presente y aceptado en `resolve-effective-model.invariant.ts` de COST-1).
+- `git status`: 3 archivos de este sprint (`route.ts` modificado, nuevo
+  `__tests__/demo-chat-model-resolution.invariant.ts`, `package.json` +1 script) + esta entrada de
+  bitácora y la corrección de las 2 notas falsas. Nada fuera de `demo-chat/[slug]/`, `package.json`
+  y `docs/bitacora-roadmap.md`.
+
+### Verificación declarada (Valentino, cuando quiera)
+Por test: `npm run test:cost2b` — el caso `'GOOGLE'` ya no throwea. No es visual ni conductual (el
+endpoint no tiene caller ni UI).
 
