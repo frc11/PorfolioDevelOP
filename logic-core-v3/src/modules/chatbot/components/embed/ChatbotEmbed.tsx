@@ -11,6 +11,7 @@ import { ChatHeader } from '../chat/ChatHeader'
 import { DegradedBanner } from '../chat/DegradedBanner'
 import { ConfigLoadError } from '../chat/ConfigLoadError'
 import { parseAttribution, EMPTY_ATTRIBUTION, type ParsedAttribution } from '../../shared/attribution'
+import { MAX_MESSAGE_CHARS } from '../../shared/historyPolicy'
 
 interface ChatbotEmbedProps {
   slug: string
@@ -486,6 +487,9 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
             placeholder={chatbot.inputLockedByDegrade ? 'Continuá la conversación por WhatsApp' : 'Escribí tu consulta...'}
             disabled={inputDisabled}
             rows={1}
+            // C0.2 — mismo tope que el schema del server (forma): el cliente
+            // nunca produce un mensaje que /chat rechazaría.
+            maxLength={MAX_MESSAGE_CHARS}
             inputMode="text"
             autoCapitalize="sentences"
             autoCorrect="on"

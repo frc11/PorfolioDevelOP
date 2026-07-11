@@ -14,6 +14,7 @@ import {
   backoffForAttempt,
   type FetchOutcome,
 } from '../shared/chatRetryPolicy'
+import { trimHistory, HISTORY_WINDOW_MESSAGES } from '../shared/historyPolicy'
 
 /** Narrow a parsed JSON value to an indexable record sin usar `any`. */
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -83,9 +84,13 @@ export interface UseChatbotOptions {
 //    para reintentar a mano (no bloquea el input — ver inputLockedByDegrade). El
 //    reintento server-side es idempotente, así que reenviar no duplica el turno.
 //    Supersede al viejo `provider_error` (que degradaba a WhatsApp al primer fallo).
+//  - conversation_limit: C0.2 — la conversación llegó al hard-cap server-side
+//    (HARD_CAP_MESSAGES en historyPolicy). Terminal para ESTA conversación;
+//    deriva a WhatsApp si el bot lo tiene configurado.
 export type DegradedReason =
   | 'quota_exhausted'
   | 'domain_overflow'
+  | 'conversation_limit'
   | 'bot_paused'
   | 'connection_failed'
 
@@ -278,7 +283,11 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
                     // el handoff a WhatsApp con la info real del bot. Campos faltantes →
                     // null sin romper.
                     const reason: DegradedReason =
-                      data.reason === 'domain_overflow' ? 'domain_overflow' : 'quota_exhausted'
+                      data.reason === 'domain_overflow'
+                        ? 'domain_overflow'
+                        : data.reason === 'conversation_limit'
+                          ? 'conversation_limit'
+                          : 'quota_exhausted'
                     setDegradedInfo({
                       reason,
                       message: typeof data.message === 'string' ? data.message : '',
@@ -340,12 +349,21 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
           return {
             body: {
               ...body,
-              messages: msgs
-                .filter((m) => !m.id.startsWith('proactive-'))
-                .map((m) => ({
-                  role: m.role,
-                  content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
-                })),
+              // C0.2 — ventana deslizante: se mandan solo los últimos
+              // HISTORY_WINDOW_MESSAGES, no todo el historial acumulado (el
+              // costo por turno crecía lineal y al mensaje 51 el server
+              // rechazaba). trimHistory preserva SIEMPRE el último 'user' (el
+              // turno en curso) y mantiene el array user-led. Cubre AMBOS
+              // renders (on-site y embed): los dos mandan por este transport.
+              messages: trimHistory(
+                msgs
+                  .filter((m) => !m.id.startsWith('proactive-'))
+                  .map((m) => ({
+                    role: m.role,
+                    content: m.parts.map((p) => (p.type === 'text' ? p.text : '')).join(''),
+                  })),
+                HISTORY_WINDOW_MESSAGES,
+              ),
               sessionId: sessionIdRef.current,
               currentPath,
               ...(opener ? { proactiveOpener: opener } : {}),

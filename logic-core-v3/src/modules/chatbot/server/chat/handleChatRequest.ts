@@ -31,6 +31,13 @@ import { logChatbotEvent, logPersistFailure } from '../logging'
 // LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
+import {
+  trimHistory,
+  HISTORY_WINDOW_MESSAGES,
+  MAX_MESSAGES_SHAPE,
+  MAX_MESSAGE_CHARS,
+  HARD_CAP_MESSAGES,
+} from '../../shared/historyPolicy'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -52,15 +59,23 @@ const attributionField = (maxLength: number) =>
  * las funciones puras de shared/attribution.ts.
  */
 export const requestBodySchema = z.object({
+  // C0.2 — una conversación larga NUNCA muere en 400 por longitud:
+  //  - Camino normal: recorte, no rechazo. El transform aplica trimHistory —
+  //    los últimos HISTORY_WINDOW_MESSAGES, con el último 'user' (el turno en
+  //    curso) SIEMPRE preservado y la ventana user-led. `body.messages` aguas
+  //    abajo ya es la ventana recortada.
+  //  - min/max quedan solo como validación de FORMA (payload absurdo que
+  //    ningún widget real produce — ver historyPolicy.ts). Superarlos sí es 400.
   messages: z
     .array(
       z.object({
         role: z.enum(['user', 'assistant', 'system']),
-        content: z.string().max(8000),
+        content: z.string().max(MAX_MESSAGE_CHARS),
       })
     )
     .min(1)
-    .max(50),
+    .max(MAX_MESSAGES_SHAPE)
+    .transform((msgs) => trimHistory(msgs, HISTORY_WINDOW_MESSAGES)),
   sessionId: z.string().min(1).max(200),
   currentPath: z.string().max(500).optional(),
   referrer: attributionField(500),
@@ -99,6 +114,19 @@ function collectProactivePrompts(raw: unknown): Set<string> {
 }
 
 /**
+ * C0.2 — Largo del array `messages` del body CRUDO (antes del recorte del
+ * transform del schema), solo para telemetría: permite ver cuánto recorta la
+ * ventana server sobre tráfico real. Defensivo contra cualquier shape.
+ */
+function countRawMessages(json: unknown): number | null {
+  if (json && typeof json === 'object') {
+    const messages = (json as { messages?: unknown }).messages
+    if (Array.isArray(messages)) return messages.length
+  }
+  return null
+}
+
+/**
  * Best-effort extraction of client IP from request headers.
  * Returns "unknown" if no header is available (e.g. local dev).
  */
@@ -123,7 +151,7 @@ function extractClientIp(request: Request): string {
  * directamente. La `reason` permite distinguir downstream (telemetría,
  * UI texto distinto en el widget si quisiera).
  */
-type DegradedReason = 'quota_exhausted' | 'domain_overflow'
+type DegradedReason = 'quota_exhausted' | 'domain_overflow' | 'conversation_limit'
 
 interface DegradedContext {
   whatsappNumber: string | null
@@ -239,8 +267,10 @@ export async function handleChatRequest(
 
   // ─── 1. Parse and validate body ───────────────────────────────
   let body: RequestBody
+  let receivedMessageCount: number | null = null
   try {
-    const json = await request.json()
+    const json: unknown = await request.json()
+    receivedMessageCount = countRawMessages(json)
     body = requestBodySchema.parse(json)
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'invalid body'
@@ -251,7 +281,10 @@ export async function handleChatRequest(
 
   chatbotDebug('request_parsed', {
     slug,
+    // C0.2 — messageCount ya es la ventana recortada (transform del schema);
+    // receivedMessageCount es lo que llegó del cliente antes del recorte.
     messageCount: body.messages.length,
+    receivedMessageCount,
     sessionId: body.sessionId,
     currentPath: body.currentPath,
   })
@@ -505,6 +538,50 @@ export async function handleChatRequest(
       )
     }
     timings.quota_reserve_ms = Date.now() - stepStart
+  }
+
+  // ─── 5.c Gating: tope duro de conversación (C0.2) ─────────────
+  // A partir de HARD_CAP_MESSAGES mensajes persistidos (~20 turnos del
+  // visitante), la conversación automática se cierra con dignidad: respuesta
+  // canned + CTA a WhatsApp si el bot lo tiene configurado — NUNCA un 400 ni
+  // un turno mudo, y cero costo de LLM. Se evalúa sobre
+  // Conversation.messageCount (autoritativo, ya resuelto en este request —
+  // cero query extra), como GATE — no como sugerencia al modelo (eso es el
+  // soft-cap de sections.ts). No se persiste el mensaje ni se incrementan
+  // contadores → el estado degradado es estable en los turnos siguientes.
+  // Solo alcanzable en conversaciones existentes (una nueva arranca en 0).
+  if ((conversation.messageCount ?? 0) >= HARD_CAP_MESSAGES) {
+    chatbotLog(
+      'chat.gating_conversation_limit',
+      {
+        slug,
+        botConfigId: bot.id,
+        conversationId: conversation.id,
+        messageCount: conversation.messageCount,
+        hardCap: HARD_CAP_MESSAGES,
+      },
+      'warn',
+    )
+    await logChatbotEvent({
+      organizationId: orgId,
+      botConfigId: bot.id,
+      type: 'chat.gating_conversation_limit',
+      level: 'warn',
+      message: `Conversación al tope (${conversation.messageCount}/${HARD_CAP_MESSAGES} mensajes) — respuesta degradada${bot.whatsappNumber ? ' con CTA a WhatsApp' : ''}`,
+      conversationId: conversation.id,
+      metadata: { messageCount: conversation.messageCount, hardCap: HARD_CAP_MESSAGES },
+    })
+    return degradedResponse(
+      bot.whatsappNumber
+        ? 'Llegamos al tope de esta conversación automática. Te derivo con el equipo por WhatsApp así seguimos personalmente y sin demoras.'
+        : 'Llegamos al tope de esta conversación automática. Escribinos por los canales de contacto del sitio y el equipo te sigue personalmente.',
+      'conversation_limit',
+      {
+        whatsappNumber: bot.whatsappNumber,
+        whatsappMessage: bot.whatsappMessage,
+        companyName: bot.organization.companyName,
+      },
+    )
   }
 
   // ─── 6. Persist user message ──────────────────────────────────
