@@ -13620,3 +13620,114 @@ credenciales") que no son de T0.2: `.env.example` (bloque `ONBOARDING_SECRET_KEY
 y `docs/audit-PD1-cifrado-onboarding.md`. No se tocaron ni se commitearon — quedan ahí para cuando
 corresponda cerrarlos por su cuenta.
 
+---
+
+## ✅ COST-2 — El breakdown de costo ya no pisa un total autoritativo con $0 (clave≡id por construcción)   ·   2026-07-11
+
+`calculateCost` calcula el total con `estimateCost(modelId, ...)` (indexa el Record interno de cada
+provider por **clave**) y reconstruye el split input/output buscando
+`listModels().find(m => m.id === modelId)` (indexa por el campo **`.id`**). Hasta ahora clave e `id`
+coincidían porque cada entrada de `GOOGLE_MODELS`/`ANTHROPIC_MODELS`/`OPENAI_MODELS` duplicaba la
+clave a mano dentro de `id:` — invariante sostenida por convención, no por el compilador. Un typo
+clave≠`id` en una entrada futura hacía que `estimateCost` calculara un total correcto (por clave)
+mientras `listModels().find` no lo encontraba (por `id`) → la rama `!modelInfo` pisaba ese total con
+**$0 en silencio**, sin ningún WARN (el WARN de COST-1 vive corriente arriba, en
+`resolveEffectiveModel`, y no ve esta capa). Este sprint corrige las dos puntas: no pisar el total
+autoritativo, y hacer que clave≡`id` sea estructuralmente imposible de desalinear.
+
+### Descubrimiento (Paso 0) — 1 corrección al ticket original
+- El archivo no vive en `llm/pricing/costs.ts` (no existe ese directorio) sino en
+  `server/pricing/costs.ts`, hermano de `server/llm/` — la misma corrección de ruta que ya había
+  documentado COST-1 para este mismo archivo. Los números de línea del ticket (`~28-34`) eran
+  aproximados (el `total` se calcula en `28`; el clobber real está en `31-34`). El resto —
+  `handleChatRequest.ts:881-886` pasándole a `calculateCost` el par ya efectivo, y los 3 registros
+  con clave/`id` duplicados a mano — coincidía exactamente.
+
+### Fix (Paso 1) — `costs.ts` ya no pisa el total autoritativo
+En la rama `!modelInfo`, `totalUsd` pasa a devolver el `total` ya calculado por `estimateCost`
+(autoritativo, porque `(provider, modelId)` ya fue validado corriente arriba por
+`resolveEffectiveModel` antes de llegar acá — COST-1) en vez de `0`. El split `inputUsd`/`outputUsd`
+no se puede reconstruir sin `modelInfo` (no hay tarifa de qué dividir) y queda en `0`/`0` — fallback
+documentado inline, no exacto pero honesto (no inventa una proporción arbitraria). `getModel`/
+`estimateCost`/`listModels` no se tocaron.
+
+### Fix (Paso 2) — la clave del Record se deriva de `.id`
+En `google.ts`, `anthropic.ts` y `openai.ts`: cada registro pasa de un objeto literal
+`{ 'clave': { id: 'clave', ... } }` (clave duplicada a mano) a una lista (`GOOGLE_MODEL_LIST`,
+`ANTHROPIC_MODEL_LIST`, `OPENAI_MODEL_LIST`) + `Object.fromEntries(list.map(m => [m.id, m] as const))`.
+Ya no existe un lugar donde escribir la clave por separado del `id` — un typo en `id` no puede
+desalinearse de "su" clave porque hay una sola fuente, no dos. `getModel`/`estimateCost`/
+`listModels` siguen leyendo el mismo `Record<string, ModelInfo>` de siempre, sin cambios de lógica
+ni de valores.
+
+### Pendiente / fuera de scope (anotado, no implementado)
+- **`resolveEffectiveModel.ts` / `handleChatRequest.ts` / el WARN `chat.cost_model_unknown` de
+  COST-1**: no tocados — la invariante de seguridad de este sprint (el par `(provider, modelId)` ya
+  viene validado corriente arriba, por eso `totalUsd` es confiable) depende exactamente de que esa
+  cadena siga como está.
+- **`getModel` real de Anthropic/OpenAI**: cuando se implemente (hoy son stubs que tiran
+  `ProviderNotImplementedError`), debe validar el modelo contra la misma tabla que
+  `estimateCost`/`listModels` — igual que ya hace `GoogleProvider.getModel` contra `GOOGLE_MODELS`
+  — para no abrir una tercera fuente de verdad desalineable. No implementado, solo anotado acá.
+- **`demo-chat/[slug]/route.ts`**: no tocado (modelo hardcodeado, código no alimentado por
+  `plan.llmModel`, ya señalado como fuera de scope por el discovery de COST-1).
+- Sin migración, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
+- Fuera de `pricing/`, `llm/providers/` y el test nuevo: nada tocado (packs/scoring/widget/admin/
+  dashboard intactos).
+
+### Tests — nuevo invariant, los 3 casos que pedía el ticket
+`cost-breakdown.invariant.ts` (nuevo, `npm run test:cost2`, 12 checks, cero DB/red/credenciales
+reales — `GoogleProvider` se instancia con env vars placeholder porque el archivo solo llama
+`estimateCost()`/`listModels()`, nunca `getModel()`, así que `getClient()`/`createVertex()` nunca se
+dispara):
+- **Paridad** (los 3 providers, 6 checks): `listModels()`/`estimateCost()` dan exactamente los
+  mismos ids, precios y flags que antes del refactor.
+- **Invariante clave≡id** (4 checks): todo modelo que `listModels()` expone es priceable por su
+  propio `id` en `estimateCost()`, en los 3 providers — más un control de que un id realmente
+  inexistente sigue devolviendo `0` sin throw.
+- **El fix de `costs.ts`** (2 checks): forzado con un monkey-patch temporal (try/finally) de
+  `listModels()` sobre el provider real cacheado por la factory — `calculateCost` no expone un
+  parámetro para inyectar un provider fake (agregarlo excedía el scope: "solo... el manejo del
+  `!modelInfo`"), y post-Paso-2 el mismatch real ya es irreproducible con los 3 providers reales
+  (lo prueba el check anterior), así que esta es la única forma de ejercitar la rama con la función
+  exportada real sin tocar su firma. Confirma `totalUsd` = total autoritativo (no `0`) + un control
+  negativo (par realmente desconocido → sigue en `$0`, sin falso positivo).
+
+**Mutation check** (hecho y deshecho en esta sesión, no queda en el repo): revertir a mano el fix de
+Paso 1 (`totalUsd: 0` en vez de `totalUsd: total`) hace fallar exactamente el check esperado
+(`AssertionError: totalUsd debía ser el total autoritativo (6), no 0`) — confirma que el test no es
+tautológico.
+
+### Controles de cierre
+- `npm run test:cost2`: 12/12 ✓.
+- `npm run test:cost1` (otro invariant que importa `costs.ts`) corrido como smoke test: sigue
+  verde, 8/8 ✓.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: idéntico al baseline (solo `searchconsole.ts:119`,
+  `@googleapis/webmasters`).
+- `eslint` (5 archivos tocados/creados): 0 errores, 3 warnings, las 3 **pre-existentes** ya
+  documentadas por COST-1 (`_modelId` sin usar en `anthropic.ts:17`/`openai.ts:11`, `_omit` sin
+  usar en `google.ts` — mismo patrón exacto, sin `argsIgnorePattern` para `_`, corridos de línea
+  por las inserciones arriba).
+- `npx prisma migrate status`: DB no alcanzable en este entorno (`P1001`, Neon) — informativo, no
+  bloquea; este sprint no toca schema/DB.
+- `git status`: además de los archivos de este sprint (`costs.ts`, `google.ts`, `anthropic.ts`,
+  `openai.ts`, `package.json` +1 script, `pricing/__tests__/` nuevo), el working tree tiene
+  cambios sin commitear de otro sprint en curso (Vault/PD-1 — ver nota abajo). Nada de COST-2 toca
+  `packs/scoring/widget/admin/dashboard`.
+
+### Verificación declarada (Valentino, cuando quiera)
+Por test: correr `npm run test:cost2` (paridad de los 3 providers + el clobber ya no da `$0`) y
+`npm run test:cost1` (smoke). No es visual ni conductual — no hay UI ni comportamiento de runtime
+que cambie para el camino feliz actual (los 3 providers ya tenían clave≡`id` correcta; el fix
+protege contra una futura regresión, no cambia ningún costo de hoy).
+
+### Nota fuera de scope (detectada, no tocada)
+El working tree ya traía, desde antes de este sprint, los cambios sin commitear de PD-1
+("Onboarding Vault — cifrado de credenciales") que T0.2 había señalado: `.env.example`,
+`src/lib/crypto/`, `docs/audit-PD1-cifrado-onboarding.md`. Durante esta sesión aparecieron además 3
+archivos más del mismo sprint PD-1, modificados (no por COST-2):
+`admin/clients/[clientId]/_components/tabs/VaultTab.tsx`, `dashboard/cuenta/boveda/page.tsx`,
+`components/dashboard/VaultRevealButton.tsx` — consistente con que hay otro trabajo en curso sobre
+el mismo working tree, en paralelo a esta sesión. No se tocaron, no se commitearon, no se
+inspeccionaron sus diffs (fuera de scope de COST-2).
+

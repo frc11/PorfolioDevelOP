@@ -45,6 +45,7 @@
     "test:q12": "npx tsx src/modules/chatbot/evals/__tests__/q1-2.invariant.ts",
     "test:c02": "npx tsx src/modules/chatbot/server/chat/__tests__/history-window.invariant.ts",
     "test:t02": "npx tsx src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts",
+    "test:cost2": "npx tsx src/modules/chatbot/server/pricing/__tests__/cost-breakdown.invariant.ts",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",
     "evals:purge": "npx tsx src/modules/chatbot/evals/cleanup.ts",
