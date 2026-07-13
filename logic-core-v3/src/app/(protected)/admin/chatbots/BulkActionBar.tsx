@@ -101,7 +101,7 @@ export function BulkActionBar({ selectedIds, totalBots, onSelectAll, onClear }: 
         URL.revokeObjectURL(url)
         toast.success(`Exportados ${result.totalLeads} leads`)
       } else {
-        toast.error('Error al exportar')
+        toast.error(result.error ?? 'Error al exportar')
       }
     })
   }

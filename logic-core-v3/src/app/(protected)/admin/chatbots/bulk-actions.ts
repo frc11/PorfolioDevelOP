@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { logAdminAction } from '@/lib/audit-log'
+import { logAdminAction, logAdminActionsBatch } from '@/lib/audit-log'
 import { CSV_NEWLINE, UTF8_BOM, rowToCsv } from '@/lib/csv/csv-escape'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 
@@ -16,96 +16,76 @@ interface BulkResult {
 
 const BulkBotIdsSchema = z.array(z.string().min(1)).min(1, 'Sin bots seleccionados.')
 
-export async function bulkPauseBotsAction(botIds: string[]): Promise<BulkResult> {
+// PA-3: causa clara en vez de failures:[] cuando el rechazo es previo al loop
+// (permiso/sesión) — la UI ya distingue vacío vs. poblado, esto solo mejora
+// el mensaje sin tocar announceBulk.
+function permissionDeniedResult(botIds: string[]): BulkResult {
+  return {
+    success: 0,
+    failed: botIds.length,
+    failures: botIds.map((botId) => ({ botId, error: 'Sin permisos o sesión expirada' })),
+  }
+}
+
+// PA-4: pause/activate pasan de N updates+logs seriales a 1 updateMany + 1
+// createMany de logs. El where del batch replica EXACTAMENTE el scope serial
+// anterior ({id} puro, sin organizationId) — no se amplía el alcance.
+async function bulkSetActiveAction(
+  botIds: string[],
+  isActive: boolean,
+  actionType: 'BOT_DEACTIVATED' | 'BOT_ACTIVATED',
+  actionVerb: string,
+): Promise<BulkResult> {
   const session = await auth()
   if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return { success: 0, failed: botIds.length, failures: [] }
+    return permissionDeniedResult(botIds)
   }
   const userId = session.user.id
-  if (!userId) return { success: 0, failed: botIds.length, failures: [] }
+  if (!userId) return permissionDeniedResult(botIds)
 
-  let success = 0
-  let failed = 0
-  const failures: Array<{ botId: string; error: string }> = []
+  const validBots = await prisma.botConfig.findMany({
+    where: { id: { in: botIds } },
+    select: { id: true, slug: true },
+  })
+  const validIds = new Set(validBots.map((bot) => bot.id))
+  const failures: Array<{ botId: string; error: string }> = botIds
+    .filter((botId) => !validIds.has(botId))
+    .map((botId) => ({ botId, error: 'El bot no existe' }))
 
-  for (const botId of botIds) {
-    try {
-      const bot = await prisma.botConfig.update({
-        where: { id: botId },
-        data: { isActive: false },
-        select: { slug: true },
-      })
+  if (validBots.length > 0) {
+    await prisma.botConfig.updateMany({
+      where: { id: { in: [...validIds] } },
+      data: { isActive },
+    })
+
+    for (const bot of validBots) {
       invalidateBotCache(bot.slug)
+    }
 
-      await logAdminAction({
+    await logAdminActionsBatch(
+      validBots.map((bot) => ({
         userId,
         userEmail: session.user.email,
         userName: session.user.name,
-        actionType: 'BOT_DEACTIVATED',
-        action: `Pausó bot ${botId} (acción bulk)`,
+        actionType,
+        action: `${actionVerb} bot ${bot.id} (acción bulk)`,
         targetType: 'BotConfig',
-        targetId: botId,
+        targetId: bot.id,
         metadata: { bulk: true },
-      })
-
-      success++
-    } catch (error) {
-      failed++
-      failures.push({
-        botId,
-        error: error instanceof Error ? error.message : 'unknown',
-      })
-    }
+      })),
+    )
   }
 
   revalidatePath('/admin/chatbots')
-  return { success, failed, failures }
+  return { success: validBots.length, failed: failures.length, failures }
+}
+
+export async function bulkPauseBotsAction(botIds: string[]): Promise<BulkResult> {
+  return bulkSetActiveAction(botIds, false, 'BOT_DEACTIVATED', 'Pausó')
 }
 
 export async function bulkActivateBotsAction(botIds: string[]): Promise<BulkResult> {
-  const session = await auth()
-  if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return { success: 0, failed: botIds.length, failures: [] }
-  }
-  const userId = session.user.id
-  if (!userId) return { success: 0, failed: botIds.length, failures: [] }
-
-  let success = 0
-  let failed = 0
-  const failures: Array<{ botId: string; error: string }> = []
-
-  for (const botId of botIds) {
-    try {
-      const bot = await prisma.botConfig.update({
-        where: { id: botId },
-        data: { isActive: true },
-        select: { slug: true },
-      })
-      invalidateBotCache(bot.slug)
-
-      await logAdminAction({
-        userId,
-        userEmail: session.user.email,
-        userName: session.user.name,
-        actionType: 'BOT_ACTIVATED',
-        action: `Activó bot ${botId} (acción bulk)`,
-        targetType: 'BotConfig',
-        targetId: botId,
-        metadata: { bulk: true },
-      })
-
-      success++
-    } catch (error) {
-      failed++
-      failures.push({
-        botId,
-        error: error instanceof Error ? error.message : 'unknown',
-      })
-    }
-  }
-
-  revalidatePath('/admin/chatbots')
-  return { success, failed, failures }
+  return bulkSetActiveAction(botIds, true, 'BOT_ACTIVATED', 'Activó')
 }
 
 export async function exportLeadsBulkAction(botIds: string[]) {
@@ -167,14 +147,18 @@ export async function exportLeadsBulkAction(botIds: string[]) {
 export async function bulkDeleteBotsAction(botIds: string[]): Promise<BulkResult> {
   const session = await auth()
   if (!session?.user || session.user.role !== 'SUPER_ADMIN') {
-    return { success: 0, failed: botIds.length, failures: [] }
+    return permissionDeniedResult(botIds)
   }
   const userId = session.user.id
-  if (!userId) return { success: 0, failed: botIds.length, failures: [] }
+  if (!userId) return permissionDeniedResult(botIds)
 
   const parsed = BulkBotIdsSchema.safeParse(botIds)
   if (!parsed.success) {
-    return { success: 0, failed: botIds.length, failures: [] }
+    return {
+      success: 0,
+      failed: botIds.length,
+      failures: botIds.map((botId) => ({ botId, error: 'Datos inválidos' })),
+    }
   }
   const ids = parsed.data
 

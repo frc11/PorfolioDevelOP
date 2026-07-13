@@ -41,6 +41,42 @@ export async function logAdminAction(input: LogActionInput): Promise<void> {
   }
 }
 
+/**
+ * PA-4 — Batch de logAdminAction para bulk actions (updateMany + N filas de
+ * auditoría en UN round-trip, en vez de N logAdminAction seriales). Obtiene
+ * ipAddress/userAgent UNA sola vez (headers() es por-request, no por-fila) y
+ * los aplica a todas las filas — paridad con el enriquecimiento de la versión
+ * serial. No-op sobre lista vacía. Mismo swallow de error que logAdminAction:
+ * un fallo de auditoría no rompe la acción llamante.
+ */
+export async function logAdminActionsBatch(inputs: LogActionInput[]): Promise<void> {
+  if (inputs.length === 0) return
+  try {
+    const headersList = await headers()
+    const ipAddress =
+      headersList.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+    const userAgent = headersList.get('user-agent')
+
+    await prisma.adminAuditLog.createMany({
+      data: inputs.map((input) => ({
+        userId: input.userId,
+        userEmail: input.userEmail,
+        userName: input.userName,
+        actionType: input.actionType,
+        action: input.action,
+        targetType: input.targetType,
+        targetId: input.targetId,
+        diff: input.diff ?? {},
+        metadata: input.metadata ?? {},
+        ipAddress,
+        userAgent,
+      })),
+    })
+  } catch (error) {
+    console.error('[audit-log] Failed to log actions (batch):', error)
+  }
+}
+
 export function computeDiff<T extends Record<string, unknown>>(
   before: T,
   after: T,

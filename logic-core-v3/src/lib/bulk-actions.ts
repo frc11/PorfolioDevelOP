@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
-import { logAdminAction } from '@/lib/audit-log'
+import { logAdminActionsBatch } from '@/lib/audit-log'
 import { CSV_NEWLINE, UTF8_BOM, rowToCsv } from '@/lib/csv/csv-escape'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
 
@@ -26,8 +26,9 @@ export async function bulkPauseBots(orgIds: string[]) {
     data: { isActive: false },
   })
 
-  for (const bot of bots) {
-    await logAdminAction({
+  // PA-4: 1 createMany en vez de N logAdminAction seriales (misma metadata).
+  await logAdminActionsBatch(
+    bots.map((bot) => ({
       userId: user.id ?? 'unknown',
       userEmail: user.email,
       userName: user.name,
@@ -36,8 +37,8 @@ export async function bulkPauseBots(orgIds: string[]) {
       targetType: 'BotConfig',
       targetId: bot.id,
       metadata: { bulkAction: true, count: uniqueOrgIds.length },
-    })
-  }
+    })),
+  )
 
   revalidatePath('/admin/clients')
   revalidateTag('admin-clients', {})
