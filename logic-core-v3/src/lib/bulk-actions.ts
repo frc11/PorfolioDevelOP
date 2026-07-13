@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { logAdminAction } from '@/lib/audit-log'
+import { CSV_NEWLINE, UTF8_BOM, rowToCsv } from '@/lib/csv/csv-escape'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
 
 export async function bulkPauseBots(orgIds: string[]) {
@@ -59,22 +60,24 @@ export async function bulkExportLeads(orgIds: string[]) {
     orderBy: { capturedAt: 'desc' },
   })
 
-  const csv = [
-    'Cliente,Nombre,Email,Telefono,Status,Intent,Fecha',
-    ...leads.map((lead) =>
-      [
-        lead.botConfig.organization.companyName,
-        lead.name ?? '',
-        lead.email ?? '',
-        lead.phone ?? '',
-        lead.status,
-        lead.intent ?? '',
-        lead.capturedAt.toISOString(),
-      ]
-        .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-        .join(','),
-    ),
-  ].join('\n')
+  // PA-2: cada celda pasa por csvEscape (anti-fórmula + RFC 4180); BOM para
+  // que Excel abra tildes/ñ; CRLF como separador.
+  const csv =
+    UTF8_BOM +
+    [
+      rowToCsv(['Cliente', 'Nombre', 'Email', 'Telefono', 'Status', 'Intent', 'Fecha']),
+      ...leads.map((lead) =>
+        rowToCsv([
+          lead.botConfig.organization.companyName,
+          lead.name ?? '',
+          lead.email ?? '',
+          lead.phone ?? '',
+          lead.status,
+          lead.intent ?? '',
+          lead.capturedAt.toISOString(),
+        ]),
+      ),
+    ].join(CSV_NEWLINE)
 
   return { ok: true, csv, count: leads.length }
 }

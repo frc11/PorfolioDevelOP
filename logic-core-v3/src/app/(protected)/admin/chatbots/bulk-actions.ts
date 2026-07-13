@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { logAdminAction } from '@/lib/audit-log'
+import { CSV_NEWLINE, UTF8_BOM, rowToCsv } from '@/lib/csv/csv-escape'
 import { invalidateBotCache } from '@/modules/chatbot/server/conversation'
 
 interface BulkResult {
@@ -136,12 +137,15 @@ export async function exportLeadsBulkAction(botIds: string[]) {
     lead.name ?? '',
     lead.email ?? '',
     lead.phone ?? '',
-    (lead.intent ?? '').replace(/"/g, '""'),
+    lead.intent ?? '',
     lead.status,
     lead.capturedAt.toISOString(),
   ])
 
-  const csv = [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n')
+  // PA-2: cada celda pasa por csvEscape (anti-fórmula + RFC 4180); BOM para
+  // que Excel abra tildes/ñ; CRLF como separador.
+  const csv =
+    UTF8_BOM + [rowToCsv(headers), ...rows.map((r) => rowToCsv(r))].join(CSV_NEWLINE)
 
   await logAdminAction({
     userId,
