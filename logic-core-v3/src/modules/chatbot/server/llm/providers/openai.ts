@@ -26,8 +26,10 @@ export class OpenAIProvider implements LLMProvider {
   }
 }
 
-const OPENAI_MODELS: Record<string, ModelInfo> = {
-  'gpt-4o-mini': {
+// COST-2 — la clave del Record se deriva de `id` (abajo), no se duplica a
+// mano: un typo en `id` ya no puede desalinearse de su propia clave.
+const OPENAI_MODEL_LIST: readonly ModelInfo[] = [
+  {
     id: 'gpt-4o-mini',
     displayName: 'GPT-4o Mini',
     inputPerMillion: 0.15,
@@ -36,7 +38,7 @@ const OPENAI_MODELS: Record<string, ModelInfo> = {
     supportsStreaming: true,
     maxOutputTokens: 16384,
   },
-  'gpt-4o': {
+  {
     id: 'gpt-4o',
     displayName: 'GPT-4o',
     inputPerMillion: 2.50,
@@ -45,4 +47,8 @@ const OPENAI_MODELS: Record<string, ModelInfo> = {
     supportsStreaming: true,
     maxOutputTokens: 16384,
   },
-}
+]
+
+const OPENAI_MODELS: Record<string, ModelInfo> = Object.fromEntries(
+  OPENAI_MODEL_LIST.map((m) => [m.id, m] as const)
+)

@@ -27,3 +27,6 @@
 
 [functions."send-weekly-reports-cron"]
   schedule = "0 12 * * MON"
+
+[functions."cleanup-old-events-cron"]
+  schedule = "0 6 * * *"

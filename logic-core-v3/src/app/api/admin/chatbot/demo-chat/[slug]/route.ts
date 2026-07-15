@@ -1,7 +1,7 @@
 import { streamText, type ModelMessage } from 'ai'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getLLMProvider } from '@/modules/chatbot/server/llm'
+import { normalizeLlmProvider, resolveEffectiveModel } from '@/modules/chatbot/server/llm'
 import { buildSystemPrompt, formatDateTimeArgentina } from '@/modules/chatbot/server/prompts'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
@@ -42,9 +42,13 @@ export async function POST(
     return NextResponse.json({ ok: false, error: 'Bot or KB not found' }, { status: 404 })
   }
 
-  const provider = getLLMProvider(bot.llmProvider as 'google' | 'anthropic' | 'openai')
+  // COST-2b — mismo patrón seguro que handleChatRequest.ts:694 (COST-1): sin
+  // esto, bot.llmProvider llega en mayúsculas ('GOOGLE', valor real del enum
+  // Prisma) y el cast `as` mentía al compilador — el switch de getLLMProvider
+  // compara en minúsculas y caía al default, throw para el 100% de los bots.
+  const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)
   const result = streamText({
-    model: provider.getModel(bot.llmModel),
+    model: effectiveModel.model,
     system: buildSystemPrompt({
       botConfig: {
         botName: bot.botName,

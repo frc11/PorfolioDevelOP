@@ -6,7 +6,14 @@ import { Eye, EyeOff, Copy, Check, Timer, ShieldAlert } from 'lucide-react'
 
 const HIDE_AFTER_SECONDS = 30
 
-export function VaultRevealButton({ url }: { url: string }) {
+// Dos modos excluyentes: `url` (link revelable — comportamiento original) o
+// `value` (credencial descifrada — se revela como texto plano, jamás como href).
+type VaultRevealButtonProps =
+  | { url: string; value?: undefined }
+  | { value: string; url?: undefined }
+
+export function VaultRevealButton({ url, value }: VaultRevealButtonProps) {
+  const secret = value ?? url ?? ''
   const [revealed, setRevealed] = useState(false)
   const [copied, setCopied] = useState(false)
   const [remaining, setRemaining] = useState(HIDE_AFTER_SECONDS)
@@ -16,9 +23,13 @@ export function VaultRevealButton({ url }: { url: string }) {
     setRemaining(HIDE_AFTER_SECONDS)
   }, [])
 
+  const reveal = useCallback(() => {
+    setRemaining(HIDE_AFTER_SECONDS)
+    setRevealed(true)
+  }, [])
+
   useEffect(() => {
     if (!revealed) return
-    setRemaining(HIDE_AFTER_SECONDS)
     const id = setInterval(() => {
       setRemaining((r) => {
         if (r <= 1) {
@@ -33,7 +44,7 @@ export function VaultRevealButton({ url }: { url: string }) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(url)
+      await navigator.clipboard.writeText(secret)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -71,10 +82,10 @@ export function VaultRevealButton({ url }: { url: string }) {
               className="flex-1 min-w-0 text-sm font-mono tracking-[0.3em] text-red-400/30 select-none truncate"
               aria-hidden
             >
-              {'•'.repeat(Math.min(url.length, 28))}
+              {'•'.repeat(Math.min(secret.length, 28))}
             </p>
             <button
-              onClick={() => setRevealed(true)}
+              onClick={reveal}
               className="flex flex-shrink-0 items-center gap-1.5 rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-red-400 transition-colors hover:bg-red-500/20"
             >
               <Eye size={12} strokeWidth={1.5} />
@@ -90,14 +101,20 @@ export function VaultRevealButton({ url }: { url: string }) {
             transition={{ duration: 0.35, ease: 'easeOut' }}
             className="flex items-center gap-2"
           >
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 min-w-0 truncate text-sm font-mono text-red-300 underline underline-offset-2 hover:text-red-200 transition-colors"
-            >
-              {url}
-            </a>
+            {url !== undefined ? (
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 min-w-0 truncate text-sm font-mono text-red-300 underline underline-offset-2 hover:text-red-200 transition-colors"
+              >
+                {url}
+              </a>
+            ) : (
+              <p className="flex-1 min-w-0 whitespace-pre-wrap break-words text-sm font-mono text-red-300">
+                {secret}
+              </p>
+            )}
             <div className="flex items-center gap-1.5 flex-shrink-0">
               <button
                 onClick={handleCopy}

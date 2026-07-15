@@ -32,8 +32,10 @@ export class AnthropicProvider implements LLMProvider {
   }
 }
 
-const ANTHROPIC_MODELS: Record<string, ModelInfo> = {
-  'claude-haiku-4-5': {
+// COST-2 — la clave del Record se deriva de `id` (abajo), no se duplica a
+// mano: un typo en `id` ya no puede desalinearse de su propia clave.
+const ANTHROPIC_MODEL_LIST: readonly ModelInfo[] = [
+  {
     id: 'claude-haiku-4-5',
     displayName: 'Claude Haiku 4.5',
     inputPerMillion: 1.00,
@@ -42,7 +44,7 @@ const ANTHROPIC_MODELS: Record<string, ModelInfo> = {
     supportsStreaming: true,
     maxOutputTokens: 8192,
   },
-  'claude-sonnet-4-6': {
+  {
     id: 'claude-sonnet-4-6',
     displayName: 'Claude Sonnet 4.6',
     inputPerMillion: 3.00,
@@ -51,4 +53,8 @@ const ANTHROPIC_MODELS: Record<string, ModelInfo> = {
     supportsStreaming: true,
     maxOutputTokens: 8192,
   },
-}
+]
+
+const ANTHROPIC_MODELS: Record<string, ModelInfo> = Object.fromEntries(
+  ANTHROPIC_MODEL_LIST.map((m) => [m.id, m] as const)
+)

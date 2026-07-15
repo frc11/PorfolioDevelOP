@@ -7,8 +7,10 @@ interface GoogleModelConfig extends ModelInfo {
   apiModelId: string  // The actual model id Google's API expects
 }
 
-const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
-  'gemini-2.5-flash': {
+// COST-2 — la clave del Record se deriva de `id` (abajo), no se duplica a
+// mano: un typo en `id` ya no puede desalinearse de su propia clave.
+const GOOGLE_MODEL_LIST: readonly GoogleModelConfig[] = [
+  {
     id: 'gemini-2.5-flash',
     apiModelId: 'gemini-2.5-flash',
     displayName: 'Gemini 2.5 Flash',
@@ -18,7 +20,7 @@ const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
     supportsStreaming: true,
     maxOutputTokens: 8192,
   },
-  'gemini-2.5-flash-lite': {
+  {
     id: 'gemini-2.5-flash-lite',
     apiModelId: 'gemini-2.5-flash-lite',
     displayName: 'Gemini 2.5 Flash Lite',
@@ -28,7 +30,7 @@ const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
     supportsStreaming: true,
     maxOutputTokens: 8192,
   },
-  'gemini-2.5-pro': {
+  {
     id: 'gemini-2.5-pro',
     apiModelId: 'gemini-2.5-pro',
     displayName: 'Gemini 2.5 Pro',
@@ -38,7 +40,11 @@ const GOOGLE_MODELS: Record<string, GoogleModelConfig> = {
     supportsStreaming: true,
     maxOutputTokens: 8192,
   },
-}
+]
+
+const GOOGLE_MODELS: Record<string, GoogleModelConfig> = Object.fromEntries(
+  GOOGLE_MODEL_LIST.map((m) => [m.id, m] as const)
+)
 
 export class GoogleProvider implements LLMProvider {
   readonly name = 'google' as const
