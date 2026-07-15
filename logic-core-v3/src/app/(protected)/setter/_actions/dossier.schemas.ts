@@ -68,10 +68,10 @@ export const DraftUrlInputSchema = z.object({
   draftUrl: z
     .string()
     .trim()
-    .min(1, 'Pegá la URL del draft que te dio Netlify Drop')
+    .min(1, 'Pegá la URL del borrador que te dio Netlify Drop')
     .url('Eso no parece una URL — copiala completa desde la barra del navegador')
     .refine((url) => url.startsWith('https://'), 'La URL tiene que empezar con https://')
-    .refine((url) => url.length <= 500, 'Esa URL es demasiado larga — revisá que sea la del draft'),
+    .refine((url) => url.length <= 500, 'Esa URL es demasiado larga — revisá que sea la del borrador'),
   confirmoCarga: z.literal(true, {
     message: 'Abrí el link en otra pestaña y confirmá que carga antes de guardar',
   }),

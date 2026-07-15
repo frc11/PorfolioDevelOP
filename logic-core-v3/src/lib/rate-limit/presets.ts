@@ -49,6 +49,14 @@ export const RATE_LIMIT_PRESETS = {
   // por el atacante — no se expone ningún campo del FormData).
   contactFormPerIp: { limit: 5, windowMs: 15 * 60_000 },
 
+  // ── Motor WhatsApp (B1-S1) ──────────────────────────────────────────────
+  // Webhook entrante del BSP (360dialog). Clave: hash del channelToken (el
+  // token es material secreto de URL — no se persiste en claro en la tabla
+  // compartida). Techo por canal pensado para ráfagas legítimas de Meta,
+  // retries incluidos (~10 msg/s sostenidos), sin dejar la URL pública sin
+  // freno frente a floods.
+  motorWebhookPerChannel: { limit: 600, windowMs: 60_000 },
+
   // ── Aviso de lead al cliente (P2.A) ───────────────────────────────────────
   // Anti-spam del email "nuevo lead" al dueño: máximo 5 avisos individuales por
   // org por hora. Superado el tope, el aviso se AGRUPA en un digest (no se

@@ -155,7 +155,7 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'manual',
     fase: 'evaluacion',
     titulo: 'Registrá el veredicto',
-    detalle: 'Score, veredicto y razonamiento del Evaluador — quedan en el dossier.',
+    detalle: 'Score, veredicto y razonamiento del Evaluador — quedan guardados con el lead.',
     corto: 'Veredicto',
   },
   m4: {
@@ -229,7 +229,7 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'manual',
     fase: 'borrador',
     titulo: 'Publicá y registrá el link del borrador',
-    detalle: 'Subí la demo a Netlify Drop y guardá el link del draft — se valida que sea un link real.',
+    detalle: 'Subí la demo a Netlify Drop y guardá el link del borrador — se valida que sea un link real.',
     corto: 'Borrador',
   },
   m14: {
@@ -237,7 +237,7 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'manual',
     fase: 'chequeo',
     titulo: 'Pasá los checks duros',
-    detalle: 'Con el link del borrador a la vista, verificá los hard-blocks y mandá la demo a revisión.',
+    detalle: 'Con el link del borrador a la vista, verificá los obligatorios y mandá la demo a revisión.',
     corto: 'Chequeo final',
   },
   m15: {
@@ -245,7 +245,7 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'manual',
     fase: 'envio',
     titulo: 'Mandá el link al negocio',
-    detalle: 'Se habilita solo con la demo aprobada y el negocio respondiendo — el gate es server-side.',
+    detalle: 'Se habilita solo con la demo aprobada y el negocio respondiendo — se destraba solo, sin que tengas que hacer nada.',
     corto: 'Envío',
   },
   m16: {

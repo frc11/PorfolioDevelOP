@@ -348,3 +348,358 @@ Dev-only (filtrables): SEED 6, EVAL-CLEANUP 6, EVAL 4, SEED-EVAL 2.
 - Correr las suites de comportamiento ev1–ev5 / ev3:golden / utm1 (necesitan dev server
   + ANTHROPIC_API_KEY, gated en esta sesión) para confirmar comportamiento preservado.
 - Resolver los 2 PENDIENTE-DECISIÓN (latencia/actividad: scopear a 'develop' o re-enmarcar).
+
+## B1-S1 — Adaptador BSP de entrada: webhook 360dialog con auth, idempotencia e identidad BSUID-first (2026-07-09)
+
+**Qué se hizo:**
+- Endpoint público `POST /api/motor/webhook/[channelToken]` (route FINO, patrón del
+  chat route: rate limit por canal → delegación al módulo). SIN handler GET: 360dialog
+  no usa challenge de verificación (el webhook se registra vía su API, no en Meta).
+- Pipeline en `src/modules/motor/adapters/whatsapp/inbound/`: `auth.ts` (verificador
+  con la cita de la doc), `resolve-channel.ts` (LA única `unsafeGlobalQuery` del sprint,
+  reason `TENANT-RESOLUTION: webhook inbound`), `payload.ts` (Zod estricto del subset
+  consumido + clasificador), `handle-message.ts` (idempotencia + tx scoped),
+  `handle-status.ts`, `process.ts` (orquestador), `handle-request.ts`, `index.ts`.
+- Dominio en `src/modules/motor/domain/`: `bsuid.ts` (detección de formato — PROHIBIDO
+  asumir E.164), `channel-credentials.ts` (token de URL + secret hasheado, timing-safe),
+  `identity.ts` (resolución BSUID-first + user_id_update), `prisma-errors.ts` (P2002).
+- Schema ADITIVO: `WabaChannel.channelToken` (@unique — el SEGUNDO unique global
+  deliberado del bloque: el webhook llega pre-tenant y el token ES la clave de
+  resolución canal→org) + `webhookSecretHash`; tabla nueva
+  `motor_contact_identity_transition`. Migración
+  `20260709163143_b1s1_webhook_credentials_and_identity_transitions`.
+- Registry del helper: accessor scoped `contactIdentityTransition` (parentCheck estilo
+  chatbot — ver decisión abajo). Preset `motorWebhookPerChannel` 600/min por canal.
+- Suite `tests/integration/motor-inbound.spec.ts` (11 tests, a–k) + fixtures realistas
+  en `tests/integration/fixtures/motor-inbound-payloads.ts`. Invocan el route handler
+  REAL con `Request` estándar contra la Neon dev; estándar B0 (seed parte del test,
+  FALLA explícito si falta, teardown por id exacto, prohibido skip).
+
+**Mecanismo de auth encontrado (paso 0, con citas):**
+- **Elegido: header secreto propio por canal** (`Authorization: Bearer <secret>`), lo
+  más fuerte disponible en el plan actual (cliente directo de la Messaging API). El
+  webhook se configura con headers custom que 360dialog reenvía en cada POST:
+  `POST https://waba-v2.360dialog.io/v1/configs/webhook` body `{ "url": ..., "headers": ... }`
+  — cita: docs.360dialog.com/docs/messaging-api/api-reference/webhooks ("Partners can
+  set http headers that they want to receive in webhook requests") y
+  docs.360dialog.com/docs/messaging/webhook (ejemplo con header Authorization; "Meta
+  retries failed webhooks for up to 7 days using exponential backoff"; 200 esperado
+  dentro de 5s).
+- `X-Hub-Signature-256` de Meta NO se reenvía al cliente (la suscripción ante Meta es
+  de 360dialog; esa firma usa el app secret de ellos). No hay hub.challenge.
+- SÍ existe firma HMAC-SHA256 propia del BSP (`x-360dialog-signature`, platform secret)
+  pero es EXCLUSIVA del plan partner (el secret se genera en el Partner Hub) — cita:
+  docs.360dialog.com/partner/onboarding/webhook-events-and-setup/signature-validation.
+  **Riesgo residual a planificación:** el header estático autentica el origen pero no
+  la integridad por-payload; si la cuenta migra a partner, `auth.ts` es el ÚNICO punto
+  a reemplazar por verificación HMAC del raw body.
+- Implementación: secret por canal persistido SOLO como SHA-256 (`webhookSecretHash`),
+  comparación timing-safe, fail-closed (canal sin hash rechaza todo), token opaco de
+  256 bits en la URL como segundo factor independiente, rate limit por canal ANTES de
+  tocar la DB, shape estricto, y cross-check `metadata.phone_number_id` vs canal.
+
+**Decisiones de diseño de identidad:**
+- BSUID (`user_id`) = clave primaria de matching. Reconciliación por `waId` SOLO sobre
+  filas con `reconciledAt` null: una fila ya reconciliada a OTRO BSUID no se pisa (un
+  número reciclado puede ser hoy de otra persona). Alta race-safe vía
+  `upsertByExternalId`. Aprendizaje lateral: si la fila no conocía el teléfono y vino,
+  se guarda.
+- `user_id_update` → **tabla de historial** (`ContactIdentityTransition`) y no un campo:
+  (1) un contacto puede transicionar más de una vez; (2) el evento puede llegar sin
+  identidad conocida (fila con `contactIdentityId` null — el dato no se tira); (3) es
+  auditoría de reconciliación. FK a ContactIdentity SIMPLE y nullable (Prisma no admite
+  FK compuesta con pata opcional) → el guard cross-org del create es un parentCheck en
+  el registry (patrón chatbot), `onDelete: SetNull` preserva el log.
+- Al migrar el BSUID se **ANULA `waId`**: el evento significa "cambió de número" y el
+  número viejo puede estar reasignado — conservarlo arriesga enviarle a un desconocido
+  en B1-S2. Conflicto (ya existe identidad con el ID nuevo) → transición marcada
+  `user_id_update:conflict`, CERO merges destructivos. Corre SIN transacción a
+  propósito (tras una violación de constraint Postgres aborta la tx — 25P02 — y el
+  registro del conflicto fallaría); cada paso es idempotente y el retry re-entra limpio.
+- Los ids de `user_id_update` se validan contra el patrón BSUID (reescriben identidades
+  existentes); el path de mensajes queda tolerante (crear identidad es aditivo).
+- Statuses: monotónico SENT→DELIVERED→READ (stale se descarta, nada retrocede), FAILED
+  terminal con detalle del error del BSP (truncado a 500), SOLO mensajes OUT y scoped
+  por org (el wamid de otra org no se alcanza — probado en test h).
+
+**Limitaciones conocidas (aceptadas y por qué):**
+- Sin unique parcial de conversación OPEN en DB: una carrera de dos mensajes DISTINTOS
+  concurrentes puede dejar dos conversaciones (elección determinística por
+  `createdAt asc` las re-unifica hacia adelante). Un índice parcial requeriría SQL
+  fuera del schema Prisma = drift físico — no se paga ese precio por una carrera de
+  ventana mínima.
+- La forma EXACTA del payload vivo de `user_id_update` queda por confirmar contra el
+  sandbox (el parser acepta la variante canónica `old_user_id`/`new_user_id`).
+- Las corridas de `/code-review`, revisión TS y `/security-review` con subagentes
+  murieron por límite de sesión → revisión ejecutada INLINE por el padre (3 fixes
+  aplicados: guard de `object` del envelope, `waId` null en migración de BSUID,
+  patrón BSUID en `user_id_update`). Re-correr los agentes dedicados post-reset es
+  opcional.
+- Hallazgo FUERA de scope (B0, no tocado): en `registry.ts`, `crmSyncAttemptConfig`
+  omite `CRM_SYNC_ATTEMPT_REPARENT` de `forbiddenUpdateKeys` (los tipos SÍ lo prohíben
+  — divergencia tipo/runtime) y eso genera el único warning de eslint del árbol.
+
+**Cierre del sprint:**
+- `npx tsc --noEmit`: 0 errores (el error preexistente de searchconsole.ts del baseline
+  B0 ya no existe en esta rama).
+- eslint sobre los archivos del sprint: 0 errores, 0 warnings (el único warning del
+  árbol es el preexistente de B0 en registry.ts, ver hallazgo).
+- `npm run build`: PASS, exit 0.
+- Migración aplicada con `prisma migrate diff --from-schema-datasource` +
+  `migrate deploy` (`migrate dev` es interactivo y la sesión no tenía TTY; precedente
+  en el repo: `20260630000000_add_dossier_progreso`). `migrate status`: 83 migraciones,
+  al día. Drift-cero verificado: `migrate diff` datasource→schema devuelve "empty
+  migration".
+- Suite de integración COMPLETA: **30/30 PASS** (11 motor-inbound nuevas + 8
+  motor-isolation B0 + 8 chatbot-isolation B0 + 3 restantes), 30.5s contra Neon dev.
+
+**Queda para verificación humana (pedido del sprint, NO delegado al reporte):**
+- Disparar un webhook REAL desde el sandbox/número de prueba de 360dialog contra un
+  entorno de dev y ver la fila creada (el fixture no reemplaza al payload vivo).
+  Requiere: sembrar un WabaChannel real con credenciales
+  (`generateChannelWebhookCredentials()`), configurar el webhook en 360dialog con
+  `{ "url": "https://<host>/api/motor/webhook/<channelToken>", "headers": { "Authorization": "Bearer <webhookSecret>" } }`.
+- Confirmar contra el payload vivo la forma real de `user_id_update` y de los mensajes
+  BSUID-only.
+- Decidir si se evalúa upgrade a partner de 360dialog para habilitar la firma HMAC
+  (`x-360dialog-signature`) — hoy la auth es header estático (fuerte, pero sin
+  integridad por-payload).
+
+## B1-S2 — Adaptador BSP de salida: cliente de envío, ventana de 24h como dominio, plantillas (2026-07-09)
+
+**Qué se hizo:**
+- **Cifrado (patrón usado):** existía un helper AES-256-GCM en
+  `src/modules/chatbot/server/crm/encryptSecret.ts` (B5.8, `CRM_SECRET_KEY`), pero
+  la frontera eslint del motor PROHÍBE importar del módulo chatbot. Se **generalizó
+  el patrón a `src/lib/crypto/secret-box.ts`** (`src/lib/**` es el único hogar
+  compartido que el motor puede importar): caja key-configurable
+  `createSecretBox(envVar)` → `encrypt/decrypt/isConfigured`, misma construcción GCM
+  (IV 12 bytes, tag autenticado). El motor usa una env key DEDICADA
+  `MOTOR_CHANNEL_SECRET_KEY` (dominio de secretos aislado del CRM, rotación
+  independiente). El chatbot NO se tocó (ruta B5.8 en producción, fuera de scope) —
+  la consolidación de su copia sobre el helper nuevo queda como deuda DRY reportada
+  (ver Pendiente).
+- **Schema ADITIVO** (`20260709180000_b1s2_outbound_apikey_templates_idempotency`):
+  `WabaChannel.apiKeyEncrypted/apiKeyIv/apiKeyTag` (nullables, mismo shape que
+  `CrmIntegration.secret*`; canal sin key = falla cerrado); modelo `MotorTemplate`
+  (org NOT NULL, FK COMPUESTA org-safe a `WabaChannel`, enums
+  `MotorTemplateCategory{UTILITY,SERVICE}` / `MotorTemplateStatus{PENDING,APPROVED,REJECTED}`,
+  `@@unique([wabaChannelId,name,language])` + `@@unique([organizationId,id])`);
+  `MotorMessage.outboundIdempotencyKey` + `@@unique([organizationId,outboundIdempotencyKey])`
+  (requerido por la idempotencia de salida — no estaba en la lista del pliego pero lo
+  exige la tarea 4). Registry del helper: accessor scoped `motorTemplate` (patrón
+  motor: FK compuesta en DB, sin parentChecks).
+- **Ventana como dominio** (`domain/window.ts`): `windowState(lastInboundAt, now)` puro,
+  intervalo semiabierto `[inbound, inbound+24h)` — el borde exacto de 24h es CLOSED.
+  `now` inyectado (sin leer reloj adentro). Test unitario de bordes en
+  `tests/integration/motor-window.spec.ts`.
+- **Cliente** (`adapters/whatsapp/outbound/client.ts`): POST texto/plantilla a
+  `{baseUrl}/messages` con `D360-API-KEY`, timeout por intento (AbortController),
+  reintento con backoff SOLO para red/timeout/5xx (jamás 4xx), mapeo de error tipado,
+  `wamid` en el camino feliz. `fetch`/`logger`/`baseUrl`/`retryDelaysMs` inyectables.
+- **Servicio** (`services/sendMessage.ts`): única puerta de salida. `forOrg` para todo;
+  idempotencia por `idempotencyKey` (pre-check + reserva PENDING con unique de carrera);
+  regla de ventana (texto fuera de ventana → RECHAZO tipado `window_closed`, CERO HTTP);
+  plantilla exige `APPROVED` en DB (categoría acotada a utility/service por el enum —
+  marketing imposible por construcción); despacha, marca SENT+wamid o FAILED.
+  Destinatario = `waId ?? externalId` (BSUID-only se direcciona por BSUID; las
+  plantillas de AUTENTICACIÓN no aceptan BSUID — comentado, irrelevante hoy).
+
+**Decisiones del mapeo de errores (provider → tipo cerrado):**
+- `401/403` o code `0/190` → `auth`. `429`/`130429`/`131056`/`131048` → `rate_limit`.
+- `131047`/`131051` → `window_closed` (el BSP rechaza texto libre fuera de 24h — segunda
+  línea de defensa: el servicio ya lo bloquea antes de llamar).
+- `132xxx` (familia de plantilla) → `template_not_approved`.
+- `131008`/`131026`/`131030`/`1013` → `invalid_recipient`.
+- `5xx` → `provider_error` (reintentable); throw de fetch → `network`/`timeout`
+  (reintentables). `2xx` sin `wamid` → terminal (no se reintenta: el provider aceptó,
+  reintentar duplicaría).
+
+**Qué se midió (cierre):**
+- `tsc --noEmit`: 0 errores. eslint sobre los archivos del sprint: 0 errores (el único
+  warning del árbol es el PREEXISTENTE de B0 en `registry.ts`,
+  `CRM_SYNC_ATTEMPT_REPARENT` — ya anotado en B1-S1).
+- Migración aplicada con `migrate diff --from-schema-datasource` + `migrate deploy`
+  (`migrate dev` es interactivo, sin TTY — precedente B1-S1). Drift-cero verificado
+  (`migrate diff` datasource→datamodel = "empty migration"). `migrate status`: 84
+  migraciones, al día.
+- Suite de integración COMPLETA: **43/43 PASS** (8 motor-outbound + 5 motor-window
+  nuevas + 30 B0/B1-S1), 34s contra Neon dev. Casos outbound: texto en ventana OK
+  (header con la API key descifrada), texto fuera de ventana RECHAZADO sin HTTP,
+  plantilla fuera de ventana OK, plantilla no aprobada rechazada, 5xx reintenta / 4xx
+  no, idempotencyKey secuencial y en paralelo (una sola fila por el unique), API key
+  jamás en logs ni en la fila.
+- `npm run build`: PASS, exit 0 (con `--max-old-space-size=4096`, nota de entorno B0).
+
+**Post-review (ECC `/code-review` + `/security-review`, subagentes en paralelo):**
+- **CORREGIDO (HIGH, ambos reviewers convergieron):** el `decrypt()` estaba DESPUÉS de
+  reservar la fila PENDING y sin try/catch — una `MOTOR_CHANNEL_SECRET_KEY`
+  ausente/rotada/malformada (o ciphertext corrupto → GCM tag mismatch) lanzaba sin
+  atrapar, dejando el OUT colgado en PENDING para siempre y "quemando" la
+  idempotencyKey (reintentos → deduped con wamid null eternamente). Fix: el decrypt se
+  movió ANTES de la reserva, en try/catch que rechaza `channel_key_invalid` sin crear
+  fila ni consumir la clave. Test nuevo (g) cubre el caso (secretBox con decrypt que
+  falla → rechazo, cero HTTP, cero fila). Se atrapa sin ligar el error (no arriesga
+  nada del secreto).
+- **CORREGIDO (LOW, defensa en profundidad):** al persistir `MotorMessage.error` se
+  redacta la API key del detalle del provider (`redact()`), por si el BSP alguna vez
+  hiciera eco del header en su body de error.
+- **CORREGIDO (MEDIUM, tamaño de función):** `sendMotorMessage` se bajó extrayendo
+  `resolveTargets` / `checkSendable` / `reserveOutbound` / `findByIdempotencyKey`.
+
+**Limitaciones / deuda reportada (aceptadas):**
+- **DRY del cifrado:** `chatbot/.../encryptSecret.ts` quedó como copia independiente del
+  patrón; migrarlo sobre `src/lib/crypto/secret-box.ts` (preservando `CrmEncryptionError`
+  y la API pública) es un follow-up de bajo riesgo NO hecho acá para no tocar la ruta
+  B5.8 viva.
+- **Duplicado por reintento (at-least-once):** si el primer intento SÍ llegó al provider
+  pero la respuesta se perdió (timeout/5xx), el reintento re-envía → mensaje duplicado
+  al usuario. Meta/360dialog no expone un token de idempotencia en el wire que dedup-ee
+  del lado del provider; `outboundIdempotencyKey` protege contra el re-invoke del CALLER,
+  no contra este reintento interno. Inherente a la entrega at-least-once y al retry que
+  el pliego EXIGE; se acepta y se documenta.
+- **Reserva PENDING sin despacho:** si el proceso muere entre la reserva de la fila
+  OUT (PENDING) y el fetch, la clave queda "usada" con la fila en PENDING; un reintento
+  con la misma clave devuelve esa fila (deduped). La reconciliación de PENDING colgados
+  es problema de B2 (orquestación).
+- **Validación de entrada (Zod):** `sendMotorMessage` es servicio INTERNO, no frontera;
+  la Server Action de B2 que lo cablee DEBE validar `content`/`to`/plantilla con Zod
+  (convención del repo). Puntero hacia adelante, no defecto de hoy.
+- **`MOTOR_D360_BASE_URL`:** solo config de servidor (nunca input de request) → sin SSRF;
+  sin assertion de `https://` (hardening opcional si el env se expusiera a superficies
+  menos confiables).
+- **Provisioning de la API key:** no hay UI/servicio de alta de `WabaChannel` con
+  `apiKey*` — hoy se siembra a mano (como el `channelToken` de B1-S1). B2/admin.
+
+**Queda para verificación humana (pedido del sprint, NO delegado al reporte):**
+- Un envío REAL de texto (en ventana, al número de prueba) y uno de plantilla desde el
+  sandbox de 360dialog: el mock no valida credenciales ni el shape fino del provider
+  (forma exacta del body de plantilla con componentes, wamid real, códigos de error
+  vivos). Requiere `MOTOR_CHANNEL_SECRET_KEY` en el entorno y un `WabaChannel` sembrado
+  con `apiKey*` cifrada.
+- Confirmar contra el sandbox el mapeo de códigos de error (especialmente el de ventana
+  cerrada del provider) y el shape del componente `body` de la plantilla.
+
+## B1-S3 — Salud del canal: quality rating, ciclo de vida de plantillas y alertas operativas (2026-07-09)
+
+**Qué se hizo:**
+- Extendido el clasificador de S1 (`payload.ts`) con tres branches nuevos de
+  `classifyChange`: `message_template_status_update`, `phone_number_quality_update`,
+  `account_update` → tres miembros nuevos de `InboundEvent`. Nuevo handler
+  `handle-health.ts` (`handleTemplateStatusUpdate` / `handlePhoneQualityUpdate` /
+  `handleAccountUpdate`), cableado en `process.ts` (3 branches nuevas en `applyEvent` +
+  contador `healthApplied` en `InboundProcessSummary`).
+- Los tres eventos se aplican SIEMPRE sobre el `channel` ya resuelto por el token del
+  webhook (frontera de tenant de la auth, no del payload): ninguno de los tres trae
+  `phone_number_id`/org en su `value` confirmado — aplicar sobre `channel` es lo que
+  preserva el aislamiento sin inventar un cruce por metadata.
+- Schema ADITIVO (`20260709200000_b1s3_health_events_and_alerts`): `WabaChannel`
+  gana `qualityRating` (`MotorPhoneQuality`), `messagingLimitTier`
+  (`MotorMessagingLimitTier`), `channelStatus` (`MotorPhoneStatus`) — los tres
+  `@default(UNKNOWN)`. `MotorTemplateStatus` gana `PAUSED` (`ALTER TYPE ADD VALUE`,
+  aditivo). Modelo nuevo `MotorAlert` (org NOT NULL, FK COMPUESTA org-safe a
+  `WabaChannel`, `MotorAlertType{PHONE_RESTRICTED_OR_BANNED,TEMPLATE_REJECTED}`,
+  `MotorAlertSeverity{CRITICAL,HIGH,WARNING,INFO}`, `metadata Json`). Registry del
+  helper: accessor scoped `motorAlert` (mismo patrón que `motorTemplate`: FK compuesta
+  en DB, sin parentChecks).
+- Suite nueva `tests/integration/motor-health.spec.ts` (11 tests, a–k) + fixtures en
+  `motor-inbound-payloads.ts` (`templateStatusUpdatePayload`, `phoneQualityUpdatePayload`,
+  `accountUpdatePayload`). Cubre los tres eventos, la dedupe de alertas (retry del BSP no
+  duplica), el caso "plantilla no matchea localmente" (200, sin escritura), y el caso
+  negativo de aislamiento (evento autenticado con el token de A jamás toca canal/alertas
+  de B).
+
+**Por qué `MotorAlert` y no `BotAlert` (decisión, con verificación estructural):**
+`BotAlert` escala vía `botConfigId` (FK **requerida** a `BotConfig`, un concepto del
+chatbot sin relación con `WabaChannel`) y su scope en el registry es relacional
+(`{ botConfig: { organizationId } }`), no columna propia — confirmado leyendo
+`registry.ts` antes de decidir, no solo por el nombre. Reusarlo para salud del motor
+exigiría un `BotConfig` fantasma por org o un `botConfigId` nullable que rompe el
+`parentCheck` existente. `MotorAlert` sigue el patrón del resto del motor: columna
+`organizationId` propia + FK compuesta org-safe a `WabaChannel`, igual que
+`MotorTemplate`. El transporte (email/WhatsApp al equipo) es B3 — acá es solo el
+registro consultable, con una dedupe de 24h por (canal, tipo) para que un retry del
+webhook no spamee el registro (patrón tomado de `detectBotIssues.ts` del chatbot).
+
+**Fuentes de los shapes de eventos de salud (paso 0, con citas — igual que B1-S1):**
+- Los tres docs de 360dialog que S1 ya citó (`docs.360dialog.com/docs/messaging-api/
+  api-reference/webhooks`, `.../docs/messaging/webhook`,
+  `.../partner/onboarding/webhook-events-and-setup/signature-validation`) documentan
+  SOLO `messages`/`statuses`/`errors` — verificado de nuevo para este sprint (fetch
+  directo de las tres páginas): ninguna menciona quality/tier/plantillas. Se fue a la
+  referencia oficial de Meta Cloud API (`developers.facebook.com/documentation/
+  business-messaging/whatsapp/webhooks/reference/...`), que 360dialog proxea.
+- **`message_template_status_update` — CONFIRMADO.** Shape completo verbatim contra la
+  referencia de Meta: `field`, `value.event` (enum: `APPROVED, ARCHIVED, UNARCHIVED,
+  DELETED, DISABLED, FLAGGED, IN_APPEAL, LIMIT_EXCEEDED, LOCKED, PAUSED, PENDING,
+  PENDING_DELETION, REJECTED, REINSTATED`), `message_template_id/name/language`,
+  `reason` (enum: `ABUSIVE_CONTENT, CATEGORY_NOT_AVAILABLE, INCORRECT_CATEGORY,
+  INVALID_FORMAT, NONE, PROMOTIONAL, SCAM, TAG_CONTENT_MISMATCH, null`). Se mapean 4
+  eventos a `MotorTemplateStatus` (`APPROVED/REJECTED/PAUSED/PENDING`); el resto
+  (`DISABLED`, `FLAGGED`, `ARCHIVED`, etc.) queda log-only a propósito — extenderlos
+  exigiría ensanchar el enum de negocio más allá de lo que este sprint pide.
+- **`phone_number_quality_update` — PARCIAL.** Solo `current_limit` (el tier:
+  `TIER_50/250/2K/10K/100K/NOT_SET/UNLIMITED`) salió confirmado y consistente contra la
+  referencia oficial de Meta. El COLOR de calidad (GREEN/YELLOW/RED, o el HIGH/MEDIUM/LOW
+  que pide el pliego) **no tiene shape confirmado**: la doc de 360dialog no lo menciona,
+  y dos fetches distintos contra la doc de Meta dieron resultados inconsistentes entre sí
+  (uno sin el campo, otro con un `qualityRating` que parece de un BSP tercero, no de Meta
+  crudo). Por la regla del pliego ("si un campo no está documentado ahí, dejá la rama con
+  log estructurado y seguí — no inventes shapes"), **`qualityRating` NO se popula en este
+  sprint**: la columna existe (aditiva, default `UNKNOWN`) pero el handler solo loguea
+  `event`/`current_limit` sin tocarla. El disparador de alerta "quality rating baja de
+  HIGH" queda SIN implementar por esta misma razón (ver Pendiente).
+- **`account_update` — PARCIAL.** La LISTA de valores de `event` salió confirmada contra
+  la referencia de Meta (`ACCOUNT_DELETED, ACCOUNT_OFFBOARDED, ACCOUNT_RECONNECTED,
+  ACCOUNT_RESTRICTION, ACCOUNT_VIOLATION, AD_ACCOUNT_LINKED,
+  AUTH_INTL_PRICE_ELIGIBILITY_UPDATE, BUSINESS_PRIMARY_LOCATION_COUNTRY_UPDATE,
+  DISABLED_UPDATE, MM_LITE_TERMS_SIGNED, PARTNER_ADDED, PARTNER_APP_INSTALLED,
+  PARTNER_APP_UNINSTALLED, PARTNER_CLIENT_CERTIFICATION_STATUS_UPDATE, PARTNER_REMOVED,
+  VOLUME_BASED_PRICING_TIER_UPDATE`), pero las formas ANIDADAS (`ban_info`,
+  `restriction_info`, `violation_info`) no lo están. El parser (`accountUpdateValueSchema`)
+  solo toma `event` — nunca inventa un campo anidado. `event` se mapea a
+  `MotorPhoneStatus` vía whitelist (`ACCOUNT_RECONNECTED→CONNECTED`,
+  `ACCOUNT_RESTRICTION/ACCOUNT_VIOLATION/DISABLED_UPDATE→RESTRICTED`,
+  `ACCOUNT_DELETED→BANNED`, `ACCOUNT_OFFBOARDED→DISCONNECTED`); el resto (partner/negocio,
+  no son de salud del NÚMERO) queda log-only — mismo comportamiento que B1-S1 ya probaba
+  para `PARTNER_ADDED` (test j de `motor-inbound.spec.ts`, sigue verde: el evento ahora
+  entra por el branch nombrado en vez de por el genérico `other`, pero el resultado
+  observable —cero escritura— es el mismo). `DISABLED_UPDATE→RESTRICTED` es una elección
+  conservadora: sin el contenido de `ban_info`, no se puede distinguir un disable temporal
+  de un ban — se prefiere subestimar severidad antes que inventarla.
+
+**Qué se midió (cierre):**
+- `tsc --noEmit`: 0 errores. `eslint` sobre los archivos del sprint: 0 errores, 0
+  warnings nuevos (el único warning del árbol sigue siendo el preexistente de B0 en
+  `registry.ts`, `CRM_SYNC_ATTEMPT_REPARENT`, ya anotado en B1-S1/B1-S2).
+- Migración aplicada con `migrate diff --from-schema-datasource` + `migrate deploy`
+  (`migrate dev` sin TTY — mismo precedente). `migrate status`: 85 migraciones, al día.
+  Drift-cero verificado (`migrate diff` datasource→datamodel = "empty migration").
+- Suite de integración COMPLETA: **55/55 PASS** (11 motor-health nuevas + 44
+  preexistentes: motor-inbound, motor-outbound, motor-window, motor-isolation,
+  chatbot-isolation), ~9-50s contra Neon dev según el filtro.
+- `npm run build`: PASS, exit 0 (con `--max-old-space-size=4096`, nota de entorno B0).
+
+**Pendiente (sube a planificación si aparece en producción):**
+- **Trigger "quality rating baja de HIGH": NO implementado.** Motivo: el campo del color
+  de calidad no tiene shape confirmado en ninguna doc accesible (ver "Fuentes" arriba).
+  Cuando el shape se confirme (payload real capturado en producción, o doc de Meta que
+  deje de ser inconsistente entre fetches), agregar: el schema del evento en `payload.ts`,
+  el mapeo a `MotorPhoneQuality` en `handle-health.ts`, y un `MotorAlertType.
+  QUALITY_DEGRADED` nuevo (no se agregó el enum value todavía a propósito — un valor sin
+  ningún code path que lo emita es dead code).
+- **`account_update` con formas anidadas (`ban_info`/`restriction_info`) sin usar:** el
+  parser las ignora por completo; si en producción aparecen campos ahí (fecha de
+  levantamiento del ban, motivo textual) que valga la pena persistir, es un sprint
+  aparte — no se especuló con su forma acá.
+- **`message_template_status_update` — eventos fuera del mapeo de 4:** `DISABLED`,
+  `FLAGGED`, `ARCHIVED`, `IN_APPEAL`, `LOCKED`, `LIMIT_EXCEEDED`, `REINSTATED`,
+  `PENDING_DELETION`, `DELETED`, `UNARCHIVED` quedan log-only. Si alguno resulta
+  operacionalmente relevante en producción (ej. `DISABLED` bloqueando envíos que el
+  chequeo de `sendMessage.ts` ya cubre indirectamente vía `status !== 'APPROVED'`),
+  ensanchar el enum es la vía — no se hizo preventivamente.
+
+**Queda para verificación humana (pedido del sprint, NO delegado al reporte):**
+- Ninguna específica más allá de la revisión del PR — este sprint no toca caminos de
+  producción existentes (no hay UI ni cron que lea `MotorAlert` todavía; el transporte
+  de la alerta es B3).

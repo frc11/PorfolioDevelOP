@@ -144,7 +144,7 @@ function describirFoco(
         icon: ArrowRight,
         eyebrow: 'Tu paso ahora',
         titulo: 'Seguí construyendo la demo',
-        detalle: 'Publicá el draft y pasá el self-check para mandarla a revisión.',
+        detalle: 'Publicá el borrador y pasá el chequeo final para mandarla a revisión.',
       }
     case 'RECHAZADA':
       return {
@@ -152,7 +152,7 @@ function describirFoco(
         icon: ArrowRight,
         eyebrow: 'Tu paso ahora',
         titulo: 'Aplicá las correcciones de Franco',
-        detalle: 'Rehacé lo que marcó y volvé a pasar por draft y self-check.',
+        detalle: 'Rehacé lo que marcó y volvé a pasar por borrador y chequeo final.',
       }
     case 'EN_REVISION':
       return {

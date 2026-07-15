@@ -20,13 +20,16 @@ import type {
   ChatbotInsight,
   ChatbotLead,
   ContactIdentity,
+  ContactIdentityTransition,
   Conversation,
   CrmIntegration,
   CrmSyncAttempt,
   KnowledgeBase,
+  MotorAlert,
   MotorChannelType,
   MotorConversation,
   MotorMessage,
+  MotorTemplate,
   Prisma,
   QuotaUsage,
   WabaChannel,
@@ -39,11 +42,17 @@ import { IsolationError, IsolationNotFoundError, ScopedModelDelegate, type Model
 // de forbiddenCreateKeys/forbiddenUpdateKeys.
 
 const WABA_CHANNEL_NESTED = ['organization', 'conversations'] as const
-const CONTACT_IDENTITY_NESTED = ['organization', 'conversations'] as const
+const CONTACT_IDENTITY_NESTED = ['organization', 'conversations', 'transitions'] as const
+const CONTACT_IDENTITY_TRANSITION_NESTED = ['organization', 'contactIdentity'] as const
+const CONTACT_IDENTITY_TRANSITION_REPARENT = ['contactIdentityId'] as const
 const MOTOR_CONVERSATION_NESTED = ['organization', 'contactIdentity', 'wabaChannel', 'messages'] as const
 const MOTOR_CONVERSATION_REPARENT = ['contactIdentityId', 'wabaChannelId'] as const
 const MOTOR_MESSAGE_NESTED = ['organization', 'conversation'] as const
 const MOTOR_MESSAGE_REPARENT = ['conversationId'] as const
+const MOTOR_TEMPLATE_NESTED = ['organization', 'wabaChannel'] as const
+const MOTOR_TEMPLATE_REPARENT = ['wabaChannelId'] as const
+const MOTOR_ALERT_NESTED = ['organization', 'wabaChannel'] as const
+const MOTOR_ALERT_REPARENT = ['wabaChannelId'] as const
 const BOT_CONFIG_NESTED = [
   'organization',
   'knowledgeBase',
@@ -94,6 +103,17 @@ type ContactIdentityUpdate = Omit<
   Prisma.ContactIdentityUncheckedUpdateInput,
   Keys<typeof CONTACT_IDENTITY_NESTED> | 'organizationId' | 'id'
 >
+type ContactIdentityTransitionCreate = Omit<
+  Prisma.ContactIdentityTransitionUncheckedCreateInput,
+  Keys<typeof CONTACT_IDENTITY_TRANSITION_NESTED> | 'organizationId'
+>
+type ContactIdentityTransitionUpdate = Omit<
+  Prisma.ContactIdentityTransitionUncheckedUpdateInput,
+  | Keys<typeof CONTACT_IDENTITY_TRANSITION_NESTED>
+  | Keys<typeof CONTACT_IDENTITY_TRANSITION_REPARENT>
+  | 'organizationId'
+  | 'id'
+>
 type MotorConversationCreate = Omit<
   Prisma.MotorConversationUncheckedCreateInput,
   Keys<typeof MOTOR_CONVERSATION_NESTED> | 'organizationId'
@@ -109,6 +129,19 @@ type MotorMessageCreate = Omit<
 type MotorMessageUpdate = Omit<
   Prisma.MotorMessageUncheckedUpdateInput,
   Keys<typeof MOTOR_MESSAGE_NESTED> | Keys<typeof MOTOR_MESSAGE_REPARENT> | 'organizationId' | 'id'
+>
+type MotorTemplateCreate = Omit<
+  Prisma.MotorTemplateUncheckedCreateInput,
+  Keys<typeof MOTOR_TEMPLATE_NESTED> | 'organizationId'
+>
+type MotorTemplateUpdate = Omit<
+  Prisma.MotorTemplateUncheckedUpdateInput,
+  Keys<typeof MOTOR_TEMPLATE_NESTED> | Keys<typeof MOTOR_TEMPLATE_REPARENT> | 'organizationId' | 'id'
+>
+type MotorAlertCreate = Omit<Prisma.MotorAlertUncheckedCreateInput, Keys<typeof MOTOR_ALERT_NESTED> | 'organizationId'>
+type MotorAlertUpdate = Omit<
+  Prisma.MotorAlertUncheckedUpdateInput,
+  Keys<typeof MOTOR_ALERT_NESTED> | Keys<typeof MOTOR_ALERT_REPARENT> | 'organizationId' | 'id'
 >
 type BotConfigCreate = Omit<Prisma.BotConfigUncheckedCreateInput, Keys<typeof BOT_CONFIG_NESTED> | 'organizationId'>
 type BotConfigUpdate = Omit<
@@ -199,6 +232,31 @@ const contactIdentityConfig: ModelIsolationConfig = {
   forbiddenUpdateKeys: [...CONTACT_IDENTITY_NESTED, 'organizationId'],
 }
 
+// B1-S1: historial de transiciones de identidad (user_id_update del BSP).
+// organizationId propio, pero la FK a ContactIdentity es SIMPLE y nullable
+// (Prisma no admite FKs compuestas con una pata opcional) → el guard
+// cross-org del create es un parentCheck estilo chatbot, no la FK compuesta
+// del resto del motor. contactIdentityId es opcional: se verifica solo si
+// viene (el evento puede llegar sin identidad conocida).
+const contactIdentityTransitionConfig: ModelIsolationConfig = {
+  model: 'contactIdentityTransition',
+  scopeWhere: (organizationId) => ({ organizationId }),
+  hasOrganizationId: true,
+  parentChecks: [
+    {
+      field: 'contactIdentityId',
+      find: (client, organizationId, id) =>
+        client.contactIdentity.findFirst({ where: { id, organizationId }, select: { id: true } }),
+    },
+  ],
+  forbiddenCreateKeys: CONTACT_IDENTITY_TRANSITION_NESTED,
+  forbiddenUpdateKeys: [
+    ...CONTACT_IDENTITY_TRANSITION_NESTED,
+    ...CONTACT_IDENTITY_TRANSITION_REPARENT,
+    'organizationId',
+  ],
+}
+
 const motorConversationConfig: ModelIsolationConfig = {
   model: 'motorConversation',
   scopeWhere: (organizationId) => ({ organizationId }),
@@ -215,6 +273,24 @@ const motorMessageConfig: ModelIsolationConfig = {
   parentChecks: [],
   forbiddenCreateKeys: MOTOR_MESSAGE_NESTED,
   forbiddenUpdateKeys: [...MOTOR_MESSAGE_NESTED, ...MOTOR_MESSAGE_REPARENT, 'organizationId'],
+}
+
+const motorTemplateConfig: ModelIsolationConfig = {
+  model: 'motorTemplate',
+  scopeWhere: (organizationId) => ({ organizationId }),
+  hasOrganizationId: true,
+  parentChecks: [],
+  forbiddenCreateKeys: MOTOR_TEMPLATE_NESTED,
+  forbiddenUpdateKeys: [...MOTOR_TEMPLATE_NESTED, ...MOTOR_TEMPLATE_REPARENT, 'organizationId'],
+}
+
+const motorAlertConfig: ModelIsolationConfig = {
+  model: 'motorAlert',
+  scopeWhere: (organizationId) => ({ organizationId }),
+  hasOrganizationId: true,
+  parentChecks: [],
+  forbiddenCreateKeys: MOTOR_ALERT_NESTED,
+  forbiddenUpdateKeys: [...MOTOR_ALERT_NESTED, ...MOTOR_ALERT_REPARENT, 'organizationId'],
 }
 
 // Chatbot: BotConfig y CrmIntegration scopean por columna directa; el resto
@@ -371,7 +447,7 @@ const crmSyncAttemptConfig: ModelIsolationConfig = {
     },
   ],
   forbiddenCreateKeys: CRM_SYNC_ATTEMPT_NESTED,
-  forbiddenUpdateKeys: [...CRM_SYNC_ATTEMPT_NESTED, 'organizationId'],
+  forbiddenUpdateKeys: [...CRM_SYNC_ATTEMPT_NESTED, ...CRM_SYNC_ATTEMPT_REPARENT, 'organizationId'],
 }
 
 // ─── Accessor extendido: ContactIdentity ─────────────────────────────────────
@@ -605,6 +681,12 @@ function buildAccessors(organizationId: string, client: ScopeClient) {
       contactIdentityConfig,
       client,
     ),
+    contactIdentityTransition: new ScopedModelDelegate<
+      typeof prisma.contactIdentityTransition,
+      ContactIdentityTransition,
+      ContactIdentityTransitionCreate,
+      ContactIdentityTransitionUpdate
+    >(client.contactIdentityTransition, organizationId, contactIdentityTransitionConfig, client),
     motorConversation: new ScopedModelDelegate<
       typeof prisma.motorConversation,
       MotorConversation,
@@ -617,6 +699,18 @@ function buildAccessors(organizationId: string, client: ScopeClient) {
       MotorMessageCreate,
       MotorMessageUpdate
     >(client.motorMessage, organizationId, motorMessageConfig, client),
+    motorTemplate: new ScopedModelDelegate<
+      typeof prisma.motorTemplate,
+      MotorTemplate,
+      MotorTemplateCreate,
+      MotorTemplateUpdate
+    >(client.motorTemplate, organizationId, motorTemplateConfig, client),
+    motorAlert: new ScopedModelDelegate<typeof prisma.motorAlert, MotorAlert, MotorAlertCreate, MotorAlertUpdate>(
+      client.motorAlert,
+      organizationId,
+      motorAlertConfig,
+      client,
+    ),
 
     // ── Chatbot (B0-S3) ──
     botConfig: new ScopedModelDelegate<typeof prisma.botConfig, BotConfig, BotConfigCreate, BotConfigUpdate>(
