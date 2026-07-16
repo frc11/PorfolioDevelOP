@@ -14128,3 +14128,120 @@ Hasta ese test de carga, **ONF-1 está implementado, no verificado bajo carga**.
 DB reconciliada.
 
 ---
+
+## ✅ PA-2 — CSV anti-inyección en los dos exports admin de leads   ·   2026-07-11
+
+**Qué hace:** cierra la vulnerabilidad de CSV formula injection + quoting roto detectada en la
+auditoría `docs/audit-PA234-bulk-actions.md`: los dos exports admin de leads (`admin/chatbots` y
+`admin/clients`) armaban el CSV a mano — uno escapaba comillas solo en `intent`, ninguno neutralizaba
+un valor que empieza con `= + - @`. Un `name`/`email`/`phone` de visitante del widget con ese
+prefijo se ejecutaba como fórmula al abrir el CSV en Excel.
+
+**Helper nuevo:** `src/lib/csv/csv-escape.ts` (`csvEscape`/`rowToCsv`/`UTF8_BOM`/`CSV_NEWLINE`) —
+anti-fórmula (prefijo `'` si la celda empieza con `= + - @ \t \r`) + quoting RFC 4180 + BOM UTF-8 +
+CRLF. **Decisión:** se DUPLICÓ la lógica de `csvEscape` que ya vivía en
+`modules/chatbot/server/leads/csv/` (helper del export del dashboard cliente, ya seguro, NO tocado)
+en terreno neutro `src/lib/csv/` en vez de importarla, por frontera de módulo. El header del archivo
+nuevo documenta que si cambia la lógica de escape hay que sincronizar ambas copias o extraer a un
+compartido. Test propio (`npm run test:pa2`), incluido un caso de tamper detectado por mutation
+testing (`\r` como carácter peligroso).
+
+**Cableado** en los dos generadores inseguros: `app/(protected)/admin/chatbots/bulk-actions.ts`
+(`exportLeadsBulkAction`, antes solo `intent` escapaba comillas, cero anti-fórmula) y
+`src/lib/bulk-actions.ts` (`bulkExportLeads`, quoting RFC 4180 OK pero sin anti-fórmula). Ninguno de
+los dos cambió su shape de retorno ni sus guards.
+
+**Seeds de QA reutilizables** (no throwaway): `scripts/dev/qa-seed-leads-dirty.ts` +
+`qa-seed-leads-dirty-clean.ts` — 8 leads con casos `=1+1`, `+SUM(...)`, `-2+3`, `@admin`, comillas
+internas, comas internas, phone/email peligrosos, y un lead de control limpio.
+
+### Verificación
+**VERIFICADO por Valentino**: los dos CSV exportados y abiertos en Excel — las fórmulas NO se
+ejecutan (salen con el texto literal prefijado), comillas/comas no corren columnas, tildes/ñ se ven
+bien (BOM), y el lead de control limpio sale sin comillas de más.
+
+---
+
+## ✅ PA-3/PA-4 — Causa en `failures` + batch de pause/activate (bulk actions admin)   ·   2026-07-11
+
+**Qué hace:** cierra los otros dos hallazgos de `docs/audit-PA234-bulk-actions.md` sobre los bulk
+actions del admin de chatbots.
+
+**PA-3 (causa sin causa):** los 3 caminos que devolvían `failures: []` (rechazo por permiso, `userId`
+ausente, parse Zod fallido de `bulkDeleteBotsAction`) ahora pueblan `failures` con una causa clara
+por cada `botId`. El export (`exportLeadsBulkAction`) ahora se lee del lado UI: `BulkActionBar.tsx`
+usa `result.error` en el toast en vez del mensaje genérico fijo. `announceBulk` NO se tocó — ya
+distinguía `failures` vacío de poblado.
+
+**PA-4 (N+1 en pause/activate):** `bulkPauseBotsAction`/`bulkActivateBotsAction`
+(`admin/chatbots/bulk-actions.ts`) pasan de loop serial (2 queries por bot: `update` +
+`logAdminAction`) a `findMany` + `updateMany` + `logAdminActionsBatch` (función nueva en
+`src/lib/audit-log.ts`: llama `headers()` UNA sola vez y hace `adminAuditLog.createMany` con una
+fila por bot — paridad de `ipAddress`/`userAgent` con el log serial). Los dos quedaron consolidados
+en un helper privado `bulkSetActiveAction` (anti-duplicación, mismo patrón del repo). `bulkPauseBots`
+(`src/lib/bulk-actions.ts`) también migró su loop de `logAdminAction` a `logAdminActionsBatch`.
+
+**Decisión:** el `bulkDeleteBotsAction` QUEDA SERIAL a propósito — su `findUnique` + `_count`
+enriquece el log de auditoría de una acción destructiva con `deletedCounts`; la trazabilidad por-item
+de un borrado vale más que el ahorro de queries. Solo recibió la causa de PA-3, ninguna lógica nueva.
+
+**Aislamiento:** el `where` del batch replica EXACTAMENTE el scope serial anterior —
+`{ id: { in: botIds } }` en `admin/chatbots` (gateado solo por rol `SUPER_ADMIN`, sin
+`organizationId`, igual que antes) y `{ organizationId: { in: uniqueOrgIds } }` en
+`src/lib/bulk-actions.ts`. No se amplió el alcance en ningún caso.
+
+### Verificación
+**VERIFICADO por Valentino.**
+
+---
+
+## ✅ CO-5/CO-6 — Índices del portal aplicados a producción   ·   2026-07-16
+
+**Qué hace:** cierra el sprint aditivo `CO-5/CO-6-indices` (schema + migración hand-written,
+detallado en su momento) con la aplicación real a la Neon compartida. Migración
+`20260710203413_add_portal_indexes` aplicada con `prisma migrate deploy`. 6 índices aditivos:
+`@@index([organizationId])` en `Service` e `Invoice`, `@@index([organizationId, createdAt(sort:
+Desc)])` en `Message` (espeja el precedente de `Notification`, por el orden del inbox), y
+`@@index` en `ContactSubmission` por `createdAt`, `read` y `referralCode`.
+
+**Bloqueada toda la tanda** por el incidente de migraciones fantasma del motor B1 (ver entrada
+siguiente) — `migrate status` no quedaba limpio hasta resolverlo, así que el `deploy` se demoró
+hasta la reconciliación.
+
+**DIFERIDO (no se hizo):** la enum-ización de `ContactSubmission.leadStatus` (`String?` → enum)
+queda fuera de este cierre — NO es aditiva (cambio de tipo en columna viva sobre rama compartida) y
+necesita su propia migración diseñada (columna nueva + backfill + cutover) o descartarse.
+
+### Verificación
+**VERIFICADO:** `prisma migrate status` post-deploy → *"Database schema is up to date!"*
+
+---
+
+## ✅ INCIDENTE — Migraciones fantasma del motor B1 (RESUELTO)   ·   2026-07-16
+
+**Síntoma:** `migrate status` reportaba 3 migraciones aplicadas en la Neon compartida
+(`20260709163143_b1s1_webhook_credentials_and_identity_transitions`,
+`20260709180000_b1s2_outbound_apikey_templates_idempotency`,
+`20260709200000_b1s3_health_events_and_alerts`) que NO existían en git ni en disco en ningún
+worktree. Bloqueó CO-5/CO-6 durante toda la tanda.
+
+**Auditoría forense read-only** (`docs/audit-migraciones-fantasma-b1s.md`): SQL PERDIDO en las 3 —
+jamás commiteadas en ninguna de las 8 refs (locales + remotas), ni en stash, ni en reflog, ni en
+objetos unreachable, ni como `.sql` suelto. Tampoco existía el datamodel en ningún `schema.prisma`
+del repo. Prisma solo guarda el checksum en `_prisma_migrations`, no el contenido. Como plan B se
+capturó el efecto neto en la DB con `prisma migrate diff` (read-only): 7 enums Motor, 3 tablas
+(`motor_alert`, `motor_contact_identity_transition`, `motor_template`), columnas nuevas en
+`motor_waba_channel`/`motor_message`.
+
+**RESOLUCIÓN:** el dueño del lane motor tenía las carpetas originales en su working tree sin
+pushear — las commiteó en la rama `b1-s2-bsp-outbound`, mergeada a `origin/main` (`62994be`). Los
+checksums matchearon **byte-exacto** contra la Neon compartida → cero cirugía, sin
+`migrate resolve`, sin tocar `_prisma_migrations` a mano. Se integró a
+`b0-isolation-motor-chatbot` por merge (`5fcb92d`): vinieron los 3 `migration.sql`, el schema con
+los modelos del motor, y el código server (`src/modules/motor/**`).
+
+**LECCIÓN (regla del repo):** nada se aplica a la Neon compartida sin estar commiteado y pusheado
+primero. Esta vez se resolvió de casualidad porque el SQL existía en una máquina; la próxima vez
+puede no aparecer.
+
+---

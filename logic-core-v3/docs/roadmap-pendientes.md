@@ -239,6 +239,61 @@ Lista única de deuda explícita conocida. Cada entrada referencia el sprint que
 
 ---
 
+## PD-1.2 — Cifrado de credenciales de onboarding
+
+### `VaultManager` no muestra errores al admin (solo `console.error`)
+- **Sprint origen:** PD-1.2 (2026-07-11)
+- **Qué:** Con el fallo duro de PD-1.2 (guardar una credencial ACCESS sin `ONBOARDING_SECRET_KEY`
+  configurada lanza en vez de guardar en claro), el formulario admin (`VaultManager.tsx`) no se
+  limpia tras el error — pero no muestra ningún mensaje al admin, solo `console.error` en el catch
+  del cliente. El admin ve que "no pasó nada" sin saber por qué.
+- **Por qué se postpuso:** Fuera de scope de PD-1.2 (era cableado de cifrado, no UX de formulario).
+- **Cuándo prioritarlo:** Candidato a mini-sprint de UX cuando se toque `VaultManager` de nuevo, o
+  antes de que un admin real se tope con el fallo duro en producción sin explicación.
+
+### `completeOnboardingAction` sin caller y con auth débil
+- **Sprint origen:** PD-1.2 (2026-07-11)
+- **Qué:** La action que escribe las credenciales de onboarding (`completeOnboardingAction`) no
+  tiene ningún caller en `src/` — parece ruta muerta o a medio cablear. Además su guard de auth es
+  débil: obtiene `session` de `auth()` pero no la usa (solo gatea vía `resolveOrgId()`).
+- **Por qué se postpuso:** Auditado y cifrado igual (PD-1.2 pidió cifrar la action existiera o no
+  caller), pero decidir si es ruta muerta a borrar o feature a terminar de cablear quedó pendiente.
+- **Cuándo prioritarlo:** Antes de reactivar el flujo de onboarding con credenciales, o al hacer
+  limpieza de código muerto.
+
+### `src/lib/crypto/` con dos helpers AES-GCM conviviendo
+- **Sprint origen:** PD-1.2 (2026-07-11), agravado por el merge del motor B1 (2026-07-16)
+- **Qué:** `src/lib/crypto/` tiene `secret-box.ts` (del motor, llegó con el merge de B1) y
+  `credential-cipher.ts`/`encrypt-for-storage.ts` (del panel, PD-1) — dos implementaciones AES-GCM
+  independientes en el mismo directorio, sin relación entre sí.
+- **Por qué se postpuso:** Cada una nació en su propio lane sin saber de la otra; consolidar implica
+  decidir cuál es la fuente de verdad y migrar callers.
+- **Cuándo prioritarlo:** Evaluar consolidación la próxima vez que se toque cualquiera de las dos, o
+  en una pasada de limpieza dedicada.
+
+---
+
+## PA-2 — CSV anti-inyección en exports admin de leads
+
+### `src/lib/csv/csv-escape.ts` es copia deliberada, no compartida
+- **Sprint origen:** PA-2 (2026-07-11)
+- **Qué:** `src/lib/csv/csv-escape.ts` duplica la lógica de
+  `modules/chatbot/server/leads/csv/csvEscape.ts` por frontera de módulo (no se puede importar
+  desde `app/admin` hacia `modules/chatbot/server`). Si cambia la lógica de escape (nuevos
+  caracteres peligrosos, ajuste de RFC 4180), hay que sincronizar ambas copias a mano.
+- **Por qué se postpuso:** Extraer a un compartido cruza la frontera de módulo — decisión de
+  arquitectura fuera de scope de un fix de seguridad puntual.
+- **Cuándo prioritarlo:** Si la lógica de escape necesita un tercer cambio, o cuando se revise la
+  frontera de módulo del chatbot en general.
+
+### Lead de prueba "Promo SEO (descartar)" (`qaseed-dirty-...-0009`) en la base
+- **Sprint origen:** PA-2 (2026-07-11)
+- **Qué:** Quedó un lead de prueba con ese nombre en la base, de un seed distinto al de
+  `qa-seed-leads-dirty.ts` — revisar que el script de limpieza correspondiente lo contemple.
+- **Cuándo prioritarlo:** Próxima pasada de limpieza de datos QA.
+
+---
+
 ## Punteros a la consolidación (detalle en `docs/consolidacion-planoA-runtime.md`)
 
 - **Carril seguridad (lo corre Franco, aparte del flujo de sprints):** RT-2 (`/smoke` sin auth quema Gemini), RE-13 (`/health` expone internals), RE-16 (SSRF/DNS-rebinding en `postToN8n` — ya listado arriba en B5.8), RE-7 (atribución spoofeable por cualquier origin), RT-13 (sessionId adivinable → secuestro intra-tenant), CO-7 + PD-1 (cripto en reposo: tokens OAuth de terceros / credenciales de onboarding en texto plano; PD-1.1/PD-1.3a ya commiteado por el chat Panel en `b06ca12`), A.4 (secret en history sin purga).
