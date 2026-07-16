@@ -20,6 +20,7 @@ import {
   checkQuota,
   incrementQuota,
   tryReserveConversation,
+  compensateNewConversationReservation,
   triggerUpsellAlertIfFirst,
 } from '../quota'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
@@ -38,6 +39,18 @@ import {
   MAX_MESSAGE_CHARS,
   HARD_CAP_MESSAGES,
 } from '../../shared/historyPolicy'
+// ONF-1 — reconcile transaccional del onFinish: decisiones puras (compensación
+// de cupo, dedup del retry de persistencia, fallback de respuesta vacía).
+import {
+  PERSIST_TX_MAX_ATTEMPTS,
+  PERSIST_TX_RETRY_BACKOFF_MS,
+  ASSISTANT_PERSIST_DEDUP_WINDOW_MS,
+  shouldSkipAssistantPersist,
+  shouldCompensateQuota,
+  buildEmptyFallbackMessage,
+  createEmptyResponseFallbackTransform,
+  type CompensationTrigger,
+} from './reconcile'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -251,6 +264,18 @@ export async function handleChatRequest(
   slug: string
 ): Promise<Response> {
   let bot: Awaited<ReturnType<typeof resolveBotBySlug>> = null
+  // ONF-1 (MH.2) — Compensador de la reserva de cupo del request. Se ARMA solo
+  // si hubo reserva atómica (conversación nueva + tryReserveConversation OK) y
+  // se dispara desde los puntos donde el turno muere sin entregar respuesta
+  // (onError/onAbort sin primer chunk útil, respuesta vacía sin tools, 400
+  // post-reserva, catch externo). Hoisted acá para que el catch externo lo
+  // alcance. null = no hubo reserva → no hay nada que compensar.
+  let compensateReservedQuota:
+    | ((
+        trigger: CompensationTrigger,
+        ctx: { firstTokenDelivered: boolean; toolCallCount: number },
+      ) => Promise<void>)
+    | null = null
   try {
   const startTime = Date.now()
 
@@ -396,6 +421,48 @@ export async function handleChatRequest(
     maxDomains: plan.maxDomains,
   })
 
+  // ONF-1 (MH.2) — Una conversación RECIÉN creada cuyo request termina
+  // degradado o inválido se descarta: la fila todavía no tiene mensajes (el
+  // USER se persiste en la sección 6, después de todos los gates) y solo
+  // inflaría las métricas de conversaciones del tenant. Borrado scoped
+  // best-effort: si falla, se loguea y la respuesta degradada sale igual.
+  // ChatbotEvent.conversationId es onDelete: SetNull → los eventos ya
+  // logueados sobreviven al borrado. Conversaciones EXISTENTES (p.ej. el gate
+  // conversation_limit, que solo aplica a existentes) jamás se tocan.
+  //
+  // Guard anti-carrera (hallazgo del review): el delete es condicional a que
+  // la conversación siga SIN ningún ASSISTANT persistido — si otro request
+  // del mismo sessionId ya entregó un turno en esta fila, no se borra nada
+  // (count 0). Nunca se arrastra historia entregada por el cascade.
+  let conversationDiscarded = false
+  const discardNewConversation = async (reason: string): Promise<void> => {
+    if (!isNewConversation || conversationDiscarded) return
+    try {
+      const del = await scope.conversation.deleteMany({
+        id: conversation.id,
+        messages: { none: { role: 'ASSISTANT' } },
+      })
+      if (del.count === 1) {
+        conversationDiscarded = true
+        chatbotDebug('degraded_conversation_discarded', {
+          conversationId: conversation.id,
+          reason,
+        })
+      } else {
+        chatbotDebug('degraded_conversation_kept', {
+          conversationId: conversation.id,
+          reason,
+        })
+      }
+    } catch (discardError) {
+      logPersistFailure('chat.degraded_discard_failed', discardError, {
+        conversationId: conversation.id,
+        botSlug: slug,
+        reason,
+      })
+    }
+  }
+
   // ─── 5.a Gating: dominio (defensive cap del plan) ─────────────
   // validateOrigin (en route.ts) ya autorizó el origin contra
   // `bot.allowedDomains` completo. Acá aplicamos el cap del plan:
@@ -424,6 +491,7 @@ export async function handleChatRequest(
       conversationId: conversation.id,
       metadata: { origin: requestOrigin, planKey: plan.key, maxDomains: plan.maxDomains },
     })
+    await discardNewConversation('domain_overflow')
     return degradedResponse(
       'Este dominio no está habilitado en el plan actual. ¿Te ayudo por WhatsApp?',
       'domain_overflow',
@@ -477,6 +545,7 @@ export async function handleChatRequest(
       month: quota.month,
       adminLinkPath: `/admin/clients/${bot.organization.id}`,
     })
+    await discardNewConversation('quota_exhausted')
     return degradedResponse(
       'Por hoy alcanzamos el límite de atención automática del mes. Te derivo con el equipo por WhatsApp así seguimos sin demoras.',
       'quota_exhausted',
@@ -527,6 +596,7 @@ export async function handleChatRequest(
         month: reserve.month,
         adminLinkPath: `/admin/clients/${bot.organization.id}`,
       })
+      await discardNewConversation('quota_reserve_failed')
       return degradedResponse(
         'Por hoy alcanzamos el límite de atención automática del mes. Te derivo con el equipo por WhatsApp así seguimos sin demoras.',
         'quota_exhausted',
@@ -538,6 +608,93 @@ export async function handleChatRequest(
       )
     }
     timings.quota_reserve_ms = Date.now() - stepStart
+
+    // ONF-1 (MH.2) — La reserva atómica ya consumió 1 cupo del mes. Si el
+    // turno muere sin entregar respuesta, este compensador devuelve el cupo Y
+    // descarta la fila de Conversation en UNA transacción
+    // (compensateNewConversationReservation): release con el patrón atómico
+    // espejo de la reserva (UPDATE conditional + guard de org — NUNCA un
+    // decrement suelto) + delete condicional a "sin ASSISTANT persistido".
+    // Van JUNTOS a propósito (hallazgo del review): un release con fila viva
+    // dejaría que el retry del widget (INFRA.2) reviva la conversación con
+    // isNew=false → sin re-reserva → conversación entera gratis (undercount).
+    // Descartada, el retry recrea y VUELVE a reservar: accounting exacto.
+    // La decisión de CUÁNDO compensar vive en shouldCompensateQuota
+    // (reconcile.ts, pura). year/month del RESULTADO de la reserva: una
+    // compensación que cruza el borde de mes devuelve el cupo al período que
+    // se reservó. En onAbort este compensador es best-effort (ai@6.0.214 no
+    // espera la promesa del hook): si el freeze lo corta, la tx hace rollback
+    // completo → cobrado + fila viva = comportamiento pre-sprint, que con el
+    // retry del widget también termina en exactamente 1 cobro.
+    let reserveCompensated = false
+    compensateReservedQuota = async (trigger, ctx) => {
+      if (
+        !shouldCompensateQuota({
+          alreadyCompensated: reserveCompensated,
+          trigger,
+          firstTokenDelivered: ctx.firstTokenDelivered,
+          toolCallCount: ctx.toolCallCount,
+        })
+      ) {
+        return
+      }
+      // El flag se marca ANTES del await: los hooks del request corren en el
+      // mismo event loop, así ningún segundo hook re-entra a la compensación.
+      // La atomicidad CROSS-request la dan la tx y el UPDATE condicional.
+      reserveCompensated = true
+      try {
+        const result = await compensateNewConversationReservation({
+          organizationId: orgId,
+          botConfigId: resolvedBot.id,
+          conversationId: conversation.id,
+          year: reserve.year,
+          month: reserve.month,
+        })
+        if (result.compensated) conversationDiscarded = true
+        chatbotLog(
+          'chat.quota_compensated',
+          {
+            slug,
+            botConfigId: resolvedBot.id,
+            conversationId: conversation.id,
+            trigger,
+            compensated: result.compensated,
+            conversationsUsed: result.conversationsUsed,
+          },
+          'warn',
+        )
+        await logChatbotEvent({
+          organizationId: orgId,
+          botConfigId: resolvedBot.id,
+          type: 'chat.quota_compensated',
+          level: 'warn',
+          message: result.compensated
+            ? `Cupo devuelto (${trigger}): el turno no entregó respuesta — conversación descartada`
+            : `Compensación (${trigger}) omitida: la conversación ya tiene un turno entregado — el cobro queda`,
+          // Si se compensó, la fila ya no existe: el id va solo en metadata
+          // (el FK del evento fallaría el parentCheck contra una fila borrada).
+          conversationId: result.compensated ? undefined : conversation.id,
+          metadata: {
+            trigger,
+            compensated: result.compensated,
+            conversationId: conversation.id,
+            year: reserve.year,
+            month: reserve.month,
+          },
+        })
+      } catch (compensationError) {
+        // Best-effort: si la tx falla, queda cobrado + fila viva (rollback
+        // total — comportamiento pre-sprint, 1 solo cobro vía retry). NO se
+        // reintenta desde otro hook — el flag queda en true a propósito:
+        // preferimos un cupo de más a devolverlo dos veces.
+        logPersistFailure('chat.quota_compensation_failed', compensationError, {
+          conversationId: conversation.id,
+          botSlug: slug,
+          botConfigId: resolvedBot.id,
+          trigger,
+        })
+      }
+    }
   }
 
   // ─── 5.c Gating: tope duro de conversación (C0.2) ─────────────
@@ -591,6 +748,15 @@ export async function handleChatRequest(
 
   if (!lastUserMessage) {
     chatbotLog('chat.no_user_message', { conversationId: conversation.id }, 'warn')
+    // ONF-1 — este 400 corre DESPUÉS de la reserva atómica (5.b): sin
+    // compensación, un body inválido dejaría 1 cupo consumido sin respuesta.
+    // Compensar ANTES de descartar la fila (el evento de compensación
+    // referencia conversationId mientras todavía existe).
+    await compensateReservedQuota?.('no_user_message', {
+      firstTokenDelivered: false,
+      toolCallCount: 0,
+    })
+    await discardNewConversation('no_user_message')
     return Response.json({ error: 'No user message found' }, { status: 400 })
   }
 
@@ -760,6 +926,14 @@ export async function handleChatRequest(
   const llmStartAt = Date.now()
   let ttfbAt: number | null = null
 
+  // ONF-1 — Fallback de respuesta vacía: si el run termina sin texto útil, el
+  // transform (experimental_transform de abajo) inyecta este mensaje de
+  // derivación al stream — el visitante lo ve EN VIVO como texto normal del
+  // assistant, sin cambios en el widget — y marca el flag para que onFinish
+  // no cuente el turno como respuesta entregada. Ver reconcile.ts.
+  const emptyFallbackText = buildEmptyFallbackMessage(bot.whatsappNumber)
+  let emptyFallbackInjected = false
+
   // MS-1: stepCountIs(3) habilita multi-step.
   //   Step 1 — modelo invoca tool (ej. capture_lead).
   //   Step 2 — modelo lee toolResult y genera texto de confirmación + (opcionalmente)
@@ -799,6 +973,11 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
+    // ONF-1 — con texto útil el transform es passthrough puro (paridad del
+    // camino feliz); solo inyecta la derivación canned en un run vacío.
+    experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
+      emptyFallbackInjected = true
+    }),
     onStepFinish: () => {
       stepCount += 1
     },
@@ -812,7 +991,7 @@ export async function handleChatRequest(
         ttfbAt = Date.now()
       }
     },
-    onError: ({ error }) => {
+    onError: async ({ error }) => {
       // INFRA.1 — falla mid-stream (Vertex, throw en un tool): hoy la enmascara
       // toUIMessageStreamResponse() como 200 y queda invisible server-side.
       // Sink off-Neon garantizado (stderr) + Sentry best-effort.
@@ -824,6 +1003,21 @@ export async function handleChatRequest(
       Sentry.captureException(error, {
         tags: { module: 'chatbot', stage: 'stream' },
         extra: { conversationId: conversation.id, botSlug: slug },
+      })
+      // ONF-1 (MH.2) — el stream murió: si al visitante no le llegó ni un
+      // chunk útil (ttfbAt null), la reserva de cupo se devuelve (atómico,
+      // once-only por request). Con entrega parcial, el cupo se cobra.
+      await compensateReservedQuota?.('stream_error', {
+        firstTokenDelivered: ttfbAt !== null,
+        toolCallCount: 0,
+      })
+    },
+    onAbort: async () => {
+      // ONF-1 (MH.2) — stream cortado (cliente desconectado / runtime abortó):
+      // mismo criterio que onError — sin primer chunk útil, se devuelve el cupo.
+      await compensateReservedQuota?.('stream_abort', {
+        firstTokenDelivered: ttfbAt !== null,
+        toolCallCount: 0,
       })
     },
     onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
@@ -847,6 +1041,9 @@ export async function handleChatRequest(
         ? steps.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0)
         : (usage?.outputTokens ?? 0)
       stepStart = llmDoneAt
+      // ONF-1 — hoisted fuera del try: el catch INFRA.1 reporta cuántos
+      // intentos de persistencia se agotaron.
+      let persistAttempt = 0
       try {
         // Validate output (capa 4)
         const warnings = validateAssistantOutput(text)
@@ -873,6 +1070,58 @@ export async function handleChatRequest(
           })
         }
 
+        // ONF-1 — Turno fallback: el modelo devolvió vacío y el transform
+        // inyectó la derivación canned al stream. Se persiste el mensaje que
+        // el visitante VIO (nunca un turno mudo), pero NO se cuenta como
+        // respuesta entregada: sin tools ejecutadas, la reserva de cupo se
+        // devuelve. `assistantContent` cae al canned explícito si el texto
+        // transformado no llegara al onFinish (belt-and-suspenders).
+        const assistantContent =
+          emptyFallbackInjected && text.trim().length === 0 ? emptyFallbackText : text
+        if (emptyFallbackInjected) {
+          chatbotLog(
+            'chat.empty_response_fallback',
+            {
+              conversationId: conversation.id,
+              finishReason,
+              toolCallCount: allToolCalls.length,
+            },
+            'warn',
+          )
+          await logChatbotEvent({
+            organizationId: orgId,
+            botConfigId: resolvedBot.id,
+            type: 'chat.empty_response_fallback',
+            level: 'warn',
+            message: 'Respuesta vacía del modelo — turno degradado con derivación canned',
+            conversationId: conversation.id,
+            metadata: { finishReason, toolCallCount: allToolCalls.length },
+          })
+          await compensateReservedQuota?.('empty_response', {
+            firstTokenDelivered: ttfbAt !== null,
+            toolCallCount: allToolCalls.length,
+          })
+        }
+
+        // ONF-1 — Si la compensación descartó la conversación (nueva, sin
+        // ASSISTANT entregado: cupo devuelto + fila borrada en una tx), no hay
+        // fila donde persistir el turno — y persistirlo re-inflaría lo que la
+        // compensación limpió. El rastro queda en chat.empty_response_fallback
+        // + chat.quota_compensated y en este log de cierre.
+        if (conversationDiscarded) {
+          mark('post_persist_ms')
+          timings.total_ms = Date.now() - startTime
+          chatbotLog('chat.llm_request_finished', {
+            conversationId: conversation.id,
+            finishReason,
+            turnDiscarded: true,
+            emptyFallback: emptyFallbackInjected,
+            durationMs: timings.total_ms,
+            timings,
+          })
+          return
+        }
+
         // MS-1: tokens y tool calls agregados desde todos los steps (ver bloque arriba).
         const tokensIn = totalIn
         const tokensOut = totalOut
@@ -885,41 +1134,111 @@ export async function handleChatRequest(
           tokensOut
         )
 
-        // Persist assistant message + tool calls (all steps).
-        await scope.chatMessage.create({
-          conversationId: conversation.id,
-          role: 'ASSISTANT',
-          content: text,
-          tokensIn,
-          tokensOut,
-          toolCalls: allToolCalls.length > 0
-            ? (allToolCalls as unknown as object)
-            : undefined,
-        })
+        // ONF-1 (RB.3) — Los tres writes del turno son UNA transacción scoped
+        // (mismo patrón que capture_lead): entran los tres o ninguno.
+        // Orden dentro de la tx: mensaje → conversación → cupo.
+        //   - mensaje primero: fila nueva, sin contención;
+        //   - conversación después: único lock compartido con la tx de
+        //     capture_lead (lead → conversación) — un solo recurso en común
+        //     entre ambas transacciones → sin ciclo de deadlock posible;
+        //   - cupo al final: la fila QuotaUsage del mes es la de mayor
+        //     contención del tenant — se lockea a lo último para achicar su
+        //     sección crítica.
+        // Ante un corte de Netlify (~10s) a mitad de la transacción, la
+        // conexión muere sin COMMIT → Postgres hace rollback: nunca queda
+        // estado parcial (cupo movido sin mensaje, o mensaje sin contadores).
+        // El turno cortado lo recupera el retry del widget (INFRA.2: la cola
+        // USER sin responder no se duplica).
+        //
+        // Caso "respuesta YA entregada + persistencia falla" (decisión ONF-1):
+        // retry acotado (PERSIST_TX_MAX_ATTEMPTS, retry de APLICACIÓN — no el
+        // retry de conexión de INFRA.3, que sigue NO activo) con guard de
+        // idempotencia: si el COMMIT del intento anterior entró pero el ack se
+        // perdió (error post-commit), el reintento ve la cola ASSISTANT
+        // idéntica y NO duplica — como los tres writes son atómicos, si el
+        // mensaje está, los contadores también entraron. Si el último intento
+        // también falla: INFRA.1 (catch de abajo) y se acepta la pérdida del
+        // registro con evento claro — la respuesta ya salió y no es
+        // re-enviable; preferimos un turno sin registrar a contadores dobles.
+        const persistedAt = new Date()
+        for (;;) {
+          persistAttempt += 1
+          try {
+            await scope.$transaction(async (tx) => {
+              if (persistAttempt > 1) {
+                // Query DIRIGIDA al ASSISTANT idéntico dentro de la ventana —
+                // no a la cola (hallazgo del review): un USER interleaved de
+                // otro request del mismo sessionId desplazaría la cola y
+                // taparía el commit fantasma del intento 1.
+                const committedCandidate = await tx.chatMessage.findFirst({
+                  where: {
+                    conversationId: conversation.id,
+                    role: 'ASSISTANT',
+                    content: assistantContent,
+                    createdAt: { gte: new Date(Date.now() - ASSISTANT_PERSIST_DEDUP_WINDOW_MS) },
+                  },
+                  orderBy: { createdAt: 'desc' },
+                  select: { role: true, content: true, createdAt: true },
+                })
+                if (shouldSkipAssistantPersist(committedCandidate, assistantContent, new Date())) {
+                  return
+                }
+              }
 
-        // Update Conversation aggregate metrics
-        await scope.conversation.update(conversation.id, {
-          messageCount: { increment: 2 },  // user + assistant
-          tokensIn: { increment: tokensIn },
-          tokensOut: { increment: tokensOut },
-          estimatedCostUsd: { increment: costBreakdown.totalUsd },
-          lastMessageAt: new Date(),
-        })
+              // Persist assistant message + tool calls (all steps).
+              await tx.chatMessage.create({
+                conversationId: conversation.id,
+                role: 'ASSISTANT',
+                content: assistantContent,
+                tokensIn,
+                tokensOut,
+                toolCalls: allToolCalls.length > 0
+                  ? (allToolCalls as unknown as object)
+                  : undefined,
+              })
 
-        // Update QuotaUsage for current period.
-        // B4.2: `conversationsCount` ya se incrementó atómicamente vía
-        // tryReserveConversation cuando isNewConversation=true. Acá pasamos
-        // false siempre para evitar double-count del counter. Tokens y cost
-        // se siguen acumulando normalmente.
-        await incrementQuota({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          isNewConversation: false,
-          messagesAdded: 2,
-          tokensIn,
-          tokensOut,
-          costUsd: costBreakdown.totalUsd,
-        })
+              // Update Conversation aggregate metrics
+              await tx.conversation.update(conversation.id, {
+                messageCount: { increment: 2 },  // user + assistant
+                tokensIn: { increment: tokensIn },
+                tokensOut: { increment: tokensOut },
+                estimatedCostUsd: { increment: costBreakdown.totalUsd },
+                lastMessageAt: persistedAt,
+              })
+
+              // Update QuotaUsage for current period.
+              // B4.2: `conversationsCount` ya se incrementó atómicamente vía
+              // tryReserveConversation cuando isNewConversation=true. Acá pasamos
+              // false siempre para evitar double-count del counter. Tokens y cost
+              // se siguen acumulando normalmente — también en un turno fallback
+              // (el modelo se consumió igual; lo que se devuelve es el CUPO).
+              await incrementQuota(
+                {
+                  organizationId: orgId,
+                  botConfigId: resolvedBot.id,
+                  isNewConversation: false,
+                  messagesAdded: 2,
+                  tokensIn,
+                  tokensOut,
+                  costUsd: costBreakdown.totalUsd,
+                },
+                tx,
+              )
+            })
+            break
+          } catch (txError) {
+            if (persistAttempt >= PERSIST_TX_MAX_ATTEMPTS) throw txError
+            // Primer intento fallido: rastro off-Neon YA (si el retry también
+            // muere, este log es lo que sobrevive), backoff corto y reintento.
+            logPersistFailure('chat.persist_retry', txError, {
+              conversationId: conversation.id,
+              botSlug: slug,
+              botConfigId: resolvedBot.id,
+              attempt: persistAttempt,
+            })
+            await new Promise<void>((resolve) => setTimeout(resolve, PERSIST_TX_RETRY_BACKOFF_MS))
+          }
+        }
         mark('post_persist_ms')
         const totalMs = Date.now() - startTime
         timings.total_ms = totalMs
@@ -933,6 +1252,9 @@ export async function handleChatRequest(
           toolCallCount: allToolCalls.length,
           warningCount: warnings.length,
           durationMs: totalMs,
+          // ONF-1 — 1 = camino feliz; >1 = el retry acotado recuperó el turno.
+          persistAttempts: persistAttempt,
+          emptyFallback: emptyFallbackInjected,
           timings,
         })
 
@@ -963,6 +1285,10 @@ export async function handleChatRequest(
           botSlug: slug,
           botConfigId: resolvedBot.id,
           turnIndex: Math.floor((conversation.messageCount ?? 0) / 2),
+          // ONF-1 — intentos agotados del $transaction (retry acotado incluido).
+          // El rollback garantiza que NO quedó estado parcial: se perdió el
+          // registro del turno completo, no un pedazo.
+          attempts: persistAttempt,
         })
         // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
         // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza.
@@ -993,6 +1319,13 @@ export async function handleChatRequest(
       botSlug: slug,
       botConfigId: bot?.id ?? null,
       stage: 'unhandled',
+    })
+    // ONF-1 (MH.2) — si hubo reserva de cupo y el request murió ANTES de
+    // devolver el stream (este catch solo alcanza fallos pre-return), el
+    // visitante no recibió nada: devolver la reserva (atómico, best-effort).
+    await compensateReservedQuota?.('unhandled_error', {
+      firstTokenDelivered: false,
+      toolCallCount: 0,
     })
     if (bot) {
       await logChatbotEvent({

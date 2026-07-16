@@ -199,7 +199,7 @@ export function NuevoProspectoForm({ nombresExistentes }: NuevoProspectoFormProp
           Cargar prospecto
         </Button>
         <p className="text-[11px] text-zinc-600">
-          Entra frío, en ficha — listo para que lo evalúes como cualquier otro.
+          Arranca en Ficha, como cualquier otro — listo para que lo evalúes.
         </p>
       </div>
     </Card>

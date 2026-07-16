@@ -36,9 +36,9 @@
  *     unsafeGlobalQuery(reason, fn). `grep -r unsafeGlobal src/` enumera
  *     todos los accesos cross-org del repo.
  *
- * Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage
- * (motor) + BotConfig, Conversation, ChatMessage, ChatbotLead, CrmIntegration
- * (chatbot, port en B0-S3). Fuera de este directorio, prisma directo sobre
+ * Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage,
+ * MotorTemplate, MotorAlert (motor) + BotConfig, Conversation, ChatMessage,
+ * ChatbotLead, CrmIntegration (chatbot, port en B0-S3). Fuera de este directorio, prisma directo sobre
  * estos modelos solo queda en el código legacy del chatbot hasta B0-S3;
  * LeadOS conserva su helper propio (otro eje de aislamiento, no se toca).
  *
@@ -51,6 +51,14 @@ import { buildScope } from './registry'
 import { IsolationError } from './scoped-model'
 
 export { IsolationError, IsolationNotFoundError } from './scoped-model'
+
+/**
+ * ONF-1 — Accessors scoped SIN la envoltura transaccional: el tipo del `tx`
+ * que recibe el callback de forOrg().$transaction. Exportado para que un
+ * módulo pueda tipar funciones que aceptan "el scope o el tx de una
+ * transacción en curso" (ej. incrementQuota dentro del reconcile del turno).
+ */
+export type { OrgScopeAccessors } from './registry'
 
 /** Scope de una organización: accessors por modelo con el tenant ya fijado. */
 export type OrgScope = ReturnType<typeof buildScope>

@@ -103,7 +103,7 @@ export function SelfCheckEjemplo() {
   const ejemplo = GUIA_SELF_CHECK_EJEMPLAR
   return (
     <EjemploIdealShell
-      resumen="Ver ejemplo de un self-check bien hecho"
+      resumen="Ver ejemplo de un chequeo final bien hecho"
       titulo={ejemplo.titulo}
       porque={ejemplo.porque}
     >

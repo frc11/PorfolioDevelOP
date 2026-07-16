@@ -56,10 +56,10 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'Una IA que lee la ficha del negocio y dice si vale la pena invertir tiempo en una demo: le das la ficha y te devuelve su lectura.',
     queLeDas:
-      'El bloque de la ficha que armaste en el Paso 1 (el botón «Copiar bloque» está al pie de la ficha).',
+      'El bloque de la ficha que armaste en Ficha (el botón «Copiar bloque» está al pie de la ficha).',
     queTeDevuelve:
-      'Un score del 1 al 5, un veredicto (descartar / avanzar / caliente) y el razonamiento. Eso es lo que transcribís acá abajo.',
-    dondeSeUsa: 'Paso 2 · Evaluación',
+      'Un score del 1 al 5, un veredicto (descartar / avanzar / avanzar con prioridad) y el razonamiento. Eso es lo que transcribís acá abajo.',
+    dondeSeUsa: 'Evaluación',
     url: null, // TODO: URL — Gem/acceso privado del Evaluador (pedir a Franco)
   },
   gemDiseno: {
@@ -71,7 +71,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
       'El bloque «para el Gem de diseño» que está acá abajo (la ficha y la evaluación juntas).',
     queTeDevuelve:
       'El brief estructurado: título, concepto, secciones en orden, CTA y notas de marca. Lo pegás y completás los campos de abajo.',
-    dondeSeUsa: 'Paso 3 · Brief',
+    dondeSeUsa: 'Brief',
     url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)
   },
   claudeDesign: {
@@ -82,8 +82,8 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queLeDas:
       'El bloque «para Claude Design» de acá abajo (el brief + los materiales reales del negocio), como primer mensaje.',
     queTeDevuelve:
-      'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Publicar el draft».',
-    dondeSeUsa: 'Paso 4 · Construcción',
+      'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Publicar el borrador».',
+    dondeSeUsa: 'Construcción',
     url: null, // TODO: URL — acceso a Claude Design que usa el equipo (pedir a Franco)
   },
   netlifyDrop: {
@@ -94,8 +94,8 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queLeDas:
       'El index.html que exportaste de Claude Design (o el .zip que lo contiene adentro).',
     queTeDevuelve:
-      'Una URL pública (algo.netlify.app). Esa es la que pegás abajo como «URL del draft».',
-    dondeSeUsa: 'Publicar el draft',
+      'Una URL pública (algo.netlify.app). Esa es la que pegás abajo como «URL del borrador».',
+    dondeSeUsa: 'Publicar el borrador',
     url: 'https://app.netlify.com/drop',
   },
   gemOutreach: {

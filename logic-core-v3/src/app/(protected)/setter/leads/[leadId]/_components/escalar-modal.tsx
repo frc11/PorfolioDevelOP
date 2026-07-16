@@ -81,7 +81,7 @@ export function EscalarModal({
         open={open}
         onClose={() => !isPending && setOpen(false)}
         title="Avisar a Franco que te trabaste"
-        description="Va por Telegram con el contexto del lead (negocio, etapa y draft si hay). Vos solo contá el problema."
+        description="Va por Telegram con el contexto del lead (negocio, etapa y borrador si hay). Vos solo contá el problema."
         size="sm"
         footer={
           <>

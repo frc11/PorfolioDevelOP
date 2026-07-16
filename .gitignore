@@ -2,3 +2,9 @@
 .claude/
 .agents/
 skills-lock.json
+
+# Cache de resultados de Playwright — ruido (timestamps/duraciones), no se rastrea
+**/.last-run.json
+
+# Artefactos de auditorías puntuales (screenshots, reportes, scripts de captura) — generado, no fuente
+audit/

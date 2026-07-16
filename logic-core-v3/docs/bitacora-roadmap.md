@@ -13258,10 +13258,15 @@ Al no inventar canal nuevo, hereda gratis: log a consola (`chatbotLog`) + fila e
   editables como antes, simplemente ya no manejan el costo/ejecución en runtime.
 - **CO-9** (unificar el default de modelo ×7): no tocado.
 - **Migración**: `prisma/schema.prisma` intacto.
-- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `demo-chat/[slug]/route.ts`,
-  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo
-  hardcodeado (no vienen de `plan.llmModel` ni alimentan costo de turno) — confirmado por grep,
-  no tocados.
+- **Otros `provider.getModel(...)` del repo** (`test-prompt/route.ts`, `generateInsights.ts`,
+  `health/smokeTest.ts`, `lib/ai/executive-brief.ts`): todos con modelo hardcodeado (no vienen de
+  `plan.llmModel` ni alimentan costo de turno) — confirmado por grep, no tocados.
+- **Corrección (COST-2b, 2026-07-11)**: `demo-chat/[slug]/route.ts` estaba agrupado acá por error —
+  su modelo NO era hardcodeado, venía dinámico de `bot.llmModel` (DB). El problema real era el
+  *provider*: `getLLMProvider(bot.llmProvider as 'google' | 'anthropic' | 'openai')`, un cast que
+  mentía al compilador — el enum Prisma llega en mayúsculas (`'GOOGLE'`) y el switch de
+  `getLLMProvider` compara en minúsculas → throw para el 100% de los bots. Fix en COST-2b (ver
+  entrada al final del archivo).
 - El log `chat.llm_request_start` sigue mostrando el par **solicitado** (no el efectivo) — el WARN
   nuevo ya deja rastro explícito del degrade con ambos pares; tocar ese log ampliaba el diff sin
   necesidad.
@@ -13669,8 +13674,10 @@ ni de valores.
   `ProviderNotImplementedError`), debe validar el modelo contra la misma tabla que
   `estimateCost`/`listModels` — igual que ya hace `GoogleProvider.getModel` contra `GOOGLE_MODELS`
   — para no abrir una tercera fuente de verdad desalineable. No implementado, solo anotado acá.
-- **`demo-chat/[slug]/route.ts`**: no tocado (modelo hardcodeado, código no alimentado por
-  `plan.llmModel`, ya señalado como fuera de scope por el discovery de COST-1).
+- **`demo-chat/[slug]/route.ts`**: no tocado por COST-2 (fuera del scope de breakdown de costo — este
+  endpoint no llama `calculateCost`). **Corrección (COST-2b, 2026-07-11)**: la caracterización
+  "modelo hardcodeado" heredada de COST-1 era falsa — ver corrección en la entrada de COST-1 y el
+  fix real en COST-2b (entrada al final del archivo).
 - Sin migración, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
 - Fuera de `pricing/`, `llm/providers/` y el test nuevo: nada tocado (packs/scoring/widget/admin/
   dashboard intactos).
@@ -13731,3 +13738,393 @@ archivos más del mismo sprint PD-1, modificados (no por COST-2):
 el mismo working tree, en paralelo a esta sesión. No se tocaron, no se commitearon, no se
 inspeccionaron sus diffs (fuera de scope de COST-2).
 
+---
+
+## ✅ COST-2b — demo-chat resuelve modelo/provider con el patrón seguro (sin cast, sin throw)   ·   2026-07-11
+
+El endpoint `demo-chat/[slug]/route.ts` (preview de bot para superadmin, tras `requireSuperAdmin()`,
+sin caller real — código muerto hoy, confirmado por grep) resolvía el par provider/modelo con
+`getLLMProvider(bot.llmProvider as 'google' | 'anthropic' | 'openai')` + `provider.getModel(bot.llmModel)`:
+un cast que le mentía al compilador. El enum Prisma `LlmProvider` llega en runtime en mayúsculas
+(`'GOOGLE'`/`'ANTHROPIC'`/`'OPENAI'`) pero el `switch` case-sensitive de `getLLMProvider` compara en
+minúsculas — caía siempre al `default` y throweaba `Unknown LLM provider: GOOGLE`, para el 100% de
+los bots (camino feliz roto, no un edge case). El modelo (`bot.llmModel`) sí era dinámico desde la
+DB — la nota de COST-1/COST-2 que decía "modelo hardcodeado" sobre este archivo era falsa (corregida
+arriba, en ambas entradas); el problema real era solo el cast del provider.
+
+### Descubrimiento (Paso 0) — coincide con el ticket
+- Resolución cruda confirmada en `route.ts:45,47` (línea 45 el cast, línea 47 el `getModel`), sin
+  `normalizeLlmProvider` ni `try/catch` — exactamente como describía el ticket.
+- Patrón de referencia confirmado en `handleChatRequest.ts:694-695` (COST-1):
+  `resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)` — ahí el modelo viene
+  de `plan.llmModel` (B4.2, no hay concepto de "plan" en demo-chat); acá se mantiene `bot.llmModel`,
+  como ya usaba el endpoint.
+- `resolveEffectiveModel(requestedProvider, requestedModel, getProvider?)` devuelve
+  `EffectiveModel { provider, modelId, model, degraded, requestedProvider, requestedModel }` — `model`
+  ya es el `LanguageModel` resuelto (mismo valor que antes devolvía `provider.getModel(...)` directo),
+  así que aguas abajo solo cambia de dónde sale `model`.
+- `normalizeLlmProvider(provider: LlmProvider): LLMProviderName` es la única traducción
+  mayúsculas→minúsculas del repo — reemplaza el cast 1:1.
+
+### Fix (Paso 1) — una línea, sin revivir el endpoint
+`route.ts`: el import de `getLLMProvider` pasa a `normalizeLlmProvider` + `resolveEffectiveModel`
+(mismo barrel, `@/modules/chatbot/server/llm`). Las dos líneas `getLLMProvider(bot.llmProvider as
+...)` + `provider.getModel(bot.llmModel)` se reemplazan por `const effectiveModel =
+resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)` y `model:
+effectiveModel.model` en el `streamText(...)`. Cast `as` eliminado, no reemplazado por otro. Nada
+más del handler (auth, zod, prisma query, armado de `system`/`messages`, streaming) se tocó.
+
+**Decisión: sin WARN de degrade en este endpoint (documentado, no omitido).** El runtime real
+(`handleChatRequest.ts`, COST-1) loguea el degrade vía `logChatbotEvent` (persiste a
+`chatbot_events`, pensado para "eventos user-facing" del dashboard de actividad). Evalué alinear
+demo-chat 1:1 y decidí no hacerlo:
+1. Este archivo no tenía NINGÚN logging antes del fix — agregarlo sería una capacidad nueva, no un
+   swap de la resolución (contra el "NADA más" del ticket).
+2. Es un endpoint muerto, admin-only, sin conversación real asociada — un preview de superadmin no
+   es la clase de evento que `logChatbotEvent` documenta como su caso de uso.
+3. Persistir a `chatbot_events` de la org mezclaría actividad sintética de preview con analítica
+   real de conversaciones — riesgo de ruido en el dashboard de actividad (Panel, fuera de la
+   frontera de este sprint).
+
+El beneficio de seguridad (degradar en vez de tirar 500) queda de todos modos — es inherente a
+`resolveEffectiveModel`, no depende de loguear el degrade. `effectiveModel.degraded` queda
+disponible si en el futuro se decide instrumentar esto.
+
+### Pendiente / fuera de scope (anotado, no implementado)
+- **No se revivió el endpoint**: sigue muerto tras `requireSuperAdmin()`, sin caller, sin UI
+  cableada. No se cruzó a Panel (`/admin`, `/dashboard`).
+- **No se tocó** `resolveEffectiveModel`, `normalizeLlmProvider`, `getLLMProvider`, ni el WARN de
+  COST-1 — solo consumidos.
+- **No se tocó** cómo el endpoint arma `system`/`messages`/streaming — solo la resolución.
+- Los otros 4 archivos que COST-1 agrupó junto a demo-chat (`test-prompt/route.ts`,
+  `generateInsights.ts`, `health/smokeTest.ts`, `lib/ai/executive-brief.ts`) no se re-verificaron en
+  este sprint — la corrección de la nota falsa aplica solo a `demo-chat/[slug]/route.ts`, que es lo
+  que este sprint confirmó de primera mano.
+
+### Tests — nuevo invariant, los 2 casos que pedía el ticket
+`demo-chat-model-resolution.invariant.ts` (nuevo, `npm run test:cost2b`, 2 checks, cero DB/red/
+credenciales — mismo mecanismo de inyección de provider fake que
+`resolve-effective-model.invariant.ts` de COST-1, vía el 3er parámetro de `resolveEffectiveModel`):
+- `LlmProvider.GOOGLE` (enum Prisma real, mayúsculas — el valor exacto que rompía el 100% de los
+  bots pre-fix) → `normalizeLlmProvider` da `'google'`, `resolveEffectiveModel` resuelve sin throw,
+  `degraded=false`.
+- `LlmProvider.ANTHROPIC` (provider stub, no implementado) → degrada a Google (`degraded=true`,
+  fallback correcto), sin throw/500.
+
+No se invocó el handler `POST` completo (auth real, DB real, `streamText` real): el fix es solo la
+línea de resolución, y este repo no tiene mocking de Prisma/NextAuth para invariants — mismo criterio
+que ya usa `cleanup-old-events-auth.invariant.ts` (T0.2) para no tocar DB real en un test que corre
+sin infraestructura.
+
+### Controles de cierre
+- `npm run test:cost2b`: 2/2 ✓.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: **0 errores** — el baseline de `searchconsole.ts:119`
+  (`@googleapis/webmasters`) que documentaban COST-1/COST-2 no apareció en esta corrida (entorno o
+  estado del paquete pudo cambiar entre sesiones; no investigado, fuera de scope de COST-2b). En
+  cualquier caso: cero errores nuevos.
+- `eslint` (2 archivos: `route.ts` + el invariant nuevo): 0 errores, 1 warning pre-existente
+  (`_modelId` sin usar en el stub fake del test — mismo patrón exacto, sin `argsIgnorePattern` para
+  `_`, ya presente y aceptado en `resolve-effective-model.invariant.ts` de COST-1).
+- `git status`: 3 archivos de este sprint (`route.ts` modificado, nuevo
+  `__tests__/demo-chat-model-resolution.invariant.ts`, `package.json` +1 script) + esta entrada de
+  bitácora y la corrección de las 2 notas falsas. Nada fuera de `demo-chat/[slug]/`, `package.json`
+  y `docs/bitacora-roadmap.md`.
+
+### Verificación declarada (Valentino, cuando quiera)
+Por test: `npm run test:cost2b` — el caso `'GOOGLE'` ya no throwea. No es visual ni conductual (el
+endpoint no tiene caller ni UI).
+
+---
+
+## ✅ CRON-2 — Scheduled function real para cleanup-old-events; mecanismo de Netlify Functions verificado con un cron   ·   2026-07-11
+
+Prod no ejecuta ninguno de los 3 crons declarados en `netlify.toml` (`generate-insights-cron`,
+`send-weekly-reports-cron`, `cleanup-old-events-cron`) — el dashboard de Netlify muestra 0
+scheduled functions, solo el "Next.js Server Handler". Causa: `netlify.toml` declara
+`[functions.X].schedule` para nombres de function que no existen como archivos reales — no había
+`netlify/functions/` en el repo. Con Next Runtime v5, nombrar una ruta de Next en `netlify.toml`
+no la agenda; hace falta una Netlify Function real que corra en el schedule y le pegue por HTTP a
+la ruta de Next. Este sprint arma el mecanismo con **un solo cron** — `cleanup-old-events`
+(T0.2, el más simple, `GET` sin body) — dejándolo listo para verificar en prod. Los otros 2 crons
+ya declarados (`generate-insights-cron`, `send-weekly-reports-cron`) y los otros crons del repo
+quedan fantasma, para replicar este mismo patrón en un sprint posterior.
+
+### Descubrimiento (Paso 0)
+- **Precondición cumplida**: `git status` en el worktree, working tree limpio — `netlify.toml`
+  sin cambios sin commitear (no hay pisada de trabajo del Panel). Branch `runtime/mejoras`, al día
+  con `origin`.
+- **`netlify.toml` ya tenía la entrada correcta para `cleanup-old-events-cron`** — esto corrige el
+  supuesto del ticket. T0.2 (hoy mismo, sesión anterior) ya había agregado
+  `[functions."cleanup-old-events-cron"] schedule = "0 6 * * *"` como parte de "cablear el cron".
+  El nombre y el horario ya eran exactamente los correctos — Netlify deriva el nombre de una
+  function de su filename bajo `netlify/functions/`, así que no había nada que "corregir o
+  reemplazar" en el contenido de la entrada: estaba bien escrita, solo huérfana (sin archivo real
+  detrás). **Consecuencia: Paso 2 del ticket (cirugía en `netlify.toml`) resultó en cero diff** —
+  crear el archivo de la function con el nombre exacto (`cleanup-old-events-cron.ts`) fue la
+  corrección completa. Confirmado con `Read` de `netlify.toml` antes y después: archivo idéntico,
+  sin tocar.
+- **`src/app/api/cron/cleanup-old-events/route.ts`**: solo `GET`, `force-dynamic`. Auth vía
+  `getProvidedCronSecret(request)` (exportada, sin helper compartido — ver nota de T0.2, duplicada
+  4 veces en el repo): primero `Authorization: Bearer <secret>`, si no matchea ese esquema cae a
+  `X-Cron-Secret`. Falla cerrado si `CRON_SECRET` no está seteada. `.env.example` documenta el
+  header esperado como `Authorization: Bearer <CRON_SECRET>` — se usó ese, no el fallback.
+- **URL del sitio**: barrido del repo entero — no hay ni un solo uso de las env vars nativas de
+  Netlify (`URL`, `DEPLOY_URL`, `SITE_URL`); la convención establecida en 22 archivos es
+  `NEXT_PUBLIC_APP_URL` (manual, documentada como "URL pública canónica de la app" en
+  `.env.example`). Se optó por `process.env.URL` (nativa de Netlify) en vez de
+  `NEXT_PUBLIC_APP_URL` para esta function puntual — la regla del ticket la nombra explícitamente
+  ("resuelve desde el entorno de Netlify"), y a diferencia de `NEXT_PUBLIC_APP_URL` (config manual,
+  pensada para uso client-facing) no depende de que alguien la haya seteado bien en el dashboard
+  para este propósito: Netlify la inyecta sola, siempre apunta al dominio primario real del sitio.
+- **`@netlify/functions`**: no está instalado (`package.json` sin ninguna referencia `@netlify/*`
+  salvo el plugin declarado sin versión en `netlify.toml`). Se decidió NO instalarlo — el único uso
+  típico del paquete acá sería tipar los parámetros `event`/`context` del handler clásico, pero
+  esta function no lee ninguno de los dos (solo hace un `fetch` y devuelve `{statusCode, body}`),
+  así que un handler sin parámetros no necesita esos tipos y queda con cero `any` sin depender de
+  nada nuevo (regla del repo: no agregar dependencia sin chequear alternativa nativa — acá la
+  alternativa es simplemente no tipar lo que no se usa).
+- **`tsconfig.json`**: `include` es `**/*.ts` sin exclusión para `netlify/**` — la function nueva
+  SÍ pasa por `tsc --noEmit` en modo strict real, no es un blind spot.
+- **`vercel.json`**: confirmado que sigue con su propio set de 3 crons distinto y desincronizado
+  (ya documentado en T0.2) — no tocado, informativo.
+
+### Implementación
+- **`netlify/functions/cleanup-old-events-cron.ts`** (nuevo): handler sin parámetros (no usa
+  `event`/`context`, cero import de `@netlify/functions`). Lee `process.env.URL` y
+  `process.env.CRON_SECRET`; si falta cualquiera de los dos, `console.error` claro + `500` (no
+  intenta el fetch con `undefined`, no falla silencioso). Si están, `fetch` a
+  `${URL}/api/cron/cleanup-old-events` con header `Authorization: Bearer ${CRON_SECRET}`. Loguea el
+  body de la respuesta tanto en éxito como en error (`console.log`/`console.error`) para que quede
+  visible en los logs de Netlify. Catch alrededor del fetch con el mismo patrón de
+  `error instanceof Error ? error.message : 'unknown error'` que ya usa la propia ruta T0.2 —
+  consistencia con el estilo existente, no un patrón nuevo.
+- **`netlify.toml`**: sin cambios (ver Descubrimiento — la entrada ya estaba completa y correcta).
+  Function bundler ya configurado repo-wide (`[functions] node_bundler = "esbuild"`), sin
+  `directory` override — usa el default `netlify/functions/`, que es donde se creó el archivo.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **`generate-insights-cron` y `send-weekly-reports-cron`**: siguen declaradas en `netlify.toml`
+  sin function real — fantasma, igual que antes de este sprint. Quedan, junto con
+  `regenerate-briefs`, `send-executive-reports` y `detect-bot-issues` (los otros 5 crons de
+  runtime), para replicar este mismo patrón en un sprint posterior una vez confirmado en prod.
+- **`alerts` y `os-follow-up`**: no tocados — son superficie del Panel/LeadOS, fuera de este sprint.
+- **`src/app/api/cron/cleanup-old-events/route.ts`**: cero líneas tocadas — la function nueva solo
+  le pega por HTTP, no cambia su lógica ni su auth.
+- **`vercel.json`**: no tocado.
+- **`@netlify/functions`**: no instalado (decisión explicada arriba, no un olvido).
+- Sin migración, sin `git`, sin tocar `schema.prisma`, sin `prisma migrate reset`. `any` cero.
+
+### Controles de cierre
+- `.\node_modules\.bin\tsc.cmd --noEmit` (PowerShell, comando único, desde
+  `logic-core-runtime\logic-core-v3`): **0 errores**, antes y después del cambio (baseline ya
+  estaba limpio — a diferencia de COST-2b, esta corrida tampoco mostró el `searchconsole.ts:119`
+  que documentaban COST-1/COST-2).
+- `eslint` sobre el único archivo tocado (`netlify/functions/cleanup-old-events-cron.ts`): 0
+  errores, 0 warnings.
+- No se corrió `git` (regla del sprint) — el archivo nuevo queda sin stagear, a criterio de
+  Valentino cuándo commitearlo.
+- `npx prisma migrate status`: no corrido — este sprint no toca schema ni tiene motivo para
+  revisar drift de migraciones (cero cambios de Prisma).
+
+### Verificación declarada (Valentino, cuando quiera) — el cierre real de este sprint
+El agente no puede confirmar esto — implementado, NO verificado hasta que se vea en prod:
+1. Deploy a producción (**published**, no preview — las scheduled functions de Netlify solo
+   disparan en published deploys).
+2. Netlify → sitio → **Functions**: debería aparecer `cleanup-old-events-cron` con badge
+   **Scheduled**.
+3. Botón **"Run now"** para forzar una invocación sin esperar las 6am UTC / 3am Argentina.
+4. Logs de la function: buscar `[cleanup-old-events-cron] OK: ...` (éxito) o el mensaje de error
+   correspondiente:
+   - `401` / body con `Unauthorized` → la ruta rechazó el secret. Más probable: `CRON_SECRET` no
+     está disponible en el contexto **Functions** de Netlify (puede estar seteada solo para
+     Builds/la app Next.js) — revisar Site settings → Environment variables → contexto de la var.
+   - `500` con `"Missing URL or CRON_SECRET environment variable"` → alguna de las dos no está en
+     el entorno de la function.
+5. Confirmar que la ruta corrió de verdad, no solo que el fetch devolvió 200: log de T0.2 del lado
+   de la ruta, o una query a `chatbotEvent` que muestre que se podó lo viejo (mismo criterio de
+   verificación que ya usó T0.2).
+
+Hasta que Valentino vea una invocación real con badge Scheduled + Run now + ejecución confirmada,
+CRON-2 está implementado, no verificado — `tsc`/`eslint` en verde no cierra esto, es prod o nada.
+
+---
+
+
+## ONF-1 — Reconcile transaccional del onFinish: writes atómicos + compensación de cupo + fallback de respuesta vacía
+
+### Descubrimiento (Paso 0) — desvíos vs. el enunciado
+- El worktree `logic-core-runtime` está en branch **`main`** (commit 776e9b4), no en `runtime/mejoras`
+  como registraba la memoria de sesiones previas. Limpio (sin cambios sin commitear) →
+  `handleChatRequest.ts` estaba libre; precondición de archivo compartido OK.
+- El "precedente de $transaction en el propio archivo" NO estaba en `handleChatRequest.ts`: está en
+  el mismo módulo, `tools/captureLead.ts:360` (`scope.$transaction`), y el helper de aislamiento ya
+  exponía la envoltura (`registry.ts` → `buildScope`: re-arma los accessors del MISMO tenant sobre
+  el `tx` de Prisma). Se reusó ese patrón tal cual — cero infraestructura nueva de transacciones.
+- `route.ts` declara `maxDuration = 30`, pero el cap real de Netlify (~10s) sigue siendo el corte a
+  diseñar. Todo lo demás coincidía: 3 writes sueltos en onFinish, INFRA.1 en onError/catch,
+  `tryReserveConversation` atómico en `checker.ts`/`registry.ts`.
+
+### Cómo quedó el $transaction (RB.3)
+Los tres writes del turno (`chatMessage.create` ASSISTANT → `conversation.update` contadores →
+`incrementQuota` upsert) van en UNA `scope.$transaction`. **Orden y por qué**: mensaje primero
+(fila nueva, sin contención); conversación después (único lock compartido con la tx de
+`capture_lead` — lead→conversación — un solo recurso común entre ambas transacciones → sin ciclo de
+deadlock posible); cupo al final (la fila `QuotaUsage` del mes es la de mayor contención del tenant
+— se lockea a lo último para achicar su sección crítica). **Ante corte a ~10s**: la conexión muere
+sin COMMIT → Postgres hace rollback → nunca queda estado parcial (cupo movido sin mensaje, o
+mensaje sin contadores). El turno cortado lo recupera el retry del widget vía INFRA.2 (cola USER
+sin responder no se duplica). `incrementQuota` ahora acepta accessors opcionales
+(`Pick<OrgScopeAccessors, 'quotaUsage'>`) para correr dentro del `tx`; sin el parámetro se comporta
+idéntico a antes (los demás callers no cambian).
+
+### Decisión: "respuesta YA entregada + transacción de persistencia falla"
+**Retry acotado + aceptar la pérdida con rastro claro.** Un (1) reintento
+(`PERSIST_TX_MAX_ATTEMPTS = 2`, backoff `PERSIST_TX_RETRY_BACKOFF_MS = 300ms` — retry de
+APLICACIÓN, no de conexión), con guard de idempotencia para el caso commit-ack perdido: el
+reintento hace una query DIRIGIDA dentro del tx (conversationId + role ASSISTANT + MISMO contenido
++ ventana de 90s) y si el ASSISTANT idéntico ya está, NO re-escribe — como los tres writes son
+atómicos, si el mensaje entró, los contadores también. La query dirigida (y no "mirar la cola") es
+fix de un hallazgo del review: un USER interleaved de otro request del mismo sessionId desplazaría
+la cola y taparía el commit fantasma → assistant y contadores duplicados. Ese chequeo corre SOLO en
+reintentos (cero lecturas extra en el camino feliz). Si el segundo intento también falla:
+`chat.persist_failed` con `attempts` vía INFRA.1 (stderr off-Neon + evento best-effort + Sentry) y
+se acepta la pérdida del REGISTRO del turno — la respuesta ya salió y no es re-enviable; preferimos
+un turno sin registrar a contadores dobles o parciales. El primer fallo también deja rastro
+(`chat.persist_retry`). Residual aceptado y documentado: un ASSISTANT canned idéntico de OTRO
+request en la misma conversación dentro de la ventana puede producir un skip "de más" (se prefiere
+un persist de menos a contadores dobles).
+
+### Compensación de cupo (MH.2) — atómica y EN PAREJA con el descarte de la fila
+- Primitiva: `QuotaUsageScopedDelegate.releaseConversation` (registry.ts) — `UPDATE ... SET
+  conversationsCount = conversationsCount - 1 WHERE ... conversationsCount > 0 AND EXISTS (guard
+  de org)` — espejo exacto de `reserveConversation`. NUNCA decrement suelto: una sola sentencia
+  condicional (row-lock de Postgres), contador jamás negativo, sin lost-updates.
+- Orquestación: `compensateNewConversationReservation` (checker.ts) — **release + descarte de la
+  fila de Conversation en UNA transacción**, con el delete condicional a que la conversación siga
+  sin NINGÚN ASSISTANT persistido. Esto es fix directo del hallazgo MAYOR del review (encontrado
+  por dos lentes independientes): compensar dejando la fila viva permitía que el retry automático
+  del widget (INFRA.2, exactamente el flujo de cold-start de Neon) reviviera la conversación con
+  `isNew=false` → sin re-reserva → **conversación entera gratis** (undercount sistemático).
+  Descartada la fila, el retry recrea la conversación y VUELVE a reservar: accounting exacto en
+  ambos desenlaces. Y si otro request del mismo sessionId ya entregó un turno en esa fila, el
+  delete no matchea → la compensación entera se omite y el cobro queda (jamás se borra historia
+  entregada — también cierra el hallazgo de la carrera del discard). `year/month` vienen del
+  RESULTADO de la reserva (borde de mes: se devuelve al período que se reservó).
+- **Cuándo compensa** (`shouldCompensateQuota`, tabla pura en `reconcile.ts`): el compensador solo
+  existe si hubo reserva (conversación nueva + reserve OK). Dispara en: `onError`/`onAbort` con
+  `ttfbAt === null` (ni un chunk útil llegó — con entrega parcial o tool ejecutada el cupo SE
+  COBRA); respuesta vacía sin tool calls (con `capture_lead` ejecutado se cobra: hubo valor); 400
+  `no_user_message` (corre DESPUÉS de la reserva — antes filtraba un cupo); catch externo (falla
+  pre-stream). **Once-only por request**: flag marcado ANTES del `await` (hooks en el mismo event
+  loop → sin re-entrada); la atomicidad cross-request la dan la tx y el SQL condicional. Si la tx
+  de compensación falla: rollback total → cobrado + fila viva = comportamiento pre-sprint (1 solo
+  cobro vía retry), rastro `chat.quota_compensation_failed`.
+- **Caveat onAbort (hallazgo del review, verificado contra `node_modules/ai/dist`)**: en ai@6.0.214
+  el SDK NO espera la promesa de `onAbort` (sí la de `onError`) → la compensación de abort es
+  best-effort en Netlify (el freeze puede cortarla). Al ser una tx todo-o-nada, el peor caso es
+  "cobrado + fila viva" (= pre-sprint, accounting correcto vía retry); nunca un estado a medias.
+- **Filas degradadas que inflaban métricas**: una conversación RECIÉN creada cuyo request termina
+  degradado (`domain_overflow`, `quota_exhausted`, `quota_reserve_failed`, `no_user_message`) se
+  descarta (`discardNewConversation`, best-effort, mismo delete condicional anti-carrera).
+  `ChatbotEvent.conversationId` es `onDelete: SetNull` → los eventos sobreviven.
+  `conversation_limit` (C0.2) solo aplica a existentes → jamás se borra nada ahí.
+
+### Fallback de respuesta vacía
+`experimental_transform` de streamText (`createEmptyResponseFallbackTransform`, reconcile.ts):
+retiene cada `finish-step` un chunk; si lo que sigue es el `finish` del run y NINGÚN step emitió
+texto útil (text-delta con contenido no-blanco), inyecta las text parts canned
+(`buildEmptyFallbackMessage`: deriva a WhatsApp si el bot tiene número, genérica si no — mismo tono
+que C0.2/B4.2) DENTRO del último step → el visitante la ve EN VIVO como texto normal del assistant
+(cero cambios en el widget), y `steps[]`/`text` del onFinish la incluyen. Con texto útil el
+transform es **passthrough idéntico** (paridad del camino feliz — pinneado por test con `deepEqual`
+del stream completo). Un stream que muere sin `finish` NO inyecta (ese caso es compensación, no
+fallback). En onFinish: si la compensación descartó la conversación (nueva, vacía, sin tools), el
+persist se SALTEA (no hay fila y re-persistir re-inflaría lo compensado) — rastro en
+`chat.empty_response_fallback` + `chat.quota_compensated` + `chat.llm_request_finished` con
+`turnDiscarded: true`. En conversación EXISTENTE (ya cobrada) el turno canned se persiste normal
+(nunca mudo). Belt-and-suspenders: si el `text` del onFinish no incluyera lo inyectado,
+`assistantContent` cae al canned explícito; y en `empty_response` la decisión ignora `ttfbAt` a
+propósito (el propio fallback inyectado puede marcar ttfb vía onChunk).
+
+### INFRA.3 — parametrizado, NO activado
+`INFRA3_CONNECTION_RETRY` (reconcile.ts): `{ maxAttempts: 3, initialBackoffMs: 250, maxBackoffMs:
+2000 }` con TODO(INFRA.3) explícito. NO se usa en ningún lado: este sprint no toca `lib/prisma.ts`,
+ni el connection string, ni pgbouncer, ni cómo se conecta a la DB. El único retry ACTIVO de ONF-1
+es `PERSIST_TX_*` (aplicación, dentro del onFinish, post-entrega).
+
+### Review adversarial (harness multi-agente) — 5 hallazgos, 2 mayores corregidos
+4 lentes (concurrencia/atomicidad, AI SDK/stream, aislamiento/seguridad, scope/paridad) + 3
+refutadores por hallazgo + crítico de completitud. La corrida se cortó por límite de sesión: 3/4
+lentes completaron (faltó AI SDK/stream), los refutadores no corrieron → los 5 hallazgos crudos se
+verificaron A MANO contra el código real:
+1. **MAYOR (2 lentes independientes) — CONFIRMADO y CORREGIDO**: compensar sin descartar la fila →
+   conversación revivida gratis por el retry del widget (undercount sistemático). Fix: compensación
+   atómica en pareja (arriba).
+2. **menor — CONFIRMADO y CORREGIDO**: guard de idempotencia del retry miraba solo la cola → USER
+   interleaved duplicaba assistant+contadores. Fix: query dirigida.
+3. **menor — CONFIRMADO y CORREGIDO**: discard podía borrar (cascade) una fila que otro request del
+   mismo sessionId estaba usando. Fix: delete condicional a "sin ASSISTANT" (residual documentado:
+   request B mid-stream sin ASSISTANT aún — ventana estrecha, mismo perfil de riesgo que pre-sprint).
+4. **menor — CONFIRMADO, mitigado por diseño**: `onAbort` no es awaited por el SDK → compensación
+   de abort best-effort; con la tx todo-o-nada el peor caso es el comportamiento pre-sprint.
+5. El lente de aislamiento devolvió 0 hallazgos (el SQL nuevo replica el guard de org de la reserva).
+El lente AI SDK/stream y el crítico de completitud NO corrieron (límite de sesión) — queda anotado
+como cobertura de review incompleta; el transform tiene tests de protocolo propios (orden de parts,
+paridad, multi-step) que cubren parte de ese eje.
+
+### Archivos
+- `src/lib/isolation/registry.ts` — `releaseConversation` en `QuotaUsageScopedDelegate` (espejo de
+  `reserveConversation`).
+- `src/lib/isolation/index.ts` — re-export type `OrgScopeAccessors` (para tipar el `tx` fuera del helper).
+- `src/modules/chatbot/server/quota/checker.ts` — `compensateNewConversationReservation` (release +
+  discard atómicos) + `incrementQuota` con accessors opcionales.
+  `src/modules/chatbot/server/quota/index.ts` — exports.
+- `src/modules/chatbot/server/chat/reconcile.ts` (NUEVO) — piezas puras (patrón dedup.ts/INFRA.2):
+  tabla de compensación, dedup del ASSISTANT, fallback text, transform, constantes.
+- `src/modules/chatbot/server/chat/handleChatRequest.ts` — cirugía del onFinish + hooks
+  (onError/onAbort/catch/400) + descartes degradados. El resto del handler NO se reestructuró.
+- `src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts` (NUEVO) + script
+  `test:onf1` en package.json.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **Connection string / pgbouncer / lib/prisma.ts** — INFRA.3, gateado por la firma real de prod
+  (Netlify logs + Sentry DSN) + coordinación con Franco + DB reconciliada. Solo constantes definidas.
+- **`schema.prisma` / migraciones** — cero. El `@@unique` compuesto de sessionId (C3.2) queda
+  pendiente, mismo gate (Franco + DB reconciliada). Nota: `Conversation.sessionId` ya es `@unique`
+  simple en el schema actual; el hallazgo 3 del review desaparece de raíz cuando C3.2 agregue el
+  unique compuesto + create atómico en `getOrCreateConversation`.
+- **Refactor del handler / extraer persistTurn a módulo (C3.6)** — no se hizo a propósito (archivo
+  compartido, diff mínimo). Solo helpers PUROS nuevos en reconcile.ts.
+- **Widget / packs / scoring / admin / dashboard** — cero líneas.
+- Deuda pre-existente anotada (no tocada): warnings eslint baseline (`CRM_SYNC_ATTEMPT_REPARENT`
+  en registry.ts:75, `toolResults` sin uso en el destructure del onFinish).
+
+### Tests (test:onf1) + controles
+- Invariantes: tabla de compensación completa (once-only, "tool ejecutada se cobra", triggers);
+  dos hooks del mismo request → 1 sola compensación; modelo del release condicional (nunca
+  negativo, sin lost-updates); modelo de la compensación EN PAREJA (release+discard juntos,
+  omitida si hay ASSISTANT, no-op al repetir); dedup del ASSISTANT (commit fantasma no duplica /
+  candidato USER o viejo persiste); transform (paridad `deepEqual` con texto, inyección en vacío /
+  whitespace / multi-step, jamás en stream muerto); modelo todo-o-nada de la tx. Los modelos
+  ejecutables pinnean la SEMÁNTICA — la garantía física (row-lock, rollback) es de Postgres, misma
+  mecánica ya en prod vía `reserveConversation`.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: **0 errores** (baseline limpio antes y después).
+- `eslint` sobre los 7 archivos tocados: 0 errores (2 warnings pre-existentes, arriba).
+- `npm run test:onf1` ✓; regresión vecina: `test:infra2` ✓, `test:c02` ✓, `test:utm1` ✓.
+- Sin `git` (regla del sprint). `npx prisma migrate status`: no corrido — cero cambios de Prisma.
+
+### Verificación declarada (Valentino) — el cierre real de este sprint
+El reconcile cierra races BAJO CONCURRENCIA y eso NO lo prueban ni el build ni estos tests:
+1. **Test de carga real**: N requests concurrentes contra el mismo bot en el último cupo del mes +
+   streams matados a mitad (pre-token y post-token) + retries del widget → `conversationsCount`
+   nunca por encima del límite NI por debajo de las conversaciones entregadas (el undercount del
+   hallazgo 1 es exactamente lo que hay que re-verificar), jamás negativo, cero turnos a medias.
+2. **Re-verificar aislamiento** (toca cupo por conversación): corrida de
+   `tests/integration/chatbot-isolation.spec.ts` / `motor-isolation.spec.ts` contra dev-DB.
+3. Netlify real: confirmar que el corte a ~10s deja rollback limpio (buscar `chat.persist_retry` /
+   `chat.persist_failed` / `chat.quota_compensated` en Function Logs tras un corte inducido).
+Hasta ese test de carga, **ONF-1 está implementado, no verificado bajo carga**. INFRA.3 (pgbouncer
++ retry activo de conexión) y C3.2 (sessionId compuesto) siguen pendientes, gateados por Franco +
+DB reconciliada.
+
+---

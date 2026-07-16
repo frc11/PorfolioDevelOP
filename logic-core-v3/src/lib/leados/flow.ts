@@ -417,7 +417,7 @@ function proximaAccionPara(
     case 'APROBADA': {
       // B6: el envío del link vive en el Paso 9 del wizard.
       if (!input.demoEnviada && gateAbierto) {
-        return { proximaAccion: 'Demo aprobada — enviá el link (Paso 9)', accionable: true }
+        return { proximaAccion: 'Demo aprobada — enviá el link (Envío)', accionable: true }
       }
       if (!input.demoEnviada) {
         return {
@@ -426,10 +426,10 @@ function proximaAccionPara(
         }
       }
       if (input.followUpVencido) {
-        return { proximaAccion: 'Demo enviada — toca el follow-up (Paso 9)', accionable: true }
+        return { proximaAccion: 'Demo enviada — te toca un toque (Seguimiento)', accionable: true }
       }
       return {
-        proximaAccion: 'Demo enviada — registrá lo que pase en la conversación (Paso 9)',
+        proximaAccion: 'Demo enviada — registrá lo que pase en la conversación (Seguimiento)',
         accionable: false,
       }
     }
@@ -440,7 +440,7 @@ function proximaAccionPara(
       }
     case 'CONSTRUCCION':
       return {
-        proximaAccion: 'Demo en construcción — publicá el draft y pasá el self-check',
+        proximaAccion: 'Demo en construcción — publicá el borrador y pasá el chequeo final',
         accionable: true,
       }
     case 'RECHAZADA':
@@ -454,10 +454,10 @@ function proximaAccionPara(
       }
       // B6: gate cerrado = la conversación manda — opener o toque pendiente.
       if (input.contactos === 0) {
-        return { proximaAccion: 'Mandá el opener (Paso 7)', accionable: true }
+        return { proximaAccion: 'Mandá el opener (Opener)', accionable: true }
       }
       if (input.followUpVencido) {
-        return { proximaAccion: 'Toca el follow-up — mandalo y registralo (Paso 9)', accionable: true }
+        return { proximaAccion: 'Te toca un toque — mandalo y registralo (Seguimiento)', accionable: true }
       }
       return { proximaAccion: 'Esperando respuesta del negocio', accionable: false }
     }

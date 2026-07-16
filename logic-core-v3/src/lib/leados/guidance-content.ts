@@ -241,7 +241,7 @@ export type GuiaPasoId =
  * `contracts.ts` ('' = sin definir todavía) — un typo no compila.
  */
 export const GUIA_FICHA = {
-  titulo: 'Paso 1 — Ficha de observación',
+  titulo: 'Ficha de observación',
   intro: [
     'Anotá lo que ',
     { enfasis: 'ves' },
@@ -309,7 +309,7 @@ export const GUIA_FICHA = {
   copyBlock: {
     titulo: 'Bloque para el Evaluador',
     instruccion:
-      'Se arma con lo último guardado. Copialo, pegalo en el Evaluador y volvé con el resultado al paso 2.',
+      'Se arma con lo último guardado. Copialo, pegalo en el Evaluador y volvé con el resultado a Evaluación.',
   },
   congelada: {
     resumen: 'Ver la ficha de observación (congelada: el Evaluador ya la leyó)',
@@ -328,7 +328,7 @@ export const GUIA_FICHA = {
  * el porqué). `porque`/`ejemplos` enseñan la disciplina de transcribir fiel.
  */
 export const GUIA_EVALUACION = {
-  titulo: 'Paso 2 — Evaluación',
+  titulo: 'Evaluación',
   intro: [
     'No juzgás vos: pegás la ficha en el Evaluador (el bloque del paso 1), esperás su respuesta y la ',
     { enfasis: 'transcribís acá tal cual' },
@@ -399,7 +399,7 @@ export const GUIA_EVALUACION = {
  * qué las secciones concretas convierten.
  */
 export const GUIA_BRIEF = {
-  titulo: 'Paso 3 — Brief de diseño',
+  titulo: 'Brief de diseño',
   intro: [
     'Copiá el bloque de abajo, pegalo en el ',
     { enfasis: 'Gem de diseño' },
@@ -475,11 +475,11 @@ export const GUIA_BRIEF = {
 export const GUIA_CONSTRUCCION = {
   // El «Paso 4 —» queda en la fuente única: el rail numera la fase y el h2 del
   // step lo refleja sin hardcodearlo en el componente (3.7, single-source).
-  titulo: 'Paso 4 — Construcción de la demo',
+  titulo: 'Construcción de la demo',
   intro: [
     'La demo se construye en ',
     { enfasis: 'Claude Design' },
-    ' (herramienta externa): el panel te guía fase por fase, no la arma por vos. Al arrancar, el dossier pasa a «Construcción» y se abren el draft y el self-check.',
+    ' (herramienta externa): el panel te guía fase por fase, no la arma por vos. Al arrancar, el dossier pasa a «Construcción» y se abren el borrador y el chequeo final.',
   ],
   porque: [
     [
@@ -512,7 +512,7 @@ export const GUIA_CONSTRUCCION = {
 } satisfies PasoGuia
 
 export const GUIA_SELF_CHECK = {
-  titulo: 'Self-check antes de enviar',
+  titulo: 'Chequeo final antes de enviar',
   intro: [
     'Revisá la demo publicada punto por punto. Los ',
     { enfasis: 'obligatorios bloquean el envío' },
@@ -530,7 +530,7 @@ export const GUIA_SELF_CHECK = {
     [
       'Es tu ',
       { enfasis: 'último filtro antes de Franco' },
-      '. Lo que dejes pasar no desaparece: vuelve como rechazo, y cada rechazo es un round-trip que enfría al negocio que está esperando.',
+      '. Lo que dejes pasar no desaparece: vuelve como rechazo, y cada rechazo es un ida y vuelta que enfría al negocio que está esperando.',
     ],
     [
       'Los obligatorios son dealbreakers; los del «ojo de diseño» no bloquean, pero Franco los ve igual. ',
@@ -564,7 +564,7 @@ export const GUIA_SELF_CHECK = {
  * va en el `intro` (publicás para que Franco revise, no para el negocio).
  */
 export const GUIA_DRAFT = {
-  titulo: 'Publicar el draft',
+  titulo: 'Publicar el borrador',
   intro: [
     'Publicás un borrador para que ',
     { enfasis: 'Franco lo revise' },
@@ -578,7 +578,7 @@ export const GUIA_DRAFT = {
   ],
   campos: {
     draftUrl: {
-      label: 'URL del draft',
+      label: 'URL del borrador',
       hint: 'La que te dio Netlify Drop, completa y con https://',
     },
   },
@@ -651,7 +651,7 @@ export const GUIA_SEGUIMIENTO = {
     [
       'Si el negocio ',
       { enfasis: 'responde' },
-      ', cambia el rumbo: marcás «Respondió», se frena el follow-up y se abre la producción de la demo (Paso 3). De ahí en más el objetivo es uno solo: la reunión.',
+      ', cambia el rumbo: marcás «Respondió», se frenan los toques y se abre la producción de la demo (Brief). De ahí en más el objetivo es uno solo: la reunión.',
     ],
     [
       'Si ',
@@ -663,7 +663,7 @@ export const GUIA_SEGUIMIENTO = {
     {
       tema: 'Cuando responde',
       asiSi: 'Contesta «contame más» → marcás «Respondió», se abre el brief y enfocás en cerrar la reunión.',
-      asiNo: 'Seguís mandando follow-ups genéricos como si no hubiera contestado.',
+      asiNo: 'Seguís mandando toques genéricos como si no hubiera contestado.',
       porque: 'Marcar «Respondió» frena la cadencia y abre la demo; ignorarlo te deja insistiendo de más.',
     },
     {
@@ -748,7 +748,7 @@ export const GUIA_AGENDA = {
   gate: {
     titulo: 'Se agenda cuando el negocio respondió y acepta reunirse',
     detalle: [
-      'No lo dispara un trigger automático: el paso se abre cuando ',
+      'Esto no se abre solo: el paso se abre cuando ',
       { enfasis: 'marcás «Respondió» en «Seguimiento»' },
       ' y en la charla el negocio acepta la reunión. Hasta entonces espera — agendar antes sería ofrecer un turno que nadie pidió.',
     ],
@@ -829,7 +829,7 @@ export const GUIA_ENVIO = {
       'Base editable: adaptala a la conversación y pegala en Instagram. El link va acá y solo acá.',
   },
   enviada: [
-    'El follow-up ya quedó armado — de acá en adelante el objetivo es ',
+    'El próximo toque ya quedó armado — de acá en adelante el objetivo es ',
     { enfasis: 'UNO: la reunión' },
     '. Preguntá si la pudo ver y proponé un horario.',
   ],
@@ -842,7 +842,7 @@ export const GUIA_ENVIO = {
     engancheSinAprobar: [
       'El link se envía cuando ',
       { enfasis: 'Franco apruebe la demo' },
-      ' (la producción pasa por brief, construcción y self-check). Hasta ahí, este paso no lo ofrece.',
+      ' (la producción pasa por brief, construcción y chequeo final). Hasta ahí, este paso no lo ofrece.',
     ],
     niEngancheNiAprobada: [
       'El link de la demo se envía recién cuando el negocio ',
@@ -913,13 +913,13 @@ export type SelfCheckEjemplar = {
 }
 
 export const GUIA_SELF_CHECK_EJEMPLAR = {
-  titulo: 'Un self-check terminado, como lo deja un buen setter',
+  titulo: 'Un chequeo final terminado, como lo deja un buen setter',
   porque:
     'No es marcar todo en verde: es verificar cada obligatorio en la demo publicada y marcar los flags de diseño que viste, aunque no bloqueen.',
   lineas: [
     'Los 6 obligatorios en verde, pero cada uno comprobado en serio: abrió la demo en el celular, en incógnito, y tocó el botón de WhatsApp para ver que abriera el chat al número real.',
     'Dejó 2 flags de diseño marcados igual —«más de 3 colores» y «la fuente parece la default»—: no frenan el envío, pero viajan a Franco y muestran que miró con criterio.',
-    'Un sheet impecable, sin un solo flag y hecho en treinta segundos, suele ser la señal de que NO se miró en serio. Un buen self-check casi siempre deja algún flag.',
+    'Un chequeo impecable, sin un solo flag de diseño marcado y hecho en treinta segundos, suele ser la señal de que NO se miró en serio. Un buen chequeo final casi siempre deja algún flag de diseño.',
   ],
 } satisfies SelfCheckEjemplar
 
