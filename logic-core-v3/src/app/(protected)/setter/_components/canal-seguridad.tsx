@@ -41,7 +41,7 @@ export function CanalSeguridad({ dmsHoy }: { dmsHoy: number }) {
 
       <details className="mt-2">
         <summary className="cursor-pointer text-[11px] font-medium text-zinc-500 hover:text-zinc-300">
-          Disciplina de canal y warm-up
+          Disciplina de canal y ritmo de arranque
         </summary>
         <ul className="mt-2 space-y-1 text-[11px] leading-relaxed text-zinc-500">
           {disciplina.map((linea) => (

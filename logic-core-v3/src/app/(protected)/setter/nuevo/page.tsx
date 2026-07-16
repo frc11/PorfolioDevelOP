@@ -30,7 +30,7 @@ export default async function NuevoProspectoPage() {
       <PageHeader
         eyebrow="LeadOS"
         title="Cargar un prospecto"
-        description="Un negocio que encontraste vos. Entra frío, en ficha — y aparece en tu foco para que lo evalúes como cualquier otro."
+        description="Un negocio que encontraste vos. Arranca en Ficha, como cualquier otro — y aparece en tu foco para que lo evalúes."
         icon={UserPlus}
       />
       <NuevoProspectoForm nombresExistentes={nombresExistentes} />

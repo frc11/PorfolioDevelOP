@@ -255,7 +255,7 @@ export async function reabrirConstruccion(
     const dossier = await getOwnedDossier(leadId.data, userId)
     if (!dossier) return fail('Lead no encontrado')
     if (dossier.stage !== 'RECHAZADA') {
-      return fail('Este dossier no tiene correcciones pendientes')
+      return fail('Este lead no tiene correcciones pendientes')
     }
 
     await transitionDossier(leadId.data, { to: 'CONSTRUCCION' })
@@ -314,7 +314,7 @@ export async function guardarDraftUrl(
 
     const input = DraftUrlInputSchema.safeParse(inputRaw)
     if (!input.success) {
-      return fail(input.error.issues[0]?.message ?? 'Revisá la URL del draft')
+      return fail(input.error.issues[0]?.message ?? 'Revisá la URL del borrador')
     }
 
     const dossier = await saveOwnedDraftUrl(leadId.data, userId, input.data.draftUrl)
@@ -323,7 +323,7 @@ export async function guardarDraftUrl(
     revalidarSetter(leadId.data)
     return ok({ draftUrl: input.data.draftUrl })
   } catch (error) {
-    return mapError(error, 'No se pudo guardar el draft')
+    return mapError(error, 'No se pudo guardar el borrador')
   }
 }
 
@@ -344,7 +344,7 @@ export async function guardarSelfCheck(
     if (!leadId.success) return fail('Lead inválido')
 
     const input = SelfCheckInputSchema.safeParse(inputRaw)
-    if (!input.success) return fail('Revisá los puntos del self-check')
+    if (!input.success) return fail('Revisá los puntos del chequeo final')
 
     const selfCheck = buildSelfCheck(input.data.duros, input.data.softIds)
     const dossier = await saveOwnedSelfCheck(leadId.data, userId, selfCheck)
@@ -353,7 +353,7 @@ export async function guardarSelfCheck(
     revalidarSetter(leadId.data)
     return ok({ aprobado: selfCheckAprobado(selfCheck) })
   } catch (error) {
-    return mapError(error, 'No se pudo guardar el self-check')
+    return mapError(error, 'No se pudo guardar el chequeo final')
   }
 }
 
@@ -379,12 +379,12 @@ export async function enviarARevision(
       return fail('Solo se envía a revisión una demo en construcción')
     }
     if (!dossier.draftUrl) {
-      return fail('Falta publicar el draft (Paso 5) antes de enviar a revisión')
+      return fail('Falta publicar el borrador (Borrador) antes de enviar a revisión')
     }
     const selfCheck = parseSelfCheck(dossier.selfCheckJson)
     if (!selfCheckAprobado(selfCheck)) {
       return fail(
-        'El self-check no está aprobado: guardalo con todos los puntos obligatorios en verde',
+        'El chequeo final no está aprobado: guardalo con todos los puntos obligatorios en verde',
       )
     }
 

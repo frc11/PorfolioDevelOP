@@ -95,7 +95,7 @@ function ReunionAgendada({ agenda, leadPhone }: { agenda: Agenda; leadPhone: str
           </p>
         )}
         {agenda.calBookingUid && (
-          <p className="text-zinc-600">Booking Cal.com: {agenda.calBookingUid}</p>
+          <p className="text-zinc-600">Código de la reserva: {agenda.calBookingUid}</p>
         )}
       </div>
 

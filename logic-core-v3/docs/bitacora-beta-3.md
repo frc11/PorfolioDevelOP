@@ -1210,3 +1210,56 @@ Veredicto: **el rediseño cumple el brief.** Motor intacto, preservación intact
 **Queda para humano: todo.** Nada del backlog se ejecuta desde acá; es insumo de decisión de Franco. La decisión más urgente no es código: cargar las 4 URLs de `herramientas.ts` (§12.3) destraba la ejecutabilidad real de ~11 pantallas.
 
 **PROYECTO DE REDISEÑO: CERRADO CON AUDITORÍA ESPEJO.** AUD-1 (2026-07-02, midió el gap) → Bloques 2–7 (lo cerraron) → AUD-2 (2026-07-07, verificó el cierre y dejó marcado el camino).
+
+---
+
+## Sprint 1.1 — Una sola lengua: barrido de vocabulario del wizard muerto (B-03/C-04/C-15) · 2026-07-09
+
+**Qué se hizo.** Sprint de SOLO STRINGS sobre el hallazgo de AUD-2: "vocabulario muerto del wizard en el copy más visible" (numeración "Paso N" y jerga técnica — draft, self-check, follow-up, hard-block, dossier, pipeline, warm-up, trigger, sheet, flag, ratio, glassmorphism, "Booking Cal.com", "Vio el video", "Entra frío, en ficha" — sobreviviendo en copy que el setter lee, aunque el wizard ya no existe desde el corte 5.6). Censo por grep sobre la superficie del setter → clasificación en 3 clases (copy que el setter LEE / payloads-munición para IA, intocados / interno) → barrido solo de clase 1, mapeando cada "Paso N" contra el registro `PANTALLAS` de `manual.ts` como diccionario canónico. Cero cambios de lógica, cero archivos nuevos, cero migraciones.
+
+- **72 strings, 18 archivos** (`git diff --stat`): `flow.ts` (proximaAccion) · `flow-content.ts` (arreglos de hard-blocks → obligatorios, soft-check glassmorphism, STATUS_LABELS.VIO_VIDEO) · `herramientas.ts` (dondeSeUsa sin numeración paralela, veredicto del Evaluador) · `guidance-content.ts` (títulos de las 4 guías con "Paso N —", draft→borrador, self-check→chequeo final, trigger/round-trip/sheet/flag en criollo) · `manual.ts` (3 bajadas del registro) · `paso.ts` (detalle del cartel "Tu paso ahora" — no estaba en la lista original, sumado porque comparte el mismo patrón que `flow.ts:proximaAccion` y sin tocarlo el grep de éxito no cerraba) · `dossier.actions.ts`/`dossier.schemas.ts`/`outreach.actions.ts` (mensajes `fail()`/validación Zod — más allá de la línea 382 confirmada, el mismo archivo tenía 5 hits hermanos de draft/self-check/dossier en otros `fail()`) · 8 componentes (`seguimiento-form`, `m5-seguimiento`, `m16-agenda`, `canal-seguridad`, `ejemplo-ideal`, `mis-numeros`, `escalar-modal`, `nuevo-prospecto-form` + `nuevo/page.tsx` hermano).
+- **Mapeo de "Paso N" → pantalla:** resuelto contra `PANTALLAS`/`FASES_MANUAL` caso por caso (no a ciegas): Paso 1→Ficha, Paso 2→Evaluación, Paso 3→Brief, Paso 4→Construcción, Paso 5→Borrador, Paso 6→Chequeo final, Paso 7→Opener, Paso 9→Seguimiento **o** Envío según el contexto (el wizard viejo combinaba ambos en un mismo paso; el manual los separó en m5/m15 — se resolvió cada cita por lo que efectivamente señala, no por el número), Paso 10→Agenda.
+- **Casos con juicio propio (documentados, no a ciegas):** `VIO_VIDEO` → `'En conversación'` (el status legacy referenciaba un paso de video que el flujo actual no tiene; sin label real que aplique, se neutralizó, tal como habilitaba la instrucción) · `'flag'` suelto → se lo dejó reformulado como `'flag de diseño'` (el compuesto ya es vocabulario establecido — `SOFT_CHECKS`/`m14-chequeo.tsx` — a diferencia del término suelto) · `dossier` → se reformuló solo en los 2 puntos donde era clase-1 evidente (`manual.ts:158`, `dossier.actions.ts` "Este dossier no tiene correcciones" → "Este lead...").
+
+**Greps de éxito (post-barrido):**
+- `Paso [0-9]` sobre `setter/**` + `lib/leados/**` → **0 hits en copy visible**; todos los restantes son comentarios `/** */`/`//` (JSDoc, referencias internas a archivos/sprints) — clase 3, exentos por regla.
+- `draft|self-check|follow-up|pipeline|hard-block` sobre strings user-facing → **0 hits** tras 3 rondas de grep (una con `['"\`]...['"\`]` para aislar literales de comentarios); lo que sobrevive es: comentarios, nombres de campo/tipo (`draftUrl` como key), specs/invariantes (`*.invariant.ts`, `self-check-gate.invariant.ts`) y `notify.ts` (mensaje de Telegram a **Franco**, no al setter — fuera del alcance "copy que el setter lee"). `dossier.ts` intacto por regla explícita (frozen, ni strings).
+- `-i caliente` → sobrevive solo el badge operativo ("Caliente" en `foco-surface.tsx`/`home-sections.tsx`/`manual-nav.tsx`) y su guardrail (Franco marcándolo, gates que lo leen); los 3 hints de `guidance-content.ts:347,351,374` quedaron intactos (otro sprint, según instrucción).
+
+**Casos dudosos, NO tocados (frontera, anotados con archivo:línea):**
+1. `evaluacion-form.tsx:42` (`CALIENTE: 'Caliente'`) — el propio comentario del archivo (línea 31) documenta que conserva el label histórico "como testigo" de una suite vieja; no está claro si el componente sigue vivo post-corte-5.6 (el reemplazo parece ser `m3-veredicto.tsx`, que ya dice "Avanzar con prioridad"). Determinar vivo/muerto es una pregunta de arquitectura, no de vocabulario — fuera de este sprint.
+2. `novedades.ts:60` — `"...es el momento caliente"` usa "caliente" como modismo de urgencia (no el campo operativo de Franco); technically viola la letra del grep 3 pero es un uso idiomático distinto, no el vocabulario de wizard que este sprint ataca.
+3. `m14-chequeo.tsx:57` — la línea confirmada en el encargo no tenía jerga en el estado actual del archivo (ya decía "Publicá el borrador (paso anterior)..." sin número ni término técnico); no se tocó nada ahí. Puede que el número de línea original referenciara un estado previo del archivo.
+
+**Verde:**
+- ✅ `npx tsc --noEmit` → 0 errores en todo archivo tocado por este sprint. (El comando global mostró errores en `src/modules/motor/**` y `tests/integration/motor-*.spec.ts` — el lane paralelo de BSP-outbound activo en simultáneo, con archivos `??`/`M` ajenos al scope de este sprint desde `git status` de Fase 0; cero relación con este diff, cero archivo de `setter`/`leados` involucrado.)
+- ✅ `npm run test:leados` → **22/22**.
+- ✅ `npm run test:setter` → **39/39** (3.8m) — ningún spec assertaba contra las strings viejas, así que no hizo falta actualizar ninguno.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 1.1: cerró verde. (1) 72 strings / 18 archivos. (2) Los 3 greps de éxito dan 0 hits en copy visible (solo sobreviven comentarios/tests/payloads-munición/campos internos, todos exentos por regla). (3) tsc limpio en el diff propio (motor ajeno rojo por el lane paralelo, no tocado) · test:leados 22/22 · test:setter 39/39, sin specs que actualizar. (4) 3 casos frontera documentados arriba, ninguno tocado. (5) Terreno raro: el `npx tsc --noEmit` global pasó de verde (Fase 0) a rojo-en-motor durante la sesión — otra sesión (BSP-outbound) escribiendo en paralelo sobre `src/modules/motor/**`, confirmado por `git status` (archivos ajenos, prohibidos por el encargo). Commit local hecho, sin push.
+
+---
+
+## Sprint R — Recuperación de terreno del lane LeadOS · 2026-07-11
+
+**Por qué.** Tres sesiones frenaron en Fase 0 con diagnósticos contradictorios sobre el mismo índice: no se sabía si el Sprint 1.1 ("una sola lengua", ~72 strings/19 archivos del setter) seguía absorbido en el commit ajeno `44e25be`, si un reset lo había deshecho a medias, o si lo staged era ruido CRLF por worktrees. Sprint R: forense read-only primero, acción por árbol de decisión pre-autorizado después. Nada se pusheó, nada se borró del working tree.
+
+**El diagnóstico real (forense Fase 1):**
+- **Rama/worktree:** `b1-s2-bsp-outbound` en el worktree principal `C:/Users/franc/Desktop/PorfolioDevelOP`. (Otras 4 worktrees vivas — 2 sesiones setter paralelas en `claude/priceless-nobel` [`seguimiento-step.tsx`] y `claude/sad-burnell` [`01-flow.spec.ts`], `chore/auditoria-maestra`, y una detached — ninguna toca los 19 archivos de 1.1; solo se miraron.)
+- **`44e25be` existe pero está HUÉRFANO:** `git branch --contains 44e25be` → vacío. Un reset movió el puntero de la rama y lo dejó fuera de toda historia. Su **mensaje** es de isolation ("fix(isolation): re-parenting de CrmSyncAttempt"), pero su **diff** es en realidad el barrido de vocabulario de 1.1 sobre los 19 archivos (setter/leados + esta bitácora) — el 1.1 quedó absorbido bajo un mensaje ajeno, y el reset lo devolvió al índice.
+- **1.1 NO estaba en la historia:** HEAD (`58eb285`) conservaba la copy vieja ("Paso 9", "draft", "self-check", "follow-up" en los literales `proximaAccion` de `flow.ts`, etc.).
+- **Lo staged = 1.1 real, byte-idéntico a `44e25be`:** `diff` entre `git diff --cached` y `git show 44e25be` → vacío (EXIT 0). Copy real (strings), **no CRLF** — insertions/deletions asimétricas (100/72), bitácora +28/-0. `core.autocrlf=true` y existe `logic-core-v3/.gitattributes`, pero el diff no era renormalización de fin de línea.
+- **(d) El isolation fix del lane BSP está ENTERO en HEAD:** `src/lib/isolation/registry.ts:450` incluye `...CRM_SYNC_ATTEMPT_REPARENT` en `forbiddenUpdateKeys` (guard runtime = Omit del tipo), entró vía `aa176f7` (B0). `0216bf8` (el commit del fix en el lane b1-s1) no es ancestro de esta rama, pero el guard llegó por otra vía y está presente. El fix no dependía de `44e25be`.
+
+**Caso del árbol aplicado: CASO B** — 1.1 no en la historia + lo staged son los cambios reales de 1.1.
+- Verificación previa: `npx tsc --noEmit` → EXIT 0 (programa entero limpio, motor incluido — hoy el lane motor typechea verde). Greps de éxito sobre lo staged: 0 hits de "Paso N"/jerga en copy user-facing de los 19 archivos; todo el residuo es clase-exenta por la regla de 1.1 (comentarios `/** */`//`, paths de import `follow-up`, keys de tipo `| 'draft'`, y `dossier.ts`/`notify.ts`/`*.invariant.ts` fuera de scope).
+- `git diff --cached --name-only`: **0 archivos del lane motor staged** — nada que des-stagear.
+- Commit (solo staged, sin `-a`, con guarda anti-carrera de índice compartido verificando el set antes/después): **`612c4ee`** — "sprint 1.1 — una sola lengua…", 19 files, 100/72 (idéntico a `44e25be`). `motor-files-captured=0`.
+- **CRLF:** `core.autocrlf=true` en este worktree + `logic-core-v3/.gitattributes` presente. NO fue la causa del diff staged (era copy real). NO se renormalizó el repo — eso queda como decisión de Franco.
+
+**Estado final:**
+- Working tree zona setter LIMPIO. Sucio permitido, listado (lane motor/test/audit): `chatbot-isolation.spec.ts`, `tests/*/.last-run.json` (×3), `?? audit/`, `?? docs/audit-chatbot-runtime.md`.
+- `npx tsc --noEmit` → verde. `git log`: `612c4ee` (1.1) sobre `58eb285` (B1-S3). Grep de éxito sobre HEAD: 0 `proximaAccion: '…Paso N'` en `flow.ts`.
+
+**BASE DECLARADA DEL LANE LeadOS:** worktree `C:/Users/franc/Desktop/PorfolioDevelOP`, rama **`b1-s2-bsp-outbound`**. De acá en más, los sprints de LeadOS corren SOLO en esta rama+worktree (donde ahora vive 1.1 = `612c4ee`). Nota de contexto para Franco: esta rama arrastra también los commits del lane motor (B1-S1/S2/S3); 1.1 quedó apilado encima. La separación de lanes en ramas distintas, si se quiere, es decisión de Franco — no se ejecutó desde acá.
