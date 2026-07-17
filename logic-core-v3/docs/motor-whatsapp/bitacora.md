@@ -703,3 +703,93 @@ webhook no spamee el registro (patrón tomado de `detectBotIssues.ts` del chatbo
 - Ninguna específica más allá de la revisión del PR — este sprint no toca caminos de
   producción existentes (no hay UI ni cron que lea `MotorAlert` todavía; el transporte
   de la alerta es B3).
+
+## B2-S1 — Superficie sincrónica del chatbot: `generateBotReply` para el Motor (2026-07-17)
+
+**Qué se hizo:**
+- **El corte núcleo/cáscara.** El pipeline del chatbot mezclaba "generar la
+  respuesta" con "servir el canal web". Se extrajo el NÚCLEO de generación a
+  `src/modules/chatbot/server/chat/core.ts` (`runChatGeneration`), consumido por
+  dos cáscaras sin duplicar el pipeline:
+  - Núcleo: intent → system prompt (con apertura proactiva/guía de intent) →
+    mapeo del historial a ModelMessage con spotlighting anti-inyección → tools
+    (gating por plan × perfil del canal) → `resolveEffectiveModel` → la ÚNICA
+    llamada a `streamText` (multi-step con tools) → persistencia en `onFinish`
+    (ChatMessage ASSISTANT + agregados de Conversation + QuotaUsage + eventos).
+  - Cáscara web (`handleChatRequest`, ahora ~350 líneas menos): parseo del
+    Request, gate de origin + cap de dominios del plan, rate limit por IP/sesión,
+    gating de cuota/hard-cap, persistencia del mensaje del visitante, y el shape
+    del stream (`toUIMessageStreamResponse`). Devuelve byte-a-byte lo mismo que antes.
+  - Cáscara sync (`generateBotReply`, la superficie nueva): valida bot∈org,
+    arma el historial desde la DB, drena el stream internamente hasta el texto completo.
+- **`TimingRecorder`** (`timing.ts`): las tres variables sueltas del timing
+  (`startTime`/`timings`/`stepStart` + closure `mark`) pasaron a una clase que la
+  cáscara pasa al núcleo a medio request (sus marcas de pre-LLM + las de generación
+  comparten cursor). `mark`/`sinceCursor`/`setCursor` reproducen la semántica del
+  closure original al pie (verificado contra `main`).
+- **Perfil de tools por canal** (`channels.ts`): `web` = las 4 tools; `sync` = SOLO
+  `capture_lead` (las otras 3 son UI del widget: sin cliente que las pinte, no se
+  registran). El perfil se intersecta con `plan.tools`. Para `web` el perfil es el
+  catálogo completo → set efectivo idéntico al de hoy (probado: getTools ya filtra
+  contra el mismo catálogo).
+- **`generateBotReply({ organizationId, botConfigId, sessionId, userMessageText })`
+  → `{ text, conversationId, leadCaptured }`**, exportada desde el barrel NUEVO
+  `src/modules/chatbot/public-api.ts` (único punto de entrada del Motor, frontera
+  ESLint B0 — el hueco que B0-S1 dejó previsto). Corre el MISMO núcleo con perfil
+  `sync`; sin origin, sin rate limit por IP, sin gating de cuota (política de
+  orquestación → B2-S2). Persiste igual que el widget.
+- **Tests** (`tests/integration/chatbot-sync-surface.spec.ts`, 5/5, LLM mockeado en
+  la interfaz `LLMProvider` vía `getProvider` + `MockLanguageModelV3`): (a) texto
+  completo devuelto y persistido; (b) bot de org B con scope de A → `BotNotInOrgError`
+  y CERO escritura; (c) `capture_lead` dispara en sync y el lead queda scoped a la
+  org; (d) sessionId `wa:...` crea conversación propia sin colisionar con el widget;
+  (e) fallo del modelo (stream sin onFinish) → RECHAZA rápido, no cuelga.
+- Script de dev para la verificación humana con LLM real:
+  `scripts/dev/b2s1-sync-reply.ts`.
+
+**Qué se decidió:**
+- **Un solo `streamText`, compartido.** Prohibido copiar-pegar el handler: el núcleo
+  es la fuente única. La superficie sync NO usa `generateText` (sería un segundo
+  pipeline) — drena el MISMO `streamText` con `consumeStream()`.
+- **Historial DB-backed para sync.** El Motor manda un mensaje; el contexto multi-turno
+  se reconstruye desde la conversación persistida (el server es dueño del hilo),
+  recortado con la MISMA política del widget (`trimHistory`). El canal decide de dónde
+  sale el historial; el núcleo solo lo consume.
+- **Orden del drenaje sync (CRÍTICO, encontrado en review adversarial).** Si el modelo
+  falla ANTES de completar un step, el SDK (`ai@6`) rechaza sus promesas internas y
+  NUNCA llama al onFinish — con lo cual el deferred `persisted` quedaría pendiente
+  para siempre. Se materializa `result.text` (que rechaza en ese caso) ANTES de
+  esperar `persisted`; así un fallo del modelo es un throw tipado (`GenerateBotReplyError`),
+  jamás un cuelgue. Cubierto por el test (e). El canal web no cambia: ignora `persisted`
+  (fire-and-forget, como siempre).
+- **`leadCaptured` autoritativo desde la fila** (`Conversation.leadCaptured`, que
+  `capture_lead` marca transaccionalmente durante el stream), leído post-drenaje.
+- **`channel` sumado a `chat.llm_request_start`** (aditivo, para distinguir canales en
+  telemetría). No rompe consumidores; único desvío —deliberado— del "mismos logs".
+
+**Qué se midió:**
+- tsc: PASS (src limpio; el único error de tsc es `.next/types` del cron
+  `cleanup-old-events` — export no-handler PRE-EXISTENTE en `main`, fuera de scope;
+  `next build` lo ignora vía `ignoreBuildErrors`).
+- ESLint `--max-warnings 0` (fronteras intactas): PASS. `npm run build`: PASS.
+- Suites ev del contrato del widget: **7/7** (ev1, ev2, ev3, ev3:golden, ev4, ev5, utm1).
+  Invariantes de la tubería tocada: infra2, c02, cost1 PASS.
+- Suite de integración COMPLETA: **61/61** (incluyendo las 5 nuevas de la superficie sync).
+- Review adversarial independiente (agente code-reviewer): 1 CRITICAL (el cuelgue del
+  drenaje) → **corregido y testeado**; 0 HIGH/MEDIUM; verificó equivalencia byte-a-byte
+  del canal web (timing, prompts, tools, persistencia) contra `main`.
+
+**Pendiente (B2-S2 y afuera):**
+- La orquestación con el webhook (rate limiting del canal WhatsApp, gating de cuota
+  para el canal sync, contabilización de conversación) es B2-S2 — NO se hizo acá.
+  Hoy `generateBotReply` no chequea cuota ni incrementa el contador de conversaciones
+  (el `onFinish` compartido pasa `isNewConversation=false` para no double-contar al
+  widget); sí acumula tokens/cost. A resolver cuando el webhook oriente la política.
+- El export no-handler `getProvidedCronSecret` de `cleanup-old-events/route.ts` sigue
+  ensuciando `tsc`/`.next/types` (pre-existente, documentado desde Sprint S). Fuera de scope.
+
+**Queda para verificación humana (pedido del sprint, NO delegado al reporte):**
+- El flujo real del widget post-cambio (que ya se debe por el pendiente de B0/B1 —
+  ahora verifica dos cosas de un tiro: que el widget sigue idéntico tras el corte).
+- Una llamada real a `generateBotReply` contra un bot de prueba con el LLM real:
+  `npx tsx scripts/dev/b2s1-sync-reply.ts [botSlug] ["mensaje"]`.

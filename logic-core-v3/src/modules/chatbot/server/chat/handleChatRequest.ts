@@ -1,9 +1,5 @@
-import { randomUUID } from 'node:crypto'
-import { streamText, stepCountIs, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
-import { detectIntent } from '../intent'
-import { getVerticalPack } from '../verticals'
 import { forOrg } from '@/lib/isolation'
 import { sanitizeAttributionField } from '../../shared/attribution'
 import { shouldSkipUserPersist } from './dedup'
@@ -12,23 +8,17 @@ import {
   resolveBotBySlug,
   getOrCreateConversation,
 } from '../conversation'
-import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
-import { getTools } from '../tools'
-import { normalizeLlmProvider, resolveEffectiveModel } from '../llm'
-import { calculateCost } from '../pricing'
 import {
   checkQuota,
-  incrementQuota,
   tryReserveConversation,
   triggerUpsellAlertIfFirst,
 } from '../quota'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
-import { hashIp, validateAssistantOutput } from '../safety'
+import { hashIp } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug } from '../logging'
 import { logChatbotEvent, logPersistFailure } from '../logging'
-// LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
 import { originMatchesAllowed } from '@/lib/security/origin-matcher'
 import {
@@ -38,6 +28,10 @@ import {
   MAX_MESSAGE_CHARS,
   HARD_CAP_MESSAGES,
 } from '../../shared/historyPolicy'
+// B2-S1 — el núcleo de generación (intent → prompt → tools → LLM → persistencia)
+// vive en ./core y lo comparten el canal web (esta cáscara) y el sync (Motor).
+import { runChatGeneration } from './core'
+import { TimingRecorder } from './timing'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -91,27 +85,6 @@ export const requestBodySchema = z.object({
 })
 
 type RequestBody = z.infer<typeof requestBodySchema>
-
-/**
- * Safely extracts the set of admin-configured proactive-prompt strings from the
- * `BotConfig.proactivePrompts` JSON (shape: Record<string, string[]>). Defensive
- * against malformed JSON. Used to validate a client-supplied `proactiveOpener`
- * before it is trusted into the system prompt — only an EXACT match with a
- * configured prompt is accepted, so a forged opener can never inject text.
- */
-function collectProactivePrompts(raw: unknown): Set<string> {
-  const out = new Set<string>()
-  if (raw && typeof raw === 'object') {
-    for (const value of Object.values(raw as Record<string, unknown>)) {
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (typeof item === 'string') out.add(item)
-        }
-      }
-    }
-  }
-  return out
-}
 
 /**
  * C0.2 — Largo del array `messages` del body CRUDO (antes del recorte del
@@ -252,18 +225,10 @@ export async function handleChatRequest(
 ): Promise<Response> {
   let bot: Awaited<ReturnType<typeof resolveBotBySlug>> = null
   try {
-  const startTime = Date.now()
-
-  // Per-stage timing breakdown (B1.3). Each `mark(key)` records the time
-  // elapsed since the previous mark and advances the cursor. Persisted in
-  // metadata.timings of the chat.message_completed event.
-  const timings: Record<string, number | null> = {}
-  let stepStart = startTime
-  const mark = (key: string): void => {
-    const now = Date.now()
-    timings[key] = now - stepStart
-    stepStart = now
-  }
+  // Per-stage timing breakdown (B1.3). B2-S1: el recorder viaja al núcleo a
+  // medio request — la cáscara hace sus marcas de pre-LLM y el núcleo continúa
+  // con las de generación/persistencia sobre el mismo cursor.
+  const timing = new TimingRecorder(Date.now())
 
   // ─── 1. Parse and validate body ───────────────────────────────
   let body: RequestBody
@@ -277,7 +242,7 @@ export async function handleChatRequest(
     chatbotLog('chat.bad_request', { slug, error: msg }, 'warn')
     return Response.json({ error: 'Invalid request body' }, { status: 400 })
   }
-  mark('validation_ms')
+  timing.mark('validation_ms')
 
   chatbotDebug('request_parsed', {
     slug,
@@ -295,18 +260,23 @@ export async function handleChatRequest(
     chatbotLog('chat.bot_not_found', { slug }, 'warn')
     return Response.json({ error: 'Bot not found or inactive' }, { status: 404 })
   }
-  const resolvedBot = bot; // non-null reference for callbacks
   // B0-S3 — org del tenant (BotConfig.organizationId, ya incluido por
   // resolveBotBySlug). Fija el scope de aislamiento de todo el request.
-  const orgId = resolvedBot.organization.id
+  // B2-S1: la persistencia en callbacks ya no vive acá (se mudó a ./core con su
+  // propia referencia no-null del bot), así que `resolvedBot` dejó de hacer falta.
+  const orgId = bot.organization.id
   const scope = forOrg(orgId)
 
   if (!bot.knowledgeBase) {
     chatbotLog('chat.bot_no_kb', { slug, botConfigId: bot.id }, 'error')
     return Response.json({ error: 'Bot misconfigured' }, { status: 500 })
   }
+  // B2-S1 — capturamos la KB no-null como `const` acá (donde el guard la estrecha):
+  // el estrechamiento de la propiedad anidada de `bot` (un `let`) no sobrevive a
+  // los awaits de más abajo, y el núcleo la exige no-null.
+  const knowledgeBase = bot.knowledgeBase
 
-  mark('bot_resolve_ms')
+  timing.mark('bot_resolve_ms')
 
   chatbotDebug('bot_resolved', {
     botId: bot.id,
@@ -342,7 +312,7 @@ export async function handleChatRequest(
     )
   }
 
-  mark('rate_limit_ms')
+  timing.mark('rate_limit_ms')
 
   // ─── 4 & 5. Plan + quota check + conversation (parallel) ──────
   // B4.2: getPlanForOrg() suma 1 DB lookup (cacheada 60s) en paralelo
@@ -354,7 +324,7 @@ export async function handleChatRequest(
     (async () => {
       const t = Date.now()
       const r: EffectivePlan = await getPlanForOrg(bot.organization.id)
-      timings.plan_only_ms = Date.now() - t
+      timing.timings.plan_only_ms = Date.now() - t
       return r
     })(),
     (async () => {
@@ -362,7 +332,7 @@ export async function handleChatRequest(
       // Lectura optimista contra QuotaUsage. El cap real lo enforce el
       // tryReserveConversation atómico de abajo cuando aplica.
       const r = await checkQuota(orgId, bot.id, Number.MAX_SAFE_INTEGER)
-      timings.quota_only_ms = Date.now() - t
+      timing.timings.quota_only_ms = Date.now() - t
       return r
     })(),
     (async () => {
@@ -379,11 +349,11 @@ export async function handleChatRequest(
         utmMedium: body.utmMedium,
         utmCampaign: body.utmCampaign,
       })
-      timings.conv_only_ms = Date.now() - t
+      timing.timings.conv_only_ms = Date.now() - t
       return r
     })(),
   ])
-  mark('db_pre_llm_ms')
+  timing.mark('db_pre_llm_ms')
 
   chatbotDebug('plan_resolved', {
     botConfigId: bot.id,
@@ -537,7 +507,7 @@ export async function handleChatRequest(
         },
       )
     }
-    timings.quota_reserve_ms = Date.now() - stepStart
+    timing.timings.quota_reserve_ms = timing.sinceCursor()
   }
 
   // ─── 5.c Gating: tope duro de conversación (C0.2) ─────────────
@@ -612,376 +582,47 @@ export async function handleChatRequest(
       content: lastUserMessage.content,
     })
   }
-  mark('user_msg_persist_ms')
+  timing.mark('user_msg_persist_ms')
 
-  // ─── 7. Intent detection & Build system prompt ────────────────
-  // EV.4 — los patrones de intent salen del pack vertical del bot (mismo camino
-  // que el scoring de EV.3). `bot` viene de resolveBotBySlug con `include`, así
-  // que `verticalPack` ya está en contexto: cero query nueva. Clave desconocida
-  // → pack `base` con warning (getVerticalPack nunca lanza).
-  const verticalPack = getVerticalPack(bot.verticalPack)
-  const intentResult = detectIntent(lastUserMessage.content, verticalPack.intents)
-  mark('intent_ms')
-  if (intentResult.intent !== 'unknown') {
-    chatbotDebug('intent_detected', {
-      intent: intentResult.intent,
-      conversationId: conversation.id,
-    })
-  }
-
-  const systemPrompt = buildSystemPrompt({
-    botConfig: {
+  // ─── 7-8. Generación (núcleo compartido web+sync, B2-S1) ──────
+  // Intent + system prompt + tools (perfil web = las 4) + resolución de modelo +
+  // streamText multi-step + persistencia en onFinish viven en ./core, una sola
+  // vez, consumidos por ambos canales. La cáscara web pasa el historial que el
+  // cliente mandó (`body.messages`, ya recortado por el schema) y devuelve el
+  // stream UI. El `timing` sigue de largo: el núcleo continúa marcando sobre el
+  // mismo cursor (intent_ms, prompt_build_ms, llm_setup_ms, y las de onFinish).
+  const { result } = await runChatGeneration({
+    organizationId: orgId,
+    bot: {
+      id: bot.id,
+      slug,
       botName: bot.botName,
       tone: bot.tone,
-    },
-    knowledgeBase: {
-      businessInfo: bot.knowledgeBase.businessInfo,
-      servicesOrProducts: bot.knowledgeBase.servicesOrProducts,
-      faq: bot.knowledgeBase.faq,
-      policies: bot.knowledgeBase.policies,
-      salesGuidance: bot.knowledgeBase.salesGuidance,
-      toneExamples: bot.knowledgeBase.toneExamples,
-      forbiddenStatements: bot.knowledgeBase.forbiddenStatements,
-    },
-    context: {
-      companyName: bot.organization.companyName,
-      currentPath: body.currentPath,
-      currentDateTime: formatDateTimeArgentina(),
-      isFirstMessage: isNewConversation,
-      // B4.5: soft-cap. messageCount cuenta user+assistant (~2 por turno);
-      // dividimos para obtener turnos del visitante. Conversation nueva → 0.
-      userTurnsCount: Math.floor((conversation.messageCount ?? 0) / 2),
-    },
-  })
-  mark('prompt_build_ms')
-
-  // B4.2 — Tools filtradas por plan.tools. Slugs desconocidos en
-  // plan.tools se ignoran silenciosamente (getTools usa el catálogo
-  // canónico). Si plan.tools quedara vacío (no debería en planes
-  // sembrados), `tools` queda {} y el modelo no invoca ninguna.
-  const tools = getTools(
-    {
-      conversationId: conversation.id,
-      botConfigId: bot.id,
-      organizationId: bot.organization.id,
-      // EV.3 — pack vertical del bot (resolución de scoring en capture_lead).
-      // `bot` viene de resolveBotBySlug con `include`, así que el escalar ya está
-      // en contexto: cero query nueva.
       verticalPack: bot.verticalPack,
-      visitorIpHash: ipHash,
-      visitorUserAgent: userAgent,
-      // UTM.1 — desde la fila YA resuelta de `conversation` (autoritativa),
-      // NUNCA desde `body.utm*`: en un mensaje #2+ de una conversación
-      // existente, el body de ESE request puede traer UTMs distintos (u
-      // ninguno) que el resolver ignora — usar `body.*` acá filtraría
-      // atribución incorrecta hacia capture_lead.
-      utmSource: conversation.utmSource ?? undefined,
-      utmMedium: conversation.utmMedium ?? undefined,
-      utmCampaign: conversation.utmCampaign ?? undefined,
-    },
-    plan.tools,
-  )
-  mark('llm_setup_ms')
-
-  // ─── 8. LLM call with streaming ───────────────────────────────
-  // B4.2 — Modelo viene del plan, no del BotConfig (legacy).
-  //   plan.llmModel ya es 'gemini-2.5-flash' en los 3 planes sembrados.
-  //   bot.llmProvider sigue siendo del BotConfig (no hay dimensión
-  //   provider en Plan todavía — toda la flota usa 'google' hoy).
-  // COST-1 — par (provider, modelo) efectivo resuelto UNA vez; se reusa
-  // más abajo en calculateCost (antes el costo leía resolvedBot.llmModel
-  // por su lado y podía divergir de lo que esta línea ejecuta).
-  const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)
-  const model = effectiveModel.model
-  if (effectiveModel.degraded) {
-    await logChatbotEvent({
-      organizationId: orgId,
-      botConfigId: bot.id,
-      type: 'chat.cost_model_unknown',
-      level: 'warn',
-      message:
-        `Provider/modelo solicitado "${effectiveModel.requestedProvider}/${effectiveModel.requestedModel}" ` +
-        `no disponible — degradando a "${effectiveModel.provider}/${effectiveModel.modelId}"`,
-      conversationId: conversation.id,
-      metadata: {
-        requestedProvider: effectiveModel.requestedProvider,
-        requestedModel: effectiveModel.requestedModel,
-        effectiveProvider: effectiveModel.provider,
-        effectiveModel: effectiveModel.modelId,
-        planKey: plan.key,
+      proactivePrompts: bot.proactivePrompts,
+      llmProvider: bot.llmProvider,
+      knowledgeBase: {
+        businessInfo: knowledgeBase.businessInfo,
+        servicesOrProducts: knowledgeBase.servicesOrProducts,
+        faq: knowledgeBase.faq,
+        policies: knowledgeBase.policies,
+        salesGuidance: knowledgeBase.salesGuidance,
+        toneExamples: knowledgeBase.toneExamples,
+        forbiddenStatements: knowledgeBase.forbiddenStatements,
       },
-    })
-  }
-
-  chatbotLog('chat.llm_request_start', {
-    slug,
-    botConfigId: bot.id,
-    conversationId: conversation.id,
+      organization: { companyName: bot.organization.companyName },
+    },
+    conversation,
     isNewConversation,
-    provider: bot.llmProvider,
-    model: plan.llmModel,
-    planKey: plan.key,
-    planIsFallback: plan.isFallback,
-    toolSlugsEnabled: Object.keys(tools),
-    messageCount: body.messages.length,
-  })
-
-  chatbotDebug('llm_call_starting', {
-    conversationId: conversation.id,
-    systemPromptLength: systemPrompt.length,
-    toolCount: Object.keys(tools).length,
-  })
-
-  // SEC: el opener viene del cliente → solo se confía si coincide EXACTAMENTE con
-  // un prompt proactivo configurado por el admin (config.proactivePrompts). Validado
-  // así, es contenido de confianza y va como sección del system prompt (NO se
-  // spotlightea como el input del visitante; el hardening SEC-LLM-01 sobre los
-  // mensajes 'user' y las secciones del Bloque 1 quedan intactos).
-  const validatedOpener = (() => {
-    const opener = body.proactiveOpener?.trim()
-    if (!opener) return null
-    return collectProactivePrompts(bot.proactivePrompts).has(opener) ? opener : null
-  })()
-
-  const enrichedSystemPrompt = [
-    systemPrompt,
-    intentResult.guidance
-      ? `# CONTEXTO DEL TURNO ACTUAL\n\nIntención detectada: ${intentResult.intent}\n\n${intentResult.guidance}`
-      : null,
-    validatedOpener
-      ? `# APERTURA PROACTIVA\n\nVos (el asistente) abriste esta conversación enviándole proactivamente al visitante la pregunta: «${validatedOpener}». Su próximo mensaje responde a esa pregunta — continuá con coherencia y NO vuelvas a hacer la misma pregunta.`
-      : null,
-  ]
-    .filter((section): section is string => section !== null)
-    .join('\n\n---\n\n')
-
-  // LLM call boundary — used to compute TTFB (first token from Vertex) and
-  // separate Vertex time from post-LLM persistence time.
-  const llmStartAt = Date.now()
-  let ttfbAt: number | null = null
-
-  // MS-1: stepCountIs(3) habilita multi-step.
-  //   Step 1 — modelo invoca tool (ej. capture_lead).
-  //   Step 2 — modelo lee toolResult y genera texto de confirmación + (opcionalmente)
-  //            invoca otra tool (ej. offer_handoff_options).
-  //   Step 3 — margen defensivo si el modelo decide encadenar algo más.
-  //   Sin esto (default v6 = 1 step), una tool call termina el turn sin texto previo
-  //   ni encadenamiento. H2/H3 documentados en bitácora B3.3-B3.6.
-  let stepCount = 0
-
-  // SEC-LLM-01 — Spotlighting del input no confiable del visitante.
-  // Cada mensaje del visitante se envuelve en <vmsg_{nonce}>…</vmsg_{nonce}>
-  // con un nonce aleatorio por request: el visitante no lo conoce, así que no
-  // puede cerrar el delimitador para "escaparse" e inyectar instrucciones.
-  // La regla que le dice al modelo que ese contenido es DATO (no órdenes) vive
-  // en la sección 6 del system prompt (buildAntiHallucination).
-  const visitorTag = `vmsg_${randomUUID().replace(/-/g, '').slice(0, 12)}`
-  const wrapUntrusted = (text: string): string => {
-    // Anti delimiter-escape: removemos cualquier intento del visitante de
-    // inyectar la etiqueta (con o sin el nonce real) antes de envolver.
-    const stripped = text.replace(/<\/?vmsg_[a-z0-9]*>/gi, '')
-    return `<${visitorTag}>\n${stripped}\n</${visitorTag}>`
-  }
-
-  const result = streamText({
-    model,
-    system: enrichedSystemPrompt,
-    messages: body.messages.map((m): ModelMessage => {
-      // El historial del asistente (sus propios outputs) va tal cual. Todo lo
-      // demás —mensajes 'user' y, defensivamente, cualquier 'system' que un
-      // cliente intente colar— se trata como input NO confiable y se envuelve
-      // con spotlighting. Así el delimitador no es esquivable mandando role:system.
-      if (m.role === 'assistant') {
-        return { role: 'assistant', content: [{ type: 'text', text: m.content }] }
-      }
-      return { role: 'user', content: [{ type: 'text', text: wrapUntrusted(m.content) }] }
-    }),
-    tools,
-    temperature: 0.7,
-    stopWhen: stepCountIs(3),
-    onStepFinish: () => {
-      stepCount += 1
-    },
-    onChunk: ({ chunk }) => {
-      // Capture timestamp of the first useful chunk (text or tool-call).
-      // Other chunk types (reasoning-delta, raw, etc.) don't count as TTFB.
-      if (
-        ttfbAt === null &&
-        (chunk.type === 'text-delta' || chunk.type === 'tool-call')
-      ) {
-        ttfbAt = Date.now()
-      }
-    },
-    onError: ({ error }) => {
-      // INFRA.1 — falla mid-stream (Vertex, throw en un tool): hoy la enmascara
-      // toUIMessageStreamResponse() como 200 y queda invisible server-side.
-      // Sink off-Neon garantizado (stderr) + Sentry best-effort.
-      logPersistFailure('chat.stream_error', error, {
-        conversationId: conversation.id,
-        botSlug: slug,
-        botConfigId: resolvedBot.id,
-      })
-      Sentry.captureException(error, {
-        tags: { module: 'chatbot', stage: 'stream' },
-        extra: { conversationId: conversation.id, botSlug: slug },
-      })
-    },
-    onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
-      const llmDoneAt = Date.now()
-      timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
-      timings.llm_stream_ms = ttfbAt !== null ? llmDoneAt - ttfbAt : null
-      timings.llm_total_ms = llmDoneAt - llmStartAt
-      timings.step_count = stepCount
-
-      // MS-1: en multi-step (stopWhen=stepCountIs(3)), las propiedades top-level
-      // del onFinish (toolCalls, usage) son SOLO del último step. Tenemos que
-      // agregar manualmente desde `steps[]` para que el chatMessage final tenga:
-      //   - todas las tool calls de todo el run (capture_lead step 1 + offer_handoff_options step 2)
-      //   - tokens/cost reales del run completo (no solo del último step)
-      const hasSteps = steps && steps.length > 0
-      const allToolCalls = hasSteps ? steps.flatMap((s) => s.toolCalls ?? []) : toolCalls ?? []
-      const totalIn = hasSteps
-        ? steps.reduce((sum, s) => sum + (s.usage?.inputTokens ?? 0), 0)
-        : (usage?.inputTokens ?? 0)
-      const totalOut = hasSteps
-        ? steps.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0)
-        : (usage?.outputTokens ?? 0)
-      stepStart = llmDoneAt
-      try {
-        // Validate output (capa 4)
-        const warnings = validateAssistantOutput(text)
-        if (warnings.length > 0) {
-          chatbotLog(
-            'chat.validation_warnings',
-            {
-              conversationId: conversation.id,
-              warnings: warnings.map((w) => ({
-                patternId: w.patternId,
-                severity: w.severity,
-              })),
-            },
-            'warn'
-          )
-          await logChatbotEvent({
-            organizationId: orgId,
-            botConfigId: resolvedBot.id,
-            type: 'chat.validation_warnings',
-            level: 'warn',
-            message: `${warnings.length} validation warning(s) en respuesta`,
-            conversationId: conversation.id,
-            metadata: { warnings: warnings.map((w) => w.patternId) },
-          })
-        }
-
-        // MS-1: tokens y tool calls agregados desde todos los steps (ver bloque arriba).
-        const tokensIn = totalIn
-        const tokensOut = totalOut
-        // COST-1 — mismo par efectivo que ejecutó la respuesta (arriba), no
-        // resolvedBot.llmProvider/llmModel (legacy, podía divergir de plan.llmModel).
-        const costBreakdown = calculateCost(
-          effectiveModel.provider,
-          effectiveModel.modelId,
-          tokensIn,
-          tokensOut
-        )
-
-        // Persist assistant message + tool calls (all steps).
-        await scope.chatMessage.create({
-          conversationId: conversation.id,
-          role: 'ASSISTANT',
-          content: text,
-          tokensIn,
-          tokensOut,
-          toolCalls: allToolCalls.length > 0
-            ? (allToolCalls as unknown as object)
-            : undefined,
-        })
-
-        // Update Conversation aggregate metrics
-        await scope.conversation.update(conversation.id, {
-          messageCount: { increment: 2 },  // user + assistant
-          tokensIn: { increment: tokensIn },
-          tokensOut: { increment: tokensOut },
-          estimatedCostUsd: { increment: costBreakdown.totalUsd },
-          lastMessageAt: new Date(),
-        })
-
-        // Update QuotaUsage for current period.
-        // B4.2: `conversationsCount` ya se incrementó atómicamente vía
-        // tryReserveConversation cuando isNewConversation=true. Acá pasamos
-        // false siempre para evitar double-count del counter. Tokens y cost
-        // se siguen acumulando normalmente.
-        await incrementQuota({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          isNewConversation: false,
-          messagesAdded: 2,
-          tokensIn,
-          tokensOut,
-          costUsd: costBreakdown.totalUsd,
-        })
-        mark('post_persist_ms')
-        const totalMs = Date.now() - startTime
-        timings.total_ms = totalMs
-
-        chatbotLog('chat.llm_request_finished', {
-          conversationId: conversation.id,
-          finishReason,
-          tokensIn,
-          tokensOut,
-          costUsd: Number(costBreakdown.totalUsd.toFixed(6)),
-          toolCallCount: allToolCalls.length,
-          warningCount: warnings.length,
-          durationMs: totalMs,
-          timings,
-        })
-
-        await logChatbotEvent({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          type: 'chat.message_completed',
-          level: 'info',
-          message: `Respuesta enviada (${tokensIn} in / ${tokensOut} out)`,
-          conversationId: conversation.id,
-          metadata: {
-            tokensIn,
-            tokensOut,
-            costUsd: costBreakdown.totalUsd,
-            toolCallCount: allToolCalls.length,
-            durationMs: totalMs,
-            latencyMs: totalMs,
-            timings,
-          },
-        })
-      } catch (persistError) {
-        // INFRA.1 — Sink off-Neon PRIMERO, antes de cualquier write a Neon.
-        // stderr estructurado con .code/.cause: el rastro que sobrevive a la
-        // conexión muerta (Netlify Function Logs). Reemplaza al chatbotError
-        // previo, que solo registraba name/message/stack (sin .code/.cause).
-        logPersistFailure('chat.persist_failed', persistError, {
-          conversationId: conversation.id,
-          botSlug: slug,
-          botConfigId: resolvedBot.id,
-          turnIndex: Math.floor((conversation.messageCount ?? 0) / 2),
-        })
-        // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
-        // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza.
-        await logChatbotEvent({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          type: 'chat.persist_error',
-          level: 'error',
-          message: persistError instanceof Error ? persistError.message : 'unknown',
-          conversationId: conversation.id,
-        })
-        // B14.5 — Sentry best-effort (no-op sin NEXT_PUBLIC_SENTRY_DSN → [FALTA:sentry-dsn]).
-        // El scrub-pii del beforeSend limpia antes de mandar.
-        Sentry.captureException(persistError, {
-          tags: { module: 'chatbot', stage: 'persist' },
-          extra: { conversationId: conversation.id, botSlug: slug },
-        })
-      }
-    },
+    plan,
+    messages: body.messages,
+    lastUserMessageContent: lastUserMessage.content,
+    channel: 'web',
+    currentPath: body.currentPath,
+    proactiveOpener: body.proactiveOpener,
+    visitorIpHash: ipHash,
+    visitorUserAgent: userAgent,
+    timing,
   })
 
   return result.toUIMessageStreamResponse()
