@@ -1284,3 +1284,38 @@ Sprint 1.1: cerró verde. (1) 72 strings / 18 archivos. (2) Los 3 greps de éxit
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint T: main verde (proxy). (1) tsc EXIT 0 sobre fuente. (2) `route.ts` sin exports no-handler (solo `GET`+`dynamic`) → TS2344 no regenera. (3) invariant t02 10/10. (4) diff = 3 archivos exactos (`route.ts`/`cron-secret.ts`/invariant). (5) commit `d0e8ef4` en `main`, aislado en `C:/tmp/wt-sprint-t` para no tocar el WIP de chatbot del worktree principal (`b2-s1`). (6) Pendiente: `next build` de Franco = cierre autoritativo. Sin push.
+
+---
+
+## Sprint 2.1 — El foco no miente: cadencia agotada, postergado y rechazado salen del loop · 2026-07-17
+
+**Objetivo único.** Cortar los tres loops que hacían que el foco sirviera leads muertos como *trabajo*. Motor-adyacente → test-primero, frenos duros, diff acotado.
+
+**Terreno (FASE 0).** El worktree principal estaba en `b2-s1-bot-sync-surface` (rama del chatbot) con WIP untracked ajeno (`scripts/dev/sandbox-360-seed-channel.ts`) y SIN el fix del cron `d0e8ef4` — base vieja. FRENO reportado; Franco autorizó dejar el WIP intacto y proceder. Cambié el checkout a **`main@1866d07`** (ningún worktree tenía main tomado; el sandbox untracked sobrevive el switch). Verde de arranque: `tsc --noEmit` EXIT 0, `flow.ts` sin copy "Paso N" (1.1 presente), `d0e8ef4` en el log.
+
+**Censo de callers (`registrarContactoComercial`).** 4: 1 admin (`activity.actions.ts:18` — surface-a `error.message` crudo), 2 setter (`outreach.actions.ts:120` opener / `:176` resultado), 1 setter (`agenda.actions.ts:216`, usa `CALL_AGENDADA` → el nuevo comportamiento no lo afecta). Los lectores admin de `nextFollowUpAt` (`lead-card.tsx:52`, `lead-activity-feed.tsx:114`) YA son null-safe → limpiar a null es compatible. `ownership.ts` (motor intocable) solo expone `_count.activities`, no el conteo SIN_RESPUESTA → el discriminador de "enfriado" sale de `nextFollowUpAt === null`.
+
+**Auditoría desfasada.** Las line-refs del brief (`os-commercial.ts:78-96,162-172`) NO matcheaban: esas líneas son RESPONDIO/`postergarLead`; `registrarContacto` no manejaba RECHAZADO/POSTERGADO. Se mapeó el terreno real antes de tocar.
+
+**Dos decisiones (Franco delegó "decide tu" → elegí lo que NO obliga a inventar semántica de status):**
+- **Caso B (postergado):** "vuelve al ciclo normal" exigiría una transición POSTERGADO→working que no existe en `os-commercial` (FRENO 1). Elegí **limpiar solo `reactivateAt`** (sin transición): el lead sale de la cola de trabajo (`postergadoVencido=false` → `seguimiento`), el loop se corta. **Limitación conocida:** el lead queda POSTERGADO pasivo y NO reanuda la cadencia de outreach (la rama POSTERGADO tapa el toque); un resume real necesita la transición que Franco decida. Gap cosmético: la copy `flow.ts:404` "se retoma cuando se reactive" es imprecisa para un postergado con `reactivateAt` null (no se tocó para no romper `flow.invariant.ts:77`, fuera del diff).
+- **Rebota del 5º SIN_RESPUESTA:** **idempotente, sin throw** — el fix C-02 ya deja `nextFollowUpAt=null` (calculateNextFollowUp(≥4)=null) y la UI M5 ya oculta "no respondió" cuando la cadencia se agotó. Cero copy nueva, sin la inconsistencia admin/setter del `mapError`, diff en 3 archivos.
+
+**El fix (3 archivos, todo dentro del scope):**
+1. **`os-commercial.ts` (C-02):** en `registrarContactoComercial`, la rama SIN_RESPUESTA ahora ESCRIBE siempre (`nextFollowUpAt` = valor o null) — antes `if (nextFollowUpAt)` dejaba el date viejo al agotarse → vencido eterno → "trabajar" para siempre.
+2. **`os-commercial.ts` (B-01):** todo contacto real (SIN_RESPUESTA/RESPONDIO/CALL_AGENDADA/RECHAZADO) limpia además `reactivateAt` (el retomar corta el loop del postergado vencido). Status intacto.
+3. **`os-commercial.ts` (C-11):** rama RECHAZADO nueva → limpia `nextFollowUpAt` + `reactivateAt`. No cambia status (no existe `LeadStatus.RECHAZADO`): el cierre a PERDIDO lo decide Franco.
+4. **`home.ts` + `flow.ts`:** señal nueva `sinProximoToque?` (= `nextFollowUpAt === null`, pura) derivada en `buildHomeLeads`; `proximaAccionPara` (rama EVALUADA gate-cerrado) la usa para el rótulo **"Se enfría — el cierre lo decide Franco"** (no accionable), distinto de "Esperando respuesta" (toque futuro). `grupoPara` NO se tocó: el enfriado ya cae en `seguimiento` sin followUpVencido. Campo opcional a propósito (ausente = sin refinamiento) para no editar los 3 invariantes fuera del diff.
+
+**Tests (in-process, camino owned via `listOwnedLeads` → `buildHomeLeads`, maquinaria real).** `tests/leados/foco-no-miente.spec.ts`, 3 casos A/B/C. **Rojo→verde confirmado:** los 3 fallaban pre-fix exactamente en las aserciones core (A/C: `nextFollowUpAt` no-null; B: `reactivateAt` en pasado + precondición `grupo==='trabajar'`); verdes post-fix.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0 (main entero).
+- ✅ `check:invariants` (cadena leados, incl. flow/foco/particion) EXIT 0.
+- ✅ `test:leados` **25/25** (22 previos + 3 nuevos), incluidos los de aislamiento cross-setter.
+- ⚠️ `test:setter` **38/39**. El 1 rojo (`01-flow.spec.ts:229`) es **pre-existente y ajeno**: espera la copy vieja "Ver ejemplo de un self-check bien hecho", pero `ejemplo-ideal.tsx:106` renderiza "…de un **chequeo final** bien hecho" (renombrada en otro sprint sin actualizar el spec). **Confirmado contra main limpio** (stash de mis 3 archivos → falla idéntico). Fuera de scope 2.1 → anotado, no tocado.
+
+**Diff:** SOLO `os-commercial.ts`, `flow.ts`, `home.ts`, `tests/leados/foco-no-miente.spec.ts` (nuevo), esta bitácora. El WIP untracked de chatbot (`sandbox-360-seed-channel.ts`) quedó intacto y fuera del commit.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 2.1 cerrado. (1) Censo: 4 callers, admin null-safe → compatible; agenda usa CALL_AGENDADA (no afectado). (2) A/B/C rojo→verde. (3) Suites: tsc EXIT 0, invariantes verdes, test:leados 25/25; test:setter 38/39 (el rojo = spec stale pre-existente, confirmado en main limpio, ajeno). (4) Diff = 3 archivos + test nuevo + bitácora. (5) Frenos: auditoría desfasada (line-refs); Caso B "vuelve al ciclo normal" = transición → elegí limpiar solo reactivateAt (sin transición; resume real queda a decisión tuya); rebota = idempotente (sin tocar el action del setter). No se tocó 01-flow.spec.ts (ningún spec asertaba el CTA viejo del agotado). Sin push.

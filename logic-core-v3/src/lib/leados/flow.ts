@@ -323,6 +323,14 @@ export type HomeLeadInput = {
   /** B6: el toque agendado por la maquinaria ya venció (nextFollowUpAt <= ahora). */
   followUpVencido: boolean
   /**
+   * 2.1: no hay próximo toque agendado (nextFollowUpAt null) — cadencia agotada
+   * (opener + 3 toques sin respuesta) o rechazado. Refina la próxima acción del lead
+   * en outreach: sin toque que mandar, se enfría (pasivo, el cierre lo decide Franco).
+   * Opcional: ausente = sin refinamiento (se trata como un toque futuro → "esperando");
+   * los invariantes que no ejercen este eje lo omiten.
+   */
+  sinProximoToque?: boolean
+  /**
    * 2.1b/D6: POSTERGADO cuya fecha de reactivación ya pasó (reactivateAt <= ahora).
    * El cron solo notifica — no reactiva el lead solo: por eso el home lo vuelve a
    * tratar como trabajo. Derivado en `buildHomeLeads` (reloj request-time, fuera
@@ -458,6 +466,12 @@ function proximaAccionPara(
       }
       if (input.followUpVencido) {
         return { proximaAccion: 'Te toca un toque — mandalo y registralo (Seguimiento)', accionable: true }
+      }
+      // 2.1: cadencia agotada o rechazado (sin próximo toque) → no hay toque que
+      // mandar. Pasivo visible; el cierre a PERDIDO lo decide Franco, jamás se
+      // automatiza. Distinto de "esperando" (que aún tiene un toque futuro).
+      if (input.sinProximoToque) {
+        return { proximaAccion: 'Se enfría — el cierre lo decide Franco', accionable: false }
       }
       return { proximaAccion: 'Esperando respuesta del negocio', accionable: false }
     }

@@ -45,6 +45,10 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
       contactos: lead._count.activities,
       followUpVencido:
         lead.nextFollowUpAt !== null && lead.nextFollowUpAt.getTime() <= ahora,
+      // 2.1: sin próximo toque agendado (nextFollowUpAt null) = cadencia agotada o
+      // rechazado → el lead se enfría. Distinto de un toque futuro (aún esperando).
+      // No mira el reloj (null es null): puro, sin la salvedad de purity del `ahora`.
+      sinProximoToque: lead.nextFollowUpAt === null,
       // 2.1b/D6: POSTERGADO cuya reactivación ya venció — vuelve a ser accionable
       // (el cron solo notifica). Mismo reloj request-time que followUpVencido.
       postergadoVencido:

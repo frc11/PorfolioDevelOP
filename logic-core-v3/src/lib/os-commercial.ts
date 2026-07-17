@@ -11,11 +11,18 @@
  *
  * Invariantes (cambiarlos = frenar y avisar):
  *   - SIN_RESPUESTA arma el próximo follow-up con calculateNextFollowUp
- *     (+2/+2/+3/stop) contando los SIN_RESPUESTA del lead.
+ *     (+2/+2/+3/stop) contando los SIN_RESPUESTA del lead. 2.1/C-02: agotada la
+ *     cadencia (cálculo → null) LIMPIA el toque viejo (nextFollowUpAt:null) —
+ *     antes quedaba vencido y el lead se servía como «trabajar» para siempre.
  *   - RESPONDIO mueve a LeadStatus.RESPONDIO y limpia nextFollowUpAt.
  *   - CALL_AGENDADA mueve a LeadStatus.CALL_AGENDADA y limpia nextFollowUpAt.
- *   - RECHAZADO y POSTERGADO solo registran la activity: el cierre (PERDIDO)
- *     y la pausa (postergarLead) son movidas aparte, como en el panel admin.
+ *   - 2.1/B-01: todo contacto real (SIN_RESPUESTA/RESPONDIO/CALL_AGENDADA/RECHAZADO)
+ *     limpia además el vencimiento del postergado (reactivateAt:null): registrar el
+ *     retomar corta el loop del postergado vencido. El status NO se toca acá (salir
+ *     de POSTERGADO sería una transición nueva; la decide Franco).
+ *   - 2.1/C-11: RECHAZADO limpia el toque agendado (nextFollowUpAt:null) — deja de
+ *     generar el CTA de toque eterno. No cambia status (no hay LeadStatus.RECHAZADO):
+ *     el cierre (PERDIDO) lo decide Franco. La pausa (postergarLead) sigue aparte.
  *   - crearDemoComercial NO es idempotente: cada llamada registra un envío
  *     (OsDemo nuevo). La idempotencia del envío del setter vive en
  *     `dossier.enviadaAt` (B6), no acá.
@@ -65,14 +72,14 @@ export async function registrarContactoComercial(
     })
 
     const followUpCount = countFollowUps(activities)
+    // C-02: agotada la cadencia, el cálculo devuelve null → se ESCRIBE null (limpia
+    // el toque viejo, antes vencido eterno). B-01: registrar el toque limpia también
+    // el vencimiento del postergado (reactivateAt) — el retomar corta ese loop.
     const nextFollowUpAt = calculateNextFollowUp(followUpCount)
-
-    if (nextFollowUpAt) {
-      await prisma.osLead.update({
-        where: { id: input.leadId },
-        data: { nextFollowUpAt },
-      })
-    }
+    await prisma.osLead.update({
+      where: { id: input.leadId },
+      data: { nextFollowUpAt, reactivateAt: null },
+    })
   }
 
   if (input.result === ActivityResult.RESPONDIO) {
@@ -81,6 +88,7 @@ export async function registrarContactoComercial(
       data: {
         status: LeadStatus.RESPONDIO,
         nextFollowUpAt: null,
+        reactivateAt: null,
       },
     })
   }
@@ -91,7 +99,18 @@ export async function registrarContactoComercial(
       data: {
         status: LeadStatus.CALL_AGENDADA,
         nextFollowUpAt: null,
+        reactivateAt: null,
       },
+    })
+  }
+
+  if (input.result === ActivityResult.RECHAZADO) {
+    // C-11: el rechazo corta el toque agendado (antes quedaba y, al vencer, generaba
+    // el CTA de toque eterno) y limpia el vencimiento del postergado. El status NO
+    // cambia (no existe LeadStatus.RECHAZADO): el cierre a PERDIDO lo decide Franco.
+    await prisma.osLead.update({
+      where: { id: input.leadId },
+      data: { nextFollowUpAt: null, reactivateAt: null },
     })
   }
 
