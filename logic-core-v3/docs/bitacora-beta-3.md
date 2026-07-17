@@ -1263,3 +1263,24 @@ Sprint 1.1: cerró verde. (1) 72 strings / 18 archivos. (2) Los 3 greps de éxit
 - `npx tsc --noEmit` → verde. `git log`: `612c4ee` (1.1) sobre `58eb285` (B1-S3). Grep de éxito sobre HEAD: 0 `proximaAccion: '…Paso N'` en `flow.ts`.
 
 **BASE DECLARADA DEL LANE LeadOS:** worktree `C:/Users/franc/Desktop/PorfolioDevelOP`, rama **`b1-s2-bsp-outbound`**. De acá en más, los sprints de LeadOS corren SOLO en esta rama+worktree (donde ahora vive 1.1 = `612c4ee`). Nota de contexto para Franco: esta rama arrastra también los commits del lane motor (B1-S1/S2/S3); 1.1 quedó apilado encima. La separación de lanes en ramas distintas, si se quiere, es decisión de Franco — no se ejecutó desde acá.
+
+---
+
+## Sprint T — Terreno verde: main typechea de nuevo · 2026-07-17
+
+**Qué rompía main.** `src/app/api/cron/cleanup-old-events/route.ts` exportaba `getProvidedCronSecret` (un `export function` extra, además de `GET` + `dynamic`). Next solo permite exports de handlers/config en un `route.ts`; el export no-handler rompe el typecheck de los tipos generados en `.next/types/.../route.ts` con un **TS2344** durante `next build`. Con eso, `main` (tip `62994be`) no buildeaba. La función estaba exportada a propósito para que el invariant de auth (`__tests__/cleanup-old-events-auth.invariant.ts`) testeara la extracción del secret sin invocar el camino feliz de `GET` (que pega a DB real).
+
+**El fix (diff mínimo, un objetivo).** Se movió `getProvidedCronSecret` **verbatim** (misma firma, mismo cuerpo — solo usa `Request` global, sin imports nuevos) a un módulo hermano `cron-secret.ts`. `route.ts` ahora importa `{ getProvidedCronSecret } from './cron-secret'` y exporta **solo** `dynamic` + `GET`. El invariant re-apunta únicamente ese import (`getProvidedCronSecret` desde `../cron-secret`, `GET` sigue desde `../route`) — ninguna aserción cambió. **NO** se unificaron los 4 crons en un helper compartido (los otros 3 `route.ts` con la misma duplicación quedan intactos — dedupe fuera de este sprint). 3 archivos tocados: `route.ts`, `cron-secret.ts` (nuevo), el invariant.
+
+**Verde (proxy — el build autoritativo es de Franco):**
+- ✅ Prueba source-level (la más fuerte sin build): grep de exports en `route.ts` → solo `dynamic` (config) y `GET` (handler). Ningún export no-handler → el TS2344 no se puede regenerar.
+- ✅ `tsc --noEmit` sobre fuente → **EXIT 0**, 0 errores (worktree limpio sin `.next/types`, que es exactamente "tsc sobre fuente").
+- ✅ Invariant `npm run test:t02` → **10/10 aserciones**, EXIT 0.
+- ✅ `git diff --cached --name-only` = los 3 archivos del scope, nada más.
+
+**Terreno / aislamiento.** El worktree principal estaba en `b2-s1-bot-sync-surface` (no `main`, aunque = `62994be`) con WIP ajeno de chatbot en el árbol (`handleChatRequest.ts` modificado + `channels.ts`/`core.ts`/`timing.ts` untracked, mutándose en vivo desde una sesión paralela). Para no correr carreras de índice compartido ni pisar ese WIP, el Sprint T se ejecutó en un **worktree aislado sobre `main`** (`C:/tmp/wt-sprint-t`, `node_modules` via junction al principal). El commit **`d0e8ef4`** aterriza en la rama `main`; el worktree principal quedó restaurado a `b2-s1` intacto.
+
+**FALTA para cerrar autoritativamente:** el `next build` de Franco sobre `main` (`d0e8ef4`). El proxy (source-level + tsc + invariant) es fuerte, pero el TS2344 solo se materializa/desaparece con los tipos que genera `next build` — esa es la verificación final. Sin push.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint T: main verde (proxy). (1) tsc EXIT 0 sobre fuente. (2) `route.ts` sin exports no-handler (solo `GET`+`dynamic`) → TS2344 no regenera. (3) invariant t02 10/10. (4) diff = 3 archivos exactos (`route.ts`/`cron-secret.ts`/invariant). (5) commit `d0e8ef4` en `main`, aislado en `C:/tmp/wt-sprint-t` para no tocar el WIP de chatbot del worktree principal (`b2-s1`). (6) Pendiente: `next build` de Franco = cierre autoritativo. Sin push.
