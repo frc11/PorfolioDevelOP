@@ -83,6 +83,11 @@ export function PantallaManual({
   captura,
 }: PantallaManualProps) {
   const esActual = pantalla.id === posicion.actual
+  // C-17: el cyan "Tu paso ahora" se reserva a lo accionable (disciplina B9). Un
+  // `actual` con `habilitadas` vacía es una pantalla terminal (DESCARTADA en m3,
+  // agendada en m16): sigue siendo la actual (para el guard de la página y la
+  // salida "Ir a tu paso"), pero NO es un paso para trabajar → tono zinc, sin cyan.
+  const esPasoActivo = esActual && posicion.habilitadas.length > 0
   const completada = posicion.completadas.includes(pantalla.id)
   const indicador = indicadorDeFase(pantalla.id)
   const esConstruccion = pantalla.fase === 'construccion'
@@ -103,7 +108,7 @@ export function PantallaManual({
         aria-label="Instrucción de esta pantalla"
         className={cn(
           'relative overflow-hidden rounded-2xl border p-5',
-          esActual
+          esPasoActivo
             ? 'border-cyan-400/25 bg-cyan-500/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
             : 'border-white/10 bg-white/[0.03]',
         )}
@@ -112,7 +117,7 @@ export function PantallaManual({
           aria-hidden
           className={cn(
             'absolute inset-y-0 left-0 w-1',
-            esActual ? 'bg-cyan-400/80' : 'bg-zinc-600/60',
+            esPasoActivo ? 'bg-cyan-400/80' : 'bg-zinc-600/60',
           )}
         />
         <div className="flex flex-wrap items-center gap-2">
@@ -120,7 +125,7 @@ export function PantallaManual({
             <p
               className={cn(
                 'text-[11px] font-medium uppercase tracking-[0.18em]',
-                esActual ? 'text-cyan-300/80' : 'text-zinc-500',
+                esPasoActivo ? 'text-cyan-300/80' : 'text-zinc-500',
               )}
             >
               {indicador.fase} — paso {indicador.n} de {indicador.m}
@@ -131,7 +136,7 @@ export function PantallaManual({
               Reentrada — correcciones de Franco
             </p>
           )}
-          {esActual ? (
+          {esPasoActivo ? (
             <Badge tone="cyan" variant="soft">
               Tu paso ahora
             </Badge>

@@ -1339,3 +1339,38 @@ Sprint 2.1 cerrado. (1) Censo: 4 callers, admin null-safe → compatible; agenda
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 2.2 cerrado. (1) `cadenciaAgotada` = `cadenciaInfo(followUpCount).agotada`, followUpCount enhebrado desde `manual.followUpCount` (misma maquinaria de 2.1/`flow.ts`, sin cálculo propio). (2) Spec nuevo `08-m5-cadencia-agotada.spec.ts`: 2 casos e2e reales (agotada oculta SIN_RESPUESTA + contador clampa + motivo; viva = form completo), landing en m5 por el mismo patrón del seed QA. (3) Suites: tsc EXIT 0, test:setter 41/41, test:leados 25/25. (4) Diff = 3 componentes + spec nuevo + bitácora. (5) Freno resuelto: `start:qa` no rebuildea solo — hubo que correr `npm run build` antes de validar el spec, si no da falso-rojo. `01-flow.spec.ts` con WIP ajeno detectado y dejado fuera del commit (índice compartido). Sin push.
+
+---
+
+## Sprint 2.3 — Los terminales derivan a archivo, no a trabajo · 2026-07-17
+
+**Objetivo único.** Un lead terminal deja de derivar como vivo: PERDIDO ya no abre m5 pidiendo contactar un negocio muerto, y DESCARTADA deja de pintar el cyan "Tu paso ahora". `posicionDe` (derivación de presentación, mi zona) — motor intocable.
+
+**Censo de terminales (lo define el código, no la instrucción).** Dos ejes:
+- **Archivo (predicado canónico del home, `flow.ts:375`):** `status === 'PERDIDO' || stage === 'DESCARTADA'`. `ArchivoCausa = 'descartado' | 'perdido'` (`flow.ts:667`) + `archivoMotivo` (motivo persistido: DESCARTADA→`evaluacion.motivoDescarte`; PERDIDO→`agenda.resultado.nota`).
+- **Status-terminal (`revision.ts:27`):** `['CERRADO', 'PERDIDO']`. **CERRADO = GANADO** (cae en m16, la reunión) — NO es archivo. Por eso la rama de pantalla es **solo PERDIDO**: un cierre exitoso no se manda a una vista de "perdido/descartado" (mislabel). DESCARTADA (terminal por STAGE) ya tenía su case (m3, veredicto a la vista) y se queda ahí — su cyan lo apaga C-17, no la derivación.
+
+**El fix (5 archivos + spec + invariante):**
+1. **`manual.ts` (B-02):** `PANTALLA_IDS`/`PANTALLAS` suman `archivo` (tipo `estado`, como espera/revisión). Rama temprana en `posicionDe`: `if (status === 'PERDIDO') return { actual: 'archivo', habilitadas: [] }` — ANTES del `switch(stage)`, así un PERDIDO en cualquier stage vivo (EVALUADA/APROBADA/…) no cae en m5/espera. El never-guard del switch queda **intacto** (la rama solo saltea la derivación por stage para este status; la exhaustividad sobre stages sigue cubriendo a los no-terminales).
+2. **`archivo-manual.tsx` (nuevo):** la vista de archivo, espejo de `EstadoManual` pero de cierre — tono zinc, cero forms, cero toque. Muestra causa (`Archivo — Perdido`), título, motivo persistido si lo hay, y CTA único "Seguí con el próximo" → `/setter`.
+3. **`page.tsx` ([paso]):** la rama `pantalla.tipo === 'estado'` (que el PROBE señaló como "dónde encaja la vista de archivo") ahora bifurca: `archivo` → `<ArchivoManual>` con causa/motivo derivados por la MISMA regla que `archivoMotivo`; espera/revisión → `EstadoManual` como antes.
+4. **`pantalla-manual.tsx` (C-17):** el cyan (marco + badge "Tu paso ahora" + indicador de fase) se gatea con `esPasoActivo = esActual && habilitadas.length > 0`. Un `actual` con `habilitadas` vacía (DESCARTADA en m3, agendada en m16) es terminal → tono zinc, sin cyan. `!esActual` (salida "Ir a tu paso") intacto.
+5. **`outreach.actions.ts` (B-02, aditivo):** guard al inicio de `registrarResultado` — `if (!leadActivo(lead.status)) return fail('Este negocio ya está cerrado — seguí con el próximo')`. Reusa `leadActivo` (`revision.ts`, cubre CERRADO+PERDIDO). Endurece, no habilita: rebota antes de tocar nada; el manual ya no ofrece m5 para estos, pero la action no confía en la UI.
+
+**Tests.**
+- **Invariante nuevo `manual.invariant.ts` (puro, sin DB, wired en `check:invariants`):** PERDIDO en 5 stages → `actual='archivo'`, `!habilitadas.includes('m5')`, `habilitadas === ['archivo']` (nada de trabajo alcanzable). Regresiones: mismo stage con status vivo → sigue m5 (no archivo); DESCARTADA → m3 `[]` (no re-ruteada); CERRADO+APROBADA → m16 (el archivo es exclusivo del perdido).
+- **Spec de render nuevo `09-archivo-terminal.spec.ts` (setter, DB+build real):** PERDIDO sembrado en EVALUADA con opener+toque vencido (el caso que ANTES caía en m5) → `/manual` redirige a `/manual/archivo`, muestra "Archivo — Perdido" + "Este negocio quedó cerrado" + CTA, y **cero** opciones de toque; el guard rebota `/manual/m5` a `/manual/archivo`.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17** (16 previos + `manual`).
+- ✅ `npm run build` EXIT 0; `prisma migrate status` up-to-date.
+- ✅ `test:leados` **25/25** (motor intacto, no se tocó).
+- ✅ `test:setter` **43/43** (41 previos + 2 nuevos). El B9 (`01-flow:314`, DESCARTADA→veredicto) sigue verde → C-17 no rompió DESCARTADA.
+
+**`01-flow.spec.ts` (lo edita `sad-burnell` en paralelo).** NO lo toqué. Su WIP uncommitted es exactamente el fix de copy que 2.1 dejó anotado (`self-check`→`chequeo final`, línea 229) — por eso el B6 pasó en mi corrida (su fix del working-tree ya aplicado). Delta de aserciones mío sobre ese archivo: **cero**.
+
+**Diff:** `manual.ts`, `pantalla-manual.tsx`, `archivo-manual.tsx` (nuevo), `[paso]/page.tsx`, `outreach.actions.ts`, `manual.invariant.ts` (nuevo), `package.json` (registra el invariante), `09-archivo-terminal.spec.ts` (nuevo), esta bitácora. `01-flow.spec.ts` (WIP ajeno) y `scripts/dev/sandbox-360-seed-channel.ts` (untracked ajeno) fuera del stage.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 2.3 cerrado. (1) Terminales censados: archivo = `PERDIDO ∨ DESCARTADA` (`flow.ts:375`); rama de pantalla solo PERDIDO (CERRADO=ganado→m16; DESCARTADA→m3 ya existía). (2) Rama temprana en `posicionDe` ANTES del switch, never-guard **intacto**. (3) Suites: tsc EXIT 0, invariantes 17/17 (nuevo `manual.invariant`), build EXIT 0, test:leados 25/25, test:setter 43/43 (spec nuevo `09-archivo-terminal` + render-check real). (4) Diff = 5 archivos + componente/invariante/spec nuevos + package.json (registro) + bitácora. (5) Frenos: page.tsx y package.json quedaron fuera de la lista literal del DoD pero son wiring necesario (el PROBE mandó a page.tsx; el invariante hay que registrarlo para que corra en la suite) — flagueado. `01-flow.spec.ts` intacto (delta de aserciones = 0). Pase visual del archivo: **Franco**. Sin push.

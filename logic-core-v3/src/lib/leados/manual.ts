@@ -58,6 +58,7 @@ export const PANTALLA_IDS = [
   'mr',
   'espera',
   'revision',
+  'archivo',
 ] as const
 
 export type PantallaId = (typeof PANTALLA_IDS)[number]
@@ -280,6 +281,14 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     detalle: 'No hay nada que hacer ahora — te avisamos cuando la apruebe o pida cambios.',
     corto: 'Revisión',
   },
+  archivo: {
+    id: 'archivo',
+    tipo: 'estado',
+    fase: null,
+    titulo: 'Este negocio quedó cerrado',
+    detalle: 'Se cerró sin avanzar — no hay nada que hacer acá. Seguí con el próximo.',
+    corto: 'Archivo',
+  },
 }
 
 export const FASES_MANUAL: Record<
@@ -474,6 +483,16 @@ function posicionDe(
   input: DerivacionManualInput,
 ): { actual: PantallaId; habilitadas: PantallaId[] } {
   const { stage } = input
+  // 2.3 (B-02): terminal por STATUS (PERDIDO — el cierre lo decide Franco desde
+  // admin, jamás se automatiza) → archivo read-only, ANTES de derivar por stage.
+  // Un negocio muerto no invita a trabajar: sin esta rama, un PERDIDO en EVALUADA
+  // (o cualquier stage vivo) caería en m5/espera pidiendo contactar un negocio
+  // que ya no está. DESCARTADA (terminal por STAGE) mantiene su case (m3, el
+  // veredicto a la vista). El never-guard del switch queda intacto: sólo se
+  // saltea la derivación por stage para este status, la exhaustividad sigue.
+  if (input.status === 'PERDIDO') {
+    return { actual: 'archivo', habilitadas: [] }
+  }
   const gateAbierto = gateBriefAbierto(input.status, input.caliente)
   const openerPendiente = stage === 'EVALUADA' && !gateAbierto && input.contactos === 0
   const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)

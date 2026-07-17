@@ -26,6 +26,7 @@ import {
 import { gateEnvioDemo, leadRespondio } from '@/lib/leados/flow'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
 import { getOwnedLead } from '@/lib/leados/ownership'
+import { leadActivo } from '@/lib/leados/revision'
 import {
   crearDemoComercial,
   postergarLead,
@@ -158,6 +159,12 @@ export async function registrarResultado(
 
     const lead = await getOwnedLead(leadId.data, userId)
     if (!lead) return fail('Lead no encontrado')
+    // 2.3 (B-02, aditivo): un lead terminal (CERRADO/PERDIDO) no recibe más
+    // toques. Endurece, no habilita — rebota antes de tocar nada. El manual ya
+    // no ofrece m5 para estos, pero la action no confía en la UI.
+    if (!leadActivo(lead.status)) {
+      return fail('Este negocio ya está cerrado — seguí con el próximo')
+    }
 
     const actividades = await listOwnedLeadActivities(leadId.data, userId)
     if (actividades === null) return fail('Lead no encontrado')

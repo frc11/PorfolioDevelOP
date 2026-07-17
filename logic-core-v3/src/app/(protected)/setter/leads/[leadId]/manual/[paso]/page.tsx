@@ -8,6 +8,7 @@ import {
 } from '@/lib/leados/manual'
 import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
 import { UrgenciaBanner } from '../../_components/urgencia-banner'
+import { ArchivoManual } from '../_components/archivo-manual'
 import { ReabrirConstruccion } from '../_components/construccion-ctas'
 import { EstadoManual } from '../_components/estado-manual'
 import { HistorialDelLead } from '../_components/historial-lead'
@@ -83,6 +84,23 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   const historial = <HistorialDelLead events={manual.timeline} />
 
   if (pantalla.tipo === 'estado') {
+    // 2.3 — El archivo es una pantalla de estado más (patrón espera/revisión),
+    // pero de CIERRE: read-only, sin toque. Causa y motivo se derivan con la
+    // MISMA regla que el home (`archivoMotivo`): DESCARTADA → motivoDescarte del
+    // veredicto; PERDIDO → nota post-reunión de Franco (opcional).
+    if (pantalla.id === 'archivo') {
+      const causa = manual.stage === 'DESCARTADA' ? 'descartado' : 'perdido'
+      const motivo =
+        causa === 'descartado'
+          ? (manual.evaluacion?.motivoDescarte ?? null)
+          : (manual.agenda?.resultado?.nota ?? null)
+      return (
+        <div className="space-y-5">
+          <ArchivoManual cabecera={cabecera} causa={causa} motivo={motivo} />
+          {historial}
+        </div>
+      )
+    }
     return (
       <div className="space-y-5">
         <EstadoManual
