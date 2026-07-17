@@ -12,7 +12,8 @@
  *   npm run test:t02
  */
 import assert from 'node:assert/strict'
-import { GET, getProvidedCronSecret } from '../route'
+import { GET } from '../route'
+import { getProvidedCronSecret } from '../cron-secret'
 
 let passed = 0
 function check(label: string, fn: () => void): void {
