@@ -69,12 +69,21 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
   }
 }
 
-export function SeguimientoForm({ leadId }: { leadId: string }) {
+export function SeguimientoForm({
+  leadId,
+  cadenciaAgotada,
+}: {
+  leadId: string
+  cadenciaAgotada: boolean
+}) {
   const [resultado, setResultado] = useState<ResultadoContacto | null>(null)
   const [nota, setNota] = useState('')
   const [fechaReactivacion, setFechaReactivacion] = useState('')
   const [error, setError] = useState<string | null>(null)
   const registro = useStepAction()
+  const opciones = cadenciaAgotada
+    ? OPCIONES.filter((opcion) => opcion.valor !== 'SIN_RESPUESTA')
+    : OPCIONES
 
   // Mínimo del date-picker de reactivación (mañana). Lazy init: se calcula UNA
   // vez al montar, fuera del render, para no leer el reloj en cada render
@@ -108,8 +117,14 @@ export function SeguimientoForm({ leadId }: { leadId: string }) {
 
   return (
     <div className="space-y-3">
+      {cadenciaAgotada && (
+        <p className="text-[11px] leading-relaxed text-zinc-500">
+          Los 3 toques ya se cumplieron — si no respondió, se enfría solo.
+        </p>
+      )}
+
       <div className="grid gap-2 sm:grid-cols-2">
-        {OPCIONES.map((opcion) => {
+        {opciones.map((opcion) => {
           const seleccionada = resultado === opcion.valor
           return (
             <button

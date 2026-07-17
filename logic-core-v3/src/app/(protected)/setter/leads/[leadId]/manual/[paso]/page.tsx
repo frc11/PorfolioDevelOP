@@ -307,7 +307,9 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                                   dmsHoy={manual.dmsHoy}
                                 />
                               ),
-                              captura: <M5Registro leadId={leadId} />,
+                              captura: (
+                                <M5Registro leadId={leadId} followUpCount={manual.followUpCount} />
+                              ),
                             }
                           : pantalla.id === 'm16'
                             ? {

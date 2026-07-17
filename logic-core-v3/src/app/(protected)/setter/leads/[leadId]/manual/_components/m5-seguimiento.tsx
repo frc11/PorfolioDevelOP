@@ -72,7 +72,8 @@ export function M5Contexto({
           <CalendarClock size={13} strokeWidth={1.5} />
           Toques:{' '}
           <span className="font-semibold text-zinc-300">
-            {cadencia.toquesHechos} de {PLANTILLAS_FOLLOW_UP.length}
+            {Math.min(cadencia.toquesHechos, PLANTILLAS_FOLLOW_UP.length)} de{' '}
+            {PLANTILLAS_FOLLOW_UP.length}
           </span>
         </span>
         {status === 'POSTERGADO' && reactivateAt ? (
@@ -182,8 +183,17 @@ export function M5Municion({
   )
 }
 
-/** Registro: el form compartido del write-path (mismas 4 opciones, misma action
- * y schema que el seguimiento del wizard). */
-export function M5Registro({ leadId }: { leadId: string }) {
-  return <SeguimientoForm leadId={leadId} />
+/** Registro: el form compartido del write-path (misma action y schema que el
+ * seguimiento del wizard). Con la cadencia agotada, «No respondió» deja de
+ * ofrecerse — la deriva `cadenciaInfo` (la misma maquinaria del contexto), no
+ * un cálculo propio. */
+export function M5Registro({
+  leadId,
+  followUpCount,
+}: {
+  leadId: string
+  followUpCount: number
+}) {
+  const cadenciaAgotada = cadenciaInfo(followUpCount).agotada
+  return <SeguimientoForm leadId={leadId} cadenciaAgotada={cadenciaAgotada} />
 }

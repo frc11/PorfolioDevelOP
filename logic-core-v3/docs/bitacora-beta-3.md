@@ -1319,3 +1319,23 @@ Sprint T: main verde (proxy). (1) tsc EXIT 0 sobre fuente. (2) `route.ts` sin ex
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 2.1 cerrado. (1) Censo: 4 callers, admin null-safe → compatible; agenda usa CALL_AGENDADA (no afectado). (2) A/B/C rojo→verde. (3) Suites: tsc EXIT 0, invariantes verdes, test:leados 25/25; test:setter 38/39 (el rojo = spec stale pre-existente, confirmado en main limpio, ajeno). (4) Diff = 3 archivos + test nuevo + bitácora. (5) Frenos: auditoría desfasada (line-refs); Caso B "vuelve al ciclo normal" = transición → elegí limpiar solo reactivateAt (sin transición; resume real queda a decisión tuya); rebota = idempotente (sin tocar el action del setter). No se tocó 01-flow.spec.ts (ningún spec asertaba el CTA viejo del agotado). Sin push.
+
+---
+
+## Sprint 2.2 — M5 agotada: el fin de la cadencia se vuelve estructura, no texto · 2026-07-17
+
+**Objetivo único.** Con la cadencia agotada, el form de M5 deja de ofrecer "No respondió" y el contador deja de poder decir "4 de 3". Motor intocable — solo componentes; el guard server-side ya quedó en 2.1.
+
+**Derivación de `cadenciaAgotada`.** La misma maquinaria del contexto (`cadenciaInfo`, `flow.ts`), no un cálculo propio. `page.tsx` pasa `manual.followUpCount` a `M5Registro`; `M5Registro` deriva `cadenciaInfo(followUpCount).agotada` y se lo pasa a `SeguimientoForm` como prop `cadenciaAgotada: boolean`. Con `true`, el form filtra `SIN_RESPUESTA` de las opciones y suma una línea de motivo en criollo ("Los 3 toques ya se cumplieron — si no respondió, se enfría solo."); con `false`, el form completo (4 opciones) igual que antes. El contador de `M5Contexto` (`{cadencia.toquesHechos} de {PLANTILLAS_FOLLOW_UP.length}`) pasa por `Math.min(...)` — nunca puede leer "4 de 3".
+
+**Spec nuevo — `tests/setter/08-m5-cadencia-agotada.spec.ts`.** Mismo patrón de aterrizaje en m5 que `scripts/dev/qa-manual-m5-m16.ts` (stage EVALUADA + contactos SIN_RESPUESTA + toque vencido o cadencia agotada), pero con leads namespaced propios (`createLead`/`registerActivity` de `setter-db.ts`, teardown por id exacto — no reutiliza el seed QA compartido). Dos casos reales contra DB+build, no mocks: (1) `cadenciaAgotada=true` (4 SIN_RESPUESTA, `nextFollowUpAt=null`) → asierta que "No respondió — mandé un toque" NO está (`toHaveCount(0)`), las otras 3 opciones sí, el contador muestra "3 de 3" (nunca "4 de 3"), y la línea de motivo aparece. (2) `cadenciaAgotada=false` (2 SIN_RESPUESTA, toque vencido) → asierta las 4 opciones completas y "1 de 3". **Trampa detectada y corregida:** la 1ª corrida contra `start:qa` (sirve el `.next` existente, NO rebuildea) dio falso-rojo con el cambio real aplicado — `npm run build` antes de correr el spec fue necesario para que el server QA reflejara el código nuevo.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0 (antes y después del cambio).
+- ✅ `test:setter` **41/41** (39 previos + 2 del spec nuevo). Nota: el rojo pre-existente de `01-flow.spec.ts:229` (documentado en 2.1, ajeno) ya NO aparece — otra sesión en paralelo corrigió esa copy en el working tree (cambio no mío, no commiteado desde acá, fuera de este diff).
+- ✅ `test:leados` **25/25**, sin regresión.
+
+**Diff:** `page.tsx` (pasa `followUpCount` a `M5Registro`), `m5-seguimiento.tsx` (`M5Registro` deriva `cadenciaAgotada`; contador con `Math.min`), `seguimiento-form.tsx` (prop `cadenciaAgotada`, filtra opciones, línea de motivo), `tests/setter/08-m5-cadencia-agotada.spec.ts` (nuevo), esta bitácora. `01-flow.spec.ts` (WIP ajeno, uncommitted) y `scripts/dev/sandbox-360-seed-channel.ts` (untracked ajeno) quedaron fuera del stage.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 2.2 cerrado. (1) `cadenciaAgotada` = `cadenciaInfo(followUpCount).agotada`, followUpCount enhebrado desde `manual.followUpCount` (misma maquinaria de 2.1/`flow.ts`, sin cálculo propio). (2) Spec nuevo `08-m5-cadencia-agotada.spec.ts`: 2 casos e2e reales (agotada oculta SIN_RESPUESTA + contador clampa + motivo; viva = form completo), landing en m5 por el mismo patrón del seed QA. (3) Suites: tsc EXIT 0, test:setter 41/41, test:leados 25/25. (4) Diff = 3 componentes + spec nuevo + bitácora. (5) Freno resuelto: `start:qa` no rebuildea solo — hubo que correr `npm run build` antes de validar el spec, si no da falso-rojo. `01-flow.spec.ts` con WIP ajeno detectado y dejado fuera del commit (índice compartido). Sin push.
