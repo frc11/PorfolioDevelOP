@@ -14128,3 +14128,109 @@ Hasta ese test de carga, **ONF-1 está implementado, no verificado bajo carga**.
 DB reconciliada.
 
 ---
+
+## FIX-ORIGIN — El config same-origin del propio sitio no debe rechazarse en prod
+
+### Causa
+`GET /api/chatbot/[slug]/config` lee `request.headers.get('origin')` y se lo pasa a
+`validateOrigin` (`src/lib/security/validate-origin.ts`, NO tocado). Un GET **same-origin** (el
+propio widget de develop-portfolio.netlify.app pidiendo su config) nunca manda header `Origin` —
+el navegador lo omite a propósito y en su lugar setea `Sec-Fetch-Site: same-origin`. `validateOrigin`
+trata cualquier `origin=null` en producción como cliente anónimo (curl/SSR) y rechaza:
+`if (!origin) return { allowed: NODE_ENV !== 'production', reason: 'no_origin' }` — sin distinguir
+el same-origin real del propio sitio. Resultado: 403 en prod, el widget del propio develOP no
+carga. Confirmado con los headers reales del 403 (`sec-fetch-site: same-origin`, sin `Origin`,
+`referer: https://develop-portfolio.netlify.app/`, `NODE_ENV=production`).
+
+### El fix
+En `src/app/api/chatbot/[slug]/config/route.ts`, ANTES de llamar a `validateOrigin`: si
+`!origin` y se cumple la condición exacta bajo la que `validateOrigin(null)` rechazaría hoy
+(`NODE_ENV === 'production'` sin `QA_ALLOW_LOCALHOST=1` — fuera de esa condición, dev y
+next-prod-qa YA permiten un origin nulo, sin cambios) y el request es same-origin confiable, se
+sirve la config saltando SOLO el check de `allowedDomains` (irrelevante same-origin — no hay
+dominio de embed que autorizar, es el propio sitio), preservando el check de bot activo/existente.
+
+Same-origin confiable = `Sec-Fetch-Site: same-origin` (señal primaria — header de Fetch Metadata,
+no falsificable desde JS de página) con un fallback defensivo si el header falta por completo:
+host del `Referer` == host del propio request (`Host`, mismo header que ya usa
+`api/qa/login/route.ts`). Un valor EXPLÍCITO distinto de `same-origin` (`cross-site` | `same-site`
+| `none`) NUNCA cae al fallback — se respeta tal cual.
+
+### Por qué NO debilita cross-origin ni abre server-to-server
+- Cross-origin real SIEMPRE manda `Origin` → `!origin` es `false` → el nuevo bloque nunca se
+  ejecuta, cae 100% intacto al `validateOrigin({origin, botSlug})` de siempre. Diff mínimo: el
+  código viejo no se tocó, solo se agregó un `if` ANTES.
+- Server-to-server (curl/SSR) sin `Origin` y sin `Sec-Fetch-Site: same-origin` ni Referer
+  matcheando → `isTrustedSameOrigin` da `false` → cae al `validateOrigin(null)` de siempre → 403
+  en prod, sin cambios.
+- Bot inactivo o inexistente → `isBotServable` (mismo criterio que `bot_not_found`/`bot_inactive`
+  de `validateOrigin`, aislado en el camino same-origin) da `false` → 403, NUNCA sirve config
+  (ni el `paused`-degradado de 200 que `getPublicConfig` da hoy para bots pausados en otros
+  caminos — se prefirió consistencia con el 403 que YA da `validateOrigin` para bot_inactive en
+  cross-origin, por instrucción explícita del sprint).
+- El bypass está gateado exactamente a la condición donde `validateOrigin(null)` rechazaría hoy:
+  en dev, o con `QA_ALLOW_LOCALHOST=1`, el nuevo código NUNCA se ejecuta — cero cambio de
+  comportamiento en esos entornos, ni siquiera para bots inactivos/inexistentes.
+- `validate-origin.ts` / `origin-matcher.ts`: **cero líneas tocadas**.
+
+### Decisiones no especificadas en el prompt
+- **`same-origin.ts` (archivo nuevo, hermano de route.ts)**: las 3 funciones del fix
+  (`isSameOriginBypassApplicable`, `isTrustedSameOrigin`, `isBotServable`) viven ahí, no inline en
+  `route.ts`. Motivo descubierto en Paso 0 de testing: `route.ts` importa
+  `@/modules/chatbot/index.server` (barrel server-only) cuya cadena de imports arrastra
+  `next-auth` → `next/server` (vía `server/insights/manageInsight.ts` →
+  `server/admin/getClientSession.ts` → `src/auth.ts`) y, en otro punto, un `.module.css` de un
+  componente de avatar — ninguno de los dos resuelve fuera del bundler de Next. Confirmado
+  intentando importar `route.ts` tanto vía `tsx` directo como vía este mismo Playwright runner:
+  mismo bloqueo en los dos ("Cannot find module 'next/server'" / "Unexpected token '.'" del CSS).
+  Es un problema PREEXISTENTE de esa ruta (no había ningún test de `config/route.ts` antes de
+  este fix, por la misma razón) — de ahí que la lógica del fix viva separada, con imports
+  mínimos, para que sea testeable con las herramientas de este repo (sin jest/vitest, sin mocking
+  de módulos). `route.ts` importa las 3 funciones desde ahí; su propio cuerpo queda casi vacío
+  (import + el `if` de 15 líneas + lo que ya había).
+- **`isBotServable` como chequeo propio (no reutiliza `validateOrigin` con un origin sintético)**:
+  se evaluó pasarle a `validateOrigin` un origin derivado de `request.url`/`NEXT_PUBLIC_APP_URL`
+  para reusar 100% su lógica (bot lookup + `allowedDomains`) — se descartó: acoplaría la confianza
+  same-origin (que no necesita allowlist, es el propio sitio por definición) a que
+  `bot.allowedDomains` siga incluyendo el dominio propio para siempre, y feedear un valor que
+  NUNCA fue un header real a un parámetro tipado como `origin` es confuso para el próximo que lea
+  el código. `isBotServable` es una query mínima (`findUnique({slug}, select:{isActive})`) que
+  refleja el MISMO criterio de `bot_not_found`/`bot_inactive`, sin la parte de `allowedDomains`
+  que same-origin no necesita.
+- **`prisma generate`** corrido antes de la verificación final: el `tsc` mostraba ~55 errores
+  ajenos al fix (modelos/campos de B1 — `MotorAlertType`, `apiKeyEncrypted`,
+  `outboundIdempotencyKey`, etc. — presentes en `schema.prisma` pero ausentes del cliente
+  generado). Causa: el worktree runtime mergeó `origin/main` (trae B1) después de la última
+  verificación de esta sesión, sin regenerar el cliente. No es parte de este fix ni toca DB/migra
+  nada — es la regeneración local de tipos que corresponde tras cualquier pull de schema
+  (documentado en `AGENTS.md`, "Workflow de cambios a BD"). Con eso, `tsc --noEmit` quedó en
+  **0 errores** en todo el repo, no solo en lo tocado por FIX-ORIGIN.
+
+### Tests
+- **Invariante puro** (`config/__tests__/fix-origin-same-origin.invariant.ts`, `npm run
+  test:fixorigin`, cero DB): 15 checks sobre `isSameOriginBypassApplicable` (prod sin flag → true;
+  dev / test / prod+flag → false) e `isTrustedSameOrigin` (same-origin → true;
+  cross-site/same-site/none → false, nunca cae al fallback; fallback por Referer==Host → true;
+  Referer distinto/ausente/malformado/sin Host → false). Mutación de `NODE_ENV` vía
+  `Object.defineProperty` (Next.js lo declara `readonly` en `global.d.ts` — asignación directa y
+  `delete` no compilan; `Object.defineProperty` es el idioma estándar para esto, cero `any`).
+- **Integración contra Neon real** (`tests/integration/fix-origin-same-origin-config.spec.ts`, in
+  process vía Playwright, mismo patrón que `chatbot-isolation.spec.ts`): siembra 2 orgs efímeras
+  (`BotConfig.organizationId` es `@unique` — un bot por org) con un bot activo y uno inactivo;
+  confirma `isBotServable` → true/false/false para activo/inactivo/inexistente. Teardown por id
+  exacto en `afterAll`.
+- **Gap declarado**: la COMPOSICIÓN de las 3 funciones dentro del `if` de `GET` (que sí compila,
+  pasa lint y tsc) no tiene test automatizado end-to-end en este sprint — por el mismo bloqueo de
+  imports de `route.ts` descripto arriba, ninguna herramienta de este repo puede importar `GET`
+  directo. Cubierto por lectura de código (el `if` son 6 líneas, directamente legibles) y por la
+  verificación en prod que sigue.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: 0 errores (repo entero, tras `prisma generate`).
+- `eslint` sobre los 4 archivos tocados/nuevos: 0 errores, 0 warnings.
+- Sin `git`, sin migración, sin tocar `schema.prisma` ni archivos frozen/de seguridad.
+
+### Verificación humana declarada (Valentino) — el punto real del fix
+Tras deploy: el chat carga en develop-portfolio.netlify.app (config 200, widget levanta) + el
+embed cross-origin de Matsu sigue andando. Esto se verifica en prod — es exactamente lo que este
+fix existe para arreglar, y ningún test de esta sesión reemplaza esa verificación.
+
+---

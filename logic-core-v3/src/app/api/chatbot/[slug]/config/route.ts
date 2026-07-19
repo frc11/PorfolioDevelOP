@@ -1,5 +1,6 @@
 import { handleConfigRequest } from '@/modules/chatbot/index.server'
 import { validateOrigin } from '@/lib/security/validate-origin'
+import { isSameOriginBypassApplicable, isTrustedSameOrigin, isBotServable } from './same-origin'
 
 export const runtime = 'nodejs'
 
@@ -39,6 +40,23 @@ export async function GET(
 ): Promise<Response> {
   const { slug } = await params
   const origin = request.headers.get('origin')
+
+  // FIX-ORIGIN — Un GET same-origin (el propio widget de develOP pidiendo su
+  // config) NO manda Origin: el navegador lo omite a propósito cuando hay
+  // Sec-Fetch-Site: same-origin. validateOrigin({origin:null}) en prod asume
+  // que "sin Origin" = cliente anónimo (curl/SSR) y rechaza — sin distinguir
+  // el same-origin real del propio sitio. Acá se distingue ANTES de llamarlo,
+  // sin tocar validate-origin.ts: mismo criterio de bot activo/existente,
+  // saltea únicamente el check de allowedDomains (irrelevante same-origin).
+  if (!origin && isSameOriginBypassApplicable() && isTrustedSameOrigin(request)) {
+    if (!(await isBotServable(slug))) {
+      return new Response(JSON.stringify({ error: 'Origin not allowed' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+    return handleConfigRequest(slug)
+  }
 
   const validation = await validateOrigin({ origin, botSlug: slug })
 
