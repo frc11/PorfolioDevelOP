@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Flame } from 'lucide-react'
+import { Star } from 'lucide-react'
 import type { LeadStatus } from '@prisma/client'
 import { Badge, Button, Card, Field, Modal, Select, TextArea } from '@/components/ui'
 import type { Evaluacion } from '@/lib/leados/contracts'
@@ -27,19 +27,18 @@ import { cn } from '@/lib/utils'
  * hay borrador que guardar a medias). El chrome (Card/intro/ToolGuide/criterios
  * en el wizard; layout-tipo en el manual) vive afuera.
  *
- * Los TEXTOS del veredicto son parámetro de presentación: el wizard conserva
- * sus labels históricos («Caliente» incluido — suites como testigo); el manual
- * usa lenguaje de prioridad post-2.1/admin-1b (el veredicto CALIENTE solo
- * SUGIERE prioridad a Franco, no marca el caliente operativo — ese es campo
- * de Franco). Los VALORES que viajan a la action no cambian nunca
- * (`VEREDICTO_VALUES`, contrato del dossier).
+ * Los TEXTOS del veredicto son parámetro de presentación: el default
+ * (`VEREDICTO_LABELS`) ya usa lenguaje de prioridad post-3.1 (el veredicto
+ * CALIENTE solo SUGIERE prioridad a Franco, no marca el caliente operativo —
+ * ese es campo de Franco). Los VALORES que viajan a la action no cambian
+ * nunca (`VEREDICTO_VALUES`, contrato del dossier).
  */
 
-/** Labels históricos del wizard — default de ambas piezas compartidas. */
+/** Default de presentación (post-3.1, vocabulario canónico) — red de seguridad si algo renderiza sin `textos`. */
 export const VEREDICTO_LABELS: Record<Evaluacion['veredicto'], string> = {
   DESCARTAR: 'Descartar',
   AVANZAR: 'Avanzar',
-  CALIENTE: 'Caliente',
+  CALIENTE: 'Avanzar con prioridad',
 } as const
 
 /** Textos de presentación del registro — la presentación elige, el motor no. */
@@ -307,10 +306,10 @@ export function EvaluacionResumen({
             Score {evaluacion.score}/5
           </Badge>
           <Badge
-            tone={evaluacion.veredicto === 'CALIENTE' ? 'amber' : evaluacion.veredicto === 'AVANZAR' ? 'emerald' : 'zinc'}
+            tone={evaluacion.veredicto === 'CALIENTE' ? 'violet' : evaluacion.veredicto === 'AVANZAR' ? 'emerald' : 'zinc'}
             variant="soft"
             size="md"
-            icon={evaluacion.veredicto === 'CALIENTE' ? <Flame size={11} strokeWidth={1.5} /> : undefined}
+            icon={evaluacion.veredicto === 'CALIENTE' ? <Star size={11} strokeWidth={1.5} /> : undefined}
           >
             {veredictoLabels[evaluacion.veredicto]}
           </Badge>

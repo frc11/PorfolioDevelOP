@@ -1374,3 +1374,36 @@ Sprint 2.2 cerrado. (1) `cadenciaAgotada` = `cadenciaInfo(followUpCount).agotada
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 2.3 cerrado. (1) Terminales censados: archivo = `PERDIDO ∨ DESCARTADA` (`flow.ts:375`); rama de pantalla solo PERDIDO (CERRADO=ganado→m16; DESCARTADA→m3 ya existía). (2) Rama temprana en `posicionDe` ANTES del switch, never-guard **intacto**. (3) Suites: tsc EXIT 0, invariantes 17/17 (nuevo `manual.invariant`), build EXIT 0, test:leados 25/25, test:setter 43/43 (spec nuevo `09-archivo-terminal` + render-check real). (4) Diff = 5 archivos + componente/invariante/spec nuevos + package.json (registro) + bitácora. (5) Frenos: page.tsx y package.json quedaron fuera de la lista literal del DoD pero son wiring necesario (el PROBE mandó a page.tsx; el invariante hay que registrarlo para que corra en la suite) — flagueado. `01-flow.spec.ts` intacto (delta de aserciones = 0). Pase visual del archivo: **Franco**. Sin push.
+
+---
+
+## Sprint 3.1 — Caliente vuelve a ser solo de Franco: hints, ícono del veredicto y modismo · 2026-07-22
+
+**Objetivo único.** `caliente` deja de existir en la voz del setter y queda reservada al badge operativo de Franco. Continuación del barrido de vocabulario de 1.1. Solo strings y presentación — motor, campo `OsLead.caliente`, `esCaliente()`, `SCORE_CALIENTE`, `gateBriefAbierto`, `ordenarCola` y el badge visual (`manual-nav.tsx`, `foco-surface.tsx`, `home-sections.tsx`) intocables.
+
+**FASE 0 — hallazgo previo al censo.** `git status --porcelain` dio limpio (sin el WIP uncommitted que 2.2/2.3 documentaron): la sesión paralela que traía el fix `self-check`→`chequeo final` en `01-flow.spec.ts:229` no lo dejó commiteado y se perdió — HEAD volvió a tener la copy vieja. `test:setter` lo confirmó rojo (B6). Reconciliado como primer commit aparte (`b468ec6`, mensaje exacto del protocolo), antes de tocar nada de `caliente`. Continuidad de B2 verificada (`aed017e`/`7425d2b`/`b844208` en el log). `tsc --noEmit` EXIT 0.
+
+**Censo (`grep -rn -i "caliente" src/lib/leados/ "src/app/(protected)/setter/"`, ~140 hits).** Clasificación:
+- **(i) Campo/badge de Franco y su guardrail — exento:** `OsLead.caliente`, `esCaliente()`, `SCORE_CALIENTE`, `gateBriefAbierto`, `ordenarCola`, `posicionDe`/`ordenFoco`, el badge "Caliente" en `manual-nav.tsx:90`, `foco-surface.tsx:161`, `home-sections.tsx:81`, y las notificaciones internas a Franco (`notify.ts`) — no las lee el setter.
+- **(ii) Copy que lee el setter — se barrió:** 6 strings en `guidance-content.ts` (347, 351, 374, 441, 823, 840 — hints del Evaluador y del gate del brief/envío) + ícono/tono del veredicto alto y el label default en `evaluacion-form.tsx` (42, 309-312) + el modismo de `novedades.ts:60`.
+- **(iii) Comentarios/JSDoc/keys/tests — exento:** el resto (`VEREDICTO_VALUES`, `calienteNotificadaAt`, comentarios explicativos en `flow.ts`/`revision.ts`/`dossier.ts`/`isolation.ts`/invariantes/tests). Actualicé además 2 comentarios en `evaluacion-form.tsx` que quedaban inexactos tras el cambio del default (mencionaban labels "históricos" del wizard, que ya no existe desde 5.6).
+- **Fronterizo NO tocado (flagueado a Franco):** `paso.ts:181` ("El link se libera... o si el lead fuera caliente") es copy que lee el setter y usa la palabra reservada, pero cae fuera de los 4 ítems explícitos de la tarea y del diff-stat pedido en el DoD — lo dejé intacto por disciplina de scope. Queda como candidato a un futuro sprint chico si Franco quiere el barrido 100% completo.
+
+**Los 3 cambios:**
+1. **Hints (`guidance-content.ts`):** "4–5 marca el lead como caliente" → "4–5 sugiere avanzar con prioridad"; "Descartar, Avanzar o Caliente" → "Descartar, Avanzar o Avanzar con prioridad"; "4–5 es caliente" → "4–5 sugiere avanzar con prioridad"; "si Franco lo marca caliente" → "si Franco le da prioridad"; el bloque `enfasis: 'caliente'` del camino preventivo → `enfasis: 'priorizado por Franco'`; "si el lead fuera caliente" → "si Franco le dio prioridad".
+2. **Ícono/tono del veredicto alto (`evaluacion-form.tsx`, `EvaluacionResumen`):** `Flame` + `amber` (idéntico al badge de Franco) → `Star` + `violet` (token ya existente en `Badge.tsx`). Identidad propia para que el setter no confunda "el Evaluador sugiere" con "Franco marcó caliente".
+3. **Label muerto (`VEREDICTO_LABELS.CALIENTE`):** `'Caliente'` → `'Avanzar con prioridad'`. Red de seguridad si algo renderiza sin `textos` — no se tocó la API del componente ni se borró la constante.
+4. **Modismo (`novedades.ts:60`):** "es el momento caliente" → "recién aprobada", conservando la urgencia.
+
+**Grep de éxito:** `grep -rn -i "caliente" src/lib/leados/ "src/app/(protected)/setter/"` → único hit de copy visible restante es `paso.ts:181` (fronterizo, flagueado arriba, no tocado); todo lo demás son badge/campo de Franco, comentarios, keys y tests.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **43/43** (dos rojos de la primera corrida — B3-opener y F4-mobile-drawer — confirmados flaky en aislado y verdes en la corrida limpia siguiente; sin relación con `caliente`).
+
+**Diff:** `guidance-content.ts`, `evaluacion-form.tsx`, `novedades.ts`, `tests/setter/01-flow.spec.ts` (commit aparte, deuda de 1.1), esta bitácora. `docs/probe-01-censo-cosecha.md` (untracked, WIP de otra sesión paralela) quedó fuera del stage.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.1 cerrado. (1) Censo ~140 hits: (i) badge/campo de Franco exento, (ii) 9 hits de copy barridos, (iii) comentarios/keys/tests exentos. (2) Se barrió: 6 hints del Evaluador/gate + ícono `Flame→Star`/tono `amber→violet` del veredicto alto + label muerto `CALIENTE→'Avanzar con prioridad'` + modismo de novedades. (3) Grep de éxito: limpio salvo `paso.ts:181` (fronterizo, no tocado, flagueado). (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 43/43 (2 flakes ajenos confirmados y re-verdes). (5) Frenos: FASE 0 encontró la deuda de 1.1 otra vez perdida (WIP ajeno no commiteado se cayó) — reconciliada como commit aparte antes del sprint, como indicaba el protocolo. `docs/probe-01-censo-cosecha.md` es WIP ajeno untracked, no tocado. Sin push.

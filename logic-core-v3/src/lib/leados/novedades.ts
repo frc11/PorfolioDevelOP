@@ -57,7 +57,7 @@ export function copyNovedad(
     case 'DEMO_APROBADA':
       return {
         title: 'Franco aprobó tu demo',
-        body: `${businessName}: la demo está aprobada. Enviá el link ya — es el momento caliente.`,
+        body: `${businessName}: la demo está aprobada. Enviá el link ya, recién aprobada.`,
       }
     case 'DEMO_RECHAZADA':
       return {

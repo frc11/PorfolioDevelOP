@@ -344,11 +344,11 @@ export const GUIA_EVALUACION = {
   campos: {
     score: {
       label: 'Score',
-      hint: 'El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 marca el lead como caliente.',
+      hint: 'El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad.',
     },
     veredicto: {
       label: 'Veredicto',
-      hint: 'El que eligió el Evaluador: Descartar, Avanzar o Caliente. Copialo, no lo cambies.',
+      hint: 'El que eligió el Evaluador: Descartar, Avanzar o Avanzar con prioridad. Copialo, no lo cambies.',
     },
     razonamiento: {
       label: 'Razonamiento',
@@ -371,7 +371,7 @@ export const GUIA_EVALUACION = {
     ],
     [
       'El score marca el camino: ',
-      { enfasis: '1–2 descarta, 3 avanza, 4–5 es caliente' },
+      { enfasis: '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' },
       ' (y deja producir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
     ],
   ],
@@ -438,7 +438,7 @@ export const GUIA_BRIEF = {
     detalle: [
       'El lead avanza, pero el brief se abre cuando ',
       { enfasis: 'el negocio responde el primer contacto' },
-      ' —o si Franco lo marca caliente—. Mientras tanto, mandá el opener y registrá la conversación en «Seguimiento»: apenas responda, este paso se abre solo.',
+      ' —o si Franco le da prioridad—. Mientras tanto, mandá el opener y registrá la conversación en «Seguimiento»: apenas responda, este paso se abre solo.',
     ],
   },
   porque: [
@@ -820,7 +820,7 @@ export const GUIA_ENVIO = {
   listo: 'Demo aprobada — momento de enviar el link',
   preventivo: [
     'Camino preventivo (lead ',
-    { enfasis: 'caliente' },
+    { enfasis: 'priorizado por Franco' },
     '): la estás mandando antes de que responda. Puede acompañar al opener — vos decidís el momento.',
   ],
   copyBlock: {
@@ -837,7 +837,7 @@ export const GUIA_ENVIO = {
     aprobadaSinEnganche: [
       'La demo está aprobada — el link se libera ',
       { enfasis: 'cuando el negocio responda' },
-      ' (o si el lead fuera caliente).',
+      ' (o si Franco le dio prioridad).',
     ],
     engancheSinAprobar: [
       'El link se envía cuando ',
