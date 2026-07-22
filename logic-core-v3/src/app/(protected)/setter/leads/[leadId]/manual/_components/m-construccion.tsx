@@ -103,8 +103,11 @@ export function ConstruccionMunicion({ faseId }: { faseId: FaseId }) {
 /** Registro: el tilde de auto-reporte de la fase (mismo camino que el checklist
  * del wizard, sin gatear nada) + las capas que el corte 5.6 trae del wizard:
  * el CTA «Arrancar construcción» mientras el dossier sigue en BRIEF (sin la
- * transición, el borrador m13 nunca se habilita — el tilde NO se bloquea, §6-3)
- * y la capa de escalamiento «me trabé» en CONSTRUCCION. */
+ * transición, el borrador m13 nunca se habilita) y la capa de escalamiento
+ * «me trabé» en CONSTRUCCION. Tildar sigue sin ser gate — no es requisito para
+ * avanzar ni condiciona navegación (§6-3): el `disabled` de más abajo solo
+ * espeja, fuera de CONSTRUCCION, la regla que el server ya aplica en
+ * `saveOwnedProgreso` (3.3). */
 export function ConstruccionRegistro({
   leadId,
   faseId,
