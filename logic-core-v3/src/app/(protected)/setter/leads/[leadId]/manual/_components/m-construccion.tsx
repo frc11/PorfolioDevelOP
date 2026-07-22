@@ -139,6 +139,8 @@ export function ConstruccionRegistro({
         faseId={faseId}
         titulo={titulo}
         completadas={completadas}
+        puedeGuardar={stage === 'CONSTRUCCION'}
+        motivo="Primero arrancá la construcción — el botón está arriba."
       />
 
       {stage === 'CONSTRUCCION' && (

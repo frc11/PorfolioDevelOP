@@ -25,17 +25,32 @@ import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actio
  * `/setter/leads/[leadId]` pero NO esta sub-ruta del manual, así que sin el
  * refresh la base optimista quedaría stale y el tilde volvería atrás al cerrar
  * la transición (mismo refresh que `OpenerForm`/`EscalarModal` en el manual).
+ *
+ * `puedeGuardar` (3.3, B-07): el server (`saveOwnedProgreso`, dossier.ts) YA
+ * rechaza el guardado fuera de `stage === 'CONSTRUCCION'` — antes de esto el
+ * tilde se ofrecía igual en BRIEF (con la CTA «Arrancar construcción» arriba)
+ * y el click volvía con un toast de error recién al tocar el server. Acá se
+ * ESPEJA esa regla, no se agrega una nueva: `puedeGuardar` no bloquea nada
+ * fuera del submit del tilde (navegación, lectura y el resto de la pantalla
+ * siguen intactos) y sigue sin ser un gate — tildar en CONSTRUCCION continúa
+ * sin hacer avanzar ni bloquear nada (§6-3 intacto).
  */
 export function FaseAutoReporte({
   leadId,
   faseId,
   titulo,
   completadas,
+  puedeGuardar = true,
+  motivo,
 }: {
   leadId: string
   faseId: FaseId
   titulo: string
   completadas: FaseId[]
+  /** false cuando el server va a rechazar el guardado (stage !== CONSTRUCCION). */
+  puedeGuardar?: boolean
+  /** Motivo corto a mostrar cuando `puedeGuardar` es false. */
+  motivo?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -64,13 +79,16 @@ export function FaseAutoReporte({
     <button
       type="button"
       onClick={toggle}
+      disabled={!puedeGuardar}
       aria-pressed={marcada}
       aria-label={marcada ? `Desmarcar «${titulo}» como hecha` : `Marcar «${titulo}» como hecha`}
       className={cn(
         'group flex w-full items-center gap-3 rounded-xl border p-4 text-left transition-colors',
-        marcada
-          ? 'border-emerald-400/30 bg-emerald-500/[0.06]'
-          : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20',
+        !puedeGuardar
+          ? 'cursor-not-allowed border-white/[0.08] bg-white/[0.02] opacity-60'
+          : marcada
+            ? 'border-emerald-400/30 bg-emerald-500/[0.06]'
+            : 'border-white/[0.08] bg-white/[0.02] hover:border-white/20',
       )}
     >
       <span
@@ -98,8 +116,9 @@ export function FaseAutoReporte({
           {marcada ? 'Fase marcada como hecha' : 'Marcá esta fase cuando la termines'}
         </span>
         <span className="mt-0.5 block text-xs leading-relaxed text-zinc-500">
-          Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden
-          que te sirva. El único chequeo que gatea es el final.
+          {puedeGuardar
+            ? 'Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el final.'
+            : motivo}
         </span>
       </span>
     </button>

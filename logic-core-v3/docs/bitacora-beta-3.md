@@ -1442,3 +1442,39 @@ Sprint 3.1 cerrado. (1) Censo ~140 hits: (i) badge/campo de Franco exento, (ii) 
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 3.2 cerrado. (1) Guard en `opener-form.tsx` (`largo > 0`) y `seguimiento-form.tsx` (`nota.trim() !== ''`), mismo patrón que `EvaluacionForm` (A-24), sin autosave ni tocar `cadenciaAgotada`. (2) Prueba real del `beforeunload`: spec nuevo `10-unsaved-guard.spec.ts`, 2 casos e2e — `defaultPrevented` `false`→`true`→`false` según haya texto, con `expect.poll` por la carrera efecto-vs-dispatch. (3) a11y: los 5 puntos con `role="alert"` (`ficha-form:249`, `evaluacion-form:229`, `agenda-form:218/231/235`) + eslint jsx-a11y verde; el radiogroup de `evaluacion-form:160` se dejó con `aria-label` porque `Field` no expone un id externo sin refactor (flagueado, no forzado). (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 45/45 (1 flake ajeno re-verde). Diff = 5 componentes + spec nuevo + bitácora. (5) Freno recurrente: `start:qa` no rebuildea solo (mismo hallazgo de 2.2) — `npm run build` antes de validar el spec nuevo. Sin push.
+
+---
+
+## Sprint 3.3 — El tilde explica por qué no se puede todavía · 2026-07-22
+
+**Objetivo único.** `FaseAutoReporte` (el tilde de auto-reporte de una fase de Construcción) dejaba de reflejar una regla que el server YA aplica: `saveOwnedProgreso` (`dossier.ts:391-393`) rechaza el guardado si `dossier.stage !== 'CONSTRUCCION'` — hasta ahora el tilde se ofrecía igual en BRIEF y el setter se enteraba recién con un toast de error tras el click. Presentación pura: el guard del server queda idéntico (diff = cero en `dossier.ts`, confirmado).
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`). Continuidad: `909ad8d` (3.1) y `79d3787` (3.2) en el log. `tsc --noEmit` EXIT 0.
+
+**PROBE.** `m-construccion.tsx:103-153` (`ConstruccionRegistro`): en `stage === 'BRIEF'` ya muestra el CTA «Arrancar construcción» arriba del tilde — el texto del motivo nuevo reusa exactamente ese nombre para que el setter encuentre lo que se le nombra. `fase-auto-reporte.tsx` entero: el tilde es un `<button>` sin `disabled` hoy, con `useOptimistic` + `guardarProgreso`; su comentario de cabecera ya documentaba el §6-3 ("NO es un gate"). `stage` viaja `manual/_data.ts` → `page.tsx` → `ConstruccionRegistro` como `DossierStage | null`, ya presente en la firma de props — no hizo falta enhebrar nada nuevo.
+
+**El cambio (2 archivos, sin tocar motor):**
+1. **`fase-auto-reporte.tsx`:** dos props nuevas, `puedeGuardar?: boolean` (default `true`, así los callers existentes — si los hay — no rompen) y `motivo?: string`. El `<button>` suma `disabled={!puedeGuardar}` + estilo `opacity-60 cursor-not-allowed` cuando está deshabilitado; el texto de ayuda bajo el label muestra el `motivo` en vez del texto de auto-reporte habitual cuando `!puedeGuardar`. El `disabled` nativo del `<button>` es lo único que cambia: no hay `onClick` condicional extra, no hay wrapper que intercepte otra cosa — navegación, lectura y el resto de la pantalla (CTA de arrancar, contexto, munición, escalamiento) quedan exactamente igual.
+2. **`m-construccion.tsx`:** `ConstruccionRegistro` pasa `puedeGuardar={stage === 'CONSTRUCCION'}` y `motivo="Primero arrancá la construcción — el botón está arriba."` a `FaseAutoReporte`. Nada más se tocó de ese archivo — ni siquiera el comentario de cabecera de `ConstruccionRegistro` (línea ~106, "el tilde NO se bloquea, §6-3"), que la tarea no pidió tocar; queda flagueado abajo porque ahora es impreciso en BRIEF (SÍ se bloquea el submit, aunque §6-3 sigue intacto en su sentido real: tildar sigue sin gatear transiciones).
+
+**§6-3, ampliado (no revertido).** El comentario de cabecera de `fase-auto-reporte.tsx` se extendió: el `disabled` ESPEJA una regla que el server ya aplicaba (no es un gate nuevo), tildar en CONSTRUCCION sigue sin hacer avanzar ni bloquear nada, y `puedeGuardar` no toca nada fuera del submit del tilde. Alguien que lea el archivo de ahora en más no debería confundir esto con una reversión del corte 5.6.
+
+**Hallazgo flagueado (no corregido, fuera del scope explícito).** `m-construccion.tsx:106` sigue diciendo "el tilde NO se bloquea, §6-3" en el comentario de `ConstruccionRegistro` — la tarea dijo explícitamente "nada más cambia de ese archivo" fuera de pasar las dos props nuevas, así que no toqué esa línea aunque quedó desactualizada. Para Franco: si se quiere, un sprint de una línea la deja consistente con `fase-auto-reporte.tsx`.
+
+**Spec nuevo — `tests/setter/11-fase-disabled.spec.ts`.** Dos casos reales (DB+build): un lead en `stage='BRIEF'` aterrizando en `/manual/m7` (primera pantalla de Construcción, alcanzable en BRIEF y CONSTRUCCION por la navegación libre de §6-3) → el tilde (`button[aria-pressed]`) está `disabled` y muestra el motivo textual; el CTA «Arrancar construcción» sigue visible y clickeable (nada más bloqueado). Un lead en `stage='CONSTRUCCION'` en la misma pantalla → el tilde está habilitado, funciona (click → `aria-pressed="true"` + "Fase marcada como hecha").
+
+**e2e B5 (`01-flow.spec.ts:174`, CONSTRUCCIÓN: arrancar + escalar).** Corrido solo (`-g "B5"`) y en la suite completa: **verde, intacto**. No asertaba el tilde en BRIEF, así que no había forma de que este cambio lo tocara — confirmado igual porque la tarea lo pedía explícito.
+
+**Trampa de siempre (2.2/3.2, esta vez sin sorpresa).** `npm run build` antes de correr el spec nuevo — `start:qa` sirve el `.next` viejo.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **47/47** (45 previos + 2 del spec nuevo) — sin flakes esta corrida.
+- ✅ `git diff -- src/lib/leados/dossier.ts` → **0 líneas** (motor intacto, confirmado con el comando, no solo de memoria).
+
+**Diff:** `fase-auto-reporte.tsx`, `m-construccion.tsx`, `tests/setter/11-fase-disabled.spec.ts` (nuevo), esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.3 cerrado. (1) `FaseAutoReporte` suma `puedeGuardar`/`motivo`: `disabled` nativo en el `<button>` + motivo "Primero arrancá la construcción — el botón está arriba." (nombra el CTA real); `m-construccion.tsx` calcula `puedeGuardar = stage === 'CONSTRUCCION'`, nada más cambia ahí. (2) e2e B5: **intacto**, verde solo y en la suite completa. (3) `dossier.ts`: confirmado con `git diff` → 0 líneas, el guard del server no se tocó. (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 47/47 (sin flakes). Diff = 2 componentes + spec nuevo + bitácora, exactamente lo pedido. (5) Freno/flag: el comentario de `m-construccion.tsx:106` quedó desactualizado ("el tilde NO se bloquea") pero fuera del scope explícito de la tarea — no se tocó, reportado para Franco. Sin push.
