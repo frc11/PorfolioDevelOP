@@ -178,7 +178,7 @@ function describirFoco(
             icon: Hourglass,
             eyebrow: 'En espera',
             titulo: 'Demo aprobada',
-            detalle: 'El link se libera cuando el negocio responda (o si el lead fuera caliente).',
+            detalle: 'El link se libera cuando el negocio responda (o si Franco le dio prioridad).',
           }
     case 'DESCARTADA':
       return {
