@@ -80,10 +80,14 @@ test('F4 · mobile (~390px): home sin overflow horizontal + drawer abre/cierra',
   )
   expect(overflow, 'sin overflow horizontal en mobile').toBeLessThanOrEqual(2)
 
-  // Drawer de navegación: abre y cierra.
+  // Drawer de navegación: abre y cierra. Dos elementos comparten el aria-label
+  // "Cerrar menú" (el scrim de fondo + el botón X dentro del panel) — `.last()`
+  // apunta al X: el scrim es `fixed inset-0` y su centro cae geométricamente
+  // bajo la columna del propio panel (240px de 390px de viewport), así que
+  // Playwright intercepta el click contra el panel en vez de cerrarlo por él.
   await firstVisible(page.getByRole('button', { name: 'Abrir menú' })).click()
   await expect(firstVisible(page.getByRole('navigation', { name: 'Navegación del setter' }))).toBeVisible()
-  await firstVisible(page.getByRole('button', { name: 'Cerrar menú' }).first()).click()
+  await firstVisible(page.getByRole('button', { name: 'Cerrar menú' }).last()).click()
 })
 
 test('F5 · mobile (~390px): abrir un lead no desborda', async ({ page }) => {
