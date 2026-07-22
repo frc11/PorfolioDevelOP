@@ -226,7 +226,7 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
 
     // Self-check: TeachPanel + ejemplo presentes.
     await expect(firstVisible(page.getByText('¿Por qué importa?'))).toBeVisible()
-    await expect(firstVisible(page.getByText('Ver ejemplo de un self-check bien hecho'))).toBeVisible()
+    await expect(firstVisible(page.getByText('Ver ejemplo de un chequeo final bien hecho'))).toBeVisible()
 
     // Marcar los 6 hard-checks (role=switch por nombre).
     for (const nombre of [
