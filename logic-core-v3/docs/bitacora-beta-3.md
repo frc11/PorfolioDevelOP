@@ -1478,3 +1478,33 @@ Sprint 3.2 cerrado. (1) Guard en `opener-form.tsx` (`largo > 0`) y `seguimiento-
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 3.3 cerrado. (1) `FaseAutoReporte` suma `puedeGuardar`/`motivo`: `disabled` nativo en el `<button>` + motivo "Primero arrancá la construcción — el botón está arriba." (nombra el CTA real); `m-construccion.tsx` calcula `puedeGuardar = stage === 'CONSTRUCCION'`, nada más cambia ahí. (2) e2e B5: **intacto**, verde solo y en la suite completa. (3) `dossier.ts`: confirmado con `git diff` → 0 líneas, el guard del server no se tocó. (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 47/47 (sin flakes). Diff = 2 componentes + spec nuevo + bitácora, exactamente lo pedido. (5) Freno/flag: el comentario de `m-construccion.tsx:106` quedó desactualizado ("el tilde NO se bloquea") pero fuera del scope explícito de la tarea — no se tocó, reportado para Franco. Sin push.
+
+---
+
+## Sprint 3.4 — cuatro residuos de B3 (2026-07-22)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `909ad8d` (3.1), `79d3787` (3.2), `db557e8` (3.3) en el log. `tsc --noEmit` EXIT 0.
+
+**Frente A — el último "caliente" fuera de la superficie.** `paso.ts:181` (estado de espera de APROBADA) todavía decía "o si el lead fuera caliente" en copy visible del setter. Reformulado con el mismo vocabulario que `guidance-content.ts` (`GUIA_ENVIO.espera.aprobadaSinEnganche`) ya usaba desde antes: "o si Franco le dio prioridad". `grep -rn -i "caliente" src/lib/leados/ "src/app/(protected)/setter/"` post-fix: todas las ocurrencias restantes son nombres de campo/prop (`caliente: boolean`, `OsLead.caliente`), comentarios técnicos, o los dos badges operativos de Franco (`foco-surface.tsx:161`, `home-sections.tsx:81`, `manual-nav.tsx:90` — «Caliente», guardrail `esCaliente`) — exactamente lo esperado, sin nueva copy con la palabra reservada.
+
+**Frente B — comentario del §6-3.** `m-construccion.tsx:103-108` (JSDoc de `ConstruccionRegistro`) seguía diciendo "el tilde NO se bloquea, §6-3" — desactualizado desde 3.3, que sí lo deshabilita fuera de CONSTRUCCION. Reescrito para decir lo correcto: tildar sigue sin ser gate (no requisito para avanzar, no condiciona navegación — eso es lo que dice §6-3 en su sentido real) y el `disabled` de `FaseAutoReporte` solo espeja, fuera de CONSTRUCCION, la regla que el server ya aplica en `saveOwnedProgreso`. Solo el comentario — cero líneas de código tocadas en ese archivo.
+
+**Frente C — `start:qa` build viejo.** `package.json` estaba limpio (sin cambios de otra sesión). El script levantaba `next start` directo sobre el `.next` existente — la trampa documentada en 2.2, 3.2 y 3.3 ("el spec nuevo corre contra código de ANTES del sprint"; workaround manual: `npm run build` antes de cada corrida). No hay build automático en otro punto del pipeline (`playwright.setter.config.ts` invoca `start:qa` directo en su `webServer`, sin paso previo) — encadenarlo no duplica nada, cierra el hueco real. Cambio mínimo: `"start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001"`. Verificado corriendo el propio script tras los cambios de A y B ya hechos: recompiló (`Creating an optimized production build...`) y sirvió el código nuevo — no hizo falta un cambio de fuente adicional para probarlo, los frentes A/B YA eran ese cambio de fuente.
+
+**Frente D — diagnóstico de flakes.** `F4 · mobile drawer` (`tests/setter/05-empty-mobile-a11y.spec.ts:72`), 6 corridas aisladas (`-g "F4"`): **3 fallas / 6** (50%, consistente con "dos veces" en B3). `B3 · OPENER` (`tests/setter/01-flow.spec.ts:114`), 5 corridas aisladas (`-g "B3"`): **0 fallas / 5** — no reprodujo el flake histórico de B3; sin cambios, sin perseguirlo más (techo respetado).
+
+Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.tsx` tiene DOS botones con `aria-label="Cerrar menú"` — el scrim de fondo (`fixed inset-0`, línea 42-48) y el X dentro del panel (línea 57-65). El test hacía `.first()`, que resuelve al scrim. El scrim cubre el viewport completo (390×844); su centro geométrico (195, 422) cae DENTRO de la columna del panel (0-240px de ancho) — Playwright intenta clickear ahí y el panel (`z-index appDrawer=110` sobre `appDrawerBackdrop=100`) intercepta el click contra sus propios `<li>`, agotando el timeout de 15s. Fix: `.last()` en vez de `.first()`, apuntando al X real — sin overlap posible (z-index `appDrawerClose=130`, el más alto). Verificado 5/5 verde tras el cambio (antes: 3 fallas en 6).
+
+**Radiogroup (recordatorio, no tocado este sprint).** El `aria-labelledby` del radiogroup de `Field` sigue descartado a propósito — `aria-label` ya es accesible y tocar el primitivo compartido no entra en 3.4 (ni entró en ningún sprint de B3). Sin cambios.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **47/47** (incluye F4 estabilizado) — sin flakes esta corrida.
+- ✅ Motor intacto: cero archivos de `dossier.ts`/transiciones/gates/ownership/schema en el diff.
+
+**Diff:** `src/lib/leados/paso.ts` (A), `m-construccion.tsx` (B, solo comentario), `package.json` (C), `tests/setter/05-empty-mobile-a11y.spec.ts` (D), esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage. Commits separados: `sprint 3.4a`…`sprint 3.4d`.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+(1) Frente A: grep post-fix limpio — solo quedan prop/campo `caliente`, comentarios técnicos y los 2 badges operativos de Franco + su guardrail `esCaliente`. (2) Frente B: hecho, solo comentario reescrito, cero código. (3) Frente C: arreglado — `start:qa` ahora encadena `npm run build` (no había build duplicado en el pipeline; el hueco era real). (4) Frente D: F4 fallaba 3/6 (50%) — causa confirmada (no hipótesis): `.first()` agarraba el scrim de fondo cuyo centro cae bajo el panel propio, interceptando el click; fix = `.last()` apunta al X real, 5/5 verde. B3-opener: 0/5 fallas, no reprodujo, sin tocar (techo respetado). (5) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 47/47. WIP ajeno detectado (`docs/probe-01-censo-cosecha.md`) no tocado. Sin push.
