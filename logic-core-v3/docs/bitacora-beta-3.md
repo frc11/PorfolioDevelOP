@@ -1407,3 +1407,38 @@ Sprint 2.3 cerrado. (1) Terminales censados: archivo = `PERDIDO ∨ DESCARTADA` 
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 Sprint 3.1 cerrado. (1) Censo ~140 hits: (i) badge/campo de Franco exento, (ii) 9 hits de copy barridos, (iii) comentarios/keys/tests exentos. (2) Se barrió: 6 hints del Evaluador/gate + ícono `Flame→Star`/tono `amber→violet` del veredicto alto + label muerto `CALIENTE→'Avanzar con prioridad'` + modismo de novedades. (3) Grep de éxito: limpio salvo `paso.ts:181` (fronterizo, no tocado, flagueado). (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 43/43 (2 flakes ajenos confirmados y re-verdes). (5) Frenos: FASE 0 encontró la deuda de 1.1 otra vez perdida (WIP ajeno no commiteado se cayó) — reconciliada como commit aparte antes del sprint, como indicaba el protocolo. `docs/probe-01-censo-cosecha.md` es WIP ajeno untracked, no tocado. Sin push.
+
+---
+
+## Sprint 3.2 — Guardias de salida y errores anunciados en formularios · 2026-07-22
+
+**Objetivo único.** Dos frentes chicos, copiando patrones ya existentes. Frente A (B-09/C-16): `useUnsavedGuard` en opener y seguimiento, hoy sin red de seguridad — cerrar la pestaña pierde el texto entero. Frente B (B-13): `role="alert"` en los `<p>` de error que quedaron fuera de `Field` (que ya lo trae de fábrica). Motor intocable — solo componentes, sin autosave nuevo.
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, no tocado). Continuidad: `909ad8d` (sprint 3.1) presente en el log. `tsc --noEmit` EXIT 0.
+
+**PROBE.** Patrón de referencia vivo en `evaluacion-form.tsx:93-95` (`hayCambiosSinGuardar` derivado de los campos locales + `useUnsavedGuard(hayCambiosSinGuardar)`, A-24) y el `role="alert"` ya aplicado al gate de link en `opener-form.tsx:82`. Replicado tal cual, sin variantes.
+
+**Frente A — guardias de salida.**
+- `opener-form.tsx`: `hayCambiosSinGuardar = largo > 0` (el mismo `largo` que ya calculaba `pasadoDeLargo`/`listoParaCopiar`, sin estado nuevo). Tras el registro exitoso, `m4-opener.tsx` swapea `OpenerForm`→`OpenerResumen` server-side (gate por `contactos`), así que no hace falta una bandera "enviado" a mano — el mismo patrón implícito que usa `EvaluacionForm`.
+- `seguimiento-form.tsx`: `hayCambiosSinGuardar = nota.trim() !== ''`. Acá SÍ hay reseteo local (`onSuccess` limpia `nota`/`resultado`/`fechaReactivacion`, el form se queda montado para el próximo toque) — el guard se apaga solo porque la condición vuelve a `false`. **No se tocó** la lógica de `cadenciaAgotada` (2.2): el guard se sumó como línea aparte, sin tocar los `useState`/`opciones` existentes.
+- La agenda (M16) queda **afuera** — la cubre B-05 más adelante, como marcaba la tarea.
+
+**Frente B — a11y.** Los 5 puntos verificados en el terreno (ninguno se había corrido de línea): `ficha-form.tsx:249`, `evaluacion-form.tsx:229` (serverError), `agenda-form.tsx:218/231/235`. Los 3 de `agenda-form.tsx` cubren las tres ramas del `error` (dentro del panel de confirmación, con slot elegido sin panel, y sin slots todavía) — las tres necesitaban el `role="alert"` porque las tres son alcanzables según el estado del booking.
+
+**Radiogroup del score (`evaluacion-form.tsx:160`).** Revisado `Field.tsx`: el `<label>` solo tiene `htmlFor={fieldId}` apuntando al control hijo (vía `FieldControlProvider`/contexto) — **no expone un `id` propio** que un `aria-labelledby` externo pueda referenciar (el radiogroup no es un control de contexto, arma su propio `role="radiogroup"` con botones sueltos). Forzar la asociación hubiera significado tocar `Field` (fuera de scope, la tarea lo prohibía explícitamente). Se dejó el `aria-label="Score de la evaluación"` como está — ya es accesible por sí solo — y se flaguea acá.
+
+**Spec nuevo — `tests/setter/10-unsaved-guard.spec.ts`.** Dos casos reales (DB+build, sin mocks), uno por form: siembra un lead aterrizando en m4 (opener, `EVALUADA` + 0 contactos) y otro en m5 (seguimiento, `EVALUADA` + opener mandado + toque vencido — mismo patrón de siembra que `08-m5-cadencia-agotada.spec.ts`). Por cada uno: sin texto → `beforeunload` sintético (`new Event('beforeunload', {cancelable:true})` + `dispatchEvent` + leer `defaultPrevented`) da `false`; con texto → `true`; vaciando el campo → vuelve a `false`. Se usó `expect.poll(...)` en vez de un solo chequeo inmediato porque el listener se ata en un `useEffect` — un dispatch pegado al `fill()` le puede ganar la carrera al re-render.
+
+**Trampa re-detectada (ya documentada en 2.2).** La 1ª corrida del spec nuevo contra `start:qa` dio falso-rojo (`defaultPrevented` siempre `false`) — el server QA servía el `.next` de ANTES de este sprint, sin el guard nuevo. `npm run build` antes de correr resolvió; quedó anotado para no repetir la sorpresa.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `npx eslint --ext .tsx` sobre los 5 componentes tocados: limpio (jsx-a11y vía `eslint-config-next`).
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **45/45** (43 previos + 2 del spec nuevo). Un rojo en la 1ª corrida (`F4-mobile-drawer`, click interceptado) confirmado flaky en aislado (verde solo) y en la corrida limpia siguiente — sin relación con este sprint.
+
+**Diff:** `opener-form.tsx`, `seguimiento-form.tsx`, `ficha-form.tsx`, `evaluacion-form.tsx`, `agenda-form.tsx`, `tests/setter/10-unsaved-guard.spec.ts` (nuevo), esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Sprint 3.2 cerrado. (1) Guard en `opener-form.tsx` (`largo > 0`) y `seguimiento-form.tsx` (`nota.trim() !== ''`), mismo patrón que `EvaluacionForm` (A-24), sin autosave ni tocar `cadenciaAgotada`. (2) Prueba real del `beforeunload`: spec nuevo `10-unsaved-guard.spec.ts`, 2 casos e2e — `defaultPrevented` `false`→`true`→`false` según haya texto, con `expect.poll` por la carrera efecto-vs-dispatch. (3) a11y: los 5 puntos con `role="alert"` (`ficha-form:249`, `evaluacion-form:229`, `agenda-form:218/231/235`) + eslint jsx-a11y verde; el radiogroup de `evaluacion-form:160` se dejó con `aria-label` porque `Field` no expone un id externo sin refactor (flagueado, no forzado). (4) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 45/45 (1 flake ajeno re-verde). Diff = 5 componentes + spec nuevo + bitácora. (5) Freno recurrente: `start:qa` no rebuildea solo (mismo hallazgo de 2.2) — `npm run build` antes de validar el spec nuevo. Sin push.

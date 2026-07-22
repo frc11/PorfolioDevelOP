@@ -215,7 +215,11 @@ export function AgendaForm({
                 <TextArea value={notas} onChange={(event) => setNotas(event.target.value)} rows={4} />
               </Field>
 
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              {error && (
+                <p role="alert" className="text-xs text-red-400">
+                  {error}
+                </p>
+              )}
 
               <Button
                 onClick={confirmar}
@@ -228,11 +232,19 @@ export function AgendaForm({
             </div>
           )}
 
-          {error && slotElegido === null && <p className="text-xs text-red-400">{error}</p>}
+          {error && slotElegido === null && (
+            <p role="alert" className="text-xs text-red-400">
+              {error}
+            </p>
+          )}
         </div>
       )}
 
-      {error && slots === null && <p className="text-xs text-red-400">{error}</p>}
+      {error && slots === null && (
+        <p role="alert" className="text-xs text-red-400">
+          {error}
+        </p>
+      )}
     </div>
   )
 }

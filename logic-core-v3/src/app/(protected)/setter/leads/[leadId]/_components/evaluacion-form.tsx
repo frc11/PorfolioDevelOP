@@ -226,7 +226,11 @@ export function EvaluacionForm({
         </div>
       )}
 
-      {serverError && <p className="text-xs text-red-400">{serverError}</p>}
+      {serverError && (
+        <p role="alert" className="text-xs text-red-400">
+          {serverError}
+        </p>
+      )}
 
       <Button onClick={intentarEnviar} loading={isPending && !confirmOpen}>
         {esDescarte ? 'Registrar evaluación y descartar' : 'Registrar evaluación'}

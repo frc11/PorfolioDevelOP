@@ -8,6 +8,7 @@ import {
   type ResultadoContacto,
 } from '@/app/(protected)/setter/_actions/outreach.schemas'
 import { useStepAction } from '@/lib/use-step-action'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
 /**
  * M5 — El REGISTRO de un toque de la conversación (5.5, tramo Seguimiento). Es
@@ -91,6 +92,12 @@ export function SeguimientoForm({
   const [minReactivacion] = useState(() =>
     new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
   )
+
+  // B-09: la nota de seguimiento se pierde si se cierra la pestaña — mismo
+  // patrón que la Evaluación (A-24) y el opener, sin autosave. `onSuccess`
+  // limpia `nota`, así que el guard se apaga solo al registrar.
+  const hayCambiosSinGuardar = nota.trim() !== ''
+  useUnsavedGuard(hayCambiosSinGuardar)
 
   const registrar = () => {
     setError(null)

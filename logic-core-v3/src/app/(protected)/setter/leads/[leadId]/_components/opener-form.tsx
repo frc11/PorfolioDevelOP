@@ -12,6 +12,7 @@ import { OpenerInputSchema } from '@/app/(protected)/setter/_actions/outreach.sc
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
 /**
  * El REGISTRO del opener (5.2, patrón 4.2/5.1): armar → copiar → mandar a mano
@@ -34,6 +35,11 @@ export function OpenerForm({ leadId }: { leadId: string }) {
   const pasadoDeLargo = largo > CANAL_INSTAGRAM.openerMaxCaracteres
   const tieneLink = contieneLink(mensaje)
   const listoParaCopiar = largo >= 10 && !tieneLink
+
+  // B-09: cerrar la pestaña a mitad del opener lo pierde entero — mismo patrón
+  // que la Evaluación (A-24), sin autosave.
+  const hayCambiosSinGuardar = largo > 0
+  useUnsavedGuard(hayCambiosSinGuardar)
 
   const registrar = () => {
     setError(null)
