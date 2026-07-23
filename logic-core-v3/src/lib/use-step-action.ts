@@ -31,8 +31,12 @@ export type StepActionOptions<TData> = {
   successToast?: string | ((data: TData) => string)
   /** `router.refresh()` tras el éxito. Default true (el ciclo submit estándar). */
   refresh?: boolean
-  /** Estado propio del step ante el error del server. */
-  onError?: (error: string) => void
+  /**
+   * Estado propio del step ante el error del server. Recibe el copy y, si la
+   * action lo emitió, el `code` estructurado (4.1) — matchear por código, nunca
+   * por substring del mensaje.
+   */
+  onError?: (error: string, code?: string) => void
   /** Estado propio del step tras el éxito. */
   onSuccess?: (data: TData) => void
 }
@@ -49,7 +53,7 @@ export function useStepAction() {
     startTransition(async () => {
       const result = await action()
       if (!result.success) {
-        onError?.(result.error)
+        onError?.(result.error, result.code)
         toast.error(result.error)
         return
       }

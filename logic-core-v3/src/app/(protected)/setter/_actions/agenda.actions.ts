@@ -36,6 +36,7 @@ import {
   revertirAgendandoOwned,
   slotSigueLibre,
 } from '@/lib/leados/agenda'
+import { SLOT_OCUPADO } from '@/lib/leados/action-codes'
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import { formatFechaHora, parseAgenda, reunionAgendada } from '@/lib/leados/flow'
 import { notificarReunionAgendada } from '@/lib/leados/notify'
@@ -57,9 +58,15 @@ function revalidarPipelineAdmin(leadId: string) {
   revalidateTag('admin-leads', {})
 }
 
+/**
+ * 4.1 — El rebote «el horario se ocupó» viaja con `SLOT_OCUPADO`: es el ÚNICO
+ * fallo al que la UI reacciona (tira la oferta vieja), y lo hace por código, no
+ * matcheando el texto. La doble fuente del mensaje (la re-validación fresca de
+ * acá y el 409 de Cal.com) emite el mismo código.
+ */
 function mapError(error: unknown, fallback: string): ActionResult<never> {
   if (error instanceof CalComV2Error) {
-    return fail(error.message)
+    return fail(error.message, error.tipo === 'slot_ocupado' ? SLOT_OCUPADO : undefined)
   }
   if (error instanceof Error && error.message === 'Unauthorized') {
     return fail('No autorizado')
@@ -174,7 +181,10 @@ export async function confirmarReunion(
       end: dia,
     })
     if (!slotSigueLibre(slotsDelDia, slotStart)) {
-      return fail('Ese horario se acaba de ocupar — pedí los horarios de nuevo y ofrecé otro')
+      return fail(
+        'Ese horario se acaba de ocupar — pedí los horarios de nuevo y ofrecé otro',
+        SLOT_OCUPADO,
+      )
     }
 
     // Claim atómico ANTES de llamar a Cal.com: doble click = un solo booking.

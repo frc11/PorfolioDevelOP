@@ -23,6 +23,7 @@ import {
   marcarDemoEnviadaOwned,
   revertirDemoEnviadaOwned,
 } from '@/lib/leados/dossier'
+import { copyOperativo } from '@/lib/leados/error-copy'
 import { gateEnvioDemo, leadRespondio } from '@/lib/leados/flow'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
 import { getOwnedLead } from '@/lib/leados/ownership'
@@ -47,9 +48,10 @@ function revalidarPipelineAdmin(leadId: string) {
   revalidateTag('admin-leads', {})
 }
 
+/** 4.1 — Idéntico criterio que en `dossier.actions`: el motor no habla al setter. */
 function mapError(error: unknown, fallback: string): ActionResult<never> {
   if (error instanceof DossierTransitionError) {
-    return fail(error.message)
+    return fail(copyOperativo(error.message))
   }
   if (error instanceof Error && error.message === 'Unauthorized') {
     return fail('No autorizado')

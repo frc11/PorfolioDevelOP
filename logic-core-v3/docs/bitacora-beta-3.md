@@ -1508,3 +1508,53 @@ Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.
 
 **PARA EL CHAT DE PLANIFICACIÓN**
 (1) Frente A: grep post-fix limpio — solo quedan prop/campo `caliente`, comentarios técnicos y los 2 badges operativos de Franco + su guardrail `esCaliente`. (2) Frente B: hecho, solo comentario reescrito, cero código. (3) Frente C: arreglado — `start:qa` ahora encadena `npm run build` (no había build duplicado en el pipeline; el hueco era real). (4) Frente D: F4 fallaba 3/6 (50%) — causa confirmada (no hipótesis): `.first()` agarraba el scrim de fondo cuyo centro cae bajo el panel propio, interceptando el click; fix = `.last()` apunta al X real, 5/5 verde. B3-opener: 0/5 fallas, no reprodujo, sin tocar (techo respetado). (5) Suites: tsc EXIT 0, invariantes 17/17, test:leados 25/25, test:setter 47/47. WIP ajeno detectado (`docs/probe-01-censo-cosecha.md`) no tocado. Sin push.
+
+---
+
+## Sprint 4.1 — errores persistentes y en criollo, sin jerga de motor (2026-07-23)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `909ad8d`…`c19f7db` (3.x) y `fccbeb7` (micro 4.0) en el log. `tsc --noEmit` EXIT 0.
+
+**Censo del motor.** `grep -n "throw new DossierTransitionError" src/lib/leados/dossier.ts` → 21 throws, **16 mensajes distintos** (el «cambió de stage durante el guardado — recargá» se repite en 4 write-paths) + 1 templado (`Transición ilegal: X → Y`, línea 148). Todos llegaban CRUDOS al setter: los dos `mapError` hacían `fail(error.message)`.
+
+**Frente 1 — el mapa.** Módulo nuevo `src/lib/leados/error-copy.ts`: mensaje literal del motor → copy operativo (qué pasó + qué hacer) en el vocabulario canónico del manual (borrador, chequeo final, negocio, demo — nunca draft/self-check/stage). **17 entradas conocidas**; lo no mapeado cae a `COPY_GENERICO` = "Algo falló al guardar — probá de nuevo; si sigue, avisale a Franco." — honesto, nunca suena a éxito. El único match no-literal es el prefijo **anclado** `Transición ilegal: ` (lleva stages interpolados); no hay ningún match por substring amplio. `dossier.actions.ts:mapError` y `outreach.actions.ts:mapError` pasan por `copyOperativo(error.message)`. **`dossier.ts` intocado** — sus mensajes son la CLAVE del mapa, el copy vive en la capa de presentación.
+
+| Error del motor | Copy que ve el setter |
+|---|---|
+| `Transición ilegal: X → Y` | Esto ya se actualizó en otra pestaña — recargá para ver el estado real. |
+| El dossier cambió de stage durante la transición — reintentar | *(ídem — multi-tab)* |
+| El dossier cambió de stage durante el guardado — recargá | *(ídem — multi-tab)* |
+| El dossier cambió de stage durante el escalamiento — recargá | *(ídem — multi-tab)* |
+| No existe dossier para ese lead | Este lead todavía no tiene ficha arrancada — abrilo desde tu cartera y empezá por la ficha. |
+| Gate EVALUADA→BRIEF: … no está marcado caliente | Todavía no se puede pasar al brief: el negocio no respondió el primer contacto y Franco no lo marcó caliente. Seguí con el seguimiento. |
+| EVALUADA→DESCARTADA requiere motivoDescarte | Para descartar el lead falta el motivo — escribí por qué no va. |
+| EVALUADA→DESCARTADA: evaluacionJson ausente o inválido… | La evaluación de este lead quedó incompleta — recargá y volvé a registrarla; si sigue, avisale a Franco. |
+| EN_REVISION→RECHAZADA requiere motivo | Falta el motivo del rechazo — escribí qué hay que corregir. |
+| El dossier desapareció durante la transición | Se perdió el rastro de este lead mientras se guardaba — recargá; si sigue, avisale a Franco. |
+| La ficha solo se edita antes de registrar la evaluación | La ficha ya no se edita: este lead tiene la evaluación registrada. |
+| El draft se publica durante la construcción — arrancala primero | El borrador se carga con la construcción arrancada — arrancala primero y volvé. |
+| El escalamiento es de la construcción en curso | Solo se puede pedir ayuda mientras la construcción está en curso. |
+| El self-check se completa durante la construcción | El chequeo final se completa mientras la demo está en construcción. |
+| El progreso se registra durante la construcción | El progreso se marca mientras la demo está en construcción. |
+| La demo se envía cuando Franco la aprobó | Esta demo todavía no está aprobada por Franco — el envío se habilita cuando la aprueba. |
+| El brief se captura después de la evaluación | El brief se captura después de registrar la evaluación. |
+| *(cualquier otro)* | Algo falló al guardar — probá de nuevo; si sigue, avisale a Franco. |
+
+**Frente 4 — multi-tab.** Las 4 familias de rebote-por-estado-ya-movido (la transición ilegal + los 3 guards optimistas de `updateMany`) comparten copy: "Esto ya se actualizó en otra pestaña — recargá para ver el estado real." Es exactamente el caso real: el guard optimista solo falla si otro proceso movió el stage entre la lectura y la escritura.
+
+**Frente 2 — error persistente en chequeo y envío.** `chequeo-form.tsx` migrado de `useTransition` + `toast.error` crudo a `useStepAction` con `onError` inline (patrón `borrador-form.tsx`): estado `serverError` + `<p role="alert">` FIJO arriba de la botonera (patrón de 3.2). El "Enviar a revisión" encadena guardado + envío dentro de UN `run` — si el guardado rebota, su fallo ES el fallo del envío (mismo camino de error, misma superficie). `envio-form.tsx` ya usaba el hook: se le sumó `onError` + el mismo bloque `role="alert"`. **Cero cambios de flujo de control**: los gates siguen decidiéndose server-side, el botón sigue `disabled` hasta 6/6.
+
+**Frente 3 — `SLOT_OCUPADO` como código compartido.** Módulo nuevo `src/lib/leados/action-codes.ts` (sin dependencias: lo importan server y cliente). `ActionResult` fallido acepta ahora un `code?: string` opcional (`fail(error, code?)`, aditivo — nadie más lo usa todavía) y `useStepAction.onError` lo propaga como 2º parámetro. `agenda.actions.ts` lo emite en las **dos** fuentes del mismo rebote: la re-validación fresca del slot (línea 177) y el `CalComV2Error` con `tipo === 'slot_ocupado'` que sube desde Cal.com. `agenda-form.tsx:92` matchea `code === SLOT_OCUPADO` — el `mensaje.includes('se acaba de ocupar')` quedó eliminado. **`cal-com-v2.ts` NO hizo falta tocarlo**: ya traía el discriminante `tipo`.
+
+**Verificación central (rebote real).** En `tests/leados/dossier-gates.spec.ts` ("máquina de stage"), el `FICHA→BRIEF` ilegal real del motor se captura y se aserta: `ilegal.message` **sí** contiene "Transición ilegal" (el motor no cambió), y `copyOperativo(ilegal.message)` **no** contiene "Transición ilegal" ni "FICHA" y es exactamente el copy multi-tab. Sin tests nuevos: la aserción entró en el test existente (sigue 25/25).
+
+`grep -rn "Transición ilegal" src/` → 4 hits, **ninguno** en un componente ni en el camino de salida al cliente: `dossier.ts:148` (el motor, intocado) y 3 en `error-copy.ts` (2 comentarios + el prefijo del mapa). `grep "se acaba de ocupar"` en las actions/componentes tocados → 1 hit, el copy del server; cero en componentes.
+
+**Suites de cierre:**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **47/47** — sin flakes.
+- ✅ Motor intacto: `dossier.ts` NO aparece en `git diff --stat`. Gates, transiciones, ownership y schema sin tocar.
+
+**Diff:** `dossier.actions.ts`, `outreach.actions.ts`, `agenda.actions.ts`, `chequeo-form.tsx`, `envio-form.tsx`, `agenda-form.tsx`, `action-utils.ts`, `use-step-action.ts`, `error-copy.ts` (nuevo), `action-codes.ts` (nuevo), `tests/leados/dossier-gates.spec.ts`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.

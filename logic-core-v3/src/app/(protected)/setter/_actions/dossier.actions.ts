@@ -28,6 +28,7 @@ import {
   saveOwnedSelfCheck,
   transitionDossier,
 } from '@/lib/leados/dossier'
+import { copyOperativo } from '@/lib/leados/error-copy'
 import {
   buildSelfCheck,
   fichaFaltantes,
@@ -62,9 +63,14 @@ function revalidarRevisionAdmin(leadId: string) {
   revalidatePath(`/admin/leados/${leadId}`)
 }
 
+/**
+ * 4.1 — El mensaje del motor NUNCA sale crudo: `copyOperativo` lo traduce a
+ * qué-pasó + qué-hacer (mapa en `error-copy.ts`, `dossier.ts` intocado). Lo no
+ * mapeado cae al genérico honesto, jamás a algo que suene a éxito.
+ */
 function mapError(error: unknown, fallback: string): ActionResult<never> {
   if (error instanceof DossierTransitionError) {
-    return fail(error.message)
+    return fail(copyOperativo(error.message))
   }
   if (error instanceof Error && error.message === 'Unauthorized') {
     return fail('No autorizado')

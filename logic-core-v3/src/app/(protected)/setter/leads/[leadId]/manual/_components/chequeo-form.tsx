@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import { CheckCircle2, Eye, Save, SendHorizonal, ShieldCheck, Wrench } from 'lucide-react'
 import { Button, Callout, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { HARD_CHECKS, SOFT_CHECKS } from '@/lib/leados/flow'
 import { GUIA_SELF_CHECK } from '@/lib/leados/guidance-content'
 import { promptParaHardCheck } from '@/lib/leados/prompts-disenio'
+import { useStepAction } from '@/lib/use-step-action'
 import { enviarARevision, guardarSelfCheck } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
@@ -51,48 +50,44 @@ export function ChequeoForm({
   selfCheck: SelfCheck | null
   brief: Brief | null
 }) {
-  const router = useRouter()
   const [duros, setDuros] = useState<Record<string, boolean>>(() => durosIniciales(selfCheck))
   const [softIds, setSoftIds] = useState<string[]>(() => softIniciales(selfCheck))
-  const [isPending, startTransition] = useTransition()
+  // 4.1: el rebote del server queda FIJO junto al form. El toast se va solo y
+  // el setter se quedaba sin saber por qué no salió el envío.
+  const [serverError, setServerError] = useState<string | null>(null)
+  const accion = useStepAction()
 
   const todosDurosOk = HARD_CHECKS.every((check) => duros[check.id])
   const faltantesDuros = HARD_CHECKS.filter((check) => !duros[check.id]).length
   const payload = () => ({ duros, softIds })
 
   const guardar = () => {
-    startTransition(async () => {
-      const result = await guardarSelfCheck(leadId, payload())
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      toast.success(
-        result.data.aprobado
+    setServerError(null)
+    accion.run(() => guardarSelfCheck(leadId, payload()), {
+      onError: setServerError,
+      successToast: (data) =>
+        data.aprobado
           ? 'Chequeo aprobado — podés enviar a revisión.'
           : 'Chequeo guardado. Quedan puntos en rojo: arreglalos antes de enviar.',
-      )
-      router.refresh()
     })
   }
 
   const enviar = () => {
-    startTransition(async () => {
-      // Guarda el estado actual primero (flags frescos) y después envía: el server
-      // re-valida los hard-blocks contra la DB, no contra la UI.
-      const guardado = await guardarSelfCheck(leadId, payload())
-      if (!guardado.success) {
-        toast.error(guardado.error)
-        return
-      }
-      const result = await enviarARevision(leadId)
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      toast.success('Demo enviada a revisión — Franco la ve en su cola.')
-      router.refresh()
-    })
+    setServerError(null)
+    // Guarda el estado actual primero (flags frescos) y después envía: el server
+    // re-valida los hard-blocks contra la DB, no contra la UI. Si el guardado
+    // rebota, su fallo ES el fallo del envío (mismo camino de error).
+    accion.run(
+      async () => {
+        const guardado = await guardarSelfCheck(leadId, payload())
+        if (!guardado.success) return guardado
+        return enviarARevision(leadId)
+      },
+      {
+        onError: setServerError,
+        successToast: 'Demo enviada a revisión — Franco la ve en su cola.',
+      },
+    )
   }
 
   return (
@@ -205,18 +200,24 @@ export function ChequeoForm({
         </Callout>
       )}
 
+      {serverError && (
+        <p role="alert" className="text-xs leading-relaxed text-red-400">
+          {serverError}
+        </p>
+      )}
+
       <div className="flex flex-wrap items-center gap-3">
         <Button
           variant="secondary"
           onClick={guardar}
-          loading={isPending}
+          loading={accion.isPending}
           icon={<Save size={14} strokeWidth={1.5} />}
         >
           Guardar el chequeo
         </Button>
         <Button
           onClick={enviar}
-          loading={isPending}
+          loading={accion.isPending}
           disabled={!todosDurosOk}
           icon={<SendHorizonal size={14} strokeWidth={1.5} />}
         >

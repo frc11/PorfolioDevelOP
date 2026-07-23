@@ -19,6 +19,7 @@ import {
   transitionDossier,
   DossierTransitionError,
 } from '../../src/lib/leados/dossier'
+import { copyOperativo } from '../../src/lib/leados/error-copy'
 import { parseProgreso, parseSelfCheck, selfCheckAprobado } from '../../src/lib/leados/flow'
 import { FASE_IDS } from '../../src/lib/leados/contracts'
 
@@ -136,7 +137,16 @@ test('máquina de stage: transición ilegal y contrato inválido fallan', async 
   const leadId = await createBareLead({})
   await ensureOwnedDossier(leadId, setterId)
 
-  await expectRejects(() => transitionDossier(leadId, { to: 'BRIEF' })) // FICHA→BRIEF ilegal (DossierTransitionError)
+  const ilegal = await expectRejects(() => transitionDossier(leadId, { to: 'BRIEF' })) // FICHA→BRIEF ilegal (DossierTransitionError)
+
+  // 4.1 — el motor sigue hablando en jerga (esto NO cambia), pero lo que sale al
+  // setter es el copy operativo: el crudo jamás llega al cliente.
+  expect(ilegal.message).toContain('Transición ilegal')
+  const visible = copyOperativo(ilegal.message)
+  expect(visible).not.toContain('Transición ilegal')
+  expect(visible).not.toContain('FICHA')
+  expect(visible).toBe('Esto ya se actualizó en otra pestaña — recargá para ver el estado real.')
+
   await expectThrows(() =>
     transitionDossier(leadId, {
       to: 'EVALUADA',

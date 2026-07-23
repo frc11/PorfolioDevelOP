@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CalendarCheck2, CalendarSearch, RefreshCw, ShieldCheck } from 'lucide-react'
 import { Button, Field, Input, TextArea } from '@/components/ui'
 import type { Ficha } from '@/lib/leados/contracts'
+import { SLOT_OCUPADO } from '@/lib/leados/action-codes'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
 import { formatFechaHora } from '@/lib/leados/flow'
 import {
@@ -86,10 +87,11 @@ export function AgendaForm({
       return
     }
     confirmacion.run(() => confirmarReunion(leadId, parsed.data), {
-      onError: (mensaje) => {
+      onError: (mensaje, code) => {
         setError(mensaje)
         // Si el horario se pisó, la oferta vieja ya no vale: a re-ofrecer.
-        if (mensaje.includes('se acaba de ocupar')) {
+        // 4.1: por CÓDIGO — el copy puede reescribirse sin romper la reacción.
+        if (code === SLOT_OCUPADO) {
           setSlots(null)
           setSlotElegido(null)
         }

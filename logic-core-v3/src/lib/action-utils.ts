@@ -2,14 +2,19 @@ import { ZodError } from 'zod'
 
 export type ActionResult<T = void> =
   | { success: true; data: T }
-  | { success: false; error: string }
+  | { success: false; error: string; code?: string }
 
 export function ok<T>(data: T): ActionResult<T> {
   return { success: true, data }
 }
 
-export function fail(error: string): ActionResult<never> {
-  return { success: false, error }
+/**
+ * `error` es SIEMPRE copy para el humano. `code` (4.1, opcional) es el contrato
+ * con la UI cuando además tiene que reaccionar al fallo puntual — así el
+ * comportamiento no cuelga de matchear el texto por substring.
+ */
+export function fail(error: string, code?: string): ActionResult<never> {
+  return code === undefined ? { success: false, error } : { success: false, error, code }
 }
 
 // Convierte cualquier error en un mensaje limpio para el cliente, sin filtrar

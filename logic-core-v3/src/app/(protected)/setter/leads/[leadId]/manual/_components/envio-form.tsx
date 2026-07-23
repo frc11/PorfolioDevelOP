@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Rocket, Send } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { buildDemoMensajeBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
@@ -29,9 +30,14 @@ export function EnvioForm({
   respondio: boolean
 }) {
   const envio = useStepAction()
+  // 4.1: el rebote del gate queda FIJO acá (el toast se va y el setter no sabía
+  // por qué el envío no se registró). El gate en sí no cambia: lo decide el server.
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const registrarEnvioDemo = () => {
+    setServerError(null)
     envio.run(() => enviarDemoAprobada(leadId), {
+      onError: setServerError,
       successToast: (data) =>
         data.yaEnviada
           ? 'Ese envío ya estaba registrado — no se duplica nada.'
@@ -55,6 +61,11 @@ export function EnvioForm({
         instruccion={GUIA_ENVIO.copyBlock.instruccion}
         texto={buildDemoMensajeBlock(lead, finalUrl)}
       />
+      {serverError && (
+        <p role="alert" className="text-xs leading-relaxed text-red-400">
+          {serverError}
+        </p>
+      )}
       <Button onClick={registrarEnvioDemo} loading={envio.isPending} icon={<Send size={14} strokeWidth={1.5} />}>
         Ya la envié — registrar
       </Button>
