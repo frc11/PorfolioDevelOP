@@ -138,16 +138,33 @@ export const RechazosSchema = z.array(RechazoSchema)
 export const RESULTADO_REUNION_VALUES = ['GANADO', 'PERDIDO', 'RE_SEGUIMIENTO'] as const
 
 /**
- * B7 — Estado de la agenda del lead. `AGENDANDO` es el claim atómico del
- * setter ANTES de llamar a Cal.com (anti doble-click, patrón enviadaAt de
- * B6); `AGENDADA` es el booking confirmado por Cal.com con uid + notas de
- * traspaso OBLIGATORIAS. `realizadaAt` y `resultado` los marca SOLO el admin
- * post-reunión (GANADO lo decide Franco, nunca el setter).
+ * B7 — Estado de la agenda del lead. `OFRECIDOS` es la oferta de horarios ya
+ * pasada al prospecto (6.1: memoria del booking — sobrevive al cierre de la
+ * pestaña); `AGENDANDO` es el claim atómico del setter ANTES de llamar a
+ * Cal.com (anti doble-click, patrón enviadaAt de B6); `AGENDADA` es el booking
+ * confirmado por Cal.com con uid + notas de traspaso OBLIGATORIAS.
+ * `realizadaAt` y `resultado` los marca SOLO el admin post-reunión (GANADO lo
+ * decide Franco, nunca el setter).
+ *
+ * 6.1 — La extensión es ADITIVA y OPCIONAL a propósito: el valor nuevo del
+ * enum y los dos campos nuevos no invalidan ningún blob viejo (una AGENDADA
+ * escrita en B7 sigue parseando igual). Ese es el contrato con los 7 readers
+ * de `agendaJson`, que filtran todos por `estado === 'AGENDADA'` y a los que
+ * un blob OFRECIDOS les resulta inerte.
  */
 export const AgendaSchema = z.object({
-  estado: z.enum(['AGENDANDO', 'AGENDADA']),
+  estado: z.enum(['OFRECIDOS', 'AGENDANDO', 'AGENDADA']),
   /** ISO del momento del claim — diagnóstico si un claim queda colgado. */
   claimedAt: z.string().datetime().optional(),
+  /**
+   * 6.1 — Los horarios que el setter le pasó al prospecto (starts ISO con
+   * offset, como los devolvió Cal.com — mismo validador que `slotStart`).
+   * Viajan también DENTRO del claim AGENDANDO: son la memoria que la
+   * compensación restaura si Cal.com falla.
+   */
+  horariosOfrecidos: z.array(z.string().datetime({ offset: true })).optional(),
+  /** ISO del momento de la oferta — cuánto hace que el prospecto la tiene. */
+  ofrecidosAt: z.string().datetime().optional(),
   calBookingUid: z.string().trim().min(1).optional(),
   /** Inicio de la reunión, ISO con offset (como lo devolvió Cal.com, BA). */
   slotStart: z.string().datetime({ offset: true }).optional(),

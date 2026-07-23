@@ -30,6 +30,7 @@ import {
   elegirTresSlots,
   getCalConfigLeadOS,
   guardarAgendaOwned,
+  guardarHorariosOfrecidosOwned,
   marcarAgendandoOwned,
   rangoOferta,
   revertirAgendaConfirmadaOwned,
@@ -113,8 +114,13 @@ async function gateAgenda(
 
 /**
  * Paso 10a — Ofrecer horarios: pide los slots REALES de la agenda de Franco
- * (próximos días, huso BA) y devuelve 3 para pasarle al prospecto. Solo
- * lectura: no muta nada. Si falta el setup B7.0, lo dice claro.
+ * (próximos días, huso BA) y devuelve 3 para pasarle al prospecto. Si falta el
+ * setup B7.0, lo dice claro.
+ *
+ * 6.1 — Dejó de ser solo-lectura: la oferta se PERSISTE en `agendaJson`
+ * (estado OFRECIDOS) por el camino owned, para que sobreviva al cierre de la
+ * pestaña. La persistencia es memoria, no gate: si no hay dónde escribir
+ * (confirmación en vuelo), los horarios se devuelven igual.
  */
 export async function ofrecerHorarios(
   leadIdRaw: unknown,
@@ -140,6 +146,13 @@ export async function ofrecerHorarios(
     if (slots.length === 0) {
       return fail('La agenda de Franco no tiene horarios libres en los próximos días — avisale directo')
     }
+
+    // 6.1 — Memoria de la oferta, con el MISMO ownership que el resto de los
+    // writes del setter acá (getOwnedDossier adentro). Re-ofrecer reemplaza la
+    // oferta anterior. Sin revalidatePath: este sprint es backend puro — la
+    // re-entrada de m16 que lee este blob es 6.2.
+    await guardarHorariosOfrecidosOwned(gate.leadId, userId, slots)
+
     return ok({ slots })
   } catch (error) {
     return mapError(error, 'No se pudieron pedir los horarios')

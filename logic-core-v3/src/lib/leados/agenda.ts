@@ -4,8 +4,10 @@
  *
  * Invariantes (no negociables):
  *   - El claim `AGENDANDO` se toma ANTES de llamar a Cal.com (updateMany
- *     condicional sobre agendaJson NULL — mismo patrón que `enviadaAt` de
- *     B6): dos clicks simultáneos producen UN solo booking.
+ *     condicional sobre agendaJson vacío u OFRECIDOS — mismo patrón que
+ *     `enviadaAt` de B6): dos clicks simultáneos producen UN solo booking.
+ *   - 6.1: la oferta de horarios se PERSISTE (`OFRECIDOS`) y sobrevive al
+ *     claim: si Cal.com falla, la compensación la restaura en vez de borrarla.
  *   - `AGENDADA` se escribe SOLO con el uid confirmado por Cal.com; si la
  *     API falla, el claim se revierte y el lead no avanza.
  *   - Los writes del setter pasan por ownership (getOwnedDossier); los del
@@ -132,9 +134,33 @@ export function slotSigueLibre(slotsPorDia: SlotsPorDia, slotStart: string): boo
 // ── Persistencia del booking (claim atómico + write final, con ownership) ───
 
 /**
- * Claim atómico ANTES de llamar a Cal.com: solo si `agendaJson` está vacío.
- * El updateMany condicional hace de llave — dos clicks simultáneos producen
- * UN solo 'claim'. Devuelve el estado existente si ya había agenda.
+ * 6.1 — Los DOS estados de partida desde los que la agenda es reclamable:
+ * blob vacío (el lead nunca pasó por acá) u oferta de horarios ya hecha. Un
+ * AGENDANDO (confirmación en vuelo) o una AGENDADA (reunión confirmada) NO
+ * matchean ninguna rama: siguen sin ser reclamables, igual que antes de 6.1.
+ *
+ * La misma condición gobierna el write de la oferta: quien ofrece horarios
+ * pisa una oferta previa, pero jamás un claim en vuelo ni una reunión.
+ */
+const PARTIDA_RECLAMABLE: Prisma.OsLeadDossierWhereInput[] = [
+  { agendaJson: { equals: Prisma.AnyNull } },
+  { agendaJson: { path: ['estado'], equals: 'OFRECIDOS' } },
+]
+
+/**
+ * Claim atómico ANTES de llamar a Cal.com: solo si `agendaJson` está vacío o
+ * quedó en OFRECIDOS. El updateMany condicional hace de llave — dos clicks
+ * simultáneos producen UN solo 'claim'. Devuelve el estado existente si ya
+ * había agenda en vuelo o confirmada.
+ *
+ * POR QUÉ acepta dos estados de partida (6.1, NO es un descuido): desde que
+ * `ofrecerHorarios` persiste la oferta, el punto de partida normal del booking
+ * dejó de ser el blob vacío — exigir NULL habría dejado inreclamable a todo
+ * lead que ya tenía horarios ofrecidos. La condición se ENSANCHÓ; el mecanismo
+ * es el mismo de siempre: UNA sola query decide el ganador. El pre-read de
+ * `getOwnedDossier` (que ya existía, para ownership) solo da FORMA al payload
+ * —arrastrar la memoria de la oferta dentro del claim— y nunca decide quién
+ * gana; si esa lectura quedó vieja, el perdedor igual pierde en el `where`.
  */
 export async function marcarAgendandoOwned(
   leadId: string,
@@ -143,14 +169,25 @@ export async function marcarAgendandoOwned(
   const dossier = await getOwnedDossier(leadId, userId)
   if (!dossier) return null
 
-  const claim: Agenda = { estado: 'AGENDANDO', claimedAt: new Date().toISOString() }
+  // La memoria viaja DENTRO del claim: el updateMany reemplaza el blob entero,
+  // así que si los horarios no se copian acá, la compensación no tiene qué
+  // restaurar y un fallo de Cal.com se come la oferta.
+  const existente = AgendaSchema.safeParse(dossier.agendaJson)
+  const oferta =
+    existente.success && existente.data.estado === 'OFRECIDOS' ? existente.data : null
+
+  const claim: Agenda = {
+    estado: 'AGENDANDO',
+    claimedAt: new Date().toISOString(),
+    ...(oferta?.horariosOfrecidos ? { horariosOfrecidos: oferta.horariosOfrecidos } : {}),
+    ...(oferta?.ofrecidosAt ? { ofrecidosAt: oferta.ofrecidosAt } : {}),
+  }
   const updated = await prisma.osLeadDossier.updateMany({
-    where: { leadId: dossier.leadId, agendaJson: { equals: Prisma.AnyNull } },
+    where: { leadId: dossier.leadId, OR: PARTIDA_RECLAMABLE },
     data: { agendaJson: claim as Prisma.InputJsonValue },
   })
   if (updated.count === 1) return 'claim'
 
-  const existente = AgendaSchema.safeParse(dossier.agendaJson)
   if (existente.success && existente.data.estado === 'AGENDADA') return 'agendada'
   return 'agendando'
 }
@@ -158,14 +195,68 @@ export async function marcarAgendandoOwned(
 /**
  * Compensación EXCLUSIVA del booking fallido: libera el claim AGENDANDO para
  * reintentar. Filtra por estado vía path Json — jamás pisa una AGENDADA.
+ *
+ * 6.1 — RESTAURA el estado previo al claim en vez de vaciar: si el claim traía
+ * la memoria de una oferta (horarios que el prospecto ya tiene en la mano), el
+ * blob vuelve a OFRECIDOS con esos horarios; si el claim nació de un blob
+ * vacío, sigue compensando a NULL. Nunca resucita una AGENDADA vieja: el
+ * payload restaurado sale del propio claim y el `where` sigue exigiendo
+ * AGENDANDO.
  */
 export async function revertirAgendandoOwned(leadId: string, userId: string): Promise<void> {
   const dossier = await getOwnedDossier(leadId, userId)
   if (!dossier) return
+
+  const claim = AgendaSchema.safeParse(dossier.agendaJson)
+  const memoria =
+    claim.success && claim.data.estado === 'AGENDANDO' && claim.data.horariosOfrecidos?.length
+      ? claim.data
+      : null
+  const restaurada: Agenda | null = memoria
+    ? {
+        estado: 'OFRECIDOS',
+        horariosOfrecidos: memoria.horariosOfrecidos,
+        ...(memoria.ofrecidosAt ? { ofrecidosAt: memoria.ofrecidosAt } : {}),
+      }
+    : null
+
   await prisma.osLeadDossier.updateMany({
     where: { leadId: dossier.leadId, agendaJson: { path: ['estado'], equals: 'AGENDANDO' } },
-    data: { agendaJson: Prisma.DbNull },
+    data: { agendaJson: restaurada ? (restaurada as Prisma.InputJsonValue) : Prisma.DbNull },
   })
+}
+
+/**
+ * 6.1 — Persiste la oferta de horarios que el setter le pasó al prospecto: la
+ * memoria del booking. Sin esto, si el prospecto tarda y el setter cierra la
+ * pestaña, los horarios ofrecidos se pierden y hay que pedirlos de nuevo (con
+ * el riesgo de ofrecer otros distintos a los que ya circulan por el chat).
+ *
+ * Re-ofrecer REEMPLAZA la oferta anterior (last-write-wins, deliberado: lo que
+ * vale es lo último que el prospecto tiene en la mano). Devuelve false cuando
+ * no había nada que pisar legítimamente —lead ajeno, o una confirmación en
+ * vuelo/ya cerrada— sin tocar el blob: la oferta se le muestra igual al setter,
+ * lo que no se hace es pisar un claim ajeno al camino.
+ */
+export async function guardarHorariosOfrecidosOwned(
+  leadId: string,
+  userId: string,
+  horarios: string[],
+): Promise<boolean> {
+  const dossier = await getOwnedDossier(leadId, userId)
+  if (!dossier) return false
+
+  const oferta: Agenda = {
+    estado: 'OFRECIDOS',
+    horariosOfrecidos: horarios,
+    ofrecidosAt: new Date().toISOString(),
+  }
+  const parsed = AgendaSchema.parse(oferta)
+  const updated = await prisma.osLeadDossier.updateMany({
+    where: { leadId: dossier.leadId, OR: PARTIDA_RECLAMABLE },
+    data: { agendaJson: parsed as Prisma.InputJsonValue },
+  })
+  return updated.count === 1
 }
 
 /**

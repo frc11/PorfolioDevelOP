@@ -1638,3 +1638,71 @@ Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.
 - ✅ Producción intacta: `agenda.ts`, `agenda.actions.ts`, `contracts.ts`, `dossier.ts`, gates y schema fuera del diff.
 
 **Diff:** `tests/setter/12-claim-agenda.spec.ts` (nuevo), esta bitácora. Cero archivos de `src/`. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Sprint 6.1 — el claim acepta OFRECIDOS y la compensación restaura: backend del booking con memoria (B-05/PR-2) (2026-07-23)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `8b3ce80` (6.0) en el log y `tests/setter/12-claim-agenda.spec.ts` existiendo. `tsc --noEmit` EXIT 0 y **el spec del claim corrido ANTES de tocar nada: 4/4 verde** — línea de base. `npx prisma migrate status`: 86 migraciones, al día.
+
+**Objetivo.** Darle memoria al booking: `ofrecerHorarios` no persistía nada, así que si el prospecto tardaba y el setter cerraba la pestaña, los horarios ofrecidos se perdían. Persistirlos chocaba con el claim atómico —que reclamaba exigiendo blob vacío— y ese choque es lo que resolvió este sprint. Backend puro: la re-entrada de m16, la guardia de salida y la confirmación son 6.2.
+
+### 1. El `where` nuevo — la condición se ensanchó, el mecanismo no cambió
+
+```ts
+const PARTIDA_RECLAMABLE: Prisma.OsLeadDossierWhereInput[] = [
+  { agendaJson: { equals: Prisma.AnyNull } },
+  { agendaJson: { path: ['estado'], equals: 'OFRECIDOS' } },
+]
+
+const updated = await prisma.osLeadDossier.updateMany({
+  where: { leadId: dossier.leadId, OR: PARTIDA_RECLAMABLE },
+  data: { agendaJson: claim as Prisma.InputJsonValue },
+})
+```
+
+**Sigue siendo UN solo `updateMany` condicional**: una sola query decide el ganador. No hay read-para-decidir, no hay segunda query, no hay transacción. El pre-read de `getOwnedDossier` ya existía (ownership) y ahora además da **forma** al payload —arrastra la memoria de la oferta dentro del claim— pero **nunca decide quién gana**: si esa lectura quedó vieja, el perdedor igual pierde en el `where`. Un lead en `AGENDANDO` o `AGENDADA` no matchea ninguna rama: sigue sin ser reclamable, exactamente como antes de 6.1.
+
+**Filtro JSON por path contra Postgres real: FUNCIONA.** No se dio por bueno por tipos. Probe descartable (fuera del repo, borrado) contra la Neon dev, 5/5: blob NULL → count 1 · `AGENDANDO` → 0 · `OFRECIDOS` → 1 · `AGENDADA` → 0 · carrera de dos `updateMany` simultáneos sobre `OFRECIDOS` → `[0,1]`. Después quedó cubierto en el spec (G5-G7).
+
+### 2. La compensación restaura el estado previo, no vacía
+
+`revertirAgendandoOwned` dejaba el blob en `Prisma.DbNull` siempre. Ahora **restaura exactamente el estado previo al claim**: si el claim traía memoria de una oferta, el blob vuelve a `OFRECIDOS` con esos horarios y su `ofrecidosAt` original; si el claim nació de un blob vacío, sigue compensando a `DbNull`. Nunca resucita una `AGENDADA` vieja: el payload restaurado sale del **propio claim** (no de un estado histórico) y el `where` sigue exigiendo `AGENDANDO`.
+
+Por qué la memoria viaja **dentro** del claim: el `updateMany` reemplaza el blob entero, así que si los horarios no se copian al reclamar, la compensación no tiene qué restaurar y un fallo de Cal.com se come la oferta.
+
+### 3. `ofrecerHorarios` pasó de solo-lectura a write
+
+Persiste `{ estado: 'OFRECIDOS', horariosOfrecidos, ofrecidosAt }` vía `guardarHorariosOfrecidosOwned` (nueva en `agenda.ts`), **con el mismo patrón de ownership que el resto de los writes del setter del archivo** (`getOwnedDossier` adentro) — probado con un caso de escritura cruzada en G10. Re-ofrecer **reemplaza** la oferta anterior (last-write-wins, deliberado: lo que vale es lo último que el prospecto tiene en la mano); condición de escritura idéntica a la del claim, así que jamás pisa un claim en vuelo ni una reunión confirmada. La persistencia es **memoria, no gate**: si no hay dónde escribir, los horarios se devuelven igual. **Sin `revalidatePath`** a propósito: este sprint es backend puro y un refresh sería un cambio observable de UI — va en 6.2.
+
+### 4. Extensión del contrato — aditiva y opcional
+
+`AgendaSchema` suma el valor `'OFRECIDOS'` al enum de `estado` y dos campos **opcionales**: `horariosOfrecidos` (array de starts ISO con offset, mismo validador que `slotStart` — el formato ya viene de Cal.com por ese camino) y `ofrecidosAt`. Ningún blob viejo deja de parsear: una `AGENDADA` escrita en B7 y un claim `AGENDANDO` pelado siguen válidos (G9 lo prueba). Ningún campo nuevo es requerido.
+
+### Censo de readers de `agendaJson` — 7/7 inertes ante `OFRECIDOS`
+
+Se re-censaron los 7 y **todos filtran por `estado === 'AGENDADA'`** (directo o vía `reunionAgendada`, que además exige `calBookingUid`): `flow.parseAgenda`/`reunionAgendada` · `manual/_data.ts:~168` (→ `manual.ts` deriva m16 con `reunionAgendada`, y `m16-agenda.tsx` idem) · `home.ts:~43` (consumido en `flow.ts:683` como `agenda?.resultado?.nota`, campo que `OFRECIDOS` no tiene) · `notify.ts:~95` (corta con `estado !== 'AGENDADA'`) · `progreso.ts:~74` (exige `AGENDADA` + `agendadaAt`) · admin `page.tsx:~229` (`reunionAgendada(agenda) ? agenda : null`) · `gateAgenda` (`reunionAgendada`). **Ninguno tuvo que cambiar y ninguno reporta problema.**
+
+### El test de 6.0 — ningún caso cambió
+
+G1-G4 quedaron **intactos en sus aserciones**: 4/4 verde sin tocar una sola expectativa. Vale la pena decir por qué, porque 6.0 anticipó lo contrario: predijo que la aserción de G3 (`la compensación dejó agendaJson en NULL`) sería la que habría que actualizar. **No hizo falta** — la compensación ahora restaura *el estado previo al claim*, y el previo de ese lead era NULL (nunca se le ofrecieron horarios), así que sigue compensando a NULL. Lo único que cambió en G3 es el **comentario**, que ahora explica eso y apunta a G8. El caso con memoria —el que sí quedaba vacío antes y ahora vuelve a `OFRECIDOS`— es nuevo, no una mutación de uno viejo.
+
+### Casos nuevos (mismo spec, sección G)
+
+- **G5 · un lead en `OFRECIDOS` es reclamable, y el claim se lleva la memoria.** Antes de 6.1 este claim rebotaba a `'agendando'` porque el blob no era NULL: el lead quedaba inreclamable para siempre apenas se le ofrecían horarios.
+- **G6 · doble claim sobre `OFRECIDOS` → exactamente uno gana.** Misma línea roja que G1 sobre el estado de partida nuevo: ensanchar la condición no aflojó la llave.
+- **G7 · `AGENDADA` sigue sin ser reclamable.** Blob sembrado directo para atacar el `where` puro (G4 llega por el camino del claim). Suma que ofrecer horarios tampoco pisa una reunión confirmada.
+- **G8 · compensación desde `OFRECIDOS` restaura los horarios.** El corazón del sprint: si Cal.com falla, el prospecto sigue teniendo esos 3 horarios en el chat; vaciar el blob obligaría a ofrecer OTROS y partiría la conversación. Aserta horarios, `ofrecidosAt` original preservado, `claimedAt` ausente y que el reintento vuelve a reclamar.
+- **G9 · contrato:** blob con el shape anterior parsea válido (sin DB, puro contrato).
+- **G10 · persistencia punta a punta a nivel datos:** ofrecer → **releer el lead desde la DB** → slots presentes con estado `OFRECIDOS`. Incluye last-write-wins y el negativo de ownership (setter ajeno → `false`, oferta del dueño intacta). Se ejercita el write-path exacto de la action (`guardarHorariosOfrecidosOwned`): `ofrecerHorarios` corre bajo `requireSetter()` y pega contra Cal.com real — mismo criterio declarado en 6.0 para G1-G4.
+
+**Cierre — verificado, no auto-confirmado.**
+- `tsc --noEmit` EXIT 0 (sin pipe).
+- `check:invariants` **17/17**.
+- `test:leados` **25/25**.
+- `test:setter` **57/57** (51 previos + los 6 nuevos) — sin flakes.
+- `npm run build` OK.
+- Spec del claim corrido **3 veces seguidas**: 10/10 las 3, estable.
+- Línea roja intacta: `confirmarReunion` conserva su semántica (qué significa ganar el claim, el flujo posterior y la integración con Cal.com sin tocar); `prisma/schema.prisma`, `dossier.ts`, gates, transiciones y componentes de UI fuera del diff.
+
+**Diff:** `src/lib/leados/agenda.ts`, `src/app/(protected)/setter/_actions/agenda.actions.ts`, `src/lib/leados/contracts.ts`, `tests/setter/12-claim-agenda.spec.ts`, `agenda-form.tsx` (**solo el comentario**: el precedente 5.4 «`agenda.actions.ts` no se toca» era de la capa de presentación del manual y quedó al día — 6.1 tocó la action a propósito por PR-2 / decisión #4), esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.

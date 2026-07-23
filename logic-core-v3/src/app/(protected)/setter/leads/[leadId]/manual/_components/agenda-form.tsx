@@ -20,8 +20,14 @@ import { useStepAction } from '@/lib/use-step-action'
  * escritura del wizard (`ofrecerHorarios`/`confirmarReunion` — ownership, gate
  * RESPONDIO, claim atómico, re-validación fresca del slot y booking real en
  * Cal.com adentro; `ConfirmarReunionSchema`, notas de traspaso obligatorias):
- * el manual y el wizard son dos presentaciones del mismo write-path (precedente
- * 5.4 — `agenda.actions.ts` no se toca). La confirmación y el recordatorio al
+ * el manual y el wizard son dos presentaciones del mismo write-path. El
+ * precedente 5.4 —«`agenda.actions.ts` no se toca»— era de la capa de
+ * PRESENTACIÓN del manual: seguía valiendo mientras el manual solo re-presentaba
+ * el write-path existente. 6.1 modificó la action a propósito, por decisión de
+ * diseño (PR-2 / decisión #4): `ofrecerHorarios` dejó de ser solo-lectura y
+ * ahora persiste la oferta (estado OFRECIDOS) para que los horarios sobrevivan
+ * al cierre de la pestaña. Este componente no cambió con eso; la re-entrada que
+ * consume esa memoria es 6.2. La confirmación y el recordatorio al
  * prospecto los manda Cal.com nativo. El componente llega solo con el gate ya
  * abierto (RESPONDIO, sin reunión): los otros estados los presenta M16Registro.
  */
