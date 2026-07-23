@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CalendarCheck2, CalendarSearch, RefreshCw, ShieldCheck } from 'lucide-react'
-import { Button, Field, Input, TextArea } from '@/components/ui'
+import { Button, Callout, Field, Input, TextArea } from '@/components/ui'
 import type { Ficha } from '@/lib/leados/contracts'
 import { SLOT_OCUPADO } from '@/lib/leados/action-codes'
 import { buildHorariosMensajeBlock } from '@/lib/leados/copy-blocks'
@@ -11,9 +11,13 @@ import {
   confirmarReunion,
   ofrecerHorarios,
 } from '@/app/(protected)/setter/_actions/agenda.actions'
-import { ConfirmarReunionSchema } from '@/app/(protected)/setter/_actions/agenda.schemas'
+import {
+  ConfirmarReunionSchema,
+  type ConfirmarReunionInput,
+} from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { useStepAction } from '@/lib/use-step-action'
+import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
 /**
  * M16 — El BOOKING de la reunión (5.5, tramo Agenda). Es el MISMO camino de
@@ -26,11 +30,27 @@ import { useStepAction } from '@/lib/use-step-action'
  * el write-path existente. 6.1 modificó la action a propósito, por decisión de
  * diseño (PR-2 / decisión #4): `ofrecerHorarios` dejó de ser solo-lectura y
  * ahora persiste la oferta (estado OFRECIDOS) para que los horarios sobrevivan
- * al cierre de la pestaña. Este componente no cambió con eso; la re-entrada que
- * consume esa memoria es 6.2. La confirmación y el recordatorio al
+ * al cierre de la pestaña. La confirmación y el recordatorio al
  * prospecto los manda Cal.com nativo. El componente llega solo con el gate ya
  * abierto (RESPONDIO, sin reunión): los otros estados los presenta M16Registro.
+ *
+ * 6.2 — La experiencia encima de esa memoria (sin tocar backend):
+ *   - `ofertaPrevia`: si el lead vuelve con horarios ya ofrecidos, el form
+ *     ARRANCA mostrándolos (con la fecha de la oferta) en vez del buscador
+ *     vacío. Quién decide que hay memoria es M16Registro; acá solo se presenta.
+ *     El flujo virgen (sin oferta previa) queda idéntico: `slots === null`.
+ *   - `useUnsavedGuard`: mismo patrón que 3.2 (A-24) — condición DERIVADA del
+ *     estado local, sin autosave. Lo que protege es lo tipeado y todavía no
+ *     persistido (notas de traspaso, nombre/email editados); los horarios ya no
+ *     corren riesgo, los persiste 6.1.
+ *   - Confirmación liviana: UN solo paso inline, en el ÚNICO punto irreversible
+ *     (`confirmarReunion` crea el booking real y le avisa al prospecto). Ningún
+ *     otro paso gana fricción: buscar/re-buscar y elegir horario siguen directos.
  */
+
+/** La oferta que el form tiene en pantalla. `ofrecidosAt` presente = viene de la
+ *  memoria del lead (el prospecto ya la tiene); ausente = recién buscada acá. */
+type OfertaVigente = { horarios: string[]; ofrecidosAt?: string }
 
 /** Recordatorio del decisor según la ficha del Paso 1 — el mismo gancho del
  * wizard: la reunión es con quien DECIDE (un CM no cierra). Va pegado al
@@ -51,34 +71,54 @@ export function AgendaForm({
   ficha,
   contactName,
   leadEmail,
+  ofertaPrevia,
 }: {
   leadId: string
   ficha: Ficha | null
   contactName: string | null
   leadEmail: string | null
+  /** 6.2 — Los horarios que este lead YA tiene ofrecidos (estado OFRECIDOS). */
+  ofertaPrevia?: OfertaVigente
 }) {
   const [decisorOk, setDecisorOk] = useState(false)
-  const [slots, setSlots] = useState<string[] | null>(null)
+  const [oferta, setOferta] = useState<OfertaVigente | null>(ofertaPrevia ?? null)
   const [slotElegido, setSlotElegido] = useState<string | null>(null)
   const [nombre, setNombre] = useState(contactName ?? '')
   const [email, setEmail] = useState(leadEmail ?? '')
   const [notas, setNotas] = useState('')
   const [error, setError] = useState<string | null>(null)
+  // Paso de confirmación: el payload YA validado, esperando el sí definitivo.
+  const [porConfirmar, setPorConfirmar] = useState<ConfirmarReunionInput | null>(null)
   const busqueda = useStepAction()
   const confirmacion = useStepAction()
+
+  const slots = oferta?.horarios ?? null
+  const ofrecidosAt = oferta?.ofrecidosAt
+
+  // 6.2 — Guardia de salida (patrón 3.2/A-24, sin autosave): lo tipeado y no
+  // persistido. Los horarios NO entran — desde 6.1 sobreviven solos.
+  const hayCambiosSinGuardar =
+    notas.trim() !== '' ||
+    nombre.trim() !== (contactName ?? '').trim() ||
+    email.trim() !== (leadEmail ?? '').trim()
+  useUnsavedGuard(hayCambiosSinGuardar)
 
   const buscarHorarios = () => {
     setError(null)
     setSlotElegido(null)
-    // La búsqueda solo carga slots: sin toast y sin refresh (no muta nada).
+    setPorConfirmar(null)
+    // La búsqueda carga slots (y desde 6.1 los persiste): sin toast y sin
+    // refresh — la oferta nueva REEMPLAZA a la anterior, acá y en el dossier.
     busqueda.run(() => ofrecerHorarios(leadId), {
       onError: setError,
-      onSuccess: (data) => setSlots(data.slots),
+      // Recién buscados: sin `ofrecidosAt` — todavía no son "los que ofreciste".
+      onSuccess: (data) => setOferta({ horarios: data.slots }),
       refresh: false,
     })
   }
 
-  const confirmar = () => {
+  /** Antesala del único paso irreversible: valida y pide el sí definitivo. */
+  const revisarAntesDeConfirmar = () => {
     setError(null)
     const payload = {
       decisorConfirmado: decisorOk,
@@ -92,13 +132,19 @@ export function AgendaForm({
       setError(parsed.error.issues[0]?.message ?? 'Revisá los datos de la reunión')
       return
     }
-    confirmacion.run(() => confirmarReunion(leadId, parsed.data), {
+    setPorConfirmar(parsed.data)
+  }
+
+  const confirmar = (input: ConfirmarReunionInput) => {
+    setError(null)
+    confirmacion.run(() => confirmarReunion(leadId, input), {
       onError: (mensaje, code) => {
         setError(mensaje)
+        setPorConfirmar(null)
         // Si el horario se pisó, la oferta vieja ya no vale: a re-ofrecer.
         // 4.1: por CÓDIGO — el copy puede reescribirse sin romper la reacción.
         if (code === SLOT_OCUPADO) {
-          setSlots(null)
+          setOferta(null)
           setSlotElegido(null)
         }
       },
@@ -141,9 +187,22 @@ export function AgendaForm({
       ) : (
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-zinc-300">
-              Horarios libres (hora Argentina) — pasáselos al prospecto
-            </p>
+            {/* 6.2 — Re-entrada con memoria: si los horarios vienen del dossier,
+                la pantalla lo dice (y desde cuándo) en vez de hacerlos pasar por
+                una búsqueda recién hecha. Sin memoria, el copy es el de siempre. */}
+            <div className="space-y-0.5">
+              <p className="text-xs font-semibold text-zinc-300">
+                {ofrecidosAt
+                  ? 'Los horarios que ofreciste'
+                  : 'Horarios libres (hora Argentina) — pasáselos al prospecto'}
+              </p>
+              {ofrecidosAt && (
+                <p className="max-w-md text-[11px] leading-relaxed text-zinc-500">
+                  Se los pasaste el {formatFechaHora(ofrecidosAt)} — son los que el prospecto tiene
+                  en la mano. Si ya no sirven, buscá de nuevo y estos quedan reemplazados.
+                </p>
+              )}
+            </div>
             <Button
               variant="secondary"
               size="sm"
@@ -229,14 +288,42 @@ export function AgendaForm({
                 </p>
               )}
 
-              <Button
-                onClick={confirmar}
-                loading={confirmacion.isPending}
-                disabled={confirmacion.isPending}
-                icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
-              >
-                Confirmar y agendar
-              </Button>
+              {/* 6.2 — La ÚNICA fricción del paso, y va acá: confirmar crea el
+                  booking real y le avisa al prospecto. Inline (nada de
+                  window.confirm), con el Callout del proyecto. */}
+              {porConfirmar ? (
+                <Callout tone="brand" icon={CalendarCheck2} title="Vas a confirmar la reunión">
+                  <p className="text-xs leading-relaxed">
+                    Vas a confirmar {formatFechaHora(porConfirmar.slotStart)} — esto le avisa al
+                    prospecto.
+                  </p>
+                  <div className="mt-3 flex items-center gap-3">
+                    <Button
+                      onClick={() => confirmar(porConfirmar)}
+                      loading={confirmacion.isPending}
+                      disabled={confirmacion.isPending}
+                      icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
+                    >
+                      Sí, confirmar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setPorConfirmar(null)}
+                      disabled={confirmacion.isPending}
+                    >
+                      Volver
+                    </Button>
+                  </div>
+                </Callout>
+              ) : (
+                <Button
+                  onClick={revisarAntesDeConfirmar}
+                  disabled={confirmacion.isPending}
+                  icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
+                >
+                  Confirmar y agendar
+                </Button>
+              )}
             </div>
           )}
 

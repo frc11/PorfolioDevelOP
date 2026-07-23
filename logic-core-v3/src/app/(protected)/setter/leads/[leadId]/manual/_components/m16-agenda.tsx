@@ -110,6 +110,22 @@ function ReunionAgendada({ agenda, leadPhone }: { agenda: Agenda; leadPhone: str
   )
 }
 
+/**
+ * 6.2 — La memoria de la oferta, leída del MISMO blob que persiste 6.1: los
+ * horarios que el prospecto ya tiene en la mano. Solo el estado OFRECIDOS
+ * cuenta — un claim `AGENDANDO` es una confirmación en vuelo, no una oferta a
+ * la que se pueda volver, y una `AGENDADA` ni llega hasta acá. Sin horarios
+ * guardados devuelve undefined: el form arranca virgen, como siempre.
+ */
+function ofertaPrevia(
+  agenda: Agenda | null,
+): { horarios: string[]; ofrecidosAt?: string } | undefined {
+  if (agenda?.estado !== 'OFRECIDOS') return undefined
+  const horarios = agenda.horariosOfrecidos
+  if (!horarios || horarios.length === 0) return undefined
+  return { horarios, ofrecidosAt: agenda.ofrecidosAt }
+}
+
 /** Registro: los tres estados del paso. El gate real (RESPONDIO ∧ sin reunión)
  * vive en `gateAgenda` (agenda.actions.ts), que la action re-valida server-side. */
 export function M16Registro({
@@ -171,7 +187,17 @@ export function M16Registro({
   }
 
   // ── Gate abierto: el form del booking (la action re-valida el gate igual) ───
+  // 6.2 — Re-entrada con memoria: si el lead ya tiene horarios ofrecidos (6.1
+  // los persistió en el dossier), el form arranca mostrándolos en vez del
+  // buscador vacío. Sin blob OFRECIDOS con horarios, `ofertaPrevia` queda
+  // undefined y el flujo virgen es exactamente el de antes.
   return (
-    <AgendaForm leadId={leadId} ficha={ficha} contactName={contactName} leadEmail={leadEmail} />
+    <AgendaForm
+      leadId={leadId}
+      ficha={ficha}
+      contactName={contactName}
+      leadEmail={leadEmail}
+      ofertaPrevia={ofertaPrevia(agenda)}
+    />
   )
 }

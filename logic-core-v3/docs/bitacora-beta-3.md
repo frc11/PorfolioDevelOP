@@ -1706,3 +1706,43 @@ G1-G4 quedaron **intactos en sus aserciones**: 4/4 verde sin tocar una sola expe
 - Línea roja intacta: `confirmarReunion` conserva su semántica (qué significa ganar el claim, el flujo posterior y la integración con Cal.com sin tocar); `prisma/schema.prisma`, `dossier.ts`, gates, transiciones y componentes de UI fuera del diff.
 
 **Diff:** `src/lib/leados/agenda.ts`, `src/app/(protected)/setter/_actions/agenda.actions.ts`, `src/lib/leados/contracts.ts`, `tests/setter/12-claim-agenda.spec.ts`, `agenda-form.tsx` (**solo el comentario**: el precedente 5.4 «`agenda.actions.ts` no se toca» era de la capa de presentación del manual y quedó al día — 6.1 tocó la action a propósito por PR-2 / decisión #4), esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Sprint 6.2 — m16 re-entra con memoria, guardia y confirmación (B-05/C-05)
+
+**Objetivo.** La experiencia encima del backend de 6.1: si el setter ya ofreció horarios, m16 se los muestra al volver; lo tipeado no se pierde al cerrar la pestaña; y el único paso irreversible pide un sí explícito. **Backend intocado** — el diff no roza `agenda.ts`, ni el claim, ni `agenda.actions.ts`.
+
+### 1. Re-entrada con memoria
+
+`M16Registro` decide (`ofertaPrevia`, en `m16-agenda.tsx`): un blob en estado `OFRECIDOS` con horarios entra al form como oferta vigente. Solo `OFRECIDOS` cuenta — un `AGENDANDO` es una confirmación en vuelo, no una oferta a la que volver, y una `AGENDADA` ni llega a esa rama. `AgendaForm` arranca con esos 3 horarios en pantalla en vez del buscador vacío, bajo el título **«Los horarios que ofreciste»** + **«Se los pasaste el {fecha}»** (el `ofrecidosAt` que persiste 6.1). Sin memoria, `ofertaPrevia` es `undefined` y el **flujo virgen queda idéntico** (`slots === null` → el buscador de siempre).
+
+El re-buscar es el botón que ya existía («Buscar de nuevo»): re-ofrecer reemplaza la oferta anterior en pantalla **y** en el dossier (last-write-wins de 6.1). Los horarios recién buscados salen sin `ofrecidosAt`, así que la pantalla no los hace pasar por «los que ofreciste» hasta que el blob vuelva a leerse: la memoria se nombra memoria y la búsqueda fresca, búsqueda fresca.
+
+### 2. Guardia de salida
+
+`useUnsavedGuard(hayCambiosSinGuardar)` — **mismo patrón exacto de 3.2/A-24**: condición derivada del estado local, sin autosave, sin estado propio. Cubre lo tipeado y todavía no persistido (notas de traspaso, nombre/email editados respecto del prefill de la ficha). Los horarios **no** entran a la condición: desde 6.1 sobreviven solos.
+
+### 3. Confirmación liviana — una sola, donde duele
+
+Antes de `confirmarReunion` (crea el booking real en Cal.com y le avisa al prospecto) hay un paso inline con el `Callout` del proyecto: **«Vas a confirmar {fecha} — esto le avisa al prospecto»**, con *Sí, confirmar* / *Volver*. Nada de `window.confirm`. La validación del payload corre **antes** del cartel: si faltan datos, el setter ve el error del campo, no una confirmación de algo que no va a salir. **Ningún otro paso gana fricción**: buscar, re-buscar y elegir horario siguen directos.
+
+### La prueba de la ficha, hecha literal (H1)
+
+`tests/setter/13-m16-memoria.spec.ts` — **contexto de browser cerrado y uno nuevo abierto**: sesión nueva, storage nuevo, cero estado de cliente heredado. Al reabrir m16 los **mismos 3 horarios** están a la vista, con la fecha de la oferta, y el buscador virgen no aparece.
+
+**Lo único sustituido, dicho sin maquillaje:** el clic en «Buscar horarios libres de Franco» dispara `ofrecerHorarios`, que pega contra **Cal.com real** (`getSlots`) — meterlo en la suite ataría la regresión a una API externa y a las credenciales de Cal en el env. La oferta se produce llamando el **write-path exacto que la action usa por dentro** (`guardarHorariosOfrecidosOwned`, mismo criterio que G10 en 6.1). Todo lo que 6.2 construye —re-lectura del blob, re-entrada, pantalla— se ejercita por la UI real cruzando un cierre de pestaña de verdad.
+
+- **H2 · guardia:** `beforeunload` sintético (patrón de 3.2). Sin tipear no intercepta; elegir horario tampoco; con notas intercepta; vaciarlas la apaga.
+- **H3 · confirmación:** no aparece al marcar el decisor, ni al elegir horario, ni al llenar los campos. Aparece al tocar «Confirmar y agendar», nombra el horario, y **la DB sigue en `OFRECIDOS`** — el paso irreversible no corrió sin el sí (si esto fallara sería un booking real en la agenda de Franco). «Volver» devuelve al form.
+
+**Cierre — verificado, no auto-confirmado.**
+- `tsc --noEmit` EXIT 0 (sin pipe).
+- `check:invariants` **17/17**.
+- `test:leados` **25/25**.
+- `test:setter` **60/60** (57 previos + H1/H2/H3), primera corrida, sin flakes.
+- `npm run build` OK.
+- Spec del claim de 6.0/6.1 (`12-claim-agenda`) **verde y sin modificar** — 10/10 dentro de la corrida.
+- **Pase visual del recorrido completo: pendiente de Franco.**
+
+**Diff:** `m16-agenda.tsx`, `agenda-form.tsx`, `tests/setter/13-m16-memoria.spec.ts`, esta bitácora. Cero backend. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
