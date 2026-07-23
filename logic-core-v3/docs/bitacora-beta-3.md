@@ -1607,3 +1607,34 @@ Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.
 - ✅ Motor intacto: `gateEnvioDemo`/`flow.ts` fuera del diff; el envío sigue gateado server-side, solo se sumó una entrada de navegación.
 
 **Diff:** `manual.ts`, `manual.invariant.ts`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Sprint 6.0 — test de caracterización del claim atómico de agenda (red previa a B-05) (2026-07-23)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `b6b2132` (4.1), `88b1f13` (5.1) y `65058fc` (5.3) en el log — **no existe commit "sprint 5.2"** en `main` (numeración no contigua; se reporta, no se inventa). `tsc --noEmit` EXIT 0.
+
+**Objetivo.** Escribir la red que le faltaba al claim atómico de agenda ANTES de que otro sprint lo toque. Hasta hoy `marcarAgendandoOwned` (`src/lib/leados/agenda.ts`) no tenía **ninguna** cobertura: `06-claim-atomico.spec.ts` cubre el claim del **envío de demo** (`enviadaAt`/`marcarDemoEnviadaOwned`), y el único test que rozaba agenda (`01-flow.spec.ts`) siembra `agendaJson` en AGENDADA directo, salteando el claim entero.
+
+**Naturaleza.** Test de **caracterización**: documenta y protege lo que el código hace HOY. Cero cambios de producción — el diff no toca `src/`.
+
+**Archivo nuevo: `tests/setter/12-claim-agenda.spec.ts` (sección G, 4 casos).** In-process contra la DB real (mismo criterio que la sección F): `confirmarReunion` corre bajo `requireSetter()` → `auth()` → cookies de request, inalcanzable desde el runner, y además pegaría contra Cal.com REAL (`createBooking`). Se ejerce la primitiva directa — sin red y sin agendar nada en el calendario de Franco.
+
+- **G1 · doble claim → uno gana, el otro rebota a `'agendando'`.** Invariante: dos confirmaciones simultáneas producen UN solo booking. Técnica: `Promise.all` sobre la primitiva contra el mismo row — **la misma del test hermano F1**, no se inventó una nueva. Aserta ambos lados: `sort()` da exactamente `['agendando','claim']`, y el ganador deja el blob `AGENDANDO` con `claimedAt`.
+- **G2 · ownership cruzado (aislamiento multi-tenant).** Invariante: el claim pasa por `getOwnedDossier`, así que un lead ajeno devuelve `null` ANTES de tocar la DB. **Resultado: PASA** — el setter B recibe `null`, el dossier queda intacto (`agendaJson` sigue NULL) y el dueño real sigue pudiendo reclamar. Sin fuga.
+- **G3 · compensación.** Invariante: si Cal.com falla el claim se libera y el setter reintenta — el lead no queda trabado en AGENDANDO. Cubre además que el re-claim inmediato es idempotente (`'agendando'`).
+- **G4 · post-AGENDADA.** Invariante: una reunión confirmada nunca se pisa con un segundo booking, y el rebote se distingue del "en curso". Camino de HOY: el `updateMany` no matchea y el parse del blob existente devuelve **`'agendada'`** (la action lo traduce a «Este lead ya tiene la reunión agendada»). Se monta por el camino REAL (`marcarAgendandoOwned` → `guardarAgendaOwned`), no por seed crudo. Extra: la AGENDADA sobrevive a un `revertirAgendandoOwned` tardío (filtra por AGENDANDO).
+
+**Comportamiento documentado tal cual, NO arreglado.** `revertirAgendandoOwned` deja `agendaJson` en **`Prisma.DbNull`** — borra el claim entero en vez de dejar rastro del intento fallido, así que un booking que falló en Cal.com no deja huella consultable en el dossier. Queda asertado con comentario explícito: **el sprint 6.1 va a cambiar esto a propósito**, y esa es la aserción a actualizar cuando lo haga. No es un bug reportable, es el contrato de hoy.
+
+**Limitación declarada (no se debilitó ninguna aserción).** `Promise.all` sobre la primitiva son dos transacciones en vuelo contra el mismo row desde un solo proceso Node — no es concurrencia multi-proceso real. Es exactamente lo que el `updateMany` condicional tiene que resolver y lo que ya valida F1, pero se deja dicho: un doble click desde dos navegadores distintos no se reproduce acá.
+
+**Cierre — verificado, no auto-confirmado.**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **51/51** (47 previos + los 4 nuevos) — sin flakes.
+- ✅ Spec nuevo corrido **3 veces seguidas**: 4/4 verde las 3 (sin `sleep`, sin retries).
+- ✅ Producción intacta: `agenda.ts`, `agenda.actions.ts`, `contracts.ts`, `dossier.ts`, gates y schema fuera del diff.
+
+**Diff:** `tests/setter/12-claim-agenda.spec.ts` (nuevo), esta bitácora. Cero archivos de `src/`. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
