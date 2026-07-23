@@ -1746,3 +1746,96 @@ Antes de `confirmarReunion` (crea el booking real en Cal.com y le avisa al prosp
 - **Pase visual del recorrido completo: pendiente de Franco.**
 
 **Diff:** `m16-agenda.tsx`, `agenda-form.tsx`, `tests/setter/13-m16-memoria.spec.ts`, esta bitácora. Cero backend. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Corrida D1 — Destilar el método real de develOP (read-only + 3 documentos nuevos) · 2026-07-23
+
+**Qué se hizo.** No es un sprint de producto: es una corrida de **destilación**. Recuperar de la
+evidencia del repo el método que develOP efectivamente ejecutó durante la remediación de LeadOS
+—no el que el método dice de sí mismo— y convertirlo en documento. Read-only estricto sobre el repo;
+las únicas escrituras son cuatro archivos nuevos en `docs/metodo/` + este append.
+
+**FASE 0.** Worktree principal, rama `main`. **El terreno cambió entre el arranque de la sesión y el
+arranque real del trabajo**: el snapshot inicial mostraba HEAD `7d323ea` (6.1) con `agenda-form.tsx` /
+`m16-agenda.tsx` modificados y `13-m16-memoria.spec.ts` untracked; al empezar, todo eso ya estaba
+commiteado en `6a88cbe` (6.2). Se anotó y se siguió (no toca el scope). Sucio permitido:
+`?? docs/probe-01-censo-cosecha.md` (WIP ajeno, no tocado). Otras 5 worktrees vivas, sólo listadas.
+`docs/metodo/` no existía: corrida fresca, sin progreso previo que retomar.
+
+**Fuentes leídas (Parte 1).** `docs/bitacora-beta-3.md` entera (1.748 líneas, sprint 3.1/2026-06-29 →
+6.2/2026-07-23) · `git log` del período de remediación (`62994be`..`6a88cbe`, 21 commits) + los dos
+forenses previos (`612c4ee`, `5068d88`), con `git show --stat` de los 7 commits no-sprint ·
+`docs/auditorias/AUDITORIA-CIERRE-2026-07.md` (333 líneas, backlog de 40 ítems + límites declarados) ·
+`CLAUDE.md` · las cabeceras de los 17 invariantes de `check:invariants` · ~60 comentarios de decisión
+del código (greps de `§`, `a propósito`, `deliberad`, `intencional`, `precedente`, `decisión`,
+`NO se toca`, `línea roja`, `no confía en la UI`, `anti-regres`).
+
+**Los tres documentos.**
+- **`docs/metodo/LECCIONES-LEADOS.md`** (commit `23a19c3`) — 20 lecciones durables en 9 secciones, cada
+  una con qué pasó (commit o `archivo:línea`), qué costó y qué regla se deriva. Incluye una sección de
+  **decisiones tomadas dos veces** (7 casos) y el contraste de las 8 lecciones semilla contra el repo.
+- **`docs/metodo/PROPUESTA-CIMIENTO.md`** (commit `f01a178`) — 21 cambios de método propuestos en 7 ejes,
+  cada uno con texto listo para insertar, dónde va, la lección que lo origina y qué costó no tenerlo.
+  **Propone, no reescribe.** Incluye una sección de qué NO se propone y por qué.
+- **`docs/metodo/MAPA-LEADOS.md`** (commit `69d0fb4`) — el sistema hoy: las 4 capas, la máquina de
+  stages, los 4 gates, aislamiento, claims atómicos, la derivación de pantallas, las capas de datos, el
+  home, las líneas rojas con sus 3 trampas pagadas, y qué prueba cada comando de verificación. Escrito
+  desde el código con `archivo:línea`; lo inferido está marcado **[INFERIDO]**.
+
+**Hallazgos que valen para el chat de planificación.**
+1. **El Cimiento de Chat y el Manual de Flujo NO existen en el repo** (búsqueda por nombre y por
+   contenido sobre todo el árbol versionado y la raíz). No se reconstruyeron ni se inventaron: la
+   propuesta salió como documento autónomo, etiquetada por eje para que Franco la mapee. Se suma al
+   `docs/brief-vision-flujo-setter.md` que 7.0, 7.3 y AUD-2 ya reportaron ausente.
+2. **Una lección semilla no se confirmó**: «cuando un sprint frena, los siguientes del bloque no deben
+   correrse igual» no tiene caso en el repo. Lo que sí hay es lo contrario —dependencias declaradas
+   («B-04 DEPENDE de B-01») y respetadas (`aed017e` → `7425d2b`)—. Se reformuló con lo que la evidencia
+   sostiene: *un hueco en la cadena se reporta y se sigue con el hueco a la vista* (Sprint 6.0 y el
+   commit "sprint 5.2" inexistente).
+3. **Tres lecciones nuevas de peso** (fuera de la lista semilla): **la suite verde mide lo que cubre, no
+   lo que importa** (el claim atómico de agenda estuvo sin una sola línea de cobertura todo el proyecto,
+   con `test:setter` en 39/39, porque el único spec que rozaba agenda sembraba el blob ya resuelto y
+   salteaba el claim); **verde no es verificado** (catálogo de seis chequeos con lo que cada uno NO
+   prueba — el más caro: `migrate status` verde escondiendo drift físico de 7 columnas, que sólo caza
+   `migrate diff`); y **el invariante ejecutable es la única verificación que no se evapora** (el
+   proyecto pasó de 10 a 17, con tres propiedades que los hacen baratos y que conviene sostener como
+   restricción de arquitectura). *La cadena `178c4d7` → `fccbeb7` (encadenar el build a `start:qa` obligó
+   a subir el timeout del `webServer` de 120s a 300s) confirma la semilla «arreglar una trampa puede
+   fabricar otra», con evidencia de dos commits.*
+4. **Contradicción viva, no resuelta**: `setter-nav.tsx:38` afirma «Navegación SOLO por
+   `triggerTransition` (decisión cerrada · CLAUDE.md)» mientras `CLAUDE.md` dice que `triggerTransition()`
+   **no aplica en portales** y no clasifica `/setter/*` en ninguna de sus dos ramas. Ya estaba en el
+   backlog (C-26) y sigue abierta: alcanza con que `CLAUDE.md` diga a qué rama pertenece la zona setter.
+
+**Concurrencia observada EN VIVO durante esta corrida (evidencia de la propia lección L-01).** Mientras
+corría, otra sesión commiteó cuatro veces en `main` sobre el mismo checkout (lane «M0 galería»:
+`62ad4bf`, `9ecd20e`, `d3f540d`, `5c3c132`, más WIP suyo sin commitear en `scripts/dev/m0-galeria-seed.ts`
+y `tests/galeria/captura.spec.ts`). Sus commits quedaron **intercalados** con los míos en el log. Los
+tres commits de esta corrida se hicieron con `git add -- <pathspec>` explícito y verificando el set con
+`git diff --cached --name-only` antes de cada commit: **cero archivos ajenos capturados** — exactamente
+lo que propone M-02. Nada de esa sesión fue tocado.
+
+**Cierre — verificado, no auto-confirmado.**
+- `git show --stat` de los tres commits propios: `23a19c3` = 2 archivos (LECCIONES + PROGRESO),
+  `f01a178` = 1 (PROPUESTA), `69d0fb4` = 1 (MAPA). **Solo `.md` bajo `docs/metodo/`.**
+- Cero archivos de `src/`, tests o configuración en los diffs propios (verificado con
+  `git diff --name-only` por commit, no de memoria).
+- `git status` final: limpio salvo el WIP de la otra sesión y el `?? docs/probe-01-censo-cosecha.md` ya
+  conocido — ninguno tocado.
+- **Nada se ejecutó**: no se corrió `build`, ni `test:setter`, ni `test:leados`, ni `check:invariants`.
+  Es una corrida de lectura y escritura de documentos; los verdes citados en los tres documentos son los
+  que esta bitácora reporta, no re-corridos acá. Declarado también en `PROGRESO-D1.md` §Reporte final (6).
+
+**PARA EL CHAT DE PLANIFICACIÓN**
+Corrida D1 cerrada. (1) Las 4 partes completadas + cierre. (2) 20 lecciones con evidencia; 11 fuera de la
+lista semilla; de las 8 semilla: 6 confirmadas, 1 con matiz (la del exit code: está la práctica datada
+desde el sprint 5.2, no el incidente), 1 no confirmada y reformulada. (3) Cimiento y Manual **no están
+en el repo** — propuesta escrita como documento autónomo, sin reconstruirlos. (4) 21 cambios de método
+propuestos; el más urgente es **M-01/M-02** (un worktree por sesión + exclusividad de commit): es el
+único que ya costó trabajo *perdido*, no demorado — el fix de `01-flow.spec.ts` se perdió dos veces y
+hubo que recuperarlo de un commit huérfano (`44e25be` → `612c4ee`) y después rehacerlo (`b468ec6`).
+(5) 7 decisiones tomadas dos veces documentadas (pin, costura `posicionDe`, vocabulario «caliente»,
+numeración «Paso N», puente del self-check, `.last-run.json`, pase de píxeles). (6) Lo que no se pudo
+establecer, declarado: el incidente original del exit code pipeado, qué pasó con el hueco del «sprint
+5.2», y nada verificado en runtime. Sin push.

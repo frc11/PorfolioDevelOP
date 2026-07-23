@@ -66,12 +66,16 @@ Las 3 nuevas más importantes:
   durante todo el proyecto con `marcarAgendandoOwned` (claim atómico de agenda) sin **una sola**
   línea de cobertura; el único test que rozaba agenda sembraba `agendaJson` en AGENDADA directo,
   salteando el claim entero. El verde no mentía: nunca había prometido eso.
-- **L-11 · Arreglar una trampa puede fabricar otra, y el segundo bug es más difícil de ver.**
-  `178c4d7` encadenó `npm run build` a `start:qa` (mata el falso-rojo de 2.2/3.2/3.3) y con eso el
-  `webServer` de Playwright empezó a caducar a los 120s — hizo falta `fccbeb7` para subirlo a 300s.
-- **L-14 · El ruido recurrente anotado no es un pendiente: es una tarea de una línea.**
-  `.last-run.json` se anotó "fuera del commit" **16 veces** en la bitácora a lo largo de 12 días
-  antes de que una línea de `.gitignore` (`b717014`) lo resolviera — y la puso otro lane.
+- **L-06 · Verde no es verificado.** Catálogo de seis chequeos con lo que cada uno **no** prueba. El
+  más caro del proyecto: `prisma migrate status` en verde escondiendo un drift físico de 7 columnas
+  —que sólo caza `migrate diff`— y que sigue abierto.
+- **L-10 · El invariante ejecutable es la única verificación que no se evapora.** El proyecto pasó de
+  10 a 17 invariantes puros, con tres propiedades que los hacen baratos (módulo de dominio sin Prisma
+  ni alias `@/`; probar las piezas puras de un write impuro; fixtures derivadas del código vivo) —
+  vale la pena sostenerlas como restricción de arquitectura, no como accidente.
+
+*(La cadena `178c4d7` → `fccbeb7` —encadenar el build a `start:qa` obligó a subir el timeout del
+`webServer` de 120s a 300s— es L-11, y **confirma** la semilla #4; no cuenta como nueva.)*
 
 **(3) ¿Cimiento / Manual en el repo?** **No.** Grep global: no existen como archivos versionados
 (ni el Cimiento de Chat, ni el Manual de Flujo, ni el `docs/brief-vision-flujo-setter.md` que tres
