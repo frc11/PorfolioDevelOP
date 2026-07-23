@@ -78,7 +78,10 @@
     "test:e2e:debug": "playwright test --debug",
     "test:setter": "playwright test --config=playwright.setter.config.ts",
     "test:leados": "playwright test --config=playwright.leados.config.ts",
-    "test:integration": "playwright test --config=playwright.integration.config.ts"
+    "test:integration": "playwright test --config=playwright.integration.config.ts",
+    "seed:galeria": "tsx scripts/dev/m0-galeria-seed.ts",
+    "galeria:capturar": "playwright test --config=playwright.galeria.config.ts",
+    "galeria": "npm run seed:galeria && npm run galeria:capturar"
   },
   "dependencies": {
     "@ai-sdk/google-vertex": "^4.0.128",
