@@ -1839,3 +1839,44 @@ hubo que recuperarlo de un commit huérfano (`44e25be` → `612c4ee`) y después
 numeración «Paso N», puente del self-check, `.last-run.json`, pase de píxeles). (6) Lo que no se pudo
 establecer, declarado: el incidente original del exit code pipeado, qué pasó con el hueco del «sprint
 5.2», y nada verificado en runtime. Sin push.
+
+---
+
+## Corrida M0 — galería de estados del Panel del Setter (base observacional del manual)
+
+Instrumento, no feature: un sembrado que lleva la app a cada estado del recorrido del setter y una
+captura que lo fotografía. Cero cambios en `src/`. 37 estados enumerados, **37 capturados, 0
+inalcanzables**, más 4 vistas mobile — 41 `.png`. El producto es
+`docs/manual-usuario/galeria/INDICE.md`; los binarios quedan fuera del repo (62 MB) y se regeneran
+con `npm run galeria`.
+
+**Cómo se sembró, dicho sin maquillar.** 8 estados por flujo real (los toques son `OsLeadActivity`
+reales; la oferta de horarios de m16 pasa por `guardarHorariosOfrecidosOwned`, el write-path exacto
+de la action), 2 provocados desde la UI (los errores persistentes de 4.1) y 27 sembrados directo por
+stage + blobs. El motivo del directo es estructural y quedó registrado: **APROBADA y RECHAZADA no son
+alcanzables desde el panel del setter** — aprobar/rechazar la demo y cargar la `finalUrl` son
+acciones de Franco desde admin, así que todo el tramo Envío/Agenda/re-loop sólo existe para el setter
+después de que un tercero actúe. El manual no puede prometer "hacé X y llegás acá" en ese tramo.
+
+**Se reusaron los fixtures, no se escribió un sembrador paralelo.** `tests/helpers/setter-db.ts` sumó
+campos opcionales (`exactName`, `progresoCompletadas`, `rechazosCount`, `sinFinalUrl`, `draftUrl`,
+`nextFollowUpAt`); los 60 tests del setter siguen verdes sin tocarse.
+
+**Dos hallazgos que valen más que la galería.** (1) **Cuatro de las cinco herramientas externas dicen
+PENDIENTE** en la barra lateral de *todas* las capturas — Evaluador, Gem de diseño, Claude Design y
+Gem de outreach no tienen URL; la única real es Netlify Drop. El manual manda al setter a
+herramientas que desde el panel no existen. (2) **`fullPage: true` de Playwright no captura la
+pantalla completa en `/setter/*`**: el layout scrollea un `<main overflow-y-auto>` y el `document`
+mide siempre el viewport, así que toda pantalla larga sale recortada — la primera vuelta de esta
+misma galería salió así antes de detectarlo. Afecta a cualquier job de screenshots de este portal, no
+sólo a esta corrida.
+
+Otros cuatro, con screenshot al lado en el índice: un lead que llegó a APROBADA muestra la
+Construcción como no completada (el checklist es auto-reporte y el rastro sugiere que se saltearon
+fases que evidentemente hizo); un toque vencido no se ve vencido ("Próximo toque: 22/7" en pasado,
+sin marca de atraso); el home acumula ruido sin techo (60 novedades, campana 9+); y conviven checkbox
+nativo y `role="switch"` para la misma idea de tildar.
+
+Cierre verde con el prod-QA levantado: `tsc` exit 0, `check:invariants` exit 0, `test:leados` 25/25,
+`test:setter` 60/60. Reproducible en dos corridas (el sembrador es idempotente y la captura resuelve
+por `businessName`, sin ids hardcodeados). Sin push.
