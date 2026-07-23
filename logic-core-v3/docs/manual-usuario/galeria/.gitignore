@@ -1,0 +1,8 @@
+# Los screenshots de la galería NO van al repo: ~890 KB cada uno × ~37 estados
+# ≈ 33 MB, y se regeneran enteros con un comando. La fuente de verdad de la
+# galería es el INDICE.md + el sembrador + la captura, no los binarios.
+#
+# Regenerar (desde logic-core-v3/):
+#   npm run galeria
+# equivale a: npx tsx scripts/dev/m0-galeria-seed.ts && npm run galeria:capturar
+png/
