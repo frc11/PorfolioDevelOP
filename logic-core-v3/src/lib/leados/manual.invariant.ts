@@ -95,6 +95,40 @@ const cerrado = derivarPantalla(
 assert.notEqual(cerrado.actual, 'archivo', 'un cierre GANADO no es archivo (el archivo es sólo PERDIDO)')
 assert.equal(cerrado.actual, 'm16', 'CERRADO+APROBADA aterriza en m16 (la reunión), sin cambios')
 
+// ── 6. Sprint 5.3: APROBADA con gate de envío cerrado → m15 consultable ──
+// El gate server-side (`gateEnvioDemo`) no se toca: `actual` sigue en espera/m5,
+// no en m15 — habilitar la CONSULTA no habilita el ENVÍO.
+const aprobadaSinEngancheSinToque = derivarPantalla(
+  input({ status: 'PROSPECTO', stage: 'APROBADA', finalUrl: null, followUpVencido: false }),
+)
+assert.equal(
+  aprobadaSinEngancheSinToque.actual,
+  'espera',
+  'APROBADA con gate cerrado y sin toque vencido: actual sigue en espera',
+)
+assert.ok(
+  aprobadaSinEngancheSinToque.habilitadas.includes('m15'),
+  'APROBADA con gate cerrado habilita m15 como consulta',
+)
+const aprobadaSinEngancheConToque = derivarPantalla(
+  input({
+    status: 'PROSPECTO',
+    stage: 'APROBADA',
+    finalUrl: null,
+    followUpCount: 1,
+    followUpVencido: true,
+  }),
+)
+assert.equal(
+  aprobadaSinEngancheConToque.actual,
+  'm5',
+  'APROBADA con gate cerrado y toque vencido: actual sigue en m5',
+)
+assert.ok(
+  aprobadaSinEngancheConToque.habilitadas.includes('m15'),
+  'APROBADA con gate cerrado y toque vencido también habilita m15 como consulta',
+)
+
 console.log(
   '✓ invariante OK: 2.3 — terminal por status (PERDIDO) deriva a ARCHIVO antes ' +
     'que por stage (nunca m5/espera; sólo el archivo es alcanzable). DESCARTADA ' +

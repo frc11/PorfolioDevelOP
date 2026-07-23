@@ -586,10 +586,12 @@ function posicionDe(
       }
       // Aprobada sin condición de envío (falta que responda, o falta la URL
       // final del admin): espera con la conversación viva — mismo tono del
-      // estado post-opener.
+      // estado post-opener. m15 es consulta (5.3): nombra la causa real de la
+      // espera, no habilita enviar — el gate server-side (`gateEnvioDemo`,
+      // arriba) sigue idéntico.
       return input.followUpVencido
-        ? { actual: 'm5', habilitadas: ['m5'] }
-        : { actual: 'espera', habilitadas: ['espera', 'm5'] }
+        ? { actual: 'm5', habilitadas: ['m5', 'm15'] }
+        : { actual: 'espera', habilitadas: ['espera', 'm5', 'm15'] }
     }
     default: {
       // Exhaustividad: un stage nuevo no compila hasta derivarse acá.

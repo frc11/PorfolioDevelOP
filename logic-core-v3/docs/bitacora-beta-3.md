@@ -1583,3 +1583,27 @@ Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.
 - ✅ Motor intacto: `_data.ts` solo LEE (`actividades` ya cargada); cero queries nuevas, cero writes; `dossier.ts`/transiciones/gates/ownership/schema fuera del diff.
 
 **Diff:** `_data.ts`, `m5-seguimiento.tsx`, `opener-form.tsx`, `m4-opener.tsx`, `manual/[paso]/page.tsx`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Sprint 5.3 — m15 consultable en la espera, causa real visible (2026-07-23)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `88b1f13` (5.1) en el log. `tsc --noEmit` EXIT 0.
+
+**Objetivo.** El componente `m15-envio.tsx` ya traía los 3 mensajes específicos de `GUIA_ENVIO.espera` (aprobadaSinEnganche / engancheSinAprobar / niEngancheNiAprobada), pero la rama era inalcanzable: en APROBADA con el gate de envío cerrado, `posicionDe` (`manual.ts`) no incluía `'m15'` en `habilitadas` — el setter no podía abrir esa pantalla para consultar por qué está esperando.
+
+**`manual.ts` (~584-593, rama APROBADA con `envioAbierto === false`).** Sumado `'m15'` a `habilitadas` en ambos sub-casos (con y sin `followUpVencido`). `actual` NO cambia — sigue en `'m5'`/`'espera'` según corresponda; m15 es consulta, nunca el paso actual. El gate server-side (`gateEnvioDemo`, que decide `envioAbierto` un poco más arriba, línea ~578) queda idéntico — el envío sigue imposible con el gate cerrado, esta rama solo habilita la NAVEGACIÓN a la pantalla que explica por qué.
+
+**Ruteo de mensajes: ya alcanzable, sin cambios.** `m15-envio.tsx:M15Registro` (~104-119) ya deriva el mensaje correcto por `stage === 'APROBADA' ? aprobadaSinEnganche : respondio ? engancheSinAprobar : niEngancheNiAprobada` — un cálculo puro sobre `stage`/`status`/`finalUrl`, independiente de `habilitadas`. No hizo falta tocar el componente: con `habilitadas` ahora incluyendo `'m15'`, la ruta ya renderiza el mensaje específico.
+
+**Invariante nuevo (`manual.invariant.ts`, caso 6).** APROBADA + gate cerrado (sin `finalUrl`) con y sin `followUpVencido`: `actual` se mantiene en `'espera'`/`'m5'` respectivamente, y `habilitadas` incluye `'m15'` en ambos.
+
+**Cierre — verificado, no auto-confirmado.**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **47/47** — sin flakes.
+- ✅ `npm run build` OK.
+- ✅ Motor intacto: `gateEnvioDemo`/`flow.ts` fuera del diff; el envío sigue gateado server-side, solo se sumó una entrada de navegación.
+
+**Diff:** `manual.ts`, `manual.invariant.ts`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
