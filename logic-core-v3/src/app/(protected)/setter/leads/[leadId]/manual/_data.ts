@@ -1,4 +1,4 @@
-import type { DossierStage, LeadStatus } from '@prisma/client'
+import type { ActivityResult, DossierStage, LeadStatus } from '@prisma/client'
 import { requireSetter } from '@/lib/auth-guards'
 import { countFollowUps } from '@/lib/follow-up'
 import type { Agenda, Brief, Evaluacion, Ficha, Progreso, Rechazo, SelfCheck } from '@/lib/leados/contracts'
@@ -112,6 +112,15 @@ export type ManualDelLead = {
   escaladoNota: string | null
   /** M4/M5 — DMs comerciales de hoy del setter: alimenta `CanalSeguridad` (el freno anti-spam). */
   dmsHoy: number
+  /** M5 (5.1, B-10) — el último toque comercial con su nota, para «Lo último de la
+   * charla» sin abrir el historial. `null` si no hay actividades. MISMA lectura
+   * que `ultimoContacto`/`followUpCount` (`actividades`, la más nueva primero) —
+   * sin query nueva. */
+  ultimoToque: { fecha: string; resultado: ActivityResult; nota: string | null } | null
+  /** M4 (5.1, C-24) — el texto del opener enviado, para mostrarlo en su resumen.
+   * `registrarOpener` lo guarda como nota del primer contacto con el prefijo
+   * `Opener: `; acá se lo despoja para presentarlo. `null` si no se mandó. */
+  openerTexto: string | null
 }
 
 /**
@@ -157,6 +166,23 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   // Hoisted: el booking alimenta la derivación (m16 completada) Y el resumen del
   // traspaso de M16. Un solo parse de `agendaJson`.
   const agenda = parseAgenda(dossier?.agendaJson ?? null)
+
+  // El opener queda como nota del PRIMER contacto (`registrarOpener`, prefijo
+  // `Opener: `) — con `actividades` ordenada desc, es la más VIEJA (última del
+  // array) una vez que hay seguimiento encima; se busca por prefijo para no
+  // depender de la posición.
+  const OPENER_NOTE_PREFIX = 'Opener: '
+  const notaOpener = actividades?.find((actividad) => actividad.notes?.startsWith(OPENER_NOTE_PREFIX))
+  const openerTexto = notaOpener?.notes?.slice(OPENER_NOTE_PREFIX.length) ?? null
+
+  const ultimaActividad = actividades?.[0] ?? null
+  const ultimoToque = ultimaActividad?.result
+    ? {
+        fecha: ultimaActividad.createdAt.toISOString(),
+        resultado: ultimaActividad.result,
+        nota: ultimaActividad.notes,
+      }
+    : null
 
   const posicion = derivarPantalla({
     stage,
@@ -225,5 +251,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     escaladoAt: dossier?.escaladoAt?.toISOString() ?? null,
     escaladoNota: dossier?.escaladoNota ?? null,
     dmsHoy,
+    ultimoToque,
+    openerTexto,
   }
 }

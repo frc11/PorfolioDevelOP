@@ -1,5 +1,5 @@
-import { CalendarClock, Phone } from 'lucide-react'
-import type { LeadStatus } from '@prisma/client'
+import { CalendarClock, MessageSquareText, Phone } from 'lucide-react'
+import type { ActivityResult, LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import { buildObjecionInputBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import {
@@ -15,6 +15,7 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
 import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
+import { resultadoEtiqueta, resultadoTono } from '../../_components/lead-timeline.helpers'
 import { SeguimientoForm } from './seguimiento-form'
 
 /**
@@ -183,6 +184,34 @@ export function M5Municion({
   )
 }
 
+/** «Lo último de la charla» (5.1, B-10): el último toque comercial a la vista,
+ * sin abrir el historial completo. Compacto, arriba del form — sin acordeón
+ * nuevo. Si no hay actividades (lead recién entrado a seguimiento) no se
+ * renderiza nada. */
+function UltimaCharla({
+  ultimoToque,
+}: {
+  ultimoToque: { fecha: string; resultado: ActivityResult; nota: string | null } | null
+}) {
+  if (!ultimoToque) return null
+
+  return (
+    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs text-zinc-500">
+      <p className="flex items-center gap-1.5 font-medium uppercase tracking-[0.14em] text-zinc-600">
+        <MessageSquareText size={12} strokeWidth={1.5} />
+        Lo último de la charla
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <span className="text-zinc-400">{formatFechaCorta(ultimoToque.fecha)}</span>
+        <Badge tone={resultadoTono(ultimoToque.resultado)} variant="soft">
+          {resultadoEtiqueta(ultimoToque.resultado)}
+        </Badge>
+      </div>
+      {ultimoToque.nota && <p className="mt-2 leading-relaxed text-zinc-400">{ultimoToque.nota}</p>}
+    </div>
+  )
+}
+
 /** Registro: el form compartido del write-path (misma action y schema que el
  * seguimiento del wizard). Con la cadencia agotada, «No respondió» deja de
  * ofrecerse — la deriva `cadenciaInfo` (la misma maquinaria del contexto), no
@@ -190,10 +219,17 @@ export function M5Municion({
 export function M5Registro({
   leadId,
   followUpCount,
+  ultimoToque,
 }: {
   leadId: string
   followUpCount: number
+  ultimoToque: { fecha: string; resultado: ActivityResult; nota: string | null } | null
 }) {
   const cadenciaAgotada = cadenciaInfo(followUpCount).agotada
-  return <SeguimientoForm leadId={leadId} cadenciaAgotada={cadenciaAgotada} />
+  return (
+    <div className="space-y-4">
+      <UltimaCharla ultimoToque={ultimoToque} />
+      <SeguimientoForm leadId={leadId} cadenciaAgotada={cadenciaAgotada} />
+    </div>
+  )
 }

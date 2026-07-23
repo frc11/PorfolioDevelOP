@@ -73,14 +73,22 @@ export function M4Registro({
   openerEnviado,
   ultimoContacto,
   proximoToque,
+  openerTexto,
 }: {
   leadId: string
   openerEnviado: boolean
   ultimoContacto: string | null
   proximoToque: string | null
+  openerTexto: string | null
 }) {
   if (openerEnviado) {
-    return <OpenerResumen ultimoContacto={ultimoContacto} proximoToque={proximoToque} />
+    return (
+      <OpenerResumen
+        ultimoContacto={ultimoContacto}
+        proximoToque={proximoToque}
+        openerTexto={openerTexto}
+      />
+    )
   }
   // El form solo llega acá en el tramo editable real: la guardia del server no
   // habilita m4 sin opener pendiente, y con el primer contacto ya registrado

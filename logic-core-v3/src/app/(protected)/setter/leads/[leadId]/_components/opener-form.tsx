@@ -124,9 +124,13 @@ export function OpenerForm({ leadId }: { leadId: string }) {
 export function OpenerResumen({
   ultimoContacto,
   proximoToque,
+  openerTexto,
 }: {
   ultimoContacto: string | null
   proximoToque: string | null
+  /** El texto del opener enviado (5.1, C-24) — a la vista sin volver a abrir
+   * el historial. `null` si no se pudo recuperar la nota (dato viejo). */
+  openerTexto: string | null
 }) {
   return (
     <Card variant="subtle" padding="lg">
@@ -144,6 +148,11 @@ export function OpenerResumen({
         {proximoToque ? ` Próximo toque: ${formatFechaCorta(proximoToque)}.` : ''}{' '}
         La conversación sigue en «Seguimiento».
       </p>
+      {openerTexto && (
+        <p className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-400">
+          {openerTexto}
+        </p>
+      )}
     </Card>
   )
 }

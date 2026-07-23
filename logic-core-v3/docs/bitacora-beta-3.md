@@ -1558,3 +1558,28 @@ Causa de F4, confirmada por el log de Playwright (no hipótesis): `setter-shell.
 - ✅ Motor intacto: `dossier.ts` NO aparece en `git diff --stat`. Gates, transiciones, ownership y schema sin tocar.
 
 **Diff:** `dossier.actions.ts`, `outreach.actions.ts`, `agenda.actions.ts`, `chequeo-form.tsx`, `envio-form.tsx`, `agenda-form.tsx`, `action-utils.ts`, `use-step-action.ts`, `error-copy.ts` (nuevo), `action-codes.ts` (nuevo), `tests/leados/dossier-gates.spec.ts`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.
+
+---
+
+## Sprint 5.1 — la conversación a la vista en m5 (2026-07-23)
+
+**FASE 0.** `git status --porcelain` limpio salvo el WIP ajeno ya conocido (`docs/probe-01-censo-cosecha.md`, sin tocar). Continuidad: `b6b2132` (4.1) en el log. `tsc --noEmit` EXIT 0.
+
+**Objetivo.** El opener enviado y la última nota del seguimiento vivían solo en el historial colapsado (`HistorialDelLead`) — el setter re-entraba a m5 sin ver "lo último de la charla" a menos que lo abriera. Sin queries nuevas, sin writes: `listOwnedLeadActivities` ya trae exactamente ese dato (`actividades`, la más nueva primero) — este sprint solo lo expone y lo presenta.
+
+**`_data.ts` (B-10/C-24).** Dos campos nuevos en `ManualDelLead`, ambos derivados de `actividades` (ya cargada en `Promise.all`, sin lectura extra):
+- `ultimoToque`: `{ fecha, resultado, nota } | null` — `actividades[0]` cuando trae `result` (siempre lo trae salvo el caso imposible de un registro sin resultado); `null` si el lead todavía no tiene actividades.
+- `openerTexto`: `string | null` — `registrarOpener` (outreach.actions.ts) guarda el mensaje como nota del PRIMER contacto con el prefijo `Opener: `; se busca por prefijo (no por posición, porque con seguimiento encima el opener queda como el ítem más VIEJO del array desc) y se despoja el prefijo para presentarlo.
+
+**`m5-seguimiento.tsx` (B-10).** Bloque nuevo `UltimaCharla` dentro de `M5Registro`, arriba de `SeguimientoForm` — compacto (fecha corta + badge de resultado + la nota si existe), reusa `resultadoEtiqueta`/`resultadoTono` de `lead-timeline.helpers.ts` (cero duplicación de las etiquetas es-AR del timeline) y `formatFechaCorta` (ya en uso en el archivo). Sin acordeón nuevo: `UltimaCharla` retorna `null` si `ultimoToque` es `null` — el bloque simplemente no se renderiza.
+
+**`opener-form.tsx` (C-24).** `OpenerResumen` suma la prop `openerTexto: string | null` y, si viene, lo muestra en un recuadro debajo del resumen del envío. Único call site: `m4-opener.tsx:M4Registro` → `page.tsx` (`manual.openerTexto`).
+
+**Cierre — verificado, no auto-confirmado.**
+- ✅ `tsc --noEmit` EXIT 0.
+- ✅ `check:invariants` **17/17**.
+- ✅ `test:leados` **25/25**.
+- ✅ `test:setter` **47/47** — sin flakes.
+- ✅ Motor intacto: `_data.ts` solo LEE (`actividades` ya cargada); cero queries nuevas, cero writes; `dossier.ts`/transiciones/gates/ownership/schema fuera del diff.
+
+**Diff:** `_data.ts`, `m5-seguimiento.tsx`, `opener-form.tsx`, `m4-opener.tsx`, `manual/[paso]/page.tsx`, esta bitácora. `docs/probe-01-censo-cosecha.md` (WIP ajeno untracked) fuera del stage.

@@ -191,6 +191,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                     openerEnviado={manual.openerEnviado}
                     ultimoContacto={manual.ultimoContacto}
                     proximoToque={manual.proximoToque}
+                    openerTexto={manual.openerTexto}
                   />
                 ),
               }
@@ -326,7 +327,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                                 />
                               ),
                               captura: (
-                                <M5Registro leadId={leadId} followUpCount={manual.followUpCount} />
+                                <M5Registro
+                                  leadId={leadId}
+                                  followUpCount={manual.followUpCount}
+                                  ultimoToque={manual.ultimoToque}
+                                />
                               ),
                             }
                           : pantalla.id === 'm16'
