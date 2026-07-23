@@ -220,8 +220,15 @@ async function main() {
     draftUrl: 'https://m0-galeria-borrador.netlify.app',
   })
   await sembrar('23-revision-franco', { setterId, stage: 'EN_REVISION' })
-  // 24 (error persistente del chequeo) NO se siembra: es un estado de
-  // INTERACCIÓN, lo provoca la captura enviando el form. Ver INDICE.
+  // 24 es un estado de INTERACCIÓN: el error lo provoca la captura enviando el
+  // form. Lleva lead PROPIO igual —la captura tilda los 6 checks y mueve el
+  // stage por detrás, y eso no puede ensuciar el lead del estado 22.
+  await sembrar('24-error-chequeo', {
+    setterId,
+    stage: 'CONSTRUCCION',
+    progresoCompletadas: TODAS_LAS_FASES,
+    draftUrl: 'https://m0-galeria-borrador.netlify.app',
+  })
 
   // ── Re-loop ───────────────────────────────────────────────────────────────
   await sembrar('25-mr-correccion-1', { setterId, stage: 'RECHAZADA', rechazosCount: 1 })

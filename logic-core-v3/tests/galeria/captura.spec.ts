@@ -109,11 +109,40 @@ async function preparar(page: Page): Promise<void> {
   await page.addStyleTag({ content: SIN_ANIMACIONES }).catch(() => {})
 }
 
-/** Navega, espera el ancla de la pantalla y dispara la foto de página completa. */
+/** Techo del alto de viewport — evita capturas absurdas si algo crece sin fin. */
+const ALTO_MAXIMO = 6000
+
+/**
+ * `fullPage: true` NO alcanza en el portal del setter: el `document` mide
+ * exactamente el viewport y quien scrollea es el `<main class="overflow-y-auto">`
+ * del layout. Sin esto, TODA pantalla más larga que el viewport sale recortada y
+ * la galería miente por omisión (verificado: m16 mide 1418px de contenido en
+ * 788px visibles). Se agranda el viewport hasta que el contenedor deja de
+ * desbordar — iterando, porque al crecer el alto el layout puede reflowear.
+ */
+async function ajustarViewportAlContenido(page: Page): Promise<void> {
+  const ancho = page.viewportSize()?.width ?? 1440
+  for (let intento = 0; intento < 4; intento++) {
+    const desborde = await page.evaluate(() => {
+      const main = document.querySelector('main')
+      if (!main) return 0
+      return Math.max(0, main.scrollHeight - main.clientHeight)
+    })
+    if (desborde === 0) return
+    const altoActual = page.viewportSize()?.height ?? 900
+    const nuevo = Math.min(ALTO_MAXIMO, altoActual + desborde + 24)
+    if (nuevo === altoActual) return
+    await page.setViewportSize({ width: ancho, height: nuevo })
+    await page.waitForTimeout(120) // reflow del layout tras el resize
+  }
+}
+
+/** Navega, espera el ancla de la pantalla y dispara la foto de la pantalla ENTERA. */
 async function fotografiar(page: Page, url: string, ancla: string, archivo: string): Promise<void> {
   await page.goto(url, { waitUntil: 'domcontentloaded' })
   await page.addStyleTag({ content: SIN_ANIMACIONES })
   await expect(page.locator(ancla).first()).toBeVisible()
+  await ajustarViewportAlContenido(page)
   await page.screenshot({ path: path.join(SALIDA, archivo), fullPage: true })
 }
 
@@ -149,6 +178,85 @@ for (const estado of ESTADOS.filter((e) => e.mobile)) {
     await fotografiar(page, url, ancla, `M-${estado.nombre}.png`)
   })
 }
+
+/**
+ * 24 — el error persistente y en criollo (4.1). NO se siembra: es un estado de
+ * INTERACCIÓN, hay que provocarlo. Dos caras, las dos reales:
+ *   · 24a — el setter pega cualquier cosa en la URL del borrador y guarda: la
+ *     validación lo frena y el error QUEDA (no es un toast que se va).
+ *   · 24b — el setter tiene el chequeo abierto y Franco le mueve el lead por
+ *     detrás; al mandar a revisión el server lo rechaza. Es la carrera que 4.1
+ *     protege, reproducida moviendo el stage en la DB con la pantalla abierta.
+ */
+test('desktop · 24a-error-borrador-url-invalida', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await preparar(page)
+  const leadId = await leadIdDe('21-m13-borrador-vacio')
+  await page.goto(`/setter/leads/${leadId}/manual/m13`, { waitUntil: 'domcontentloaded' })
+  await page.addStyleTag({ content: SIN_ANIMACIONES })
+  await expect(page.locator(ANCLA_MANUAL).first()).toBeVisible()
+
+  await page.locator('input[type="url"]').first().fill('esto no es un link')
+  await page.getByRole('button', { name: 'Guardar borrador' }).first().click()
+
+  // El error tiene que QUEDAR en pantalla (no desaparecer como un toast).
+  await expect(page.locator('input[type="url"][aria-invalid="true"]').first()).toBeVisible()
+  await ajustarViewportAlContenido(page)
+  await page.screenshot({
+    path: path.join(SALIDA, '24a-error-borrador-url-invalida.png'),
+    fullPage: true,
+  })
+})
+
+test('desktop · 24b-error-persistente-chequeo', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await preparar(page)
+  const leadId = await leadIdDe('24-error-chequeo')
+  await page.goto(`/setter/leads/${leadId}/manual/m14`, { waitUntil: 'domcontentloaded' })
+  await page.addStyleTag({ content: SIN_ANIMACIONES })
+  await expect(page.locator(ANCLA_MANUAL).first()).toBeVisible()
+
+  // Los 6 obligatorios en verde SON el gate del botón: se tildan por la UI real,
+  // uno por uno, como lo haría el setter. El `Toggle` compartido es un
+  // `role="switch"` (no aria-pressed), y los 6 duros se renderizan ANTES que los
+  // soft-checks → los 6 primeros switches de la pantalla son los obligatorios.
+  const duros = page.locator('[role="switch"]')
+  for (let i = 0; i < 6; i++) {
+    const toggle = duros.nth(i)
+    if ((await toggle.getAttribute('aria-checked')) === 'false') await toggle.click()
+    await expect(toggle).toHaveAttribute('aria-checked', 'true')
+  }
+  const enviar = page.getByRole('button', { name: 'Enviar a revisión' }).first()
+  await expect(enviar).toBeEnabled()
+
+  // Franco mueve el lead por detrás, con la pantalla ya abierta. El `finally`
+  // devuelve el stage pase lo que pase: si esto quedara a mitad, la próxima
+  // corrida arrancaría de un estado distinto y la galería dejaría de converger.
+  try {
+    await prisma.osLeadDossier.update({
+      where: { leadId },
+      data: { stage: 'EN_REVISION' },
+    })
+    await enviar.click()
+    // El error PERSISTENTE es el `<p role="alert">` fijo junto al form (4.1) —
+    // NO el toast, que es efímero y también lleva role=alert. Se afirma el `p`
+    // para no fotografiar el toast creyendo que es el error que queda.
+    await expect(page.locator('p[role="alert"]').first()).toBeVisible()
+    // Y se espera a que la acción termine: sin esto la foto sale con los botones
+    // en spinner, a mitad de vuelo.
+    await expect(enviar).toBeEnabled()
+    await ajustarViewportAlContenido(page)
+    await page.screenshot({
+      path: path.join(SALIDA, '24b-error-persistente-chequeo.png'),
+      fullPage: true,
+    })
+  } finally {
+    await prisma.osLeadDossier.update({
+      where: { leadId },
+      data: { stage: 'CONSTRUCCION' },
+    })
+  }
+})
 
 test('desktop · 35-home-foco', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
