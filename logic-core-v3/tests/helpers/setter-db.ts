@@ -85,6 +85,33 @@ function rechazoJson(): Prisma.InputJsonValue {
   ]
 }
 
+/**
+ * Historial de rechazos de N vueltas (M0): el re-loop muestra la corrección
+ * NUEVA al frente y colapsa las anteriores (5.2) — con una sola entrada esa
+ * variación no se ve. Cada entrada es más vieja que la siguiente, así el orden
+ * del blob es el cronológico real que produciría el motor al appendear.
+ */
+export function rechazosJsonDeNVueltas(n: number): Prisma.InputJsonValue {
+  const DIA_MS = 24 * 60 * 60 * 1000
+  return Array.from({ length: n }, (_, i) => ({
+    fecha: new Date(Date.now() - (n - i) * DIA_MS).toISOString(),
+    motivo:
+      i === n - 1
+        ? 'El hero sigue sin los datos reales del negocio'
+        : `Vuelta ${i + 1}: faltan fotos propias y el CTA no se ve en mobile`,
+    donde: i === n - 1 ? 'Hero' : 'Contacto',
+    arreglo:
+      i === n - 1
+        ? 'Poner nombre, dirección y fotos reales en el hero'
+        : 'Reemplazar el stock por fotos del local y agrandar el botón de WhatsApp',
+  }))
+}
+
+/** Checklist de Construcción con las fases indicadas ya tildadas (auto-reporte). */
+export function progresoJsonCon(completadas: readonly string[]): Prisma.InputJsonValue {
+  return { completadas: [...completadas] }
+}
+
 // ── Tracker para teardown por id exacto ──────────────────────────────────────
 
 export type SmokeTracker = {
@@ -139,6 +166,22 @@ export type SeedLeadOpts = {
   finalUrl?: string
   /** marcar demo ya enviada (enviadaAt). */
   enviada?: boolean
+  // ── Extensiones M0 (galería de estados) ────────────────────────────────────
+  /**
+   * Nombre EXACTO, sin el sufijo de timestamp. Lo usa la galería para que el
+   * lead de cada estado sea reconciliable entre corridas (sembrado idempotente).
+   */
+  exactName?: string
+  /** Fases de Construcción ya tildadas en el checklist (`progresoJson`). */
+  progresoCompletadas?: readonly string[]
+  /** Vueltas de rechazo a sembrar en RECHAZADA (default 1). */
+  rechazosCount?: number
+  /** APROBADA sin la URL final del admin → el gate del envío queda cerrado. */
+  sinFinalUrl?: boolean
+  /** Forzar draftUrl (o quitarlo con `null` en stages que lo traen por default). */
+  draftUrl?: string | null
+  /** Fecha del próximo toque (pasada = vencido; null = sin toque agendado). */
+  nextFollowUpAt?: Date | null
 }
 
 /** Construye el `dossier.create` acumulando el JSON necesario hasta el stage pedido. */
@@ -169,21 +212,31 @@ function dossierCreateFor(opts: SeedLeadOpts): Prisma.OsLeadDossierCreateWithout
   if (stage === 'RECHAZADA') {
     base.selfCheckJson = selfCheckAprobadoJson()
     base.draftUrl = 'https://smoke-draft.netlify.app'
-    base.rechazos = rechazoJson()
+    base.rechazos = opts.rechazosCount
+      ? rechazosJsonDeNVueltas(opts.rechazosCount)
+      : rechazoJson()
   }
   if (stage === 'DESCARTADA') {
     base.evaluacionJson = evaluacionJson(2, 'DESCARTAR')
   }
+  // ── Extensiones M0 ──────────────────────────────────────────────────────────
+  if (opts.progresoCompletadas) {
+    base.progresoJson = progresoJsonCon(opts.progresoCompletadas)
+  }
+  if (opts.sinFinalUrl) base.finalUrl = null
+  if (opts.draftUrl !== undefined) base.draftUrl = opts.draftUrl
   return base
 }
 
 /** Crea un OsLead namespaced + su dossier en el stage pedido, asignado al setter. */
 export async function createLead(tracker: SmokeTracker, opts: SeedLeadOpts): Promise<{ id: string; businessName: string }> {
   const stamp = Date.now() + Math.floor(Math.random() * 1000)
-  const businessName = `${SMOKE_TAG} ${opts.businessName ?? 'Negocio'} ${stamp}`
+  const businessName =
+    opts.exactName ?? `${SMOKE_TAG} ${opts.businessName ?? 'Negocio'} ${stamp}`
   const lead = await prisma.osLead.create({
     data: {
       businessName,
+      ...(opts.nextFollowUpAt !== undefined ? { nextFollowUpAt: opts.nextFollowUpAt } : {}),
       industry: opts.industry ?? 'gastronomia',
       zone: opts.zone ?? 'Centro',
       status: opts.status ?? 'PROSPECTO',
