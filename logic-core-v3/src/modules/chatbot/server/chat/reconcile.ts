@@ -13,6 +13,8 @@
  *   3. Fallback de respuesta vacía: mensaje canned de derivación + transform que
  *      lo inyecta al stream cuando el modelo no emitió texto útil.
  *   4. Constantes de INFRA.3 (retry contra la conexión) DEFINIDAS pero NO activas.
+ *   5. DEADLINE-ONFINISH: presupuestos de tiempo de los hooks del stream y el
+ *      cálculo puro del techo efectivo contra el `maxDuration` de la ruta.
  */
 import type { StreamTextTransform, TextStreamPart, ToolSet } from 'ai'
 import type { TailMessage } from './dedup'
@@ -73,6 +75,73 @@ export function shouldSkipAssistantPersist(
   if (candidate.role !== 'ASSISTANT') return false
   if (candidate.content !== assistantContent) return false
   return now.getTime() - candidate.createdAt.getTime() < windowMs
+}
+
+// ─── 1.b DEADLINE-ONFINISH: presupuestos de tiempo de los hooks ──────────────
+
+/**
+ * DEADLINE-ONFINISH — Por qué existen estas constantes.
+ *
+ * `onFinish` corre DENTRO del `flush()` del stream del AI SDK (`notify()` lo
+ * invoca con `await`), y por semántica de `TransformStream` el lado readable no
+ * llega a `done` hasta que ese flush resuelve. El `useChat` del cliente itera
+ * hasta `done` y recién ahí pasa a `status:'ready'` — lo único que destraba el
+ * input del widget. O sea: **el input del visitante queda rehén de toda la
+ * persistencia post-respuesta**. Sin techo de tiempo, una DB que no responde
+ * deja el input trabado hasta que la plataforma mata la función (30s exactos).
+ *
+ * Estas constantes son el techo. Son CALIBRABLES: cambiarlas no toca lógica.
+ */
+
+/** Techo total de un hook del stream (`onFinish` y `onError`). */
+export const ONFINISH_TOTAL_BUDGET_MS = 5_000
+
+/** Techo de CADA intento del `$transaction` de persistencia del turno. */
+export const PERSIST_TX_DEADLINE_MS = 2_000
+
+/** Techo de cada `logChatbotEvent` (write a `chatbot_events`). */
+export const EVENT_LOG_DEADLINE_MS = 700
+
+/** Techo de la compensación de cupo (`compensateNewConversationReservation`). */
+export const QUOTA_COMPENSATION_DEADLINE_MS = 1_500
+
+/**
+ * ⚠️ ESPEJO de `export const maxDuration = 30` en
+ * `src/app/api/chatbot/[slug]/chat/route.ts:9`. NO se puede importar de ahí (ese
+ * módulo arrastra el barrel `index.server`, que trae `next-auth`/`next/server`).
+ * **Si `maxDuration` cambia allá, este valor tiene que cambiar acá** — si no, el
+ * colchón de `computeHookBudgetMs` queda mal calibrado en silencio.
+ */
+export const ROUTE_MAX_DURATION_MS = 30_000
+
+/**
+ * Colchón entre el fin del hook y el kill de la plataforma: la respuesta todavía
+ * tiene que cerrar y llegar al cliente después de que el hook retorna.
+ */
+export const HOOK_SAFETY_MARGIN_MS = 3_000
+
+/**
+ * Presupuesto EFECTIVO de un hook del stream, dado cuánto lleva corriendo el
+ * request completo.
+ *
+ * Sin este techo, los 5s fijos se suman a lo que ya consumió el request: con una
+ * conversación larga y Vertex lento (LLM de ~24s) el hook volvería a rozar el
+ * `maxDuration` de 30s y la plataforma mataría la función igual — exactamente el
+ * síntoma que este sprint arregla.
+ *
+ * Ejemplos: request de 3s → 5000ms; LLM lento de 24s → 3000ms; request de 28s →
+ * **0ms** (no se arranca ninguna query: se emite el abandono y el stream cierra).
+ *
+ * Pura y determinista: recibe el elapsed explícito, no lee reloj.
+ */
+export function computeHookBudgetMs(requestElapsedMs: number): number {
+  return Math.max(
+    0,
+    Math.min(
+      ONFINISH_TOTAL_BUDGET_MS,
+      ROUTE_MAX_DURATION_MS - requestElapsedMs - HOOK_SAFETY_MARGIN_MS,
+    ),
+  )
 }
 
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────

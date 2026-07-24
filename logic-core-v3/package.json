@@ -48,6 +48,7 @@
     "test:cost2": "npx tsx src/modules/chatbot/server/pricing/__tests__/cost-breakdown.invariant.ts",
     "test:cost2b": "npx tsx \"src/app/api/admin/chatbot/demo-chat/[slug]/__tests__/demo-chat-model-resolution.invariant.ts\"",
     "test:onf1": "npx tsx src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts",
+    "test:deadline": "npx tsx src/modules/chatbot/server/chat/__tests__/deadline.invariant.ts",
     "test:fixorigin": "npx tsx \"src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts\"",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",

@@ -14234,3 +14234,135 @@ embed cross-origin de Matsu sigue andando. Esto se verifica en prod — es exact
 fix existe para arreglar, y ningún test de esta sesión reemplaza esa verificación.
 
 ---
+
+## DEADLINE-ONFINISH - techo de tiempo en el cierre del stream del chatbot
+
+**Sintoma.** El bot responde, el texto se renderiza completo, pero el input del widget queda
+trabado ~17s mas. Netlify billa `Duration: 30000 ms` EXACTO, dos corridas seguidas. Un numero
+redondo identico no es un proceso que termina: es uno que la plataforma mata al llegar al techo
+(`maxDuration = 30`, `route.ts:9`). El input se destrababa porque se caia la conexion, no porque
+el trabajo terminara.
+
+**Cadena causal** (verificada contra `ai@6.0.177` instalado, no contra la doc): `onFinish`
+(`handleChatRequest.ts`) corre dentro del `flush()` del eventProcessor
+(`node_modules/ai/dist/index.js:7261-7351`), invocado via `notify()` (`index.js:665-674`) con
+**`await callback(event)`**. Por semantica de TransformStream el readable no llega a `done` hasta
+que ese flush resuelve; `useChat` itera `reader.read()` hasta `done` (`index.js:13799`) y recien
+ahi setea `status:'ready'` (`index.js:13815`), lo unico que destraba el textarea
+(`ChatWindow.tsx:568` via `isStreaming` en `useChatbot.ts:402`). **El input del visitante quedaba
+rehen de toda la persistencia post-respuesta.**
+
+Dano verificado en prod: cero filas ASSISTANT en la conversacion exitosa; `ChatbotEvent` sin
+escrituras nuevas desde 2026-07-20. El fallo era invisible porque el reporte del fallo
+(`logChatbotEvent`) es otro write a la misma DB que no responde.
+
+**Por que no alcanzaban las opciones de Prisma.** Ya hay defaults activos (tx interactiva
+`timeout: 5000` / `maxWait: 2000`, `pool_timeout: 10s`). Si alguno hubiera disparado veriamos
+P2028 o P2024; no hay ningun codigo de error. Eso ubica el cuelgue POR DEBAJO de la capa donde
+Prisma mide: socket TCP muerto esperando un read que no vuelve, o contencion de lock
+(`lock_timeout = 0` por defecto = espera infinita). Ninguna opcion de configuracion corta esos
+dos casos: el deadline tiene que ser a nivel JavaScript (`Promise.race` contra un timer).
+
+### Que se hizo
+- **`server/chat/withDeadline.ts` (nuevo)**: `withDeadline()` + `DeadlineExceededError` +
+  `isDeadlineExceeded()` + `createBudget()`. `clearTimeout` en `finally` siempre, y un `.catch()`
+  OBLIGATORIO sobre la operacion abandonada (sin el, su rechazo tardio es un unhandled rejection
+  y Node mata el proceso: el helper empeoraria el problema en vez de arreglarlo).
+- **`onFinish`**: cuerpo en try/catch/finally; los 6 awaits que tocan DB corren con deadline
+  techado al presupuesto. Presupuesto global calculado por `computeHookBudgetMs()`.
+- **`onError`**: mismo tratamiento sobre la compensacion de cupo. Tambien bloquea el cierre (el
+  SDK lo invoca con `await` en el `transform`, `index.js:7113`). `onAbort` NO lo necesita: el SDK
+  lo invoca sin `await` (`index.js:7363`).
+- **`persistentLogger.ts`**: el comentario decia "fire and forget - don't block the request" y
+  era FALSO (el `await` es real). Se corrigio el comentario, no el codigo: hay ~18 callsites que
+  asumen la semantica actual, y en serverless el trabajo async sin await no tiene garantia de
+  completarse. El techo lo pone el llamador.
+
+### Constantes de presupuesto (en `reconcile.ts`, calibrables sin tocar logica)
+
+| Constante | Valor |
+|---|---|
+| `ONFINISH_TOTAL_BUDGET_MS` | 5000 |
+| `PERSIST_TX_DEADLINE_MS` | 2000 |
+| `EVENT_LOG_DEADLINE_MS` | 700 |
+| `QUOTA_COMPENSATION_DEADLINE_MS` | 1500 |
+| `ROUTE_MAX_DURATION_MS` | 30000 (espejo de `route.ts:9`) |
+| `HOOK_SAFETY_MARGIN_MS` | 3000 |
+
+`computeHookBudgetMs(requestElapsedMs)` techa el presupuesto tambien contra el remanente hasta el
+`maxDuration` de la ruta: request de 3s -> 5000ms; LLM lento de 24s -> 3000ms; request de 28s ->
+**0ms** (no se arranca ninguna query, se cierra el stream). Sin esto, 5s fijos sumados a un LLM
+lento volvian a rozar el kill de 30s.
+
+**El retry NO se dispara ante deadline, solo ante error real.** El retry de ONF-1 se diseno para
+el transitorio corto de Neon. Un deadline es otra cosa: la operacion quedo abandonada pero VIVA,
+reteniendo su conexion del pool. Reintentar ahi retendria una segunda. Resultado en el camino que
+estamos viviendo: ~2700ms en vez de 30000ms.
+
+### RIESGO A VIGILAR POST-DEPLOY - envenenamiento progresivo del pool
+`withDeadline` **abandona, no cancela** (Prisma 6 no acepta AbortSignal por query). La tx colgada
+retiene su conexion del pool por el resto de la vida del contenedor. Hoy eso no se nota porque el
+kill a los 30s se lleva el pool entero; **despues de este fix el contenedor sobrevive con el pool
+degradado**. Con `connection_limit` por defecto (`num_physical_cpus * 2 + 1`, ~3-5 en una lambda)
+el pool se agota en pocos requests fallidos del mismo contenedor caliente.
+**Senal a buscar: `P2024` (pool timeout) en los logs.** Seria la primera vez que Prisma nos da un
+codigo de error, y confirmaria este mecanismo. Recuperar la conexion requiere cancelacion real
+(`statement_timeout` / `idle_in_transaction_session_timeout` del lado Neon, o reciclar el
+cliente): toca la connection string y la Neon compartida -> fuera de scope, decision con Franco.
+
+### LA CAUSA RAIZ SIGUE ABIERTA
+**Este sprint NO recupera la persistencia.** Si la causa es un socket muerto o un lock, el widget
+ahora responde rapido y **los mensajes se van a seguir perdiendo**. La diferencia es que el fallo
+pasa de colgado en silencio a visible en el log: la perdida de datos pasa de escandalosa a
+diagnosticable. El sprint de causa raiz se define con el log de la proxima corrida en prod.
+
+### Instrumentacion que cierra el diagnostico
+`chat.onfinish_phases` (un log agregado off-Neon en el `finally`, en todos los caminos): duracion
+y desenlace por fase (`ok`/`deadline`/`error`/`skipped`/`no_budget`), `retrySkipped`, `totalMs`,
+`budgetMs`, `budgetExhausted`, `requestElapsedMsAtHookStart`. Como leerlo:
+- `persist_tx_1: deadline` con las fases previas rapidas -> cuelga la transaccion.
+- un `*_event: deadline` ANTES de la tx -> el problema es la conexion, no un lock. **Ojo: esas
+  fases son condicionales y en trafico normal quedan en `skipped`**, asi que ese discriminador no
+  siempre esta disponible.
+- **`chat.hook_late_settlement` es el discriminador real**: si la operacion abandonada settlea
+  tarde -> conexion viva pero lenta (lock / cold start). Si nunca aparece -> socket muerto.
+  Caveat: Netlify puede congelar el contenedor al cerrar la respuesta, asi que su AUSENCIA no
+  prueba nada; su PRESENCIA si es concluyente.
+- `chat.persist_abandoned`: registro de reconciliacion (identificadores, contadores y LONGITUDES,
+  nunca contenido). Significa desenlace DESCONOCIDO, no "perdido con certeza".
+
+### Cupo al abandonar - PARADA OBLIGATORIA, sin cambios
+La reserva (`tryReserveConversation`) incrementa `conversationsCount`; el `incrementQuota` de
+adentro de la tx se llama SIEMPRE con `isNewConversation: false` y solo acumula tokens/costo. Son
+unidades distintas, no hay doble contabilidad. **Al abandonar: el cupo queda COBRADO** (se
+incremento fuera de la tx abandonada) y se pierden la fila ASSISTANT, los contadores de
+Conversation y los tokens/costo. Si corresponde compensar es decision comercial de Valentino y
+Franco: **este sprint dejo el comportamiento actual sin cambios.**
+
+### Tests y gates
+- `npm run test:deadline` (nuevo, cero DB): 8 bloques. Incluye verificacion REAL de que el timer
+  se limpia (`process.getActiveResourcesInfo()`, tipado en @types/node - cero `any`), que una
+  operacion abandonada que rechaza tarde no produce unhandled rejection, y que `onLateSettle` NO
+  se dispara en el camino sano.
+- Bateria de regresion: `test:onf1`, `test:infra1`, `test:infra2`, `test:c02`, `test:cost1`,
+  `test:utm1` - todos OK.
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 5 archivos: 0 errores (1 warning
+  preexistente, `toolResults` sin usar en la firma de `onFinish`).
+- Sin migracion, sin `git`, sin tocar el widget, `route.ts`, `prisma.ts`, `schema.prisma`, la
+  connection string ni el modulo de seguridad. `forOrg`/scoping por organizationId: byte-identico.
+
+### Verificacion humana declarada (Valentino) - nada de esto lo da por bueno el agente
+Que el input se destrabe rapido en prod real; que la funcion deje de billar 30000 ms; que fase es
+la que vence (sale del log de arriba en la proxima corrida); si los mensajes se persisten o se
+siguen perdiendo; y si aparece `P2024` tras varios requests en el mismo contenedor caliente.
+"Verde != se ve": los tres bugs anteriores de esta superficie (origin same-origin, ghost-box,
+credenciales de Vertex) no aparecian en build, ni en tests, ni en dev, ni en /health.
+
+### Deuda anotada, NO tocada
+- `ROUTE_MAX_DURATION_MS` duplica `maxDuration` de `route.ts:9` (no se puede importar: ese modulo
+  arrastra el barrel `index.server`). Si cambia alla, el colchon queda mal calibrado en silencio.
+- `toolResults` sin usar en la firma de `onFinish` (warning de eslint preexistente).
+- La compensacion de `onAbort` sigue siendo best-effort huerfana: el SDK no espera su promesa.
+- Cancelacion real de la operacion abandonada (ver riesgo del pool).
+
+---

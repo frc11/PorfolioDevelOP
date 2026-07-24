@@ -50,7 +50,22 @@ import {
   buildEmptyFallbackMessage,
   createEmptyResponseFallbackTransform,
   type CompensationTrigger,
+  // DEADLINE-ONFINISH — presupuestos de tiempo de los hooks del stream.
+  ONFINISH_TOTAL_BUDGET_MS,
+  PERSIST_TX_DEADLINE_MS,
+  EVENT_LOG_DEADLINE_MS,
+  QUOTA_COMPENSATION_DEADLINE_MS,
+  computeHookBudgetMs,
 } from './reconcile'
+// DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
+// del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
+import {
+  createBudget,
+  isDeadlineExceeded,
+  withDeadline,
+  DeadlineExceededError,
+  type LateSettleInfo,
+} from './withDeadline'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -253,6 +268,80 @@ function isOriginWithinPlanCap(
 
   const { effective } = effectiveAllowedDomains(botAllowedDomains, planMaxDomains)
   return originMatchesAllowed(origin, effective)
+}
+
+// ─── DEADLINE-ONFINISH — plomería de los hooks con techo de tiempo ───────────
+
+/** Desenlace de una operación corrida con deadline. `ok:false` NO se lanza. */
+type HookOpResult<T> =
+  | { ok: true; value: T; ms: number }
+  | { ok: false; error: unknown; timedOut: boolean; noBudget: boolean; ms: number }
+
+/** Desenlace de una fase, para el log agregado `chat.onfinish_phases`. */
+type PhaseOutcome = 'ok' | 'deadline' | 'error' | 'skipped' | 'no_budget'
+
+interface PhaseRecord {
+  ms: number
+  outcome: PhaseOutcome
+}
+
+/**
+ * Por qué NO se reintentó la persistencia. `null` = se reintentó (o no hizo
+ * falta). Sin este campo, "no reintenté" y "reintenté y falló" serían
+ * indistinguibles en el log — y son diagnósticos opuestos.
+ */
+type RetrySkipReason = 'deadline' | 'budget' | 'max_attempts' | null
+
+/**
+ * Corre una operación de hook con techo de tiempo y NUNCA lanza: devuelve el
+ * desenlace para que el llamador decida. El bucle de persistencia necesita
+ * distinguir `timedOut` (cuelgue abandonado → NO reintentar, ya retuvo una
+ * conexión del pool) de un error real de Prisma (transitorio → sí reintentar).
+ *
+ * `deadlineMs <= 0` (presupuesto agotado) NO arranca la operación: disparar una
+ * query para abandonarla en el mismo tick cuesta una conexión del pool a cambio
+ * de nada.
+ */
+async function runHookOp<T>(
+  label: string,
+  deadlineMs: number,
+  start: () => Promise<T>,
+  onLateSettle?: (info: LateSettleInfo) => void,
+): Promise<HookOpResult<T>> {
+  if (deadlineMs <= 0) {
+    return {
+      ok: false,
+      error: new DeadlineExceededError(label, 0),
+      timedOut: true,
+      noBudget: true,
+      ms: 0,
+    }
+  }
+  const startedAt = Date.now()
+  try {
+    const value = await withDeadline(
+      start(),
+      deadlineMs,
+      label,
+      onLateSettle ? { onLateSettle } : undefined,
+    )
+    return { ok: true, value, ms: Date.now() - startedAt }
+  } catch (error) {
+    return {
+      ok: false,
+      error,
+      timedOut: isDeadlineExceeded(error),
+      noBudget: false,
+      ms: Date.now() - startedAt,
+    }
+  }
+}
+
+/** Traduce el desenlace de una operación a la etiqueta que va al log de fases. */
+function phaseOutcome<T>(result: HookOpResult<T>): PhaseOutcome {
+  if (result.ok) return 'ok'
+  if (result.noBudget) return 'no_budget'
+  return result.timedOut ? 'deadline' : 'error'
 }
 
 /**
@@ -1007,10 +1096,52 @@ export async function handleChatRequest(
       // ONF-1 (MH.2) — el stream murió: si al visitante no le llegó ni un
       // chunk útil (ttfbAt null), la reserva de cupo se devuelve (atómico,
       // once-only por request). Con entrega parcial, el cupo se cobra.
-      await compensateReservedQuota?.('stream_error', {
-        firstTokenDelivered: ttfbAt !== null,
-        toolCallCount: 0,
-      })
+      //
+      // DEADLINE-ONFINISH — este hook TAMBIÉN bloquea el cierre del stream: el
+      // SDK lo invoca con `await onError({ error })` dentro del `transform` del
+      // eventProcessor. Es la segunda vía de cuelgue del mismo síntoma, así que
+      // la compensación va con su propio techo de tiempo. (`onAbort` en cambio
+      // NO lo necesita: el SDK lo invoca sin `await` — no bloquea nada.)
+      const compensate = compensateReservedQuota
+      if (compensate) {
+        const errorHookBudget = createBudget(computeHookBudgetMs(Date.now() - startTime))
+        const compensation = await runHookOp(
+          'onerror_quota_compensation',
+          errorHookBudget.clamp(QUOTA_COMPENSATION_DEADLINE_MS),
+          () =>
+            compensate('stream_error', {
+              firstTokenDelivered: ttfbAt !== null,
+              toolCallCount: 0,
+            }),
+          (info) => {
+            chatbotLog(
+              'chat.hook_late_settlement',
+              {
+                conversationId: conversation.id,
+                botConfigId: resolvedBot.id,
+                botSlug: slug,
+                phase: info.label,
+                deadlineMs: info.deadlineMs,
+                elapsedMs: info.elapsedMs,
+                settled: info.settled,
+              },
+              'warn',
+            )
+          },
+        )
+        if (!compensation.ok) {
+          // El cupo queda cobrado (comportamiento pre-sprint ante fallo de
+          // compensación). Rastro off-Neon garantizado; nunca relanza.
+          logPersistFailure('chat.onerror_compensation_incomplete', compensation.error, {
+            conversationId: conversation.id,
+            botSlug: slug,
+            botConfigId: resolvedBot.id,
+            timedOut: compensation.timedOut,
+            noBudget: compensation.noBudget,
+            elapsedMs: compensation.ms,
+          })
+        }
+      }
     },
     onAbort: async () => {
       // ONF-1 (MH.2) — stream cortado (cliente desconectado / runtime abortó):
@@ -1044,6 +1175,73 @@ export async function handleChatRequest(
       // ONF-1 — hoisted fuera del try: el catch INFRA.1 reporta cuántos
       // intentos de persistencia se agotaron.
       let persistAttempt = 0
+
+      // ─── DEADLINE-ONFINISH — techo de tiempo del hook ─────────────────────
+      // Este callback corre DENTRO del flush() del stream (el SDK lo invoca con
+      // `await`): hasta que no retorna, el readable no llega a `done`, el
+      // cliente no pasa a `status:'ready'` y el input del widget sigue trabado.
+      // Por eso TODO await que toque la DB va con deadline, y el conjunto con un
+      // presupuesto global — techado también contra el `maxDuration` de la ruta,
+      // así un LLM lento no vuelve a empujar el hook contra el kill de 30s.
+      const hookStartedAt = Date.now()
+      const requestElapsedMsAtHookStart = hookStartedAt - startTime
+      const budget = createBudget(computeHookBudgetMs(requestElapsedMsAtHookStart))
+      let retrySkipped: RetrySkipReason = null
+      // Longitud —NUNCA contenido— del mensaje del assistant. Hoisted para que
+      // el registro de abandono la alcance desde el catch.
+      let assistantMessageLength = 0
+
+      // Todas las fases arrancan en 'skipped' para que el log salga SIEMPRE con
+      // la misma forma: una fase condicional que no corrió queda distinguible de
+      // una que corrió y falló, sin tener que cruzar el log contra el código.
+      const phases: Record<string, PhaseRecord> = {
+        validation_warnings_event: { ms: 0, outcome: 'skipped' },
+        empty_fallback_event: { ms: 0, outcome: 'skipped' },
+        quota_compensation: { ms: 0, outcome: 'skipped' },
+        completed_event: { ms: 0, outcome: 'skipped' },
+        persist_error_event: { ms: 0, outcome: 'skipped' },
+      }
+      for (let attempt = 1; attempt <= PERSIST_TX_MAX_ATTEMPTS; attempt += 1) {
+        phases[`persist_tx_${attempt}`] = { ms: 0, outcome: 'skipped' }
+      }
+
+      // Rastro del settlement TARDÍO de una operación ya abandonada: es el
+      // discriminador socket-vs-lock. Si la tx commitea a los 18s → conexión
+      // viva pero lenta (lock / cold start). Si nunca aparece → socket muerto.
+      // Caveat: Netlify puede congelar el contenedor al cerrar la respuesta, así
+      // que su AUSENCIA no prueba nada; su PRESENCIA sí es concluyente.
+      const reportLateSettlement = (info: LateSettleInfo): void => {
+        chatbotLog(
+          'chat.hook_late_settlement',
+          {
+            conversationId: conversation.id,
+            botConfigId: resolvedBot.id,
+            botSlug: slug,
+            phase: info.label,
+            deadlineMs: info.deadlineMs,
+            elapsedMs: info.elapsedMs,
+            settled: info.settled,
+          },
+          'warn',
+        )
+      }
+
+      /** Corre una fase con deadline (techado al presupuesto) y la registra. */
+      const runPhase = async <T>(
+        phase: string,
+        phaseBudgetMs: number,
+        start: () => Promise<T>,
+      ): Promise<HookOpResult<T>> => {
+        const result = await runHookOp(
+          phase,
+          budget.clamp(phaseBudgetMs),
+          start,
+          reportLateSettlement,
+        )
+        phases[phase] = { ms: result.ms, outcome: phaseOutcome(result) }
+        return result
+      }
+
       try {
         // Validate output (capa 4)
         const warnings = validateAssistantOutput(text)
@@ -1059,15 +1257,17 @@ export async function handleChatRequest(
             },
             'warn'
           )
-          await logChatbotEvent({
-            organizationId: orgId,
-            botConfigId: resolvedBot.id,
-            type: 'chat.validation_warnings',
-            level: 'warn',
-            message: `${warnings.length} validation warning(s) en respuesta`,
-            conversationId: conversation.id,
-            metadata: { warnings: warnings.map((w) => w.patternId) },
-          })
+          await runPhase('validation_warnings_event', EVENT_LOG_DEADLINE_MS, () =>
+            logChatbotEvent({
+              organizationId: orgId,
+              botConfigId: resolvedBot.id,
+              type: 'chat.validation_warnings',
+              level: 'warn',
+              message: `${warnings.length} validation warning(s) en respuesta`,
+              conversationId: conversation.id,
+              metadata: { warnings: warnings.map((w) => w.patternId) },
+            }),
+          )
         }
 
         // ONF-1 — Turno fallback: el modelo devolvió vacío y el transform
@@ -1078,6 +1278,7 @@ export async function handleChatRequest(
         // transformado no llegara al onFinish (belt-and-suspenders).
         const assistantContent =
           emptyFallbackInjected && text.trim().length === 0 ? emptyFallbackText : text
+        assistantMessageLength = assistantContent.length
         if (emptyFallbackInjected) {
           chatbotLog(
             'chat.empty_response_fallback',
@@ -1088,19 +1289,28 @@ export async function handleChatRequest(
             },
             'warn',
           )
-          await logChatbotEvent({
-            organizationId: orgId,
-            botConfigId: resolvedBot.id,
-            type: 'chat.empty_response_fallback',
-            level: 'warn',
-            message: 'Respuesta vacía del modelo — turno degradado con derivación canned',
-            conversationId: conversation.id,
-            metadata: { finishReason, toolCallCount: allToolCalls.length },
-          })
-          await compensateReservedQuota?.('empty_response', {
-            firstTokenDelivered: ttfbAt !== null,
-            toolCallCount: allToolCalls.length,
-          })
+          await runPhase('empty_fallback_event', EVENT_LOG_DEADLINE_MS, () =>
+            logChatbotEvent({
+              organizationId: orgId,
+              botConfigId: resolvedBot.id,
+              type: 'chat.empty_response_fallback',
+              level: 'warn',
+              message: 'Respuesta vacía del modelo — turno degradado con derivación canned',
+              conversationId: conversation.id,
+              metadata: { finishReason, toolCallCount: allToolCalls.length },
+            }),
+          )
+          // Se captura en un const para que el narrowing sobreviva al closure
+          // (`compensateReservedQuota` es un `let` del scope externo).
+          const compensate = compensateReservedQuota
+          if (compensate) {
+            await runPhase('quota_compensation', QUOTA_COMPENSATION_DEADLINE_MS, () =>
+              compensate('empty_response', {
+                firstTokenDelivered: ttfbAt !== null,
+                toolCallCount: allToolCalls.length,
+              }),
+            )
+          }
         }
 
         // ONF-1 — Si la compensación descartó la conversación (nueva, sin
@@ -1163,81 +1373,111 @@ export async function handleChatRequest(
         const persistedAt = new Date()
         for (;;) {
           persistAttempt += 1
-          try {
-            await scope.$transaction(async (tx) => {
-              if (persistAttempt > 1) {
-                // Query DIRIGIDA al ASSISTANT idéntico dentro de la ventana —
-                // no a la cola (hallazgo del review): un USER interleaved de
-                // otro request del mismo sessionId desplazaría la cola y
-                // taparía el commit fantasma del intento 1.
-                const committedCandidate = await tx.chatMessage.findFirst({
-                  where: {
-                    conversationId: conversation.id,
-                    role: 'ASSISTANT',
-                    content: assistantContent,
-                    createdAt: { gte: new Date(Date.now() - ASSISTANT_PERSIST_DEDUP_WINDOW_MS) },
-                  },
-                  orderBy: { createdAt: 'desc' },
-                  select: { role: true, content: true, createdAt: true },
-                })
-                if (shouldSkipAssistantPersist(committedCandidate, assistantContent, new Date())) {
-                  return
+          const attempt = await runPhase(
+            `persist_tx_${persistAttempt}`,
+            PERSIST_TX_DEADLINE_MS,
+            () =>
+              scope.$transaction(async (tx) => {
+                if (persistAttempt > 1) {
+                  // Query DIRIGIDA al ASSISTANT idéntico dentro de la ventana —
+                  // no a la cola (hallazgo del review): un USER interleaved de
+                  // otro request del mismo sessionId desplazaría la cola y
+                  // taparía el commit fantasma del intento 1.
+                  const committedCandidate = await tx.chatMessage.findFirst({
+                    where: {
+                      conversationId: conversation.id,
+                      role: 'ASSISTANT',
+                      content: assistantContent,
+                      createdAt: { gte: new Date(Date.now() - ASSISTANT_PERSIST_DEDUP_WINDOW_MS) },
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    select: { role: true, content: true, createdAt: true },
+                  })
+                  if (shouldSkipAssistantPersist(committedCandidate, assistantContent, new Date())) {
+                    return
+                  }
                 }
-              }
 
-              // Persist assistant message + tool calls (all steps).
-              await tx.chatMessage.create({
-                conversationId: conversation.id,
-                role: 'ASSISTANT',
-                content: assistantContent,
-                tokensIn,
-                tokensOut,
-                toolCalls: allToolCalls.length > 0
-                  ? (allToolCalls as unknown as object)
-                  : undefined,
-              })
-
-              // Update Conversation aggregate metrics
-              await tx.conversation.update(conversation.id, {
-                messageCount: { increment: 2 },  // user + assistant
-                tokensIn: { increment: tokensIn },
-                tokensOut: { increment: tokensOut },
-                estimatedCostUsd: { increment: costBreakdown.totalUsd },
-                lastMessageAt: persistedAt,
-              })
-
-              // Update QuotaUsage for current period.
-              // B4.2: `conversationsCount` ya se incrementó atómicamente vía
-              // tryReserveConversation cuando isNewConversation=true. Acá pasamos
-              // false siempre para evitar double-count del counter. Tokens y cost
-              // se siguen acumulando normalmente — también en un turno fallback
-              // (el modelo se consumió igual; lo que se devuelve es el CUPO).
-              await incrementQuota(
-                {
-                  organizationId: orgId,
-                  botConfigId: resolvedBot.id,
-                  isNewConversation: false,
-                  messagesAdded: 2,
+                // Persist assistant message + tool calls (all steps).
+                await tx.chatMessage.create({
+                  conversationId: conversation.id,
+                  role: 'ASSISTANT',
+                  content: assistantContent,
                   tokensIn,
                   tokensOut,
-                  costUsd: costBreakdown.totalUsd,
-                },
-                tx,
-              )
-            })
-            break
-          } catch (txError) {
-            if (persistAttempt >= PERSIST_TX_MAX_ATTEMPTS) throw txError
-            // Primer intento fallido: rastro off-Neon YA (si el retry también
-            // muere, este log es lo que sobrevive), backoff corto y reintento.
-            logPersistFailure('chat.persist_retry', txError, {
-              conversationId: conversation.id,
-              botSlug: slug,
-              botConfigId: resolvedBot.id,
-              attempt: persistAttempt,
-            })
-            await new Promise<void>((resolve) => setTimeout(resolve, PERSIST_TX_RETRY_BACKOFF_MS))
+                  toolCalls: allToolCalls.length > 0
+                    ? (allToolCalls as unknown as object)
+                    : undefined,
+                })
+
+                // Update Conversation aggregate metrics
+                await tx.conversation.update(conversation.id, {
+                  messageCount: { increment: 2 },  // user + assistant
+                  tokensIn: { increment: tokensIn },
+                  tokensOut: { increment: tokensOut },
+                  estimatedCostUsd: { increment: costBreakdown.totalUsd },
+                  lastMessageAt: persistedAt,
+                })
+
+                // Update QuotaUsage for current period.
+                // B4.2: `conversationsCount` ya se incrementó atómicamente vía
+                // tryReserveConversation cuando isNewConversation=true. Acá pasamos
+                // false siempre para evitar double-count del counter. Tokens y cost
+                // se siguen acumulando normalmente — también en un turno fallback
+                // (el modelo se consumió igual; lo que se devuelve es el CUPO).
+                await incrementQuota(
+                  {
+                    organizationId: orgId,
+                    botConfigId: resolvedBot.id,
+                    isNewConversation: false,
+                    messagesAdded: 2,
+                    tokensIn,
+                    tokensOut,
+                    costUsd: costBreakdown.totalUsd,
+                  },
+                  tx,
+                )
+              }),
+          )
+          if (attempt.ok) break
+
+          // ── Gate del retry (DEADLINE-ONFINISH) ────────────────────────────
+          // El retry de ONF-1 se diseñó para el transitorio CORTO de Neon: un
+          // error real y rápido que el 2º intento supera. Un DEADLINE es otra
+          // cosa — la operación quedó abandonada pero VIVA, reteniendo su
+          // conexión del pool (withDeadline abandona, no cancela). Reintentar
+          // ahí retendría una segunda conexión: en un contenedor caliente eso
+          // envenena el pool para los requests siguientes (P2024) a cambio de
+          // nada, porque el cuelgue no se va a destrabar en 300ms. El valor
+          // diagnóstico ya quedó capturado por `onLateSettle` del intento 1.
+          if (persistAttempt >= PERSIST_TX_MAX_ATTEMPTS) {
+            retrySkipped = 'max_attempts'
+            throw attempt.error
           }
+          if (attempt.timedOut) {
+            retrySkipped = 'deadline'
+            throw attempt.error
+          }
+          // El techo global gana siempre: si no entra un intento COMPLETO más el
+          // evento de cierre, no se reintenta — así el reporte de abandono
+          // conserva su presupuesto y el stream cierra igual.
+          if (
+            !budget.hasRoomFor(
+              PERSIST_TX_RETRY_BACKOFF_MS + PERSIST_TX_DEADLINE_MS + EVENT_LOG_DEADLINE_MS,
+            )
+          ) {
+            retrySkipped = 'budget'
+            throw attempt.error
+          }
+          // Primer intento fallido: rastro off-Neon YA (si el retry también
+          // muere, este log es lo que sobrevive), backoff corto y reintento.
+          logPersistFailure('chat.persist_retry', attempt.error, {
+            conversationId: conversation.id,
+            botSlug: slug,
+            botConfigId: resolvedBot.id,
+            attempt: persistAttempt,
+          })
+          await new Promise<void>((resolve) => setTimeout(resolve, PERSIST_TX_RETRY_BACKOFF_MS))
         }
         mark('post_persist_ms')
         const totalMs = Date.now() - startTime
@@ -1258,23 +1498,25 @@ export async function handleChatRequest(
           timings,
         })
 
-        await logChatbotEvent({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          type: 'chat.message_completed',
-          level: 'info',
-          message: `Respuesta enviada (${tokensIn} in / ${tokensOut} out)`,
-          conversationId: conversation.id,
-          metadata: {
-            tokensIn,
-            tokensOut,
-            costUsd: costBreakdown.totalUsd,
-            toolCallCount: allToolCalls.length,
-            durationMs: totalMs,
-            latencyMs: totalMs,
-            timings,
-          },
-        })
+        await runPhase('completed_event', EVENT_LOG_DEADLINE_MS, () =>
+          logChatbotEvent({
+            organizationId: orgId,
+            botConfigId: resolvedBot.id,
+            type: 'chat.message_completed',
+            level: 'info',
+            message: `Respuesta enviada (${tokensIn} in / ${tokensOut} out)`,
+            conversationId: conversation.id,
+            metadata: {
+              tokensIn,
+              tokensOut,
+              costUsd: costBreakdown.totalUsd,
+              toolCallCount: allToolCalls.length,
+              durationMs: totalMs,
+              latencyMs: totalMs,
+              timings,
+            },
+          }),
+        )
       } catch (persistError) {
         // INFRA.1 — Sink off-Neon PRIMERO, antes de cualquier write a Neon.
         // stderr estructurado con .code/.cause: el rastro que sobrevive a la
@@ -1289,23 +1531,106 @@ export async function handleChatRequest(
           // El rollback garantiza que NO quedó estado parcial: se perdió el
           // registro del turno completo, no un pedazo.
           attempts: persistAttempt,
+          // DEADLINE-ONFINISH — por qué no hubo (o no hubo más) reintentos.
+          retrySkipped,
         })
+
+        // DEADLINE-ONFINISH — Registro de RECONCILIACIÓN, distinto del de arriba.
+        // `chat.persist_failed` cubre "Postgres falló y garantizó rollback: el
+        // turno se perdió, punto". Esto cubre el caso nuevo: el turno se ABANDONÓ
+        // por deadline, así que su desenlace es DESCONOCIDO — puede commitear más
+        // tarde (ver `chat.hook_late_settlement`). Es la línea a partir de la
+        // cual se puede reconciliar a mano lo que falta. Solo identificadores,
+        // contadores y LONGITUDES: nunca contenido de mensajes.
+        const abandoned = isDeadlineExceeded(persistError) || retrySkipped === 'budget'
+        if (abandoned) {
+          chatbotLog(
+            'chat.persist_abandoned',
+            {
+              conversationId: conversation.id,
+              botConfigId: resolvedBot.id,
+              botSlug: slug,
+              phase: isDeadlineExceeded(persistError)
+                ? persistError.label
+                : `persist_tx_${persistAttempt}`,
+              elapsedMs: Date.now() - hookStartedAt,
+              assistantMessageLength,
+              finishReason,
+              attempts: persistAttempt,
+              retrySkipped,
+            },
+            'error',
+          )
+        }
+
         // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
-        // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza.
-        await logChatbotEvent({
-          organizationId: orgId,
-          botConfigId: resolvedBot.id,
-          type: 'chat.persist_error',
-          level: 'error',
-          message: persistError instanceof Error ? persistError.message : 'unknown',
-          conversationId: conversation.id,
-        })
+        // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza;
+        // DEADLINE-ONFINISH le agrega el techo de tiempo y traga también el
+        // deadline — el rastro autoritativo ya salió a stderr arriba, y esta
+        // escritura puede quedar starved por la conexión que retuvo la tx
+        // abandonada. El orden (stderr PRIMERO, DB después) es deliberado: el
+        // reporte del fallo no puede depender del recurso que está fallando.
+        await runPhase('persist_error_event', EVENT_LOG_DEADLINE_MS, () =>
+          logChatbotEvent({
+            organizationId: orgId,
+            botConfigId: resolvedBot.id,
+            type: 'chat.persist_error',
+            level: 'error',
+            message: persistError instanceof Error ? persistError.message : 'unknown',
+            conversationId: conversation.id,
+          }),
+        )
         // B14.5 — Sentry best-effort (no-op sin NEXT_PUBLIC_SENTRY_DSN → [FALTA:sentry-dsn]).
         // El scrub-pii del beforeSend limpia antes de mandar.
         Sentry.captureException(persistError, {
           tags: { module: 'chatbot', stage: 'persist' },
           extra: { conversationId: conversation.id, botSlug: slug },
         })
+      } finally {
+        // ─── DEADLINE-ONFINISH (instrumentación) ────────────────────────────
+        // UN log agregado, off-Neon, en TODOS los caminos (éxito, fallo, early
+        // return del turno descartado). Es el entregable que cierra el
+        // diagnóstico: la próxima corrida en prod dice exactamente qué await
+        // cuelga y cuánto. Nunca contenido de mensajes — solo fases, duraciones,
+        // desenlaces y longitudes.
+        //
+        // Cómo leerlo:
+        //   - `persist_tx_1: deadline` con las fases previas en 'skipped'/'ok'
+        //     rápidas → cuelga la transacción (socket muerto o lock).
+        //   - un `*_event: deadline` ANTES de la tx → el problema es la conexión,
+        //     no un lock de la tx. Ojo: esas fases son condicionales y en tráfico
+        //     normal quedan en 'skipped', así que no siempre está disponible.
+        //   - un `chat.hook_late_settlement` posterior con la misma `phase` →
+        //     la operación SÍ terminó, tarde: conexión viva pero lenta.
+        //   - `budgetExhausted: true` → el techo cortó el hook (lo esperado
+        //     mientras la causa raíz siga abierta).
+        const anomalous = Object.values(phases).some(
+          (p) => p.outcome === 'deadline' || p.outcome === 'error' || p.outcome === 'no_budget',
+        )
+        chatbotLog(
+          'chat.onfinish_phases',
+          {
+            conversationId: conversation.id,
+            botConfigId: resolvedBot.id,
+            botSlug: slug,
+            finishReason,
+            assistantMessageLength,
+            phases,
+            retrySkipped,
+            attempts: persistAttempt,
+            totalMs: Date.now() - hookStartedAt,
+            budgetMs: budget.totalMs,
+            budgetExhausted: budget.remainingMs() === 0,
+            // Cuánto llevaba el request al entrar al hook: si el presupuesto
+            // salió recortado por debajo de ONFINISH_TOTAL_BUDGET_MS, fue por
+            // acá (LLM lento empujando contra el maxDuration de la ruta).
+            requestElapsedMsAtHookStart,
+            budgetCapMs: ONFINISH_TOTAL_BUDGET_MS,
+          },
+          // Nivel según desenlace: un turno sano no ensucia el carril de error,
+          // y uno anómalo sale por stderr junto al resto del rastro off-Neon.
+          anomalous ? 'warn' : 'info',
+        )
       }
     },
   })

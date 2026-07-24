@@ -40,8 +40,21 @@ export async function logChatbotEvent(params: {
     params.level
   )
 
-  // Persist to BD (fire and forget — don't block the request). El create
-  // scoped verifica que el bot (y la conversación, si viene) sean de la org.
+  // Persist to BD. El create scoped verifica que el bot (y la conversación, si
+  // viene) sean de la org.
+  //
+  // ⚠️ ESTO BLOQUEA. El `await` es real: la función no resuelve hasta que Neon
+  // contesta (o el try/catch de abajo atrapa el fallo). El comentario anterior
+  // decía "fire and forget — don't block the request" y era falso; con una DB
+  // que no responde, esta llamada se cuelga y arrastra a su llamador. Fue parte
+  // de por qué el cuelgue del onFinish del chatbot pasó inadvertido.
+  //
+  // NO se cambió a fire-and-forget de verdad: hay ~18 callsites que hoy asumen
+  // que al resolver el evento ya está escrito, y en serverless el trabajo async
+  // sin await no tiene garantía de completarse (la plataforma congela la función
+  // al cerrar la respuesta). El techo de tiempo lo pone el LLAMADOR cuando está
+  // en un camino sensible a latencia — ver `runHookOp`/`withDeadline` en
+  // `server/chat/` (DEADLINE-ONFINISH). Acá la semántica queda intacta.
   try {
     await forOrg(params.organizationId).chatbotEvent.create({
       botConfigId: params.botConfigId,
