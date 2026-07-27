@@ -242,4 +242,59 @@ subfrase de al lado, porque el label solo no comunica que está bloqueado.
 
 ---
 
+## H-10 · La tira COMPLETADAS de un negocio terminado no muestra la construcción
+
+**Dónde.** Cualquier pantalla de un negocio que pasó la construcción; se ve
+crudo en [`31-m16-ofrecidos.png`](galeria/png/31-m16-ofrecidos.png) — un negocio
+que llegó hasta ofrecer horarios de reunión.
+
+**Qué lo hace fricción.** La tira **COMPLETADAS — PODÉS VOLVER CUANDO QUIERAS**
+lista *Ficha · Al Evaluador · Veredicto · Brief · Borrador · Chequeo final ·
+Envío*, y **ninguna de las seis fases de construcción** — de un negocio cuya demo
+evidentemente se construyó, se publicó, pasó el chequeo y se envió.
+
+Es coherente con el diseño (la tira refleja el auto-reporte, no el recorrido), y
+el panel avisa que tildar es opcional. Pero **la tira no se llama «lo que
+tildaste», se llama «completadas»**, y queda al lado de pasos que sí aparecen
+solos. El setter que no tildó ve un hueco donde hubo horas de trabajo.
+
+**Severidad. Me hace ruido.** Nada se rompe; lo que se distorsiona es el rastro
+de trabajo propio.
+
+**La frase que lo delató.** Hizo falta un recuadro entero —*«Por qué la lista
+COMPLETADAS a veces "miente"»*— para explicar un hueco que la pantalla no
+explica. Es el caso exacto de «para explicar esto necesito tres párrafos porque la
+pantalla no lo dice».
+
+> Registrado también en M0 (punto 3 del índice de la galería). **Sigue vigente
+> después de P3.1.**
+
+---
+
+## H-11 · El tilde de fase no se anuncia como tilde
+
+**Dónde.** m7–m12, bloque **REGISTRO**
+([`15-m7-estructura.png`](galeria/png/15-m7-estructura.png)).
+
+**Qué lo hace fricción.** Lo que el setter lee es *«Marcá esta fase cuando la
+termines»*, pero el control **no es una casilla**: es un botón cuyo nombre real
+es *«Marcar «Estructura» como hecha»* y que no se presenta como algo tildado o
+sin tildar. En la misma pantalla, la única señal de que una fase quedó hecha
+aparece **en otro lugar** — la tira COMPLETADAS del fondo, y los números de la
+navegación de fases.
+
+El resultado: el setter toca, no ve una tilde aparecer donde tocó, y no sabe si
+quedó registrado. Es el mismo patrón de H-03 (acción sin acuse en el lugar del
+clic).
+
+**Severidad. Me confunde.** Se agrava porque el propio panel dice que tildar no
+sirve para avanzar: si además no se ve el efecto, la pregunta natural es para qué
+está el botón.
+
+**La frase que lo delató.** *«el botón se llama Marcar «Estructura» como hecha,
+con el nombre de la fase que estés»* — hubo que aclarar que el nombre del control
+cambia solo, porque no coincide con el texto que el setter tiene delante.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*
