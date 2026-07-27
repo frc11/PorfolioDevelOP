@@ -404,4 +404,51 @@ fricción.
 
 ---
 
+## H-15 · Dos esperas con causas opuestas muestran el mismo texto — y en una es falso
+
+**Dónde.** La pantalla de espera del tramo de envío, en sus dos variantes:
+[`28-m15-espera-sin-respuesta.png`](galeria/png/28-m15-espera-sin-respuesta.png) y
+[`29-m15-espera-sin-final-url.png`](galeria/png/29-m15-espera-sin-final-url.png).
+
+**Qué lo hace fricción.** Las dos pantallas dicen **exactamente lo mismo**:
+
+> **Esperando respuesta del negocio**
+> Sin próximo toque agendado — **si el negocio responde, registralo** y el flujo
+> sigue solo.
+
+Pero las causas son opuestas. Verificado contra la base:
+
+| Caso | `status` | Link permanente | Qué falta de verdad | ¿El texto aplica? |
+|---|---|---|---|---|
+| #28 | `PROSPECTO` | cargado | que el **negocio** conteste | Sí |
+| #29 | `RESPONDIO` | **`null`** | que **Franco** cargue el link | **No** |
+
+En el caso #29 el negocio **ya respondió**, así que la única instrucción que da la
+pantalla —*«si el negocio responde, registralo»*— es una acción que ya ocurrió y
+que no va a destrabar nada. Lo que falta es de Franco, y **la pantalla no lo
+nombra en ningún lado**. El setter queda esperando algo que no va a pasar y sin
+saber a quién reclamarle.
+
+La única señal que los distingue es la etiqueta de estado del encabezado
+(**PROSPECTO** vs **RESPONDIÓ**), que no está puesta ahí para eso y que nadie
+mira como diagnóstico.
+
+**Severidad. Me frena.** No en el sentido de que no pueda seguir con otro negocio,
+sino en que este negocio queda parado por tiempo indefinido sin que el setter
+tenga forma de saber que hay algo pendiente del lado de Franco. Es exactamente el
+caso que el manual tiene que cubrir con honestidad —«acá esperás, y a quién»— y la
+pantalla no da el dato.
+
+**La frase que lo delató.** El manual tuvo que agregar un recuadro entero para
+enseñar a leer una etiqueta como si fuera un diagnóstico: *«Cómo distinguirlas de
+un vistazo: mirá la etiqueta al lado del nombre del negocio»*. Y después admitir
+que la pantalla dice algo que no aplica: *«en el caso 3 esa frase confunde: el
+negocio ya respondió»*.
+
+> **Corrección respecto de M0.** El índice de la galería describía #28 como
+> *«espera con m15 consultable, que nombra la causa real (5.3)»*. La causa real
+> **no se nombra** en ninguna de las dos variantes: el texto es idéntico.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*
