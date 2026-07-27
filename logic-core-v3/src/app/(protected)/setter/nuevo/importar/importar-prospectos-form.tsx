@@ -198,7 +198,7 @@ function ReporteImportacion({ report }: { report: ImportReport }) {
         title={`${creados} prospecto${creados !== 1 ? 's' : ''} importado${creados !== 1 ? 's' : ''}`}
       >
         {creados > 0
-          ? 'Entraron fríos, en ficha — ya aparecen en tu foco para evaluarlos.'
+          ? 'Entraron a tu cartera sin marca de caliente, listos para completar la Ficha — ya aparecen en tu foco para evaluarlos.'
           : 'No se creó ningún lead nuevo en esta tanda. Revisá el detalle de abajo.'}
       </Callout>
 

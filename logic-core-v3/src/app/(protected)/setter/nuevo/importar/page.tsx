@@ -20,7 +20,7 @@ export default async function ImportarProspectosPage() {
       <PageHeader
         eyebrow="LeadOS"
         title="Importar una lista"
-        description="Subí un CSV con varios negocios de una — esa lista que te pasó Franco. Cada fila entra fría, en ficha, a tu cartera: como si los cargaras uno por uno."
+        description="Subí un CSV con varios negocios de una — esa lista que te pasó Franco. Cada fila entra a tu cartera sin marca de caliente, lista para completar la Ficha: como si los cargaras uno por uno."
         icon={FileSpreadsheet}
       />
 
