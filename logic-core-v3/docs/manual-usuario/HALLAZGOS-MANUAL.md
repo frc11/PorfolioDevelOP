@@ -360,4 +360,48 @@ sola habría descrito mal alguna de las pantallas.
 
 ---
 
+## H-14 · «El historial de rechazos se conserva» — pero el setter no lo puede ver
+
+**Dónde.** `mr` — reentrada por rechazo, bloque **REGISTRO**
+([`26-mr-correccion-2.png`](galeria/png/26-mr-correccion-2.png)).
+
+**Qué lo hace fricción.** El texto del registro afirma, literal: *«el historial de
+rechazos se conserva»*. **Se conserva en la base, pero no se muestra en ninguna
+parte de la pantalla.**
+
+Comprobado sobre un negocio con **dos** rechazos guardados:
+
+| # | Fecha | Dónde | Qué pidió Franco | ¿Se ve? |
+|---|---|---|---|---|
+| 1 | 25/7 | Contacto | «faltan fotos propias y el CTA no se ve en mobile» | **No** |
+| 2 | 26/7 | Hero | «el hero sigue sin los datos reales del negocio» | Sí |
+
+La pantalla del segundo rechazo es **idéntica** a la del primero: un solo recuadro
+rojo con la corrección más reciente. El rechazo anterior no aparece desplegado, ni
+plegado, ni bajo *Ver historial del lead* (que en estos negocios dice *«— sin
+movimientos»*).
+
+**Por qué importa de verdad:** en la segunda vuelta el setter está corrigiendo el
+hero **sin poder ver** que la vuelta anterior era sobre las fotos y el botón de
+WhatsApp. No tiene cómo confirmar que lo de antes sigue arreglado, ni cómo darse
+cuenta de si le están pidiendo dos veces lo mismo.
+
+**Severidad. Me confunde**, y a partir del segundo rechazo empuja a *me frena*: es
+información que el setter necesita para trabajar y que el sistema tiene pero no le
+entrega.
+
+**La frase que lo delató.** El manual tuvo que escribir un consejo que compensa a
+mano una función que el panel dice tener: *«cuando te llegue el primer rechazo,
+copiate la nota a algún lado tuyo antes de corregir»*. Decirle al usuario que
+guarde por su cuenta lo que la pantalla promete conservar es la definición de
+fricción.
+
+> **Corrección respecto de M0.** El índice de la galería describía el estado #26
+> como *«Segundo rechazo: la corrección nueva al frente y las anteriores
+> colapsadas»*. Eso **no ocurre**: las anteriores no están, ni colapsadas ni de
+> ninguna otra forma. Las capturas #25 y #26 se diferencian sólo en el nombre del
+> negocio.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*

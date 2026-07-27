@@ -55,7 +55,7 @@ fingir un link. Registrado como `H-01`.
 | 04 — Brief | **CERRADO** | `M1 cap 04` |
 | 05 — Construcción | **CERRADO** | `M1 cap 05` |
 | 06 — Borrador, chequeo y revisión | **CERRADO** | `M1 cap 06` |
-| 07 — Cuando Franco dice no | pendiente | — |
+| 07 — Cuando Franco dice no | **CERRADO** | `M1 cap 07` |
 | 08 — Envío | pendiente | — |
 | 09 — Agenda | pendiente | — |
 | 10 — Cierres | pendiente | — |
