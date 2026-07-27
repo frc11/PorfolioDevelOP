@@ -17,7 +17,14 @@ const emptyStringToUndefined = (value: unknown) => {
   return trimmed === '' ? undefined : trimmed
 }
 
-const textoLibre = z.preprocess(emptyStringToUndefined, z.string().optional())
+// P3#3: techo de sanidad contra blobs sin fin (pegado de IA, copy-paste
+// accidental) — no es un límite de UX, es una cota de rendering/storage.
+const TEXTO_LIBRE_MAX = 5000
+
+const textoLibre = z.preprocess(
+  emptyStringToUndefined,
+  z.string().max(TEXTO_LIBRE_MAX).optional(),
+)
 
 // ── Ficha de observación del negocio (la llena el setter, texto crudo) ──────
 

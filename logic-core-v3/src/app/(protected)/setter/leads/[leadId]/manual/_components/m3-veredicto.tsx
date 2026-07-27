@@ -52,7 +52,7 @@ export function M3Contexto({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha 
     )
   }
   return (
-    <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap rounded-xl border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-400">
+    <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-400">
       {buildFichaCopyBlock(lead, ficha)}
     </pre>
   )

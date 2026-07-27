@@ -150,18 +150,18 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
         {lead.stage === 'RECHAZADA' && lead.ultimoRechazo && (
           <Callout tone="danger" accent icon={OctagonAlert} title="Franco pidió cambios" className="mt-3">
             <div className="space-y-1 text-zinc-300">
-              <p>
+              <p className="line-clamp-2">
                 <span className="font-semibold text-rose-200">Qué:</span>{' '}
                 {lead.ultimoRechazo.motivo}
               </p>
               {lead.ultimoRechazo.donde && (
-                <p>
+                <p className="line-clamp-2">
                   <span className="font-semibold text-rose-200">Dónde:</span>{' '}
                   {lead.ultimoRechazo.donde}
                 </p>
               )}
               {lead.ultimoRechazo.arreglo && (
-                <p>
+                <p className="line-clamp-2">
                   <span className="font-semibold text-rose-200">Arreglo:</span>{' '}
                   {lead.ultimoRechazo.arreglo}
                 </p>

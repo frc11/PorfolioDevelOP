@@ -39,7 +39,7 @@ export function FichaStep({ leadId, lead, ficha, editable }: FichaStepProps) {
         </summary>
         <div className="border-t border-white/[0.06] px-5 py-4">
           {ficha ? (
-            <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-zinc-400">
+            <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed text-zinc-400">
               {buildFichaCopyBlock(lead, ficha)}
             </pre>
           ) : (

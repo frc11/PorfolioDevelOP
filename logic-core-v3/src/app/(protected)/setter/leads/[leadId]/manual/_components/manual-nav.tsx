@@ -81,7 +81,7 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
+        <h1 className="line-clamp-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
           {lead.businessName}
         </h1>
         <div className="flex items-center gap-1.5">
@@ -121,7 +121,7 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
       )}
 
       {notas && (
-        <p className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
+        <p className="line-clamp-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
           <span className="font-semibold text-zinc-400">Notas del lead:</span> {notas}
         </p>
       )}

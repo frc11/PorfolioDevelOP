@@ -61,7 +61,7 @@ export function CopyBlock({ titulo, instruccion, texto }: CopyBlockProps) {
       </div>
       <pre
         className={cn(
-          'mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-xl border p-3 font-mono text-[11px] leading-relaxed transition-colors duration-300 motion-reduce:transition-none',
+          'mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-xl border p-3 font-mono text-[11px] leading-relaxed transition-colors duration-300 motion-reduce:transition-none',
           copiado
             ? 'border-emerald-400/40 bg-emerald-500/[0.06] text-zinc-300'
             : 'border-white/[0.06] bg-black/30 text-zinc-400',

@@ -143,7 +143,7 @@ function TimelineRow({ event }: { event: LeadTimelineEvent }) {
         <p className="mt-1 text-[11px] text-zinc-500">{formatearMomento(event.createdAt)}</p>
 
         {event.notes && (
-          <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-zinc-300">
+          <p className="mt-2 whitespace-pre-wrap break-words text-xs leading-relaxed text-zinc-300">
             {event.notes}
           </p>
         )}

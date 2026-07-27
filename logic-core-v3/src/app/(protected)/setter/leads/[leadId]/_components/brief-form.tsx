@@ -245,7 +245,7 @@ export function BriefResumen({ brief }: { brief: Brief }) {
           <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300">
             Ver respuesta completa del Gem
           </summary>
-          <pre className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-500">
+          <pre className="mt-2 max-h-56 overflow-y-auto whitespace-pre-wrap break-words rounded-lg border border-white/[0.06] bg-black/30 p-3 font-mono text-[11px] leading-relaxed text-zinc-500">
             {brief.pegadoGem}
           </pre>
         </details>
