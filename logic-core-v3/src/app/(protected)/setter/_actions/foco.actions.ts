@@ -9,7 +9,7 @@
  *   - solo escribe la cookie del foco (preferencia de navegación). NO toca
  *     status/stage/reactivateAt: el foco PRESENTA y CALCULA, no transiciona.
  *
- * "Parquear" (snooze) y "terminar" (trabajar el lead en el detalle) ya existen:
+ * "Pausar" (snooze) y "terminar" (trabajar el lead en el detalle) ya existen:
  * el snooze vive en `cartera.actions.ts#pausarLead` y la terminación es el flujo
  * del wizard. Acá solo manejamos el anclaje del sticky.
  */

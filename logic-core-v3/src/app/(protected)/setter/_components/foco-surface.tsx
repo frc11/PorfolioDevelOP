@@ -30,7 +30,7 @@ import { useKeyboardShortcuts, type ShortcutMap } from './use-keyboard-shortcuts
  *
  *   - "Ir a trabajarlo": ancla el lead como foco (sticky D7) y abre su detalle.
  *     Al volver, retomás el MISMO lead aunque haya entrado uno más urgente.
- *   - "Parquear": snooze personal (reusa `pausarLead`) → sale de la cola → próximo.
+ *   - "Pausar": snooze personal (reusa `pausarLead`) → sale de la cola → próximo.
  *   - "Saltar": ancla el próximo como foco → te corre al siguiente sin posponer.
  *
  * El padre (server) ya eligió foco/próximo con `seleccionarFoco`; acá no hay
@@ -48,7 +48,7 @@ type FocoSurfaceProps = {
 
 const ATAJOS_FOCO: Atajo[] = [
   { accion: 'Ir a trabajar el lead', teclas: ['t'] },
-  { accion: 'Parquear (posponer)', teclas: ['p'] },
+  { accion: 'Pausar (posponer)', teclas: ['p'] },
   { accion: 'Saltar al próximo', teclas: ['s'] },
   { accion: 'Esta ayuda', teclas: ['?'] },
 ]
@@ -99,14 +99,14 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
     })
   }
 
-  const parquear = (hasta: string) => {
+  const pausar = (hasta: string) => {
     startTransition(async () => {
       const result = await pausarLead(foco.id, hasta)
       if (!result.success) {
         toast.error(result.error)
         return
       }
-      toast.success(`Parqueado — vuelve a tu cartera el ${formatFechaCorta(result.data.snoozedUntil)}.`)
+      toast.success(`Pausado — vuelve a tu cartera el ${formatFechaCorta(result.data.snoozedUntil)}.`)
       setSnoozeAbierto(false)
       setFechaCustom('')
       router.refresh()
@@ -119,7 +119,7 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
   }
 
   // Bindings frescos cada render (el hook los lee por ref): `t`/`s` disparan el
-  // mismo botón que el click (respetan `disabled`); `p` abre/cierra el parqueo.
+  // mismo botón que el click (respetan `disabled`); `p` abre/cierra la pausa.
   const bindings: ShortcutMap = {
     t: () => trabajarRef.current?.click(),
     s: () => saltarRef.current?.click(),
@@ -212,7 +212,7 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
             )}
           >
             <CalendarClock size={14} strokeWidth={1.5} aria-hidden />
-            Parquear
+            Pausar
           </button>
 
           <button
@@ -236,7 +236,7 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
                 <button
                   key={atajo.dias}
                   type="button"
-                  onClick={() => parquear(fechaEnDias(atajo.dias))}
+                  onClick={() => pausar(fechaEnDias(atajo.dias))}
                   disabled={isPending}
                   className="rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition-colors hover:bg-white/[0.07] disabled:opacity-50"
                 >
@@ -254,11 +254,11 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
                 />
                 <button
                   type="button"
-                  onClick={() => parquear(fechaCustom)}
+                  onClick={() => pausar(fechaCustom)}
                   disabled={!fechaCustom || isPending}
                   className="shrink-0 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:bg-white/[0.07] disabled:opacity-50"
                 >
-                  Parquear
+                  Pausar
                 </button>
               </div>
             </Field>
