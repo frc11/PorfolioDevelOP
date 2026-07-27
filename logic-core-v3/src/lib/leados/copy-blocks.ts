@@ -132,8 +132,11 @@ export function buildDemoMensajeBlock(lead: CopyBlockLead, finalUrl: string): st
  */
 export function buildHorariosMensajeBlock(slots: string[]): string {
   const lineas = slots.map((slot, i) => `${i + 1}. ${formatFechaHora(slot)}`)
+  // P3#11: la cantidad real de slots, no un "tres" fijo que ya no describe la
+  // oferta si el setter carga uno o dos.
+  const cantidad = slots.length === 1 ? 'un horario' : `${slots.length} horarios`
   return [
-    'Buenísimo! Te paso tres horarios para la reunión (hora Argentina):',
+    `Buenísimo! Te paso ${cantidad} para la reunión (hora Argentina):`,
     lineas.join('\n'),
     '¿Cuál te queda mejor? Si ninguno te sirve, decime y busco otro.',
   ].join('\n\n')
