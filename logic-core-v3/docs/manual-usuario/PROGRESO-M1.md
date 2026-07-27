@@ -52,7 +52,7 @@ fingir un link. Registrado como `H-01`.
 | 01 — Tu panel | **CERRADO** | `M1 cap 00-01` |
 | 02 — Ficha y evaluación | **CERRADO** | `M1 cap 02` |
 | 03 — Opener y seguimiento | **CERRADO** | `M1 cap 03` |
-| 04 — Brief | pendiente | — |
+| 04 — Brief | **CERRADO** | `M1 cap 04` |
 | 05 — Construcción | pendiente | — |
 | 06 — Borrador, chequeo y revisión | pendiente | — |
 | 07 — Cuando Franco dice no | pendiente | — |
