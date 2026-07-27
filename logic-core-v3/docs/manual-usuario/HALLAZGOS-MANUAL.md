@@ -297,4 +297,67 @@ cambia solo, porque no coincide con el texto que el setter tiene delante.
 
 ---
 
+## H-12 · Los seis tildes del chequeo final se pierden si no tocás «Guardar el chequeo»
+
+**Dónde.** m14 — chequeo final
+([`22-m14-chequeo.png`](galeria/png/22-m14-chequeo.png)).
+
+**Qué lo hace fricción.** **Verificado en vivo.** Se marcaron los seis
+obligatorios, se salió de la pantalla sin tocar **Guardar el chequeo**, y al
+volver el cartel decía otra vez *«Quedan 6 obligatorios en rojo»*: **los seis
+tildes se perdieron**.
+
+Lo caro no son los seis clics: es lo que hay detrás de cada uno. La propia
+pantalla exige abrir el borrador *«mejor en incógnito y en tu celular»*, recorrer
+la página entera buscando textos de relleno y **tocar cada link y el botón de
+WhatsApp**. Eso es un rato largo de trabajo real que se descarta sin ningún aviso.
+
+Y hay un agravante de aprendizaje: **el panel ya le enseñó al setter lo
+contrario**. En la ficha (m1) dice, textual, *«Se guarda solo mientras escribís.
+Podés cerrar y seguir después»*. El setter llega al chequeo con esa expectativa
+instalada, y acá no vale — sin que nada en la pantalla se lo advierta.
+
+**Severidad. Me frena.** Es la pérdida de trabajo más concreta que encontró la
+corrida.
+
+**La frase que lo delató.** Hizo falta un recuadro de advertencia entero —*«Los
+tildes del chequeo NO se guardan solos»*— dentro del paso, y repetir la
+instrucción **Guardar el chequeo** dos veces en la misma página. Cuando el manual
+tiene que gritar, es que la pantalla está callada.
+
+> **Relacionado con H-06:** el problema no es que un formulario guarde solo y otro
+> no, sino que **los dos usan el mismo lenguaje** y no se distinguen.
+
+---
+
+## H-13 · Dos controles distintos para la misma idea de «tildar algo»
+
+**Dónde.** A lo largo del recorrido:
+
+| Pantalla | Control | Cómo se ve |
+|---|---|---|
+| m7–m12, tilde de fase | `button` | Sin estado tildado visible en el lugar del clic (H-11) |
+| m13, *Confirmo que abrí el link y carga* | `switch` | Interruptor |
+| m14, los 6 obligatorios + los 4 de diseño | `switch` | Interruptores ([`24b`](galeria/png/24b-error-persistente-chequeo.png)) |
+
+**Qué lo hace fricción.** Tres pantallas seguidas del mismo recorrido le piden al
+setter exactamente lo mismo —«confirmá que hiciste esto»— y en la primera el
+control no se parece ni se comporta como en las otras dos. Nada se rompe, pero
+justo donde el control **menos** parece un tilde (la fase) es donde además el
+efecto no se ve en el lugar del clic.
+
+**Severidad. Me hace ruido.**
+
+**La frase que lo delató.** El manual terminó llamándolos *«interruptor»* en m13 y
+m14 y *«tilde»* en las fases — dos palabras para una sola acción, porque usar una
+sola habría descrito mal alguna de las pantallas.
+
+> **Corrección respecto de M0.** El punto 6 del índice de la galería reportaba un
+> tercer control: una casilla nativa en m16 (*«Estoy hablando con el dueño / quien
+> decide»*). **Ese control ya no está**: se recorrieron los tres estados de m16
+> (virgen, con horarios ofrecidos, agendada) y ninguno lo tiene. En cambio, el
+> tilde de fase, que M0 daba como `role="switch"`, hoy es un `button`.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*
