@@ -330,7 +330,7 @@ tiene que gritar, es que la pantalla está callada.
 
 ---
 
-## H-13 · Dos controles distintos para la misma idea de «tildar algo»
+## H-13 · Tres controles distintos para la misma idea de «tildar algo»
 
 **Dónde.** A lo largo del recorrido:
 
@@ -339,24 +339,30 @@ tiene que gritar, es que la pantalla está callada.
 | m7–m12, tilde de fase | `button` | Sin estado tildado visible en el lugar del clic (H-11) |
 | m13, *Confirmo que abrí el link y carga* | `switch` | Interruptor |
 | m14, los 6 obligatorios + los 4 de diseño | `switch` | Interruptores ([`24b`](galeria/png/24b-error-persistente-chequeo.png)) |
+| m16, *Estoy hablando con el dueño / quien decide* | `<input type="checkbox">` nativo | Cuadradito ([`30`](galeria/png/30-m16-virgen.png)) |
 
-**Qué lo hace fricción.** Tres pantallas seguidas del mismo recorrido le piden al
-setter exactamente lo mismo —«confirmá que hiciste esto»— y en la primera el
-control no se parece ni se comporta como en las otras dos. Nada se rompe, pero
+**Qué lo hace fricción.** Cuatro pantallas del mismo recorrido le piden al setter
+exactamente lo mismo —«confirmá que hiciste esto»— con tres controles que se ven y
+se comportan distinto. Nada se rompe, pero cada pantalla se aprende de nuevo, y
 justo donde el control **menos** parece un tilde (la fase) es donde además el
 efecto no se ve en el lugar del clic.
 
 **Severidad. Me hace ruido.**
 
-**La frase que lo delató.** El manual terminó llamándolos *«interruptor»* en m13 y
-m14 y *«tilde»* en las fases — dos palabras para una sola acción, porque usar una
-sola habría descrito mal alguna de las pantallas.
+**Detalle extra, verificado en el DOM.** El checkbox de m16 es
+`<input class="mt-0.5 h-4 w-4 shrink-0 accent-cyan-500" type="checkbox">` — **sin
+`id`, sin `name` y sin `aria-label`**, y sin `<label for>` que lo asocie a su
+texto. Queda sin nombre accesible: un lector de pantalla anuncia una casilla sin
+decir qué confirma, y es la casilla que decide si se le quema un turno de agenda
+a Franco.
 
-> **Corrección respecto de M0.** El punto 6 del índice de la galería reportaba un
-> tercer control: una casilla nativa en m16 (*«Estoy hablando con el dueño / quien
-> decide»*). **Ese control ya no está**: se recorrieron los tres estados de m16
-> (virgen, con horarios ofrecidos, agendada) y ninguno lo tiene. En cambio, el
-> tilde de fase, que M0 daba como `role="switch"`, hoy es un `button`.
+**La frase que lo delató.** El manual terminó llamándolos *«interruptor»* en m13 y
+m14, *«tilde»* en las fases y *«casilla»* en m16 — tres palabras para una sola
+acción, porque usar una sola habría descrito mal alguna de las pantallas.
+
+> Registrado parcialmente en M0 (punto 6). Se amplía acá con el caso de las fases,
+> que en M0 figuraba como `role="switch"` y hoy es un `button`, y con la falta de
+> nombre accesible del checkbox de m16.
 
 ---
 
@@ -448,6 +454,64 @@ negocio ya respondió»*.
 > **Corrección respecto de M0.** El índice de la galería describía #28 como
 > *«espera con m15 consultable, que nombra la causa real (5.3)»*. La causa real
 > **no se nombra** en ninguna de las dos variantes: el texto es idéntico.
+
+---
+
+## H-16 · «Buscar horarios libres de Franco» devuelve un mensaje de configuración técnica al setter
+
+**Dónde.** m16 — agenda, al tocar **Buscar horarios libres de Franco**
+([`30-m16-virgen.png`](galeria/png/30-m16-virgen.png)).
+
+**Qué lo hace fricción.** El botón no trae horarios: devuelve, en la pantalla del
+setter, este texto:
+
+> Setup B7.0 pendiente: cargá en la organización develOP el username de Cal.com
+> (`calComUsername`) y el slug del event type (`calComEmbedUrl`, vale el slug
+> pelado o la URL `https://cal.com/usuario/slug`).
+
+Es la única pantalla de todo el recorrido que le habla al setter en jerga de
+sistema: *setup B7.0*, *organización*, *username*, *slug*, *event type*, y dos
+nombres de variables. Está redactada para quien configura la aplicación, y quien
+la lee es una persona que vende y que acaba de conseguir la reunión.
+
+Peor: **está escrita en imperativo** («cargá en la organización develOP…»), o sea
+que le pide al setter que haga algo que no puede hacer y que ni siquiera le
+corresponde. La reacción previsible es reintentar, recargar y perder tiempo en el
+momento más caliente del recorrido — con el prospecto esperando del otro lado.
+
+Contrasta con el resto del panel, que tiene un traductor de errores completo para
+justamente esto (*«Algo falló al guardar — probá de nuevo; si sigue, avisale a
+Franco»*). Acá el mensaje crudo pasa de largo.
+
+**Severidad. Me frena.** Es la pared del último paso: sin horarios no hay reunión,
+y el mensaje no dice ni a quién avisarle.
+
+**La frase que lo delató.** El manual tuvo que **traducir el error** para que
+sirviera: *«Eso no es algo que puedas resolver vos… mandale una captura a Franco y
+decile que falta configurar Cal.com»*. Cuando el manual tiene que reescribir un
+mensaje de error para volverlo accionable, el mensaje está mal dirigido.
+
+---
+
+## H-17 · TRAMO NO DOCUMENTADO · La búsqueda real de horarios y la confirmación del booking
+
+**Dónde.** m16 — el corazón del último paso.
+
+**Qué quedó sin documentar y por qué:**
+
+| Tramo | Motivo |
+|---|---|
+| Cómo se ven los 3 horarios cuando Cal.com los trae de verdad | **No se pudo ejecutar**: la búsqueda devuelve el error de H-16 (Cal.com sin configurar en el entorno). Los horarios de [`31-m16-ofrecidos.png`](galeria/png/31-m16-ofrecidos.png) fueron cargados por el sembrador, no por la herramienta |
+| Qué pasa al tocar **Confirmar y agendar** | **No se ejecutó a propósito**: la pantalla avisa que *«el evento se crea en el calendario real de Franco y Cal.com le manda la confirmación al prospecto»*. Es una acción que sale hacia afuera y toca la agenda de una persona real — no se dispara para documentar |
+
+**Lo que sí quedó documentado del tramo**, por observación directa: la casilla del
+dueño y su efecto sobre el botón, la pantalla con los horarios ya ofrecidos, el
+formulario de confirmación completo (los tres campos obligatorios y sus ayudas), y
+el estado final de reunión agendada.
+
+**Qué haría falta para cerrarlo.** Cargar `calComUsername` y `calComEmbedUrl` en
+la organización develOP del entorno de prueba, y hacer una corrida contra un
+event type descartable de Cal.com.
 
 ---
 
