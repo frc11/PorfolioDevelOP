@@ -184,6 +184,12 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
       }
     : null
 
+  // Turnaround real (P3#5): la última movida comercial que marcó RESPONDIO,
+  // NO `lead.updatedAt` (cualquier mutación del dossier lo pisa y falsea la
+  // espera). `actividades` ya viene desc — la primera con ese resultado es la
+  // más reciente.
+  const ultimaRespuesta = actividades?.find((actividad) => actividad.result === 'RESPONDIO') ?? null
+
   const posicion = derivarPantalla({
     stage,
     status: lead.status,
@@ -247,7 +253,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
       createdAt: evento.createdAt.toISOString(),
       performedByName: evento.performedBy?.name ?? null,
     })),
-    respondioDesde: leadRespondio(lead.status) ? lead.updatedAt.toISOString() : null,
+    respondioDesde: leadRespondio(lead.status)
+      ? (ultimaRespuesta?.createdAt ?? lead.updatedAt).toISOString()
+      : null,
     escaladoAt: dossier?.escaladoAt?.toISOString() ?? null,
     escaladoNota: dossier?.escaladoNota ?? null,
     dmsHoy,

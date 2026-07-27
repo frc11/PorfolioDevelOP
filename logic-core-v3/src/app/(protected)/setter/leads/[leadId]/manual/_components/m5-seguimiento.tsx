@@ -49,6 +49,13 @@ export function M5Contexto({
 }) {
   const respondio = leadRespondio(status)
   const cadencia = cadenciaInfo(followUpCount)
+  // P3#5: el toque agendado ya pasó — mismo criterio de reloj request-time
+  // que `followUpVencido` en `_data.ts` (server component, sin hidratación).
+  const toqueVencido =
+    Boolean(proximoToque) &&
+    new Date(proximoToque as string).getTime() <= Date.now() &&
+    !respondio &&
+    status !== 'POSTERGADO'
 
   return (
     <div className="space-y-3">
@@ -60,7 +67,7 @@ export function M5Contexto({
             {leadPhone}
           </p>
         ) : (
-          <span />
+          <p className="text-xs text-zinc-600">Sin teléfono cargado en la ficha.</p>
         )}
         <Badge tone="zinc" variant="outline">
           {STATUS_LABELS[status]}
@@ -81,6 +88,11 @@ export function M5Contexto({
           <span>
             Postergado — se retoma el{' '}
             <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
+          </span>
+        ) : toqueVencido ? (
+          <span className="text-amber-300/90">
+            Toque vencido — era para el{' '}
+            <span className="font-semibold">{formatFechaCorta(proximoToque as string)}</span>
           </span>
         ) : proximoToque && !respondio ? (
           <span>
