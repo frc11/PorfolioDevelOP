@@ -149,7 +149,7 @@ abrís por tu cuenta, no desde el panel.
 | 05 | [Construir la demo](05-construccion.md) | Las seis fases, y el tilde |
 | 06 | [Publicar y mandar a revisión](06-borrador-chequeo-revision.md) | Borrador, checks duros, Franco revisando |
 | 07 | [Franco rechazó la demo](07-cuando-franco-dice-no.md) | El re-loop, primera y siguientes correcciones |
-| 08 | [Mandar el link](08-envio.md) | El envío y sus tres esperas |
+| 08 | [Mandar el link](08-envio.md) | El envío, y por qué a veces todavía no se abre |
 | 09 | [Agendar la reunión](09-agenda.md) | Horarios, confirmación, traspaso |
 | 10 | [Cuando no sale](10-cierres.md) | Negocios perdidos y negocios que se enfrían |
 
@@ -165,3 +165,10 @@ Todo lo que dice acá se vio en la aplicación andando. Las fotos están en
 [`galeria/`](galeria/INDICE.md) y se sacaron de la misma versión del panel que
 vas a usar. Donde un tramo no se pudo ver, el capítulo lo dice con todas las
 letras en vez de inventarlo.
+
+**Lo que quedó sin documentar.** Un tramo del [capítulo 09](09-agenda.md): cómo se
+ven los horarios de reunión cuando la herramienta de agenda los trae de verdad. En
+el entorno donde se escribió este manual esa búsqueda no llegó a funcionar (falta
+una configuración de Cal.com), así que el capítulo describe todo lo demás del paso
+y avisa explícitamente qué parte no pudo verse. El detalle está en
+[HALLAZGOS-MANUAL.md](HALLAZGOS-MANUAL.md), H-16 y H-17.

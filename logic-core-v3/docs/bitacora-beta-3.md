@@ -1933,3 +1933,70 @@ pendiente** — no se implementó en este sprint (fuera del alcance pedido, solo
 **Cierre:** `tsc` exit 0 · `check:invariants` 17/17 · `test:leados` 25/25 · `test:setter` 60/60.
 `git diff --stat` contra el HEAD previo: 17 archivos, todos dentro de `setter/` o helpers de copy/
 contratos — sin tocar motor. Sin push.
+
+---
+
+## Corrida M1 — el manual de usuario del Panel del Setter, escrito desde la observación
+
+Documento, no feature: **cero cambios en `src/`, en tests y en config**. El diff son 13 archivos, los
+13 bajo `docs/manual-usuario/`. El producto es `00-INDICE.md` + 10 capítulos; el byproducto de
+auditoría es `HALLAZGOS-MANUAL.md`.
+
+**La galería se regeneró antes de escribir una línea.** Los 41 `.png` de M0 existían, pero eran de
+`6a88cbe` — **anteriores a P3.1**, el sprint que cambió copy de pantalla (el vencido visible en m5, el
+`Parquear`→`Pausado`, la pluralización de los horarios, los placeholders de `Zona()`). Un manual
+escrito contra esas fotos habría citado texto que la app ya no dice. Se corrió `seed:galeria` +
+`SETTER_EXTERNAL_SERVER=1 galeria:capturar` contra el mismo prod-QA :3001 que después se usó para
+navegar. 41/41 en 1,9 min.
+
+**La regla de oro se sostuvo, y una vez se aplicó contra mí mismo.** Cada afirmación sale de la app
+viva, de un screenshot o del copy literal — en ese orden. Se navegaron **en vivo los caminos felices
+de 7 de los 10 capítulos**, no sólo se miraron fotos: cargar una ficha de cero y ver que el gate pasa
+de "Todavía falta" a "✓ Señal mínima lista"; registrar veredicto AVANZAR y caer en m4 con la etiqueta
+EVALUADA; mandar el opener y caer EN ESPERA con la fecha del próximo toque calculada sola; guardar el
+brief y caer en CONSTRUCCIÓN PASO 1 DE 6; arrancar construcción y tildar una fase; pegar una URL
+inválida y ver el error quedarse fijo; pasar los 6 obligatorios y mandar a revisión. **Dos acciones no
+se ejecutaron a propósito**: `Confirmar y agendar` (crea un evento en el calendario real de Franco y
+dispara un mail al prospecto) y el `Enviar aviso` del escalamiento.
+
+**Lo que la corrida encontró sin buscarlo: 18 hallazgos.** Cuatro son *me frena*:
+
+1. **4 de 5 herramientas siguen sin URL** (`herramientas.ts` sin cambios desde M0) — **10 de las 16
+   pantallas** mandan a un acceso que dice `PENDIENTE` / `Link pendiente`. Sigue siendo el techo real
+   del recorrido.
+2. **Los 6 tildes del chequeo final se pierden si no se toca `Guardar el chequeo`** — verificado:
+   marcar los seis, salir y volver deja los seis en rojo. Lo caro no son los clics: cada tilde exige
+   abrir el borrador en incógnito y en el celular y tocar cada link. Agravante de aprendizaje: m1 le
+   enseña al setter *«Se guarda solo mientras escribís»*.
+3. **Las dos esperas de m15 muestran texto idéntico con causas opuestas** — verificado contra la DB:
+   #28 es `status PROSPECTO` + `finalUrl` cargada (falta el negocio); #29 es `status RESPONDIO` +
+   `finalUrl: null` (falta que Franco cargue el link). Las dos dicen *«si el negocio responde,
+   registralo»*, que en #29 es una acción ya ocurrida y que no destraba nada.
+4. **`Buscar horarios libres de Franco` devuelve jerga de sistema al setter**: *«Setup B7.0 pendiente:
+   cargá en la organización develOP el username de Cal.com (calComUsername)…»*, en imperativo, a una
+   persona que vende. Es la única pantalla que esquiva el traductor de `error-copy.ts`.
+
+**Tres hallazgos corrigen datos de M0**, y uno de ellos me corrigió a mí. `35-home-foco.png` y
+`36-home-cartera.png` son **el mismo archivo** (mismo md5): la captura del #36 espera la sección
+plegada y dispara sin desplegarla, así que la galería nunca fotografió la cartera. El estado #26 no
+muestra las correcciones anteriores colapsadas — coincide con lo que P3.1 ya había diagnosticado (la
+feature de B-11 nunca llegó a `main`), y lo que M1 agrega es la consecuencia: la frase *«el historial
+de rechazos se conserva»* sigue prometiendo lo que no hay. Y en sentido inverso: **afirmé que el
+checkbox de m16 ya no existía y era falso** — mi propio volcado de controles lo salteaba porque el
+`<input type="checkbox">` no tiene `id`, `name` ni `aria-label`. Se verificó contra el DOM, se
+corrigió el hallazgo, y la falta de nombre accesible quedó registrada como lo que es.
+
+**El patrón que más se repitió** — 5 hallazgos de 3 tramos distintos — es **acción sin acuse en el
+lugar del clic**: `Saltar` que tarda segundos sin señal (y dos toques te devuelven al inicio), el
+tilde de fase que no se ve tildar, los tildes del chequeo que se pierden, `Guardar ficha` junto a
+«se guarda solo».
+
+**Un tramo quedó declarado NO documentado, en vez de inventado**: cómo se ven los horarios cuando
+Cal.com los trae de verdad. No se pudo ejecutar (falta `calComUsername`/`calComEmbedUrl` en la
+organización del entorno) y los horarios de la foto #31 los puso el sembrador. El capítulo 09
+describe todo lo demás del paso y avisa qué parte no pudo verse; el índice lo repite al frente.
+
+**Cierre:** `git diff --stat` contra `e7f81ab`: **13 archivos, 2.692 inserciones, 0 eliminaciones,
+todos bajo `docs/manual-usuario/`**. Cero `src/`, cero tests, cero config — no se corrieron `tsc` ni
+las suites porque no había nada que romper. El WIP ajeno (`docs/probe-01-censo-cosecha.md`, untracked)
+quedó intacto. Sin push.

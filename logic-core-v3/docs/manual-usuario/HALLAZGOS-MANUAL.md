@@ -18,6 +18,42 @@ escribir derecha.
 
 ---
 
+## Resumen
+
+**18 hallazgos.** Ninguno se buscó: todos aparecieron al intentar escribir una
+instrucción honesta.
+
+| | Hallazgo | Dónde |
+|---|---|---|
+| **me frena** | [H-01](#h-01--cuatro-de-las-cinco-herramientas-no-se-pueden-abrir-desde-el-panel) · 4 de 5 herramientas sin acceso cargado | 10 de 16 pantallas |
+| **me frena** | [H-12](#h-12--los-seis-tildes-del-chequeo-final-se-pierden-si-no-tocás-guardar-el-chequeo) · los 6 tildes del chequeo se pierden sin guardar | m14 |
+| **me frena** | [H-15](#h-15--dos-esperas-con-causas-opuestas-muestran-el-mismo-texto--y-en-una-es-falso) · dos esperas opuestas con texto idéntico | m15 |
+| **me frena** | [H-16](#h-16--buscar-horarios-libres-de-franco-devuelve-un-mensaje-de-configuración-técnica-al-setter) · error de configuración crudo al setter | m16 |
+| me confunde | [H-14](#h-14--el-historial-de-rechazos-se-conserva--pero-el-setter-no-lo-puede-ver) · el historial de rechazos no se ve | mr |
+| me confunde | [H-03](#h-03--saltar-no-da-señal-de-que-lo-tocaste-y-tocarlo-dos-veces-te-devuelve-al-principio) · «Saltar» sin acuse; dos toques vuelven al inicio | home |
+| me confunde | [H-06](#h-06--se-guarda-solo-al-lado-de-un-botón-guardar-ficha) · «se guarda solo» junto a un botón de guardar | m1 |
+| me confunde | [H-08](#h-08--dos-numeraciones-de-toque-distintas-en-la-misma-pantalla) · dos numeraciones de toque a la vez | m5 |
+| me confunde | [H-09](#h-09--con-la-cadencia-agotada-la-opción-deshabilitada-se-llama-toque-4) · la opción bloqueada se llama «toque 4» | m5 |
+| me confunde | [H-11](#h-11--el-tilde-de-fase-no-se-anuncia-como-tilde) · el tilde de fase no se ve tildar | m7–m12 |
+| me hace ruido | [H-02](#h-02--la-más-vieja-hace-hace-45-días) · «hace hace 45 días» | home |
+| me hace ruido | [H-04](#h-04--las-novedades-se-acumulan-sin-techo-ni-resumen) · novedades sin techo ni resumen | home |
+| me hace ruido | [H-10](#h-10--la-tira-completadas-de-un-negocio-terminado-no-muestra-la-construcción) · COMPLETADAS sin la construcción | todas |
+| me hace ruido | [H-13](#h-13--tres-controles-distintos-para-la-misma-idea-de-tildar-algo) · tres controles para «tildar algo» | m7–m16 |
+| me hace ruido | [H-18](#h-18--el-filtro-perdidos-post-reunión-lista-negocios-que-nunca-tuvieron-reunión) · filtro «Perdidos (post-reunión)» impreciso | cartera |
+| *interno* | [H-05](#h-05--la-galería-no-tiene-ninguna-foto-de-la-cartera-desplegada) · la galería no fotografió la cartera | galería |
+| *interno* | [H-07](#h-07--en-la-foto-del-descarte-el-razonamiento-dice-lo-contrario-del-veredicto) · razonamiento sembrado contradice el veredicto | galería |
+| *interno* | [H-17](#h-17--tramo-no-documentado--la-búsqueda-real-de-horarios-y-la-confirmación-del-booking) · tramo que no se pudo documentar | m16 |
+
+**Tres hallazgos corrigen datos de la corrida M0** (que no se pudieron reproducir
+o resultaron ser otra cosa): H-13, H-14 y H-15.
+
+**El patrón que más se repite** — cinco hallazgos, de tres tramos distintos — es
+**acción sin acuse en el lugar donde se hizo el clic**: H-03, H-06, H-11, H-12 y
+H-13. El setter toca algo, la pantalla no cambia donde él está mirando, y no
+puede saber si quedó.
+
+---
+
 ## H-01 · Cuatro de las cinco herramientas no se pueden abrir desde el panel
 
 **Dónde.** La barra lateral, en **todas** las pantallas
@@ -407,6 +443,19 @@ fricción.
 > colapsadas»*. Eso **no ocurre**: las anteriores no están, ni colapsadas ni de
 > ninguna otra forma. Las capturas #25 y #26 se diferencian sólo en el nombre del
 > negocio.
+
+> **Ya estaba diagnosticado.** El cierre del sprint P3.1 en
+> [`bitacora-beta-3.md`](../bitacora-beta-3.md) lo dice con todas las letras: el
+> contador «Corrección N°{n}» y el desplegable de correcciones anteriores **nunca
+> llegaron a `main`** — *«La galería (captura #26) fotografió una feature que
+> nunca llegó»* — y quedaron pendientes como **B-11**.
+>
+> Lo que agrega esta corrida no es el diagnóstico técnico sino **la consecuencia
+> para el setter**: la frase *«el historial de rechazos se conserva»* sigue en
+> pantalla prometiendo una función que no existe, y en la segunda vuelta de
+> correcciones el setter trabaja sin saber qué le pidieron en la primera. Mientras
+> B-11 siga abierto, **conviene sacar o reformular esa frase**: hoy es lo único
+> que le dice al setter que no hace falta que se copie la nota.
 
 ---
 
