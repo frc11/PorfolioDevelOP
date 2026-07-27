@@ -139,8 +139,8 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
       <UrgenciaBanner respondioDesde={manual.respondioDesde} />
     ) : undefined
 
-  // Slots por pantalla migrada — cada módulo m<N>-*.tsx llena los tres del
-  // layout-tipo; las pantallas sin migrar muestran los placeholders honestos.
+  // Slots por pantalla — cada módulo m<N>-*.tsx llena los tres del layout-tipo
+  // (las 16 pantallas del manual ya están migradas, corte 5.6).
   const slots =
     pantalla.id === 'm1'
       ? {

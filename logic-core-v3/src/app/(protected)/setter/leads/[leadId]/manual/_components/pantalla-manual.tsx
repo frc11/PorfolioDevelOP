@@ -12,41 +12,19 @@ import {
 import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './manual-nav'
 
 /**
- * Zona-slot del layout-tipo. Con contenido lo enmarca; sin contenido muestra el
- * placeholder honesto del esqueleto (la pantalla real la llena al migrar) —
- * nunca una zona en blanco.
+ * Zona-slot del layout-tipo. Las 16 pantallas del manual están migradas
+ * (corte 5.6): las tres zonas siempre llegan con contenido real, así que acá
+ * solo se enmarca — sin contenido no se renderiza nada (mismo criterio que ya
+ * usaba la reentrada para sus zonas vacías, P3#10).
  */
-function Zona({
-  etiqueta,
-  pendiente,
-  children,
-}: {
-  etiqueta: string
-  pendiente: string
-  children?: ReactNode
-}) {
-  if (children) {
-    return (
-      <section
-        aria-label={etiqueta}
-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
-      >
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-          {etiqueta}
-        </p>
-        <div className="mt-2">{children}</div>
-      </section>
-    )
-  }
+function Zona({ etiqueta, children }: { etiqueta: string; children?: ReactNode }) {
+  if (!children) return null
   return (
-    <section
-      aria-label={etiqueta}
-      className="rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.015] p-4"
-    >
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
+    <section aria-label={etiqueta} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
         {etiqueta}
       </p>
-      <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-600">{pendiente}</p>
+      <div className="mt-2">{children}</div>
     </section>
   )
 }
@@ -91,10 +69,6 @@ export function PantallaManual({
   const completada = posicion.completadas.includes(pantalla.id)
   const indicador = indicadorDeFase(pantalla.id)
   const esConstruccion = pantalla.fase === 'construccion'
-  // La reentrada (M-R) YA está migrada y no lleva munición ni registro propios
-  // (el retrabajo va en las fases): sus zonas vacías se ocultan en vez de mostrar
-  // el placeholder "sin migrar". Las pantallas 'manual' sin migrar sí lo muestran.
-  const esReentrada = pantalla.tipo === 'reentrada'
 
   return (
     <div className="space-y-5">
@@ -163,31 +137,10 @@ export function PantallaManual({
       </section>
 
       {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan.
-          En la reentrada, solo las que tienen contenido (sin placeholders). */}
-      {(contexto || !esReentrada) && (
-        <Zona
-          etiqueta="Contexto del lead"
-          pendiente="Acá se re-sirve lo ya capturado que esta tarea necesita (ficha, evaluación o brief según la pantalla) — llega con la migración de esta pantalla."
-        >
-          {contexto}
-        </Zona>
-      )}
-      {(municion || !esReentrada) && (
-        <Zona
-          etiqueta="Munición"
-          pendiente="Acá va el bloque copiable o el link a la herramienta externa de esta tarea — llega con la migración de esta pantalla."
-        >
-          {municion}
-        </Zona>
-      )}
-      {(captura || !esReentrada) && (
-        <Zona
-          etiqueta="Registro"
-          pendiente="Acá se registra el resultado de la tarea (form, checks o tilde de avance) — mientras esta pantalla no migre, el registro sigue viviendo en el wizard del lead."
-        >
-          {captura}
-        </Zona>
-      )}
+          Zona no renderiza nada sin contenido (reentrada y cualquier slot vacío). */}
+      <Zona etiqueta="Contexto del lead">{contexto}</Zona>
+      <Zona etiqueta="Munición">{municion}</Zona>
+      <Zona etiqueta="Registro">{captura}</Zona>
 
       {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
       {!esActual && (
