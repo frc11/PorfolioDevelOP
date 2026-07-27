@@ -195,4 +195,51 @@ ejemplo.
 
 ---
 
+## H-08 · Dos numeraciones de toque distintas en la misma pantalla
+
+**Dónde.** m5 — seguimiento
+([`09-m5-toque-vencido.png`](galeria/png/09-m5-toque-vencido.png)).
+
+**Qué lo hace fricción.** Arriba, en el contexto, dice **«Toques: 1 de 3»**. Unos
+centímetros más abajo, en la munición, el bloque a copiar se llama **«Mensaje base
+del toque 2 de 3»**. Las dos son correctas —una cuenta los toques *hechos*, la
+otra numera el que *vas a mandar*— pero la pantalla nunca dice cuál es cuál, y
+quedan a la vista al mismo tiempo.
+
+Para alguien que arranca, la lectura natural es «¿voy por el 1 o por el 2?», y de
+eso depende algo concreto: cuántos le quedan antes de que el negocio se enfríe.
+
+**Severidad. Me confunde.**
+
+**La frase que lo delató.** El capítulo 03 tuvo que poner los dos números en
+tablas separadas y explicar el contador antes de nombrar el mensaje base, para
+que el lector no los cruzara. Escribirlos en el orden en que aparecen en la
+pantalla no se entendía.
+
+---
+
+## H-09 · Con la cadencia agotada, la opción deshabilitada se llama «toque 4»
+
+**Dónde.** m5 con 3 de 3 toques
+([`10-m5-cadencia-agotada.png`](galeria/png/10-m5-cadencia-agotada.png)), primera
+opción del registro.
+
+**Qué lo hace fricción.** Las otras tres opciones son acciones en el idioma del
+setter: **Respondió**, **Postergar**, **Rechazó**. La primera, en cambio, dice
+**«toque 4»** — en minúscula, sin verbo, y nombrando algo que justamente **no
+existe**. Se lee como si fuera una opción disponible («mandar el toque 4») cuando
+es exactamente lo contrario.
+
+En la variante normal esa misma opción se llama *«No respondió — mandé un
+toque»*, que sí es una frase.
+
+**Severidad. Me confunde.** Es el momento más delicado de la cadencia —el setter
+está decidiendo si insiste o suelta— y es donde el label es más pobre.
+
+**La frase que lo delató.** *«donde antes decía "No respondió — mandé un toque"
+ahora dice **toque 4**»* — hubo que citarlo en negrita y explicarlo con la
+subfrase de al lado, porque el label solo no comunica que está bloqueado.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*

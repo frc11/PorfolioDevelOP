@@ -51,7 +51,7 @@ fingir un link. Registrado como `H-01`.
 | 00 — Índice | **CERRADO** | `M1 cap 00-01` |
 | 01 — Tu panel | **CERRADO** | `M1 cap 00-01` |
 | 02 — Ficha y evaluación | **CERRADO** | `M1 cap 02` |
-| 03 — Opener y seguimiento | pendiente | — |
+| 03 — Opener y seguimiento | **CERRADO** | `M1 cap 03` |
 | 04 — Brief | pendiente | — |
 | 05 — Construcción | pendiente | — |
 | 06 — Borrador, chequeo y revisión | pendiente | — |
