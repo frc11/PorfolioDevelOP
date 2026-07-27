@@ -58,7 +58,7 @@ fingir un link. Registrado como `H-01`.
 | 07 — Cuando Franco dice no | **CERRADO** | `M1 cap 07` |
 | 08 — Envío | **CERRADO** | `M1 cap 08` |
 | 09 — Agenda | **CERRADO** | `M1 cap 09` |
-| 10 — Cierres | pendiente | — |
+| 10 — Cierres | **CERRADO** | `M1 cap 10` |
 | HALLAZGOS | en curso | — |
 
 ---

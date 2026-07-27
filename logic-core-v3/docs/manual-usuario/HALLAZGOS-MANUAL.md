@@ -515,4 +515,31 @@ event type descartable de Cal.com.
 
 ---
 
-*(Se sigue completando a medida que avanzan los capítulos.)*
+## H-18 · El filtro «Perdidos (post-reunión)» lista negocios que nunca tuvieron reunión
+
+**Dónde.** Home → **Ver toda la cartera** → **Filtrar por estado** → *Perdidos
+(post-reunión)*.
+
+**Qué lo hace fricción.** Verificado en vivo: con ese filtro aplicado aparece un
+negocio cerrado **en la etapa de evaluación**, que nunca pasó por el opener, ni
+por la demo, ni por ninguna reunión. La cartera lo muestra como *«Perdido — sin
+acción pendiente»*, correctamente; lo que no encaja es el nombre del filtro que lo
+trajo.
+
+El par de filtros está pensado como una dicotomía —*Descartados (antes de la
+demo)* vs *Perdidos (post-reunión)*— pero la segunda mitad no describe a sus
+integrantes: **«perdido» es todo lo que cierra Franco, en el punto del recorrido
+que sea.**
+
+**Severidad. Me hace ruido.** El setter que busca un negocio cerrado en la etapa
+temprana no lo va a buscar bajo «post-reunión», y puede concluir que se perdió del
+sistema.
+
+**La frase que lo delató.** El capítulo 10 tuvo que agregar una advertencia para
+que el filtro se pueda usar: *«Leelo como "los que cerró Franco", sin importar
+hasta dónde habían llegado»*. Cuando el manual tiene que enseñar a desconfiar de
+una etiqueta, la etiqueta está mal.
+
+---
+
+*(Cerrado al terminar el capítulo 10.)*
