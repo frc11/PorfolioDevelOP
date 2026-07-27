@@ -179,11 +179,11 @@ export function NavAtras({
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
                   activo
-                    ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
+                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
                     : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
                 )}
               >
-                <Check size={11} strokeWidth={1.5} aria-hidden className="text-emerald-400/80" />
+                <Check size={11} strokeWidth={1.5} aria-hidden className="text-cyan-400/80" />
                 {PANTALLAS[id].corto}
               </Link>
             </li>
