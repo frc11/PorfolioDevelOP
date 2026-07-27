@@ -1880,3 +1880,56 @@ nativo y `role="switch"` para la misma idea de tildar.
 Cierre verde con el prod-QA levantado: `tsc` exit 0, `check:invariants` exit 0, `test:leados` 25/25,
 `test:setter` 60/60. Reproducible en dos corridas (el sembrador es idempotente y la captura resuelve
 por `businessName`, sin ids hardcodeados). Sin push.
+
+---
+
+## Sprint P3.1 — la interfaz deja de decir cosas que no son
+
+Ítems seleccionados del P3 del backlog (`docs/auditorias/AUDITORIA-CIERRE-2026-07.md`, §7) más el
+hallazgo del toque vencido que la galería M0 ya había fotografiado. Todo presentación/copy; motor
+intocable — 7 commits atómicos, uno por ítem.
+
+**El misterio del sprint 5.2 (B-11), resuelto: NO está en HEAD.** `guia-retrabajo.tsx` en `main`
+(`git log` solo muestra el commit `2d8a3bc` de A-26/A-29, ningún "sprint 5.2") renderiza el ÚLTIMO
+rechazo nomás — motivo/dónde/arreglo, sin contador "Corrección N°{n}" ni `<details>` de correcciones
+anteriores. La galería (captura #26) fotografió una feature que nunca llegó a `main`. **B-11 sigue
+pendiente** — no se implementó en este sprint (fuera del alcance pedido, solo el diagnóstico).
+
+**Hecho:**
+1. **El vencido se ve vencido (P3#5).** `m5-seguimiento.tsx`: nueva rama `toqueVencido` (proximoToque
+   pasado + no respondió + no postergado) → "Toque vencido — era para el {fecha}" en ámbar, antes de
+   caer al "Próximo toque" normal. `respondioDesde` (`_data.ts`) dejó de leer `lead.updatedAt`
+   (cualquier mutación del dossier lo pisaba, falseando la espera del `UrgenciaBanner`) y ahora busca
+   la última activity con `result: 'RESPONDIO'` — con fallback a `updatedAt` solo si no hay ninguna.
+2. **Clamps y topes (P3#3).** `textoLibre` (contracts.ts, el preprocessor compartido de Ficha/Brief/
+   Rechazo) sumó `.max(5000)` — techo de sanidad, no de UX. `line-clamp-2` en el h1 de la cabecera del
+   manual y en el bloque de rechazo del `LeadCard` de cartera; `line-clamp-3` en las notas del lead.
+   `break-words` en los 4 `<pre>` que faltaban (CopyBlock, brief-form, ficha-step, m3-veredicto) y en
+   la nota del timeline — `whitespace-pre-wrap` solo envuelve en espacios, no corta tokens largos.
+3. **Un solo verbo (P3#7).** Censo por grep: "Pausado" domina ampliamente en todo el setter (badges,
+   toasts, `flow.ts`, invariantes); "Parquear" solo vivía en `foco-surface.tsx` + un comentario de
+   `foco.actions.ts`. Unificado a Pausar/Pausado — coincide además con el nombre real de la action
+   (`pausarLead`).
+4. **Chip ACTIVO (P3#8).** `NavAtras` usaba emerald para el paso activo entre completados; su hermano
+   `NavConstruccion` ya usaba cyan para el mismo concepto. Unificado a cyan.
+5. **`<span/>` vacío (P3#9).** Mismo archivo que el ítem 1: sin teléfono, `m5-seguimiento.tsx` ahora
+   muestra el texto literal que ya usaba `m16-agenda.tsx` ("Sin teléfono cargado en la ficha.") en vez
+   de un span vacío.
+6. **Pluralizar horarios (P3#11).** `buildHorariosMensajeBlock` arma "un horario" / "N horarios" según
+   `slots.length` real, en vez de un "tres" fijo que mentía si el setter cargaba otra cantidad.
+7. **Placeholders "sin migrar" (P3#10, mitad segura).** Las 16 pantallas del manual están migradas
+   (corte 5.6) — cada rama del switch de `page.tsx` siempre pasa `contexto`/`municion`/`captura`, así
+   que el placeholder dashed de `Zona()` en `pantalla-manual.tsx` era código muerto, nunca visible al
+   setter. Simplificado: `Zona` sin contenido ahora no renderiza nada (mismo criterio que ya usaba la
+   reentrada). Las `GUIA_CONSTRUCCION`/`REVISION`/`TRASPASO` de `guidance-content.ts` se verificaron
+   SIN tocar: 0 referencias fuera de su propia definición — muertas y sin cablear, decisión de
+   contenido de Franco, anotado sin implementar.
+8. **Lente novato (P3#14/#15).** `STATUS_LABELS.VIO_VIDEO` ya dice "En conversación" en `flow-content.ts`
+   — P3#14 resuelto de rebote, probablemente por el sprint 1.1 (el admin conserva su propio label
+   "Vio video", fuera de este scope). P3#15 seguía literal: reformulado "entra fría, en ficha" (jerga
+   interna: caliente/stage) a "entra a tu cartera sin marca de caliente, lista para completar la
+   Ficha" en `nuevo/importar/page.tsx` e `importar-prospectos-form.tsx`.
+
+**Cierre:** `tsc` exit 0 · `check:invariants` 17/17 · `test:leados` 25/25 · `test:setter` 60/60.
+`git diff --stat` contra el HEAD previo: 17 archivos, todos dentro de `setter/` o helpers de copy/
+contratos — sin tocar motor. Sin push.
