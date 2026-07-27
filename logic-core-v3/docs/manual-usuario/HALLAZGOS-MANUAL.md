@@ -147,4 +147,52 @@ haciendo el clic a mano.
 
 ---
 
+## H-06 · «Se guarda solo» al lado de un botón «Guardar ficha»
+
+**Dónde.** m1 — la ficha
+([`01-m1-ficha-vacia.png`](galeria/png/01-m1-ficha-vacia.png)), al pie del
+formulario.
+
+**Qué lo hace fricción.** El botón dice **Guardar ficha**. Justo debajo, la
+leyenda dice *«Se guarda solo mientras escribís. Podés cerrar y seguir después.»*
+Las dos cosas juntas dejan al setter sin saber lo único que le importa: **¿si
+cierro sin tocar el botón, pierdo lo que escribí o no?** Y como este es el primer
+formulario que toca en su vida dentro del panel, es exactamente el momento en que
+menos margen tiene para arriesgarse.
+
+El cartel de arriba tampoco lo desempata: dice *«guardá y pasala por el
+Evaluador»* — o sea, pide guardar.
+
+**Severidad. Me confunde.**
+
+**La frase que lo delató.** El capítulo 02 terminó instruyendo *«7. Tocá Guardar
+ficha»* sin poder explicar para qué, porque la pantalla afirma que no hace falta.
+La instrucción honesta habría sido «tocalo por las dudas», que no es una
+instrucción.
+
+---
+
+## H-07 · En la foto del descarte, el razonamiento dice lo contrario del veredicto
+
+**Dónde.** m3 con veredicto Descartar
+([`05-m3-veredicto-descartado.png`](galeria/png/05-m3-veredicto-descartado.png)).
+
+**Qué lo hace fricción.** La pantalla muestra **SCORE 2/5 · DESCARTAR**, motivo
+*«Sin presencia ni materia prima suficiente»* — y arriba, bajo **RAZONAMIENTO DEL
+EVALUADOR**, el texto dice *«Negocio con presencia digital y reseñas reales —
+buen fit para una demo.»* Justo lo opuesto.
+
+**Severidad.** No afecta al setter en producción: el razonamiento lo pega él, así
+que en un caso real va a ser coherente. **Afecta a la enseñanza**: es la única
+foto de un descarte que existe, y es la que se usaría para mostrarle a alguien
+nuevo cómo se lee un veredicto negativo. El dato viene del sembrador de la
+galería, que usa el mismo razonamiento genérico para todos los estados.
+
+**La frase que lo delató.** Al escribir «la pantalla queda de sólo lectura, con
+el score, el veredicto, el razonamiento y el motivo» hubo que evitar
+deliberadamente citar el razonamiento, porque citarlo hacía incomprensible el
+ejemplo.
+
+---
+
 *(Se sigue completando a medida que avanzan los capítulos.)*
