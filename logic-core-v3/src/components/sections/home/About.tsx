@@ -291,7 +291,7 @@ const LocationBadge = ({ progress, active }: { progress?: MotionValue<number>; a
         <div className="mt-6 inline-flex max-w-full items-center gap-3 rounded-full border border-white/15 bg-gradient-to-r from-white/[0.07] via-white/[0.025] to-white/[0.05] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_44px_rgba(255,255,255,0.04)]">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-zinc-100 shadow-[0_0_16px_rgba(255,255,255,0.38)]" />
             <span className="text-sm tracking-wide text-zinc-300">
-                TucumÃ¡n, Argentina - trabajamos con clientes de todo el paÃ­s
+                Tucumán, Argentina — trabajamos con clientes de todo el país
             </span>
         </div>
     );

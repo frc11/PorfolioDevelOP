@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     url: "https://develop.com.ar",
     siteName: "develOP",
     title: "develOP — Agencia de Desarrollo Digital | Tucumán, Argentina",
-    description: "Desarrollo web, software, automatización e IA para negocios del NOA. +47 empresas potenciadas.",
+    description: "develOP — ingeniería de software, automatización con IA y sistemas a medida. Desde Tucumán para todo el país.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "develOP Agencia Digital" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "develOP — Desarrollo Digital en Tucumán",
-    description: "Desarrollo web, software, automatización e IA para negocios del NOA. +47 empresas potenciadas.",
+    description: "develOP — ingeniería de software, automatización con IA y sistemas a medida. Desde Tucumán para todo el país.",
     images: ["/og-image.png"],
   },
 };
@@ -59,7 +59,7 @@ export default function RootLayout({
     // <html> ANTES de hidratar (scroll-lock temprano del intro en home), mientras
     // el SSR no lo trae → mismatch legítimo y esperado SOLO en el style del <html>.
     // Es shallow (un nivel): no enmascara mismatches de los hijos.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />

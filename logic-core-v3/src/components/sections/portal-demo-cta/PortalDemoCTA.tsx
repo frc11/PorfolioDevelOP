@@ -4,7 +4,7 @@ import { motion } from 'motion/react'
 import { MessageCircle, LogIn, CheckCircle2 } from 'lucide-react'
 
 const WHATSAPP_PREFILL_TEXT =
-  '¡Hola, develOP! Vi su landing y me interesa el portal develOP para mi negocio. ¿Podemos coordinar una llamada de 30 minutos?'
+  '¡Hola develOP! Vi la web y quiero coordinar una llamada. Mi negocio es'
 
 const TRUST_SIGNALS = ['Sin permanencia', 'Sin setup fee', 'Cancelás cuando quieras']
 

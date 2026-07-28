@@ -7,7 +7,7 @@ import { MessageCircle, FileText, MapPin, Clock, Shield, Users } from 'lucide-re
 
 const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';
 const WA_TEXT = encodeURIComponent(
-  'Hola! Vi tu página y me gustaría saber qué necesita mi negocio para crecer. ¿Pueden ayudarme?'
+  '¡Hola develOP! Vi la web y quiero coordinar una llamada. Mi negocio es'
 );
 
 const LOGO_PATH =

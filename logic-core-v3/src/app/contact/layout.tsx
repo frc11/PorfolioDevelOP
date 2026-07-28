@@ -19,6 +19,14 @@ export const metadata: Metadata = {
         description: "Hablemos de tu proyecto. Respondemos en menos de 24h.",
         images: ["/og-image.png"],
     },
+    alternates: {
+        canonical: "https://develop.com.ar/contact",
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: { index: true, follow: true, "max-snippet": -1 },
+    },
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

@@ -68,7 +68,7 @@ const SERVICES: Service[] = [
     description:
       'Diseñamos la presencia digital que pone tu negocio en Google, captura consultas mientras dormís y convierte visitas en clientes reales.',
     price: '$800 USD',
-    timeline: '15 dias',
+    timeline: '15 días',
     metric: '+340% consultas promedio',
     sectors: ['Concesionarias', 'Clínicas', 'Gimnasios', 'Restaurantes'],
     outcomes: ['Más autoridad en Google', 'Carga impecable en mobile', 'Captación 24/7'],
@@ -86,7 +86,7 @@ const SERVICES: Service[] = [
     description:
       'Un agente de IA responde consultas, califica leads y agenda reuniones por WhatsApp. A las 3AM, en feriados, siempre disponible.',
     price: '$300 USD',
-    timeline: '7 dias',
+    timeline: '7 días',
     metric: '94% respuesta automática',
     sectors: ['Concesionarias', 'Clínicas', 'Comercios', 'Inmobiliarias'],
     outcomes: ['Atención inmediata', 'Mejor calidad de lead', 'Agenda operando sola'],
@@ -104,7 +104,7 @@ const SERVICES: Service[] = [
     description:
       'Conectamos tus herramientas y automatizamos lo repetitivo. Reportes, seguimientos y notificaciones corriendo solos mientras vos te ocupás de lo importante.',
     price: '$200 USD',
-    timeline: '5 dias',
+    timeline: '5 días',
     metric: '23hs por semana ahorradas',
     sectors: ['Distribuidoras', 'Comercios', 'Clínicas', 'Inmobiliarias'],
     outcomes: ['Menos trabajo manual', 'Follow-up automático', 'Reportes al instante'],
@@ -2667,7 +2667,7 @@ function WebScene({ service }: { service: Service }) {
                   textTransform: 'uppercase',
                 }}
               >
-                Proximo sprint
+                Próximo sprint
               </span>
             </div>
 
@@ -8004,10 +8004,10 @@ const SERVICE_IMPACT_ITEMS: Record<number, Array<{ label: string; value: string 
   3: [
     { label: 'Flujo', value: 'Apps conectadas' },
     { label: 'Alertas', value: 'Seguimiento activo' },
-    { label: 'Reportes', value: 'Envio programado' },
+    { label: 'Reportes', value: 'Envío programado' },
   ],
   4: [
-    { label: 'Modulos', value: 'Ventas + stock' },
+    { label: 'Módulos', value: 'Ventas + stock' },
     { label: 'Datos', value: 'Reportes propios' },
     { label: 'Costo', value: 'Sin licencias' },
   ],
@@ -9183,7 +9183,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                 marginBottom: 14,
               }}
             >
-              Cierre de diagnostico
+              Cierre de diagnóstico
             </div>
             <h3
               style={{
@@ -9196,7 +9196,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                 fontWeight: 900,
               }}
             >
-              Converti esta lectura en una decision clara.
+              Convertí esta lectura en una decisión clara.
             </h3>
             <p
               style={{
@@ -9207,8 +9207,8 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                 color: 'rgba(255,255,255,0.64)',
               }}
             >
-              Si tu negocio necesita verse mejor, responder mas rapido, ahorrar horas o centralizar la operacion,
-              el proximo paso es elegir el frente con mayor impacto y construirlo con foco comercial desde el dia uno.
+              Si tu negocio necesita verse mejor, responder más rápido, ahorrar horas o centralizar la operación,
+              el próximo paso es elegir el frente con mayor impacto y construirlo con foco comercial desde el día uno.
             </p>
             <div
               style={{
@@ -9220,8 +9220,8 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
               }}
             >
               {[
-                { label: '4 areas', value: 'Presencia, IA, procesos y sistema' },
-                { label: '1 plan', value: 'Prioridad segun retorno real' },
+                { label: '4 áreas', value: 'Presencia, IA, procesos y sistema' },
+                { label: '1 plan', value: 'Prioridad según retorno real' },
                 { label: '0 relleno', value: 'Solo piezas que mueven ventas' },
               ].map((item) => (
                 <motion.div
@@ -9275,7 +9275,7 @@ function ServicesFullWidthCta({ onNavigate }: { onNavigate: (href: string) => vo
                 color: 'rgba(255,255,255,0.40)',
               }}
             >
-              Elegi por donde empezar
+              Elegí por dónde empezar
             </div>
             {ORDERED_SERVICES.map((service) => {
               const Icon = service.icon;
