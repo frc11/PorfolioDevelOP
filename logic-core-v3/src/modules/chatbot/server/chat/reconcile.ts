@@ -144,6 +144,46 @@ export function computeHookBudgetMs(requestElapsedMs: number): number {
   )
 }
 
+// ─── 1.c STREAM-TIMEOUT: silencio máximo tolerado del provider ───────────────
+
+/**
+ * STREAM-TIMEOUT — Silencio máximo tolerado ENTRE chunks del provider antes de
+ * abortar el stream.
+ *
+ * EL PROBLEMA QUE RESUELVE (medido en prod con los probes de PROBE-STREAM):
+ * el stream de Gemini entrega el texto completo y después NO EMITE SU CHUNK
+ * TERMINAL. El SDK espera para siempre: `onStepFinish` nunca dispara,
+ * `onFinish` nunca entra, y la función muere en el kill de `maxDuration` (30s
+ * exactos) con el input del widget trabado todo ese tiempo. La corrida real
+ * mostró `firstChunk` a los 6.2s y después silencio absoluto hasta el kill.
+ * Es un problema conocido de la API de Gemini, NO de la DB ni de los tools
+ * (cero probes de tool en esa corrida) ni de `onFinish` (nunca se llega).
+ *
+ * CÓMO CORTA: `chunkMs` arma un timer que `resetChunkTimeout()` reinicia en la
+ * PRIMERA línea del transform de cada chunk del provider (ai/dist/index.js:7793).
+ * Al vencer, dispara un AbortController que el SDK mergea en el `abortSignal`
+ * del run; el `pull` del stream ve `abortSignal.aborted`, enquea el chunk
+ * `abort` y cierra el stream. El cliente recibe `done` y el input se destraba.
+ *
+ * POR QUÉ SOLO `chunkMs` — `stepMs`/`totalMs` quedan deliberadamente sin setear:
+ *   - `chunkMs` se arma recién DESPUÉS del primer chunk, así que no puede matar
+ *     una respuesta que tarda en arrancar. Cubre exactamente nuestro síntoma:
+ *     silencio DESPUÉS de que el texto ya llegó.
+ *   - `stepMs` se arma al inicio del step, antes de `doStream`: cubriría "nunca
+ *     llega el primer chunk", que NO es nuestro síntoma y del que hoy no hay
+ *     evidencia — y mataría generaciones legítimas lentas. Queda disponible si
+ *     algún día los logs muestran ese caso.
+ *
+ * CALIBRABLE: los chunks de Gemini llegan con ms de diferencia entre sí, así que
+ * 5s de silencio es señal clara de stream muerto sin riesgo de cortar una
+ * generación sana. Ajustable contra tráfico real sin tocar lógica.
+ *
+ * OJO con la forma del valor: `getChunkTimeoutMs` (ai/dist/index.js:1043) SOLO
+ * lee `.chunkMs` cuando `timeout` es un OBJETO — pasar un número plano se
+ * interpreta como `totalMs` y tendría un efecto completamente distinto.
+ */
+export const STREAM_CHUNK_TIMEOUT_MS = 5_000
+
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────
 
 /** Dónde se detectó que el turno NO entregó una respuesta cobrable. */

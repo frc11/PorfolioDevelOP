@@ -56,6 +56,8 @@ import {
   EVENT_LOG_DEADLINE_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   computeHookBudgetMs,
+  // STREAM-TIMEOUT — silencio máximo del provider antes de abortar el stream.
+  STREAM_CHUNK_TIMEOUT_MS,
 } from './reconcile'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
@@ -1086,6 +1088,14 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
+    // STREAM-TIMEOUT — Gemini entrega el texto completo y después NO emite su
+    // chunk terminal: el SDK espera para siempre y la función muere en el kill
+    // de `maxDuration` (30s) con el input del widget trabado. Este techo aborta
+    // el stream tras STREAM_CHUNK_TIMEOUT_MS de silencio del provider, así el
+    // stream cierra y el cliente pasa a `ready`. SOLO `chunkMs` a propósito
+    // (`stepMs`/`totalMs` matarían generaciones lentas legítimas) — el porqué
+    // completo, y la forma OBJETO obligatoria del valor, en reconcile.ts.
+    timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
     // camino feliz); solo inyecta la derivación canned en un run vacío.
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
