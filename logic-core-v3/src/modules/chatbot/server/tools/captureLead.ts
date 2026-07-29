@@ -11,6 +11,9 @@ import type { VerticalToolCopy } from '../verticals/types'
 import { syncLeadToCrm } from '../crm'
 import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext, CaptureLeadResult, ToolExecuteResult } from './types'
+// PROBE-STREAM — instrumentación TEMPORAL de diagnóstico (gated por
+// CHATBOT_STREAM_PROBE). Ver server/chat/streamProbe.ts.
+import { probeAround, DISABLED_STREAM_PROBE } from '../chat/streamProbe'
 
 /**
  * Tool `capture_lead` — SERVER-SIDE.
@@ -197,11 +200,16 @@ async function captureLeadExecute(
   ctx: ToolCallContext
 ): Promise<ToolExecuteResult<CaptureLeadResult>> {
   const scope = forOrg(ctx.organizationId)
+  // PROBE-STREAM — ver el enter/exit del tool completo en buildCaptureLeadTool;
+  // acá van los awaits a DB individuales, para localizar CUÁL de ellos cuelga.
+  const probe = ctx.probe ?? DISABLED_STREAM_PROBE
   try {
     // 1. Check if a lead already exists for this conversation
-    const existing = await scope.chatbotLead.findFirst({
-      where: { conversationId: ctx.conversationId },
-    })
+    const existing = await probeAround(probe, 'tool:capture_lead:db:check_existing', () =>
+      scope.chatbotLead.findFirst({
+        where: { conversationId: ctx.conversationId },
+      }),
+    )
 
     if (existing) {
       console.log(
@@ -227,10 +235,12 @@ async function captureLeadExecute(
     //    por ése (no perdemos el lead). Si no queda ninguno → re-ask graceful (el bot
     //    repregunta en vez de enmudecer por un throw del SDK).
     const visitorMessages = (
-      await scope.chatMessage.findMany({
-        where: { conversationId: ctx.conversationId, role: 'USER' },
-        select: { content: true },
-      })
+      await probeAround(probe, 'tool:capture_lead:db:visitor_messages', () =>
+        scope.chatMessage.findMany({
+          where: { conversationId: ctx.conversationId, role: 'USER' },
+          select: { content: true },
+        }),
+      )
     ).map((m) => m.content)
 
     const rawPhone = input.phone?.trim() || null
@@ -281,15 +291,17 @@ async function captureLeadExecute(
           emailReason,
         }),
       )
-      await logChatbotEvent({
-        organizationId: ctx.organizationId,
-        botConfigId: ctx.botConfigId,
-        type: 'tool.lead_reask',
-        level: 'warn',
-        message: `capture_lead repreguntó contacto (phone=${phoneReason}, email=${emailReason})`,
-        conversationId: ctx.conversationId,
-        metadata: { phoneReason, emailReason },
-      })
+      await probeAround(probe, 'tool:capture_lead:db:reask_event', () =>
+        logChatbotEvent({
+          organizationId: ctx.organizationId,
+          botConfigId: ctx.botConfigId,
+          type: 'tool.lead_reask',
+          level: 'warn',
+          message: `capture_lead repreguntó contacto (phone=${phoneReason}, email=${emailReason})`,
+          conversationId: ctx.conversationId,
+          metadata: { phoneReason, emailReason },
+        }),
+      )
 
       return {
         success: false,
@@ -357,45 +369,50 @@ async function captureLeadExecute(
     // 4. Create the lead and update conversation in a transaction.
     //    B5.1: providedPhone/providedEmail SE DERIVAN del input — no del LLM.
     //    El bot no puede inflar esto: si no mandó phone, providedPhone=false. Estructural.
-    const result = await scope.$transaction(async (tx) => {
-      const lead = await tx.chatbotLead.create({
-        botConfigId: ctx.botConfigId,
-        conversationId: ctx.conversationId,
-        name: input.name,
-        email,
-        phone,
-        intent: intentEnum,
-        message: input.contextSummary,
-        status: 'NEW',
-        // B5.1 — Señales estructuradas (columnas legacy — el panel las muestra).
-        category: input.category,
-        requestedAppointment: input.requestedAppointment,
-        mentionedFinancing: input.mentionedFinancing,
-        mentionedTradeIn: input.mentionedTradeIn,
-        askedSpecificModel: input.askedSpecificModel,
-        providedPhone,
-        providedEmail,
-        // UTM.1 — copiado 1:1 desde ctx (que a su vez viene de Conversation,
-        // ver handleChatRequest.ts). NUNCA se deriva de nada del LLM/input.
-        utmSource: ctx.utmSource ?? null,
-        utmMedium: ctx.utmMedium ?? null,
-        utmCampaign: ctx.utmCampaign ?? null,
-        // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
-        // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
-        signals: signalsSnapshot as unknown as Prisma.InputJsonValue,
-        // B5.2 — Score heurístico calculado server-side (cero LLM).
-        score,
-        classification,
-        // `scoreSignals` es `ScoredSignal[]` (JSON-serializable estructuralmente).
-        // Cast en el boundary Prisma porque `keyof LeadSignals` no es asignable
-        // a InputJsonValue sin perder tipo en el dominio.
-        scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
-      })
+    // PROBE-STREAM — candidato principal del sprint: un $transaction interactivo
+    // completo (create + update). Si algo cuelga acá, es el que más se parece al
+    // patrón "socket muerto / lock" ya visto en onFinish antes de DEADLINE-ONFINISH.
+    const result = await probeAround(probe, 'tool:capture_lead:db:transaction', () =>
+      scope.$transaction(async (tx) => {
+        const lead = await tx.chatbotLead.create({
+          botConfigId: ctx.botConfigId,
+          conversationId: ctx.conversationId,
+          name: input.name,
+          email,
+          phone,
+          intent: intentEnum,
+          message: input.contextSummary,
+          status: 'NEW',
+          // B5.1 — Señales estructuradas (columnas legacy — el panel las muestra).
+          category: input.category,
+          requestedAppointment: input.requestedAppointment,
+          mentionedFinancing: input.mentionedFinancing,
+          mentionedTradeIn: input.mentionedTradeIn,
+          askedSpecificModel: input.askedSpecificModel,
+          providedPhone,
+          providedEmail,
+          // UTM.1 — copiado 1:1 desde ctx (que a su vez viene de Conversation,
+          // ver handleChatRequest.ts). NUNCA se deriva de nada del LLM/input.
+          utmSource: ctx.utmSource ?? null,
+          utmMedium: ctx.utmMedium ?? null,
+          utmCampaign: ctx.utmCampaign ?? null,
+          // EV.3 — Dual-write: señales del pack vertical en formato estructurado.
+          // ADEMÁS de las columnas legacy de arriba (no en reemplazo).
+          signals: signalsSnapshot as unknown as Prisma.InputJsonValue,
+          // B5.2 — Score heurístico calculado server-side (cero LLM).
+          score,
+          classification,
+          // `scoreSignals` es `ScoredSignal[]` (JSON-serializable estructuralmente).
+          // Cast en el boundary Prisma porque `keyof LeadSignals` no es asignable
+          // a InputJsonValue sin perder tipo en el dominio.
+          scoreSignals: scoreSignals as unknown as Prisma.InputJsonValue,
+        })
 
-      await tx.conversation.update(ctx.conversationId, { leadCaptured: true })
+        await tx.conversation.update(ctx.conversationId, { leadCaptured: true })
 
-      return lead
-    })
+        return lead
+      }),
+    )
 
     // 5. Notify the client without blocking the bot response.
     async function notifyClient() {
@@ -492,34 +509,36 @@ async function captureLeadExecute(
       })
     )
 
-    await logChatbotEvent({
-      organizationId: ctx.organizationId,
-      botConfigId: ctx.botConfigId,
-      type: 'tool.lead_captured',
-      level: 'info',
-      message: `Lead capturado (intent: ${input.intent}, category: ${input.category}, score: ${score}/${classification}${dqReason ? ` [dq=${dqReason}]` : ''}, canales: ${channels.join('+') || 'ninguno'})`,
-      conversationId: ctx.conversationId,
-      metadata: {
-        intent: input.intent,
-        category: input.category,
-        channels,
-        leadId: result.id,
-        // B5.1 — flags de señal para trazabilidad / debugging del scoring
-        signals: {
-          requestedAppointment: input.requestedAppointment,
-          mentionedFinancing: input.mentionedFinancing,
-          mentionedTradeIn: input.mentionedTradeIn,
-          askedSpecificModel: input.askedSpecificModel,
-          providedPhone,
-          providedEmail,
+    await probeAround(probe, 'tool:capture_lead:db:completed_event', () =>
+      logChatbotEvent({
+        organizationId: ctx.organizationId,
+        botConfigId: ctx.botConfigId,
+        type: 'tool.lead_captured',
+        level: 'info',
+        message: `Lead capturado (intent: ${input.intent}, category: ${input.category}, score: ${score}/${classification}${dqReason ? ` [dq=${dqReason}]` : ''}, canales: ${channels.join('+') || 'ninguno'})`,
+        conversationId: ctx.conversationId,
+        metadata: {
+          intent: input.intent,
+          category: input.category,
+          channels,
+          leadId: result.id,
+          // B5.1 — flags de señal para trazabilidad / debugging del scoring
+          signals: {
+            requestedAppointment: input.requestedAppointment,
+            mentionedFinancing: input.mentionedFinancing,
+            mentionedTradeIn: input.mentionedTradeIn,
+            askedSpecificModel: input.askedSpecificModel,
+            providedPhone,
+            providedEmail,
+          },
+          // B5.2/B5.3 — score calculado + desglose + razón de DQ
+          score,
+          classification,
+          dqReason,
+          scoreBreakdown: scoreSignals,
         },
-        // B5.2/B5.3 — score calculado + desglose + razón de DQ
-        score,
-        classification,
-        dqReason,
-        scoreBreakdown: scoreSignals,
-      },
-    })
+      }),
+    )
 
     return {
       success: true,
@@ -549,9 +568,13 @@ async function captureLeadExecute(
  */
 export function buildCaptureLeadTool(ctx: ToolCallContext) {
   const { toolCopy } = getVerticalPack(ctx.verticalPack ?? 'base')
+  // PROBE-STREAM — enter/exit/error de la tool COMPLETA (los awaits a DB
+  // individuales están instrumentados dentro de captureLeadExecute).
+  const probe = ctx.probe ?? DISABLED_STREAM_PROBE
   return tool({
     description: CAPTURE_LEAD_DESCRIPTION,
     inputSchema: buildCaptureLeadSchema(toolCopy),
-    execute: async (input: CaptureLeadInput) => captureLeadExecute(input, ctx),
+    execute: async (input: CaptureLeadInput) =>
+      probeAround(probe, 'tool:capture_lead', () => captureLeadExecute(input, ctx)),
   })
 }

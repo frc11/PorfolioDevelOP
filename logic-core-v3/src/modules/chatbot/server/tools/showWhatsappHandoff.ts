@@ -6,6 +6,9 @@ import { notifyTelegramOptional } from '@/lib/notifications/telegram'
 import type { ToolCallContext } from './types'
 import { getVerticalPack } from '../verticals'
 import type { VerticalToolCopy } from '../verticals/types'
+// PROBE-STREAM — instrumentación TEMPORAL de diagnóstico (gated por
+// CHATBOT_STREAM_PROBE). Ver server/chat/streamProbe.ts.
+import { probeAround, DISABLED_STREAM_PROBE, type StreamProbe } from '../chat/streamProbe'
 
 /**
  * Tool `show_whatsapp_handoff` — HYBRID.
@@ -90,12 +93,20 @@ interface ChannelLite {
   hadLead: boolean
 }
 
-async function checkLeadStatus(organizationId: string, conversationId: string): Promise<ChannelLite> {
+async function checkLeadStatus(
+  organizationId: string,
+  conversationId: string,
+  // PROBE-STREAM — parámetro interno (esta función no es pública ni parte de
+  // ningún tool schema): permite instrumentar el `await` a DB de acá adentro.
+  probe: StreamProbe,
+): Promise<ChannelLite> {
   try {
-    const conv = await forOrg(organizationId).conversation.findFirst({
-      where: { id: conversationId },
-      select: { leadCaptured: true },
-    })
+    const conv = await probeAround(probe, 'tool:show_whatsapp_handoff:db:check_lead_status', () =>
+      forOrg(organizationId).conversation.findFirst({
+        where: { id: conversationId },
+        select: { leadCaptured: true },
+      }),
+    )
     return { hadLead: Boolean(conv?.leadCaptured) }
   } catch {
     return { hadLead: false }
@@ -106,30 +117,34 @@ async function showWhatsappHandoffExecute(
   input: ShowWhatsappHandoffInput,
   ctx: ToolCallContext
 ): Promise<{ success: boolean }> {
-  const { hadLead } = await checkLeadStatus(ctx.organizationId, ctx.conversationId)
+  // PROBE-STREAM — ver el enter/exit del tool completo en buildShowWhatsappHandoffTool.
+  const probe = ctx.probe ?? DISABLED_STREAM_PROBE
+  const { hadLead } = await checkLeadStatus(ctx.organizationId, ctx.conversationId, probe)
 
   const derivedReason =
     input.reason ?? `intent=${input.intent}: ${input.topicSummary.slice(0, 140)}`
 
-  await logChatbotEvent({
-    organizationId: ctx.organizationId,
-    botConfigId: ctx.botConfigId,
-    type: 'handoff.whatsapp',
-    level: 'info',
-    message: `Derivación a WhatsApp${input.visitorName ? ` — ${input.visitorName}` : ''} (${input.intent})`,
-    conversationId: ctx.conversationId,
-    metadata: {
-      // Campos preservados para el dashboard pre-B3.6 (multiTenantQueries.ts).
-      visitorName: input.visitorName ?? null,
-      reason: derivedReason,
-      // Campos nuevos B3.6 — contexto rico.
-      visitorContact: input.visitorContact ?? null,
-      intent: input.intent,
-      topicSummary: input.topicSummary,
-      purchaseSignals: input.purchaseSignals ?? null,
-      hadLeadBeforeHandoff: hadLead,
-    },
-  })
+  await probeAround(probe, 'tool:show_whatsapp_handoff:db:event', () =>
+    logChatbotEvent({
+      organizationId: ctx.organizationId,
+      botConfigId: ctx.botConfigId,
+      type: 'handoff.whatsapp',
+      level: 'info',
+      message: `Derivación a WhatsApp${input.visitorName ? ` — ${input.visitorName}` : ''} (${input.intent})`,
+      conversationId: ctx.conversationId,
+      metadata: {
+        // Campos preservados para el dashboard pre-B3.6 (multiTenantQueries.ts).
+        visitorName: input.visitorName ?? null,
+        reason: derivedReason,
+        // Campos nuevos B3.6 — contexto rico.
+        visitorContact: input.visitorContact ?? null,
+        intent: input.intent,
+        topicSummary: input.topicSummary,
+        purchaseSignals: input.purchaseSignals ?? null,
+        hadLeadBeforeHandoff: hadLead,
+      },
+    }),
+  )
 
   // Telegram al equipo solo si NO hubo lead capturado en esta conversación.
   // Si hubo capture_lead, su propia notificación Telegram ya avisó al equipo —
@@ -156,10 +171,15 @@ async function showWhatsappHandoffExecute(
 
 export function buildShowWhatsappHandoffTool(ctx: ToolCallContext) {
   const { toolCopy } = getVerticalPack(ctx.verticalPack ?? 'base')
+  // PROBE-STREAM — enter/exit/error de la tool COMPLETA (los awaits a DB
+  // individuales están instrumentados dentro de showWhatsappHandoffExecute).
+  const probe = ctx.probe ?? DISABLED_STREAM_PROBE
   return tool({
     description: SHOW_WHATSAPP_HANDOFF_DESCRIPTION,
     inputSchema: buildHandoffSchema(toolCopy),
     execute: async (input: ShowWhatsappHandoffInput) =>
-      showWhatsappHandoffExecute(input, ctx),
+      probeAround(probe, 'tool:show_whatsapp_handoff', () =>
+        showWhatsappHandoffExecute(input, ctx),
+      ),
   })
 }
