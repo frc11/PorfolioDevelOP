@@ -4,7 +4,7 @@
 **Rama de la auditoría:** `chore/auditoria-seguridad` (worktree `C:\Users\franc\Desktop\wt-auditoria-seguridad`)
 **Fecha de la corrida:** 2026-07-29
 **Tipo:** defensiva, read-only sobre `src/`. Cero exploits, cero PoC armados, cero pruebas contra producción.
-**Resultado:** 75 hallazgos — **3 ALTO · 38 MEDIO · 34 BAJO · 0 CRÍTICO**. 97 hallazgos ya conocidos quedaron fuera por la regla de no-duplicación.
+**Resultado:** 75 hallazgos — **2 ALTO · 25 MEDIO · 48 BAJO · 0 CRÍTICO**, todos con pasada de refutación adversarial independiente. 97 hallazgos ya conocidos quedaron fuera por la regla de no-duplicación.
 
 ---
 
@@ -26,9 +26,13 @@ Las tres cambian el alcance de lo que pediste y las verifiqué antes de abrir ni
 
 **Lentes.** 8 lentes (S2 partida en tres por volumen: admin / dashboard / setter+censo) corridas en paralelo por agentes independientes, cada una con su slice del ledger y la obligación de marcar cada hallazgo como `NUEVO` / `CAMBIÓ DE ESTADO` / `CONFIRMADO-SIN-TEST`.
 
-**Refutación adversarial.** Cada lente tenía un segundo agente con la instrucción de *refutar*, no de confirmar. **5 de 10 verificadores completaron** (S2b, S4, S5, S6, S8). Los otros 5 (S1, S2a, S2c, S3, S7) murieron por límite de sesión, y un reintento posterior murió igual. Eso es una limitación real de esta corrida y está marcada hallazgo por hallazgo: **32 de los 75 no tienen pasada de refutación independiente**. De esos 32 verifiqué yo mismo, de primera mano, los que sostienen las conclusiones más pesadas (S1-01, S3-01, S3-02, S7-01, S7-03, S7-05, y la adjudicación de S8-01); están anotados como *Adjudicación del auditor*.
+**Refutación adversarial.** Cada lente tuvo un segundo agente con la instrucción de *refutar*, no de confirmar, y con la regla de elegir PLAUSIBLE ante la duda. Las 10 lentes recibieron su pasada. Resultado: **68 confirmados, 6 plausibles, 1 refutado**.
 
-La refutación no fue decorativa: **1 hallazgo refutado** (S5-03, la compensación de cupo — el disparador que proponía resultó inalcanzable porque el `streamText` no recibe `abortSignal`) y **9 severidades corregidas hacia abajo**.
+La refutación no fue decorativa. **S5-03 quedó refutado**: proponía que cortar el stream disparaba la compensación de cupo, y el verificador demostró que el disparador es inalcanzable porque `streamText` no recibe `abortSignal` (cero resultados de `grep -n "abortSignal"` en `handleChatRequest.ts`). Además hubo **una docena de severidades corregidas**, casi todas hacia abajo, con el contra-argumento explícito.
+
+**Variabilidad entre pasadas, declarada.** Por un corte de sesión, cinco lentes recibieron dos pasadas de refutación independientes en vez de una. En dos hallazgos las dos pasadas discreparon, y la discrepancia la adjudiqué yo:
+- **S1-01** — una pasada dijo ALTO, la otra MEDIO. Adjudiqué **MEDIO**: la evadibilidad por header depende del comportamiento de la plataforma (si Netlify normaliza `x-forwarded-for`), que no es verificable desde el repo, y `bcryptjs` con cost 10-12 techa el throughput real. **Si se confirma que Netlify no normaliza ese header, este hallazgo es ALTO.**
+- **S2b-01** — una pasada dijo MEDIO, la otra ALTO. Adjudiqué **ALTO**: aun descartando el eje "bypass del módulo pago" (que se cae porque el slug del gate está roto y no distingue nada), queda en pie que cualquier ORG_MEMBER autenticado puede disparar envíos con remitente y HTML propios desde la **única cuenta Brevo de la agencia**.
 
 **Lo que no se hizo, a propósito:** no se ejecutó el dev server, no se tocó ninguna base de datos, no se probó nada contra producción, y no se escribió ningún exploit. `git status -s` sobre el worktree no muestra cambios en `src/`.
 
@@ -36,20 +40,18 @@ La refutación no fue decorativa: **1 hallazgo refutado** (S5-03, la compensaci�
 
 ## 3. Resumen ejecutivo
 
-### 3.1 Los 3 ALTO
+### 3.1 Los 2 ALTO
 
-**S4-01 — el escape de origen `develop.com.ar` anula la allowlist de dominios de TODOS los bots.** `src/lib/security/validate-origin.ts:69-75` devuelve `allowed: true` en cuanto el header `Origin` es `https://develop.com.ar`, y ese `return` está **antes** del chequeo de `allowedDomains` (`:78-85`). Cualquiera que sepa el slug de un bot —enumerable desde `/health` y `/config`, ambos públicos— puede conversar con el bot de cualquier organización mandando ese header: consume su cupo mensual, gasta Vertex a cuenta de develOP, obtiene las respuestas construidas con la KB completa de ese tenant (info del negocio, servicios, precios, políticas) y puede inyectar leads en su CRM. Sin autenticación. Confirmado por el verificador, que buscó activamente el contra-argumento y no lo encontró.
+**S4-01 — el escape de origen `develop.com.ar` anula la allowlist de dominios de TODOS los bots.** `src/lib/security/validate-origin.ts:69-75` devuelve `allowed: true` en cuanto el header `Origin` es `https://develop.com.ar`, y ese `return` está **antes** del chequeo de `allowedDomains` (`:78-85`). Cualquiera que sepa el slug de un bot —enumerable desde `/health` y `/config`, ambos públicos— puede conversar con el bot de cualquier organización mandando ese header: consume su cupo mensual, gasta Vertex a cuenta de develOP, obtiene las respuestas construidas con la KB completa de ese tenant (info del negocio, servicios, precios, políticas) y puede inyectar leads en su CRM. Sin autenticación. El verificador buscó activamente el contra-argumento y no lo encontró.
 
-**S1-01 — el lockout del login es evadible con un header, y el limiter durable que ya existe nunca se aplicó al login.** `src/app/login/actions.ts:20` usa un `Map` en memoria de módulo y `:53` toma el elemento **más a la izquierda** de `x-forwarded-for` — el que manda el cliente. Cada valor distinto cae en un bucket nuevo, así que el tope de 5 intentos / 5 minutos nunca se alcanza. No hay captcha, ni lockout por cuenta, ni delay progresivo: verifiqué que `auth-rate-limit.ts:11-18` no tiene ningún scope de login. El reemplazo durable (tabla `rate_limit` en Neon, UPSERT atómico) ya existe y lo usan forgot, reset, chatbot, contacto y el motor. El comentario de `login/actions.ts:10` que dice "en producción multi-instancia reemplazar por Redis" quedó obsoleto: el reemplazo se hizo, y a este archivo no llegó. Verificado por mí.
-
-**S7-01 — retención indefinida de PII.** El único purgado cableado del sistema es `chatbot_events` a 30 días. Las transcripciones completas (`ChatMessage.content`), los leads con nombre/email/teléfono (`ChatbotLead`) y **todo el motor de WhatsApp** —número en claro en `ContactIdentity` y cuerpo íntegro de cada mensaje en `MotorMessage.body`— crecen sin cota y sin borrado. Verifiqué por mi cuenta que el grep de `deleteMany`/`delete` sobre esos modelos devuelve solo un borrado puntual de admin, un invariante de test, el cleanup de evals y dos borrados operativos del flujo de chat: ninguna política de retención. Bajo Ley 25.326 esto es exposición regulatoria, y además agranda el radio de daño de cualquier otro incidente.
+**S2b-01 — las tres server actions de Email Marketing no verifican la contratación del módulo, y el envío usa la cuenta Brevo compartida de la agencia con remitente y HTML tomados del input.** El gate `isModuleActive` vive **solo** en `layout.tsx:20-21`, que es un redirect de render: las tres actions (`_actions.ts:72, :129, :175`) arrancan por `getOrgWithBrevo()` (`:17-28`), que hace `resolveOrgId` + `findUnique` y nada más. Una server action es un endpoint: se invoca por su ID, no navegando la página. `createCampaignAction` lee cinco campos crudos del FormData sin Zod ni tope de longitud, y `brevo.ts:76` arma el `sender` con el input contra la única `BREVO_API_KEY`. El riesgo real no es el bypass del módulo pago —el gate está roto y no distingue nada— sino el abuso del activo compartido: la reputación de envío de la agencia.
 
 ### 3.2 El multiplicador: el repositorio es público
 
 `gh repo view` sobre `frc11/PorfolioDevelOP` devuelve `"visibility":"PUBLIC"`. Eso no es un hallazgo aislado, es el contexto que le sube el precio a varios otros:
 
 - **S8-06** — el repo publica 16 documentos de auditoría que enumeran, con `archivo:línea`, cada debilidad abierta de la aplicación. Es un mapa curado y priorizado, gratis para cualquiera. *Este reporte, si se pushea, se suma a esa pila.*
-- **S8-01** — la key `GOOGLE_GENERATIVE_AI_API_KEY` sigue en el historial (blob `f9d11ed`, commit `3953558`, alcanzable desde `origin/main`). **Corrección importante:** el runbook `docs/audits/2026-05-bfg-leak-cleanup.md:19` deja constancia de que confirmaste que esa key ya estaba deshabilitada antes del descubrimiento, y el formato coincide con lo que medí (36 caracteres, formato UUID). **No es una credencial viva y no hay rotación de emergencia que hacer.** Queda confirmarlo en GCP y decidir la purga.
+- **S8-01** — el archivo `enviroment.env` sigue en el historial (blob `f9d11ed`, commit `3953558`, alcanzable desde `origin/main` y 7 refs remotas). **Corrección importante respecto de lo que parece a primera vista: no hay una credencial viva acá.** Tres cosas verificadas lo sostienen: el runbook `docs/audits/2026-05-bfg-leak-cleanup.md:19` deja constancia de que confirmaste que la key estaba deshabilitada antes del descubrimiento; el valor tiene 36 caracteres en formato UUID, que es lo que ese mismo runbook ya documentaba; y **no lleva el prefijo `AIza`** de las claves de Google AI Studio, así que ni siquiera está confirmado que sea una credencial funcional bajo el nombre que declara. **No hay rotación de emergencia que hacer.** Queda confirmarlo en GCP y decidir la purga del historial.
 - **S7-03** — `ipHash` cae a un salt literal escrito en el código si falta `CHATBOT_IP_HASH_SALT`, y en producción solo loguea un warning y sigue. Con el repo público, ese salt es de dominio público: la propiedad de no-reversibilidad que el propio módulo declara ("GDPR-friendly") se cae si la variable no está seteada en Netlify. No puedo verificar desde el repo si lo está.
 - **S8-07** — los 20 archivos basura de la raíz están todos trackeados. Verifiqué que **no contienen credenciales**: solo rutas absolutas con tu usuario de Windows (75 ocurrencias en `.eslint_output.txt`, 23 en `audit.txt`). Fuga de información menor, no de secretos.
 
@@ -65,13 +67,13 @@ También cerré un ítem del ledger que estaba abierto por arrastre: **el state 
 
 | # | Fix | Qué cierra | Esfuerzo | ¿Decisión tuya? |
 |---|---|---|---|---|
-| 1 | **Pasar el repositorio a privado** | S8-06 entero, el residual de S8-01, S8-07, y le quita alcance público al salt de S7-03 | 1 checkbox | **Sí** — ¿el repo tiene que ser público como portfolio de la agencia? |
+| 1 | **Mergear `chore/gs-aislamiento` y `chore/security-quick-wins`** | GS.1 (8 tests `@isolation`), el borrado de `/api/test-sentry`, y la frontera ESLint sobre los ~20 modelos del portal | El trabajo ya está hecho y probado: es un merge | Orden de merge, y si la regla del portal entra como `warn` o `error` |
 | 2 | **Acotar el escape de `develop.com.ar`** al bot propio, moviéndolo después de resolver el bot (`validate-origin.ts:69-75`) | S4-01 (ALTO) | ~5 líneas | Definir la lista exacta a sembrar en `allowedDomains` |
-| 3 | **Migrar el login al limiter durable** + un único helper de IP confiable que no lea el elemento left-most | S1-01 (ALTO) y de paso el mismo defecto en forgot/reset | ~1 sprint chico | Confirmar el header de IP no falsificable de Netlify |
-| 4 | **Mergear `chore/gs-aislamiento` y `chore/security-quick-wins`** | GS.1 (8 tests `@isolation`), el borrado de `/api/test-sentry`, y la frontera ESLint sobre los ~20 modelos del portal | El trabajo ya está hecho y probado: es un merge | Orden de merge, y si la regla del portal entra como `warn` o `error` |
-| 5 | **Un cron de retención**, hermano del `cleanup-old-events` que ya existe | S7-01 (ALTO) y la exposición Ley 25.326 | ~1 sprint chico | **Sí** — el TTL por tipo de dato, y si vence en borrado o en anonimización |
+| 3 | **Llamar `isModuleActive` dentro de `getOrgWithBrevo()`** + Zod en las tres actions + acotar el remitente permitido | S2b-01 (ALTO) | ~1 día | **Sí** — qué remitentes se permiten por org, y el tope de envíos |
+| 4 | **Pasar el repositorio a privado** | S8-06 entero, el residual de S8-01, S8-07, y le quita alcance público al salt de S7-03 | 1 checkbox | **Sí** — ¿el repo tiene que ser público como portfolio de la agencia? |
+| 5 | **Un cron de retención**, hermano del `cleanup-old-events` que ya existe | S7-01 y la exposición Ley 25.326 | ~1 sprint chico | **Sí** — el TTL por tipo de dato, y si vence en borrado o en anonimización |
 
-El #4 es el de mejor relación esfuerzo/retorno de toda la lista: **no requiere escribir código nuevo**. Son dos ramas terminadas que nunca se mergearon, y una de ellas contiene el fix de un endpoint público de debug que sigue vivo en lo desplegado.
+El #1 es el de mejor relación esfuerzo/retorno de toda la lista: **no requiere escribir código nuevo**. Son dos ramas terminadas que nunca se mergearon, y una de ellas contiene el fix de un endpoint público de debug que sigue vivo en lo desplegado.
 
 ---
 
@@ -638,13 +640,13 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 ## S1 — Autenticación y ciclo de vida de sesión
 
-> **Pasada de refutación adversarial:** **no** — el verificador murió por límite de sesión. Los hallazgos marcados *sin verificar* los sostiene una sola lectura, salvo los que verifiqué yo y están anotados como tales.
+> **Pasada de refutación adversarial:** sí, agente independiente.
 
 ### [S1-01] El lockout del login es evadible con un header y ademas crece sin cota: el limiter durable existe y el login nunca migro
 
 | | |
 |---|---|
-| **Severidad** | ALTO |
+| **Severidad** | MEDIO |
 | **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CAMBIO_DE_ESTADO |
 | **Precondiciones** | Sin auth. Solo requiere emitir requests HTTP con un header x-forwarded-for propio. |
@@ -676,14 +678,18 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Confirmar cual es el header de IP no falsificable del plan de Netlify contratado (x-nf-client-connection-ip) — es lo unico que no se puede verificar desde el repo. Tambien decidir si el bloqueo por email (no solo por IP) es aceptable operativamente: habilita un DoS dirigido contra una cuenta concreta.
 
-**Adjudicación del auditor.** Verificado por el padre leyendo src/app/login/actions.ts:20 (Map de modulo) y :53 (x-forwarded-for left-most). El limiter durable de src/lib/rate-limit/limiter.ts existe y el login nunca migro.
+**Qué encontró el verificador.** Abri los 6 archivos citados y todas las citas son textuales. src/app/login/actions.ts:50-57 lee efectivamente el elemento [0] de x-forwarded-for; :20 declara el Map de modulo; :22-27 getRateEntry CREA entrada para cada key nueva y las unicas dos vias de borrado son checkBlocked (:29-36, solo si hubo blockedUntil) y clearRateLimit (:46-48, solo en exito) — o sea las entradas con count 1-4 nunca se podan, tal cual afirma el hallazgo. Verifique la ausencia del preset: cat src/lib/rate-limit/presets.ts (77 lineas leidas completas) NO contiene loginPerIp/loginPerEmail/magicLink; src/lib/security/auth-rate-limit.ts:11-18 lista exactamente los 5 scopes citados. Busque el contra-argumento aguas arriba y NO existe: src/proxy.ts (leido completo, 173 lineas) no tiene ninguna capa de rate-limit, y su matcher (:171-173) ni siquiera cubre POSTs a /api; login/actions.ts:6 importa prisma y next/headers, no importa auth-rate-limit. Tampoco hay test ni invariante: `grep -rln 'loginAction' tests/ src/ --include=*.spec.ts --include=*.invariant.ts` = 0 resultados. Lo que SI corregi: el hallazgo apoya su titular en el vector del header, y eso NO es verificable desde el repo — depende de si el edge de Netlify deja pasar un x-forwarded-for provisto por el cliente como elemento mas a la izquierda. Ahora bien, la CONCLUSION (el lockout es evadible) sobrevive sin ese vector, y la prueba la da el propio repo: src/lib/rate-limit/limiter.ts:21-26 dice literalmente que la tabla Neon 'Reemplaza el limiter in-memory por proceso que era evadible rotando lambdas'. El login es el unico consumidor de auth que quedo del lado viejo de esa frase.
+
+**Corrección aplicada.** El mecanismo del header queda como INFERIDO (comportamiento de plataforma, no de codigo) — no lo puedo cerrar leyendo el repo. La evadibilidad probada es la de rotacion de lambdas, que es lo que el ledger ya llamaba SEC-05/SEC-RATELIMIT-01. Lo genuinamente NUEVO y verificado por mi es acotado pero solido: existe un limiter durable en el repo, lo usan forgot/reset/chatbot/contacto/motor, y el login nunca migro. Bajo de ALTO a MEDIO: no hay compromiso directo, cada intento cuesta un bcrypt.compare de bcryptjs (JS puro, cost 10-12) que techa el throughput real, y el impacto es habilitar credential-stuffing / fuerza bruta, no obtenerlo.
+
+**Verificado además por el auditor padre, de primera mano.** src/app/login/actions.ts:20 (Map de modulo) y :53 (x-forwarded-for left-most); el limiter durable de src/lib/rate-limit/limiter.ts existe y el login nunca migro.
 
 ### [S1-02] Borrar un usuario no mata su sesion: el JWT sigue valido hasta 8h y el unico dato que lo detectaria (userExists) se calcula y se tira
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | El operador borra la fila User a mano (unica via de baja disponible). El ex-usuario conserva su cookie. |
 
@@ -714,12 +720,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Decidir si la baja de usuario se modela como borrado fisico o como soft-delete (disabledAt). Afecta a las relaciones con onDelete Cascade ya declaradas (Session, Account, PasswordResetToken) y a la trazabilidad de OsLeadActivity/logAdminAction, que hoy referencian userId.
 
+**Qué encontró el verificador.** Verifique las 7 evidencias. src/auth.ts:44-52 usa optional-chaining con defaults (role cae a 'ORG_MEMBER', sessionVersion queda undefined) y :61 calcula userExists. Corri `grep -rn 'userExists' src/`: UNA sola ocurrencia, la definicion — cero consumidores, tal cual dice. El bloque de invalidacion :215-223 exige `accessState.sessionVersion !== undefined`, condicion falsa para un usuario borrado, asi que no retorna null. Verifique el modelo User en prisma/schema.prisma (leido 280-335): tiene passwordResetRequired, sessionVersion Int @default(1) y NO tiene isActive/disabled/deletedAt. `grep -rn 'user\.delete|deleteUser' src/` = 0 resultados: no hay via de baja en la app. Segui la cadena para buscar el contra-argumento y me confirmo el techo del dano, no lo refuto: en jwt, `shouldRefreshFromDb` es true en cada request normal (:207, rama `!user`), asi que el token degrada a role='ORG_MEMBER' + organizationId=undefined; con eso src/proxy.ts:154 deja pasar /dashboard (role === USER_ROLE) pero /api/dashboard/leads/recent:16 resuelve orgId y devuelve lista vacia, y /setter y /admin rebotan por rol. Confirmado tambien que la estrategia es JWT (auth.ts:79-83), o sea no hay fila Session que el Cascade del schema pueda matar.
+
+**Corrección aplicada.** La severidad esta inflada. Lo que sobrevive a la baja es un cascaron autenticado: rol menos privilegiado, sin organizationId, y todas las superficies re-derivan la org desde DB. No verifique ninguna ruta que devuelva datos a ese token. El propio hallazgo admite que no hay escalada; con eso el impacto real es 'una cookie que abre paginas vacias durante 8h'. MEDIO->BAJO. El valor del item es preventivo (no existe NINGUNA primitiva de revocacion) y el fix que propone es correcto y de una linea.
+
 ### [S1-03] El login filtra existencia de cuenta por timing: bcryptjs solo corre si el usuario existe, y la mitigacion que el repo ya usa en forgot-password no se aplico aca
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | PLAUSIBLE |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sin auth. |
 
@@ -748,12 +758,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** Un test que mida el tiempo de authorize() para un email inexistente y para un email existente con password incorrecta: la diferencia de medianas sobre 20 corridas debe quedar por debajo del 20% del tiempo del caso 'existe'. Ademas, el DUMMY_HASH debe aparecer en un unico archivo (grep de la constante = 1 definicion + N imports).
 
+**Qué encontró el verificador.** Las citas son reales: src/auth.ts:152 retorna antes del compare y :157 es el unico bcrypt del camino; src/app/forgot-password/actions.ts:20-22 define el DUMMY_HASH y :67-70 lo ejecuta en la rama 'no existe'; :96 confirma que la rama 'existe' gasta un $transaction + una llamada HTTP a Brevo y NINGUN bcrypt, o sea la observacion sobre la mitigacion incompleta de forgot-password es correcta (el perfil temporal que iguala no es el que corre del otro lado; ademas por RESIL-05 ese fetch no tiene timeout). Verifique bcryptjs ^3.0.3 en package.json y los costs 10/12 por grep. Busque el contra-argumento del ruido de fondo y encontre uno parcial que el hallazgo no menciona: loginAction ya hace un prisma.user.findUnique con join a orgMemberships en :84-97 ANTES de signIn, y authorize repite otro findUnique con include en :142-150 — o sea las dos ramas pagan dos roundtrips a Neon, cuyo jitter compite con la senal. La delta neta sigue siendo exactamente un bcrypt.compare y no la puedo anular por lectura, pero tampoco la puedo cerrar: no la medi, y el hallazgo tampoco (no aporta ninguna medicion, solo el razonamiento sobre bcryptjs puro). Por eso PLAUSIBLE y no CONFIRMADO.
+
+**Corrección aplicada.** Severidad inflada. El impacto es enumeracion de cuentas: no expone ningun dato ni habilita ninguna accion, y encima es el oraculo MAS CARO de los tres que reporta esta misma tanda (requiere estadistica sobre red, contra el string determinista de S1-07 que es gratis). MEDIO->BAJO. El fix propuesto sigue siendo correcto y barato.
+
 ### [S1-04] El login responde distinto para una cuenta existente-sin-verificar, y ese chequeo corre ANTES de validar la contrasena
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sin auth. Basta un POST al formulario de login con un email y una contrasena cualquiera de 8-128 caracteres. |
 
@@ -781,12 +795,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Decidir el reemplazo de UX para el usuario legitimo que no verifico su email (hoy el mensaje diferencial cumple esa funcion). Opcion sugerida: reenvio automatico del mail de verificacion, con el mismo mensaje generico en pantalla.
 
+**Qué encontró el verificador.** El mecanismo es real y lo verifique hasta el fondo, pero el hallazgo se contradice a si mismo en la parte que mas importa. Verificado: src/auth.ts:153-155 lanza el Error ANTES del compare de :157, y src/app/login/actions.ts:113-123 tiene el switch tal cual. Fui a node_modules a cerrar la duda que el hallazgo deja abierta: @auth/core/lib/actions/callback/index.js:236 tira CredentialsSignin solo cuando authorize devuelve falsy, y :388 envuelve CUALQUIER throw en `new CallbackRouteError(e, {provider})`; @auth/core/errors.js:9-13 arma cause = { err: message, ... }, o sea error.cause.message es undefined. Ademas @auth/core/index.js:124-125 confirma que en modo raw el AuthError se re-lanza al server action. Conclusion: la rama de login/actions.ts:119-121 es CODIGO MUERTO — nunca se ve 'Por favor verifica tu email'; lo que sale es 'Ocurrio un error inesperado. Intenta de nuevo.', que igual es distinguible de 'Email o contrasena incorrectos'. El oraculo existe.
+
+**Corrección aplicada.** Dos correcciones. (1) El mensaje diferencial NO es el que el hallazgo supone: la rama EMAIL_NOT_VERIFIED es inalcanzable (verificado en @auth/core/errors.js:9-13 + callback/index.js:388). El oraculo se manifiesta como el mensaje generico de error inesperado. Esto tambien invalida el 'reemplazo de UX' que plantea en necesita_decision_humana: hoy el usuario legitimo YA no recibe ninguna guia. (2) La poblacion afectada esta mal descripta y se contradice: dice que son cuentas que 'todavia no tienen password fijada', pero auth.ts:152 (`if (!user?.password) return null`) corta ANTES del chequeo — una cuenta sin password nunca dispara el oraculo. Mapee la poblacion real por grep de emailVerified: accept-invite/actions.ts:72, reset-password/actions.ts:74, clients.ts:120, onboarding/core.ts:97, createClientOnly.ts:95 y createClientWithBot.ts:145 setean emailVerified junto con la password; el unico origen con emailVerified null es invitations.ts:81, y esas cuentas no tienen password. Queda un solo camino que produce password + emailVerified null: un usuario invitado y NO aceptado al que un admin le dispara resend-credentials (route.ts:64-73 escribe password y passwordResetRequired pero no toca emailVerified). Es una interseccion angosta y probablemente vacia. MEDIO->BAJO.
+
 ### [S1-05] passwordResetRequired solo se enforcea en proxy.ts, y su matcher no cubre /api/*: con una password temporal se exportan los leads sin pasar por el cambio forzado
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Tener credenciales validas de un usuario con passwordResetRequired=true (tipicamente la password temporal recien emitida por /api/admin/users/[userId]/resend-credentials). |
 
@@ -817,12 +835,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Definir el alcance: si el bloqueo aplica a TODAS las rutas /api autenticadas o solo a las que devuelven datos de negocio. Bloquear indiscriminadamente puede romper el propio flujo de cambio de password si alguna pieza de esa pantalla pega a /api.
 
+**Qué encontró el verificador.** Todas las citas son exactas y el hueco estructural existe. Lei src/proxy.ts completo: :84-90 es el unico bloqueo por passwordResetRequired, :68 declara ALWAYS_ALLOWED con las 3 entradas inalcanzables, y :171-173 es el matcher sin /api. Confirme por `find src/app -iname '*logout*'` = 0 resultados que /logout no existe. Confirme por `grep -rn 'passwordResetRequired' src/app/api/` que las UNICAS 3 ocurrencias bajo api/ son escrituras (resend-credentials/route.ts:68, qa/login/route.ts:41 y :165) — ningun route handler lee la bandera para bloquear. Verifique los dos handlers citados: leads/recent/route.ts:11-14 es literal y su unico gate es `if (!session?.user)`; el bloque 'Seguridad critica' de chatbot/leads/export/route.ts (:16-32) enumera auth + multi-tenant + audit + csvEscape y efectivamente no menciona passwordResetRequired. Tambien confirme que src/lib/auth-guards.ts (:1-21) solo expone requireSuperAdmin/requireSetter y ninguno mira la bandera.
+
+**Corrección aplicada.** La severidad esta inflada porque el gate que se saltea no es un control de acceso: es autobypasseable por el propio poseedor de la credencial. Lei src/app/cambiar-password/actions.ts:12-60 — el cambio forzado solo pide oldPassword, que es exactamente la password temporal que el atacante ya tiene; en dos clicks completa el flujo y accede a TODO por la via legitima. O sea el bypass por /api no gana acceso, gana sigilo (no deja la cuenta con la password cambiada, que es lo que alertaria a la victima). Eso es defensa en profundidad, no exposicion. MEDIO->BAJO. Lo que si vale intacto es la parte de higiene: las 3 entradas muertas de ALWAYS_ALLOWED (:68) dan la impresion falsa de que el proxy gobierna /api, y eso es residuo de la migracion a Next 16.
+
 ### [S1-06] El token de reset se guarda en claro y su tabla la comparten dos endpoints de canje con guardas asimetricas: /accept-invite no tiene rate-limit, no sube sessionVersion y no audita
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Para el token en claro: acceso de lectura a la base o a un backup. Para el canje asimetrico: poseer un token valido de un usuario cuyo campo password sea null. |
 
@@ -853,12 +875,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Confirmar si hay tokens vivos en la base de produccion antes de migrar la columna (el hasheo invalida los pendientes). Con 45 minutos de TTL alcanza con hacer la migracion en una ventana tranquila.
 
+**Qué encontró el verificador.** Las dos mitades son ciertas y las verifique por separado. (1) prisma/schema.prisma: el modelo PasswordResetToken tiene `token String @unique` y no hay columna de hash — el token se persiste tal cual; forgot-password/actions.ts:73 lo genera con randomBytes(32) y :80-83 lo escribe crudo. (2) La asimetria es real: lei accept-invite/actions.ts COMPLETO (82 lineas) y confirmo que no importa auth-rate-limit, que el update de :67-79 no lleva sessionVersion:{increment:1} y que no hay logAdminAction; contra reset-password/actions.ts:19-26 (applyAuthRateLimit resetPasswordPerIp), :76 (increment) y :87-96 (logAdminAction). El unico discriminador de accept-invite es :58-63 (`record.user.password !== null`), que efectivamente no distingue origen del token. Sumo un detalle que el hallazgo no vio y que refuerza la asimetria: reset-password valida la FORMA del token con Zod (schemas.ts:88-93, min 32 / max 128 / regex ^[a-f0-9]+$) y accept-invite:19 toma el formData crudo sin validar nada.
+
+**Corrección aplicada.** Bajo la severidad porque las dos mitades tienen precondiciones caras que el hallazgo no descuenta. (a) El token en claro solo se cobra con lectura de la DB o de un backup; el repo no usa SQL crudo con input de usuario (todo Prisma) y, segun el propio ledger (DR-01), los backups fallan 44/44 desde 2026-05-28 — la superficie de fuga que justificaria hashear es estrecha hoy. (b) El canje asimetrico exige POSEER el token, y quien lo posee ya puede tomar la cuenta por /reset-password, que es el link que efectivamente viaja en el mail (forgot-password/actions.ts:88). Lo que gana usando accept-invite es no dejar rastro de auditoria y no invalidar las sesiones de la victima: sigilo, no acceso. Y el rate-limit que se saltea es irrelevante contra un token de 256 bits. MEDIO->BAJO. El fix (hashear + campo purpose + alinear guardas) sigue siendo el correcto.
+
 ### [S1-07] El magic link confirma existencia de cuenta por respuesta diferencial: el callback signIn devuelve false para el usuario inexistente y eso llega al formulario
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CONFIRMADO_SIN_TEST |
 | **Precondiciones** | Sin auth. Un POST al formulario de magic link del /login. |
 
@@ -881,12 +907,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** Test de integracion sobre magicLinkAction con un email seedeado y un email inexistente: ambas invocaciones devuelven exactamente el mismo string. Segundo test: la 6a invocacion desde la misma IP devuelve tambien ese mismo string (el corte no se distingue).
 
+**Qué encontró el verificador.** Verifique la cadena entera. src/auth.ts:174-186 es textual: el callback signIn intercepta email.verificationRequest y retorna Boolean(existingUser). src/app/login/actions.ts:145-157 es textual y la accion esta viva (login/page.tsx:8 la importa y :170 la cablea con useActionState, o sea el formulario existe y es alcanzable sin auth). Confirme la ausencia de limite: login/actions.ts no importa auth-rate-limit, y presets.ts (leido completo) no tiene ningun scope de magic link. Cerre la mecanica en node_modules: @auth/core/index.js:124-125 re-lanza el AuthError en modo raw, asi que un signIn callback que devuelve false llega al catch de :153 y produce el string de error, mientras el camino feliz retorna 'SUCCESS' en :151 — dos respuestas distinguibles por el cliente. Busque activamente un guard aguas arriba y no hay ninguno: /login no esta protegido y el proxy no rate-limita. Tambien confirmo el matiz que el hallazgo agrega: el chequeo corre ANTES de mandar el mail, asi que la rama negativa no consume credito de Brevo.
+
+**Corrección aplicada.** Severidad inflada para el titular. Lo que el hallazgo reporta como propio es el oraculo de enumeracion, y enumeracion aislada no expone dato ni habilita accion: BAJO. El peso MEDIO de esta superficie ya vive en el ledger como SEC-04 (email bombing + quema de creditos Brevo por falta de rate-limit), que es un impacto distinto del que este item desarrolla. Comparto la observacion metodologica del hallazgo — ponerle rate-limit NO cierra la fuga, hay que igualar la respuesta — pero eso corrige el fix de SEC-04, no crea un hallazgo de severidad propia.
+
 ### [S1-08] generateTempPassword: sesgo de modulo, ~33 bits de entropia y estructura publica fija, para una credencial que se manda por email
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Conocer el email del objetivo y que exista una password temporal vigente sin cambiar. |
 
@@ -909,12 +939,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** Test estadistico: generar 100.000 passwords y verificar que la frecuencia de cada caracter de LETTERS no se desvia mas de 3 sigma de la uniforme. Y que generateTempPassword().length >= 12.
 
+**Qué encontró el verificador.** Verifique el archivo entero (21 lineas) y la aritmetica a mano. src/lib/security/generate-temp-password.ts:8-13 mapea con `b % str.length` sin rechazo de muestras. Conte los alfabetos caracter por caracter: LETTERS = 24 mayusculas (26 menos I y O) + 23 minusculas (26 menos i, l, o) = 47, y 256 % 47 = 21 -> sesgado; SPECIALS = '!@#$%&*' = 7, y 256 % 7 = 4 -> sesgado; NUMBERS = 8 -> unico sin sesgo. La entropia declarada tambien da: 4*log2(47) + 2*3 + 2*log2(7) = 33,8 bits. La estructura fija 4+2+2 esta en :15-21. Confirme el destino de la credencial en resend-credentials/route.ts:61-62 y :77-83 (viaja en claro en el mail) y ademas encontre que :112 la devuelve al admin en el JSON cuando Brevo falla. Busque el contra-argumento de 'no importa porque hay lockout' y NO aplica: por S1-01 el tope de intentos del login es evadible.
+
+**Corrección aplicada.** Ninguna. La severidad BAJO esta bien calibrada y el propio hallazgo la argumenta correctamente: 2^33 con un bcrypt por intento no es atacable online en ventana realista, aun sin lockout. El valor es que el fix es una linea (crypto.randomInt) y elimina la clase.
+
 ### [S1-09] La politica de contrasena mas debil corre en el camino de recuperacion, y el cost de bcrypt esta partido en 10 y 12 segun por donde entres
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna — es el flujo normal de recuperacion o de aceptacion de invitacion. |
 
@@ -941,12 +975,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Elegir el cost unico de bcrypt. Subir todo a 12 duplica el tiempo de login (bcryptjs es JS puro) y ese tiempo corre dentro de una lambda con timeout — conviene medirlo antes de fijarlo.
 
+**Qué encontró el verificador.** Las 4 definiciones de politica existen y divergen tal cual: schemas.ts:88-104 (ResetPasswordSchema: min 8 / max 128, sin regex de complejidad — verificado leyendo el bloque), accept-invite/actions.ts:26-31 (validacion inline, sin Zod), schemas.ts:22-35 (UpdatePasswordSchema con regex /[A-Z]/ y /[0-9]/) y cambiar-password/actions.ts:12-19 (duplicado a mano, con el comentario que admite la sincronizacion manual). Confirmado el punto central: 'aaaaaaaa' pasa por los dos caminos SIN sesion (recuperacion e invitacion) y no pasa por Mi Cuenta. Busque si algun guard aguas arriba compensaba (un refine compartido, un middleware de validacion) y no existe.
+
+**Corrección aplicada.** El conteo de call sites de bcrypt esta mal y subestima el problema. Corri `grep -rn 'bcrypt.hash(' src/`: son NUEVE, no cuatro. Cost 12 en accept-invite/actions.ts:65, reset-password/actions.ts:66, lib/actions/clients.ts:109 y lib/actions/profile.ts:223; cost 10 en resend-credentials/route.ts:62, cambiar-password/actions.ts:49, lib/onboarding/core.ts:76, createClientOnly.ts:67 y createClientWithBot.ts:117. El caso mas nitido de la incoherencia es uno que el hallazgo no cita: la MISMA politica estricta se hashea a 12 en Mi Cuenta (profile.ts:223) y a 10 en /cambiar-password (:49). El criterio de aceptacion que propone (grep de bcrypt.hash sin BCRYPT_COST = 0) sigue siendo el correcto, solo que cubre 9 sitios. Severidad BAJO bien calibrada: no habilita ataque por si solo.
+
 ### [S1-10] /api/qa/login: el 403 dice cual de las tres guardas fallo, y la tercera solo conoce Netlify y Vercel
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CAMBIO_DE_ESTADO |
 | **Precondiciones** | Sin auth. Un GET/POST/DELETE a /api/qa/login. |
 
@@ -973,6 +1011,10 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Confirmar que ningun script de QA parsea el campo reason del 403 para decidir su comportamiento antes de sacarlo del body.
 
+**Qué encontró el verificador.** Lei el route.ts completo (227 lineas). tripleGuardCheck :50-70 es textual y evalua en orden flag -> host -> hosting, y los TRES handlers serializan el motivo al cliente: POST :87, GET :200, DELETE :217. El comentario del propio archivo :20-23 esta citado fielmente. Verifique el detalle IPv6 y es correcto, incluso mas amplio de lo que dice: `'[::1]:3000'.split(':')[0]` da '[' y `'::1'.split(':')[0]` da '' — las DOS ramas IPv6 de :59-60 son inalcanzables, y falla cerrada. Verifique tambien la observacion sobre el token QA: encode() en :151-167 no incluye sessionVersion, con lo cual ese token queda fuera del chequeo de invalidacion de auth.ts:215-223. Intente refutar el hallazgo por la via de 'el guard 3 igual salva': es cierto que en Netlify las tres cerraduras se cumplen y la ruta responde 403 — no encontre ningun camino que las supere, y el hallazgo lo dice honestamente. Lo que queda en pie es lo que efectivamente reporta: el 403 identifica la primera cerradura que fallo, y la tercera es denylist de dos proveedores en vez de allowlist.
+
+**Corrección aplicada.** Ninguna sustantiva. Comparto la severidad BAJO: la fuga es de estado de configuracion, no de acceso. Un matiz sobre el criterio de aceptacion propuesto — tambien conviene sacar el `reason` del 400 de :96 y el del 404 de :135, que confirman al probador anonimo que emails de personas seedeadas existen o no en la DB, pero eso solo es alcanzable si las tres guardas ya pasaron, o sea nunca en prod.
+
 #### Ya documentado en auditorías previas — no se re-reporta (12)
 
 - [SEC-AUTH-03] El mecanismo sessionVersion existe y funciona para los tres caminos de cambio de password (reset-password/actions.ts:76, cambiar-password/actions.ts:59, resend-credentials/route.ts:71) + chequeo en auth.ts:215-223 — sin test, tal como lo declara el ledger; el hueco del usuario borrado lo desarrollo aparte en S1-02.
@@ -993,14 +1035,14 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 ## S2a — Autorización por rol: superficie ADMIN
 
-> **Pasada de refutación adversarial:** **no** — el verificador murió por límite de sesión. Los hallazgos marcados *sin verificar* los sostiene una sola lectura, salvo los que verifiqué yo y están anotados como tales.
+> **Pasada de refutación adversarial:** sí, agente independiente.
 
 ### [S2a-01] El rol más privilegiado no tiene ciclo de vida en la app: el único provisioning de SUPER_ADMIN vive en un módulo sin ningún importador, y no existe ninguna action de revocación/baja
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna para el estado de hecho. El impacto aparece cuando hay que revocar un SUPER_ADMIN (salida del equipo, cuenta comprometida, invitación mal tipeada). |
 
@@ -1029,12 +1071,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Necesita decisión de Franco.** Sí: Franco define la política de baja — ¿degradar a ORG_MEMBER (deja el historial de audit-log atado al usuario) o borrado duro? Y si quiere reactivar la invitación de admin en la app o dejar la alta como operación manual de DB (con 2 personas puede ser la respuesta correcta).
 
+**Qué encontró el verificador.** Verifiqué las 5 citas una por una y todas son reales. src/lib/actions/settings.ts:148 declara inviteTeamMemberAction y :176 escribe role: 'SUPER_ADMIN' dentro de prisma.user.create — es la única escritura de ese rol en src/ (grep "role: 'SUPER_ADMIN'" devuelve 7 hits y los otros 6 son where: de findMany/findFirst en dashboard-actions.ts:31,:119, settings.actions.ts:220, messages.ts:176, upsell.ts:108, referrals.service.ts:152). Confirmé que el módulo es huérfano por dos vías: grep de '@/lib/actions/settings' → 0 hits, y grep de 'inviteTeamMemberAction|saveAgencySettingsAction' en src+tests+scripts → solo la propia declaración. Confirmé la ausencia de revocación: prisma.user.update aparece en 7 lugares (accept-invite, resend-credentials, cambiar-password, reset-password, clients.ts:205, profile.ts:51 y :224) y ninguno toca `role`; `prisma.user.delete` no existe en src/. listTeamMembers (settings.actions.ts:206-232) es efectivamente read-only. Verifiqué la asimetría de auth.ts: el provider Resend SÍ está registrado (auth.ts:6 import, :97 en providers), y el callback signIn en :175-186 aprueba la magic link por mera existencia del usuario (findUnique select {id}, return Boolean(existingUser)), mientras el camino Credentials en :153-155 sí exige emailVerified. Busqué contra-argumentos y no encontré ninguno que cierre el hueco: no hay layout, helper ni ruta que provea baja de rol. Sí encontré dos matices que la severidad debe absorber (ver corrección).
+
+**Corrección aplicada.** Dos matices que el hallazgo no pondera. (1) La palanca manual funciona y es inmediata: el callback jwt de auth.ts:205-208 calcula shouldRefreshFromDb = ... || !user, así que en toda request normal relee getUserAccessState desde DB — cambiar el rol a mano en Neon corta el acceso en el siguiente request, sin esperar expiración. (2) El provisioning fuera de la app existe: prisma/seed.ts:87 y :94 crean SUPER_ADMIN, así que 'no hay forma de crear un segundo super-admin' vale para la UI, no para el sistema. Por eso bajo MEDIO→BAJO: es un control de proceso ausente (sin dato expuesto, sin acción alcanzable, con remediación manual efectiva en minutos para una agencia de 2 personas). El sub-argumento del 'mail mal tipeado deja una cuenta SUPER_ADMIN reclamable' es correcto como mecanismo pero es condicional a re-cablear un módulo hoy muerto — es riesgo latente de refactor, no estado actual.
+
 ### [S2a-02] El único test automatizado de autorización de la API admin se auto-saltea siempre: apunta a /api/admin/clients, ruta que no existe en el árbol
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna (defecto de cobertura de tests, no superficie atacable). |
 
@@ -1059,12 +1105,14 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** `npx playwright test tests/e2e/19-security.spec.ts` reporta 0 skipped en el bloque de API admin, y si se comenta el bloque `if (!session?.user || session.user.role !== 'SUPER_ADMIN')` de `src/app/api/admin/reports/send-now/route.ts` el test pasa a ROJO.
 
+**Qué encontró el verificador.** Abrí tests/e2e/19-security.spec.ts entero (41 líneas). La cita es exacta: :21 hace request.get('/api/admin/clients') y :22 test.skip(response.status() === 404, ...). Verifiqué por FS que la ruta no existe: find src/app/api/admin -name route.ts devuelve 8 handlers y ninguno es clients/route.ts — bajo src/app/api/admin/clients sólo hay [organizationId]/send-executive-report/route.ts, o sea que el segmento 'clients' no tiene handler propio y Next responde 404. Por lo tanto el test.skip se dispara siempre y el expect([401,403,307]) de :23 es código muerto. Busqué el contra-argumento obvio (un catch-all o un route.ts en otro casing) y no existe. Verifiqué también los dos apoyos: proxy.ts:171-172 tiene matcher ['/admin/:path*','/dashboard/:path*','/setter/:path*','/login','/bienvenida','/cambiar-password'] sin /api/*, y tests/e2e/11-client-login.spec.ts:14-20 es efectivamente el único caso cross-rol y sólo navega a la página /admin. Verifiqué el destino propuesto para el fix: src/app/api/admin/reports/send-now/route.ts:6-9 devuelve 403 con el guard de rol, así que el criterio de aceptación es ejecutable. Confirmé además contra el ledger que esto es NUEVO: la entrada SEC-AUTH-04 cita 19-security.spec.ts:4,12 (los dos tests de página) y nunca el bloque de API.
+
 ### [S2a-03] No existe invariante ni test que exija guard de rol en las server actions de admin: 112 de 116 lo tienen por disciplina manual, escrita en 6 dialectos distintos
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CAMBIO_DE_ESTADO |
 | **Precondiciones** | Ninguna hoy. El riesgo es de regresión: una action de admin nueva sin `requireSuperAdmin()` sería invocable por cualquier rol (o sin sesión) posteando su action-id a cualquier URL, porque el matcher del middleware sólo protege rutas de página. |
 
@@ -1095,12 +1143,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** `npm run check:invariants` incluye el nuevo invariante y sale en verde sobre el árbol actual; si a `src/app/(protected)/admin/leads/_actions/lead.actions.ts` se le comenta el `await requireSuperAdmin()` de `deleteLead`, el comando sale en ROJO nombrando archivo y función.
 
+**Qué encontró el verificador.** Verifiqué los 6 dialectos abriendo cada archivo. src/lib/auth-guards.ts:3-11 es literal como se cita (exige role y user.id, devuelve el id). src/modules/chatbot/server/admin/requireSuperAdmin.ts es literal (dos throws distintos, retorna session.user sin exigir id). src/lib/bulk-actions.ts:6 importa el guard del chatbot, :9 lo consume y :30 audita con user.id ?? 'unknown'. src/lib/actions/settings.ts:20-27 tiene la función privada homónima. src/lib/actions/leads.ts:14-17 es el ensureAdmin booleano y src/lib/actions/projects.ts:24-31 el wrapper que convierte el throw en string (con un comentario propio en :20-22 que reconoce el patrón trust-the-layout como IDOR latente). Cerré el punto clave del hallazgo — la ausencia del candado — de forma más fuerte que el auditor: no sólo grep de *.invariant.ts da 0 hits de rol sobre 56 archivos, sino que abrí el único invariante de seguridad cableado en CI (package.json:57 → src/lib/security/idor-tokens.invariant.ts) y su docstring :8-13 declara alcance sobre token HMAC de opt-out y resolveScopedOrgId: nada de rol. Verifiqué también preflightChecks.ts: sus dos exports (:13 runPreflightChecks, :170 canActivate) no llaman auth() ni ningún guard, consistente con SEC-02 del ledger.
+
+**Corrección aplicada.** Dos sub-claims que no sobreviven al mismo estándar de evidencia que el resto. (1) El 'audit-log sin autor' de bulk-actions.ts:30 es un artefacto de tipos, no un hueco runtime demostrado: user.id es opcional en el Session type de next-auth v5, pero el JWT siempre trae sub → el ?? 'unknown' no es alcanzable por lectura de código. Nótese que resend-credentials/route.ts:21 usa exactamente el mismo patrón defensivo. (2) El censo de 116 acciones (112 con guard / 2 org-scoped / 2 sin guard) NO lo pude re-contar de forma independiente en esta pasada: lo tomo como PLAUSIBLE dentro de un hallazgo por lo demás confirmado. Lo mismo para 'ninguna de las 6 formas se invoca sin await': mi grep de invocaciones sin await devolvió sólo comentarios, lo que es consistente, pero no es una prueba exhaustiva.
+
 ### [S2a-04] 21 de 33 páginas de /admin no tienen guard propio: delegan el chequeo de rol en admin/layout.tsx, capa que Next.js documenta como no confiable para auth
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Requiere que falle el middleware (edición del matcher de proxy.ts:171-173, o mover la página fuera del árbol de admin/layout.tsx). Con el código actual, ningún rol menor llega. |
 
@@ -1123,12 +1175,16 @@ LECTURA DE CONJUNTO. El diseño de aislamiento de este repo es mejor que su enfo
 
 **Criterio de aceptación.** Un usuario con sesión SETTER que hace `GET /admin/leados/setter/<id>` con el middleware deshabilitado en local (comentando el matcher) recibe redirect a /dashboard y el body no contiene el email del setter. Hoy, con esa misma prueba, la respuesta la corta el layout — el criterio es que la corte también la página.
 
+**Qué encontró el verificador.** Verifiqué la doble capa y el censo. src/app/(protected)/admin/layout.tsx:41-49 es literal (auth(), redirect('/login') sin sesión, redirect('/dashboard') si role !== 'SUPER_ADMIN'). Confirmé que ese layout es el ÚNICO de la cadena: ls de src/app/(protected)/ muestra sólo admin/, dashboard/, setter/ — no existe (protected)/layout.tsx, así que no hay un guard intermedio que el auditor haya pasado por alto. En proxy.ts conté las líneas exactas: :148-152 es el bloque isAdminRoute && role !== ADMIN_ROLE, coincide con la cita. Verifiqué la página estrella: src/app/(protected)/admin/leados/setter/[setterId]/page.tsx tiene el comentario 'Admin-only por el layout (SUPER_ADMIN)' en :27, toma setterId de params en :30, y consulta prisma.user.findUnique select {name,email} + osLeadDossier.findMany por lead.assignedToId sin ningún chequeo de sesión propio — el único redirect (:56) es por setter inexistente, no por rol. El contra-argumento que busqué (que el middleware cubre también los payloads RSC) es real y el propio hallazgo lo pondera al quedarse en BAJO, así que la severidad ya está bien calibrada: es defensa en profundidad, no una puerta abierta.
+
+**Corrección aplicada.** El conteo está levemente mal: hay 34 page.tsx bajo src/app/(protected)/admin (no 33). De ellas, 18 no contienen siquiera el string SUPER_ADMIN/requireSuperAdmin, y verificando a mano las 4 que el hallazgo lista como sin-guard pero que sí contienen el string (fg2-lab, team, leados/setter/[setterId], projects/[projectId]/tasks) confirmé que en las 4 el string es un comentario o un where: de Prisma, no un guard — el total real sin guard propio es ~22 de 34, no 21 de 33. La dirección del hallazgo es correcta; el número exacto no.
+
 ### [S2a-05] Role.CLIENT es un valor de primera clase del enum sin ninguna rama en el middleware ni en los guards: un usuario con ese rol queda en bucle de redirección /dashboard ↔ /login
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Un usuario con `User.role = 'CLIENT'` en la DB. Ningún código de src/ produce ese estado hoy; sí lo permite el enum de Prisma y el tipo `Role` de auth.config.ts. |
 
@@ -1159,12 +1215,14 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: Franco define si CLIENT se elimina del modelo o se cablea. Es una decisión de producto (¿va a existir un rol de cliente distinto de ORG_MEMBER?), y toca el schema.
 
+**Qué encontró el verificador.** Reconstruí el bucle leyendo proxy.ts completo, no sólo las líneas citadas. Las constantes están en :13-15 y no hay ninguna para CLIENT. Recorrí el orden de evaluación: :104-108 corta a los no autenticados; :113-121 es el retorno temprano de SETTER; para un CLIENT autenticado en /dashboard cae en :154-155 (isDashboardRoute && role !== USER_ROLE, sin la excepción de impersonation) → redirect a LOGIN_PATH construido como new URL(LOGIN_PATH, nextUrl), que efectivamente descarta el query; ya en /login, :134-146 no encuentra callbackUrl, el rol no es ADMIN_ROLE, y :143-145 devuelve a DASHBOARD_PATH si onboardingCompleted. El bucle cierra. Verifiqué que el enum tiene los 4 valores (prisma/schema.prisma:12-17) y el type los repite (auth.config.ts:4), y que ningún guard consulta CLIENT (grep da 2 hits, ambos el VisibilityFilter de projects-filters.ts y el type). Busqué la precondición real: auth.ts:44-50 calcula onboardingCompleted como true sólo si hay organizationId + companyName + organization.onboardingCompleted, y el callback signIn (:194-200) rechaza a todo rol que no sea SUPER_ADMIN ni SETTER sin organizationId — así que el bucle exige un CLIENT CON org completa; un CLIENT sin org ni siquiera puede loguearse. El hallazgo no menciona ese filtro pero no lo invalida, sólo acota la precondición.
+
 ### [S2a-06] /api/admin/users/[userId]/resend-credentials no valida el rol del usuario target: un SUPER_ADMIN puede resetear la contraseña e invalidar la sesión de otro SUPER_ADMIN o de un SETTER
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sesión SUPER_ADMIN válida (el guard de la ruta se cumple). No alcanzable por ORG_MEMBER, CLIENT ni SETTER. |
 
@@ -1187,6 +1245,10 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Con sesión SUPER_ADMIN, `POST /api/admin/users/<id-de-otro-super-admin>/resend-credentials` devuelve 400 y `SELECT sessionVersion FROM "User" WHERE id = <id>` no cambia; el mismo POST contra un ORG_MEMBER sigue devolviendo 200.
 
+**Qué encontró el verificador.** Leí la ruta entera (114 líneas). Las 4 citas son textuales y las líneas coinciden: :16-19 guard del llamador, :46-54 findUnique por userId sin filtro de rol ni de pertenencia, :64-73 update con password + passwordResetRequired + sessionVersion increment, :75-83 orgName con fallback 'tu cuenta' y welcomeClientEmail. Busqué activamente el guard aguas arriba que refutaría el hallazgo y no existe: el Zod de :40 (ResendCredentialsParamsSchema) valida sólo el shape del userId, el rate-limit de :25-28 es por admin y no discrimina target, y el select del findUnique ni siquiera trae `role`, así que no hay comparación posible más abajo. La precondición declarada es correcta y decisiva: hay que ser ya SUPER_ADMIN, por eso BAJO es la severidad adecuada.
+
+**Corrección aplicada.** La justificación de impacto está incompleta y en un punto es incorrecta. El hallazgo afirma 'no es toma de cuenta, es denegación de servicio dirigida' porque la contraseña temporal va al buzón del target. Pero :107-113 devuelve tempPassword en el body de la respuesta cuando emailResult.ok es false (fallback deliberado y comentado para que la UI la muestre). O sea: si el envío por Brevo falla, el admin que dispara la acción obtiene en claro la contraseña temporal de otro SUPER_ADMIN o de un SETTER, y con passwordResetRequired:true puede completar el login y fijar una nueva — eso sí es toma de cuenta. La severidad NO cambia (el actor ya tiene el rol máximo, así que no hay escalada; el impacto es integridad intra-admin y falta de no-repudio), pero el fix propuesto queda mejor motivado: sin el guard de rol del target, un canal de email degradado convierte esta ruta en un lateral entre cuentas privilegiadas.
+
 #### Ya documentado en auditorías previas — no se re-reporta (6)
 
 - [SEC-02] runPreflightChecks(botId) sin ningún guard — verificado idéntico en 49fec9b: src/modules/chatbot/server/admin/preflightChecks.ts:1 ('use server'), :13 findUnique por botId arbitrario vía unsafeGlobalQuery, :118 número de WhatsApp de la org; su único call-site es un client component (admin/chatbots/[botId]/BotDetailClient.tsx:140), o sea action-id invocable desde cualquier URL sin sesión. Sin cambios; ningún test ni invariante lo cubre.
@@ -1207,7 +1269,7 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
+| **Severidad** | ALTO |
 | **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Cuenta ORG_MEMBER autenticada con una organización (no requiere tener el módulo activo, ni rol admin, ni impersonation) |
@@ -1241,9 +1303,54 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí — dos decisiones: (a) qué remitente(s) se permiten por org (dominio fijo de develOP vs. allow-list verificada por cliente), porque eso define si el módulo puede seguir ofreciendo white-label; (b) el tope de envíos por org y por ventana, que es una decisión comercial además de técnica.
 
-**Qué encontró el verificador.** Abrí las 7 citas y todas son reales y literales. `getOrgWithBrevo()` en src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-28 hace solo resolveOrgId + findUnique; leí el archivo COMPLETO (219 líneas) y `isModuleActive` no aparece ni una vez — las tres actions (:71, :128, :174) comparten ese preámbulo y nada más. El gate vive solo en layout.tsx:20-21, que es render-path. El contra-ejemplo es exacto: motor-resenas/_actions.ts:23-24 y :58-59 repiten el gate dentro de la action (y además usan resolveScopedOrgId). createCampaignAction:131-139 lee 5 campos crudos del FormData con única validación no-vacío; brevo.ts:2-7 arma el header con la única `process.env.BREVO_API_KEY` y :76 pasa `sender:{name,email}` del input. Leí presets.ts completo (líneas 8-75): existen sendExecutiveReportNowPerAdmin, resendCredentialsPerAdmin, testNotificationPerAdmin, crmRetryPerOrg, contactFormPerIp — ninguno para email-marketing. Busqué guards aguas arriba y NO los hay: el proxy no cubre server actions posteadas a rutas fuera del matcher, y la action corre antes del render del layout. No refutado.
+**Qué encontró el verificador.** Abrí el archivo entero. `getOrgWithBrevo()` en src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:17-28 es exactamente lo citado: resolveOrgId + findUnique de la org, cero isModuleActive. Las tres exports arrancan con él (:72, :129, :175 — el auditor citó :71/:128/:174, que son las líneas de la firma; correcto). createCampaignAction:131-139 lee 5 campos crudos del FormData con la única validación no-vacío, tal cual. brevo.ts:76 pone `sender: {name, email}` del input y headers() usa process.env.BREVO_API_KEY (brevo.ts:4). El contra-ejemplo motor-resenas/_actions.ts:23-24 y :58-59 existe verbatim. Leí presets.ts completo (70 líneas): no hay preset de email marketing y sí están los 3 de admin citados. Busqué guards aguas arriba y NO los hay: no existe `serverActions` configurado en next.config.ts, y verifiqué que las actions sí entran al manifest (campaigns/new/page.tsx:6, campaigns/[id]/send/page.tsx:7 e ImportCSVButton.tsx:5 las importan). Único contra-argumento real que encontré y que el auditor no cruzó: por CLEAN-1.1-SLUG (premium-modules.ts:38 seedea 'email-marketing-pro' y layout.tsx:20 consulta 'email-marketing'), isModuleActive devuelve false para TODA org — el layout redirige a todos, contratados incluidos. Eso no salva el hallazgo (las actions siguen sin gate) pero cambia la historia: no es 'un cliente que no pagó entra igual', es 'la UI está cerrada para todos y las actions están abiertas para todos', o sea que el disparo exige invocar la action fuera de la UI.
 
-**Corrección aplicada.** La severidad ALTO está inflada por dos motivos que verifiqué. (1) REACHABILITY: `grep -rn email-marketing` muestra que el catálogo declara slug 'email-marketing-pro' (premium-modules.ts:38) y el gate/sidebar consultan 'email-marketing' (layout.tsx:20, SidebarNav.tsx:78) — el mismo bug CLEAN-1.1-SLUG que ya está en el ledger. Consecuencia: isModuleActive devuelve false SIEMPRE, el layout redirige a TODOS y el ítem de sidebar no se pinta nunca, así que NO existe UI renderizada del módulo. Alcanzar las actions exige fabricar un POST con header Next-Action y el action-id sacado del chunk estático de la ruta — sigue siendo alcanzable, pero no es 'un cliente cualquiera hace click'. (2) El bypass del módulo pago que describe es sobre un gate que hoy deniega también a quien SÍ pagó. Además el 'spoof de remitente' depende de la verificación de sender de Brevo, que no es verificable desde el repo (el propio hallazgo lo admite). Lo que queda sólido y justifica MEDIO: tres mutaciones + una llamada saliente a la cuenta Brevo compartida de la agencia, sin gate de módulo, sin Zod y sin rate-limit, alcanzables por cualquier ORG_MEMBER. No hay cruce entre organizaciones: sendCampaignAction:177-181 filtra por organizationId y exige status DRAFT, e importContactsAction:86-87 upsertea con clave compuesta (organizationId,email). Sobre estado_vs_ledger: el hueco de gate a nivel action es NUEVO, pero la superficie ya figura en el ledger como CLEAN-1.1-SLUG — conviene reportarlo cruzado, no como hallazgo aislado.
+**Corrección aplicada.** Dos correcciones. (1) La sub-afirmación 'cero Zod' NO es NUEVO: el ledger ya la tiene en [SEC-INV-zod-gaps] ('Server actions sin Zod: admin/module-demand, referrals.admin, dashboard mark-read / email-marketing / motor-resenas, setter/novedades', ledger-S4.md:279-282). Lo NUEVO es únicamente que las actions no repiten el gate de módulo. (2) La justificación de severidad dice 'incluido uno que NO contrató el módulo (US$80/mes)' como si el gate distinguiera pagos: con el slug roto no distingue nada, así que el eje 'bypass del módulo pago' se cae y queda solo el eje real, que es el abuso del activo compartido (cuenta Brevo de la agencia).
+
+### [S2b-02] Dos predicados divergentes de "el caller es un cliente del dashboard": resolveOrgId() (consciente del rol y de la impersonation) contra session.user.organizationId / getClientChatbotSession() (ciegos al rol, derivados solo de OrgMember) — y la superficie de PII del chatbot cuelga del segundo
+
+| | |
+|---|---|
+| **Severidad** | MEDIO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | NUEVO |
+| **Precondiciones** | Poseer una fila OrgMember para la organización objetivo, cualquiera sea el User.role. No requiere ser ORG_MEMBER ni pasar por proxy.ts. |
+
+**Impacto.** (a) Qué se expone: por el predicado ciego pasa toda la superficie de datos del chatbot — listado y detalle de leads con nombre/email/teléfono/mensaje, transcripciones completas de conversación, export CSV masivo (cap 10.000) y la mutación de estado del lead. (b) A quién: a cualquier principal que tenga UNA fila OrgMember, sin importar su `User.role`. (c) Precondiciones: hoy ese conjunto coincide exactamente con los ORG_MEMBER, porque en el seed ni el SUPER_ADMIN ni los SETTER reciben OrgMember — o sea que hoy falla cerrado por AUSENCIA DE DATOS, no por un guard. No es CRÍTICO porque no hay principal vivo que lo cruce; no es BAJO porque el gate de rol que el producto cree tener (proxy.ts:154) no gobierna esta superficie y basta una fila de membresía mal creada para que un SETTER o un futuro CLIENT lea PII de una org completa. Es además la razón por la que la impersonation no llega a esta superficie.
+
+**Mecanismo.** El repo tiene dos raíces de sesión distintas para el mismo concepto. `resolveOrgId()` es explícitamente role-aware: devuelve la org solo si el rol es ORG_MEMBER, o si es SUPER_ADMIN Y hay cookie de impersonation; para CLIENT y SETTER devuelve null. `getClientChatbotSession()` y las ~13 actions que leen `session.user.organizationId` no miran el rol en absoluto: la org sale del primer OrgMember del usuario (en el caso de la sesión, poblada en auth.ts:42-45 por getUserAccessState, que tampoco filtra por rol). El resultado es que dentro del MISMO namespace /api/dashboard conviven las dos políticas: /api/dashboard/leads/recent usa auth()+resolveOrgId (role-aware) y /api/dashboard/chatbot/leads/export usa getClientChatbotSession (role-blind), y ninguna de las dos está cubierta por proxy.ts, cuyo matcher no incluye /api. La divergencia tiene además un segundo filo, ya visible hoy: durante una impersonation, `resolveOrgId()` devuelve la org impersonada mientras `session.user.organizationId` devuelve la del propio admin — si a un SUPER_ADMIN se le crea alguna vez una membresía, la pantalla mostraría los datos del cliente impersonado y las actions role-blind escribirían sobre la org del admin. El propio código documenta el efecto como si fuera una propiedad deseada.
+
+**Evidencia.**
+
+- `src/lib/preview.ts:6-20`
+  > export const resolveOrgId = cache(async (): Promise<string | null> => { … if (role === 'ORG_MEMBER') return session?.user?.organizationId ?? null; if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession(); return impersonation?.orgId ?? null } return null })
+- `src/modules/chatbot/server/admin/getClientSession.ts:5-27`
+  > export const getClientChatbotSession = cache(async () => { const session = await auth(); if (!session?.user?.id) return null; const member = await unsafeGlobalQuery('AUTH-RESOLUTION: user→org via OrgMember …', (c) => c.orgMember.findFirst({ where: { userId: session.user.id }, … })); if (!member?.organization?.botConfig) return null; return { user: session.user, organization: member.organization, bot: member.organization.botConfig } })   // ningún chequeo de session.user.role
+- `src/app/api/dashboard/chatbot/leads/export/route.ts:84-87`
+  > const session = await getClientChatbotSession()
+  if (!session) {
+    return new Response('Unauthorized', { status: 401 })
+  }   // único gate del export CSV de PII de leads
+- `src/app/api/dashboard/leads/recent/route.ts:10-19`
+  > const session = await auth(); if (!session?.user) { return NextResponse.json({ leads: [] }, { status: 401 }) } const orgId = await resolveOrgId()   // el MISMO namespace /api/dashboard, con el predicado role-aware
+- `src/proxy.ts:154,172`
+  > if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) { … }  ·  matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password']   // /api/* nunca entra al proxy
+- `src/auth.ts:42-46`
+  > const membership = dbUser?.orgMemberships[0]  … const organizationId = membership?.organizationId   // la org de la sesión se deriva de la membresía sin consultar el rol
+- `src/lib/actions/gbp-connection.ts:15`
+  > * SUPER_ADMIN no tiene organizationId → no puede usarlo; es self-service del dueño.   // el código documenta que el predicado ciego depende de que el admin NO tenga membresía
+- `comando: grep -rln "session?.user?.organizationId|session.user.organizationId" src`
+  > src/actions/dashboard-actions.ts · src/actions/task-approvals.ts · src/app/api/track/route.ts · src/lib/actions/announcements.ts · src/lib/actions/gbp-connection.ts · src/lib/actions/messages.ts · src/lib/actions/notifications.ts · src/lib/actions/profile.ts · src/lib/actions/referrals.ts · src/lib/actions/upsell.ts (+ auth.ts/auth.config.ts/preview.ts que lo definen) — 30 ocurrencias
+
+**Fix.** Unificar en un solo chokepoint. Agregar a src/lib/preview.ts un `requireClientOrgId()` que devuelva `{ organizationId, userId }` o null aplicando la política única (rol ORG_MEMBER, o SUPER_ADMIN con impersonation activa) y migrar a él: (a) `getClientChatbotSession()` en src/modules/chatbot/server/admin/getClientSession.ts — que además resolvería el hueco de impersonation en todo /dashboard/chatbot; (b) los 10 archivos de actions que hoy leen `session.user.organizationId` a mano. Dejar `session.user.organizationId` como dato de presentación, nunca como decisión de autorización, y agregar un guard de lint (mismo mecanismo que el guard de aislamiento ya existente) que prohíba leerlo fuera de src/auth.ts y src/lib/preview.ts.
+
+**Criterio de aceptación.** (1) Un usuario cuyo User.role no sea ORG_MEMBER pero que tenga una fila OrgMember recibe 401 en GET /api/dashboard/chatbot/leads/export y no obtiene datos de las páginas de /dashboard/chatbot. (2) Un SUPER_ADMIN con impersonation activa sobre la org X sí obtiene el export de X (hoy da 401), y las actions de perfil/notificaciones/referidos escriben sobre X y no sobre la org propia del admin. (3) `grep -rn "session.user.organizationId" src --include=*.ts` fuera de auth.ts/auth.config.ts/preview.ts devuelve 0. Cubrir 1 y 2 con un test de integración por rol.
+
+**Necesita decisión de Franco.** Sí — decidir si la impersonation DEBE alcanzar la superficie del chatbot (hoy no llega, fail-closed). Es una decisión de producto sobre el alcance del "modo soporte", y determina si el fix de getClientChatbotSession amplía o restringe.
+
+**Qué encontró el verificador.** Verifiqué las dos raíces. src/lib/preview.ts:6-20 es literal lo citado (ORG_MEMBER → session.organizationId; SUPER_ADMIN → impersonation; `return null` en :19 para todo lo demás). getClientSession.ts:5-34 leído completo: `if (!session?.user?.id) return null` y después orgMember.findFirst por userId — no hay ninguna lectura de session.user.role en el archivo. Leí el export route completo desde la línea 1: el único gate es :83-87 (`getClientChatbotSession()` → 401); su propio comentario de cabecera (:24-25) declara 'Auth obligatorio (getClientChatbotSession)' sin mencionar rol. leads/recent/route.ts:10-19 usa auth()+resolveOrgId, mismo namespace, confirmado. proxy.ts:154 y el matcher :172 verbatim; /api no aparece en el matcher. auth.ts:42-46 deriva organizationId de orgMemberships[0] sin mirar rol. Mi grep propio da 32 ocurrencias en 13 archivos (el auditor dijo 30; los 10 archivos de actions que lista coinciden uno a uno). Busqué el contra-argumento del conjunto vacío y lo confirmé — proxy.ts:114-116 documenta 'un setter no tiene org membership' y gbp-connection.ts:15 documenta lo mismo del SUPER_ADMIN — pero el auditor ya lo declara y por eso puso MEDIO en vez de CRITICO, así que no lo refuta: es honesto. También verifiqué que getClientChatbotSession gobierna 13 archivos, incluidos writes (updateLeadStatus.ts, manageInsight.ts, transcript-action.ts), no solo lecturas.
+
+**Corrección aplicada.** Ninguna sustantiva. Solo precisar que el segundo filo (divergencia durante impersonation) hoy es fail-closed y no fail-open: con SUPER_ADMIN sin membresía, session.user.organizationId es undefined, así que las actions role-blind no escriben sobre la org equivocada — abortan. El escenario 'escribirían sobre la org del admin' que describe el mecanismo requiere la misma fila OrgMember hipotética que el resto del hallazgo.
 
 ### [S2b-04] El cambio de contraseña obligatorio es un gate solo de navegación: no cubre /api/* ni el camino de ejecución de ninguna server action, y todo cliente nuevo nace en ese estado
 
@@ -1284,54 +1391,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Con una sesión válida de un usuario cuyo passwordResetRequired es true: GET /api/dashboard/chatbot/leads/export, GET /api/dashboard/leads/recent, GET /api/reports/client-monthly y GET /api/reports/monthly devuelven 401/403 sin cuerpo de datos; tras completar el cambio de contraseña, las mismas requests devuelven 200. Test de integración con las dos sesiones.
 
-**Qué encontró el verificador.** Leí proxy.ts:60-115 completo. ALWAYS_ALLOWED está en :68 e incluye '/api/' literal; el bloque de forzado está en :83-90 (el hallazgo dice 84-90, off-by-one benigno) y el matcher en :172 confirma que /api/* nunca entra. Corrí yo el censo de `passwordResetRequired` sobre src: 28 ocurrencias en 15 archivos — auth.ts (token/authorize), auth.config.ts:37, next-auth.d.ts, cambiar-password/actions.ts, reset-password/actions.ts:73, profile.ts:239, qa/login, proxy.ts:75/:86, y los tres sitios que lo ponen en true (createClientOnly.ts:94, createClientWithBot.ts:144, onboarding/core.ts:96, más resend-credentials/route.ts:68 que lo re-arma). Cero lecturas dentro de un route handler de datos y cero dentro de una función de datos 'use server'. Busqué activamente un guard aguas arriba en el camino /api y no existe: export/route.ts:83-87 solo llama getClientChatbotSession. El estado inicial forzado en toda alta de cliente también es real.
+**Qué encontró el verificador.** Corrí el censo completo de `passwordResetRequired` sobre src (28 ocurrencias en 14 archivos) y el reparto es exactamente el que afirma el hallazgo: proxy.ts:75/:86 (único enforcement), auth.ts:24/:51/:59/:168/:229/:237-239/:254 y auth.config.ts:37 (poblado del token/sesión), types/next-auth.d.ts:12/:20/:31, cambiar-password/actions.ts:55/:69/:72-73 y page.tsx:25, reset-password/actions.ts:73, profile.ts:239 y qa/login:41/:165 (escrituras a false), y los 3 sitios que lo ponen en true — createClientOnly.ts:94, createClientWithBot.ts:144, onboarding/core.ts:96, más resend-credentials/route.ts:68. Cero lecturas como GUARD dentro de un route.ts de datos o de una server action. proxy.ts:84-90 y el matcher :172 verbatim; ALWAYS_ALLOWED en :68 incluye '/api/' textualmente. El export de PII (export/route.ts:83-87) no lo consulta, verificado leyendo el handler. Busqué un guard aguas arriba en el layout de /dashboard y no cubre /api por construcción.
 
-**Corrección aplicada.** Una pata del mecanismo está sobre-declarada. El hallazgo afirma que el gate 'no cubre el camino de ejecución de NINGUNA server action'. Eso es falso para el caso normal: una server action se postea contra la ruta de la página que la monta, y /dashboard/:path*, /admin/:path* y /setter/:path* SÍ están en el matcher (proxy.ts:172) — el middleware corre ANTES del route handler, devuelve el redirect de :89 y la action nunca se ejecuta. El bypass por action solo aplica si el atacante postea el action-id contra una ruta fuera del matcher (p. ej. '/'), lo cual no pude cerrar por lectura de código y bajaría a PLAUSIBLE por sí solo. Lo que SÍ queda verificado y sostiene MEDIO es la pata /api: GET /api/dashboard/chatbot/leads/export (CSV de PII de leads, cap 10.000) y GET /api/dashboard/leads/recent son plenamente funcionales con una sesión en estado passwordResetRequired. El criterio de aceptación propuesto es correcto tal cual está.
-
-### [S2b-02] Dos predicados divergentes de "el caller es un cliente del dashboard": resolveOrgId() (consciente del rol y de la impersonation) contra session.user.organizationId / getClientChatbotSession() (ciegos al rol, derivados solo de OrgMember) — y la superficie de PII del chatbot cuelga del segundo
-
-| | |
-|---|---|
-| **Severidad** | BAJO |
-| **Veredicto** | CONFIRMADO |
-| **vs. ledger** | NUEVO |
-| **Precondiciones** | Poseer una fila OrgMember para la organización objetivo, cualquiera sea el User.role. No requiere ser ORG_MEMBER ni pasar por proxy.ts. |
-
-**Impacto.** (a) Qué se expone: por el predicado ciego pasa toda la superficie de datos del chatbot — listado y detalle de leads con nombre/email/teléfono/mensaje, transcripciones completas de conversación, export CSV masivo (cap 10.000) y la mutación de estado del lead. (b) A quién: a cualquier principal que tenga UNA fila OrgMember, sin importar su `User.role`. (c) Precondiciones: hoy ese conjunto coincide exactamente con los ORG_MEMBER, porque en el seed ni el SUPER_ADMIN ni los SETTER reciben OrgMember — o sea que hoy falla cerrado por AUSENCIA DE DATOS, no por un guard. No es CRÍTICO porque no hay principal vivo que lo cruce; no es BAJO porque el gate de rol que el producto cree tener (proxy.ts:154) no gobierna esta superficie y basta una fila de membresía mal creada para que un SETTER o un futuro CLIENT lea PII de una org completa. Es además la razón por la que la impersonation no llega a esta superficie.
-
-**Mecanismo.** El repo tiene dos raíces de sesión distintas para el mismo concepto. `resolveOrgId()` es explícitamente role-aware: devuelve la org solo si el rol es ORG_MEMBER, o si es SUPER_ADMIN Y hay cookie de impersonation; para CLIENT y SETTER devuelve null. `getClientChatbotSession()` y las ~13 actions que leen `session.user.organizationId` no miran el rol en absoluto: la org sale del primer OrgMember del usuario (en el caso de la sesión, poblada en auth.ts:42-45 por getUserAccessState, que tampoco filtra por rol). El resultado es que dentro del MISMO namespace /api/dashboard conviven las dos políticas: /api/dashboard/leads/recent usa auth()+resolveOrgId (role-aware) y /api/dashboard/chatbot/leads/export usa getClientChatbotSession (role-blind), y ninguna de las dos está cubierta por proxy.ts, cuyo matcher no incluye /api. La divergencia tiene además un segundo filo, ya visible hoy: durante una impersonation, `resolveOrgId()` devuelve la org impersonada mientras `session.user.organizationId` devuelve la del propio admin — si a un SUPER_ADMIN se le crea alguna vez una membresía, la pantalla mostraría los datos del cliente impersonado y las actions role-blind escribirían sobre la org del admin. El propio código documenta el efecto como si fuera una propiedad deseada.
-
-**Evidencia.**
-
-- `src/lib/preview.ts:6-20`
-  > export const resolveOrgId = cache(async (): Promise<string | null> => { … if (role === 'ORG_MEMBER') return session?.user?.organizationId ?? null; if (role === 'SUPER_ADMIN') { const impersonation = await getImpersonationSession(); return impersonation?.orgId ?? null } return null })
-- `src/modules/chatbot/server/admin/getClientSession.ts:5-27`
-  > export const getClientChatbotSession = cache(async () => { const session = await auth(); if (!session?.user?.id) return null; const member = await unsafeGlobalQuery('AUTH-RESOLUTION: user→org via OrgMember …', (c) => c.orgMember.findFirst({ where: { userId: session.user.id }, … })); if (!member?.organization?.botConfig) return null; return { user: session.user, organization: member.organization, bot: member.organization.botConfig } })   // ningún chequeo de session.user.role
-- `src/app/api/dashboard/chatbot/leads/export/route.ts:84-87`
-  > const session = await getClientChatbotSession()
-  if (!session) {
-    return new Response('Unauthorized', { status: 401 })
-  }   // único gate del export CSV de PII de leads
-- `src/app/api/dashboard/leads/recent/route.ts:10-19`
-  > const session = await auth(); if (!session?.user) { return NextResponse.json({ leads: [] }, { status: 401 }) } const orgId = await resolveOrgId()   // el MISMO namespace /api/dashboard, con el predicado role-aware
-- `src/proxy.ts:154,172`
-  > if (isDashboardRoute && role !== USER_ROLE && !(role === ADMIN_ROLE && isImpersonating)) { … }  ·  matcher: ['/admin/:path*', '/dashboard/:path*', '/setter/:path*', '/login', '/bienvenida', '/cambiar-password']   // /api/* nunca entra al proxy
-- `src/auth.ts:42-46`
-  > const membership = dbUser?.orgMemberships[0]  … const organizationId = membership?.organizationId   // la org de la sesión se deriva de la membresía sin consultar el rol
-- `src/lib/actions/gbp-connection.ts:15`
-  > * SUPER_ADMIN no tiene organizationId → no puede usarlo; es self-service del dueño.   // el código documenta que el predicado ciego depende de que el admin NO tenga membresía
-- `comando: grep -rln "session?.user?.organizationId|session.user.organizationId" src`
-  > src/actions/dashboard-actions.ts · src/actions/task-approvals.ts · src/app/api/track/route.ts · src/lib/actions/announcements.ts · src/lib/actions/gbp-connection.ts · src/lib/actions/messages.ts · src/lib/actions/notifications.ts · src/lib/actions/profile.ts · src/lib/actions/referrals.ts · src/lib/actions/upsell.ts (+ auth.ts/auth.config.ts/preview.ts que lo definen) — 30 ocurrencias
-
-**Fix.** Unificar en un solo chokepoint. Agregar a src/lib/preview.ts un `requireClientOrgId()` que devuelva `{ organizationId, userId }` o null aplicando la política única (rol ORG_MEMBER, o SUPER_ADMIN con impersonation activa) y migrar a él: (a) `getClientChatbotSession()` en src/modules/chatbot/server/admin/getClientSession.ts — que además resolvería el hueco de impersonation en todo /dashboard/chatbot; (b) los 10 archivos de actions que hoy leen `session.user.organizationId` a mano. Dejar `session.user.organizationId` como dato de presentación, nunca como decisión de autorización, y agregar un guard de lint (mismo mecanismo que el guard de aislamiento ya existente) que prohíba leerlo fuera de src/auth.ts y src/lib/preview.ts.
-
-**Criterio de aceptación.** (1) Un usuario cuyo User.role no sea ORG_MEMBER pero que tenga una fila OrgMember recibe 401 en GET /api/dashboard/chatbot/leads/export y no obtiene datos de las páginas de /dashboard/chatbot. (2) Un SUPER_ADMIN con impersonation activa sobre la org X sí obtiene el export de X (hoy da 401), y las actions de perfil/notificaciones/referidos escriben sobre X y no sobre la org propia del admin. (3) `grep -rn "session.user.organizationId" src --include=*.ts` fuera de auth.ts/auth.config.ts/preview.ts devuelve 0. Cubrir 1 y 2 con un test de integración por rol.
-
-**Necesita decisión de Franco.** Sí — decidir si la impersonation DEBE alcanzar la superficie del chatbot (hoy no llega, fail-closed). Es una decisión de producto sobre el alcance del "modo soporte", y determina si el fix de getClientChatbotSession amplía o restringe.
-
-**Qué encontró el verificador.** Verifiqué las 8 citas una por una y todas son textuales. src/lib/preview.ts:6-20 es exactamente el predicado role-aware (ORG_MEMBER → org de sesión; SUPER_ADMIN → solo con impersonation; :19 `return null` para todo lo demás). src/modules/chatbot/server/admin/getClientSession.ts:5-34 leído completo: NO hay ninguna lectura de session.user.role, la org sale de orgMember.findFirst dentro de unsafeGlobalQuery. export/route.ts:83-87 es el único gate del CSV de leads. leads/recent/route.ts:10-19 usa el predicado role-aware en el MISMO namespace. proxy.ts:154 y el matcher :172 confirmados (leí el bloque 60-180): /api no está en el matcher. auth.ts:42-46 deriva organizationId de orgMemberships[0] sin mirar rol. Mi grep dio 13 archivos / 32 ocurrencias (el hallazgo dijo 30, diferencia menor, mismo set de archivos). La divergencia de predicados es real.
-
-**Corrección aplicada.** MEDIO está por encima de lo que la evidencia sostiene. Fui a buscar el contra-argumento y lo encontré en los datos: censé TODOS los sitios que crean OrgMember (clients.ts:130, invitations.ts:89, onboarding/core.ts:101, createClientOnly.ts:99, createClientWithBot.ts:149) y los cinco crean el User con `role: Role.ORG_MEMBER` en la misma transacción — no existe ningún camino de código que produzca un OrgMember para un SUPER_ADMIN, CLIENT o SETTER. Y prisma/seed.ts:136-139 lo documenta como decisión explícita: 'LeadOS B1 — setter de prueba. SIN OrgMember a propósito: el setter opera fuera del modelo multi-tenant'. O sea: no es una ausencia accidental de datos, es una invariante de diseño escrita. Hoy el conjunto de principals que cruzan el predicado ciego es exactamente {ORG_MEMBER}, idéntico al del predicado role-aware: cero datos expuestos, cero acciones logradas, cero principal vivo que lo atraviese. Lo que queda es deuda de defensa-en-profundidad real (el gate es por forma de los datos, no por guard) más el segundo filo de la impersonation, que falla CERRADO (un SUPER_ADMIN no tiene organizationId → las actions role-blind abortan). Eso es BAJO por impacto, aunque el fix propuesto (chokepoint único) sigue siendo el correcto.
+**Corrección aplicada.** Un matiz que el hallazgo roza pero no cierra: la exclusión de /api no es solo consecuencia del matcher, es DELIBERADA — '/api/' está escrito a mano en ALWAYS_ALLOWED (proxy.ts:68), lo que sugiere una decisión tomada, no un olvido. Eso no cambia el riesgo, pero sí el framing del fix: hay que preguntarle a Franco por qué se exceptuó /api antes de asumir que fue descuido.
 
 ### [S2b-03] El rol CLIENT es un valor fantasma: existe en el enum de Prisma y en la unión de tipos, no se asigna en ningún punto del código, y las superficies que lo rechazan lo hacen por dos caminos distintos — uno de ellos por ausencia de datos, no por guard
 
@@ -1374,9 +1436,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí — Franco tiene que decidir si CLIENT es un rol previsto del producto (por ejemplo, un usuario de solo-lectura de una org) o un residuo de diseño. La auditoría no puede decidirlo: no hay ningún artefacto en el repo que lo describa.
 
-**Qué encontró el verificador.** Verifiqué los hechos: prisma/schema.prisma:12-17 declara los 4 valores incluido CLIENT; src/auth.config.ts:4 replica la unión. Corrí el grep yo mismo sobre src, prisma y scripts: las únicas apariciones de la cadena 'CLIENT' fuera de esos dos archivos son projects-filters.ts:19,23,219, que es un VisibilityFilter de proyectos ('ALL'|'CLIENT'|'INTERNAL') y no tiene nada que ver con Role. Cero asignaciones de Role.CLIENT en todo el árbol. Confirmé también los dos rechazos: proxy.ts:14 define USER_ROLE='ORG_MEMBER' y :154 rechaza explícitamente, y dashboard/layout.tsx:90-92 redirige vía la rama final de preview.ts:19.
+**Qué encontró el verificador.** Corrí el censo yo mismo. prisma/schema.prisma:12-17 declara los 4 valores (verificado en el bloque `enum Role`). src/auth.config.ts:4 declara la misma unión. Mi grep de 'CLIENT' sobre src, prisma y scripts devuelve exactamente 4 hits y NINGUNO es una asignación de rol: 3 son el VisibilityFilter de projects-filters.ts (:19, :23, :219 — un enum de visibilidad de proyectos, homónimo) y el cuarto es la propia declaración del tipo en auth.config.ts:4. O sea: cero escrituras de Role CLIENT, confirmado. proxy.ts:154 y USER_ROLE='ORG_MEMBER' en :14, verificados. dashboard/layout.tsx:90-92 verbatim. preview.ts:19 `return null`, verbatim.
 
-**Corrección aplicada.** MEDIO no se sostiene contra el criterio de impacto real del encargo. El propio hallazgo admite que 'no hay hoy ningún dato expuesto — es una celda vacía de la matriz'. La precondición que declara ('que alguien lo asigne por script, seed, migración o edición manual de la DB') implica capacidad de escritura directa sobre la base de producción; un actor con esa capacidad no necesita un rol fantasma para leer PII, la lee de la tabla. No hay input alcanzable desde ninguna superficie HTTP que produzca role=CLIENT. Es un defecto de contrato/higiene de esquema legítimo (y el fix A —borrarlo del enum y de la unión— es correcto y barato), pero como hallazgo de seguridad su severidad honesta es BAJO. Nota adicional: el candado tipo que propone la opción B es parcialmente ficción hoy, porque el ledger ya registra que next.config.ts tiene ignoreBuildErrors/ignoreDuringBuilds y nada typechequea el repo en CI.
+**Corrección aplicada.** La severidad está inflada. El impacto real hoy es CERO por definición del propio hallazgo ('no hay ningún dato expuesto — es una celda vacía'), y la precondición es una escritura manual en la DB de un valor que ningún camino de código produce. Además, todo el riesgo que describe es el mecanismo de S2b-02 (predicado role-blind) contado por segunda vez: si se arregla S2b-02, CLIENT deja de ser peligroso sin tocar el enum. Es un hallazgo de contrato/higiene, no de exposición. Baja a BAJO.
 
 ### [S2b-05] completeOnboardingAction guarda credenciales de dominio/hosting y de redes sociales EN CLARO en ClientAsset.description, escribiendo el literal url: 'ENCRIPTADO_EN_TEXTO' que afirma un cifrado que no ocurre
 
@@ -1415,9 +1477,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí — decisión de producto y de exposición legal: ¿develOP quiere ser custodio de credenciales de hosting y redes de sus clientes? Bajo Ley 25.326 eso agrega una categoría de dato a proteger y una obligación de resguardo; la alternativa (no guardarlas) elimina el riesgo de raíz.
 
-**Qué encontró el verificador.** Las citas son exactas hasta el número de línea. Verifiqué en src/actions/onboarding-actions.ts: :110 `if (data.domainCredentials)`, :115 y :127 `url: 'ENCRIPTADO_EN_TEXTO'`, :117 y :129 `description: data.domainCredentials/socialCredentials`, y :32-33 los campos de OnboardingData. `grep -rn ENCRIPTADO_EN_TEXTO src` devuelve exactamente 2 hits, ambos en ese archivo. prisma/schema.prisma:734-747 confirma `description String? @db.Text` sin tratamiento. El grep de importadores da un único resultado — OnboardingWizard.tsx:6 importa saveOnboardingProfile, la OTRA export — así que completeOnboardingAction no tiene caller de UI, tal como declara. El aislamiento por org sí está (:80-84, resolveOrgId). También verifiqué la alternativa que menciona: createClientAssetAction en agency-actions.ts:94-111 exige role SUPER_ADMIN y no es un camino de credenciales específico.
+**Qué encontró el verificador.** Leí el bloque completo. onboarding-actions.ts:110-132 es literal: dos `tx.clientAsset.create` con `url: 'ENCRIPTADO_EN_TEXTO'` (:115 y :127) y el secreto crudo en `description` (:117 y :129). Mi grep de 'ENCRIPTADO_EN_TEXTO' sobre src devuelve exactamente esas 2 líneas y nada más. prisma/schema.prisma:734-747 confirma `description String? @db.Text` sin tratamiento. El guard de org existe (:81-85, resolveOrgId), así que el aislamiento no está en juego — correcto lo que dice. Y confirmé el orfanato del camino: el único importador del módulo es OnboardingWizard.tsx:6 y trae `saveOnboardingProfile`, no `completeOnboardingAction`.
 
-**Corrección aplicada.** MEDIO está un escalón alto. Lo que verifiqué recorta el impacto a casi nada hoy: sin caller de UI no hay ninguna credencial acumulada por esta vía, y cuando la action se invoca a mano el escritor solo puede plantar texto en su PROPIA organización (organizationId sale de resolveOrgId, no del input) — es auto-infligido, no una fuga. El agravante real es de otra clase: el literal 'ENCRIPTADO_EN_TEXTO' documenta una protección inexistente y es una mina para el próximo que cablee el wizard. Matizo un punto del mecanismo a favor del hallazgo: el archivo SÍ está en el grafo de módulos (por el import de saveOnboardingProfile), así que Next emite action-id para completeOnboardingAction y el endpoint existe aunque no haya botón — eso es correcto tal como lo describe, y es lo que impide bajarlo a mera higiene de código muerto. La decisión humana que plantea (¿custodiar credenciales de terceros?) es la parte de más valor del hallazgo.
+**Corrección aplicada.** Severidad inflada, y por una razón que el propio hallazgo admite: hoy NO hay ni una credencial guardada por esta vía porque el camino no tiene caller. El impacto real presente es cero; lo que queda es un literal que miente y un modelo sin campo de secreto. Baja a BAJO. Aparte, un matiz de alcance que corrige el 'hoy sin superficie de UI que lo dispare': verifiqué que OnboardingWizard.tsx:1 es 'use client' e importa del mismo módulo 'use server', así que Next registra action-id para TODAS las exports de ese archivo — completeOnboardingAction es probablemente invocable pese a no tener UI. No sube la severidad (el atacante solo lograría guardar sus PROPIAS credenciales en claro), pero invalida la idea de que el código está inerte.
 
 ### [S2b-06] Dos módulos de server actions huérfanos (task-approvals.ts y metrics-actions.ts) duplican caminos ya resueltos con guards MÁS DÉBILES: sin Zod, sin tope en el texto libre, y permitiendo al cliente una transición de estado que el camino vivo reserva a SUPER_ADMIN
 
@@ -1451,9 +1513,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Los dos archivos no existen y `npx tsc --noEmit` sigue en cero errores; `npx knip` no reporta referencias colgadas. Como regla duradera: agregar al pipeline de limpieza un chequeo que falle si un archivo con la directiva 'use server' no tiene ningún importador.
 
-**Qué encontró el verificador.** Corrí el grep de importadores sobre src, tests y scripts para 'task-approvals' y 'metrics-actions': cero resultados, ni siquiera en tests. Leí src/actions/task-approvals.ts entero (136 líneas): requestTaskApproval:7-25 efectivamente solo exige `session.user.organizationId` y pertenencia (`task.project.organizationId !== session.user.organizationId`, :16), y rejectTask:85-93 valida `reason` con trim no-vacío sin tope. Verifiqué la asimetría central en el camino vivo: src/lib/actions/projects.ts:177-178 arranca `sendTaskForApprovalAction` con `await requireSuperAdmin()`. Y dashboard-actions.ts:107-111 sí usa TaskRejectionSchema.safeParse. La asimetría de rol es real.
+**Qué encontró el verificador.** Verifiqué el orfanato yo mismo: grep de 'task-approvals|metrics-actions' sobre src, tests y scripts devuelve CERO resultados fuera de los propios archivos. La asimetría central es real y la leí en los dos lados: task-approvals.ts:7-25 (`requestTaskApproval` → auth() + chequeo de org + `prisma.task.update({ approvalStatus: 'PENDING_APPROVAL' })`, sin ningún chequeo de rol) contra src/lib/actions/projects.ts:177-178 (`sendTaskForApprovalAction` → `await requireSuperAdmin()` como primera línea). rejectTask arranca en :85 y la validación de :89-91 es efectivamente `if (!reason || reason.trim() === '') throw` sin tope de longitud, mientras dashboard-actions.ts:108-111 sí hace `TaskRejectionSchema.safeParse`. Todos los números de línea citados caen donde el hallazgo dice.
 
-**Corrección aplicada.** Dos correcciones al texto, ninguna fatal. (1) El contraste está exagerado: el hallazgo presenta el módulo huérfano como si le faltaran 'chequeo de approvalStatus, transacción y notificación' frente al vivo — falso, los tiene los tres (task-approvals.ts:52-54 y :104-106 chequean PENDING_APPROVAL, :56-77 y :108-130 usan $transaction y crean Notification). La única asimetría real es requestTaskApproval sin requireSuperAdmin, más la ausencia de Zod y de tope de longitud en `reason`. (2) A favor de bajar aún más el riesgo actual: con CERO importadores el archivo no entra al grafo de módulos, así que Next no emite action-id y hoy no existe endpoint alguno — a diferencia de onboarding-actions.ts (S2b-05), que sí está en el grafo. Es decir, el impacto presente es literalmente nulo y el hallazgo es de higiene/mina latente. BAJO es la severidad correcta y el fix (borrar ambos archivos + chequeo de 'use server' sin importador en el pipeline de limpieza) es el adecuado.
+**Corrección aplicada.** Ninguna. La severidad BAJO está bien calibrada y la justificación reconoce por sí sola que el impacto actual es cero.
 
 ### [S2b-07] /api/track: escritura ilimitada de filas PageView por cualquier usuario autenticado, con `url` sin validación de forma ni de longitud y sin rate-limit ni preset
 
@@ -1484,9 +1546,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** POST /api/track con un `url` de 100 KB, con un `url` absoluto a un dominio ajeno, o con `duration` no numérico devuelve 400 y no crea fila. Superado el límite del preset, el mismo POST devuelve el error de rate-limit. Cero filas PageView nuevas en los tres casos.
 
-**Qué encontró el verificador.** Leí src/app/api/track/route.ts completo (46 líneas). :20 `const url = String(data?.url ?? '')` sin Zod, sin validación de forma ni tope; :29 solo exige no-vacío; :33-39 el create con `duration` coaccionado por Number(). El gate es únicamente `session?.user?.id` (:11-14). Confirmé en presets.ts (leí las 75 líneas) que no hay ningún preset de tracking, y grepeé checkRateLimit: los call sites son chat/motor/contact/client-notifications/auth-rate-limit/retryCrmSync/testCrmConnection/sendTestNotification — /api/track no está. El matcher del proxy (:172) confirma que la ruta no pasa por el guard. Busqué un guard aguas arriba (wrapper, helper) y no existe: el handler es autocontenido.
+**Qué encontró el verificador.** Leí el route.ts completo (44 líneas). El gate es `auth()` + `session?.user?.id` (:11-13); `url` sale de `String(data?.url ?? '')` sin Zod, sin forma y sin tope; la única validación es `if (!organizationId || !url)`; el create de PageView está en :33-39. Corrí el grep de checkRateLimit: 10 call sites en 9 archivos y /api/track no está entre ellos, confirmado. presets.ts leído entero: no hay preset de tracking.
 
-**Corrección aplicada.** Severidad BAJO correcta y bien justificada: para ORG_MEMBER la org sale de la sesión (:27), no del body, así que no hay cruce de tenants por esta vía. Una corrección de encuadre, no de fondo: estado_vs_ledger 'NUEVO' es discutible — el ledger ya tiene SEC-AUTH-05 sobre ESTE MISMO endpoint ('/api/track POST acepta organizationId arbitrario para SUPER_ADMIN sin validar existencia', slice S3), que el propio código reconoce en el comentario :16-18 y ejerce en :22-27. El defecto que reporta S2b-07 (escritura sin cota, `url` sin validar, sin rate-limit) es distinto del ya documentado, pero conviene reportarlo como defecto nuevo sobre superficie ya inventariada, no como superficie nueva.
+**Corrección aplicada.** Dos correcciones al encuadre, no al mecanismo. (1) estado_vs_ledger NUEVO es engañoso: el endpoint YA está en el ledger — [SEC-AUTH-05] '/api/track POST acepta organizationId arbitrario para SUPER_ADMIN sin validar existencia' (índice S3). Corresponde 'mismo endpoint, aspecto distinto (falta de validación de url + sin rate-limit)', no NUEVO limpio. (2) La cita de ':20-39' elide con '…' justo las líneas 22-27, que son la rama `bodyOrgId` del SUPER_ADMIN — precisamente el trozo ya documentado. Es una cita recortada, no falsa, pero oculta el solapamiento. Detalle menor: el hallazgo dice '12 call sites' de checkRateLimit; mi grep da 10.
 
 ### [S2b-08] Las dos bajas de suscripción mutan estado por GET sin paso de confirmación: un prefetch o un escáner de seguridad de correo dispara la baja sin intención del destinatario
 
@@ -1516,9 +1578,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** GET a cualquiera de las dos URLs con token válido devuelve 200 con la página de confirmación y NO cambia optedOut / executiveReportOptOut en la DB; el POST del formulario (o el POST one-click con el campo RFC 8058) sí lo cambia. Verificable con dos requests y un SELECT sobre la fila.
 
-**Qué encontró el verificador.** Verifiqué ambos handlers. En src/app/api/email/optout/[contactId]/route.ts el GET está en :69 y el updateMany que escribe optedOut en :91-94, dentro del propio GET y sin pantalla intermedia. En src/app/api/email/unsubscribe-executive/route.ts el update de executiveReportOptOut está en :75-78 dentro de `handle`, y :103-111 exporta GET y POST contra el mismo handler. También verifiqué el CIERRE que sostiene el CAMBIO_DE_ESTADO: unsubscribe-token.ts:97-108 hace verify con signEmailContactOptOutToken + comparación de longitud + timingSafeEqual, y el chequeo es previo a tocar la DB (comentario :92-95 y código :77-87 del route) — F7 del checklist heredado está efectivamente cerrado. El token es un HMAC determinístico del id, sin expiración, y _actions.ts:113-116 lo persiste como atributo OPTOUT_TOKEN en Brevo, tal como afirma.
+**Qué encontró el verificador.** Leí los dos route.ts completos. optout/[contactId]/route.ts: solo exporta GET (:69), y tras el chequeo de token (:77-87) hace el `updateMany` con `optedOut: true` en :91-94 — no hay POST en el archivo ni pantalla intermedia; la primera request con token válido consuma la baja. unsubscribe-executive/route.ts: `handle()` escribe `executiveReportOptOut: true` en :75-78 y se exporta desde GET (:103-105) y POST (:110-112), con el comentario RFC 8058 en :107-109 tal cual se cita. Verifiqué también la afirmación del CAMBIO_DE_ESTADO: unsubscribe-token.ts:97-109 es el verify con timingSafeEqual, el HMAC es determinístico sobre el contactId (sign en :85-90) y no tiene expiración ni revocación; y _actions.ts:113-116 efectivamente persiste OPTOUT_TOKEN como atributo del contacto en Brevo. Además encontré la cobertura que confirma el cierre de F7 y acota lo que queda vivo: tests/e2e/20-idor-optout.spec.ts y src/lib/security/idor-tokens.invariant.ts prueban el token, no el método HTTP.
 
-**Corrección aplicada.** BAJO es correcto, y el encuadre CAMBIO_DE_ESTADO está bien fundado (lo que queda vivo no es el HMAC, es el verbo). Un matiz que no lo refuta pero baja el peso: el patrón GET-que-da-de-baja es práctica de industria en links de email (por eso mismo existe RFC 8058, que el código cita correctamente en :107-109), y el propio handler de optout es idempotente y no revela existencia del contacto (updateMany deliberado, :89-90). El daño es pérdida de canal, reversible en el caso ejecutivo. El fix propuesto (GET renderiza formulario, POST escribe, manteniendo el POST one-click de RFC 8058) es correcto y acotado a los dos route.ts.
+**Corrección aplicada.** Ninguna sustantiva. Refuerzo del encuadre: el residuo (GET que muta) NO está cubierto por el e2e ni por el invariante que cerraron F7 — ambos afirman sobre el token, no sobre el verbo — así que el CAMBIO_DE_ESTADO está bien planteado.
 
 ### [S2b-09] sendCampaignAction devuelve al cliente el texto crudo de la respuesta de error de la API de Brevo
 
@@ -1548,9 +1610,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Forzando un fallo de la llamada a Brevo, el objeto devuelto por sendCampaignAction no contiene la subcadena 'Brevo error:' ni ningún fragmento del body de la respuesta remota, y el detalle completo sí aparece en los logs del servidor.
 
-**Qué encontró el verificador.** Cita literal verificada: src/lib/integrations/brevo.ts:80-83 devuelve `error: \`Brevo error: ${res.status} ${await res.text()}\`` — el body remoto entero en el mensaje (el hallazgo dice 81-83, off-by-one benigno). Y src/app/(protected)/dashboard/modules/email-marketing/_actions.ts:197-203 lo devuelve tal cual al cliente en `{ error: brevoResult.error }`. Contrasté con el patrón correcto del mismo archivo: ensureBrevoList:20 sí hace console.error del body y devuelve null, sin filtrarlo. Verifiqué también la regla citada: existe textual en C:\Users\franc\Desktop\wt-auditoria-seguridad\CLAUDE.md:24 ('Never expose internal error messages or stack traces to the client'). Busqué un mapeo a mensaje genérico aguas abajo en la UI y no lo hay.
+**Qué encontró el verificador.** brevo.ts:81-83 es verbatim `if (!res.ok) { return { ok: false, error: \`Brevo error: ${res.status} ${await res.text()}\` } }`. _actions.ts:197-203 devuelve `{ error: brevoResult.error }` sin mapeo tras marcar la campaña FAILED. Verifiqué el asimétrico que hace el hallazgo interesante: ensureBrevoList (brevo.ts:19-22) SÍ hace `console.error` con el body y devuelve null — o sea, el patrón correcto existe dos funciones más arriba en el mismo archivo, y createCampaign es el que lo rompe. La regla del CLAUDE.md que se cita ('Never expose internal error messages or stack traces to the client') está donde dice.
 
-**Corrección aplicada.** BAJO correcto: la api-key va en header (brevo.ts:2-7) y no se refleja en la respuesta, así que no hay fuga de credencial. Dos matices de encuadre. (1) La alcanzabilidad real está atada a S2b-01: hoy no hay UI del módulo (slug divergente), así que provocar el fallo exige el mismo POST fabricado. (2) estado_vs_ledger: el ledger ya tiene CLEAN-2.1-CATCH ('63 catch devuelven el .message crudo al cliente', slice S7) y C-10 ('DossierTransitionError llega crudo al cliente'), que son la misma CLASE de defecto. Este sitio concreto —body de una API de terceros, no un Error interno— no figura, así que es un sitio nuevo dentro de una clase ya documentada; conviene reportarlo así para no inflar el conteo.
+**Corrección aplicada.** Ampliación, no corrección: el mismo patrón está también en brevo.ts:133 (sendTransactionalEmail, `Brevo error: ${res.status} ${await res.text()}`) y en :88/:139 (`err.message` crudo), así que el fix propuesto no es de un solo call site. Y la exposición práctica hereda la precondición de S2b-01: con el layout redirigiendo a todos por el slug roto, hoy nadie ve ese error a través de la UI.
 
 #### Ya documentado en auditorías previas — no se re-reporta (8)
 
@@ -1568,14 +1630,14 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 ## S2c — Autorización por rol: SETTER + censo del patrón P0-6
 
-> **Pasada de refutación adversarial:** **no** — el verificador murió por límite de sesión. Los hallazgos marcados *sin verificar* los sostiene una sola lectura, salvo los que verifiqué yo y están anotados como tales.
+> **Pasada de refutación adversarial:** sí, agente independiente.
 
 ### [S4-01] Dos dialectos de "cual es mi organizacion": resolveOrgId() filtra por rol, session.user.organizationId no — 19 server actions y 2 rutas API corren sobre el dialecto ciego al rol
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sesion valida de un usuario con rol SETTER (o CLIENT) que ademas tenga una fila OrgMember. Hoy solo alcanzable por edicion manual de la DB — que es exactamente como se crean los setters, porque no hay UI para darlos de alta. |
 
@@ -1624,12 +1686,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** 1) `grep -rn "user\.organizationId\|user?.organizationId" src/ --include=*.ts --include=*.tsx` devuelve solo src/auth.ts, src/auth.config.ts, src/lib/preview.ts y src/types/next-auth.d.ts. 2) Con un usuario de rol SETTER al que se le inserta a mano una fila OrgMember en la DB de dev, invocar markNotificationReadAction / updateContactAction / approveTaskAction / GET /api/reports/monthly devuelve 'No autorizado' / 403 en los cuatro casos (hoy devuelven exito). 3) `npm run lint` falla si se agrega un `session.user.organizationId` nuevo fuera de los 3 archivos permitidos.
 
+**Qué encontró el verificador.** Abrí los 6 archivos núcleo y las citas son literales. src/lib/preview.ts:6-20 filtra por rol y hace `return null` para todo lo que no sea ORG_MEMBER/SUPER_ADMIN. src/auth.ts:42-45 deriva `organizationId = membership?.organizationId` de `orgMemberships[0]` (take:1, sin orderBy) sin mirar `role`, y lo propaga en auth.ts:226 y auth.config.ts:33 / auth.ts:250. Verifiqué por grep los 21 call sites del segundo dialecto y son reales (notifications.ts:21,48,75 · profile.ts:29,81,108,152 · task-approvals.ts:9,39,87 · dashboard-actions.ts:14,102,190 · messages.ts:119 · gbp-connection.ts:19,40 · announcements.ts:20 · referrals.ts:14 · upsell.ts:16 · api/reports/monthly/route.ts:41-51 rama else sin chequear ORG_MEMBER · api/track/route.ts:26-27). Busqué contra-argumentos y encontré tres, dos de los cuales bajan la severidad. (1) El argumento del proxy está mal: en Next App Router el middleware SÍ corre sobre los POST de server action dirigidos a una ruta del matcher, así que la rama SETTER de proxy.ts:117-122 sí cubre la invocación normal desde /dashboard; lo que queda abierto es un POST fabricado a una ruta fuera del matcher, que no verifiqué en runtime. (2) El rol CLIENT es letra muerta: `grep -rn "'CLIENT'"` solo devuelve la unión de tipos en auth.config.ts:4 y un filtro de UI no relacionado (projects-filters.ts) — ninguna asignación de role CLIENT en src/, prisma/seed.ts ni scripts/. La precondición colapsa a SETTER+OrgMember. (3) Confirmé por grep que ninguna ruta de la app asigna role SETTER (solo prisma/seed.ts:155,163 y scripts de QA), y proxy.ts:114-116 documenta que 'un setter no tiene org membership'. Precondición = estado de DB que la app nunca produce, alcance = una sola org, y el afectado sería personal interno de la agencia.
+
+**Corrección aplicada.** El mecanismo citado del proxy es incorrecto: los server actions POST a rutas del matcher SÍ atraviesan el middleware (el matcher es por path, no por método), así que proxy.ts:117-122 sí frena la invocación por el camino normal. El bypass real exige un POST fabricado a una ruta no matcheada — no verificado. Además la precondición 'SETTER o CLIENT' se reduce a SETTER: CLIENT no se asigna en ningún lado del árbol. Severidad MEDIO inflada para un estado de datos que ninguna ruta de la app produce y que otorga acceso a una sola org.
+
 ### [S4-02] La cadena de ownership del setter y la ESCRITURA estan desacopladas: 8 funciones del dominio LeadOS mutan por `leadId` pelado, sin discriminante de duenio en la firma ni en el where
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna para el estado actual (todos los call sites guardan). Para materializarse: una edicion futura que omita el preambulo de ownership, o un call site nuevo. |
 
@@ -1666,12 +1732,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** 1) `transitionDossier`, `registrarContactoComercial`, `postergarLead` y `crearDemoComercial` no compilan si se las llama sin identidad del actor (tsc falla). 2) Un test que llame `transitionDossier(leadDeA, userB, {to:'EVALUADA'})` obtiene null/throw y el stage del lead de A no cambia. 3) `npm run check:invariants` incluye el invariante nuevo y esta cableado en CI (hoy 40 de 56 invariantes no corren — ver CLEAN-1.1-INVARIANTES del ledger: si el invariante no entra al agregado enumerado a mano, no vale).
 
+**Qué encontró el verificador.** Verifiqué las 8 firmas y son exactamente como se citan: dossier.ts:134 `transitionDossier(leadId, input)` sin userId, con el updateMany en :246-247 sobre `{leadId, stage: from}`; os-commercial.ts:47 registrarContactoComercial, :115 crearDemoComercial, :162 postergarLead — todos mutando OsLead por `where: {id}` crudo; notify.ts y agenda.ts con el mismo patrón. El contraste con saveOwnedFicha (dossier.ts:271-291, `ensureOwnedDossier(leadId,userId)` adentro) también es real. Pero encontré dos contra-argumentos fuertes. (1) NO es una omisión: dossier.ts:129-133 documenta el contrato de forma explícita — 'QUIÉN puede transicionar no se resuelve acá: el caller setter llega vía getOwnedDossier/ensureOwnedDossier (ownership), el admin vía requireSuperAdmin()'. Es una separación de capas deliberada y escrita, no un candado olvidado. (2) Enumeré por grep TODOS los call sites de las 8 funciones y los abrí uno por uno: los del setter (dossier.actions.ts:139,146,203,232,261,391 · outreach.actions.ts:120,176,185,239 · agenda.actions.ts:216) tienen `requireSetter()` + `getOwnedLead`/`getOwnedDossier` con return temprano antes de escribir, sin excepción; los de admin (revision.actions.ts, admin/leads/_actions/*) son admin-only. Cero caminos abiertos hoy. El hallazgo es entonces una propuesta de endurecimiento de defensa en profundidad ante una regresión futura, no una debilidad presente.
+
+**Corrección aplicada.** El encuadre 'la cadena de ownership y la escritura están desacopladas' sugiere un descuido; el docblock de src/lib/leados/dossier.ts:129-133 declara el contrato de capas de forma explícita. Verifiqué los 14 call sites y los 11 del setter guardan sin excepción. Con impacto real cero hoy y un mecanismo que solo se materializa con una regresión hipotética, MEDIO no se sostiene bajo la regla de severidad por impacto real.
+
 ### [S4-03] unsafeGlobalQuery: 50 accesos cross-org en runtime cuyo unico control es un string de justificacion libre — nada verifica que el caller tenga el rol que el string afirma
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna para el hallazgo de control. Para que un call site concreto filtre: que sea 'use server' o ruta API sin guard de rol — hoy pasa en 1 de 50. |
 
@@ -1696,12 +1766,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** 1) `unsafeGlobalQuery('ADMIN: ...', fn)` no compila sin el identificador del admin verificado. 2) El invariante/probe corre en CI y falla contra el arbol actual senalando preflightChecks.ts:16 (prueba de que detecta el caso conocido), y pasa una vez que esa funcion tenga requireSuperAdmin. 3) `grep -rn "unsafeGlobalQuery(" src/ | grep -v "^src/lib/isolation/"` sigue enumerando todos los accesos y cada linea arranca con uno de los prefijos tipados.
 
+**Qué encontró el verificador.** Abrí la implementación en src/lib/isolation/index.ts:84-92 y el hallazgo es exacto: `unsafeGlobalQuery(reason, fn)` solo valida que reason sea string no vacío (`throw new IsolationError` si no) y devuelve `fn(prisma)` — el reason no se compara con nada ni participa de ninguna decisión. Confirmé el conteo total: `grep -rn "unsafeGlobalQuery(" src/ | grep -v "^src/lib/isolation/"` da 68 (la resta a 50 de runtime no la revalidé). eslint.config.mjs:48-88 confirma que las únicas reglas existentes empujan HACIA el escape hatch (no-restricted-imports de @/lib/prisma en chatbot y motor + NewExpression[callee.name='PrismaClient']); ninguna restringe su uso. El ejemplo de preflightChecks.ts:13-25 es literal: 'use server', string 'ADMIN: ... (super-admin, cualquier org)', y ningún import de guard en el archivo — su único caller es admin/chatbots/[botId]/BotDetailClient.tsx:140. Contra-argumento que sí encontré: el hallazgo llama al reason 'el único control', pero el docblock del módulo (index.ts:35-37) lo define como marcador de auditabilidad y greppabilidad, no como control de autorización — nunca pretendió serlo. Y el único síntoma concreto medible (preflightChecks) ya está en el ledger como SEC-02, así que el contenido nuevo es la propuesta de tipar el prefijo, no una fuga adicional.
+
+**Corrección aplicada.** 'Cuyo único control es un string de justificación libre' sobreestima la intención del helper: src/lib/isolation/index.ts:35-37 lo define como escape explícito y greppable para auditoría, no como control de autorización. El hallazgo no aporta ninguna fuga nueva — el único call site sin guard que exhibe es preflightChecks, ya inventariado como SEC-02 en el ledger. Es una propuesta de hardening del marcador, con impacto presente cero más allá de lo ya documentado.
+
 ### [S4-04] A-13 vigente y peor de lo declarado: CERO tests del repo invocan una server action del setter — los 19 guards de ownership del nivel action no tienen ninguna cobertura, y la suite de aislamiento solo prueba lectura
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CONFIRMADO_SIN_TEST |
 | **Precondiciones** | Ninguna hoy. El hallazgo es de cobertura: cualquier regresion en un guard de action pasa verde. |
 
@@ -1730,12 +1804,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** 1) La spec falla si se comenta el `if (!lead) return fail(...)` de cualquiera de las 19 actions (probarlo con una, revertir). 2) Los 19 casos verdes con snapshot de las 4 tablas sin diff. 3) La spec corre dentro de `npm run test:setter` (o el comando de cierre estandar) y no como archivo suelto.
 
+**Qué encontró el verificador.** Corrí los comandos yo mismo. `grep -rn "_actions/" tests/` devuelve exactamente 1 línea (tests/leados/alta-import.spec.ts:25, y es un import de `NuevoProspectoSchema`, no de una action). `grep -n "test(" tests/setter/02-isolation.spec.ts` devuelve 4 casos, y los cuatro títulos (:51 C1 no ve la cartera, :80 C2 ve solo lo suyo, :95 C3 nota privada, :111 C4 novedades) son de lectura — ninguno intenta mutar con un leadId ajeno. Verifiqué el árbol completo: tests/setter tiene 8 specs y tests/leados 5. Contra-argumento que encontré y que corrige el título: tests/setter/01-flow.spec.ts SÍ invoca las server actions, por HTTP a través del navegador (Playwright, 28 interacciones de UI, con aserciones duras en DB tras cada acción, según su propio docblock). O sea que 'CERO tests invocan una server action del setter' es falso como enunciado literal; lo que es cierto y verifiqué es que ningún test las importa directamente y que ninguno prueba mutación cruzada. Eso coincide con lo que ya dice el ledger en A-13 ('la denegación de mutación cruzada solo está testeada en 2 de ~19 funciones de escritura') y en BRIEF-3.3 ('la prueba dinámica que cerraría el perímetro no se corrió'). El estado CONFIRMADO_SIN_TEST es correcto, pero la porción realmente nueva es el censo de imports, no el hueco.
+
+**Corrección aplicada.** El título es incorrecto: las specs E2E del setter (tests/setter/01-flow.spec.ts y hermanas) sí ejercitan las server actions vía navegador, con aserciones en DB. Lo verificado es que ningún test las IMPORTA directamente y que ninguno intenta una mutación cross-setter. Además el hueco ya está inventariado en el ledger (A-13 + BRIEF-3.3-PRUEBA-DINAMICA-PENDIENTE), así que el aporte nuevo es el censo, no el hallazgo. Es una brecha de cobertura con impacto presente cero: MEDIO no aplica bajo severidad por impacto real.
+
 ### [S4-05] passwordResetRequired se enforcea SOLO en el proxy: ninguna server action ni ruta API lo mira, y los server actions no atraviesan el middleware
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sesion valida de una cuenta con passwordResetRequired=true (la que crea createClientOnly o POST /api/admin/users/[userId]/resend-credentials), invocando server actions directamente en vez de navegar. |
 
@@ -1762,12 +1840,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Con una cuenta con passwordResetRequired=true en la DB de dev: (1) invocar cualquier server action de su rol devuelve el fail de no-autorizado; (2) cambiarPasswordAction sigue funcionando y, tras cambiar la password, las mismas actions vuelven a responder OK; (3) `grep -rn "passwordResetRequired" src/lib/auth-guards.ts src/lib/preview.ts` devuelve las lecturas nuevas.
 
+**Qué encontró el verificador.** El grep completo de `passwordResetRequired` en src/ lo confirma: los únicos dos sitios que lo LEEN para decidir son src/proxy.ts:75 y :86; todo lo demás es escritura (createClientOnly.ts:94, createClientWithBot.ts:144, onboarding/core.ts:96, resend-credentials/route.ts:68, cambiar-password/actions.ts:55) o propagación de sesión (auth.ts:24,51,229,238,254 · auth.config.ts:37 · types/next-auth.d.ts). Abrí src/lib/auth-guards.ts entero (21 líneas): requireSuperAdmin y requireSetter solo miran role e id, tal como se cita, y resolveOrgId (preview.ts:6-20) tampoco lo consulta. Pero el mecanismo declarado está mal y encontré uno mejor en el mismo archivo. Mal: 'los server actions no atraviesan el middleware' es falso — el matcher de proxy.ts:172 es por path y el middleware corre igual sobre los POST de server action a /dashboard, /admin y /setter. Mejor: proxy.ts:68 define `ALWAYS_ALLOWED = [CHANGE_PASSWORD_PATH, '/api/auth/', '/logout', '/api/']` — el prefijo '/api/' exime EXPLÍCITAMENTE a toda ruta de API del gate de rotación, además de que el matcher tampoco las cubre. Ese es el hueco verificable por lectura. Severidad: se mantiene BAJO, la precondición es tener ya la credencial temporal (post-login), no es bypass de autenticación.
+
+**Corrección aplicada.** El mecanismo citado es incorrecto: los POST de server action a rutas del matcher SÍ pasan por el middleware (proxy.ts:172 filtra por path, no por método). El hueco verificable es otro y está en el mismo archivo: proxy.ts:68 lista '/api/' dentro de ALWAYS_ALLOWED, eximiendo explícitamente a toda ruta de API del gate de rotación de password. El fix propuesto (chequear el flag en auth-guards.ts y resolveOrgId) sigue siendo el correcto, pero debe cubrir también las rutas de API.
+
 ### [S4-06] /admin/leados/setter/[setterId]: la pagina lee cualquier User por id de URL sin validar que sea un SETTER, y no tiene guard propio — depende enteramente del layout
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sesion SUPER_ADMIN. Sin sesion o con otro rol, el layout de /admin redirige antes. |
 
@@ -1792,6 +1874,10 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** 1) Navegar a /admin/leados/setter/<id-de-un-usuario-cliente> con sesion SUPER_ADMIN redirige a /admin/leados en vez de renderizar su nombre y email. 2) `grep -n "requireSuperAdmin" src/app/(protected)/admin/leados/**/page.tsx` devuelve las 3 paginas. 3) La navegacion normal desde la cola (fila clickeable de un setter real) sigue funcionando.
 
+**Qué encontró el verificador.** Abrí la página completa y las cuatro citas son literales: page.tsx:37-40 hace `prisma.user.findUnique({ where: { id: setterId }, select: { name, email } })` sin `role: 'SETTER'`; :41-50 el findMany de dossiers sin take; :26-27 el propio comentario declara 'Admin-only por el layout (SUPER_ADMIN)'; :55-57 el redirect a /admin/leados solo si el user no existe. Confirmé el guard real en src/app/(protected)/admin/layout.tsx:39-49 (auth() → redirect('/login') si no hay sesión, redirect('/dashboard') si role !== 'SUPER_ADMIN') y el precedente citado en src/lib/actions/projects.ts:19-21 ('B11.2 fix F2: defense-in-depth... si el layout-guard se rompía en un refactor, IDOR inmediato'). Contra-argumentos que refuerzan la severidad baja y que verifiqué: el enforcement es DOBLE hoy — además del layout, proxy.ts:148-152 redirige a cualquier no-SUPER_ADMIN fuera de /admin antes de llegar al layout. Y el dato expuesto (name+email de un usuario propio) ya es visible para SUPER_ADMIN en /admin/clients. El hallazgo es correcto pero su valor es de censo/hardening, no de exposición.
+
+**Corrección aplicada.** Ninguna corrección de fondo. Precisión: el enforcement no depende 'enteramente del layout' — hay una segunda capa en src/proxy.ts:148-152 que redirige a todo no-SUPER_ADMIN fuera de /admin antes de que se evalúe el layout. Con doble guard y un dato que el mismo rol ya ve en /admin/clients, el hallazgo es de censo/hardening; BAJO es correcto y está en el límite de lo informativo.
+
 #### Ya documentado en auditorías previas — no se re-reporta (7)
 
 - [SEC-02] runPreflightChecks(botId) sigue sin ningun guard en src/modules/chatbot/server/admin/preflightChecks.ts:13 ('use server' + findUnique por botId arbitrario, sin auth() ni requireSuperAdmin en las 172 lineas del archivo) — identico al ledger; mi censo confirma que es la UNICA de las 200 server actions del repo con cero guard de rol y cero scoping (el detalle nuevo, que su string de unsafeGlobalQuery afirma un rol que nadie exige, va desarrollado en S4-03).
@@ -1807,7 +1893,7 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 ## S3 — Aislamiento multi-tenant en profundidad
 
-> **Pasada de refutación adversarial:** **no** — el verificador murió por límite de sesión. Los hallazgos marcados *sin verificar* los sostiene una sola lectura, salvo los que verifiqué yo y están anotados como tales.
+> **Pasada de refutación adversarial:** sí, agente independiente.
 
 ### [S3-01] Las dos piezas que cierran esta lente ya están construidas y NO están en la línea auditada: la golden suite GS.1 (@isolation, incluye impersonation y cookie forjada) y la frontera ESLint sobre los modelos del portal
 
@@ -1841,13 +1927,51 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: decidir el orden de merge de las dos ramas y si la regla del portal entra como `warn` (como la dejó fa5ed47, con 222 call-sites de deuda) o se sube a `error` con allowlist. Recomendación: entrar como warn tal cual está, para no bloquear el pipeline con deuda preexistente.
 
-**Adjudicación del auditor.** Verificado por el padre: git merge-base --is-ancestor chore/gs-aislamiento origin/main da falso, y grep -rn @isolation sobre el arbol auditado devuelve cero.
+**Qué encontró el verificador.** Reproduje los comandos de git y todas las constataciones de árbol, con un intento explícito de refutación por la vía 'quizá ya está mergeado en otra punta'. `git rev-parse HEAD` = 49fec9bd54c8… y `git rev-parse origin/main` da EL MISMO hash, así que la línea auditada ES main: `git merge-base --is-ancestor 403280b origin/main` → NO y `--is-ancestor fa5ed47 origin/main` → NO. `git branch -a --contains 403280b` → solo chore/gs-aislamiento; fa5ed47 → solo chore/security-quick-wins (+ su remoto). `git show --stat 403280b` lista exactamente playwright.golden.config.ts, src/lib/security/tenant-isolation.invariant.ts, tests/golden/helpers/golden-fixtures.ts, tests/golden/isolation-http.spec.ts, tests/golden/isolation-queries.spec.ts — `ls` de los tres primeros en el worktree devuelve 'No such file or directory' para los tres. `grep -rn "@isolation"` sobre .ts/.json/.mjs/.yml (sin node_modules) devuelve 0 líneas. Busqué el contra-argumento más obvio —que la suite corra por otro nombre— y no aplica: package.json:78-83 tiene test:e2e/test:setter/test:leados/test:integration y ningún test:isolation. Verifiqué además el punto de CI que sostiene el hallazgo: .github/workflows/e2e.yml tiene 3 jobs (check:invariants, test:leados, test:e2e) y playwright.config.ts:4 fija `testDir: './tests/e2e'` mientras playwright.integration.config.ts:40 fija `testDir: './tests/integration'` — o sea, las dos suites de aislamiento que SÍ existen (tests/integration/chatbot-isolation.spec.ts, motor-isolation.spec.ts) no las levanta ningún job. Único matiz que agrego: package.json:18 ya encadena `check:invariant:security` → package.json:57 = src/lib/security/idor-tokens.invariant.ts, que existe; no es el invariante de tenant-isolation, así que no refuta nada, pero conviene que el criterio de aceptación diga 'suma' y no 'crea' ese eslabón.
+
+**Verificado además por el auditor padre, de primera mano.** git merge-base --is-ancestor chore/gs-aislamiento origin/main da falso, y grep -rn @isolation sobre el arbol auditado devuelve cero.
+
+### [S3-03] Los ~20 modelos del portal con organizationId están enteramente fuera del helper de aislamiento, y sus tres únicos guards no tienen un solo test cruzado
+
+| | |
+|---|---|
+| **Severidad** | MEDIO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | CONFIRMADO_SIN_TEST |
+| **Precondiciones** | Para el estado actual: ninguna (es una constatación de cobertura). Para que se convierta en fuga: un solo call-site nuevo del portal que reciba un id del cliente y consulte por `{ id }` sin el organizationId — no hay linter, tipo ni test que lo detenga en la línea auditada. |
+
+**Impacto.** (a) Qué está en juego: Ticket, Project, Message, Invoice, Subscription, Notification, ClientAsset, ClientBrandProfile, Service, OnboardingTask, OrganizationModule, EmailContact, EmailCampaign, BusinessMetric, PageView, WeeklyReportLog, ExecutiveBriefSnapshot, PanelAnnouncement, ReferralCode y OrgMember — o sea toda la data comercial y de soporte del cliente, incluidos contactos de email (PII) y facturación. (b) A quién: a cualquier ORG_MEMBER autenticado si un where se olvida en un call-site nuevo. (c) Precondiciones para daño: hoy NINGUNA fuga viva — leí ~25 de los 135 call-sites sin discriminante de org y todos caen en 'es el registro de tenants (User/Organization)', 'es superficie SUPER_ADMIN-only' o 'está guardado aguas arriba en la misma función'. La severidad viene de que el enforcement es 100% disciplina humana sobre la superficie con más server actions del repo, y de que los tres helpers que la sostienen no tienen ni un test. Se queda en MEDIO y no sube porque no hay explotación demostrada.
+
+**Mecanismo.** El repo tiene DOS regímenes de aislamiento que no se tocan. Régimen fuerte: src/lib/isolation cubre 18 modelos (7 del motor + 11 del chatbot) con scope no-sobreescribible, guard atómico en update/delete, anti-IDOR de create, prohibición de re-parenting y rechazo de `cursor`; hay 35 archivos que lo usan y dos suites que lo prueban. Régimen débil: los ~20 modelos del portal quedan con where manual y tres helpers sueltos —assertTicketBelongsToOrg, assertProjectBelongsToOrg (re-consultan por id+org) y callerCanAccessOrg (evalúa un org ya cargado, y es no-op para SUPER_ADMIN)—. Ninguno de los tres aparece en un archivo de test o invariante del árbol. La frontera entre regímenes es exactamente la que fa5ed47 vino a marcar y que no está mergeada (ver S3-01).
+
+**Evidencia.**
+
+- `prisma/schema.prisma (awk por modelo sobre `organizationId String`)`
+  > 30 modelos con columna organizationId. Los 18 cubiertos por el helper están listados en src/lib/isolation/index.ts:39-43 ('Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage, MotorTemplate, MotorAlert (motor) + BotConfig, Conversation, ChatMessage, ChatbotLead, CrmIntegration…'). Los otros ~20 (ExecutiveBriefSnapshot :461, WeeklyReportLog :501, OrgMember :522, Service :541, Project :559, Message :600, Subscription :636, Notification :721, ClientAsset :743, ClientBrandProfile :758, Ticket :768, BusinessMetric :799, PageView :812, OnboardingTask :842, OrganizationModule :1193, EmailContact :1215, EmailCampaign :1236, PanelAnnouncement :1797, ReferralCode :1840) no aparecen en registry.ts.
+- `src/lib/auth/assert-ownership.ts:32-56 y :81-89`
+  > assertTicketBelongsToOrg / assertProjectBelongsToOrg / callerCanAccessOrg — los tres guards del portal. `grep -rn "callerCanAccessOrg|assertTicketBelongsToOrg|assertProjectBelongsToOrg" src/ tests/` devuelve 15 líneas, TODAS en src/, cero en tests/.
+- `censo propio (script read-only sobre src/, 349 call-sites de Prisma en modelos con eje de org)`
+  > 349 call-sites; 214 llevan organizationId u `organization:` en los args; 135 no. Cruce con forOrg: 35 archivos usan forOrg() contra 181 que importan @/lib/prisma directo.
+- `src/lib/tickets/actions.ts:124-137 (ejemplo del régimen débil funcionando por disciplina)`
+  > if (!isAdmin) { const organizationId = await resolveOrgId(); … await assertTicketBelongsToOrg(parsed.data.ticketId, organizationId) } — correcto, pero el guard depende de que alguien se acuerde de escribirlo; los updates de abajo (:188) consultan por `{ id }` solo.
+- `git show --stat fa5ed47`
+  > El propio equipo midió esta superficie: '222 call-sites existentes (90 archivos) quedan como deuda migrable, volcados a security/multi-tenant-callsites-pendientes.txt'
+
+**Fix.** Dos movimientos, en este orden. (1) Mergear fa5ed47 (ver S3-01): pone la regla ESLint en `warn` sobre los ~20 modelos y deja el inventario de deuda en security/multi-tenant-callsites-pendientes.txt — costo cero de migración, cobertura inmediata para código NUEVO. (2) Escribir el test que hoy no existe para los tres guards: un invariante puro (sin DB) para callerCanAccessOrg con la matriz de borde (SUPER_ADMIN + org null → true; ORG_MEMBER + org propia → true; ORG_MEMBER + org ajena → false; ORG_MEMBER sin org → false; resourceOrgId null → false), que es exactamente lo que 403280b ya trae en src/lib/security/tenant-isolation.invariant.ts; y un spec de integración de dos actores para assertTicketBelongsToOrg/assertProjectBelongsToOrg (org A siembra, org B pide → ResourceNotOwnedError, fila de A intacta), hermano de tests/integration/chatbot-isolation.spec.ts.
+
+**Criterio de aceptación.** (1) `npx eslint` sobre un archivo nuevo bajo src/app que haga `prisma.ticket.findMany(...)` emite el warn de frontera del portal. (2) `npm run check:invariants` incluye el invariante de callerCanAccessOrg y falla si se invierte la comparación `caller.organizationId === resourceOrgId`. (3) Un spec de integración nuevo prueba que assertTicketBelongsToOrg lanza ResourceNotOwnedError para un ticket de otra org, y falla si se le saca el `organizationId` del where.
+
+**Necesita decisión de Franco.** Sí: si se migran los 222 call-sites del portal a un helper scoped (equivalente a forOrg para el eje del portal) o se acepta el régimen de disciplina + linter. Es una decisión de alcance de sprint, no de seguridad — el linter y los tests bajan el riesgo sin la migración.
+
+**Qué encontró el verificador.** Abrí src/lib/auth/assert-ownership.ts completo: assertTicketBelongsToOrg en :32-43 y assertProjectBelongsToOrg en :45-56 (ambos re-consultan `findFirst({ where: { id, organizationId } })`), callerCanAccessOrg en :81-89 con el no-op explícito para SUPER_ADMIN en :85-87. `grep -rn` de los tres nombres sobre src/ y tests/ da 15 líneas, TODAS en src/ (6 archivos: agency-actions.ts, admin/chatbots/[botId]/page.tsx, admin/projects/[projectId]/{layout,page}.tsx, lib/auth/assert-ownership.ts, lib/tickets/actions.ts) y 0 en tests/ — el 'sin un solo test' es literal. Verifiqué la frontera de regímenes: src/lib/isolation/index.ts:39-43 enumera la cobertura (WabaChannel, ContactIdentity, MotorConversation, MotorMessage, MotorTemplate, MotorAlert + BotConfig, Conversation, ChatMessage, ChatbotLead, CrmIntegration) y ninguno de los modelos del portal (Ticket, Project, Invoice, EmailContact, etc.) aparece en registry.ts. `git show --stat fa5ed47` corrobora que el propio equipo midió esa superficie. Intenté refutarlo por 'los guards igual alcanzan' y no pude: el enforcement es efectivamente disciplina de call-site.
+
+**Corrección aplicada.** Una cita está tergiversada y conviene sacarla del hallazgo: 'los updates de abajo (:188) consultan por `{ id }` solo' presenta src/lib/tickets/actions.ts:188 como ejemplo de laxitud, pero al abrir el archivo ese update vive dentro de updateTicketStatusAction, que arranca con `await requireSuperAdmin()` en :186 — está guardado, no es un hueco. El ejemplo correcto del régimen débil es el que el mismo hallazgo cita bien (:124-137, guard manual que alguien tiene que acordarse de escribir). El resto del hallazgo no depende de esa línea, por eso el veredicto no cambia.
 
 ### [S3-02] Conversation.sessionId es @unique GLOBAL: el namespace de sesión del widget público se comparte entre TODOS los tenants, y la colisión cae como 500 sin traducir
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
+| **Severidad** | BAJO |
 | **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Sin auth. Basta poder POSTear a /api/chatbot/[slug]/chat de cualquier bot activo con un header Origin que la allowlist de ese bot acepte. El sessionId es un campo libre del body. |
@@ -1881,46 +2005,18 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí, una: confirmar que ningún consumidor externo (export, n8n, reporting, o los scripts de evals que hacen `conversation.findUnique({where:{sessionId}})` en src/modules/chatbot/evals/capture.ts:96) depende de que el sessionId sea una llave global. Los evals son dev-only y namespacean sus sesiones con prefijo, así que el impacto esperado es nulo, pero la decisión de dropear un unique en producción la firma Franco.
 
-**Adjudicación del auditor.** Verificado por el padre: prisma/schema.prisma:1375 dice literalmente `sessionId String @unique`.
+**Qué encontró el verificador.** Verifiqué la cadena entera línea por línea y es real. prisma/schema.prisma:1375 dice literalmente `sessionId   String  @unique` dentro de `model Conversation` (abre en :1368, sin columna organizationId). handleChatRequest.ts:107 = `sessionId: z.string().min(1).max(200)` (campo libre del body). resolver.ts:78-96: `scope.conversation.findFirst({ where: { botConfigId, sessionId } })` y, si no hay, `scope.conversation.create({ botConfigId, sessionId, … })` sin try/catch. Confirmé que la LECTURA sí está acotada al tenant: registry.ts:328 define `scopeWhere: (organizationId) => ({ conversation: { botConfig: { organizationId } } })`, así que no hay fuga de datos — coincido con el auditor en eso. Confirmé que P2002 no se traduce: scoped-model.ts:358-375 sólo mapea P2025 y P2003, y `grep -rn P2002 src/` no devuelve ningún handler en el camino del chatbot (los únicos usos son del motor: modules/motor/domain/prisma-errors.ts:11, cuyo comentario :4 dice explícitamente que translateDbError 'deja pasar P2002 tal cual'). El catch externo de handleChatRequest.ts:1640-1681 termina en `status: 500`. Busqué contra-argumentos y no encontré ninguno que anule el mecanismo: no hay upsert, no hay pre-chequeo global, y MotorMessage.providerMessageId (schema.prisma:2126) efectivamente es `String? @unique` global, mientras que el mismo modelo usa `@@unique([organizationId, outboundIdempotencyKey])` en :2142 — el contraste de criterio que cita el hallazgo es exacto.
 
-### [S3-03] Los ~20 modelos del portal con organizationId están enteramente fuera del helper de aislamiento, y sus tres únicos guards no tienen un solo test cruzado
+**Corrección aplicada.** La severidad MEDIO está inflada para el impacto real. Lo que verifiqué acota el daño a un DoS dirigido cuya precondición es conocer un sessionId ajeno, y useChatbot.ts:24-34 lo genera con `crypto.randomUUID()` en sessionStorage (per-origin, no compartido entre tenants): no hay forma práctica de reclamar el UUIDv4 de un visitante de otra org, ni de barrer el espacio. El 'oráculo de existencia' (200 vs 500) discrimina sobre valores igualmente inadivinables, así que aporta ~cero. Sin fuga de datos (probado por registry.ts:328) y sin vía de explotación masiva, esto es BAJO: es un defecto estructural real de coherencia schema-vs-aislamiento y el fix propuesto (@@unique([botConfigId, sessionId]) + mapear P2002) es correcto, pero no se paga como MEDIO.
 
-| | |
-|---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
-| **vs. ledger** | CONFIRMADO_SIN_TEST |
-| **Precondiciones** | Para el estado actual: ninguna (es una constatación de cobertura). Para que se convierta en fuga: un solo call-site nuevo del portal que reciba un id del cliente y consulte por `{ id }` sin el organizationId — no hay linter, tipo ni test que lo detenga en la línea auditada. |
-
-**Impacto.** (a) Qué está en juego: Ticket, Project, Message, Invoice, Subscription, Notification, ClientAsset, ClientBrandProfile, Service, OnboardingTask, OrganizationModule, EmailContact, EmailCampaign, BusinessMetric, PageView, WeeklyReportLog, ExecutiveBriefSnapshot, PanelAnnouncement, ReferralCode y OrgMember — o sea toda la data comercial y de soporte del cliente, incluidos contactos de email (PII) y facturación. (b) A quién: a cualquier ORG_MEMBER autenticado si un where se olvida en un call-site nuevo. (c) Precondiciones para daño: hoy NINGUNA fuga viva — leí ~25 de los 135 call-sites sin discriminante de org y todos caen en 'es el registro de tenants (User/Organization)', 'es superficie SUPER_ADMIN-only' o 'está guardado aguas arriba en la misma función'. La severidad viene de que el enforcement es 100% disciplina humana sobre la superficie con más server actions del repo, y de que los tres helpers que la sostienen no tienen ni un test. Se queda en MEDIO y no sube porque no hay explotación demostrada.
-
-**Mecanismo.** El repo tiene DOS regímenes de aislamiento que no se tocan. Régimen fuerte: src/lib/isolation cubre 18 modelos (7 del motor + 11 del chatbot) con scope no-sobreescribible, guard atómico en update/delete, anti-IDOR de create, prohibición de re-parenting y rechazo de `cursor`; hay 35 archivos que lo usan y dos suites que lo prueban. Régimen débil: los ~20 modelos del portal quedan con where manual y tres helpers sueltos —assertTicketBelongsToOrg, assertProjectBelongsToOrg (re-consultan por id+org) y callerCanAccessOrg (evalúa un org ya cargado, y es no-op para SUPER_ADMIN)—. Ninguno de los tres aparece en un archivo de test o invariante del árbol. La frontera entre regímenes es exactamente la que fa5ed47 vino a marcar y que no está mergeada (ver S3-01).
-
-**Evidencia.**
-
-- `prisma/schema.prisma (awk por modelo sobre `organizationId String`)`
-  > 30 modelos con columna organizationId. Los 18 cubiertos por el helper están listados en src/lib/isolation/index.ts:39-43 ('Cobertura: WabaChannel, ContactIdentity, MotorConversation, MotorMessage, MotorTemplate, MotorAlert (motor) + BotConfig, Conversation, ChatMessage, ChatbotLead, CrmIntegration…'). Los otros ~20 (ExecutiveBriefSnapshot :461, WeeklyReportLog :501, OrgMember :522, Service :541, Project :559, Message :600, Subscription :636, Notification :721, ClientAsset :743, ClientBrandProfile :758, Ticket :768, BusinessMetric :799, PageView :812, OnboardingTask :842, OrganizationModule :1193, EmailContact :1215, EmailCampaign :1236, PanelAnnouncement :1797, ReferralCode :1840) no aparecen en registry.ts.
-- `src/lib/auth/assert-ownership.ts:32-56 y :81-89`
-  > assertTicketBelongsToOrg / assertProjectBelongsToOrg / callerCanAccessOrg — los tres guards del portal. `grep -rn "callerCanAccessOrg|assertTicketBelongsToOrg|assertProjectBelongsToOrg" src/ tests/` devuelve 15 líneas, TODAS en src/, cero en tests/.
-- `censo propio (script read-only sobre src/, 349 call-sites de Prisma en modelos con eje de org)`
-  > 349 call-sites; 214 llevan organizationId u `organization:` en los args; 135 no. Cruce con forOrg: 35 archivos usan forOrg() contra 181 que importan @/lib/prisma directo.
-- `src/lib/tickets/actions.ts:124-137 (ejemplo del régimen débil funcionando por disciplina)`
-  > if (!isAdmin) { const organizationId = await resolveOrgId(); … await assertTicketBelongsToOrg(parsed.data.ticketId, organizationId) } — correcto, pero el guard depende de que alguien se acuerde de escribirlo; los updates de abajo (:188) consultan por `{ id }` solo.
-- `git show --stat fa5ed47`
-  > El propio equipo midió esta superficie: '222 call-sites existentes (90 archivos) quedan como deuda migrable, volcados a security/multi-tenant-callsites-pendientes.txt'
-
-**Fix.** Dos movimientos, en este orden. (1) Mergear fa5ed47 (ver S3-01): pone la regla ESLint en `warn` sobre los ~20 modelos y deja el inventario de deuda en security/multi-tenant-callsites-pendientes.txt — costo cero de migración, cobertura inmediata para código NUEVO. (2) Escribir el test que hoy no existe para los tres guards: un invariante puro (sin DB) para callerCanAccessOrg con la matriz de borde (SUPER_ADMIN + org null → true; ORG_MEMBER + org propia → true; ORG_MEMBER + org ajena → false; ORG_MEMBER sin org → false; resourceOrgId null → false), que es exactamente lo que 403280b ya trae en src/lib/security/tenant-isolation.invariant.ts; y un spec de integración de dos actores para assertTicketBelongsToOrg/assertProjectBelongsToOrg (org A siembra, org B pide → ResourceNotOwnedError, fila de A intacta), hermano de tests/integration/chatbot-isolation.spec.ts.
-
-**Criterio de aceptación.** (1) `npx eslint` sobre un archivo nuevo bajo src/app que haga `prisma.ticket.findMany(...)` emite el warn de frontera del portal. (2) `npm run check:invariants` incluye el invariante de callerCanAccessOrg y falla si se invierte la comparación `caller.organizationId === resourceOrgId`. (3) Un spec de integración nuevo prueba que assertTicketBelongsToOrg lanza ResourceNotOwnedError para un ticket de otra org, y falla si se le saca el `organizationId` del where.
-
-**Necesita decisión de Franco.** Sí: si se migran los 222 call-sites del portal a un helper scoped (equivalente a forOrg para el eje del portal) o se acepta el régimen de disciplina + linter. Es una decisión de alcance de sprint, no de seguridad — el linter y los tests bajan el riesgo sin la migración.
+**Verificado además por el auditor padre, de primera mano.** prisma/schema.prisma:1375 dice literalmente `sessionId String @unique`.
 
 ### [S3-04] El ciclo de vida del token de impersonation no cierra: el logout no borra la cookie, el middleware gatea por mera presencia, y ninguna escritura queda marcada como hecha bajo impersonation
 
 | | |
 |---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ser SUPER_ADMIN con sesión válida. El riesgo es de rendición de cuentas (insider o cuenta comprometida), no de acceso no autorizado. |
 
@@ -1951,12 +2047,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: si el middleware verifica el JWT en edge (costo de latencia en cada request de /dashboard y /admin) o si se acepta y documenta que su `isImpersonating` es una señal optimista y el enforcement vive en el server component. Con dos personas operando, documentar la decisión puede ser la respuesta correcta — pero hay que tomarla, hoy está implícita.
 
+**Qué encontró el verificador.** Verifiqué los tres huecos por separado. (1) src/actions/auth-actions.ts tiene 7 líneas en total y el cuerpo entero es `await signOut({ redirectTo: '/login' })` (:6) — no toca IMPERSONATION_COOKIE; el único `jar.delete(IMPERSONATION_COOKIE)` del repo está en src/lib/actions/impersonation.ts:64, dentro de stopImpersonationAction. Como src/lib/preview.ts:14-17 deriva la org del SUPER_ADMIN de `getImpersonationSession()`, y getImpersonationSession (impersonation.ts:54-80) sólo exige rol SUPER_ADMIN + adminId coincidente + expiresAt vigente, un re-login del mismo admin dentro de la ventana efectivamente reanuda el scope sin emitir un segundo IMPERSONATION_STARTED (impersonation.ts:36-45 es el único emisor). (2) src/proxy.ts:77 es textual: `const isImpersonating = Boolean(req.cookies.get(IMPERSONATION_COOKIE)?.value)`, consumido en :154 y :158 sin jwtVerify. (3) src/lib/audit-log.ts:5-14 confirma que LogActionInput no tiene campo de impersonation ni de org efectiva. También verifiqué lo que el hallazgo declara como correcto y lo es: impersonation.ts:68 (binding adminId) y :72 (expiresAt), más impersonation-constants.ts:2 (30 min) y getImpersonationCookieOptions():82-89 (httpOnly, sameSite lax, secure en prod, maxAge=TTL).
+
+**Corrección aplicada.** Dos ajustes. (a) Severidad: MEDIO está inflado. La regla de esta corrida es explícita en que un hallazgo que exige ser SUPER_ADMIN no se paga igual, y acá no hay acceso no autorizado alguno — el sistema falla cerrado y lo que se degrada es la completitud del rastro. El único sub-hallazgo con sustancia es (1), el logout que no borra la cookie. BAJO. (b) El sub-hallazgo (2) está sobrevendido: `isImpersonating` en proxy.ts:154 y :158 SÓLO ensancha el acceso cuando `role === ADMIN_ROLE`, es decir para una cuenta que ya tiene privilegio total; una cookie forjada por cualquier otro rol no habilita nada, y para el SUPER_ADMIN el dato sigue cerrado porque preview.ts:14-17 devuelve null si getImpersonationSession() no verifica. Impacto ~cero: es coherencia de señal, no un control. Recomendaría reescribirlo como nota de diseño y no como uno de los tres 'huecos'.
+
 ### [S3-05] Tres dialectos vivos del discriminante de tenant (resolveOrgId · session.user.organizationId · getClientChatbotSession), con semánticas distintas frente a impersonation y ninguna prueba que los concilie
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Un usuario con role SUPER_ADMIN que además tenga una fila OrgMember. No existe hoy; lo crearía cualquier alta manual, un seed, o la feature 'develOP también usa su propio panel'. |
 
@@ -1985,12 +2085,14 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: definir si develOP va a ser cliente de sí misma en el panel (es decir, si un SUPER_ADMIN va a tener OrgMember). Si la respuesta es sí, este hallazgo pasa de latente a activo y el fix deja de ser opcional.
 
+**Qué encontró el verificador.** Conté los tres dialectos yo mismo y las cifras se sostienen. `grep -rn "resolveOrgId()" src/` = 48. Para el dialecto A hay que sumar dos formas: `user\.organizationId` = 14 y `user?\.organizationId` = 18, total 32, menos el cableado legítimo (src/auth.config.ts:33, src/auth.ts:250, src/lib/preview.ts:11) → 29 call-sites reales; los de ESCRITURA que cita están: src/actions/task-approvals.ts:72 y :125 (`organizationId: session.user.organizationId!` dentro de creates), src/lib/actions/upsell.ts:16, announcements.ts:20, y además profile.ts (:29,:81,:108,:152), notifications.ts (:21,:48,:75) y gbp-connection.ts (:19,:40) que el hallazgo no nombra. `grep -rn "getClientChatbotSession()" src/` = 11 invocaciones exactas; getClientSession.ts:5-27 confirma que re-consulta OrgMember por userId sin mirar rol ni impersonation. Verifiqué la precondición que el propio hallazgo declara inalcanzable, porque era el camino natural para refutarlo, y es correcta: prisma/seed.ts crea admin@develop.com como SUPER_ADMIN en :82-97 y los dos únicos orgMember.upsert (:183, :230) son para los usuarios cliente; en prisma/seed-agency-os.ts, getAgencyMembers():345-393 crea franco@/valentino@ como SUPER_ADMIN y `grep -n 'ensureOrgMember('` muestra una sola invocación, :2403, con `clientUser.id`. Las cinco altas (invitations.ts:66-69, clients.ts, onboarding/core.ts, createClientOnly.ts, createClientWithBot.ts) rechazan email ya registrado. Agrego una consecuencia VIVA que el hallazgo no explota y que refuerza el diagnóstico: como getClientChatbotSession busca OrgMember del usuario autenticado y un SUPER_ADMIN no tiene ninguno, la sección de chatbot del dashboard devuelve null bajo impersonation — el desacople ya produce comportamiento observable hoy, no sólo latente.
+
 ### [S3-06] El tenant de la sesión se elige con `take: 1` / `findFirst` sin orderBy sobre las membresías: con dos membresías, a qué organización queda atada la sesión es no determinístico
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Un User con ≥2 filas OrgMember. Hoy sólo alcanzable por escritura manual en DB, un seed, o una feature futura de 'invitar a mi equipo' / 'este contacto trabaja para dos clientes'. |
 
@@ -2017,12 +2119,14 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: ¿el producto es 1 usuario = 1 organización, o va a soportar multi-org? De la respuesta depende si el fix es un invariante que prohíbe el caso o un selector de organización en la UI.
 
+**Qué encontró el verificador.** Los cinco sitios son textuales y ninguno lleva orderBy. src/auth.ts:25-37 (`orgMemberships: { select: {…}, take: 1 }`) → :41 `dbUser?.orgMemberships[0]` → :44 `const organizationId = membership?.organizationId`. src/auth.ts:143-149 (`orgMemberships: { select: { organizationId: true, role: true }, take: 1 }`) → :160 `const primaryMembership = user.orgMemberships[0]` → :165 `organizationId: primaryMembership?.organizationId ?? undefined`. src/modules/chatbot/server/admin/getClientSession.ts:15-24: `c.orgMember.findFirst({ where: { userId: session.user.id }, include: {…} })`, sin orderBy. src/app/api/qa/login/route.ts:117-127 + :131 mismo patrón. src/app/login/actions.ts:87-95 + :99 `userRecord?.orgMemberships?.[0]?.organization`. El schema habilita el caso a propósito: prisma/schema.prisma:530 es `@@unique([userId, organizationId])` — por PAR, no por userId — dentro de `model OrgMember` (:519). Busqué el desempate implícito (algún índice o default que fije el orden) y no existe: los índices declarados son :531 `@@index([userId])` y :532 `@@index([organizationId])`, ninguno impone orden estable. La precondición sigue sin ser alcanzable (mismo censo de altas que verifiqué en S3-05), que es exactamente lo que justifica BAJO.
+
 ### [S3-07] El escape cross-org unsafeGlobalQuery llegó a 51 usos en caminos de producción sin ningún techo, y la regla ESLint que prohíbe Prisma directo en chatbot/motor lo convirtió en el embudo por donde pasa todo lo no scopeado
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna hoy. El daño requiere que un uso futuro del escape quede accesible desde una superficie no-SUPER_ADMIN. |
 
@@ -2048,6 +2152,10 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 **Criterio de aceptación.** `npm run check:invariants` falla cuando se agrega un uso nuevo de unsafeGlobalQuery sin actualizar el conteo esperado, y pasa cuando se actualiza. Un fixture con unsafeGlobalQuery bajo src/app/(protected)/dashboard/ dispara el error de ESLint.
 
 **Necesita decisión de Franco.** No para el drift-check (es mecánico). Sí, en una segunda pasada, para decidir cuáles de los 51 usos son deuda migrable a forOrg y cuáles son legítimamente globales para siempre — pero eso no bloquea poner el techo.
+
+**Qué encontró el verificador.** Verifiqué el diseño declarado, el conteo y la ausencia de techo. src/lib/isolation/index.ts:35-37 describe el escape ('unsafeGlobalQuery(reason, fn). `grep -r unsafeGlobal src/` enumera todos los accesos cross-org del repo') y :39-43 la cobertura. eslint.config.mjs contiene los dos bloques citados: el de motor con `group: ["@/lib/prisma"]` y mensaje 'Usar src/lib/isolation/ (B0-S2)', y el del chatbot (files: src/modules/chatbot/**, src/app/api/chatbot/**) con no-restricted-imports sobre @/lib/prisma y `**/lib/prisma` más un no-restricted-syntax contra `NewExpression[callee.name='PrismaClient']` — nombran el escape como salida sancionada y no hay ninguna regla que lo acote. Confirmé el punto central: no existe conteo, allowlist ni drift-check de unsafeGlobalQuery en package.json ni en check:invariants (package.json:18). Y verifiqué los seis archivos sin guard: getActivityChartData, getLatencyHistory, listAllBots, detectBotIssues, multiTenantQueries y createBot dan 0 ocurrencias de requireSuperAdmin/SUPER_ADMIN/resolveOrgId/getClientChatbotSession y 0 de 'use server' en sus primeras líneas — el dato es correcto en las dos mitades. preflightChecks.ts:1 es 'use server' y :13 exporta runPreflightChecks(botId) sin guard, o sea la prueba de que la clase se materializó (ya está en el ledger como SEC-02, y el hallazgo lo cita como antecedente, no lo re-reporta).
+
+**Corrección aplicada.** Conteo levemente impreciso, sin efecto sobre la conclusión. Mi medición: `grep -rn "unsafeGlobalQuery(" src/` excluyendo src/lib/isolation/index.ts da 68 usos en 38 archivos, y excluyendo además /evals/ da 56 (el hallazgo dice 51 en 31 archivos de producción tras excluir también prisma/seed y update-proactive-prompts — quedan ~52). El orden de magnitud y el argumento se sostienen; conviene fijar el número exacto en el momento de escribir el drift-check, porque ese número ES el criterio de aceptación.
 
 #### Ya documentado en auditorías previas — no se re-reporta (11)
 
@@ -2104,9 +2212,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Si el bot de develOP debe seguir siendo servible desde www.develop.com.ar ademas de develop.com.ar (definir la lista exacta a sembrar en allowedDomains), y si /embed debe seguir siendo iframeable por terceros o pasa a whitelist por bot (esto ultimo es la decision R18 ya pendiente).
 
-**Qué encontró el verificador.** Abri validate-origin.ts: el bloque de escape esta EXACTAMENTE en :69-75 y devuelve {allowed:true, botConfigId, organizationId} para cualquier bot resuelto por `botSlug`, ANTES del check `bot.allowedDomains.length === 0` (:78-80) y de `originMatchesAllowed` (:83). La cita es literal. Busque activamente el guard aguas arriba y NO existe: lei chat/route.ts completo (105 lineas) — validateOrigin en :43 es el unico gate antes de checkRateLimit (:75) y handleChatRequest (:91); proxy.ts:172 confirma que el matcher es ['/admin','/dashboard','/setter','/login','/bienvenida','/cambiar-password'] — ni /api ni /embed. La duplicacion aguas abajo esta literal en handleChatRequest.ts:257-263 y verifique que isOriginWithinPlanCap se consume en :561, o sea que el escape efectivamente saltea el cap del plan. embed/[slug]/page.tsx:29-37 y next.config.ts:85-89 (source '/embed/:slug*' + frame-ancestors *) tambien son citas literales. Verifique ademas que NO hay test ni invariante que cubra validateOrigin: `grep -rln 'validateOrigin|validate-origin|allowedDomains'` sobre tests/ y *.invariant.ts devuelve UN solo archivo, y es el de fix-origin (que no toca el escape). Contra-argumentos que probe y no prosperaron: (a) no hay condicion de entorno que apague el escape — no esta bajo NODE_ENV ni flag; (b) el tipo no impide nada (origin es `string | null` del header); (c) la ruta es alcanzable sin sesion. Severidad: la sostengo en ALTO por ser alcanzable sin auth contra el 100% de los tenants, con consumo de cupo pago ajeno (tryReserveConversation en :653 pone el techo, no el piso) e inyeccion de leads via capture_lead.
+**Qué encontró el verificador.** Abri validate-origin.ts entero. El escape esta en :69-75 textual, y esta ubicado DESPUES de resolver el bot (:61-64) pero ANTES de `if (bot.allowedDomains.length === 0)` (:78) y de `originMatchesAllowed` (:83) — o sea, la cita y el orden son reales, y no hay ninguna condicion sobre `bot.organizationId` ni sobre el slug: se evalua para todo bot. Busque el guard aguas arriba que lo salvaria y NO existe: chat/route.ts:43 llama validateOrigin y con `allowed:true` sigue directo (no re-chequea dominios), y en el handler isOriginWithinPlanCap (handleChatRequest.ts:257-263) repite el mismo escape literal, verificado. proxy.ts:172 confirma que /api no pasa por el middleware. Verifique tambien que el impacto declarado es real y no teorico: handleChatRequest.ts:887-899 mete `bot.knowledgeBase.businessInfo/servicesOrProducts/faq/policies/salesGuidance/toneExamples/forbiddenStatements` en el system prompt, asi que conversar con el bot ajeno SI expone KB del tenant. next.config.ts:87 tiene `frame-ancestors *` para `/embed/:slug*` (linea exacta 87, no 85-89) y el unico CSP global que dice `frame-ancestors 'none'` esta en la clave **Content-Security-Policy-Report-Only** (next.config.ts:48-56) — no enforcea, asi que no hay intersecion de politicas que salve el /embed. embed/[slug]/page.tsx:37 `if (!bot) notFound()` sin check de origen, verificado. ALTO se sostiene: sin auth, alcanza a los 100% de los tenants, y anula el unico control de acceso de la superficie primaria.
 
-**Corrección aplicada.** Dos matices. (1) La sub-cadena de /embed como 'proxy nativo de navegador' NO la pude cerrar: depende de que el host de produccion sea literalmente develop.com.ar. La fixture del invariante usa `develop-portfolio.netlify.app` como Host (fix-origin-same-origin.invariant.ts:104-108), asi que si el deploy sirve desde el dominio Netlify, un fetch same-origin desde /embed mandaria Origin=<host-netlify> y NO matchearia el escape. El mecanismo central (setear el header desde cualquier cliente HTTP) no necesita esa sub-cadena — bajo la confianza SOLO de ese parrafo, no del hallazgo. (2) 'NUEVO' es parcialmente inexacto: las MISMAS lineas ya estan en el ledger como CLEAN-1.2-ORIGIN (validate-origin.ts:71-72 + handleChatRequest.ts:259-260), pero catalogadas como duplicacion DRY con impacto 'solo pega en el harness prod-QA local'. Lo genuinamente nuevo es la consecuencia de seguridad, no el locus. Dato para el fix que el hallazgo no menciona: tests/e2e/05-config-public.spec.ts:5 depende del escape (manda Origin: https://develop.com.ar contra el slug 'develop'), asi que sembrar el dominio en allowedDomains del bot propio es condicion para que borrar el escape no rompa la suite.
+**Corrección aplicada.** Dos correcciones. (1) El sub-vector '/embed como proxy universal via navegador' esta MAL cerrado: si el deploy vive en develop-portfolio.netlify.app (asi lo dan scripts/_b14-2-pages-*.json:3 `baseUrl` y el propio invariante fix-origin-same-origin.invariant.ts:106, que usa host='develop-portfolio.netlify.app'), el iframe genera Origin=https://develop-portfolio.netlify.app, que NO esta en el escape :71-72 y por lo tanto NO pasa. Ese sub-vector solo aplica si develop.com.ar es el host servido. El vector principal (cliente HTTP no-browser que declara el header Origin) es independiente y queda intacto. (2) `estado_vs_ledger: NUEVO` es discutible: ledger-S4.md:149-151 (CLEAN-1.2-ORIGIN) ya cita estas MISMAS lineas (validate-origin.ts:71-72 y handleChatRequest.ts:259-260), aunque encuadradas como duplicacion DRY y con impacto desinflado ('solo pega en el harness prod-QA local'). Corresponde CAMBIO_DE_ESTADO / re-caracterizacion, no NUEVO. Ademas el escape no es reciente: `git log -S"www.develop.com.ar"` lo data en 1d51c7a (2026-05-20), anterior a las dos auditorias del ledger.
 
 ### [S4-03] Las dos capas de rate-limit del chat publico se llavean con material que el atacante controla: el `origin` de la route (variable por subdominio arbitrario) y el `sessionId` del body en el limiter interno — el fix que cerro SEC-RATELIMIT-02 reintrodujo el mismo defecto en otra dimension
 
@@ -2142,9 +2250,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Si se acepta perder la granularidad por dominio embebedor en el rate-limit (un tenant con 3 sitios pasa a compartir un solo cupo por IP visitante). Mi lectura es que si — el cupo es por visitante, no por sitio — pero es una decision de producto.
 
-**Qué encontró el verificador.** Las cuatro citas son literales. chat/route.ts:71-74: `rateKey = chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}` — el origin entra crudo en la clave. origin-matcher.ts:39-41 confirma `originHost.endsWith('.' + clean)` sin ninguna prueba de posesion del dominio, o sea espacio de subdominios infinito → un bucket de 30/min por cada etiqueta inventada. handleChatRequest.ts:436-439 sigue llaveando por `chatbotPerBotSession:${slug}:${body.sessionId}` con sessionId validado solo por forma en :107 (`z.string().min(1).max(200)`), y verifique el detalle que hace trivial el fix: `const ipHash = hashIp(clientIp)` ya esta calculado en la linea inmediatamente anterior (:435) y hoy solo se usa para logging (:444). presets.ts:27/33 confirma 30/min y 10/min, y el techo que el hallazgo invoca para NO inflar la severidad tambien lo verifique: tryReserveConversation esta en handleChatRequest.ts:653 con plan.quota. El CAMBIO_DE_ESTADO es correcto contra SEC-RATELIMIT-02 (ledger: 'CERRADO-SIN-TEST, key ahora origin + sha256(IP)'): la dimension controlable no desaparecio, se mudo de sessionId a origin, y la capa interna quedo igual (el ledger la ubicaba en :285-287, hoy vive en :436-439).
+**Qué encontró el verificador.** chat/route.ts:71-79 verificado textual, incluido el comentario :68-70 que defiende la IP. origin-matcher.ts:39-41 confirma `originHost.endsWith('.' + clean)` sin ninguna prueba de posesion del dominio, asi que el espacio de valores de `origin` que sobreviven a validateOrigin es infinito para todo bot con allowedDomains poblado. handleChatRequest.ts:436-439 verificado: la key interna es `chatbotPerBotSession:${slug}:${body.sessionId}`, y el `ipHash` YA esta calculado en la linea inmediatamente anterior (:435 `const ipHash = hashIp(clientIp)`) y se usa solo para loguear (:444) — o sea, la dimension no elegible esta a mano y no se usa en la clave. sessionId validado solo por forma en :107 (`z.string().min(1).max(200)`). presets.ts:27/33 (30/min y 10/min) verificados, y el propio comentario de presets.ts admite que la capa interna quedo pendiente de consolidar. tryReserveConversation en :653 verificado — el techo de cupo del plan existe y justifica MEDIO en vez de ALTO. Ledger-S4.md:229-231 confirma SEC-RATELIMIT-02 como CERRADO-SIN-TEST con la key origin+sha256(IP): el CAMBIO_DE_ESTADO esta bien clasificado.
 
-**Corrección aplicada.** Una imprecision en la cadena, no en el hallazgo: los dos vectores NO se componen como sugiere el texto de precondiciones. Si el atacante usa el escape de S4-01 (Origin: https://develop.com.ar) la clave queda FIJA en ese literal → un solo bucket de 30/min, o sea el rate-limit funciona. Para multiplicar buckets hace falta el otro camino: un bot con allowedDomains poblado y variar subdominios de un dominio autorizado (que es lo que habilita origin-matcher.ts:40). Son vectores alternativos, no acumulativos. La capa interna (sessionId) si es evadible en ambos casos, pero por si sola esta topeada aguas arriba por los 30/min de la route.
+**Corrección aplicada.** Matiz sobre el vector: la dimension `origin` solo es de espacio infinito para bots con allowedDomains configurado (subdominios arbitrarios de un dominio autorizado). Para un bot al que se llega por el escape de S4-01, `origin` toma solo 2 valores (develop.com.ar / www.) y ahi la key SI queda acotada — el bucket compartido lo frena. El vector realmente ilimitado y sin condiciones es el interno por sessionId (10/min, trivialmente rotable), que ademas es el mas restrictivo de los dos y por lo tanto el que gobierna. La severidad no cambia.
 
 ### [S4-04] La tabla rate_limit no tiene job de purga y tres endpoints publicos derivan la clave de datos que el atacante elige libremente — el peor caso es el webhook del motor, donde la clave sale del path ANTES de cualquier autenticacion: cada request con un token nuevo inserta una fila permanente y estrena un cupo de 600/min
 
@@ -2180,9 +2288,47 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** El cupo del nuevo limiter por IP del webhook: 360dialog entrega desde un rango de IPs propio, asi que un cupo por IP demasiado bajo podria frenar rafagas legitimas de Meta. Franco tiene que decidir el numero (o confirmar el rango de IPs del BSP para tratarlo aparte).
 
-**Qué encontró el verificador.** Verifique el punto que sostiene todo el hallazgo — que no hay purga — corriendo yo el grep sobre src/, scripts/, prisma/ y netlify/: los unicos hits sobre la tabla son limiter.ts:46-54 (el UPSERT), presets.ts:6 (comentario), el comentario del webhook (route.ts:31) y `model RateLimit` en prisma/schema.prisma:1765. Cero deleteMany, cero job. El comentario de limiter.ts:28-32 declara la premisa ('la siguiente request los pisa') y el de schema.prisma:1756-1764 admite que el indice en expiresAt esta 'por si mas adelante hace falta purgar' — o sea el propio codigo documenta el supuesto de espacio de claves finito que el webhook viola. En webhook/[channelToken]/route.ts:30-37 la clave sale del segmento de URL y el comentario dice explicitamente 'Rate limit ANTES de cualquier lectura de DB de canales', asi que la fila se escribe antes de cualquier auth; el 401 posterior no la borra. presets.ts:58 confirma 600/min por canal. Tambien verifique la parte que el hallazgo usa para NO inflar: resolve-channel.ts:25 corta por CHANNEL_TOKEN_PATTERN antes de tocar la DB — el freno existe, pero corre despues del limiter, tal como dice. Y limiter.ts:65-70 es fail-closed, asi que ni siquiera hay un modo degradado que evite la escritura.
+**Qué encontró el verificador.** limiter.ts:44-62 verificado: es un INSERT ... ON CONFLICT, o sea inserta fila por cada key no vista. El comentario :28-32 dice textualmente 'No hay job de limpieza'. Corri `grep -rn 'rate_limit' src/ scripts/` y `grep 'rateLimit\.'`: los unicos hits son el propio limiter, presets.ts, el comentario del route del motor y logs de handleChatRequest — CERO deleteMany, cero job de purga. El modelo esta en schema.prisma:1765-1777 con `@@index([expiresAt])` y el comentario de :1755-1763 dice 'deja la puerta abierta a un job de purga futuro si hace falta'. motor/webhook/[channelToken]/route.ts:27-37 verificado linea por linea: `const { channelToken } = await context.params` → sha256 → checkRateLimit, TODO antes de `handleInboundWebhookRequest` (:50). Fui a buscar el guard aguas arriba que lo refutaria y confirme que NO alcanza: resolve-channel.ts:25 tiene `CHANNEL_TOKEN_PATTERN.test()` que corta antes de la DB de canales, pero corre dentro de handleInboundWebhookRequest (handle-request.ts:22), es decir DESPUES de que la fila de rate_limit ya se escribio. presets.ts:58 = 600/60s, verificado. Es el unico hallazgo de la tanda sin ninguna precondicion.
 
-**Corrección aplicada.** Ninguna correccion sustantiva. Dos precisiones de cita: el INSERT esta en limiter.ts:46-49 (la :44 es la linea del $queryRawUnsafe), y el modelo Prisma arranca en :1765 (el comentario que se cita es :1756-1764). Ambas son off-by-poco, no tergiversan nada. Sostengo MEDIO: es el unico hallazgo de la tanda con CERO precondiciones y el unico cuyo daño (filas que nadie borra en una DB compartida por todos los tenants) es acumulativo y no se auto-repara; no expone ni muta dato de negocio, por eso no sube.
+**Corrección aplicada.** Citas con drift menor, no material: el modelo RateLimit esta en schema.prisma:1765-1777 (el hallazgo dice 1761-1777; 1755-1764 es el bloque de comentario). Confirmo ademas que el cron propuesto como percha existe: netlify.toml declara `cleanup-old-events-cron` con schedule '0 6 * * *', asi que el fix (1) es viable sin cron nuevo.
+
+### [S4-05] /api/chatbot/[slug]/health es publico, sin rate-limit y sin origin-check, y su respuesta publica el inventario de infraestructura (nombres de env vars y cuales faltan), los mensajes de error crudos de Prisma y de Vertex, y el botName de cualquier organizacion por enumeracion de slug
+
+| | |
+|---|---|
+| **Severidad** | MEDIO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | NUEVO |
+| **Precondiciones** | Sin auth, sin header Origin, sin rate-limit. El slug es opcional en la practica (checkChatbotHealth tiene default 'develop'). |
+
+**Impacto.** (a) Que se expone: la lista completa de variables de entorno criticas por nombre con un booleano de presencia (DATABASE_URL, GOOGLE_APPLICATION_CREDENTIALS, CHATBOT_GCP_PROJECT_ID, AUTH_SECRET, CHATBOT_IP_HASH_SALT...), mas strings de error sin filtrar de Prisma y del proveedor LLM, mas —por enumeracion de slug— el botName y el estado activo/pausado de cualquier tenant. Ademas cada request cuesta 2 consultas a Neon y no tiene ningun freno. (b) A quien: a cualquiera sin autenticacion. (c) Precondiciones: ninguna para la parte de env/errores (el slug tiene default 'develop'); conocer o adivinar slugs para la parte de enumeracion. NO son valores de secretos — solo nombres y presencia — por eso es MEDIO y no ALTO: es material de reconocimiento (que stack, que proyecto GCP, si el deploy esta a medio configurar), no una fuga de credenciales. El ledger tiene el endpoint anotado en un inventario como 'publico, sin origin-check' SIN severidad y sin caracterizar el payload; lo NUEVO aca es el contenido de lo que devuelve.
+
+**Mecanismo.** health/route.ts:6-19 no llama a validateOrigin, no llama a checkRateLimit y no tiene guard de sesion: pasa el slug directo a checkChatbotHealth y serializa el resultado entero con Response.json. Ese resultado incluye `checks.env.details` (checkHealth.ts:93), que es la salida completa de checkChatbotEnv — y esa funcion construye un array con el `name`, `description`, `hint` y `present` de cada variable del catalogo ENV_VARS (envValidator.ts:26-75, :80-85), mas arrays `errors`/`warnings` cuyo texto nombra explicitamente la variable faltante (:92-98). Tambien se serializan `database.error` y `llmProvider.error`, que son `error.message` sin sanitizar del cliente Prisma y del provider de Vertex (checkHealth.ts:35 y :56) — mensajes que tipicamente incluyen host de la DB o el project id de GCP. Y `bot.botName` (:78) convierte al endpoint en un oraculo de existencia y nombre comercial cruzado entre organizaciones. Cada llamada ejecuta un `SELECT 1` (:32) y un findUnique sobre botConfig (:65-72), con `dynamic = 'force-dynamic'` y `Cache-Control: no-store` (route.ts:4, :17) — o sea, ni el cache lo amortigua.
+
+**Evidencia.**
+
+- `src/app/api/chatbot/[slug]/health/route.ts:6-19`
+  > export async function GET(_request: Request, { params }...) {\n  const { slug } = await params\n  const health = await checkChatbotHealth(slug)\n  return Response.json(health, { status: health.ok ? 200 : 503, ... })
+- `src/modules/chatbot/server/health/checkHealth.ts:89-98`
+  > return { ok: allOk, timestamp: ..., checks: { env: { ok: envResult.allCriticalPresent, details: envResult }, database: dbCheck, llmProvider: llmCheck, bot: botCheck } }
+- `src/modules/chatbot/server/config/envValidator.ts:80-85`
+  > const vars: EnvVarStatus[] = ENV_VARS.map((v) => { const value = process.env[v.name]; const present = !!value && value.length > 0; return { ...v, present } })
+- `src/modules/chatbot/server/config/envValidator.ts:26-45`
+  > { name: 'DATABASE_URL', required: true, description: 'PostgreSQL connection string for Neon DB', hint: 'Get it from Neon console → Connection details' }, ... { name: 'CHATBOT_GCP_PROJECT_ID', ... }
+- `src/modules/chatbot/server/health/checkHealth.ts:35`
+  > dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }
+- `src/modules/chatbot/server/health/checkHealth.ts:78`
+  > botCheck = { ok: true, slug: bot.slug, botName: bot.botName, isActive: bot.isActive }
+
+**Fix.** Partir la respuesta en dos formas segun el llamador, sin crear un endpoint nuevo: en src/app/api/chatbot/[slug]/health/route.ts, si no hay sesion SUPER_ADMIN devolver un payload minimo `{ ok: boolean, timestamp }` (que es todo lo que necesita un monitor de uptime), y servir el objeto `checks` completo solo cuando `auth()` da SUPER_ADMIN. En src/modules/chatbot/server/health/checkHealth.ts:35 y :56, reemplazar `error.message` por un codigo estable ('db_unreachable' / 'llm_provider_unavailable') y loguear el mensaje real por logger, no por la respuesta HTTP. Sumar checkRateLimit con un preset nuevo por IP hasheada — el endpoint pega 2 veces a la DB por request y hoy no tiene ningun freno.
+
+**Criterio de aceptación.** GET /api/chatbot/develop/health sin sesion devuelve exactamente las claves `ok` y `timestamp` y ninguna otra (verificable con `Object.keys(body).sort()`). Con cookie de SUPER_ADMIN devuelve el objeto `checks` completo. Ninguna respuesta, en ningun rol, contiene la subcadena 'DATABASE_URL', 'CHATBOT_GCP_PROJECT_ID' ni el texto de un error de Prisma. Mas de N requests por minuto desde la misma IP devuelven 429.
+
+**Necesita decisión de Franco.** Si algun monitor de uptime externo ya esta consumiendo el payload completo (el ledger registra OBS-03: 'cero monitoreo de uptime externo', lo que sugiere que no, pero conviene confirmarlo antes de recortar la respuesta).
+
+**Qué encontró el verificador.** health/route.ts:6-19 lo lei completo: 20 lineas, sin validateOrigin, sin checkRateLimit, sin auth(), y serializa `health` entero con Response.json. checkHealth.ts:89-98 confirma que `checks.env.details` es el objeto COMPLETO de checkChatbotEnv. Lei envValidator.ts entero: ENV_VARS:26-75 lista DATABASE_URL, GOOGLE_APPLICATION_CREDENTIALS, CHATBOT_GCP_PROJECT_ID, CHATBOT_GCP_LOCATION, CHATBOT_GOOGLE_API_KEY, CHATBOT_IP_HASH_SALT, CHATBOT_LLM_PROVIDER y AUTH_SECRET con description+hint, y :80-85 los mapea con `present` booleano; :92-98 arma errors/warnings que nombran la variable faltante. checkHealth.ts:35 y :56 devuelven `error.message` crudo de Prisma y del provider, verificado. :78 devuelve botName/isActive por slug (oraculo cross-org). Confirmo que cada GET dispara 2 queries (`SELECT 1` en :32 + findUnique en :65-72) y que `dynamic='force-dynamic'` + no-store (route.ts:4,:17) impiden amortiguarlo por cache. Ledger-S4.md:274-276 confirma que el endpoint solo figuraba en un inventario 'sin severidad asignada, no elevado a hallazgo' — la caracterizacion del payload SI es nueva.
+
+**Corrección aplicada.** La mitad confidencialidad del argumento es mas fina de lo que sugiere el titulo y conviene decirlo: NO se exponen valores, solo nombres y booleanos de presencia; los nombres son estandar y adivinables; botName ya sale por /config, que es semi-publico. Los mensajes crudos de Prisma/Vertex solo aparecen cuando la infra ya esta rota. Lo que sostiene MEDIO no es el secreto filtrado sino (a) el string de error crudo bajo falla y (b) un endpoint publico sin ningun freno que pega 2 veces a la Neon compartida por todos los tenants. Con solo (a) seria BAJO.
 
 ### [S4-02] FIX-ORIGIN (c19e49e): el fallback Referer-vs-Host de isTrustedSameOrigin confia en dos headers que el cliente controla — en prod anula el check de allowedDomains de /config para cualquier cliente sin header Origin, y el invariante que lo acompaña consagra ese camino como correcto
 
@@ -2216,47 +2362,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Un GET a /api/chatbot/<slug>/config sin header Origin, sin Sec-Fetch-Site y con `Referer: https://<host-del-deploy>/` devuelve 403 en produccion. El widget real embebido en develop.com.ar (que si manda Sec-Fetch-Site: same-origin) sigue devolviendo 200 — verificable con el spec ya existente tests/integration/fix-origin-same-origin-config.spec.ts. `npm run check:invariants` ejecuta el invariante de fix-origin y falla si alguien restaura el fallback.
 
-**Qué encontró el verificador.** Cita verificada linea por linea: same-origin.ts:45-58 es literal (secFetchSite==='same-origin'→true; cualquier valor explicito→false; ausencia→compara `new URL(referer).host === host`), y route.ts:51-59 es literal (el bypass corre ANTES de validateOrigin y solo exige isBotServable). Confirme que ambos headers del fallback los escribe el emisor: no hay ninguna verificacion de Host contra un allowlist en el repo, y `isSameOriginBypassApplicable()` (same-origin.ts:26) solo exige NODE_ENV==='production' && QA_ALLOW_LOCALHOST!=='1', o sea que el camino esta ACTIVO justamente en prod. El problema de proceso tambien es real y lo verifique yo: el invariante afirma el fallback como correcto en fix-origin-same-origin.invariant.ts:104 (assert.equal(..., true)), y contando el JSON, `check:invariants` es package.json:18 y NO enumera `test:fixorigin`, que es package.json:52 — script suelto. El CAMBIO_DE_ESTADO tambien es correcto: `git show --stat c19e49e` da fecha Sat Jul 18 2026 y 466 inserciones, POSTERIOR al hash de la auditoria maestra (6254428, 2026-07-10) que declaraba SEC-AUTH-07 CERRADO-DOCUMENTADO con evidencia 'no-origin solo en non-prod'.
+**Qué encontró el verificador.** Lei same-origin.ts completo: :46-48 respeta el Sec-Fetch-Site explicito y :50-57 es exactamente el fallback Referer-vs-Host descripto. config/route.ts:51-59 verificado literal — el bypass corre antes de `validateOrigin` (:61) y solo chequea `isBotServable` (existe + activo), sin tocar allowedDomains. isSameOriginBypassApplicable() (:25-27) confirma que el camino se activa justo en prod sin QA_ALLOW_LOCALHOST, o sea donde antes se rechazaba. El invariante existe y la asercion de la linea 104 dice literalmente 'sin Sec-Fetch-Site, Referer con el MISMO host que Host → fallback confiable' esperando `true` — consagra el camino, confirmado. package.json:18 (`check:invariants`) lo lei entero: encadena 16 `check:invariant:*` y NO incluye `test:fixorigin`, que vive suelto en :52. `git log` confirma c19e49e como HEAD~2. Busque contra-argumento y no lo hay: no hay proxy sobre /api, no hay validacion de Referer contra allowedDomains.
 
-**Corrección aplicada.** Severidad inflada. Lei getPublicConfig.ts entero: el select devuelve botName, colores, estilos, welcomeMessage, quickReplies, proactivePrompts, whatsappNumber y organization.companyName — nada confidencial, y el propio comentario documenta que llmProvider/llmModel/monthlyQuota/tone/temperature nunca salen. Es exactamente lo que cualquier visitante anonimo del sitio del cliente ya recibe. Ademas, mientras S4-01 este abierto, este camino NO agrega capacidad alguna: `Origin: https://develop.com.ar` ya abre /config de cualquier bot por la via principal. Y la etiqueta 'oraculo comodo de enumeracion de tenants' no se sostiene: hace falta conocer el slug de antemano; es confirmacion de una adivinanza, no enumeracion. Lo que realmente se pierde es la propiedad 'allowedDomains gobierna /config' — control debilitado sin exposicion de dato → BAJO. El item de proceso (invariante que consagra el fallback + fuera de CI) es lo mas valioso del hallazgo y ese sobrevive intacto.
-
-### [S4-05] /api/chatbot/[slug]/health es publico, sin rate-limit y sin origin-check, y su respuesta publica el inventario de infraestructura (nombres de env vars y cuales faltan), los mensajes de error crudos de Prisma y de Vertex, y el botName de cualquier organizacion por enumeracion de slug
-
-| | |
-|---|---|
-| **Severidad** | BAJO |
-| **Veredicto** | CONFIRMADO |
-| **vs. ledger** | NUEVO |
-| **Precondiciones** | Sin auth, sin header Origin, sin rate-limit. El slug es opcional en la practica (checkChatbotHealth tiene default 'develop'). |
-
-**Impacto.** (a) Que se expone: la lista completa de variables de entorno criticas por nombre con un booleano de presencia (DATABASE_URL, GOOGLE_APPLICATION_CREDENTIALS, CHATBOT_GCP_PROJECT_ID, AUTH_SECRET, CHATBOT_IP_HASH_SALT...), mas strings de error sin filtrar de Prisma y del proveedor LLM, mas —por enumeracion de slug— el botName y el estado activo/pausado de cualquier tenant. Ademas cada request cuesta 2 consultas a Neon y no tiene ningun freno. (b) A quien: a cualquiera sin autenticacion. (c) Precondiciones: ninguna para la parte de env/errores (el slug tiene default 'develop'); conocer o adivinar slugs para la parte de enumeracion. NO son valores de secretos — solo nombres y presencia — por eso es MEDIO y no ALTO: es material de reconocimiento (que stack, que proyecto GCP, si el deploy esta a medio configurar), no una fuga de credenciales. El ledger tiene el endpoint anotado en un inventario como 'publico, sin origin-check' SIN severidad y sin caracterizar el payload; lo NUEVO aca es el contenido de lo que devuelve.
-
-**Mecanismo.** health/route.ts:6-19 no llama a validateOrigin, no llama a checkRateLimit y no tiene guard de sesion: pasa el slug directo a checkChatbotHealth y serializa el resultado entero con Response.json. Ese resultado incluye `checks.env.details` (checkHealth.ts:93), que es la salida completa de checkChatbotEnv — y esa funcion construye un array con el `name`, `description`, `hint` y `present` de cada variable del catalogo ENV_VARS (envValidator.ts:26-75, :80-85), mas arrays `errors`/`warnings` cuyo texto nombra explicitamente la variable faltante (:92-98). Tambien se serializan `database.error` y `llmProvider.error`, que son `error.message` sin sanitizar del cliente Prisma y del provider de Vertex (checkHealth.ts:35 y :56) — mensajes que tipicamente incluyen host de la DB o el project id de GCP. Y `bot.botName` (:78) convierte al endpoint en un oraculo de existencia y nombre comercial cruzado entre organizaciones. Cada llamada ejecuta un `SELECT 1` (:32) y un findUnique sobre botConfig (:65-72), con `dynamic = 'force-dynamic'` y `Cache-Control: no-store` (route.ts:4, :17) — o sea, ni el cache lo amortigua.
-
-**Evidencia.**
-
-- `src/app/api/chatbot/[slug]/health/route.ts:6-19`
-  > export async function GET(_request: Request, { params }...) {\n  const { slug } = await params\n  const health = await checkChatbotHealth(slug)\n  return Response.json(health, { status: health.ok ? 200 : 503, ... })
-- `src/modules/chatbot/server/health/checkHealth.ts:89-98`
-  > return { ok: allOk, timestamp: ..., checks: { env: { ok: envResult.allCriticalPresent, details: envResult }, database: dbCheck, llmProvider: llmCheck, bot: botCheck } }
-- `src/modules/chatbot/server/config/envValidator.ts:80-85`
-  > const vars: EnvVarStatus[] = ENV_VARS.map((v) => { const value = process.env[v.name]; const present = !!value && value.length > 0; return { ...v, present } })
-- `src/modules/chatbot/server/config/envValidator.ts:26-45`
-  > { name: 'DATABASE_URL', required: true, description: 'PostgreSQL connection string for Neon DB', hint: 'Get it from Neon console → Connection details' }, ... { name: 'CHATBOT_GCP_PROJECT_ID', ... }
-- `src/modules/chatbot/server/health/checkHealth.ts:35`
-  > dbCheck = { ok: false, error: error instanceof Error ? error.message : 'unknown' }
-- `src/modules/chatbot/server/health/checkHealth.ts:78`
-  > botCheck = { ok: true, slug: bot.slug, botName: bot.botName, isActive: bot.isActive }
-
-**Fix.** Partir la respuesta en dos formas segun el llamador, sin crear un endpoint nuevo: en src/app/api/chatbot/[slug]/health/route.ts, si no hay sesion SUPER_ADMIN devolver un payload minimo `{ ok: boolean, timestamp }` (que es todo lo que necesita un monitor de uptime), y servir el objeto `checks` completo solo cuando `auth()` da SUPER_ADMIN. En src/modules/chatbot/server/health/checkHealth.ts:35 y :56, reemplazar `error.message` por un codigo estable ('db_unreachable' / 'llm_provider_unavailable') y loguear el mensaje real por logger, no por la respuesta HTTP. Sumar checkRateLimit con un preset nuevo por IP hasheada — el endpoint pega 2 veces a la DB por request y hoy no tiene ningun freno.
-
-**Criterio de aceptación.** GET /api/chatbot/develop/health sin sesion devuelve exactamente las claves `ok` y `timestamp` y ninguna otra (verificable con `Object.keys(body).sort()`). Con cookie de SUPER_ADMIN devuelve el objeto `checks` completo. Ninguna respuesta, en ningun rol, contiene la subcadena 'DATABASE_URL', 'CHATBOT_GCP_PROJECT_ID' ni el texto de un error de Prisma. Mas de N requests por minuto desde la misma IP devuelven 429.
-
-**Necesita decisión de Franco.** Si algun monitor de uptime externo ya esta consumiendo el payload completo (el ledger registra OBS-03: 'cero monitoreo de uptime externo', lo que sugiere que no, pero conviene confirmarlo antes de recortar la respuesta).
-
-**Qué encontró el verificador.** Todas las citas son literales y las verifique una por una: health/route.ts:6-19 no llama a validateOrigin, no llama a checkRateLimit y no tiene auth() — pasa el slug a checkChatbotHealth y serializa el objeto entero (`Response.json(health)`), con force-dynamic (:4) y no-store (:17), asi que ni el cache amortigua. checkHealth.ts:89-98 mete `details: envResult` completo; envValidator.ts:80-85 arma ese array con name/description/hint/present de las 8 entradas de ENV_VARS (:26-75), y :92-98 nombra la variable faltante en el string de error/warning. checkHealth.ts:35 y :56 devuelven `error.message` crudo de Prisma y del provider; :78 devuelve botName/isActive por slug. El default 'develop' esta en :21. Verificado tambien que pega 2 veces a la DB por request (:32 SELECT 1 y :65-72 findUnique) sin ningun freno. No encontre guard aguas arriba: proxy.ts:172 no cubre /api.
-
-**Corrección aplicada.** Dos correcciones. (1) Severidad: MEDIO esta inflado para el impacto REAL. No se expone ni un valor de secreto — solo nombres de variables estandar y adivinables (DATABASE_URL, AUTH_SECRET) con un booleano de presencia; los `error.message` de Prisma/Vertex solo aparecen cuando el check YA esta fallando (estado excepcional, no el payload normal); y botName/isActive por slug no es cross-tenant en sentido util, porque /config lo devuelve igual y el widget lo muestra publicamente en el sitio del cliente. Queda una fuga de reconocimiento de bajo valor + un endpoint sin rate-limit que cuesta 2 queries — clasico CWE-200 de severidad baja. (2) estado_vs_ledger: 'NUEVO' es incorrecto. El ledger ya tiene SEC-INV-health con la evidencia 'api/chatbot/[slug]/health | GET | publico, sin origin-check | por slug | sin RL'. Lo unico nuevo es la caracterizacion del payload, asi que corresponde CAMBIO/ampliacion de un item existente, no NUEVO.
+**Corrección aplicada.** Severidad inflada. Lo que se sirve es getPublicConfig (getPublicConfig.ts:68-95): botName, colores, avatar, welcomeMessage, quickReplies, proactivePrompts — datos que ya se le entregan a cualquier visitante anonimo del sitio autorizado. No hay dato confidencial, no hay mutacion, no hay PII. Ademas el valor marginal del hallazgo es casi nulo mientras S4-01 este abierto: con `Origin: https://develop.com.ar` se llega al mismo /config de cualquier bot sin necesitar este camino. Lo que queda en pie y vale es la parte de PROCESO (invariante que consagra el fallback + fuera de CI), que es real pero no mueve la aguja de impacto. BAJO.
 
 ### [S4-06] /monitoring es un endpoint publico que no figura en el inventario de rutas: el tunnelRoute de Sentry genera un rewrite que reenvia el cuerpo de cualquier POST anonimo a o<orgid>.ingest.sentry.io, con orgid y projectid tomados del query string
 
@@ -2288,9 +2396,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Si conservar el tunnel de Sentry (telemetria de clientes con adblock) o borrarlo. Es una decision de producto/observabilidad, no de seguridad pura.
 
-**Qué encontró el verificador.** La configuracion y el codigo upstream los verifique yo y coinciden exactamente: next.config.ts:210-216 pasa `tunnelRoute: "/monitoring"` a withSentryConfig; en el paquete instalado (@sentry/nextjs 10.62.0) tunnel.js:22 tiene el destination literal `https://o:orgid.ingest.sentry.io/api/:projectid/envelope/?hsts=0` y :28-42 el source `${tunnelPath}(/?)` con `o` capturado como `(?<orgid>\d*)` y `p` como `(?<projectid>\d*)` — los numeros de linea citados son exactos. Cerre ademas el eslabon que el hallazgo no cito: getFinalConfigObjectUtils.js:33 llama setUpTunnelRewriteRules incondicionalmente cuando `userSentryOptions.tunnelRoute` esta seteado y `output !== 'export'` (no lo es), asi que el rewrite SI queda en la config construida. proxy.ts:171-173 confirma que el matcher no lo cubre, y no existe route handler propio (no hay src/app/monitoring ni src/app/api/monitoring). Dejo PLAUSIBLE y no CONFIRMADO por una sola razon: que Netlify materialice ese rewrite externo como proxy real desde la function es comportamiento de plataforma que NO puedo verificar por lectura, y probarlo exigiria pegarle al deploy — fuera del limite de la corrida. Todo lo que es codigo, esta confirmado.
+**Qué encontró el verificador.** Las citas son exactas. next.config.ts:215 `tunnelRoute: "/monitoring"` dentro de withSentryConfig, verificado. Abri node_modules/@sentry/nextjs/build/cjs/config/withSentryConfig/tunnel.js: :22 define `const destination = destinationOverride || "https://o:orgid.ingest.sentry.io/api/:projectid/envelope/?hsts=0"` y :28-42 arma el rewrite con `source: `${tunnelPath}(/?)`` y las dos condiciones `has` de query con los grupos nombrados `(?<orgid>\\d*)` y `(?<projectid>\\d*)`, interpolados en host y path del destino. Confirmo que `\\d*` acepta vacio. proxy.ts:171-173 verificado: el matcher lista solo /admin, /dashboard, /setter, /login, /bienvenida, /cambiar-password — /monitoring queda fuera, y al ser un rewrite de infraestructura no hay archivo propio donde meterle un limiter. Queda PLAUSIBLE y no CONFIRMADO porque la cadena no la puedo cerrar por lectura: no verifique que el runtime de @netlify/plugin-nextjs honre un rewrite externo con grupos regex nombrados interpolados en el host, y no se puede probar sin tocar el deploy (prohibido por el pliego). Es la unica pieza que falta.
 
-**Corrección aplicada.** Severidad inflada a MEDIO. Por el propio razonamiento del hallazgo: el destino esta clavado al dominio de ingesta de Sentry por la plantilla (no es SSRF a hosts arbitrarios ni a red interna), no expone ni un dato de develOP, no permite ninguna accion sobre la app y no toca datos de tenants. Lo que queda es consumo de invocaciones/ancho de banda de Netlify por un tercero anonimo y reputacion del dominio — eso es BAJO bajo un criterio de impacto real. El valor del hallazgo no esta en la severidad sino en el inventario: es superficie publica que no figura en ninguna auditoria previa ni en las 37 rutas listadas, y no vive en src/ (por eso ningun censo de route handlers la ve), asi que la parte 'NUEVO' la confirmo.
+**Corrección aplicada.** Severidad inflada. La propia justificacion del hallazgo concede que NO se expone ningun dato de develOP y que el destino esta clavado al dominio de ingesta de Sentry por la plantilla (:22), o sea no es SSRF general. Lo que queda es consumo de invocaciones de Netlify y reputacion de dominio — con precondicion cero, pero sin impacto sobre datos ni sobre tenants. BAJO. Ademas es comportamiento documentado y de diseño del paquete upstream, no un defecto introducido en este repo: lo local es solo la decision de habilitarlo.
 
 #### Ya documentado en auditorías previas — no se re-reporta (11)
 
@@ -2347,7 +2455,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Un POST a /api/chatbot/[slug]/chat con `currentPath` que contenga newlines o un encabezado de seccion tipo '# 10. …' produce un system prompt donde la linea 'Ruta del usuario:' dice 'no determinada' (o el valor recortado a un path valido) — verificable con un test unitario sobre requestBodySchema.parse + buildSystemPrompt, sin LLM: assert de que el prompt resultante no contiene el marcador inyectado. Sumar el caso al archivo de invariantes del chat (patron de src/modules/chatbot/server/chat/__tests__/*.invariant.ts) para que quede en check:invariants.
 
-**Qué encontró el verificador.** Abri los 3 archivos citados y las 3 citas son literales. handleChatRequest.ts:108 dice exactamente `currentPath: z.string().max(500).optional(),` mientras que la linea 109 inmediatamente debajo usa `referrer: attributionField(500)` — lei src/modules/chatbot/shared/attribution.ts:65-72 y sanitizeAttributionField SI hace strip de C0(0-31)+DEL, trim y cap, o sea el contraste que afirma el hallazgo es real. sections.ts:199 interpola `${context.currentPath ?? 'no determinada'}` dentro de la seccion 8, y la unica regla de desconfianza del prompt (sections.ts:150) habla explicitamente solo de las etiquetas <vmsg_…>, que handleChatRequest.ts:1042-1047 aplica UNICAMENTE al map de body.messages. Busque el guard aguas arriba y NO existe: grep de currentPath en src/ da 3 usos de body.currentPath (403 log de debug, 488 getOrCreateConversation, 903 el prompt) y ninguno normaliza; el route handler (src/app/api/chatbot/[slug]/chat/route.ts:36-88) solo hace validateOrigin + rate-limit, no toca el body; TypeScript no puede acotar un string. Hallazgo lateral que el auditor no menciono: el mismo valor crudo entra a chatbotDebug('request_parsed') en :403, asi que newlines tambien contaminan el log estructurado.
+**Qué encontró el verificador.** Abrí los 5 puntos citados y todos existen literalmente. `handleChatRequest.ts:108` es `currentPath: z.string().max(500).optional(),` — string libre; `:109` es `referrer: attributionField(500)` y `attributionField` (definido en :75-79) aplica `sanitizeAttributionField`. `:903` mete `currentPath: body.currentPath` en `context` de buildSystemPrompt, y `sections.ts:199` lo interpola en `- Ruta del usuario: ${context.currentPath ?? 'no determinada'}`, dentro de la sección 8 — es decir FUERA de las etiquetas `<vmsg_…>`. Verifiqué el spotlighting yo mismo: `handleChatRequest.ts:1066-1071` (`visitorTag`, `wrapUntrusted`) se aplica exclusivamente en el `.map()` de `body.messages` (:1052-1070), nunca al system. La regla del prompt que declara no-confiable el contenido está en `sections.ts:150` y habla SOLO de `<vmsg_…>`. Busqué guard aguas arriba y no existe: `src/app/api/chatbot/[slug]/chat/route.ts` solo hace validateOrigin + rate-limit y pasa el `request` crudo a `handleChatRequest`; no toca el body. Los otros dos usos de `body.currentPath` (`:403` log, `:488` getOrCreateConversation) tampoco lo normalizan. Confirmé también que ningún invariante lo cubre: `src/modules/chatbot/server/chat/__tests__/` tiene 5 archivos y `utm-attribution.invariant.ts` (el único que importa `requestBodySchema`) no menciona `currentPath` (grep = 0 hits).
+
+**Corrección aplicada.** Nada sustantivo. Matiz de honestidad: lo VERIFICADO por código es la asimetría de validación (referrer sanitizado, proactiveOpener validado por match exacto en :991-999, currentPath ninguno) y la ubicación en la región confiable del prompt. Que el modelo efectivamente obedezca ese texto es comportamiento de LLM, no verificable leyendo el repo y no se probó en esta corrida — el auditor lo presenta con más certeza de la que su método puede sostener. Aun así el defecto de código se sostiene solo y el fix es correcto.
 
 ### [S5-02] El historial completo lo provee el cliente y los turnos con role 'assistant' estan EXPLICITAMENTE exentos del spotlighting — el servidor nunca reconstruye la conversacion desde la DB
 
@@ -2382,7 +2492,43 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Elegir opcion (1) o (2): la (2) cambia el contrato con el widget (el cliente deja de ser fuente de verdad del historial) y toca el camino caliente del producto — decision de Franco, no del auditor.
 
-**Qué encontró el verificador.** Verifique el map real en handleChatRequest.ts:1052-1061: la rama `if (m.role === 'assistant') return { role: 'assistant', content: [{ type: 'text', text: m.content }] }` devuelve el contenido del BODY sin pasar por wrapUntrusted, y el comentario 1053-1056 efectivamente solo justifica el caso 'system'. Confirme la premisa fuerte (que el server no reconstruye historial) corriendo yo mismo `grep -rn "chatMessage.findMany|chatMessage.findFirst" src/modules/chatbot/server/`: devuelve 5 sitios (admin/multiTenantQueries.ts:166, handleChatRequest.ts:858 dedup, handleChatRequest.ts:1386 dedup de retry, reports/buildWeeklyReport.ts:74, captureLead.ts:230 pertenencia) y NINGUNO alimenta el array `messages` del streamText — `messages: body.messages.map(...)` es la unica fuente. Tambien verifique la persistencia asimetrica en :834-869: solo se persiste `lastUserMessage`, asi que el historial 'assistant' forjado no deja rastro. No encontre contra-argumento: no hay guard de coherencia body-vs-DB, y el schema (:100) admite role 'assistant' explicitamente. Salvedad honesta: que un turno assistant forjado pese mas en el modelo que el mismo texto en un turno user es comportamiento de modelo, INFERIDO — lo verificado es la ausencia del control.
+**Qué encontró el verificador.** Verifiqué el map completo en `handleChatRequest.ts:1052-1070`: el comentario (:1053-1056) dice explícitamente que el historial del asistente 'va tal cual', y el branch `if (m.role === 'assistant') return { role: 'assistant', content: [{ type:'text', text: m.content }] }` (:1067-1069) devuelve el contenido del BODY sin `wrapUntrusted`. El schema (:97-106) acepta `role: z.enum(['user','assistant','system'])` con `content: z.string().max(MAX_MESSAGE_CHARS)` — nada impide fabricar turnos assistant. Verifiqué por mi cuenta el contra-argumento más fuerte (¿el server reconstruye el historial desde la DB?) con `grep -rn 'chatMessage.find*' src/modules/chatbot/server/`: solo 5 hits — `handleChatRequest.ts:858` (dedup de cola, lee `role/content/createdAt` del último), `:1386` (dedup del retry), `captureLead.ts:230` (pertenencia), `admin/multiTenantQueries.ts:166` y `reports/buildWeeklyReport.ts:74`. Ninguno alimenta a `streamText`. También confirmé la persistencia asimétrica: `:834-836` toma `lastUserMessage` y `:864-869` persiste SOLO ese USER — el historial forjado no queda en DB, así que la parte forense del hallazgo también es cierta.
+
+**Corrección aplicada.** Ninguna. Corroboración extra que el auditor no citó: el propio comentario del código muestra que el caso 'system' se pensó defensivamente y el caso 'assistant' se dejó pasar a propósito, así que es una decisión de diseño explícita, no un olvido — eso refuerza el 'necesita_decision_humana' que el hallazgo ya marca.
+
+### [S5-04] El guard de pertenencia de datos de contacto existe en capture_lead pero NO en show_whatsapp_handoff, que tambien persiste y notifica el contacto del visitante
+
+| | |
+|---|---|
+| **Severidad** | MEDIO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | CAMBIO_DE_ESTADO |
+| **Precondiciones** | Sin auth. Visitante del widget publico. No requiere inyeccion sofisticada: alcanza con dictarle al bot un contacto que no es propio, o con que el modelo alucine el campo (que es el caso que el fix de SEC-LLM-03 reconocio como real). |
+
+**Impacto.** (a) Que se logra: que un telefono/email fabricado por el modelo —o dictado por el visitante como si fuera de un tercero— quede persistido en ChatbotEvent.metadata.visitorContact y viaje al Telegram del equipo presentado como 'Contacto' del visitante. Es exactamente la consecuencia LLM06 que SEC-LLM-03 cerro en el otro camino: contactos de terceros sin consentimiento entrando al circuito comercial. (b) A quien: al operador de develOP (Telegram) y al panel de derivaciones del tenant. Menor que capture_lead porque no crea una fila ChatbotLead ni dispara el mail al cliente ni el sync a CRM — por eso MEDIO y no ALTO. (c) Precondiciones: sin auth, desde el widget publico; solo hace falta que el modelo invoque show_whatsapp_handoff, cosa que su description lo empuja a hacer 'decididamente' ante señales de compra.
+
+**Mecanismo.** El ledger da SEC-LLM-03 / P0-7 como CERRADO-SIN-TEST-CI, y el cierre esta efectivamente en captureLead.ts: classifyChannel valida formato Y pertenencia (el dato tiene que aparecer en algun turno USER persistido) y descarta el canal si no. showWhatsappHandoff.ts declara visitorContact y visitorName como strings libres provenientes del modelo, sin ninguna de las dos validaciones: van directo al metadata del ChatbotEvent y al mensaje de Telegram. Es una mitigacion presente en un camino y ausente en el otro sobre el mismo tipo de dato (PII de contacto del visitante). El propio archivo tiene los helpers a un import de distancia.
+
+**Evidencia.**
+
+- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:44-49`
+  > visitorName: z.string().max(100).optional()… visitorContact: z.string().max(200).optional().describe('Telefono o email del visitante si lo dio en la conversacion…')
+- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:121-131`
+  > metadata: { visitorName: input.visitorName ?? null, … visitorContact: input.visitorContact ?? null, intent: input.intent, topicSummary: input.topicSummary, …
+- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:138-147`
+  > input.visitorContact ? `Contacto: ${input.visitorContact}` : '',   // → notifyTelegramOptional
+- `src/modules/chatbot/server/tools/captureLead.ts:134-143`
+  > function classifyChannel(raw, isValidFormat, appearsInVisitor): ChannelReason { if (!raw) return 'absent'; if (!isValidFormat(raw)) return 'invalid_format'; if (!appearsInVisitor(raw)) return 'not_owned'; return 'ok' }
+- `src/modules/chatbot/server/tools/captureLead.ts:239-247`
+  > const phoneReason = classifyChannel(rawPhone, isValidArgentinePhone, (v) => phoneAppearsInVisitorText(v, visitorMessages))  …  const phone = phoneReason === 'ok' ? rawPhone : null
+
+**Fix.** Extraer de captureLead.ts los helpers de pertenencia (classifyChannel, phoneAppearsInVisitorText, emailAppearsInVisitorText, isValidEmailFormat, OWNERSHIP_PHONE_TAIL) a un modulo hermano — p.ej. src/modules/chatbot/server/tools/contactOwnership.ts — y consumirlo desde showWhatsappHandoffExecute: leer los USER persistidos de la conversacion (misma query que captureLead.ts:230) y si visitorContact no es 'ok', persistirlo como null y omitirlo del Telegram (la derivacion se hace igual; el contacto es un campo auxiliar). Cero cambio de schema, cero migracion, y de paso mata la duplicacion.
+
+**Criterio de aceptación.** Un test unitario sobre el execute de show_whatsapp_handoff (con la lectura de mensajes mockeada): un visitorContact que no aparece en ningun turno USER produce metadata.visitorContact === null y un mensaje de Telegram sin la linea 'Contacto:'. Sumarlo al set de invariantes del modulo para que corra en check:invariants — hoy la unica cobertura del guard equivalente en capture_lead es scripts/regression/cases.ts, que exige LLM vivo y no corre en CI.
+
+**Qué encontró el verificador.** Leí `showWhatsappHandoff.ts` entero. `visitorContact: z.string().max(200).optional()` está en :47-49 (el hallazgo cita 44-49; el desfasaje es de 2-3 líneas, la cita es fiel). El valor entra a `metadata` en :121-128 (`visitorContact: input.visitorContact ?? null`) y al Telegram en :138-147 (`input.visitorContact ? \`Contacto: ${input.visitorContact}\` : ''`). Recorré el `execute` completo (:112-158): la ÚNICA lectura de DB es `checkLeadStatus` (:95-107), que hace un `findFirst` de `conversation` por `leadCaptured` — no lee ningún `chatMessage`, así que no hay chequeo de pertenencia ni podría haberlo. Contrasté contra el guard cerrado: `captureLead.ts:134-142` define `classifyChannel` con la rama `if (!appearsInVisitor(raw)) return 'not_owned'`, alimentada por el `findMany` de mensajes USER en :230-234 y aplicada en :239-247, con descarte en :246-247. O sea: la mitigación existe, está a un import de distancia, y no se aplicó en el otro camino que persiste y reenvía PII de contacto. Busqué un guard aguas arriba (¿algún wrapper de tools que valide?) y no existe: `buildShowWhatsappHandoffTool` (:160-169) pasa el input directo al execute.
+
+**Corrección aplicada.** Ninguna. La severidad MEDIO está bien calibrada y el propio hallazgo se auto-limita correctamente: verifiqué que este camino NO crea `ChatbotLead`, NO llama a `notifyClientOfLead` ni al sync CRM — todo eso vive solo en captureLead (:415-450). El impacto queda en metadata del evento + un mensaje al Telegram interno.
 
 ### [S5-05] Texto generado por el modelo se interpola sin escapar en los mensajes de Telegram enviados con parse_mode 'Markdown' (inyeccion de formato/enlace en el canal interno y supresion silenciosa del aviso)
 
@@ -2412,7 +2558,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Test unitario del armado del mensaje: un nombre o resumen que contenga metacaracteres de formato o un constructor de enlace produce un payload donde esos caracteres van escapados y no queda ningun enlace clicable ni marcador sin cerrar. Y verificacion manual en el bot de Telegram de staging: el aviso llega (200 de la API) con el texto literal, no formateado.
 
-**Qué encontró el verificador.** Verifique el sender: telegram.ts:116-118 es literal — notifyTelegramOptional fija `{ parseMode: 'Markdown' }`, y sendTelegram (:67-99) manda ese parse_mode al API y, ante `!response.ok`, hace `console.error` y `return false` (:90-93) sin propagar nada al caller; el contrato del header (:17-18) lo declara explicitamente. Lei los dos call-sites y la interpolacion es por template literal cruda: showWhatsappHandoff.ts:138-147 mete input.visitorName / input.visitorContact / input.topicSummary / input.purchaseSignals, y captureLead.ts:424-436 mete input.name y demas. Busque un escape en el camino y no existe: no hay helper de escape en src/lib/notifications/ ni ninguna transformacion entre la tool y el sender. El unico control sobre esos campos es el cap de longitud de Zod. Salvedad de confianza: lo VERIFICADO es la ausencia de escape con parse_mode Markdown; que Telegram rechace con 400 un marcador desbalanceado y que renderice [texto](url) como enlace clicable es comportamiento del API que NO pude comprobar (no se prueba contra servicios externos en esta corrida) — es conocimiento de la plataforma, no evidencia de este repo. Mantengo MEDIO pero aclarando el reparto: el desenlace probable es la perdida silenciosa del aviso interno; el phishing al operador exige ademas que el operador clickee.
+**Qué encontró el verificador.** Leí `src/lib/notifications/telegram.ts` completo (118 líneas). `notifyTelegramOptional` en :116-118 fija `{ parseMode: 'Markdown' }` — cita exacta. El contrato 'NUNCA lanza… devuelve false' está en :17-18 y la implementación en :90-93 (`if (!response.ok) { console.error(...); return false }`) confirma la supresión silenciosa: un 400 de la API de Telegram queda en un console.error y el caller nunca se entera. Los dos armados por concatenación existen tal cual: `showWhatsappHandoff.ts:138-147` y `captureLead.ts:424-436`, ambos con valores producidos por el modelo (`input.name`, `input.visitorName`, `input.visitorContact`, `input.topicSummary`, `input.purchaseSignals`) sin escape. Busqué activamente el contra-argumento 'ya existe un escape en algún lado' y encontré exactamente lo contrario, lo cual REFUERZA el hallazgo: `src/modules/chatbot/server/admin/detectBotIssues.ts:350` define `escapeMarkdown(value) { return value.replace(/[_*[\]()~`>#+=|{}.!-]/g, '\\$&') }` y lo aplica en :275-276 a texto de origen admin. El helper YA EXISTE en el repo y no se aplica en los dos call-sites que transportan texto derivado del visitante. Verifiqué además que el resto de los senders (`leados/notify.ts:67,114,160`, `cron/os-follow-up:265`) usan `parseMode: 'HTML'` — los únicos dos en 'Markdown' con input de LLM son los dos citados.
+
+**Corrección aplicada.** Un matiz de método: la afirmación de que Telegram RECHAZA el envío ante un marcador desbalanceado (la pata de 'supresión silenciosa') es comportamiento de una API externa y no es verificable leyendo este repo — no la probé y el hallazgo no aporta evidencia de ella. La pata de inyección de formato/enlace sí se sostiene solo por lectura de código. Recomiendo que el criterio de aceptación no dependa de golpear la API real.
 
 ### [S5-06] La respuesta del modelo se renderiza como Markdown con imagenes y enlaces habilitados por default, y el /embed solo trae CSP de frame-ancestors: canal de salida silencioso para cualquier inyeccion que si prospere
 
@@ -2450,9 +2598,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Definir la allowlist de hosts para los enlaces que el bot puede emitir (hoy no existe esa lista en ningun lado; el prompt en sections.ts:217 le dice al modelo que puede usar [links](url) sin acotar el dominio).
 
-**Qué encontró el verificador.** Verifique las 6 citas y todas son reales, con un desvio menor de numeracion en next.config.ts (el bloque de /embed es 85-89, no 85-88; la key CSP esta en :87). ChatWindow.tsx:22-41 define MARKDOWN_COMPONENTS con p/code/strong y nada mas; StreamingMarkdown.tsx renderiza `<ReactMarkdown components={components}>{body}</ReactMarkdown>` con ese mapa; ChatbotEmbed.tsx repite inline el mismo mapa de 3 componentes. Confirme el default del renderer contra el paquete instalado: react-markdown 10.1.0, lib/index.js:124 `const safeProtocol = /^(https?|ircs?|mailto|xmpp)$/i`, :320 `options.urlTransform || defaultUrlTransform`, :382 aplica el transform a las url-props — o sea https pasa y no hay ninguna supresion de `img` (mi grep de 'img' en ese archivo no da ningun caso especial). Confirme las cabeceras: la unica politica con img-src/connect-src es Content-Security-Policy-Report-Only (next.config.ts:47-61, no bloquea) y la ENFORCED de /embed/:slug* es `frame-ancestors *;` a secas (:87). Y confirme que validateOutput.ts:30-76 tiene los 7 patrones citados, todos de frases/encabezados, ninguno sobre URLs o imagenes, y la funcion (:78+) solo acumula warnings. Sin contra-argumento. Dos matices honestos: (a) MEDIO esta bien puesto porque no es una brecha autonoma — exige una inyeccion previa; (b) 'NUEVO' esta algo sobrevendido: los dos componentes ya viven en el ledger por separado (SEC-LLM-05 'ReactMarkdown sin urlTransform explicito', SEC-08 'CSP nunca paso de Report-Only', SEC-15 '/embed con frame-ancestors *'); lo genuinamente nuevo es la composicion como canal de salida silencioso.
+**Qué encontró el verificador.** Verifiqué las 6 citas. `ChatWindow.tsx:22-41`: `MARKDOWN_COMPONENTS: Components` redefine solo `p`, `code` y `strong` — no hay `img` ni `a`. `ChatbotEmbed.tsx:358-380`: mapa inline idéntico, mismo hueco. `StreamingMarkdown.tsx:148` es `<ReactMarkdown components={components}>{body}</ReactMarkdown>`. En `next.config.ts` confirmé por grep de líneas: :85 `source: '/embed/:slug*'` y :87 `{ key: 'Content-Security-Policy', value: "frame-ancestors *;" }` — política ENFORCED sin `default-src` ni `img-src`; la única con `img-src 'self' data: blob: https:` está en el bloque :48-59 bajo la key `Content-Security-Policy-Report-Only`. `validateOutput.ts:30-77`: los 7 patrones son todos frases/encabezados (`guarantee_absolute`, `prompt_section_leak`, `delimiter_echo`, etc.); ninguno mira URLs ni imágenes, y son solo warnings. En `node_modules/react-markdown/lib/index.js` confirmé `const safeProtocol = /^(https?|ircs?|mailto|xmpp)$/i` en :124 y `options.urlTransform || defaultUrlTransform` en :320 (v10.1.0) → https permitido por default. Chequeé la reachability real: `src/app/embed/[slug]/page.tsx:4,40` renderiza `ChatbotEmbed` (no ChatWindow), o sea el mapa con el hueco ES el que corre en el widget embebido. El sandbox del iframe (`public/widget.js:119-123`: `allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox`) no restringe la carga de imágenes, así que no es un contra-argumento.
 
-**Corrección aplicada.** Numeracion: el bloque de /embed en next.config.ts es 85-89 (key CSP en :87), no 85-88. Clasificacion: mas CAMBIO_DE_ESTADO/composicion que NUEVO — sus tres piezas ya estan en el ledger (SEC-LLM-05, SEC-08, SEC-15); el aporte es unirlas en un canal de exfiltracion.
+**Corrección aplicada.** El `estado_vs_ledger: NUEVO` es incorrecto a medias. La pata de CSP ya está documentada: el ledger tiene [SEC-08] 'CSP nunca pasó de Report-Only' y [SEC-15] '/embed/:slug* con frame-ancestors *'. Lo genuinamente NUEVO es la otra pata — que el mapa de componentes de ReactMarkdown no override `img`/`a`, con lo cual una imagen Markdown se convierte en una petición saliente automática. Eso es distinto de [SEC-LLM-05], que estaba framed como XSS-latente-por-rehype-raw y se cerró 'por default'. Debería re-etiquetarse como CAMBIO_DE_ESTADO/ampliación de SEC-LLM-05 + SEC-08, no como NUEVO. Sobre severidad: MEDIO se sostiene pero está en el borde alto, porque no es autónomo — depende de que una inyección previa prospere; el argumento que lo salva es que S5-01 y S5-02 (ambos confirmados por mí) abaratan esa precondición y que el fix son dos líneas.
 
 ### [S5-03] La compensacion de cupo se dispara por una condicion que controla el cliente (cortar el stream antes del primer token): el cap mensual de conversaciones deja de ser vinculante mientras el costo de Vertex se sigue incurriendo
 
@@ -2492,43 +2640,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Elegir el umbral de compensaciones tolerado por periodo y el umbral USD mensual de gasto LLM (esto ultimo ya figura como decision pendiente #11 de la auditoria maestra / OBS-05). Tambien: si se prefiere directamente NO compensar en stream_abort (cobrar el cupo cuando el cliente corta) — es una decision de producto sobre a quien se le carga un corte de red legitimo.
 
-**Qué encontró el verificador.** Las citas son reales pero la cadena NO cierra: el disparador que el hallazgo pone en el titulo es inalcanzable. Corri `grep -n "abortSignal|timeout:" src/modules/chatbot/server/chat/handleChatRequest.ts` → CERO resultados, y lei el bloque de argumentos del streamText (:1049-1154): model, system, messages, tools, temperature, stopWhen, experimental_transform, onStepFinish, onChunk, onError, onAbort, onFinish — sin `abortSignal` ni `timeout`. Despues fui al SDK instalado (ai@6.0.214, node_modules/ai/dist/index.js:7362-7390): `onAbort` se invoca SOLO desde la funcion local `abort()`, que tiene exactamente dos call-sites y ambos estan gateados por `abortSignal?.aborted` (`if (abortSignal?.aborted) { abort(); return }` y `if (isAbortError(error) && abortSignal?.aborted) { abort() }`). Con abortSignal undefined, `abortSignal?.aborted` es siempre falsy → `abort()` nunca corre → onAbort NUNCA dispara. El `cancel(reason)` del ReadableStream externo (:7392-7394) solo propaga a stitchableStream.cancel, no llama onAbort. Es decir: que el cliente corte la conexion no compensa nada. Reviso los otros triggers de la tabla y ninguno sustituye al abort: 'stream_error' exige que Vertex o una tool tiren (no lo controla el visitante); 'no_user_message' (:838-849) SI es 100% client-triggerable pero corre ANTES del streamText, o sea reserva+release neto cero sin una sola llamada a Vertex — no es denial-of-wallet; 'empty_response' queda como residuo especulativo (habria que lograr que el modelo devuelva texto vacio y cero tool calls). Ademas el agravante contable esta invertido: el comentario y el codigo de :1422-1439 dicen literalmente 'Tokens y cost se siguen acumulando normalmente — tambien en un turno fallback (el modelo se consumio igual; lo que se devuelve es el CUPO)', asi que en el unico camino residual (empty_response, que pasa por onFinish) tokensIn/tokensOut/costUsd SI se escriben a QuotaUsage — el gasto no es invisible. Lo que sobrevive es un hallazgo mucho mas chico y de otra clase: 'empty_response devuelve el cupo pese a que la llamada a Vertex ya se pago', sin via conocida de forzarlo.
+**Qué encontró el verificador.** El mecanismo central NO es alcanzable: `onAbort` nunca se dispara en este código. Verifiqué en `node_modules/ai/dist/index.mjs` (ai@6.0.214, confirmado por `require('ai/package.json').version`) que el ÚNICO call-site de `onAbort` es la función local `abort()` en la línea 7290, y `abort()` solo se invoca desde dos guardas que ambas exigen `abortSignal?.aborted` (:7306 en el `pull`, y :7312 en el `catch` con `isAbortError2`). Ese `abortSignal` viene de `mergeAbortSignals(abortSignal, totalTimeout, stepAbortController, chunkAbortController)` (:6853-6858), y `mergeAbortSignals` (:4316-4322) devuelve `undefined` cuando todos los argumentos son null. Leí la llamada real a `streamText` en `handleChatRequest.ts:1049` y siguientes: pasa model, system, messages, tools, temperature, stopWhen, experimental_transform, onStepFinish, onChunk, onError, onAbort, onFinish — y NADA más; `grep -n 'abortSignal|timeout:|stepTimeout|chunkTimeout' handleChatRequest.ts` da 0 hits fuera de comentarios. Con `abortSignal === undefined`, `undefined?.aborted` es falsy siempre → `abort()` jamás corre → `compensateReservedQuota('stream_abort', …)` (:1146-1152) es código muerto ante una desconexión del cliente. El ledger corrobora la premisa desde otro ángulo: RESIL-01 documenta 'streamText sin abortSignal ni maxRetries'. Segundo error de hecho: la justificación de severidad afirma que el rate-limit es 'in-memory y poroso en serverless'. Leí `src/lib/rate-limit/limiter.ts:34-58`: es un UPSERT `ON CONFLICT` contra la tabla `rate_limit` de Neon, con comentario explícito de que 'Reemplaza el limiter in-memory por proceso que era evadible rotando lambdas'. O sea el techo de 30/min por (origen, IP-hash) SÍ es vinculante y compartido entre lambdas. Con las dos patas caídas (gatillo controlado por el cliente + ausencia de techo), el ALTO no se sostiene.
 
-**Corrección aplicada.** Cae el mecanismo central (corte de stream → onAbort → compensacion) y cae el agravante contable (el gasto SI se contabiliza en el camino que queda vivo). Sobrevive solo el residuo 'empty_response devuelve cupo con costo ya incurrido', sin disparador controlable verificado. El fix propuesto (contador de compensaciones + alerta) sigue siendo razonable como higiene, pero no cierra un abuso alcanzable hoy.
-
-### [S5-04] El guard de pertenencia de datos de contacto existe en capture_lead pero NO en show_whatsapp_handoff, que tambien persiste y notifica el contacto del visitante
-
-| | |
-|---|---|
-| **Severidad** | BAJO |
-| **Veredicto** | CONFIRMADO |
-| **vs. ledger** | CAMBIO_DE_ESTADO |
-| **Precondiciones** | Sin auth. Visitante del widget publico. No requiere inyeccion sofisticada: alcanza con dictarle al bot un contacto que no es propio, o con que el modelo alucine el campo (que es el caso que el fix de SEC-LLM-03 reconocio como real). |
-
-**Impacto.** (a) Que se logra: que un telefono/email fabricado por el modelo —o dictado por el visitante como si fuera de un tercero— quede persistido en ChatbotEvent.metadata.visitorContact y viaje al Telegram del equipo presentado como 'Contacto' del visitante. Es exactamente la consecuencia LLM06 que SEC-LLM-03 cerro en el otro camino: contactos de terceros sin consentimiento entrando al circuito comercial. (b) A quien: al operador de develOP (Telegram) y al panel de derivaciones del tenant. Menor que capture_lead porque no crea una fila ChatbotLead ni dispara el mail al cliente ni el sync a CRM — por eso MEDIO y no ALTO. (c) Precondiciones: sin auth, desde el widget publico; solo hace falta que el modelo invoque show_whatsapp_handoff, cosa que su description lo empuja a hacer 'decididamente' ante señales de compra.
-
-**Mecanismo.** El ledger da SEC-LLM-03 / P0-7 como CERRADO-SIN-TEST-CI, y el cierre esta efectivamente en captureLead.ts: classifyChannel valida formato Y pertenencia (el dato tiene que aparecer en algun turno USER persistido) y descarta el canal si no. showWhatsappHandoff.ts declara visitorContact y visitorName como strings libres provenientes del modelo, sin ninguna de las dos validaciones: van directo al metadata del ChatbotEvent y al mensaje de Telegram. Es una mitigacion presente en un camino y ausente en el otro sobre el mismo tipo de dato (PII de contacto del visitante). El propio archivo tiene los helpers a un import de distancia.
-
-**Evidencia.**
-
-- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:44-49`
-  > visitorName: z.string().max(100).optional()… visitorContact: z.string().max(200).optional().describe('Telefono o email del visitante si lo dio en la conversacion…')
-- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:121-131`
-  > metadata: { visitorName: input.visitorName ?? null, … visitorContact: input.visitorContact ?? null, intent: input.intent, topicSummary: input.topicSummary, …
-- `src/modules/chatbot/server/tools/showWhatsappHandoff.ts:138-147`
-  > input.visitorContact ? `Contacto: ${input.visitorContact}` : '',   // → notifyTelegramOptional
-- `src/modules/chatbot/server/tools/captureLead.ts:134-143`
-  > function classifyChannel(raw, isValidFormat, appearsInVisitor): ChannelReason { if (!raw) return 'absent'; if (!isValidFormat(raw)) return 'invalid_format'; if (!appearsInVisitor(raw)) return 'not_owned'; return 'ok' }
-- `src/modules/chatbot/server/tools/captureLead.ts:239-247`
-  > const phoneReason = classifyChannel(rawPhone, isValidArgentinePhone, (v) => phoneAppearsInVisitorText(v, visitorMessages))  …  const phone = phoneReason === 'ok' ? rawPhone : null
-
-**Fix.** Extraer de captureLead.ts los helpers de pertenencia (classifyChannel, phoneAppearsInVisitorText, emailAppearsInVisitorText, isValidEmailFormat, OWNERSHIP_PHONE_TAIL) a un modulo hermano — p.ej. src/modules/chatbot/server/tools/contactOwnership.ts — y consumirlo desde showWhatsappHandoffExecute: leer los USER persistidos de la conversacion (misma query que captureLead.ts:230) y si visitorContact no es 'ok', persistirlo como null y omitirlo del Telegram (la derivacion se hace igual; el contacto es un campo auxiliar). Cero cambio de schema, cero migracion, y de paso mata la duplicacion.
-
-**Criterio de aceptación.** Un test unitario sobre el execute de show_whatsapp_handoff (con la lectura de mensajes mockeada): un visitorContact que no aparece en ningun turno USER produce metadata.visitorContact === null y un mensaje de Telegram sin la linea 'Contacto:'. Sumarlo al set de invariantes del modulo para que corra en check:invariants — hoy la unica cobertura del guard equivalente en capture_lead es scripts/regression/cases.ts, que exige LLM vivo y no corre en CI.
-
-**Qué encontró el verificador.** Lei showWhatsappHandoff.ts entero (166 lineas): visitorName/visitorContact son `z.string().max(100|200).optional()` en :44-49, entran crudos al metadata del evento en :123-131 y al mensaje de Telegram en :138-147, sin una sola llamada de validacion. Verifique el lado que SI tiene el guard: captureLead.ts:134-143 (classifyChannel con las 3 ramas absent/invalid_format/not_owned), :161-184 (phoneAppearsInVisitorText con cola de 7 digitos, emailAppearsInVisitorText), :229-247 (lee los USER persistidos y descarta el canal si no es 'ok'). Las citas del hallazgo son correctas linea por linea. Busque contra-argumentos y no hay: showWhatsappHandoff no importa nada de captureLead, no lee ChatMessage (mi grep de chatMessage.find* no lo lista), y checkLeadStatus (:93-103) solo mira leadCaptured. CORRIJO LA SEVERIDAD hacia abajo: verifique con `grep -rn "handoff.whatsapp" src/` que el evento tiene UN solo consumidor (admin/multiTenantQueries.ts:218, tabla de derivaciones del panel) — no crea ChatbotLead, no dispara el mail al cliente, no entra al sync de CRM. El dano concreto es PII de un tercero en un log interno + una linea 'Contacto:' en el Telegram del equipo; comparado con SEC-LLM-03 (que si creaba lead + mail + CRM) el hallazgo no esta a la par, y el propio auditor apoya el MEDIO en esa comparacion.
-
-**Corrección aplicada.** La equiparacion con SEC-LLM-03 esta sobredimensionada: aquel camino creaba lead, mail y sync CRM; este termina en ChatbotEvent.metadata con un unico lector (panel admin) y una linea de Telegram. El mecanismo (falta de guard de pertenencia) es identico y real; el impacto no.
+**Corrección aplicada.** Queda un residuo real pero mucho más chico, que el auditor no estableció: la rama `empty_response` de `shouldCompensateQuota` (`reconcile.ts:184-186`, `return input.toolCallCount === 0`) SÍ devuelve el cupo tras una llamada a Vertex ya facturada, y una respuesta vacía puede ser inducible por contenido del visitante (p. ej. bloqueo de filtros de seguridad del proveedor) — pero eso es hipótesis, no lo verifiqué ni es verificable leyendo el repo. También es cierto y verificado que el consumo de un turno abortado no se contabiliza (`incrementQuota` vive dentro de la tx de onFinish, :1428-1439) y que `chat.quota_compensated` se loguea a 'warn' sin umbral (:743-754). Eso justifica a lo sumo un hallazgo BAJO de observabilidad de costo, no un ALTO de bypass de cuota. Nota adicional verificada: un body con solo turnos 'assistant' dispara la rama `no_user_message` (:838-849) que reserva y devuelve el cupo — pero retorna 400 ANTES de `streamText`, así que no incurre costo LLM alguno.
 
 #### Ya documentado en auditorías previas — no se re-reporta (11)
 
@@ -2591,9 +2705,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: si la bóveda debe seguir guardando credenciales reusables del cliente (hosting/redes) o pasar a un modelo de acceso delegado; y qué TTL de retención aplica. El cifrado tapa el agujero técnico pero no la decisión de custodiar claves de terceros.
 
-**Qué encontró el verificador.** Verifiqué yo: `encryptCredential` está definido en src/lib/crypto/credential-cipher.ts:73 (key = ONBOARDING_SECRET_KEY, credential-cipher.ts:35) y mi propio grep sobre src/ scripts/ tests/ prisma/ devuelve como únicos hits el propio helper y src/lib/crypto/__tests__/credential-cipher.test.ts — cero call-sites de escritura. Abrí src/actions/agency-actions.ts:94-111: `createClientAssetAction` hace `prisma.clientAsset.create({ ... description: data.description })` crudo (:107). Abrí el badge: 'AES-256' está literal en src/app/(protected)/dashboard/cuenta/boveda/page.tsx:85 y otra vez por card en :148, y la lectura pasa por resolveCredentialDisplay (:131), cuya rama no-cifrada devuelve el valor tal cual (src/lib/crypto/resolve-credential.ts:23). Confirmé el commit: b06ca12 2026-07-11 'feat(crypto): cifrado de credenciales de la boveda (PD-1.1 helper + PD-1.3a lectores)' — el título mismo dice helper+lectores, sin escritores. Busqué contra-argumentos y no encontré: no hay script de backfill en scripts/, ONBOARDING_SECRET_KEY no figura en scripts/check-env.js (CRITICAL_VARS:15 / OPTIONAL_VARS:32), y no hay guard aguas arriba que cifre.
+**Qué encontró el verificador.** Verifiqué el núcleo yo mismo y sobrevive: grep sobre src/ scripts/ tests/ prisma/ devuelve `encryptCredential` SOLO en src/lib/crypto/credential-cipher.ts:73 y en src/lib/crypto/__tests__/credential-cipher.test.ts — cero call-sites de producción. Los lectores sí están cableados (src/lib/crypto/resolve-credential.ts:16-24, usado en dashboard/cuenta/boveda/page.tsx:131 y VaultTab.tsx:41) y la rama no-cifrada devuelve el valor tal cual (resolve-credential.ts:24), así que el defecto es silencioso. El badge 'AES-256' existe en boveda/page.tsx:85 (header) y se repite por card. No existe script de backfill. PERO encontré un contra-argumento parcial que el auditor no chequeó: reachability.
 
-**Corrección aplicada.** El write-path de onboarding citado (src/actions/onboarding-actions.ts:110-130) está en una función MUERTA. `completeOnboardingAction` de ese archivo no tiene ningún importador: el único import de '@/actions/onboarding-actions' en todo src/ es `saveOnboardingProfile` desde src/components/onboarding/OnboardingWizard.tsx:6. El wizard vivo (src/app/bienvenida/_components/BienvenidaWizard.tsx:9) usa OTRA acción homónima, src/app/bienvenida/_actions/complete-onboarding.ts:17, que solo escribe Organization + ClientBrandProfile y NUNCA toca ClientAsset — no tiene campos de credenciales. Consecuencia: cae el marco de '(a) credenciales tal como el propio cliente las tipeó en el onboarding'. El único escritor REAL de assets ACCESS es createClientAssetAction (agency-actions.ts:94), gateado a SUPER_ADMIN (:99) vía VaultManager.tsx:25 — o sea, las credenciales las carga la agencia, no el cliente. El defecto de fondo (texto plano en ClientAsset.description bajo un badge que promete AES-256) sobrevive intacto, y el fix debe cablearse en agency-actions.ts:94; el bloque de onboarding-actions.ts es código muerto que conviene borrar, no cifrar. Caveat de Next: al ser un archivo 'use server' incluido en el grafo por saveOnboardingProfile, sus exports podrían quedar registrados como action-ids — no lo pude cerrar sin build, así que no lo cuento a favor ni en contra.
+**Corrección aplicada.** Dos de las cuatro citas de escritura están en CÓDIGO MUERTO. `src/actions/onboarding-actions.ts` (líneas 115/117/127/129, el `url: 'ENCRIPTADO_EN_TEXTO'`) no está en el grafo de módulos: su único importador es src/components/onboarding/OnboardingWizard.tsx:6, y ese componente NO tiene ningún importador (el /admin/clients/new usa OTRO OnboardingWizard, el de @/modules/chatbot/components/admin/onboarding/). El wizard de onboarding VIVO es src/app/bienvenida/_components/BienvenidaWizard.tsx:33 → src/app/bienvenida/_actions/complete-onboarding.ts:17, que NO escribe credenciales: su schema (:9-15) solo tiene companyName/contactEmail/whatsapp/ga4MeasurementId/rubro y su update (:33-43) no toca ClientAsset. Consecuencia: la narrativa 'tal como el propio cliente las tipeó en el onboarding' es FALSA — el cliente nunca las tipea. El ÚNICO write-path vivo es createClientAssetAction (src/actions/agency-actions.ts:94, description crudo en :109), alcanzable solo por SUPER_ADMIN desde VaultManager (src/components/admin/managers/VaultManager.tsx:25), montado en VaultTab.tsx:26. El fix debe apuntar a ese único punto; los dos bloques de onboarding-actions.ts no hace falta cablearlos (hace falta borrarlos). La severidad se sostiene igual porque el defecto central —el control de cifrado que la UI promete no existe, y el cliente ve 'AES-256' sobre texto plano— es real y vivo.
 
 ### [S6-05] Los tokens de integración por tenant (Google Business access+refresh, Tiendanube access, Cal.com API key) y el bot token de Telegram de la agencia se persisten en claro, mientras el repo tiene dos cajas AEAD funcionando y las aplica solo al CRM y al motor
 
@@ -2635,14 +2749,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: elegir si va una env key nueva compartida para integraciones o una por integración (radio de exposición vs. cantidad de secretos a rotar), y ordenar la rotación de los tokens que ya estuvieron en claro en la DB.
 
-**Qué encontró el verificador.** Abrí las 9 citas y todas son literales. prisma/schema.prisma:358-359 (gbpAccessToken/gbpRefreshToken String? @db.Text), :367 tiendanubeAccessToken, :375 calComApiKey, :835 osTelegramBotToken String? — una sola columna, sin trío Encrypted/Iv/Tag. Contrasté con el patrón correcto y está donde dice: schema.prisma:1706-1709 (CrmIntegration.secretEncrypted/secretIv/secretTag, con el comentario 'Secret cifrado AES-256-GCM con env CRM_SECRET_KEY') y :2032-2034 (WabaChannel.apiKeyEncrypted/Iv/Tag). Los cuatro hot-paths de lectura leen crudo: google-business-profile.ts:59-71 selecciona gbpAccessToken/gbpRefreshToken y los pasa a setCredentials sin descifrar; tiendanube.ts:54-58 devuelve accessToken tal cual; cal-com.ts:24-30 `return org?.calComApiKey ?? null`; telegram.ts:79 interpola el botToken en el PATH de la URL. La persistencia en claro desde el callback OAuth está en google-business/callback/route.ts:48-56. Busqué un descifrado envolvente o un helper intermedio y no existe: `createSecretBox` solo se instancia en sendMessage.ts:210 (motor) y `encryptSecret` es del CRM. No hay condición de entorno que lo apague.
+**Qué encontró el verificador.** Abrí las 9 citas y todas son literales y correctas. Schema: prisma/schema.prisma:358 gbpAccessToken, :359 gbpRefreshToken, :367 tiendanubeAccessToken, :375 calComApiKey, :835 osTelegramBotToken — todas columna única sin trío de cifrado. Contraste verificado: :1706-1709 secretEncrypted/secretIv/secretTag de CrmIntegration (comentario en :1704-1705 dice explícitamente AES-256-GCM con CRM_SECRET_KEY) y :2032-2034 apiKeyEncrypted/Iv/Tag de WabaChannel (comentario :2025-2031 dice 'mismo shape que CrmIntegration.secret*'). Lecturas crudas confirmadas: google-business-profile.ts:69 `access_token: org.gbpAccessToken` (select en :59-61, cero descifrado), tiendanube.ts:58, cal-com.ts:29. Escritura cruda: api/auth/google-business/callback/route.ts:52-53 persiste tokens.access_token/refresh_token directo del intercambio OAuth. Y el bot token interpolado en el PATH de la URL: telegram.ts:79. Busqué contra-argumentos y NO los encontré: no hay wrapper de cifrado aguas arriba, no hay decrypt en ninguna lectura (no habría qué descifrar). Sí verifiqué las dos mitigaciones que el propio hallazgo declara y son ciertas: settings.actions.ts:109 sirve `osTelegramBotTokenMasked: maskSecret(...)`, y dashboard/modules/agenda-inteligente/page.tsx:329 hace `Boolean(org.calComApiKey)` — ninguna de las cuatro columnas se devuelve al cliente. Precondición real = lectura a nivel DB, sin camino HTTP ni cross-tenant.
+
+**Corrección aplicada.** Detalle menor de cita: el path de la agenda es src/app/(protected)/dashboard/modules/agenda-inteligente/page.tsx (falta el segmento /modules/), aunque la línea :329 es exacta. No afecta el hallazgo.
 
 ### [S6-02] El webhook de alertas de la agencia (alertWebhookUrl) es la segunda superficie saliente configurable y no pasa por validateWebhookUrl ni exige HTTPS; testWebhookAction acepta además una URL arbitraria y devuelve el status de la respuesta al llamador
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | CONFIRMADO |
+| **Veredicto** | PLAUSIBLE |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Cuenta SUPER_ADMIN para escribir la URL o disparar el test. Para el camino de fuga en claro no hace falta atacante: alcanza con guardar una URL http://. |
 
@@ -2675,9 +2791,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** No para el fix. Sí una decisión de operación: si el webhook de alertas apunta hoy a un http:// en producción, hay que rotarlo — no lo puedo verificar desde el repo.
 
-**Qué encontró el verificador.** Verifiqué el núcleo y sobrevive: `alertWebhookUrl` nunca pasa por validateWebhookUrl. Mi grep de `validateWebhookUrl` en todo src/ devuelve solo saveCrmIntegration.ts:10,60 y el módulo crm (index.ts:8,15,17 + la definición) — un único call-site, como dice el hallazgo. El write-path VIVO es updateSettings en src/app/(protected)/admin/settings/_actions/settings.actions.ts:127-154, que escribe `alertWebhookUrl: normalizeNullableString(parsed.alertWebhookUrl)` (:154) tras un `UpdateSettingsSchema.parse` cuyo único chequeo de URL es `z.string().url()` (settings.schemas.ts:25) — acepta http:// y hosts privados. Confirmé que ese path es el que usa la UI: settings-console.tsx:19-22 importa updateSettings desde '../_actions/settings.actions'. El fetch de salida existe y es alcanzable: alerts.ts:131 dentro de sendAgencyAlert, que sí tiene call-sites vivos (lib/actions/contact.ts, lib/actions/messages.ts, lib/tickets/actions.ts, referrals.service.ts, quota/upsellAlert.ts, entre otros), y el payload lleva `🏢 Cliente: ${event.clientName}` y `💬 ${event.detail}` (alerts.ts:64-65). Ese camino —guardar un http:// y exfiltrar en claro— es real y no tiene guard aguas arriba.
+**Qué encontró el verificador.** Verifiqué que validateWebhookUrl tiene UN solo call-site en todo el repo (saveCrmIntegration.ts:60; el resto son el propio archivo y el barrel crm/index.ts:15). Verifiqué el camino VIVO: settings.schemas.ts:25 `alertWebhookUrl: z.preprocess(emptyStringToNull, z.string().url().nullable())` (sin restricción de esquema ni host) → settings.actions.ts:154 dentro de updateSettings (con requireSuperAdmin en :142) → alerts.ts:125 lee y :131 hace fetch. Y confirmé que el payload lleva PII real: contact.ts:71-75 manda `detail: 'Nuevo lead desde formulario. Contacto: ${payload.email}...'` desde el formulario público, y messages.ts:158-162 manda el contenido del mensaje del cliente. Sobre http:// eso viaja en claro. Ese tramo del hallazgo es correcto. Pero encontré un contra-argumento fuerte para la otra mitad.
 
-**Corrección aplicada.** Refuto la MITAD de la evidencia: el archivo src/lib/actions/settings.ts está HUÉRFANO. Busqué importadores con dos patrones ('lib/actions/settings' y 'actions/settings') sobre todo src/ y el resultado son solo los dos imports de './_actions/settings.actions' (page.tsx:3 y settings-console.tsx:22) — nada importa src/lib/actions/settings.ts. Por lo tanto `testWebhookAction` (:309), su `fetch(url)` de :338 y el eco de `${response.status} ${response.statusText}` de :349, más el upsert de :61/:74, son código muerto: no hay superficie que los invoque. Cae con ellos el argumento del 'oráculo de respuesta hacia la red interna' y el SSRF gateado por SUPER_ADMIN, que era lo que empujaba el hallazgo a MEDIO. Cae también `sendTestAgencyAlert` (alerts.ts:149-163), cuyo único importador es ese archivo huérfano (settings.ts:8) — o sea que el fetch de alerts.ts:163 tampoco es alcanzable; el vivo es solo el de :131. Lo que queda es un único camino sin atacante: un SUPER_ADMIN pega mal una URL http:// en /admin/settings y el nombre del cliente + el detalle del evento salen en claro. Eso es BAJO: precondición = rol máximo, sin adversario, daño autoinfligido y acotado al contenido de la alerta. El fix sigue valiendo, pero el punto de aplicación es settings.actions.ts:154 y, como red, alerts.ts:131 — no las líneas de settings.ts, que habría que borrar en vez de arreglar.
+**Corrección aplicada.** CÓDIGO MUERTO: `src/lib/actions/settings.ts` no tiene NI UN importador ni una referencia en src/, tests/ ni scripts/ (grep por el path y por los 4 nombres exportados: saveAgencySettingsAction, testWebhookAction, inviteTeamMemberAction, testN8nConnectionAction → solo se auto-referencian). Al no estar en el grafo de módulos, Next no le asigna action-id y sus 'use server' no son invocables. Por lo tanto: (a) `testWebhookAction` (:309-338) es INALCANZABLE → el 'oráculo SSRF que devuelve response.status al llamador' NO existe como superficie; (b) settings.ts:61 y :74 (el segundo write-path) tampoco existen; (c) `sendTestAgencyAlert` (alerts.ts:149, fetch en :163) solo se llama desde ese archivo muerto, así que el fetch de :163 también es inerte. De las 8 evidencias citadas, 4 apuntan a código muerto. Lo que queda es UN write-path (settings.actions.ts:154) y UN fetch vivo (alerts.ts:131), con precondición SUPER_ADMIN y dependiente de que el admin pegue una URL http://. Sin el oráculo SSRF, lo que sostenía el MEDIO se cae: bajo a BAJO. El fix útil se reduce a validar en settings.actions.ts:154 (+ re-validar en alerts.ts:131); tocar settings.ts sería trabajo sobre un archivo que corresponde borrar.
 
 ### [S6-08] El motor 360dialog no tiene camino de aprovisionamiento ni de rotación: generateChannelWebhookCredentials y el cifrado de la API key del canal solo se ejercitan desde los tests — nada en src/ ni en scripts/ crea o rota un WabaChannel
 
@@ -2711,9 +2827,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: si el aprovisionamiento vive como script de operador o como pantalla de admin. Para 2 personas el script alcanza; una pantalla suma superficie que después hay que gatear por rol.
 
-**Qué encontró el verificador.** Reproduje el grep con mis propios términos: `generateChannelWebhookCredentials` solo aparece en su definición (src/modules/motor/domain/channel-credentials.ts:30) y en tests/integration/motor-health.spec.ts:19,90 y tests/integration/motor-inbound.spec.ts:26,112 — cero en src/ y cero en scripts/. `createSecretBox` solo en src/lib/crypto/secret-box.ts:55 (definición), sendMessage.ts:22,210 (descifrado) y tests/integration/motor-outbound.spec.ts:17,120. Amplié la búsqueda a `wabaChannel.create|upsert|update` para descartar un aprovisionamiento por otra vía: los únicos creates están en tests (motor-health.spec.ts:91, motor-inbound.spec.ts:113, motor-isolation.spec.ts:82) y los únicos updates de producción son de salud del canal (handle-health.ts:219,243), que no tocan credenciales. Verifiqué los dos fail-closed que el auditor acredita a favor del código: sendMessage.ts:113 aborta si apiKeyEncrypted/Iv/Tag son null, y verifyWebhookAuth devuelve 'not-configured' si webhookSecretHash es null o vacío (auth.ts:51-53).
+**Qué encontró el verificador.** Verifiqué la ausencia yo mismo. `generateChannelWebhookCredentials` está definida en src/modules/motor/domain/channel-credentials.ts:30 y sus únicos llamadores son tests/integration/motor-health.spec.ts:90 y tests/integration/motor-inbound.spec.ts:112. El cifrado de la API key: createSecretBox aparece en src/lib/crypto/secret-box.ts:55 (definición), sendMessage.ts:22/:210 (solo para DESCIFRAR) y tests/integration/motor-outbound.spec.ts:120-126 (único cifrado). Corrí además un grep por escrituras del modelo: `wabaChannel.create` no existe en ningún lado de src/, scripts/ ni prisma/ — los únicos writes son dos `scope.wabaChannel.update` de salud en handle-health.ts:219 y :243. Confirmé también los dos fail-closed que el hallazgo acredita a favor del código: sendMessage.ts:113 aborta si apiKeyEncrypted/Iv/Tag son null, y auth.ts:51-53 devuelve 'not-configured' si webhookSecretHash es null o vacío. El contrato declarado 'el valor en claro se muestra una única vez al generarlo' está en channel-credentials.ts:8-10 y no hay superficie que lo muestre.
 
-**Corrección aplicada.** Bajo la severidad de MEDIO a BAJO aplicando el criterio de impacto real que pide la consigna. Hoy no se expone ningún dato ni se habilita ninguna acción: no hay canales aprovisionados (cero creates de producción), el consumo falla cerrado en ambos extremos (sendMessage.ts:113, auth.ts:51) y el hallazgo es una ausencia de camino operativo, no una debilidad alcanzable. El propio auditor lo admite ('para que se vuelva un incidente hace falta que el motor se aprovisione'). Es deuda de preparación —legítima y con ventana barata ahora— pero no compite en la misma banda que S6-01/S6-05, donde ya hay material secreto en claro en la DB.
+**Corrección aplicada.** La severidad está inflada por la propia justificación del hallazgo, que admite que hoy no hay impacto: el motor no está aprovisionado, no hay canal en prod, y el consumo falla cerrado en las dos puntas. No se expone ningún dato ni se gana ninguna acción — es una brecha de preparación operativa y de capacidad de rotación de una feature todavía apagada. Por la regla de severidad-por-impacto-real corresponde BAJO, no MEDIO. Sube a MEDIO recién el día que se aprovisione el primer canal en producción.
 
 ### [S6-03] validateWebhookUrl no bloquea direcciones IPv6 mapeadas a IPv4 ([::ffff:127.0.0.1], [::ffff:169.254.169.254], [::ffff:10.0.0.5]) ni la dirección no especificada [::] — la lista negra de loopback y rangos privados es evadible en config-time, no solo por DNS rebinding
 
@@ -2745,9 +2861,7 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** Un test unitario nuevo junto a validateWebhookUrl.ts afirma ok:false para 'https://[::ffff:127.0.0.1]/x', 'https://[::ffff:169.254.169.254]/x', 'https://[::ffff:10.0.0.5]/x', 'https://[::]/x' y 'https://100.64.0.1/x', y ok:true para 'https://n8n.example.com/webhook/x'. El test corre en el agregado de package.json:18.
 
-**Qué encontró el verificador.** Corrí yo mismo el parser de este Node y reproduje la normalización: 'https://[::ffff:127.0.0.1]/x' → hostname '[::ffff:7f00:1]', '[::ffff:169.254.169.254]' → '[::ffff:a9fe:a9fe]', '[::]' → '[::]', '[::ffff:10.0.0.5]' → '[::ffff:a00:5]'; y las ofuscadas IPv4 sí se normalizan ('https://2130706433/x' → '127.0.0.1', 'https://0177.0.0.1/x' → '127.0.0.1'). Leí el validador entero: tras strippear corchetes (validateWebhookUrl.ts:62-66) el hostname resultante '::ffff:7f00:1' no está en BLOCKED_HOSTNAMES (:20-27), no matchea ninguna de las 5 regex dotted-quad (:36-42), y falla las cuatro comparaciones IPv6 de :85-90 (`=== '::1'`, startsWith 'fe80:', 'fc', 'fd') → devuelve ok:true. Confirmé también el contra-hallazgo que el auditor reconoce: el https-only de :56-58 sí cierra http:/file:/gopher:. Verifiqué la precondición: el único call-site es saveCrmIntegration.ts:60, cuya primera línea es `await requireSuperAdmin()` (:30) — BAJO es la severidad correcta.
-
-**Corrección aplicada.** Detalle menor en la spec del fix, no en el hallazgo: el validador YA quita los corchetes (validateWebhookUrl.ts:62-66, con comentario explícito), así que 'quitar los corchetes' del fix es redundante. El bypass sobrevive DESPUÉS del stripping — lo verifiqué siguiendo el flujo con el hostname ya sin corchetes. El resto del fix (normalizar ::ffff:x a IPv4 antes de aplicar rangos, rechazar :: y ::ffff:0:0/96) es correcto.
+**Qué encontró el verificador.** No me conformé con la lectura: EJECUTÉ el validador real. Escribí un probe temporal fuera de src/, lo corrí con `npx tsx` importando src/modules/chatbot/server/crm/validateWebhookUrl, y lo borré (git status quedó sin cambios míos). Resultado literal: {ok:true} para https://[::ffff:127.0.0.1]/x, https://[::ffff:169.254.169.254]/x, https://[::]/x, https://[::ffff:10.0.0.5]/x y https://100.64.0.1/x; {ok:false,'Ese hostname no está permitido'} para https://2130706433/x, https://0177.0.0.1/x y https://[::1]/x; {ok:false,'No se pueden usar IPs privadas o de loopback'} para https://[fd00::1]/x; {ok:false,'Solo se aceptan URLs HTTPS'} para http://ejemplo.com/h. O sea: el bypass de mapeadas IPv6 y de :: es REAL y el contraste con las formas ofuscadas IPv4 (que sí quedan cubiertas) también. La explicación mecánica se sostiene: `new URL('https://[::ffff:127.0.0.1]/x').hostname` devuelve `[::ffff:7f00:1]`, el código strippea corchetes en validateWebhookUrl.ts:62-66 y luego decide con el Set de :20-27, los sufijos de :29-33, las 5 regex punteadas de :36-42 y los cuatro startsWith de :86-91 — ninguno reconoce la forma comprimida. El gate HTTPS de :56 sí funciona. Busqué guard aguas arriba y no hay: el único caller es saveCrmIntegration.ts:60, gateado por SUPER_ADMIN.
 
 ### [S6-07] El channelToken del webhook del motor —declarado material secreto por el propio código— viaja en el path de la URL, y el scrubber de Sentry no tiene ningún patrón que lo reconozca ni cubre eventos de transaction (beforeSendTransaction no está configurado con tracesSampleRate 0.1 en prod)
 
@@ -2783,7 +2897,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí, una sola: si el channelToken se queda en el path (y se acepta el riesgo residual mitigado por el scrub) o se mueve a header antes de aprovisionar el primer canal. La ventana para decidirlo barato es ahora, mientras no hay canales en prod.
 
-**Qué encontró el verificador.** Verifiqué todo lo verificable y sostiene, pero la cadena no cierra. Confirmado por lectura: el comentario 'es material secreto de URL' está en src/app/api/motor/webhook/[channelToken]/route.ts:30-31 y el token se hashea solo para la clave de rate-limit (:32); los 4 PATTERNS de src/lib/sentry/scrub-pii.ts:47-61 son email, JWT (ancla `\beyJ`), tarjeta (4 grupos de 4 dígitos) y teléfono (8+ dígitos) — ninguno matchea 64 hex, lo comprobé leyendo cada regex; scrubString solo se aplica a event.request.url en :135. Confirmé el segundo hueco con mi propio grep sobre src/: `beforeSendTransaction` no aparece en NINGÚN archivo (los únicos hits del término son el comentario de scrub-pii.ts:110 que reconoce la deuda). Amplié a los inits legacy de la raíz que el auditor cita y también los verifiqué: sentry.server.config.ts y sentry.edge.config.ts tienen `tracesSampleRate: 0.1` fijo y solo `beforeSend(event, hint) { return scrubPii(event, hint) }`; src/instrumentation.ts:8 y :35 y src/instrumentation-client.ts:6 usan `NODE_ENV === 'production' ? 0.1 : 0`. Queda en PLAUSIBLE por tres eslabones que no puedo cerrar sin tráfico y que se acumulan a favor de bajar la preocupación: (1) el propio auditor admite no haber confirmado que el SDK meta el path CRUDO —y no la ruta parametrizada `/api/motor/webhook/[channelToken]`— en el payload de transaction; (2) por S6-08, que verifiqué, no hay ningún WabaChannel aprovisionado, así que hoy no existe un channelToken real que pueda filtrarse; (3) el ledger trae OBS-01 ('Sentry completo pero sin evidencia de vida en prod: sin DSN todo el pipeline queda inerte'), condición de entorno que apagaría el canal entero. La pieza del fix que sí es incondicionalmente correcta y barata es enganchar beforeSendTransaction — esa no depende de ninguno de los tres eslabones.
+**Qué encontró el verificador.** Verifiqué todas las citas y son exactas: route.ts:30-32 hashea el channelToken con el comentario 'es material secreto de URL'; scrub-pii.ts:48 abre PATTERNS con exactamente 4 entradas (email :50, JWT :52, tarjeta de 4 grupos de 4 :57, teléfono) y ninguna puede matchear una cadena de 64 hex sin separadores; :135 sanea req.url con esos mismos patrones; el comentario de :109-110 admite que beforeSend recibe ErrorEvent y que para transactions haría falta otro hook; grep por beforeSendTransaction en src/instrumentation.ts, src/instrumentation-client.ts y la raíz devuelve cero; instrumentation.ts:8 y :35 fijan tracesSampleRate 0.1 en producción y solo enganchan beforeSend (:11-22 y :38-40). ignoreTransactions (:24-28) no cubre /api/motor. Todo eso es correcto.
+
+**Corrección aplicada.** Se queda en PLAUSIBLE por dos eslabones que no puedo cerrar por lectura, uno que el propio autor declara y otro que no citó. (1) El declarado: que el SDK de Next incluya el path CRUDO —y no la ruta parametrizada /api/motor/webhook/[channelToken]— en el payload de transaction es una suposición; sin tráfico real no se verifica. (2) El que falta: el ledger registra OBS-01 ('Sentry completo pero sin evidencia de vida en prod: sin DSN todo el pipeline'). Los cinco inits leen `dsn: process.env.NEXT_PUBLIC_SENTRY_DSN` sin fallback; si esa var no está seteada en Netlify, Sentry.init no emite nada y el camino entero es inerte hoy. Eso no invalida el fix propuesto (es barato y correcto), pero baja la confianza del hallazgo y refuerza el BAJO. Nota adicional a favor del hallazgo: el token en el path también cae en los logs de acceso de Netlify, que NO dependen del DSN.
 
 ### [S6-04] Las dos piezas de seguridad de esta lente no tienen candado: validateWebhookUrl no tiene ni un solo test, y el único invariante de autenticación de cron que existe no está enganchado al agregado que corre en CI
 
@@ -2811,9 +2927,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** `npm run check:invariants` ejecuta los dos nuevos y falla si se rompe cualquiera de sus afirmaciones (comprobable revirtiendo a mano una línea del validador y viendo el rojo).
 
-**Qué encontró el verificador.** Verifiqué las dos mitades por separado. (1) validateWebhookUrl sin candado: `ls src/modules/chatbot/server/crm/` devuelve exactamente buildLeadPayload.ts, encryptSecret.ts, getEffectiveSyncStatus.ts, index.ts, postToN8n.ts, syncLeadToCrm.ts, validateWebhookUrl.ts — ni carpeta __tests__ ni archivo .invariant.ts. Confirmado: el único control anti-SSRF del repo no tiene nada que afirme qué bloquea, lo que es exactamente el vehículo del criterio de aceptación de S6-03. (2) El agregado: leí package.json:18 y conté los 16 `check:invariant:*` encadenados en `check:invariants`; ninguno es el del cron. El invariante existe (src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts).
+**Qué encontró el verificador.** Verifiqué las tres afirmaciones. `ls src/modules/chatbot/server/crm/` devuelve exactamente los 7 archivos citados, sin __tests__/ ni ningún *.invariant.ts — el único control anti-SSRF del repo no tiene candado. El invariante de cron existe: src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts:53 tiene literalmente el caso 'sin CRON_SECRET seteada + "Authorization: Bearer undefined" literal → 401'. Y package.json:18 encadena 16 `check:invariant:*` a mano (assignment-trail, setter-meta, escalamiento, novedades, mis-numeros, timeline, foco, particion, flow, alta-propia, prospecto-import, gate-envio, self-check, progreso, reloop-selfcheck, security) — el de cron no figura. Confirmado sin contra-argumento.
 
-**Corrección aplicada.** Dos correcciones a la mitad del cron. (a) El invariante SÍ está registrado como npm script: package.json:47 `"test:t02": "npx tsx src/app/api/cron/cleanup-old-events/__tests__/cleanup-old-events-auth.invariant.ts"`. El hallazgo afirma que 'queda escrito y sin correr' y su fix propone CREAR un script `check:invariant:cron-auth` que ya existe con otro nombre — lo que falta es encadenar `test:t02` al agregado, no escribirlo. (b) Más de fondo: el título dice 'no está enganchado al agregado que corre en CI', y ese agregado NO corre en CI. `npm run check:invariants` aparece únicamente en logic-core-v3/.github/workflows/e2e.yml:16, y verifiqué con `git rev-parse --show-toplevel` que la raíz del repo es C:/Users/franc/Desktop/wt-auditoria-seguridad, cuyo .github/workflows/ contiene solo db-backup.yml — el workflow está en un subdirectorio y GitHub Actions no lo levanta (ya documentado en el ledger como DATOS-CAND-e2e-yml/OBS-10). Así que enganchar el invariante al agregado no lo hace correr: primero hay que mover el workflow. Además, esta mitad del hallazgo es un caso particular de CLEAN-1.1-INVARIANTES del ledger ('40 de 56 invariantes nunca corren — CI ejecuta un agregado que enumera 16'), o sea que 'CONFIRMADO_SIN_TEST' es correcto pero el aporte nuevo real es solo la ausencia de tests de validateWebhookUrl. Mantengo BAJO.
+**Corrección aplicada.** El hallazgo se queda CORTO y su criterio de aceptación es insuficiente. Rastreé quién corre `check:invariants`: el único consumidor es logic-core-v3/.github/workflows/e2e.yml:16. Pero la raíz del repo git es C:\Users\franc\Desktop\wt-auditoria-seguridad (git status devuelve rutas con prefijo logic-core-v3/), y `ls .github/workflows/` en esa raíz contiene SOLO db-backup.yml. GitHub Actions únicamente lee workflows de .github/workflows del root del repo, así que e2e.yml NUNCA se ejecuta — no corre el invariante de cron NI los 16 encadenados. Esto coincide con la entrada DATOS-CAND-e2e-yml/OBS-10 del ledger ('e2e.yml mal ubicado y nunca ejecutado'), que el auditor no cruzó. Consecuencia: encadenar el invariante en package.json:18 es necesario pero NO suficiente; el criterio de aceptación 'npm run check:invariants ejecuta los dos nuevos' se cumple en local y sigue sin haber candado en CI. El fix completo requiere además mover e2e.yml (o crear el workflow) en el .github/workflows de la raíz del repo.
 
 ### [S6-06] CIERRE VERIFICADO — el state de OAuth de Google Business y Tiendanube sí está firmado con HMAC y validado antes de tocar la DB: SEC-AUTH-01, SEC-AUTH-02, SEC-AUTH-06 y F3 del ledger están cerrados (residual acotado: el state es replayable dentro de su TTL de 10 min y no está atado a la sesión que lo emitió)
 
@@ -2851,9 +2967,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí, pero solo de inventario: confirmar el cierre de esas 4 entradas para que la próxima corrida no vuelva a gastar tiempo en ellas.
 
-**Qué encontró el verificador.** Verifiqué el cierre leyendo las tres piezas completas. src/lib/security/oauth-state.ts: la firma es HMAC-SHA256 sobre `${scope}:${payload}` (:37-41), el payload lleva {o, n:randomBytes(16), e:Date.now()+STATE_TTL_MS} con TTL de 10 min (:23, :49-57), y verifyOAuthState compara con timingSafeEqual dentro de try/catch más chequeo previo de longitud (:83-95) y valida shape+expiry después. Los dos callbacks llaman al verificador ANTES de cualquier prisma.*: en google-business/callback/route.ts el `verifyOAuthState(GBP_OAUTH_SCOPE, rawState)` está en :30 con el `if (!stateCheck.valid) return redirect` en :31-34, y el primer prisma.organization.findUnique recién en :38; en tiendanube/callback/route.ts el verify está en :42 y el primer prisma en :50. Ambos exigen además sesión SUPER_ADMIN como primer guard (:15-18 y :29-31). El emisor firma de verdad: google-business-profile.ts:44 `state: signOAuthState(GBP_OAUTH_SCOPE, orgId)`. Confirmé la fecha con git: `git log -1 --date=short 7f21360` = '7f21360 2026-05-26 chore: consolidate working tree backlog (B11 + B12 + B-SEC)', y `git log -1 -- src/lib/security/oauth-state.ts` devuelve ese mismo commit — el fix es de mayo, anterior a la maestra. Y confirmé el lado del ledger: ledger-S6.md:109 (SEC-AUTH-01), :114 (SEC-AUTH-02), :124-125 (SEC-AUTH-06 'estado declarado: abierto'), :130-131 (F3 'ABIERTO → escalado a SEC-AUTH-01') — las cuatro figuran abiertas contra un árbol donde el fix ya está. El residual que reporta también es real y está declarado en el código: oauth-state.ts:19-21 dice textualmente que no se persisten nonces consumidos.
+**Qué encontró el verificador.** Es un hallazgo de CIERRE y verifiqué el cierre yo mismo, línea por línea. src/lib/security/oauth-state.ts:38-43 firma con HMAC-SHA256 sobre `${scope}:${payload}` y trunca a 32; :50-59 emite payload {o,n,e} con nonce de 16 bytes y TTL de 10 min (:24); :86-96 compara con timingSafeEqual dentro de try (y chequea longitud antes, para que timingSafeEqual no tire); :115-117 rechaza expirados. Los dos callbacks lo invocan ANTES de tocar la DB: google-business/callback/route.ts:30 (primer prisma en :38) y tiendanube/callback/route.ts:42 (primer prisma en :50), ambos además detrás de auth() + SUPER_ADMIN (:14-17 y :29-32 respectivamente). Los dos /start ya emiten firmado: google-business-profile.ts:44 `state: signOAuthState(GBP_OAUTH_SCOPE, orgId)` y tiendanube.ts:20. El scope namespacea, así que un state de una integración no sirve para la otra. Verifiqué también la cronología con `git log --diff-filter=A -- src/lib/security/oauth-state.ts`: el archivo fue AGREGADO en 7f21360 (2026-05-26), o sea que SEC-AUTH-01/02/06 y F3 ya estaban cerrados cuando la auditoría maestra los transcribió como abiertos. El residual está declarado a propósito en el comentario :20-21 ('No persistimos nonces consumidos... el modelo de amenaza es anti state-swap, no anti-replay'), así que es decisión de diseño, no descuido.
 
-**Corrección aplicada.** Un matiz sobre la tesis de 'transcripción sin re-verificar': la maestra SÍ miró oauth-state.ts — ledger-S6.md:100 la lista entre los positivos a preservar ('oauth-state.ts:30-34 falla duro si faltan los secrets'). O sea que el ledger contiene simultáneamente el positivo del archivo nuevo y las entradas viejas sin actualizar; el defecto es de reconciliación, no de que nadie haya abierto el archivo. Dato adicional que el hallazgo no menciona y matiza el cierre: getSecret() cae a AUTH_SECRET si OAUTH_STATE_SECRET falta (oauth-state.ts:26-28) — el ledger ya lo trae como CLEAN-REF-OAUTHSTATE, 'DESINFLADO por el escéptico: el fallback es deliberado', así que no reabre nada, pero la nota de cierre debería dejarlo dicho.
+**Corrección aplicada.** Corrección menor de fecha: `git log -1 6254428` da 2026-07-06, no 2026-07-10 (esa es la fecha del documento de la maestra, no la del commit auditado). No cambia el argumento — 7f21360 sigue siendo ~6 semanas anterior. Segunda observación: el hallazgo afirma que 'exchangeCodeForTokens sigue sin recibir el state' y lo verifiqué (google-business-profile.ts:49-53 recibe solo `code`), pero eso NO es un residual de seguridad: el caller ya validó el state antes de llamarlo, que es exactamente lo que SEC-AUTH-06 pedía.
 
 #### Ya documentado en auditorías previas — no se re-reporta (10)
 
@@ -2873,13 +2989,13 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 ## S7 — Exposición de datos, secretos y PII
 
-> **Pasada de refutación adversarial:** **no** — el verificador murió por límite de sesión. Los hallazgos marcados *sin verificar* los sostiene una sola lectura, salvo los que verifiqué yo y están anotados como tales.
+> **Pasada de refutación adversarial:** sí, agente independiente.
 
 ### [S7-01] Retención indefinida de PII: el único purgado cableado es chatbot_events (30 d). Transcripciones, leads y TODO el motor WhatsApp (teléfono en claro + cuerpo del mensaje) crecen sin cota ni borrado
 
 | | |
 |---|---|
-| **Severidad** | ALTO |
+| **Severidad** | MEDIO |
 | **Veredicto** | CONFIRMADO |
 | **vs. ledger** | CAMBIO_DE_ESTADO |
 | **Precondiciones** | Ninguna para que la retención ocurra. Para explotar el volumen acumulado: acceso a la base o a un backup (SUPER_ADMIN, compromiso de Neon, o un artifact de backup). |
@@ -2911,14 +3027,18 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: el TTL exacto por tipo de dato (transcripción vs lead vs mensaje de WhatsApp) y si el vencimiento es borrado o anonimización. Depende del contrato con los clientes (develOP es encargado, el responsable es el cliente) y de la asesoría legal — es la misma decisión #6 que ya figura pendiente en el cierre de la auditoría maestra.
 
-**Adjudicación del auditor.** Verificado por el padre: el grep de deleteMany/delete sobre los modelos con PII devuelve solo un borrado puntual de admin, un invariante de test, el cleanup de evals y dos borrados operativos del flujo de chat. Ninguna politica de retencion. La unica purga agendada es chatbot_events a 30 dias.
+**Qué encontró el verificador.** Verifiqué toda la evidencia: src/app/api/cron/cleanup-old-events/route.ts:13 (RETENTION_DAYS=30), :48 (llama cleanupOldEvents), persistentLogger.ts:83-95 (deleteMany SOLO sobre chatbotEvent), netlify.toml:31-32 (schedule 0 6 * * *) y netlify/functions/cleanup-old-events-cron.ts es el ÚNICO archivo en netlify/functions/ (las otras 2 functions agendadas no existen — dato colateral que refuerza CLEAN-H-CRONTRIGGER). Corrí yo mismo el grep de deleteMany/delete sobre los 6 modelos con PII: 6 hits en src/ (lead.actions.ts:237 borrado manual admin, get-client-monthly-report-data.invariant.ts:86, evals/cleanup.ts:91-92, handleChatRequest.ts:530, quota/checker.ts:197) + 8 hits en tests/ — ninguno es purga por antigüedad. Confirmé en schema: ContactIdentity.externalId/waId en claro (2066-2067), MotorMessage.body @db.Text (2124), ChatMessage.content @db.Text (1424), Conversation sin campo de expiración (1368-1408). No encontré contra-argumento: no hay TTL de DB, ni política de retención, ni cron de purga de contenido.
+
+**Corrección aplicada.** Dos correcciones. (1) NOVEDAD INFLADA: el headline NO es CAMBIO_DE_ESTADO — es prácticamente verbatim LEG-02 del ledger ('Retención indefinida sin purga ni derechos ARCO operativos (transcripciones + leads para siempre)', P1, ABIERTO, decisión humana TTL 12-24 meses = decisión #6 del cierre maestro). Lo único genuinamente nuevo es (a) que el cron de chatbot_events HOY está cableado (OBS-06 decía '0 callers') y (b) las tablas motor_* (ContactIdentity/MotorMessage), que ninguna corrida previa auditó. El resto ya estaba documentado. (2) SEVERIDAD: ALTO no se sostiene contra la regla de impacto real de esta corrida — el propio hallazgo admite '(b) A quién: a nadie hoy por vía de aplicación' y '(c) Precondiciones: acceso a la base o a un backup'. Un hallazgo sin vía de explotación desde la app, cuyo daño requiere ya haber comprometido la DB, no puede ser ALTO cuando la vara dice que un hallazgo alcanzable desde el widget público sin auth es la referencia. El régimen legal es real (Ley 25.326) pero es riesgo regulatorio, no severidad técnica. MEDIO, y el TTL sigue siendo decisión de Franco + abogado.
+
+**Verificado además por el auditor padre, de primera mano.** el grep de deleteMany/delete sobre los modelos con PII devuelve solo un borrado puntual de admin, un invariante de test, el cleanup de evals y dos borrados operativos del flujo de chat.
 
 ### [S7-02] /api/chatbot/[slug]/health es público y sin guard alguno: devuelve el inventario de variables de entorno de la plataforma, el mensaje crudo del error de conexión a la base, y un oráculo de existencia + nombre de bot para cualquier slug de cualquier tenant
 
 | | |
 |---|---|
 | **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna. Sin autenticación, sin header Origin, desde internet abierto. |
 
@@ -2944,6 +3064,10 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 **Fix.** Partir el endpoint en dos. (1) Público: reducir la respuesta a `{ ok: boolean, timestamp }` y el status 200/503 — nada más; sin `checks`, sin `error`, sin `botName`, y sin distinguir 'no existe' de 'inactivo' (mismo cuerpo para ambos). (2) Detallado: mover el objeto `checks` completo a una ruta bajo el guard de SUPER_ADMIN (p. ej. `/api/admin/chatbot/health`), que ya es donde vive la página de salud del admin. En `checkHealth.ts`, reemplazar los tres `error.message` por un código estable (`'db_unreachable'`, `'llm_unavailable'`, `'bot_unavailable'`) y mandar el mensaje real a `logPersistFailure`/Sentry, nunca a la respuesta. Agregarle a la ruta pública el mismo `checkRateLimit` por IP que ya usan los otros endpoints del chatbot.
 
 **Criterio de aceptación.** `curl -s https://<host>/api/chatbot/<slug-inexistente>/health` y `curl -s https://<host>/api/chatbot/<slug-real>/health` devuelven cuerpos byte-idénticos salvo el timestamp, y `grep -E 'DATABASE_URL|AUTH_SECRET|botName|neon\.tech'` sobre ambos da 0 ocurrencias. La ruta admin, con sesión SUPER_ADMIN, sigue devolviendo el detalle completo.
+
+**Qué encontró el verificador.** Leí el route handler completo (src/app/api/chatbot/[slug]/health/route.ts, 20 líneas): efectivamente cero auth(), cero validateOrigin(), cero checkRateLimit() — sólo await params → checkChatbotHealth(slug) → Response.json. Busqué el guard aguas arriba que lo salvaría y NO existe: no hay src/middleware.ts ni middleware.ts en la raíz (ls falla en ambos), no hay public/_headers, y el único [[redirects]] de netlify.toml sobre /api/chatbot/* es un rewrite 1:1 sin protección. Verifiqué checkHealth.ts:93 (env: details = objeto completo), :35 y :56 (error.message crudo de DB y de LLM), :74-78 (los tres cuerpos textualmente distintos con botName). Verifiqué envValidator.ts:26-75: la tabla ENV_VARS es exactamente la citada y checkChatbotEnv (:81-85) devuelve {...v, present} — es decir name+required+description+hint+present, sin valores. El oráculo de existencia por slug y la fuga de error.message son reales.
+
+**Corrección aplicada.** El punto (a) de la justificación está parcialmente mal y hay que sacarlo: 'el censo de 8 env vars con su nombre, su descripción y el hint' NO es una divulgación — el repo es PÚBLICO (verifiqué yo: gh repo view → frc11/PorfolioDevelOP, visibility PUBLIC), así que envValidator.ts:26-75 con nombres, descripciones y hints ya es de lectura libre en GitHub. Lo único que el endpoint agrega sobre lo ya público es el booleano `present` por variable (que sí importa: delata si CHATBOT_IP_HASH_SALT está vacía, encadenando con S7-03), el .message crudo de Prisma/Vertex y el oráculo bot existe/inactivo/botName. Sobre esa base recortada MEDIO se sostiene. Además el estado_vs_ledger 'NUEVO' es optimista: S4 ya registra [SEC-INV-health] '/api/chatbot/[slug]/health público y sin origin-check'; esto es una AMPLIACIÓN de un hallazgo existente (qué divulga), no un hallazgo nuevo.
 
 ### [S7-03] hashIp cae a un salt literal escrito en el código si falta CHATBOT_IP_HASH_SALT — y el repositorio es PÚBLICO en GitHub. La variable está declarada opcional en los tres manifiestos de entorno y el health público delata si está ausente
 
@@ -2979,43 +3103,11 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí, dos: (1) confirmar en el panel de Netlify si CHATBOT_IP_HASH_SALT está seteada hoy — de eso depende si esto es una debilidad latente o un dato ya comprometido; (2) si no lo estaba, decidir qué se hace con los ipHash históricos (re-hash vs anulación).
 
-**Adjudicación del auditor.** Verificado por el padre: ipHash.ts cae al literal chatbot-dev-salt-do-not-use-in-prod y en produccion solo loguea un warning. Con el repo PUBLICO, ese salt es de dominio publico.
+**Qué encontró el verificador.** Leí ipHash.ts entero (30 líneas): :13 lee la var, :14-23 sólo emite un console.warn en producción, :25 `const effectiveSalt = salt ?? 'chatbot-dev-salt-do-not-use-in-prod'` y :26-29 sha256 truncado a 16 hex. Es fail-open literal, y la promesa de :6-7 ('GDPR-friendly: non-reversible') se cae con salt conocido sobre el espacio IPv4. Verifiqué yo la visibilidad del repo: gh repo view --json visibility → {"nameWithOwner":"frc11/PorfolioDevelOP","visibility":"PUBLIC"} — la constante es de dominio público. Verifiqué las tres desalineaciones: envValidator.ts:60-64 required:false, scripts/check-env.js:38 dentro de OPTIONAL_VARS, y check-env.js:139-140 imprime 'el bot va a arrancar con error' — que es falso, arranca con el default. Busqué un guard que lo salve (un requireChatbotEnv en el arranque del chat): requireChatbotEnv existe en envValidator.ts:114-121 pero CHATBOT_IP_HASH_SALT está required:false, así que no la cubre. hashIp se consume en handleChatRequest.ts:435 y su salida se persiste como Conversation.ipHash vía resolver.ts:107.
 
-### [S7-04] El gate del plan sobre la clasificación de leads es sólo de presentación: el score crudo, la clasificación, las señales de scoring y la explicación viajan completos al browser en el payload RSC — y /api/dashboard/leads/recent los sirve sin ningún gate
+**Corrección aplicada.** Sin corrección de fondo, pero la severidad es CONDICIONAL y eso debe quedar al frente, no en 'precondiciones': si CHATBOT_IP_HASH_SALT está seteada en Netlify hoy, el impacto es CERO y sólo queda el defecto de diseño (fail-open). No es verificable desde el repo. MEDIO se sostiene únicamente en la rama 'no está seteada'; si Franco confirma que sí lo está, esto baja a BAJO (deuda de diseño, sin dato comprometido). Nota menor: el hallazgo lo enmarca como GDPR/pseudonimización y el marco aplicable acá es Ley 25.326 — el módulo mismo dice GDPR, así que la cita es fiel al código, pero la conclusión legal debería referenciar 25.326.
 
-| | |
-|---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
-| **vs. ledger** | NUEVO |
-| **Precondiciones** | Cuenta autenticada de la organización (rol CLIENT u ORG_MEMBER). Ninguna escalación de privilegio. |
-
-**Impacto.** (a) Dato: `score`, `classification`, `scoreSignals` (el detalle interno de qué subió y bajó el puntaje), `effectiveScore`, `effectiveClassification`, `decayTierLabel` y `scoreExplanation` de cada lead — más los campos operativos que el propio repo declara como no-exportables al dueño (`botConfigId`, `notificationSent`, `notificationSentAt`, `convertedToOsLeadId`). (b) A quién: al usuario autenticado de la org, incluidos los de plan STARTER a los que la feature se les vende como no incluida. No hay fuga cross-tenant: el where filtra por org correctamente. (c) Precondiciones: sesión válida de CLIENT/ORG_MEMBER, y abrir devtools o pegarle al endpoint. Es MEDIO y no ALTO porque el dato es de la propia org; lo que se rompe es el paywall y la política explícita de qué campos ve el dueño, no el aislamiento.
-
-**Mecanismo.** En `/dashboard/chatbot/leads` la página server obtiene las filas con `listLeadsForDashboard`, que las trae completas, y las enriquece haciendo spread de la fila entera (`...lead`) junto con el scoring calculado. Ese array se pasa como prop a `ClientLeadsTable`, que es un componente `'use client'` — React serializa el objeto íntegro en el payload de flight, no sólo los campos que el componente lee. El flag `showScoring` derivado de `planAllows(plan,'leadScoring')` se usa exclusivamente en el render (`showScoring ? lead.effectiveScore : null`), y el comentario del propio código lo dice sin ambigüedad: 'Gate de PRESENTACIÓN... este flag solo decide si la UI muestra los chips o el teaser'. El mismo objeto sin proyectar se sirve además por `/api/dashboard/leads/recent`, que hace `findMany` sin `select` y devuelve `{ ...lead, effectiveScore, ..., scoreExplanation }` como JSON, esta vez sin consultar el plan siquiera. El contraste que lo vuelve inequívocamente un defecto y no una decisión: la ruta de export CSV, sobre la misma consulta, sí proyecta a mano una lista blanca de columnas y sí aplica el gate del plan, con un comentario que enumera exactamente los campos que no deben salir.
-
-**Evidencia.**
-
-- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:65`
-  > const showScoring = planAllows(plan, 'leadScoring')  // 'Gate de PRESENTACIÓN ... este flag solo decide si la UI muestra los chips o el teaser'
-- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:95-100`
-  > return { ...lead, effectiveScore: effective.effectiveScore, effectiveClassification: ..., decayTierLabel: ..., scoreExplanation: getScoreExplanation(signals) }
-- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:116`
-  > <ClientLeadsTable leads={leads} ... showScoring={showScoring} />
-- `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx:1`
-  > 'use client'  — todo lo que entra por props se serializa al browser
-- `src/app/api/dashboard/leads/recent/route.ts:22-29`
-  > const rawLeads = await prisma.chatbotLead.findMany({ where: {...}, orderBy: {...}, take: 50 })  — sin select
-- `src/app/api/dashboard/leads/recent/route.ts:49-55`
-  > return { ...lead, effectiveScore, effectiveClassification, decayTierLabel, scoreExplanation }  → NextResponse.json({ leads })  — sin getPlanForOrg ni planAllows en toda la ruta
-- `src/app/api/dashboard/chatbot/leads/export/route.ts:30-32`
-  > * NO se exporta:\n *  - score crudo, scoreSignals, internalNotes, botConfigId, notificationSent*.\n *  - Solo lo legible al dueño.  — la política que las otras dos superficies incumplen
-- `src/lib/plan/plan-allows.ts:25-34`
-  > // el scoring se sigue computando y guardando para todos los planes; este gate solo decide si se MUESTRA.
-
-**Fix.** Introducir un proyector único y usarlo en las tres superficies. Crear `src/modules/chatbot/server/leads/toClientLeadDto.ts` que reciba la fila cruda más `{ showScoring }` y devuelva sólo los campos que el dueño puede ver, omitiendo `score`, `scoreSignals`, `botConfigId`, `notificationSent`, `notificationSentAt`, `convertedToOsLeadId`, y omitiendo además `classification`/`effectiveClassification`/`decayTierLabel`/`scoreExplanation` cuando `showScoring` es false. Reemplazar el spread de `page.tsx:76` y `:95` y el de `recent/route.ts:36` y `:49` por ese DTO, y agregar el gate de plan que hoy falta en `recent/route.ts` (mismo `getPlanForOrg` + `planAllows` que usa el export). `ClientLeadsTable` pasa a tipar su prop contra el tipo del DTO, no contra la fila de Prisma.
-
-**Criterio de aceptación.** Con una sesión de una org en plan STARTER: (1) `curl` autenticado a `/api/dashboard/leads/recent` devuelve un JSON donde `grep -E '"score"|"scoreSignals"|"classification"|"scoreExplanation"|"botConfigId"'` da 0 ocurrencias; (2) el HTML/flight de `/dashboard/chatbot/leads` da 0 ocurrencias de `scoreSignals` y de `"score":`. Con una org en plan PRO, la clasificación sí aparece y el score crudo y scoreSignals siguen sin aparecer en ninguna de las dos.
+**Verificado además por el auditor padre, de primera mano.** ipHash.ts cae al literal chatbot-dev-salt-do-not-use-in-prod y en produccion solo loguea un warning.
 
 ### [S7-05] La protección anti-framing sólo cubre /admin y /dashboard: el panel del setter y todas las páginas de autenticación quedan embebibles, porque el frame-ancestors 'none' global está en modo Report-Only y no bloquea nada
 
@@ -3047,14 +3139,18 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Criterio de aceptación.** `curl -sI https://<host>/setter` y `curl -sI https://<host>/login` devuelven `X-Frame-Options: DENY`; `curl -sI https://<host>/embed/<slug>` NO lo devuelve y sigue trayendo `Content-Security-Policy: frame-ancestors *`. Verificación funcional: el widget embebido en un sitio de cliente sigue cargando.
 
-**Adjudicación del auditor.** Verificado por el padre leyendo next.config.ts: el X-Frame-Options: DENY de :67-71 aplica a /(admin|dashboard)(.*) y /setter no esta; el CSP de :48 es Report-Only, asi que su frame-ancestors 'none' no impone nada.
+**Qué encontró el verificador.** Leí next.config.ts completo. Verifiqué que el bloque global /:path* pone frame-ancestors 'none' DENTRO de la clave 'Content-Security-Policy-Report-Only' (líneas ~47-56) — report-only no bloquea, la directiva es inerte. Verifiqué que el único header que bloquea es {source:'/(admin|dashboard)(.*)', X-Frame-Options: DENY}. Busqué activamente la fuente de headers que refutaría el hallazgo y no existe ninguna: netlify.toml completo (33 líneas, leído entero) no tiene ningún [[headers]]; ls public/_headers, src/middleware.ts y middleware.ts fallan los tres. next.config.ts es la única fuente. Verifiqué que las rutas quedan fuera del patrón: ls src/app/(protected)/ → admin, dashboard, setter; ls src/app/ → login, forgot-password, reset-password, cambiar-password, accept-invite, bienvenida. Ninguna de esas matchea /(admin|dashboard). La advertencia del fix sobre la intersección de CSPs al pasar a enforcement (frame-ancestors global 'none' rompería /embed/*) es técnicamente correcta y es el mejor aporte del hallazgo.
+
+**Corrección aplicada.** Matiz sobre el alcance real, no sobre el veredicto: el riesgo de framing en /login y las pantallas de credenciales es menor de lo que sugiere el título — un iframe cross-origin no puede LEER lo que el usuario tipea (same-origin lo impide), así que ahí el vector es UI-redressing, no robo de credenciales. El riesgo sustantivo está en /setter/*, donde hay controles de un clic con la sesión del setter. MEDIO se sostiene por /setter, no por las pantallas de auth. El estado_vs_ledger 'NUEVO' es defendible como refinamiento: SEC-MISC-01 daba el bloque por resuelto y SEC-08 registra el Report-Only, pero ninguno notó que el patrón de ruta dejó afuera /setter.
+
+**Verificado además por el auditor padre, de primera mano.** next.config.ts:67-71 aplica X-Frame-Options a /(admin|dashboard)(.*) y /setter no esta; el CSP de :48 es Report-Only.
 
 ### [S7-06] El formulario de contacto del footer manda nombre, WhatsApp, rubro y mensaje del visitante directamente del browser al webhook de n8n, con la URL del webhook horneada en el bundle público — sin pasar por el servidor, sin validación, sin rate-limit y sin registro
 
 | | |
 |---|---|
 | **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Ninguna para leer la URL del bundle. Para abusarla: sólo poder hacer un POST HTTP. Requiere que NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL esté configurada en el entorno de producción. |
 
@@ -3081,12 +3177,94 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí: confirmar en Netlify si la variable está seteada hoy (define si esto es latente o activo) y coordinar con Franco la rotación de la URL del webhook en n8n.
 
-### [S7-07] El scrub de PII hacia Sentry no cubre transacciones (beforeSendTransaction ausente con tracesSampleRate 0.1) y no redacta parámetros de query por nombre — y la app transporta tokens de reset de contraseña, de invitación y de baja en el query string
+**Qué encontró el verificador.** Leí el handler de submit en Footer.tsx: :81 `const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL` y :84 `await fetch(webhookUrl, {method:'POST', body: JSON.stringify(form)})` con form = {nombre, whatsapp, rubro, mensaje} (:72-77). El prefijo NEXT_PUBLIC_ garantiza inlining en el bundle de cliente. Verifiqué la variante correcta que convive: src/lib/n8n.ts:19-22 usa N8N_CONTACT_WEBHOOK_URL sin prefijo público y tira si falta, y además tiene AbortSignal.timeout(8_000) que la ruta del footer no tiene. Verifiqué el delta de control: src/lib/actions/contact.ts:23-25 aplica getClientIpHash + rate-limit `contactFormPerIp` — es decir, el camino servidor SÍ está rate-limiteado y el del footer no, con lo cual el bypass del limitador es concreto y no teórico. Confirmé .env.example:196-204 (las 4 vars N8N, con la nota de que NEXT_PUBLIC_ se expone) y check-env.js:55-58 (las 4 declaradas).
+
+**Corrección aplicada.** Sin corrección de sustancia. Dos matices para el reporte: (1) igual que S7-03, la severidad es CONDICIONAL a que NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL esté seteada en Netlify — si está vacía, el código cae al branch de WhatsApp (:97-107) y el problema no existe hoy; no es verificable desde el repo. (2) El encuadre de PII es el más débil de los tres argumentos: los datos que salen del browser al webhook son del PROPIO visitante que los está tipeando, así que la pérdida de privacidad frente al server-relay es marginal. Lo que sostiene MEDIO es (a) la URL del webhook como capacidad portadora publicada en el bundle y (b) que ese camino saltea el rate-limit y la validación Zod que el camino gemelo sí tiene. La recomendación de rotar la URL en n8n es correcta y debe hacerse aunque se aplique el fix.
+
+### [S7-08] El .message crudo de Prisma llega al cliente: los mensajes de nivel de conexión revelan host y puerto de Neon, el usuario de la base y nombres de columnas/constraints. El helper compartido toErrorMessage es el canal, no sólo las 49 copias inline
 
 | | |
 |---|---|
 | **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | CONFIRMADO_SIN_TEST |
+| **Precondiciones** | Sesión autenticada de cualquier rol (SETTER, CLIENT, ORG_MEMBER o SUPER_ADMIN) y un fallo de base o de validación de Prisma durante la acción. |
+
+**Impacto.** (a) Dato: según qué falle, la respuesta de una server action puede contener 'Can't reach database server at <host>:<puerto>' (el endpoint de Neon), 'Authentication failed ... credentials for `<usuario>` are not valid' (el usuario de la base), 'Database `<nombre>` does not exist', 'Unique constraint failed on the fields: (`email`)' (nombres de columna), 'Foreign key constraint violated on the constraint: `<índice>`' (nombres de constraint), o — con un PrismaClientValidationError — el diagrama completo de argumentos que enumera todos los campos del modelo. (b) A quién: al usuario autenticado que dispara la acción, en un toast; alcanza a SETTER y a CLIENT, no sólo a admin. (c) Precondiciones: sesión válida de cualquier rol + que ocurra un error de base. Es MEDIO: no da acceso, da reconocimiento de infraestructura y de esquema que acorta el trabajo previo de un atacante. Se marca CONFIRMADO_SIN_TEST porque CLEAN-2.1-CATCH ya contó el fenómeno (63 devuelven el .message crudo) y sigue abierto sin candado; lo que aporto y no estaba es CUÁL de los mensajes filtra qué, y que el helper compartido también filtra — dato que cambia el fix propuesto.
+
+**Mecanismo.** El patrón es doble. Por un lado están las copias inline `catch (error) { return fail(error instanceof Error ? error.message : '…') }` repartidas por los directorios `_actions`; llegan hasta el carril del setter, donde `marcarNovedadesVistasAction` envuelve una escritura de Prisma y devuelve el mensaje tal cual. Por otro — y esto es lo que la propuesta de remediación previa no contempla — el helper compartido `toErrorMessage` en `src/lib/action-utils.ts` hace exactamente lo mismo: si el error es un `Error`, devuelve su `.message` sin transformar, y se usa en 15 puntos de 7 archivos. La consecuencia práctica es que 'promover mapError a action-utils.ts' aterrizaría en el mismo archivo que ya es el canal de fuga. La severidad del contenido depende de la clase de error: los de conexión y autenticación de Prisma son los que llevan infraestructura, y pueden dispararse en CUALQUIER acción, no en casos exóticos — con Neon y su cold-start, un P1001/P2024 es un evento esperable, no hipotético.
+
+**Evidencia.**
+
+- `src/lib/action-utils.ts:19-31`
+  > export function toErrorMessage(error: unknown, fallback = 'Ocurrió un error inesperado.'): string { if (error instanceof ZodError) {...} if (error instanceof Error) { return error.message } return fallback }
+- `src/app/(protected)/setter/_actions/novedades.actions.ts:23-26`
+  > } catch (error) { return fail(error instanceof Error ? error.message : 'No se pudieron marcar las novedades') }  — envuelve marcarNovedadesVistas(userId), que escribe en Prisma; alcanzable por rol SETTER
+- `node_modules/@prisma/client/runtime/client.js (grep 'reach database server')`
+  > case"DatabaseNotReachable":{let t=e.cause.host&&e.cause.port?`${e.cause.host}:${e.cause.port}`:e.cause.host;return`Can't reach database server${t?` at ${t}`:""}`}
+- `node_modules/@prisma/client/runtime/client.js (grep 'Authentication failed against')`
+  > case"AuthenticationFailed":return`Authentication failed against the database server, the provided database credentials for \\`${e.cause.user??"(not available)"}\\` are not valid`
+- `node_modules/@prisma/client/runtime/client.js (grep 'Unique constraint failed')`
+  > case"UniqueConstraintViolation":return`Unique constraint failed on the ${ro(e.cause.constraint)}` ... function ro(e){return e&&"fields"in e?`fields: (${e.fields.map(t=>`\\`${t}\\``).join(", ")})`:e&&"index"in e?`constraint: \\`${e.index}\\``:...}
+- `node_modules/@prisma/client/runtime/client.js (grep 'Unknown argument')`
+  > `Unknown argument \\`${e.red(t)}\\`.` ... `Did you mean \\`${e.green(i)}\\`?` ... "Available options are " — el error de validación enumera los campos del modelo
+- `grep -rn "toErrorMessage(" src/ | grep -v "export function" | wc -l`
+  > 15 (en 7 archivos)
+
+**Fix.** Convertir `toErrorMessage` en la frontera de saneamiento en vez del canal de fuga. En `src/lib/action-utils.ts`: mantener el trato especial de `ZodError` (los mensajes de Zod son copy propio y son seguros), y para todo lo demás — en particular cuando el error sea una instancia de `Prisma.PrismaClientKnownRequestError`, `PrismaClientValidationError`, `PrismaClientInitializationError` o `PrismaClientUnknownRequestError` — loguear el error completo por `logger.error` y devolver ÚNICAMENTE el `fallback`. Para los errores de dominio propios que sí quieren llegar al usuario (por ejemplo `DossierTransitionError`), definir una clase base `UserFacingError` y dejar pasar sólo su `.message`. Después, reemplazar las copias inline por llamadas a ese helper — empezando por el carril del setter, que es el de menor volumen. Ese orden importa: si se migran primero las copias sin arreglar el helper, no se cierra nada.
+
+**Criterio de aceptación.** Un test unitario que le pase a `toErrorMessage` un `PrismaClientKnownRequestError` con code P2002 y mensaje 'Unique constraint failed on the fields: (`email`)' obtiene el fallback genérico, no el mensaje original; y que le pase un `UserFacingError('Transición ilegal')` obtiene ese texto. Complementariamente, una regla `no-restricted-syntax` que prohíba `error instanceof Error ? error.message` dentro de `**/_actions/**` mide 0 violaciones tras la migración.
+
+**Qué encontró el verificador.** Leí action-utils.ts:19-30 y es literal: `if (error instanceof Error) { return error.message }`, sin ninguna rama para errores de Prisma — el helper compartido devuelve el mensaje crudo. Leí novedades.actions.ts entero (28 líneas) y confirmé el catch de :23-26 envolviendo marcarNovedadesVistas(userId), que escribe en Prisma, tras requireSetter() — alcanzable por rol SETTER, como afirma. Verifiqué el conteo con mi propio grep: 15 ocurrencias de toErrorMessage( fuera de la definición, en 6 archivos consumidores (announcements, referrals.admin, settings, prospecto-bulk, prospecto, profile) + action-utils.ts que es donde vive la definición. Busqué una frontera de saneamiento aguas abajo (un wrapper que filtre el ActionResult antes del cliente) y no existe: fail() en :11-13 devuelve el string tal cual. El aporte real del hallazgo sobre CLEAN-2.1-CATCH es correcto y cambia el fix: el helper al que la remediación previa propone migrar YA es el canal de fuga.
+
+**Corrección aplicada.** Corrección menor de conteo: '15 (en 7 archivos)' — son 15 ocurrencias en 6 archivos consumidores; el séptimo de la lista es action-utils.ts, que es donde se DEFINE, no donde se consume. No cambia la conclusión. Segunda observación sobre la evidencia: los mensajes concretos de Prisma (host:puerto, usuario de la base, nombres de constraint, enumeración de campos del modelo) están citados desde node_modules/@prisma/client/runtime/client.js minificado — los verifiqué como cadenas presentes en el runtime instalado, pero que un P1001/P2002 concreto llegue a un toast del setter depende de que el error escape sin envolver desde la capa de datos, cosa que es cierta en novedades.actions.ts:23-26 pero no la comprobé call-site por call-site en los 15. El estado CONFIRMADO_SIN_TEST es honesto: CLEAN-2.1-CATCH está en el ledger (S1) y sigue abierto sin candado.
+
+### [S7-04] El gate del plan sobre la clasificación de leads es sólo de presentación: el score crudo, la clasificación, las señales de scoring y la explicación viajan completos al browser en el payload RSC — y /api/dashboard/leads/recent los sirve sin ningún gate
+
+| | |
+|---|---|
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | NUEVO |
+| **Precondiciones** | Cuenta autenticada de la organización (rol CLIENT u ORG_MEMBER). Ninguna escalación de privilegio. |
+
+**Impacto.** (a) Dato: `score`, `classification`, `scoreSignals` (el detalle interno de qué subió y bajó el puntaje), `effectiveScore`, `effectiveClassification`, `decayTierLabel` y `scoreExplanation` de cada lead — más los campos operativos que el propio repo declara como no-exportables al dueño (`botConfigId`, `notificationSent`, `notificationSentAt`, `convertedToOsLeadId`). (b) A quién: al usuario autenticado de la org, incluidos los de plan STARTER a los que la feature se les vende como no incluida. No hay fuga cross-tenant: el where filtra por org correctamente. (c) Precondiciones: sesión válida de CLIENT/ORG_MEMBER, y abrir devtools o pegarle al endpoint. Es MEDIO y no ALTO porque el dato es de la propia org; lo que se rompe es el paywall y la política explícita de qué campos ve el dueño, no el aislamiento.
+
+**Mecanismo.** En `/dashboard/chatbot/leads` la página server obtiene las filas con `listLeadsForDashboard`, que las trae completas, y las enriquece haciendo spread de la fila entera (`...lead`) junto con el scoring calculado. Ese array se pasa como prop a `ClientLeadsTable`, que es un componente `'use client'` — React serializa el objeto íntegro en el payload de flight, no sólo los campos que el componente lee. El flag `showScoring` derivado de `planAllows(plan,'leadScoring')` se usa exclusivamente en el render (`showScoring ? lead.effectiveScore : null`), y el comentario del propio código lo dice sin ambigüedad: 'Gate de PRESENTACIÓN... este flag solo decide si la UI muestra los chips o el teaser'. El mismo objeto sin proyectar se sirve además por `/api/dashboard/leads/recent`, que hace `findMany` sin `select` y devuelve `{ ...lead, effectiveScore, ..., scoreExplanation }` como JSON, esta vez sin consultar el plan siquiera. El contraste que lo vuelve inequívocamente un defecto y no una decisión: la ruta de export CSV, sobre la misma consulta, sí proyecta a mano una lista blanca de columnas y sí aplica el gate del plan, con un comentario que enumera exactamente los campos que no deben salir.
+
+**Evidencia.**
+
+- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:65`
+  > const showScoring = planAllows(plan, 'leadScoring')  // 'Gate de PRESENTACIÓN ... este flag solo decide si la UI muestra los chips o el teaser'
+- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:95-100`
+  > return { ...lead, effectiveScore: effective.effectiveScore, effectiveClassification: ..., decayTierLabel: ..., scoreExplanation: getScoreExplanation(signals) }
+- `src/app/(protected)/dashboard/chatbot/leads/page.tsx:116`
+  > <ClientLeadsTable leads={leads} ... showScoring={showScoring} />
+- `src/modules/chatbot/components/dashboard/ClientLeadsTable.tsx:1`
+  > 'use client'  — todo lo que entra por props se serializa al browser
+- `src/app/api/dashboard/leads/recent/route.ts:22-29`
+  > const rawLeads = await prisma.chatbotLead.findMany({ where: {...}, orderBy: {...}, take: 50 })  — sin select
+- `src/app/api/dashboard/leads/recent/route.ts:49-55`
+  > return { ...lead, effectiveScore, effectiveClassification, decayTierLabel, scoreExplanation }  → NextResponse.json({ leads })  — sin getPlanForOrg ni planAllows en toda la ruta
+- `src/app/api/dashboard/chatbot/leads/export/route.ts:30-32`
+  > * NO se exporta:\n *  - score crudo, scoreSignals, internalNotes, botConfigId, notificationSent*.\n *  - Solo lo legible al dueño.  — la política que las otras dos superficies incumplen
+- `src/lib/plan/plan-allows.ts:25-34`
+  > // el scoring se sigue computando y guardando para todos los planes; este gate solo decide si se MUESTRA.
+
+**Fix.** Introducir un proyector único y usarlo en las tres superficies. Crear `src/modules/chatbot/server/leads/toClientLeadDto.ts` que reciba la fila cruda más `{ showScoring }` y devuelva sólo los campos que el dueño puede ver, omitiendo `score`, `scoreSignals`, `botConfigId`, `notificationSent`, `notificationSentAt`, `convertedToOsLeadId`, y omitiendo además `classification`/`effectiveClassification`/`decayTierLabel`/`scoreExplanation` cuando `showScoring` es false. Reemplazar el spread de `page.tsx:76` y `:95` y el de `recent/route.ts:36` y `:49` por ese DTO, y agregar el gate de plan que hoy falta en `recent/route.ts` (mismo `getPlanForOrg` + `planAllows` que usa el export). `ClientLeadsTable` pasa a tipar su prop contra el tipo del DTO, no contra la fila de Prisma.
+
+**Criterio de aceptación.** Con una sesión de una org en plan STARTER: (1) `curl` autenticado a `/api/dashboard/leads/recent` devuelve un JSON donde `grep -E '"score"|"scoreSignals"|"classification"|"scoreExplanation"|"botConfigId"'` da 0 ocurrencias; (2) el HTML/flight de `/dashboard/chatbot/leads` da 0 ocurrencias de `scoreSignals` y de `"score":`. Con una org en plan PRO, la clasificación sí aparece y el score crudo y scoreSignals siguen sin aparecer en ninguna de las dos.
+
+**Qué encontró el verificador.** Verifiqué la cadena completa, incluido el eslabón que el hallazgo no cita y que era el candidato a refutación: fui a listLeadsForDashboard (multiTenantQueries.ts:101-121) para ver si había un `select` que recortara la fila antes del spread — NO lo hay, es findMany con `include` de conversation y `return rows.map(r => ({...r, ...}))`, o sea fila completa de ChatbotLead. De ahí page.tsx:76 y :95-100 hacen ...lead y :116 la pasa a ClientLeadsTable, que confirmé es 'use client' (línea 1 exacta). El tipado de props no recorta nada en runtime. En recent/route.ts leí las 69 líneas: :22-29 findMany sin select, :36 y :50 spread, :68 NextResponse.json — y confirmé por lectura completa del archivo que NO aparece getPlanForOrg ni planAllows en ninguna línea. El contraste con export/route.ts:30-32 ('NO se exporta: score crudo, scoreSignals, internalNotes, botConfigId, notificationSent*') es textual. plan-allows.ts:32-34 confirma que leadScoring mapea a insightEnabled y que el gate es de presentación.
+
+**Corrección aplicada.** Severidad inflada. El propio hallazgo establece que no hay fuga cross-tenant ('el where filtra por org correctamente' — lo verifiqué: forOrg() en el page, botConfig.organizationId en la ruta) y que el dato es de la propia org, visible por un usuario ya autenticado de esa org. Lo que se rompe es un paywall comercial y una política interna de proyección — impacto de negocio y de higiene, no de confidencialidad. Es además el MISMO patrón estructural que el propio auditor calificó BAJO en S7-09 (fila cruda al cliente de la misma org); calificarlo MEDIO acá y BAJO allá es incoherente, y S7-09 expone identificadores de visitante, que es material más sensible que un score. BAJO. El defecto sigue siendo real y el fix propuesto (DTO único + agregar el gate ausente en recent/route.ts) es correcto y barato.
+
+### [S7-07] El scrub de PII hacia Sentry no cubre transacciones (beforeSendTransaction ausente con tracesSampleRate 0.1) y no redacta parámetros de query por nombre — y la app transporta tokens de reset de contraseña, de invitación y de baja en el query string
+
+| | |
+|---|---|
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Que se genere un evento (error o transacción muestreada) durante una navegación a una URL portadora de token. Para aprovecharlo: acceso al proyecto de Sentry. |
 
@@ -3117,46 +3295,16 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Sí, una separable: si Sentry sigue en la nube o se auto-hospeda. Este fix reduce el material que sale, pero la decisión de residencia por Ley 25.326 sigue abierta y es de Franco.
 
-### [S7-08] El .message crudo de Prisma llega al cliente: los mensajes de nivel de conexión revelan host y puerto de Neon, el usuario de la base y nombres de columnas/constraints. El helper compartido toErrorMessage es el canal, no sólo las 49 copias inline
+**Qué encontró el verificador.** Verifiqué el mecanismo por lectura y no encontré el hook que lo refutaría: grep de beforeSendTransaction en todo el árbol (excluyendo node_modules) devuelve UN solo hit y es el COMENTARIO de scrub-pii.ts:110 que dice que haría falta usarlo — cero registros reales. Leí scrub-pii.ts entero: :135-136 aplican scrubString a request.url y request.query_string, y scrubString (:64-70) sólo corre PATTERNS (:48-62 = email, JWT eyJ..., CC 4x4, teléfono 8+ dígitos). SENSITIVE_KEY_PATTERN (:17-36, incluye '^token$') se usa únicamente en scrubValue (:92) sobre objetos, nunca sobre la query string — la asimetría es exactamente la descrita. Confirmé los tres call sites de token en URL: forgot-password/actions.ts:88, invitations.ts:110, unsubscribe-token.ts:123. Confirmé tracesSampleRate 0.1 en sentry.server.config.ts:10, sentry.edge.config.ts:23 y instrumentation-client.ts:35.
 
-| | |
-|---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | SIN VERIFICAR |
-| **vs. ledger** | CONFIRMADO_SIN_TEST |
-| **Precondiciones** | Sesión autenticada de cualquier rol (SETTER, CLIENT, ORG_MEMBER o SUPER_ADMIN) y un fallo de base o de validación de Prisma durante la acción. |
-
-**Impacto.** (a) Dato: según qué falle, la respuesta de una server action puede contener 'Can't reach database server at <host>:<puerto>' (el endpoint de Neon), 'Authentication failed ... credentials for `<usuario>` are not valid' (el usuario de la base), 'Database `<nombre>` does not exist', 'Unique constraint failed on the fields: (`email`)' (nombres de columna), 'Foreign key constraint violated on the constraint: `<índice>`' (nombres de constraint), o — con un PrismaClientValidationError — el diagrama completo de argumentos que enumera todos los campos del modelo. (b) A quién: al usuario autenticado que dispara la acción, en un toast; alcanza a SETTER y a CLIENT, no sólo a admin. (c) Precondiciones: sesión válida de cualquier rol + que ocurra un error de base. Es MEDIO: no da acceso, da reconocimiento de infraestructura y de esquema que acorta el trabajo previo de un atacante. Se marca CONFIRMADO_SIN_TEST porque CLEAN-2.1-CATCH ya contó el fenómeno (63 devuelven el .message crudo) y sigue abierto sin candado; lo que aporto y no estaba es CUÁL de los mensajes filtra qué, y que el helper compartido también filtra — dato que cambia el fix propuesto.
-
-**Mecanismo.** El patrón es doble. Por un lado están las copias inline `catch (error) { return fail(error instanceof Error ? error.message : '…') }` repartidas por los directorios `_actions`; llegan hasta el carril del setter, donde `marcarNovedadesVistasAction` envuelve una escritura de Prisma y devuelve el mensaje tal cual. Por otro — y esto es lo que la propuesta de remediación previa no contempla — el helper compartido `toErrorMessage` en `src/lib/action-utils.ts` hace exactamente lo mismo: si el error es un `Error`, devuelve su `.message` sin transformar, y se usa en 15 puntos de 7 archivos. La consecuencia práctica es que 'promover mapError a action-utils.ts' aterrizaría en el mismo archivo que ya es el canal de fuga. La severidad del contenido depende de la clase de error: los de conexión y autenticación de Prisma son los que llevan infraestructura, y pueden dispararse en CUALQUIER acción, no en casos exóticos — con Neon y su cold-start, un P1001/P2024 es un evento esperable, no hipotético.
-
-**Evidencia.**
-
-- `src/lib/action-utils.ts:19-31`
-  > export function toErrorMessage(error: unknown, fallback = 'Ocurrió un error inesperado.'): string { if (error instanceof ZodError) {...} if (error instanceof Error) { return error.message } return fallback }
-- `src/app/(protected)/setter/_actions/novedades.actions.ts:23-26`
-  > } catch (error) { return fail(error instanceof Error ? error.message : 'No se pudieron marcar las novedades') }  — envuelve marcarNovedadesVistas(userId), que escribe en Prisma; alcanzable por rol SETTER
-- `node_modules/@prisma/client/runtime/client.js (grep 'reach database server')`
-  > case"DatabaseNotReachable":{let t=e.cause.host&&e.cause.port?`${e.cause.host}:${e.cause.port}`:e.cause.host;return`Can't reach database server${t?` at ${t}`:""}`}
-- `node_modules/@prisma/client/runtime/client.js (grep 'Authentication failed against')`
-  > case"AuthenticationFailed":return`Authentication failed against the database server, the provided database credentials for \\`${e.cause.user??"(not available)"}\\` are not valid`
-- `node_modules/@prisma/client/runtime/client.js (grep 'Unique constraint failed')`
-  > case"UniqueConstraintViolation":return`Unique constraint failed on the ${ro(e.cause.constraint)}` ... function ro(e){return e&&"fields"in e?`fields: (${e.fields.map(t=>`\\`${t}\\``).join(", ")})`:e&&"index"in e?`constraint: \\`${e.index}\\``:...}
-- `node_modules/@prisma/client/runtime/client.js (grep 'Unknown argument')`
-  > `Unknown argument \\`${e.red(t)}\\`.` ... `Did you mean \\`${e.green(i)}\\`?` ... "Available options are " — el error de validación enumera los campos del modelo
-- `grep -rn "toErrorMessage(" src/ | grep -v "export function" | wc -l`
-  > 15 (en 7 archivos)
-
-**Fix.** Convertir `toErrorMessage` en la frontera de saneamiento en vez del canal de fuga. En `src/lib/action-utils.ts`: mantener el trato especial de `ZodError` (los mensajes de Zod son copy propio y son seguros), y para todo lo demás — en particular cuando el error sea una instancia de `Prisma.PrismaClientKnownRequestError`, `PrismaClientValidationError`, `PrismaClientInitializationError` o `PrismaClientUnknownRequestError` — loguear el error completo por `logger.error` y devolver ÚNICAMENTE el `fallback`. Para los errores de dominio propios que sí quieren llegar al usuario (por ejemplo `DossierTransitionError`), definir una clase base `UserFacingError` y dejar pasar sólo su `.message`. Después, reemplazar las copias inline por llamadas a ese helper — empezando por el carril del setter, que es el de menor volumen. Ese orden importa: si se migran primero las copias sin arreglar el helper, no se cierra nada.
-
-**Criterio de aceptación.** Un test unitario que le pase a `toErrorMessage` un `PrismaClientKnownRequestError` con code P2002 y mensaje 'Unique constraint failed on the fields: (`email`)' obtiene el fallback genérico, no el mensaje original; y que le pase un `UserFacingError('Transición ilegal')` obtiene ese texto. Complementariamente, una regla `no-restricted-syntax` que prohíba `error instanceof Error ? error.message` dentro de `**/_actions/**` mide 0 violaciones tras la migración.
+**Corrección aplicada.** Tres correcciones. (1) CONTEO MAL: el hallazgo dice 'los tres Sentry.init' y son CINCO init en cuatro archivos — se le escapó src/instrumentation.ts:6-29 (nodejs) y :33-41 (edge), que es el archivo que Next carga de verdad cuando existe src/ (el instrumentation.ts de la raíz sólo re-importa los legacy). Los dos init olvidados TAMPOCO tienen beforeSendTransaction, así que el error subestima el alcance; pero el criterio de aceptación propuesto ('grep devuelve 3 resultados') es incorrecto y dejaría dos init sin cubrir. (2) La pata de transacciones es INFERIDA, no verificada: que el SDK adjunte la query string a los eventos de transacción bajo sendDefaultPii por defecto (grep de sendDefaultPii = 0 en el repo, o sea default) no lo pude confirmar por lectura del código de la app. La pata de eventos de error SÍ está verificada. (3) SEVERIDAD: la cadena requiere que ocurra un error/muestreo sobre una URL con token, dentro de su ventana de validez, con el DSN vivo — y el ledger tiene OBS-01 abierto ('Sentry sin evidencia de vida en prod: sin DSN todo el pipeline'), o sea que ni siquiera está establecido que los eventos salgan. El destino es el propio proyecto del equipo. BAJO.
 
 ### [S7-09] Filas completas de Conversation viajan al browser del cliente en el payload RSC (ipHash, userAgent, referrerUrl, UTMs y el costo en USD que la conversación le cuesta a la agencia); el tipo de props declara 12 campos pero el cable lleva la fila entera
 
 | | |
 |---|---|
 | **Severidad** | BAJO |
-| **Veredicto** | SIN VERIFICAR |
+| **Veredicto** | CONFIRMADO |
 | **vs. ledger** | NUEVO |
 | **Precondiciones** | Cuenta autenticada de la organización (CLIENT u ORG_MEMBER). Ninguna escalación. |
 
@@ -3182,6 +3330,10 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 **Criterio de aceptación.** Sobre el HTML/flight servido de `/dashboard/chatbot/conversations` con una sesión de cliente, `grep -E 'ipHash|userAgent|referrerUrl|utmSource'` devuelve 0 ocurrencias. La tabla sigue renderizando las mismas columnas.
 
 **Necesita decisión de Franco.** Sí, una comercial y menor: si el cliente puede ver el costo en USD y el consumo de tokens de sus conversaciones, o si eso es dato interno de la agencia.
+
+**Qué encontró el verificador.** Verifiqué el eslabón decisivo yo mismo en multiTenantQueries.ts:173-197: listConversationsByOrgSlug hace findMany con `include` (lead + _count) y SIN `select`, y devuelve rows.map(r => ({...r, lead: ...})) — fila completa de Conversation. Contrasté contra el schema (1368-1408) y los campos que viajan de más son exactamente los denunciados: ipHash (1376), userAgent @db.Text (1377), referrerUrl (1378), utmSource/utmMedium/utmCampaign (1384-1386), endedAt (1393), botConfigId (1371). Confirmé conversations/page.tsx:12-18 pasando items a ConversationsTable y que ese componente es 'use client' (línea 1) con una interfaz ConversationRow de 12 campos (:10-24) que no recorta nada en runtime. El contraste que el hallazgo señala dentro del mismo archivo es real: getConversationMessagesForOrg (:161-172), tres funciones más arriba, SÍ usa select explícito — la disciplina existe y este call site se le escapó.
+
+**Corrección aplicada.** Sin corrección; la autocalificación BAJO es la correcta y el razonamiento honesto ('los identificadores son de los visitantes del propio cliente, que es el responsable del tratamiento'). Agrego un matiz que el hallazgo no menciona y que refuerza el fix: la misma consulta alimenta también la superficie de admin, así que el `select` explícito debe conservar los campos que el admin sí necesita para diagnóstico de abuso — de ahí que la recomendación correcta sea partir la consulta, no sólo recortarla. La pregunta comercial sobre estimatedCostUsd/tokensIn/tokensOut es legítima y ya está tipada en las props, o sea que hoy se muestra a propósito: eso NO es una fuga, es una decisión vigente que conviene reconfirmar, no un defecto.
 
 #### Ya documentado en auditorías previas — no se re-reporta (12)
 
@@ -3243,9 +3395,9 @@ const SETTER_ROLE = 'SETTER'   // no hay constante ni rama para CLIENT
 
 **Necesita decisión de Franco.** Si — dos decisiones que no puedo tomar ni verificar desde el repo: (a) confirmar en GCP si la key esta efectivamente revocada, y rotarla si no; (b) autorizar el force-push que reescribe historial (rompe clones y forks existentes). Ninguna de las dos es ejecutable por un agente.
 
-**Qué encontró el verificador.** Reproduje toda la cadena yo mismo desde C:\Users\franc\Desktop\wt-auditoria-seguridad. `gh repo view --json visibility,nameWithOwner` → {"nameWithOwner":"frc11/PorfolioDevelOP","visibility":"PUBLIC"}. `git rev-list --all --objects | grep enviroment` → blob f9d11ed0bd6952840a566ac902d2c14d655acf8a en logic-core-v3/enviroment.env. `git rev-list origin/main --objects | grep -c f9d11ed0…` → 1, o sea alcanzable desde la rama por defecto del remote publico. `git merge-base --is-ancestor 3953558 origin/main` → YES. La purga nunca corrio: docs/audits/2026-05-bfg-leak-cleanup.md:5 dice literalmente 'history aun contiene el secret'. Y verifique que la premisa contraria del ledger es falsa: ledger-S8.md:126 (SEC-SECRETS-01) afirma 'la key no esta en git history' — eso es incorrecto para este blob. Busque activamente el contra-argumento y no lo encontre: no hay .gitignore ni packfile que lo saque, el blob esta vivo y colgando ademas de 6 ramas remotas (git branch -r --contains 3953558 devuelve main, b0-isolation-motor-chatbot, b1-s2-bsp-outbound, chore/security-quick-wins, fix/home-sanidad y runtime/mejoras — el hallazgo dice 5, son 6).
+**Qué encontró el verificador.** Reproduje las cuatro cadenas de comando yo mismo desde el worktree. `git rev-list --all --objects | grep -i enviroment` devuelve el blob f9d11ed0bd6952840a566ac902d2c14d655acf8a en logic-core-v3/enviroment.env; `git rev-list origin/main --objects | grep -c f9d11ed0…` devuelve 1, o sea alcanzable desde la rama por defecto; `gh repo view --json visibility,nameWithOwner,isFork` devuelve {"isFork":false,"nameWithOwner":"frc11/PorfolioDevelOP","visibility":"PUBLIC"} y `git remote -v` confirma que es ese el origin. docs/audits/2026-05-bfg-leak-cleanup.md:5 dice textualmente 'history aun contiene el secret' y el runbook nunca se ejecuto. Busque el contra-argumento y NO lo encontre: no hay .gitattributes filter, no hay replace-ref, y el blob cuelga de 7 refs remotas (git branch -r --contains 3953558: origin/main, origin/HEAD, b0-isolation-motor-chatbot, b1-s2-bsp-outbound, chore/security-quick-wins, fix/home-sanidad y ademas origin/runtime/mejoras, que el hallazgo omitio). El eje CAMBIO_DE_ESTADO tambien lo verifique contra el ledger: ledger-S8.md:126 registra que SEC-SECRETS-01 se cerro como falso positivo con la evidencia 'la key no esta en git history' — esa afirmacion es demostrablemente falsa hoy.
 
-**Corrección aplicada.** Dos imprecisiones en la caracterizacion del secreto, ninguna de las cuales invalida el mecanismo pero ambas cambian la severidad. (1) El valor NO tiene 43 caracteres: `git cat-file -s f9d11ed0…` da 65 bytes de blob total y el valor mide 36 caracteres. (2) No tiene forma de API key de Google: su patron de clases de caracteres es 8-4-4-4-12 hex-alfanumerico, es decir un UUID — lo mismo que ya documenta el propio runbook en docs/audits/2026-05-bfg-leak-cleanup.md:13 ('GOOGLE_GENERATIVE_AI_API_KEY=<UUID-format-key>'). Las API keys de Google Cloud son AIza… de 39 caracteres. Llamarlo 'una API key de Google de 43 caracteres' sobredimensiona lo que hay ahi. Bajo de ALTO a MEDIO por tres razones acumuladas: el valor no matchea el formato de una key activa de Google, es UN solo valor (no un .env completo), y el mismo runbook (seccion 2, punto 1) registra que la key fue confirmada deshabilitada antes del descubrimiento. Sigue siendo MEDIO y no BAJO porque las precondiciones son efectivamente cero y la confirmacion de revocacion no es verificable desde el repo. El fix propuesto (rotar/confirmar en GCP primero, historial despues) es el orden correcto.
+**Corrección aplicada.** Dos correcciones de evidencia, ninguna toca el mecanismo. (1) La longitud del valor no es 43 caracteres: `git cat-file -p` + awk da VALUELEN=36 y el blob entero pesa 65 bytes (git cat-file -s). 36 caracteres es formato UUID, exactamente lo que el propio runbook ya documentaba en docs/audits/2026-05-bfg-leak-cleanup.md:13 ('<UUID-format-key>'). El valor NO tiene el prefijo AIza que llevan las claves de Google AI Studio/Gemini (verifique substr(v,1,4)!='AIza'), asi que ni siquiera esta confirmado que sea una credencial de Google funcional bajo ese nombre. (2) Son 7 refs remotas, no 5. Bajo la severidad de ALTO a MEDIO por tres razones acumuladas y verificables: el valor no matchea el formato de la credencial que su nombre declara, el runbook deja constancia escrita de que Franco la deshabilito antes del descubrimiento, y todo el codigo fuente del repo ya es publico de todos modos — el delta de riesgo del blob es un secreto de formato dudoso y presuntamente revocado. Lo que SI queda intacto y justifica el MEDIO es que una auditoria previa declaro cerrado por lectura algo que es falso, y que el runbook lleva dos meses sin ejecutarse.
 
 **Adjudicación del auditor.** Adjudicacion propia: el runbook docs/audits/2026-05-bfg-leak-cleanup.md:19 deja constancia de que la key ya estaba deshabilitada ANTES del descubrimiento. No es credencial viva. Verifique yo el blob (f9d11ed, 65 bytes, valor de 36 chars = formato UUID, coincide con lo que dice el runbook) y su alcanzabilidad desde origin/main. Queda: confirmar la revocacion en GCP + decidir la purga.
 
@@ -3293,9 +3445,9 @@ LO QUE VERIFIQUE QUE **NO** APLICA, y por eso no lo reporto como riesgo:
 
 **Necesita decisión de Franco.** Si — saltar de beta.31 a otra beta de next-auth es un cambio de dependencia de autenticacion sin garantia de estabilidad de API. Decision de Franco: hacerlo ya (recomendado, la superficie es el login publico) o esperar; y en cualquier caso decidir si se pinea la version exacta (ver S8-03 sobre el caret en un prerelease).
 
-**Qué encontró el verificador.** Verifique las versiones con el lockfile, no con npm ls: package-lock.json da next-auth 5.0.0-beta.31 y @auth/core 0.41.2, ambos dev=false. Corri `npm audit --omit=dev --json` yo mismo y confirmo las 4 advisories de next-auth (GHSA-8fpg critical, GHSA-xmf8 high, GHSA-7rqj critical, GHSA-x445 moderate). Confirmo las dos exclusiones del auditor: getToken de next-auth no se usa (grep en src/ solo devuelve src/lib/integrations/google-business-profile.ts:51, que es oauth2Client.getToken de google-auth-library); y sobre GHSA-8fpg revise los 92 `await auth()` de src/ — ninguno chequea la existencia del objeto pelado, y los 11 `if (!session)` cuelgan todos de getClientChatbotSession (verificado en conversations/page.tsx:9, chatbot/layout.tsx:25, api/dashboard/chatbot/leads/export/route.ts:84, updateLeadStatus.ts:18), que devuelve null en src/modules/chatbot/server/admin/getClientSession.ts:7. Fail-closed, correcto.
+**Qué encontró el verificador.** Verifique las versiones contra el lockfile (node_modules/@auth/core 0.41.2, next-auth 5.0.0-beta.31, dev=false en ambos) y corri `npm audit --omit=dev --json` yo mismo: aparecen las 4 advisories citadas (GHSA-8fpg-xm3f-6cx3 critical, GHSA-7rqj-j65f-68wh critical, GHSA-xmf8-cvqr-rfgj high, GHSA-x445-f3h2-j279 moderate). El normalizador existe tal cual: node_modules/@auth/core/src/lib/actions/signin/send-token.ts:94-124, con `email.toLowerCase().trim()` en :97 y el conteo de separadores ASCII en :110. src/auth.ts:97 es efectivamente `Resend({` y src/auth.ts:175-186 es el gate de existencia. La ruta publica existe: src/app/login/actions.ts:146 `await signIn('resend', {...})` en una server action sin autenticacion. PERO encontre el contra-argumento que el hallazgo no cerro, leyendo el flujo completo de send-token.ts:12-52: la libreria llama `callbacks.signIn({user, account, email:{verificationRequest:true}})` y hace `if (!authorized) throw new AccessDenied` ANTES de invocar `provider.sendVerificationRequest` (:64). O sea que el gate propio de la app corre antes del envio, no despues. Y ese gate (auth.ts:178-186) hace findUnique sobre el identificador YA normalizado. Para que el mail salga, la salida del normalizador tiene que existir literal como fila User.email; si existe, esa cadena es el email real del usuario y por construccion no contiene el homoglifo — no hay divergencia entre lo validado y lo entregado. La cadena de toma de cuenta no se cierra en esta app salvo que la propia fila de la DB guarde una direccion con homoglifo. Tambien verifique lo que el hallazgo declara NO aplicable y coincide: `grep -rn -A4 'await auth()'` no devuelve ni un solo chequeo de existencia pelado sobre el objeto de sesion (0 coincidencias de `if (!session)` inmediatamente posterior), src/proxy.ts:75 es `Boolean(session?.user)` — chequeo de propiedad, fail-closed frente a GHSA-8fpg; y getToken de next-auth no se usa. Y verifique el estado previo: ledger-S8.md:216 dice literal 'next-auth@5.0.0-beta.31 sin advisory activa', asi que el CAMBIO_DE_ESTADO es real.
 
-**Corrección aplicada.** El contra-argumento que el auditor menciona pero no cierra, y que yo si cerre: la via del magic-link NO alcanza toma de cuenta en esta app. Lei node_modules/@auth/core/lib/actions/signin/send-token.js:8-32: el normalizador corre y despues sendToken llama callbacks.signIn ANTES de generar el token y de invocar sendVerificationRequest. El gate propio de la app en src/auth.ts:174-186 exige `prisma.user.findUnique({ where: { email: requestedEmail } })` sobre el string ya normalizado, y devuelve false si no hay fila. Una direccion con homoglifo nunca puede matchear exactamente la fila de un usuario real (que es ASCII), asi que la ejecucion muere en AccessDenied y no se manda ningun email. Y a la inversa: si el string SI matchea una fila real, entonces es ASCII puro y no hay divergencia posible entre lo validado y lo entregado. Es decir, el gate cierra la clase entera de GHSA-7rqj por construccion, no por casualidad. Por eso el impacto declarado ('recibir el magic-link de una cuenta ajena, toma de cuenta del portal') queda refutado y bajo de ALTO a MEDIO: lo que queda en pie es una dependencia de autenticacion desactualizada con CVEs abiertos, que hay que subir igual, pero sin camino de explotacion verificable en este codigo. Dos apuntes menores: el auditor dice 'revise los 66 call-sites', mi grep da 92; y omite del triage la 4ta advisory, GHSA-x445-f3h2-j279 (cookies de state/nonce/PKCE de OAuth no atadas al provider que las creo), que si roza esta app porque convive Google OAuth con credentials y con el provider de email — no la evalue a fondo, queda como cola suelta.
+**Corrección aplicada.** El titulo afirma 'una alcanzable por el magic-link' y de ahi sale el ALTO. Esa parte no la pude confirmar y encontre razon activa para dudarla: el orden de send-token.ts:31-40 (signIn callback gatea ANTES del envio) sumado al findUnique de auth.ts:183 hace que el mail solo se despache a una direccion que ya existe exacta en User.email — el vector de homoglifo no llega a entregar nada. Corrijo a MEDIO: lo que queda verificado es una dependencia de autenticacion desactualizada con 2 advisories criticas cuyas cadenas de explotacion estan bloqueadas por logica propia de la app, no por la libreria. Ese bloqueo es fragil (vive en un callback que cualquier refactor puede tocar y no hay ningun test que lo cubra), asi que el upgrade sigue siendo la accion correcta. Ademas el hallazgo triaja 3 de las 4 advisories y omite GHSA-x445-f3h2-j279 (cookies de state/nonce/PKCE no ligadas al proveedor): la verifique yo y tambien queda en gran medida fuera de alcance porque Google es el UNICO proveedor OAuth configurado en src/auth.ts:121, y esa advisory necesita cruzar dos proveedores.
 
 ### [S8-03] next@16.2.9: se reabrio SEC-DEP-01 con 9 advisories nuevas; triage real = 4 alcanzables, 3 verificadas NO alcanzables, y el fix ya cae dentro del rango declarado
 
@@ -3349,9 +3501,9 @@ DATO OPERATIVO IMPORTANTE: el fix es 16.2.11, que YA satisface el rango declarad
 
 **Necesita decisión de Franco.** No. Es un patch dentro del rango de version ya declarado.
 
-**Qué encontró el verificador.** Es el hallazgo mejor calibrado del lote y lo verifique entero de primera mano. Corri `npm audit --omit=dev --json` y obtuve exactamente las 9 advisories de next con range >=16.0.0 <16.2.11; los titulos del propio feed de advisories respaldan las tres exclusiones sin necesidad de inferencia: GHSA-6gpp dice 'using Turbopack and single locale' (y package.json:7 y :9 usan `next dev --webpack` / `next build --webpack`), GHSA-4c39 dice 'in Edge runtime' (grep -rE "runtime\s*=\s*['\"]edge['\"]" src/ → cero resultados), GHSA-p9j2 dice 'in rewrites' (grep rewrites next.config.ts → cero; el config solo tiene headers(), redirects() e images). Ademas cerre una que el auditor menciona al pasar sin evidencia: GHSA-89xv es 'SSRF in Server Actions on custom servers' y no hay servidor custom — no existe server.js/server.ts ni ningun createServer fuera de node_modules, el deploy va por @netlify/plugin-nextjs. Confirmo tambien dangerouslyAllowSVG ausente (el unico hit es .next/required-server-files.js con valor false) y next.config.ts:16-23 con remotePatterns limitado a placehold.co. El dato operativo clave lo verifique contra el registry: `npm view next version` devuelve 16.2.12, o sea el fix cae dentro del `^16.2.6` de package.json:117 y solo lo congela el lockfile. postcss: confirmado que no se importa en src/ y que postcss.config.mjs solo carga @tailwindcss/postcss, o sea build-time sobre CSS propio.
+**Qué encontró el verificador.** Corri `npm audit --omit=dev --json` yo mismo y next@16.2.9 aparece con exactamente las 9 advisories citadas, todas con range >=16.0.0 <16.2.11. Verifique una por una las tres exclusiones, que es donde el hallazgo se juega la credibilidad, y las tres se sostienen: `grep -n '"dev":|"build":' package.json` da :7 `next dev --webpack` y :9 `next build --webpack` (Turbopack no se usa en ningun script, lo que saca GHSA-6gpp-xcg3-4w24); `grep -rn "runtime\s*=\s*['\"]edge['\"]" src/` devuelve cero resultados (saca GHSA-4c39-4ccg-62r3); y leyendo next.config.ts entero no hay `rewrites()` — solo headers(), redirects() e images (saca GHSA-p9j2-gv94-2wf4). Confirme tambien la contencion parcial del optimizador de imagenes: `dangerouslyAllowSVG` no aparece en ningun archivo del repo y next.config.ts:16-23 limita remotePatterns a placehold.co. El dato operativo que hace barato el fix tambien es real: package.json:117 declara `"next": "^16.2.6"`, o sea 16.2.11 ya cae dentro del caret y solo el lockfile congela la version vulnerable. No encontre contra-argumento; la severidad MEDIO esta bien calibrada porque lo que queda alcanzable es enumeracion de endpoints y DoS, no lectura cross-tenant ni bypass de auth.
 
-**Corrección aplicada.** Sin correccion. La unica diferencia menor: el conteo de archivos con 'use server' me da 90 (grep -rl sobre la directiva al inicio de linea), no 92; irrelevante para el argumento.
+**Corrección aplicada.** Sola omision: el hallazgo lista GHSA-89xv-2m56-2m9x (SSRF en Server Actions on custom servers) entre las 9 pero no lo triaja ni a favor ni en contra. Lo mire yo: el deploy es Netlify via @netlify/plugin-nextjs (netlify.toml:9-10) y no hay servidor custom propio en el repo, asi que probablemente tampoco aplica — pero no puedo cerrarlo por lectura porque no se como el plugin envuelve el handler. No cambia la severidad ni el fix.
 
 ### [S8-04] El formulario de contacto del home postea la PII del visitante desde el browser directo al webhook de n8n, con la URL del webhook inlineada en el bundle publico
 
@@ -3383,79 +3535,9 @@ DATO OPERATIVO IMPORTANTE: el fix es 16.2.11, que YA satisface el rango declarad
 
 **Necesita decisión de Franco.** No. La variable server-side equivalente ya esta prevista en los manifiestos del repo.
 
-**Qué encontró el verificador.** Las dos citas son literales y las verifique linea por linea: src/components/sections/home/Footer.tsx:81 es `const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;` y :84-89 es el fetch POST con JSON.stringify(form) desde el browser. Verifique la alcanzabilidad, que el hallazgo no probaba: el componente se monta en la home publica (src/app/page.tsx:11 lo importa con dynamic + ssr:true), asi que el codigo va al bundle del cliente de la landing. Busque un guard aguas arriba y no existe: no hay proxy ni server action en el camino, el POST sale del navegador. Confirmo tambien que el inventario de NEXT_PUBLIC_* es exactamente el que dice (APP_URL, BUILD_TIME, N8N_CONTACT_WEBHOOK_URL, SENTRY_DSN, WHATSAPP_NUMBER) y que las otras cuatro no son sensibles. Y encontre un refuerzo del fix que el hallazgo no cita: la ruta server-side ya existe y ya se usa — src/lib/n8n.ts:19 lee N8N_CONTACT_WEBHOOK_URL (sin prefijo publico), con timeout de 8s, y su unico consumidor es src/lib/actions/contact.ts:5. O sea que el Footer es la duplicacion cruda de un camino que ya esta bien hecho en el servidor.
+**Qué encontró el verificador.** Las dos citas son exactas: src/components/sections/home/Footer.tsx:81 `const webhookUrl = process.env.NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL;` y :84-89 el fetch POST con JSON.stringify(form) desde el browser. Verifique que el componente esta vivo en la superficie publica: src/app/page.tsx:11 lo importa dinamicamente con ssr:true y :42 lo renderiza en el home. Busque el guard aguas arriba que refutaria el hallazgo y encontre lo contrario — encontre la prueba de que el camino correcto YA existe y esta siendo puenteado: src/lib/n8n.ts:19 lee `N8N_CONTACT_WEBHOOK_URL` (sin prefijo publico) y src/lib/actions/contact.ts es una server action ('use server') que hace exactamente lo que el hallazgo propone y mas — rate-limit por IP hasheada antes del parsing (contact.ts:22-33, getClientIpHash + RATE_LIMIT_PRESETS.contactFormPerIp), validacion Zod con ContactFormSchema (:35-46) y recien despues sendLeadToN8n. O sea que el formulario del footer no es que carezca de defensa por falta de infraestructura: la esquiva enteramente. Eso refuerza el hallazgo, no lo refuta.
 
-**Corrección aplicada.** Una condicion que el hallazgo no explicita y que hay que decir: la exposicion depende de que NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL este efectivamente seteada en el entorno de produccion de Netlify. En el repo esta comentada (.env.example:204) y el codigo tiene fallback a wa.me cuando la variable es falsy (Footer.tsx:97-105), asi que si en prod no esta cargada, no hay URL inlineada y el hallazgo no se materializa. Eso no es verificable desde el repo — el env de Netlify es inaccesible, limitacion que el propio ledger ya registra (ledger-S8.md:94). Mantengo MEDIO porque el defecto de diseno es real e independiente de eso, y porque el criterio de aceptacion propuesto (grep sobre .next/static de un build de prod) es justamente la forma de resolver la duda.
-
-### [S8-06] El repositorio publico hostea 16+ documentos de auditoria que enumeran, con archivo:linea, cada vulnerabilidad abierta de la aplicacion
-
-| | |
-|---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | CONFIRMADO |
-| **vs. ledger** | NUEVO |
-| **Precondiciones** | Ninguna. Lectura del repositorio publico. |
-
-**Impacto.** (a) Que se expone: un mapa curado, priorizado y con ubicacion exacta de las debilidades sin arreglar — incluyendo el inventario de 32 hallazgos SEC-* de 2026-05 y el runbook que nombra el archivo con el secret filtrado y su commit. (b) A quien: a cualquiera, sin autenticacion. (c) Precondiciones: ninguna. No es una vulnerabilidad en si — no abre por si solo ninguna puerta — pero elimina por completo la fase de reconocimiento de quien quiera explotar las que SI estan abiertas, y varias de esas (SEC-01, SEC-11, rate-limit poroso) siguen sin cerrar. MEDIO es el techo honesto: el dano es indirecto y amplificador, no directo.
-
-**Mecanismo.** El repo es publico (verificado en S8-01) y el arbol de origin/main incluye 16 archivos bajo docs/auditoria*, docs/audits/ y docs/baselines/. Entre ellos, docs/auditoria-seguridad-2026-05.md es el inventario completo de 32 hallazgos SEC-* con evidencia archivo:linea y severidad propuesta, y docs/audits/2026-05-bfg-leak-cleanup.md documenta paso a paso el secret filtrado, el nombre exacto del archivo y el commit donde vive — es decir, publica la ruta hacia S8-01. La practica de dejar constancia escrita de las auditorias es buena y hay que conservarla; el problema es unicamente donde vive el archivo.
-
-**Evidencia.**
-
-- `comando: git ls-tree -r origin/main --name-only | grep -icE 'docs/(auditoria|audits|baselines)'`
-  > 16
-- `comando: git ls-files | grep -iE '^docs/.*(audit|segur|baseline)'`
-  > docs/auditoria-seguridad-2026-05.md, docs/audits/2026-05-auditoria-profunda.md, docs/audits/2026-05-auditoria-db.md, docs/audits/2026-05-bfg-leak-cleanup.md, docs/auditorias/AUDITORIA-CIERRE-2026-07.md, docs/audit-repo-20260707.md, ... (16 en total)
-- `docs/audits/2026-05-bfg-leak-cleanup.md:11-16`
-  > El archivo `logic-core-v3/enviroment.env` (typo, faltaba la "n") estaba tracked en git history desde commit `3953558`. Contenia: GOOGLE_GENERATIVE_AI_API_KEY=...
-- `comando: gh repo view --json visibility`
-  > "visibility":"PUBLIC"
-
-**Fix.** Decidir una de dos y ejecutarla entera. Opcion A (recomendada por costo): pasar el repositorio a privado — es 1 checkbox, resuelve tambien la mitad de S8-01 y S8-07, y este repo no es una libreria que alguien vaya a consumir. Opcion B (si el repo tiene que seguir publico por portfolio): mover docs/auditoria*, docs/audits/ y docs/baselines/ a un repo privado aparte o a un drive compartido, dejando en el repo publico solo un README que apunte ahi. Mientras se decide, lo urgente no es el documento sino cerrar lo que el documento denuncia.
-
-**Criterio de aceptación.** O bien `gh repo view --json visibility` devuelve PRIVATE, o bien `git ls-tree -r origin/main --name-only | grep -cE 'docs/(auditoria|audits|baselines)'` devuelve 0.
-
-**Necesita decisión de Franco.** Si — es una decision de producto, no tecnica: si el repo tiene que ser publico (portfolio de la agencia) o puede pasar a privado. Todo lo demas depende de esa respuesta.
-
-**Qué encontró el verificador.** Verifique el conteo y el contenido. `git ls-tree -r origin/main --name-only | grep -icE 'docs/(auditoria|audits|baselines)'` devuelve 16, y la lista incluye docs/auditoria-seguridad-2026-05.md, docs/audits/2026-05-bfg-leak-cleanup.md y docs/auditorias/AUDITORIA-CIERRE-2026-07.md. Abri el doc principal y el valor de reconocimiento es real, no hipotetico: docs/auditoria-seguridad-2026-05.md:11-30 trae la tabla de 32 hallazgos por severidad y un 'Top 3 prioridades' que describe en prosa el camino de ataque de una debilidad marcada ABIERTA (SEC-AUTH-01/02: state OAuth sin HMAC → conectar la cuenta externa del atacante a la org de otro cliente), mas el checklist heredado con el veredicto abierto/cerrado de cada item. El repo es PUBLIC (verificado en S8-01). Busque si el ledger ya lo tenia: ledger-S8.md:90 registra que se uso `gh` para visibility en la lente DATOS+DR, pero no hay ningun hallazgo previo sobre la publicacion de los documentos. NUEVO, correcto.
-
-**Corrección aplicada.** Considere deflacionarlo a BAJO con el argumento de que el codigo fuente entero ya es publico y contiene mas informacion que los documentos — pero no se sostiene: lo que agregan los docs no es informacion sobre el codigo sino el estado de remediacion (que esta ABIERTO hoy, priorizado, con el camino de explotacion redactado en castellano). Eso no se deduce leyendo el fuente. MEDIO se mantiene. Si agrego una observacion de encuadre: tanto este hallazgo como S8-01 rodean, sin nombrarlo, el hecho de fondo — el codigo fuente completo de una plataforma multi-tenant que procesa PII de terceros esta publicado. La opcion A del fix (pasar el repo a privado) es la unica que ataca eso, y por eso es la correcta.
-
-### [S8-08] Siguen 4 dependencias fantasma sin declarar; la critica es `jose` (firma de los tokens de impersonation), que cuelga justo de @auth/core — el paquete que S8-02 obliga a subir
-
-| | |
-|---|---|
-| **Severidad** | MEDIO |
-| **Veredicto** | CONFIRMADO |
-| **vs. ledger** | CONFIRMADO_SIN_TEST |
-| **Precondiciones** | Ninguna desde afuera. Se materializa al reinstalar dependencias o al subir @auth/core. |
-
-**Impacto.** (a) Que se rompe: la version de la libreria que firma y verifica los tokens de impersonation (HS256) no la decide el lockfile de este repo sino el arbol de dependencias de @auth/core. (b) A quien afecta: al mecanismo de impersonation, que es como un SUPER_ADMIN entra al contexto de un cliente. (c) Precondiciones: no es explotable por un atacante externo — es una fragilidad de la cadena, no una puerta. Por eso MEDIO y no ALTO. Lo que lo saca de BAJO es la coincidencia concreta y verificada: el fix obligatorio de S8-02 es subir @auth/core, y @auth/core es hoy el UNICO proveedor de `jose`. El arreglo de seguridad y la pieza fragil son el mismo paquete.
-
-**Mecanismo.** Cruce los imports de paquetes externos de todo src/ contra las claves de dependencies y devDependencies de package.json. Cuatro paquetes se importan sin estar declarados y hoy resuelven solo por hoisting transitivo: jose (1 archivo), server-only (1), three-stdlib (4) y framer-motion (3). Correccion metodologica que hago explicita porque casi la reporto mal: mi primer barrido dio 3 porque el regex exigia `from`, y server-only se importa como efecto lateral puro (`import 'server-only'`); son 4, igual que en CLEAN-ANEXO-DEPS — no hubo cierre, el sprint E1.5 no corrio sobre esto. La cadena de jose es la que importa: @auth/prisma-adapter@2.11.2 → @auth/core@0.41.2 → jose@6.2.3. Si @auth/core sube a >=0.41.3 y cambia su rango de jose, o si npm decide no hoistear, el import de src/lib/impersonation.ts:3 pasa a resolver a otra version o a fallar. Y como next.config.ts:10-15 apaga el chequeo de tipos en el build, un cambio de API de jose no rompe el build: llega a produccion.
-
-**Evidencia.**
-
-- `comando: cruce de imports de src/ contra package.json (script propio en scratchpad/phantom.js) + verificacion manual de server-only`
-  > jose ← src/lib/impersonation.ts | server-only ← src/lib/leados/foco-cookie.ts:1 | three-stdlib ← 4 archivos | framer-motion ← 3 archivos
-- `comando: npm ls jose`
-  > logic-core-v3@0.1.0\n`-- @auth/prisma-adapter@2.11.2\n  `-- @auth/core@0.41.2\n    `-- jose@6.2.3      (unico proveedor)
-- `src/lib/impersonation.ts:3`
-  > import { jwtVerify, SignJWT } from 'jose'
-- `src/lib/impersonation.ts:25-30`
-  > return new SignJWT(payload).setProtectedHeader({ alg: 'HS256', typ: 'JWT' })...sign(getSecret())
-- `comando: npm ls three-stdlib / framer-motion`
-  > three-stdlib@2.36.1 ← @react-three/drei@10.7.7 | framer-motion@12.42.0 ← motion@12.42.0
-- `next.config.ts:10-15`
-  > typescript: { ignoreBuildErrors: true }, eslint: { ignoreDuringBuilds: true }   → un cambio de API de jose no rompe el build
-
-**Fix.** Declarar los 4 en package.json con la version que hoy resuelve (jose@^6.2.3, server-only, three-stdlib@^2.36.1, framer-motion@^12.42.0) y regenerar el lockfile. Es un cambio de 4 lineas y hay que hacerlo ANTES del upgrade de @auth/core de S8-02, no despues. Como candado, `npx knip --include unlisted` ya esta instalado en el repo (devDependency knip@6.16.1) y detecta exactamente esta clase: alcanza con agregarlo como script npm y correrlo antes de deployar.
-
-**Criterio de aceptación.** `npx knip --include unlisted` devuelve cero imports no declarados, y tras un `rm -rf node_modules && npm ci` la app sigue buildeando y `npm ls jose` muestra jose como dependencia directa del proyecto y no colgada de @auth/core.
-
-**Qué encontró el verificador.** Cruce yo mismo package.json contra los imports. jose, server-only, three-stdlib y framer-motion no figuran en dependencies ni devDependencies (verificado con node -e sobre package.json); si figuran motion ^12.36.0, three ^0.182.0 y @react-three/drei ^10.7.7, que son los que los hoistean. Los imports existen: src/lib/impersonation.ts:3 `import { jwtVerify, SignJWT } from 'jose'`, src/lib/leados/foco-cookie.ts:1 `import 'server-only'` (efecto lateral puro — la correccion metodologica que el auditor se hace a si mismo es correcta y la reproduje), y three-stdlib/framer-motion en varios componentes. `npm ls jose` confirma el proveedor unico: logic-core-v3 → @auth/prisma-adapter@2.11.2 → @auth/core@0.41.2 → jose@6.2.3. El acoplamiento con S8-02 es real: el paquete que hay que subir por CVE es el unico que provee la libreria que firma los tokens de impersonation (src/lib/impersonation.ts:24-29, SignJWT HS256). Confirmo tambien next.config.ts:10-15 con ignoreBuildErrors y ignoreDuringBuilds, o sea que un cambio de API de jose no rompe el build.
-
-**Corrección aplicada.** Un matiz que atenua sin invalidar: hoy la resolucion no es azarosa, package-lock.json pinea jose@6.2.3 explicitamente, asi que un `npm ci` reproduce exactamente la misma version. El riesgo no es 'cualquier reinstall', es especificamente el upgrade de @auth/core que S8-02 vuelve obligatorio, o un `npm update` amplio. El hallazgo ya dice esto ('se materializa al reinstalar dependencias o al subir @auth/core'), asi que MEDIO se sostiene por el acoplamiento concreto y de corto plazo, no por fragilidad generica. Ademas noto, fuera del alcance de este hallazgo, que src/lib/impersonation.ts:14-19 tiene un secreto de fallback hardcodeado ('develOP-dev-impersonation-secret') si no hay IMPERSONATION_SECRET/AUTH_SECRET/NEXTAUTH_SECRET — no es lo que S8-08 reporta y no lo evalue, pero esta en la misma funcion citada como evidencia.
+**Corrección aplicada.** Dos matices que el hallazgo no declara y que bajan la confianza del impacto en produccion sin tocar el defecto de diseno. (1) La exposicion solo se materializa si NEXT_PUBLIC_N8N_CONTACT_WEBHOOK_URL esta seteada en el entorno de build de Netlify; en .env.example:204 esta comentada. Si en prod no esta seteada, Footer.tsx:98 cae al fallback de wa.me y no hay URL inlineada en el bundle. Eso no lo puedo verificar desde el repo (el env de Netlify es inaccesible) — el criterio de aceptacion propuesto por el hallazgo, grep sobre .next/static, es la forma correcta de cerrarlo. (2) No es un descuido: .env.example:202-203 documenta explicitamente 'NOTA: NEXT_PUBLIC_ se expone al browser. No pongas secretos aca.' Es una decision consciente. Eso no la hace correcta — la URL del webhook no es un secreto pero si es un endpoint de escritura sin auth ni validacion — pero cambia el fix de 'corregir un bug' a 'revertir una decision', que es conversacion con Franco. Mantengo MEDIO.
 
 ### [S8-05] El plugin de build de Netlify no esta pineado en ningun lado: se resuelve en cada deploy con acceso total al build y a todas las env vars de produccion
 
@@ -3487,9 +3569,43 @@ DATO OPERATIVO IMPORTANTE: el fix es 16.2.11, que YA satisface el rango declarad
 
 **Necesita decisión de Franco.** Si — hay que mirar el log de deploy en el panel de Netlify para saber que version pinear. Ese dato no existe en el repo.
 
-**Qué encontró el verificador.** Las tres verificaciones dan lo que dice. netlify.toml lineas 9-10 son `[[plugins]]` / `package = "@netlify/plugin-nextjs"` sin campo de version — lo lei con sed y no hay linea de version en el bloque. `grep -n netlify package.json` sale con exit 1 (no esta declarado). Y recorri package-lock.json programaticamente filtrando claves que contengan 'netlify': cero entradas. netlify.toml:2 confirma que el plugin envuelve `npx prisma generate && npm run build`, o sea el entorno completo del build.
+**Qué encontró el verificador.** Verifique las tres patas. netlify.toml:9-10 es exactamente `[[plugins]]` / `package = "@netlify/plugin-nextjs"` sin campo de version. `grep -n netlify package.json` no devuelve nada. Y el barrido programatico sobre package-lock.json (Object.keys(l.packages).filter(/netlify/i)) devuelve 0 entradas, o sea que el lockfile — la unica garantia de reproducibilidad del repo — no cubre el plugin. netlify.toml:2 confirma que el plugin envuelve `npx prisma generate && npm run build`, con lo cual el privilegio que describe el hallazgo es real.
 
-**Corrección aplicada.** Bajo de MEDIO a BAJO aplicando el mismo criterio de estrictez que el hallazgo pide para los demas. La precondicion es comprometer una release publicada por Netlify — editor de primera parte — y ademas esta es la configuracion por defecto documentada por el propio Netlify: la enorme mayoria de los sitios Next en Netlify declara el plugin sin version, e incluso sin declararlo Netlify lo auto-instala. No hay evidencia de compromiso ni de comportamiento anomalo. El impacto teorico maximo no alcanza para MEDIO cuando la probabilidad es la de una supply-chain de primera parte y la configuracion es el default de la plataforma. El fix (una linea con version explicita) sigue siendo correcto y barato; es higiene, no riesgo activo. Nota practica sobre el criterio de aceptacion: pinear en netlify.toml no elimina la resolucion desde el registry en build-time, solo la hace reproducible.
+**Corrección aplicada.** Bajo de MEDIO a BAJO por dos motivos. (1) La precondicion es el compromiso de una release de un editor de primera parte (Netlify) sobre su propio paquete de integracion — es el escalon mas exigente de todos los hallazgos de esta lente, y la severidad tiene que reflejar impacto REAL, no el maximo teorico. (2) Mas importante: el fix propuesto solo cierra la mitad del hueco que el propio hallazgo describe. Pinear `version` en netlify.toml fija QUE version se instala, pero el plugin se sigue bajando del registry en tiempo de build sin entrada de lockfile ni verificacion de integridad — o sea que no queda cubierto por la misma garantia que los 1092 paquetes del lockfile, que es el argumento central del hallazgo. Pinear reduce la deriva silenciosa entre deploys (que es un problema real y vale la linea de config), no elimina la superficie de supply-chain. El criterio de aceptacion propuesto mide lo primero, no lo segundo.
+
+### [S8-06] El repositorio publico hostea 16+ documentos de auditoria que enumeran, con archivo:linea, cada vulnerabilidad abierta de la aplicacion
+
+| | |
+|---|---|
+| **Severidad** | BAJO |
+| **Veredicto** | PLAUSIBLE |
+| **vs. ledger** | NUEVO |
+| **Precondiciones** | Ninguna. Lectura del repositorio publico. |
+
+**Impacto.** (a) Que se expone: un mapa curado, priorizado y con ubicacion exacta de las debilidades sin arreglar — incluyendo el inventario de 32 hallazgos SEC-* de 2026-05 y el runbook que nombra el archivo con el secret filtrado y su commit. (b) A quien: a cualquiera, sin autenticacion. (c) Precondiciones: ninguna. No es una vulnerabilidad en si — no abre por si solo ninguna puerta — pero elimina por completo la fase de reconocimiento de quien quiera explotar las que SI estan abiertas, y varias de esas (SEC-01, SEC-11, rate-limit poroso) siguen sin cerrar. MEDIO es el techo honesto: el dano es indirecto y amplificador, no directo.
+
+**Mecanismo.** El repo es publico (verificado en S8-01) y el arbol de origin/main incluye 16 archivos bajo docs/auditoria*, docs/audits/ y docs/baselines/. Entre ellos, docs/auditoria-seguridad-2026-05.md es el inventario completo de 32 hallazgos SEC-* con evidencia archivo:linea y severidad propuesta, y docs/audits/2026-05-bfg-leak-cleanup.md documenta paso a paso el secret filtrado, el nombre exacto del archivo y el commit donde vive — es decir, publica la ruta hacia S8-01. La practica de dejar constancia escrita de las auditorias es buena y hay que conservarla; el problema es unicamente donde vive el archivo.
+
+**Evidencia.**
+
+- `comando: git ls-tree -r origin/main --name-only | grep -icE 'docs/(auditoria|audits|baselines)'`
+  > 16
+- `comando: git ls-files | grep -iE '^docs/.*(audit|segur|baseline)'`
+  > docs/auditoria-seguridad-2026-05.md, docs/audits/2026-05-auditoria-profunda.md, docs/audits/2026-05-auditoria-db.md, docs/audits/2026-05-bfg-leak-cleanup.md, docs/auditorias/AUDITORIA-CIERRE-2026-07.md, docs/audit-repo-20260707.md, ... (16 en total)
+- `docs/audits/2026-05-bfg-leak-cleanup.md:11-16`
+  > El archivo `logic-core-v3/enviroment.env` (typo, faltaba la "n") estaba tracked en git history desde commit `3953558`. Contenia: GOOGLE_GENERATIVE_AI_API_KEY=...
+- `comando: gh repo view --json visibility`
+  > "visibility":"PUBLIC"
+
+**Fix.** Decidir una de dos y ejecutarla entera. Opcion A (recomendada por costo): pasar el repositorio a privado — es 1 checkbox, resuelve tambien la mitad de S8-01 y S8-07, y este repo no es una libreria que alguien vaya a consumir. Opcion B (si el repo tiene que seguir publico por portfolio): mover docs/auditoria*, docs/audits/ y docs/baselines/ a un repo privado aparte o a un drive compartido, dejando en el repo publico solo un README que apunte ahi. Mientras se decide, lo urgente no es el documento sino cerrar lo que el documento denuncia.
+
+**Criterio de aceptación.** O bien `gh repo view --json visibility` devuelve PRIVATE, o bien `git ls-tree -r origin/main --name-only | grep -cE 'docs/(auditoria|audits|baselines)'` devuelve 0.
+
+**Necesita decisión de Franco.** Si — es una decision de producto, no tecnica: si el repo tiene que ser publico (portfolio de la agencia) o puede pasar a privado. Todo lo demas depende de esa respuesta.
+
+**Qué encontró el verificador.** Los hechos son exactos y los reproduje: `git ls-tree -r origin/main --name-only | grep -icE 'docs/(auditoria|audits|baselines)'` devuelve 16, y enumerandolos aparecen docs/auditoria-seguridad-2026-05.md, docs/audits/2026-05-bfg-leak-cleanup.md, docs/auditorias/AUDITORIA-CIERRE-2026-07.md y el resto. El inventario es real: `grep -coE 'SEC-[A-Z]+-[0-9]+' docs/auditoria-seguridad-2026-05.md` devuelve 60 ocurrencias de IDs SEC-*. El repo es PUBLIC (verificado en S8-01). docs/audits/2026-05-bfg-leak-cleanup.md:11-16 efectivamente nombra el archivo y el commit del secret. Nada de la evidencia esta tergiversado.
+
+**Corrección aplicada.** El contra-argumento que el hallazgo no considera y que le baja el techo: en un repositorio publico, TODO el codigo fuente ya es legible. El atacante no necesita el documento de auditoria para encontrar src/app/api/chatbot/[slug]/smoke o /api/test-sentry — los puede leer directo, con mas detalle del que da cualquier resumen. El valor marginal que aportan los 16 documentos es priorizacion y ahorro de tiempo, no acceso a informacion que de otro modo estaria oculta. Lo mismo vale para el puntero al secret: el blob se encuentra con un `git rev-list --all --objects` sobre el clon publico, sin leer ningun doc. Corrijo de MEDIO a BAJO: el dano es de segundo orden sobre una superficie que ya es integramente publica. La recomendacion operativa del hallazgo (decidir si el repo tiene que ser publico) sigue siendo la correcta, y es la misma decision que domina S8-01 — conviene tratarlos como una sola decision, no como dos hallazgos.
 
 ### [S8-07] Los archivos basura trackeados publican el arbol interno de modulos y el usuario del sistema del desarrollador — verificado que NO contienen credenciales
 
@@ -3521,9 +3637,45 @@ DATO OPERATIVO IMPORTANTE: el fix es 16.2.11, que YA satisface el rango declarad
 
 **Criterio de aceptación.** `git ls-files` en la raiz devuelve solo archivos de configuracion y documentacion legitimos, y .gitignore cubre los patrones para que no vuelvan.
 
-**Qué encontró el verificador.** Reproduje la parte que importa, que es la afirmacion NEGATIVA. `git ls-files` en la raiz confirma que estan trackeados .eslint_output.txt, ts_errors.log/.txt, ts_prune_output.txt, unused_report.txt, unused_report_utf8.txt, prisma_err.txt, audit.txt, test-chat.mjs, __dev_task.md, find_unused.js, replace_analytics.js, los 9 script*.js y 8 archivos _lane-*/_CHANGELOG-lane-*. Confirmo el detalle de encoding con `file -b`: .eslint_output.txt, ts_errors.log, ts_errors.txt, unused_report.txt y prisma_err.txt son UTF-16LE (audit.txt es UTF-8 con BOM) — el punto ciego de un escaneo de secrets ingenuo es real. Decodifique los 29 archivos con iconv a un scratchpad y corri mi propio barrido con patrones de connection string de Postgres, sk-, AIza, npm_, re_, xkeysib-, ghp_ y bloques PEM: cero coincidencias. Cero direcciones de email. Solo rutas C:\Users\franc (mi conteo da 76 ocurrencias sobre mi set de archivos, el hallazgo dice 99 sobre el suyo — diferencia de set, no contradiccion). La afirmacion 'NO contienen credenciales' resiste mi verificacion independiente.
+**Qué encontró el verificador.** Reproduje la parte que mas importa, que es la NEGATIVA. Confirme por `file -b` que .eslint_output.txt, ts_errors.log, ts_errors.txt, unused_report.txt y prisma_err.txt son UTF-16LE (audit.txt es UTF-8 con BOM), o sea que el punto ciego que describe el hallazgo para cualquier escaneo de secrets con grep es real y verificable. Decodifique los 20 archivos con iconv a C:/tmp/junkscan y corri el barrido de patrones (postgres://, sk-, AIza, npm_, re_, xkeysib-, ghp_, BEGIN PRIVATE KEY): CERO coincidencias. Confirme la exposicion de bajo grado: `C:\Users\franc` aparece repetido en los archivos decodificados. Y `git ls-files` confirma que los archivos estan efectivamente trackeados en la raiz de logic-core-v3/ (.eslint_output.txt, ts_errors.*, unused_report*.txt, prisma_err.txt, audit.txt, script*.js x8, find_unused.js, replace_analytics.js, __dev_task.md, test-chat.mjs, _lane-*.md). BAJO es la severidad correcta y el hallazgo tiene el merito de haber verificado la ausencia de credenciales en vez de asumirla.
 
-**Corrección aplicada.** Ninguna sustantiva. El encuadre CAMBIO_DE_ESTADO vs CLEAN-H-JUNKROOT (ledger-S8.md:164) es honesto: aquel lo trataba como ruido de lint y este aporta el eje de que estan publicados y la verificacion de que no hay secretos adentro. BAJO es la severidad correcta y el hallazgo no la infla.
+**Corrección aplicada.** Dos correcciones menores. (1) La etiqueta estado_vs_ledger deberia ser CONFIRMADO_SIN_TEST, no CAMBIO_DE_ESTADO. ledger-S8.md:164 (CLEAN-H-JUNKROOT) ya documenta los mismos archivos con estado 'abierto'; lo que el hallazgo aporta no es un cambio en el codigo — los archivos son los mismos — sino un eje de analisis distinto (visibilidad publica + verificacion de ausencia de secretos + el punto ciego UTF-16). Eso es valor real, pero por la regla dura de la corrida no es CAMBIO_DE_ESTADO, que exige que el codigo haya cambiado. (2) Mi conteo de rutas absolutas dio 76 ocurrencias de C:\Users\franc, no 99; probablemente porque mi set de archivos decodificados difiere en un par de items o por diferencias de fallback de iconv. La conclusion no cambia en absoluto.
+
+### [S8-08] Siguen 4 dependencias fantasma sin declarar; la critica es `jose` (firma de los tokens de impersonation), que cuelga justo de @auth/core — el paquete que S8-02 obliga a subir
+
+| | |
+|---|---|
+| **Severidad** | BAJO |
+| **Veredicto** | CONFIRMADO |
+| **vs. ledger** | CONFIRMADO_SIN_TEST |
+| **Precondiciones** | Ninguna desde afuera. Se materializa al reinstalar dependencias o al subir @auth/core. |
+
+**Impacto.** (a) Que se rompe: la version de la libreria que firma y verifica los tokens de impersonation (HS256) no la decide el lockfile de este repo sino el arbol de dependencias de @auth/core. (b) A quien afecta: al mecanismo de impersonation, que es como un SUPER_ADMIN entra al contexto de un cliente. (c) Precondiciones: no es explotable por un atacante externo — es una fragilidad de la cadena, no una puerta. Por eso MEDIO y no ALTO. Lo que lo saca de BAJO es la coincidencia concreta y verificada: el fix obligatorio de S8-02 es subir @auth/core, y @auth/core es hoy el UNICO proveedor de `jose`. El arreglo de seguridad y la pieza fragil son el mismo paquete.
+
+**Mecanismo.** Cruce los imports de paquetes externos de todo src/ contra las claves de dependencies y devDependencies de package.json. Cuatro paquetes se importan sin estar declarados y hoy resuelven solo por hoisting transitivo: jose (1 archivo), server-only (1), three-stdlib (4) y framer-motion (3). Correccion metodologica que hago explicita porque casi la reporto mal: mi primer barrido dio 3 porque el regex exigia `from`, y server-only se importa como efecto lateral puro (`import 'server-only'`); son 4, igual que en CLEAN-ANEXO-DEPS — no hubo cierre, el sprint E1.5 no corrio sobre esto. La cadena de jose es la que importa: @auth/prisma-adapter@2.11.2 → @auth/core@0.41.2 → jose@6.2.3. Si @auth/core sube a >=0.41.3 y cambia su rango de jose, o si npm decide no hoistear, el import de src/lib/impersonation.ts:3 pasa a resolver a otra version o a fallar. Y como next.config.ts:10-15 apaga el chequeo de tipos en el build, un cambio de API de jose no rompe el build: llega a produccion.
+
+**Evidencia.**
+
+- `comando: cruce de imports de src/ contra package.json (script propio en scratchpad/phantom.js) + verificacion manual de server-only`
+  > jose ← src/lib/impersonation.ts | server-only ← src/lib/leados/foco-cookie.ts:1 | three-stdlib ← 4 archivos | framer-motion ← 3 archivos
+- `comando: npm ls jose`
+  > logic-core-v3@0.1.0\n`-- @auth/prisma-adapter@2.11.2\n  `-- @auth/core@0.41.2\n    `-- jose@6.2.3      (unico proveedor)
+- `src/lib/impersonation.ts:3`
+  > import { jwtVerify, SignJWT } from 'jose'
+- `src/lib/impersonation.ts:25-30`
+  > return new SignJWT(payload).setProtectedHeader({ alg: 'HS256', typ: 'JWT' })...sign(getSecret())
+- `comando: npm ls three-stdlib / framer-motion`
+  > three-stdlib@2.36.1 ← @react-three/drei@10.7.7 | framer-motion@12.42.0 ← motion@12.42.0
+- `next.config.ts:10-15`
+  > typescript: { ignoreBuildErrors: true }, eslint: { ignoreDuringBuilds: true }   → un cambio de API de jose no rompe el build
+
+**Fix.** Declarar los 4 en package.json con la version que hoy resuelve (jose@^6.2.3, server-only, three-stdlib@^2.36.1, framer-motion@^12.42.0) y regenerar el lockfile. Es un cambio de 4 lineas y hay que hacerlo ANTES del upgrade de @auth/core de S8-02, no despues. Como candado, `npx knip --include unlisted` ya esta instalado en el repo (devDependency knip@6.16.1) y detecta exactamente esta clase: alcanza con agregarlo como script npm y correrlo antes de deployar.
+
+**Criterio de aceptación.** `npx knip --include unlisted` devuelve cero imports no declarados, y tras un `rm -rf node_modules && npm ci` la app sigue buildeando y `npm ls jose` muestra jose como dependencia directa del proyecto y no colgada de @auth/core.
+
+**Qué encontró el verificador.** Verifique los 4 paquetes contra package.json programaticamente: jose, server-only, three-stdlib y framer-motion salen todos NOT DECLARED, mientras que motion@^12.36.0, three@^0.182.0 y @react-three/drei@^10.7.7 si estan declarados. Los imports existen: src/lib/impersonation.ts:3 `import { jwtVerify, SignJWT } from 'jose'`, src/lib/leados/foco-cookie.ts:1 `import 'server-only'`. La cadena de jose la confirme con `npm ls jose`: logic-core-v3 -> @auth/prisma-adapter@2.11.2 -> @auth/core@0.41.2 -> jose@6.2.3, proveedor unico. El acoplamiento que el hallazgo senala como su aporte propio es real y es el punto mas util de la entrada: el paquete que S8-02 obliga a subir es exactamente el unico que hoy provee la libreria que firma los tokens de impersonation (src/lib/impersonation.ts:24-29, SignJWT HS256). Y next.config.ts:10-15 tiene ignoreBuildErrors:true (:11) e ignoreDuringBuilds:true (:14) tal como se cita. Cruzando con el ledger, ledger-S8.md:169-171 (CLEAN-ANEXO-DEPS) ya trae los mismos 4 paquetes con la misma evidencia archivo:linea, asi que CONFIRMADO_SIN_TEST es la etiqueta correcta.
+
+**Corrección aplicada.** Refuto una pieza del razonamiento de severidad, que es justamente la que sostenia el MEDIO. El hallazgo afirma: 'como next.config.ts:10-15 apaga el chequeo de tipos en el build, un cambio de API de jose no rompe el build: llega a produccion'. Eso es incorrecto. `typescript.ignoreBuildErrors` solo saltea la pasada de tsc; una dependencia que deja de resolverse es un error de resolucion de modulo de webpack y hace fallar el build igual, ruidosamente. El escenario 'llega a produccion en silencio' no se sostiene: el modo de falla real es un build roto, que es molesto pero visible. Sin ese argumento queda una fragilidad de reproducibilidad de la cadena, sin explotabilidad externa (el propio hallazgo lo admite en precondiciones) — corrijo a BAJO. Aclaro tambien que mi primera verificacion de framer-motion dio 2 archivos y estuve por corregir el conteo del hallazgo: me equivocaba yo, mi grep exigia comillas simples y src/components/sections/home/Portfolio.tsx:3 importa con comillas dobles. Son 3 archivos vivos, el hallazgo tiene razon (hay ademas 2 .bak que no cuentan). El fix de 4 lineas y el orden propuesto (declarar jose ANTES de tocar @auth/core) siguen siendo correctos.
 
 #### Ya documentado en auditorías previas — no se re-reporta (9)
 
@@ -3584,7 +3736,9 @@ Esta sección es deliberadamente larga. Nada de lo que sigue está afirmado en e
 
 **Fuera de alcance por decisión.** El comportamiento efectivo del modelo ante `currentPath` o un historial `assistant` forjados (S5-01, S5-02): lo verificado es que ese texto llega al prompt en la región confiable y sin envolver; el desenlace depende del modelo. Y la configuración del proyecto de Sentry (lista de campos sensibles, Enhanced Privacy), que vive en su panel y podría mitigar parte de S7-07 — o no.
 
-**Limitación metodológica de esta corrida.** 32 de los 75 hallazgos no tienen pasada de refutación adversarial independiente, porque 5 de los 10 verificadores murieron por límite de sesión y el reintento murió igual. Verifiqué yo mismo los que sostienen las conclusiones más pesadas; el resto se apoya en una sola lectura y está marcado como *SIN VERIFICAR* en su ficha. Un hallazgo sin refutación no es un hallazgo falso, pero tampoco tiene el mismo respaldo que los 39 confirmados.
+**Sobre el respaldo de cada hallazgo.** Los 75 tienen pasada de refutación adversarial independiente: 68 confirmados, 6 plausibles, 1 refutado. Los **6 plausibles** son aquellos donde el verificador dio por real el mecanismo pero no pudo cerrar la cadena con lo observable desde el repo — están marcados como tales en su ficha y no deberían tratarse con la misma confianza que los confirmados. Seis hallazgos llevan además verificación de primera mano del auditor padre, anotada en su ficha.
+
+**Variabilidad entre pasadas.** Cinco lentes recibieron dos pasadas de refutación independientes en lugar de una (efecto colateral de un corte de sesión y su reintento). Las dos pasadas coincidieron en el veredicto en todos los casos y discreparon en la severidad de dos hallazgos: S1-01 (ALTO vs MEDIO) y S2b-01 (MEDIO vs ALTO). Ambas discrepancias están adjudicadas y razonadas en §2. Que dos revisores independientes calibren distinto la severidad del mismo mecanismo verificado es un dato útil sobre el margen de error de cualquier número de este reporte: los mecanismos son firmes, las severidades son juicios.
 
 ---
 
@@ -3592,87 +3746,87 @@ Esta sección es deliberadamente larga. Nada de lo que sigue está afirmado en e
 
 | # | id | lente | severidad | veredicto | vs. ledger |
 |---|---|---|---|---|---|
-| 1 | S1-01 | S1 | **ALTO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 1 | S2b-01 | S2b | **ALTO** | CONFIRMADO | NUEVO |
 | 2 | S4-01 | S4 | **ALTO** | CONFIRMADO | NUEVO |
-| 3 | S7-01 | S7 | **ALTO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 4 | S1-02 | S1 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 5 | S1-03 | S1 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 6 | S1-04 | S1 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 7 | S1-05 | S1 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 8 | S1-06 | S1 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 9 | S1-07 | S1 | **MEDIO** | SIN VERIFICAR | CONFIRMADO_SIN_TEST |
-| 10 | S2a-01 | S2a | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 11 | S2b-01 | S2b | **MEDIO** | CONFIRMADO | NUEVO |
-| 12 | S2b-04 | S2b | **MEDIO** | CONFIRMADO | NUEVO |
-| 13 | S4-01 | S2c | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 14 | S4-02 | S2c | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 15 | S4-03 | S2c | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 16 | S4-04 | S2c | **MEDIO** | SIN VERIFICAR | CONFIRMADO_SIN_TEST |
-| 17 | S3-01 | S3 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 18 | S3-02 | S3 | **MEDIO** | CONFIRMADO | NUEVO |
-| 19 | S3-03 | S3 | **MEDIO** | SIN VERIFICAR | CONFIRMADO_SIN_TEST |
-| 20 | S3-04 | S3 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 21 | S4-03 | S4 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 22 | S4-04 | S4 | **MEDIO** | CONFIRMADO | NUEVO |
-| 23 | S5-01 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
-| 24 | S5-02 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
-| 25 | S5-05 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
-| 26 | S5-06 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
-| 27 | S6-01 | S6 | **MEDIO** | CONFIRMADO | NUEVO |
-| 28 | S6-05 | S6 | **MEDIO** | CONFIRMADO | NUEVO |
-| 29 | S7-02 | S7 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 30 | S7-03 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
-| 31 | S7-04 | S7 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 32 | S7-05 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
-| 33 | S7-06 | S7 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 34 | S7-07 | S7 | **MEDIO** | SIN VERIFICAR | NUEVO |
-| 35 | S7-08 | S7 | **MEDIO** | SIN VERIFICAR | CONFIRMADO_SIN_TEST |
-| 36 | S8-01 | S8 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 37 | S8-02 | S8 | **MEDIO** | PLAUSIBLE | CAMBIO_DE_ESTADO |
-| 38 | S8-03 | S8 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 39 | S8-04 | S8 | **MEDIO** | CONFIRMADO | NUEVO |
-| 40 | S8-06 | S8 | **MEDIO** | CONFIRMADO | NUEVO |
-| 41 | S8-08 | S8 | **MEDIO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
-| 42 | S1-08 | S1 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 43 | S1-09 | S1 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 44 | S1-10 | S1 | **BAJO** | SIN VERIFICAR | CAMBIO_DE_ESTADO |
-| 45 | S2a-02 | S2a | **BAJO** | SIN VERIFICAR | NUEVO |
-| 46 | S2a-03 | S2a | **BAJO** | SIN VERIFICAR | CAMBIO_DE_ESTADO |
-| 47 | S2a-04 | S2a | **BAJO** | SIN VERIFICAR | NUEVO |
-| 48 | S2a-05 | S2a | **BAJO** | SIN VERIFICAR | NUEVO |
-| 49 | S2a-06 | S2a | **BAJO** | SIN VERIFICAR | NUEVO |
-| 50 | S2b-02 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 51 | S2b-03 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 52 | S2b-05 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 53 | S2b-06 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 54 | S2b-07 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 55 | S2b-08 | S2b | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 56 | S2b-09 | S2b | **BAJO** | CONFIRMADO | NUEVO |
-| 57 | S4-05 | S2c | **BAJO** | SIN VERIFICAR | NUEVO |
-| 58 | S4-06 | S2c | **BAJO** | SIN VERIFICAR | NUEVO |
-| 59 | S3-05 | S3 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 60 | S3-06 | S3 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 61 | S3-07 | S3 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 62 | S4-02 | S4 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 63 | S4-05 | S4 | **BAJO** | CONFIRMADO | NUEVO |
-| 64 | S4-06 | S4 | **BAJO** | PLAUSIBLE | NUEVO |
-| 65 | S5-03 | S5 | **BAJO** | REFUTADO | NUEVO |
-| 66 | S5-04 | S5 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 67 | S6-02 | S6 | **BAJO** | CONFIRMADO | NUEVO |
-| 68 | S6-08 | S6 | **BAJO** | CONFIRMADO | NUEVO |
-| 69 | S6-03 | S6 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 70 | S6-07 | S6 | **BAJO** | PLAUSIBLE | NUEVO |
-| 71 | S6-04 | S6 | **BAJO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
-| 72 | S6-06 | S6 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
-| 73 | S7-09 | S7 | **BAJO** | SIN VERIFICAR | NUEVO |
-| 74 | S8-05 | S8 | **BAJO** | CONFIRMADO | NUEVO |
-| 75 | S8-07 | S8 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 3 | S1-01 | S1 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 4 | S2b-02 | S2b | **MEDIO** | CONFIRMADO | NUEVO |
+| 5 | S2b-04 | S2b | **MEDIO** | CONFIRMADO | NUEVO |
+| 6 | S3-01 | S3 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 7 | S3-03 | S3 | **MEDIO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
+| 8 | S4-03 | S4 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 9 | S4-04 | S4 | **MEDIO** | CONFIRMADO | NUEVO |
+| 10 | S4-05 | S4 | **MEDIO** | CONFIRMADO | NUEVO |
+| 11 | S5-01 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
+| 12 | S5-02 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
+| 13 | S5-04 | S5 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 14 | S5-05 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
+| 15 | S5-06 | S5 | **MEDIO** | CONFIRMADO | NUEVO |
+| 16 | S6-01 | S6 | **MEDIO** | CONFIRMADO | NUEVO |
+| 17 | S6-05 | S6 | **MEDIO** | CONFIRMADO | NUEVO |
+| 18 | S7-01 | S7 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 19 | S7-02 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
+| 20 | S7-03 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
+| 21 | S7-05 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
+| 22 | S7-06 | S7 | **MEDIO** | CONFIRMADO | NUEVO |
+| 23 | S7-08 | S7 | **MEDIO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
+| 24 | S8-01 | S8 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 25 | S8-02 | S8 | **MEDIO** | PLAUSIBLE | CAMBIO_DE_ESTADO |
+| 26 | S8-03 | S8 | **MEDIO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 27 | S8-04 | S8 | **MEDIO** | CONFIRMADO | NUEVO |
+| 28 | S1-02 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 29 | S1-03 | S1 | **BAJO** | PLAUSIBLE | NUEVO |
+| 30 | S1-04 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 31 | S1-05 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 32 | S1-06 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 33 | S1-07 | S1 | **BAJO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
+| 34 | S1-08 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 35 | S1-09 | S1 | **BAJO** | CONFIRMADO | NUEVO |
+| 36 | S1-10 | S1 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 37 | S2a-01 | S2a | **BAJO** | CONFIRMADO | NUEVO |
+| 38 | S2a-02 | S2a | **BAJO** | CONFIRMADO | NUEVO |
+| 39 | S2a-03 | S2a | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 40 | S2a-04 | S2a | **BAJO** | CONFIRMADO | NUEVO |
+| 41 | S2a-05 | S2a | **BAJO** | CONFIRMADO | NUEVO |
+| 42 | S2a-06 | S2a | **BAJO** | CONFIRMADO | NUEVO |
+| 43 | S2b-03 | S2b | **BAJO** | CONFIRMADO | NUEVO |
+| 44 | S2b-05 | S2b | **BAJO** | CONFIRMADO | NUEVO |
+| 45 | S2b-06 | S2b | **BAJO** | CONFIRMADO | NUEVO |
+| 46 | S2b-07 | S2b | **BAJO** | CONFIRMADO | NUEVO |
+| 47 | S2b-08 | S2b | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 48 | S2b-09 | S2b | **BAJO** | CONFIRMADO | NUEVO |
+| 49 | S4-01 | S2c | **BAJO** | CONFIRMADO | NUEVO |
+| 50 | S4-02 | S2c | **BAJO** | CONFIRMADO | NUEVO |
+| 51 | S4-03 | S2c | **BAJO** | CONFIRMADO | NUEVO |
+| 52 | S4-04 | S2c | **BAJO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
+| 53 | S4-05 | S2c | **BAJO** | CONFIRMADO | NUEVO |
+| 54 | S4-06 | S2c | **BAJO** | CONFIRMADO | NUEVO |
+| 55 | S3-02 | S3 | **BAJO** | CONFIRMADO | NUEVO |
+| 56 | S3-04 | S3 | **BAJO** | CONFIRMADO | NUEVO |
+| 57 | S3-05 | S3 | **BAJO** | CONFIRMADO | NUEVO |
+| 58 | S3-06 | S3 | **BAJO** | CONFIRMADO | NUEVO |
+| 59 | S3-07 | S3 | **BAJO** | CONFIRMADO | NUEVO |
+| 60 | S4-02 | S4 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 61 | S4-06 | S4 | **BAJO** | PLAUSIBLE | NUEVO |
+| 62 | S5-03 | S5 | **BAJO** | REFUTADO | NUEVO |
+| 63 | S6-02 | S6 | **BAJO** | PLAUSIBLE | NUEVO |
+| 64 | S6-08 | S6 | **BAJO** | CONFIRMADO | NUEVO |
+| 65 | S6-03 | S6 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 66 | S6-07 | S6 | **BAJO** | PLAUSIBLE | NUEVO |
+| 67 | S6-04 | S6 | **BAJO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
+| 68 | S6-06 | S6 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 69 | S7-04 | S7 | **BAJO** | CONFIRMADO | NUEVO |
+| 70 | S7-07 | S7 | **BAJO** | CONFIRMADO | NUEVO |
+| 71 | S7-09 | S7 | **BAJO** | CONFIRMADO | NUEVO |
+| 72 | S8-05 | S8 | **BAJO** | CONFIRMADO | NUEVO |
+| 73 | S8-06 | S8 | **BAJO** | PLAUSIBLE | NUEVO |
+| 74 | S8-07 | S8 | **BAJO** | CONFIRMADO | CAMBIO_DE_ESTADO |
+| 75 | S8-08 | S8 | **BAJO** | CONFIRMADO | CONFIRMADO_SIN_TEST |
 
 
 ---
 
 ## 10. Notas de cierre
 
-**Sobre dónde vive este documento.** El hallazgo S8-06 dice que el repositorio público ya hostea 16 documentos de auditoría que enumeran, con `archivo:línea`, cada debilidad abierta. Este reporte es el decimoséptimo. Queda commiteado en la rama `chore/auditoria-seguridad` y **no se pusheó**: mientras el repositorio siga siendo público, publicarlo entrega el mapa completo. Esa decisión es de Franco, y es la misma decisión #1 de §3.4.
+**Sobre dónde vive este documento.** El hallazgo S8-06 dice que el repositorio público ya hostea 16 documentos de auditoría que enumeran, con `archivo:línea`, cada debilidad abierta. Este reporte es el decimoséptimo. Queda commiteado en la rama `chore/auditoria-seguridad` y **no se pusheó**: mientras el repositorio siga siendo público, publicarlo entrega el mapa completo. Esa decisión es de Franco, y es la misma decisión #4 de §3.4.
 
 **Lo que esta corrida no hizo:** cero cambios en `src/`, cero fixes, cero pruebas contra producción, cero exploits. `git status -s` sobre el worktree solo muestra `docs/`.

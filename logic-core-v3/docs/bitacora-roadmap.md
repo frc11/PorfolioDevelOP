@@ -14373,9 +14373,10 @@ credenciales de Vertex) no aparecian en build, ni en tests, ni en dev, ni en /he
 (worktree propio), commit auditado `49fec9b` = `origin/main` al 2026-07-24. Read-only sobre `src/`:
 cero fixes, cero exploits, cero pruebas contra produccion. `git status -s` solo muestra `docs/`.
 
-**Resultado:** 75 hallazgos — 3 ALTO / 38 MEDIO / 34 BAJO / 0 CRITICO. Regla dura de no-duplicacion
-contra un ledger de 217 hallazgos ya documentados (4 auditorias previas, ~540 KB); 97 quedaron
-fuera por identicos a lo ya conocido.
+**Resultado:** 75 hallazgos — 2 ALTO / 25 MEDIO / 48 BAJO / 0 CRITICO, todos con pasada de
+refutacion adversarial independiente (68 confirmados, 6 plausibles, 1 refutado). Regla dura de
+no-duplicacion contra un ledger de 217 hallazgos ya documentados (4 auditorias previas, ~540 KB);
+97 quedaron fuera por identicos a lo ya conocido.
 
 ### Tres correcciones a las premisas del encargo
 - El motor 360dialog SI esta en el arbol auditado (`src/modules/motor/` + webhook publico
@@ -14384,43 +14385,46 @@ fuera por identicos a lo ya conocido.
   toca solo el carril del setter; el perimetro publico es identico.
 - La golden suite GS.1 NO esta en la rama auditada: `grep -rn "@isolation"` devuelve cero.
 
-### Los 3 ALTO
+### Los 2 ALTO
 - **S4-01** — el escape `origin === https://develop.com.ar` de `validate-origin.ts:69-75` corre ANTES
   del check de `allowedDomains`: anula la allowlist de TODOS los bots. Sin auth, cross-tenant, fuga
-  de la KB del tenant y consumo de su cupo. Confirmado por refutacion adversarial.
-- **S1-01** — el lockout del login es evadible con un `x-forwarded-for` propio (`login/actions.ts:53`
-  toma el left-most) y usa un `Map` en memoria (`:20`). El limiter durable ya existe y el login nunca
-  migro. Unico endpoint de credenciales, sin captcha ni lockout por cuenta.
-- **S7-01** — retencion indefinida de PII: la unica purga cableada es `chatbot_events` a 30 dias.
-  Transcripciones, leads y todo el motor de WhatsApp crecen sin cota. Ley 25.326.
+  de la KB del tenant y consumo de su cupo.
+- **S2b-01** — las 3 server actions de Email Marketing no verifican la contratacion del modulo (el
+  gate `isModuleActive` vive solo en `layout.tsx:20-21`, que es un redirect de render) y el envio usa
+  la unica cuenta Brevo de la agencia con remitente y HTML tomados del input, sin Zod. El riesgo real
+  es el abuso del activo compartido: la reputacion de envio de la agencia.
 
 ### El multiplicador
 El repositorio es PUBLICO (`gh repo view` → `visibility: PUBLIC`). Sube el precio de S8-06 (16 docs
 de auditoria publicados con archivo:linea de cada debilidad abierta), del salt literal de `ipHash`
 (S7-03) y de los 20 archivos basura trackeados (S8-07, verificado que NO contienen credenciales).
-Sobre la key del historial (S8-01): el runbook `docs/audits/2026-05-bfg-leak-cleanup.md:19` deja
-constancia de que ya estaba deshabilitada antes del descubrimiento — NO es credencial viva.
+Sobre `enviroment.env` en el historial (S8-01): NO hay credencial viva — el runbook
+`docs/audits/2026-05-bfg-leak-cleanup.md:19` deja constancia de la deshabilitacion previa, el valor
+tiene 36 chars formato UUID y NO lleva el prefijo `AIza` de las claves de Google AI Studio.
 
 ### El positivo
 CERO escaladas verticales. Las 116 acciones del perimetro admin llevan guard propio salvo las 2 ya
-documentadas. Los "tres dialectos de soy super-admin" son seis y ninguno es mas debil: los seis
+documentadas. Los "tres dialectos de soy super-admin" son SEIS y ninguno es mas debil: los seis
 comparan contra la misma fuente. Cerrado por verificacion: el state de OAuth SI esta firmado con
 HMAC y validado con `timingSafeEqual` (SEC-AUTH-01/02/06 y F3 pueden marcarse cerrados).
 
 ### Tres arreglos que existen y NO estan en lo desplegado
 `/api/test-sentry` sigue vivo (fix en `chore/security-quick-wins@1b63945`); la frontera de aislamiento
 del portal + inventario de 222 call-sites no esta (`fa5ed47`); GS.1 no esta (`chore/gs-aislamiento@403280b`).
-El fix #4 de mayor retorno es mergear esas dos ramas: trabajo hecho y probado, cero codigo nuevo.
+El fix #1 de mayor retorno es mergear esas dos ramas: trabajo hecho y probado, cero codigo nuevo.
 
-### Limitacion declarada de la corrida
-5 de los 10 verificadores adversariales murieron por limite de sesion, y el reintento murio igual:
-32 de los 75 hallazgos no tienen refutacion independiente. El auditor padre verifico de primera mano
-los que sostienen las conclusiones pesadas (S1-01, S3-01, S3-02, S7-01, S7-03, S7-05, S8-01); estan
-anotados como "Adjudicacion del auditor". La refutacion no fue decorativa: 1 hallazgo refutado
-(S5-03) y 9 severidades corregidas hacia abajo.
+### Calidad de la evidencia, declarada
+La refutacion no fue decorativa: S5-03 quedo REFUTADO (proponia que cortar el stream disparaba la
+compensacion de cupo; el verificador probo que el disparador es inalcanzable porque `streamText` no
+recibe `abortSignal`), y hubo una docena de severidades corregidas con contra-argumento.
+Cinco lentes recibieron DOS pasadas independientes (efecto de un corte de sesion y su reintento):
+coincidieron en todos los veredictos y discreparon en la severidad de dos hallazgos, adjudicados en
+el §2 del reporte — S1-01 a MEDIO (la evadibilidad por header depende de si Netlify normaliza
+`x-forwarded-for`, no verificable desde el repo; seria ALTO si se confirma que no lo hace) y S2b-01
+a ALTO. Los mecanismos son firmes; las severidades son juicios.
 
 ### Decision pendiente que bloquea al resto
-Si el repositorio sigue siendo publico. Es el fix #1 por retorno y condiciona S8-06, S8-01, S8-07 y
-S7-03. Por eso este reporte queda commiteado en su rama y NO se pusheo.
+Si el repositorio sigue siendo publico. Condiciona S8-06, S8-01, S8-07 y S7-03. Por eso este reporte
+queda commiteado en su rama y NO se pusheo.
 
 ---
