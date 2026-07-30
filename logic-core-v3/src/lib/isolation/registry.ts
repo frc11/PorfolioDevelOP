@@ -630,6 +630,44 @@ class QuotaUsageScopedDelegate extends ScopedModelDelegate<
   }
 
   /**
+   * ONF-1 — Compensación atómica de una reserva de cupo (espejo EXACTO de
+   * reserveConversation, mismo mecanismo): cuando el stream murió sin entregar
+   * respuesta, el cupo reservado se devuelve con UPDATE conditional
+   * (`conversationsCount > 0`, row-lock de Postgres) + guard de org EMBEBIDO
+   * (EXISTS sobre chatbot_bot_config). Garantías:
+   *   - el contador NUNCA queda negativo (el conditional no toca filas en 0);
+   *   - N releases concurrentes decrementan exactamente N (o hasta llegar a 0),
+   *     sin lost-updates — no es un decrement leído-y-escrito, es un solo UPDATE.
+   * La idempotencia POR REQUEST (no compensar dos veces la misma reserva) es
+   * responsabilidad del caller (flag de request en handleChatRequest).
+   */
+  async releaseConversation(input: {
+    botConfigId: string
+    year: number
+    month: number
+  }): Promise<{ released: boolean; conversationsUsed: number }> {
+    await this.assertBotInScope(input.botConfigId)
+    const affected = await this.client.$executeRaw`
+      UPDATE "chatbot_quota_usage" q
+      SET "conversationsCount" = "conversationsCount" - 1,
+          "updatedAt" = NOW()
+      WHERE q."botConfigId" = ${input.botConfigId}
+        AND q."year" = ${input.year}
+        AND q."month" = ${input.month}
+        AND q."conversationsCount" > 0
+        AND EXISTS (
+          SELECT 1 FROM "chatbot_bot_config" b
+          WHERE b."id" = q."botConfigId" AND b."organizationId" = ${this.organizationId}
+        )
+    `
+    const usage = (await this.unsafe.findFirst({
+      where: this.scopedWhere({ botConfigId: input.botConfigId, year: input.year, month: input.month }),
+      select: { conversationsCount: true },
+    })) as { conversationsCount: number } | null
+    return { released: affected === 1, conversationsUsed: usage?.conversationsCount ?? 0 }
+  }
+
+  /**
    * B4.5 — Marca `degradedAt` atómicamente si era null (ex upsellAlert.ts).
    * Devuelve true solo la primera vez del período → anti-spam de la alerta de
    * upsell. EXISTS agrega el guard de org al UPDATE conditional.

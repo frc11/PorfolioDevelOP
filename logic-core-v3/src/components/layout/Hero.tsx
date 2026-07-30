@@ -1,7 +1,7 @@
 "use client"
 
 import { Canvas, useThree, useFrame, useLoader } from '@react-three/fiber'
-import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
+import { Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { motion, useTransform, type MotionValue } from 'motion/react'
 import * as THREE from 'three'
 import { SVGLoader } from 'three-stdlib'
@@ -193,11 +193,17 @@ function LogoReadySignal({ onReady }: { onReady: () => void }) {
 function HeroCanvasSizeSync({
     active,
     targetRef,
+    onSized,
 }: {
     active: boolean
     targetRef: RefObject<HTMLDivElement | null>
+    // FIX-GHOST-BOX: se dispara UNA vez, cuando el canvas deja el default 300×150
+    // de R3F y toma su tamaño real. El caller lo usa para no pintar post-fx antes.
+    onSized?: () => void
 }) {
     const { invalidate, setSize } = useThree()
+    // Guard: onSized dispara exactamente una vez por vida del componente.
+    const sizedRef = useRef(false)
 
     useLayoutEffect(() => {
         if (!active) return
@@ -213,6 +219,12 @@ function HeroCanvasSizeSync({
 
             setSize(rect.width, rect.height, rect.top, rect.left)
             invalidate()
+            // FIX-GHOST-BOX: recién acá el canvas dejó el 300×150 default. Avisar
+            // una sola vez para habilitar el EffectComposer sin ventana de cuadrado.
+            if (!sizedRef.current) {
+                sizedRef.current = true
+                onSized?.()
+            }
         }
 
         const syncAcrossFrames = () => {
@@ -245,7 +257,7 @@ function HeroCanvasSizeSync({
             window.removeEventListener('resize', syncAcrossFrames)
             window.removeEventListener('orientationchange', syncAcrossFrames)
         }
-    }, [active, invalidate, setSize, targetRef])
+    }, [active, invalidate, setSize, targetRef, onSized])
 
     return null
 }
@@ -356,9 +368,22 @@ function HeroCanvas({
     prefersReducedMotion: boolean
     onLogoReady: () => void
 }) {
+    // FIX-GHOST-BOX — El EffectComposer (incl. Vignette darkness) sobre este canvas
+    // transparente (gl.alpha:true) pinta un cuadrado OSCURO del tamaño del canvas
+    // (lesson-learned del repo). Al montar, R3F arranca en su default 300×150 y
+    // HeroCanvasSizeSync recién sincroniza el tamaño real un par de frames después.
+    // Si `canvasReveal` (la opacidad del wrapper) sube en esa ventana, el composer
+    // se ve como un recuadro oscuro 300×150 arriba-izquierda ("recuadro fantasma").
+    // Gateamos el composer hasta el primer sizing real: sin composer, R3F pinta
+    // directo al canvas transparente → cero cuadrado. Una vez dimensionado (a los
+    // pocos frames, normalmente todavía bajo la opacidad del reveal) el post-fx
+    // entra idéntico a antes. Degradación segura: si nunca dimensionara, se pierde
+    // el post-fx pero jamás aparece el cuadrado.
+    const [postFxReady, setPostFxReady] = useState(false)
+    const handleSized = useCallback(() => setPostFxReady(true), [])
     return (
         <Canvas className="relative z-10 h-full w-full" camera={{ position: [0, 0, isSplitLayout ? 15 : 13], fov: isSplitLayout ? 35 : 30 }} gl={{ alpha: true, powerPreference: "high-performance", antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
-            <HeroCanvasSizeSync active={active} targetRef={targetRef} />
+            <HeroCanvasSizeSync active={active} targetRef={targetRef} onSized={handleSized} />
             <MobileInputHandler />
             {isSplitLayout && !prefersReducedMotion ? <DesktopPointerSync introProgress={introProgress} layerOpacity={layerOpacity} /> : null}
             <Suspense fallback={null}>
@@ -380,12 +405,16 @@ function HeroCanvas({
                 {/* Sombra del logo que lo sigue en X (solo desktop) */}
                 {isSplitLayout ? <HeroLogoShadow introProgress={introProgress} /> : null}
 
-                {/* Post-Processing Effects */}
-                <EffectComposer enableNormalPass={false}>
-                    <ChromaticAberration offset={CHROMATIC_ABERRATION_OFFSET} />
-                    <Noise opacity={0.05} premultiply />
-                    <Vignette eskil={false} offset={0.1} darkness={0.5} />
-                </EffectComposer>
+                {/* Post-Processing Effects — FIX-GHOST-BOX: gateado a que el canvas
+                    ya tenga tamaño real (postFxReady), para no pintar el cuadrado
+                    oscuro 300×150 durante la ventana de sizing. Ver nota en HeroCanvas. */}
+                {postFxReady && (
+                    <EffectComposer enableNormalPass={false}>
+                        <ChromaticAberration offset={CHROMATIC_ABERRATION_OFFSET} />
+                        <Noise opacity={0.05} premultiply />
+                        <Vignette eskil={false} offset={0.1} darkness={0.5} />
+                    </EffectComposer>
+                )}
             </Suspense>
         </Canvas>
     )

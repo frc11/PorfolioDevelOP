@@ -13949,3 +13949,420 @@ CRON-2 está implementado, no verificado — `tsc`/`eslint` en verde no cierra e
 
 ---
 
+
+## ONF-1 — Reconcile transaccional del onFinish: writes atómicos + compensación de cupo + fallback de respuesta vacía
+
+### Descubrimiento (Paso 0) — desvíos vs. el enunciado
+- El worktree `logic-core-runtime` está en branch **`main`** (commit 776e9b4), no en `runtime/mejoras`
+  como registraba la memoria de sesiones previas. Limpio (sin cambios sin commitear) →
+  `handleChatRequest.ts` estaba libre; precondición de archivo compartido OK.
+- El "precedente de $transaction en el propio archivo" NO estaba en `handleChatRequest.ts`: está en
+  el mismo módulo, `tools/captureLead.ts:360` (`scope.$transaction`), y el helper de aislamiento ya
+  exponía la envoltura (`registry.ts` → `buildScope`: re-arma los accessors del MISMO tenant sobre
+  el `tx` de Prisma). Se reusó ese patrón tal cual — cero infraestructura nueva de transacciones.
+- `route.ts` declara `maxDuration = 30`, pero el cap real de Netlify (~10s) sigue siendo el corte a
+  diseñar. Todo lo demás coincidía: 3 writes sueltos en onFinish, INFRA.1 en onError/catch,
+  `tryReserveConversation` atómico en `checker.ts`/`registry.ts`.
+
+### Cómo quedó el $transaction (RB.3)
+Los tres writes del turno (`chatMessage.create` ASSISTANT → `conversation.update` contadores →
+`incrementQuota` upsert) van en UNA `scope.$transaction`. **Orden y por qué**: mensaje primero
+(fila nueva, sin contención); conversación después (único lock compartido con la tx de
+`capture_lead` — lead→conversación — un solo recurso común entre ambas transacciones → sin ciclo de
+deadlock posible); cupo al final (la fila `QuotaUsage` del mes es la de mayor contención del tenant
+— se lockea a lo último para achicar su sección crítica). **Ante corte a ~10s**: la conexión muere
+sin COMMIT → Postgres hace rollback → nunca queda estado parcial (cupo movido sin mensaje, o
+mensaje sin contadores). El turno cortado lo recupera el retry del widget vía INFRA.2 (cola USER
+sin responder no se duplica). `incrementQuota` ahora acepta accessors opcionales
+(`Pick<OrgScopeAccessors, 'quotaUsage'>`) para correr dentro del `tx`; sin el parámetro se comporta
+idéntico a antes (los demás callers no cambian).
+
+### Decisión: "respuesta YA entregada + transacción de persistencia falla"
+**Retry acotado + aceptar la pérdida con rastro claro.** Un (1) reintento
+(`PERSIST_TX_MAX_ATTEMPTS = 2`, backoff `PERSIST_TX_RETRY_BACKOFF_MS = 300ms` — retry de
+APLICACIÓN, no de conexión), con guard de idempotencia para el caso commit-ack perdido: el
+reintento hace una query DIRIGIDA dentro del tx (conversationId + role ASSISTANT + MISMO contenido
++ ventana de 90s) y si el ASSISTANT idéntico ya está, NO re-escribe — como los tres writes son
+atómicos, si el mensaje entró, los contadores también. La query dirigida (y no "mirar la cola") es
+fix de un hallazgo del review: un USER interleaved de otro request del mismo sessionId desplazaría
+la cola y taparía el commit fantasma → assistant y contadores duplicados. Ese chequeo corre SOLO en
+reintentos (cero lecturas extra en el camino feliz). Si el segundo intento también falla:
+`chat.persist_failed` con `attempts` vía INFRA.1 (stderr off-Neon + evento best-effort + Sentry) y
+se acepta la pérdida del REGISTRO del turno — la respuesta ya salió y no es re-enviable; preferimos
+un turno sin registrar a contadores dobles o parciales. El primer fallo también deja rastro
+(`chat.persist_retry`). Residual aceptado y documentado: un ASSISTANT canned idéntico de OTRO
+request en la misma conversación dentro de la ventana puede producir un skip "de más" (se prefiere
+un persist de menos a contadores dobles).
+
+### Compensación de cupo (MH.2) — atómica y EN PAREJA con el descarte de la fila
+- Primitiva: `QuotaUsageScopedDelegate.releaseConversation` (registry.ts) — `UPDATE ... SET
+  conversationsCount = conversationsCount - 1 WHERE ... conversationsCount > 0 AND EXISTS (guard
+  de org)` — espejo exacto de `reserveConversation`. NUNCA decrement suelto: una sola sentencia
+  condicional (row-lock de Postgres), contador jamás negativo, sin lost-updates.
+- Orquestación: `compensateNewConversationReservation` (checker.ts) — **release + descarte de la
+  fila de Conversation en UNA transacción**, con el delete condicional a que la conversación siga
+  sin NINGÚN ASSISTANT persistido. Esto es fix directo del hallazgo MAYOR del review (encontrado
+  por dos lentes independientes): compensar dejando la fila viva permitía que el retry automático
+  del widget (INFRA.2, exactamente el flujo de cold-start de Neon) reviviera la conversación con
+  `isNew=false` → sin re-reserva → **conversación entera gratis** (undercount sistemático).
+  Descartada la fila, el retry recrea la conversación y VUELVE a reservar: accounting exacto en
+  ambos desenlaces. Y si otro request del mismo sessionId ya entregó un turno en esa fila, el
+  delete no matchea → la compensación entera se omite y el cobro queda (jamás se borra historia
+  entregada — también cierra el hallazgo de la carrera del discard). `year/month` vienen del
+  RESULTADO de la reserva (borde de mes: se devuelve al período que se reservó).
+- **Cuándo compensa** (`shouldCompensateQuota`, tabla pura en `reconcile.ts`): el compensador solo
+  existe si hubo reserva (conversación nueva + reserve OK). Dispara en: `onError`/`onAbort` con
+  `ttfbAt === null` (ni un chunk útil llegó — con entrega parcial o tool ejecutada el cupo SE
+  COBRA); respuesta vacía sin tool calls (con `capture_lead` ejecutado se cobra: hubo valor); 400
+  `no_user_message` (corre DESPUÉS de la reserva — antes filtraba un cupo); catch externo (falla
+  pre-stream). **Once-only por request**: flag marcado ANTES del `await` (hooks en el mismo event
+  loop → sin re-entrada); la atomicidad cross-request la dan la tx y el SQL condicional. Si la tx
+  de compensación falla: rollback total → cobrado + fila viva = comportamiento pre-sprint (1 solo
+  cobro vía retry), rastro `chat.quota_compensation_failed`.
+- **Caveat onAbort (hallazgo del review, verificado contra `node_modules/ai/dist`)**: en ai@6.0.214
+  el SDK NO espera la promesa de `onAbort` (sí la de `onError`) → la compensación de abort es
+  best-effort en Netlify (el freeze puede cortarla). Al ser una tx todo-o-nada, el peor caso es
+  "cobrado + fila viva" (= pre-sprint, accounting correcto vía retry); nunca un estado a medias.
+- **Filas degradadas que inflaban métricas**: una conversación RECIÉN creada cuyo request termina
+  degradado (`domain_overflow`, `quota_exhausted`, `quota_reserve_failed`, `no_user_message`) se
+  descarta (`discardNewConversation`, best-effort, mismo delete condicional anti-carrera).
+  `ChatbotEvent.conversationId` es `onDelete: SetNull` → los eventos sobreviven.
+  `conversation_limit` (C0.2) solo aplica a existentes → jamás se borra nada ahí.
+
+### Fallback de respuesta vacía
+`experimental_transform` de streamText (`createEmptyResponseFallbackTransform`, reconcile.ts):
+retiene cada `finish-step` un chunk; si lo que sigue es el `finish` del run y NINGÚN step emitió
+texto útil (text-delta con contenido no-blanco), inyecta las text parts canned
+(`buildEmptyFallbackMessage`: deriva a WhatsApp si el bot tiene número, genérica si no — mismo tono
+que C0.2/B4.2) DENTRO del último step → el visitante la ve EN VIVO como texto normal del assistant
+(cero cambios en el widget), y `steps[]`/`text` del onFinish la incluyen. Con texto útil el
+transform es **passthrough idéntico** (paridad del camino feliz — pinneado por test con `deepEqual`
+del stream completo). Un stream que muere sin `finish` NO inyecta (ese caso es compensación, no
+fallback). En onFinish: si la compensación descartó la conversación (nueva, vacía, sin tools), el
+persist se SALTEA (no hay fila y re-persistir re-inflaría lo compensado) — rastro en
+`chat.empty_response_fallback` + `chat.quota_compensated` + `chat.llm_request_finished` con
+`turnDiscarded: true`. En conversación EXISTENTE (ya cobrada) el turno canned se persiste normal
+(nunca mudo). Belt-and-suspenders: si el `text` del onFinish no incluyera lo inyectado,
+`assistantContent` cae al canned explícito; y en `empty_response` la decisión ignora `ttfbAt` a
+propósito (el propio fallback inyectado puede marcar ttfb vía onChunk).
+
+### INFRA.3 — parametrizado, NO activado
+`INFRA3_CONNECTION_RETRY` (reconcile.ts): `{ maxAttempts: 3, initialBackoffMs: 250, maxBackoffMs:
+2000 }` con TODO(INFRA.3) explícito. NO se usa en ningún lado: este sprint no toca `lib/prisma.ts`,
+ni el connection string, ni pgbouncer, ni cómo se conecta a la DB. El único retry ACTIVO de ONF-1
+es `PERSIST_TX_*` (aplicación, dentro del onFinish, post-entrega).
+
+### Review adversarial (harness multi-agente) — 5 hallazgos, 2 mayores corregidos
+4 lentes (concurrencia/atomicidad, AI SDK/stream, aislamiento/seguridad, scope/paridad) + 3
+refutadores por hallazgo + crítico de completitud. La corrida se cortó por límite de sesión: 3/4
+lentes completaron (faltó AI SDK/stream), los refutadores no corrieron → los 5 hallazgos crudos se
+verificaron A MANO contra el código real:
+1. **MAYOR (2 lentes independientes) — CONFIRMADO y CORREGIDO**: compensar sin descartar la fila →
+   conversación revivida gratis por el retry del widget (undercount sistemático). Fix: compensación
+   atómica en pareja (arriba).
+2. **menor — CONFIRMADO y CORREGIDO**: guard de idempotencia del retry miraba solo la cola → USER
+   interleaved duplicaba assistant+contadores. Fix: query dirigida.
+3. **menor — CONFIRMADO y CORREGIDO**: discard podía borrar (cascade) una fila que otro request del
+   mismo sessionId estaba usando. Fix: delete condicional a "sin ASSISTANT" (residual documentado:
+   request B mid-stream sin ASSISTANT aún — ventana estrecha, mismo perfil de riesgo que pre-sprint).
+4. **menor — CONFIRMADO, mitigado por diseño**: `onAbort` no es awaited por el SDK → compensación
+   de abort best-effort; con la tx todo-o-nada el peor caso es el comportamiento pre-sprint.
+5. El lente de aislamiento devolvió 0 hallazgos (el SQL nuevo replica el guard de org de la reserva).
+El lente AI SDK/stream y el crítico de completitud NO corrieron (límite de sesión) — queda anotado
+como cobertura de review incompleta; el transform tiene tests de protocolo propios (orden de parts,
+paridad, multi-step) que cubren parte de ese eje.
+
+### Archivos
+- `src/lib/isolation/registry.ts` — `releaseConversation` en `QuotaUsageScopedDelegate` (espejo de
+  `reserveConversation`).
+- `src/lib/isolation/index.ts` — re-export type `OrgScopeAccessors` (para tipar el `tx` fuera del helper).
+- `src/modules/chatbot/server/quota/checker.ts` — `compensateNewConversationReservation` (release +
+  discard atómicos) + `incrementQuota` con accessors opcionales.
+  `src/modules/chatbot/server/quota/index.ts` — exports.
+- `src/modules/chatbot/server/chat/reconcile.ts` (NUEVO) — piezas puras (patrón dedup.ts/INFRA.2):
+  tabla de compensación, dedup del ASSISTANT, fallback text, transform, constantes.
+- `src/modules/chatbot/server/chat/handleChatRequest.ts` — cirugía del onFinish + hooks
+  (onError/onAbort/catch/400) + descartes degradados. El resto del handler NO se reestructuró.
+- `src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts` (NUEVO) + script
+  `test:onf1` en package.json.
+
+### Qué NO se tocó (fuera de scope, anotado)
+- **Connection string / pgbouncer / lib/prisma.ts** — INFRA.3, gateado por la firma real de prod
+  (Netlify logs + Sentry DSN) + coordinación con Franco + DB reconciliada. Solo constantes definidas.
+- **`schema.prisma` / migraciones** — cero. El `@@unique` compuesto de sessionId (C3.2) queda
+  pendiente, mismo gate (Franco + DB reconciliada). Nota: `Conversation.sessionId` ya es `@unique`
+  simple en el schema actual; el hallazgo 3 del review desaparece de raíz cuando C3.2 agregue el
+  unique compuesto + create atómico en `getOrCreateConversation`.
+- **Refactor del handler / extraer persistTurn a módulo (C3.6)** — no se hizo a propósito (archivo
+  compartido, diff mínimo). Solo helpers PUROS nuevos en reconcile.ts.
+- **Widget / packs / scoring / admin / dashboard** — cero líneas.
+- Deuda pre-existente anotada (no tocada): warnings eslint baseline (`CRM_SYNC_ATTEMPT_REPARENT`
+  en registry.ts:75, `toolResults` sin uso en el destructure del onFinish).
+
+### Tests (test:onf1) + controles
+- Invariantes: tabla de compensación completa (once-only, "tool ejecutada se cobra", triggers);
+  dos hooks del mismo request → 1 sola compensación; modelo del release condicional (nunca
+  negativo, sin lost-updates); modelo de la compensación EN PAREJA (release+discard juntos,
+  omitida si hay ASSISTANT, no-op al repetir); dedup del ASSISTANT (commit fantasma no duplica /
+  candidato USER o viejo persiste); transform (paridad `deepEqual` con texto, inyección en vacío /
+  whitespace / multi-step, jamás en stream muerto); modelo todo-o-nada de la tx. Los modelos
+  ejecutables pinnean la SEMÁNTICA — la garantía física (row-lock, rollback) es de Postgres, misma
+  mecánica ya en prod vía `reserveConversation`.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: **0 errores** (baseline limpio antes y después).
+- `eslint` sobre los 7 archivos tocados: 0 errores (2 warnings pre-existentes, arriba).
+- `npm run test:onf1` ✓; regresión vecina: `test:infra2` ✓, `test:c02` ✓, `test:utm1` ✓.
+- Sin `git` (regla del sprint). `npx prisma migrate status`: no corrido — cero cambios de Prisma.
+
+### Verificación declarada (Valentino) — el cierre real de este sprint
+El reconcile cierra races BAJO CONCURRENCIA y eso NO lo prueban ni el build ni estos tests:
+1. **Test de carga real**: N requests concurrentes contra el mismo bot en el último cupo del mes +
+   streams matados a mitad (pre-token y post-token) + retries del widget → `conversationsCount`
+   nunca por encima del límite NI por debajo de las conversaciones entregadas (el undercount del
+   hallazgo 1 es exactamente lo que hay que re-verificar), jamás negativo, cero turnos a medias.
+2. **Re-verificar aislamiento** (toca cupo por conversación): corrida de
+   `tests/integration/chatbot-isolation.spec.ts` / `motor-isolation.spec.ts` contra dev-DB.
+3. Netlify real: confirmar que el corte a ~10s deja rollback limpio (buscar `chat.persist_retry` /
+   `chat.persist_failed` / `chat.quota_compensated` en Function Logs tras un corte inducido).
+Hasta ese test de carga, **ONF-1 está implementado, no verificado bajo carga**. INFRA.3 (pgbouncer
++ retry activo de conexión) y C3.2 (sessionId compuesto) siguen pendientes, gateados por Franco +
+DB reconciliada.
+
+---
+
+## FIX-ORIGIN — El config same-origin del propio sitio no debe rechazarse en prod
+
+### Causa
+`GET /api/chatbot/[slug]/config` lee `request.headers.get('origin')` y se lo pasa a
+`validateOrigin` (`src/lib/security/validate-origin.ts`, NO tocado). Un GET **same-origin** (el
+propio widget de develop-portfolio.netlify.app pidiendo su config) nunca manda header `Origin` —
+el navegador lo omite a propósito y en su lugar setea `Sec-Fetch-Site: same-origin`. `validateOrigin`
+trata cualquier `origin=null` en producción como cliente anónimo (curl/SSR) y rechaza:
+`if (!origin) return { allowed: NODE_ENV !== 'production', reason: 'no_origin' }` — sin distinguir
+el same-origin real del propio sitio. Resultado: 403 en prod, el widget del propio develOP no
+carga. Confirmado con los headers reales del 403 (`sec-fetch-site: same-origin`, sin `Origin`,
+`referer: https://develop-portfolio.netlify.app/`, `NODE_ENV=production`).
+
+### El fix
+En `src/app/api/chatbot/[slug]/config/route.ts`, ANTES de llamar a `validateOrigin`: si
+`!origin` y se cumple la condición exacta bajo la que `validateOrigin(null)` rechazaría hoy
+(`NODE_ENV === 'production'` sin `QA_ALLOW_LOCALHOST=1` — fuera de esa condición, dev y
+next-prod-qa YA permiten un origin nulo, sin cambios) y el request es same-origin confiable, se
+sirve la config saltando SOLO el check de `allowedDomains` (irrelevante same-origin — no hay
+dominio de embed que autorizar, es el propio sitio), preservando el check de bot activo/existente.
+
+Same-origin confiable = `Sec-Fetch-Site: same-origin` (señal primaria — header de Fetch Metadata,
+no falsificable desde JS de página) con un fallback defensivo si el header falta por completo:
+host del `Referer` == host del propio request (`Host`, mismo header que ya usa
+`api/qa/login/route.ts`). Un valor EXPLÍCITO distinto de `same-origin` (`cross-site` | `same-site`
+| `none`) NUNCA cae al fallback — se respeta tal cual.
+
+### Por qué NO debilita cross-origin ni abre server-to-server
+- Cross-origin real SIEMPRE manda `Origin` → `!origin` es `false` → el nuevo bloque nunca se
+  ejecuta, cae 100% intacto al `validateOrigin({origin, botSlug})` de siempre. Diff mínimo: el
+  código viejo no se tocó, solo se agregó un `if` ANTES.
+- Server-to-server (curl/SSR) sin `Origin` y sin `Sec-Fetch-Site: same-origin` ni Referer
+  matcheando → `isTrustedSameOrigin` da `false` → cae al `validateOrigin(null)` de siempre → 403
+  en prod, sin cambios.
+- Bot inactivo o inexistente → `isBotServable` (mismo criterio que `bot_not_found`/`bot_inactive`
+  de `validateOrigin`, aislado en el camino same-origin) da `false` → 403, NUNCA sirve config
+  (ni el `paused`-degradado de 200 que `getPublicConfig` da hoy para bots pausados en otros
+  caminos — se prefirió consistencia con el 403 que YA da `validateOrigin` para bot_inactive en
+  cross-origin, por instrucción explícita del sprint).
+- El bypass está gateado exactamente a la condición donde `validateOrigin(null)` rechazaría hoy:
+  en dev, o con `QA_ALLOW_LOCALHOST=1`, el nuevo código NUNCA se ejecuta — cero cambio de
+  comportamiento en esos entornos, ni siquiera para bots inactivos/inexistentes.
+- `validate-origin.ts` / `origin-matcher.ts`: **cero líneas tocadas**.
+
+### Decisiones no especificadas en el prompt
+- **`same-origin.ts` (archivo nuevo, hermano de route.ts)**: las 3 funciones del fix
+  (`isSameOriginBypassApplicable`, `isTrustedSameOrigin`, `isBotServable`) viven ahí, no inline en
+  `route.ts`. Motivo descubierto en Paso 0 de testing: `route.ts` importa
+  `@/modules/chatbot/index.server` (barrel server-only) cuya cadena de imports arrastra
+  `next-auth` → `next/server` (vía `server/insights/manageInsight.ts` →
+  `server/admin/getClientSession.ts` → `src/auth.ts`) y, en otro punto, un `.module.css` de un
+  componente de avatar — ninguno de los dos resuelve fuera del bundler de Next. Confirmado
+  intentando importar `route.ts` tanto vía `tsx` directo como vía este mismo Playwright runner:
+  mismo bloqueo en los dos ("Cannot find module 'next/server'" / "Unexpected token '.'" del CSS).
+  Es un problema PREEXISTENTE de esa ruta (no había ningún test de `config/route.ts` antes de
+  este fix, por la misma razón) — de ahí que la lógica del fix viva separada, con imports
+  mínimos, para que sea testeable con las herramientas de este repo (sin jest/vitest, sin mocking
+  de módulos). `route.ts` importa las 3 funciones desde ahí; su propio cuerpo queda casi vacío
+  (import + el `if` de 15 líneas + lo que ya había).
+- **`isBotServable` como chequeo propio (no reutiliza `validateOrigin` con un origin sintético)**:
+  se evaluó pasarle a `validateOrigin` un origin derivado de `request.url`/`NEXT_PUBLIC_APP_URL`
+  para reusar 100% su lógica (bot lookup + `allowedDomains`) — se descartó: acoplaría la confianza
+  same-origin (que no necesita allowlist, es el propio sitio por definición) a que
+  `bot.allowedDomains` siga incluyendo el dominio propio para siempre, y feedear un valor que
+  NUNCA fue un header real a un parámetro tipado como `origin` es confuso para el próximo que lea
+  el código. `isBotServable` es una query mínima (`findUnique({slug}, select:{isActive})`) que
+  refleja el MISMO criterio de `bot_not_found`/`bot_inactive`, sin la parte de `allowedDomains`
+  que same-origin no necesita.
+- **`prisma generate`** corrido antes de la verificación final: el `tsc` mostraba ~55 errores
+  ajenos al fix (modelos/campos de B1 — `MotorAlertType`, `apiKeyEncrypted`,
+  `outboundIdempotencyKey`, etc. — presentes en `schema.prisma` pero ausentes del cliente
+  generado). Causa: el worktree runtime mergeó `origin/main` (trae B1) después de la última
+  verificación de esta sesión, sin regenerar el cliente. No es parte de este fix ni toca DB/migra
+  nada — es la regeneración local de tipos que corresponde tras cualquier pull de schema
+  (documentado en `AGENTS.md`, "Workflow de cambios a BD"). Con eso, `tsc --noEmit` quedó en
+  **0 errores** en todo el repo, no solo en lo tocado por FIX-ORIGIN.
+
+### Tests
+- **Invariante puro** (`config/__tests__/fix-origin-same-origin.invariant.ts`, `npm run
+  test:fixorigin`, cero DB): 15 checks sobre `isSameOriginBypassApplicable` (prod sin flag → true;
+  dev / test / prod+flag → false) e `isTrustedSameOrigin` (same-origin → true;
+  cross-site/same-site/none → false, nunca cae al fallback; fallback por Referer==Host → true;
+  Referer distinto/ausente/malformado/sin Host → false). Mutación de `NODE_ENV` vía
+  `Object.defineProperty` (Next.js lo declara `readonly` en `global.d.ts` — asignación directa y
+  `delete` no compilan; `Object.defineProperty` es el idioma estándar para esto, cero `any`).
+- **Integración contra Neon real** (`tests/integration/fix-origin-same-origin-config.spec.ts`, in
+  process vía Playwright, mismo patrón que `chatbot-isolation.spec.ts`): siembra 2 orgs efímeras
+  (`BotConfig.organizationId` es `@unique` — un bot por org) con un bot activo y uno inactivo;
+  confirma `isBotServable` → true/false/false para activo/inactivo/inexistente. Teardown por id
+  exacto en `afterAll`.
+- **Gap declarado**: la COMPOSICIÓN de las 3 funciones dentro del `if` de `GET` (que sí compila,
+  pasa lint y tsc) no tiene test automatizado end-to-end en este sprint — por el mismo bloqueo de
+  imports de `route.ts` descripto arriba, ninguna herramienta de este repo puede importar `GET`
+  directo. Cubierto por lectura de código (el `if` son 6 líneas, directamente legibles) y por la
+  verificación en prod que sigue.
+- `.\node_modules\.bin\tsc.cmd --noEmit`: 0 errores (repo entero, tras `prisma generate`).
+- `eslint` sobre los 4 archivos tocados/nuevos: 0 errores, 0 warnings.
+- Sin `git`, sin migración, sin tocar `schema.prisma` ni archivos frozen/de seguridad.
+
+### Verificación humana declarada (Valentino) — el punto real del fix
+Tras deploy: el chat carga en develop-portfolio.netlify.app (config 200, widget levanta) + el
+embed cross-origin de Matsu sigue andando. Esto se verifica en prod — es exactamente lo que este
+fix existe para arreglar, y ningún test de esta sesión reemplaza esa verificación.
+
+---
+
+## DEADLINE-ONFINISH - techo de tiempo en el cierre del stream del chatbot
+
+**Sintoma.** El bot responde, el texto se renderiza completo, pero el input del widget queda
+trabado ~17s mas. Netlify billa `Duration: 30000 ms` EXACTO, dos corridas seguidas. Un numero
+redondo identico no es un proceso que termina: es uno que la plataforma mata al llegar al techo
+(`maxDuration = 30`, `route.ts:9`). El input se destrababa porque se caia la conexion, no porque
+el trabajo terminara.
+
+**Cadena causal** (verificada contra `ai@6.0.177` instalado, no contra la doc): `onFinish`
+(`handleChatRequest.ts`) corre dentro del `flush()` del eventProcessor
+(`node_modules/ai/dist/index.js:7261-7351`), invocado via `notify()` (`index.js:665-674`) con
+**`await callback(event)`**. Por semantica de TransformStream el readable no llega a `done` hasta
+que ese flush resuelve; `useChat` itera `reader.read()` hasta `done` (`index.js:13799`) y recien
+ahi setea `status:'ready'` (`index.js:13815`), lo unico que destraba el textarea
+(`ChatWindow.tsx:568` via `isStreaming` en `useChatbot.ts:402`). **El input del visitante quedaba
+rehen de toda la persistencia post-respuesta.**
+
+Dano verificado en prod: cero filas ASSISTANT en la conversacion exitosa; `ChatbotEvent` sin
+escrituras nuevas desde 2026-07-20. El fallo era invisible porque el reporte del fallo
+(`logChatbotEvent`) es otro write a la misma DB que no responde.
+
+**Por que no alcanzaban las opciones de Prisma.** Ya hay defaults activos (tx interactiva
+`timeout: 5000` / `maxWait: 2000`, `pool_timeout: 10s`). Si alguno hubiera disparado veriamos
+P2028 o P2024; no hay ningun codigo de error. Eso ubica el cuelgue POR DEBAJO de la capa donde
+Prisma mide: socket TCP muerto esperando un read que no vuelve, o contencion de lock
+(`lock_timeout = 0` por defecto = espera infinita). Ninguna opcion de configuracion corta esos
+dos casos: el deadline tiene que ser a nivel JavaScript (`Promise.race` contra un timer).
+
+### Que se hizo
+- **`server/chat/withDeadline.ts` (nuevo)**: `withDeadline()` + `DeadlineExceededError` +
+  `isDeadlineExceeded()` + `createBudget()`. `clearTimeout` en `finally` siempre, y un `.catch()`
+  OBLIGATORIO sobre la operacion abandonada (sin el, su rechazo tardio es un unhandled rejection
+  y Node mata el proceso: el helper empeoraria el problema en vez de arreglarlo).
+- **`onFinish`**: cuerpo en try/catch/finally; los 6 awaits que tocan DB corren con deadline
+  techado al presupuesto. Presupuesto global calculado por `computeHookBudgetMs()`.
+- **`onError`**: mismo tratamiento sobre la compensacion de cupo. Tambien bloquea el cierre (el
+  SDK lo invoca con `await` en el `transform`, `index.js:7113`). `onAbort` NO lo necesita: el SDK
+  lo invoca sin `await` (`index.js:7363`).
+- **`persistentLogger.ts`**: el comentario decia "fire and forget - don't block the request" y
+  era FALSO (el `await` es real). Se corrigio el comentario, no el codigo: hay ~18 callsites que
+  asumen la semantica actual, y en serverless el trabajo async sin await no tiene garantia de
+  completarse. El techo lo pone el llamador.
+
+### Constantes de presupuesto (en `reconcile.ts`, calibrables sin tocar logica)
+
+| Constante | Valor |
+|---|---|
+| `ONFINISH_TOTAL_BUDGET_MS` | 5000 |
+| `PERSIST_TX_DEADLINE_MS` | 2000 |
+| `EVENT_LOG_DEADLINE_MS` | 700 |
+| `QUOTA_COMPENSATION_DEADLINE_MS` | 1500 |
+| `ROUTE_MAX_DURATION_MS` | 30000 (espejo de `route.ts:9`) |
+| `HOOK_SAFETY_MARGIN_MS` | 3000 |
+
+`computeHookBudgetMs(requestElapsedMs)` techa el presupuesto tambien contra el remanente hasta el
+`maxDuration` de la ruta: request de 3s -> 5000ms; LLM lento de 24s -> 3000ms; request de 28s ->
+**0ms** (no se arranca ninguna query, se cierra el stream). Sin esto, 5s fijos sumados a un LLM
+lento volvian a rozar el kill de 30s.
+
+**El retry NO se dispara ante deadline, solo ante error real.** El retry de ONF-1 se diseno para
+el transitorio corto de Neon. Un deadline es otra cosa: la operacion quedo abandonada pero VIVA,
+reteniendo su conexion del pool. Reintentar ahi retendria una segunda. Resultado en el camino que
+estamos viviendo: ~2700ms en vez de 30000ms.
+
+### RIESGO A VIGILAR POST-DEPLOY - envenenamiento progresivo del pool
+`withDeadline` **abandona, no cancela** (Prisma 6 no acepta AbortSignal por query). La tx colgada
+retiene su conexion del pool por el resto de la vida del contenedor. Hoy eso no se nota porque el
+kill a los 30s se lleva el pool entero; **despues de este fix el contenedor sobrevive con el pool
+degradado**. Con `connection_limit` por defecto (`num_physical_cpus * 2 + 1`, ~3-5 en una lambda)
+el pool se agota en pocos requests fallidos del mismo contenedor caliente.
+**Senal a buscar: `P2024` (pool timeout) en los logs.** Seria la primera vez que Prisma nos da un
+codigo de error, y confirmaria este mecanismo. Recuperar la conexion requiere cancelacion real
+(`statement_timeout` / `idle_in_transaction_session_timeout` del lado Neon, o reciclar el
+cliente): toca la connection string y la Neon compartida -> fuera de scope, decision con Franco.
+
+### LA CAUSA RAIZ SIGUE ABIERTA
+**Este sprint NO recupera la persistencia.** Si la causa es un socket muerto o un lock, el widget
+ahora responde rapido y **los mensajes se van a seguir perdiendo**. La diferencia es que el fallo
+pasa de colgado en silencio a visible en el log: la perdida de datos pasa de escandalosa a
+diagnosticable. El sprint de causa raiz se define con el log de la proxima corrida en prod.
+
+### Instrumentacion que cierra el diagnostico
+`chat.onfinish_phases` (un log agregado off-Neon en el `finally`, en todos los caminos): duracion
+y desenlace por fase (`ok`/`deadline`/`error`/`skipped`/`no_budget`), `retrySkipped`, `totalMs`,
+`budgetMs`, `budgetExhausted`, `requestElapsedMsAtHookStart`. Como leerlo:
+- `persist_tx_1: deadline` con las fases previas rapidas -> cuelga la transaccion.
+- un `*_event: deadline` ANTES de la tx -> el problema es la conexion, no un lock. **Ojo: esas
+  fases son condicionales y en trafico normal quedan en `skipped`**, asi que ese discriminador no
+  siempre esta disponible.
+- **`chat.hook_late_settlement` es el discriminador real**: si la operacion abandonada settlea
+  tarde -> conexion viva pero lenta (lock / cold start). Si nunca aparece -> socket muerto.
+  Caveat: Netlify puede congelar el contenedor al cerrar la respuesta, asi que su AUSENCIA no
+  prueba nada; su PRESENCIA si es concluyente.
+- `chat.persist_abandoned`: registro de reconciliacion (identificadores, contadores y LONGITUDES,
+  nunca contenido). Significa desenlace DESCONOCIDO, no "perdido con certeza".
+
+### Cupo al abandonar - PARADA OBLIGATORIA, sin cambios
+La reserva (`tryReserveConversation`) incrementa `conversationsCount`; el `incrementQuota` de
+adentro de la tx se llama SIEMPRE con `isNewConversation: false` y solo acumula tokens/costo. Son
+unidades distintas, no hay doble contabilidad. **Al abandonar: el cupo queda COBRADO** (se
+incremento fuera de la tx abandonada) y se pierden la fila ASSISTANT, los contadores de
+Conversation y los tokens/costo. Si corresponde compensar es decision comercial de Valentino y
+Franco: **este sprint dejo el comportamiento actual sin cambios.**
+
+### Tests y gates
+- `npm run test:deadline` (nuevo, cero DB): 8 bloques. Incluye verificacion REAL de que el timer
+  se limpia (`process.getActiveResourcesInfo()`, tipado en @types/node - cero `any`), que una
+  operacion abandonada que rechaza tarde no produce unhandled rejection, y que `onLateSettle` NO
+  se dispara en el camino sano.
+- Bateria de regresion: `test:onf1`, `test:infra1`, `test:infra2`, `test:c02`, `test:cost1`,
+  `test:utm1` - todos OK.
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 5 archivos: 0 errores (1 warning
+  preexistente, `toolResults` sin usar en la firma de `onFinish`).
+- Sin migracion, sin `git`, sin tocar el widget, `route.ts`, `prisma.ts`, `schema.prisma`, la
+  connection string ni el modulo de seguridad. `forOrg`/scoping por organizationId: byte-identico.
+
+### Verificacion humana declarada (Valentino) - nada de esto lo da por bueno el agente
+Que el input se destrabe rapido en prod real; que la funcion deje de billar 30000 ms; que fase es
+la que vence (sale del log de arriba en la proxima corrida); si los mensajes se persisten o se
+siguen perdiendo; y si aparece `P2024` tras varios requests en el mismo contenedor caliente.
+"Verde != se ve": los tres bugs anteriores de esta superficie (origin same-origin, ghost-box,
+credenciales de Vertex) no aparecian en build, ni en tests, ni en dev, ni en /health.
+
+### Deuda anotada, NO tocada
+- `ROUTE_MAX_DURATION_MS` duplica `maxDuration` de `route.ts:9` (no se puede importar: ese modulo
+  arrastra el barrel `index.server`). Si cambia alla, el colchon queda mal calibrado en silencio.
+- `toolResults` sin usar en la firma de `onFinish` (warning de eslint preexistente).
+- La compensacion de `onAbort` sigue siendo best-effort huerfana: el SDK no espera su promesa.
+- Cancelacion real de la operacion abandonada (ver riesgo del pool).
+
+---
