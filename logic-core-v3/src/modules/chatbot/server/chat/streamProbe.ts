@@ -98,6 +98,89 @@ export function createStreamProbe(conversationId: string, startTime: number): St
 }
 
 /**
+ * STREAM-TIMEOUT (Fase 2) — Contador de chunks del provider, para confirmar o
+ * descartar la hipótesis del cuelgue: **¿Gemini sigue emitiendo chunks después
+ * de terminar la respuesta?**
+ *
+ * POR QUÉ IMPORTA: `resetChunkTimeout()` es la PRIMERA línea del transform del
+ * SDK (`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider —
+ * incluidos los que el SDK descarta enseguida (un `text-delta` con
+ * `delta.length === 0` hace `break` sin enqueue, `:7824-7834`; `stream-start`
+ * hace `return`, `:7794-7797`). Si Gemini sigue emitiendo chunks vacíos o
+ * keepalives, el timer de `chunkMs` se reinicia para siempre y NUNCA vence.
+ * Eso explicaría por qué el `chunkMs` de la Fase 1 no cortó el cuelgue.
+ *
+ * ⚠️ LÍMITE DE ESTA MEDICIÓN, y hay que tenerlo presente al leer el log: este
+ * tally cuenta en `onChunk`, que el SDK invoca AGUAS ABAJO del enqueue. Los
+ * chunks descartados NO llegan acá. O sea:
+ *   - contador que SIGUE SUBIENDO tras el fin del texto → Gemini emite chunks
+ *     visibles de más (hipótesis confirmada, variante "ruido visible");
+ *   - contador ESTANCADO y aun así el `chunkMs` no vence → los chunks existen
+ *     pero el SDK los descarta antes de `onChunk` (hipótesis confirmada,
+ *     variante "ruido invisible" — la más probable);
+ *   - contador estancado Y el `chunkMs` corta → el provider se calló de verdad.
+ * Las dos primeras se distinguen entre sí por el contador; ambas se distinguen
+ * de la tercera por si el stream aborta o no.
+ *
+ * HEARTBEAT en vez de log terminal: el modo de falla es justamente que ningún
+ * hook terminal dispara, así que un resumen emitido al final no se vería nunca.
+ * Se emite periódicamente desde el propio `onChunk`, con throttle para no
+ * inundar el log.
+ */
+export interface ChunkTally {
+  /** Registra un chunk recibido. Emite el heartbeat si toca. */
+  record(chunkType: string): void
+  /** Contadores acumulados, listos para adjuntar a otra emisión. */
+  snapshot(): ProbeExtra
+}
+
+/** Intervalo mínimo entre heartbeats de `chunkFlow`. */
+export const CHUNK_FLOW_HEARTBEAT_MS = 2_000
+
+/** `text-delta` → `chunks_text_delta`. Claves planas y seguras para el log. */
+function tallyKey(chunkType: string): string {
+  return `chunks_${chunkType.replace(/[^a-zA-Z0-9]+/g, '_')}`
+}
+
+export function createChunkTally(
+  probe: StreamProbe,
+  heartbeatMs: number = CHUNK_FLOW_HEARTBEAT_MS,
+): ChunkTally {
+  const counts = new Map<string, number>()
+  let total = 0
+  let lastChunkAt = Date.now()
+  let lastEmitAt = 0
+
+  const snapshot = (): ProbeExtra => {
+    const out: ProbeExtra = {
+      chunks_total: total,
+      // Silencio del provider hasta ESTE instante. Es el número que decide:
+      // si se mantiene chico mientras el stream sigue colgado, el provider
+      // sigue hablando y ningún timeout ENTRE chunks puede cortar.
+      msSinceLastChunk: Date.now() - lastChunkAt,
+    }
+    for (const [type, count] of counts) out[tallyKey(type)] = count
+    return out
+  }
+
+  return {
+    snapshot,
+    record(chunkType) {
+      total += 1
+      counts.set(chunkType, (counts.get(chunkType) ?? 0) + 1)
+      const now = Date.now()
+      // msSinceLastChunk del heartbeat mide el gap ANTES de este chunk.
+      const gapMs = now - lastChunkAt
+      lastChunkAt = now
+      if (!probe.enabled) return
+      if (now - lastEmitAt < heartbeatMs) return
+      lastEmitAt = now
+      probe.probe('chunkFlow', 'mark', { ...snapshot(), gapMs })
+    },
+  }
+}
+
+/**
  * Fallback para callers que no wirearon `ctx.probe` (hoy solo `getTools()`, en
  * `handleChatRequest.ts`, siempre lo pasa — este fallback es defensivo, para
  * cualquier otro call-site presente o futuro). SIEMPRE no-op, sin importar la

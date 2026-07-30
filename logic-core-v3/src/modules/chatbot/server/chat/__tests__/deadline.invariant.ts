@@ -37,6 +37,8 @@ import {
   PERSIST_TX_RETRY_BACKOFF_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   ROUTE_MAX_DURATION_MS,
+  STREAM_CHUNK_TIMEOUT_MS,
+  STREAM_STEP_TIMEOUT_MS,
   computeHookBudgetMs,
 } from '../reconcile.ts'
 
@@ -277,6 +279,40 @@ async function main(): Promise<void> {
   assert.ok(
     retryPath + QUOTA_COMPENSATION_DEADLINE_MS > ONFINISH_TOTAL_BUDGET_MS,
     'con una fase condicional previa el nominal se pasa del techo → el clamp es el que corta',
+  )
+}
+
+// ── 9. STREAM-TIMEOUT: la calibración de stepMs deja vivir a la persistencia ──
+// Pinnea la aritmética documentada en reconcile.ts. Si alguien sube
+// STREAM_STEP_TIMEOUT_MS sin recalcularla, el abort caería tan tarde que
+// `computeHookBudgetMs` recortaría el presupuesto y el turno se perdería igual —
+// el bug exacto que este sprint arregla. Acá falla el test en vez de en prod.
+{
+  // Elapsed real medido en prod con los probes: el request llega a streamText()
+  // a los ~5.1s (todo el pre-LLM). El timer de stepMs arranca ahí.
+  const PRE_LLM_ELAPSED_MS = 5_100
+  const abortAtMs = PRE_LLM_ELAPSED_MS + STREAM_STEP_TIMEOUT_MS
+
+  assert.equal(
+    computeHookBudgetMs(abortAtMs),
+    ONFINISH_TOTAL_BUDGET_MS,
+    `con stepMs=${STREAM_STEP_TIMEOUT_MS} el abort cae a ${abortAtMs}ms y la persistencia ` +
+      'todavía recibe el presupuesto COMPLETO (si esto falla, subieron stepMs de más)',
+  )
+  assert.ok(
+    abortAtMs + ONFINISH_TOTAL_BUDGET_MS + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    'abort + persistencia + colchón entran antes del kill de la plataforma',
+  )
+  // Piso: tiene que sobrevivir holgado a una generación sana de Flash (2-5s).
+  assert.ok(
+    STREAM_STEP_TIMEOUT_MS >= 10_000,
+    'stepMs demasiado bajo: mataría generaciones legítimas lentas',
+  )
+  // chunkMs corta antes que stepMs cuando el provider se calla de verdad —
+  // si no, el techo rápido sería inalcanzable y solo quedaría el reloj de pared.
+  assert.ok(
+    STREAM_CHUNK_TIMEOUT_MS < STREAM_STEP_TIMEOUT_MS,
+    'chunkMs debe ser el corte rápido y stepMs el piso duro, no al revés',
   )
 }
 

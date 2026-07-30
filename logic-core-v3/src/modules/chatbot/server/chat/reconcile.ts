@@ -184,6 +184,47 @@ export function computeHookBudgetMs(requestElapsedMs: number): number {
  */
 export const STREAM_CHUNK_TIMEOUT_MS = 5_000
 
+/**
+ * STREAM-TIMEOUT (Fase 2) — RELOJ DE PARED por step. La red de seguridad que
+ * `chunkMs` no puede ser.
+ *
+ * POR QUÉ HIZO FALTA: con `chunkMs = 5000` deployado, el cuelgue SIGUIÓ. La
+ * causa está en el SDK: `resetChunkTimeout()` es la PRIMERA línea del transform
+ * (`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider, ANTES de
+ * cualquier filtrado — un `text-delta` con `delta.length === 0` hace `break` sin
+ * enqueue (`:7824-7834`) y `stream-start` hace `return` (`:7794-7797`), pero los
+ * dos YA reiniciaron el timer. Si Gemini sigue emitiendo chunks vacíos o
+ * keepalives tras completar la respuesta (hay reportes públicos de eso), el
+ * timer ENTRE chunks se reinicia para siempre y no vence nunca.
+ *
+ * `stepMs` no tiene ese problema: es un `setTimeout` plano armado al entrar a
+ * `streamStep`, ANTES de `doStream` (`:7599`), que ningún chunk resetea. Vence
+ * pase lo que pase. Se re-arma por step y dispara el `stepAbortController` del
+ * run — abortar en cualquier step mata el run entero.
+ *
+ * ARITMÉTICA DEL VALOR (12s), contra los números reales del probe en prod:
+ *   - El request llega a `streamText()` a los ~5.1s (todo el pre-LLM: validación,
+ *     resolve del bot, rate limit, plan+cuota+conversación, persistencia del
+ *     mensaje del visitante, build del prompt). El timer arranca ahí.
+ *   - Abort en ~5.1 + 12 = ~17.1s de elapsed del request.
+ *   - `computeHookBudgetMs(17_100)` = min(5000, 30000 - 17100 - 3000) = **5000**,
+ *     el presupuesto COMPLETO de ONF-2 para persistir. Ese es el techo que fija
+ *     el valor: para no recortarlo, el abort tiene que caer antes de los 22s
+ *     (→ `stepMs <= ~16.9s`); 12s deja margen cómodo.
+ *   - Cierre del turno a ~22.1s → **~8s de aire** antes del kill de 30s.
+ *   - Una respuesta sana de Flash se genera en 2-5s: 12s es ~2.4× ese techo, así
+ *     que no mata generaciones legítimas. Un run multi-step sano (hasta 3 steps
+ *     de 2-5s cada uno) entra holgado, y cada step tiene su propio timer.
+ *
+ * `totalMs` queda SIN setear: `stepMs` ya acota el caso real y `totalMs` mataría
+ * un run multi-step legítimo que sumara varios steps sanos.
+ *
+ * Los dos timeouts son COMPLEMENTARIOS, no redundantes: `chunkMs` corta rápido
+ * (5s) cuando el provider se calla de verdad; `stepMs` es el piso duro para
+ * cuando el provider "habla" pero no termina nunca.
+ */
+export const STREAM_STEP_TIMEOUT_MS = 12_000
+
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────
 
 /** Dónde se detectó que el turno NO entregó una respuesta cobrable. */

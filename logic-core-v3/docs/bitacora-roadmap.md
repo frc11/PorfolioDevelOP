@@ -14466,3 +14466,142 @@ dos respuestas y NO se resuelve leyendo codigo:
 Lo decide el log de la proxima corrida en prod, no una lectura de codigo.
 
 ---
+
+## STREAM-TIMEOUT Fase 2 - reloj de pared + persistencia desde el abort
+
+### La evidencia que decidio la fase: RAMA B, y el chunkMs NO alcanzo
+
+Corrida en prod con la Fase 1 deployada (`chunkMs = 5000`) y `CHATBOT_STREAM_PROBE=1`.
+Conversacion `cms647c2j0001l609kcmprzlm`:
+
+- **DB**: `ChatMessage` = 1 fila, role USER ("hola"). **CERO filas ASSISTANT.** `ChatbotEvent` sin
+  escrituras nuevas desde 2026-07-20: ni `chat.message_completed` ni `chat.persist_error`.
+- **Probes** (completos, seq 1 a 4):
+```
+seq 1 streamText_construct enter 5108ms
+seq 2 streamText_construct exit  5112ms
+seq 3 beforeStreamResponse mark  5113ms
+seq 4 firstChunk           mark  7037ms  chunkType text-delta
+        --------- nada mas ---------
+```
+- Ni `onFinish_enter` ni `onAbort_enter`. **El input SIGUIO trabado: el chunkMs no corto nada.**
+
+=> Rama B (hay que persistir desde el abort) + un hallazgo que obligo a ajustar el diseno.
+
+### Por que el chunkMs no sirvio - CONFIRMADO en el codigo del SDK instalado
+
+`resetChunkTimeout()` es la **PRIMERA linea** del transform del SDK
+(`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider, **antes de todo
+filtrado**. Justo despues:
+- `case "text-delta": if (chunk.delta.length > 0) { enqueue } break` (`:7824-7834`) - un
+  text-delta VACIO se descarta sin enqueue, pero **el timer ya se reinicio**;
+- `if (chunk.type === "stream-start") { ...; return }` (`:7794-7797`) - idem.
+
+O sea: si Gemini sigue emitiendo chunks vacios o keepalives tras completar la respuesta (hay
+reportes publicos de eso), el timer ENTRE chunks se reinicia para siempre y **no vence nunca**.
+**Ningun timeout entre chunks puede cortar este cuelgue.** Hace falta un reloj de pared.
+
+Corolario que hay que tener presente al leer los logs: esos chunks descartados **tampoco llegan a
+nuestro `onChunk`** (el SDK lo invoca aguas abajo del enqueue). Ver "limite de la medicion" abajo.
+
+### 1) STREAM_STEP_TIMEOUT_MS = 12000 - el reloj de pared
+
+`stepMs` NO tiene el problema de `chunkMs`: es un `setTimeout` plano armado al entrar a
+`streamStep`, ANTES de `doStream` (`index.js:7599`), que ningun chunk resetea. Se re-arma por step
+y dispara el `stepAbortController` del run (uno solo: abortar en cualquier step mata el run).
+
+**Aritmetica del valor**, contra los numeros reales del probe:
+- El request llega a `streamText()` a los ~5.1s (todo el pre-LLM). El timer arranca ahi.
+- Abort en ~5.1 + 12 = **~17.1s** de elapsed.
+- `computeHookBudgetMs(17100)` = min(5000, 30000 - 17100 - 3000) = **5000**, el presupuesto
+  COMPLETO de ONF-2 para persistir. Ese techo es el que fija el valor: para no recortarlo el abort
+  tiene que caer antes de los 22s (stepMs <= ~16.9s); 12s deja margen comodo.
+- Cierre del turno a ~22.1s -> **~8s de aire** antes del kill de 30s.
+- Una respuesta sana de Flash se genera en 2-5s: 12s es ~2.4x ese techo. Un multi-step sano
+  (hasta 3 steps de 2-5s, cada uno con su propio timer) entra holgado.
+
+`totalMs` queda SIN setear: mataria un multi-step legitimo. Los dos timeouts son
+COMPLEMENTARIOS: `chunkMs` (5s) corta rapido si el provider se calla de verdad; `stepMs` es el
+piso duro para cuando el provider "habla" pero no termina nunca. La aritmetica quedo pinneada en
+`deadline.invariant.ts` (bloque 9): si alguien sube `stepMs` sin recalcular, el test falla.
+
+### 2) persistTurn - persistencia idempotente desde cualquiera de los dos caminos
+
+El cuerpo de `onFinish` se MOVIO tal cual a `persistTurn(input)`, invocable desde `onFinish`
+(camino normal) o desde `onAbort` (el stream murio por timeout). Mismo deadline, mismo
+presupuesto, mismas fases de ONF-2 - lo unico nuevo es de donde salen texto/finishReason/tokens/
+tool-calls, que ahora entran por parametro. Verificado mecanicamente: **457 lineas movidas
+verbatim, cero eliminaciones**; las unicas 11 lineas agregadas son `source: persistSource` en los
+dos logs de cierre y el `...chunkTally.snapshot()` en `chat.onfinish_phases`.
+
+Para tener el texto en el camino de abort hubo que **acumularlo por nuestra cuenta en `onChunk`**:
+cuando el run muere por timeout el SDK no arma ni entrega el texto (sin `finish-step` no hay
+`steps[]`, y `onFinish` ni siquiera se invoca).
+
+**Idempotencia**: `turnPersisted` se marca SINCRONICAMENTE al entrar, antes de cualquier await.
+Los dos hooks corren en el mismo event loop de la misma instancia, asi que si una carrera
+dispara ambos, el segundo sale por el early-return (`persistTurn_skipped` en el log): cero doble
+escritura y cero doble conteo de cupo. El dedup por `findFirst` de ONF-1 sigue cubriendo el caso
+distinto (commit-ack perdido entre reintentos).
+
+### BEST-EFFORT: la persistencia por abort NO tiene garantia - hay que decirlo asi
+
+El SDK invoca `onAbort` **SIN await**: `onAbort?.({ steps })` (`index.js:7363`), seguido
+inmediatamente de `controller.close()`. En serverless la funcion se congela al cerrar la
+respuesta, asi que esa escritura **corre carrera contra el freeze y puede no completar**.
+
+Se busco una salida y NO la hay: tras un abort no queda step registrado, asi que el `flush` del
+eventProcessor toma su early-return (`if (recordedSteps.length === 0 ...) return`,
+`index.js:7264-7273`) y **nunca llama a `onFinish`** - el unico hook que el SDK si espera. No se
+uso `after()` de Next 16 ni `waitUntil` (no verificados en este entorno). **Es best-effort, no una
+garantia.** Si falla, el rastro queda en `chat.persist_abandoned` / `chat.onfinish_phases` con
+`source: "onAbort"`.
+
+### 3) Instrumentacion: contador de chunks con heartbeat
+
+`createChunkTally` (en `streamProbe.ts`, extendiendo el probe existente) cuenta chunks por tipo y
+emite `chunkFlow` cada 2s desde el propio `onChunk`, con `chunks_total`, contadores por tipo y
+`msSinceLastChunk`. **Heartbeat y no resumen final a proposito**: el modo de falla es justamente
+que ningun hook terminal dispara, asi que un log al cierre no se veria nunca. Solo tipos y
+contadores, jamas contenido.
+
+**LIMITE DE LA MEDICION** (importante al leer el log): el tally cuenta en `onChunk`, que el SDK
+invoca AGUAS ABAJO del enqueue, asi que **los chunks descartados no llegan aca**. Lecturas:
+- contador que SIGUE SUBIENDO tras el fin del texto -> Gemini emite chunks visibles de mas
+  (hipotesis confirmada, variante "ruido visible");
+- contador ESTANCADO y aun asi el `chunkMs` no vence -> los chunks existen pero el SDK los
+  descarta antes de `onChunk` (hipotesis confirmada, variante "ruido invisible", la mas probable);
+- contador estancado Y el `chunkMs` corta -> el provider se callo de verdad.
+
+### CUPO - revisado, NO cambia. Pero hay un subreporte de costo que hay que decidir
+
+- `conversationsCount` (la unidad que enforce el plan): **sin cambios**. La reserva del inicio
+  sigue igual y el `incrementQuota` de adentro de la tx sigue con `isNewConversation: false`.
+- La compensacion en `onAbort` no cambio de criterio: con texto entregado (`ttfbAt !== null`)
+  `shouldCompensateQuota` devuelve false -> **el cupo se cobra**, que es lo correcto (el visitante
+  recibio la respuesta). Va ANTES de `persistTurn` a proposito: si compensara, descarta la fila y
+  deja `conversationDiscarded` en true, que es justo lo que `persistTurn` mira.
+- **SUBREPORTE, a validar por Valentino y Franco**: un turno persistido por el camino de abort
+  guarda **tokensIn/tokensOut/costUsd = 0**, porque sin `finish-step` el provider no entrega
+  `usage`. Vertex SI facturo ese turno. Se eligio el 0 auditable (con `source: "onAbort"` en el
+  log para reconciliar) antes que inventar una estimacion en una tabla de costo. Antes de este
+  sprint no se registraba NADA, asi que no es una regresion - pero es una decision de negocio, no
+  del agente.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero).
+- `eslint` sobre los 4 archivos: **0 errores, 0 warnings** (el warning preexistente de
+  `toolResults` desaparecio: se saco de la firma de `onFinish`, donde nunca se usaba).
+- `npm run test:deadline` con el bloque 9 nuevo (calibracion de stepMs) + bateria completa:
+  onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4 - todos OK.
+- `prisma migrate status`: up to date. Sin migracion, sin git, sin tocar frozen / cliente /
+  connection string / modulo de seguridad. Scoping por organizacion byte-identico.
+- Probes de PROBE-STREAM: ACTIVOS. Son el instrumento de verificacion.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe rapido en prod; que la funcion deje de billar 30000 ms; que aparezcan
+filas ASSISTANT en `ChatMessage`; **si la persistencia por abort llega a completar o la mata el
+freeze** (best-effort, ver arriba); si el `stepMs` de 12000 esta bien calibrado contra trafico
+real. "Verde != se ve".
+
+---
