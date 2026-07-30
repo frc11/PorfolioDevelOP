@@ -561,3 +561,105 @@ npm install
 npm run start:qa      # buildea y sirve en :3001
 # luego http://127.0.0.1:3001/styleguide
 ```
+
+---
+
+## CONSOLIDACIÓN — las tres ramas hacia `redesign/home` · 2026-07-30
+
+Decisión de Franco: **cero merges a `main` hasta el final del rediseño**. Producción
+se queda como está y la decisión se toma con el trabajo terminado a la vista. Para
+que las tres ramas paralelas no diverjan hasta volverse un merge caro, se unen acá:
+`redesign/home` pasa a ser **la rama única del proyecto**.
+
+### Qué se unió
+
+| Rama | Qué traía |
+|------|-----------|
+| `fix/home-sanidad` | B0 + B0-bis: copy del home, `lang`, meta, HDRI self-hosteado, three fuera del bundle inicial (−42,8% de JS inicial) |
+| `fix/fonts-geist-scope` | las variables de `next/font` movidas al scope correcto |
+| `redesign/home` (base) | B1: tokens, componentes del sistema de diseño, `/styleguide` |
+
+### Conflicto 1 — `Hero.tsx` (merge de `fix/home-sanidad`)
+
+**Los dos lados.** `main` había agregado el FIX-GHOST-BOX (gate del `EffectComposer`
+hasta el primer sizing real del canvas, para no pintar el cuadrado oscuro 300×150
+durante la ventana de montaje) **dentro** del `HeroCanvas` inline de `Hero.tsx`.
+`fix/home-sanidad`, en paralelo, extrajo ese mismo bloque a un `HeroCanvas.tsx`
+propio para sacar three/fiber/drei/postprocessing del bundle inicial — pero partió
+de la versión **previa** al fix. Git no lo vio como un conflicto de una línea: vio
+400 líneas movidas contra 40 líneas cambiadas.
+
+**Cómo se resolvió, conservando los dos.** `Hero.tsx` queda con la extracción (sin
+un solo import de three, `HeroCanvas` por `next/dynamic ssr:false`) y el
+FIX-GHOST-BOX se **portó** al nuevo `HeroCanvas.tsx`: `onSized` en
+`HeroCanvasSizeSync` con guard de una sola vez (`sizedRef`), `postFxReady` gateando
+el `EffectComposer`, y el dep array actualizado con `onSized`.
+
+**Verificado:** el delta aplicado a `HeroCanvas.tsx` es línea por línea el mismo que
+`main` había aplicado a `Hero.tsx`. Nada del fix se perdió y nada de la extracción
+se revirtió.
+
+### Conflicto 2 — `layout.tsx` (merge de `fix/fonts-geist-scope`)
+
+**Los dos lados.** Mismo elemento `<html>`. `fix/home-sanidad` había cambiado
+`lang="en"` → `lang="es"`; `fix/fonts-geist-scope` movió el `className` con las
+variables de Geist del `<body>` al `<html>` (y dejó el porqué comentado).
+
+**Cómo se resolvió, por unión.** El `<html>` queda con `lang="es"` **y** el
+`className` con las dos variables **y** `suppressHydrationWarning` **y** los dos
+comentarios (el del scroll-lock y el del scope de las variables). El `<body>` queda
+solo con `antialiased`. Se conservan también, del mismo merge, el `alternates.canonical`
+y la meta description sin el claim `+47`.
+
+### El workaround de fuentes de B1, colapsado
+
+B1 había duplicado `--font-ds-sans` / `--font-ds-mono` en un bloque
+`[data-ds-theme]` de `globals.css` — existía **solo** para esquivar el bug de scope:
+las variables vivían en el `<body>`, más abajo que `:root`, así que la declaración
+del `@theme` quedaba inválida. Con el arreglo adentro, `next/font` deja las
+variables en el `<html>` = el mismo elemento donde Tailwind emite `@theme`, y esa
+segunda copia pasó a ser redundante. Se quitó: **una sola fuente de verdad, la del
+`@theme`**.
+
+Verificado después de quitarlo, en `/styleguide`: los 25 elementos `font-ds-sans`
+resuelven `Geist, "Geist Fallback"` y los 200 `font-ds-mono` resuelven
+`"Geist Mono", "Geist Mono Fallback"`. Ningún componente del sistema de diseño
+perdió la fuente. No hizo falta revertir.
+
+### Verificación de la consolidación
+
+| Chequeo | Resultado |
+|---|---|
+| `npm install` (no `npm ci`) | ok |
+| `npm run build` | ✅ exit 0 |
+| `npx tsc --noEmit` | ✅ 0 errores |
+| `getComputedStyle(document.body).fontFamily` en `/` | `Geist, "Geist Fallback"` |
+| ídem en `/styleguide` | `Geist, "Geist Fallback"` |
+| elemento `font-mono` | `"Geist Mono", "Geist Mono Fallback"` |
+| `--font-ds-sans` leída en `:root` (sin el workaround) | `"Geist","Geist Fallback"` |
+| mojibake en archivos del home | cero (los 8 casos vivos son de landings → B0.5 T4) |
+| chunks de three en el documento inicial del home | cero de 23 scripts |
+| `/styleguide` | 200 |
+| errores de consola en `/` y `/styleguide` | cero |
+
+**Nota sobre el hero 3D.** No se pudo verificar visualmente: el pane del navegador
+no estaba compositando (`document.hidden === true`, **0 frames de rAF en 1 segundo**),
+así que la coreografía del intro nunca arrancó y el canvas quedó en el default
+300×150 de R3F. Esa medición es **nula**, no un hallazgo — el `<section>` del hero
+sí mide 1280×720. El port del FIX-GHOST-BOX se verificó estáticamente (delta
+idéntico al de `main`). **Queda para la verificación humana de Franco en el deploy
+preview.**
+
+### Efecto sobre el Gate 1
+
+La **decisión 3 del Gate 1** ("el bug de Geist") queda **resuelta**: `font-sans` y
+`font-mono` ahora sí aplican Geist en todo el sitio. La decisión 2 (familia del
+display: Geist vs Space Grotesk) deja de estar viciada — la comparación ya se hace
+contra el sitio mostrando su tipografía real y no Segoe UI. Las decisiones 1 y 4-8
+siguen abiertas.
+
+### Los dos que las tres ramas siguen sin conocer
+
+- `fix/motion-sanidad-mobile` existe y **ya ejecutó B0.6 completo**. Ver la entrada
+  de la Fase 3.
+- `main` no recibe nada de esto. Sigue siendo lo que hay en producción.
