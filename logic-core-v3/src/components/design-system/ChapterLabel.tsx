@@ -20,7 +20,7 @@ interface ChapterLabelProps {
  */
 export function ChapterLabel({ number, title, className }: ChapterLabelProps) {
   return (
-    <p className={cn('font-mono text-ds-eyebrow uppercase text-ds-fg-muted', className)}>
+    <p className={cn('font-ds-mono text-ds-eyebrow uppercase text-ds-fg-muted', className)}>
       <span aria-hidden="true">(&nbsp;&nbsp;</span>
       {number}
       {title ? (

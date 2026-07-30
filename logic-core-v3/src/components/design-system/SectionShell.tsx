@@ -67,7 +67,10 @@ export function SectionShell({
       ref={ref}
       id={id}
       data-ds-theme={theme}
-      className={cn('relative bg-ds-canvas py-ds-section text-ds-fg', className)}
+      // `font-ds-sans` acá y no en cada pieza: así el texto que no declara
+      // familia propia (Lead, párrafos de cuerpo) hereda Geist en vez de caer
+      // en la fuente del sistema operativo.
+      className={cn('relative bg-ds-canvas py-ds-section font-ds-sans text-ds-fg', className)}
     >
       {contained ? (
         <div className="mx-auto w-full max-w-ds-page px-ds-gutter">{children}</div>

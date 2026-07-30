@@ -73,6 +73,11 @@
   /* ── Escala tipográfica ─────────────────────────────────────────────────
      Sin familias nuevas: Geist (sans) y Geist Mono, ya cargadas en
      layout.tsx. El display se distingue por escala y tracking.
+
+     ⚠ Al agregar un token `--text-ds-*` acá, agregarlo TAMBIÉN a
+     `DS_FONT_SIZE_CLASSES` en `src/lib/utils.ts`. tailwind-merge no distingue
+     `text-<nombre>` tamaño de `text-<nombre>` color y descarta uno de los dos
+     sin avisar: el componente pierde el tamaño o el color, sin error de build.
      ───────────────────────────────────────────────────────────────────── */
   --text-ds-display-xl: clamp(3.25rem, 8vw, 7rem);
   --text-ds-display-xl--line-height: 0.98;
@@ -134,6 +139,39 @@
      oscuro el botón es casi blanco, en crema es casi negro — el valor tiene
      que invertirse con el tema, así que vive en la capa semántica. */
   --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+
+  /* ── Familias ───────────────────────────────────────────────────────────
+     Declaradas acá solo para que Tailwind genere `font-ds-sans` /
+     `font-ds-mono`. El valor REAL se re-declara abajo en `[data-ds-theme]`:
+     `next/font` define `--font-geist-sans` con una clase en el <body>, no en
+     `:root`, así que un `var(--font-geist-sans)` resuelto a nivel `:root` queda
+     inválido y hereda vacío hacia abajo. Ver la nota del bloque siguiente.
+     ───────────────────────────────────────────────────────────────────── */
+  --font-ds-sans: var(--font-geist-sans);
+  --font-ds-mono: var(--font-geist-mono);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FAMILIAS DEL SISTEMA — REDISEÑO B1
+   Re-declaración en un scope que está DEBAJO del <body>, que es donde
+   `next/font` deja `--font-geist-sans` / `--font-geist-mono`.
+
+   Por qué hace falta: un custom property se resuelve en el elemento donde se
+   declara. `--font-ds-sans` declarado en `:root` intenta leer
+   `--font-geist-sans`, que en `:root` no existe → queda inválido, y ese valor
+   inválido es el que heredan todos los descendientes, incluso los que sí tienen
+   `--font-geist-sans` definido. Declarándolo acá se resuelve en el lugar
+   correcto y devuelve `Geist, "Geist Fallback"` (verificado en runtime).
+
+   ⚠ Esta es exactamente la razón por la que `--font-sans` y `--font-mono` del
+   `@theme` original resuelven VACÍO en todo el sitio, y por la que las clases
+   `font-sans` / `font-mono` hoy no aplican Geist en ninguna página. Es
+   pre-existente, idéntico en `main`, y arreglarlo cambia la tipografía de todo
+   el sitio — no es asunto de este bloque. Documentado en la bitácora.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-ds-theme] {
+  --font-ds-sans: var(--font-geist-sans);
+  --font-ds-mono: var(--font-geist-mono);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

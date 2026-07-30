@@ -355,3 +355,209 @@ Nada bloqueante para S3. Se suma al Gate 1:
 
 1. **La sombra del control en tema crema** (punto 1 de arriba).
 2. **La flecha: icono o carácter en el copy** (`withArrow`).
+
+---
+
+## B1-S3 — Styleguide · 2026-07-30 · CIERRE DEL BLOQUE B1
+
+Commit: `feat(design-system): styleguide con las 6 secciones y opciones para Gate 1`
+
+**La ejecución autónoma termina acá.** El repo queda en `redesign/home`, sin
+mergear. Lo que sigue necesita el Gate 1.
+
+### Qué se hizo
+
+`/styleguide` en `src/app/styleguide/` — 10 archivos, 1.176 líneas, el más largo
+202 (`ComponentStates.tsx`). `noindex, nofollow, nocache` por metadata, verificado
+en el HTML servido. Cinco bloques más el esqueleto del home:
+
+| Bloque | Qué muestra |
+|---|---|
+| 01 Paleta | Los 16 tokens de color en swatches. Cada swatch **lee su propio valor del DOM** con `getComputedStyle`, así que no puede desincronizarse de `globals.css`. La capa semántica va dos veces, montada en dark y en crema, para ver la inversión sobre el mismo componente |
+| 02 Acentos | Las **dos permutaciones** lado a lado, cada una en uso real: asignación desnuda, `MonoLabel` con tick, `DataStat` acentuado y las cuatro filas de servicio |
+| 03 Tipografía | La escala completa con copy real del home, más **Geist vs Space Grotesk** en el mismo titular. Más un aviso y un tercer especimen: lo que el sitio renderiza HOY (ver hallazgo 1) |
+| 04 Componentes | Los 10 de S2. Los interactivos van dos veces: vivos y con el estado forzado, para comparar normal/hover/active/focus-visible/disabled de un vistazo. También `loading` y las 4 variantes de `padding` de `Surface` |
+| 05 Las 6 secciones | Esqueleto a ancho completo, con la arquitectura de temas y el copy real. La lámina de producto va dentro de S3 |
+
+**Las dos permutaciones sin un solo hex hardcodeado.** Cada opción se expresa como
+"a este servicio le toca el token de aquel otro" (`Record<ServiceAccent,
+ServiceAccent>`), así que el styleguide sigue consumiendo los tokens del sistema.
+Cyan queda en web development en las dos; los otros tres rotan.
+
+**La fuente de prueba se carga solo en esta página.** `Space_Grotesk` se declara
+en `_components/TypographyBlock.tsx`, no en `app/layout.tsx`: en el App Router
+`next/font` preloadea por ruta. Si se descarta, se borra el archivo y no queda
+nada colgado.
+
+**La lámina de producto es CSS puro.** Marco con canto superior iluminado y sombra
+corta de dos capas (el mismo relieve del control primario), chrome de dispositivo,
+sidebar y cuerpo en wireframe de barras neutras, y un cartel
+`[CAPTURA DEL PANEL — PENDIENTE DE FRANCO]`. Sin imágenes externas, sin blur, y
+**sin ninguna cifra**: es el encuadre, no una captura falsa.
+
+### Dos bugs encontrados y corregidos
+
+Los dos aparecieron **midiendo el DOM**, no leyendo el código: el build, `tsc` y
+`eslint` estaban verdes con los dos adentro.
+
+**Bug 1 — `twMerge` borraba media escala tipográfica.** `tailwind-merge` no puede
+saber si `text-<nombre-custom>` es un tamaño o un color: los dos utilities se
+escriben igual. Los clasificaba en el mismo grupo y **descartaba uno**. Medido en
+runtime, antes del fix:
+
+| Componente | Clase que desaparecía | Efecto real |
+|---|---|---|
+| `CtaButton` primario | `text-ds-canvas` | `color` = `rgb(237,233,225)`, **el mismo que su fondo** — texto invisible |
+| `Eyebrow` | `text-ds-eyebrow` | 16px sans sin tracking, en vez de 12px con .18em |
+| `MonoLabel` / `ChapterLabel` | `text-ds-eyebrow` | idem |
+| `Lead` | `text-ds-lead` | 16px en vez de `clamp(1.125rem…)` |
+| `DataStat` | `text-ds-data` | perdía la escala de dato |
+| `DisplayHeading` | `text-ds-fg` | tapado por herencia, no se veía |
+
+Arreglado en la raíz: `cn()` ahora usa `extendTailwindMerge` declarando los siete
+tokens `--text-ds-*` como grupo `font-size`. **Regresión medida sobre 5.615 strings
+de `className` reales del repo** (excluyendo el sistema nuevo), sueltos y en pares
+base+override: **0 diferencias** contra el `twMerge` por defecto. Extender el
+config solo agrega nombres que reconocer.
+
+**Bug 2 — los componentes no renderizaban Geist.** Consecuencia del hallazgo 1 de
+abajo. Arreglado con un alias del sistema (`--font-ds-sans` / `--font-ds-mono`)
+declarado en un scope `[data-ds-theme]`, que está **debajo del `<body>`** — que es
+donde `next/font` deja las variables. Verificado en runtime: `Geist` y
+`Geist Mono` resuelven. Los componentes pasaron de `font-sans`/`font-mono` a
+`font-ds-sans`/`font-ds-mono`, y `SectionShell` fija la familia base para que el
+texto de cuerpo la herede. **No se tocó `--font-sans` ni `--font-mono`**: eso
+cambiaría la tipografía de todo el sitio.
+
+### Qué se midió
+
+| Chequeo | Resultado |
+|---|---|
+| `npm run build` | ✅ verde. `/styleguide` prerenderizada como estática (`○`) |
+| `npx tsc --noEmit` | ✅ 0 errores |
+| `npx eslint` sobre `src/app/styleguide/`, `design-system/`, `lib/utils.ts` | ✅ 0 problemas |
+| `/styleguide` responde | ✅ HTTP 200 |
+| `noindex` | ✅ `<meta name="robots" content="noindex, nofollow, nocache"/>` en el HTML servido |
+| Sin links entrantes | ✅ `grep` de "styleguide" en todo `src/`, `public/`, `netlify/` y configs: solo 3 menciones, las tres en comentarios. Ningún `<Link>`, ningún `href`, ninguna entrada de navegación |
+| Fuera del sitemap | ✅ **no existe ningún sitemap ni robots** en el repo (`sitemap.ts`, `robots.ts`, `public/sitemap.xml`, `public/robots.txt`: ninguno). No se creó ninguno — está fuera de scope |
+| 1440×900 | ✅ sin overflow horizontal, 1 solo `<h1>`, las 43 superficies con radio `0px` |
+| 390×844 | ✅ **0 elementos desbordando** el viewport. display-xl baja a 52px, lead a 18px, eyebrow 12px, CTA de 50px de alto (target táctil cómodo). Los grids colapsan a 1–2 columnas |
+| Inversión de tema | ✅ S1 `#0d0b09` · S2 `#f2eee6` · S3 `#0d0b09` · S4 `#0d0b09` · S5 `#f2eee6` · S6 `#0d0b09` — exactamente la arquitectura pedida, y los tokens semánticos se reapuntan dentro de cada scope |
+| **Teclado (diferido de S2)** | ✅ `Tab` cae en el `CtaButton`, `:focus-visible` matchea, outline `2px solid rgb(237,233,225)` con offset 2px. En el mismo elemento: radio 9px, canto superior `rgba(255,255,255,.85)`, y la sombra de dos capas exacta del token |
+| Glassmorphism | ✅ 3 elementos con `backdrop-filter` en la página, los 3 del chrome del sitio actual (Navbar, launcher del chat, un panel flotante). **Ninguno dentro del `<main>` del styleguide** |
+| Errores de consola | ✅ ninguno, en `/styleguide` y en las 5 páginas públicas |
+| Diff del CSS compilado vs `main` | ✅ 101 fragmentos nuevos, **cero removidos, cero alterados, cero reordenados**. `--font-sans` y `--font-mono` del `@theme` original quedan idénticos |
+| Home + 4 landings tras los cambios | ✅ conteos de elementos y visibles iguales a la medición de S1, sin overflow, tokens viejos intactos, y `[data-ds-theme]` = **0** en todas: el scope del sistema no se filtra al sitio |
+
+### Qué NO se hizo, y por qué
+
+**Sigue sin haber capturas de pantalla.** El pane del browser no se despliega en
+esta sesión sin supervisión, así que la página no compone frames y `screenshot`
+falla por timeout. Todo lo visual se verificó midiendo el DOM: colores computados,
+tamaños de fuente resueltos, tracking, familias reales, radios, geometría de
+overflow y estado de foco. Eso es lo que encontró los dos bugs — pero **nadie miró
+píxeles en todo el bloque B1**. Es la limitación más importante de este cierre.
+
+**El aviso tipográfico y los `[PENDIENTE]` quedaron a la vista** en la página. No
+se limpiaron: son el punto.
+
+**No se creó sitemap ni robots.txt** aunque no existen. Está fuera de scope (era
+tarea de B0.5, que no está mergeado).
+
+**No se sacó el chrome del sitio de `/styleguide`.** El Navbar y el launcher del
+chat se renderizan encima, porque `/styleguide` no es ruta de portal. Agregarla a
+`PORTAL_PREFIXES` era tocar un archivo compartido por una comodidad. El intro del
+Preloader **no** corre ahí (verificado: no está en `MARKETING_ROUTES` y no es `/`).
+
+**`CtaButton` sigue sin navegar** y las secciones del esqueleto no tienen motion
+ni 3D. Es maqueta de estructura y jerarquía; el cableado es de B2.
+
+**La numeración de capítulos del sprint va 01 → 03**, sin 02 (S2 es `( 01 )` y S3
+es `( 03 )`). Se reprodujo tal cual está escrito, sin "arreglarlo". Ver decisión 4.
+
+### Hallazgos fuera de scope
+
+1. **El sitio público no está renderizando Geist. Ninguna página.** El `@theme`
+   declara `--font-sans: var(--font-geist-sans)` en `:root`, pero `next/font` deja
+   `--font-geist-sans` en una clase del `<body>`. Un custom property se resuelve en
+   el elemento donde se declara: en `:root` la variable no existe, el valor queda
+   **inválido**, y ese valor inválido es el que heredan todos los descendientes —
+   incluso los que sí tienen `--font-geist-sans` definido. Resultado: `font-sans` y
+   `font-mono` no aplican nada y todo cae en la fuente de interfaz del sistema
+   operativo (Segoe UI en Windows). Verificado en runtime (`--font-sans` resuelve
+   vacío) y en el CSS compilado de `main` — **es pre-existente e idéntico en
+   `main`**, no lo introdujo este bloque. No se arregló porque cambia la tipografía
+   de todo el sitio de golpe, lo cual no es una decisión de B1. El styleguide lo
+   avisa y muestra el especimen para que se vea.
+
+2. **El launcher del chat está en `opacity: 0` en modo normal** (ya reportado en
+   S1). `src/modules/chatbot/components/LogicCompanion.tsx:199`.
+
+3. **`SectionTransition.tsx` es código muerto** (S1). Se borra en el bloque final.
+
+4. **La numeración de capítulos del sprint salta el 02.** Puede ser deliberado (hay
+   6 secciones y solo algunas llevan capítulo) o un typo del documento.
+
+5. **`next.config.ts` ignora tipos y lint en el build**, y Next 16.2.9 ya avisa que
+   la clave `eslint` no está soportada.
+
+6. **El documento de sprint `docs/sprints/sprint-b1-sistema-diseno.md` no existe**
+   en el repo (ver la nota de arranque arriba).
+
+---
+
+## GATE 1 — lo que Franco tiene que decidir
+
+Ordenado por lo que bloquea a B2.
+
+### Bloquean B2
+
+1. **Permutación de acentos.** `/styleguide#acentos`. Los mismos cuatro hex, dos
+   repartos. Hoy los tokens tienen la **A**. Cambiar a B es editar cuatro hex en
+   `globals.css`; ningún componente se toca.
+   - **A (código actual):** web = cyan `#06b6d4` · ia = verde `#10b981` · automation = ámbar `#f59e0b` · software = violeta `#8b5cf6`
+   - **B (CLAUDE.md):** web = cyan `#06b6d4` · ia = violeta `#8b5cf6` · automation = verde `#10b981` · software = ámbar `#f59e0b`
+
+2. **Familia del display.** `/styleguide#tipografia`. Geist (ya cargada) o Space
+   Grotesk (de prueba, solo en esa página). Space Grotesk la eligió el ejecutor:
+   el sprint pedía "una grotesca con más carácter" sin nombrar ninguna. Cambiarla
+   por otra es un `import` de una línea.
+
+3. **El bug de Geist (hallazgo 1).** Esta decisión está **antes** que la 2: si
+   `font-sans` no aplica, la comparación de familias se hace sobre un sitio que hoy
+   muestra Segoe UI. Tres caminos: arreglarlo en el bloque final del rediseño,
+   arreglarlo ya como sprint aparte, o dejarlo y decidir la tipografía sabiendo que
+   el sitio actual no la usa.
+
+### No bloquean, pero conviene resolverlas en el mismo Gate
+
+4. **Sombra del control en tema crema.** `--shadow-ds-control` es un valor único
+   para los dos temas y sus dos capas son negras. En crema el botón primario es
+   casi negro y la sombra funciona como canto duro — la intención del relieve —
+   pero pesa más que en oscuro. Se dejó el valor del sprint sin inventar un segundo.
+
+5. **La flecha del CTA: icono o carácter.** El copy trae «… WhatsApp →».
+   `CtaButton` la pinta como `<ArrowRight>` de Lucide y el styleguide pasa el texto
+   sin el `→`. Se apaga con `withArrow={false}`.
+
+6. **Numeración de capítulos** (hallazgo 4): ¿el salto 01 → 03 es a propósito?
+
+7. **Los contrastes de S5 y las bios.** Están en placeholder porque el sprint no
+   los define. Dato útil: `WhyDevelOP.tsx` ya tiene material — cuatro cards
+   (Velocidad Absoluta, Cero Costos Ocultos, Soporte Directo, Propiedad Total) y un
+   bloque "AGENCIAS TRADICIONALES / 76 DÍAS". **No se importó**: son cuatro y no
+   tres, no están escritas como contrastes, y el "76" es una cifra sin verificar —
+   justo del tipo que B0.5 está sacando del sitio.
+
+8. **Mirar la página con ojos propios.** Nadie vio píxeles en todo B1 (ver arriba).
+   Antes de aprobar el styleguide conviene abrir `/styleguide` en el navegador, a
+   1440 y a 390.
+
+### Cómo verla
+
+```
+cd logic-core-v3
+npm install
+npm run start:qa      # buildea y sirve en :3001
+# luego http://127.0.0.1:3001/styleguide
+```

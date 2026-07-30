@@ -23,7 +23,7 @@ export function Eyebrow({ children, accent, as = 'p', className }: EyebrowProps)
   return (
     <Tag
       className={cn(
-        'font-mono text-ds-eyebrow uppercase',
+        'font-ds-mono text-ds-eyebrow uppercase',
         accent ? accentTextClass[accent] : 'text-ds-fg-muted',
         className,
       )}

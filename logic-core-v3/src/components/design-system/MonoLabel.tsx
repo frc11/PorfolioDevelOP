@@ -22,7 +22,7 @@ export function MonoLabel({ children, accent, tick = false, className }: MonoLab
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-2 font-mono text-ds-eyebrow uppercase text-ds-fg-muted',
+        'inline-flex items-center gap-2 font-ds-mono text-ds-eyebrow uppercase text-ds-fg-muted',
         className,
       )}
     >

@@ -20,7 +20,7 @@ export function DataStat({ value, label, accent, className }: DataStatProps) {
     <div className={cn('flex flex-col gap-2', className)}>
       <span
         className={cn(
-          'font-mono text-ds-data tabular-nums',
+          'font-ds-mono text-ds-data tabular-nums',
           accent ? accentTextClass[accent] : 'text-ds-fg',
         )}
       >

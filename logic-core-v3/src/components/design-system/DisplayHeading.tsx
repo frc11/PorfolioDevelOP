@@ -33,7 +33,7 @@ export function DisplayHeading({
   return (
     <Tag
       id={id}
-      className={cn('font-sans font-medium text-balance text-ds-fg', sizeClass[size], className)}
+      className={cn('font-ds-sans font-medium text-balance text-ds-fg', sizeClass[size], className)}
     >
       {children}
     </Tag>
