@@ -266,15 +266,6 @@ const ScrollingTextMarquee = () => {
         let velocityBoost = 0;
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                isVisible = entry.isIntersecting;
-            },
-            { threshold: 0 },
-        );
-
-        observer.observe(section);
-
         // Single RAF loop drives scroll progress, parallax, background interpolation and marquee speed.
         const paintFrame = (time: number) => {
             const deltaSeconds = Math.min((time - lastTime) / 1000, 0.05);
@@ -324,14 +315,51 @@ const ScrollingTextMarquee = () => {
             }
 
             lastScrollY = window.scrollY;
+
+            if (isVisible) {
+                frameId = window.requestAnimationFrame(paintFrame);
+            } else {
+                frameId = 0;
+            }
+        };
+
+        // El rAF vive DENTRO del gate de visibilidad. Antes se re-agendaba siempre —
+        // el observer gateaba el trabajo, no el loop — así que la sección seguía
+        // corriendo a 60 fps y leyendo window.scrollY fuera de pantalla.
+        const startLoop = () => {
+            if (frameId) return;
+            // Rebasar ambos relojes: sin esto, el primer frame de vuelta al viewport
+            // ve un delta y una velocidad de scroll acumulados y el marquee pega un
+            // salto de velocidad.
+            lastTime = performance.now();
+            lastScrollY = window.scrollY;
             frameId = window.requestAnimationFrame(paintFrame);
         };
 
-        frameId = window.requestAnimationFrame(paintFrame);
+        const stopLoop = () => {
+            if (!frameId) return;
+            window.cancelAnimationFrame(frameId);
+            frameId = 0;
+        };
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isVisible = entry.isIntersecting;
+
+                if (isVisible) {
+                    startLoop();
+                } else {
+                    stopLoop();
+                }
+            },
+            { threshold: 0 },
+        );
+
+        observer.observe(section);
 
         return () => {
             observer.disconnect();
-            window.cancelAnimationFrame(frameId);
+            stopLoop();
         };
     }, []);
 

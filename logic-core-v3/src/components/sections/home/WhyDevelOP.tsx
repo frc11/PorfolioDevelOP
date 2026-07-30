@@ -865,7 +865,7 @@ function MainNodesVisual() {
                 animate={shouldSimplify ? { strokeDashoffset: 0 } : { strokeDashoffset: [24, 0] }}
                 transition={{
                   duration: shouldSimplify ? 0.01 : 1.2,
-                  repeat: Infinity,
+                  repeat: shouldSimplify ? 0 : Infinity,
                   ease: 'linear',
                   delay: shouldSimplify ? 0 : satellite.delay,
                 }}
@@ -882,7 +882,7 @@ function MainNodesVisual() {
             animate={shouldSimplify ? { y: 0 } : { y: [-5, 5, -5] }}
             transition={{
               duration: shouldSimplify ? 0.01 : 4.8,
-              repeat: Infinity,
+              repeat: shouldSimplify ? 0 : Infinity,
               ease: 'easeInOut',
               delay: shouldSimplify ? 0 : satellite.delay,
             }}
@@ -894,17 +894,17 @@ function MainNodesVisual() {
         <motion.div
           className="relative z-10 flex h-32 w-32 flex-col items-center justify-center rounded-full border border-cyan-400/40 bg-[#020617]/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(34,211,238,0.2)] md:h-40 md:w-40 md:shadow-[0_0_80px_rgba(34,211,238,0.25)]"
           animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.05, 1], boxShadow: ['0 0 30px rgba(34,211,238,0.1)', '0 0 60px rgba(34,211,238,0.3)', '0 0 30px rgba(34,211,238,0.1)'] }}
-          transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
         >
           <motion.div
             className="pointer-events-none absolute -inset-2 rounded-full border border-cyan-400/30 md:-inset-3"
             animate={shouldSimplify ? { scale: 1, opacity: 0.22 } : { scale: [1, 1.4], opacity: [0.6, 0] }}
-            transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: Infinity, ease: 'easeOut' }}
+            transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeOut' }}
           />
           <motion.div
             className="pointer-events-none absolute -inset-5 rounded-full border border-cyan-400/20 md:-inset-7"
             animate={shouldSimplify ? { scale: 1, opacity: 0.14 } : { scale: [1, 1.6], opacity: [0.4, 0] }}
-            transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: Infinity, ease: 'easeOut', delay: shouldSimplify ? 0 : 1.15 }}
+            transition={{ duration: shouldSimplify ? 0.01 : 2.6, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeOut', delay: shouldSimplify ? 0 : 1.15 }}
           />
           <div ref={countRef} className="font-mono text-4xl font-black tracking-tighter text-cyan-300 drop-shadow-[0_0_15px_rgba(34,211,238,0.6)] md:text-5xl">
             +0
@@ -934,7 +934,7 @@ function MainAIVisual() {
             animate={shouldSimplify ? { x: 0, opacity: 0.5 } : { x: [0, 50], opacity: [0, 1, 0] }}
             transition={{
               duration: shouldSimplify ? 0.01 : 2.4,
-              repeat: Infinity,
+              repeat: shouldSimplify ? 0 : Infinity,
               ease: 'easeInOut',
               delay: shouldSimplify ? 0 : index * 0.45,
             }}
@@ -947,7 +947,7 @@ function MainAIVisual() {
       <motion.div
         className="relative z-10 flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-violet-500/40 bg-[#030305]/80 shadow-[0_0_18px_rgba(139,92,246,0.16)] backdrop-blur-md md:h-24 md:w-24 md:shadow-[0_0_30px_rgba(139,92,246,0.2)] md:backdrop-blur-xl"
         animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.03, 1] }}
-        transition={{ duration: shouldSimplify ? 0.01 : 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       >
         <motion.div
           className="pointer-events-none absolute inset-0 rounded-[inherit] p-px"
@@ -958,16 +958,16 @@ function MainAIVisual() {
             maskComposite: 'exclude',
           }}
           animate={{ rotate: shouldSimplify ? 0 : 360 }}
-          transition={{ duration: shouldSimplify ? 0.01 : 4.5, repeat: Infinity, ease: 'linear' }}
+          transition={{ duration: shouldSimplify ? 0.01 : 4.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'linear' }}
         />
         <motion.div
           className="pointer-events-none absolute left-0 h-px w-full bg-violet-400/80 shadow-[0_0_8px_#8b5cf6] md:shadow-[0_0_10px_#8b5cf6]"
           animate={shouldSimplify ? { top: '50%', opacity: 0.8 } : { top: ['0%', '100%', '0%'], opacity: [0.35, 1, 0.35] }}
-          transition={{ duration: shouldSimplify ? 0.01 : 3.2, repeat: Infinity, ease: 'easeInOut' }}
+          transition={{ duration: shouldSimplify ? 0.01 : 3.2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
         />
         <motion.div
           animate={{ rotate: shouldSimplify ? 0 : 180 }}
-          transition={{ duration: shouldSimplify ? 0.01 : 8, repeat: Infinity, ease: 'linear' }}
+          transition={{ duration: shouldSimplify ? 0.01 : 8, repeat: shouldSimplify ? 0 : Infinity, ease: 'linear' }}
         >
           <Sparkles className="h-7 w-7 text-violet-300 md:h-8 md:w-8" />
         </motion.div>
@@ -981,7 +981,7 @@ function MainAIVisual() {
             animate={shouldSimplify ? { x: 0, opacity: 1 } : { x: [-50, 0, 18], opacity: [0, 1, 0] }}
             transition={{
               duration: shouldSimplify ? 0.01 : 2.4,
-              repeat: Infinity,
+              repeat: shouldSimplify ? 0 : Infinity,
               ease: 'easeInOut',
               delay: shouldSimplify ? 0 : 0.35 + index * 0.45,
             }}
