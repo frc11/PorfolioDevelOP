@@ -38,6 +38,31 @@
  *
  * Módulo puro: sin dependencias nuevas, sin DB, sin red, sin `any`. Nunca
  * inspecciona ni transforma el contenido de un chunk.
+ *
+ * WATCHDOG-2 — dos ventanas + suspensión externa.
+ *
+ * **Dos ventanas.** El watchdog original usaba un único `idleMs` desde la
+ * creación del stream. Pero el gap real hasta el PRIMER chunk (cold start de
+ * Vertex/Gemini) es mucho más largo que el silencio tolerable UNA VEZ que la
+ * respuesta ya empezó a fluir — medido en prod: 1470ms y 1664ms hasta el primer
+ * chunk. Con un solo `idleMs` corto, el watchdog cortaría la respuesta ANTES de
+ * que llegue el texto. `initialIdleMs` cubre la espera inicial (generosa);
+ * `idleMs` aplica desde el primer chunk en adelante (ajustado, es lo que baja
+ * la latencia de cierre real).
+ *
+ * **Suspensión externa (`suspend`/`resume`).** Mientras un tool ejecuta
+ * `execute()` server-side, no fluye NINGÚN chunk por este borde — el SDK recién
+ * vuelve a emitir algo cuando el tool termina. Sin una forma de pausar, el
+ * watchdog cortaría la respuesta A MITAD de `capture_lead` (Neon fría: 6-7s
+ * medidos), justo el momento comercialmente más valioso del producto. Por eso
+ * `createStreamWatchdog` devuelve un CONTROLLER (`{ stream, suspend, resume }`)
+ * en vez de directamente el `TransformStream`.
+ *
+ * Este módulo NO sabe nada de "tools": `suspend()`/`resume()` son un toggle
+ * genérico e idempotente (llamarlos de más no rompe nada — desarman/rearman el
+ * timer, nada más). La lógica de CONTEO (varios tools en paralelo, resumir solo
+ * cuando el último termina) es responsabilidad del LLAMADOR — ver
+ * `handleChatRequest.ts`, donde vive el contador real.
  */
 
 /** Por qué se resolvió el watchdog. Solo `idle` significa que actuó. */
@@ -57,8 +82,15 @@ export interface StreamWatchdogEvent {
 }
 
 export interface StreamWatchdogOptions {
-  /** Silencio máximo tolerado antes de cerrar por nuestra cuenta. */
+  /** Silencio máximo tolerado UNA VEZ que empezó a fluir el primer chunk. */
   idleMs: number
+  /**
+   * Silencio máximo tolerado ANTES del primer chunk (cold start del provider).
+   * Casi siempre más largo que `idleMs`. Default: `idleMs` (mismo
+   * comportamiento que la versión de una sola ventana, para no romper otros
+   * callers si alguna vez aparecen).
+   */
+  initialIdleMs?: number
   /**
    * Se ESPERA antes de cerrar el readable. Acá va la persistencia del turno.
    * Si rechaza, se traga y el stream cierra igual: cerrar nunca puede quedar
@@ -67,6 +99,19 @@ export interface StreamWatchdogOptions {
   onIdle: () => Promise<void>
   /** Telemetría a stderr. Recibe contadores y tiempos, jamás contenido. */
   onEvent?: (info: StreamWatchdogEvent) => void
+}
+
+/**
+ * Lo que devuelve `createStreamWatchdog`: el stream a pipear, más los dos
+ * controles externos de suspensión. `suspend`/`resume` son idempotentes — se
+ * pueden llamar de más sin efecto adicional (ver el encabezado del archivo).
+ */
+export interface StreamWatchdogController {
+  stream: TransformStream<Uint8Array, Uint8Array>
+  /** Desarma el timer. Ningún chunk lo re-arma mientras esté suspendido. */
+  suspend(): void
+  /** Re-arma el timer con la ventana post-primer-chunk (`idleMs`). */
+  resume(): void
 }
 
 /**
@@ -82,19 +127,31 @@ interface CancelableTransformer<I, O> extends Transformer<I, O> {
 
 /**
  * Transform que deja pasar bytes verbatim y cierra el readable si el upstream
- * se queda mudo más de `idleMs`.
+ * se queda mudo más de `idleMs` (o `initialIdleMs` antes del primer chunk).
+ * Suspendible desde afuera con `suspend()`/`resume()`.
  */
 export function createStreamWatchdog({
   idleMs,
+  initialIdleMs = idleMs,
   onIdle,
   onEvent,
-}: StreamWatchdogOptions): TransformStream<Uint8Array, Uint8Array> {
+}: StreamWatchdogOptions): StreamWatchdogController {
   const startedAt = Date.now()
   let chunks = 0
   let lastChunkAt = startedAt
   /** El watchdog ya se resolvió por algún camino: no vuelve a actuar. */
   let settled = false
+  /** `false` = todavía no llegó ningún chunk → usar `initialIdleMs`. */
+  let hasFirstChunk = false
+  /** Suspendido por el llamador (tool en vuelo): ningún timer se arma. */
+  let suspended = false
   let timer: ReturnType<typeof setTimeout> | undefined
+  /**
+   * Capturado en `start()`. `resume()` lo necesita para poder re-armar el
+   * timer sin depender de que un `transform()` lo llame — `resume()` se invoca
+   * desde AFUERA (cuando termina un tool), no desde dentro del transform.
+   */
+  let activeController: TransformStreamDefaultController<Uint8Array> | undefined
 
   // Un timer huérfano mantiene viva la función serverless. Se limpia en TODOS
   // los caminos de salida (idle, cierre normal, cancelación del cliente).
@@ -148,12 +205,18 @@ export function createStreamWatchdog({
     }
   }
 
+  /**
+   * Re-arma el timer con la ventana que corresponda. NO-OP mientras
+   * `suspended` — es lo que hace que un tool en vuelo no corte la respuesta:
+   * el chunk (si llega alguno) igual se enqueuea, pero el timer no se toca.
+   */
   const armTimer = (controller: TransformStreamDefaultController<Uint8Array>): void => {
     clearTimer()
+    if (suspended) return
     timer = setTimeout(() => {
       // `fireIdle` atrapa todo internamente, así que esta promesa nunca rechaza.
       void fireIdle(controller)
-    }, idleMs)
+    }, hasFirstChunk ? idleMs : initialIdleMs)
   }
 
   // Se declara como variable tipada (no como literal inline) para que
@@ -161,6 +224,7 @@ export function createStreamWatchdog({
   // chequeo de propiedades excedentes sin recurrir a un cast.
   const transformer: CancelableTransformer<Uint8Array, Uint8Array> = {
     start(controller) {
+      activeController = controller
       // El timer se arma AL CREAR, no con el primer chunk. Es la diferencia
       // clave con el `chunkMs` del SDK: si no llega NADA, igual cerramos.
       armTimer(controller)
@@ -171,6 +235,7 @@ export function createStreamWatchdog({
       controller.enqueue(chunk)
       chunks += 1
       lastChunkAt = Date.now()
+      hasFirstChunk = true
       // Si ya estamos comprometidos a cerrar (persistiendo), no re-armamos: el
       // chunk sale igual, pero la decisión de cerrar no se revierte. La carrera
       // es remotísima (el stream lleva `idleMs` mudo) y preferimos un cierre
@@ -200,5 +265,22 @@ export function createStreamWatchdog({
     },
   }
 
-  return new TransformStream<Uint8Array, Uint8Array>(transformer)
+  return {
+    stream: new TransformStream<Uint8Array, Uint8Array>(transformer),
+    suspend() {
+      // Idempotente: si ya está suspendido (o el stream ya se resolvió), no
+      // hace nada extra. El llamador puede llamarlo de más sin riesgo.
+      if (settled) return
+      suspended = true
+      clearTimer()
+    },
+    resume() {
+      if (settled || !activeController) return
+      suspended = false
+      // SIEMPRE la ventana post-primer-chunk: reanudar pasa a mitad del
+      // stream, nunca durante la espera inicial del modelo.
+      hasFirstChunk = true
+      armTimer(activeController)
+    },
+  }
 }

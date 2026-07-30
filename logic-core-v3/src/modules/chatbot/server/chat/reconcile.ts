@@ -185,8 +185,8 @@ export function computeHookBudgetMs(requestElapsedMs: number): number {
 export const STREAM_CHUNK_TIMEOUT_MS = 5_000
 
 /**
- * WATCHDOG — Silencio máximo tolerado EN EL BORDE DE LA RESPUESTA antes de que
- * cerremos el stream nosotros.
+ * WATCHDOG — Silencio máximo tolerado EN EL BORDE DE LA RESPUESTA, UNA VEZ QUE
+ * YA FLUYÓ EL PRIMER CHUNK, antes de que cerremos el stream nosotros.
  *
  * POR QUÉ EXISTE, y por qué reemplaza al enfoque de los dos sprints previos: la
  * medición en prod (dos invocaciones idénticas) mostró `chunks_total: 1` —
@@ -200,17 +200,54 @@ export const STREAM_CHUNK_TIMEOUT_MS = 5_000
  * Este techo NO le pide nada al SDK: corre en el `TransformStream` que envuelve
  * el body que devolvemos, así que el cierre está garantizado por construcción.
  *
- * ARITMÉTICA (con los números medidos): el chunk único llega a los ~6.4s de
- * elapsed del request → el watchdog dispara a ~9.4s → `persistTurn` corre con el
- * presupuesto de ONF-2 (típico ~300ms, techo 5s) → cierre a ~10s. Contra los 30s
- * de hoy, y con ~20s de aire contra el `maxDuration`. En el camino sano el
- * upstream cierra solo, el `flush` mata el timer y esto no cambia NADA.
+ * WATCHDOG-2 — bajado de 3000ms a 1200ms tras verificar en prod que el watchdog
+ * SÍ funciona (el input se destrababa en ~4s: ~3000ms de idle + ~300-1000ms de
+ * `persistTurn`). Casi todo ese tiempo era el idle, así que ahí estaba el
+ * margen. Bajarlo de una sin separar ventanas hubiera cortado el arranque (ver
+ * `STREAM_WATCHDOG_INITIAL_IDLE_MS`) — por eso esta ventana ahora SOLO aplica
+ * después del primer chunk, donde 1200ms es un silencio mucho más anómalo.
  *
- * CALIBRABLE, no sagrado. Los `gapMs` medidos hasta el primer chunk fueron 1470
- * y 1664; no tenemos datos de gaps ENTRE chunks porque Gemini mandó uno solo. Si
- * en prod aparecen respuestas cortadas a la mitad, este es el número a subir.
+ * ARITMÉTICA (con los números medidos): el chunk único llega a los ~6.4s de
+ * elapsed del request → el watchdog dispara a ~7.6s → `persistTurn` corre con el
+ * presupuesto de ONF-2 (típico ~300ms, techo 5s) → cierre a ~7.9-8.6s. Contra
+ * los 30s de hoy. En el camino sano el upstream cierra solo, el `flush` mata el
+ * timer y esto no cambia NADA.
+ *
+ * CALIBRABLE, no sagrado. NO tenemos datos de gaps ENTRE chunks (Gemini mandó
+ * uno solo en las mediciones) — 1200ms es una estimación conservadora, no una
+ * medición directa como sí lo es `STREAM_WATCHDOG_INITIAL_IDLE_MS`. Si en prod
+ * aparecen respuestas cortadas a la mitad, este es el número a subir primero.
  */
-export const STREAM_WATCHDOG_IDLE_MS = 3_000
+export const STREAM_WATCHDOG_IDLE_MS = 1_200
+
+/**
+ * WATCHDOG-2 — Silencio máximo tolerado ANTES del primer chunk (cold start del
+ * provider). Por qué es mucho más largo que `STREAM_WATCHDOG_IDLE_MS`: bajar
+ * este último a 1200ms (de los 3000ms originales) para acortar la latencia de
+ * cierre habría cortado la respuesta ANTES de que llegara el primer chunk —
+ * los `gapMs` medidos en prod hasta el primer chunk fueron **1470ms y 1664ms**,
+ * ya por encima de 1200ms. Separar las dos ventanas permite bajar la ventana
+ * POST-chunk sin arriesgar el arranque.
+ *
+ * 12000ms da margen amplio para un cold start de Vertex/Neon sin ser, por eso
+ * mismo, un reloj absoluto: sigue siendo un timeout de INACTIVIDAD (se resetea
+ * si algo llega antes), no un techo duro tipo el `stepMs` removido.
+ */
+export const STREAM_WATCHDOG_INITIAL_IDLE_MS = 12_000
+
+/**
+ * WATCHDOG-2 — Techo máximo de SUSPENSIÓN del watchdog mientras hay tools en
+ * vuelo (`capture_lead`, `show_whatsapp_handoff` — los únicos con `execute`
+ * server-side). Sin este techo, un tool colgado (ej. la misma Neon fría que
+ * motiva la suspensión, pero que nunca responde) dejaría al watchdog suspendido
+ * PARA SIEMPRE — exactamente el mismo síntoma de 30s que este sprint entero
+ * viene arreglando, ahora reintroducido por la propia mitigación.
+ *
+ * 15000ms: más que suficiente para el cold start de Neon medido (6-7s) más
+ * margen, y bien por debajo de lo que quedaría de `maxDuration` (30s) restando
+ * el pre-LLM (~5-6s medido) y el colchón de persistencia.
+ */
+export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000
 
 /**
  * WATCHDOG — `STREAM_STEP_TIMEOUT_MS` (el `stepMs` de la Fase 2) fue REMOVIDO.

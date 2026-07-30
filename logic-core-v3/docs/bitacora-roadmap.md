@@ -14731,3 +14731,129 @@ la `Duration` sigue en 30000 ms, **el objetivo del sprint igual se cumplio**: el
 libre a ~10s. La Duration es facturacion e higiene, no UX.
 
 ---
+
+## WATCHDOG-2 (Fase 1) - dos ventanas + suspension durante tools
+
+### Punto de partida
+El watchdog del sprint anterior (WATCHDOG) YA esta en produccion y FUNCIONA: el input se
+destraba a los ~4s en vez de 16s+kill a 30s. Descomposicion medida: ~3000ms de
+`STREAM_WATCHDOG_IDLE_MS` + ~300-1000ms de `persistTurn`. Casi todo era el idle -> ahi estaba
+el margen para bajar la latencia.
+
+### El bug que ya existia y nadie habia visto
+El timer del watchdog arranca AL CREAR el stream, no con el primer chunk (requisito explicito
+del sprint anterior: si nunca llega nada, igual hay que cerrar). Los `gapMs` medidos hasta el
+primer chunk fueron **1470ms y 1664ms** - bajar el idle unico a algo corto (ej. 1000ms) hubiera
+cortado la respuesta ANTES de que llegue el texto.
+
+Ademas: **durante la ejecucion de un tool no fluye NADA por el body**. El SDK emite
+`tool-input-available`, corre el `execute()` del tool, y recien ahi emite
+`tool-output-available`. `capture_lead` hace varias escrituras a Neon dentro de su `execute`, y
+Neon autosuspende (6-7s de cold start medidos). **Con `idleMs = 3000` eso YA se corta hoy, en
+produccion**, justo en el momento comercialmente mas valioso del producto (la captura del lead).
+No es un riesgo introducido por este sprint: es uno preexistente que nadie habia verificado con
+un tool real en el camino.
+
+### El diseno: dos ventanas + suspension por contador
+
+**`streamWatchdog.ts`** ahora acepta `initialIdleMs` (ademas de `idleMs`) y devuelve un
+CONTROLLER (`{ stream, suspend, resume }`) en vez de directamente el `TransformStream`:
+
+| Constante (`reconcile.ts`) | Valor | Cuando aplica |
+|---|---|---|
+| `STREAM_WATCHDOG_INITIAL_IDLE_MS` | 12000 | desde la creacion hasta el PRIMER chunk |
+| `STREAM_WATCHDOG_IDLE_MS` | 1200 (bajado de 3000) | entre chunks, una vez que ya fluyo |
+| `STREAM_WATCHDOG_TOOL_MAX_MS` | 15000 | techo de suspension mientras un tool corre |
+
+- El timer se arma con `initialIdleMs` en `start()`; con el PRIMER `transform()` (cualquier
+  chunk) pasa a usar `idleMs` para todo lo que sigue.
+- `suspend()`/`resume()` son un toggle GENERICO e IDEMPOTENTE: el modulo no sabe nada de "tools",
+  solo desarma/rearma el timer. Llamarlos de mas no rompe nada.
+
+**El contador vive en `handleChatRequest.ts`**, cableado a
+`experimental_onToolCallStart`/`experimental_onToolCallFinish` de `streamText`:
+- Incrementa en start, decrementa en finish. Se suspende SOLO en la transicion 0->1, se
+  reanuda SOLO en la transicion ->0.
+- **Confirmado con doc oficial del SDK instalado** (`ai/dist/index.d.ts:2881`):
+  "Callback that is called right after a tool's execute function completes **(or errors)**".
+  Verificado tambien en runtime: `onToolCallFinish` se invoca en el camino de EXITO
+  (`ai/dist/index.js:3088-3097`) Y en el camino de ERROR (`:3065-3075`, dentro del catch de
+  `executeToolCall`), asi que el contador SIEMPRE se decrementa - un tool que tira excepcion NO
+  deja el watchdog suspendido para siempre.
+- **Techo de seguridad** (`STREAM_WATCHDOG_TOOL_MAX_MS = 15000`): si el contador queda > 0 mas de
+  ese tiempo, se fuerza el `resume()` igual - un tool realmente COLGADO (ni exito ni error, se
+  cuelga de verdad) no puede reintroducir el mismo cuelgue de 30s que este sprint entero viene
+  arreglando. NO toca el contador: si el tool eventualmente "termina", el decrement corre
+  normal (resume() de mas es idempotente).
+- `chat.watchdog_fired` ahora incluye `toolsInFlight` y `suspendedMsTotal` - si el disparo
+  ocurrio con tools en vuelo, solo puede ser porque el techo de seguridad forzo el resume.
+
+### Aritmetica (pinneada en `deadline.invariant.ts`, bloque 9)
+Watchdog se crea a ~4.9s (medido), el chunk unico llega a ~6.4s:
+- Camino real: dispara a 6.4+1.2=7.6s -> `computeHookBudgetMs` da el presupuesto COMPLETO de
+  ONF-2 (5000ms) -> cierre a ~7.9-8.6s. Contra 30s de hoy.
+- Camino patologico (nunca llega nada): dispara a 4.9+12=16.9s, sin nada que persistir.
+- Peor caso de suspension (tool al limite de TOOL_MAX_MS): dispara a 4.9+15+1.2=21.1s ->
+  `computeHookBudgetMs(21100)` SIGUE dando el presupuesto completo (30000-21100-3000=5900>5000).
+
+**Incertidumbre declarada**: NO hay datos de gaps ENTRE chunks (Gemini mando uno solo en las
+mediciones). `idleMs=1200` es una estimacion conservadora, no una medicion directa como si lo
+es `initialIdleMs` (que si tiene 2 mediciones reales de gap-al-primer-chunk). Si en produccion
+aparecen respuestas cortadas a la mitad, subir primero `STREAM_WATCHDOG_IDLE_MS`.
+
+### Tests
+`stream-watchdog.invariant.ts`: 15 bloques (7 originales + 8 nuevos). Los nuevos verifican, contra
+el modulo REAL (no mocks): las dos ventanas conmutan en el momento correcto, `suspend()` aguanta
+un silencio mucho mayor a `idleMs`, el CONTADOR de 2 tools solapados (no un booleano: el primero
+que termina no reanuda si el segundo sigue en vuelo), y el techo de seguridad libera un tool que
+nunca llama a finish. Cero unhandled rejections en los 15 bloques.
+
+### Gates
+- `tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings en los 5 archivos.
+- `test:watchdog` (15/15) + bateria completa (deadline, onf1, infra1, infra2, c02, cost1, cost2,
+  utm1, re2, ev4) - todas OK.
+- Sin migracion, sin git. Sin tocar route.ts, connection string, modulo de seguridad, scoping por
+  organizacion, ni la logica/idempotencia de `persistTurn` (solo cambia QUIEN dispara el resume,
+  nunca que se persiste).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe en ~1.5s en produccion real; que NINGUNA respuesta se corte (ni de texto
+largo, ni con tool); **que una captura de lead con Neon fria NO se corte** (es el caso que motiva
+la mitad de este sprint, y no hay forma de reproducir un cold-start real de Neon fuera de prod).
+
+---
+
+## WATCHDOG-2 (Fase 2) - cursor de tipeo inline (commit aparte)
+
+### Sintoma y causa
+El cursor (`|`) aparecia en la linea de ABAJO del ultimo parrafo en vez de a la derecha de la
+ultima palabra. Componente: `StreamingMarkdown.tsx` (NO frozen; `ChatWindow.tsx` solo lo consume
+via props y no necesito tocarlo en absoluto).
+
+Causa confirmada leyendo el JSX: el caret es un `<span>` HERMANO que se renderiza DESPUES del
+`<ReactMarkdown>`, y react-markdown renderiza el markdown como elemento(s) de bloque (tipicamente
+un `<p>`) directos del div contenedor, sin wrapper propio. Aunque el caret en si es
+`display: inline-block`, el bloque `<p>` que lo precede fuerza el corte de linea antes de el.
+
+### El fix
+Un `className` condicional en el div contenedor, activo SOLO mientras `showCaret` es true:
+`[&>*:nth-last-child(2)]:inline` (Tailwind, selector arbitrario). `:nth-last-child(2)` es
+exactamente el bloque INMEDIATAMENTE ANTES del caret (el caret mismo es siempre el ultimo hijo
+cuando se muestra) - sea el unico parrafo o el ultimo de varios. Volverlo `inline` lo fusiona en
+el mismo renglon que el texto que se esta revelando.
+
+Diff minimo: 1 archivo, ~16 lineas (todas dentro del `return`), cero cambios de estado, cero
+tocar `ChatWindow.tsx` (que arrastra cambios de RE-2/C0.2 sin verificacion humana - no se le
+toco absolutamente nada).
+
+Mensajes historicos (sin caret, `showCaret=false`) quedan con el layout de bloque normal de
+`prose`, sin cambios.
+
+### Gates
+`tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings.
+
+### Verificacion humana declarada (Valentino)
+Que el cursor se vea a la derecha de la ultima palabra en desktop y mobile, con mensajes de un
+parrafo y de varios parrafos.
+
+---

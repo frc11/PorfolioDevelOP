@@ -60,6 +60,8 @@ import {
   // en el borde de la respuesta antes de que cerremos nosotros.
   STREAM_CHUNK_TIMEOUT_MS,
   STREAM_WATCHDOG_IDLE_MS,
+  STREAM_WATCHDOG_INITIAL_IDLE_MS,
+  STREAM_WATCHDOG_TOOL_MAX_MS,
 } from './reconcile'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
@@ -76,7 +78,7 @@ import {
 import { createStreamProbe, createChunkTally } from './streamProbe'
 // WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
 // Ver el encabezado de streamWatchdog.ts para el porqué.
-import { createStreamWatchdog } from './streamWatchdog'
+import { createStreamWatchdog, type StreamWatchdogController } from './streamWatchdog'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -1079,6 +1081,66 @@ export async function handleChatRequest(
   // muere por timeout, el SDK no arma ni entrega el texto (no hay `finish-step`,
   // así que `steps[]` viene vacío y `onFinish` ni siquiera se invoca).
   let accumulatedAssistantText = ''
+
+  // ─── WATCHDOG-2 — suspensión del watchdog durante la ejecución de tools ────
+  // Mientras `capture_lead`/`show_whatsapp_handoff` corren su `execute()` (DB a
+  // Neon, potencialmente fría), NO fluye ningún chunk por el body: sin pausar
+  // el watchdog, cortaría la respuesta a mitad de la captura del lead — el
+  // momento comercialmente más valioso del producto.
+  //
+  // CONTADOR, no booleano: el SDK corre las tool calls de un mismo step en
+  // paralelo (`Promise.all`, `ai/dist/index.js:7525-7548`). Con un booleano, el
+  // primer tool que termina reanudaría el watchdog mientras el segundo sigue
+  // en Neon — y ahí sí se corta. Se suspende SOLO en la transición 0→1 y se
+  // reanuda SOLO en la transición →0.
+  //
+  // `watchdogRef` es un holder mutable porque el controller del watchdog recién
+  // existe DESPUÉS de que `streamText(...)` retorna (más abajo), pero estos
+  // callbacks se PASAN como parte de la config de `streamText` antes de eso.
+  // Por construcción (streamText es síncrono) el holder ya está poblado para
+  // cuando el SDK pueda disparar el primer tool call, así que el optional
+  // chaining de abajo es defensivo, no una carrera real.
+  let toolsInFlight = 0
+  let suspendedSinceAt: number | null = null
+  let suspendedMsTotal = 0
+  let toolMaxTimer: ReturnType<typeof setTimeout> | undefined
+  const watchdogRef: { current: StreamWatchdogController | null } = { current: null }
+
+  const clearToolMaxTimer = (): void => {
+    if (toolMaxTimer !== undefined) {
+      clearTimeout(toolMaxTimer)
+      toolMaxTimer = undefined
+    }
+  }
+
+  const onToolCallStart = (): void => {
+    toolsInFlight += 1
+    if (toolsInFlight !== 1) return // ya había otro tool en vuelo: no re-suspender
+    suspendedSinceAt = Date.now()
+    watchdogRef.current?.suspend()
+    // Techo de seguridad: un tool colgado no puede dejar el watchdog suspendido
+    // para siempre — sería reintroducir el mismo cuelgue de 30s que este sprint
+    // entero viene arreglando. NO toca `toolsInFlight`: si el tool eventualmente
+    // termina, `onToolCallFinish` corre igual (ver abajo) — solo que a esta
+    // altura resumir es un no-op (ya se resumió acá).
+    toolMaxTimer = setTimeout(() => {
+      streamProbe.mark('watchdog_tool_max_forced', { toolsInFlight })
+      watchdogRef.current?.resume()
+    }, STREAM_WATCHDOG_TOOL_MAX_MS)
+  }
+
+  const onToolCallFinish = (): void => {
+    // Piso en 0: una llamada de más (no debería pasar, pero es defensivo) nunca
+    // deja el contador negativo, que rompería la próxima transición 0→1.
+    toolsInFlight = Math.max(0, toolsInFlight - 1)
+    if (toolsInFlight !== 0) return
+    clearToolMaxTimer()
+    if (suspendedSinceAt !== null) {
+      suspendedMsTotal += Date.now() - suspendedSinceAt
+      suspendedSinceAt = null
+    }
+    watchdogRef.current?.resume()
+  }
   // STREAM-TIMEOUT (Fase 2) — Guard de idempotencia de `persistTurn`. Se marca
   // sincrónicamente, antes de cualquier await: si una carrera dispara los dos
   // hooks, el segundo sale por el early-return. Cero doble escritura, cero doble
@@ -1671,6 +1733,17 @@ export async function handleChatRequest(
     // ⚠️ La forma tiene que ser un OBJETO: `getChunkTimeoutMs` solo lee
     // `.chunkMs` así; un número plano se interpreta como `totalMs`.
     timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
+    // WATCHDOG-2 — suspende/reanuda el watchdog del borde mientras un tool
+    // ejecuta su `execute()` server-side (ver el bloque de arriba). Confirmado
+    // contra el SDK instalado, con doc oficial: "Callback that is called right
+    // after a tool's execute function completes (or errors)"
+    // (ai/dist/index.d.ts:2881) — `onToolCallFinish` corre en AMBOS caminos
+    // (éxito: ai/dist/index.js:3088-3097; error: :3065-3075), así que el
+    // contador SIEMPRE se decrementa y el watchdog nunca queda suspendido por
+    // culpa de un tool que falla (el `STREAM_WATCHDOG_TOOL_MAX_MS` de arriba
+    // cubre el caso de un tool que ni falla ni resuelve — cuelga de verdad).
+    experimental_onToolCallStart: onToolCallStart,
+    experimental_onToolCallFinish: onToolCallFinish,
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
     // camino feliz); solo inyecta la derivación canned en un run vacío.
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
@@ -1874,6 +1947,9 @@ export async function handleChatRequest(
   const streamed = result.toUIMessageStreamResponse()
   const watchdog = createStreamWatchdog({
     idleMs: STREAM_WATCHDOG_IDLE_MS,
+    // WATCHDOG-2 — ventana generosa para el cold start (antes del primer
+    // chunk); `idleMs` (más ajustado) aplica recién después. Ver reconcile.ts.
+    initialIdleMs: STREAM_WATCHDOG_INITIAL_IDLE_MS,
     onIdle: async () => {
       // ESPERADO antes de cerrar: mientras el readable siga abierto la respuesta
       // no terminó y la función sigue viva. Acá la persistencia deja de ser la
@@ -1904,6 +1980,14 @@ export async function handleChatRequest(
     },
     onEvent: (info) => {
       if (info.reason === 'idle') {
+        // WATCHDOG-2 — si el disparo ocurrió con tools en vuelo, solo puede ser
+        // porque `STREAM_WATCHDOG_TOOL_MAX_MS` forzó el resume de un tool que ni
+        // falló ni resolvió (colgado de verdad) — la suspensión normal bloquea
+        // por completo el timer, así que en el camino sano `toolsInFlight` acá
+        // siempre es 0. `suspendedMsTotal` suma cualquier suspensión todavía
+        // abierta en este instante.
+        const suspendedMsAtFire =
+          suspendedMsTotal + (suspendedSinceAt !== null ? Date.now() - suspendedSinceAt : 0)
         // El evento que importa: el watchdog tuvo que actuar. Va a stderr
         // SIEMPRE (no gated por el probe) porque es la señal de que el stream
         // de Gemini sigue sin cerrar. Longitudes y contadores, nunca contenido.
@@ -1918,13 +2002,17 @@ export async function handleChatRequest(
             elapsedMs: info.elapsedMs,
             lastGapMs: info.lastGapMs,
             assistantTextLength: accumulatedAssistantText.length,
+            toolsInFlight,
+            suspendedMsTotal: suspendedMsAtFire,
           },
           'warn',
         )
         return
       }
-      // Cierre normal o cancelación del cliente: solo diagnóstico, gated por el
-      // probe para no agregar una línea por request en operación normal.
+      // Cierre normal o cancelación del cliente: ya no hay nada que suspender.
+      clearToolMaxTimer()
+      // Solo diagnóstico, gated por el probe para no agregar una línea por
+      // request en operación normal.
       streamProbe.mark('watchdog_settled', {
         reason: info.reason,
         chunks: info.chunks,
@@ -1933,6 +2021,9 @@ export async function handleChatRequest(
       })
     },
   })
+  // WATCHDOG-2 — recién acá existe el controller: los callbacks de tool call ya
+  // están wireados en el streamText de arriba (referencian este mismo holder).
+  watchdogRef.current = watchdog
 
   // `streamed.body` es null solo si no hubiera cuerpo; acá siempre lo hay
   // (toUIMessageStreamResponse arma un ReadableStream). El fallback devuelve la
@@ -1942,7 +2033,7 @@ export async function handleChatRequest(
   // Se preservan status, statusText y headers: `route.ts` los vuelve a copiar
   // para los headers de CORS y no necesita ningún cambio (el body sigue siendo
   // un ReadableStream).
-  return new Response(streamed.body.pipeThrough(watchdog), {
+  return new Response(streamed.body.pipeThrough(watchdog.stream), {
     status: streamed.status,
     statusText: streamed.statusText,
     headers: streamed.headers,
