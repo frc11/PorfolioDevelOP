@@ -570,7 +570,7 @@ function ROISummary({
                         maxWidth: isTablet ? '520px' : '240px',
                     }}
                 >
-                    Cada mes con atencion manual suma sueldos, supervision y oportunidades perdidas por demora.
+                    Cada mes con atención manual suma sueldos, supervisión y oportunidades perdidas por demora.
                 </p>
                 <div
                     style={{
@@ -629,7 +629,7 @@ function CostContextBlock({
                     Costo de no automatizar en contexto
                 </p>
                 <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.52)', lineHeight: 1.6, textAlign: isMobileL ? 'center' : 'left' }}>
-                    Esta comparativa muestra por que el modelo tradicional termina siendo mas caro en pocos meses.
+                    Esta comparativa muestra por que el modelo tradicional termina siendo más caro en pocos meses.
                 </p>
             </div>
 
@@ -649,7 +649,7 @@ function CostContextBlock({
                         USD 450-700 / mes
                     </p>
                     <p style={{ margin: 0, fontSize: '13px', lineHeight: 1.6, color: 'rgba(255,255,255,0.58)', textAlign: isMobileL ? 'center' : 'left' }}>
-                        Un perfil para responder en horario comercial, mas supervision, ausencias y curva de entrenamiento.
+                        Un perfil para responder en horario comercial, más supervisión, ausencias y curva de entrenamiento.
                     </p>
                 </div>
 
@@ -662,7 +662,7 @@ function CostContextBlock({
                     }}
                 >
                     <p style={{ margin: '0 0 6px', fontSize: '10px', letterSpacing: '0.16em', color: 'rgba(167,243,208,0.9)', textTransform: 'uppercase', fontWeight: 700, textAlign: isMobileL ? 'center' : 'left' }}>
-                        Implementacion IA develOP
+                        Implementación IA develOP
                     </p>
                     <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: 900, color: '#a7f3d0', lineHeight: 1, textAlign: isMobileL ? 'center' : 'left' }}>
                         Desde USD 300 inicial
@@ -686,7 +686,7 @@ function CostContextBlock({
                     lineHeight: 1.5,
                 }}
             >
-                En muchos negocios, 1 mes de atencion manual ya cuesta mas que implementar IA.
+                En muchos negocios, 1 mes de atención manual ya cuesta más que implementar IA.
             </div>
         </motion.div>
     )

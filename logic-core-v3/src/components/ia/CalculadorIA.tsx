@@ -123,10 +123,10 @@ export default function CalculadorIA() {
             [ CALCULA TU ROI ]
           </div>
           <h2 style={{ fontSize: 'clamp(32px,5vw,64px)', fontWeight: 900, color: 'white', margin: '0 0 16px', lineHeight: 1.1 }}>
-            Cuanto vale tu tiempo?
+            ¿Cuánto vale tu tiempo?
           </h2>
           <p style={{ fontSize: '18px', color: 'rgba(255,255,255,0.45)', margin: 0 }}>
-            Move el slider y mira cuanto recupera tu negocio cada mes.
+            Mové el slider y mira cuanto recupera tu negocio cada mes.
           </p>
         </motion.div>
 
@@ -296,7 +296,7 @@ export default function CalculadorIA() {
               style={{ fontSize: '28px', fontWeight: 900, color: colorROI, display: 'block', marginBottom: '8px' }}
             />
             <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)', margin: 0 }}>
-              Retorno sobre inversion de IA
+              Retorno sobre inversión de IA
             </p>
             <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.28)', margin: '10px 0 0' }}>
               Basado en setup inicial USD {inversionInicialIA} amortizado en {mesesAmortizacion} meses

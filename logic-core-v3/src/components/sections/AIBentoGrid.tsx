@@ -188,7 +188,7 @@ export const AIBentoGrid = () => {
 
                 {/* --- Tarjeta 3: Computer Vision --- */}
                 <BentoCard
-                    title="Computer Vision"
+                    title="Computer Visión"
                     description="Redes neuronales convolucionales para clasificación de imágenes, detección de objetos y análisis visual automatizado."
                     icon={<Eye className="w-6 h-6" />}
                     delay={0.3}

@@ -67,7 +67,7 @@ const burnEdgeVariants = {
 const cardGlow =
     "pointer-events-none absolute inset-0 rounded-[inherit] bg-[linear-gradient(140deg,rgba(255,255,255,0.12),transparent_28%,transparent_70%,rgba(34,211,238,0.08))]"
 
-const metricPills = ["UX qué retiene", "Carga ultra rápida", "Conversión mobile"]
+const metricPills = ["UX que retiene", "Carga ultra rápida", "Conversión mobile"]
 const seoPills = ["Google Maps", "Búsqueda local", "NOA"]
 const motionPills = ["WhatsApp", "Formularios", "Catálogo"]
 
@@ -176,7 +176,7 @@ const ScrollCue = () => {
                 </div>
             </div>
             <p className="mt-6 text-center text-sm italic text-white/40">
-                Una web qué no convierte es decoración cara.
+                Una web que no convierte es decoración cara.
             </p>
         </div>
     )
@@ -415,7 +415,7 @@ export const WebDevelopmentBento = () => {
                         transition={{ duration: prefersReduced ? 0 : 0.64, delay: 0.2, ease }}
                         className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-white/52 md:text-lg"
                     >
-                        Diseñamos una presencia qué convence en segundos, aparece en el momento correcto y convierte incluso cuándo vos no estás frente al mostrador.
+                        Diseñamos una presencia que convence en segundos, aparece en el momento correcto y convierte incluso cuando vos no estás frente al mostrador.
                     </motion.p>
                 </motion.div>
 
@@ -493,10 +493,10 @@ export const WebDevelopmentBento = () => {
                                 <IconOrb icon={Bolt} accent="rgba(34,211,238,0.22)" className="mb-5" />
                                 <LighthouseGauge />
                                 <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">
-                                    El cliente qué espera, se va.
+                                    El cliente que espera, se va.
                                 </h3>
                                 <p className="mt-3 max-w-sm text-sm leading-7 text-white/52">
-                                    La carga se siente inmediata en desktop y mobile para qué la intención no se enfríe antes del primer scroll.
+                                    La carga se siente inmediata en desktop y mobile para que la intención no se enfríe antes del primer scroll.
                                 </p>
                                 <div className="mt-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.24em] text-white/35">
                                     <span>Mobile first</span>
@@ -526,7 +526,7 @@ export const WebDevelopmentBento = () => {
                                         Primero en Google en tu ciudad.
                                     </h3>
                                     <p className="mt-4 max-w-sm text-sm leading-7 text-white/55">
-                                        cuándo alguien busca tu rubro en Tucumán, Salta o Jujuy, la intención cae sobre tu negocio antes qué sobre la competencia.
+                                        cuando alguien busca tu rubro en Tucumán, Salta o Jujuy, la intención cae sobre tu negocio antes que sobre la competencia.
                                     </p>
                                 </div>
 
@@ -573,7 +573,7 @@ export const WebDevelopmentBento = () => {
                                         <span className="bg-gradient-to-r from-violet-200 to-cyan-200 bg-clip-text text-transparent"> vende mientras dormís.</span>
                                     </h3>
                                     <p className="mt-5 max-w-2xl text-sm leading-7 text-white/55 md:text-base">
-                                        Formularios, WhatsApp integrado y productos listos para consultar. Todo armado para qué el siguiente clic suceda sin depender de tu presencia.
+                                        Formularios, WhatsApp integrado y productos listos para consultar. Todo armado para que el siguiente clic suceda sin depender de tu presencia.
                                     </p>
                                 </div>
 

@@ -3096,7 +3096,7 @@ function AIScene({ service }: { service: Service }) {
     const clientMsg1 = '¡Hola! ¿Tienen la Toyota Hilux 4x4 disponible? ¿Cuánto sale?';
     const botMsg1 =
       '¡Hola! Sí, tenemos 2 Hilux 4x4 disponibles:\n• AT Full: $47.500 USD\n• MT SR: $43.200 USD\nPuedo mostrarte fotos o simular financiación.';
-    const clientMsg2 = 'Me interesa la AT Full. Tienen financiación?';
+    const clientMsg2 = 'Me interesa la AT Full. ¿Tienen financiación?';
     const botMsg2 =
       'Sí. Hay 3 opciones disponibles. También puedo agendarte un test drive esta semana.';
     const clientMsg3 = 'Perfecto, jueves a la mañana.';
@@ -6071,7 +6071,7 @@ function AutomationScene({ service }: { service: Service }) {
                 { label: 'Nombre', value: 'Laura Sanchez' },
                 { label: 'WhatsApp', value: '+54 381 444-5678' },
                 { label: 'Interes', value: 'Presupuesto web' },
-                { label: 'Empresa', value: 'Clinica Norte' },
+                { label: 'Empresa', value: 'Clínica Norte' },
               ].map((field) => (
                 <div
                   key={field.label}

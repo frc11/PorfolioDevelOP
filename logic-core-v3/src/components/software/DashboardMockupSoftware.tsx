@@ -126,12 +126,12 @@ const rubroSnapshots: RubroSnapshot[] = [
     bars: [54, 58, 56, 63, 66, 64, 70, 74, 78, 84, 80, 82],
     activity: [
       { text: 'Lead #1987 confirmo test drive', time: 'hace 2 min', dot: '#6366f1' },
-      { text: 'Cotizacion enviada - SUV Touring', time: 'hace 5 min', dot: '#7b2fff' },
+      { text: 'Cotización enviada - SUV Touring', time: 'hace 5 min', dot: '#7b2fff' },
       { text: 'Unidad reservada - Cliente Molina', time: 'hace 9 min', dot: '#818cf8' },
-      { text: 'Credito preaprobado por banco aliado', time: 'hace 13 min', dot: '#34d399' },
+      { text: 'Crédito preaprobado por banco aliado', time: 'hace 13 min', dot: '#34d399' },
       { text: 'Entrega programada para este viernes', time: 'hace 19 min', dot: '#6366f1' },
       { text: 'Firma digital completada en portal', time: 'hace 24 min', dot: '#818cf8' },
-      { text: 'Recordatorio automatico de visita', time: 'hace 31 min', dot: '#7b2fff' },
+      { text: 'Recordatorio automático de visita', time: 'hace 31 min', dot: '#7b2fff' },
       { text: 'Seguimiento postventa activado', time: 'hace 40 min', dot: '#34d399' },
     ],
   },
@@ -169,7 +169,7 @@ const rubroSnapshots: RubroSnapshot[] = [
         formatDisplay: formatInteger,
       },
       {
-        label: 'Facturacion neta',
+        label: 'Facturación neta',
         value: 8_920_000,
         change: '+18.3%',
         positive: true,
@@ -195,7 +195,7 @@ const rubroSnapshots: RubroSnapshot[] = [
       { text: 'Recordatorio enviado a 32 pacientes', time: 'hace 4 min', dot: '#16a34a' },
       { text: 'Receta digital emitida - Dra Suarez', time: 'hace 8 min', dot: '#34d399' },
       { text: 'Consulta de guardia clasificada como urgente', time: 'hace 12 min', dot: '#86efac' },
-      { text: 'Historia clinica actualizada automaticamente', time: 'hace 17 min', dot: '#22c55e' },
+      { text: 'Historia clínica actualizada automaticamente', time: 'hace 17 min', dot: '#22c55e' },
       { text: 'Cobertura validada con obra social', time: 'hace 23 min', dot: '#34d399' },
       { text: 'Reprogramacion inteligente completada', time: 'hace 29 min', dot: '#16a34a' },
       { text: 'Panel de ausencias actualizado', time: 'hace 37 min', dot: '#86efac' },
@@ -245,7 +245,7 @@ const rubroSnapshots: RubroSnapshot[] = [
         formatDisplay: formatCurrency,
       },
       {
-        label: 'Ocupacion de mesas',
+        label: 'Ocupación de mesas',
         value: 87.2,
         change: '+3.2pp',
         positive: true,
@@ -277,7 +277,7 @@ const rubroSnapshots: RubroSnapshot[] = [
     gradient: 'linear-gradient(135deg, #34d399, #0ea5a2)',
     url: 'tiendauno.com.ar/operaciones',
     month: 'Mar 2026',
-    focusTitle: 'Operacion omnicanal unificada',
+    focusTitle: 'Operación omnicanal unificada',
     focusSub: 'Inventario, consultas y cobros conectados',
     widgets: [
       {
@@ -325,7 +325,7 @@ const rubroSnapshots: RubroSnapshot[] = [
     activity: [
       { text: 'Consulta de producto respondida en 12s', time: 'hace 1 min', dot: '#34d399' },
       { text: 'Pago aprobado - Orden #6724', time: 'hace 5 min', dot: '#0ea5a2' },
-      { text: 'Reposicion sugerida para categoria A', time: 'hace 9 min', dot: '#2dd4bf' },
+      { text: 'Reposicion sugerida para categoría A', time: 'hace 9 min', dot: '#2dd4bf' },
       { text: 'Carrito abandonado recuperado', time: 'hace 13 min', dot: '#6ee7b7' },
       { text: 'Envio coordinado con operador logistico', time: 'hace 18 min', dot: '#34d399' },
       { text: 'Promocion segmentada disparada automaticamente', time: 'hace 24 min', dot: '#2dd4bf' },
@@ -347,7 +347,7 @@ const rubroSnapshots: RubroSnapshot[] = [
     focusSub: 'Leads calificados y visitas sin friccion',
     widgets: [
       {
-        label: 'Facturacion neta',
+        label: 'Facturación neta',
         value: 12_640_000,
         change: '+15.8%',
         positive: true,
@@ -377,7 +377,7 @@ const rubroSnapshots: RubroSnapshot[] = [
         formatDisplay: formatInteger,
       },
       {
-        label: 'Conversion de leads',
+        label: 'Conversión de leads',
         value: 29.8,
         change: '+4.1pp',
         positive: true,
@@ -395,7 +395,7 @@ const rubroSnapshots: RubroSnapshot[] = [
       { text: 'Prioridad alta para alquiler temporal', time: 'hace 16 min', dot: '#c4b5fd' },
       { text: 'Comparativa de propiedades generada', time: 'hace 21 min', dot: '#8b5cf6' },
       { text: 'Checklist legal actualizado en CRM', time: 'hace 28 min', dot: '#a78bfa' },
-      { text: 'Seguimiento automatico a lead frio', time: 'hace 35 min', dot: '#7c3aed' },
+      { text: 'Seguimiento automático a lead frio', time: 'hace 35 min', dot: '#7c3aed' },
       { text: 'Embudo de cierre recalculado por zona', time: 'hace 44 min', dot: '#c4b5fd' },
     ],
   },
@@ -818,7 +818,7 @@ export default function DashboardMockupSoftware() {
             </span>
           </h2>
           <p className="mx-auto max-w-2xl text-sm text-white/45 sm:text-base">
-            La misma representacion del panel, ahora adaptada por rubro. Cambia sola cada pocos segundos y la podes
+            La misma representacion del panel, ahora adaptada por rubro. Cambia sola cada pocos segundos y la podés
             pausar cuando quieras.
           </p>
         </motion.div>

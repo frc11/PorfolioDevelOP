@@ -573,7 +573,7 @@ function NodeCanvas({
         n.vx += Math.sin(t) * 0.000012
         n.vy += Math.cos(t * 0.72) * 0.000009
 
-        // AtracciÃ³n sutil hacia el mouse
+        // Atracción sutil hacia el mouse
         if (hasMouseFocus || isTabletOrLess) {
           const dx = focusX - n.x
           const dy = focusY - n.y
@@ -618,7 +618,7 @@ function NodeCanvas({
         const cx2 = app.x * W
         const cy2 = app.y * H
 
-        // LÃ­nea base tenue punteada
+        // Línea base tenue punteada
         ctx.beginPath()
         ctx.moveTo(cx1, cy1)
         ctx.lineTo(cx2, cy2)
@@ -628,7 +628,7 @@ function NodeCanvas({
         ctx.stroke()
         ctx.setLineDash([])
 
-        // PartÃ­cula viajando desde app -> n8n
+        // Partícula viajando desde app -> n8n
         const particleSpeed = shouldReduceMotion ? 0.004 : 0.008
         const tP = ((f * particleSpeed + app.phase * 0.2) % 1)
         const px = cx2 + (cx1 - cx2) * tP
@@ -647,7 +647,7 @@ function NodeCanvas({
         }
       }
 
-      // â”€â”€ CONEXIONES DINÃMICAS (MOUSE) â”€â”€â”€â”€â”€â”€â”€â”€
+      // ── CONEXIONES DINÁMICAS (MOUSE) ────────
       const mx = focusX
       const my = focusY
 
@@ -1186,7 +1186,7 @@ export default function HeroAutomation() {
           pointerEvents: 'none',
         }}
       >
-        {/* Aurora Ã¡mbar central */}
+        {/* Aurora ámbar central */}
         <div style={{
           position: 'absolute',
           top: '30%', left: '50%',
@@ -1205,7 +1205,7 @@ export default function HeroAutomation() {
           filter: 'blur(100px)',
         }} />
 
-        {/* Aurora Ã¡mbar derecha */}
+        {/* Aurora ámbar derecha */}
         <div style={{
           position: 'absolute',
           top: '40%', right: '-10%',

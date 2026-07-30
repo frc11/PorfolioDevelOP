@@ -663,3 +663,163 @@ siguen abiertas.
 - `fix/motion-sanidad-mobile` existe y **ya ejecutó B0.6 completo**. Ver la entrada
   de la Fase 3.
 - `main` no recibe nada de esto. Sigue siendo lo que hay en producción.
+
+---
+
+## B0.5 — Sanidad del sitio público + SEO base · 2026-07-30
+
+Ejecutado sobre `redesign/home` (no sobre la rama `fix/site-sanidad` que nombra el
+sprint: acá todo va a la rama única). Su precondición de "B0 y B0-bis mergeados a
+main" se ignoró a propósito — están adentro de esta rama por la consolidación.
+
+### T1 — El claim «+47»: hecho
+
+Los dos casos. En `VaultIA.tsx:184` era un `<p>` plano → texto directo. En
+`RubrosIA.tsx:318` la estructura era «destacado + resto»
+(`<strong>+47 negocios</strong> ya automatizados en Tucuman`), así que se respetó:
+`<strong>Automatizaciones</strong> funcionando en negocios del NOA`. Concatenado
+da exactamente el reemplazo especificado. `grep -rn "+47" src/` → **0**.
+
+### T2 — Preguntas sin «¿»: 53 aperturas en 52 líneas
+
+`audit/copy-preguntas-sin-apertura.txt` ya no existe, así que se regeneró el
+listado con un barrido propio. Primer intento: 1.964 falsos positivos, porque el
+regex confundía ternarios (`x > 0 ? 'red' : 'zinc'`). Afinado a «el signo cierra
+el texto» (pegado a comilla, a `<` o a fin de línea) y acotado al sitio público:
+**53 candidatos reales, cero ternarios**.
+
+Aplicadas 53 aperturas en 52 líneas, 10 archivos. Una línea llevó dos
+(`WebDevelopmentFaq.tsx:49` — «¿Qué pasa después de la entrega? ¿Me dejan solo?»).
+Se aprovechó para acentuar el interrogativo de cada una (Que→Qué, Cuanto→Cuánto,
+Como→Cómo) y pasar a voseo donde correspondía (Tenes→Tenés, Queres→Querés).
+
+**Dos falsos positivos, no tocados** — ya tenían el signo de apertura en la línea
+anterior del mismo bloque JSX:
+
+- `sections/ROICalculator.tsx:180` — la apertura está en la 178.
+- `sections/home/Footer.tsx:251` — la apertura está en la 239.
+
+### T3 — Tildes: 266 palabras, 22 líneas de tilde sobrante, 13 casos puntuales
+
+`audit/copy-tildes.txt` tampoco existe. Regenerado.
+
+**El conteo real es muy superior al que reportó la auditoría (36).** Se aplicaron
+**266 palabras en 190 líneas**. Se hizo con un diccionario que excluye a propósito
+toda palabra ambigua — si, que, como, esta, estas, tu, solo, donde, cuanto,
+practica, valido, titulo, publica — y que solo entra al interior de literales de
+string y a líneas de texto JSX puro: nunca identificadores, keys sin comillas,
+imports, comentarios ni clases CSS.
+
+**La tilde SOBRANTE no era un caso, era un patrón.** El sprint señalaba
+`WebDevelopmentTimeline.tsx:66`. Al abrirlo apareció que las **cuatro** componentes
+de la landing de web-development escriben «qué» y «cuándo» como relativo o
+conjunción: «Una web qué no convierte», «para qué cada clic se sienta inmediato»,
+«incluso cuándo el salón está cerrado». **22 líneas corregidas.** Se conservaron
+los 25 «por qué» y todos los interrogativos indirectos legítimos de las otras
+landings, verificados uno por uno: `ProcesoAutomation.tsx:78` («sepa qué hacer»),
+`PipelineSoftware.tsx:458`, `IntegracionesAutomation.tsx:588`,
+`ProcesoSoftware.tsx:49` y `:207`, `Footer.tsx:271` y `:670`,
+`PortalDemoHeader.tsx:39-40`.
+
+**Los cuatro casos puntuales que nombra el sprint:**
+
+- `GarantiaIA.tsx` tuteo → voseo: definis→definís, ensenas→enseñás.
+- `contact/page.tsx:208`: «Contanos brevemente que necesitas...» → «Contanos
+  brevemente qué necesitás...» (tuteo + interrogativo indirecto).
+- `contact/page.tsx:275`: «Elegí como hablar» → «Elegí cómo hablar».
+- `WebDevelopmentTimeline.tsx:66`: la tilde sobrante, más solida→sólida.
+
+`grep -rn "Tucuman" src/` → **0**, incluidos comentarios y keys.
+
+### T4 — Higiene: hecho
+
+Los 3 `.bak` borrados, verificado antes que ninguno estuviera importado (0
+referencias). Los 8 mojibake de comentarios corregidos.
+
+**Un tropiezo propio, corregido.** La reparación se hizo re-decodificando
+latin1 → utf8, que es exacta para «Ã³»→«ó» pero **rompe** los caracteres de dibujo
+de caja: `HeroAutomation.tsx:650` tenía doble mojibake y la pasada lo dejó en
+U+FFFD. Se reescribió la línea a mano. Barrido de U+FFFD en `src/` → **0**.
+
+### T5 — sitemap.ts y robots.ts: creados
+
+Estructura de rutas verificada, no asumida: `src/app/` tiene el grupo
+`(protected)` con **admin, dashboard y setter** adentro, más accept-invite, api,
+bienvenida, cambiar-password, contact, embed, forgot-password, login,
+reset-password, styleguide y las 4 landings.
+
+`sitemap.ts` — las **6 rutas públicas y nada más**. Home 1.0, las 4 landings 0.8,
+contact 0.5. Base `https://develop.com.ar`, el mismo dominio del `metadataBase`
+del layout raíz. Verificado sirviendo el build: cero rutas privadas.
+
+`robots.ts` — Allow `/` más 13 Disallow: las tres del grupo `(protected)`, `/api/`,
+`/embed/`, las seis rutas de sesión y alta de cuenta, y `/styleguide`.
+
+> **Decisión propia a confirmar:** `/styleguide` no estaba en la lista del sprint
+> (es una ruta nueva, la creó B1). Se bloqueó igual: es una página interna del
+> rediseño, y dejarla indexable justo mientras se escribe el robots sería un
+> agujero evidente. Sacarla es borrar una línea.
+
+### T6 — Mapeo de colores en CLAUDE.md: corregido
+
+Verificado contra dos fuentes independientes antes de tocar el doc:
+`globals.css:60-63` y los colores reales de cada landing. `CLAUDE.md` documentaba
+mal 3 de los 4. Ahora dice: web → cyan `#06b6d4` · IA → verde/emerald `#10b981` ·
+automation → ámbar `#f59e0b` · software → violeta `#8b5cf6`.
+
+> **Cruce con el Gate 1.** La decisión 1 del Gate (permutación de acentos, A vs B)
+> sigue siendo de Franco, y T6 acaba de alinear la documentación con **A** (el
+> código actual). No la cierra: si Franco elige B, `CLAUDE.md` se vuelve a editar
+> junto con los cuatro hex de `globals.css`. Queda anotado para que la decisión no
+> se dé por tomada de rebote.
+
+### Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `npm run build` | ✅ exit 0, `/robots.txt` y `/sitemap.xml` prerenderizados |
+| `npx tsc --noEmit` | ✅ 0 errores |
+| grep del claim `+47` en `src/` | 0 |
+| grep de mojibake en `src/` | 0 |
+| grep de «Tucuman» en `src/` | 0 |
+| archivos `.bak` | 0 |
+| SSR de las 5 rutas públicas | 200 · mojibake 0 · claim 0 |
+| `/robots.txt` y `/sitemap.xml` servidos | contenido correcto, 0 rutas privadas |
+| errores de consola en `/web-development` y `/ai-implementations` | 0 |
+
+**`eslint` sobre los 33 archivos tocados: 2 errores, los dos PRE-EXISTENTES.**
+`react-hooks/set-state-in-effect` en `app/contact/page.tsx:73` (captura del `?ref`
+del querystring) y en `software/DiagnosticoSoftware.tsx:520` (`setMounted(true)`).
+Verificado contra `HEAD`: los dos ya estaban, y lo único que B0.5 tocó en esos
+archivos son strings de copy. Arreglarlos es refactor de lógica de hooks — fuera
+del scope de un sprint de sanidad de copy. **Se reportan, no se tocan.**
+
+### Errores propios que hubo que revertir
+
+Tres, encontrados por `tsc` y por revisión del diff. Vale anotarlos porque son el
+riesgo estructural de cualquier pasada masiva sobre copy:
+
+1. **Claves de objeto acentuadas.** `motor-resenas` en `ModuloActiveCard.tsx` y
+   `pequeno` en `DiagnosticoSoftware.tsx` no son copy visible: son claves de
+   lookup. Revertidas.
+2. **Declaraciones de tipo acentuadas.** La heurística de «línea de texto JSX puro»
+   no excluía los dos puntos, así que alcanzó a `solución: string` (interface
+   `RubroData`) y `decisión: string` (interface `StoryMoment`) más sus 3 keys.
+   Revertidas.
+3. **Identificador dentro de un template literal.** `OurServices.tsx:4719` — la
+   pasada entró al interior de un backtick sin saltear la expresión interpolada.
+   Revertido; el label visible «SATISFACCIÓN» de la misma línea sí queda acentuado,
+   que es lo correcto.
+
+Regla que deja: sobre copy nunca alcanza con «está dentro de un string». Hay que
+distinguir string-de-texto de string-de-clave, y saltear las interpolaciones
+dentro de los template literals.
+
+### Fuera de scope, anotado
+
+- `WebDevelopmentByRubro.tsx:15` mantiene la propiedad `solucion` sin tilde en la
+  interface `RubroData`, y `portal-demo/data.ts:7` mantiene `decision`. Son
+  identificadores, no copy — correcto que sigan así.
+- El bloque `metricPills` de `WebDevelopmentBento.tsx:70` y varios headline y
+  problema de `WebDevelopmentByRubro.tsx` son copy de venta que quedó gramatical
+  pero sigue sonando a borrador. No es asunto de un sprint de sanidad.
