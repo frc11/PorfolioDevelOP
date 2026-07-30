@@ -756,14 +756,19 @@ function StatusVisual({ animationKey }: { animationKey: number }) {
 
 function OwnershipVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  // Mismo gate que MainNodesVisual/MainAIVisual: sin él estos dos loops corrían
+  // a 60 fps para siempre en mobile y con reduced-motion (el `animate` estaba
+  // gateado, pero `repeat: Infinity` no).
+  const shouldSimplify = shouldReduceMotion || isMobile;
   const tone = ACCENT_STYLES[accent];
 
   return (
     <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
       <motion.div
         className="relative flex h-20 md:h-[68px] w-48 items-center gap-5 rounded-2xl border border-cyan-500/40 bg-cyan-950/50 px-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_10px_30px_rgba(0,0,0,0.5)] backdrop-blur-md"
-        animate={shouldReduceMotion ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldSimplify ? { y: 0 } : { y: [-4, 4, -4], boxShadow: [`0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 25px ${tone.glow}`, `0 10px 30px rgba(0,0,0,0.5), 0 0 0px ${tone.glow}`] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       >
         <Server className="h-8 w-8 text-cyan-300 drop-shadow-[0_0_12px_rgba(34,211,238,0.8)]" />
         <div className="flex w-full flex-col gap-2">
@@ -774,8 +779,8 @@ function OwnershipVisual({ accent }: { accent: AccentKey }) {
                 key={index}
                 className="h-1.5 w-full rounded-full"
                 style={{ backgroundColor: tone.strong, opacity }}
-                animate={shouldReduceMotion ? { opacity } : { opacity: [opacity * 0.4, opacity, opacity * 0.4] }}
-                transition={{ duration: 2, repeat: Infinity, delay: index * 0.15 }}
+                animate={shouldSimplify ? { opacity } : { opacity: [opacity * 0.4, opacity, opacity * 0.4] }}
+                transition={{ duration: shouldSimplify ? 0.01 : 2, repeat: shouldSimplify ? 0 : Infinity, delay: shouldSimplify ? 0 : index * 0.15 }}
               />
             ))}
           </div>
@@ -997,6 +1002,10 @@ function MainAIVisual() {
 
 function RoiVisual() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  // Gate del pulso del punto final (loop perpetuo). El trazado de la curva de
+  // abajo es one-shot y sigue con el criterio de reduced-motion a secas.
+  const shouldSimplify = shouldReduceMotion || isMobile;
 
   return (
     <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-end justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_bottom,rgba(34,211,238,0.12),transparent_70%)] sm:w-[calc(100%+48px)]">
@@ -1022,8 +1031,8 @@ function RoiVisual() {
           r="6"
           fill="#22d3ee"
           style={{ filter: 'drop-shadow(0 0 15px rgba(34,211,238,1))' }}
-          animate={shouldReduceMotion ? { opacity: 1 } : { scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={shouldSimplify ? { opacity: 1 } : { scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: shouldSimplify ? 0.01 : 2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
         />
       </svg>
     </div>

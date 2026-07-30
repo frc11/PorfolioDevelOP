@@ -36,6 +36,14 @@ const MARKETING_INTERACT_MS = 1000; // ventana interactiva (mouse-follow) post-c
 const MARKETING_LIFT_SECONDS = 0.8; // toldo sube (translateY 0→-100%)
 const MARKETING_LIFT_EASE: [number, number, number, number] = [0.4, 0, 0.6, 1]; // ease-in-out
 const MARKETING_READY_TIMEOUT_MS = 2500; // tope del readiness gate (no colgar)
+// Red de seguridad del scroll. MISMO mecanismo y MISMO umbral que el Hero
+// (`src/components/layout/Hero.tsx`: setTimeout de 6 s anclado al montaje que
+// fuerza el estado final si la coreografía no terminó) → un solo patrón en el
+// repo. Clave: `setTimeout` NO depende del requestAnimationFrame, así que sigue
+// disparando aunque la cadena de `await animate(...)` quede congelada (pestaña
+// en segundo plano, throttling del navegador, device lento) — que es
+// exactamente el cuelgue que esta red cubre.
+const MARKETING_SCROLL_SAFETY_MS = 6000;
 const MARKETING_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const MARKETING_STROKE_EASE: [number, number, number, number] = [0.65, 0, 0.35, 1];
 // ──────────────────────────────────────────────────────────────────────────────
@@ -103,6 +111,32 @@ export function MarketingIntro() {
 
     const isCancelledRef = useRef(false);
     const timeoutIdsRef = useRef<number[]>([]);
+    // Cierre one-shot: la coreografía normal y la red de seguridad compiten por
+    // terminar el intro; el primero que llega gana y el otro queda no-op (sin
+    // doble unlock, sin doble evento `chrome:revealed`, sin salto visual).
+    const finishedRef = useRef(false);
+
+    // Únicas implementaciones del lock/unlock: las comparten la coreografía, el
+    // cleanup de desmontaje y la red de seguridad. Estables (leen `lenisRef`),
+    // así que no re-disparan el effect principal.
+    const lockScroll = useCallback(() => {
+        document.documentElement.style.overflow = "hidden";
+        document.body.style.overflow = "hidden";
+        lenisRef.current?.stop();
+    }, []);
+    const unlockScroll = useCallback(() => {
+        document.documentElement.style.overflow = "";
+        document.body.style.overflow = "";
+        lenisRef.current?.start();
+    }, []);
+
+    const finish = useCallback(() => {
+        if (finishedRef.current) return;
+        finishedRef.current = true;
+        markIntroConsumed();
+        markMarketingIntroDone();
+        setDone(true);
+    }, []);
 
     // Readiness LOCAL (ref/promesa propios — NO los helpers del contexto).
     const readyRef = useRef(false);
@@ -134,23 +168,6 @@ export function MarketingIntro() {
                 : new Promise<void>((resolve) => {
                       readyResolveRef.current = resolve;
                   });
-
-        const finish = () => {
-            markIntroConsumed();
-            markMarketingIntroDone();
-            setDone(true);
-        };
-
-        const lockScroll = () => {
-            document.documentElement.style.overflow = "hidden";
-            document.body.style.overflow = "hidden";
-            lenisRef.current?.stop();
-        };
-        const unlockScroll = () => {
-            document.documentElement.style.overflow = "";
-            document.body.style.overflow = "";
-            lenisRef.current?.start();
-        };
 
         const run = async () => {
             // Scroll bloqueado desde el arranque (se libera cuando el toldo termina
@@ -311,7 +328,35 @@ export function MarketingIntro() {
         dotsReveal,
         textReveal,
         liftY,
+        lockScroll,
+        unlockScroll,
+        finish,
     ]);
+
+    // Red de seguridad del scroll (ver MARKETING_SCROLL_SAFETY_MS). Los 8
+    // `unlockScroll()` de la coreografía viven aguas abajo de `await animate(...)`,
+    // que avanza por requestAnimationFrame: si el rAF no corre, ninguno se alcanza
+    // y el scroll queda trabado para siempre. Este `setTimeout` no depende del rAF.
+    //
+    // Idempotente y sin pelea con el camino normal: si la coreografía termina bien,
+    // `done` pasa a true → el cleanup cancela el timer y nunca dispara. Si dispara
+    // primero, `finishedRef` deja no-op al camino normal y `isCancelledRef` lo corta
+    // en su próximo checkpoint por si el rAF revive después.
+    useEffect(() => {
+        if (done) return;
+
+        const safety = window.setTimeout(() => {
+            if (finishedRef.current) return;
+            console.warn("MarketingIntro safety timeout triggered");
+            isCancelledRef.current = true;
+            unlockScroll();
+            finish();
+        }, MARKETING_SCROLL_SAFETY_MS);
+
+        return () => {
+            window.clearTimeout(safety);
+        };
+    }, [done, unlockScroll, finish]);
 
     if (done) {
         return null;

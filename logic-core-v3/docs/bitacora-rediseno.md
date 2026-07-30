@@ -1100,3 +1100,157 @@ Sumar a esa lista: **el hero 3D del home**, que ningún agente pudo ver.
 Después, `/styleguide` en el teléfono → **Gate 1**.
 
 **B2 no se abre hasta que pases ese Gate.**
+
+## B0.7 — Red de seguridad del scroll en `MarketingIntro` · 2026-07-30
+
+Cierra los puntos que B0.6 dejó como informe o como decisión pendiente: la red de
+seguridad (punto 6 del Gate), los tres `repeat: Infinity` sin gate (punto 8) y la
+línea de `/styleguide` en `robots.ts` (punto 5).
+
+### T1 — La red de seguridad · HECHO
+
+`src/components/ui/MarketingIntro.tsx`. Se replicó el mecanismo del `Hero`
+(`src/components/layout/Hero.tsx:158-169`): un `window.setTimeout` anclado al
+montaje que, si la coreografía no terminó, fuerza el estado final. `setTimeout` no
+depende del `requestAnimationFrame`, así que sigue disparando exactamente en el
+caso que rompía — el rAF congelado.
+
+Cambios de forma, no de coreografía:
+
+- `lockScroll` / `unlockScroll` / `finish` salieron del cuerpo del effect a
+  `useCallback` de nivel de componente. Ahora hay **una sola** implementación que
+  comparten los 8 `unlockScroll()` de la coreografía, el cleanup de desmontaje y la
+  red nueva. Estables (leen `lenisRef`), así que no re-disparan el effect.
+- `finishedRef` hace el cierre **one-shot**: coreografía y red compiten, gana el
+  primero, el otro queda no-op. Sin doble `unlockScroll()`, sin doble evento
+  `chrome:revealed`, sin salto visual.
+- Si la red dispara, además setea `isCancelledRef` para cortar la coreografía en su
+  próximo checkpoint, por si el rAF revive después.
+- El effect de la red depende de `done`: cuando la coreografía termina bien, el
+  cleanup cancela el timer y **nunca** dispara.
+
+**El umbral: 6000 ms, igual al del `Hero`.** Es el máximo que permite la regla
+«menor o igual al de Hero», y hace falta hasta el último milisegundo — ver el
+margen medido abajo. Anclado al montaje, no a la navegación: el montaje ocurre
+entre 330 y 1060 ms después del `commit` del documento, así que el presupuesto real
+de la coreografía es 6000 ms desde que arranca.
+
+### T2 — Medición
+
+Harness: Playwright **headed**. En headless Chromium no compone, el rAF queda a
+0 fps y la corrida «normal» termina midiendo el mismo cuelgue que se quiere
+reproducir — la misma trampa que ya había mordido en B0.6. `navigator.webdriver`
+forzado a `false` en un `addInitScript`, que corre antes que cualquier script de
+página: sin eso, `isAutomationEnvironment()` y el `EarlyScrollLock` se
+cortocircuitan y el bug no se reproduce. La condición de falla se simula
+reemplazando `requestAnimationFrame` por una función que nunca invoca el callback.
+
+Tiempo desde el `commit` del documento hasta que el scroll queda libre
+(`documentElement.style.overflow` y `body.style.overflow` vacíos):
+
+| ruta | rAF vivo — antes | rAF vivo — después | rAF congelado — antes | rAF congelado — después |
+|---|---|---|---|---|
+| `/` (Hero) | 10467 ms | 10275 ms | 9279 ms | 9372 ms |
+| `/contact` | 5209 ms | 5329 ms | **> 15000 ms TRABADO** | **6335 ms** |
+| `/web-development` | 6170 ms | 6534 ms | **> 15000 ms TRABADO** | **6866 ms** |
+
+`/` no cambia: su red ya existía y es la que dispara con el rAF congelado. Las dos
+rutas de marketing pasaban de no recuperarse nunca a recuperarse en ~6,3 y ~6,9 s
+(montaje + 6000). Con el rAF vivo los números coinciden dentro del ruido de corrida
+a corrida (±400 ms sobre ~5-6 s), o sea: **el intro normal se comporta igual que
+antes**, misma secuencia, sin flash ni salto.
+
+**El margen es ajustado, y es lo único que quedó incómodo.** Duración de la
+coreografía medida desde el montaje, en las 5 rutas que montan `MarketingIntro`:
+
+| ruta | montaje | fin | duración desde el montaje | margen contra los 6000 ms |
+|---|---|---|---|---|
+| `/contact` | 334 ms | 6042 ms | 5707 ms | **293 ms** |
+| `/web-development` | 823 ms | 6114 ms | 5291 ms | 709 ms |
+| `/ai-implementations` | 722 ms | 5565 ms | 4843 ms | 1157 ms |
+| `/software-development` | 1061 ms | 6038 ms | 4976 ms | 1024 ms |
+| `/process-automation` | 949 ms | 5926 ms | 4977 ms | 1023 ms |
+
+Esto es en un desktop rápido contra un servidor local. El sumando que manda es el
+readiness gate del 3D (`MARKETING_READY_TIMEOUT_MS`, tope 2500 ms): si en una
+máquina lenta llega a su tope, la coreografía tarda ~6420 ms y **la red le corta los
+últimos ~400 ms al toldo** — el velo desaparece de golpe cuando ya está medio fuera
+de pantalla. Es un caso que de por sí ya está degradado (significa que el 3D nunca
+cargó en 2,5 s), pero es un caso real. Ver el punto 10 del Gate.
+
+Caminos de desbloqueo verificados, además del hard-load:
+
+- **Client-nav `/` → `/contact` con el rAF congelado:** el scroll se libera a los
+  5837 ms de la navegación. Ahí `MarketingIntro` ni siquiera monta —
+  `shouldRunMarketingIntro` solo dispara en la ruta de entrada; lo que traba y
+  libera es el Shutter, que ya tenía su propia red en `TransitionContext.tsx:53`.
+- **Desmontaje a mitad del intro:** no se pudo forzar. Con el rAF congelado la
+  transición del Shutter tampoco puede completarse, así que el click de salida no
+  navega y **la red nueva es la que libera** (4655 ms después del click, ~6,1 s
+  desde la carga). El cleanup de desmontaje no cambió de comportamiento en este
+  sprint: es el mismo `unlockScroll()` de siempre, solo que ahora hoisteado.
+
+### T3 — Los 3 `repeat: Infinity` sin gate · HECHO
+
+`WhyDevelOP.tsx`: `OwnershipVisual` (la card y sus 2 barras) y `RoiVisual` (el punto
+del final de la curva). Se les puso el mismo gate que ya tenían sus hermanos de
+`MainNodesVisual` / `MainAIVisual`: `useIsMobileViewport()` sumado al
+`useReducedMotion()` que ya estaba, y `duration: shouldSimplify ? 0.01 : X` +
+`repeat: shouldSimplify ? 0 : Infinity`. Sin helper compartido: el archivo se
+reemplaza más adelante.
+
+Medición: `getComputedStyle` muestreado 50 veces cada 50 ms. El atributo `style`
+inline **no sirve** — motion delega en WAAPI cuando puede y el inline queda viejo.
+Valores distintos > 1 ⇒ el loop corre.
+
+| nodo | condición | antes | después |
+|---|---|---|---|
+| card + barras de `ownership` | **mobile 390×844** | keyframe animado (`translateY(-4px)`, opacity 0,36/0,24) | **estático final** (`none`, opacity 0,9/0,6) |
+| punto del ROI | **mobile 390×844** | **ANIMANDO** (50 valores distintos) | **estático** |
+| card + barras de `ownership` | desktop + reduced-motion | estático | estático |
+| punto del ROI | desktop + reduced-motion | estático | estático |
+| card + barras de `ownership` | **desktop sin reduced-motion** | lectura X | **idéntica byte a byte** |
+| punto del ROI | **desktop sin reduced-motion** | ANIMANDO (49) | ANIMANDO (48) |
+
+Desktop sin reduced-motion no cambia — verificado contra un build de la versión
+anterior, no solo por inspección del código. Detalle honesto: en ese harness la card
+de `ownership` se lee **estática también en desktop**, sentada en su primer
+keyframe. Pero se lee exactamente igual antes y después, así que sea lo que sea que
+la congela, es pre-existente y ajeno a este sprint.
+
+### T4 — `/styleguide` fuera de `robots.ts` · HECHO
+
+Una línea. La página ya lleva `robots: { index: false, follow: false }` en su
+metadata (`app/styleguide/page.tsx:26`) y no tiene ningún link entrante.
+`/robots.txt` verificado en el build de producción: sin la línea de styleguide, con
+las 12 rutas privadas intactas.
+
+### Verificación
+
+- `npm run build` verde. `npx tsc --noEmit` → 0 errores. `eslint` sobre los 3
+  archivos tocados → 0. Los 2 errores pre-existentes de `contact/page.tsx` y
+  `DiagnosticoSoftware.tsx` quedaron como estaban.
+- `npm install` no hizo falta; `package-lock.json` no se movió.
+- Errores de consola: 0 en `/`, `/contact` y `/styleguide`. En `/web-development`
+  hay 4, **pre-existentes** (idénticos en el build de antes): dos 404 de recurso y
+  dos violaciones de CSP report-only del iframe de `template-zero.netlify.app`.
+
+### Lo que sigue esperando decisión de Franco
+
+10. **El margen de la red de seguridad.** 293 ms en `/contact` sobre un desktop
+    rápido. Tres salidas, ninguna implementada: (a) dejarlo así y aceptar que en un
+    desktop lento la red le corte la cola al toldo; (b) subir las dos redes (Hero y
+    MarketingIntro) a ~8000 ms — mantiene un solo patrón, pero alarga la ventana de
+    trabazón; (c) armar el timer de `MarketingIntro` **después** del readiness gate
+    — el gate ya está acotado por `setTimeout` a 2500 ms, así que no puede colgarse,
+    y así los 6000 ms cubren enteros la parte que sí depende del rAF. (c) es la
+    mejor técnicamente, pero mete un segundo anclaje en el repo.
+
+11. **Los otros `repeat: Infinity` de `WhyDevelOP.tsx`.** T3 pedía tres líneas y se
+    hicieron esas tres. Pero el archivo tiene **17 loops perpetuos más** en la misma
+    situación (`ClockVisual` en 1052/1058/1064, `LayersVisual`, `DashboardVisual` y
+    el resto hasta la línea 1487): `animate` gateado por `useReducedMotion` —cuando
+    lo está—, pero `repeat: Infinity`
+    sin gatear y sin camino de mobile. El control de la medición lo confirma en
+    runtime — el sonar de `ClockVisual` sigue **ANIMANDO en mobile 390×844** después
+    de este sprint. Fuera del scope tal como estaba escrito.
