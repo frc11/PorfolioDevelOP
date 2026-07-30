@@ -823,3 +823,154 @@ dentro de los template literals.
 - El bloque `metricPills` de `WebDevelopmentBento.tsx:70` y varios headline y
   problema de `WebDevelopmentByRubro.tsx` son copy de venta que quedó gramatical
   pero sigue sonando a borrador. No es asunto de un sprint de sanidad.
+
+---
+
+## B0.6 — Bugs de motion · 2026-07-30
+
+### Cómo se resolvió, y por qué distinto a lo planeado
+
+El sprint pedía ejecutar `docs/sprints/sprint-b06-motion-bugs.md`. **Ese archivo no
+existe** — ni en `main`, ni en ninguna rama, ni en disco, ni en la historia
+(`git log --all --diff-filter=A` no lo encuentra nunca).
+
+Lo que sí existe es la rama **`fix/motion-sanidad-mobile`** (c54e608, pusheada),
+que ya ejecutó B0.6 **completo**: T1 los 11 loops de `WhyDevelOP`, T2 el
+`frameloop` del canvas del hero, T3 el `requestAnimationFrame` del marquee, y T4
+declarado explícitamente como solo investigación. Con mediciones tomadas.
+
+Consultado con Franco, se decidió **mergearla** en vez de re-implementar: conserva
+las mediciones y la historia, y elimina la cuarta rama divergente en lugar de
+crear un duplicado que después habría que reconciliar igual.
+
+### Conflicto — `Hero.tsx` (el mismo choque, otra vez)
+
+Idéntico en forma al de la consolidación: `fix/motion-sanidad-mobile` modificó el
+`HeroCanvas` **inline** de `Hero.tsx` (agregándole la prop `frameloop`), mientras
+que `fix/home-sanidad` lo había extraído a `HeroCanvas.tsx`.
+
+**Resuelto conservando los dos lados**, y el corte cayó justo:
+
+- Lo que T2 le hizo a `Hero()` —`sectionRef`, el estado `isHeroInView`, el
+  `IntersectionObserver` con `rootMargin: '120px'`, y los dos
+  `frameloop={isHeroInView ? 'always' : 'demand'}` en los dos puntos de montaje—
+  **auto-mergeó sin tocar nada**: vive en la parte de `Hero.tsx` que la extracción
+  no movió.
+- Lo que T2 le hizo al componente `HeroCanvas` —la prop `frameloop` y su paso al
+  `<Canvas>`— se **portó a `HeroCanvas.tsx`**, junto al FIX-GHOST-BOX que ya
+  vivía ahí desde la consolidación. Los dos fixes conviven en el mismo `<Canvas>`.
+
+`WhyDevelOP.tsx` (T1) auto-mergeó limpio pese a que `fix/home-sanidad` también lo
+había tocado. Verificado con un diff contra esa rama: los **únicos** cambios que
+introduce el merge son el gateo del `repeat` — nada de `fix/home-sanidad` se
+perdió. `InfiniteReviews.tsx` (T3) no lo tocaba nadie más.
+
+### Qué quedó adentro, verificado
+
+**T1 — `WhyDevelOP`, 11 loops.** Cada `duration: shouldSimplify ? 0.01` que iba
+junto a `repeat: Infinity` ahora lleva `repeat: shouldSimplify ? 0 : Infinity`.
+El problema era que `duration: 0.01` **no** apaga la animación: la reinicia cada
+frame indefinidamente, y como `shouldSimplify = shouldReduceMotion || isMobile`,
+el camino de alivio salía más caro que la animación original. Medido por la rama:
+192,7 mutaciones de `style` por segundo, perpetuas → 0. La rama de desktop queda
+byte-idéntica.
+
+Verificado que no quedó ninguno crudo: 0 líneas con `duration: shouldSimplify ?
+0.01` seguidas de `repeat: Infinity` sin gatear. Las líneas 514 y 589 conservan el
+`0.01` **sin** `repeat` — son animaciones de un solo disparo, no loops. Correcto
+dejarlas.
+
+> Anotado, fuera del alcance de T1 tal como está escrito: las líneas 766, 778 y
+> 1026 del mismo archivo tienen `repeat: Infinity` con duraciones normales (3s, 2s,
+> 2s) y **ningún** camino de `shouldSimplify`. No son el bug del 0.01, pero corren
+> a 60fps para siempre también en mobile y con reduced-motion. No se tocaron.
+
+**T2 — `frameloop` del canvas.** El `<Canvas>` no lo declaraba, así que R3F usaba
+`'always'`: los 3 `useFrame` (HeroLogo, HeroLogoShadow, DesktopPointerSync) y los
+3 pases del EffectComposer seguían renderizando con el hero fuera de pantalla.
+Medido por la rama en mobile: 156 draw calls WebGL en viewport → 0 fuera → 152 al
+volver. Arranca en `true` para no arriesgar la coreografía de intro.
+
+**T3 — rAF del marquee.** El `IntersectionObserver` de `InfiniteReviews` gateaba el
+trabajo pero el `requestAnimationFrame` quedaba **fuera** del `if (isVisible)`, así
+que el loop corría a 60fps de por vida leyendo `window.scrollY`. Ahora arranca y se
+cancela con la visibilidad, y al reentrar rebasa `lastTime` y `lastScrollY` para
+que no pegue un salto de velocidad. Medido: 58-120 `paintFrame` por ventana en
+viewport → 0 fuera.
+
+### T4 — Informe del scroll-lock del intro (sin cambios de código)
+
+**Quiénes escriben `documentElement.style.overflow`.** Tres dueños, sin refcount ni
+coordinación, sobre la misma propiedad:
+
+1. `EarlyScrollLock` — script inline inyectado al stream SSR antes de `</head>`,
+   corre **antes del primer paint**. Lockea solo en `/` y **nunca** bajo
+   `navigator.webdriver`.
+2. `Hero` — efecto sobre `[lenis, phase]`: `hidden` mientras `phase !== 'done'`,
+   vacío en `'done'`. Más un cleanup de desmontaje que limpia incondicionalmente.
+3. `MarketingIntro` — su propio `lockScroll()` / `unlockScroll()`.
+
+**Los dos primeros no coliden con el tercero**: `Hero` es home-only y
+`MarketingIntro` corre solo en las 5 rutas de marketing (allow-list de
+`marketing-routes.ts`, que excluye el home explícitamente). Son mutuamente
+excluyentes por ruta.
+
+**El hallazgo real es una asimetría entre los dos orquestadores de intro:**
+
+| | red de seguridad | qué pasa si la coreografía se cuelga |
+|---|---|---|
+| `Hero` (home) | **sí** — `window.setTimeout` de 6s que fuerza `setPhase('done')` | el lock se libera a los 6s, con un `console.warn('Preloader safety timeout triggered')` |
+| `MarketingIntro` (4 landings + contact) | **no** | el lock **no se libera** |
+
+En `MarketingIntro`, los 8 puntos que llaman a `unlockScroll()` están todos aguas
+abajo de la cadena secuencial de `await animate(...)` de Framer Motion, que es
+rAF-driven, o bien en el cleanup de desmontaje. No hay ningún fallback de reloj de
+pared. `MARKETING_READY_TIMEOUT_MS` existe pero solo acota el
+`Promise.race([waitForLogoReady(), …])`, no la cadena de animación.
+
+**Medido, no deducido.** En el navegador del harness (que resultó tener
+`navigator.webdriver === false`, así que el corto-circuito de automation **no**
+aplicó) y con el pane sin compositar — o sea rAF congelado, 0 frames por segundo:
+
+- `/` (hard-load): `overflow: hidden` al entrar, y **liberado antes de los 6s**.
+  La red de seguridad del `Hero` funciona. `setTimeout` corre aunque rAF no.
+- `/contact` (hard-load): `overflow: hidden` en `<html>` y `<body>`,
+  `scrollHeight <= innerHeight`, **seguía bloqueado a los 12 segundos**. Y el click
+  en el link al home ni siquiera navegó: el velo del intro sigue arriba.
+
+**Exposición real: acotada, no nula.** Un tab en segundo plano congela rAF, pero
+Framer reanuda al enfocar, así que ese caso se autocura. El riesgo genuino es
+cualquier camino que corte la cadena sin desmontar el componente — una excepción a
+mitad de la secuencia, o un dispositivo lo bastante lento como para que un
+`animate` quede starved. No se midió con qué frecuencia pasa en producción.
+
+**Recomendación, NO implementada** (T4 es solo informe): darle a `MarketingIntro`
+la misma red que el `Hero` ya tiene — un `setTimeout` de reloj de pared que llame a
+`unlockScroll()` pase lo que pase. Son ~6 líneas y cierra la asimetría.
+
+**Y un problema de método que conviene anotar:** este bug es **estructuralmente
+invisible** para las herramientas del repo. `EarlyScrollLock` se saltea a sí mismo
+bajo `navigator.webdriver`, y `PreloaderContext:125` salta la fase directo a
+`'done'` bajo la misma condición. O sea: la única herramienta que podría cazar un
+bug de scroll-lock está excluida por diseño. El discriminador para Franco es
+manual: abrir `/contact` en un navegador normal y mirar si aparece
+`Preloader safety timeout triggered` en la consola, o si la página queda sin
+scroll.
+
+### Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `npm run build` | ✅ exit 0 |
+| `npx tsc --noEmit` | ✅ 0 errores |
+| 11 loops de `WhyDevelOP` gateados | sí, 0 crudos restantes |
+| nada de `fix/home-sanidad` perdido en `WhyDevelOP` | verificado por diff contra esa rama |
+| `frameloop` llega al `<Canvas>` | sí, junto al FIX-GHOST-BOX |
+| las 9 rutas públicas + robots + sitemap | 200 |
+| chunks de three en el documento inicial del home | 0 de 23 scripts |
+| errores de consola en `/` | 0 |
+
+**Sigue sin verificarse visualmente el hero 3D**, por la misma razón de la Fase 1:
+el pane no compositaba (0 frames de rAF), así que la coreografía de intro nunca
+arranca y el canvas queda en el default 300×150 de R3F. Es artefacto del entorno,
+no del código. **Queda para la verificación humana de Franco en el deploy preview.**

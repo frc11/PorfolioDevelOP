@@ -64,8 +64,15 @@ export function Hero() {
         textReveal,
         markLogoReady,
     } = usePreloader()
+    const sectionRef = useRef<HTMLElement>(null)
     const canvasWrapperRef = useRef<HTMLDivElement>(null)
     const fullBleedRef = useRef<HTMLDivElement>(null)
+    // Gate de viewport del render loop del canvas. Sin `frameloop`, R3F usa 'always':
+    // los 3 useFrame (HeroLogo, HeroLogoShadow, DesktopPointerSync) y los 3 pases del
+    // EffectComposer seguían corriendo con el hero fuera de pantalla. Arranca en true
+    // para no arriesgar la coreografía de intro, que corre siempre con el hero visible
+    // y el scroll bloqueado; el observer solo puede apagarlo al scrollear.
+    const [isHeroInView, setIsHeroInView] = useState(true)
     // Tamaño real del canvas in-box de mobile: la overlay lo necesita para que el SVG
     // matchee el footprint del 3D (window.innerHeight daría un SVG mucho más grande).
     const [mobileCanvasPx, setMobileCanvasPx] = useState<{ w: number; h: number } | null>(null)
@@ -125,6 +132,20 @@ export function Hero() {
         }
     }, [lenis, phase])
 
+    // Pausa el render loop del canvas cuando el hero sale del viewport.
+    useEffect(() => {
+        const node = sectionRef.current
+        if (!node || typeof IntersectionObserver === 'undefined') return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => setIsHeroInView(entry.isIntersecting),
+            { rootMargin: '120px' },
+        )
+        observer.observe(node)
+
+        return () => observer.disconnect()
+    }, [])
+
     // Si el Hero se desmonta a mitad del intro (navegación), liberar el scroll.
     useEffect(() => {
         return () => {
@@ -149,6 +170,7 @@ export function Hero() {
 
     return (
         <section
+            ref={sectionRef}
             className="relative flex min-h-[100svh] flex-col overflow-hidden bg-[#f1f2f4] pb-12 pt-5 md:grid md:min-h-screen md:grid-cols-2 md:items-stretch md:pb-0 md:pt-0"
             id="inicio"
         >
@@ -254,6 +276,7 @@ export function Hero() {
                         dotsReveal={dotsReveal}
                         prefersReducedMotion={prefersReducedMotion}
                         onLogoReady={markLogoReady}
+                        frameloop={isHeroInView ? 'always' : 'demand'}
                     />
                 </motion.div>
             ) : null}
@@ -406,6 +429,7 @@ export function Hero() {
                             dotsReveal={dotsReveal}
                             prefersReducedMotion={prefersReducedMotion}
                             onLogoReady={markLogoReady}
+                            frameloop={isHeroInView ? 'always' : 'demand'}
                         />
                     </motion.div>
                 ) : null}

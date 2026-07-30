@@ -323,6 +323,7 @@ export default function HeroCanvas({
     layerOpacity,
     dotsReveal,
     prefersReducedMotion,
+    frameloop,
     onLogoReady,
 }: {
     active: boolean
@@ -332,6 +333,8 @@ export default function HeroCanvas({
     layerOpacity: MotionValue<number>
     dotsReveal: MotionValue<number>
     prefersReducedMotion: boolean
+    // 'always' con el hero en viewport; 'demand' fuera de él (ver gate en Hero()).
+    frameloop: 'always' | 'demand'
     onLogoReady: () => void
 }) {
     // FIX-GHOST-BOX — El EffectComposer (incl. Vignette darkness) sobre este canvas
@@ -348,7 +351,7 @@ export default function HeroCanvas({
     const [postFxReady, setPostFxReady] = useState(false)
     const handleSized = useCallback(() => setPostFxReady(true), [])
     return (
-        <Canvas className="relative z-10 h-full w-full" camera={{ position: [0, 0, isSplitLayout ? 15 : 13], fov: isSplitLayout ? 35 : 30 }} gl={{ alpha: true, powerPreference: "high-performance", antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
+        <Canvas className="relative z-10 h-full w-full" frameloop={frameloop} camera={{ position: [0, 0, isSplitLayout ? 15 : 13], fov: isSplitLayout ? 35 : 30 }} gl={{ alpha: true, powerPreference: "high-performance", antialias: false, stencil: false, depth: true }} dpr={[1, 1.5]}>
             <HeroCanvasSizeSync active={active} targetRef={targetRef} onSized={handleSized} />
             <MobileInputHandler />
             {isSplitLayout && !prefersReducedMotion ? <DesktopPointerSync introProgress={introProgress} layerOpacity={layerOpacity} /> : null}
