@@ -16,6 +16,93 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — REDISEÑO B1
+   Dirección: "instrumento de precisión, editorial".
+   Base monocroma, superficies planas y quietas, acento en dosis mínimas.
+
+   Prefijo `ds` en todos los tokens: el sitio actual todavía consume
+   --color-void / --color-obsidian / --color-accent (definidos más abajo,
+   fuera de @theme). Esos tokens viejos se conservan hasta el bloque final
+   del rediseño; el sistema nuevo no los pisa.
+
+   `static` y no `@theme` a secas: Tailwind 4.3 hace tree-shaking de las
+   variables de tema que ningún utility usa. Verificado contra el build —
+   sin `static` estos tokens NO aparecen en el CSS emitido, y las secciones
+   que los leen por `var()` crudo (la inversión de tema de SectionShell)
+   se quedarían sin valor. Va en su propio bloque para forzar solo estos
+   ~35 tokens, sin arrastrar el tema default entero de Tailwind.
+   ══════════════════════════════════════════════════════════════════════════ */
+@theme static {
+
+  /* ── Base dark (tema por defecto) ───────────────────────────────────── */
+  --color-ds-void: #0D0B09;
+  --color-ds-surface: #151210;
+  --color-ds-ink: #EDE9E1;
+  --color-ds-ink-muted: #A39C8F;
+  --color-ds-border: rgba(237, 233, 225, 0.10);
+
+  /* ── Tema claro (secciones invertidas) ──────────────────────────────── */
+  --color-ds-light-bg: #F2EEE6;
+  --color-ds-light-surface: #EAE5DA;
+  --color-ds-light-ink: #1A1713;
+  --color-ds-light-ink-muted: #6E675C;
+  --color-ds-light-border: rgba(26, 23, 19, 0.12);
+
+  /* ── Acentos de servicio ────────────────────────────────────────────────
+     Valores tomados del código actual (OurServices.tsx:77/95/113/131), que
+     es la fuente internamente coherente. Son los tonos sobrios de cada
+     familia; los neón (#00ff88, #00e5ff/#00e1ff) quedan descartados.
+     ⚠ PENDIENTE GATE 1: CLAUDE.md asigna estos mismos cuatro hex a otros
+     servicios (permutación alternativa). El styleguide (B1-S3) muestra las
+     dos opciones; Franco elige. NO resolver acá.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-accent-web: #06b6d4;
+  --color-ds-accent-ia: #10b981;
+  --color-ds-accent-automation: #f59e0b;
+  --color-ds-accent-software: #8b5cf6;
+
+  /* ── Radios y elevación ─────────────────────────────────────────────────
+     Radio 0 en superficies (planas, no se aprietan). El radio y el relieve
+     de 2 capas quedan reservados a lo interactivo.
+     ───────────────────────────────────────────────────────────────────── */
+  --radius-ds-surface: 0px;
+  --radius-ds-control: 9px;
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
+
+  /* ── Escala tipográfica ─────────────────────────────────────────────────
+     Sin familias nuevas: Geist (sans) y Geist Mono, ya cargadas en
+     layout.tsx. El display se distingue por escala y tracking.
+     ───────────────────────────────────────────────────────────────────── */
+  --text-ds-display-xl: clamp(3.25rem, 8vw, 7rem);
+  --text-ds-display-xl--line-height: 0.98;
+  --text-ds-display-xl--letter-spacing: -0.03em;
+
+  --text-ds-display-lg: clamp(2.25rem, 5vw, 4.25rem);
+  --text-ds-display-lg--line-height: 1.05;
+  --text-ds-display-lg--letter-spacing: -0.02em;
+
+  --text-ds-lead: clamp(1.125rem, 1.6vw, 1.375rem);
+  --text-ds-lead--line-height: 1.55;
+
+  --text-ds-body: 1.0625rem;
+  --text-ds-body--line-height: 1.7;
+
+  --text-ds-eyebrow: 0.75rem;
+  --text-ds-eyebrow--line-height: 1.2;
+  --text-ds-eyebrow--letter-spacing: 0.18em;
+
+  --text-ds-data: clamp(2rem, 4vw, 3.5rem);
+  --text-ds-data--line-height: 1;
+  --text-ds-data--font-weight: 500;
+
+  /* ── Espaciado y layout ─────────────────────────────────────────────── */
+  --spacing-ds-section: clamp(6rem, 14vh, 11rem);
+  --spacing-ds-gutter: clamp(1.25rem, 4vw, 3rem);
+  --container-ds-page: 1240px;
+  --container-ds-prose: 65ch;
+}
+
 /* Logic Core V3: The Inversion System */
 :root {
   /* Default dark fallback prevents white flashes before section themes hydrate. */
@@ -368,4 +455,38 @@ canvas {
 }
 .chat-messages-area::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION GLOBAL — REDISEÑO B1
+   Hasta este sprint el sitio no tenía ningún bloque de prefers-reduced-motion.
+   Solo aplica cuando el usuario lo pidió a nivel sistema: en modo normal esta
+   regla no existe y nada de lo que ya animaba cambia.
+
+   Por qué 1ms y no 0s: una duración de 0.01ms sobre una animación `infinite`
+   la convierte en un loop de ~100Hz (quema CPU en vez de aquietar). Cortar la
+   animación a UNA iteración de 1ms la deja aterrizar en su keyframe final —
+   los reveals con `fill: both` terminan visibles en lugar de quedar en
+   opacity 0, que es el modo clásico de romper una página con reduced-motion.
+
+   Alcance: CSS. Las animaciones de Framer Motion ya se apagan por
+   `useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen.
+   PENDIENTE (fuera del scope de S1, que es solo tokens): el scroll suave de
+   Lenis (SmoothScroll.tsx) es JS y no se neutraliza desde CSS.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
 }
