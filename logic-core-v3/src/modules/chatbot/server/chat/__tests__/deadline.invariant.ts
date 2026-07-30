@@ -38,7 +38,7 @@ import {
   QUOTA_COMPENSATION_DEADLINE_MS,
   ROUTE_MAX_DURATION_MS,
   STREAM_CHUNK_TIMEOUT_MS,
-  STREAM_STEP_TIMEOUT_MS,
+  STREAM_WATCHDOG_IDLE_MS,
   computeHookBudgetMs,
 } from '../reconcile.ts'
 
@@ -282,37 +282,42 @@ async function main(): Promise<void> {
   )
 }
 
-// ── 9. STREAM-TIMEOUT: la calibración de stepMs deja vivir a la persistencia ──
-// Pinnea la aritmética documentada en reconcile.ts. Si alguien sube
-// STREAM_STEP_TIMEOUT_MS sin recalcularla, el abort caería tan tarde que
-// `computeHookBudgetMs` recortaría el presupuesto y el turno se perdería igual —
-// el bug exacto que este sprint arregla. Acá falla el test en vez de en prod.
+// ── 9. WATCHDOG: la calibración del cierre deja vivir a la persistencia ──────
+// Reemplaza al bloque que pinneaba `stepMs` (removido: beneficio medido cero y
+// truncaba generaciones legítimas). Ahora quien cierra el stream es el watchdog
+// de nuestro borde, y lo que hay que pinnear es que dispare a tiempo para que
+// `persistTurn` conserve su presupuesto — si no, el turno se perdería igual, que
+// es el bug exacto que venimos arrastrando. Acá falla el test, no prod.
 {
-  // Elapsed real medido en prod con los probes: el request llega a streamText()
-  // a los ~5.1s (todo el pre-LLM). El timer de stepMs arranca ahí.
-  const PRE_LLM_ELAPSED_MS = 5_100
-  const abortAtMs = PRE_LLM_ELAPSED_MS + STREAM_STEP_TIMEOUT_MS
+  // Elapsed real medido en prod: el chunk único de Gemini llega a los ~6.4s.
+  // El watchdog arma su timer al devolver la respuesta y se re-arma con ese
+  // chunk, así que el disparo cae en chunk + idle.
+  const LAST_CHUNK_ELAPSED_MS = 6_400
+  const firesAtMs = LAST_CHUNK_ELAPSED_MS + STREAM_WATCHDOG_IDLE_MS
 
   assert.equal(
-    computeHookBudgetMs(abortAtMs),
+    computeHookBudgetMs(firesAtMs),
     ONFINISH_TOTAL_BUDGET_MS,
-    `con stepMs=${STREAM_STEP_TIMEOUT_MS} el abort cae a ${abortAtMs}ms y la persistencia ` +
-      'todavía recibe el presupuesto COMPLETO (si esto falla, subieron stepMs de más)',
+    `con idle=${STREAM_WATCHDOG_IDLE_MS} el watchdog dispara a ${firesAtMs}ms y la ` +
+      'persistencia todavía recibe el presupuesto COMPLETO',
   )
   assert.ok(
-    abortAtMs + ONFINISH_TOTAL_BUDGET_MS + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
-    'abort + persistencia + colchón entran antes del kill de la plataforma',
+    firesAtMs + ONFINISH_TOTAL_BUDGET_MS + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    'disparo + persistencia + colchón entran holgados antes del kill de la plataforma',
   )
-  // Piso: tiene que sobrevivir holgado a una generación sana de Flash (2-5s).
+  // Piso: los gaps medidos hasta el primer chunk fueron 1470 y 1664ms. El idle
+  // tiene que superarlos con margen o cortaríamos respuestas sanas a la mitad.
+  const MAX_OBSERVED_GAP_MS = 1_664
   assert.ok(
-    STREAM_STEP_TIMEOUT_MS >= 10_000,
-    'stepMs demasiado bajo: mataría generaciones legítimas lentas',
+    STREAM_WATCHDOG_IDLE_MS > MAX_OBSERVED_GAP_MS * 1.5,
+    `idle demasiado bajo: el gap máximo observado fue ${MAX_OBSERVED_GAP_MS}ms y cortaría ` +
+      'respuestas legítimas',
   )
-  // chunkMs corta antes que stepMs cuando el provider se calla de verdad —
-  // si no, el techo rápido sería inalcanzable y solo quedaría el reloj de pared.
+  // El watchdog es el mecanismo CONFIABLE (no depende del SDK), así que tiene
+  // que actuar antes que el chunkMs — que está probado que no cierra nada.
   assert.ok(
-    STREAM_CHUNK_TIMEOUT_MS < STREAM_STEP_TIMEOUT_MS,
-    'chunkMs debe ser el corte rápido y stepMs el piso duro, no al revés',
+    STREAM_WATCHDOG_IDLE_MS < STREAM_CHUNK_TIMEOUT_MS,
+    'el watchdog debe disparar antes que el chunkMs del SDK: es el único que garantiza el cierre',
   )
 }
 

@@ -185,45 +185,52 @@ export function computeHookBudgetMs(requestElapsedMs: number): number {
 export const STREAM_CHUNK_TIMEOUT_MS = 5_000
 
 /**
- * STREAM-TIMEOUT (Fase 2) — RELOJ DE PARED por step. La red de seguridad que
- * `chunkMs` no puede ser.
+ * WATCHDOG — Silencio máximo tolerado EN EL BORDE DE LA RESPUESTA antes de que
+ * cerremos el stream nosotros.
  *
- * POR QUÉ HIZO FALTA: con `chunkMs = 5000` deployado, el cuelgue SIGUIÓ. La
- * causa está en el SDK: `resetChunkTimeout()` es la PRIMERA línea del transform
- * (`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider, ANTES de
- * cualquier filtrado — un `text-delta` con `delta.length === 0` hace `break` sin
- * enqueue (`:7824-7834`) y `stream-start` hace `return` (`:7794-7797`), pero los
- * dos YA reiniciaron el timer. Si Gemini sigue emitiendo chunks vacíos o
- * keepalives tras completar la respuesta (hay reportes públicos de eso), el
- * timer ENTRE chunks se reinicia para siempre y no vence nunca.
+ * POR QUÉ EXISTE, y por qué reemplaza al enfoque de los dos sprints previos: la
+ * medición en prod (dos invocaciones idénticas) mostró `chunks_total: 1` —
+ * Gemini manda la respuesta entera en UN chunk y después silencio absoluto. Sin
+ * ruido y sin keepalives, los timers del SDK (`chunkMs`, `stepMs`) TUVIERON que
+ * vencer, y aun así no se cerró nada. La causa está en el SDK y ninguna opción
+ * de `timeout` la esquiva (ver el encabezado de `streamWatchdog.ts`): el chequeo
+ * de abort corre detrás de un `read()` bloqueado, y el `closeStream()` vive en
+ * un `flush()` que no corre cuando el stream erroriza.
  *
- * `stepMs` no tiene ese problema: es un `setTimeout` plano armado al entrar a
- * `streamStep`, ANTES de `doStream` (`:7599`), que ningún chunk resetea. Vence
- * pase lo que pase. Se re-arma por step y dispara el `stepAbortController` del
- * run — abortar en cualquier step mata el run entero.
+ * Este techo NO le pide nada al SDK: corre en el `TransformStream` que envuelve
+ * el body que devolvemos, así que el cierre está garantizado por construcción.
  *
- * ARITMÉTICA DEL VALOR (12s), contra los números reales del probe en prod:
- *   - El request llega a `streamText()` a los ~5.1s (todo el pre-LLM: validación,
- *     resolve del bot, rate limit, plan+cuota+conversación, persistencia del
- *     mensaje del visitante, build del prompt). El timer arranca ahí.
- *   - Abort en ~5.1 + 12 = ~17.1s de elapsed del request.
- *   - `computeHookBudgetMs(17_100)` = min(5000, 30000 - 17100 - 3000) = **5000**,
- *     el presupuesto COMPLETO de ONF-2 para persistir. Ese es el techo que fija
- *     el valor: para no recortarlo, el abort tiene que caer antes de los 22s
- *     (→ `stepMs <= ~16.9s`); 12s deja margen cómodo.
- *   - Cierre del turno a ~22.1s → **~8s de aire** antes del kill de 30s.
- *   - Una respuesta sana de Flash se genera en 2-5s: 12s es ~2.4× ese techo, así
- *     que no mata generaciones legítimas. Un run multi-step sano (hasta 3 steps
- *     de 2-5s cada uno) entra holgado, y cada step tiene su propio timer.
+ * ARITMÉTICA (con los números medidos): el chunk único llega a los ~6.4s de
+ * elapsed del request → el watchdog dispara a ~9.4s → `persistTurn` corre con el
+ * presupuesto de ONF-2 (típico ~300ms, techo 5s) → cierre a ~10s. Contra los 30s
+ * de hoy, y con ~20s de aire contra el `maxDuration`. En el camino sano el
+ * upstream cierra solo, el `flush` mata el timer y esto no cambia NADA.
  *
- * `totalMs` queda SIN setear: `stepMs` ya acota el caso real y `totalMs` mataría
- * un run multi-step legítimo que sumara varios steps sanos.
- *
- * Los dos timeouts son COMPLEMENTARIOS, no redundantes: `chunkMs` corta rápido
- * (5s) cuando el provider se calla de verdad; `stepMs` es el piso duro para
- * cuando el provider "habla" pero no termina nunca.
+ * CALIBRABLE, no sagrado. Los `gapMs` medidos hasta el primer chunk fueron 1470
+ * y 1664; no tenemos datos de gaps ENTRE chunks porque Gemini mandó uno solo. Si
+ * en prod aparecen respuestas cortadas a la mitad, este es el número a subir.
  */
-export const STREAM_STEP_TIMEOUT_MS = 12_000
+export const STREAM_WATCHDOG_IDLE_MS = 3_000
+
+/**
+ * WATCHDOG — `STREAM_STEP_TIMEOUT_MS` (el `stepMs` de la Fase 2) fue REMOVIDO.
+ *
+ * Se agregó como reloj de pared contra la hipótesis de que Gemini emitía ruido
+ * que reiniciaba el `chunkMs`. La medición la descartó: `chunks_total: 1`, un
+ * solo chunk y silencio. Con eso, `stepMs` (12s) TUVO que vencer en las dos
+ * invocaciones observadas — y no apareció ni `onAbort_enter` ni `onFinish_enter`,
+ * y la función igual billó 30000 ms. Beneficio medido: CERO.
+ *
+ * Y tenía un costo real: aborta a los 12s del inicio del step pase lo que pase,
+ * así que TRUNCA cualquier generación legítima más larga. Riesgo sin
+ * contraprestación → se saca. Quien cierra el stream ahora es el watchdog
+ * (`STREAM_WATCHDOG_IDLE_MS` arriba), que no depende del SDK.
+ *
+ * `chunkMs` (`STREAM_CHUNK_TIMEOUT_MS`) se deja: es más benigno (5s de silencio,
+ * no un reloj absoluto) y no trunca generaciones sanas. No cierra el stream por
+ * sí mismo, pero una vez que el watchdog cerró el lado del cliente puede ayudar
+ * a que el SDK libere recursos upstream.
+ */
 
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────
 

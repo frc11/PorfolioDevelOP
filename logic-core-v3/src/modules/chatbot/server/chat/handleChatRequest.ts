@@ -56,9 +56,10 @@ import {
   EVENT_LOG_DEADLINE_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   computeHookBudgetMs,
-  // STREAM-TIMEOUT — silencio máximo del provider (chunk) + reloj de pared (step).
+  // STREAM-TIMEOUT — silencio máximo del provider. WATCHDOG — silencio máximo
+  // en el borde de la respuesta antes de que cerremos nosotros.
   STREAM_CHUNK_TIMEOUT_MS,
-  STREAM_STEP_TIMEOUT_MS,
+  STREAM_WATCHDOG_IDLE_MS,
 } from './reconcile'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
@@ -73,6 +74,9 @@ import {
 // streamText() → tools → onFinish, gated por CHATBOT_STREAM_PROBE. Ver el
 // encabezado de streamProbe.ts. Reversible: buscar `probe: 'stream'`.
 import { createStreamProbe, createChunkTally } from './streamProbe'
+// WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
+// Ver el encabezado de streamWatchdog.ts para el porqué.
+import { createStreamWatchdog } from './streamWatchdog'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -310,7 +314,13 @@ type RetrySkipReason = 'deadline' | 'budget' | 'max_attempts' | null
  *     quedan en 0 (subreporte honesto, ver el call-site).
  */
 interface PersistTurnInput {
-  source: 'onFinish' | 'onAbort'
+  /**
+   * WATCHDOG — `watchdog` es el camino nuevo: el borde de la respuesta se quedó
+   * mudo y cerramos nosotros. A diferencia de `onAbort`, este SÍ se espera antes
+   * de cerrar el stream, así que la persistencia no corre carrera contra el
+   * freeze de la función.
+   */
+  source: 'onFinish' | 'onAbort' | 'watchdog'
   /** Texto que el visitante REALMENTE vio. Nunca se loguea, solo se persiste. */
   assistantText: string
   finishReason: string
@@ -1647,21 +1657,20 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
-    // STREAM-TIMEOUT — Gemini entrega el texto completo y después NO emite su
-    // chunk terminal: el SDK espera para siempre y la función muere en el kill
-    // de `maxDuration` (30s) con el input del widget trabado. Dos techos
-    // COMPLEMENTARIOS (el porqué y la aritmética, en reconcile.ts):
-    //   - chunkMs: corta rápido si el provider se calla de verdad. NO alcanza
-    //     solo: el SDK resetea ese timer con CUALQUIER chunk, incluidos los que
-    //     descarta (text-delta vacío, stream-start), así que un provider que
-    //     "habla" sin terminar lo reinicia para siempre. Medido en prod.
-    //   - stepMs: reloj de pared armado antes de `doStream`, que ningún chunk
-    //     resetea. Es el piso duro que garantiza el corte.
-    // `totalMs` queda sin setear: mataría un multi-step legítimo.
-    timeout: {
-      chunkMs: STREAM_CHUNK_TIMEOUT_MS,
-      stepMs: STREAM_STEP_TIMEOUT_MS,
-    },
+    // STREAM-TIMEOUT — `chunkMs` corta el pedido al provider si se calla más de
+    // ese lapso. NO cierra el stream por sí mismo (medido: el chequeo de abort
+    // del SDK corre detrás de un `read()` ya bloqueado, y su `closeStream()`
+    // vive en un `flush()` que no corre cuando la cadena erroriza) — de cerrar
+    // se encarga el watchdog de nuestro borde, más abajo en el `return`. Se
+    // mantiene igual porque es benigno (5s de silencio, no un reloj absoluto) y
+    // ayuda a que el SDK libere recursos upstream.
+    //
+    // `stepMs` fue REMOVIDO (ver reconcile.ts): beneficio medido cero y truncaba
+    // generaciones legítimas de más de 12s. `totalMs` nunca se seteó.
+    //
+    // ⚠️ La forma tiene que ser un OBJETO: `getChunkTimeoutMs` solo lee
+    // `.chunkMs` así; un número plano se interpreta como `totalMs`.
+    timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
     // camino feliz); solo inyecta la derivación canned en un run vacío.
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
@@ -1855,7 +1864,89 @@ export async function handleChatRequest(
   // devolvió (es síncrono); esto solo confirma que el tramo de setup previo al
   // return no colgó por su cuenta.
   streamProbe.mark('beforeStreamResponse')
-  return result.toUIMessageStreamResponse()
+
+  // ─── WATCHDOG — el cierre del stream, desde NUESTRO borde ───────────────────
+  // Último eslabón bajo nuestro control antes de que la respuesta salga. Si el
+  // body se queda mudo más de STREAM_WATCHDOG_IDLE_MS, persistimos el turno y
+  // cerramos el readable nosotros: el cliente ve `done`, `useChat` pasa a
+  // `ready` y el input se destraba. Cero dependencia de `abortSignal` o de que
+  // corra algún `flush` del SDK — que es exactamente lo que falló dos veces.
+  const streamed = result.toUIMessageStreamResponse()
+  const watchdog = createStreamWatchdog({
+    idleMs: STREAM_WATCHDOG_IDLE_MS,
+    onIdle: async () => {
+      // ESPERADO antes de cerrar: mientras el readable siga abierto la respuesta
+      // no terminó y la función sigue viva. Acá la persistencia deja de ser la
+      // carrera contra el freeze que sí era desde `onAbort` (donde el SDK ya
+      // había llamado a `controller.close()`).
+      //
+      // Idempotente por el flag `turnPersisted`: si `onFinish` llegara a correr
+      // igual, el segundo camino sale por su early-return — cero doble escritura
+      // y cero doble conteo de cupo. `persistTurn` trae su propio techo de
+      // tiempo (presupuesto de ONF-2), así que esta espera está acotada.
+      //
+      // Sin texto acumulado no hay turno que guardar (un stream que murió antes
+      // del primer chunk no dejó nada que el visitante haya visto).
+      if (accumulatedAssistantText.trim().length === 0) return
+      await persistTurn({
+        source: 'watchdog',
+        assistantText: accumulatedAssistantText,
+        // El run nunca emitió su chunk terminal: no hay finishReason real.
+        finishReason: 'watchdog_idle',
+        // Sin `finish-step` no hay tool calls agregadas ni `usage` del provider.
+        // Se persisten 0 tokens a propósito (subreporte auditable, con
+        // `source: "watchdog"` en el log para reconciliar) en vez de inventar
+        // una estimación en una tabla de costo. Mismo criterio que `onAbort`.
+        toolCalls: [],
+        tokensIn: 0,
+        tokensOut: 0,
+      })
+    },
+    onEvent: (info) => {
+      if (info.reason === 'idle') {
+        // El evento que importa: el watchdog tuvo que actuar. Va a stderr
+        // SIEMPRE (no gated por el probe) porque es la señal de que el stream
+        // de Gemini sigue sin cerrar. Longitudes y contadores, nunca contenido.
+        chatbotLog(
+          'chat.watchdog_fired',
+          {
+            conversationId: conversation.id,
+            botConfigId: resolvedBot.id,
+            botSlug: slug,
+            reason: info.reason,
+            chunks: info.chunks,
+            elapsedMs: info.elapsedMs,
+            lastGapMs: info.lastGapMs,
+            assistantTextLength: accumulatedAssistantText.length,
+          },
+          'warn',
+        )
+        return
+      }
+      // Cierre normal o cancelación del cliente: solo diagnóstico, gated por el
+      // probe para no agregar una línea por request en operación normal.
+      streamProbe.mark('watchdog_settled', {
+        reason: info.reason,
+        chunks: info.chunks,
+        elapsedMs: info.elapsedMs,
+        lastGapMs: info.lastGapMs,
+      })
+    },
+  })
+
+  // `streamed.body` es null solo si no hubiera cuerpo; acá siempre lo hay
+  // (toUIMessageStreamResponse arma un ReadableStream). El fallback devuelve la
+  // respuesta intacta en vez de romper.
+  if (streamed.body === null) return streamed
+
+  // Se preservan status, statusText y headers: `route.ts` los vuelve a copiar
+  // para los headers de CORS y no necesita ningún cambio (el body sigue siendo
+  // un ReadableStream).
+  return new Response(streamed.body.pipeThrough(watchdog), {
+    status: streamed.status,
+    statusText: streamed.statusText,
+    headers: streamed.headers,
+  })
 
   } catch (unhandledError) {
     // INFRA.1 — Sink off-Neon PRIMERO (mismo patrón silencioso: el logChatbotEvent

@@ -14605,3 +14605,129 @@ freeze** (best-effort, ver arriba); si el `stepMs` de 12000 esta bien calibrado 
 real. "Verde != se ve".
 
 ---
+
+## WATCHDOG - cerrar el stream desde nuestro borde
+
+### La evidencia que descarto el enfoque de los dos sprints previos
+
+Con `chunkMs = 5000` y `stepMs = 12000` YA deployados, dos invocaciones consecutivas en prod:
+
+```
+seq 1 streamText_construct enter 4914ms
+seq 2 streamText_construct exit  4917ms
+seq 3 beforeStreamResponse mark  4917ms
+seq 4 chunkFlow  mark 6383ms  chunks_total: 1  chunks_text_delta: 1  gapMs: 1470
+seq 5 firstChunk mark 6383ms  chunkType: text-delta
+        --------- silencio hasta el kill de 30s ---------
+```
+
+**`chunks_total: 1`.** Gemini manda la respuesta entera en UN chunk y despues silencio absoluto.
+Sin ruido, sin keepalives, sin text-delta vacios. **La hipotesis de la Fase 2 anterior ("sigue
+emitiendo basura que resetea el timer") queda DESCARTADA.**
+
+Lo cual implica que el `chunkMs` de 5s y el `stepMs` de 12s **tuvieron que disparar**. Y sin
+embargo: ni `onAbort_enter` ni `onFinish_enter`, y la funcion igual billo 30000 ms. Identico en
+las dos invocaciones - no es azar.
+
+### Por que NINGUNA opcion de `timeout` del SDK puede arreglarlo
+
+Todas (`chunkMs`, `stepMs`, `totalMs`) desembocan en el mismo `mergeAbortSignals`, y ese camino
+no cierra el stream por **dos eslabones independientes**:
+
+1. **El chequeo de abort corre DETRAS de un `read()` ya bloqueado** (`ai/dist/index.js:7374-7382`):
+   `const { done, value } = await reader.read()` y recien despues `if (abortSignal?.aborted)`.
+   Abortar la senal no despierta un `read()` que espera un chunk que no va a llegar.
+2. **`self.closeStream()` vive en un `flush()`**, y el `flush` de un `TransformStream` NO corre
+   cuando el stream erroriza - solo cuando cierra normal. El abort erroriza la cadena, o sea que
+   rompe el stream por un camino que impide que se cierre.
+
+**Conclusion: dejamos de pedirle al SDK que se cierre a si mismo.** Los dos sprints anteriores
+fallaron por la misma razon.
+
+### El fix: `streamWatchdog.ts` en el borde de la respuesta
+
+Un `TransformStream` propio que envuelve el body que devolvemos. Deja pasar cada chunk
+**verbatim** (nunca inspecciona ni transforma contenido), resetea un timer, y si pasan
+`STREAM_WATCHDOG_IDLE_MS` sin actividad **cierra el readable nosotros** con `controller.terminate()`.
+El cliente ve `done`, `useChat` pasa a `ready`, el input se destraba. Cero dependencia de
+`abortSignal` y de que corra ningun `flush` del SDK.
+
+| Constante | Valor | Razon |
+|---|---|---|
+| `STREAM_WATCHDOG_IDLE_MS` | 3000 | silencio maximo tolerado en el borde antes de cerrar |
+
+**Aritmetica** (numeros medidos): el chunk unico llega a ~6.4s de elapsed -> el watchdog dispara a
+~9.4s -> `persistTurn` con el presupuesto COMPLETO de ONF-2 (tipico ~300ms, techo 5s) -> cierre a
+~10s. Contra 30s hoy, con ~20s de aire contra el `maxDuration`. En el camino sano el upstream
+cierra solo, el `flush` mata el timer y esto no cambia NADA. Calibracion pinneada en el bloque 9
+de `deadline.invariant.ts`.
+
+Calibrable: los `gapMs` medidos hasta el primer chunk fueron 1470 y 1664. No hay datos de gaps
+ENTRE chunks (Gemini mando uno solo). Si en prod aparecen respuestas cortadas, este es el numero
+a subir.
+
+### La persistencia deja de ser best-effort
+
+Como el watchdog corre en codigo nuestro, `onIdle` se **espera** antes de cerrar: mientras el
+readable siga abierto la respuesta no termino y la funcion sigue viva. Es una diferencia
+estructural con el camino de `onAbort` del sprint anterior, donde el SDK ya habia llamado a
+`controller.close()` y la escritura corria carrera contra el freeze.
+
+Se reusa TODO lo que ya existia: el acumulador `accumulatedAssistantText` (poblado en `onChunk`),
+`persistTurn()` con su flag `turnPersisted`, el presupuesto de ONF-2. **Lo unico que cambia es
+quien dispara `persistTurn`** - se agrego `source: 'watchdog'` al input, nada mas del contrato.
+
+Si `onIdle` rechaza, se traga y **el stream cierra igual**: cerrar nunca puede quedar condicionado
+a que la DB responda (leccion de ONF-2).
+
+### Verificaciones empiricas del runtime, hechas ANTES de escribir el modulo
+
+Node v24.12.0:
+- `controller.terminate()` deja al consumidor con un **`done: true` limpio, sin error**. (Esta era
+  la parada obligatoria #4 del sprint: NO se disparo.)
+- El `transformer.cancel()` **esta soportado** (la lib de TS instalada todavia no lo declara; se
+  extendio el tipo con `CancelableTransformer` en vez de castear - cero `any`).
+- El `pipeThrough` **no deja unhandled rejections** al terminar (la spec marca su promesa como
+  handled). Igual el test lo verifica en los 7 escenarios.
+- **La cancelacion SI se propaga hacia arriba**: `terminate()` erroriza el writable -> el `pipeTo`
+  interno cancela el source -> se llama `source.cancel()`. Reproducido con la misma forma que
+  tiene la cadena del SDK (`cancel(reason) { return stitchableStream.stream.cancel(reason) }`,
+  `index.js:7392-7394`): **el `read()` colgado se destrabo con `done=true`.**
+
+### `stepMs` REMOVIDO
+
+Beneficio medido: **cero** (esta probado que no cierra el stream). Costo real: aborta a los 12s
+del inicio del step pase lo que pase, o sea **trunca cualquier generacion legitima mas larga**.
+Riesgo sin contraprestacion.
+
+**`chunkMs` se DEJA.** Es benigno (5s de silencio, no un reloj absoluto), no trunca generaciones
+sanas, y aborta el fetch a Vertex - lo que ayuda a liberar el socket upstream una vez que el
+watchdog cerro el lado del cliente. No cierra el stream por si mismo, pero no molesta.
+
+### LO QUE ESTO NO ARREGLA
+**El stream de Gemini SIGUE sin terminar.** Este sprint lo vuelve irrelevante para el visitante,
+no lo arregla. La causa raiz esta del lado del provider.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero).
+- `eslint` sobre los 5 archivos: 0 errores, 0 warnings.
+- `npm run test:watchdog` (nuevo, 8 bloques, cero DB) + `test:deadline` con el bloque 9 reescrito
+  + bateria: onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4 - todos OK.
+- Sin migracion, sin git. Sin tocar `route.ts` (el body sigue siendo un ReadableStream y su
+  re-wrapping de CORS funciona igual), ni el cliente, ni frozen, ni la connection string, ni el
+  modulo de seguridad. Scoping por organizacion byte-identico. Cupo sin cambios.
+- Probes de PROBE-STREAM: ACTIVOS.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe en prod; que aparezcan filas ASSISTANT en `ChatMessage`; que 3000ms este
+bien calibrado contra trafico real; **que ninguna respuesta larga se corte a la mitad** (el riesgo
+propio de este fix); y si la `Duration` baja o no.
+
+**Sobre la `Duration`:** se espera que baje a ~10s, con fundamento en la propagacion de
+cancelacion verificada arriba - el `terminate()` deberia destrabar el `read()` colgado que es la
+raiz del cuelgue. Pero **no esta garantizado**: depende de que la cadena del SDK propague sin
+trabarse en otro punto y de que Netlify de por terminada la invocacion al cerrar la respuesta. Si
+la `Duration` sigue en 30000 ms, **el objetivo del sprint igual se cumplio**: el visitante queda
+libre a ~10s. La Duration es facturacion e higiene, no UX.
+
+---
