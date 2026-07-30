@@ -62,15 +62,24 @@ export default function RootLayout({
     // <html> ANTES de hidratar (scroll-lock temprano del intro en home), mientras
     // el SSR no lo trae → mismatch legítimo y esperado SOLO en el style del <html>.
     // Es shallow (un nivel): no enmascara mismatches de los hijos.
-    <html lang="es" suppressHydrationWarning>
+    // Las variables de `next/font` van en el <html>, no en el <body>: `globals.css`
+    // declara `--font-sans` / `--font-mono` dentro de `@theme`, que Tailwind emite
+    // en `:root` (= el <html>). Un custom property se resuelve en el elemento donde
+    // se declara, así que `var(--font-geist-sans)` leído desde `:root` no encontraba
+    // nada si la variable vivía en el <body> → `--font-sans` quedaba inválida y todo
+    // el sitio caía en la fuente del sistema. Con la clase acá, `:root` tiene las dos
+    // variables definidas y la cadena resuelve.
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
         <EarlyScrollLock />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         <PreloaderProvider>
           <CustomCursor />
           <NoiseOverlay />
