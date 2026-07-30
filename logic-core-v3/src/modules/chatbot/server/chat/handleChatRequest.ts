@@ -56,6 +56,8 @@ import {
   EVENT_LOG_DEADLINE_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   computeHookBudgetMs,
+  // STREAM-TIMEOUT — silencio máximo del provider antes de abortar el stream.
+  STREAM_CHUNK_TIMEOUT_MS,
 } from './reconcile'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
@@ -66,6 +68,10 @@ import {
   DeadlineExceededError,
   type LateSettleInfo,
 } from './withDeadline'
+// PROBE-STREAM — instrumentación TEMPORAL de diagnóstico del tramo
+// streamText() → tools → onFinish, gated por CHATBOT_STREAM_PROBE. Ver el
+// encabezado de streamProbe.ts. Reversible: buscar `probe: 'stream'`.
+import { createStreamProbe } from './streamProbe'
 
 // UTM.1 — Los campos de atribución (referrer + utm_*) son input del
 // visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
@@ -910,6 +916,16 @@ export async function handleChatRequest(
   })
   mark('prompt_build_ms')
 
+  // PROBE-STREAM — instrumentación TEMPORAL de diagnóstico (gated por
+  // CHATBOT_STREAM_PROBE; no-op y cero overhead si la env var no está en '1').
+  // Creado ACÁ (antes de `getTools`) y no "justo después de chat.llm_request_start"
+  // como en el enunciado del sprint: `getTools` arma el contexto de cada tool
+  // ANTES de ese log, y el probe tiene que existir para poder pasarlo en ese
+  // mismo contexto (ver `ToolCallContext.probe`, tools/types.ts). Mismo
+  // `conversation.id`/`startTime` que se hubiera usado más abajo — el reordenamiento
+  // es puramente de esta instrumentación nueva, no toca código existente.
+  const streamProbe = createStreamProbe(conversation.id, startTime)
+
   // B4.2 — Tools filtradas por plan.tools. Slugs desconocidos en
   // plan.tools se ignoran silenciosamente (getTools usa el catálogo
   // canónico). Si plan.tools quedara vacío (no debería en planes
@@ -933,6 +949,8 @@ export async function handleChatRequest(
       utmSource: conversation.utmSource ?? undefined,
       utmMedium: conversation.utmMedium ?? undefined,
       utmCampaign: conversation.utmCampaign ?? undefined,
+      // PROBE-STREAM — ver comentario arriba.
+      probe: streamProbe,
     },
     plan.tools,
   )
@@ -1014,6 +1032,8 @@ export async function handleChatRequest(
   // separate Vertex time from post-LLM persistence time.
   const llmStartAt = Date.now()
   let ttfbAt: number | null = null
+  // PROBE-STREAM — flag para emitir el mark `firstChunk` una sola vez.
+  let firstChunkProbed = false
 
   // ONF-1 — Fallback de respuesta vacía: si el run termina sin texto útil, el
   // transform (experimental_transform de abajo) inyecta este mensaje de
@@ -1046,6 +1066,12 @@ export async function handleChatRequest(
     return `<${visitorTag}>\n${stripped}\n</${visitorTag}>`
   }
 
+  // PROBE-STREAM — streamText() en sí es síncrono (devuelve el
+  // DefaultStreamTextResult de una, el trabajo real es todo dentro de sus
+  // callbacks/promesas internas), así que este par enter/exit debería ser
+  // siempre ~0ms. Sirve de ancla: si ALGÚN DÍA esto no cierra, el cuelgue está
+  // en la construcción misma, no en la ejecución del stream.
+  streamProbe.probe('streamText_construct', 'enter')
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
@@ -1062,13 +1088,34 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
+    // STREAM-TIMEOUT — Gemini entrega el texto completo y después NO emite su
+    // chunk terminal: el SDK espera para siempre y la función muere en el kill
+    // de `maxDuration` (30s) con el input del widget trabado. Este techo aborta
+    // el stream tras STREAM_CHUNK_TIMEOUT_MS de silencio del provider, así el
+    // stream cierra y el cliente pasa a `ready`. SOLO `chunkMs` a propósito
+    // (`stepMs`/`totalMs` matarían generaciones lentas legítimas) — el porqué
+    // completo, y la forma OBJETO obligatoria del valor, en reconcile.ts.
+    timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
     // camino feliz); solo inyecta la derivación canned en un run vacío.
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
       emptyFallbackInjected = true
     }),
-    onStepFinish: () => {
+    onStepFinish: (step) => {
       stepCount += 1
+      // PROBE-STREAM — el SDK no expone un chunk `finish` a `onChunk` (solo
+      // text-delta/reasoning-delta/source/tool-call/tool-result/tool-input-*/raw
+      // — ver ai/dist/index.js, eventProcessor.transform), así que no hay un
+      // "textDone" literal disponible ahí. `onStepFinish` es el hook más cercano
+      // con `finishReason` real por step — cubre la misma necesidad diagnóstica
+      // (¿llegó el modelo a terminar de generar ESTE step?) sin inventar un punto
+      // que no corresponde a ningún callback real del SDK.
+      streamProbe.mark('onStepFinish', {
+        stepNumber: step.stepNumber,
+        finishReason: step.finishReason,
+        toolCallCount: step.toolCalls.length,
+        textLength: step.text.length,
+      })
     },
     onChunk: ({ chunk }) => {
       // Capture timestamp of the first useful chunk (text or tool-call).
@@ -1079,8 +1126,16 @@ export async function handleChatRequest(
       ) {
         ttfbAt = Date.now()
       }
+      // PROBE-STREAM — una sola vez, el primer chunk de CUALQUIER tipo (no solo
+      // los que cuentan para TTFB). NO se loguea contenido, solo el tipo.
+      if (!firstChunkProbed) {
+        firstChunkProbed = true
+        streamProbe.mark('firstChunk', { chunkType: chunk.type })
+      }
     },
     onError: async ({ error }) => {
+      // PROBE-STREAM — primera línea: confirma si el hook llega a entrar.
+      streamProbe.mark('onError_enter')
       // INFRA.1 — falla mid-stream (Vertex, throw en un tool): hoy la enmascara
       // toUIMessageStreamResponse() como 200 y queda invisible server-side.
       // Sink off-Neon garantizado (stderr) + Sentry best-effort.
@@ -1144,6 +1199,8 @@ export async function handleChatRequest(
       }
     },
     onAbort: async () => {
+      // PROBE-STREAM — primera línea: confirma si el hook llega a entrar.
+      streamProbe.mark('onAbort_enter')
       // ONF-1 (MH.2) — stream cortado (cliente desconectado / runtime abortó):
       // mismo criterio que onError — sin primer chunk útil, se devuelve el cupo.
       await compensateReservedQuota?.('stream_abort', {
@@ -1152,6 +1209,10 @@ export async function handleChatRequest(
       })
     },
     onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
+      // PROBE-STREAM — primera línea, literal. Es el chequeo central de este
+      // sprint: si esto NUNCA aparece en un log donde sí aparece `firstChunk` o
+      // algún `tool:*:enter`, el cuelgue está confirmado aguas arriba de acá.
+      streamProbe.mark('onFinish_enter', { textLength: text.length, finishReason })
       const llmDoneAt = Date.now()
       timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
       timings.llm_stream_ms = ttfbAt !== null ? llmDoneAt - ttfbAt : null
@@ -1634,7 +1695,14 @@ export async function handleChatRequest(
       }
     },
   })
+  // PROBE-STREAM — cierra el enter de arriba (streamText() es síncrono: esto
+  // debería salir siempre a ~0ms del enter).
+  streamProbe.probe('streamText_construct', 'exit')
 
+  // PROBE-STREAM — último punto ANTES de devolver el Response. streamText() ya
+  // devolvió (es síncrono); esto solo confirma que el tramo de setup previo al
+  // return no colgó por su cuenta.
+  streamProbe.mark('beforeStreamResponse')
   return result.toUIMessageStreamResponse()
 
   } catch (unhandledError) {

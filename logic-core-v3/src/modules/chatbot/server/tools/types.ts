@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import type { StreamProbe } from '../chat/streamProbe'
 
 /**
  * Context passed to tools that need to perform side effects
@@ -36,6 +37,15 @@ export interface ToolCallContext {
   utmSource?: string
   utmMedium?: string
   utmCampaign?: string
+  /**
+   * PROBE-STREAM — instrumentación TEMPORAL de diagnóstico (gated por
+   * `CHATBOT_STREAM_PROBE`). El SDK no inyecta contexto en `execute`: cada tool
+   * es un closure armado por `getTools()` ANTES de `streamText()`, así que el
+   * probe entra acá, igual que `visitorIpHash`/`utmSource` — sin tocar la firma
+   * pública del tool (`inputSchema`/`execute` que ve el AI SDK queda intacta).
+   * `undefined` si la instrumentación fue revertida.
+   */
+  probe?: StreamProbe
 }
 
 /**

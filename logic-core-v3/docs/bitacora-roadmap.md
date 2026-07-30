@@ -14366,3 +14366,103 @@ credenciales de Vertex) no aparecian en build, ni en tests, ni en dev, ni en /he
 - Cancelacion real de la operacion abandonada (ver riesgo del pool).
 
 ---
+
+## STREAM-TIMEOUT Fase 1 - cortar el stream que Gemini no cierra
+
+**Sintoma.** El bot responde, el texto se renderiza completo, pero el input del widget queda
+trabado ~17s y la funcion billa `Duration: 30000 ms` exacto (kill de `maxDuration`, `route.ts:9`).
+
+**Causa, PROBADA con instrumentacion en produccion** (probes de PROBE-STREAM,
+`CHATBOT_STREAM_PROBE=1`). Una corrida real esperando los 30s completos dio esto y nada mas:
+
+```
+seq 1  streamText_construct  enter   4928ms
+seq 2  streamText_construct  exit    4932ms
+seq 3  beforeStreamResponse  mark    4932ms
+seq 4  firstChunk            mark    6269ms   chunkType: text-delta
+        --------- silencio hasta el kill de 30s ---------
+```
+
+Lecturas directas: **cero probes de tools** (capture_lead / show_whatsapp_handoff nunca corrieron
+-> tools y DB descartados como causa); **`onStepFinish` nunca disparo** (el texto llego entero al
+visitante pero el step nunca se completo para el SDK); **`onFinish_enter` nunca disparo**.
+
+**Conclusion: el stream de Gemini NO EMITE SU CHUNK TERMINAL.** El SDK espera para siempre. Es un
+problema conocido de la API de Gemini. No es la base de datos, no son los tools, no es `onFinish`.
+
+**Que implica sobre sprints previos.** ONF-2 (deadline en `onFinish`) arreglo un problema
+estructural real pero NO ERA EL CUELGUE - no sirve poner techo a un hook al que nunca se llega.
+INFRA.3 / pgbouncer NO es el fix de esto. El `prisma:error kind: Closed` visto en logs es un
+problema APARTE (promesas detached de `notifyClient`/`syncLeadToCrm`, `captureLead.ts:467,474`),
+no se toco en este sprint.
+
+### Verificacion previa 1a (read-only) - el experimental_transform NO filtra nada
+
+Auditado `createEmptyResponseFallbackTransform` (`reconcile.ts`) contra la advertencia del SDK
+("stream transformations must maintain the stream structure"). Resultado: **ningun tipo de chunk
+se descarta.**
+
+- `finish-step`: se RETIENE exactamente un chunk (`heldFinishStep`) y se libera al llegar el chunk
+  siguiente, o en el `flush`. Retrasado, nunca perdido.
+- `finish`, `start-step`, `error`, `abort`, `text-*`, `tool-*`, `raw`, todo lo demas: caen al
+  `controller.enqueue(chunk)` final. Reenviados verbatim.
+- En el camino de abort el orden queda bien: el chunk `abort` entra al transform, libera primero el
+  `finish-step` retenido y despues se reenvia a si mismo.
+
+**El transform NO es un segundo culpable.** Ademas, no puede interferir con el timeout nuevo: los
+transforms de usuario se aplican en `ai/dist/index.js:7396-7405`, MUY aguas abajo de
+`resetChunkTimeout()` (`:7793`), que corre sobre el stream crudo del provider dentro de
+`streamStep`. Retener un chunk aca no reinicia ni demora el timer.
+
+### El cambio (3 lineas de codigo)
+
+`timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS }` en el `streamText` de `handleChatRequest.ts`.
+
+| Constante | Valor | Razon |
+|---|---|---|
+| `STREAM_CHUNK_TIMEOUT_MS` | 5000 | silencio maximo tolerado entre chunks del provider |
+
+**Como corta.** `resetChunkTimeout()` es la PRIMERA linea del transform de cada chunk del provider
+(`index.js:7793`). Al vencer dispara `chunkAbortController.abort()`, que el SDK mergea en el
+`abortSignal` del run (`index.js:6926-6931`); el `pull` del stream ve `abortSignal.aborted`
+(`:7379`), enquea el chunk `abort` y hace `controller.close()` (`:7362-7372`). El stream cierra,
+el cliente recibe `done` y el input se destraba.
+
+**Solo `chunkMs`, deliberadamente - `stepMs`/`totalMs` quedan SIN setear:**
+- `chunkMs` se arma recien DESPUES del primer chunk, asi que no puede matar una respuesta que
+  tarda en arrancar. Cubre exactamente el sintoma: silencio DESPUES de que el texto llego.
+- `stepMs` se arma al inicio del step, antes de `doStream`. Cubriria "nunca llega el primer
+  chunk", que NO es el sintoma y del que hoy no hay evidencia - y mataria generaciones legitimas
+  lentas. Queda disponible si algun dia los logs muestran ese caso.
+
+**Trampa de la API, documentada inline:** `getChunkTimeoutMs` (`index.js:1043`) SOLO lee
+`.chunkMs` cuando `timeout` es un OBJETO. Un numero plano se interpreta como `totalMs` y tendria
+un efecto completamente distinto (mataria la generacion entera, no el silencio).
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero).
+- `eslint` sobre los 2 archivos: 0 errores (1 warning preexistente, `toolResults` sin usar).
+- Bateria de regresion: onf1, deadline, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4 - OK.
+- Sin migracion, sin git, sin tocar frozen / cliente / connection string / modulo de seguridad.
+- Los probes de PROBE-STREAM se dejaron ACTIVOS a proposito: son el instrumento de verificacion
+  de este sprint. Se revierten despues, en otro commit.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe rapido en prod real; que la funcion deje de billar 30000 ms; que el
+`chunkMs` de 5000 este bien calibrado contra trafico real. "Verde != se ve": los bugs de esta
+superficie (origin same-origin, ghost-box, credenciales de Vertex, este mismo cuelgue) no
+aparecian en build, ni en tests, ni en dev, ni en /health.
+
+### Pregunta abierta que decide la Fase 2
+Cuando el `chunkMs` aborta, se llega igual a `onFinish`? Leyendo el SDK hay argumentos para las
+dos respuestas y NO se resuelve leyendo codigo:
+- A favor de SI: el `flush` del transform interno chequea
+  `if (!hasReceivedTerminalChunk && !hasReceivedOutputChunk)` - como ya llego un `text-delta`,
+  `hasReceivedOutputChunk` es true, no toma el early return y enquea `finish-step`; con un step
+  registrado, el `flush` del `eventProcessor` si llama a `onFinish`.
+- A favor de NO: el `abort()` del `pull` hace `controller.close()` de inmediato y puede ganar la
+  carrera.
+
+Lo decide el log de la proxima corrida en prod, no una lectura de codigo.
+
+---
