@@ -176,3 +176,182 @@ S3), desde este sprint:
    arriba).
 3. **Revisar los valores de los tokens con ojo propio** — nadie vio píxeles en este
    sprint.
+
+---
+
+## B1-S2 — Componentes base · 2026-07-30
+
+Commit: `feat(design-system): componentes base del sistema visual`
+
+Archivos nuevos en `src/components/design-system/` — 457 líneas en total, ninguno
+pasa de 79:
+
+| Archivo | Qué es |
+|---|---|
+| `SectionShell.tsx` | Wrapper de sección, dueño del theming (79 líneas) |
+| `Eyebrow.tsx` | Kicker mono/uppercase, prop `accent` |
+| `ChapterLabel.tsx` | Label editorial `( 01 — LA PRUEBA )` |
+| `DisplayHeading.tsx` | Titular display, `size` xl/lg, `as` h1/h2, `text-balance` |
+| `Lead.tsx` | Subhead, corta a 55ch |
+| `CtaButton.tsx` | CTA sobre `ui/Button`, `tone` primary/secondary, flecha |
+| `Surface.tsx` | Panel plano, prop `padding`, sin relieve |
+| `DataStat.tsx` | Valor mono + label, prop `accent` en el valor |
+| `MonoLabel.tsx` | Etiqueta chica mono con tick de color opcional |
+| `RuleDivider.tsx` | Regla de 1px con el color de borde del tema |
+| `accent.ts` | Tipo `ServiceAccent` + mapas de clase literales |
+| `index.ts` | Barrel |
+
+Archivos existentes tocados — **tres, todos de forma aditiva**:
+`src/app/globals.css` (+61), `src/components/ui/Button.tsx` (+27/−2),
+`src/hooks/useThemeObserver.tsx` (+23).
+
+### Qué se hizo
+
+**1. `CtaButton` se construyó SOBRE `ui/Button`, extendiéndolo.** Se agregaron dos
+variantes (`ds-primary`, `ds-secondary`) y un tamaño (`ds`) a los objetos que ya
+tenía, y se ensancharon las dos uniones de tipo. Las cuatro variantes y los tres
+tamaños existentes quedaron **byte a byte iguales**, igual que `baseClasses`.
+
+El primario hace la inversión monocroma (`bg-ds-fg text-ds-canvas`), con canto
+superior iluminado (`border-t border-t-ds-control-edge`), `--shadow-ds-control` de
+2 capas, `--radius-ds-control`, `active` que hunde 2px y apaga la sombra, y
+`focus-visible` con outline de 2px en el color de texto del tema. El secundario es
+transparente con borde de 1px y plano — sin relieve, para no competir con el
+primario. Ninguno anima `scale` en hover ni `letterSpacing`.
+
+**2. Capa semántica de tokens + inversión por sección.** Cinco tokens de rol
+(`--color-ds-canvas`, `--color-ds-panel`, `--color-ds-fg`, `--color-ds-fg-muted`,
+`--color-ds-rule`) más `--color-ds-control-edge`, y dos scopes
+`[data-ds-theme='dark'|'light']` que los reapuntan. También
+`--container-ds-lead: 55ch` y `--text-ds-control: 1rem`.
+
+**3. `useThemeSectionOptional`**, agregado a `useThemeObserver.tsx` sin tocar
+`useTheme` ni `useThemeSection`.
+
+### Decisiones tomadas (y por qué)
+
+**Extender `Button.tsx` en vez de envolverlo — con medición, no por gusto.** El
+sprint pedía construir sobre `Button` "extendiéndolo o envolviéndolo", y envolver
+es menos invasivo, así que se probó eso primero. Se midió `twMerge` (el motor de
+`cn()`) contra los tokens del sistema:
+
+    'rounded-2xl' + 'rounded-ds-control'  =>  rounded-2xl rounded-ds-control    NO colapsa
+    'text-sm px-5' + 'text-ds-control px-7'  =>  text-sm px-7 text-ds-control   NO colapsa
+    'bg-cyan-400 text-zinc-950' + 'bg-ds-fg text-ds-canvas'  =>  bg-ds-fg text-ds-canvas    sí
+    'border border-white/10' + 'border border-ds-rule'       =>  border border-ds-rule      sí
+    'transition-colors' + 'transition-[translate,...]'        =>  transition-[translate,…]   sí
+
+`twMerge` no reconoce `rounded-ds-control` como border-radius ni `text-ds-control`
+como font-size (lo lee como color), así que envolver habría dejado el radio y el
+tamaño de fuente decididos por el orden del CSS emitido — frágil y silencioso. Los
+colores sí colapsan bien. Con esa evidencia, extender es el camino que el sprint
+habilita explícitamente para este caso.
+
+**El `active` hundido convive con `buttonPress` en vez de pelearse.** Tailwind 4
+implementa `translate-y-*` con la propiedad CSS `translate`, no con `transform`
+(verificado en el CSS emitido:
+`.active\:translate-y-\[2px\]:active{--tw-translate-y:2px;translate:…}`). Framer
+Motion escribe `transform`. Son propiedades distintas: **componen**. El botón baja
+2px Y escala 0.97 al apretarlo, en vez de que una sobrescriba a la otra.
+
+**`SectionShell` con tema LOCAL, no global.** Escribe `data-ds-theme` en su propio
+`<section>` y los scopes de `globals.css` reapuntan ahí la capa semántica.
+Consecuencias: funciona anidado (una sección oscura dentro de una crema), funciona
+sin ningún provider montado, y ningún componente hijo necesita recibir el tema por
+prop. Además dispara la inversión global del `<body>` vía
+`useThemeSectionOptional` cuando entra en la banda central del viewport
+(`margin: '-45% 0px -45% 0px'` — con márgenes más flojos dos secciones contiguas se
+pelean el tema en el borde del scroll).
+
+**Mecanismo de theming elegido — reporte pedido por el sprint.** Cómo funciona
+hoy: `ThemeProvider` (montado en `app/page.tsx`) guarda el tema en estado y un
+`useEffect` escribe `data-theme` en el `<html>`; los scopes `[data-theme='…']` de
+`globals.css` reapuntan `--color-void` / `--color-obsidian` / `--color-accent`, y
+`body` los consume. `useThemeSection(isInView, tema)` llama a `setTheme` cuando una
+sección entra en viewport. **Llamadores vivos: solo dos** — `About.tsx` (×2,
+`'light'`) y `WhyDevelOP.tsx` (`'dark'`). El tercero, `SectionTransition.tsx`, tiene
+cero consumidores.
+
+Se eligió **no reemplazar** ese sistema sino sumarse a él: `SectionShell` maneja sus
+propios colores localmente (capa nueva, `data-ds-theme`) y además le avisa al
+sistema viejo para que el `<body>` acompañe. Los dos conviven sin pisarse: son
+atributos distintos sobre elementos distintos (`data-theme` en `<html>`,
+`data-ds-theme` en cada `<section>`). Así el rediseño puede avanzar sección por
+sección sin un corte global, y cuando About y WhyDevelOP mueran el tema no queda
+congelado en claro.
+
+**Se usó `useThemeSectionOptional` y no `useThemeSection`** porque el segundo llama
+a `useTheme()`, que **tira** si no hay `ThemeProvider` arriba — y `SectionShell`
+tiene que poder renderizar fuera del árbol del home. El hook nuevo lee el contexto
+con `useContext` y no hace nada si está `undefined`.
+
+### Qué se midió
+
+| Chequeo | Resultado |
+|---|---|
+| `npm run build` | ✅ verde (exit 0) |
+| `npx tsc --noEmit` | ✅ 0 errores |
+| `npx eslint` sobre los 12 nuevos + los 3 tocados | ✅ 0 problemas |
+| `git diff` de `Button.tsx` | ✅ 27 inserciones / 2 borrados, y los 2 borrados son las dos líneas de unión de tipo **ensanchadas**. Cero líneas de runtime modificadas |
+| Diff del **CSS compilado** vs `main` | ✅ 53 fragmentos nuevos, **cero removidos, cero alterados, cero reordenados** |
+| Utilities del sistema emitidas | ✅ las esperadas, más `outline-2`, `outline-offset-2`, `outline-ds-fg`, `motion-reduce:transition-none`, `tabular-nums`, `text-balance` |
+| `--radius-ds-surface` → radio real | ✅ `.rounded-ds-surface{border-radius:var(--radius-ds-surface)}` = 0 |
+| Ningún `any`, ningún archivo > 300 líneas | ✅ el más largo es `SectionShell.tsx`, 79 |
+
+**Sobre los consumidores de `Button`: son 19, no 14.** El sprint decía 14; el conteo
+real de archivos que importan `Button` en `src/` es 19 (`variant`: secondary ×21,
+ghost ×19, primary ×3, danger ×3; `size`: sm ×31, md ×1). No cambia nada del plan,
+pero el número del sprint estaba corto.
+
+Los 19 quedan probados intactos por dos vías independientes: (a) el diff muestra que
+ninguna clave existente de `variantClasses` / `sizeClasses` ni `baseClasses` se tocó
+— es lookup por clave en un objeto, agregar claves no puede alterar el resultado de
+las que ya estaban; (b) el diff del CSS compilado confirma que agregar utilities
+nuevas **no** reordenó ni removió ninguna regla existente, que era el único riesgo
+indirecto real (un cambio de orden puede invertir quién gana en un conflicto de
+utilities preexistente). No hizo falta revertir la extensión ni caer al plan B de
+envolver.
+
+### Qué NO se hizo, y por qué
+
+**El chequeo de teclado (`Tab` sobre `CtaButton` mostrando `focus-visible`) se corre
+en S3, no acá.** Es una contradicción del propio sprint: S2 manda que los
+componentes "no se usan todavía en ninguna sección del sitio — solo se construyen y
+se muestran en el styleguide (S3)", y a la vez pide tabular sobre un componente que
+en S2 no está renderizado en ninguna ruta. Se verificó lo que sí es verificable sin
+consumidor: que las tres reglas de `focus-visible` (`outline-2`,
+`outline-offset-2`, `outline-ds-fg`) están emitidas en el CSS. La prueba de teclado
+real va en la entrada de S3.
+
+**`CtaButton` no navega.** Es un `<button>`. En el sitio público la navegación va por
+`triggerTransition()` del `TransitionContext` (archivo frozen), y cablearla es
+trabajo de B2 — la tabla de componentes del sprint no pide `href`. Hoy acepta
+`onClick` como cualquier `Button`.
+
+**La flecha es el icono, no el copy.** El copy del sprint trae la flecha en el string
+(«Escribinos por WhatsApp →»). `CtaButton` la renderiza como `<ArrowRight>` de
+Lucide (`strokeWidth={1.5}`, `aria-hidden`), así que el styleguide pasa el texto
+**sin** el `→` literal para no duplicarla. Si Franco prefiere el carácter en el copy,
+se apaga con `withArrow={false}`.
+
+**No se creó ningún componente fuera de la tabla del sprint**, ni se usó ninguno en
+secciones reales del sitio.
+
+### Hallazgos fuera de scope
+
+1. **`--shadow-ds-control` es un valor único para los dos temas.** Sus dos capas son
+   negras (`rgba(0,0,0,.9)` / `rgba(0,0,0,.5)`), pensadas contra el fondo oscuro. En
+   una sección crema el botón primario es casi negro y esa sombra negra funciona como
+   canto duro, que es la intención del relieve — pero es más pesada que en oscuro. Se
+   dejó el valor del sprint tal cual: inventar un segundo valor era reinterpretar la
+   dirección. **Vale mirarlo en el Gate 1.**
+
+2. **`SectionTransition.tsx` sigue muerto** (ya reportado en S1). No se borró: la
+   limpieza es del bloque final.
+
+### Qué necesita decidir Franco
+
+Nada bloqueante para S3. Se suma al Gate 1:
+
+1. **La sombra del control en tema crema** (punto 1 de arriba).
+2. **La flecha: icono o carácter en el copy** (`withArrow`).

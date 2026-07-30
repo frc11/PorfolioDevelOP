@@ -101,6 +101,67 @@
   --spacing-ds-gutter: clamp(1.25rem, 4vw, 3rem);
   --container-ds-page: 1240px;
   --container-ds-prose: 65ch;
+
+  /* ── Agregados en B1-S2 ─────────────────────────────────────────────────
+     El sprint habilita agregar tokens cuando un componente necesita un valor
+     que no existe: "se agrega el token, no un valor suelto".
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Medida del subhead: el Lead corta a 55ch, más angosto que la prosa. */
+  --container-ds-lead: 55ch;
+
+  /* Tamaño de control. La escala de S1 no traía uno, y `--text-ds-body`
+     arrastra line-height 1.7 — demasiado suelto para un botón. */
+  --text-ds-control: 1rem;
+  --text-ds-control--line-height: 1;
+
+  /* ── Capa semántica (se invierte por sección) ───────────────────────────
+     Los tokens de arriba son la paleta literal y NO se mueven. Estos son los
+     roles que consumen los componentes (`bg-ds-canvas`, `text-ds-fg`,
+     `border-ds-rule`). El default es el tema oscuro; `SectionShell` los
+     reapunta poniendo `data-ds-theme` en su <section> (scopes más abajo).
+     Dos capas y no una porque `[data-ds-theme='dark']` necesita volver a los
+     valores crudos para que una sección oscura anidada en una crema funcione
+     — con una sola capa esa regla sería circular.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-canvas: var(--color-ds-void);
+  --color-ds-panel: var(--color-ds-surface);
+  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg-muted: var(--color-ds-ink-muted);
+  --color-ds-rule: var(--color-ds-border);
+
+  /* Canto iluminado del control primario: 1px más claro que su fondo. En
+     oscuro el botón es casi blanco, en crema es casi negro — el valor tiene
+     que invertirse con el tema, así que vive en la capa semántica. */
+  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INVERSIÓN DE TEMA POR SECCIÓN — REDISEÑO B1-S2
+   `SectionShell` escribe data-ds-theme en su propio <section>, así que el
+   alcance es local: no hay estado global, funciona anidado y funciona sin
+   ningún provider. Reglas sin @layer a propósito — así ganan contra el
+   `@layer theme` de Tailwind donde viven los defaults.
+
+   Convive con el sistema viejo (`[data-theme]` en el <html>, más abajo) sin
+   pisarlo: son atributos distintos sobre elementos distintos.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-ds-theme='dark'] {
+  --color-ds-canvas: var(--color-ds-void);
+  --color-ds-panel: var(--color-ds-surface);
+  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg-muted: var(--color-ds-ink-muted);
+  --color-ds-rule: var(--color-ds-border);
+  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+}
+
+[data-ds-theme='light'] {
+  --color-ds-canvas: var(--color-ds-light-bg);
+  --color-ds-panel: var(--color-ds-light-surface);
+  --color-ds-fg: var(--color-ds-light-ink);
+  --color-ds-fg-muted: var(--color-ds-light-ink-muted);
+  --color-ds-rule: var(--color-ds-light-border);
+  --color-ds-control-edge: rgba(237, 233, 225, 0.22);
 }
 
 /* Logic Core V3: The Inversion System */
