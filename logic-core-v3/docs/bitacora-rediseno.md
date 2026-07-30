@@ -974,3 +974,129 @@ scroll.
 el pane no compositaba (0 frames de rAF), así que la coreografía de intro nunca
 arranca y el canvas queda en el default 300×150 de R3F. Es artefacto del entorno,
 no del código. **Queda para la verificación humana de Franco en el deploy preview.**
+
+---
+
+## CIERRE DE LA CORRIDA — `redesign/home` es la rama única · 2026-07-30
+
+### Qué quedó consolidado
+
+`redesign/home` contiene ahora, en un solo lugar:
+
+- **B1** (su base): tokens, componentes del sistema de diseño, `/styleguide`.
+- **B0 + B0-bis** (de `fix/home-sanidad`): copy del home, `lang`, meta, HDRI
+  self-hosteado, three fuera del bundle inicial.
+- **El arreglo de fuentes** (de `fix/fonts-geist-scope`): las variables de
+  `next/font` en el scope correcto. Todo el sitio renderiza Geist por primera vez.
+- **B0.5**: sanidad de copy de las landings + `sitemap.ts` y `robots.ts`.
+- **B0.6** (de `fix/motion-sanidad-mobile`): los tres bugs de motion.
+
+**Las cuatro ramas quedaron absorbidas.** Ninguna tiene ya nada que
+`redesign/home` no tenga. Borrarlas es decisión de Franco; no se tocaron.
+
+**`main` no recibió nada.** Cero merges, cero pushes, cero deploys, ningún
+fast-forward. Producción sigue exactamente como estaba.
+
+### Los tres conflictos, y cómo se resolvieron
+
+Los tres eran **la misma colisión estructural**: `fix/home-sanidad` extrajo el
+bloque 3D de `Hero.tsx` a un `HeroCanvas.tsx` nuevo, mientras otras dos ramas
+seguían editando ese bloque en su lugar original. Git no ve «400 líneas movidas
+contra 40 editadas» como un conflicto de una línea: lo ve como el archivo entero.
+
+1. **`Hero.tsx` vs `main`** (merge de `fix/home-sanidad`) — `main` había agregado
+   el FIX-GHOST-BOX. Resuelto: `Hero.tsx` se queda con la extracción, el
+   FIX-GHOST-BOX se porta a `HeroCanvas.tsx`. Delta verificado idéntico al de `main`.
+2. **`layout.tsx`** (merge de `fix/fonts-geist-scope`) — mismo elemento `<html>`:
+   una rama cambió `lang`, la otra movió el `className` de las fuentes. Resuelto
+   por unión pura: quedaron los dos, más el canonical y la meta sin el claim `+47`.
+3. **`Hero.tsx` vs `fix/motion-sanidad-mobile`** (merge de B0.6) — la misma
+   colisión que 1, ahora con la prop `frameloop`. Resuelto igual: lo que T2 le hizo
+   a `Hero()` auto-mergeó, la prop del componente se portó a `HeroCanvas.tsx`.
+
+**En ningún caso se descartó el lado ajeno.** Los tres se cerraron conservando la
+intención completa de las dos ramas, y en los tres se verificó después que nada de
+ninguno de los dos lados se hubiera perdido.
+
+### Qué se completó de cada fase
+
+- **Fase 1 — consolidación:** cerrada en verde. Build 0, tsc 0, Geist aplicada en
+  `/` y `/styleguide`, `font-mono` en Geist Mono, cero chunks de three en el
+  documento inicial del home, `/styleguide` 200, cero errores de consola. El
+  workaround de fuentes de B1 se colapsó a una sola fuente de verdad y se verificó
+  que los 225 elementos del sistema de diseño siguen resolviendo Geist sin él.
+- **Fase 2 — B0.5:** T1 a T6 completas. 53 aperturas de interrogación, 266 tildes,
+  22 líneas de tilde sobrante, 3 `.bak`, 8 mojibake, sitemap y robots nuevos,
+  `CLAUDE.md` corregido.
+- **Fase 3 — B0.6:** T1, T2 y T3 adentro vía merge. T4 es informe, entregado.
+
+### Qué se frenó, y por qué
+
+- **El doc `sprint-b06-motion-bugs.md` no existe.** Se consultó con Franco antes de
+  seguir y se decidió mergear `fix/motion-sanidad-mobile` en vez de re-implementar.
+- **Los 2 errores de `eslint` no se tocaron.** `react-hooks/set-state-in-effect` en
+  `app/contact/page.tsx:73` y `software/DiagnosticoSoftware.tsx:520`. Verificados
+  como **pre-existentes en `HEAD`**; arreglarlos es refactor de lógica de hooks,
+  fuera del scope de un sprint de copy.
+- **`package-lock.json` quedó sin commitear.** `npm install` lo modificó (60+/84−),
+  pero solo por churn de dependencias opcionales de plataforma (`@emnapi/*`,
+  marcas `peer: true`). Fuera del scope y riesgoso para los otros lanes. Se
+  restauró.
+- **El hero 3D no se verificó visualmente.** El pane del navegador no compositaba
+  (`document.hidden === true`, 0 frames de rAF por segundo), así que la coreografía
+  de intro nunca arranca. Cualquier medición del canvas en ese entorno es nula.
+
+### Informe del scroll-lock (T4), en una línea
+
+`Hero` tiene una red de seguridad de 6 segundos que libera el scroll si la
+coreografía se cuelga; **`MarketingIntro` no tiene ninguna** — sus 8 llamadas a
+`unlockScroll()` están todas aguas abajo de `await animate(...)` rAF-driven.
+Medido con rAF congelado: `/` se recuperó antes de los 6s, `/contact` seguía
+bloqueado a los 12. Recomendación (no implementada): darle a `MarketingIntro` el
+mismo `setTimeout` de reloj de pared. Detalle completo en la entrada de B0.6.
+
+### Lo que espera decisión de Franco
+
+**Gate 1 — bloquean B2:**
+
+1. **Permutación de acentos, A vs B.** Sigue abierta. Ojo: T6 alineó `CLAUDE.md`
+   con **A** (el código actual). Eso NO cierra la decisión — si elegís B, se
+   reeditan los cuatro hex de `globals.css` y esa sección de `CLAUDE.md` juntos.
+2. **Familia del display: Geist o Space Grotesk.** Sigue abierta, pero ahora es una
+   comparación honesta: el sitio por fin muestra su tipografía real.
+3. ~~El bug de Geist~~ — **RESUELTA** por la consolidación.
+
+**Gate 1 — no bloquean:** las 4 a 8 siguen igual (sombra del control en tema crema,
+flecha del CTA, numeración de capítulos, contrastes de S5 en placeholder, y mirar
+la página con ojos propios).
+
+**Nuevas, de esta corrida:**
+
+4. **El texto de reemplazo de T1.** Quedó «Automatizaciones funcionando en negocios
+   del NOA». Es copy de venta: si querés otra frase, es el momento.
+5. **`/styleguide` bloqueado en `robots.ts`.** Decisión propia, no estaba en la
+   lista del sprint. Sacarlo es borrar una línea.
+6. **La red de seguridad de `MarketingIntro`.** Recomendada, no implementada.
+7. **Los 2 `eslint` pre-existentes.** ¿Sprint aparte o se dejan?
+8. **`WhyDevelOP.tsx:766, 778, 1026.**` Tres `repeat: Infinity` con duraciones
+   normales y **sin** camino de `shouldSimplify`. No son el bug del 0.01 que
+   arreglaba T1, pero corren a 60fps para siempre también en mobile y con
+   reduced-motion. Fuera del scope de B0.6 tal como estaba escrito.
+9. **Borrar las cuatro ramas absorbidas**, si estás de acuerdo en que ya no
+   aportan nada.
+
+### Verificación humana (la tuya)
+
+Deploy preview de `redesign/home`, las 5 rutas públicas **primero en el teléfono**.
+Es la primera vez que vas a ver el sitio con su tipografía real, el copy sano y sin
+los bugs de motion, todo junto.
+
+Los cuatro puntos que reportó el sprint de fuentes: el label «WhatsApp» de
+`/contact` a 375px, los titulares pineados de `/web-development` y
+`/software-development` en movimiento, y el overhang del `develOP` del hero.
+
+Sumar a esa lista: **el hero 3D del home**, que ningún agente pudo ver.
+
+Después, `/styleguide` en el teléfono → **Gate 1**.
+
+**B2 no se abre hasta que pases ese Gate.**
