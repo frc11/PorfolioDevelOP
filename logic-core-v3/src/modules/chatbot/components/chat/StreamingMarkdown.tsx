@@ -144,7 +144,23 @@ function StreamingMarkdownImpl({
   const showCaret = animate && !reduced && (revealed < full || streaming)
 
   return (
-    <div className="prose prose-invert prose-sm max-w-none">
+    <div
+      className={
+        // Cursor de tipeo — el caret es el ÚLTIMO hijo de este div cuando se
+        // muestra, y react-markdown renderiza el markdown como elemento(s) de
+        // bloque (típicamente un <p>) DIRECTOS del div, sin wrapper propio. Sin
+        // esto, el caret (aunque sea `inline-block`) arranca en una línea nueva
+        // porque el bloque que lo precede fuerza el corte. `:nth-last-child(2)`
+        // es justamente ESE bloque — el que está inmediatamente antes del caret,
+        // sea el único párrafo o el último de varios — y volverlo `inline` lo
+        // fusiona en el mismo renglón que el texto que se está revelando. Solo
+        // mientras se muestra el caret: los mensajes históricos (sin caret)
+        // quedan con el layout de bloque normal de `prose`, sin tocar nada.
+        showCaret
+          ? 'prose prose-invert prose-sm max-w-none [&>*:nth-last-child(2)]:inline'
+          : 'prose prose-invert prose-sm max-w-none'
+      }
+    >
       <ReactMarkdown components={components}>{body}</ReactMarkdown>
       {showCaret && (
         <span
