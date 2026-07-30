@@ -194,7 +194,7 @@ function WeekResultsMockup({ color }: { color: string }) {
         ))}
       </div>
       <div className="rounded-lg border border-white/[0.07] bg-white/[0.03] p-3 text-[11px] leading-relaxed text-white/55 sm:text-xs">
-        La IA detecto una mejora de conversion y recomienda reforzar el canal que mas cierres genero.
+        La IA detectó una mejora de conversión y recomienda reforzar el canal que más cierres generó.
       </div>
     </div>
   )
