@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   keywords: ["agencia desarrollo web tucumán", "software a medida argentina", "automatización procesos noa", "desarrollo digital tucumán", "agencia digital argentina", "inteligencia artificial pymes"],
   authors: [{ name: "develOP" }],
   creator: "develOP",
+  alternates: {
+    canonical: "https://develop.com.ar",
+  },
   openGraph: {
     type: "website",
     locale: "es_AR",

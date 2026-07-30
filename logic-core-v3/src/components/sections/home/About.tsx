@@ -242,7 +242,7 @@ const AnimatedLocationBadge = ({ progress }: { progress: MotionValue<number> }) 
                 style={{ scale: dotScale, boxShadow: dotBoxShadow }}
             />
             <span className="text-sm tracking-wide text-zinc-300">
-                Tucumán, Argentina - trabajamos con clientes de todo el país
+                Tucumán, Argentina — trabajamos con clientes de todo el país
             </span>
         </motion.div>
     );
@@ -277,7 +277,7 @@ const LocationBadge = ({ progress, active }: { progress?: MotionValue<number>; a
                     transition={{ duration: active ? 0.72 : 0.42, ease: [0.16, 1, 0.3, 1] }}
                 />
                 <span className="text-sm tracking-wide text-zinc-300">
-                    Tucumán, Argentina - trabajamos con clientes de todo el país
+                    Tucumán, Argentina — trabajamos con clientes de todo el país
                 </span>
             </motion.div>
         );

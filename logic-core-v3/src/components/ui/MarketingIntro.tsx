@@ -1,15 +1,25 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { animate, motion, useMotionValue, useTransform } from "motion/react";
 
 import { useLenis } from "@/components/layout/SmoothScroll";
 
 import { isAutomationEnvironment } from "@/context/PreloaderContext";
 import { markIntroConsumed, markMarketingIntroDone } from "@/lib/marketing-routes";
-import { BrandedIntroCanvas } from "@/components/ui/BrandedIntroCanvas";
 import { LogoStrokeOverlay } from "@/components/ui/LogoStrokeOverlay";
 import { IntroLockupText, WRITE_MS, TEXT_LEAD_MS } from "@/components/ui/IntroLockupText";
+
+// El canvas 3D en su propio chunk, cargado client-only: three, r3f, drei y
+// postprocessing salen del bundle inicial (este módulo cuelga del layout raíz vía
+// Preloader). No cambia el comportamiento: el render ya estaba gateado por
+// `isClient && isSplitLayout`, así que nunca se SSR'eaba. El velo del intro sigue
+// pintándose en el primer paint porque vive en este módulo, no en el canvas.
+const BrandedIntroCanvas = dynamic(
+    () => import("@/components/ui/BrandedIntroCanvas").then((m) => m.BrandedIntroCanvas),
+    { ssr: false },
+);
 
 // ── Tunables del intro branded de marketing (R4 calibra) ──────────────────────
 const MARKETING_VEIL_COLOR = "#0a0a0a"; // backdrop oscuro/neutro (= máscara del 2D)
