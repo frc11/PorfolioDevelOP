@@ -2000,3 +2000,71 @@ describe todo lo demás del paso y avisa qué parte no pudo verse; el índice lo
 todos bajo `docs/manual-usuario/`**. Cero `src/`, cero tests, cero config — no se corrieron `tsc` ni
 las suites porque no había nada que romper. El WIP ajeno (`docs/probe-01-censo-cosecha.md`, untracked)
 quedó intacto. Sin push.
+
+---
+
+## PROBE · Terreno para la poda del Panel del Setter — 2026-07-31
+
+Corrida de **relevamiento**, no de sprint: diez ítems independientes para fundamentar el plan de poda
+de LeadOS, sin planificar ni proponer. Reporte completo en
+[`docs/probe-poda-terreno.md`](probe-poda-terreno.md). Rama `redesign/home`, HEAD `11eee1b`, working
+tree limpio de punta a punta.
+
+**Ocho ítems cerrados, dos parciales, ninguno sin relevar.** Los dos parciales lo son por falta de
+acceso **fuera** del repo, no por fallo de la corrida: R5 no pudo medir el progreso guardado en
+producción (solo existe `DATABASE_URL` local y apunta al branch Neon de dev) y R8 no pudo leer el
+panel de env vars de Netlify/Vercel. Los tres ítems de mayor costo-si-me-equivoco (R3, R8, R9)
+pasaron por un verificador adversarial con consigna de refutar: los tres volvieron
+**CONFIRMADO_CON_CORRECCIONES** — conclusión central en pie, con errores de evidencia plegados y
+marcados en el reporte (números de línea envejecidos, un `grep` que devolvía 19 y se reportó como 1,
+y una lista de call-sites de `gateEnvioDemo` a la que le faltaba `manual.ts`, que es justo el módulo
+que decide qué pantalla ve el setter).
+
+**Las cuatro suites están verdes hoy, sin deuda:** `tsc --noEmit` exit 0 (salida de 0 bytes),
+`check:invariants` **17/17**, `test:leados` **25/25**, `test:setter` **60/60** en 3.4 min — los cuatro
+números exactos que registró el cierre del bloque anterior en `:1933`. El `test:setter` lo dejó
+abierto el relevador paralelo (12/12 al corte) y lo cerró el agente padre con los puertos verificados
+libres de antemano.
+
+**El hallazgo que más cambia el plan salió de R4** (el único ítem que tocó archivos). Achicar
+`FASE_IDS` lo detectan exactamente dos guardianes: `tsc` (4 errores con 4 fases, 16 con 2) y
+`check:invariant:progreso` (`6 !== N`). Los dos specs de `tests/leados` **no detectan nada con 4
+fases** — derivan sus fixtures de `FASE_IDS` en vivo — y con 2 fallan por sus propios índices
+`undefined`, no porque la lógica se dé cuenta. Y el progreso **ya guardado se vacía en silencio y es
+todo-o-nada**: `parseProgreso` (`flow.ts:131-134`) hace `safeParse` contra `z.enum(FASE_IDS)` y ante
+cualquier fallo devuelve `{ completadas: [] }`. Una sola llave muerta —en `completadas`, `faseActual`
+o `marcadas`— borra el objeto entero: se midió un lead con 3 fases de las cuales 2 seguían existiendo,
+y quedó en 0, sin error ni log. Aguas abajo, `manual.ts:450` deja de marcar m7–m12 y el setter vuelve
+al principio de la Construcción. Agravante: `next.config.ts:10-15` tiene `ignoreBuildErrors: true`,
+así que el guardián de tsc **no frena un deploy**.
+
+**Lo que queda abierto para quien planifique.** (a) El *inventario de 16 pantallas con destino* que el
+`HANDOFF` cita como §9 del brief v3 **no existe en el repo** — el archivo commiteado tiene 11
+secciones y su §9 es «Qué queda fuera»; la vara de la poda está fuera del árbol. El censo real son
+**6 patrones de URL y 23 pantallas renderizadas**, con `/setter/nuevo`, `/setter/nuevo/importar` y el
+historial del lead ausentes de todo inventario documental. (b) La decisión sobre links en el opener
+sigue siendo de Franco: la regla vive en **un solo lugar** (`flow.ts:205`, dos call-sites), pero el
+precio son ~3 archivos de lógica, **8** de copy que la afirman en prosa —incluido el prompt que se le
+pega al Gem de outreach—, **4+** artefactos de test y 6+ documentos. (c) El número de progreso
+guardado en producción. (d) Si `QA_ALLOW_LOCALHOST` está definida en el entorno de prod: el guard de
+`/api/qa/login` se evalúa en **request time** (verificado en el bundle compilado), así que setear esa
+variable en un deploy ya construido abre la puerta **sin rebuildear**.
+
+**Dos cosas del terreno que conviene saber.** Otra sesión trabajó sobre este mismo checkout en
+paralelo: el HEAD se movió `e06e3c4` → `11eee1b` a mitad de corrida (commit docs-only) y `.next` se
+vació a las 01:53. Por eso **R4 se corrió en un `git worktree` aislado en vez del checkout
+compartido** — checkoutear una rama descartable en un índice compartido habría puesto los commits
+ajenos sobre una rama que después se borra con `-D`. Los 8 pasos del protocolo se cumplieron igual y
+la prueba de inocuidad está pegada en el reporte: `git status --porcelain` vacío, HEAD idéntico al
+anotado, y el blob de `contracts.ts` igual byte a byte al de HEAD.
+
+Además del relevamiento pedido, quedaron registrados **55 hallazgos laterales** en el bloque final del
+reporte. Los tres que más pesan: `src/app/api/test-sentry/route.ts` es un endpoint **sin ningún
+guard** que viaja al bundle de producción y genera un 500 no autenticado; `validate-origin.ts:49` es
+una segunda superficie de la misma variable de QA con **una sola pata** (la satisface un `curl` sin
+header `Origin`); y los invariantes corren bajo type-stripping de Node, **sin type-check** — medido:
+con `FASE_IDS` en 4, `tsc` marca errores en `manual.ts` y `check:invariant:manual` pasa igual.
+
+**Cierre:** `git diff --stat` contra `11eee1b`: **2 archivos, ambos bajo `docs/`**. Cero `src/`, cero
+tests, cero configuración — el único archivo de código que se tocó en toda la corrida vivió y murió
+dentro del worktree descartable. Sin push.
