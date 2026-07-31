@@ -161,6 +161,7 @@ export function AgendaForm({
           type="checkbox"
           checked={decisorOk}
           onChange={(event) => setDecisorOk(event.target.checked)}
+          aria-label="Estoy hablando con el dueño o quien decide"
           className="mt-0.5 h-4 w-4 shrink-0 accent-cyan-500"
         />
         <span className="space-y-1">

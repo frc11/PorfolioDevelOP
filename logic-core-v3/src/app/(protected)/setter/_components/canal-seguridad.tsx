@@ -21,10 +21,10 @@ export function CanalSeguridad({ dmsHoy }: { dmsHoy: number }) {
       : 'border-white/[0.08] bg-white/[0.02] text-zinc-400'
 
   const aviso = pasado
-    ? `Pasaste el tope diario recomendado (${topeDiarioDms}). Podés seguir — vos decidís — pero el canal se cuida espaciando.`
+    ? `Pasaste los ${topeDiarioDms} de hoy. Podés seguir, vos decidís — pero el canal se cuida espaciando. El tope de hoy no es para siempre: sube a medida que la cuenta acumula historial.`
     : cerca
-      ? `Te estás acercando al tope diario recomendado (${topeDiarioDms}). Dosificá lo que queda del día.`
-      : `Ritmo recomendado: hasta ${ritmoPorHora} por hora, máximo ${topeDiarioDms} por día.`
+      ? `Te estás acercando a los ${topeDiarioDms} de hoy. Dosificá lo que queda — el número es bajo a propósito, para que la cuenta crezca sin restricciones.`
+      : `Hoy arrancás con hasta ${ritmoPorHora} por hora y ${topeDiarioDms} en el día. No es el techo de siempre — es el punto de partida de una cuenta nueva, y crece con ella. Pocos mensajes bien apuntados rinden más que muchos genéricos.`
 
   return (
     <div className={`rounded-2xl border p-4 ${tono}`}>

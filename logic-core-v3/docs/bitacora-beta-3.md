@@ -2068,3 +2068,50 @@ con `FASE_IDS` en 4, `tsc` marca errores en `manual.ts` y `check:invariant:manua
 **Cierre:** `git diff --stat` contra `11eee1b`: **2 archivos, ambos bajo `docs/`**. Cero `src/`, cero
 tests, cero configuración — el único archivo de código que se tocó en toda la corrida vivió y murió
 dentro del worktree descartable. Sin push.
+
+## Sprint P1 — poda del Panel del Setter: seis correcciones de copy, cero lógica — 2026-07-31
+
+**Terreno.** Arrancó en `redesign/home`, `7bc0a82`, sobre el worktree principal (no uno dedicado).
+`git status --porcelain` mostró 11 archivos con WIP ajeno (landings de marketing + `navigateToPage.ts`,
+nada del setter) — se frenó y se preguntó; Franco confirmó que era su propio WIP en curso y que
+siguiera sin tocarlo. `tsc --noEmit` de partida: exit 0.
+
+**Seis objetivos, cinco aplicados, uno ya resuelto.**
+1. **H-02** (`novedades-panel.tsx:139`) — "la más vieja hace **hace** 45 días": `formatEspera` ya
+   antepone "hace", el label lo repetía. Se sacó el "hace" del prefijo (`'' | 'la más vieja '`) — el
+   mismo bug estaba también en el caso singular ("hace **hace** 1 día"), se corrigió junto por ser la
+   misma línea y la misma causa.
+2. **H-18** (`cartera-toolbar.tsx:28`) — el filtro "Perdidos (post-reunión)" lista negocios cerrados
+   en evaluación, sin reunión: `archivoCausaDe` (flow.ts) clasifica como "perdido" todo lo que Franco
+   cierra fuera de DESCARTADA, en cualquier punto del recorrido. Label nuevo: "Perdidos (cerrados por
+   Franco)".
+3. **H-09** — **ya resuelto, salteado.** `seguimiento-form.tsx:85-87` filtra `SIN_RESPUESTA` del
+   array de opciones cuando `cadenciaAgotada`; la opción "toque 4" deshabilitada no existe en el DOM
+   actual. Grep en todo `src/` sin matches de ese label.
+4. **H-13** (`agenda-form.tsx:160-165`) — el checkbox de "Estoy hablando con el dueño / quien decide"
+   ya estaba envuelto en `<label>` (asociación implícita válida), pero sin nombre accesible propio; el
+   cómputo del navegador arrastraba el ícono y el hint dinámico. Se agregó `aria-label` explícito y
+   corto — atributo, sin tocar el envoltorio.
+5. **Límites de Instagram** (`flow-content.ts` + `canal-seguridad.tsx`) — `topeDiarioDms/avisoDesdeDms/
+   ritmoPorHora` bajaron de `30/24/6` a `10/8/3` (perfil de cuenta nueva). Comentario de decisión
+   agregado arriba de la constante. Los tres textos del cartel se reescribieron para explicar el
+   ramp-up (el número de hoy no es un techo permanente, crece con la cuenta) en vez de mostrar un
+   número fijo — sin agregar bloqueo, el cartel sigue siendo informativo. El array `warmUp` (mismo
+   objeto, misma superficie de UI) tenía semana 2 en "10–20/día", por encima del nuevo tope de 10:
+   se reescribió para no contradecir el número nuevo.
+6. **Comentario del contador** (`_data.ts:113`) — decía "DMs comerciales de hoy del setter";
+   `contarDmsHoy` (outreach.ts:55-57) solo cuenta `channel: 'INSTAGRAM_DM'`. Alineado a "DMs de
+   Instagram de hoy del setter".
+
+**Lo que quedó anotado sin tocar** (fuera de scope por instrucción explícita): los dos hallazgos de
+guardado (tildes que se pierden, "se guarda solo") — viven en pantallas que la poda va a rehacer; el
+monolito de la ruta del manual; cualquier cosa de lógica, gates o schema.
+
+**Verificación.** `tsc --noEmit`: exit 0. `check:invariants`: **17/17**, exit 0. `git diff --stat`:
+**6 archivos**, todos copy/atributo (`novedades-panel.tsx`, `cartera-toolbar.tsx`, `agenda-form.tsx`,
+`flow-content.ts`, `canal-seguridad.tsx`, `_data.ts`) — ninguno de lógica, gates ni schema. Sin push.
+
+**Para Franco, por escrito — no autocerrado.** Los tres textos nuevos del cartel de Instagram
+(`canal-seguridad.tsx`) los tiene que ver en preview: es criterio comercial, no algo que un `tsc` en
+verde valide. Los números del perfil conservador (`10/8/3`) son una propuesta del research citado en
+la tarea — Franco los ajusta según el historial real de la cuenta que va a usar el setter.
