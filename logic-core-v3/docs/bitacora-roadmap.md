@@ -15340,3 +15340,148 @@ baja en turnos rapidos (la ventana larga solo aplica hasta el primer chunk de co
 deberia penalizar el camino sano).
 
 ---
+
+## CONTACT-PATH - el camino "que me contacten" tiene que terminar en texto
+
+### EL HALLAZGO CENTRAL
+**Un tool client-side no produce output, asi que el SDK no continua a otro step; si el turno
+depende de ese tool, cierra sin texto. Todo camino conversacional que deba terminar en respuesta
+necesita un tool SERVER-SIDE que fuerce el step final.**
+
+### El bug
+El visitante daba sus datos, se capturaba el lead, aparecia la tarjeta con dos opciones. Elegir
+WhatsApp funcionaba; elegir **"Que me contacten"** devolvia nuestro fallback de respuesta vacia
+("Se me complico generar una respuesta ahora...") y volvia a renderizar la misma tarjeta.
+
+Log de produccion:
+```
+onStepFinish  stepNumber:0  finishReason:"tool-calls"  toolCallCount:1  textLength:0
+onStepFinish  stepNumber:1  finishReason:"tool-calls"  toolCallCount:1  textLength:0
+onFinish_enter  textLength:106      <- largo del fallback, no del modelo
+chat.empty_response_fallback  finishReason:"tool-calls"  toolCallCount:2
+```
+
+### La causa (estructural, del SDK)
+En el `flush` del inner transform de `streamStep`, la continuacion a otro step exige que las tool
+calls hayan producido OUTPUT:
+```js
+if (clientToolCalls.length > 0 && clientToolOutputs.length === clientToolCalls.length) -> otro step
+else -> cerrar
+```
+`offer_handoff_options` (`offerHandoffOptions.ts:29-35`) y `navigate_to_page`
+(`navigateToPage.ts:53-59`) son **client-side puros, sin `execute`** - no producen output, no hay
+step siguiente, el turno cierra mudo.
+
+**Por eso WhatsApp SI funcionaba:** `show_whatsapp_handoff` es server-side, su `execute` produce
+un tool-result, la condicion se cumple, arranca el step siguiente y ahi el modelo escribe.
+
+Para el camino de contacto **no existia ningun tool server-side**: el modelo no tenia a donde ir,
+reusaba la tarjeta (client-side) y se quedaba mudo.
+
+### El re-llamado de capture_lead: no era redaccion floja
+La descripcion del tool YA decia "Ya se invoco esta tool exitosamente en esta conversacion (no
+duplicar)" (`captureLead.ts:120`). El mecanismo real: `sections.ts:84` ata `offer_handoff_options`
+a "despues de capture_lead exitoso", y **sin destino para el camino de contacto el modelo
+reconstruia la unica secuencia que conocia**. Darle el destino lo arregla solo. (Igual se reforzo
+la linea de `capture_lead` con un "UNA sola vez por conversacion" explicito.)
+
+### El fix
+**`confirm_contact_request`** (`server/tools/confirmContactRequest.ts`), espejo server-side de
+`show_whatsapp_handoff`:
+- Su `execute` fuerza el step final **por construccion del SDK**, no por obediencia del modelo.
+  Instruir por prompt ("acordate de escribir algo") no alcanzaba: es el momento en que el
+  visitante convierte y no puede depender de una probabilidad.
+- Persiste un `ChatbotEvent` tipo **`handoff.callback`**, espejo de `handoff.whatsapp`. Cero
+  migracion: el patron de registro de derivaciones ya es un evento, no una columna.
+- Idempotente POR CONVERSACION (patron `capture_lead.already_captured`): dos clicks, un registro.
+  Devuelve `success: true` igual cuando ya existia - devolver error empujaria al modelo a
+  reintentar o a disculparse.
+- Nunca relanza: si la DB falla, el turno igual cierra con texto (el lead ya esta en
+  `ChatbotLead`, que es lo que habilita el contacto).
+- **Cero cambios en el widget**: `renderToolCall.tsx` tiene `default: return null`, asi que un
+  tool sin tarjeta no renderiza nada y no rompe. Lo que el visitante ve es el TEXTO del modelo -
+  exactamente lo que faltaba.
+- **PII**: la metadata persistida es solo `{preferredChannel}`. Importante porque
+  `logChatbotEvent` escribe la metadata a stderr ademas de a la DB.
+
+Una linea nueva en `sections.ts` le da destino al camino de contacto, **sin tocar el acople de
+`offer_handoff_options` a `capture_lead`** (que es lo que hace aparecer la tarjeta cuando
+corresponde): esa linea no aparece en el diff.
+
+### Se descarto darle `execute` a `offer_handoff_options`
+Arreglaria el "sin texto" pero NO el segundo sintoma - el modelo seguiria sin tener a donde ir y
+volveria a renderizar la misma tarjeta. Ademas no esta en `STARTER_TOOLS`.
+
+### GATE OPERATIVO: Plan.tools es una columna de la DB
+`getTools` filtra por `plan.tools`, y `Plan.tools` es `String[]` en la DB (`schema.prisma:616`).
+**Sin actualizar las filas Plan de produccion, el slug se descarta en silencio y el bug sigue.**
+
+**Auditoria de `sync-plans.ts` (pedida antes de implementar):**
+- **NO borra ni recrea**: cero `delete`/`deleteMany`/`createMany`. `findMany` -> `create` si falta
+  / `update` si cambio / skip. Filas con `key` fuera del catalogo quedan intactas. Idempotente.
+- **PERO pisa las 13 columnas**: `prisma.plan.update({where:{key}, data: next})` (`:168-171`)
+  escribe el objeto completo, y `hasPlanChanged` (`:131-147`) compara las 13 - drift en UNA marca
+  la fila como cambiada y se sobrescriben TODAS (precios, cuotas, limites, flags). Cualquier
+  ajuste manual en prod se revertiria en silencio, y la Neon es compartida con Franco.
+- **No hay Plan con tools por cliente**: `Plan` es catalogo global (3 filas por `key`); la
+  personalizacion por cliente vive en `Subscription` (`priceOverride`/`overrideUntil`/
+  `overrideReason`), que ningun script de planes toca. El override de Matsu esta a salvo.
+
+-> **Se uso el camino quirurgico**: `prisma/seeds/add-contact-tool.ts`, que hace
+`update({where:{id}, data:{tools: [...]}})` - UNA columna, preservando el resto del array,
+idempotente. `sync-plans.ts` y `fallback.ts` se actualizaron igual para que el catalogo quede
+coherente (si no, la proxima corrida del seed revertiria el slug), pero **el seed completo NO se
+corre**.
+
+**PASO MANUAL REQUERIDO** (Valentino, contra prod):
+`DATABASE_URL=<prod> npx tsx prisma/seeds/add-contact-tool.ts`
+Sin eso el fix no surte efecto.
+
+### Tests
+`confirm-contact-request.invariant.ts` (`npm run test:contactpath`, cero DB/red/credenciales):
+- PARTE A - el tool REAL con la persistencia inyectada (patron del 3er parametro de
+  `resolveEffectiveModel`): primera invocacion registra; idempotencia por conversacion; otra
+  conversacion si registra; DB caida no relanza; el schema rechaza un canal inventado.
+- PARTE B - contra el `streamText` REAL: el tool real hace **arrancar el step 2** y el turno
+  cierra con texto y `finishReason: "stop"`. Y el CONTROL: el mismo tool sin `execute` reproduce
+  el bug exacto.
+
+**Se corrigio una debilidad del propio test durante el sprint**: la primera version construia una
+replica del tool en vez de usar el builder real, asi que mutar el archivo de produccion no lo
+habria hecho fallar - un placebo. Se inyecto la persistencia para poder ejercitar el tool de
+verdad sin DB.
+
+### Verificacion falla-primero
+Se le quito el `execute` al tool REAL. El test fallo. Y se verifico especificamente el test de
+PIPELINE, aislado: con el tool mutado da **`steps: 1`, `textLength: 0`, `finishReason:
+"tool-calls"`** - identico al log de produccion. Restaurado, todo pasa.
+
+### Gates
+- `tsc --noEmit`: 0 errores. `eslint` sobre los 7 archivos: 0 errores (5 warnings PREEXISTENTES de
+  `_input`/`_ctx`, verificado contra el diff: ninguno lo agrega este sprint).
+- `test:contactpath` (nuevo) + watchdog, emptyfallback, providerclose, deadline, onf1, infra1,
+  infra2, c02, cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git, sin correr nada contra la DB.
+- Sin tocar: `streamWatchdog.ts`, `providerStreamClose.ts`, `reconcile.ts`, `persistTurn`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. **El boton "Que me contacten" NO se toco.**
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+Despues de correr el script quirurgico, en una conversacion NUEVA: (1) nombre y telefono -> lead
+capturado -> **"Que me contacten"** -> el bot responde con una confirmacion real (NO el texto que
+empieza con "Se me complico generar una respuesta ahora"); (2) `chat.empty_response_fallback` NO
+aparece en ese turno; (3) `finishReason: "stop"` y `textLength > 0`; (4) el camino de WhatsApp
+sigue igual; (5) queda un `ChatbotEvent` tipo `handoff.callback`; (6) `capture_lead` deja de
+re-llamarse con el lead ya capturado; (7) `step_count`, `costUsd` y la latencia se mantienen.
+
+### Deuda que deja este sprint
+- **`listRecentHandoffsByOrgSlug`** (`server/admin/multiTenantQueries.ts:215-219`) filtra estricto
+  por `type: 'handoff.whatsapp'`: los `handoff.callback` quedan en la DB (auditables) pero NO
+  aparecen en "Derivaciones recientes". Ampliar la query exige agregar `type` al shape para que el
+  panel los distinga - si no, un pedido de contacto se listaria como si fuera un handoff de
+  WhatsApp, peor que no mostrarlo. **Es del chat Panel/Dashboard** (frontera del proyecto).
+- **`show_whatsapp_handoff` loguea PII a stderr**: su `logChatbotEvent` manda `visitorName` y
+  `visitorContact` en la metadata, y `logChatbotEvent` escribe la metadata tanto a la DB como a
+  stderr (`persistentLogger.ts`). Preexistente, no se replico en el tool nuevo.
+
+---

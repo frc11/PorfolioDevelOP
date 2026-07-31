@@ -38,14 +38,30 @@ type PlanWrite = {
   sortOrder: number
 }
 
-const BASE_TOOLS_4 = [
+// CONTACT-PATH — `confirm_contact_request` va en TODOS los planes, incluido
+// Starter: el camino "que me contacten" no es una feature premium, es la mitad
+// de la conversión (hay visitantes que no quieren WhatsApp). Sin el slug acá, el
+// filtro por plan de `getTools` lo descarta en silencio y el turno vuelve a
+// cerrar sin texto.
+//
+// ⚠️ Actualizar este catálogo NO alcanza para producción: `Plan.tools` es una
+// columna de la DB. Pero correr ESTE seed pisaría las 13 columnas de cada Plan
+// (precios, cuotas, límites) con los valores de acá — ver el aviso del
+// encabezado. Para aplicarlo se usa el script quirúrgico
+// `prisma/seeds/add-contact-tool.ts`, que solo toca `tools`.
+const BASE_TOOLS_5 = [
   'capture_lead',
   'offer_handoff_options',
   'show_whatsapp_handoff',
   'navigate_to_page',
+  'confirm_contact_request',
 ] as const
 
-const STARTER_TOOLS = ['capture_lead', 'show_whatsapp_handoff'] as const
+const STARTER_TOOLS = [
+  'capture_lead',
+  'show_whatsapp_handoff',
+  'confirm_contact_request',
+] as const
 
 export const PLANS_CATALOG: readonly PlanWrite[] = [
   {
@@ -71,7 +87,7 @@ export const PLANS_CATALOG: readonly PlanWrite[] = [
     setupFloorPrice: new Prisma.Decimal('900'),
     quota: 3000,
     llmModel: 'gemini-2.5-flash',
-    tools: [...BASE_TOOLS_4],
+    tools: [...BASE_TOOLS_5],
     maxDomains: 3,
     reportsEnabled: true,
     insightEnabled: true,
@@ -87,7 +103,7 @@ export const PLANS_CATALOG: readonly PlanWrite[] = [
     setupFloorPrice: new Prisma.Decimal('1000'),
     quota: 5000,
     llmModel: 'gemini-2.5-flash',
-    tools: [...BASE_TOOLS_4],
+    tools: [...BASE_TOOLS_5],
     maxDomains: null,
     reportsEnabled: true,
     insightEnabled: true,

@@ -3,6 +3,7 @@ import { buildCaptureLeadTool } from './captureLead'
 import { buildOfferHandoffOptionsTool } from './offerHandoffOptions'
 import { buildShowWhatsappHandoffTool } from './showWhatsappHandoff'
 import { buildNavigateToPageTool } from './navigateToPage'
+import { buildConfirmContactRequestTool } from './confirmContactRequest'
 
 /**
  * Slug → builder de cada tool. El builder recibe el contexto y devuelve
@@ -14,6 +15,10 @@ const TOOL_BUILDERS = {
   offer_handoff_options: (_ctx: ToolCallContext) => buildOfferHandoffOptionsTool(),
   show_whatsapp_handoff: (ctx: ToolCallContext) => buildShowWhatsappHandoffTool(ctx),
   navigate_to_page: (_ctx: ToolCallContext) => buildNavigateToPageTool(),
+  // CONTACT-PATH — espejo server-side de `show_whatsapp_handoff` para el camino
+  // "que me contacten". Su `execute` es lo que fuerza el step final: sin un tool
+  // server-side ese camino cerraba sin texto (ver confirmContactRequest.ts).
+  confirm_contact_request: (ctx: ToolCallContext) => buildConfirmContactRequestTool(ctx),
 } as const
 
 export type ToolSlug = keyof typeof TOOL_BUILDERS

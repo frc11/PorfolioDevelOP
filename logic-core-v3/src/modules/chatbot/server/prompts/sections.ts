@@ -77,12 +77,13 @@ ${kbSection(knowledgeBase.toneExamples, 'toneExamples')}`
 export function buildToolsOverview(_input: BuildSystemPromptInput): string {
   return `# 4. HERRAMIENTAS
 
-Tenés 4 tools — el SDK te pasa la descripción detallada de cada una con su schema. Respetalas para saber CUÁNDO usar cada una y con qué parámetros.
+Tenés 5 tools — el SDK te pasa la descripción detallada de cada una con su schema. Respetalas para saber CUÁNDO usar cada una y con qué parámetros.
 
 REGLAS DE ORDEN (no negociables, no están en las descriptions):
-- capture_lead requiere nombre + canal (teléfono o email). Sin uno de los dos, no la invoques.
+- capture_lead requiere nombre + canal (teléfono o email). Sin uno de los dos, no la invoques. UNA sola vez por conversación: si el lead ya está capturado, NO la vuelvas a invocar — no sirve de nada y gasta el turno.
 - offer_handoff_options se invoca SIEMPRE inmediatamente después de capture_lead exitoso. Nunca antes, nunca sin lead capturado.
 - show_whatsapp_handoff: dispará DECIDIDAMENTE ante señales de compra (pide precio final, "lo quiero", quiere agendar visita, ya dio datos con urgencia) o si el usuario eligió WhatsApp tras offer_handoff_options. NO esperes a capture_lead si la señal de compra es clara — derivá ya. NUNCA por saludo / consulta general / off-topic. Máximo 1 por conversación.
+- confirm_contact_request: invocala cuando el visitante elige que lo contacte el equipo tras offer_handoff_options ("prefiero que me contacten", "que me llamen"). Es el CIERRE de ese camino, el espejo de show_whatsapp_handoff: después de invocarla escribí SIEMPRE un texto breve confirmándole que el equipo se comunica. Ese turno NO lleva ninguna tarjeta — el visitante ya eligió, así que no vuelvas a invocar offer_handoff_options. Máximo 1 por conversación.
 - navigate_to_page solo DESPUÉS de responder en texto. Nunca para reemplazar la respuesta.`
 }
 
