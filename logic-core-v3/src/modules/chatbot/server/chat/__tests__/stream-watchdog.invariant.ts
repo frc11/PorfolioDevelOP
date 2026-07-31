@@ -55,6 +55,21 @@
  *   18. `beginStep()` llamado varias veces seguidas → un solo timer vivo.
  *   19. El step 2 nunca manda ningún chunk → dispara a `initialIdleMs`, no se
  *       queda esperando `idleMs` (que en este caso sería mucho más largo).
+ *
+ * WATCHDOG-4 — la ventana la decide el CONTENIDO, no los bytes:
+ *   20. EL CASO DEL BUG: pasa un byte que NO es contenido (el frame `start` del
+ *       SDK), después un silencio entre `idleMs` e `initialIdleMs` (el cold
+ *       start de Vertex) → NO dispara, y la respuesta llega completa. Con la
+ *       semántica vieja el watchdog la mataba.
+ *   21. Bytes fluyendo sin `markContent()` jamás → dispara recién a
+ *       `initialIdleMs`, y el evento sale con `window:'initial'` y
+ *       `contentChunks: 0` — la telemetría que hace obvio el diagnóstico.
+ *   22. `markContent()` es idempotente: N llamadas dejan UN timer y un solo
+ *       cambio de ventana, pero el contador sí cuenta las N.
+ *   23. `beginStep()` vuelve a la ventana larga aunque el step previo hubiera
+ *       tenido contenido (multi-step: el step 2 arranca en frío).
+ *   24 y 25. `suspend()`/`resume()` NO pisan el estado de ventana, en ambas
+ *       direcciones (regresión de WATCHDOG-3, ahora sobre el flag nuevo).
  */
 import assert from 'node:assert/strict'
 import { createStreamWatchdog } from '../streamWatchdog.ts'
@@ -343,9 +358,14 @@ assert.deepEqual(unhandled, [], `unhandled rejections detectadas (1-7): ${unhand
   assert.ok(elapsed < 1_000, `disparó con initialIdleMs (${elapsed}ms), no esperó los 5000ms de idleMs`)
 }
 
-// ── 11. Post-primer-chunk, silencio > idleMs: dispara con la ventana CORTA ───
+// ── 11. Tras markContent(), silencio > idleMs: dispara con la ventana CORTA ──
 // initialIdleMs largo (5s) — si el switch de ventana no ocurriera, el test
-// tardaría 5s. idleMs corto (40ms) es el que tiene que aplicar tras el chunk.
+// tardaría 5s. idleMs corto (40ms) es el que tiene que aplicar tras el
+// contenido.
+//
+// WATCHDOG-4 — antes este bloque mandaba solo un byte y esperaba el switch.
+// Ese era EXACTAMENTE el bug: un byte (p. ej. el frame `start` del SDK) no es
+// contenido del modelo. Ahora el switch lo dispara `markContent()`.
 {
   let idleCalls = 0
   const startedAt = Date.now()
@@ -356,12 +376,16 @@ assert.deepEqual(unhandled, [], `unhandled rejections detectadas (1-7): ${unhand
       idleCalls += 1
     },
   })
-  await drain(makeSource(['data: hola\n\n'], 10, false).pipeThrough(wd.stream))
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  src.push('data: hola\n\n')
+  wd.markContent() // ← el modelo empezó a responder de verdad
+  await drainPromise
   const elapsed = Date.now() - startedAt
   assert.equal(idleCalls, 1)
   assert.ok(
     elapsed < 1_000,
-    `tras el chunk se usó idleMs=40 (${elapsed}ms), no se quedó en la ventana inicial de 5s`,
+    `tras markContent() se usó idleMs=40 (${elapsed}ms), no la ventana inicial de 5s`,
   )
 }
 
@@ -573,7 +597,172 @@ assert.deepEqual(unhandled, [], `unhandled rejections detectadas (1-7): ${unhand
   )
 }
 
-// ── Cero unhandled rejections en TODO el archivo (9-19 incluidos) ───────────
+// ── 20. EL CASO DEL BUG: un byte SIN contenido no acorta la ventana ─────────
+// Reproduce el turno real de prod: el frame `start` del SDK pasa por el borde
+// (1 byte-chunk, `assistantTextLength: 0`), después Vertex tarda 8s en el
+// primer token. Con la semántica vieja (bytes eligen ventana) el watchdog
+// disparaba a los 3s y mataba una respuesta que el modelo generó bien.
+{
+  const events: { window: string; contentChunks: number }[] = []
+  const wd = createStreamWatchdog({
+    idleMs: 120, // "3000ms" a escala
+    initialIdleMs: 480, // "12000ms" a escala
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window, contentChunks: info.contentChunks }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+
+  src.push('data: {"type":"start"}\n\n') // el frame `start` del SDK: NO es contenido
+  await sleep(320) // > idleMs(120), < initialIdleMs(480): el cold start de Vertex
+  // `.length` y no `deepEqual(events, [])`: comparar contra `[]` estrecha
+  // `events` a `never[]` y rompe los usos de abajo.
+  assert.equal(events.length, 0, 'un byte sin contenido NO acorta la ventana: no dispara')
+
+  wd.markContent() // recién ahora el modelo empieza a responder
+  src.push('data: {"type":"text-delta"}\n\n')
+  await sleep(10)
+  src.close()
+
+  const { text, sawDone } = await drainPromise
+  assert.equal(sawDone, true, 'cierre normal — el watchdog nunca cortó')
+  assert.equal(
+    text,
+    'data: {"type":"start"}\n\ndata: {"type":"text-delta"}\n\n',
+    'la respuesta llega completa: es la que antes se perdía',
+  )
+  assert.deepEqual(events.map((e) => e.window), ['content'], 'terminó en la ventana de contenido')
+}
+
+// ── 21. Bytes fluyendo sin markContent() nunca → dispara a INITIAL, no antes ─
+{
+  const events: { window: string; contentChunks: number }[] = []
+  const startedAt = Date.now()
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 300,
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window, contentChunks: info.contentChunks }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  // Bytes estructurales cada 80ms: superan idleMs(40) pero resetean el timer,
+  // así que lo que corre es la ventana INICIAL desde el último byte.
+  for (let i = 0; i < 3; i += 1) {
+    src.push(`data: {"frame":${i}}\n\n`)
+    await sleep(80)
+  }
+  await drainPromise
+  const elapsed = Date.now() - startedAt
+  assert.ok(elapsed >= 300, `esperó la ventana inicial completa (${elapsed}ms >= 300ms)`)
+  assert.deepEqual(
+    events,
+    [{ window: 'initial', contentChunks: 0 }],
+    'disparó en la ventana INICIAL, con contentChunks 0 — el log lo dice solo',
+  )
+}
+
+// ── 22. markContent() es idempotente: un solo cambio, sin timers duplicados ──
+{
+  const baseline = liveTimers()
+  const events: { window: string; contentChunks: number }[] = []
+  const wd = createStreamWatchdog({
+    idleMs: 60_000,
+    initialIdleMs: 60_000,
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window, contentChunks: info.contentChunks }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  for (let i = 0; i < 5; i += 1) wd.markContent()
+  assert.equal(
+    liveTimers(),
+    baseline + 1,
+    'cinco markContent() dejan UN solo timer vivo, no cinco',
+  )
+  src.close()
+  await drainPromise
+  assert.equal(events[0]?.contentChunks, 5, 'el contador SÍ cuenta las cinco llamadas')
+  assert.equal(events[0]?.window, 'content')
+  assert.equal(liveTimers(), baseline, 'timer limpio al cerrar')
+}
+
+// ── 23. beginStep() vuelve a la ventana larga aunque hubo contenido antes ────
+// Es el caso multi-step real: step 1 genera texto, step 2 arranca en frío.
+{
+  const events: { window: string }[] = []
+  const startedAt = Date.now()
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 350,
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  wd.markContent() // step 1 tuvo contenido → ventana corta
+  src.push('data: step1\n\n')
+  await sleep(10)
+  wd.beginStep() // step 2 arranca → tiene que volver a la ventana LARGA
+  await drainPromise
+  const elapsed = Date.now() - startedAt
+  assert.ok(
+    elapsed >= 350,
+    `tras beginStep() rige la ventana inicial otra vez (${elapsed}ms >= 350ms)`,
+  )
+  assert.deepEqual(events.map((e) => e.window), ['initial'], 'volvió a la ventana inicial')
+}
+
+// ── 24. suspend()/resume() NO pisan el estado de ventana ────────────────────
+// Regresión directa de WATCHDOG-3, ahora también sobre el estado de contenido.
+{
+  const events: { window: string }[] = []
+  const startedAt = Date.now()
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 350,
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  // Sin markContent(): estamos en la ventana LARGA. Un ciclo de tool no debe
+  // convertirla en corta (eso era el bug de WATCHDOG-3, ahora con otro flag).
+  wd.suspend()
+  await sleep(60)
+  wd.resume()
+  await drainPromise
+  const elapsed = Date.now() - startedAt
+  assert.ok(
+    elapsed >= 350,
+    `resume() respetó la ventana LARGA que no se había cambiado (${elapsed}ms >= 350ms)`,
+  )
+  assert.deepEqual(events.map((e) => e.window), ['initial'])
+}
+
+// ── 25. Simetría: con contenido previo, resume() mantiene la ventana CORTA ──
+{
+  const events: { window: string }[] = []
+  const startedAt = Date.now()
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 5_000,
+    onIdle: async () => {},
+    onEvent: (info) => events.push({ window: info.window }),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+  wd.markContent() // ya hubo contenido en este step
+  wd.suspend()
+  await sleep(60)
+  wd.resume() // sin beginStep(): sigue siendo el MISMO step
+  await drainPromise
+  const elapsed = Date.now() - startedAt
+  assert.ok(elapsed < 1_000, `resume() conservó la ventana CORTA (${elapsed}ms)`)
+  assert.deepEqual(events.map((e) => e.window), ['content'])
+}
+
+// ── Cero unhandled rejections en TODO el archivo (9-25 incluidos) ───────────
 await sleep(150)
 assert.deepEqual(unhandled, [], `unhandled rejections detectadas: ${unhandled.join(' | ')}`)
 
@@ -583,8 +772,10 @@ console.log(
     'cancelación no persisten ni dejan timers, un onIdle que falla no impide cerrar, no queda ' +
     'ninguna promesa sin manejar, las dos ventanas (initial/post-chunk) conmutan correctamente, ' +
     'la suspensión por contador (no booleano) aguanta tools solapados y se libera con el techo ' +
-    'de seguridad ante un tool colgado, y beginStep() hace que el arranque en frío del STEP 2 ' +
-    '(tras un tool) ya no corte la respuesta — sin importar el orden entre resume() y beginStep().',
+    'de seguridad ante un tool colgado, beginStep() hace que el arranque en frío del STEP 2 ' +
+    '(tras un tool) ya no corte la respuesta — sin importar el orden entre resume() y ' +
+    'beginStep() — y la ventana la decide markContent() (contenido real del modelo), NO los ' +
+    'bytes: un frame estructural del SDK ya no acorta la ventana ni mata una respuesta lenta.',
 )
 }
 

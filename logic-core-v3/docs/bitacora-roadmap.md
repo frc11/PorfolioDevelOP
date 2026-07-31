@@ -15231,3 +15231,112 @@ en el camino sano - si sigue apareciendo, el pipeline aun no completa solo; (5) 
 de 30000 ms; (6) `ChatMessage` con fila ASSISTANT y `ChatbotEvent` con `chat.message_completed`.
 
 ---
+
+## WATCHDOG-4 - la ventana la decide el contenido, no los bytes
+
+### EL HALLAZGO CENTRAL
+**El frame `start` del SDK no es contenido del modelo. Un watchdog que opera sobre BYTES no puede
+distinguir "empezo a fluir el transporte" de "empezo a responder el modelo". El discriminador es
+`onChunk`.**
+
+### El bug
+El SDK encola un frame `start` apenas se crea el stream (`ai/dist/index.js:7359`, en el `start()`
+del ReadableStream que alimenta `baseStream`), y `toUIMessageStream` lo traduce a un frame SSE
+inmediato (`:8534-8542`, con `sendStart` default true en `:8321`). O sea: llega al borde ANTES de
+que el modelo haya generado nada.
+
+El watchdog del borde opera sobre `Uint8Array`. Veia ese byte, lo tomaba como "ya llego el primer
+chunk" y **cambiaba de la ventana inicial (12000ms) a la corta (3000ms)**. Despues Vertex tardaba
+en el primer token y el watchdog mataba una respuesta que el modelo estaba generando bien.
+
+Log del turno que se corto:
+```
+18:27:44.762  beforeStreamResponse
+18:27:47.767  chat.watchdog_fired  chunks: 1  elapsedMs: 3005  assistantTextLength: 0
+18:27:52.804  provider.stream_chunks  reason:"natural"  finishReason:"stop"
+              finishOutputTokens: 351  chunk_text_delta: 2
+```
+`chunks: 1` con `assistantTextLength: 0` = el unico chunk que habia pasado era el `start`. El
+modelo termino igual, natural, con **351 tokens de salida**, 5 segundos DESPUES de que lo
+cortaramos.
+
+**Y no era un bug de un camino puntual.** El turno "sano" de la misma sesion tenia `gapMs: 2969`
+contra una ventana de 3000: **zafo por 31 milisegundos**. Era una moneda al aire en CADA turno,
+que sale mal cada vez que Vertex tarda.
+
+Corolario: la respuesta que el usuario pedia (una confirmacion tras "que me contacten") **ya
+existia** - eran esos 351 tokens. El modelo siempre hizo lo correcto; lo cortabamos nosotros. No
+hizo falta agregar ningun tool ni tocar el prompt.
+
+### El discriminador (verificado antes de cablear)
+`onChunk` se invoca UNICAMENTE para chunks reales del modelo - `text-delta`, `reasoning-delta`,
+`source`, `tool-call`, `tool-result`, `tool-input-start`, `tool-input-delta`, `raw`
+(`ai/dist/index.js:7105-7106`) - y **nunca** para `start`, `start-step`, `finish-step` ni `finish`.
+Es la unica senal disponible que separa transporte de contenido. La parada obligatoria #1 no se
+disparo.
+
+### El fix: separar dos cosas que estaban mezcladas
+| | Que la dispara | Que hace |
+|---|---|---|
+| Reset del timer | cualquier byte que pase por el transform | reinicia la cuenta regresiva |
+| Seleccion de ventana | `markContent()` (senal explicita de contenido) | pasa a la ventana corta |
+
+Antes los bytes hacian las dos cosas. Ahora hacen solo la primera.
+
+- `streamWatchdog.ts`: metodo nuevo **`markContent()`**; el flag interno pasa de `hasFirstChunk`
+  (bytes) a `hasContent` (contenido real). El `transform` sigue reseteando el timer con cada byte
+  pero ya NO toca la ventana. El flag sigue siendo POR STEP: `beginStep()` lo vuelve a `false`.
+  `resume()` no lo pisa (era el bug de WATCHDOG-3, ahora con el flag nuevo).
+- `handleChatRequest.ts`: `watchdogRef.current?.markContent()` como primera linea del `onChunk`
+  que ya existia. Si el watchdog aun no esta en el ref, es no-op seguro (optional chaining).
+- `markContent()` es idempotente y barato: cuenta siempre (telemetria) pero solo cambia la ventana
+  y re-arma la primera vez.
+
+**Las constantes NO cambian.** `INITIAL_IDLE_MS = 12000` y `IDLE_MS = 3000` estaban bien: el peor
+caso medido a primer token fue ~8s, que entra con margen en 12s. Con el fix, esa es la ventana que
+realmente aplica.
+
+### Telemetria: que la proxima vez el log lo diga solo
+`chat.watchdog_fired` (y el `watchdog_settled` del probe) ahora llevan:
+- **`window`**: `initial` | `content` - que ventana estaba activa al disparar;
+- **`contentChunks`**: chunks de contenido REAL, distinto del `chunks` de bytes.
+
+Con esos dos campos el diagnostico habria sido inmediato: `window:"content"` con
+`contentChunks: 0` es una contradiccion evidente.
+
+### Tests
+`stream-watchdog.invariant.ts` pasa de 19 a 25 bloques. Los nuevos: (20) el caso EXACTO del bug -
+un byte que no es contenido + silencio entre `idleMs` e `initialIdleMs` -> NO dispara y la
+respuesta llega completa; (21) bytes sin `markContent()` jamas -> dispara recien a `initialIdleMs`
+con `window:'initial'` y `contentChunks: 0`; (22) `markContent()` idempotente (N llamadas, UN
+timer, un cambio de ventana, pero el contador cuenta N); (23) `beginStep()` vuelve a la ventana
+larga aunque el step previo tuvo contenido; (24 y 25) `suspend()`/`resume()` no pisan el estado de
+ventana en NINGUNA de las dos direcciones.
+
+Se actualizo el bloque 11, que pinneaba la semantica vieja (mandaba un byte y esperaba el switch
+de ventana) - o sea, pinneaba el bug. Ahora el switch lo dispara `markContent()`.
+
+### Verificacion falla-primero
+Se reintrodujo `hasContent = true` en el `transform` (que los bytes vuelvan a elegir la ventana) y
+el test **fallo en el bloque 20**: "un byte sin contenido NO acorta la ventana: no dispara - 1 !== 0".
+Restaurado, los 25 bloques pasan.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 3 archivos: 0 errores, 0 warnings.
+- `test:watchdog` (25 bloques) + emptyfallback, providerclose, deadline, onf1, infra1, infra2,
+  c02, cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `reconcile.ts`, `providerStreamClose.ts`, `persistTurn`, `StreamingMarkdown.tsx`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. **Cero tools nuevos, cero cambios al prompt** -
+  el modelo ya generaba la respuesta correcta. Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) nombre y telefono -> capturar el lead -> **elegir "Que me
+contacten"** -> el bot responde con la confirmacion; (2) la opcion de WhatsApp sigue andando;
+(3) `chat.watchdog_fired` NO aparece en turnos sanos - y si aparece, `window` y `contentChunks`
+dicen por que; (4) `step_count > 0` y `costUsd != 0` se mantienen; (5) la latencia de cierre sigue
+baja en turnos rapidos (la ventana larga solo aplica hasta el primer chunk de contenido, no
+deberia penalizar el camino sano).
+
+---

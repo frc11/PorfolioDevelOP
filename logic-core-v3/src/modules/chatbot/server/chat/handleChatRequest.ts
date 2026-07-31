@@ -1825,6 +1825,16 @@ export async function handleChatRequest(
       })
     },
     onChunk: ({ chunk }) => {
+      // WATCHDOG-4 — LA señal de "el modelo empezó a responder de verdad".
+      // El SDK invoca `onChunk` SOLO para chunks reales del modelo (text-delta,
+      // reasoning-delta, source, tool-call, tool-result, tool-input-*, raw —
+      // ai/dist/index.js:7105) y NUNCA para `start`/`start-step`/`finish-step`/
+      // `finish`. El watchdog del borde opera sobre BYTES y no puede
+      // distinguirlos: veía el frame `start` del SDK (encolado apenas se crea el
+      // stream, antes de que el modelo genere nada) y se pasaba a la ventana
+      // corta, matando respuestas que Vertex tardaba en arrancar. Con esto la
+      // ventana la decide el contenido, no el transporte.
+      watchdogRef.current?.markContent()
       // Capture timestamp of the first useful chunk (text or tool-call).
       // Other chunk types (reasoning-delta, raw, etc.) don't count as TTFB.
       if (
@@ -2058,6 +2068,11 @@ export async function handleChatRequest(
             botSlug: slug,
             reason: info.reason,
             chunks: info.chunks,
+            // WATCHDOG-4 — los dos campos que habrían hecho este diagnóstico
+            // inmediato: `window: "content"` con `contentChunks: 0` es una
+            // contradicción evidente (el transporte arrancó, el modelo no).
+            contentChunks: info.contentChunks,
+            window: info.window,
             elapsedMs: info.elapsedMs,
             lastGapMs: info.lastGapMs,
             assistantTextLength: accumulatedAssistantText.length,
@@ -2075,6 +2090,8 @@ export async function handleChatRequest(
       streamProbe.mark('watchdog_settled', {
         reason: info.reason,
         chunks: info.chunks,
+        contentChunks: info.contentChunks,
+        window: info.window,
         elapsedMs: info.elapsedMs,
         lastGapMs: info.lastGapMs,
       })

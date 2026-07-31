@@ -92,6 +92,37 @@
  * watchdog sigue suspendido, `armTimer` ya no arma nada (ver su guard), y
  * cuando `resume()` llegue después va a usar el `hasFirstChunk` que
  * `beginStep()` dejó en `false` — mismo resultado, sin importar el orden.
+ *
+ * WATCHDOG-4 — la ventana la decide el CONTENIDO, no los bytes.
+ *
+ * EL BUG: este transform opera sobre bytes (`Uint8Array`), y el SDK encola un
+ * frame `start` apenas se crea el stream (`ai/dist/index.js:7359`), que
+ * `toUIMessageStream` traduce a un frame SSE inmediato (`:8534-8542`) — **antes
+ * de que el modelo haya generado nada**. La versión anterior tomaba ese byte
+ * como "ya llegó el primer chunk" y se pasaba a la ventana CORTA. Después
+ * Vertex tardaba en el primer token y el watchdog mataba una respuesta que el
+ * modelo estaba generando bien.
+ *
+ * Medido en prod, en un turno que se cortó: `chunks: 1` con
+ * `assistantTextLength: 0` al disparar a los 3005ms — el único chunk que había
+ * pasado era el `start`. El modelo terminó igual, natural, con 351 tokens de
+ * salida y `finishReason: "stop"`... 5 segundos después de que lo cortáramos. Y
+ * el turno "sano" de la misma sesión tenía `gapMs: 2969` contra una ventana de
+ * 3000: **zafó por 31ms**. No era un bug de un camino puntual, era una moneda
+ * al aire en CADA turno.
+ *
+ * LA SEPARACIÓN QUE INTRODUCE: hoy los bytes hacían dos cosas a la vez.
+ *   - RESETEAR EL TIMER  ← lo siguen haciendo (cualquier byte cuenta como
+ *     actividad del transporte, y eso está bien);
+ *   - ELEGIR LA VENTANA  ← ya NO. Eso ahora lo decide `markContent()`, que el
+ *     llamador invoca desde el `onChunk` de `streamText`.
+ *
+ * Por qué `onChunk` es el discriminador correcto: el SDK lo invoca ÚNICAMENTE
+ * para chunks reales del modelo — `text-delta`, `reasoning-delta`, `source`,
+ * `tool-call`, `tool-result`, `tool-input-*`, `raw` (`ai/dist/index.js:7105`) —
+ * y NUNCA para `start`, `start-step`, `finish-step` ni `finish`. Es la única
+ * señal disponible que distingue "empezó a fluir el transporte" de "empezó a
+ * responder el modelo".
  */
 
 /** Por qué se resolvió el watchdog. Solo `idle` significa que actuó. */
@@ -100,10 +131,30 @@ export type StreamWatchdogReason =
   | 'closed' // el upstream cerró normal (camino sano) — el timer se limpia
   | 'cancelled' // el consumidor (cliente) cortó la conexión
 
+/**
+ * WATCHDOG-4 — Qué ventana estaba activa. `initial` = todavía esperando el
+ * primer contenido REAL del modelo (ventana larga, cold start). `content` = ya
+ * llegó contenido y aplica la ventana corta.
+ */
+export type StreamWatchdogWindow = 'initial' | 'content'
+
 export interface StreamWatchdogEvent {
   reason: StreamWatchdogReason
-  /** Chunks que pasaron por el borde. NUNCA su contenido. */
+  /**
+   * Chunks de BYTES que pasaron por el borde. Incluye frames estructurales del
+   * SDK (`start`, `finish-step`…), así que NO implica contenido del modelo.
+   * NUNCA su contenido.
+   */
   chunks: number
+  /**
+   * WATCHDOG-4 — Chunks de CONTENIDO real del modelo (los que el SDK pasa a
+   * `onChunk`), acumulados en todo el stream. Es el contador que distingue
+   * "el transporte arrancó" de "el modelo respondió": un disparo con
+   * `window: 'content'` y `contentChunks: 0` sería una contradicción evidente.
+   */
+  contentChunks: number
+  /** WATCHDOG-4 — Ventana activa al momento del evento. */
+  window: StreamWatchdogWindow
   /** Desde que se creó el watchdog (≈ desde que se devolvió la respuesta). */
   elapsedMs: number
   /** Silencio acumulado hasta este evento. */
@@ -111,13 +162,16 @@ export interface StreamWatchdogEvent {
 }
 
 export interface StreamWatchdogOptions {
-  /** Silencio máximo tolerado UNA VEZ que empezó a fluir el primer chunk. */
+  /**
+   * Silencio máximo tolerado una vez que llegó CONTENIDO real del modelo
+   * (o sea, tras el primer `markContent()`) — no desde el primer byte.
+   */
   idleMs: number
   /**
-   * Silencio máximo tolerado ANTES del primer chunk (cold start del provider).
-   * Casi siempre más largo que `idleMs`. Default: `idleMs` (mismo
-   * comportamiento que la versión de una sola ventana, para no romper otros
-   * callers si alguna vez aparecen).
+   * Silencio máximo tolerado ANTES del primer contenido real del modelo (cold
+   * start del provider). Casi siempre más largo que `idleMs`. Default: `idleMs`
+   * (mismo comportamiento que la versión de una sola ventana, para no romper
+   * otros callers si alguna vez aparecen).
    */
   initialIdleMs?: number
   /**
@@ -140,20 +194,34 @@ export interface StreamWatchdogController {
   /** Desarma el timer. Ningún chunk lo re-arma mientras esté suspendido. */
   suspend(): void
   /**
-   * Re-arma el timer. Usa la ventana que corresponda según el estado ACTUAL de
-   * "¿ya llegó el primer chunk de este step?" — ya no lo asume. Ver
-   * `beginStep()`, que es quien controla ese estado.
+   * Re-arma el timer. Usa la ventana que corresponda según el estado ACTUAL —
+   * ya no lo asume (fue el bug de WATCHDOG-3). Quienes controlan ese estado son
+   * `beginStep()` y `markContent()`; `resume()` solo re-arma con lo que haya.
    */
   resume(): void
   /**
    * WATCHDOG-3 — Llamar al ARRANCAR CADA STEP (cableado a
    * `experimental_onStepStart`), incluido el primero. Resetea el watchdog al
-   * estado "esperando el primer chunk" y rearma con `initialIdleMs` — el
-   * arranque en frío del provider es una propiedad de CADA step, no del stream
-   * completo. No-op mientras esté suspendido (no pisa una suspensión activa) y
-   * es idempotente: llamarlo dos veces seguidas no duplica timers.
+   * estado "esperando contenido" y rearma con `initialIdleMs` — el arranque en
+   * frío del provider es una propiedad de CADA step, no del stream completo.
+   * No-op mientras esté suspendido (no pisa una suspensión activa) y es
+   * idempotente: llamarlo dos veces seguidas no duplica timers.
    */
   beginStep(): void
+  /**
+   * WATCHDOG-4 — Llamar cuando llega CONTENIDO REAL del modelo (cableado al
+   * `onChunk` de `streamText`, que el SDK invoca solo para chunks del modelo y
+   * nunca para frames estructurales — ver el encabezado del archivo). Pasa a la
+   * ventana corta `idleMs`.
+   *
+   * Los BYTES ya no eligen la ventana: el frame `start` del SDK llega antes de
+   * que el modelo genere nada, y tomarlo como "primer chunk" cortaba respuestas
+   * sanas. Esta es la única señal que distingue transporte de contenido.
+   *
+   * Idempotente y barata: se invoca por cada chunk, pero después del primero
+   * solo incrementa el contador de telemetría.
+   */
+  markContent(): void
 }
 
 /**
@@ -183,8 +251,16 @@ export function createStreamWatchdog({
   let lastChunkAt = startedAt
   /** El watchdog ya se resolvió por algún camino: no vuelve a actuar. */
   let settled = false
-  /** `false` = todavía no llegó ningún chunk → usar `initialIdleMs`. */
-  let hasFirstChunk = false
+  /**
+   * WATCHDOG-4 — `false` = todavía no llegó CONTENIDO real del modelo en este
+   * step → aplica `initialIdleMs`. Lo levanta SOLO `markContent()`; los bytes
+   * que pasan por el transform ya NO lo tocan (el frame `start` del SDK es un
+   * byte que no es contenido, y tomarlo como tal cortaba respuestas sanas).
+   * Es POR STEP: `beginStep()` lo vuelve a `false`.
+   */
+  let hasContent = false
+  /** WATCHDOG-4 — Chunks de contenido real, acumulados. Solo telemetría. */
+  let contentChunks = 0
   /** Suspendido por el llamador (tool en vuelo): ningún timer se arma. */
   let suspended = false
   let timer: ReturnType<typeof setTimeout> | undefined
@@ -209,6 +285,8 @@ export function createStreamWatchdog({
     onEvent?.({
       reason,
       chunks,
+      contentChunks,
+      window: hasContent ? 'content' : 'initial',
       elapsedMs: now - startedAt,
       lastGapMs: now - lastChunkAt,
     })
@@ -258,7 +336,7 @@ export function createStreamWatchdog({
     timer = setTimeout(() => {
       // `fireIdle` atrapa todo internamente, así que esta promesa nunca rechaza.
       void fireIdle(controller)
-    }, hasFirstChunk ? idleMs : initialIdleMs)
+    }, hasContent ? idleMs : initialIdleMs)
   }
 
   // Se declara como variable tipada (no como literal inline) para que
@@ -277,11 +355,10 @@ export function createStreamWatchdog({
       controller.enqueue(chunk)
       chunks += 1
       lastChunkAt = Date.now()
-      hasFirstChunk = true
-      // Si ya estamos comprometidos a cerrar (persistiendo), no re-armamos: el
-      // chunk sale igual, pero la decisión de cerrar no se revierte. La carrera
-      // es remotísima (el stream lleva `idleMs` mudo) y preferimos un cierre
-      // determinista a un watchdog que se pueda posponer indefinidamente.
+      // WATCHDOG-4 — Un byte cuenta como ACTIVIDAD (resetea el timer) pero NO
+      // elige la ventana. El frame `start` del SDK llega antes de que el modelo
+      // genere nada; tomarlo como "ya hay contenido" pasaba a la ventana corta
+      // y mataba respuestas sanas. La ventana la decide `markContent()`.
       if (settled) return
       armTimer(controller)
     },
@@ -319,21 +396,35 @@ export function createStreamWatchdog({
     resume() {
       if (settled || !activeController) return
       suspended = false
-      // WATCHDOG-3 — YA NO fuerza `hasFirstChunk = true`. Esa suposición
-      // ("reanudar pasa a mitad del stream") es la que causaba el bug: cuando
-      // un tool termina, lo que sigue casi siempre es un STEP NUEVO (su propio
-      // arranque en frío), no una continuación del mismo texto. Quien decide
-      // la ventana ahora es `beginStep()` — acá solo se re-arma con lo que haya.
+      // WATCHDOG-3 — NO toca el estado de ventana. Esa suposición ("reanudar
+      // pasa a mitad del stream", que forzaba la ventana corta) fue el bug de
+      // aquel sprint: cuando un tool termina, lo que sigue casi siempre es un
+      // STEP NUEVO con su propio arranque en frío. Quienes deciden la ventana
+      // son `beginStep()` y `markContent()`; acá solo se re-arma con lo que haya.
       armTimer(activeController)
     },
     beginStep() {
       if (settled || !activeController) return
-      // Resetea el estado a "esperando el primer chunk DE ESTE STEP". Si el
-      // watchdog sigue suspendido (no debería, en el orden real, pero es
+      // Vuelve al estado "esperando CONTENIDO de este step" → ventana larga. Si
+      // el watchdog sigue suspendido (no debería, en el orden real, pero es
       // defensivo ante cualquier orden), `armTimer` no arma nada — respeta la
       // suspensión — y este `false` queda listo para cuando `resume()` corra.
-      hasFirstChunk = false
+      hasContent = false
       armTimer(activeController)
+    },
+    markContent() {
+      if (settled) return
+      // El contador es telemetría pura y cuenta TODAS las llamadas.
+      contentChunks += 1
+      // El cambio de ventana ocurre una sola vez por step: a partir del segundo
+      // chunk esto es un no-op barato (se invoca por cada chunk del modelo).
+      if (hasContent) return
+      hasContent = true
+      // Re-armar con la ventana corta ya. No depende del orden respecto de los
+      // bytes: `onChunk` corre aguas arriba del borde, así que normalmente esto
+      // llega antes que el byte correspondiente — y si llegara después, el
+      // `armTimer` del transform ya habría usado la ventana correcta igual.
+      if (activeController) armTimer(activeController)
     },
   }
 }
