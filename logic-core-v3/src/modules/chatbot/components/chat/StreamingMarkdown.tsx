@@ -148,16 +148,23 @@ function StreamingMarkdownImpl({
       className={
         // Cursor de tipeo — el caret es el ÚLTIMO hijo de este div cuando se
         // muestra, y react-markdown renderiza el markdown como elemento(s) de
-        // bloque (típicamente un <p>) DIRECTOS del div, sin wrapper propio. Sin
-        // esto, el caret (aunque sea `inline-block`) arranca en una línea nueva
-        // porque el bloque que lo precede fuerza el corte. `:nth-last-child(2)`
-        // es justamente ESE bloque — el que está inmediatamente antes del caret,
-        // sea el único párrafo o el último de varios — y volverlo `inline` lo
-        // fusiona en el mismo renglón que el texto que se está revelando. Solo
-        // mientras se muestra el caret: los mensajes históricos (sin caret)
-        // quedan con el layout de bloque normal de `prose`, sin tocar nada.
+        // bloque DIRECTOS del div, sin wrapper propio. Sin esto, el caret
+        // (aunque sea `inline-block`) arranca en una línea nueva porque el
+        // bloque que lo precede fuerza el corte. `:nth-last-child(2)` es
+        // justamente ESE bloque — el que está inmediatamente antes del caret —
+        // y volverlo `inline` lo fusiona en el mismo renglón que el texto que
+        // se está revelando.
+        //
+        // Acotado a `p` a propósito: cuando el último bloque es una LISTA,
+        // ponerla `inline` colapsa las viñetas y se ve desalineada y apretada
+        // mientras streamea (se acomodaba sola recién al terminar). Lo mismo
+        // valdría para bloques de código o tablas. Con esos, el caret cae
+        // abajo — feo pero legible — en vez de romper el bloque.
+        //
+        // Solo mientras se muestra el caret: los mensajes históricos (sin
+        // caret) quedan con el layout de bloque normal de `prose`, sin tocar.
         showCaret
-          ? 'prose prose-invert prose-sm max-w-none [&>*:nth-last-child(2)]:inline'
+          ? 'prose prose-invert prose-sm max-w-none [&>p:nth-last-child(2)]:inline'
           : 'prose prose-invert prose-sm max-w-none'
       }
     >
