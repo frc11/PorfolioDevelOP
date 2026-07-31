@@ -1657,3 +1657,244 @@ Modificados: `src/components/layout/Hero.tsx` · `src/components/layout/HeroCanv
 Creados: `src/components/layout/HeroArtifactLayer.tsx` · `src/lib/whatsapp.ts`
 
 Borrado: `src/components/layout/EarlyScrollLock.tsx`
+
+---
+
+## B2-S2 — Purga y navegación · 2026-07-31
+
+Commit: `refactor(home): purga del intro, el 3D y la navegación vieja`
+Rama: `redesign/home` (desde `0e4c9b0`, el commit de B2-S1). `package-lock.json`
+no se movió — no hizo falta `npm install`.
+
+Cierra el bloque B2. Se detiene acá: B3 necesita los datos publicables del caso
+Concesionaria, que todavía no existen en ningún documento del proyecto.
+
+### T1 — Bifurcación del intro y navegación por hash
+
+**La bifurcación quedó bien.** Verificado en build de producción servida:
+`/` no corre ningún intro y el scroll está libre desde el primer frame
+(`overflow: visible` en `<html>` y `<body>`, cero estilos inline, `scrollTo(0,600)`
+responde). `/web-development` sigue con su intro completo — trazado del logo,
+relleno y lockup "CONSTRUIMOS LO QUE IMAGINAS" — y las 3 rutas de auth siguen
+renderizando (`/login` con su canvas de `DotMatrix` y su formulario).
+
+**La navegación por hash en carga fría NO quedó arreglada, y la causa no era el
+preloader.** Este era el criterio de éxito de T1 y hay que reportarlo derecho.
+Se encontraron tres causas, con medición:
+
+1. **`SmoothScroll.tsx` forzaba el home a scroll 0 en cada carga.** Dos llamadas
+   (`window.scrollTo(0,0)` y `lenis.scrollTo(0)`) cuyo comentario decía
+   explícitamente que existían "para que el preloader tape la posición correcta y
+   el slot del logo del hero se mida desde 0". B2-S1 borró esa coreografía; lo
+   único que seguían haciendo era pisar el scroll nativo al hash. **Corregido**:
+   se saltean cuando la URL trae ancla, se conservan para la entrada sin ancla.
+2. **Las secciones destino no existen cuando el navegador resuelve el hash.**
+   `app/page.tsx` las monta con `next/dynamic` + placeholder. Medido en producción:
+   el documento arranca en **16.823px** y llega a **21.561px** una vez que todo
+   montó — `#portfolio` es un placeholder de 0px de alto en el instante del salto,
+   así que no hay caja a la que ir. A los 7s de una carga limpia siguen los 7
+   placeholders puestos: montan recién al acercarse con scroll.
+3. **`#nosotros` está declarado dos veces** (variante mobile y desktop de
+   `About.tsx`). `getElementById` devuelve la primera, que en desktop está en
+   `display:none`.
+
+(2) y (3) son del terreno que B3/B4 rediseña — el brief dice que las anclas se
+remapean ahí. No se tocaron.
+
+**Un intento descartado, anotado para que no se repita.** Se escribió un helper de
+~90 líneas en `SmoothScroll` que reintentaba por `requestAnimationFrame` hasta que
+el destino tuviera caja, eligiendo entre ids duplicados el que renderiza. **No
+aterrizaba de forma reproducible** (el destino no aparece si no se scrollea hacia
+él: es circular) y le peleaba el control a Lenis. Se revirtió entero. Queda el
+diagnóstico escrito en el comentario de `SmoothScroll.tsx`. La conclusión: el
+arreglo real no es reintentar el scroll, es que el destino tenga caja cuando el
+hash se resuelve.
+
+**Nota de método — una medición contaminada.** Durante la verificación se
+rebuildeó con la página abierta en el navegador. Eso invalida los nombres
+hasheados de los chunks y la página viva empieza a tirar `ChunkLoadError`, cae en
+el error boundary y deja los boundaries de streaming de React colgados. Varias
+mediciones intermedias de esta sesión salieron de ese estado y fueron descartadas;
+las que quedan en esta bitácora se rehicieron sobre servidor reiniciado y pestaña
+nueva, sin rebuilds en el medio. **Regla: no rebuildear con la pestaña de
+verificación abierta.**
+
+### T2 — Purga
+
+Borrados tras verificar cero importadores archivo por archivo (**91,5 KB** de
+fuente):
+
+| Archivo | Motivo |
+|---|---|
+| `sections/home/PortalDemo.tsx` (63,5 KB) | huérfano; el vivo es `sections/portal-demo/PortalDemo.tsx` |
+| `sections/AIBentoGrid.tsx` (16,2 KB) | huérfano |
+| `ui/buttons/MagneticCta.tsx` (7 KB) | lo reemplazó `CtaButton` en B2-S1 |
+| `ui/TypewriterText.tsx` (2,6 KB) | su único consumidor era `AIBentoGrid` |
+| `lib/home-routes.ts` (1,4 KB) | gate del intro del home, muerto desde B2-S1 |
+| `layout/SectionTransition.tsx` (0,7 KB) | huérfano autodocumentado |
+| `layout/DynamicDock.tsx` | lo reemplaza la barra nueva (ver T3) |
+
+**Desconectados, no borrados.** `CustomCursor` y `NoiseOverlay` salieron de
+`layout.tsx`. Eran las dos únicas piezas montadas globalmente (fuera de
+`PublicOnlyComponents`), así que sacarlas de ahí las saca de todas las
+superficies. Los dos contradicen la dirección: el cursor custom está prohibido —y
+además escondía el del sistema con un `cursor:none` global en ≥768px, un costo de
+accesibilidad por un adorno— y el grano animado corría a `steps(10)` infinito
+sobre todo el viewport, en toda ruta, sin gate de visibilidad. Verificado después:
+`/login` reporta `cursor: auto`, el nativo volvió. Los archivos quedan sin
+consumidores.
+
+`DotMatrix.tsx` no se tocó — ya lo había desconectado del home B2-S1, y lo siguen
+usando `/login`, `/forgot-password` y `/accept-invite`.
+
+`PreloaderProvider` sigue inerte: nadie llama `usePreloader()` (verificado, solo
+quedan su definición y un comentario). Es frozen, no se tocó.
+
+**HDRI**: `public/hdri/studio_small_03_1k.hdr` se sirve desde el propio origen
+(`/hdri/...`), no desde `githubusercontent`. La única mención a ese dominio en
+`HeroCanvas.tsx` es el comentario que explica por qué se self-hosteó.
+
+### T3 — Navegación
+
+`Navbar` + `DynamicDock` se reemplazaron por **una barra superior plana**, en un
+solo archivo (`Navbar.tsx`); el dock se borró.
+
+**Por qué arriba y no abajo — resuelve por posición dos bugs medidos**, no es
+preferencia:
+
+- A 390px el launcher del chat cubría por completo el botón del menú. Su z-index
+  es `2.147.000.100`, así que no había forma de ganarle apilando. **Medido
+  ahora**: botón del menú en `y 15–49`, launcher en `y 804–860` — **755px de
+  separación, cero solape**. (Antes: botón `318–366 × 772–820`, launcher
+  `310–366 × 764–820`.)
+- El microcopy del hero caía debajo del dock flotante. Sin chrome fijo abajo la
+  colisión no puede existir.
+
+**Qué se fue con el dock**: el glassmorphism (`blur(48px) saturate(180%)`), los
+radios y píldoras, los 7 iconos de Lucide (la flecha del `CtaButton` es el único
+icono del sistema; las anclas son texto y el disparador del menú dice "Menú"), las
+dos animaciones infinitas (shimmer del CTA y latido del logo), `getLightLevel()`
+—la heurística de luz por umbrales de scroll que el dock reimplementaba al margen
+de `ThemeContext`— y los **dos listeners de scroll sin coordinar** (Framer
+`useScroll` en `Navbar` + `addEventListener` nativo en el dock). La barra es
+chrome: va siempre en tema oscuro vía `data-ds-theme`, el mismo mecanismo de
+`SectionShell`, y es persistente (no se esconde al scrollear).
+
+**Qué se conservó**: los `id` de destino, `triggerTransition()` para toda
+navegación interna, el revelado en lockstep con el widget de chat
+(`useChromeRevealed` + tokens de `chromeReveal`), el menú mobile con su submenú de
+servicios, y el acceso al portal. El observador de sección activa ahora mira
+**solo los destinos del nav** en vez de todo `section[id], div[id]` del documento.
+
+**Dos correcciones de calidad en el archivo nuevo** (en archivos que el sprint
+reescribe el objetivo es cero hallazgos): el hash se lee con `useSyncExternalStore`
+en vez de espejarlo a `useState` desde un efecto —de paso la barra ahora reacciona
+a `hashchange`, cosa que antes no hacía— y el reseteo al cambiar de ruta se hace
+ajustando estado durante el render, el patrón que documenta React, en vez de un
+efecto que pinta un frame con el menú de la ruta anterior abierto.
+
+**Agregados al sistema, no inline**: `--spacing-ds-nav` (alto de la barra; lo
+consumen la barra y el `scroll-padding-top` del `<html>`, que si no toda ancla
+aterriza tapada) y la densidad `compact` del `CtaButton` (tamaño `ds-compact` en
+`ui/Button`), expuesta en `/styleguide`.
+
+### T4 — WhatsApp
+
+Migrados **15 call-sites** en 13 archivos a `src/lib/whatsapp.ts`. Se agregó
+`getWhatsappDigits()` porque `/contact` arma además un `tel:` con el mismo número.
+
+**Verificado byte a byte, no afirmado**: se comparó el href viejo (el literal que
+estaba en el fuente) contra el nuevo para los 12 casos representativos →
+**12/12 idénticos**. El único que cambia bytes es `CalculadoraAutomation`, que
+tenía una `é` sin codificar en el querystring; el texto decodificado que recibe
+WhatsApp es el mismo (es un arreglo, no un cambio).
+
+De paso se cerraron **seis** call-sites que servían `https://wa.me/undefined` si
+faltaba la variable de entorno (`WebDevelopmentTimeline`, `VaultIA`,
+`PricingSection`, `CalculadoraAutomation`, y los dos de `ShowcaseSoftware`, que no
+estaban en el censo de B2-S1 porque no tenían literal de fallback que grepear).
+
+**Uno NO se migró, a propósito**: `components/ia/CalculadorIA.tsx:316` tiene
+`5493815674738` hardcodeado y **no lee la variable de entorno**. Es el único punto
+del sitio que hoy sirve un número realmente distinto, no un fallback muerto —
+unificarlo cambiaría el destino que se sirve en producción. Queda como está,
+reportado para que lo decida una persona.
+
+### Verificación (medida, no afirmada)
+
+- `npm run build` verde · `tsc --noEmit`: **1 error, el preexistente y ajeno** de
+  `searchconsole.ts` (conflicto `googleapis`/`google-gax`) · eslint: **0 nuevos**
+  (los 2 que este sprint introdujo en `Navbar.tsx` se corrigieron; los 3 restantes
+  en archivos tocados son preexistentes y ajenos a las líneas migradas).
+- **Scroll libre desde el primer frame** en `/`. El baseline de 9,77s no aplica
+  más: no hay nada que esperar.
+- **Cero mensajes de consola** en carga limpia de `/` (medido con tracking activo
+  y recarga, no afirmado).
+- **390px**: sin desborde horizontal; H1 a 52px en 4 líneas; microcopy visible
+  (bottom 691 de 844); **el canvas 3D no se monta y su chunk `4198` no se pide**.
+- **1440×760**: el microcopy termina en 797 con viewport 760 → queda **37px bajo
+  el borde, sin nada que lo tape**. Antes quedaba 66px por debajo del dock, que sí
+  lo cubría. Mejora, pero no queda holgado: el H1 a 4 líneas no entra en 760px de
+  alto. Si molesta, la palanca es acotar `--text-ds-display-xl`, que es un token
+  del sistema y afecta a todo — por eso no se tocó acá.
+- **Desktop**: el chunk del hero se pide a los 583ms (después del contenido) y el
+  canvas monta a los 769ms.
+- **Detector plano** (`npx impeccable detect`): **51** hallazgos sobre la
+  superficie pública (`app/page.tsx`, `app/contact`, las 4 landings,
+  `components/{layout,design-system,sections,ia,automation,software,ui}`). El
+  baseline dado era 46, pero **el alcance de esa medición no está documentado**,
+  así que los dos números no son directamente comparables. Lo que sí se verificó,
+  hallazgo por hallazgo: **ninguno cae en una línea escrita por este sprint**.
+  `Navbar.tsx`, `Hero.tsx`, `SmoothScroll.tsx`, `SectionShell.tsx` y
+  `CtaButton.tsx` dan **cero**. Los 10 que aparecen en archivos tocados están en
+  líneas lejos de las migradas (p. ej. `CtaIA.tsx:321`, cuando la migración tocó
+  la 6 y la 440). Corrida completa del repo: se abandonó a los 20 minutos sin
+  terminar.
+
+### Fuera de scope, anotado y NO implementado
+
+- **El artefacto 3D no se revela.** En desktop el canvas monta y pinta, pero su
+  capa de fade se queda en `opacity: 0` de forma permanente (medido a lo largo de
+  ~110s): `onReady` nunca llega. Se ve apenas un arco tenue casi negro sobre el
+  fondo oscuro. No se tocó ninguno de los tres archivos involucrados
+  (`HeroArtifactLayer`, `HeroCanvas`, `HeroArtifact` —frozen—): es un defecto de
+  B2-S1, no una regresión de este sprint. **Es lo primero a revisar del bloque.**
+- **Three.js sigue bajando en mobile**, pero ya no por el hero: a 390px el chunk
+  del hero no se pide y aun así entran `bd904a5c` (364 KB) y `b536a0f1` (341 KB).
+  En `/` el único otro consumidor de R3F es el avatar del widget de chat. Si el
+  presupuesto mobile es objetivo, ese avatar es el próximo blanco.
+- **`ShowcaseSection.tsx:580`** tiene un `<Link href="#">` placeholder. No es del
+  home; se reporta y no se toca.
+- **Atributos `data-cursor` inertes** en 6 archivos: sin `CustomCursor` no hacen
+  nada. Limpieza cosmética para cuando se toquen esos archivos.
+- **`CustomCursor.tsx` y `NoiseOverlay.tsx` quedaron sin consumidores.** Se
+  desconectaron, no se borraron (el brief pedía desconectar lo COMPARTIDO). Una
+  poda posterior puede levantarlos.
+
+### Archivos
+
+Modificados: `src/app/layout.tsx` · `src/app/globals.css` · `src/app/contact/page.tsx` ·
+`src/app/styleguide/_components/ComponentStates.tsx` ·
+`src/components/layout/Navbar.tsx` · `src/components/layout/Hero.tsx` ·
+`src/components/layout/SmoothScroll.tsx` · `src/components/ui/Button.tsx` ·
+`src/components/design-system/CtaButton.tsx` ·
+`src/components/design-system/SectionShell.tsx` · `src/hooks/useThemeObserver.tsx` ·
+`src/lib/whatsapp.ts` · `src/lib/chromeReveal.ts` ·
+`src/components/sections/home/Footer.tsx` ·
+`src/components/sections/portal-demo-cta/PortalDemoCTA.tsx` ·
+`src/components/sections/software-development/SoftwareDevelopmentCta.tsx` ·
+`src/components/sections/web-development/WebDevelopmentCta.tsx` ·
+`src/components/sections/web-development/WebDevelopmentTimeline.tsx` ·
+`src/components/sections/web-development/PricingSection.tsx` ·
+`src/components/ia/CtaIA.tsx` · `src/components/ia/VaultIA.tsx` ·
+`src/components/automation/CtaAutomation.tsx` ·
+`src/components/automation/VaultAutomation.tsx` ·
+`src/components/automation/CalculadoraAutomation.tsx` ·
+`src/components/software/DiagnosticoSoftware.tsx` ·
+`src/components/software/ShowcaseSoftware.tsx`
+
+Borrados: `src/components/layout/DynamicDock.tsx` ·
+`src/components/layout/SectionTransition.tsx` ·
+`src/components/sections/home/PortalDemo.tsx` ·
+`src/components/sections/AIBentoGrid.tsx` · `src/components/ui/TypewriterText.tsx` ·
+`src/components/ui/buttons/MagneticCta.tsx` · `src/lib/home-routes.ts`

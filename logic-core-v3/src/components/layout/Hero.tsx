@@ -37,13 +37,21 @@ export function Hero() {
       theme="dark"
       id="inicio"
       // Ritmo vertical propio (`spacing="none"`), no el `py-ds-section`
-      // genérico. Medido: con el genérico el microcopy caía DEBAJO del dock
-      // flotante — a 1440×900 el texto terminaba en 832 y el dock arranca en
-      // 816. El padding inferior reserva el alto del chrome fijo: dock
-      // (`bottom-8`, 52px de alto) y launcher del chat (`bottom` 24px, 56px)
-      // ocupan los ~84px de abajo del viewport.
+      // genérico: el hero reserva el alto del chrome fijo, y el chrome cambió
+      // de borde en B2-S2.
+      //
+      // Arriba: la barra de navegación es fija y opaca, así que su alto
+      // (`--spacing-ds-nav`) es reserva obligatoria — sin ella el eyebrow queda
+      // debajo de la barra. Se suma al aire propio del hero en vez de
+      // reemplazarlo.
+      //
+      // Abajo: ya no hay dock flotante que esquivar (era lo que pisaba el
+      // microcopy). Lo único anclado abajo es el launcher del chat —
+      // `bottom` 24px + 56px de alto = ~80px, y solo en la esquina derecha. La
+      // reserva bajó de `clamp(7rem,16vh,11rem)` a lo que ese launcher pide de
+      // verdad, que le devuelve alto útil al titular en viewports bajos.
       spacing="none"
-      className="flex min-h-[100svh] items-center pt-[clamp(3.5rem,7vh,6rem)] pb-[clamp(7rem,16vh,11rem)]"
+      className="flex min-h-[100svh] items-center pt-[calc(var(--spacing-ds-nav)+clamp(1.5rem,4vh,3.5rem))] pb-[clamp(5rem,9vh,7rem)]"
     >
       <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
         <div className="animate-ds-reveal flex flex-col">

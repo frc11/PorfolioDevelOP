@@ -35,10 +35,36 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
         const isHome = pathname === '/';
 
-        // On the home route, force the page to the top before Lenis initialises
-        // so the preloader overlay covers the correct position and the hero logo
-        // slot is measured from scroll 0.
-        if (isHome) {
+        // Este forzado a scroll 0 existía para que el velo del intro tapara la
+        // posición correcta y el slot del logo del hero se midiera desde 0.
+        // B2-S1 borró esa coreografía: no hay velo ni logo que medir. Lo único
+        // que seguía haciendo era pisar el scroll nativo al hash — el navegador
+        // aterrizaba en la sección y este efecto la devolvía al tope.
+        //
+        // Se conserva para la entrada SIN ancla (que sí debe empezar arriba, y
+        // acompaña a `history.scrollRestoration = 'manual'`) y se saltea cuando
+        // la URL trae un destino.
+        //
+        // ⚠ Esto es NECESARIO pero NO SUFICIENTE para que `/#portfolio`,
+        // `/#nosotros` y `/#servicios` aterricen en carga fría. Quedan dos causas
+        // medidas, las dos fuera del alcance de B2-S2 y ambas en el terreno que
+        // B3/B4 rediseña:
+        //
+        //  1. `app/page.tsx` monta las secciones con `next/dynamic` + placeholder.
+        //     Cuando el navegador resuelve el hash, el destino todavía es un
+        //     placeholder sin caja: no hay a dónde saltar. Medido en build de
+        //     producción — el documento pasa de ~16.200px a ~21.500px a medida
+        //     que las secciones montan.
+        //  2. `#nosotros` está declarado DOS veces (`About.tsx`, variante mobile
+        //     y desktop). `getElementById` devuelve la primera, que en desktop
+        //     está en `display:none` — el navegador apunta a un elemento sin caja.
+        //
+        // Se intentó un reintento por rAF acá y se descartó: no aterrizaba de
+        // forma reproducible y le peleaba el control a Lenis. El arreglo real es
+        // que el destino exista con caja cuando el hash se resuelve.
+        const hasHashTarget = window.location.hash.length > 1;
+
+        if (isHome && !hasHashTarget) {
             window.scrollTo(0, 0);
         }
 
@@ -66,8 +92,10 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
         // Sync Lenis's internal scroll state to 0 for the home route so it
         // agrees with the window.scrollTo(0,0) above (Lenis tracks its own
-        // virtual scroll position independently of the DOM scroll).
-        if (isHome) {
+        // virtual scroll position independently of the DOM scroll). Mismo gate:
+        // con ancla en la URL no hay nada que sincronizar a 0 — Lenis lee la
+        // posición real del documento al construirse.
+        if (isHome && !hasHashTarget) {
             lenis.scrollTo(0, { immediate: true });
         }
 

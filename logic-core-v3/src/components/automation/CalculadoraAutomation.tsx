@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 import {
   ArrowUpRight,
   BarChart3,
@@ -897,7 +898,9 @@ function OdometerSide({
       </div>
 
       <motion.a
-        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20calcular%20el%20ROI%20real%20de%20automatizar%20procesos.%20Estimé%20${resultados.horasAhorradas}%20horas%20recuperables%20al%20mes.`}
+        href={getWhatsappHref(
+          `Hola DevelOP, quiero calcular el ROI real de automatizar procesos. Estimé ${resultados.horasAhorradas} horas recuperables al mes.`
+        )}
         target="_blank"
         rel="noopener noreferrer"
         whileHover={shouldReduceMotion ? {} : { scale: 1.025, y: -2 }}

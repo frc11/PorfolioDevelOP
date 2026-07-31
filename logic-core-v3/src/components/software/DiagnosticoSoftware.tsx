@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 import {
   CheckCircle2,
   ShoppingCart, Stethoscope, Settings, UtensilsCrossed,
@@ -633,9 +634,9 @@ function ResultBody({ resultado }: { resultado: DiagnosticoResult }) {
 
 function ResultCTA({ resultado, onReset }: { resultado: DiagnosticoResult, onReset: () => void }) {
   const [copied, setCopied] = useState(false)
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '543812223344'
-  const whatsappMsg = `Hola DevelOP, hice el diagnóstico y necesito ${resultado.title}`
-  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMsg)}`
+  const whatsappUrl = getWhatsappHref(
+    `Hola DevelOP, hice el diagnóstico y necesito ${resultado.title}`
+  )
 
   async function copyResult() {
     try {
@@ -700,9 +701,9 @@ function ResultPanel({ resultado, onReset }: { resultado: DiagnosticoResult, onR
 }
 
 function PostDiagnosticoCTA({ resultado }: { resultado: DiagnosticoResult }) {
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '543812223344'
-  const waText = `Hola DevelOP, ya complete el diagnóstico y quiero avanzar con ${resultado.title}`
-  const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waText)}`
+  const waUrl = getWhatsappHref(
+    `Hola DevelOP, ya complete el diagnóstico y quiero avanzar con ${resultado.title}`
+  )
 
   return (
     <motion.div

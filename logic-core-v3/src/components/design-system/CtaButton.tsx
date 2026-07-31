@@ -13,6 +13,12 @@ interface CtaButtonProps extends Omit<ButtonOwnProps, 'variant' | 'size' | 'icon
   children: ReactNode
   /** Primario = inversión monocroma con relieve. Secundario = plano. */
   tone?: 'primary' | 'secondary'
+  /**
+   * `default` es el CTA de sección (hero, cierre). `compact` es la densidad de
+   * chrome — el CTA persistente de la barra de navegación. Misma variante y
+   * mismo radio; solo cambia la caja.
+   */
+  density?: 'default' | 'compact'
   /** Flecha final. Es el único icono que admite el sistema. */
   withArrow?: boolean
   /**
@@ -58,6 +64,7 @@ interface CtaButtonProps extends Omit<ButtonOwnProps, 'variant' | 'size' | 'icon
 export function CtaButton({
   children,
   tone = 'primary',
+  density = 'default',
   withArrow = true,
   href,
   target,
@@ -68,6 +75,7 @@ export function CtaButton({
 }: CtaButtonProps) {
   const reduced = useReducedMotion()
   const variant = tone === 'primary' ? 'ds-primary' : 'ds-secondary'
+  const size = density === 'compact' ? 'ds-compact' : 'ds'
 
   const content = (
     <>
@@ -87,7 +95,7 @@ export function CtaButton({
         // destino recibe `window.opener` y puede reescribir la nuestra.
         rel={target === '_blank' ? (rel ?? 'noopener noreferrer') : rel}
         aria-label={ariaLabel}
-        className={buttonClasses({ variant, size: 'ds', className })}
+        className={buttonClasses({ variant, size, className })}
         {...(reduced ? {} : buttonPress)}
       >
         {content}
@@ -98,7 +106,7 @@ export function CtaButton({
   return (
     <Button
       variant={variant}
-      size="ds"
+      size={size}
       className={className}
       aria-label={ariaLabel}
       {...rest}

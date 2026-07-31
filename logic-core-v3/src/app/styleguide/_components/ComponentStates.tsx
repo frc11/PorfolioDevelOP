@@ -143,6 +143,35 @@ export function ComponentStates() {
         </div>
       </div>
 
+      <div>
+        <SgLabel>CtaButton — densidad compacta (chrome)</SgLabel>
+        <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
+          <code className="font-ds-mono">density=&quot;compact&quot;</code> (B2-S2) es el mismo control
+          en la caja del chrome: mismo radio, mismo relieve, misma variante — solo cambia el padding
+          y el tamaño de texto. Existe porque el CTA persistente de la barra de navegación tiene que
+          entrar en sus 64px de alto junto al logo y las anclas; con la densidad de sección la barra
+          se iba a ~72px y el CTA pesaba más que el titular de la página. No es un tamaño nuevo del
+          sistema para usar en secciones: ahí va el <code className="font-ds-mono">default</code>.
+        </p>
+        <div className="flex flex-wrap items-center gap-6">
+          <Specimen label="compacto primario">
+            <CtaButton density="compact" href={getWhatsappHref()} target="_blank">
+              Escribinos
+            </CtaButton>
+          </Specimen>
+          <Specimen label="compacto secundario">
+            <CtaButton density="compact" tone="secondary" href={getWhatsappHref()} target="_blank">
+              Escribinos
+            </CtaButton>
+          </Specimen>
+          <Specimen label="default, para comparar">
+            <CtaButton href={getWhatsappHref()} target="_blank">
+              Escribinos
+            </CtaButton>
+          </Specimen>
+        </div>
+      </div>
+
       <RuleDivider />
 
       {/* ── Piezas tipográficas ──────────────────────────────────────────── */}

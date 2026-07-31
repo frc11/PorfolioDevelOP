@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react'
 import { ArrowRight, Clock3, Gem, ShieldCheck } from 'lucide-react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 function MagneticButton({
     href,
@@ -132,8 +133,6 @@ export default function CtaAutomation() {
     const [isFormShineActive, setIsFormShineActive] = useState(false)
     const [formData, setFormData] = useState({ name: '', whatsapp: '', business: '' })
     const prefersReducedMotion = useReducedMotion()
-
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'
 
     useEffect(() => {
         if (typeof window === 'undefined') return
@@ -439,7 +438,7 @@ export default function CtaAutomation() {
 
                             <div className="mt-6 flex flex-col items-center gap-2.5 sm:mt-7 sm:gap-3">
                                 <MagneticButton
-                                    href={`https://wa.me/${whatsappNumber}?text=Hola%20DevelOP%2C%20quiero%20mapear%20mis%20procesos%20para%20automatizacion`}
+                                    href={getWhatsappHref('Hola DevelOP, quiero mapear mis procesos para automatizacion')}
                                 >
                                     Quiero mi mapeo ahora
                                 </MagneticButton>
@@ -490,7 +489,7 @@ export default function CtaAutomation() {
                                         onSubmit={(e) => {
                                             e.preventDefault()
                                             const text = `Hola develOP, soy ${formData.name} de ${formData.business}. Quiero mapeo gratuito. WhatsApp: ${formData.whatsapp}`
-                                            window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`, '_blank')
+                                            window.open(getWhatsappHref(text), '_blank')
                                         }}
                                         className="rounded-[1.35rem] border border-amber-300/16 bg-black/28 p-4 shadow-[0_0_28px_rgba(245,158,11,0.12)]"
                                     >
