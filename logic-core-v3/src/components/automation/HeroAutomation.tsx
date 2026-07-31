@@ -943,6 +943,7 @@ export default function HeroAutomation() {
 
   return (
     <section
+      id="hero"
       className="automation-hero"
       style={{
         position: 'relative',

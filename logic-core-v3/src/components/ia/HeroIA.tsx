@@ -537,6 +537,7 @@ export default function HeroIA() {
 
     return (
         <section
+            id="hero"
             className="hero-ia-root"
             style={{
                 position: 'relative',
@@ -761,7 +762,7 @@ export default function HeroIA() {
                     }}
                 >
                     <motion.a
-                        href="#live-chat"
+                        href="#demo-ia"
                         whileHover={prefersReduced ? {} : { scale: 1.04 }}
                         whileTap={prefersReduced ? {} : { scale: 0.97 }}
                         transition={{ type: 'spring', stiffness: 400, damping: 15 }}

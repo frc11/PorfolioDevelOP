@@ -1334,3 +1334,136 @@ query). Preexistentes, ajenos a este sprint.
     tiene ningún `repeat: Infinity` sin `shouldSimplify` — los 3 `animate-pulse`/
     `animate-ping` de Tailwind que quedan corriendo son CSS, no Framer, y no eran
     parte del pedido.
+
+---
+
+## B0.8 — Anclas rotas del chatbot y del menú mobile · 2026-07-31
+
+Bugs pre-existentes de navegación, ajenos al rediseño. Un solo objetivo: que ningún
+link del sitio público apunte a un ancla inexistente. Verificado sobre el build de
+producción (`start:qa`, :3001) con Playwright a 390px.
+
+### T1 — Censo completo (verificado contra el código, no contra los probes)
+
+**Chatbot — `navigateToPage.ts` `VALID_PATHS`**
+
+| Destino ofrecido | ¿Existe? | Acción | Runtime |
+|---|---|---|---|
+| `/web-development` · `/ai-implementations` · `/process-automation` · `/software-development` | ✅ rutas | — | ✅ llega |
+| `/#nosotros` | ✅ `About.tsx:411` y `:471` | — | ⚠️ ver nota T4 |
+| `/#portafolio` | ❌ `portafolio` no existe; el id real es `portfolio` (`Portfolio.tsx:726`) | → `/#portfolio` | ⚠️ ver nota T4 |
+| `/#calculadora` | ❌ `calculadora` solo existe en `CalculadoraAutomation.tsx:955`, montado únicamente en `/process-automation` | → `/process-automation#calculadora` | ✅ llega (top −48px) |
+| `/#servicios` | ✅ `OurServices.tsx:9632` | — | ⚠️ ver nota T4 |
+
+**Menú mobile de las 4 landings — `Navbar.tsx` `getNavItems`**
+
+| Landing | Ítem | Ancla vieja | Ancla nueva | Runtime 390px |
+|---|---|---|---|---|
+| las 4 | Inicio | `#hero` ❌ no existía en ningún lado | `#hero` (id **agregado** a los 4 heroes) | ✅ top 0 ×4 |
+| `/process-automation` | Proceso | `#proceso` ✅ `ProcesoAutomation.tsx:832` | sin cambio | ✅ top 0 |
+| `/ai-implementations` | Proceso | `#proceso` ❌ | `#proceso` (id **agregado** a `PipelineIA.tsx:1107`) | ✅ top −48 |
+| `/web-development` | Proceso | `#proceso` ❌ | `#web-development-timeline` (ya existía, `:660`) | ✅ top −48 |
+| `/software-development` | Proceso | `#proceso` ❌ | `#pipeline` (ya existía, `PipelineSoftware.tsx:333`) | ✅ top 0 |
+| las 4 | FAQ | `#faq` ❌ no existía en ningún lado | `#faq` (id **agregado** a las 4 secciones FAQ) | ✅ top −48 ×4 |
+| las 4 | Contacto | `/contact` ✅ | — | ✅ |
+
+**Home — `Navbar.tsx` `MAIN_NAV_ITEMS` y `DynamicDock.tsx` `NAV_ITEMS`**
+`#inicio` (`Hero.tsx:175`), `#nosotros`, `#portfolio`, `#servicios`, `#caracteristicas`
+(`WhyDevelOP.tsx:1629`) y `/contact`: **los 6 existen**. Verificados por menú mobile:
+✅ los 4 probados. `#caracteristicas` aterriza en `top −793` — es el centrado
+deliberado de `TransitionContext:28,41`, no un fallo.
+
+**Footer** (`Footer.tsx:56-61, 352`): solo externos (LinkedIn, Instagram, X, mailto,
+wa.me). Nada roto.
+
+**Hallazgos nuevos, fuera de lo que describían los probes**
+
+| Link | Ancla vieja | Ancla nueva | Runtime |
+|---|---|---|---|
+| `HeroIA.tsx:764` "Proba la IA ahora" | `#live-chat` ❌ no existe | `#demo-ia` (`DemoIA.tsx:711`) | ✅ top −48 |
+| `VaultIA.tsx:392` "Probar la IA primero" | `#live-chat` ❌ | `#demo-ia` | ✅ (mismo selector) |
+| `ProcesoAutomation.tsx:872` "Planificar flujo" | `#contacto` ❌ no existe | `#contacto-form` (`CtaAutomation.tsx:481`) | ✅ en pantalla |
+
+Sobre el último: aterriza en `top 704` y no en `top ≈ 0`, pero **no es un fallo** —
+`scrollY 22949 + viewport 844 = bodyH 23793`: la página ya está en su fondo absoluto
+y el ancla no puede subir más. La sección queda visible.
+
+**Verificados como sanos, sin tocar:** `HeroAutomation.tsx:1412` `#calculadora` ·
+`:1462` `#flujo` · `HeroSoftware.tsx:420` `#diagnostico` · `:460` `#pipeline` ·
+`PainBentoSoftware.tsx:697` `#diagnostico` · los 4 `getElementById('contacto-form')`
+de los CTA (el id existe en las 4 landings).
+
+### T2 / T3 — Qué se corrigió
+
+Regla respetada: **se corrige el link, no el destino.** No se renombró ningún `id`.
+Donde el `id` correcto no existía en ninguna parte pero la sección sí (`#hero` ×4,
+`#faq` ×4, `#proceso` en IA), se frenó y Franco decidió **agregar el id faltante** —
+que no es renombrar: esas secciones no tenían `id`, así que la adición no rompe
+ningún consumidor previo. Nada se quitó del menú: los 4 ítems siguen en las 4 landings.
+
+`getNavItems` pasó a resolver el ancla de "Proceso" por ruta
+(`PROCESO_ANCHOR_BY_ROUTE`), porque en 2 de las 4 landings la sección de proceso ya
+tenía id propio. `HASH_TO_LABEL` sumó las dos entradas nuevas para que el tab activo
+siga marcando.
+
+### T4 — Navegación del widget por recarga completa: RELEVADO, NO APLICADO
+
+`useChatbot.ts:487` hace `window.location.href = path`. **No se tocó.** El bloqueo es
+estructural y está medido:
+
+- `ChatWidgetMount` se monta en `layout.tsx:112`, **fuera** del `<TransitionProvider>`
+  que cierra en `:95`. `useTransitionContext()` dentro del widget tiraría excepción hoy.
+- `TransitionContext.tsx` es frozen: no se puede agregarle un hook opcional.
+- El embed de terceros (`ChatbotEmbed.tsx:401`) ya usa su propio `handleNavigate` por
+  `postMessage`, así que **no** se vería afectado: el único consumidor real de
+  `navigateTo` es `LogicCompanion.tsx:162`.
+
+Opciones y costo:
+1. **Mover `ChatWidgetMount` adentro del provider** — lo mete también dentro de
+   `<SmoothScroll>` (Lenis). Riesgo real sobre un launcher `position: fixed`; exige
+   re-verificar el launcher en las 5 rutas públicas. No es "acotado y de bajo riesgo".
+2. `router.push()` en `LogicCompanion` — evita la recarga sin necesitar el provider,
+   pero viola la regla de `CLAUDE.md` para el sitio público.
+3. Dejarlo (elegido).
+
+**Consecuencia medida, y es peor de lo que decía el probe.** En carga fría de
+`/#hash` (contexto nuevo, `/#hash` como primera navegación), el preloader del home
+resetea el scroll y **el salto nativo al ancla nunca ocurre**: `scrollY = 0` para
+`#nosotros`, `#portfolio` y `#servicios` por igual. O sea: corregir la grafía de
+`/#portafolio` → `/#portfolio` deja el destino **válido** (verificado: aterriza bien
+cuando el scroll no queda pisado — same-document da `top 0`), pero el chatbot va a
+seguir sin aterrizar visiblemente en ninguna ancla del **home** hasta que se resuelva
+T4. Las 4 rutas de servicio y `/process-automation#calculadora` sí funcionan enteras.
+
+Esto **no es una regresión de este sprint**: afecta idénticamente a `#nosotros` y
+`#servicios`, que no se tocaron y que los probes daban por sanos.
+
+### Verificación
+
+- `npm run build` verde · `npx tsc --noEmit` → 0 · `eslint` sobre los 13 archivos → 0
+  nuevos. El único error de eslint (`react-hooks/set-state-in-effect` en `Navbar.tsx`)
+  es **pre-existente**: se reproduce igual en `HEAD:183`, mis cambios solo lo corrieron
+  a `:195`.
+- `npm install` no hizo falta; `package-lock.json` no se movió.
+- Runtime: 20/20 anclas presentes en el HTML de producción (SSR, curl) + click-through
+  real a 390px con Playwright sobre el build de producción.
+- **Errores de consola: 0 nuevos**, medido — no afirmado. Se capturó el set
+  normalizado en `HEAD` (build aparte en :3007) y en la rama: `diff` idéntico
+  (5 entradas pre-existentes: 404s de assets de templates externos y una violación
+  CSP report-only por los iframes de Netlify).
+
+### Nota de método
+
+El pane del preview no compositaba (`rAF` medido en **0 fps**), lo que congela Lenis y
+Framer y habría dado falsos ❌ en toda verificación de scroll. Se midió el rAF antes de
+reportar y se movió la verificación a Playwright headless, que sí compone. A 390px el
+launcher del chatbot se superpone al botón del menú mobile y se come el hit-test: hubo
+que usar `dispatchEvent('click')`. **Esa superposición es un hallazgo pre-existente,
+fuera de scope, sin corregir.**
+
+### Fuera de scope, anotado y no implementado
+
+- `ShowcaseSection.tsx:580` — `<Link href="#">Ver proyecto →</Link>`. No es un ancla
+  rota sino un placeholder sin destino; darle uno es decisión de producto.
+- La superposición launcher del chatbot / botón del menú mobile a 390px.
+- T4 (arriba).

@@ -1106,6 +1106,7 @@ export default function PipelineIA() {
   return (
     <section
       ref={sectionRef}
+      id="proceso"
       style={{
         padding: 'clamp(74px,10vh,112px) clamp(20px,5vw,80px)',
         background: 'transparent',

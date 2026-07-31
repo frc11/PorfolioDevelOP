@@ -389,7 +389,7 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
         </motion.a>
 
         <motion.a
-          href="#live-chat"
+          href="#demo-ia"
           whileHover={reduced ? {} : { scale: 1.02, borderColor: 'rgba(0,255,136,0.4)' }}
           whileTap={reduced ? {} : { scale: 0.97 }}
           style={{

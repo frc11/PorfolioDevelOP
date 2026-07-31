@@ -204,7 +204,7 @@ export default function FaqIA() {
     const prefersReducedMotion = useReducedMotion()
 
     return (
-        <section className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
+        <section id="faq" className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
