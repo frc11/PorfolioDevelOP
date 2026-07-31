@@ -59,9 +59,15 @@ type Estado = {
 const ESTADOS: Estado[] = [
   { nombre: '01-m1-ficha-vacia', paso: 'm1' },
   { nombre: '02-m1-ficha-cargada', paso: 'm1' },
+  // P4 fusionó m3 dentro de m2 (llevar la ficha a evaluar + registrar el veredicto
+  // son una sola pantalla). Los tres apuntan ahora a m2; los NOMBRES de archivo se
+  // conservan porque el índice de `docs/manual-usuario/galeria/` los referencia.
+  // 03 y 04 quedan fotografiando el MISMO estado (el sembrador les da a los dos
+  // stage FICHA + señal): colapsarlos y renumerar la galería es trabajo del bloque
+  // M0, no de P4.
   { nombre: '03-m2-al-evaluador', paso: 'm2' },
-  { nombre: '04-m3-veredicto-registrar', paso: 'm3' },
-  { nombre: '05-m3-veredicto-descartado', paso: 'm3' },
+  { nombre: '04-m3-veredicto-registrar', paso: 'm2' },
+  { nombre: '05-m3-veredicto-descartado', paso: 'm2' },
   { nombre: '06-m4-opener-pendiente', paso: 'm4' },
   { nombre: '07-m4-opener-enviado', paso: 'm4' },
   { nombre: '08-espera-post-opener', paso: 'espera' },

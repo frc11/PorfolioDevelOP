@@ -2115,3 +2115,149 @@ monolito de la ruta del manual; cualquier cosa de lógica, gates o schema.
 (`canal-seguridad.tsx`) los tiene que ver en preview: es criterio comercial, no algo que un `tsc` en
 verde valide. Los números del perfil conservador (`10/8/3`) son una propuesta del research citado en
 la tarea — Franco los ajusta según el historial real de la cuenta que va a usar el setter.
+
+## Sprint P4 — poda del Panel del Setter: las dos pantallas de evaluación son una — 2026-07-31
+
+**Terreno — se frenó y se preguntó.** Arrancó en `redesign/home`, `3fd3d1d`, sobre el worktree
+principal (no uno dedicado — las otras dos copias están en `chore/auditoria-clean` y `main`, así que
+la rama solo puede vivir acá). **Tres de las cinco condiciones de la Fase 0 no se cumplían** y el
+sprint no arrancó hasta destrabarlas por escrito:
+
+1. **WIP ajeno** — `git status --porcelain` con 11 archivos del rediseño de home (`layout.tsx`,
+   design-system, y los borrados de `SectionTransition`/`AIBentoGrid`/`PortalDemo`/`TypewriterText`/
+   `MagneticCta`/`home-routes.ts`), **cero del setter**. Mismo caso que frenó a P1. Se confirmó que
+   era WIP propio en curso y que siguiera sin tocarlo. **Creció durante la corrida** (aparecieron
+   `contact/page.tsx`, `globals.css`, `Navbar`, `Hero`, `DynamicDock` borrado, `whatsapp.ts`…): otra
+   sesión trabajó sobre este mismo checkout en paralelo, igual que en el PROBE de `:2006`.
+2. **`tsc --noEmit` arrancó en rojo, exit 2** — un error, **ajeno al sprint y al WIP**:
+   `src/lib/searchconsole.ts:119`, dos copias de `google-auth-library` (la de `googleapis` contra la
+   que anida `@google-analytics/data@5.2.2 → google-gax@5.0.7`). El archivo no está tocado por nadie
+   y `package.json` no cambió — la dependencia entró en `68f406d`, hace meses. El PROBE de esta misma
+   mañana y P1 arrancaron los dos en **exit 0** (`:2028`), así que el árbol de `node_modules` se
+   movió después, probablemente por un `npm install` que re-resolvió la anidación. Se acordó
+   **línea base declarada**: ese error y ninguno nuevo. Al cierre: **idéntico, cero errores nuevos**.
+3. **Worktree no dedicado** — ver arriba.
+
+`check:invariants` sí arrancó verde: **17/17, exit 0**.
+
+**El descubrimiento, y la pregunta que decidía el riesgo.** La posición **se DERIVA en cada request,
+no se guarda** — `manual.ts:8-10` lo promete y se verificó: `derivarPantalla` calcula todo desde
+stage + blobs + checklist; **cero `PantallaId` en `prisma/`**; el grep fuera de `manual.ts` solo
+devuelve el `[paso]` de la URL y una prop de UI de `manual-nav.tsx`. El único blob con ids
+persistidos es `progresoJson`, que guarda **`FaseId`** (las 6 fases de Construcción — la lista que
+este sprint tenía prohibido tocar, y no tocó). Por eso la fusión era segura y **no hay leads que
+migrar**: un `m3` guardado en un bookmark cae en `esPantallaId('m3') === false` → `redirect` a la
+actual. De haber estado guardado, era el mismo patrón que vacía progreso en silencio (`:2035`) y el
+sprint se frenaba.
+
+**La fusión.** Sobrevive `m2` y absorbe a `m3`, que **desaparece del registro** (`PANTALLA_IDS`,
+`PANTALLAS`, `FASES_MANUAL.evaluacion`, `ORDEN_MANUAL`).
+
+- **Título nuevo**: «Llevá la ficha al Evaluador» + «Registrá el veredicto» →
+  **«Llevá la ficha a evaluar y registrá el veredicto»**, los dos movimientos en el orden en que
+  ocurren, con el patrón que ya usaba `m13` («Publicá y registrá el link del borrador»). El chip
+  corto pasa de «Al Evaluador» a «Evaluación». El indicador queda en «Evaluación — paso 1 de 1».
+- **Un solo bloque visual, no dos pegados**: las dos traían tratamiento propio para la MISMA ficha —
+  `m2` la servía como `CopyBlock` (copiable) y `m3` como `<pre>` crudo (abierta, A-22). Se unificó en
+  `CopyBlock`, que ya es las dos cosas: se copia para el viaje y queda abierta y scrolleable para
+  transcribir contra ella a la vuelta. Las tres zonas del layout-tipo (`PantallaManual`) ya eran un
+  marco común, así que la pantalla fusionada llena contexto/munición/registro sin costura.
+- **La rama muerta se sacó, no quedó inalcanzable**: la cadena de condicionales de
+  `manual/[paso]/page.tsx` pasa de dos ramas a una (y el árbol entero desanida un nivel — de ahí el
+  tamaño del diff en ese archivo: es re-indentación, no lógica nueva). `m3-veredicto.tsx` **borrado**;
+  su registro (el form compartido `EvaluacionForm`/`EvaluacionResumen`, que NO se tocó) vive ahora en
+  `M2Registro`.
+- **Derivación**: `completadasDe` deja de marcar `m3`; `posicionDe` devuelve `['m2']` en FICHA (ya no
+  hace falta habilitar un destino para la vuelta) y `m2` en DESCARTADA. **Sin caso por defecto y sin
+  tocar el never-guard** — la exhaustividad por stage quedó intacta.
+- **La herramienta pasa al chat de Sonnet** (`herramientas.ts`): nombre «Evaluador» →
+  **«Chat de evaluación (Sonnet)»** y descripción reescrita. La dirección sigue **pendiente por el
+  mecanismo que ya existía** (`url: null` → la UI muestra el acceso como pendiente en vez de un link
+  roto). No se inventó ninguna URL.
+- **Copy del paso que desapareció**: se fueron los dos `<Link>` a `m3` y sus textos («El veredicto se
+  registra en la pantalla siguiente», «esta pantalla queda de consulta»), el detalle del registro
+  («volvé con el resultado») y las menciones de la munición al Gem. Quedan cero referencias a `m3` en
+  `src/`.
+
+**Los tests.** `manual.invariant.ts` ejercita la fusionada; los dos `goto` de `01-flow.spec.ts` (B2 y
+B9) y sus dos asserts de URL apuntan a `m2`.
+
+**La expectativa que se ajustó, declarada — no en silencio.** Es una sola, en
+`manual.invariant.ts:88`: `assert.equal(descartada.actual, 'm3', …)` → **`'m2'`**. La garantía que
+protege NO cambió (DESCARTADA conserva su case por stage y no cae al archivo); cambió **dónde vive el
+veredicto**, que es exactamente el objetivo del sprint. **No existe ningún invariante que assertee la
+cantidad de pantallas del registro** — se buscó explícitamente y no está, así que el ajuste
+anticipado por el plan (una pantalla menos) no aplicó a ningún contador.
+
+**Lo que quedó anotado sin tocar.** El monolito de `manual/[paso]/page.tsx` (la cadena de
+condicionales sigue siendo una escalera de 12 ternarios anidados; este sprint le sacó uno). Los dos
+hallazgos de guardado (los tildes que se pierden, el «se guarda solo») — viven en pantallas que la
+poda rehace después. El vocabulario: «el Evaluador» sobrevive en `guidance-content.ts`
+(`GUIA_FICHA.copyBlock`, el `intro`/`porque`/`ejemplos` de `GUIA_EVALUACION`) y en el label
+«Veredicto del Evaluador» del form compartido — es el barrido general, otro bloque, y tocarlo acá
+habría movido copy del wizard y roto specs por fuera del objetivo. `GUIA_EVALUACION.intro` además no
+se renderiza en ninguna pantalla (solo `criterios`/`campos`/`gate` llegan a la UI). La galería M0:
+`03` y `04` quedan fotografiando el MISMO estado (el sembrador les da a los dos `stage: FICHA` +
+señal); colapsarlas y renumerar es trabajo del bloque M0, así que los tres estados apuntan a `m2` y
+**los nombres de archivo se conservaron** porque el índice de `docs/manual-usuario/galeria/` los
+referencia.
+
+**Verificación.** `tsc --noEmit`: **exit 2 con el MISMO error preexistente de `searchconsole.ts` y
+cero errores nuevos** — línea base declarada arriba, leída del proceso sin pipe.
+`check:invariants`: **17/17, exit 0**. `test:leados`: **25/25, exit 0** (1.4m).
+
+**`test:setter` NO cerró: 41 passed / 19 failed, exit 1 (11.4m) — por colisión ambiental, no por el
+sprint.** El diagnóstico, con evidencia: los 19 fallos arrancan en `03-cabina` y siguen en cascada
+(`04-admin`, `05-empty-mobile`, `07`, `08`, `09`, `10`, `11`, `13`), y **7 de los 19 traen el síntoma
+directo** — `_next/static/*.css|js` servidos como `text/plain` y `500 (Internal Server Error)`; los
+otros 12 son su consecuencia (sin CSS ni hidratación, los locators no se ven, el drawer no abre, el
+`aria-pressed` no cambia). Causa: **la suite comparte el directorio `.next` con la otra sesión**.
+`next start` de QA sirve `:3001` desde el mismo `.next` que un `next dev` de `:3000` reescribe:
+el proceso de `:3000` **arrancó 19:12:44**, con la suite ya corriendo (largó ~19:08), y `.next/trace`
+quedó reescrito **19:18:40**, en plena corrida. Es el mismo patrón que el PROBE registró en `:2088`
+(«`.next` se vació a las 01:53») y que lo llevó a aislar R4 en un worktree.
+
+**Lo que sí quedó probado de la fusión:** los DOS tests que la ejercitan **pasaron** —
+`B2 · EVALUACIÓN: registrar (AVANZAR) transiciona FICHA→EVALUADA` y
+`B9 · DESCARTADA: score bajo → modal → archivo`, ambos de `01-flow.spec.ts`, que corrió completo
+antes de que `.next` se rompiera. Ninguno de los 19 fallidos está en el archivo que el sprint tocó.
+**La suite queda pendiente de una corrida limpia** (sin dev server sobre el mismo checkout) — no se
+declara verde y **el sprint no se autocierra**.
+
+**`git diff --stat` del sprint — 10 archivos**, todos de la fusión: `manual.ts` (registro y
+derivación), `manual.invariant.ts`, `manual/[paso]/page.tsx` (la cadena de condicionales),
+`m2-evaluador.tsx` (absorbe el registro), `m3-veredicto.tsx` (**borrado**), `herramientas.ts`,
+`pantalla-manual.tsx` y `evaluacion-form.tsx` (un comentario cada uno), `tests/setter/01-flow.spec.ts`,
+`tests/galeria/captura.spec.ts`. **Cero gates, cero transiciones, cero aislamiento, cero schema** —
+`dossier.actions.ts`, `flow.ts`, `dossier.ts`, `contracts.ts` y `prisma/` intactos. El resto del
+`git status` es WIP ajeno que no se tocó. Sin push.
+
+**Para Franco, por escrito — no autocerrado.** (1) El **título** «Llevá la ficha a evaluar y registrá
+el veredicto» y el orden de los dos movimientos son criterio de producto: los aprueba él en el
+preview. (2) Que la pantalla fusionada **se lea como un solo paso y no como dos pegados** lo cierra él
+mirando — ningún test lo valida. (3) Falta la **dirección del chat de evaluación en Sonnet**: hoy la
+UI muestra el acceso como «pendiente» (`url: null`), que es el comportamiento correcto hasta que él
+cargue el link real.
+
+**Reintento de `test:setter` — segunda contaminación, distinta causa, mismo origen.** Con el puerto
+3001 liberado a mano (había quedado un `next start -p 3001` huérfano de la primera corrida, que
+Playwright reusa **en silencio** por `reuseExistingServer` y habría servido el build corrupto), el
+segundo intento abortó de entrada: `⨯ Another next build process is already running` — un
+`next build --webpack` **ajeno** (PID 21624, 19:25:51) tenía tomado `.next/lock`. El lock NO se tocó;
+la corrida se encoló hasta que se liberó (5s) y arrancó sola. Resultado: **32 passed / 28 failed,
+exit 1** (13.2m). Durante esa corrida la otra sesión levantó **dos servidores más** sobre el mismo
+`.next` — `next start -p 3002` (19:27:13) y `next start` (19:32:25), ambos con la suite ya corriendo.
+El punto de quiebre lo muestra: los tests **1 al 14 pasaron todos** y el primer fallo aparece recién
+en el #15 (`B10`, `01-flow.spec.ts:350`), justo después de que arrancaran los servidores ajenos.
+(Nota de método: `tests/setter/.last-run.json` **no es fuente confiable acá** — es un archivo único
+que cualquier corrida concurrente sobrescribe; sus números no coincidían con los de la corrida propia,
+así que el conteo se leyó del log de la corrida, no del JSON.)
+
+**Conclusión sobre la suite: no se declara verde y no se reintenta más.** Dos corridas completas, dos
+contaminaciones por procesos ajenos arrancando a mitad de camino (19:12:44 la primera; 19:27 y 19:32
+la segunda). Un tercer intento es tirar 13 minutos contra una carrera que esta sesión no controla: la
+suite necesita el checkout quieto (sin dev/start/build de otra sesión sobre el mismo `.next`).
+**Lo que las DOS corridas prueban de forma concordante:** `B2 · EVALUACIÓN: registrar (AVANZAR)
+transiciona FICHA→EVALUADA` y `B9 · DESCARTADA: score bajo → modal → archivo` —los dos únicos tests
+que ejercitan la fusión— **pasaron en ambas**, y en la segunda `01-flow.spec.ts` corrió entero hasta
+B9 sin un solo fallo. Ningún fallo, en ninguna de las dos, cayó en la superficie que el sprint tocó.
