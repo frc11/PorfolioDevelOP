@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { streamText, stepCountIs, type ModelMessage } from 'ai'
+import { streamText, stepCountIs, wrapLanguageModel, type ModelMessage } from 'ai'
 import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
@@ -62,7 +62,14 @@ import {
   STREAM_WATCHDOG_IDLE_MS,
   STREAM_WATCHDOG_INITIAL_IDLE_MS,
   STREAM_WATCHDOG_TOOL_MAX_MS,
+  // PROVIDER-CLOSE — ventanas del stream CRUDO del provider (aguas arriba del
+  // watchdog del borde). Ver llm/providerStreamClose.ts.
+  PROVIDER_STREAM_IDLE_MS,
+  PROVIDER_STREAM_INITIAL_IDLE_MS,
 } from './reconcile'
+// PROVIDER-CLOSE — cierra el stream del provider para que el pipeline del SDK
+// (tools, steps, onFinish, usage) pueda avanzar. Cerrar, nunca abortar.
+import { createProviderStreamCloseMiddleware } from '../llm/providerStreamClose'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
 import {
@@ -1003,7 +1010,44 @@ export async function handleChatRequest(
   // más abajo en calculateCost (antes el costo leía resolvedBot.llmModel
   // por su lado y podía divergir de lo que esta línea ejecuta).
   const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)
-  const model = effectiveModel.model
+
+  // ─── PROVIDER-CLOSE — cerrar el stream CRUDO del provider cuando se calla ──
+  // El stream de Gemini no termina nunca, y el SDK ejecuta el `flush()` de sus
+  // transforms internos —donde emite `finish-step`, arranca el step siguiente y
+  // dispara `onStepFinish`/`onFinish` con el `usage`— solo cuando el stream de
+  // arriba TERMINA. Sin esto: `step_count: 0`, `onFinish` nunca dispara y el
+  // costo queda en 0. El watchdog del borde no alcanza porque cierra hacia
+  // ABAJO (la respuesta al cliente), no hacia arriba.
+  //
+  // Se envuelve ACÁ y no dentro de `resolveEffectiveModel` a propósito: esa
+  // función está documentada como PURA y tiene dos invariantes que le inyectan
+  // providers falsos — envolver ahí rompería su contrato. Acá el fallback de
+  // provider ya está resuelto, así que el envoltorio lo cubre igual, y es
+  // agnóstico del provider (Anthropic/OpenAI recibirían el mismo trato).
+  const rawModel = effectiveModel.model
+  const model =
+    // `LanguageModel` es una unión (`string | V3 | V2`) y `wrapLanguageModel`
+    // exige un V3. Se discrimina por `specificationVersion` en vez de castear.
+    // Si algún día el modelo no fuera V3, se usa sin envolver (degradación
+    // silenciosa: se pierde el cierre, no la respuesta) y queda el rastro.
+    typeof rawModel === 'object' && rawModel.specificationVersion === 'v3'
+      ? wrapLanguageModel({
+          model: rawModel,
+          middleware: createProviderStreamCloseMiddleware({
+            idleMs: PROVIDER_STREAM_IDLE_MS,
+            initialIdleMs: PROVIDER_STREAM_INITIAL_IDLE_MS,
+            // Instrumentación gated por CHATBOT_STREAM_PROBE (el `mark` es
+            // no-op sin la env var). Responde la pregunta abierta del costo:
+            // si `sawFinishChunk` es true, el `usage` se recupera solo.
+            onClose: (report) => streamProbe.mark('provider.stream_chunks', report),
+          }),
+        })
+      : rawModel
+  if (typeof rawModel === 'object' && rawModel.specificationVersion !== 'v3') {
+    streamProbe.mark('provider.stream_close_skipped', {
+      specificationVersion: rawModel.specificationVersion,
+    })
+  }
   if (effectiveModel.degraded) {
     await logChatbotEvent({
       organizationId: orgId,

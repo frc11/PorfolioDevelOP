@@ -51,6 +51,7 @@
     "test:onf1": "npx tsx src/modules/chatbot/server/chat/__tests__/onf1-reconcile.invariant.ts",
     "test:deadline": "npx tsx src/modules/chatbot/server/chat/__tests__/deadline.invariant.ts",
     "test:watchdog": "npx tsx src/modules/chatbot/server/chat/__tests__/stream-watchdog.invariant.ts",
+    "test:providerclose": "npx tsx src/modules/chatbot/server/llm/__tests__/provider-stream-close.invariant.ts",
     "test:fixorigin": "npx tsx \"src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts\"",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",

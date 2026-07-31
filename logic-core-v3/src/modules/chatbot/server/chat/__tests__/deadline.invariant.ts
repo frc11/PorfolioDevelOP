@@ -336,11 +336,23 @@ async function main(): Promise<void> {
   // calibrado demasiado alto.
   const firesAtMsAfterToolMax =
     WATCHDOG_CREATED_ELAPSED_MS + STREAM_WATCHDOG_TOOL_MAX_MS + STREAM_WATCHDOG_IDLE_MS
-  assert.equal(
-    computeHookBudgetMs(firesAtMsAfterToolMax),
-    ONFINISH_TOTAL_BUDGET_MS,
+  // PROVIDER-CLOSE — al subir `STREAM_WATCHDOG_IDLE_MS` de 1200 a 3000 (el
+  // watchdog del borde pasó a ser RED DE SEGURIDAD, ver reconcile.ts), este
+  // peor caso ya NO conserva el presupuesto COMPLETO: quedan ~4100ms en vez de
+  // 5000ms. Es un trade-off aceptado y medido, no una regresión silenciosa —
+  // `persistTurn` tarda ~300-1600ms en producción, así que 4100ms sigue siendo
+  // holgado. Lo que se pinnea ahora es lo que de verdad importa: que alcance
+  // para un intento completo de persistencia MÁS su evento de cierre.
+  const persistenceFloorMs = PERSIST_TX_DEADLINE_MS + EVENT_LOG_DEADLINE_MS
+  assert.ok(
+    computeHookBudgetMs(firesAtMsAfterToolMax) >= persistenceFloorMs,
     `con TOOL_MAX_MS=${STREAM_WATCHDOG_TOOL_MAX_MS} el peor caso de suspensión dispara a ` +
-      `${firesAtMsAfterToolMax}ms y la persistencia sigue recibiendo el presupuesto COMPLETO`,
+      `${firesAtMsAfterToolMax}ms y el presupuesto (${computeHookBudgetMs(firesAtMsAfterToolMax)}ms) ` +
+      `sigue alcanzando para un intento de persistencia + su evento (${persistenceFloorMs}ms)`,
+  )
+  assert.ok(
+    firesAtMsAfterToolMax + computeHookBudgetMs(firesAtMsAfterToolMax) < ROUTE_MAX_DURATION_MS,
+    'el peor caso de suspensión sigue cerrando antes del kill de la plataforma',
   )
   // Nota sobre 9c: modela el resume() del PROPIO techo de seguridad — dispara
   // con la ventana CORTA (`idleMs`) porque en ese punto `beginStep()` todavía

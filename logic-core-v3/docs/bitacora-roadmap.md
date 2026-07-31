@@ -14963,3 +14963,149 @@ apareciendo en `ChatbotLead`; que una conversacion SIN tools se siga destrabando
 sprint no debia tocar ese camino, y las pruebas locales no reemplazan la verificacion real).
 
 ---
+
+## PROVIDER-CLOSE (Fase 1) - cerrar el stream del provider, no el del borde
+
+### EL HALLAZGO CENTRAL
+**El SDK emite `finish-step`, arranca el step siguiente y dispara `onStepFinish`/`onFinish` (con
+el `usage` que alimenta el costo) desde el `flush()` de sus TransformStreams internos. Un
+`flush()` solo corre cuando el stream de arriba TERMINA. El stream de Gemini no termina nunca.**
+
+Y la consecuencia que explica los dos sprints fallidos anteriores: **cerrar funciona, abortar no.**
+Un abort ERRORIZA la cadena, y un `flush()` NO corre cuando el stream erroriza - solo cuando
+cierra normal. `chunkMs` y `stepMs` (los timeouts del propio SDK) abortaban. Por eso no servian.
+
+El watchdog del borde (sprints WATCHDOG-1/2/3) no podia arreglar esto: cierra hacia ABAJO (la
+respuesta HTTP al cliente, que es lo que destraba el input del widget), no hacia arriba.
+
+### Verificado END-TO-END contra el SDK real ANTES de escribir codigo
+Modelo falso que emite y NUNCA cierra, con el `streamText` real de `ai@6.0.177`:
+
+| variante                       | onStepFinish | onFinish  |
+|--------------------------------|--------------|-----------|
+| sin middleware (control)       | 0            | NUNCA     |
+| ABORT tras idle                | 0            | NUNCA     |
+| CLOSE (`terminate`) tras idle  | 2            | 623ms     |
+
+### EL COSTO SE RECUPERA - medido, no asumido (era la pregunta abierta del sprint)
+`terminate()` NO pierde los chunks ya encolados. Si el provider mando su chunk `finish`, el
+`usage` que llega a `onFinish` es **byte-identico** al de un provider que cierra solo
+(`{inputTokens:111, outputTokens:222, totalTokens:333, ...}` en ambos casos). Si el provider NO
+manda `finish`, el pipeline igual se destraba (texto entregado, `onFinish` dispara, persistencia
+OK) pero el `usage` queda vacio y el costo en 0.
+
+Cual de los dos es Gemini lo responde la instrumentacion en produccion: **el chunk `finish` NO se
+pasa a `onChunk`**, asi que el `chunks_total: 1` que habiamos medido antes NO lo descartaba.
+
+### UNA PARTE DEL DIAGNOSTICO DEL SPRINT NO SE PUDO REPRODUCIR - hay que decirlo
+El sprint atribuia a la misma causa que **los tools se ejecuten 30s tarde**
+(`tool:capture_lead enter elapsedMs: 32651` en prod). En el probe contra el SDK real, **los tools
+se ejecutan INMEDIATAMENTE (13ms) incluso sin el middleware, con el stream colgado**: en
+`runToolsTransformation` el `executeToolCall` se dispara en el `transform` del chunk `tool-call`,
+NO en el `flush` (`ai/dist/index.js:6744-6764`).
+
+O sea: el fix esta validado para `onFinish`/`onStepFinish`/step-2/`usage` (3 de los 4 sintomas),
+pero **la causa del retraso de 30s del tool queda SIN explicar**. Hipotesis no verificada: el
+`terminate()` del watchdog del borde a los 1217ms propaga cancelacion aguas arriba y difiere la
+ejecucion del tool hasta que la plataforma mata. Plausible que el middleware tambien lo resuelva
+(el stream del provider cierra a ~1s y el pipeline completa antes de que el borde actue), pero
+**no se afirma**: lo dira el log de produccion.
+
+### Que se hizo
+- **`server/llm/providerStreamClose.ts` (nuevo)**: middleware de `wrapLanguageModel` que envuelve
+  el stream CRUDO del provider. Reenvia cada chunk verbatim, y tras un silencio hace
+  `controller.terminate()`. Nunca aborta. Limpia timers en `flush`/`cancel`.
+- **Instrumentacion** (gated por `CHATBOT_STREAM_PROBE`): log `provider.stream_chunks` con conteo
+  POR TIPO de chunk, `sawFinishChunk`, `finishInputTokens`/`finishOutputTokens`, `finishReason`,
+  `elapsedMs`, `lastGapMs` y el motivo del cierre. Tipos y contadores, nunca contenido.
+- **Punto de cableado**: `handleChatRequest.ts`, donde se toma `effectiveModel.model`. NO dentro
+  de `resolveEffectiveModel` a proposito: esa funcion esta documentada como PURA y tiene dos
+  invariantes que le inyectan providers falsos. Aca el fallback de provider ya esta resuelto, asi
+  que el envoltorio lo cubre igual, y es agnostico del provider. `LanguageModel` es una union
+  (`string | V3 | V2`) y `wrapLanguageModel` exige V3: se discrimina por `specificationVersion`,
+  sin castear.
+
+| Constante (`reconcile.ts`) | Valor | Que acota |
+|---|---|---|
+| `PROVIDER_STREAM_IDLE_MS` | 1000 | silencio entre chunks del provider |
+| `PROVIDER_STREAM_INITIAL_IDLE_MS` | 12000 | antes del primer chunk (cold start) |
+
+No hace falta `beginStep()` como en el watchdog del borde: **cada step llama a `doStream()` de
+nuevo**, asi que cada step recibe su propia instancia del transform con su propia ventana
+inicial. El cold start por step queda cubierto por construccion.
+
+### El watchdog del borde pasa a RED DE SEGURIDAD
+`STREAM_WATCHDOG_IDLE_MS` subido de 1200 a 3000. Ahora quien cierra rapido es el middleware
+(~1s, aguas arriba); al cerrarse el stream del provider el SDK completa el pipeline y el body
+termina solo, asi que el watchdog del borde no deberia dispararse NUNCA en operacion normal. Se
+sube para que no compitan: con 1200ms podia dispararse justo mientras el SDK arranca el step 2.
+No degrada la latencia. **Es lo unico que se toco del watchdog** (`streamWatchdog.ts` y
+`persistTurn` quedaron intactos).
+
+**Trade-off medido y documentado** (no una regresion silenciosa): con idle=3000, el peor caso de
+suspension por tool (`TOOL_MAX_MS` agotado) ya no conserva el presupuesto COMPLETO de
+persistencia - quedan ~4100ms en vez de 5000ms. `persistTurn` tarda ~300-1600ms medido, asi que
+sigue holgado. El invariante del bloque 9c de `deadline.invariant.ts` se actualizo para pinnear
+lo que de verdad importa (que alcance para un intento de persistencia + su evento de cierre)
+en vez de "exactamente 5000".
+
+### Tests, y la verificacion FALLA-PRIMERO
+`provider-stream-close.invariant.ts` (nuevo, `npm run test:providerclose`, cero DB/red/credenciales):
+- PARTE A - el transform: chunks verbatim y en orden, cierre con `done` LIMPIO (no error), las dos
+  ventanas, ningun timer huerfano, cancelacion.
+- PARTE B - la premisa, contra el `streamText` REAL: control sin middleware (onFinish NUNCA),
+  con middleware (onFinish SI + usage recuperado), paridad exacta del usage contra un provider
+  que cierra solo, y la rama sin chunk `finish` (se destraba igual, usage vacio).
+
+**Verificacion falla-primero, con DOS mutaciones:**
+1. `terminate()` -> `controller.error()`: el test falla ("el consumidor NO ve un error: ve un
+   cierre LIMPIO"). Prueba que el test distingue close de abort.
+2. timer neutralizado (middleware = passthrough): el test falla ("el stream NO cerro en 2000ms").
+
+**La mutacion 2 destapo un hueco REAL en el propio test**, que se corrigio: sin un guard de
+timeout, un stream que no cierra deja el `read()` pendiente, el event loop de Node se vacia y **el
+proceso sale con codigo 0 en silencio** - el test "pasaba" sin verificar nada. Se agrego un guard
+con timer CANCELABLE (si no se cancelara, contaminaria los checks de timers huerfanos - eso
+tambien se descubrio corriendo el test).
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 6 archivos: 0 errores, 0 warnings.
+- `test:providerclose` + `test:watchdog` + `test:deadline` + bateria (onf1, infra1, infra2, c02,
+  cost1, cost2, utm1, re2, ev4): **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `streamWatchdog.ts`, `persistTurn`, `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`,
+  connection string, modulo de seguridad, frozen, scoping por organizacion, contabilidad de cupo.
+  Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) tras dar nombre y telefono el bot RESPONDE; (2) el tool corre de
+inmediato, no a los 30s; (3) `step_count > 0` y aparece `onStepFinish`; (4) `tokensIn`/`tokensOut`
+/`costUsd` distintos de 0 - **o, si siguen en 0, el log `provider.stream_chunks` dice por que**
+(mirar `sawFinishChunk`); (5) la `Duration` baja de 30000ms; (6) una conversacion sin tools se
+sigue destrabando rapido.
+
+---
+
+## PROVIDER-CLOSE (Fase 2) - el cursor con listas (commit aparte)
+
+**Sintoma:** mientras el bot escribia una respuesta con vinetas, la lista se veia desalineada y
+apretada; al terminar se acomodaba sola.
+
+**Causa:** el fix del sprint anterior aplicaba `inline` a `[&>*:nth-last-child(2)]` para que el
+caret quedara a la derecha de la ultima palabra. Cuando el ultimo bloque es un `<ul>`, ponerlo
+`inline` colapsa las vinetas.
+
+**Fix:** acotar el selector a `p`: `[&>p:nth-last-child(2)]:inline`. Con listas, bloques de codigo
+o tablas el caret cae abajo (feo pero legible) en vez de romper el bloque. **El diff es
+literalmente un caracter** (`*` -> `p`) mas el comentario que explica por que.
+
+Archivo: `StreamingMarkdown.tsx`, y solo ese. `ChatWindow.tsx` no se toco.
+
+### Gates
+`tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings.
+
+### Verificacion humana
+Que la lista con vinetas se vea bien MIENTRAS streamea, en desktop y mobile, y que el caret siga
+inline al lado de la ultima palabra en respuestas de texto normal.
+
+---

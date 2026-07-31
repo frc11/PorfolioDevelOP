@@ -214,11 +214,55 @@ export const STREAM_CHUNK_TIMEOUT_MS = 5_000
  * timer y esto no cambia NADA.
  *
  * CALIBRABLE, no sagrado. NO tenemos datos de gaps ENTRE chunks (Gemini mandó
- * uno solo en las mediciones) — 1200ms es una estimación conservadora, no una
+ * uno solo en las mediciones) — es una estimación conservadora, no una
  * medición directa como sí lo es `STREAM_WATCHDOG_INITIAL_IDLE_MS`. Si en prod
  * aparecen respuestas cortadas a la mitad, este es el número a subir primero.
+ *
+ * PROVIDER-CLOSE — SUBIDO de 1200ms a 3000ms: pasa de ser el mecanismo que
+ * cierra a ser una RED DE SEGURIDAD. Ahora quien cierra rápido es
+ * `PROVIDER_STREAM_IDLE_MS` (1000ms, aguas arriba, sobre el stream del
+ * provider), y al cerrarse ese stream el SDK completa el pipeline y el body
+ * termina solo — este watchdog no debería dispararse NUNCA en operación
+ * normal. Se sube para que los dos no compitan: con 1200ms podía dispararse
+ * justo mientras el SDK arranca el step 2 (que tiene su propio cold start),
+ * cortando la respuesta final. NO degrada la latencia — el cierre rápido ahora
+ * lo hace el middleware del provider.
  */
-export const STREAM_WATCHDOG_IDLE_MS = 1_200
+export const STREAM_WATCHDOG_IDLE_MS = 3_000
+
+/**
+ * PROVIDER-CLOSE — Silencio máximo tolerado en el stream CRUDO del provider,
+ * ENTRE chunks, antes de que lo cerremos para destrabar el pipeline del SDK.
+ *
+ * Distinto —y aguas ARRIBA— del watchdog del borde: aquel cierra la respuesta
+ * HTTP hacia el cliente (destraba el input del widget); este cierra el stream
+ * del provider, que es lo único que hace correr los `flush()` internos del SDK
+ * (ejecución de tools, `finish-step`, step siguiente, `onStepFinish`,
+ * `onFinish` y el `usage` que alimenta el costo). El del borde no puede hacer
+ * eso: cierra hacia abajo, no hacia arriba.
+ *
+ * 1000ms: el silencio entre chunks de un provider que está generando es de
+ * milisegundos; 1s ya es señal inequívoca de que terminó y no va a cerrar.
+ * Más agresivo que el del borde (3000ms) a propósito — este es el que ahora
+ * marca la latencia real de cierre, y el del borde quedó como red de seguridad.
+ */
+export const PROVIDER_STREAM_IDLE_MS = 1_000
+
+/**
+ * PROVIDER-CLOSE — Silencio máximo tolerado ANTES del primer chunk del stream
+ * del provider (cold start real de Vertex/Gemini).
+ *
+ * Misma razón que `STREAM_WATCHDOG_INITIAL_IDLE_MS` y el mismo valor: los gaps
+ * medidos en prod hasta el primer chunk fueron 1470ms y 1664ms, muy por encima
+ * de `PROVIDER_STREAM_IDLE_MS`. Con una sola ventana, cerraríamos el stream
+ * ANTES de que el modelo empiece a responder.
+ *
+ * No hace falta un `beginStep()` como en el watchdog del borde: cada step llama
+ * a `doStream()` de nuevo, así que cada step recibe su propia instancia del
+ * transform con su propia ventana inicial. El arranque en frío por step queda
+ * cubierto por construcción.
+ */
+export const PROVIDER_STREAM_INITIAL_IDLE_MS = 12_000
 
 /**
  * WATCHDOG-2 — Silencio máximo tolerado ANTES del primer chunk (cold start del
