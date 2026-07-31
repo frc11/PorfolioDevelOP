@@ -11,58 +11,58 @@ type FaqItem = {
 
 const FAQ_ITEMS: FaqItem[] = [
     {
-        question: 'Por que no usar Wix, WordPress o TiendaNube?',
+        question: '¿Por qué no usar Wix, WordPress o TiendaNube?',
         answer:
-            'Para empezar estan bien. Para escalar te limitan. Las plantillas te hacen ver igual que tu competencia, suelen ser mas lentas y te atan a suscripciones por funciones basicas. Nosotros programamos desde cero en Next.js: velocidad alta, marca propia y codigo tuyo.',
+            'Para empezar están bien. Para escalar te limitan. Las plantillas te hacen ver igual que tu competencia, suelen ser más lentas y te atan a suscripciones por funciones básicas. Nosotros programamos desde cero en Next.js: velocidad alta, marca propia y código tuyo.',
     },
     {
-        question: 'Cuanto cuesta una pagina web profesional?',
+        question: '¿Cuánto cuesta una página web profesional?',
         answer:
-            'Nuestros proyectos arrancan desde 800 USD para sitios institucionales y pueden subir segun alcance, integraciones y automatizaciones. Definimos alcance cerrado al inicio para que sepas inversion, tiempos y entregables con claridad.',
+            'Nuestros proyectos arrancan desde 800 USD para sitios institucionales y pueden subir según alcance, integraciones y automatizaciones. Definimos alcance cerrado al inicio para que sepas inversión, tiempos y entregables con claridad.',
     },
     {
-        question: 'En cuanto tiempo esta lista mi web?',
+        question: '¿En cuánto tiempo está lista mi web?',
         answer:
-            'En 4 semanas: semana 1 estrategia, semana 2 diseno aprobado, semana 3 desarrollo y semana 4 SEO, pruebas y lanzamiento. Desde la semana 2 ya tenes preview para seguir avance real.',
+            'En 4 semanas: semana 1 estrategia, semana 2 diseño aprobado, semana 3 desarrollo y semana 4 SEO, pruebas y lanzamiento. Desde la semana 2 ya tenés preview para seguir avance real.',
     },
     {
-        question: 'Como esto se traduce en ventas reales para mi negocio?',
+        question: '¿Cómo esto se traduce en ventas reales para mi negocio?',
         answer:
-            'Tu web trabaja mientras no estas: aparece en busquedas, filtra mejor el trafico y envia consultas listas por formulario o WhatsApp. Menos charla improductiva, mas conversaciones con intencion de compra.',
+            'Tu web trabaja mientras no estas: aparece en búsquedas, filtra mejor el tráfico y envía consultas listas por formulario o WhatsApp. Menos charla improductiva, más conversaciones con intención de compra.',
     },
     {
-        question: 'Posicionan en Google (SEO)?',
+        question: '¿Posicionan en Google (SEO)?',
         answer:
-            'Si. Estructura tecnica, contenido orientado a busqueda local, metadata, sitemap y performance real. La base SEO viene en el proceso para que no dependa de publicidad todo el tiempo.',
+            'Si. Estructura técnica, contenido orientado a búsqueda local, metadata, sitemap y performance real. La base SEO viene en el proceso para que no dependa de publicidad todo el tiempo.',
     },
     {
-        question: 'Puedo ver ejemplos de trabajos anteriores de negocios como el mio?',
+        question: '¿Puedo ver ejemplos de trabajos anteriores de negocios como el mío?',
         answer:
-            'Si. Tenes portfolio publico y tambien referencias por rubro cuando nos escribis. Asi ves casos cercanos a tu contexto antes de decidir.',
+            'Si. Tenés portfolio público y también referencias por rubro cuando nos escribis. Así ves casos cercanos a tu contexto antes de decidir.',
     },
     {
-        question: 'Trabajan con negocios de otras provincias o solo Tucuman?',
+        question: '¿Trabajan con negocios de otras provincias o solo Tucumán?',
         answer:
             'Trabajamos en todo Argentina, 100% remoto. Reuniones por videollamada, validaciones por etapas y demos en vivo para que tengas control completo del proceso.',
     },
     {
-        question: 'Que pasa despues de la entrega? Me dejan solo?',
+        question: '¿Qué pasa después de la entrega? ¿Me dejan solo?',
         answer:
-            'No. Tenes soporte opcional con monitoreo, backups, ajustes y mejoras continuas. La idea es sostener resultados, no solo entregar una web y desaparecer.',
+            'No. Tenés soporte opcional con monitoreo, backups, ajustes y mejoras continuas. La idea es sostener resultados, no solo entregar una web y desaparecer.',
     },
 ]
 
 const OBJECTION_ITEMS: FaqItem[] = [
     {
-        question: 'Y si no me gusta como queda?',
-        answer: 'No cerramos visual sin tu aprobacion. Validamos direccion de estilo y estructura antes de construir full.',
+        question: '¿Y si no me gusta cómo queda?',
+        answer: 'No cerramos visual sin tu aprobacion. Validamos dirección de estilo y estructura antes de construir full.',
     },
     {
-        question: 'Que pasa si quiero cambiar algo despues?',
-        answer: 'La arquitectura queda lista para iterar. Podemos ajustar secciones, mensajes o conversion sin rehacer todo.',
+        question: '¿Qué pasa si quiero cambiar algo después?',
+        answer: 'La arquitectura queda lista para iterar. Podemos ajustar secciones, mensajes o conversión sin rehacer todo.',
     },
     {
-        question: 'Que incluye exactamente?',
+        question: '¿Qué incluye exactamente?',
         answer: 'Alcance, entregables y etapas definidos desde el inicio. Sin zonas grises ni costos sorpresa a mitad del proyecto.',
     },
 ]
@@ -201,7 +201,7 @@ export const WebDevelopmentFaq = () => {
     const prefersReducedMotion = useReducedMotion()
 
     return (
-        <section className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
+        <section id="faq" className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
@@ -311,7 +311,7 @@ export const WebDevelopmentFaq = () => {
                     </div>
 
                     <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-black leading-[0.96] tracking-[-0.05em] text-white">
-                        Lo que todo dueno
+                        Lo que todo dueño
                         <br />
                         <span className="bg-gradient-to-r from-cyan-200 via-cyan-300 to-violet-200 bg-clip-text text-transparent">
                             de negocio pregunta.
@@ -319,7 +319,7 @@ export const WebDevelopmentFaq = () => {
                     </h2>
 
                     <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg lg:mx-0">
-                        Respuestas directas para tiempos, inversion, soporte y como esta web termina siendo una herramienta real de ventas.
+                        Respuestas directas para tiempos, inversión, soporte y como esta web termina siendo una herramienta real de ventas.
                     </p>
                 </motion.div>
 
@@ -342,7 +342,7 @@ export const WebDevelopmentFaq = () => {
                         Objeciones comunes
                     </div>
                     <p className="mx-auto max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base lg:mx-0">
-                        Las dudas que mas frenan la decision, reunidas aca para que tengas claridad total en un solo bloque.
+                        Las dudas que más frenan la decisión, reunidas acá para que tengas claridad total en un solo bloque.
                     </p>
                 </motion.div>
 
@@ -377,7 +377,7 @@ export const WebDevelopmentFaq = () => {
                             margin: 0,
                         }}
                     >
-                        Tenes otra pregunta?
+                        ¿Tenés otra pregunta?
                     </p>
                     <p
                         style={{

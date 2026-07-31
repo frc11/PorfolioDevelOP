@@ -136,7 +136,7 @@ export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
                 {revision.total} {revision.total === 1 ? 'demo' : 'demos'}
               </span>{' '}
               esperando revisión de Franco ·{' '}
-              {revision.total === 1 ? 'hace' : 'la más vieja hace'}{' '}
+              {revision.total === 1 ? '' : 'la más vieja '}
               <span className="tabular-nums">{revision.hace}</span>.
               <span className="mt-0.5 block text-zinc-600">
                 Las ves en tu cartera → filtro «Esperando revisión».

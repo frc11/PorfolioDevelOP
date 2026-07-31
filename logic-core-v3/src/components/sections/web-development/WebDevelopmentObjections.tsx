@@ -13,27 +13,27 @@ type ObjectionItem = {
 const objections: ObjectionItem[] = [
     {
         icon: Palette,
-        question: "Y si no me gusta como queda?",
-        answer: "No avanzamos a desarrollo final sin tu aprobacion visual. Validamos direccion, estilo y estructura por etapas.",
+        question: "¿Y si no me gusta cómo queda?",
+        answer: "No avanzamos a desarrollo final sin tu aprobacion visual. Validamos dirección, estilo y estructura por etapas.",
     },
     {
         icon: RefreshCw,
-        question: "Que pasa si quiero cambiar algo despues?",
+        question: "¿Qué pasa si quiero cambiar algo después?",
         answer: "La web queda preparada para iterar. Definimos ajustes post-lanzamiento y mejoras sin rehacer todo desde cero.",
     },
     {
         icon: ClipboardList,
-        question: "Que incluye exactamente?",
+        question: "¿Qué incluye exactamente?",
         answer: "Trabajas con alcance y entregables claros desde el inicio. Sin zonas grises ni costos sorpresa en mitad del proceso.",
     },
 ]
 
 const includes = [
-    "Arquitectura y copy de conversion",
-    "Diseno UI responsive",
+    "Arquitectura y copy de conversión",
+    "Diseño UI responsive",
     "Desarrollo en Next.js",
-    "SEO tecnico base",
-    "Integracion de formularios y WhatsApp",
+    "SEO técnico base",
+    "Integración de formularios y WhatsApp",
     "Analytics y handoff final",
 ]
 
@@ -80,7 +80,7 @@ export function WebDevelopmentObjections() {
                         transition={{ duration: 0.5, delay: 0.14, ease }}
                         className="mx-auto mt-6 max-w-3xl text-base leading-8 text-zinc-400 md:text-lg"
                     >
-                        Esta seccion responde las dudas que frenan la decision en negocios reales, sin esperar al FAQ final.
+                        Esta sección responde las dudas que frenan la decisión en negocios reales, sin esperar al FAQ final.
                     </motion.p>
                 </div>
 
@@ -131,7 +131,7 @@ export function WebDevelopmentObjections() {
                         <div className="mb-4 inline-flex items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-1.5">
                             <ShieldCheck className="h-4 w-4 text-zinc-300" />
                             <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-zinc-300">
-                                Garantia explicita
+                                Garantía explicita
                             </span>
                         </div>
 
@@ -140,7 +140,7 @@ export function WebDevelopmentObjections() {
                         </h3>
 
                         <p className="mt-4 max-w-2xl text-sm leading-7 text-zinc-400 md:text-base">
-                            Alcance, entregables y tiempos quedan definidos desde el dia 1. Cada hito se aprueba antes de pasar al siguiente.
+                            Alcance, entregables y tiempos quedan definidos desde el día 1. Cada hito se aprueba antes de pasar al siguiente.
                         </p>
 
                         <div className="mt-5 inline-flex items-center gap-2 rounded-sm border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] text-zinc-300">

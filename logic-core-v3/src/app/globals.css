@@ -16,6 +16,199 @@
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   SISTEMA DE DISEÑO — REDISEÑO B1
+   Dirección: "instrumento de precisión, editorial".
+   Base monocroma, superficies planas y quietas, acento en dosis mínimas.
+
+   Prefijo `ds` en todos los tokens: el sitio actual todavía consume
+   --color-void / --color-obsidian / --color-accent (definidos más abajo,
+   fuera de @theme). Esos tokens viejos se conservan hasta el bloque final
+   del rediseño; el sistema nuevo no los pisa.
+
+   `static` y no `@theme` a secas: Tailwind 4.3 hace tree-shaking de las
+   variables de tema que ningún utility usa. Verificado contra el build —
+   sin `static` estos tokens NO aparecen en el CSS emitido, y las secciones
+   que los leen por `var()` crudo (la inversión de tema de SectionShell)
+   se quedarían sin valor. Va en su propio bloque para forzar solo estos
+   ~35 tokens, sin arrastrar el tema default entero de Tailwind.
+   ══════════════════════════════════════════════════════════════════════════ */
+@theme static {
+
+  /* ── Base dark (tema por defecto) ───────────────────────────────────── */
+  --color-ds-void: #0D0B09;
+  --color-ds-surface: #151210;
+  --color-ds-ink: #EDE9E1;
+  --color-ds-ink-muted: #A39C8F;
+  --color-ds-border: rgba(237, 233, 225, 0.10);
+
+  /* ── Tema claro (secciones invertidas) ──────────────────────────────── */
+  --color-ds-light-bg: #F2EEE6;
+  --color-ds-light-surface: #EAE5DA;
+  --color-ds-light-ink: #1A1713;
+  --color-ds-light-ink-muted: #6E675C;
+  --color-ds-light-border: rgba(26, 23, 19, 0.12);
+
+  /* ── Acentos de servicio ────────────────────────────────────────────────
+     Valores tomados del código actual (OurServices.tsx:77/95/113/131), que
+     es la fuente internamente coherente. Son los tonos sobrios de cada
+     familia; los neón (#00ff88, #00e5ff/#00e1ff) quedan descartados.
+     ⚠ PENDIENTE GATE 1: CLAUDE.md asigna estos mismos cuatro hex a otros
+     servicios (permutación alternativa). El styleguide (B1-S3) muestra las
+     dos opciones; Franco elige. NO resolver acá.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-accent-web: #06b6d4;
+  --color-ds-accent-ia: #10b981;
+  --color-ds-accent-automation: #f59e0b;
+  --color-ds-accent-software: #8b5cf6;
+
+  /* ── Radios y elevación ─────────────────────────────────────────────────
+     Radio 0 en superficies (planas, no se aprietan). El radio y el relieve
+     de 2 capas quedan reservados a lo interactivo.
+     ───────────────────────────────────────────────────────────────────── */
+  --radius-ds-surface: 0px;
+  --radius-ds-control: 9px;
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
+
+  /* ── Motion ─────────────────────────────────────────────────────────────
+     Único reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
+     a propósito: un `initial={{opacity:0}}` de Framer se serializa en el HTML
+     del SSR, así que el bloque nace con `opacity:0` y queda invisible hasta que
+     hidrata — si el JS tarda o falla, no se ve nada. Una animación CSS corre
+     con el primer paint, sin depender de JS, y el bloque global de
+     `prefers-reduced-motion` (al final de este archivo) la aterriza en su
+     keyframe final —visible— en 1ms.
+
+     `both` es obligatorio: sin fill-mode el elemento parpadea a su estado
+     final antes de arrancar.
+     ───────────────────────────────────────────────────────────────────── */
+  --animate-ds-reveal: ds-reveal 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+  @keyframes ds-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ── Escala tipográfica ─────────────────────────────────────────────────
+     Sin familias nuevas: Geist (sans) y Geist Mono, ya cargadas en
+     layout.tsx. El display se distingue por escala y tracking.
+
+     ⚠ Al agregar un token `--text-ds-*` acá, agregarlo TAMBIÉN a
+     `DS_FONT_SIZE_CLASSES` en `src/lib/utils.ts`. tailwind-merge no distingue
+     `text-<nombre>` tamaño de `text-<nombre>` color y descarta uno de los dos
+     sin avisar: el componente pierde el tamaño o el color, sin error de build.
+     ───────────────────────────────────────────────────────────────────── */
+  --text-ds-display-xl: clamp(3.25rem, 8vw, 7rem);
+  --text-ds-display-xl--line-height: 0.98;
+  --text-ds-display-xl--letter-spacing: -0.03em;
+
+  --text-ds-display-lg: clamp(2.25rem, 5vw, 4.25rem);
+  --text-ds-display-lg--line-height: 1.05;
+  --text-ds-display-lg--letter-spacing: -0.02em;
+
+  --text-ds-lead: clamp(1.125rem, 1.6vw, 1.375rem);
+  --text-ds-lead--line-height: 1.55;
+
+  --text-ds-body: 1.0625rem;
+  --text-ds-body--line-height: 1.7;
+
+  --text-ds-eyebrow: 0.75rem;
+  --text-ds-eyebrow--line-height: 1.2;
+  --text-ds-eyebrow--letter-spacing: 0.18em;
+
+  --text-ds-data: clamp(2rem, 4vw, 3.5rem);
+  --text-ds-data--line-height: 1;
+  --text-ds-data--font-weight: 500;
+
+  /* ── Espaciado y layout ─────────────────────────────────────────────── */
+  --spacing-ds-section: clamp(6rem, 14vh, 11rem);
+  --spacing-ds-gutter: clamp(1.25rem, 4vw, 3rem);
+  --container-ds-page: 1240px;
+  --container-ds-prose: 65ch;
+
+  /* ── Agregados en B1-S2 ─────────────────────────────────────────────────
+     El sprint habilita agregar tokens cuando un componente necesita un valor
+     que no existe: "se agrega el token, no un valor suelto".
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Medida del subhead: el Lead corta a 55ch, más angosto que la prosa. */
+  --container-ds-lead: 55ch;
+
+  /* Tamaño de control. La escala de S1 no traía uno, y `--text-ds-body`
+     arrastra line-height 1.7 — demasiado suelto para un botón. */
+  --text-ds-control: 1rem;
+  --text-ds-control--line-height: 1;
+
+  /* ── Capa semántica (se invierte por sección) ───────────────────────────
+     Los tokens de arriba son la paleta literal y NO se mueven. Estos son los
+     roles que consumen los componentes (`bg-ds-canvas`, `text-ds-fg`,
+     `border-ds-rule`). El default es el tema oscuro; `SectionShell` los
+     reapunta poniendo `data-ds-theme` en su <section> (scopes más abajo).
+     Dos capas y no una porque `[data-ds-theme='dark']` necesita volver a los
+     valores crudos para que una sección oscura anidada en una crema funcione
+     — con una sola capa esa regla sería circular.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-canvas: var(--color-ds-void);
+  --color-ds-panel: var(--color-ds-surface);
+  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg-muted: var(--color-ds-ink-muted);
+  --color-ds-rule: var(--color-ds-border);
+
+  /* Canto iluminado del control primario: 1px más claro que su fondo. En
+     oscuro el botón es casi blanco, en crema es casi negro — el valor tiene
+     que invertirse con el tema, así que vive en la capa semántica. */
+  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+
+  /* ── Familias ───────────────────────────────────────────────────────────
+     Fuente única de verdad de las familias del sistema. `next/font` deja
+     `--font-geist-sans` / `--font-geist-mono` en el <html> (ver el className
+     de `layout.tsx`), que es el mismo elemento donde Tailwind emite `@theme`,
+     así que el `var()` resuelve acá y hereda correcto hacia abajo.
+
+     B1 había duplicado estas dos líneas en un `[data-ds-theme]` para esquivar
+     el bug de scope: las variables vivían en el <body>, más abajo que `:root`,
+     y esta declaración quedaba inválida. Con el scope arreglado esa segunda
+     copia era redundante y se quitó.
+     ───────────────────────────────────────────────────────────────────── */
+  --font-ds-sans: var(--font-geist-sans);
+  --font-ds-mono: var(--font-geist-mono);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INVERSIÓN DE TEMA POR SECCIÓN — REDISEÑO B1-S2
+   `SectionShell` escribe data-ds-theme en su propio <section>, así que el
+   alcance es local: no hay estado global, funciona anidado y funciona sin
+   ningún provider. Reglas sin @layer a propósito — así ganan contra el
+   `@layer theme` de Tailwind donde viven los defaults.
+
+   Convive con el sistema viejo (`[data-theme]` en el <html>, más abajo) sin
+   pisarlo: son atributos distintos sobre elementos distintos.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-ds-theme='dark'] {
+  --color-ds-canvas: var(--color-ds-void);
+  --color-ds-panel: var(--color-ds-surface);
+  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg-muted: var(--color-ds-ink-muted);
+  --color-ds-rule: var(--color-ds-border);
+  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+}
+
+[data-ds-theme='light'] {
+  --color-ds-canvas: var(--color-ds-light-bg);
+  --color-ds-panel: var(--color-ds-light-surface);
+  --color-ds-fg: var(--color-ds-light-ink);
+  --color-ds-fg-muted: var(--color-ds-light-ink-muted);
+  --color-ds-rule: var(--color-ds-light-border);
+  --color-ds-control-edge: rgba(237, 233, 225, 0.22);
+}
+
 /* Logic Core V3: The Inversion System */
 :root {
   /* Default dark fallback prevents white flashes before section themes hydrate. */
@@ -368,4 +561,38 @@ canvas {
 }
 .chat-messages-area::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION GLOBAL — REDISEÑO B1
+   Hasta este sprint el sitio no tenía ningún bloque de prefers-reduced-motion.
+   Solo aplica cuando el usuario lo pidió a nivel sistema: en modo normal esta
+   regla no existe y nada de lo que ya animaba cambia.
+
+   Por qué 1ms y no 0s: una duración de 0.01ms sobre una animación `infinite`
+   la convierte en un loop de ~100Hz (quema CPU en vez de aquietar). Cortar la
+   animación a UNA iteración de 1ms la deja aterrizar en su keyframe final —
+   los reveals con `fill: both` terminan visibles en lugar de quedar en
+   opacity 0, que es el modo clásico de romper una página con reduced-motion.
+
+   Alcance: CSS. Las animaciones de Framer Motion ya se apagan por
+   `useReducedMotion()` / `motion-reduce:` en los componentes que lo consumen.
+   PENDIENTE (fuera del scope de S1, que es solo tokens): el scroll suave de
+   Lenis (SmoothScroll.tsx) es JS y no se neutraliza desde CSS.
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto !important;
+  }
 }

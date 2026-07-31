@@ -46,7 +46,7 @@ interface MockupMessage {
 }
 
 interface RubroContent {
-    headline: string      // ultima palabra se colorea
+    headline: string      // última palabra se colorea
     headlineAccent: string
     subhead: string
     automations: Automation[]
@@ -84,29 +84,29 @@ const rubroContent: Record<number, RubroContent> = {
     0: {
         headline: 'Tu restaurante llena mesas',
         headlineAccent: 'solo.',
-        subhead: 'La IA gestiona reservas, responde WhatsApp y recuerda cumpleanos, sin que toques el celular a las 2AM.',
+        subhead: 'La IA gestiona reservas, responde WhatsApp y recuerda cumpleaños, sin que toques el celular a las 2AM.',
         automations: [
             {
-                icon: CalendarDays, title: 'Reservas automaticas',
+                icon: CalendarDays, title: 'Reservas automáticas',
                 description: 'Recibe y confirma por WhatsApp 24/7',
-                metric: '\u2191 40% ocupacion'
+                metric: '\u2191 40% ocupación'
             },
             {
-                icon: Star, title: 'Respuesta a resenas',
+                icon: Star, title: 'Respuesta a reseñas',
                 description: 'Google Reviews respondidas en 2 horas',
                 metric: '\u2191 0.8 estrellas promedio'
             },
             {
-                icon: BadgeCheck, title: 'Fidelizacion automatica',
-                description: 'Descuentos en cumpleanos y fechas especiales',
+                icon: BadgeCheck, title: 'Fidelización automática',
+                description: 'Descuentos en cumpleaños y fechas especiales',
                 metric: '\u00D7 2 retorno de clientes'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: 'Tienen mesa para 4 el sabado a las 21?', delay: 0 },
-            { from: 'ai', text: 'Claro. Tenemos disponibilidad. A que nombre reservo?', delay: 800 },
-            { from: 'client', text: 'Garcia', delay: 1600 },
-            { from: 'ai', text: 'Reserva confirmada: Garcia \u00B7 4 personas \u00B7 Sab 21hs. Te mando recordatorio el viernes.', delay: 2400 },
+            { from: 'client', text: '¿Tienen mesa para 4 el sábado a las 21?', delay: 0 },
+            { from: 'ai', text: 'Claro. Tenemos disponibilidad. ¿A qué nombre reservo?', delay: 800 },
+            { from: 'client', text: 'García', delay: 1600 },
+            { from: 'ai', text: 'Reserva confirmada: García \u00B7 4 personas \u00B7 Sab 21hs. Te mando recordatorio el viernes.', delay: 2400 },
         ],
     },
     1: {
@@ -120,21 +120,21 @@ const rubroContent: Record<number, RubroContent> = {
                 metric: '\u221260% ausencias'
             },
             {
-                icon: Bell, title: 'Recordatorio de medicacion',
-                description: 'Mensajes automaticos a pacientes cronicos',
+                icon: Bell, title: 'Recordatorio de medicación',
+                description: 'Mensajes automáticos a pacientes crónicos',
                 metric: '\u2191 adherencia al tratamiento'
             },
             {
                 icon: ShieldAlert, title: 'Triaje de urgencias',
-                description: 'Detecta sintomas urgentes y prioriza',
+                description: 'Detecta síntomas urgentes y prioriza',
                 metric: '0 urgencias perdidas'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: 'Necesito turno con la Dra. Lopez', delay: 0 },
-            { from: 'ai', text: 'Es primera consulta o seguimiento?', delay: 800 },
+            { from: 'client', text: 'Necesito turno con la Dra. López', delay: 0 },
+            { from: 'ai', text: '¿Es primera consulta o seguimiento?', delay: 800 },
             { from: 'client', text: 'Seguimiento', delay: 1500 },
-            { from: 'ai', text: 'Perfecto. Hay lugar miercoles 10hs o jueves 17hs. Cual te viene mejor?', delay: 2300 },
+            { from: 'ai', text: 'Perfecto. Hay lugar miércoles 10hs o jueves 17hs. ¿Cuál te viene mejor?', delay: 2300 },
         ],
     },
     2: {
@@ -143,7 +143,7 @@ const rubroContent: Record<number, RubroContent> = {
         subhead: 'La IA responde consultas de productos, toma pedidos y recupera carritos abandonados, a las 3AM si hace falta.',
         automations: [
             {
-                icon: MessageSquareText, title: 'Catalogo interactivo',
+                icon: MessageSquareText, title: 'Catálogo interactivo',
                 description: 'Stock, tallas y precios al instante',
                 metric: '\u221280% consultas sin respuesta'
             },
@@ -153,16 +153,16 @@ const rubroContent: Record<number, RubroContent> = {
                 metric: '\u221270% llamadas de seguimiento'
             },
             {
-                icon: CheckCircle2, title: 'Recuperacion de carritos',
-                description: 'Mensaje automatico al comprador indeciso',
-                metric: '\u2191 25% conversion'
+                icon: CheckCircle2, title: 'Recuperación de carritos',
+                description: 'Mensaje automático al comprador indeciso',
+                metric: '\u2191 25% conversión'
             },
         ],
         mockupMessages: [
-            { from: 'client', text: 'Tienen la campera negra en talle M?', delay: 0 },
-            { from: 'ai', text: 'Si. Stock disponible en M y L. Precio: $45.000. Te reservo una?', delay: 800 },
+            { from: 'client', text: '¿Tienen la campera negra en talle M?', delay: 0 },
+            { from: 'ai', text: 'Sí. Stock disponible en M y L. Precio: $45.000. ¿Te reservo una?', delay: 800 },
             { from: 'client', text: 'Si, la reservo', delay: 1600 },
-            { from: 'ai', text: 'Reservada. Te paso el link de pago o podes pasar hoy hasta las 20hs.', delay: 2400 },
+            { from: 'ai', text: 'Reservada. Te paso el link de pago o podés pasar hoy hasta las 20hs.', delay: 2400 },
         ],
     },
     3: {
@@ -171,26 +171,26 @@ const rubroContent: Record<number, RubroContent> = {
         subhead: 'La IA califica leads, agenda visitas y matchea propiedades, filtrando curiosos de compradores reales.',
         automations: [
             {
-                icon: Users, title: 'Calificacion de leads',
-                description: 'Filtra intencion real antes de llegar a vos',
+                icon: Users, title: 'Calificación de leads',
+                description: 'Filtra intención real antes de llegar a vos',
                 metric: '\u00D7 3 leads calificados'
             },
             {
                 icon: Search, title: 'Match de propiedades',
                 description: 'Cruza el pedido con tu cartera al instante',
-                metric: '\u221250% tiempo de busqueda'
+                metric: '\u221250% tiempo de búsqueda'
             },
             {
-                icon: CalendarDays, title: 'Coordinacion de visitas',
+                icon: CalendarDays, title: 'Coordinación de visitas',
                 description: 'Agenda sin llamadas cruzadas',
                 metric: '\u2191 35% visitas realizadas'
             },
         ],
         mockupMessages: [
             { from: 'client', text: 'Busco depto 2 amb en Yerba Buena hasta $120k', delay: 0 },
-            { from: 'ai', text: 'Tengo 3 opciones. Preferis planta baja o piso alto?', delay: 800 },
+            { from: 'ai', text: 'Tengo 3 opciones. ¿Preferís planta baja o piso alto?', delay: 800 },
             { from: 'client', text: 'Piso alto con balcon', delay: 1500 },
-            { from: 'ai', text: 'Perfecto, este te va a encantar. Podes visitar manana o el jueves?', delay: 2300 },
+            { from: 'ai', text: 'Perfecto, este te va a encantar. ¿Podés visitar mañana o el jueves?', delay: 2300 },
         ],
     },
 }
@@ -270,7 +270,7 @@ function Header({
                     margin: 0
                 }}
             >
-                Elegi tu rubro y mira que hace la IA por vos.
+                Elegí tu rubro y mira que hace la IA por vos.
             </motion.p>
 
             <motion.div
@@ -315,7 +315,7 @@ function Header({
                     <strong style={{
                         color: 'white',
                         fontWeight: 700,
-                    }}>+47 negocios</strong> ya automatizados en Tucuman
+                    }}>Automatizaciones</strong> funcionando en negocios del NOA
                 </span>
             </motion.div>
         </div>
@@ -755,7 +755,7 @@ export default function RubrosIA() {
                 alignItems: isTabletOrDown ? 'flex-start' : 'center',
             }}
         >
-            {/* PartÃ­culas decorativas de fondo */}
+            {/* Partículas decorativas de fondo */}
             {BACKGROUND_PARTICLES.map((p, i) => (
                 <div key={i} style={{
                     position: 'absolute',
@@ -916,7 +916,7 @@ export default function RubrosIA() {
                                             minWidth: 0,
                                         }}
                                     >
-                                        {/* Ãcono */}
+                                        {/* Ícono */}
                                         <div style={{
                                             width: '42px',
                                             height: '42px',

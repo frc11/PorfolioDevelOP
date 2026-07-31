@@ -65,7 +65,7 @@ export default function ComparadorSection() {
     const [controlHovered, setControlHovered] = useState(false);
 
     const caosItems = [
-        'Respondes precios 100 veces por dia',
+        'Respondes precios 100 veces por día',
         'Si no contestas, el cliente se va',
         'Dependes del algoritmo de Instagram',
         'A las 2AM, el cliente no puede comprarte',
@@ -75,7 +75,7 @@ export default function ComparadorSection() {
     const controlItems = [
         'Tu web cotiza sola mientras dormis',
         'Google te trae clientes listos para comprar',
-        'Tu catalogo actualizado sin llamarte',
+        'Tu catálogo actualizado sin llamarte',
         'Pedidos a las 3AM sin que estes presente',
         'Primero en Google en tu ciudad',
     ];

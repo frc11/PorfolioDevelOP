@@ -127,7 +127,7 @@ const NODES: PipelineNode[] = [
     x: 514,
     y: 248,
     label: 'IA Core',
-    sublabel: 'Decision y reglas',
+    sublabel: 'Decisión y reglas',
     type: 'core',
     color: '#34d399',
     colorRgb: '52,211,153',
@@ -187,34 +187,34 @@ const FLOW_SCENARIOS: FlowScenario[] = [
   {
     id: 'medico-wa',
     sourceNode: 'wa',
-    query: 'Tienen turno para el martes?',
-    firstResponse: 'Si, tengo martes 15:00 disponible. Lo reservo a tu nombre?',
+    query: '¿Tienen turno para el martes?',
+    firstResponse: 'Sí, tengo martes 15:00 disponible. ¿Lo reservo a tu nombre?',
     confirmation: 'Si, para Gonzalez.',
     finalResponse: 'Perfecto. Turno confirmado para Gonzalez, martes 15:00.',
     sheetsSummary: 'Sheets devuelve disponibilidad y reglas de agenda al IA Core.',
-    crmSummary: 'IA Core guarda la confirmacion del cliente en CRM.',
+    crmSummary: 'IA Core guarda la confirmación del cliente en CRM.',
     slackSummary: 'IA Core notifica en Slack que entro un lead confirmado.',
   },
   {
     id: 'inmobiliaria-web',
     sourceNode: 'web',
     query: 'Busco depto 2 ambientes, presupuesto 120k.',
-    firstResponse: 'Tengo 3 opciones compatibles. Te muestro primero las mas recientes?',
+    firstResponse: 'Tengo 3 opciones compatibles. ¿Te muestro primero las más recientes?',
     confirmation: 'Si, mostrame esas opciones.',
     finalResponse: 'Listo. Ya te mande el detalle y avise al asesor comercial.',
     sheetsSummary: 'Sheets devuelve propiedades filtradas por presupuesto y zona.',
-    crmSummary: 'IA Core registra la confirmacion y preferencia en CRM.',
+    crmSummary: 'IA Core registra la confirmación y preferencia en CRM.',
     slackSummary: 'Slack recibe alerta para seguimiento del lead calificado.',
   },
   {
     id: 'ecommerce-wa',
     sourceNode: 'wa',
-    query: 'Quiero cambiar la direccion de entrega del pedido 4812.',
+    query: 'Quiero cambiar la dirección de entrega del pedido 4812.',
     firstResponse: 'Perfecto, encontre tu pedido. Te confirmo el cambio ahora mismo.',
     confirmation: 'Dale, confirmalo por favor.',
-    finalResponse: 'Cambio aplicado. Tu pedido 4812 ya figura con la nueva direccion.',
-    sheetsSummary: 'Sheets devuelve datos del pedido y politicas de modificacion.',
-    crmSummary: 'La confirmacion del cliente queda guardada en CRM.',
+    finalResponse: 'Cambio aplicado. Tu pedido 4812 ya figura con la nueva dirección.',
+    sheetsSummary: 'Sheets devuelve datos del pedido y políticas de modificacion.',
+    crmSummary: 'La confirmación del cliente queda guardada en CRM.',
     slackSummary: 'Slack notifica al equipo operativo sobre el cambio aplicado.',
   },
 ]
@@ -230,7 +230,7 @@ const EXPLAIN_STEPS = [
   },
   {
     title: '3. IA -> Sheets -> IA',
-    description: 'IA consulta datos guardados y recibe la informacion.',
+    description: 'IA consulta datos guardados y recibe la información.',
   },
   {
     title: '4. IA responde cliente',
@@ -238,7 +238,7 @@ const EXPLAIN_STEPS = [
   },
   {
     title: '5. CRM + Slack',
-    description: 'Con la confirmacion, IA guarda en CRM y avisa por Slack.',
+    description: 'Con la confirmación, IA guarda en CRM y avisa por Slack.',
   },
   {
     title: '6. Cierre final',
@@ -249,9 +249,9 @@ const EXPLAIN_STEPS = [
 const STAGE_SEGMENTS: number[][] = [[0], [1], [2, 3], [4, 5], [6, 7, 8, 9, 10], [11, 12, 13]]
 
 const METRICS = [
-  { value: '< 280ms', label: 'Latencia promedio de decision' },
+  { value: '< 280ms', label: 'Latencia promedio de decisión' },
   { value: '99.9%', label: 'Disponibilidad del sistema' },
-  { value: '24/7', label: 'Ejecucion ininterrumpida' },
+  { value: '24/7', label: 'Ejecución ininterrumpida' },
 ]
 
 const MAX_LIVE_EVENTS = 15
@@ -369,7 +369,7 @@ function buildFlowSegments(sourceNode: 'wa' | 'web', scenario: FlowScenario): Fl
     {
       edgeId: 'ia-gw',
       kind: 'proceso',
-      message: 'IA Core arma la primera respuesta y la envia al Gateway.',
+      message: 'IA Core arma la primera respuesta y la envía al Gateway.',
     },
     {
       edgeId: outboundEdge,
@@ -380,13 +380,13 @@ function buildFlowSegments(sourceNode: 'wa' | 'web', scenario: FlowScenario): Fl
     {
       edgeId: inboundEdge,
       kind: 'entrada',
-      message: `Cliente envia su confirmacion por ${channelLabel}.`,
+      message: `Cliente envía su confirmación por ${channelLabel}.`,
       milestone: 'client_confirmation_sent',
     },
     {
       edgeId: 'gw-ia',
       kind: 'proceso',
-      message: 'Gateway reenvia la confirmacion del cliente al IA Core.',
+      message: 'Gateway reenvia la confirmación del cliente al IA Core.',
     },
     {
       edgeId: 'ia-crm',
@@ -414,12 +414,12 @@ function buildFlowSegments(sourceNode: 'wa' | 'web', scenario: FlowScenario): Fl
     {
       edgeId: 'ia-gw',
       kind: 'proceso',
-      message: 'IA Core prepara confirmacion final para el cliente.',
+      message: 'IA Core prepara confirmación final para el cliente.',
     },
     {
       edgeId: outboundEdge,
       kind: 'salida',
-      message: `Gateway entrega confirmacion final por ${channelLabel}.`,
+      message: `Gateway entrega confirmación final por ${channelLabel}.`,
       milestone: 'final_response_delivered',
     },
   ]
@@ -1106,6 +1106,7 @@ export default function PipelineIA() {
   return (
     <section
       ref={sectionRef}
+      id="proceso"
       style={{
         padding: 'clamp(74px,10vh,112px) clamp(20px,5vw,80px)',
         background: 'transparent',
@@ -1177,7 +1178,7 @@ export default function PipelineIA() {
               letterSpacing: '-0.02em',
             }}
           >
-            Asi fluye la inteligencia.
+            Así fluye la inteligencia.
           </h2>
           <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.64)', margin: 0 }}>
             Consulta cliente {'\u2192'} IA responde {'\u2192'} cliente confirma {'\u2192'} IA cierra + CRM + Slack.
@@ -1614,7 +1615,7 @@ export default function PipelineIA() {
                       fontSize: '12px',
                     }}
                   >
-                    Esperando primera ejecucion del flujo...
+                    Esperando primera ejecución del flujo...
                   </div>
                 ) : null}
               </motion.div>

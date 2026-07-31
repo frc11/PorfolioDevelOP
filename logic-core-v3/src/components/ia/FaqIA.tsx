@@ -11,62 +11,62 @@ type FaqItem = {
 
 const FAQ_ITEMS: FaqItem[] = [
     {
-        question: "Que diferencia hay entre un chatbot basico y un agente IA?",
+        question: "¿Qué diferencia hay entre un chatbot básico y un agente IA?",
         answer:
             "Un chatbot comun sigue respuestas fijas. Un agente IA entiende contexto, consulta tus datos y ejecuta acciones reales como cotizar, agendar, crear leads y actualizar tu CRM.",
     },
     {
-        question: "Cuanto cuesta implementar IA en mi empresa?",
+        question: "¿Cuánto cuesta implementar IA en mi empresa?",
         answer:
-            "Depende del alcance. Un flujo inicial de atencion y ventas suele arrancar con setup cerrado y luego mantenimiento opcional. Definimos costos y entregables desde el inicio para evitar sorpresas.",
+            "Depende del alcance. Un flujo inicial de atención y ventas suele arrancar con setup cerrado y luego mantenimiento opcional. Definimos costos y entregables desde el inicio para evitar sorpresas.",
     },
     {
-        question: "En cuanto tiempo puede quedar funcionando?",
+        question: "¿En cuánto tiempo puede quedar funcionando?",
         answer:
-            "Un primer agente operativo suele salir en 2 a 4 semanas. Si hay integraciones avanzadas con CRM, ERP o multiples canales, el tiempo se extiende segun complejidad.",
+            "Un primer agente operativo suele salir en 2 a 4 semanas. Si hay integraciones avanzadas con CRM, ERP o multiples canales, el tiempo se extiende según complejidad.",
     },
     {
-        question: "Necesito conocimientos tecnicos para usarla?",
+        question: "¿Necesito conocimientos técnicos para usarla?",
         answer:
-            "No. La operacion diaria queda pensada para negocio, no para programadores. Tu equipo usa paneles simples y nosotros nos ocupamos de la capa tecnica.",
+            "No. La operación diaria queda pensada para negocio, no para programadores. Tu equipo usa paneles simples y nosotros nos ocupamos de la capa técnica.",
     },
     {
-        question: "La IA se conecta con mis sistemas actuales?",
+        question: "¿La IA se conecta con mis sistemas actuales?",
         answer:
-            "Si. Podemos integrar con WhatsApp, formularios web, CRM, Sheets, ERP y APIs propias. La idea es sumar IA sin romper tu operacion actual.",
+            "Si. Podemos integrar con WhatsApp, formularios web, CRM, Sheets, ERP y APIs propias. La idea es sumar IA sin romper tu operación actual.",
     },
     {
-        question: "Que pasa si la IA no sabe responder?",
+        question: "¿Qué pasa si la IA no sabe responder?",
         answer:
-            "Se aplica una derivacion segura a humano con todo el contexto de la conversacion. El cliente no queda colgado y tu equipo retoma sin perder informacion.",
+            "Se aplica una derivacion segura a humano con todo el contexto de la conversación. El cliente no queda colgado y tu equipo retoma sin perder información.",
     },
     {
-        question: "Como evitan respuestas inventadas o fuera de tono?",
+        question: "¿Cómo evitan respuestas inventadas o fuera de tono?",
         answer:
             "Trabajamos con reglas de negocio, base de conocimiento validada y guardrails por rubro. El agente responde sobre datos reales de tu empresa, no sobre suposiciones.",
     },
     {
-        question: "Como miden si realmente mejora ventas y soporte?",
+        question: "¿Cómo miden si realmente mejora ventas y soporte?",
         answer:
-            "Medimos tiempos de respuesta, volumen resuelto, conversion por canal y calidad de atencion. Cada etapa queda trazada para optimizar decisiones con datos.",
+            "Medimos tiempos de respuesta, volumen resuelto, conversión por canal y calidad de atención. Cada etapa queda trazada para optimizar decisiones con datos.",
     },
 ]
 
 const OBJECTION_ITEMS: FaqItem[] = [
     {
-        question: "Y si despues quiero cambiar mensajes o flujos?",
+        question: "¿Y si después quiero cambiar mensajes o flujos?",
         answer:
-            "La implementacion queda modular para iterar. Podemos ajustar prompts, reglas y automatizaciones sin rehacer todo el sistema.",
+            "La implementación queda modular para iterar. Podemos ajustar prompts, reglas y automatizaciones sin rehacer todo el sistema.",
     },
     {
-        question: "Y si mi rubro es muy especifico?",
+        question: "¿Y si mi rubro es muy específico?",
         answer:
-            "Precisamente ahi mas valor aporta. Configuramos lenguaje, procesos y decisiones en base a tu negocio para que la IA responda con criterio real.",
+            "Precisamente ahí más valor aporta. Configuramos lenguaje, procesos y decisiones en base a tu negocio para que la IA responda con criterio real.",
     },
     {
-        question: "Y si mi equipo no se adapta rapido?",
+        question: "¿Y si mi equipo no se adapta rápido?",
         answer:
-            "Se implementa por etapas, con procesos simples y acompanamiento. El objetivo es liberar carga operativa desde la primera version, no complicar el dia a dia.",
+            "Se implementa por etapas, con procesos simples y acompañamiento. El objetivo es liberar carga operativa desde la primera versión, no complicar el día a día.",
     },
 ]
 
@@ -204,7 +204,7 @@ export default function FaqIA() {
     const prefersReducedMotion = useReducedMotion()
 
     return (
-        <section className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
+        <section id="faq" className="relative z-10 w-full overflow-hidden bg-[#00010c] px-4 py-24 md:py-28">
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0"
@@ -312,7 +312,7 @@ export default function FaqIA() {
                     </div>
 
                     <h2 className="text-[clamp(2rem,4.5vw,3.5rem)] font-black leading-[0.96] tracking-[-0.05em] text-white">
-                        Lo que queres saber
+                        Lo que querés saber
                         <br />
                         <span className="bg-gradient-to-r from-emerald-200 via-emerald-300 to-teal-200 bg-clip-text text-transparent">
                             sobre IA en tu empresa.
@@ -320,7 +320,7 @@ export default function FaqIA() {
                     </h2>
 
                     <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-zinc-300/75 md:text-lg lg:mx-0">
-                        Respuestas directas para implementacion, tiempos, integraciones y como la IA impacta ventas, soporte y operacion real.
+                        Respuestas directas para implementación, tiempos, integraciones y como la IA impacta ventas, soporte y operación real.
                     </p>
                 </motion.div>
 
@@ -343,7 +343,7 @@ export default function FaqIA() {
                         Objeciones comunes
                     </div>
                     <p className="mx-auto max-w-3xl text-sm leading-7 text-zinc-300/72 md:text-base lg:mx-0">
-                        Las dudas que mas frenan la decision de automatizar, reunidas en un solo bloque para que avances con claridad.
+                        Las dudas que más frenan la decisión de automatizar, reunidas en un solo bloque para que avances con claridad.
                     </p>
                 </motion.div>
 
@@ -378,7 +378,7 @@ export default function FaqIA() {
                             margin: 0,
                         }}
                     >
-                        Tenes otra pregunta?
+                        ¿Tenés otra pregunta?
                     </p>
                     <p
                         style={{

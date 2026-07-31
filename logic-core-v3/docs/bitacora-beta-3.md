@@ -2000,3 +2000,118 @@ describe todo lo demás del paso y avisa qué parte no pudo verse; el índice lo
 todos bajo `docs/manual-usuario/`**. Cero `src/`, cero tests, cero config — no se corrieron `tsc` ni
 las suites porque no había nada que romper. El WIP ajeno (`docs/probe-01-censo-cosecha.md`, untracked)
 quedó intacto. Sin push.
+
+---
+
+## PROBE · Terreno para la poda del Panel del Setter — 2026-07-31
+
+Corrida de **relevamiento**, no de sprint: diez ítems independientes para fundamentar el plan de poda
+de LeadOS, sin planificar ni proponer. Reporte completo en
+[`docs/probe-poda-terreno.md`](probe-poda-terreno.md). Rama `redesign/home`, HEAD `11eee1b`, working
+tree limpio de punta a punta.
+
+**Ocho ítems cerrados, dos parciales, ninguno sin relevar.** Los dos parciales lo son por falta de
+acceso **fuera** del repo, no por fallo de la corrida: R5 no pudo medir el progreso guardado en
+producción (solo existe `DATABASE_URL` local y apunta al branch Neon de dev) y R8 no pudo leer el
+panel de env vars de Netlify/Vercel. Los tres ítems de mayor costo-si-me-equivoco (R3, R8, R9)
+pasaron por un verificador adversarial con consigna de refutar: los tres volvieron
+**CONFIRMADO_CON_CORRECCIONES** — conclusión central en pie, con errores de evidencia plegados y
+marcados en el reporte (números de línea envejecidos, un `grep` que devolvía 19 y se reportó como 1,
+y una lista de call-sites de `gateEnvioDemo` a la que le faltaba `manual.ts`, que es justo el módulo
+que decide qué pantalla ve el setter).
+
+**Las cuatro suites están verdes hoy, sin deuda:** `tsc --noEmit` exit 0 (salida de 0 bytes),
+`check:invariants` **17/17**, `test:leados` **25/25**, `test:setter` **60/60** en 3.4 min — los cuatro
+números exactos que registró el cierre del bloque anterior en `:1933`. El `test:setter` lo dejó
+abierto el relevador paralelo (12/12 al corte) y lo cerró el agente padre con los puertos verificados
+libres de antemano.
+
+**El hallazgo que más cambia el plan salió de R4** (el único ítem que tocó archivos). Achicar
+`FASE_IDS` lo detectan exactamente dos guardianes: `tsc` (4 errores con 4 fases, 16 con 2) y
+`check:invariant:progreso` (`6 !== N`). Los dos specs de `tests/leados` **no detectan nada con 4
+fases** — derivan sus fixtures de `FASE_IDS` en vivo — y con 2 fallan por sus propios índices
+`undefined`, no porque la lógica se dé cuenta. Y el progreso **ya guardado se vacía en silencio y es
+todo-o-nada**: `parseProgreso` (`flow.ts:131-134`) hace `safeParse` contra `z.enum(FASE_IDS)` y ante
+cualquier fallo devuelve `{ completadas: [] }`. Una sola llave muerta —en `completadas`, `faseActual`
+o `marcadas`— borra el objeto entero: se midió un lead con 3 fases de las cuales 2 seguían existiendo,
+y quedó en 0, sin error ni log. Aguas abajo, `manual.ts:450` deja de marcar m7–m12 y el setter vuelve
+al principio de la Construcción. Agravante: `next.config.ts:10-15` tiene `ignoreBuildErrors: true`,
+así que el guardián de tsc **no frena un deploy**.
+
+**Lo que queda abierto para quien planifique.** (a) El *inventario de 16 pantallas con destino* que el
+`HANDOFF` cita como §9 del brief v3 **no existe en el repo** — el archivo commiteado tiene 11
+secciones y su §9 es «Qué queda fuera»; la vara de la poda está fuera del árbol. El censo real son
+**6 patrones de URL y 23 pantallas renderizadas**, con `/setter/nuevo`, `/setter/nuevo/importar` y el
+historial del lead ausentes de todo inventario documental. (b) La decisión sobre links en el opener
+sigue siendo de Franco: la regla vive en **un solo lugar** (`flow.ts:205`, dos call-sites), pero el
+precio son ~3 archivos de lógica, **8** de copy que la afirman en prosa —incluido el prompt que se le
+pega al Gem de outreach—, **4+** artefactos de test y 6+ documentos. (c) El número de progreso
+guardado en producción. (d) Si `QA_ALLOW_LOCALHOST` está definida en el entorno de prod: el guard de
+`/api/qa/login` se evalúa en **request time** (verificado en el bundle compilado), así que setear esa
+variable en un deploy ya construido abre la puerta **sin rebuildear**.
+
+**Dos cosas del terreno que conviene saber.** Otra sesión trabajó sobre este mismo checkout en
+paralelo: el HEAD se movió `e06e3c4` → `11eee1b` a mitad de corrida (commit docs-only) y `.next` se
+vació a las 01:53. Por eso **R4 se corrió en un `git worktree` aislado en vez del checkout
+compartido** — checkoutear una rama descartable en un índice compartido habría puesto los commits
+ajenos sobre una rama que después se borra con `-D`. Los 8 pasos del protocolo se cumplieron igual y
+la prueba de inocuidad está pegada en el reporte: `git status --porcelain` vacío, HEAD idéntico al
+anotado, y el blob de `contracts.ts` igual byte a byte al de HEAD.
+
+Además del relevamiento pedido, quedaron registrados **55 hallazgos laterales** en el bloque final del
+reporte. Los tres que más pesan: `src/app/api/test-sentry/route.ts` es un endpoint **sin ningún
+guard** que viaja al bundle de producción y genera un 500 no autenticado; `validate-origin.ts:49` es
+una segunda superficie de la misma variable de QA con **una sola pata** (la satisface un `curl` sin
+header `Origin`); y los invariantes corren bajo type-stripping de Node, **sin type-check** — medido:
+con `FASE_IDS` en 4, `tsc` marca errores en `manual.ts` y `check:invariant:manual` pasa igual.
+
+**Cierre:** `git diff --stat` contra `11eee1b`: **2 archivos, ambos bajo `docs/`**. Cero `src/`, cero
+tests, cero configuración — el único archivo de código que se tocó en toda la corrida vivió y murió
+dentro del worktree descartable. Sin push.
+
+## Sprint P1 — poda del Panel del Setter: seis correcciones de copy, cero lógica — 2026-07-31
+
+**Terreno.** Arrancó en `redesign/home`, `7bc0a82`, sobre el worktree principal (no uno dedicado).
+`git status --porcelain` mostró 11 archivos con WIP ajeno (landings de marketing + `navigateToPage.ts`,
+nada del setter) — se frenó y se preguntó; Franco confirmó que era su propio WIP en curso y que
+siguiera sin tocarlo. `tsc --noEmit` de partida: exit 0.
+
+**Seis objetivos, cinco aplicados, uno ya resuelto.**
+1. **H-02** (`novedades-panel.tsx:139`) — "la más vieja hace **hace** 45 días": `formatEspera` ya
+   antepone "hace", el label lo repetía. Se sacó el "hace" del prefijo (`'' | 'la más vieja '`) — el
+   mismo bug estaba también en el caso singular ("hace **hace** 1 día"), se corrigió junto por ser la
+   misma línea y la misma causa.
+2. **H-18** (`cartera-toolbar.tsx:28`) — el filtro "Perdidos (post-reunión)" lista negocios cerrados
+   en evaluación, sin reunión: `archivoCausaDe` (flow.ts) clasifica como "perdido" todo lo que Franco
+   cierra fuera de DESCARTADA, en cualquier punto del recorrido. Label nuevo: "Perdidos (cerrados por
+   Franco)".
+3. **H-09** — **ya resuelto, salteado.** `seguimiento-form.tsx:85-87` filtra `SIN_RESPUESTA` del
+   array de opciones cuando `cadenciaAgotada`; la opción "toque 4" deshabilitada no existe en el DOM
+   actual. Grep en todo `src/` sin matches de ese label.
+4. **H-13** (`agenda-form.tsx:160-165`) — el checkbox de "Estoy hablando con el dueño / quien decide"
+   ya estaba envuelto en `<label>` (asociación implícita válida), pero sin nombre accesible propio; el
+   cómputo del navegador arrastraba el ícono y el hint dinámico. Se agregó `aria-label` explícito y
+   corto — atributo, sin tocar el envoltorio.
+5. **Límites de Instagram** (`flow-content.ts` + `canal-seguridad.tsx`) — `topeDiarioDms/avisoDesdeDms/
+   ritmoPorHora` bajaron de `30/24/6` a `10/8/3` (perfil de cuenta nueva). Comentario de decisión
+   agregado arriba de la constante. Los tres textos del cartel se reescribieron para explicar el
+   ramp-up (el número de hoy no es un techo permanente, crece con la cuenta) en vez de mostrar un
+   número fijo — sin agregar bloqueo, el cartel sigue siendo informativo. El array `warmUp` (mismo
+   objeto, misma superficie de UI) tenía semana 2 en "10–20/día", por encima del nuevo tope de 10:
+   se reescribió para no contradecir el número nuevo.
+6. **Comentario del contador** (`_data.ts:113`) — decía "DMs comerciales de hoy del setter";
+   `contarDmsHoy` (outreach.ts:55-57) solo cuenta `channel: 'INSTAGRAM_DM'`. Alineado a "DMs de
+   Instagram de hoy del setter".
+
+**Lo que quedó anotado sin tocar** (fuera de scope por instrucción explícita): los dos hallazgos de
+guardado (tildes que se pierden, "se guarda solo") — viven en pantallas que la poda va a rehacer; el
+monolito de la ruta del manual; cualquier cosa de lógica, gates o schema.
+
+**Verificación.** `tsc --noEmit`: exit 0. `check:invariants`: **17/17**, exit 0. `git diff --stat`:
+**6 archivos**, todos copy/atributo (`novedades-panel.tsx`, `cartera-toolbar.tsx`, `agenda-form.tsx`,
+`flow-content.ts`, `canal-seguridad.tsx`, `_data.ts`) — ninguno de lógica, gates ni schema. Sin push.
+
+**Para Franco, por escrito — no autocerrado.** Los tres textos nuevos del cartel de Instagram
+(`canal-seguridad.tsx`) los tiene que ver en preview: es criterio comercial, no algo que un `tsc` en
+verde valide. Los números del perfil conservador (`10/8/3`) son una propuesta del research citado en
+la tarea — Franco los ajusta según el historial real de la cuenta que va a usar el setter.

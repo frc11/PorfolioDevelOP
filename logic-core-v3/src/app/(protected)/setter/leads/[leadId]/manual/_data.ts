@@ -110,7 +110,7 @@ export type ManualDelLead = {
   escaladoAt: string | null
   /** M7–M12 — la nota del escalamiento (A-23): se re-sirve a su autor y prefillea el re-escalar. */
   escaladoNota: string | null
-  /** M4/M5 — DMs comerciales de hoy del setter: alimenta `CanalSeguridad` (el freno anti-spam). */
+  /** M4/M5 — DMs de Instagram de hoy del setter: alimenta `CanalSeguridad` (el freno anti-spam). */
   dmsHoy: number
   /** M5 (5.1, B-10) — el último toque comercial con su nota, para «Lo último de la
    * charla» sin abrir el historial. `null` si no hay actividades. MISMA lectura

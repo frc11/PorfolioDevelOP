@@ -40,11 +40,21 @@ const SERVICE_ITEMS: readonly ServiceItem[] = [
 
 const SERVICE_ROUTE_SET = new Set<string>(SERVICE_ITEMS.map((item) => item.href));
 
+// El ancla de "Proceso" no es la misma en las 4 landings: /process-automation y
+// /ai-implementations exponen id="proceso", pero en estas dos la sección de proceso
+// ya tenía id propio de antes — se corrige el link, no el destino.
+const PROCESO_ANCHOR_BY_ROUTE: Readonly<Record<string, string>> = {
+    "/web-development": "web-development-timeline",
+    "/software-development": "pipeline",
+};
+
 export function getNavItems(pathname: string): NavItem[] {
     if (SERVICE_ROUTE_SET.has(pathname)) {
+        const procesoAnchor = PROCESO_ANCHOR_BY_ROUTE[pathname] ?? "proceso";
+
         return [
             { href: `${pathname}#hero`, label: "Inicio" },
-            { href: `${pathname}#proceso`, label: "Proceso" },
+            { href: `${pathname}#${procesoAnchor}`, label: "Proceso" },
             { href: `${pathname}#faq`, label: "FAQ" },
             { href: "/contact", label: "Contacto" },
         ];
@@ -60,6 +70,8 @@ const HASH_TO_LABEL: Readonly<Record<string, string>> = {
     "#caracteristicas": "Características",
     "#hero": "Inicio",
     "#proceso": "Proceso",
+    "#web-development-timeline": "Proceso",
+    "#pipeline": "Proceso",
     "#faq": "FAQ"
 };
 

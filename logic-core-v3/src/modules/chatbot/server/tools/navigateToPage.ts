@@ -18,8 +18,8 @@ export const VALID_PATHS = [
   '/process-automation',
   '/software-development',
   '/#nosotros',
-  '/#portafolio',
-  '/#calculadora',
+  '/#portfolio',
+  '/process-automation#calculadora',
   '/#servicios',
 ] as const
 
@@ -46,8 +46,8 @@ Rutas válidas:
 - "/process-automation" — página del servicio Automatizaciones
 - "/software-development" — página del servicio Software a medida
 - "/#nosotros" — sección "Nosotros" en home
-- "/#portafolio" — sección Portfolio en home
-- "/#calculadora" — calculadora ROI en home
+- "/#portfolio" — sección Portfolio en home
+- "/process-automation#calculadora" — calculadora de ahorro en la landing de Automatizaciones
 - "/#servicios" — overview de servicios en home`
 
 export function buildNavigateToPageTool() {

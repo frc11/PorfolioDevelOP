@@ -144,7 +144,7 @@ const rubroContent: Record<number, RubroContent> = {
         { num: '01', type: 'TRIGGER', name: 'WhatsApp Webhook', detail: 'mensaje entrante detectado', icon: MessageCircle },
         { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'interpreta intención del cliente', icon: Bot },
         { num: '03', type: 'HTTP', name: 'API de Stock', detail: 'consulta disponibilidad en tiempo real', icon: Package },
-        { num: '04', type: 'IF', name: 'Hay stock?', detail: 'bifurcación según disponibilidad', icon: CheckCircle2 },
+        { num: '04', type: 'IF', name: '¿Hay stock?', detail: 'bifurcación según disponibilidad', icon: CheckCircle2 },
         { num: '05', type: 'MERCADOPAGO', name: 'Generar Link de Pago', detail: 'pago en 1 clic para el cliente', icon: CreditCard },
         { num: '06', type: 'WHATSAPP', name: 'Enviar Respuesta', detail: 'mensaje + link automático', icon: Mail },
       ],
@@ -254,7 +254,7 @@ const rubroContent: Record<number, RubroContent> = {
       nodes: [
         { num: '01', type: 'TRIGGER', name: 'WhatsApp / Form Webhook', detail: 'lead entrante de cualquier canal', icon: MessageCircle },
         { num: '02', type: 'AI NODE', name: 'Claude Sonnet 4.6', detail: 'califica intención y presupuesto', icon: Bot },
-        { num: '03', type: 'IF', name: 'Lead calificado?', detail: 'filtra antes de llegar al equipo', icon: CheckCircle2 },
+        { num: '03', type: 'IF', name: '¿Lead calificado?', detail: 'filtra antes de llegar al equipo', icon: CheckCircle2 },
         { num: '04', type: 'HTTP', name: 'Generar Propuesta PDF', detail: 'documento personalizado por rubro', icon: FileText },
         { num: '05', type: 'WHATSAPP', name: 'Enviar Propuesta', detail: 'en menos de 5 minutos', icon: Mail },
         { num: '06', type: 'WAIT + WHATSAPP', name: 'Seguimiento automático', detail: '+35% tasa de cierre', icon: Bell },

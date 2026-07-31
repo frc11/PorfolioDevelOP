@@ -100,6 +100,7 @@ export default function WebDevelopmentPage() {
             </div>
 
             <motion.div
+                id="hero"
                 style={{ opacity: heroOpacity, scale: heroScale }}
                 className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1920px] flex-col items-center justify-center px-4 pb-10 pt-24 lg:grid lg:grid-cols-[minmax(0,70%)_1px_minmax(0,30%)] lg:items-center lg:gap-8 lg:px-10 lg:pb-0 lg:pt-0"
             >

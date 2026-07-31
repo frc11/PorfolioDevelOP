@@ -28,7 +28,7 @@ const seoTitleDynamicPhrases = [
     "no existis.",
     "perdes plata.",
     "perdes el tiempo.",
-    "vas atras.",
+    "vas atrás.",
 ]
 const seoLongestDynamicPhrase = seoTitleDynamicPhrases.reduce((longest, phrase) =>
     phrase.length > longest.length ? phrase : longest
@@ -317,7 +317,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
                             <div className="rounded-[1.6rem] border border-cyan-300/[0.12] bg-white/[0.02] p-4 shadow-[0_0_36px_rgba(34,211,238,0.08)]">
                                 <div className="mb-3 flex items-center gap-3">
                                     <Sparkles className={`size-5 text-violet-200 ${floatingIconClass}`} />
-                                    <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">Señales qué importan</span>
+                                    <span className="text-[11px] uppercase tracking-[0.28em] text-white/35">Señales que importan</span>
                                 </div>
                                 <div className="space-y-3">
                                     {["Título relevante", "Ficha local completa", "Velocidad mobile"].map((item) => (
@@ -371,7 +371,7 @@ function GoogleSimulator({ centerMode }: { centerMode: boolean }) {
                             >
                                 <div className="text-[11px] uppercase tracking-[0.28em] text-white/35">Lectura rápida</div>
                                 <p className="mt-3 text-sm leading-7 text-white/55">
-                                    Esto es lo qué ven tus clientes cuándo te buscan. Si no estás arriba, ese clic termina en otra marca.
+                                    Esto es lo que ven tus clientes cuando te buscan. Si no estás arriba, ese clic termina en otra marca.
                                 </p>
                             </CenterHoverCard>
                         </div>
@@ -683,7 +683,7 @@ export function WebDevelopmentSeo() {
                             transition={{ duration: prefersReduced || isBelowLg ? 0 : 1.05, delay: isBelowLg ? 0 : 0.24, ease }}
                             className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/54 md:text-lg lg:mx-0 lg:max-w-[43ch]"
                         >
-                            Cada dia, cientos de personas buscan tu rubro en su ciudad. La diferencia entre vender o desaparecer empieza en esa pantalla.
+                            Cada día, cientos de personas buscan tu rubro en su ciudad. La diferencia entre vender o desaparecer empieza en esa pantalla.
                         </motion.p>
 
                         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-7">

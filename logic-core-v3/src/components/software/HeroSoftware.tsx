@@ -289,6 +289,7 @@ export default function HeroSoftware() {
 
   return (
     <section
+      id="hero"
       className="hero-software-section"
       style={{
         position: 'relative',

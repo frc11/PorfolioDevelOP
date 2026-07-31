@@ -8,3 +8,12 @@ skills-lock.json
 
 # Artefactos de auditorías puntuales (screenshots, reportes, scripts de captura) — generado, no fuente
 audit/
+
+# Local Netlify folder
+.netlify
+
+# Worktrees de git anidados en el arbol (git worktree list) — NO son contenido
+# del repo: staged por un `git add .` entran como gitlinks (modo 160000) y
+# rompen el clone. Se ignoran para que no se puedan re-stagear por accidente.
+audit-clean/
+logic-core-runtime/
