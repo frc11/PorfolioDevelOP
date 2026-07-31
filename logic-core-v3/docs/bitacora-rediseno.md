@@ -2175,3 +2175,78 @@ literalmente, el bug que se acaba de diagnosticar.
 
 Modificados: `src/components/layout/HeroArtifactLayer.tsx` ·
 `docs/bitacora-rediseno.md`
+
+---
+
+## Instalación de Impeccable y baseline del detector · 2026-07-31
+
+Rama `redesign/home`, sobre `c216079`. **No se tocó una sola línea de código de producto**: esta entrada es harness + medición.
+
+### Qué es y qué no es acá
+
+Impeccable aporta vocabulario y detección de anti-patrones. **No aporta dirección estética.** La dirección del sitio ya está cerrada ("instrumento de precisión, editorial") y la manda el proyecto. Donde el detector contradiga la dirección, gana develOP y queda anotado como descartado.
+
+### Versión y estado del hook
+
+- **Versión instalada: `impeccable` v3.5.0** (`npx impeccable install`, ejecutado desde `logic-core-v3/`).
+- El instalador detectó como raíz de proyecto la **raíz del repo** (`PorfolioDevelOP/`), no `logic-core-v3/`. Instaló en dos targets:
+  - `.claude/skills/impeccable/` + hook mergeado en `.claude/settings.local.json`
+  - `.github/skills/impeccable/` + `.github/hooks/impeccable.json` (Copilot)
+- **El hook quedó activo.** Dos disparos: `PostToolUse` sobre `Edit|Write|MultiEdit` (timeout 5s, chequeo inmediato) y `Stop` (timeout 30s, pasada profunda con todas las reglas).
+- **El merge no pisó nada.** El instalador hace `{...existing, hooks: merged}` y solo escribe `.bak` si el JSON previo no parsea — no hubo `.bak`, así que no se perdió configuración local.
+- **Verificado a mano en Windows**: se le pasó un payload de `PostToolUse` real al hook y devolvió `hookSpecificOutput` correcto, exit 0. El comando usa sintaxis POSIX (`[ ! -f … ] || node …`), o sea que depende de que el harness lo corra bajo Git Bash — se verificó bajo Git Bash, no bajo `cmd`.
+- **`.claude/` está en el `.gitignore` de este repo** ("tooling local de agentes, no es código del proyecto") y **no se tocó el .gitignore**. Consecuencia operativa: el skill y el hook de Claude Code **no se versionan** — en una máquina nueva hay que correr `npx impeccable install` otra vez. Sí quedan versionados `.github/skills|hooks`, `PRODUCT.md`, `DESIGN.md`, `.impeccable/design.json` y los reportes.
+
+### El baseline (el número contra el que se mide cada bloque)
+
+Detector determinista, local, sin modelo ni API key. Auditar no consume tokens. Reporte completo en `docs/impeccable-baseline.md`; salida cruda en `docs/impeccable-baseline.json`.
+
+| Scope | Hallazgos |
+|---|---:|
+| `src/` completo | **115** (todos severidad `warning`, cero `error`) |
+| Scope pedido "sitio público" (`src/app` + `sections` + `ia` + `automation` + `software`) | 65 |
+| ↳ de esos, dentro de `src/app/(protected)` y `src/app/api` (portal, no es sitio público) | 19 |
+| ↳ **superficie pública real** | **46** ← este es el número del rediseño |
+| `src/components/design-system/` | **0** ← este es el techo a sostener |
+
+Desglose de `src/` por tipo: `gray-on-color` 56 · `gradient-text` 37 · `ai-color-palette` 6 · `side-tab` 5 · `overused-font` 5 · `bounce-easing` 3 · `layout-transition` 2 · `broken-image` 1. **51 de los 115 son categoría `slop`** (44%).
+
+Desglose de los 46 públicos: `gradient-text` 34 · `ai-color-palette` 4 · `gray-on-color` 3 · `layout-transition` 2 · `bounce-easing` 2 · `side-tab` 1.
+
+**El 74% del slop público es una sola cosa: `bg-clip-text` + gradiente en titulares y métricas.** Y está *distribuido*, no concentrado: 30 de los 36 archivos afectados tienen exactamente un hallazgo. Los peores son `WebDevelopmentBento.tsx` y `home/Portfolio.tsx` con 4 cada uno. Se limpia bloque por bloque; no hay un componente podrido que arreglar de una.
+
+Reales y accionables además del gradiente: `layout-transition` en `OurServices.tsx:7639` (anima `width`) y `VaultIA.tsx:226` (anima `padding`) — contradicen la regla de performance del propio repo; `bounce-easing` en `WebDevelopmentBento.tsx:171` y `ComparadorSection.tsx:44` (`bounce-chevron … infinite`), que es motion perpetuo, anti-referencia explícita de la dirección nueva.
+
+### Descartados (Impeccable pierde contra la dirección de develOP)
+
+1. **`overused-font` ×5 y 4 de los 5 `side-tab`: son plantillas de email HTML.** `font-family:Arial` y `border-left: 4px solid` en `client-notifications/templates.ts`, `sendLeadNotification.ts`, `notify-message.ts`, `detectBotIssues.ts`, `auth.ts`. Arial es fallback deliberado en clientes de correo. El detector no distingue email de web. **Falso positivo de contexto.**
+2. **La regla `overused-font` lista Geist como tipografía "sobreexpuesta".** La dirección fija Geist + Geist Mono, y la mono es elemento de identidad. **Gana develOP; no se reabre la discusión de tipografía.**
+3. `gray-on-color` ×56 no se descarta — es contraste, no estética — pero **se difiere**: solo 3 caen en superficie pública, el resto es portal/chatbot.
+
+### `PRODUCT.md` y `DESIGN.md`
+
+Escritos en la raíz del repo con la dirección **ya cerrada**; no se dejó que la herramienta inventara nada.
+
+- **`PRODUCT.md`** declara alcance explícito: **solo el sitio de marketing** (home + 4 landings + contacto). El portal queda fuera de alcance por escrito, para que Impeccable no opine sobre pantallas que ya tienen su propio lenguaje visual cerrado. Registra el CTA único por WhatsApp, la voz (voseo, sin jerga de agencia), y la lista de lo que **no existe y no se puede fabricar**: sin testimonios, sin logos de clientes, sin benchmarks, sin casos publicados, sin pricing.
+- **`DESIGN.md`** sigue el spec oficial (frontmatter de tokens + 8 secciones canónicas). Los tokens **se extrajeron del `@theme static` real** de `globals.css`, no se inventaron. Sidecar en `.impeccable/design.json` con las 6 primitivas del sistema como snippets HTML/CSS autocontenidos.
+- **Gate 1 queda abierto y anotado, no resuelto.** El brief de dirección dice que el acento de Software es *índigo*; el token vigente es `#8b5cf6` (violeta), y `globals.css` ya deja anotado que `CLAUDE.md` asigna los mismos cuatro hex a servicios distintos. `DESIGN.md` refleja el código y marca la decisión como pendiente de Franco en `/styleguide`.
+
+### Efecto lateral de tener `DESIGN.md`: el hook se vuelve mucho más ruidoso
+
+Con `DESIGN.md` presente se activa la regla **`design-system-color`**, que compara cada color literal contra la paleta del sistema. Medido: sobre `home/Portfolio.tsx` el detector plano reporta **4** hallazgos y el hook reporta **39**. Es esperado —el sitio todavía no está rediseñado y casi ningún color literal pertenece a la paleta nueva— pero conviene saberlo antes de asustarse: durante B2 el hook va a gritar en cada archivo viejo que se toque. El número que importa sigue siendo el del detector plano.
+
+### Reglas de uso vigentes (hasta que B2 esté terminado y revisado)
+
+**Permitido ya:** `npx impeccable detect` cuantas veces se quiera, el hook automático durante los sprints, y `/impeccable audit` + `/impeccable critique` (solo lectura).
+
+**Prohibido:** `/impeccable polish`, `bolder`, `quieter`, `distill`, `animate` y cualquier comando que escriba código; Live Mode; y cualquier corrida masiva sobre el sitio entero. Motivo: mientras B2 construye estructura, un segundo agente reescribiendo estética en paralelo genera estética por acumulación — que es exactamente lo que produjo el estado actual del sitio. Las herramientas de escritura entran después, sobre una sección por vez.
+
+### Cómo se re-mide al cerrar cada bloque
+
+```bash
+npx impeccable detect src/app src/components/sections src/components/ia src/components/automation src/components/software
+```
+
+Contra **46**. Y `npx impeccable detect src/components/design-system` tiene que seguir dando **0**.
+
+> El detector sale con **exit code 2** cuando encuentra hallazgos. No es un fallo de la herramienta.
