@@ -1235,6 +1235,89 @@ las 12 rutas privadas intactas.
   hay 4, **pre-existentes** (idénticos en el build de antes): dos 404 de recurso y
   dos violaciones de CSP report-only del iframe de `template-zero.netlify.app`.
 
+### T5 — Los 17 `repeat: Infinity` restantes de `WhyDevelOP.tsx` · HECHO
+
+Cierra el punto 11 que había quedado abierto en T3. Relevado antes de tocar nada:
+`grep -n "Infinity"` sobre el archivo daba 31 sitios con `repeat: Infinity` — 14 ya
+gateados por sprints previos (`OwnershipVisual`, `MainNodesVisual`, `MainAIVisual`,
+`RoiVisual`) y **17 sin gatear**, coincidiendo exacto con el número estimado en T3:
+
+| componente | líneas | detalle |
+|---|---|---|
+| `ClockVisual` | 1048-1053, 1054-1059, 1061-1065 | solo `useReducedMotion`, sin `isMobile`; el 3er anillo no tenía ni siquiera el gate de reduced-motion |
+| `LayersVisual` | 1077-1087 | ídem, `duration`/`repeat` nunca gateados |
+| `DashboardVisual` | 1105-1110, 1116-1120, 1127-1132 | ídem (3 loops) |
+| `AgentsVisual` | 1146-1151, 1154-1163 | ídem (2 loops) |
+| `GearVisual` | 1179-1182, 1185-1196 | ídem (2 loops) |
+| `MetricsVisual` | 1213-1216 (ticker, 3 instancias), 1234-1239 | la barra de 1234 no tenía **ningún** gate, ni de reduced-motion |
+| `LogoPulseVisual` | 1250-1258, 1259-1263 | ídem (2 loops) |
+| `WhyDevelopBackground` | 1479-1483, 1484-1488 | ídem, los 2 glows de fondo de toda la sección |
+
+Ningún caso de un solo disparo mezclado en el lote — los 31 sitios listados por el
+grep son loops de verdad. Se les aplicó a los 17 el mismo patrón que ya tenían sus
+14 hermanos: `useIsMobileViewport()` sumado al `useReducedMotion()` que ya estaba
+en cada componente, `duration: shouldSimplify ? 0.01 : X` y
+`repeat: shouldSimplify ? 0 : Infinity`. Sin helper compartido, caso por caso, tal
+como pedía el sprint. Ningún caso quedó afuera por no admitir el patrón estándar.
+
+### Medición
+
+Primer intento con el pane de preview del harness: `document.hidden` daba `true`
+(el pane no estaba compositando — mismo síntoma ya conocido de otras corridas) y
+`document.getAnimations()` devolvía cero animaciones de Framer en cualquier
+condición, mobile o desktop. Se migró a un harness Playwright standalone
+(`chromium.launch()`, invocado desde el scratchpad vía `NODE_PATH` al
+`node_modules` del repo) apuntando a un servidor real en `:3050`.
+
+Segunda trampa: contra `next dev`, el WebSocket de HMR fallaba en loop
+(`ERR_INVALID_HTTP_RESPONSE`) y el click de cambio de pestaña nunca actualizaba
+`aria-selected` — parecía que las pestañas estaban rotas. No lo estaban: el ruido
+de reconexión de HMR se comía el estado de React. Con `npm run build` +
+`next start -p 3050` (el mismo build ya verificado) el cambio de pestaña
+funcionó al primer click.
+
+Método final: `getComputedStyle` de todo `#caracteristicas` (transform, opacity,
+filter, boxShadow), 20 muestras cada 150 ms, arrancando 2 s después del cambio de
+pestaña para no confundir el settle de las transiciones de un solo disparo del
+cross-fade de paneles (`AnimatePresence mode="wait"`) con un loop real. La barra de
+`MetricsVisual` anima `width`, que no está en esa lista de propiedades — se
+verificó aparte, igual que `GearVisual` (SVG, su `<g>`/`<rect>` colapsaban en el
+mismo bucket genérico que otros SVG de la sección).
+
+| nodo | mobile 390×844 (sin reduced-motion) | desktop sin reduced-motion |
+|---|---|---|
+| `ClockVisual` (3 anillos) | **estático**, 1 valor distinto en 20 muestras | **ANIMANDO**, 20 valores distintos |
+| `LayersVisual` (3 cards) | estático | ANIMANDO |
+| `DashboardVisual` (barras + dot) | estático | ANIMANDO |
+| `AgentsVisual` (glow + bubbles) | estático | ANIMANDO |
+| `GearVisual` (`<g>` rotando + 8 `<rect>`) | estático, matrices y opacidad fijas | ANIMANDO, matrices y opacidad (0,22→0,88 etc.) variando en las 20 muestras |
+| `MetricsVisual` ticker (×3) | estático, `transform: none` fijo | ANIMANDO, `translateY` corriendo |
+| `MetricsVisual` barra de ancho | estático, `40.7969px` fijo en las 20 muestras | ANIMANDO, `74.23px → 41.11px` |
+| `LogoPulseVisual` (glow + scale) | estático | ANIMANDO |
+| `WhyDevelopBackground` (2 glows) | estático | ANIMANDO |
+
+Con `prefers-reduced-motion: reduce` emulado (Playwright `reducedMotion: 'reduce'`)
+en mobile y en desktop: **0 elementos de Framer animando** en las 3 pestañas, en
+ambos casos. Desktop sin reduced-motion quedó verificado contra el mismo build de
+producción recién generado (no solo inspección de código) — todo lo que animaba
+antes de este sprint (los 14 loops ya gateados + los one-shot de
+`AgencyComparisonVisual`) sigue animando exactamente igual.
+
+Ruido fuera de scope, no tocado: 3 elementos usan `animate-pulse`/`animate-ping` de
+Tailwind (CSS puro, no Framer) — siguen corriendo perpetuos en todas las
+condiciones salvo cuando Playwright fuerza `reduced-motion` (que aparentemente
+desactiva animaciones CSS a nivel de motor, no solo las que consultan la media
+query). Preexistentes, ajenos a este sprint.
+
+### Verificación
+
+- `npm run build` verde. `npx tsc --noEmit` → 0 errores. `eslint` sobre el archivo
+  → 0.
+- `npm install` no hizo falta; `package-lock.json` no se movió.
+- `git status` solo modifica `WhyDevelOP.tsx` (49 inserciones, 33 borrados).
+- Errores de consola: 0 en `/` (verificado contra el build de producción en la
+  corrida de medición).
+
 ### Lo que sigue esperando decisión de Franco
 
 10. **El margen de la red de seguridad.** 293 ms en `/contact` sobre un desktop
@@ -1246,11 +1329,8 @@ las 12 rutas privadas intactas.
     y así los 6000 ms cubren enteros la parte que sí depende del rAF. (c) es la
     mejor técnicamente, pero mete un segundo anclaje en el repo.
 
-11. **Los otros `repeat: Infinity` de `WhyDevelOP.tsx`.** T3 pedía tres líneas y se
-    hicieron esas tres. Pero el archivo tiene **17 loops perpetuos más** en la misma
-    situación (`ClockVisual` en 1052/1058/1064, `LayersVisual`, `DashboardVisual` y
-    el resto hasta la línea 1487): `animate` gateado por `useReducedMotion` —cuando
-    lo está—, pero `repeat: Infinity`
-    sin gatear y sin camino de mobile. El control de la medición lo confirma en
-    runtime — el sonar de `ClockVisual` sigue **ANIMANDO en mobile 390×844** después
-    de este sprint. Fuera del scope tal como estaba escrito.
+11. ~~**Los otros `repeat: Infinity` de `WhyDevelOP.tsx`.**~~ Cerrado en T5: los 17
+    loops restantes quedaron gateados y verificados en runtime. `WhyDevelOP.tsx` no
+    tiene ningún `repeat: Infinity` sin `shouldSimplify` — los 3 `animate-pulse`/
+    `animate-ping` de Tailwind que quedan corriendo son CSS, no Framer, y no eran
+    parte del pedido.

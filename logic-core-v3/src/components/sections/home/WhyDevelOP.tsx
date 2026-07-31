@@ -1041,6 +1041,8 @@ function RoiVisual() {
 
 function ClockVisual() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
 
   return (
     <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(circle_at_center,rgba(8,145,178,0.15),transparent_60%)] sm:w-[calc(100%+48px)]">
@@ -1048,20 +1050,20 @@ function ClockVisual() {
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400"
         style={{ filter: `drop-shadow(0 0 10px rgba(34,211,238,0.8))` }}
-        animate={shouldReduceMotion ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.8, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 0 }}
+        animate={shouldSimplify ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.8, 0] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeOut', delay: 0 }}
       />
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400/80"
         style={{ filter: `drop-shadow(0 0 10px rgba(34,211,238,0.5))` }}
-        animate={shouldReduceMotion ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.6, 0] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeOut', delay: 1.25 }}
+        animate={shouldSimplify ? { opacity: 0.5 } : { scale: [1, 3.5], opacity: [0.6, 0] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeOut', delay: shouldSimplify ? 0 : 1.25 }}
       />
 
       <motion.div
         className="absolute h-16 w-16 rounded-full border border-cyan-400/40 bg-cyan-950/60 backdrop-blur-md"
-        animate={{ scale: [1, 1.1, 1], boxShadow: [`0 0 15px rgba(34,211,238,0.2)`, `0 0 30px rgba(34,211,238,0.6)`, `0 0 15px rgba(34,211,238,0.2)`] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.1, 1], boxShadow: [`0 0 15px rgba(34,211,238,0.2)`, `0 0 30px rgba(34,211,238,0.6)`, `0 0 15px rgba(34,211,238,0.2)`] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       />
       <Clock3 className="relative z-10 h-8 w-8 text-cyan-200 drop-shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
     </div>
@@ -1070,6 +1072,8 @@ function ClockVisual() {
 
 function LayersVisual() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
 
   return (
     <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_top,rgba(8,145,178,0.15),transparent_70%)] [perspective:800px] sm:w-[calc(100%+48px)]">
@@ -1079,8 +1083,8 @@ function LayersVisual() {
             key={layer}
             className="absolute left-1/2 h-16 w-32 -translate-x-1/2 rounded-2xl border border-cyan-400/30 bg-cyan-950/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_5px_15px_rgba(0,0,0,0.5)] backdrop-blur-sm"
             style={{ top: `${layer * 12}px`, transform: 'rotateX(65deg) skewX(-15deg)', zIndex: 3 - layer }}
-            animate={shouldReduceMotion ? { opacity: 1, y: 0 } : { y: [-3, 3, -3], opacity: [0.6, 1, 0.6], filter: [`drop-shadow(0 0 0px rgba(34,211,238,0))`, `drop-shadow(0 0 25px rgba(34,211,238,0.5))`, `drop-shadow(0 0 0px rgba(34,211,238,0))`] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: layer * 0.25 }}
+            animate={shouldSimplify ? { opacity: 1, y: 0 } : { y: [-3, 3, -3], opacity: [0.6, 1, 0.6], filter: [`drop-shadow(0 0 0px rgba(34,211,238,0))`, `drop-shadow(0 0 25px rgba(34,211,238,0.5))`, `drop-shadow(0 0 0px rgba(34,211,238,0))`] }}
+            transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : layer * 0.25 }}
           >
             <div className="mx-auto mt-4 h-1.5 w-14 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
           </motion.div>
@@ -1092,6 +1096,8 @@ function LayersVisual() {
 
 function DashboardVisual() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
 
   return (
     <div className="-mx-5 -mt-5 mb-4 md:mb-1 sm:-mx-6 sm:-mt-6 relative flex h-[120px] md:h-[100px] w-[calc(100%+40px)] items-center justify-center overflow-hidden rounded-t-[24px] border-b border-cyan-500/10 bg-[radial-gradient(ellipse_at_left,rgba(8,145,178,0.15),transparent_70%)] sm:w-[calc(100%+48px)]">
@@ -1105,8 +1111,8 @@ function DashboardVisual() {
                   <motion.div
                     className="w-3 rounded-full bg-cyan-300 shadow-[0_0_10px_rgba(34,211,238,0.7)]"
                     style={{ height }}
-                    animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut', delay: index * 0.28 }}
+                    animate={shouldSimplify ? { opacity: 1 } : { opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: shouldSimplify ? 0.01 : 1.2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : index * 0.28 }}
                   />
                 </div>
               ))}
@@ -1115,8 +1121,8 @@ function DashboardVisual() {
           <div className="flex flex-col items-center justify-center gap-3 md:gap-1.5 rounded-xl border border-cyan-700/50 bg-cyan-950/50 p-3.5 md:p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_0_15px_rgba(34,211,238,0.1)] backdrop-blur-md">
             <motion.div
               className="h-6 w-6 rounded-full bg-cyan-400 shadow-[0_0_25px_rgba(34,211,238,1)]"
-              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: [0.3, 1, 0.3] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              animate={shouldSimplify ? { opacity: 1 } : { opacity: [0.3, 1, 0.3] }}
+              transition={{ duration: shouldSimplify ? 0.01 : 1.8, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : 0.5 }}
             />
             <div className="h-1.5 w-8 rounded-full bg-cyan-800/80" />
           </div>
@@ -1127,8 +1133,8 @@ function DashboardVisual() {
             <motion.div
               key={index}
               className="h-3 w-8 rounded-full bg-cyan-500/80 shadow-[0_0_8px_rgba(34,211,238,0.5)]"
-              animate={shouldReduceMotion ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: index * 0.22 }}
+              animate={shouldSimplify ? { opacity: 0.85 } : { opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: shouldSimplify ? 0.01 : 1.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : index * 0.22 }}
             />
           ))}
         </div>
@@ -1139,6 +1145,8 @@ function DashboardVisual() {
 
 function AgentsVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
   const tone = ACCENT_STYLES[accent];
 
   return (
@@ -1146,8 +1154,8 @@ function AgentsVisual({ accent }: { accent: AccentKey }) {
       <motion.div
         className="absolute inset-0 rounded-[22px] blur-xl"
         style={{ backgroundColor: tone.glow }}
-        animate={shouldReduceMotion ? { opacity: 0.28 } : { opacity: [0.18, 0.36, 0.18] }}
-        transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldSimplify ? { opacity: 0.28 } : { opacity: [0.18, 0.36, 0.18] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       />
       <div className="relative space-y-2">
         {[44, 30].map((width, index) => (
@@ -1155,11 +1163,11 @@ function AgentsVisual({ accent }: { accent: AccentKey }) {
             key={width}
             className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2"
             animate={
-              shouldReduceMotion
+              shouldSimplify
                 ? { opacity: 1 }
                 : { opacity: [0.45, 1, 0.45], filter: ['blur(6px)', 'blur(0px)', 'blur(6px)'], x: [0, 4, 0] }
             }
-            transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut', delay: index * 0.24 }}
+            transition={{ duration: shouldSimplify ? 0.01 : 2.2, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : index * 0.24 }}
           >
             <div className="h-1.5 rounded-full bg-white/55" style={{ width }} />
           </motion.div>
@@ -1171,14 +1179,16 @@ function AgentsVisual({ accent }: { accent: AccentKey }) {
 
 function GearVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
   const tone = ACCENT_STYLES[accent];
 
   return (
     <div className="inline-flex rounded-[22px] border border-white/10 bg-black/20 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
       <svg viewBox="0 0 84 84" className="h-14 w-14" aria-hidden="true">
         <motion.g
-          animate={shouldReduceMotion ? { rotate: 0 } : { rotate: 90 }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          animate={shouldSimplify ? { rotate: 0 } : { rotate: 90 }}
+          transition={{ duration: shouldSimplify ? 0.01 : 3, repeat: shouldSimplify ? 0 : Infinity, ease: 'linear' }}
           style={{ transformOrigin: '42px 42px' }}
         >
           {Array.from({ length: 8 }).map((_, index) => (
@@ -1191,8 +1201,8 @@ function GearVisual({ accent }: { accent: AccentKey }) {
               rx="3"
               fill={tone.strong}
               transform={`rotate(${index * 45} 42 42)`}
-              animate={shouldReduceMotion ? { opacity: 0.85 } : { opacity: [1, 0.18, 1] }}
-              transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut', delay: index * 0.08 }}
+              animate={shouldSimplify ? { opacity: 0.85 } : { opacity: [1, 0.18, 1] }}
+              transition={{ duration: shouldSimplify ? 0.01 : 1.9, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : index * 0.08 }}
             />
           ))}
         </motion.g>
@@ -1205,14 +1215,16 @@ function GearVisual({ accent }: { accent: AccentKey }) {
 
 function MetricsVisual({ accent }: { accent: AccentKey }) {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
   const tone = ACCENT_STYLES[accent];
   const itemHeight = 16;
 
   const renderTicker = (values: string[]) => (
     <div className="h-4 min-w-[32px] overflow-hidden">
       <motion.div
-        animate={shouldReduceMotion ? { y: 0 } : { y: [0, -itemHeight, -itemHeight * 2, 0] }}
-        transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldSimplify ? { y: 0 } : { y: [0, -itemHeight, -itemHeight * 2, 0] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 4.4, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       >
         {values.map((value) => (
           <div key={value} className={`h-4 whitespace-nowrap text-center text-[13px] font-semibold leading-4 ${tone.textClass}`}>
@@ -1234,8 +1246,8 @@ function MetricsVisual({ accent }: { accent: AccentKey }) {
         <motion.div
           className="h-1.5 rounded-full"
           style={{ backgroundColor: tone.strong }}
-          animate={{ width: ['34%', '62%', '84%', '34%'] }}
-          transition={{ duration: 4.4, repeat: Infinity, ease: 'easeInOut' }}
+          animate={shouldSimplify ? { width: '34%' } : { width: ['34%', '62%', '84%', '34%'] }}
+          transition={{ duration: shouldSimplify ? 0.01 : 4.4, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
         />
       </div>
     </div>
@@ -1244,6 +1256,8 @@ function MetricsVisual({ accent }: { accent: AccentKey }) {
 
 function LogoPulseVisual() {
   const shouldReduceMotion = useReducedMotion();
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
 
   return (
     <div className="relative flex h-16 w-24 items-center justify-center overflow-hidden rounded-[22px] border border-white/10 bg-black/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
@@ -1253,13 +1267,13 @@ function LogoPulseVisual() {
           background:
             'conic-gradient(from 90deg, rgba(34,211,238,0.52), rgba(167,139,250,0.58), rgba(34,211,238,0.52))',
         }}
-        animate={shouldReduceMotion ? { rotate: 0, opacity: 0.5 } : { rotate: 360, opacity: [0.35, 0.72, 0.35] }}
-        transition={{ duration: 6.4, repeat: Infinity, ease: 'linear' }}
+        animate={shouldSimplify ? { rotate: 0, opacity: 0.5 } : { rotate: 360, opacity: [0.35, 0.72, 0.35] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 6.4, repeat: shouldSimplify ? 0 : Infinity, ease: 'linear' }}
       />
       <motion.div
         className="relative flex h-10 min-w-12 items-center justify-center rounded-full border border-white/10 bg-[#0b0e12]/90 px-3 py-2"
-        animate={shouldReduceMotion ? { scale: 1 } : { scale: [1, 1.05, 1] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+        animate={shouldSimplify ? { scale: 1 } : { scale: [1, 1.05, 1] }}
+        transition={{ duration: shouldSimplify ? 0.01 : 2.4, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       >
         <BrandLogoMark size={20} opacity={0.92} />
       </motion.div>
@@ -1457,7 +1471,9 @@ function TabbedFeatureVisual({ visual }: { visual: TabMainVisualKey }) {
 
 function WhyDevelopBackground() {
   const shouldReduceMotion = useReducedMotion();
-  const glowAnimation = shouldReduceMotion
+  const isMobile = useIsMobileViewport();
+  const shouldSimplify = shouldReduceMotion || isMobile;
+  const glowAnimation = shouldSimplify
     ? { opacity: 0.72, scale: 1 }
     : { opacity: [0.55, 0.86, 0.55], scale: [1, 1.04, 1] };
 
@@ -1479,12 +1495,12 @@ function WhyDevelopBackground() {
       <motion.div
         className="absolute -left-44 top-10 h-[34rem] w-[34rem] rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.20)_0%,rgba(6,182,212,0.10)_34%,transparent_68%)] blur-3xl"
         animate={glowAnimation}
-        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: shouldSimplify ? 0.01 : 9, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut' }}
       />
       <motion.div
         className="absolute -right-48 top-1/4 h-[38rem] w-[38rem] rounded-full bg-[radial-gradient(circle,rgba(14,165,233,0.18)_0%,rgba(99,102,241,0.08)_42%,transparent_70%)] blur-3xl"
         animate={glowAnimation}
-        transition={{ duration: 10.5, repeat: Infinity, ease: 'easeInOut', delay: 1.1 }}
+        transition={{ duration: shouldSimplify ? 0.01 : 10.5, repeat: shouldSimplify ? 0 : Infinity, ease: 'easeInOut', delay: shouldSimplify ? 0 : 1.1 }}
       />
 
       <svg
