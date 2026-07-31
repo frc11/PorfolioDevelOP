@@ -19,9 +19,12 @@
  *   7. `computeHookBudgetMs`: el presupuesto se techa contra el `maxDuration` de
  *      la ruta, nunca es negativo.
  *   8. La decisión del gate del retry (deadline → NO reintentar).
- *   9. WATCHDOG-2: calibración de las dos ventanas (`idleMs`/`initialIdleMs`)
- *      y del techo de suspensión por tools (`STREAM_WATCHDOG_TOOL_MAX_MS`)
- *      contra los presupuestos de persistencia y el `maxDuration` de la ruta.
+ *   9. WATCHDOG-2/3: calibración de las dos ventanas (`idleMs`/`initialIdleMs`),
+ *      APLICADAS POR STEP (WATCHDOG-3: el cold start es de cada step, no del
+ *      stream completo — tras un tool, el step que genera el texto final
+ *      necesita la ventana LARGA), y del techo de suspensión por tools
+ *      (`STREAM_WATCHDOG_TOOL_MAX_MS`) contra los presupuestos de persistencia
+ *      y el `maxDuration` de la ruta.
  */
 import assert from 'node:assert/strict'
 import {
@@ -287,14 +290,18 @@ async function main(): Promise<void> {
   )
 }
 
-// ── 9. WATCHDOG-2: la calibración de las DOS ventanas deja vivir a la
-// persistencia y no corta respuestas sanas ───────────────────────────────────
+// ── 9. WATCHDOG-2/3: la calibración de las DOS ventanas —POR STEP— deja vivir
+// a la persistencia y no corta respuestas sanas ──────────────────────────────
 // Reemplaza al bloque que pinneaba `stepMs` (removido: beneficio medido cero y
 // truncaba generaciones legítimas). Quien cierra el stream es el watchdog de
 // nuestro borde, con dos ventanas separadas (WATCHDOG-2: bajar la ventana
-// post-chunk de 3000 a 1200ms sin romper el arranque). Lo que hay que pinnear:
-// que cada ventana dispare a tiempo para que `persistTurn` conserve su
-// presupuesto, y que ninguna corte una respuesta sana. Acá falla el test, no prod.
+// post-chunk de 3000 a 1200ms sin romper el arranque) que ahora aplican POR
+// STEP, no por stream completo (WATCHDOG-3: el arranque en frío del provider es
+// una propiedad de CADA step — tras un tool, el step 2 que genera el texto
+// final es una llamada nueva al provider con su propio cold start). Lo que hay
+// que pinnear: que cada ventana dispare a tiempo para que `persistTurn`
+// conserve su presupuesto, y que ninguna corte una respuesta sana. Acá falla
+// el test, no prod.
 {
   // Elapsed real medido en prod: el watchdog se crea (~return de la respuesta)
   // a los ~4.9s; el único chunk de Gemini llega ~1.5s después, a los ~6.4s.
@@ -335,6 +342,34 @@ async function main(): Promise<void> {
     `con TOOL_MAX_MS=${STREAM_WATCHDOG_TOOL_MAX_MS} el peor caso de suspensión dispara a ` +
       `${firesAtMsAfterToolMax}ms y la persistencia sigue recibiendo el presupuesto COMPLETO`,
   )
+  // Nota sobre 9c: modela el resume() del PROPIO techo de seguridad — dispara
+  // con la ventana CORTA (`idleMs`) porque en ese punto `beginStep()` todavía
+  // no corrió (el tool ni terminó). Sigue siendo el comportamiento correcto:
+  // no cambia con WATCHDOG-3.
+
+  // 9d. WATCHDOG-3 — camino REALISTA: el tool termina DENTRO de su cold start
+  // esperado (Neon fría: 6-7s medidos, bien por debajo de TOOL_MAX_MS), y el
+  // step 2 arranca con la ventana LARGA (`beginStep()` → `initialIdleMs`), no
+  // con la corta — que es exactamente el bug que este sprint arregla. Aun con
+  // el cold start COMPLETO del step 2 sumado encima, sigue cerrando antes del
+  // kill de la plataforma.
+  const TYPICAL_TOOL_DURATION_MS = 7_000
+  const firesAtMsStep2NoChunk =
+    WATCHDOG_CREATED_ELAPSED_MS + TYPICAL_TOOL_DURATION_MS + STREAM_WATCHDOG_INITIAL_IDLE_MS
+  assert.ok(
+    firesAtMsStep2NoChunk + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    `tool (${TYPICAL_TOOL_DURATION_MS}ms) + cold start COMPLETO del step 2 con la ventana LARGA ` +
+      `(dispara a ${firesAtMsStep2NoChunk}ms) sigue cerrando antes del kill de la plataforma`,
+  )
+  // ⚠️ RESIDUAL, fuera de scope de este sprint (no se tocan constantes): en el
+  // caso EXTREMO donde el techo de seguridad fuerza el resume (TOOL_MAX_MS
+  // agotado) Y el tool termina poco después Y el step 2 necesita su cold start
+  // COMPLETO, la suma teórica puede superar ROUTE_MAX_DURATION_MS:
+  //   WATCHDOG_CREATED(~4.9s) + TOOL_MAX_MS(15s) + IDLE_MS(~1.2s de margen) +
+  //   INITIAL_IDLE_MS(12s) ≈ 33.1s > 30s.
+  // Es un doble-edge-case (tool casi colgado + step 2 lento) que no se
+  // resuelve en este sprint — si aparece en prod, revisar TOOL_MAX_MS con
+  // Valentino/Franco.
 
   // Piso de la ventana INICIAL: los gaps medidos hasta el primer chunk fueron
   // 1470 y 1664ms. Tiene que superarlos con margen o cortaría respuestas sanas

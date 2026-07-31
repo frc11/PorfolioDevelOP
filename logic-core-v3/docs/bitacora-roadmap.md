@@ -14857,3 +14857,109 @@ Que el cursor se vea a la derecha de la ultima palabra en desktop y mobile, con 
 parrafo y de varios parrafos.
 
 ---
+
+## WATCHDOG-3 - la ventana del watchdog es por STEP, no por stream
+
+### El bug (verificado en produccion, dos veces)
+El visitante daba nombre/mail/telefono, `capture_lead` corria bien (el lead quedaba en
+`ChatbotLead` con todos los datos), pero **el bot no respondia nada** - ni texto ni error. Los
+mensajes siguientes de esa conversacion tampoco recibian respuesta.
+
+### La causa
+Cuando un tool termina, el SDK arranca un STEP NUEVO: manda el resultado del tool de vuelta al
+modelo y espera el texto final. Ese step 2 es una llamada NUEVA al provider, con su propio
+arranque en frio - los `gapMs` medidos hasta el primer chunk fueron 1470ms y 1664ms, los mismos
+numeros que ya se habian medido para el arranque del stream completo.
+
+El watchdog (WATCHDOG-2), al reanudar tras un tool, rearmaba SIEMPRE con la ventana CORTA
+(`STREAM_WATCHDOG_IDLE_MS = 1200ms`) bajo la suposicion de que "reanudar pasa a mitad del
+stream". Esa suposicion era el error de diseno: el arranque en frio no es una propiedad del
+STREAM, es de CADA STEP. Con la ventana corta, el watchdog cortaba antes de que llegara el
+primer token del step 2.
+
+### Confirmado antes de tocar codigo
+- `experimental_onStepStart` existe en `streamText` de `ai@6.0.177`
+  (`ai/dist/index.d.ts:2875`), documentado explicitamente: "Callback invoked when each step
+  begins, **before the provider is called**" (`:1340`).
+- Verificado en el runtime instalado, no solo en la doc: el `notify()` de `onStepStart`
+  (`ai/dist/index.js:7661-7685`) corre estrictamente ANTES de `stepModel.doStream(...)`
+  (`:7690-7746`), dentro de la MISMA funcion `streamStep` que ya conociamos de sprints
+  anteriores (donde vive `resetChunkTimeout`). Corre en CADA step, incluido el primero.
+- Ninguna parada obligatoria se disparo: `onStepStart` existe, se invoca en el camino real, y
+  corre ANTES del primer chunk del step (nunca despues).
+
+### El fix
+- **`streamWatchdog.ts`**: nuevo metodo `beginStep()` en el controller (junto a `suspend`/
+  `resume`). Resetea `hasFirstChunk = false` y rearma via el `armTimer` YA EXISTENTE (que ya
+  respeta la suspension - `if (suspended) return` - asi que "beginStep() no debe rearmar si
+  esta suspendido" se cumple GRATIS, reusando el guard que ya existia, sin logica nueva).
+  `resume()` YA NO fuerza `hasFirstChunk = true` - esa era la linea del bug. Ahora usa el estado
+  que haya, y es `beginStep()` (no una suposicion de `resume()`) quien decide la ventana.
+- Diseno robusto al ORDEN: el orden real confirmado es tool termina -> `onToolCallFinish`/
+  `resume()` (dentro del step que llamo al tool) -> un instante despues, arranca el step
+  siguiente -> `onStepStart`/`beginStep()`. Pero el fix NO depende de ese orden: si
+  `beginStep()` corriera antes que `resume()` (mientras sigue suspendido), `armTimer` no arma
+  nada (respeta la suspension) y deja `hasFirstChunk=false` listo para cuando `resume()`
+  corra despues - mismo resultado en cualquier orden. Verificado con un test especifico
+  (orden invertido).
+- **`handleChatRequest.ts`**: `experimental_onStepStart: () => { watchdogRef.current?.beginStep() }`,
+  cableado sin condicionar por numero de step (corre tambien en el step 1, donde es redundante
+  con lo que ya arma `start()` pero inofensivo - mismo re-arm idempotente).
+
+**Diff no-comentario, verificado con grep**: en `handleChatRequest.ts`, EXACTAMENTE 3 lineas
+(el callback `experimental_onStepStart`). En `streamWatchdog.ts`: la firma nueva en la interfaz,
+la linea `hasFirstChunk = true` ELIMINADA de `resume()`, y el metodo `beginStep()` (reusando
+`armTimer` existente). Nada mas se toco: ni `suspend()`, ni el contador de tools, ni
+`STREAM_WATCHDOG_TOOL_MAX_MS`, ni `persistTurn`, ni las constantes.
+
+### Verificacion de que el test detecta el bug de verdad
+Antes de cerrar, reintroduje temporalmente la linea `hasFirstChunk = true` en `resume()` (el
+bug original) y corri la bateria: **el test 17 fallo** exactamente como se esperaba
+(`chat.watchdog_fired` disparaba de mas, `reasons` traia `['idle']` en vez de `[]`). Restaurado
+el fix, los 19 bloques vuelven a pasar. El test no es un placebo - detecta la regresion real.
+
+### Aritmetica actualizada (`deadline.invariant.ts`, bloque 9)
+- 9a/9b/9c (sin cambios de valor, siguen validos): camino real con chunk, camino sin ningun
+  chunk, y el resume() del PROPIO techo de seguridad (que sigue usando la ventana corta - no
+  cambia con este sprint, porque en ese punto `beginStep()` todavia no corrio).
+- **9d (nuevo)**: camino REALISTA - tool termina dentro de su cold start esperado (~7s, medido
+  6-7s), step 2 arranca con la ventana LARGA (`beginStep()` -> `initialIdleMs`=12000) - sigue
+  cerrando comodo antes del kill de 30s aun con el cold start COMPLETO del step 2 sumado encima.
+
+**Hallazgo residual, declarado y FUERA de scope de este sprint** (no se tocan constantes, era
+regla explicita): en el caso EXTREMO donde el techo de seguridad (TOOL_MAX_MS=15s) fuerza el
+resume, Y el tool termina poco despues, Y el step 2 necesita su cold start COMPLETO, la suma
+teorica puede superar los 30s: ~4.9s (pre-LLM) + 15s (TOOL_MAX_MS) + ~1.2s (margen) + 12s
+(INITIAL_IDLE_MS) = ~33.1s. Es un doble-edge-case (tool casi colgado + step 2 lento) que no se
+resuelve aca - si aparece en produccion, revisar `STREAM_WATCHDOG_TOOL_MAX_MS` con
+Valentino/Franco. Documentado en el codigo, no solo en la bitacora.
+
+### Tests
+`stream-watchdog.invariant.ts`: 19 bloques (15 del sprint anterior + 4 nuevos). Los nuevos:
+(16) reproduccion EXACTA del bug con el orden real (tool termina -> resume() -> beginStep() ->
+cold start del step 2 entre idleMs e initialIdleMs -> NO dispara, el texto llega); (17) orden
+INVERTIDO (beginStep() antes que resume(), con el watchdog todavia suspendido) - no pisa la
+suspension y al reanudar usa la ventana larga igual; (18) beginStep() llamado 3 veces seguidas
+- un solo timer vivo (verificado contra `process.getActiveResourcesInfo()`, no por inspeccion);
+(19) el step 2 nunca manda nada - dispara a `initialIdleMs`, no se queda esperando `idleMs`
+(deliberadamente puesto larguisimo para que el test fallara rapido si el bug seguia).
+
+### Gates (corridos y reportados explicitamente, como se pidio)
+- `tsc --noEmit`: **0 errores** (repo entero).
+- `eslint` sobre los 4 archivos tocados: **0 errores, 0 warnings**.
+- `npm run test:watchdog`: **19/19 OK**.
+- Bateria de regresion completa: deadline, onf1, infra1, infra2, c02, cost1, cost2, utm1, re2,
+  ev4 - **todas OK**.
+- `prisma migrate status`: up to date, sin cambios. Sin migracion, sin git.
+- Sin tocar: `StreamingMarkdown.tsx`, `ChatWindow.tsx`, `useChatbot.ts`, `route.ts`,
+  `persistTurn` (ni su idempotencia ni su contrato), la connection string, el modulo de
+  seguridad, el scoping por organizacion, ni la contabilidad de cupo. Probes de PROBE-STREAM
+  intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+En una conversacion NUEVA (las de prueba anteriores quedaron con un `ASSISTANT` vacio o parcial
+en el historial): que tras dar nombre y telefono el bot **responda**; que el lead siga
+apareciendo en `ChatbotLead`; que una conversacion SIN tools se siga destrabando en ~1.5s (este
+sprint no debia tocar ese camino, y las pruebas locales no reemplazan la verificacion real).
+
+---

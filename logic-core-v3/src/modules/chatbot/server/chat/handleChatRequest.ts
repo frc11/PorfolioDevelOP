@@ -1744,6 +1744,21 @@ export async function handleChatRequest(
     // cubre el caso de un tool que ni falla ni resuelve — cuelga de verdad).
     experimental_onToolCallStart: onToolCallStart,
     experimental_onToolCallFinish: onToolCallFinish,
+    // WATCHDOG-3 — el arranque en frío del provider es POR STEP, no por
+    // stream: tras un tool, el modelo arranca un step NUEVO (llamada nueva al
+    // provider) para generar el texto final, con su propio cold start. Sin
+    // esto, `resume()` (disparado por `onToolCallFinish` cuando el contador
+    // llega a 0) dejaba la ventana CORTA activa justo cuando hacía falta la
+    // ventana larga — el watchdog cortaba antes de que llegara el primer token
+    // del step 2 (el lead se guardaba, pero el bot nunca respondía nada).
+    // Confirmado que corre ANTES de invocar al provider para ese step
+    // (ai/dist/index.d.ts:1340, "before the provider is called"; runtime en
+    // ai/dist/index.js:7661-7685, antes de `doStream` en :7690-7746) — incluido
+    // el primer step, donde es redundante con el arranque de `start()` pero
+    // inofensivo (mismo idempotente re-arm).
+    experimental_onStepStart: () => {
+      watchdogRef.current?.beginStep()
+    },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
     // camino feliz); solo inyecta la derivación canned en un run vacío.
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {

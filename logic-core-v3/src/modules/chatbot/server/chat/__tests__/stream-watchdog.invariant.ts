@@ -38,6 +38,23 @@
  *   15. Tool "colgado" (nunca termina) → el techo de seguridad fuerza el
  *       resume igual, y el watchdog cierra — un tool colgado no puede
  *       reintroducir el cuelgue de 30s.
+ *
+ * WATCHDOG-3 — la ventana inicial es POR STEP, no por stream. Reproduce el bug
+ * verificado en prod: el lead se guardaba (el tool corría bien) pero el bot
+ * nunca respondía nada, porque tras el tool el modelo arranca un STEP NUEVO
+ * (su propio arranque en frío) y `resume()` dejaba la ventana CORTA activa
+ * justo ahí:
+ *   16. El caso del bug, reproducido exacto: chunk de texto fluye → tool
+ *       suspende → tool termina (`resume()`) → arranca el step 2
+ *       (`beginStep()`) → un silencio entre `idleMs` e `initialIdleMs` (el
+ *       cold start del step 2) → NO dispara, y el chunk del step 2 llega bien.
+ *   17. Orden INVERTIDO (`beginStep()` antes que `resume()`, con el watchdog
+ *       todavía suspendido): no pisa la suspensión, y al reanudar usa la
+ *       ventana LARGA de todos modos — el fix no depende de qué callback del
+ *       SDK llegue primero.
+ *   18. `beginStep()` llamado varias veces seguidas → un solo timer vivo.
+ *   19. El step 2 nunca manda ningún chunk → dispara a `initialIdleMs`, no se
+ *       queda esperando `idleMs` (que en este caso sería mucho más largo).
  */
 import assert from 'node:assert/strict'
 import { createStreamWatchdog } from '../streamWatchdog.ts'
@@ -91,6 +108,30 @@ function makeSilentSource(): ReadableStream<Uint8Array> {
       return new Promise<void>(() => {})
     },
   })
+}
+
+/**
+ * Fuente pilotada a mano: el test decide EXACTAMENTE cuándo llega cada chunk,
+ * para poder intercalar `suspend()`/`resume()`/`beginStep()` en los instantes
+ * precisos que reproducen el orden real del SDK (tool termina → `resume()` →
+ * un instante después, el step siguiente arranca → `beginStep()`).
+ */
+function makeControllableSource(): {
+  stream: ReadableStream<Uint8Array>
+  push: (text: string) => void
+  close: () => void
+} {
+  let ctrl: ReadableStreamDefaultController<Uint8Array> | undefined
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      ctrl = controller
+    },
+  })
+  return {
+    stream,
+    push: (text) => ctrl?.enqueue(enc.encode(text)),
+    close: () => ctrl?.close(),
+  }
 }
 
 /** Drena el readable y devuelve el texto concatenado + si vio `done` limpio. */
@@ -417,7 +458,122 @@ assert.deepEqual(unhandled, [], `unhandled rejections detectadas (1-7): ${unhand
   assert.deepEqual(reasons, ['idle'])
 }
 
-// ── Cero unhandled rejections en TODO el archivo (9-15 incluidos) ───────────
+// ── 16. EL BUG REPRODUCIDO: tool termina → step 2 arranca → cold start del
+// step 2 (entre idleMs e initialIdleMs) → NO dispara, el chunk final llega ───
+// Orden EXACTO confirmado en el SDK: onToolCallFinish/resume() corre DENTRO
+// del step que llamó al tool, antes de que el step siguiente arranque; el
+// onStepStart/beginStep() del step 2 llega un instante después.
+{
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 300,
+    onIdle: async () => {},
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+
+  src.push('data: step1-tool-call\n\n')
+  await sleep(10)
+  wd.suspend() // el tool arranca (onToolCallStart)
+  await sleep(60) // el tool "corre" (más que idleMs Y que initialIdleMs — suspendido, no importa)
+  wd.resume() // el tool termina (onToolCallFinish, contador → 0)
+  wd.beginStep() // el step 2 arranca (onStepStart) — ACÁ está el fix
+  await sleep(150) // cold start del step 2: > idleMs(40), < initialIdleMs(300)
+  src.push('data: step2-respuesta-final\n\n') // el texto que ANTES se perdía
+  await sleep(10)
+  src.close()
+
+  const { text, sawDone, error } = await drainPromise
+  assert.equal(error, null)
+  assert.equal(sawDone, true, 'cierre normal — el watchdog NUNCA disparó de más')
+  assert.equal(
+    text,
+    'data: step1-tool-call\n\ndata: step2-respuesta-final\n\n',
+    'EL BUG: sin beginStep(), el watchdog cortaba acá y el texto del step 2 nunca llegaba',
+  )
+}
+
+// ── 17. Orden invertido: beginStep() ANTES que resume() ──────────────────────
+// El fix no puede depender de qué callback del SDK llegue primero.
+{
+  const reasons: string[] = []
+  const wd = createStreamWatchdog({
+    idleMs: 40,
+    initialIdleMs: 300,
+    onIdle: async () => {},
+    onEvent: (info) => reasons.push(info.reason),
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+
+  src.push('data: step1\n\n')
+  await sleep(10)
+  wd.suspend()
+  wd.beginStep() // llega ANTES que resume(): no debe pisar la suspensión
+  await sleep(150) // bien suspendido: ni idleMs(40) ni "casi" initialIdleMs importan
+  assert.deepEqual(reasons, [], 'beginStep() mientras está suspendido no dispara nada')
+
+  wd.resume() // recién ACÁ se reanuda — tiene que usar la ventana LARGA (la dejó beginStep())
+  await sleep(150) // > idleMs(40); si resume() hubiera vuelto a la ventana corta, ya habría cortado
+  assert.deepEqual(reasons, [], 'tras resume(), sigue viva la ventana LARGA que dejó beginStep()')
+
+  src.push('data: step2-final\n\n')
+  await sleep(10)
+  src.close()
+  const { text, sawDone } = await drainPromise
+  assert.equal(sawDone, true)
+  assert.equal(text, 'data: step1\n\ndata: step2-final\n\n', 'ambos chunks llegaron, sin importar el orden')
+}
+
+// ── 18. beginStep() llamado varias veces seguidas: un solo timer vivo ───────
+{
+  const baseline = liveTimers()
+  const wd = createStreamWatchdog({ idleMs: 5_000, initialIdleMs: 5_000, onIdle: async () => {} })
+  assert.equal(liveTimers(), baseline + 1, 'start() ya armó un timer al crear el watchdog')
+  wd.beginStep()
+  wd.beginStep()
+  wd.beginStep()
+  assert.equal(
+    liveTimers(),
+    baseline + 1,
+    'beginStep() llamado 3 veces seguidas sigue siendo UN solo timer, no 3',
+  )
+  wd.suspend() // limpieza: no dejar un timer de 5s vivo hasta el final del proceso
+  assert.equal(liveTimers(), baseline)
+}
+
+// ── 19. Step 2 nunca manda ningún chunk: dispara a initialIdleMs ────────────
+// idleMs deliberadamente larguísimo: si el watchdog usara esa ventana en vez
+// de initialIdleMs tras beginStep(), el test tardaría 5s en pasar.
+{
+  let idleCalls = 0
+  const startedAt = Date.now()
+  const wd = createStreamWatchdog({
+    idleMs: 5_000,
+    initialIdleMs: 40,
+    onIdle: async () => {
+      idleCalls += 1
+    },
+  })
+  const src = makeControllableSource()
+  const drainPromise = drain(src.stream.pipeThrough(wd.stream))
+
+  src.push('data: step1\n\n')
+  await sleep(10)
+  wd.suspend()
+  wd.resume()
+  wd.beginStep() // step 2 arranca — y no manda NADA nunca
+  await drainPromise
+  const elapsed = Date.now() - startedAt
+
+  assert.equal(idleCalls, 1)
+  assert.ok(
+    elapsed < 1_000,
+    `disparó con initialIdleMs tras beginStep() (${elapsed}ms) — no se quedó esperando idleMs=5000`,
+  )
+}
+
+// ── Cero unhandled rejections en TODO el archivo (9-19 incluidos) ───────────
 await sleep(150)
 assert.deepEqual(unhandled, [], `unhandled rejections detectadas: ${unhandled.join(' | ')}`)
 
@@ -426,8 +582,9 @@ console.log(
     'esperando la persistencia, un stream que nunca emite igual cierra, el cierre sano y la ' +
     'cancelación no persisten ni dejan timers, un onIdle que falla no impide cerrar, no queda ' +
     'ninguna promesa sin manejar, las dos ventanas (initial/post-chunk) conmutan correctamente, ' +
-    'y la suspensión por contador (no booleano) aguanta tools solapados y se libera con el ' +
-    'techo de seguridad ante un tool colgado.',
+    'la suspensión por contador (no booleano) aguanta tools solapados y se libera con el techo ' +
+    'de seguridad ante un tool colgado, y beginStep() hace que el arranque en frío del STEP 2 ' +
+    '(tras un tool) ya no corte la respuesta — sin importar el orden entre resume() y beginStep().',
 )
 }
 

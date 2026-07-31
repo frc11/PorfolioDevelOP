@@ -63,6 +63,35 @@
  * timer, nada más). La lógica de CONTEO (varios tools en paralelo, resumir solo
  * cuando el último termina) es responsabilidad del LLAMADOR — ver
  * `handleChatRequest.ts`, donde vive el contador real.
+ *
+ * WATCHDOG-3 — la ventana inicial es POR STEP, no por stream.
+ *
+ * EL BUG que esto arregla: verificado en prod, dos veces. El visitante da sus
+ * datos, `capture_lead` corre bien (el lead queda en la tabla), pero **el bot
+ * nunca responde nada** — ni texto, ni error. Causa: cuando un tool termina, el
+ * SDK arranca un STEP NUEVO (manda el resultado del tool de vuelta al modelo y
+ * espera el texto final) — y ese step es una llamada NUEVA al provider, con su
+ * propio arranque en frío. WATCHDOG-2 asumía que "reanudar pasa a mitad del
+ * stream" y por eso `resume()` forzaba la ventana CORTA (`idleMs`) — correcto
+ * si el tool call y el texto final compartieran step, pero **el arranque en
+ * frío no es una propiedad del stream, es de cada step**. Con la ventana corta,
+ * el watchdog cortaba antes de que llegara el primer token del step 2 (gaps
+ * medidos de 1470-1664ms > `idleMs`=1200ms).
+ *
+ * LA SALIDA: `beginStep()`, cableado a `experimental_onStepStart` de
+ * `streamText` (confirmado que corre ANTES de que el provider sea invocado
+ * para ese step — `ai/dist/index.js:7661-7685`, antes de `doStream` en
+ * `:7690-7746`). Resetea el estado a "esperando el primer chunk DE ESTE STEP" y
+ * rearma con `initialIdleMs`. `resume()` YA NO fuerza `hasFirstChunk = true`:
+ * ahora es `beginStep()` —no la suposición de `resume()`— quien decide qué
+ * ventana corresponde. El orden real (confirmado en el SDK): el tool termina
+ * y `resume()` corre DENTRO del mismo step que lo llamó, ANTES de que el
+ * siguiente step arranque; `beginStep()` llega un instante después y
+ * sobreescribe con la ventana correcta — pero el diseño no depende de ese
+ * orden: si por algún motivo `beginStep()` corriera primero mientras el
+ * watchdog sigue suspendido, `armTimer` ya no arma nada (ver su guard), y
+ * cuando `resume()` llegue después va a usar el `hasFirstChunk` que
+ * `beginStep()` dejó en `false` — mismo resultado, sin importar el orden.
  */
 
 /** Por qué se resolvió el watchdog. Solo `idle` significa que actuó. */
@@ -110,8 +139,21 @@ export interface StreamWatchdogController {
   stream: TransformStream<Uint8Array, Uint8Array>
   /** Desarma el timer. Ningún chunk lo re-arma mientras esté suspendido. */
   suspend(): void
-  /** Re-arma el timer con la ventana post-primer-chunk (`idleMs`). */
+  /**
+   * Re-arma el timer. Usa la ventana que corresponda según el estado ACTUAL de
+   * "¿ya llegó el primer chunk de este step?" — ya no lo asume. Ver
+   * `beginStep()`, que es quien controla ese estado.
+   */
   resume(): void
+  /**
+   * WATCHDOG-3 — Llamar al ARRANCAR CADA STEP (cableado a
+   * `experimental_onStepStart`), incluido el primero. Resetea el watchdog al
+   * estado "esperando el primer chunk" y rearma con `initialIdleMs` — el
+   * arranque en frío del provider es una propiedad de CADA step, no del stream
+   * completo. No-op mientras esté suspendido (no pisa una suspensión activa) y
+   * es idempotente: llamarlo dos veces seguidas no duplica timers.
+   */
+  beginStep(): void
 }
 
 /**
@@ -277,9 +319,20 @@ export function createStreamWatchdog({
     resume() {
       if (settled || !activeController) return
       suspended = false
-      // SIEMPRE la ventana post-primer-chunk: reanudar pasa a mitad del
-      // stream, nunca durante la espera inicial del modelo.
-      hasFirstChunk = true
+      // WATCHDOG-3 — YA NO fuerza `hasFirstChunk = true`. Esa suposición
+      // ("reanudar pasa a mitad del stream") es la que causaba el bug: cuando
+      // un tool termina, lo que sigue casi siempre es un STEP NUEVO (su propio
+      // arranque en frío), no una continuación del mismo texto. Quien decide
+      // la ventana ahora es `beginStep()` — acá solo se re-arma con lo que haya.
+      armTimer(activeController)
+    },
+    beginStep() {
+      if (settled || !activeController) return
+      // Resetea el estado a "esperando el primer chunk DE ESTE STEP". Si el
+      // watchdog sigue suspendido (no debería, en el orden real, pero es
+      // defensivo ante cualquier orden), `armTimer` no arma nada — respeta la
+      // suspensión — y este `false` queda listo para cuando `resume()` corra.
+      hasFirstChunk = false
       armTimer(activeController)
     },
   }
