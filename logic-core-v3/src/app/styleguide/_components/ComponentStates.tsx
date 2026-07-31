@@ -9,6 +9,7 @@ import {
   RuleDivider,
   Surface,
 } from '@/components/design-system'
+import { getWhatsappHref } from '@/lib/whatsapp'
 import { SgLabel } from './SgBlock'
 
 function Specimen({ label, children }: { label: string; children: React.ReactNode }) {
@@ -116,6 +117,30 @@ export function ComponentStates() {
           Transparente, borde de 1px, plano. Sin relieve: no compite con el primario.
         </p>
         <CtaMatrix tone="secondary" />
+      </div>
+
+      <div>
+        <SgLabel>CtaButton — con destino (es un &lt;a&gt;, no un &lt;button&gt;)</SgLabel>
+        <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
+          Con <code className="font-ds-mono">href</code> el CTA se renderiza como enlace de verdad y
+          comparte la receta de clases con el botón (<code className="font-ds-mono">buttonClasses</code>{' '}
+          de <code className="font-ds-mono">ui/Button</code>), así que no pueden divergir. Es la forma
+          que usa el hero para WhatsApp: un destino tiene que poder abrirse en pestaña nueva,
+          copiarse con click derecho y anunciarse como enlace. Solo para destinos externos — la
+          navegación interna sigue yendo por <code className="font-ds-mono">triggerTransition()</code>.
+        </p>
+        <div className="flex flex-wrap items-center gap-6">
+          <Specimen label="primario con destino">
+            <CtaButton href={getWhatsappHref()} target="_blank">
+              Escribinos por WhatsApp
+            </CtaButton>
+          </Specimen>
+          <Specimen label="secundario con destino">
+            <CtaButton href={getWhatsappHref()} target="_blank" tone="secondary">
+              Escribinos por WhatsApp
+            </CtaButton>
+          </Specimen>
+        </div>
       </div>
 
       <RuleDivider />

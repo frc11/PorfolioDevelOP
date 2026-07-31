@@ -1,8 +1,11 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { ComponentProps, ReactNode } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button, buttonClasses } from '@/components/ui/Button'
+import { buttonPress } from '@/lib/motion-variants'
+import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type ButtonOwnProps = ComponentProps<typeof Button>
 
@@ -12,6 +15,22 @@ interface CtaButtonProps extends Omit<ButtonOwnProps, 'variant' | 'size' | 'icon
   tone?: 'primary' | 'secondary'
   /** Flecha final. Es el único icono que admite el sistema. */
   withArrow?: boolean
+  /**
+   * Destino. Si viene, el CTA se renderiza como `<a>` en vez de `<button>`.
+   *
+   * Reservado a destinos EXTERNOS (wa.me, mailto, tel). La navegación interna
+   * del sitio público va por `triggerTransition()` del `TransitionContext`, que
+   * necesita un `onClick` sobre el `<button>` — no un href.
+   *
+   * Es un `<a>` de verdad y no un `<button onClick={location.href}>` porque un
+   * destino tiene que poder abrirse en pestaña nueva, copiarse con click
+   * derecho y anunciarse como enlace al lector de pantalla.
+   */
+  href?: string
+  /** Solo con `href`. */
+  target?: string
+  /** Solo con `href`. Con `target="_blank"` va siempre `noopener`. */
+  rel?: string
 }
 
 /**
@@ -31,26 +50,60 @@ interface CtaButtonProps extends Omit<ButtonOwnProps, 'variant' | 'size' | 'icon
  * Sin scale en hover y sin letterSpacing animado: el CTA actual del sitio anima
  * letterSpacing, que provoca reflow del texto en cada hover.
  *
- * NO navega. Es un `<button>`: en el sitio público la navegación va por
- * `triggerTransition()` del `TransitionContext`, y cablearla es trabajo de B2 —
- * acá el componente todavía no se usa en ninguna sección real.
+ * Con `href` deja de ser un `<button>` y pasa a ser un `<a>` con la MISMA receta
+ * de clases (`buttonClasses`, exportada por `ui/Button`) — no una copia del
+ * string. En esa rama las props exclusivas de `<button>` (`disabled`,
+ * `loading`, `type`) no aplican y no se reenvían.
  */
 export function CtaButton({
   children,
   tone = 'primary',
   withArrow = true,
+  href,
+  target,
+  rel,
+  className,
+  'aria-label': ariaLabel,
   ...rest
 }: CtaButtonProps) {
-  return (
-    <Button variant={tone === 'primary' ? 'ds-primary' : 'ds-secondary'} size="ds" {...rest}>
+  const reduced = useReducedMotion()
+  const variant = tone === 'primary' ? 'ds-primary' : 'ds-secondary'
+
+  const content = (
+    <>
       <span>{children}</span>
       {withArrow ? (
-        <ArrowRight
-          aria-hidden="true"
-          strokeWidth={1.5}
-          className="size-[1.05em] shrink-0"
-        />
+        <ArrowRight aria-hidden="true" strokeWidth={1.5} className="size-[1.05em] shrink-0" />
       ) : null}
+    </>
+  )
+
+  if (href !== undefined) {
+    return (
+      <motion.a
+        href={href}
+        target={target}
+        // `noopener` siempre que se abra en pestaña nueva: sin él la página
+        // destino recibe `window.opener` y puede reescribir la nuestra.
+        rel={target === '_blank' ? (rel ?? 'noopener noreferrer') : rel}
+        aria-label={ariaLabel}
+        className={buttonClasses({ variant, size: 'ds', className })}
+        {...(reduced ? {} : buttonPress)}
+      >
+        {content}
+      </motion.a>
+    )
+  }
+
+  return (
+    <Button
+      variant={variant}
+      size="ds"
+      className={className}
+      aria-label={ariaLabel}
+      {...rest}
+    >
+      {content}
     </Button>
   )
 }

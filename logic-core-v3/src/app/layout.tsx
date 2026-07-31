@@ -49,7 +49,6 @@ import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
 import { ChatWidgetMount } from "@/components/layout/ChatWidgetMount";
-import { EarlyScrollLock } from "@/components/layout/EarlyScrollLock";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -58,10 +57,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning: el <script> de abajo setea overflow:hidden en el
-    // <html> ANTES de hidratar (scroll-lock temprano del intro en home), mientras
-    // el SSR no lo trae → mismatch legítimo y esperado SOLO en el style del <html>.
-    // Es shallow (un nivel): no enmascara mismatches de los hijos.
+    // suppressHydrationWarning: lo conserva la extensión de navegador / el
+    // `data-theme` que `ThemeProvider` escribe en el <html> antes de hidratar.
+    // El scroll-lock pre-hidratación que lo justificaba originalmente
+    // (`EarlyScrollLock`) se eliminó en B2-S1 junto con el intro del home: el
+    // hero nuevo no bloquea el scroll en ningún momento.
     // Las variables de `next/font` van en el <html>, no en el <body>: `globals.css`
     // declara `--font-sans` / `--font-mono` dentro de `@theme`, que Tailwind emite
     // en `:root` (= el <html>). Un custom property se resuelve en el elemento donde
@@ -77,7 +77,6 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
-        <EarlyScrollLock />
       </head>
       <body className="antialiased">
         <PreloaderProvider>

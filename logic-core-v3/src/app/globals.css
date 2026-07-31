@@ -70,6 +70,32 @@
   --radius-ds-control: 9px;
   --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
 
+  /* ── Motion ─────────────────────────────────────────────────────────────
+     Único reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
+     a propósito: un `initial={{opacity:0}}` de Framer se serializa en el HTML
+     del SSR, así que el bloque nace con `opacity:0` y queda invisible hasta que
+     hidrata — si el JS tarda o falla, no se ve nada. Una animación CSS corre
+     con el primer paint, sin depender de JS, y el bloque global de
+     `prefers-reduced-motion` (al final de este archivo) la aterriza en su
+     keyframe final —visible— en 1ms.
+
+     `both` es obligatorio: sin fill-mode el elemento parpadea a su estado
+     final antes de arrancar.
+     ───────────────────────────────────────────────────────────────────── */
+  --animate-ds-reveal: ds-reveal 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+  @keyframes ds-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   /* ── Escala tipográfica ─────────────────────────────────────────────────
      Sin familias nuevas: Geist (sans) y Geist Mono, ya cargadas en
      layout.tsx. El display se distingue por escala y tracking.

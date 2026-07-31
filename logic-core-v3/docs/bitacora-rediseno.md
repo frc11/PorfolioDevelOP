@@ -1467,3 +1467,193 @@ fuera de scope, sin corregir.**
   rota sino un placeholder sin destino; darle uno es decisión de producto.
 - La superposición launcher del chatbot / botón del menú mobile a 390px.
 - T4 (arriba).
+
+---
+
+## B2-S1 — Hero tipográfico · 2026-07-31
+
+Commit: `feat(home): hero tipografico del sistema nuevo`
+Rama: `redesign/home` (checkout local nuevo desde `origin/redesign/home` @ `c216079`;
+el worktree principal estaba en `b0-isolation-motor-chatbot`, que no tiene el sistema
+de diseño de B1). `package-lock.json` **idéntico** entre ambas ramas → no hizo falta
+`npm install`, y el lockfile no se movió.
+
+### Qué se hizo
+
+**El hero es ahora dos capas desacopladas.**
+
+**Capa 1 — base tipográfica.** `Hero.tsx` reescrito entero, solo con piezas de
+`components/design-system/`: `SectionShell` (tema dark) · `Eyebrow` ·
+`DisplayHeading size="xl" as="h1"` · `Lead` · `CtaButton` · microcopy. Es un
+**Server Component**: no lleva `'use client'` ni una línea de JS propia, así que se
+pinta con el HTML del documento. `id="inicio"` conservado.
+
+**Capa 2 — artefacto 3D como mejora progresiva.** `HeroArtifactLayer.tsx` (nuevo)
+monta el canvas **solo en desktop (`min-width: 1024px`), solo sin
+`prefers-reduced-motion`, y recién en el primer hueco de `requestIdleCallback`**
+posterior al paint. Aparece con un fade cuando el SVG está cargado y extruido.
+`frameloop` gateado por `IntersectionObserver`. No toca `overflow`, no toca Lenis, no
+espera a nadie: si el canvas nunca carga, el hero ya está completo.
+
+**Murió el intro del home.** `Preloader.tsx` pasó de orquestador (velo negro,
+readiness gate de 2500 ms, trazado del logo, lockup de texto, hold de lectura,
+borrado, compresión) a **router de tres líneas** hacia `MarketingIntro`. La rama de
+marketing quedó **intacta**: las 5 rutas conservan su intro, su gate de hard-load y su
+red de seguridad de 6 s. `EarlyScrollLock.tsx` **borrado** (cero importadores
+verificados por grep antes de tocarlo).
+
+### Decisiones tomadas (y por qué)
+
+**El reveal de entrada es CSS, no Framer Motion.** Un `initial={{opacity:0}}` de
+Framer se serializa en el HTML del SSR: el bloque nace invisible y no aparece hasta
+que hidrata. Para una capa cuyo requisito explícito es "verse terminada por sí sola",
+eso es exactamente el modo de fallar equivocado. Se agregó `--animate-ds-reveal` al
+`@theme static` (verificado en el CSS emitido: la utility y el `@keyframes ds-reveal`
+están en el bundle). El bloque global de `prefers-reduced-motion` que dejó B1-S1 ya lo
+aterriza en su keyframe final —visible— en 1 ms.
+
+**`CtaButton` acepta `href` y entonces es un `<a>`.** El destino del hero es externo
+(wa.me). Un destino tiene que poder abrirse en pestaña nueva, copiarse con click
+derecho y anunciarse como enlace. Para no copiar el string de clases a otro archivo
+—que es lo que las deja divergir— se extrajo `buttonClasses()` de `ui/Button` como
+export aditivo; `Button` la usa internamente y el `<a>` la reusa. De paso los mapas de
+variantes salieron del cuerpo del componente al scope de módulo (se recreaban en cada
+render). Las clases no cambiaron. Variante nueva visible en `/styleguide`.
+
+**`SectionShell` ganó `spacing='none'`.** El hero necesita su propio ritmo vertical
+para reservar el alto del chrome flotante. **No alcanzaba con pasar `pt-*`/`pb-*` por
+`className`**: se midió contra el `cn` del repo y `twMerge` NO colapsa `py-ds-section`
+contra `pt-*`/`pb-*` — las tres clases sobreviven y quién gana lo decide el orden del
+CSS emitido, no el del código. Es el mismo fallo silencioso que ya documentó
+`DS_FONT_SIZE_CLASSES`. La prop lo hace explícito.
+
+**El canvas ya no lleva `EffectComposer`.** Dos razones que apuntan al mismo lado: (1)
+`ChromaticAberration` es literalmente meter color, y la dirección es monocroma; (2) la
+lección aprendida del repo prohíbe el composer en canvas chicos y transparentes —el
+hero viejo se salvaba por ser full-bleed de página, este es in-box, o sea el caso
+prohibido. Se fue con él el gate `postFxReady`, que existía solo para esquivar el
+cuadrado oscuro. `DotMatrixMesh` tampoco se monta más acá (desconectado del home; el
+archivo sigue vivo para `/login`, `/forgot-password` y `/accept-invite`). Se cayeron
+también `HeroCanvasSizeSync` (el canvas ahora llena su propio wrapper y r3f lo
+dimensiona solo) y `HeroLogoShadow` (una sombra negra sobre fondo casi negro no aporta
+nada).
+
+**`useChromeRevealed` dejó de depender de `PreloaderContext`.** El home entró en la
+rama "cualquier otra ruta": revela al instante. De haber dejado la condición vieja
+(`phase === 'done'`), `phase` se habría quedado en `'drawing'` para siempre —nadie la
+escribe ya— y el dock y el widget no habrían aparecido nunca en el home.
+
+**El HDRI se conserva.** No es decorativo: el material del artefacto es `metalness=1`
+/ `roughness=0` / `clearcoat=1`, un espejo. Sin entorno que reflejar se renderiza
+negro plano. Pesa 1641 KB, se pide a los ~2,3 s, solo en desktop.
+
+### Verificación (medida, no afirmada)
+
+`npm run build` verde · `eslint` sobre los 11 archivos tocados → **0** · `tsc --noEmit`
+→ **1 error, preexistente y ajeno** (`src/lib/searchconsole.ts`, conflicto de tipos
+`googleapis`/`google-gax`; archivo no tocado, `git status` limpio para él).
+
+> ⚠ **`npm run build` muere con OOM (exit 134, heap de 2 GB) en esta máquina** salvo
+> que se le pase `NODE_OPTIONS=--max-old-space-size=8192`. Es preexistente: la primera
+> corrida, sobre el árbol sin tocar, falló igual. Afecta a `npm run start:qa`, que
+> encadena un build.
+
+Runtime, Playwright sobre el build de producción servido (`next start`):
+
+| viewport | scroll bloqueado | scroll libre | rueda real | `<canvas>` | consola |
+|---|---|---|---|---|---|
+| 1440×900 | **nunca** | 169 ms (1er tick de rAF) | OK 690px | 1 | 0 |
+| 1280×800 | **nunca** | 241 ms (1er tick) | OK 690px | 1 | 0 |
+| 1440×760 | **nunca** | 237 ms (1er tick) | OK 691px | 1 | 0 |
+| 390×844 | **nunca** | 226 ms (1er tick) | OK 690px | **0** | 0 |
+
+- **Tiempo hasta scroll libre: baseline 9,77 s → disponible desde el primer frame.**
+  El probe corre antes que cualquier script de la página y nunca observó el scroll
+  bloqueado (`everLocked: false` en los 4 viewports, en el primer tick de rAF).
+  Prueba estructural complementaria: cero `documentElement.style.overflow` /
+  `lenis.stop()` en el camino del home (los que quedan son modales de producto, el
+  menú mobile y las rutas de marketing).
+- **Nota de método:** el baseline de 9,77 s **no se pudo re-medir** con Playwright. El
+  lock viejo tenía guarda `navigator.webdriver !== true` y `isAutomationEnvironment()`
+  saltaba la fase a `'done'`, así que bajo automatización el intro viejo nunca corría.
+  La cifra viene del PROBE (suma de constantes del código).
+- **JS del documento inicial de `/`** (suma de los `<script src>` que declara el HTML
+  servido): **1494,5 KB raw / 443,9 KB gzip → 1484,2 / 441,0**. Baja poco, y era lo
+  esperable: el peso del home no está en el hero. **Chunks de three/r3f en el documento
+  inicial: 0, antes y después** — ya eran diferidos.
+- **Peso y momento de la capa 2** (desktop): `4198…js` 3,9 KB @ ~1,84 s ·
+  `6187…js` 71,2 KB @ ~1,84 s · `studio_small_03_1k.hdr` 1641 KB @ ~2,3 s. Todo
+  después de que la página es scrolleable (~0,2 s). **A 390px no se pide ninguno de
+  los tres.**
+- **Hallazgo de presupuesto:** el grueso de three/r3f **no** es del hero — lo baja el
+  **widget de chat**, que tiene avatares R3F y se monta en todas las rutas públicas,
+  mobile incluido. Por eso el canvas del hero solo suma ~75 KB de JS sobre lo que ya
+  bajaba. Es el candidato real para el presupuesto mobile, no el hero.
+- H1 a 390px: entra sin desbordar, sin scroll horizontal de documento, 52 px, 4 líneas
+  sin cortes feos.
+- **0 errores de consola** en los 4 viewports. Es el total, no el delta: no puede haber
+  "nuevos" cuando el total es cero.
+- Las 5 rutas de marketing, las 3 de auth y `/styleguide` responden 200.
+
+### Un ajuste que salió de medir, no de mirar
+
+Con el `py-ds-section` genérico el microcopy caía **debajo del dock flotante** (a
+1440×900 terminaba en 832 y el dock arranca en 816: 16 px de solape; a 1280×800, 60 px).
+Se le dio al hero ritmo propio (`spacing="none"` + `pt` reducido) y separaciones
+explícitas en vez de un `gap` parejo. Resultado: holgura **+63 px** a 1440×900 y
+**+16 px** a 1280×800.
+
+**Residual, sin resolver:** a **1440×760** (portátil bajo) el microcopy queda 66 px por
+debajo del borde superior del dock. Con un H1 de 4 líneas a 112 px no entra: el
+contenido mide 686 px y arriba del dock hay 676 px. **No se forzó** — el dock es
+justamente lo que S2-T3 rediseña ("logo + anclas + CtaButton compacto"), y ajustar el
+hero contra una geometría que cambia en el sprint siguiente es trabajo tirado. Queda
+anotado con el número.
+
+### Nota de método — verificación visual
+
+Se despachó el subagente `visual-qa` como manda `CLAUDE.md`. **No pudo entregar
+reporte:** primero quedó bloqueado porque el servidor estaba en un puerto no declarado
+en `.claude/launch.json` (archivo trackeado por git, no se tocó por estar fuera de
+scope), y al reanudarlo perdió el acceso a sus herramientas de preview. La verificación
+visual se hizo con Playwright + screenshots leídos a mano, que además compone de verdad
+— la bitácora de B1-S3 ya había registrado el pane de preview midiendo **0 fps de rAF**,
+lo que congela WebGL y da falsos negativos justo en lo que había que mirar.
+
+**El artefacto 3D se lee bien sobre el fondo oscuro**, verificado en captura: el HDRI le
+da un filo especular claro contra el `#0D0B09`. Era el riesgo abierto del sprint.
+
+### Fuera de scope, anotado y NO implementado
+
+- **Cinco fallbacks distintos** hardcodeados para `NEXT_PUBLIC_WHATSAPP_NUMBER`:
+  `5493816223508` (×5), `543812223344` (×2), `5493815000000` (Footer),
+  `5493815555555`, `543813165293` (`/contact`). `src/lib/whatsapp.ts` es el destino al
+  que migrarlos; los call-sites no se tocaron. El prefill sí quedó unificado ahí
+  (mismo texto que ya repetían `Footer.tsx` y `PortalDemoCTA.tsx`).
+- **`PreloaderProvider` quedó inerte.** Tras este sprint **nadie llama a
+  `usePreloader()`**. Sigue montado en el layout raíz porque `PreloaderContext.tsx` es
+  frozen; de él solo se consumen el tipo `PreloaderPhase` (por `HeroArtifact`, también
+  frozen) y `isAutomationEnvironment()` (por `MarketingIntro`).
+- **`src/lib/home-routes.ts` quedó huérfano** (cero importadores). Se purga en S2-T2.
+- **`MagneticCta` quedó con cero importadores.** Se purga en S2-T2.
+- **Superposición launcher del chat / botón del menú mobile a 390px**, ahora con
+  medidas: launcher `310–366 × 764–820`, botón `318–366 × 772–820` — lo **cubre por
+  completo**. El launcher usa `z-index: 2.147.000.100` (escala de widget embebible),
+  así que no se resuelve por z-index sino por posición. Se arregla en S2-T3.
+- **`HeroArtifact.tsx` (frozen) tiene un float perpetuo** (`Math.sin(elapsedTime)` en
+  su `useFrame`), que contradice el "nada perpetuo" de la dirección. No se tocó por
+  estar congelado. Sí queda gateado por viewport vía `frameloop`.
+- El HDRI de 1641 KB podría reemplazarse por `Lightformer`s procedurales de drei (cero
+  asset) si el peso de desktop pasa a ser objetivo.
+
+### Archivos
+
+Modificados: `src/components/layout/Hero.tsx` · `src/components/layout/HeroCanvas.tsx` ·
+`src/components/layout/useChromeRevealed.ts` · `src/components/ui/Preloader.tsx` ·
+`src/components/ui/Button.tsx` · `src/components/design-system/CtaButton.tsx` ·
+`src/components/design-system/SectionShell.tsx` · `src/app/layout.tsx` ·
+`src/app/globals.css` · `src/app/styleguide/_components/ComponentStates.tsx`
+
+Creados: `src/components/layout/HeroArtifactLayer.tsx` · `src/lib/whatsapp.ts`
+
+Borrado: `src/components/layout/EarlyScrollLock.tsx`
