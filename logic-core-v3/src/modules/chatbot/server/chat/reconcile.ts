@@ -386,15 +386,55 @@ export function buildEmptyFallbackMessage(whatsappNumber: string | null): string
  * texto normal del assistant — cero cambios en el widget) y el turno no queda
  * mudo.
  *
- * Mecánica: cada `finish-step` se retiene un chunk (no sabemos si es el último
- * step hasta ver el siguiente chunk). Si lo que sigue es el `finish` del run y
- * no hubo texto útil, las text parts canned se inyectan ANTES del finish-step
- * retenido — quedan DENTRO del último step, así `steps[]`/`text` del onFinish
- * las incluyen y el orden del protocolo UI queda válido. En cualquier otro caso
- * el chunk retenido se libera intacto: con texto útil el stream pasa IDÉNTICO
- * (paridad del camino feliz, sin latencia — retener finish-step no demora
- * ningún text-delta). Un stream que muere con error nunca llega al `finish`
- * → no se inyecta (ese caso es compensación, no fallback).
+ * ⚠️ REGLA DURA, aprendida a los golpes (DEADLOCK-FINISH-STEP): un transform de
+ * usuario puede AGREGAR chunks, pero **JAMÁS puede demorar uno del SDK**. Cada
+ * chunk se reenvía con `controller.enqueue()` en la MISMA invocación de
+ * `transform()` en la que llega. Nada se retiene, ni un chunk ni un tick.
+ *
+ * POR QUÉ. La versión anterior retenía `finish-step` un chunk (para saber si era
+ * el último step antes de decidir). Eso producía una ESPERA CIRCULAR que trababa
+ * el pipeline entero del SDK:
+ *
+ *   1. El inner transform de `streamStep` encola `finish-step`
+ *      (`ai/dist/index.js:8007`) y hace `await stepFinish.promise` (`:8022`).
+ *   2. `stepFinish.resolve()` vive en el `eventProcessor`, bajo
+ *      `part.type === 'finish-step'` (`:7253`) — o sea, corre SOLO cuando ese
+ *      chunk llega hasta ahí.
+ *   3. Nuestros transforms se aplican ENTRE medio (`:7396-7405`), así que el
+ *      chunk retenido nunca llegaba al `eventProcessor`.
+ *   4. Se liberaba con el chunk siguiente... que solo llega si el SDK avanza.
+ *   5. O en nuestro `flush`, que corre al cerrar el stream de arriba — y ese
+ *      cierre (`self.closeStream()`, `:8103`/`:8112`) está DESPUÉS del `await`
+ *      bloqueado.
+ *
+ * Consecuencias medidas en prod: `step_count: 0`, `onFinish` nunca dispara,
+ * costo en 0 (el `usage` viaja en `finish`, que nunca se procesaba) y —lo más
+ * caro— tras un tool el step 2 NUNCA arrancaba, así que el bot capturaba el lead
+ * y después no respondía nada. Verificado contra el `streamText` real: con un
+ * provider sano que cierra normal, SIN este transform `onFinish` dispara con
+ * `steps: 1` y usage completo; CON la versión que retenía, el stream quedaba
+ * colgado. Ver `empty-fallback-pipeline.invariant.ts`.
+ *
+ * MECÁNICA ACTUAL. Se lleva la cuenta de si hubo texto útil a medida que fluyen
+ * los chunks, y la decisión se toma en el chunk terminal `finish` — que es
+ * inequívocamente el final de TODO el run, no de un step intermedio. Si no hubo
+ * texto en ningún step, las text parts canned se encolan ANTES del `finish`, en
+ * la misma invocación: alcanza con el ORDEN dentro de la llamada, no hace falta
+ * retener para inyectar antes.
+ *
+ * CUÁNDO INYECTA: idéntico a la versión anterior (la vieja también decidía al
+ * ver el `finish`). Un step intermedio que solo hace una tool call no dispara
+ * nada — su `finish-step` pasa de largo y la decisión espera al `finish` del
+ * run, para entonces con el texto del step 2 ya contabilizado. Un stream que
+ * muere con error/abort nunca llega al `finish` → no se inyecta (ese caso es
+ * compensación, no fallback).
+ *
+ * LO ÚNICO QUE CAMBIA: las text parts caen DESPUÉS del último `finish-step` en
+ * vez de antes, así que quedan fuera de `steps[]`/`text` del `onFinish`. Es
+ * inocuo para la persistencia: `handleChatRequest` ya resuelve
+ * `assistantContent` con el canned explícito cuando `emptyFallbackInjected` y
+ * el texto viene vacío (belt-and-suspenders que ya existía). Y para el
+ * visitante no cambia nada: las parts igual viajan por el UI message stream.
  *
  * `onInject` avisa al handler (flag de request) que el turno fue fallback:
  * no se cuenta como respuesta entregada (compensación de cupo si aplica).
@@ -405,33 +445,23 @@ export function createEmptyResponseFallbackTransform<TOOLS extends ToolSet>(
 ): StreamTextTransform<TOOLS> {
   return () => {
     let sawUsefulText = false
-    let heldFinishStep: TextStreamPart<TOOLS> | null = null
     return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
       transform(chunk, controller) {
         if (chunk.type === 'text-delta' && chunk.text.trim().length > 0) {
           sawUsefulText = true
         }
-        if (heldFinishStep !== null) {
-          if (chunk.type === 'finish' && !sawUsefulText) {
-            onInject()
-            sawUsefulText = true
-            controller.enqueue({ type: 'text-start', id: EMPTY_FALLBACK_TEXT_ID })
-            controller.enqueue({ type: 'text-delta', id: EMPTY_FALLBACK_TEXT_ID, text: fallbackText })
-            controller.enqueue({ type: 'text-end', id: EMPTY_FALLBACK_TEXT_ID })
-          }
-          controller.enqueue(heldFinishStep)
-          heldFinishStep = null
+        // `finish` = terminal del RUN completo (no de un step). Es el único
+        // punto donde ya se sabe que no va a llegar más texto.
+        if (chunk.type === 'finish' && !sawUsefulText) {
+          onInject()
+          sawUsefulText = true
+          controller.enqueue({ type: 'text-start', id: EMPTY_FALLBACK_TEXT_ID })
+          controller.enqueue({ type: 'text-delta', id: EMPTY_FALLBACK_TEXT_ID, text: fallbackText })
+          controller.enqueue({ type: 'text-end', id: EMPTY_FALLBACK_TEXT_ID })
         }
-        if (chunk.type === 'finish-step') {
-          heldFinishStep = chunk
-          return
-        }
+        // SIEMPRE, en la misma invocación. Sin `flush`: no hay nada retenido
+        // que liberar — y esa es exactamente la propiedad que importa.
         controller.enqueue(chunk)
-      },
-      flush(controller) {
-        // Stream que terminó sin `finish` (error/abort): liberar lo retenido
-        // tal cual — nunca inyectar en un stream que murió.
-        if (heldFinishStep !== null) controller.enqueue(heldFinishStep)
       },
     })
   }

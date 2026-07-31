@@ -15109,3 +15109,125 @@ Que la lista con vinetas se vea bien MIENTRAS streamea, en desktop y mobile, y q
 inline al lado de la ultima palabra en respuestas de texto normal.
 
 ---
+
+## DEADLOCK-FINISH-STEP - nuestro transform trababa el pipeline del SDK
+
+### EL HALLAZGO CENTRAL
+**Un transform de usuario que RETIENE el chunk `finish-step` produce una espera circular con el
+`stepFinish` del SDK y traba TODO el pipeline. Nunca se puede demorar un chunk estructural: un
+transform puede AGREGAR chunks, jamas diferir los del SDK.**
+
+Y el corolario que da vuelta tres sprints: **el stream de Gemini SIEMPRE estuvo sano.** La
+instrumentacion del sprint anterior (PROVIDER-CLOSE) lo probo en la primera corrida en prod:
+
+```
+provider.stream_chunks  reason:"natural"  elapsedMs:659  totalChunks:7
+sawFinishChunk:true  finishReason:"stop"  finishInputTokens:6280  finishOutputTokens:202
+```
+
+`reason: "natural"` = el timer del middleware NUNCA disparo. Gemini cerro solo, en 659ms, completo,
+con su chunk `finish` y usage real. **Todo lo que le atribuimos al provider era falso.** El
+middleware no arreglo nada por su timer: sirvio para darnos la visibilidad que faltaba.
+
+### La cadena del deadlock (verificada contra el codigo instalado)
+1. El inner transform de `streamStep` encola `finish-step` (`ai/dist/index.js:8007-8017`) y hace
+   `await stepFinish.promise` (`:8022`).
+2. `stepFinish.resolve()` vive en el `eventProcessor`, bajo `part.type === 'finish-step'`
+   (`:7253`) - corre SOLO cuando ese chunk llega hasta ahi.
+3. Nuestros transforms se aplican EN EL MEDIO (`:7396-7405`, entre el stitchable stream y el
+   `eventProcessor`), y `createEmptyResponseFallbackTransform` lo tenia retenido
+   (`reconcile.ts:425-428` en la version vieja).
+4. Se liberaba con el chunk siguiente... que solo llega si el SDK avanza.
+5. O en su `flush`, que corre al cerrar el stream de arriba - y ese cierre (`self.closeStream()`,
+   `:8103`/`:8112`) esta DESPUES del `await` bloqueado.
+
+Retenia UNICAMENTE `finish-step`; ningun otro chunk estructural (auditado).
+
+### VERIFICACION EMPIRICA - lo decisivo, contra el streamText REAL
+Provider falso SANO (emite y cierra normal), con y sin nuestro transform:
+
+| escenario | stream drenado | onFinish | onStepFinish | steps | usage in/out | tool |
+|---|---|---|---|---|---|---|
+| SIN transform (texto)       | si           | SI | 1 | 1 | 6280/202  | -  |
+| CON transform (texto)       | NO (COLGADO) | NO | 0 | - | n/a       | -  |
+| SIN transform (tool->step2) | si           | SI | 2 | 2 | 12560/404 | si |
+| CON transform (tool->step2) | NO (COLGADO) | NO | 0 | - | n/a       | si |
+
+**Diagnostico probado.** Y explica los cuatro sintomas: `step_count: 0` (los steps se registran al
+procesar `finish-step`), `onFinish` nunca dispara (su `flush` nunca corre), costo en 0 (el `usage`
+viaja en `finish`, que nunca se procesaba - y ahora sabemos que el dato SIEMPRE estuvo ahi), y el
+mas caro: **tras un tool el step 2 nunca arrancaba** (se lanza desde el inner flush, despues del
+await bloqueado), asi que el bot capturaba el lead y despues no respondia nada. El tool SI corria
+- por eso el lead aparecia en la tabla.
+
+Por que fallaron `chunkMs`, `stepMs`, el watchdog del borde y el middleware del provider:
+**ninguno tocaba el nudo.**
+
+### Correlacion historica
+`git log -S` sobre `reconcile.ts`: el transform entro en **ONF-1, commit 644b2b7 del 2026-07-14**.
+La evidencia de sprints previos decia que `chat.message_completed` dejo de escribirse por esa
+fecha. Correlaciona (sugerente, no prueba - la prueba es la tabla de arriba).
+
+### El fix - opcion (b): decidir en el chunk terminal `finish`
+Se lleva la cuenta de si hubo texto util a medida que fluyen los chunks, y la decision se toma al
+ver el `finish`, que es inequivocamente el final de TODO el run (no de un step intermedio). Si no
+hubo texto en ningun step, las text parts canned se encolan ANTES del `finish`, **en la misma
+invocacion de transform()**: alcanza con el ORDEN dentro de la llamada, no hace falta retener
+para inyectar antes. El `finish-step` pasa de largo en su posicion original. Ya no hay `flush`:
+no queda nada que liberar.
+
+**Por que (b) y no (a):** decidir en `finish-step` no puede distinguir un step intermedio (solo
+tool call, sin texto - correcto que no tenga) del step final vacio. Esa es exactamente la razon
+por la que la version original retenia. El chunk `finish` no tiene esa ambiguedad.
+**Por que no (c):** sacar el fallback a `onFinish` perderia la inyeccion EN VIVO al stream - el
+visitante dejaria de ver el texto de derivacion mientras pasa.
+
+**CUANDO inyecta: identico a antes** (la version vieja tambien decidia al ver el `finish`). El
+caso multi-step queda cubierto: un step intermedio sin texto no dispara nada, la decision espera
+al `finish` con el texto del step 2 ya contabilizado. Verificado en el test.
+
+**LO UNICO QUE CAMBIA:** las text parts caen DESPUES del ultimo `finish-step` en vez de antes, asi
+que quedan fuera de `steps[]`/`text` del `onFinish`. Inocuo: `handleChatRequest` ya resolvia
+`assistantContent` con el canned explicito cuando `emptyFallbackInjected` y el texto viene vacio
+(belt-and-suspenders preexistente). Para el visitante no cambia nada: las parts igual viajan por
+el UI message stream (verificado - el test afirma que el texto del fallback llega al stream real).
+
+### El test que faltaba hace tres sprints
+`empty-fallback-pipeline.invariant.ts` (`npm run test:emptyfallback`), contra el `streamText`
+REAL. Los unitarios del transform NO detectaron el bug porque lo miraban AISLADO: el chunk salia,
+solo que mas tarde, y eso parecia inofensivo ("retrasado, nunca perdido"). **El bug solo existe en
+la interaccion con el pipeline.** Afirma: onFinish dispara, onStepFinish dispara, steps > 0, el
+usage llega con los tokens del `finish`, y con una tool call **el step 2 arranca**. Mas paridad
+(el pipeline se comporta identico con y sin el transform) y un barrido que verifica que ningun
+chunk de entrada falta en la salida, para cada prefijo del stream.
+
+Tambien tiene guard de timeout: sin el, un pipeline trabado deja el `for await` pendiente, el
+event loop se vacia y **Node sale con codigo 0 en silencio** - el test "pasaria" sin verificar
+nada (leccion del sprint anterior).
+
+### Verificacion falla-primero
+Se reintrodujo la retencion original de `finish-step` y el test **fallo en el primer assert**:
+"el stream se drena por completo (no hay deadlock)" - false !== true. Restaurado, pasa.
+
+### Se actualizo onf1-reconcile.invariant.ts
+Sus bloques 5.b y 5.e pinneaban el orden VIEJO (texto inyectado ANTES del `finish-step`, "dentro
+del ultimo step") - o sea, pinneaban el diseno que causaba el deadlock. Actualizados al orden
+nuevo, con comentario explicando por que cambio. 5.a/5.c/5.d/5.f pasan sin tocar.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 3 archivos: 0 errores, 0 warnings.
+- `test:emptyfallback` (nuevo) + onf1, providerclose, watchdog, deadline, infra1, infra2, c02,
+  cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `streamWatchdog.ts`, `providerStreamClose.ts`, `persistTurn`, `StreamingMarkdown.tsx`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) nombre y telefono -> **el bot responde** tras capturar el lead;
+(2) `step_count > 0` en `chat.llm_request_finished`; (3) `tokensIn`/`tokensOut`/`costUsd`
+distintos de 0 (el usage esta: 6280/202 medidos); (4) **`chat.watchdog_fired` DEJA de aparecer**
+en el camino sano - si sigue apareciendo, el pipeline aun no completa solo; (5) la `Duration` baja
+de 30000 ms; (6) `ChatMessage` con fila ASSISTANT y `ChatbotEvent` con `chat.message_completed`.
+
+---

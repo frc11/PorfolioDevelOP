@@ -293,15 +293,28 @@ const textParts = (text: string): Part[] => [
   assert.deepEqual(out, chunks, 'paridad camino feliz: el stream pasa idéntico')
 }
 
-// 5.b — Run vacío (sin text-delta): inyecta la derivación DENTRO del último step.
+// 5.b — Run vacío (sin text-delta): inyecta la derivación antes del `finish`.
+//
+// DEADLOCK-FINISH-STEP — este bloque pinneaba el orden VIEJO (texto inyectado
+// ANTES del `finish-step`, "dentro del último step"). Ese orden solo era posible
+// RETENIENDO el `finish-step`, y esa retención resultó ser una espera circular
+// que trababa el pipeline entero del SDK: `step_count: 0`, `onFinish` nunca
+// disparaba, costo en 0 y el step 2 tras un tool nunca arrancaba. Ver el
+// encabezado de `createEmptyResponseFallbackTransform` y el test de pipeline
+// `empty-fallback-pipeline.invariant.ts`.
+//
+// Ahora el `finish-step` pasa de largo en su posición original y el fallback se
+// encola justo antes del `finish`. CUÁNDO inyecta no cambió; solo DÓNDE caen las
+// text parts. Es inocuo para la persistencia: `handleChatRequest` ya resuelve
+// `assistantContent` con el canned explícito cuando el texto viene vacío.
 {
   const { out, injected } = await runTransform([start, startStep, finishStep, finish])
   assert.equal(injected, true, 'run vacío → inyecta')
   const types = out.map((c) => c.type)
   assert.deepEqual(
     types,
-    ['start', 'start-step', 'text-start', 'text-delta', 'text-end', 'finish-step', 'finish'],
-    'texto inyectado ANTES del finish-step (dentro del step) y antes del finish',
+    ['start', 'start-step', 'finish-step', 'text-start', 'text-delta', 'text-end', 'finish'],
+    'el finish-step conserva su posición (nada retenido) y el texto se inyecta antes del finish',
   )
   const delta = out.find((c) => c.type === 'text-delta')
   assert.ok(delta && delta.type === 'text-delta' && delta.text === 'FALLBACK')
@@ -315,7 +328,7 @@ const textParts = (text: string): Part[] => [
 }
 
 // 5.d — Multi-step con tool en step 1 y texto en step 2: NO inyecta y el orden
-// se preserva (el finish-step retenido se libera al ver el start-step siguiente).
+// se preserva (ningún chunk se retiene, así que el stream pasa tal cual).
 {
   const chunks = [start, startStep, finishStep, startStep, ...textParts('listo, te anoté'), finishStep, finish]
   const { out, injected } = await runTransform(chunks)
@@ -330,17 +343,25 @@ const textParts = (text: string): Part[] => [
   assert.equal(injected, true)
   const deltas = out.filter((c) => c.type === 'text-delta')
   assert.equal(deltas.length, 1, 'una sola inyección aunque haya varios steps')
-  assert.equal(out[out.length - 1].type, 'finish')
-  assert.equal(out[out.length - 2].type, 'finish-step', 'inyección dentro del ÚLTIMO step')
+  assert.equal(out[out.length - 1].type, 'finish', 'el `finish` sigue siendo el último chunk')
+  // DEADLOCK-FINISH-STEP — antes se afirmaba que out[len-2] era `finish-step`
+  // ("inyección dentro del último step"). Ahora la inyección va justo antes del
+  // `finish`, así que lo que precede al `finish` es el `text-end` del fallback.
+  assert.equal(out[out.length - 2].type, 'text-end', 'el fallback se inyecta justo antes del finish')
+  assert.equal(
+    out.filter((c) => c.type === 'finish-step').length,
+    2,
+    'los dos finish-step pasan, ninguno se retiene ni se pierde',
+  )
 }
 
-// 5.f — Stream que muere sin `finish` (error mid-run): NUNCA inyecta; lo
-// retenido se libera intacto en el flush (ese caso es compensación, no fallback).
+// 5.f — Stream que muere sin `finish` (error mid-run): NUNCA inyecta, y como
+// nada se retiene, todo lo que entró ya salió (no hace falta ningún flush).
 {
   const chunks = [start, startStep, finishStep]
   const { out, injected } = await runTransform(chunks)
   assert.equal(injected, false, 'sin finish → no inyecta (stream muerto)')
-  assert.deepEqual(out, chunks, 'flush libera el finish-step retenido')
+  assert.deepEqual(out, chunks, 'todo salió en su momento: no quedó nada esperando un flush')
 }
 
 // ── 6. Modelo de atomicidad de la tx (write 3 falla → nada persiste) ──────────
