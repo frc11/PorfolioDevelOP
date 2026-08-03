@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react'
 import { ArrowRight, Clock3, Gem, ShieldCheck } from 'lucide-react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 function MagneticButton({
     href,
@@ -436,7 +437,7 @@ export const WebDevelopmentCta = () => {
 
                             <div className="mt-6 flex flex-col items-center gap-2.5 sm:mt-7 sm:gap-3">
                                 <MagneticButton
-                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20agendar%20mi%20diagnostico%20estrategico%20para%20crecer%20con%20mi%20web`}
+                                    href={getWhatsappHref('Hola DevelOP, quiero agendar mi diagnostico estrategico para crecer con mi web')}
                                 >
                                     Quiero mi diagnóstico ahora
                                 </MagneticButton>

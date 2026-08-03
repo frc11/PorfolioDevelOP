@@ -12,9 +12,10 @@
  *     ANTES de derivar por stage. En CUALQUIER stage vivo (EVALUADA, APROBADA,
  *     FICHA…) donde antes caía en m5/espera, ahora cae en archivo. m5 (ni ningún
  *     paso de trabajo) queda habilitado — sólo el propio archivo es alcanzable.
- *   - DESCARTADA (terminal por STAGE) NO se re-rutea: conserva su case (m3, el
- *     veredicto a la vista) con `habilitadas` vacía — su badge cyan lo apaga C-17
- *     en presentación, no la derivación.
+ *   - DESCARTADA (terminal por STAGE) NO se re-rutea: conserva su case (m2, el
+ *     veredicto a la vista — P4 fusionó ahí el registro que vivía en m3) con
+ *     `habilitadas` vacía — su badge cyan lo apaga C-17 en presentación, no la
+ *     derivación.
  *   - CERRADO (terminal GANADO) NO cae al archivo: es un cierre exitoso, mantiene
  *     su aterrizaje por stage (m16, la reunión). El archivo es sólo para el lead
  *     que se cerró sin avanzar (PERDIDO).
@@ -83,9 +84,11 @@ const vivoEvaluada = derivarPantalla(
 assert.notEqual(vivoEvaluada.actual, 'archivo', 'un lead vivo NO cae al archivo')
 assert.equal(vivoEvaluada.actual, 'm5', 'EVALUADA con toque vencido sigue derivando a m5 (sin cambios)')
 
-// ── 4. Regresión: DESCARTADA (terminal por STAGE) conserva su case (m3, sin toque) ──
+// ── 4. Regresión: DESCARTADA (terminal por STAGE) conserva su case (m2, sin toque) ──
+// P4: el veredicto se registra en m2 (pantalla fusionada) — la garantía que se
+// prueba es la misma (DESCARTADA no cae al archivo), cambió dónde vive.
 const descartada = derivarPantalla(input({ status: 'PROSPECTO', stage: 'DESCARTADA' }))
-assert.equal(descartada.actual, 'm3', 'DESCARTADA sigue mostrando el veredicto en m3, no el archivo')
+assert.equal(descartada.actual, 'm2', 'DESCARTADA sigue mostrando el veredicto en m2, no el archivo')
 assert.deepEqual(descartada.habilitadas, [], 'DESCARTADA no habilita ningún paso (C-17 apaga el cyan en presentación)')
 
 // ── 5. Regresión: CERRADO (terminal GANADO) NO cae al archivo — mantiene m16 ──
@@ -132,6 +135,6 @@ assert.ok(
 console.log(
   '✓ invariante OK: 2.3 — terminal por status (PERDIDO) deriva a ARCHIVO antes ' +
     'que por stage (nunca m5/espera; sólo el archivo es alcanzable). DESCARTADA ' +
-    'conserva m3 y CERRADO conserva m16 (el archivo es exclusivo del lead perdido). ' +
+    'conserva m2 y CERRADO conserva m16 (el archivo es exclusivo del lead perdido). ' +
     'Es derivación de presentación, no motor: status/stages intactos, never-guard vivo.',
 )

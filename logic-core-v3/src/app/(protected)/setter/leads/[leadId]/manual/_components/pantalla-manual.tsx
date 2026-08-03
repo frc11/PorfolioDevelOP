@@ -62,7 +62,7 @@ export function PantallaManual({
 }: PantallaManualProps) {
   const esActual = pantalla.id === posicion.actual
   // C-17: el cyan "Tu paso ahora" se reserva a lo accionable (disciplina B9). Un
-  // `actual` con `habilitadas` vacía es una pantalla terminal (DESCARTADA en m3,
+  // `actual` con `habilitadas` vacía es una pantalla terminal (DESCARTADA en m2,
   // agendada en m16): sigue siendo la actual (para el guard de la página y la
   // salida "Ir a tu paso"), pero NO es un paso para trabajar → tono zinc, sin cyan.
   const esPasoActivo = esActual && posicion.habilitadas.length > 0

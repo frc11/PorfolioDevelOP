@@ -50,8 +50,8 @@ interface SectionShellProps {
  *    entra en la banda central del viewport, para que el `<body>` acompañe.
  *
  * Por qué (2) existe: hoy ese disparo lo hacen `About.tsx` y `WhyDevelOP.tsx`
- * vía `useThemeSection`, y son los ÚNICOS dos llamadores vivos —
- * `SectionTransition.tsx`, el tercero, es código muerto (cero consumidores).
+ * vía `useThemeSection`, y son los ÚNICOS dos llamadores que quedan — el
+ * tercero, `SectionTransition.tsx`, era código muerto y se borró en B2-S2.
  * Los dos vivos mueren en el rediseño, y como `ThemeProvider` arranca en
  * `'light'`, el tema global quedaría congelado en claro para siempre, sin
  * ningún error de build. `SectionShell` toma esa responsabilidad.

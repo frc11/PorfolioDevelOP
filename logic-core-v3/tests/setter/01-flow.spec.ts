@@ -94,9 +94,9 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await prisma.osLeadDossier.update({ where: { leadId }, data: { fichaJson: fichaConSenal() } })
 
     await qaLogin(page, 'setter')
-    // 5.6: con señal, la raíz aterriza en m2 (llevar la ficha al Evaluador); el
-    // veredicto se transcribe en m3 — habilitada por la derivación (tarea con vuelta).
-    await page.goto(pantalla(leadId, 'm3'), { waitUntil: 'domcontentloaded' })
+    // P4: con señal, la raíz aterriza en m2 — la pantalla fusionada donde se
+    // lleva la ficha a evaluar Y se transcribe el veredicto, sin navegar en el medio.
+    await page.goto(pantalla(leadId, 'm2'), { waitUntil: 'domcontentloaded' })
 
     // El form de evaluación está habilitado (la ficha tiene señal).
     await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' })
@@ -320,8 +320,9 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
   })
 
   await qaLogin(page, 'setter')
-  // 5.6: el veredicto se transcribe en m3 (habilitada — la ficha tiene señal).
-  await page.goto(pantalla(lead.id, 'm3'), { waitUntil: 'domcontentloaded' })
+  // P4: el veredicto se transcribe en m2, la pantalla fusionada (habilitada — la
+  // ficha tiene señal).
+  await page.goto(pantalla(lead.id, 'm2'), { waitUntil: 'domcontentloaded' })
 
   await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' }).getByRole('radio', { name: '2' })).click()
   await pickSelect(page, 'Veredicto del Evaluador', /^Descartar$/i)
@@ -337,13 +338,13 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
   }).toPass({ timeout: 15_000 })
 
   // El manual colapsa al veredicto: DESCARTADA es terminal — la raíz aterriza en
-  // m3 (sin pantallas por delante) y nada de producción se renderiza.
+  // m2 (sin pantallas por delante) y nada de producción se renderiza.
   await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m3$/)
+  await expect(page).toHaveURL(/\/manual\/m2$/)
   await expect(page.getByRole('heading', { name: 'Self-check' })).toHaveCount(0)
-  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige a m3.
+  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige a m2.
   await page.goto(pantalla(lead.id, 'm14'), { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m3$/)
+  await expect(page).toHaveURL(/\/manual\/m2$/)
 })
 
 test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió cambios"', async ({ page }) => {

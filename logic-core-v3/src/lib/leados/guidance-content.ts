@@ -163,6 +163,21 @@ export type CongeladaGuia = {
   vacia: string
 }
 
+/**
+ * Encabezado de un GRUPO de campos dentro de un paso. [P5-A]
+ *
+ * Existe para que un bloque de campos no quede suelto entre los demás: el
+ * setter tiene que ver de un vistazo que lo de abajo es una cosa sola y para
+ * qué se la piden. Como el resto del módulo, solo palabras — qué campos entran
+ * en el grupo lo decide el componente.
+ */
+export type GrupoGuia = {
+  /** Título visible del grupo. */
+  titulo: string
+  /** Una línea de encuadre: para qué sirve lo que se pide adentro. */
+  intro: string
+}
+
 // ── Guía completa de un paso ─────────────────────────────────────────────────
 
 /**
@@ -192,6 +207,8 @@ export type PasoGuia = {
   porque?: readonly LineaRica[]
   /** Guía campo por campo (clave = id del campo en el form). */
   campos?: Readonly<Record<string, CampoGuia>>
+  /** Grupos de campos con título propio dentro del paso (clave = id del grupo). [P5-A] */
+  grupos?: Readonly<Record<string, GrupoGuia>>
   /** Ejemplos contrastados esto-sí / esto-no. [ejemplos · 1.2] */
   ejemplos?: readonly EjemploContrastado[]
   /** Criterios que mira un evaluador externo (qué mira y por qué). [evaluación · 3.2] */
@@ -296,9 +313,42 @@ export const GUIA_FICHA = {
       mejora:
         'Bajá la operación: ¿toman pedidos o reservas y por dónde? ¿horarios al día? ¿demoras que mencionan los clientes? ¿delivery o turnos?',
     },
+    // ── P5-A · Material para construir la demo (grupo `materiales`) ─────────
+    resenasUrl: {
+      label: '¿Dónde se leen las reseñas?',
+      hint: 'Pegá la dirección de la ficha de Google, o de donde estén. Sirve para volver a mirarlas mientras armás la demo.',
+      ejemplo: 'Ej: https://maps.app.goo.gl/…',
+    },
+    imagenesUrl: {
+      label: '¿De dónde bajás el logo y las fotos?',
+      hint: 'La dirección donde están las imágenes reales: una carpeta de Drive, la web vieja, el perfil con las mejores fotos.',
+      ejemplo: 'Ej: https://drive.google.com/…',
+    },
+    otraRedUrl: {
+      label: '¿Está en otra red?',
+      hint: 'Además del Instagram que cargaste en el alta: Facebook, TikTok, lo que tenga.',
+      ejemplo: 'Ej: https://facebook.com/…',
+    },
+    queVende: {
+      label: '¿Qué vende y a qué precio?',
+      hint: 'Sus productos o servicios principales. Si los precios están publicados, copialos tal cual; si no están, dejalo así — no los inventes.',
+      ejemplo: 'Ej: milanesa napolitana $8.500 · pizza grande $9.200 · envío $1.200…',
+    },
+    comoSePresenta: {
+      label: '¿Cómo habla el negocio de sí mismo?',
+      hint: 'Copiá su bio, su eslogan o el «quiénes somos». Con eso la demo suena a ellos y no a plantilla.',
+      ejemplo: 'Ej: bio de IG: «Cocina de barrio desde 1998. Pedidos por WhatsApp»…',
+    },
     otros: {
       label: 'Otras observaciones',
       hint: 'Todo lo que viste y no entra arriba. Mejor que sobre a que falte.',
+    },
+  },
+  grupos: {
+    materiales: {
+      titulo: 'Material para construir la demo',
+      intro:
+        'Esto viaja al bloque que pegás en la herramienta cuando construís. Todo es opcional: lo que no consigas, dejalo vacío — nada se inventa por vos.',
     },
   },
   validacion: {
@@ -894,6 +944,14 @@ export const GUIA_FICHA_EJEMPLAR = {
       'Fotos reales del local y de los platos, con buena luz natural. Logo propio, simple (no es stock). Tono cercano, tutean, usan emojis. Las historias destacadas están sin portada y desordenadas.',
     senalesOperativas:
       'Toman pedidos solo por DM y WhatsApp, no hay carta online. Horario de la bio desactualizado (dice 19h; en un posteo reciente avisan que ahora cierran 21h). Hacen delivery por la zona pero no lo aclaran en ningún lado fijo.',
+    // P5-A — el material que la construcción necesita tener junto.
+    resenasUrl: 'https://maps.app.goo.gl/ejemplo-cafe-de-barrio',
+    imagenesUrl: 'https://drive.google.com/drive/folders/ejemplo-fotos-cafe',
+    otraRedUrl: 'https://www.facebook.com/ejemplocafedebarrio',
+    queVende:
+      'Café de especialidad ($2.800 el flat white), medialunas ($1.400 la unidad), tostados y una carta corta de brunch los fines de semana ($9.500 el plato). Los precios los sacan de las fotos de la carta que subieron en marzo — están publicados en el feed, no en historias.',
+    comoSePresenta:
+      'Bio de IG: «Café de especialidad en el barrio desde 2019 ☕ Tostado propio. Pedidos por WhatsApp». En los posteos se presentan como el café "de siempre" del barrio y destacan que tuestan ellos mismos.',
     otros:
       'Tienen una segunda sucursal que casi no aparece en el IG; en los comentarios preguntan seguido "¿la de Centro sigue abierta?" y queda sin respuesta.',
   },

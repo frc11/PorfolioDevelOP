@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 interface FAQItem {
   question: string
@@ -362,9 +363,7 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'clamp(24px, 4vh, 40px)' }}>
         <motion.a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-            'Hola DevelOP, vi la página de IA y quiero ver como funciona para mi negocio'
-          )}`}
+          href={getWhatsappHref('Hola DevelOP, vi la página de IA y quiero ver como funciona para mi negocio')}
           target="_blank"
           rel="noopener noreferrer"
           whileHover={reduced ? {} : { scale: 1.04 }}

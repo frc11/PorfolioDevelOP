@@ -146,6 +146,14 @@
   --text-ds-control: 1rem;
   --text-ds-control--line-height: 1;
 
+  /* ── Agregado en B2-S2 ──────────────────────────────────────────────────
+     Alto de la barra de navegación fija. Es un token y no un `h-16` suelto
+     porque lo consumen DOS lugares que tienen que moverse juntos: la barra
+     (`h-ds-nav`) y el `scroll-padding-top` del <html>. Sin el segundo, toda
+     ancla del sitio aterriza con su encabezado tapado por la barra.
+     ───────────────────────────────────────────────────────────────────── */
+  --spacing-ds-nav: 4rem;
+
   /* ── Capa semántica (se invierte por sección) ───────────────────────────
      Los tokens de arriba son la paleta literal y NO se mueven. Estos son los
      roles que consumen los componentes (`bg-ds-canvas`, `text-ds-fg`,
@@ -250,6 +258,13 @@ body {
     /* IE/Edge */
     overscroll-behavior-y: none;
     overscroll-behavior-x: none;
+  }
+
+  /* La barra de navegación es fija y opaca: sin esto, cualquier aterrizaje por
+     ancla (carga fría de `/#portfolio`, `scrollIntoView`) deja el encabezado de
+     la sección debajo de la barra. Aplica al scroll nativo del documento. */
+  html {
+    scroll-padding-top: var(--spacing-ds-nav);
   }
 
   ::-webkit-scrollbar {

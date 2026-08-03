@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 type PricingTier = {
   name: string
@@ -399,7 +400,7 @@ function PremiumPricingCard({
 
         <div className="relative z-10 mt-5">
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20el%20plan%20${encodeURIComponent(tier.name)}%20de%20automatizaciones`}
+            href={getWhatsappHref(`Hola DevelOP, quiero el plan ${tier.name} de automatizaciones`)}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex h-12 w-full items-center justify-center rounded-[0.95rem] border border-white/15 bg-black/30 text-[12px] font-extrabold uppercase tracking-[0.2em] text-white/90 transition-all duration-150 hover:border-white/28"
