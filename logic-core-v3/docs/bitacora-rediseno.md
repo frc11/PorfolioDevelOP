@@ -1898,3 +1898,280 @@ Borrados: `src/components/layout/DynamicDock.tsx` ·
 `src/components/sections/home/PortalDemo.tsx` ·
 `src/components/sections/AIBentoGrid.tsx` · `src/components/ui/TypewriterText.tsx` ·
 `src/components/ui/buttons/MagneticCta.tsx` · `src/lib/home-routes.ts`
+
+---
+
+## B2-S3 — La capa 3D del hero se revela · 2026-08-03
+
+Commit: `fix(home): revela la capa 3D del hero con red de seguridad`
+Rama: `redesign/home` (desde `5d844bb`).
+
+Un solo objetivo: que el artefacto 3D se revele en desktop. No se rediseñó el
+hero, no se tocó la capa tipográfica, no se tocó ningún token del sistema.
+Archivo de código modificado: **uno**, `src/components/layout/HeroArtifactLayer.tsx`.
+
+### T1 — La contradicción entre B2-S1 y B2-S2, resuelta
+
+Las dos mediciones anteriores decían cosas incompatibles. B2-S1: "el artefacto
+se lee bien sobre el fondo oscuro, verificado en captura". B2-S2: "la capa se
+queda en `opacity: 0` de forma permanente, medido a lo largo de ~110 s".
+
+**Las dos describen algo real. La de B2-S2 es un artefacto del entorno de
+medición, no un defecto del build.**
+
+La cadena de `onReady`, reconstruida con archivo:línea:
+
+| # | Dónde | Qué hace |
+|---|---|---|
+| 1 | `HeroArtifactLayer.tsx:106` | declara `isRevealed` |
+| 2 | `HeroArtifactLayer.tsx:138` | `handleReady = () => setIsRevealed(true)` |
+| 3 | `HeroArtifactLayer.tsx:162` | `animate={{ opacity: isRevealed ? 1 : 0 }}` |
+| 4 | `HeroArtifactLayer.tsx:166` | pasa `onReady` a `HeroCanvas` |
+| 5 | `HeroCanvas.tsx:159` | pasa `onReady` a `ReadySignal`, dentro del `<Suspense>` |
+| 6 | `HeroCanvas.tsx:71-88` | `ReadySignal` suspende en el SVG y, al montar, dispara `onReady()` tras dos `requestAnimationFrame` |
+
+En un navegador que **renderiza**, esa cadena **se completa**. Medido sobre el
+build de producción, Playwright, 1440x900, tres corridas:
+
+| corrida | capa montada | capa revelada (`opacity` 1) |
+|---|---|---|
+| 1 | 1711 ms | **3409 ms** |
+| 2 | 1889 ms | **3869 ms** |
+| 3 | 2021 ms | **4075 ms** |
+
+Dónde se corta, entonces. La cadena depende de que el documento produzca
+**rendering steps**. Si no los produce —pestaña en segundo plano, ventana
+ocluida, pane de preview— pasan dos cosas a la vez:
+
+1. El `ResizeObserver` de `react-use-measure` **nunca entrega**. Sin eso, el
+   gate de r3f en `react-three-fiber.cjs.dev.js:91`
+   (`if (containerRect.width > 0 && containerRect.height > 0 && canvas)`) no se
+   abre nunca, y `root.render(children)` no llega a correr: `ReadySignal` **ni
+   siquiera se monta**.
+2. Aunque se montara, los dos `requestAnimationFrame` no corren.
+
+Reproducido de punta a punta en una pestaña oculta, contra el mismo build:
+
+```
+document.visibilityState = "hidden"   ·   frames de rAF en 1 s = 0
+capa: opacity 0 durante 42 s seguidos (sin cambio)
+<canvas>: 300x150  <- el default del elemento; r3f nunca lo dimensionó
+requests de /logodevelOP.svg y /hdri/*.hdr: NINGUNO
+```
+
+Un único `window.dispatchEvent(new Event('resize'))` sintético destrabó todo:
+el canvas pasó a 416x416, el SVG y el HDRI se pidieron por primera vez, y
+`isRevealed` (leído del fiber de React) pasó a `true`. Es la prueba de que la
+cadena estaba entera y lo que faltaba era el frame.
+
+**Y la trampa de medición que anticipaba el brief existe y está confirmada:**
+
+```
+capa (motion.div)  -> getComputedStyle(...).opacity = "0"
+<canvas> adentro   -> getComputedStyle(...).opacity = "1"
+```
+
+`opacity` no es heredada, así que el `<canvas>` computa `1` aunque su ancestro
+esté en `0`. Medir el `<canvas>` en vez de su capa contenedora da verde siempre.
+
+**Conclusión.** La captura de B2-S1 era correcta: reproducida con el mismo
+método (Playwright sobre build de producción) se ve exactamente lo que
+describía, filo especular incluido. Lo que B2-S2 midió es el síntoma exacto de
+un contexto sin rAF —el mismo que la propia bitácora de B1-S3 ya había
+registrado en el pane de preview, y el que volvió a aparecer en este sprint—, y
+no se reproduce en un navegador que pinta. No se puede verificar a posteriori en
+qué entorno corrió B2-S2; lo que sí se puede afirmar es que el conjunto de
+síntomas que reportó se reproduce al 100% bajo esa condición y al 0% fuera de
+ella.
+
+**Pero B2-S2 apuntaba a una fragilidad real**, y buscándola apareció algo peor.
+
+### T1.b — El hallazgo que nadie estaba buscando
+
+La cadena de readiness tiene seis eslabones (chunk -> medición del contenedor ->
+configuración de r3f -> SVG -> HDRI de 1,6 MB -> dos rAF). Se probó qué pasa si
+uno falla. **El HDRI que no baja no dejaba la capa invisible: se llevaba puesto
+el home entero.**
+
+`<Canvas>` re-lanza hacia afuera cualquier error de su árbol (r3f lo atrapa con
+su ErrorBoundary interno y lo re-tira desde `CanvasImpl`). Sin nadie que lo
+contenga, escalaba hasta el `error.tsx` de la ruta. Medido sobre el build
+previo, con el `.hdr` bloqueado:
+
+```
+heroAlive: false          <- el <h1> del hero ya no existe
+scrollHeight: 900         <- la página entera reemplazada
+scrollWorks: false        <- no scrollea
+texto en pantalla: "ERROR DEL SISTEMA - Algo salió mal"
+```
+
+Un bloqueador, un proxy corporativo o un corte de red en un asset **decorativo**
+tumbaba la home. Mismo resultado con el SVG bloqueado. Era una violación directa
+de la condición 1 de la capa 2 ("cero bloqueo de scroll") y de lo que el propio
+docblock del hero afirmaba: *"si el canvas nunca carga, el hero ya está completo
+y usable"* — que hasta este sprint era falso.
+
+### T2 — El arreglo
+
+Dos piezas, las dos en `HeroArtifactLayer.tsx`. **No se reescribió la cadena de
+readiness**: `onReady` sigue siendo el camino normal, y es el que corre siempre
+que el navegador pinta.
+
+**1. Red de seguridad del reveal (`REVEAL_SAFETY_MS = 6000`).** Mismo mecanismo
+y mismo umbral que la red del scroll de `MarketingIntro`
+(`MARKETING_SCROLL_SAFETY_MS`) -> un solo patrón en el repo, por la misma razón:
+`setTimeout` no depende del rAF ni de la cadena de carga, que es exactamente
+donde esta capa se cuelga. Se arma cuando el canvas se monta, no al montar el
+componente: hasta ahí no hay nada que esperar. Es idempotente — si `onReady`
+llega primero el cleanup cancela el timer; si dispara primero deja el mismo
+estado final.
+
+Revelar de más no cuesta nada, y esto es lo que hace que el umbral sea barato:
+el canvas es transparente y el artefacto trae su propio fade de material
+(`HeroArtifact`, opacidad 0->1 en el `useFrame`), así que una capa revelada antes
+de tiempo **se ve igual que una sin revelar: vacía**. El costo de revelar de
+menos, en cambio, es que no aparezca nunca.
+
+**2. `CanvasErrorBoundary`.** Contiene el fallo del canvas en la capa. Al fallar
+renderiza `null`: la caja queda vacía y la base tipográfica del hero —que es el
+hero terminado— sigue intacta. Sin UI de error porque no hay nada que comunicar:
+el artefacto es decorativo y la caja es `aria-hidden`. Sin esto, la red de
+seguridad no alcanzaba: no sirve garantizar `opacity: 1` sobre un subárbol que
+un error acaba de desmontar.
+
+Se evaluó reutilizar un boundary existente: **no hay**. Los 20+ `error.tsx` del
+repo son boundaries de ruta de Next (reciben `error`/`reset`), no envuelven un
+componente. `AdminErrorBoundary` / `SectionErrorBoundary` son de esa familia.
+
+### Verificación (medida, no afirmada)
+
+`npm run build` **verde** · `tsc --noEmit` -> **1 error, byte a byte idéntico al
+baseline** (`searchconsole.ts`, preexistente y ajeno; `diff` contra el baseline
+sin diferencias) · `eslint` sobre los 3 archivos del hero -> **0**. Baseline del
+repo, para contexto: 79 errores / 52 warnings, ninguno en estos archivos.
+
+**Tabla de `opacity` de la capa a 1440x900, build de producción.** Se miden la
+capa y el `<canvas>` por separado, a propósito, para dejar visible la trampa:
+
+| t (ms) | capa (`motion.div`) | `<canvas>` | attr del canvas | scroll bloqueado |
+|---|---|---|---|---|
+| 424 | *(sin montar)* | — | — | no |
+| 1002 | *(sin montar)* | — | — | no |
+| 2004 | **0** | — | — | no |
+| 5007 | **1** | 1 | 416x416 | no |
+| 8019 | **1** | 1 | 416x416 | no |
+| 12006 | **1** | 1 | 416x416 | no |
+
+Antes del arreglo, en el mismo build y viewport, la tabla es idéntica: el camino
+normal ya funcionaba. La diferencia está en los escenarios de abajo.
+
+**La prueba de la red de seguridad.** Se simuló que el evento de readiness no
+llega, colgando el asset (la ruta nunca responde y nunca falla -> ni `onReady` ni
+error boundary; sin la red, `opacity: 0` para siempre):
+
+| asset colgado | capa montada | capa revelada | delta desde el montaje | errores |
+|---|---|---|---|---|
+| HDRI (`.hdr`) | 1993 ms | 8580 ms | **6587 ms** | 0 |
+| SVG del logo | 2082 ms | 8641 ms | **6559 ms** | 0 |
+| chunk del canvas | 1987 ms | 8571 ms | **6584 ms** | 0 |
+
+Los ~6,6 s son los 6000 ms del umbral más los 600 ms del fade de entrada
+(`opacity > 0.99`) y la granularidad de 100 ms del muestreo. En los tres casos
+el hero siguió vivo y la página scrolleable.
+
+**Antes / después, con el asset caído (no colgado):**
+
+| escenario | build previo | con el fix |
+|---|---|---|
+| HDRI caído | hero **muerto**, scroll **muerto**, pantalla de error | capa `opacity 1`, **hero vivo**, **scroll OK** |
+| SVG caído | hero **muerto**, scroll **muerto**, pantalla de error | capa `opacity 1`, **hero vivo**, **scroll OK** |
+
+**Las condiciones de la capa 2, una por una:**
+
+- **A 390px no se monta ni se pide nada.** `display: none`, capa sin montar,
+  **0 contextos WebGL**, **0 requests del chunk del hero**, **0 del HDRI**. El
+  chunk se identificó por contenido (en producción sale con hash), y la
+  referencia positiva a 1440 lo pide 1 vez (`4198.e70aac245b121123.js`) -> el
+  detector no es un falso negativo. El único `/logodevelOP.svg` a 390px es el
+  logo del navbar (a 1440 hay 2: navbar + loader del 3D).
+- **`prefers-reduced-motion`**: no se monta. 0 chunk, 0 HDRI, 0 WebGL.
+- **`frameloop` gateado**: draw calls de WebGL contadas en ventanas de 2 s ->
+  **240 dentro del viewport, 0 fuera**. Fuera de pantalla no renderiza un frame.
+- **Scroll libre desde el primer frame**: primera muestra que scrollea a
+  **221 ms** en 1440 y **222 ms** en 390, con `overflow: visible` en `html` y
+  `body`. En todos los escenarios de fallo también.
+- **Carga diferida**: la capa monta a ~2,0 s, después del contenido.
+- **Monocromo**: ver abajo.
+
+**Consola.** Cero errores nuevos, medido contra el build previo servido en
+paralelo, no afirmado. El único error que aparece en ambos builds es un
+**React #418** (hydration mismatch) bajo `prefers-reduced-motion` — **idéntico
+antes y después**, preexistente y ajeno a este arreglo (ver *Fuera de scope*).
+Los errores en los escenarios de asset caído son el fallo de red en sí, que es
+inevitable; lo que cambió es que ya no tumban la página. El `console.warn` del
+boundary es deliberado y es warning, no error.
+
+### T3.1 — Cómo se ve el artefacto
+
+Se lee **monocromo**, y la condición 6 no necesita ajuste. **No hay aberración
+cromática que atenuar**: `HeroCanvas` no monta `EffectComposer` —lo sacó B2-S1 a
+propósito, documentado en su docblock (la dirección es monocroma, y la lección
+del repo prohíbe el composer en canvas chicos transparentes). La preocupación de
+la condición 6 no aplica a esta implementación; se verificó que no hay ninguna
+fuente de color en el pipeline.
+
+Lo que se ve: el lazo del logo en material negro metálico, con un filo especular
+frío —blanco/gris acero, del HDRI de estudio— cayendo sobre el flanco derecho.
+Neutro, sin tinte que pelee con la dirección.
+
+**Una observación para juicio del humano, no un defecto:** el artefacto es muy
+oscuro contra el `#0D0B09`. La lectura depende **casi por completo** del filo
+especular; el flanco izquierdo y la base son negro sobre casi-negro y
+prácticamente no se distinguen. Se lee como una insinuación, no como un objeto
+sólido — que puede ser exactamente la intención. **No se tocó**: subirle
+presencia es una decisión de dirección de arte, no un arreglo, y este sprint
+tenía un solo objetivo. Anotado para B1-S5, que es el sprint de calibración.
+
+**Caveat de método:** las capturas salen de Chromium con SwiftShader
+(rasterizado por software). El material y los colores son fieles; el brillo y la
+riqueza del reflejo en una GPU real serán algo mayores, nunca menores. La
+observación de "muy oscuro" es entonces un piso, no un techo.
+
+### Nota de método — verificación visual
+
+Se despachó el subagente `visual-qa` como manda `CLAUDE.md`. **No pudo entregar
+reporte**, por la misma razón que en B2-S1: no tiene acceso a sus herramientas de
+preview en este contexto (y el servidor corría en un puerto no declarado en
+`.claude/launch.json`, archivo trackeado y fuera de scope). Es una limitación del
+harness, no un hallazgo sobre el hero.
+
+La verificación visual se hizo con Playwright sobre el build de producción, con
+capturas leídas a mano. Sigue siendo el método más confiable acá por lo mismo que
+este sprint terminó de demostrar: el pane de preview mide **0 fps de rAF**, lo que
+congela WebGL y da falsos negativos exactamente en lo que hay que mirar. Es,
+literalmente, el bug que se acaba de diagnosticar.
+
+### Fuera de scope, anotado y NO implementado
+
+- **React #418 (hydration mismatch) bajo `prefers-reduced-motion` en `/`.**
+  Presente **igual** en el build previo y en el actual -> preexistente, ajeno a
+  este sprint. No se investigó de dónde sale. Es el único error de consola vivo
+  en la home.
+- **El HDRI de 1,6 MB es el cuello de botella del reveal.** Con throttling
+  fast-3G la capa tarda **~11 s** desde el montaje (contra ~1,8 s sin
+  throttling): la red de seguridad la revela a los 6 s y el artefacto entra
+  después. Funciona, pero la palanca real es el peso del `.hdr` — comprimirlo o
+  bajarlo de resolución. No se tocó: es un asset, no la cadena de readiness.
+- **`ReadySignal` comparte el `<Suspense>` con `<Environment>`**
+  (`HeroCanvas.tsx:158-165`), así que `onReady` espera al HDRI aunque el SVG ya
+  esté listo. Separarlos haría que el logo aparezca antes y el reflejo después.
+  Es un cambio de comportamiento visual, no un arreglo — queda anotado.
+- **El escenario "chunk caído" del barrido no bloqueó nada**: el patrón de ruta
+  apuntaba al nombre de desarrollo y en producción el chunk sale con hash. La
+  cobertura real del chunk viene de la prueba de colgado (identifica el chunk
+  por contenido), que sí es válida.
+
+### Archivos
+
+Modificados: `src/components/layout/HeroArtifactLayer.tsx` ·
+`docs/bitacora-rediseno.md`
