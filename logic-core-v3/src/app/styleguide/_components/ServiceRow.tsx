@@ -1,4 +1,4 @@
-import { MonoLabel, RuleDivider, type ServiceAccent } from '@/components/design-system'
+import { MonoLabel, RuleDivider, Subhead, type ServiceAccent } from '@/components/design-system'
 
 export interface ServiceRowData {
   /** Nombre del frente, con el copy que ya usa el sitio. */
@@ -22,17 +22,27 @@ interface ServiceRowProps extends ServiceRowData {
 /**
  * Fila de servicio de la sección "Cuatro frentes. Un sistema.".
  *
- * El acento aparece una sola vez, en el tick del label. Nada de gradientes ni
- * glows: es la dosis mínima que pide la dirección.
+ * Dos correcciones de calibración conviven acá:
+ *
+ * 1. **El peldaño que faltaba.** El nombre del frente era una mono de 12px, así
+ *    que la sección saltaba del titular de 68px directo a la etiqueta más chica
+ *    del sistema. Ahora es `Subhead`, el nivel intermedio.
+ *
+ * 2. **La dosis del acento.** El acento vivía en un tick de 6×6 px — 36 px² por
+ *    fila. Con tan poca área, sacarle el color a las cuatro filas casi no
+ *    perdía información: un identificador que no identifica. Ahora pinta el
+ *    nombre del frente y su plazo, que es superficie plana y sólida. El tick se
+ *    fue: con el nombre en color, repetía el mismo dato en 36 px².
+ *
+ * Sigue sin haber gradiente, glow ni borde lateral de acento — la dosis mínima
+ * es de color, no de área.
  */
 export function ServiceRow({ name, timeline, accentToken, last = false }: ServiceRowProps) {
   return (
     <div>
       <div className="flex flex-col gap-2 py-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-8">
-        <MonoLabel accent={accentToken} tick>
-          {name}
-        </MonoLabel>
-        <span className="font-ds-mono text-ds-eyebrow uppercase text-ds-fg-muted">{timeline}</span>
+        <Subhead accent={accentToken}>{name}</Subhead>
+        <MonoLabel accent={accentToken}>{timeline}</MonoLabel>
       </div>
       {last ? null : <RuleDivider />}
     </div>

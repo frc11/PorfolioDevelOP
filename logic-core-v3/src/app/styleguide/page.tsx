@@ -116,7 +116,7 @@ export default function StyleguidePage() {
         id="home"
         index="05"
         title="Las 6 secciones del home — esqueleto"
-        note="Arquitectura de temas: S1 oscura · S2 crema · S3 oscura · S4 oscura · S5 crema · S6 oscura. Es maqueta de estructura y jerarquía, no la sección terminada: no hay motion, no hay 3D y no hay contenido que no esté decidido."
+        note="Arquitectura de temas: alternancia estricta — S1 oscura · S2 crema · S3 oscura · S4 crema · S5 oscura · S6 crema. La inversión es el dispositivo de ritmo del sistema, y antes había dos secciones oscuras seguidas (S3 y S4): 236px de fondo idéntico entre dos capítulos distintos, sin ningún corte. Los cuatro frentes se movieron a S5 porque son la única sección con acentos, y tres de los cuatro no llegan a 3:1 sobre crema. Es maqueta de estructura y jerarquía, no la sección terminada: no hay motion, no hay 3D y no hay contenido que no esté decidido."
       >
         <p className="max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
           Las seis arrancan abajo, a ancho completo, cada una con su propio tema. Cada
@@ -129,8 +129,9 @@ export default function StyleguidePage() {
       <SkeletonHero />
       <SkeletonProof />
       <SkeletonLiveProof />
-      <SkeletonServices />
+      {/* Los contrastes van cuartos y los frentes quintos: ver SkeletonWhy. */}
       <SkeletonWhy />
+      <SkeletonServices />
       <SkeletonClose />
 
       <footer data-ds-theme="dark" className="bg-ds-canvas px-ds-gutter py-16 text-ds-fg">

@@ -20,6 +20,7 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const DS_FONT_SIZE_CLASSES = [
   'text-ds-display-xl',
   'text-ds-display-lg',
+  'text-ds-subhead',
   'text-ds-lead',
   'text-ds-body',
   'text-ds-eyebrow',

@@ -9,11 +9,19 @@ interface ChapterLabelProps {
 }
 
 /**
- * Label editorial de capítulo: `( 01 — LA PRUEBA )`.
+ * Label editorial de capítulo: `( 01 )`.
  *
  * Es la convención estructural tomada de las referencias: numera los capítulos
  * de la página para que el recorrido se lea como un índice y no como una pila
  * de secciones.
+ *
+ * **Va en TODAS las secciones, correlativo, y solo con el número.** Estaba
+ * aplicado en 2 de 6 y con dos formatos distintos —`( 01 )` en la segunda
+ * sección y `( 03 — Un lunes cualquiera )` en la tercera—, o sea dos marcas
+ * sueltas que no numeraban nada. El formato sin título es el que se fija: el
+ * título repetía el propio titular de la sección, que va justo debajo. `title`
+ * queda para superficies que no sean el home, donde el número solo no alcanza
+ * para ubicar al lector.
  *
  * Los paréntesis y el guión son ornamento tipográfico y van `aria-hidden`: a un
  * lector de pantalla le llega "01 LA PRUEBA", no la puntuación.

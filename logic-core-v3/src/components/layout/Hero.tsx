@@ -1,4 +1,5 @@
 import {
+  ChapterLabel,
   CtaButton,
   DisplayHeading,
   Eyebrow,
@@ -56,11 +57,23 @@ export function Hero() {
       <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
         <div className="animate-ds-reveal flex flex-col">
           {/*
-            En grafía natural y no en mayúsculas: el `uppercase` lo pone el
-            token del Eyebrow, así que se ve idéntico, pero el lector de
-            pantalla no deletrea el texto letra por letra.
+            El hero LLEVA número. La sección-como-capítulo es la firma del
+            sistema, y una portada sin numerar deja el índice arrancando en
+            "01" sobre la segunda sección — que es justo la inconsistencia que
+            se está corrigiendo. Numerar desde el hero da una convención
+            mecánica, replicable tal cual en las cuatro landings.
+
+            En la misma fila que el eyebrow y no encima: son dos etiquetas mono
+            del mismo peso, y apiladas leen como dos kickers en pugna.
+
+            El eyebrow va en grafía natural y no en mayúsculas: el `uppercase`
+            lo pone el token, así que se ve idéntico, pero el lector de pantalla
+            no deletrea el texto letra por letra.
           */}
-          <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <ChapterLabel number="01" />
+            <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
+          </div>
 
           {/*
             Separaciones explícitas y no un `gap` parejo: el eyebrow pertenece

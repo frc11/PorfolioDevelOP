@@ -2250,3 +2250,149 @@ npx impeccable detect src/app src/components/sections src/components/ia src/comp
 Contra **46**. Y `npx impeccable detect src/components/design-system` tiene que seguir dando **0**.
 
 > El detector sale con **exit code 2** cuando encuentra hallazgos. No es un fallo de la herramienta.
+
+---
+
+## Calibración del sistema · 2026-08-03
+
+No es un rediseño: es una pasada de corrección sobre valores y defectos ya
+identificados. La arquitectura se dio por buena y no se tocó — el theming local de
+`SectionShell`, el padding vertical, la disciplina plana, los pares de texto
+calibrados y la matriz de estados del styleguide quedaron como estaban.
+
+### La causa raíz, y por qué era una sola
+
+Los pisos de todos los `clamp()` se habían elegido como **mínimos individuales**,
+cada uno defendible por separado. Pero en mobile todos tocan su piso a la vez, así
+que el piso no es una lista de mínimos: **es la escala completa que ve la mayoría de
+la audiencia**. La jerarquía existía en el rango fluido y colapsaba justo donde vive
+el negocio.
+
+Medido a 390px, antes: `lead` 18 contra `body` 17 (1.06× — el único separador real
+era el color) y la cifra de `data` 32 contra un titular de 36 (0.89× — el dato
+competía con el título de su propia sección).
+
+Los pisos se re-eligieron como escala. Las dos invariantes se verificaron con un
+**barrido continuo de 320 a 1920px**, no solo en los tres breakpoints — y ahí
+apareció un valor que pasaba en 390 y 1440 pero fallaba en el medio (`data` daba
+0.85 a 768px con la primera rampa propuesta), así que la rampa se rehízo.
+
+| | 390px | 768px | 1440px | peor caso 320–1920 |
+|---|---|---|---|---|
+| `lead`/`body` (≥1.20) | 1.06 → **1.25** | 1.06 → **1.25** | 1.29 → **1.29** | **1.25** a 320px |
+| `data`/`display-lg` (≤0.75) | 0.89 → **0.67** | 0.83 → **0.70** | 0.82 → **0.71** | **0.706** a 1372px |
+
+Escala renderizada a 390px, después: 52 · 36 · 26 · 24 · 20 · 16 · 12.
+
+**El peldaño que faltaba.** Entre `display-lg` (68px) y `lead` (22px) había un salto
+de 3.09× sin nada en el medio, así que las secciones con estructura interna caían
+del titular directo a la mono de 12px. `--text-ds-subhead` lo ocupa: ahora son 1.79×
+y 1.73× a 1440. Es escala, no una familia nueva.
+
+**El bug de la unidad `ch`.** `ch` es relativo al `font-size` **del propio
+elemento**. El subhead a 55ch sobre 22px rendía 802px contra los 732px de la prosa a
+65ch sobre 17px: el subhead salía **más ancho** que la prosa, lo contrario de lo
+documentado. Se recalculó a 42ch en vez de pasar a una medida absoluta — `ch` es la
+unidad correcta para una medida de lectura, y un `rem` se habría roto igual de
+silencioso en cualquier elemento que no corriera al tamaño para el que se calculó.
+Verificado en el DOM: 612.6px contra 732.2px.
+
+### La dosis del acento es de color, no de área
+
+El acento vivía en un tick de 6×6 px: **36 px² por fila**. Con tan poca área,
+sacarle el color a las cuatro filas casi no perdía información — un identificador
+que no identifica. Ahora pinta el nombre del frente (`Subhead`) y su plazo: **16.412
+px² por fila**, medido en el DOM. El tick se fue porque repetía el mismo dato. Sigue
+sin haber glow, gradiente ni borde lateral: la anti-referencia es de forma, no de
+tamaño.
+
+**Los acentos viven solo sobre oscuro**, y ahora es regla escrita y no un hueco.
+Tres de los cuatro no llegan a 3:1 sobre crema (cian 2.10, verde 2.19, ámbar 1.86).
+
+**Dos observaciones se dejaron medidas y sin resolver, a propósito.** El violeta es
+el más flojo sobre oscuro (4.64:1 contra 7.7–9.1) y cian-contra-verde es el par más
+cercano (0.125 OKLab, la mitad del siguiente par). Los dos se arreglan moviendo un
+hex — y los cuatro hex están congelados en `CLAUDE.md` y pendientes del Gate 1, que
+todavía puede permutar qué color le toca a qué servicio. Mover un valor ahora sería
+decidir el Gate por la ventana.
+
+> El sprint pedía "oscurecer" el violeta para acercarlo a los otros tres. Sobre
+> lienzo oscuro eso va al revés: oscurecer **baja** el contraste. Para acercarlo
+> habría que aclararlo.
+
+### El CTA
+
+- **Se fue el canto superior iluminado.** Medía **1.18:1** contra el fondo del
+  propio botón: no era una señal débil, era una línea que solo existía en la spec.
+  El relieve son dos señales, no tres.
+- **Un solo press.** Convivían `active:translate-y-[2px]` (CSS) y `whileTap: scale
+  .97` (Framer), sin pisarse porque animan propiedades distintas. Quedó el
+  hundimiento: un objeto físico se hunde, no se comprime. El gateo vive en
+  `hasFramerPress()`, del lado de la variante, así que vale también para quien use
+  `Button` directo. La rama con `href` dejó de ser `motion.a` y es un `<a>` pelado.
+- **El secundario tiene frontera.** Usaba el token de regla (1.23:1) y WCAG 1.4.11
+  pide 3:1 para el borde de un componente interactivo: el botón no tenía frontera en
+  reposo y aparecía recién en `hover` — o sea nunca a touch, y con el `hover` más
+  visible que el reposo. Token propio `--color-ds-control-stroke`: **3.55:1** en
+  oscuro, **3.48:1** en crema.
+- **`disabled` sigue perceptible**: 1.73:1 en oscuro y 1.74:1 en crema, más visible
+  que el borde en **reposo** del diseño anterior. WCAG exime a los controles
+  inactivos del mínimo; lo que se exigía acá era que se siga viendo.
+- **La sombra invierte con el tema.** Estaba en `@theme static` con negro al 90%,
+  calculada contra lienzo oscuro. Se movió a la capa semántica. Verificado en el DOM
+  que `shadow-[var(--shadow-ds-control)]` resuelve por elemento: `rgba(0,0,0,.9)` en
+  oscuro, `rgba(26,23,19,.30)` en crema.
+
+### El índice de capítulos, y la colisión que frenó el sprint
+
+`ChapterLabel` estaba en 2 de 6 secciones y con dos formatos (`( 01 )` en la
+segunda, `( 03 — Un lunes cualquiera )` en la tercera): dos marcas sueltas que no
+numeraban nada. Ahora están las seis, correlativas, **solo con el número** — el
+título repetía el titular que va justo debajo. **El hero lleva el `01`**: una
+portada sin numerar deja el índice arrancando en "01" sobre la segunda sección, que
+era justo la inconsistencia a corregir.
+
+**T7 chocó con T4 y se frenó, como pedía el sprint.** La alternancia estricta
+arrancando en oscuro deja S4 en crema — y S4 "Cuatro frentes" era la única sección
+con acentos, tres de los cuales no llegan a 3:1 sobre claro. Se reportó con la
+medición en vez de improvisar otro orden. **Franco eligió intercambiar S4 y S5.**
+
+Orden final: `01` oscura (hero) · `02` crema (la prueba) · `03` oscura (la prueba
+viva) · `04` crema (los 3 contrastes) · `05` oscura (los 4 frentes, con acentos) ·
+`06` crema (cierre). Verificado en el DOM: **cero empalmes con el mismo tema** y
+**cero acentos sobre crema**. Cerrar en crema es consecuencia deseada — obliga a que
+el CTA funcione sobre claro, que era un hueco real: los 22 botones del styleguide
+vivían sobre oscuro.
+
+### Dos premisas del sprint que no se sostuvieron
+
+1. **`/styleguide` sí estaba recibiendo el chrome.** Confirmado: `isPortalRoute()`
+   solo excluía los cuatro prefijos de portal. Se agregó `CHROME_FREE_PREFIXES` y un
+   `isChromeFreeRoute()` que consultan los dos gates — `isPortalRoute` se conservó
+   aparte porque responde otra pregunta ("esto es producto?"). Verificado en el DOM
+   de la página: **0 `backdrop-filter`, 0 gradientes**, y el único `<nav>` es el
+   índice propio del styleguide.
+2. **`NoiseOverlay` ya no corría en ninguna ruta.** La premisa describía el estado
+   pre-B2-S2; el componente se había desmontado ahí y no le quedaba ni un consumidor
+   en todo el repo. Desmontado no hacía nada, pero el archivo seguía llevando adentro
+   una animación `infinite` a 5 Hz sin gate de `prefers-reduced-motion` — lo que la
+   lista de "Don't" prohíbe — y alcanzaba con volver a importarlo. **Se borró.**
+   `CustomCursor.tsx` está en la misma situación y queda anotado para una poda aparte.
+
+### Verificación
+
+- `npm run build` verde · `tsc --noEmit` limpio · `prisma migrate status` al día.
+- Escala, medidas, sombras, bordes, temas y acentos medidos **en el DOM** a 390 /
+  768 / 1440, no estimados.
+- Hero de B2-S1 intacto a 390 y 1440: sin overflow horizontal, sin canvas en mobile,
+  scroll disponible, `( 01 )` presente, CTA sin `border-top`.
+- Detector: `design-system` sigue en **0** (el techo). Superficie pública 65 → **64**.
+
+### Lo que quedó pendiente
+
+**T8 (legibilidad del artefacto 3D) no se ejecutó.** Requiere juicio visual y
+capturas antes/después a 1440px, y el Browser pane no estaba compositando en toda la
+sesión (`screenshot` devolvía "the pane is not displayed"). Con el pane oculto el
+`rAF` no dispara: medir la capa 3D ahí no mide el artefacto, mide un cuelgue que no
+existe. Se prefirió dejarlo abierto antes que cerrarlo a ciegas. Todo lo demás se
+verificó por DOM, que no depende del compositor.

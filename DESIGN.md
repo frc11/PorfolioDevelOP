@@ -7,11 +7,13 @@ colors:
   ink: "#EDE9E1"
   ink-muted: "#A39C8F"
   border: "rgba(237, 233, 225, 0.10)"
+  control-stroke: "rgba(237, 233, 225, 0.42)"
   light-bg: "#F2EEE6"
   light-surface: "#EAE5DA"
   light-ink: "#1A1713"
   light-ink-muted: "#6E675C"
   light-border: "rgba(26, 23, 19, 0.12)"
+  light-control-stroke: "rgba(26, 23, 19, 0.52)"
   accent-web: "#06b6d4"
   accent-ia: "#10b981"
   accent-automation: "#f59e0b"
@@ -27,13 +29,18 @@ typography:
     fontSize: "clamp(2.25rem, 5vw, 4.25rem)"
     lineHeight: 1.05
     letterSpacing: "-0.02em"
+  subhead:
+    fontFamily: "Geist, system-ui, sans-serif"
+    fontSize: "clamp(1.625rem, 2.9vw, 2.375rem)"
+    lineHeight: 1.25
+    letterSpacing: "-0.01em"
   lead:
     fontFamily: "Geist, system-ui, sans-serif"
-    fontSize: "clamp(1.125rem, 1.6vw, 1.375rem)"
+    fontSize: "clamp(1.25rem, 1.6vw, 1.375rem)"
     lineHeight: 1.55
   body:
     fontFamily: "Geist, system-ui, sans-serif"
-    fontSize: "1.0625rem"
+    fontSize: "clamp(1rem, 1.18vw, 1.0625rem)"
     lineHeight: 1.7
   label:
     fontFamily: "Geist Mono, ui-monospace, monospace"
@@ -42,7 +49,7 @@ typography:
     letterSpacing: "0.18em"
   data:
     fontFamily: "Geist Mono, ui-monospace, monospace"
-    fontSize: "clamp(2rem, 4vw, 3.5rem)"
+    fontSize: "clamp(1.5rem, 3.5vw, 3rem)"
     fontWeight: 500
     lineHeight: 1
 rounded:
@@ -61,6 +68,7 @@ components:
   cta-secondary:
     backgroundColor: "transparent"
     textColor: "{colors.ink}"
+    borderColor: "{colors.control-stroke}"
     rounded: "{rounded.control}"
     padding: "16px 28px"
     typography: "1rem/1"
@@ -124,11 +132,30 @@ Un acento por servicio, y solo uno visible por vista:
 
 ### Named Rules
 
-**La Regla de la Voz Única.** Nunca dos acentos en una misma vista. El acento identifica al servicio; dos acentos no identifican nada.
+**La Regla de la Voz Única.** Nunca dos acentos en una misma vista. El acento identifica al servicio; dos acentos no identifican nada. La única excepción documentada es la sección de los cuatro frentes, donde el color *es* lo que distingue una fila de otra.
 
 **La Regla del Acento Plano.** El acento se usa como color sólido. Nunca en gradiente, nunca como glow, nunca como sombra de color.
 
+**La Regla de la Dosis Mínima es de Color, no de Área.** El acento vivía en un tick de 6×6 px — 36 px² por fila. Con tan poca área, sacarle el color a las cuatro filas de servicios casi no perdía información: un identificador que no identifica. El acento se aplica sobre superficie **grande y plana** (el nombre del frente, su plazo, una cifra); lo que se raciona es en cuántos lugares aparece y con qué forma, no cuánto mide. "Discreto" no significa "diminuto".
+
+**La Regla del Acento sobre Oscuro.** Los cuatro acentos viven **solo sobre tema oscuro**. No es una limitación pendiente de resolver: es la regla. Tres de los cuatro no llegan a 3:1 sobre el lienzo crema, así que sobre claro no pueden portar información.
+
+| Acento | Sobre `void` | Sobre `light-bg` |
+|---|---|---|
+| Cian (web) | 8.09:1 | 2.10:1 ✗ |
+| Verde (IA) | 7.74:1 | 2.19:1 ✗ |
+| Ámbar (automatización) | 9.15:1 | 1.86:1 ✗ |
+| Violeta (software) | 4.64:1 | 3.66:1 |
+
+Ninguna sección crema lleva acento. Una sección que necesita acento es, por esa sola razón, una sección oscura.
+
+> **Dos observaciones abiertas, deliberadamente no resueltas acá.** El violeta es el más flojo de los cuatro sobre oscuro (4.64:1 contra 7.7–9.1) — sigue pasando 3:1, pero desparejo. Y cian contra verde es el par más cercano: 0.125 de distancia OKLab, la mitad del siguiente par, con luminancia casi igual (L 0.715 contra 0.696). Los dos se arreglan moviendo un hex, y los cuatro hex están congelados en `CLAUDE.md` y pendientes del Gate 1 (que todavía puede permutar qué color le toca a qué servicio). Mover un valor ahora es decidir el Gate por la ventana. Se anotan medidos, para resolver **después** del Gate 1.
+
 **La Regla de la Inversión Local.** El tema lo escribe la sección en su propio `<section>` (`data-ds-theme`), no un provider global. Una sección oscura anidada en una crema tiene que funcionar sin que nadie la configure.
+
+**La Regla de la Alternancia Estricta.** La inversión es el dispositivo de ritmo del sistema, así que **no hay dos secciones seguidas con el mismo tema**. El home alterna oscuro · crema · oscuro · crema · oscuro · crema. Dos capítulos contiguos del mismo tema son 236px de fondo idéntico (118px de padding inferior + 118 de superior) sin ningún corte: ahí el ritmo simplemente no existe.
+
+La alternancia y la Regla del Acento sobre Oscuro se restringen entre sí, y el orden de las secciones se decide con las dos a la vez: **una sección que necesita acento tiene que caer en una posición oscura.** Por eso los cuatro frentes van quintos y los contrastes cuartos, y no al revés. Cerrar en crema es consecuencia deseada: obliga a que el CTA funcione sobre claro, que era un hueco real del sistema.
 
 ## Typography
 
@@ -142,10 +169,11 @@ Un acento por servicio, y solo uno visible por vista:
 
 - **Display** (`clamp(3.25rem, 8vw, 7rem)`, line-height 0.98, tracking −0.03em): titulares de apertura. Uno por pantalla.
 - **Headline** (`clamp(2.25rem, 5vw, 4.25rem)`, line-height 1.05, tracking −0.02em): apertura de capítulo dentro de la página.
-- **Lead** (`clamp(1.125rem, 1.6vw, 1.375rem)`, line-height 1.55): subhead. Corta a 55ch — más angosto que la prosa, a propósito.
-- **Body** (`1.0625rem`, line-height 1.7): prosa. Medida máxima 65ch.
+- **Subhead** (`clamp(1.625rem, 2.9vw, 2.375rem)`, line-height 1.25, tracking −0.01em): subtítulo de bloque. Abre una unidad DENTRO de una sección — un frente de servicio, un contraste. Es el peldaño entre el titular y el lead.
+- **Lead** (`clamp(1.25rem, 1.6vw, 1.375rem)`, line-height 1.55): bajada. Corta a 42ch — más angosto que la prosa, a propósito.
+- **Body** (`clamp(1rem, 1.18vw, 1.0625rem)`, line-height 1.7): prosa. Medida máxima 65ch.
 - **Label** (Geist Mono, `0.75rem`, tracking 0.18em): eyebrows y labels de capítulo.
-- **Data** (Geist Mono, `clamp(2rem, 4vw, 3.5rem)`, weight 500, line-height 1): cifras. Es el único lugar donde un número puede ser grande.
+- **Data** (Geist Mono, `clamp(1.5rem, 3.5vw, 3rem)`, weight 500, line-height 1): cifras. Es el único lugar donde un número puede ser grande — pero nunca más grande que el titular de su sección.
 
 ### Named Rules
 
@@ -153,11 +181,20 @@ Un acento por servicio, y solo uno visible por vista:
 
 **La Regla de la Mono como Dato.** Geist Mono se reserva para labels, eyebrows y cifras. Un párrafo de cuerpo en monoespaciada rompe el sistema.
 
+**La Regla del Piso como Escala.** En mobile todos los `clamp()` tocan su piso a la vez, así que el piso no es una lista de mínimos sueltos: **es la escala que ve la mayoría de la audiencia**, y se elige como escala. Dos invariantes, verificadas con un barrido continuo de 320 a 1920px y no solo en los breakpoints:
+
+| Invariante | Por qué | Antes (390px) | Ahora (peor caso) |
+|---|---|---|---|
+| `lead` / `body` ≥ 1.20 | A 18 contra 17 el único separador real era el color: dos niveles que no se distinguen no son dos niveles | 1.06 | **1.25** |
+| `data` / `display-lg` ≤ 0.75 | La cifra no puede competir con el titular de su propia sección | 0.89 | **0.71** |
+
+**La Regla de la Medida en `ch`.** Las medidas de lectura se cuentan en caracteres, no en píxeles — pero `ch` es relativo al `font-size` **del propio elemento**. El subhead a 55ch sobre 22px rendía 802px contra los 732px de la prosa a 65ch sobre 17px: el orden declarado y el renderizado eran opuestos. Al fijar una medida nueva hay que compararla en píxeles a su tamaño real, no en el número declarado.
+
 ## Layout
 
 Container de página de 1240px con gutter fluido (`clamp(1.25rem, 4vw, 3rem)`). El ritmo vertical lo marca un único paso de sección (`clamp(6rem, 14vh, 11rem)`) — las secciones respiran igual entre sí, y la variación se produce dentro, no en el espaciado entre bloques.
 
-La prosa corta a 65ch y el subhead a 55ch. Esas dos medidas —no el ancho del container— son las que gobiernan la línea de lectura.
+La prosa corta a 65ch y la bajada a 42ch. Esas dos medidas —no el ancho del container— son las que gobiernan la línea de lectura. Medidas a su tamaño real: ≈732px la prosa y ≈612px la bajada (ver *La Regla de la Medida en `ch`*).
 
 Estructura editorial: cada sección es un capítulo con su label mono, su apertura y su regla divisoria. La página se recorre como un documento, no como una grilla de cards.
 
@@ -169,11 +206,21 @@ La audiencia es mayoritariamente mobile: la escala fluida está calibrada para q
 
 ### Shadow Vocabulary
 
-- **Relieve de control** (`box-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 3px 6px rgba(0,0,0,0.5)`): dos capas — un canto duro que da el grosor físico y una difusa corta que lo apoya. **Exclusivo del CTA primario.** Se apaga por completo en `:active`.
+- **Relieve de control**: dos capas — un canto duro que da el grosor físico y una difusa corta que lo apoya. **Exclusivo del CTA primario.** Se apaga por completo en `:active`. Se invierte con el tema, porque una sombra calculada contra lienzo oscuro sobre crema se lee como una mancha, no como un objeto apoyado:
+  - oscuro: `0 2px 0 rgba(0,0,0,.9), 0 3px 6px rgba(0,0,0,.5)`
+  - crema: `0 2px 0 rgba(26,23,19,.30), 0 3px 6px rgba(26,23,19,.16)`
+
+  Misma **forma** en los dos temas —dos capas, mismos offsets—; lo único que cambia es cuánta sombra proyecta la superficie.
+
+- **Borde de control** (`{colors.control-stroke}`): la frontera del control secundario, que es plano y por lo tanto no tiene relieve que lo delate. Es un token propio y **no** el de regla: 3.55:1 en oscuro y 3.48:1 en crema, contra los ~1.25:1 del token de división.
 
 ### Named Rules
 
 **La Regla del Relieve Táctil.** Si no se puede apretar, es plano. El relieve es la señal de que algo es interactivo; usarlo en un panel decorativo lo vuelve ruido y deja al botón sin voz.
+
+**La Regla de las Dos Señales.** El relieve son exactamente dos capas de sombra. Tenía una tercera —un canto superior iluminado— que medía 1.18:1 contra el fondo del propio botón: no era una señal débil, era una línea que no existía más que en la spec. Una señal que no se puede medir no cuenta como señal.
+
+**La Regla del Contrapeso.** Si un control es plano, su borde tiene que llegar a 3:1 (WCAG 1.4.11). El secundario usaba el token de regla y quedaba en 1.23:1: sin frontera en reposo, aparecía recién en `hover` —o sea nunca a touch— y el `hover` terminaba siendo más visible que el estado normal. **Ningún estado puede ser más visible que el reposo.**
 
 ## Shapes
 
@@ -186,10 +233,11 @@ El borde es siempre de 1px y siempre del token de regla. No hay bordes de 2px, n
 ### Buttons
 
 - **Shape:** radio de control (9px). Padding generoso (`28px` horizontal, `16px` vertical), tamaño de texto `1rem` con line-height 1 — no hereda el 1.7 del cuerpo.
-- **Primary:** inversión monocroma — fondo tinta sobre lienzo oscuro, texto del color del lienzo. Canto superior de 1px más claro que el fondo, más el relieve de dos capas. El valor del canto se invierte con el tema.
+- **Primary:** inversión monocroma — fondo tinta sobre lienzo oscuro, texto del color del lienzo, más el relieve de dos capas (que se invierte con el tema). Sin canto superior iluminado: ver *La Regla de las Dos Señales*.
 - **Hover / Focus:** hover baja la opacidad al 90%. **Sin `scale` y sin `letter-spacing` animado** — el CTA anterior animaba tracking y provocaba reflow del texto en cada hover. Foco visible: `outline` de 2px con offset de 2px.
-- **Active:** hunde 2px (`translate-y`) y apaga la sombra. Es el estado que declara que el objeto es físico.
-- **Secondary:** plano. Borde de regla, fondo transparente; el hover sube el borde a tinta, el active hunde 1px. No lleva relieve porque competiría con el primario.
+- **Active:** hunde 2px (`translate-y`) y apaga la sombra. Es el estado que declara que el objeto es físico. **Un solo press**: convivía con un `whileTap: scale .97` de Framer Motion, y los dos se aplicaban a la vez porque animan propiedades distintas (`translate` contra `transform`). Un objeto físico se hunde; no se comprime.
+- **Secondary:** plano. Fondo transparente y borde de control (no el de regla — ver *La Regla del Contrapeso*); el hover sube el borde a tinta, el active hunde 1px. No lleva relieve porque competiría con el primario.
+- **Disabled:** `opacity: .5` sobre el borde de control deja 1.73:1 en oscuro y 1.74:1 en crema — más visible que el borde en **reposo** del diseño anterior (1.23:1). WCAG exime a los controles inactivos del mínimo de 3:1; lo que se exige acá es que se siga percibiendo, y se percibe.
 - **Icono:** una flecha final, opcional. Es el único ícono que admite el sistema en un CTA (`strokeWidth={1.5}`).
 
 ### Cards / Containers
@@ -205,18 +253,29 @@ El borde es siempre de 1px y siempre del token de regla. No hay bordes de 2px, n
 
 El wrapper de sección es el dueño del theming. Escribe su tema en su propio elemento, y todo lo que esté adentro toma los colores sin recibir ninguna prop. Anida, funciona sin provider, y avisa al tema global cuando ocupa la banda central del viewport para que el fondo del documento acompañe. El ritmo dark/crema del home sale de acá.
 
+**El índice de capítulos.** Si la sección-como-capítulo es la firma, el índice tiene que existir de verdad: **todas** las secciones llevan su `ChapterLabel`, correlativo y sin saltos. Estaba aplicado en 2 de 6 y con dos formatos distintos —`( 01 )` en la segunda sección, `( 03 — Un lunes cualquiera )` en la tercera—, o sea dos marcas sueltas que no numeraban nada.
+
+Dos decisiones, que se replican tal cual en las cuatro landings:
+
+- **El formato es solo el número**: `( 01 )`. El título repetía el titular de la sección, que va justo debajo. La prop `title` queda para superficies que no sean el home, donde el número solo no alcanza para ubicar al lector.
+- **El hero lleva número, y es el `01`.** Una portada sin numerar deja el índice arrancando en "01" sobre la segunda sección — exactamente la inconsistencia que se estaba corrigiendo. En el hero va en la misma fila que el eyebrow: son dos etiquetas mono del mismo peso, y apiladas leen como dos kickers en pugna.
+
 ### Motion
 
-Jerárquica y escasa. Reveals de sección: `opacity` + `translateY`, ~0.9s, `once` — no se repiten al volver a subir. Transiciones de estado: 150ms `ease-out` sobre `translate`, `box-shadow` y `opacity`. Todo respeta `prefers-reduced-motion` (`motion-reduce:transition-none`), y el press del botón está gateado contra `useReducedMotion()`.
+Jerárquica y escasa. Reveals de sección: `opacity` + `translateY`, ~0.9s, `once` — no se repiten al volver a subir. Transiciones de estado: 150ms `ease-out` sobre `translate`, `box-shadow` y `opacity`. Todo respeta `prefers-reduced-motion` (`motion-reduce:transition-none`).
+
+El press del CTA es **CSS puro** (`:active`), no Framer Motion. Con `prefers-reduced-motion` no desaparece: se vuelve instantáneo. Un cambio de estado inmediato no es movimiento — quitarlo dejaría al botón sin acuse de recibo justo para quien pidió menos animación.
 
 ## Do's and Don'ts
 
 ### Do:
 
 - **Do** usar radio 0 en superficies y 9px solo en controles.
-- **Do** darle relieve únicamente a lo que se aprieta: canto iluminado + sombra de dos capas + hundimiento de 2px en `:active`.
+- **Do** darle relieve únicamente a lo que se aprieta: sombra de dos capas + hundimiento de 2px en `:active`.
+- **Do** numerar TODAS las secciones con `ChapterLabel`, correlativo y solo con el número.
+- **Do** elegir los pisos de los `clamp()` como una escala, no como mínimos sueltos.
 - **Do** dejar que la sección declare su tema (`data-ds-theme`) en vez de pasar colores por props.
-- **Do** cortar la prosa a 65ch y el subhead a 55ch.
+- **Do** cortar la prosa a 65ch y la bajada a 42ch.
 - **Do** usar Geist Mono para eyebrows, labels de capítulo y cifras — es identidad, no ornamento.
 - **Do** animar solo `transform` y `opacity`.
 - **Do** agregar un token cuando falta un valor. Se agrega el token, no un valor suelto.
@@ -226,7 +285,9 @@ Jerárquica y escasa. Reveals de sección: `opacity` + `translateY`, ~0.9s, `onc
 - **Don't** usar `backdrop-blur` ni glassmorphism en ninguna superficie.
 - **Don't** usar gradientes decorativos, ni `bg-clip-text` con gradiente en titulares o métricas.
 - **Don't** usar sombras de color ni glow de acento.
-- **Don't** mostrar dos acentos de servicio en una misma vista.
+- **Don't** mostrar dos acentos de servicio en una misma vista (única excepción: la sección de los cuatro frentes).
+- **Don't** poner un acento de servicio sobre tema crema — tres de los cuatro no llegan a 3:1.
+- **Don't** dejar que un estado (`hover`, `focus`) sea más visible que el reposo.
 - **Don't** dejar animaciones perpetuas (`infinite`), typewriters ni cursores custom.
 - **Don't** escalar cards en hover ni animar `letter-spacing`, `width`, `height`, `padding` o `margin`.
 - **Don't** poner un borde lateral grueso de acento (`border-left: 4px solid`) como decoración de card.

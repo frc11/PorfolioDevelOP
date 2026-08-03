@@ -1,21 +1,33 @@
 import {
+  ChapterLabel,
   CtaButton,
   DisplayHeading,
   Lead,
   MonoLabel,
   RuleDivider,
   SectionShell,
+  Subhead,
   Surface,
 } from '@/components/design-system'
 import { SERVICE_ROWS, ServiceRow } from './ServiceRow'
 
 const PENDIENTE = '[PENDIENTE DE FRANCO]'
 
-/** S4 — Qué hacemos. Tema oscuro. */
+/**
+ * S5 — Qué hacemos. Tema oscuro.
+ *
+ * Es la única sección con acentos, y por eso NO puede ser crema: tres de los
+ * cuatro no llegan a 3:1 sobre el lienzo claro (cian 2.10, verde 2.19, ámbar
+ * 1.86). La alternancia estricta la habría dejado en crema; se resolvió
+ * intercambiándola con los contrastes en vez de sacarle el color, que era lo
+ * único que distingue una fila de otra.
+ */
 export function SkeletonServices() {
   return (
-    <SectionShell theme="dark" id="home-s4">
+    <SectionShell theme="dark" id="home-s5">
       <div className="flex flex-col gap-10">
+        <ChapterLabel number="05" />
+
         <DisplayHeading size="lg" as="h2">
           Cuatro frentes. Un sistema.
         </DisplayHeading>
@@ -37,9 +49,10 @@ export function SkeletonServices() {
         </div>
 
         <p className="max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
-          El acento aparece una vez por fila, en el tick. Cuatro acentos en la misma vista es la
+          El acento pinta el nombre del frente y su plazo. Cuatro acentos en la misma vista es la
           única excepción del sistema, y existe porque acá el color es lo que distingue un frente
-          del otro — no decoración.
+          del otro — no decoración. Por eso también es la única sección donde el acento necesita
+          área: en 36 px² de tick no alcanzaba a identificar nada.
         </p>
       </div>
     </SectionShell>
@@ -47,16 +60,22 @@ export function SkeletonServices() {
 }
 
 /**
- * S5 — Por qué develOP. Tema crema.
+ * S4 — Por qué develOP. Tema crema.
  *
  * Los tres contrastes van con el texto en placeholder: el sprint pide "los 3
  * contrastes agencia/develOP" pero no dice cuáles son, y las bios están
  * explícitamente pendientes. La estructura se muestra; el copy no se inventa.
+ *
+ * Va cuarta y no quinta: es la sección crema que la alternancia estricta pedía
+ * en ese lugar, y —a diferencia de los cuatro frentes— no necesita acento para
+ * funcionar, así que es la que puede vivir sobre claro.
  */
 export function SkeletonWhy() {
   return (
-    <SectionShell theme="light" id="home-s5">
+    <SectionShell theme="light" id="home-s4">
       <div className="flex flex-col gap-10">
+        <ChapterLabel number="04" />
+
         <DisplayHeading size="lg" as="h2">
           Ingenieros, no intermediarios.
         </DisplayHeading>
@@ -73,9 +92,17 @@ export function SkeletonWhy() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <MonoLabel>develOP</MonoLabel>
-                  <p className="text-ds-body text-ds-fg">
+                  {/*
+                    El lado develOP va en el peldaño nuevo (`Subhead`) y el de
+                    la agencia queda en cuerpo. No es énfasis inventado: el
+                    bloque YA los distinguía por color (`text-ds-fg` contra
+                    `text-ds-fg-muted`); lo que faltaba era el escalón de
+                    tamaño, porque el contraste saltaba del titular de la
+                    sección directo a la mono de 12px.
+                  */}
+                  <Subhead as="p">
                     {PENDIENTE} — contraste {index}
-                  </p>
+                  </Subhead>
                 </div>
               </div>
               {index === 3 ? null : <RuleDivider />}
@@ -100,11 +127,21 @@ export function SkeletonWhy() {
   )
 }
 
-/** S6 — Cierre. Tema oscuro. */
+/**
+ * S6 — Cierre. Tema crema.
+ *
+ * Cierra en claro por la alternancia estricta, y eso es deliberado: obliga a
+ * resolver el CTA sobre crema, que era un hueco real del sistema — los 22
+ * botones del styleguide vivían sobre oscuro y el relieve estaba calculado
+ * contra lienzo oscuro. Con `--shadow-ds-control` invertido por tema, el mismo
+ * componente se apoya bien en los dos.
+ */
 export function SkeletonClose() {
   return (
-    <SectionShell theme="dark" id="home-s6">
+    <SectionShell theme="light" id="home-s6">
       <div className="flex flex-col items-start gap-8">
+        <ChapterLabel number="06" />
+
         <DisplayHeading size="lg" as="h2">
           Empecemos por una llamada.
         </DisplayHeading>

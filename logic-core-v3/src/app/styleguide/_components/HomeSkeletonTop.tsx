@@ -33,7 +33,10 @@ export function SkeletonHero() {
   return (
     <SectionShell theme="dark" id="home-s1">
       <div className="flex flex-col gap-8">
-        <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <ChapterLabel number="01" />
+          <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
+        </div>
 
         {/*
           En el home real esto es el <h1>. Acá va como h2 porque el <h1> de la
@@ -66,7 +69,7 @@ export function SkeletonProof() {
     <SectionShell theme="light" id="home-s2">
       <div className="flex flex-col gap-10">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <ChapterLabel number="01" />
+          <ChapterLabel number="02" />
           <MonoLabel>Caso real</MonoLabel>
         </div>
 
@@ -104,7 +107,7 @@ export function SkeletonLiveProof() {
   return (
     <SectionShell theme="dark" id="home-s3">
       <div className="flex flex-col gap-10">
-        <ChapterLabel number="03" title="Un lunes cualquiera" />
+        <ChapterLabel number="03" />
 
         <DisplayHeading size="lg" as="h2">
           Un lunes a la mañana, abrís tu panel.

@@ -85,10 +85,16 @@ export default function RootLayout({
           pelea con las superficies planas — corría a `steps(10)` infinito sobre
           todo el viewport, en toda ruta, sin gate de visibilidad.
 
-          Se desmontan, no se borran: eran las dos únicas piezas montadas
-          globalmente (fuera de `PublicOnlyComponents`), así que sacarlas de acá
-          las saca de todas las superficies. Los archivos quedan sin consumidores
-          — anotado en la bitácora para que una poda posterior los levante.
+          Eran las dos únicas piezas montadas globalmente (fuera de
+          `PublicOnlyComponents`), así que sacarlas de acá las sacó de todas las
+          superficies, producto incluido.
+
+          `NoiseOverlay.tsx` se borró en el sprint de calibración: desmontado ya
+          no hacía nada, pero el archivo seguía llevando adentro una animación
+          `infinite` a 5 Hz sin gate de `prefers-reduced-motion` — exactamente lo
+          que la lista de "Don't" del sistema prohíbe — y bastaba con volver a
+          importarlo para reintroducirla. `CustomCursor.tsx` sigue vivo y sin
+          consumidores: queda para una poda aparte.
         */}
         <PreloaderProvider>
           <SmoothScroll>
