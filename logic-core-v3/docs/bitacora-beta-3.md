@@ -2261,3 +2261,134 @@ suite necesita el checkout quieto (sin dev/start/build de otra sesión sobre el 
 transiciona FICHA→EVALUADA` y `B9 · DESCARTADA: score bajo → modal → archivo` —los dos únicos tests
 que ejercitan la fusión— **pasaron en ambas**, y en la segunda `01-flow.spec.ts` corrió entero hasta
 B9 sin un solo fallo. Ningún fallo, en ninguna de las dos, cayó en la superficie que el sprint tocó.
+
+---
+
+## Sprint P5-A — poda del Panel del Setter: la ficha recibe el material de la demo — 2026-08-03
+
+**Terreno — limpio, por primera vez en el bloque.** `redesign/home`, HEAD `5d844bb` (el P4 que fusiona
+m2+m3, presente y verificado). `git status --porcelain` **vacío** — sin WIP ajeno, a diferencia de P1
+y P4. Worktree principal `C:/PorfolioDevelOP` (los otros dos siguen en `chore/auditoria-clean` y
+`main`). Línea base de tipos: **exit 2 con un solo error, el mismo preexistente y ajeno** de
+`src/lib/searchconsole.ts:119` (doble copia de `google-auth-library`); el error del frente público que
+el encargo anticipaba **no apareció**. `check:invariants` **17/17, exit 0**. Al arrancar, **cero
+procesos node** sobre el checkout — el `.next` estaba quieto.
+
+**El descubrimiento corrigió la premisa del encargo, y eso cambió el trabajo.** El encargo decía
+«el material que hoy se junta en el paso del brief». **No es así: M6 no junta material del negocio.**
+M6 («Armá el brief») pide el pegado crudo del Gem de diseño + 5 campos estructurados (`titulo`,
+`secciones`, `cta`, `concepto`, `notasMarca`) y persiste en `briefJson`. El material —reseñas, logo,
+fotos, tono— ya vivía en la **ficha (M1)**, en `fichaJson`. **Son dos columnas Json distintas de la
+misma fila `OsLeadDossier`**, con schemas, actions, gates y pantallas separadas: no hay estructura
+compartida que fusionar.
+
+**El solapamiento real es UNO solo, y es chico:** `brief.notasMarca` («Colores, tono, logo: lo que la
+demo tiene que respetar») pisa a `ficha.contenidoReal` («Contenido real — logo / fotos / tono»).
+Es el único campo que P5-B puede retirar sin perder nada. **Consecuencia para P5-B: el retiro de M6 no
+es «mover campos a la ficha» —no hay campos que mover—, es decidir qué pasa con `pegadoGem` y
+`secciones`**, que hoy alimentan `buildConstruccionBlock` y no tienen equivalente en la ficha.
+
+**La pregunta que decidía el precio: NO hace falta tocar la base.** `fichaJson` es `Json?`
+(`schema.prisma:992`) y su contrato es `FichaSchema` (`contracts.ts:33`), cuyo encabezado ya declara
+el mecanismo: *«contratos base MINIMALES a propósito: B3/B4 los extienden acá mismo con campos
+opcionales nuevos, sin romper datos ya guardados»*. Los campos nuevos entran en el blob. **Cero
+migración, cero `prisma generate`, cero decisión pendiente de Franco sobre el schema.**
+
+**Lo que se agregó — cinco campos, todos opcionales, en un grupo `materiales` anidado** (mismo patrón
+que `identidad`), y una sección propia en el formulario titulada **«Material para construir la
+demo»**: tres direcciones (`resenasUrl`, `imagenesUrl`, `otraRedUrl`) validadas con
+`EnlaceFichaSchema` —el patrón `optionalUrl` que el repo ya usa, con el tope de largo de
+`DraftUrlInputSchema`— y dos de texto libre (`queVende`, `comoSePresenta`). Son URLs y texto: **no se
+construyó ninguna subida de archivos**, según la restricción declarada.
+
+**Los campos NO entran en `fichaFaltantes`.** El gate de señal mínima quedó intacto a propósito:
+suman material, no mueven la puerta. Un lead viejo no ve faltantes nuevos.
+
+**Trampa encontrada y cerrada — `aPayload` podía tirar abajo el formulario.** `faltantesEnVivo` re-arma
+el payload con `FichaSchema.parse` **en cada render**, y el autosave hace lo mismo. Con `.url()` en el
+schema, una dirección a medio pegar (`h`, `ht`, `http`) hacía **throw en cada tecla**. Se resolvió sin
+aflojar el contrato: `aPayload` pasó a `safeParse` y, si falla, re-arma sin los enlaces —que el
+formulario ya marca en rojo— para que el resto del trabajo escrito se siga autoguardando; el guardado
+explícito **se bloquea** con mensaje visible. Cliente y servidor validan con el MISMO schema exportado,
+así no pueden divergir. El rojo aparece al SALIR del campo, no mientras se tipea (mismo criterio que
+los nudges de calidad que ya existían).
+
+**El consumidor.** `buildConstruccionBlock` (el bloque para Claude Design, `copy-blocks.ts:154`)
+ahora lleva el material: la dirección del logo/fotos encabeza «DE DÓNDE BAJAR EL LOGO Y LAS FOTOS
+REALES», las reseñas viajan con su link, y entran dos secciones nuevas —«QUÉ VENDE Y A QUÉ PRECIO» y
+«CÓMO HABLA EL NEGOCIO DE SÍ MISMO»—. **Degradación honesta, verificada:** se reusó el helper
+`seccion()` que ya define el criterio del archivo (vacío → `null` → `filter(Boolean)` lo saca), así que
+un campo sin cargar **se omite**; no hay placeholder, no hay «falta X», no quedan títulos huérfanos ni
+renglones dobles. Se sumó también a `buildFichaCopyBlock` porque es la forma canónica en texto de la
+ficha: es lo que ve la **vista congelada** post-evaluación, y dejarlo afuera habría hecho que el
+material desapareciera de la vista apenas se registra el veredicto — exactamente la omisión estructural
+que documenta el comentario A-21 de ese mismo archivo.
+
+**Verificación de que un lead viejo sigue andando — hecha, no asumida.** Script de 30 aserciones
+(`tsx`, descartado al cerrar) sobre un blob con la forma EXACTA de un guardado pre-P5-A, sin la clave
+`materiales`: `parseFicha` no devuelve `null`, los seis campos viejos llegan intactos, `materiales`
+queda `undefined` (no se inventa un grupo vacío), **`fichaFaltantes` da lo mismo que antes** y
+`fichaTieneSenal` sigue `true`; los dos bloques copiables no muestran ni un título del material nuevo
+y no aparecen huecos. Cubre además ficha vacía `{}`, `ficha: null`, material parcial (aparece lo que
+hay, se omite lo que falta), solo-link-sin-texto, y la validación de direcciones (inválida rechazada
+con el mensaje del repo, vacío y espacios válidos y sin dejar clave en el blob, URL larguísima
+rechazada). **30/30, exit 0.** Corrobora el mismo patrón de `01-flow.spec.ts:319`, que escribe un
+`fichaJson` con la forma vieja directo a la DB.
+
+**La pantalla del brief sigue existiendo y funcionando.** Su retiro es P5-B: `m6-brief.tsx`,
+`brief-form.tsx`, `BriefSchema`, `BriefInputSchema`, `guardarBrief` y `saveOwnedBrief` **no se
+tocaron** — no aparecen en el diff.
+
+**Verificación.** `tsc --noEmit`: **exit 2 con el MISMO error preexistente de `searchconsole.ts` y
+cero errores nuevos**, leído del proceso sin pipe. `check:invariants`: **17/17, exit 0**.
+`test:leados`: **25/25, exit 0** (57.8s).
+
+**`test:setter` NO se corrió — bloqueo ambiental, declarado entero y no disimulado.** Al llegar al
+cierre, otra sesión tenía tomado el checkout: `next dev --webpack --port 3000` (PID 13324, arrancado
+14:07:14) reescribiendo `.next` de forma continua, un `next build --webpack` (PID 21876, 14:21:19) que
+terminó a las 14:23:04, y un `next start -p 3100` (PID 25240, 14:23:47) **sirviendo desde ese mismo
+`.next`**. `test:setter` arrastra `start:qa` = `npm run build && next start -p 3001`, así que correrlo
+habría (a) dado números contaminados —la misma carrera que quemó las dos corridas de P4— y
+(b) **reconstruido `.next` por debajo del server vivo de la otra sesión**, rompiéndole el trabajo en
+curso. No se mató ningún proceso ajeno. **La suite queda pendiente de una corrida con el checkout
+quieto; el sprint no se autocierra por ella.** `test:leados` sí corrió y es válido: su config
+**no tiene `webServer`** (`playwright.leados.config.ts` lo dice explícito — lógica pura + Prisma
+directo), así que es inmune a la colisión de `.next`.
+
+**Evaluación estática del riesgo sobre `test:setter`, ya que no pudo correr.** Los tests que llenan la
+ficha localizan por placeholder (`/IG activo/i`, `/la cuenta la firma/i`, `/Nunca contestan/i`,
+`01-flow.spec.ts:66-76`): **ninguno de los cinco placeholders nuevos matchea esos regex**. El botón
+«Guardar ficha» y el banner «✓ Señal mínima lista» no cambiaron, y el bloqueo nuevo del guardado solo
+dispara con una dirección inválida (en el test están todas vacías = válidas). El `id` del título del
+grupo usa `useId()`, no una constante, así que no puede duplicarse si el form se monta más de una vez
+(que es lo que sugiere el `firstVisible` de los tests).
+
+**`git diff --stat` — 5 archivos, 329 inserciones / 8 borrados:** `contracts.ts` (el grupo
+`materiales` + `EnlaceFichaSchema`), `guidance-content.ts` (tipo `GrupoGuia` + copy de los 5 campos +
+la ficha modelo, que el tipo obliga a cubrir), `ficha-form.tsx` (estado, payload resiliente,
+validación visible y la sección agrupada), `copy-blocks.ts` (los dos bloques) y `ejemplo-ideal.tsx`
+(el orden de los campos del ejemplo). **Cero gates, cero transiciones, cero aislamiento, cero schema:**
+`flow.ts`, `dossier.ts`, `dossier.actions.ts`, `isolation.ts`, `manual.ts` y `prisma/` intactos.
+Sin push.
+
+**Hallazgos fuera de scope — anotados, no tocados.**
+
+1. **El setter no puede cargar ni editar `googleMapsUrl`.** Existe como columna
+   (`schema.prisma:873`), lo pide el admin, y **lo leen los dos bloques copiables** — pero no está en
+   el alta del setter ni en el CSV, y **no existe ninguna action de edición de columnas del lead para
+   el setter**. Arreglarlo exige tocar `isolation.ts` (`OwnedLeadFields` / `ownedLeadCreateData`),
+   que este sprint tiene vedado. Mitigado de costado: `resenasUrl` suele ser la misma ficha de Google.
+   Lo mismo aplica a `currentWebUrl` si el alta no lo trajo.
+2. **El panel de admin no muestra el material nuevo.** `FICHA_BLOQUES`
+   (`admin/leados/[leadId]/_components/dossier-panels.tsx:227`) es una lista fija de los seis campos
+   viejos. Franco no ve `materiales` al revisar el dossier. Es otra superficie: no se tocó.
+3. **`brief.referenciasFicha` se pierde en silencio** en cualquier re-guardado (`saveOwnedBrief`
+   sobrescribe `briefJson` entero y ni el form ni `BriefInputSchema` lo producen). Hoy es inerte
+   porque nadie lo escribe. Es uno de los dos hallazgos de guardado que el encargo dejó fuera.
+
+**Para Franco, por escrito — no autocerrado.** (1) **Cuáles son los cinco campos y que estén
+agrupados** es criterio de producto: de más, la ficha se vuelve un formulario que nadie completa; de
+menos, la construcción arranca a ciegas. Lo aprueba él en el preview. (2) **Los rótulos y los
+ejemplos** los cierra él mirando — en particular «¿Cómo habla el negocio de sí mismo?», que es el
+único que le pide al setter una lectura y no un dato. (3) **Que una sola dirección alcance para el
+logo Y las fotos**: si en la práctica viven en lugares distintos, hace falta un campo más.
