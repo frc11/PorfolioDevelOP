@@ -31,9 +31,16 @@ export default function Home() {
           <OurServices />
         </SectionWrapper>
 
-        <SectionWrapper>
-          <PortalDemo />
-        </SectionWrapper>
+        {/*
+          `PortalDemo` sale del `SectionWrapper` en B3-S2. No es cosmético: el
+          wrapper envuelve a su hijo en un `motion.div` con
+          `initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en
+          el HTML del SSR — la sección nace invisible y depende del JS para
+          aparecer. Encima le montaba un segundo reveal ajeno arriba del reveal
+          CSS del sistema. `Hero` y `Portfolio`, ya migrados, tampoco lo usan.
+          `OurServices` lo conserva: no es de este sprint.
+        */}
+        <PortalDemo />
 
         <TodoIncluido />
         <ModulosOpcionales />

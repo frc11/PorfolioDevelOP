@@ -2664,3 +2664,199 @@ sistema de diseño que la sección ahora importa cruzan a ese lado del corte.
 
 > **Gate de merge.** Esta rama tiene placeholders a la vista. **No se mergea a `main`**
 > hasta que Franco cierre el contenido marcado.
+
+---
+
+## B3-S2 — S3, el panel del lunes · 2026-08-04 · CIERRE DEL BLOQUE B3
+
+El concepto se conserva entero —tres momentos de una mañana, no una lista de
+features— y la ejecución se rehace completa.
+
+### Lo que se sacó por falso, no por feo
+
+Esta es la sección que sirve de prueba, así que cada cosa que aparece se verificó
+**contra el código del portal**. Lo que la versión anterior afirmaba y el panel
+no hace:
+
+| Afirmaba | Realidad |
+|---|---|
+| «develOP filtró los 14 mails, 8 mensajes y 3 alertas que te llegaron» | El panel **no lee tu correo**. `AttentionStack` arma sus ítems con datos propios: entregas, facturas, reseñas, conexiones |
+| «8 ventas cerradas» · «$340K facturados» | `WeekResultsData` **no tiene** métrica de ventas ni de facturación |
+| «Comparativa contra mes anterior» | La comparación es contra la **semana** anterior |
+| Gráfico de barras de siete días | No existe en `WeekResultsGrid` |
+| Health Score 78, dimensiones 82/74/79 | La capacidad existe; **las cifras eran inventadas** |
+| 47 leads, +12%, 2 reseñas de Google | Ídem: los tipos son reales, los números no |
+
+Lo que sí quedó, con su fuente: el **Health Score** (`lib/health-score.ts`, total
+0-100 y tres dimensiones con los nombres exactos del portal), **Tu Atención Hoy**
+(`lib/dashboard/attention.ts`, tipos `billing` / `approval` / `message` /
+`connection` / `review` con su prioridad), **Resultados de la semana**
+(`lib/dashboard/week-results.ts`, contra la semana anterior) y el **resumen
+ejecutivo escrito por IA** (`lib/ai/executive-brief.ts`). Todas las cifras van
+marcadas.
+
+`visits` quedó **afuera a propósito**: está hardcodeado en 0 porque no hay
+integración de analítica, y la card real muestra «— Sin integración aún».
+Mostrarla en la sección de la prueba sería vender una integración que no existe.
+
+### Decisiones
+
+**Sin Framer Motion en el árbol.** Se fueron `DashboardStoryBackground` (~200
+líneas de gradientes radiales, blurs `3xl`, ocho SVG decorativos y **dos loops
+`Infinity` corriendo de por vida**), los mockups con `conic-gradient` y
+`boxShadow` de color, el CTA propio con glow, y la línea conectora con su
+destello perpetuo. `useReducedMotion` se sigue importando de `motion/react`, pero
+por dentro es un `matchMedia`: no arrastra el motor de animación.
+
+**El contrato de motion vive en `useEscenaCycle`.** Fuera del viewport el
+`setInterval` **no se crea** — el efecto depende de `enViewport`, así que React
+corre su `clearInterval` al salir de pantalla. No hay `requestAnimationFrame` en
+toda la sección.
+
+**La selección manual corta el avance automático para siempre.** Quien toca un
+paso del riel deja de recibir cambios de escena: es una salida del loop para
+quien quiere leer tranquilo, no una comodidad.
+
+**Legible a mitad de ciclo.** El riel con las tres horas está siempre completo y
+la escena activa se marca sobre él. Quien llega cuando va por la segunda ve las
+tres, sabe que son tres y sabe en cuál está.
+
+**`PortalDemo` salió del `SectionWrapper`** en `page.tsx`. No es cosmético: ese
+wrapper envuelve a su hijo en un `motion.div` con
+`initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en el HTML
+del SSR — la sección nacía invisible y dependía del JS para aparecer, encima con
+un segundo reveal ajeno montado arriba del reveal del sistema. `Hero` y
+`Portfolio` tampoco lo usan. `OurServices` lo conserva: no es de este sprint.
+
+### El bug que introduje y cómo se cazó
+
+La primera versión ramificaba el JSX con un booleano `estatico`: una escena si
+había motion, las tres si no. **Error de hidratación React #418**, medido en
+runtime con `reducedMotion: 'reduce'`. La causa: `useReducedMotion()` devuelve
+`false` en el servidor y `true` en el cliente, así que el HTML del SSR y el
+primer render del cliente salían distintos.
+
+El arreglo no fue un flag `mounted`: **las tres escenas están siempre en el DOM y
+quién se ve lo decide CSS**, con la variante `motion-reduce:`. El marcado es
+idéntico en servidor y cliente, y quien pidió menos movimiento ve las tres
+escenas desde el primer paint sin depender de un solo byte de JS. El fade sale
+gratis de paso: un elemento en `display:none` no corre sus animaciones, así que
+al pasar a `block` la de entrada arranca de cero.
+
+**El #418 que queda en `/` con reduced-motion NO es de esta sección.**
+Discriminador empírico, no deducción: el mismo error aparece con reduced-motion
+en `/web-development`, `/process-automation` y `/software-development`, que **no
+montan `PortalDemo`**, y no aparece en `/contact`. Es un componente compartido de
+las landings que ramifica su marcado con `useReducedMotion`. Preexistente y
+fuera de scope.
+
+### Verificación
+
+Playwright headed contra el build de producción en `:3001`, servidor reiniciado
+en cada corrida.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `portal-demo/` + `page.tsx` | **0** |
+| `section#portal-demo` en el DOM | **1** |
+| `h2` de la sección en el HTML servido | **1** (contando el tag de cierre) |
+| `h2` de S2 en el mismo documento | **1** |
+| `backdrop-filter` / gradiente / radio en superficies | **0 / 0 / 0** |
+| Scroll horizontal | **no**, a 1440 y a 390 |
+| Errores de consola (motion normal) | **0** a 1440 y a 390 |
+| Detector — `design-system/` | **0** |
+| Detector — superficie pública | **59** contra baseline 64 |
+
+**Peso.** El presupuesto era ≤80 KB gz de JS **adicional**. La sección no agrega:
+**resta**.
+
+| Momento | Chunk de la ruta `/` |
+|---|---:|
+| Pre-B3 | 79.64 KB gz |
+| Post-S1 | 79.78 KB gz |
+| **Post-S2** | **74.60 KB gz** |
+
+−5.18 KB gz contra post-S1 y −5.04 contra el baseline del bloque. El HTML servido
+de `/` bajó de 421.3 a **402.0 KB**.
+
+**Motion gateado — medido, no afirmado.** Instrumentando `setInterval` /
+`clearInterval` y `requestAnimationFrame` antes de que cargue la app:
+
+| Estado | Temporizadores vivos | rAF de la sección |
+|---|---:|---:|
+| Sección fuera del viewport | **2** | 0 |
+| Sección dentro del viewport | **3** | 0 |
+| Reduced-motion, dentro del viewport | **2** | 0 |
+
+El 2 → 3 → 2 es el loop naciendo y muriendo con el viewport. Con reduced-motion
+nunca llega a 3: el intervalo no se crea. Los 2 temporizadores de base y el rAF
+perpetuo que sí corre en la página son **preexistentes** (Lenis, ya fichado en
+esta bitácora como pendiente): la sección no suma ninguno.
+
+**Reduced-motion**: 3 escenas visibles de 3, 3 láminas visibles, la escena no
+avanza en 6 s. Con motion normal: 1 visible de 3, y avanza 8:30 → 9:00 sola.
+
+**Alturas**
+
+| Sección | 1440 × 900 | 390 × 844 |
+|---|---:|---:|
+| S2 — el caso real | 1520 px · **1.69** pantallas | 1893 px · **2.24** |
+| S3 — el panel | 1087 px · **1.21** pantallas | 1591 px · **1.89** |
+| S3 con reduced-motion | 1886 px · **2.10** | — |
+
+Las tres escenas apiladas del modo estático explican los 2.10: es el modo que
+muestra todo junto.
+
+### Un segundo bug de composición, cazado en la captura
+
+Las etiquetas de las métricas salían **truncadas** —«RESPONDI…», «COMPLETA…»— y
+las del Health Score partidas en dos líneas. El interior de la lámina mide ~370px
+a 1440 (570 de lámina menos la barra lateral) y ahí no entran tres columnas.
+Pasaron a filas: etiqueta a la izquierda, cifra a la derecha, regla abajo. No se
+ve leyendo el JSX.
+
+---
+
+## Inventario de placeholders pendientes — GATE DE MERGE
+
+**Ninguna rama con estos placeholders a la vista se mergea a `main`.** Son 15, en
+dos archivos:
+
+| Archivo | Línea | Placeholder |
+|---|---:|---|
+| `sections/home/Portfolio.tsx` | 54 | `[CONTEXTO — 1 línea: qué perdían antes de develOP]` |
+| `sections/home/Portfolio.tsx` | 56 | `[ENTREGABLE — 2 a 3 líneas: …]` |
+| `sections/home/Portfolio.tsx` | 57 | `[URL DEL CASO]` |
+| `sections/home/Portfolio.tsx` | 66 | `[+00%]` — consultas canalizadas |
+| `sections/home/Portfolio.tsx` | 67 | `[00 días]` — tiempo a producción |
+| `sections/home/Portfolio.tsx` | 68 | `[000]` — vehículos publicados |
+| `sections/home/Portfolio.tsx` | 73 | `[RUBRO 1]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/home/Portfolio.tsx` | 74 | `[RUBRO 2]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/home/Portfolio.tsx` | 75 | `[RUBRO 3]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/portal-demo/data.ts` | 87 | `[00]` — score |
+| `sections/portal-demo/data.ts` | 88 | `[+00%]` — delta de métrica |
+| `sections/portal-demo/data.ts` | 89 | `[00]` — entero de métrica |
+| `sections/portal-demo/data.ts` | 104 | `[ENTREGA QUE ESPERA APROBACIÓN]` |
+| `sections/portal-demo/data.ts` | 105 | `[RESEÑA SIN RESPONDER]` |
+| `sections/portal-demo/data.ts` | 106 | `[FACTURA POR VENCER]` |
+
+Lo que **no** es placeholder y queda tal cual: **Concesionaria San Miguel** y su
+rubro; los nombres de las capacidades del panel (Health Score, Tu Atención Hoy,
+Resultados de la semana, Salud Digital / Comercial / Operativa, Leads,
+Respondidos, Completadas); y los labels de las cifras del caso. Todo eso está
+verificado contra el código o es dato real.
+
+### Fuera de scope — anotado, no implementado
+
+1. **#418 con reduced-motion en las tres landings** (`/web-development`,
+   `/process-automation`, `/software-development`) y en `/`. Componente
+   compartido que ramifica marcado con `useReducedMotion`. Necesita el mismo
+   tratamiento que se le dio acá: la diferencia va en CSS, no en JSX.
+2. **`About.tsx` sigue sirviendo dos árboles JSX completos.** Es la otra mitad
+   del patrón que infló el documento.
+3. **`page.tsx` sigue envolviendo `OurServices` en `SectionWrapper`**, con el
+   mismo `initial` de Framer serializado en el SSR.
+4. **`Portfolio` sigue importado con `next/dynamic`** aunque ya no tenga JS
+   propio: ese `dynamic()` no code-splitea nada útil.
