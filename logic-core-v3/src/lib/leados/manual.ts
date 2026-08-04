@@ -101,7 +101,12 @@ export type PantallaDef = {
   corto: string
 }
 
-/** Las 6 pantallas de Construcción, en el MISMO orden que `FASE_IDS`. */
+/**
+ * Las pantallas de Construcción, en orden de presentación (el rail de fases y
+ * el indicador "paso N de M" cuentan sobre esta lista). Es la lista de
+ * PRESENTACIÓN: el mapeo fase→pantalla vive en `PANTALLA_DE_FASE`, y el
+ * invariante `check:invariant:pantallas` ata las dos.
+ */
 export const PANTALLAS_CONSTRUCCION = [
   'm7',
   'm8',
@@ -111,15 +116,44 @@ export const PANTALLAS_CONSTRUCCION = [
   'm12',
 ] as const satisfies readonly PantallaId[]
 
-/** Pantalla del manual que corresponde a una fase del checklist (m7…m12). */
-export function pantallaDeFaseConstruccion(fase: FaseId): PantallaId {
-  return PANTALLAS_CONSTRUCCION[FASE_IDS.indexOf(fase)]
+export type PantallaConstruccionId = (typeof PANTALLAS_CONSTRUCCION)[number]
+
+/**
+ * Tabla EXPLÍCITA fase del checklist → pantalla que la contiene.
+ *
+ * `Record<FaseId, …>` es la RED que el acoplamiento posicional anterior no
+ * daba. Antes esto era `PANTALLAS_CONSTRUCCION[FASE_IDS.indexOf(fase)]`:
+ * indexar una tupla con un `number` —sin `noUncheckedIndexedAccess` en el
+ * tsconfig— devuelve la unión de los tipos de sus elementos, así que desalinear
+ * las dos listas COMPILABA EN VERDE y devolvía `undefined` en runtime, tipado
+ * como `PantallaId`. La consecuencia era muda y cara: fases que dejan de
+ * marcarse como completadas, `actual = undefined`, y `/manual/undefined` en
+ * loop de redirects. Con la tabla, una fase sin entrada NO COMPILA.
+ *
+ * La dirección que el tipo NO cubre —una pantalla del registro que ninguna fase
+ * mapea, que renderizaría con los tres slots vacíos— la cubre el invariante.
+ *
+ * N:1 a propósito: varias fases pueden compartir pantalla (P6-B agrupó las seis
+ * fases en dos pantallas). La lista de fases (`FASE_IDS`, llave del progreso
+ * persistido) NO se toca al reagrupar: sólo cambian los valores de esta tabla.
+ */
+export const PANTALLA_DE_FASE = {
+  estructura: 'm7',
+  personalizacion: 'm8',
+  assets: 'm9',
+  cta: 'm10',
+  calidad: 'm11',
+  mobile: 'm12',
+} as const satisfies Record<FaseId, PantallaConstruccionId>
+
+/** Pantalla del manual que contiene una fase del checklist. */
+export function pantallaDeFaseConstruccion(fase: FaseId): PantallaConstruccionId {
+  return PANTALLA_DE_FASE[fase]
 }
 
-/** Fase del checklist detrás de una pantalla de Construcción (inversa). */
+/** Fase del checklist detrás de una pantalla de Construcción (inversa de la tabla). */
 export function faseDePantallaConstruccion(id: PantallaId): FaseId | null {
-  const index = (PANTALLAS_CONSTRUCCION as readonly PantallaId[]).indexOf(id)
-  return index === -1 ? null : FASE_IDS[index]
+  return FASE_IDS.find((fase) => PANTALLA_DE_FASE[fase] === id) ?? null
 }
 
 /**
