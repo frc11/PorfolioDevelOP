@@ -2544,3 +2544,123 @@ elementos **interactivos** en `Portfolio.tsx` (4, incluidas dos flechas de naveg
 regla CSS `cursor: none` propia en `:695`. Hoy un usuario que pasa por encima de esos
 elementos **no ve ningún cursor**. Es una regresión de accesibilidad ya viva en la
 rama, anterior a este sprint. Necesita una pasada propia.
+
+---
+
+## B3-S1 — S2, el caso real · 2026-08-04
+
+`Portfolio.tsx` deja de ser un carrusel de seis tarjetas y pasa a ser la lámina de
+un case study: **un** caso real arriba, demos conceptuales abajo, y la jerarquía
+diciendo cuál es cuál.
+
+### La regla de contenido, aplicada
+
+Lo único real que entró tal cual es **Concesionaria San Miguel** y su rubro. Todo lo
+demás está marcado. No se inventó ninguna cifra, ningún porcentaje, ningún nombre de
+cliente y ningún plazo: los placeholders tienen la **forma** del texto final (misma
+extensión, misma estructura) y el **contenido** dice que falta.
+
+Lo que sí se escribió son los **labels** de las cifras (`CONSULTAS CANALIZADAS`,
+`TIEMPO A PRODUCCIÓN`, `VEHÍCULOS PUBLICADOS`): el label es la categoría de lo que se
+midió — una decisión ya tomada — y escribirlo es lo que deja juzgar si la fila de
+datos tiene el peso que la sección necesita. El valor es el dato, y el valor está
+marcado.
+
+Los cinco demos inventados (Clínica Médica, Gimnasio, Restaurante, Inmobiliaria,
+Portal SaaS) **se fueron**: eran rubros elegidos sin decisión comercial detrás,
+presentados con la misma tarjeta que el cliente real. Quedan tres slots marcados
+`[RUBRO 1..3]` y la aclaración pasó de nota al pie en gris chico a cuerpo de la
+sección: «No son clientes: son demostraciones».
+
+### Decisiones
+
+**Server Component, cero JS.** El archivo no lleva `'use client'`. Se fueron
+`useState`, `useRef`, `useInView`, `useMotionValue`, `useTransform` y
+`AnimatePresence` — todo eso existía para mover el carrusel. El reveal es
+`animate-ds-reveal`, la animación CSS del sistema (opacity + translateY, una sola
+iteración, y el bloque global de `prefers-reduced-motion` la aterriza en su keyframe
+final). Sin Framer no hay `initial={{opacity:0}}` serializado en el SSR, así que la
+sección no tiene el modo de fallar «si el JS no llega, no se ve nada».
+
+**Un solo árbol JSX.** El responsive va por clases. La versión anterior servía
+`PortfolioDesktop` y `PortfolioMobile` **completos** y los tapaba con
+`hidden md:block` / `block md:hidden`: los dos árboles viajaban en el HTML.
+
+**Sin acentos.** La sección corre en crema (`data-ds-theme="light"`, verificado en el
+DOM: `rgb(242, 238, 230)`). Tres de los cuatro acentos no llegan a 3:1 sobre ese
+lienzo — cian 2.10, verde 2.19, ámbar 1.86. No hay excepción que pedir.
+
+**El `ChapterLabel` va solo con el número.** El sprint pedía `( 02 — LA PRUEBA )`,
+pero el formato con título es justo el que B1-S5 sacó del home porque repetía el
+titular de la sección, que va dos líneas más abajo. Lo que decía el título lo dice el
+`MonoLabel` de al lado (`CASO REAL`), que es la etiqueta del contenido y no un segundo
+kicker. Es el mismo par que ya tenía el esqueleto de `/styleguide`.
+
+### El bug que apareció midiendo, no leyendo
+
+La primera versión metía los resultados en la columna angosta de un grid de dos
+columnas, al lado de la narración. **Las tres cifras se pisaban entre ellas a 1440.**
+`--text-ds-data` llega a 48px en mono: una cifra de 6-9 caracteres pide ~170px, y esa
+columna daba ~150px. No se ve leyendo el JSX — se ve en la captura.
+
+Los resultados pasaron a **ancho completo**, debajo de la narración. Cada cifra tiene
+ahora ~380px. Y además es lo que la sección quiere decir: en la lámina de la prueba la
+cifra es el objeto principal, no una nota al margen. Costo: la sección creció de 1.39 a
+**1.69 pantallas** a 1440. Se paga.
+
+### Verificación
+
+Medida con **Playwright headed** contra el build de producción en `:3001`, servidor
+reiniciado. El Browser pane de esta sesión no compone: deja las siete secciones
+`dynamic()` colgadas en su fallback, la hidratación nunca termina y toda geometría da
+0. Queda anotado porque va a volver a pasar.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `Portfolio.tsx` | **0** |
+| `section#portfolio` en el DOM | **1** |
+| `<h2>` «Esto ya funciona.» en el DOM | **1** a 1440 y a 390 |
+| Heading en el HTML servido (sin el payload RSC) | **1** |
+| Restos del carrusel viejo (`NUESTROS TRABAJOS`, `POR RUBRO`, `DEMOS Y CONCEPTOS`) | **0** |
+| `backdrop-filter` en la sección | **0** |
+| `background-image: *gradient*` en la sección | **0** |
+| Radio ≠ 0 en superficies no interactivas | **0** |
+| Scroll horizontal | **no**, a 1440 y a 390 |
+| Errores de consola | **0** a 1440 y a 390 |
+| Detector — `design-system/` | **0** (se sostiene) |
+| Detector — superficie pública | **60** contra baseline 64. Bajó 4: los cuatro `gradient-text` vivían en este archivo |
+| Detector — `Portfolio.tsx` solo | **0** |
+
+**Altura de la sección**
+
+| Viewport | Alto | En pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1520 px | **1.69** |
+| 390 × 844 | 1893 px | **2.24** |
+
+Los 2.24 de mobile son con placeholders de forma realista, que es el punto: el texto
+marcado ocupa lo que va a ocupar el definitivo. El número es interpretable, no una
+medición de relleno arbitrario.
+
+**Peso.** El chunk de la ruta `/` quedó en 79.78 KB gz contra 79.64 KB antes (+0.14).
+El total de `static/chunks` bajó de 2342.3 a 2338.8 KB gz y desapareció un chunk: es
+el JS del carrusel yéndose. El chunk de `/page` sube apenas porque las piezas del
+sistema de diseño que la sección ahora importa cruzan a ese lado del corte.
+
+### Fuera de scope — anotado, no implementado
+
+1. **`About.tsx` sigue sirviendo dos árboles JSX completos.** Es la otra mitad del
+   patrón que infló el documento. El HTML servido de `/` quedó en **421.3 KB**; no
+   tengo baseline del documento previo a este sprint (la primera medición ya fue con
+   S1 puesto), así que el número queda como referencia, no como delta.
+2. **`page.tsx` sigue importando `Portfolio` con `next/dynamic` y un `loading:` de
+   `animate-pulse`.** Ahora que la sección es un Server Component sin JS propio, ese
+   `dynamic()` no code-splitea nada útil. Buildea y sirve bien, así que no se tocó:
+   `page.tsx` no es de este sprint.
+3. **Los `[RUBRO 1..3]` y el `[URL DEL CASO]` son decisión de Franco**, no deuda
+   técnica. La lista consolidada de placeholders, con archivo y línea, va al cerrar B3.
+
+> **Gate de merge.** Esta rama tiene placeholders a la vista. **No se mergea a `main`**
+> hasta que Franco cierre el contenido marcado.
