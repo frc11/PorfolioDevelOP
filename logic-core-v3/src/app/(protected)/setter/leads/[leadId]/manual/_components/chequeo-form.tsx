@@ -21,7 +21,7 @@ import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
  * es el gate). El chrome (cómo chequear, el borrador a la vista, el brief) vive en
  * el módulo `m14-chequeo`; acá solo el núcleo: la grilla de dos niveles y el envío
  * a revisión. Los 6 obligatorios en verde habilitan el botón — es EL gate de
- * Construcción; las fases (M7–M12) siguen sin gatear.
+ * Construcción; las fases de Construcción siguen sin gatear.
  */
 
 /** Estado inicial de los duros: lo guardado, mapeado por nombre vigente. */

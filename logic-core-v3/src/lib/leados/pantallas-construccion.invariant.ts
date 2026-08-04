@@ -36,12 +36,12 @@
  * tsconfig-paths.
  */
 import assert from 'node:assert/strict'
-import { FASE_IDS, type FaseId } from './contracts.ts'
+import { FASE_IDS } from './contracts.ts'
 import {
   derivarPantalla,
   esPantallaId,
-  faseDePantallaConstruccion,
   FASES_MANUAL,
+  fasesDePantallaConstruccion,
   PANTALLA_DE_FASE,
   PANTALLAS,
   PANTALLAS_CONSTRUCCION,
@@ -51,14 +51,10 @@ import {
 } from './manual.ts'
 
 /**
- * La inversa EXPORTADA, en forma de lista — así este invariante ejercita la
- * función real (no una re-implementación) y sigue valiendo cuando el mapeo pasa
- * de 1:1 a N:1 (varias fases por pantalla).
+ * La inversa EXPORTADA (mutable, para poder ordenarla acá) — este invariante
+ * ejercita la función real, no una re-implementación.
  */
-function fasesDe(id: PantallaId): FaseId[] {
-  const fase = faseDePantallaConstruccion(id)
-  return fase === null ? [] : [fase]
-}
+const fasesDe = (id: PantallaId) => [...fasesDePantallaConstruccion(id)]
 
 // ── 1. Toda fase tiene pantalla, y la pantalla es real y de Construcción ──
 for (const fase of FASE_IDS) {
@@ -136,6 +132,19 @@ for (const ajena of ['m13', 'm14', 'mr'] as const) {
     fasesDe(ajena),
     [],
     `«${ajena}» no es una pantalla del checklist de Construcción y no puede devolver fases`,
+  )
+}
+
+// ── 7b. Las pantallas RETIRADAS ya no son alcanzables ──
+// P4 retiró m3; P6-B retiró m7…m12 al agrupar las seis fases en dos. Un id
+// retirado tiene que caer fuera del registro para que la guardia de la página
+// (`esPantallaId` → redirect a la actual) lo rescate en vez de renderizar una
+// pantalla fantasma. Sin esto, un bookmark viejo o una fila de la galería
+// abriría una pantalla vacía.
+for (const retirada of ['m3', 'm7', 'm8', 'm9', 'm10', 'm11', 'm12'] as const) {
+  assert.ok(
+    !esPantallaId(retirada),
+    `«${retirada}» fue retirada del mapa pero sigue en PANTALLA_IDS (sería alcanzable por URL)`,
   )
 }
 

@@ -7,13 +7,15 @@
  * es la actual, cuáles quedaron completadas, cuáles se pueden trabajar). La
  * posición NUNCA se persiste: se re-deriva en cada request, así jamás se
  * desincroniza del dossier (mismo principio que `pasoActual` del rail del
- * wizard, extendido de 5 pasos a 19 pantallas).
+ * wizard, extendido de 5 pasos a las pantallas del mapa).
  *
  * Reglas de navegación del mapa que esta derivación garantiza:
  *   - atrás siempre libre a pantallas completadas;
  *   - el futuro no se renderiza (pedir una pantalla no habilitada → la actual);
  *   - las 6 fases de Construcción son AUTO-REPORTE con navegación libre entre
  *     ellas — jamás gates (§6-3 del brief; `progreso-isolation.invariant.ts`).
+ *     P6-B las agrupó en DOS pantallas (mc1/mc2) sin tocar la lista de fases:
+ *     lo persistido sigue siendo el checklist de 6, la pantalla es presentación.
  *
  * Imports relativos a propósito (patrón de flow.ts): el módulo queda importable
  * por un harness ts-node sin tsconfig-paths si algún día suma invariante.
@@ -21,7 +23,6 @@
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import type { Agenda, Ficha, Progreso } from './contracts.ts'
 import { FASE_IDS, type FaseId } from './contracts.ts'
-import { SHELL_CONSTRUCCION } from './flow-content.ts'
 import {
   cadenciaInfo,
   fichaTieneSenal,
@@ -35,10 +36,11 @@ import { derivarPasoDelLead } from './paso.ts'
 
 /**
  * Ids de pantalla del mapa: m1…m16 (manual, sin m3 — P4 fusionó el registro del
- * veredicto dentro de m2) + mr (reentrada re-loop) + los estados de espera. El
- * `[paso]` de la URL es uno de estos — cualquier otra cosa redirige a la actual
- * (así el `m3` de un bookmark viejo aterriza solo en la pantalla fusionada: la
- * posición se re-deriva, nunca se guarda).
+ * veredicto dentro de m2; sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) +
+ * mr (reentrada re-loop) + los estados de espera. El `[paso]` de la URL es uno
+ * de estos — cualquier otra cosa redirige a la actual (así el `m3` de un
+ * bookmark viejo, o un `m9` de la galería, aterrizan solos en la pantalla
+ * vigente: la posición se re-deriva, nunca se guarda).
  */
 export const PANTALLA_IDS = [
   'm1',
@@ -46,12 +48,8 @@ export const PANTALLA_IDS = [
   'm4',
   'm5',
   'm6',
-  'm7',
-  'm8',
-  'm9',
-  'm10',
-  'm11',
-  'm12',
+  'mc1',
+  'mc2',
   'm13',
   'm14',
   'm15',
@@ -107,14 +105,7 @@ export type PantallaDef = {
  * PRESENTACIÓN: el mapeo fase→pantalla vive en `PANTALLA_DE_FASE`, y el
  * invariante `check:invariant:pantallas` ata las dos.
  */
-export const PANTALLAS_CONSTRUCCION = [
-  'm7',
-  'm8',
-  'm9',
-  'm10',
-  'm11',
-  'm12',
-] as const satisfies readonly PantallaId[]
+export const PANTALLAS_CONSTRUCCION = ['mc1', 'mc2'] as const satisfies readonly PantallaId[]
 
 export type PantallaConstruccionId = (typeof PANTALLAS_CONSTRUCCION)[number]
 
@@ -138,12 +129,14 @@ export type PantallaConstruccionId = (typeof PANTALLAS_CONSTRUCCION)[number]
  * persistido) NO se toca al reagrupar: sólo cambian los valores de esta tabla.
  */
 export const PANTALLA_DE_FASE = {
-  estructura: 'm7',
-  personalizacion: 'm8',
-  assets: 'm9',
-  cta: 'm10',
-  calidad: 'm11',
-  mobile: 'm12',
+  // Se hacen con el BRIEF a la vista, contra una demo que todavía no existe.
+  estructura: 'mc1',
+  personalizacion: 'mc1',
+  assets: 'mc1',
+  // Se hacen con la DEMO ya en pantalla: verificar y pulir.
+  cta: 'mc2',
+  calidad: 'mc2',
+  mobile: 'mc2',
 } as const satisfies Record<FaseId, PantallaConstruccionId>
 
 /** Pantalla del manual que contiene una fase del checklist. */
@@ -151,22 +144,15 @@ export function pantallaDeFaseConstruccion(fase: FaseId): PantallaConstruccionId
   return PANTALLA_DE_FASE[fase]
 }
 
-/** Fase del checklist detrás de una pantalla de Construcción (inversa de la tabla). */
-export function faseDePantallaConstruccion(id: PantallaId): FaseId | null {
-  return FASE_IDS.find((fase) => PANTALLA_DE_FASE[fase] === id) ?? null
-}
-
 /**
- * Título/bajada de las pantallas de Construcción: se toman del shell vigente
- * (`SHELL_CONSTRUCCION`, editable por Franco) — única copia del contenido de
- * las fases, igual que en el wizard.
+ * Las fases del checklist que contiene una pantalla de Construcción — inversa
+ * de la tabla, en el orden de `FASE_IDS`. `[]` para cualquier otra pantalla
+ * (incluida la reentrada `mr`, que pertenece a la fase 'construccion' del
+ * indicador pero NO es una pantalla del checklist). El árbol de slots de la
+ * página despacha por esto: lista vacía = no es pantalla de Construcción.
  */
-function shellDe(fase: FaseId): { titulo: string; detalle: string } {
-  const shell = SHELL_CONSTRUCCION.find((s) => s.id === fase)
-  return {
-    titulo: shell?.titulo ?? fase,
-    detalle: shell?.detalle ?? '',
-  }
+export function fasesDePantallaConstruccion(id: PantallaId): readonly FaseId[] {
+  return FASE_IDS.filter((fase) => PANTALLA_DE_FASE[fase] === id)
 }
 
 export const PANTALLAS: Record<PantallaId, PantallaDef> = {
@@ -211,47 +197,26 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     detalle: 'Con la ficha y la evaluación a la vista, generá el brief de diseño y traelo acá.',
     corto: 'Brief',
   },
-  m7: {
-    id: 'm7',
+  // P6-B — las seis fases agrupadas en dos pantallas. El corte NO es por orden
+  // del array (4+2) sino por el criterio que el repo ya tenía codificado:
+  // ¿esto se hace mirando el brief, o mirando la demo ya construida? Las tres
+  // primeras son lead-específicas y no tienen prompt (`FASE_PROMPTS`); las tres
+  // últimas se verifican y pulen sobre algo que ya existe.
+  mc1: {
+    id: 'mc1',
     tipo: 'manual',
     fase: 'construccion',
-    ...shellDe('estructura'),
-    corto: 'Estructura',
+    titulo: 'Construí la demo en Claude Design',
+    detalle: 'Con el brief y los materiales del negocio a la vista, armá la demo.',
+    corto: 'Construir',
   },
-  m8: {
-    id: 'm8',
+  mc2: {
+    id: 'mc2',
     tipo: 'manual',
     fase: 'construccion',
-    ...shellDe('personalizacion'),
-    corto: 'Personalización',
-  },
-  m9: {
-    id: 'm9',
-    tipo: 'manual',
-    fase: 'construccion',
-    ...shellDe('assets'),
-    corto: 'Assets',
-  },
-  m10: {
-    id: 'm10',
-    tipo: 'manual',
-    fase: 'construccion',
-    ...shellDe('cta'),
-    corto: 'CTA',
-  },
-  m11: {
-    id: 'm11',
-    tipo: 'manual',
-    fase: 'construccion',
-    ...shellDe('calidad'),
-    corto: 'Calidad',
-  },
-  m12: {
-    id: 'm12',
-    tipo: 'manual',
-    fase: 'construccion',
-    ...shellDe('mobile'),
-    corto: 'Mobile',
+    titulo: 'Refiná la demo antes de publicarla',
+    detalle: 'Con la demo ya en pantalla: verificá lo que hiciste y pulí el detalle.',
+    corto: 'Refinar',
   },
   m13: {
     id: 'm13',
@@ -405,12 +370,8 @@ const ORDEN_MANUAL = [
   'm4',
   'm5',
   'm6',
-  'm7',
-  'm8',
-  'm9',
-  'm10',
-  'm11',
-  'm12',
+  'mc1',
+  'mc2',
   'm13',
   'm14',
   'm15',
@@ -473,8 +434,14 @@ function completadasDe(input: DerivacionManualInput): PantallaId[] {
 
   if (stage !== null && STAGES_POST_BRIEF.includes(stage)) done.add('m6')
 
-  for (const fase of input.progreso.completadas) {
-    done.add(pantallaDeFaseConstruccion(fase))
+  // P6-B — con las fases agrupadas N:1, una pantalla de Construcción se marca
+  // completada SÓLO cuando TODAS sus fases lo están: si bastara una, «Construir»
+  // figuraría hecha con un tercio del trabajo. La unidad persistida sigue siendo
+  // la fase (`progresoJson.completadas`), no la pantalla.
+  for (const pantalla of PANTALLAS_CONSTRUCCION) {
+    const fases = fasesDePantallaConstruccion(pantalla)
+    const todas = fases.every((fase) => input.progreso.completadas.includes(fase))
+    if (fases.length > 0 && todas) done.add(pantalla)
   }
 
   if (input.draftUrl) done.add('m13')

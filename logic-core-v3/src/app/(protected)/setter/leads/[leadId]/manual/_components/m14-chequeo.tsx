@@ -19,7 +19,7 @@ import { ChequeoForm } from './chequeo-form'
  *     terminado (`TeachPanel` / `SelfCheckEjemplo`, las mismas piezas del wizard);
  *   - registro: la grilla de dos niveles y el envío a revisión (`ChequeoForm`,
  *     que reusa listas + puente + actions del wizard; el server es el gate).
- * El chequeo final sigue siendo EL gate de Construcción; las fases (M7–M12) no
+ * El chequeo final sigue siendo EL gate de Construcción; las fases de Construcción no
  * gatean. El avance lo da el motor: enviar a revisión transiciona a EN_REVISION.
  */
 

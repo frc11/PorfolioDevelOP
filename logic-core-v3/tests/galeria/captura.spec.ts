@@ -76,6 +76,17 @@ const ESTADOS: Estado[] = [
   { nombre: '11-m5-charla-poblada', paso: 'm5' },
   { nombre: '12-m6-brief-abierto', paso: 'm6' },
   { nombre: '13-m6-brief-guardado', paso: 'm6' },
+  // ⚠️ OBSOLETOS DESDE P6-B — NO REGENERAR ASÍ. Las seis pantallas de fase
+  // (m7…m12) se agruparon en DOS (mc1 «Construir» = estructura+personalización+
+  // assets; mc2 «Refinar» = cta+calidad+mobile) y sus ids salieron del registro:
+  // estos siete `paso` ya no existen y la guardia del server los redirige a la
+  // pantalla actual, así que una corrida de la galería fotografiaría siete veces
+  // la misma pantalla con nombres que mienten. El retiro, el re-seteo del
+  // sembrador (`scripts/dev/m0-galeria-seed.ts:180-202`), la renumeración
+  // (21→…) y el índice (`docs/manual-usuario/galeria/INDICE.md:106-112` + la
+  // fila mobile `:162`) van con la regeneración entera de la galería, después
+  // de la poda — no en P6-B. Cobertura esperada después: cuatro estados
+  // (mc1 · mc2 · el tilde deshabilitado en BRIEF · uno mobile).
   { nombre: '14-m7-tilde-deshabilitado', paso: 'm7' },
   { nombre: '15-m7-estructura', paso: 'm7', mobile: true },
   { nombre: '16-m8-personalizacion', paso: 'm8' },

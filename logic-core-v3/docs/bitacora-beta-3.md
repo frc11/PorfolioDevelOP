@@ -2392,3 +2392,200 @@ menos, la construcción arranca a ciegas. Lo aprueba él en el preview. (2) **Lo
 ejemplos** los cierra él mirando — en particular «¿Cómo habla el negocio de sí mismo?», que es el
 único que le pide al setter una lectura y no un dato. (3) **Que una sola dirección alcance para el
 logo Y las fotos**: si en la práctica viven en lugares distintos, hace falta un campo más.
+
+---
+
+## P6-B — las seis pantallas de Construcción son dos
+
+**Rama:** `redesign/home` · **Commits:** `742f756` (la red) + el del colapso · **Nada pusheado.**
+
+Dos pantallas es un **paso intermedio hacia cero**, no el destino: el brief v3 pide que el contenido
+de las fases termine reabsorbido por el chequeo final y la librería de prompts. Franco eligió ver el
+colapso funcionando antes de ir a cero. De ahí las dos restricciones que gobernaron el sprint: **cero
+inversión en copy nuevo** (se reordena y se agrupa lo que ya existe) y **los seis tildes se conservan**,
+agrupados 3+3, porque es lo único que deja `progresoJson` intacto y no encarece el paso siguiente.
+
+### Paso 1 — la red, antes de tocar nada (commit aparte: `742f756`)
+
+El probe midió que el compilador **no iba a guiar** este sprint. El mapeo fase→pantalla era
+posicional —`PANTALLAS_CONSTRUCCION[FASE_IDS.indexOf(fase)]`— y sin `noUncheckedIndexedAccess`
+indexar una tupla con un `number` devuelve la unión de los tipos de sus elementos, **nunca
+`undefined`**. Desalinear las dos listas compilaba en verde y devolvía `undefined` en runtime,
+tipado como `PantallaId`: fases que dejan de marcarse, `actual = undefined`, y `/manual/undefined`
+en loop de redirects. Y ningún invariante cubría ese eslabón (sí existe el de
+`SHELL_CONSTRUCCION ↔ FASE_IDS`; no el de `PANTALLAS_CONSTRUCCION ↔ FASE_IDS`).
+
+Antes del colapso:
+
+1. **`PANTALLA_DE_FASE`** — tabla explícita `Record<FaseId, PantallaConstruccionId>`. Las dos
+   funciones de traducción derivan de ella. Falte una entrada = **error de compilación**.
+2. **`pantallas-construccion.invariant.ts`** (#18) — cubre la mitad que el tipo no ve, más la
+   inversa exacta, el round-trip, las pantallas retiradas y que `actual` nunca sea `undefined`.
+
+**La prueba de sabotaje.** Dos, porque la red tiene dos capas:
+
+*Sabotaje A — quitar la entrada `assets` de la tabla.* Rojo en las dos:
+
+```
+src/lib/leados/manual.ts(146,12): error TS1360: Type '{ ... }' does not satisfy the expected type
+'Record<"estructura" | "personalizacion" | "assets" | "cta" | "calidad" | "mobile", ...>'.
+  Property 'assets' is missing in type '{ ... }' but required in type 'Record<...>'.
+EXIT_TSC=2
+
+TSError: ⨯ Unable to compile TypeScript:
+src/lib/leados/pantallas-construccion.invariant.ts(65,20): error TS7053: Element implicitly has an
+'any' type because expression of type '"estructura" | ... | "mobile"' can't be used to index type
+'{ readonly estructura: "m7"; ... }'.
+EXIT_INV=1
+```
+
+*Sabotaje B — una pantalla huérfana en `PANTALLAS_CONSTRUCCION` (compila en verde).* Es la mitad
+que **sólo** el invariante ve:
+
+```
+--- npx tsc --noEmit ---
+EXIT_TSC=0
+
+--- npm run check:invariant:pantallas ---
+AssertionError [ERR_ASSERTION]: la pantalla «m13» está en PANTALLAS_CONSTRUCCION pero ninguna fase
+la mapea (renderiza con los tres slots vacíos)
+    at .../pantallas-construccion.invariant.ts:161:6
+  code: 'ERR_ASSERTION', actual: false, expected: true
+EXIT_INV=1
+```
+
+Restaurado y verde en las dos capas antes de seguir.
+
+### Paso 2 — el colapso
+
+**El corte es 3+3, no 4+2.** El criterio no es el orden del array sino: ¿esto se hace mirando el
+brief, o mirando la demo ya construida? Ese criterio ya estaba codificado en el repo —`FASE_PROMPTS`
+reparte prompts sólo a `calidad` y `mobile`, y `PROMPTS_DISENIO` se define como la capa que actúa
+«sobre una demo ya construida»—. El colapso no traza una línea nueva: hace visible la que existía.
+
+| | **mc1 · «Construí la demo en Claude Design»** | **mc2 · «Refiná la demo antes de publicarla»** |
+|---|---|---|
+| Chip | Construir | Refinar |
+| Fases | estructura · personalizacion · assets | cta · calidad · mobile |
+| Munición | 9 items en **3 bloques** con el subtítulo de su fase | 9 items en **3 bloques** con el subtítulo de su fase |
+| Prompts | ninguno (ninguna de las tres tiene) | **dentro de su bloque**: Calidad→estética+motion, Mobile→mobile |
+| Tildes | 3, uno por fase | 3, uno por fase |
+| Indicador | Construcción — paso 1 de 2 | paso 2 de 2 |
+
+- **`m7`…`m12` salieron de `PANTALLA_IDS`**: no existen ni son alcanzables. Sus ramas no quedaron
+  inalcanzables — el árbol despacha por `fasesDePantallaConstruccion(id).length > 0`, y sigue
+  teniendo 11 ramas (el probe ya lo había medido: las seis contribuían **una**, no seis).
+- **La munición se agrupa, no se concatena.** Concatenar reintroduce A-10 («el checklist y los
+  prompts viven desconectados dentro del mismo paso»), el hallazgo que costó el sprint 5.3. El
+  subtítulo de la fase es el ancla que reemplaza a la pantalla.
+- **Los seis tildes se conservan**, 1↔1 con su `FaseId`. Con dos tildes, destildar «Construir»
+  borraría tres fases de un saque sin mostrar cuáles.
+- **Completada = TODAS sus fases.** Si bastara una, «Construir» figuraría hecha con un tercio del
+  trabajo. Está asertado en el invariante.
+- **Repeticiones que bajan de 6 a 2 por recorrido**: el bloque de Claude Design, el badge «Guía
+  preliminar» y el aviso «Link pendiente» de la herramienta.
+- **La explicación del auto-reporte pasó del tilde al grupo**: repetida en cada uno de los tres era
+  el mismo párrafo tres veces. El `motivo` del tilde deshabilitado sigue por-tilde (es la razón
+  accesible de ESE control).
+- **La lista de fases está intacta.** Verificado explícitamente: `FASE_IDS` no aparece en el diff
+  (`git diff -- src/lib/leados/contracts.ts` vacío), `progreso-isolation.invariant.ts` sigue en
+  verde sin ajustes, y `tests/leados/progreso-construccion.spec.ts` (25/25) pasa sin tocarse porque
+  deriva sus fixtures de `FASE_IDS` en vivo.
+
+### Paso 3 — la reentrada, verificada en la aplicación
+
+Servidor `dev:qa` (:3002), persona QA `setter`, dos leads sembrados: uno **RECHAZADA** y uno
+**CONSTRUCCION**, ambos con progreso **parcial y cruzado** a propósito —`estructura` +
+`personalizacion` (mc1, incompleta: falta `assets`) y `cta` (mc2)—. Si el re-loop reiniciara el
+progreso, los tres tildes volvían a gris.
+
+- La raíz del lead RECHAZADA aterriza en **`mr`**, con la nota de Franco al frente. Su rail ofrece
+  exactamente **dos** destinos: `/manual/mc1` y `/manual/mc2`. Ninguno apunta a una pantalla muerta.
+- Entrando a **mc1**: «CONSTRUCCIÓN — PASO 1 DE 2», tres subtítulos (Estructura · Personalización
+  con datos del negocio · Assets reales) y **tres tildes con el progreso preservado**:
+  `Estructura=true`, `Personalización=true`, `Assets=false`. **No se reinicia.**
+- Entrando a **mc2**: «PASO 2 DE 2», tres bloques con `CTA de WhatsApp` (0 prompts),
+  `Calidad y motion` (**2** bloques copiables) y `Mobile` (**1**) — cada prompt dentro del bloque
+  que lo usa, no al pie. `cta=true` preservado.
+- **Direcciones viejas**: `/manual/m7` y `/manual/m12` sobre el lead RECHAZADA aterrizan en `mr`
+  («Aplicá las correcciones de Franco»); `/manual/m9` sobre el lead en CONSTRUCCION aterriza en
+  `mc1`. Sin loop, sin pantalla fantasma.
+- Mobile 390×844: sin desborde horizontal, los dos chips presentes.
+
+**Nota de método:** el pane del navegador no compositaba frames esta sesión → **sin screenshots**.
+Todo lo de arriba se afirmó por navegación real + lectura del DOM servido, que es más preciso pero
+no reemplaza el ojo. Y `curl` devuelve **200 sin seguir** en las direcciones viejas: el redirect de
+`redirect()` viaja en el payload de streaming, no como 3xx — afirmar por **contenido**, no por status
+(mismo patrón que ya registró `notFound()` en este repo).
+
+### Paso 4 — tests y galería
+
+**Expectativas ajustadas, con antes y después.** Un solo archivo: `tests/setter/11-fase-disabled.spec.ts`.
+
+| | Antes | Después | Por qué |
+|---|---|---|---|
+| Destino de B-07 y C-08 | `goto(.../manual/m7)` + `toHaveURL(/\/manual\/m7$/)` | `.../manual/mc1` + `/\/manual\/mc1$/` | m7 no existe más — es el objetivo del sprint |
+| Selector del tilde | `page.locator('button[aria-pressed]')` | `page.locator('main section[aria-label="Registro"] button[aria-pressed]')` | con tres tildes hace falta contarlos, y el contenedor de streaming de React (`body > div[id^="S:"]`) duplica el DOM fuera de `<main>` |
+| — | — | **+** `toHaveCount(3)` en los dos tests | prueba durable de que los seis tildes siguen, 3+3 |
+| — | — | **+** `goto(.../manual/m9)` → `toHaveURL(/mc1$/)` | prueba durable del rescate de direcciones viejas |
+| — | — | **+** los otros dos tildes siguen en `aria-pressed="false"` tras tildar uno | tildar una fase no arrastra a las otras |
+
+Los tres textos que el spec ya asertaba (`Marcá esta fase cuando la termines`, `Fase marcada como
+hecha`, `Primero arrancá la construcción — el botón está arriba.`) se conservan intactos.
+**Sin tests nuevos: 60 siguen siendo 60.**
+
+`tests/setter/01-flow.spec.ts` **no se tocó** — B5 entra por la raíz (que redirige a la actual) y B6
+por `m13`. `tests/leados/progreso-construccion.spec.ts` tampoco: no conoce `PantallaId`.
+
+**Galería — NO regenerada acá** (va entera después de la poda, junto al manual). Quedan obsoletos
+**siete estados**, anotados en `tests/galeria/captura.spec.ts` con un bloque de advertencia:
+`14-m7-tilde-deshabilitado`, `15-m7-estructura` (mobile), `16-m8-personalizacion`, `17-m9-assets`,
+`18-m10-cta`, `19-m11-calidad`, `20-m12-mobile-fases-hechas`. Arrastran tres artefactos más: el
+sembrador (`scripts/dev/m0-galeria-seed.ts:180-202`), el índice
+(`docs/manual-usuario/galeria/INDICE.md:106-112` + la fila mobile `:162`) y los PNG. Cobertura
+esperada después: **cuatro** estados (mc1 · mc2 · el tilde deshabilitado en BRIEF · uno mobile), con
+renumeración de 21 en adelante. **Correr la galería hoy fotografiaría siete veces la misma pantalla
+con nombres que mienten** — por eso el bloque de advertencia y no un ajuste silencioso.
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — mismos errores que la línea base (cero) y ninguno nuevo |
+| `npm run check:invariants` | **18/18, exit 0** (17 + `check:invariant:pantallas`) |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** — corrió aislada (`.next-setter/`, :3003) |
+
+`npm run lint` sobre los archivos tocados: **exit 0**. (El repo entero sigue en 11.381 errores
+pre-existentes — `next.config.ts` ignora lint y tipos en build; no lo toca este sprint.)
+
+El diff no toca gates, transiciones, aislamiento ni schema: sólo el registro y la derivación de
+presentación (`manual.ts`), sus consumidores de UI, y dos specs.
+
+### Fuera de scope — anotado, no implementado
+
+1. **Desarmar la escalera de condicionales** de `manual/[paso]/page.tsx`. Sigue en 11 ramas: las seis
+   de construcción contribuían **una**, no seis. Es un sprint propio, independiente de este.
+2. **El `motivo` del tilde deshabilitado miente en RECHAZADA.** Dice «Primero arrancá la construcción
+   — el botón está arriba» pero en `mc1` de un lead RECHAZADA ese botón no está (el CTA es
+   «Reabrir construcción», y vive en `mr`). Es **pre-existente**: `motivo` está hardcodeado y
+   `puedeGuardar` es `stage === 'CONSTRUCCION'` mientras el CTA se gatea con `stage === 'BRIEF'`.
+   El colapso no lo introdujo ni lo empeora.
+3. **`GUIA_CONSTRUCCION` sigue siendo contenido muerto** (`guidance-content.ts:525-563`, registrada
+   en `GUIA_PASOS.construccion`, ninguna pantalla la renderiza). Decisión de Franco: renderizarla en
+   mc1/mc2 o borrarla.
+4. **El primer item de `assets`** («Bajá el logo y 3–5 fotos…») sigue duplicando lo que la ficha ya
+   capturó en `materiales.imagenesUrl` desde P5-A.
+5. **`faseActual` sigue siendo un campo fantasma** en `ProgresoSchema`: declarado, validado, nunca
+   escrito.
+6. **El link de Claude Design sigue en `null`** (`herramientas.ts:87`) — ahora el setter ve el aviso
+   «Link pendiente» dos veces en vez de seis, pero la deuda de fondo es de Franco.
+7. **Barrido general de vocabulario** y **los dos hallazgos de guardado**: son de sus propios bloques.
+
+### Lo que cierra Franco en el preview
+
+Ningún test mide esto y el probe lo avisó como el riesgo conocido del sprint: **se pierde el foco de
+una tarea por pantalla**. Antes un setter abría m9 y veía **una** cosa que hacer; ahora ve tres. El
+contrapeso es cuatro navegaciones menos por demo. Que mc1 y mc2 **se lean como un paso de trabajo y
+no como tres cosas apiladas** lo decide Franco mirándolo. Y los dos títulos —«Construí la demo en
+Claude Design» y «Refiná la demo antes de publicarla»— los aprueba él.

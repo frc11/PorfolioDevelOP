@@ -51,9 +51,9 @@ export type ManualDelLead = {
   caliente: boolean
   /** M6 — el brief guardado, parseado con el MISMO contrato que el wizard
    * (`parseBrief`); null mientras no se armó. Alimenta la captura vs. la
-   * consulta de M6 y el bloque de Construcción (M7–M12 / M-R). */
+   * consulta de M6 y el bloque de Construcción (mc1/mc2 / M-R). */
   brief: Brief | null
-  /** M7–M12 — el checklist de Construcción (auto-reporte, jamás gate); el MISMO
+  /** mc1/mc2 — el checklist de Construcción (auto-reporte, jamás gate); el MISMO
    * `progresoJson` que consume el wizard. Fresco = `{ completadas: [] }`. */
   progreso: Progreso
   /** M4 — el primer contacto (opener) ya está registrado (mismo proxy que el
@@ -103,12 +103,12 @@ export type ManualDelLead = {
   /** Historial (5.6) — la cronología COMPLETA (incluye SISTEMA) serializada para el pie de
    * cada pantalla. NO alimenta `contactos`/cadencia — esos siguen leyendo `actividades`. */
   timeline: LeadTimelineEvent[]
-  /** M7–M12 — turnaround visible (UrgenciaBanner): ISO de la última movida comercial si el
+  /** mc1/mc2 — turnaround visible (UrgenciaBanner): ISO de la última movida comercial si el
    * lead respondió; null si no. Mismo proxy que usaba el wizard (B4). */
   respondioDesde: string | null
-  /** M7–M12 — marca del escalamiento «me trabé» vigente (B-beta); null si no escaló. */
+  /** mc1/mc2 — marca del escalamiento «me trabé» vigente (B-beta); null si no escaló. */
   escaladoAt: string | null
-  /** M7–M12 — la nota del escalamiento (A-23): se re-sirve a su autor y prefillea el re-escalar. */
+  /** mc1/mc2 — la nota del escalamiento (A-23): se re-sirve a su autor y prefillea el re-escalar. */
   escaladoNota: string | null
   /** M4/M5 — DMs de Instagram de hoy del setter: alimenta `CanalSeguridad` (el freno anti-spam). */
   dmsHoy: number
@@ -155,7 +155,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   const stage = dossier?.stage ?? null
   const ficha = parseFicha(dossier?.fichaJson ?? null)
   // Hoisted: el checklist alimenta la derivación (completadas) Y se re-sirve a
-  // las pantallas de Construcción (M7–M12). Una sola lectura de `progresoJson`.
+  // las pantallas de Construcción (mc1/mc2). Una sola lectura de `progresoJson`.
   const progreso = parseProgreso(dossier?.progresoJson ?? null)
   // Contactos comerciales (opener incluido): alimenta la derivación Y el proxy
   // `openerEnviado` de M4 — una sola lectura de `actividades`.

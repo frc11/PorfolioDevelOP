@@ -9,10 +9,12 @@ import type { FaseId } from '@/lib/leados/contracts'
 import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actions'
 
 /**
- * M7–M12 — el tilde de auto-reporte de UNA fase. El MISMO camino de escritura
- * que tenía el checklist 6-en-uno del wizard (`guardarProgreso →
- * saveOwnedProgreso → progresoJson`), explotado en una pantalla por fase, cada
- * una con SU tilde. Desde el corte 5.6 esta es la única presentación.
+ * El tilde de auto-reporte de UNA fase. El MISMO camino de escritura que tenía
+ * el checklist 6-en-uno del wizard (`guardarProgreso → saveOwnedProgreso →
+ * progresoJson`). Desde el corte 5.6 esta es la única presentación; desde P6-B
+ * se renderizan TRES por pantalla (mc1/mc2) — uno por fase, 1↔1 con su `FaseId`,
+ * así el progreso persistido no cambia de forma. La explicación del auto-reporte
+ * la sirve el grupo (`ConstruccionRegistro`) una sola vez, no cada tilde.
  *
  * NO es un gate (§6-3 del brief): tildar no bloquea nada ni hace avanzar —
  * `progresoJson` jamás se cablea a la transición. El único gate de Construcción
@@ -107,19 +109,20 @@ export function FaseAutoReporte({
         ) : null}
       </span>
       <span className="min-w-0 flex-1">
+        {/* P6-B: con tres tildes por pantalla, el nombre de la fase tiene que
+            estar A LA VISTA — sin él los tres se leen idénticos. */}
+        <span className="block text-[11px] font-medium text-zinc-500">{titulo}</span>
         <span
           className={cn(
-            'block text-sm font-semibold',
+            'mt-0.5 block text-sm font-semibold',
             marcada ? 'text-emerald-200' : 'text-zinc-200',
           )}
         >
           {marcada ? 'Fase marcada como hecha' : 'Marcá esta fase cuando la termines'}
         </span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-zinc-500">
-          {puedeGuardar
-            ? 'Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el orden que te sirva. El único chequeo que gatea es el final.'
-            : motivo}
-        </span>
+        {!puedeGuardar && motivo && (
+          <span className="mt-0.5 block text-xs leading-relaxed text-zinc-500">{motivo}</span>
+        )}
       </span>
     </button>
   )

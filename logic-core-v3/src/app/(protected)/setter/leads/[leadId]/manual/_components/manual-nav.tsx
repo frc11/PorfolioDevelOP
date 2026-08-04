@@ -195,9 +195,13 @@ export function NavAtras({
 }
 
 /**
- * El rail de las 6 fases de Construcción — navegación LIBRE entre todas, en
+ * El rail de las pantallas de Construcción — navegación LIBRE entre todas, en
  * cualquier orden (auto-reporte, jamás gate: §6-3 del brief). Se muestra en
- * m7–m12 y en la reentrada M-R.
+ * mc1/mc2 y en la reentrada M-R.
+ *
+ * El copy NO nombra una cantidad a propósito: decía «las seis fases» literal y
+ * dejó de ser cierto el día que P6-B las agrupó en dos pantallas. Sin número, la
+ * frase sobrevive al próximo reagrupamiento.
  */
 export function NavConstruccion({
   leadId,
@@ -217,8 +221,8 @@ export function NavConstruccion({
         Construcción — navegación libre
       </p>
       <p className="mt-1 text-xs leading-relaxed text-zinc-600">
-        Las seis fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna
-        bloquea a otra.
+        Las fases son auto-reporte: entrá y salí en el orden que te sirva — ninguna bloquea
+        a otra.
       </p>
       <ul className="mt-3 flex flex-wrap gap-2">
         {PANTALLAS_CONSTRUCCION.map((id, index) => {
