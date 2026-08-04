@@ -358,7 +358,7 @@ export default function PortfolioWebCases() {
                 >
                     ¿Tu negocio podría ser el próximo caso?{' '}
                     <span
-                        className="cursor-none text-zinc-300 transition-colors hover:text-cyan-300"
+                        className="cursor-pointer text-zinc-300 transition-colors hover:text-cyan-300"
                         onClick={() => document.getElementById('pricing-section')?.scrollIntoView({ behavior: 'smooth' })}
                     >
                         Conversemos →

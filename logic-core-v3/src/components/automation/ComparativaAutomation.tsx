@@ -155,7 +155,6 @@ export default function ComparativaAutomation() {
                 boxShadow: tool.highlight
                   ? `0 0 40px rgba(${tool.badgeRgb},0.1), 0 8px 32px rgba(0,0,0,0.3)`
                   : '0 4px 16px rgba(0,0,0,0.2)',
-                cursor: 'none',
                 '--mx': '50%',
                 '--my': '50%',
               } as React.CSSProperties & Record<'--mx' | '--my', string>}

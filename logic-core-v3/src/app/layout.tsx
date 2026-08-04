@@ -97,10 +97,12 @@ export default function RootLayout({
           `cursor:none` global sobre el cursor del sistema el otro— y bastaba
           con volver a importarlos para reintroducirlo.
 
-          Queda anotado, y NO se resolvió acá: las clases `cursor-none` siguen
-          puestas en elementos interactivos de varias pantallas (Portfolio,
-          About, las de automatización, el chat). Sin `CustomCursor` montado
-          esconden el cursor del sistema sin reemplazarlo por nada.
+          Las clases `cursor-none` y los `cursor: 'none'` sueltos que quedaban
+          repartidos por las pantallas se barrieron después, en su propio paso:
+          escondían el cursor del sistema sin reemplazarlo por nada. Única
+          excepción: `PortfolioWebCases.tsx` conserva el suyo porque ahí sí hay
+          un reemplazo visual propio ("Ver Proyecto") que sigue al puntero — y
+          además hoy ese componente no lo importa nadie.
         */}
         <PreloaderProvider>
           <SmoothScroll>

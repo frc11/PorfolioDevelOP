@@ -90,7 +90,7 @@ const TeamMemberMobile = ({ name, role, description, avatarInitial, tone }: Team
 const TeamMemberDesktop = ({ name, role, description, avatarInitial, tone }: TeamMemberProps) => (
     <motion.div
         data-cursor="hover"
-        className="group relative h-[clamp(20rem,50vh,28.125rem)] w-[clamp(13rem,21vw,25rem)] flex-shrink-0 cursor-none overflow-hidden rounded-sm border border-white/[0.12] bg-white/[0.025] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-md"
+        className="group relative h-[clamp(20rem,50vh,28.125rem)] w-[clamp(13rem,21vw,25rem)] flex-shrink-0 overflow-hidden rounded-sm border border-white/[0.12] bg-white/[0.025] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-md"
         whileHover={{
             y: -6,
             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.12), 0 0 44px 0 rgba(255,255,255,0.12)',

@@ -204,10 +204,6 @@ export function ChatWindow({
               exit={{ opacity: 0 }}
               onClick={onClose}
               className="fixed inset-0 bg-black/60 backdrop-blur-md"
-              // Inherits `cursor: none` on desktop. NOTE: the custom cursor this
-              // was written for was unmounted in B2-S2 and deleted in B2-S4, so
-              // today this hides the system cursor with nothing in its place.
-              // Pending a separate pass over every `cursor-none` in the repo.
               style={{ pointerEvents: 'auto', zIndex: CHATBOT_Z_INDEX.backdrop }}
               aria-hidden="true"
             />
@@ -222,8 +218,6 @@ export function ChatWindow({
               className="fixed bottom-4 left-4 right-4 flex flex-col md:bottom-[6.5rem] md:left-auto md:right-6 md:w-[420px]"
               style={{
                 pointerEvents: 'auto',
-                // Inherit `cursor: none` on desktop so the custom cursor is kept
-                // over the whole panel instead of reverting to the OS pointer.
                 zIndex: CHATBOT_Z_INDEX.panel,
                 background: buildPanelBackground(config),
                 backdropFilter: 'blur(32px)',
@@ -642,9 +636,10 @@ export function ChatWindow({
                     width: '40px', height: '40px',
                     borderRadius: '50%',
                     border: `1px solid rgba(${ar},${ag},${ab},0.2)`,
-                    // No inline cursor: falls back to the global `button { cursor: none }`
-                    // on desktop so the custom cursor shows (disabled state is conveyed
-                    // by the dimmed background, not an OS not-allowed cursor).
+                    // Puntero solo cuando el botón está habilitado; el estado
+                    // deshabilitado se comunica con el fondo atenuado, no con un
+                    // `not-allowed` del sistema operativo.
+                    cursor: botBusy || inputLocked || !input.trim() ? 'default' : 'pointer',
                     background: botBusy || inputLocked || !input.trim()
                       ? 'rgba(255,255,255,0.05)'
                       : `linear-gradient(135deg, rgba(${ar},${ag},${ab},0.85), rgba(${ar},${ag},${ab},0.65))`,
@@ -687,15 +682,6 @@ export function ChatWindow({
            explicativo se ve con buen contraste en los dos casos. */
         [data-chatbot-input]:read-only::placeholder {
           color: rgba(255, 255, 255, 0.6);
-        }
-        /* Cursor custom del sitio sobre el input (solo desktop, igual que el resto
-           del widget): el textarea trae 'cursor: text' del UA y tapaba el cursor
-           custom. Se oculta solo el PUNTERO del mouse; el caret de escritura sigue
-           visible con normalidad. */
-        @media (min-width: 768px) {
-          [data-chatbot-input] {
-            cursor: none;
-          }
         }
       `}</style>
     </>

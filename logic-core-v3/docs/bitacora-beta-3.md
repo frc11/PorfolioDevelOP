@@ -2589,3 +2589,127 @@ una tarea por pantalla**. Antes un setter abría m9 y veía **una** cosa que hac
 contrapeso es cuatro navegaciones menos por demo. Que mc1 y mc2 **se lean como un paso de trabajo y
 no como tres cosas apiladas** lo decide Franco mirándolo. Y los dos títulos —«Construí la demo en
 Claude Design» y «Refiná la demo antes de publicarla»— los aprueba él.
+
+---
+
+## Microsprint a11y — vuelve el cursor del sistema — 2026-08-04
+
+**Objetivo único.** Que el cursor del sistema sea visible en todo el sitio. Nada más: cero refactors,
+cero cambios de estilo, cero "de paso". Y **sin reintroducir ningún cursor custom** — la solución es
+dejar el nativo del navegador.
+
+**El defecto, vivo en producción.** `CustomCursor` se desmontó en B2-S2 y el archivo se borró en
+B2-S4, pero las reglas que lo acompañaban quedaron puestas. Resultado: el usuario pasaba el mouse
+sobre un elemento y el puntero **desaparecía sin nada que lo reemplazara**. No sabía dónde estaba ni
+que el elemento era clickeable. Regresión de accesibilidad, no detalle estético.
+
+### El censo real: 13 archivos, no 7
+
+El conteo previo (7 archivos) venía de buscar `cursor-none`. La mitad del daño no era una clase de
+Tailwind sino `style={{ cursor: 'none' }}` **inline**, que ese patrón no captura. Censo por grep
+ancho sobre `src/`:
+
+| Archivo | Ocurrencias | Elemento | Acción |
+|---|---:|---|---|
+| `sections/home/Portfolio.tsx` | 4 | 2 cards de tilt (hover, sin `onClick`) + 2 `<button>` de carrusel | quitar / `cursor-pointer` |
+| `sections/home/About.tsx` | 1 | card de equipo (solo hover) | quitar |
+| `sections/home/OurServices.tsx` | 1 | `<button>` pill de servicio | `cursor: 'pointer'` |
+| `automation/CalculadoraAutomation.tsx` | 2 | `<input type="range">` invisible sobre track propio | `cursor-pointer` |
+| `automation/FlujoAutomation.tsx` | 1 | `<g>` de nodo SVG, decorativo | quitar |
+| `software/PainBentoSoftware.tsx` | 1 | overlay con `onClick` de flip | `cursor: 'pointer'` |
+| `chatbot/chat/ChatWindow.tsx` | 1 | regla CSS `[data-chatbot-input] { cursor: none }` @ ≥768px | borrar la regla |
+| `chatbot/LogicCompanion.tsx` | 0 | launcher: **no** tenía regla, dependía de heredar `none` | `cursor: 'pointer'` |
+| `sections/web-development/PortfolioWebCases.tsx` | 3 | sección + card + span | **2 quedan** (ver excepción) |
+| `software/ProcesoSoftware.tsx` | 2 | pasos con `onClick` | `cursor: 'pointer'` |
+| `software/ShowcaseSoftware.tsx` | 4 | card, chips de métrica, tags, `<p>` de mockup | quitar |
+| `automation/ComparativaAutomation.tsx` | 1 | card de herramienta (hover) | quitar |
+| `automation/SocialProofAutomation.tsx` | 1 | avatar circular, decorativo | quitar |
+
+**Hallazgo de scope.** Cinco de esos archivos —`PortfolioWebCases`, `ProcesoSoftware`,
+`ShowcaseSoftware`, `ComparativaAutomation`, `SocialProofAutomation`— **no los importa nadie**. Son
+componentes muertos: el defecto vivo estaba en 8 archivos, no en 13. Se limpiaron igual (el arreglo
+viaja con el archivo si algún día se monta), pero **no se pueden verificar en runtime** y no cuentan
+como superficie reparada.
+
+### La excepción que se frenó y se reporta
+
+`PortfolioWebCases.tsx` **conserva** su `cursor: 'none'` (sección, línea 304; card, línea 212).
+Es el único caso donde el ocultamiento **sí tiene un reemplazo visual real y funcionando**: una
+píldora «Ver Proyecto» que sigue al puntero con spring, gateada por `!reducedMotion` y `md:block`.
+La regla del sprint era frenar ahí, no tocarlo y reportarlo. Se le cambió únicamente el span
+«Conversemos →» (línea 361), que es clickeable y **no** está cubierto por ese reemplazo. Doble
+motivo para no avanzar: es un cursor custom, y la dirección los prohíbe. Queda para Franco decidir
+si ese componente muerto se borra o se revive sin el cursor.
+
+### Criterio aplicado
+
+- **Interactivo** → se quita el ocultamiento y se pone `cursor-pointer` donde el navegador no lo
+  infiere solo. Tailwind 4 mete `button, [role="button"] { cursor: default }` en preflight, así que
+  los `<button>` **también** necesitan el `pointer` explícito.
+- **Decorativo / no interactivo** → también se quita. Sin cursor custom que lo reemplace, esconder el
+  puntero sobre cualquier superficie es un defecto, no una decisión.
+- **Comentarios** que documentaban el régimen `cursor:none` (3 en `ChatWindow.tsx`, 1 en
+  `LogicCompanion.tsx`, la nota pendiente de `layout.tsx`) se actualizaron: describían una regla que
+  ya no existe.
+
+### Verificación
+
+Playwright **headed** contra prod build en `:3000` (el Browser pane no compone), con servidor
+reiniciado y pestaña nueva, medido **contra un build previo** del mismo checkout:
+
+| Ruta | `cursor: none` computado ANTES | DESPUÉS |
+|---|---:|---:|
+| `/` | 97 | **0** |
+| `/` con el chat ABIERTO | 98 | **0** |
+| `/contact` | 0 | **0** |
+| `/process-automation` | 116 | **0** |
+| `/software-development` | 6 | **0** |
+
+Valor computado de `cursor`, un elemento por archivo vivo tocado:
+
+| Archivo | Elemento | ANTES | DESPUÉS |
+|---|---|---|---|
+| `Portfolio.tsx` | card `h-[52vh]` | `none` | `auto` |
+| `Portfolio.tsx` | `<button>` flecha demo | `none` | `pointer` |
+| `About.tsx` | card de equipo | `none` | `auto` |
+| `OurServices.tsx` | pill `[aria-label^="Ir a "]` | `none` | `pointer` |
+| `LogicCompanion.tsx` | launcher del chat | `auto` | `pointer` |
+| `ChatWindow.tsx` | `[data-chatbot-input]` | `none` | `text` |
+| `ChatWindow.tsx` | botón enviar (deshabilitado) | `default` | `default` |
+| `CalculadoraAutomation.tsx` | `input[type=range]` | `none` | `pointer` |
+| `FlujoAutomation.tsx` | nodo `<g>` | `none` | `auto` |
+| `PainBentoSoftware.tsx` | overlay de flip | `none` | `pointer` |
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre los 14 archivos tocados | 1 error + 3 warnings, **todos pre-existentes** y fuera de todo hunk del diff (`ShowcaseSoftware.tsx:238`, imports sin usar) — **0 nuevos** |
+| `grep -rn "cursor-none\|cursor:\s*['\"]\?none" src/` | solo comentarios de `layout.tsx` + la excepción de `PortfolioWebCases` |
+| Referencias a `CustomCursor` en código activo | **0** (solo la narración histórica del `layout.tsx`) |
+| Errores de consola | **2 antes, 2 después** — los mismos 404 en `/process-automation` y `/software-development`. **0 nuevos** |
+| `impeccable detect` — `design-system/` | **0** (se sostiene) |
+| `impeccable detect` — superficie pública | **64** = baseline. **Sin números nuevos** |
+
+### Fuera de scope — anotado, no implementado
+
+1. **`data-cursor="hover"` quedó como atributo muerto** en ~10 elementos (Portfolio, About,
+   OurServices, LogicCompanion). Ninguna regla CSS ni JS lo consume desde que se borró
+   `CustomCursor.tsx`. Es ruido, no un defecto de accesibilidad; barrerlo es su propio paso.
+2. **Los cinco componentes sin importadores** (`PortfolioWebCases`, `ProcesoSoftware`,
+   `ShowcaseSoftware`, `ComparativaAutomation`, `SocialProofAutomation`) son código muerto con peso
+   real. Decisión de Franco: borrarlos o volver a montarlos.
+3. **El span «Conversemos →»** de `PortfolioWebCases.tsx:361` es un `<span onClick>` sin `role`,
+   sin `tabIndex` y sin handler de teclado: inalcanzable por teclado. Ahora al menos se ve
+   clickeable con el mouse. El arreglo de teclado es de un sprint de a11y, no de este.
+4. **Los hallazgos de `gradient-text`** que marcó el hook de impeccable en los archivos tocados
+   (`Portfolio.tsx` ×4, `About.tsx`, `CalculadoraAutomation.tsx`) son **pre-existentes**, están en
+   líneas que este diff no toca y forman parte del baseline de 64. No se tocaron: cambiarlos sería
+   exactamente el "de paso" que el sprint prohíbe.
+
+### Lo que cierra Franco en el preview
+
+Que el puntero se vea y **se sienta correcto** sobre cada superficie: que las cards de Portfolio y
+About con flecha normal no lean como "acá no pasa nada", y que el `pointer` de las flechas del
+carrusel, la pill de servicio, el slider de la calculadora y el launcher del chat caiga donde tiene
+que caer. Eso lo decide él mirándolo.

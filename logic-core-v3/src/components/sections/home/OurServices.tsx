@@ -9818,7 +9818,7 @@ export default function OurServices() {
                   background: `${service.accent}08`,
                   border: `1px solid ${service.accent}22`,
                   borderRadius: 100,
-                  cursor: 'none',
+                  cursor: 'pointer',
                 }}
               >
                 <div

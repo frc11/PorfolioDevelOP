@@ -317,7 +317,7 @@ function BentoFlipCard({
           position: 'absolute',
           inset: '-4px',
           zIndex: 30,
-          cursor: isDesktopMode ? 'none' : 'default',
+          cursor: 'pointer',
           pointerEvents: isDesktopMode ? 'auto' : 'none',
         }}
       />

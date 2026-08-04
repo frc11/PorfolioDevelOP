@@ -236,7 +236,7 @@ const RealProjectCard = ({ project }: { project: Project }) => {
             onMouseMove={handleMouseMove}
             onMouseLeave={() => { x.set(0); y.set(0); }}
             style={{ perspective: 1200 }}
-            className="group relative w-full h-[52vh] cursor-none"
+            className="group relative w-full h-[52vh]"
         >
             <motion.div
                 style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
@@ -326,7 +326,7 @@ const DemoCard = ({ project, isDimmed, isFocused }: { project: Project; isDimmed
             style={{ perspective: 1000 }}
             animate={{ opacity: isDimmed ? 0.25 : 1, scale: isFocused ? 1.04 : 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="group relative w-full h-[38vh] cursor-none"
+            className="group relative w-full h-[38vh]"
         >
             <motion.div
                 style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
@@ -478,14 +478,14 @@ const PortfolioDesktop = () => {
                             <button
                                 data-cursor="hover"
                                 onClick={() => setDemoIndex((prev) => (prev - 1 + DEMO_PROJECTS.length) % DEMO_PROJECTS.length)}
-                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
+                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
                             >
                                 <ArrowLeft className="w-5 h-5" />
                             </button>
                             <button
                                 data-cursor="hover"
                                 onClick={() => setDemoIndex((prev) => (prev + 1) % DEMO_PROJECTS.length)}
-                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-none"
+                                className="w-12 h-12 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
                             >
                                 <ArrowRight className="w-5 h-5" />
                             </button>
