@@ -122,7 +122,7 @@ Un acento por servicio, y solo uno visible por vista:
 - **Ámbar** (`{colors.accent-automation}`) — Automatización de procesos
 - **Violeta** (`{colors.accent-software}`) — Software a medida
 
-> **Decisión abierta (Gate 1).** El brief de dirección nombra el acento de Software como *índigo*, y el token vigente es `#8b5cf6` (violeta). Además, `globals.css` deja anotado que `CLAUDE.md` asigna estos mismos cuatro hex a servicios distintos — una permutación alternativa. `/styleguide` muestra las dos opciones y **Franco elige**. Hasta que elija, la tabla de arriba refleja el código, no una decisión tomada. No resolver acá.
+> **Gate 1 — CERRADO (B2-S4).** Ganó la **opción A, la del código**: web cian · IA verde · automatización ámbar · software violeta. Es la permutación que la tabla de arriba ya reflejaba, así que no se movió ningún hex. El brief de dirección nombraba el acento de Software como *índigo* contra el `#8b5cf6` (violeta) vigente; queda el token, no el nombre del brief. `/styleguide` sigue mostrando las dos permutaciones como referencia de por qué se eligió esta.
 
 ### Neutral
 
@@ -149,7 +149,13 @@ Un acento por servicio, y solo uno visible por vista:
 
 Ninguna sección crema lleva acento. Una sección que necesita acento es, por esa sola razón, una sección oscura.
 
-> **Dos observaciones abiertas, deliberadamente no resueltas acá.** El violeta es el más flojo de los cuatro sobre oscuro (4.64:1 contra 7.7–9.1) — sigue pasando 3:1, pero desparejo. Y cian contra verde es el par más cercano: 0.125 de distancia OKLab, la mitad del siguiente par, con luminancia casi igual (L 0.715 contra 0.696). Los dos se arreglan moviendo un hex, y los cuatro hex están congelados en `CLAUDE.md` y pendientes del Gate 1 (que todavía puede permutar qué color le toca a qué servicio). Mover un valor ahora es decidir el Gate por la ventana. Se anotan medidos, para resolver **después** del Gate 1.
+**La Regla de que la Distinguibilidad Depende del Área.** Cian contra verde es el par más cercano del sistema: 0.125 de distancia OKLab, la mitad del siguiente par, con luminancia casi igual (L 0.715 contra 0.696). Medido así, sobre el papel, el par parece un problema. **No lo es**, y la razón es que la distancia OKLab no se juzga sola: la distinguibilidad de dos colores parecidos crece con el área que ocupan. En 36 px² de tick el par era efectivamente indistinguible; en los 13.704 y 16.646 px² que hoy ocupan los nombres de los frentes, se separan sin esfuerzo.
+
+> **Verificado mirando, no calculando (B2-S4).** Se capturó la sección de los cuatro frentes a 1440 y a 390 con los cuatro acentos puestos, y en las dos anchuras las cuatro filas se distinguen por su acento — cian lee azulado y verde lee verde, incluso en las mono de 12px de los plazos. El punto queda **cerrado y no se movió ningún hex**. Evidencia: [`servicios-1440-antes.png`](logic-core-v3/docs/proof-screenshots/b2-s4/servicios-1440-antes.png) y [`servicios-390-antes.png`](logic-core-v3/docs/proof-screenshots/b2-s4/servicios-390-antes.png).
+>
+> Corrige de paso una instrucción errada del sprint anterior: sobre lienzo oscuro, para subir contraste hay que **aclarar**, no oscurecer. No hizo falta aplicarla, pero queda escrita para que nadie la aplique al revés.
+
+> **Una observación abierta.** El violeta es el más flojo de los cuatro sobre oscuro (4.64:1 contra 7.7–9.1) — sigue pasando 3:1, pero desparejo. Se anota medido; no se toca, porque los cuatro hex están congelados en `CLAUDE.md`.
 
 **La Regla de la Inversión Local.** El tema lo escribe la sección en su propio `<section>` (`data-ds-theme`), no un provider global. Una sección oscura anidada en una crema tiene que funcionar sin que nadie la configure.
 

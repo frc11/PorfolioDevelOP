@@ -3,7 +3,7 @@
 import { Canvas, useThree, useLoader } from '@react-three/fiber'
 import { Suspense, useEffect } from 'react'
 import { SVGLoader } from 'three-stdlib'
-import { Environment } from '@react-three/drei'
+import { Environment, Lightformer } from '@react-three/drei'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
 
 // HDRI self-hosteado (public/hdri): el preset 'studio' de drei lo bajaba de
@@ -158,8 +158,55 @@ export default function HeroCanvas({
       <Suspense fallback={null}>
         <ReadySignal onReady={onReady} />
 
-        <ambientLight intensity={1.5} />
-        <Environment files={HDRI_STUDIO_PATH} />
+        {/*
+          Rig de luz del artefacto (B2-S4). El objeto se leía como un fantasma:
+          negro metálico sobre `#0D0B09`, con el flanco izquierdo indistinguible
+          del fondo y la lectura colgada del filo especular del HDRI.
+
+          La causa es el MATERIAL, que está congelado (`HeroArtifact.tsx`):
+          `color=#000000` con `metalness=1` deja F0 = 0, así que como metal el
+          objeto no refleja NADA salvo en ángulos rasantes. Lo único que sí
+          responde de frente es el `clearcoat` (capa dieléctrica, F0 = 0.04): el
+          barrido brillante que ya tenía la panza de la "p" es el clearcoat
+          espejando un softbox del HDRI al 4%.
+
+          Se descartaron, en el orden que fija el sprint:
+
+          - **Encuadre.** Medido en las dos direcciones (yaw −0.4 y +0.5): rotar
+            solo MUEVE el único parche iluminado de un flanco al otro. Con F0 = 0
+            no hay orientación que ilumine una cara frontal plana.
+          - **Material.** Congelado. No se toca.
+
+          Queda la luz, y el rig es de dos piezas:
+
+          1. `environmentIntensity` sube el HDRI y con él el barrido de la "p" —
+             es un degradé fotográfico, sin bordes, que es lo que da el carácter
+             metálico.
+          2. Los tres `Lightformer` concéntricos son el relleno del flanco muerto.
+             Van SOLO a la izquierda y con `z` positivo (detrás de la cámara)
+             porque es la dirección que espejan las caras frontales. Dos
+             restricciones los fijan: si tapan el lóbulo brillante del HDRI el
+             barrido desaparece (medido), y como las caras planas comparten
+             normal, una fuente de borde duro se espeja como un corte recto sobre
+             el objeto — de ahí los tres círculos en escalones, que aproximan una
+             caída suave.
+
+          Las intensidades son bajas a propósito: la cara plana tiene que quedar
+          en grafito oscuro, apenas despegada del lienzo. El objeto se lee como
+          instrumento iluminado, no como objeto con luz propia.
+
+          Todo blanco: la dirección es monocroma y una luz de color la rompería.
+
+          Sin `ambientLight`: la que había (intensity 1.5) no aportaba un solo
+          fotón a este material. La luz ambiente solo alimenta el término difuso,
+          y con `metalness=1` el difuso es 0; el clearcoat es puramente especular.
+          Verificado sacándola: el render queda indistinguible.
+        */}
+        <Environment files={HDRI_STUDIO_PATH} environmentIntensity={2.2} frames={1} resolution={512}>
+          <Lightformer form="circle" intensity={0.3} position={[-9, -2, 12]} scale={[26, 26, 1]} />
+          <Lightformer form="circle" intensity={0.42} position={[-8, 1, 12]} scale={[16, 16, 1]} />
+          <Lightformer form="circle" intensity={0.6} position={[-7, 3, 12]} scale={[9, 9, 1]} />
+        </Environment>
 
         <HeroLogo />
       </Suspense>

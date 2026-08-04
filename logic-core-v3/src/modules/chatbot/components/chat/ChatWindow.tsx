@@ -204,8 +204,10 @@ export function ChatWindow({
               exit={{ opacity: 0 }}
               onClick={onClose}
               className="fixed inset-0 bg-black/60 backdrop-blur-md"
-              // No `cursor: auto`: the surface inherits `cursor: none` on desktop
-              // so the site's custom cursor stays visible over it (see CustomCursor).
+              // Inherits `cursor: none` on desktop. NOTE: the custom cursor this
+              // was written for was unmounted in B2-S2 and deleted in B2-S4, so
+              // today this hides the system cursor with nothing in its place.
+              // Pending a separate pass over every `cursor-none` in the repo.
               style={{ pointerEvents: 'auto', zIndex: CHATBOT_Z_INDEX.backdrop }}
               aria-hidden="true"
             />

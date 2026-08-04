@@ -2396,3 +2396,151 @@ sesión (`screenshot` devolvía "the pane is not displayed"). Con el pane oculto
 `rAF` no dispara: medir la capa 3D ahí no mide el artefacto, mide un cuelgue que no
 existe. Se prefirió dejarlo abierto antes que cerrarlo a ciegas. Todo lo demás se
 verificó por DOM, que no depende del compositor.
+
+---
+
+## B2-S4 — Legibilidad del artefacto 3D y poda de muertos · 2026-08-04
+
+Cierra el T8 que B1-S5 dejó abierto (juicio visual, sin compositor disponible),
+resuelve la observación de cian↔verde que quedaba pendiente del Gate 1 y borra el
+último archivo desmontado.
+
+**Método de captura: Playwright headed, no el Browser pane.** El pane falló en cinco
+sprints consecutivos sobre este mismo objetivo. Se lanzó un Chromium con ventana real
+y se **midió el `rAF` antes de afirmar nada**: 33/s antes, 32/s después. Con la
+pestaña oculta el `rAF` queda en 0 y no arranca la cadena del canvas — ahí no se mide
+el artefacto, se mide un cuelgue inexistente. El revelado se midió sobre el
+**contenedor** (`motion.div`), no sobre el canvas: `getComputedStyle(canvas).opacity`
+devuelve `"1"` aunque su capa esté en 0.
+
+### T1 — El artefacto 3D (el punto principal)
+
+**La causa está en el material, y el material está congelado.** `HeroArtifact.tsx`
+pinta `color="#000000"` con `metalness={1}`: como metal eso deja F0 = 0, así que el
+objeto **no refleja nada de frente**, sólo en ángulos rasantes. Lo único que responde
+frontalmente es el `clearcoat` (capa dieléctrica, F0 = 0.04) — el barrido brillante
+que ya tenía la panza de la "p" es el clearcoat espejando un softbox del HDRI al 4 %.
+
+Se recorrió el orden que fija el sprint y se descartó con medición, no por argumento:
+
+1. **Encuadre.** Probado en las dos direcciones (yaw −0.4 y +0.5). Rotar sólo **mueve
+   el único parche iluminado de un flanco al otro**: con −0.4 desaparece el barrido y
+   queda una silueta plana; con +0.5 se ilumina la izquierda y se apaga la derecha. Es
+   el mismo problema espejado, no un arreglo. Con F0 = 0 no hay orientación que
+   ilumine una cara frontal plana.
+2. **Material.** Congelado. No se toca.
+3. **Iluminación.** Acá cae el arreglo.
+
+Dentro de iluminación también hubo descartes medidos, que quedan escritos porque son
+la parte no obvia:
+
+- **Luces puntuales no sirven.** Con `roughness={0}` / `clearcoatRoughness={0}` la
+  superficie es un espejo perfecto, y un espejo refleja una fuente puntual en un
+  ángulo sólido casi nulo. Tres `directionalLight` fuertes no cambiaron nada. A un
+  espejo lo ilumina el **entorno**, no las luces.
+- **Subir el HDRI solo tampoco.** A `environmentIntensity={6}` la derecha se quema y
+  la izquierda apenas pasa a gris azulado: es un HDRI de un solo lado, y escalarlo
+  amplifica el desbalance en vez de corregirlo.
+- **Un relleno frontal grande apaga el barrido.** Las caras frontales planas comparten
+  normal, así que reflejan todas la misma dirección: lo que se ponga ahí sale
+  **uniforme**. Con relleno alto el objeto queda gris plano, sin metal.
+- **Un relleno frontal chico deja un corte recto.** Por lo mismo, el borde duro de una
+  fuente finita se espeja como una **línea recta atravesando el objeto**.
+- **Cualquier panel tapa el HDRI que tiene detrás.** Los paneles grandes ocultaban el
+  lóbulo brillante al cubo de render y el barrido desaparecía.
+
+**El rig que quedó** son dos piezas, en `HeroCanvas.tsx` (no congelado):
+`environmentIntensity={2.2}` sobre el HDRI —degradé fotográfico, sin bordes, que es lo
+que da el carácter metálico— más **tres `Lightformer` circulares concéntricos**, sólo
+a la izquierda y con `z` positivo (detrás de la cámara, que es la dirección que
+espejan las caras frontales). Concéntricos y en escalones porque aproximan una caída
+suave donde un solo círculo dejaba el corte recto; sólo a la izquierda porque a la
+derecha taparían el barrido.
+
+También se sacó el `ambientLight intensity={1.5}`: **no aportaba un solo fotón**. La
+luz ambiente sólo alimenta el término difuso y con `metalness=1` el difuso es 0; el
+clearcoat es puramente especular. Verificado sacándola — el render queda
+indistinguible.
+
+**Resultado, medido sobre el mismo recorte en las dos capturas:**
+
+| | antes | después |
+|---|---:|---:|
+| Píxeles visibles del artefacto | 15.258 | **47.536** (3,1×) |
+| Spread RGB promedio (monocromía) | 16,46 | **4,11** |
+| % de píxeles con spread > 20 | 35,9 % | **5,9 %** |
+| Brillo promedio | 167 | 88 |
+
+El área visible se **triplicó** y el render quedó **4× más neutro**: la monocromía
+mejoró, no se degradó. Más oscuro en promedio y mucho más visible en total es
+exactamente "instrumento de precisión iluminado", no "objeto con luz propia".
+
+Capturas: [`hero-1440x900-antes.png`](proof-screenshots/b2-s4/hero-1440x900-antes.png)
+· [`hero-1440x900-despues.png`](proof-screenshots/b2-s4/hero-1440x900-despues.png).
+Quedan además las 9 variantes intermedias del descarte, con el nombre de cada hipótesis.
+
+**Las siete condiciones de la capa 2, medidas:**
+
+| Condición | Medición |
+|---|---|
+| Cero bloqueo de scroll | `scrollY` 0 → 2500 |
+| Carga diferida | sin pedidos 3D hasta que la capa monta |
+| No monta a 390px | 0 canvas, **0 pedidos 3D** |
+| No monta con `prefers-reduced-motion` | 0 canvas, **0 pedidos 3D** |
+| Presupuesto sin aumentar | **delta 0 bytes** (1.733.868 antes y después) |
+| Monocromo | spread promedio 16,46 → **4,11** |
+| `frameloop` gateado | fuera de vista **4** draw calls en 2,5 s; en vista **724** en 2 s |
+
+Draw calls por frame: **2 antes, 2 después**. No se agregó geometría.
+
+### T2 — Distinguibilidad de los acentos: se distinguen, no se tocó ningún hex
+
+Capturado a 1440 y a 390 con los cuatro acentos puestos. **Las cuatro filas se
+distinguen por su acento en las dos anchuras**, cian incluido contra verde, y hasta en
+las mono de 12px de los plazos. La observación del critique estaba medida sobre un
+tick de 36 px²; sobre los 13.704–16.646 px² que hoy ocupan los nombres, los 0.125 de
+OKLab alcanzan de sobra. **Punto cerrado sin mover ningún valor.**
+
+Se documentó en `DESIGN.md` como regla nueva —*la distinguibilidad depende del área*—
+con las dos capturas como evidencia, y de paso quedó escrita al derecho la
+instrucción que el sprint anterior tenía al revés: **sobre lienzo oscuro se aclara
+para subir contraste, no se oscurece**. No hizo falta aplicarla; queda para que nadie
+la aplique invertida. El Gate 1 se marcó **cerrado con la opción A** en `DESIGN.md` y
+en `accent.ts`. `CLAUDE.md` no se tocó: los cuatro hex siguen exactamente igual.
+
+Queda abierta y anotada una sola observación: el violeta es el más flojo sobre oscuro
+(4.64:1 contra 7.7–9.1). Pasa 3:1. No se toca.
+
+> **Nota de numeración.** El sprint pedía "la sección de servicios (S4)". En el código
+> los cuatro frentes son **S5** (`id="home-s5"`); S4 es "Por qué develOP", que no lleva
+> acentos. Se capturó S5, que es inequívocamente la sección de los cuatro acentos. El
+> cruce viene de B1-S5, que intercambió las dos secciones para que la única con acentos
+> cayera en posición oscura.
+
+### T3 — `CustomCursor.tsx` borrado
+
+`grep` sobre `.ts/.tsx/.js/.mjs`: **cero importadores**. Los cuatro hits que quedaban
+eran comentarios. Borrado, y actualizados los tres comentarios que lo nombraban
+(`layout.tsx`, `design-tokens.ts`, `ChatWindow.tsx`) para que no apunten a un archivo
+que ya no existe.
+
+### Verificación
+
+- `npm run build` **verde** · `npx tsc --noEmit` **0 errores** (el preexistente de
+  `searchconsole.ts` tampoco aparece) · `eslint` sobre los cuatro archivos tocados: **0**.
+- Detector: `design-system` sigue en **0** (el techo) · superficie pública **64**,
+  igual que el baseline. Cero nuevos.
+- Consola: **1 entrada antes, 1 después** — la misma advertencia de shader de THREE,
+  preexistente. Cero errores nuevos, medidos contra build previo, servidor reiniciado
+  y pestaña nueva.
+
+### Fuera de scope — anotado, no implementado
+
+**Las clases `cursor-none` siguen puestas y ahora esconden el cursor del sistema sin
+reemplazo.** `CustomCursor` se desmontó en B2-S2, pero las clases quedaron sobre
+elementos **interactivos** en `Portfolio.tsx` (4, incluidas dos flechas de navegación),
+`About.tsx`, `CalculadoraAutomation.tsx` (2), `FlujoAutomation.tsx`,
+`PortfolioWebCases.tsx`, `LogicCompanion.tsx` y `ChatWindow.tsx` — este último con una
+regla CSS `cursor: none` propia en `:695`. Hoy un usuario que pasa por encima de esos
+elementos **no ve ningún cursor**. Es una regresión de accesibilidad ya viva en la
+rama, anterior a este sprint. Necesita una pasada propia.

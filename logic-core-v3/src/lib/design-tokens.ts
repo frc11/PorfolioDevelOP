@@ -219,9 +219,10 @@ export const breakpoints = {
 // del flujo de la página. `modal`/`toast`/`tooltip` son capas full-viewport:
 // cuando un overlay se portalea a <body> compite en el stacking context RAÍZ
 // contra el chrome fijo del app — transición/Shutter (~9985), dock·noise·navbar
-// (~9990–9995) y preloader·marketing (9999). Por eso viven por ENCIMA de 9999, y
-// por DEBAJO del cursor custom (CustomCursor.tsx → 2_147_483_647), que siempre
-// va arriba de todo. Un `modal: 50` quedaba debajo del propio layout de admin
+// (~9990–9995) y preloader·marketing (9999). Por eso viven por ENCIMA de 9999.
+// (Antes había un techo más arriba todavía: el cursor custom en 2_147_483_647.
+// Ese componente se borró en B2-S4 y ya no hay nada por encima de esta escala.)
+// Un `modal: 50` quedaba debajo del propio layout de admin
 // (fixed z-[80]) al portalearse → aparecía detrás del contenido / del iframe.
 export const zIndex = {
   base: 0,

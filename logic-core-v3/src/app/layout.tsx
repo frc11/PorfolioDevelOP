@@ -89,12 +89,18 @@ export default function RootLayout({
           `PublicOnlyComponents`), así que sacarlas de acá las sacó de todas las
           superficies, producto incluido.
 
-          `NoiseOverlay.tsx` se borró en el sprint de calibración: desmontado ya
-          no hacía nada, pero el archivo seguía llevando adentro una animación
-          `infinite` a 5 Hz sin gate de `prefers-reduced-motion` — exactamente lo
-          que la lista de "Don't" del sistema prohíbe — y bastaba con volver a
-          importarlo para reintroducirla. `CustomCursor.tsx` sigue vivo y sin
-          consumidores: queda para una poda aparte.
+          Los dos archivos ya no existen. `NoiseOverlay.tsx` se borró en el
+          sprint de calibración y `CustomCursor.tsx` en B2-S4, por la misma
+          razón: desmontados no hacían nada, pero cada uno seguía llevando
+          adentro lo que la lista de "Don't" del sistema prohíbe —una animación
+          `infinite` a 5 Hz sin gate de `prefers-reduced-motion` uno, un
+          `cursor:none` global sobre el cursor del sistema el otro— y bastaba
+          con volver a importarlos para reintroducirlo.
+
+          Queda anotado, y NO se resolvió acá: las clases `cursor-none` siguen
+          puestas en elementos interactivos de varias pantallas (Portfolio,
+          About, las de automatización, el chat). Sin `CustomCursor` montado
+          esconden el cursor del sistema sin reemplazarlo por nada.
         */}
         <PreloaderProvider>
           <SmoothScroll>
