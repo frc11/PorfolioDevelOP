@@ -1,17 +1,16 @@
 import dynamic from 'next/dynamic'
 import { ThemeProvider } from '@/hooks/useThemeObserver'
 import { HomeWrapper } from '@/components/layout/HomeWrapper'
-import { SectionWrapper } from '@/components/layout/SectionWrapper'
 
 // Critical ATF (Above The Fold) Components
 import { Hero } from '@/components/layout/Hero'
 import { About } from '@/components/sections/home/About'
+import { Servicios } from '@/components/sections/servicios/Servicios'
 
 // Heavy Components Lazy Loaded
 const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
 const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
 const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const OurServices = dynamic(() => import('@/components/sections/home/OurServices'), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
 const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
 const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
 const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
@@ -27,19 +26,25 @@ export default function Home() {
         <Portfolio />
         <InfiniteReviews />
 
-        <SectionWrapper>
-          <OurServices />
-        </SectionWrapper>
-
         {/*
-          `PortalDemo` sale del `SectionWrapper` en B3-S2. No es cosmético: el
-          wrapper envuelve a su hijo en un `motion.div` con
-          `initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en
-          el HTML del SSR — la sección nace invisible y depende del JS para
-          aparecer. Encima le montaba un segundo reveal ajeno arriba del reveal
-          CSS del sistema. `Hero` y `Portfolio`, ya migrados, tampoco lo usan.
-          `OurServices` lo conserva: no es de este sprint.
+          B4-S1 desmonta `OurServices` —el monolito de 9.898 líneas— y pone en
+          su lugar la sección nueva. El ARCHIVO todavía existe: borrarlo es
+          B4-S3, después de que S1 y S2 estén verificados. Acá deja de
+          renderizarse, que es lo que hacía falta para que `id="servicios"` no
+          quedara declarado dos veces en el mismo documento.
+
+          Con él se va el último `SectionWrapper` del home. El wrapper envolvía
+          a su hijo en un `motion.div` con `initial={{ opacity: 0, y: 40 }}`, y
+          Framer serializa ese `initial` en el HTML del SSR: la sección nacía
+          invisible y dependía del JS para aparecer. Encima montaba un segundo
+          reveal ajeno arriba del reveal CSS del sistema. `Hero`, `Portfolio` y
+          `PortalDemo`, ya migrados, tampoco lo usaban.
+
+          El ORDEN todavía no es el de la arquitectura: la sección entra en el
+          hueco que dejó el monolito. Reordenar las seis es B4-S3.
         */}
+        <Servicios />
+
         <PortalDemo />
 
         <TodoIncluido />

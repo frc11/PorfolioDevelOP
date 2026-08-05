@@ -2860,3 +2860,193 @@ verificado contra el código o es dato real.
    mismo `initial` de Framer serializado en el SSR.
 4. **`Portfolio` sigue importado con `next/dynamic`** aunque ya no tenga JS
    propio: ese `dynamic()` no code-splitea nada útil.
+
+---
+
+## B4-S0 · Daño colateral de B3 — diagnóstico · 2026-08-05
+
+Sprint de diagnóstico. **No arregla nada**: sale con reporte y captura.
+
+### La hipótesis del roadmap se confirma
+
+El censo (`docs/probe-monolito-censo.md`, §C.7) había marcado `Portfolio.tsx`
+como **"⚠ NO es un borrado limpio"**: tiene dos importadores, y el segundo es
+`src/app/web-development/page.tsx:19`, una landing de producto que sobrevive al
+rediseño. B3-S1 reescribió ese archivo entero — de carrusel de seis tarjetas a
+lámina de caso de estudio con placeholders.
+
+**Hoy `/web-development` renderiza la lámina de San Miguel con 10 placeholders a
+la vista**, en tema crema, embutida en una landing oscura (`bg-[#020611]`).
+Verificado en runtime, no por lectura:
+
+| Qué se midió | Resultado |
+|---|---|
+| `#portfolio` en `/web-development` | existe, `section` con `data-ds-theme="light"` |
+| Fondo computado de la sección | `rgb(242, 238, 230)` — crema, dentro de la landing oscura |
+| Placeholders visibles en el `innerText` | **10** |
+| Índice de capítulo que muestra | `( 02 )` — la numeración del **home** |
+
+Los 10: `[CONTEXTO — 1 línea…]`, `[+00%]`, `[00 días]`, `[000]`, `[RUBRO 1..3]`,
+`[QUÉ RESUELVE — 1 línea]` ×3. Más `[ENTREGABLE — 2 a 3 líneas…]` y
+`[URL DEL CASO]`, que el `innerText` corta pero están en el DOM.
+
+Capturas: la costura entre la landing oscura y la lámina crema a 1440 y a 390, y
+la sección completa a 1440.
+
+**Frenado acá.** Qué hacer con esto es decisión de alcance —¿la landing recibe su
+propia sección de casos, o se le quita?—, no del ejecutor.
+
+Un detalle extra que la captura muestra y la lectura no: además del tema y los
+placeholders, la sección lleva el **índice de capítulo del home**. `( 02 )` no
+significa nada en una landing que no tiene índice de capítulos. Cualquiera de las
+dos salidas tiene que resolver eso también.
+
+### Barrido: ningún otro consumidor fuera del home
+
+B3 tocó 9 archivos (`git diff --name-only 66c74a3~1 7b0793d`). Se buscó, para
+cada uno, todo `import` o `dynamic()` que lo apunte desde fuera de
+`sections/home` y `sections/portal-demo`:
+
+| Archivo que B3 reescribió o borró | Importadores fuera del home |
+|---|---|
+| `home/Portfolio.tsx` (reescrito) | **`app/web-development/page.tsx:19`** ← el único |
+| `portal-demo/PortalDemo.tsx` (reescrito) | ninguno |
+| `portal-demo/data.ts` (reescrito) | ninguno |
+| `PortalDemoHeader` · `StoryArcLunes` · `StoryMomentCard` (borrados) | ninguno — cero referencias vivas en `src/` |
+
+Verificado también que las otras cuatro landings (`ai-implementations`,
+`process-automation`, `software-development`, `contact`) no importan nada de lo
+que B3 tocó.
+
+De paso, el mismo barrido sobre los archivos condenados en B4-S3: **todos tienen
+a `src/app/page.tsx` como único importador**. Las tres coincidencias que aparecen
+en un grep textual —`styleguide/_components/ServiceRow.tsx:53`,
+`layout/SmoothScroll.tsx:58`, `lib/whatsapp.ts:25`— son menciones en comentarios,
+no imports.
+
+---
+
+## B4-S1 · Servicios: los cuatro frentes · 2026-08-05
+
+### La numeración: manda el código
+
+El roadmap llama S4 a servicios y S5 a "por qué develOP". **El código dice lo
+contrario**, y el código gana. Relevado antes de escribir un solo `ChapterLabel`,
+contra el esqueleto del home que fijó B1-S5 en `/styleguide`:
+
+| # | Sección | Tema | `id` | Dónde vive |
+|---|---|---|---|---|
+| 01 | Hero | oscuro | `inicio` | `layout/Hero.tsx` ✅ |
+| 02 | El caso real | crema | `portfolio` | `sections/home/Portfolio.tsx` ✅ |
+| 03 | El panel del lunes | oscuro | `portal-demo` | `sections/portal-demo/` ✅ |
+| 04 | Por qué develOP + Somos | **crema** | `caracteristicas` · `nosotros` | ← B4-S2 |
+| 05 | **Los cuatro frentes** | **oscuro** | `servicios` | ← **este sprint** |
+| 06 | Cierre | crema | — | **no existe** ← ver abajo |
+
+La inversión no es un descuido del esqueleto: está argumentada en
+`HomeSkeletonBottom.tsx`. Los frentes son la única sección con los cuatro
+acentos y por eso no puede ser crema (tres de los cuatro no llegan a 3:1 sobre
+claro); la alternancia estricta la habría dejado ahí, así que se intercambió con
+los contrastes, que no necesitan acento para funcionar. **Alternancia
+resultante: oscuro · crema · oscuro · crema · oscuro · crema.** Correlativa y sin
+saltos.
+
+> **La sección 06 no existe todavía.** El esqueleto la tiene (`SkeletonClose`:
+> `( 06 )`, "Empecemos por una llamada.", dos CTAs), pero no hay componente real.
+> Y B4-S3 borra `PortalDemoCTA`, que es el CTA de cierre que el home tiene hoy.
+> Sin construirla, la demolición deja el home terminando sin llamada a la acción.
+> Anotado acá; se resuelve en S3, que es el sprint que arma el `page.tsx` final.
+
+### Qué se construyó
+
+`sections/servicios/Servicios.tsx` + `data.ts`. Server Component, cero JS propio:
+el reveal es `animate-ds-reveal`, la animación CSS del sistema. Sin demo animada
+por servicio — el único motion vivo de la página sigue siendo el panel del lunes.
+
+Cuatro filas. Cada una: nombre · para quién es · entregable · plazo · acento.
+Un solo árbol JSX; el responsive va por clases.
+
+**Contenido.** Real y tal cual: los tres timelines (15 · 7 · 5 días) y la
+asignación de acento por servicio. Del monolito no se hereda **nada**:
+`OurServices.tsx` traía por servicio precio "DESDE", métrica de impacto sin
+fuente, icono, href y una simulación animada propia. Software a medida va con
+placeholder en las tres casillas que no están definidas —para quién, entregable y
+plazo—: el monolito decía "entrega por etapas", que no es un número.
+
+**Sin pricing** (decisión D1: módulos y precios salen del home). **Sin links a las
+landings**: no estaban en el alcance de la fila, y el camino home → landing lo
+sirve el desplegable de servicios del `Navbar`, que las lista las cuatro.
+El "Cierre de diagnóstico" del monolito no se conserva.
+
+**La dosis del acento.** Pinta el nombre del frente (`Subhead`, 38px a 1440) y su
+plazo. Es la calibración de B1-S5: con un tick de 6×6 px —36 px² por fila— sacarle
+el color a las cuatro casi no perdía información. Sin glow, sin gradiente, sin
+borde lateral.
+
+### `id="servicios"` no se tocó, pero el monolito se desmontó
+
+El `id` lo consumen tres cosas: `Navbar` (`MAIN_NAV_ITEMS` + `HASH_TO_LABEL`), la
+tool `navigate_to_page` del chatbot (`VALID_PATHS`) y `TransitionContext`, que
+está **congelado** y lo tiene hardcodeado en dos ramas (líneas 28 y 41) para
+centrar el destino del scroll.
+
+Por eso `OurServices` **deja de renderizarse en este sprint**: dos secciones
+declarando `id="servicios"` en el mismo documento habrían dejado el ancla
+aterrizando en la vieja. El **archivo** sigue existiendo — borrarlo es S3, después
+de que S1 y S2 estén verificados. Con él sale el último `SectionWrapper` del home,
+que serializaba `initial: opacity 0` en el SSR.
+
+El **orden** todavía no es el de la arquitectura: la sección entra en el hueco que
+dejó el monolito. Reordenar las seis es S3.
+
+### Verificación
+
+Build de producción servido en `:3001`, medido con Playwright.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `sections/servicios/` + `page.tsx` | **0** |
+| `section#servicios` en el DOM | **1** (era 1 antes, del monolito) |
+| Las 5 anclas del Navbar/chatbot existen | **5/5** |
+| Aterrizaje same-document | **5/5**, a 64px del tope |
+| Errores de consola en `/` | **0** |
+| `backdrop-filter` / gradiente / radio / sombra en la sección | **0 / 0 / 0 / 0** (48 nodos) |
+| Scroll horizontal a 390 | **no** — `scrollWidth` 390 = viewport |
+| Detector — `design-system/` | **0** |
+| Detector — superficie pública | **59**, igual que post-B3 |
+| Detector — `sections/servicios/` | **0** |
+
+Los cuatro acentos, leídos del `getComputedStyle` sobre la página servida:
+`#06b6d4` · `#10b981` · `#f59e0b` · `#8b5cf6`. Los cuatro hex congelados en
+`CLAUDE.md`, sin mover ninguno. El par crítico —cian y verde— se distingue en la
+captura.
+
+**Alturas**
+
+| Viewport | Alto | Pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1038 px | **1.15** |
+| 390 × 844 | 1352 px | **1.60** |
+
+La fila más ancha a 390 es "Automatización de procesos": 338 px de texto en un
+contenedor de 350. Entra, sin desbordar.
+
+**Peso.** Chunk de la ruta `/` medido como gzip de
+`.next/static/chunks/app/page-*.js`: **39.17 KB gz**. El antes/después contra el
+estado pre-B4, con la misma vara, se mide en S3 — que es donde el roadmap lo pide.
+
+### Fuera de scope — anotado, no implementado
+
+1. **`#nosotros` está roto hoy, y no es de este sprint.** Hay **dos** elementos
+   con ese `id` (los dos árboles de `About.tsx`, mobile y desktop, ambos en el
+   DOM), y el primero resuelve a `scrollY: 0` — o sea que el link "Nosotros" del
+   Navbar te deja en el hero. Lo arregla S2, que reemplaza `About.tsx` entero.
+2. **Carga fría de `/#servicios`: intermitente.** En dos corridas idénticas,
+   aterrizó una vez y la otra quedó 1854px corto. Es la carrera ya fichada en el
+   repo entre el scroll-to-hash y el contenido lazy de arriba creciendo después.
+   No lo introduce esta sección — y debería mejorar solo en S3, cuando
+   desaparezcan las secciones pesadas que hoy están arriba del ancla.
+3. **`SectionWrapper` queda huérfano.** `page.tsx` era su único consumidor. Se
+   barre en S3.
