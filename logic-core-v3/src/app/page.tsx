@@ -4,12 +4,11 @@ import { HomeWrapper } from '@/components/layout/HomeWrapper'
 
 // Critical ATF (Above The Fold) Components
 import { Hero } from '@/components/layout/Hero'
-import { About } from '@/components/sections/home/About'
+import { Nosotros } from '@/components/sections/nosotros/Nosotros'
 import { Servicios } from '@/components/sections/servicios/Servicios'
 
 // Heavy Components Lazy Loaded
 const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
-const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
 const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
 const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
 const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
@@ -22,7 +21,6 @@ export default function Home() {
     <ThemeProvider>
       <HomeWrapper>
         <Hero />
-        <About />
         <Portfolio />
         <InfiniteReviews />
 
@@ -43,6 +41,24 @@ export default function Home() {
           El ORDEN todavía no es el de la arquitectura: la sección entra en el
           hueco que dejó el monolito. Reordenar las seis es B4-S3.
         */}
+
+        {/*
+          B4-S2 hace lo mismo con `About` y `WhyDevelOP`: los dos dejan de
+          renderizarse acá y `Nosotros` —que los fusiona— ocupa el lugar. Los
+          ARCHIVOS siguen existiendo hasta S3.
+
+          Tenían que salir los dos en este sprint, no en la demolición: `About`
+          declara `id="nosotros"` DOS veces (líneas 411 y 471, un árbol por
+          breakpoint, los dos en el DOM) y `WhyDevelOP` declara
+          `id="caracteristicas"` (línea 1629). Dejarlos montados habría puesto
+          tres ids duplicados en el documento junto a los de la sección nueva, y
+          `getElementById` resuelve al primero: los links del Navbar habrían
+          seguido aterrizando en el árbol viejo.
+
+          Va pegada a `Servicios` para que el par 04 → 05 se lea correlativo. El
+          resto del orden sigue sin ser el de la arquitectura — eso es S3.
+        */}
+        <Nosotros />
         <Servicios />
 
         <PortalDemo />
@@ -50,7 +66,6 @@ export default function Home() {
         <TodoIncluido />
         <ModulosOpcionales />
         <PortalDemoCTA />
-        <WhyDevelOP />
         <Footer />
       </HomeWrapper>
     </ThemeProvider>

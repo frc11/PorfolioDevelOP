@@ -3050,3 +3050,119 @@ estado pre-B4, con la misma vara, se mide en S3 — que es donde el roadmap lo p
    desaparezcan las secciones pesadas que hoy están arriba del ancla.
 3. **`SectionWrapper` queda huérfano.** `page.tsx` era su único consumidor. Se
    barre en S3.
+
+---
+
+## B4-S2 · Por qué develOP + Somos · 2026-08-05
+
+Fusiona `WhyDevelOP.tsx` (1.750 líneas) y `About.tsx` (527) en una sección sola:
+`sections/nosotros/` — 162 líneas de componente + 78 de datos. **240 contra
+2.277.**
+
+### Los dos ids conviven, y por primera vez aterrizan donde deben
+
+El roadmap pedía frenar y reportar si la fusión dejaba una sola sección con dos
+ids que resolver. No hizo falta frenar: los dos ids describen cosas de tamaño
+distinto y por eso entran en niveles distintos del mismo árbol.
+
+| `id` | Dónde va | Por qué ahí |
+|---|---|---|
+| `caracteristicas` | la `<section>` entera | `TransitionContext` está **congelado**, lo tiene hardcodeado en dos ramas y le da tratamiento especial: centra el destino en el viewport en vez de pegarlo arriba. Centrar exige que el destino sea el contenedor grande. |
+| `nosotros` | el bloque del equipo | Es exactamente el contenido que el link promete. Lleva `scroll-mt-24` propio: el `scroll-margin` de la sección no lo hereda un div interno. |
+
+**Y de paso se arregla el `#nosotros` roto** que B4-S1 dejó anotado como fuera de
+scope. `About.tsx` declaraba ese `id` **dos veces** —líneas 411 y 471, un árbol
+por breakpoint, los dos en el DOM— y `getElementById` resuelve al primero, que
+estaba dentro de un contenedor de `400vh` arrancando arriba de todo: el link
+"Nosotros" del Navbar te dejaba en el hero. Ahora aterriza en el bloque del
+equipo.
+
+### Por qué los dos archivos salieron del árbol en S2 y no en la demolición
+
+Misma maniobra que S1 con el monolito: dejan de renderizarse acá, el archivo se
+borra en S3. No es prolijidad, es obligatorio — `About` aporta dos `id="nosotros"`
+y `WhyDevelOP` un `id="caracteristicas"`. Montados junto a la sección nueva
+habrían puesto **tres ids duplicados** en el documento, y como `getElementById`
+resuelve al primero, los links del Navbar habrían seguido aterrizando en el árbol
+viejo. La sección nueva se vería perfecta y la navegación seguiría rota.
+
+### Lo que se sacó
+
+- **Los tabs.** El argumento anti-agencia era un widget con estado; ahora son
+  tres filas estáticas que se leen todas juntas. Server Component, cero JS
+  propio: el reveal es `animate-ds-reveal`, la animación CSS del sistema.
+- **133 usos de motion/whileInView** en `WhyDevelOP` y los dos scrollytelling
+  horizontales de `400vh` de `About` —servidos los dos, mobile y desktop, en el
+  mismo HTML—. Mueren con los archivos en S3.
+- **Dos cifras sin fuente**: `76` días de las agencias contra `15`, y
+  `+850 LEADS GENERADOS`. No se reemplazaron por otras: se fueron.
+- El mojibake del badge de ubicación en la rama mobile de `About`.
+
+### Los cinco placeholders que agrega este sprint
+
+`[PLAZO — a definir con dato real]` · `[CONTRASTE 3 — LADO AGENCIA]` ·
+`[CONTRASTE 3 — LADO DEVELOP]` · `[ROL EN UN PROYECTO — 1 línea]` ×2.
+
+El del contraste 2 no es un olvido: los timelines por servicio (15/7/5 días) son
+reales, pero **"primera versión funcionando en X" es un claim distinto** y no está
+verificado. Un plazo de entrega no es un plazo de arranque. El contraste 3 quedó
+sin definir y va con los dos lados marcados, porque lo que la sección necesita
+mostrar es la forma completa de la fila.
+
+Los avatares son placeholder **tipográfico** —la inicial dentro de una superficie
+plana—, no un cuadrado vacío: un cuadrado vacío se lee como imagen rota, no como
+"falta la foto". Van `aria-hidden`, con el nombre escrito al lado.
+
+### Verificación
+
+Build de producción servido en `:3001`, medido con Playwright — el Browser pane
+no compuso frames en toda la sesión, así que las capturas salieron por Playwright
+directo.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `sections/nosotros/` + `page.tsx` | **0** |
+| `id="caracteristicas"` en el documento | **1** (era 1, de `WhyDevelOP`) |
+| `id="nosotros"` en el documento | **1** (era **2**, los dos de `About`) |
+| Las 6 anclas aterrizan — same-document | **6/6**, a 64px del tope |
+| Las 6 anclas aterrizan — carga fría | **6/6** |
+| Errores de consola en `/` a 1440 y a 390 | **0 / 0** |
+| `backdrop-filter` / gradiente / radio / sombra en la sección | **0 / 0 / 0 / 0** (57 nodos) |
+| Scroll horizontal a 390 | **no** |
+| Detector — `design-system/` | **0** (el techo, se sostiene) |
+| Detector — `sections/nosotros/` | **0** |
+| Detector — superficie pública | **59**, igual que post-S1 |
+
+**Alturas**
+
+| Viewport | Alto | Pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1409 px | **1.57** |
+| 390 × 844 | 1818 px | **2.15** |
+
+**Peso.** Chunk de la ruta `/`, gzip de `.next/static/chunks/app/page-*.js`:
+**39.17 KB gz → 23.89 KB gz**. `About` era import estático y `WhyDevelOP` un
+`dynamic` con `ssr: true`; los dos entraban igual en el grafo del home.
+
+**El aterrizaje en carga fría anduvo.** S1 lo había medido intermitente sobre
+`/#servicios` (una corrida bien, otra 1854px corta) y lo atribuyó a la carrera
+entre el scroll-to-hash y el contenido lazy de arriba creciendo después. Con dos
+secciones pesadas menos arriba del ancla, las seis dieron bien. Sigue siendo una
+carrera, no una garantía: se vuelve a medir en S3, que saca cuatro secciones más.
+
+Capturas: `docs/proof-screenshots/b4-s2/` — la sección a 1440 y a 390.
+
+### Fuera de scope — anotado, no implementado
+
+1. **La sección 06 sigue sin existir.** El esqueleto la tiene (`( 06 )`,
+   "Empecemos por una llamada."), no hay componente, y S3 borra `PortalDemoCTA`,
+   que es el CTA de cierre de hoy. Sin construirla, la demolición deja el home
+   terminando sin llamada a la acción. Se resuelve en S3.
+2. **El orden todavía no es el de la arquitectura.** Hoy se lee 01 · 02 ·
+   *(testimonials)* · 04 · 05 · 03. `Nosotros` se puso pegado a `Servicios` para
+   que el par 04 → 05 quede correlativo; el resto lo reordena S3.
+3. **El launcher del chatbot pisa contenido a 390.** Se ve en la captura, encima
+   de la ficha de Franco. Es el problema ya fichado del widget flotante, no de
+   esta sección.
