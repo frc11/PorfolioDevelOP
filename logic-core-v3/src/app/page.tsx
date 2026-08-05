@@ -1,71 +1,53 @@
-import dynamic from 'next/dynamic'
 import { ThemeProvider } from '@/hooks/useThemeObserver'
 import { HomeWrapper } from '@/components/layout/HomeWrapper'
 
-// Critical ATF (Above The Fold) Components
 import { Hero } from '@/components/layout/Hero'
+import { Portfolio } from '@/components/sections/home/Portfolio'
+import { PortalDemo } from '@/components/sections/portal-demo/PortalDemo'
 import { Nosotros } from '@/components/sections/nosotros/Nosotros'
 import { Servicios } from '@/components/sections/servicios/Servicios'
+import { Cierre } from '@/components/sections/cierre/Cierre'
+import { Footer } from '@/components/sections/home/Footer'
 
-// Heavy Components Lazy Loaded
-const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
-const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
-const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
-const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
-const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
-const PortalDemoCTA = dynamic(() => import('@/components/sections/portal-demo-cta/PortalDemoCTA').then(mod => mod.PortalDemoCTA), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
-const InfiniteReviews = dynamic(() => import('@/components/sections/home/InfiniteReviews').then(mod => mod.InfiniteReviews), { loading: () => <div className="min-h-[20vh] animate-pulse bg-zinc-900/20" /> })
-
+/**
+ * El home, después de B4-S3.
+ *
+ * Seis secciones en el orden de la arquitectura, alternando tema de forma
+ * estricta y con el índice de capítulos correlativo:
+ *
+ * | # | Sección | Tema | `id` |
+ * |---|---|---|---|
+ * | 01 | Hero | oscuro | `inicio` |
+ * | 02 | El caso real | crema | `portfolio` |
+ * | 03 | El panel del lunes | oscuro | `portal-demo` |
+ * | 04 | Por qué develOP + Somos | crema | `caracteristicas` · `nosotros` |
+ * | 05 | Los cuatro frentes | oscuro | `servicios` |
+ * | 06 | El cierre | crema | — |
+ *
+ * **Ya no hay `dynamic()`.** Las seis son Server Components y el único JS de la
+ * página vive en tres islas: `SectionShell` (que observa el viewport para
+ * invertir el tema), el ciclo de escenas del panel del lunes y el CTA a
+ * `/contact` del cierre. Partir eso en chunks separados con `next/dynamic`
+ * agregaba un placeholder `animate-pulse` y una carga en cascada para ahorrar
+ * kilobytes que ya no existen: las secciones que pesaban —el monolito de 9.898
+ * líneas, los dos scrollytelling de `400vh`, el marquee infinito— se borraron en
+ * este sprint.
+ *
+ * **Tampoco hay `SectionWrapper`.** Envolvía a cada hijo en un `motion.div` con
+ * `initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en el HTML
+ * del SSR: cada sección nacía invisible y dependía del JS para aparecer. El
+ * reveal ahora es `animate-ds-reveal`, una animación CSS que corre sin JS.
+ */
 export default function Home() {
   return (
     <ThemeProvider>
       <HomeWrapper>
         <Hero />
         <Portfolio />
-        <InfiniteReviews />
-
-        {/*
-          B4-S1 desmonta `OurServices` —el monolito de 9.898 líneas— y pone en
-          su lugar la sección nueva. El ARCHIVO todavía existe: borrarlo es
-          B4-S3, después de que S1 y S2 estén verificados. Acá deja de
-          renderizarse, que es lo que hacía falta para que `id="servicios"` no
-          quedara declarado dos veces en el mismo documento.
-
-          Con él se va el último `SectionWrapper` del home. El wrapper envolvía
-          a su hijo en un `motion.div` con `initial={{ opacity: 0, y: 40 }}`, y
-          Framer serializa ese `initial` en el HTML del SSR: la sección nacía
-          invisible y dependía del JS para aparecer. Encima montaba un segundo
-          reveal ajeno arriba del reveal CSS del sistema. `Hero`, `Portfolio` y
-          `PortalDemo`, ya migrados, tampoco lo usaban.
-
-          El ORDEN todavía no es el de la arquitectura: la sección entra en el
-          hueco que dejó el monolito. Reordenar las seis es B4-S3.
-        */}
-
-        {/*
-          B4-S2 hace lo mismo con `About` y `WhyDevelOP`: los dos dejan de
-          renderizarse acá y `Nosotros` —que los fusiona— ocupa el lugar. Los
-          ARCHIVOS siguen existiendo hasta S3.
-
-          Tenían que salir los dos en este sprint, no en la demolición: `About`
-          declara `id="nosotros"` DOS veces (líneas 411 y 471, un árbol por
-          breakpoint, los dos en el DOM) y `WhyDevelOP` declara
-          `id="caracteristicas"` (línea 1629). Dejarlos montados habría puesto
-          tres ids duplicados en el documento junto a los de la sección nueva, y
-          `getElementById` resuelve al primero: los links del Navbar habrían
-          seguido aterrizando en el árbol viejo.
-
-          Va pegada a `Servicios` para que el par 04 → 05 se lea correlativo. El
-          resto del orden sigue sin ser el de la arquitectura — eso es S3.
-        */}
+        <PortalDemo />
         <Nosotros />
         <Servicios />
-
-        <PortalDemo />
-
-        <TodoIncluido />
-        <ModulosOpcionales />
-        <PortalDemoCTA />
+        <Cierre />
         <Footer />
       </HomeWrapper>
     </ThemeProvider>

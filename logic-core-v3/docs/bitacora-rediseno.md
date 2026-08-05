@@ -3166,3 +3166,217 @@ Capturas: `docs/proof-screenshots/b4-s2/` — la sección a 1440 y a 390.
 3. **El launcher del chatbot pisa contenido a 390.** Se ve en la captura, encima
    de la ficha de Franco. Es el problema ya fichado del widget flotante, no de
    esta sección.
+
+---
+
+## B4-S3 · La demolición · 2026-08-05 · CIERRE DEL BLOQUE B4
+
+**14.663 líneas borradas.** El home queda con seis secciones, todas del sistema
+nuevo, y sin monolito.
+
+| Archivo | Líneas |
+|---|---:|
+| `sections/home/OurServices.tsx` | 9.898 |
+| `sections/home/WhyDevelOP.tsx` | 1.750 |
+| `sections/home/About.tsx` | 527 |
+| `sections/home/InfiniteReviews.tsx` (`ScrollingTextMarquee`) | 520 |
+| `sections/modulos-opcionales/` (3 archivos) | 939 |
+| `sections/todo-incluido/` (3 archivos) | 576 |
+| `sections/portal-demo-cta/PortalDemoCTA.tsx` | 392 |
+| `components/ui/KineticText.tsx` (huérfano del barrido) | 43 |
+| `components/layout/SectionWrapper.tsx` (huérfano del barrido) | 18 |
+
+Antes de borrar cada uno se corrió el grep de importadores. **Ninguno tenía
+consumidores fuera de `src/app/page.tsx`** — el caso peligroso, `Portfolio.tsx`
+con su segundo importador en `/web-development`, no está en esta lista: sigue
+vivo, y su problema es el de B4-S0.
+
+### La sección 06 no existía, y sin ella la demolición dejaba el home sin cierre
+
+Anotado como fuera de scope en S1 y en S2; acá había que resolverlo. El esqueleto
+de B1-S5 tenía la sección (`( 06 )`, "Empecemos por una llamada.", dos CTAs) pero
+no había componente, y este sprint borra `PortalDemoCTA` — que era la llamada a
+la acción del home. Se construyó `sections/cierre/`.
+
+**Dos claims del esqueleto no sobrevivieron la regla de contenido.** Proponía
+"Te respondemos hoy. Coordinamos una llamada de 30 minutos": son un tiempo de
+respuesta y una duración, y ninguno de los dos está en la lista de datos reales.
+Los timelines de entrega (15/7/5 días) sí lo están, pero miden otra cosa —cuánto
+tarda el trabajo, no cuánto tarda la respuesta—. Los dos se fueron a un
+placeholder marcado. Lo que queda afirmado es lo que la sección 04 ya demostró:
+que del otro lado está el que construye.
+
+Los CTAs van a destinos **reales**: WhatsApp por `lib/whatsapp.ts` (la fuente
+única del sitio) y `/contact`, que es una página propia. El segundo es navegación
+interna, así que va por `triggerTransition()` en un componente cliente aparte
+(`ContactoCta.tsx`) — así la sección sigue siendo Server Component.
+
+### El page.tsx final
+
+Seis secciones, alternancia estricta, índice correlativo:
+
+| # | Sección | Tema | `id` |
+|---|---|---|---|
+| 01 | Hero | oscuro | `inicio` |
+| 02 | El caso real | crema | `portfolio` |
+| 03 | El panel del lunes | oscuro | `portal-demo` |
+| 04 | Por qué develOP + Somos | crema | `caracteristicas` · `nosotros` |
+| 05 | Los cuatro frentes | oscuro | `servicios` |
+| 06 | El cierre | crema | — |
+
+**Se fueron los siete `dynamic()`.** Ya no code-splitean nada útil: las seis son
+Server Components y el único JS de la página vive en tres islas (`SectionShell`,
+que observa el viewport para invertir el tema; el ciclo de escenas del panel; el
+CTA a `/contact`). Lo que pesaba se borró. Cada `dynamic()` además metía un
+placeholder `animate-pulse` y una carga en cascada.
+
+### Lo que sí había que verificar en runtime: la alternancia de temas
+
+Era el riesgo de regresión **silenciosa** del sprint. El censo había registrado
+que `useThemeSection` tenía tres consumidores y dos eran `About` y `WhyDevelOP`;
+B1-S5 le pasó el theming a `SectionShell`, pero como `ThemeProvider` arranca en
+claro, si la entrega no funcionara el tema global quedaría congelado en claro
+**sin ningún error de build**.
+
+Se barrió la página de a 150px, 44 muestras, leyendo el `data-theme` del `<html>`
+en cada paso:
+
+oscuro (inicio) → crema (portfolio) → oscuro (portal-demo) → crema
+(caracteristicas) → oscuro (servicios) → crema (cierre). **Los seis tramos
+correctos.**
+
+> Una muestra suelta, en y=1950, da oscuro mientras el punto medio del viewport
+> todavía cae en `portfolio`. No es una falla: a esa altura `portfolio` (que
+> termina en 2420) y `portal-demo` (que empieza en 2420) están **los dos** dentro
+> de la banda central, y gana el que entra. Es el traspaso, y es la conducta
+> diseñada.
+>
+> Una corrida anterior había marcado `portfolio` en oscuro como falla. Era
+> artefacto del método: saltar de golpe a una coordenada exacta con `scrollTo` no
+> le da al observador el mismo recorrido que un scroll real. Se refutó de dos
+> formas — el barrido progresivo de arriba, y entrando en frío a `/#portfolio`,
+> `/#portal-demo`, `/#caracteristicas` y `/#servicios`: **4/4 con el tema
+> correcto**.
+
+### Verificación
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `page.tsx` + las 3 secciones nuevas | **0** |
+| Imports rotos tras la demolición | **0** |
+| Las 5 landings + las 3 de auth | **8/8 sirven contenido real** (no solo 200: `h1`, `form`, peso) |
+| Alternancia de tema en las 6 secciones | **6/6**, verificado scrolleando |
+| Anclas — same-document | **6/6** |
+| Anclas — carga fría | **6/6** |
+| Errores de consola (barrido completo, 1440 y 390) | **0 / 0** |
+| Detector — `design-system/` | **0** (el techo) |
+| Detector — `sections/cierre/` | **0** |
+| Detector — superficie pública | **59 → 55** |
+
+**Anclas.** Las seis aterrizan, en los dos modos. El −64px es el `scroll-margin`
+de `SectionShell` (despeje del chrome flotante); `#nosotros` suma su `scroll-mt-24`
+propio y da −160. **Ninguna quedó sin destino.** La carga fría, que S1 había
+medido intermitente, ahora da 6/6 — es lo que se esperaba al sacar las secciones
+pesadas que estaban arriba de las anclas, aunque sigue siendo una carrera y no
+una garantía.
+
+### Números medidos
+
+| Métrica | Antes | Después |
+|---|---:|---:|
+| Chunk de la ruta `/` (gz) | 39.17 KB *(post-B4-S1)* | **9.32 KB** |
+| Total `static/chunks` (gz) | 2338.8 KB *(post-B3)* | **2268.5 KB** |
+| HTML servido de `/` | 402.0 KB *(post-B3)* · 465 KB *(original)* | **89.6 KB** |
+| JS inicial, 19 scripts del HTML | ~1,53 MB raw *(baseline de la rama)* | **1113.7 KB raw / 356.5 KB gz** |
+
+**Lighthouse mobile de `/`**, contra el build de producción servido en `:3001`:
+
+| | Baseline | Ahora |
+|---|---:|---:|
+| Performance | 34/100 | **83/100** |
+| LCP | 6,1 s | **4,2 s** |
+| FCP | — | 1,7 s |
+| Speed Index | — | 1,7 s |
+| TBT | — | 200 ms |
+| CLS | — | 0,019 |
+
+> **Cuidado con dos de estos números.** El chunk de la ruta viene de otra vara que
+> la que usó B3 (gzip de `static/chunks/app/page-*.js`, que B4-S1 dejó escrita);
+> los 79.64 / 74.60 KB de B3 no son comparables con estos. Y la baseline de "JS
+> inicial 723 KB" de `sprint-b0-bis-cierre.md` no documenta si era raw o gzip, así
+> que se comparó contra el ~1,53 MB raw de `probe-b2-hero-nav.md`, que sí es de
+> esta rama y de la misma vara.
+
+**El LCP que queda no es de las secciones.** El elemento es el `h1` del hero
+—texto, no imagen— y el desglose lo dice: TTFB 453 ms, load delay 0, load time 0,
+**render delay 3.720 ms**. Lo que retiene la pintura es el gate de readiness del
+preloader contra el canvas del hero, no el peso del contenido. Bajar de 4,2 s
+pide tocar el preloader, que es territorio de B2 y roza un archivo congelado.
+
+Capturas: `docs/proof-screenshots/b4-s3/` — el home completo a 1440 (7.500 px) y
+a 390 (9.070 px), más el cierre solo en los dos anchos.
+
+---
+
+## Inventario consolidado de placeholders — GATE DE MERGE
+
+**Ninguna rama con estos placeholders a la vista se mergea a `main`.** Son **27
+cadenas en 24 filas**, en cinco archivos. Las 15 filas de B3 más las 9 que suma
+B4.
+
+| Bloque | Archivo | Línea | Placeholder |
+|---|---|---:|---|
+| B3 | `sections/home/Portfolio.tsx` | 54 | `[CONTEXTO — 1 línea: qué perdían antes de develOP]` |
+| B3 | `sections/home/Portfolio.tsx` | 56 | `[ENTREGABLE — 2 a 3 líneas: …]` |
+| B3 | `sections/home/Portfolio.tsx` | 57 | `[URL DEL CASO]` |
+| B3 | `sections/home/Portfolio.tsx` | 66 | `[+00%]` — consultas canalizadas |
+| B3 | `sections/home/Portfolio.tsx` | 67 | `[00 días]` — tiempo a producción |
+| B3 | `sections/home/Portfolio.tsx` | 68 | `[000]` — vehículos publicados |
+| B3 | `sections/home/Portfolio.tsx` | 73 | `[RUBRO 1]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/home/Portfolio.tsx` | 74 | `[RUBRO 2]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/home/Portfolio.tsx` | 75 | `[RUBRO 3]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/portal-demo/data.ts` | 87 | `[00]` — score |
+| B3 | `sections/portal-demo/data.ts` | 88 | `[+00%]` — delta de métrica |
+| B3 | `sections/portal-demo/data.ts` | 89 | `[00]` — entero de métrica |
+| B3 | `sections/portal-demo/data.ts` | 104 | `[ENTREGA QUE ESPERA APROBACIÓN]` |
+| B3 | `sections/portal-demo/data.ts` | 105 | `[RESEÑA SIN RESPONDER]` |
+| B3 | `sections/portal-demo/data.ts` | 106 | `[FACTURA POR VENCER]` |
+| **B4** | `sections/servicios/data.ts` | 64 | `[PARA QUIÉN — 1 línea]` — software a medida |
+| **B4** | `sections/servicios/data.ts` | 65 | `[ENTREGABLE — 1 línea]` — software a medida |
+| **B4** | `sections/servicios/data.ts` | 66 | `[00 días]` — software a medida |
+| **B4** | `sections/nosotros/data.ts` | 43 | `[PLAZO — a definir con dato real]` — contraste 2 |
+| **B4** | `sections/nosotros/data.ts` | 47 | `[CONTRASTE 3 — LADO AGENCIA]` |
+| **B4** | `sections/nosotros/data.ts` | 48 | `[CONTRASTE 3 — LADO DEVELOP]` |
+| **B4** | `sections/nosotros/data.ts` | 67 | `[ROL EN UN PROYECTO — 1 línea]` — Franco |
+| **B4** | `sections/nosotros/data.ts` | 73 | `[ROL EN UN PROYECTO — 1 línea]` — Valentino |
+| **B4** | `sections/cierre/Cierre.tsx` | 46 | `[TIEMPO DE RESPUESTA Y DURACIÓN DE LA LLAMADA — a definir con dato real]` |
+
+Lo que **no** es placeholder y queda tal cual: Concesionaria San Miguel y su
+rubro · los nombres de las capacidades del panel · los labels de las cifras del
+caso · los tres timelines reales (15 / 7 / 5 días) y la asignación de acento ·
+las áreas de Franco y Valentino · la línea de ubicación. Todo verificado contra
+el código o dato real.
+
+Además faltan las **fotos** de Franco y Valentino: hoy hay placeholder
+tipográfico (la inicial en una superficie plana). No bloquea el merge como un
+claim falso —no afirma nada—, pero es contenido pendiente.
+
+### Fuera de scope — anotado, no implementado
+
+1. **B4-S0 sigue abierto.** `/web-development` renderiza la lámina de San Miguel
+   con sus placeholders, en crema dentro de una landing oscura y con el índice de
+   capítulo del home. Es decisión de alcance: o la landing recibe su propia
+   sección de casos, o se le quita. Dato para esa decisión: ya existe
+   `sections/web-development/PortfolioWebCases.tsx`, hoy sin usar.
+2. **`src/lib/data/premium-modules.ts` NO se tocó**, aunque el barrido lo marcó
+   sin consumidores en `src/`. Su consumidor vive en `prisma/`:
+   `prisma/seeds/sync-premium-modules.ts`, que hace `deleteMany` sobre
+   `PremiumModule` y `organizationModule`. Borrarlo rompía el seed y podía
+   borrar filas.
+3. **LCP 4,2 s: el techo es el preloader**, no las secciones (render delay 3.720
+   ms sobre un LCP de texto). Tocarlo es B2 y roza un archivo congelado.
+4. **`/login` no tiene `h1`.** Apareció verificando que las rutas sirven
+   contenido real. Preexistente, ajeno al home.
+5. **El launcher del chatbot pisa contenido a 390.** Ya fichado.
