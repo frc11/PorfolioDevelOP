@@ -10,6 +10,16 @@ import { z } from 'zod'
  *
  * The `z.enum` prevents the LLM from inventing routes ("/precios-secretos"
  * would fail validation, model receives the error and self-corrects).
+ *
+ * C0.1 — VALID_PATHS son rutas del sitio de develOP. En el bot de un cliente
+ * esto NO produce un 404: el embed (`public/widget.js`) resuelve la
+ * navegación con `window.open(BASE_URL + path, '_blank')`, donde `BASE_URL`
+ * sale del origin del script que sirve el widget (típicamente
+ * develop.com.ar) — el resultado es una pestaña nueva con una página de
+ * VENTAS de develOP abierta desde el sitio del cliente. Fuga de tráfico, no
+ * un link roto. Hasta que exista `BotConfig.allowedNavigationPaths` (Phase
+ * 1.5, arriba), este tool queda restringido al bot propio de develOP — ver
+ * `TOOLS_RESTRICTED_TO_AGENCY_BOT` en `getTools.ts`.
  */
 
 export const VALID_PATHS = [

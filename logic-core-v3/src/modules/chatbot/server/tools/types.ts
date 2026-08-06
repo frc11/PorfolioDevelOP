@@ -12,6 +12,15 @@ export interface ToolCallContext {
   botConfigId: string
   organizationId: string
   /**
+   * C0.1 — slug publico del bot (`BotConfig.slug`). Requerido: lo usa
+   * `getTools()` para decidir tools restringidas al bot propio de develOP
+   * (ver TOOLS_RESTRICTED_TO_AGENCY_BOT en getTools.ts). Es el mismo idiom
+   * de comparacion de slug que ya usa el resto del repo para esta distincion
+   * (convert-chatbot-lead.actions.ts, ChatWidgetMount.tsx) — no existe un
+   * helper compartido de "org/bot agencia".
+   */
+  botSlug: string
+  /**
    * EV.3 — Clave del pack vertical del bot (`BotConfig.verticalPack`). Determina
    * la tabla de scoring que usa `capture_lead`. Se resuelve con `getVerticalPack()`
    * (clave desconocida → `base` con warning). Si está ausente en el contexto,

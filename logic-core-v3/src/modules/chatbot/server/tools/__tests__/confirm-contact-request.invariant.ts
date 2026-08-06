@@ -48,6 +48,9 @@ const CTX: ToolCallContext = {
   conversationId: 'conv-1',
   botConfigId: 'bot-1',
   organizationId: 'org-1',
+  // C0.1 — botSlug pasó a requerido en ToolCallContext; irrelevante para
+  // confirm_contact_request, cualquier valor no-agencia sirve acá.
+  botSlug: 'bot-1',
 }
 
 /** Persistencia en memoria. `recordThrows` simula la DB caída. */
