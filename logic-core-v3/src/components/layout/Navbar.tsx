@@ -1,54 +1,118 @@
 "use client";
 
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react";
-import { ChevronDown, Grid2x2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-import DynamicDock from "@/components/layout/DynamicDock";
+import { CtaButton, accentBgClass, type ServiceAccent } from "@/components/design-system";
+import { useChromeRevealed } from "@/components/layout/useChromeRevealed";
 import { useTransitionContext } from "@/context/TransitionContext";
+import {
+    CHROME_REVEAL_DURATION_S,
+    CHROME_REVEAL_EASE,
+    CHROME_REVEAL_OFFSET_PX,
+} from "@/lib/chromeReveal";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
+import { getWhatsappHref } from "@/lib/whatsapp";
+
+/**
+ * Chrome de navegación del sitio público — B2-S2.
+ *
+ * Reemplaza al par `Navbar` + `DynamicDock`: una barra superior plana, opaca y
+ * quieta, en lugar de un dock flotante inferior de vidrio esmerilado. El dock
+ * se borró; este archivo es todo lo que queda.
+ *
+ * Por qué arriba y no abajo — no es preferencia, resuelve dos bugs medidos que
+ * el dock inferior causaba por posición:
+ *
+ *  1. A 390px el launcher del chat (310–366 × 764–820) tapaba por completo el
+ *     botón del menú (318–366 × 772–820). El widget vive en z-index
+ *     2.147.000.100, así que no había forma de ganarle apilando — se resuelve
+ *     moviendo el disparador del menú al extremo opuesto del viewport.
+ *  2. A 1440×760, con un H1 de 4 líneas, el microcopy del hero caía 66px por
+ *     debajo del dock. Sin chrome fijo abajo, la colisión no puede existir.
+ *
+ * Qué se fue con el dock, y por qué:
+ *  - Glassmorphism (`backdrop-filter: blur(48px) saturate(180%)`) — la
+ *    dirección pide superficies planas. La barra es opaca.
+ *  - Radios y píldoras — radio 0 en superficies.
+ *  - Los 7 iconos de Lucide (House/Bot/Code2/Network/Workflow/Mail/LogIn) — la
+ *    flecha `→` del `CtaButton` es el único icono del sistema. Las anclas son
+ *    texto.
+ *  - Dos animaciones infinitas (el shimmer del CTA y el latido del logo) —
+ *    nada perpetuo.
+ *  - `getLightLevel()`, la heurística de luz/oscuridad por umbrales de scroll
+ *    que el dock reimplementaba al margen de `ThemeContext`. La barra es
+ *    chrome, no contenido: va siempre en tema oscuro vía `data-ds-theme`, el
+ *    mismo mecanismo que usa `SectionShell`.
+ *  - Los DOS listeners de scroll sin coordinar (Framer `useScroll` en Navbar +
+ *    `window.addEventListener` nativo en el dock) y el ocultarse/mostrarse
+ *    según dirección. La barra es persistente: no se esconde.
+ *
+ * Los `id` de destino NO se tocan. Las secciones que mueren se rediseñan en
+ * B3/B4 y sus anclas se remapean ahí.
+ */
 
 type NavItem = {
     href: string;
     label: string;
-    expandable?: boolean;
 };
 
 type ServiceItem = {
     href: string;
     label: string;
     subLabel: string;
-    price: string;
+    accent: ServiceAccent;
 };
 
 const MAIN_NAV_ITEMS: readonly NavItem[] = [
     { href: "/#inicio", label: "Inicio" },
     { href: "/#nosotros", label: "Nosotros" },
     { href: "/#portfolio", label: "Portfolio" },
-    { href: "/#servicios", label: "Servicios", expandable: true },
+    { href: "/#servicios", label: "Servicios" },
     { href: "/#caracteristicas", label: "Características" },
     { href: "/contact", label: "Contacto" },
 ] as const;
 
 const SERVICE_ITEMS: readonly ServiceItem[] = [
-    { href: "/web-development", label: "Sitio Web", subLabel: "Presencia profesional", price: "$800" },
-    { href: "/ai-implementations", label: "Agente IA", subLabel: "Atención 24/7", price: "$300" },
-    { href: "/software-development", label: "Software", subLabel: "Sistema a medida", price: "$1.500" },
-    { href: "/process-automation", label: "Automatización", subLabel: "Tareas automáticas", price: "$200" },
+    {
+        href: "/web-development",
+        label: "Sitio web",
+        subLabel: "Presencia profesional",
+        accent: "web",
+    },
+    {
+        href: "/ai-implementations",
+        label: "Agente de IA",
+        subLabel: "Atención 24/7",
+        accent: "ia",
+    },
+    {
+        href: "/software-development",
+        label: "Software",
+        subLabel: "Sistema a medida",
+        accent: "software",
+    },
+    {
+        href: "/process-automation",
+        label: "Automatización",
+        subLabel: "Tareas automáticas",
+        accent: "automation",
+    },
 ] as const;
 
 const SERVICE_ROUTE_SET = new Set<string>(SERVICE_ITEMS.map((item) => item.href));
 
 // El ancla de "Proceso" no es la misma en las 4 landings: /process-automation y
-// /ai-implementations exponen id="proceso", pero en estas dos la sección de proceso
-// ya tenía id propio de antes — se corrige el link, no el destino.
+// /ai-implementations exponen id="proceso"; las otras dos tenían id propio de
+// antes — se corrige el link, no el destino. Verificado contra los ids reales.
 const PROCESO_ANCHOR_BY_ROUTE: Readonly<Record<string, string>> = {
     "/web-development": "web-development-timeline",
     "/software-development": "pipeline",
 };
 
-export function getNavItems(pathname: string): NavItem[] {
+function getNavItems(pathname: string): readonly NavItem[] {
     if (SERVICE_ROUTE_SET.has(pathname)) {
         const procesoAnchor = PROCESO_ANCHOR_BY_ROUTE[pathname] ?? "proceso";
 
@@ -59,7 +123,8 @@ export function getNavItems(pathname: string): NavItem[] {
             { href: "/contact", label: "Contacto" },
         ];
     }
-    return [...MAIN_NAV_ITEMS];
+
+    return MAIN_NAV_ITEMS;
 }
 
 const HASH_TO_LABEL: Readonly<Record<string, string>> = {
@@ -72,355 +137,439 @@ const HASH_TO_LABEL: Readonly<Record<string, string>> = {
     "#proceso": "Proceso",
     "#web-development-timeline": "Proceso",
     "#pipeline": "Proceso",
-    "#faq": "FAQ"
+    "#faq": "FAQ",
 };
 
-function getActiveTab(pathname: string, hash: string): string {
+function getActiveLabel(pathname: string, hash: string): string {
     if (pathname === "/contact") return "Contacto";
-    return HASH_TO_LABEL[hash] ?? (SERVICE_ROUTE_SET.has(pathname) ? "Inicio" : "Inicio");
+    return HASH_TO_LABEL[hash] ?? "Inicio";
 }
 
-function BrandLogo() {
+/** Los ids que el observador vigila. Derivados de las anclas, no del DOM entero. */
+function getObservedIds(items: readonly NavItem[]): string[] {
+    return items
+        .map((item) => item.href.split("#")[1])
+        .filter((id): id is string => Boolean(id));
+}
+
+// El hash de la URL es estado EXTERNO al árbol de React, así que se lee con
+// `useSyncExternalStore` y no copiándolo a un `useState` desde un efecto. De
+// yapa arregla algo que la versión anterior no hacía: la barra ahora reacciona
+// a `hashchange` (botón atrás del navegador, o el chatbot navegando por hash).
+// Identidades a nivel de módulo para que no se resuscriba en cada render.
+function subscribeToHash(onStoreChange: () => void) {
+    window.addEventListener("hashchange", onStoreChange);
+    return () => window.removeEventListener("hashchange", onStoreChange);
+}
+
+const getHashSnapshot = () => window.location.hash;
+// En SSR no hay hash: el servidor nunca lo recibe.
+const getHashServerSnapshot = () => "";
+
+function Wordmark({ onActivate }: { onActivate: () => void }) {
     return (
-        <motion.div
-            animate={{ opacity: [0.82, 1, 0.82], scale: [1, 1.02, 1] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-            className="relative flex h-6 w-6 items-center justify-center overflow-hidden rounded-[8px] border border-white/[0.08] bg-white/[0.04] shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+        <button
+            type="button"
+            onClick={onActivate}
+            aria-label="develOP — ir al inicio"
+            className="flex shrink-0 items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ds-fg"
         >
             <Image
                 src="/logodevelOP.svg"
-                alt="develOP"
+                alt=""
+                aria-hidden="true"
                 width={18}
                 height={18}
                 className="h-[18px] w-[18px] object-contain brightness-0 invert"
             />
-        </motion.div>
+            <span className="font-ds-mono text-[11px] font-medium tracking-[0.22em] text-ds-fg">
+                develOP
+            </span>
+        </button>
     );
 }
 
-function AccederButton({ compact = false }: { compact?: boolean }) {
-    const { triggerTransition } = useTransitionContext();
-
+/**
+ * Ancla de la barra. El estado activo es una regla de 1px bajo la palabra — no
+ * una píldora con fondo. El subrayado ocupa su lugar siempre (transparente
+ * cuando no está activo) para que activarse no mueva el texto.
+ */
+function NavLink({
+    item,
+    isActive,
+    onActivate,
+}: {
+    item: NavItem;
+    isActive: boolean;
+    onActivate: (item: NavItem) => void;
+}) {
     return (
-        <motion.button
-            type="button"
-            onClick={() => triggerTransition("/login")}
-            whileHover={{ y: -1 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 360, damping: 28 }}
-            className={`group relative isolate overflow-hidden rounded-full bg-gradient-to-r from-cyan-600 to-cyan-800 font-medium tracking-wide text-white shadow-[0_14px_34px_rgba(8,145,178,0.26),inset_0_1px_0_rgba(255,255,255,0.12)] ${
-                compact ? "px-4 py-2 text-xs" : "px-5 py-2.5 text-sm"
+        <a
+            href={item.href}
+            onClick={(event) => {
+                event.preventDefault();
+                onActivate(item);
+            }}
+            aria-current={isActive ? "page" : undefined}
+            className={`border-b pb-0.5 text-sm transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ds-fg ${
+                isActive
+                    ? "border-b-ds-fg text-ds-fg"
+                    : "border-b-transparent text-ds-fg-muted hover:text-ds-fg"
             }`}
         >
-            <span className="relative z-10">Acceder</span>
-            <motion.span
+            {item.label}
+        </a>
+    );
+}
+
+function ServiceRow({
+    service,
+    onActivate,
+    className = "",
+}: {
+    service: ServiceItem;
+    onActivate: (href: string) => void;
+    className?: string;
+}) {
+    return (
+        <button
+            type="button"
+            onClick={() => onActivate(service.href)}
+            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-ds-fg/[0.06] motion-reduce:transition-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ds-fg ${className}`}
+        >
+            {/*
+              El acento en su dosis mínima: un cuadrado de 6px. Es el único
+              color de toda la barra.
+            */}
+            <span
                 aria-hidden="true"
-                animate={{ x: ["-140%", "260%"] }}
-                transition={{ duration: 1.05, repeat: Infinity, repeatDelay: 3.95, ease: "easeInOut" }}
-                className="pointer-events-none absolute inset-y-[-30%] left-[-45%] z-0 w-[42%] rotate-[18deg] bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.48),transparent)] opacity-80"
+                className={`size-1.5 shrink-0 ${accentBgClass[service.accent]}`}
             />
-        </motion.button>
+            <span className="min-w-0">
+                <span className="block text-sm text-ds-fg">{service.label}</span>
+                <span className="mt-0.5 block text-xs text-ds-fg-muted">{service.subLabel}</span>
+            </span>
+        </button>
     );
 }
 
 export function Navbar() {
     const pathname = usePathname();
     const { triggerTransition } = useTransitionContext();
-    const { scrollY } = useScroll();
+    const revealed = useChromeRevealed();
+    const reduced = useReducedMotion();
 
-    const lastScrollYRef = useRef(0);
+    // Etiqueta activa: la manda el observador de secciones si ya dijo algo; si
+    // no, se deriva de la URL. Se guarda SOLO lo que el observador aporta, en
+    // vez de espejar la URL en un estado — así no hay dos fuentes de verdad que
+    // sincronizar desde un efecto.
+    const [observedLabel, setObservedLabel] = useState<string | null>(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isServicesOpen, setIsServicesOpen] = useState(false);
 
-    const [activeTab, setActiveTab] = useState("Inicio");
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isServicesExpanded, setIsServicesExpanded] = useState(false);
-    const [isDockVisible, setIsDockVisible] = useState(true);
+    const servicesRef = useRef<HTMLDivElement>(null);
 
-    useMotionValueEvent(scrollY, "change", (current) => {
-        const previous = lastScrollYRef.current;
-        const delta = current - previous;
+    const hash = useSyncExternalStore(subscribeToHash, getHashSnapshot, getHashServerSnapshot);
 
-        if (isMobileMenuOpen) {
-            setIsDockVisible(true);
-            lastScrollYRef.current = current;
-            return;
-        }
+    // Reseteo al cambiar de ruta, ajustando estado DURANTE el render en vez de
+    // en un efecto: es el patrón que documenta React para "estado derivado que
+    // se resetea cuando cambia una prop". Un efecto acá pinta un frame con el
+    // menú de la ruta anterior todavía abierto.
+    const [routeKey, setRouteKey] = useState(pathname);
 
-        if (current <= 8) {
-            setIsDockVisible(true);
-            lastScrollYRef.current = current;
-            return;
-        }
+    if (routeKey !== pathname) {
+        setRouteKey(pathname);
+        setObservedLabel(null);
+        setIsMenuOpen(false);
+        setIsServicesOpen(false);
+    }
 
-        if (delta > 0) {
-            setIsDockVisible(false);
-        } else if (delta < 0) {
-            setIsDockVisible(true);
-        }
+    const items = getNavItems(pathname);
+    const showServicesMenu = !SERVICE_ROUTE_SET.has(pathname);
+    const activeLabel = observedLabel ?? getActiveLabel(pathname, hash);
 
-        lastScrollYRef.current = current;
-    });
+    const navigate = useCallback(
+        (href: string) => {
+            setIsMenuOpen(false);
+            setIsServicesOpen(false);
+            triggerTransition(href);
+        },
+        [triggerTransition],
+    );
 
+    const handleNavItem = useCallback(
+        (item: NavItem) => {
+            setObservedLabel(item.label);
+            navigate(item.href);
+        },
+        [navigate],
+    );
+
+    // Sección activa. A diferencia del observador anterior —que vigilaba TODO
+    // `section[id], div[id]` del documento— este solo mira los destinos que la
+    // barra realmente puede resaltar.
     useEffect(() => {
-        if (typeof window === "undefined") return;
+        const ids = getObservedIds(getNavItems(pathname));
+        if (ids.length === 0) return;
 
-        let observer: IntersectionObserver;
+        let observer: IntersectionObserver | undefined;
 
+        // El home monta sus secciones por `next/dynamic`: al primer frame varios
+        // destinos todavía no están en el DOM. Un reintento corto los alcanza sin
+        // dejar un intervalo colgado.
         const timeoutId = window.setTimeout(() => {
-            const sections = document.querySelectorAll("section[id], div[id]");
-            if (sections.length === 0) return;
+            const targets = ids
+                .map((id) => document.getElementById(id))
+                .filter((node): node is HTMLElement => node !== null);
+
+            if (targets.length === 0) return;
 
             observer = new IntersectionObserver(
                 (entries) => {
-                    const visibleEntries = entries.filter((e) => e.isIntersecting);
-                    if (visibleEntries.length > 0) {
-                        visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-                        const topSection = visibleEntries[0];
-                        const id = topSection.target.id;
-                        
-                        const currentItems = getNavItems(pathname);
-                        const match = currentItems.find(item => item.href.endsWith(`#${id}`));
-                        if (match) {
-                            setActiveTab(match.label);
-                        } else if (id === "hero" || id === "inicio") {
-                            setActiveTab("Inicio");
-                        }
-                    }
+                    const visible = entries
+                        .filter((entry) => entry.isIntersecting)
+                        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+                    if (!visible) return;
+
+                    const match = getNavItems(pathname).find((item) =>
+                        item.href.endsWith(`#${visible.target.id}`),
+                    );
+                    if (match) setObservedLabel(match.label);
                 },
-                { root: null, rootMargin: "-30% 0px -40% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] }
+                { rootMargin: "-30% 0px -40% 0px", threshold: [0, 0.25, 0.5, 1] },
             );
 
-            sections.forEach((section) => observer.observe(section));
+            targets.forEach((target) => observer?.observe(target));
         }, 500);
-
-        setActiveTab(getActiveTab(pathname, window.location.hash));
 
         return () => {
             window.clearTimeout(timeoutId);
-            if (observer) observer.disconnect();
+            observer?.disconnect();
         };
     }, [pathname]);
 
+    // El panel mobile es un modal: mientras está abierto, el fondo no scrollea.
+    // Es lo único de este archivo que toca `overflow`, y solo por interacción
+    // del usuario — nunca en carga.
     useEffect(() => {
-        document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
+        if (!isMenuOpen) return;
 
+        document.body.style.overflow = "hidden";
         return () => {
             document.body.style.overflow = "";
         };
-    }, [isMobileMenuOpen]);
+    }, [isMenuOpen]);
 
+    // Escape cierra; un click fuera cierra el desplegable de servicios.
     useEffect(() => {
-        const timeoutId = window.setTimeout(() => {
-            setIsMobileMenuOpen(false);
-            setIsServicesExpanded(false);
-            setIsDockVisible(true);
-        }, 0);
+        if (!isMenuOpen && !isServicesOpen) return;
 
-        return () => window.clearTimeout(timeoutId);
-    }, [pathname]);
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== "Escape") return;
+            setIsMenuOpen(false);
+            setIsServicesOpen(false);
+        };
+
+        const onPointerDown = (event: PointerEvent) => {
+            if (!isServicesOpen) return;
+            if (servicesRef.current?.contains(event.target as Node)) return;
+            setIsServicesOpen(false);
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        window.addEventListener("pointerdown", onPointerDown);
+
+        return () => {
+            window.removeEventListener("keydown", onKeyDown);
+            window.removeEventListener("pointerdown", onPointerDown);
+        };
+    }, [isMenuOpen, isServicesOpen]);
 
     return (
-        <>
-            <DynamicDock />
+        <motion.header
+            // La barra es chrome, no contenido: no acompaña la inversión de tema
+            // por sección. `data-ds-theme` fija el oscuro para todo el subárbol,
+            // el mismo mecanismo que usa `SectionShell`.
+            data-ds-theme="dark"
+            initial={false}
+            animate={{
+                opacity: revealed ? 1 : 0,
+                y: revealed ? 0 : reduced ? 0 : -CHROME_REVEAL_OFFSET_PX,
+            }}
+            transition={
+                reduced
+                    ? { duration: 0 }
+                    : { duration: CHROME_REVEAL_DURATION_S, ease: CHROME_REVEAL_EASE }
+            }
+            style={{ pointerEvents: revealed ? "auto" : "none" }}
+            className="fixed inset-x-0 top-0 z-[9991] border-b border-ds-rule bg-ds-canvas"
+        >
+            <nav
+                aria-label="Navegación principal"
+                className="mx-auto flex h-ds-nav max-w-ds-page items-center justify-between gap-6 px-ds-gutter"
+            >
+                <Wordmark onActivate={() => handleNavItem(MAIN_NAV_ITEMS[0])} />
 
-            <div className="md:hidden">
-                <AnimatePresence>
-                    {isMobileMenuOpen ? (
-                        <motion.button
-                            type="button"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm"
-                            onClick={() => {
-                                setIsMobileMenuOpen(false);
-                                setIsServicesExpanded(false);
-                            }}
-                            aria-label="Cerrar menu"
-                        />
-                    ) : null}
-                </AnimatePresence>
+                {/* ── Anclas, desktop ────────────────────────────────── */}
+                <div className="hidden items-center gap-7 lg:flex">
+                    {items.map((item) => {
+                        const isServices = showServicesMenu && item.label === "Servicios";
 
-                <motion.button
-                    type="button"
-                    onClick={() => {
-                        setIsMobileMenuOpen((value) => {
-                            const nextValue = !value;
+                        if (!isServices) {
+                            return (
+                                <NavLink
+                                    key={item.label}
+                                    item={item}
+                                    isActive={activeLabel === item.label}
+                                    onActivate={handleNavItem}
+                                />
+                            );
+                        }
 
-                            if (!nextValue) {
-                                setIsServicesExpanded(false);
-                            }
+                        return (
+                            <div key={item.label} ref={servicesRef} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsServicesOpen((value) => !value)}
+                                    aria-expanded={isServicesOpen}
+                                    aria-haspopup="true"
+                                    className={`border-b pb-0.5 text-sm transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ds-fg ${
+                                        activeLabel === item.label || isServicesOpen
+                                            ? "border-b-ds-fg text-ds-fg"
+                                            : "border-b-transparent text-ds-fg-muted hover:text-ds-fg"
+                                    }`}
+                                >
+                                    {item.label}
+                                </button>
 
-                            return nextValue;
-                        });
-                    }}
-                    animate={isDockVisible || isMobileMenuOpen ? { y: 0, opacity: 1 } : { y: "100%", opacity: 0 }}
-                    transition={{
-                        y: {
-                            type: "spring",
-                            stiffness: isDockVisible ? 360 : 280,
-                            damping: isDockVisible ? 22 : 30,
-                            mass: 0.9,
-                        },
-                        opacity: { duration: 0.18, ease: "easeOut" },
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    style={{ pointerEvents: isDockVisible || isMobileMenuOpen ? "auto" : "none" }}
-                    className="fixed bottom-6 right-6 z-[9999] flex h-12 w-12 items-center justify-center rounded-[14px] border border-white/[0.08] bg-[#030305]/80 shadow-2xl shadow-black/50 backdrop-blur-2xl"
-                >
-                    <AnimatePresence mode="wait" initial={false}>
-                        {isMobileMenuOpen ? (
-                            <motion.span
-                                key="close"
-                                initial={{ rotate: -90, scale: 0.75 }}
-                                animate={{ rotate: 0, scale: 1 }}
-                                exit={{ rotate: 90, scale: 0.75 }}
-                                transition={{ type: "spring", stiffness: 420, damping: 30 }}
-                            >
-                                <X size={16} color="rgba(255,255,255,0.74)" />
-                            </motion.span>
-                        ) : (
-                            <motion.span
-                                key="open"
-                                initial={{ rotate: 90, scale: 0.75 }}
-                                animate={{ rotate: 0, scale: 1 }}
-                                exit={{ rotate: -90, scale: 0.75 }}
-                                transition={{ type: "spring", stiffness: 420, damping: 30 }}
-                            >
-                                <Grid2x2 size={16} color="rgba(255,255,255,0.74)" />
-                            </motion.span>
-                        )}
-                    </AnimatePresence>
-                </motion.button>
-
-                <AnimatePresence>
-                    {isMobileMenuOpen ? (
-                        <motion.div
-                            initial={{ y: "100%" }}
-                            animate={{ y: 0 }}
-                            exit={{ y: "100%" }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="fixed inset-x-0 bottom-0 z-[9995] overflow-hidden rounded-t-[24px] border-t border-white/[0.08] bg-[#030305]/92 px-5 pt-3 pb-8 backdrop-blur-2xl"
-                            style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 2rem)" }}
-                        >
-                            <div className="mb-4 flex justify-center">
-                                <div className="h-1 w-10 rounded-full bg-white/[0.14]" />
-                            </div>
-
-                            <div className="mb-5 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <BrandLogo />
-                                    <div className="text-[10px] font-semibold tracking-[0.24em] text-white/38">
-                                        develOP
-                                    </div>
-                                </div>
-                                <AccederButton compact />
-                            </div>
-
-                            <motion.div
-                                initial="hidden"
-                                animate="visible"
-                                variants={{
-                                    hidden: {},
-                                    visible: {
-                                        transition: {
-                                            staggerChildren: 0.04,
-                                            delayChildren: 0.04,
-                                        },
-                                    },
-                                }}
-                            >
-                                {getNavItems(pathname).map((item) => {
-                                    const isServices = item.expandable === true;
-                                    const isActive = activeTab === item.label;
-
-                                    return (
+                                <AnimatePresence mode="wait">
+                                    {isServicesOpen ? (
                                         <motion.div
-                                            key={item.label}
-                                            variants={{
-                                                hidden: { opacity: 0, x: -12 },
-                                                visible: { opacity: 1, x: 0 },
-                                            }}
+                                            initial={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={reduced ? { opacity: 0 } : { opacity: 0, y: -6 }}
+                                            transition={{ duration: reduced ? 0.12 : 0.18, ease: "easeOut" }}
+                                            className="absolute left-1/2 top-[calc(100%+1.1rem)] w-72 -translate-x-1/2 border border-ds-rule bg-ds-panel py-1"
                                         >
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    if (isServices) {
-                                                        setIsServicesExpanded((value) => !value);
-                                                        setActiveTab(item.label);
-                                                        return;
-                                                    }
+                                            {SERVICE_ITEMS.map((service) => (
+                                                <ServiceRow
+                                                    key={service.href}
+                                                    service={service}
+                                                    onActivate={navigate}
+                                                />
+                                            ))}
 
-                                                    setActiveTab(item.label);
-                                                    triggerTransition(item.href);
-                                                    setTimeout(() => setIsMobileMenuOpen(false), 250);
-                                                }}
-                                                className="flex h-[54px] w-full items-center justify-between border-b border-white/[0.05] text-left"
-                                            >
-                                                <span className={`text-[15px] font-medium tracking-wide ${isActive ? "text-white" : "text-white/78"}`}>
-                                                    {item.label}
-                                                </span>
-                                                {isServices ? (
-                                                    <motion.span
-                                                        animate={{ rotate: isServicesExpanded ? 180 : 0 }}
-                                                        transition={{ duration: 0.18 }}
-                                                    >
-                                                        <ChevronDown size={14} color="rgba(255,255,255,0.28)" />
-                                                    </motion.span>
-                                                ) : null}
-                                            </button>
-
-                                            {isServices ? (
-                                                <AnimatePresence>
-                                                    {isServicesExpanded ? (
-                                                        <motion.div
-                                                            initial={{ height: 0, opacity: 0 }}
-                                                            animate={{ height: "auto", opacity: 1 }}
-                                                            exit={{ height: 0, opacity: 0 }}
-                                                            transition={{ duration: 0.2 }}
-                                                            className="overflow-hidden"
-                                                        >
-                                                            {SERVICE_ITEMS.map((service) => (
-                                                                <button
-                                                                    key={service.href}
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        setActiveTab("Servicios");
-                                                                        triggerTransition(service.href);
-                                                                        setTimeout(() => setIsMobileMenuOpen(false), 250);
-                                                                    }}
-                                                                    className="flex w-full items-center justify-between border-b border-white/[0.04] py-4 pl-4 text-left"
-                                                                >
-                                                                    <span>
-                                                                        <span className="block text-sm font-medium tracking-wide text-white/82">
-                                                                            {service.label}
-                                                                        </span>
-                                                                        <span className="mt-1 block text-[11px] tracking-wide text-white/34">
-                                                                            {service.subLabel}
-                                                                        </span>
-                                                                    </span>
-                                                                    <span className="text-[11px] font-medium tracking-wide text-cyan-100/72">
-                                                                        {service.price}
-                                                                    </span>
-                                                                </button>
-                                                            ))}
-                                                        </motion.div>
-                                                    ) : null}
-                                                </AnimatePresence>
-                                            ) : null}
+                                            <div className="border-t border-ds-rule">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => navigate(item.href)}
+                                                    className="w-full px-4 py-3 text-left text-xs text-ds-fg-muted transition-colors duration-150 hover:text-ds-fg motion-reduce:transition-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ds-fg"
+                                                >
+                                                    Ver todos los servicios
+                                                </button>
+                                            </div>
                                         </motion.div>
-                                    );
-                                })}
-                            </motion.div>
-
-                            <div className="pt-5 text-xs tracking-wide text-white/24">
-                                Tucumán, Argentina
+                                    ) : null}
+                                </AnimatePresence>
                             </div>
-                        </motion.div>
-                    ) : null}
-                </AnimatePresence>
-            </div>
-        </>
+                        );
+                    })}
+                </div>
+
+                {/* ── Controles, desktop ─────────────────────────────── */}
+                <div className="hidden shrink-0 items-center gap-5 lg:flex">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/login")}
+                        className="text-sm text-ds-fg-muted transition-colors duration-150 hover:text-ds-fg motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ds-fg"
+                    >
+                        Acceder
+                    </button>
+
+                    <CtaButton density="compact" href={getWhatsappHref()} target="_blank">
+                        Escribinos
+                    </CtaButton>
+                </div>
+
+                {/*
+                  ── Disparador del menú, mobile ─────────────────────────
+                  Arriba a la derecha: el extremo opuesto al launcher del chat
+                  (abajo a la derecha), que es lo que tapaba al botón viejo.
+                  Es texto y no un icono — la flecha del CtaButton es el único
+                  icono del sistema.
+                */}
+                <button
+                    type="button"
+                    onClick={() => setIsMenuOpen((value) => !value)}
+                    aria-expanded={isMenuOpen}
+                    aria-controls="menu-mobile"
+                    className="shrink-0 border border-ds-rule px-3 py-2 text-xs tracking-[0.14em] text-ds-fg uppercase transition-colors duration-150 hover:border-ds-fg motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-fg lg:hidden"
+                >
+                    {isMenuOpen ? "Cerrar" : "Menú"}
+                </button>
+            </nav>
+
+            {/* ── Panel mobile ───────────────────────────────────────── */}
+            <AnimatePresence mode="wait">
+                {isMenuOpen ? (
+                    <motion.div
+                        id="menu-mobile"
+                        initial={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={reduced ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                        transition={{ duration: reduced ? 0.12 : 0.22, ease: "easeOut" }}
+                        className="max-h-[calc(100svh-var(--spacing-ds-nav))] overflow-y-auto border-t border-ds-rule bg-ds-canvas lg:hidden"
+                    >
+                        {items.map((item) => (
+                            <button
+                                key={item.label}
+                                type="button"
+                                onClick={() => handleNavItem(item)}
+                                aria-current={activeLabel === item.label ? "page" : undefined}
+                                className={`flex h-14 w-full items-center border-b border-ds-rule px-ds-gutter text-left text-[15px] transition-colors duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ds-fg ${
+                                    activeLabel === item.label ? "text-ds-fg" : "text-ds-fg-muted"
+                                }`}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+
+                        {showServicesMenu ? (
+                            <div className="border-b border-ds-rule py-1">
+                                {SERVICE_ITEMS.map((service) => (
+                                    <ServiceRow
+                                        key={service.href}
+                                        service={service}
+                                        onActivate={navigate}
+                                        className="px-ds-gutter"
+                                    />
+                                ))}
+                            </div>
+                        ) : null}
+
+                        <div className="flex flex-col gap-4 px-ds-gutter py-6">
+                            <CtaButton
+                                density="compact"
+                                href={getWhatsappHref()}
+                                target="_blank"
+                                className="w-full"
+                            >
+                                Escribinos
+                            </CtaButton>
+
+                            <button
+                                type="button"
+                                onClick={() => navigate("/login")}
+                                className="text-left text-sm text-ds-fg-muted transition-colors duration-150 hover:text-ds-fg motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ds-fg"
+                            >
+                                Acceder al portal
+                            </button>
+                        </div>
+                    </motion.div>
+                ) : null}
+            </AnimatePresence>
+        </motion.header>
     );
 }
 

@@ -1,11 +1,16 @@
 /**
- * Tokens compartidos de la animación de "revelado del chrome": el dock
- * (`DynamicDock`) y el widget de chat (`LogicCompanion`) cuelgan ambos de
- * `useChromeRevealed()` y deben aparecer JUNTOS con el MISMO fade + slide-up.
+ * Tokens compartidos de la animación de "revelado del chrome": la barra de
+ * navegación (`Navbar`) y el widget de chat (`LogicCompanion`) cuelgan ambos de
+ * `useChromeRevealed()` y deben aparecer JUNTOS con el MISMO fade + slide.
  * Fuente única para que queden en lockstep — se cambia acá, se mueven los dos.
  *
+ * El consumidor era `DynamicDock` hasta B2-S2, cuando el dock flotante inferior
+ * se reemplazó por la barra superior. El offset se sigue aplicando en el eje Y,
+ * pero con el signo invertido: la barra baja desde arriba, el dock subía desde
+ * abajo.
+ *
  * GPU-friendly: los consumidores animan `opacity` + un transform/`translate`
- * (nunca width/height). El dock lo aplica vía Framer (`y` + `opacity`); el widget
+ * (nunca width/height). La barra lo aplica vía Framer (`y` + `opacity`); el widget
  * vía un keyframe CSS (`translate` + `opacity`, robusto al paint pesado del
  * arranque). Cada consumidor respeta `prefers-reduced-motion` (sin slide / dur 0).
  *

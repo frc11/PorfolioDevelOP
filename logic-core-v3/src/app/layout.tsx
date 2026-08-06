@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CustomCursor } from "@/components/ui/CustomCursor";
-import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,9 +77,20 @@ export default function RootLayout({
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
       </head>
       <body className="antialiased">
+        {/*
+          `CustomCursor` y `NoiseOverlay` se desmontaron en B2-S2. Los dos
+          contradicen la dirección del rediseño: el cursor custom está prohibido
+          (y además escondía el del sistema con `cursor:none` global en ≥768px,
+          un costo de accesibilidad por un adorno), y el grano animado del noise
+          pelea con las superficies planas — corría a `steps(10)` infinito sobre
+          todo el viewport, en toda ruta, sin gate de visibilidad.
+
+          Se desmontan, no se borran: eran las dos únicas piezas montadas
+          globalmente (fuera de `PublicOnlyComponents`), así que sacarlas de acá
+          las saca de todas las superficies. Los archivos quedan sin consumidores
+          — anotado en la bitácora para que una poda posterior los levante.
+        */}
         <PreloaderProvider>
-          <CustomCursor />
-          <NoiseOverlay />
           <SmoothScroll>
             <TransitionProvider>
               <PublicOnlyComponents>

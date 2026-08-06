@@ -26,6 +26,25 @@ const textoLibre = z.preprocess(
   z.string().max(TEXTO_LIBRE_MAX).optional(),
 )
 
+/**
+ * P5-A: una DIRECCIÓN opcional que el setter pega (no un archivo — el producto
+ * no tiene subida en ninguna superficie, y la ausencia es deliberada).
+ *
+ * Mismo patrón que el resto de las direcciones opcionales del panel
+ * (`optionalUrl` de `prospecto.schemas.ts`): vacío → `undefined`, y si hay algo
+ * tiene que ser una URL completa. El tope de largo copia el de `DraftUrlInputSchema`.
+ * Se exporta para que el formulario valide con ESTE schema y no con una copia
+ * que se desincronice.
+ */
+export const EnlaceFichaSchema = z.preprocess(
+  emptyStringToUndefined,
+  z
+    .string()
+    .url('Link inválido — pegá la dirección completa (https://…)')
+    .max(500, 'Esa dirección es demasiado larga — revisá que sea la correcta')
+    .optional(),
+)
+
 // ── Ficha de observación del negocio (la llena el setter, texto crudo) ──────
 
 export const IG_MANEJADO_POR_VALUES = ['DUENO', 'CM', 'NO_SABE'] as const
@@ -41,6 +60,25 @@ export const FichaSchema = z.object({
   resenas: textoLibre,
   contenidoReal: textoLibre, // logo / fotos / tono
   senalesOperativas: textoLibre,
+  /**
+   * P5-A — El MATERIAL del negocio que la construcción necesita tener junto
+   * antes de arrancar (el recorrido nuevo llega con la demo ya hecha, así que
+   * esto no puede estar repartido en dos momentos del flujo).
+   *
+   * TODO opcional, y el grupo entero también: una ficha guardada ANTES de P5-A
+   * no trae la clave `materiales` y sigue parseando igual — es exactamente el
+   * crecimiento que anticipa el encabezado de este archivo. No entra en
+   * `fichaFaltantes` a propósito: suma material, no mueve el gate de señal.
+   */
+  materiales: z
+    .object({
+      resenasUrl: EnlaceFichaSchema, // dónde se leen las reseñas (ficha de Google, etc.)
+      imagenesUrl: EnlaceFichaSchema, // de dónde bajar el logo y las fotos reales
+      otraRedUrl: EnlaceFichaSchema, // otra red además del Instagram del alta
+      queVende: textoLibre, // productos/servicios + precios SI están publicados
+      comoSePresenta: textoLibre, // bio / eslogan / qué destaca de sí mismo
+    })
+    .optional(),
   otros: textoLibre, // catch-all libre
 })
 

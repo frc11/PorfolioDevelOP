@@ -19,7 +19,7 @@ export type ButtonVariant =
   | 'ds-primary'
   | 'ds-secondary'
 
-export type ButtonSize = 'sm' | 'md' | 'lg' | 'ds'
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'ds' | 'ds-compact'
 
 interface ButtonProps extends Omit<HTMLMotionProps<'button'>, 'children' | 'ref'> {
   variant?: ButtonVariant
@@ -64,6 +64,12 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   lg: 'rounded-2xl px-6 py-3 text-base',
   // Radio de control (9px), no el radio 0 de las superficies.
   ds: 'rounded-ds-control px-7 py-4 text-ds-control',
+  // Mismo control, densidad de chrome. Existe porque el CTA persistente de la
+  // barra de navegación tiene que caber en 64px de alto junto al logo y las
+  // anclas: con `ds` (py-4 + text-ds-control) la barra se iba a ~72px y el CTA
+  // pesaba más que el titular de la página. Mismo radio, mismo relieve, misma
+  // receta de variante — solo cambia la caja.
+  'ds-compact': 'rounded-ds-control px-4 py-2.5 text-sm',
 }
 
 /**

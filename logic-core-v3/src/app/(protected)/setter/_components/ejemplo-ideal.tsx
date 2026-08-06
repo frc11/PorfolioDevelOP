@@ -53,6 +53,12 @@ const ORDEN_CAMPOS_FICHA: readonly (keyof typeof GUIA_FICHA.campos)[] = [
   'resenas',
   'contenidoReal',
   'senalesOperativas',
+  // P5-A · material para construir la demo (mismo orden que el formulario)
+  'resenasUrl',
+  'imagenesUrl',
+  'otraRedUrl',
+  'queVende',
+  'comoSePresenta',
   'otros',
 ]
 

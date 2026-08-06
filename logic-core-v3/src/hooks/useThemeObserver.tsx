@@ -55,7 +55,8 @@ export function useThemeSection(isInView: boolean, themeToSet: Theme) {
  * y `useTheme()` tira si el contexto está `undefined`.
  *
  * Agregado sin tocar `useTheme` ni `useThemeSection`: los consumidores
- * existentes (About, WhyDevelOP, SectionTransition) no cambian de conducta.
+ * existentes (About, WhyDevelOP) no cambian de conducta. `SectionTransition`
+ * era el tercero y se borró en B2-S2 — nunca tuvo consumidores propios.
  */
 export function useThemeSectionOptional(isInView: boolean, themeToSet: Theme) {
     const context = useContext(ThemeContext);

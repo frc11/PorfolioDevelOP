@@ -10,6 +10,7 @@ import {
     useTransform,
 } from 'motion/react'
 import { ArrowRight, CircleCheckBig, Search, Sparkles, Wrench, type LucideIcon } from 'lucide-react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 const ease = [0.16, 1, 0.3, 1] as const
 const TITLE_CLOCK_MS = 1200
@@ -938,7 +939,7 @@ export function WebDevelopmentTimeline() {
                                             </div>
 
                                             <motion.a
-                                                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20iniciar%20la%20transformaci%C3%B3n%20de%20mi%20negocio`}
+                                                href={getWhatsappHref('Hola DevelOP, quiero iniciar la transformación de mi negocio')}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 whileHover={enableLaunchBtnAutoHover || prefersReduced ? {} : { scale: 1.03, y: -1 }}

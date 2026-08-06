@@ -34,14 +34,15 @@ import { derivarPasoDelLead } from './paso.ts'
 // ── El registro de pantallas (mapa v1) ───────────────────────────────────────
 
 /**
- * Ids de pantalla del mapa: m1…m16 (manual) + mr (reentrada re-loop) + los dos
- * estados de espera. El `[paso]` de la URL es uno de estos — cualquier otra
- * cosa redirige a la actual.
+ * Ids de pantalla del mapa: m1…m16 (manual, sin m3 — P4 fusionó el registro del
+ * veredicto dentro de m2) + mr (reentrada re-loop) + los estados de espera. El
+ * `[paso]` de la URL es uno de estos — cualquier otra cosa redirige a la actual
+ * (así el `m3` de un bookmark viejo aterriza solo en la pantalla fusionada: la
+ * posición se re-deriva, nunca se guarda).
  */
 export const PANTALLA_IDS = [
   'm1',
   'm2',
-  'm3',
   'm4',
   'm5',
   'm6',
@@ -147,17 +148,10 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     id: 'm2',
     tipo: 'manual',
     fase: 'evaluacion',
-    titulo: 'Llevá la ficha al Evaluador',
-    detalle: 'Copiá el bloque de la ficha, pasalo por el Gem Evaluador y volvé con el resultado.',
-    corto: 'Al Evaluador',
-  },
-  m3: {
-    id: 'm3',
-    tipo: 'manual',
-    fase: 'evaluacion',
-    titulo: 'Registrá el veredicto',
-    detalle: 'Score, veredicto y razonamiento del Evaluador — quedan guardados con el lead.',
-    corto: 'Veredicto',
+    titulo: 'Llevá la ficha a evaluar y registrá el veredicto',
+    detalle:
+      'Copiá el bloque, pasalo por el chat de evaluación y transcribí acá lo que te devolvió: score, veredicto y razonamiento.',
+    corto: 'Evaluación',
   },
   m4: {
     id: 'm4',
@@ -296,7 +290,7 @@ export const FASES_MANUAL: Record<
   { titulo: string; pantallas: readonly PantallaId[] }
 > = {
   ficha: { titulo: 'Ficha', pantallas: ['m1'] },
-  evaluacion: { titulo: 'Evaluación', pantallas: ['m2', 'm3'] },
+  evaluacion: { titulo: 'Evaluación', pantallas: ['m2'] },
   opener: { titulo: 'Opener', pantallas: ['m4'] },
   seguimiento: { titulo: 'Seguimiento', pantallas: ['m5'] },
   brief: { titulo: 'Brief', pantallas: ['m6'] },
@@ -374,7 +368,6 @@ export type PosicionManual = {
 const ORDEN_MANUAL = [
   'm1',
   'm2',
-  'm3',
   'm4',
   'm5',
   'm6',
@@ -390,7 +383,7 @@ const ORDEN_MANUAL = [
   'm16',
 ] as const satisfies readonly PantallaId[]
 
-/** Stages donde la evaluación quedó registrada (m1–m3 atrás). */
+/** Stages donde la evaluación quedó registrada (m1–m2 atrás). */
 const STAGES_POST_EVALUACION: readonly DossierStage[] = [
   'EVALUADA',
   'DESCARTADA',
@@ -429,7 +422,6 @@ function completadasDe(input: DerivacionManualInput): PantallaId[] {
   if (stage !== null && STAGES_POST_EVALUACION.includes(stage)) {
     done.add('m1')
     done.add('m2')
-    done.add('m3')
   } else if (fichaTieneSenal(input.ficha)) {
     // Todavía en FICHA pero con señal mínima: la ficha ya cumplió su gate.
     done.add('m1')
@@ -487,7 +479,7 @@ function posicionDe(
   // admin, jamás se automatiza) → archivo read-only, ANTES de derivar por stage.
   // Un negocio muerto no invita a trabajar: sin esta rama, un PERDIDO en EVALUADA
   // (o cualquier stage vivo) caería en m5/espera pidiendo contactar un negocio
-  // que ya no está. DESCARTADA (terminal por STAGE) mantiene su case (m3, el
+  // que ya no está. DESCARTADA (terminal por STAGE) mantiene su case (m2, el
   // veredicto a la vista). El never-guard del switch queda intacto: sólo se
   // saltea la derivación por stage para este status, la exhaustividad sigue.
   if (input.status === 'PERDIDO') {
@@ -500,18 +492,19 @@ function posicionDe(
     case null:
     case 'FICHA': {
       // La evaluación ocurre con stage=FICHA: registrar el veredicto ES la
-      // transición. Sin señal mínima, m2/m3 son futuro (gate de la ficha).
+      // transición. Sin señal mínima, m2 es futuro (gate de la ficha).
       if (!fichaTieneSenal(input.ficha)) {
         return { actual: 'm1', habilitadas: ['m1'] }
       }
-      // Tarea externa con vuelta: m3 tiene que ser alcanzable desde m2 (no hay
-      // dato que persista "ya fui al Evaluador" — la posición no se guarda).
-      return { actual: 'm2', habilitadas: ['m2', 'm3'] }
+      // P4: el viaje a la herramienta y la vuelta con el resultado son UNA
+      // pantalla — no hace falta habilitar un destino aparte para la vuelta (no
+      // había dato que persistiera "ya fui a evaluar": la posición no se guarda).
+      return { actual: 'm2', habilitadas: ['m2'] }
     }
     case 'DESCARTADA':
       // Terminal del archivo: el manual muestra el veredicto registrado; no
-      // hay pantallas por delante.
-      return { actual: 'm3', habilitadas: [] }
+      // hay pantallas por delante. Con la fusión de P4 el veredicto vive en m2.
+      return { actual: 'm2', habilitadas: [] }
     case 'EVALUADA': {
       if (paso.anchor === 'opener') {
         return { actual: 'm4', habilitadas: ['m4'] }

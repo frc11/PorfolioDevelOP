@@ -19,7 +19,6 @@ import {
 } from '../_components/m-construccion'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
-import { M3Contexto, M3Municion, M3Registro } from '../_components/m3-veredicto'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
 import { M5Contexto, M5Municion, M5Registro } from '../_components/m5-seguimiento'
 import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
@@ -157,66 +156,89 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
         }
       : pantalla.id === 'm2'
         ? {
+            // P4 — pantalla fusionada: el viaje a la herramienta y el registro
+            // del veredicto en una sola. La ficha (contexto) sirve a los dos
+            // movimientos: se copia para llevarla y queda abierta para
+            // transcribir contra ella a la vuelta.
             contexto: <M2Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
             municion: <M2Municion />,
-            captura: <M2Registro leadId={leadId} evaluada={manual.evaluacion !== null} />,
+            captura: (
+              <M2Registro
+                leadId={leadId}
+                leadStatus={manual.leadStatus}
+                caliente={manual.caliente}
+                evaluacion={manual.evaluacion}
+                descartado={manual.stage === 'DESCARTADA'}
+              />
+            ),
           }
-        : pantalla.id === 'm3'
+        : pantalla.id === 'm4'
           ? {
-              contexto: <M3Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
-              municion: <M3Municion />,
-              captura: (
-                <M3Registro
-                  leadId={leadId}
-                  leadStatus={manual.leadStatus}
-                  caliente={manual.caliente}
+              contexto: (
+                <M4Contexto
+                  lead={manual.leadCopy}
+                  ficha={manual.ficha}
                   evaluacion={manual.evaluacion}
-                  descartado={manual.stage === 'DESCARTADA'}
+                />
+              ),
+              municion: <M4Municion dmsHoy={manual.dmsHoy} />,
+              captura: (
+                <M4Registro
+                  leadId={leadId}
+                  openerEnviado={manual.openerEnviado}
+                  ultimoContacto={manual.ultimoContacto}
+                  proximoToque={manual.proximoToque}
+                  openerTexto={manual.openerTexto}
                 />
               ),
             }
-          : pantalla.id === 'm4'
+          : pantalla.id === 'm6'
             ? {
                 contexto: (
-                  <M4Contexto
+                  <M6Contexto
                     lead={manual.leadCopy}
                     ficha={manual.ficha}
                     evaluacion={manual.evaluacion}
                   />
                 ),
-                municion: <M4Municion dmsHoy={manual.dmsHoy} />,
+                municion: <M6Municion />,
                 captura: (
-                  <M4Registro
+                  <M6Registro
                     leadId={leadId}
-                    openerEnviado={manual.openerEnviado}
-                    ultimoContacto={manual.ultimoContacto}
-                    proximoToque={manual.proximoToque}
-                    openerTexto={manual.openerTexto}
+                    businessName={manual.lead.businessName}
+                    brief={manual.brief}
+                    capturando={manual.stage === 'EVALUADA'}
+                    stage={manual.stage}
                   />
                 ),
               }
-            : pantalla.id === 'm6'
+            : faseConstruccion
               ? {
                   contexto: (
-                    <M6Contexto
+                    <ConstruccionContexto
                       lead={manual.leadCopy}
+                      brief={manual.brief}
                       ficha={manual.ficha}
-                      evaluacion={manual.evaluacion}
                     />
                   ),
-                  municion: <M6Municion />,
+                  municion: <ConstruccionMunicion faseId={faseConstruccion} />,
                   captura: (
-                    <M6Registro
+                    <ConstruccionRegistro
                       leadId={leadId}
-                      businessName={manual.lead.businessName}
-                      brief={manual.brief}
-                      capturando={manual.stage === 'EVALUADA'}
+                      faseId={faseConstruccion}
+                      titulo={pantalla.corto}
+                      completadas={manual.progreso.completadas}
                       stage={manual.stage}
+                      escaladoAt={manual.escaladoAt}
+                      escaladoNota={manual.escaladoNota}
                     />
                   ),
                 }
-              : faseConstruccion
+              : pantalla.id === 'mr'
                 ? {
+                    // Reentrada: el brief re-servido para retrabajar contra él
+                    // (las fases se alcanzan por `NavConstruccion`); la nota de
+                    // Franco va como `encabezado`, arriba de la instrucción.
                     contexto: (
                       <ConstruccionContexto
                         lead={manual.leadCopy}
@@ -224,138 +246,113 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                         ficha={manual.ficha}
                       />
                     ),
-                    municion: <ConstruccionMunicion faseId={faseConstruccion} />,
+                    // 5.6 — El re-loop necesita SU transición: reabrir la
+                    // construcción (RECHAZADA→CONSTRUCCION, action intacta del
+                    // wizard). Sin esto, el chequeo final queda futuro para siempre.
                     captura: (
-                      <ConstruccionRegistro
-                        leadId={leadId}
-                        faseId={faseConstruccion}
-                        titulo={pantalla.corto}
-                        completadas={manual.progreso.completadas}
-                        stage={manual.stage}
-                        escaladoAt={manual.escaladoAt}
-                        escaladoNota={manual.escaladoNota}
-                      />
+                      <div className="space-y-3">
+                        <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
+                          Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
+                          arriba). Después volvés a publicar el borrador y a pasar el chequeo
+                          final antes de reenviar — el historial de rechazos se conserva.
+                        </p>
+                        <ReabrirConstruccion leadId={leadId} />
+                      </div>
                     ),
                   }
-                : pantalla.id === 'mr'
+                : pantalla.id === 'm13'
                   ? {
-                      // Reentrada: el brief re-servido para retrabajar contra él
-                      // (las fases se alcanzan por `NavConstruccion`); la nota de
-                      // Franco va como `encabezado`, arriba de la instrucción.
-                      contexto: (
-                        <ConstruccionContexto
-                          lead={manual.leadCopy}
-                          brief={manual.brief}
-                          ficha={manual.ficha}
+                      contexto: <M13Contexto brief={manual.brief} />,
+                      municion: <M13Municion />,
+                      captura: (
+                        <M13Registro
+                          leadId={leadId}
+                          stage={manual.stage}
+                          draftUrl={manual.draftUrl}
                         />
                       ),
-                      // 5.6 — El re-loop necesita SU transición: reabrir la
-                      // construcción (RECHAZADA→CONSTRUCCION, action intacta del
-                      // wizard). Sin esto, el chequeo final queda futuro para siempre.
-                      captura: (
-                        <div className="space-y-3">
-                          <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
-                            Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
-                            arriba). Después volvés a publicar el borrador y a pasar el chequeo
-                            final antes de reenviar — el historial de rechazos se conserva.
-                          </p>
-                          <ReabrirConstruccion leadId={leadId} />
-                        </div>
-                      ),
                     }
-                  : pantalla.id === 'm13'
+                  : pantalla.id === 'm14'
                     ? {
-                        contexto: <M13Contexto brief={manual.brief} />,
-                        municion: <M13Municion />,
+                        contexto: (
+                          <M14Contexto draftUrl={manual.draftUrl} brief={manual.brief} />
+                        ),
+                        municion: <M14Municion />,
                         captura: (
-                          <M13Registro
+                          <M14Registro
                             leadId={leadId}
                             stage={manual.stage}
                             draftUrl={manual.draftUrl}
+                            selfCheck={manual.selfCheck}
+                            brief={manual.brief}
                           />
                         ),
                       }
-                    : pantalla.id === 'm14'
+                    : pantalla.id === 'm15'
                       ? {
-                          contexto: (
-                            <M14Contexto draftUrl={manual.draftUrl} brief={manual.brief} />
-                          ),
-                          municion: <M14Municion />,
+                          contexto: <M15Contexto finalUrl={manual.finalUrl} />,
+                          municion: <M15Municion />,
                           captura: (
-                            <M14Registro
+                            <M15Registro
                               leadId={leadId}
+                              lead={manual.leadCopy}
                               stage={manual.stage}
-                              draftUrl={manual.draftUrl}
-                              selfCheck={manual.selfCheck}
-                              brief={manual.brief}
+                              status={manual.leadStatus}
+                              caliente={manual.caliente}
+                              finalUrl={manual.finalUrl}
+                              demoEnviadaAt={manual.demoEnviadaAt}
                             />
                           ),
                         }
-                      : pantalla.id === 'm15'
+                      : pantalla.id === 'm5'
                         ? {
-                            contexto: <M15Contexto finalUrl={manual.finalUrl} />,
-                            municion: <M15Municion />,
-                            captura: (
-                              <M15Registro
-                                leadId={leadId}
-                                lead={manual.leadCopy}
-                                stage={manual.stage}
+                            contexto: (
+                              <M5Contexto
                                 status={manual.leadStatus}
-                                caliente={manual.caliente}
-                                finalUrl={manual.finalUrl}
-                                demoEnviadaAt={manual.demoEnviadaAt}
+                                followUpCount={manual.followUpCount}
+                                proximoToque={manual.proximoToque}
+                                reactivateAt={manual.reactivateAt}
+                                leadPhone={manual.leadPhone}
+                              />
+                            ),
+                            municion: (
+                              <M5Municion
+                                status={manual.leadStatus}
+                                followUpCount={manual.followUpCount}
+                                lead={manual.leadCopy}
+                                dmsHoy={manual.dmsHoy}
+                              />
+                            ),
+                            captura: (
+                              <M5Registro
+                                leadId={leadId}
+                                followUpCount={manual.followUpCount}
+                                ultimoToque={manual.ultimoToque}
                               />
                             ),
                           }
-                        : pantalla.id === 'm5'
+                        : pantalla.id === 'm16'
                           ? {
                               contexto: (
-                                <M5Contexto
+                                <M16Contexto
                                   status={manual.leadStatus}
-                                  followUpCount={manual.followUpCount}
-                                  proximoToque={manual.proximoToque}
-                                  reactivateAt={manual.reactivateAt}
                                   leadPhone={manual.leadPhone}
                                 />
                               ),
-                              municion: (
-                                <M5Municion
-                                  status={manual.leadStatus}
-                                  followUpCount={manual.followUpCount}
-                                  lead={manual.leadCopy}
-                                  dmsHoy={manual.dmsHoy}
-                                />
-                              ),
+                              municion: <M16Municion />,
                               captura: (
-                                <M5Registro
+                                <M16Registro
                                   leadId={leadId}
-                                  followUpCount={manual.followUpCount}
-                                  ultimoToque={manual.ultimoToque}
+                                  status={manual.leadStatus}
+                                  ficha={manual.ficha}
+                                  agenda={manual.agenda}
+                                  contactName={manual.contactName}
+                                  leadEmail={manual.leadEmail}
+                                  leadPhone={manual.leadPhone}
                                 />
                               ),
                             }
-                          : pantalla.id === 'm16'
-                            ? {
-                                contexto: (
-                                  <M16Contexto
-                                    status={manual.leadStatus}
-                                    leadPhone={manual.leadPhone}
-                                  />
-                                ),
-                                municion: <M16Municion />,
-                                captura: (
-                                  <M16Registro
-                                    leadId={leadId}
-                                    status={manual.leadStatus}
-                                    ficha={manual.ficha}
-                                    agenda={manual.agenda}
-                                    contactName={manual.contactName}
-                                    leadEmail={manual.leadEmail}
-                                    leadPhone={manual.leadPhone}
-                                  />
-                                ),
-                              }
-                            : {}
+                          : {}
 
   return (
     <div className="space-y-5">

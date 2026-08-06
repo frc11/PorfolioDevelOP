@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -458,7 +459,7 @@ function MiniDashboard({ isInView }: { isInView: boolean }) {
               <p style={{ fontSize: 'clamp(20px, 3vw, 32px)', fontWeight: 900, color: 'white', margin: '0 0 8px', lineHeight: 1.2 }}>Tu empresa, en esta pantalla.</p>
               <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.55)', margin: '0 0 24px' }}>Desde cualquier dispositivo, en cualquier parte del mundo.</p>
               <motion.a
-                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola DevelOP, vi el dashboard y quiero un sistema así para mi empresa')}`}
+                href={getWhatsappHref('Hola DevelOP, vi el dashboard y quiero un sistema así para mi empresa')}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
@@ -794,7 +795,7 @@ export default function ShowcaseSoftware() {
           </div>
 
           <motion.a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20ver%20si%20pueden%20hacer%20un%20sistema%20para%20mi%20empresa`}
+            href={getWhatsappHref('Hola DevelOP, quiero ver si pueden hacer un sistema para mi empresa')}
             target="_blank"
             whileHover={shouldReduceMotion ? {} : { scale: 1.04 }}
             whileTap={shouldReduceMotion ? {} : { scale: 0.97 }}

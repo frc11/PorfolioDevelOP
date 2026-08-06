@@ -1657,3 +1657,521 @@ Modificados: `src/components/layout/Hero.tsx` · `src/components/layout/HeroCanv
 Creados: `src/components/layout/HeroArtifactLayer.tsx` · `src/lib/whatsapp.ts`
 
 Borrado: `src/components/layout/EarlyScrollLock.tsx`
+
+---
+
+## B2-S2 — Purga y navegación · 2026-07-31
+
+Commit: `refactor(home): purga del intro, el 3D y la navegación vieja`
+Rama: `redesign/home` (desde `0e4c9b0`, el commit de B2-S1). `package-lock.json`
+no se movió — no hizo falta `npm install`.
+
+Cierra el bloque B2. Se detiene acá: B3 necesita los datos publicables del caso
+Concesionaria, que todavía no existen en ningún documento del proyecto.
+
+### T1 — Bifurcación del intro y navegación por hash
+
+**La bifurcación quedó bien.** Verificado en build de producción servida:
+`/` no corre ningún intro y el scroll está libre desde el primer frame
+(`overflow: visible` en `<html>` y `<body>`, cero estilos inline, `scrollTo(0,600)`
+responde). `/web-development` sigue con su intro completo — trazado del logo,
+relleno y lockup "CONSTRUIMOS LO QUE IMAGINAS" — y las 3 rutas de auth siguen
+renderizando (`/login` con su canvas de `DotMatrix` y su formulario).
+
+**La navegación por hash en carga fría NO quedó arreglada, y la causa no era el
+preloader.** Este era el criterio de éxito de T1 y hay que reportarlo derecho.
+Se encontraron tres causas, con medición:
+
+1. **`SmoothScroll.tsx` forzaba el home a scroll 0 en cada carga.** Dos llamadas
+   (`window.scrollTo(0,0)` y `lenis.scrollTo(0)`) cuyo comentario decía
+   explícitamente que existían "para que el preloader tape la posición correcta y
+   el slot del logo del hero se mida desde 0". B2-S1 borró esa coreografía; lo
+   único que seguían haciendo era pisar el scroll nativo al hash. **Corregido**:
+   se saltean cuando la URL trae ancla, se conservan para la entrada sin ancla.
+2. **Las secciones destino no existen cuando el navegador resuelve el hash.**
+   `app/page.tsx` las monta con `next/dynamic` + placeholder. Medido en producción:
+   el documento arranca en **16.823px** y llega a **21.561px** una vez que todo
+   montó — `#portfolio` es un placeholder de 0px de alto en el instante del salto,
+   así que no hay caja a la que ir. A los 7s de una carga limpia siguen los 7
+   placeholders puestos: montan recién al acercarse con scroll.
+3. **`#nosotros` está declarado dos veces** (variante mobile y desktop de
+   `About.tsx`). `getElementById` devuelve la primera, que en desktop está en
+   `display:none`.
+
+(2) y (3) son del terreno que B3/B4 rediseña — el brief dice que las anclas se
+remapean ahí. No se tocaron.
+
+**Un intento descartado, anotado para que no se repita.** Se escribió un helper de
+~90 líneas en `SmoothScroll` que reintentaba por `requestAnimationFrame` hasta que
+el destino tuviera caja, eligiendo entre ids duplicados el que renderiza. **No
+aterrizaba de forma reproducible** (el destino no aparece si no se scrollea hacia
+él: es circular) y le peleaba el control a Lenis. Se revirtió entero. Queda el
+diagnóstico escrito en el comentario de `SmoothScroll.tsx`. La conclusión: el
+arreglo real no es reintentar el scroll, es que el destino tenga caja cuando el
+hash se resuelve.
+
+**Nota de método — una medición contaminada.** Durante la verificación se
+rebuildeó con la página abierta en el navegador. Eso invalida los nombres
+hasheados de los chunks y la página viva empieza a tirar `ChunkLoadError`, cae en
+el error boundary y deja los boundaries de streaming de React colgados. Varias
+mediciones intermedias de esta sesión salieron de ese estado y fueron descartadas;
+las que quedan en esta bitácora se rehicieron sobre servidor reiniciado y pestaña
+nueva, sin rebuilds en el medio. **Regla: no rebuildear con la pestaña de
+verificación abierta.**
+
+### T2 — Purga
+
+Borrados tras verificar cero importadores archivo por archivo (**91,5 KB** de
+fuente):
+
+| Archivo | Motivo |
+|---|---|
+| `sections/home/PortalDemo.tsx` (63,5 KB) | huérfano; el vivo es `sections/portal-demo/PortalDemo.tsx` |
+| `sections/AIBentoGrid.tsx` (16,2 KB) | huérfano |
+| `ui/buttons/MagneticCta.tsx` (7 KB) | lo reemplazó `CtaButton` en B2-S1 |
+| `ui/TypewriterText.tsx` (2,6 KB) | su único consumidor era `AIBentoGrid` |
+| `lib/home-routes.ts` (1,4 KB) | gate del intro del home, muerto desde B2-S1 |
+| `layout/SectionTransition.tsx` (0,7 KB) | huérfano autodocumentado |
+| `layout/DynamicDock.tsx` | lo reemplaza la barra nueva (ver T3) |
+
+**Desconectados, no borrados.** `CustomCursor` y `NoiseOverlay` salieron de
+`layout.tsx`. Eran las dos únicas piezas montadas globalmente (fuera de
+`PublicOnlyComponents`), así que sacarlas de ahí las saca de todas las
+superficies. Los dos contradicen la dirección: el cursor custom está prohibido —y
+además escondía el del sistema con un `cursor:none` global en ≥768px, un costo de
+accesibilidad por un adorno— y el grano animado corría a `steps(10)` infinito
+sobre todo el viewport, en toda ruta, sin gate de visibilidad. Verificado después:
+`/login` reporta `cursor: auto`, el nativo volvió. Los archivos quedan sin
+consumidores.
+
+`DotMatrix.tsx` no se tocó — ya lo había desconectado del home B2-S1, y lo siguen
+usando `/login`, `/forgot-password` y `/accept-invite`.
+
+`PreloaderProvider` sigue inerte: nadie llama `usePreloader()` (verificado, solo
+quedan su definición y un comentario). Es frozen, no se tocó.
+
+**HDRI**: `public/hdri/studio_small_03_1k.hdr` se sirve desde el propio origen
+(`/hdri/...`), no desde `githubusercontent`. La única mención a ese dominio en
+`HeroCanvas.tsx` es el comentario que explica por qué se self-hosteó.
+
+### T3 — Navegación
+
+`Navbar` + `DynamicDock` se reemplazaron por **una barra superior plana**, en un
+solo archivo (`Navbar.tsx`); el dock se borró.
+
+**Por qué arriba y no abajo — resuelve por posición dos bugs medidos**, no es
+preferencia:
+
+- A 390px el launcher del chat cubría por completo el botón del menú. Su z-index
+  es `2.147.000.100`, así que no había forma de ganarle apilando. **Medido
+  ahora**: botón del menú en `y 15–49`, launcher en `y 804–860` — **755px de
+  separación, cero solape**. (Antes: botón `318–366 × 772–820`, launcher
+  `310–366 × 764–820`.)
+- El microcopy del hero caía debajo del dock flotante. Sin chrome fijo abajo la
+  colisión no puede existir.
+
+**Qué se fue con el dock**: el glassmorphism (`blur(48px) saturate(180%)`), los
+radios y píldoras, los 7 iconos de Lucide (la flecha del `CtaButton` es el único
+icono del sistema; las anclas son texto y el disparador del menú dice "Menú"), las
+dos animaciones infinitas (shimmer del CTA y latido del logo), `getLightLevel()`
+—la heurística de luz por umbrales de scroll que el dock reimplementaba al margen
+de `ThemeContext`— y los **dos listeners de scroll sin coordinar** (Framer
+`useScroll` en `Navbar` + `addEventListener` nativo en el dock). La barra es
+chrome: va siempre en tema oscuro vía `data-ds-theme`, el mismo mecanismo de
+`SectionShell`, y es persistente (no se esconde al scrollear).
+
+**Qué se conservó**: los `id` de destino, `triggerTransition()` para toda
+navegación interna, el revelado en lockstep con el widget de chat
+(`useChromeRevealed` + tokens de `chromeReveal`), el menú mobile con su submenú de
+servicios, y el acceso al portal. El observador de sección activa ahora mira
+**solo los destinos del nav** en vez de todo `section[id], div[id]` del documento.
+
+**Dos correcciones de calidad en el archivo nuevo** (en archivos que el sprint
+reescribe el objetivo es cero hallazgos): el hash se lee con `useSyncExternalStore`
+en vez de espejarlo a `useState` desde un efecto —de paso la barra ahora reacciona
+a `hashchange`, cosa que antes no hacía— y el reseteo al cambiar de ruta se hace
+ajustando estado durante el render, el patrón que documenta React, en vez de un
+efecto que pinta un frame con el menú de la ruta anterior abierto.
+
+**Agregados al sistema, no inline**: `--spacing-ds-nav` (alto de la barra; lo
+consumen la barra y el `scroll-padding-top` del `<html>`, que si no toda ancla
+aterriza tapada) y la densidad `compact` del `CtaButton` (tamaño `ds-compact` en
+`ui/Button`), expuesta en `/styleguide`.
+
+### T4 — WhatsApp
+
+Migrados **15 call-sites** en 13 archivos a `src/lib/whatsapp.ts`. Se agregó
+`getWhatsappDigits()` porque `/contact` arma además un `tel:` con el mismo número.
+
+**Verificado byte a byte, no afirmado**: se comparó el href viejo (el literal que
+estaba en el fuente) contra el nuevo para los 12 casos representativos →
+**12/12 idénticos**. El único que cambia bytes es `CalculadoraAutomation`, que
+tenía una `é` sin codificar en el querystring; el texto decodificado que recibe
+WhatsApp es el mismo (es un arreglo, no un cambio).
+
+De paso se cerraron **seis** call-sites que servían `https://wa.me/undefined` si
+faltaba la variable de entorno (`WebDevelopmentTimeline`, `VaultIA`,
+`PricingSection`, `CalculadoraAutomation`, y los dos de `ShowcaseSoftware`, que no
+estaban en el censo de B2-S1 porque no tenían literal de fallback que grepear).
+
+**Uno NO se migró, a propósito**: `components/ia/CalculadorIA.tsx:316` tiene
+`5493815674738` hardcodeado y **no lee la variable de entorno**. Es el único punto
+del sitio que hoy sirve un número realmente distinto, no un fallback muerto —
+unificarlo cambiaría el destino que se sirve en producción. Queda como está,
+reportado para que lo decida una persona.
+
+### Verificación (medida, no afirmada)
+
+- `npm run build` verde · `tsc --noEmit`: **1 error, el preexistente y ajeno** de
+  `searchconsole.ts` (conflicto `googleapis`/`google-gax`) · eslint: **0 nuevos**
+  (los 2 que este sprint introdujo en `Navbar.tsx` se corrigieron; los 3 restantes
+  en archivos tocados son preexistentes y ajenos a las líneas migradas).
+- **Scroll libre desde el primer frame** en `/`. El baseline de 9,77s no aplica
+  más: no hay nada que esperar.
+- **Cero mensajes de consola** en carga limpia de `/` (medido con tracking activo
+  y recarga, no afirmado).
+- **390px**: sin desborde horizontal; H1 a 52px en 4 líneas; microcopy visible
+  (bottom 691 de 844); **el canvas 3D no se monta y su chunk `4198` no se pide**.
+- **1440×760**: el microcopy termina en 797 con viewport 760 → queda **37px bajo
+  el borde, sin nada que lo tape**. Antes quedaba 66px por debajo del dock, que sí
+  lo cubría. Mejora, pero no queda holgado: el H1 a 4 líneas no entra en 760px de
+  alto. Si molesta, la palanca es acotar `--text-ds-display-xl`, que es un token
+  del sistema y afecta a todo — por eso no se tocó acá.
+- **Desktop**: el chunk del hero se pide a los 583ms (después del contenido) y el
+  canvas monta a los 769ms.
+- **Detector plano** (`npx impeccable detect`): **51** hallazgos sobre la
+  superficie pública (`app/page.tsx`, `app/contact`, las 4 landings,
+  `components/{layout,design-system,sections,ia,automation,software,ui}`). El
+  baseline dado era 46, pero **el alcance de esa medición no está documentado**,
+  así que los dos números no son directamente comparables. Lo que sí se verificó,
+  hallazgo por hallazgo: **ninguno cae en una línea escrita por este sprint**.
+  `Navbar.tsx`, `Hero.tsx`, `SmoothScroll.tsx`, `SectionShell.tsx` y
+  `CtaButton.tsx` dan **cero**. Los 10 que aparecen en archivos tocados están en
+  líneas lejos de las migradas (p. ej. `CtaIA.tsx:321`, cuando la migración tocó
+  la 6 y la 440). Corrida completa del repo: se abandonó a los 20 minutos sin
+  terminar.
+
+### Fuera de scope, anotado y NO implementado
+
+- **El artefacto 3D no se revela.** En desktop el canvas monta y pinta, pero su
+  capa de fade se queda en `opacity: 0` de forma permanente (medido a lo largo de
+  ~110s): `onReady` nunca llega. Se ve apenas un arco tenue casi negro sobre el
+  fondo oscuro. No se tocó ninguno de los tres archivos involucrados
+  (`HeroArtifactLayer`, `HeroCanvas`, `HeroArtifact` —frozen—): es un defecto de
+  B2-S1, no una regresión de este sprint. **Es lo primero a revisar del bloque.**
+- **Three.js sigue bajando en mobile**, pero ya no por el hero: a 390px el chunk
+  del hero no se pide y aun así entran `bd904a5c` (364 KB) y `b536a0f1` (341 KB).
+  En `/` el único otro consumidor de R3F es el avatar del widget de chat. Si el
+  presupuesto mobile es objetivo, ese avatar es el próximo blanco.
+- **`ShowcaseSection.tsx:580`** tiene un `<Link href="#">` placeholder. No es del
+  home; se reporta y no se toca.
+- **Atributos `data-cursor` inertes** en 6 archivos: sin `CustomCursor` no hacen
+  nada. Limpieza cosmética para cuando se toquen esos archivos.
+- **`CustomCursor.tsx` y `NoiseOverlay.tsx` quedaron sin consumidores.** Se
+  desconectaron, no se borraron (el brief pedía desconectar lo COMPARTIDO). Una
+  poda posterior puede levantarlos.
+
+### Archivos
+
+Modificados: `src/app/layout.tsx` · `src/app/globals.css` · `src/app/contact/page.tsx` ·
+`src/app/styleguide/_components/ComponentStates.tsx` ·
+`src/components/layout/Navbar.tsx` · `src/components/layout/Hero.tsx` ·
+`src/components/layout/SmoothScroll.tsx` · `src/components/ui/Button.tsx` ·
+`src/components/design-system/CtaButton.tsx` ·
+`src/components/design-system/SectionShell.tsx` · `src/hooks/useThemeObserver.tsx` ·
+`src/lib/whatsapp.ts` · `src/lib/chromeReveal.ts` ·
+`src/components/sections/home/Footer.tsx` ·
+`src/components/sections/portal-demo-cta/PortalDemoCTA.tsx` ·
+`src/components/sections/software-development/SoftwareDevelopmentCta.tsx` ·
+`src/components/sections/web-development/WebDevelopmentCta.tsx` ·
+`src/components/sections/web-development/WebDevelopmentTimeline.tsx` ·
+`src/components/sections/web-development/PricingSection.tsx` ·
+`src/components/ia/CtaIA.tsx` · `src/components/ia/VaultIA.tsx` ·
+`src/components/automation/CtaAutomation.tsx` ·
+`src/components/automation/VaultAutomation.tsx` ·
+`src/components/automation/CalculadoraAutomation.tsx` ·
+`src/components/software/DiagnosticoSoftware.tsx` ·
+`src/components/software/ShowcaseSoftware.tsx`
+
+Borrados: `src/components/layout/DynamicDock.tsx` ·
+`src/components/layout/SectionTransition.tsx` ·
+`src/components/sections/home/PortalDemo.tsx` ·
+`src/components/sections/AIBentoGrid.tsx` · `src/components/ui/TypewriterText.tsx` ·
+`src/components/ui/buttons/MagneticCta.tsx` · `src/lib/home-routes.ts`
+
+---
+
+## B2-S3 — La capa 3D del hero se revela · 2026-08-03
+
+Commit: `fix(home): revela la capa 3D del hero con red de seguridad`
+Rama: `redesign/home` (desde `5d844bb`).
+
+Un solo objetivo: que el artefacto 3D se revele en desktop. No se rediseñó el
+hero, no se tocó la capa tipográfica, no se tocó ningún token del sistema.
+Archivo de código modificado: **uno**, `src/components/layout/HeroArtifactLayer.tsx`.
+
+### T1 — La contradicción entre B2-S1 y B2-S2, resuelta
+
+Las dos mediciones anteriores decían cosas incompatibles. B2-S1: "el artefacto
+se lee bien sobre el fondo oscuro, verificado en captura". B2-S2: "la capa se
+queda en `opacity: 0` de forma permanente, medido a lo largo de ~110 s".
+
+**Las dos describen algo real. La de B2-S2 es un artefacto del entorno de
+medición, no un defecto del build.**
+
+La cadena de `onReady`, reconstruida con archivo:línea:
+
+| # | Dónde | Qué hace |
+|---|---|---|
+| 1 | `HeroArtifactLayer.tsx:106` | declara `isRevealed` |
+| 2 | `HeroArtifactLayer.tsx:138` | `handleReady = () => setIsRevealed(true)` |
+| 3 | `HeroArtifactLayer.tsx:162` | `animate={{ opacity: isRevealed ? 1 : 0 }}` |
+| 4 | `HeroArtifactLayer.tsx:166` | pasa `onReady` a `HeroCanvas` |
+| 5 | `HeroCanvas.tsx:159` | pasa `onReady` a `ReadySignal`, dentro del `<Suspense>` |
+| 6 | `HeroCanvas.tsx:71-88` | `ReadySignal` suspende en el SVG y, al montar, dispara `onReady()` tras dos `requestAnimationFrame` |
+
+En un navegador que **renderiza**, esa cadena **se completa**. Medido sobre el
+build de producción, Playwright, 1440x900, tres corridas:
+
+| corrida | capa montada | capa revelada (`opacity` 1) |
+|---|---|---|
+| 1 | 1711 ms | **3409 ms** |
+| 2 | 1889 ms | **3869 ms** |
+| 3 | 2021 ms | **4075 ms** |
+
+Dónde se corta, entonces. La cadena depende de que el documento produzca
+**rendering steps**. Si no los produce —pestaña en segundo plano, ventana
+ocluida, pane de preview— pasan dos cosas a la vez:
+
+1. El `ResizeObserver` de `react-use-measure` **nunca entrega**. Sin eso, el
+   gate de r3f en `react-three-fiber.cjs.dev.js:91`
+   (`if (containerRect.width > 0 && containerRect.height > 0 && canvas)`) no se
+   abre nunca, y `root.render(children)` no llega a correr: `ReadySignal` **ni
+   siquiera se monta**.
+2. Aunque se montara, los dos `requestAnimationFrame` no corren.
+
+Reproducido de punta a punta en una pestaña oculta, contra el mismo build:
+
+```
+document.visibilityState = "hidden"   ·   frames de rAF en 1 s = 0
+capa: opacity 0 durante 42 s seguidos (sin cambio)
+<canvas>: 300x150  <- el default del elemento; r3f nunca lo dimensionó
+requests de /logodevelOP.svg y /hdri/*.hdr: NINGUNO
+```
+
+Un único `window.dispatchEvent(new Event('resize'))` sintético destrabó todo:
+el canvas pasó a 416x416, el SVG y el HDRI se pidieron por primera vez, y
+`isRevealed` (leído del fiber de React) pasó a `true`. Es la prueba de que la
+cadena estaba entera y lo que faltaba era el frame.
+
+**Y la trampa de medición que anticipaba el brief existe y está confirmada:**
+
+```
+capa (motion.div)  -> getComputedStyle(...).opacity = "0"
+<canvas> adentro   -> getComputedStyle(...).opacity = "1"
+```
+
+`opacity` no es heredada, así que el `<canvas>` computa `1` aunque su ancestro
+esté en `0`. Medir el `<canvas>` en vez de su capa contenedora da verde siempre.
+
+**Conclusión.** La captura de B2-S1 era correcta: reproducida con el mismo
+método (Playwright sobre build de producción) se ve exactamente lo que
+describía, filo especular incluido. Lo que B2-S2 midió es el síntoma exacto de
+un contexto sin rAF —el mismo que la propia bitácora de B1-S3 ya había
+registrado en el pane de preview, y el que volvió a aparecer en este sprint—, y
+no se reproduce en un navegador que pinta. No se puede verificar a posteriori en
+qué entorno corrió B2-S2; lo que sí se puede afirmar es que el conjunto de
+síntomas que reportó se reproduce al 100% bajo esa condición y al 0% fuera de
+ella.
+
+**Pero B2-S2 apuntaba a una fragilidad real**, y buscándola apareció algo peor.
+
+### T1.b — El hallazgo que nadie estaba buscando
+
+La cadena de readiness tiene seis eslabones (chunk -> medición del contenedor ->
+configuración de r3f -> SVG -> HDRI de 1,6 MB -> dos rAF). Se probó qué pasa si
+uno falla. **El HDRI que no baja no dejaba la capa invisible: se llevaba puesto
+el home entero.**
+
+`<Canvas>` re-lanza hacia afuera cualquier error de su árbol (r3f lo atrapa con
+su ErrorBoundary interno y lo re-tira desde `CanvasImpl`). Sin nadie que lo
+contenga, escalaba hasta el `error.tsx` de la ruta. Medido sobre el build
+previo, con el `.hdr` bloqueado:
+
+```
+heroAlive: false          <- el <h1> del hero ya no existe
+scrollHeight: 900         <- la página entera reemplazada
+scrollWorks: false        <- no scrollea
+texto en pantalla: "ERROR DEL SISTEMA - Algo salió mal"
+```
+
+Un bloqueador, un proxy corporativo o un corte de red en un asset **decorativo**
+tumbaba la home. Mismo resultado con el SVG bloqueado. Era una violación directa
+de la condición 1 de la capa 2 ("cero bloqueo de scroll") y de lo que el propio
+docblock del hero afirmaba: *"si el canvas nunca carga, el hero ya está completo
+y usable"* — que hasta este sprint era falso.
+
+### T2 — El arreglo
+
+Dos piezas, las dos en `HeroArtifactLayer.tsx`. **No se reescribió la cadena de
+readiness**: `onReady` sigue siendo el camino normal, y es el que corre siempre
+que el navegador pinta.
+
+**1. Red de seguridad del reveal (`REVEAL_SAFETY_MS = 6000`).** Mismo mecanismo
+y mismo umbral que la red del scroll de `MarketingIntro`
+(`MARKETING_SCROLL_SAFETY_MS`) -> un solo patrón en el repo, por la misma razón:
+`setTimeout` no depende del rAF ni de la cadena de carga, que es exactamente
+donde esta capa se cuelga. Se arma cuando el canvas se monta, no al montar el
+componente: hasta ahí no hay nada que esperar. Es idempotente — si `onReady`
+llega primero el cleanup cancela el timer; si dispara primero deja el mismo
+estado final.
+
+Revelar de más no cuesta nada, y esto es lo que hace que el umbral sea barato:
+el canvas es transparente y el artefacto trae su propio fade de material
+(`HeroArtifact`, opacidad 0->1 en el `useFrame`), así que una capa revelada antes
+de tiempo **se ve igual que una sin revelar: vacía**. El costo de revelar de
+menos, en cambio, es que no aparezca nunca.
+
+**2. `CanvasErrorBoundary`.** Contiene el fallo del canvas en la capa. Al fallar
+renderiza `null`: la caja queda vacía y la base tipográfica del hero —que es el
+hero terminado— sigue intacta. Sin UI de error porque no hay nada que comunicar:
+el artefacto es decorativo y la caja es `aria-hidden`. Sin esto, la red de
+seguridad no alcanzaba: no sirve garantizar `opacity: 1` sobre un subárbol que
+un error acaba de desmontar.
+
+Se evaluó reutilizar un boundary existente: **no hay**. Los 20+ `error.tsx` del
+repo son boundaries de ruta de Next (reciben `error`/`reset`), no envuelven un
+componente. `AdminErrorBoundary` / `SectionErrorBoundary` son de esa familia.
+
+### Verificación (medida, no afirmada)
+
+`npm run build` **verde** · `tsc --noEmit` -> **1 error, byte a byte idéntico al
+baseline** (`searchconsole.ts`, preexistente y ajeno; `diff` contra el baseline
+sin diferencias) · `eslint` sobre los 3 archivos del hero -> **0**. Baseline del
+repo, para contexto: 79 errores / 52 warnings, ninguno en estos archivos.
+
+**Tabla de `opacity` de la capa a 1440x900, build de producción.** Se miden la
+capa y el `<canvas>` por separado, a propósito, para dejar visible la trampa:
+
+| t (ms) | capa (`motion.div`) | `<canvas>` | attr del canvas | scroll bloqueado |
+|---|---|---|---|---|
+| 424 | *(sin montar)* | — | — | no |
+| 1002 | *(sin montar)* | — | — | no |
+| 2004 | **0** | — | — | no |
+| 5007 | **1** | 1 | 416x416 | no |
+| 8019 | **1** | 1 | 416x416 | no |
+| 12006 | **1** | 1 | 416x416 | no |
+
+Antes del arreglo, en el mismo build y viewport, la tabla es idéntica: el camino
+normal ya funcionaba. La diferencia está en los escenarios de abajo.
+
+**La prueba de la red de seguridad.** Se simuló que el evento de readiness no
+llega, colgando el asset (la ruta nunca responde y nunca falla -> ni `onReady` ni
+error boundary; sin la red, `opacity: 0` para siempre):
+
+| asset colgado | capa montada | capa revelada | delta desde el montaje | errores |
+|---|---|---|---|---|
+| HDRI (`.hdr`) | 1993 ms | 8580 ms | **6587 ms** | 0 |
+| SVG del logo | 2082 ms | 8641 ms | **6559 ms** | 0 |
+| chunk del canvas | 1987 ms | 8571 ms | **6584 ms** | 0 |
+
+Los ~6,6 s son los 6000 ms del umbral más los 600 ms del fade de entrada
+(`opacity > 0.99`) y la granularidad de 100 ms del muestreo. En los tres casos
+el hero siguió vivo y la página scrolleable.
+
+**Antes / después, con el asset caído (no colgado):**
+
+| escenario | build previo | con el fix |
+|---|---|---|
+| HDRI caído | hero **muerto**, scroll **muerto**, pantalla de error | capa `opacity 1`, **hero vivo**, **scroll OK** |
+| SVG caído | hero **muerto**, scroll **muerto**, pantalla de error | capa `opacity 1`, **hero vivo**, **scroll OK** |
+
+**Las condiciones de la capa 2, una por una:**
+
+- **A 390px no se monta ni se pide nada.** `display: none`, capa sin montar,
+  **0 contextos WebGL**, **0 requests del chunk del hero**, **0 del HDRI**. El
+  chunk se identificó por contenido (en producción sale con hash), y la
+  referencia positiva a 1440 lo pide 1 vez (`4198.e70aac245b121123.js`) -> el
+  detector no es un falso negativo. El único `/logodevelOP.svg` a 390px es el
+  logo del navbar (a 1440 hay 2: navbar + loader del 3D).
+- **`prefers-reduced-motion`**: no se monta. 0 chunk, 0 HDRI, 0 WebGL.
+- **`frameloop` gateado**: draw calls de WebGL contadas en ventanas de 2 s ->
+  **240 dentro del viewport, 0 fuera**. Fuera de pantalla no renderiza un frame.
+- **Scroll libre desde el primer frame**: primera muestra que scrollea a
+  **221 ms** en 1440 y **222 ms** en 390, con `overflow: visible` en `html` y
+  `body`. En todos los escenarios de fallo también.
+- **Carga diferida**: la capa monta a ~2,0 s, después del contenido.
+- **Monocromo**: ver abajo.
+
+**Consola.** Cero errores nuevos, medido contra el build previo servido en
+paralelo, no afirmado. El único error que aparece en ambos builds es un
+**React #418** (hydration mismatch) bajo `prefers-reduced-motion` — **idéntico
+antes y después**, preexistente y ajeno a este arreglo (ver *Fuera de scope*).
+Los errores en los escenarios de asset caído son el fallo de red en sí, que es
+inevitable; lo que cambió es que ya no tumban la página. El `console.warn` del
+boundary es deliberado y es warning, no error.
+
+### T3.1 — Cómo se ve el artefacto
+
+Se lee **monocromo**, y la condición 6 no necesita ajuste. **No hay aberración
+cromática que atenuar**: `HeroCanvas` no monta `EffectComposer` —lo sacó B2-S1 a
+propósito, documentado en su docblock (la dirección es monocroma, y la lección
+del repo prohíbe el composer en canvas chicos transparentes). La preocupación de
+la condición 6 no aplica a esta implementación; se verificó que no hay ninguna
+fuente de color en el pipeline.
+
+Lo que se ve: el lazo del logo en material negro metálico, con un filo especular
+frío —blanco/gris acero, del HDRI de estudio— cayendo sobre el flanco derecho.
+Neutro, sin tinte que pelee con la dirección.
+
+**Una observación para juicio del humano, no un defecto:** el artefacto es muy
+oscuro contra el `#0D0B09`. La lectura depende **casi por completo** del filo
+especular; el flanco izquierdo y la base son negro sobre casi-negro y
+prácticamente no se distinguen. Se lee como una insinuación, no como un objeto
+sólido — que puede ser exactamente la intención. **No se tocó**: subirle
+presencia es una decisión de dirección de arte, no un arreglo, y este sprint
+tenía un solo objetivo. Anotado para B1-S5, que es el sprint de calibración.
+
+**Caveat de método:** las capturas salen de Chromium con SwiftShader
+(rasterizado por software). El material y los colores son fieles; el brillo y la
+riqueza del reflejo en una GPU real serán algo mayores, nunca menores. La
+observación de "muy oscuro" es entonces un piso, no un techo.
+
+### Nota de método — verificación visual
+
+Se despachó el subagente `visual-qa` como manda `CLAUDE.md`. **No pudo entregar
+reporte**, por la misma razón que en B2-S1: no tiene acceso a sus herramientas de
+preview en este contexto (y el servidor corría en un puerto no declarado en
+`.claude/launch.json`, archivo trackeado y fuera de scope). Es una limitación del
+harness, no un hallazgo sobre el hero.
+
+La verificación visual se hizo con Playwright sobre el build de producción, con
+capturas leídas a mano. Sigue siendo el método más confiable acá por lo mismo que
+este sprint terminó de demostrar: el pane de preview mide **0 fps de rAF**, lo que
+congela WebGL y da falsos negativos exactamente en lo que hay que mirar. Es,
+literalmente, el bug que se acaba de diagnosticar.
+
+### Fuera de scope, anotado y NO implementado
+
+- **React #418 (hydration mismatch) bajo `prefers-reduced-motion` en `/`.**
+  Presente **igual** en el build previo y en el actual -> preexistente, ajeno a
+  este sprint. No se investigó de dónde sale. Es el único error de consola vivo
+  en la home.
+- **El HDRI de 1,6 MB es el cuello de botella del reveal.** Con throttling
+  fast-3G la capa tarda **~11 s** desde el montaje (contra ~1,8 s sin
+  throttling): la red de seguridad la revela a los 6 s y el artefacto entra
+  después. Funciona, pero la palanca real es el peso del `.hdr` — comprimirlo o
+  bajarlo de resolución. No se tocó: es un asset, no la cadena de readiness.
+- **`ReadySignal` comparte el `<Suspense>` con `<Environment>`**
+  (`HeroCanvas.tsx:158-165`), así que `onReady` espera al HDRI aunque el SVG ya
+  esté listo. Separarlos haría que el logo aparezca antes y el reflejo después.
+  Es un cambio de comportamiento visual, no un arreglo — queda anotado.
+- **El escenario "chunk caído" del barrido no bloqueó nada**: el patrón de ruta
+  apuntaba al nombre de desarrollo y en producción el chunk sale con hash. La
+  cobertura real del chunk viene de la prueba de colgado (identifica el chunk
+  por contenido), que sí es válida.
+
+### Archivos
+
+Modificados: `src/components/layout/HeroArtifactLayer.tsx` ·
+`docs/bitacora-rediseno.md`
