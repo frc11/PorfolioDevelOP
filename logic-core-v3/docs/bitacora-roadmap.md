@@ -15485,3 +15485,199 @@ re-llamarse con el lead ya capturado; (7) `step_count`, `costUsd` y la latencia 
   stderr (`persistentLogger.ts`). Preexistente, no se replico en el tool nuevo.
 
 ---
+
+## C0.1 - navigate_to_page restringido al bot propio de develOP
+
+Contencion, no el fix definitivo (ese es `BotConfig.allowedNavigationPaths`, pendiente de
+migracion). Item #1 del roadmap C (bloque C0, "que el primer cliente no lo vea roto").
+
+### El problema
+
+`navigate_to_page` (`server/tools/navigateToPage.ts`) manda al visitante a rutas hardcodeadas
+del sitio de develOP (`VALID_PATHS`). Habilitado en los planes PRO y BUSINESS. En el bot de un
+cliente el tool se invoca igual: el modelo lo llama y el embed lo resuelve.
+
+CORRECCION AL SINTOMA (no es un 404): el embed externo (`public/widget.js:184-187`) resuelve
+la navegacion con `window.open(BASE_URL + path, '_blank')`, con `BASE_URL` tomado del origin
+del propio `<script src>` que sirve el widget (tipicamente develop.com.ar, no el dominio del
+cliente). El resultado real es que el bot de un cliente le abre a SU visitante una pestana
+nueva con una pagina de VENTAS de develOP, sin haberse ido de nada roto. Fuga de trafico del
+cliente hacia la agencia, no un link roto. El otro camino client-side (`ChatWidgetMount.tsx`,
+`WIDGET_SLUG='develop'` hardcodeado, in-app, nunca en portales) jamas corre para un bot de
+cliente - no esta en riesgo.
+
+### Fase 0 (hallazgos clave, read-only)
+
+1. `navigate_to_page` es client-side puro (sin `execute`); su builder ni siquiera recibia el
+   ctx (`getTools.ts` lo llamaba con `_ctx`). El header de `navigateToPage.ts` ya declaraba la
+   deuda: "Phase 1.5: paths come from BotConfig.allowedNavigationPaths per org" - campo que no
+   existe en `schema.prisma`.
+2. Gating de tools: una sola capa (`Plan.tools`), un solo call-site real (`getTools()` desde
+   `handleChatRequest.ts:978`). `BotConfig` no tiene ningun campo de tools/navegacion.
+3. `sync-plans.ts`: STARTER sin `navigate_to_page`; PRO y BUSINESS con el. El bot `develop`
+   corre BUSINESS (confirmado por log de prod en CONTACT-PATH) sin Subscription en ningun seed
+   -> asignado a mano. `san-miguel` es un fixture MOCK (STATUS.md: "Franco la anoto para
+   cleanup"), no un cliente real. `matsu` (piloto comercial real) no tiene bloque de
+   Subscription en ningun seed -> sin confirmar por archivos si hoy tiene `navigate_to_page`
+   habilitado.
+4. No existe un helper reusable de "org/bot agencia" en el repo. Unico precedente real (mismo
+   tipo de restriccion, distinto subsistema): `convert-chatbot-lead.actions.ts` compara
+   `botConfig.slug !== 'develop'`. Cero de esto en el runtime del chatbot hasta este sprint.
+5. Los packs verticales (EV) no tocan `navigate_to_page` (cero referencias en `server/verticals/`,
+   confirmado por lectura completa de los 3 packs) y serian un chokepoint mas invasivo: exige
+   tocar el contrato compartido `VerticalToolCopy`, y el pack `'agencia'` no esta asignado a
+   ningun `BotConfig` real en ningun seed. Descartado como candidato.
+
+### Diseno elegido (aprobado por Valentino, con 2 ajustes)
+
+Gate por bot dentro de `getTools()` (opcion b del brief). `Plan.tools` no cambia - PRO/BUSINESS
+siguen listando `navigate_to_page` como capacidad del plan; el gate adicional decide si se
+OFRECE en este bot puntual. Cero seed, cero migracion, cero paso manual en produccion.
+
+AJUSTE 1 (Valentino): no un `if` con el slug inline. `TOOLS_RESTRICTED_TO_AGENCY_BOT` (lista
+nombrada, hoy solo `navigate_to_page`) + `isAgencyOwnedBot(botSlug)` (helper exportado), ambos
+en `getTools.ts`, con el comentario del porque. Cuando exista `allowedNavigationPaths`: la
+lista se vacia y el helper se borra - el punto de salida de la contencion queda evidente.
+
+AJUSTE 2 (Valentino): sintoma corregido en todos los comentarios nuevos - fuga de trafico via
+`window.open`, no 404 (ver seccion de arriba).
+
+### Cambios
+
+- `server/tools/types.ts`: `ToolCallContext.botSlug: string` (requerido).
+- `server/tools/getTools.ts`: `TOOLS_RESTRICTED_TO_AGENCY_BOT` + `AGENCY_BOT_SLUG` +
+  `isAgencyOwnedBot()` (exportados) + guard de una linea en el loop de `getTools`.
+- `server/chat/handleChatRequest.ts`: `botSlug: bot.slug` en el ctx de `getTools()` (cero query
+  nueva, `bot` ya viene con el escalar via `resolveBotBySlug`).
+- `server/tools/navigateToPage.ts`: header corregido (sintoma real + referencia al gate nuevo).
+- `server/tools/__tests__/confirm-contact-request.invariant.ts`: fixture CTX actualizado
+  (`botSlug` paso a requerido en la interfaz).
+- `server/tools/__tests__/navigate-to-page-gate.invariant.ts` (NUEVO): el test de este sprint.
+- `package.json`: script `test:c01`.
+
+### Test y falla-primero
+
+`test:c01` (nuevo): org cliente no recibe `navigate_to_page` (el resto de las tools si - el
+gate es quirurgico); bot `develop` si lo recibe; combinado con `plan.tools` es un AND (ninguno
+de los dos gates alcanza solo: BUSINESS+cliente sigue sin la tool, BUSINESS+develop la tiene,
+STARTER+develop tampoco la tiene); `isAgencyOwnedBot` unitario; y un guard de alcance que fija
+`TOOLS_RESTRICTED_TO_AGENCY_BOT` a exactamente `['navigate_to_page']` para que una segunda tool
+no entre ahi por accidente.
+
+Falla-primero: se removio temporalmente el guard del loop en `getTools.ts` (produccion real, no
+una copia) y se corrio `test:c01` - fallo en la primera asercion ("org cliente NO recibe
+navigate_to_page"), `AssertionError` con `actual: false, expected: true`. Se restauro el guard
+y se re-corrio: verde.
+
+Nota aparte (detectado por la corrida real, no asumido): el primer `npm run test:c01` fallo con
+`actual: undefined` en el guard de alcance - `TOOLS_RESTRICTED_TO_AGENCY_BOT` habia quedado sin
+`export` en `getTools.ts`. Se agrego el `export` faltante y se re-corrio: verde. Se deja
+documentado porque es exactamente el tipo de error que la corrida real esta para atrapar.
+
+### Gates
+
+- `tsc --noEmit` (via `node_modules\.bin\tsc.cmd`, sin `npx`): 0 errores.
+- `eslint` sobre los 6 archivos tocados: 0 errores, 2 warnings PREEXISTENTES (`_ctx` sin usar en
+  `offer_handoff_options`/`navigate_to_page`, ya estaban antes de este sprint).
+- Bateria completa (c01 nuevo + contactpath + watchdog + emptyfallback + providerclose +
+  deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las 15, OK.
+- `prisma migrate status`: schema al dia, 86 migraciones, sin drift.
+- Sin migracion, sin seed, sin git, sin tocar frozen ni scoping por organizacion.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+En el bot de develOP: `navigate_to_page` sigue funcionando igual que antes (nada cambio para el
+bot propio). En el bot de un cliente con plan que incluya la tool (sanmiguel o matsu, el que
+corresponda): confirmar en una conversacion nueva que el modelo ya no ofrece la navegacion. Si
+Matsu hoy tiene `navigate_to_page` habilitado (Fase 0, punto 3, sin confirmar por archivos),
+verificar en el admin su plan real y que el comportamiento en su sitio cambio.
+
+### Deuda que deja este sprint
+
+- `BotConfig.allowedNavigationPaths` (el fix real - requiere migracion, reemplaza esta
+  contencion).
+- Revertir los probes de PROBE-STREAM.
+- `BREVO_API_KEY` + Telegram sin configurar (notificaciones de lead no se envian).
+- PII en stderr de `show_whatsapp_handoff`.
+- Dos hashes de IP divergentes (`route.ts:73` sin salt).
+- `CHATBOT_IP_HASH_SALT` sin setear.
+- Key de Vertex expuesta en logs, pendiente de rotacion.
+- Promesas detached de `captureLead.ts:467,474`.
+- Indentacion de mas en `persistTurn` (whitespace-only).
+- `.netlify/state.json` sin gitignorar.
+- `demo-chat/[slug]/route.ts` sin el middleware de PROVIDER-CLOSE.
+- NUEVO: no se pudo confirmar por archivos si `matsu` (piloto comercial real) tiene hoy
+  `Subscription`/Plan asignado - si no lo tiene, corre en `PLAN_FALLBACK` (sin
+  `navigate_to_page`) y el bug de este sprint podria no haber sido explotable ahi todavia.
+  Verificar en el admin.
+
+---
+
+## D.1 - backfill de verticalPack (cierra el bloque EV)
+
+Item unico pendiente que bloqueaba el efecto real de EV.3/EV.4/EV.5 (ver bloque EV mas arriba):
+la migracion de EV.2 dejo `BotConfig.verticalPack` en 'base' para todos los bots. Scoring e
+intents por pack estan codeados y cerrados desde EV.3/EV.4, pero sin el pack real asignado por
+bot su efecto no existia en runtime. Sin clientes reales activos (Matsu pincho, cero trafico),
+el gate de EV.3 ("no desplegar a un bot con trafico") no aplicaba - este backfill era el unico
+paso que faltaba.
+
+### Fase 0 (hallazgos, read-only)
+
+1. Packs confirmados: `base` (generico, red de seguridad del registry), `usados` (concesionaria,
+   scoring + 7 intents verbatim del motor historico), `agencia` (bot propio de develOP, intents
+   propios, scoring y widgetCopy heredados de `base` por decision EV.4). Cada uno define scoring,
+   intents, toolCopy y widgetCopy (`server/verticals/types.ts:142-155`).
+2. Bots segun seeds (sin consultar produccion): `develop` (industry 'generico', sin verticalPack
+   seteado -> default 'base'), `sanmiguel` (industry 'automotive', el seed YA declara
+   verticalPack 'usados' pero si corrio contra una DB real es no confirmado), `matsu` (industry
+   'concesionaria', sin verticalPack seteado -> default 'base').
+3. `prisma/seed.ts` NO es logica de backfill reutilizable: es un upsert monolitico completo (org,
+   usuario, KB y ~15 campos mas de BotConfig). Se escribio un script nuevo, quirurgico, espejo de
+   `prisma/seeds/add-contact-tool.ts`.
+4. Alcance de verticalPack verificado mas alla de scoring/intents/toolCopy: tambien viaja como
+   metadata en el payload v2 de sync a CRM (`server/crm/syncLeadToCrm.ts`) y en la columna del CSV
+   de export de leads (`server/leads/csv/buildLeadsCsv.ts`), resuelta en vivo al momento del
+   export - ninguno es dato guardado del lead ni toca tenancy/auth/facturacion. El guard de
+   `evals/runner.ts` (aborta si un bot QA no matchea su pack esperado) no aplica: los bots de
+   evals usan slugs dedicados (`qaseed-evals-*`), sin superposicion con develop/sanmiguel/matsu.
+
+### El defecto que corrige (redactado tal como quedo, no como se planteo originalmente)
+
+NO es "intents de agencia en bots de concesionaria" - eso era cierto PRE-EV.4, cuando los
+patrones de agencia eran el unico hardcode del motor y corrian en todos los bots por igual.
+POST-EV.4 (codigo ya deployado), un bot sin backfill cae en el pack 'base' - 2 intents genericos
+(precio/consulta) - no en los 6 de agencia. El defecto real: `matsu` corria con intents
+genericos donde deberian ir los 7 de concesionaria (compra/visita/permuta/financiacion/modelo/
+precio/humano) que EV.4 construyo especificamente para este caso.
+
+### Mapeo aprobado
+
+develop -> 'agencia' (bot propio de develOP, el pack esta escrito para el). sanmiguel -> 'usados'
+(ya es el valor que el seed declara). matsu -> 'usados' (industry 'concesionaria' calza exacto
+con el proposito del pack). Cualquier otro bot queda sin tocar (no se fuerza a 'base' - ya nace
+ahi por default de schema).
+
+### Archivo
+
+`prisma/seeds/backfill-vertical-pack.ts` (NUEVO). Toca UNICAMENTE `BotConfig.verticalPack`,
+`data` de una sola clave. Idempotente (reporta `unchanged` si ya esta en el valor destino). No
+crea ni borra filas. No toca bots fuera del mapeo. Modo dry-run obligatorio (`DRY_RUN=1` o
+`--dry-run`) - primera corrida de este script contra la Neon compartida.
+
+### Gates
+
+`tsc --noEmit` (via node_modules\.bin\tsc.cmd, sin npx): 0 errores. `eslint` sobre el archivo
+nuevo: 0 errores, 0 warnings. `prisma migrate status`: schema al dia, 86 migraciones, sin drift.
+Sin tests (es infraestructura de un solo uso, se verifica a ojo segun el propio sprint). El
+agente NO corrio el script contra ninguna DB, ni dry-run - eso lo corre Valentino a mano.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Correr el dry-run primero, revisar el log linea por linea contra el mapeo esperado, y recien
+despues la corrida real. Tras la corrida real: confirmar en el admin/DB que los 3 bots quedaron
+en su pack; y en una conversacion nueva de matsu o sanmiguel, confirmar que el bot reconoce los
+intents de concesionaria (ej. "quiero permutar mi auto") en vez de caer en los genericos de base.
+Esto cierra el ultimo gate abierto de EV.3/EV.4/EV.5 (bloque EV en su totalidad).
+
+---
