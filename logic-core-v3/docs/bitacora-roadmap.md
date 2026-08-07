@@ -16016,3 +16016,116 @@ Ninguna nueva. `NextConfig` sin usar en `next.config.ts` (preexistente, sin toca
 por si alguien lo retoma.
 
 ---
+
+## H.3 - PROBE-STREAM: se apaga el ruido, se conserva el instrumento
+
+Los probes de PROBE-STREAM fueron el instrumento que encontro el deadlock (ver
+DEADLOCK-FINISH-STEP): nuestro propio `createEmptyResponseFallbackTransform` retenia el chunk
+`finish-step` y trababa el pipeline del SDK. Cumplida esa funcion, emitian ~20 lineas ERROR por
+conversacion en prod (`console.error` por diseno, para que salieran por stderr).
+
+NO fue un `git revert` de `ac86e85`: desde ese commit `handleChatRequest.ts` se reestructuro
+fuerte (extraccion de `persistTurn`, ~500 lineas movidas), `streamProbe.ts` crecio, y el watchdog
+sumo cableado adyacente (`markContent`, `beginStep`) que NO es probe y tiene que quedar. Un revert
+ciego conflictuaba y se llevaba cosas vivas.
+
+### El hallazgo de la Fase 0 que cambio el planteo del sprint
+
+Dos de los cinco items declarados "telemetria permanente intocable" se emitian HOY via el probe,
+o sea gated por `CHATBOT_STREAM_PROBE`, y ademas en el camino sano - chocando con la otra regla
+del sprint ("lo que emite por conversacion se va"):
+
+- `provider.stream_chunks` -> `streamProbe.mark(...)`
+- `watchdog_settled` -> `streamProbe.mark(...)`
+
+Los otros tres si eran permanentes de verdad (`chatbotLog` ungated): `chat.watchdog_fired`,
+`chat.onfinish_phases`, `chat.persist_abandoned`.
+
+Tercer enganche, tecnico: `createChunkTally` vivia en `streamProbe.ts` pero su `snapshot()`
+alimenta `chat.onfinish_phases`, que es permanente. Borrar el modulo del probe habria roto un log
+permanente.
+
+Valentino resolvio la contradiccion: la regla estaba mal formulada, no los items.
+
+### Decision ejecutada
+
+1. `streamProbe.ts` + el gate `CHATBOT_STREAM_PROBE` SE QUEDAN. Reconstruir el instrumento si
+   aparece otro cuelgue seria tirar tres sprints de trabajo. Apagado cuesta una lectura de env var
+   por request y un `return` sobre un booleano.
+2. `provider.stream_chunks` y `watchdog_settled` PROMOVIDOS a telemetria de primera clase: salen
+   del gate, se emiten SIEMPRE via `chatbotLog` (formato type/level/timestamp, igual que
+   `chat.watchdog_fired`). Son la unica senal de si el pipeline cierra por si mismo.
+3. Los 6 emisores del camino sano, ELIMINADOS (no gated - borrados):
+   `streamText_construct` (enter+exit), `beforeStreamResponse`, `firstChunk` (+ su flag
+   `firstChunkProbed`), el mark de `onStepFinish`, `onFinish_enter`, y el heartbeat `chunkFlow`
+   (dentro de `createChunkTally`). Criterio: su pregunta diagnostica ya esta respondida Y su
+   informacion ya viaja en telemetria permanente - `firstChunk` es redundante con `ttfbAt` ->
+   `timings.llm_ttfb_ms`; `onFinish_enter` con `chat.onfinish_phases`; el mark de `onStepFinish`
+   con `timings.step_count`; el heartbeat con el snapshot del tally en `chat.onfinish_phases`.
+4. `createChunkTally` MOVIDO a `server/chat/chunkTally.ts`, desacoplado del probe (ya no recibe
+   `StreamProbe` ni emite nada; solo cuenta). Con eso la telemetria permanente deja de depender
+   del modulo temporal: si algun dia se borra `streamProbe.ts`, no se rompe ningun log.
+   `CHUNK_FLOW_HEARTBEAT_MS` desaparece (era solo del heartbeat).
+5. `chat.watchdog_fired`, `chat.onfinish_phases` y `chat.persist_abandoned`: sin tocar.
+
+### Lo que queda gated (el instrumento, para un cuelgue FUTURO)
+
+Cinco marks, TODOS solo-ante-anomalia - ninguno emite en el camino sano ni con el probe prendido:
+`provider.stream_close_skipped` (modelo no-v3, nunca ocurre hoy), `watchdog_tool_max_forced` (tool
+colgado 15s), `persistTurn_skipped` (doble persistencia), `onError_enter`, `onAbort_enter`.
+
+Y los pares enter/exit de `probeAround` alrededor de cada await a DB de los tools
+(`captureLead.ts`, `showWhatsappHandoff.ts`, `confirmContactRequest.ts`): SIN TOCAR, gated. Estos
+SI emitirian en el camino sano con el probe prendido - se dejan a proposito porque son
+literalmente el instrumento que encontro el deadlock, y prenderlos es una accion deliberada de
+diagnostico. Con la env var sin setear son no-ops.
+
+### Nombres de las dos promovidas - decision explicita
+
+Se conservan los nombres EXACTOS (`watchdog_settled`, `provider.stream_chunks`), sin migrarlos al
+prefijo `chat.` del resto de la telemetria permanente. Motivo: son los strings que ya se usan para
+filtrar en los logs de prod desde los sprints del watchdog, y renombrar telemetria en la misma
+operacion que la promueve agrega churn sin ganancia funcional. Si se prefiere consistencia
+`chat.*`, es un cambio de una linea en cada uno.
+
+Niveles: `watchdog_settled` -> `info` siempre (es el camino sano; su contraparte anomala
+`chat.watchdog_fired` ya es `warn`). `provider.stream_chunks` -> `warn` solo si
+`reason === 'idle'`, que es el unico caso en que ACTUAMOS nosotros (el propio tipo
+`ProviderStreamCloseReason` lo documenta: "Solo `idle` significa que actuamos"); `natural` y
+`cancelled` van `info`.
+
+### Detalle de implementacion que vale anotar
+
+El `onClose` del middleware es un CALLBACK, y el narrowing de `bot` (un `let`) no sobrevive al
+closure - `tsc` lo agarro (TS18047). Se usa `resolvedBot`, que existe exactamente para eso
+(`handleChatRequest.ts:466`, comentario propio: "non-null reference for callbacks"), igual que ya
+hacia `chat.watchdog_fired`.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre los 3 archivos tocados: 0 errores, 0 warnings. Bateria
+completa + los 2 tests de crons de H.2 (17 en total: c01, contactpath, watchdog, emptyfallback,
+providerclose, deadline, onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4, cron-secret,
+t02): TODAS OK. Sin tests nuevos: el sprint es sustractivo mas dos cambios de destino de log; lo
+que quedaba por verificar era que no se rompiera nada, y de eso se encarga la bateria - en
+particular `test:watchdog`, `test:providerclose` y `test:emptyfallback`, que ejercitan justo el
+codigo tocado.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+`CHATBOT_STREAM_PROBE` ya fue borrada de Netlify antes de este sprint, asi que el ruido en prod ya
+estaba cortado. Tras el deploy, en una conversacion real con el flujo entero (captura + contacto):
+(1) SIGUEN apareciendo `watchdog_settled`, `provider.stream_chunks`, `chat.onfinish_phases` y
+`chat.watchdog_fired`; (2) NO aparece ninguna linea con `probe:"stream"`; (3) el turno se comporta
+identico (texto completo, input destrabado rapido, `step_count`/`costUsd` no-cero).
+
+### Deuda
+
+- `provider.stream_close_skipped` queda gated aunque su hermano `provider.stream_chunks` se
+  promovio. Es una asimetria conocida y aceptada: la rama nunca se ejecuta hoy (todos los modelos
+  son v3) y su ausencia ya esta monitoreada indirectamente - si el middleware no se aplicara,
+  `provider.stream_chunks` dejaria de aparecer, que es justo lo que la verificacion humana mira.
+  Promoverlo quedo fuera de scope (un objetivo por sprint).
+- El resto de la deuda conocida sigue igual que en H.4 - este sprint no agrega ninguna otra.
+
+---

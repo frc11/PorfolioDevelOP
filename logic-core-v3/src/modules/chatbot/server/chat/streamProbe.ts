@@ -1,15 +1,29 @@
 /**
- * PROBE-STREAM — Instrumentación TEMPORAL de diagnóstico para localizar el
- * punto EXACTO donde el stream del chatbot se cuelga en producción.
+ * PROBE-STREAM — Instrumento de diagnóstico APAGADO POR DEFECTO, para localizar
+ * el punto EXACTO donde el stream del chatbot se cuelga.
  *
- * CONTEXTO: en prod, una invocación colgada muestra `chat.llm_request_start` y
- * después, directo, `Duration: 30000` (el kill de Netlify). `chat.onfinish_phases`
- * —que vive en un `finally` y corre SIEMPRE si `onFinish` llega a entrar— NO
- * aparece. Eso prueba que el cuelgue está AGUAS ARRIBA de `onFinish`, en algún
- * `await` del tramo `streamText()` → tools → `onFinish` que hoy no loguea nada.
+ * ESTADO (H.3). El cuelgue que motivó este módulo YA ESTÁ RESUELTO: era nuestro
+ * propio `createEmptyResponseFallbackTransform` reteniendo el chunk
+ * `finish-step` y deadlockeando el pipeline del SDK (ver DEADLOCK-FINISH-STEP en
+ * la bitácora). Este instrumento fue el que lo encontró, después de tres sprints
+ * de hipótesis equivocadas sobre el provider.
  *
- * ESTE MÓDULO ES TEMPORAL Y REVERSIBLE. Cada línea que emite lleva el campo
- * `probe: 'stream'` para poder localizarla y revertirla de una.
+ * POR QUÉ SE QUEDA IGUAL. Reconstruirlo si aparece OTRO cuelgue sería tirar ese
+ * trabajo. Con `CHATBOT_STREAM_PROBE` sin setear cuesta una lectura de env var
+ * por request y un `return` sobre un booleano: cero líneas de log, cero
+ * overhead. H.3 sacó los puntos que emitían en el CAMINO SANO (eran ~20 líneas
+ * ERROR por conversación) y dejó los que sirven para diagnosticar algo nuevo:
+ * los pares enter/exit alrededor de cada await a DB de los tools, y las entradas
+ * de `onError`/`onAbort`.
+ *
+ * NO CONFUNDIR con la telemetría permanente, que NO pasa por acá y se emite
+ * siempre vía `chatbotLog`: `chat.watchdog_fired`, `watchdog_settled`,
+ * `provider.stream_chunks`, `chat.onfinish_phases`, `chat.persist_abandoned`.
+ * Ese es el diagnóstico de rutina; esto es el instrumento que se prende cuando
+ * el diagnóstico de rutina no alcanza.
+ *
+ * CÓMO PRENDERLO: `CHATBOT_STREAM_PROBE=1` en el entorno. Cada línea que emite
+ * lleva el campo `probe: 'stream'` para poder aislarlas de un grep.
  *
  * POR QUÉ CADA LÍNEA ES AUTOSUFICIENTE PARA REORDENAR A MANO
  * Netlify bufferea y reordena logs — se comprobó una línea `Duration` apareciendo
@@ -94,89 +108,6 @@ export function createStreamProbe(conversationId: string, startTime: number): St
     enabled,
     probe,
     mark: (point, extra) => probe(point, 'mark', extra),
-  }
-}
-
-/**
- * STREAM-TIMEOUT (Fase 2) — Contador de chunks del provider, para confirmar o
- * descartar la hipótesis del cuelgue: **¿Gemini sigue emitiendo chunks después
- * de terminar la respuesta?**
- *
- * POR QUÉ IMPORTA: `resetChunkTimeout()` es la PRIMERA línea del transform del
- * SDK (`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider —
- * incluidos los que el SDK descarta enseguida (un `text-delta` con
- * `delta.length === 0` hace `break` sin enqueue, `:7824-7834`; `stream-start`
- * hace `return`, `:7794-7797`). Si Gemini sigue emitiendo chunks vacíos o
- * keepalives, el timer de `chunkMs` se reinicia para siempre y NUNCA vence.
- * Eso explicaría por qué el `chunkMs` de la Fase 1 no cortó el cuelgue.
- *
- * ⚠️ LÍMITE DE ESTA MEDICIÓN, y hay que tenerlo presente al leer el log: este
- * tally cuenta en `onChunk`, que el SDK invoca AGUAS ABAJO del enqueue. Los
- * chunks descartados NO llegan acá. O sea:
- *   - contador que SIGUE SUBIENDO tras el fin del texto → Gemini emite chunks
- *     visibles de más (hipótesis confirmada, variante "ruido visible");
- *   - contador ESTANCADO y aun así el `chunkMs` no vence → los chunks existen
- *     pero el SDK los descarta antes de `onChunk` (hipótesis confirmada,
- *     variante "ruido invisible" — la más probable);
- *   - contador estancado Y el `chunkMs` corta → el provider se calló de verdad.
- * Las dos primeras se distinguen entre sí por el contador; ambas se distinguen
- * de la tercera por si el stream aborta o no.
- *
- * HEARTBEAT en vez de log terminal: el modo de falla es justamente que ningún
- * hook terminal dispara, así que un resumen emitido al final no se vería nunca.
- * Se emite periódicamente desde el propio `onChunk`, con throttle para no
- * inundar el log.
- */
-export interface ChunkTally {
-  /** Registra un chunk recibido. Emite el heartbeat si toca. */
-  record(chunkType: string): void
-  /** Contadores acumulados, listos para adjuntar a otra emisión. */
-  snapshot(): ProbeExtra
-}
-
-/** Intervalo mínimo entre heartbeats de `chunkFlow`. */
-export const CHUNK_FLOW_HEARTBEAT_MS = 2_000
-
-/** `text-delta` → `chunks_text_delta`. Claves planas y seguras para el log. */
-function tallyKey(chunkType: string): string {
-  return `chunks_${chunkType.replace(/[^a-zA-Z0-9]+/g, '_')}`
-}
-
-export function createChunkTally(
-  probe: StreamProbe,
-  heartbeatMs: number = CHUNK_FLOW_HEARTBEAT_MS,
-): ChunkTally {
-  const counts = new Map<string, number>()
-  let total = 0
-  let lastChunkAt = Date.now()
-  let lastEmitAt = 0
-
-  const snapshot = (): ProbeExtra => {
-    const out: ProbeExtra = {
-      chunks_total: total,
-      // Silencio del provider hasta ESTE instante. Es el número que decide:
-      // si se mantiene chico mientras el stream sigue colgado, el provider
-      // sigue hablando y ningún timeout ENTRE chunks puede cortar.
-      msSinceLastChunk: Date.now() - lastChunkAt,
-    }
-    for (const [type, count] of counts) out[tallyKey(type)] = count
-    return out
-  }
-
-  return {
-    snapshot,
-    record(chunkType) {
-      total += 1
-      counts.set(chunkType, (counts.get(chunkType) ?? 0) + 1)
-      const now = Date.now()
-      // msSinceLastChunk del heartbeat mide el gap ANTES de este chunk.
-      const gapMs = now - lastChunkAt
-      lastChunkAt = now
-      if (!probe.enabled) return
-      if (now - lastEmitAt < heartbeatMs) return
-      lastEmitAt = now
-      probe.probe('chunkFlow', 'mark', { ...snapshot(), gapMs })
-    },
   }
 }
 

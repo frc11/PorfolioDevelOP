@@ -82,7 +82,10 @@ import {
 // PROBE-STREAM — instrumentación TEMPORAL de diagnóstico del tramo
 // streamText() → tools → onFinish, gated por CHATBOT_STREAM_PROBE. Ver el
 // encabezado de streamProbe.ts. Reversible: buscar `probe: 'stream'`.
-import { createStreamProbe, createChunkTally } from './streamProbe'
+import { createStreamProbe } from './streamProbe'
+// Contador de chunks del provider — telemetría PERMANENTE (alimenta
+// `chat.onfinish_phases`). H.3 lo separó del probe: ver chunkTally.ts.
+import { createChunkTally } from './chunkTally'
 // WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
 // Ver el encabezado de streamWatchdog.ts para el porqué.
 import { createStreamWatchdog, type StreamWatchdogController } from './streamWatchdog'
@@ -1040,10 +1043,25 @@ export async function handleChatRequest(
           middleware: createProviderStreamCloseMiddleware({
             idleMs: PROVIDER_STREAM_IDLE_MS,
             initialIdleMs: PROVIDER_STREAM_INITIAL_IDLE_MS,
-            // Instrumentación gated por CHATBOT_STREAM_PROBE (el `mark` es
-            // no-op sin la env var). Responde la pregunta abierta del costo:
-            // si `sawFinishChunk` es true, el `usage` se recupera solo.
-            onClose: (report) => streamProbe.mark('provider.stream_chunks', report),
+            // H.3 — telemetría PERMANENTE (antes iba por el probe, gated).
+            // Junto con `watchdog_settled` es la única señal de si el pipeline
+            // cierra por sí mismo: `sawFinishChunk` dice si el provider manda
+            // su chunk terminal (y con él el `usage`, o sea el costo).
+            // `warn` solo cuando `reason: 'idle'` — el único caso en que
+            // ACTUAMOS nosotros; `natural`/`cancelled` son el camino sano.
+            onClose: (report) =>
+              chatbotLog(
+                'provider.stream_chunks',
+                {
+                  conversationId: conversation.id,
+                  // `resolvedBot`, no `bot`: esto es un callback y el narrowing
+                  // de un `let` no sobrevive al closure (ver :466).
+                  botConfigId: resolvedBot.id,
+                  botSlug: slug,
+                  ...report,
+                },
+                report.reason === 'idle' ? 'warn' : 'info',
+              ),
           }),
         })
       : rawModel
@@ -1118,12 +1136,10 @@ export async function handleChatRequest(
   // separate Vertex time from post-LLM persistence time.
   const llmStartAt = Date.now()
   let ttfbAt: number | null = null
-  // PROBE-STREAM — flag para emitir el mark `firstChunk` una sola vez.
-  let firstChunkProbed = false
-  // STREAM-TIMEOUT (Fase 2) — conteo de chunks por tipo + heartbeat. Confirma o
-  // descarta que Gemini siga emitiendo chunks tras terminar la respuesta (lo que
-  // reinicia el timer de `chunkMs` para siempre). Ver streamProbe.ts.
-  const chunkTally = createChunkTally(streamProbe)
+  // Conteo de chunks por tipo. Su `snapshot()` viaja en `chat.onfinish_phases`
+  // (permanente): si `chunks_total` siguió subiendo tras el fin del texto, el
+  // provider seguía hablando. Ver chunkTally.ts.
+  const chunkTally = createChunkTally()
   // STREAM-TIMEOUT (Fase 2) — Texto del asistente acumulado por nuestra cuenta.
   // Es la ÚNICA forma de tener el mensaje en el camino de abort: cuando el run
   // muere por timeout, el SDK no arma ni entrega el texto (no hay `finish-step`,
@@ -1745,12 +1761,6 @@ export async function handleChatRequest(
     }
   }
 
-  // PROBE-STREAM — streamText() en sí es síncrono (devuelve el
-  // DefaultStreamTextResult de una, el trabajo real es todo dentro de sus
-  // callbacks/promesas internas), así que este par enter/exit debería ser
-  // siempre ~0ms. Sirve de ancla: si ALGÚN DÍA esto no cierra, el cuelgue está
-  // en la construcción misma, no en la ejecución del stream.
-  streamProbe.probe('streamText_construct', 'enter')
   const result = streamText({
     model,
     system: enrichedSystemPrompt,
@@ -1812,21 +1822,10 @@ export async function handleChatRequest(
     experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
       emptyFallbackInjected = true
     }),
-    onStepFinish: (step) => {
+    // El conteo de steps viaja en `timings.step_count`
+    // (`chat.llm_request_finished`), que es permanente.
+    onStepFinish: () => {
       stepCount += 1
-      // PROBE-STREAM — el SDK no expone un chunk `finish` a `onChunk` (solo
-      // text-delta/reasoning-delta/source/tool-call/tool-result/tool-input-*/raw
-      // — ver ai/dist/index.js, eventProcessor.transform), así que no hay un
-      // "textDone" literal disponible ahí. `onStepFinish` es el hook más cercano
-      // con `finishReason` real por step — cubre la misma necesidad diagnóstica
-      // (¿llegó el modelo a terminar de generar ESTE step?) sin inventar un punto
-      // que no corresponde a ningún callback real del SDK.
-      streamProbe.mark('onStepFinish', {
-        stepNumber: step.stepNumber,
-        finishReason: step.finishReason,
-        toolCallCount: step.toolCalls.length,
-        textLength: step.text.length,
-      })
     },
     onChunk: ({ chunk }) => {
       // WATCHDOG-4 — LA señal de "el modelo empezó a responder de verdad".
@@ -1856,12 +1855,6 @@ export async function handleChatRequest(
       // STREAM-TIMEOUT (Fase 2) — conteo + heartbeat (throttled). Solo TIPOS y
       // contadores, jamás contenido.
       chunkTally.record(chunk.type)
-      // PROBE-STREAM — una sola vez, el primer chunk de CUALQUIER tipo (no solo
-      // los que cuentan para TTFB). NO se loguea contenido, solo el tipo.
-      if (!firstChunkProbed) {
-        firstChunkProbed = true
-        streamProbe.mark('firstChunk', { chunkType: chunk.type })
-      }
     },
     onError: async ({ error }) => {
       // PROBE-STREAM — primera línea: confirma si el hook llega a entrar.
@@ -1973,15 +1966,6 @@ export async function handleChatRequest(
       }
     },
     onFinish: async ({ text, usage, finishReason, toolCalls, steps }) => {
-      // PROBE-STREAM — primera línea, literal. Es el chequeo central de este
-      // sprint: si esto NUNCA aparece en un log donde sí aparece `firstChunk` o
-      // algún `tool:*:enter`, el cuelgue está confirmado aguas arriba de acá.
-      streamProbe.mark('onFinish_enter', {
-        textLength: text.length,
-        finishReason,
-        ...chunkTally.snapshot(),
-      })
-
       // MS-1: en multi-step (stopWhen=stepCountIs(3)), las propiedades top-level
       // del onFinish (toolCalls, usage) son SOLO del último step. Tenemos que
       // agregar manualmente desde `steps[]` para que el chatMessage final tenga:
@@ -2002,15 +1986,6 @@ export async function handleChatRequest(
       })
     },
   })
-  // PROBE-STREAM — cierra el enter de arriba (streamText() es síncrono: esto
-  // debería salir siempre a ~0ms del enter).
-  streamProbe.probe('streamText_construct', 'exit')
-
-  // PROBE-STREAM — último punto ANTES de devolver el Response. streamText() ya
-  // devolvió (es síncrono); esto solo confirma que el tramo de setup previo al
-  // return no colgó por su cuenta.
-  streamProbe.mark('beforeStreamResponse')
-
   // ─── WATCHDOG — el cierre del stream, desde NUESTRO borde ───────────────────
   // Último eslabón bajo nuestro control antes de que la respuesta salga. Si el
   // body se queda mudo más de STREAM_WATCHDOG_IDLE_MS, persistimos el turno y
@@ -2089,9 +2064,16 @@ export async function handleChatRequest(
       }
       // Cierre normal o cancelación del cliente: ya no hay nada que suspender.
       clearToolMaxTimer()
-      // Solo diagnóstico, gated por el probe para no agregar una línea por
-      // request en operación normal.
-      streamProbe.mark('watchdog_settled', {
+      // H.3 — telemetría PERMANENTE (antes iba por el probe, gated). Es la
+      // contraparte sana de `chat.watchdog_fired`: el stream cerró solo (o el
+      // cliente canceló) y el watchdog NO tuvo que actuar. Sin esta línea, un
+      // pipeline que dejara de cerrar por sí mismo se vería como silencio.
+      // Nombre sin prefijo `chat.` a propósito: es el que ya se usa para
+      // filtrar en los logs desde los sprints del watchdog.
+      chatbotLog('watchdog_settled', {
+        conversationId: conversation.id,
+        botConfigId: resolvedBot.id,
+        botSlug: slug,
         reason: info.reason,
         chunks: info.chunks,
         contentChunks: info.contentChunks,
