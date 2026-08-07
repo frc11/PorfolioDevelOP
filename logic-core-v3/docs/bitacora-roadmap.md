@@ -15681,3 +15681,118 @@ intents de concesionaria (ej. "quiero permutar mi auto") en vez de caer en los g
 Esto cierra el ultimo gate abierto de EV.3/EV.4/EV.5 (bloque EV en su totalidad).
 
 ---
+
+## D.3 - cron real de generate-insights (bloque DESPERTAR cerrado)
+
+Cierra el arco D.1/D.2/D.3 ("DESPERTAR"): D.1 backfilleo verticalPack, D.2 probo el motor de
+insights a mano contra produccion, D.3 (este sprint) lo hace correr solo. Un objetivo por sprint;
+la superficie del dueno para ver estos insights queda pendiente del chat Panel/Dashboard.
+
+### El hallazgo de D.2 (no ejecutado por este agente, documentado para que quede en la bitacora)
+
+El motor de `ChatbotInsight` funciona y produce senal de calidad. Disparado a mano contra el bot
+`develop`: `ok: true`, `conversationsAnalyzed: 17`, 4 insights, todos con evidencia citada y
+accion concreta:
+
+| Categoria | evidenceCount | Que detecto |
+|---|---|---|
+| KB_GAP | 2 | Dos usuarios preguntaron directamente por el costo de un servicio |
+| KB_GAP | 4 | Cuatro usuarios pidieron explicitamente una lista de los servicios |
+| CONVERSION_LEAK | 1 | Un usuario proporciono nombre, email y telefono... -> detecto solo el bug de captura de leads que costo dos semanas de esta sesion |
+| CONFIG_TWEAK | 7 | "Seis conversaciones comenzaron con un simple 'hola' y no progresaron" (asi redactado por el LLM: evidenceCount 7 vs "seis" en el texto - inconsistencia propia de la corrida, no corregida aca) |
+
+**E1 no es construccion: es despertar lo que ya existe.** El buque insignia del roadmap Plano B
+ya estaba codeado (EV.5/B9.3 lo dejaron armado); le faltaba correr solo y tener superficie. D.3
+resuelve la primera mitad.
+
+### Fase 0 (hallazgos, read-only)
+
+1. `netlify/functions/cleanup-old-events-cron.ts` (molde, CRON-2): lee `process.env.URL` +
+   `process.env.CRON_SECRET`, si falta alguno devuelve 500 SIN llamar (falla cerrado del lado del
+   llamador). `fetch` sin metodo explicito (GET por default, matchea que su target tambien es
+   GET) y SIN timeout. Maneja error con try/catch, loguea con strings con prefijo `[nombre-cron]`
+   (no JSON estructurado).
+2. `/api/cron/generate-insights` (`route.ts:9`): **POST**, exige `Authorization: Bearer
+   <CRON_SECRET>`, sin body. Devuelve `{ok, durationMs, results: {total, processed,
+   skipped_pending_overload, skipped_insufficient, generated, failed, emails_sent}}`. Procesa los
+   bots activos en un for..of SECUENCIAL (no Promise.all) - relevante para el timeout.
+3. `netlify.toml`: los 3 crons declarados como `[functions."<nombre>"]` con su `schedule` -
+   Netlify matchea el nombre de archivo en `netlify/functions/` contra esa key exacta (confirmado
+   por el propio comentario del molde). `generate-insights-cron` y `send-weekly-reports-cron`
+   estaban declarados sin archivo real - agendados por Netlify, fallando en silencio. Este sprint
+   agrega el archivo para el primero.
+4. `CRON_SECRET`: confirmado el defecto ya detectado - `generate-insights/route.ts` y
+   `send-weekly-reports/route.ts` comparan `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``
+   SIN chequear que la env var este seteada: si falta, el token esperado pasa a ser el string
+   literal "Bearer undefined". `cleanup-old-events/route.ts` (via `cron-secret.ts`, patron mas
+   nuevo) SI falla cerrado: chequea `!expectedSecret` explicito antes de comparar. Asimetria real
+   entre las dos rutas, no corregida en este sprint (un objetivo por sprint) - ver deuda.
+5. `send-weekly-reports/route.ts` existe, es GET, mismo patron viejo de auth (mismo defecto que
+   generate-insights). Es un sprint gemelo TRIVIAL: mismo molde de `cleanup-old-events-cron.ts`
+   sin ninguna de las 2 adaptaciones que pidio este sprint (no es POST, no necesita el timeout
+   largo - manda emails, no llama al LLM por bot). No se hizo aca (un objetivo por sprint).
+
+### Diseno
+
+`netlify/functions/generate-insights-cron.ts` (NUEVO), espejo de `cleanup-old-events-cron.ts` con
+3 diferencias explicitas: (1) POST en vez de GET, (2) timeout explicito en el fetch, (3) log
+estructurado `{type, level, timestamp, ...}` (mismo shape que `logger.ts`/`persistentLogger.ts`
+del proyecto, replicado local - esta function no importa el logger real para no arrastrar Prisma
+a un trigger que tiene que quedar liviano).
+
+Timeout: 20s. Aritmetica: una Netlify Function sincrona no pasa de ~26s (limite duro de AWS API
+Gateway que Netlify hereda) salvo Background Function (sufijo -background.ts, hasta 15 min,
+requiere plan que lo soporte) - ni el molde ni esta usan ese sufijo, mismo techo duro para ambas.
+El plan real de Netlify de este sitio NO es confirmable desde el repo (el propio
+`docs/operations/cron-jobs.md` deja la misma pregunta abierta para otro cron). 20s deja margen
+para que esta function devuelva SU PROPIO timeout, informativo, antes de que la plataforma mate
+la invocacion entera con un error menos claro.
+
+`netlify.toml` no se toco: la entrada `[functions."generate-insights-cron"]` ya existia.
+
+### Gates
+
+`tsc --noEmit` (via node_modules\.bin\tsc.cmd, sin npx): 0 errores. `eslint` sobre el archivo
+nuevo: 0 errores, 0 warnings. Bateria completa (c01 + contactpath + watchdog + emptyfallback +
+providerclose + deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las
+15, OK - confirmado que este sprint no toca nada de eso. `prisma migrate status`: al dia, 86
+migraciones, sin drift. Sin tests nuevos (infraestructura de un solo uso, se verifica corriendola,
+segun el propio sprint).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras deployar: (1) Netlify > Functions, confirmar que `generate-insights-cron` aparece agendada
+(el log del deploy deberia decir "Scheduling functions: ..."); (2) "Run now" desde Netlify sobre
+esa function; (3) en Prisma Studio > ChatbotInsight, filas nuevas con createdAt de recien; (4)
+confirmar que CRON_SECRET esta seteada en Netlify - si no lo esta, generate-insights (y
+send-weekly-reports) quedan con el token esperado predecible.
+
+### Deuda que deja este sprint
+
+**Nueva y prioritaria:** el patron "Bearer undefined" sigue abierto en `generate-insights/route.ts`
+y en `send-weekly-reports/route.ts` (si CRON_SECRET no esta seteada en el entorno, el token
+esperado es un string literal predecible en vez de fallar cerrado). `cleanup-old-events/route.ts`
+ya tiene el patron correcto (`cron-secret.ts`) - migrar las otras dos rutas al mismo helper es
+mecanico pero es su propio sprint.
+
+**Conocida, carry-forward:**
+- Superficie de insights para el dueno (chat Panel) - hoy los insights se acumulan en PENDING
+  sin que nadie los vea.
+- Deteccion en runtime de "el bot admitio no saber" - los 4 insights de D.2 salen de ausencias
+  en 30 dias de conversaciones, no de que el bot lo dijera en el momento; extension natural de
+  E1, distinta de este batch retrospectivo.
+- `send-weekly-reports-cron` sin cablear (gemelo trivial, ver Fase 0 punto 5).
+- Rotar la key de Vertex expuesta en logs.
+- Revertir probes de PROBE-STREAM.
+- `BREVO_API_KEY` + Telegram sin configurar.
+- PII en stderr de `show_whatsapp_handoff`.
+- Dos hashes de IP divergentes (`route.ts:73` sin salt).
+- `CHATBOT_IP_HASH_SALT` sin setear.
+- Promesas detached de `captureLead.ts:467,474`.
+- Indentacion de mas en `persistTurn` (whitespace-only).
+- `.netlify/state.json` sin gitignorar.
+- `demo-chat/[slug]/route.ts` sin el middleware de PROVIDER-CLOSE.
+- `BotConfig.allowedNavigationPaths` (fix real de C0.1).
+- MS-E6.2 (descomponer `handleChatRequest.ts`, 871 lineas).
+
+---
