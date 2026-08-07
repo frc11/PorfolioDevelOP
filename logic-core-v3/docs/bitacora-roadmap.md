@@ -15796,3 +15796,223 @@ mecanico pero es su propio sprint.
 - MS-E6.2 (descomponer `handleChatRequest.ts`, 871 lineas).
 
 ---
+
+## H.1 - cron real de send-weekly-reports-cron (gemelo de D.3)
+
+Mismo defecto que D.3 resolvio para generate-insights-cron: `netlify.toml` declaraba
+`[functions."send-weekly-reports-cron"]` (schedule `"0 12 * * MON"`) sin archivo real en
+`netlify/functions/` - Netlify agendaba algo que no existia y fallaba en silencio.
+
+Fase 0 (read-only, releida fresca): `/api/cron/send-weekly-reports` (`route.ts:6`) es GET, sin
+body, mismo patron viejo de auth que generate-insights (`authHeader !== Bearer+CRON_SECRET`, sin
+chequear que la env var este seteada - mismo defecto "Bearer undefined", ya anotado como deuda en
+D.3, no tocado aca). Devuelve `{ok, total, sent, failed, skipped, errors}` con los campos SUELTOS
+en la raiz (a diferencia de generate-insights, que los anida bajo `results`).
+
+`netlify/functions/send-weekly-reports-cron.ts` (NUEVO), espejo de `cleanup-old-events-cron.ts`
+(que es GET, igual que este target - a diferencia de D.3 no hizo falta adaptar el metodo). Trae
+las dos mejoras de D.3 que valen igual: falla cerrado del lado del llamador si falta `CRON_SECRET`
+(no llama con "Bearer undefined"), y log estructurado `{type, level, timestamp, ...}` en vez de
+strings con prefijo. Mismo timeout de 20s que D.3 y misma razon: el techo real es el limite duro
+de plataforma (~26s), no la duracion esperada del trabajo - aunque aca el trabajo es mas liviano
+(emails transaccionales por bot, no LLM), la function no puede superar ese techo de todos modos.
+
+Decision de PII no pedida explicitamente pero consistente con la regla del sprint ("nunca loguear
+contenido... contadores, slugs, status y timings si"): `errors: string[]` de la ruta trae
+`${bot.slug}: ${mensaje}` (`sendWeeklyReports.ts:82,86-88`), y ese mensaje puede traer el email
+del destinatario si el provider lo hace eco en su propio error - se loguea solo `errorsCount`
+(la cantidad), nunca el array.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre el archivo nuevo: exit 0 (limpio). Bateria completa (c01
++ contactpath + watchdog + emptyfallback + providerclose + deadline + onf1 + infra1 + infra2 + c02
++ cost1 + cost2 + utm1 + re2 + ev4): las 15, OK - no pedida explicitamente por este sprint (terso,
+"sin tests"), corrida igual por consistencia con D.3 dado que es su gemelo. `prisma migrate
+status`: al dia, sin drift.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras deployar: el log del deploy tiene que listar las TRES functions agendadas (ya no dos) -
+"Scheduling functions: cleanup-old-events-cron, generate-insights-cron, send-weekly-reports-cron".
+"Run now" sobre `send-weekly-reports-cron` desde Netlify. Confirmar que `CRON_SECRET` esta
+seteada (sino, esta ruta y generate-insights quedan con el token esperado predecible).
+
+Con esto, los 3 crons declarados en `netlify.toml` tienen function real. Deuda sin cambios
+respecto de D.3 - el patron "Bearer undefined" sigue abierto en las 2 rutas viejas.
+
+---
+
+## H.2 - auth de crons que falle cerrado (cierra la deuda de D.3/H.1)
+
+Cierra la deuda marcada como prioritaria en D.3 y H.1: `generate-insights` y `send-weekly-reports`
+comparaban el header contra `Bearer ${process.env.CRON_SECRET}` sin chequear que la env var
+exista - si falta, el token esperado pasa a ser el string literal "Bearer undefined" y la ruta
+queda abierta a cualquiera que mande ese header. En `generate-insights` eso permitiria a un
+anonimo disparar generacion de insights (quema tokens de Vertex).
+
+### Relevamiento de las 8 rutas bajo app/api/cron/
+
+El build lista 8 rutas. Inventario completo del patron de auth de cada una (no solo las 2 que
+menciono el sprint):
+
+- **Patron viejo, vulnerable** (agujero real, corregido en este sprint):
+  `generate-insights` (POST), `send-weekly-reports` (GET), y una TERCERA no mencionada en el
+  sprint, encontrada en el relevamiento: `detect-bot-issues` (GET) - mismo `authHeader !==
+  Bearer+secret` sin chequear que la env var exista.
+- **Ya fallaban cerrado, pero duplicando el chequeo inline** (NO vulnerables, no tocadas):
+  `os-follow-up`, `regenerate-briefs`, `send-executive-reports` - las 3 ya tenian su propia copia
+  de `getProvidedCronSecret` + el chequeo `!expectedSecret || provided !== expectedSecret`
+  (exactamente las "3 duplicadas" que el comentario original de `cron-secret.ts` ya mencionaba).
+- **Ya fallaba cerrado, patron distinto** (no vulnerable, no tocada): `alerts` - chequea
+  `!expectedSecret || providedSecret !== expectedSecret` pero solo lee `X-Cron-Secret` (sin
+  soporte de `Authorization: Bearer`), sin usar el helper compartido.
+- **Ya usaba el patron correcto via el helper compartido** (el unico caso real de reuso antes de
+  este sprint): `cleanup-old-events`.
+
+### Por que no se tocaron os-follow-up, regenerate-briefs, send-executive-reports, alerts
+
+Ninguna de las 4 tiene el agujero (las 4 fallan cerrado hoy) - no hay vulnerabilidad que cerrar
+ahi, asi que "arreglar todas" no aplica a estas. Ademas, dominio: `os-follow-up` importa
+`SOLO_CONTACTOS_COMERCIALES` de `@/lib/leados/isolation` y trabaja sobre `OsLead` - es
+inequivocamente del lane LeadOS/Setter de Franco. `regenerate-briefs` y `send-executive-reports`
+trabajan sobre "executive brief" org-scoped por subscripcion activa - dominio de reporting para
+clientes, probablemente del chat Panel/Dashboard (misma frontera de proyecto que ya establecieron
+sprints anteriores de esta sesion). `alerts` tiene dueno incierto (`@/lib/alerts`, no es claramente
+del runtime del chatbot). Las 4 quedan con su patron actual (ya seguro) sin tocar.
+
+### Diseno
+
+El helper `getProvidedCronSecret` (`cleanup-old-events/cron-secret.ts`) se MOVIO a
+`src/lib/cron/cron-secret.ts` (como pidio el sprint: "si esta acoplado a su carpeta, moverlo a un
+lugar compartido es aceptable") - deja de vivir dentro de la carpeta de una ruta especifica, seria
+raro que `generate-insights` importara algo de la carpeta de `cleanup-old-events`. Convencion:
+mismo patron que `lib/isolation`, `lib/plan`, etc. Se borro el archivo viejo (no se dejo un
+re-export - es codigo 100% interno, sin necesidad de compatibilidad hacia atras).
+
+Se agrego una segunda funcion, `isAuthorizedCronRequest(request): boolean`, que compone la
+extraccion + la comparacion fallar-cerrado en una sola funcion. Antes, CADA ruta (incluida
+`cleanup-old-events`) repetia la misma linea `!expectedSecret || provided !== expectedSecret` -
+esto es lo que de verdad estaba duplicado 4 veces (el helper original solo cubria la extraccion
+del header). `cleanup-old-events` tambien se migro a usar `isAuthorizedCronRequest` directo, ya
+que se estaba tocando su import de todos modos.
+
+Efectos colaterales menores, reportados por transparencia:
+- `detect-bot-issues` antes solo aceptaba `Authorization: Bearer`; con el helper compartido ahora
+  tambien acepta `X-Cron-Secret` como fallback (aditivo, no reduce seguridad - mismo secret
+  exigido por cualquiera de los 2 caminos).
+- `send-weekly-reports` devolvia `{error: 'Unauthorized'}` en su 401 (sin `ok: false`, inconsistente
+  con su propia rama de error 500); ahora devuelve `{ok: false, error: 'Unauthorized'}` como el
+  resto de las rutas.
+- `generate-insights/route.ts` tenia un `any` preexistente (`const org: any = bot.organization`,
+  ajeno a este sprint) que quedo expuesto por eslint al tocar el archivo. `bot.organization` ya
+  viene tipado por el `include` de la query de arriba - se saco el `any`, cero cambio de
+  comportamiento. Regla del proyecto es "cero any, cero excepciones"; se corrigio en vez de
+  dejarlo pasar por estar en un archivo ya tocado.
+
+### Test
+
+`src/lib/cron/cron-secret.invariant.ts` (NUEVO) - los 3 casos que pidio el sprint
+(`isAuthorizedCronRequest`: sin env var rechaza, con env var + token correcto acepta, con token
+incorrecto rechaza) mas el caso central del bug real ("Bearer undefined" literal sin CRON_SECRET
+setead -> rechaza) y un sanity minimo de `getProvidedCronSecret`. El detalle fino de extraccion de
+headers lo sigue cubriendo el invariant existente de `cleanup-old-events`, solo se le actualizo el
+import.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre los 7 archivos tocados: 0 errores (encontro y se corrigio
+el `any` preexistente de arriba). `check:invariant:cron-secret` (nuevo) + `test:t02` (import
+actualizado): OK. Bateria completa (c01 + contactpath + watchdog + emptyfallback + providerclose +
+deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las 15, OK. `prisma
+migrate status`: al dia, sin drift.
+
+### Deuda
+
+Cerrada la deuda "Bearer undefined" para `generate-insights`, `send-weekly-reports` y
+`detect-bot-issues`. Sigue abierta (a proposito, fuera de este sprint) la duplicacion inline del
+mismo chequeo en `os-follow-up`, `regenerate-briefs`, `send-executive-reports` y el patron distinto
+de `alerts` - ninguna es vulnerable hoy, consolidarlas al helper compartido es limpieza, no
+seguridad, y son de otros dominios/lanes.
+
+---
+
+## H.4 - miscelaneos (dos commits)
+
+Tres items chicos sin relacion entre si. Items 1 y 2 en un commit, item 3 (whitespace-only) en
+otro, separado, como pidio el sprint.
+
+### 1. .gitignore / .netlify - sin cambios, la regla ya existia
+
+Investigado antes de tocar nada: `.netlify` ya esta en el `.gitignore` de la raiz del repo
+(`logic-core-runtime/.gitignore`, no `logic-core-v3/.gitignore` - son dos archivos distintos, el
+repo real es `logic-core-runtime`, `logic-core-v3` es una subcarpeta). La regla esta commiteada
+desde hace un mes (`7da07fce`, 2026-07-05, autor Valentino Olmedo) y sigue vigente hoy
+(`git check-ignore -v` la confirma). `git ls-files` no encontro ningun archivo tracked dentro de
+`.netlify/` que necesite `git rm --cached`. No hay nada que agregar: la premisa del sprint
+("aparece untracked hace semanas") no coincide con el estado actual del repo - se reporta la
+discrepancia en vez de escribir una regla redundante que no arreglaria nada.
+
+### 2. next.config.ts - key eslint removida, confirmado sin efecto en ningun chequeo real
+
+Verificado contra el codigo fuente instalado de Next 16.2.9
+(`node_modules/next/dist/server/config.js:167`), no contra documentacion externa:
+`warnOptionHasBeenDeprecated(userConfig, 'eslint', 'eslint configuration in next.config.ts is no
+longer supported...')`. La key esta deprecada y Next 16 ya no la lee bajo ninguna forma - no hay
+key de reemplazo a la que migrar, el mecanismo que controlaba (ESLint dentro de `next build`) no
+existe mas en el framework.
+
+Por que sacarla no desactiva ningun chequeo que usemos: `ignoreDuringBuilds: true` le decia a Next
+que NO corriera ESLint durante el build - o sea que el propio valor ya estaba deshabilitando algo,
+no habilitandolo. Como Next 16 no ejecuta esa integracion de todos modos (la key es un no-op),
+sacarla no cambia el comportamiento del build en absoluto. El chequeo real de lint de este repo es
+independiente: `npm run lint` (`eslint` plano, `package.json`), corrido a mano en cada sprint de
+esta sesion - nunca dependio de `next.config.ts`. Coincide con lo ya sabido: "next build ignora
+tipos/lint" no era un bug, era la key `ignoreDuringBuilds` + `ignoreBuildErrors` haciendo lo que
+decian.
+
+`typescript.ignoreBuildErrors` NO se toco - el sprint pedia especificamente la key `eslint`, y esa
+key sigue siendo valida y funcional en Next 16 (`tsc --noEmit` sigue siendo el gate real,
+independiente de esto tambien).
+
+Eslint sobre el archivo encontro 1 warning preexistente, no introducido por este cambio (verificado
+con `git diff`: el diff es exactamente las 3 lineas removidas, nada mas) - `NextConfig` importado
+pero nunca aplicado a `nextConfig` (`const nextConfig = {` en vez de `const nextConfig: NextConfig
+= {}`). No se toco: fuera de alcance de este sprint, y tipar el objeto podria destapar mismatches
+reales que el propio `ignoreBuildErrors` viene ocultando - cambio con riesgo, no pedido.
+
+### 3. Indentacion de persistTurn - whitespace-only, commit separado
+
+`handleChatRequest.ts` lineas 1279-1745 (467 lineas del rango, dentro de la funcion `persistTurn`)
+tenian un nivel de mas: el cuerpo movido tal cual desde el viejo `onFinish` (comentario propio en
+el archivo: "El cuerpo es el de onFinish movido TAL CUAL") quedo con la indentacion que tenia
+cuando vivia un nivel mas adentro. El preambulo de la funcion (lineas 1253-1277) ya estaba bien
+indentado (4 espacios, un nivel bajo la declaracion de la funcion en 2) - la desalineacion
+arrancaba justo despues, en el bloque `try/catch/finally` completo (que arrancaba en 6 espacios en
+vez de 4).
+
+Se removieron exactamente 2 espacios de indentacion al inicio de cada linea no vacia del rango
+(sed con direccion de linea, no edicion manual - a esta escala una transcripcion a mano es el modo
+mas facil de introducir un error real). El cierre de `persistTurn` (linea 1746) ya estaba correcto
+y no se toco.
+
+Verificacion pedida por el sprint, corrida y confirmada: `git diff -w` sobre el archivo da vacio
+(exit limpio de `git diff -w --quiet`) - cero diferencia semantica ignorando espacios. El diff real
+(con espacios) es simetrico: 427 inserciones / 427 eliminaciones sobre 467 lineas de rango (la
+resta son lineas en blanco dentro del bloque, que no tienen espacios que remover y por eso no
+cuentan como cambio).
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre `handleChatRequest.ts` y `next.config.ts`: 0 errores (1
+warning preexistente en `next.config.ts`, ver arriba). Bateria completa (c01 + contactpath +
+watchdog + emptyfallback + providerclose + deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2
++ utm1 + re2 + ev4): las 15, OK - critico dado que `handleChatRequest.ts` es el archivo mas
+ejercitado por esta bateria. `prisma migrate status`: al dia, sin drift.
+
+### Deuda
+
+Ninguna nueva. `NextConfig` sin usar en `next.config.ts` (preexistente, sin tocar) queda anotado
+por si alguien lo retoma.
+
+---

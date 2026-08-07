@@ -81,6 +81,7 @@
     "check:invariant:client-monthly-report-pdf": "npx tsx src/lib/reports/client-monthly/get-client-monthly-report-data.invariant.ts",
     "check:invariant:notifications-brevo": "npx tsx src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts",
     "check:invariant:mask-secret": "npx tsx src/lib/mask-secret.invariant.ts",
+    "check:invariant:cron-secret": "npx tsx src/lib/cron/cron-secret.invariant.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

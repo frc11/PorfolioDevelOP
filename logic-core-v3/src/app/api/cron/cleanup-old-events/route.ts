@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { cleanupOldEvents } from '@/modules/chatbot/server/logging'
-import { getProvidedCronSecret } from './cron-secret'
+import { isAuthorizedCronRequest } from '@/lib/cron/cron-secret'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +14,7 @@ export const dynamic = 'force-dynamic'
 const RETENTION_DAYS = 30
 
 export async function GET(request: Request) {
-  const expectedSecret = process.env.CRON_SECRET?.trim()
-  const providedSecret = getProvidedCronSecret(request)
-
-  if (!expectedSecret || providedSecret !== expectedSecret) {
+  if (!isAuthorizedCronRequest(request)) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 
