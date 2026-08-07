@@ -1,6 +1,27 @@
 import type { NextConfig } from "next";
 
 const nextConfig = {
+  // ── Directorio de build parametrizable (solo para suites de test) ──────────
+  // Por qué aparte: `next build`/`next start`/`next dev` escriben todos en el
+  // MISMO directorio de build. El recurso compartido es el directorio, NO el
+  // puerto — cambiar de puerto no evita nada. Cuando la suite del setter
+  // buildeaba en `.next/` con un `next dev` vivo sobre este checkout, pasaban
+  // las dos cosas: la suite leía artefactos mezclados (estáticos servidos con
+  // el Content-Type equivocado, 500s) y le reconstruía el directorio por debajo
+  // al dev server, rompiéndole el trabajo al otro frente. Next mismo lo nombra:
+  // toma un lock en `<distDir>/lock` porque dos procesos escribiendo el mismo
+  // distDir "can mangle the state of the directory".
+  //
+  // Sin la variable seteada el valor es `.next` → el build por defecto, el dev
+  // server y `start:qa` NO cambian de comportamiento. Solo `start:setter` la
+  // setea (ver package.json).
+  //
+  // Si alguien lo vuelve a unificar (borra esta línea o hace que la suite
+  // buildee en `.next`): vuelven los dos síntomas de arriba, y vuelven en
+  // silencio — la suite no falla por "directorio compartido", falla con errores
+  // de MIME type y 500s que parecen bugs de producto. La doc de Next exige
+  // además que el directorio NO salga del proyecto (`../build` es inválido).
+  distDir: process.env.E2E_DIST_DIR ?? '.next',
   serverExternalPackages: [
     '@react-pdf/renderer',
     '@prisma/client',

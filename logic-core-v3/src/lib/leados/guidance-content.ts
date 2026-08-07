@@ -435,13 +435,15 @@ export const GUIA_EVALUACION = {
   ],
 } satisfies PasoGuia
 
-// ── Contenido: Paso 3 · Brief de diseño (el plano de la demo) ────────────────
+// ── Contenido: decidir cómo va a ser la demo (el plano, antes de construirla) ─
 
 /**
- * Guía del brief (Paso 3). El setter NO lo inventa: corre el Gem de diseño (que
- * lee la ficha + la evaluación), trae su respuesta y la ordena en secciones
- * concretas. `campos` son los del formulario (las claves casan 1:1 con el estado
- * del form: pegadoGem/titulo/cta/seccionesTexto/concepto/notasMarca). `gate`
+ * Guía de la pantalla que decide la demo (m6). El setter NO la inventa: corre el
+ * Gem de diseño (que lee la ficha + la evaluación), trae su respuesta y la ordena
+ * en secciones concretas. `campos` son los del formulario (las claves casan 1:1
+ * con los campos que se PIDEN: pegadoGem/titulo/cta/seccionesTexto/concepto —
+ * P5-B sacó `notasMarca` de la pregunta porque la ficha ya junta ese material;
+ * el valor guardado igual viaja en el payload, ver `brief-form.tsx`). `gate`
  * explica el estado «esperando respuesta» cuando el gate EVALUADA→BRIEF está
  * cerrado —el criterio sigue en `flow.ts: gateBriefAbierto`, acá solo el porqué
  * + el qué-hacer-mientras; el TONO lo elige el componente (zinc: es una espera,
@@ -477,10 +479,6 @@ export const GUIA_BRIEF = {
     concepto: {
       label: 'Concepto',
       hint: 'La idea central que propone el Gem, en una o dos líneas.',
-    },
-    notasMarca: {
-      label: 'Notas de marca',
-      hint: 'Colores, tono, logo: lo que la demo tiene que respetar.',
     },
   },
   gate: {
@@ -564,9 +562,9 @@ export const GUIA_CONSTRUCCION = {
 export const GUIA_SELF_CHECK = {
   titulo: 'Chequeo final antes de enviar',
   intro: [
-    'Revisá la demo publicada punto por punto. Los ',
-    { enfasis: 'obligatorios bloquean el envío' },
-    ' si fallan; los de «Ojo de diseño» no bloquean, pero viajan a Franco tal como los marques.',
+    'Revisá la demo publicada punto por punto. Están partidos en dos: los que ',
+    { enfasis: 'decidís vos solo' },
+    ' y los que al final mira Franco —esos también los marcás vos, con lo que ves—. Todos bloquean el envío mientras queden en rojo. Los delatores de diseño no bloquean, pero viajan a Franco tal como los marques.',
   ],
   gate: {
     titulo: 'El envío se habilita con todos los obligatorios en verde',

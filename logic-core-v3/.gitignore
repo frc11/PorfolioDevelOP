@@ -16,6 +16,10 @@
 # next.js
 /.next/
 /out/
+# Build aislado de la suite del setter (`npm run start:setter`). Es un
+# directorio de build más — artefacto, nunca código. `/.next/` es ancla exacta
+# y NO lo cubre.
+/.next-setter/
 
 # production
 /build

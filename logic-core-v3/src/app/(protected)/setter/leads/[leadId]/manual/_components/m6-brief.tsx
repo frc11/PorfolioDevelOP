@@ -7,9 +7,10 @@ import { BriefForm, BriefResumen } from '../../_components/brief-form'
 import { BriefSanity } from './brief-sanity'
 
 /**
- * M6 — «Armá el brief» (5.3, tramo Brief del patrón 4.2/5.1/5.2). Con la ficha y
- * la evaluación a la vista, el setter genera el brief en el Gem de diseño y lo
- * trae. Registro COMPARTIDO del wizard (`BriefForm`: misma action `guardarBrief`
+ * M6 — «Decidí cómo va a ser la demo» (5.3, tramo Brief del patrón 4.2/5.1/5.2;
+ * retitulada en P5-B). Con la ficha y la evaluación a la vista, el setter corre
+ * el Gem de diseño y trae acá el plano de la demo. Registro COMPARTIDO del
+ * wizard (`BriefForm`: misma action `guardarBrief`
  * con su gate y su transición EVALUADA→BRIEF adentro):
  *   - contexto: el bloque del Gem re-servido (ficha + evaluación) — el MISMO
  *     builder del wizard (`buildBriefInputBlock`), listo para copiar;

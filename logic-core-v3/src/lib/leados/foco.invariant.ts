@@ -6,8 +6,9 @@
  * Verifica, de forma ejecutable (no "es obvio"), las garantías que el sprint 2.1a
  * promete y que la consigna pide constatar (a–d, g):
  *
- *   - CALIENTE PRIMERO (d): sin sticky, el foco es la cima de la cola `trabajar`
- *     (que ya viene ordenada respondió → caliente → resto por `ordenUrgencia`).
+ *   - LA CIMA PRIMERO (d): sin sticky, el foco es la cima de la cola `trabajar`.
+ *     Este módulo NO decide el criterio — la cola llega ordenada por `ordenFoco`
+ *     (P8: construir primero; ver `particion.invariant.ts`, que sí lo verifica).
  *   - STICKY SOSTIENE (c): con un lead anclado, entra uno más urgente y NO te
  *     saca — el más urgente aparece como `proximo`, el foco sigue siendo el tuyo.
  *   - INVALIDACIÓN POR CONSTRUCCIÓN: si el lead anclado ya no está en la cola

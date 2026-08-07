@@ -69,8 +69,11 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
       'Una IA que convierte la ficha + la evaluación en el brief de la demo: el plano de qué secciones lleva y qué dice cada una.',
     queLeDas:
       'El bloque «para el Gem de diseño» que está acá abajo (la ficha y la evaluación juntas).',
+    // P5-B: la lista tiene que nombrar los campos que la pantalla PIDE. Decía
+    // «y notas de marca» — ese ya no se completa acá (lo junta la ficha), así
+    // que prometía un campo inexistente justo arriba del formulario.
     queTeDevuelve:
-      'El brief estructurado: título, concepto, secciones en orden, CTA y notas de marca. Lo pegás y completás los campos de abajo.',
+      'El brief estructurado: título, concepto, secciones en orden y CTA. Lo pegás y completás los campos de abajo.',
     dondeSeUsa: 'Brief',
     url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)
   },

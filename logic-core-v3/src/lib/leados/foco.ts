@@ -2,9 +2,12 @@
  * LeadOS 2.1a — Selección del FOCO ("modo dirección").
  *
  * Módulo PURO (sin Prisma, sin server-only, sin `Date.now`): elige UN lead
- * accionable a la vez sobre la cola `trabajar` YA ordenada por `ordenUrgencia`
- * (respondió → caliente → resto). NO clasifica ni transiciona — solo decide
- * cuál es el foco y cuál el próximo, respetando el sticky (D7).
+ * accionable a la vez sobre la cola `trabajar` YA ordenada por `ordenFoco`
+ * (P8: fijado → construir → espera tu acción → contactar con demo → evaluar →
+ * contacto sin demo; la urgencia vieja quedó como desempate dentro del tier).
+ * NO clasifica, NO prioriza y NO transiciona: es POSICIONAL — toma la cima de la
+ * cola que le entregan y respeta el sticky (D7). El criterio vive en `flow.ts`
+ * (`trabajoTier`); cambiarlo NO toca este archivo.
  *
  * Sticky (D7): mientras el setter trabaja un lead, ese lead queda FIJO como foco
  * aunque entre uno más urgente. El más urgente aparece como `proximo`, no

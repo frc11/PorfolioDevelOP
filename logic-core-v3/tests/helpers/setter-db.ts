@@ -1,5 +1,6 @@
 import { PrismaClient, type Prisma, type DossierStage, type LeadStatus } from '@prisma/client'
 import dotenv from 'dotenv'
+import { HARD_CHECKS } from '../../src/lib/leados/flow'
 
 // El proceso de test necesita DATABASE_URL (Prisma) y AUTH_SECRET (minteo de
 // cookie del 2º setter). No hay .env, solo .env.local. Idempotente: dotenv no
@@ -17,16 +18,12 @@ dotenv.config({ path: '.env.local' })
 export const SMOKE_TAG = 'SMOKE-SETTER'
 export const prisma = new PrismaClient()
 
-// Nombres EXACTOS de los hard-checks (espejo de src/lib/leados/flow-content.ts
-// HARD_CHECKS[].nombre). Seedear un self-check "aprobado" requiere los 6 en ok.
-const HARD_CHECK_NOMBRES = [
-  'La demo carga',
-  'Se ve bien en tu celular',
-  'No hay lorem ipsum ni textos de relleno',
-  'Los links y el botón de WhatsApp funcionan',
-  'Usa los datos y assets reales del negocio',
-  'La demo dice lo que el brief pedía',
-] as const
+// Nombres de los hard-checks DERIVADOS de la lista viva, no copiados: seedear un
+// self-check "aprobado" requiere TODOS los vigentes en ok, y `selfCheckAprobado`
+// valida contra `HARD_CHECKS` (no contra lo que el blob diga tener). El espejo
+// hardcodeado que había acá quedaba stale apenas la lista cambiaba — pasó en P7,
+// que sumó tres puntos.
+const HARD_CHECK_NOMBRES: readonly string[] = HARD_CHECKS.map((check) => check.nombre)
 
 // ── Factories de JSON válido por contrato (src/lib/leados/contracts.ts) ───────
 

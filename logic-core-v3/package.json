@@ -9,6 +9,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",
+    "start:setter": "cross-env E2E_DIST_DIR=.next-setter npm run build && cross-env E2E_DIST_DIR=.next-setter QA_ALLOW_LOCALHOST=1 next start -p 3003",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "seed:agency-os": "ts-node prisma/seed-agency-os.ts",

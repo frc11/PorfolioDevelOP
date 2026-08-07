@@ -2395,6 +2395,82 @@ logo Y las fotos**: si en la práctica viven en lugares distintos, hace falta un
 
 ---
 
+## Microsprint INFRA — la suite del setter deja de compartir el directorio de build — 2026-08-03
+
+**Objetivo único.** Que `test:setter` compile y sirva desde un directorio de build PROPIO, para poder
+correr sin parar el checkout ni pisar a nadie. Solo configuración y scripts: **cero código de
+producto, cero tests tocados.**
+
+**El problema, nombrado con precisión.** `test:setter` arrastraba `start:qa` = `npm run build &&
+next start -p 3001`, y sin `distDir` configurado eso compila y sirve desde **`.next/`, el mismo
+directorio que usa `next dev`**. Con un dev server vivo sobre el checkout —que es el caso normal, hay
+dos frentes— pasaban las dos cosas: (a) la suite leía artefactos mezclados (estáticos con el
+Content-Type equivocado, 500s, números contaminados) y (b) le **reconstruía `.next/` por debajo** al
+otro frente. **Cambiar de puerto no lo evita: el recurso compartido es el directorio, no el puerto.**
+Es exactamente el bloqueo que dejó `test:setter` sin correr en P5-A (ver la entrada anterior). Next
+mismo nombra el problema: toma un lock en `<distDir>/lock` en `dev` y en `build` porque dos procesos
+escribiendo el mismo distDir *"can mangle the state of the directory"* (`config-shared.d.ts:829`).
+
+**Qué se cambió — 4 archivos, 55 inserciones / 8 borrados.**
+
+1. `next.config.ts` — `distDir: process.env.E2E_DIST_DIR ?? '.next'`. Verificado contra la doc oficial
+   de Next (`api-reference/config/next-config-js/distDir`) y contra el schema instalado
+   (`config-schema.js:541`, Next 16.2.9): **`distDir` se configura solo por `next.config`, no hay flag
+   de CLI** en `next build` ni en `next start`, y la doc exige que el directorio **no salga del
+   proyecto**. Sin la variable el valor es `.next` → el default no cambia.
+2. `package.json` — script nuevo `start:setter`: buildea y sirve con `E2E_DIST_DIR=.next-setter` en el
+   puerto **3003**. `start:qa` (:3001) **no se tocó** — lo siguen usando galería, qa-persona y
+   qa-walkthrough.
+3. `playwright.setter.config.ts` — `webServer.command` → `npm run start:setter`, puerto default
+   3003, y **`reuseExistingServer: false`**. Era `!process.env.CI` = siempre `true` en local: un
+   server huérfano en el puerto hacía que las 60 pruebas corrieran contra un build viejo, en silencio
+   y sin aviso en el reporte. El opt-in explícito `SETTER_EXTERNAL_SERVER=1` sigue existiendo — eso es
+   una decisión de una persona, no reutilización a ciegas.
+4. `.gitignore` — `/.next-setter/`. `/.next/` es ancla exacta y no cubría al hermano.
+
+**Comando nuevo — esto cambia para todos.** `npm run test:setter` sigue siendo el mismo comando y no
+hay que cambiar nada para correrlo. Lo que cambió por debajo: **levanta su server en :3003, no en
+:3001**, buildea en `.next-setter/`, y **ya no reutiliza** lo que encuentre en el puerto. Si alguien
+iteraba con un server externo en :3001 apuntando a esta suite, ahora tiene que usar
+`SETTER_EXTERNAL_SERVER=1` **con `SETTER_PORT` apuntando a donde esté su server**.
+
+**La prueba, que es el punto del microsprint.** La suite corrió **con un `next dev` vivo al lado sobre
+el mismo checkout** (PID 1424 en :3000, con `.next/dev/lock` tomado). **60/60 passed, exit 0** (4.8m),
+leído del proceso sin pipe. Y la otra mitad, la que nadie mira: **el dev server sobrevivió** —
+respondiendo 200 después de la corrida, `.next/dev/lock` intacto y **`.next/BUILD_ID` con el mismo
+mtime (`1785507218`) antes y después**, o sea la suite no le reconstruyó nada. Durante el build se
+verificó en vivo que `.next-setter/` se creaba con su propio `lock` mientras `.next/` no se movía.
+**Cero fallos por contaminación de entorno y cero fallos reales de producto.**
+
+**El default sigue intacto — verificado, no asumido.** El dev server tomó el lock sobre `.next/`
+(`.next/dev/lock`, mtime `1785794134`) **después** de que `next.config.ts` ya tenía el cambio
+(mtime `1785794067`): corrió con la config nueva y siguió usando `.next/`. No se corrió un
+`npm run build` por defecto a propósito — habría reconstruido `.next/` con la otra sesión trabajando,
+que es exactamente lo que este microsprint evita.
+
+**Gates.** `npx tsc --noEmit`: **exit 0, cero errores** — idéntico al baseline tomado antes de editar
+(también exit 0). Ojo, dato para la próxima: **el error preexistente que la bitácora de P5-A anotaba
+en `searchconsole.ts` ya no aparece**, y el de las dos copias de `google-auth-library` tampoco.
+`check:invariants`: **17/17, exit 0**. Sin push.
+
+**Hallazgo del entorno, anotado y no tocado.** Al cierre, `git status` mostró cambios de producto que
+**no son de este microsprint**: `src/app/layout.tsx`, `ChatWidgetMount.tsx`, `PublicOnlyComponents.tsx`,
+`publicRoute.ts`, `tsconfig.json` y un borrado ya en el índice de `src/components/ui/NoiseOverlay.tsx`.
+El checkout estaba limpio al abrir la sesión y esos archivos se modificaron **durante la corrida**
+(mtimes 1785794293–1785794432, posteriores a la última edición de este sprint, 1785794121): **hay otra
+sesión editando este checkout en vivo**. No se revirtió ni se tocó nada de eso — el índice de git es
+compartido. Es, de paso, la confirmación empírica del supuesto del microsprint: acá siempre hay
+alguien más trabajando.
+
+**Fuera de scope — anotado, no implementado.** `playwright.galeria.config.ts`,
+`playwright.qa-persona.config.ts` y `playwright.qa-walkthrough.config.ts` siguen apuntando a
+`start:qa` en :3001 y **siguen buildeando en `.next/`**: tienen el mismo problema, sin arreglar. La
+receta ya está — `E2E_DIST_DIR` + script propio + `reuseExistingServer: false`. `playwright.config.ts`
+(e2e, :3000) corre `npm run start` sin build, y `leados`/`integration` no levantan server: esos
+últimos no aplican.
+
+---
+
 ## P6-B — las seis pantallas de Construcción son dos
 
 **Rama:** `redesign/home` · **Commits:** `742f756` (la red) + el del colapso · **Nada pusheado.**
@@ -2713,3 +2789,385 @@ Que el puntero se vea y **se sienta correcto** sobre cada superficie: que las ca
 About con flecha normal no lean como "acá no pasa nada", y que el `pointer` de las flechas del
 carrusel, la pill de servicio, el slider de la calculadora y el launcher del chat caiga donde tiene
 que caer. Eso lo decide él mirándolo.
+
+---
+
+## Sprint P8 — El foco prioriza CONSTRUIR, no contactar · 2026-08-04
+
+**Objetivo.** Que el foco del panel del setter priorice construir la demo, no contactar. El
+recorrido cambió: antes el setter contactaba primero y construía si el negocio respondía; ahora
+llega con la demo hecha. El foco seguía razonando con el orden viejo. No es un retoque de
+presentación — cambia **qué considera el producto "trabajo pendiente"**, y el foco es lo primero
+que el setter ve cada mañana.
+
+### Descubrimiento (read-only, antes de tocar)
+
+El criterio estaba en **un solo archivo** (`flow.ts`), no repartido → el sprint no se partió:
+
+- `urgenciaTier` (l.551) → `respondió(0) → caliente(1) → resto(2)`, desempate por antigüedad.
+  **No miraba el `stage` en ningún momento.**
+- `ordenFoco` (l.569) = pin primero, después `urgenciaTier`.
+- `motivoOrden` (l.500) = el rótulo, con un comentario "MANTENER EN SINCRONÍA con `ordenFoco`"
+  (sincronía por disciplina, no por construcción).
+- `seleccionarFoco` (`foco.ts`) es **posicional**: toma la cima de la cola ya ordenada y aplica el
+  sticky. No decide prioridad → no hubo que tocarlo.
+
+Consumidores de la derivación: `clasificarLead`/`particionarCartera` los llama un único punto
+(`buildHomeLeads` ← `page.tsx`), que alimenta **tres superficies de la misma página**: el foco, los
+conteos de `HomeEnEspera` y la cartera secundaria. `novedades.ts`/`mis-numeros.ts` derivan aparte;
+`paso.ts` (el cartel del detalle del lead) es otra derivación y **no se tocó**.
+
+**El hallazgo:** brief listo, demo a medio construir y demo rechazada —trabajo de construcción
+puro— caían en el **último tier** salvo que el negocio hubiera contestado. Un prospecto frío recién
+cargado con `caliente` marcado le ganaba a una demo a medio construir.
+
+### Qué criterio cambió
+
+`trabajoTier` (nuevo, en `flow.ts`) reemplaza a `urgenciaTier` **como criterio primario** de la cola
+`trabajar`. La urgencia vieja **sobrevive como desempate dentro del tier** — sigue siendo señal, ya
+no puede dominar. `ordenUrgencia` quedó **intacto**: la cartera (orden "urgencia") y los `fijados`
+en vuelo conservan exactamente el orden que tenían.
+
+| # | Tier | Qué entra |
+|---|---|---|
+| — | pin | fijado por el setter (A-05/6.1 — se conserva, gana a todo) |
+| 0 | `CONSTRUIR` | `BRIEF`, `CONSTRUCCION`, `EVALUADA` con el gate abierto |
+| 1 | `ESPERA_TU_ACCION` | `RECHAZADA`, toque vencido, postergación cumplida |
+| 2 | `CONTACTAR_CON_DEMO` | `APROBADA` (demo lista para mandar) |
+| 3 | `EVALUAR` | sin dossier o `FICHA` — sin veredicto todavía |
+| 4 | `CONTACTO_SIN_DEMO` | `EVALUADA` con el gate cerrado — el opener del recorrido viejo, último |
+
+**Restricción del premortem (estructural, no un `if`):** el foco **nunca** sugiere construir para un
+lead sin veredicto. La única puerta a `CONSTRUIR` es un stage que solo se alcanza *después* del
+veredicto. Verificado en la aplicación con un lead **CALIENTE** sin evaluar: dice "Completá la ficha
+/ Todavía no sabés si sirve — evalualo", nunca "construila".
+
+**Rótulos** (`motivoOrden`, reescrito). El `switch` es exhaustivo sobre `TrabajoTier` → la sincronía
+rótulo↔criterio pasó de disciplina a **construcción** (un tier nuevo no compila hasta tener rótulo).
+Ninguna rama mide el comportamiento del setter: tono de oportunidad, cero reproche.
+
+| Antes | Ahora |
+|---|---|
+| Respondió — va primero | Pasó el filtro y le falta la demo — construila |
+| Caliente — va antes del resto | Te está esperando a vos |
+| Por orden de llegada | La demo está lista para mandar |
+| | Todavía no sabés si sirve — evalualo |
+| | Todavía no hay demo que mostrar |
+
+**No se tocó:** `grupoPara` (qué cola), `proximaAccion` (el copy por lead — es el barrido de
+vocabulario, otro bloque), gates, transiciones, aislamiento, schema, la lista de fases, ni la
+estética de la superficie.
+
+### Tabla verificada EN LA APLICACIÓN
+
+Sembrado en la DB real y leído por el camino real del home (`listOwnedLeads → buildHomeLeads →
+particionarCartera → seleccionarFoco`) + navegación real a `/setter` en el build de producción con
+lectura del DOM. Orden resultante de la cola `trabajar`:
+
+| # | Estado del lead | Qué sugiere el foco | Por qué (rótulo) | ¿Correcto? |
+|---|---|---|---|---|
+| 1 | Fijado por el setter | Completá la ficha | Fijado por vos — va primero | ✅ pin intacto |
+| 2 | Evaluado sin demo (gate abierto) | Generá el brief | Pasó el filtro y le falta la demo | ✅ |
+| 3 | Brief listo | Brief listo — arrancá la construcción | Pasó el filtro y le falta la demo | ✅ |
+| 4 | Demo a medio construir | Publicá el borrador y pasá el chequeo | Pasó el filtro y le falta la demo | ✅ |
+| 5 | Demo rechazada | Franco pidió correcciones — reabrí | Te está esperando a vos | ✅ |
+| 6 | Toque de seguimiento vencido | Te toca un toque — mandalo y registralo | Te está esperando a vos | ✅ |
+| 7 | Demo aprobada, lista para mandar | Demo aprobada — enviá el link | La demo está lista para mandar | ✅ |
+| 8 | **Caliente sin evaluar** | **Completá la ficha** | **Todavía no sabés si sirve — evalualo** | ✅ premortem |
+| 9 | Recién cargado, sin evaluar | Completá la ficha | Todavía no sabés si sirve — evalualo | ✅ |
+| 10 | Sin contactar (opener pendiente) | Mandá el opener | Todavía no hay demo que mostrar | ✅ último |
+
+Fuera de la cola, **cada uno con su lugar** (15 sembrados / 15 ubicados, ninguno sin lugar):
+esperando respuesta → `seguimiento` · en revisión → `revision` · reunión agendada → `agendadas` ·
+descartado → `archivo-descartado` · pausado → `pausados`. Los cinco estados siguen visibles en la
+cartera completa (verificado leyendo el DOM de "Tu cartera completa").
+
+**El vacío** (cola sin nada): `HomeEnEspera` se mantiene tal cual —ya era honesto—. "No hay nada
+para trabajar ahora mismo" + conteos de lo que está en vuelo + "¿Querés adelantar? Cargá un
+prospecto nuevo". No inventa tarea. Se respetó, no se rehízo.
+
+### Expectativas ajustadas
+
+- `particion.invariant.ts` #5: el rótulo del no-fijado esperaba `'Respondió — va primero'` →
+  ahora `'Todavía no sabés si sirve — evalualo'` (ese fixture no tiene dossier: sin veredicto).
+- **Sumados** al mismo invariante (sigue siendo 18 archivos, no 19): orden completo de los 5 tiers ·
+  el duelo "demo fría vs caliente sin evaluar" · **barrido de 16 combinaciones** (stage × caliente ×
+  status × pinned) probando que un lead sin veredicto jamás recibe el rótulo de construir · el gate
+  del brief manda (EVALUADA cerrada no se manda a construir, abierta sí) · el pin gana al tier
+  nuevo · ningún lead de la cola queda sin rótulo.
+- Doc-comments de `foco.ts` y `foco.invariant.ts`: decían "la cola viene ordenada respondió →
+  caliente → resto". Corregidos (solo comentarios).
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — línea base era 0 errores, sigue en 0. **Ninguno nuevo** |
+| `npm run check:invariants` | **18/18, exit 0** |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** (build aislado en `.next-setter/`, puerto 3003) |
+| `git diff --stat` | 4 archivos del sprint. **Cero gates / transiciones / aislamiento / schema** |
+
+### Fuera de scope — anotado, no implementado
+
+1. **`gateBriefAbierto` es del recorrido viejo.** Exige `respondió || caliente` para abrir el brief,
+   así que un lead que **pasó la evaluación pero está frío no puede construir** — justo lo que el
+   recorrido nuevo pide hacer primero. Es un **gate**: no se tocó (regla 1). El foco ordena dentro
+   de lo que el gate permite y ese caso cae en `CONTACTO_SIN_DEMO` (último). **Es el techo real de
+   este sprint**: mientras el gate siga así, el foco no puede mandar a construir en frío.
+   Decisión de producto de Franco.
+2. **`proximaAccion` conserva jerga de pantalla**: "(Opener)", "(Seguimiento)", "(Envío)",
+   "Generá el brief", "Pasala por el Evaluador". Es el barrido de vocabulario — último bloque.
+3. **`agruparParaHome` (`flow.ts:532`) no tiene ningún consumidor** — código muerto exportado. No se
+   tocó (poda, no este sprint).
+4. Los dos hallazgos de guardado, la galería y el tilde deshabilitado: sin tocar, como se pidió.
+
+### Lo que cierra Franco
+
+- **Que el foco sugiera lo correcto**: es criterio comercial, no técnico. Qué merece la atención del
+  setter primero lo decide él, en el preview, con varios leads en estados distintos.
+- **El copy de los cinco rótulos**: es lo primero que el setter lee cada mañana. Lo aprueba él.
+
+---
+
+## Sprint P5-B — la pantalla del brief deja de pedir lo que la ficha ya tiene — 2026-08-04
+
+**Objetivo único.** Que `m6` deje de preguntar lo que P5-A ya junta en la ficha, y que se lea como
+lo que es: **decidir cómo va a ser la demo antes de construirla**. La pantalla se reconvierte, no se
+retira.
+
+### Descubrimiento (antes de editar)
+
+**La pantalla hoy.** Título «Armá el brief»; entrada «Con la ficha y la evaluación a la vista, generá
+el brief de diseño y traelo acá.». Seis campos: *Respuesta del Gem* (oblig.), *Título del brief*
+(oblig.), *Llamado a la acción (CTA)*, *Secciones de la demo* (oblig.), *Concepto*, *Notas de marca*.
+
+**El duplicado.** «**Notas de marca**» (*«Colores, tono, logo: lo que la demo tiene que respetar»*)
+contra el material de P5-A «**¿Cómo habla el negocio de sí mismo?**» (*«Copiá su bio, su eslogan o el
+"quiénes somos"»*). El pisón es completo, no parcial: el **tono** lo cubre `comoSePresenta`, el
+**logo** lo cubre «¿De dónde bajás el logo y las fotos?» (`imagenesUrl`), y **colores/estilo** los
+cubre «Contenido real (logo / fotos / tono)». Las tres ya viajaban solas a la construcción.
+
+**Quién lee cada campo.** Al bloque de Claude Design (`buildConstruccionBlock`) van `concepto`,
+`secciones`, `cta`, `notasMarca` y `pegadoGem`. **`titulo` NO viaja** al bloque (el encabezado usa
+`lead.businessName`): solo lo leen `BriefResumen` y el panel del admin.
+
+**Punto 4 — el campo sin consumidor: CONFIRMADO, con un matiz que cambia el remedio.** Es
+`referenciasFicha` (`contracts.ts:118`). **Cero lectores en todo el repo** — solo su propia
+declaración y una mención en un comentario de `copy-blocks.ts:234`. Y no está en `BriefInputSchema`,
+mientras `guardarBrief` persiste `const brief: Brief = input.data`: **se pierde en cada
+re-guardado, confirmado.** El matiz: **nunca fue un campo del formulario**. No hay nada que retirar
+de la pantalla — es un fantasma del contrato, no una pregunta. Se dejó como está (tocar
+`BriefSchema` es tocar schema).
+
+**Punto 6 — la transición.** `dossier.actions.ts:208`: `if (dossier.stage === 'EVALUADA') await
+transitionDossier(leadId, { to: 'BRIEF' })`. El primer guardado es el único que ocurre con stage
+`EVALUADA`, y por eso es el que mueve el lead; lo dispara el botón **«Guardar brief»**. Por eso el
+autosave está APAGADO en la captura y solo se prende en el re-pegado (ya en `BRIEF`). **Intacto.**
+
+**Dónde cae hoy.** `m1` → `m2` (fusión P4) → `m4` → `m5`/espera → **`m6`** → `mc1`/`mc2` (colapso
+P6-B) → `m13` → `m14` → `m15` → `m16`.
+
+### La trampa que el descubrimiento destapó
+
+`guardarBrief` guarda el input **completo**, así que **un campo que sale del payload se BORRA en el
+próximo re-guardado** — el destino exacto de `referenciasFicha`. Por eso `notasMarca` salió **de la
+pregunta, no del payload**: sigue en `BriefFormState` y en `aPayloadBrief`, invisible, para que los
+briefs ya guardados sobrevivan a una re-edición. Está documentado en `brief-form.tsx` con el porqué,
+para que nadie lo "limpie" después.
+
+### Qué cambió — 5 archivos
+
+1. `brief-form.tsx` — se retira el `<Field>` de «Notas de marca» (el `<div>` de dos columnas que
+   compartía con Concepto se disuelve: Concepto queda a ancho completo). El valor **viaja igual**.
+2. `guidance-content.ts` — se borra `GUIA_BRIEF.campos.notasMarca` (su único consumidor era ese
+   Field). Se corrige el encabezado del bloque, que decía «Paso 3» — numeración del wizard que dejó
+   de existir en 5.6.
+3. `manual.ts` — `PANTALLAS.m6`: **«Decidí cómo va a ser la demo»** / «Antes de construirla: qué
+   secciones lleva, qué cuenta y a qué invita. El Gem de diseño te lo propone y vos lo cerrás acá.».
+   Mismo registro que dejó el colapso de la construcción (verbo en voseo + la demo como objeto).
+4. `m6-brief.tsx` — el doc-comment citaba el título viejo.
+5. `herramientas.ts` — **lo encontró la verificación, no la lectura**. El `ToolGuide` del Gem de
+   diseño, que se renderiza JUSTO ARRIBA del formulario, prometía «título, concepto, secciones en
+   orden, CTA **y notas de marca**. Lo pegás y completás los campos de abajo». Sacar el campo sin
+   tocar esto dejaba la pantalla mandando a completar un campo inexistente.
+
+### Verificado en la aplicación (no solo compila)
+
+Spec temporal contra el harness real del setter (`.next-setter/`, :3003), **borrada después de
+correr**. Sin capturas: se afirma por navegación real y lectura del DOM.
+
+| | Qué se afirmó |
+|---|---|
+| **V1** | Lead con brief **pre-P5-B** (con `notasMarca` Y con `referenciasFicha`): la pantalla abre, el resumen muestra los datos viejos, la pregunta ya no se ofrece, y tras **re-pegar + Guardar brief** la DB conserva `notasMarca` con su valor legacy y el stage sigue en `BRIEF`. Cero errores de consola |
+| **V2** | Lead nuevo en `EVALUADA`: completa la pantalla, guarda y el dossier **transiciona a `BRIEF`** (leído de la DB) |
+| **V3** | Se lee el `<pre>` **real** que el setter copia en `mc1` (anclado por «BRIEF DE DEMO», no por posición): siguen ahí CONCEPTO, SECCIONES, el CTA, el pegado del Gem y el `notasMarca` legacy — **y** lo que ahora aporta la ficha: cómo se presenta, de dónde bajar el logo, contenido y tono real, qué vende, y la dirección de las reseñas |
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — línea base era 0 errores, sigue en 0. **Ninguno nuevo** |
+| `npm run check:invariants` | **18/18, exit 0** |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** (build aislado en `.next-setter/`, puerto 3003) |
+| `git diff --stat` | 5 archivos del sprint. **Cero gates / transiciones / aislamiento / schema** |
+
+### Fuera de scope — anotado, no implementado
+
+1. **`referenciasFicha` sigue en `BriefSchema`** sin lectores y borrándose en cada guardado. Sacarlo
+   es tocar el contrato — no entra acá.
+2. **`GUIA_BRIEF` quedó casi entero sin consumidor**: `titulo`, `intro`, `gate`, `porque` y
+   `ejemplos` no los renderiza nadie (solo se usa `campos`). Copy muerto, no lo toqué.
+3. **El rail sigue diciendo «Brief»** (`FASES_MANUAL.brief.titulo` y `PANTALLAS.m6.corto`): arriba
+   del título nuevo se lee «Brief — paso 1 de 1». Cambiarlo mueve los chips de navegación de todo el
+   manual → es el barrido de vocabulario, último bloque.
+4. **`gateBriefAbierto`** (el techo que ya anotó P8), retirar la pantalla, los dos hallazgos de
+   guardado, la galería y la función exportada sin consumidores del foco: sin tocar.
+
+### Lo que cierra Franco
+
+- **El título nuevo y la entrada**, en el preview. Elegí «la demo» y no «la página» para no meter un
+  sinónimo nuevo: el resto del manual (mc1, mc2, m13) ya dice «la demo». Si prefiere «página», es un
+  cambio de una línea.
+- **Si la pantalla quedó demasiado flaca** con cinco campos para lo que tiene que decidir. Eso se ve
+  mirando: es criterio de producto.
+
+---
+
+## P7 · El chequeo final deja de perder trabajo, y dice la verdad — 2026-08-05
+
+Rama `redesign/home`, HEAD `90510f5`, working tree con WIP propio (P5-B, P8) y ajeno (rediseño del
+home). **Sin commit y sin push**: el índice de git está compartido con otra sesión que dejó borrados
+*staged* del home mientras corría este sprint — cualquier commit se los llevaba puestos.
+
+**Dos objetivos en la misma pantalla** (`m14`, el chequeo final): que los tildes no se pierdan, y que
+los seis motivos de rechazo de una demo estén ahí, en dos grupos.
+
+### El hallazgo, reproducido antes de tocar nada
+
+No se asumió: se reprodujo en dev:qa :3002 sobre `QA-W Construccion` (CONSTRUCCION + draft +
+self-check 6/6 sembrado). Destildar tres obligatorios, marcar un flag de diseño, salir por el link
+«Borrador» del propio manual y volver → **los cuatro cambios volvieron atrás**. Sin aviso, sin toast,
+sin diálogo. Los tildes vivían solo en `useState` y se persistían únicamente al tocar `Guardar el
+chequeo`; como la navegación del manual es SPA, `beforeunload` ni siquiera corría — y tampoco había
+`useUnsavedGuard` en esta pantalla. El costo real no son los clics: cada obligatorio exige abrir la
+demo publicada en el celular, en incógnito, y tocar cada link.
+
+**La otra mitad del hallazgo estaba en otra pantalla.** El «se guarda solo» no lo dice `m14`: lo dice
+`m1` (`ficha-form.tsx`, *«Se guarda solo mientras escribís. Podés cerrar y seguir después»*), y ahí
+**es verdad**. El problema no era una pantalla mintiendo: era el manual enseñando una regla en el
+primer paso y rompiéndola en el noveno.
+
+### Cómo quedó el guardado
+
+**Autosave, y el botón de guardar desapareció.** `useAutosave` + `useUnsavedGuard` + `AutosaveStatus`
+sobre la MISMA action `guardarSelfCheck` — cero caminos de escritura nuevos, el mismo patrón que la
+ficha y el brief ya usan. La alternativa (botón único + aviso al salir) se descartó porque **no
+arregla el caso del hallazgo**: `useUnsavedGuard` no intercepta navegación SPA, que es exactamente
+cómo se sale de `m14`.
+
+`guardarSelfCheck` tiene **un solo consumidor** (`chequeo-form.tsx`), así que el arreglo no toca
+ninguna otra pantalla. Lo único compartido que se rozó: `<AutosaveStatus>` hardcodeaba *«No se pudo
+guardar — tocá «Guardar»»*, un mensaje que acá mandaría a un botón inexistente. Se le agregó un prop
+**opcional** `errorLabel` cuyo default es el string de siempre → ficha y brief quedan idénticas.
+
+**Con `delayMs: 0`, sin el debounce de 1200 ms de la ficha.** Un tilde es una acción TERMINADA, no
+una tecla en el medio de una frase: esperar una pausa dejaba abierta justo la ventana del hallazgo
+(tildar y salir en el mismo segundo). El coalescing del hook evita pedidos encimados, y un guardado
+en vuelo termina aunque el componente se desmonte — lo único que la salida cancela es un timer
+pendiente, y con delay 0 no hay.
+
+Queda **una sola forma de tildar** (`Toggle`) y **una sola de persistir**. El único botón que
+sobrevive hace otra cosa: mandar a revisión.
+
+### Los seis criterios, en dos grupos
+
+`HardCheck` ganó un campo `grupo` (`'setter' | 'franco'`) y `flow-content.ts` un `GRUPOS_CHEQUEO` con
+los dos rótulos. Es **presentación pura**: `selfCheckAprobado` recorre la lista entera sin mirar el
+grupo, así que el gate no cambió de forma. De 6 obligatorios se pasó a 10.
+
+**«Esto lo revisás vos»** — lo mira en la demo y decide solo:
+
+| Punto | Origen |
+|---|---|
+| La demo carga | conservado (no está entre los seis) |
+| Se ve bien en tu celular | **criterio 1 fundido** — mismo ítem, sin duplicar |
+| No hay lorem ipsum ni textos de relleno | conservado — es mecánico, distinto de la vara alta de abajo |
+| Los links y el botón de WhatsApp funcionan | conservado — «funciona», distinto de «se entiende» |
+| **Se entiende qué tiene que hacer el visitante** | **criterio 2, nuevo** |
+| Usa los datos y assets reales del negocio | **criterio 3 fundido** |
+| La demo dice lo que el brief pedía | conservado |
+
+**«Esto lo mira Franco»** — *«Marcá lo que ves vos. El ojo final es de Franco: lo que se te pase, lo
+cacha él y vuelve como rechazo»*:
+
+| Punto | Origen |
+|---|---|
+| **No se nota que la hizo una IA** | **criterio 4, nuevo** |
+| **El texto es de este negocio y de ningún otro** | **criterio 5, nuevo** — «tapá el nombre y leelo» |
+| **Suena como habla el negocio** | **criterio 6, nuevo** — «compará con cómo escribe en Instagram» |
+
+Los cuatro **delatores del ojo de diseño** (`SOFT_CHECKS`) se conservan intactos y se mudaron
+**adentro** del grupo de Franco, como sub-bloque rotulado: son el detalle concreto que hace
+verificable a «No se nota que la hizo una IA». Siguen sin bloquear y siguen viajando a la superficie
+de revisión del admin.
+
+**Ningún `nombre` existente se renombró, a propósito.** `nombre` es la llave con la que el formulario
+reencuentra un tilde guardado *y* con la que el gate valida: renombrar «Usa los datos y assets reales
+del negocio» habría dejado en rojo un tilde ya hecho — el mismo bug que este sprint vino a cerrar — y
+habría obligado a meter mano en `selfCheckAprobado`. La jerga que queda ahí («assets», «lorem
+ipsum») es del barrido de vocabulario, no de acá. Lo que sí se reescribió es el `comoVerificar`, que
+no se persiste.
+
+### Verificado en la aplicación (no solo compila)
+
+Sin capturas: el panel del navegador no compone frames en esta sesión (`screenshot` corta a los 5 s).
+Se afirma por navegación real y lectura del DOM, nunca por status code.
+
+| | Qué se afirmó |
+|---|---|
+| **V1 · el caso del hallazgo** | Tildar cuatro puntos y salir a `m13` **en el mismo tick** (más hostil que cualquier humano). La DB quedó con los cuatro: `ctaClaro`, `noPareceIa`, `tonoDelNegocio` en `ok:true` y `softFlags: ["Tiene más de 3 colores"]`. Al volver, el DOM los muestra tildados |
+| **V2 · datos viejos** | El lead traía los **6 nombres pre-P7** guardados. Al abrir, los 6 siguen en `true` y los 4 nuevos en `false`. Nada se perdió ni se re-interpretó |
+| **V3 · el gate con los ítems nuevos** | Con 9 de 10, `Enviar a revisión` **disabled** y el Callout dice «Queda 1 obligatorio en rojo». Al tildar el décimo: botón **enabled** + «Todos los obligatorios en verde». El indicador dice «Guardado» |
+| **V4 · los dos grupos** | Dos `<section>` con `aria-label` propio, separadas 20 px, con borde/fondo distintos (zinc neutro vs. ámbar) y encabezados de color distinto. 7 tildes en la primera, 3 + el sub-bloque de delatores en la segunda |
+| **V5 · mobile 375 px** | Cero overflow horizontal (`scrollWidth == 375`), ningún elemento desbordado |
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — línea base era 0 errores, sigue en 0. **Ninguno nuevo** |
+| `npm run check:invariants` | **18/18, exit 0** |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** (build aislado en `.next-setter/`, puerto 3003) |
+| `git diff --stat` | 7 archivos del sprint (5 de `src/`, 2 de `tests/`). **Cero gates, transiciones, aislamiento ni schema** |
+
+Dos espejos de tests se actualizaron porque la lista creció: `tests/helpers/setter-db.ts` copiaba los
+seis nombres a mano — ahora los **deriva de `HARD_CHECKS`**, así no vuelve a quedar stale — y
+`01-flow.spec.ts` tildaba los seis literales y apretaba `Guardar el chequeo`; ahora recorre la lista
+viva y **afirma que ese botón ya no existe**, más los dos rótulos de grupo.
+
+### Fuera de scope — anotado, no implementado
+
+1. **El barrido de vocabulario.** El título de la pantalla sigue siendo «Pasá los checks duros» y el
+   rail dice «Chequeo»; «assets» y «lorem ipsum» siguen en dos `nombre`. Es el último bloque.
+2. **La galería** (`22-m14-chequeo.png` quedó vieja: no tiene los grupos ni el botón sacado). Se
+   regenera al final.
+3. **Verificación automática de la demo: no existe ninguna**, se confirmó por grep — ni un `fetch`,
+   HEAD, Lighthouse ni captura contra `draftUrl`. Lo único automático es la validación de FORMA de la
+   URL. Este sprint deja los seis criterios como checklist humano, como estaba pedido.
+4. **El campo fantasma del contrato del brief** (`referenciasFicha`): sin tocar.
+5. **`HARD_CHECK_PROMPT` sigue en 1 de 10** (solo `mobile`). Los tres criterios nuevos no tienen
+   prompt de diseño mapeado — muestran solo su arreglo humano. No se forzó el mapa.
+
+### Lo que cierra Franco
+
+- **La redacción final de los seis.** Son suyos: acá se tradujeron a idioma del setter (voseo, frase
+  corta, verificables — «tapá el nombre y leelo», «compará con cómo escribe en Instagram»). Confirmar
+  que dicen lo que quería decir es de él.
+- **Que la separación entre los dos grupos se entienda de un vistazo.** Eso se cierra mirando, y es
+  la información que decide qué revisión se puede delegar.
+- **Si diez obligatorios son demasiados.** Los tres nuevos bloquean el envío igual que el resto: el
+  punto es que el setter MIRE los tres antes de mandar, no que decida por Franco. Si prefiere que el
+  grupo de Franco no bloquee, es mover esos tres a la lista blanda — decisión de producto.

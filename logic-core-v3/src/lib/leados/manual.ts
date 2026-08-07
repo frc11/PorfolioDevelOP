@@ -189,12 +189,17 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     detalle: 'Cada toque de la cadencia se registra al hacerse — la fecha del próximo la pone la maquinaria.',
     corto: 'Toque',
   },
+  // P5-B — «Armá el brief» nombraba el ARTEFACTO, y con palabra de agencia. Lo
+  // que el setter hace acá es decidir cómo va a ser la demo antes de existir:
+  // qué secciones lleva, qué cuenta y a qué invita. Mismo registro que dejó el
+  // colapso de la construcción (mc1/mc2): verbo en voseo + la demo como objeto.
   m6: {
     id: 'm6',
     tipo: 'manual',
     fase: 'brief',
-    titulo: 'Armá el brief',
-    detalle: 'Con la ficha y la evaluación a la vista, generá el brief de diseño y traelo acá.',
+    titulo: 'Decidí cómo va a ser la demo',
+    detalle:
+      'Antes de construirla: qué secciones lleva, qué cuenta y a qué invita. El Gem de diseño te lo propone y vos lo cerrás acá.',
     corto: 'Brief',
   },
   // P6-B — las seis fases agrupadas en dos pantallas. El corte NO es por orden

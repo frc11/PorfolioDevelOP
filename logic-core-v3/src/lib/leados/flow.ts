@@ -49,13 +49,14 @@ export {
   SHELL_CONSTRUCCION,
   HARD_CHECKS,
   SOFT_CHECKS,
+  GRUPOS_CHEQUEO,
   CANAL_INSTAGRAM,
   GUARDRAIL_ROL,
   PLANTILLAS_FOLLOW_UP,
   STATUS_LABELS,
   STAGE_LABELS,
 } from './flow-content.ts'
-export type { ShellFase, HardCheck, SoftCheck, CanalParams } from './flow-content.ts'
+export type { ShellFase, HardCheck, SoftCheck, GrupoChequeo, CanalParams } from './flow-content.ts'
 
 // ── Gate del flujo invertido ─────────────────────────────────────────────────
 
@@ -485,24 +486,36 @@ function proximaAccionPara(
 }
 
 /**
- * B-beta — Rótulo INFORMATIVO de por qué una card ocupa su lugar en el carril
- * "trabajar". NO recalcula el orden: lee los MISMOS criterios que ordenan la
- * cola (`ordenFoco`: fijado primero, después respondió → caliente → resto),
- * traducidos al idioma del setter. Solo aplica a "trabajar" — el único lane
+ * P8 — Rótulo INFORMATIVO de por qué una card ocupa su lugar en el carril
+ * "trabajar". NO recalcula nada: lee el MISMO `trabajoTier` que ordena la cola,
+ * traducido al idioma del setter. Solo aplica a "trabajar" — el único lane
  * ordenado por prioridad; los demás van por antigüedad, ya visible en la meta
  * "hace X días". Devuelve null cuando no hay rótulo que mostrar.
  *
- * MANTENER EN SINCRONÍA con `ordenFoco`: si cambian los tiers del sort, cambian
- * estas ramas. A-05: el pin es el tier de más peso (sube el fijado a la cima), así
- * que su rótulo va PRIMERO — sin él, un fijado que es foco mostraría su tier de
- * urgencia ("Por orden de llegada") y mentiría sobre por qué está arriba.
+ * Sincronía POR CONSTRUCCIÓN (antes era por disciplina): el `switch` es
+ * exhaustivo sobre `TrabajoTier`, así que agregar un tier al criterio no compila
+ * hasta darle rótulo. A-05/6.1: el pin es el tier de más peso (sube el fijado a
+ * la cima), así que su rótulo va PRIMERO — sin él, un fijado que es foco mostraría
+ * el rótulo de su tier y mentiría sobre por qué está arriba.
+ *
+ * Tono: oportunidad, nunca reproche. Ninguna rama mide el comportamiento del
+ * setter ("hace X días que no tocás esto") — todas nombran lo que HAY para hacer.
  */
 export function motivoOrden(lead: HomeLead): string | null {
   if (lead.grupo !== 'trabajar') return null
   if (lead.pinned) return 'Fijado por vos — va primero'
-  if (leadRespondio(lead.status)) return 'Respondió — va primero'
-  if (lead.caliente) return 'Caliente — va antes del resto'
-  return 'Por orden de llegada'
+  switch (trabajoTier(lead)) {
+    case TRABAJO_TIER.CONSTRUIR:
+      return 'Pasó el filtro y le falta la demo — construila'
+    case TRABAJO_TIER.ESPERA_TU_ACCION:
+      return 'Te está esperando a vos'
+    case TRABAJO_TIER.CONTACTAR_CON_DEMO:
+      return 'La demo está lista para mandar'
+    case TRABAJO_TIER.EVALUAR:
+      return 'Todavía no sabés si sirve — evalualo'
+    case TRABAJO_TIER.CONTACTO_SIN_DEMO:
+      return 'Todavía no hay demo que mostrar'
+  }
 }
 
 export function clasificarLead(input: HomeLeadInput): HomeLead {
@@ -559,15 +572,99 @@ function ordenUrgencia(a: HomeLead, b: HomeLead): number {
   return urgenciaTier(a) - urgenciaTier(b) || a.createdAt.getTime() - b.createdAt.getTime()
 }
 
+// ── P8: qué es "trabajo pendiente" ahora que el recorrido se dio vuelta ───────
+
 /**
- * A-05 — Comparador del foco (cola `trabajar`): el fijado va PRIMERO, y a
- * igualdad de pin, manda la urgencia. El pin es preferencia de ORDEN, no
- * exclusión: sube el lead a la cima de la cola accionable en vez de sacarlo de
- * ella (mismo patrón `Number(b.pinned) - Number(a.pinned)` que
- * `filtrarYOrdenarCartera`, donde el fijado ya flotaba arriba).
+ * P8 — El criterio del FOCO. El recorrido cambió: antes el setter contactaba
+ * primero y construía si el negocio respondía; ahora llega con la demo hecha. El
+ * orden viejo (`urgenciaTier`: respondió → caliente → resto) razonaba con el
+ * recorrido anterior — no miraba el stage en ningún momento, así que una demo a
+ * medio construir quedaba en el último tier detrás de cualquier prospecto frío
+ * marcado caliente. Este tier lo reemplaza COMO CRITERIO PRIMARIO de la cola
+ * `trabajar`; la urgencia vieja sobrevive como DESEMPATE dentro del tier (ver
+ * `ordenFoco`), donde sigue siendo señal útil sin poder dominar.
+ *
+ * Números bajos = más prioritario. El orden es el del sprint:
+ *   0 CONSTRUIR            — pasó la evaluación y todavía no tiene demo. Es el
+ *                            trabajo que produce valor y el que antes no se sugería.
+ *   1 ESPERA_TU_ACCION     — algo quedó trabado esperándolo a él: correcciones de
+ *                            Franco, un toque vencido, una postergación cumplida.
+ *   2 CONTACTAR_CON_DEMO   — la demo está aprobada y lista para mandar.
+ *   3 EVALUAR              — lead nuevo sin veredicto todavía.
+ *   4 CONTACTO_SIN_DEMO    — contacto del recorrido VIEJO (opener sin demo). Va
+ *                            último a propósito: sigue siendo visible y
+ *                            accionable, pero ya no es lo que abre el día.
+ *
+ * RESTRICCIÓN DEL PREMORTEM (la que no se negocia): construir nunca se sugiere
+ * para un lead sin veredicto. Cada demo son treinta minutos del setter; hacerla
+ * para quien no califica es la forma más cara de perder el día. Un lead sin
+ * evaluar cae SIEMPRE en EVALUAR — la única puerta a CONSTRUIR es un stage que
+ * solo se alcanza después del veredicto (BRIEF/CONSTRUCCION vienen de EVALUADA,
+ * y EVALUADA es el veredicto mismo). La garantía es estructural, no un `if`.
+ *
+ * Es criterio de PRESENTACIÓN: lee stage/status/flags ya persistidos y no
+ * transiciona nada. Gates intactos — en particular `gateBriefAbierto`, que sigue
+ * exigiendo respuesta (o caliente) para abrir el brief. Por eso un lead que pasó
+ * la evaluación pero está frío NO puede construir todavía y cae en el tier de
+ * contacto viejo: el foco ordena dentro de lo que el gate permite, nunca contra él.
+ */
+const TRABAJO_TIER = {
+  CONSTRUIR: 0,
+  ESPERA_TU_ACCION: 1,
+  CONTACTAR_CON_DEMO: 2,
+  EVALUAR: 3,
+  CONTACTO_SIN_DEMO: 4,
+} as const
+
+type TrabajoTier = (typeof TRABAJO_TIER)[keyof typeof TRABAJO_TIER]
+
+/**
+ * El orden de los `if` ES el orden de prioridad: el primero que matchea gana. Un
+ * lead puede calificar para dos tiers (una demo a medio construir con un toque
+ * vencido encima) y ahí construir manda — es lo que el sprint pone primero.
+ */
+function trabajoTier(lead: HomeLead): TrabajoTier {
+  // Construir: pasó el filtro y la demo todavía no existe. EVALUADA entra solo
+  // con el gate abierto — con el gate cerrado el brief está bloqueado y mandarlo
+  // a construir sería mentirle. RECHAZADA queda fuera a propósito: es retrabajo
+  // sobre una demo que ya existe, y el sprint lo pone en el tier de abajo.
+  if (lead.stage === 'BRIEF' || lead.stage === 'CONSTRUCCION') return TRABAJO_TIER.CONSTRUIR
+  if (lead.stage === 'EVALUADA' && lead.gateAbierto) return TRABAJO_TIER.CONSTRUIR
+
+  // Lo que quedó trabado esperándolo a él: correcciones de Franco, un toque que
+  // venció, una postergación que se cumplió.
+  if (lead.stage === 'RECHAZADA') return TRABAJO_TIER.ESPERA_TU_ACCION
+  if (lead.followUpVencido || lead.postergadoVencido) return TRABAJO_TIER.ESPERA_TU_ACCION
+
+  // La demo ya está aprobada: lo que queda es mandarla.
+  if (lead.stage === 'APROBADA') return TRABAJO_TIER.CONTACTAR_CON_DEMO
+
+  // Sin veredicto: evaluar. Nunca construir (restricción del premortem).
+  if (lead.stage === null || lead.stage === 'FICHA') return TRABAJO_TIER.EVALUAR
+
+  // Resto: EVALUADA con el gate cerrado — el brief no se puede abrir, así que lo
+  // único disponible es el contacto del recorrido viejo (opener/toque). Último.
+  return TRABAJO_TIER.CONTACTO_SIN_DEMO
+}
+
+/**
+ * A-05 + P8 — Comparador del foco (cola `trabajar`). Tres niveles, en orden:
+ *   1. el fijado va PRIMERO (A-05: el pin es preferencia de ORDEN, no exclusión —
+ *      sube el lead a la cima de la cola accionable en vez de sacarlo de ella,
+ *      mismo patrón `Number(b.pinned) - Number(a.pinned)` que `filtrarYOrdenarCartera`);
+ *   2. a igualdad de pin manda `trabajoTier` — el criterio nuevo (construir primero);
+ *   3. a igualdad de tier, la urgencia de siempre (respondió → caliente → antigüedad),
+ *      que queda como desempate: sigue siendo señal, ya no es el criterio.
+ *
+ * `ordenUrgencia` NO cambió: la cartera (orden "urgencia") y los `fijados` en vuelo
+ * conservan exactamente el orden que tenían. Lo que cambia es la cola del foco.
  */
 function ordenFoco(a: HomeLead, b: HomeLead): number {
-  return Number(b.pinned) - Number(a.pinned) || ordenUrgencia(a, b)
+  return (
+    Number(b.pinned) - Number(a.pinned) ||
+    trabajoTier(a) - trabajoTier(b) ||
+    ordenUrgencia(a, b)
+  )
 }
 
 /** Partición de la cartera con la organización propia del setter por encima. */
