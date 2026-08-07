@@ -73,7 +73,7 @@
      (`--shadow-ds-control`). Ver la nota de ese bloque. */
 
   /* ── Motion ─────────────────────────────────────────────────────────────
-     Único reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
+     Reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
      a propósito: un `initial={{opacity:0}}` de Framer se serializa en el HTML
      del SSR, así que el bloque nace con `opacity:0` y queda invisible hasta que
      hidrata — si el JS tarda o falla, no se ve nada. Una animación CSS corre
@@ -83,6 +83,16 @@
 
      `both` es obligatorio: sin fill-mode el elemento parpadea a su estado
      final antes de arrancar.
+
+     ⚠ NO envolver contenido crítico —el titular que es el LCP de la página— en
+     `ds-reveal`. El `from` lo arranca en `opacity: 0`, la opacidad del ancestro
+     multiplica a todos sus descendientes, y Chrome no considera candidato a LCP
+     a un elemento transparente: el titular deja de contar hasta que el fade
+     termina. Medido en D9 sobre el hero del home, con `elementtiming` inyectado
+     en el HTML servido para fechar la pintura del `h1` independientemente de su
+     candidatura: dentro de `ds-reveal` pintaba a FCP + 1.020 ms; con la
+     animación apagada, en el MISMO frame que FCP. Para esos casos está
+     `ds-rise`, abajo.
      ───────────────────────────────────────────────────────────────────── */
   --animate-ds-reveal: ds-reveal 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 
@@ -94,6 +104,26 @@
 
     to {
       opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Compañero de `ds-reveal` para contenido crítico: MISMA distancia, MISMA
+     duración y MISMA curva, sin el tramo de opacidad. Puesto sobre un hermano
+     de bloques con `ds-reveal`, los dos se mueven en lockstep — la diferencia
+     es que este nace opaco y por lo tanto pinta, y cuenta, desde el primer
+     frame.
+
+     Solo transform: se compone en la GPU igual que el reveal y no dispara
+     layout, así que no suma CLS. */
+  --animate-ds-rise: ds-rise 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+  @keyframes ds-rise {
+    from {
+      transform: translateY(16px);
+    }
+
+    to {
       transform: none;
     }
   }

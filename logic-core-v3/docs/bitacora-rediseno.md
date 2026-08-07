@@ -3326,6 +3326,13 @@ a 390 (9.070 px), más el cierre solo en los dos anchos.
 cadenas en 24 filas**, en cinco archivos. Las 15 filas de B3 más las 9 que suma
 B4.
 
+> **Actualizado en D9 (2026-08-07).** El conteo no se movió —siguen siendo 27 en
+> 24 filas, recontadas contra el código— pero **las 9 filas de
+> `home/Portfolio.tsx` se ven en una ruta menos**: `/web-development` dejó de
+> importar esa sección, así que hoy solo aparecen en `/`. Las otras 15 filas no
+> cambiaron de superficie. El gate sigue vigente igual: lo que lo levanta es que
+> Franco cierre el contenido, no que se vea en menos lugares.
+
 | Bloque | Archivo | Línea | Placeholder |
 |---|---|---:|---|
 | B3 | `sections/home/Portfolio.tsx` | 54 | `[CONTEXTO — 1 línea: qué perdían antes de develOP]` |
@@ -3380,3 +3387,214 @@ claim falso —no afirma nada—, pero es contenido pendiente.
 4. **`/login` no tiene `h1`.** Apareció verificando que las rutas sirven
    contenido real. Preexistente, ajeno al home.
 5. **El launcher del chatbot pisa contenido a 390.** Ya fichado.
+
+---
+
+## D9 · El h1 del hero y la sección huérfana de `/web-development` · 2026-08-07
+
+Dos cosas puntuales que quedaron abiertas al cerrar B4. No hay sección nueva ni
+copy nuevo: es una remoción y un arreglo de pintura.
+
+### T1 · `/web-development` pierde su bloque de casos
+
+`src/app/web-development/page.tsx` importaba `sections/home/Portfolio.tsx`, que
+B3-S1 había reescrito como la lámina del caso real **del home**. La landing
+renderizaba entonces San Miguel en tema crema dentro de una página oscura, con el
+`ChapterLabel` del home (`( 02 )`) y los placeholders a la vista. Se quitó el
+import y el render; la ruta queda sin bloque de casos hasta que se rediseñe en el
+suyo (B7).
+
+**No se revivió `sections/web-development/PortfolioWebCases.tsx`**: trae cursor
+custom, prohibido por la dirección del rediseño. Queda como estaba — sin usar y
+sin borrar.
+
+De los dos `SectionDivider` que rodeaban la sección se conservó **uno** (el cian
+que ya introducía a `WebTemplatesImmersive`) y se borró el violeta. Dos cian
+seguidos ya existen en la página (ByRubro → Bento); dos violetas seguidos, no.
+
+**No quedó hueco de espaciado, y está medido, no mirado.** Los huecos entre todos
+los hijos directos de `<main>` son de **1 px** —el divisor— en los dos anchos,
+incluida la junta Comparador → WebTemplates (1440: 5244 → 5245; 390: 8547 →
+8548). El subárbol removido se llevaba su propio aire: `SectionReveal` no tiene
+padding propio y el `py-ds-section` vivía dentro del `SectionShell` de
+`Portfolio`. La banda oscura que se ve bajo la junta es el arranque del
+scrollytelling de `WebTemplatesImmersive` (5.400 px de alto propio), no un vacío
+nuevo.
+
+**Tampoco quedó transición de tema colgada**: censo de secciones con
+`data-ds-theme="light"` en la landing = **0**, a 1440 y a 390. Además
+`/web-development` nunca montó `ThemeProvider`, así que el
+`useThemeSectionOptional` de `SectionShell` ya era un no-op ahí.
+
+**Barrido de importadores cruzados.** Ninguna otra ruta fuera del home importa
+componentes que B3/B4 reescribieron o borraron. `web-development/page.tsx:19` era
+**el único** caso, y era este. Los borrados de la demolición (`OurServices`,
+`WhyDevelOP`, `About`, `InfiniteReviews`, `SectionWrapper`, `KineticText`,
+`PortalDemoCTA`, `TodoIncluido`, `ModulosOpcionales`) solo sobreviven como
+menciones en comentarios.
+
+### T2 · Qué retenía el `h1` del hero
+
+**La bitácora de B4-S3 atribuyó el render delay al preloader. Es incorrecto y se
+corrige acá:** `Preloader.tsx:39-43` devuelve `null` en `/` — su rama de home
+murió en B2-S1 y hoy solo bifurca a `MarketingIntro` en las cinco rutas de
+marketing. No hay preloader que tocar en el home, y el archivo congelado
+(`HeroArtifact.tsx`) nunca estuvo en la cadena.
+
+Lo que retenía la pintura es de este lado:
+
+- **`Hero.tsx:58`** — `<div className="animate-ds-reveal flex flex-col">`
+  envolvía la columna entera del hero, `h1` incluido.
+- **`globals.css:87`** — `--animate-ds-reveal: ds-reveal 0.9s … both`, con
+  `from { opacity: 0 }`.
+
+La opacidad de un ancestro multiplica a todos sus descendientes, así que el `h1`
+nacía transparente y seguía así durante los 900 ms del fade. **Chrome no
+considera candidato a LCP a un elemento transparente**, y como la elegibilidad se
+evalúa al pintar, el titular quedaba fuera de la carrera: el LCP se lo llevaba un
+`<span>` de 896 px² de la barra de navegación mientras el titular de 75.818 px²
+no figuraba.
+
+**Medido, no deducido.** A/B controlado sobre el mismo build (Moto G4 412×823,
+CPU 4×, red 4G lenta), con `elementtiming` inyectado **en el HTML servido** para
+fechar la pintura del `h1` independientemente de su candidatura a LCP:
+
+| Variante | FCP | `elementtiming` del `h1` | Δ vs FCP | Elemento LCP |
+|---|---:|---:|---:|---|
+| A · tal cual | 888 ms | 1.908 ms | **+1.020 ms** | `h1` a 1.908 ms |
+| B · `animation:none` sobre `.animate-ds-reveal` | 1.104 ms | 1.104 ms | **0 ms** | `h1` a 1.104 ms |
+| C · B + sin `text-balance` | 652 ms | 652 ms | 0 ms | `h1` a 652 ms |
+
+`text-balance` es inocente (C ≡ B). Los otros candidatos del brief se descartaron
+uno por uno: `useChromeRevealed()` devuelve `true` de forma síncrona fuera de las
+rutas de marketing y solo alimenta `Navbar` y `ChatWidgetMount` — nunca toca el
+hero; `Shutter` arranca en `opacity: 0`; y `HeroArtifactLayer` es **hermano** de
+la columna de texto, no ancestro, y a 412 px ni se monta.
+
+> ⚠ La v1 de esta matriz inyectaba un `<style>` en el `<head>` y midió **cuatro
+> veces la misma variante A**: React 19 gestiona el `<head>` y borra los `<style>`
+> ajenos. La variante tiene que entrar reescribiendo la respuesta del CSS.
+
+### El arreglo
+
+El reveal pasó de la columna a **los hijos**. Los tres bloques de apoyo (la fila
+de capítulo + eyebrow, el `Lead` y el grupo del CTA) conservan `ds-reveal`
+intacto. El titular usa **`ds-rise`**, un token nuevo del sistema
+(`globals.css`): misma distancia, misma duración y misma curva que `ds-reveal`,
+**sin el tramo de opacidad**. La columna sigue entrando en lockstep; lo único que
+cambia es que el titular nace opaco.
+
+Solo `transform`: se compone en GPU igual que el reveal y no dispara layout, así
+que no suma CLS (0,019 antes y después).
+
+**No hizo falta ninguna red de seguridad nueva.** El punto 5 del brief pedía un
+`setTimeout` que fuerce el estado final si algo del hero quedaba colgado de un
+evento: después del arreglo el titular no depende de ningún evento —es CSS puro
+sobre HTML del SSR— y lo único del hero que sí espera un evento, el fade de la
+capa 3D, ya tiene la suya (`HeroArtifactLayer.tsx:46`, `REVEAL_SAFETY_MS` de
+6 s).
+
+### Números medidos
+
+Lighthouse mobile de `/` contra el build de producción en `:3001`. **Las dos
+corridas son de la misma vara** (Lighthouse 13.4.1, `--headless=new`,
+`--throttling-method=simulate`, misma máquina, servidor recién levantado):
+
+| | Antes | Después |
+|---|---:|---:|
+| Performance | 59/100 | **73/100** |
+| LCP | 8,0 s | **4,1 s** |
+| FCP | 2,5 s | **1,8 s** |
+| Speed Index | 3,4 s | 1,8 s |
+| TBT | 490 ms | 490 ms |
+| CLS | 0,019 | 0,019 |
+| **Elemento LCP** | `span.font-ds-mono` de la barra (896 px²) | **el `h1` del hero** |
+| **Render delay del LCP** (traza observada) | **1.261 ms** | **245 ms** |
+
+> **Estos números NO son comparables con los 83/100 y 4,2 s que anotó B4-S3.** Esa
+> corrida se hizo con otra herramienta/máquina y no quedó registrado con cuál.
+> Contra la vara de B4 este build daría otra cosa; lo que vale acá es el par
+> antes/después, tomado con la misma vara y con minutos de diferencia.
+
+El `h1` como LCP a 4,1 s todavía **no** llega al objetivo de D9 (<2,5 s), pero el
+techo ya no es el hero: con render delay de 245 ms, lo que queda es FCP.
+
+Confirmación directa de que el titular pinta con el primer frame, sobre la página
+**sin modificar** del build nuevo:
+
+- `elementtiming` del `h1` = **724 ms = FCP exacto**. El `Lead`, que sigue dentro
+  de `ds-reveal`, pinta a 1.236 ms — 512 ms después. Misma página, mismo frame:
+  el mecanismo es real y el fade sigue funcionando para todo lo demás.
+- Opacidad **efectiva** del `h1` (producto de toda la cadena de ancestros),
+  muestreada por `requestAnimationFrame`: **0 frames con opacidad < 1** sobre 502
+  muestras a 412 px con CPU 4× + 4G lenta, y 0 sobre 600 a 1440 px sin throttle.
+
+Peso: chunk de `/` **9,32 KB gz** (idéntico al de B4-S3 — el arreglo no agrega
+JS), CSS mayor 426,98 KB raw / **54,46 KB gz** contra 426,80 / 54,52 del build
+anterior. Sin aumento.
+
+### Verificación
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `Hero.tsx` + `web-development/page.tsx` | **0** |
+| Detector — `src/components/design-system` | **0** (el techo) |
+| Detector — superficie pública | **55** contra baseline **55** — sin números nuevos |
+| Errores de consola en `/` (1440 y 390) | **0** |
+| Errores de consola en `/web-development` | **5, todos preexistentes y atribuidos** (ver abajo) |
+| Huecos entre secciones de `/web-development` | **1 px en todas las juntas**, a 1440 y 390 |
+| Secciones crema sobrantes en `/web-development` | **0** |
+| Placeholders visibles en `/web-development` | **0** |
+| Animaciones aplicadas | `h1` → `ds-rise`; eyebrow/lead/CTA → `ds-reveal`; columna → `none` |
+| `prefers-reduced-motion` | las cuatro aterrizan en **1 ms** (bloque global de `globals.css`) |
+
+**Las siete condiciones de la capa 3D se mantienen.** Cuatro por diff —
+`HeroArtifactLayer.tsx`, `HeroCanvas.tsx`, `components/3d/`, `components/canvas/`
+y `context/` están **byte a byte iguales**, el único archivo tocado en
+`components/layout/` es `Hero.tsx`— y las otras medidas en runtime:
+
+| Condición | Medición |
+|---|---|
+| No monta a 390 | `canvas` = `null` |
+| No monta con `prefers-reduced-motion` | `canvas` = `null` a 1440 |
+| Monta en desktop | `canvas` 416×416 a 1440 |
+| Sin bloqueo de scroll | `scrollY` llega a 1200 / 4000 en las tres configuraciones; `overflow` de `html` y `body` = `visible` |
+| `frameloop` gateado | **722 draw calls de WebGL en 2 s con el hero en viewport → 0 con el hero fuera** (barrido progresivo con la rueda, canvas a `top: -3748`). rAF del pane a 181 fps, así que la medición es válida y no un falso negativo de pane congelado |
+| Peso | chunk de `/` sin cambio (9,32 KB gz) |
+
+Capturas: `docs/proof-screenshots/d9/` — `/web-development` completa a 1440
+(22.806 px) y a 390 (29.025 px), la junta recortada a los dos anchos, y el hero
+del home a 1440 y 390.
+
+### Fuera de scope — anotado, no implementado
+
+1. **El techo que queda es FCP, y es el bundle.** FCP 1,8 s con TBT 490 ms sin
+   mover. En la traza con CPU 4× + 4G lenta: el CSS grande termina a 1.609 ms y el
+   DOM a 1.662 ms, pero el primer paint recién ocurre a 3.508 ms — en el medio hay
+   **1.078 ms de long tasks** de los **19 scripts `async`** del `<head>`
+   (1.113,7 KB raw / 356,5 KB gz). Bajar LCP de 4,1 s a menos de 2,5 s pide
+   trabajar ese bundle, no el hero.
+2. **`/web-development` tiene 5 errores de consola preexistentes**, todos
+   atribuidos a componentes que este sprint no tocó: 404 de
+   `/assets/templates/chatgpt/zero/mid.webp` y dos violaciones de CSP
+   (report-only) por el iframe a `template-zero.netlify.app`, las tres de
+   `WebTemplatesImmersive`; 404 ×2 de `grainy-gradients.vercel.app/noise.svg` (la
+   capa de grano de la propia landing); y `ERR_ABORTED` de
+   `/video/Woman_engrossed_in_screen_delpmaspu_.mp4`. La sección removida no hacía
+   ningún request, así que no puede haber agregado ninguno.
+3. **Cuatro huérfanos en `sections/web-development/`**: `PortfolioWebCases.tsx`,
+   `ShowcaseSection.tsx`, `WebDevelopmentObjections.tsx` y
+   `WebDevelopmentSensory.tsx` — cero importadores. Insumo para B7; no se borra
+   nada en este sprint.
+4. **El hook de impeccable marca `gradient-text` en el `h1` de
+   `/web-development`** (texto con `bg-clip-text` + gradiente). Es preexistente,
+   del hero de esa landing, y no lo introdujo este sprint: entra en el rediseño de
+   la ruta (B7). No se suprimió el hallazgo.
+5. **El mismo patrón sigue vivo en las otras cinco secciones del home.**
+   `Portfolio`, `PortalDemo`, `Nosotros`, `Servicios` y `Cierre` envuelven su
+   titular en `animate-ds-reveal`. Hoy no cuesta nada —están bajo el fold y
+   ninguna es el LCP— pero la regla quedó escrita en `globals.css`: contenido
+   crítico va en `ds-rise`, no en `ds-reveal`.
+6. **El launcher del chatbot pisa el microcopy del hero a 390.** Ya fichado.

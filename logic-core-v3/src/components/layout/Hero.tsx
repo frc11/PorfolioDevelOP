@@ -18,9 +18,12 @@ import { HeroArtifactLayer } from './HeroArtifactLayer'
  *    `prefers-reduced-motion` y cualquiera cuyo canvas no cargue. No es un
  *    placeholder esperando al 3D: es el hero terminado. Server Component — no
  *    lleva `'use client'` ni una línea de JS propia, así que se pinta con el
- *    HTML del documento. El reveal de entrada es la animación CSS
- *    `animate-ds-reveal` del sistema, por la misma razón: si fuese de Framer,
- *    el SSR emitiría `opacity:0` y el hero quedaría en blanco hasta hidratar.
+ *    HTML del documento. El reveal de entrada es una animación CSS del sistema,
+ *    por la misma razón: si fuese de Framer, el SSR emitiría `opacity:0` y el
+ *    hero quedaría en blanco hasta hidratar. El titular lleva la variante sin
+ *    opacidad (`animate-ds-rise`) — ver la nota de la columna, abajo: no
+ *    alcanza con no depender del JS, el titular tampoco puede nacer
+ *    transparente.
  *
  * 2. **Artefacto 3D** (`HeroArtifactLayer`), mejora progresiva de desktop que
  *    se monta DESPUÉS del contenido y aparece con un fade cuando está listo.
@@ -55,7 +58,22 @@ export function Hero() {
       className="flex min-h-[100svh] items-center pt-[calc(var(--spacing-ds-nav)+clamp(1.5rem,4vh,3.5rem))] pb-[clamp(5rem,9vh,7rem)]"
     >
       <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-20">
-        <div className="animate-ds-reveal flex flex-col">
+        {/*
+          El reveal va en los HIJOS y no en esta columna. Envolviendo la columna
+          entera, el `from { opacity: 0 }` de `ds-reveal` se aplicaba también al
+          titular, y la opacidad de un ancestro multiplica a todo lo que cuelga
+          de él: el `h1` —que es el LCP de la página— quedaba transparente
+          durante los 900 ms del fade, y Chrome no considera candidato a LCP a un
+          elemento transparente. Medido con `elementtiming` inyectado en el HTML
+          servido, que fecha la pintura del `h1` sin depender de su candidatura:
+          pintaba a FCP + 1.020 ms; fuera del fade, en el MISMO frame que FCP.
+
+          Los tres bloques de apoyo conservan `ds-reveal` intacto. El titular usa
+          `ds-rise`, su compañero sin tramo de opacidad: misma distancia, misma
+          duración, misma curva, así que la columna sigue entrando en lockstep —
+          lo único que cambia es que el titular nace opaco.
+        */}
+        <div className="flex flex-col">
           {/*
             El hero LLEVA número. La sección-como-capítulo es la firma del
             sistema, y una portada sin numerar deja el índice arrancando en
@@ -70,7 +88,7 @@ export function Hero() {
             lo pone el token, así que se ve idéntico, pero el lector de pantalla
             no deletrea el texto letra por letra.
           */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div className="animate-ds-reveal flex flex-wrap items-center gap-x-6 gap-y-2">
             <ChapterLabel number="01" />
             <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
           </div>
@@ -80,16 +98,16 @@ export function Hero() {
             al titular y va pegado; el CTA necesita aire para despegarse del
             cuerpo. Un gap uniforme los trata como cinco bloques sueltos.
           */}
-          <DisplayHeading size="xl" as="h1" className="mt-5">
+          <DisplayHeading size="xl" as="h1" className="animate-ds-rise mt-5">
             Software de élite, sin la burocracia de agencia.
           </DisplayHeading>
 
-          <Lead className="mt-6">
+          <Lead className="animate-ds-reveal mt-6">
             Web, agentes de IA y sistemas a medida para negocios que quieren operar en serio. Desde
             Tucumán, para todo el país.
           </Lead>
 
-          <div className="mt-8 flex flex-col items-start gap-4">
+          <div className="animate-ds-reveal mt-8 flex flex-col items-start gap-4">
             <CtaButton href={getWhatsappHref()} target="_blank">
               Escribinos por WhatsApp
             </CtaButton>
