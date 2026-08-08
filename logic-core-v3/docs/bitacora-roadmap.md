@@ -16129,3 +16129,184 @@ identico (texto completo, input destrabado rapido, `step_count`/`costUsd` no-cer
 - El resto de la deuda conocida sigue igual que en H.4 - este sprint no agrega ninguna otra.
 
 ---
+
+## MS-E6.2 - Descomposicion de handleChatRequest.ts
+
+Tres costuras, un commit cada una (A, B, C - este cierre va con C). Invariante duro del
+sprint: CERO cambio de comportamiento. Se movio codigo, no se mejoro nada. Los bugs
+encontrados en el camino se anotaron y NO se tocaron.
+
+**Conteo: 2148 -> 1297 lineas (-40%, -851).**
+
+| Costura | Que salio | Archivo nuevo | handleChatRequest.ts |
+|---|---|---|---|
+| A | Schema del body + helpers del request crudo; respuesta degradada + cap de dominios; plomeria de hooks con deadline | `requestSchema.ts` (115), `degradedResponse.ts` (111), `hookOps.ts` (86) | 2148 -> 1875 |
+| B | Suspension del watchdog durante tools (4 contadores sueltos) | `toolSuspension.ts` (117) | 1875 -> 1830 |
+| C | `persistTurn` (495 lineas) | `persistTurn.ts` (669) | 1830 -> 1297 |
+
+### HALLAZGO 0 - la red no era la que creiamos (lo mas importante de este sprint)
+
+**NINGUN test de la bateria de 17 invoca `handleChatRequest`.** Los unicos importadores del
+archivo son `route.ts` (via `index.server`) y `chat/index.ts`; los tests importan SOLO
+`requestBodySchema`. La bateria cubre los modulos que el handler llama - `reconcile.ts`,
+`withDeadline.ts`, `streamWatchdog.ts`, `providerStreamClose.ts`, `dedup.ts`,
+`historyPolicy.ts` - en AISLAMIENTO. No cubre la orquestacion, que es exactamente lo que este
+sprint movio.
+
+Consecuencia practica, y hay que tenerla presente al tocar este archivo: "bateria verde"
+prueba que no se rompieron los modulos, NO que no se rompio el orquestador.
+
+Eso forzo construir una red distinta: un baseline de TELEMETRIA. Se le pega al endpoint real
+contra el dev server y se compara la secuencia de eventos normalizada (que eventos salen, en
+que orden, con que outcome y que contadores), descartando timestamps, ids y mediciones de
+tiempo. La herramienta vive en el scratchpad de la sesion (capture/normalize/compare), no en
+el repo: es andamio, no producto.
+
+Calibracion del instrumento: dos corridas SIN tocar codigo difieren en tokens, costo y
+text-deltas (el modelo es no determinista a temperature 0.7). Enmascarando esos campos, la
+capa estructural es identica. Ese es el piso de ruido, y distinguirlo de la senal fue lo que
+hizo util la comparacion.
+
+El e2e `40-lead-capture-e2e.spec.ts` se evaluo como red y se DESCARTO: su `request.post` espera
+el body completo de un stream SSE con llamada real a Vertex, y el `actionTimeout: 15000` de
+`playwright.config.ts` corta antes. Ademas tiene dos `test.skip` que enmascaran fallas (un
+"verde" puede ser un skip). El pipeline funcionaba en las dos corridas - `capture_lead.created`
+en ambas -; lo que fallaba era el cliente del test.
+
+### Costuras descartadas, con fundamento
+
+- **Gating completo (~277 lineas).** Los tres gates terminan en `return degradedResponse(...)`,
+  asi que extraerlos exige un protocolo `Response | null`; y peor, el bloque ESCRIBE
+  `compensateReservedQuota`, con lo cual el extraido tendria que devolver un closure ademas del
+  Response. Riesgo medio para una ganancia que los comentarios de seccion ya resuelven
+  visualmente.
+- **Pre-flight (~130 lineas).** Cuatro early-returns -> union discriminada. Lee bien en un
+  diagrama y agrega indireccion real.
+- **`streamText` + sus callbacks (225 lineas) - NUCLEO IRREDUCIBLE.** Los cinco callbacks
+  capturan 9 bindings mutables del request por closure. Separarlos exige reconstruir el closure
+  a mano, con mas superficie de error y cero ganancia. Y el orden del cableado (`markContent`
+  antes de `ttfbAt` antes del acumulador antes del tally; `beginStep` en `onStepStart`;
+  suspend/resume por contador) costo un mes: se mueve como bloque o no se mueve.
+
+### El riesgo real del sprint: los 4 getters de la costura C
+
+`persistTurn` lee cuatro bindings que el handler MUTA DESPUES de construir el factory. Pasarlos
+por valor los congelaria para siempre, y NINGUNA de las cuatro roturas la detecta la bateria
+(ver Hallazgo 0). Por eso viajan como funciones:
+
+| Getter | Quien muta el binding | Si fuera valor |
+|---|---|---|
+| `getTtfbAt` | `onChunk` (primer chunk util) | `llm_ttfb_ms` = null siempre |
+| `getStepCount` | `onStepFinish` | `step_count` = 0 siempre |
+| `getEmptyFallbackInjected` | el transform de respuesta vacia | el fallback nunca cierra el turno |
+| `getConversationDiscarded` | `discardNewConversation` y la compensacion de cupo (que `persistTurn` invoca el mismo) | re-infla una fila que la compensacion borro |
+
+Verificacion empirica: `step_count` dio 2/2/2/1 y `llm_ttfb_ms` 11237/3433/6701/3470 en las
+corridas post-refactor - nunca 0, nunca null. `getEmptyFallbackInjected` quedo probado por una
+corrida que salio con `emptyFallback=true` (con el binding congelado en false ese camino seria
+inalcanzable).
+
+**`getConversationDiscarded` NO quedo ejercitado empiricamente**: `quota_compensation` salio
+`skipped` en las 5 corridas, asi que ese camino no se recorrio. Es el mismo mecanismo que los
+otros tres, pero no esta probado. Queda dicho.
+
+### Estado por request - la trampa que el sprint evito
+
+Todo el estado por request sigue viviendo en el scope del request. Cero estado a nivel de
+modulo, que en serverless (un contenedor caliente atiende muchos requests con el mismo modulo
+cargado) filtraria entre conversaciones: cupo mal contado, el texto de un visitante persistido
+en la conversacion de otro, el watchdog de un request suspendido por el tool de otro. Seria
+invisible en tests y catastrofico con trafico.
+
+- Costura A: las tres piezas son funciones puras y un schema inmutable. No hay estado.
+- Costura B: los 4 contadores en el closure de `createToolSuspensionController`.
+- Costura C: `turnPersisted` en el closure de `createPersistTurn`.
+
+Mismo patron que los factories ya probados: `createStreamWatchdog`, `createChunkTally`,
+`createStreamProbe`.
+
+### Verificacion de movimiento verbatim
+
+- **A**: de 275 lineas eliminadas, 272 reaparecen textuales. Las 3 restantes no son codigo (dos
+  items de imports multilinea colapsados y un separador de seccion que paso a ser header).
+- **B**: toda sentencia con comportamiento verbatim. Los unicos cambios son de firma (const a
+  propiedad de objeto, `streamProbe` a `probe`, la constante del techo a parametro) y el rewire
+  de los dos callbacks.
+- **C**: el diff del cuerpo (493 lineas) muestra EXACTAMENTE las 12 sustituciones planificadas y
+  nada mas. `timings.llm_ttfb_ms` y `llm_stream_ms` ni aparecen en el diff: capturar
+  `const ttfbAt = getTtfbAt()` las dejo byte-identicas (y era necesario ademas porque TS no
+  narrowea el resultado de una llamada).
+
+### Gates (por costura)
+
+`tsc --noEmit` sin errores, `eslint` limpio sobre los archivos tocados, y bateria 17/17 verde -
+las tres veces. Mas 5 corridas de telemetria por costura contra el endpoint real.
+
+### DEADLINE-ONFINISH confirmado en vivo (primera vez)
+
+Durante la calibracion del baseline, con Neon fria, una corrida dio: `persist_tx_1` vencio su
+deadline de 2000ms -> `chat.persist_abandoned`... y despues `chat.hook_late_settlement` reporto
+**`settled: "fulfilled"` a los 2454ms**. O sea: la transaccion SI commiteo, 454ms tarde.
+
+Es la primera confirmacion EN VIVO de que la semantica de DEADLINE-ONFINISH es la correcta:
+"abandonado" significa desenlace DESCONOCIDO, no perdido - y el `onLateSettle`, que existe
+justamente para distinguir esos dos casos, hizo su trabajo. El diseno se valido solo.
+
+### Modo anomalo: turno que no persiste (PREEXISTENTE, no tocado)
+
+Aparecio dos veces durante la verificacion. La segunda (corrida C5, conversacion
+`cmskw3rzl0025upjkzonbb6nl`) dio el mecanismo completo. Log guardado aparte para el sprint que
+lo tome.
+
+Secuencia: dos steps COMPLETOS (`provider.stream_chunks` x2, los dos `reason=natural`), lead
+capturado (`capture_lead.created` + `tool.lead_captured`), y **cero texto en todo el run**.
+Entonces el watchdog dispara con `assistantTextLength=0`; el `onIdle` sale por su early-return
+(`if (accumulatedAssistantText.trim().length === 0) return`) sin persistir; y `onFinish` nunca
+corre. Resultado: NO hay fila ASSISTANT, ni `chat.llm_request_finished`, ni
+`chat.onfinish_phases`, ni contabilidad de costo. El lead - lo comercialmente critico -
+sobrevive.
+
+Tasa observada: ~1 de cada 8-13 turnos entre todas las sesiones de verificacion.
+
+**Es PREEXISTENTE**: aparecio tambien con el codigo stasheado (sin ninguna costura aplicada),
+que es como quedo descartado que lo causara el refactor.
+
+Detalle util para ese sprint: el `chat.watchdog_fired` de C5 trae `window=initial` con
+`contentChunks=4` - el watchdog estaba en la ventana corta pese a haber visto contenido,
+probablemente porque `beginStep()` la resetea al arrancar el step 2 (WATCHDOG-3). Vale
+revisarlo junto con el resto.
+
+Relacionado, visto en otra corrida: `assistantMessageLength=0` con `emptyFallback=false` - el
+modelo emitio texto en el step 1 (asi que el transform no inyecta el fallback) pero el `text`
+final viene vacio, y se persiste una fila ASSISTANT vacia. El visitante vio texto; la DB no.
+Probablemente el mismo problema visto desde otro lado.
+
+### Bugs anotados en Fase 0 - NO tocados (invariante del sprint)
+
+1. `chat.llm_request_start` reporta el par SOLICITADO, no el efectivo: loguea `bot.llmProvider`
+   / `plan.llmModel`, pero si `resolveEffectiveModel` degrado, el modelo que corre es otro.
+   COST-1 arreglo el camino del costo; este log quedo. Recuperable via
+   `chat.cost_model_unknown`, pero enganoso leido solo.
+2. Comentario stale de H.3 en el `onChunk`: dice "conteo + heartbeat (throttled)" y el heartbeat
+   ya no existe.
+3. Condicion duplicada: el discriminante `specificationVersion === 'v3'` se evalua dos veces
+   sobre el mismo valor (el wrap del middleware y el mark de `provider.stream_close_skipped`).
+4. `timings.quota_reserve_ms` usa `stepStart` a mano en vez de `mark()`, a diferencia del resto.
+
+### Oportunidad que abre el sprint (no ejecutada)
+
+`createToolSuspensionController` y `createPersistTurn` son ahora modulos con dependencias
+inyectables: por primera vez la suspension por contador y la persistencia del turno son
+testeables en aislamiento, sin DB ni servidor. Cierra parte del Hallazgo 0. No se hizo aca (el
+sprint era un movimiento, no una feature).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras el deploy, en una conversacion NUEVA con el flujo entero (mensaje simple -> nombre y
+telefono -> captura de lead -> "Que me contacten" -> WhatsApp), que TODO siga igual:
+`step_count > 0`, `costUsd != 0`, `chat.onfinish_phases` con `persist_tx_1: ok`,
+`watchdog_settled reason: "closed"`, `provider.stream_chunks reason: "natural"`, filas ASSISTANT
+en ChatMessage y el lead en ChatbotLead. **Cualquier diferencia contra eso es una regresion del
+refactor, no un descubrimiento.**
+
+---
