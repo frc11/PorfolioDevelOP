@@ -29,7 +29,7 @@ import {
   MAX_MESSAGE_CHARS,
   HARD_CAP_MESSAGES,
 } from '../../../shared/historyPolicy'
-import { requestBodySchema } from '../handleChatRequest'
+import { requestBodySchema } from '../requestSchema'
 
 type Role = 'user' | 'assistant' | 'system'
 interface Msg {

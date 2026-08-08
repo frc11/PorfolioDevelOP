@@ -1,12 +1,29 @@
 import { randomUUID } from 'node:crypto'
 import { streamText, stepCountIs, wrapLanguageModel, type ModelMessage } from 'ai'
-import { z } from 'zod'
 import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
 import { getVerticalPack } from '../verticals'
 import { forOrg } from '@/lib/isolation'
-import { sanitizeAttributionField } from '../../shared/attribution'
 import { shouldSkipUserPersist } from './dedup'
+// MS-E6.2 (costura A) — contrato de entrada del endpoint: schema del body y
+// helpers que leen el request crudo. `requestBodySchema` se re-exporta abajo.
+import {
+  requestBodySchema,
+  collectProactivePrompts,
+  countRawMessages,
+  extractClientIp,
+  type RequestBody,
+} from './requestSchema'
+// MS-E6.2 (costura A) — respuesta de modo degradado + cap de dominios del plan.
+import { degradedResponse, isOriginWithinPlanCap } from './degradedResponse'
+// MS-E6.2 (costura A) — plomería de los hooks con techo de tiempo.
+import {
+  runHookOp,
+  phaseOutcome,
+  type HookOpResult,
+  type PhaseRecord,
+  type RetrySkipReason,
+} from './hookOps'
 
 import {
   resolveBotBySlug,
@@ -31,14 +48,7 @@ import { chatbotDebug } from '../logging'
 import { logChatbotEvent, logPersistFailure } from '../logging'
 // LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
-import { originMatchesAllowed } from '@/lib/security/origin-matcher'
-import {
-  trimHistory,
-  HISTORY_WINDOW_MESSAGES,
-  MAX_MESSAGES_SHAPE,
-  MAX_MESSAGE_CHARS,
-  HARD_CAP_MESSAGES,
-} from '../../shared/historyPolicy'
+import { HARD_CAP_MESSAGES } from '../../shared/historyPolicy'
 // ONF-1 — reconcile transaccional del onFinish: decisiones puras (compensación
 // de cupo, dedup del retry de persistencia, fallback de respuesta vacía).
 import {
@@ -72,13 +82,7 @@ import {
 import { createProviderStreamCloseMiddleware } from '../llm/providerStreamClose'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
-import {
-  createBudget,
-  isDeadlineExceeded,
-  withDeadline,
-  DeadlineExceededError,
-  type LateSettleInfo,
-} from './withDeadline'
+import { createBudget, isDeadlineExceeded, type LateSettleInfo } from './withDeadline'
 // PROBE-STREAM — instrumentación TEMPORAL de diagnóstico del tramo
 // streamText() → tools → onFinish, gated por CHATBOT_STREAM_PROBE. Ver el
 // encabezado de streamProbe.ts. Reversible: buscar `probe: 'stream'`.
@@ -89,231 +93,8 @@ import { createChunkTally } from './chunkTally'
 // WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
 // Ver el encabezado de streamWatchdog.ts para el porqué.
 import { createStreamWatchdog, type StreamWatchdogController } from './streamWatchdog'
-
-// UTM.1 — Los campos de atribución (referrer + utm_*) son input del
-// visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
-// se quitan caracteres de control y se recorta a `maxLength`. Nunca rechazan
-// la request (sanitización silenciosa, no validación estricta) — son datos
-// de atribución best-effort, no lógica crítica.
-const attributionField = (maxLength: number) =>
-  z
-    .string()
-    .nullish()
-    .transform((val) => (val == null ? undefined : sanitizeAttributionField(val, maxLength)))
-
-/**
- * Body schema for POST /api/chatbot/[slug]/chat.
- * Validates incoming requests from the frontend.
- *
- * Exportado (UTM.1) para que el invariant de sanitización de atribución
- * pueda testear el schema real vía requestBodySchema.parse(...), no solo
- * las funciones puras de shared/attribution.ts.
- */
-export const requestBodySchema = z.object({
-  // C0.2 — una conversación larga NUNCA muere en 400 por longitud:
-  //  - Camino normal: recorte, no rechazo. El transform aplica trimHistory —
-  //    los últimos HISTORY_WINDOW_MESSAGES, con el último 'user' (el turno en
-  //    curso) SIEMPRE preservado y la ventana user-led. `body.messages` aguas
-  //    abajo ya es la ventana recortada.
-  //  - min/max quedan solo como validación de FORMA (payload absurdo que
-  //    ningún widget real produce — ver historyPolicy.ts). Superarlos sí es 400.
-  messages: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'assistant', 'system']),
-        content: z.string().max(MAX_MESSAGE_CHARS),
-      })
-    )
-    .min(1)
-    .max(MAX_MESSAGES_SHAPE)
-    .transform((msgs) => trimHistory(msgs, HISTORY_WINDOW_MESSAGES)),
-  sessionId: z.string().min(1).max(200),
-  currentPath: z.string().max(500).optional(),
-  referrer: attributionField(500),
-  // Proactive teaser question the bot "asked" via the tooltip. Client-supplied →
-  // VALIDATED server-side against the bot's configured proactivePrompts before it
-  // is trusted into the system prompt. Never enters the conversation as a turn.
-  proactiveOpener: z.string().max(500).optional(),
-  // UTM.1 — first-touch, ver getOrCreateConversation (resolver.ts) para la
-  // semántica de "se persisten una sola vez".
-  utmSource: attributionField(255),
-  utmMedium: attributionField(255),
-  utmCampaign: attributionField(255),
-})
-
-type RequestBody = z.infer<typeof requestBodySchema>
-
-/**
- * Safely extracts the set of admin-configured proactive-prompt strings from the
- * `BotConfig.proactivePrompts` JSON (shape: Record<string, string[]>). Defensive
- * against malformed JSON. Used to validate a client-supplied `proactiveOpener`
- * before it is trusted into the system prompt — only an EXACT match with a
- * configured prompt is accepted, so a forged opener can never inject text.
- */
-function collectProactivePrompts(raw: unknown): Set<string> {
-  const out = new Set<string>()
-  if (raw && typeof raw === 'object') {
-    for (const value of Object.values(raw as Record<string, unknown>)) {
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (typeof item === 'string') out.add(item)
-        }
-      }
-    }
-  }
-  return out
-}
-
-/**
- * C0.2 — Largo del array `messages` del body CRUDO (antes del recorte del
- * transform del schema), solo para telemetría: permite ver cuánto recorta la
- * ventana server sobre tráfico real. Defensivo contra cualquier shape.
- */
-function countRawMessages(json: unknown): number | null {
-  if (json && typeof json === 'object') {
-    const messages = (json as { messages?: unknown }).messages
-    if (Array.isArray(messages)) return messages.length
-  }
-  return null
-}
-
-/**
- * Best-effort extraction of client IP from request headers.
- * Returns "unknown" if no header is available (e.g. local dev).
- */
-function extractClientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
-  const real = request.headers.get('x-real-ip')
-  if (real) return real
-  return 'unknown'
-}
-
-/**
- * B4.2/B4.5 — Respuesta estandarizada de modo degradado.
- *
- * Lockeada en la economía del producto: cuando el gating bloquea,
- * NUNCA llamamos a Gemini. Devolvemos JSON canned + datos para que el
- * widget arme el handoff de WhatsApp con la info del bot real.
- *
- * Cero costo de LLM, cero crash, cero 500.
- *
- * El widget detecta `mode === 'degraded'` y muestra el CTA WhatsApp
- * directamente. La `reason` permite distinguir downstream (telemetría,
- * UI texto distinto en el widget si quisiera).
- */
-type DegradedReason = 'quota_exhausted' | 'domain_overflow' | 'conversation_limit'
-
-interface DegradedContext {
-  whatsappNumber: string | null
-  whatsappMessage: string | null
-  companyName: string | null
-}
-
-function degradedResponse(
-  message: string,
-  reason: DegradedReason,
-  bot: DegradedContext = {
-    whatsappNumber: null,
-    whatsappMessage: null,
-    companyName: null,
-  },
-): Response {
-  return Response.json({
-    mode: 'degraded',
-    reason,
-    message,
-    ctaWhatsapp: true,
-    whatsappNumber: bot.whatsappNumber,
-    whatsappMessage: bot.whatsappMessage,
-    companyName: bot.companyName,
-  })
-}
-
-/**
- * B4.2 — Aplica el cap de `maxDomains` del plan al array de dominios
- * autorizados del bot.
- *
- * Si el plan no tiene cap (`null` = uso justo / ilimitado), devuelve
- * el array entero. Si el bot tiene más dominios configurados que el
- * plan permite (downgrade sin limpieza), los primeros N son efectivos
- * y el resto queda como "overflow" — pasa validateOrigin (que mira el
- * full array) pero NO pasa el check defensivo de este pipeline.
- */
-function effectiveAllowedDomains(
-  botAllowedDomains: readonly string[],
-  planMaxDomains: number | null,
-): { effective: string[]; overflow: string[] } {
-  if (planMaxDomains === null) {
-    return { effective: [...botAllowedDomains], overflow: [] }
-  }
-  return {
-    effective: botAllowedDomains.slice(0, planMaxDomains),
-    overflow: botAllowedDomains.slice(planMaxDomains),
-  }
-}
-
-/**
- * B4.2 — ¿El origin es efectivamente autorizado para este (bot, plan)?
- *
- * Replica los escapes de `validateOrigin` (dev/localhost, develop.com.ar)
- * y después aplica el slice del plan. NO duplica el matcher (delega a
- * `originMatchesAllowed`). Llamado DESPUÉS de validateOrigin (que ya
- * autorizó el origin contra el full `bot.allowedDomains`).
- *
- * Devuelve `false` solo si el origin matchea exclusivamente un dominio
- * "overflow" (configurado en el bot pero excedido por el cap del plan).
- */
-function isOriginWithinPlanCap(
-  origin: string | null,
-  botAllowedDomains: readonly string[],
-  planMaxDomains: number | null,
-): boolean {
-  // Dev → localhost siempre OK (la batería de regresión corre desde localhost)
-  if (
-    process.env.NODE_ENV === 'development' &&
-    origin &&
-    (origin.includes('localhost') || origin.includes('127.0.0.1'))
-  ) {
-    return true
-  }
-  // develop.com.ar nunca cae al cap
-  if (
-    origin === 'https://develop.com.ar' ||
-    origin === 'https://www.develop.com.ar'
-  ) {
-    return true
-  }
-  // Sin cap del plan → cualquier origin que pasó validateOrigin pasa acá también
-  if (planMaxDomains === null) return true
-  // Sin origin (curl, same-origin) — ya pasó validateOrigin, no aplico el cap
-  if (!origin) return true
-
-  const { effective } = effectiveAllowedDomains(botAllowedDomains, planMaxDomains)
-  return originMatchesAllowed(origin, effective)
-}
-
-// ─── DEADLINE-ONFINISH — plomería de los hooks con techo de tiempo ───────────
-
-/** Desenlace de una operación corrida con deadline. `ok:false` NO se lanza. */
-type HookOpResult<T> =
-  | { ok: true; value: T; ms: number }
-  | { ok: false; error: unknown; timedOut: boolean; noBudget: boolean; ms: number }
-
-/** Desenlace de una fase, para el log agregado `chat.onfinish_phases`. */
-type PhaseOutcome = 'ok' | 'deadline' | 'error' | 'skipped' | 'no_budget'
-
-interface PhaseRecord {
-  ms: number
-  outcome: PhaseOutcome
-}
-
-/**
- * Por qué NO se reintentó la persistencia. `null` = se reintentó (o no hizo
- * falta). Sin este campo, "no reintenté" y "reintenté y falló" serían
- * indistinguibles en el log — y son diagnósticos opuestos.
- */
-type RetrySkipReason = 'deadline' | 'budget' | 'max_attempts' | null
+// MS-E6.2 (costura B) — suspensión del watchdog mientras corren los tools.
+import { createToolSuspensionController } from './toolSuspension'
 
 /**
  * STREAM-TIMEOUT (Fase 2) — Entrada de `persistTurn`. Es todo lo que cambia
@@ -344,58 +125,6 @@ interface PersistTurnInput {
   toolCalls: readonly unknown[]
   tokensIn: number
   tokensOut: number
-}
-
-/**
- * Corre una operación de hook con techo de tiempo y NUNCA lanza: devuelve el
- * desenlace para que el llamador decida. El bucle de persistencia necesita
- * distinguir `timedOut` (cuelgue abandonado → NO reintentar, ya retuvo una
- * conexión del pool) de un error real de Prisma (transitorio → sí reintentar).
- *
- * `deadlineMs <= 0` (presupuesto agotado) NO arranca la operación: disparar una
- * query para abandonarla en el mismo tick cuesta una conexión del pool a cambio
- * de nada.
- */
-async function runHookOp<T>(
-  label: string,
-  deadlineMs: number,
-  start: () => Promise<T>,
-  onLateSettle?: (info: LateSettleInfo) => void,
-): Promise<HookOpResult<T>> {
-  if (deadlineMs <= 0) {
-    return {
-      ok: false,
-      error: new DeadlineExceededError(label, 0),
-      timedOut: true,
-      noBudget: true,
-      ms: 0,
-    }
-  }
-  const startedAt = Date.now()
-  try {
-    const value = await withDeadline(
-      start(),
-      deadlineMs,
-      label,
-      onLateSettle ? { onLateSettle } : undefined,
-    )
-    return { ok: true, value, ms: Date.now() - startedAt }
-  } catch (error) {
-    return {
-      ok: false,
-      error,
-      timedOut: isDeadlineExceeded(error),
-      noBudget: false,
-      ms: Date.now() - startedAt,
-    }
-  }
-}
-
-/** Traduce el desenlace de una operación a la etiqueta que va al log de fases. */
-function phaseOutcome<T>(result: HookOpResult<T>): PhaseOutcome {
-  if (result.ok) return 'ok'
-  if (result.noBudget) return 'no_budget'
-  return result.timedOut ? 'deadline' : 'error'
 }
 
 /**
@@ -1146,65 +875,23 @@ export async function handleChatRequest(
   // así que `steps[]` viene vacío y `onFinish` ni siquiera se invoca).
   let accumulatedAssistantText = ''
 
-  // ─── WATCHDOG-2 — suspensión del watchdog durante la ejecución de tools ────
-  // Mientras `capture_lead`/`show_whatsapp_handoff` corren su `execute()` (DB a
-  // Neon, potencialmente fría), NO fluye ningún chunk por el body: sin pausar
-  // el watchdog, cortaría la respuesta a mitad de la captura del lead — el
-  // momento comercialmente más valioso del producto.
-  //
-  // CONTADOR, no booleano: el SDK corre las tool calls de un mismo step en
-  // paralelo (`Promise.all`, `ai/dist/index.js:7525-7548`). Con un booleano, el
-  // primer tool que termina reanudaría el watchdog mientras el segundo sigue
-  // en Neon — y ahí sí se corta. Se suspende SOLO en la transición 0→1 y se
-  // reanuda SOLO en la transición →0.
-  //
-  // `watchdogRef` es un holder mutable porque el controller del watchdog recién
-  // existe DESPUÉS de que `streamText(...)` retorna (más abajo), pero estos
-  // callbacks se PASAN como parte de la config de `streamText` antes de eso.
-  // Por construcción (streamText es síncrono) el holder ya está poblado para
-  // cuando el SDK pueda disparar el primer tool call, así que el optional
-  // chaining de abajo es defensivo, no una carrera real.
-  let toolsInFlight = 0
-  let suspendedSinceAt: number | null = null
-  let suspendedMsTotal = 0
-  let toolMaxTimer: ReturnType<typeof setTimeout> | undefined
+  // WATCHDOG-2 — `watchdogRef` es un holder mutable porque el controller del
+  // watchdog recién existe DESPUÉS de que `streamText(...)` retorna (más abajo),
+  // pero estos callbacks se PASAN como parte de la config de `streamText` antes
+  // de eso. Por construcción (streamText es síncrono) el holder ya está poblado
+  // para cuando el SDK pueda disparar el primer tool call, así que el optional
+  // chaining de los consumidores es defensivo, no una carrera real.
   const watchdogRef: { current: StreamWatchdogController | null } = { current: null }
 
-  const clearToolMaxTimer = (): void => {
-    if (toolMaxTimer !== undefined) {
-      clearTimeout(toolMaxTimer)
-      toolMaxTimer = undefined
-    }
-  }
-
-  const onToolCallStart = (): void => {
-    toolsInFlight += 1
-    if (toolsInFlight !== 1) return // ya había otro tool en vuelo: no re-suspender
-    suspendedSinceAt = Date.now()
-    watchdogRef.current?.suspend()
-    // Techo de seguridad: un tool colgado no puede dejar el watchdog suspendido
-    // para siempre — sería reintroducir el mismo cuelgue de 30s que este sprint
-    // entero viene arreglando. NO toca `toolsInFlight`: si el tool eventualmente
-    // termina, `onToolCallFinish` corre igual (ver abajo) — solo que a esta
-    // altura resumir es un no-op (ya se resumió acá).
-    toolMaxTimer = setTimeout(() => {
-      streamProbe.mark('watchdog_tool_max_forced', { toolsInFlight })
-      watchdogRef.current?.resume()
-    }, STREAM_WATCHDOG_TOOL_MAX_MS)
-  }
-
-  const onToolCallFinish = (): void => {
-    // Piso en 0: una llamada de más (no debería pasar, pero es defensivo) nunca
-    // deja el contador negativo, que rompería la próxima transición 0→1.
-    toolsInFlight = Math.max(0, toolsInFlight - 1)
-    if (toolsInFlight !== 0) return
-    clearToolMaxTimer()
-    if (suspendedSinceAt !== null) {
-      suspendedMsTotal += Date.now() - suspendedSinceAt
-      suspendedSinceAt = null
-    }
-    watchdogRef.current?.resume()
-  }
+  // MS-E6.2 (costura B) — la suspensión por contador vive en su propio módulo.
+  // Su estado (toolsInFlight, suspendedSinceAt, suspendedMsTotal, el timer del
+  // techo) queda en el closure del factory: una instancia POR REQUEST, nunca a
+  // nivel de módulo. Ver toolSuspension.ts.
+  const suspension = createToolSuspensionController({
+    watchdogRef,
+    probe: streamProbe,
+    toolMaxMs: STREAM_WATCHDOG_TOOL_MAX_MS,
+  })
   // STREAM-TIMEOUT (Fase 2) — Guard de idempotencia de `persistTurn`. Se marca
   // sincrónicamente, antes de cualquier await: si una carrera dispara los dos
   // hooks, el segundo sale por el early-return. Cero doble escritura, cero doble
@@ -1800,8 +1487,8 @@ export async function handleChatRequest(
     // contador SIEMPRE se decrementa y el watchdog nunca queda suspendido por
     // culpa de un tool que falla (el `STREAM_WATCHDOG_TOOL_MAX_MS` de arriba
     // cubre el caso de un tool que ni falla ni resuelve — cuelga de verdad).
-    experimental_onToolCallStart: onToolCallStart,
-    experimental_onToolCallFinish: onToolCallFinish,
+    experimental_onToolCallStart: suspension.onToolCallStart,
+    experimental_onToolCallFinish: suspension.onToolCallFinish,
     // WATCHDOG-3 — el arranque en frío del provider es POR STEP, no por
     // stream: tras un tool, el modelo arranca un step NUEVO (llamada nueva al
     // provider) para generar el texto final, con su propio cold start. Sin
@@ -2028,14 +1715,9 @@ export async function handleChatRequest(
     },
     onEvent: (info) => {
       if (info.reason === 'idle') {
-        // WATCHDOG-2 — si el disparo ocurrió con tools en vuelo, solo puede ser
-        // porque `STREAM_WATCHDOG_TOOL_MAX_MS` forzó el resume de un tool que ni
-        // falló ni resolvió (colgado de verdad) — la suspensión normal bloquea
-        // por completo el timer, así que en el camino sano `toolsInFlight` acá
-        // siempre es 0. `suspendedMsTotal` suma cualquier suspensión todavía
-        // abierta en este instante.
-        const suspendedMsAtFire =
-          suspendedMsTotal + (suspendedSinceAt !== null ? Date.now() - suspendedSinceAt : 0)
+        // Contadores de la suspensión al momento del disparo (ver toolSuspension.ts:
+        // `suspendedMsTotal` ya incluye cualquier suspensión todavía abierta).
+        const { toolsInFlight, suspendedMsTotal } = suspension.snapshot()
         // El evento que importa: el watchdog tuvo que actuar. Va a stderr
         // SIEMPRE (no gated por el probe) porque es la señal de que el stream
         // de Gemini sigue sin cerrar. Longitudes y contadores, nunca contenido.
@@ -2056,14 +1738,14 @@ export async function handleChatRequest(
             lastGapMs: info.lastGapMs,
             assistantTextLength: accumulatedAssistantText.length,
             toolsInFlight,
-            suspendedMsTotal: suspendedMsAtFire,
+            suspendedMsTotal,
           },
           'warn',
         )
         return
       }
       // Cierre normal o cancelación del cliente: ya no hay nada que suspender.
-      clearToolMaxTimer()
+      suspension.clearToolMaxTimer()
       // H.3 — telemetría PERMANENTE (antes iba por el probe, gated). Es la
       // contraparte sana de `chat.watchdog_fired`: el stream cerró solo (o el
       // cliente canceló) y el watchdog NO tuvo que actuar. Sin esta línea, un
