@@ -178,8 +178,25 @@ export interface StreamWatchdogOptions {
    * Se ESPERA antes de cerrar el readable. Acá va la persistencia del turno.
    * Si rechaza, se traga y el stream cierra igual: cerrar nunca puede quedar
    * condicionado a que la DB responda (lección de ONF-2).
+   *
+   * MUDEZ (commit 2) — puede devolver bytes (frames SSE ya codificados, ver
+   * silenceFrames.ts): se encolan al readable INMEDIATAMENTE antes del
+   * `terminate()`, sin ningún await entre medio (condición del premortem: un
+   * await ahí abre la ventana para que un provider revivido meta texto real
+   * DESPUÉS del canned). Devolver `void`/`null` = cerrar sin hablar.
    */
-  onIdle: () => Promise<void>
+  onIdle: () => Promise<Uint8Array | null | void>
+  /**
+   * MUDEZ (commit 2) — la red del CIERRE LIMPIO. El SDK puede cerrar el body
+   * normal y rápido con cero texto (un part de error tipo NoOutputGeneratedError
+   * cierra vía closeStream: sin silencio no hay idle, y sin chunk `finish` el
+   * fallback del transform no inyecta). Se invoca en `flush()` — upstream cerró
+   * solo, todavía podemos encolar — y sus bytes salen antes del cierre. La
+   * decisión de si hay que hablar (¿hubo texto? ¿el fallback ya habló?) es del
+   * llamador; devolver `null`/`void` = cierre normal mudo a propósito.
+   * NUNCA se invoca en `cancel()`: si el cliente se fue, no hay a quién hablarle.
+   */
+  onSilentClose?: () => Promise<Uint8Array | null | void>
   /** Telemetría a stderr. Recibe contadores y tiempos, jamás contenido. */
   onEvent?: (info: StreamWatchdogEvent) => void
 }
@@ -244,6 +261,7 @@ export function createStreamWatchdog({
   idleMs,
   initialIdleMs = idleMs,
   onIdle,
+  onSilentClose,
   onEvent,
 }: StreamWatchdogOptions): StreamWatchdogController {
   const startedAt = Date.now()
@@ -305,18 +323,26 @@ export function createStreamWatchdog({
     // línea ya salió y el log dice qué pasó. Es la lección de los sprints
     // previos — el rastro nunca puede depender del recurso que está fallando.
     emit('idle')
+    // MUDEZ (commit 2) — si `onIdle` devuelve frames (la derivación canned ya
+    // persistida), se encolan justo antes del terminate.
+    let silenceFrames: Uint8Array | null = null
     try {
       // Esperado a propósito: mientras el readable siga abierto la respuesta no
       // terminó y la función sigue viva. Acá es donde la persistencia deja de
       // ser best-effort. `onIdle` trae su propio techo de tiempo (el
       // presupuesto de ONF-2), así que esta espera está acotada.
-      await onIdle()
+      const returned = await onIdle()
+      if (returned instanceof Uint8Array) silenceFrames = returned
     } catch {
       // Tragado a propósito: el cierre del stream NO puede quedar condicionado
       // a que la DB responda. Quien pasa `onIdle` es responsable de su propio
       // rastro de error (persistTurn ya loguea a stderr).
     }
     try {
+      // Enqueue y terminate en la MISMA tarea, sin await entre medio: un await
+      // acá abriría la ventana para que un provider revivido intercale texto
+      // real después del canned (condición del premortem del bloque MUDEZ).
+      if (silenceFrames !== null) controller.enqueue(silenceFrames)
       // Cierra el readable (el cliente ve `done`) y erroriza el writable, que
       // es lo que corta el productor colgado upstream.
       controller.terminate()
@@ -351,6 +377,14 @@ export function createStreamWatchdog({
     },
 
     transform(chunk, controller) {
+      // MUDEZ (commit 2) — DESCARTE post-settled. `fireIdle` marca `settled`
+      // sincrónicamente y después ESPERA la persistencia (hasta 5s de
+      // presupuesto): en esa ventana un provider revivido puede empujar chunks.
+      // Antes se encolaban igual (el guard solo evitaba re-armar el timer) y el
+      // visitante veía texto DESPUÉS de decidida la persistencia — con la red
+      // que habla, eso sería canned + texto real duplicado. Decidido el cierre,
+      // lo que llegue tarde se descarta.
+      if (settled) return
       // Verbatim y primero: el contenido no se inspecciona ni se transforma.
       controller.enqueue(chunk)
       chunks += 1
@@ -359,15 +393,29 @@ export function createStreamWatchdog({
       // elige la ventana. El frame `start` del SDK llega antes de que el modelo
       // genere nada; tomarlo como "ya hay contenido" pasaba a la ventana corta
       // y mataba respuestas sanas. La ventana la decide `markContent()`.
-      if (settled) return
       armTimer(controller)
     },
 
-    flush() {
+    async flush(controller) {
       // Camino sano: el upstream cerró solo. Matar el timer para no cerrar (ni
       // persistir) sobre un stream que ya terminó.
       if (!settled) {
         settled = true
+        clearTimer()
+        // MUDEZ (commit 2) — la red del CIERRE LIMPIO: el SDK puede cerrar
+        // normal con cero texto (part de error → closeStream: sin silencio no
+        // hay idle, sin `finish` el fallback no inyecta). El llamador decide si
+        // hay que hablar; sus bytes salen antes de completar el cierre. El
+        // enqueue en flush es legal: se entrega antes del close del readable.
+        if (onSilentClose) {
+          try {
+            const returned = await onSilentClose()
+            if (returned instanceof Uint8Array) controller.enqueue(returned)
+          } catch {
+            // Tragado: el cierre no puede quedar condicionado a la DB (misma
+            // regla que onIdle).
+          }
+        }
         emit('closed')
       }
       clearTimer()

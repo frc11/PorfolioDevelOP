@@ -77,6 +77,10 @@ import { createChunkTally } from './chunkTally'
 // WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
 // Ver el encabezado de streamWatchdog.ts para el porqué.
 import { createStreamWatchdog, type StreamWatchdogController } from './streamWatchdog'
+// MUDEZ (commit 2) — frames SSE del canned que el borde encola cuando el turno
+// iba a terminar mudo. Forma ESTRICTA (el cliente valida con z.strictObject y
+// el campo del delta se llama `delta`) — ver silenceFrames.ts.
+import { buildSilenceTextFrames } from './silenceFrames'
 // MS-E6.2 (costura B) — suspensión del watchdog mientras corren los tools.
 import { createToolSuspensionController } from './toolSuspension'
 // MS-E6.2 (costura C) — persistencia del turno (los 3 caminos que lo cierran).
@@ -1170,28 +1174,46 @@ export async function handleChatRequest(
       // y cero doble conteo de cupo. `persistTurn` trae su propio techo de
       // tiempo (presupuesto de ONF-2), así que esta espera está acotada.
       //
-      // Sin texto acumulado no hay turno que guardar TODAVÍA (la red que habla
-      // —persistir un turno canned y emitirlo al visitante— llega en el commit
-      // 2 del bloque MUDEZ; hasta entonces este camino solo hace la limpieza de
-      // abajo, que ya recupera la contabilidad vía el drain).
-      if (accumulatedAssistantText.trim().length > 0) {
-        await persistTurn({
-          source: 'watchdog',
-          assistantText: accumulatedAssistantText,
-          // El run nunca emitió su chunk terminal: no hay finishReason real.
-          finishReason: 'watchdog_idle',
-          // Sin `finish-step` no hay tool calls agregadas ni `usage` del provider.
-          // Se persisten 0 tokens a propósito (subreporte auditable, con
-          // `source: "watchdog"` en el log para reconciliar) en vez de inventar
-          // una estimación en una tabla de costo. Mismo criterio que `onAbort`.
-          toolCalls: [],
-          tokensIn: 0,
-          tokensOut: 0,
-        })
-      }
-      // MUDEZ (commit 1) — DESPUÉS de persistir (el orden importa: si el drain
-      // dispara la compensación de cupo antes del persist, su tx borra la
-      // Conversation y el turno se queda sin fila):
+      // MUDEZ (commit 2) — la red que HABLA. Con texto acumulado, se persiste
+      // lo que el visitante vio (como siempre). Sin texto, el turno iba a
+      // terminar mudo: se persiste la derivación canned (source
+      // 'watchdog_canned', distinguible a propósito en telemetría) y se
+      // DEVUELVEN sus frames — el watchdog los encola justo antes del
+      // terminate, así el visitante ve la derivación en vez de silencio.
+      // Decisión del bloque: se COBRA y se persiste (transcript > cupo).
+      const spokeCanned = accumulatedAssistantText.trim().length === 0
+      await persistTurn(
+        spokeCanned
+          ? {
+              source: 'watchdog_canned',
+              assistantText: emptyFallbackText,
+              finishReason: 'watchdog_idle',
+              toolCalls: [],
+              tokensIn: 0,
+              tokensOut: 0,
+            }
+          : {
+              source: 'watchdog',
+              assistantText: accumulatedAssistantText,
+              // El run nunca emitió su chunk terminal: no hay finishReason real.
+              finishReason: 'watchdog_idle',
+              // Sin `finish-step` no hay tool calls agregadas ni `usage` del
+              // provider. Se persisten 0 tokens a propósito (subreporte
+              // auditable, con `source` en el log para reconciliar) en vez de
+              // inventar una estimación en una tabla de costo.
+              toolCalls: [],
+              tokensIn: 0,
+              tokensOut: 0,
+            },
+      )
+      // MUDEZ (commit 1) — ⚠️ NO REORDENAR: el abort va DESPUÉS del persist.
+      // Parecen dos pasos independientes y NO lo son — el drain que arranca acá
+      // puede disparar `onAbort` → compensación de cupo, y esa compensación
+      // borra la fila de Conversation dentro de su tx: si le gana la carrera al
+      // persist de arriba, el turno (canned incluido) se queda sin fila donde
+      // vivir. Persistir PRIMERO garantiza que el delete condicional de la
+      // compensación ("solo si no hay ASSISTANT persistido") encuentre la fila
+      // y no borre nada.
       //   1. abort: mata el fetch de Vertex pendiente (la causa de la variante
       //      C5: doStream sin headers por 31s que ningún timer cubría) y les
       //      avisa a los tools que respeten la señal.
@@ -1206,9 +1228,34 @@ export async function handleChatRequest(
       // El drain nunca debe tumbar el cierre — cualquier error suyo se traga
       // (el rastro del turno ya salió por los caminos de arriba).
       void Promise.resolve(result.consumeStream()).catch(() => {})
+      return spokeCanned ? buildSilenceTextFrames(emptyFallbackText) : null
+    },
+    // MUDEZ (commit 2) — la red del CIERRE LIMPIO. El SDK puede cerrar el body
+    // normal y rápido con CERO texto: un part de error (p.ej.
+    // NoOutputGeneratedError) cierra vía closeStream — sin silencio no hay
+    // idle, y sin chunk `finish` el fallback del transform no inyecta. Acá se
+    // decide si el borde habla: solo si no hubo texto Y el fallback no habló.
+    // El watchdog NUNCA lo invoca en `cancel` (visitante ido).
+    onSilentClose: async () => {
+      if (accumulatedAssistantText.trim().length > 0) return null
+      if (emptyFallbackInjected) return null
+      await persistTurn({
+        source: 'watchdog_canned',
+        assistantText: emptyFallbackText,
+        finishReason: 'silent_close',
+        toolCalls: [],
+        tokensIn: 0,
+        tokensOut: 0,
+      })
+      return buildSilenceTextFrames(emptyFallbackText)
     },
     onEvent: (info) => {
       if (info.reason === 'idle') {
+        // MUDEZ (commit 2, premortem #13) — el disparo idle también suelta el
+        // timer del techo de tools: antes solo lo soltaban closed/cancelled y
+        // un timer huérfano de hasta 15s quedaba vivo tras el cierre (inocuo en
+        // serverless por el freeze, leak menor en dev — cerrado acá).
+        suspension.clearToolMaxTimer()
         // Contadores de la suspensión al momento del disparo (ver toolSuspension.ts:
         // `suspendedMsTotal` ya incluye cualquier suspensión todavía abierta).
         const { toolsInFlight, suspendedMsTotal } = suspension.snapshot()

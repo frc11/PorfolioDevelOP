@@ -55,6 +55,7 @@
     "test:emptyfallback": "npx tsx src/modules/chatbot/server/chat/__tests__/empty-fallback-pipeline.invariant.ts",
     "test:contactpath": "npx tsx src/modules/chatbot/server/tools/__tests__/confirm-contact-request.invariant.ts",
     "test:c01": "npx tsx src/modules/chatbot/server/tools/__tests__/navigate-to-page-gate.invariant.ts",
+    "test:mudez": "npx tsx src/modules/chatbot/server/chat/__tests__/mudez-net.invariant.ts",
     "test:fixorigin": "npx tsx \"src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts\"",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",

@@ -91,8 +91,18 @@ export interface PersistTurnInput {
    * mudo y cerramos nosotros. A diferencia de `onAbort`, este SÍ se espera antes
    * de cerrar el stream, así que la persistencia no corre carrera contra el
    * freeze de la función.
+   *
+   * MUDEZ (commit 2) — `watchdog_canned`: el borde HABLÓ por el modelo. El run
+   * iba a terminar mudo (silencio cortado, o cierre limpio sin texto ni
+   * fallback) y la red persistió la derivación canned que el visitante vio.
+   * Distinguible A PROPÓSITO de un turno real de costo 0: dentro de tres meses,
+   * un `source: 'watchdog_canned'` en `chat.onfinish_phases` /
+   * `chat.llm_request_finished` dice "esto lo dijo el borde, no el modelo" sin
+   * tener que cruzar contra el texto. Decisión del bloque: se COBRA y se
+   * persiste (el transcript vale más que el cupo — el dueño ve la conversación
+   * completa en su panel y el motor de insights la puede leer).
    */
-  source: 'onFinish' | 'onAbort' | 'watchdog'
+  source: 'onFinish' | 'onAbort' | 'watchdog' | 'watchdog_canned'
   /** Texto que el visitante REALMENTE vio. Nunca se loguea, solo se persiste. */
   assistantText: string
   finishReason: string
