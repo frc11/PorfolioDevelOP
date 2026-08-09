@@ -35,7 +35,10 @@ import { z } from 'zod'
 import type { LanguageModelV3, LanguageModelV3StreamPart } from '@ai-sdk/provider'
 import { createStreamWatchdog } from '../streamWatchdog.ts'
 import { buildSilenceTextFrames, SILENCE_TEXT_ID } from '../silenceFrames.ts'
-import { createEmptyResponseFallbackTransform } from '../reconcile.ts'
+import {
+  createEmptyResponseFallbackTransform,
+  pickPersistedAssistantText,
+} from '../reconcile.ts'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -349,6 +352,94 @@ async function main(): Promise<void> {
     assert.ok(out.includes(SILENCE_TEXT_ID), 'descarte: el canned salio igual, despues')
     await writer.close().catch(() => {})
     console.log('  ok 5. Descarte post-settled: chunk revivido no llega, canned si')
+  }
+
+  // ── 6. BUG-D: texto en un step ANTERIOR al último — se persiste lo visto ───
+  // El más silencioso de la familia: el visitante VE la respuesta (streameada
+  // en vivo desde el step 1) pero onFinish llega con text='' (solo último
+  // step, ai/dist/index.js:7280/:4203) y se persistía una fila vacía. Acá se
+  // reproduce la forma REAL contra el streamText instalado y se verifica que
+  // la decisión de producción (pickPersistedAssistantText) rescata lo visto.
+  {
+    const textAndToolModel: LanguageModelV3 = {
+      specificationVersion: 'v3',
+      provider: 'probe',
+      modelId: 'probe',
+      supportedUrls: {},
+      doGenerate: () => Promise.reject(new Error('no doGenerate')),
+      doStream: (() => {
+        let call = 0
+        return async () => ({
+          stream: new ReadableStream<LanguageModelV3StreamPart>({
+            start(c) {
+              c.enqueue({ type: 'stream-start', warnings: [] })
+              if (call++ === 0) {
+                // Step 1: TEXTO (el visitante lo ve en vivo) + tool-call.
+                c.enqueue({ type: 'text-start', id: 't0' })
+                c.enqueue({ type: 'text-delta', id: 't0', delta: 'texto visto por el visitante' })
+                c.enqueue({ type: 'text-end', id: 't0' })
+                c.enqueue({ type: 'tool-input-start', id: 'tc0', toolName: 'probe_tool' })
+                c.enqueue({ type: 'tool-input-end', id: 'tc0' })
+                c.enqueue({ type: 'tool-call', toolCallId: 'tc0', toolName: 'probe_tool', input: '{}' })
+                c.enqueue({ type: 'finish', finishReason: { unified: 'tool-calls', raw: 'T' }, usage: USAGE })
+              } else {
+                // Step 2 (final): cierra SIN texto.
+                c.enqueue({ type: 'finish', finishReason: { unified: 'stop', raw: 'S' }, usage: USAGE })
+              }
+              c.close()
+            },
+          }),
+        })
+      })(),
+    }
+
+    let accumulated = ''
+    let finishText: string | null = null
+    const probeTool = tool({
+      description: 'sonda',
+      inputSchema: z.object({}),
+      execute: async () => ({ ok: true }),
+    })
+    const result = streamText({
+      model: textAndToolModel,
+      prompt: 'sonda',
+      tools: { probe_tool: probeTool },
+      stopWhen: stepCountIs(3),
+      onChunk: ({ chunk }) => {
+        if (chunk.type === 'text-delta') accumulated += chunk.text
+      },
+      onFinish: ({ text }) => {
+        finishText = text
+      },
+      onError: () => {},
+    })
+    const response = result.toUIMessageStreamResponse()
+    assert.ok(response.body, 'BUG-D: el body existe')
+    const drained = await drainBody(response.body, 8_000)
+    assert.ok(drained.done, 'BUG-D: el run cierra normal')
+    assert.ok(drained.realTextSeen, 'BUG-D: el visitante VIO el texto del step 1')
+    // La premisa del bug, verificada contra el SDK real: onFinish.text vacío.
+    assert.equal(finishText, '', 'BUG-D premisa: onFinish.text es SOLO el último step (vacío)')
+    assert.equal(accumulated, 'texto visto por el visitante', 'BUG-D: el acumulado tiene lo visto')
+    // La decisión de producción rescata lo que el visitante vio:
+    assert.equal(
+      pickPersistedAssistantText(finishText ?? '', accumulated),
+      'texto visto por el visitante',
+      'BUG-D: se persiste lo VISTO, no la fila vacía',
+    )
+    // Residuo del premortem: whitespace-only no pisa un acumulado con contenido.
+    assert.equal(
+      pickPersistedAssistantText('   \n ', accumulated),
+      accumulated,
+      'BUG-D: text whitespace-only cae al acumulado',
+    )
+    // Y con texto real en el cierre, ese gana (comportamiento de siempre):
+    assert.equal(
+      pickPersistedAssistantText('cierre real', accumulated),
+      'cierre real',
+      'BUG-D: un cierre con texto real se persiste tal cual',
+    )
+    console.log('  ok 6. BUG-D: onFinish.text vacio con texto visto -> se persiste el acumulado')
   }
 
   assert.equal(unhandled.length, 0, `unhandled rejections: ${unhandled.join(' | ')}`)

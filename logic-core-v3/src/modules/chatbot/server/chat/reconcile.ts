@@ -299,6 +299,38 @@ export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000
  * Ver la nota de remoción en la sección 1.c.
  */
 
+// ─── 1.d MUDEZ: qué texto se persiste como respuesta del asistente ───────────
+
+/**
+ * MUDEZ (commit 3) — BUG-D: `onFinish.text` es SOLO el texto del ÚLTIMO step
+ * (`ai/dist/index.js:7280` + `:4203`: `recordedContent` se resetea en cada
+ * `start-step`). En un run multi-step donde el modelo escribió en el step 1 y
+ * el step final cerró sin texto, el visitante VIO la respuesta streameada en
+ * vivo pero `onFinish` llega con `text: ''` — y se persistía una fila ASSISTANT
+ * vacía. El bug más silencioso de la familia: en producción no se nota nunca;
+ * se nota meses después, en un transcript incompleto o en el motor de insights
+ * leyendo conversaciones sin respuestas. Reproducido empíricamente contra el
+ * streamText real (sonda P3 de la Fase 0).
+ *
+ * La decisión: si el `text` del SDK trae contenido real, se persiste ese (es el
+ * texto canónico del cierre); si viene vacío —o solo whitespace, el residuo que
+ * marcó el premortem— se persiste el ACUMULADO de `onChunk`, que es literalmente
+ * lo que el visitante vio pasar por su pantalla.
+ *
+ * LÍMITE CONOCIDO (anotado, no cubierto acá): si el step final SÍ trae texto y
+ * un step anterior TAMBIÉN traía, el transcript conserva solo el final — igual
+ * que siempre. Cambiar eso es una decisión de formato de transcript (¿concatenar
+ * steps? ¿con qué separador?), no un fix de mudez.
+ *
+ * Pura y determinista, sin I/O — testeable directo (mudez-net.invariant.ts).
+ */
+export function pickPersistedAssistantText(
+  finishText: string,
+  accumulatedText: string,
+): string {
+  return finishText.trim().length > 0 ? finishText : accumulatedText
+}
+
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────
 
 /** Dónde se detectó que el turno NO entregó una respuesta cobrable. */

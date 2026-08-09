@@ -45,6 +45,8 @@ import { HARD_CAP_MESSAGES } from '../../shared/historyPolicy'
 // de cupo, dedup del retry de persistencia, fallback de respuesta vacía).
 import {
   shouldCompensateQuota,
+  // MUDEZ (commit 3) — qué texto se persiste en onFinish (BUG-D).
+  pickPersistedAssistantText,
   buildEmptyFallbackMessage,
   createEmptyResponseFallbackTransform,
   type CompensationTrigger,
@@ -1139,7 +1141,11 @@ export async function handleChatRequest(
       const hasSteps = steps && steps.length > 0
       await persistTurn({
         source: 'onFinish',
-        assistantText: text,
+        // MUDEZ (commit 3) — `text` es SOLO el último step: si cierra vacío
+        // pero el visitante vio texto de steps anteriores (streameado en vivo),
+        // se persiste el acumulado de onChunk — lo que la pantalla mostró.
+        // Ver pickPersistedAssistantText en reconcile.ts (BUG-D).
+        assistantText: pickPersistedAssistantText(text, accumulatedAssistantText),
         finishReason,
         toolCalls: hasSteps ? steps.flatMap((s) => s.toolCalls ?? []) : (toolCalls ?? []),
         tokensIn: hasSteps
