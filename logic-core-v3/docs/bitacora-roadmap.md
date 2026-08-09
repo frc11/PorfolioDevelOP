@@ -16310,3 +16310,215 @@ en ChatMessage y el lead en ChatbotLead. **Cualquier diferencia contra eso es un
 refactor, no un descubrimiento.**
 
 ---
+
+## BLOQUE MUDEZ - ningun turno puede terminar sin decir nada
+
+Objetivo: enumerar TODOS los caminos por los que un turno del chatbot puede terminar sin texto
+del asistente llegando al visitante, y cerrarlos por estructura. Cuatro commits. La Fase 0 (mapa
+del espacio de estados + premortem adversarial) es el entregable mas durable del bloque, mas que
+los fixes.
+
+Version del SDK: **ai@6.0.214** (NO 6.0.177 como decia el brief - el `^` del package.json nos
+movio de version sin que nadie lo decidiera; ver Deuda). Todas las lineas del SDK citadas abajo
+son de esa version instalada.
+
+### El caso que abrio el bloque (variante C5, preexistente)
+
+Capturado durante MS-E6.2: dos steps completos (`reason: natural` los dos), lead capturado, CERO
+texto, el watchdog dispara con `assistantTextLength: 0`, el `onIdle` sale por su early-return sin
+persistir, `onFinish` nunca corre. El visitante da sus datos y el bot no dice nada; no se
+persiste, no se registra costo, el cupo queda cobrado. ~1 de cada 8-13 turnos con captura de lead
+en dev.
+
+### Fase 0 - el mapa de 16 caminos
+
+Como se llega, que ve el visitante, que queda en DB, si el costo se registra. Los 4 primeros son
+PRE-LLM (el USER se persiste recien en handleChatRequest.ts:598, despues de todos los gates - todo
+return anterior sale sin USER persistido). Los demas, con el stream ya arrancado (USER persistido:
+un camino mudo deja "USER sin respuesta" en DB).
+
+| # | Camino | Mecanismo | Visitante | DB / costo | Estado |
+|---|---|---|---|---|---|
+| 1 | 400 body / 404 bot / 500 sin KB | return pre-LLM | NADA (widget descarta status error) | nada | abierto (widget) |
+| 2 | 429 rate-limit | return pre-LLM | NADA (server manda mensaje que el widget no muestra) | nada | abierto (widget) |
+| 3 | Degradados (dominio/cuota/TOCTOU/hard-cap) | degradedResponse JSON | DegradedBanner | conv nueva descartada | manejado |
+| 4 | 500 catch externo | catch pre-return | banner connection_failed tras 3 retries | compensado | manejado |
+| 5 | Cierre normal con texto | - | texto | ok | sano |
+| 6 | Ultimo step = tool client-side (CONTACT-PATH) | continuacion imposible -> finish -> fallback inyecta | card + canned | canned persistido | manejado |
+| 7 | stepCountIs(3) agotado / run vacio | finish -> fallback | canned | ok | manejado |
+| 8 | chunkMs abort, 0 steps (orig3) | abort silencioso, sin onFinish | NADA | nada, cobrado | **CERRADO commit 1** |
+| 9 | chunkMs abort, >=1 step | onFinish con text='' | NADA o parcial | fila ASSISTANT vacia | **CERRADO commit 1** |
+| 10 | doStream pendiente >12s (C5) | watchdog corta, onIdle early-return, tee congela | NADA + chime | nada, cobrado | **CERRADO commits 1+2** |
+| 11 | onFinish.text = ultimo step (BUG-D) | visitante vio texto step 1, text='' | fila vacia | vacia | **CERRADO commit 3** |
+| 12 | NoOutputGeneratedError (provider cierra sin output ni finish) | error part -> onError -> frame "An error occurred." | NADA (widget ignora error frame) | nada | **CERRADO commit 2** (borde) + abierto (widget) |
+| 13 | Provider-close cierra con output parcial sin finish | flush procede, onFinish, usage 0 | texto parcial | subreporte ok | manejado |
+| 14 | Tool execute lanza | vuelve como tool-error = output, el run continua (index.js:3065-3087) | texto del paso siguiente | ok | manejado |
+| 15 | Cliente se desconecta | cancel -> tee congela (onAbort NO corre desde abajo) | se fue | retry INFRA.2 recupera | abierto a proposito |
+| 16 | Errorizacion no-abort de la cadena (callbacks que lanzan / chunk desconocido) | body muere sin frame ni [DONE] | NADA | nada | teorico (no usamos esos callbacks) |
+
+### Premortem adversarial - lo que la enumeracion lineal NO produjo
+
+Un agente adversarial independiente ataco el mapa y el plan de fixes. Dos hallazgos reales que la
+enumeracion no daba, mas condiciones de implementacion de los fixes:
+
+1. **BUG NUEVO (cerrado en commit 4): la ventana inicial de providerStreamClose era de 1s, no 12s.**
+   `stream-start` lo emite el adapter de Google al RESOLVER doStream (headers HTTP, ANTES de
+   cualquier token: `@ai-sdk/google/dist/internal/index.js:1650`), y el transform lo tomaba como
+   "primer chunk" -> ventana colapsada a `idleMs` (1s). Si Gemini "pensaba" >1s, se cerraba su
+   stream sano -> NoOutputGeneratedError -> turno mudo. Latente hoy solo porque Vertex entrega los
+   headers pegados al burst.
+2. **Agujero en el plan de fixes: el camino de error (fila 12) cierra el body limpio y rapido, sin
+   idle.** El fix de la red colgado del timer de idle no disparaba ahi. Se cubrio con `onSilentClose`
+   en el flush del watchdog (commit 2).
+3. El transform del watchdog seguia encolando post-`settled` -> chunks revividos durante el `await`
+   de la persistencia -> doble texto con la red. Cerrado con el descarte post-settled (commit 2).
+4. La forma del frame de UI usa `delta`, NO `text`, y el cliente valida con `z.strictObject`
+   (index.js:5504-5519) -> un campo mal = throw = el fix de la mudez produce mudez. Respetado en
+   silenceFrames.ts (commit 2).
+5. Persistir el canned y compensar el cupo son EXCLUYENTES (la compensacion borra la fila
+   Conversation). Decision tomada: COBRAR Y PERSISTIR (el transcript vale mas que el cupo de una
+   conversacion; sin el, el dueno ve una conversacion cortada y el motor de insights lee justo
+   esas). Distinguible por `source: watchdog_canned`.
+
+Descartes del atacante (con linea): `stepCountIs(3)` no tiene camino a 4 steps (index.js:8078 +
+8022 + 7251-7253); el retry de INFRA.2 no envenena el historial (un stream mudo no commitea
+mensaje assistant en el cliente porque el `start` sin messageId no hace write, index.js:6206-6214);
+la sospecha sobre el acumulador quedo REFUTADA (onChunk corre aguas abajo del descarte del pull,
+index.js:7406 vs 7379-7381: un chunk descartado por abort nunca se acumula).
+
+### TRES APRENDIZAJES QUE NO SE PIERDEN
+
+**1. PATRON del proyecto: "frame de transporte contado como primer chunk" - TERCERA aparicion.**
+Ya paso tres veces: el watchdog del borde (arreglado en WATCHDOG-4), el `chunkMs` del SDK, y
+providerStreamClose (premortem #1, commit 4). REGLA: **todo mecanismo que decida algo mirando "el
+primer chunk" tiene que distinguir TRANSPORTE de CONTENIDO del modelo.** El transporte
+(`start`/`stream-start`/`response-metadata`) llega antes de que el modelo genere nada; tomarlo como
+contenido colapsa cualquier ventana de cold-start y mata respuestas sanas. Un byte resetea el timer
+(es actividad), pero solo el contenido real del modelo elige la ventana corta. El discriminador
+correcto en el borde es `onChunk` del SDK (solo dispara para chunks del modelo, nunca para frames
+estructurales, index.js:7105-7107); en el middleware crudo, excluir `stream-start`/`response-metadata`.
+
+**2. El hallazgo del tee (el aprendizaje mas durable de la Fase 0).**
+`toUIMessageStream` se construye sobre `this.fullStream`, que sale de `teeStream()` (index.js:8219-8223:
+`const [s1, s2] = this.baseStream.tee(); this.baseStream = s2; return s1`). CONSECUENCIA:
+**cancelar una rama del tee NO cancela la fuente** - `ReadableStream.tee()` solo cancela el origen
+cuando AMBAS ramas cancelan. Por eso el `terminate()` del watchdog (que cancela la rama del body)
+nunca alcanza el `cancel()` del stream del SDK (index.js:7392-7394): muere en el tee. Y por eso
+`onAbort` era CASI INALCANZABLE - el unico disparador real era el AbortController interno de
+`chunkMs` (removido en commit 1). La pieza que SI drena el pipeline congelado es
+**`result.consumeStream()`**: abre una rama NUEVA del tee y la drena activamente, lo que hace correr
+el reconcile del SDK (onAbort/onFinish) tras nuestro terminate. Es lo que recupera la contabilidad
+del turno cuando hay >=1 step registrado. Verificado empiricamente (sonda P4: sin consumeStream, el
+tool del step 2 NO ejecuta y el run queda congelado).
+
+**3. Regla de gates: NUNCA encadenar comandos de gate ni pipear su salida.**
+En el commit 1, con la cwd del shell reseteada, un `tsc | head` enmascaro que ni tsc ni eslint
+corrieron (eslint hasta instalo un paquete global equivocado) - un falso verde. Casi mete a
+produccion un `consumeStream()` sin `.catch` (PromiseLike sin metodo catch, error de tipo real que
+la corrida enmascarada no vio). REGLA: **uno por vez, cwd confirmada primero (`pwd`), salida
+completa leida, sin pipes.** Un falso verde de tsc/eslint es PEOR que no correrlos, porque genera
+confianza.
+
+### Validacion en vivo (no anecdota): un C5 real atrapado end-to-end
+
+Durante la verificacion del commit 3, un turno REAL de dev paso por la red del commit 2. Numeros:
+`chat.watchdog_fired reason:idle chunks:1 contentChunks:0 window:initial elapsedMs:12019
+assistantTextLength:0` (C5 puro: doStream pendiente 12s, cero contenido). Resultado:
+`chat.onfinish_phases source:"watchdog_canned" assistantMessageLength:106 persist_tx_1.outcome:ok
+completed_event.outcome:ok costUsd:0`. Y la compensacion del drain: `chat.quota_compensated
+trigger:stream_abort compensated:false` (una sola compensacion, logueada dos veces por
+chatbotLog + logChatbotEvent). El `compensated:false` es el orden `NO REORDENAR` validado FUERA del
+test: el canned se persistio PRIMERO, la compensacion del drain llego DESPUES, encontro la fila
+ASSISTANT y NO la borro -> transcript conservado + cupo cobrado = exactamente "cobrar y persistir".
+Reaparecio otra vez en la verificacion del commit 4 (`source:watchdog_canned chunks_total:0`),
+mismo desenlace correcto.
+
+### Los cuatro commits
+
+- **1/4 - remueve chunkMs, da al handler la senal de abort.** `timeout:{chunkMs}` fuera (era la
+  causa raiz de la variante orig3: su timer corre durante la ejecucion de los tools -el SDK retiene
+  el finish hasta que terminan, index.js:6655/6618- y un capture_lead >5s abortaba el run en
+  silencio). A cambio: un `AbortController` por request (la unica senal que mata un fetch de Vertex
+  pendiente, porque la cancelacion del body muere en el tee), disparado por el watchdog al actuar
+  (DESPUES de persistir - ver el orden abajo) y ante `cancelled`; + `consumeStream()` al disparar
+  para drenar el tee. `STREAM_CHUNK_TIMEOUT_MS` removido de reconcile.ts con lapida.
+- **2/4 - la red que habla.** `onIdle`/`onSilentClose` del watchdog devuelven frames SSE (triada
+  text-start/text-delta/text-end, campo `delta`) que se encolan justo antes del terminate SIN await
+  entre medio; el turno canned se persiste con `source:watchdog_canned`. Cubre C5 (via idle) y
+  NoOutputGeneratedError (via flush/cierre limpio). NUNCA en `cancel`. Descarte post-settled en el
+  transform. Cierra tambien el timer huerfano del techo de tools en el disparo idle (premortem #13).
+- **3/4 - persiste el texto que el visitante vio (BUG-D).** `pickPersistedAssistantText(text,
+  accumulated)`: si `onFinish.text` (solo ultimo step) viene vacio pero el visitante vio texto de
+  steps anteriores, se persiste el acumulado de onChunk. El mas silencioso de la familia.
+- **4/4 - stream-start no colapsa la ventana de providerStreamClose (premortem #1, PATRON 3ra vez).**
+
+**El orden persist -> abort del commit 1 (NO REORDENAR).** El abort del watchdog va DESPUES del
+persist, no antes. Parecen dos lineas independientes y NO lo son: el drain que arranca con el abort
+puede disparar onAbort -> compensacion de cupo, que borra la fila Conversation en su tx; si le gana
+la carrera al persist, el turno (canned incluido) se queda sin fila. Persistir primero hace que el
+delete condicional de la compensacion ("solo si no hay ASSISTANT persistido") encuentre la fila y
+no borre nada. Documentado inline con ese porque - es exactamente el tipo de dependencia que
+alguien rompe en seis meses reordenando dos lineas que parecen ortogonales.
+
+### El test - test:mudez (bateria: 17 -> 18)
+
+Contra el streamText REAL + watchdog REAL + builder REAL + transform de fallback REAL. 6 casos:
+C5 (canned visible + persistido via idle), NoOutput (via silent_close, verificando closed y no
+idle), paridad sana (texto real, cero canned, la red no interviene), cancel (nunca habla ni
+persiste), descarte post-settled (chunk revivido no sale, canned si), BUG-D (multi-step con texto
+en step anterior -> se persiste el acumulado). Cada fix con su falla-primero ejecutada. El caso A7
+de provider-close cubre el commit 4 (gap tras el transporte no colapsa la ventana). Limite honesto
+(hallazgo 0 de MS-E6.2): el closure de produccion vive en handleChatRequest y no es invocable sin
+server; el test cablea un espejo minimo SOBRE los mecanismos reales, que es donde vivia el bug.
+
+### Estado final de la familia
+
+**Cerrados:** caminos 8, 9 (commit 1), 10 (commits 1+2), 11 (commit 3), 12 en el BORDE (commit 2),
+mas el bug del premortem #1 (commit 4). Todo turno que llega al borde ahora produce texto visible O
+queda persistido con su costo (source distinguible), y en el caso canned, las dos cosas.
+
+**Abiertos A PROPOSITO** (no valen la pena, con su porque):
+- Desconexion del cliente (camino 15): no hay a quien hablarle; el retry de INFRA.2 recupera el
+  turno.
+- Degradados (camino 3): el banner es la UX correcta por diseno.
+- Cierre con tool client-side cardeado (camino 6): card + canned es UX aceptable.
+- Stream de contenido infinito: hoy tampoco tiene techo (cada chunk resetea el timer); lo mata
+  Netlify a los 30s. Preexistente, fuera del alcance de la mudez.
+- Errorizacion no-abort de la cadena (camino 16): teorico, no usamos los callbacks que la
+  disparan.
+
+**Para el SPRINT SIGUIENTE** (bug distinto, verificacion visual propia): el WIDGET que descarta
+`status: 'error'` cuando el server SI le esta hablando - caminos 1, 2 y 12 del lado cliente. El 429
+manda un mensaje amable que nadie ve; el error-frame del stream y todo 4xx directo terminan en
+`status:'error'` que useChatbot ignora (no destructura `error`, no pasa `onError`), cero UI. Es la
+otra mitad del camino 12: el borde ya habla (commit 2), pero cuando el server responde un
+error-frame o un 4xx, el widget lo descarta. Sprint corto, banner estilo connection_failed.
+
+### Deuda
+
+- `^` en `"ai"` del package.json nos movio de 6.0.177 a 6.0.214 sin decision humana. Considerar
+  pineo exacto (sprint aparte).
+- Camino 14 (BUG-D residual): si el step final trae texto y uno anterior TAMBIEN, el transcript
+  conserva solo el final. Decision de formato de transcript, no de mudez.
+- Drift de messageCount en turnos mudos historicos (premortem #14): el `+2` vive solo en la tx del
+  turno; los turnos que murieron mudos antes de este bloque dejaron un USER sin ese incremento.
+  Anotar para E2 (historial desde DB).
+- Resto de la deuda conocida sin cambios: superficie de insights para el dueno (chat Panel, ya
+  bloqueante) - BREVO_API_KEY + Telegram - PII en stderr de show_whatsapp_handoff - hashes de IP
+  divergentes (route.ts:73 sin salt) - CHATBOT_IP_HASH_SALT - rotar key de Vertex - promesas
+  detached de captureLead.ts - demo-chat/[slug]/route.ts sin el middleware -
+  BotConfig.allowedNavigationPaths - timeout de 20s de generate-insights-cron - insights no
+  deduplican entre corridas - los 4 bugs anotados en Fase 0 de MS-E6.2 - la orquestacion sigue sin
+  cobertura de tests salvo lo que test:mudez ahora cubre del borde.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+En produccion, conversacion nueva, flujo completo (mensaje simple -> nombre y telefono -> captura
+-> "Que me contacten" -> y en otra, WhatsApp): que TODO turno produzca texto, y que en el log esten
+step_count > 0, costUsd != 0, chat.onfinish_phases con persist_tx_1: ok, y fila ASSISTANT en
+ChatMessage. Y el discriminador nuevo: si aparece `source: watchdog_canned`, es un turno que iba a
+ser mudo y la red lo salvo - confirmar que el visitante vio la derivacion. La ventana de
+providerStreamClose ya no debe colapsar: `provider.stream_chunks` con `reason:idle totalChunks:1
+chunk_stream_start:1` seria el bug reapareciendo.
+
+---

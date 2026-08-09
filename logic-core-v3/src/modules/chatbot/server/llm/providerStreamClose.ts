@@ -179,7 +179,20 @@ export function createProviderStreamCloseMiddleware({
           totalChunks += 1
           counts.set(chunk.type, (counts.get(chunk.type) ?? 0) + 1)
           lastChunkAt = Date.now()
-          hasFirstChunk = true
+          // MUDEZ (commit 4) — PATRÓN "frame de transporte contado como primer
+          // chunk", tercera aparición (watchdog en WATCHDOG-4, chunkMs, y acá).
+          // `stream-start` lo emite el adapter de Google al RESOLVER doStream
+          // (headers HTTP recibidos, ANTES de cualquier token — verificado en
+          // @ai-sdk/google/dist/internal/index.js:1650); `response-metadata` es
+          // metadata, no contenido. Tomarlos como "primer chunk" colapsaba la
+          // ventana de `initialIdleMs` (12s, cold start del provider) a `idleMs`
+          // (1s) apenas llegaban los headers, y si Gemini "pensaba" >1s antes
+          // del primer token, cerrábamos su stream → NoOutputGeneratedError →
+          // turno mudo. Un byte resetea el timer (es actividad del transporte),
+          // pero SOLO el contenido real del modelo elige la ventana corta.
+          if (chunk.type !== 'stream-start' && chunk.type !== 'response-metadata') {
+            hasFirstChunk = true
+          }
 
           if (chunk.type === 'finish') {
             // Solo contadores de tokens y el motivo — nunca contenido.

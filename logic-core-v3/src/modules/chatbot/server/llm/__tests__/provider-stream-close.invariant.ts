@@ -47,6 +47,13 @@ function makeFakeModel(options: {
   emitFinish: boolean
   closeNaturally: boolean
   firstChunkDelayMs?: number
+  /**
+   * MUDEZ (commit 4) — Silencio ENTRE `stream-start`/`response-metadata` (el
+   * transporte) y el primer chunk de CONTENIDO, simulando el "thinking" de
+   * Gemini tras recibir los headers. Con el bug, la ventana ya colapsó a
+   * `idleMs` con los headers y este gap la mataba.
+   */
+  gapAfterTransportMs?: number
 }): LanguageModelV3 {
   return {
     specificationVersion: 'v3',
@@ -67,6 +74,8 @@ function makeFakeModel(options: {
             modelId: 'test-model',
             timestamp: new Date(0),
           })
+          // El transporte ya llegó; el modelo "piensa" antes del primer token.
+          if (options.gapAfterTransportMs) await sleep(options.gapAfterTransportMs)
           controller.enqueue({ type: 'text-start', id: 't1' })
           controller.enqueue({ type: 'text-delta', id: 't1', delta: 'hola mundo' })
           controller.enqueue({ type: 'text-end', id: 't1' })
@@ -305,6 +314,30 @@ async function main(): Promise<void> {
   await sleep(80)
   assert.equal(liveTimers(), baseline, 'timer limpio también en la cancelación')
   assert.equal(reports[0]?.reason, 'cancelled')
+}
+
+// ── A7. MUDEZ (commit 4) — el transporte NO colapsa la ventana inicial ──────
+// PATRÓN "frame de transporte contado como primer chunk". `stream-start` y
+// `response-metadata` llegan al RESOLVER doStream (headers), antes de cualquier
+// token. Con el bug, `hasFirstChunk` se ponía true con ellos y la ventana
+// pasaba de `initialIdleMs` a `idleMs`: un gap de "thinking" del modelo mayor a
+// `idleMs` (pero menor a `initialIdleMs`) mataba un stream sano → cero output →
+// NoOutputGeneratedError → turno mudo. El fix: solo el CONTENIDO real elige la
+// ventana corta.
+{
+  const reports: Record<string, string | number | boolean>[] = []
+  // idleMs=300 (colapsaría acá con el bug), initialIdleMs=5000 (holgado). El
+  // gap de 900ms tras el transporte supera idleMs pero NO initialIdleMs: con el
+  // fix, la ventana sigue siendo la inicial y el contenido llega sano.
+  const stream = await pipeThroughMiddleware(
+    makeFakeModel({ emitFinish: true, closeNaturally: true, gapAfterTransportMs: 900 }),
+    { idleMs: 300, initialIdleMs: 5_000, onClose: (r) => reports.push(r) },
+  )
+  const drained = await drainRaw(stream, 8_000)
+  assert.ok(drained.sawDone, 'A7: el stream cierra normal')
+  assert.ok(drained.types.includes('text-delta'), 'A7: el CONTENIDO del modelo llega (ventana no colapsó con el transporte)')
+  assert.equal(reports[0]?.reason, 'natural', 'A7: cierre natural — el watchdog no tuvo que actuar')
+  assert.equal(reports[0]?.sawFinishChunk, true, 'A7: el finish del provider llegó')
 }
 
 // ══════════ PARTE B — la premisa, contra el `streamText` REAL ══════════
