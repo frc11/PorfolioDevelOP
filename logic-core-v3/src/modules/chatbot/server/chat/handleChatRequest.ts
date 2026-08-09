@@ -53,7 +53,6 @@ import {
   computeHookBudgetMs,
   // STREAM-TIMEOUT — silencio máximo del provider. WATCHDOG — silencio máximo
   // en el borde de la respuesta antes de que cerremos nosotros.
-  STREAM_CHUNK_TIMEOUT_MS,
   STREAM_WATCHDOG_IDLE_MS,
   STREAM_WATCHDOG_INITIAL_IDLE_MS,
   STREAM_WATCHDOG_TOOL_MAX_MS,
@@ -915,8 +914,20 @@ export async function handleChatRequest(
     getConversationDiscarded: () => conversationDiscarded,
   })
 
+  // MUDEZ (commit 1) — señal de abort PROPIA del run, POR REQUEST (nunca a
+  // nivel de módulo). Hasta este commit el run no tenía NINGUNA señal externa:
+  // no se pasaba `abortSignal` y el único abortador era el AbortController
+  // interno de `chunkMs` (removido acá — ver reconcile.ts §1.c). Esta señal la
+  // dispara el watchdog al actuar (onIdle) y ante la cancelación del cliente:
+  // es lo único que mata un fetch de Vertex pendiente (la señal viaja a
+  // `doStream`, ai/dist/index.js:7733-7743) — la cancelación del body NO llega
+  // sola: muere en el tee del SDK (`teeStream`, :8219-8223, cancelar una rama
+  // no cancela la fuente).
+  const runAbortController = new AbortController()
+
   const result = streamText({
     model,
+    abortSignal: runAbortController.signal,
     system: enrichedSystemPrompt,
     messages: body.messages.map((m): ModelMessage => {
       // El historial del asistente (sus propios outputs) va tal cual. Todo lo
@@ -931,20 +942,16 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
-    // STREAM-TIMEOUT — `chunkMs` corta el pedido al provider si se calla más de
-    // ese lapso. NO cierra el stream por sí mismo (medido: el chequeo de abort
-    // del SDK corre detrás de un `read()` ya bloqueado, y su `closeStream()`
-    // vive en un `flush()` que no corre cuando la cadena erroriza) — de cerrar
-    // se encarga el watchdog de nuestro borde, más abajo en el `return`. Se
-    // mantiene igual porque es benigno (5s de silencio, no un reloj absoluto) y
-    // ayuda a que el SDK libere recursos upstream.
-    //
-    // `stepMs` fue REMOVIDO (ver reconcile.ts): beneficio medido cero y truncaba
-    // generaciones legítimas de más de 12s. `totalMs` nunca se seteó.
-    //
-    // ⚠️ La forma tiene que ser un OBJETO: `getChunkTimeoutMs` solo lee
-    // `.chunkMs` así; un número plano se interpreta como `totalMs`.
-    timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
+    // MUDEZ (commit 1) — SIN `timeout`. `chunkMs` ("benigno") resultó ser la
+    // causa raíz de la variante orig3 del turno mudo: su timer corre DURANTE la
+    // ejecución de los tools (el SDK retiene el `finish` del provider hasta que
+    // terminan, así que el gap es intra-step) y un capture_lead legítimo de >5s
+    // abortaba el run entero en silencio — sin onError, sin onFinish con 0
+    // steps, sin texto, sin persistencia. Ver reconcile.ts §1.c y la bitácora
+    // del bloque MUDEZ. Los techos reales: silencio del provider →
+    // providerStreamClose; tool colgado → STREAM_WATCHDOG_TOOL_MAX_MS +
+    // watchdog; doStream pendiente / borde → watchdog. Recursos upstream → el
+    // `abortSignal` de arriba, disparado por el watchdog.
     // WATCHDOG-2 — suspende/reanuda el watchdog del borde mientras un tool
     // ejecuta su `execute()` server-side (ver el bloque de arriba). Confirmado
     // contra el SDK instalado, con doc oficial: "Callback that is called right
@@ -1163,22 +1170,42 @@ export async function handleChatRequest(
       // y cero doble conteo de cupo. `persistTurn` trae su propio techo de
       // tiempo (presupuesto de ONF-2), así que esta espera está acotada.
       //
-      // Sin texto acumulado no hay turno que guardar (un stream que murió antes
-      // del primer chunk no dejó nada que el visitante haya visto).
-      if (accumulatedAssistantText.trim().length === 0) return
-      await persistTurn({
-        source: 'watchdog',
-        assistantText: accumulatedAssistantText,
-        // El run nunca emitió su chunk terminal: no hay finishReason real.
-        finishReason: 'watchdog_idle',
-        // Sin `finish-step` no hay tool calls agregadas ni `usage` del provider.
-        // Se persisten 0 tokens a propósito (subreporte auditable, con
-        // `source: "watchdog"` en el log para reconciliar) en vez de inventar
-        // una estimación en una tabla de costo. Mismo criterio que `onAbort`.
-        toolCalls: [],
-        tokensIn: 0,
-        tokensOut: 0,
-      })
+      // Sin texto acumulado no hay turno que guardar TODAVÍA (la red que habla
+      // —persistir un turno canned y emitirlo al visitante— llega en el commit
+      // 2 del bloque MUDEZ; hasta entonces este camino solo hace la limpieza de
+      // abajo, que ya recupera la contabilidad vía el drain).
+      if (accumulatedAssistantText.trim().length > 0) {
+        await persistTurn({
+          source: 'watchdog',
+          assistantText: accumulatedAssistantText,
+          // El run nunca emitió su chunk terminal: no hay finishReason real.
+          finishReason: 'watchdog_idle',
+          // Sin `finish-step` no hay tool calls agregadas ni `usage` del provider.
+          // Se persisten 0 tokens a propósito (subreporte auditable, con
+          // `source: "watchdog"` en el log para reconciliar) en vez de inventar
+          // una estimación en una tabla de costo. Mismo criterio que `onAbort`.
+          toolCalls: [],
+          tokensIn: 0,
+          tokensOut: 0,
+        })
+      }
+      // MUDEZ (commit 1) — DESPUÉS de persistir (el orden importa: si el drain
+      // dispara la compensación de cupo antes del persist, su tx borra la
+      // Conversation y el turno se queda sin fila):
+      //   1. abort: mata el fetch de Vertex pendiente (la causa de la variante
+      //      C5: doStream sin headers por 31s que ningún timer cubría) y les
+      //      avisa a los tools que respeten la señal.
+      //   2. consumeStream: abre una rama NUEVA del tee del SDK y drena el
+      //      pipeline congelado — es la ÚNICA forma de que el reconcile del SDK
+      //      corra tras nuestro terminate (la cancelación del body muere en el
+      //      tee). Con el drain, onAbort/onFinish SÍ corren: con ≥1 step
+      //      registrado, onFinish recupera la contabilidad del turno
+      //      (persistTurn es idempotente — el primero en llegar gana).
+      runAbortController.abort()
+      // `consumeStream()` devuelve PromiseLike (sin .catch propio): se envuelve.
+      // El drain nunca debe tumbar el cierre — cualquier error suyo se traga
+      // (el rastro del turno ya salió por los caminos de arriba).
+      void Promise.resolve(result.consumeStream()).catch(() => {})
     },
     onEvent: (info) => {
       if (info.reason === 'idle') {
@@ -1213,6 +1240,13 @@ export async function handleChatRequest(
       }
       // Cierre normal o cancelación del cliente: ya no hay nada que suspender.
       suspension.clearToolMaxTimer()
+      // MUDEZ (commit 1) — el cliente se fue: matar el run (fetch de Vertex
+      // incluido). Sin esto el pipeline queda congelado en el tee del SDK
+      // quemando el fetch hasta el freeze de la función. En 'closed' (el SDK
+      // terminó solo) el abort es innecesario y no se emite.
+      if (info.reason === 'cancelled') {
+        runAbortController.abort()
+      }
       // H.3 — telemetría PERMANENTE (antes iba por el probe, gated). Es la
       // contraparte sana de `chat.watchdog_fired`: el stream cerró solo (o el
       // cliente canceló) y el watchdog NO tuvo que actuar. Sin esta línea, un

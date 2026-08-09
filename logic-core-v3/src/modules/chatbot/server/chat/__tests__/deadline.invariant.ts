@@ -43,7 +43,6 @@ import {
   PERSIST_TX_RETRY_BACKOFF_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   ROUTE_MAX_DURATION_MS,
-  STREAM_CHUNK_TIMEOUT_MS,
   STREAM_WATCHDOG_IDLE_MS,
   STREAM_WATCHDOG_INITIAL_IDLE_MS,
   STREAM_WATCHDOG_TOOL_MAX_MS,
@@ -398,12 +397,11 @@ async function main(): Promise<void> {
     STREAM_WATCHDOG_IDLE_MS < STREAM_WATCHDOG_INITIAL_IDLE_MS,
     'idleMs (post-chunk) tiene que ser más corto que initialIdleMs — si no, no hay para qué separarlas',
   )
-  // El watchdog es el mecanismo CONFIABLE (no depende del SDK), así que tiene
-  // que actuar antes que el chunkMs — que está probado que no cierra nada.
-  assert.ok(
-    STREAM_WATCHDOG_IDLE_MS < STREAM_CHUNK_TIMEOUT_MS,
-    'el watchdog debe disparar antes que el chunkMs del SDK: es el único que garantiza el cierre',
-  )
+  // MUDEZ (commit 1) — la aserción "watchdog antes que chunkMs" se removió
+  // JUNTO con STREAM_CHUNK_TIMEOUT_MS: la premisa que pinneaba (que chunkMs
+  // existe y es benigno) resultó falsa — su timer corría durante la ejecución
+  // de tools legítimos y abortaba el run en silencio (variante orig3 del turno
+  // mudo). Sin chunkMs, la relación que este bloque protegía ya no existe.
 }
 
 console.log(

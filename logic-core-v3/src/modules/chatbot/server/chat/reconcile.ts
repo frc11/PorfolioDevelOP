@@ -144,45 +144,32 @@ export function computeHookBudgetMs(requestElapsedMs: number): number {
   )
 }
 
-// ─── 1.c STREAM-TIMEOUT: silencio máximo tolerado del provider ───────────────
+// ─── 1.c STREAM-TIMEOUT: `chunkMs` — REMOVIDO (bloque MUDEZ) ─────────────────
 
 /**
- * STREAM-TIMEOUT — Silencio máximo tolerado ENTRE chunks del provider antes de
- * abortar el stream.
+ * `STREAM_CHUNK_TIMEOUT_MS` (el `chunkMs` de STREAM-TIMEOUT) fue REMOVIDO.
  *
- * EL PROBLEMA QUE RESUELVE (medido en prod con los probes de PROBE-STREAM):
- * el stream de Gemini entrega el texto completo y después NO EMITE SU CHUNK
- * TERMINAL. El SDK espera para siempre: `onStepFinish` nunca dispara,
- * `onFinish` nunca entra, y la función muere en el kill de `maxDuration` (30s
- * exactos) con el input del widget trabado todo ese tiempo. La corrida real
- * mostró `firstChunk` a los 6.2s y después silencio absoluto hasta el kill.
- * Es un problema conocido de la API de Gemini, NO de la DB ni de los tools
- * (cero probes de tool en esa corrida) ni de `onFinish` (nunca se llega).
+ * Se creía "benigno" (5s de silencio, no un reloj absoluto). La Fase 0 del
+ * bloque MUDEZ probó lo contrario, contra el SDK instalado (ai@6.0.214) y con
+ * reproducción empírica: el timer se arma con el primer chunk del step
+ * (`ai/dist/index.js:7793` — incluido `stream-start`, que es transporte) y se
+ * limpia recién en el flush del step (`:8071`). Como el SDK RETIENE el chunk
+ * `finish` del provider hasta que los tools terminan (`:6655/:6618`), el gap
+ * tool-call→tool-result es INTRA-step: un tool server-side legítimo que tarde
+ * más de 5s (capture_lead con Neon fría: 7.8s medidos) disparaba un ABORT
+ * SILENCIOSO del run entero — `onAbort` sin `onError`, cero texto, y con 0
+ * steps registrados `onFinish` jamás corre (`:7264`): turno mudo, nada
+ * persistido, costo perdido, cupo cobrado. Era la causa raíz de la variante
+ * "orig3" del turno mudo (~1 de cada 8-13 turnos con captura de lead en dev).
  *
- * CÓMO CORTA: `chunkMs` arma un timer que `resetChunkTimeout()` reinicia en la
- * PRIMERA línea del transform de cada chunk del provider (ai/dist/index.js:7793).
- * Al vencer, dispara un AbortController que el SDK mergea en el `abortSignal`
- * del run; el `pull` del stream ve `abortSignal.aborted`, enquea el chunk
- * `abort` y cierra el stream. El cliente recibe `done` y el input se destraba.
+ * Sus dos funciones reales ya tienen dueño mejor:
+ *   - cortar el silencio del provider → `providerStreamClose` (cierra, no
+ *     aborta: los `flush()` del SDK corren y el run TERMINA con `onFinish`);
+ *   - liberar recursos upstream → el AbortController propio del handler,
+ *     abortado por el watchdog al disparar (bloque MUDEZ, commit 1).
  *
- * POR QUÉ SOLO `chunkMs` — `stepMs`/`totalMs` quedan deliberadamente sin setear:
- *   - `chunkMs` se arma recién DESPUÉS del primer chunk, así que no puede matar
- *     una respuesta que tarda en arrancar. Cubre exactamente nuestro síntoma:
- *     silencio DESPUÉS de que el texto ya llegó.
- *   - `stepMs` se arma al inicio del step, antes de `doStream`: cubriría "nunca
- *     llega el primer chunk", que NO es nuestro síntoma y del que hoy no hay
- *     evidencia — y mataría generaciones legítimas lentas. Queda disponible si
- *     algún día los logs muestran ese caso.
- *
- * CALIBRABLE: los chunks de Gemini llegan con ms de diferencia entre sí, así que
- * 5s de silencio es señal clara de stream muerto sin riesgo de cortar una
- * generación sana. Ajustable contra tráfico real sin tocar lógica.
- *
- * OJO con la forma del valor: `getChunkTimeoutMs` (ai/dist/index.js:1043) SOLO
- * lee `.chunkMs` cuando `timeout` es un OBJETO — pasar un número plano se
- * interpreta como `totalMs` y tendría un efecto completamente distinto.
+ * `stepMs`/`totalMs` siguen sin setearse (ver la nota de `stepMs` abajo).
  */
-export const STREAM_CHUNK_TIMEOUT_MS = 5_000
 
 /**
  * WATCHDOG — Silencio máximo tolerado EN EL BORDE DE LA RESPUESTA, UNA VEZ QUE
@@ -307,10 +294,9 @@ export const STREAM_WATCHDOG_TOOL_MAX_MS = 15_000
  * contraprestación → se saca. Quien cierra el stream ahora es el watchdog
  * (`STREAM_WATCHDOG_IDLE_MS` arriba), que no depende del SDK.
  *
- * `chunkMs` (`STREAM_CHUNK_TIMEOUT_MS`) se deja: es más benigno (5s de silencio,
- * no un reloj absoluto) y no trunca generaciones sanas. No cierra el stream por
- * sí mismo, pero una vez que el watchdog cerró el lado del cliente puede ayudar
- * a que el SDK libere recursos upstream.
+ * `chunkMs` (`STREAM_CHUNK_TIMEOUT_MS`) corrió la misma suerte después (bloque
+ * MUDEZ): "benigno" resultó falso — abortaba turnos con tools legítimos lentos.
+ * Ver la nota de remoción en la sección 1.c.
  */
 
 // ─── 2. Compensación de cupo: tabla de decisión ──────────────────────────────
