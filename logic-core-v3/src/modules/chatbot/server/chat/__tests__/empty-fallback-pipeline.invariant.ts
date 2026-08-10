@@ -35,7 +35,9 @@ import type { LanguageModelV3, LanguageModelV3StreamPart } from '@ai-sdk/provide
 import type { TextStreamPart, ToolSet } from 'ai'
 import {
   EMPTY_FALLBACK_TEXT_ID,
+  CARD_CONNECTOR_TEXT_ID,
   createEmptyResponseFallbackTransform,
+  type EmptyFallbackInjectionKind,
 } from '../reconcile.ts'
 
 const unhandled: string[] = []
@@ -238,11 +240,18 @@ async function runPipeline(
 /** Corre SOLO el transform, aislado, y devuelve los chunks de salida. */
 async function runTransformOnly(
   input: readonly TextStreamPart<ToolSet>[],
-): Promise<{ out: TextStreamPart<ToolSet>[]; injected: boolean }> {
+  cardConnectors?: ReadonlyMap<string, string>,
+): Promise<{ out: TextStreamPart<ToolSet>[]; injected: boolean; kinds: EmptyFallbackInjectionKind[] }> {
   let injected = false
-  const factory = createEmptyResponseFallbackTransform<ToolSet>('FALLBACK-CANNED', () => {
-    injected = true
-  })
+  const kinds: EmptyFallbackInjectionKind[] = []
+  const factory = createEmptyResponseFallbackTransform<ToolSet>(
+    'FALLBACK-CANNED',
+    (kind) => {
+      injected = true
+      kinds.push(kind)
+    },
+    cardConnectors,
+  )
   const transform = factory({ tools: {}, stopStream: () => {} })
   const source = new ReadableStream<TextStreamPart<ToolSet>>({
     start(controller) {
@@ -257,7 +266,7 @@ async function runTransformOnly(
     if (done) break
     if (value) out.push(value)
   }
-  return { out, injected }
+  return { out, injected, kinds }
 }
 
 async function main(): Promise<void> {
@@ -369,6 +378,25 @@ const textParts = (text: string): TextStreamPart<ToolSet>[] => [
   { type: 'text-delta', id: 't1', text } as unknown as TextStreamPart<ToolSet>,
   { type: 'text-end', id: 't1' } as unknown as TextStreamPart<ToolSet>,
 ]
+// BLOQUE VOZ — tool-call como lo ve el transform (TextStreamPart, campo toolName).
+const toolCall = (toolName: string): TextStreamPart<ToolSet> =>
+  ({
+    type: 'tool-call',
+    toolCallId: `tc-${toolName}`,
+    toolName,
+    input: {},
+  }) as unknown as TextStreamPart<ToolSet>
+// Mapa de conectores DE PRUEBA (el test pinnea la MECÁNICA; el copy real vive
+// en CARD_RENDERING_TOOL_CONNECTORS de getTools.ts y lo pinnea test:mudez).
+const CARD_CONNECTORS_TEST: ReadonlyMap<string, string> = new Map([
+  ['offer_handoff_options', 'CONECTOR-OFFER'],
+  ['show_whatsapp_handoff', 'CONECTOR-WA'],
+])
+const deltaOf = (out: readonly TextStreamPart<ToolSet>[]): { id: string; text: string } => {
+  const d = out.find((c) => c.type === 'text-delta')
+  assert.ok(d && d.type === 'text-delta', 'hay exactamente un text-delta inyectado')
+  return { id: String(d.id), text: String(d.text) }
+}
 
 // ── B1. `finish-step` sale en la MISMA posición en que entra ────────────────
 // La propiedad estructural que evita el deadlock. Con la versión vieja,
@@ -484,6 +512,122 @@ const textParts = (text: string): TextStreamPart<ToolSet>[] => [
       )
     }
   }
+}
+
+// ══════════ PARTE C — BLOQUE VOZ: el conector de tarjeta ══════════
+// Cuando el run cierra en un tool CARDEADO sin texto, la tarjeta ES la
+// respuesta: se inyecta el conector neutral, no la disculpa. Misma mecánica
+// sin retención (la decisión sigue en el chunk terminal `finish`).
+
+// ── C1. Run que cierra en tool cardeada: conector, no disculpa ──────────────
+{
+  const { out, injected, kinds } = await runTransformOnly(
+    [
+      START,
+      START_STEP,
+      toolCall('offer_handoff_options'),
+      FINISH_STEP,
+      FINISH,
+    ] as TextStreamPart<ToolSet>[],
+    CARD_CONNECTORS_TEST,
+  )
+  assert.equal(injected, true, 'C1: run sin texto → inyecta')
+  assert.deepEqual(kinds, ['card_connector'], 'C1: el kind es card_connector')
+  const delta = deltaOf(out)
+  assert.equal(delta.text, 'CONECTOR-OFFER', 'C1: el texto es el conector del tool, NO la disculpa')
+  assert.equal(delta.id, CARD_CONNECTOR_TEXT_ID, 'C1: id propio del conector (greppable en el wire)')
+  assert.equal(out[out.length - 1].type, 'finish', 'C1: el `finish` sigue siendo el último chunk')
+  const idxFinishStep = out.findIndex((c) => c.type === 'finish-step')
+  assert.ok(idxFinishStep !== -1 && idxFinishStep < out.findIndex((c) => c.type === 'text-start'),
+    'C1: `finish-step` conserva su posición — nada se retuvo')
+}
+
+// ── C2. Run que cierra en tool NO cardeada: la disculpa de siempre ──────────
+{
+  const { out, injected, kinds } = await runTransformOnly(
+    [START, START_STEP, toolCall('capture_lead'), FINISH_STEP, FINISH] as TextStreamPart<ToolSet>[],
+    CARD_CONNECTORS_TEST,
+  )
+  assert.equal(injected, true)
+  assert.deepEqual(kinds, ['derivation'], 'C2: capture_lead no es cardeado → derivación')
+  const delta = deltaOf(out)
+  assert.equal(delta.text, 'FALLBACK-CANNED', 'C2: sin tarjeta en pantalla, la disculpa es correcta')
+  assert.equal(delta.id, EMPTY_FALLBACK_TEXT_ID)
+}
+
+// ── C3. Tool cardeada + texto real después: passthrough puro, cero inyección ─
+{
+  const input = [
+    START,
+    START_STEP,
+    toolCall('offer_handoff_options'),
+    FINISH_STEP,
+    START_STEP,
+    ...textParts('cierre real'),
+    FINISH_STEP,
+    FINISH,
+  ] as TextStreamPart<ToolSet>[]
+  const { out, injected } = await runTransformOnly(input, CARD_CONNECTORS_TEST)
+  assert.equal(injected, false, 'C3: con texto real no se inyecta nada')
+  assert.deepEqual(
+    out.map((c) => c.type),
+    input.map((c) => c.type),
+    'C3: paridad exacta del camino con texto',
+  )
+}
+
+// ── C4. La memoria del tool cardeado NO se resetea entre steps — a propósito ─
+// (pregunta explícita del cierre de Fase 0, en sus dos direcciones)
+{
+  // a) Tarjeta en step 1, tool NO cardeado en step 2, cero texto: la tarjeta
+  //    sigue en pantalla (el widget renderiza el acumulado de toolCalls del
+  //    mensaje) → conector de la tarjeta, no disculpa.
+  const a = await runTransformOnly(
+    [
+      START,
+      START_STEP,
+      toolCall('show_whatsapp_handoff'),
+      FINISH_STEP,
+      START_STEP,
+      toolCall('capture_lead'),
+      FINISH_STEP,
+      FINISH,
+    ] as TextStreamPart<ToolSet>[],
+    CARD_CONNECTORS_TEST,
+  )
+  assert.deepEqual(a.kinds, ['card_connector'], 'C4a: un tool no cardeado posterior no borra la tarjeta')
+  assert.equal(deltaOf(a.out).text, 'CONECTOR-WA', 'C4a: el conector es el de la tarjeta visible')
+
+  // b) capture_lead en step 1 y step 2 cierra sin tool ni texto: capture_lead
+  //    JAMÁS setea el conector (no está en el mapa) → derivación. Es el
+  //    escenario exacto de la pregunta: nada "viejo" queda apuntado.
+  const b = await runTransformOnly(
+    [
+      START,
+      START_STEP,
+      toolCall('capture_lead'),
+      FINISH_STEP,
+      START_STEP,
+      FINISH_STEP,
+      FINISH,
+    ] as TextStreamPart<ToolSet>[],
+    CARD_CONNECTORS_TEST,
+  )
+  assert.deepEqual(b.kinds, ['derivation'], 'C4b: capture_lead nunca deja conector viejo apuntado')
+  assert.equal(deltaOf(b.out).text, 'FALLBACK-CANNED')
+}
+
+// ── C5. Sin mapa (callers legacy): tool cardeada igual cae a derivación ─────
+{
+  const { kinds, out } = await runTransformOnly([
+    START,
+    START_STEP,
+    toolCall('offer_handoff_options'),
+    FINISH_STEP,
+    FINISH,
+  ] as TextStreamPart<ToolSet>[])
+  assert.deepEqual(kinds, ['derivation'], 'C5: sin mapa el comportamiento previo queda intacto')
+  assert.equal(deltaOf(out).text, 'FALLBACK-CANNED')
 }
 
 // ── Cero unhandled rejections ───────────────────────────────────────────────

@@ -7,7 +7,7 @@ export type {
 } from './types'
 
 // Factory (main entry point for consumers)
-export { getTools, ALL_TOOL_SLUGS } from './getTools'
+export { getTools, ALL_TOOL_SLUGS, CARD_RENDERING_TOOL_CONNECTORS } from './getTools'
 export type { ChatbotTools, ToolSlug } from './getTools'
 
 // Individual tool builders (rarely needed, exposed for testing)

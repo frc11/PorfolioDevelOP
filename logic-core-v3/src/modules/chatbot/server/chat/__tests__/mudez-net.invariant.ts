@@ -38,7 +38,13 @@ import { buildSilenceTextFrames, SILENCE_TEXT_ID } from '../silenceFrames.ts'
 import {
   createEmptyResponseFallbackTransform,
   pickPersistedAssistantText,
+  CARD_CONNECTOR_TEXT_ID,
+  type EmptyFallbackInjectionKind,
 } from '../reconcile.ts'
+// BLOQUE VOZ — el mapa REAL de conectores (catálogo en getTools.ts): el caso 7
+// pinnea que el cableado de producción existe, leyendo el texto del propio mapa
+// para que un ajuste de copy no rompa el test.
+import { CARD_RENDERING_TOOL_CONNECTORS } from '../../tools/getTools.ts'
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms))
 
@@ -59,6 +65,8 @@ interface DrainResult {
   cannedSeen: boolean
   realTextSeen: boolean
   done: boolean
+  /** BLOQUE VOZ — cada text-delta del wire con su id (para asserts de contenido). */
+  deltas: Array<{ id: string; text: string }>
 }
 
 /** Drena el body y clasifica los frames. Cuelgue => throw (nunca silencio). */
@@ -66,6 +74,7 @@ async function drainBody(body: ReadableStream<Uint8Array>, capMs: number): Promi
   const reader = body.getReader()
   const decoder = new TextDecoder()
   const frames: string[] = []
+  const deltas: Array<{ id: string; text: string }> = []
   let cannedSeen = false
   let realTextSeen = false
   let buffer = ''
@@ -95,6 +104,7 @@ async function drainBody(body: ReadableStream<Uint8Array>, capMs: number): Promi
           // FORMA ESTRICTA del cliente: text-delta DEBE traer id y delta string.
           assert.equal(typeof obj.id, 'string', 'text-delta sin id: el cliente haria throw')
           assert.equal(typeof obj.delta, 'string', 'text-delta sin delta: el cliente haria throw')
+          deltas.push({ id: String(obj.id), text: String(obj.delta) })
           if (obj.id === SILENCE_TEXT_ID) cannedSeen = true
           else realTextSeen = true
         }
@@ -107,7 +117,7 @@ async function drainBody(body: ReadableStream<Uint8Array>, capMs: number): Promi
     await reader.cancel().catch(() => {})
     throw new Error(`drain colgado > ${capMs}ms — el pipeline no cerro`)
   }
-  return { frames, cannedSeen, realTextSeen, done }
+  return { frames, cannedSeen, realTextSeen, done, deltas }
 }
 
 /** Modelo falso: step 1 tool-call; el doStream del step 2 NUNCA resuelve (C5). */
@@ -155,6 +165,40 @@ function makeNoOutputModel(): LanguageModelV3 {
   }
 }
 
+/**
+ * BLOQUE VOZ — Modelo falso del camino 6: un único step que llama a un tool
+ * CARDEADO client-side (offer_handoff_options, sin execute) y cierra. Sin
+ * output del tool no hay step siguiente: el run termina con `finish` y cero
+ * texto — la forma EXACTA capturada en producción y en el baseline de este
+ * sprint (capture_lead + offer_handoff_options; acá alcanza con el cardeado).
+ */
+function makeCardCloseModel(): LanguageModelV3 {
+  return {
+    specificationVersion: 'v3',
+    provider: 'probe',
+    modelId: 'probe',
+    supportedUrls: {},
+    doGenerate: () => Promise.reject(new Error('no doGenerate')),
+    doStream: async () => ({
+      stream: new ReadableStream<LanguageModelV3StreamPart>({
+        start(c) {
+          c.enqueue({ type: 'stream-start', warnings: [] })
+          c.enqueue({ type: 'tool-input-start', id: 'tc0', toolName: 'offer_handoff_options' })
+          c.enqueue({ type: 'tool-input-end', id: 'tc0' })
+          c.enqueue({
+            type: 'tool-call',
+            toolCallId: 'tc0',
+            toolName: 'offer_handoff_options',
+            input: JSON.stringify({ preamble: 'elegi una opcion' }),
+          })
+          c.enqueue({ type: 'finish', finishReason: { unified: 'tool-calls', raw: 'T' }, usage: USAGE })
+          c.close()
+        },
+      }),
+    }),
+  }
+}
+
 /** Modelo falso sano: texto y cierre normal. */
 function makeHealthyModel(): LanguageModelV3 {
   return {
@@ -182,6 +226,10 @@ interface NetRun {
   drained: DrainResult
   persisted: Array<{ source: string; text: string; finishReason: string }>
   events: string[]
+  /** BLOQUE VOZ — kinds que reportó el transform de fallback, en orden. */
+  kinds: EmptyFallbackInjectionKind[]
+  /** BLOQUE VOZ — texto acumulado por onChunk (lo que persistiría onFinish en prod). */
+  accumulated: string
 }
 
 /**
@@ -189,11 +237,15 @@ interface NetRun {
  * REAL con la red (onIdle devuelve canned si no hubo texto; onSilentClose igual
  * salvo fallback ya inyectado), grabando cada persist.
  */
-async function runThroughNet(model: LanguageModelV3, opts: { cancelAfterMs?: number } = {}): Promise<NetRun> {
+async function runThroughNet(
+  model: LanguageModelV3,
+  opts: { cancelAfterMs?: number; cardClose?: boolean } = {},
+): Promise<NetRun> {
   let accumulated = ''
   let fallbackInjected = false
   const persisted: NetRun['persisted'] = []
   const events: string[] = []
+  const kinds: EmptyFallbackInjectionKind[] = []
   const runAbort = new AbortController()
 
   const probeTool = tool({
@@ -202,15 +254,31 @@ async function runThroughNet(model: LanguageModelV3, opts: { cancelAfterMs?: num
     execute: async () => ({ ok: true }),
   })
 
+  // BLOQUE VOZ — espejo del tool cardeado real: client-side, SIN execute
+  // (offerHandoffOptions.ts). Registrado solo en modo cardClose para que el
+  // tool-call del modelo falso valide contra un tool conocido.
+  const offerHandoffTool = tool({
+    description: 'sonda cardeada client-side',
+    inputSchema: z.object({ preamble: z.string() }),
+  })
+
   const result = streamText({
     model,
     abortSignal: runAbort.signal,
     prompt: 'sonda',
-    tools: { probe_tool: probeTool },
+    tools: opts.cardClose
+      ? { probe_tool: probeTool, offer_handoff_options: offerHandoffTool }
+      : { probe_tool: probeTool },
     stopWhen: stepCountIs(3),
-    experimental_transform: createEmptyResponseFallbackTransform(CANNED, () => {
-      fallbackInjected = true
-    }),
+    experimental_transform: createEmptyResponseFallbackTransform(
+      CANNED,
+      (kind) => {
+        fallbackInjected = true
+        kinds.push(kind)
+      },
+      // El mapa REAL de producción — mismo cableado que handleChatRequest.
+      opts.cardClose ? CARD_RENDERING_TOOL_CONNECTORS : undefined,
+    ),
     onChunk: ({ chunk }) => {
       if (chunk.type === 'text-delta') accumulated += chunk.text
     },
@@ -256,12 +324,18 @@ async function runThroughNet(model: LanguageModelV3, opts: { cancelAfterMs?: num
     await sleep(opts.cancelAfterMs)
     await reader.cancel()
     await sleep(400) // dejar asentar los callbacks
-    return { drained: { frames: [], cannedSeen: false, realTextSeen: false, done: false }, persisted, events }
+    return {
+      drained: { frames: [], cannedSeen: false, realTextSeen: false, done: false, deltas: [] },
+      persisted,
+      events,
+      kinds,
+      accumulated,
+    }
   }
 
   const drained = await drainBody(guarded, 8_000)
   await sleep(300)
-  return { drained, persisted, events }
+  return { drained, persisted, events, kinds, accumulated }
 }
 
 async function main(): Promise<void> {
@@ -440,6 +514,48 @@ async function main(): Promise<void> {
       'BUG-D: un cierre con texto real se persiste tal cual',
     )
     console.log('  ok 6. BUG-D: onFinish.text vacio con texto visto -> se persiste el acumulado')
+  }
+
+  // ── 7. BLOQUE VOZ — turno que cierra en tool CARDEADO: conector, no disculpa ─
+  // La forma del camino 6 del mapa (capturada en prod y en el baseline de este
+  // sprint): el run cierra en un tool client-side que renderiza tarjeta, cero
+  // texto. La tarjeta ES la respuesta → el fallback inyecta el conector neutral
+  // del mapa REAL (CARD_RENDERING_TOOL_CONNECTORS), nunca la disculpa, y la red
+  // del watchdog NO habla encima (emptyFallbackInjected la frena).
+  {
+    const connector = CARD_RENDERING_TOOL_CONNECTORS.get('offer_handoff_options')
+    assert.ok(
+      typeof connector === 'string' && connector.length > 0,
+      'VOZ: offer_handoff_options tiene conector en el mapa real',
+    )
+    const run = await runThroughNet(makeCardCloseModel(), { cardClose: true })
+    assert.ok(run.drained.done, 'VOZ: el body cierra normal')
+    assert.deepEqual(run.kinds, ['card_connector'], 'VOZ: el transform reporta card_connector')
+    const injected = run.drained.deltas.filter((d) => d.id === CARD_CONNECTOR_TEXT_ID)
+    assert.equal(injected.length, 1, 'VOZ: el conector viaja en el wire con su id propio')
+    assert.equal(injected[0].text, connector, 'VOZ: el texto es EL DEL MAPA (catálogo de getTools)')
+    assert.ok(
+      !run.drained.deltas.some((d) => d.text.includes('Se me complico')),
+      'VOZ: la disculpa NO sale cuando hay tarjeta en pantalla',
+    )
+    assert.ok(!run.drained.cannedSeen, 'VOZ: la red del watchdog no habla encima del conector')
+    assert.ok(
+      run.drained.frames.includes('tool-input-available'),
+      'VOZ: la tarjeta (tool-input-available) viaja en el mismo body',
+    )
+    assert.equal(run.persisted.length, 0, 'VOZ: la red no persiste (lo hace onFinish en prod)')
+    // Paridad de persistencia: lo que onFinish persistiría (acumulado de
+    // onChunk, vía pickPersistedAssistantText) es EXACTAMENTE lo que la
+    // pantalla mostró — el conector, no la disculpa. Verificado además en vivo
+    // contra dev: onfinish_phases salió con chunks_text_delta:1 y
+    // assistantMessageLength == len(texto inyectado).
+    assert.equal(run.accumulated, connector, 'VOZ: onChunk acumuló el conector inyectado')
+    assert.equal(
+      pickPersistedAssistantText('', run.accumulated),
+      connector,
+      'VOZ: se persiste lo que el visitante vio — transcript y pantalla no divergen',
+    )
+    console.log('  ok 7. VOZ: cierre en tool cardeado -> conector neutral visible, persistible y sin disculpa')
   }
 
   assert.equal(unhandled.length, 0, `unhandled rejections: ${unhandled.join(' | ')}`)

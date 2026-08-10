@@ -384,6 +384,19 @@ export function shouldCompensateQuota(input: CompensationDecisionInput): boolean
 /** id de las text parts inyectadas (visible en el UI message stream — greppable). */
 export const EMPTY_FALLBACK_TEXT_ID = 'onf1-empty-fallback'
 
+/** BLOQUE VOZ — id de las text parts del conector de tarjeta (greppable en el wire). */
+export const CARD_CONNECTOR_TEXT_ID = 'voz-card-connector'
+
+/**
+ * BLOQUE VOZ — qué inyectó el transform de respuesta vacía:
+ *  - 'derivation': la disculpa/derivación de siempre (algo se rompió de verdad).
+ *  - 'card_connector': el conector neutral — el run cerró en un tool CARDEADO
+ *    y la tarjeta en pantalla ES la respuesta; disculparse la contradecía.
+ * Ambos kinds marcan el turno como fallback (mismo flag del handler); el kind
+ * existe para telemetría y para elegir el texto.
+ */
+export type EmptyFallbackInjectionKind = 'derivation' | 'card_connector'
+
 /**
  * Mensaje canned de derivación para un turno donde el modelo devolvió vacío.
  * Mismo tono y estructura que las respuestas degradadas de C0.2/B4.2 (deriva a
@@ -454,28 +467,64 @@ export function buildEmptyFallbackMessage(whatsappNumber: string | null): string
  * el texto viene vacío (belt-and-suspenders que ya existía). Y para el
  * visitante no cambia nada: las parts igual viajan por el UI message stream.
  *
+ * BLOQUE VOZ — QUÉ texto se inyecta depende de cómo cerró el run. Si algún
+ * tool CARDEADO (claves de `cardConnectors`, catálogo en getTools.ts) corrió
+ * en el run, su tarjeta quedó en pantalla y ES la respuesta: se inyecta el
+ * conector neutral de ese tool (id `CARD_CONNECTOR_TEXT_ID`) — disculparse
+ * ahí contradecía la tarjeta (camino 6 del mapa de MUDEZ, capturado en prod).
+ * Sin tarjeta, la derivación de siempre (id `EMPTY_FALLBACK_TEXT_ID`). La
+ * decisión sigue tomándose en el chunk terminal `finish`, con estado
+ * acumulado — la regla de NO retención queda intacta.
+ *
  * `onInject` avisa al handler (flag de request) que el turno fue fallback:
- * no se cuenta como respuesta entregada (compensación de cupo si aplica).
+ * no se cuenta como respuesta entregada (compensación de cupo si aplica; con
+ * tools ejecutadas el turno se cobra igual — tabla de shouldCompensateQuota).
+ * El `kind` distingue derivación de conector, para telemetría.
  */
 export function createEmptyResponseFallbackTransform<TOOLS extends ToolSet>(
   fallbackText: string,
-  onInject: () => void,
+  onInject: (kind: EmptyFallbackInjectionKind) => void,
+  cardConnectors: ReadonlyMap<string, string> = new Map<string, string>(),
 ): StreamTextTransform<TOOLS> {
   return () => {
     let sawUsefulText = false
+    // BLOQUE VOZ — conector del último tool CARDEADO visto en el run (las
+    // claves de `cardConnectors` son el catálogo de getTools.ts). NO se
+    // resetea entre steps A PROPÓSITO: la tarjeta ya renderizada persiste en
+    // pantalla (el widget renderiza el acumulado de toolCalls del mensaje),
+    // así que un tool NO cardeado posterior no la quita — y un reset por step
+    // reintroduciría la disculpa pegada a la tarjeta en el caso
+    // show_whatsapp_handoff → step siguiente vacío. Un tool no cardeado
+    // (capture_lead) jamás lo setea, así que el caso "capture_lead y después
+    // nada" cae en la derivación, que es lo correcto (no hay nada visible).
+    // Solo estado ACUMULADO en el closure del factory — cero retención de
+    // chunks, la regla dura de arriba sigue intacta.
+    let cardConnectorText: string | null = null
     return new TransformStream<TextStreamPart<TOOLS>, TextStreamPart<TOOLS>>({
       transform(chunk, controller) {
         if (chunk.type === 'text-delta' && chunk.text.trim().length > 0) {
           sawUsefulText = true
         }
+        if (chunk.type === 'tool-call') {
+          const connector = cardConnectors.get(chunk.toolName)
+          if (connector !== undefined) cardConnectorText = connector
+        }
         // `finish` = terminal del RUN completo (no de un step). Es el único
         // punto donde ya se sabe que no va a llegar más texto.
         if (chunk.type === 'finish' && !sawUsefulText) {
-          onInject()
+          // BLOQUE VOZ — con tarjeta en pantalla, la tarjeta ES la respuesta:
+          // el texto conecta con ella en vez de disculparse. Sin tarjeta, la
+          // derivación de siempre. Cada variante con su id, distinguible en
+          // el wire y en telemetría.
+          const kind: EmptyFallbackInjectionKind =
+            cardConnectorText !== null ? 'card_connector' : 'derivation'
+          const id = kind === 'card_connector' ? CARD_CONNECTOR_TEXT_ID : EMPTY_FALLBACK_TEXT_ID
+          const text = cardConnectorText ?? fallbackText
+          onInject(kind)
           sawUsefulText = true
-          controller.enqueue({ type: 'text-start', id: EMPTY_FALLBACK_TEXT_ID })
-          controller.enqueue({ type: 'text-delta', id: EMPTY_FALLBACK_TEXT_ID, text: fallbackText })
-          controller.enqueue({ type: 'text-end', id: EMPTY_FALLBACK_TEXT_ID })
+          controller.enqueue({ type: 'text-start', id })
+          controller.enqueue({ type: 'text-delta', id, text })
+          controller.enqueue({ type: 'text-end', id })
         }
         // SIEMPRE, en la misma invocación. Sin `flush`: no hay nada retenido
         // que liberar — y esa es exactamente la propiedad que importa.

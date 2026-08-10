@@ -24,7 +24,10 @@ import {
   getOrCreateConversation,
 } from '../conversation'
 import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
-import { getTools } from '../tools'
+// BLOQUE VOZ — el catálogo de tools cardeadas vive al lado de las definiciones
+// (getTools.ts): claves = tools que renderizan tarjeta, valor = el conector
+// neutral que inyecta el transform de respuesta vacía.
+import { getTools, CARD_RENDERING_TOOL_CONNECTORS } from '../tools'
 import { normalizeLlmProvider, resolveEffectiveModel } from '../llm'
 import {
   checkQuota,
@@ -985,10 +988,27 @@ export async function handleChatRequest(
       watchdogRef.current?.beginStep()
     },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
-    // camino feliz); solo inyecta la derivación canned en un run vacío.
-    experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
-      emptyFallbackInjected = true
-    }),
+    // camino feliz); solo inyecta en un run vacío. BLOQUE VOZ — qué inyecta
+    // lo decide el transform: si el run dejó una tarjeta en pantalla (tool
+    // cardeado, catálogo CARD_RENDERING_TOOL_CONNECTORS), el conector neutral;
+    // si no, la derivación de siempre. Ambos kinds marcan el flag — la
+    // compensación de cupo y el guard de onSilentClose no distinguen.
+    experimental_transform: createEmptyResponseFallbackTransform(
+      emptyFallbackText,
+      (kind) => {
+        emptyFallbackInjected = true
+        if (kind === 'card_connector') {
+          // Discriminador de telemetría del BLOQUE VOZ: este turno cerró en
+          // tarjeta y habló el conector, no la disculpa. Solo metadatos.
+          chatbotLog('chat.card_connector_injected', {
+            conversationId: conversation.id,
+            botConfigId: resolvedBot.id,
+            botSlug: slug,
+          })
+        }
+      },
+      CARD_RENDERING_TOOL_CONNECTORS,
+    ),
     // El conteo de steps viaja en `timings.step_count`
     // (`chat.llm_request_finished`), que es permanente.
     onStepFinish: () => {

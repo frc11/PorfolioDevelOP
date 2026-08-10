@@ -29,6 +29,33 @@ export const ALL_TOOL_SLUGS: readonly ToolSlug[] = Object.keys(
 ) as ToolSlug[]
 
 /**
+ * BLOQUE VOZ — tools que renderizan una TARJETA en el widget del visitante
+ * (ver renderToolCall.tsx). Las CLAVES son el set canónico de "tools
+ * cardeadas"; el VALOR es el texto neutral que el transform de respuesta
+ * vacía inyecta cuando el run cierra en esa tarjeta sin texto del modelo:
+ * la tarjeta ES la respuesta, así que el texto conecta con lo que se ve
+ * abajo en vez de disculparse. La mecánica vive en reconcile.ts §3; acá
+ * vive SOLO el catálogo.
+ *
+ * ⚠️ Este mapa vive AL LADO de TOOL_BUILDERS a propósito: si agregás un
+ * tool que renderiza tarjeta y no lo sumás acá, el visitante vuelve a ver
+ * la disculpa ("Se me complicó generar una respuesta...") pegada a tu
+ * tarjeta nueva — el bug del camino 6 del mapa de MUDEZ, de vuelta.
+ *
+ * `show_whatsapp_handoff` está aunque es server-side (tiene execute): si el
+ * modelo no agrega texto en el step siguiente, su tarjeta también queda como
+ * única respuesta visible y la situación es idéntica.
+ */
+export const CARD_RENDERING_TOOL_CONNECTORS: ReadonlyMap<ToolSlug, string> = new Map<
+  ToolSlug,
+  string
+>([
+  ['offer_handoff_options', 'Listo. Elegí abajo cómo preferís que sigamos.'],
+  ['show_whatsapp_handoff', 'Listo, te dejo el acceso directo a WhatsApp.'],
+  ['navigate_to_page', 'Te dejo el enlace acá abajo.'],
+])
+
+/**
  * C0.1 — tools restringidas al bot propio de develOP (contención, no el fix
  * definitivo).
  *
