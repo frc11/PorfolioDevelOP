@@ -25,7 +25,7 @@ como [H-00](HALLAZGOS-MANUAL-v3.md#h-00--terreno--el-bloque-de-vocabulario-de-la
 | 04 | El primer mensaje | ✅ |
 | 05 | Los toques y la espera | ✅ |
 | 06 | Decidir cómo va a ser la demo | ✅ |
-| 07 | Construir la demo | ⏳ |
+| 07 | Construir la demo | ✅ |
 | 08 | Publicar el borrador | ⏳ |
 | 09 | El chequeo final y mandarla a revisión | ⏳ |
 | 10 | Cuando Franco pide correcciones | ⏳ |
