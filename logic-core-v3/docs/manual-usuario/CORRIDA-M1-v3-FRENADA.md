@@ -154,6 +154,34 @@ regla de oro vuelve a tener sus tres fuentes disponibles.
 
 ---
 
+## Addendum — la galería se está regenerando ahora mismo
+
+Durante esta corrida, entre el primer `git status` y el último, aparecieron **tres
+archivos modificados que no toqué**:
+
+```
+ M logic-core-v3/.gitignore
+ M logic-core-v3/package.json
+ M logic-core-v3/playwright.galeria.config.ts
+```
+
+En `package.json` el cambio es un script nuevo:
+
+```
+"start:galeria": "cross-env E2E_DIST_DIR=.next-galeria npm run build && cross-env E2E_DIST_DIR=.next-galeria QA_ALLOW_LOCALHOST=1 next start -p 3004"
+```
+
+Es el mismo patrón de aislamiento que `start:setter` (directorio de build propio,
+puerto propio) aplicado a la galería. Otra sesión está construyendo el carril
+aislado de la galería en paralelo — es decir, el punto 2 de «qué destraba la
+corrida» ya está en marcha.
+
+Esto refuerza el freno en vez de contradecirlo: escribir el manual ahora no sólo
+sería escribir sobre capturas viejas, sería además competir con una regeneración
+en curso. La corrida M1 v3 se retoma cuando esa regeneración cierre.
+
+---
+
 ## Nota de método
 
 La regla de oro admite tres fuentes: lo navegado en vivo, la captura de la
