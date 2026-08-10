@@ -1,13 +1,18 @@
-# Galería de estados — Panel del Setter (corrida M0)
+# Galería de estados — Panel del Setter (corrida M0/G)
+
+> **Archivo GENERADO.** No editar a mano: se regenera con
+> `npx tsx scripts/dev/m0-galeria-indice.ts`, que deriva el conteo y las
+> dimensiones de los `.png` que hay en `png/`. El texto de cada estado vive
+> en el catálogo de ese script.
 
 Base observacional del manual de usuario. Cada fila es **un estado del recorrido
 del setter**: una pantalla del registro `PANTALLAS` (`src/lib/leados/manual.ts`)
 en una **variación** concreta — porque la mitad del manual vive en las variaciones,
 no en las pantallas.
 
-**Resultado: 37 estados enumerados, 37 alcanzados, 0 inalcanzables.** Más 4
-capturas mobile. Todas las fotos son de estados a los que se llegó de verdad;
-ninguna fue fabricada.
+**Resultado: 43 estados capturados** sobre 43 catalogados, en 16 pantallas distintas. Más 7 capturas mobile. 50 archivos en total (9.3 MB).
+
+Huecos (catalogados sin foto): **0**. Residuos (fotos sin entrada en el catálogo): **0**.
 
 ---
 
@@ -19,218 +24,167 @@ Desde `logic-core-v3/`, con la DB de dev sembrable:
 npm run galeria
 ```
 
-Equivale a `npm run seed:galeria && npm run galeria:capturar`. Requiere el
-servidor prod-QA en :3001; si no hay uno corriendo, el config lo levanta solo
-(`npm run start:qa`). Para reusar un server ya levantado:
+Equivale a `npm run seed:galeria && npm run galeria:capturar && npm run galeria:indice`.
+La captura levanta su PROPIO servidor: `npm run start:galeria` buildea en
+`.next-galeria/` y sirve en `:3004`, y el config NO reutiliza lo que haya en el
+puerto. Es a propósito — compartir `.next/` con el `next dev`/`next start` del
+checkout hace que la corrida lea artefactos mezclados y le reconstruya el build
+por debajo al otro frente. Para reusar un server ya levantado, a propósito:
 
 ```bash
 SETTER_EXTERNAL_SERVER=1 npm run galeria:capturar
 ```
 
-**Los `.png` NO están en el repo** (~62 MB, 41 archivos) — ver
-[.gitignore](.gitignore). La fuente de verdad de la galería es este índice + el
-sembrador + la captura; los binarios se regeneran enteros con el comando de
-arriba. Salen en `docs/manual-usuario/galeria/png/`.
+**Los `.png` NO están en el repo** — ver [.gitignore](.gitignore). La fuente de
+verdad de la galería es este índice + el sembrador + la captura; los binarios se
+regeneran enteros. Salen en `docs/manual-usuario/galeria/png/`.
 
 Piezas:
 - Sembrado — [`scripts/dev/m0-galeria-seed.ts`](../../../scripts/dev/m0-galeria-seed.ts)
 - Captura — [`tests/galeria/captura.spec.ts`](../../../tests/galeria/captura.spec.ts) + [`playwright.galeria.config.ts`](../../../playwright.galeria.config.ts)
+- Índice — [`scripts/dev/m0-galeria-indice.ts`](../../../scripts/dev/m0-galeria-indice.ts)
 - Fixtures reusados — [`tests/helpers/setter-db.ts`](../../../tests/helpers/setter-db.ts)
-
-## Terreno de la corrida
-
-| Chequeo | Resultado |
-|---|---|
-| Rama | `main` |
-| HEAD al arrancar | `6a88cbe` (sprint 6.2) |
-| Sprint 6.2 en el log | **Sí** → los estados de m16 con horarios ofrecidos existen y se alcanzaron |
-| `npx tsc --noEmit` | exit 0 |
-| `npm run build` | exit 0 |
-| Sucio al arrancar | solo `docs/probe-01-censo-cosecha.md` (untracked, WIP ajeno — no se tocó) |
 
 ## Flujo real vs sembrado directo
 
 | Modo | Cuántos | Qué significa |
-|---|---|---|
+| --- | --- | --- |
 | **Flujo real (parcial)** | 8 | Los toques de la cadencia son `OsLeadActivity` reales — las mismas filas que escribe el motor. La oferta de horarios de #31 pasa por `guardarHorariosOfrecidosOwned`, el write-path exacto de la action `ofrecerHorarios`. |
-| **Interacción real** | 2 | #24a y #24b se provocan **desde la UI**: se escribe en el form y se manda, no se siembra nada. |
-| **Sembrado directo** | 27 | Se coloca el lead por `stage` + blobs del dossier. |
+| **Interacción real** | 2 | Se provocan **desde la UI**: se escribe en el form y se manda, no se siembra nada. |
+| **Sembrado directo** | 33 | Se coloca el lead por `stage` + blobs del dossier. |
 
-**Por qué sembrado directo en la mayoría.** Llevar 30 leads hasta su estado por
-la UI real exigiría encadenar el recorrido completo por cada uno (ficha →
-evaluador → opener → cadencia → brief → 6 fases → borrador → chequeo → revisión
-→ aprobación de Franco → envío → agenda). Varios pasos no los puede dar el
-setter solo: la **aprobación / rechazo de la demo es de Franco desde admin** y la
-**`finalUrl` la carga el admin**, así que APROBADA y RECHAZADA no son alcanzables
-desde el panel del setter por definición. Eso vuelve el sembrado por flujo
-impracticable para una galería reproducible, y se marca acá como pide la regla.
-Ninguna combinación sembrada es imposible para el flujo real: son todas
-posiciones que el motor produce.
+**Por qué sembrado directo en la mayoría.** Llevar 40 leads hasta su estado por
+la UI real exigiría encadenar el recorrido completo por cada uno. Varios pasos no
+los puede dar el setter solo: la **aprobación / rechazo de la demo es de Franco
+desde admin** y la **`finalUrl` la carga el admin**, así que APROBADA y RECHAZADA
+no son alcanzables desde el panel del setter por definición. Ninguna combinación
+sembrada es imposible para el flujo real: son todas posiciones que el motor produce.
 
 ---
 
-## Los estados alcanzados
+## Los estados capturados
 
 ### Tramo Ficha y Evaluación
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega (palabras del setter) | Modo |
-|---|---|---|---|---|---|
-| 01 | m1 ficha vacía | `01-m1-ficha-vacia.png` | m1 | Te asignan un negocio nuevo y todavía no cargaste nada de la ficha. | directo |
-| 02 | m1 ficha cargada | `02-m1-ficha-cargada.png` | m1 | Ya cargaste la ficha y volvés a mirarla — queda navegable, no se resetea. | directo |
-| 03 | m2 al Evaluador | `03-m2-al-evaluador.png` | m2 | La ficha tiene señal: te toca copiar el bloque y pasarlo por el Gem Evaluador. | directo |
-| 04 | m3 registrar veredicto | `04-m3-veredicto-registrar.png` | m3 | Volviste del Evaluador con el resultado y vas a registrar score y veredicto. | directo |
-| 05 | m3 descartado | `05-m3-veredicto-descartado.png` | m3 | El Evaluador dijo DESCARTAR: queda el veredicto a la vista y nada por delante. | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m1 ficha vacía | `01-m1-ficha-vacia.png` | `m1` | 1440×2597 | Te asignan un negocio nuevo y todavía no cargaste nada de la ficha. | directo |
+| m1 ficha cargada | `02-m1-ficha-cargada.png` | `m1` | 1440×2720 | Ya cargaste la ficha y volvés a mirarla — queda navegable, no se resetea. | directo |
+| m2 llevar la ficha a evaluar | `03-m2-al-evaluador.png` | `m2` | 1440×1929 | La ficha tiene señal: te toca copiar el bloque y pasarlo por el Evaluador. Ir y volver son UNA pantalla desde P4. | directo |
+| m2 con el veredicto ya registrado | `04-m2-veredicto-registrado.png` | `m2` | 1440×1699 | Volviste del Evaluador, registraste score y veredicto, y volvés a mirar la pantalla — queda completada y navegable. | directo |
+| m2 descartado | `05-m2-veredicto-descartado.png` | `m2` | 1440×1732 | El Evaluador dijo DESCARTAR: queda el veredicto a la vista y nada por delante. | directo |
 
 ### Tramo Opener y Seguimiento
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 06 | m4 opener pendiente | `06-m4-opener-pendiente.png` | m4 | El negocio quedó AVANZAR pero todavía no le escribiste el primer mensaje. | directo |
-| 07 | m4 opener enviado | `07-m4-opener-enviado.png` | m4 | Ya mandaste el opener y volvés a mirar la pantalla. | flujo |
-| 08 | espera post-opener | `08-espera-post-opener.png` | espera | Mandaste el opener y el próximo toque no vence todavía: la pelota la tiene el negocio. | flujo |
-| 09 | m5 toque vencido | `09-m5-toque-vencido.png` | m5 | Venció el toque de la cadencia y te toca registrar qué pasó. | flujo |
-| 10 | m5 cadencia agotada | `10-m5-cadencia-agotada.png` | m5 | Hiciste todos los toques y nadie contestó: la cadencia se agotó (2.2). | flujo |
-| 11 | m5 charla poblada | `11-m5-charla-poblada.png` | m5 | Hubo ida y vuelta: «Lo último de la charla» muestra el último toque con su nota (5.1). | flujo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m4 opener pendiente | `06-m4-opener-pendiente.png` | `m4` | 1440×1727 | El negocio quedó AVANZAR pero todavía no le escribiste el primer mensaje. | directo |
+| m4 opener enviado | `07-m4-opener-enviado.png` | `m4` | 1440×1634 | Ya mandaste el opener y volvés a mirar la pantalla. | flujo |
+| espera post-opener | `08-espera-post-opener.png` | `espera` | 1440×900 | Mandaste el opener y el próximo toque no vence todavía: la pelota la tiene el negocio. | flujo |
+| m5 toque vencido | `09-m5-toque-vencido.png` | `m5` | 1440×1874 | Venció el toque de la cadencia y te toca registrar qué pasó. | flujo |
+| m5 cadencia agotada | `10-m5-cadencia-agotada.png` | `m5` | 1440×1826 | Hiciste todos los toques y nadie contestó: la cadencia se agotó (2.2). | flujo |
+| m5 charla poblada | `11-m5-charla-poblada.png` | `m5` | 1440×1902 | Hubo ida y vuelta: «Lo último de la charla» muestra el último toque con su nota (5.1). | flujo |
 
 ### Tramo Brief
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 12 | m6 brief abierto | `12-m6-brief-abierto.png` | m6 | El negocio respondió: se abrió el brief y te toca generarlo y traerlo. | directo |
-| 13 | m6 brief guardado | `13-m6-brief-guardado.png` | m6 | El brief ya quedó guardado y volvés a leerlo. | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m6 «Decidí cómo va a ser la demo» — abierto | `12-m6-brief-abierto.png` | `m6` | 1440×2107 | El negocio respondió: se destrabó la pantalla donde decidís cómo va a ser la demo (secciones, qué cuenta, a qué invita). | directo |
+| m6 decisión guardada | `13-m6-brief-guardado.png` | `m6` | 1440×1694 | Ya cerraste cómo va a ser la demo y volvés a leerlo. | directo |
 
 ### Tramo Construcción
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 14 | m7 tilde deshabilitado | `14-m7-tilde-deshabilitado.png` | m7 | Estás en las fases pero no arrancaste la construcción: el tilde no se ofrece y dice por qué (3.3). | directo |
-| 15 | m7 estructura | `15-m7-estructura.png` | m7 | Arrancaste la construcción: primera fase, tilde habilitado. | directo |
-| 16 | m8 personalización | `16-m8-personalizacion.png` | m8 | Segunda fase, con la primera ya tildada. | directo |
-| 17 | m9 assets | `17-m9-assets.png` | m9 | Tercera fase. | directo |
-| 18 | m10 CTA | `18-m10-cta.png` | m10 | Cuarta fase. | directo |
-| 19 | m11 calidad | `19-m11-calidad.png` | m11 | Quinta fase. | directo |
-| 20 | m12 mobile, fases hechas | `20-m12-mobile-fases-hechas.png` | m12 | Última fase, con las 5 anteriores tildadas (chips verdes en la nav). | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| mc1 con el tilde deshabilitado | `14-mc1-tilde-deshabilitado.png` | `mc1` | 1440×2313 | Estás en Construcción pero todavía no la arrancaste: el tilde no se ofrece y dice por qué (3.3). | directo |
+| mc1 «Construí la demo» — sin avance | `15-mc1-construir.png` | `mc1` | 1440×2224 | Arrancaste la construcción: la pantalla junta estructura, personalización y assets, y ninguna está tildada. | directo |
+| mc1 a medio hacer | `16-mc1-parcial.png` | `mc1` | 1440×2224 | Tildaste una de las tres cosas de esta pantalla; las otras dos siguen abiertas. | directo |
+| mc1 completa | `17-mc1-completa.png` | `mc1` | 1440×2308 | Tildaste las tres: la pantalla figura completada (hace falta que TODAS sus fases lo estén) y volvés a mirarla. | directo |
+| mc2 «Refiná la demo» — sin avance | `18-mc2-refinar.png` | `mc2` | 1440×3007 | Terminaste de construir y pasás a refinar: CTA, calidad y mobile, con la demo ya en pantalla. | directo |
+| mc2 a medio hacer | `19-mc2-parcial.png` | `mc2` | 1440×3007 | Tildaste una de las tres de refinado; faltan dos. | directo |
+| mc2 completa (las seis tildadas) | `20-mc2-completa.png` | `mc2` | 1440×3091 | Las seis del checklist tildadas: la construcción quedó cerrada y lo que sigue es publicar el borrador. | directo |
 
 ### Tramo Borrador, Chequeo y Revisión
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 21 | m13 borrador vacío | `21-m13-borrador-vacio.png` | m13 | Terminaste de construir y te toca publicar en Netlify Drop y pegar el link. | directo |
-| 22 | m14 chequeo | `22-m14-chequeo.png` | m14 | Ya hay borrador publicado: te toca pasar los 6 checks duros y mandar a revisión. | directo |
-| 23 | revisión de Franco | `23-revision-franco.png` | revision | Mandaste la demo: Franco la está revisando y no hay nada que hacer. | directo |
-| 24a | error de URL del borrador | `24a-error-borrador-url-invalida.png` | m13 | Pegás cualquier cosa en el campo del link y guardás: el error queda fijo, no se va como un toast. | interacción |
-| 24b | error persistente del chequeo | `24b-error-persistente-chequeo.png` | m14 | Tenías el chequeo abierto y el lead se movió por detrás: al mandar, el server rebota y el motivo queda a la vista, en criollo (4.1). | interacción |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m13 borrador vacío | `21-m13-borrador-vacio.png` | `m13` | 1440×1557 | Terminaste de construir y te toca publicar en Netlify Drop y pegar el link. | directo |
+| m14 chequeo sin tildar | `22-m14-chequeo.png` | `m14` | 1440×3259 | Ya hay borrador publicado: la grilla de los diez obligatorios, en sus dos grupos («esto lo revisás vos» / «esto lo mira Franco»), toda en cero. | directo |
+| m14 chequeo a medias | `22b-m14-chequeo-parcial.png` | `m14` | 1440×2819 | Cerraste tu grupo y te falta el de Franco: el botón de mandar a revisión sigue trabado y dice cuántos faltan. | directo |
+| m14 chequeo completo | `22c-m14-chequeo-completo.png` | `m14` | 1440×2700 | Los diez en verde: recién ahí se destraba «Enviar a revisión». | directo |
+| revisión de Franco | `23-revision-franco.png` | `revision` | 1440×900 | Mandaste la demo: Franco la está revisando y no hay nada que hacer. | directo |
+| error de URL del borrador | `24a-error-borrador-url-invalida.png` | `m13` | 1440×1557 | Pegás cualquier cosa en el campo del link y guardás: el error queda fijo, no se va como un toast. | interacción |
+| error persistente del chequeo | `24b-error-persistente-chequeo.png` | `m14` | 1440×2739 | Tenías el chequeo abierto y el lead se movió por detrás: al mandar, el server rebota y el motivo queda a la vista, en criollo (4.1). | interacción |
 
 ### Tramo Re-loop
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 25 | mr corrección N°1 | `25-mr-correccion-1.png` | mr | Franco rechazó la demo por primera vez: la nota está al frente. | directo |
-| 26 | mr corrección N°2 | `26-mr-correccion-2.png` | mr | Segundo rechazo: la corrección nueva al frente y las anteriores colapsadas (5.2). | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| mr corrección N°1 | `25-mr-correccion-1.png` | `mr` | 1440×1555 | Franco rechazó la demo por primera vez: la nota está al frente. | directo |
+| mr corrección N°2 | `26-mr-correccion-2.png` | `mr` | 1440×1555 | Segundo rechazo: la corrección nueva al frente y las anteriores colapsadas (5.2). | directo |
 
 ### Tramo Envío
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 27 | m15 envío abierto | `27-m15-envio-abierto.png` | m15 | Franco aprobó y el negocio está respondiendo: se destrabó el envío del link. | directo |
-| 28 | espera sin respuesta | `28-m15-espera-sin-respuesta.png` | espera | Está aprobada pero el negocio no respondió: espera con m15 consultable, que nombra la causa real (5.3). | directo |
-| 29 | espera sin URL final | `29-m15-espera-sin-final-url.png` | espera | Aprobada y el negocio respondió, pero falta la URL final que carga el admin. | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m15 envío abierto | `27-m15-envio-abierto.png` | `m15` | 1440×1362 | Franco aprobó y el negocio está respondiendo: se destrabó el envío del link. | directo |
+| espera sin respuesta | `28-m15-espera-sin-respuesta.png` | `espera` | 1440×900 | Está aprobada pero el negocio no respondió: espera con m15 consultable, que nombra la causa real (5.3). | directo |
+| espera sin URL final | `29-m15-espera-sin-final-url.png` | `espera` | 1440×900 | Aprobada y el negocio respondió, pero falta la URL final que carga el admin. | directo |
 
 ### Tramo Agenda
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 30 | m16 virgen | `30-m16-virgen.png` | m16 | Mandaste el link, el negocio dijo «sí, reunámonos» y todavía no ofreciste horarios. | directo |
-| 31 | m16 con horarios ofrecidos | `31-m16-ofrecidos.png` | m16 | Ya le pasaste 3 horarios y volvés a entrar: los mismos horarios siguen ahí (6.1/6.2). | flujo |
-| 32 | m16 agendada | `32-m16-agendada.png` | m16 | La reunión quedó agendada: resumen del traspaso, nada por delante. | directo |
-| 33 | m5 post-envío | `33-m5-post-envio.png` | m5 | Mandaste el link y venció el toque: registrás el seguimiento post-envío con m16 al lado. | flujo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| m16 virgen | `30-m16-virgen.png` | `m16` | 1440×1218 | Mandaste el link, el negocio dijo «sí, reunámonos» y todavía no ofreciste horarios. | directo |
+| m16 con horarios ofrecidos | `31-m16-ofrecidos.png` | `m16` | 1440×1553 | Ya le pasaste 3 horarios y volvés a entrar: los mismos horarios siguen ahí (6.1/6.2). | flujo |
+| m16 agendada | `32-m16-agendada.png` | `m16` | 1440×1270 | La reunión quedó agendada: resumen del traspaso, nada por delante. | directo |
+| m5 post-envío | `33-m5-post-envio.png` | `m5` | 1440×1776 | Mandaste el link y venció el toque: registrás el seguimiento post-envío con m16 al lado. | flujo |
 
-### Terminales y home
+### Tramo Terminal
 
-| # | Estado | Screenshot | Pantalla | Cómo se llega | Modo |
-|---|---|---|---|---|---|
-| 34 | archivo (perdido) | `34-archivo-perdido.png` | archivo | El negocio se cerró sin avanzar (Franco lo marcó PERDIDO): vista de archivo, read-only (2.3). | flujo |
-| 35 | home — tu foco | `35-home-foco.png` | `/setter` | Entrás al panel: el foco te dice con qué negocio seguir. | directo |
-| 36 | home — tu cartera | `36-home-cartera.png` | `/setter` | Mirás toda tu cartera, subordinada al foco. | directo |
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| archivo (perdido) | `34-archivo-perdido.png` | `archivo` | 1440×900 | El negocio se cerró sin avanzar (Franco lo marcó PERDIDO): vista de archivo, read-only (2.3). | flujo |
+
+### Tramo Panel de inicio
+
+| Estado | Screenshot | Pantalla | Dimensiones | Cómo se llega (palabras del setter) | Modo |
+| --- | --- | --- | --- | --- | --- |
+| el foco, con cartera cargada | `35-home-foco.png` | `/setter` | 1440×2406 | Entrás al panel con trabajo acumulado: el foco te dice con qué negocio seguir. Sale de la cartera REAL del setter de prueba. | directo |
+| la cartera completa | `36-home-cartera.png` | `/setter` | 1440×2406 | Mirás toda tu cartera, subordinada al foco. | directo |
+| el foco manda a construir | `37-home-foco-construir.png` | `/setter` | 1440×900 | Tenés un negocio que pasó el filtro y le falta la demo: es lo primero que el foco pone adelante (P8). | directo |
+| el foco dice «te está esperando a vos» | `38-home-foco-espera-accion.png` | `/setter` | 1440×900 | No hay nada para construir pero sí algo trabado esperándote: una demo que Franco rechazó. | directo |
+| cartera vacía | `39-home-vacio.png` | `/setter` | 1440×900 | Sos setter nuevo y todavía no te asignaron ni cargaste ningún negocio. | directo |
+| nada para trabajar ahora | `40-home-nada-para-trabajar.png` | `/setter` | 1440×1121 | Tenés cartera pero está toda en vuelo (esperando a Franco o al negocio): el panel muestra dónde quedó el trabajo en vez de un foco. | directo |
 
 ### Mobile
 
-| Screenshot | Qué muestra |
-|---|---|
-| `M-35-home-foco.png` | El panel en el celular: el drawer (botón hamburguesa) reemplaza la barra lateral. |
-| `M-09-m5-toque-vencido.png` | El registro de toque en el celular — lo que más se usa fuera del escritorio. |
-| `M-15-m7-estructura.png` | Una fase de construcción en el celular: la nav de fases cambia de forma. |
-| `M-31-m16-ofrecidos.png` | La agenda en el celular (la pantalla con más form). |
+| Screenshot | Dimensiones | Qué muestra |
+| --- | --- | --- |
+| `M-09-m5-toque-vencido.png` | 390×2486 | El registro de toque en el celular — lo que más se usa fuera del escritorio. |
+| `M-15-mc1-construir.png` | 390×2602 | «Construí la demo» en el celular: la navegación de la construcción cambia de forma. |
+| `M-18-mc2-refinar.png` | 390×3743 | «Refiná la demo» en el celular — la segunda mitad de la construcción. |
+| `M-22b-m14-chequeo-parcial.png` | 390×3914 | El chequeo final en el celular: los dos grupos, uno cerrado y otro abierto. |
+| `M-31-m16-ofrecidos.png` | 390×2055 | La agenda en el celular (la pantalla con más form). |
+| `M-35-home-foco.png` | 390×2875 | El panel en el celular: el drawer (botón hamburguesa) reemplaza la barra lateral. |
+| `M-37-home-foco-construir.png` | 390×1097 | El foco que manda a construir, en el celular. |
 
 ---
 
-## INALCANZABLES
+## Huecos y residuos (derivado del cruce)
 
-**Ninguno de los 37 estados enumerados quedó sin alcanzar.**
+**Huecos: ninguno.** Cada estado del catálogo tiene su `.png`.
 
-Se registran igual dos límites que la corrida encontró y que el manual tiene que
-tener en cuenta:
+**Residuos: ninguno.** No quedó ningún `.png` de un estado que ya no existe.
 
-1. **APROBADA y RECHAZADA no son alcanzables desde el panel del setter.** No es
-   una falla: aprobar o rechazar una demo, y cargar la `finalUrl`, son acciones
-   de Franco desde el admin. Todo el tramo Envío + Agenda + re-loop (#25 a #33)
-   sólo existe para el setter *después* de que Franco actúe. El manual no puede
-   prometer "hacé X y llegás acá" en ese tramo: hay una espera de un tercero en
-   el medio. Por eso esos estados van sembrados directo.
+## Altos de captura
 
-2. **El estado 24 (error persistente) no se puede sembrar, sólo provocar.** Es un
-   estado de interacción: existe durante la vuelta de un submit rechazado. Se
-   alcanzó desde la UI, pero no hay forma de "dejar la app" en ese estado — si
-   alguien quiere volver a verlo, tiene que re-provocarlo.
+El portal **no scrollea el documento**: scrollea un `<main class="overflow-y-auto">`,
+y el `document` mide siempre el viewport. Por eso `fullPage: true` por sí solo NO
+alcanza acá — la primera vuelta de esta galería salió recortada así. La captura
+agranda el viewport hasta que el `<main>` deja de desbordar y **afirma contra el DOM**
+que no quedó nada fuera de cuadro antes de disparar (`ajustarYVerificar`): si alguna
+quedara cortada, la corrida falla en vez de guardar una foto que miente.
 
-## Lo que vi y me llamó la atención
+Altos: de 900px a 3914px (la más larga es `M-22b-m14-chequeo-parcial.png`). 8 de 50 entraron en una sola pantalla (900px desktop / 844px mobile) — eso es contenido corto, no recorte.
 
-**1. Cuatro de las cinco herramientas externas dicen PENDIENTE.** Visible en la
-barra lateral de *todas* las capturas (p. ej. `35-home-foco.png`): **Evaluador**,
-**Gem de diseño**, **Claude Design** y **Gem de outreach** aparecen con la
-etiqueta `PENDIENTE` y sin link. La única con URL real es **Netlify Drop**. Esto
-no es cosmético: el manual del setter dice literalmente "copiá el bloque y pasalo
-por el Gem Evaluador" (m2) y "generá el brief" (m6) — y desde el panel no hay
-adónde ir. **Es el hallazgo más importante de la corrida**: el recorrido está
-completo en la app y roto en las herramientas. Las URLs viven en
-`herramientas.ts` y son de Franco.
-
-**2. En una pantalla larga, `fullPage` de Playwright no captura la pantalla
-completa.** El layout del setter no scrollea el documento: scrollea un
-`<main class="overflow-y-auto">`, y el `document` mide siempre el viewport.
-Cualquier verificación visual de este portal que confíe en `fullPage: true` está
-mirando sólo el primer scroll — la primera vuelta de esta misma galería salió
-recortada así. Está arreglado en `captura.spec.ts`, pero afecta a cualquier otro
-job de screenshots contra `/setter/*`.
-
-**3. Un lead que llegó hasta APROBADA muestra la Construcción como no
-completada.** En `31-m16-ofrecidos.png` la tira "COMPLETADAS" lista Ficha, Al
-Evaluador, Veredicto, Brief, Borrador, Chequeo final y Envío — **pero ninguna de
-las 6 fases de construcción**. Es coherente con el diseño (el checklist es
-auto-reporte y `completadasDe` lo lee de `progresoJson`, no del stage), pero al
-setter le queda un rastro que sugiere que se salteó la construcción de un
-negocio que evidentemente construyó. Vale decidir si el manual lo explica o si
-la pantalla debería inferirlo del stage.
-
-**4. Un toque vencido no se ve vencido.** En `09-m5-toque-vencido.png` /
-`M-09-m5-toque-vencido.png` el contexto dice "Próximo toque: 22/7" — una fecha
-**ya pasada** (la corrida fue el 23/7) — sin ninguna marca de atraso. La pantalla
-es la correcta (el motor derivó bien que hay que tocar ahora), pero el dato en
-crudo se lee como si el toque fuera a futuro.
-
-**5. El home llega con mucho ruido acumulado.** En `35-home-foco.png`: campana
-con `9+`, **60 novedades** sin leer y "1 de 44 para trabajar". Las novedades
-visibles son todas "Te reasignaron un lead" de datos de smoke viejos. Es DB de
-dev, no producción — pero muestra que la sección de novedades no tiene techo ni
-resumen cuando se acumula, y para las capturas del manual conviene un setter con
-la bandeja limpia.
-
-**6. Mezcla de controles en la misma pantalla.** En m16 (`31-m16-ofrecidos.png`)
-el "Estoy hablando con el dueño / quien decide" es un checkbox cuadrado nativo,
-mientras que los 6 checks de m14 y los toggles de las fases son switches
-(`role="switch"`). Dos controles distintos para la misma idea de "tildar algo".
-
-**7. Detalle de captura, no del producto.** Las animaciones de `motion/react` no
-las frena el CSS inyectado, así que en las fotos disparadas justo después de un
-clic (24a/24b) puede quedar un círculo gris del toggle a mitad de transición. No
-es un bug de la app; anotado para que nadie lo lea como uno.

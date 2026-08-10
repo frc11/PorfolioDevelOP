@@ -3305,6 +3305,121 @@ nunca por status code.
 
 ---
 
+## Corrida G — La galería de estados, regenerada sobre el producto podado
+
+**Qué era.** La galería (`docs/manual-usuario/galeria/`) es el insumo del manual de usuario: cada
+capítulo cita sus capturas. Después de la poda (P4 fusión de evaluación, P5-B brief reconvertido,
+P6-B colapso de construcción, P7 chequeo, P8 foco, P9 vocabulario) el sembrador seguía sembrando
+estados de pantallas retiradas y el índice declaraba un total que ya no coincidía con su tabla.
+
+### El aislamiento (mismo defecto que tenía la suite del panel)
+
+`playwright.galeria.config.ts` apuntaba a `npm run start:qa` —que buildea en `.next/`, el MISMO
+directorio del `next dev`/`next start` del checkout— y reutilizaba a ciegas cualquier server del
+puerto (`reuseExistingServer: !CI`). Se aplicó la solución ya commiteada para la suite del setter:
+
+| Antes | Ahora |
+|---|---|
+| `npm run start:qa` → build en `.next/`, puerto 3001 | `npm run start:galeria` → build en `.next-galeria/`, puerto 3004 |
+| `reuseExistingServer: !process.env.CI` | `reuseExistingServer: false` (reuso a propósito = `SETTER_EXTERNAL_SERVER=1`) |
+
+Para una galería el daño de compartir `.next/` es peor que para una suite: no falla, **fotografía lo
+roto**, y esas fotos entran al manual como si fueran el producto.
+
+**Probado con un server ajeno vivo al lado.** Había un `next start -p 3010` de otro frente sirviendo
+desde `.next/`. Antes del build: `:3010` → 200, `.next/BUILD_ID` = `PaLMC0ClHYso9NBQ3ISvO`
+(mtime 2026-08-07T14:38:32). Después del build de la galería: `.next-galeria/BUILD_ID` nuevo
+(`WqtU-vRhyE_xGsbGFQbs_`), `.next/BUILD_ID` **byte por byte y mtime idénticos**, y `:3010` seguía
+en 200. El vecino sobrevivió.
+
+### El sembrador
+
+**Retirado** — los cinco estados de las pantallas que P6-B sacó del registro (`m8`…`m12`):
+`16-m8-personalizacion`, `17-m9-assets`, `18-m10-cta`, `19-m11-calidad`, `20-m12-mobile-fases-hechas`.
+Sus ids ya no existen y la guardia del server los redirigía: una corrida habría fotografiado siete
+veces la misma pantalla con nombres que mienten.
+
+**Reconvertido, conservando la numeración** (así el resto del índice no se corre):
+
+| # | Antes | Ahora |
+|---|---|---|
+| 04 | `04-m3-veredicto-registrar` (idéntico al 03) | `04-m2-veredicto-registrado` — la vuelta del Evaluador, stage EVALUADA |
+| 05 | `05-m3-veredicto-descartado` | `05-m2-veredicto-descartado` (m3 no existe desde P4) |
+| 14 | `14-m7-tilde-deshabilitado` | `14-mc1-tilde-deshabilitado` |
+| 15 | `15-m7-estructura` | `15-mc1-construir` |
+| 16–20 | m8…m12 | `16-mc1-parcial`, `17-mc1-completa`, `18-mc2-refinar`, `19-mc2-parcial`, `20-mc2-completa` |
+
+**Agregado**: `22b-m14-chequeo-parcial` y `22c-m14-chequeo-completo` (P7 llevó los hard-checks de 6 a
+10 en dos grupos: sin estos, la galería no muestra ni la grilla agrupada ni el momento en que el
+botón se destraba), y `37`…`40` — el panel de inicio con el foco de P8.
+
+**Los homes cuelgan de setters DEDICADOS, no del setter QA.** El foco se deriva de la cartera entera:
+sobre `setter-qa` (44 leads de smoke viejo + los 40 de la galería) no hay forma de elegir qué muestra
+la foto. Cuatro setters `m0-gal-*@develop.test`, uno por situación: foco→construir, foco→«te está
+esperando a vos», cartera vacía, y nada-para-trabajar. La limpieza idempotente los borra por prefijo
+de email, igual que los leads por prefijo de `businessName` + owner conocido.
+
+**Lo que NO se copió a mano.** Los nombres de los hard-checks y el reparto fase→pantalla se derivan de
+`HARD_CHECKS` y `PANTALLA_DE_FASE` en vivo. El espejo hardcodeado es justo lo que quedó stale en P7.
+La captura tenía un `for (let i = 0; i < 6; i++)` para tildar los duros: con 10 en la lista, el botón
+no se habilitaba nunca. Ahora es `HARD_CHECKS.length`.
+
+### El índice ya no puede mentir sobre su conteo
+
+Era un `.md` a mano que declaraba «37 estados enumerados, 37 alcanzados» contra una tabla que ya no
+los tenía. Ahora se genera (`scripts/dev/m0-galeria-indice.ts`, `npm run galeria:indice`): el conteo,
+las dimensiones y el cruce salen del directorio de `.png`. El catálogo de prosa vive en el script; el
+cruce marca **huecos** (catalogado sin foto) y **residuos** (foto sin catalogar). La primera corrida
+encontró 10 residuos —los `.png` de los estados retirados, que habrían quedado ahí sin que nadie se
+enterara— y se borraron.
+
+**Trampa que este mismo trabajo se comió.** La primera versión del generador infería recortes desde el
+`.png` («alto == viewport») y marcó **ocho falsos positivos**: hay pantallas que sí entran en 900px.
+El alto de un archivo no puede probar recorte. La garantía se movió a donde está el dato: la captura
+mide el desborde del `<main>` contra el DOM y **afirma que es cero** antes de disparar
+(`ajustarYVerificar`). Si alguna quedara cortada, la corrida falla en vez de guardar una foto que
+miente. El ajuste de viewport ya existía; lo que faltaba era la aserción.
+
+### Verificación
+
+| Chequeo | Resultado |
+|---|---|
+| `npm run galeria:capturar` | **50/50, exit 0** (2 corridas: la 2ª con la aserción de desborde activa) |
+| Capturas miradas a ojo | 7 de distintos tramos — ver reporte. App real, con estilos, sin pantalla de error |
+| Censo pantallas del registro vs galería | **15/15 cubiertas**, 0 huecos, 0 residuos |
+| Índice | 43 estados + 7 mobile = 50 archivos, conteo DERIVADO |
+| `npx tsc --noEmit` | exit 0 |
+| `npm run check:invariants` | 18/18, exit 0 |
+| `npm run test:setter` | **60/60, exit 0** — se corrió porque la corrida tocó `tests/helpers/setter-db.ts`, helper compartido con esa suite |
+
+### Fuera de scope — anotado, no implementado
+
+1. **Un estado del manual sin captura:** APROBADA con el envío cerrado (falta que responda o falta la
+   `finalUrl`) **y un toque vencido** → la derivación manda a `m5` con `m15` habilitada. Es una rama
+   real de `posicionDe` y la galería no la tiene. Se suma al catálogo cuando se decida si el manual
+   la documenta.
+2. **Veredicto CALIENTE sin captura.** 04 es AVANZAR y 05 DESCARTAR; CALIENTE abre el gate del brief
+   **sin** que el negocio responda — es un camino distinto y no está fotografiado.
+3. **El foco con un lead FIJADO** (6.1: el pin ordena la cola) no tiene captura propia.
+4. **Rutas del portal fuera del manual paso-a-paso:** `/setter/nuevo`, `/setter/nuevo/importar` y
+   `/setter/leads/[leadId]` (ficha + timeline). El manual de usuario las necesita; la galería sólo
+   cubre el manual y el panel de inicio.
+5. **`tsconfig.json` cambió sin que nadie lo editara:** Next agrega los tipos de `.next-galeria/` al
+   buildear con un `distDir` nuevo, igual que las dos líneas de `.next-setter/` que ya estaban.
+6. **La jerga «brief» sigue en el formulario de m6** («Título del brief», «Guardar brief») aunque el
+   título de la pantalla ya es «Decidí cómo va a ser la demo». Es vocabulario, no galería.
+7. **Cuatro de las cinco herramientas siguen en PENDIENTE** en el rail de todas las capturas
+   (Evaluador, Gem de diseño, Claude Design, Gem de outreach). El hallazgo es de la corrida M0 y
+   sigue igual: las URLs son de Franco.
+
+### Lo que cierra Franco
+
+- **Las capturas.** Ningún test valida que una imagen muestre lo que dice mostrar.
+- **Si los cuatro estados del panel de inicio (37–40) reemplazan a `35-home-foco`** en el manual, o
+  si conviven: 35 sale de una cartera real y ruidosa; 37–40 son limpios y elegidos.
+
+---
+
 ## Corrida M1 v3 — El manual del Panel del Setter, escrito sobre el producto podado — 2026-08-10
 
 **Rama** `redesign/home` · **HEAD de arranque** `02ba28df` · **Sin push.**
@@ -3529,11 +3644,19 @@ El brazo B falló a compilar dos veces con
 directorios de build del A/B (`.next-perf-a`, `.next-perf-b`) no estaban gitignoreados, y la
 auto-detección de fuentes de Tailwind 4 —que respeta gitignore— se puso a escanear el **HTML
 prerenderizado del otro brazo** como si fuera código. Ahí encontró la clase arbitraria
-`bg-[url('…noise.svg')]` de `web-development/page.tsx` ya escapada a entidades HTML
+`bg-[url('https://grainy-gradients.vercel.app/noise.svg')]` de `web-development/page.tsx` ya
+escapada a entidades HTML
 (`url(&#x27;…&#x27;)`), emitió ese CSS, y `css-loader` intentó resolver `./&` como módulo. Se
 resolvió excluyendo `.next-perf-*/` en `.git/info/exclude` (local, no toca ningún archivo
 versionado ni el `git status` de las otras sesiones). **Regla:** todo distDir alternativo tiene que
 estar ignorado antes del primer build, o contamina el siguiente.
+
+**Regla 2 — esta bitácora también es fuente de Tailwind.** El párrafo de arriba escribía la clase
+con la URL elidida (`…noise.svg`), y eso volvió a romper el build en el sprint siguiente: Tailwind
+escanea `docs/**/*.md`, extrajo la clase truncada del markdown y `css-loader` volvió a intentar
+resolver un módulo que no existe. La documentación del bug reintrodujo el bug por otra puerta. Al
+citar una clase arbitraria con `url()` en un doc, escribirla **completa y resoluble** (una URL
+absoluta `https://` la deja pasar); nunca elidir el path con `…`.
 
 ### Fuera de scope — anotado, no implementado
 

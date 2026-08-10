@@ -1,19 +1,36 @@
 /**
- * Corrida M0 — SEMBRADOR de la galería de estados del Panel del Setter.
+ * Corrida M0/G — SEMBRADOR de la galería de estados del Panel del Setter.
  *
  * Lleva la app a CADA estado enumerado en `docs/manual-usuario/galeria/INDICE.md`,
- * un lead por estado, todos owned por el setter de prueba (`setter-qa@develop.test`)
- * y namespaced con el prefijo `M0-GAL` — aislados de cualquier dato real.
+ * un lead por estado, todos owned por un setter de prueba y namespaced con el
+ * prefijo `M0-GAL` — aislados de cualquier dato real.
  *
- * Idempotente: borra los leads del prefijo (solo los propios, por prefijo EXACTO
- * y assignedToId del setter de prueba) y los vuelve a sembrar. Re-correrlo
- * CONVERGE. Nada destructivo fuera del namespace; jamás `migrate reset`.
+ * Idempotente: borra lo del prefijo (leads por prefijo EXACTO de `businessName`
+ * y owner conocido; setters dedicados por prefijo EXACTO de email) y lo vuelve a
+ * sembrar. Re-correrlo CONVERGE. Nada destructivo fuera del namespace; jamás
+ * `migrate reset`.
  *
  * REUSA los helpers de fixture de `tests/helpers/setter-db.ts` (factories de JSON
  * por contrato + `createLead` + `registerActivity`) en vez de escribir un
  * sembrador paralelo. Lo que a esos helpers les faltaba para la galería se sumó
  * ahí como campos opcionales (`exactName`, `progresoCompletadas`, `rechazosCount`,
- * `sinFinalUrl`, `draftUrl`, `nextFollowUpAt`), no acá.
+ * `sinFinalUrl`, `draftUrl`, `nextFollowUpAt`, `selfCheckDurosOk`), no acá.
+ *
+ * ── Qué cambió en la corrida G (después de la poda) ──────────────────────────
+ *   · RETIRADOS los cinco estados de las pantallas m8…m12: P6-B agrupó las seis
+ *     fases del checklist en DOS pantallas (mc1 «Construir» = estructura +
+ *     personalización + assets; mc2 «Refinar» = cta + calidad + mobile) y esos
+ *     ids salieron del registro. Los estados 14…20 se reconvirtieron en su lugar
+ *     a mc1/mc2 con progreso parcial y completo — la numeración NO se corrió,
+ *     así el resto del índice queda estable.
+ *   · AGREGADOS: el chequeo con tildes parciales y completos (22b/22c: P7 llevó
+ *     los hard-checks de 6 a 10, en dos grupos), y cuatro panel-de-inicio (37…40)
+ *     con el foco de P8 en sus situaciones distinguibles.
+ *   · Los homes 37…40 cuelgan de SETTERS DEDICADOS, no del setter QA: el foco se
+ *     deriva de la cartera ENTERA del setter, así que sobre `setter-qa` (44 leads
+ *     de smoke viejo + los 36 de esta galería) no hay forma de fotografiar «el
+ *     foco es construir» ni «no hay nada para trabajar». Un setter por situación
+ *     es la única manera de que la foto muestre lo que su nombre dice.
  *
  * FLUJO REAL vs SEMBRADO DIRECTO — la distinción se registra en el INDICE:
  *   · Los toques de la cadencia son actividades REALES (`OsLeadActivity`), las
@@ -22,7 +39,7 @@
  *     write-path EXACTO que la action `ofrecerHorarios` usa por dentro (mismo
  *     criterio que la suite 13-m16-memoria).
  *   · El resto de los estados se coloca por stage + blobs del dossier: SEMBRADO
- *     DIRECTO. Manejar 30 leads por la UI real sería impracticable para una
+ *     DIRECTO. Manejar 40 leads por la UI real sería impracticable para una
  *     galería reproducible, y cada combinación sembrada es una que el flujo real
  *     sí produce (no se fuerza ningún estado imposible).
  *
@@ -43,6 +60,9 @@ if (!process.env.DATABASE_URL?.includes(DEV_BRANCH_HOST)) {
 /** Prefijo del namespace de la galería. Todo lo sembrado acá lo lleva. */
 export const GAL_TAG = 'M0-GAL'
 
+/** Prefijo de email de los setters dedicados a los estados del panel de inicio. */
+export const GAL_SETTER_PREFIX = 'm0-gal-'
+
 const DIA_MS = 24 * 60 * 60 * 1000
 
 /** Los 3 horarios de la oferta de m16, tal como los devuelve Cal.com. */
@@ -51,6 +71,17 @@ const HORARIOS_OFRECIDOS = [
   '2026-09-02T16:30:00.000-03:00',
   '2026-09-03T11:00:00.000-03:00',
 ]
+
+/**
+ * Las fases del checklist que contiene cada pantalla de Construcción. Se importa
+ * la tabla viva (`PANTALLA_DE_FASE`) en `main()` en vez de copiar el reparto:
+ * si mañana una fase se muda de pantalla, el progreso sembrado la sigue sola.
+ */
+async function fasesDe(pantalla: 'mc1' | 'mc2'): Promise<string[]> {
+  const { FASE_IDS } = await import('../../src/lib/leados/contracts')
+  const { PANTALLA_DE_FASE } = await import('../../src/lib/leados/manual')
+  return FASE_IDS.filter((fase) => PANTALLA_DE_FASE[fase] === pantalla)
+}
 
 async function main() {
   const {
@@ -62,13 +93,45 @@ async function main() {
     newTracker,
   } = await import('../../tests/helpers/setter-db')
   const { guardarHorariosOfrecidosOwned } = await import('../../src/lib/leados/agenda')
+  const { HARD_CHECKS } = await import('../../src/lib/leados/flow')
 
   const setter = await getSetterQa()
   const setterId = setter.id
 
+  // Nombres de los hard-checks DERIVADOS de la lista viva, nunca copiados: P7 la
+  // llevó de 6 a 10 y cualquier espejo hardcodeado habría quedado stale en
+  // silencio (el `nombre` es la llave con la que el formulario re-encuentra un
+  // tilde guardado, así que un espejo viejo siembra tildes que no matchean).
+  const CHEQUEO_GRUPO_SETTER = HARD_CHECKS.filter((c) => c.grupo === 'setter').map((c) => c.nombre)
+  const CHEQUEO_TODOS = HARD_CHECKS.map((c) => c.nombre)
+
+  const MC1 = await fasesDe('mc1')
+  const MC2 = await fasesDe('mc2')
+  const TODAS_LAS_FASES = [...MC1, ...MC2]
+
+  // ── Setters dedicados a los estados del panel de inicio ───────────────────
+  const SETTERS_HOME = [
+    { slug: 'foco-construir', nombre: `${GAL_TAG} home foco construir` },
+    { slug: 'foco-espera-accion', nombre: `${GAL_TAG} home foco espera acción` },
+    { slug: 'vacio', nombre: `${GAL_TAG} home vacío` },
+    { slug: 'nada-para-trabajar', nombre: `${GAL_TAG} home nada para trabajar` },
+  ] as const
+  const emailDe = (slug: string) => `${GAL_SETTER_PREFIX}${slug}@develop.test`
+
   // ── Limpieza idempotente: SOLO el namespace propio ────────────────────────
+  // Owners conocidos = el setter QA + los setters dedicados que hayan quedado de
+  // una corrida anterior. El filtro sigue siendo prefijo EXACTO de businessName
+  // AND owner conocido — nunca una heurística amplia sobre una DB compartida.
+  const setteresDedicadosPrevios = await prisma.user.findMany({
+    where: { email: { startsWith: GAL_SETTER_PREFIX } },
+    select: { id: true },
+  })
+  const ownersConocidos = [setterId, ...setteresDedicadosPrevios.map((u) => u.id)]
   const previos = await prisma.osLead.findMany({
-    where: { businessName: { startsWith: `${GAL_TAG} ` }, assignedToId: setterId },
+    where: {
+      businessName: { startsWith: `${GAL_TAG} ` },
+      assignedToId: { in: ownersConocidos },
+    },
     select: { id: true },
   })
   if (previos.length > 0) {
@@ -76,6 +139,12 @@ async function main() {
     await prisma.osSetterNotice.deleteMany({ where: { leadId: { in: ids } } })
     await prisma.osLead.deleteMany({ where: { id: { in: ids } } })
     console.log(`Limpieza: ${ids.length} leads previos del namespace ${GAL_TAG} borrados.`)
+  }
+  if (setteresDedicadosPrevios.length > 0) {
+    const ids = setteresDedicadosPrevios.map((u) => u.id)
+    await prisma.osSetterNotice.deleteMany({ where: { setterId: { in: ids } } })
+    await prisma.user.deleteMany({ where: { id: { in: ids } } })
+    console.log(`Limpieza: ${ids.length} setters dedicados previos borrados.`)
   }
 
   // El tracker existe por contrato del helper; el teardown de la galería es el
@@ -95,7 +164,6 @@ async function main() {
   ) => {
     const lead = await createLead(tracker, {
       ...opts,
-      setterId,
       exactName: `${GAL_TAG} ${nombre}`,
     })
     sembrados.push({ estado: nombre, leadId: lead.id, modo })
@@ -106,13 +174,17 @@ async function main() {
   await sembrar('01-m1-ficha-vacia', { setterId, stage: 'FICHA' })
   await sembrar('02-m1-ficha-cargada', { setterId, stage: 'FICHA' })
   await sembrar('03-m2-al-evaluador', { setterId, stage: 'FICHA' })
-  await sembrar('04-m3-veredicto-registrar', { setterId, stage: 'FICHA' })
-  await sembrar('05-m3-veredicto-descartado', { setterId, stage: 'DESCARTADA' })
+  // P4 fusionó m3 dentro de m2. Antes 03 y 04 se sembraban IDÉNTICOS (los dos
+  // FICHA + señal) y fotografiaban la misma pantalla dos veces: ahora 04 es la
+  // vuelta del Evaluador con el veredicto YA registrado (stage EVALUADA → m2
+  // queda completada y navegable), que es la variación real de esa pantalla.
+  await sembrar('04-m2-veredicto-registrado', { setterId, stage: 'EVALUADA' })
+  await sembrar('05-m2-veredicto-descartado', { setterId, stage: 'DESCARTADA' })
 
-  // 02/03/04 necesitan ficha CON señal (el gate de m2/m3). `createLead` solo la
-  // pone en stages posteriores a FICHA → se completa acá, con la misma factory.
+  // 02/03 necesitan ficha CON señal (el gate de m2). `createLead` solo la pone en
+  // stages posteriores a FICHA → se completa acá, con la misma factory.
   const { fichaConSenal } = await import('../../tests/helpers/setter-db')
-  for (const nombre of ['02-m1-ficha-cargada', '03-m2-al-evaluador', '04-m3-veredicto-registrar']) {
+  for (const nombre of ['02-m1-ficha-cargada', '03-m2-al-evaluador']) {
     const s = sembrados.find((x) => x.estado === nombre)!
     await prisma.osLeadDossier.update({
       where: { leadId: s.leadId },
@@ -172,57 +244,76 @@ async function main() {
     'Le escribí al WhatsApp del local. Contestó la empleada: el dueño viene a la tarde.',
   )
 
-  // ── Tramo Brief ───────────────────────────────────────────────────────────
+  // ── Tramo Brief (m6 reconvertido en P5-B: «Decidí cómo va a ser la demo») ──
   await sembrar('12-m6-brief-abierto', { setterId, stage: 'EVALUADA', status: 'RESPONDIO' })
   await sembrar('13-m6-brief-guardado', { setterId, stage: 'BRIEF' })
 
-  // ── Tramo Construcción ────────────────────────────────────────────────────
-  await sembrar('14-m7-tilde-deshabilitado', { setterId, stage: 'BRIEF' })
-  await sembrar('15-m7-estructura', { setterId, stage: 'CONSTRUCCION' })
-  await sembrar('16-m8-personalizacion', {
+  // ── Tramo Construcción (P6-B: dos pantallas, mc1 «Construir» / mc2 «Refinar») ─
+  // El progreso persistido sigue siendo el checklist de SEIS fases; la pantalla
+  // es presentación. Por eso «mc1 completa» = sus tres fases tildadas, no una.
+  await sembrar('14-mc1-tilde-deshabilitado', { setterId, stage: 'BRIEF' })
+  await sembrar('15-mc1-construir', { setterId, stage: 'CONSTRUCCION' })
+  await sembrar('16-mc1-parcial', {
     setterId,
     stage: 'CONSTRUCCION',
-    progresoCompletadas: ['estructura'],
+    progresoCompletadas: MC1.slice(0, 1),
   })
-  await sembrar('17-m9-assets', {
+  await sembrar('17-mc1-completa', {
     setterId,
     stage: 'CONSTRUCCION',
-    progresoCompletadas: ['estructura', 'personalizacion'],
+    progresoCompletadas: MC1,
   })
-  await sembrar('18-m10-cta', {
+  await sembrar('18-mc2-refinar', {
     setterId,
     stage: 'CONSTRUCCION',
-    progresoCompletadas: ['estructura', 'personalizacion', 'assets'],
+    progresoCompletadas: MC1,
   })
-  await sembrar('19-m11-calidad', {
+  await sembrar('19-mc2-parcial', {
     setterId,
     stage: 'CONSTRUCCION',
-    progresoCompletadas: ['estructura', 'personalizacion', 'assets', 'cta'],
+    progresoCompletadas: [...MC1, ...MC2.slice(0, 1)],
   })
-  await sembrar('20-m12-mobile-fases-hechas', {
+  await sembrar('20-mc2-completa', {
     setterId,
     stage: 'CONSTRUCCION',
-    progresoCompletadas: ['estructura', 'personalizacion', 'assets', 'cta', 'calidad'],
+    progresoCompletadas: TODAS_LAS_FASES,
   })
 
   // ── Borrador, Chequeo y Revisión ──────────────────────────────────────────
-  const TODAS_LAS_FASES = ['estructura', 'personalizacion', 'assets', 'cta', 'calidad', 'mobile']
   await sembrar('21-m13-borrador-vacio', {
     setterId,
     stage: 'CONSTRUCCION',
     progresoCompletadas: TODAS_LAS_FASES,
     draftUrl: null,
   })
+  // El chequeo en sus tres momentos (P7 lo llevó a 10 puntos en DOS grupos):
+  // sin tildar / con el grupo del setter cerrado y el de Franco abierto / los
+  // diez en verde, que es cuando el botón de mandar a revisión se destraba.
   await sembrar('22-m14-chequeo', {
     setterId,
     stage: 'CONSTRUCCION',
     progresoCompletadas: TODAS_LAS_FASES,
     draftUrl: 'https://m0-galeria-borrador.netlify.app',
   })
+  await sembrar('22b-m14-chequeo-parcial', {
+    setterId,
+    stage: 'CONSTRUCCION',
+    progresoCompletadas: TODAS_LAS_FASES,
+    draftUrl: 'https://m0-galeria-borrador.netlify.app',
+    selfCheckDurosOk: CHEQUEO_GRUPO_SETTER,
+    selfCheckSoftFlags: ['Tiene más de 3 colores'],
+  })
+  await sembrar('22c-m14-chequeo-completo', {
+    setterId,
+    stage: 'CONSTRUCCION',
+    progresoCompletadas: TODAS_LAS_FASES,
+    draftUrl: 'https://m0-galeria-borrador.netlify.app',
+    selfCheckDurosOk: CHEQUEO_TODOS,
+  })
   await sembrar('23-revision-franco', { setterId, stage: 'EN_REVISION' })
   // 24 es un estado de INTERACCIÓN: el error lo provoca la captura enviando el
-  // form. Lleva lead PROPIO igual —la captura tilda los 6 checks y mueve el
-  // stage por detrás, y eso no puede ensuciar el lead del estado 22.
+  // form. Lleva lead PROPIO igual —la captura tilda los duros y mueve el stage
+  // por detrás, y eso no puede ensuciar el lead del estado 22.
   await sembrar('24-error-chequeo', {
     setterId,
     stage: 'CONSTRUCCION',
@@ -230,7 +321,7 @@ async function main() {
     draftUrl: 'https://m0-galeria-borrador.netlify.app',
   })
 
-  // ── Re-loop ───────────────────────────────────────────────────────────────
+  // ── Re-loop (reentrada tras una demo rechazada) ───────────────────────────
   await sembrar('25-mr-correccion-1', { setterId, stage: 'RECHAZADA', rechazosCount: 1 })
   await sembrar('26-mr-correccion-2', { setterId, stage: 'RECHAZADA', rechazosCount: 2 })
 
@@ -296,11 +387,61 @@ async function main() {
   )
   await registerActivity(perdido, 'INSTAGRAM_DM', 'SIN_RESPUESTA', setterId, 'opener')
 
+  // ── Panel de inicio: el foco de P8 en sus situaciones distinguibles ────────
+  // Un setter dedicado por situación (ver la cabecera): el foco se deriva de la
+  // cartera entera, así que sobre el setter QA la foto sale de lo que haya.
+  const setteresHome: Array<{ slug: string; id: string; email: string }> = []
+  for (const s of SETTERS_HOME) {
+    const email = emailDe(s.slug)
+    const user = await prisma.user.create({
+      data: { email, name: s.nombre, role: 'SETTER' },
+      select: { id: true, email: true },
+    })
+    setteresHome.push({ slug: s.slug, id: user.id, email: user.email })
+  }
+  const idDe = (slug: string) => setteresHome.find((s) => s.slug === slug)!.id
+
+  // 37 — el foco manda a CONSTRUIR (tier 0). Un lead en CONSTRUCCION alcanza; el
+  // segundo, en FICHA, existe para que se vea el «próximo» y el contador.
+  await sembrar('37-home-foco-construir', {
+    setterId: idDe('foco-construir'),
+    stage: 'CONSTRUCCION',
+    progresoCompletadas: MC1,
+  })
+  await sembrar('37b-home-foco-construir-proximo', {
+    setterId: idDe('foco-construir'),
+    stage: 'FICHA',
+  })
+
+  // 38 — el foco es «te está esperando a vos» (tier 1): una demo que Franco
+  // rechazó. Sin ningún lead de tier 0 en la cartera, si no ganaría construir.
+  await sembrar('38-home-foco-espera-accion', {
+    setterId: idDe('foco-espera-accion'),
+    stage: 'RECHAZADA',
+    rechazosCount: 1,
+  })
+
+  // 39 — cartera vacía: el setter recién creado no tiene un solo lead. (No se
+  // siembra nada a propósito: ESE es el estado.)
+
+  // 40 — hay cartera pero nada accionable: la cola `trabajar` queda en cero y el
+  // home cae en «nada para trabajar ahora». EN_REVISION va a la cola `revision`.
+  await sembrar('40-home-nada-para-trabajar', {
+    setterId: idDe('nada-para-trabajar'),
+    stage: 'EN_REVISION',
+  })
+
   await prisma.$disconnect()
 
-  console.log(`\n${'='.repeat(84)}\nGalería M0 sembrada — ${sembrados.length} estados (owned por ${setter.email}):\n`)
+  console.log(
+    `\n${'='.repeat(84)}\nGalería M0/G sembrada — ${sembrados.length} leads (${setter.email} + ${setteresHome.length} setters dedicados):\n`,
+  )
   for (const s of sembrados) {
-    console.log(`  ${s.estado.padEnd(32)} ${s.modo.padEnd(8)} ${s.leadId}`)
+    console.log(`  ${s.estado.padEnd(34)} ${s.modo.padEnd(8)} ${s.leadId}`)
+  }
+  console.log('\nSetters dedicados al panel de inicio:')
+  for (const s of setteresHome) {
+    console.log(`  ${s.slug.padEnd(34)} ${s.email}`)
   }
   console.log('')
 }

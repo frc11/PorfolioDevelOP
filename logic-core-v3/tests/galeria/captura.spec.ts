@@ -1,11 +1,12 @@
 import { test, expect, type Page } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
-import { qaLogin } from '../helpers/setter-auth'
+import { qaLogin, mintSessionCookie } from '../helpers/setter-auth'
 import { prisma, disconnect } from '../helpers/setter-db'
+import { HARD_CHECKS } from '../../src/lib/leados/flow'
 
 /**
- * Corrida M0 — la CAPTURA de la galería de estados del Panel del Setter.
+ * Corrida M0/G — la CAPTURA de la galería de estados del Panel del Setter.
  *
  * No afirma: fotografía. Cada `test` visita UN estado sembrado por
  * `scripts/dev/m0-galeria-seed.ts` y guarda un screenshot de página completa con
@@ -26,6 +27,8 @@ import { prisma, disconnect } from '../helpers/setter-db'
 
 const SALIDA = path.join('docs', 'manual-usuario', 'galeria', 'png')
 const GAL_TAG = 'M0-GAL'
+/** Prefijo de email de los setters dedicados al panel de inicio (ver sembrador). */
+const GAL_SETTER_PREFIX = 'm0-gal-'
 
 /** Congela animaciones/transiciones para que la foto sea determinística. */
 const SIN_ANIMACIONES = `
@@ -60,14 +63,13 @@ const ESTADOS: Estado[] = [
   { nombre: '01-m1-ficha-vacia', paso: 'm1' },
   { nombre: '02-m1-ficha-cargada', paso: 'm1' },
   // P4 fusionó m3 dentro de m2 (llevar la ficha a evaluar + registrar el veredicto
-  // son una sola pantalla). Los tres apuntan ahora a m2; los NOMBRES de archivo se
-  // conservan porque el índice de `docs/manual-usuario/galeria/` los referencia.
-  // 03 y 04 quedan fotografiando el MISMO estado (el sembrador les da a los dos
-  // stage FICHA + señal): colapsarlos y renumerar la galería es trabajo del bloque
-  // M0, no de P4.
+  // son una sola pantalla). 03 es la ida (ficha con señal, sin veredicto) y 04 la
+  // vuelta (veredicto ya registrado, m2 completada y navegable): antes los dos
+  // sembraban lo MISMO y fotografiaban la misma pantalla dos veces. Renombrados
+  // en la corrida G — los nombres viejos decían `m3`, una pantalla que no existe.
   { nombre: '03-m2-al-evaluador', paso: 'm2' },
-  { nombre: '04-m3-veredicto-registrar', paso: 'm2' },
-  { nombre: '05-m3-veredicto-descartado', paso: 'm2' },
+  { nombre: '04-m2-veredicto-registrado', paso: 'm2' },
+  { nombre: '05-m2-veredicto-descartado', paso: 'm2' },
   { nombre: '06-m4-opener-pendiente', paso: 'm4' },
   { nombre: '07-m4-opener-enviado', paso: 'm4' },
   { nombre: '08-espera-post-opener', paso: 'espera' },
@@ -76,26 +78,28 @@ const ESTADOS: Estado[] = [
   { nombre: '11-m5-charla-poblada', paso: 'm5' },
   { nombre: '12-m6-brief-abierto', paso: 'm6' },
   { nombre: '13-m6-brief-guardado', paso: 'm6' },
-  // ⚠️ OBSOLETOS DESDE P6-B — NO REGENERAR ASÍ. Las seis pantallas de fase
-  // (m7…m12) se agruparon en DOS (mc1 «Construir» = estructura+personalización+
-  // assets; mc2 «Refinar» = cta+calidad+mobile) y sus ids salieron del registro:
-  // estos siete `paso` ya no existen y la guardia del server los redirige a la
-  // pantalla actual, así que una corrida de la galería fotografiaría siete veces
-  // la misma pantalla con nombres que mienten. El retiro, el re-seteo del
-  // sembrador (`scripts/dev/m0-galeria-seed.ts:180-202`), la renumeración
-  // (21→…) y el índice (`docs/manual-usuario/galeria/INDICE.md:106-112` + la
-  // fila mobile `:162`) van con la regeneración entera de la galería, después
-  // de la poda — no en P6-B. Cobertura esperada después: cuatro estados
-  // (mc1 · mc2 · el tilde deshabilitado en BRIEF · uno mobile).
-  { nombre: '14-m7-tilde-deshabilitado', paso: 'm7' },
-  { nombre: '15-m7-estructura', paso: 'm7', mobile: true },
-  { nombre: '16-m8-personalizacion', paso: 'm8' },
-  { nombre: '17-m9-assets', paso: 'm9' },
-  { nombre: '18-m10-cta', paso: 'm10' },
-  { nombre: '19-m11-calidad', paso: 'm11' },
-  { nombre: '20-m12-mobile-fases-hechas', paso: 'm12' },
+  // P6-B agrupó las seis pantallas de fase (m7…m12) en DOS: mc1 «Construir»
+  // (estructura + personalización + assets) y mc2 «Refinar» (cta + calidad +
+  // mobile). Los cinco estados de m8…m12 se RETIRARON —esos ids salieron del
+  // registro y el guard del server los redirigía, así que la galería habría
+  // fotografiado siete veces la misma pantalla con nombres que mienten— y los
+  // números 14…20 se reasignaron a las dos pantallas vigentes con progreso
+  // parcial y completo. La numeración no se corrió: el resto del índice no se
+  // mueve. El progreso persistido sigue siendo el checklist de SEIS fases.
+  { nombre: '14-mc1-tilde-deshabilitado', paso: 'mc1' },
+  { nombre: '15-mc1-construir', paso: 'mc1', mobile: true },
+  { nombre: '16-mc1-parcial', paso: 'mc1' },
+  { nombre: '17-mc1-completa', paso: 'mc1' },
+  { nombre: '18-mc2-refinar', paso: 'mc2', mobile: true },
+  { nombre: '19-mc2-parcial', paso: 'mc2' },
+  { nombre: '20-mc2-completa', paso: 'mc2' },
   { nombre: '21-m13-borrador-vacio', paso: 'm13' },
+  // P7 llevó el chequeo a 10 puntos en dos grupos («esto lo revisás vos» / «esto
+  // lo mira Franco»): sin los tres momentos, la galería no muestra ni la grilla
+  // agrupada ni el momento en que el botón se destraba.
   { nombre: '22-m14-chequeo', paso: 'm14' },
+  { nombre: '22b-m14-chequeo-parcial', paso: 'm14', mobile: true },
+  { nombre: '22c-m14-chequeo-completo', paso: 'm14' },
   { nombre: '23-revision-franco', paso: 'revision' },
   { nombre: '25-mr-correccion-1', paso: 'mr' },
   { nombre: '26-mr-correccion-2', paso: 'mr' },
@@ -126,6 +130,31 @@ async function preparar(page: Page): Promise<void> {
   await page.addStyleTag({ content: SIN_ANIMACIONES }).catch(() => {})
 }
 
+/**
+ * Entra como uno de los setters DEDICADOS del panel de inicio (ver el sembrador).
+ * El foco se deriva de la cartera entera del setter: sobre `setter-qa` —que
+ * arrastra los leads de smoke viejos y los 36 de esta misma galería— no hay forma
+ * de fotografiar «el foco es construir» ni «no hay nada para trabajar».
+ */
+async function prepararComoSetterDedicado(
+  page: Page,
+  slug: string,
+  baseURL: string | undefined,
+): Promise<void> {
+  const email = `${GAL_SETTER_PREFIX}${slug}@develop.test`
+  const user = await prisma.user.findUnique({ where: { email }, select: { id: true, role: true } })
+  expect(
+    user,
+    `setter dedicado "${email}" — corré: npx tsx scripts/dev/m0-galeria-seed.ts`,
+  ).toBeTruthy()
+  await mintSessionCookie(page.context(), baseURL ?? '', {
+    userId: user!.id,
+    email,
+    role: user!.role,
+  })
+  await page.addStyleTag({ content: SIN_ANIMACIONES }).catch(() => {})
+}
+
 /** Techo del alto de viewport — evita capturas absurdas si algo crece sin fin. */
 const ALTO_MAXIMO = 6000
 
@@ -137,21 +166,41 @@ const ALTO_MAXIMO = 6000
  * 788px visibles). Se agranda el viewport hasta que el contenedor deja de
  * desbordar — iterando, porque al crecer el alto el layout puede reflowear.
  */
-async function ajustarViewportAlContenido(page: Page): Promise<void> {
-  const ancho = page.viewportSize()?.width ?? 1440
-  for (let intento = 0; intento < 4; intento++) {
-    const desborde = await page.evaluate(() => {
+async function ajustarViewportAlContenido(page: Page): Promise<number> {
+  const medirDesborde = () =>
+    page.evaluate(() => {
       const main = document.querySelector('main')
       if (!main) return 0
       return Math.max(0, main.scrollHeight - main.clientHeight)
     })
-    if (desborde === 0) return
+  const ancho = page.viewportSize()?.width ?? 1440
+  for (let intento = 0; intento < 4; intento++) {
+    const desborde = await medirDesborde()
+    if (desborde === 0) return 0
     const altoActual = page.viewportSize()?.height ?? 900
     const nuevo = Math.min(ALTO_MAXIMO, altoActual + desborde + 24)
-    if (nuevo === altoActual) return
+    if (nuevo === altoActual) return desborde // techo de ALTO_MAXIMO
     await page.setViewportSize({ width: ancho, height: nuevo })
     await page.waitForTimeout(120) // reflow del layout tras el resize
   }
+  return medirDesborde()
+}
+
+/**
+ * Ajusta y AFIRMA que no quedó contenido fuera de cuadro. Sin esta aserción el
+ * ajuste es sólo un intento: si el bucle se queda corto (reflow encadenado,
+ * techo de `ALTO_MAXIMO`), el png sale recortado igual y nadie se entera — y una
+ * galería recortada es peor que una faltante, porque el manual la cita como si
+ * mostrara la pantalla entera. Un alto de captura igual al del viewport no
+ * prueba recorte por sí solo (hay pantallas que sí entran): lo que prueba que
+ * NINGUNA quedó cortada es esto, medido contra el DOM antes de disparar.
+ */
+async function ajustarYVerificar(page: Page, etiqueta: string): Promise<void> {
+  const desborde = await ajustarViewportAlContenido(page)
+  expect(
+    desborde,
+    `"${etiqueta}": quedaron ${desborde}px de contenido fuera de cuadro — la captura estaría recortada`,
+  ).toBe(0)
 }
 
 /** Navega, espera el ancla de la pantalla y dispara la foto de la pantalla ENTERA. */
@@ -159,7 +208,7 @@ async function fotografiar(page: Page, url: string, ancla: string, archivo: stri
   await page.goto(url, { waitUntil: 'domcontentloaded' })
   await page.addStyleTag({ content: SIN_ANIMACIONES })
   await expect(page.locator(ancla).first()).toBeVisible()
-  await ajustarViewportAlContenido(page)
+  await ajustarYVerificar(page, archivo)
   await page.screenshot({ path: path.join(SALIDA, archivo), fullPage: true })
 }
 
@@ -218,7 +267,7 @@ test('desktop · 24a-error-borrador-url-invalida', async ({ page }, testInfo) =>
 
   // El error tiene que QUEDAR en pantalla (no desaparecer como un toast).
   await expect(page.locator('input[type="url"][aria-invalid="true"]').first()).toBeVisible()
-  await ajustarViewportAlContenido(page)
+  await ajustarYVerificar(page, '24a-error-borrador-url-invalida')
   await page.screenshot({
     path: path.join(SALIDA, '24a-error-borrador-url-invalida.png'),
     fullPage: true,
@@ -233,12 +282,14 @@ test('desktop · 24b-error-persistente-chequeo', async ({ page }, testInfo) => {
   await page.addStyleTag({ content: SIN_ANIMACIONES })
   await expect(page.locator(ANCLA_MANUAL).first()).toBeVisible()
 
-  // Los 6 obligatorios en verde SON el gate del botón: se tildan por la UI real,
+  // Los obligatorios en verde SON el gate del botón: se tildan por la UI real,
   // uno por uno, como lo haría el setter. El `Toggle` compartido es un
-  // `role="switch"` (no aria-pressed), y los 6 duros se renderizan ANTES que los
-  // soft-checks → los 6 primeros switches de la pantalla son los obligatorios.
+  // `role="switch"` (no aria-pressed), y los duros se renderizan ANTES que los
+  // soft-checks → los N primeros switches de la pantalla son los obligatorios.
+  // N sale de `HARD_CHECKS.length`, NO de un literal: P7 llevó la lista de 6 a
+  // 10 y un `6` hardcodeado dejaba el botón deshabilitado para siempre.
   const duros = page.locator('[role="switch"]')
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < HARD_CHECKS.length; i++) {
     const toggle = duros.nth(i)
     if ((await toggle.getAttribute('aria-checked')) === 'false') await toggle.click()
     await expect(toggle).toHaveAttribute('aria-checked', 'true')
@@ -262,7 +313,7 @@ test('desktop · 24b-error-persistente-chequeo', async ({ page }, testInfo) => {
     // Y se espera a que la acción termine: sin esto la foto sale con los botones
     // en spinner, a mitad de vuelo.
     await expect(enviar).toBeEnabled()
-    await ajustarViewportAlContenido(page)
+    await ajustarYVerificar(page, '24b-error-persistente-chequeo')
     await page.screenshot({
       path: path.join(SALIDA, '24b-error-persistente-chequeo.png'),
       fullPage: true,
@@ -275,10 +326,20 @@ test('desktop · 24b-error-persistente-chequeo', async ({ page }, testInfo) => {
   }
 })
 
+// ── Panel de inicio ─────────────────────────────────────────────────────────
+// 35/36 salen de la cartera REAL del setter QA (es el panel tal como lo ve un
+// setter con trabajo acumulado). 37…40 salen de setters dedicados: son las
+// situaciones del foco de P8, que sobre una cartera cargada no se pueden elegir.
+
+const ANCLA_FOCO = 'section[aria-label="Tu foco ahora"]'
+const ANCLA_EN_ESPERA = 'section[aria-label="Nada para trabajar ahora"]'
+// `HomeEmpty` no envuelve en `<section aria-label>`: su ancla es su propio título.
+const ANCLA_VACIO = 'text=Tu cartera está vacía'
+
 test('desktop · 35-home-foco', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
   await preparar(page)
-  await fotografiar(page, '/setter', 'section[aria-label="Tu foco ahora"]', '35-home-foco.png')
+  await fotografiar(page, '/setter', ANCLA_FOCO, '35-home-foco.png')
 })
 
 test('desktop · 36-home-cartera', async ({ page }, testInfo) => {
@@ -295,5 +356,39 @@ test('desktop · 36-home-cartera', async ({ page }, testInfo) => {
 test('mobile · 35-home-foco', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile', 'solo mobile')
   await preparar(page)
-  await fotografiar(page, '/setter', 'section[aria-label="Tu foco ahora"]', 'M-35-home-foco.png')
+  await fotografiar(page, '/setter', ANCLA_FOCO, 'M-35-home-foco.png')
+})
+
+test('desktop · 37-home-foco-construir', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await prepararComoSetterDedicado(page, 'foco-construir', baseURL)
+  await fotografiar(page, '/setter', ANCLA_FOCO, '37-home-foco-construir.png')
+  // Que la foto muestre lo que el nombre dice: el rótulo del tier CONSTRUIR.
+  // Después de la foto, para no perderla si el rótulo cambió de texto.
+  await expect(page.getByText('Pasó el filtro y le falta la demo').first()).toBeVisible()
+})
+
+test('desktop · 38-home-foco-espera-accion', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await prepararComoSetterDedicado(page, 'foco-espera-accion', baseURL)
+  await fotografiar(page, '/setter', ANCLA_FOCO, '38-home-foco-espera-accion.png')
+  await expect(page.getByText('Te está esperando a vos').first()).toBeVisible()
+})
+
+test('desktop · 39-home-vacio', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await prepararComoSetterDedicado(page, 'vacio', baseURL)
+  await fotografiar(page, '/setter', ANCLA_VACIO, '39-home-vacio.png')
+})
+
+test('desktop · 40-home-nada-para-trabajar', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
+  await prepararComoSetterDedicado(page, 'nada-para-trabajar', baseURL)
+  await fotografiar(page, '/setter', ANCLA_EN_ESPERA, '40-home-nada-para-trabajar.png')
+})
+
+test('mobile · 37-home-foco-construir', async ({ page, baseURL }, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'solo mobile')
+  await prepararComoSetterDedicado(page, 'foco-construir', baseURL)
+  await fotografiar(page, '/setter', ANCLA_FOCO, 'M-37-home-foco-construir.png')
 })

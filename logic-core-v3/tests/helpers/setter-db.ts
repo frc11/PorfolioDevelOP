@@ -62,6 +62,26 @@ export function selfCheckAprobadoJson(): Prisma.InputJsonValue {
   }
 }
 
+/**
+ * Self-check PARCIAL (M0/G): los `nombresOk` en verde, el resto de la lista VIVA
+ * en falso. Derivado de `HARD_CHECKS` igual que el aprobado — con la lista
+ * hardcodeada, un check nuevo entraría como "ausente" en vez de "sin tildar" y
+ * el formulario lo re-encontraría vacío por otro motivo que el sembrado.
+ * `softFlags` aparte: son los delatores del Ojo de diseño, no bloquean el gate.
+ */
+export function selfCheckParcialJson(
+  nombresOk: readonly string[],
+  softFlags: readonly string[] = [],
+): Prisma.InputJsonValue {
+  return {
+    itemsDuros: HARD_CHECK_NOMBRES.map((nombre) => ({
+      nombre,
+      ok: nombresOk.includes(nombre),
+    })),
+    softFlags: [...softFlags],
+  }
+}
+
 export function agendaAgendadaJson(): Prisma.InputJsonValue {
   return {
     estado: 'AGENDADA',
@@ -179,6 +199,14 @@ export type SeedLeadOpts = {
   draftUrl?: string | null
   /** Fecha del próximo toque (pasada = vencido; null = sin toque agendado). */
   nextFollowUpAt?: Date | null
+  /**
+   * Tildes del chequeo final ya guardados, por NOMBRE de hard-check. Pisa el
+   * self-check que el stage traiga por default. `[]` = grilla en cero pero con
+   * blob presente (distinto de `undefined` = sin `selfCheckJson`).
+   */
+  selfCheckDurosOk?: readonly string[]
+  /** Delatores del Ojo de diseño marcados (viajan en `softFlags`). */
+  selfCheckSoftFlags?: readonly string[]
 }
 
 /** Construye el `dossier.create` acumulando el JSON necesario hasta el stage pedido. */
@@ -222,6 +250,11 @@ function dossierCreateFor(opts: SeedLeadOpts): Prisma.OsLeadDossierCreateWithout
   }
   if (opts.sinFinalUrl) base.finalUrl = null
   if (opts.draftUrl !== undefined) base.draftUrl = opts.draftUrl
+  // Último a propósito: pisa el self-check aprobado que traen EN_REVISION /
+  // APROBADA / RECHAZADA cuando el estado sembrado quiere una grilla a medias.
+  if (opts.selfCheckDurosOk !== undefined) {
+    base.selfCheckJson = selfCheckParcialJson(opts.selfCheckDurosOk, opts.selfCheckSoftFlags)
+  }
   return base
 }
 

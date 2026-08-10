@@ -10,6 +10,7 @@
     "start": "next start",
     "start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",
     "start:setter": "cross-env E2E_DIST_DIR=.next-setter npm run build && cross-env E2E_DIST_DIR=.next-setter QA_ALLOW_LOCALHOST=1 next start -p 3003",
+    "start:galeria": "cross-env E2E_DIST_DIR=.next-galeria npm run build && cross-env E2E_DIST_DIR=.next-galeria QA_ALLOW_LOCALHOST=1 next start -p 3004",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "seed:agency-os": "ts-node prisma/seed-agency-os.ts",
@@ -86,7 +87,8 @@
     "test:integration": "playwright test --config=playwright.integration.config.ts",
     "seed:galeria": "tsx scripts/dev/m0-galeria-seed.ts",
     "galeria:capturar": "playwright test --config=playwright.galeria.config.ts",
-    "galeria": "npm run seed:galeria && npm run galeria:capturar"
+    "galeria:indice": "tsx scripts/dev/m0-galeria-indice.ts",
+    "galeria": "npm run seed:galeria && npm run galeria:capturar && npm run galeria:indice"
   },
   "dependencies": {
     "@ai-sdk/google-vertex": "^4.0.128",
