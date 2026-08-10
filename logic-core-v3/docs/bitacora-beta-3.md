@@ -3174,6 +3174,137 @@ viva y **afirma que ese botón ya no existe**, más los dos rótulos de grupo.
 
 ---
 
+## Sprint P9 — una sola lengua: el último barrido de la poda — 2026-08-07
+
+Rama `redesign/home`, HEAD `fafd796`. **Sin commit y sin push**: el working tree tiene WIP ajeno
+vivo (`src/app/web-development/page.tsx`, `src/app/globals.css` — la sesión del rediseño del home).
+Igual que en P7: cualquier commit se lo lleva puesto.
+
+**Objetivo único.** Que el producto hable un solo idioma, el del recorrido que existe hoy. Después
+de P4/P5-B/P6-B quedaban textos que nombran pantallas retiradas, numeraciones de un recorrido que
+ya no existe y jerga de sistema donde debería haber idioma de setter.
+
+### Terreno
+
+Los seis sprints de la poda están en la historia. **P5-B no lo nombra ningún subject**: entró dentro
+de `fafd796` (confirmado por `git log -S "P5-B"` y por el código — `brief-form.tsx:30` documenta el
+retiro de `notasMarca`, `manual.ts:200` ya dice «Decidí cómo va a ser la demo»). Línea base:
+`tsc --noEmit` exit 0 con **cero** errores, `check:invariants` 18/18.
+
+### El volcado (clasificación antes de editar)
+
+| Clase | Cuenta | Qué |
+|---|---|---|
+| **TEXTO** | 18 | lo lee el setter — se cambió |
+| **LLAVE** | 19 | persistido o identificador — **intacto** |
+| **AMBIGUO** | 8 | parece texto, no se toca — va a Franco |
+
+**Ninguna llave se renombró.** Las que importan: los **10 `HardCheck.nombre`** (se guardan en
+`selfCheckJson.itemsDuros[].nombre`; el formulario re-encuentra el tilde por igualdad de ese string
+en `chequeo-form.tsx:51` y el gate valida contra la lista) y las **4 `SoftCheck.etiqueta`**
+(`selfCheckJson.softFlags[]`, `chequeo-form.tsx:58`). Más `FASE_IDS`/`ShellFase.id` (llave de
+`progresoJson`), `PANTALLA_IDS` (segmento de URL), los enums de Prisma y las claves literales del
+motor en `error-copy.ts`.
+
+**Los dos `nombre` con jerga son LLAVE, no texto suelto.** «No hay lorem ipsum ni textos de relleno»
+y «Usa los datos y assets reales del negocio»: en este diseño `nombre` **es a la vez** lo que se
+renderiza (`chequeo-form.tsx:92`) y la llave de lo guardado — no hay campo separado que cambiar.
+Quedan literales. Separar etiqueta de llave es cambio de estructura, no de vocabulario.
+
+### Los cuatro conocidos
+
+1. **El título del chequeo.** `PANTALLAS.m14`: «Pasá los checks duros» → **«Chequeá la demo antes de
+   mandarla»**. «Checks duros» es el nombre del motor (los hard-checks); el setter ve puntos
+   obligatorios. Mismo registro que el resto de la poda: verbo en voseo + la demo como objeto.
+2. **La numeración del rail.** `pantalla-manual.tsx` mostraba `{fase} — paso {n} de {m}` siempre. Con
+   el colapso de P6-B, **nueve de las diez fases tienen una sola pantalla**: se leía «Brief — paso 1
+   de 1», «Chequeo final — paso 1 de 1»… El contador ahora aparece **solo cuando `m > 1`**. Sobrevive
+   donde informa: «Construcción — paso 1 de 2» y «paso 2 de 2». `indicadorDeFase` (manual.ts) no se
+   tocó — el cambio es de presentación.
+3. **La sugerencia del panel de inicio** (`proximaAccionPara`, la línea más leída del producto: la
+   muestra el foco y cada card). Se le sacó el nombre interno del destino entre paréntesis —
+   «(Opener)», «(Seguimiento)» ×3, «(Envío)» — y «Generá el brief», que además apuntaba a una
+   pantalla que P5-B ya había retitulado (→ «Decidí cómo va a ser la demo»). A dónde ir lo resuelve
+   el botón, no un paréntesis: sin nombres internos, un reagrupamiento futuro no vuelve a dejar esta
+   línea mintiendo.
+4. **Los dos nombres de chequeo guardados**: ver arriba — LLAVE, intactos.
+
+### Lo demás que se barrió
+
+- **Dos textos que mandaban al lugar equivocado.** `GUIA_OPENER.gate.detalle` (visible: el callout
+  rojo de `opener-form.tsx:91`) decía que el link se registra «desde «Seguimiento»» — vive en
+  «Envío» desde el corte 5.6. Y `GUIA_EVALUACION.intro` mandaba «al bloque del paso 1»: no hay paso
+  1, y el bloque está en la propia pantalla.
+- **Nombres que no son de ninguna pantalla.** `herramientas.ts`: «Publicar el borrador» → «Borrador»
+  (×2), «Primer contacto y Seguimiento» → «Opener y Seguimiento». `m14-chequeo.tsx`: «(paso
+  anterior)» → «(pantalla anterior)», el vocabulario que m2 ya usaba. `opener-form.tsx`: «Primer
+  contacto (opener)» → «El opener» (glosaba entre paréntesis la palabra que el título ya usa).
+- **Una palabra por cosa.** El historial decía **«Instagram DM»** y todas las demás superficies del
+  setter dicen **«Instagram»** (el opener, la capa de canal, las herramientas, la agenda). Unificado
+  a la forma corta en `canalEtiqueta`. La llave es el enum `INSTAGRAM_DM` de Prisma: no se tocó.
+  También «flag(s) de diseño» → «delator(es) de diseño», que es como los llama el propio formulario.
+- **Comentarios que describen el recorrido viejo** (24): «M7–M12» y «M3» donde ya no hay esas
+  pantallas, «las 16 pantallas», el título viejo de m14, y los `Paso N` de `guidance-content.ts` /
+  `flow-content.ts` / los cuatro componentes de guía, mapeados contra el registro `PANTALLAS`.
+
+### Verificado en la aplicación (no solo compila)
+
+Spec temporal contra el harness real del setter (`.next-setter/`, :3003), **borrada después de
+correr** — 4/4 verde. Sin capturas: se afirma por navegación real y lectura del DOM del `<main>`,
+nunca por status code.
+
+| | Qué se afirmó |
+|---|---|
+| **P9-A** | Lead con `selfCheckJson` sembrado con los **diez nombres literales escritos a mano** (no derivados de `HARD_CHECKS` — derivarlos habría hecho pasar el test aunque una llave se hubiera roto) + un delator por su etiqueta literal. Los diez toggles abren en `aria-checked=true`, el delator también, «Enviar a revisión» **habilitado** y «Todos los obligatorios en verde». Cero errores de consola |
+| **P9-B** | Recorrido de **12 pantallas** por el camino real (m1·m2·m4·m5·m6·mc1·mc2·m13·m14·revisión·m15·m16), cada una contra 10 patrones prohibidos: «paso 1 de 1», «checks duros», los tres paréntesis de pantalla, «Generá el brief», «(paso anterior)», «Instagram DM», «del paso 1», «flag(s) de diseño», «Publicar el borrador» y cualquier id retirado (m3/m7–m12). Y la numeración que sí informa **sigue puesta**: «Construcción — paso 1 de 2» y «paso 2 de 2» |
+| **P9-C** | El home del setter, y con un lead fijado en EVALUADA con el gate abierto: la sugerencia se lee **«Decidí cómo va a ser la demo»**, sin paréntesis |
+| **P9-D** | El historial de un toque real: dice «Instagram», y «Instagram DM» ya no aparece |
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — línea base era 0 errores, sigue en 0. **Ninguno nuevo** |
+| `npm run check:invariants` | **18/18, exit 0** |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** (build aislado en `.next-setter/`, puerto 3003) |
+| `git diff --stat` | 19 archivos, +95/−56. **Solo texto y comentarios**: cero gates, transiciones, aislamiento, lista de fases ni schema |
+
+### Fuera de scope — anotado, no implementado
+
+1. **«Assets reales» (`SHELL_CONSTRUCCION`) queda como está.** Es TEXTO (la llave es `id:'assets'`),
+   pero «assets» está congelado en un `nombre` LLAVE (`datosReales`). Cambiar el título de la fase
+   sin poder cambiar el del check **crearía** dos palabras para la misma cosa — justo lo que este
+   sprint vino a sacar. Se resuelve junto, y eso exige separar etiqueta de llave.
+2. **Dos nombres para la misma pantalla:** el chip dice «Toque» y el rail «Seguimiento»
+   (`PANTALLAS.m5.corto` vs `FASES_MANUAL.seguimiento.titulo`).
+3. **«Call agendada» vs «Reunión agendada»:** `resultadoEtiqueta` contra `STATUS_LABELS` y m16.
+4. **Copy muerto que nombra lugares viejos** (0 consumidores, por eso no es texto visible):
+   `describirFoco` entero en `paso.ts` («Brief de diseño», «Mandá el primer mensaje (opener)»),
+   `GUIA_REVISION` («el envío del link vive en «Seguimiento»» — falso), `GUIA_CONSTRUCCION` («el
+   dossier pasa a…») y casi todo `GUIA_BRIEF`. Retirar copy muerto es poda, no vocabulario.
+5. **Los 13 `Paso N` de `dossier.actions.ts` / `outreach.actions.ts` / `agenda.*`:** comentarios de
+   server actions, motor-adyacente (la auditoría de cierre lo advierte). Son una numeración interna
+   del backend, consistente entre sí; renumerarlos es decidir un esquema nuevo.
+6. **Las ~110 menciones a «wizard» en comentarios:** ninguna es texto visible. Naming histórico —
+   sprint propio, ya anotado en los cierres 7.x.
+7. **`tests/qa-persona/corrida-1-novato-frio.spec.ts` referencia «Primer contacto (opener)»**: esa
+   suite recorre el **wizard retirado** (`[data-step="ficha"]`, `[data-step="opener"]`), está fuera
+   de los cuatro gates y ya venía enferma. Su string viejo es la menor de sus deudas — se resuelve
+   cuando se regenere.
+8. **El campo fantasma del contrato del brief** (`referenciasFicha`), **la galería** y **la función
+   exportada sin consumidores del foco** (`agruparParaHome`): sin tocar, como se pidió.
+
+### Lo que cierra Franco
+
+- **Los textos nuevos, recorriendo el manual entero en el preview.** Es la última lectura completa
+  antes de que el manual v2 documente el producto. En particular: «Chequeá la demo antes de
+  mandarla» (m14) y la sugerencia «Decidí cómo va a ser la demo» en el home.
+- **Los tres AMBIGUOS de vocabulario** (1, 2 y 3 de arriba): «assets», «Toque» vs «Seguimiento» y
+  «call» vs «reunión». Los tres son decisiones de producto, no de barrido.
+
+---
+
 ## Corrida M1 v3 — El manual del Panel del Setter, escrito sobre el producto podado — 2026-08-10
 
 **Rama** `redesign/home` · **HEAD de arranque** `02ba28df` · **Sin push.**

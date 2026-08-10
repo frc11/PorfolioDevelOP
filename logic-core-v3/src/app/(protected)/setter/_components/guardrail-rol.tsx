@@ -3,7 +3,7 @@ import { GUARDRAIL_ROL } from '@/lib/leados/flow'
 import { CopyBlock } from './copy-block'
 
 type GuardrailRolProps = {
-  /** true = solo la regla en una línea (Paso 7); false = con guion copiable. */
+  /** true = solo la regla en una línea (m4, el opener); false = con guion copiable. */
   compacto?: boolean
 }
 

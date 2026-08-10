@@ -395,6 +395,18 @@ function grupoPara(input: HomeLeadInput, gateAbierto: boolean): HomeGroupKey {
   return 'trabajar'
 }
 
+/**
+ * La sugerencia que el panel de inicio pone al frente de cada lead (la línea más
+ * leída del producto: la muestra el foco y cada card de la cartera).
+ *
+ * P9 — se le sacó la jerga de pantalla. Traía el nombre interno del destino
+ * entre paréntesis —«(Opener)», «(Seguimiento)», «(Envío)»— más «Generá el
+ * brief», que nombraba el artefacto con palabra de agencia y encima apuntaba a
+ * una pantalla que P5-B ya había retitulado. La sugerencia dice QUÉ hacer, en la
+ * misma voz que el título de la pantalla a la que lleva; a dónde ir lo resuelve
+ * el botón, no un paréntesis. Sin nombres internos, un reagrupamiento de
+ * pantallas no vuelve a dejar esta línea mintiendo.
+ */
 function proximaAccionPara(
   input: HomeLeadInput,
   gateAbierto: boolean,
@@ -424,9 +436,9 @@ function proximaAccionPara(
     case 'EN_REVISION':
       return { proximaAccion: 'Esperando revisión de Franco', accionable: false }
     case 'APROBADA': {
-      // B6: el envío del link vive en el Paso 9 del wizard.
+      // El envío del link vive en «Envío» (m15) desde el corte 5.6.
       if (!input.demoEnviada && gateAbierto) {
-        return { proximaAccion: 'Demo aprobada — enviá el link (Envío)', accionable: true }
+        return { proximaAccion: 'Demo aprobada — mandá el link al negocio', accionable: true }
       }
       if (!input.demoEnviada) {
         return {
@@ -435,10 +447,10 @@ function proximaAccionPara(
         }
       }
       if (input.followUpVencido) {
-        return { proximaAccion: 'Demo enviada — te toca un toque (Seguimiento)', accionable: true }
+        return { proximaAccion: 'Demo enviada — te toca un toque', accionable: true }
       }
       return {
-        proximaAccion: 'Demo enviada — registrá lo que pase en la conversación (Seguimiento)',
+        proximaAccion: 'Demo enviada — registrá lo que pase en la conversación',
         accionable: false,
       }
     }
@@ -459,14 +471,14 @@ function proximaAccionPara(
       }
     case 'EVALUADA': {
       if (gateAbierto) {
-        return { proximaAccion: 'Generá el brief', accionable: true }
+        return { proximaAccion: 'Decidí cómo va a ser la demo', accionable: true }
       }
       // B6: gate cerrado = la conversación manda — opener o toque pendiente.
       if (input.contactos === 0) {
-        return { proximaAccion: 'Mandá el opener (Opener)', accionable: true }
+        return { proximaAccion: 'Mandá el opener', accionable: true }
       }
       if (input.followUpVencido) {
-        return { proximaAccion: 'Te toca un toque — mandalo y registralo (Seguimiento)', accionable: true }
+        return { proximaAccion: 'Te toca un toque — mandalo y registralo', accionable: true }
       }
       // 2.1: cadencia agotada o rechazado (sin próximo toque) → no hay toque que
       // mandar. Pasivo visible; el cierre a PERDIDO lo decide Franco, jamás se

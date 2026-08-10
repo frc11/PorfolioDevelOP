@@ -35,7 +35,7 @@ import { derivarPasoDelLead } from './paso.ts'
 // ── El registro de pantallas (mapa v1) ───────────────────────────────────────
 
 /**
- * Ids de pantalla del mapa: m1…m16 (manual, sin m3 — P4 fusionó el registro del
+ * Ids de pantalla del mapa: once del manual, sin m3 — P4 fusionó el registro del
  * veredicto dentro de m2; sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) +
  * mr (reentrada re-loop) + los estados de espera. El `[paso]` de la URL es uno
  * de estos — cualquier otra cosa redirige a la actual (así el `m3` de un
@@ -231,11 +231,16 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     detalle: 'Subí la demo a Netlify Drop y guardá el link del borrador — se valida que sea un link real.',
     corto: 'Borrador',
   },
+  // P9 — «Pasá los checks duros» nombraba la lista con la palabra del sistema
+  // (los hard-checks del motor). El setter no ve «checks duros»: ve puntos
+  // obligatorios de un chequeo final. Mismo registro que el resto de la poda
+  // (verbo en voseo + la demo como objeto), y «chequeo» ya es el vocabulario
+  // del rail, del gate y del propio formulario.
   m14: {
     id: 'm14',
     tipo: 'manual',
     fase: 'chequeo',
-    titulo: 'Pasá los checks duros',
+    titulo: 'Chequeá la demo antes de mandarla',
     detalle: 'Con el link del borrador a la vista, verificá los obligatorios y mandá la demo a revisión.',
     corto: 'Chequeo final',
   },

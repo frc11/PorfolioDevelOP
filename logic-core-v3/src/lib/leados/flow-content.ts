@@ -41,7 +41,7 @@ export type ShellFase = {
 /**
  * PROVISORIO: refinar tras el test de Claude Design (registro v0.4).
  *
- * Secuencia guiada del Paso 4 — Construcción. El panel NO construye la demo:
+ * Secuencia guiada de la Construcción (mc1/mc2). El panel NO construye la demo:
  * acompaña al setter mientras la arma en Claude Design (herramienta externa).
  * Esta constante es la ÚNICA copia del contenido del shell: la UI la consume
  * tal cual, así Franco reemplaza la secuencia por la validada editando SOLO

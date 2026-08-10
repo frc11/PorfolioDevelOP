@@ -42,10 +42,11 @@ export type ManualDelLead = {
   /** M1 — MISMA regla que `fichaEditable` del wizard: editable hasta que la
    * evaluación quede registrada (después, congelada). */
   fichaEditable: boolean
-  /** M2/M3 — la evaluación registrada, parseada con el MISMO contrato que el
+  /** M2 — la evaluación registrada (P4 fusionó ahí el registro del veredicto
+   * que vivía en m3), parseada con el MISMO contrato que el
    * wizard (`parseEvaluacion`); null mientras el veredicto no se transcribió. */
   evaluacion: Evaluacion | null
-  /** M3 — los MISMOS datos que el wizard pasa al registro para la nota de
+  /** M2 — los MISMOS datos que el wizard pasa al registro para la nota de
    * score 3 (`gateBriefAbierto`): status del lead + campo caliente de Franco. */
   leadStatus: LeadStatus
   caliente: boolean

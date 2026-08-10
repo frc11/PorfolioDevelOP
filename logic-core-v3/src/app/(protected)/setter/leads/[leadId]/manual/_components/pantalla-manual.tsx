@@ -12,7 +12,7 @@ import {
 import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './manual-nav'
 
 /**
- * Zona-slot del layout-tipo. Las 16 pantallas del manual están migradas
+ * Zona-slot del layout-tipo. Todas las pantallas del manual están migradas
  * (corte 5.6): las tres zonas siempre llegan con contenido real, así que acá
  * solo se enmarca — sin contenido no se renderiza nada (mismo criterio que ya
  * usaba la reentrada para sus zonas vacías, P3#10).
@@ -46,9 +46,10 @@ type PantallaManualProps = {
 /**
  * El layout-tipo de pantalla del manual (Bloque 4): una pantalla = una tarea
  * atómica con su instrucción corta, su contexto re-servido, su munición
- * (bloque copiable / link externo), su captura y su avance. Indicador
- * "paso N de M" POR FASE — nunca global. Solo presentación: la posición viene
- * derivada del server y los gates reales viven en el motor.
+ * (bloque copiable / link externo), su captura y su avance. El indicador es POR
+ * FASE —nunca global— y solo cuenta pantallas donde hay más de una (P9). Solo
+ * presentación: la posición viene derivada del server y los gates reales viven
+ * en el motor.
  */
 export function PantallaManual({
   leadId,
@@ -102,7 +103,12 @@ export function PantallaManual({
                 esPasoActivo ? 'text-cyan-300/80' : 'text-zinc-500',
               )}
             >
-              {indicador.fase} — paso {indicador.n} de {indicador.m}
+              {/* P9 — el contador solo aparece donde la fase tiene más de una
+                  pantalla. Con el colapso de Construcción (P6-B) nueve de las
+                  diez fases quedaron con una sola, y «paso 1 de 1» no informa
+                  nada: ahí se lee el nombre de la fase, y listo. */}
+              {indicador.fase}
+              {indicador.m > 1 && ` — paso ${indicador.n} de ${indicador.m}`}
             </p>
           )}
           {pantalla.tipo === 'reentrada' && (

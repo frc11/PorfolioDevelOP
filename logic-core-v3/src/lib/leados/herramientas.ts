@@ -85,7 +85,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queLeDas:
       'El bloque «para Claude Design» de acá abajo (el brief + los materiales reales del negocio), como primer mensaje.',
     queTeDevuelve:
-      'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Publicar el borrador».',
+      'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».',
     dondeSeUsa: 'Construcción',
     url: null, // TODO: URL — acceso a Claude Design que usa el equipo (pedir a Franco)
   },
@@ -98,7 +98,10 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
       'El index.html que exportaste de Claude Design (o el .zip que lo contiene adentro).',
     queTeDevuelve:
       'Una URL pública (algo.netlify.app). Esa es la que pegás abajo como «URL del borrador».',
-    dondeSeUsa: 'Publicar el borrador',
+    // P9 — `dondeSeUsa` es el rótulo del rail de herramientas: nombra la pantalla
+    // por su nombre del manual, no por lo que se hace ahí. Decía «Publicar el
+    // borrador» y «Primer contacto», que no son nombres de ninguna pantalla.
+    dondeSeUsa: 'Borrador',
     url: 'https://app.netlify.com/drop',
   },
   gemOutreach: {
@@ -110,7 +113,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
       'El bloque «para el Gem de outreach» (el del opener, o el de objeciones en «Seguimiento» si te tiraron una).',
     queTeDevuelve:
       'Un mensaje listo para adaptar y pegar en Instagram. Vos lo revisás antes de mandarlo.',
-    dondeSeUsa: 'Primer contacto y Seguimiento',
+    dondeSeUsa: 'Opener y Seguimiento',
     url: null, // TODO: URL — Gem privado de outreach (pedir a Franco)
   },
 }

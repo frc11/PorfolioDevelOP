@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils'
  * El REGISTRO de la evaluación (5.1, patrón 4.2): transcripción score +
  * veredicto + razonamiento con su gate triple (Zod), el descarte encadenado
  * por score 1–2 (modal + motivo) y la guardia de salida — extraído SIN cambio
- * de comportamiento del `EvaluacionStep` para que el wizard y el manual (M3)
+ * de comportamiento del `EvaluacionStep` para que el wizard y el manual (m2)
  * sean dos presentaciones del MISMO camino de escritura: misma action
  * (`registrarEvaluacion`, ownership y stage=FICHA adentro), mismo schema
  * (`EvaluacionInputSchema`), misma guardia (`useUnsavedGuard`; A-24: la
@@ -286,7 +286,7 @@ export function EvaluacionForm({
 
 /**
  * Vista de la evaluación ya registrada (badges + razonamiento + cierre del
- * descarte) — la MISMA pieza para el wizard (defaults históricos) y para M3
+ * descarte) — la MISMA pieza para el wizard (defaults históricos) y para m2
  * (título propio + labels de prioridad). Solo lectura: la evaluación no se
  * re-registra jamás (stage=FICHA es condición de la action).
  */

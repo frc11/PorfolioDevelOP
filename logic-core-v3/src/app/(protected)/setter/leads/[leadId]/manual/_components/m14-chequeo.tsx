@@ -10,8 +10,9 @@ import { BriefResumen } from '../../_components/brief-form'
 import { ChequeoForm } from './chequeo-form'
 
 /**
- * M14 — «Pasá los checks duros» / chequeo final (5.4, tramo Chequeo). El gate de
- * Construcción presentado en el manual, con dos correcciones de auditoría:
+ * M14 — «Chequeá la demo antes de mandarla» / chequeo final (5.4, tramo Chequeo;
+ * retitulada en P9). El gate de Construcción presentado en el manual, con dos
+ * correcciones de auditoría:
  *   - contexto: el LINK DEL BORRADOR A LA VISTA dentro de la pantalla (cierra
  *     A-04: los checks se hacen contra la demo publicada, sin salir a buscarla) +
  *     el brief re-servido (referencia para «fiel al brief»);
@@ -54,7 +55,7 @@ export function M14Contexto({
         </div>
       ) : (
         <p className="text-xs leading-relaxed text-zinc-500">
-          Publicá el borrador (paso anterior) para poder chequearlo acá.
+          Publicá el borrador (pantalla anterior) para poder chequearlo acá.
         </p>
       )}
       {brief && brief.secciones.length > 0 && (
@@ -105,8 +106,8 @@ export function M14Registro({
           <p className="text-xs leading-relaxed text-zinc-500">
             {selfCheck.itemsDuros.filter((item) => item.ok).length} puntos obligatorios en verde
             {selfCheck.softFlags.length > 0
-              ? ` · ${selfCheck.softFlags.length} flag(s) de diseño marcados para Franco`
-              : ' · sin flags de diseño'}
+              ? ` · ${selfCheck.softFlags.length} delator(es) de diseño marcados para Franco`
+              : ' · sin delatores de diseño marcados'}
             .
           </p>
         )}

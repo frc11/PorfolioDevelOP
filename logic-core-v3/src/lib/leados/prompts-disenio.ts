@@ -157,8 +157,9 @@ export function promptParaHardCheck(hardCheckId: string): PromptDisenio | null {
 
 /**
  * Mapeo editable `FaseId` → prompts de esta librería. El puente del tramo 5.3:
- * cada pantalla de Construcción del manual (M7–M12) renderiza —DENTRO de la fase
- * que lo usa— el prompt prefijado que la resuelve, en vez de listar los tres
+ * las pantallas de Construcción del manual (mc1/mc2 desde P6-B; eran una por
+ * fase, M7–M12, cuando se escribió esto) renderizan —DENTRO de la fase que lo
+ * usa— el prompt prefijado que la resuelve, en vez de listar los tres
  * genéricamente al final del paso (lo que hacía `<PromptsDisenio />` en el wizard;
  * hallazgo A-10 de la auditoría: "el checklist y los prompts viven desconectados
  * dentro del mismo paso"). Solo dos fases se pulen con un prompt lead-agnóstico:
@@ -183,7 +184,7 @@ export const FASE_PROMPTS: Readonly<Record<string, readonly PromptDisenioId[]>> 
 /**
  * Los prompts de diseño mapeados a una fase de Construcción, en orden de
  * presentación (`[]` si la fase no tiene). Puro y lead-agnóstico: lo usa la
- * pantalla de la fase (M7–M12) para ofrecer, junto a los items de la fase, el
+ * pantalla que contiene la fase (mc1/mc2) para ofrecer, junto a sus items, el
  * prompt copiable a Claude Design que la resuelve. NO toca el checklist ni ningún
  * gate: es solo la DIRECCIÓN de diseño, servida donde se usa.
  */
