@@ -28,8 +28,8 @@ como [H-00](HALLAZGOS-MANUAL-v3.md#h-00--terreno--el-bloque-de-vocabulario-de-la
 | 07 | Construir la demo | ✅ |
 | 08 | Publicar el borrador | ✅ |
 | 09 | El chequeo final y mandarla a revisión | ✅ |
-| 10 | Cuando Franco pide correcciones | ⏳ |
-| 11 | Mandarle el link al negocio | ⏳ |
+| 10 | Cuando Franco pide correcciones | ✅ |
+| 11 | Mandarle el link al negocio | ✅ |
 | 12 | Agendar la reunión | ⏳ |
 | 13 | Cuando un negocio se cierra | ⏳ |
 
