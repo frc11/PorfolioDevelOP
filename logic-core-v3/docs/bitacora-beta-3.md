@@ -3171,3 +3171,109 @@ viva y **afirma que ese botón ya no existe**, más los dos rótulos de grupo.
 - **Si diez obligatorios son demasiados.** Los tres nuevos bloquean el envío igual que el resto: el
   punto es que el setter MIRE los tres antes de mandar, no que decida por Franco. Si prefiere que el
   grupo de Franco no bloquee, es mover esos tres a la lista blanda — decisión de producto.
+
+---
+
+## Corrida M1 v3 — El manual del Panel del Setter, escrito sobre el producto podado — 2026-08-10
+
+**Rama** `redesign/home` · **HEAD de arranque** `02ba28df` · **Sin push.**
+Diff de la corrida: **solo `docs/`**. Cero `src/`, cero tests, cero configuración.
+
+### Fase 0 — el terreno, y el desvío que se declaró
+
+La corrida anterior frenó por dos motivos (`docs/manual-usuario/CORRIDA-M1-v3-FRENADA.md`).
+Hoy uno está resuelto y el otro no:
+
+| Condición | Resultado |
+|---|---|
+| Borrados preparados ajenos en el índice | **PASA** — índice vacío. El riesgo que hizo que P9 no se commiteara ya no existe |
+| Los nueve bloques de la poda, commiteados | **FALLA parcial** — ocho sí; **P9 (vocabulario) vive sin commitear** en 19 archivos |
+| La galería regenerada sobre el producto podado | **PASA** — 50 capturas del 2026-08-10 12:30, con `mc1`/`mc2`, los tres momentos del chequeo y los cuatro paneles de inicio; sin `m7`…`m12` |
+
+**Se siguió, declarándolo.** El motivo que de verdad impedía escribir —una galería
+que retrataba el producto viejo— está resuelto: las fotos y la aplicación que se
+navegó son **el mismo árbol**. Lo que falta es un commit, no el producto. Queda
+registrado como **H-00** y en el reporte. La corrida corrió sobre el carril
+aislado de la galería (`.next-galeria/`, `:3004`), es decir el build exacto con
+el que se sacaron esas capturas. Ningún proceso ajeno vivo al arrancar; no se
+mató ninguno.
+
+### Parte A — el manual
+
+**Índice + 13 capítulos**, estructurados por **momento del trabajo**, derivados
+del recorrido que existe hoy (once pantallas de trabajo + espera, revisión,
+reentrada y archivo). Se retiraron los diez capítulos de la corrida anterior:
+documentaban dieciséis pantallas, las dos de evaluación separadas y las seis de
+construcción. `HALLAZGOS-MANUAL.md` se conserva con una nota de documento
+histórico — es contra lo que valida la Parte B.
+
+Cobertura de lo que la poda cambió, toda escrita: la evaluación fusionada (cap.
+03), la pantalla que decide la demo (06), las dos de construcción con sus seis
+tildes (07), el chequeo con sus dos grupos (09), el panel con el foco nuevo (01),
+y la reentrada tras rechazo (10).
+
+**La munición se explica, no se transcribe:** los tres bloques copiables de
+Refinar salen como tabla de *para qué sirve / cuándo se usa / qué mirar después
+de pegarlo*.
+
+### Parte B — la validación
+
+**Nueve bloques verificados contra sus entradas de bitácora, en la aplicación
+viva: cero desvíos.** La poda hizo lo que dijo.
+
+**Los cuatro arreglos de fondo, los cuatro en pie.** El del autoguardado del
+chequeo se probó más duro de lo pedido: los tildes sobreviven a salir navegando
+por el manual **y** a cerrar el navegador entero. Las direcciones viejas se
+probaron en siete combinaciones (`m3`, `m7`, `m9`, `m12` y una inventada, sobre
+negocios en tres puntos distintos): todas aterrizan en la pantalla vigente, cero
+bucles.
+
+**De los 18 hallazgos anteriores: 4 resueltos, 1 desaparecido, 1 a medias, 12
+vivos.** Ninguno de los doce es regresión — **los doce estaban anotados como
+fuera de scope** en alguna entrada de la propia bitácora de la poda.
+
+**Ocho principios de diseño: se cumplen cinco.** El barrido de nombres accesibles
+sobre once pantallas da **cero** faltantes. Los tres que no se cumplen —la
+pantalla no promete lo que no muestra, dos situaciones no muestran el mismo
+texto, una sola forma de tildar— son los que la poda no tocó.
+
+### Parte C — los hallazgos
+
+**18 entradas: 4 nuevas, 13 heredadas, 1 de terreno.**
+
+**El patrón, que es lo que más vale de esta corrida:** tres hallazgos en tres
+pantallas que no comparten código confunden **«esperar al negocio» con «esperar a
+Franco»** — la espera del envío que dice lo mismo en dos causas opuestas, el
+contador del panel que llama «esperando respuesta» a una demo en la cola de
+Franco, y la reentrada que promete un historial que no muestra. El producto tiene
+vocabulario preciso para todo, menos para decir **a quién le toca**. No se
+arregla con un cambio de texto puntual.
+
+Y un residuo del barrido de vocabulario que ninguna auditoría había visto:
+sobrevive **un** paréntesis con nombre de pantalla en todo el recorrido —
+«Abre la producción de la demo **(Brief)**», en la opción *Respondió* de la
+pantalla de toques. La bitácora de P9 no lo declara cubierto ni fuera de scope.
+
+### Prueba de inocuidad
+
+Se escribió en tres leads sembrados de la galería, todo restaurado y verificado:
+tres tildes del chequeo (puestos y sacados, la lista quedó en cero), un enlace
+inválido en la ficha (borrado, la ficha quedó vacía) y un enlace inválido en el
+borrador (rechazado por la validación, nunca se guardó). **No se disparó ninguna
+acción hacia afuera:** la confirmación de la reunión no se tocó, y la búsqueda de
+horarios murió en la configuración local antes de llegar a Cal.com.
+
+### Lo que cierra Franco
+
+1. **Commitear el bloque de vocabulario (P9).** Es lo único que separa este
+   veredicto de ser reproducible commit por commit.
+2. **Las cuatro direcciones de herramienta.** Tres corridas seguidas lo registran
+   como el hallazgo más importante: seis de las once pantallas de trabajo mandan a
+   una herramienta que no se abre desde el panel.
+3. **Configurar la agenda**, o el último paso del recorrido queda sin poder
+   documentarse — y peor, el setter se come un mensaje de configuración técnica
+   con el prospecto esperando.
+4. **Lo que sólo él puede escribir en el manual:** el contexto comercial (qué
+   rubros funcionan, qué zona), el tono real con los clientes, y munición curada
+   —openers y respuestas a objeciones que ya cerraron— que hoy el manual sólo
+   puede describir en abstracto.

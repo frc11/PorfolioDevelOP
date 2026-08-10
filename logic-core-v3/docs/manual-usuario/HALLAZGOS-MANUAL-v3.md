@@ -19,6 +19,39 @@ anterior ([HALLAZGOS-MANUAL.md](HALLAZGOS-MANUAL.md)) se corresponde.
 
 ---
 
+## Resumen
+
+**18 entradas: 4 nuevas, 13 heredadas y 1 de terreno.** Ninguna se buscó.
+
+| | Hallazgo | Dónde | ¿Nuevo? |
+|---|---|---|---|
+| **me frena** | H-01 · 4 de 5 herramientas sin acceso cargado | 6 de 11 pantallas | heredado |
+| **me frena** | H-02 · cuando falta Franco, las dos pantallas mandan a esperar al negocio | envío | heredado y **ampliado** |
+| **me frena** | H-08 · la búsqueda de horarios devuelve jerga de configuración | agenda | heredado |
+| me confunde | H-03 · el panel llama «esperando respuesta» a lo que espera a Franco | panel de inicio | **nuevo** |
+| me confunde | H-04 · «Saltar» sin acuse | panel de inicio | heredado |
+| me confunde | H-05 · «se guarda solo» junto a un botón de guardar | ficha | heredado |
+| me confunde | H-06 · dos numeraciones de toque a la vez | toques | heredado |
+| me confunde | H-09 · el historial de rechazos no se ve | reentrada | heredado |
+| me hace ruido | H-07 · COMPLETADAS sin la construcción | todas | heredado |
+| me hace ruido | H-10 · novedades sin techo ni resumen | panel de inicio | heredado |
+| me hace ruido | H-11 · la pantalla se llama de una forma y su formulario de otra | decidir la demo | **nuevo** |
+| me hace ruido | H-12 · «(Brief)» sobrevivió al barrido | toques | **nuevo** |
+| me hace ruido | H-13 · la explicación del auto-reporte, dos veces por pantalla | construcción | **nuevo** |
+| *interno* | H-00 · el bloque de vocabulario no está commiteado | el árbol | terreno |
+| *interno* | H-14 · la galería sigue sin foto de la cartera desplegada | galería | heredado |
+| *interno* | H-15 · dos entradas del índice describen algo que la foto no muestra | galería | heredado |
+| *interno* | H-16 · el razonamiento sembrado contradice al veredicto | galería | heredado |
+| *interno* | H-17 · tramo no documentado: la agenda real | agenda | heredado |
+
+**El patrón que más se repite** —tres entradas, en tres pantallas que no
+comparten código— es **confundir «esperar al negocio» con «esperar a Franco»**
+(H-02, H-03, y de refilón H-09). El producto tiene un vocabulario preciso para
+todo menos para decir **a quién le toca**. Es lo único de esta lista que no se
+arregla con un cambio de texto puntual.
+
+---
+
 ## H-00 · TERRENO · El bloque de vocabulario de la poda no está commiteado
 
 **Dónde.** No es una pantalla: es el árbol de trabajo.

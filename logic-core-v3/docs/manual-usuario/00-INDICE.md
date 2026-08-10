@@ -130,6 +130,12 @@ La regla que se repite en todo el panel: **la herramienta de afuera hace el
 trabajo, el panel registra que lo hiciste.** El panel no construye la demo ni
 escribe el mensaje por vos. Vos traés el resultado y lo registrás acá.
 
+> **Una palabra que vas a ver seguido: «lead».** Es como el panel llama a cada
+> negocio de tu cartera — aparece en *CONTEXTO DEL LEAD*, en *Ver historial del
+> lead* y en varios avisos. Es lo mismo que «negocio». Este manual dice
+> **negocio** en todos lados, salvo cuando cita textual lo que muestra la
+> pantalla.
+
 ### Si escribís una dirección que no existe, no te rompe nada
 
 Si volvés desde un favorito viejo o escribís cualquier cosa en la barra del
