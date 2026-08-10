@@ -3277,3 +3277,153 @@ horarios murió en la configuración local antes de llegar a Cal.com.
    rubros funcionan, qué zona), el tono real con los clientes, y munición curada
    —openers y respuestas a objeciones que ya cerraron— que hoy el manual sólo
    puede describir en abstracto.
+
+---
+
+## Sprint D10 — los avatares 3D dejan de viajar en el bundle inicial — 2026-08-10
+
+Rama `redesign/home`, base `02ba28df`. Ejecuta el candidato **D#1** del PROBE del bundle
+(`docs/probe-bundle-inicial.md` §D): sacar `three` + R3F del árbol del widget de chat sin tocar una
+sola conducta. **Un objetivo, una pasada.** No difiere el widget (eso es otro sprint, con decisión
+de producto de por medio).
+
+**El hecho de partida, del PROBE:** `registry.ts` importaba los dos avatares 3D de forma estática,
+así que 230,7 kB gz de `three` + `@react-three/fiber` bajaban, parseaban y evaluaban en **toda**
+ruta pública — para alimentar dos componentes que la config vigente (`avatarStyle: "image"`) no
+puede montar nunca, porque `AvatarRenderer` resuelve la escotilla `image` antes de tocar el registry.
+
+### El cambio
+
+`HeavyAvatarsLazy.tsx` (nuevo, cliente) resuelve los dos pesados por `dynamic(..., { ssr: false })`
+— el mismo patrón que ya usan `HeroCanvas`, `DotMatrix` y `BrandedIntroCanvas` — y el registry
+apunta ahí. Los avatares **no se borran**: siguen registrados, el picker del admin sigue mostrando
+las cinco opciones, y al seleccionar uno su chunk baja on-demand.
+
+**El eslabón que no estaba en el plan: los barrels.** Con el registry ya diferido, el build seguía
+dando 25 chunks y 225,5 kB de `three` en la entrada del widget, y las dos entradas nuevas del
+`react-loadable-manifest.json` salían con **`files: []`** — la firma exacta de "webpack resolvió
+este `dynamic()` contra chunks que ya estaban cargados". La causa: `components/avatar/index.ts`
+reexportaba `NeuroAvatar`, `LegacyNeuroAvatar` y `LegacyNeuroAvatarAdapter` de forma estática, y
+`modules/chatbot/index.ts` los volvía a reexportar — y ese barrel lo importa entero
+`ChatWidgetMount` en toda ruta pública. Un reexport estático es una arista igual de fuerte que un
+import. Se trataron igual: los barrels ahora exponen `NeuroAvatarLazy` / `LegacyNeuroAvatarLazy`.
+**Cambia el nombre de dos exports públicos del módulo** — ninguno tenía consumidor en el repo
+(verificado por grep); los archivos originales siguen importables por ruta directa.
+
+**El placeholder.** `loading` de `next/dynamic` no recibe las props del componente, así que
+`HeavyAvatarFrame` reserva la caja del tamaño final y publica el accent como custom property; el
+disco plano de marca lo lee por CSS. La caja del placeholder y la del canvas son la misma (67×67
+para `neuro`, 73×73 para `legacy_neuro`) — no hay hueco que salte.
+
+### Los números
+
+Harness idéntico al del PROBE (Playwright 1.61.1 headless `--disable-gpu`, Slow 4G por CDP
+1,6 Mbps / 150 ms RTT, CPU 4×, espera `load` + 9 000 ms, pesos gz nivel 9 sobre el build).
+**Los dos brazos se buildearon completos y se sirvieron en paralelo** (A = baseline en `:3010`,
+B = sprint en `:3011`), con las corridas **intercaladas** y un ciclo con el orden invertido.
+
+**Censo estático — entradas de `dynamic()` según `react-loadable-manifest.json`:**
+
+| entrada | A (baseline) | B (sprint) |
+|---|---|---|
+| `ChatWidgetMount → @/modules/chatbot` | 25 chunks · **438,5 kB gz** | 22 chunks · **202,0 kB gz** |
+| `three` dentro de esa entrada | 3 chunks · **225,5 kB gz** | **0** |
+| `HeavyAvatarsLazy → ./NeuroAvatar` | — | 5 chunks · 232,5 kB gz *(on-demand)* |
+| `HeavyAvatarsLazy → ./LegacyNeuroAvatarAdapter` | — | 6 chunks · 240,2 kB gz *(on-demand)* |
+
+**Runtime, `/` mobile 390×844 — 5 corridas por brazo:**
+
+| | A | B | Δ |
+|---|---|---|---|
+| scripts totales | 43 | **40** | −3 |
+| JS sobre el cable | 757,2 kB | **520,1 kB** | **−237,1 kB** |
+| inicial (pre-paint) | 18 · 317,7 kB | 18 · 317,9 kB | **±0** *(hash distinto)* |
+| post-paint | 25 · 439,5 kB | 22 · 202,3 kB | **−237,2 kB** |
+| long tasks (mediana) | 4 056 ms | **3 296 ms** | **−760 ms** |
+| long tasks pre-FCP | 1 203 ms | 1 167 ms | ±0 |
+| TBT | 3 456 ms | **2 796 ms** | **−660 ms** |
+| FCP = LCP | 2 960 ms | 2 872 ms | −88 ms *(dentro del ruido)* |
+| CLS | 0,0057 | **0,0057** | **0** |
+| `<canvas>` dentro del widget | 0 | **0** | — |
+| errores de consola | 0 | 0 | 0 |
+
+**Dónde cobra el ahorro, y dónde no.** Los 237 kB salen enteros en toda ruta pública donde **no
+monte otro canvas 3D**. Donde ya hay uno, `three` viaja igual por su propio dueño y lo único que se
+gana es que el widget deje de adelantarlo:
+
+| escenario | A | B | Δ |
+|---|---|---|---|
+| `/` mobile (sin canvas) | 757,2 kB | 520,1 kB | **−237,1 kB** · long tasks −760 ms |
+| `/` desktop **reduced-motion** (sin canvas) | 757,0 kB | 520,0 kB | **−237,0 kB** · long tasks −698 ms |
+| `/` desktop 1440 (hero 3D activo) | 784,5 kB | 778,7 kB | −5,8 kB · long tasks en el ruido |
+| `/web-development` mobile (`HeroBackground`) | 807,0 kB | 801,2 kB | −5,8 kB · long tasks en el ruido |
+
+Los pesos son deterministas (idénticos corrida a corrida). Los tiempos derivan por carga del host:
+en los dos escenarios marcados "en el ruido" los rangos de los brazos se solapan (desktop
+A 4 452–4 610 ms vs B 4 355–4 542; landing A 10 846–11 192 vs B 10 975–11 774).
+
+### Los dos caminos del avatar, verificados
+
+1. **`avatarStyle: "image"` (la config real).** DOM idéntico al baseline: el mismo
+   `<img src="data:image/webp;base64,…">` de 56 px. **Cero `<canvas>` dentro del widget**, en los
+   dos brazos. Teaser proactivo a los 3 s, el chat abre, el input responde, 0 errores de consola.
+   Capturas del launcher A vs B: mismo avatar, misma posición, mismo tamaño.
+2. **`neuro` activado.** La config se reescribió **sólo en el test**, interceptando
+   `/api/chatbot/*/config` con `page.route` — sin tocar la base ni el código. Baja el chunk y monta:
+   canvas 67×67 a los **159 ms** en localhost y a los **1 480 ms** con Slow 4G + CPU 4×. Mientras
+   baja se ve el disco ámbar plano ocupando la caja final. Misma geometría que el brazo A (67×67).
+3. **`legacy_neuro` activado.** Igual: caja 73×73, canvas a los 222 ms en localhost. 0 errores.
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `next build --webpack` | **verde** (corrido con `E2E_DIST_DIR` para no pisar `.next`, que comparte el checkout) |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre los archivos tocados | **0** — los 6 errores + 2 warnings del directorio son pre-existentes (`LegacyNeuroAvatar.tsx`, el archivo congelado) y están fuera del diff |
+| `impeccable detect` — `design-system/` | **0** (se sostiene) |
+| `impeccable detect` — `src/` completo | **103 → 103**; superficie pública **84 → 84**; **0 hallazgos nuevos** |
+| errores de consola | `/` 0→0 · `/web-development` mismas 3 clases pre-existentes en los dos brazos (404 + CSP report-only del iframe de template-zero) |
+| `npx prisma migrate status` | up to date, 86 migraciones |
+
+*Nota sobre el detector:* el encargo cita 55 como baseline de superficie pública; el número que da
+hoy el detector con el filtro "todo `src/` menos `app/(protected)` y `app/api`" es 84. No se pudo
+reconstruir el scope exacto de aquel 55. Lo que decide el gate es el **delta, que es 0**: mismos
+hallazgos, mismas líneas, antes y después.
+
+### La trampa del harness (costó dos builds)
+
+El brazo B falló a compilar dos veces con
+`./src/app/globals.css:4:1 Module not found: Can't resolve './&'`. **No era el cambio.** Los
+directorios de build del A/B (`.next-perf-a`, `.next-perf-b`) no estaban gitignoreados, y la
+auto-detección de fuentes de Tailwind 4 —que respeta gitignore— se puso a escanear el **HTML
+prerenderizado del otro brazo** como si fuera código. Ahí encontró la clase arbitraria
+`bg-[url('…noise.svg')]` de `web-development/page.tsx` ya escapada a entidades HTML
+(`url(&#x27;…&#x27;)`), emitió ese CSS, y `css-loader` intentó resolver `./&` como módulo. Se
+resolvió excluyendo `.next-perf-*/` en `.git/info/exclude` (local, no toca ningún archivo
+versionado ni el `git status` de las otras sesiones). **Regla:** todo distDir alternativo tiene que
+estar ignorado antes del primer build, o contamina el siguiente.
+
+### Fuera de scope — anotado, no implementado
+
+1. **Diferir el widget entero** (~202 kB gz que quedan). Sigue siendo la jugada más grande del repo
+   y ahora se puede medir sobre un set más chico. Las dos ataduras del PROBE siguen en pie: el
+   teaser dispara solo a los 3 s, y el first-touch de atribución se resuelve al montar. Sprint
+   propio, con decisión de producto.
+2. **`@next/bundle-analyzer`** sigue instalado y sin cablear — hay que tocar `next.config.ts`, que
+   otra sesión está editando.
+3. **El LCP no se movió y no iba a moverse.** El techo son los 18 chunks iniciales hidratando; este
+   sprint no toca un byte del inicial (medido: ±0).
+4. **`three` sigue viajando en las 5 landings y en el home desktop**, por sus propios canvas
+   (`MarketingIntro → BrandedIntroCanvas`, `HeroBackground`, `HeroCanvas`). Gatearlos es otro frente.
+
+### Lo que cierra Franco
+
+- **Que el launcher se vea igual** en `/` y en una landing, desktop y mobile. El DOM y las capturas
+  dicen que sí; la última palabra es mirarlo.
+- **El disco plano como estado de carga de los avatares 3D.** Sólo se ve si algún bot vuelve a un
+  avatar 3D, y dura ~1,5 s en 4G. Si prefiere otra cosa ahí (la imagen del bot, o nada), es un
+  cambio de una línea en `HeavyAvatarsLazy.tsx`.
+- **El renombre de los dos exports del barrel** (`NeuroAvatar` → `NeuroAvatarLazy`,
+  `LegacyNeuroAvatar` → `LegacyNeuroAvatarLazy`). Nadie los importa hoy; si el módulo se extrae
+  algún día, esos nombres son su API pública.
