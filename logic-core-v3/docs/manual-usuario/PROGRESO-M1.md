@@ -38,7 +38,7 @@ como [H-00](HALLAZGOS-MANUAL-v3.md#h-00--terreno--el-bloque-de-vocabulario-de-la
 | | Estado |
 |---|---|
 | [HALLAZGOS-MANUAL-v3.md](HALLAZGOS-MANUAL-v3.md) | 🔄 crece con cada capítulo |
-| [VALIDACION-PODA.md](VALIDACION-PODA.md) | ⏳ se escribe al final, con el recorrido entero recorrido |
+| [VALIDACION-PODA.md](VALIDACION-PODA.md) | ✅ |
 
 ---
 
