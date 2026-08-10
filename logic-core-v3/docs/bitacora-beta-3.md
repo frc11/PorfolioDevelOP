@@ -3681,3 +3681,105 @@ absoluta `https://` la deja pasar); nunca elidir el path con `…`.
 - **El renombre de los dos exports del barrel** (`NeuroAvatar` → `NeuroAvatarLazy`,
   `LegacyNeuroAvatar` → `LegacyNeuroAvatarLazy`). Nadie los importa hoy; si el módulo se extrae
   algún día, esos nombres son su API pública.
+
+## Sprint D11 — framer-motion en el home: la medición dice que no hay nada que sacar — 2026-08-10
+
+Sprint de una sola fase. La hipótesis era la del PROBE de motion: 69 de 76 formas de `initial` en el
+sitio eran `opacity` + `transform`, 37 eran literalmente el mismo `opacity: 0, y: N`, y framer pesaba
+63 kB gz. Cambiarlas por `IntersectionObserver` + CSS parecía la última pieza barata del home.
+
+**El número viejo describía un archivo que ya no existe.** Ese PROBE se midió sobre el monolito de
+9.898 líneas que B4 borró. Hoy las seis secciones del home —`Hero`, `Portfolio`, `PortalDemo`,
+`Nosotros`, `Servicios`, `Cierre`— tienen **cero** imports de `motion/react` y 13 usos de
+`animate-ds-reveal` / `animate-ds-rise`. La migración que este sprint proponía **ya la hizo el
+rediseño**. No quedaba nada que migrar en las secciones.
+
+### El censo (bundle inicial de `/`)
+
+Doce consumidores reales de `motion/react` más uno type-only (`lib/motion-variants.ts:1`, que se borra
+en compilación y pesa 0). El corte que importa no es "reemplazable vs no": es **de quién son**.
+
+| Archivo | Qué usa | ¿Reemplazable? |
+|---|---|---|
+| `context/PreloaderContext.tsx:4` | 7× `useMotionValue` | No — y el archivo está **congelado** |
+| `ui/MarketingIntro.tsx:5` | `animate`, `useMotionValue`, `useTransform` | No |
+| `ui/IntroLockupText.tsx:3` | `useTransform` sobre MotionValues compartidos | No |
+| `ui/LogoStrokeOverlay.tsx:3` | `useTransform` sobre MotionValues compartidos | No |
+| `layout/Navbar.tsx:3` | 2× `AnimatePresence mode="wait"` con `exit` | No |
+| `design-system/SectionShell.tsx:3` | `useInView` (`once:false`) — es el theming, no un reveal | Sí |
+| `layout/Shutter.tsx:3` · `ui/Button.tsx:4` | `motion.div` / `motion.button` | Sí / parcial |
+| `sections/home/Footer.tsx:5` | 37 `motion.*`, 12 `whileInView`, pero 2 `AnimatePresence` + 4 `exit` | Mixto |
+| `layout/HomeWrapper.tsx:3` · `layout/HeroArtifactLayer.tsx:4` · `portal-demo/useEscenaCycle.ts:3` | `motion.main`, un fade, `useReducedMotion` | Sí |
+
+Los cinco primeros llegan por el **root layout**, no por el home.
+
+### La medición
+
+Ground truth: los `<script src>` del HTML prerenderizado, no un manifest. `app-build-manifest.json` ya
+no existe en Next 16.2.9.
+
+| | |
+|---|---|
+| Bundle inicial de `/` | 19 chunks · 355,8 kB gz |
+| Sin `polyfills` (el recorte del harness del baseline) | **18 chunks · 317,2 kB gz** — reconcilia con los 317,7 medidos antes |
+| framer-motion | **1 chunk**, `3813-*.js`, **42,5 kB gz**, puro (sin `react-dom`, `scheduler`, `three`, `sonner`) |
+
+### El hallazgo: el chunk de motion no es del home
+
+La prueba no es un argumento, es una segunda ruta. `/login` comparte el root layout y **no renderiza
+ni una sección del home** — y carga el mismo chunk `3813`, los mismos 42,5 kB gz.
+
+| | chunks | kB gz | de los cuales motion |
+|---|---|---|---|
+| Compartido `/` ∩ `/login` (lo pone el root layout) | 17 | 344,1 | **42,5** |
+| Exclusivo de `/` (todo lo que este sprint podía tocar) | 2 | **11,7** | **0** |
+
+El techo absoluto de un sprint que solo toca el home son 11,7 kB gz, y **ni un byte de esos es
+framer-motion**. `Footer`, `HomeWrapper`, `HeroArtifactLayer` y `useEscenaCycle` no *traen* la
+librería: la *referencian* desde el chunk compartido que el layout ya cargó. Migrarlos a los cuatro
+adelgaza `app/page-*.js` unos pocos kB y deja los 42,5 exactamente donde están.
+
+### El criterio, aplicado
+
+1. **¿Todos los usos del inicial son reemplazables?** No. `PreloaderContext` (congelado, 7
+   `useMotionValue`), `Navbar` (`AnimatePresence` con `exit`) y el árbol del Preloader
+   (`useTransform` sobre MotionValues compartidos).
+2. **¿Se pueden diferir en vez de reescribirlos?** No. `PreloaderContext` es el provider que envuelve
+   el árbol entero; el Preloader **es** el primer paint —diferirlo empeora justo lo que se optimiza—;
+   el `Navbar` es chrome above-the-fold en toda ruta.
+3. **¿El ahorro supera ~30 kB gz?** El ahorro es **0 kB gz**. No "menos de 30": cero.
+
+→ **Sprint cerrado en Fase 1, sin tocar una línea de código del home.** Cero cambios visuales, cero
+riesgo sobre los reveals, `CLS` intacto en 0,0057 por construcción.
+
+### El build estaba roto en HEAD, y no por este sprint
+
+`npm run build` fallaba en `39b9d90f` con `globals.css:4:1 Module not found`. La causa: el párrafo de
+D10 que documenta la trampa de Tailwind escribía la clase arbitraria con el path elidido. Tailwind 4
+escanea `docs/**/*.md`, extrajo esa clase del markdown y `css-loader` murió resolviendo un módulo
+inexistente. **La documentación del bug reintrodujo el bug por otra puerta** — misma falla, fuente
+distinta: antes el HTML prerenderizado del otro brazo, ahora la bitácora. Se arregló escribiendo la
+URL completa y absoluta (`https://`, que `css-loader` deja pasar) y se anotó como *Regla 2* arriba.
+Sin eso no había medición posible.
+
+### Fuera de scope — anotado, no implementado
+
+1. **`MarketingIntro` viaja en el inicial de `/` sin renderizarse nunca.** `marketing-routes.ts`
+   excluye el home del allow-list, pero `Preloader.tsx:6` lo importa estático, así que los tres
+   archivos (`MarketingIntro` 409 L + `IntroLockupText` 256 L + `LogoStrokeOverlay` 142 L, todos
+   motion-pesados) se bundlean para nada. Viven en `app/layout-*.js`, que entero pesa 9,8 kB gz — el
+   ahorro real es una fracción de eso, muy por debajo del umbral, y **no saca el chunk de motion**
+   (lo retienen `PreloaderContext` y `Navbar`). Es un `dynamic()`, no una reescritura de animación.
+2. **`Footer` es la última pieza legacy del home** (916 líneas, 37 `motion.*`). No se tocó porque no
+   mueve el bundle. Si algún día se reescribe, que sea por su tamaño, no por performance.
+3. **Sacar framer-motion del sitio entero** es un frente distinto y mucho más grande: obliga a tocar
+   `PreloaderContext`, que está congelado. Requiere decisión de Franco antes de existir.
+4. **Tailwind escanea `docs/`.** Cualquier bitácora futura que cite una clase arbitraria con `url()`
+   puede volver a romper el build. El arreglo sistémico sería acotar las fuentes de Tailwind; toca
+   `globals.css`, archivo caliente y compartido.
+
+### Lo que cierra Franco
+
+Nada técnico. Con esto se agota el trabajo de performance del home: lo que queda es la pasada visual
+y el contenido real de los placeholders. El inventario queda **idéntico** — este sprint no modificó
+ningún archivo de `src/`, así que no lo pudo mover ni en un carácter.
