@@ -87,12 +87,27 @@ export interface UseChatbotOptions {
 //  - conversation_limit: C0.2 — la conversación llegó al hard-cap server-side
 //    (HARD_CAP_MESSAGES en historyPolicy). Terminal para ESTA conversación;
 //    deriva a WhatsApp si el bot lo tiene configurado.
+//  - rate_limited: BLOQUE VOZ — 429 del POST a /chat. El 429 de sesión
+//    (handleChatRequest) trae un mensaje escrito para el visitante en JSON y
+//    ese se muestra; el de origen+IP (route.ts) es texto plano y cae al canned
+//    local (mismo texto — misma situación para el visitante). Transitorio:
+//    input habilitado, reintenta en un rato.
+//  - chat_unavailable: BLOQUE VOZ — 400/403/404 del POST a /chat (body
+//    inválido, origin bloqueado, bot inexistente o pausado a mitad de sesión).
+//    Antes estos caminos terminaban en status:'error' del SDK sin UI (caminos
+//    1 y 2 del mapa de MUDEZ): el visitante no veía NADA.
+//  - stream_interrupted: BLOQUE VOZ — frame de error DENTRO del stream (fila
+//    12 del mapa: NoOutputGeneratedError, Vertex muerto a mitad de respuesta).
+//    Banner honesto "se cortó"; el texto parcial ya renderizado queda.
 export type DegradedReason =
   | 'quota_exhausted'
   | 'domain_overflow'
   | 'conversation_limit'
   | 'bot_paused'
   | 'connection_failed'
+  | 'rate_limited'
+  | 'chat_unavailable'
+  | 'stream_interrupted'
 
 export interface DegradedInfo {
   reason: DegradedReason
@@ -103,6 +118,30 @@ export interface DegradedInfo {
 }
 
 const CONNECTION_ERROR_MESSAGE = 'No pudimos conectar. Probá de nuevo en un momento.'
+
+// BLOQUE VOZ — canned locales de los caminos que el widget descartaba. Regla
+// dura: JAMÁS se rendea el body/error.message crudo del wire (son técnicos y
+// en inglés — "Invalid request body", "An error occurred."). Allowlist: el
+// ÚNICO texto del server que se muestra es el `error` del 429 JSON de sesión,
+// que está escrito para el visitante (handleChatRequest.ts).
+//
+// RATE_LIMITED_MESSAGE es espejo deliberado de ese texto del server: cubre el
+// 429 por origen+IP (route.ts), que responde texto plano sin JSON — para el
+// visitante es la misma situación, así que es el mismo mensaje.
+const RATE_LIMITED_MESSAGE = 'Demasiadas consultas seguidas. Probá en un minuto.'
+const CHAT_UNAVAILABLE_MESSAGE = 'El chat no está disponible en este momento.'
+const STREAM_INTERRUPTED_MESSAGE = 'Se cortó la respuesta.'
+
+// BLOQUE VOZ — degradados que NO bloquean el input (mismo trato que
+// connection_failed: son transitorios o re-intentables a mano; el resto —
+// cuota/dominio/tope/pausa— es terminal y su único CTA es WhatsApp).
+// Constante pura a nivel de módulo (sin estado — la regla es sobre estado).
+const NON_LOCKING_DEGRADES: ReadonlySet<DegradedReason> = new Set([
+  'connection_failed',
+  'rate_limited',
+  'chat_unavailable',
+  'stream_interrupted',
+])
 
 export interface UseChatbotReturn {
   config: PublicBotConfig | null
@@ -317,11 +356,46 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
               return response
             }
 
-            // 4xx (incl. 429): NUNCA reintentar. Pasa tal cual al SDK (se respeta el
-            // Retry-After por NO martillar, no como retry ciego).
+            // 4xx (incl. 429): NUNCA reintentar (se respeta el Retry-After por NO
+            // martillar, no como retry ciego).
+            //
+            // BLOQUE VOZ — antes el response pasaba tal cual al SDK, cuyo transport
+            // hace `throw new Error(await response.text())` → status:'error' que
+            // este hook descartaba: el visitante no veía NADA (caminos 1 y 2 del
+            // mapa de MUDEZ). El error se resuelve ACÁ, donde el status HTTP existe
+            // (el Error del SDK no lo trae), con el mismo patrón del resto del
+            // wrapper: degradedInfo + stream vacío 200 para que el SDK no erre.
+            //
+            // Allowlist del copy: SOLO el `error` del 429 JSON de sesión se muestra
+            // (está escrito para el visitante); cualquier otro body (JSON técnico,
+            // texto plano, HTML de un proxy) cae al canned local. Jamás el body crudo.
             if (outcome.kind === 'client-error' && response) {
               setReconnecting(false)
-              return response
+              let message = CHAT_UNAVAILABLE_MESSAGE
+              if (outcome.status === 429) {
+                message = RATE_LIMITED_MESSAGE
+                try {
+                  const data: unknown = await response.json()
+                  if (isRecord(data) && typeof data.error === 'string' && data.error.length > 0) {
+                    // Cota defensiva: el mensaje real del server mide ~45 chars;
+                    // nada legítimo se acerca al tope.
+                    message = data.error.slice(0, 200)
+                  }
+                } catch {
+                  // Texto plano (rate-limit por origen+IP de route.ts) → canned local.
+                }
+              }
+              setDegradedInfo({
+                reason: outcome.status === 429 ? 'rate_limited' : 'chat_unavailable',
+                message,
+                whatsappNumber: null,
+                whatsappMessage: null,
+                companyName: null,
+              })
+              return new Response('', {
+                status: 200,
+                headers: { 'content-type': 'text/event-stream' },
+              })
             }
 
             // Transitorio (red / 5xx) con presupuesto → reintentar con backoff. El
@@ -382,7 +456,31 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
     [slug, currentPath]
   )
 
-  const { messages: sdkMessages, sendMessage: sdkSendMessage, setMessages, status } = useChat({ transport })
+  const { messages: sdkMessages, sendMessage: sdkSendMessage, setMessages, status } = useChat({
+    transport,
+    // BLOQUE VOZ — fila 12 del mapa de MUDEZ: un frame de error DENTRO del
+    // stream (NoOutputGeneratedError, Vertex muerto a mitad de respuesta)
+    // termina en status:'error', que este hook no rendea → el visitante no
+    // veía NADA. Banner honesto "se cortó" con el input libre para reintentar.
+    // El error.message NUNCA se muestra (allowlist): viene del wire con
+    // textos técnicos en inglés ("An error occurred."). El texto parcial ya
+    // streameado queda en messages — el SDK lo commiteó antes del error.
+    // `bot_paused` no se pisa (persistente, viene del config — mismo guard
+    // que sendMessage/close).
+    onError: () => {
+      setDegradedInfo((prev) =>
+        prev?.reason === 'bot_paused'
+          ? prev
+          : {
+              reason: 'stream_interrupted',
+              message: STREAM_INTERRUPTED_MESSAGE,
+              whatsappNumber: null,
+              whatsappMessage: null,
+              companyName: null,
+            },
+      )
+    },
+  })
 
   // B3.7 — pendingSubmit hace que el estado "Pensando" reaccione en el mismo
   // frame en que el usuario presiona Enter, sin esperar al microtick del SDK
@@ -520,8 +618,10 @@ export function useChatbot({ slug, currentPath, attribution }: UseChatbotOptions
   // INFRA.2 — Cuáles degradados BLOQUEAN el input. connection_failed NO bloquea:
   // es "probá de nuevo", el visitante reintenta a mano. Los demás (cuota, dominio,
   // bot pausado) son terminales → input deshabilitado (el único CTA es WhatsApp).
+  // BLOQUE VOZ — los reasons nuevos (rate_limited / chat_unavailable /
+  // stream_interrupted) tampoco bloquean: ver NON_LOCKING_DEGRADES arriba.
   const inputLockedByDegrade =
-    degradedInfo !== null && degradedInfo.reason !== 'connection_failed'
+    degradedInfo !== null && !NON_LOCKING_DEGRADES.has(degradedInfo.reason)
 
   // "Conversación activa" = al menos un mensaje REAL en la sesión actual (en
   // memoria, se reinicia al recargar). Las burbujas proactive-* son el teaser

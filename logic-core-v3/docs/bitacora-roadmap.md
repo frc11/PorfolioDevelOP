@@ -16522,3 +16522,185 @@ providerStreamClose ya no debe colapsar: `provider.stream_chunks` con `reason:id
 chunk_stream_start:1` seria el bug reapareciendo.
 
 ---
+
+## BLOQUE VOZ - lo que el visitante ve cuando el camino no es el feliz
+
+Contraparte cliente del mapa de MUDEZ: aquel bloque cerro el borde del servidor; este cierra lo
+que llega a la pantalla. Dos problemas, dos commits: (1) el fallback de respuesta vacia se
+disculpaba en el momento de conversion, pegado a una tarjeta que lo contradecia (camino 6);
+(2) el widget descartaba errores que el server SI mandaba (caminos 1, 2 y 12 del lado cliente).
+Copy decidido por Valentino en la parada dura de Fase 0. Sin clientes reales activos.
+
+### Fase 0 - el mapa extendido: que hace el WIDGET con lo que el server manda
+
+Los tres transportes del lado cliente, verificados contra el SDK instalado (ai@6.0.214):
+
+- T1, error HTTP antes del stream: el wrapper de fetch (useChatbot.ts) intercepta primero.
+  Red caida y 5xx son transitorios -> retry x3 con backoff 2s/4s (chatRetryPolicy) -> agotado,
+  banner connection_failed. Los 4xx pasaban "tal cual al SDK": el transport hace
+  `throw new Error(await response.text())` (ai/dist/index.js:13397-13401) -> catch ->
+  onError?/setStatus error (:13826-13829). useChatbot no destructuraba `error` ni pasaba
+  onError -> moria ahi. El Error.message del SDK NO trae el status HTTP - por eso el fix vive
+  en el wrapper, donde el status existe.
+- T2, frame de error DENTRO del stream: processUIMessageStream lo relanza como
+  `new Error(chunk.errorText)` (:6233-6235) via un onError interno `(e) => { throw e }`
+  (:13806-13808) -> mismo catch -> status 'error'. El texto parcial ya streameado queda
+  commiteado en messages. MATIZ NUEVO: el throw ABORTA el consumo, asi que los frames
+  POSTERIORES al de error se descartan - los silence frames de onSilentClose (MUDEZ commit 2)
+  viajan en el wire pero el cliente los tira. La fila 12 decia "CERRADO (borde) + abierto
+  (widget)": el canned del borde queda en DB pero la pantalla no lo veia.
+- T3, frame `abort`: solo marca isAborted (:6304-6306) -> status 'ready', sin error, texto
+  parcial conservado. Casi siempre es el propio visitante cancelando (camino 15) - sin fix,
+  a proposito.
+
+Mapa (columna cliente; solo filas con novedad respecto de MUDEZ):
+
+| Camino | Server manda | Widget ANTES | Widget AHORA |
+|---|---|---|---|
+| 1a 400 body | JSON tecnico EN (handleChatRequest:137,:594) | NADA | banner chat_unavailable |
+| 1b 404 bot inexistente o pausado | JSON tecnico EN (:155) | NADA | banner chat_unavailable |
+| 1c 403 origin (fila nueva) | JSON tecnico EN (route.ts:62) | NADA | banner chat_unavailable |
+| 1d 500 sin KB | JSON tecnico EN (:165) | CORRECCION al mapa MUDEZ: nunca fue NADA - es 5xx, INFRA.2 lo reintenta y muestra connection_failed | igual (sin cambios) |
+| 2a 429 sesion | JSON con mensaje amable (:192-201) | NADA - el copy existia y nadie lo vio nunca | banner rate_limited con EL TEXTO DEL SERVER |
+| 2b 429 origen+IP (fila nueva - hay DOS rate limits) | texto plano EN 'Too many requests' (route.ts:82-88) | NADA | banner rate_limited con canned local espejo |
+| 6 cierre en tool cardeada | tarjeta + fallback inyectado | tarjeta + disculpa que la contradecia | tarjeta + conector neutral (commit 1) |
+| 12 NoOutputGeneratedError | error frame + silence frames DESPUES | NADA (throw del error frame descarta el canned que venia atras) | banner stream_interrupted; el canned del borde sigue viajando y sigue sin verse (orden del wire) - divergencia leve transcript/pantalla, documentada abajo |
+
+### Inventario de copy (Fase 0) - hallazgos del conjunto
+
+Primera vez que se miro todo el copy canned junto. Lo que salio:
+
+1. La familia de degradados es coherente entre si (quota/tope/fallback comparten formula;
+   connection_failed y ConfigLoadError comparten lenguaje ambar). El bug del conjunto era la
+   fila 6: UN texto para dos situaciones opuestas.
+2. El copy del 429 de sesion existia y era invisible. El 429 outer ni tenia copy de visitante.
+3. Todos los cuerpos 4xx/5xx son ingles tecnico ('Invalid request body', 'Bot not found or
+   inactive', 'Origin not allowed', 'Too many requests', y el 'An error occurred.' del SDK).
+   REGLA DEL FIX: jamas renderizar body/error.message crudo - allowlist. El UNICO texto del
+   server que se muestra es el `error` del 429 JSON de sesion (escrito para el visitante),
+   con cota defensiva de 200 chars.
+4. Para el SPRINT DE COPY (fuera de scope aca, base = este inventario): el empty-state on-site
+   'Sistema Listo / Protocolo de consultoria iniciado. Como puedo asistirle hoy?'
+   (ChatWindow.tsx) rompe el voseo del resto del widget y usa jerga de sistema; y
+   'WhatsApp no configurado.' (WhatsappHandoffCard.tsx) le muestra al visitante un problema
+   de configuracion del dueno.
+
+### Commit 1 (servidor) - el conector de tarjeta
+
+Cuando el run cierra en un tool CARDEADO sin texto, la tarjeta ES la respuesta: el transform
+inyecta un conector neutral en vez de la disculpa. Copy aprobado (aca ascii; el codigo lleva
+tildes): offer_handoff_options -> 'Listo. Elegi abajo como preferis que sigamos.' /
+show_whatsapp_handoff -> 'Listo, te dejo el acceso directo a WhatsApp.' / navigate_to_page ->
+'Te dejo el enlace aca abajo.'
+
+- El catalogo `CARD_RENDERING_TOOL_CONNECTORS` vive AL LADO de TOOL_BUILDERS (getTools.ts),
+  a proposito: quien agrega un tool cardeado lo ve, y si no lo suma, la disculpa vuelve.
+  `show_whatsapp_handoff` esta aunque es server-side: si el modelo no agrega texto despues,
+  su tarjeta tambien queda como unica respuesta.
+- Mecanica en reconcile.ts, MISMA regla dura del deadlock: cero retencion, la decision sigue
+  en el chunk terminal `finish`. Solo UNA variable acumulada mas en el closure
+  (`cardConnectorText`, seteada al pasar cada tool-call cardeado). NO se resetea entre steps
+  A PROPOSITO: la tarjeta renderizada persiste en pantalla (el widget rendea el acumulado de
+  toolCalls del mensaje) - un reset por step reintroduciria la disculpa sobre la tarjeta en
+  show_whatsapp_handoff -> step vacio. Un tool no cardeado jamas la setea, asi que
+  capture_lead -> step vacio cae en la derivacion (correcto). Pinneado en ambas direcciones
+  (C4a/C4b de test:emptyfallback).
+- Id propio en el wire: 'voz-card-connector' (vs 'onf1-empty-fallback'). Telemetria nueva:
+  `chat.card_connector_injected` (solo metadatos). Ambos kinds marcan `emptyFallbackInjected`:
+  compensacion de cupo y guard de onSilentClose sin cambios (con tools ejecutadas se cobra,
+  tabla de shouldCompensateQuota intacta).
+- PARIDAD DE PERSISTENCIA verificada en vivo y en test: el texto inyectado pasa por onChunk
+  (onfinish_phases salio con chunks_text_delta:1 y assistantMessageLength 45 = len(conector)),
+  asi que pickPersistedAssistantText persiste EXACTAMENTE lo que la pantalla mostro.
+- Falla-primero EJECUTADA: plomeria sin comportamiento -> ambos tests fallaron con
+  ['derivation'] vs ['card_connector'] -> comportamiento -> verde. Casos nuevos: C1-C5 en
+  test:emptyfallback (conector/disculpa/passthrough/no-reset/callers-legacy) y caso 7 en
+  test:mudez contra el streamText real + watchdog real + mapa REAL (lee el texto del mapa:
+  un ajuste de copy no rompe el test; la red del watchdog no habla encima del conector).
+- Diff de telemetria contra baseline PRE-cambio (la herramienta de MS-E6.2 era andamio de
+  scratchpad - se reconstruyo y el baseline se capturo ANTES de tocar codigo, contra el
+  endpoint real de dev, bot develop): estructura identica, dos deltas exactos - el evento
+  nuevo x1 y assistantMessageLength 106 -> 45. El camino 6 real (capture_lead +
+  offer_handoff_options, toolCallCount:2, step_count:2) se reprodujo en ambas corridas.
+- Gates: tsc 0 errores; eslint 0 errores (2 warnings _ctx preexistentes en getTools.ts);
+  bateria 18/18 verde, uno por vez, sin pipes.
+
+### Commit 2 (cliente) - el widget deja de descartar lo que el server manda
+
+Diff minimo, SOLO useChatbot.ts y DegradedBanner.tsx. Tres reasons nuevos en DegradedReason,
+todos SIN bloquear el input (NON_LOCKING_DEGRADES, mismo trato que connection_failed;
+sendMessage ya limpiaba el degrade reactivo al reenviar - cero cambios ahi):
+
+- rate_limited (429): la rama 4xx del wrapper deja de entregar el response al SDK y lo
+  resuelve ahi (patron existente: degradedInfo + stream vacio 200). Muestra el `error` del
+  JSON de sesion; texto plano del outer -> RATE_LIMITED_MESSAGE local (espejo deliberado del
+  texto del server: misma situacion, mismo mensaje). Sub-linea: 'Espera un momento y volve a
+  escribir.' Icono Clock.
+- chat_unavailable (400/403/404): 'El chat no esta disponible en este momento.' + sub 'Proba
+  de nuevo en un rato.' Un solo copy para los tres (indistinguibles para el visitante).
+- stream_interrupted (frame de error mid-stream): onError del useChat (el wrapper no puede
+  verlo: el fetch ya resolvio 200) -> 'Se corto la respuesta.' + sub 'Escribi de nuevo y
+  seguimos.' SIEMPRE banner, sin discriminador de estado (E3 descartado: metia estado en
+  useChatbot). El texto parcial ya streameado queda. Guard de bot_paused (no se pisa).
+- DegradedBanner: la variante ambar pasa de `reason === 'connection_failed'` a AMBER_REASONS,
+  con sub-linea e icono por reason. Nada mas se toco: ni mensajes, ni scroll, ni retry
+  INFRA.2, ni ChatWindow/ChatbotEmbed/widget.js.
+
+Humo real (browser + dev server): camino feliz intacto; rafaga de 11 POSTs auto-limpiantes
+(bodies sin mensaje user: consumen el bucket 10/min pero salen por el 400 no_user_message,
+que compensa cupo y descarta fila - cero LLM) -> mensaje real desde el widget -> banner ambar
+con el texto del server, Clock, historial intacto, input habilitado. La fila 2a quedo cerrada
+de punta a punta. chat_unavailable y stream_interrupted quedan para la verificacion humana
+(pasos abajo).
+
+Gates commit 2: tsc 0 errores; eslint 1 error PREEXISTENTE en useChatbot.ts
+(react-hooks/set-state-in-effect sobre el setPendingSubmit del flag B3.7 - codigo no tocado,
+parte del baseline de ~80 errores de la auditoria CLEAN; arreglarlo = tocar pendingSubmit,
+prohibido en este sprint). DegradedBanner limpio.
+
+### Abierto / deuda que deja este bloque
+
+- Divergencia leve fila 12: la DB persiste el canned del borde ('Se me complico...') pero la
+  pantalla muestra el banner stream_interrupted (el throw del cliente descarta los silence
+  frames que vienen DESPUES del error frame). Compatible semanticamente; eliminarla exigiria
+  tocar el borde (fuera de scope, y el borde es de MUDEZ).
+- El frame abort (T3) queda sin UI a proposito (camino 15: visitante ido).
+- SPRINT DE COPY pendiente (pedido por Valentino, base = inventario de Fase 0): voseo del
+  empty-state on-site + 'WhatsApp no configurado.'.
+- Consolidar los DOS rate limits (chatbotPerSession route + chatbotPerBotSession handler) -
+  deuda previa de B14.1, este bloque solo la hizo visible.
+- Ruido de dev de la verificacion: ~5 cupos de QuotaUsage consumidos por conversaciones de
+  prueba creadas-y-borradas (los deletes manuales no devuelven cupo), ChatbotEvents huerfanos
+  (SetNull, los purga T0.2). Gotcha reconfirmado: 'Jest worker exceptions' en dev = server
+  colgado, reciclar (paso durante el humo; matar el node del puerto, no el wrapper npm).
+- Resto de la deuda conocida sin cambios (ver cierre de MUDEZ): insights para el dueno
+  (bloqueante), BREVO/Telegram, PII en stderr de show_whatsapp_handoff, hashes IP
+  divergentes, CHATBOT_IP_HASH_SALT, rotar key Vertex, promesas detached de captureLead,
+  demo-chat sin middleware, allowedNavigationPaths, timeout del cron de insights, insights
+  sin dedup, pin exacto de `ai`, orquestacion sin cobertura salvo test:mudez.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Commit 1 (servidor): conversacion nueva -> nombre y telefono -> 'quiero que me contacten' ->
+el texto pegado a la tarjeta debe ser 'Listo. Elegi abajo como preferis que sigamos.' (con
+tildes en pantalla), nunca la disculpa. En el log: chat.card_connector_injected + step_count>0,
+costUsd!=0, persist_tx_1 ok. La disculpa SIGUE siendo correcta donde algo se rompe de verdad
+(watchdog_canned).
+
+Commit 2 (cliente), desktop y mobile:
+1. rate_limited: 11+ mensajes cortos seguidos en menos de un minuto (limite 10/min por
+   sesion) -> banner ambar con reloj y el texto del server; el input sigue habilitado; al
+   minuto, reenviar -> el banner se limpia y responde normal.
+2. chat_unavailable: con el panel abierto y la config ya cargada, PAUSAR el bot desde el
+   admin -> mandar un mensaje -> banner 'El chat no esta disponible en este momento.'
+   (resolveBotBySlug filtra inactivos -> 404). Reactivar el bot al terminar.
+3. stream_interrupted: en dev, romper la credencial de Vertex (GOOGLE_APPLICATION_CREDENTIALS
+   a un path invalido, o modelo inexistente) con el server corriendo -> mandar un mensaje ->
+   banner 'Se corto la respuesta.' Restaurar al terminar.
+4. Regresion connection_failed: DevTools -> Network -> Offline -> mandar un mensaje -> banner
+   'No pudimos conectar...' tras ~6s de reintentos (2s+4s), header 'Conectando...' mientras.
+5. Regresion de siempre en un turno sano: step_count>0, costUsd!=0, persist_tx_1 ok,
+   watchdog_settled reason 'closed', provider.stream_chunks reason 'natural', cero
+   watchdog_canned.
+
+---
