@@ -30,8 +30,8 @@ como [H-00](HALLAZGOS-MANUAL-v3.md#h-00--terreno--el-bloque-de-vocabulario-de-la
 | 09 | El chequeo final y mandarla a revisión | ✅ |
 | 10 | Cuando Franco pide correcciones | ✅ |
 | 11 | Mandarle el link al negocio | ✅ |
-| 12 | Agendar la reunión | ⏳ |
-| 13 | Cuando un negocio se cierra | ⏳ |
+| 12 | Agendar la reunión | ✅ |
+| 13 | Cuando un negocio se cierra | ✅ |
 
 ## Los otros dos documentos
 
