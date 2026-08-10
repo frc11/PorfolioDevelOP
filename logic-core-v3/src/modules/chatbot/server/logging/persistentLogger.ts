@@ -12,6 +12,70 @@ const LEVEL_TO_ENUM: Record<'info' | 'warn' | 'error', ChatbotEventLevel> = {
 }
 
 /**
+ * PRIVACIDAD — allowlist del camino CONSOLA.
+ *
+ * `logChatbotEvent` emite a dos sinks: la columna org-scoped
+ * `chatbot_events.metadata` (INTACTA — es dato del propio cliente y el panel
+ * la consume) y la consola (stdout/stderr → Netlify Logs, visibles para la
+ * plataforma). A consola solo pasan las claves de esta lista — la unión de
+ * las claves seguras (ids, contadores, duraciones, booleans, enums,
+ * longitudes) de los 18 callsites al momento del barrido. El resto se
+ * reemplaza por `redactedKeys` (los NOMBRES excluidos, nunca los valores):
+ * la señal de que el dato existió sobrevive para diagnóstico.
+ *
+ * Allowlist y no denylist: una clave nueva queda FUERA del log por omisión
+ * (visible y recuperable vía redactedKeys), en vez de FUGARSE por omisión.
+ * Agregar una clave acá es una decisión consciente — el test
+ * __tests__/console-pii.invariant.ts duplica la lista a propósito y se pone
+ * en rojo si divergen.
+ */
+export const CONSOLE_METADATA_ALLOWLIST: ReadonlySet<string> = new Set([
+  'orgSlug',
+  'intent',
+  'hadLeadBeforeHandoff',
+  'preferredChannel',
+  'phoneReason',
+  'emailReason',
+  'category',
+  'channels',
+  'leadId',
+  'signals',
+  'score',
+  'classification',
+  'dqReason',
+  'scoreBreakdown',
+  'warnings',
+  'finishReason',
+  'toolCallCount',
+  'tokensIn',
+  'tokensOut',
+  'costUsd',
+  'durationMs',
+  'latencyMs',
+  'timings',
+  'planKey',
+  'maxDomains',
+  'conversationsUsed',
+  'conversationsLimit',
+  'period',
+  'reservedRace',
+  'trigger',
+  'compensated',
+  'conversationId',
+  'year',
+  'month',
+  'messageCount',
+  'hardCap',
+  'requestedProvider',
+  'requestedModel',
+  'effectiveProvider',
+  'effectiveModel',
+  'newStatus',
+  'userId',
+  'insightId',
+])
+
+/**
  * Logs an event AND persists it to the chatbot_events table for the
  * activity dashboard.
  *
@@ -29,16 +93,22 @@ export async function logChatbotEvent(params: {
   conversationId?: string | null
   metadata?: Record<string, unknown>
 }): Promise<void> {
-  // Always log to console (the existing flow)
-  chatbotLog(
-    params.type,
-    {
-      botConfigId: params.botConfigId,
-      conversationId: params.conversationId,
-      ...params.metadata,
-    },
-    params.level
-  )
+  // Always log to console (the existing flow) — pero SOLO claves del
+  // allowlist: la metadata completa va únicamente a la DB org-scoped.
+  // `message` tampoco sale por acá (solo DB), desde siempre — mantener.
+  const consoleFields: Record<string, unknown> = {
+    botConfigId: params.botConfigId,
+    conversationId: params.conversationId,
+  }
+  const redactedKeys: string[] = []
+  if (params.metadata) {
+    for (const [key, value] of Object.entries(params.metadata)) {
+      if (CONSOLE_METADATA_ALLOWLIST.has(key)) consoleFields[key] = value
+      else redactedKeys.push(key)
+    }
+  }
+  if (redactedKeys.length > 0) consoleFields.redactedKeys = redactedKeys.sort()
+  chatbotLog(params.type, consoleFields, params.level)
 
   // Persist to BD. El create scoped verifica que el bot (y la conversación, si
   // viene) sean de la org.
