@@ -1,5 +1,4 @@
-import { createHash } from 'crypto'
-import { handleChatRequest } from '@/modules/chatbot/index.server'
+import { extractClientIp, handleChatRequest, hashIp } from '@/modules/chatbot/index.server'
 import { validateOrigin } from '@/lib/security/validate-origin'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
@@ -68,9 +67,11 @@ export async function POST(
   // Rate-limit per origin + IP hash (SEC-RATELIMIT-02).
   // sessionId was attacker-controllable — trivially bypassed by rotating it.
   // IP is set by the Netlify edge and is not spoofeble from the outside.
-  const fwd = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-  const real = request.headers.get('x-real-ip')?.trim()
-  const ipHash = createHash('sha256').update(fwd ?? real ?? 'no-ip').digest('hex').slice(0, 24)
+  // PRIVACIDAD: mismo esquema de hash que el resto del chatbot (hashIp,
+  // salted, 16 hex) — al cambiar el formato de la clave, los buckets en Neon
+  // se resetean UNA vez en el deploy (ventana de 60s; las filas viejas las
+  // barre el cleanup perezoso del limiter).
+  const ipHash = hashIp(extractClientIp(request))
   const rateKey = `chatbotPerSession:${origin ?? 'no-origin'}:${ipHash}`
   const rate = await checkRateLimit({
     key: rateKey,

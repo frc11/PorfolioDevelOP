@@ -135,13 +135,21 @@ if (provider === 'google') {
 }
 
 const isProd = process.env.NODE_ENV === 'production'
+let prodFatal = false
 if (isProd) {
   if (!process.env.CHATBOT_IP_HASH_SALT) {
-    console.log('  ! NODE_ENV=production y CHATBOT_IP_HASH_SALT vacía — el bot va a arrancar con error.')
+    // PRIVACIDAD (S7-03): hashIp ABORTA en prod sin salt — esto ya no es un aviso.
+    console.log('  - NODE_ENV=production y CHATBOT_IP_HASH_SALT vacía — el chatbot ABORTA cada request (hashIp tira). Generala con: openssl rand -hex 32')
+    prodFatal = true
   }
   if (!process.env.CRON_SECRET) {
     console.log('  ! NODE_ENV=production y CRON_SECRET vacía — los crons de Netlify van a fallar 401.')
   }
+}
+
+if (prodFatal) {
+  console.log('\nFALTAN (OBLIGATORIAS EN PRODUCCIÓN): ver arriba. La app no funcionará sin estas variables.\n')
+  process.exit(1)
 }
 
 console.log('\nOK — Todas las críticas configuradas.\n')

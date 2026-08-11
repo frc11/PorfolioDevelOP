@@ -58,8 +58,11 @@ const ENV_VARS: Omit<EnvVarStatus, 'present'>[] = [
   },
   {
     name: 'CHATBOT_IP_HASH_SALT',
-    required: false,
-    description: 'Secret salt for IP hashing (GDPR-safe rate limiting)',
+    // PRIVACIDAD (S7-03): obligatoria en prod — hashIp ABORTA sin ella.
+    // En dev cae al fallback declarado, por eso required es condicional.
+    required: process.env.NODE_ENV === 'production',
+    description:
+      'Secret salt for IP hashing (rate-limit key + Conversation.ipHash). In production hashIp aborts without it',
     hint: 'Generate with: openssl rand -hex 32',
   },
   {

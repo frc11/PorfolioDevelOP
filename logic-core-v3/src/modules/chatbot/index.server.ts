@@ -46,6 +46,9 @@ export { getTools, VALID_PATHS } from './server/tools'
 
 // Chat handler (Sprint S5)
 export { handleChatRequest } from './server/chat'
+// PRIVACIDAD — extracción canónica de IP (fallback 'unknown'): el route del
+// chat la comparte con el handler para que haya UN solo esquema IP→hash.
+export { extractClientIp } from './server/chat/requestSchema'
 
 // Safety, quota — rate-limit migrado a @/lib/rate-limit/limiter (B14.1).
 export { validateAssistantOutput, hashIp } from './server/safety'
