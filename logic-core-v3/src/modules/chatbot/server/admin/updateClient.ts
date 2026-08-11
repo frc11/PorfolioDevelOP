@@ -75,7 +75,8 @@ export async function updateClient(input: z.infer<typeof UpdateClientInputSchema
       (c) => c.user.findUnique({ where: { email: nextEmail }, select: { id: true } }),
     )
     if (clash && clash.id !== adminUser.id) {
-      throw new Error(`El email ${nextEmail} ya está registrado en otro usuario.`)
+      // PRIVACIDAD: sin interpolar el email (el throw termina en stderr).
+      throw new Error('El email ingresado ya está registrado en otro usuario.')
     }
   }
 

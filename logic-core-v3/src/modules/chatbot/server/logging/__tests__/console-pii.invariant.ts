@@ -29,8 +29,10 @@
  * metadata). Corre con:  npm run test:pii   (npx tsx …)
  */
 import assert from 'node:assert/strict'
+import { Prisma } from '@prisma/client'
 import { logChatbotEvent } from '../persistentLogger'
-import { chatbotLog } from '../logger'
+import { chatbotLog, chatbotError, logPersistFailure, sanitizeErrorMessage } from '../logger'
+import { __INTERNALS_FOR_TESTING__ } from '@/lib/sentry/scrub-pii'
 
 // ── Copia pin del allowlist de consola (ver persistentLogger.ts) ────────────
 const ALLOWLIST_PIN: ReadonlySet<string> = new Set([
@@ -379,6 +381,87 @@ async function main(): Promise<void> {
       }
     })
   }
+
+  // ── 6. (commit 3) PrismaClientValidationError ecoa los ARGUMENTOS de la
+  // query en su .message (y el stack arranca con el message). Si la query
+  // llevaba name/email/phone (capture_lead, persistTurn), el mensaje los
+  // arrastra. La clase entera se redacta; name/prismaCode se conservan.
+  const validationError = new Prisma.PrismaClientValidationError(
+    `Invalid \`prisma.chatbotLead.create()\` invocation:\n{ data: { name: "${M.nombre}", email: "${M.contacto}" } }`,
+    { clientVersion: 'test' },
+  )
+
+  await check('logPersistFailure: PrismaClientValidationError no ecoa argumentos', async () => {
+    const lines = await captureConsole(() => {
+      logPersistFailure('chat.persist_failed', validationError, {
+        conversationId: 'conv_test',
+        turnIndex: 1,
+      })
+    })
+    assertNoMarker(lines)
+    const event = lines.map(parseLine).find((l) => l?.type === 'chat.persist_failed')
+    assert.ok(event, 'la línea chat.persist_failed tiene que salir')
+    assert.equal(event.errorName, 'PrismaClientValidationError', 'el nombre de la clase se conserva')
+    assert.equal(event.conversationId, 'conv_test', 'los campos del turno se conservan')
+  })
+
+  await check('chatbotError: PrismaClientValidationError no ecoa argumentos (ni en stack)', async () => {
+    const lines = await captureConsole(() => {
+      chatbotError('lead_capture', validationError, { conversationId: 'conv_test' })
+    })
+    assertNoMarker(lines)
+    const event = lines.map(parseLine).find((l) => l?.type === 'error.lead_capture')
+    assert.ok(event, 'la línea error.lead_capture tiene que salir')
+  })
+
+  await check('los errores comunes conservan su message (solo se redacta la clase que ecoa args)', async () => {
+    const known = new Prisma.PrismaClientKnownRequestError('Server has closed the connection.', {
+      code: 'P1017',
+      clientVersion: 'test',
+    })
+    const lines = await captureConsole(() => {
+      logPersistFailure('chat.persist_failed', known, {})
+    })
+    const event = lines.map(parseLine).find((l) => l?.type === 'chat.persist_failed')
+    assert.ok(event, 'la línea tiene que salir')
+    assert.equal(event.errorMessage, 'Server has closed the connection.')
+    assert.equal(event.prismaCode, 'P1017')
+  })
+
+  // El helper que usan los catch de tools/admin (captureLead,
+  // confirmContactRequest, saveBotConfig, saveKnowledgeBase) — pin directo.
+  await check('sanitizeErrorMessage: redacta SOLO la clase que ecoa argumentos', () => {
+    assert.ok(
+      !sanitizeErrorMessage(validationError).includes(M.nombre),
+      'validation error → mensaje redactado',
+    )
+    assert.equal(sanitizeErrorMessage(new Error('fetch failed')), 'fetch failed')
+    assert.equal(sanitizeErrorMessage('boom'), 'boom')
+  })
+
+  // ── 7. (commit 3) Claves de IP en la denylist de scrub-pii — blindaje
+  // pre-activación de Sentry: la IPv6 pasa los regex de texto libre, así que
+  // los headers de IP se redactan por CLAVE, enteros.
+  await check('scrub-pii: los headers de IP están en la denylist por clave', () => {
+    const { SENSITIVE_KEY_PATTERN } = __INTERNALS_FOR_TESTING__
+    for (const key of [
+      'x-forwarded-for',
+      'X-Forwarded-For',
+      'x-real-ip',
+      'x-nf-client-connection-ip',
+      'ip_address',
+      'ip',
+      'forwarded',
+    ]) {
+      assert.ok(
+        SENSITIVE_KEY_PATTERN.test(key),
+        `la clave ${key} tiene que estar cubierta por la denylist`,
+      )
+    }
+    // Y una clave inocente no se come el redactado por accidente.
+    assert.ok(!SENSITIVE_KEY_PATTERN.test('conversationId'), 'conversationId no se redacta')
+    assert.ok(!SENSITIVE_KEY_PATTERN.test('shipping'), 'shipping (contiene "ip") no se redacta')
+  })
 
   console.log(
     failed === 0

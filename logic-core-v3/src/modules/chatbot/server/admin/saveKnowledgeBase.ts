@@ -3,7 +3,7 @@
 import { z } from 'zod'
 import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
-import { chatbotLog } from '../logging'
+import { chatbotLog, sanitizeErrorMessage } from '../logging'
 import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 
@@ -83,7 +83,10 @@ export async function saveKnowledgeBase(input: KnowledgeBaseInput): Promise<{ su
     chatbotLog('admin.kb_updated', { botConfigId: parsed.data.botConfigId })
     return { success: true }
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'unknown error'
+    // PRIVACIDAD: sanitizado — el try cubre knowledgeBase.update con la KB
+    // completa; un PrismaClientValidationError la ecoaría entera (a consola
+    // Y al cliente vía el return).
+    const msg = sanitizeErrorMessage(error)
     chatbotLog('admin.kb_update_error', { botConfigId: parsed.data.botConfigId, error: msg }, 'error')
     return { success: false, error: msg }
   }

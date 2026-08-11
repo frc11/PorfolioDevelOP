@@ -1,6 +1,6 @@
 import { ChatbotEventLevel } from '@prisma/client'
 import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
-import { chatbotLog } from './logger'
+import { chatbotLog, sanitizeErrorMessage } from './logger'
 
 // B11.4 — mantenemos la API lowercase para no romper los ~15 callsites
 // existentes; el mapping a enum UPPER vive acá. El console logger sigue
@@ -141,7 +141,7 @@ export async function logChatbotEvent(params: {
       JSON.stringify({
         type: 'logger.persist_failed',
         level: 'error',
-        error: error instanceof Error ? error.message : 'unknown',
+        error: sanitizeErrorMessage(error),
       })
     )
   }

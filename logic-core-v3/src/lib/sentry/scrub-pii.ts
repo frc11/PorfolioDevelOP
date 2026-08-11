@@ -31,6 +31,11 @@ const SENSITIVE_KEY_PATTERN = new RegExp(
     'credit_?card', 'cc_?number', 'cardnumber',
     // Sesión
     'sessionid', 'session_id', 'csrf',
+    // PRIVACIDAD — headers/campos de IP por CLAVE: una IPv6 pasa los regex
+    // de texto libre (la IPv4 solo se salva de casualidad como [phone]).
+    // Anclados donde la subcadena es genérica ("ip" está en "shipping").
+    'x-forwarded-for', 'x-real-ip', 'x-client-ip', 'x-nf-client-connection-ip',
+    'client_?ip', '^ip$', 'ip_?address', 'remote_?addr', '^forwarded$',
   ].join('|'),
   'i',
 )

@@ -1,7 +1,7 @@
 import { tool } from 'ai'
 import { z } from 'zod'
 import { forOrg } from '@/lib/isolation'
-import { logChatbotEvent } from '../logging'
+import { logChatbotEvent, sanitizeErrorMessage } from '../logging'
 import type { ToolCallContext } from './types'
 // PROBE-STREAM — instrumentación TEMPORAL de diagnóstico (gated por
 // CHATBOT_STREAM_PROBE). Ver server/chat/streamProbe.ts.
@@ -167,7 +167,7 @@ async function confirmContactRequestExecute(
       JSON.stringify({
         type: 'confirm_contact_request.error',
         conversationId: ctx.conversationId,
-        error: error instanceof Error ? error.message : 'unknown',
+        error: sanitizeErrorMessage(error),
       }),
     )
     return { success: true, alreadyRequested: false }

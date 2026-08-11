@@ -3,7 +3,7 @@ import { z } from 'zod'
 import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
 import { forOrg } from '@/lib/isolation'
-import { logChatbotEvent } from '../logging'
+import { logChatbotEvent, sanitizeErrorMessage } from '../logging'
 import { notifyClientOfLead } from '@/lib/client-notifications'
 import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
 import { getVerticalPack } from '../verticals'
@@ -477,7 +477,12 @@ async function captureLeadExecute(
           },
         })
       } catch (error) {
-        console.error('[captureLead] Notification failed but lead was saved', error)
+        // PRIVACIDAD: sanitizado — un PrismaClientValidationError acá ecoaría
+        // name/email/phone del lead en message y stack.
+        console.error(
+          '[captureLead] Notification failed but lead was saved',
+          sanitizeErrorMessage(error)
+        )
       }
     }
 
@@ -548,7 +553,9 @@ async function captureLeadExecute(
       },
     }
   } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'unknown error'
+    // PRIVACIDAD: sanitizado — el try cubre el chatbotLead.create con
+    // name/email/phone; un PrismaClientValidationError los ecoaría enteros.
+    const errorMsg = sanitizeErrorMessage(error)
     console.error(
       JSON.stringify({
         type: 'capture_lead.error',
