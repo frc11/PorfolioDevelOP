@@ -16704,3 +16704,198 @@ Commit 2 (cliente), desktop y mobile:
    watchdog_canned.
 
 ---
+
+
+---
+
+## BLOQUE PRIVACIDAD â€” datos de terceros fuera de los logs de plataforma
+
+**Objetivo:** que ningun dato personal de los visitantes de los clientes
+llegue a los logs de plataforma (Netlify Logs), y que el hash de IP sea lo
+que su docstring promete. Fase 0 de barrido read-only con parada dura +
+3 commits atomicos con compuerta humana entre cada uno. Fechas: 2026-08-10/11.
+Arbol: worktree logic-core-runtime (branch main). Reporte de Fase 0 completo
+entregado en sesion; lo durable quedo aca y en docs/privacidad-afirmaciones-cliente.md.
+
+### Fase 0 â€” barrido (aprobado por Valentino con 3 decisiones)
+- ~135 puntos unicos de emision console/stderr inventariados y verificados
+  adversarialmente. UN solo derrame incondicional de PII de visitantes a
+  consola: handoff.whatsapp (showWhatsappHandoff), que filtraba MAS de lo que
+  decia el brief: visitorName, visitorContact, topicSummary, purchaseSignals
+  y reason (via el spread de metadata en persistentLogger).
+- Correccion de premisas del brief, con evidencia: (a) el hash salteado de
+  ipHash.ts NO participaba del rate-limit pese a su docstring â€” la clave real
+  del chat era un segundo hash inline SIN salt en route.ts; (b) habia 4
+  esquemas de hash, no 2; (c) la retencion de 30 dias SI estaba cableada en
+  Netlify (cleanup-old-events-cron).
+- DB: chatbot_events.metadata esta bien â€” todo org-scoped via forOrg, cero
+  caminos tenant->tenant. El problema era exclusivamente el camino consola y
+  sus espejos.
+- Sinks externos no contemplados por el brief: Sentry (espejo parcial de la
+  consola via breadcrumbs; scrub por regex no cubre texto libre) y el
+  Telegram interno de la agencia (PII de visitantes por diseno â€” decision de
+  producto). Verificado por NOMBRES de env en Netlify (nunca valores):
+  no existe SENTRY_DSN ni NEXT_PUBLIC_SENTRY_DSN en ningun contexto â€”
+  Sentry esta INACTIVO en prod; su superficie es teorica.
+- CORRECCION DE DEUDA VIEJA: "dev no llega a Vertex" es FALSO hoy â€” dev
+  (dev:qa) SI llega a un LLM (Gemini API, respuestas reales). Lo que falla en
+  dev es la persistencia intermitente (ver P2002 abajo). Sacado de la deuda.
+- Decisiones aprobadas: allowlist con redactedKeys (no denylist); salt con
+  ABORT en produccion (argumento decisivo: docs/env-vars.md y check-env.js ya
+  prometian "error en arranque" â€” el codigo mentia respecto de su propia doc);
+  el commit 3 de redaccion de errores ENTRA en el bloque.
+
+### Commit 1 â€” allowlist del camino consola (feat(privacidad): P1)
+- persistentLogger.ts: el relay a consola de logChatbotEvent emite SOLO las
+  claves de CONSOLE_METADATA_ALLOWLIST (43 claves â€” la union exacta de las
+  claves seguras de los 18 callsites, re-enumerada del codigo). Lo excluido se
+  reemplaza por redactedKeys (los NOMBRES, nunca los valores). El camino DB
+  queda intacto (la metadata completa y message siguen yendo a la columna
+  org-scoped que consume el panel). Una clave nueva queda FUERA del log por
+  omision â€” el modo de falla seguro, exactamente el inverso del bug.
+- Test nuevo test:pii (console-pii.invariant.ts), falla-primero con rojo
+  documentado: marcadores de PII + un campo inventado no listado -> nada sale;
+  message jamas toca consola; lo seguro pasa intacto; y pinnea la FORMA de los
+  4 eventos de telemetria permanente (chat.onfinish_phases, watchdog_settled,
+  provider.stream_chunks, chat.watchdog_fired â€” verificados libres de PII, no
+  perdieron ningun campo). El allowlist esta DUPLICADO a proposito en el test:
+  cambiarlo en produccion sin decidirlo tambien ahi lo pone en rojo.
+
+### Commit 2 â€” hash de IP unificado + salt con ABORT (feat(privacidad): P2)
+- route.ts del chat usa hashIp(extractClientIp(request)): UN solo esquema
+  (salted, 16 hex) en todo el chatbot; muere el hash inline sin salt de 24 hex
+  y el parsing duplicado de headers (extractClientIp, fallback 'unknown',
+  exportada por el facade index.server). Mismos presets, ventanas y codigos.
+  Unico efecto operativo: los buckets chatbotPerSession se resetean UNA vez en
+  el deploy (ventana de 60s; filas viejas las barre el cleanup perezoso).
+- ipHash.ts: en produccion sin CHATBOT_IP_HASH_SALT ahora TIRA (antes: warning
+  por request + fallback a un salt hardcodeado en un repo PUBLICO). Docstring
+  reescrita a la verdad. check-env.js sale con codigo 1 en prod sin la
+  variable; envValidator la marca required condicional a prod. Cumple el
+  criterio de aceptacion que S7-03 dejo escrito en la auditoria de julio.
+- AVISO CRITICO DE DEPLOY: deployar el ABORT sin CHATBOT_IP_HASH_SALT en
+  Netlify tira el chatbot de prod al primer request (500). La variable fue
+  creada en Netlify por Valentino ANTES del push, y el mensaje del commit lo
+  dice explicito. El build NO se rompe sin la variable (el abort es por
+  request, verificado: next build local pasa sin salt).
+- Test nuevo test:iphash, falla-primero: abort en prod, determinismo, el salt
+  participa, dev sigue funcionando, extractClientIp pinneada, y un pin del
+  FUENTE del route (sin createHash inline â€” el bug que motivo el sprint).
+
+### Commit 3 â€” redaccion de la clase de error que ecoa argumentos (feat(privacidad): P3)
+- sanitizeErrorMessage (logger.ts): redacta message (y stack) SOLO de
+  PrismaClientValidationError â€” la unica clase de Prisma que ecoa los
+  ARGUMENTOS de la query (nombre/email/telefono de un lead, contenido de
+  mensajes, la KB entera). Todo otro error pasa intacto (los P1017/P2024 del
+  diagnostico INFRA conservan su message â€” pinneado por test).
+- Aplicado en: extractDbErrorInfo (message + causeMessage), chatbotError
+  (ademas omite stack para esa clase y le manda a Sentry un Error saneado
+  equivalente), fallback de persistentLogger, capture_lead.error (el peor:
+  su try cubre chatbotLead.create con name/email/phone), catch de notifyClient
+  en captureLead, confirm_contact_request.error, saveBotConfig y
+  saveKnowledgeBase. Inventario exhaustivo previo: 15 puntos PRISMA-POSIBLE,
+  8 con PII en los args de la query.
+- FUGA AL BROWSER, no solo a consola: saveBotConfig y saveKnowledgeBase
+  devolvian el message crudo AL CLIENTE via { success: false, error: msg } â€”
+  un PrismaClientValidationError ahi habria devuelto al browser el
+  leadNotificationEmail del cliente o la knowledge base completa. El mismo
+  msg saneado corrige el log Y el return.
+- Los 3 throws de admin (createClientOnly, createClientWithBot, updateClient)
+  ya no interpolan el email en el mensaje que termina en stderr.
+- scrub-pii.ts: claves de IP a la denylist por CLAVE (x-forwarded-for,
+  x-real-ip, x-nf-client-connection-ip, client_ip, ^ip$, ip_address,
+  remote_addr, ^forwarded$) â€” una IPv6 pasa los regex de texto libre.
+  Blindaje pre-activacion: Sentry sigue inactivo (sin DSN).
+- test:pii extendido a 13 checks (rojo documentado 3/12 antes del fix).
+
+### Hallazgo colateral â€” P2002: el PRIMER mensaje de un visitante puede devolver 500 (SPRINT APARTE)
+- Evidencia: 21 de las 23 lineas de error capturadas en los diffs de
+  telemetria son EL MISMO error determinista: PrismaClientKnownRequestError
+  P2002, unique(sessionId), en prisma.conversation.create() â€” stage unhandled.
+- Mecanismo: carrera de creacion en getOrCreateConversation. Varios
+  primeros-turnos concurrentes de la MISMA sesion hacen find -> "no existe" ->
+  create; el primero commitea y los demas chocan contra el unique y escapan
+  como 500.
+- Exposicion real en produccion (el analisis completo): el camino es el retry
+  del widget (INFRA.2) contra el PRIMER turno de una sesion. La ventana se
+  abre justo con Neon fria: con un cold start de 6-7 segundos, el request
+  original sigue en vuelo cuando el retry dispara; ambos ven "no existe" y el
+  perdedor devuelve 500. Es decir: EL PRIMER MENSAJE DE UN VISITANTE NUEVO
+  PUEDE FALLAR â€” la primera impresion del producto, en el peor momento
+  (funcion fria). El harness del bloque lo amplifico (14 turnos concurrentes
+  de la misma sesion) pero el mecanismo es real.
+- Forma del fix (para el sprint aparte): catch de P2002 en
+  getOrCreateConversation + re-fetch de la fila ganadora (la conversacion ya
+  existe â€” el perdedor debe adoptarla, no fallar).
+- Threat model: el message de P2002 nombra el CAMPO (sessionId), nunca
+  valores. Solo PrismaClientValidationError ecoa datos â€” y esa es la clase
+  que el commit 3 redacta.
+- Las otras 2 lineas: DeadlineExceededError (2000ms, persist_tx_1) â€” el
+  timeout intermitente de persistencia conocido (familia INFRA.3), consistente
+  con Neon dev lenta bajo rafaga. Sin novedades; sigue gated en la firma real
+  de prod.
+
+### Verificacion (por commit, gates de a uno, sin pipes)
+- tsc --noEmit (.\node_modules\.bin\tsc.cmd): limpio en los 3 commits.
+- eslint sobre los archivos tocados: limpio; unicos hallazgos PREEXISTENTES y
+  fuera de los diffs: check-env.js:10-11 (require de dotenv, 2 errores que ya
+  estaban) y scrub-pii.ts:118 (warning _hint sin uso).
+- Bateria completa de invariantes del chatbot: 26/26, 27/27 y 28/28 verdes
+  (crece porque cada commit suma su test nuevo).
+- npm run build: exit 0 en los 3 (local necesita
+  NODE_OPTIONS=--max-old-space-size=6144 â€” OOM con el heap default de Node 24;
+  Netlify ya tiene su NODE_OPTIONS). prisma migrate status: 86 migraciones al
+  dia en los 3.
+- Telemetria: baseline capturado ANTES de tocar codigo contra dev:qa (puerto
+  3002), set fijo de 16 requests (14 turnos concurrentes de una sesion + body
+  invalido + shape invalida; el limiter interno da 10-pasan/4x429
+  deterministico). METODO DECLARADO: dev es un camino MIXTO no deterministico
+  (el LLM responde a veces, la persistencia falla intermitente), asi que el
+  diff compara FORMAS (tipo de evento -> set de claves), no valores. Los 3
+  diffs pre/post: IDENTICOS en los tipos comunes (10 tipos, mismos sets).
+  chat.rate_limited conserva su ipHash. Filas de prueba de dev-DB borradas
+  tras cada corrida; los chatbot_events generados los purga T0.2 a los 30 dias.
+
+### Que se puede afirmar al cliente
+- Archivo propio: docs/privacidad-afirmaciones-cliente.md â€” legible sin haber
+  leido nada de esto; es el insumo de Franco para escribir el contrato sin
+  mentir. Condicionado a: 3 commits deployados + verificacion post-deploy.
+
+### Deuda / fuera de bloque (anotado, NO tocado)
+- P2002 race del primer turno (sprint aparte, analisis arriba).
+- Telegram con PII de visitantes al chat interno de la agencia: decision de
+  PRODUCTO para Franco antes del primer cliente â€” o queda y se declara en
+  contrato, o manda solo un identificador y el dueno entra al panel.
+- Valores historicos de Conversation.ipHash generados con el salt publico:
+  limpieza de datos pendiente (operacion de datos, NO migracion de schema).
+- S7-09 vigente: Conversation.ipHash viaja al browser del cliente via RSC
+  (findMany sin select en el dashboard de conversaciones).
+- Resto de la superficie de Sentry (IPv6 en x-forwarded-for pasa el scrub de
+  texto, consoleIntegration espeja la consola como breadcrumbs, dual
+  instrumentation files): deuda TEORICA mientras no haya DSN.
+- chat.bad_request arrastra un snippet corto del body crudo en el message del
+  SyntaxError/ZodError (no-Prisma, acotado por V8).
+- Sinks fuera del modulo chatbot con el mismo patron: lib/alerts.ts:145
+  (console.error con el Error crudo; su try envuelve prisma) y syncLeadToCrm
+  via lib/logger (args sin PII de visitante).
+- Esquemas C/D de hash de la plataforma (auth-rate-limit.ts) siguen sin salt.
+- admin/settings/reports/page.tsx usa prisma crudo fuera de la frontera de
+  isolation.
+- .env.local del worktree logic-core-runtime sin IMPERSONATION_SECRET ni
+  DEVELOP_ALERTS_EMAIL (check-env sale 1 en dev por eso; preexistente, deuda
+  de entorno).
+- vercel.json registra un set de crons DISTINTO al de netlify.toml (el que
+  corre es Netlify; desincronizados desde T0.2).
+
+### Pendiente del humano
+1. Push de los 3 commits (CHATBOT_IP_HASH_SALT ya creada en Netlify). Tras el
+   deploy: mandar un mensaje real al bot de prod que dispare un handoff o un
+   lead y verificar en Netlify Logs que la linea sale con redactedKeys y SIN
+   visitorName/visitorContact/topicSummary.
+2. Verificar la retencion de logs del plan de Netlify: lo YA derramado antes
+   de este bloque expira segun esa retencion, no segun nuestro codigo.
+3. Decision de producto (Franco): Telegram con PII de visitantes.
+4. Priorizar el sprint del P2002 (primer mensaje de un visitante puede dar
+   500 con Neon fria).
+5. Opcional: completar IMPERSONATION_SECRET y DEVELOP_ALERTS_EMAIL en el
+   .env.local del worktree para que check-env vuelva a verde en dev.
