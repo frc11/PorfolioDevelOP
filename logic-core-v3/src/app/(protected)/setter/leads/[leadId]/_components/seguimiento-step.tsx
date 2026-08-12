@@ -128,6 +128,12 @@ export function SeguimientoStep({
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [enviandoDemo, startEnvioDemo] = useTransition()
+  // Piso del date-picker de POSTERGADO: "mañana" (hoy + 24h, fecha UTC).
+  // Lazy init → Date.now() corre una sola vez al montar (o por request en SSR),
+  // nunca en cada render ni congelado a nivel módulo entre requests.
+  const [minReactivacion] = useState(
+    () => new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+  )
 
   const respondio = leadRespondio(status)
   const demoEnviada = Boolean(demoEnviadaAt)
@@ -196,10 +202,6 @@ export function SeguimientoStep({
       router.refresh()
     })
   }
-
-  const minReactivacion = new Date(Date.now() + 24 * 60 * 60 * 1000)
-    .toISOString()
-    .slice(0, 10)
 
   return (
     <Card padding="lg" className="space-y-5">
