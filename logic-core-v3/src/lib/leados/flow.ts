@@ -22,6 +22,7 @@ import type { DossierStage, LeadStatus } from '@prisma/client'
 // revision solo `import type`) — por eso `flow.invariant.ts` puede importar
 // `clasificarLead` de verdad. Es además el patrón ya usado por home.ts/foco.ts.
 import { calculateNextFollowUp } from '../follow-up.ts'
+import { TEXTO_TURNO, turnoDelLead } from './turno.ts'
 import {
   AgendaSchema,
   BriefSchema,
@@ -407,6 +408,24 @@ function grupoPara(input: HomeLeadInput, gateAbierto: boolean): HomeGroupKey {
  * el botón, no un paréntesis. Sin nombres internos, un reagrupamiento de
  * pantallas no vuelve a dejar esta línea mintiendo.
  */
+/**
+ * La sugerencia de un lead que NO tiene nada para hacer ahora. La primera mitad
+ * NOMBRA EL TURNO —de `turno.ts`, el único lugar donde se decide— y la segunda
+ * dice qué está pasando. Antes cada rama escribía su propia frase de espera, y
+ * así fue como «Esperando respuesta del negocio» terminó cubriendo también lo
+ * que esperaba a Franco.
+ */
+function esperaDe(
+  input: HomeLeadInput,
+  detalle: string,
+): { proximaAccion: string; accionable: boolean } {
+  // El turno lo decide `turno.ts` — acá no se vuelve a decidir. El panel no
+  // proyecta `finalUrl`, así que la rama «aprobada sin el link de Franco» no se
+  // puede afirmar desde esta superficie y no se afirma (queda `undefined`).
+  const turno = turnoDelLead({ status: input.status, stage: input.stage, accionPendiente: false })
+  return { proximaAccion: `${TEXTO_TURNO[turno].titulo} — ${detalle}`, accionable: false }
+}
+
 function proximaAccionPara(
   input: HomeLeadInput,
   gateAbierto: boolean,
@@ -429,30 +448,24 @@ function proximaAccionPara(
   // caso, un CALL_AGENDADA en stage FICHA mostraba "Completá la ficha" dentro
   // de "Agendadas" (incoherencia observada en runtime).
   if (input.status === 'CALL_AGENDADA') {
-    return { proximaAccion: 'Reunión agendada — la cierra Franco', accionable: false }
+    return esperaDe(input, 'la reunión la corre él')
   }
 
   switch (input.stage) {
     case 'EN_REVISION':
-      return { proximaAccion: 'Esperando revisión de Franco', accionable: false }
+      return esperaDe(input, 'está revisando tu demo')
     case 'APROBADA': {
       // El envío del link vive en «Envío» (m15) desde el corte 5.6.
       if (!input.demoEnviada && gateAbierto) {
         return { proximaAccion: 'Demo aprobada — mandá el link al negocio', accionable: true }
       }
       if (!input.demoEnviada) {
-        return {
-          proximaAccion: 'Demo aprobada — se envía cuando el negocio responda',
-          accionable: false,
-        }
+        return esperaDe(input, 'la demo está aprobada y el link sale cuando conteste')
       }
       if (input.followUpVencido) {
         return { proximaAccion: 'Demo enviada — te toca un toque', accionable: true }
       }
-      return {
-        proximaAccion: 'Demo enviada — registrá lo que pase en la conversación',
-        accionable: false,
-      }
+      return esperaDe(input, 'ya tiene la demo — registrá lo que pase en la conversación')
     }
     case 'BRIEF':
       return {
@@ -486,7 +499,7 @@ function proximaAccionPara(
       if (input.sinProximoToque) {
         return { proximaAccion: 'Se enfría — el cierre lo decide Franco', accionable: false }
       }
-      return { proximaAccion: 'Esperando respuesta del negocio', accionable: false }
+      return esperaDe(input, 'todavía no contestó el primer mensaje')
     }
     case 'FICHA':
       return fichaTieneSenal(input.ficha)
@@ -520,7 +533,8 @@ export function motivoOrden(lead: HomeLead): string | null {
     case TRABAJO_TIER.CONSTRUIR:
       return 'Pasó el filtro y le falta la demo — construila'
     case TRABAJO_TIER.ESPERA_TU_ACCION:
-      return 'Te está esperando a vos'
+      // Mismo turno, misma palabra que el resto del producto (`turno.ts`).
+      return TEXTO_TURNO.setter.titulo
     case TRABAJO_TIER.CONTACTAR_CON_DEMO:
       return 'La demo está lista para mandar'
     case TRABAJO_TIER.EVALUAR:

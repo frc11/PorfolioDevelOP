@@ -1,27 +1,33 @@
 import Link from 'next/link'
 import { CheckCircle2, CalendarClock, Hourglass, Pin } from 'lucide-react'
+import { TEXTO_TURNO, type Turno } from '@/lib/leados/turno'
 
 /**
  * LeadOS 2.1b — Estado "todo en espera": el setter TIENE leads pero ninguno está
  * en su cola de trabajo ahora (la cola `trabajar` quedó vacía). Es DISTINTO del
  * `HomeEmpty` (cero leads asignados): acá hay trabajo, solo que no en el foco —
- * está en vuelo (esperando respuesta del negocio, revisión de Franco o una
- * reactivación), o el setter lo guardó él mismo (pausado/fijado). Server component
+ * está en vuelo, o el setter lo guardó él mismo (pausado/fijado). Server component
  * puro (sin interacción): presenta los conteos que ya calculó la page desde la
  * partición de la cartera.
  *
- * Las tres cuentas son disjuntas (partición). `fijados` acá son fijados que NO
- * son accionables (en vuelo o fijado+pausado): desde A-05 el fijado ACCIONABLE ya
- * es el foco (el pin ordena la cola, no la excluye), así que si esta pantalla se
- * muestra, ninguno de los fijados tenía nada para hacer ahora — pero siguen
- * contando para no afirmar "no hay leads activos" cuando sí los hay (cartera abajo).
+ * Los conteos en vuelo vienen desglosados POR TURNO (`turno.ts`). Es la única
+ * pantalla que existe para decirle al setter a quién está esperando, y hasta P11
+ * lo decía al revés: un solo contador «esperando respuesta» que incluía las
+ * demos paradas en la cola de Franco (H-03 del manual). Un negocio, dos rótulos,
+ * y el más grande era el equivocado.
+ *
+ * Las tres cuentas de abajo son disjuntas (partición). `fijados` acá son fijados
+ * que NO son accionables (en vuelo o fijado+pausado): desde A-05 el fijado
+ * ACCIONABLE ya es el foco (el pin ordena la cola, no la excluye), así que si esta
+ * pantalla se muestra, ninguno de los fijados tenía nada para hacer ahora — pero
+ * siguen contando para no afirmar "no hay leads activos" cuando sí los hay.
  *
  * Paleta NEUTRA a propósito (disciplina B9): el cyan queda para lo accionable, y
  * acá no hay nada que accionar.
  */
 type HomeEnEsperaProps = {
-  /** En vuelo, no accionables (seguimiento + revisión + agendadas). */
-  enEspera: number
+  /** En vuelo, no accionables (seguimiento + revisión + agendadas), por turno. */
+  enVueloPorTurno: Record<Turno, number>
   /** Pausados por el propio setter (snooze personal vigente). */
   pausados: number
   /** Fijados por el setter que NO son accionables (en vuelo) — A-05: el fijado
@@ -33,7 +39,11 @@ function plural(n: number, singular: string, plural: string): string {
   return n === 1 ? singular : plural
 }
 
-export function HomeEnEspera({ enEspera, pausados, fijados }: HomeEnEsperaProps) {
+/** El turno propio primero: si algo quedó trabado de su lado, es lo que urge. */
+const ORDEN_TURNOS: readonly Turno[] = ['setter', 'franco', 'negocio']
+
+export function HomeEnEspera({ enVueloPorTurno, pausados, fijados }: HomeEnEsperaProps) {
+  const enEspera = ORDEN_TURNOS.reduce((total, turno) => total + enVueloPorTurno[turno], 0)
   // Sin NADA activo solo si las tres cuentas son cero (todo lo demás es archivo).
   const sinNada = enEspera === 0 && pausados === 0 && fijados === 0
   const enVuelo = enEspera > 0
@@ -52,20 +62,26 @@ export function HomeEnEspera({ enEspera, pausados, fijados }: HomeEnEsperaProps)
         <p className="max-w-sm text-xs leading-relaxed text-zinc-500">
           {sinNada
             ? 'No tenés leads activos en este momento.'
-            : enVuelo
-              ? 'Tu trabajo está en vuelo: el lead vuelve a tu foco cuando el negocio responda, Franco revise o se venza una postergación.'
-              : 'Lo que tenés está guardado por vos — fijado o pausado; nada quedó en la cola para trabajar ahora.'}
+            : enVueloPorTurno.setter > 0
+              ? TEXTO_TURNO.setter.detalle
+              : enVuelo
+                ? 'Tu trabajo está en vuelo: el lead vuelve a tu foco cuando el negocio conteste, Franco resuelva lo suyo o se venza una postergación.'
+                : 'Lo que tenés está guardado por vos — fijado o pausado; nada quedó en la cola para trabajar ahora.'}
         </p>
 
         {!sinNada && (
           <div className="flex flex-wrap items-center justify-center gap-2">
-            {enEspera > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300">
+            {/* Un chip POR TURNO: a quién le toca es el dato, no cuántos hay. */}
+            {ORDEN_TURNOS.filter((turno) => enVueloPorTurno[turno] > 0).map((turno) => (
+              <span
+                key={turno}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300"
+              >
                 <Hourglass size={12} strokeWidth={1.5} aria-hidden className="shrink-0 text-zinc-500" />
-                <span className="tabular-nums">{enEspera}</span>
-                esperando respuesta
+                <span className="tabular-nums">{enVueloPorTurno[turno]}</span>
+                {TEXTO_TURNO[turno].chip}
               </span>
-            )}
+            ))}
             {fijados > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.06] bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-zinc-300">
                 <Pin size={12} strokeWidth={1.5} aria-hidden className="shrink-0 text-zinc-500" />

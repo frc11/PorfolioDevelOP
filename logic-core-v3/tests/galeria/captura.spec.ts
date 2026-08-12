@@ -43,9 +43,13 @@ const SIN_ANIMACIONES = `
 `
 
 /** Los selectores que DEFINEN cada tipo de pantalla (lo que se espera antes de la foto). */
+// P11 — las dos pantallas de estado rotulan DE QUIÉN ES EL TURNO («Le toca al
+// negocio» / «Le toca a Franco»), y cuál de los dos sale depende del lead: la
+// misma pantalla de espera cubre los dos turnos. El ancla matchea el prefijo, así
+// que no hay que sembrar el turno para poder esperar la pantalla.
 const ANCLA_POR_PANTALLA: Record<string, string> = {
-  espera: 'section[aria-label="Esperando respuesta del negocio"]',
-  revision: 'section[aria-label="Demo en revisión"]',
+  espera: 'section[aria-label^="Le toca"]',
+  revision: 'section[aria-label^="Le toca"]',
   archivo: 'section[aria-label="Negocio cerrado"]',
 }
 const ANCLA_MANUAL = 'section[aria-label="Instrucción de esta pantalla"]'
@@ -372,7 +376,8 @@ test('desktop · 38-home-foco-espera-accion', async ({ page, baseURL }, testInfo
   test.skip(testInfo.project.name !== 'desktop', 'solo desktop')
   await prepararComoSetterDedicado(page, 'foco-espera-accion', baseURL)
   await fotografiar(page, '/setter', ANCLA_FOCO, '38-home-foco-espera-accion.png')
-  await expect(page.getByText('Te está esperando a vos').first()).toBeVisible()
+  // P11 — el rótulo del tier usa el vocabulario de turno (`TEXTO_TURNO.setter`).
+  await expect(page.getByText('Te toca a vos').first()).toBeVisible()
 })
 
 test('desktop · 39-home-vacio', async ({ page, baseURL }, testInfo) => {

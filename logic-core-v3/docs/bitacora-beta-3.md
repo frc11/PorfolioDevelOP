@@ -3786,6 +3786,160 @@ ningún archivo de `src/`, así que no lo pudo mover ni en un carácter.
 
 ---
 
+## Sprint P11 — A quién le toca: el concepto que faltaba — 2026-08-10
+
+Rama `redesign/home`, HEAD de arranque `c138ae4c`. **Sin push.**
+
+**Fase A previa (separación del árbol).** El árbol traía dos trabajos terminados sin commitear de dos
+sesiones distintas, más una bitácora que los dos habían escrito. Se separaron sin descartar nada:
+`f06df31e` (P9, barrido de vocabulario — 19 archivos de `src/`, +95/−56, exactamente lo que su propia
+entrada declara) y `c138ae4c` (Corrida G, galería regenerada — 8 archivos + el script del índice). La
+bitácora se partió por tramos construyendo el blob del índice (`hash-object --path` + `update-index`),
+sin tocar el árbol de trabajo. Quedó **un archivo sin commitear y declarado**: `tsconfig.json`, que es
+MIXTO — dos líneas de `.next-galeria/` (galería) y seis de `.next-perf-*/` (residuo
+de la sesión de perf ya commiteada en `39b9d90f`, con esos dirs excluidos por `.git/info/exclude` y ya
+inexistentes; los builds de ESTA corrida le sumaron el par de `.next-perf-base/`, misma clase de residuo autogenerado — ninguna línea la escribió nadie). No encaja limpio en ninguno de los dos grupos, y la propia entrada de Corrida G lo lista
+bajo «fuera de scope».
+
+### El hallazgo
+
+El manual de usuario recién escrito encontró tres pantallas que **no comparten una sola línea de
+código** diciendo lo mismo para dos cosas distintas: confundir **esperar al negocio** con **esperar a
+Franco** (H-02, H-03, y de refilón H-09). Lo delató una frase que el manual no pudo escribir derecha:
+el capítulo 11 tuvo que enseñar a leer *«la etiqueta al lado del nombre del negocio»* como
+diagnóstico, y después admitir que la pantalla dice algo que no aplica.
+
+Que tres superficies independientes lleguen al mismo error no es un bug suelto: **falta un concepto**.
+El producto tiene vocabulario preciso para todo —ficha, veredicto, opener, toque, brief, borrador,
+chequeo— menos para decir **a quién le toca**.
+
+### El censo (antes de editar)
+
+Once superficies hablan de esperas. Clasificadas por turno:
+
+| Turno | Superficies | Estado |
+|---|---|---|
+| **negocio** (afuera, puede no pasar nunca) | pantalla de estado, panel de inicio, envío, `proximaAccionPara` | decidían cada una por su cuenta |
+| **franco** (adentro, va a pasar) | las MISMAS cuatro + novedades + filtro de cartera | las dos primeras lo llamaban «espera del negocio» |
+| **setter** (no es espera: es acción) | `motivoOrden`, banner de turnaround | «Te está esperando a vos», sin vocabulario compartido |
+
+Tres son **copy muerto** (0 consumidores, verificado): `describirFoco` entero en `paso.ts`,
+`GUIA_BRIEF.gate` y `GUIA_REVISION`. No se tocaron — retirar copy muerto es poda, no vocabulario.
+
+**De dónde sale el turno.** De lo que el producto ya sabe: `status` (la conversación), `stage` (la
+demo) y `dossier.finalUrl` — la URL permanente que Franco registra AL APROBAR. Ese campo es el
+discriminador que faltaba: aprobada **sin** link cargado significa que el envío está trabado de este
+lado, no del otro. Cero datos nuevos, cero migraciones.
+
+### El concepto, una sola vez
+
+`src/lib/leados/turno.ts` — módulo HOJA (solo tipos de Prisma, así `flow.ts` lo consume sin ciclo).
+`turnoDelLead()` decide; `TEXTO_TURNO` tiene las palabras, editables por Franco en un solo lugar.
+
+No re-decide lo que ya estaba decidido: recibe `accionPendiente` —`HomeLead.accionable` en el panel,
+«la pantalla derivada es de estado» en el manual— y lo TRADUCE. Por eso no puede desincronizarse de la
+cola de trabajo. Los gates (`gateBriefAbierto`, `gateEnvioDemo`) siguen en `flow.ts`, intactos.
+
+Los tres textos:
+
+| Turno | Titular | Qué dice |
+|---|---|---|
+| negocio | **Le toca al negocio** | «Puede contestar hoy, en dos semanas o no contestar nunca — eso no lo manejás vos. Cuando toque un toque te lo traemos al foco; mientras tanto, trabajá otro negocio.» |
+| franco | **Le toca a Franco** | «Está de este lado y va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas — cuando lo resuelva, el negocio vuelve solo a tu foco.» |
+| setter | **Te toca a vos** | «Esto no es una espera: hay algo trabado de tu lado y nadie lo va a destrabar por vos. Abrilo y seguí desde donde quedó.» |
+
+El titular dice el turno **solo**: ninguna pantalla obliga ya a leer una etiqueta al costado.
+
+Consumidores (los cinco, sin excepción): `estado-manual.tsx`, `home-en-espera.tsx` (un chip POR
+TURNO en vez de un contador único), `m15-envio.tsx`, `proximaAccionPara` y `motivoOrden`.
+
+**El cuarto «todavía no» del envío.** `gateEnvioDemo` pide aprobación + `finalUrl` + enganche, y la
+aprobación y el link son dos cosas que Franco hace en momentos distintos — pero la pantalla tenía tres
+mensajes, no cuatro. Ahora aprobada CON link y sin respuesta es del negocio; aprobada SIN link es de
+Franco, con su causa real nombrada.
+
+### La red
+
+`turno.invariant.ts` (invariante 19). Fija seis cosas sobre las 432 combinaciones de
+status × stage × finalUrl × acción-pendiente: totalidad, texto propio por turno, **ningún texto
+compartido entre dos turnos**, los tres alcanzables, coherencia con `accionable`, y el caso #29 del
+manual clavado por ejecución. El universo se escribe como `Record<LeadStatus, true>` para que un enum
+nuevo **no compile** en vez de escaparse de la matriz.
+
+**Demostrado fallando, dos veces.** (1) Igualando `franco.titulo` a `negocio.titulo`: *«dos turnos
+distintos muestran el MISMO texto: negocio.titulo y franco.titulo dicen «Le toca al negocio»»*, exit 1.
+(2) Apagando la derivación «aprobada sin link → Franco»: *«lo que está en la cola de Franco es de
+Franco... 'setter' !== 'franco'»*, exit 1. Restaurado, verde.
+
+### El residuo de vocabulario
+
+El manual encontró uno; el barrido dejó **cuatro** —la búsqueda de P9 no miraba los mensajes de error
+de las server actions—:
+
+- `seguimiento-form.tsx`: «Abre la producción de la demo **(Brief)**» → «Frena los toques y te habilita
+  a construir la demo». Es el que el manual vio: visible, y encima traía un tercer sinónimo de
+  construir la demo.
+- `dossier.actions.ts`: «Falta publicar el borrador **(Borrador)**» → sin el paréntesis.
+- `outreach.actions.ts`: «Primero registrá el opener **(Opener)**» → sin el paréntesis.
+- `guidance-content.ts` (`GUIA_SEGUIMIENTO.porque`): mismo `(Brief)`. Copy muerto —ese teach panel no
+  se monta—, corregido igual por coherencia.
+
+Queda uno declarado: `paso.ts:110` «Mandá el primer mensaje (opener)», dentro de `describirFoco`, que
+no tiene consumidores.
+
+### Verificado en la aplicación (no solo compila)
+
+Spec temporal contra el harness real del setter (`.next-setter/`, :3003), **borrada después de
+correr** — 5/5 verde. Sin capturas: se afirma por navegación real y lectura del DOM del `<main>`,
+nunca por status code.
+
+| Situación sembrada | Qué dice el producto | ¿Se entiende el turno solo? |
+|---|---|---|
+| El negocio no contestó (EVALUADA, opener mandado, toque futuro) | *En espera* → **«Le toca al negocio»** → «…o **no contestar nunca** — eso no lo manejás vos… trabajá otro negocio. Próximo toque el 13/8» | sí |
+| La demo espera a Franco (EN_REVISION) | *En revisión* → **«Le toca a Franco»** → «…va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas» | sí |
+| Aprobada y lista: le toca al setter | *Envío* → **«Tu paso ahora / Mandá el link al negocio»** → «Demo aprobada — momento de enviar el link» | sí, y sin ninguna frase de espera |
+| **La captura #29**: aprobada + respondió + SIN link de Franco | *En espera* → **«Le toca a Franco»**; y en el envío: **«Le toca a Franco» / «todavía no cargó su link permanente…»** | sí — antes decía «Esperando respuesta del negocio» a un negocio que ya había respondido |
+| Panel de inicio con un solo lead, en la cola de Franco | «No hay nada para trabajar ahora mismo» → **«1 esperando a Franco»** | sí — antes «1 · esperando respuesta» |
+
+**Lo que el DOM delató y el manual no había visto.** En la única pantalla donde el turno es del setter
+(m15 con el gate abierto), el subtítulo del registro decía *«se destraba solo, sin que tengas que hacer
+nada»* — el mismo texto que con el gate cerrado. Le toca a él y sonaba a espera. Ahora dice qué es:
+«El segundo mensaje: la demo aprobada, con su link, al negocio que respondió».
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | **exit 0** — línea base era 0 errores, sigue en 0. **Ninguno nuevo** |
+| `npm run check:invariants` | **19/19, exit 0** (el 19 es `check:invariant:turno`) |
+| `npm run test:leados` | **25/25, exit 0** |
+| `npm run test:setter` | **60/60, exit 0** (build aislado en `.next-setter/`, puerto 3003). La corrida con la spec temporal adentro dio **65/65** |
+| `git diff --stat` | 15 archivos tocados + 2 nuevos (`turno.ts`, `turno.invariant.ts`). Cero transiciones, gates, aislamiento, lista de fases ni schema |
+
+### Fuera de scope — anotado, no implementado
+
+1. **El panel dice «mandá el link» para una demo aprobada sin `finalUrl`.** `grupoPara`/
+   `proximaAccionPara` deciden con `gateBriefAbierto` (respondió ∨ caliente), que no mira `finalUrl`:
+   ese lead cae accionable en `trabajar` y el card pide mandar un link que no existe. Es el mismo
+   hallazgo, pero del lado de la ACCIONABILIDAD, no del vocabulario: arreglarlo pide proyectar
+   `finalUrl` en `HomeLeadInput` y cambiar qué es accionable — decisión de producto, no de barrido.
+2. **Copy muerto que habla de esperas:** `describirFoco` (`paso.ts`), `GUIA_BRIEF.gate` y
+   `GUIA_REVISION`. Cero consumidores; retirarlo es poda.
+3. **`tsconfig.json` sigue sin commitear**, declarado arriba.
+4. **La galería y el manual de usuario** no se regeneran acá. Solo se ajustaron los tres selectores de
+   `tests/galeria/captura.spec.ts` que dependían de los textos cambiados, para no dejar la corrida de
+   capturas rota a la espera.
+5. Los hallazgos que la bitácora ya declaró fuera de scope siguen fuera: accesos externos pendientes,
+   horarios, «assets», «Toque» vs «Seguimiento», «call» vs «reunión».
+
+### Lo que cierra Franco
+
+- **Los tres textos.** Sobre todo el del negocio: tiene que transmitir que puede no pasar nunca sin
+  sonar desalentador.
+- **Que el turno se entienda de un vistazo**, mirando las pantallas.
+
+---
+
 ## Corrida de experiencia — el Panel del Setter recorrido como usuario (11/8/2026)
 
 **Qué fue.** No una auditoría: cinco recorridos *usando* el panel y anotando cada cosa que

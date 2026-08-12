@@ -385,7 +385,8 @@ export async function enviarARevision(
       return fail('Solo se envía a revisión una demo en construcción')
     }
     if (!dossier.draftUrl) {
-      return fail('Falta publicar el borrador (Borrador) antes de enviar a revisión')
+      // P11 — el paréntesis nombraba la pantalla; el mensaje ya dice qué falta.
+      return fail('Falta publicar el borrador antes de enviar a revisión')
     }
     const selfCheck = parseSelfCheck(dossier.selfCheckJson)
     if (!selfCheckAprobado(selfCheck)) {

@@ -244,12 +244,16 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     detalle: 'Con el link del borrador a la vista, verificá los obligatorios y mandá la demo a revisión.',
     corto: 'Chequeo final',
   },
+  // P11 — el detalle decía «se destraba solo, sin que tengas que hacer nada», y
+  // se muestra IGUAL con el gate abierto: la única pantalla donde el turno es
+  // del setter se leía como una espera. Ahora dice qué hacer; el «todavía no»,
+  // cuando corresponde, lo nombra el registro con su turno y su causa real.
   m15: {
     id: 'm15',
     tipo: 'manual',
     fase: 'envio',
     titulo: 'Mandá el link al negocio',
-    detalle: 'Se habilita solo con la demo aprobada y el negocio respondiendo — se destraba solo, sin que tengas que hacer nada.',
+    detalle: 'El segundo mensaje: la demo aprobada, con su link, al negocio que respondió.',
     corto: 'Envío',
   },
   m16: {
