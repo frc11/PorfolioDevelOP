@@ -1,53 +1,44 @@
+import dynamic from 'next/dynamic'
 import { ThemeProvider } from '@/hooks/useThemeObserver'
 import { HomeWrapper } from '@/components/layout/HomeWrapper'
+import { SectionWrapper } from '@/components/layout/SectionWrapper'
 
+// Critical ATF (Above The Fold) Components
 import { Hero } from '@/components/layout/Hero'
-import { Portfolio } from '@/components/sections/home/Portfolio'
-import { PortalDemo } from '@/components/sections/portal-demo/PortalDemo'
-import { Nosotros } from '@/components/sections/nosotros/Nosotros'
-import { Servicios } from '@/components/sections/servicios/Servicios'
-import { Cierre } from '@/components/sections/cierre/Cierre'
-import { Footer } from '@/components/sections/home/Footer'
+import { About } from '@/components/sections/home/About'
 
-/**
- * El home, después de B4-S3.
- *
- * Seis secciones en el orden de la arquitectura, alternando tema de forma
- * estricta y con el índice de capítulos correlativo:
- *
- * | # | Sección | Tema | `id` |
- * |---|---|---|---|
- * | 01 | Hero | oscuro | `inicio` |
- * | 02 | El caso real | crema | `portfolio` |
- * | 03 | El panel del lunes | oscuro | `portal-demo` |
- * | 04 | Por qué develOP + Somos | crema | `caracteristicas` · `nosotros` |
- * | 05 | Los cuatro frentes | oscuro | `servicios` |
- * | 06 | El cierre | crema | — |
- *
- * **Ya no hay `dynamic()`.** Las seis son Server Components y el único JS de la
- * página vive en tres islas: `SectionShell` (que observa el viewport para
- * invertir el tema), el ciclo de escenas del panel del lunes y el CTA a
- * `/contact` del cierre. Partir eso en chunks separados con `next/dynamic`
- * agregaba un placeholder `animate-pulse` y una carga en cascada para ahorrar
- * kilobytes que ya no existen: las secciones que pesaban —el monolito de 9.898
- * líneas, los dos scrollytelling de `400vh`, el marquee infinito— se borraron en
- * este sprint.
- *
- * **Tampoco hay `SectionWrapper`.** Envolvía a cada hijo en un `motion.div` con
- * `initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en el HTML
- * del SSR: cada sección nacía invisible y dependía del JS para aparecer. El
- * reveal ahora es `animate-ds-reveal`, una animación CSS que corre sin JS.
- */
+// Heavy Components Lazy Loaded
+const Footer = dynamic(() => import('@/components/sections/home/Footer').then(mod => mod.Footer), { ssr: true })
+const WhyDevelOP = dynamic(() => import('@/components/sections/home/WhyDevelOP').then(mod => mod.WhyDevelOP), { ssr: true })
+const Portfolio = dynamic(() => import('@/components/sections/home/Portfolio').then(mod => mod.Portfolio), { loading: () => <div className="min-h-[50vh] animate-pulse bg-zinc-900/20" /> })
+const OurServices = dynamic(() => import('@/components/sections/home/OurServices'), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const PortalDemo = dynamic(() => import('@/components/sections/portal-demo/PortalDemo').then(mod => mod.PortalDemo), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const TodoIncluido = dynamic(() => import('@/components/sections/todo-incluido/TodoIncluido').then(mod => mod.TodoIncluido), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const ModulosOpcionales = dynamic(() => import('@/components/sections/modulos-opcionales/ModulosOpcionales').then(mod => mod.ModulosOpcionales), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const PortalDemoCTA = dynamic(() => import('@/components/sections/portal-demo-cta/PortalDemoCTA').then(mod => mod.PortalDemoCTA), { loading: () => <div className="min-h-[50vh] animate-pulse bg-[#030303]" /> })
+const InfiniteReviews = dynamic(() => import('@/components/sections/home/InfiniteReviews').then(mod => mod.InfiniteReviews), { loading: () => <div className="min-h-[20vh] animate-pulse bg-zinc-900/20" /> })
+
 export default function Home() {
   return (
     <ThemeProvider>
       <HomeWrapper>
         <Hero />
+        <About />
         <Portfolio />
-        <PortalDemo />
-        <Nosotros />
-        <Servicios />
-        <Cierre />
+        <InfiniteReviews />
+
+        <SectionWrapper>
+          <OurServices />
+        </SectionWrapper>
+
+        <SectionWrapper>
+          <PortalDemo />
+        </SectionWrapper>
+
+        <TodoIncluido />
+        <ModulosOpcionales />
+        <PortalDemoCTA />
+        <WhyDevelOP />
         <Footer />
       </HomeWrapper>
     </ThemeProvider>

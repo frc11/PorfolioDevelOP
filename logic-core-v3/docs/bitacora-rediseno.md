@@ -3598,3 +3598,139 @@ del home a 1440 y 390.
    ninguna es el LCP— pero la regla quedó escrita en `globals.css`: contenido
    crítico va en `ds-rise`, no en `ds-reveal`.
 6. **El launcher del chatbot pisa el microcopy del hero a 390.** Ya fichado.
+
+---
+
+## HOME-CLASICO · La home clasica vuelve a main; el rediseno pasa a experimental · 2026-08-12
+
+Decision de producto: produccion vuelve a servir la home anterior al PR #4. El
+rediseno queda como experimental en `origin/redesign/home`. No es un revert de
+commits — los merges entrelazaron el rediseno con LeadOS, el Panel del Setter y
+fixes del chatbot — sino una RESTAURACION DE ARCHIVOS: la historia queda como
+esta y los archivos de la home vuelven a su version de `63a4e364` (el padre del
+merge del PR #4, ultimo estado completo de la home clasica).
+
+### Que se hizo
+
+- **30 archivos restaurados** con `git checkout 63a4e364 -- <path>`: `app/page.tsx`,
+  `layout/Hero.tsx`, `layout/Navbar.tsx`, `layout/DynamicDock.tsx`,
+  `layout/EarlyScrollLock.tsx`, `layout/SectionWrapper.tsx`,
+  `layout/useChromeRevealed.ts`, `ui/Preloader.tsx`, `ui/TypewriterText.tsx`,
+  `ui/KineticText.tsx`, `ui/buttons/MagneticCta.tsx`, `lib/home-routes.ts`, y las
+  secciones: `home/About`, `home/Portfolio`, `home/InfiniteReviews`,
+  `home/OurServices`, `home/WhyDevelOP`, `home/Footer`, `portal-demo/PortalDemo`,
+  `portal-demo/data.ts`, `portal-demo/PortalDemoHeader`, `portal-demo/StoryArcLunes`,
+  `portal-demo/StoryMomentCard`, `portal-demo-cta/PortalDemoCTA`,
+  `todo-incluido/*` (3), `modulos-opcionales/*` (3).
+- **1 edicion a mano**: `app/layout.tsx` (base actual + remonta `<EarlyScrollLock />`
+  en el `<head>` y actualiza el comentario del `suppressHydrationWarning`). Fue la
+  UNICA edicion a mano de toda la operacion.
+- **1 borrado**: `portal-demo/PanelPlate.tsx` — huerfano post-restauracion que
+  importa del `data.ts` nuevo exports que el viejo no tiene (`ATENCION`, `DATO`,
+  `DIMENSIONES`, `METRICAS`, `EscenaId`); `tsc --noEmit` compila todo el arbol,
+  huerfano o no, asi que dejarlo rompia el gate. Sigue vivo en `redesign/home`.
+
+### Que quedo en su version actual (decisiones no obvias)
+
+- `layout/publicRoute.ts`: la version actual es un superset (conserva
+  `isPortalRoute` y suma `isChromeFreeRoute`, que `ChatWidgetMount` necesita).
+- `layout/PublicOnlyComponents.tsx` y `layout/SmoothScroll.tsx`: el brief decia
+  restaurarlos, pero el diff probo que la version actual es estrictamente mejor y
+  compatible (gate de `/styleguide` sin chrome; fix de anclas `/#...` conservando
+  el export `useLenis`). Desvio documentado con evidencia.
+- `layout/ChatWidgetMount.tsx`, `lib/chromeReveal.ts` (diff solo comentarios),
+  `hooks/useThemeObserver.tsx` (aditivo), `ui/MarketingIntro.tsx`, `ui/Button.tsx`,
+  `lib/utils.ts`, `lib/design-tokens.ts`: sin cambios.
+- `app/globals.css`: NO se toco. El diff del rediseno fue +322/-0 (append-only,
+  todo namespaced `ds-*`): no habia merge de CSS que hacer.
+- `useChromeRevealed.ts` SI volvio a la version vieja: en `/` espera
+  `PreloaderContext.phase === 'done'` (el Preloader clasico vuelve a escribirla).
+  Con la version nueva el widget habria aparecido ENCIMA del velo del intro.
+- `ui/Preloader.tsx` volvio entero a la version vieja sin trabajo a mano: esa
+  version ya contenia la rama de marketing (`shouldRunMarketingIntro` ->
+  `<MarketingIntro />`) identica a la actual, asi que los intros de las landings
+  de marketing siguen funcionando con el `MarketingIntro` actual (misma firma).
+  `PreloaderContext` y `TransitionContext` estaban identicos entre ambos commits:
+  CERO ediciones en contexts frozen.
+
+### CustomCursor y NoiseOverlay quedan AFUERA (decision explicita)
+
+El layout viejo los montaba; se borraron en B2 por razones documentadas (cursor
+custom con `cursor:none` global = costo de accesibilidad; grano `steps(10)`
+infinito sin gate). Argumento adicional que cierra la decision: el merge de hoy
+de Franco limpio los `cursor:none` huerfanos de `ChatWindow.tsx` y
+`LogicCompanion.tsx` y ya esta en produccion — resucitar `CustomCursor`
+reintroducia el conflicto recien resuelto. Costo aceptado: la home restaurada no
+es pixel-perfect contra julio (sin grano ni cursor custom).
+
+### Correcciones al brief, con evidencia de primera mano
+
+Tres afirmaciones del brief (tomadas de mensajes de commit) resultaron falsas o
+incompletas al verificarlas contra el arbol:
+
+1. **`HeroCanvas.tsx` NO lo usan `/login`, `/forgot-password` ni
+   `/accept-invite`.** Grep import por import: su unico consumidor era
+   `HeroArtifactLayer.tsx:10`, cuyo unico consumidor era el Hero nuevo. El dato
+   salia del mensaje de commit del rediseno y era falso.
+2. **`PanelPlate.tsx` habria roto el gate de tipos** si se dejaba como huerfano
+   (importa exports del `data.ts` nuevo). El brief no lo tenia en la lista.
+3. **`globals.css` es append-only (+322/-0)**, asi que `layout.tsx` fue la unica
+   edicion a mano — el brief anticipaba un merge de CSS que no existio.
+
+Moraleja: los mensajes de commit describen intenciones; el arbol describe hechos.
+
+### REGRESION DE PERFORMANCE — declarada y aceptada
+
+Restaurar la home clasica revierte mejoras MEDIDAS del rediseno: el scroll del
+home vuelve a liberarse a los ~9,8s (intro con scroll-lock, 2,5s de
+`LOGO_READY_TIMEOUT_MS` incluidos) contra scroll libre desde el primer frame;
+vuelven los `dynamic()` con placeholders y carga en cascada (documento creciendo
+de ~16.200px a ~21.500px al montar secciones); vuelven ~9.000 lineas. No es un
+descuido tecnico: es una decision de producto tomada con este costo a la vista.
+
+### Riesgo aceptado: el chrome viejo vuelve a TODAS las rutas publicas
+
+Navbar/DynamicDock son chrome global: las paginas de servicio y `/contact`
+(que NO se tocaron) quedan con su contenido actual + el dock inferior viejo.
+Aceptado y consciente: es el mismo chrome que esas paginas tenian en julio.
+
+### Gates (baseline previo capturado ANTES de tocar nada)
+
+- Baseline: `tsc --noEmit` limpio (0 errores) y `npm run build` verde (34/34
+  estaticas). El build necesita `NODE_OPTIONS=--max-old-space-size=6144` (OOM con
+  heap default) y red (Google Fonts para el styleguide).
+- Post-restauracion: `tsc --noEmit` 0 errores. `npm run build` identico al
+  baseline (34/34, `/` estatica). ESLint sobre los 31 tocados: 2 errores
+  `react-hooks/set-state-in-effect` (`DynamicDock.tsx:460`, `Navbar.tsx:183`) —
+  codigo de julio byte-identico, misma clase que el baseline conocido de
+  `PreloaderContext`; NO se corrigieron (fuera del objetivo del sprint).
+- Bateria del chatbot: 7/7 verdes (deadline, watchdog, mudez, re2, c02,
+  emptyfallback, providerclose).
+- Verificacion visual en dev (desktop 1440): `/` con intro completo y las 11
+  secciones; dock y launcher aparecen POST-intro; conversacion real con el bot
+  ("hola" -> respuesta); `/web-development`, `/software-development`,
+  `/process-automation` con su intro de marketing y dock con tab activo;
+  `/contact` completo; `/styleguide` SIN chrome; `/login` completo. Consola sin
+  errores (solo warnings de shaders THREE, ruido conocido).
+- NO verificado: pasada mobile (el navegador no acepto el resize a 390px) y el
+  flujo completo en produccion. Queda para la verificacion humana pre/post push.
+
+### Deuda nueva / preexistente relevada
+
+- ESLint x2 en el codigo restaurado (arriba). Corregirlos implica tocar
+  comportamiento de navegacion del chrome viejo: sprint aparte si se quiere.
+- `framer-motion` y `three-stdlib` son phantom deps (no estan en `package.json`;
+  resuelven via transitivas de `motion` y `drei`). Ya era asi en julio.
+- El Hero viejo usa `<Environment preset="studio" />`: baja el HDRI de un CDN en
+  runtime (comportamiento pre-rediseno; sin red pierde reflejos).
+- Anclas `/#...` en carga fria pueden no aterrizar (dynamic() sin caja +
+  `#nosotros` duplicado en About) — bug viejo conocido que vuelve con la home.
+
+### Como volver al rediseno
+
+El rediseno completo vive en `origin/redesign/home`. Sus piezas siguen en main:
+design-system intacto, `/styleguide` funcionando, y los huerfanos que se dejaron
+a proposito (`HeroArtifactLayer`, `HeroCanvas`, `cierre/*`, `nosotros/*`,
+`servicios/*`, `portal-demo/useEscenaCycle`; todos compilan solos). Para volver:
+`git checkout <commit-del-rediseno> -- <los mismos paths>` + restaurar
+`PanelPlate.tsx` + revertir la edicion de `layout.tsx` (sacar `EarlyScrollLock`).

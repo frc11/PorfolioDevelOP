@@ -1,174 +1,292 @@
 'use client'
 
-import {
-  ChapterLabel,
-  CtaButton,
-  DisplayHeading,
-  Lead,
-  MonoLabel,
-  SectionShell,
-  Subhead,
-} from '@/components/design-system'
-import { getWhatsappHref } from '@/lib/whatsapp'
-import { cn } from '@/lib/utils'
-import { ESCENAS, type Escena } from './data'
-import { PanelPlate } from './PanelPlate'
-import { useEscenaCycle } from './useEscenaCycle'
+import { motion } from 'motion/react'
+import { PortalDemoHeader } from './PortalDemoHeader'
+import { StoryArcLunes } from './StoryArcLunes'
 
-/**
- * S3 del home — el panel del lunes. Tema oscuro.
- *
- * Conserva el concepto (que es bueno: tres momentos de una mañana, no una lista
- * de features) y cambia su ejecución entera. Lo que se fue:
- *
- * · `DashboardStoryBackground`, ~200 líneas de gradientes radiales, blurs de
- *   `3xl`, grillas enmascaradas y ocho SVG decorativos, con dos loops `Infinity`
- *   corriendo de por vida.
- * · Los mockups con `conic-gradient`, `boxShadow` de color y barras con
- *   degradado.
- * · El CTA propio con borde cian, glow en hover y `whileTap`.
- * · La línea conectora vertical con su destello perpetuo.
- *
- * Lo que queda es la lámina de producto, tres escenas y un riel. **Sin Framer
- * Motion en el árbol**: el cross-fade es la animación CSS del sistema.
- * `useReducedMotion` se importa de `motion/react` pero por dentro es un
- * `matchMedia` — no arrastra el motor de animación.
- *
- * **Legible a mitad de ciclo.** El riel con las tres horas está SIEMPRE
- * completo y la escena activa se marca sobre él. Quien llega cuando va por la
- * segunda ve las tres, sabe que son tres y sabe en cuál está. El texto de la
- * escena activa se lee entero sin esperar nada.
- *
- * El contrato de motion —cancelar el loop fuera del viewport, no arrancarlo con
- * `prefers-reduced-motion`— vive en `useEscenaCycle`, documentado ahí.
- */
-export function PortalDemo() {
-  const { ref, indice, seleccionar } = useEscenaCycle(ESCENAS.length)
+const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const
 
+function DashboardStoryBackground() {
   return (
-    <SectionShell theme="dark" id="portal-demo">
-      <div className="flex flex-col gap-10 md:gap-14">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <ChapterLabel number="03" />
-            <MonoLabel>Un lunes cualquiera</MonoLabel>
-          </div>
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, #020407 0%, #031018 34%, #030609 68%, #020304 100%)',
+        }}
+      />
+      <div
+        className="absolute inset-x-0 top-0 h-72"
+        style={{
+          background:
+            'linear-gradient(180deg, #020407 0%, rgba(2,7,12,0.72) 34%, transparent 100%)',
+        }}
+      />
+      <div
+        className="absolute left-1/2 top-[-13rem] h-80 w-[68rem] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(ellipse, rgba(6,182,212,0.08), rgba(37,99,235,0.035) 44%, transparent 74%)',
+        }}
+      />
+      <svg
+        className="absolute left-[-9%] top-[-5rem] hidden h-52 w-[64rem] opacity-18 lg:block"
+        viewBox="0 0 1020 220"
+        fill="none"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0 84C152 126 252 80 392 120C544 164 646 170 792 126C892 96 954 104 1020 132"
+          stroke="rgba(56,189,248,0.34)"
+          strokeWidth="1"
+        />
+        <path
+          d="M0 126C164 154 280 114 430 146C574 176 690 178 838 148C926 130 984 142 1020 154"
+          stroke="rgba(37,99,235,0.22)"
+          strokeWidth="1"
+        />
+      </svg>
 
-          <DisplayHeading size="lg" as="h2">
-            Un lunes a la mañana, abrís tu panel.
-          </DisplayHeading>
+      <motion.div
+        className="absolute -left-[18%] -top-[14%] h-[44rem] w-[44rem] rounded-full opacity-70 blur-3xl"
+        animate={{ opacity: [0.48, 0.72, 0.48], scale: [0.98, 1.04, 0.98] }}
+        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        style={{
+          background:
+            'radial-gradient(circle, rgba(6,182,212,0.16), rgba(14,116,144,0.07) 38%, transparent 70%)',
+        }}
+      />
+      <div
+        className="absolute -right-[16%] top-[6%] h-[36rem] w-[36rem] rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(37,99,235,0.13), rgba(6,182,212,0.045) 42%, transparent 72%)',
+        }}
+      />
+      <div
+        className="absolute bottom-[-18%] right-[4%] h-[34rem] w-[42rem] rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(circle, rgba(6,182,212,0.10), rgba(59,130,246,0.045) 42%, transparent 72%)',
+        }}
+      />
 
-          <Lead>Mientras arrancás el café, el sistema ya trabajó.</Lead>
-        </div>
+      <div
+        className="absolute inset-0 opacity-[0.085]"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(56,189,248,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.18) 1px, transparent 1px)',
+          backgroundSize: '72px 72px',
+          maskImage: 'radial-gradient(ellipse 86% 74% at 50% 46%, black 24%, transparent 88%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 86% 74% at 50% 46%, black 24%, transparent 88%)',
+        }}
+      />
 
-        <div className="flex flex-col gap-8">
-          {/*
-            El riel. Las tres horas siempre visibles, la activa marcada. Son
-            botones de verdad: alcanzables con teclado, con `aria-current` para
-            que el lector de pantalla anuncie en cuál está parado, y tocarlos
-            corta el avance automático — quien quiere leer tranquilo tiene por
-            dónde salirse del loop.
-          */}
-          <ul className="grid gap-px border-y border-ds-rule bg-ds-rule sm:grid-cols-3">
-            {ESCENAS.map((escena, index) => (
-              <li key={escena.id} className="bg-ds-canvas">
-                <button
-                  type="button"
-                  onClick={() => seleccionar(index)}
-                  aria-current={index === indice ? 'true' : undefined}
-                  className={cn(
-                    'flex w-full cursor-pointer flex-col items-start gap-1 px-4 py-4 text-left',
-                    'transition-opacity duration-300 motion-reduce:transition-none',
-                    'outline-none focus-visible:ring-1 focus-visible:ring-ds-fg',
-                    // Con reduced-motion se ven las tres escenas a la vez, así
-                    // que atenuar dos pasos del riel no significaría nada.
-                    index === indice
-                      ? 'opacity-100'
-                      : 'opacity-55 hover:opacity-90 motion-reduce:opacity-100',
-                  )}
-                >
-                  <span className="font-ds-mono text-ds-subhead tabular-nums text-ds-fg">
-                    {escena.hora}
-                  </span>
-                  <span className="font-ds-mono text-ds-eyebrow uppercase text-ds-fg-muted">
-                    {escena.momento}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+      <svg
+        className="absolute right-[-4%] top-0 hidden h-[36rem] w-[44rem] opacity-55 md:block"
+        viewBox="0 0 720 560"
+        fill="none"
+        preserveAspectRatio="xMidYMin slice"
+      >
+        <path d="M720 44H558L522 80H394L360 114H250" stroke="rgba(56,189,248,0.28)" strokeWidth="1" />
+        <path d="M720 86H610L574 122H462L426 158H330" stroke="rgba(37,99,235,0.24)" strokeWidth="1" />
+        <path d="M720 134H640L606 168H486L448 206H300" stroke="rgba(6,182,212,0.22)" strokeWidth="1" />
+        <path d="M720 204H626L596 234H512L482 264H360" stroke="rgba(56,189,248,0.16)" strokeWidth="1" />
+        <path d="M720 286H660V360H600V430" stroke="rgba(59,130,246,0.18)" strokeWidth="1" />
+        <path d="M642 42V164H594V250" stroke="rgba(6,182,212,0.16)" strokeWidth="1" />
+        {[250, 300, 330, 360, 394, 426, 448, 462, 482, 512, 522, 558, 574, 596, 606, 610, 626, 640, 660].map((x, index) => (
+          <circle
+            key={index}
+            cx={x}
+            cy={[114, 206, 158, 264, 80, 158, 206, 122, 264, 234, 80, 44, 122, 234, 168, 86, 204, 134, 286][index]}
+            r="3"
+            fill="rgba(56,189,248,0.55)"
+          />
+        ))}
+        <circle cx="594" cy="250" r="4" fill="rgba(6,182,212,0.7)" />
+        <circle cx="642" cy="42" r="3" fill="rgba(255,255,255,0.72)" />
+      </svg>
 
-          {/*
-            LAS TRES ESCENAS ESTÁN SIEMPRE EN EL DOM, y quién se ve lo decide
-            CSS. No es un detalle de implementación: es lo que evita un error de
-            hidratación.
+      <svg
+        className="absolute bottom-[-3%] left-[-7%] hidden h-[34rem] w-[52rem] opacity-50 lg:block"
+        viewBox="0 0 860 520"
+        fill="none"
+        preserveAspectRatio="xMinYMax slice"
+      >
+        <path d="M0 364C150 292 240 482 394 388C512 316 628 190 860 238" stroke="rgba(6,182,212,0.35)" strokeWidth="1.2" />
+        <path d="M0 394C158 322 252 488 398 420C548 350 644 242 860 274" stroke="rgba(37,99,235,0.24)" strokeWidth="1" />
+        <path d="M0 426C182 356 274 502 430 452C570 406 692 320 860 344" stroke="rgba(56,189,248,0.18)" strokeWidth="1" />
+        {Array.from({ length: 46 }).map((_, index) => {
+          const cx = 24 + index * 18
+          // Math.sin es implementation-defined en sus últimos bits → SSR (Node) y
+          // cliente (browser) pueden diferir en el último decimal y romper la
+          // hidratación del <circle cy>. Redondeamos a 2 decimales para que
+          // server y cliente coincidan exacto (el wave se preserva).
+          const cy = Math.round((366 + Math.sin(index * 0.62) * 42 + (index % 5) * 3) * 100) / 100
 
-            La primera versión ramificaba el JSX con `estatico` —una escena si
-            había motion, las tres si no—. Pero `useReducedMotion()` devuelve
-            `false` en el servidor y `true` en el cliente, así que el HTML del
-            SSR y el primer render del cliente salían distintos: React error
-            #418, medido en runtime con `reducedMotion: 'reduce'`.
+          return (
+            <circle
+              key={index}
+              cx={cx}
+              cy={cy}
+              r={index % 7 === 0 ? 2.8 : 1.4}
+              fill={index % 7 === 0 ? 'rgba(6,182,212,0.75)' : 'rgba(56,189,248,0.28)'}
+            />
+          )
+        })}
+        {[90, 160, 230, 306, 380].map((x, index) => (
+          <path
+            key={x}
+            d={`M${x} ${350 - index * 12}V${250 - index * 22}`}
+            stroke="rgba(56,189,248,0.22)"
+            strokeWidth="1"
+          />
+        ))}
+      </svg>
 
-            Acá el marcado es idéntico en servidor y cliente. `motion-reduce:`
-            es una media query pura: quien pidió menos movimiento ve las tres
-            escenas desde el primer paint, sin depender de que corra un solo
-            byte de JS. El `useReducedMotion` del hook ya solo gatea el
-            temporizador — comportamiento, no marcado.
+      <svg
+        className="absolute bottom-[3%] right-[-5%] hidden h-[27rem] w-[43rem] opacity-45 md:block"
+        viewBox="0 0 700 420"
+        fill="none"
+        preserveAspectRatio="xMaxYMax slice"
+      >
+        <path d="M120 310L236 246L334 288L450 214L590 264L680 198" stroke="rgba(56,189,248,0.26)" strokeWidth="1" />
+        <path d="M236 246L292 158L450 214L516 116L590 264" stroke="rgba(37,99,235,0.20)" strokeWidth="1" />
+        <path d="M334 288L392 354L590 264L650 346" stroke="rgba(6,182,212,0.16)" strokeWidth="1" />
+        {[
+          [120, 310],
+          [236, 246],
+          [292, 158],
+          [334, 288],
+          [392, 354],
+          [450, 214],
+          [516, 116],
+          [590, 264],
+          [650, 346],
+          [680, 198],
+        ].map(([cx, cy], index) => (
+          <circle
+            key={`${cx}-${cy}`}
+            cx={cx}
+            cy={cy}
+            r={index % 3 === 0 ? 4 : 2.6}
+            fill="rgba(6,182,212,0.72)"
+          />
+        ))}
+        <path d="M482 318H528V220H548V164H568" stroke="rgba(249,115,22,0.18)" strokeWidth="1" />
+        <circle cx="568" cy="164" r="3.4" fill="rgba(251,146,60,0.62)" />
+      </svg>
 
-            Y el fade sale gratis: un elemento en `display:none` no corre sus
-            animaciones, así que al pasar a `block` la animación de entrada
-            arranca de cero. Es un fade por cambio de escena, de una pasada, sin
-            remontar nada y sin un loop.
-          */}
-          <div ref={ref} className="flex flex-col">
-            {ESCENAS.map((escena, index) => (
-              <div
-                key={escena.id}
-                className={cn(
-                  'animate-ds-reveal grid items-start gap-10',
-                  'lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14',
-                  // El margen solo aplica en la vista estática, donde las tres
-                  // escenas conviven apiladas.
-                  'motion-reduce:mb-14 motion-reduce:last:mb-0',
-                  index === indice ? 'block lg:grid' : 'hidden motion-reduce:block motion-reduce:lg:grid',
-                )}
-              >
-                <EscenaTexto escena={escena} />
-                <div className="mt-8 lg:mt-0">
-                  <PanelPlate escena={escena.id} hora={escena.hora} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-col items-start gap-4">
-          <CtaButton href={getWhatsappHref()} target="_blank">
-            Escribinos por WhatsApp
-          </CtaButton>
-          <p className="max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
-            El panel viene con lo que entregamos. No se paga aparte.
-          </p>
-        </div>
+      <div className="absolute left-0 top-[14%] hidden h-[22rem] w-[18rem] opacity-30 md:block">
+        <div
+          className="h-full w-full"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, rgba(56,189,248,0.52) 1px, transparent 1.8px)',
+            backgroundSize: '22px 22px',
+            maskImage: 'linear-gradient(90deg, black, transparent 86%)',
+            WebkitMaskImage: 'linear-gradient(90deg, black, transparent 86%)',
+          }}
+        />
       </div>
-    </SectionShell>
+
+      <motion.div
+        className="absolute bottom-[20%] left-[-18%] hidden h-px w-[48%] md:block"
+        animate={{ x: ['0%', '125%'], opacity: [0, 0.42, 0] }}
+        transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3.5 }}
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(56,189,248,0.76), transparent)',
+          boxShadow: '0 0 28px rgba(6,182,212,0.26)',
+        }}
+      />
+
+      <div
+        className="absolute inset-x-0 bottom-0 h-80"
+        style={{
+          background:
+            'linear-gradient(180deg, transparent 0%, rgba(2,7,12,0.44) 42%, #020407 100%)',
+        }}
+      />
+      <div
+        className="absolute bottom-[-12rem] left-1/2 h-80 w-[70rem] -translate-x-1/2 rounded-full blur-3xl"
+        style={{
+          background:
+            'radial-gradient(ellipse, rgba(6,182,212,0.09), rgba(37,99,235,0.04) 42%, transparent 72%)',
+        }}
+      />
+      <svg
+        className="absolute bottom-[-4rem] left-[-8%] hidden h-52 w-[64rem] opacity-20 lg:block"
+        viewBox="0 0 1020 220"
+        fill="none"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0 150C150 96 240 188 380 132C530 72 630 64 760 112C866 152 930 126 1020 78"
+          stroke="rgba(56,189,248,0.40)"
+          strokeWidth="1"
+        />
+        <path
+          d="M0 184C160 138 270 202 410 158C560 110 670 98 814 146C910 178 970 154 1020 128"
+          stroke="rgba(37,99,235,0.26)"
+          strokeWidth="1"
+        />
+      </svg>
+
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 62% 46% at 50% 36%, rgba(2,4,7,0.78) 0%, rgba(2,4,7,0.58) 42%, transparent 72%), radial-gradient(ellipse 85% 52% at 50% 50%, transparent 28%, rgba(0,0,0,0.34) 100%)',
+        }}
+      />
+    </div>
   )
 }
 
-function EscenaTexto({ escena }: { escena: Escena }) {
+function PortalDashboardCta() {
   return (
-    <div className="flex flex-col gap-5">
-      <Subhead as="h3">{escena.pregunta}</Subhead>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.35 }}
+      transition={{ duration: 0.65, ease: EASE_PREMIUM }}
+      className="mt-20 flex justify-center md:mt-28"
+    >
+      <motion.a
+        href="/contact"
+        whileHover={{
+          y: -3,
+          borderColor: 'rgba(6,182,212,0.55)',
+          boxShadow: '0 18px 54px rgba(0,0,0,0.38), 0 0 42px rgba(6,182,212,0.20)',
+          backgroundColor: 'rgba(6,182,212,0.12)',
+        }}
+        whileTap={{ scale: 0.985 }}
+        transition={{ duration: 0.35, ease: EASE_PREMIUM }}
+        className="group inline-flex items-center gap-3 rounded-xl border border-cyan-400/25 bg-cyan-400/[0.07] px-5 py-3 text-sm font-bold text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-cyan-300/50 md:px-6 md:py-3.5"
+      >
+        Quiero saber más sobre el dashboard
+        <span className="text-cyan-300 transition-transform duration-300 ease-out group-hover:translate-x-1" aria-hidden>
+          -&gt;
+        </span>
+      </motion.a>
+    </motion.div>
+  )
+}
 
-      <div className="flex flex-col gap-2">
-        <MonoLabel>Qué ves</MonoLabel>
-        <p className="max-w-ds-prose text-ds-body text-ds-fg">{escena.muestra}</p>
-      </div>
+export function PortalDemo() {
+  return (
+    <section className="relative isolate w-full overflow-hidden bg-[#030303] py-24 md:py-36">
+      <DashboardStoryBackground />
 
-      <div className="flex flex-col gap-2 border-t border-ds-rule pt-5">
-        <MonoLabel>Qué hacés</MonoLabel>
-        <p className="max-w-ds-prose text-ds-body text-ds-fg-muted">{escena.decidis}</p>
+      <div className="relative z-10 mx-auto max-w-6xl px-6 md:px-10 lg:px-16">
+        <div className="mb-20 md:mb-28">
+          <PortalDemoHeader />
+        </div>
+
+        <StoryArcLunes />
+        <PortalDashboardCta />
       </div>
-    </div>
+    </section>
   )
 }

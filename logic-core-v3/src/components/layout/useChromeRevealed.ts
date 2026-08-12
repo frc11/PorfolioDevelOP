@@ -2,28 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
+import { usePreloader } from '@/context/PreloaderContext'
 import { isMarketingIntroDone, shouldRunMarketingIntro } from '@/lib/marketing-routes'
 
 /**
  * `true` once the page "chrome" (chat widget + dock) should appear:
+ *  - home `/`         → when the preloader intro finishes (`phase === 'done'`).
  *  - marketing routes → when their local intro finishes (`markMarketingIntroDone`,
  *                       delivered via the `'chrome:revealed'` window event).
  *  - any other route  → immediately (no intro runs there).
  *
- * El home entra en "any other route" desde B2-S1. Antes esperaba
- * `PreloaderContext.phase === 'done'`, porque el intro del home escondía el
- * contenido hasta terminar; ese intro ya no existe, así que el dock y el widget
- * aparecen con la página, como en `/login` o `/bienvenida`. De haber dejado la
- * condición vieja, `phase` se habría quedado en `'drawing'` para siempre —
- * nadie la escribe ya — y el chrome del home no habría aparecido nunca.
- *
- * Con eso, este hook dejó de depender de `PreloaderContext`: ya no llama a
- * `usePreloader()`. Es un requisito MENOS, no uno nuevo — sus dos consumidores
- * (`ChatWidgetMount` y `DynamicDock`) siguen montándose bajo el
- * `PreloaderProvider` del layout raíz, que no se tocó.
+ * Only CONSUMES PreloaderContext (never mutates its phase). Shared by
+ * `ChatWidgetMount` and `DynamicDock` so the widget and the dock reveal together.
  */
 export function useChromeRevealed(): boolean {
   const pathname = usePathname() ?? '/'
+  const { phase } = usePreloader()
   const marketingPending = shouldRunMarketingIntro(pathname)
   const [marketingRevealed, setMarketingRevealed] = useState(() =>
     isMarketingIntroDone()
@@ -42,6 +36,7 @@ export function useChromeRevealed(): boolean {
     return () => window.removeEventListener('chrome:revealed', onRevealed)
   }, [marketingPending, marketingRevealed])
 
+  if (pathname === '/') return phase === 'done'
   if (marketingPending) return marketingRevealed
   return true
 }
