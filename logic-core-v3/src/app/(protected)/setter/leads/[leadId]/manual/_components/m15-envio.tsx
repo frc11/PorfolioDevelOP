@@ -5,6 +5,7 @@ import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { formatFechaCorta, gateEnvioDemo, leadRespondio } from '@/lib/leados/flow'
 import { GUIA_ENVIO } from '@/lib/leados/guidance-content'
 import { rutaManual } from '@/lib/leados/manual'
+import { TEXTO_TURNO, turnoDelLead } from '@/lib/leados/turno'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { EnvioForm } from './envio-form'
 
@@ -101,21 +102,27 @@ export function M15Registro({
     return <EnvioForm leadId={leadId} lead={lead} finalUrl={finalUrl} respondio={respondio} />
   }
 
-  // ── Gate cerrado: nombra la condición que falta por su causa real ───────────
+  // ── Gate cerrado: nombra el TURNO y después la condición que falta ──────────
   // (mismo criterio que `gateEnvioDemo`; la derivación no aterriza acá con el gate
   // cerrado — esto es la presentación honesta del deshabilitado-con-motivo).
+  // El turno sale de `turno.ts`; `accionPendiente: false` no es decisión de este
+  // módulo: con el gate cerrado no hay envío que el setter pueda hacer.
+  const turno = turnoDelLead({ status, stage, finalUrl, accionPendiente: false })
+  // Cuatro «todavía no», no tres: aprobada CON link y sin respuesta es del
+  // negocio; aprobada SIN link es de Franco, y decía lo mismo que la anterior.
+  const motivo =
+    stage === 'APROBADA'
+      ? finalUrl
+        ? GUIA_ENVIO.espera.aprobadaSinEnganche
+        : GUIA_ENVIO.espera.aprobadaSinLink
+      : respondio
+        ? GUIA_ENVIO.espera.engancheSinAprobar
+        : GUIA_ENVIO.espera.niEngancheNiAprobada
   return (
     <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+      <p className="text-xs font-semibold text-zinc-300">{TEXTO_TURNO[turno].titulo}</p>
       <p className="text-xs leading-relaxed text-zinc-400">
-        <LineaRicaText
-          linea={
-            stage === 'APROBADA'
-              ? GUIA_ENVIO.espera.aprobadaSinEnganche
-              : respondio
-                ? GUIA_ENVIO.espera.engancheSinAprobar
-                : GUIA_ENVIO.espera.niEngancheNiAprobada
-          }
-        />
+        <LineaRicaText linea={motivo} />
       </p>
       <Link
         href={rutaManual(leadId, 'm5')}

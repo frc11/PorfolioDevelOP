@@ -6,6 +6,7 @@ import {
   PANTALLAS,
   rutaManual,
 } from '@/lib/leados/manual'
+import { turnoDelLead } from '@/lib/leados/turno'
 import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
 import { UrgenciaBanner } from '../../_components/urgencia-banner'
 import { ArchivoManual } from '../_components/archivo-manual'
@@ -108,6 +109,15 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
           leadId={leadId}
           cabecera={cabecera}
           tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
+          // El turno sale de la fuente única. `accionPendiente: false` no es una
+          // decisión de esta página: aterrizar en una pantalla de ESTADO es,
+          // por construcción de `posicionDe`, no tener nada para hacer ahora.
+          turno={turnoDelLead({
+            status: manual.leadStatus,
+            stage: manual.stage,
+            finalUrl: manual.finalUrl,
+            accionPendiente: false,
+          })}
           proximoToque={manual.proximoToque}
           posicion={posicion}
         />

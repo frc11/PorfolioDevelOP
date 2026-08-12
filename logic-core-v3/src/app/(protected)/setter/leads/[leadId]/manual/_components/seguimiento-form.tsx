@@ -40,8 +40,10 @@ const OPCIONES: OpcionResultado[] = [
   {
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
+    // P11 — el último paréntesis con nombre de pantalla del recorrido, y con él
+    // «la producción de la demo», un tercer sinónimo de construir la demo.
     detalle:
-      'Abre la producción de la demo (Brief) y frena los toques. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
+      'Frena los toques y te habilita a construir la demo. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
   },
   {
     valor: 'POSTERGADO',

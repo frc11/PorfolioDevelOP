@@ -699,7 +699,7 @@ export const GUIA_SEGUIMIENTO = {
     [
       'Si el negocio ',
       { enfasis: 'responde' },
-      ', cambia el rumbo: marcás «Respondió», se frenan los toques y se abre la producción de la demo (Brief). De ahí en más el objetivo es uno solo: la reunión.',
+      ', cambia el rumbo: marcás «Respondió», se frenan los toques y podés arrancar la demo. De ahí en más el objetivo es uno solo: la reunión.',
     ],
     [
       'Si ',
@@ -847,10 +847,18 @@ export type EnvioGuia = {
   copyBlock: CopyBlockGuia
   /** Confirmación tras registrar el envío: el foco pasa a la reunión. */
   enviada: LineaRica
-  /** El «todavía no», según qué mitad del gate falta (las tres combinaciones). */
+  /**
+   * El «todavía no», según qué falta. Son CUATRO, no tres: `gateEnvioDemo` pide
+   * aprobación + `finalUrl` + enganche, y la aprobación y el link son dos cosas
+   * distintas que Franco hace en momentos distintos. Sin el cuarto, la pantalla
+   * mandaba a esperar al negocio cuando el negocio ya había contestado y lo que
+   * faltaba era el link de Franco (H-02 del manual).
+   */
   espera: {
-    /** APROBADA, pero el negocio no enganchó (ni es caliente): falta la respuesta. */
+    /** APROBADA con link cargado, pero el negocio no enganchó: falta la respuesta. */
     aprobadaSinEnganche: LineaRica
+    /** APROBADA sin link permanente: le toca a Franco, no al negocio. */
+    aprobadaSinLink: LineaRica
     /** El negocio enganchó, pero Franco todavía no aprobó: falta la revisión. */
     engancheSinAprobar: LineaRica
     /** Ni enganche ni aprobación todavía: faltan las dos. */
@@ -883,9 +891,14 @@ export const GUIA_ENVIO = {
   ],
   espera: {
     aprobadaSinEnganche: [
-      'La demo está aprobada — el link se libera ',
-      { enfasis: 'cuando el negocio responda' },
+      'La demo está aprobada y su link ya está cargado — sale ',
+      { enfasis: 'cuando el negocio conteste' },
       ' (o si Franco le dio prioridad).',
+    ],
+    aprobadaSinLink: [
+      'Franco aprobó la demo pero ',
+      { enfasis: 'todavía no cargó su link permanente' },
+      ' — sin ese link no hay nada que mandar, y el negocio no tiene nada que ver con esto. Cuando lo registre, el envío se destraba solo.',
     ],
     engancheSinAprobar: [
       'El link se envía cuando ',

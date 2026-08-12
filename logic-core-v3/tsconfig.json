@@ -37,7 +37,15 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     ".next-setter/types/**/*.ts",
-    ".next-setter/dev/types/**/*.ts"
+    ".next-setter/dev/types/**/*.ts",
+    ".next-galeria/types/**/*.ts",
+    ".next-galeria/dev/types/**/*.ts",
+    ".next-perf-a/types/**/*.ts",
+    ".next-perf-a/dev/types/**/*.ts",
+    ".next-perf-b/types/**/*.ts",
+    ".next-perf-b/dev/types/**/*.ts",
+    ".next-perf-base/types/**/*.ts",
+    ".next-perf-base/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

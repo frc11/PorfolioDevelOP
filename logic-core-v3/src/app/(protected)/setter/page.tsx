@@ -10,6 +10,7 @@ import { derivarMisNumeros } from '@/lib/leados/mis-numeros'
 import { getNovedadesSetter } from '@/lib/leados/novedades'
 import { listOwnedLeads } from '@/lib/leados/ownership'
 import { getProgresoSemana } from '@/lib/leados/progreso'
+import { turnoDelLead, type Turno } from '@/lib/leados/turno'
 import { CarteraView } from './_components/cartera-view'
 import { FocoSurface } from './_components/foco-surface'
 import { HomeEmpty } from './_components/home-empty'
@@ -44,10 +45,25 @@ export default async function SetterHomePage() {
   // `fijados` = fijados NO accionables (A-05: el fijado accionable ya es foco —
   // no llega acá; el pin ordena la cola, no la excluye. Un fijado en vuelo sí
   // queda esperando y se cuenta para no afirmar "0 leads activos").
-  const enEspera =
-    particion.grupos.seguimiento.length +
-    particion.grupos.revision.length +
-    particion.grupos.agendadas.length
+  //
+  // El desglose es POR TURNO (`turno.ts`, fuente única): hasta P11 esto era un
+  // solo número rotulado «esperando respuesta», que contaba también las demos
+  // paradas en la cola de Franco. La partición ya garantiza que nada de acá es
+  // accionable — el turno traduce esa decisión, no la vuelve a tomar.
+  const enVuelo = [
+    ...particion.grupos.seguimiento,
+    ...particion.grupos.revision,
+    ...particion.grupos.agendadas,
+  ]
+  const enVueloPorTurno: Record<Turno, number> = { negocio: 0, franco: 0, setter: 0 }
+  for (const lead of enVuelo) {
+    const turno = turnoDelLead({
+      status: lead.status,
+      stage: lead.stage,
+      accionPendiente: lead.accionable,
+    })
+    enVueloPorTurno[turno] += 1
+  }
   const pausados = particion.pausados.length
   const fijados = particion.fijados.length
 
@@ -89,7 +105,11 @@ export default async function SetterHomePage() {
           stickyActivo={foco.stickyActivo}
         />
       ) : (
-        <HomeEnEspera enEspera={enEspera} pausados={pausados} fijados={fijados} />
+        <HomeEnEspera
+          enVueloPorTurno={enVueloPorTurno}
+          pausados={pausados}
+          fijados={fijados}
+        />
       )}
 
       {/* 2.2 / A-06 — Secundario al foco pero presente: los handoffs recientes

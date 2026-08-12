@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, Hourglass } from 'lucide-react'
 import { formatFechaCorta } from '@/lib/leados/flow'
 import { rutaManual, type PosicionManual } from '@/lib/leados/manual'
+import { TEXTO_TURNO, type Turno } from '@/lib/leados/turno'
 import { ManualHeader, NavAtras, type CabeceraLead } from './manual-nav'
 
 type EstadoManualProps = {
@@ -9,6 +10,14 @@ type EstadoManualProps = {
   /** El contexto de cabecera del lead (5.6) — badges, links, notas, asignación. */
   cabecera: CabeceraLead
   tipo: 'espera' | 'revision'
+  /**
+   * De quién es el turno, derivado en el server con `turnoDelLead` (fuente
+   * única). NO es lo mismo que `tipo`: la pantalla de espera se muestra tanto
+   * cuando falta que conteste el negocio como cuando Franco aprobó y todavía no
+   * cargó el link — dos turnos distintos en la MISMA pantalla, que es
+   * exactamente lo que antes se decía con una sola frase.
+   */
+  turno: Turno
   /** ISO del próximo toque agendado — solo lo usa el estado de espera. */
   proximoToque: string | null
   posicion: PosicionManual
@@ -20,20 +29,30 @@ type EstadoManualProps = {
  * tono de espera (zinc, sin cyan: la pelota no la tiene el setter). Desde acá
  * la navegación hacia atrás sigue libre, y en espera se puede saltar a
  * registrar un toque (m5) si algo pasa antes de la fecha.
+ *
+ * El titular dice DE QUIÉN ES EL TURNO y lo dice solo: el manual de usuario
+ * tuvo que enseñar a leer la etiqueta de estado al lado del nombre del negocio
+ * para saber si la espera era del negocio o de Franco (H-02). Una pantalla que
+ * necesita esa lectura auxiliar no está diciendo lo que hace falta.
  */
 export function EstadoManual({
   leadId,
   cabecera,
   tipo,
+  turno,
   proximoToque,
   posicion,
 }: EstadoManualProps) {
   const esEspera = tipo === 'espera'
-  const detalle = esEspera
-    ? proximoToque
-      ? `Próximo toque el ${formatFechaCorta(proximoToque)} — el foco te lo trae cuando llegue.`
-      : 'Sin próximo toque agendado — si el negocio responde, registralo y el flujo sigue solo.'
-    : 'No hay nada que hacer ahora — te avisamos cuando la apruebe o pida cambios.'
+  const texto = TEXTO_TURNO[turno]
+  // Lo que está pasando, además del turno. Con el turno de Franco la causa es él
+  // (revisa la demo, o le falta cargar el link) y su texto ya lo cubre.
+  const situacion =
+    turno !== 'negocio'
+      ? null
+      : proximoToque
+        ? `Próximo toque el ${formatFechaCorta(proximoToque)} — el foco te lo trae cuando llegue.`
+        : 'Sin próximo toque agendado — si contesta, registralo y el flujo sigue solo.'
   const puedeRegistrar = esEspera && posicion.habilitadas.includes('m5')
 
   return (
@@ -41,7 +60,7 @@ export function EstadoManual({
       <ManualHeader cabecera={cabecera} />
 
       <section
-        aria-label={esEspera ? 'Esperando respuesta del negocio' : 'Demo en revisión'}
+        aria-label={texto.titulo}
         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5"
       >
         <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-zinc-500/60" />
@@ -51,9 +70,12 @@ export function EstadoManual({
         </p>
         {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
         <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-zinc-100 sm:text-2xl">
-          {esEspera ? 'Esperando respuesta del negocio' : 'Franco está revisando tu demo'}
+          {texto.titulo}
         </h2>
-        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">{detalle}</p>
+        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">
+          {texto.detalle}
+          {situacion ? ` ${situacion}` : ''}
+        </p>
 
         {puedeRegistrar && (
           <Link

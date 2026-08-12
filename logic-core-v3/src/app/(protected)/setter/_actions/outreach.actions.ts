@@ -171,7 +171,8 @@ export async function registrarResultado(
     const actividades = await listOwnedLeadActivities(leadId.data, userId)
     if (actividades === null) return fail('Lead no encontrado')
     if (actividades.length === 0) {
-      return fail('Primero registrá el opener (Opener) — ahí arranca la conversación')
+      // P11 — el paréntesis nombraba la pantalla; el mensaje ya dice qué falta.
+      return fail('Primero registrá el opener — ahí arranca la conversación')
     }
 
     const { resultado, nota, reactivateAt } = input.data
