@@ -21,7 +21,7 @@
  * son / qué esperar / dónde se abren + sus URLs); este registra la guía del
  * PASO. Son dos capas distintas — no se fusionan.
  *
- * CRECIMIENTO: hoy el registro solo tiene la ficha (Paso 1), migrada como
+ * CRECIMIENTO: hoy el registro solo tiene la ficha (m1), migrada como
  * primer consumidor de prueba. Los tipos ya cubren lo que consumen los
  * próximos sprints —teach (1.1), ejemplos esto-sí/esto-no (1.2), validación de
  * calidad (1.3) y razones de self-check (FG-4)—; cada uno suma su contenido al
@@ -124,7 +124,7 @@ export type SelfCheckRazon = {
 
 /**
  * Un criterio que mira una herramienta de evaluación externa, en el idioma del
- * setter: qué es y por qué pesa en el score. Lo consume el Paso 2 (evaluación)
+ * setter: qué es y por qué pesa en el score. Lo consume m2 (la evaluación)
  * para mostrar «qué mira el Evaluador» sin hardcodear la lista en el componente.
  * El criterio REAL lo aplica el Evaluador externo; acá solo lo explicamos. [evaluación · 3.2]
  */
@@ -246,10 +246,10 @@ export type GuiaPasoId =
   | 'objeciones'
   | 'traspaso'
 
-// ── Contenido: Paso 1 · Ficha de observación (primer consumidor) ─────────────
+// ── Contenido: m1 · Ficha de observación (primer consumidor) ────────────────
 
 /**
- * Guía de la ficha de observación (Paso 1). Migrada desde `ficha-step.tsx`
+ * Guía de la ficha de observación (m1). Migrada desde `ficha-step.tsx`
  * como primer consumidor de prueba del esquema. `satisfies PasoGuia` valida la
  * forma pero conserva las claves exactas de `campos` para acceso tipado
  * (`GUIA_FICHA.campos.resenas.hint`). Las claves de `campos` casan 1:1 con el
@@ -367,10 +367,10 @@ export const GUIA_FICHA = {
   },
 } satisfies PasoGuia
 
-// ── Contenido: Paso 2 · Evaluación (transcribir el veredicto del Evaluador) ──
+// ── Contenido: m2 · Evaluación (transcribir el veredicto del Evaluador) ─────
 
 /**
- * Guía de la evaluación (Paso 2). El setter NO juzga: pega la ficha en el
+ * Guía de la evaluación (m2). El setter NO juzga: pega la ficha en el
  * Evaluador externo y transcribe acá lo que devolvió (score, veredicto,
  * razonamiento). `campos` son los del formulario (score/veredicto/razonamiento);
  * `criterios` explica qué mira el Evaluador; `gate` explica el descarte
@@ -380,7 +380,7 @@ export const GUIA_FICHA = {
 export const GUIA_EVALUACION = {
   titulo: 'Evaluación',
   intro: [
-    'No juzgás vos: pegás la ficha en el Evaluador (el bloque del paso 1), esperás su respuesta y la ',
+    'No juzgás vos: pegás la ficha en el Evaluador (el bloque de esta pantalla), esperás su respuesta y la ',
     { enfasis: 'transcribís acá tal cual' },
     ' — score, veredicto y razonamiento. No hace falta interpretarla.',
   ],
@@ -435,13 +435,15 @@ export const GUIA_EVALUACION = {
   ],
 } satisfies PasoGuia
 
-// ── Contenido: Paso 3 · Brief de diseño (el plano de la demo) ────────────────
+// ── Contenido: decidir cómo va a ser la demo (el plano, antes de construirla) ─
 
 /**
- * Guía del brief (Paso 3). El setter NO lo inventa: corre el Gem de diseño (que
- * lee la ficha + la evaluación), trae su respuesta y la ordena en secciones
- * concretas. `campos` son los del formulario (las claves casan 1:1 con el estado
- * del form: pegadoGem/titulo/cta/seccionesTexto/concepto/notasMarca). `gate`
+ * Guía de la pantalla que decide la demo (m6). El setter NO la inventa: corre el
+ * Gem de diseño (que lee la ficha + la evaluación), trae su respuesta y la ordena
+ * en secciones concretas. `campos` son los del formulario (las claves casan 1:1
+ * con los campos que se PIDEN: pegadoGem/titulo/cta/seccionesTexto/concepto —
+ * P5-B sacó `notasMarca` de la pregunta porque la ficha ya junta ese material;
+ * el valor guardado igual viaja en el payload, ver `brief-form.tsx`). `gate`
  * explica el estado «esperando respuesta» cuando el gate EVALUADA→BRIEF está
  * cerrado —el criterio sigue en `flow.ts: gateBriefAbierto`, acá solo el porqué
  * + el qué-hacer-mientras; el TONO lo elige el componente (zinc: es una espera,
@@ -477,10 +479,6 @@ export const GUIA_BRIEF = {
     concepto: {
       label: 'Concepto',
       hint: 'La idea central que propone el Gem, en una o dos líneas.',
-    },
-    notasMarca: {
-      label: 'Notas de marca',
-      hint: 'Colores, tono, logo: lo que la demo tiene que respetar.',
     },
   },
   gate: {
@@ -523,8 +521,8 @@ export const GUIA_BRIEF = {
  * lógica — acá solo el porqué y los ejemplos, editables por Franco.
  */
 export const GUIA_CONSTRUCCION = {
-  // El «Paso 4 —» queda en la fuente única: el rail numera la fase y el h2 del
-  // step lo refleja sin hardcodearlo en el componente (3.7, single-source).
+  // Sin numerar: el rail nombra la fase y el h2 de la pantalla lo refleja sin
+  // hardcodearlo en el componente (3.7, single-source).
   titulo: 'Construcción de la demo',
   intro: [
     'La demo se construye en ',
@@ -564,9 +562,9 @@ export const GUIA_CONSTRUCCION = {
 export const GUIA_SELF_CHECK = {
   titulo: 'Chequeo final antes de enviar',
   intro: [
-    'Revisá la demo publicada punto por punto. Los ',
-    { enfasis: 'obligatorios bloquean el envío' },
-    ' si fallan; los de «Ojo de diseño» no bloquean, pero viajan a Franco tal como los marques.',
+    'Revisá la demo publicada punto por punto. Están partidos en dos: los que ',
+    { enfasis: 'decidís vos solo' },
+    ' y los que al final mira Franco —esos también los marcás vos, con lo que ves—. Todos bloquean el envío mientras queden en rojo. Los delatores de diseño no bloquean, pero viajan a Franco tal como los marques.',
   ],
   gate: {
     titulo: 'El envío se habilita con todos los obligatorios en verde',
@@ -604,10 +602,10 @@ export const GUIA_SELF_CHECK = {
   ],
 } satisfies PasoGuia
 
-// ── Contenido: Paso 5 · Publicar el draft (instructivo mecánico) ─────────────
+// ── Contenido: m13 · Publicar el borrador (instructivo mecánico) ────────────
 
 /**
- * Guía del draft (Paso 5). Instructivo mecánico: exportar de Claude Design,
+ * Guía del borrador (m13). Instructivo mecánico: exportar de Claude Design,
  * publicar en Netlify Drop y traer la URL. `pasos` son las instrucciones
  * ordenadas (el componente las dibuja como `<ol>`); `campos.draftUrl` la
  * etiqueta/hint del input. Sin teach (porque/ejemplos): es mecánico, el porqué
@@ -648,7 +646,7 @@ export const GUIA_OPENER = {
       { enfasis: 'abre una conversación, no vende' },
       ': un link en el primer mensaje se lee como publicidad y el dueño lo ignora (o Instagram lo manda a spam). El link viaja recién en el ',
       { enfasis: 'segundo mensaje, con la demo ya aprobada' },
-      ' — eso lo registrás desde «Seguimiento», cuando el negocio respondió.',
+      ' — eso lo registrás en «Envío», cuando el negocio respondió.',
     ],
   },
   porque: [
@@ -673,7 +671,7 @@ export const GUIA_OPENER = {
   ],
 } satisfies PasoGuia
 
-// ── Contenido: Paso 7 · Seguimiento de la conversación ───────────────────────
+// ── Contenido: m5 · Seguimiento de la conversación ──────────────────────────
 
 /**
  * Guía del seguimiento (la conversación después del opener). El setter registra
@@ -773,10 +771,10 @@ const GUIA_TRASPASO = {
   ],
 } satisfies PasoGuia
 
-// ── Contenido: Paso 10 · Agendar la reunión ──────────────────────────────────
+// ── Contenido: m16 · Agendar la reunión ─────────────────────────────────────
 
 /**
- * Guía de la agenda (Paso 10). `intro` encuadra el momento; `pasos` es el how-to
+ * Guía de la agenda (m16). `intro` encuadra el momento; `pasos` es el how-to
  * mecánico (confirmar decisor → buscar horarios → ofrecer → marcar el elegido →
  * confirmar con notas); `gate` explica por qué el paso espera hasta RESPONDIO —el
  * criterio sigue en `agenda.actions.ts: gateAgenda` y manda—. La enseñanza del

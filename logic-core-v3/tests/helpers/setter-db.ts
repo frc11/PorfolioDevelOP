@@ -1,5 +1,6 @@
 import { PrismaClient, type Prisma, type DossierStage, type LeadStatus } from '@prisma/client'
 import dotenv from 'dotenv'
+import { HARD_CHECKS } from '../../src/lib/leados/flow'
 
 // El proceso de test necesita DATABASE_URL (Prisma) y AUTH_SECRET (minteo de
 // cookie del 2º setter). No hay .env, solo .env.local. Idempotente: dotenv no
@@ -17,16 +18,12 @@ dotenv.config({ path: '.env.local' })
 export const SMOKE_TAG = 'SMOKE-SETTER'
 export const prisma = new PrismaClient()
 
-// Nombres EXACTOS de los hard-checks (espejo de src/lib/leados/flow-content.ts
-// HARD_CHECKS[].nombre). Seedear un self-check "aprobado" requiere los 6 en ok.
-const HARD_CHECK_NOMBRES = [
-  'La demo carga',
-  'Se ve bien en tu celular',
-  'No hay lorem ipsum ni textos de relleno',
-  'Los links y el botón de WhatsApp funcionan',
-  'Usa los datos y assets reales del negocio',
-  'La demo dice lo que el brief pedía',
-] as const
+// Nombres de los hard-checks DERIVADOS de la lista viva, no copiados: seedear un
+// self-check "aprobado" requiere TODOS los vigentes en ok, y `selfCheckAprobado`
+// valida contra `HARD_CHECKS` (no contra lo que el blob diga tener). El espejo
+// hardcodeado que había acá quedaba stale apenas la lista cambiaba — pasó en P7,
+// que sumó tres puntos.
+const HARD_CHECK_NOMBRES: readonly string[] = HARD_CHECKS.map((check) => check.nombre)
 
 // ── Factories de JSON válido por contrato (src/lib/leados/contracts.ts) ───────
 
@@ -62,6 +59,26 @@ export function selfCheckAprobadoJson(): Prisma.InputJsonValue {
   return {
     itemsDuros: HARD_CHECK_NOMBRES.map((nombre) => ({ nombre, ok: true })),
     softFlags: [],
+  }
+}
+
+/**
+ * Self-check PARCIAL (M0/G): los `nombresOk` en verde, el resto de la lista VIVA
+ * en falso. Derivado de `HARD_CHECKS` igual que el aprobado — con la lista
+ * hardcodeada, un check nuevo entraría como "ausente" en vez de "sin tildar" y
+ * el formulario lo re-encontraría vacío por otro motivo que el sembrado.
+ * `softFlags` aparte: son los delatores del Ojo de diseño, no bloquean el gate.
+ */
+export function selfCheckParcialJson(
+  nombresOk: readonly string[],
+  softFlags: readonly string[] = [],
+): Prisma.InputJsonValue {
+  return {
+    itemsDuros: HARD_CHECK_NOMBRES.map((nombre) => ({
+      nombre,
+      ok: nombresOk.includes(nombre),
+    })),
+    softFlags: [...softFlags],
   }
 }
 
@@ -182,6 +199,14 @@ export type SeedLeadOpts = {
   draftUrl?: string | null
   /** Fecha del próximo toque (pasada = vencido; null = sin toque agendado). */
   nextFollowUpAt?: Date | null
+  /**
+   * Tildes del chequeo final ya guardados, por NOMBRE de hard-check. Pisa el
+   * self-check que el stage traiga por default. `[]` = grilla en cero pero con
+   * blob presente (distinto de `undefined` = sin `selfCheckJson`).
+   */
+  selfCheckDurosOk?: readonly string[]
+  /** Delatores del Ojo de diseño marcados (viajan en `softFlags`). */
+  selfCheckSoftFlags?: readonly string[]
 }
 
 /** Construye el `dossier.create` acumulando el JSON necesario hasta el stage pedido. */
@@ -225,6 +250,11 @@ function dossierCreateFor(opts: SeedLeadOpts): Prisma.OsLeadDossierCreateWithout
   }
   if (opts.sinFinalUrl) base.finalUrl = null
   if (opts.draftUrl !== undefined) base.draftUrl = opts.draftUrl
+  // Último a propósito: pisa el self-check aprobado que traen EN_REVISION /
+  // APROBADA / RECHAZADA cuando el estado sembrado quiere una grilla a medias.
+  if (opts.selfCheckDurosOk !== undefined) {
+    base.selfCheckJson = selfCheckParcialJson(opts.selfCheckDurosOk, opts.selfCheckSoftFlags)
+  }
   return base
 }
 

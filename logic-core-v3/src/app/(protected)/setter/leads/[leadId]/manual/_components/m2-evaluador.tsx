@@ -30,8 +30,9 @@ import {
  * la posición se RE-DERIVA sola en el próximo request.
  */
 
-/** Instrucción propia de la pantalla (la de `GUIA_FICHA.copyBlock` apunta al
- * «paso 2» del wizard — numeración que acá no existe). */
+/** Instrucción propia de la pantalla: la de `GUIA_FICHA.copyBlock` está escrita
+ * para quien todavía está en la Ficha y manda «volvé a Evaluación» — acá ya se
+ * está en Evaluación. */
 const INSTRUCCION_BLOQUE_M2 =
   'Se arma con lo último guardado — copialo y pegalo en el chat de evaluación.'
 

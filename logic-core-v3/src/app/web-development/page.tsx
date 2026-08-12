@@ -16,7 +16,6 @@ import WebDevelopmentByRubro from '@/components/sections/web-development/WebDeve
 import WebTemplatesImmersive from '@/components/sections/web-development/WebTemplatesImmersive'
 import AiSection from '@/components/sections/web-development/AiSection'
 import { ChargeTraceButton } from '@/components/ui/buttons/ChargeTraceButton'
-import { Portfolio } from '@/components/sections/home/Portfolio'
 
 const HeroBackground = dynamic(() => import('@/components/canvas/HeroBackground'), { ssr: false })
 
@@ -240,11 +239,18 @@ export default function WebDevelopmentPage() {
                 <ComparadorSection />
             </SectionReveal>
 
-            <SectionDivider color="violet" />
+            {/*
+                Acá iba la sección de casos. Era `sections/home/Portfolio.tsx`,
+                que B3-S1 reescribió como la lámina del caso real DEL HOME: tema
+                crema dentro de esta landing oscura, con el `ChapterLabel` del
+                home (`( 02 )`) y sus placeholders a la vista. Una sección rota
+                se ve peor que ninguna, así que la ruta pierde su bloque de
+                casos hasta que se rediseñe en el suyo propio (B7).
 
-            <SectionReveal delay={0.05}>
-                <Portfolio />
-            </SectionReveal>
+                No se revive `sections/web-development/PortfolioWebCases.tsx`:
+                trae cursor custom, que la dirección del rediseño prohíbe. Queda
+                donde está — sin usar y sin borrar.
+            */}
 
             <SectionDivider />
 

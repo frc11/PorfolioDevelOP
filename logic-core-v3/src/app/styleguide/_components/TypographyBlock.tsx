@@ -1,5 +1,5 @@
 import { Space_Grotesk } from 'next/font/google'
-import { DataStat, Eyebrow, Lead, Surface } from '@/components/design-system'
+import { DataStat, Eyebrow, Lead, Subhead, Surface } from '@/components/design-system'
 import { SgLabel } from './SgBlock'
 
 /**
@@ -25,6 +25,8 @@ const displayCandidate = Space_Grotesk({
 
 const H1_REAL = 'Software de élite, sin la burocracia de agencia.'
 const H2_REAL = 'Cuatro frentes. Un sistema.'
+// Peldaño nuevo: es un nombre de frente, que es exactamente donde vive.
+const SUBHEAD_REAL = 'Inteligencia artificial'
 const LEAD_REAL =
   'Web, agentes de IA y sistemas a medida para negocios que quieren operar en serio. Desde Tucumán, para todo el país.'
 const BODY_REAL =
@@ -139,11 +141,21 @@ export function TypographyBlock() {
             </p>
           </ScaleRow>
 
-          <ScaleRow token="--text-ds-lead" meta="clamp(1.125rem, 1.6vw, 1.375rem) · lh 1.55 · máx 55ch">
+          <ScaleRow
+            token="--text-ds-subhead"
+            meta="clamp(1.625rem, 2.9vw, 2.375rem) · lh 1.25 · tracking −.01em"
+          >
+            <Subhead as="p">{SUBHEAD_REAL}</Subhead>
+          </ScaleRow>
+
+          <ScaleRow token="--text-ds-lead" meta="clamp(1.25rem, 1.6vw, 1.375rem) · lh 1.55 · máx 42ch">
             <Lead>{LEAD_REAL}</Lead>
           </ScaleRow>
 
-          <ScaleRow token="--text-ds-body" meta="1.0625rem · lh 1.7 · medida de prosa 65ch">
+          <ScaleRow
+            token="--text-ds-body"
+            meta="clamp(1rem, 1.18vw, 1.0625rem) · lh 1.7 · medida de prosa 65ch"
+          >
             <p className="max-w-ds-prose text-ds-body text-ds-fg">{BODY_REAL}</p>
           </ScaleRow>
 
@@ -151,7 +163,7 @@ export function TypographyBlock() {
             <Eyebrow>Ingeniería de software — Tucumán, AR</Eyebrow>
           </ScaleRow>
 
-          <ScaleRow token="--text-ds-data" meta="clamp(2rem, 4vw, 3.5rem) · mono 500 · lh 1">
+          <ScaleRow token="--text-ds-data" meta="clamp(1.5rem, 3.5vw, 3rem) · mono 500 · lh 1">
             <div className="flex flex-wrap items-end gap-12">
               <p className="font-ds-mono text-ds-data tabular-nums text-ds-fg">0123456789</p>
               <DataStat value="[PENDIENTE]" label="Métrica del caso" />

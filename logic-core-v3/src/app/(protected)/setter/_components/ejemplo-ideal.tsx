@@ -72,7 +72,7 @@ function valorCampo(campo: keyof typeof GUIA_FICHA.campos, valor: string): strin
 }
 
 /**
- * Ejemplo de una ficha bien hecha, para el inicio del Paso 1. Reusa los labels
+ * Ejemplo de una ficha bien hecha, para el inicio de m1. Reusa los labels
  * de `GUIA_FICHA.campos` (no los duplica) y los valores modelo de
  * `GUIA_FICHA_EJEMPLAR`. Presentación pura.
  */

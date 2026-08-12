@@ -18,6 +18,11 @@
 /.next-galeria/
 /.next-setter/
 /out/
+# Builds aislados de las suites que no pueden compartir `.next/` con el checkout
+# (`npm run start:setter`, `npm run start:galeria`). Son directorios de build más
+# — artefacto, nunca código. `/.next/` es ancla exacta y NO los cubre.
+/.next-setter/
+/.next-galeria/
 
 # production
 /build

@@ -103,12 +103,14 @@ assert.equal(pausado.fijados.length, 1, 'fijado+pausado cae en `fijados` (preced
 assert.equal(
   motivoOrden(mezcla.grupos.trabajar[0]),
   'Fijado por vos — va primero',
-  'el rótulo del fijado-foco explica el pin, no su tier de urgencia',
+  'el rótulo del fijado-foco explica el pin, no su tier de trabajo',
 )
+// P8: A-respondio no tiene dossier (stage null) → sin veredicto. Que haya
+// respondido ya NO lo sube: el rótulo nombra lo que falta, no el contacto.
 assert.equal(
   motivoOrden(mezcla.grupos.trabajar[1]),
-  'Respondió — va primero',
-  'el no-fijado conserva su rótulo de urgencia',
+  'Todavía no sabés si sirve — evalualo',
+  'el no-fijado muestra su tier de TRABAJO, no el viejo "Respondió — va primero"',
 )
 assert.equal(
   motivoOrden(fijadoEnVuelo),
@@ -116,9 +118,113 @@ assert.equal(
   'un fijado fuera de `trabajar` no muestra rótulo de orden',
 )
 
+// ── P8: el foco prioriza CONSTRUIR, no contactar ─────────────────────────────
+// El criterio nuevo se verifica por la superficie pública (el orden que sale de
+// `particionarCartera` y el rótulo de `motivoOrden`), no por el tier interno.
+
+/** Los cinco tiers, cada uno en su estado mínimo, cargados en desorden. */
+const construir = lead({ id: 'construir', stage: 'CONSTRUCCION' })
+const esperaTuAccion = lead({ id: 'espera', stage: 'RECHAZADA' })
+const contactarConDemo = lead({ id: 'con-demo', stage: 'APROBADA' })
+const evaluarNuevo = lead({ id: 'evaluar', stage: 'FICHA' })
+const contactoSinDemo = lead({ id: 'sin-demo', stage: 'EVALUADA', gateAbierto: false })
+
+const colaP8 = particionarCartera([
+  contactoSinDemo,
+  evaluarNuevo,
+  contactarConDemo,
+  esperaTuAccion,
+  construir,
+])
+assert.deepEqual(
+  colaP8.grupos.trabajar.map((l) => l.id),
+  ['construir', 'espera', 'con-demo', 'evaluar', 'sin-demo'],
+  'el orden del foco es construir → espera tu acción → contactar con demo → evaluar → contacto sin demo',
+)
+
+// ── P8.a — construir le gana al contacto, aunque el contacto sea "más urgente" ──
+// El caso exacto que el sprint viene a arreglar: con el criterio viejo
+// (respondió → caliente → resto) el prospecto caliente sin evaluar era la cima y
+// la demo a medio construir quedaba última.
+const calienteSinEvaluar = lead({ id: 'caliente-crudo', caliente: true, stage: null })
+const demoFria = lead({ id: 'demo-fria', stage: 'CONSTRUCCION', status: 'PROSPECTO' })
+const duelo = particionarCartera([calienteSinEvaluar, demoFria])
+assert.equal(
+  duelo.grupos.trabajar[0].id,
+  'demo-fria',
+  'la demo a medio construir es el foco, por encima del caliente sin evaluar',
+)
+
+// ── P8.b — RESTRICCIÓN DEL PREMORTEM: nunca construir sin veredicto ──
+// Ni caliente, ni respondió, ni fijado hacen que un lead sin evaluar se sugiera
+// para construir: cada demo son 30 minutos y hacerla para quien no califica es la
+// forma más cara de perder el día. Se barre TODO el eje de un lead sin dossier.
+const ROTULO_CONSTRUIR = 'Pasó el filtro y le falta la demo — construila'
+for (const sinVeredicto of [null, 'FICHA'] as const) {
+  for (const caliente of [false, true]) {
+    for (const status of ['PROSPECTO', 'RESPONDIO'] as const) {
+      for (const pinned of [false, true]) {
+        const crudo = lead({
+          id: `crudo-${sinVeredicto}-${caliente}-${status}-${pinned}`,
+          stage: sinVeredicto,
+          caliente,
+          status,
+          pinned,
+          // gateAbierto:true es lo que abre el brief en EVALUADA — acá NO hay
+          // veredicto, así que ni siquiera con el gate abierto se sugiere construir.
+          gateAbierto: true,
+        })
+        assert.notEqual(
+          motivoOrden(crudo),
+          ROTULO_CONSTRUIR,
+          `un lead sin veredicto jamás se sugiere para construir (${crudo.id})`,
+        )
+      }
+    }
+  }
+}
+// Y el que SÍ pasó el veredicto sí lo dice — la garantía no es "nunca construir".
+assert.equal(
+  motivoOrden(construir),
+  ROTULO_CONSTRUIR,
+  'el lead que pasó la evaluación sí se sugiere para construir',
+)
+
+// ── P8.c — el gate manda: EVALUADA con el brief cerrado NO se manda a construir ──
+// `gateBriefAbierto` (respondió || caliente) es gate, no presentación: el foco
+// ordena dentro de lo que permite, nunca contra él.
+assert.equal(
+  motivoOrden(contactoSinDemo),
+  'Todavía no hay demo que mostrar',
+  'con el brief bloqueado por el gate, el foco no manda a construir',
+)
+assert.equal(
+  motivoOrden(lead({ id: 'evaluada-abierta', stage: 'EVALUADA', gateAbierto: true })),
+  ROTULO_CONSTRUIR,
+  'la misma EVALUADA con el gate abierto sí se manda a construir',
+)
+
+// ── P8.d — el pin sigue ganando al criterio nuevo (no se regresa A-05) ──
+const fijadoUltimoTier = lead({ id: 'fijado-sin-demo', stage: 'EVALUADA', pinned: true })
+const dueloPin = particionarCartera([construir, fijadoUltimoTier])
+assert.equal(
+  dueloPin.grupos.trabajar[0].id,
+  'fijado-sin-demo',
+  'el pin sigue siendo el tier de más peso: gana incluso al tier de construir',
+)
+
+// ── P8.e — ningún estado accionable queda sin lugar ni sin rótulo ──
+// Todo lead de `trabajar` cae en algún tier y tiene rótulo: nadie queda mudo.
+for (const l of colaP8.grupos.trabajar) {
+  assert.ok(motivoOrden(l), `todo lead de la cola tiene rótulo de orden (${l.id})`)
+}
+
 console.log(
-  '✓ invariante OK: A-05 — el pin ordena el foco, no lo excluye. Un fijado ' +
-    'accionable sube a la cima de `trabajar` (nunca deja el foco falsamente vacío); ' +
-    'un fijado en vuelo o pausado sigue aparte en `fijados`, sin inventar foco. ' +
-    'Es derivación (cola + orden), no motor (status/stages intactos).',
+  '✓ invariante OK: A-05 — el pin ordena el foco, no lo excluye (un fijado ' +
+    'accionable sube a la cima y nunca deja el foco falsamente vacío; uno en vuelo ' +
+    'o pausado sigue aparte). P8 — el foco prioriza CONSTRUIR: construir → espera ' +
+    'tu acción → contactar con demo → evaluar → contacto sin demo, y un lead SIN ' +
+    'VEREDICTO jamás se sugiere para construir (barrido de todo el eje: caliente, ' +
+    'respondió, fijado, gate abierto). Es derivación (cola + orden + rótulo), no ' +
+    'motor: status/stages y el gate del brief intactos.',
 )

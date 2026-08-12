@@ -1,5 +1,4 @@
-import { NeuroAvatar } from './NeuroAvatar'
-import { LegacyNeuroAvatarAdapter } from './LegacyNeuroAvatarAdapter'
+import { NeuroAvatarLazy, LegacyNeuroAvatarLazy } from './HeavyAvatarsLazy'
 import { MonogramAvatar } from './MonogramAvatar'
 import { PulseAvatar } from './PulseAvatar'
 import { GeometricAvatar } from './GeometricAvatar'
@@ -25,6 +24,11 @@ export const DEFAULT_AVATAR_ID = 'neuro'
  *  - monograma     → Initials on a brand-tinted disc (SVG, light)
  *  - onda          → Voice-assistant rings + central dot (SVG, light)
  *  - geometrico    → Organic blob with micro-expression (SVG, light)
+ *
+ * Los dos `heavy` entran por `HeavyAvatarsLazy` (chunk aparte, `ssr: false`):
+ * importarlos acá de forma estática metía `three` + R3F en el bundle de toda
+ * ruta pública vía el widget de chat. NO importar `./NeuroAvatar` ni
+ * `./LegacyNeuroAvatarAdapter` desde este archivo — deshace el diferido.
  */
 export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
   {
@@ -32,7 +36,7 @@ export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
     label: 'Orbe Neural',
     description: 'Esfera de partículas con núcleo pulsante. Vibe tech / innovador.',
     weight: 'heavy',
-    component: NeuroAvatar,
+    component: NeuroAvatarLazy,
     // The orb intentionally leaves margin inside its frustum (no state may
     // clip particles at the box edge — see NEURO_ORB_SCALE in types.ts), so
     // render the box larger for the visible orb to read at nominal size.
@@ -45,7 +49,7 @@ export const AVATAR_REGISTRY: readonly AvatarRegistryEntry[] = [
     label: 'Rostro Neural',
     description: 'Cara 3D con micro-expresiones. Vibe asistente con presencia.',
     weight: 'heavy',
-    component: LegacyNeuroAvatarAdapter,
+    component: LegacyNeuroAvatarLazy,
     // The face is framed with margin + an idle bob, so at rest it fills ~77% of
     // its box vs the Geometric avatar's 100%. Render its box ~1/0.77 larger so
     // the face reads the same physical size as the light avatars. Tune by eye.

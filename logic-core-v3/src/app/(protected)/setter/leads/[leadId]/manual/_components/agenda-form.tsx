@@ -52,7 +52,7 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
  *  memoria del lead (el prospecto ya la tiene); ausente = recién buscada acá. */
 type OfertaVigente = { horarios: string[]; ofrecidosAt?: string }
 
-/** Recordatorio del decisor según la ficha del Paso 1 — el mismo gancho del
+/** Recordatorio del decisor según la ficha (m1) — el mismo gancho del
  * wizard: la reunión es con quien DECIDE (un CM no cierra). Va pegado al
  * checkbox del decisor, que es donde el setter lo necesita. */
 function hintDecisor(ficha: Ficha | null): string {
@@ -155,7 +155,7 @@ export function AgendaForm({
 
   return (
     <div className="space-y-4">
-      {/* ── Primero: confirmar que habla con el decisor (ficha del Paso 1) ── */}
+      {/* ── Primero: confirmar que habla con el decisor (ficha de m1) ── */}
       <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 transition-colors hover:bg-white/[0.05]">
         <input
           type="checkbox"

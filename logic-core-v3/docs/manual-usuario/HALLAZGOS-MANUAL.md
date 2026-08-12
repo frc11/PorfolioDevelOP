@@ -1,5 +1,14 @@
 # HALLAZGOS — byproducto de escribir el manual (corrida M1)
 
+> **Documento histórico — no se edita.** Describe el producto **anterior a la
+> poda**: dieciséis pantallas, las dos de evaluación separadas, las seis de
+> construcción. Tres de las capturas que cita ya no existen, porque retrataban
+> pantallas retiradas.
+>
+> Para el estado de cada uno de estos 18 hallazgos **hoy**, ver
+> [VALIDACION-PODA.md § B.3](VALIDACION-PODA.md). Para los hallazgos del producto
+> actual, ver [HALLAZGOS-MANUAL-v3.md](HALLAZGOS-MANUAL-v3.md).
+
 **Qué es esto.** No es una auditoría de código ni una lista de bugs buscados a
 propósito. Es lo que apareció solo al escribir las instrucciones honestas: cada
 vez que la frase del manual salía incómoda, torcida o defensiva, quedó anotada

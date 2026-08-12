@@ -39,23 +39,48 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   danger: 'border border-red-400/30 bg-red-400/15 text-red-200 hover:bg-red-400/25',
 
   // ── Sistema de diseño B1 (sitio público) ───────────────────────────
-  // Inversión monocroma + relieve táctil de 2 capas. El canto superior
-  // más claro y la sombra corta son lo único que declara "esto se aprieta".
-  // `active` hunde 2px y apaga la sombra. Sin scale en hover.
+  // Inversión monocroma + relieve táctil de 2 capas. El relieve son DOS
+  // señales, no tres: sombra dura de 2px que da el grosor físico y difusa
+  // corta que lo apoya. `active` hunde 2px y apaga la sombra.
+  //
+  // Ya no lleva canto superior iluminado. Medido: `rgba(255,255,255,.85)`
+  // sobre el fondo tinta `#EDE9E1` da 1.18:1 — no es una señal débil, es una
+  // línea que no se ve; existía solo en la spec.
+  //
+  // La sombra va por `var()` y no por un utility de tema: `--shadow-ds-control`
+  // se invierte con la sección (ver globals.css), y así el mismo botón proyecta
+  // la sombra de su propio lienzo en vez de arrastrar la del oscuro sobre crema.
   'ds-primary':
-    'border-t border-t-ds-control-edge bg-ds-fg text-ds-canvas shadow-ds-control ' +
+    'bg-ds-fg text-ds-canvas shadow-[var(--shadow-ds-control)] ' +
     'transition-[translate,box-shadow,opacity] duration-150 ease-out ' +
     'hover:opacity-90 active:translate-y-[2px] active:shadow-none ' +
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-fg ' +
     'disabled:shadow-none disabled:hover:opacity-50 motion-reduce:transition-none',
 
-  // Secundario: plano. No se le da relieve porque compite con el primario.
+  // Secundario: plano. No se le da relieve porque compite con el primario —
+  // pero plano no es invisible. Lleva su propio token de borde
+  // (`--color-ds-control-stroke`, 3:1 en los dos temas) y no el de regla, que
+  // daba 1.23:1: el botón no tenía frontera y aparecía recién en hover, o sea
+  // nunca en touch.
   'ds-secondary':
-    'border border-ds-rule bg-transparent text-ds-fg ' +
+    'border border-ds-control-stroke bg-transparent text-ds-fg ' +
     'transition-[border-color,translate] duration-150 ease-out ' +
     'hover:border-ds-fg active:translate-y-[1px] ' +
     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-fg ' +
-    'disabled:hover:border-ds-rule motion-reduce:transition-none',
+    'disabled:hover:border-ds-control-stroke motion-reduce:transition-none',
+}
+
+/**
+ * Variantes del sistema de diseño público. Se listan porque el press físico de
+ * estas variantes es CSS (`active:translate-y`), y superponerle el
+ * `whileTap: scale` de Framer da dos presses a la vez — uno hunde y el otro
+ * comprime, y conviven porque animan propiedades distintas. Un objeto físico se
+ * hunde; no se achica.
+ */
+const DS_VARIANTS: ReadonlySet<ButtonVariant> = new Set(['ds-primary', 'ds-secondary'])
+
+export function hasFramerPress(variant: ButtonVariant): boolean {
+  return !DS_VARIANTS.has(variant)
 }
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -114,7 +139,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <motion.button
         ref={ref}
         disabled={disabled || loading}
-        {...(reduced || disabled || loading ? {} : buttonPress)}
+        {...(reduced || disabled || loading || !hasFramerPress(variant) ? {} : buttonPress)}
         className={buttonClasses({ variant, size, className })}
         {...props}
       >

@@ -1,6 +1,10 @@
-export { NeuroAvatar } from './NeuroAvatar'
-export { LegacyNeuroAvatar } from './LegacyNeuroAvatar'
-export { LegacyNeuroAvatarAdapter } from './LegacyNeuroAvatarAdapter'
+// Los dos avatares 3D salen de acá SOLO por su wrapper diferido. Reexportar
+// `NeuroAvatar` / `LegacyNeuroAvatar` / `LegacyNeuroAvatarAdapter` directo
+// reinstala la arista estática a `three` + R3F: este barrel viaja entero en el
+// árbol del widget de chat, y webpack entonces resuelve el `dynamic()` contra
+// chunks que ya estaban cargados (`files: []` en react-loadable-manifest).
+// Para usarlos eager, importarlos por ruta directa.
+export { NeuroAvatarLazy, LegacyNeuroAvatarLazy } from './HeavyAvatarsLazy'
 export { MonogramAvatar } from './MonogramAvatar'
 export { PulseAvatar } from './PulseAvatar'
 export { GeometricAvatar } from './GeometricAvatar'

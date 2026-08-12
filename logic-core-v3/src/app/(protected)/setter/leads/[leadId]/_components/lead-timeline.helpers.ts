@@ -11,10 +11,17 @@ import type { ActivityChannel, ActivityResult } from '@prisma/client'
 /** Tonos del badge de resultado (subconjunto de `BadgeTone`). */
 export type ResultadoTone = 'emerald' | 'amber' | 'rose' | 'blue' | 'zinc'
 
+/**
+ * P9 — el canal, con la palabra que usa el resto del panel. El historial decía
+ * «Instagram DM» y todas las demás superficies del setter dicen «Instagram» a
+ * secas (el opener, la capa de canal, las herramientas, la agenda): una sola
+ * palabra por cosa. La LLAVE es el enum `INSTAGRAM_DM` de Prisma y no se toca —
+ * acá solo cambia lo que se lee.
+ */
 export function canalEtiqueta(channel: ActivityChannel): string {
   switch (channel) {
     case 'INSTAGRAM_DM':
-      return 'Instagram DM'
+      return 'Instagram'
     case 'WHATSAPP':
       return 'WhatsApp'
     case 'EMAIL':

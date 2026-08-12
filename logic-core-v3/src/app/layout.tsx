@@ -85,10 +85,24 @@ export default function RootLayout({
           pelea con las superficies planas — corría a `steps(10)` infinito sobre
           todo el viewport, en toda ruta, sin gate de visibilidad.
 
-          Se desmontan, no se borran: eran las dos únicas piezas montadas
-          globalmente (fuera de `PublicOnlyComponents`), así que sacarlas de acá
-          las saca de todas las superficies. Los archivos quedan sin consumidores
-          — anotado en la bitácora para que una poda posterior los levante.
+          Eran las dos únicas piezas montadas globalmente (fuera de
+          `PublicOnlyComponents`), así que sacarlas de acá las sacó de todas las
+          superficies, producto incluido.
+
+          Los dos archivos ya no existen. `NoiseOverlay.tsx` se borró en el
+          sprint de calibración y `CustomCursor.tsx` en B2-S4, por la misma
+          razón: desmontados no hacían nada, pero cada uno seguía llevando
+          adentro lo que la lista de "Don't" del sistema prohíbe —una animación
+          `infinite` a 5 Hz sin gate de `prefers-reduced-motion` uno, un
+          `cursor:none` global sobre el cursor del sistema el otro— y bastaba
+          con volver a importarlos para reintroducirlo.
+
+          Las clases `cursor-none` y los `cursor: 'none'` sueltos que quedaban
+          repartidos por las pantallas se barrieron después, en su propio paso:
+          escondían el cursor del sistema sin reemplazarlo por nada. Única
+          excepción: `PortfolioWebCases.tsx` conserva el suyo porque ahí sí hay
+          un reemplazo visual propio ("Ver Proyecto") que sigue al puntero — y
+          además hoy ese componente no lo importa nadie.
         */}
         <PreloaderProvider>
           <SmoothScroll>

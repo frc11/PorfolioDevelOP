@@ -71,7 +71,7 @@ function EjemploContraste({ ejemplo }: { ejemplo: EjemploContrastado }) {
 /**
  * Panel de enseñanza reutilizable: «¿Por qué importa?» (el porqué del paso) +
  * el contraste «esto sí / esto no», colapsable. Productiza el patrón de ayuda
- * de la ficha (Paso 1) y el colapsable de `ToolGuide`, para los pasos que hoy
+ * de la ficha (m1) y el colapsable de `ToolGuide`, para las pantallas que hoy
  * no enseñan. Contenido 100% de `guidance-content.ts` (1.0) — no hardcodea
  * texto. Estilo NEUTRAL (disciplina B9: el cyan queda para lo accionable).
  *

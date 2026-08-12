@@ -19,13 +19,24 @@ import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-st
  * ownership, gate y transición EVALUADA→BRIEF adentro), mismo schema
  * (`BriefInputSchema`), mismo autosave/guardia. El chrome (intro, ToolGuide,
  * TeachPanel, el bloque del Gem) vive AFUERA; acá solo el núcleo de escritura:
- * los seis campos, el guardado y el estado de autosave.
+ * los campos, el guardado y el estado de autosave.
  *
  * `autosaveEnabled` lo decide el caller (el wizard SOLO lo prende en el
  * re-pegado BRIEF+editando — la captura inicial en EVALUADA NO se autoguarda a
  * propósito: ese primer guardado ES la transición deliberada). `onCancel`
  * agrega el botón Cancelar (re-pegado del wizard); `onSaved` deja al caller
  * cerrar su propio estado de edición tras un guardado exitoso.
+ *
+ * P5-B — `notasMarca` YA NO SE PIDE (la ficha lo junta en «¿Cómo habla el
+ * negocio de sí mismo?», «¿De dónde bajás el logo y las fotos?» y «Contenido
+ * real», y las tres viajan solas al bloque de construcción). Pero sigue en el
+ * estado y en el payload A PROPÓSITO: `guardarBrief` persiste el input COMPLETO
+ * (`const brief: Brief = input.data`), así que un campo que sale del payload se
+ * BORRA en el próximo re-guardado. Ese es exactamente el destino silencioso de
+ * `referenciasFicha` (en `BriefSchema`, fuera de `BriefInputSchema`, sin ningún
+ * lector). Dejarlo viajar es lo que mantiene legibles los briefs ya guardados.
+ * Si alguien lo saca de `BriefFormState`/`aPayloadBrief` "porque no se usa", el
+ * dato viejo se pierde a la primera edición y nadie se entera.
  */
 
 type BriefFormState = {
@@ -179,23 +190,13 @@ export function BriefForm({
         />
       </Field>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Field label={GUIA_BRIEF.campos.concepto.label} hint={GUIA_BRIEF.campos.concepto.hint}>
-          <TextArea
-            value={form.concepto}
-            onChange={(event) => set('concepto', event.target.value)}
-            rows={3}
-          />
-        </Field>
-
-        <Field label={GUIA_BRIEF.campos.notasMarca.label} hint={GUIA_BRIEF.campos.notasMarca.hint}>
-          <TextArea
-            value={form.notasMarca}
-            onChange={(event) => set('notasMarca', event.target.value)}
-            rows={3}
-          />
-        </Field>
-      </div>
+      <Field label={GUIA_BRIEF.campos.concepto.label} hint={GUIA_BRIEF.campos.concepto.hint}>
+        <TextArea
+          value={form.concepto}
+          onChange={(event) => set('concepto', event.target.value)}
+          rows={3}
+        />
+      </Field>
 
       {serverError && (
         <p role="alert" className="text-xs text-red-400">

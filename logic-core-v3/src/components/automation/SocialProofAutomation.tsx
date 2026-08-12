@@ -321,7 +321,6 @@ function TestimonialCard({
             flexShrink: 0,
             letterSpacing: '0.05em',
             boxShadow: `0 0 0 2px rgba(${t.colorRgb},0.25)`,
-            cursor: 'none',
           }}
         >
           {t.initials}

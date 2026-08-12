@@ -27,7 +27,10 @@ export type {
 export type { PublicBotConfig } from './shared/publicConfig'
 
 // Avatar (Sprint S7)
-export { NeuroAvatar } from './components/avatar'
+// Diferido: este barrel lo importa entero `ChatWidgetMount` en toda ruta
+// pública. Reexportar el avatar 3D eager metía `three` + R3F (225 kB gz) en el
+// bundle del widget aunque nadie lo monte. Ver components/avatar/HeavyAvatarsLazy.tsx.
+export { NeuroAvatarLazy } from './components/avatar'
 export type { NeuroAvatarProps, NeuroAvatarState } from './components/avatar'
 
 // ChatWindow (Sprint S8)
@@ -65,7 +68,7 @@ export { useChatbot } from './hooks'
 export type { UseChatbotOptions, UseChatbotReturn } from './hooks'
 
 // Avatar variants (Sprint S12)
-export { AvatarRenderer, LegacyNeuroAvatar } from './components/avatar'
+export { AvatarRenderer, LegacyNeuroAvatarLazy } from './components/avatar'
 export type { AvatarRendererProps } from './components/avatar'
 
 // Admin UI components (Sprint S13+)

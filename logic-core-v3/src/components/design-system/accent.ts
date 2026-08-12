@@ -5,10 +5,10 @@
  * resolver nombres de clase armados en runtime. Un `text-ds-accent-${accent}`
  * no generaría CSS.
  *
- * ⚠ Los VALORES de estos cuatro tokens tienen una decisión pendiente de Franco
- * (Gate 1): el código y CLAUDE.md asignan los mismos cuatro hex a servicios
- * distintos. Acá viven los nombres de rol, no los colores — cuando se resuelva
- * la permutación se cambian los hex en `globals.css` y este archivo no se toca.
+ * El Gate 1 se cerró en B2-S4 con la permutación A, que es la que ya tenían los
+ * tokens: web cian · IA verde · automatización ámbar · software violeta. No se
+ * movió ningún hex. Acá viven los nombres de rol, no los colores; los valores
+ * están en `globals.css` y congelados en `CLAUDE.md`.
  */
 
 export type ServiceAccent = 'web' | 'ia' | 'automation' | 'software'

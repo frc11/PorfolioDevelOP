@@ -7,7 +7,7 @@ import { useHidratado } from '../../_components/use-hidratado'
 
 /**
  * 5.6 — La capa «si se traba» que vivía SOLO en el paso de Construcción del
- * wizard, traída al manual (pantallas m7–m12): el MISMO `EscalarModal` (misma
+ * wizard, traída al manual (pantallas mc1/mc2): el MISMO `EscalarModal` (misma
  * action `escalarConstruccion` → dossier + Telegram a Franco), el banner «ya
  * avisaste» con la espera visible, y la nota re-servida a su autor que prefillea
  * el re-escalar (A-23). El «hace X» depende del reloj del cliente → se difiere a

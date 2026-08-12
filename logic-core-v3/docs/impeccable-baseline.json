@@ -1,0 +1,1313 @@
+[
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\announcements\\_components\\announcement-list.tsx",
+    "line": 96,
+    "snippet": "text-zinc-500 on bg-rose-500",
+    "importedBy": [
+      "page.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\audit-log\\_components\\audit-period-filter.tsx",
+    "line": 210,
+    "snippet": "text-zinc-200 on bg-cyan-400",
+    "importedBy": [
+      "AuditLogClient.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\chatbots\\BotsListClient.tsx",
+    "line": 211,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "page.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\clients\\[clientId]\\edit\\EditClientForm.tsx",
+    "line": 242,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "page.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\clients\\[clientId]\\_components\\InternalNotesCard.tsx",
+    "line": 107,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "OverviewTab.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\clients\\_components\\ClientsListClient.tsx",
+    "line": 354,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "page.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\clients\\_components\\ClientsListClient.tsx",
+    "line": 623,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "page.tsx"
+    ]
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\leads\\_components\\lead-pipeline.shared.ts",
+    "line": 59,
+    "snippet": "from-violet-400 gradient",
+    "importedBy": [
+      "page.tsx",
+      "change-status-select.tsx",
+      "column-overview.tsx",
+      "draggable-lead-card.tsx",
+      "droppable-column.tsx",
+      "lead-card.helpers.ts",
+      "lead-card.tsx",
+      "lead-filters.ts",
+      "lead-form.tsx",
+      "lead-pipeline.tsx",
+      "outbound-leads-view.tsx",
+      "pipeline-board.tsx",
+      "pipeline-column.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\leads\\_components\\location-typeahead.tsx",
+    "line": 216,
+    "snippet": "text-zinc-200 on bg-cyan-400",
+    "importedBy": [
+      "lead-filters-bar.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\projects\\_components\\projects-period-dropdown.tsx",
+    "line": 225,
+    "snippet": "text-zinc-200 on bg-cyan-400",
+    "importedBy": [
+      "projects-filter-bar.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\admin\\_components\\admin-topbar.tsx",
+    "line": 89,
+    "snippet": "text-zinc-500 on bg-red-500",
+    "importedBy": [
+      "AdminLayoutClient.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\dashboard\\cuenta\\boveda\\page.tsx",
+    "line": 215,
+    "snippet": "text-zinc-300 on bg-cyan-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\dashboard\\cuenta\\facturacion\\page.tsx",
+    "line": 234,
+    "snippet": "text-zinc-400 on bg-cyan-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\layout.tsx",
+    "line": 81,
+    "snippet": "text-zinc-500 on bg-red-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\leads\\[leadId]\\_components\\evaluacion-form.tsx",
+    "line": 174,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "m3-veredicto.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\leads\\[leadId]\\_components\\evaluacion-form.tsx",
+    "line": 175,
+    "snippet": "text-zinc-950 on bg-amber-400",
+    "importedBy": [
+      "m3-veredicto.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\_components\\copy-block.tsx",
+    "line": 66,
+    "snippet": "text-zinc-300 on bg-emerald-500",
+    "importedBy": [
+      "guardrail-rol.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\_components\\lead-card-actions.tsx",
+    "line": 247,
+    "snippet": "text-zinc-500 on bg-cyan-500",
+    "importedBy": [
+      "home-sections.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\(protected)\\setter\\_components\\lead-card-actions.tsx",
+    "line": 247,
+    "snippet": "text-zinc-300 on bg-cyan-500",
+    "importedBy": [
+      "home-sections.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\bienvenida\\_components\\Step1Empresa.tsx",
+    "line": 105,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "BienvenidaWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\bienvenida\\_components\\Step2Conexiones.tsx",
+    "line": 84,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "BienvenidaWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\bienvenida\\_components\\Step3Tour.tsx",
+    "line": 59,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "BienvenidaWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\app\\web-development\\page.tsx",
+    "line": 166,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\auth.ts",
+    "line": 109,
+    "snippet": "font-family:Arial"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\BentoAutomation.tsx",
+    "line": 514,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\CalculadoraAutomation.tsx",
+    "line": 321,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\CtaAutomation.tsx",
+    "line": 323,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\FaqAutomation.tsx",
+    "line": 308,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\IntegracionesAutomation.tsx",
+    "line": 564,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\ProcesoAutomation.tsx",
+    "line": 366,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\automation\\RubrosAutomation.tsx",
+    "line": 609,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\DashboardLayoutClient.tsx",
+    "line": 51,
+    "snippet": "text-zinc-100 on bg-cyan-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\DashboardLayoutClient.tsx",
+    "line": 154,
+    "snippet": "text-zinc-500 on bg-red-500"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\LeakMeter.tsx",
+    "line": 89,
+    "snippet": "animate-bounce (Tailwind)"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\MessageThread.tsx",
+    "line": 177,
+    "snippet": "text-zinc-400 on bg-cyan-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\results\\analysis\\AnalysisTeaser.tsx",
+    "line": 14,
+    "snippet": "text-zinc-300 on bg-violet-500"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\dashboard\\UpsellCard.tsx",
+    "line": 84,
+    "snippet": "from-violet-500 gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ia\\CtaIA.tsx",
+    "line": 320,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ia\\FaqIA.tsx",
+    "line": 317,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ia\\VaultIA.tsx",
+    "line": 226,
+    "snippet": "transition: padding"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\layout\\Hero.tsx",
+    "line": 336,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\layout\\Hero.tsx",
+    "line": 353,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\AIBentoGrid.tsx",
+    "line": 105,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\AILargeCta.tsx",
+    "line": 25,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\AIPipelineSection.tsx",
+    "line": 29,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\About.tsx",
+    "line": 383,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "layout-transition",
+    "name": "Layout property animation",
+    "description": "Animating width, height, padding, or margin causes layout thrash and janky performance. Use transform and opacity instead, or grid-template-rows for height animations.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\OurServices.tsx",
+    "line": 7639,
+    "snippet": "transition: width"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\Portfolio.tsx",
+    "line": 428,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\Portfolio.tsx",
+    "line": 468,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\Portfolio.tsx",
+    "line": 629,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\Portfolio.tsx",
+    "line": 664,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\home\\WhyDevelOP.tsx",
+    "line": 1654,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\portal-demo\\StoryMomentCard.tsx",
+    "line": 346,
+    "snippet": "borderLeft: `3px solid",
+    "importedBy": [
+      "StoryArcLunes.tsx"
+    ]
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\portal-demo-cta\\PortalDemoCTA.tsx",
+    "line": 304,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\ProcessAutomationCta.tsx",
+    "line": 23,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\software-development\\SoftwareDevelopmentCta.tsx",
+    "line": 320,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\ComparadorSection.tsx",
+    "line": 44,
+    "snippet": "animation: bounce-chevron"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentBento.tsx",
+    "line": 406,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentBento.tsx",
+    "line": 573,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentBento.tsx",
+    "line": 573,
+    "snippet": "from-violet-200 gradient"
+  },
+  {
+    "antipattern": "bounce-easing",
+    "name": "Bounce or elastic easing",
+    "description": "Bounce and elastic easing feel dated and tacky. Real objects decelerate smoothly — use exponential easing (ease-out-quart/quint/expo) instead.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentBento.tsx",
+    "line": 171,
+    "snippet": "animation: bounce-chevron-bento_1.5s_infinite_ease-in-out]\">"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentByRubro.tsx",
+    "line": 679,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentCta.tsx",
+    "line": 320,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentFaq.tsx",
+    "line": 316,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentSeo.tsx",
+    "line": 661,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentTimeline.tsx",
+    "line": 814,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\sections\\web-development\\WebDevelopmentTimeline.tsx",
+    "line": 918,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\ArchitectureSoftware.tsx",
+    "line": 660,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\ArchitectureSoftware.tsx",
+    "line": 660,
+    "snippet": "from-indigo-100 gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\FaqSoftware.tsx",
+    "line": 280,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\FaqSoftware.tsx",
+    "line": 280,
+    "snippet": "from-indigo-300 gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\PipelineSoftware.tsx",
+    "line": 443,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\RoiSoftware.tsx",
+    "line": 371,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "ai-color-palette",
+    "name": "AI color palette",
+    "description": "Purple/violet gradients and cyan-on-dark are the most recognizable tells of AI-generated UIs. Choose a distinctive, intentional palette.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\software\\RoiSoftware.tsx",
+    "line": 371,
+    "snippet": "from-indigo-300 gradient"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 20,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 25,
+    "snippet": "text-zinc-950 on bg-emerald-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 30,
+    "snippet": "text-zinc-950 on bg-amber-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 35,
+    "snippet": "text-zinc-50 on bg-rose-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 40,
+    "snippet": "text-zinc-50 on bg-violet-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Badge.tsx",
+    "line": 50,
+    "snippet": "text-zinc-50 on bg-blue-500",
+    "importedBy": [
+      "ErrorState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Button.tsx",
+    "line": 41,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "EmptyState.tsx"
+    ]
+  },
+  {
+    "antipattern": "gradient-text",
+    "name": "Gradient text",
+    "description": "Gradient text is decorative rather than meaningful — a common AI tell, especially on headings and metrics. Use solid colors for text.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\PageHeader.tsx",
+    "line": 67,
+    "snippet": "bg-clip-text + bg-gradient"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\components\\ui\\Tabs.tsx",
+    "line": 80,
+    "snippet": "text-zinc-950 on bg-cyan-500"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\client-notifications\\templates.ts",
+    "line": 139,
+    "snippet": "border-left:4px solid ${theme.accent}",
+    "importedBy": [
+      "client-notifications.invariant.ts",
+      "notify.ts"
+    ]
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\client-notifications\\templates.ts",
+    "line": 167,
+    "snippet": "border-left:4px solid ${theme.accent}",
+    "importedBy": [
+      "client-notifications.invariant.ts",
+      "notify.ts"
+    ]
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\client-notifications\\templates.ts",
+    "line": 150,
+    "snippet": "font-family:Arial",
+    "importedBy": [
+      "client-notifications.invariant.ts",
+      "notify.ts"
+    ]
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\client-notifications\\templates.ts",
+    "line": 218,
+    "snippet": "font-family:Arial",
+    "importedBy": [
+      "client-notifications.invariant.ts",
+      "notify.ts"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\design-patterns.ts",
+    "line": 28,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\design-patterns.ts",
+    "line": 37,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\lib\\email\\notify-message.ts",
+    "line": 109,
+    "snippet": "border-left: 3px solid #06b6d4"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\activation\\ActivationModal.tsx",
+    "line": 138,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\BotConfigEditor.tsx",
+    "line": 224,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "broken-image",
+    "name": "Broken or placeholder image",
+    "description": "<img> tags with empty src, missing src, or placeholder values ship as broken-image boxes. Use real images, generated assets, or remove the tag.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\client-avatar\\ClientAvatar.tsx",
+    "line": 15,
+    "snippet": "<img>",
+    "importedBy": [
+      "ClientAvatarField.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\config\\BotConfigDiffModal.tsx",
+    "line": 150,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "BotConfigEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\config\\tabs\\BehaviorTab.tsx",
+    "line": 97,
+    "snippet": "text-zinc-500 on bg-red-500",
+    "importedBy": [
+      "BotConfigEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\config\\tabs\\BehaviorTab.tsx",
+    "line": 194,
+    "snippet": "text-zinc-500 on bg-red-500",
+    "importedBy": [
+      "BotConfigEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\config\\tabs\\BehaviorTab.tsx",
+    "line": 272,
+    "snippet": "text-zinc-500 on bg-red-500",
+    "importedBy": [
+      "BotConfigEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\kb\\SaveConfirmModal.tsx",
+    "line": 89,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "KnowledgeBaseEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\kb\\TestPromptSandbox.tsx",
+    "line": 186,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "KnowledgeBaseEditor.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\KnowledgeBaseEditor.tsx",
+    "line": 188,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\ExpandableTextField.tsx",
+    "line": 79,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "Step3KnowledgeBase.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step1Company.tsx",
+    "line": 197,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step2BotIdentity.tsx",
+    "line": 103,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step3KnowledgeBase.tsx",
+    "line": 97,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step4Appearance.tsx",
+    "line": 123,
+    "snippet": "text-zinc-950 on bg-cyan-500",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step5Review.tsx",
+    "line": 189,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\admin\\onboarding\\Step5Review.tsx",
+    "line": 329,
+    "snippet": "text-zinc-950 on bg-cyan-400",
+    "importedBy": [
+      "OnboardingWizard.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\dashboard\\BotPersonalization.tsx",
+    "line": 443,
+    "snippet": "text-zinc-500 on bg-red-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\dashboard\\ChatbotUpsellLanding.tsx",
+    "line": 52,
+    "snippet": "text-zinc-950 on bg-cyan-400"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\dashboard\\ClientSettingsForm.tsx",
+    "line": 180,
+    "snippet": "text-zinc-950 on bg-cyan-500"
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\dashboard\\LeadScoringTeaser.tsx",
+    "line": 17,
+    "snippet": "text-zinc-300 on bg-violet-500",
+    "importedBy": [
+      "ClientLeadsTable.tsx",
+      "LeadDetail.tsx"
+    ]
+  },
+  {
+    "antipattern": "gray-on-color",
+    "name": "Gray text on colored background",
+    "description": "Gray text looks washed out on colored backgrounds. Use a darker shade of the background color instead, or white/near-white for contrast.",
+    "severity": "warning",
+    "category": "quality",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\components\\dashboards\\ConversationsTable.tsx",
+    "line": 231,
+    "snippet": "text-zinc-200 on bg-cyan-500"
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\server\\admin\\detectBotIssues.ts",
+    "line": 305,
+    "snippet": "font-family:Arial"
+  },
+  {
+    "antipattern": "side-tab",
+    "name": "Side-tab accent border",
+    "description": "Thick colored border on one side of a card — the most recognizable tell of AI-generated UIs. Use a subtler accent or remove it entirely.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\server\\notifications\\sendLeadNotification.ts",
+    "line": 75,
+    "snippet": "border-left:4px solid #06b6d4",
+    "importedBy": [
+      "notifications-brevo.invariant.ts"
+    ]
+  },
+  {
+    "antipattern": "overused-font",
+    "name": "Overused font",
+    "description": "Inter, Roboto, Fraunces, Geist, Plus Jakarta Sans, and Space Grotesk are used on so many sites they no longer feel distinctive. Each new wave of AI-generated UIs converges on the same handful of faces. Choose a face that gives your interface personality.",
+    "severity": "warning",
+    "category": "slop",
+    "file": "C:\\Users\\franc\\Desktop\\PorfolioDevelOP\\logic-core-v3\\src\\modules\\chatbot\\server\\notifications\\sendLeadNotification.ts",
+    "line": 57,
+    "snippet": "font-family:Arial",
+    "importedBy": [
+      "notifications-brevo.invariant.ts"
+    ]
+  }
+]

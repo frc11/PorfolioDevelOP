@@ -750,10 +750,9 @@ function FlowSVG({
           }
 
           return (
-            <g 
-              key={node.id} 
+            <g
+              key={node.id}
               transform={`translate(${node.x}, ${node.y})`}
-              className="cursor-none"
             >
               {/* Capa opaca para ocultar líneas detrás del nodo */}
               <circle

@@ -7,6 +7,7 @@ import {
   Lead,
   MonoLabel,
   RuleDivider,
+  Subhead,
   Surface,
 } from '@/components/design-system'
 import { getWhatsappHref } from '@/lib/whatsapp'
@@ -102,11 +103,12 @@ export function ComponentStates() {
       <div>
         <SgLabel>CtaButton — primario</SgLabel>
         <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
-          Inversión monocroma, canto superior iluminado, sombra corta de dos capas y radio de
-          control. Sin scale en hover y sin letterSpacing animado. Al apretarlo baja 2px y además
-          escala 0.97 — las dos cosas a la vez, porque Tailwind usa la propiedad{' '}
-          <code className="font-ds-mono">translate</code> y Framer Motion usa{' '}
-          <code className="font-ds-mono">transform</code>.
+          Inversión monocroma, sombra corta de dos capas y radio de control. El relieve son{' '}
+          <strong className="text-ds-fg">dos</strong> señales, no tres: se le sacó el canto superior
+          iluminado, que medía 1.18:1 contra el fondo del propio botón — invisible. Un solo press:
+          hunde 2px y apaga la sombra. Antes hundía <em>y</em> escalaba 0.97 a la vez, porque
+          Tailwind anima <code className="font-ds-mono">translate</code> y Framer Motion{' '}
+          <code className="font-ds-mono">transform</code>, así que no se pisaban.
         </p>
         <CtaMatrix tone="primary" />
       </div>
@@ -114,7 +116,11 @@ export function ComponentStates() {
       <div>
         <SgLabel>CtaButton — secundario</SgLabel>
         <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
-          Transparente, borde de 1px, plano. Sin relieve: no compite con el primario.
+          Transparente, borde de 1px, plano — sin relieve, no compite con el primario. El borde usa
+          su propio token (<code className="font-ds-mono">--color-ds-control-stroke</code>) y no el
+          de regla: 3.55:1 en oscuro y 3.48:1 en crema, contra los 1.23:1 del token de división, que
+          dejaba al botón sin ninguna frontera y lo hacía aparecer recién en hover — o sea nunca a
+          touch.
         </p>
         <CtaMatrix tone="secondary" />
       </div>
@@ -172,6 +178,47 @@ export function ComponentStates() {
         </div>
       </div>
 
+      {/* ── El CTA bajo tema crema ───────────────────────────────────────── */}
+      <div>
+        <SgLabel>CtaButton — sobre tema crema</SgLabel>
+        <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
+          Hueco real hasta este sprint: los 22 botones del styleguide vivían sobre oscuro, y el
+          relieve estaba calculado con negro al 90% contra lienzo oscuro. Sobre crema, esa misma
+          sombra se leía como una mancha en vez de un objeto apoyado. Ahora{' '}
+          <code className="font-ds-mono">--shadow-ds-control</code> se invierte con la sección:
+          misma forma —dos capas, mismos offsets— con la opacidad bajada. Este bloque existe para
+          poder comparar los dos temas de un vistazo.
+        </p>
+        <div
+          data-ds-theme="light"
+          className="border border-ds-rule bg-ds-canvas p-6 text-ds-fg rounded-ds-surface md:p-8"
+        >
+          <div className="flex flex-wrap items-center gap-6">
+            <Specimen label="primario">
+              <CtaButton>Escribinos por WhatsApp</CtaButton>
+            </Specimen>
+            <Specimen label="secundario">
+              <CtaButton tone="secondary" withArrow={false}>
+                Ver el caso completo
+              </CtaButton>
+            </Specimen>
+            <Specimen label="primario disabled">
+              <CtaButton disabled>Escribinos por WhatsApp</CtaButton>
+            </Specimen>
+            <Specimen label="secundario disabled">
+              <CtaButton tone="secondary" disabled withArrow={false}>
+                Ver el caso completo
+              </CtaButton>
+            </Specimen>
+            <Specimen label="active (hundido)">
+              <CtaButton className="translate-y-[2px]! shadow-none!">
+                Escribinos por WhatsApp
+              </CtaButton>
+            </Specimen>
+          </div>
+        </div>
+      </div>
+
       <RuleDivider />
 
       {/* ── Piezas tipográficas ──────────────────────────────────────────── */}
@@ -185,20 +232,22 @@ export function ComponentStates() {
         </div>
 
         <div>
-          <SgLabel>ChapterLabel</SgLabel>
+          <SgLabel>ChapterLabel — el formato del home es solo el número</SgLabel>
           <div className="flex flex-col gap-4">
-            <ChapterLabel number="01" title="La prueba" />
-            <ChapterLabel number="03" title="Un lunes cualquiera" />
             <ChapterLabel number="01" />
+            <ChapterLabel number="02" />
+            <ChapterLabel number="03" />
+            <ChapterLabel number="03" title="Con título — para fuera del home" />
           </div>
         </div>
 
         <div>
-          <SgLabel>MonoLabel</SgLabel>
+          <SgLabel>MonoLabel — el acento pinta el texto</SgLabel>
           <div className="flex flex-col items-start gap-4">
             <MonoLabel>Caso real</MonoLabel>
+            <MonoLabel accent="ia">Inteligencia artificial</MonoLabel>
             <MonoLabel accent="ia" tick>
-              Demo conceptual
+              Con tick — sigue disponible
             </MonoLabel>
             <MonoLabel>15 días</MonoLabel>
           </div>
@@ -214,7 +263,7 @@ export function ComponentStates() {
       </div>
 
       <div>
-        <SgLabel>DisplayHeading — xl y lg</SgLabel>
+        <SgLabel>DisplayHeading — xl y lg, y el peldaño nuevo debajo</SgLabel>
         <div className="flex flex-col gap-8">
           <DisplayHeading size="xl" as="h2">
             Software de élite, sin la burocracia de agencia.
@@ -222,11 +271,15 @@ export function ComponentStates() {
           <DisplayHeading size="lg" as="h2">
             Cuatro frentes. Un sistema.
           </DisplayHeading>
+          <Subhead as="p">Subhead — el escalón que faltaba entre el titular y el subhead</Subhead>
+          <Subhead as="p" accent="ia">
+            Subhead con acento — así se pinta un frente de servicio
+          </Subhead>
         </div>
       </div>
 
       <div>
-        <SgLabel>Lead — corta a 55ch</SgLabel>
+        <SgLabel>Lead — corta a 42ch</SgLabel>
         <Lead>
           Web, agentes de IA y sistemas a medida para negocios que quieren operar en serio. Desde
           Tucumán, para todo el país.

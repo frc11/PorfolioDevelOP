@@ -191,8 +191,7 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
           padding: 0,
           border: 'none',
           background: 'transparent',
-          // No `cursor: pointer`: inherits `cursor: none` on desktop so the site's
-          // custom cursor stays over the bubble; `data-cursor="hover"` grows its aura.
+          cursor: 'pointer',
           // One-shot CSS reveal on first appearance (skipped under reduced motion).
           animation: reducedMotion
             ? undefined

@@ -68,10 +68,12 @@
      ───────────────────────────────────────────────────────────────────── */
   --radius-ds-surface: 0px;
   --radius-ds-control: 9px;
-  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
+  /* El relieve del control NO vive acá: es de los pocos valores que tienen que
+     invertirse con el tema, así que está en la capa semántica más abajo
+     (`--shadow-ds-control`). Ver la nota de ese bloque. */
 
   /* ── Motion ─────────────────────────────────────────────────────────────
-     Único reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
+     Reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
      a propósito: un `initial={{opacity:0}}` de Framer se serializa en el HTML
      del SSR, así que el bloque nace con `opacity:0` y queda invisible hasta que
      hidrata — si el JS tarda o falla, no se ve nada. Una animación CSS corre
@@ -81,6 +83,16 @@
 
      `both` es obligatorio: sin fill-mode el elemento parpadea a su estado
      final antes de arrancar.
+
+     ⚠ NO envolver contenido crítico —el titular que es el LCP de la página— en
+     `ds-reveal`. El `from` lo arranca en `opacity: 0`, la opacidad del ancestro
+     multiplica a todos sus descendientes, y Chrome no considera candidato a LCP
+     a un elemento transparente: el titular deja de contar hasta que el fade
+     termina. Medido en D9 sobre el hero del home, con `elementtiming` inyectado
+     en el HTML servido para fechar la pintura del `h1` independientemente de su
+     candidatura: dentro de `ds-reveal` pintaba a FCP + 1.020 ms; con la
+     animación apagada, en el MISMO frame que FCP. Para esos casos está
+     `ds-rise`, abajo.
      ───────────────────────────────────────────────────────────────────── */
   --animate-ds-reveal: ds-reveal 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 
@@ -96,6 +108,26 @@
     }
   }
 
+  /* Compañero de `ds-reveal` para contenido crítico: MISMA distancia, MISMA
+     duración y MISMA curva, sin el tramo de opacidad. Puesto sobre un hermano
+     de bloques con `ds-reveal`, los dos se mueven en lockstep — la diferencia
+     es que este nace opaco y por lo tanto pinta, y cuenta, desde el primer
+     frame.
+
+     Solo transform: se compone en la GPU igual que el reveal y no dispara
+     layout, así que no suma CLS. */
+  --animate-ds-rise: ds-rise 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+
+  @keyframes ds-rise {
+    from {
+      transform: translateY(16px);
+    }
+
+    to {
+      transform: none;
+    }
+  }
+
   /* ── Escala tipográfica ─────────────────────────────────────────────────
      Sin familias nuevas: Geist (sans) y Geist Mono, ya cargadas en
      layout.tsx. El display se distingue por escala y tracking.
@@ -104,6 +136,20 @@
      `DS_FONT_SIZE_CLASSES` en `src/lib/utils.ts`. tailwind-merge no distingue
      `text-<nombre>` tamaño de `text-<nombre>` color y descarta uno de los dos
      sin avisar: el componente pierde el tamaño o el color, sin error de build.
+
+     ── Recalibración del piso móvil ────────────────────────────────────────
+     Los pisos de estos `clamp()` se habían elegido como mínimos individuales,
+     cada uno defendible por separado. Pero en mobile TODOS tocan su piso a la
+     vez, así que el piso no es una lista de mínimos: es LA escala que ve la
+     mayoría de la audiencia. Medido a 390px daba `lead` 18 contra `body` 17
+     (1.06× — indistinguibles, el único separador real era el color) y la cifra
+     de `data` 32 contra un titular de 36 (0.89× — el dato competía con el
+     título de su propia sección).
+
+     Los pisos se re-eligieron como escala. Invariantes verificadas con un
+     barrido continuo de 320 a 1920px, no solo en los tres breakpoints:
+       · `lead` / `body` ≥ 1.20  → mínimo real 1.25 (a 320px)
+       · `data` / `display-lg` ≤ 0.75 → máximo real 0.71 (a 1372px)
      ───────────────────────────────────────────────────────────────────── */
   --text-ds-display-xl: clamp(3.25rem, 8vw, 7rem);
   --text-ds-display-xl--line-height: 0.98;
@@ -113,17 +159,25 @@
   --text-ds-display-lg--line-height: 1.05;
   --text-ds-display-lg--letter-spacing: -0.02em;
 
-  --text-ds-lead: clamp(1.125rem, 1.6vw, 1.375rem);
+  /* Peldaño intermedio: subtítulo de bloque. Existe porque entre el titular de
+     capítulo y el subhead había un salto de 3.09× sin nada en el medio, y las
+     secciones con estructura interna (los 4 frentes, los 3 contrastes) caían
+     del titular directo a la mono de 12px. Es escala, no una familia nueva. */
+  --text-ds-subhead: clamp(1.625rem, 2.9vw, 2.375rem);
+  --text-ds-subhead--line-height: 1.25;
+  --text-ds-subhead--letter-spacing: -0.01em;
+
+  --text-ds-lead: clamp(1.25rem, 1.6vw, 1.375rem);
   --text-ds-lead--line-height: 1.55;
 
-  --text-ds-body: 1.0625rem;
+  --text-ds-body: clamp(1rem, 1.18vw, 1.0625rem);
   --text-ds-body--line-height: 1.7;
 
   --text-ds-eyebrow: 0.75rem;
   --text-ds-eyebrow--line-height: 1.2;
   --text-ds-eyebrow--letter-spacing: 0.18em;
 
-  --text-ds-data: clamp(2rem, 4vw, 3.5rem);
+  --text-ds-data: clamp(1.5rem, 3.5vw, 3rem);
   --text-ds-data--line-height: 1;
   --text-ds-data--font-weight: 500;
 
@@ -138,8 +192,19 @@
      que no existe: "se agrega el token, no un valor suelto".
      ───────────────────────────────────────────────────────────────────── */
 
-  /* Medida del subhead: el Lead corta a 55ch, más angosto que la prosa. */
-  --container-ds-lead: 55ch;
+  /* Medida del subhead. Tiene que quedar MÁS ANGOSTA que la prosa (65ch).
+     Estaba en 55ch y rendía al revés: `ch` es relativo al `font-size` del
+     propio elemento, y el Lead corre a 22px contra los 17px de la prosa, así
+     que 55ch daba 802px contra los 732px de la prosa — el subhead salía más
+     ancho, lo contrario de lo declarado.
+
+     Se recalcula en `ch` en vez de pasar a una medida absoluta: `ch` es la
+     unidad correcta para una medida de lectura (se cuenta en caracteres), y
+     una medida en `rem` se rompería igual de silenciosa en cualquier elemento
+     que no corra al tamaño para el que se calculó. Con 42ch el orden declarado
+     (42 < 65) y el orden renderizado (≈612px < ≈732px) coinciden a TODO
+     tamaño, no solo en el que se midió. */
+  --container-ds-lead: 42ch;
 
   /* Tamaño de control. La escala de S1 no traía uno, y `--text-ds-body`
      arrastra line-height 1.7 — demasiado suelto para un botón. */
@@ -169,10 +234,23 @@
   --color-ds-fg-muted: var(--color-ds-ink-muted);
   --color-ds-rule: var(--color-ds-border);
 
-  /* Canto iluminado del control primario: 1px más claro que su fondo. En
-     oscuro el botón es casi blanco, en crema es casi negro — el valor tiene
-     que invertirse con el tema, así que vive en la capa semántica. */
-  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+  /* Borde del control secundario. Es un token PROPIO y no el de regla
+     (`--color-ds-rule`) porque son dos cosas distintas: la regla divide, este
+     borde es la frontera de un objeto que se aprieta. WCAG 1.4.11 pide 3:1
+     para el borde de un componente interactivo, y el token de regla da 1.23:1
+     en oscuro y 1.27:1 en crema — el secundario quedaba sin ninguna señal de
+     que era un botón, y prácticamente aparecía recién en hover (1.23 → 16.23),
+     o sea nunca en touch. Medido: 3.55:1 en oscuro, 3.48:1 en crema. */
+  --color-ds-control-stroke: rgba(237, 233, 225, 0.42);
+
+  /* Relieve del control primario: un canto duro que da el grosor físico y una
+     difusa corta que lo apoya. Vive en la capa semántica, y no en la paleta,
+     porque estaba calculado contra lienzo oscuro (negro al 90%) y sobre crema
+     se leía como una mancha sucia en vez de un objeto apoyado. Misma FORMA en
+     los dos temas —dos capas, mismos offsets— con la opacidad bajada en crema:
+     lo que cambia es cuánta sombra proyecta la superficie, no la geometría del
+     relieve. */
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
 
   /* ── Familias ───────────────────────────────────────────────────────────
      Fuente única de verdad de las familias del sistema. `next/font` deja
@@ -205,7 +283,8 @@
   --color-ds-fg: var(--color-ds-ink);
   --color-ds-fg-muted: var(--color-ds-ink-muted);
   --color-ds-rule: var(--color-ds-border);
-  --color-ds-control-edge: rgba(255, 255, 255, 0.85);
+  --color-ds-control-stroke: rgba(237, 233, 225, 0.42);
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
 }
 
 [data-ds-theme='light'] {
@@ -214,7 +293,8 @@
   --color-ds-fg: var(--color-ds-light-ink);
   --color-ds-fg-muted: var(--color-ds-light-ink-muted);
   --color-ds-rule: var(--color-ds-light-border);
-  --color-ds-control-edge: rgba(237, 233, 225, 0.22);
+  --color-ds-control-stroke: rgba(26, 23, 19, 0.52);
+  --shadow-ds-control: 0 2px 0 rgba(26, 23, 19, 0.30), 0 3px 6px rgba(26, 23, 19, 0.16);
 }
 
 /* Logic Core V3: The Inversion System */

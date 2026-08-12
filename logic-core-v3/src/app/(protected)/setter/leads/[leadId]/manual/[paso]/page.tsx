@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import {
   esPantallaId,
-  faseDePantallaConstruccion,
+  fasesDePantallaConstruccion,
   PANTALLAS,
   rutaManual,
 } from '@/lib/leados/manual'
@@ -62,9 +62,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   if (!accesible) redirect(destinoActual)
 
   const pantalla = PANTALLAS[paso]
-  // FaseId de la fase de Construcción detrás de esta pantalla (m7–m12), o null.
-  // Narrowea a `FaseId` dentro de la rama de slots — sin non-null assertion.
-  const faseConstruccion = faseDePantallaConstruccion(pantalla.id)
+  // Las fases del checklist que contiene esta pantalla (mc1: las tres que se
+  // hacen con el brief; mc2: las tres que se hacen sobre la demo). Lista vacía
+  // = no es pantalla de Construcción — el árbol despacha por eso.
+  const fasesConstruccion = fasesDePantallaConstruccion(pantalla.id)
+  const esConstruccion = fasesConstruccion.length > 0
 
   // 5.6 — El contexto de cabecera que la página del wizard mostraba: badges,
   // links externos, notas y el rastro de asignación. El manual ES la experiencia.
@@ -134,12 +136,12 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   const encabezado =
     pantalla.tipo === 'reentrada' ? (
       notaRechazo
-    ) : faseConstruccion ? (
+    ) : esConstruccion ? (
       <UrgenciaBanner respondioDesde={manual.respondioDesde} />
     ) : undefined
 
   // Slots por pantalla — cada módulo m<N>-*.tsx llena los tres del layout-tipo
-  // (las 16 pantallas del manual ya están migradas, corte 5.6).
+  // (todas las pantallas del manual ya están migradas, corte 5.6).
   const slots =
     pantalla.id === 'm1'
       ? {
@@ -212,7 +214,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                   />
                 ),
               }
-            : faseConstruccion
+            : esConstruccion
               ? {
                   contexto: (
                     <ConstruccionContexto
@@ -221,12 +223,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                       ficha={manual.ficha}
                     />
                   ),
-                  municion: <ConstruccionMunicion faseId={faseConstruccion} />,
+                  municion: <ConstruccionMunicion fases={fasesConstruccion} />,
                   captura: (
                     <ConstruccionRegistro
                       leadId={leadId}
-                      faseId={faseConstruccion}
-                      titulo={pantalla.corto}
+                      fases={fasesConstruccion}
                       completadas={manual.progreso.completadas}
                       stage={manual.stage}
                       escaladoAt={manual.escaladoAt}

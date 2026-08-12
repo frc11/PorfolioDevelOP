@@ -1,11 +1,8 @@
 'use client'
 
 import { ArrowRight } from 'lucide-react'
-import { motion } from 'motion/react'
 import type { ComponentProps, ReactNode } from 'react'
 import { Button, buttonClasses } from '@/components/ui/Button'
-import { buttonPress } from '@/lib/motion-variants'
-import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 type ButtonOwnProps = ComponentProps<typeof Button>
 
@@ -42,10 +39,17 @@ interface CtaButtonProps extends Omit<ButtonOwnProps, 'variant' | 'size' | 'icon
 /**
  * CTA del sitio público.
  *
- * Construido SOBRE `ui/Button`, no al lado: reusa su gateo de `buttonPress`
- * (`whileTap: scale .97`, spring 600/25) contra `useReducedMotion()`, su manejo
- * de `disabled` y su estado `loading`. Las variantes `ds-primary` / `ds-secondary`
- * y el tamaño `ds` se agregaron a `Button` de forma aditiva.
+ * Construido SOBRE `ui/Button`, no al lado: reusa su manejo de `disabled` y su
+ * estado `loading`. Las variantes `ds-primary` / `ds-secondary` y el tamaño `ds`
+ * se agregaron a `Button` de forma aditiva.
+ *
+ * Lo que NO reusa es el `whileTap: scale .97` de Framer. Las variantes del
+ * sistema traen su press propio en CSS (`active:translate-y`), y los dos
+ * convivían sin pisarse porque animan propiedades distintas: el botón se hundía
+ * Y se comprimía en el mismo gesto. Queda el hundimiento de 2px — un objeto
+ * físico se hunde, no se achica. El gateo vive en `hasFramerPress()` de
+ * `ui/Button`, del lado de la variante, para que valga igual para quien use
+ * `Button` directo.
  *
  * Por qué extender y no envolver: se midió `twMerge` contra los tokens del
  * sistema y NO colapsa `rounded-2xl` + `rounded-ds-control` ni
@@ -73,7 +77,6 @@ export function CtaButton({
   'aria-label': ariaLabel,
   ...rest
 }: CtaButtonProps) {
-  const reduced = useReducedMotion()
   const variant = tone === 'primary' ? 'ds-primary' : 'ds-secondary'
   const size = density === 'compact' ? 'ds-compact' : 'ds'
 
@@ -88,7 +91,11 @@ export function CtaButton({
 
   if (href !== undefined) {
     return (
-      <motion.a
+      // `<a>` pelado y no `motion.a`: el press de estas variantes es CSS, así
+      // que esta rama no necesita Framer para nada. `:active` aplica igual a un
+      // enlace que a un botón, y `motion-reduce:transition-none` ya lo aterriza
+      // instantáneo para quien pidió menos movimiento.
+      <a
         href={href}
         target={target}
         // `noopener` siempre que se abra en pestaña nueva: sin él la página
@@ -96,10 +103,9 @@ export function CtaButton({
         rel={target === '_blank' ? (rel ?? 'noopener noreferrer') : rel}
         aria-label={ariaLabel}
         className={buttonClasses({ variant, size, className })}
-        {...(reduced ? {} : buttonPress)}
       >
         {content}
-      </motion.a>
+      </a>
     )
   }
 

@@ -255,7 +255,7 @@ function StepRow({ paso, index, isActive, isInView, onClick, onHoverChange, shou
             alignItems: 'center',
             justifyContent: 'center',
             fontSize: '24px',
-            cursor: 'none',
+            cursor: 'pointer',
             transition: 'background 70ms linear, border 70ms linear',
           }}
           onClick={onClick}
@@ -284,7 +284,7 @@ function StepRow({ paso, index, isActive, isInView, onClick, onHoverChange, shou
           border: `1px solid rgba(${paso.colorRgb}, ${isActive ? 0.2 : 0.08})`,
           borderRadius: '16px',
           overflow: 'hidden',
-          cursor: 'none',
+          cursor: 'pointer',
           transition: 'all 70ms linear',
         }}
         onClick={onClick}

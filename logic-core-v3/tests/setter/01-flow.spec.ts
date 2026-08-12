@@ -14,6 +14,7 @@ import {
   agendaAgendadaJson,
   type SmokeTracker,
 } from '../helpers/setter-db'
+import { HARD_CHECKS } from '../../src/lib/leados/flow'
 
 /**
  * Sección B — Recorrido COMPLETO de un lead por la UI, etapa por etapa. La
@@ -228,18 +229,18 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await expect(firstVisible(page.getByText('¿Por qué importa?'))).toBeVisible()
     await expect(firstVisible(page.getByText('Ver ejemplo de un chequeo final bien hecho'))).toBeVisible()
 
-    // Marcar los 6 hard-checks (role=switch por nombre).
-    for (const nombre of [
-      'La demo carga',
-      'Se ve bien en tu celular',
-      'No hay lorem ipsum ni textos de relleno',
-      'Los links y el botón de WhatsApp funcionan',
-      'Usa los datos y assets reales del negocio',
-      'La demo dice lo que el brief pedía',
-    ]) {
-      await firstVisible(page.getByRole('switch', { name: nombre })).click()
+    // P7 · los dos grupos están rotulados y separados en la pantalla.
+    await expect(firstVisible(page.getByText('Esto lo revisás vos'))).toBeVisible()
+    await expect(firstVisible(page.getByText('Esto lo mira Franco'))).toBeVisible()
+
+    // Marcar TODOS los obligatorios vigentes (role=switch por nombre), derivados
+    // de la lista viva: P7 los partió en dos grupos y sumó tres.
+    for (const check of HARD_CHECKS) {
+      await firstVisible(page.getByRole('switch', { name: check.nombre })).click()
     }
-    await firstVisible(page.getByRole('button', { name: 'Guardar el chequeo' })).click()
+    // P7 · ya no hay botón de guardar: el chequeo se guarda solo. El envío
+    // flushea igual el último tilde antes de que el server re-valide.
+    await expect(page.getByRole('button', { name: 'Guardar el chequeo' })).toHaveCount(0)
 
     // Enviar a revisión (gate: draft + self-check aprobado).
     const enviar = firstVisible(page.getByRole('button', { name: 'Enviar a revisión' }))

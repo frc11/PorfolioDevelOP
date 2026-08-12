@@ -47,7 +47,7 @@ export function HerramientaLauncher({
  * Explicación inline de una herramienta, en su paso: nombre + lanzador siempre
  * visibles, y un «qué es / qué le das / qué te devuelve» colapsable (concisa,
  * no agrega ruido al flujo). Clona la calidad de la ayuda embebida de la ficha
- * (Paso 1): jerarquía clara, lenguaje concreto, cero jerga. Contenido y link
+ * (m1): jerarquía clara, lenguaje concreto, cero jerga. Contenido y link
  * salen del registro editable (lib/leados/herramientas.ts).
  */
 export function ToolGuide({ id }: { id: HerramientaId }) {

@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-31T00:00:00.000Z",
+  "title": "Design System: develOP — sitio público",
+  "extensions": {
+    "colorMeta": {
+      "void": { "role": "primary", "displayName": "Vacío Cálido", "canonical": "#0D0B09" },
+      "surface": { "role": "neutral", "displayName": "Panel", "canonical": "#151210" },
+      "ink": { "role": "primary", "displayName": "Tinta Hueso", "canonical": "#EDE9E1" },
+      "ink-muted": { "role": "neutral", "displayName": "Tinta Apagada", "canonical": "#A39C8F" },
+      "border": { "role": "neutral", "displayName": "Regla", "canonical": "rgba(237, 233, 225, 0.10)" },
+      "light-bg": { "role": "secondary", "displayName": "Papel", "canonical": "#F2EEE6" },
+      "light-surface": { "role": "neutral", "displayName": "Panel Claro", "canonical": "#EAE5DA" },
+      "light-ink": { "role": "secondary", "displayName": "Tinta Grafito", "canonical": "#1A1713" },
+      "light-ink-muted": { "role": "neutral", "displayName": "Grafito Apagado", "canonical": "#6E675C" },
+      "light-border": { "role": "neutral", "displayName": "Regla Clara", "canonical": "rgba(26, 23, 19, 0.12)" },
+      "accent-web": { "role": "tertiary", "displayName": "Cian — Desarrollo web", "canonical": "#06b6d4" },
+      "accent-ia": { "role": "tertiary", "displayName": "Verde — Agentes de IA", "canonical": "#10b981" },
+      "accent-automation": { "role": "tertiary", "displayName": "Ámbar — Automatización", "canonical": "#f59e0b" },
+      "accent-software": { "role": "tertiary", "displayName": "Violeta — Software a medida (Gate 1 abierto: el brief dice índigo)", "canonical": "#8b5cf6" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Titular de apertura. Uno por pantalla." },
+      "headline": { "displayName": "Headline", "purpose": "Apertura de capítulo dentro de la página." },
+      "lead": { "displayName": "Lead", "purpose": "Subhead. Corta a 55ch." },
+      "body": { "displayName": "Body", "purpose": "Prosa. Medida máxima 65ch." },
+      "label": { "displayName": "Label mono", "purpose": "Eyebrows y labels de capítulo. Geist Mono, tracking 0.18em." },
+      "data": { "displayName": "Data", "purpose": "Cifras. El único lugar donde un número puede ser grande." }
+    },
+    "shadows": [
+      {
+        "name": "control-relief",
+        "value": "0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5)",
+        "purpose": "Relieve táctil de dos capas. Exclusivo del CTA primario. Se apaga en :active. Ninguna superficie lo usa."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-transition",
+        "value": "150ms ease-out",
+        "purpose": "Transiciones de estado sobre translate, box-shadow y opacity."
+      },
+      {
+        "name": "section-reveal",
+        "value": "opacity + translateY, ~900ms, once",
+        "purpose": "Revelado de sección al entrar en viewport. No se repite al volver a subir."
+      }
+    ],
+    "breakpoints": [
+      { "name": "page-container", "value": "1240px" },
+      { "name": "prose", "value": "65ch" },
+      { "name": "lead", "value": "55ch" }
+    ]
+  },
+  "components": [
+    {
+      "name": "CTA Primario",
+      "kind": "button",
+      "refersTo": "cta-primary",
+      "description": "El único CTA del sitio. Inversión monocroma con relieve táctil de dos capas; hunde 2px al presionar.",
+      "html": "<button class=\"ds-cta-primary\"><span>Escribinos por WhatsApp</span><svg class=\"ds-cta-arrow\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5l7 7-7 7\"/></svg></button>",
+      "css": ".ds-cta-primary { display: inline-flex; align-items: center; gap: 0.5em; background: var(--color-ds-fg, #EDE9E1); color: var(--color-ds-canvas, #0D0B09); font-family: var(--font-ds-sans, Geist, system-ui, sans-serif); font-size: 1rem; line-height: 1; padding: 16px 28px; border: none; border-top: 1px solid var(--color-ds-control-edge, rgba(255,255,255,0.85)); border-radius: 9px; box-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 3px 6px rgba(0,0,0,0.5); cursor: pointer; transition: translate 150ms ease-out, box-shadow 150ms ease-out, opacity 150ms ease-out; } .ds-cta-primary:hover { opacity: 0.9; } .ds-cta-primary:focus-visible { outline: 2px solid var(--color-ds-fg, #EDE9E1); outline-offset: 2px; } .ds-cta-primary:active { translate: 0 2px; box-shadow: none; } .ds-cta-arrow { width: 1.05em; height: 1.05em; flex-shrink: 0; } @media (prefers-reduced-motion: reduce) { .ds-cta-primary { transition: none; } }"
+    },
+    {
+      "name": "CTA Secundario",
+      "kind": "button",
+      "refersTo": "cta-secondary",
+      "description": "Plano a propósito: sin relieve, para no competir con el primario. Hover sube el borde a tinta.",
+      "html": "<button class=\"ds-cta-secondary\"><span>Ver los servicios</span></button>",
+      "css": ".ds-cta-secondary { display: inline-flex; align-items: center; gap: 0.5em; background: transparent; color: var(--color-ds-fg, #EDE9E1); font-family: var(--font-ds-sans, Geist, system-ui, sans-serif); font-size: 1rem; line-height: 1; padding: 16px 28px; border: 1px solid var(--color-ds-rule, rgba(237,233,225,0.10)); border-radius: 9px; cursor: pointer; transition: border-color 150ms ease-out, translate 150ms ease-out; } .ds-cta-secondary:hover { border-color: var(--color-ds-fg, #EDE9E1); } .ds-cta-secondary:active { translate: 0 1px; } @media (prefers-reduced-motion: reduce) { .ds-cta-secondary { transition: none; } }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "surface-panel",
+      "description": "Superficie plana: radio 0, borde de 1px, sin sombra, sin blur y sin hover. Si no se puede apretar, es plano.",
+      "html": "<div class=\"ds-panel\"><p class=\"ds-panel-label\">CAPÍTULO 02</p><p class=\"ds-panel-body\">Automatizamos la respuesta a consultas para que ninguna quede sin contestar de noche.</p></div>",
+      "css": ".ds-panel { background: var(--color-ds-panel, #151210); color: var(--color-ds-fg, #EDE9E1); border: 1px solid var(--color-ds-rule, rgba(237,233,225,0.10)); border-radius: 0; padding: 24px; } .ds-panel-label { font-family: var(--font-ds-mono, ui-monospace, monospace); font-size: 0.75rem; line-height: 1.2; letter-spacing: 0.18em; color: var(--color-ds-fg-muted, #A39C8F); margin: 0 0 12px; } .ds-panel-body { font-family: var(--font-ds-sans, Geist, system-ui, sans-serif); font-size: 1.0625rem; line-height: 1.7; margin: 0; max-width: 65ch; }"
+    },
+    {
+      "name": "Eyebrow / Label de capítulo",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "Geist Mono en 0.75rem con tracking 0.18em. Es el elemento de identidad del sistema: marca el capítulo sin gritar.",
+      "html": "<p class=\"ds-eyebrow\">003 — AUTOMATIZACIÓN</p>",
+      "css": ".ds-eyebrow { font-family: var(--font-ds-mono, ui-monospace, monospace); font-size: 0.75rem; line-height: 1.2; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-ds-fg-muted, #A39C8F); margin: 0; }"
+    },
+    {
+      "name": "Regla divisoria",
+      "kind": "custom",
+      "refersTo": "border",
+      "description": "1px del token de regla. Es el único borde del sistema y el separador entre capítulos.",
+      "html": "<hr class=\"ds-rule\" />",
+      "css": ".ds-rule { border: 0; border-top: 1px solid var(--color-ds-rule, rgba(237,233,225,0.10)); margin: 0; }"
+    },
+    {
+      "name": "Cifra",
+      "kind": "custom",
+      "refersTo": "data",
+      "description": "El único lugar del sistema donde un número puede ser grande. Geist Mono, weight 500, line-height 1.",
+      "html": "<p class=\"ds-data\"><span class=\"ds-data-value\">48h</span><span class=\"ds-data-caption\">de la consulta a la primera respuesta</span></p>",
+      "css": ".ds-data { margin: 0; } .ds-data-value { display: block; font-family: var(--font-ds-mono, ui-monospace, monospace); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 500; line-height: 1; color: var(--color-ds-fg, #EDE9E1); } .ds-data-caption { display: block; margin-top: 8px; font-family: var(--font-ds-sans, Geist, system-ui, sans-serif); font-size: 1.0625rem; line-height: 1.7; color: var(--color-ds-fg-muted, #A39C8F); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El instrumento de precisión",
+    "overview": "El sitio se comporta como un objeto fabricado, no como una página. La superficie es plana, quieta y monocroma; el color y el movimiento son recursos escasos que se gastan solo donde hay algo que señalar. La estructura es editorial: capítulos numerados, labels en monoespaciada, reglas de 1px que dividen. La lectura es la de una ficha técnica bien compuesta — densa donde importa, con aire alrededor.\n\nLo táctil está racionado con una regla dura: si no se puede apretar, es plano. Un panel no tiene relieve, no tiene sombra de color, no tiene desenfoque de fondo. Un botón sí: radio de 9px, canto superior iluminado, sombra corta de dos capas, y un hundimiento visible de 2px al presionar. Esa asimetría es la que convierte el relieve en información en vez de decoración.\n\nEl sistema se rechaza a sí mismo en su versión anterior. Lo que se está eliminando —glassmorphism, backdrop-blur, gradientes decorativos, sombras de color, radios grandes en superficies, motion perpetuo, cards que escalan en hover, cursores custom, typewriters— no es materia de gusto: es la lista de anti-referencias del rediseño. Referencias tomadas: otsuka-air.jp y coffee-tech.com. Sin serif de lujo.",
+    "keyCharacteristics": [
+      "Monocromo cálido, con inversión de tema por sección (oscuro ↔ crema)",
+      "Radio 0 en superficies, 9px solo en controles",
+      "Geist para escala y tracking negativo; Geist Mono como elemento de identidad",
+      "Un acento por servicio, en dosis mínimas, nunca en gradiente",
+      "Reveals sobrios (opacity + translateY, once), cero movimiento perpetuo"
+    ],
+    "rules": [
+      { "name": "La Regla de la Voz Única", "body": "Nunca dos acentos en una misma vista. El acento identifica al servicio; dos acentos no identifican nada.", "section": "colors" },
+      { "name": "La Regla del Acento Plano", "body": "El acento se usa como color sólido. Nunca en gradiente, nunca como glow, nunca como sombra de color.", "section": "colors" },
+      { "name": "La Regla de la Inversión Local", "body": "El tema lo escribe la sección en su propio <section> (data-ds-theme), no un provider global. Una sección oscura anidada en una crema tiene que funcionar sin que nadie la configure.", "section": "colors" },
+      { "name": "La Regla del Tracking", "body": "El display gana peso visual por tamaño y tracking negativo, nunca por una familia distinta. No se incorporan fuentes nuevas.", "section": "typography" },
+      { "name": "La Regla de la Mono como Dato", "body": "Geist Mono se reserva para labels, eyebrows y cifras. Un párrafo de cuerpo en monoespaciada rompe el sistema.", "section": "typography" },
+      { "name": "La Regla del Relieve Táctil", "body": "Si no se puede apretar, es plano. El relieve es la señal de que algo es interactivo; usarlo en un panel decorativo lo vuelve ruido y deja al botón sin voz.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar radio 0 en superficies y 9px solo en controles.",
+      "Do darle relieve únicamente a lo que se aprieta: canto iluminado + sombra de dos capas + hundimiento de 2px en :active.",
+      "Do dejar que la sección declare su tema (data-ds-theme) en vez de pasar colores por props.",
+      "Do cortar la prosa a 65ch y el subhead a 55ch.",
+      "Do usar Geist Mono para eyebrows, labels de capítulo y cifras — es identidad, no ornamento.",
+      "Do animar solo transform y opacity.",
+      "Do agregar un token cuando falta un valor. Se agrega el token, no un valor suelto."
+    ],
+    "donts": [
+      "Don't usar backdrop-blur ni glassmorphism en ninguna superficie.",
+      "Don't usar gradientes decorativos, ni bg-clip-text con gradiente en titulares o métricas.",
+      "Don't usar sombras de color ni glow de acento.",
+      "Don't mostrar dos acentos de servicio en una misma vista.",
+      "Don't dejar animaciones perpetuas (infinite), typewriters ni cursores custom.",
+      "Don't escalar cards en hover ni animar letter-spacing, width, height, padding o margin.",
+      "Don't poner un borde lateral grueso de acento (border-left: 4px solid) como decoración de card.",
+      "Don't incorporar familias tipográficas nuevas."
+    ]
+  }
+}

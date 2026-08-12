@@ -137,7 +137,9 @@ export function OpenerResumen({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <MessageCircle size={15} strokeWidth={1.5} className="text-zinc-500" />
-          <h2 className="text-base font-semibold text-zinc-300">Primer contacto (opener)</h2>
+          {/* P9 — «Primer contacto (opener)» glosaba entre paréntesis la misma
+              palabra que el título de la pantalla ya usa. Una sola. */}
+          <h2 className="text-base font-semibold text-zinc-300">El opener</h2>
         </div>
         <Badge tone="emerald" variant="soft">
           Enviado

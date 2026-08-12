@@ -393,7 +393,7 @@ function SliderMini({
           step={step}
           value={value}
           onChange={(event) => onChange(Number(event.target.value))}
-          className="absolute inset-x-0 z-10 w-full cursor-none opacity-0"
+          className="absolute inset-x-0 z-10 w-full cursor-pointer opacity-0"
         />
         <div
           className="pointer-events-none absolute h-3.5 w-3.5 rounded-full border-2 border-[#070709] bg-amber-500 shadow-lg transition-[left] duration-100"
@@ -480,7 +480,7 @@ function SliderSide({
             step={5}
             value={tareasAlDia}
             onChange={(event) => setTareasAlDia(Number(event.target.value))}
-            className="absolute inset-x-0 z-10 h-full w-full cursor-none opacity-0"
+            className="absolute inset-x-0 z-10 h-full w-full cursor-pointer opacity-0"
           />
           <div
             className="pointer-events-none absolute z-20 h-7 w-7 rounded-full border-[3px] border-[#070709] transition-[left] duration-100"

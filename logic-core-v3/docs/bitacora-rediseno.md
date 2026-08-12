@@ -2175,3 +2175,1426 @@ literalmente, el bug que se acaba de diagnosticar.
 
 Modificados: `src/components/layout/HeroArtifactLayer.tsx` ·
 `docs/bitacora-rediseno.md`
+
+---
+
+## Instalación de Impeccable y baseline del detector · 2026-07-31
+
+Rama `redesign/home`, sobre `c216079`. **No se tocó una sola línea de código de producto**: esta entrada es harness + medición.
+
+### Qué es y qué no es acá
+
+Impeccable aporta vocabulario y detección de anti-patrones. **No aporta dirección estética.** La dirección del sitio ya está cerrada ("instrumento de precisión, editorial") y la manda el proyecto. Donde el detector contradiga la dirección, gana develOP y queda anotado como descartado.
+
+### Versión y estado del hook
+
+- **Versión instalada: `impeccable` v3.5.0** (`npx impeccable install`, ejecutado desde `logic-core-v3/`).
+- El instalador detectó como raíz de proyecto la **raíz del repo** (`PorfolioDevelOP/`), no `logic-core-v3/`. Instaló en dos targets:
+  - `.claude/skills/impeccable/` + hook mergeado en `.claude/settings.local.json`
+  - `.github/skills/impeccable/` + `.github/hooks/impeccable.json` (Copilot)
+- **El hook quedó activo.** Dos disparos: `PostToolUse` sobre `Edit|Write|MultiEdit` (timeout 5s, chequeo inmediato) y `Stop` (timeout 30s, pasada profunda con todas las reglas).
+- **El merge no pisó nada.** El instalador hace `{...existing, hooks: merged}` y solo escribe `.bak` si el JSON previo no parsea — no hubo `.bak`, así que no se perdió configuración local.
+- **Verificado a mano en Windows**: se le pasó un payload de `PostToolUse` real al hook y devolvió `hookSpecificOutput` correcto, exit 0. El comando usa sintaxis POSIX (`[ ! -f … ] || node …`), o sea que depende de que el harness lo corra bajo Git Bash — se verificó bajo Git Bash, no bajo `cmd`.
+- **`.claude/` está en el `.gitignore` de este repo** ("tooling local de agentes, no es código del proyecto") y **no se tocó el .gitignore**. Consecuencia operativa: el skill y el hook de Claude Code **no se versionan** — en una máquina nueva hay que correr `npx impeccable install` otra vez. Sí quedan versionados `.github/skills|hooks`, `PRODUCT.md`, `DESIGN.md`, `.impeccable/design.json` y los reportes.
+
+### El baseline (el número contra el que se mide cada bloque)
+
+Detector determinista, local, sin modelo ni API key. Auditar no consume tokens. Reporte completo en `docs/impeccable-baseline.md`; salida cruda en `docs/impeccable-baseline.json`.
+
+| Scope | Hallazgos |
+|---|---:|
+| `src/` completo | **115** (todos severidad `warning`, cero `error`) |
+| Scope pedido "sitio público" (`src/app` + `sections` + `ia` + `automation` + `software`) | 65 |
+| ↳ de esos, dentro de `src/app/(protected)` y `src/app/api` (portal, no es sitio público) | 19 |
+| ↳ **superficie pública real** | **46** ← este es el número del rediseño |
+| `src/components/design-system/` | **0** ← este es el techo a sostener |
+
+Desglose de `src/` por tipo: `gray-on-color` 56 · `gradient-text` 37 · `ai-color-palette` 6 · `side-tab` 5 · `overused-font` 5 · `bounce-easing` 3 · `layout-transition` 2 · `broken-image` 1. **51 de los 115 son categoría `slop`** (44%).
+
+Desglose de los 46 públicos: `gradient-text` 34 · `ai-color-palette` 4 · `gray-on-color` 3 · `layout-transition` 2 · `bounce-easing` 2 · `side-tab` 1.
+
+**El 74% del slop público es una sola cosa: `bg-clip-text` + gradiente en titulares y métricas.** Y está *distribuido*, no concentrado: 30 de los 36 archivos afectados tienen exactamente un hallazgo. Los peores son `WebDevelopmentBento.tsx` y `home/Portfolio.tsx` con 4 cada uno. Se limpia bloque por bloque; no hay un componente podrido que arreglar de una.
+
+Reales y accionables además del gradiente: `layout-transition` en `OurServices.tsx:7639` (anima `width`) y `VaultIA.tsx:226` (anima `padding`) — contradicen la regla de performance del propio repo; `bounce-easing` en `WebDevelopmentBento.tsx:171` y `ComparadorSection.tsx:44` (`bounce-chevron … infinite`), que es motion perpetuo, anti-referencia explícita de la dirección nueva.
+
+### Descartados (Impeccable pierde contra la dirección de develOP)
+
+1. **`overused-font` ×5 y 4 de los 5 `side-tab`: son plantillas de email HTML.** `font-family:Arial` y `border-left: 4px solid` en `client-notifications/templates.ts`, `sendLeadNotification.ts`, `notify-message.ts`, `detectBotIssues.ts`, `auth.ts`. Arial es fallback deliberado en clientes de correo. El detector no distingue email de web. **Falso positivo de contexto.**
+2. **La regla `overused-font` lista Geist como tipografía "sobreexpuesta".** La dirección fija Geist + Geist Mono, y la mono es elemento de identidad. **Gana develOP; no se reabre la discusión de tipografía.**
+3. `gray-on-color` ×56 no se descarta — es contraste, no estética — pero **se difiere**: solo 3 caen en superficie pública, el resto es portal/chatbot.
+
+### `PRODUCT.md` y `DESIGN.md`
+
+Escritos en la raíz del repo con la dirección **ya cerrada**; no se dejó que la herramienta inventara nada.
+
+- **`PRODUCT.md`** declara alcance explícito: **solo el sitio de marketing** (home + 4 landings + contacto). El portal queda fuera de alcance por escrito, para que Impeccable no opine sobre pantallas que ya tienen su propio lenguaje visual cerrado. Registra el CTA único por WhatsApp, la voz (voseo, sin jerga de agencia), y la lista de lo que **no existe y no se puede fabricar**: sin testimonios, sin logos de clientes, sin benchmarks, sin casos publicados, sin pricing.
+- **`DESIGN.md`** sigue el spec oficial (frontmatter de tokens + 8 secciones canónicas). Los tokens **se extrajeron del `@theme static` real** de `globals.css`, no se inventaron. Sidecar en `.impeccable/design.json` con las 6 primitivas del sistema como snippets HTML/CSS autocontenidos.
+- **Gate 1 queda abierto y anotado, no resuelto.** El brief de dirección dice que el acento de Software es *índigo*; el token vigente es `#8b5cf6` (violeta), y `globals.css` ya deja anotado que `CLAUDE.md` asigna los mismos cuatro hex a servicios distintos. `DESIGN.md` refleja el código y marca la decisión como pendiente de Franco en `/styleguide`.
+
+### Efecto lateral de tener `DESIGN.md`: el hook se vuelve mucho más ruidoso
+
+Con `DESIGN.md` presente se activa la regla **`design-system-color`**, que compara cada color literal contra la paleta del sistema. Medido: sobre `home/Portfolio.tsx` el detector plano reporta **4** hallazgos y el hook reporta **39**. Es esperado —el sitio todavía no está rediseñado y casi ningún color literal pertenece a la paleta nueva— pero conviene saberlo antes de asustarse: durante B2 el hook va a gritar en cada archivo viejo que se toque. El número que importa sigue siendo el del detector plano.
+
+### Reglas de uso vigentes (hasta que B2 esté terminado y revisado)
+
+**Permitido ya:** `npx impeccable detect` cuantas veces se quiera, el hook automático durante los sprints, y `/impeccable audit` + `/impeccable critique` (solo lectura).
+
+**Prohibido:** `/impeccable polish`, `bolder`, `quieter`, `distill`, `animate` y cualquier comando que escriba código; Live Mode; y cualquier corrida masiva sobre el sitio entero. Motivo: mientras B2 construye estructura, un segundo agente reescribiendo estética en paralelo genera estética por acumulación — que es exactamente lo que produjo el estado actual del sitio. Las herramientas de escritura entran después, sobre una sección por vez.
+
+### Cómo se re-mide al cerrar cada bloque
+
+```bash
+npx impeccable detect src/app src/components/sections src/components/ia src/components/automation src/components/software
+```
+
+Contra **46**. Y `npx impeccable detect src/components/design-system` tiene que seguir dando **0**.
+
+> El detector sale con **exit code 2** cuando encuentra hallazgos. No es un fallo de la herramienta.
+
+---
+
+## Calibración del sistema · 2026-08-03
+
+No es un rediseño: es una pasada de corrección sobre valores y defectos ya
+identificados. La arquitectura se dio por buena y no se tocó — el theming local de
+`SectionShell`, el padding vertical, la disciplina plana, los pares de texto
+calibrados y la matriz de estados del styleguide quedaron como estaban.
+
+### La causa raíz, y por qué era una sola
+
+Los pisos de todos los `clamp()` se habían elegido como **mínimos individuales**,
+cada uno defendible por separado. Pero en mobile todos tocan su piso a la vez, así
+que el piso no es una lista de mínimos: **es la escala completa que ve la mayoría de
+la audiencia**. La jerarquía existía en el rango fluido y colapsaba justo donde vive
+el negocio.
+
+Medido a 390px, antes: `lead` 18 contra `body` 17 (1.06× — el único separador real
+era el color) y la cifra de `data` 32 contra un titular de 36 (0.89× — el dato
+competía con el título de su propia sección).
+
+Los pisos se re-eligieron como escala. Las dos invariantes se verificaron con un
+**barrido continuo de 320 a 1920px**, no solo en los tres breakpoints — y ahí
+apareció un valor que pasaba en 390 y 1440 pero fallaba en el medio (`data` daba
+0.85 a 768px con la primera rampa propuesta), así que la rampa se rehízo.
+
+| | 390px | 768px | 1440px | peor caso 320–1920 |
+|---|---|---|---|---|
+| `lead`/`body` (≥1.20) | 1.06 → **1.25** | 1.06 → **1.25** | 1.29 → **1.29** | **1.25** a 320px |
+| `data`/`display-lg` (≤0.75) | 0.89 → **0.67** | 0.83 → **0.70** | 0.82 → **0.71** | **0.706** a 1372px |
+
+Escala renderizada a 390px, después: 52 · 36 · 26 · 24 · 20 · 16 · 12.
+
+**El peldaño que faltaba.** Entre `display-lg` (68px) y `lead` (22px) había un salto
+de 3.09× sin nada en el medio, así que las secciones con estructura interna caían
+del titular directo a la mono de 12px. `--text-ds-subhead` lo ocupa: ahora son 1.79×
+y 1.73× a 1440. Es escala, no una familia nueva.
+
+**El bug de la unidad `ch`.** `ch` es relativo al `font-size` **del propio
+elemento**. El subhead a 55ch sobre 22px rendía 802px contra los 732px de la prosa a
+65ch sobre 17px: el subhead salía **más ancho** que la prosa, lo contrario de lo
+documentado. Se recalculó a 42ch en vez de pasar a una medida absoluta — `ch` es la
+unidad correcta para una medida de lectura, y un `rem` se habría roto igual de
+silencioso en cualquier elemento que no corriera al tamaño para el que se calculó.
+Verificado en el DOM: 612.6px contra 732.2px.
+
+### La dosis del acento es de color, no de área
+
+El acento vivía en un tick de 6×6 px: **36 px² por fila**. Con tan poca área,
+sacarle el color a las cuatro filas casi no perdía información — un identificador
+que no identifica. Ahora pinta el nombre del frente (`Subhead`) y su plazo: **16.412
+px² por fila**, medido en el DOM. El tick se fue porque repetía el mismo dato. Sigue
+sin haber glow, gradiente ni borde lateral: la anti-referencia es de forma, no de
+tamaño.
+
+**Los acentos viven solo sobre oscuro**, y ahora es regla escrita y no un hueco.
+Tres de los cuatro no llegan a 3:1 sobre crema (cian 2.10, verde 2.19, ámbar 1.86).
+
+**Dos observaciones se dejaron medidas y sin resolver, a propósito.** El violeta es
+el más flojo sobre oscuro (4.64:1 contra 7.7–9.1) y cian-contra-verde es el par más
+cercano (0.125 OKLab, la mitad del siguiente par). Los dos se arreglan moviendo un
+hex — y los cuatro hex están congelados en `CLAUDE.md` y pendientes del Gate 1, que
+todavía puede permutar qué color le toca a qué servicio. Mover un valor ahora sería
+decidir el Gate por la ventana.
+
+> El sprint pedía "oscurecer" el violeta para acercarlo a los otros tres. Sobre
+> lienzo oscuro eso va al revés: oscurecer **baja** el contraste. Para acercarlo
+> habría que aclararlo.
+
+### El CTA
+
+- **Se fue el canto superior iluminado.** Medía **1.18:1** contra el fondo del
+  propio botón: no era una señal débil, era una línea que solo existía en la spec.
+  El relieve son dos señales, no tres.
+- **Un solo press.** Convivían `active:translate-y-[2px]` (CSS) y `whileTap: scale
+  .97` (Framer), sin pisarse porque animan propiedades distintas. Quedó el
+  hundimiento: un objeto físico se hunde, no se comprime. El gateo vive en
+  `hasFramerPress()`, del lado de la variante, así que vale también para quien use
+  `Button` directo. La rama con `href` dejó de ser `motion.a` y es un `<a>` pelado.
+- **El secundario tiene frontera.** Usaba el token de regla (1.23:1) y WCAG 1.4.11
+  pide 3:1 para el borde de un componente interactivo: el botón no tenía frontera en
+  reposo y aparecía recién en `hover` — o sea nunca a touch, y con el `hover` más
+  visible que el reposo. Token propio `--color-ds-control-stroke`: **3.55:1** en
+  oscuro, **3.48:1** en crema.
+- **`disabled` sigue perceptible**: 1.73:1 en oscuro y 1.74:1 en crema, más visible
+  que el borde en **reposo** del diseño anterior. WCAG exime a los controles
+  inactivos del mínimo; lo que se exigía acá era que se siga viendo.
+- **La sombra invierte con el tema.** Estaba en `@theme static` con negro al 90%,
+  calculada contra lienzo oscuro. Se movió a la capa semántica. Verificado en el DOM
+  que `shadow-[var(--shadow-ds-control)]` resuelve por elemento: `rgba(0,0,0,.9)` en
+  oscuro, `rgba(26,23,19,.30)` en crema.
+
+### El índice de capítulos, y la colisión que frenó el sprint
+
+`ChapterLabel` estaba en 2 de 6 secciones y con dos formatos (`( 01 )` en la
+segunda, `( 03 — Un lunes cualquiera )` en la tercera): dos marcas sueltas que no
+numeraban nada. Ahora están las seis, correlativas, **solo con el número** — el
+título repetía el titular que va justo debajo. **El hero lleva el `01`**: una
+portada sin numerar deja el índice arrancando en "01" sobre la segunda sección, que
+era justo la inconsistencia a corregir.
+
+**T7 chocó con T4 y se frenó, como pedía el sprint.** La alternancia estricta
+arrancando en oscuro deja S4 en crema — y S4 "Cuatro frentes" era la única sección
+con acentos, tres de los cuales no llegan a 3:1 sobre claro. Se reportó con la
+medición en vez de improvisar otro orden. **Franco eligió intercambiar S4 y S5.**
+
+Orden final: `01` oscura (hero) · `02` crema (la prueba) · `03` oscura (la prueba
+viva) · `04` crema (los 3 contrastes) · `05` oscura (los 4 frentes, con acentos) ·
+`06` crema (cierre). Verificado en el DOM: **cero empalmes con el mismo tema** y
+**cero acentos sobre crema**. Cerrar en crema es consecuencia deseada — obliga a que
+el CTA funcione sobre claro, que era un hueco real: los 22 botones del styleguide
+vivían sobre oscuro.
+
+### Dos premisas del sprint que no se sostuvieron
+
+1. **`/styleguide` sí estaba recibiendo el chrome.** Confirmado: `isPortalRoute()`
+   solo excluía los cuatro prefijos de portal. Se agregó `CHROME_FREE_PREFIXES` y un
+   `isChromeFreeRoute()` que consultan los dos gates — `isPortalRoute` se conservó
+   aparte porque responde otra pregunta ("esto es producto?"). Verificado en el DOM
+   de la página: **0 `backdrop-filter`, 0 gradientes**, y el único `<nav>` es el
+   índice propio del styleguide.
+2. **`NoiseOverlay` ya no corría en ninguna ruta.** La premisa describía el estado
+   pre-B2-S2; el componente se había desmontado ahí y no le quedaba ni un consumidor
+   en todo el repo. Desmontado no hacía nada, pero el archivo seguía llevando adentro
+   una animación `infinite` a 5 Hz sin gate de `prefers-reduced-motion` — lo que la
+   lista de "Don't" prohíbe — y alcanzaba con volver a importarlo. **Se borró.**
+   `CustomCursor.tsx` está en la misma situación y queda anotado para una poda aparte.
+
+### Verificación
+
+- `npm run build` verde · `tsc --noEmit` limpio · `prisma migrate status` al día.
+- Escala, medidas, sombras, bordes, temas y acentos medidos **en el DOM** a 390 /
+  768 / 1440, no estimados.
+- Hero de B2-S1 intacto a 390 y 1440: sin overflow horizontal, sin canvas en mobile,
+  scroll disponible, `( 01 )` presente, CTA sin `border-top`.
+- Detector: `design-system` sigue en **0** (el techo). Superficie pública 65 → **64**.
+
+### Lo que quedó pendiente
+
+**T8 (legibilidad del artefacto 3D) no se ejecutó.** Requiere juicio visual y
+capturas antes/después a 1440px, y el Browser pane no estaba compositando en toda la
+sesión (`screenshot` devolvía "the pane is not displayed"). Con el pane oculto el
+`rAF` no dispara: medir la capa 3D ahí no mide el artefacto, mide un cuelgue que no
+existe. Se prefirió dejarlo abierto antes que cerrarlo a ciegas. Todo lo demás se
+verificó por DOM, que no depende del compositor.
+
+---
+
+## B2-S4 — Legibilidad del artefacto 3D y poda de muertos · 2026-08-04
+
+Cierra el T8 que B1-S5 dejó abierto (juicio visual, sin compositor disponible),
+resuelve la observación de cian↔verde que quedaba pendiente del Gate 1 y borra el
+último archivo desmontado.
+
+**Método de captura: Playwright headed, no el Browser pane.** El pane falló en cinco
+sprints consecutivos sobre este mismo objetivo. Se lanzó un Chromium con ventana real
+y se **midió el `rAF` antes de afirmar nada**: 33/s antes, 32/s después. Con la
+pestaña oculta el `rAF` queda en 0 y no arranca la cadena del canvas — ahí no se mide
+el artefacto, se mide un cuelgue inexistente. El revelado se midió sobre el
+**contenedor** (`motion.div`), no sobre el canvas: `getComputedStyle(canvas).opacity`
+devuelve `"1"` aunque su capa esté en 0.
+
+### T1 — El artefacto 3D (el punto principal)
+
+**La causa está en el material, y el material está congelado.** `HeroArtifact.tsx`
+pinta `color="#000000"` con `metalness={1}`: como metal eso deja F0 = 0, así que el
+objeto **no refleja nada de frente**, sólo en ángulos rasantes. Lo único que responde
+frontalmente es el `clearcoat` (capa dieléctrica, F0 = 0.04) — el barrido brillante
+que ya tenía la panza de la "p" es el clearcoat espejando un softbox del HDRI al 4 %.
+
+Se recorrió el orden que fija el sprint y se descartó con medición, no por argumento:
+
+1. **Encuadre.** Probado en las dos direcciones (yaw −0.4 y +0.5). Rotar sólo **mueve
+   el único parche iluminado de un flanco al otro**: con −0.4 desaparece el barrido y
+   queda una silueta plana; con +0.5 se ilumina la izquierda y se apaga la derecha. Es
+   el mismo problema espejado, no un arreglo. Con F0 = 0 no hay orientación que
+   ilumine una cara frontal plana.
+2. **Material.** Congelado. No se toca.
+3. **Iluminación.** Acá cae el arreglo.
+
+Dentro de iluminación también hubo descartes medidos, que quedan escritos porque son
+la parte no obvia:
+
+- **Luces puntuales no sirven.** Con `roughness={0}` / `clearcoatRoughness={0}` la
+  superficie es un espejo perfecto, y un espejo refleja una fuente puntual en un
+  ángulo sólido casi nulo. Tres `directionalLight` fuertes no cambiaron nada. A un
+  espejo lo ilumina el **entorno**, no las luces.
+- **Subir el HDRI solo tampoco.** A `environmentIntensity={6}` la derecha se quema y
+  la izquierda apenas pasa a gris azulado: es un HDRI de un solo lado, y escalarlo
+  amplifica el desbalance en vez de corregirlo.
+- **Un relleno frontal grande apaga el barrido.** Las caras frontales planas comparten
+  normal, así que reflejan todas la misma dirección: lo que se ponga ahí sale
+  **uniforme**. Con relleno alto el objeto queda gris plano, sin metal.
+- **Un relleno frontal chico deja un corte recto.** Por lo mismo, el borde duro de una
+  fuente finita se espeja como una **línea recta atravesando el objeto**.
+- **Cualquier panel tapa el HDRI que tiene detrás.** Los paneles grandes ocultaban el
+  lóbulo brillante al cubo de render y el barrido desaparecía.
+
+**El rig que quedó** son dos piezas, en `HeroCanvas.tsx` (no congelado):
+`environmentIntensity={2.2}` sobre el HDRI —degradé fotográfico, sin bordes, que es lo
+que da el carácter metálico— más **tres `Lightformer` circulares concéntricos**, sólo
+a la izquierda y con `z` positivo (detrás de la cámara, que es la dirección que
+espejan las caras frontales). Concéntricos y en escalones porque aproximan una caída
+suave donde un solo círculo dejaba el corte recto; sólo a la izquierda porque a la
+derecha taparían el barrido.
+
+También se sacó el `ambientLight intensity={1.5}`: **no aportaba un solo fotón**. La
+luz ambiente sólo alimenta el término difuso y con `metalness=1` el difuso es 0; el
+clearcoat es puramente especular. Verificado sacándola — el render queda
+indistinguible.
+
+**Resultado, medido sobre el mismo recorte en las dos capturas:**
+
+| | antes | después |
+|---|---:|---:|
+| Píxeles visibles del artefacto | 15.258 | **47.536** (3,1×) |
+| Spread RGB promedio (monocromía) | 16,46 | **4,11** |
+| % de píxeles con spread > 20 | 35,9 % | **5,9 %** |
+| Brillo promedio | 167 | 88 |
+
+El área visible se **triplicó** y el render quedó **4× más neutro**: la monocromía
+mejoró, no se degradó. Más oscuro en promedio y mucho más visible en total es
+exactamente "instrumento de precisión iluminado", no "objeto con luz propia".
+
+Capturas: [`hero-1440x900-antes.png`](proof-screenshots/b2-s4/hero-1440x900-antes.png)
+· [`hero-1440x900-despues.png`](proof-screenshots/b2-s4/hero-1440x900-despues.png).
+Quedan además las 9 variantes intermedias del descarte, con el nombre de cada hipótesis.
+
+**Las siete condiciones de la capa 2, medidas:**
+
+| Condición | Medición |
+|---|---|
+| Cero bloqueo de scroll | `scrollY` 0 → 2500 |
+| Carga diferida | sin pedidos 3D hasta que la capa monta |
+| No monta a 390px | 0 canvas, **0 pedidos 3D** |
+| No monta con `prefers-reduced-motion` | 0 canvas, **0 pedidos 3D** |
+| Presupuesto sin aumentar | **delta 0 bytes** (1.733.868 antes y después) |
+| Monocromo | spread promedio 16,46 → **4,11** |
+| `frameloop` gateado | fuera de vista **4** draw calls en 2,5 s; en vista **724** en 2 s |
+
+Draw calls por frame: **2 antes, 2 después**. No se agregó geometría.
+
+### T2 — Distinguibilidad de los acentos: se distinguen, no se tocó ningún hex
+
+Capturado a 1440 y a 390 con los cuatro acentos puestos. **Las cuatro filas se
+distinguen por su acento en las dos anchuras**, cian incluido contra verde, y hasta en
+las mono de 12px de los plazos. La observación del critique estaba medida sobre un
+tick de 36 px²; sobre los 13.704–16.646 px² que hoy ocupan los nombres, los 0.125 de
+OKLab alcanzan de sobra. **Punto cerrado sin mover ningún valor.**
+
+Se documentó en `DESIGN.md` como regla nueva —*la distinguibilidad depende del área*—
+con las dos capturas como evidencia, y de paso quedó escrita al derecho la
+instrucción que el sprint anterior tenía al revés: **sobre lienzo oscuro se aclara
+para subir contraste, no se oscurece**. No hizo falta aplicarla; queda para que nadie
+la aplique invertida. El Gate 1 se marcó **cerrado con la opción A** en `DESIGN.md` y
+en `accent.ts`. `CLAUDE.md` no se tocó: los cuatro hex siguen exactamente igual.
+
+Queda abierta y anotada una sola observación: el violeta es el más flojo sobre oscuro
+(4.64:1 contra 7.7–9.1). Pasa 3:1. No se toca.
+
+> **Nota de numeración.** El sprint pedía "la sección de servicios (S4)". En el código
+> los cuatro frentes son **S5** (`id="home-s5"`); S4 es "Por qué develOP", que no lleva
+> acentos. Se capturó S5, que es inequívocamente la sección de los cuatro acentos. El
+> cruce viene de B1-S5, que intercambió las dos secciones para que la única con acentos
+> cayera en posición oscura.
+
+### T3 — `CustomCursor.tsx` borrado
+
+`grep` sobre `.ts/.tsx/.js/.mjs`: **cero importadores**. Los cuatro hits que quedaban
+eran comentarios. Borrado, y actualizados los tres comentarios que lo nombraban
+(`layout.tsx`, `design-tokens.ts`, `ChatWindow.tsx`) para que no apunten a un archivo
+que ya no existe.
+
+### Verificación
+
+- `npm run build` **verde** · `npx tsc --noEmit` **0 errores** (el preexistente de
+  `searchconsole.ts` tampoco aparece) · `eslint` sobre los cuatro archivos tocados: **0**.
+- Detector: `design-system` sigue en **0** (el techo) · superficie pública **64**,
+  igual que el baseline. Cero nuevos.
+- Consola: **1 entrada antes, 1 después** — la misma advertencia de shader de THREE,
+  preexistente. Cero errores nuevos, medidos contra build previo, servidor reiniciado
+  y pestaña nueva.
+
+### Fuera de scope — anotado, no implementado
+
+**Las clases `cursor-none` siguen puestas y ahora esconden el cursor del sistema sin
+reemplazo.** `CustomCursor` se desmontó en B2-S2, pero las clases quedaron sobre
+elementos **interactivos** en `Portfolio.tsx` (4, incluidas dos flechas de navegación),
+`About.tsx`, `CalculadoraAutomation.tsx` (2), `FlujoAutomation.tsx`,
+`PortfolioWebCases.tsx`, `LogicCompanion.tsx` y `ChatWindow.tsx` — este último con una
+regla CSS `cursor: none` propia en `:695`. Hoy un usuario que pasa por encima de esos
+elementos **no ve ningún cursor**. Es una regresión de accesibilidad ya viva en la
+rama, anterior a este sprint. Necesita una pasada propia.
+
+---
+
+## B3-S1 — S2, el caso real · 2026-08-04
+
+`Portfolio.tsx` deja de ser un carrusel de seis tarjetas y pasa a ser la lámina de
+un case study: **un** caso real arriba, demos conceptuales abajo, y la jerarquía
+diciendo cuál es cuál.
+
+### La regla de contenido, aplicada
+
+Lo único real que entró tal cual es **Concesionaria San Miguel** y su rubro. Todo lo
+demás está marcado. No se inventó ninguna cifra, ningún porcentaje, ningún nombre de
+cliente y ningún plazo: los placeholders tienen la **forma** del texto final (misma
+extensión, misma estructura) y el **contenido** dice que falta.
+
+Lo que sí se escribió son los **labels** de las cifras (`CONSULTAS CANALIZADAS`,
+`TIEMPO A PRODUCCIÓN`, `VEHÍCULOS PUBLICADOS`): el label es la categoría de lo que se
+midió — una decisión ya tomada — y escribirlo es lo que deja juzgar si la fila de
+datos tiene el peso que la sección necesita. El valor es el dato, y el valor está
+marcado.
+
+Los cinco demos inventados (Clínica Médica, Gimnasio, Restaurante, Inmobiliaria,
+Portal SaaS) **se fueron**: eran rubros elegidos sin decisión comercial detrás,
+presentados con la misma tarjeta que el cliente real. Quedan tres slots marcados
+`[RUBRO 1..3]` y la aclaración pasó de nota al pie en gris chico a cuerpo de la
+sección: «No son clientes: son demostraciones».
+
+### Decisiones
+
+**Server Component, cero JS.** El archivo no lleva `'use client'`. Se fueron
+`useState`, `useRef`, `useInView`, `useMotionValue`, `useTransform` y
+`AnimatePresence` — todo eso existía para mover el carrusel. El reveal es
+`animate-ds-reveal`, la animación CSS del sistema (opacity + translateY, una sola
+iteración, y el bloque global de `prefers-reduced-motion` la aterriza en su keyframe
+final). Sin Framer no hay `initial={{opacity:0}}` serializado en el SSR, así que la
+sección no tiene el modo de fallar «si el JS no llega, no se ve nada».
+
+**Un solo árbol JSX.** El responsive va por clases. La versión anterior servía
+`PortfolioDesktop` y `PortfolioMobile` **completos** y los tapaba con
+`hidden md:block` / `block md:hidden`: los dos árboles viajaban en el HTML.
+
+**Sin acentos.** La sección corre en crema (`data-ds-theme="light"`, verificado en el
+DOM: `rgb(242, 238, 230)`). Tres de los cuatro acentos no llegan a 3:1 sobre ese
+lienzo — cian 2.10, verde 2.19, ámbar 1.86. No hay excepción que pedir.
+
+**El `ChapterLabel` va solo con el número.** El sprint pedía `( 02 — LA PRUEBA )`,
+pero el formato con título es justo el que B1-S5 sacó del home porque repetía el
+titular de la sección, que va dos líneas más abajo. Lo que decía el título lo dice el
+`MonoLabel` de al lado (`CASO REAL`), que es la etiqueta del contenido y no un segundo
+kicker. Es el mismo par que ya tenía el esqueleto de `/styleguide`.
+
+### El bug que apareció midiendo, no leyendo
+
+La primera versión metía los resultados en la columna angosta de un grid de dos
+columnas, al lado de la narración. **Las tres cifras se pisaban entre ellas a 1440.**
+`--text-ds-data` llega a 48px en mono: una cifra de 6-9 caracteres pide ~170px, y esa
+columna daba ~150px. No se ve leyendo el JSX — se ve en la captura.
+
+Los resultados pasaron a **ancho completo**, debajo de la narración. Cada cifra tiene
+ahora ~380px. Y además es lo que la sección quiere decir: en la lámina de la prueba la
+cifra es el objeto principal, no una nota al margen. Costo: la sección creció de 1.39 a
+**1.69 pantallas** a 1440. Se paga.
+
+### Verificación
+
+Medida con **Playwright headed** contra el build de producción en `:3001`, servidor
+reiniciado. El Browser pane de esta sesión no compone: deja las siete secciones
+`dynamic()` colgadas en su fallback, la hidratación nunca termina y toda geometría da
+0. Queda anotado porque va a volver a pasar.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `Portfolio.tsx` | **0** |
+| `section#portfolio` en el DOM | **1** |
+| `<h2>` «Esto ya funciona.» en el DOM | **1** a 1440 y a 390 |
+| Heading en el HTML servido (sin el payload RSC) | **1** |
+| Restos del carrusel viejo (`NUESTROS TRABAJOS`, `POR RUBRO`, `DEMOS Y CONCEPTOS`) | **0** |
+| `backdrop-filter` en la sección | **0** |
+| `background-image: *gradient*` en la sección | **0** |
+| Radio ≠ 0 en superficies no interactivas | **0** |
+| Scroll horizontal | **no**, a 1440 y a 390 |
+| Errores de consola | **0** a 1440 y a 390 |
+| Detector — `design-system/` | **0** (se sostiene) |
+| Detector — superficie pública | **60** contra baseline 64. Bajó 4: los cuatro `gradient-text` vivían en este archivo |
+| Detector — `Portfolio.tsx` solo | **0** |
+
+**Altura de la sección**
+
+| Viewport | Alto | En pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1520 px | **1.69** |
+| 390 × 844 | 1893 px | **2.24** |
+
+Los 2.24 de mobile son con placeholders de forma realista, que es el punto: el texto
+marcado ocupa lo que va a ocupar el definitivo. El número es interpretable, no una
+medición de relleno arbitrario.
+
+**Peso.** El chunk de la ruta `/` quedó en 79.78 KB gz contra 79.64 KB antes (+0.14).
+El total de `static/chunks` bajó de 2342.3 a 2338.8 KB gz y desapareció un chunk: es
+el JS del carrusel yéndose. El chunk de `/page` sube apenas porque las piezas del
+sistema de diseño que la sección ahora importa cruzan a ese lado del corte.
+
+### Fuera de scope — anotado, no implementado
+
+1. **`About.tsx` sigue sirviendo dos árboles JSX completos.** Es la otra mitad del
+   patrón que infló el documento. El HTML servido de `/` quedó en **421.3 KB**; no
+   tengo baseline del documento previo a este sprint (la primera medición ya fue con
+   S1 puesto), así que el número queda como referencia, no como delta.
+2. **`page.tsx` sigue importando `Portfolio` con `next/dynamic` y un `loading:` de
+   `animate-pulse`.** Ahora que la sección es un Server Component sin JS propio, ese
+   `dynamic()` no code-splitea nada útil. Buildea y sirve bien, así que no se tocó:
+   `page.tsx` no es de este sprint.
+3. **Los `[RUBRO 1..3]` y el `[URL DEL CASO]` son decisión de Franco**, no deuda
+   técnica. La lista consolidada de placeholders, con archivo y línea, va al cerrar B3.
+
+> **Gate de merge.** Esta rama tiene placeholders a la vista. **No se mergea a `main`**
+> hasta que Franco cierre el contenido marcado.
+
+---
+
+## B3-S2 — S3, el panel del lunes · 2026-08-04 · CIERRE DEL BLOQUE B3
+
+El concepto se conserva entero —tres momentos de una mañana, no una lista de
+features— y la ejecución se rehace completa.
+
+### Lo que se sacó por falso, no por feo
+
+Esta es la sección que sirve de prueba, así que cada cosa que aparece se verificó
+**contra el código del portal**. Lo que la versión anterior afirmaba y el panel
+no hace:
+
+| Afirmaba | Realidad |
+|---|---|
+| «develOP filtró los 14 mails, 8 mensajes y 3 alertas que te llegaron» | El panel **no lee tu correo**. `AttentionStack` arma sus ítems con datos propios: entregas, facturas, reseñas, conexiones |
+| «8 ventas cerradas» · «$340K facturados» | `WeekResultsData` **no tiene** métrica de ventas ni de facturación |
+| «Comparativa contra mes anterior» | La comparación es contra la **semana** anterior |
+| Gráfico de barras de siete días | No existe en `WeekResultsGrid` |
+| Health Score 78, dimensiones 82/74/79 | La capacidad existe; **las cifras eran inventadas** |
+| 47 leads, +12%, 2 reseñas de Google | Ídem: los tipos son reales, los números no |
+
+Lo que sí quedó, con su fuente: el **Health Score** (`lib/health-score.ts`, total
+0-100 y tres dimensiones con los nombres exactos del portal), **Tu Atención Hoy**
+(`lib/dashboard/attention.ts`, tipos `billing` / `approval` / `message` /
+`connection` / `review` con su prioridad), **Resultados de la semana**
+(`lib/dashboard/week-results.ts`, contra la semana anterior) y el **resumen
+ejecutivo escrito por IA** (`lib/ai/executive-brief.ts`). Todas las cifras van
+marcadas.
+
+`visits` quedó **afuera a propósito**: está hardcodeado en 0 porque no hay
+integración de analítica, y la card real muestra «— Sin integración aún».
+Mostrarla en la sección de la prueba sería vender una integración que no existe.
+
+### Decisiones
+
+**Sin Framer Motion en el árbol.** Se fueron `DashboardStoryBackground` (~200
+líneas de gradientes radiales, blurs `3xl`, ocho SVG decorativos y **dos loops
+`Infinity` corriendo de por vida**), los mockups con `conic-gradient` y
+`boxShadow` de color, el CTA propio con glow, y la línea conectora con su
+destello perpetuo. `useReducedMotion` se sigue importando de `motion/react`, pero
+por dentro es un `matchMedia`: no arrastra el motor de animación.
+
+**El contrato de motion vive en `useEscenaCycle`.** Fuera del viewport el
+`setInterval` **no se crea** — el efecto depende de `enViewport`, así que React
+corre su `clearInterval` al salir de pantalla. No hay `requestAnimationFrame` en
+toda la sección.
+
+**La selección manual corta el avance automático para siempre.** Quien toca un
+paso del riel deja de recibir cambios de escena: es una salida del loop para
+quien quiere leer tranquilo, no una comodidad.
+
+**Legible a mitad de ciclo.** El riel con las tres horas está siempre completo y
+la escena activa se marca sobre él. Quien llega cuando va por la segunda ve las
+tres, sabe que son tres y sabe en cuál está.
+
+**`PortalDemo` salió del `SectionWrapper`** en `page.tsx`. No es cosmético: ese
+wrapper envuelve a su hijo en un `motion.div` con
+`initial={{ opacity: 0, y: 40 }}`, y Framer serializa ese `initial` en el HTML
+del SSR — la sección nacía invisible y dependía del JS para aparecer, encima con
+un segundo reveal ajeno montado arriba del reveal del sistema. `Hero` y
+`Portfolio` tampoco lo usan. `OurServices` lo conserva: no es de este sprint.
+
+### El bug que introduje y cómo se cazó
+
+La primera versión ramificaba el JSX con un booleano `estatico`: una escena si
+había motion, las tres si no. **Error de hidratación React #418**, medido en
+runtime con `reducedMotion: 'reduce'`. La causa: `useReducedMotion()` devuelve
+`false` en el servidor y `true` en el cliente, así que el HTML del SSR y el
+primer render del cliente salían distintos.
+
+El arreglo no fue un flag `mounted`: **las tres escenas están siempre en el DOM y
+quién se ve lo decide CSS**, con la variante `motion-reduce:`. El marcado es
+idéntico en servidor y cliente, y quien pidió menos movimiento ve las tres
+escenas desde el primer paint sin depender de un solo byte de JS. El fade sale
+gratis de paso: un elemento en `display:none` no corre sus animaciones, así que
+al pasar a `block` la de entrada arranca de cero.
+
+**El #418 que queda en `/` con reduced-motion NO es de esta sección.**
+Discriminador empírico, no deducción: el mismo error aparece con reduced-motion
+en `/web-development`, `/process-automation` y `/software-development`, que **no
+montan `PortalDemo`**, y no aparece en `/contact`. Es un componente compartido de
+las landings que ramifica su marcado con `useReducedMotion`. Preexistente y
+fuera de scope.
+
+### Verificación
+
+Playwright headed contra el build de producción en `:3001`, servidor reiniciado
+en cada corrida.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `portal-demo/` + `page.tsx` | **0** |
+| `section#portal-demo` en el DOM | **1** |
+| `h2` de la sección en el HTML servido | **1** (contando el tag de cierre) |
+| `h2` de S2 en el mismo documento | **1** |
+| `backdrop-filter` / gradiente / radio en superficies | **0 / 0 / 0** |
+| Scroll horizontal | **no**, a 1440 y a 390 |
+| Errores de consola (motion normal) | **0** a 1440 y a 390 |
+| Detector — `design-system/` | **0** |
+| Detector — superficie pública | **59** contra baseline 64 |
+
+**Peso.** El presupuesto era ≤80 KB gz de JS **adicional**. La sección no agrega:
+**resta**.
+
+| Momento | Chunk de la ruta `/` |
+|---|---:|
+| Pre-B3 | 79.64 KB gz |
+| Post-S1 | 79.78 KB gz |
+| **Post-S2** | **74.60 KB gz** |
+
+−5.18 KB gz contra post-S1 y −5.04 contra el baseline del bloque. El HTML servido
+de `/` bajó de 421.3 a **402.0 KB**.
+
+**Motion gateado — medido, no afirmado.** Instrumentando `setInterval` /
+`clearInterval` y `requestAnimationFrame` antes de que cargue la app:
+
+| Estado | Temporizadores vivos | rAF de la sección |
+|---|---:|---:|
+| Sección fuera del viewport | **2** | 0 |
+| Sección dentro del viewport | **3** | 0 |
+| Reduced-motion, dentro del viewport | **2** | 0 |
+
+El 2 → 3 → 2 es el loop naciendo y muriendo con el viewport. Con reduced-motion
+nunca llega a 3: el intervalo no se crea. Los 2 temporizadores de base y el rAF
+perpetuo que sí corre en la página son **preexistentes** (Lenis, ya fichado en
+esta bitácora como pendiente): la sección no suma ninguno.
+
+**Reduced-motion**: 3 escenas visibles de 3, 3 láminas visibles, la escena no
+avanza en 6 s. Con motion normal: 1 visible de 3, y avanza 8:30 → 9:00 sola.
+
+**Alturas**
+
+| Sección | 1440 × 900 | 390 × 844 |
+|---|---:|---:|
+| S2 — el caso real | 1520 px · **1.69** pantallas | 1893 px · **2.24** |
+| S3 — el panel | 1087 px · **1.21** pantallas | 1591 px · **1.89** |
+| S3 con reduced-motion | 1886 px · **2.10** | — |
+
+Las tres escenas apiladas del modo estático explican los 2.10: es el modo que
+muestra todo junto.
+
+### Un segundo bug de composición, cazado en la captura
+
+Las etiquetas de las métricas salían **truncadas** —«RESPONDI…», «COMPLETA…»— y
+las del Health Score partidas en dos líneas. El interior de la lámina mide ~370px
+a 1440 (570 de lámina menos la barra lateral) y ahí no entran tres columnas.
+Pasaron a filas: etiqueta a la izquierda, cifra a la derecha, regla abajo. No se
+ve leyendo el JSX.
+
+---
+
+## Inventario de placeholders pendientes — GATE DE MERGE
+
+**Ninguna rama con estos placeholders a la vista se mergea a `main`.** Son 15, en
+dos archivos:
+
+| Archivo | Línea | Placeholder |
+|---|---:|---|
+| `sections/home/Portfolio.tsx` | 54 | `[CONTEXTO — 1 línea: qué perdían antes de develOP]` |
+| `sections/home/Portfolio.tsx` | 56 | `[ENTREGABLE — 2 a 3 líneas: …]` |
+| `sections/home/Portfolio.tsx` | 57 | `[URL DEL CASO]` |
+| `sections/home/Portfolio.tsx` | 66 | `[+00%]` — consultas canalizadas |
+| `sections/home/Portfolio.tsx` | 67 | `[00 días]` — tiempo a producción |
+| `sections/home/Portfolio.tsx` | 68 | `[000]` — vehículos publicados |
+| `sections/home/Portfolio.tsx` | 73 | `[RUBRO 1]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/home/Portfolio.tsx` | 74 | `[RUBRO 2]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/home/Portfolio.tsx` | 75 | `[RUBRO 3]` + `[QUÉ RESUELVE — 1 línea]` |
+| `sections/portal-demo/data.ts` | 87 | `[00]` — score |
+| `sections/portal-demo/data.ts` | 88 | `[+00%]` — delta de métrica |
+| `sections/portal-demo/data.ts` | 89 | `[00]` — entero de métrica |
+| `sections/portal-demo/data.ts` | 104 | `[ENTREGA QUE ESPERA APROBACIÓN]` |
+| `sections/portal-demo/data.ts` | 105 | `[RESEÑA SIN RESPONDER]` |
+| `sections/portal-demo/data.ts` | 106 | `[FACTURA POR VENCER]` |
+
+Lo que **no** es placeholder y queda tal cual: **Concesionaria San Miguel** y su
+rubro; los nombres de las capacidades del panel (Health Score, Tu Atención Hoy,
+Resultados de la semana, Salud Digital / Comercial / Operativa, Leads,
+Respondidos, Completadas); y los labels de las cifras del caso. Todo eso está
+verificado contra el código o es dato real.
+
+### Fuera de scope — anotado, no implementado
+
+1. **#418 con reduced-motion en las tres landings** (`/web-development`,
+   `/process-automation`, `/software-development`) y en `/`. Componente
+   compartido que ramifica marcado con `useReducedMotion`. Necesita el mismo
+   tratamiento que se le dio acá: la diferencia va en CSS, no en JSX.
+2. **`About.tsx` sigue sirviendo dos árboles JSX completos.** Es la otra mitad
+   del patrón que infló el documento.
+3. **`page.tsx` sigue envolviendo `OurServices` en `SectionWrapper`**, con el
+   mismo `initial` de Framer serializado en el SSR.
+4. **`Portfolio` sigue importado con `next/dynamic`** aunque ya no tenga JS
+   propio: ese `dynamic()` no code-splitea nada útil.
+
+---
+
+## B4-S0 · Daño colateral de B3 — diagnóstico · 2026-08-05
+
+Sprint de diagnóstico. **No arregla nada**: sale con reporte y captura.
+
+### La hipótesis del roadmap se confirma
+
+El censo (`docs/probe-monolito-censo.md`, §C.7) había marcado `Portfolio.tsx`
+como **"⚠ NO es un borrado limpio"**: tiene dos importadores, y el segundo es
+`src/app/web-development/page.tsx:19`, una landing de producto que sobrevive al
+rediseño. B3-S1 reescribió ese archivo entero — de carrusel de seis tarjetas a
+lámina de caso de estudio con placeholders.
+
+**Hoy `/web-development` renderiza la lámina de San Miguel con 10 placeholders a
+la vista**, en tema crema, embutida en una landing oscura (`bg-[#020611]`).
+Verificado en runtime, no por lectura:
+
+| Qué se midió | Resultado |
+|---|---|
+| `#portfolio` en `/web-development` | existe, `section` con `data-ds-theme="light"` |
+| Fondo computado de la sección | `rgb(242, 238, 230)` — crema, dentro de la landing oscura |
+| Placeholders visibles en el `innerText` | **10** |
+| Índice de capítulo que muestra | `( 02 )` — la numeración del **home** |
+
+Los 10: `[CONTEXTO — 1 línea…]`, `[+00%]`, `[00 días]`, `[000]`, `[RUBRO 1..3]`,
+`[QUÉ RESUELVE — 1 línea]` ×3. Más `[ENTREGABLE — 2 a 3 líneas…]` y
+`[URL DEL CASO]`, que el `innerText` corta pero están en el DOM.
+
+Capturas: la costura entre la landing oscura y la lámina crema a 1440 y a 390, y
+la sección completa a 1440.
+
+**Frenado acá.** Qué hacer con esto es decisión de alcance —¿la landing recibe su
+propia sección de casos, o se le quita?—, no del ejecutor.
+
+Un detalle extra que la captura muestra y la lectura no: además del tema y los
+placeholders, la sección lleva el **índice de capítulo del home**. `( 02 )` no
+significa nada en una landing que no tiene índice de capítulos. Cualquiera de las
+dos salidas tiene que resolver eso también.
+
+### Barrido: ningún otro consumidor fuera del home
+
+B3 tocó 9 archivos (`git diff --name-only 66c74a3~1 7b0793d`). Se buscó, para
+cada uno, todo `import` o `dynamic()` que lo apunte desde fuera de
+`sections/home` y `sections/portal-demo`:
+
+| Archivo que B3 reescribió o borró | Importadores fuera del home |
+|---|---|
+| `home/Portfolio.tsx` (reescrito) | **`app/web-development/page.tsx:19`** ← el único |
+| `portal-demo/PortalDemo.tsx` (reescrito) | ninguno |
+| `portal-demo/data.ts` (reescrito) | ninguno |
+| `PortalDemoHeader` · `StoryArcLunes` · `StoryMomentCard` (borrados) | ninguno — cero referencias vivas en `src/` |
+
+Verificado también que las otras cuatro landings (`ai-implementations`,
+`process-automation`, `software-development`, `contact`) no importan nada de lo
+que B3 tocó.
+
+De paso, el mismo barrido sobre los archivos condenados en B4-S3: **todos tienen
+a `src/app/page.tsx` como único importador**. Las tres coincidencias que aparecen
+en un grep textual —`styleguide/_components/ServiceRow.tsx:53`,
+`layout/SmoothScroll.tsx:58`, `lib/whatsapp.ts:25`— son menciones en comentarios,
+no imports.
+
+---
+
+## B4-S1 · Servicios: los cuatro frentes · 2026-08-05
+
+### La numeración: manda el código
+
+El roadmap llama S4 a servicios y S5 a "por qué develOP". **El código dice lo
+contrario**, y el código gana. Relevado antes de escribir un solo `ChapterLabel`,
+contra el esqueleto del home que fijó B1-S5 en `/styleguide`:
+
+| # | Sección | Tema | `id` | Dónde vive |
+|---|---|---|---|---|
+| 01 | Hero | oscuro | `inicio` | `layout/Hero.tsx` ✅ |
+| 02 | El caso real | crema | `portfolio` | `sections/home/Portfolio.tsx` ✅ |
+| 03 | El panel del lunes | oscuro | `portal-demo` | `sections/portal-demo/` ✅ |
+| 04 | Por qué develOP + Somos | **crema** | `caracteristicas` · `nosotros` | ← B4-S2 |
+| 05 | **Los cuatro frentes** | **oscuro** | `servicios` | ← **este sprint** |
+| 06 | Cierre | crema | — | **no existe** ← ver abajo |
+
+La inversión no es un descuido del esqueleto: está argumentada en
+`HomeSkeletonBottom.tsx`. Los frentes son la única sección con los cuatro
+acentos y por eso no puede ser crema (tres de los cuatro no llegan a 3:1 sobre
+claro); la alternancia estricta la habría dejado ahí, así que se intercambió con
+los contrastes, que no necesitan acento para funcionar. **Alternancia
+resultante: oscuro · crema · oscuro · crema · oscuro · crema.** Correlativa y sin
+saltos.
+
+> **La sección 06 no existe todavía.** El esqueleto la tiene (`SkeletonClose`:
+> `( 06 )`, "Empecemos por una llamada.", dos CTAs), pero no hay componente real.
+> Y B4-S3 borra `PortalDemoCTA`, que es el CTA de cierre que el home tiene hoy.
+> Sin construirla, la demolición deja el home terminando sin llamada a la acción.
+> Anotado acá; se resuelve en S3, que es el sprint que arma el `page.tsx` final.
+
+### Qué se construyó
+
+`sections/servicios/Servicios.tsx` + `data.ts`. Server Component, cero JS propio:
+el reveal es `animate-ds-reveal`, la animación CSS del sistema. Sin demo animada
+por servicio — el único motion vivo de la página sigue siendo el panel del lunes.
+
+Cuatro filas. Cada una: nombre · para quién es · entregable · plazo · acento.
+Un solo árbol JSX; el responsive va por clases.
+
+**Contenido.** Real y tal cual: los tres timelines (15 · 7 · 5 días) y la
+asignación de acento por servicio. Del monolito no se hereda **nada**:
+`OurServices.tsx` traía por servicio precio "DESDE", métrica de impacto sin
+fuente, icono, href y una simulación animada propia. Software a medida va con
+placeholder en las tres casillas que no están definidas —para quién, entregable y
+plazo—: el monolito decía "entrega por etapas", que no es un número.
+
+**Sin pricing** (decisión D1: módulos y precios salen del home). **Sin links a las
+landings**: no estaban en el alcance de la fila, y el camino home → landing lo
+sirve el desplegable de servicios del `Navbar`, que las lista las cuatro.
+El "Cierre de diagnóstico" del monolito no se conserva.
+
+**La dosis del acento.** Pinta el nombre del frente (`Subhead`, 38px a 1440) y su
+plazo. Es la calibración de B1-S5: con un tick de 6×6 px —36 px² por fila— sacarle
+el color a las cuatro casi no perdía información. Sin glow, sin gradiente, sin
+borde lateral.
+
+### `id="servicios"` no se tocó, pero el monolito se desmontó
+
+El `id` lo consumen tres cosas: `Navbar` (`MAIN_NAV_ITEMS` + `HASH_TO_LABEL`), la
+tool `navigate_to_page` del chatbot (`VALID_PATHS`) y `TransitionContext`, que
+está **congelado** y lo tiene hardcodeado en dos ramas (líneas 28 y 41) para
+centrar el destino del scroll.
+
+Por eso `OurServices` **deja de renderizarse en este sprint**: dos secciones
+declarando `id="servicios"` en el mismo documento habrían dejado el ancla
+aterrizando en la vieja. El **archivo** sigue existiendo — borrarlo es S3, después
+de que S1 y S2 estén verificados. Con él sale el último `SectionWrapper` del home,
+que serializaba `initial: opacity 0` en el SSR.
+
+El **orden** todavía no es el de la arquitectura: la sección entra en el hueco que
+dejó el monolito. Reordenar las seis es S3.
+
+### Verificación
+
+Build de producción servido en `:3001`, medido con Playwright.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `sections/servicios/` + `page.tsx` | **0** |
+| `section#servicios` en el DOM | **1** (era 1 antes, del monolito) |
+| Las 5 anclas del Navbar/chatbot existen | **5/5** |
+| Aterrizaje same-document | **5/5**, a 64px del tope |
+| Errores de consola en `/` | **0** |
+| `backdrop-filter` / gradiente / radio / sombra en la sección | **0 / 0 / 0 / 0** (48 nodos) |
+| Scroll horizontal a 390 | **no** — `scrollWidth` 390 = viewport |
+| Detector — `design-system/` | **0** |
+| Detector — superficie pública | **59**, igual que post-B3 |
+| Detector — `sections/servicios/` | **0** |
+
+Los cuatro acentos, leídos del `getComputedStyle` sobre la página servida:
+`#06b6d4` · `#10b981` · `#f59e0b` · `#8b5cf6`. Los cuatro hex congelados en
+`CLAUDE.md`, sin mover ninguno. El par crítico —cian y verde— se distingue en la
+captura.
+
+**Alturas**
+
+| Viewport | Alto | Pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1038 px | **1.15** |
+| 390 × 844 | 1352 px | **1.60** |
+
+La fila más ancha a 390 es "Automatización de procesos": 338 px de texto en un
+contenedor de 350. Entra, sin desbordar.
+
+**Peso.** Chunk de la ruta `/` medido como gzip de
+`.next/static/chunks/app/page-*.js`: **39.17 KB gz**. El antes/después contra el
+estado pre-B4, con la misma vara, se mide en S3 — que es donde el roadmap lo pide.
+
+### Fuera de scope — anotado, no implementado
+
+1. **`#nosotros` está roto hoy, y no es de este sprint.** Hay **dos** elementos
+   con ese `id` (los dos árboles de `About.tsx`, mobile y desktop, ambos en el
+   DOM), y el primero resuelve a `scrollY: 0` — o sea que el link "Nosotros" del
+   Navbar te deja en el hero. Lo arregla S2, que reemplaza `About.tsx` entero.
+2. **Carga fría de `/#servicios`: intermitente.** En dos corridas idénticas,
+   aterrizó una vez y la otra quedó 1854px corto. Es la carrera ya fichada en el
+   repo entre el scroll-to-hash y el contenido lazy de arriba creciendo después.
+   No lo introduce esta sección — y debería mejorar solo en S3, cuando
+   desaparezcan las secciones pesadas que hoy están arriba del ancla.
+3. **`SectionWrapper` queda huérfano.** `page.tsx` era su único consumidor. Se
+   barre en S3.
+
+---
+
+## B4-S2 · Por qué develOP + Somos · 2026-08-05
+
+Fusiona `WhyDevelOP.tsx` (1.750 líneas) y `About.tsx` (527) en una sección sola:
+`sections/nosotros/` — 162 líneas de componente + 78 de datos. **240 contra
+2.277.**
+
+### Los dos ids conviven, y por primera vez aterrizan donde deben
+
+El roadmap pedía frenar y reportar si la fusión dejaba una sola sección con dos
+ids que resolver. No hizo falta frenar: los dos ids describen cosas de tamaño
+distinto y por eso entran en niveles distintos del mismo árbol.
+
+| `id` | Dónde va | Por qué ahí |
+|---|---|---|
+| `caracteristicas` | la `<section>` entera | `TransitionContext` está **congelado**, lo tiene hardcodeado en dos ramas y le da tratamiento especial: centra el destino en el viewport en vez de pegarlo arriba. Centrar exige que el destino sea el contenedor grande. |
+| `nosotros` | el bloque del equipo | Es exactamente el contenido que el link promete. Lleva `scroll-mt-24` propio: el `scroll-margin` de la sección no lo hereda un div interno. |
+
+**Y de paso se arregla el `#nosotros` roto** que B4-S1 dejó anotado como fuera de
+scope. `About.tsx` declaraba ese `id` **dos veces** —líneas 411 y 471, un árbol
+por breakpoint, los dos en el DOM— y `getElementById` resuelve al primero, que
+estaba dentro de un contenedor de `400vh` arrancando arriba de todo: el link
+"Nosotros" del Navbar te dejaba en el hero. Ahora aterriza en el bloque del
+equipo.
+
+### Por qué los dos archivos salieron del árbol en S2 y no en la demolición
+
+Misma maniobra que S1 con el monolito: dejan de renderizarse acá, el archivo se
+borra en S3. No es prolijidad, es obligatorio — `About` aporta dos `id="nosotros"`
+y `WhyDevelOP` un `id="caracteristicas"`. Montados junto a la sección nueva
+habrían puesto **tres ids duplicados** en el documento, y como `getElementById`
+resuelve al primero, los links del Navbar habrían seguido aterrizando en el árbol
+viejo. La sección nueva se vería perfecta y la navegación seguiría rota.
+
+### Lo que se sacó
+
+- **Los tabs.** El argumento anti-agencia era un widget con estado; ahora son
+  tres filas estáticas que se leen todas juntas. Server Component, cero JS
+  propio: el reveal es `animate-ds-reveal`, la animación CSS del sistema.
+- **133 usos de motion/whileInView** en `WhyDevelOP` y los dos scrollytelling
+  horizontales de `400vh` de `About` —servidos los dos, mobile y desktop, en el
+  mismo HTML—. Mueren con los archivos en S3.
+- **Dos cifras sin fuente**: `76` días de las agencias contra `15`, y
+  `+850 LEADS GENERADOS`. No se reemplazaron por otras: se fueron.
+- El mojibake del badge de ubicación en la rama mobile de `About`.
+
+### Los cinco placeholders que agrega este sprint
+
+`[PLAZO — a definir con dato real]` · `[CONTRASTE 3 — LADO AGENCIA]` ·
+`[CONTRASTE 3 — LADO DEVELOP]` · `[ROL EN UN PROYECTO — 1 línea]` ×2.
+
+El del contraste 2 no es un olvido: los timelines por servicio (15/7/5 días) son
+reales, pero **"primera versión funcionando en X" es un claim distinto** y no está
+verificado. Un plazo de entrega no es un plazo de arranque. El contraste 3 quedó
+sin definir y va con los dos lados marcados, porque lo que la sección necesita
+mostrar es la forma completa de la fila.
+
+Los avatares son placeholder **tipográfico** —la inicial dentro de una superficie
+plana—, no un cuadrado vacío: un cuadrado vacío se lee como imagen rota, no como
+"falta la foto". Van `aria-hidden`, con el nombre escrito al lado.
+
+### Verificación
+
+Build de producción servido en `:3001`, medido con Playwright — el Browser pane
+no compuso frames en toda la sesión, así que las capturas salieron por Playwright
+directo.
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `sections/nosotros/` + `page.tsx` | **0** |
+| `id="caracteristicas"` en el documento | **1** (era 1, de `WhyDevelOP`) |
+| `id="nosotros"` en el documento | **1** (era **2**, los dos de `About`) |
+| Las 6 anclas aterrizan — same-document | **6/6**, a 64px del tope |
+| Las 6 anclas aterrizan — carga fría | **6/6** |
+| Errores de consola en `/` a 1440 y a 390 | **0 / 0** |
+| `backdrop-filter` / gradiente / radio / sombra en la sección | **0 / 0 / 0 / 0** (57 nodos) |
+| Scroll horizontal a 390 | **no** |
+| Detector — `design-system/` | **0** (el techo, se sostiene) |
+| Detector — `sections/nosotros/` | **0** |
+| Detector — superficie pública | **59**, igual que post-S1 |
+
+**Alturas**
+
+| Viewport | Alto | Pantallas |
+|---|---:|---:|
+| 1440 × 900 | 1409 px | **1.57** |
+| 390 × 844 | 1818 px | **2.15** |
+
+**Peso.** Chunk de la ruta `/`, gzip de `.next/static/chunks/app/page-*.js`:
+**39.17 KB gz → 23.89 KB gz**. `About` era import estático y `WhyDevelOP` un
+`dynamic` con `ssr: true`; los dos entraban igual en el grafo del home.
+
+**El aterrizaje en carga fría anduvo.** S1 lo había medido intermitente sobre
+`/#servicios` (una corrida bien, otra 1854px corta) y lo atribuyó a la carrera
+entre el scroll-to-hash y el contenido lazy de arriba creciendo después. Con dos
+secciones pesadas menos arriba del ancla, las seis dieron bien. Sigue siendo una
+carrera, no una garantía: se vuelve a medir en S3, que saca cuatro secciones más.
+
+Capturas: `docs/proof-screenshots/b4-s2/` — la sección a 1440 y a 390.
+
+### Fuera de scope — anotado, no implementado
+
+1. **La sección 06 sigue sin existir.** El esqueleto la tiene (`( 06 )`,
+   "Empecemos por una llamada."), no hay componente, y S3 borra `PortalDemoCTA`,
+   que es el CTA de cierre de hoy. Sin construirla, la demolición deja el home
+   terminando sin llamada a la acción. Se resuelve en S3.
+2. **El orden todavía no es el de la arquitectura.** Hoy se lee 01 · 02 ·
+   *(testimonials)* · 04 · 05 · 03. `Nosotros` se puso pegado a `Servicios` para
+   que el par 04 → 05 quede correlativo; el resto lo reordena S3.
+3. **El launcher del chatbot pisa contenido a 390.** Se ve en la captura, encima
+   de la ficha de Franco. Es el problema ya fichado del widget flotante, no de
+   esta sección.
+
+---
+
+## B4-S3 · La demolición · 2026-08-05 · CIERRE DEL BLOQUE B4
+
+**14.663 líneas borradas.** El home queda con seis secciones, todas del sistema
+nuevo, y sin monolito.
+
+| Archivo | Líneas |
+|---|---:|
+| `sections/home/OurServices.tsx` | 9.898 |
+| `sections/home/WhyDevelOP.tsx` | 1.750 |
+| `sections/home/About.tsx` | 527 |
+| `sections/home/InfiniteReviews.tsx` (`ScrollingTextMarquee`) | 520 |
+| `sections/modulos-opcionales/` (3 archivos) | 939 |
+| `sections/todo-incluido/` (3 archivos) | 576 |
+| `sections/portal-demo-cta/PortalDemoCTA.tsx` | 392 |
+| `components/ui/KineticText.tsx` (huérfano del barrido) | 43 |
+| `components/layout/SectionWrapper.tsx` (huérfano del barrido) | 18 |
+
+Antes de borrar cada uno se corrió el grep de importadores. **Ninguno tenía
+consumidores fuera de `src/app/page.tsx`** — el caso peligroso, `Portfolio.tsx`
+con su segundo importador en `/web-development`, no está en esta lista: sigue
+vivo, y su problema es el de B4-S0.
+
+### La sección 06 no existía, y sin ella la demolición dejaba el home sin cierre
+
+Anotado como fuera de scope en S1 y en S2; acá había que resolverlo. El esqueleto
+de B1-S5 tenía la sección (`( 06 )`, "Empecemos por una llamada.", dos CTAs) pero
+no había componente, y este sprint borra `PortalDemoCTA` — que era la llamada a
+la acción del home. Se construyó `sections/cierre/`.
+
+**Dos claims del esqueleto no sobrevivieron la regla de contenido.** Proponía
+"Te respondemos hoy. Coordinamos una llamada de 30 minutos": son un tiempo de
+respuesta y una duración, y ninguno de los dos está en la lista de datos reales.
+Los timelines de entrega (15/7/5 días) sí lo están, pero miden otra cosa —cuánto
+tarda el trabajo, no cuánto tarda la respuesta—. Los dos se fueron a un
+placeholder marcado. Lo que queda afirmado es lo que la sección 04 ya demostró:
+que del otro lado está el que construye.
+
+Los CTAs van a destinos **reales**: WhatsApp por `lib/whatsapp.ts` (la fuente
+única del sitio) y `/contact`, que es una página propia. El segundo es navegación
+interna, así que va por `triggerTransition()` en un componente cliente aparte
+(`ContactoCta.tsx`) — así la sección sigue siendo Server Component.
+
+### El page.tsx final
+
+Seis secciones, alternancia estricta, índice correlativo:
+
+| # | Sección | Tema | `id` |
+|---|---|---|---|
+| 01 | Hero | oscuro | `inicio` |
+| 02 | El caso real | crema | `portfolio` |
+| 03 | El panel del lunes | oscuro | `portal-demo` |
+| 04 | Por qué develOP + Somos | crema | `caracteristicas` · `nosotros` |
+| 05 | Los cuatro frentes | oscuro | `servicios` |
+| 06 | El cierre | crema | — |
+
+**Se fueron los siete `dynamic()`.** Ya no code-splitean nada útil: las seis son
+Server Components y el único JS de la página vive en tres islas (`SectionShell`,
+que observa el viewport para invertir el tema; el ciclo de escenas del panel; el
+CTA a `/contact`). Lo que pesaba se borró. Cada `dynamic()` además metía un
+placeholder `animate-pulse` y una carga en cascada.
+
+### Lo que sí había que verificar en runtime: la alternancia de temas
+
+Era el riesgo de regresión **silenciosa** del sprint. El censo había registrado
+que `useThemeSection` tenía tres consumidores y dos eran `About` y `WhyDevelOP`;
+B1-S5 le pasó el theming a `SectionShell`, pero como `ThemeProvider` arranca en
+claro, si la entrega no funcionara el tema global quedaría congelado en claro
+**sin ningún error de build**.
+
+Se barrió la página de a 150px, 44 muestras, leyendo el `data-theme` del `<html>`
+en cada paso:
+
+oscuro (inicio) → crema (portfolio) → oscuro (portal-demo) → crema
+(caracteristicas) → oscuro (servicios) → crema (cierre). **Los seis tramos
+correctos.**
+
+> Una muestra suelta, en y=1950, da oscuro mientras el punto medio del viewport
+> todavía cae en `portfolio`. No es una falla: a esa altura `portfolio` (que
+> termina en 2420) y `portal-demo` (que empieza en 2420) están **los dos** dentro
+> de la banda central, y gana el que entra. Es el traspaso, y es la conducta
+> diseñada.
+>
+> Una corrida anterior había marcado `portfolio` en oscuro como falla. Era
+> artefacto del método: saltar de golpe a una coordenada exacta con `scrollTo` no
+> le da al observador el mismo recorrido que un scroll real. Se refutó de dos
+> formas — el barrido progresivo de arriba, y entrando en frío a `/#portfolio`,
+> `/#portal-demo`, `/#caracteristicas` y `/#servicios`: **4/4 con el tema
+> correcto**.
+
+### Verificación
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `page.tsx` + las 3 secciones nuevas | **0** |
+| Imports rotos tras la demolición | **0** |
+| Las 5 landings + las 3 de auth | **8/8 sirven contenido real** (no solo 200: `h1`, `form`, peso) |
+| Alternancia de tema en las 6 secciones | **6/6**, verificado scrolleando |
+| Anclas — same-document | **6/6** |
+| Anclas — carga fría | **6/6** |
+| Errores de consola (barrido completo, 1440 y 390) | **0 / 0** |
+| Detector — `design-system/` | **0** (el techo) |
+| Detector — `sections/cierre/` | **0** |
+| Detector — superficie pública | **59 → 55** |
+
+**Anclas.** Las seis aterrizan, en los dos modos. El −64px es el `scroll-margin`
+de `SectionShell` (despeje del chrome flotante); `#nosotros` suma su `scroll-mt-24`
+propio y da −160. **Ninguna quedó sin destino.** La carga fría, que S1 había
+medido intermitente, ahora da 6/6 — es lo que se esperaba al sacar las secciones
+pesadas que estaban arriba de las anclas, aunque sigue siendo una carrera y no
+una garantía.
+
+### Números medidos
+
+| Métrica | Antes | Después |
+|---|---:|---:|
+| Chunk de la ruta `/` (gz) | 39.17 KB *(post-B4-S1)* | **9.32 KB** |
+| Total `static/chunks` (gz) | 2338.8 KB *(post-B3)* | **2268.5 KB** |
+| HTML servido de `/` | 402.0 KB *(post-B3)* · 465 KB *(original)* | **89.6 KB** |
+| JS inicial, 19 scripts del HTML | ~1,53 MB raw *(baseline de la rama)* | **1113.7 KB raw / 356.5 KB gz** |
+
+**Lighthouse mobile de `/`**, contra el build de producción servido en `:3001`:
+
+| | Baseline | Ahora |
+|---|---:|---:|
+| Performance | 34/100 | **83/100** |
+| LCP | 6,1 s | **4,2 s** |
+| FCP | — | 1,7 s |
+| Speed Index | — | 1,7 s |
+| TBT | — | 200 ms |
+| CLS | — | 0,019 |
+
+> **Cuidado con dos de estos números.** El chunk de la ruta viene de otra vara que
+> la que usó B3 (gzip de `static/chunks/app/page-*.js`, que B4-S1 dejó escrita);
+> los 79.64 / 74.60 KB de B3 no son comparables con estos. Y la baseline de "JS
+> inicial 723 KB" de `sprint-b0-bis-cierre.md` no documenta si era raw o gzip, así
+> que se comparó contra el ~1,53 MB raw de `probe-b2-hero-nav.md`, que sí es de
+> esta rama y de la misma vara.
+
+**El LCP que queda no es de las secciones.** El elemento es el `h1` del hero
+—texto, no imagen— y el desglose lo dice: TTFB 453 ms, load delay 0, load time 0,
+**render delay 3.720 ms**. Lo que retiene la pintura es el gate de readiness del
+preloader contra el canvas del hero, no el peso del contenido. Bajar de 4,2 s
+pide tocar el preloader, que es territorio de B2 y roza un archivo congelado.
+
+Capturas: `docs/proof-screenshots/b4-s3/` — el home completo a 1440 (7.500 px) y
+a 390 (9.070 px), más el cierre solo en los dos anchos.
+
+---
+
+## Inventario consolidado de placeholders — GATE DE MERGE
+
+**Ninguna rama con estos placeholders a la vista se mergea a `main`.** Son **27
+cadenas en 24 filas**, en cinco archivos. Las 15 filas de B3 más las 9 que suma
+B4.
+
+> **Actualizado en D9 (2026-08-07).** El conteo no se movió —siguen siendo 27 en
+> 24 filas, recontadas contra el código— pero **las 9 filas de
+> `home/Portfolio.tsx` se ven en una ruta menos**: `/web-development` dejó de
+> importar esa sección, así que hoy solo aparecen en `/`. Las otras 15 filas no
+> cambiaron de superficie. El gate sigue vigente igual: lo que lo levanta es que
+> Franco cierre el contenido, no que se vea en menos lugares.
+
+| Bloque | Archivo | Línea | Placeholder |
+|---|---|---:|---|
+| B3 | `sections/home/Portfolio.tsx` | 54 | `[CONTEXTO — 1 línea: qué perdían antes de develOP]` |
+| B3 | `sections/home/Portfolio.tsx` | 56 | `[ENTREGABLE — 2 a 3 líneas: …]` |
+| B3 | `sections/home/Portfolio.tsx` | 57 | `[URL DEL CASO]` |
+| B3 | `sections/home/Portfolio.tsx` | 66 | `[+00%]` — consultas canalizadas |
+| B3 | `sections/home/Portfolio.tsx` | 67 | `[00 días]` — tiempo a producción |
+| B3 | `sections/home/Portfolio.tsx` | 68 | `[000]` — vehículos publicados |
+| B3 | `sections/home/Portfolio.tsx` | 73 | `[RUBRO 1]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/home/Portfolio.tsx` | 74 | `[RUBRO 2]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/home/Portfolio.tsx` | 75 | `[RUBRO 3]` + `[QUÉ RESUELVE — 1 línea]` |
+| B3 | `sections/portal-demo/data.ts` | 87 | `[00]` — score |
+| B3 | `sections/portal-demo/data.ts` | 88 | `[+00%]` — delta de métrica |
+| B3 | `sections/portal-demo/data.ts` | 89 | `[00]` — entero de métrica |
+| B3 | `sections/portal-demo/data.ts` | 104 | `[ENTREGA QUE ESPERA APROBACIÓN]` |
+| B3 | `sections/portal-demo/data.ts` | 105 | `[RESEÑA SIN RESPONDER]` |
+| B3 | `sections/portal-demo/data.ts` | 106 | `[FACTURA POR VENCER]` |
+| **B4** | `sections/servicios/data.ts` | 64 | `[PARA QUIÉN — 1 línea]` — software a medida |
+| **B4** | `sections/servicios/data.ts` | 65 | `[ENTREGABLE — 1 línea]` — software a medida |
+| **B4** | `sections/servicios/data.ts` | 66 | `[00 días]` — software a medida |
+| **B4** | `sections/nosotros/data.ts` | 43 | `[PLAZO — a definir con dato real]` — contraste 2 |
+| **B4** | `sections/nosotros/data.ts` | 47 | `[CONTRASTE 3 — LADO AGENCIA]` |
+| **B4** | `sections/nosotros/data.ts` | 48 | `[CONTRASTE 3 — LADO DEVELOP]` |
+| **B4** | `sections/nosotros/data.ts` | 67 | `[ROL EN UN PROYECTO — 1 línea]` — Franco |
+| **B4** | `sections/nosotros/data.ts` | 73 | `[ROL EN UN PROYECTO — 1 línea]` — Valentino |
+| **B4** | `sections/cierre/Cierre.tsx` | 46 | `[TIEMPO DE RESPUESTA Y DURACIÓN DE LA LLAMADA — a definir con dato real]` |
+
+Lo que **no** es placeholder y queda tal cual: Concesionaria San Miguel y su
+rubro · los nombres de las capacidades del panel · los labels de las cifras del
+caso · los tres timelines reales (15 / 7 / 5 días) y la asignación de acento ·
+las áreas de Franco y Valentino · la línea de ubicación. Todo verificado contra
+el código o dato real.
+
+Además faltan las **fotos** de Franco y Valentino: hoy hay placeholder
+tipográfico (la inicial en una superficie plana). No bloquea el merge como un
+claim falso —no afirma nada—, pero es contenido pendiente.
+
+### Fuera de scope — anotado, no implementado
+
+1. **B4-S0 sigue abierto.** `/web-development` renderiza la lámina de San Miguel
+   con sus placeholders, en crema dentro de una landing oscura y con el índice de
+   capítulo del home. Es decisión de alcance: o la landing recibe su propia
+   sección de casos, o se le quita. Dato para esa decisión: ya existe
+   `sections/web-development/PortfolioWebCases.tsx`, hoy sin usar.
+2. **`src/lib/data/premium-modules.ts` NO se tocó**, aunque el barrido lo marcó
+   sin consumidores en `src/`. Su consumidor vive en `prisma/`:
+   `prisma/seeds/sync-premium-modules.ts`, que hace `deleteMany` sobre
+   `PremiumModule` y `organizationModule`. Borrarlo rompía el seed y podía
+   borrar filas.
+3. **LCP 4,2 s: el techo es el preloader**, no las secciones (render delay 3.720
+   ms sobre un LCP de texto). Tocarlo es B2 y roza un archivo congelado.
+4. **`/login` no tiene `h1`.** Apareció verificando que las rutas sirven
+   contenido real. Preexistente, ajeno al home.
+5. **El launcher del chatbot pisa contenido a 390.** Ya fichado.
+
+---
+
+## D9 · El h1 del hero y la sección huérfana de `/web-development` · 2026-08-07
+
+Dos cosas puntuales que quedaron abiertas al cerrar B4. No hay sección nueva ni
+copy nuevo: es una remoción y un arreglo de pintura.
+
+### T1 · `/web-development` pierde su bloque de casos
+
+`src/app/web-development/page.tsx` importaba `sections/home/Portfolio.tsx`, que
+B3-S1 había reescrito como la lámina del caso real **del home**. La landing
+renderizaba entonces San Miguel en tema crema dentro de una página oscura, con el
+`ChapterLabel` del home (`( 02 )`) y los placeholders a la vista. Se quitó el
+import y el render; la ruta queda sin bloque de casos hasta que se rediseñe en el
+suyo (B7).
+
+**No se revivió `sections/web-development/PortfolioWebCases.tsx`**: trae cursor
+custom, prohibido por la dirección del rediseño. Queda como estaba — sin usar y
+sin borrar.
+
+De los dos `SectionDivider` que rodeaban la sección se conservó **uno** (el cian
+que ya introducía a `WebTemplatesImmersive`) y se borró el violeta. Dos cian
+seguidos ya existen en la página (ByRubro → Bento); dos violetas seguidos, no.
+
+**No quedó hueco de espaciado, y está medido, no mirado.** Los huecos entre todos
+los hijos directos de `<main>` son de **1 px** —el divisor— en los dos anchos,
+incluida la junta Comparador → WebTemplates (1440: 5244 → 5245; 390: 8547 →
+8548). El subárbol removido se llevaba su propio aire: `SectionReveal` no tiene
+padding propio y el `py-ds-section` vivía dentro del `SectionShell` de
+`Portfolio`. La banda oscura que se ve bajo la junta es el arranque del
+scrollytelling de `WebTemplatesImmersive` (5.400 px de alto propio), no un vacío
+nuevo.
+
+**Tampoco quedó transición de tema colgada**: censo de secciones con
+`data-ds-theme="light"` en la landing = **0**, a 1440 y a 390. Además
+`/web-development` nunca montó `ThemeProvider`, así que el
+`useThemeSectionOptional` de `SectionShell` ya era un no-op ahí.
+
+**Barrido de importadores cruzados.** Ninguna otra ruta fuera del home importa
+componentes que B3/B4 reescribieron o borraron. `web-development/page.tsx:19` era
+**el único** caso, y era este. Los borrados de la demolición (`OurServices`,
+`WhyDevelOP`, `About`, `InfiniteReviews`, `SectionWrapper`, `KineticText`,
+`PortalDemoCTA`, `TodoIncluido`, `ModulosOpcionales`) solo sobreviven como
+menciones en comentarios.
+
+### T2 · Qué retenía el `h1` del hero
+
+**La bitácora de B4-S3 atribuyó el render delay al preloader. Es incorrecto y se
+corrige acá:** `Preloader.tsx:39-43` devuelve `null` en `/` — su rama de home
+murió en B2-S1 y hoy solo bifurca a `MarketingIntro` en las cinco rutas de
+marketing. No hay preloader que tocar en el home, y el archivo congelado
+(`HeroArtifact.tsx`) nunca estuvo en la cadena.
+
+Lo que retenía la pintura es de este lado:
+
+- **`Hero.tsx:58`** — `<div className="animate-ds-reveal flex flex-col">`
+  envolvía la columna entera del hero, `h1` incluido.
+- **`globals.css:87`** — `--animate-ds-reveal: ds-reveal 0.9s … both`, con
+  `from { opacity: 0 }`.
+
+La opacidad de un ancestro multiplica a todos sus descendientes, así que el `h1`
+nacía transparente y seguía así durante los 900 ms del fade. **Chrome no
+considera candidato a LCP a un elemento transparente**, y como la elegibilidad se
+evalúa al pintar, el titular quedaba fuera de la carrera: el LCP se lo llevaba un
+`<span>` de 896 px² de la barra de navegación mientras el titular de 75.818 px²
+no figuraba.
+
+**Medido, no deducido.** A/B controlado sobre el mismo build (Moto G4 412×823,
+CPU 4×, red 4G lenta), con `elementtiming` inyectado **en el HTML servido** para
+fechar la pintura del `h1` independientemente de su candidatura a LCP:
+
+| Variante | FCP | `elementtiming` del `h1` | Δ vs FCP | Elemento LCP |
+|---|---:|---:|---:|---|
+| A · tal cual | 888 ms | 1.908 ms | **+1.020 ms** | `h1` a 1.908 ms |
+| B · `animation:none` sobre `.animate-ds-reveal` | 1.104 ms | 1.104 ms | **0 ms** | `h1` a 1.104 ms |
+| C · B + sin `text-balance` | 652 ms | 652 ms | 0 ms | `h1` a 652 ms |
+
+`text-balance` es inocente (C ≡ B). Los otros candidatos del brief se descartaron
+uno por uno: `useChromeRevealed()` devuelve `true` de forma síncrona fuera de las
+rutas de marketing y solo alimenta `Navbar` y `ChatWidgetMount` — nunca toca el
+hero; `Shutter` arranca en `opacity: 0`; y `HeroArtifactLayer` es **hermano** de
+la columna de texto, no ancestro, y a 412 px ni se monta.
+
+> ⚠ La v1 de esta matriz inyectaba un `<style>` en el `<head>` y midió **cuatro
+> veces la misma variante A**: React 19 gestiona el `<head>` y borra los `<style>`
+> ajenos. La variante tiene que entrar reescribiendo la respuesta del CSS.
+
+### El arreglo
+
+El reveal pasó de la columna a **los hijos**. Los tres bloques de apoyo (la fila
+de capítulo + eyebrow, el `Lead` y el grupo del CTA) conservan `ds-reveal`
+intacto. El titular usa **`ds-rise`**, un token nuevo del sistema
+(`globals.css`): misma distancia, misma duración y misma curva que `ds-reveal`,
+**sin el tramo de opacidad**. La columna sigue entrando en lockstep; lo único que
+cambia es que el titular nace opaco.
+
+Solo `transform`: se compone en GPU igual que el reveal y no dispara layout, así
+que no suma CLS (0,019 antes y después).
+
+**No hizo falta ninguna red de seguridad nueva.** El punto 5 del brief pedía un
+`setTimeout` que fuerce el estado final si algo del hero quedaba colgado de un
+evento: después del arreglo el titular no depende de ningún evento —es CSS puro
+sobre HTML del SSR— y lo único del hero que sí espera un evento, el fade de la
+capa 3D, ya tiene la suya (`HeroArtifactLayer.tsx:46`, `REVEAL_SAFETY_MS` de
+6 s).
+
+### Números medidos
+
+Lighthouse mobile de `/` contra el build de producción en `:3001`. **Las dos
+corridas son de la misma vara** (Lighthouse 13.4.1, `--headless=new`,
+`--throttling-method=simulate`, misma máquina, servidor recién levantado):
+
+| | Antes | Después |
+|---|---:|---:|
+| Performance | 59/100 | **73/100** |
+| LCP | 8,0 s | **4,1 s** |
+| FCP | 2,5 s | **1,8 s** |
+| Speed Index | 3,4 s | 1,8 s |
+| TBT | 490 ms | 490 ms |
+| CLS | 0,019 | 0,019 |
+| **Elemento LCP** | `span.font-ds-mono` de la barra (896 px²) | **el `h1` del hero** |
+| **Render delay del LCP** (traza observada) | **1.261 ms** | **245 ms** |
+
+> **Estos números NO son comparables con los 83/100 y 4,2 s que anotó B4-S3.** Esa
+> corrida se hizo con otra herramienta/máquina y no quedó registrado con cuál.
+> Contra la vara de B4 este build daría otra cosa; lo que vale acá es el par
+> antes/después, tomado con la misma vara y con minutos de diferencia.
+
+El `h1` como LCP a 4,1 s todavía **no** llega al objetivo de D9 (<2,5 s), pero el
+techo ya no es el hero: con render delay de 245 ms, lo que queda es FCP.
+
+Confirmación directa de que el titular pinta con el primer frame, sobre la página
+**sin modificar** del build nuevo:
+
+- `elementtiming` del `h1` = **724 ms = FCP exacto**. El `Lead`, que sigue dentro
+  de `ds-reveal`, pinta a 1.236 ms — 512 ms después. Misma página, mismo frame:
+  el mecanismo es real y el fade sigue funcionando para todo lo demás.
+- Opacidad **efectiva** del `h1` (producto de toda la cadena de ancestros),
+  muestreada por `requestAnimationFrame`: **0 frames con opacidad < 1** sobre 502
+  muestras a 412 px con CPU 4× + 4G lenta, y 0 sobre 600 a 1440 px sin throttle.
+
+Peso: chunk de `/` **9,32 KB gz** (idéntico al de B4-S3 — el arreglo no agrega
+JS), CSS mayor 426,98 KB raw / **54,46 KB gz** contra 426,80 / 54,52 del build
+anterior. Sin aumento.
+
+### Verificación
+
+| Gate | Resultado |
+|---|---|
+| `npm run build` | **verde** |
+| `npx tsc --noEmit` | **exit 0** |
+| `eslint` sobre `Hero.tsx` + `web-development/page.tsx` | **0** |
+| Detector — `src/components/design-system` | **0** (el techo) |
+| Detector — superficie pública | **55** contra baseline **55** — sin números nuevos |
+| Errores de consola en `/` (1440 y 390) | **0** |
+| Errores de consola en `/web-development` | **5, todos preexistentes y atribuidos** (ver abajo) |
+| Huecos entre secciones de `/web-development` | **1 px en todas las juntas**, a 1440 y 390 |
+| Secciones crema sobrantes en `/web-development` | **0** |
+| Placeholders visibles en `/web-development` | **0** |
+| Animaciones aplicadas | `h1` → `ds-rise`; eyebrow/lead/CTA → `ds-reveal`; columna → `none` |
+| `prefers-reduced-motion` | las cuatro aterrizan en **1 ms** (bloque global de `globals.css`) |
+
+**Las siete condiciones de la capa 3D se mantienen.** Cuatro por diff —
+`HeroArtifactLayer.tsx`, `HeroCanvas.tsx`, `components/3d/`, `components/canvas/`
+y `context/` están **byte a byte iguales**, el único archivo tocado en
+`components/layout/` es `Hero.tsx`— y las otras medidas en runtime:
+
+| Condición | Medición |
+|---|---|
+| No monta a 390 | `canvas` = `null` |
+| No monta con `prefers-reduced-motion` | `canvas` = `null` a 1440 |
+| Monta en desktop | `canvas` 416×416 a 1440 |
+| Sin bloqueo de scroll | `scrollY` llega a 1200 / 4000 en las tres configuraciones; `overflow` de `html` y `body` = `visible` |
+| `frameloop` gateado | **722 draw calls de WebGL en 2 s con el hero en viewport → 0 con el hero fuera** (barrido progresivo con la rueda, canvas a `top: -3748`). rAF del pane a 181 fps, así que la medición es válida y no un falso negativo de pane congelado |
+| Peso | chunk de `/` sin cambio (9,32 KB gz) |
+
+Capturas: `docs/proof-screenshots/d9/` — `/web-development` completa a 1440
+(22.806 px) y a 390 (29.025 px), la junta recortada a los dos anchos, y el hero
+del home a 1440 y 390.
+
+### Fuera de scope — anotado, no implementado
+
+1. **El techo que queda es FCP, y es el bundle.** FCP 1,8 s con TBT 490 ms sin
+   mover. En la traza con CPU 4× + 4G lenta: el CSS grande termina a 1.609 ms y el
+   DOM a 1.662 ms, pero el primer paint recién ocurre a 3.508 ms — en el medio hay
+   **1.078 ms de long tasks** de los **19 scripts `async`** del `<head>`
+   (1.113,7 KB raw / 356,5 KB gz). Bajar LCP de 4,1 s a menos de 2,5 s pide
+   trabajar ese bundle, no el hero.
+2. **`/web-development` tiene 5 errores de consola preexistentes**, todos
+   atribuidos a componentes que este sprint no tocó: 404 de
+   `/assets/templates/chatgpt/zero/mid.webp` y dos violaciones de CSP
+   (report-only) por el iframe a `template-zero.netlify.app`, las tres de
+   `WebTemplatesImmersive`; 404 ×2 de `grainy-gradients.vercel.app/noise.svg` (la
+   capa de grano de la propia landing); y `ERR_ABORTED` de
+   `/video/Woman_engrossed_in_screen_delpmaspu_.mp4`. La sección removida no hacía
+   ningún request, así que no puede haber agregado ninguno.
+3. **Cuatro huérfanos en `sections/web-development/`**: `PortfolioWebCases.tsx`,
+   `ShowcaseSection.tsx`, `WebDevelopmentObjections.tsx` y
+   `WebDevelopmentSensory.tsx` — cero importadores. Insumo para B7; no se borra
+   nada en este sprint.
+4. **El hook de impeccable marca `gradient-text` en el `h1` de
+   `/web-development`** (texto con `bg-clip-text` + gradiente). Es preexistente,
+   del hero de esa landing, y no lo introdujo este sprint: entra en el rediseño de
+   la ruta (B7). No se suprimió el hallazgo.
+5. **El mismo patrón sigue vivo en las otras cinco secciones del home.**
+   `Portfolio`, `PortalDemo`, `Nosotros`, `Servicios` y `Cierre` envuelven su
+   titular en `animate-ds-reveal`. Hoy no cuesta nada —están bajo el fold y
+   ninguna es el LCP— pero la regla quedó escrita en `globals.css`: contenido
+   crítico va en `ds-rise`, no en `ds-reveal`.
+6. **El launcher del chatbot pisa el microcopy del hero a 390.** Ya fichado.
