@@ -4040,3 +4040,142 @@ se tocaron en ninguno de los cinco recorridos; el formulario quedó documentado 
 **Cierre:** `git diff --stat` sin cambios en archivos versionados; el único agregado es
 `docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md` más esta entrada. Cero `src/`, cero
 tests, cero config. Worktree y scripts de navegación borrados. Sin push.
+
+---
+
+## F1 — Dos bugs de datos: la fecha que se corría un día y el contador que contaba de más
+
+**Rama:** `f1/datos-fecha-contador` (worktree propio en `C:\tmp\wt-f1-datos`) · **Base:** `05ae1a87`
+
+### Las dos causas, confirmadas antes de tocar
+
+Las dos venían diagnosticadas. Se reprodujeron primero, contra el camino real, y **las dos
+seguían siendo la causa**:
+
+**La fecha.** `ResultadoInputSchema` tomaba `reactivateAt` con `z.coerce.date()`, o sea
+`new Date('2026-08-25')` — que por especificación es medianoche **UTC**. En AR (UTC-3) ese
+instante todavía es el 24 a las 21:00. Reproducido con cinco fechas antes de tocar nada:
+
+| elegida | guardado | mostraba | el panel lo traía |
+|---|---|---|---|
+| 25/08 | `2026-08-25T00:00:00Z` | 24/8 | 24/08 21:00 |
+| 31/08 | `2026-08-31T00:00:00Z` | 30/8 | 30/08 21:00 |
+| 01/09 | `2026-09-01T00:00:00Z` | 31/8 | 31/08 21:00 |
+| 31/12 | `2026-12-31T00:00:00Z` | 30/12 | 30/12 21:00 |
+
+No era un bug de formateo: el mismo instante gobierna `postergadoVencido` (home.ts) y el cron,
+así que el lead **volvía la noche anterior**. Las dos mitades rotas por la misma raíz.
+
+**El contador.** `contarDmsHoy` filtraba por `performedById` + `channel: INSTAGRAM_DM` y nada
+más. Como `registrarResultado` deja una fila de ese canal para *todo* resultado, postergar
+sumaba sin que saliera un mensaje. Medido en la DB de dev el mismo día: **contador viejo = 2,
+mensajes reales = 0**.
+
+### Qué se cambió
+
+**Arreglo 1 — una fecha sin hora es un día del calendario, no un instante.** El helper
+canónico `src/lib/dates-ar.ts` (que ya modela AR = UTC-3 fijo) suma `parseCalendarDayAR`:
+toma el `YYYY-MM-DD` y construye el instante **desde los componentes del calendario**, con la
+misma regla que ya usaba `startOfMonthAR` — 00:00 AR ≡ 03:00 UTC del mismo día. **No se
+desplazan horas** sobre un `Date` ya mal parseado: ese es el arreglo ingenuo que corre el día
+en la dirección contraria. Round-trip contra los componentes pedidos para rechazar los días
+que no existen (`2026-02-31`, que `Date.UTC` normalizaría en silencio al 3 de marzo).
+
+El schema del setter lo aplica en el borde, vía `preprocess` que **solo toca strings
+date-only**. Eso lo hace idempotente, y hacía falta: el form valida y manda `parsed.data`
+(ya un `Date`), y la action re-valida. Con un desplazamiento de horas la segunda pasada
+habría corrido el día otra vez.
+
+**Arreglo 2 — el contador cuenta mensajes, no registros.** El discriminador existía en el
+modelo (`OsLeadActivity.result`) y **no se inventó acá**: `countFollowUps` ya define «un toque
+mandado» como una fila `SIN_RESPUESTA`, y sobre ese conteo corre la cadencia. `isolation.ts`
+suma `SOLO_MENSAJES_ENVIADOS` + su predicado espejo `esMensajeEnviado`, mismo patrón que
+`SOLO_CONTACTOS_COMERCIALES`. Los otros resultados registran lo que hizo el prospecto
+(respondió, pidió esperar, rechazó) o un evento (reunión de Cal.com): reacciones a un mensaje
+que ya se contó cuando se mandó. **Cero bloqueo agregado** — sigue siendo informativo.
+
+### Los dos invariantes, demostrados fallando
+
+`check:invariants` sube de **19 a 21** (los dos nuevos quedan encadenados).
+
+- `postergacion.invariant.ts` — saboteado volviendo a `z.coerce.date()`:
+  `AssertionError: 2099-08-25: guardado == elegido (día AR) / + '2099-08-24' - '2099-08-25'`, exit 1.
+- `contador-dms.invariant.ts` — saboteado en dos puntos. Con el `where` vacío:
+  `AssertionError: el where del conteo filtra por resultado, no solo por canal / + {} - { result: 'SIN_RESPUESTA' }`, exit 1.
+  Con el predicado aflojado a `result !== null`:
+  `AssertionError: RESPONDIO: NO cuenta como mensaje mandado / true !== false`, exit 1.
+
+Restaurados, los dos vuelven a verde. El de la fecha cubre 25/08, **31/08**, **01/09**,
+31/12, 01/01 y el bisiesto 29/02/2028, y afirma las dos mitades por separado: lo mostrado
+(mismo `formatFechaCorta` de la pantalla) y el día de reactivación (misma comparación de
+`home.ts`, verificando que el interruptor da vuelta en el borde exacto y no un día antes).
+
+### Verificación en la aplicación
+
+Prod-QA propio (build aislado en `.next-f1`, puerto 3013) para no tocar el `:3003` de otra
+sesión. **Sin capturas: el panel del navegador no compone frames** (el mismo instrumento roto
+que ya está anotado en la corrida de experiencia) — se afirma por navegación real y lectura
+del DOM.
+
+| qué se hizo | qué mostró | correcto |
+|---|---|---|
+| Abrir `m5` de «QA-M5 Toque» (dato viejo, `…25T00:00:00Z`) | "se retoma el **24/8**" | ✅ *(es el bug: evidencia del dato pre-arreglo)* |
+| Postergar al **25/08** | "se retoma el **25/8**" | ✅ |
+| Contador tras postergar | **0 / 10 DMs** (no se movió) | ✅ |
+| Postergar al **31/08** (fin de mes) | "se retoma el **31/8**" | ✅ |
+| Contador tras la 2ª postergación | **0 / 10 DMs** | ✅ |
+| Registrar «No respondió — mandé un toque» | **1 / 10 DMs** | ✅ |
+
+El instante que quedó guardado en la postergación nueva es `2026-08-31T03:00:00.000Z` → el
+panel lo trae el **31/08 a las 00:00 AR**, el arranque del día elegido.
+
+### Las postergaciones ya guardadas: qué les pasa
+
+**El arreglo NO cambia cómo se interpreta un dato guardado.** Un `reactivateAt` sigue siendo
+un instante y se lee igual que antes: **ningún lead se reactiva un día distinto del que venía**.
+Lo que cambia es cómo se *escribe* una postergación nueva.
+
+Censo en Neon dev al abrir el sprint: **6 leads** con `reactivateAt`, todos POSTERGADO. De
+esos, **2 con la marca del bug** (medianoche UTC exacta: «QA-M5 Toque» y «QA-M5 Agotada»,
+ambos fixtures de QA) y 4 con hora real, cargados desde admin (`Date.now() + N días`) y por
+lo tanto nunca afectados. Los 2 con la marca siguen mostrando —y trayendo— el día anterior
+**hasta que se los vuelva a postergar**; uno de ellos se re-posterguió durante la verificación
+y quedó anclado, así que **queda 1**. **No se migró nada.** El número es de la DB de dev: en
+producción hay que volver a contarlo.
+
+### Fuera de scope, anotado y no tocado
+
+- **El admin no tiene este bug.** `updateLeadStatus` recibe `new Date(Date.now() + N días)`
+  —un instante real— desde `change-status-select` y `lead-pipeline`; su `type="date"` es solo
+  para filtros de rango. `optionalReactivateAtSchema` usa `z.coerce.date()`, o sea la trampa
+  sigue armada si alguien le enchufa un date-picker: si eso pasa, `parseCalendarDayAR` ya está.
+- `limitesDelDiaArgentino` (outreach.ts) duplica lo que `dayRangeAR` ya hace, y usa `lte
+  23:59:59.999` donde `dates-ar` usa rango semiabierto. Funciona; es consolidación, no bug.
+- `check:invariant:dates-ar` **existe pero no estaba encadenado** en `check:invariants` — otra
+  cara de «dos listas que divergieron». No se agregó: no es de este sprint.
+- Lo declarado fuera por el encargo (motivo del rechazo que no se muestra, contraste de texto,
+  acuse de recibo, lo diferido de celular): sin tocar.
+
+### Gates
+
+| gate | resultado | exit |
+|---|---|---|
+| `npx tsc --noEmit` | 0 errores | **0** |
+| `npm run check:invariants` | **21/21** (sube de 19: los dos nuevos) | **0** |
+| `npm run test:leados` | **25/25** | **0** |
+| `npm run test:setter` | **60/60** (aislada: `.next-f1` + puerto 3013, sin tocar el `:3003` ajeno) | **0** |
+
+`git diff --stat`: 5 archivos tocados + 2 invariantes nuevos. **Cero gates, cero transiciones,
+cero aislamiento entre setters, cero schema, cero migraciones.** El único archivo del write-path
+que se tocó es el schema de entrada, y el cambio es cómo se lee la fecha — las transiciones de
+`registrarResultado` y `postergarLead` quedaron intactas. Nada pusheado.
+
+**Fixtures movidos** (Neon dev, por la verificación en la app): «QA-M5 Toque» quedó POSTERGADO
+al **31/08** con `2026-08-31T03:00:00.000Z` (anclado, ya sin la marca del bug) y con dos
+postergaciones más en su historial. «M0-GAL 09-m5-toque-vencido» sumó un toque: quedó en
+2 de 3 de cadencia. «QA-M5 Agotada» **no se tocó a propósito** — es la muestra viva del dato
+pre-arreglo (sigue mostrando 31/8 cuando dice 01/09).
+
+**Worktree conservado** en `C:\tmp\wt-f1-datos` (rama `f1/datos-fecha-contador`) para que
+Franco levante el preview. Al desarmarlo: sacar primero la junction de `node_modules` con
+`cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra el `node_modules` real.
