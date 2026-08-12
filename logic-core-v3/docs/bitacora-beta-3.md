@@ -2000,3 +2000,106 @@ describe todo lo demás del paso y avisa qué parte no pudo verse; el índice lo
 todos bajo `docs/manual-usuario/`**. Cero `src/`, cero tests, cero config — no se corrieron `tsc` ni
 las suites porque no había nada que romper. El WIP ajeno (`docs/probe-01-censo-cosecha.md`, untracked)
 quedó intacto. Sin push.
+
+---
+
+## Corrida de experiencia — el Panel del Setter recorrido como usuario (11/8/2026)
+
+**Qué fue.** No una auditoría: cinco recorridos *usando* el panel y anotando cada cosa que
+hizo falta saber y la pantalla no dijo. El camino principal entero y en secuencia por el
+agente padre sobre un negocio sembrado desde cero (`Gimnasio Nova Fit`, `OsLead` sin
+dossier), y después cuatro barridos en paralelo: la demo rechazada, el negocio que no
+contesta, nombres accesibles y celular. Salida en
+[`docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md`](manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md).
+
+**Contra qué.** `4dadd274`, build de producción en un **worktree aislado** (`C:/tmp/corrida-exp`,
+puerto 3005). Hizo falta porque el checkout compartido estaba siendo mutado en vivo por otra
+sesión: había un `npm run start:setter` corriendo en `:3003` con `E2E_DIST_DIR`, y ni ese
+script ni el knob `distDir` existen ya en el árbol. Buildear encima habría medido un árbol
+que no es `4dadd274`.
+
+**Dos premisas del encargo no se sostienen contra este commit.** La "pantalla de evaluación
+fusionada" no existe: son dos (`EVALUACIÓN — PASO 1 DE 2` / `2 DE 2`). Las "dos pantallas de
+construcción con tres tildes cada una" tampoco: son **seis** (`PASO 1 DE 6`, m7–m12, un tilde
+cada una), y `mc1`/`mc2` devuelven byte a byte la misma página que un paso inexistente
+(`mzz`). Lo que sí se pudo responder es cómo se lee la versión que existe: la de seis se lee
+como un paso de trabajo por pantalla, no como cosas apiladas.
+
+**48 baches. Seis patrones — eso es lo que vale.** Un bache que aparece en pantallas que no
+comparten código no son varios bugs, es un concepto que falta:
+
+1. **No hay acuse de recibo estándar en el lugar del clic** — 10 casos, 6 caminos de código.
+   El aviso flotante confirma y la pantalla sigue mostrando el estado anterior, a veces
+   contradiciéndolo en la misma vista ("Construcción arrancada" arriba, "Primero arrancá la
+   construcción" abajo). **Ya produjo daño medible:** sin acuse, el barrido B registró la
+   misma postergación dos veces. El patrón correcto ya existe en el producto ("Fijar arriba"
+   se deshabilita y anuncia en la live region) — falta aplicarlo parejo.
+2. **El puntero de "dónde estoy y a dónde voy" miente** — 8 casos. `m3` dice "tu paso de
+   ahora es otro" y manda a `m2`, que solo avanza a `m3`; lo mismo entre `m5` y `espera`. El
+   chequeo final se nombra tres veces y no se linkea ninguna. La nav "Cartera" lleva a "Tu día".
+3. **El dato que necesitás vive en una sola pantalla y no viaja** — 7 casos. El peor: el
+   motivo del rechazo.
+4. **Mensajes de sistema crudos al setter** — 2 pantallas, y las dos esquivan el traductor
+   que el resto del panel usa.
+5. **Vocabulario que cambia entre pantallas** — Pausar/Posponer/Postergar, con el filtro
+   "Pausados por vos" vacío porque el lead cae en otro.
+6. **Lo que decide más tiene menos peso que lo accesorio** — los 6 checks que bloquean el
+   envío miden 26px sin fila tappeable; los 4 que no bloquean nada, 44px con fila tappeable.
+
+**Los tres que más bloquean a quien trabaja solo.** (a) En la reentrada por rechazo,
+**"Reabrir construcción" destruye el motivo del rechazo** — pasa a CONSTRUCCIÓN y `Qué/Dónde/
+Arreglo` desaparece de `mr`, de la tarjeta de cartera y de los doce pasos barridos, mientras
+`mr` promete "el historial de rechazos se conserva" y el historial dice "sin movimientos".
+(b) En `m13`, guardar sin tocar el interruptor de confirmación devuelve **`Invalid literal
+value, expected true`**, en inglés y con el `aria-invalid` sobre el campo URL, que es válido.
+(c) **La postergación se guarda un día antes de la elegida** — 25/8 → 24/8, 1/9 → 31/8, dos
+de dos.
+
+**Lo que está bien y conviene no tocar.** El chequeo final con sus dos grupos rotulados es la
+mejor pantalla del recorrido y **la partición ya está lista para delegar la revisión algún
+día**. Las esperas dicen de quién es el turno sin ambigüedad y sacan el peso de encima ("el
+foco te lo trae cuando llegue"). La cadencia de tres toques está escrita entera y el sistema
+**no te deja insistir de más**: al tercero el botón desaparece. Y `m16` trae el mejor aviso de
+consecuencia de toda la app, justo encima del botón que no hay que apretar a la ligera.
+
+**Cuatro correcciones a cosas escritas antes**, todas verificadas contra el DOM:
+- El **checkbox de `m16` SÍ tiene nombre accesible**: está envuelto en un `<label>` con texto,
+  y el label envolvente nombra. **H-13 está mal en ese punto** (el resto del hallazgo sigue).
+  Confirmado de forma independiente por el padre y por el barrido de accesibilidad.
+- Los **4 botones de resultado de `m5` SÍ tienen `aria-pressed`** — el padre afirmó lo
+  contrario a mitad de corrida y se retractó.
+- El **tilde de fase ya se acusa** en el lugar del clic ("Fase marcada como hecha"): H-11
+  mejoró.
+- La salida cuando falta una herramienta **ya está escrita** ("pedíselo a Franco y lo vas a
+  poder abrir desde acá"), contra lo que dice H-01 — pero está plegada bajo "Qué es y cómo se
+  usa", falta en `m5` y la herramienta ni aparece en `mr`.
+
+**Herramientas sin dirección: 24 choques** sumando los cinco recorridos (10 el camino
+principal, 8 la rechazada, 6 el que no contesta). Sigue siendo el techo real: **el punto de
+frenada de alguien nuevo es `m2`, el segundo paso de su primer negocio.** Se resuelve
+cargando cuatro URLs.
+
+**La pregunta de fondo — ¿podría alguien que nunca vio esto recorrerlo solo? NO.** Se frena en
+`m2` (configuración). Resuelto eso, se frena en `m13` (producto). Y si le rechazan una demo,
+en `mr`. Todo lo que está en el medio sí se recorre solo: **el recorrido está mucho mejor
+contado de lo que está destrabado.**
+
+**Nota de instrumento.** El panel del navegador no compone frames: React 19 difiere el reveal
+de los Suspense boundaries desde `requestAnimationFrame`, así que el contenido queda en un
+`<div hidden>` y parece que la app no carga; y las transiciones CSS quedan congeladas en el
+frame 0. Produjo seis falsos positivos, todos refutados antes de escribirlos — incluida una
+sospecha del padre sobre el detalle de revisión del admin, que **se retira**.
+
+**Fixtures movidos** (Neon dev): `QA-W Rechazada` quedó en CONSTRUCCIÓN con las 6 fases
+tildadas — **ya no reproduce la pantalla de reentrada, hay que re-seedearlo**. `QA-W Evaluada
+Gate Cerrado` quedó POSTERGADO con 3 toques y dos postergaciones (la segunda, duplicada por el
+bache del acuse). El negocio sembrado quedó en EN_REVISION.
+
+**Ninguna acción hacia afuera disparada.** "Confirmar y agendar" y "Buscar de nuevo" (m16) no
+se tocaron en ninguno de los cinco recorridos; el formulario quedó documentado igual.
+"Enviar a revisión" sí se apretó una vez, y la propia app declara que es cola interna
+("Franco la ve en su cola").
+
+**Cierre:** `git diff --stat` sin cambios en archivos versionados; el único agregado es
+`docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md` más esta entrada. Cero `src/`, cero
+tests, cero config. Worktree y scripts de navegación borrados. Sin push.
