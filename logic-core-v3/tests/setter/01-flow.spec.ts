@@ -97,7 +97,9 @@ test.describe.serial('Recorrido completo del lead (FICHA → APROBADA → envío
     const opener = firstVisible(fieldControl(page, 'Tu opener'))
     // 🔴 ASSERT CRÍTICO: meter un link → error + botón deshabilitado.
     await opener.fill('Mirá esta demo: https://ejemplo.com')
-    await expect(firstVisible(page.getByText(/El opener va SIN link/i))).toBeVisible()
+    // El alert vivo (on-fill) muestra GUIA_OPENER.gate.titulo, no el mensaje del schema
+    // (que recién aparece post-submit). Afirmamos lo que el hard-block surfacea al tipear.
+    await expect(firstVisible(page.getByText(/El link NO va en el opener/i))).toBeVisible()
     const registrar = firstVisible(page.getByRole('button', { name: /Ya lo mandé en Instagram — registrar/i }))
     await expect(registrar).toBeDisabled()
 
