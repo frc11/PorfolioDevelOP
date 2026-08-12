@@ -5,6 +5,7 @@ import {
   fasesDePantallaConstruccion,
   PANTALLAS,
   rutaManual,
+  type PantallaId,
 } from '@/lib/leados/manual'
 import { turnoDelLead } from '@/lib/leados/turno'
 import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
@@ -40,6 +41,15 @@ export const dynamic = 'force-dynamic'
 type PantallaPageProps = {
   params: Promise<{ leadId: string; paso: string }>
 }
+
+/**
+ * F2 — Las pantallas donde el setter CORRIGE: el aterrizaje del re-loop, las dos
+ * de Construcción, el borrador y el chequeo final. En todas tiene que poder leer
+ * qué le pidieron sin salir de donde está trabajando (en m14, además, para
+ * verificar contra el pedido antes de reenviar). Fuera de esta lista el bloque no
+ * existe: en `revision`/`m15`/`m16` la corrección ya pasó y sería ruido.
+ */
+const PANTALLAS_DEL_RETRABAJO: readonly PantallaId[] = ['mr', 'mc1', 'mc2', 'm13', 'm14']
 
 /**
  * Una pantalla del manual (mapa v1). La GUARDIA es del servidor, no CSS:
@@ -126,29 +136,43 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
     )
   }
 
-  // Reentrada M-R: la nota de Franco AL FRENTE, antes de la instrucción. Es el
-  // MISMO `GuiaRetrabajo` compartido que muestra el aterrizaje del wizard (una
-  // sola fuente de la nota, no un Callout duplicado) + el recordatorio de que el
-  // motor preservó checklist y borrador y reseteó el chequeo final.
-  const notaRechazo =
-    pantalla.tipo === 'reentrada' && manual.rechazo ? (
-      <div className="space-y-2">
-        <GuiaRetrabajo rechazo={manual.rechazo} />
-        <p className="px-1 text-xs leading-relaxed text-zinc-400">
-          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y volvé a
-          pasar el chequeo final (se reseteó).
-        </p>
-      </div>
-    ) : undefined
+  // F2 — La nota de Franco AL FRENTE de TODA pantalla del retrabajo, no solo del
+  // aterrizaje: hasta este sprint desaparecía al reabrir la construcción (`mr`
+  // deja de ser alcanzable) justo cuando el setter empezaba a corregir. Es el
+  // MISMO `GuiaRetrabajo` compartido (una sola fuente de la nota, no un Callout
+  // por pantalla), con las vueltas anteriores como contexto secundario.
+  //
+  // El gate por stage es exacto, no aproximado: `rechazos` solo se appendea en
+  // EN_REVISION→RECHAZADA y el ÚNICO camino de vuelta a CONSTRUCCION es el
+  // re-loop (`LEGAL_TRANSITIONS`), así que rechazo + uno de esos dos stages ⟺
+  // hay una corrección en curso. Sin rechazo, `null`: el bloque no existe.
+  const guiaRetrabajo =
+    manual.rechazo !== null &&
+    (manual.stage === 'RECHAZADA' || manual.stage === 'CONSTRUCCION') &&
+    PANTALLAS_DEL_RETRABAJO.includes(pantalla.id) ? (
+      <GuiaRetrabajo rechazo={manual.rechazo} previos={manual.rechazosPrevios} />
+    ) : null
 
   // 5.6 — Turnaround visible en las fases (el banner del wizard): el negocio
   // respondió y está esperando la demo. Null-safe: sin respuesta no renderiza.
   const encabezado =
     pantalla.tipo === 'reentrada' ? (
-      notaRechazo
+      // La reentrada suma el recordatorio de qué preservó y qué reseteó el motor.
+      <div className="space-y-2">
+        {guiaRetrabajo}
+        <p className="px-1 text-xs leading-relaxed text-zinc-400">
+          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y volvé a
+          pasar el chequeo final (se reseteó).
+        </p>
+      </div>
     ) : esConstruccion ? (
-      <UrgenciaBanner respondioDesde={manual.respondioDesde} />
-    ) : undefined
+      <>
+        {guiaRetrabajo}
+        <UrgenciaBanner respondioDesde={manual.respondioDesde} />
+      </>
+    ) : (
+      guiaRetrabajo
+    )
 
   // Slots por pantalla — cada módulo m<N>-*.tsx llena los tres del layout-tipo
   // (todas las pantallas del manual ya están migradas, corte 5.6).
@@ -262,10 +286,15 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                     // wizard). Sin esto, el chequeo final queda futuro para siempre.
                     captura: (
                       <div className="space-y-3">
+                        {/* F2 — Antes prometía «el historial de rechazos se
+                            conserva», un historial que el setter no veía por
+                            ningún lado. Ahora las vueltas anteriores están en el
+                            bloque de arriba, y el texto dice lo que de verdad
+                            importa: el pedido te acompaña mientras corregís. */}
                         <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
                           Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
                           arriba). Después volvés a publicar el borrador y a pasar el chequeo
-                          final antes de reenviar — el historial de rechazos se conserva.
+                          final antes de reenviar — el pedido te sigue en cada pantalla.
                         </p>
                         <ReabrirConstruccion leadId={leadId} />
                       </div>

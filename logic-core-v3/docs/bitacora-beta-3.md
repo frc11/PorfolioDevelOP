@@ -4179,3 +4179,108 @@ pre-arreglo (sigue mostrando 31/8 cuando dice 01/09).
 **Worktree conservado** en `C:\tmp\wt-f1-datos` (rama `f1/datos-fecha-contador`) para que
 Franco levante el preview. Al desarmarlo: sacar primero la junction de `node_modules` con
 `cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra el `node_modules` real.
+
+---
+
+## F2 — El pedido de Franco acompaña la corrección (2026-08-12)
+
+**Encargo.** Que el setter tenga a la vista qué le pidió corregir Franco, en las pantallas
+donde va a corregirlo. El dato ya estaba guardado y sobrevivía: había que mostrarlo.
+
+### El terreno (lo que el descubrimiento encontró antes de tocar nada)
+
+**Qué se guarda.** `OsLeadDossier.rechazos` es un **array** (`RechazosSchema`), no un campo:
+guarda **todas** las vueltas. Cada entrada tiene cinco campos — `fecha` (la estampa el motor),
+`motivo` (obligatorio, ≤280), `donde` (sección/elemento, ≤280), `arreglo` (≤2000) y `detalle`
+(texto libre **pre-B5**: el formulario del admin ya no lo captura y **ninguna** superficie del
+setter lo mostraba). Lo escribe SOLO `transitionDossier` en EN_REVISION→RECHAZADA, appendeando
+al final. Nadie lo borra: el re-loop resetea `selfCheckJson` y nada más.
+
+**Quién lo mostraba.** Tres superficies, todas atadas al stage RECHAZADA: la card del panel
+(`home-sections.tsx`), la pantalla `mr` del manual (`GuiaRetrabajo`, gate
+`pantalla.tipo === 'reentrada'`) y el `RechazosPanel` del admin. **El hallazgo, confirmado:** al
+reabrir la construcción el stage pasa a CONSTRUCCION, `mr` deja de ser alcanzable y el gate del
+home deja de aplicar → **el pedido desaparecía de todas las superficies del setter justo cuando
+empezaba a corregir**. El dato seguía intacto en la DB.
+
+**El recorrido de la corrección.** `mr` → [Reabrir construcción] → `mc1` → `mc2` → `m13` →
+`m14` → revisión. Esas cinco pantallas son la lista.
+
+### Qué se hizo
+
+El **mismo** `GuiaRetrabajo` (una sola fuente de la nota, no un Callout por pantalla) al frente
+de las cinco pantallas del retrabajo, en el slot `encabezado` que `mr` ya usaba — mismo
+tratamiento visual, ninguna pantalla rediseñada. En `mc1`/`mc2` va arriba del banner de urgencia;
+en `m14` queda pegado al chequeo, que es donde hay que verificar contra el pedido antes de
+reenviar.
+
+**El gate es exacto, no aproximado:** hay rechazo **y** el stage es RECHAZADA o CONSTRUCCION.
+`rechazos` solo se appendea en EN_REVISION→RECHAZADA y el único camino de vuelta a CONSTRUCCION
+es el re-loop (`LEGAL_TRANSITIONS`), así que esa condición equivale a «hay una corrección en
+curso». Sin rechazo el bloque **no existe** — ni vacío ni de relleno; en `revision`/`m15`/`m16`
+tampoco, porque ahí la corrección ya pasó.
+
+**La promesa que se cerró (C-19 de la auditoría de cierre).** `mr` decía «el historial de
+rechazos se conserva» y el setter no lo veía por ningún lado. Ahora las vueltas anteriores van
+**dentro del mismo bloque**, plegadas y **anunciadas con su cuenta** («Lo que te pidió en las
+vueltas anteriores (N)», con la fecha de cada una); lo que importa —el último pedido— nunca se
+pliega. Y el texto de `mr` dejó de prometer un archivo invisible: ahora dice que el pedido lo
+sigue en cada pantalla. Sin vueltas anteriores, el plegado no se renderiza.
+
+De paso, el bloque muestra `detalle` cuando existe: es dato guardado del pedido que el setter
+no podía leer en ninguna pantalla (el lead sembrado «Studio Yoga Balance» lo tiene).
+
+### El salto al lugar correcto: DESCARTADO, con su razón
+
+`donde` es **texto libre** de hasta 280 caracteres («Hero, título principal», «Sección hero y
+fondo general»). No hay enum, ni lista cerrada, ni relación con `FASE_IDS`/`PANTALLA_DE_FASE`,
+y un «Hero» no distingue estructura (`mc1`) de calidad/mobile (`mc2`). No es mapeable de forma
+confiable y un salto al lugar equivocado es peor que ninguno: **comportamiento actual intacto**.
+Si algún día el rechazo se estructura (un select de sección en el panel del admin), el mapeo
+pasa a ser trivial — es el prerequisito, no el trabajo.
+
+### Verificación en la aplicación
+
+Lead sembrado con **dos** vueltas de rechazo, recorrido completo contra el prod-QA propio
+(`.next-setter` + puerto 3013, sin tocar el `:3003` ajeno). Navegación real + lectura del DOM,
+afirmado por CONTENIDO (las redirecciones viajan en el payload de streaming) + capturas de las
+cinco pantallas.
+
+| pantalla | ¿se ve el motivo? | ¿se entiende qué corregir? |
+|---|---|---|
+| `mr` aterrizaje (RECHAZADA) | sí — qué / dónde / arreglo + «vueltas anteriores (1)» | sí |
+| `mc1` construir (tras reabrir) | **sí** — antes desaparecía acá | sí |
+| `mc2` refinar | **sí** | sí |
+| `m13` borrador | **sí** | sí |
+| `m14` chequeo final | **sí**, pegado al link del borrador y al brief | sí, se verifica contra el pedido |
+| las mismas cinco, lead sin rechazo | no existe el bloque (0 nodos) | — |
+
+### Fuera de scope, anotado y no tocado
+
+- **El rechazo y la reapertura NO quedan como movimientos.** `HistorialDelLead` lee solo
+  `OsLeadActivity`, y ni `rechazarRevision` ni `reabrirConstruccion` escriben actividad — por eso
+  un lead rechazado sin toques dice «sin movimientos». Registrarlos exige escribir datos nuevos:
+  no es de este sprint.
+- El acuse de recibo (F3), el contraste de texto, que un rechazo no aparezca en el panel de
+  inicio, y lo diferido de celular: sin tocar.
+
+### Gates
+
+| gate | resultado | exit |
+|---|---|---|
+| `npx tsc --noEmit` | 0 errores | **0** |
+| `npm run check:invariants` | **21/21** (sin cambios respecto de F1) | **0** |
+| `npm run test:leados` | **25/25** | **0** |
+| `npm run test:setter` | **62/62** (sube de 60: los dos casos de F2) | **0** |
+
+`git diff --stat`: 4 archivos tocados + 1 spec nueva. **Cero gates, cero transiciones, cero
+aislamiento entre setters, cero schema, cero migraciones.** Nada pusheado.
+
+**Queda para Franco (criterio de producto).** Un bloque de contexto permanente en una pantalla
+de trabajo puede volverse ruido: el equilibrio entre «lo tengo a la vista» y «no me estorba»
+lo cierra él en el preview. Si estorba, la variante barata es comprimirlo fuera de `mr`
+(solo el «qué», con el resto plegado) sin tocar nada más.
+
+**Worktree** en `C:\tmp\wt-f2-motivo` (rama `f2/motivo-rechazo`, sobre F1). Al desarmarlo:
+sacar primero la junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue
+el enlace y borra el `node_modules` real.
