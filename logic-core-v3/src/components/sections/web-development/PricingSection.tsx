@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { motion, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 type PricingTier = {
     name: string
@@ -20,22 +21,22 @@ type PricingTier = {
 const TIERS: PricingTier[] = [
     {
         name: 'Base',
-        subtitle: 'Para arrancar rapido',
+        subtitle: 'Para arrancar rápido',
         price: '$490',
         unit: 'USD',
         desc: 'Landing profesional para validar oferta y empezar a captar desde Google.',
-        items: ['1 pagina principal', 'SEO local inicial', 'Boton WhatsApp + formulario', 'Carga rapida mobile'],
+        items: ['1 pagina principal', 'SEO local inicial', 'Boton WhatsApp + formulario', 'Carga rápida mobile'],
         accent: '#22d3ee',
         accentRgb: '34,211,238',
-        microLabel: 'Salida rapida en semanas',
+        microLabel: 'Salida rápida en semanas',
     },
     {
         name: 'Completa',
-        subtitle: 'La opcion mas elegida',
+        subtitle: 'La opción más elegida',
         price: '$980',
         unit: 'USD',
-        desc: 'La mejor relacion precio-resultado para vender mas sin complejidad innecesaria.',
-        items: ['Hasta 6 paginas', 'SEO local + estructura avanzada', 'Integraciones (WhatsApp, pagos)', 'Panel editable + analitica'],
+        desc: 'La mejor relación precio-resultado para vender más sin complejidad innecesaria.',
+        items: ['Hasta 6 páginas', 'SEO local + estructura avanzada', 'Integraciones (WhatsApp, pagos)', 'Panel editable + analitica'],
         accent: '#8b5cf6',
         accentRgb: '139,92,246',
         highlight: true,
@@ -44,11 +45,11 @@ const TIERS: PricingTier[] = [
     },
     {
         name: 'Escala',
-        subtitle: 'Para operar mas grande',
+        subtitle: 'Para operar más grande',
         price: '$1.690',
         unit: 'USD',
-        desc: 'Sumamos automatizaciones y capas extra para equipos con mas volumen.',
-        items: ['Todo lo de Completa', 'Automatizaciones de ventas', 'Embudo y seguimiento de leads', 'Soporte prioritario 30 dias'],
+        desc: 'Sumamos automatizaciones y capas extra para equipos con más volumen.',
+        items: ['Todo lo de Completa', 'Automatizaciones de ventas', 'Embudo y seguimiento de leads', 'Soporte prioritario 30 días'],
         accent: '#06b6d4',
         accentRgb: '6,182,212',
         microLabel: 'Pensado para crecer sin freno',
@@ -286,7 +287,7 @@ const PremiumPricingCard = ({
                         }}
                     >
                         <span className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-white/95">
-                            Opcion mas elegida
+                            Opción más elegida
                         </span>
                     </div>
                 )}
@@ -342,7 +343,7 @@ const PremiumPricingCard = ({
 
                 <div className="relative z-10 mt-5">
                     <a
-                        href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20el%20plan%20${encodeURIComponent(tier.name)}`}
+                        href={getWhatsappHref(`Hola DevelOP, quiero el plan ${tier.name}`)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex h-12 w-full items-center justify-center rounded-[0.95rem] border border-white/15 bg-black/30 text-[12px] font-extrabold uppercase tracking-[0.2em] text-white/90 transition-all duration-150 hover:border-white/28"
@@ -457,10 +458,10 @@ export const PricingSection = () => {
                         [ Pricing estrategico ]
                     </span>
                     <h2 className="mt-5 text-balance text-[clamp(2rem,4.4vw,3.85rem)] font-black leading-[0.94] tracking-[-0.045em] text-white">
-                        Invertis una vez. Tu web factura todos los dias.
+                        Invertis una vez. Tu web factura todos los días.
                     </h2>
                     <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-white/62 md:text-base">
-                        Elegi el nivel de profundidad segun tu etapa actual. Mismo criterio premium en los tres planes, con distinta potencia de crecimiento.
+                        Elegí el nivel de profundidad según tu etapa actual. Mismo criterio premium en los tres planes, con distinta potencia de crecimiento.
                     </p>
                 </motion.div>
 
@@ -477,7 +478,7 @@ export const PricingSection = () => {
                 </div>
 
                 <p className="mt-8 text-center text-xs text-white/36">
-                    Sin letra chica. Ajustamos alcance y etapas segun tu negocio.
+                    Sin letra chica. Ajustamos alcance y etapas según tu negocio.
                 </p>
             </div>
         </section>

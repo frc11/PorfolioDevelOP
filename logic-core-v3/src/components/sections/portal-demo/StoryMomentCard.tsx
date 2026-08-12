@@ -118,8 +118,8 @@ function AttentionMockup({ color }: { color: string }) {
       </div>
       <div className="grid min-h-0 flex-1 gap-2.5 sm:gap-3">
         {[
-          ['Critico', 'Entrega del proyecto espera aprobacion', color],
-          ['Responder', '2 resenas de Google en 48h', '#f59e0b'],
+          ['Crítico', 'Entrega del proyecto espera aprobacion', color],
+          ['Responder', '2 reseñas de Google en 48h', '#f59e0b'],
           ['Puede esperar', 'Resumen semanal listo para revisar', '#64748b'],
         ].map(([tag, title, tagColor]) => (
           <motion.div
@@ -194,7 +194,7 @@ function WeekResultsMockup({ color }: { color: string }) {
         ))}
       </div>
       <div className="rounded-lg border border-white/[0.07] bg-white/[0.03] p-3 text-[11px] leading-relaxed text-white/55 sm:text-xs">
-        La IA detecto una mejora de conversion y recomienda reforzar el canal que mas cierres genero.
+        La IA detectó una mejora de conversión y recomienda reforzar el canal que más cierres generó.
       </div>
     </div>
   )

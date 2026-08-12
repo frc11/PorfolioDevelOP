@@ -54,6 +54,18 @@ export function buildFichaCopyBlock(lead: CopyBlockLead, ficha: Ficha): string {
     .filter(Boolean)
     .join('\n')
 
+  // P5-A: el material del negocio. Mismo criterio que el resto del archivo —
+  // lo que está vacío se OMITE; nunca se rellena ni se anuncia como faltante.
+  const materiales = ficha.materiales
+
+  const materialLinks = [
+    materiales?.resenasUrl ? `Reseñas: ${materiales.resenasUrl}` : null,
+    materiales?.imagenesUrl ? `Logo y fotos: ${materiales.imagenesUrl}` : null,
+    materiales?.otraRedUrl ? `Otra red: ${materiales.otraRedUrl}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n')
+
   const partes = [
     `FICHA DE OBSERVACIÓN — ${lead.businessName}`,
     meta || null,
@@ -63,6 +75,9 @@ export function buildFichaCopyBlock(lead: CopyBlockLead, ficha: Ficha): string {
     seccion('RESEÑAS (copiadas tal cual)', ficha.resenas),
     seccion('CONTENIDO REAL (logo / fotos / tono)', ficha.contenidoReal),
     seccion('SEÑALES OPERATIVAS', ficha.senalesOperativas),
+    seccion('DÓNDE ESTÁ EL MATERIAL', materialLinks || undefined),
+    seccion('QUÉ VENDE Y A QUÉ PRECIO', materiales?.queVende),
+    seccion('CÓMO HABLA EL NEGOCIO DE SÍ MISMO', materiales?.comoSePresenta),
     seccion('OTRAS OBSERVACIONES', ficha.otros),
   ]
 
@@ -150,19 +165,42 @@ export function buildHorariosMensajeBlock(slots: string[]): string {
  * El shell de construcción pide usarlos, pero antes vivían sólo en la ficha
  * (lejos del paso) y NO viajaban en este bloque — el setter quedaba pegando un
  * plano sin la materia prima. Ahora el bloque es auto-suficiente.
+ *
+ * P5-A: suma el material que la ficha empezó a juntar en M1 — dónde bajar el
+ * logo y las fotos, dónde se leen las reseñas, qué vende y a qué precio, y cómo
+ * habla el negocio de sí mismo. Sin esto los campos nuevos se cargaban y no
+ * llegaban a la construcción. Degradación igual que siempre: lo vacío se OMITE,
+ * nunca se rellena ni se anuncia como faltante.
  */
 export function buildConstruccionBlock(
   lead: CopyBlockLead,
   brief: Brief,
   ficha: Ficha | null,
 ): string {
+  // P5-A: el material que el setter junta en la ficha entra acá. La dirección
+  // de las imágenes va PRIMERA porque es la respuesta directa al título de la
+  // sección; los links del alta quedan como respaldo.
+  const materiales = ficha?.materiales
+
   const assets = [
+    materiales?.imagenesUrl ? `Logo y fotos: ${materiales.imagenesUrl}` : null,
     lead.instagramUrl ? `Instagram: ${lead.instagramUrl}` : null,
     lead.googleMapsUrl ? `Google Maps: ${lead.googleMapsUrl}` : null,
     lead.currentWebUrl ? `Web actual: ${lead.currentWebUrl}` : null,
+    materiales?.otraRedUrl ? `Otra red: ${materiales.otraRedUrl}` : null,
   ]
     .filter(Boolean)
     .join('\n')
+
+  // Las reseñas viajan con su dirección cuando la hay: el texto crudo es la
+  // prueba social y el link permite ir a buscar más. Si falta cualquiera de los
+  // dos, queda solo el otro; si faltan ambos, la sección no aparece.
+  const resenasBloque = [
+    ficha?.resenas ?? null,
+    materiales?.resenasUrl ? `Se leen acá: ${materiales.resenasUrl}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 
   const partes = [
     `BRIEF DE DEMO — ${lead.businessName}`,
@@ -178,8 +216,15 @@ export function buildConstruccionBlock(
       : null,
     seccion('LLAMADO A LA ACCIÓN', brief.cta),
     seccion('NOTAS DE MARCA', brief.notasMarca),
-    seccion('RESEÑAS REALES (usalas textuales como prueba social)', ficha?.resenas),
+    seccion('RESEÑAS REALES (usalas textuales como prueba social)', resenasBloque || undefined),
     seccion('CONTENIDO Y TONO REAL (logo / fotos / estilo)', ficha?.contenidoReal),
+    // P5-A: qué vende y cómo habla el negocio — lo que evita que la demo salga
+    // genérica. Antes no existían como campo en ningún punto del flujo.
+    seccion('QUÉ VENDE Y A QUÉ PRECIO (usá estos datos reales, no inventes)', materiales?.queVende),
+    seccion(
+      'CÓMO HABLA EL NEGOCIO DE SÍ MISMO (escribí los textos en ESTA voz, no en una genérica)',
+      materiales?.comoSePresenta,
+    ),
     // A-21 (5.3): las señales operativas (horarios, delivery, turnos) son material
     // de demo — moldean la sección de horarios, la disponibilidad y el CTA. Antes
     // solo viajaban al Evaluador vía `buildFichaCopyBlock`; se re-sirven acá a Claude

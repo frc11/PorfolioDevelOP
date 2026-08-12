@@ -869,7 +869,7 @@ export default function ProcesoAutomation() {
             </span>
           </div>
           <a
-            href="#contacto"
+            href="#contacto-form"
             className="group inline-flex items-center justify-center gap-2 rounded-full border border-amber-500/24 bg-amber-500/10 px-5 py-3 text-sm font-black uppercase tracking-[0.08em] text-amber-200"
             style={{ transition: 'none' }}
           >

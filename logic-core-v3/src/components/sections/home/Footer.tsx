@@ -4,11 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'motion/react';
 import { MessageCircle, FileText, MapPin, Clock, Shield, Users } from 'lucide-react';
-
-const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493815000000';
-const WA_TEXT = encodeURIComponent(
-  'Hola! Vi tu página y me gustaría saber qué necesita mi negocio para crecer. ¿Pueden ayudarme?'
-);
+import { getWhatsappHref } from '@/lib/whatsapp';
 
 const LOGO_PATH =
   'M532 700v-67q0-6 3-10l54-98q0-3 4-4l4 5q13 27 34 48 35 35 83 41a153 153 0 0 0 86-288c-62-28-134-13-178 39q-20 24-33 52l-57 127q-16 38-40 71-63 86-166 105-92 16-173-30A257 257 0 0 1 38 371a258 258 0 0 1 210-164 257 257 0 0 1 233 92q5 6 1 10l-52 93-1 1q-4 8-8 0l-7-13q-37-62-108-75-66-10-118 30-43 33-55 86-16 76 35 136 37 41 91 48 83 11 139-53 18-23 29-49l51-111q18-44 44-83a257 257 0 0 1 201-113q96-5 171 52a256 256 0 0 1 69 336 262 262 0 0 1-298 121q-8-4-7 6l-1 100 1 58q1 8-6 6H538q-7 1-6-7z';
@@ -89,17 +85,13 @@ export const Footer = () => {
         setSubmitted(true);
       } catch {
         window.open(
-          `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-            `Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`
-          )}`,
+          getWhatsappHref(`Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`),
           '_blank'
         );
       }
     } else {
       window.open(
-        `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-          `Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`
-        )}`,
+        getWhatsappHref(`Hola! Soy ${form.nombre}. Rubro: ${form.rubro}. ${form.mensaje}`),
         '_blank'
       );
       setSubmitted(true);
@@ -349,7 +341,7 @@ export const Footer = () => {
         >
           {/* CTA WHATSAPP */}
           <motion.a
-            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${WA_TEXT}`}
+            href={getWhatsappHref()}
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.025, y: -3 }}

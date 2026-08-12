@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { unsafeGlobalQuery } from '@/lib/isolation'
 import { computeDiff, logAdminAction, omitAuditNoise } from '@/lib/audit-log'
 import { AVATAR_STYLE_SCHEMA } from '@/modules/chatbot/components/avatar'
-import { chatbotLog } from '../logging'
+import { chatbotLog, sanitizeErrorMessage } from '../logging'
 import { invalidateBotCache } from '../conversation'
 import { requireSuperAdmin } from './requireSuperAdmin'
 import { avatarImageUrlSchema } from './avatarImageUrlSchema'
@@ -149,7 +149,10 @@ export async function saveBotConfig(input: BotConfigInput): Promise<{ success: b
     chatbotLog('admin.bot_config_updated', { botConfigId })
     return { success: true }
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'unknown error'
+    // PRIVACIDAD: sanitizado — el try cubre organization.update con
+    // leadNotificationEmail; un PrismaClientValidationError lo ecoaría
+    // (a consola Y al cliente vía el return).
+    const msg = sanitizeErrorMessage(error)
     chatbotLog('admin.bot_config_update_error', { error: msg }, 'error')
     return { success: false, error: msg }
   }

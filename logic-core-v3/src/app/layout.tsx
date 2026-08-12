@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { CustomCursor } from "@/components/ui/CustomCursor";
-import { NoiseOverlay } from "@/components/ui/NoiseOverlay";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,19 +19,22 @@ export const metadata: Metadata = {
   keywords: ["agencia desarrollo web tucumán", "software a medida argentina", "automatización procesos noa", "desarrollo digital tucumán", "agencia digital argentina", "inteligencia artificial pymes"],
   authors: [{ name: "develOP" }],
   creator: "develOP",
+  alternates: {
+    canonical: "https://develop.com.ar",
+  },
   openGraph: {
     type: "website",
     locale: "es_AR",
     url: "https://develop.com.ar",
     siteName: "develOP",
     title: "develOP — Agencia de Desarrollo Digital | Tucumán, Argentina",
-    description: "Desarrollo web, software, automatización e IA para negocios del NOA. +47 empresas potenciadas.",
+    description: "develOP — ingeniería de software, automatización con IA y sistemas a medida. Desde Tucumán para todo el país.",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "develOP Agencia Digital" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "develOP — Desarrollo Digital en Tucumán",
-    description: "Desarrollo web, software, automatización e IA para negocios del NOA. +47 empresas potenciadas.",
+    description: "develOP — ingeniería de software, automatización con IA y sistemas a medida. Desde Tucumán para todo el país.",
     images: ["/og-image.png"],
   },
 };
@@ -46,7 +47,6 @@ import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
 import { ChatWidgetMount } from "@/components/layout/ChatWidgetMount";
-import { EarlyScrollLock } from "@/components/layout/EarlyScrollLock";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -55,22 +55,42 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning: el <script> de abajo setea overflow:hidden en el
-    // <html> ANTES de hidratar (scroll-lock temprano del intro en home), mientras
-    // el SSR no lo trae → mismatch legítimo y esperado SOLO en el style del <html>.
-    // Es shallow (un nivel): no enmascara mismatches de los hijos.
-    <html lang="en" suppressHydrationWarning>
+    // suppressHydrationWarning: lo conserva la extensión de navegador / el
+    // `data-theme` que `ThemeProvider` escribe en el <html> antes de hidratar.
+    // El scroll-lock pre-hidratación que lo justificaba originalmente
+    // (`EarlyScrollLock`) se eliminó en B2-S1 junto con el intro del home: el
+    // hero nuevo no bloquea el scroll en ningún momento.
+    // Las variables de `next/font` van en el <html>, no en el <body>: `globals.css`
+    // declara `--font-sans` / `--font-mono` dentro de `@theme`, que Tailwind emite
+    // en `:root` (= el <html>). Un custom property se resuelve en el elemento donde
+    // se declara, así que `var(--font-geist-sans)` leído desde `:root` no encontraba
+    // nada si la variable vivía en el <body> → `--font-sans` quedaba inválida y todo
+    // el sitio caía en la fuente del sistema. Con la clase acá, `:root` tiene las dos
+    // variables definidas y la cadena resuelve.
+    <html
+      lang="es"
+      className={`${geistSans.variable} ${geistMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
-        <EarlyScrollLock />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
+        {/*
+          `CustomCursor` y `NoiseOverlay` se desmontaron en B2-S2. Los dos
+          contradicen la dirección del rediseño: el cursor custom está prohibido
+          (y además escondía el del sistema con `cursor:none` global en ≥768px,
+          un costo de accesibilidad por un adorno), y el grano animado del noise
+          pelea con las superficies planas — corría a `steps(10)` infinito sobre
+          todo el viewport, en toda ruta, sin gate de visibilidad.
+
+          Se desmontan, no se borran: eran las dos únicas piezas montadas
+          globalmente (fuera de `PublicOnlyComponents`), así que sacarlas de acá
+          las saca de todas las superficies. Los archivos quedan sin consumidores
+          — anotado en la bitácora para que una poda posterior los levante.
+        */}
         <PreloaderProvider>
-          <CustomCursor />
-          <NoiseOverlay />
           <SmoothScroll>
             <TransitionProvider>
               <PublicOnlyComponents>

@@ -15,7 +15,7 @@
  */
 
 import assert from 'node:assert/strict'
-import { requestBodySchema } from '../handleChatRequest'
+import { requestBodySchema } from '../requestSchema'
 import { parseAttribution, sanitizeAttributionField, EMPTY_ATTRIBUTION } from '../../../shared/attribution'
 
 const baseBody = {

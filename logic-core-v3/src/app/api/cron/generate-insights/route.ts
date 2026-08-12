@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { isAuthorizedCronRequest } from '@/lib/cron/cron-secret'
 import { generateInsightsForBot, getInsightsCountForBot } from '@/modules/chatbot/index.server'
 import { logChatbotEvent } from '@/modules/chatbot/server/logging'
 import { sendInsightsNotificationEmail } from '@/modules/chatbot/server/notifications/sendInsightsNotification'
@@ -7,11 +8,7 @@ import { sendInsightsNotificationEmail } from '@/modules/chatbot/server/notifica
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
-  // Validar secret token
-  const authHeader = req.headers.get('authorization')
-  const expectedToken = `Bearer ${process.env.CRON_SECRET}`
-
-  if (authHeader !== expectedToken) {
+  if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -55,7 +52,7 @@ export async function POST(req: Request) {
         results.generated += result.insights.length
 
         // Email al cliente si hay email configurado
-        const org: any = bot.organization
+        const org = bot.organization
         if (
           org.leadNotificationEmail &&
           org.leadNotificationMode !== 'DISABLED'

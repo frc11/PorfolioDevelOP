@@ -206,15 +206,22 @@ export type CanalParams = {
  * cual. La capa que alimenta es INFORMATIVA por decisión registrada de
  * Franco: avisa al acercarse/pasar el tope pero NUNCA bloquea — el setter
  * está capacitado y decide.
+ *
+ * P1 (sprint poda): perfil conservador de CUENTA NUEVA, no un techo
+ * permanente. Treinta DMs/día es agresivo para una cuenta sin historial de
+ * outreach — el research recomienda arrancar bajo y subir gradualmente
+ * (ver `warmUp` abajo). Franco sube estos tres números a mano, en este
+ * archivo, a medida que la cuenta real que usa el setter acumula
+ * historial sin restricciones.
  */
 export const CANAL_INSTAGRAM: CanalParams = {
-  topeDiarioDms: 30,
-  avisoDesdeDms: 24,
-  ritmoPorHora: 6,
+  topeDiarioDms: 10,
+  avisoDesdeDms: 8,
+  ritmoPorHora: 3,
   warmUp: [
-    'Cuenta nueva o fría: semana 1, 5–10 DMs por día.',
-    'Semana 2: 10–20 DMs por día si no hubo señales de restricción.',
-    'Semana 3 en adelante: hasta el tope diario.',
+    'Cuenta nueva o fría: arrancá con la mitad del tope diario, más lento que rápido.',
+    'Si no hubo señales de restricción, subís hasta el tope diario en la semana 2.',
+    'De ahí en adelante, Franco sube el tope a medida que la cuenta acumula historial.',
   ],
   openerMaxCaracteres: 300,
   disciplina: [

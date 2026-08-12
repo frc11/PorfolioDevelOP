@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react'
 import { ArrowRight, Clock3, Gem, ShieldCheck } from 'lucide-react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 function MagneticButton({
     href,
@@ -306,7 +307,7 @@ export const WebDevelopmentCta = () => {
                                     style={{ animation: 'ctaPulseDot 2s ease-in-out infinite' }}
                                 />
                                 <span className="text-[10px] font-bold uppercase leading-[1.35] tracking-[0.18em] text-amber-100/92 max-[425px]:text-[9px] max-[425px]:tracking-[0.14em] max-[375px]:text-[8.5px] max-[375px]:tracking-[0.1em]">
-                                    Agenda limitada: 2 cupos de implementacion esta semana
+                                    Agenda limitada: 2 cupos de implementación esta semana
                                 </span>
                             </div>
 
@@ -315,7 +316,7 @@ export const WebDevelopmentCta = () => {
                             </div>
 
                             <h2 className="mx-auto max-w-4xl text-[clamp(1.82rem,5.1vw,4.45rem)] font-black leading-[0.9] tracking-[-0.045em] text-white max-[425px]:text-[clamp(1.66rem,8.8vw,2.5rem)] max-[425px]:tracking-[-0.038em] max-[375px]:text-[clamp(1.45rem,8.2vw,2.1rem)] max-[375px]:tracking-[-0.032em]">
-                                Cada dia sin tu web optimizada
+                                Cada día sin tu web optimizada
                                 <br />
                                 <span className="bg-gradient-to-r from-white via-cyan-200 to-blue-300 bg-clip-text text-transparent">
                                     es plata que queda afuera.
@@ -323,7 +324,7 @@ export const WebDevelopmentCta = () => {
                             </h2>
 
                             <p className="mx-auto mt-3 max-w-3xl text-[14px] leading-7 text-white/64 max-[425px]:text-[13px] max-[425px]:leading-[1.9] max-[375px]:text-[12.5px] max-[375px]:leading-7 md:text-base">
-                                Te diseñamos una presencia que vende 24/7, posiciona tu marca en Google y filtra mejor cada consulta. Menos improvisacion, mas ventas con proceso.
+                                Te diseñamos una presencia que vende 24/7, posiciona tu marca en Google y filtra mejor cada consulta. Menos improvisación, más ventas con proceso.
                             </p>
 
                             <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-2.5">
@@ -360,7 +361,7 @@ export const WebDevelopmentCta = () => {
                                     className="inline-flex w-full max-w-[18.5rem] items-center justify-center gap-2 rounded-full border border-cyan-300/22 bg-cyan-300/[0.08] px-3 py-1.5 text-center text-[11px] leading-[1.25] text-cyan-100/85 max-[425px]:max-w-[17rem] max-[375px]:max-w-[15.8rem] max-[375px]:text-[10.5px] sm:w-auto sm:max-w-none sm:px-4 sm:py-2 sm:text-[12px] sm:text-left"
                                 >
                                     <ShieldCheck className="size-4 text-cyan-200" />
-                                    Diagnostico inicial sin costo
+                                    Diagnóstico inicial sin costo
                                 </motion.div>
                                 <motion.div
                                     whileHover={
@@ -395,7 +396,7 @@ export const WebDevelopmentCta = () => {
                                     className="inline-flex w-full max-w-[18.5rem] items-center justify-center gap-2 rounded-full border border-blue-300/20 bg-blue-300/[0.08] px-3 py-1.5 text-center text-[11px] leading-[1.25] text-blue-100/84 max-[425px]:max-w-[17rem] max-[375px]:max-w-[15.8rem] max-[375px]:text-[10.5px] sm:w-auto sm:max-w-none sm:px-4 sm:py-2 sm:text-[12px] sm:text-left"
                                 >
                                     <Gem className="size-4 text-blue-200" />
-                                    Inversion desde 800 USD
+                                    Inversión desde 800 USD
                                 </motion.div>
                                 <motion.div
                                     whileHover={
@@ -436,9 +437,9 @@ export const WebDevelopmentCta = () => {
 
                             <div className="mt-6 flex flex-col items-center gap-2.5 sm:mt-7 sm:gap-3">
                                 <MagneticButton
-                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5493816223508'}?text=Hola%20DevelOP%2C%20quiero%20agendar%20mi%20diagnostico%20estrategico%20para%20crecer%20con%20mi%20web`}
+                                    href={getWhatsappHref('Hola DevelOP, quiero agendar mi diagnostico estrategico para crecer con mi web')}
                                 >
-                                    Quiero mi diagnostico ahora
+                                    Quiero mi diagnóstico ahora
                                 </MagneticButton>
 
                                 <div className="w-full max-w-[19rem] rounded-full border border-cyan-300/22 bg-cyan-300/[0.1] px-3 py-1.5 text-center text-[10px] font-semibold leading-[1.25] tracking-[0.03em] text-cyan-100/92 max-[425px]:max-w-[17.75rem] max-[375px]:max-w-[16.5rem] sm:w-auto sm:max-w-none sm:px-4 sm:text-[11px] sm:tracking-[0.04em]">
@@ -471,7 +472,7 @@ export const WebDevelopmentCta = () => {
                                 </button>
 
                                 <div className="text-[9px] tracking-[0.04em] text-white/34 max-[375px]:text-[8.5px] sm:text-[10px] sm:tracking-[0.05em]">
-                                    Implementacion por etapas para reducir riesgo y acelerar resultados
+                                    Implementación por etapas para reducir riesgo y acelerar resultados
                                 </div>
 
                                 <div
@@ -527,7 +528,7 @@ export const WebDevelopmentCta = () => {
                                                 type="submit"
                                                 className="mt-1 w-full rounded-xl border-0 bg-[linear-gradient(135deg,#22d3ee,#0ea5e9,#2563eb)] px-4 py-3 text-sm font-bold text-white transition-[box-shadow,filter] duration-75 ease-out hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(186,230,253,0.34),0_0_22px_rgba(56,189,248,0.44)]"
                                             >
-                                                Enviar y reservar diagnostico
+                                                Enviar y reservar diagnóstico
                                             </button>
                                         </div>
                                     </form>

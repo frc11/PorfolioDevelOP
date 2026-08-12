@@ -68,7 +68,7 @@ type EvaluacionFormProps = {
  * Formulario vivo de transcripción. Solo se monta en el tramo editable real
  * (sin evaluación registrada y con la ficha en señal mínima): en el wizard lo
  * garantizan los early-return del step; en el manual, la guardia del server
- * (m3 no habilitada sin señal) + el branch por `evaluacion` de `M3Registro`.
+ * (m2 no habilitada sin señal) + el branch por `evaluacion` de `M2Registro`.
  * Por eso la guardia de salida corre con cualquier campo tocado, sin espejar
  * condiciones de visibilidad acá adentro.
  */

@@ -53,6 +53,21 @@ export function chatbotDebug(
 import * as Sentry from '@sentry/nextjs'
 
 /**
+ * PRIVACIDAD — un `PrismaClientValidationError` ecoa los ARGUMENTOS de la
+ * query en su `.message` (y su `.stack` arranca con el message): si la query
+ * llevaba name/email/phone (capture_lead, persistTurn), el error los
+ * arrastra a cualquier log que imprima el mensaje. Se redacta la CLASE
+ * entera en vez de parsear el texto; el resto de los errores pasa intacto
+ * (los mensajes de motor de Known/Initialization no llevan valores).
+ */
+export function sanitizeErrorMessage(error: unknown): string {
+  if (error instanceof Prisma.PrismaClientValidationError) {
+    return 'PrismaClientValidationError (mensaje redactado: ecoa argumentos de la query)'
+  }
+  return error instanceof Error ? error.message : String(error)
+}
+
+/**
  * Records a critical error event. Same as chatbotLog with level='error'
  * but with stricter typing and explicit error object handling.
  */
@@ -61,10 +76,14 @@ export function chatbotError(
   error: unknown,
   fields: Record<string, unknown> = {}
 ): void {
+  // Para PrismaClientValidationError el stack también se omite (empieza con
+  // el message). Sentry recibe un Error saneado equivalente, no el original.
   const errorInfo =
-    error instanceof Error
-      ? { message: error.message, name: error.name, stack: error.stack }
-      : { message: String(error) }
+    error instanceof Prisma.PrismaClientValidationError
+      ? { message: sanitizeErrorMessage(error), name: error.name }
+      : error instanceof Error
+        ? { message: error.message, name: error.name, stack: error.stack }
+        : { message: String(error) }
   const payload = {
     type: `error.${event}`,
     level: 'error',
@@ -74,8 +93,14 @@ export function chatbotError(
   }
   console.error(JSON.stringify(payload))
 
-  // Reportar a Sentry con contexto
-  Sentry.captureException(error, {
+  // Reportar a Sentry con contexto. El captureException de un validation
+  // error mandaría el message original como exception.value (el scrub por
+  // regex no cubre nombres en texto libre) — se reemplaza por el saneado.
+  const reportable =
+    error instanceof Prisma.PrismaClientValidationError
+      ? Object.assign(new Error(sanitizeErrorMessage(error)), { name: error.name })
+      : error
+  Sentry.captureException(reportable, {
     tags: {
       module: 'chatbot',
       event_type: event,
@@ -103,7 +128,8 @@ export function extractDbErrorInfo(error: unknown): {
   causeMessage?: string
 } {
   const errorName = error instanceof Error ? error.name : 'NonError'
-  const errorMessage = error instanceof Error ? error.message : String(error)
+  // PRIVACIDAD: sanitizeErrorMessage redacta la clase que ecoa argumentos.
+  const errorMessage = sanitizeErrorMessage(error)
 
   let prismaCode: string | undefined
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -120,7 +146,7 @@ export function extractDbErrorInfo(error: unknown): {
   if (error instanceof Error && error.cause != null) {
     const cause = error.cause
     if (cause instanceof Error) {
-      causeMessage = cause.message
+      causeMessage = sanitizeErrorMessage(cause)
       if (
         'code' in cause &&
         typeof (cause as { code?: unknown }).code === 'string'

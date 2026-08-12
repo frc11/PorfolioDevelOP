@@ -26,13 +26,13 @@ const integrationStats: IntegrationStat[] = [
   {
     id: 0,
     value: '3 pasos',
-    label: 'De consulta a accion',
+    label: 'De consulta a acción',
     accent: '#34d399',
     accentRgb: '52,211,153',
   },
   {
     id: 1,
-    value: '7-14 dias',
+    value: '7-14 días',
     label: 'Para salir en piloto',
     accent: '#2dd4bf',
     accentRgb: '45,212,191',
@@ -64,7 +64,7 @@ const integrationCards: IntegrationCard[] = [
     badge: 'PASO 02 - LOGICA',
     title: 'Consulta tus datos y aplica reglas del negocio',
     description:
-      'Antes de contestar, valida precios, servicios, disponibilidad y politicas para evitar errores.',
+      'Antes de contestar, valida precios, servicios, disponibilidad y políticas para evitar errores.',
     details: ['Base de conocimiento con tus fuentes', 'Reglas por rubro, zona o servicio', 'Derivacion a humano cuando aplica'],
     accent: '#2dd4bf',
     accentRgb: '45,212,191',
@@ -75,8 +75,8 @@ const integrationCards: IntegrationCard[] = [
     badge: 'PASO 03 - ACCION',
     title: 'Responde, ejecuta tareas y confirma resultados',
     description:
-      'No solo conversa: tambien puede cotizar, agendar, crear lead y cerrar cada flujo con seguimiento.',
-    details: ['Acciones conectadas a CRM y agenda', 'Notificaciones internas automaticas', 'Cierre con respuesta final al cliente'],
+      'No solo conversa: también puede cotizar, agendar, crear lead y cerrar cada flujo con seguimiento.',
+    details: ['Acciones conectadas a CRM y agenda', 'Notificaciones internas automáticas', 'Cierre con respuesta final al cliente'],
     accent: '#22c55e',
     accentRgb: '34,197,94',
   },
@@ -86,8 +86,8 @@ const integrationCards: IntegrationCard[] = [
     badge: 'BENEFICIO 01 - VENTAS',
     title: 'Recuperas oportunidades que hoy se pierden',
     description:
-      'Responder rapido y con informacion clara mejora la conversion desde el primer contacto.',
-    details: ['Menos demoras en primera respuesta', 'Mas consultas calificadas para ventas', 'Seguimiento consistente hasta cierre'],
+      'Responder rápido y con información clara mejora la conversión desde el primer contacto.',
+    details: ['Menos demoras en primera respuesta', 'Más consultas calificadas para ventas', 'Seguimiento consistente hasta cierre'],
     accent: '#10b981',
     accentRgb: '16,185,129',
   },
@@ -98,7 +98,7 @@ const integrationCards: IntegrationCard[] = [
     title: 'Baja carga operativa sin bajar calidad',
     description:
       'La IA absorbe consultas repetitivas para que tu equipo se enfoque en casos de mayor valor.',
-    details: ['Menos tareas manuales por canal', 'Atencion continua fuera de horario', 'Escalado a humano solo cuando conviene'],
+    details: ['Menos tareas manuales por canal', 'Atención continua fuera de horario', 'Escalado a humano solo cuando conviene'],
     accent: '#14b8a6',
     accentRgb: '20,184,166',
   },
@@ -106,10 +106,10 @@ const integrationCards: IntegrationCard[] = [
     id: 5,
     group: 'benefit',
     badge: 'BENEFICIO 03 - CONTROL',
-    title: 'Tenes control total y mejora continua',
+    title: 'Tenés control total y mejora continua',
     description:
       'Cada respuesta queda registrada para medir resultados, ajustar reglas y escalar con menos riesgo.',
-    details: ['Historial completo por conversacion', 'Metricas de tiempos y conversion', 'Iteraciones mensuales de performance'],
+    details: ['Historial completo por conversación', 'Métricas de tiempos y conversión', 'Iteraciones mensuales de performance'],
     accent: '#34d399',
     accentRgb: '52,211,153',
   },
@@ -119,7 +119,7 @@ const CARD_GROUPS: Array<{ id: IntegrationCard['group']; title: string; descript
   {
     id: 'how',
     title: 'Como funciona la IA en tu negocio',
-    description: 'Un flujo simple: entrada, logica y accion conectada con tu operacion real.',
+    description: 'Un flujo simple: entrada, lógica y acción conectada con tu operación real.',
   },
   {
     id: 'benefit',
@@ -263,7 +263,7 @@ function Header({ isInView }: { isInView: boolean }) {
           lineHeight: 1.65,
         }}
       >
-        Esta seccion te muestra de forma simple que hace la IA por dentro y que resultado concreto puede generar en tu negocio desde las primeras semanas.
+        Esta sección te muestra de forma simple que hace la IA por dentro y que resultado concreto puede generar en tu negocio desde las primeras semanas.
       </motion.p>
     </div>
   )
@@ -695,7 +695,7 @@ function BottomNote({ isInView }: { isInView: boolean }) {
       }}
     >
       <p style={{ margin: 0, fontSize: '14px', lineHeight: 1.6, color: 'rgba(220,252,231,0.86)' }}>
-        Empezamos con un piloto enfocado en consultas de alto impacto y luego escalamos a ventas, soporte y seguimiento comercial con metricas claras.
+        Empezamos con un piloto enfocado en consultas de alto impacto y luego escalamos a ventas, soporte y seguimiento comercial con métricas claras.
       </p>
     </motion.div>
   )

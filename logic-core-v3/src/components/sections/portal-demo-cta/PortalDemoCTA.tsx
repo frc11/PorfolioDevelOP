@@ -2,9 +2,7 @@
 
 import { motion } from 'motion/react'
 import { MessageCircle, LogIn, CheckCircle2 } from 'lucide-react'
-
-const WHATSAPP_PREFILL_TEXT =
-  '¡Hola, develOP! Vi su landing y me interesa el portal develOP para mi negocio. ¿Podemos coordinar una llamada de 30 minutos?'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 const TRUST_SIGNALS = ['Sin permanencia', 'Sin setup fee', 'Cancelás cuando quieras']
 
@@ -232,10 +230,10 @@ function FinalCtaBackground() {
 }
 
 export function PortalDemoCTA() {
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
-  const whatsappUrl = whatsappNumber
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(WHATSAPP_PREFILL_TEXT)}`
-    : 'mailto:hola@develop.com.ar'
+  // El fallback a `mailto:` existía para no emitir `wa.me/undefined` cuando la
+  // variable de entorno faltaba. `getWhatsappHref()` ya no puede producir eso
+  // —siempre resuelve a un número—, así que la rama quedó sin caso que cubrir.
+  const whatsappUrl = getWhatsappHref()
 
   return (
     <section className="relative isolate w-full overflow-hidden bg-[#030303] px-6 py-28 md:py-40">

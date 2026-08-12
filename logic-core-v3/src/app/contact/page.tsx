@@ -5,9 +5,10 @@ import { ArrowUpRight, CheckCircle, Mail, MapPin, MessageCircle, PhoneCall, Send
 import { useActionState, useEffect, useState } from 'react';
 import { submitContactForm } from '@/lib/actions/contact';
 import type { ActionResult } from '@/lib/actions/schemas';
+import { getWhatsappDigits, getWhatsappHref } from '@/lib/whatsapp';
 
 const EMAIL = 'hola@develop.com.ar';
-const DEFAULT_PHONE_DIGITS = '543813165293';
+const WHATSAPP_PREFILL_CONTACTO = 'Hola develOP, quiero hablar sobre mi proyecto.';
 const LOCATION = 'Tucumán, Argentina';
 const SERVICE_OPTIONS = [
   { value: '', label: 'Selecciona un servicio' },
@@ -22,7 +23,7 @@ const CHANNELS = [
   {
     id: 'whatsapp',
     title: 'WhatsApp',
-    subtitle: 'Respuesta rapida en horario comercial',
+    subtitle: 'Respuesta rápida en horario comercial',
     cta: 'Escribir ahora',
     icon: MessageCircle,
     accent: '#14b8a6',
@@ -45,16 +46,15 @@ const CHANNELS = [
   },
 ] as const;
 
-function getWhatsappHref() {
-  const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_PHONE_DIGITS;
-  const cleanNumber = rawNumber.replace(/\D/g, '');
-  return `https://wa.me/${cleanNumber}?text=Hola%20develOP%2C%20quiero%20hablar%20sobre%20mi%20proyecto.`;
-}
-
+// El `tel:` y el link de WhatsApp de esta página son el MISMO número, así que
+// salen de la misma puerta (`@/lib/whatsapp`). Antes cada uno lo reconstruía
+// desde un `DEFAULT_PHONE_DIGITS` local — un sexto literal del mismo teléfono.
+//
+// El `cleanNumber.startsWith('+')` que tenía la versión anterior era una rama
+// muerta: `getWhatsappDigits()` ya sacó todo lo que no fuera dígito, así que
+// nunca podía empezar con `+`.
 function getPhoneContact() {
-  const rawNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? DEFAULT_PHONE_DIGITS;
-  const cleanNumber = rawNumber.replace(/\D/g, '');
-  const international = cleanNumber.startsWith('+') ? cleanNumber : `+${cleanNumber}`;
+  const international = `+${getWhatsappDigits()}`;
 
   return {
     href: `tel:${international}`,
@@ -93,7 +93,7 @@ export default function ContactPage() {
     };
   }, []);
 
-  const whatsappHref = getWhatsappHref();
+  const whatsappHref = getWhatsappHref(WHATSAPP_PREFILL_CONTACTO);
   const phone = getPhoneContact();
 
   const channelHrefById: Record<string, string> = {
@@ -141,7 +141,7 @@ export default function ContactPage() {
                     <p className="text-sm font-semibold">Mensaje enviado</p>
                   </div>
                   <p className="mt-2 text-sm text-[#c6e8e9]/80">
-                    Te respondemos pronto. Si queres acelerar, tambien podes contactarnos por WhatsApp o llamada.
+                    Te respondemos pronto. Si querés acelerar, también podés contactarnos por WhatsApp o llamada.
                   </p>
                 </div>
               ) : (
@@ -205,7 +205,7 @@ export default function ContactPage() {
                       name="message"
                       rows={2}
                       required
-                      placeholder="Contanos brevemente que necesitas..."
+                      placeholder="Contanos brevemente qué necesitás..."
                       className="w-full rounded-xl border border-[#22d3ee]/25 bg-[#081a20]/70 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#22d3ee]/50 resize-none"
                     />
                   </div>
@@ -272,7 +272,7 @@ export default function ContactPage() {
             <div className="mb-3 flex items-end justify-between">
               <div>
                 <p className="text-[10px] font-mono uppercase tracking-[0.28em] text-[#8deef5]/72">Canales</p>
-                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Elegí como hablar</h2>
+                <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-white md:text-3xl">Elegí cómo hablar</h2>
               </div>
               <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#7cdce4]/60">Online ahora</p>
             </div>

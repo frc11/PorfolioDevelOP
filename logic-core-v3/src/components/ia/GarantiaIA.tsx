@@ -56,21 +56,21 @@ interface LockGlyph {
 const features: GuardrailFeature[] = [
   {
     icon: ShieldCheck,
-    title: 'Solo responde lo que vos definis',
+    title: 'Solo responde lo que vos definís',
     description:
-      'La IA solo conoce lo que le ensenas: tus precios, tus productos y tus politicas. No puede inventar informacion que no existe en tu negocio.',
+      'La IA solo conoce lo que le enseñás: tus precios, tus productos y tus políticas. No puede inventar información que no existe en tu negocio.',
   },
   {
     icon: UserRoundCheck,
-    title: 'Deriva automatica a humanos',
+    title: 'Deriva automática a humanos',
     description:
-      'Si la consulta supera su conocimiento, transfiere la conversacion a tu equipo al instante. Sin que el cliente note la diferencia.',
+      'Si la consulta supera su conocimiento, transfiere la conversación a tu equipo al instante. Sin que el cliente note la diferencia.',
   },
   {
     icon: FileText,
     title: 'Todo queda registrado',
     description:
-      'Cada conversacion queda guardada. Podes revisar que dijo la IA en cualquier momento y corregir si algo no esta bien.',
+      'Cada conversación queda guardada. Podés revisar que dijo la IA en cualquier momento y corregir si algo no esta bien.',
   },
   {
     icon: Settings2,

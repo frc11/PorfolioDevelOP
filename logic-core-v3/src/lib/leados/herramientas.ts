@@ -52,15 +52,15 @@ export type Herramienta = {
 export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
   evaluador: {
     id: 'evaluador',
-    nombre: 'Evaluador',
+    nombre: 'Chat de evaluación (Sonnet)',
     queEs:
-      'Una IA que lee la ficha del negocio y dice si vale la pena invertir tiempo en una demo: le das la ficha y te devuelve su lectura.',
+      'Un chat de Sonnet que lee la ficha del negocio y dice si vale la pena invertir tiempo en una demo: le pegás la ficha y te devuelve su lectura.',
     queLeDas:
-      'El bloque de la ficha que armaste en Ficha (el botón «Copiar bloque» está al pie de la ficha).',
+      'El bloque de la ficha que armaste en Ficha (el botón «Copiar bloque» está acá arriba), como primer mensaje del chat.',
     queTeDevuelve:
       'Un score del 1 al 5, un veredicto (descartar / avanzar / avanzar con prioridad) y el razonamiento. Eso es lo que transcribís acá abajo.',
     dondeSeUsa: 'Evaluación',
-    url: null, // TODO: URL — Gem/acceso privado del Evaluador (pedir a Franco)
+    url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)
   },
   gemDiseno: {
     id: 'gemDiseno',

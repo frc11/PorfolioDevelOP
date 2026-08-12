@@ -1,354 +1,96 @@
 import { randomUUID } from 'node:crypto'
-import { streamText, stepCountIs, type ModelMessage } from 'ai'
-import { z } from 'zod'
+import { streamText, stepCountIs, wrapLanguageModel, type ModelMessage } from 'ai'
 import * as Sentry from '@sentry/nextjs'
 import { detectIntent } from '../intent'
 import { getVerticalPack } from '../verticals'
 import { forOrg } from '@/lib/isolation'
-import { sanitizeAttributionField } from '../../shared/attribution'
 import { shouldSkipUserPersist } from './dedup'
+// MS-E6.2 (costura A) — contrato de entrada del endpoint: schema del body y
+// helpers que leen el request crudo. `requestBodySchema` se re-exporta abajo.
+import {
+  requestBodySchema,
+  collectProactivePrompts,
+  countRawMessages,
+  extractClientIp,
+  type RequestBody,
+} from './requestSchema'
+// MS-E6.2 (costura A) — respuesta de modo degradado + cap de dominios del plan.
+import { degradedResponse, isOriginWithinPlanCap } from './degradedResponse'
+// MS-E6.2 (costura A) — plomería de los hooks con techo de tiempo.
+import { runHookOp } from './hookOps'
 
 import {
   resolveBotBySlug,
   getOrCreateConversation,
 } from '../conversation'
 import { buildSystemPrompt, formatDateTimeArgentina } from '../prompts'
-import { getTools } from '../tools'
+// BLOQUE VOZ — el catálogo de tools cardeadas vive al lado de las definiciones
+// (getTools.ts): claves = tools que renderizan tarjeta, valor = el conector
+// neutral que inyecta el transform de respuesta vacía.
+import { getTools, CARD_RENDERING_TOOL_CONNECTORS } from '../tools'
 import { normalizeLlmProvider, resolveEffectiveModel } from '../llm'
-import { calculateCost } from '../pricing'
 import {
   checkQuota,
-  incrementQuota,
   tryReserveConversation,
   compensateNewConversationReservation,
   triggerUpsellAlertIfFirst,
 } from '../quota'
 import { checkRateLimit } from '@/lib/rate-limit/limiter'
 import { RATE_LIMIT_PRESETS } from '@/lib/rate-limit/presets'
-import { hashIp, validateAssistantOutput } from '../safety'
+import { hashIp } from '../safety'
 import { chatbotLog } from '../logging'
 import { chatbotDebug } from '../logging'
 import { logChatbotEvent, logPersistFailure } from '../logging'
 // LLMProviderName is used only through normalizeLlmProvider — no direct import needed here.
 import { getPlanForOrg, type EffectivePlan } from '@/lib/plan'
-import { originMatchesAllowed } from '@/lib/security/origin-matcher'
-import {
-  trimHistory,
-  HISTORY_WINDOW_MESSAGES,
-  MAX_MESSAGES_SHAPE,
-  MAX_MESSAGE_CHARS,
-  HARD_CAP_MESSAGES,
-} from '../../shared/historyPolicy'
+import { HARD_CAP_MESSAGES } from '../../shared/historyPolicy'
 // ONF-1 — reconcile transaccional del onFinish: decisiones puras (compensación
 // de cupo, dedup del retry de persistencia, fallback de respuesta vacía).
 import {
-  PERSIST_TX_MAX_ATTEMPTS,
-  PERSIST_TX_RETRY_BACKOFF_MS,
-  ASSISTANT_PERSIST_DEDUP_WINDOW_MS,
-  shouldSkipAssistantPersist,
   shouldCompensateQuota,
+  // MUDEZ (commit 3) — qué texto se persiste en onFinish (BUG-D).
+  pickPersistedAssistantText,
   buildEmptyFallbackMessage,
   createEmptyResponseFallbackTransform,
   type CompensationTrigger,
-  // DEADLINE-ONFINISH — presupuestos de tiempo de los hooks del stream.
-  ONFINISH_TOTAL_BUDGET_MS,
-  PERSIST_TX_DEADLINE_MS,
-  EVENT_LOG_DEADLINE_MS,
+  // DEADLINE-ONFINISH — presupuesto del hook de onError.
   QUOTA_COMPENSATION_DEADLINE_MS,
   computeHookBudgetMs,
-  // STREAM-TIMEOUT — silencio máximo del provider antes de abortar el stream.
-  STREAM_CHUNK_TIMEOUT_MS,
+  // STREAM-TIMEOUT — silencio máximo del provider. WATCHDOG — silencio máximo
+  // en el borde de la respuesta antes de que cerremos nosotros.
+  STREAM_WATCHDOG_IDLE_MS,
+  STREAM_WATCHDOG_INITIAL_IDLE_MS,
+  STREAM_WATCHDOG_TOOL_MAX_MS,
+  // PROVIDER-CLOSE — ventanas del stream CRUDO del provider (aguas arriba del
+  // watchdog del borde). Ver llm/providerStreamClose.ts.
+  PROVIDER_STREAM_IDLE_MS,
+  PROVIDER_STREAM_INITIAL_IDLE_MS,
 } from './reconcile'
+// PROVIDER-CLOSE — cierra el stream del provider para que el pipeline del SDK
+// (tools, steps, onFinish, usage) pueda avanzar. Cerrar, nunca abortar.
+import { createProviderStreamCloseMiddleware } from '../llm/providerStreamClose'
 // DEADLINE-ONFINISH — techo de tiempo sobre cada await que bloquea el cierre
 // del stream. Ver el encabezado de withDeadline.ts: abandona, NO cancela.
-import {
-  createBudget,
-  isDeadlineExceeded,
-  withDeadline,
-  DeadlineExceededError,
-  type LateSettleInfo,
-} from './withDeadline'
+import { createBudget } from './withDeadline'
 // PROBE-STREAM — instrumentación TEMPORAL de diagnóstico del tramo
 // streamText() → tools → onFinish, gated por CHATBOT_STREAM_PROBE. Ver el
 // encabezado de streamProbe.ts. Reversible: buscar `probe: 'stream'`.
 import { createStreamProbe } from './streamProbe'
+// Contador de chunks del provider — telemetría PERMANENTE (alimenta
+// `chat.onfinish_phases`). H.3 lo separó del probe: ver chunkTally.ts.
+import { createChunkTally } from './chunkTally'
+// WATCHDOG — cierre del stream desde nuestro borde, sin depender del SDK.
+// Ver el encabezado de streamWatchdog.ts para el porqué.
+import { createStreamWatchdog, type StreamWatchdogController } from './streamWatchdog'
+// MUDEZ (commit 2) — frames SSE del canned que el borde encola cuando el turno
+// iba a terminar mudo. Forma ESTRICTA (el cliente valida con z.strictObject y
+// el campo del delta se llama `delta`) — ver silenceFrames.ts.
+import { buildSilenceTextFrames } from './silenceFrames'
+// MS-E6.2 (costura B) — suspensión del watchdog mientras corren los tools.
+import { createToolSuspensionController } from './toolSuspension'
+// MS-E6.2 (costura C) — persistencia del turno (los 3 caminos que lo cierran).
+import { createPersistTurn } from './persistTurn'
 
-// UTM.1 — Los campos de atribución (referrer + utm_*) son input del
-// visitante (query string / document.referrer) → SIEMPRE sanitizados acá:
-// se quitan caracteres de control y se recorta a `maxLength`. Nunca rechazan
-// la request (sanitización silenciosa, no validación estricta) — son datos
-// de atribución best-effort, no lógica crítica.
-const attributionField = (maxLength: number) =>
-  z
-    .string()
-    .nullish()
-    .transform((val) => (val == null ? undefined : sanitizeAttributionField(val, maxLength)))
-
-/**
- * Body schema for POST /api/chatbot/[slug]/chat.
- * Validates incoming requests from the frontend.
- *
- * Exportado (UTM.1) para que el invariant de sanitización de atribución
- * pueda testear el schema real vía requestBodySchema.parse(...), no solo
- * las funciones puras de shared/attribution.ts.
- */
-export const requestBodySchema = z.object({
-  // C0.2 — una conversación larga NUNCA muere en 400 por longitud:
-  //  - Camino normal: recorte, no rechazo. El transform aplica trimHistory —
-  //    los últimos HISTORY_WINDOW_MESSAGES, con el último 'user' (el turno en
-  //    curso) SIEMPRE preservado y la ventana user-led. `body.messages` aguas
-  //    abajo ya es la ventana recortada.
-  //  - min/max quedan solo como validación de FORMA (payload absurdo que
-  //    ningún widget real produce — ver historyPolicy.ts). Superarlos sí es 400.
-  messages: z
-    .array(
-      z.object({
-        role: z.enum(['user', 'assistant', 'system']),
-        content: z.string().max(MAX_MESSAGE_CHARS),
-      })
-    )
-    .min(1)
-    .max(MAX_MESSAGES_SHAPE)
-    .transform((msgs) => trimHistory(msgs, HISTORY_WINDOW_MESSAGES)),
-  sessionId: z.string().min(1).max(200),
-  currentPath: z.string().max(500).optional(),
-  referrer: attributionField(500),
-  // Proactive teaser question the bot "asked" via the tooltip. Client-supplied →
-  // VALIDATED server-side against the bot's configured proactivePrompts before it
-  // is trusted into the system prompt. Never enters the conversation as a turn.
-  proactiveOpener: z.string().max(500).optional(),
-  // UTM.1 — first-touch, ver getOrCreateConversation (resolver.ts) para la
-  // semántica de "se persisten una sola vez".
-  utmSource: attributionField(255),
-  utmMedium: attributionField(255),
-  utmCampaign: attributionField(255),
-})
-
-type RequestBody = z.infer<typeof requestBodySchema>
-
-/**
- * Safely extracts the set of admin-configured proactive-prompt strings from the
- * `BotConfig.proactivePrompts` JSON (shape: Record<string, string[]>). Defensive
- * against malformed JSON. Used to validate a client-supplied `proactiveOpener`
- * before it is trusted into the system prompt — only an EXACT match with a
- * configured prompt is accepted, so a forged opener can never inject text.
- */
-function collectProactivePrompts(raw: unknown): Set<string> {
-  const out = new Set<string>()
-  if (raw && typeof raw === 'object') {
-    for (const value of Object.values(raw as Record<string, unknown>)) {
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          if (typeof item === 'string') out.add(item)
-        }
-      }
-    }
-  }
-  return out
-}
-
-/**
- * C0.2 — Largo del array `messages` del body CRUDO (antes del recorte del
- * transform del schema), solo para telemetría: permite ver cuánto recorta la
- * ventana server sobre tráfico real. Defensivo contra cualquier shape.
- */
-function countRawMessages(json: unknown): number | null {
-  if (json && typeof json === 'object') {
-    const messages = (json as { messages?: unknown }).messages
-    if (Array.isArray(messages)) return messages.length
-  }
-  return null
-}
-
-/**
- * Best-effort extraction of client IP from request headers.
- * Returns "unknown" if no header is available (e.g. local dev).
- */
-function extractClientIp(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  if (forwarded) return forwarded.split(',')[0].trim()
-  const real = request.headers.get('x-real-ip')
-  if (real) return real
-  return 'unknown'
-}
-
-/**
- * B4.2/B4.5 — Respuesta estandarizada de modo degradado.
- *
- * Lockeada en la economía del producto: cuando el gating bloquea,
- * NUNCA llamamos a Gemini. Devolvemos JSON canned + datos para que el
- * widget arme el handoff de WhatsApp con la info del bot real.
- *
- * Cero costo de LLM, cero crash, cero 500.
- *
- * El widget detecta `mode === 'degraded'` y muestra el CTA WhatsApp
- * directamente. La `reason` permite distinguir downstream (telemetría,
- * UI texto distinto en el widget si quisiera).
- */
-type DegradedReason = 'quota_exhausted' | 'domain_overflow' | 'conversation_limit'
-
-interface DegradedContext {
-  whatsappNumber: string | null
-  whatsappMessage: string | null
-  companyName: string | null
-}
-
-function degradedResponse(
-  message: string,
-  reason: DegradedReason,
-  bot: DegradedContext = {
-    whatsappNumber: null,
-    whatsappMessage: null,
-    companyName: null,
-  },
-): Response {
-  return Response.json({
-    mode: 'degraded',
-    reason,
-    message,
-    ctaWhatsapp: true,
-    whatsappNumber: bot.whatsappNumber,
-    whatsappMessage: bot.whatsappMessage,
-    companyName: bot.companyName,
-  })
-}
-
-/**
- * B4.2 — Aplica el cap de `maxDomains` del plan al array de dominios
- * autorizados del bot.
- *
- * Si el plan no tiene cap (`null` = uso justo / ilimitado), devuelve
- * el array entero. Si el bot tiene más dominios configurados que el
- * plan permite (downgrade sin limpieza), los primeros N son efectivos
- * y el resto queda como "overflow" — pasa validateOrigin (que mira el
- * full array) pero NO pasa el check defensivo de este pipeline.
- */
-function effectiveAllowedDomains(
-  botAllowedDomains: readonly string[],
-  planMaxDomains: number | null,
-): { effective: string[]; overflow: string[] } {
-  if (planMaxDomains === null) {
-    return { effective: [...botAllowedDomains], overflow: [] }
-  }
-  return {
-    effective: botAllowedDomains.slice(0, planMaxDomains),
-    overflow: botAllowedDomains.slice(planMaxDomains),
-  }
-}
-
-/**
- * B4.2 — ¿El origin es efectivamente autorizado para este (bot, plan)?
- *
- * Replica los escapes de `validateOrigin` (dev/localhost, develop.com.ar)
- * y después aplica el slice del plan. NO duplica el matcher (delega a
- * `originMatchesAllowed`). Llamado DESPUÉS de validateOrigin (que ya
- * autorizó el origin contra el full `bot.allowedDomains`).
- *
- * Devuelve `false` solo si el origin matchea exclusivamente un dominio
- * "overflow" (configurado en el bot pero excedido por el cap del plan).
- */
-function isOriginWithinPlanCap(
-  origin: string | null,
-  botAllowedDomains: readonly string[],
-  planMaxDomains: number | null,
-): boolean {
-  // Dev → localhost siempre OK (la batería de regresión corre desde localhost)
-  if (
-    process.env.NODE_ENV === 'development' &&
-    origin &&
-    (origin.includes('localhost') || origin.includes('127.0.0.1'))
-  ) {
-    return true
-  }
-  // develop.com.ar nunca cae al cap
-  if (
-    origin === 'https://develop.com.ar' ||
-    origin === 'https://www.develop.com.ar'
-  ) {
-    return true
-  }
-  // Sin cap del plan → cualquier origin que pasó validateOrigin pasa acá también
-  if (planMaxDomains === null) return true
-  // Sin origin (curl, same-origin) — ya pasó validateOrigin, no aplico el cap
-  if (!origin) return true
-
-  const { effective } = effectiveAllowedDomains(botAllowedDomains, planMaxDomains)
-  return originMatchesAllowed(origin, effective)
-}
-
-// ─── DEADLINE-ONFINISH — plomería de los hooks con techo de tiempo ───────────
-
-/** Desenlace de una operación corrida con deadline. `ok:false` NO se lanza. */
-type HookOpResult<T> =
-  | { ok: true; value: T; ms: number }
-  | { ok: false; error: unknown; timedOut: boolean; noBudget: boolean; ms: number }
-
-/** Desenlace de una fase, para el log agregado `chat.onfinish_phases`. */
-type PhaseOutcome = 'ok' | 'deadline' | 'error' | 'skipped' | 'no_budget'
-
-interface PhaseRecord {
-  ms: number
-  outcome: PhaseOutcome
-}
-
-/**
- * Por qué NO se reintentó la persistencia. `null` = se reintentó (o no hizo
- * falta). Sin este campo, "no reintenté" y "reintenté y falló" serían
- * indistinguibles en el log — y son diagnósticos opuestos.
- */
-type RetrySkipReason = 'deadline' | 'budget' | 'max_attempts' | null
-
-/**
- * Corre una operación de hook con techo de tiempo y NUNCA lanza: devuelve el
- * desenlace para que el llamador decida. El bucle de persistencia necesita
- * distinguir `timedOut` (cuelgue abandonado → NO reintentar, ya retuvo una
- * conexión del pool) de un error real de Prisma (transitorio → sí reintentar).
- *
- * `deadlineMs <= 0` (presupuesto agotado) NO arranca la operación: disparar una
- * query para abandonarla en el mismo tick cuesta una conexión del pool a cambio
- * de nada.
- */
-async function runHookOp<T>(
-  label: string,
-  deadlineMs: number,
-  start: () => Promise<T>,
-  onLateSettle?: (info: LateSettleInfo) => void,
-): Promise<HookOpResult<T>> {
-  if (deadlineMs <= 0) {
-    return {
-      ok: false,
-      error: new DeadlineExceededError(label, 0),
-      timedOut: true,
-      noBudget: true,
-      ms: 0,
-    }
-  }
-  const startedAt = Date.now()
-  try {
-    const value = await withDeadline(
-      start(),
-      deadlineMs,
-      label,
-      onLateSettle ? { onLateSettle } : undefined,
-    )
-    return { ok: true, value, ms: Date.now() - startedAt }
-  } catch (error) {
-    return {
-      ok: false,
-      error,
-      timedOut: isDeadlineExceeded(error),
-      noBudget: false,
-      ms: Date.now() - startedAt,
-    }
-  }
-}
-
-/** Traduce el desenlace de una operación a la etiqueta que va al log de fases. */
-function phaseOutcome<T>(result: HookOpResult<T>): PhaseOutcome {
-  if (result.ok) return 'ok'
-  if (result.noBudget) return 'no_budget'
-  return result.timedOut ? 'deadline' : 'error'
-}
 
 /**
  * Main entrypoint for the chat API route.
@@ -935,6 +677,10 @@ export async function handleChatRequest(
       conversationId: conversation.id,
       botConfigId: bot.id,
       organizationId: bot.organization.id,
+      // C0.1 — slug del bot para el gate de TOOLS_RESTRICTED_TO_AGENCY_BOT
+      // (getTools.ts). `bot` viene de resolveBotBySlug con `include`, así que
+      // el escalar ya está en contexto: cero query nueva.
+      botSlug: bot.slug,
       // EV.3 — pack vertical del bot (resolución de scoring en capture_lead).
       // `bot` viene de resolveBotBySlug con `include`, así que el escalar ya está
       // en contexto: cero query nueva.
@@ -965,7 +711,59 @@ export async function handleChatRequest(
   // más abajo en calculateCost (antes el costo leía resolvedBot.llmModel
   // por su lado y podía divergir de lo que esta línea ejecuta).
   const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), plan.llmModel)
-  const model = effectiveModel.model
+
+  // ─── PROVIDER-CLOSE — cerrar el stream CRUDO del provider cuando se calla ──
+  // El stream de Gemini no termina nunca, y el SDK ejecuta el `flush()` de sus
+  // transforms internos —donde emite `finish-step`, arranca el step siguiente y
+  // dispara `onStepFinish`/`onFinish` con el `usage`— solo cuando el stream de
+  // arriba TERMINA. Sin esto: `step_count: 0`, `onFinish` nunca dispara y el
+  // costo queda en 0. El watchdog del borde no alcanza porque cierra hacia
+  // ABAJO (la respuesta al cliente), no hacia arriba.
+  //
+  // Se envuelve ACÁ y no dentro de `resolveEffectiveModel` a propósito: esa
+  // función está documentada como PURA y tiene dos invariantes que le inyectan
+  // providers falsos — envolver ahí rompería su contrato. Acá el fallback de
+  // provider ya está resuelto, así que el envoltorio lo cubre igual, y es
+  // agnóstico del provider (Anthropic/OpenAI recibirían el mismo trato).
+  const rawModel = effectiveModel.model
+  const model =
+    // `LanguageModel` es una unión (`string | V3 | V2`) y `wrapLanguageModel`
+    // exige un V3. Se discrimina por `specificationVersion` en vez de castear.
+    // Si algún día el modelo no fuera V3, se usa sin envolver (degradación
+    // silenciosa: se pierde el cierre, no la respuesta) y queda el rastro.
+    typeof rawModel === 'object' && rawModel.specificationVersion === 'v3'
+      ? wrapLanguageModel({
+          model: rawModel,
+          middleware: createProviderStreamCloseMiddleware({
+            idleMs: PROVIDER_STREAM_IDLE_MS,
+            initialIdleMs: PROVIDER_STREAM_INITIAL_IDLE_MS,
+            // H.3 — telemetría PERMANENTE (antes iba por el probe, gated).
+            // Junto con `watchdog_settled` es la única señal de si el pipeline
+            // cierra por sí mismo: `sawFinishChunk` dice si el provider manda
+            // su chunk terminal (y con él el `usage`, o sea el costo).
+            // `warn` solo cuando `reason: 'idle'` — el único caso en que
+            // ACTUAMOS nosotros; `natural`/`cancelled` son el camino sano.
+            onClose: (report) =>
+              chatbotLog(
+                'provider.stream_chunks',
+                {
+                  conversationId: conversation.id,
+                  // `resolvedBot`, no `bot`: esto es un callback y el narrowing
+                  // de un `let` no sobrevive al closure (ver :466).
+                  botConfigId: resolvedBot.id,
+                  botSlug: slug,
+                  ...report,
+                },
+                report.reason === 'idle' ? 'warn' : 'info',
+              ),
+          }),
+        })
+      : rawModel
+  if (typeof rawModel === 'object' && rawModel.specificationVersion !== 'v3') {
+    streamProbe.mark('provider.stream_close_skipped', {
+      specificationVersion: rawModel.specificationVersion,
+    })
+  }
   if (effectiveModel.degraded) {
     await logChatbotEvent({
       organizationId: orgId,
@@ -1032,9 +830,33 @@ export async function handleChatRequest(
   // separate Vertex time from post-LLM persistence time.
   const llmStartAt = Date.now()
   let ttfbAt: number | null = null
-  // PROBE-STREAM — flag para emitir el mark `firstChunk` una sola vez.
-  let firstChunkProbed = false
+  // Conteo de chunks por tipo. Su `snapshot()` viaja en `chat.onfinish_phases`
+  // (permanente): si `chunks_total` siguió subiendo tras el fin del texto, el
+  // provider seguía hablando. Ver chunkTally.ts.
+  const chunkTally = createChunkTally()
+  // STREAM-TIMEOUT (Fase 2) — Texto del asistente acumulado por nuestra cuenta.
+  // Es la ÚNICA forma de tener el mensaje en el camino de abort: cuando el run
+  // muere por timeout, el SDK no arma ni entrega el texto (no hay `finish-step`,
+  // así que `steps[]` viene vacío y `onFinish` ni siquiera se invoca).
+  let accumulatedAssistantText = ''
 
+  // WATCHDOG-2 — `watchdogRef` es un holder mutable porque el controller del
+  // watchdog recién existe DESPUÉS de que `streamText(...)` retorna (más abajo),
+  // pero estos callbacks se PASAN como parte de la config de `streamText` antes
+  // de eso. Por construcción (streamText es síncrono) el holder ya está poblado
+  // para cuando el SDK pueda disparar el primer tool call, así que el optional
+  // chaining de los consumidores es defensivo, no una carrera real.
+  const watchdogRef: { current: StreamWatchdogController | null } = { current: null }
+
+  // MS-E6.2 (costura B) — la suspensión por contador vive en su propio módulo.
+  // Su estado (toolsInFlight, suspendedSinceAt, suspendedMsTotal, el timer del
+  // techo) queda en el closure del factory: una instancia POR REQUEST, nunca a
+  // nivel de módulo. Ver toolSuspension.ts.
+  const suspension = createToolSuspensionController({
+    watchdogRef,
+    probe: streamProbe,
+    toolMaxMs: STREAM_WATCHDOG_TOOL_MAX_MS,
+  })
   // ONF-1 — Fallback de respuesta vacía: si el run termina sin texto útil, el
   // transform (experimental_transform de abajo) inyecta este mensaje de
   // derivación al stream — el visitante lo ve EN VIVO como texto normal del
@@ -1066,14 +888,55 @@ export async function handleChatRequest(
     return `<${visitorTag}>\n${stripped}\n</${visitorTag}>`
   }
 
-  // PROBE-STREAM — streamText() en sí es síncrono (devuelve el
-  // DefaultStreamTextResult de una, el trabajo real es todo dentro de sus
-  // callbacks/promesas internas), así que este par enter/exit debería ser
-  // siempre ~0ms. Sirve de ancla: si ALGÚN DÍA esto no cierra, el cuelgue está
-  // en la construcción misma, no en la ejecución del stream.
-  streamProbe.probe('streamText_construct', 'enter')
+  // MS-E6.2 (costura C) — la persistencia del turno vive en su propio módulo.
+  // `turnPersisted` (el guard de idempotencia) queda en el closure del factory:
+  // una instancia por request, nunca a nivel de módulo.
+  //
+  // ⚠️ Los cuatro últimos son GETTERS, no valores, y es deliberado: el handler
+  // MUTA esos bindings DESPUÉS de esta línea (`onChunk` setea `ttfbAt`,
+  // `onStepFinish` incrementa `stepCount`, el transform marca
+  // `emptyFallbackInjected`, y `conversationDiscarded` lo mueven
+  // `discardNewConversation` y la compensación de cupo — que `persistTurn`
+  // invoca él mismo). Congelarlos acá los dejaría en null/0/false/false para
+  // siempre. Ver la tabla del encabezado de persistTurn.ts.
+  const persistTurn = createPersistTurn({
+    conversation,
+    resolvedBot,
+    slug,
+    orgId,
+    scope,
+    startTime,
+    llmStartAt,
+    effectiveModel,
+    emptyFallbackText,
+    chunkTally,
+    streamProbe,
+    timings,
+    mark,
+    setStepStart: (value) => {
+      stepStart = value
+    },
+    compensateReservedQuota,
+    getTtfbAt: () => ttfbAt,
+    getStepCount: () => stepCount,
+    getEmptyFallbackInjected: () => emptyFallbackInjected,
+    getConversationDiscarded: () => conversationDiscarded,
+  })
+
+  // MUDEZ (commit 1) — señal de abort PROPIA del run, POR REQUEST (nunca a
+  // nivel de módulo). Hasta este commit el run no tenía NINGUNA señal externa:
+  // no se pasaba `abortSignal` y el único abortador era el AbortController
+  // interno de `chunkMs` (removido acá — ver reconcile.ts §1.c). Esta señal la
+  // dispara el watchdog al actuar (onIdle) y ante la cancelación del cliente:
+  // es lo único que mata un fetch de Vertex pendiente (la señal viaja a
+  // `doStream`, ai/dist/index.js:7733-7743) — la cancelación del body NO llega
+  // sola: muere en el tee del SDK (`teeStream`, :8219-8223, cancelar una rama
+  // no cancela la fuente).
+  const runAbortController = new AbortController()
+
   const result = streamText({
     model,
+    abortSignal: runAbortController.signal,
     system: enrichedSystemPrompt,
     messages: body.messages.map((m): ModelMessage => {
       // El historial del asistente (sus propios outputs) va tal cual. Todo lo
@@ -1088,36 +951,80 @@ export async function handleChatRequest(
     tools,
     temperature: 0.7,
     stopWhen: stepCountIs(3),
-    // STREAM-TIMEOUT — Gemini entrega el texto completo y después NO emite su
-    // chunk terminal: el SDK espera para siempre y la función muere en el kill
-    // de `maxDuration` (30s) con el input del widget trabado. Este techo aborta
-    // el stream tras STREAM_CHUNK_TIMEOUT_MS de silencio del provider, así el
-    // stream cierra y el cliente pasa a `ready`. SOLO `chunkMs` a propósito
-    // (`stepMs`/`totalMs` matarían generaciones lentas legítimas) — el porqué
-    // completo, y la forma OBJETO obligatoria del valor, en reconcile.ts.
-    timeout: { chunkMs: STREAM_CHUNK_TIMEOUT_MS },
+    // MUDEZ (commit 1) — SIN `timeout`. `chunkMs` ("benigno") resultó ser la
+    // causa raíz de la variante orig3 del turno mudo: su timer corre DURANTE la
+    // ejecución de los tools (el SDK retiene el `finish` del provider hasta que
+    // terminan, así que el gap es intra-step) y un capture_lead legítimo de >5s
+    // abortaba el run entero en silencio — sin onError, sin onFinish con 0
+    // steps, sin texto, sin persistencia. Ver reconcile.ts §1.c y la bitácora
+    // del bloque MUDEZ. Los techos reales: silencio del provider →
+    // providerStreamClose; tool colgado → STREAM_WATCHDOG_TOOL_MAX_MS +
+    // watchdog; doStream pendiente / borde → watchdog. Recursos upstream → el
+    // `abortSignal` de arriba, disparado por el watchdog.
+    // WATCHDOG-2 — suspende/reanuda el watchdog del borde mientras un tool
+    // ejecuta su `execute()` server-side (ver el bloque de arriba). Confirmado
+    // contra el SDK instalado, con doc oficial: "Callback that is called right
+    // after a tool's execute function completes (or errors)"
+    // (ai/dist/index.d.ts:2881) — `onToolCallFinish` corre en AMBOS caminos
+    // (éxito: ai/dist/index.js:3088-3097; error: :3065-3075), así que el
+    // contador SIEMPRE se decrementa y el watchdog nunca queda suspendido por
+    // culpa de un tool que falla (el `STREAM_WATCHDOG_TOOL_MAX_MS` de arriba
+    // cubre el caso de un tool que ni falla ni resuelve — cuelga de verdad).
+    experimental_onToolCallStart: suspension.onToolCallStart,
+    experimental_onToolCallFinish: suspension.onToolCallFinish,
+    // WATCHDOG-3 — el arranque en frío del provider es POR STEP, no por
+    // stream: tras un tool, el modelo arranca un step NUEVO (llamada nueva al
+    // provider) para generar el texto final, con su propio cold start. Sin
+    // esto, `resume()` (disparado por `onToolCallFinish` cuando el contador
+    // llega a 0) dejaba la ventana CORTA activa justo cuando hacía falta la
+    // ventana larga — el watchdog cortaba antes de que llegara el primer token
+    // del step 2 (el lead se guardaba, pero el bot nunca respondía nada).
+    // Confirmado que corre ANTES de invocar al provider para ese step
+    // (ai/dist/index.d.ts:1340, "before the provider is called"; runtime en
+    // ai/dist/index.js:7661-7685, antes de `doStream` en :7690-7746) — incluido
+    // el primer step, donde es redundante con el arranque de `start()` pero
+    // inofensivo (mismo idempotente re-arm).
+    experimental_onStepStart: () => {
+      watchdogRef.current?.beginStep()
+    },
     // ONF-1 — con texto útil el transform es passthrough puro (paridad del
-    // camino feliz); solo inyecta la derivación canned en un run vacío.
-    experimental_transform: createEmptyResponseFallbackTransform(emptyFallbackText, () => {
-      emptyFallbackInjected = true
-    }),
-    onStepFinish: (step) => {
+    // camino feliz); solo inyecta en un run vacío. BLOQUE VOZ — qué inyecta
+    // lo decide el transform: si el run dejó una tarjeta en pantalla (tool
+    // cardeado, catálogo CARD_RENDERING_TOOL_CONNECTORS), el conector neutral;
+    // si no, la derivación de siempre. Ambos kinds marcan el flag — la
+    // compensación de cupo y el guard de onSilentClose no distinguen.
+    experimental_transform: createEmptyResponseFallbackTransform(
+      emptyFallbackText,
+      (kind) => {
+        emptyFallbackInjected = true
+        if (kind === 'card_connector') {
+          // Discriminador de telemetría del BLOQUE VOZ: este turno cerró en
+          // tarjeta y habló el conector, no la disculpa. Solo metadatos.
+          chatbotLog('chat.card_connector_injected', {
+            conversationId: conversation.id,
+            botConfigId: resolvedBot.id,
+            botSlug: slug,
+          })
+        }
+      },
+      CARD_RENDERING_TOOL_CONNECTORS,
+    ),
+    // El conteo de steps viaja en `timings.step_count`
+    // (`chat.llm_request_finished`), que es permanente.
+    onStepFinish: () => {
       stepCount += 1
-      // PROBE-STREAM — el SDK no expone un chunk `finish` a `onChunk` (solo
-      // text-delta/reasoning-delta/source/tool-call/tool-result/tool-input-*/raw
-      // — ver ai/dist/index.js, eventProcessor.transform), así que no hay un
-      // "textDone" literal disponible ahí. `onStepFinish` es el hook más cercano
-      // con `finishReason` real por step — cubre la misma necesidad diagnóstica
-      // (¿llegó el modelo a terminar de generar ESTE step?) sin inventar un punto
-      // que no corresponde a ningún callback real del SDK.
-      streamProbe.mark('onStepFinish', {
-        stepNumber: step.stepNumber,
-        finishReason: step.finishReason,
-        toolCallCount: step.toolCalls.length,
-        textLength: step.text.length,
-      })
     },
     onChunk: ({ chunk }) => {
+      // WATCHDOG-4 — LA señal de "el modelo empezó a responder de verdad".
+      // El SDK invoca `onChunk` SOLO para chunks reales del modelo (text-delta,
+      // reasoning-delta, source, tool-call, tool-result, tool-input-*, raw —
+      // ai/dist/index.js:7105) y NUNCA para `start`/`start-step`/`finish-step`/
+      // `finish`. El watchdog del borde opera sobre BYTES y no puede
+      // distinguirlos: veía el frame `start` del SDK (encolado apenas se crea el
+      // stream, antes de que el modelo genere nada) y se pasaba a la ventana
+      // corta, matando respuestas que Vertex tardaba en arrancar. Con esto la
+      // ventana la decide el contenido, no el transporte.
+      watchdogRef.current?.markContent()
       // Capture timestamp of the first useful chunk (text or tool-call).
       // Other chunk types (reasoning-delta, raw, etc.) don't count as TTFB.
       if (
@@ -1126,12 +1033,15 @@ export async function handleChatRequest(
       ) {
         ttfbAt = Date.now()
       }
-      // PROBE-STREAM — una sola vez, el primer chunk de CUALQUIER tipo (no solo
-      // los que cuentan para TTFB). NO se loguea contenido, solo el tipo.
-      if (!firstChunkProbed) {
-        firstChunkProbed = true
-        streamProbe.mark('firstChunk', { chunkType: chunk.type })
+      // STREAM-TIMEOUT (Fase 2) — Acumular el texto que el visitante VE. Es lo
+      // único que permite persistir el turno desde el camino de abort, donde el
+      // SDK no nos entrega el texto armado. Nunca se loguea; solo se persiste.
+      if (chunk.type === 'text-delta') {
+        accumulatedAssistantText += chunk.text
       }
+      // STREAM-TIMEOUT (Fase 2) — conteo + heartbeat (throttled). Solo TIPOS y
+      // contadores, jamás contenido.
+      chunkTally.record(chunk.type)
     },
     onError: async ({ error }) => {
       // PROBE-STREAM — primera línea: confirma si el hook llega a entrar.
@@ -1198,512 +1108,254 @@ export async function handleChatRequest(
         }
       }
     },
-    onAbort: async () => {
+    onAbort: async ({ steps }) => {
       // PROBE-STREAM — primera línea: confirma si el hook llega a entrar.
-      streamProbe.mark('onAbort_enter')
+      streamProbe.mark('onAbort_enter', {
+        assistantTextLength: accumulatedAssistantText.length,
+        stepCount: steps?.length ?? 0,
+        ...chunkTally.snapshot(),
+      })
       // ONF-1 (MH.2) — stream cortado (cliente desconectado / runtime abortó):
       // mismo criterio que onError — sin primer chunk útil, se devuelve el cupo.
+      // Va PRIMERO: si compensa, descarta la fila de Conversation y deja
+      // `conversationDiscarded` en true, que es justo lo que persistTurn mira
+      // para no re-inflar lo que la compensación limpió.
       await compensateReservedQuota?.('stream_abort', {
         firstTokenDelivered: ttfbAt !== null,
         toolCallCount: 0,
       })
-    },
-    onFinish: async ({ text, usage, finishReason, toolCalls, toolResults, steps }) => {
-      // PROBE-STREAM — primera línea, literal. Es el chequeo central de este
-      // sprint: si esto NUNCA aparece en un log donde sí aparece `firstChunk` o
-      // algún `tool:*:enter`, el cuelgue está confirmado aguas arriba de acá.
-      streamProbe.mark('onFinish_enter', { textLength: text.length, finishReason })
-      const llmDoneAt = Date.now()
-      timings.llm_ttfb_ms = ttfbAt !== null ? ttfbAt - llmStartAt : null
-      timings.llm_stream_ms = ttfbAt !== null ? llmDoneAt - ttfbAt : null
-      timings.llm_total_ms = llmDoneAt - llmStartAt
-      timings.step_count = stepCount
 
+      // STREAM-TIMEOUT (Fase 2) — El visitante YA vio este texto: persistirlo es
+      // lo único que evita que el turno se pierda. Sin texto acumulado no hay
+      // nada que guardar (un abort antes del primer chunk no deja turno).
+      //
+      // ⚠️ BEST-EFFORT, sin garantía — el SDK invoca este hook SIN await
+      // (`onAbort?.({ steps })` en ai/dist/index.js:7363, seguido inmediatamente
+      // de `controller.close()`). En serverless la función se congela al cerrar
+      // la respuesta, así que esta escritura CORRE CARRERA contra el freeze y
+      // puede no completar. No hay forma de meterla en un camino que el SDK
+      // espere: tras un abort no queda step registrado, así que el `flush` del
+      // eventProcessor toma su early-return y nunca llama a `onFinish`. Si falla,
+      // el rastro queda en `chat.onfinish_phases` / `chat.persist_abandoned`.
+      if (accumulatedAssistantText.trim().length > 0) {
+        const abortToolCalls = steps?.flatMap((s) => s.toolCalls ?? []) ?? []
+        await persistTurn({
+          source: 'onAbort',
+          assistantText: accumulatedAssistantText,
+          // No hay finishReason del provider: el run murió antes del terminal.
+          finishReason: 'abort',
+          toolCalls: abortToolCalls,
+          // Sin `finish-step` no hay usage del provider. Se persiste 0 a
+          // propósito (subreporte honesto) en vez de inventar una estimación.
+          tokensIn: steps?.reduce((sum, s) => sum + (s.usage?.inputTokens ?? 0), 0) ?? 0,
+          tokensOut: steps?.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0) ?? 0,
+        })
+      }
+    },
+    onFinish: async ({ text, usage, finishReason, toolCalls, steps }) => {
       // MS-1: en multi-step (stopWhen=stepCountIs(3)), las propiedades top-level
       // del onFinish (toolCalls, usage) son SOLO del último step. Tenemos que
       // agregar manualmente desde `steps[]` para que el chatMessage final tenga:
       //   - todas las tool calls de todo el run (capture_lead step 1 + offer_handoff_options step 2)
       //   - tokens/cost reales del run completo (no solo del último step)
       const hasSteps = steps && steps.length > 0
-      const allToolCalls = hasSteps ? steps.flatMap((s) => s.toolCalls ?? []) : toolCalls ?? []
-      const totalIn = hasSteps
-        ? steps.reduce((sum, s) => sum + (s.usage?.inputTokens ?? 0), 0)
-        : (usage?.inputTokens ?? 0)
-      const totalOut = hasSteps
-        ? steps.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0)
-        : (usage?.outputTokens ?? 0)
-      stepStart = llmDoneAt
-      // ONF-1 — hoisted fuera del try: el catch INFRA.1 reporta cuántos
-      // intentos de persistencia se agotaron.
-      let persistAttempt = 0
-
-      // ─── DEADLINE-ONFINISH — techo de tiempo del hook ─────────────────────
-      // Este callback corre DENTRO del flush() del stream (el SDK lo invoca con
-      // `await`): hasta que no retorna, el readable no llega a `done`, el
-      // cliente no pasa a `status:'ready'` y el input del widget sigue trabado.
-      // Por eso TODO await que toque la DB va con deadline, y el conjunto con un
-      // presupuesto global — techado también contra el `maxDuration` de la ruta,
-      // así un LLM lento no vuelve a empujar el hook contra el kill de 30s.
-      const hookStartedAt = Date.now()
-      const requestElapsedMsAtHookStart = hookStartedAt - startTime
-      const budget = createBudget(computeHookBudgetMs(requestElapsedMsAtHookStart))
-      let retrySkipped: RetrySkipReason = null
-      // Longitud —NUNCA contenido— del mensaje del assistant. Hoisted para que
-      // el registro de abandono la alcance desde el catch.
-      let assistantMessageLength = 0
-
-      // Todas las fases arrancan en 'skipped' para que el log salga SIEMPRE con
-      // la misma forma: una fase condicional que no corrió queda distinguible de
-      // una que corrió y falló, sin tener que cruzar el log contra el código.
-      const phases: Record<string, PhaseRecord> = {
-        validation_warnings_event: { ms: 0, outcome: 'skipped' },
-        empty_fallback_event: { ms: 0, outcome: 'skipped' },
-        quota_compensation: { ms: 0, outcome: 'skipped' },
-        completed_event: { ms: 0, outcome: 'skipped' },
-        persist_error_event: { ms: 0, outcome: 'skipped' },
-      }
-      for (let attempt = 1; attempt <= PERSIST_TX_MAX_ATTEMPTS; attempt += 1) {
-        phases[`persist_tx_${attempt}`] = { ms: 0, outcome: 'skipped' }
-      }
-
-      // Rastro del settlement TARDÍO de una operación ya abandonada: es el
-      // discriminador socket-vs-lock. Si la tx commitea a los 18s → conexión
-      // viva pero lenta (lock / cold start). Si nunca aparece → socket muerto.
-      // Caveat: Netlify puede congelar el contenedor al cerrar la respuesta, así
-      // que su AUSENCIA no prueba nada; su PRESENCIA sí es concluyente.
-      const reportLateSettlement = (info: LateSettleInfo): void => {
+      await persistTurn({
+        source: 'onFinish',
+        // MUDEZ (commit 3) — `text` es SOLO el último step: si cierra vacío
+        // pero el visitante vio texto de steps anteriores (streameado en vivo),
+        // se persiste el acumulado de onChunk — lo que la pantalla mostró.
+        // Ver pickPersistedAssistantText en reconcile.ts (BUG-D).
+        assistantText: pickPersistedAssistantText(text, accumulatedAssistantText),
+        finishReason,
+        toolCalls: hasSteps ? steps.flatMap((s) => s.toolCalls ?? []) : (toolCalls ?? []),
+        tokensIn: hasSteps
+          ? steps.reduce((sum, s) => sum + (s.usage?.inputTokens ?? 0), 0)
+          : (usage?.inputTokens ?? 0),
+        tokensOut: hasSteps
+          ? steps.reduce((sum, s) => sum + (s.usage?.outputTokens ?? 0), 0)
+          : (usage?.outputTokens ?? 0),
+      })
+    },
+  })
+  // ─── WATCHDOG — el cierre del stream, desde NUESTRO borde ───────────────────
+  // Último eslabón bajo nuestro control antes de que la respuesta salga. Si el
+  // body se queda mudo más de STREAM_WATCHDOG_IDLE_MS, persistimos el turno y
+  // cerramos el readable nosotros: el cliente ve `done`, `useChat` pasa a
+  // `ready` y el input se destraba. Cero dependencia de `abortSignal` o de que
+  // corra algún `flush` del SDK — que es exactamente lo que falló dos veces.
+  const streamed = result.toUIMessageStreamResponse()
+  const watchdog = createStreamWatchdog({
+    idleMs: STREAM_WATCHDOG_IDLE_MS,
+    // WATCHDOG-2 — ventana generosa para el cold start (antes del primer
+    // chunk); `idleMs` (más ajustado) aplica recién después. Ver reconcile.ts.
+    initialIdleMs: STREAM_WATCHDOG_INITIAL_IDLE_MS,
+    onIdle: async () => {
+      // ESPERADO antes de cerrar: mientras el readable siga abierto la respuesta
+      // no terminó y la función sigue viva. Acá la persistencia deja de ser la
+      // carrera contra el freeze que sí era desde `onAbort` (donde el SDK ya
+      // había llamado a `controller.close()`).
+      //
+      // Idempotente por el flag `turnPersisted`: si `onFinish` llegara a correr
+      // igual, el segundo camino sale por su early-return — cero doble escritura
+      // y cero doble conteo de cupo. `persistTurn` trae su propio techo de
+      // tiempo (presupuesto de ONF-2), así que esta espera está acotada.
+      //
+      // MUDEZ (commit 2) — la red que HABLA. Con texto acumulado, se persiste
+      // lo que el visitante vio (como siempre). Sin texto, el turno iba a
+      // terminar mudo: se persiste la derivación canned (source
+      // 'watchdog_canned', distinguible a propósito en telemetría) y se
+      // DEVUELVEN sus frames — el watchdog los encola justo antes del
+      // terminate, así el visitante ve la derivación en vez de silencio.
+      // Decisión del bloque: se COBRA y se persiste (transcript > cupo).
+      const spokeCanned = accumulatedAssistantText.trim().length === 0
+      await persistTurn(
+        spokeCanned
+          ? {
+              source: 'watchdog_canned',
+              assistantText: emptyFallbackText,
+              finishReason: 'watchdog_idle',
+              toolCalls: [],
+              tokensIn: 0,
+              tokensOut: 0,
+            }
+          : {
+              source: 'watchdog',
+              assistantText: accumulatedAssistantText,
+              // El run nunca emitió su chunk terminal: no hay finishReason real.
+              finishReason: 'watchdog_idle',
+              // Sin `finish-step` no hay tool calls agregadas ni `usage` del
+              // provider. Se persisten 0 tokens a propósito (subreporte
+              // auditable, con `source` en el log para reconciliar) en vez de
+              // inventar una estimación en una tabla de costo.
+              toolCalls: [],
+              tokensIn: 0,
+              tokensOut: 0,
+            },
+      )
+      // MUDEZ (commit 1) — ⚠️ NO REORDENAR: el abort va DESPUÉS del persist.
+      // Parecen dos pasos independientes y NO lo son — el drain que arranca acá
+      // puede disparar `onAbort` → compensación de cupo, y esa compensación
+      // borra la fila de Conversation dentro de su tx: si le gana la carrera al
+      // persist de arriba, el turno (canned incluido) se queda sin fila donde
+      // vivir. Persistir PRIMERO garantiza que el delete condicional de la
+      // compensación ("solo si no hay ASSISTANT persistido") encuentre la fila
+      // y no borre nada.
+      //   1. abort: mata el fetch de Vertex pendiente (la causa de la variante
+      //      C5: doStream sin headers por 31s que ningún timer cubría) y les
+      //      avisa a los tools que respeten la señal.
+      //   2. consumeStream: abre una rama NUEVA del tee del SDK y drena el
+      //      pipeline congelado — es la ÚNICA forma de que el reconcile del SDK
+      //      corra tras nuestro terminate (la cancelación del body muere en el
+      //      tee). Con el drain, onAbort/onFinish SÍ corren: con ≥1 step
+      //      registrado, onFinish recupera la contabilidad del turno
+      //      (persistTurn es idempotente — el primero en llegar gana).
+      runAbortController.abort()
+      // `consumeStream()` devuelve PromiseLike (sin .catch propio): se envuelve.
+      // El drain nunca debe tumbar el cierre — cualquier error suyo se traga
+      // (el rastro del turno ya salió por los caminos de arriba).
+      void Promise.resolve(result.consumeStream()).catch(() => {})
+      return spokeCanned ? buildSilenceTextFrames(emptyFallbackText) : null
+    },
+    // MUDEZ (commit 2) — la red del CIERRE LIMPIO. El SDK puede cerrar el body
+    // normal y rápido con CERO texto: un part de error (p.ej.
+    // NoOutputGeneratedError) cierra vía closeStream — sin silencio no hay
+    // idle, y sin chunk `finish` el fallback del transform no inyecta. Acá se
+    // decide si el borde habla: solo si no hubo texto Y el fallback no habló.
+    // El watchdog NUNCA lo invoca en `cancel` (visitante ido).
+    onSilentClose: async () => {
+      if (accumulatedAssistantText.trim().length > 0) return null
+      if (emptyFallbackInjected) return null
+      await persistTurn({
+        source: 'watchdog_canned',
+        assistantText: emptyFallbackText,
+        finishReason: 'silent_close',
+        toolCalls: [],
+        tokensIn: 0,
+        tokensOut: 0,
+      })
+      return buildSilenceTextFrames(emptyFallbackText)
+    },
+    onEvent: (info) => {
+      if (info.reason === 'idle') {
+        // MUDEZ (commit 2, premortem #13) — el disparo idle también suelta el
+        // timer del techo de tools: antes solo lo soltaban closed/cancelled y
+        // un timer huérfano de hasta 15s quedaba vivo tras el cierre (inocuo en
+        // serverless por el freeze, leak menor en dev — cerrado acá).
+        suspension.clearToolMaxTimer()
+        // Contadores de la suspensión al momento del disparo (ver toolSuspension.ts:
+        // `suspendedMsTotal` ya incluye cualquier suspensión todavía abierta).
+        const { toolsInFlight, suspendedMsTotal } = suspension.snapshot()
+        // El evento que importa: el watchdog tuvo que actuar. Va a stderr
+        // SIEMPRE (no gated por el probe) porque es la señal de que el stream
+        // de Gemini sigue sin cerrar. Longitudes y contadores, nunca contenido.
         chatbotLog(
-          'chat.hook_late_settlement',
+          'chat.watchdog_fired',
           {
             conversationId: conversation.id,
             botConfigId: resolvedBot.id,
             botSlug: slug,
-            phase: info.label,
-            deadlineMs: info.deadlineMs,
+            reason: info.reason,
+            chunks: info.chunks,
+            // WATCHDOG-4 — los dos campos que habrían hecho este diagnóstico
+            // inmediato: `window: "content"` con `contentChunks: 0` es una
+            // contradicción evidente (el transporte arrancó, el modelo no).
+            contentChunks: info.contentChunks,
+            window: info.window,
             elapsedMs: info.elapsedMs,
-            settled: info.settled,
+            lastGapMs: info.lastGapMs,
+            assistantTextLength: accumulatedAssistantText.length,
+            toolsInFlight,
+            suspendedMsTotal,
           },
           'warn',
         )
+        return
       }
-
-      /** Corre una fase con deadline (techado al presupuesto) y la registra. */
-      const runPhase = async <T>(
-        phase: string,
-        phaseBudgetMs: number,
-        start: () => Promise<T>,
-      ): Promise<HookOpResult<T>> => {
-        const result = await runHookOp(
-          phase,
-          budget.clamp(phaseBudgetMs),
-          start,
-          reportLateSettlement,
-        )
-        phases[phase] = { ms: result.ms, outcome: phaseOutcome(result) }
-        return result
+      // Cierre normal o cancelación del cliente: ya no hay nada que suspender.
+      suspension.clearToolMaxTimer()
+      // MUDEZ (commit 1) — el cliente se fue: matar el run (fetch de Vertex
+      // incluido). Sin esto el pipeline queda congelado en el tee del SDK
+      // quemando el fetch hasta el freeze de la función. En 'closed' (el SDK
+      // terminó solo) el abort es innecesario y no se emite.
+      if (info.reason === 'cancelled') {
+        runAbortController.abort()
       }
-
-      try {
-        // Validate output (capa 4)
-        const warnings = validateAssistantOutput(text)
-        if (warnings.length > 0) {
-          chatbotLog(
-            'chat.validation_warnings',
-            {
-              conversationId: conversation.id,
-              warnings: warnings.map((w) => ({
-                patternId: w.patternId,
-                severity: w.severity,
-              })),
-            },
-            'warn'
-          )
-          await runPhase('validation_warnings_event', EVENT_LOG_DEADLINE_MS, () =>
-            logChatbotEvent({
-              organizationId: orgId,
-              botConfigId: resolvedBot.id,
-              type: 'chat.validation_warnings',
-              level: 'warn',
-              message: `${warnings.length} validation warning(s) en respuesta`,
-              conversationId: conversation.id,
-              metadata: { warnings: warnings.map((w) => w.patternId) },
-            }),
-          )
-        }
-
-        // ONF-1 — Turno fallback: el modelo devolvió vacío y el transform
-        // inyectó la derivación canned al stream. Se persiste el mensaje que
-        // el visitante VIO (nunca un turno mudo), pero NO se cuenta como
-        // respuesta entregada: sin tools ejecutadas, la reserva de cupo se
-        // devuelve. `assistantContent` cae al canned explícito si el texto
-        // transformado no llegara al onFinish (belt-and-suspenders).
-        const assistantContent =
-          emptyFallbackInjected && text.trim().length === 0 ? emptyFallbackText : text
-        assistantMessageLength = assistantContent.length
-        if (emptyFallbackInjected) {
-          chatbotLog(
-            'chat.empty_response_fallback',
-            {
-              conversationId: conversation.id,
-              finishReason,
-              toolCallCount: allToolCalls.length,
-            },
-            'warn',
-          )
-          await runPhase('empty_fallback_event', EVENT_LOG_DEADLINE_MS, () =>
-            logChatbotEvent({
-              organizationId: orgId,
-              botConfigId: resolvedBot.id,
-              type: 'chat.empty_response_fallback',
-              level: 'warn',
-              message: 'Respuesta vacía del modelo — turno degradado con derivación canned',
-              conversationId: conversation.id,
-              metadata: { finishReason, toolCallCount: allToolCalls.length },
-            }),
-          )
-          // Se captura en un const para que el narrowing sobreviva al closure
-          // (`compensateReservedQuota` es un `let` del scope externo).
-          const compensate = compensateReservedQuota
-          if (compensate) {
-            await runPhase('quota_compensation', QUOTA_COMPENSATION_DEADLINE_MS, () =>
-              compensate('empty_response', {
-                firstTokenDelivered: ttfbAt !== null,
-                toolCallCount: allToolCalls.length,
-              }),
-            )
-          }
-        }
-
-        // ONF-1 — Si la compensación descartó la conversación (nueva, sin
-        // ASSISTANT entregado: cupo devuelto + fila borrada en una tx), no hay
-        // fila donde persistir el turno — y persistirlo re-inflaría lo que la
-        // compensación limpió. El rastro queda en chat.empty_response_fallback
-        // + chat.quota_compensated y en este log de cierre.
-        if (conversationDiscarded) {
-          mark('post_persist_ms')
-          timings.total_ms = Date.now() - startTime
-          chatbotLog('chat.llm_request_finished', {
-            conversationId: conversation.id,
-            finishReason,
-            turnDiscarded: true,
-            emptyFallback: emptyFallbackInjected,
-            durationMs: timings.total_ms,
-            timings,
-          })
-          return
-        }
-
-        // MS-1: tokens y tool calls agregados desde todos los steps (ver bloque arriba).
-        const tokensIn = totalIn
-        const tokensOut = totalOut
-        // COST-1 — mismo par efectivo que ejecutó la respuesta (arriba), no
-        // resolvedBot.llmProvider/llmModel (legacy, podía divergir de plan.llmModel).
-        const costBreakdown = calculateCost(
-          effectiveModel.provider,
-          effectiveModel.modelId,
-          tokensIn,
-          tokensOut
-        )
-
-        // ONF-1 (RB.3) — Los tres writes del turno son UNA transacción scoped
-        // (mismo patrón que capture_lead): entran los tres o ninguno.
-        // Orden dentro de la tx: mensaje → conversación → cupo.
-        //   - mensaje primero: fila nueva, sin contención;
-        //   - conversación después: único lock compartido con la tx de
-        //     capture_lead (lead → conversación) — un solo recurso en común
-        //     entre ambas transacciones → sin ciclo de deadlock posible;
-        //   - cupo al final: la fila QuotaUsage del mes es la de mayor
-        //     contención del tenant — se lockea a lo último para achicar su
-        //     sección crítica.
-        // Ante un corte de Netlify (~10s) a mitad de la transacción, la
-        // conexión muere sin COMMIT → Postgres hace rollback: nunca queda
-        // estado parcial (cupo movido sin mensaje, o mensaje sin contadores).
-        // El turno cortado lo recupera el retry del widget (INFRA.2: la cola
-        // USER sin responder no se duplica).
-        //
-        // Caso "respuesta YA entregada + persistencia falla" (decisión ONF-1):
-        // retry acotado (PERSIST_TX_MAX_ATTEMPTS, retry de APLICACIÓN — no el
-        // retry de conexión de INFRA.3, que sigue NO activo) con guard de
-        // idempotencia: si el COMMIT del intento anterior entró pero el ack se
-        // perdió (error post-commit), el reintento ve la cola ASSISTANT
-        // idéntica y NO duplica — como los tres writes son atómicos, si el
-        // mensaje está, los contadores también entraron. Si el último intento
-        // también falla: INFRA.1 (catch de abajo) y se acepta la pérdida del
-        // registro con evento claro — la respuesta ya salió y no es
-        // re-enviable; preferimos un turno sin registrar a contadores dobles.
-        const persistedAt = new Date()
-        for (;;) {
-          persistAttempt += 1
-          const attempt = await runPhase(
-            `persist_tx_${persistAttempt}`,
-            PERSIST_TX_DEADLINE_MS,
-            () =>
-              scope.$transaction(async (tx) => {
-                if (persistAttempt > 1) {
-                  // Query DIRIGIDA al ASSISTANT idéntico dentro de la ventana —
-                  // no a la cola (hallazgo del review): un USER interleaved de
-                  // otro request del mismo sessionId desplazaría la cola y
-                  // taparía el commit fantasma del intento 1.
-                  const committedCandidate = await tx.chatMessage.findFirst({
-                    where: {
-                      conversationId: conversation.id,
-                      role: 'ASSISTANT',
-                      content: assistantContent,
-                      createdAt: { gte: new Date(Date.now() - ASSISTANT_PERSIST_DEDUP_WINDOW_MS) },
-                    },
-                    orderBy: { createdAt: 'desc' },
-                    select: { role: true, content: true, createdAt: true },
-                  })
-                  if (shouldSkipAssistantPersist(committedCandidate, assistantContent, new Date())) {
-                    return
-                  }
-                }
-
-                // Persist assistant message + tool calls (all steps).
-                await tx.chatMessage.create({
-                  conversationId: conversation.id,
-                  role: 'ASSISTANT',
-                  content: assistantContent,
-                  tokensIn,
-                  tokensOut,
-                  toolCalls: allToolCalls.length > 0
-                    ? (allToolCalls as unknown as object)
-                    : undefined,
-                })
-
-                // Update Conversation aggregate metrics
-                await tx.conversation.update(conversation.id, {
-                  messageCount: { increment: 2 },  // user + assistant
-                  tokensIn: { increment: tokensIn },
-                  tokensOut: { increment: tokensOut },
-                  estimatedCostUsd: { increment: costBreakdown.totalUsd },
-                  lastMessageAt: persistedAt,
-                })
-
-                // Update QuotaUsage for current period.
-                // B4.2: `conversationsCount` ya se incrementó atómicamente vía
-                // tryReserveConversation cuando isNewConversation=true. Acá pasamos
-                // false siempre para evitar double-count del counter. Tokens y cost
-                // se siguen acumulando normalmente — también en un turno fallback
-                // (el modelo se consumió igual; lo que se devuelve es el CUPO).
-                await incrementQuota(
-                  {
-                    organizationId: orgId,
-                    botConfigId: resolvedBot.id,
-                    isNewConversation: false,
-                    messagesAdded: 2,
-                    tokensIn,
-                    tokensOut,
-                    costUsd: costBreakdown.totalUsd,
-                  },
-                  tx,
-                )
-              }),
-          )
-          if (attempt.ok) break
-
-          // ── Gate del retry (DEADLINE-ONFINISH) ────────────────────────────
-          // El retry de ONF-1 se diseñó para el transitorio CORTO de Neon: un
-          // error real y rápido que el 2º intento supera. Un DEADLINE es otra
-          // cosa — la operación quedó abandonada pero VIVA, reteniendo su
-          // conexión del pool (withDeadline abandona, no cancela). Reintentar
-          // ahí retendría una segunda conexión: en un contenedor caliente eso
-          // envenena el pool para los requests siguientes (P2024) a cambio de
-          // nada, porque el cuelgue no se va a destrabar en 300ms. El valor
-          // diagnóstico ya quedó capturado por `onLateSettle` del intento 1.
-          if (persistAttempt >= PERSIST_TX_MAX_ATTEMPTS) {
-            retrySkipped = 'max_attempts'
-            throw attempt.error
-          }
-          if (attempt.timedOut) {
-            retrySkipped = 'deadline'
-            throw attempt.error
-          }
-          // El techo global gana siempre: si no entra un intento COMPLETO más el
-          // evento de cierre, no se reintenta — así el reporte de abandono
-          // conserva su presupuesto y el stream cierra igual.
-          if (
-            !budget.hasRoomFor(
-              PERSIST_TX_RETRY_BACKOFF_MS + PERSIST_TX_DEADLINE_MS + EVENT_LOG_DEADLINE_MS,
-            )
-          ) {
-            retrySkipped = 'budget'
-            throw attempt.error
-          }
-          // Primer intento fallido: rastro off-Neon YA (si el retry también
-          // muere, este log es lo que sobrevive), backoff corto y reintento.
-          logPersistFailure('chat.persist_retry', attempt.error, {
-            conversationId: conversation.id,
-            botSlug: slug,
-            botConfigId: resolvedBot.id,
-            attempt: persistAttempt,
-          })
-          await new Promise<void>((resolve) => setTimeout(resolve, PERSIST_TX_RETRY_BACKOFF_MS))
-        }
-        mark('post_persist_ms')
-        const totalMs = Date.now() - startTime
-        timings.total_ms = totalMs
-
-        chatbotLog('chat.llm_request_finished', {
-          conversationId: conversation.id,
-          finishReason,
-          tokensIn,
-          tokensOut,
-          costUsd: Number(costBreakdown.totalUsd.toFixed(6)),
-          toolCallCount: allToolCalls.length,
-          warningCount: warnings.length,
-          durationMs: totalMs,
-          // ONF-1 — 1 = camino feliz; >1 = el retry acotado recuperó el turno.
-          persistAttempts: persistAttempt,
-          emptyFallback: emptyFallbackInjected,
-          timings,
-        })
-
-        await runPhase('completed_event', EVENT_LOG_DEADLINE_MS, () =>
-          logChatbotEvent({
-            organizationId: orgId,
-            botConfigId: resolvedBot.id,
-            type: 'chat.message_completed',
-            level: 'info',
-            message: `Respuesta enviada (${tokensIn} in / ${tokensOut} out)`,
-            conversationId: conversation.id,
-            metadata: {
-              tokensIn,
-              tokensOut,
-              costUsd: costBreakdown.totalUsd,
-              toolCallCount: allToolCalls.length,
-              durationMs: totalMs,
-              latencyMs: totalMs,
-              timings,
-            },
-          }),
-        )
-      } catch (persistError) {
-        // INFRA.1 — Sink off-Neon PRIMERO, antes de cualquier write a Neon.
-        // stderr estructurado con .code/.cause: el rastro que sobrevive a la
-        // conexión muerta (Netlify Function Logs). Reemplaza al chatbotError
-        // previo, que solo registraba name/message/stack (sin .code/.cause).
-        logPersistFailure('chat.persist_failed', persistError, {
-          conversationId: conversation.id,
-          botSlug: slug,
-          botConfigId: resolvedBot.id,
-          turnIndex: Math.floor((conversation.messageCount ?? 0) / 2),
-          // ONF-1 — intentos agotados del $transaction (retry acotado incluido).
-          // El rollback garantiza que NO quedó estado parcial: se perdió el
-          // registro del turno completo, no un pedazo.
-          attempts: persistAttempt,
-          // DEADLINE-ONFINISH — por qué no hubo (o no hubo más) reintentos.
-          retrySkipped,
-        })
-
-        // DEADLINE-ONFINISH — Registro de RECONCILIACIÓN, distinto del de arriba.
-        // `chat.persist_failed` cubre "Postgres falló y garantizó rollback: el
-        // turno se perdió, punto". Esto cubre el caso nuevo: el turno se ABANDONÓ
-        // por deadline, así que su desenlace es DESCONOCIDO — puede commitear más
-        // tarde (ver `chat.hook_late_settlement`). Es la línea a partir de la
-        // cual se puede reconciliar a mano lo que falta. Solo identificadores,
-        // contadores y LONGITUDES: nunca contenido de mensajes.
-        const abandoned = isDeadlineExceeded(persistError) || retrySkipped === 'budget'
-        if (abandoned) {
-          chatbotLog(
-            'chat.persist_abandoned',
-            {
-              conversationId: conversation.id,
-              botConfigId: resolvedBot.id,
-              botSlug: slug,
-              phase: isDeadlineExceeded(persistError)
-                ? persistError.label
-                : `persist_tx_${persistAttempt}`,
-              elapsedMs: Date.now() - hookStartedAt,
-              assistantMessageLength,
-              finishReason,
-              attempts: persistAttempt,
-              retrySkipped,
-            },
-            'error',
-          )
-        }
-
-        // Best-effort: si Neon se recuperó, dejar también el row en chatbot_events.
-        // logChatbotEvent traga su propio fallo (persistentLogger) y nunca relanza;
-        // DEADLINE-ONFINISH le agrega el techo de tiempo y traga también el
-        // deadline — el rastro autoritativo ya salió a stderr arriba, y esta
-        // escritura puede quedar starved por la conexión que retuvo la tx
-        // abandonada. El orden (stderr PRIMERO, DB después) es deliberado: el
-        // reporte del fallo no puede depender del recurso que está fallando.
-        await runPhase('persist_error_event', EVENT_LOG_DEADLINE_MS, () =>
-          logChatbotEvent({
-            organizationId: orgId,
-            botConfigId: resolvedBot.id,
-            type: 'chat.persist_error',
-            level: 'error',
-            message: persistError instanceof Error ? persistError.message : 'unknown',
-            conversationId: conversation.id,
-          }),
-        )
-        // B14.5 — Sentry best-effort (no-op sin NEXT_PUBLIC_SENTRY_DSN → [FALTA:sentry-dsn]).
-        // El scrub-pii del beforeSend limpia antes de mandar.
-        Sentry.captureException(persistError, {
-          tags: { module: 'chatbot', stage: 'persist' },
-          extra: { conversationId: conversation.id, botSlug: slug },
-        })
-      } finally {
-        // ─── DEADLINE-ONFINISH (instrumentación) ────────────────────────────
-        // UN log agregado, off-Neon, en TODOS los caminos (éxito, fallo, early
-        // return del turno descartado). Es el entregable que cierra el
-        // diagnóstico: la próxima corrida en prod dice exactamente qué await
-        // cuelga y cuánto. Nunca contenido de mensajes — solo fases, duraciones,
-        // desenlaces y longitudes.
-        //
-        // Cómo leerlo:
-        //   - `persist_tx_1: deadline` con las fases previas en 'skipped'/'ok'
-        //     rápidas → cuelga la transacción (socket muerto o lock).
-        //   - un `*_event: deadline` ANTES de la tx → el problema es la conexión,
-        //     no un lock de la tx. Ojo: esas fases son condicionales y en tráfico
-        //     normal quedan en 'skipped', así que no siempre está disponible.
-        //   - un `chat.hook_late_settlement` posterior con la misma `phase` →
-        //     la operación SÍ terminó, tarde: conexión viva pero lenta.
-        //   - `budgetExhausted: true` → el techo cortó el hook (lo esperado
-        //     mientras la causa raíz siga abierta).
-        const anomalous = Object.values(phases).some(
-          (p) => p.outcome === 'deadline' || p.outcome === 'error' || p.outcome === 'no_budget',
-        )
-        chatbotLog(
-          'chat.onfinish_phases',
-          {
-            conversationId: conversation.id,
-            botConfigId: resolvedBot.id,
-            botSlug: slug,
-            finishReason,
-            assistantMessageLength,
-            phases,
-            retrySkipped,
-            attempts: persistAttempt,
-            totalMs: Date.now() - hookStartedAt,
-            budgetMs: budget.totalMs,
-            budgetExhausted: budget.remainingMs() === 0,
-            // Cuánto llevaba el request al entrar al hook: si el presupuesto
-            // salió recortado por debajo de ONFINISH_TOTAL_BUDGET_MS, fue por
-            // acá (LLM lento empujando contra el maxDuration de la ruta).
-            requestElapsedMsAtHookStart,
-            budgetCapMs: ONFINISH_TOTAL_BUDGET_MS,
-          },
-          // Nivel según desenlace: un turno sano no ensucia el carril de error,
-          // y uno anómalo sale por stderr junto al resto del rastro off-Neon.
-          anomalous ? 'warn' : 'info',
-        )
-      }
+      // H.3 — telemetría PERMANENTE (antes iba por el probe, gated). Es la
+      // contraparte sana de `chat.watchdog_fired`: el stream cerró solo (o el
+      // cliente canceló) y el watchdog NO tuvo que actuar. Sin esta línea, un
+      // pipeline que dejara de cerrar por sí mismo se vería como silencio.
+      // Nombre sin prefijo `chat.` a propósito: es el que ya se usa para
+      // filtrar en los logs desde los sprints del watchdog.
+      chatbotLog('watchdog_settled', {
+        conversationId: conversation.id,
+        botConfigId: resolvedBot.id,
+        botSlug: slug,
+        reason: info.reason,
+        chunks: info.chunks,
+        contentChunks: info.contentChunks,
+        window: info.window,
+        elapsedMs: info.elapsedMs,
+        lastGapMs: info.lastGapMs,
+      })
     },
   })
-  // PROBE-STREAM — cierra el enter de arriba (streamText() es síncrono: esto
-  // debería salir siempre a ~0ms del enter).
-  streamProbe.probe('streamText_construct', 'exit')
+  // WATCHDOG-2 — recién acá existe el controller: los callbacks de tool call ya
+  // están wireados en el streamText de arriba (referencian este mismo holder).
+  watchdogRef.current = watchdog
 
-  // PROBE-STREAM — último punto ANTES de devolver el Response. streamText() ya
-  // devolvió (es síncrono); esto solo confirma que el tramo de setup previo al
-  // return no colgó por su cuenta.
-  streamProbe.mark('beforeStreamResponse')
-  return result.toUIMessageStreamResponse()
+  // `streamed.body` es null solo si no hubiera cuerpo; acá siempre lo hay
+  // (toUIMessageStreamResponse arma un ReadableStream). El fallback devuelve la
+  // respuesta intacta en vez de romper.
+  if (streamed.body === null) return streamed
+
+  // Se preservan status, statusText y headers: `route.ts` los vuelve a copiar
+  // para los headers de CORS y no necesita ningún cambio (el body sigue siendo
+  // un ReadableStream).
+  return new Response(streamed.body.pipeThrough(watchdog.stream), {
+    status: streamed.status,
+    statusText: streamed.statusText,
+    headers: streamed.headers,
+  })
 
   } catch (unhandledError) {
     // INFRA.1 — Sink off-Neon PRIMERO (mismo patrón silencioso: el logChatbotEvent

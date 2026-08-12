@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "motion/react"
 import { ArrowRight, Clock3, Gem, ShieldCheck } from "lucide-react"
+import { getWhatsappHref } from "@/lib/whatsapp"
 
 function MagneticButton({
     href,
@@ -306,24 +307,24 @@ export default function CtaIA() {
                                     style={{ animation: "ctaPulseDot 2s ease-in-out infinite" }}
                                 />
                                 <span className="text-[10px] font-bold uppercase leading-[1.35] tracking-[0.18em] text-emerald-100/92 max-[425px]:text-[9px] max-[425px]:tracking-[0.14em] max-[375px]:text-[8.5px] max-[375px]:tracking-[0.1em]">
-                                    Agenda limitada: 2 cupos de implementacion IA esta semana
+                                    Agenda limitada: 2 cupos de implementación IA esta semana
                                 </span>
                             </div>
 
                             <div className="mb-2 text-[9px] uppercase tracking-[0.24em] text-emerald-100/36 max-[425px]:text-[8px] max-[425px]:tracking-[0.2em] max-[375px]:tracking-[0.15em]">
-                                SI NO AUTOMATIZAS HOY, MANANA PERDES CONSULTAS
+                                SI NO AUTOMATIZAS HOY, MAÑANA PERDES CONSULTAS
                             </div>
 
                             <h2 className="mx-auto max-w-4xl text-[clamp(1.82rem,5.1vw,4.45rem)] font-black leading-[0.9] tracking-[-0.045em] text-white max-[425px]:text-[clamp(1.66rem,8.8vw,2.5rem)] max-[425px]:tracking-[-0.038em] max-[375px]:text-[clamp(1.45rem,8.2vw,2.1rem)] max-[375px]:tracking-[-0.032em]">
                                 Tu empresa con IA operativa
                                 <br />
                                 <span className="bg-gradient-to-r from-white via-emerald-200 to-teal-200 bg-clip-text text-transparent">
-                                    en 30 dias.
+                                    en 30 días.
                                 </span>
                             </h2>
 
                             <p className="mx-auto mt-3 max-w-3xl text-[14px] leading-7 text-white/64 max-[425px]:text-[13px] max-[425px]:leading-[1.9] max-[375px]:text-[12.5px] max-[375px]:leading-7 md:text-base">
-                                Arrancamos con un diagnostico gratuito de 45 minutos para detectar los 3 procesos donde la IA puede generar impacto mas rapido en ventas y soporte.
+                                Arrancamos con un diagnóstico gratuito de 45 minutos para detectar los 3 procesos donde la IA puede generar impacto más rápido en ventas y soporte.
                             </p>
 
                             <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:mt-6 sm:flex-row sm:flex-wrap sm:gap-2.5">
@@ -360,7 +361,7 @@ export default function CtaIA() {
                                     className="inline-flex w-full max-w-[18.5rem] items-center justify-center gap-2 rounded-full border border-emerald-300/22 bg-emerald-300/[0.08] px-3 py-1.5 text-center text-[11px] leading-[1.25] text-emerald-100/85 max-[425px]:max-w-[17rem] max-[375px]:max-w-[15.8rem] max-[375px]:text-[10.5px] sm:w-auto sm:max-w-none sm:px-4 sm:py-2 sm:text-[12px] sm:text-left"
                                 >
                                     <ShieldCheck className="size-4 text-emerald-200" />
-                                    Diagnostico inicial sin costo
+                                    Diagnóstico inicial sin costo
                                 </motion.div>
                                 <motion.div
                                     whileHover={
@@ -395,7 +396,7 @@ export default function CtaIA() {
                                     className="inline-flex w-full max-w-[18.5rem] items-center justify-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/[0.08] px-3 py-1.5 text-center text-[11px] leading-[1.25] text-teal-100/84 max-[425px]:max-w-[17rem] max-[375px]:max-w-[15.8rem] max-[375px]:text-[10.5px] sm:w-auto sm:max-w-none sm:px-4 sm:py-2 sm:text-[12px] sm:text-left"
                                 >
                                     <Gem className="size-4 text-teal-200" />
-                                    Implementacion desde USD 300
+                                    Implementación desde USD 300
                                 </motion.div>
                                 <motion.div
                                     whileHover={
@@ -436,10 +437,10 @@ export default function CtaIA() {
 
                             <div className="mt-6 flex flex-col items-center gap-2.5 sm:mt-7 sm:gap-3">
                                 <MagneticButton
-                                    href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493816223508"}?text=Hola%20DevelOP%2C%20quiero%20agendar%20mi%20diagnostico%20de%20IA`}
+                                    href={getWhatsappHref("Hola DevelOP, quiero agendar mi diagnostico de IA")}
                                     autoHover={enableAutoHover}
                                 >
-                                    Quiero mi diagnostico IA ahora
+                                    Quiero mi diagnóstico IA ahora
                                 </MagneticButton>
 
                                 <div className="w-full max-w-[19rem] rounded-full border border-emerald-300/22 bg-emerald-300/[0.1] px-3 py-1.5 text-center text-[10px] font-semibold leading-[1.25] tracking-[0.03em] text-emerald-100/92 max-[425px]:max-w-[17.75rem] max-[375px]:max-w-[16.5rem] sm:w-auto sm:max-w-none sm:px-4 sm:text-[11px] sm:tracking-[0.04em]">
@@ -472,7 +473,7 @@ export default function CtaIA() {
                                 </button>
 
                                 <div className="text-[9px] tracking-[0.04em] text-white/34 max-[375px]:text-[8.5px] sm:text-[10px] sm:tracking-[0.05em]">
-                                    Implementacion por etapas para reducir riesgo y acelerar resultados
+                                    Implementación por etapas para reducir riesgo y acelerar resultados
                                 </div>
 
                                 <div
@@ -528,7 +529,7 @@ export default function CtaIA() {
                                                 type="submit"
                                                 className="mt-1 w-full rounded-xl border-0 bg-[linear-gradient(135deg,#10b981,#22c55e,#14b8a6)] px-4 py-3 text-sm font-bold text-white transition-[box-shadow,filter] duration-75 ease-out hover:brightness-110 hover:shadow-[0_0_0_1px_rgba(220,252,231,0.34),0_0_22px_rgba(52,211,153,0.44)]"
                                             >
-                                                Enviar y reservar diagnostico IA
+                                                Enviar y reservar diagnóstico IA
                                             </button>
                                         </div>
                                     </form>

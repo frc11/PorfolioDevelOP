@@ -14466,3 +14466,2436 @@ dos respuestas y NO se resuelve leyendo codigo:
 Lo decide el log de la proxima corrida en prod, no una lectura de codigo.
 
 ---
+
+## STREAM-TIMEOUT Fase 2 - reloj de pared + persistencia desde el abort
+
+### La evidencia que decidio la fase: RAMA B, y el chunkMs NO alcanzo
+
+Corrida en prod con la Fase 1 deployada (`chunkMs = 5000`) y `CHATBOT_STREAM_PROBE=1`.
+Conversacion `cms647c2j0001l609kcmprzlm`:
+
+- **DB**: `ChatMessage` = 1 fila, role USER ("hola"). **CERO filas ASSISTANT.** `ChatbotEvent` sin
+  escrituras nuevas desde 2026-07-20: ni `chat.message_completed` ni `chat.persist_error`.
+- **Probes** (completos, seq 1 a 4):
+```
+seq 1 streamText_construct enter 5108ms
+seq 2 streamText_construct exit  5112ms
+seq 3 beforeStreamResponse mark  5113ms
+seq 4 firstChunk           mark  7037ms  chunkType text-delta
+        --------- nada mas ---------
+```
+- Ni `onFinish_enter` ni `onAbort_enter`. **El input SIGUIO trabado: el chunkMs no corto nada.**
+
+=> Rama B (hay que persistir desde el abort) + un hallazgo que obligo a ajustar el diseno.
+
+### Por que el chunkMs no sirvio - CONFIRMADO en el codigo del SDK instalado
+
+`resetChunkTimeout()` es la **PRIMERA linea** del transform del SDK
+(`ai/dist/index.js:7793`) y corre para CUALQUIER chunk del provider, **antes de todo
+filtrado**. Justo despues:
+- `case "text-delta": if (chunk.delta.length > 0) { enqueue } break` (`:7824-7834`) - un
+  text-delta VACIO se descarta sin enqueue, pero **el timer ya se reinicio**;
+- `if (chunk.type === "stream-start") { ...; return }` (`:7794-7797`) - idem.
+
+O sea: si Gemini sigue emitiendo chunks vacios o keepalives tras completar la respuesta (hay
+reportes publicos de eso), el timer ENTRE chunks se reinicia para siempre y **no vence nunca**.
+**Ningun timeout entre chunks puede cortar este cuelgue.** Hace falta un reloj de pared.
+
+Corolario que hay que tener presente al leer los logs: esos chunks descartados **tampoco llegan a
+nuestro `onChunk`** (el SDK lo invoca aguas abajo del enqueue). Ver "limite de la medicion" abajo.
+
+### 1) STREAM_STEP_TIMEOUT_MS = 12000 - el reloj de pared
+
+`stepMs` NO tiene el problema de `chunkMs`: es un `setTimeout` plano armado al entrar a
+`streamStep`, ANTES de `doStream` (`index.js:7599`), que ningun chunk resetea. Se re-arma por step
+y dispara el `stepAbortController` del run (uno solo: abortar en cualquier step mata el run).
+
+**Aritmetica del valor**, contra los numeros reales del probe:
+- El request llega a `streamText()` a los ~5.1s (todo el pre-LLM). El timer arranca ahi.
+- Abort en ~5.1 + 12 = **~17.1s** de elapsed.
+- `computeHookBudgetMs(17100)` = min(5000, 30000 - 17100 - 3000) = **5000**, el presupuesto
+  COMPLETO de ONF-2 para persistir. Ese techo es el que fija el valor: para no recortarlo el abort
+  tiene que caer antes de los 22s (stepMs <= ~16.9s); 12s deja margen comodo.
+- Cierre del turno a ~22.1s -> **~8s de aire** antes del kill de 30s.
+- Una respuesta sana de Flash se genera en 2-5s: 12s es ~2.4x ese techo. Un multi-step sano
+  (hasta 3 steps de 2-5s, cada uno con su propio timer) entra holgado.
+
+`totalMs` queda SIN setear: mataria un multi-step legitimo. Los dos timeouts son
+COMPLEMENTARIOS: `chunkMs` (5s) corta rapido si el provider se calla de verdad; `stepMs` es el
+piso duro para cuando el provider "habla" pero no termina nunca. La aritmetica quedo pinneada en
+`deadline.invariant.ts` (bloque 9): si alguien sube `stepMs` sin recalcular, el test falla.
+
+### 2) persistTurn - persistencia idempotente desde cualquiera de los dos caminos
+
+El cuerpo de `onFinish` se MOVIO tal cual a `persistTurn(input)`, invocable desde `onFinish`
+(camino normal) o desde `onAbort` (el stream murio por timeout). Mismo deadline, mismo
+presupuesto, mismas fases de ONF-2 - lo unico nuevo es de donde salen texto/finishReason/tokens/
+tool-calls, que ahora entran por parametro. Verificado mecanicamente: **457 lineas movidas
+verbatim, cero eliminaciones**; las unicas 11 lineas agregadas son `source: persistSource` en los
+dos logs de cierre y el `...chunkTally.snapshot()` en `chat.onfinish_phases`.
+
+Para tener el texto en el camino de abort hubo que **acumularlo por nuestra cuenta en `onChunk`**:
+cuando el run muere por timeout el SDK no arma ni entrega el texto (sin `finish-step` no hay
+`steps[]`, y `onFinish` ni siquiera se invoca).
+
+**Idempotencia**: `turnPersisted` se marca SINCRONICAMENTE al entrar, antes de cualquier await.
+Los dos hooks corren en el mismo event loop de la misma instancia, asi que si una carrera
+dispara ambos, el segundo sale por el early-return (`persistTurn_skipped` en el log): cero doble
+escritura y cero doble conteo de cupo. El dedup por `findFirst` de ONF-1 sigue cubriendo el caso
+distinto (commit-ack perdido entre reintentos).
+
+### BEST-EFFORT: la persistencia por abort NO tiene garantia - hay que decirlo asi
+
+El SDK invoca `onAbort` **SIN await**: `onAbort?.({ steps })` (`index.js:7363`), seguido
+inmediatamente de `controller.close()`. En serverless la funcion se congela al cerrar la
+respuesta, asi que esa escritura **corre carrera contra el freeze y puede no completar**.
+
+Se busco una salida y NO la hay: tras un abort no queda step registrado, asi que el `flush` del
+eventProcessor toma su early-return (`if (recordedSteps.length === 0 ...) return`,
+`index.js:7264-7273`) y **nunca llama a `onFinish`** - el unico hook que el SDK si espera. No se
+uso `after()` de Next 16 ni `waitUntil` (no verificados en este entorno). **Es best-effort, no una
+garantia.** Si falla, el rastro queda en `chat.persist_abandoned` / `chat.onfinish_phases` con
+`source: "onAbort"`.
+
+### 3) Instrumentacion: contador de chunks con heartbeat
+
+`createChunkTally` (en `streamProbe.ts`, extendiendo el probe existente) cuenta chunks por tipo y
+emite `chunkFlow` cada 2s desde el propio `onChunk`, con `chunks_total`, contadores por tipo y
+`msSinceLastChunk`. **Heartbeat y no resumen final a proposito**: el modo de falla es justamente
+que ningun hook terminal dispara, asi que un log al cierre no se veria nunca. Solo tipos y
+contadores, jamas contenido.
+
+**LIMITE DE LA MEDICION** (importante al leer el log): el tally cuenta en `onChunk`, que el SDK
+invoca AGUAS ABAJO del enqueue, asi que **los chunks descartados no llegan aca**. Lecturas:
+- contador que SIGUE SUBIENDO tras el fin del texto -> Gemini emite chunks visibles de mas
+  (hipotesis confirmada, variante "ruido visible");
+- contador ESTANCADO y aun asi el `chunkMs` no vence -> los chunks existen pero el SDK los
+  descarta antes de `onChunk` (hipotesis confirmada, variante "ruido invisible", la mas probable);
+- contador estancado Y el `chunkMs` corta -> el provider se callo de verdad.
+
+### CUPO - revisado, NO cambia. Pero hay un subreporte de costo que hay que decidir
+
+- `conversationsCount` (la unidad que enforce el plan): **sin cambios**. La reserva del inicio
+  sigue igual y el `incrementQuota` de adentro de la tx sigue con `isNewConversation: false`.
+- La compensacion en `onAbort` no cambio de criterio: con texto entregado (`ttfbAt !== null`)
+  `shouldCompensateQuota` devuelve false -> **el cupo se cobra**, que es lo correcto (el visitante
+  recibio la respuesta). Va ANTES de `persistTurn` a proposito: si compensara, descarta la fila y
+  deja `conversationDiscarded` en true, que es justo lo que `persistTurn` mira.
+- **SUBREPORTE, a validar por Valentino y Franco**: un turno persistido por el camino de abort
+  guarda **tokensIn/tokensOut/costUsd = 0**, porque sin `finish-step` el provider no entrega
+  `usage`. Vertex SI facturo ese turno. Se eligio el 0 auditable (con `source: "onAbort"` en el
+  log para reconciliar) antes que inventar una estimacion en una tabla de costo. Antes de este
+  sprint no se registraba NADA, asi que no es una regresion - pero es una decision de negocio, no
+  del agente.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero).
+- `eslint` sobre los 4 archivos: **0 errores, 0 warnings** (el warning preexistente de
+  `toolResults` desaparecio: se saco de la firma de `onFinish`, donde nunca se usaba).
+- `npm run test:deadline` con el bloque 9 nuevo (calibracion de stepMs) + bateria completa:
+  onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4 - todos OK.
+- `prisma migrate status`: up to date. Sin migracion, sin git, sin tocar frozen / cliente /
+  connection string / modulo de seguridad. Scoping por organizacion byte-identico.
+- Probes de PROBE-STREAM: ACTIVOS. Son el instrumento de verificacion.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe rapido en prod; que la funcion deje de billar 30000 ms; que aparezcan
+filas ASSISTANT en `ChatMessage`; **si la persistencia por abort llega a completar o la mata el
+freeze** (best-effort, ver arriba); si el `stepMs` de 12000 esta bien calibrado contra trafico
+real. "Verde != se ve".
+
+---
+
+## WATCHDOG - cerrar el stream desde nuestro borde
+
+### La evidencia que descarto el enfoque de los dos sprints previos
+
+Con `chunkMs = 5000` y `stepMs = 12000` YA deployados, dos invocaciones consecutivas en prod:
+
+```
+seq 1 streamText_construct enter 4914ms
+seq 2 streamText_construct exit  4917ms
+seq 3 beforeStreamResponse mark  4917ms
+seq 4 chunkFlow  mark 6383ms  chunks_total: 1  chunks_text_delta: 1  gapMs: 1470
+seq 5 firstChunk mark 6383ms  chunkType: text-delta
+        --------- silencio hasta el kill de 30s ---------
+```
+
+**`chunks_total: 1`.** Gemini manda la respuesta entera en UN chunk y despues silencio absoluto.
+Sin ruido, sin keepalives, sin text-delta vacios. **La hipotesis de la Fase 2 anterior ("sigue
+emitiendo basura que resetea el timer") queda DESCARTADA.**
+
+Lo cual implica que el `chunkMs` de 5s y el `stepMs` de 12s **tuvieron que disparar**. Y sin
+embargo: ni `onAbort_enter` ni `onFinish_enter`, y la funcion igual billo 30000 ms. Identico en
+las dos invocaciones - no es azar.
+
+### Por que NINGUNA opcion de `timeout` del SDK puede arreglarlo
+
+Todas (`chunkMs`, `stepMs`, `totalMs`) desembocan en el mismo `mergeAbortSignals`, y ese camino
+no cierra el stream por **dos eslabones independientes**:
+
+1. **El chequeo de abort corre DETRAS de un `read()` ya bloqueado** (`ai/dist/index.js:7374-7382`):
+   `const { done, value } = await reader.read()` y recien despues `if (abortSignal?.aborted)`.
+   Abortar la senal no despierta un `read()` que espera un chunk que no va a llegar.
+2. **`self.closeStream()` vive en un `flush()`**, y el `flush` de un `TransformStream` NO corre
+   cuando el stream erroriza - solo cuando cierra normal. El abort erroriza la cadena, o sea que
+   rompe el stream por un camino que impide que se cierre.
+
+**Conclusion: dejamos de pedirle al SDK que se cierre a si mismo.** Los dos sprints anteriores
+fallaron por la misma razon.
+
+### El fix: `streamWatchdog.ts` en el borde de la respuesta
+
+Un `TransformStream` propio que envuelve el body que devolvemos. Deja pasar cada chunk
+**verbatim** (nunca inspecciona ni transforma contenido), resetea un timer, y si pasan
+`STREAM_WATCHDOG_IDLE_MS` sin actividad **cierra el readable nosotros** con `controller.terminate()`.
+El cliente ve `done`, `useChat` pasa a `ready`, el input se destraba. Cero dependencia de
+`abortSignal` y de que corra ningun `flush` del SDK.
+
+| Constante | Valor | Razon |
+|---|---|---|
+| `STREAM_WATCHDOG_IDLE_MS` | 3000 | silencio maximo tolerado en el borde antes de cerrar |
+
+**Aritmetica** (numeros medidos): el chunk unico llega a ~6.4s de elapsed -> el watchdog dispara a
+~9.4s -> `persistTurn` con el presupuesto COMPLETO de ONF-2 (tipico ~300ms, techo 5s) -> cierre a
+~10s. Contra 30s hoy, con ~20s de aire contra el `maxDuration`. En el camino sano el upstream
+cierra solo, el `flush` mata el timer y esto no cambia NADA. Calibracion pinneada en el bloque 9
+de `deadline.invariant.ts`.
+
+Calibrable: los `gapMs` medidos hasta el primer chunk fueron 1470 y 1664. No hay datos de gaps
+ENTRE chunks (Gemini mando uno solo). Si en prod aparecen respuestas cortadas, este es el numero
+a subir.
+
+### La persistencia deja de ser best-effort
+
+Como el watchdog corre en codigo nuestro, `onIdle` se **espera** antes de cerrar: mientras el
+readable siga abierto la respuesta no termino y la funcion sigue viva. Es una diferencia
+estructural con el camino de `onAbort` del sprint anterior, donde el SDK ya habia llamado a
+`controller.close()` y la escritura corria carrera contra el freeze.
+
+Se reusa TODO lo que ya existia: el acumulador `accumulatedAssistantText` (poblado en `onChunk`),
+`persistTurn()` con su flag `turnPersisted`, el presupuesto de ONF-2. **Lo unico que cambia es
+quien dispara `persistTurn`** - se agrego `source: 'watchdog'` al input, nada mas del contrato.
+
+Si `onIdle` rechaza, se traga y **el stream cierra igual**: cerrar nunca puede quedar condicionado
+a que la DB responda (leccion de ONF-2).
+
+### Verificaciones empiricas del runtime, hechas ANTES de escribir el modulo
+
+Node v24.12.0:
+- `controller.terminate()` deja al consumidor con un **`done: true` limpio, sin error**. (Esta era
+  la parada obligatoria #4 del sprint: NO se disparo.)
+- El `transformer.cancel()` **esta soportado** (la lib de TS instalada todavia no lo declara; se
+  extendio el tipo con `CancelableTransformer` en vez de castear - cero `any`).
+- El `pipeThrough` **no deja unhandled rejections** al terminar (la spec marca su promesa como
+  handled). Igual el test lo verifica en los 7 escenarios.
+- **La cancelacion SI se propaga hacia arriba**: `terminate()` erroriza el writable -> el `pipeTo`
+  interno cancela el source -> se llama `source.cancel()`. Reproducido con la misma forma que
+  tiene la cadena del SDK (`cancel(reason) { return stitchableStream.stream.cancel(reason) }`,
+  `index.js:7392-7394`): **el `read()` colgado se destrabo con `done=true`.**
+
+### `stepMs` REMOVIDO
+
+Beneficio medido: **cero** (esta probado que no cierra el stream). Costo real: aborta a los 12s
+del inicio del step pase lo que pase, o sea **trunca cualquier generacion legitima mas larga**.
+Riesgo sin contraprestacion.
+
+**`chunkMs` se DEJA.** Es benigno (5s de silencio, no un reloj absoluto), no trunca generaciones
+sanas, y aborta el fetch a Vertex - lo que ayuda a liberar el socket upstream una vez que el
+watchdog cerro el lado del cliente. No cierra el stream por si mismo, pero no molesta.
+
+### LO QUE ESTO NO ARREGLA
+**El stream de Gemini SIGUE sin terminar.** Este sprint lo vuelve irrelevante para el visitante,
+no lo arregla. La causa raiz esta del lado del provider.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero).
+- `eslint` sobre los 5 archivos: 0 errores, 0 warnings.
+- `npm run test:watchdog` (nuevo, 8 bloques, cero DB) + `test:deadline` con el bloque 9 reescrito
+  + bateria: onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4 - todos OK.
+- Sin migracion, sin git. Sin tocar `route.ts` (el body sigue siendo un ReadableStream y su
+  re-wrapping de CORS funciona igual), ni el cliente, ni frozen, ni la connection string, ni el
+  modulo de seguridad. Scoping por organizacion byte-identico. Cupo sin cambios.
+- Probes de PROBE-STREAM: ACTIVOS.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe en prod; que aparezcan filas ASSISTANT en `ChatMessage`; que 3000ms este
+bien calibrado contra trafico real; **que ninguna respuesta larga se corte a la mitad** (el riesgo
+propio de este fix); y si la `Duration` baja o no.
+
+**Sobre la `Duration`:** se espera que baje a ~10s, con fundamento en la propagacion de
+cancelacion verificada arriba - el `terminate()` deberia destrabar el `read()` colgado que es la
+raiz del cuelgue. Pero **no esta garantizado**: depende de que la cadena del SDK propague sin
+trabarse en otro punto y de que Netlify de por terminada la invocacion al cerrar la respuesta. Si
+la `Duration` sigue en 30000 ms, **el objetivo del sprint igual se cumplio**: el visitante queda
+libre a ~10s. La Duration es facturacion e higiene, no UX.
+
+---
+
+## WATCHDOG-2 (Fase 1) - dos ventanas + suspension durante tools
+
+### Punto de partida
+El watchdog del sprint anterior (WATCHDOG) YA esta en produccion y FUNCIONA: el input se
+destraba a los ~4s en vez de 16s+kill a 30s. Descomposicion medida: ~3000ms de
+`STREAM_WATCHDOG_IDLE_MS` + ~300-1000ms de `persistTurn`. Casi todo era el idle -> ahi estaba
+el margen para bajar la latencia.
+
+### El bug que ya existia y nadie habia visto
+El timer del watchdog arranca AL CREAR el stream, no con el primer chunk (requisito explicito
+del sprint anterior: si nunca llega nada, igual hay que cerrar). Los `gapMs` medidos hasta el
+primer chunk fueron **1470ms y 1664ms** - bajar el idle unico a algo corto (ej. 1000ms) hubiera
+cortado la respuesta ANTES de que llegue el texto.
+
+Ademas: **durante la ejecucion de un tool no fluye NADA por el body**. El SDK emite
+`tool-input-available`, corre el `execute()` del tool, y recien ahi emite
+`tool-output-available`. `capture_lead` hace varias escrituras a Neon dentro de su `execute`, y
+Neon autosuspende (6-7s de cold start medidos). **Con `idleMs = 3000` eso YA se corta hoy, en
+produccion**, justo en el momento comercialmente mas valioso del producto (la captura del lead).
+No es un riesgo introducido por este sprint: es uno preexistente que nadie habia verificado con
+un tool real en el camino.
+
+### El diseno: dos ventanas + suspension por contador
+
+**`streamWatchdog.ts`** ahora acepta `initialIdleMs` (ademas de `idleMs`) y devuelve un
+CONTROLLER (`{ stream, suspend, resume }`) en vez de directamente el `TransformStream`:
+
+| Constante (`reconcile.ts`) | Valor | Cuando aplica |
+|---|---|---|
+| `STREAM_WATCHDOG_INITIAL_IDLE_MS` | 12000 | desde la creacion hasta el PRIMER chunk |
+| `STREAM_WATCHDOG_IDLE_MS` | 1200 (bajado de 3000) | entre chunks, una vez que ya fluyo |
+| `STREAM_WATCHDOG_TOOL_MAX_MS` | 15000 | techo de suspension mientras un tool corre |
+
+- El timer se arma con `initialIdleMs` en `start()`; con el PRIMER `transform()` (cualquier
+  chunk) pasa a usar `idleMs` para todo lo que sigue.
+- `suspend()`/`resume()` son un toggle GENERICO e IDEMPOTENTE: el modulo no sabe nada de "tools",
+  solo desarma/rearma el timer. Llamarlos de mas no rompe nada.
+
+**El contador vive en `handleChatRequest.ts`**, cableado a
+`experimental_onToolCallStart`/`experimental_onToolCallFinish` de `streamText`:
+- Incrementa en start, decrementa en finish. Se suspende SOLO en la transicion 0->1, se
+  reanuda SOLO en la transicion ->0.
+- **Confirmado con doc oficial del SDK instalado** (`ai/dist/index.d.ts:2881`):
+  "Callback that is called right after a tool's execute function completes **(or errors)**".
+  Verificado tambien en runtime: `onToolCallFinish` se invoca en el camino de EXITO
+  (`ai/dist/index.js:3088-3097`) Y en el camino de ERROR (`:3065-3075`, dentro del catch de
+  `executeToolCall`), asi que el contador SIEMPRE se decrementa - un tool que tira excepcion NO
+  deja el watchdog suspendido para siempre.
+- **Techo de seguridad** (`STREAM_WATCHDOG_TOOL_MAX_MS = 15000`): si el contador queda > 0 mas de
+  ese tiempo, se fuerza el `resume()` igual - un tool realmente COLGADO (ni exito ni error, se
+  cuelga de verdad) no puede reintroducir el mismo cuelgue de 30s que este sprint entero viene
+  arreglando. NO toca el contador: si el tool eventualmente "termina", el decrement corre
+  normal (resume() de mas es idempotente).
+- `chat.watchdog_fired` ahora incluye `toolsInFlight` y `suspendedMsTotal` - si el disparo
+  ocurrio con tools en vuelo, solo puede ser porque el techo de seguridad forzo el resume.
+
+### Aritmetica (pinneada en `deadline.invariant.ts`, bloque 9)
+Watchdog se crea a ~4.9s (medido), el chunk unico llega a ~6.4s:
+- Camino real: dispara a 6.4+1.2=7.6s -> `computeHookBudgetMs` da el presupuesto COMPLETO de
+  ONF-2 (5000ms) -> cierre a ~7.9-8.6s. Contra 30s de hoy.
+- Camino patologico (nunca llega nada): dispara a 4.9+12=16.9s, sin nada que persistir.
+- Peor caso de suspension (tool al limite de TOOL_MAX_MS): dispara a 4.9+15+1.2=21.1s ->
+  `computeHookBudgetMs(21100)` SIGUE dando el presupuesto completo (30000-21100-3000=5900>5000).
+
+**Incertidumbre declarada**: NO hay datos de gaps ENTRE chunks (Gemini mando uno solo en las
+mediciones). `idleMs=1200` es una estimacion conservadora, no una medicion directa como si lo
+es `initialIdleMs` (que si tiene 2 mediciones reales de gap-al-primer-chunk). Si en produccion
+aparecen respuestas cortadas a la mitad, subir primero `STREAM_WATCHDOG_IDLE_MS`.
+
+### Tests
+`stream-watchdog.invariant.ts`: 15 bloques (7 originales + 8 nuevos). Los nuevos verifican, contra
+el modulo REAL (no mocks): las dos ventanas conmutan en el momento correcto, `suspend()` aguanta
+un silencio mucho mayor a `idleMs`, el CONTADOR de 2 tools solapados (no un booleano: el primero
+que termina no reanuda si el segundo sigue en vuelo), y el techo de seguridad libera un tool que
+nunca llama a finish. Cero unhandled rejections en los 15 bloques.
+
+### Gates
+- `tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings en los 5 archivos.
+- `test:watchdog` (15/15) + bateria completa (deadline, onf1, infra1, infra2, c02, cost1, cost2,
+  utm1, re2, ev4) - todas OK.
+- Sin migracion, sin git. Sin tocar route.ts, connection string, modulo de seguridad, scoping por
+  organizacion, ni la logica/idempotencia de `persistTurn` (solo cambia QUIEN dispara el resume,
+  nunca que se persiste).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+Que el input se destrabe en ~1.5s en produccion real; que NINGUNA respuesta se corte (ni de texto
+largo, ni con tool); **que una captura de lead con Neon fria NO se corte** (es el caso que motiva
+la mitad de este sprint, y no hay forma de reproducir un cold-start real de Neon fuera de prod).
+
+---
+
+## WATCHDOG-2 (Fase 2) - cursor de tipeo inline (commit aparte)
+
+### Sintoma y causa
+El cursor (`|`) aparecia en la linea de ABAJO del ultimo parrafo en vez de a la derecha de la
+ultima palabra. Componente: `StreamingMarkdown.tsx` (NO frozen; `ChatWindow.tsx` solo lo consume
+via props y no necesito tocarlo en absoluto).
+
+Causa confirmada leyendo el JSX: el caret es un `<span>` HERMANO que se renderiza DESPUES del
+`<ReactMarkdown>`, y react-markdown renderiza el markdown como elemento(s) de bloque (tipicamente
+un `<p>`) directos del div contenedor, sin wrapper propio. Aunque el caret en si es
+`display: inline-block`, el bloque `<p>` que lo precede fuerza el corte de linea antes de el.
+
+### El fix
+Un `className` condicional en el div contenedor, activo SOLO mientras `showCaret` es true:
+`[&>*:nth-last-child(2)]:inline` (Tailwind, selector arbitrario). `:nth-last-child(2)` es
+exactamente el bloque INMEDIATAMENTE ANTES del caret (el caret mismo es siempre el ultimo hijo
+cuando se muestra) - sea el unico parrafo o el ultimo de varios. Volverlo `inline` lo fusiona en
+el mismo renglon que el texto que se esta revelando.
+
+Diff minimo: 1 archivo, ~16 lineas (todas dentro del `return`), cero cambios de estado, cero
+tocar `ChatWindow.tsx` (que arrastra cambios de RE-2/C0.2 sin verificacion humana - no se le
+toco absolutamente nada).
+
+Mensajes historicos (sin caret, `showCaret=false`) quedan con el layout de bloque normal de
+`prose`, sin cambios.
+
+### Gates
+`tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings.
+
+### Verificacion humana declarada (Valentino)
+Que el cursor se vea a la derecha de la ultima palabra en desktop y mobile, con mensajes de un
+parrafo y de varios parrafos.
+
+---
+
+## WATCHDOG-3 - la ventana del watchdog es por STEP, no por stream
+
+### El bug (verificado en produccion, dos veces)
+El visitante daba nombre/mail/telefono, `capture_lead` corria bien (el lead quedaba en
+`ChatbotLead` con todos los datos), pero **el bot no respondia nada** - ni texto ni error. Los
+mensajes siguientes de esa conversacion tampoco recibian respuesta.
+
+### La causa
+Cuando un tool termina, el SDK arranca un STEP NUEVO: manda el resultado del tool de vuelta al
+modelo y espera el texto final. Ese step 2 es una llamada NUEVA al provider, con su propio
+arranque en frio - los `gapMs` medidos hasta el primer chunk fueron 1470ms y 1664ms, los mismos
+numeros que ya se habian medido para el arranque del stream completo.
+
+El watchdog (WATCHDOG-2), al reanudar tras un tool, rearmaba SIEMPRE con la ventana CORTA
+(`STREAM_WATCHDOG_IDLE_MS = 1200ms`) bajo la suposicion de que "reanudar pasa a mitad del
+stream". Esa suposicion era el error de diseno: el arranque en frio no es una propiedad del
+STREAM, es de CADA STEP. Con la ventana corta, el watchdog cortaba antes de que llegara el
+primer token del step 2.
+
+### Confirmado antes de tocar codigo
+- `experimental_onStepStart` existe en `streamText` de `ai@6.0.177`
+  (`ai/dist/index.d.ts:2875`), documentado explicitamente: "Callback invoked when each step
+  begins, **before the provider is called**" (`:1340`).
+- Verificado en el runtime instalado, no solo en la doc: el `notify()` de `onStepStart`
+  (`ai/dist/index.js:7661-7685`) corre estrictamente ANTES de `stepModel.doStream(...)`
+  (`:7690-7746`), dentro de la MISMA funcion `streamStep` que ya conociamos de sprints
+  anteriores (donde vive `resetChunkTimeout`). Corre en CADA step, incluido el primero.
+- Ninguna parada obligatoria se disparo: `onStepStart` existe, se invoca en el camino real, y
+  corre ANTES del primer chunk del step (nunca despues).
+
+### El fix
+- **`streamWatchdog.ts`**: nuevo metodo `beginStep()` en el controller (junto a `suspend`/
+  `resume`). Resetea `hasFirstChunk = false` y rearma via el `armTimer` YA EXISTENTE (que ya
+  respeta la suspension - `if (suspended) return` - asi que "beginStep() no debe rearmar si
+  esta suspendido" se cumple GRATIS, reusando el guard que ya existia, sin logica nueva).
+  `resume()` YA NO fuerza `hasFirstChunk = true` - esa era la linea del bug. Ahora usa el estado
+  que haya, y es `beginStep()` (no una suposicion de `resume()`) quien decide la ventana.
+- Diseno robusto al ORDEN: el orden real confirmado es tool termina -> `onToolCallFinish`/
+  `resume()` (dentro del step que llamo al tool) -> un instante despues, arranca el step
+  siguiente -> `onStepStart`/`beginStep()`. Pero el fix NO depende de ese orden: si
+  `beginStep()` corriera antes que `resume()` (mientras sigue suspendido), `armTimer` no arma
+  nada (respeta la suspension) y deja `hasFirstChunk=false` listo para cuando `resume()`
+  corra despues - mismo resultado en cualquier orden. Verificado con un test especifico
+  (orden invertido).
+- **`handleChatRequest.ts`**: `experimental_onStepStart: () => { watchdogRef.current?.beginStep() }`,
+  cableado sin condicionar por numero de step (corre tambien en el step 1, donde es redundante
+  con lo que ya arma `start()` pero inofensivo - mismo re-arm idempotente).
+
+**Diff no-comentario, verificado con grep**: en `handleChatRequest.ts`, EXACTAMENTE 3 lineas
+(el callback `experimental_onStepStart`). En `streamWatchdog.ts`: la firma nueva en la interfaz,
+la linea `hasFirstChunk = true` ELIMINADA de `resume()`, y el metodo `beginStep()` (reusando
+`armTimer` existente). Nada mas se toco: ni `suspend()`, ni el contador de tools, ni
+`STREAM_WATCHDOG_TOOL_MAX_MS`, ni `persistTurn`, ni las constantes.
+
+### Verificacion de que el test detecta el bug de verdad
+Antes de cerrar, reintroduje temporalmente la linea `hasFirstChunk = true` en `resume()` (el
+bug original) y corri la bateria: **el test 17 fallo** exactamente como se esperaba
+(`chat.watchdog_fired` disparaba de mas, `reasons` traia `['idle']` en vez de `[]`). Restaurado
+el fix, los 19 bloques vuelven a pasar. El test no es un placebo - detecta la regresion real.
+
+### Aritmetica actualizada (`deadline.invariant.ts`, bloque 9)
+- 9a/9b/9c (sin cambios de valor, siguen validos): camino real con chunk, camino sin ningun
+  chunk, y el resume() del PROPIO techo de seguridad (que sigue usando la ventana corta - no
+  cambia con este sprint, porque en ese punto `beginStep()` todavia no corrio).
+- **9d (nuevo)**: camino REALISTA - tool termina dentro de su cold start esperado (~7s, medido
+  6-7s), step 2 arranca con la ventana LARGA (`beginStep()` -> `initialIdleMs`=12000) - sigue
+  cerrando comodo antes del kill de 30s aun con el cold start COMPLETO del step 2 sumado encima.
+
+**Hallazgo residual, declarado y FUERA de scope de este sprint** (no se tocan constantes, era
+regla explicita): en el caso EXTREMO donde el techo de seguridad (TOOL_MAX_MS=15s) fuerza el
+resume, Y el tool termina poco despues, Y el step 2 necesita su cold start COMPLETO, la suma
+teorica puede superar los 30s: ~4.9s (pre-LLM) + 15s (TOOL_MAX_MS) + ~1.2s (margen) + 12s
+(INITIAL_IDLE_MS) = ~33.1s. Es un doble-edge-case (tool casi colgado + step 2 lento) que no se
+resuelve aca - si aparece en produccion, revisar `STREAM_WATCHDOG_TOOL_MAX_MS` con
+Valentino/Franco. Documentado en el codigo, no solo en la bitacora.
+
+### Tests
+`stream-watchdog.invariant.ts`: 19 bloques (15 del sprint anterior + 4 nuevos). Los nuevos:
+(16) reproduccion EXACTA del bug con el orden real (tool termina -> resume() -> beginStep() ->
+cold start del step 2 entre idleMs e initialIdleMs -> NO dispara, el texto llega); (17) orden
+INVERTIDO (beginStep() antes que resume(), con el watchdog todavia suspendido) - no pisa la
+suspension y al reanudar usa la ventana larga igual; (18) beginStep() llamado 3 veces seguidas
+- un solo timer vivo (verificado contra `process.getActiveResourcesInfo()`, no por inspeccion);
+(19) el step 2 nunca manda nada - dispara a `initialIdleMs`, no se queda esperando `idleMs`
+(deliberadamente puesto larguisimo para que el test fallara rapido si el bug seguia).
+
+### Gates (corridos y reportados explicitamente, como se pidio)
+- `tsc --noEmit`: **0 errores** (repo entero).
+- `eslint` sobre los 4 archivos tocados: **0 errores, 0 warnings**.
+- `npm run test:watchdog`: **19/19 OK**.
+- Bateria de regresion completa: deadline, onf1, infra1, infra2, c02, cost1, cost2, utm1, re2,
+  ev4 - **todas OK**.
+- `prisma migrate status`: up to date, sin cambios. Sin migracion, sin git.
+- Sin tocar: `StreamingMarkdown.tsx`, `ChatWindow.tsx`, `useChatbot.ts`, `route.ts`,
+  `persistTurn` (ni su idempotencia ni su contrato), la connection string, el modulo de
+  seguridad, el scoping por organizacion, ni la contabilidad de cupo. Probes de PROBE-STREAM
+  intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada de esto
+En una conversacion NUEVA (las de prueba anteriores quedaron con un `ASSISTANT` vacio o parcial
+en el historial): que tras dar nombre y telefono el bot **responda**; que el lead siga
+apareciendo en `ChatbotLead`; que una conversacion SIN tools se siga destrabando en ~1.5s (este
+sprint no debia tocar ese camino, y las pruebas locales no reemplazan la verificacion real).
+
+---
+
+## PROVIDER-CLOSE (Fase 1) - cerrar el stream del provider, no el del borde
+
+### EL HALLAZGO CENTRAL
+**El SDK emite `finish-step`, arranca el step siguiente y dispara `onStepFinish`/`onFinish` (con
+el `usage` que alimenta el costo) desde el `flush()` de sus TransformStreams internos. Un
+`flush()` solo corre cuando el stream de arriba TERMINA. El stream de Gemini no termina nunca.**
+
+Y la consecuencia que explica los dos sprints fallidos anteriores: **cerrar funciona, abortar no.**
+Un abort ERRORIZA la cadena, y un `flush()` NO corre cuando el stream erroriza - solo cuando
+cierra normal. `chunkMs` y `stepMs` (los timeouts del propio SDK) abortaban. Por eso no servian.
+
+El watchdog del borde (sprints WATCHDOG-1/2/3) no podia arreglar esto: cierra hacia ABAJO (la
+respuesta HTTP al cliente, que es lo que destraba el input del widget), no hacia arriba.
+
+### Verificado END-TO-END contra el SDK real ANTES de escribir codigo
+Modelo falso que emite y NUNCA cierra, con el `streamText` real de `ai@6.0.177`:
+
+| variante                       | onStepFinish | onFinish  |
+|--------------------------------|--------------|-----------|
+| sin middleware (control)       | 0            | NUNCA     |
+| ABORT tras idle                | 0            | NUNCA     |
+| CLOSE (`terminate`) tras idle  | 2            | 623ms     |
+
+### EL COSTO SE RECUPERA - medido, no asumido (era la pregunta abierta del sprint)
+`terminate()` NO pierde los chunks ya encolados. Si el provider mando su chunk `finish`, el
+`usage` que llega a `onFinish` es **byte-identico** al de un provider que cierra solo
+(`{inputTokens:111, outputTokens:222, totalTokens:333, ...}` en ambos casos). Si el provider NO
+manda `finish`, el pipeline igual se destraba (texto entregado, `onFinish` dispara, persistencia
+OK) pero el `usage` queda vacio y el costo en 0.
+
+Cual de los dos es Gemini lo responde la instrumentacion en produccion: **el chunk `finish` NO se
+pasa a `onChunk`**, asi que el `chunks_total: 1` que habiamos medido antes NO lo descartaba.
+
+### UNA PARTE DEL DIAGNOSTICO DEL SPRINT NO SE PUDO REPRODUCIR - hay que decirlo
+El sprint atribuia a la misma causa que **los tools se ejecuten 30s tarde**
+(`tool:capture_lead enter elapsedMs: 32651` en prod). En el probe contra el SDK real, **los tools
+se ejecutan INMEDIATAMENTE (13ms) incluso sin el middleware, con el stream colgado**: en
+`runToolsTransformation` el `executeToolCall` se dispara en el `transform` del chunk `tool-call`,
+NO en el `flush` (`ai/dist/index.js:6744-6764`).
+
+O sea: el fix esta validado para `onFinish`/`onStepFinish`/step-2/`usage` (3 de los 4 sintomas),
+pero **la causa del retraso de 30s del tool queda SIN explicar**. Hipotesis no verificada: el
+`terminate()` del watchdog del borde a los 1217ms propaga cancelacion aguas arriba y difiere la
+ejecucion del tool hasta que la plataforma mata. Plausible que el middleware tambien lo resuelva
+(el stream del provider cierra a ~1s y el pipeline completa antes de que el borde actue), pero
+**no se afirma**: lo dira el log de produccion.
+
+### Que se hizo
+- **`server/llm/providerStreamClose.ts` (nuevo)**: middleware de `wrapLanguageModel` que envuelve
+  el stream CRUDO del provider. Reenvia cada chunk verbatim, y tras un silencio hace
+  `controller.terminate()`. Nunca aborta. Limpia timers en `flush`/`cancel`.
+- **Instrumentacion** (gated por `CHATBOT_STREAM_PROBE`): log `provider.stream_chunks` con conteo
+  POR TIPO de chunk, `sawFinishChunk`, `finishInputTokens`/`finishOutputTokens`, `finishReason`,
+  `elapsedMs`, `lastGapMs` y el motivo del cierre. Tipos y contadores, nunca contenido.
+- **Punto de cableado**: `handleChatRequest.ts`, donde se toma `effectiveModel.model`. NO dentro
+  de `resolveEffectiveModel` a proposito: esa funcion esta documentada como PURA y tiene dos
+  invariantes que le inyectan providers falsos. Aca el fallback de provider ya esta resuelto, asi
+  que el envoltorio lo cubre igual, y es agnostico del provider. `LanguageModel` es una union
+  (`string | V3 | V2`) y `wrapLanguageModel` exige V3: se discrimina por `specificationVersion`,
+  sin castear.
+
+| Constante (`reconcile.ts`) | Valor | Que acota |
+|---|---|---|
+| `PROVIDER_STREAM_IDLE_MS` | 1000 | silencio entre chunks del provider |
+| `PROVIDER_STREAM_INITIAL_IDLE_MS` | 12000 | antes del primer chunk (cold start) |
+
+No hace falta `beginStep()` como en el watchdog del borde: **cada step llama a `doStream()` de
+nuevo**, asi que cada step recibe su propia instancia del transform con su propia ventana
+inicial. El cold start por step queda cubierto por construccion.
+
+### El watchdog del borde pasa a RED DE SEGURIDAD
+`STREAM_WATCHDOG_IDLE_MS` subido de 1200 a 3000. Ahora quien cierra rapido es el middleware
+(~1s, aguas arriba); al cerrarse el stream del provider el SDK completa el pipeline y el body
+termina solo, asi que el watchdog del borde no deberia dispararse NUNCA en operacion normal. Se
+sube para que no compitan: con 1200ms podia dispararse justo mientras el SDK arranca el step 2.
+No degrada la latencia. **Es lo unico que se toco del watchdog** (`streamWatchdog.ts` y
+`persistTurn` quedaron intactos).
+
+**Trade-off medido y documentado** (no una regresion silenciosa): con idle=3000, el peor caso de
+suspension por tool (`TOOL_MAX_MS` agotado) ya no conserva el presupuesto COMPLETO de
+persistencia - quedan ~4100ms en vez de 5000ms. `persistTurn` tarda ~300-1600ms medido, asi que
+sigue holgado. El invariante del bloque 9c de `deadline.invariant.ts` se actualizo para pinnear
+lo que de verdad importa (que alcance para un intento de persistencia + su evento de cierre)
+en vez de "exactamente 5000".
+
+### Tests, y la verificacion FALLA-PRIMERO
+`provider-stream-close.invariant.ts` (nuevo, `npm run test:providerclose`, cero DB/red/credenciales):
+- PARTE A - el transform: chunks verbatim y en orden, cierre con `done` LIMPIO (no error), las dos
+  ventanas, ningun timer huerfano, cancelacion.
+- PARTE B - la premisa, contra el `streamText` REAL: control sin middleware (onFinish NUNCA),
+  con middleware (onFinish SI + usage recuperado), paridad exacta del usage contra un provider
+  que cierra solo, y la rama sin chunk `finish` (se destraba igual, usage vacio).
+
+**Verificacion falla-primero, con DOS mutaciones:**
+1. `terminate()` -> `controller.error()`: el test falla ("el consumidor NO ve un error: ve un
+   cierre LIMPIO"). Prueba que el test distingue close de abort.
+2. timer neutralizado (middleware = passthrough): el test falla ("el stream NO cerro en 2000ms").
+
+**La mutacion 2 destapo un hueco REAL en el propio test**, que se corrigio: sin un guard de
+timeout, un stream que no cierra deja el `read()` pendiente, el event loop de Node se vacia y **el
+proceso sale con codigo 0 en silencio** - el test "pasaba" sin verificar nada. Se agrego un guard
+con timer CANCELABLE (si no se cancelara, contaminaria los checks de timers huerfanos - eso
+tambien se descubrio corriendo el test).
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 6 archivos: 0 errores, 0 warnings.
+- `test:providerclose` + `test:watchdog` + `test:deadline` + bateria (onf1, infra1, infra2, c02,
+  cost1, cost2, utm1, re2, ev4): **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `streamWatchdog.ts`, `persistTurn`, `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`,
+  connection string, modulo de seguridad, frozen, scoping por organizacion, contabilidad de cupo.
+  Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) tras dar nombre y telefono el bot RESPONDE; (2) el tool corre de
+inmediato, no a los 30s; (3) `step_count > 0` y aparece `onStepFinish`; (4) `tokensIn`/`tokensOut`
+/`costUsd` distintos de 0 - **o, si siguen en 0, el log `provider.stream_chunks` dice por que**
+(mirar `sawFinishChunk`); (5) la `Duration` baja de 30000ms; (6) una conversacion sin tools se
+sigue destrabando rapido.
+
+---
+
+## PROVIDER-CLOSE (Fase 2) - el cursor con listas (commit aparte)
+
+**Sintoma:** mientras el bot escribia una respuesta con vinetas, la lista se veia desalineada y
+apretada; al terminar se acomodaba sola.
+
+**Causa:** el fix del sprint anterior aplicaba `inline` a `[&>*:nth-last-child(2)]` para que el
+caret quedara a la derecha de la ultima palabra. Cuando el ultimo bloque es un `<ul>`, ponerlo
+`inline` colapsa las vinetas.
+
+**Fix:** acotar el selector a `p`: `[&>p:nth-last-child(2)]:inline`. Con listas, bloques de codigo
+o tablas el caret cae abajo (feo pero legible) en vez de romper el bloque. **El diff es
+literalmente un caracter** (`*` -> `p`) mas el comentario que explica por que.
+
+Archivo: `StreamingMarkdown.tsx`, y solo ese. `ChatWindow.tsx` no se toco.
+
+### Gates
+`tsc --noEmit`: 0 errores. `eslint`: 0 errores, 0 warnings.
+
+### Verificacion humana
+Que la lista con vinetas se vea bien MIENTRAS streamea, en desktop y mobile, y que el caret siga
+inline al lado de la ultima palabra en respuestas de texto normal.
+
+---
+
+## DEADLOCK-FINISH-STEP - nuestro transform trababa el pipeline del SDK
+
+### EL HALLAZGO CENTRAL
+**Un transform de usuario que RETIENE el chunk `finish-step` produce una espera circular con el
+`stepFinish` del SDK y traba TODO el pipeline. Nunca se puede demorar un chunk estructural: un
+transform puede AGREGAR chunks, jamas diferir los del SDK.**
+
+Y el corolario que da vuelta tres sprints: **el stream de Gemini SIEMPRE estuvo sano.** La
+instrumentacion del sprint anterior (PROVIDER-CLOSE) lo probo en la primera corrida en prod:
+
+```
+provider.stream_chunks  reason:"natural"  elapsedMs:659  totalChunks:7
+sawFinishChunk:true  finishReason:"stop"  finishInputTokens:6280  finishOutputTokens:202
+```
+
+`reason: "natural"` = el timer del middleware NUNCA disparo. Gemini cerro solo, en 659ms, completo,
+con su chunk `finish` y usage real. **Todo lo que le atribuimos al provider era falso.** El
+middleware no arreglo nada por su timer: sirvio para darnos la visibilidad que faltaba.
+
+### La cadena del deadlock (verificada contra el codigo instalado)
+1. El inner transform de `streamStep` encola `finish-step` (`ai/dist/index.js:8007-8017`) y hace
+   `await stepFinish.promise` (`:8022`).
+2. `stepFinish.resolve()` vive en el `eventProcessor`, bajo `part.type === 'finish-step'`
+   (`:7253`) - corre SOLO cuando ese chunk llega hasta ahi.
+3. Nuestros transforms se aplican EN EL MEDIO (`:7396-7405`, entre el stitchable stream y el
+   `eventProcessor`), y `createEmptyResponseFallbackTransform` lo tenia retenido
+   (`reconcile.ts:425-428` en la version vieja).
+4. Se liberaba con el chunk siguiente... que solo llega si el SDK avanza.
+5. O en su `flush`, que corre al cerrar el stream de arriba - y ese cierre (`self.closeStream()`,
+   `:8103`/`:8112`) esta DESPUES del `await` bloqueado.
+
+Retenia UNICAMENTE `finish-step`; ningun otro chunk estructural (auditado).
+
+### VERIFICACION EMPIRICA - lo decisivo, contra el streamText REAL
+Provider falso SANO (emite y cierra normal), con y sin nuestro transform:
+
+| escenario | stream drenado | onFinish | onStepFinish | steps | usage in/out | tool |
+|---|---|---|---|---|---|---|
+| SIN transform (texto)       | si           | SI | 1 | 1 | 6280/202  | -  |
+| CON transform (texto)       | NO (COLGADO) | NO | 0 | - | n/a       | -  |
+| SIN transform (tool->step2) | si           | SI | 2 | 2 | 12560/404 | si |
+| CON transform (tool->step2) | NO (COLGADO) | NO | 0 | - | n/a       | si |
+
+**Diagnostico probado.** Y explica los cuatro sintomas: `step_count: 0` (los steps se registran al
+procesar `finish-step`), `onFinish` nunca dispara (su `flush` nunca corre), costo en 0 (el `usage`
+viaja en `finish`, que nunca se procesaba - y ahora sabemos que el dato SIEMPRE estuvo ahi), y el
+mas caro: **tras un tool el step 2 nunca arrancaba** (se lanza desde el inner flush, despues del
+await bloqueado), asi que el bot capturaba el lead y despues no respondia nada. El tool SI corria
+- por eso el lead aparecia en la tabla.
+
+Por que fallaron `chunkMs`, `stepMs`, el watchdog del borde y el middleware del provider:
+**ninguno tocaba el nudo.**
+
+### Correlacion historica
+`git log -S` sobre `reconcile.ts`: el transform entro en **ONF-1, commit 644b2b7 del 2026-07-14**.
+La evidencia de sprints previos decia que `chat.message_completed` dejo de escribirse por esa
+fecha. Correlaciona (sugerente, no prueba - la prueba es la tabla de arriba).
+
+### El fix - opcion (b): decidir en el chunk terminal `finish`
+Se lleva la cuenta de si hubo texto util a medida que fluyen los chunks, y la decision se toma al
+ver el `finish`, que es inequivocamente el final de TODO el run (no de un step intermedio). Si no
+hubo texto en ningun step, las text parts canned se encolan ANTES del `finish`, **en la misma
+invocacion de transform()**: alcanza con el ORDEN dentro de la llamada, no hace falta retener
+para inyectar antes. El `finish-step` pasa de largo en su posicion original. Ya no hay `flush`:
+no queda nada que liberar.
+
+**Por que (b) y no (a):** decidir en `finish-step` no puede distinguir un step intermedio (solo
+tool call, sin texto - correcto que no tenga) del step final vacio. Esa es exactamente la razon
+por la que la version original retenia. El chunk `finish` no tiene esa ambiguedad.
+**Por que no (c):** sacar el fallback a `onFinish` perderia la inyeccion EN VIVO al stream - el
+visitante dejaria de ver el texto de derivacion mientras pasa.
+
+**CUANDO inyecta: identico a antes** (la version vieja tambien decidia al ver el `finish`). El
+caso multi-step queda cubierto: un step intermedio sin texto no dispara nada, la decision espera
+al `finish` con el texto del step 2 ya contabilizado. Verificado en el test.
+
+**LO UNICO QUE CAMBIA:** las text parts caen DESPUES del ultimo `finish-step` en vez de antes, asi
+que quedan fuera de `steps[]`/`text` del `onFinish`. Inocuo: `handleChatRequest` ya resolvia
+`assistantContent` con el canned explicito cuando `emptyFallbackInjected` y el texto viene vacio
+(belt-and-suspenders preexistente). Para el visitante no cambia nada: las parts igual viajan por
+el UI message stream (verificado - el test afirma que el texto del fallback llega al stream real).
+
+### El test que faltaba hace tres sprints
+`empty-fallback-pipeline.invariant.ts` (`npm run test:emptyfallback`), contra el `streamText`
+REAL. Los unitarios del transform NO detectaron el bug porque lo miraban AISLADO: el chunk salia,
+solo que mas tarde, y eso parecia inofensivo ("retrasado, nunca perdido"). **El bug solo existe en
+la interaccion con el pipeline.** Afirma: onFinish dispara, onStepFinish dispara, steps > 0, el
+usage llega con los tokens del `finish`, y con una tool call **el step 2 arranca**. Mas paridad
+(el pipeline se comporta identico con y sin el transform) y un barrido que verifica que ningun
+chunk de entrada falta en la salida, para cada prefijo del stream.
+
+Tambien tiene guard de timeout: sin el, un pipeline trabado deja el `for await` pendiente, el
+event loop se vacia y **Node sale con codigo 0 en silencio** - el test "pasaria" sin verificar
+nada (leccion del sprint anterior).
+
+### Verificacion falla-primero
+Se reintrodujo la retencion original de `finish-step` y el test **fallo en el primer assert**:
+"el stream se drena por completo (no hay deadlock)" - false !== true. Restaurado, pasa.
+
+### Se actualizo onf1-reconcile.invariant.ts
+Sus bloques 5.b y 5.e pinneaban el orden VIEJO (texto inyectado ANTES del `finish-step`, "dentro
+del ultimo step") - o sea, pinneaban el diseno que causaba el deadlock. Actualizados al orden
+nuevo, con comentario explicando por que cambio. 5.a/5.c/5.d/5.f pasan sin tocar.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 3 archivos: 0 errores, 0 warnings.
+- `test:emptyfallback` (nuevo) + onf1, providerclose, watchdog, deadline, infra1, infra2, c02,
+  cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `streamWatchdog.ts`, `providerStreamClose.ts`, `persistTurn`, `StreamingMarkdown.tsx`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) nombre y telefono -> **el bot responde** tras capturar el lead;
+(2) `step_count > 0` en `chat.llm_request_finished`; (3) `tokensIn`/`tokensOut`/`costUsd`
+distintos de 0 (el usage esta: 6280/202 medidos); (4) **`chat.watchdog_fired` DEJA de aparecer**
+en el camino sano - si sigue apareciendo, el pipeline aun no completa solo; (5) la `Duration` baja
+de 30000 ms; (6) `ChatMessage` con fila ASSISTANT y `ChatbotEvent` con `chat.message_completed`.
+
+---
+
+## WATCHDOG-4 - la ventana la decide el contenido, no los bytes
+
+### EL HALLAZGO CENTRAL
+**El frame `start` del SDK no es contenido del modelo. Un watchdog que opera sobre BYTES no puede
+distinguir "empezo a fluir el transporte" de "empezo a responder el modelo". El discriminador es
+`onChunk`.**
+
+### El bug
+El SDK encola un frame `start` apenas se crea el stream (`ai/dist/index.js:7359`, en el `start()`
+del ReadableStream que alimenta `baseStream`), y `toUIMessageStream` lo traduce a un frame SSE
+inmediato (`:8534-8542`, con `sendStart` default true en `:8321`). O sea: llega al borde ANTES de
+que el modelo haya generado nada.
+
+El watchdog del borde opera sobre `Uint8Array`. Veia ese byte, lo tomaba como "ya llego el primer
+chunk" y **cambiaba de la ventana inicial (12000ms) a la corta (3000ms)**. Despues Vertex tardaba
+en el primer token y el watchdog mataba una respuesta que el modelo estaba generando bien.
+
+Log del turno que se corto:
+```
+18:27:44.762  beforeStreamResponse
+18:27:47.767  chat.watchdog_fired  chunks: 1  elapsedMs: 3005  assistantTextLength: 0
+18:27:52.804  provider.stream_chunks  reason:"natural"  finishReason:"stop"
+              finishOutputTokens: 351  chunk_text_delta: 2
+```
+`chunks: 1` con `assistantTextLength: 0` = el unico chunk que habia pasado era el `start`. El
+modelo termino igual, natural, con **351 tokens de salida**, 5 segundos DESPUES de que lo
+cortaramos.
+
+**Y no era un bug de un camino puntual.** El turno "sano" de la misma sesion tenia `gapMs: 2969`
+contra una ventana de 3000: **zafo por 31 milisegundos**. Era una moneda al aire en CADA turno,
+que sale mal cada vez que Vertex tarda.
+
+Corolario: la respuesta que el usuario pedia (una confirmacion tras "que me contacten") **ya
+existia** - eran esos 351 tokens. El modelo siempre hizo lo correcto; lo cortabamos nosotros. No
+hizo falta agregar ningun tool ni tocar el prompt.
+
+### El discriminador (verificado antes de cablear)
+`onChunk` se invoca UNICAMENTE para chunks reales del modelo - `text-delta`, `reasoning-delta`,
+`source`, `tool-call`, `tool-result`, `tool-input-start`, `tool-input-delta`, `raw`
+(`ai/dist/index.js:7105-7106`) - y **nunca** para `start`, `start-step`, `finish-step` ni `finish`.
+Es la unica senal disponible que separa transporte de contenido. La parada obligatoria #1 no se
+disparo.
+
+### El fix: separar dos cosas que estaban mezcladas
+| | Que la dispara | Que hace |
+|---|---|---|
+| Reset del timer | cualquier byte que pase por el transform | reinicia la cuenta regresiva |
+| Seleccion de ventana | `markContent()` (senal explicita de contenido) | pasa a la ventana corta |
+
+Antes los bytes hacian las dos cosas. Ahora hacen solo la primera.
+
+- `streamWatchdog.ts`: metodo nuevo **`markContent()`**; el flag interno pasa de `hasFirstChunk`
+  (bytes) a `hasContent` (contenido real). El `transform` sigue reseteando el timer con cada byte
+  pero ya NO toca la ventana. El flag sigue siendo POR STEP: `beginStep()` lo vuelve a `false`.
+  `resume()` no lo pisa (era el bug de WATCHDOG-3, ahora con el flag nuevo).
+- `handleChatRequest.ts`: `watchdogRef.current?.markContent()` como primera linea del `onChunk`
+  que ya existia. Si el watchdog aun no esta en el ref, es no-op seguro (optional chaining).
+- `markContent()` es idempotente y barato: cuenta siempre (telemetria) pero solo cambia la ventana
+  y re-arma la primera vez.
+
+**Las constantes NO cambian.** `INITIAL_IDLE_MS = 12000` y `IDLE_MS = 3000` estaban bien: el peor
+caso medido a primer token fue ~8s, que entra con margen en 12s. Con el fix, esa es la ventana que
+realmente aplica.
+
+### Telemetria: que la proxima vez el log lo diga solo
+`chat.watchdog_fired` (y el `watchdog_settled` del probe) ahora llevan:
+- **`window`**: `initial` | `content` - que ventana estaba activa al disparar;
+- **`contentChunks`**: chunks de contenido REAL, distinto del `chunks` de bytes.
+
+Con esos dos campos el diagnostico habria sido inmediato: `window:"content"` con
+`contentChunks: 0` es una contradiccion evidente.
+
+### Tests
+`stream-watchdog.invariant.ts` pasa de 19 a 25 bloques. Los nuevos: (20) el caso EXACTO del bug -
+un byte que no es contenido + silencio entre `idleMs` e `initialIdleMs` -> NO dispara y la
+respuesta llega completa; (21) bytes sin `markContent()` jamas -> dispara recien a `initialIdleMs`
+con `window:'initial'` y `contentChunks: 0`; (22) `markContent()` idempotente (N llamadas, UN
+timer, un cambio de ventana, pero el contador cuenta N); (23) `beginStep()` vuelve a la ventana
+larga aunque el step previo tuvo contenido; (24 y 25) `suspend()`/`resume()` no pisan el estado de
+ventana en NINGUNA de las dos direcciones.
+
+Se actualizo el bloque 11, que pinneaba la semantica vieja (mandaba un byte y esperaba el switch
+de ventana) - o sea, pinneaba el bug. Ahora el switch lo dispara `markContent()`.
+
+### Verificacion falla-primero
+Se reintrodujo `hasContent = true` en el `transform` (que los bytes vuelvan a elegir la ventana) y
+el test **fallo en el bloque 20**: "un byte sin contenido NO acorta la ventana: no dispara - 1 !== 0".
+Restaurado, los 25 bloques pasan.
+
+### Gates
+- `tsc --noEmit`: 0 errores (repo entero). `eslint` sobre los 3 archivos: 0 errores, 0 warnings.
+- `test:watchdog` (25 bloques) + emptyfallback, providerclose, deadline, onf1, infra1, infra2,
+  c02, cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git.
+- Sin tocar: `reconcile.ts`, `providerStreamClose.ts`, `persistTurn`, `StreamingMarkdown.tsx`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. **Cero tools nuevos, cero cambios al prompt** -
+  el modelo ya generaba la respuesta correcta. Probes de PROBE-STREAM intactos.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+En una conversacion NUEVA: (1) nombre y telefono -> capturar el lead -> **elegir "Que me
+contacten"** -> el bot responde con la confirmacion; (2) la opcion de WhatsApp sigue andando;
+(3) `chat.watchdog_fired` NO aparece en turnos sanos - y si aparece, `window` y `contentChunks`
+dicen por que; (4) `step_count > 0` y `costUsd != 0` se mantienen; (5) la latencia de cierre sigue
+baja en turnos rapidos (la ventana larga solo aplica hasta el primer chunk de contenido, no
+deberia penalizar el camino sano).
+
+---
+
+## CONTACT-PATH - el camino "que me contacten" tiene que terminar en texto
+
+### EL HALLAZGO CENTRAL
+**Un tool client-side no produce output, asi que el SDK no continua a otro step; si el turno
+depende de ese tool, cierra sin texto. Todo camino conversacional que deba terminar en respuesta
+necesita un tool SERVER-SIDE que fuerce el step final.**
+
+### El bug
+El visitante daba sus datos, se capturaba el lead, aparecia la tarjeta con dos opciones. Elegir
+WhatsApp funcionaba; elegir **"Que me contacten"** devolvia nuestro fallback de respuesta vacia
+("Se me complico generar una respuesta ahora...") y volvia a renderizar la misma tarjeta.
+
+Log de produccion:
+```
+onStepFinish  stepNumber:0  finishReason:"tool-calls"  toolCallCount:1  textLength:0
+onStepFinish  stepNumber:1  finishReason:"tool-calls"  toolCallCount:1  textLength:0
+onFinish_enter  textLength:106      <- largo del fallback, no del modelo
+chat.empty_response_fallback  finishReason:"tool-calls"  toolCallCount:2
+```
+
+### La causa (estructural, del SDK)
+En el `flush` del inner transform de `streamStep`, la continuacion a otro step exige que las tool
+calls hayan producido OUTPUT:
+```js
+if (clientToolCalls.length > 0 && clientToolOutputs.length === clientToolCalls.length) -> otro step
+else -> cerrar
+```
+`offer_handoff_options` (`offerHandoffOptions.ts:29-35`) y `navigate_to_page`
+(`navigateToPage.ts:53-59`) son **client-side puros, sin `execute`** - no producen output, no hay
+step siguiente, el turno cierra mudo.
+
+**Por eso WhatsApp SI funcionaba:** `show_whatsapp_handoff` es server-side, su `execute` produce
+un tool-result, la condicion se cumple, arranca el step siguiente y ahi el modelo escribe.
+
+Para el camino de contacto **no existia ningun tool server-side**: el modelo no tenia a donde ir,
+reusaba la tarjeta (client-side) y se quedaba mudo.
+
+### El re-llamado de capture_lead: no era redaccion floja
+La descripcion del tool YA decia "Ya se invoco esta tool exitosamente en esta conversacion (no
+duplicar)" (`captureLead.ts:120`). El mecanismo real: `sections.ts:84` ata `offer_handoff_options`
+a "despues de capture_lead exitoso", y **sin destino para el camino de contacto el modelo
+reconstruia la unica secuencia que conocia**. Darle el destino lo arregla solo. (Igual se reforzo
+la linea de `capture_lead` con un "UNA sola vez por conversacion" explicito.)
+
+### El fix
+**`confirm_contact_request`** (`server/tools/confirmContactRequest.ts`), espejo server-side de
+`show_whatsapp_handoff`:
+- Su `execute` fuerza el step final **por construccion del SDK**, no por obediencia del modelo.
+  Instruir por prompt ("acordate de escribir algo") no alcanzaba: es el momento en que el
+  visitante convierte y no puede depender de una probabilidad.
+- Persiste un `ChatbotEvent` tipo **`handoff.callback`**, espejo de `handoff.whatsapp`. Cero
+  migracion: el patron de registro de derivaciones ya es un evento, no una columna.
+- Idempotente POR CONVERSACION (patron `capture_lead.already_captured`): dos clicks, un registro.
+  Devuelve `success: true` igual cuando ya existia - devolver error empujaria al modelo a
+  reintentar o a disculparse.
+- Nunca relanza: si la DB falla, el turno igual cierra con texto (el lead ya esta en
+  `ChatbotLead`, que es lo que habilita el contacto).
+- **Cero cambios en el widget**: `renderToolCall.tsx` tiene `default: return null`, asi que un
+  tool sin tarjeta no renderiza nada y no rompe. Lo que el visitante ve es el TEXTO del modelo -
+  exactamente lo que faltaba.
+- **PII**: la metadata persistida es solo `{preferredChannel}`. Importante porque
+  `logChatbotEvent` escribe la metadata a stderr ademas de a la DB.
+
+Una linea nueva en `sections.ts` le da destino al camino de contacto, **sin tocar el acople de
+`offer_handoff_options` a `capture_lead`** (que es lo que hace aparecer la tarjeta cuando
+corresponde): esa linea no aparece en el diff.
+
+### Se descarto darle `execute` a `offer_handoff_options`
+Arreglaria el "sin texto" pero NO el segundo sintoma - el modelo seguiria sin tener a donde ir y
+volveria a renderizar la misma tarjeta. Ademas no esta en `STARTER_TOOLS`.
+
+### GATE OPERATIVO: Plan.tools es una columna de la DB
+`getTools` filtra por `plan.tools`, y `Plan.tools` es `String[]` en la DB (`schema.prisma:616`).
+**Sin actualizar las filas Plan de produccion, el slug se descarta en silencio y el bug sigue.**
+
+**Auditoria de `sync-plans.ts` (pedida antes de implementar):**
+- **NO borra ni recrea**: cero `delete`/`deleteMany`/`createMany`. `findMany` -> `create` si falta
+  / `update` si cambio / skip. Filas con `key` fuera del catalogo quedan intactas. Idempotente.
+- **PERO pisa las 13 columnas**: `prisma.plan.update({where:{key}, data: next})` (`:168-171`)
+  escribe el objeto completo, y `hasPlanChanged` (`:131-147`) compara las 13 - drift en UNA marca
+  la fila como cambiada y se sobrescriben TODAS (precios, cuotas, limites, flags). Cualquier
+  ajuste manual en prod se revertiria en silencio, y la Neon es compartida con Franco.
+- **No hay Plan con tools por cliente**: `Plan` es catalogo global (3 filas por `key`); la
+  personalizacion por cliente vive en `Subscription` (`priceOverride`/`overrideUntil`/
+  `overrideReason`), que ningun script de planes toca. El override de Matsu esta a salvo.
+
+-> **Se uso el camino quirurgico**: `prisma/seeds/add-contact-tool.ts`, que hace
+`update({where:{id}, data:{tools: [...]}})` - UNA columna, preservando el resto del array,
+idempotente. `sync-plans.ts` y `fallback.ts` se actualizaron igual para que el catalogo quede
+coherente (si no, la proxima corrida del seed revertiria el slug), pero **el seed completo NO se
+corre**.
+
+**PASO MANUAL REQUERIDO** (Valentino, contra prod):
+`DATABASE_URL=<prod> npx tsx prisma/seeds/add-contact-tool.ts`
+Sin eso el fix no surte efecto.
+
+### Tests
+`confirm-contact-request.invariant.ts` (`npm run test:contactpath`, cero DB/red/credenciales):
+- PARTE A - el tool REAL con la persistencia inyectada (patron del 3er parametro de
+  `resolveEffectiveModel`): primera invocacion registra; idempotencia por conversacion; otra
+  conversacion si registra; DB caida no relanza; el schema rechaza un canal inventado.
+- PARTE B - contra el `streamText` REAL: el tool real hace **arrancar el step 2** y el turno
+  cierra con texto y `finishReason: "stop"`. Y el CONTROL: el mismo tool sin `execute` reproduce
+  el bug exacto.
+
+**Se corrigio una debilidad del propio test durante el sprint**: la primera version construia una
+replica del tool en vez de usar el builder real, asi que mutar el archivo de produccion no lo
+habria hecho fallar - un placebo. Se inyecto la persistencia para poder ejercitar el tool de
+verdad sin DB.
+
+### Verificacion falla-primero
+Se le quito el `execute` al tool REAL. El test fallo. Y se verifico especificamente el test de
+PIPELINE, aislado: con el tool mutado da **`steps: 1`, `textLength: 0`, `finishReason:
+"tool-calls"`** - identico al log de produccion. Restaurado, todo pasa.
+
+### Gates
+- `tsc --noEmit`: 0 errores. `eslint` sobre los 7 archivos: 0 errores (5 warnings PREEXISTENTES de
+  `_input`/`_ctx`, verificado contra el diff: ninguno lo agrega este sprint).
+- `test:contactpath` (nuevo) + watchdog, emptyfallback, providerclose, deadline, onf1, infra1,
+  infra2, c02, cost1, cost2, utm1, re2, ev4: **todas OK**.
+- `prisma migrate status`: up to date. Sin migracion, sin git, sin correr nada contra la DB.
+- Sin tocar: `streamWatchdog.ts`, `providerStreamClose.ts`, `reconcile.ts`, `persistTurn`,
+  `useChatbot.ts`, `ChatWindow.tsx`, `route.ts`, connection string, modulo de seguridad, frozen,
+  scoping por organizacion, contabilidad de cupo. **El boton "Que me contacten" NO se toco.**
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+Despues de correr el script quirurgico, en una conversacion NUEVA: (1) nombre y telefono -> lead
+capturado -> **"Que me contacten"** -> el bot responde con una confirmacion real (NO el texto que
+empieza con "Se me complico generar una respuesta ahora"); (2) `chat.empty_response_fallback` NO
+aparece en ese turno; (3) `finishReason: "stop"` y `textLength > 0`; (4) el camino de WhatsApp
+sigue igual; (5) queda un `ChatbotEvent` tipo `handoff.callback`; (6) `capture_lead` deja de
+re-llamarse con el lead ya capturado; (7) `step_count`, `costUsd` y la latencia se mantienen.
+
+### Deuda que deja este sprint
+- **`listRecentHandoffsByOrgSlug`** (`server/admin/multiTenantQueries.ts:215-219`) filtra estricto
+  por `type: 'handoff.whatsapp'`: los `handoff.callback` quedan en la DB (auditables) pero NO
+  aparecen en "Derivaciones recientes". Ampliar la query exige agregar `type` al shape para que el
+  panel los distinga - si no, un pedido de contacto se listaria como si fuera un handoff de
+  WhatsApp, peor que no mostrarlo. **Es del chat Panel/Dashboard** (frontera del proyecto).
+- **`show_whatsapp_handoff` loguea PII a stderr**: su `logChatbotEvent` manda `visitorName` y
+  `visitorContact` en la metadata, y `logChatbotEvent` escribe la metadata tanto a la DB como a
+  stderr (`persistentLogger.ts`). Preexistente, no se replico en el tool nuevo.
+
+---
+
+## C0.1 - navigate_to_page restringido al bot propio de develOP
+
+Contencion, no el fix definitivo (ese es `BotConfig.allowedNavigationPaths`, pendiente de
+migracion). Item #1 del roadmap C (bloque C0, "que el primer cliente no lo vea roto").
+
+### El problema
+
+`navigate_to_page` (`server/tools/navigateToPage.ts`) manda al visitante a rutas hardcodeadas
+del sitio de develOP (`VALID_PATHS`). Habilitado en los planes PRO y BUSINESS. En el bot de un
+cliente el tool se invoca igual: el modelo lo llama y el embed lo resuelve.
+
+CORRECCION AL SINTOMA (no es un 404): el embed externo (`public/widget.js:184-187`) resuelve
+la navegacion con `window.open(BASE_URL + path, '_blank')`, con `BASE_URL` tomado del origin
+del propio `<script src>` que sirve el widget (tipicamente develop.com.ar, no el dominio del
+cliente). El resultado real es que el bot de un cliente le abre a SU visitante una pestana
+nueva con una pagina de VENTAS de develOP, sin haberse ido de nada roto. Fuga de trafico del
+cliente hacia la agencia, no un link roto. El otro camino client-side (`ChatWidgetMount.tsx`,
+`WIDGET_SLUG='develop'` hardcodeado, in-app, nunca en portales) jamas corre para un bot de
+cliente - no esta en riesgo.
+
+### Fase 0 (hallazgos clave, read-only)
+
+1. `navigate_to_page` es client-side puro (sin `execute`); su builder ni siquiera recibia el
+   ctx (`getTools.ts` lo llamaba con `_ctx`). El header de `navigateToPage.ts` ya declaraba la
+   deuda: "Phase 1.5: paths come from BotConfig.allowedNavigationPaths per org" - campo que no
+   existe en `schema.prisma`.
+2. Gating de tools: una sola capa (`Plan.tools`), un solo call-site real (`getTools()` desde
+   `handleChatRequest.ts:978`). `BotConfig` no tiene ningun campo de tools/navegacion.
+3. `sync-plans.ts`: STARTER sin `navigate_to_page`; PRO y BUSINESS con el. El bot `develop`
+   corre BUSINESS (confirmado por log de prod en CONTACT-PATH) sin Subscription en ningun seed
+   -> asignado a mano. `san-miguel` es un fixture MOCK (STATUS.md: "Franco la anoto para
+   cleanup"), no un cliente real. `matsu` (piloto comercial real) no tiene bloque de
+   Subscription en ningun seed -> sin confirmar por archivos si hoy tiene `navigate_to_page`
+   habilitado.
+4. No existe un helper reusable de "org/bot agencia" en el repo. Unico precedente real (mismo
+   tipo de restriccion, distinto subsistema): `convert-chatbot-lead.actions.ts` compara
+   `botConfig.slug !== 'develop'`. Cero de esto en el runtime del chatbot hasta este sprint.
+5. Los packs verticales (EV) no tocan `navigate_to_page` (cero referencias en `server/verticals/`,
+   confirmado por lectura completa de los 3 packs) y serian un chokepoint mas invasivo: exige
+   tocar el contrato compartido `VerticalToolCopy`, y el pack `'agencia'` no esta asignado a
+   ningun `BotConfig` real en ningun seed. Descartado como candidato.
+
+### Diseno elegido (aprobado por Valentino, con 2 ajustes)
+
+Gate por bot dentro de `getTools()` (opcion b del brief). `Plan.tools` no cambia - PRO/BUSINESS
+siguen listando `navigate_to_page` como capacidad del plan; el gate adicional decide si se
+OFRECE en este bot puntual. Cero seed, cero migracion, cero paso manual en produccion.
+
+AJUSTE 1 (Valentino): no un `if` con el slug inline. `TOOLS_RESTRICTED_TO_AGENCY_BOT` (lista
+nombrada, hoy solo `navigate_to_page`) + `isAgencyOwnedBot(botSlug)` (helper exportado), ambos
+en `getTools.ts`, con el comentario del porque. Cuando exista `allowedNavigationPaths`: la
+lista se vacia y el helper se borra - el punto de salida de la contencion queda evidente.
+
+AJUSTE 2 (Valentino): sintoma corregido en todos los comentarios nuevos - fuga de trafico via
+`window.open`, no 404 (ver seccion de arriba).
+
+### Cambios
+
+- `server/tools/types.ts`: `ToolCallContext.botSlug: string` (requerido).
+- `server/tools/getTools.ts`: `TOOLS_RESTRICTED_TO_AGENCY_BOT` + `AGENCY_BOT_SLUG` +
+  `isAgencyOwnedBot()` (exportados) + guard de una linea en el loop de `getTools`.
+- `server/chat/handleChatRequest.ts`: `botSlug: bot.slug` en el ctx de `getTools()` (cero query
+  nueva, `bot` ya viene con el escalar via `resolveBotBySlug`).
+- `server/tools/navigateToPage.ts`: header corregido (sintoma real + referencia al gate nuevo).
+- `server/tools/__tests__/confirm-contact-request.invariant.ts`: fixture CTX actualizado
+  (`botSlug` paso a requerido en la interfaz).
+- `server/tools/__tests__/navigate-to-page-gate.invariant.ts` (NUEVO): el test de este sprint.
+- `package.json`: script `test:c01`.
+
+### Test y falla-primero
+
+`test:c01` (nuevo): org cliente no recibe `navigate_to_page` (el resto de las tools si - el
+gate es quirurgico); bot `develop` si lo recibe; combinado con `plan.tools` es un AND (ninguno
+de los dos gates alcanza solo: BUSINESS+cliente sigue sin la tool, BUSINESS+develop la tiene,
+STARTER+develop tampoco la tiene); `isAgencyOwnedBot` unitario; y un guard de alcance que fija
+`TOOLS_RESTRICTED_TO_AGENCY_BOT` a exactamente `['navigate_to_page']` para que una segunda tool
+no entre ahi por accidente.
+
+Falla-primero: se removio temporalmente el guard del loop en `getTools.ts` (produccion real, no
+una copia) y se corrio `test:c01` - fallo en la primera asercion ("org cliente NO recibe
+navigate_to_page"), `AssertionError` con `actual: false, expected: true`. Se restauro el guard
+y se re-corrio: verde.
+
+Nota aparte (detectado por la corrida real, no asumido): el primer `npm run test:c01` fallo con
+`actual: undefined` en el guard de alcance - `TOOLS_RESTRICTED_TO_AGENCY_BOT` habia quedado sin
+`export` en `getTools.ts`. Se agrego el `export` faltante y se re-corrio: verde. Se deja
+documentado porque es exactamente el tipo de error que la corrida real esta para atrapar.
+
+### Gates
+
+- `tsc --noEmit` (via `node_modules\.bin\tsc.cmd`, sin `npx`): 0 errores.
+- `eslint` sobre los 6 archivos tocados: 0 errores, 2 warnings PREEXISTENTES (`_ctx` sin usar en
+  `offer_handoff_options`/`navigate_to_page`, ya estaban antes de este sprint).
+- Bateria completa (c01 nuevo + contactpath + watchdog + emptyfallback + providerclose +
+  deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las 15, OK.
+- `prisma migrate status`: schema al dia, 86 migraciones, sin drift.
+- Sin migracion, sin seed, sin git, sin tocar frozen ni scoping por organizacion.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+En el bot de develOP: `navigate_to_page` sigue funcionando igual que antes (nada cambio para el
+bot propio). En el bot de un cliente con plan que incluya la tool (sanmiguel o matsu, el que
+corresponda): confirmar en una conversacion nueva que el modelo ya no ofrece la navegacion. Si
+Matsu hoy tiene `navigate_to_page` habilitado (Fase 0, punto 3, sin confirmar por archivos),
+verificar en el admin su plan real y que el comportamiento en su sitio cambio.
+
+### Deuda que deja este sprint
+
+- `BotConfig.allowedNavigationPaths` (el fix real - requiere migracion, reemplaza esta
+  contencion).
+- Revertir los probes de PROBE-STREAM.
+- `BREVO_API_KEY` + Telegram sin configurar (notificaciones de lead no se envian).
+- PII en stderr de `show_whatsapp_handoff`.
+- Dos hashes de IP divergentes (`route.ts:73` sin salt).
+- `CHATBOT_IP_HASH_SALT` sin setear.
+- Key de Vertex expuesta en logs, pendiente de rotacion.
+- Promesas detached de `captureLead.ts:467,474`.
+- Indentacion de mas en `persistTurn` (whitespace-only).
+- `.netlify/state.json` sin gitignorar.
+- `demo-chat/[slug]/route.ts` sin el middleware de PROVIDER-CLOSE.
+- NUEVO: no se pudo confirmar por archivos si `matsu` (piloto comercial real) tiene hoy
+  `Subscription`/Plan asignado - si no lo tiene, corre en `PLAN_FALLBACK` (sin
+  `navigate_to_page`) y el bug de este sprint podria no haber sido explotable ahi todavia.
+  Verificar en el admin.
+
+---
+
+## D.1 - backfill de verticalPack (cierra el bloque EV)
+
+Item unico pendiente que bloqueaba el efecto real de EV.3/EV.4/EV.5 (ver bloque EV mas arriba):
+la migracion de EV.2 dejo `BotConfig.verticalPack` en 'base' para todos los bots. Scoring e
+intents por pack estan codeados y cerrados desde EV.3/EV.4, pero sin el pack real asignado por
+bot su efecto no existia en runtime. Sin clientes reales activos (Matsu pincho, cero trafico),
+el gate de EV.3 ("no desplegar a un bot con trafico") no aplicaba - este backfill era el unico
+paso que faltaba.
+
+### Fase 0 (hallazgos, read-only)
+
+1. Packs confirmados: `base` (generico, red de seguridad del registry), `usados` (concesionaria,
+   scoring + 7 intents verbatim del motor historico), `agencia` (bot propio de develOP, intents
+   propios, scoring y widgetCopy heredados de `base` por decision EV.4). Cada uno define scoring,
+   intents, toolCopy y widgetCopy (`server/verticals/types.ts:142-155`).
+2. Bots segun seeds (sin consultar produccion): `develop` (industry 'generico', sin verticalPack
+   seteado -> default 'base'), `sanmiguel` (industry 'automotive', el seed YA declara
+   verticalPack 'usados' pero si corrio contra una DB real es no confirmado), `matsu` (industry
+   'concesionaria', sin verticalPack seteado -> default 'base').
+3. `prisma/seed.ts` NO es logica de backfill reutilizable: es un upsert monolitico completo (org,
+   usuario, KB y ~15 campos mas de BotConfig). Se escribio un script nuevo, quirurgico, espejo de
+   `prisma/seeds/add-contact-tool.ts`.
+4. Alcance de verticalPack verificado mas alla de scoring/intents/toolCopy: tambien viaja como
+   metadata en el payload v2 de sync a CRM (`server/crm/syncLeadToCrm.ts`) y en la columna del CSV
+   de export de leads (`server/leads/csv/buildLeadsCsv.ts`), resuelta en vivo al momento del
+   export - ninguno es dato guardado del lead ni toca tenancy/auth/facturacion. El guard de
+   `evals/runner.ts` (aborta si un bot QA no matchea su pack esperado) no aplica: los bots de
+   evals usan slugs dedicados (`qaseed-evals-*`), sin superposicion con develop/sanmiguel/matsu.
+
+### El defecto que corrige (redactado tal como quedo, no como se planteo originalmente)
+
+NO es "intents de agencia en bots de concesionaria" - eso era cierto PRE-EV.4, cuando los
+patrones de agencia eran el unico hardcode del motor y corrian en todos los bots por igual.
+POST-EV.4 (codigo ya deployado), un bot sin backfill cae en el pack 'base' - 2 intents genericos
+(precio/consulta) - no en los 6 de agencia. El defecto real: `matsu` corria con intents
+genericos donde deberian ir los 7 de concesionaria (compra/visita/permuta/financiacion/modelo/
+precio/humano) que EV.4 construyo especificamente para este caso.
+
+### Mapeo aprobado
+
+develop -> 'agencia' (bot propio de develOP, el pack esta escrito para el). sanmiguel -> 'usados'
+(ya es el valor que el seed declara). matsu -> 'usados' (industry 'concesionaria' calza exacto
+con el proposito del pack). Cualquier otro bot queda sin tocar (no se fuerza a 'base' - ya nace
+ahi por default de schema).
+
+### Archivo
+
+`prisma/seeds/backfill-vertical-pack.ts` (NUEVO). Toca UNICAMENTE `BotConfig.verticalPack`,
+`data` de una sola clave. Idempotente (reporta `unchanged` si ya esta en el valor destino). No
+crea ni borra filas. No toca bots fuera del mapeo. Modo dry-run obligatorio (`DRY_RUN=1` o
+`--dry-run`) - primera corrida de este script contra la Neon compartida.
+
+### Gates
+
+`tsc --noEmit` (via node_modules\.bin\tsc.cmd, sin npx): 0 errores. `eslint` sobre el archivo
+nuevo: 0 errores, 0 warnings. `prisma migrate status`: schema al dia, 86 migraciones, sin drift.
+Sin tests (es infraestructura de un solo uso, se verifica a ojo segun el propio sprint). El
+agente NO corrio el script contra ninguna DB, ni dry-run - eso lo corre Valentino a mano.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Correr el dry-run primero, revisar el log linea por linea contra el mapeo esperado, y recien
+despues la corrida real. Tras la corrida real: confirmar en el admin/DB que los 3 bots quedaron
+en su pack; y en una conversacion nueva de matsu o sanmiguel, confirmar que el bot reconoce los
+intents de concesionaria (ej. "quiero permutar mi auto") en vez de caer en los genericos de base.
+Esto cierra el ultimo gate abierto de EV.3/EV.4/EV.5 (bloque EV en su totalidad).
+
+---
+
+## D.3 - cron real de generate-insights (bloque DESPERTAR cerrado)
+
+Cierra el arco D.1/D.2/D.3 ("DESPERTAR"): D.1 backfilleo verticalPack, D.2 probo el motor de
+insights a mano contra produccion, D.3 (este sprint) lo hace correr solo. Un objetivo por sprint;
+la superficie del dueno para ver estos insights queda pendiente del chat Panel/Dashboard.
+
+### El hallazgo de D.2 (no ejecutado por este agente, documentado para que quede en la bitacora)
+
+El motor de `ChatbotInsight` funciona y produce senal de calidad. Disparado a mano contra el bot
+`develop`: `ok: true`, `conversationsAnalyzed: 17`, 4 insights, todos con evidencia citada y
+accion concreta:
+
+| Categoria | evidenceCount | Que detecto |
+|---|---|---|
+| KB_GAP | 2 | Dos usuarios preguntaron directamente por el costo de un servicio |
+| KB_GAP | 4 | Cuatro usuarios pidieron explicitamente una lista de los servicios |
+| CONVERSION_LEAK | 1 | Un usuario proporciono nombre, email y telefono... -> detecto solo el bug de captura de leads que costo dos semanas de esta sesion |
+| CONFIG_TWEAK | 7 | "Seis conversaciones comenzaron con un simple 'hola' y no progresaron" (asi redactado por el LLM: evidenceCount 7 vs "seis" en el texto - inconsistencia propia de la corrida, no corregida aca) |
+
+**E1 no es construccion: es despertar lo que ya existe.** El buque insignia del roadmap Plano B
+ya estaba codeado (EV.5/B9.3 lo dejaron armado); le faltaba correr solo y tener superficie. D.3
+resuelve la primera mitad.
+
+### Fase 0 (hallazgos, read-only)
+
+1. `netlify/functions/cleanup-old-events-cron.ts` (molde, CRON-2): lee `process.env.URL` +
+   `process.env.CRON_SECRET`, si falta alguno devuelve 500 SIN llamar (falla cerrado del lado del
+   llamador). `fetch` sin metodo explicito (GET por default, matchea que su target tambien es
+   GET) y SIN timeout. Maneja error con try/catch, loguea con strings con prefijo `[nombre-cron]`
+   (no JSON estructurado).
+2. `/api/cron/generate-insights` (`route.ts:9`): **POST**, exige `Authorization: Bearer
+   <CRON_SECRET>`, sin body. Devuelve `{ok, durationMs, results: {total, processed,
+   skipped_pending_overload, skipped_insufficient, generated, failed, emails_sent}}`. Procesa los
+   bots activos en un for..of SECUENCIAL (no Promise.all) - relevante para el timeout.
+3. `netlify.toml`: los 3 crons declarados como `[functions."<nombre>"]` con su `schedule` -
+   Netlify matchea el nombre de archivo en `netlify/functions/` contra esa key exacta (confirmado
+   por el propio comentario del molde). `generate-insights-cron` y `send-weekly-reports-cron`
+   estaban declarados sin archivo real - agendados por Netlify, fallando en silencio. Este sprint
+   agrega el archivo para el primero.
+4. `CRON_SECRET`: confirmado el defecto ya detectado - `generate-insights/route.ts` y
+   `send-weekly-reports/route.ts` comparan `authHeader !== \`Bearer ${process.env.CRON_SECRET}\``
+   SIN chequear que la env var este seteada: si falta, el token esperado pasa a ser el string
+   literal "Bearer undefined". `cleanup-old-events/route.ts` (via `cron-secret.ts`, patron mas
+   nuevo) SI falla cerrado: chequea `!expectedSecret` explicito antes de comparar. Asimetria real
+   entre las dos rutas, no corregida en este sprint (un objetivo por sprint) - ver deuda.
+5. `send-weekly-reports/route.ts` existe, es GET, mismo patron viejo de auth (mismo defecto que
+   generate-insights). Es un sprint gemelo TRIVIAL: mismo molde de `cleanup-old-events-cron.ts`
+   sin ninguna de las 2 adaptaciones que pidio este sprint (no es POST, no necesita el timeout
+   largo - manda emails, no llama al LLM por bot). No se hizo aca (un objetivo por sprint).
+
+### Diseno
+
+`netlify/functions/generate-insights-cron.ts` (NUEVO), espejo de `cleanup-old-events-cron.ts` con
+3 diferencias explicitas: (1) POST en vez de GET, (2) timeout explicito en el fetch, (3) log
+estructurado `{type, level, timestamp, ...}` (mismo shape que `logger.ts`/`persistentLogger.ts`
+del proyecto, replicado local - esta function no importa el logger real para no arrastrar Prisma
+a un trigger que tiene que quedar liviano).
+
+Timeout: 20s. Aritmetica: una Netlify Function sincrona no pasa de ~26s (limite duro de AWS API
+Gateway que Netlify hereda) salvo Background Function (sufijo -background.ts, hasta 15 min,
+requiere plan que lo soporte) - ni el molde ni esta usan ese sufijo, mismo techo duro para ambas.
+El plan real de Netlify de este sitio NO es confirmable desde el repo (el propio
+`docs/operations/cron-jobs.md` deja la misma pregunta abierta para otro cron). 20s deja margen
+para que esta function devuelva SU PROPIO timeout, informativo, antes de que la plataforma mate
+la invocacion entera con un error menos claro.
+
+`netlify.toml` no se toco: la entrada `[functions."generate-insights-cron"]` ya existia.
+
+### Gates
+
+`tsc --noEmit` (via node_modules\.bin\tsc.cmd, sin npx): 0 errores. `eslint` sobre el archivo
+nuevo: 0 errores, 0 warnings. Bateria completa (c01 + contactpath + watchdog + emptyfallback +
+providerclose + deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las
+15, OK - confirmado que este sprint no toca nada de eso. `prisma migrate status`: al dia, 86
+migraciones, sin drift. Sin tests nuevos (infraestructura de un solo uso, se verifica corriendola,
+segun el propio sprint).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras deployar: (1) Netlify > Functions, confirmar que `generate-insights-cron` aparece agendada
+(el log del deploy deberia decir "Scheduling functions: ..."); (2) "Run now" desde Netlify sobre
+esa function; (3) en Prisma Studio > ChatbotInsight, filas nuevas con createdAt de recien; (4)
+confirmar que CRON_SECRET esta seteada en Netlify - si no lo esta, generate-insights (y
+send-weekly-reports) quedan con el token esperado predecible.
+
+### Deuda que deja este sprint
+
+**Nueva y prioritaria:** el patron "Bearer undefined" sigue abierto en `generate-insights/route.ts`
+y en `send-weekly-reports/route.ts` (si CRON_SECRET no esta seteada en el entorno, el token
+esperado es un string literal predecible en vez de fallar cerrado). `cleanup-old-events/route.ts`
+ya tiene el patron correcto (`cron-secret.ts`) - migrar las otras dos rutas al mismo helper es
+mecanico pero es su propio sprint.
+
+**Conocida, carry-forward:**
+- Superficie de insights para el dueno (chat Panel) - hoy los insights se acumulan en PENDING
+  sin que nadie los vea.
+- Deteccion en runtime de "el bot admitio no saber" - los 4 insights de D.2 salen de ausencias
+  en 30 dias de conversaciones, no de que el bot lo dijera en el momento; extension natural de
+  E1, distinta de este batch retrospectivo.
+- `send-weekly-reports-cron` sin cablear (gemelo trivial, ver Fase 0 punto 5).
+- Rotar la key de Vertex expuesta en logs.
+- Revertir probes de PROBE-STREAM.
+- `BREVO_API_KEY` + Telegram sin configurar.
+- PII en stderr de `show_whatsapp_handoff`.
+- Dos hashes de IP divergentes (`route.ts:73` sin salt).
+- `CHATBOT_IP_HASH_SALT` sin setear.
+- Promesas detached de `captureLead.ts:467,474`.
+- Indentacion de mas en `persistTurn` (whitespace-only).
+- `.netlify/state.json` sin gitignorar.
+- `demo-chat/[slug]/route.ts` sin el middleware de PROVIDER-CLOSE.
+- `BotConfig.allowedNavigationPaths` (fix real de C0.1).
+- MS-E6.2 (descomponer `handleChatRequest.ts`, 871 lineas).
+
+---
+
+## H.1 - cron real de send-weekly-reports-cron (gemelo de D.3)
+
+Mismo defecto que D.3 resolvio para generate-insights-cron: `netlify.toml` declaraba
+`[functions."send-weekly-reports-cron"]` (schedule `"0 12 * * MON"`) sin archivo real en
+`netlify/functions/` - Netlify agendaba algo que no existia y fallaba en silencio.
+
+Fase 0 (read-only, releida fresca): `/api/cron/send-weekly-reports` (`route.ts:6`) es GET, sin
+body, mismo patron viejo de auth que generate-insights (`authHeader !== Bearer+CRON_SECRET`, sin
+chequear que la env var este seteada - mismo defecto "Bearer undefined", ya anotado como deuda en
+D.3, no tocado aca). Devuelve `{ok, total, sent, failed, skipped, errors}` con los campos SUELTOS
+en la raiz (a diferencia de generate-insights, que los anida bajo `results`).
+
+`netlify/functions/send-weekly-reports-cron.ts` (NUEVO), espejo de `cleanup-old-events-cron.ts`
+(que es GET, igual que este target - a diferencia de D.3 no hizo falta adaptar el metodo). Trae
+las dos mejoras de D.3 que valen igual: falla cerrado del lado del llamador si falta `CRON_SECRET`
+(no llama con "Bearer undefined"), y log estructurado `{type, level, timestamp, ...}` en vez de
+strings con prefijo. Mismo timeout de 20s que D.3 y misma razon: el techo real es el limite duro
+de plataforma (~26s), no la duracion esperada del trabajo - aunque aca el trabajo es mas liviano
+(emails transaccionales por bot, no LLM), la function no puede superar ese techo de todos modos.
+
+Decision de PII no pedida explicitamente pero consistente con la regla del sprint ("nunca loguear
+contenido... contadores, slugs, status y timings si"): `errors: string[]` de la ruta trae
+`${bot.slug}: ${mensaje}` (`sendWeeklyReports.ts:82,86-88`), y ese mensaje puede traer el email
+del destinatario si el provider lo hace eco en su propio error - se loguea solo `errorsCount`
+(la cantidad), nunca el array.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre el archivo nuevo: exit 0 (limpio). Bateria completa (c01
++ contactpath + watchdog + emptyfallback + providerclose + deadline + onf1 + infra1 + infra2 + c02
++ cost1 + cost2 + utm1 + re2 + ev4): las 15, OK - no pedida explicitamente por este sprint (terso,
+"sin tests"), corrida igual por consistencia con D.3 dado que es su gemelo. `prisma migrate
+status`: al dia, sin drift.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras deployar: el log del deploy tiene que listar las TRES functions agendadas (ya no dos) -
+"Scheduling functions: cleanup-old-events-cron, generate-insights-cron, send-weekly-reports-cron".
+"Run now" sobre `send-weekly-reports-cron` desde Netlify. Confirmar que `CRON_SECRET` esta
+seteada (sino, esta ruta y generate-insights quedan con el token esperado predecible).
+
+Con esto, los 3 crons declarados en `netlify.toml` tienen function real. Deuda sin cambios
+respecto de D.3 - el patron "Bearer undefined" sigue abierto en las 2 rutas viejas.
+
+---
+
+## H.2 - auth de crons que falle cerrado (cierra la deuda de D.3/H.1)
+
+Cierra la deuda marcada como prioritaria en D.3 y H.1: `generate-insights` y `send-weekly-reports`
+comparaban el header contra `Bearer ${process.env.CRON_SECRET}` sin chequear que la env var
+exista - si falta, el token esperado pasa a ser el string literal "Bearer undefined" y la ruta
+queda abierta a cualquiera que mande ese header. En `generate-insights` eso permitiria a un
+anonimo disparar generacion de insights (quema tokens de Vertex).
+
+### Relevamiento de las 8 rutas bajo app/api/cron/
+
+El build lista 8 rutas. Inventario completo del patron de auth de cada una (no solo las 2 que
+menciono el sprint):
+
+- **Patron viejo, vulnerable** (agujero real, corregido en este sprint):
+  `generate-insights` (POST), `send-weekly-reports` (GET), y una TERCERA no mencionada en el
+  sprint, encontrada en el relevamiento: `detect-bot-issues` (GET) - mismo `authHeader !==
+  Bearer+secret` sin chequear que la env var exista.
+- **Ya fallaban cerrado, pero duplicando el chequeo inline** (NO vulnerables, no tocadas):
+  `os-follow-up`, `regenerate-briefs`, `send-executive-reports` - las 3 ya tenian su propia copia
+  de `getProvidedCronSecret` + el chequeo `!expectedSecret || provided !== expectedSecret`
+  (exactamente las "3 duplicadas" que el comentario original de `cron-secret.ts` ya mencionaba).
+- **Ya fallaba cerrado, patron distinto** (no vulnerable, no tocada): `alerts` - chequea
+  `!expectedSecret || providedSecret !== expectedSecret` pero solo lee `X-Cron-Secret` (sin
+  soporte de `Authorization: Bearer`), sin usar el helper compartido.
+- **Ya usaba el patron correcto via el helper compartido** (el unico caso real de reuso antes de
+  este sprint): `cleanup-old-events`.
+
+### Por que no se tocaron os-follow-up, regenerate-briefs, send-executive-reports, alerts
+
+Ninguna de las 4 tiene el agujero (las 4 fallan cerrado hoy) - no hay vulnerabilidad que cerrar
+ahi, asi que "arreglar todas" no aplica a estas. Ademas, dominio: `os-follow-up` importa
+`SOLO_CONTACTOS_COMERCIALES` de `@/lib/leados/isolation` y trabaja sobre `OsLead` - es
+inequivocamente del lane LeadOS/Setter de Franco. `regenerate-briefs` y `send-executive-reports`
+trabajan sobre "executive brief" org-scoped por subscripcion activa - dominio de reporting para
+clientes, probablemente del chat Panel/Dashboard (misma frontera de proyecto que ya establecieron
+sprints anteriores de esta sesion). `alerts` tiene dueno incierto (`@/lib/alerts`, no es claramente
+del runtime del chatbot). Las 4 quedan con su patron actual (ya seguro) sin tocar.
+
+### Diseno
+
+El helper `getProvidedCronSecret` (`cleanup-old-events/cron-secret.ts`) se MOVIO a
+`src/lib/cron/cron-secret.ts` (como pidio el sprint: "si esta acoplado a su carpeta, moverlo a un
+lugar compartido es aceptable") - deja de vivir dentro de la carpeta de una ruta especifica, seria
+raro que `generate-insights` importara algo de la carpeta de `cleanup-old-events`. Convencion:
+mismo patron que `lib/isolation`, `lib/plan`, etc. Se borro el archivo viejo (no se dejo un
+re-export - es codigo 100% interno, sin necesidad de compatibilidad hacia atras).
+
+Se agrego una segunda funcion, `isAuthorizedCronRequest(request): boolean`, que compone la
+extraccion + la comparacion fallar-cerrado en una sola funcion. Antes, CADA ruta (incluida
+`cleanup-old-events`) repetia la misma linea `!expectedSecret || provided !== expectedSecret` -
+esto es lo que de verdad estaba duplicado 4 veces (el helper original solo cubria la extraccion
+del header). `cleanup-old-events` tambien se migro a usar `isAuthorizedCronRequest` directo, ya
+que se estaba tocando su import de todos modos.
+
+Efectos colaterales menores, reportados por transparencia:
+- `detect-bot-issues` antes solo aceptaba `Authorization: Bearer`; con el helper compartido ahora
+  tambien acepta `X-Cron-Secret` como fallback (aditivo, no reduce seguridad - mismo secret
+  exigido por cualquiera de los 2 caminos).
+- `send-weekly-reports` devolvia `{error: 'Unauthorized'}` en su 401 (sin `ok: false`, inconsistente
+  con su propia rama de error 500); ahora devuelve `{ok: false, error: 'Unauthorized'}` como el
+  resto de las rutas.
+- `generate-insights/route.ts` tenia un `any` preexistente (`const org: any = bot.organization`,
+  ajeno a este sprint) que quedo expuesto por eslint al tocar el archivo. `bot.organization` ya
+  viene tipado por el `include` de la query de arriba - se saco el `any`, cero cambio de
+  comportamiento. Regla del proyecto es "cero any, cero excepciones"; se corrigio en vez de
+  dejarlo pasar por estar en un archivo ya tocado.
+
+### Test
+
+`src/lib/cron/cron-secret.invariant.ts` (NUEVO) - los 3 casos que pidio el sprint
+(`isAuthorizedCronRequest`: sin env var rechaza, con env var + token correcto acepta, con token
+incorrecto rechaza) mas el caso central del bug real ("Bearer undefined" literal sin CRON_SECRET
+setead -> rechaza) y un sanity minimo de `getProvidedCronSecret`. El detalle fino de extraccion de
+headers lo sigue cubriendo el invariant existente de `cleanup-old-events`, solo se le actualizo el
+import.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre los 7 archivos tocados: 0 errores (encontro y se corrigio
+el `any` preexistente de arriba). `check:invariant:cron-secret` (nuevo) + `test:t02` (import
+actualizado): OK. Bateria completa (c01 + contactpath + watchdog + emptyfallback + providerclose +
+deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2 + utm1 + re2 + ev4): las 15, OK. `prisma
+migrate status`: al dia, sin drift.
+
+### Deuda
+
+Cerrada la deuda "Bearer undefined" para `generate-insights`, `send-weekly-reports` y
+`detect-bot-issues`. Sigue abierta (a proposito, fuera de este sprint) la duplicacion inline del
+mismo chequeo en `os-follow-up`, `regenerate-briefs`, `send-executive-reports` y el patron distinto
+de `alerts` - ninguna es vulnerable hoy, consolidarlas al helper compartido es limpieza, no
+seguridad, y son de otros dominios/lanes.
+
+---
+
+## H.4 - miscelaneos (dos commits)
+
+Tres items chicos sin relacion entre si. Items 1 y 2 en un commit, item 3 (whitespace-only) en
+otro, separado, como pidio el sprint.
+
+### 1. .gitignore / .netlify - sin cambios, la regla ya existia
+
+Investigado antes de tocar nada: `.netlify` ya esta en el `.gitignore` de la raiz del repo
+(`logic-core-runtime/.gitignore`, no `logic-core-v3/.gitignore` - son dos archivos distintos, el
+repo real es `logic-core-runtime`, `logic-core-v3` es una subcarpeta). La regla esta commiteada
+desde hace un mes (`7da07fce`, 2026-07-05, autor Valentino Olmedo) y sigue vigente hoy
+(`git check-ignore -v` la confirma). `git ls-files` no encontro ningun archivo tracked dentro de
+`.netlify/` que necesite `git rm --cached`. No hay nada que agregar: la premisa del sprint
+("aparece untracked hace semanas") no coincide con el estado actual del repo - se reporta la
+discrepancia en vez de escribir una regla redundante que no arreglaria nada.
+
+### 2. next.config.ts - key eslint removida, confirmado sin efecto en ningun chequeo real
+
+Verificado contra el codigo fuente instalado de Next 16.2.9
+(`node_modules/next/dist/server/config.js:167`), no contra documentacion externa:
+`warnOptionHasBeenDeprecated(userConfig, 'eslint', 'eslint configuration in next.config.ts is no
+longer supported...')`. La key esta deprecada y Next 16 ya no la lee bajo ninguna forma - no hay
+key de reemplazo a la que migrar, el mecanismo que controlaba (ESLint dentro de `next build`) no
+existe mas en el framework.
+
+Por que sacarla no desactiva ningun chequeo que usemos: `ignoreDuringBuilds: true` le decia a Next
+que NO corriera ESLint durante el build - o sea que el propio valor ya estaba deshabilitando algo,
+no habilitandolo. Como Next 16 no ejecuta esa integracion de todos modos (la key es un no-op),
+sacarla no cambia el comportamiento del build en absoluto. El chequeo real de lint de este repo es
+independiente: `npm run lint` (`eslint` plano, `package.json`), corrido a mano en cada sprint de
+esta sesion - nunca dependio de `next.config.ts`. Coincide con lo ya sabido: "next build ignora
+tipos/lint" no era un bug, era la key `ignoreDuringBuilds` + `ignoreBuildErrors` haciendo lo que
+decian.
+
+`typescript.ignoreBuildErrors` NO se toco - el sprint pedia especificamente la key `eslint`, y esa
+key sigue siendo valida y funcional en Next 16 (`tsc --noEmit` sigue siendo el gate real,
+independiente de esto tambien).
+
+Eslint sobre el archivo encontro 1 warning preexistente, no introducido por este cambio (verificado
+con `git diff`: el diff es exactamente las 3 lineas removidas, nada mas) - `NextConfig` importado
+pero nunca aplicado a `nextConfig` (`const nextConfig = {` en vez de `const nextConfig: NextConfig
+= {}`). No se toco: fuera de alcance de este sprint, y tipar el objeto podria destapar mismatches
+reales que el propio `ignoreBuildErrors` viene ocultando - cambio con riesgo, no pedido.
+
+### 3. Indentacion de persistTurn - whitespace-only, commit separado
+
+`handleChatRequest.ts` lineas 1279-1745 (467 lineas del rango, dentro de la funcion `persistTurn`)
+tenian un nivel de mas: el cuerpo movido tal cual desde el viejo `onFinish` (comentario propio en
+el archivo: "El cuerpo es el de onFinish movido TAL CUAL") quedo con la indentacion que tenia
+cuando vivia un nivel mas adentro. El preambulo de la funcion (lineas 1253-1277) ya estaba bien
+indentado (4 espacios, un nivel bajo la declaracion de la funcion en 2) - la desalineacion
+arrancaba justo despues, en el bloque `try/catch/finally` completo (que arrancaba en 6 espacios en
+vez de 4).
+
+Se removieron exactamente 2 espacios de indentacion al inicio de cada linea no vacia del rango
+(sed con direccion de linea, no edicion manual - a esta escala una transcripcion a mano es el modo
+mas facil de introducir un error real). El cierre de `persistTurn` (linea 1746) ya estaba correcto
+y no se toco.
+
+Verificacion pedida por el sprint, corrida y confirmada: `git diff -w` sobre el archivo da vacio
+(exit limpio de `git diff -w --quiet`) - cero diferencia semantica ignorando espacios. El diff real
+(con espacios) es simetrico: 427 inserciones / 427 eliminaciones sobre 467 lineas de rango (la
+resta son lineas en blanco dentro del bloque, que no tienen espacios que remover y por eso no
+cuentan como cambio).
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre `handleChatRequest.ts` y `next.config.ts`: 0 errores (1
+warning preexistente en `next.config.ts`, ver arriba). Bateria completa (c01 + contactpath +
+watchdog + emptyfallback + providerclose + deadline + onf1 + infra1 + infra2 + c02 + cost1 + cost2
++ utm1 + re2 + ev4): las 15, OK - critico dado que `handleChatRequest.ts` es el archivo mas
+ejercitado por esta bateria. `prisma migrate status`: al dia, sin drift.
+
+### Deuda
+
+Ninguna nueva. `NextConfig` sin usar en `next.config.ts` (preexistente, sin tocar) queda anotado
+por si alguien lo retoma.
+
+---
+
+## H.3 - PROBE-STREAM: se apaga el ruido, se conserva el instrumento
+
+Los probes de PROBE-STREAM fueron el instrumento que encontro el deadlock (ver
+DEADLOCK-FINISH-STEP): nuestro propio `createEmptyResponseFallbackTransform` retenia el chunk
+`finish-step` y trababa el pipeline del SDK. Cumplida esa funcion, emitian ~20 lineas ERROR por
+conversacion en prod (`console.error` por diseno, para que salieran por stderr).
+
+NO fue un `git revert` de `ac86e85`: desde ese commit `handleChatRequest.ts` se reestructuro
+fuerte (extraccion de `persistTurn`, ~500 lineas movidas), `streamProbe.ts` crecio, y el watchdog
+sumo cableado adyacente (`markContent`, `beginStep`) que NO es probe y tiene que quedar. Un revert
+ciego conflictuaba y se llevaba cosas vivas.
+
+### El hallazgo de la Fase 0 que cambio el planteo del sprint
+
+Dos de los cinco items declarados "telemetria permanente intocable" se emitian HOY via el probe,
+o sea gated por `CHATBOT_STREAM_PROBE`, y ademas en el camino sano - chocando con la otra regla
+del sprint ("lo que emite por conversacion se va"):
+
+- `provider.stream_chunks` -> `streamProbe.mark(...)`
+- `watchdog_settled` -> `streamProbe.mark(...)`
+
+Los otros tres si eran permanentes de verdad (`chatbotLog` ungated): `chat.watchdog_fired`,
+`chat.onfinish_phases`, `chat.persist_abandoned`.
+
+Tercer enganche, tecnico: `createChunkTally` vivia en `streamProbe.ts` pero su `snapshot()`
+alimenta `chat.onfinish_phases`, que es permanente. Borrar el modulo del probe habria roto un log
+permanente.
+
+Valentino resolvio la contradiccion: la regla estaba mal formulada, no los items.
+
+### Decision ejecutada
+
+1. `streamProbe.ts` + el gate `CHATBOT_STREAM_PROBE` SE QUEDAN. Reconstruir el instrumento si
+   aparece otro cuelgue seria tirar tres sprints de trabajo. Apagado cuesta una lectura de env var
+   por request y un `return` sobre un booleano.
+2. `provider.stream_chunks` y `watchdog_settled` PROMOVIDOS a telemetria de primera clase: salen
+   del gate, se emiten SIEMPRE via `chatbotLog` (formato type/level/timestamp, igual que
+   `chat.watchdog_fired`). Son la unica senal de si el pipeline cierra por si mismo.
+3. Los 6 emisores del camino sano, ELIMINADOS (no gated - borrados):
+   `streamText_construct` (enter+exit), `beforeStreamResponse`, `firstChunk` (+ su flag
+   `firstChunkProbed`), el mark de `onStepFinish`, `onFinish_enter`, y el heartbeat `chunkFlow`
+   (dentro de `createChunkTally`). Criterio: su pregunta diagnostica ya esta respondida Y su
+   informacion ya viaja en telemetria permanente - `firstChunk` es redundante con `ttfbAt` ->
+   `timings.llm_ttfb_ms`; `onFinish_enter` con `chat.onfinish_phases`; el mark de `onStepFinish`
+   con `timings.step_count`; el heartbeat con el snapshot del tally en `chat.onfinish_phases`.
+4. `createChunkTally` MOVIDO a `server/chat/chunkTally.ts`, desacoplado del probe (ya no recibe
+   `StreamProbe` ni emite nada; solo cuenta). Con eso la telemetria permanente deja de depender
+   del modulo temporal: si algun dia se borra `streamProbe.ts`, no se rompe ningun log.
+   `CHUNK_FLOW_HEARTBEAT_MS` desaparece (era solo del heartbeat).
+5. `chat.watchdog_fired`, `chat.onfinish_phases` y `chat.persist_abandoned`: sin tocar.
+
+### Lo que queda gated (el instrumento, para un cuelgue FUTURO)
+
+Cinco marks, TODOS solo-ante-anomalia - ninguno emite en el camino sano ni con el probe prendido:
+`provider.stream_close_skipped` (modelo no-v3, nunca ocurre hoy), `watchdog_tool_max_forced` (tool
+colgado 15s), `persistTurn_skipped` (doble persistencia), `onError_enter`, `onAbort_enter`.
+
+Y los pares enter/exit de `probeAround` alrededor de cada await a DB de los tools
+(`captureLead.ts`, `showWhatsappHandoff.ts`, `confirmContactRequest.ts`): SIN TOCAR, gated. Estos
+SI emitirian en el camino sano con el probe prendido - se dejan a proposito porque son
+literalmente el instrumento que encontro el deadlock, y prenderlos es una accion deliberada de
+diagnostico. Con la env var sin setear son no-ops.
+
+### Nombres de las dos promovidas - decision explicita
+
+Se conservan los nombres EXACTOS (`watchdog_settled`, `provider.stream_chunks`), sin migrarlos al
+prefijo `chat.` del resto de la telemetria permanente. Motivo: son los strings que ya se usan para
+filtrar en los logs de prod desde los sprints del watchdog, y renombrar telemetria en la misma
+operacion que la promueve agrega churn sin ganancia funcional. Si se prefiere consistencia
+`chat.*`, es un cambio de una linea en cada uno.
+
+Niveles: `watchdog_settled` -> `info` siempre (es el camino sano; su contraparte anomala
+`chat.watchdog_fired` ya es `warn`). `provider.stream_chunks` -> `warn` solo si
+`reason === 'idle'`, que es el unico caso en que ACTUAMOS nosotros (el propio tipo
+`ProviderStreamCloseReason` lo documenta: "Solo `idle` significa que actuamos"); `natural` y
+`cancelled` van `info`.
+
+### Detalle de implementacion que vale anotar
+
+El `onClose` del middleware es un CALLBACK, y el narrowing de `bot` (un `let`) no sobrevive al
+closure - `tsc` lo agarro (TS18047). Se usa `resolvedBot`, que existe exactamente para eso
+(`handleChatRequest.ts:466`, comentario propio: "non-null reference for callbacks"), igual que ya
+hacia `chat.watchdog_fired`.
+
+### Gates
+
+`tsc --noEmit`: 0 errores. `eslint` sobre los 3 archivos tocados: 0 errores, 0 warnings. Bateria
+completa + los 2 tests de crons de H.2 (17 en total: c01, contactpath, watchdog, emptyfallback,
+providerclose, deadline, onf1, infra1, infra2, c02, cost1, cost2, utm1, re2, ev4, cron-secret,
+t02): TODAS OK. Sin tests nuevos: el sprint es sustractivo mas dos cambios de destino de log; lo
+que quedaba por verificar era que no se rompiera nada, y de eso se encarga la bateria - en
+particular `test:watchdog`, `test:providerclose` y `test:emptyfallback`, que ejercitan justo el
+codigo tocado.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+`CHATBOT_STREAM_PROBE` ya fue borrada de Netlify antes de este sprint, asi que el ruido en prod ya
+estaba cortado. Tras el deploy, en una conversacion real con el flujo entero (captura + contacto):
+(1) SIGUEN apareciendo `watchdog_settled`, `provider.stream_chunks`, `chat.onfinish_phases` y
+`chat.watchdog_fired`; (2) NO aparece ninguna linea con `probe:"stream"`; (3) el turno se comporta
+identico (texto completo, input destrabado rapido, `step_count`/`costUsd` no-cero).
+
+### Deuda
+
+- `provider.stream_close_skipped` queda gated aunque su hermano `provider.stream_chunks` se
+  promovio. Es una asimetria conocida y aceptada: la rama nunca se ejecuta hoy (todos los modelos
+  son v3) y su ausencia ya esta monitoreada indirectamente - si el middleware no se aplicara,
+  `provider.stream_chunks` dejaria de aparecer, que es justo lo que la verificacion humana mira.
+  Promoverlo quedo fuera de scope (un objetivo por sprint).
+- El resto de la deuda conocida sigue igual que en H.4 - este sprint no agrega ninguna otra.
+
+---
+
+## MS-E6.2 - Descomposicion de handleChatRequest.ts
+
+Tres costuras, un commit cada una (A, B, C - este cierre va con C). Invariante duro del
+sprint: CERO cambio de comportamiento. Se movio codigo, no se mejoro nada. Los bugs
+encontrados en el camino se anotaron y NO se tocaron.
+
+**Conteo: 2148 -> 1297 lineas (-40%, -851).**
+
+| Costura | Que salio | Archivo nuevo | handleChatRequest.ts |
+|---|---|---|---|
+| A | Schema del body + helpers del request crudo; respuesta degradada + cap de dominios; plomeria de hooks con deadline | `requestSchema.ts` (115), `degradedResponse.ts` (111), `hookOps.ts` (86) | 2148 -> 1875 |
+| B | Suspension del watchdog durante tools (4 contadores sueltos) | `toolSuspension.ts` (117) | 1875 -> 1830 |
+| C | `persistTurn` (495 lineas) | `persistTurn.ts` (669) | 1830 -> 1297 |
+
+### HALLAZGO 0 - la red no era la que creiamos (lo mas importante de este sprint)
+
+**NINGUN test de la bateria de 17 invoca `handleChatRequest`.** Los unicos importadores del
+archivo son `route.ts` (via `index.server`) y `chat/index.ts`; los tests importan SOLO
+`requestBodySchema`. La bateria cubre los modulos que el handler llama - `reconcile.ts`,
+`withDeadline.ts`, `streamWatchdog.ts`, `providerStreamClose.ts`, `dedup.ts`,
+`historyPolicy.ts` - en AISLAMIENTO. No cubre la orquestacion, que es exactamente lo que este
+sprint movio.
+
+Consecuencia practica, y hay que tenerla presente al tocar este archivo: "bateria verde"
+prueba que no se rompieron los modulos, NO que no se rompio el orquestador.
+
+Eso forzo construir una red distinta: un baseline de TELEMETRIA. Se le pega al endpoint real
+contra el dev server y se compara la secuencia de eventos normalizada (que eventos salen, en
+que orden, con que outcome y que contadores), descartando timestamps, ids y mediciones de
+tiempo. La herramienta vive en el scratchpad de la sesion (capture/normalize/compare), no en
+el repo: es andamio, no producto.
+
+Calibracion del instrumento: dos corridas SIN tocar codigo difieren en tokens, costo y
+text-deltas (el modelo es no determinista a temperature 0.7). Enmascarando esos campos, la
+capa estructural es identica. Ese es el piso de ruido, y distinguirlo de la senal fue lo que
+hizo util la comparacion.
+
+El e2e `40-lead-capture-e2e.spec.ts` se evaluo como red y se DESCARTO: su `request.post` espera
+el body completo de un stream SSE con llamada real a Vertex, y el `actionTimeout: 15000` de
+`playwright.config.ts` corta antes. Ademas tiene dos `test.skip` que enmascaran fallas (un
+"verde" puede ser un skip). El pipeline funcionaba en las dos corridas - `capture_lead.created`
+en ambas -; lo que fallaba era el cliente del test.
+
+### Costuras descartadas, con fundamento
+
+- **Gating completo (~277 lineas).** Los tres gates terminan en `return degradedResponse(...)`,
+  asi que extraerlos exige un protocolo `Response | null`; y peor, el bloque ESCRIBE
+  `compensateReservedQuota`, con lo cual el extraido tendria que devolver un closure ademas del
+  Response. Riesgo medio para una ganancia que los comentarios de seccion ya resuelven
+  visualmente.
+- **Pre-flight (~130 lineas).** Cuatro early-returns -> union discriminada. Lee bien en un
+  diagrama y agrega indireccion real.
+- **`streamText` + sus callbacks (225 lineas) - NUCLEO IRREDUCIBLE.** Los cinco callbacks
+  capturan 9 bindings mutables del request por closure. Separarlos exige reconstruir el closure
+  a mano, con mas superficie de error y cero ganancia. Y el orden del cableado (`markContent`
+  antes de `ttfbAt` antes del acumulador antes del tally; `beginStep` en `onStepStart`;
+  suspend/resume por contador) costo un mes: se mueve como bloque o no se mueve.
+
+### El riesgo real del sprint: los 4 getters de la costura C
+
+`persistTurn` lee cuatro bindings que el handler MUTA DESPUES de construir el factory. Pasarlos
+por valor los congelaria para siempre, y NINGUNA de las cuatro roturas la detecta la bateria
+(ver Hallazgo 0). Por eso viajan como funciones:
+
+| Getter | Quien muta el binding | Si fuera valor |
+|---|---|---|
+| `getTtfbAt` | `onChunk` (primer chunk util) | `llm_ttfb_ms` = null siempre |
+| `getStepCount` | `onStepFinish` | `step_count` = 0 siempre |
+| `getEmptyFallbackInjected` | el transform de respuesta vacia | el fallback nunca cierra el turno |
+| `getConversationDiscarded` | `discardNewConversation` y la compensacion de cupo (que `persistTurn` invoca el mismo) | re-infla una fila que la compensacion borro |
+
+Verificacion empirica: `step_count` dio 2/2/2/1 y `llm_ttfb_ms` 11237/3433/6701/3470 en las
+corridas post-refactor - nunca 0, nunca null. `getEmptyFallbackInjected` quedo probado por una
+corrida que salio con `emptyFallback=true` (con el binding congelado en false ese camino seria
+inalcanzable).
+
+**`getConversationDiscarded` NO quedo ejercitado empiricamente**: `quota_compensation` salio
+`skipped` en las 5 corridas, asi que ese camino no se recorrio. Es el mismo mecanismo que los
+otros tres, pero no esta probado. Queda dicho.
+
+### Estado por request - la trampa que el sprint evito
+
+Todo el estado por request sigue viviendo en el scope del request. Cero estado a nivel de
+modulo, que en serverless (un contenedor caliente atiende muchos requests con el mismo modulo
+cargado) filtraria entre conversaciones: cupo mal contado, el texto de un visitante persistido
+en la conversacion de otro, el watchdog de un request suspendido por el tool de otro. Seria
+invisible en tests y catastrofico con trafico.
+
+- Costura A: las tres piezas son funciones puras y un schema inmutable. No hay estado.
+- Costura B: los 4 contadores en el closure de `createToolSuspensionController`.
+- Costura C: `turnPersisted` en el closure de `createPersistTurn`.
+
+Mismo patron que los factories ya probados: `createStreamWatchdog`, `createChunkTally`,
+`createStreamProbe`.
+
+### Verificacion de movimiento verbatim
+
+- **A**: de 275 lineas eliminadas, 272 reaparecen textuales. Las 3 restantes no son codigo (dos
+  items de imports multilinea colapsados y un separador de seccion que paso a ser header).
+- **B**: toda sentencia con comportamiento verbatim. Los unicos cambios son de firma (const a
+  propiedad de objeto, `streamProbe` a `probe`, la constante del techo a parametro) y el rewire
+  de los dos callbacks.
+- **C**: el diff del cuerpo (493 lineas) muestra EXACTAMENTE las 12 sustituciones planificadas y
+  nada mas. `timings.llm_ttfb_ms` y `llm_stream_ms` ni aparecen en el diff: capturar
+  `const ttfbAt = getTtfbAt()` las dejo byte-identicas (y era necesario ademas porque TS no
+  narrowea el resultado de una llamada).
+
+### Gates (por costura)
+
+`tsc --noEmit` sin errores, `eslint` limpio sobre los archivos tocados, y bateria 17/17 verde -
+las tres veces. Mas 5 corridas de telemetria por costura contra el endpoint real.
+
+### DEADLINE-ONFINISH confirmado en vivo (primera vez)
+
+Durante la calibracion del baseline, con Neon fria, una corrida dio: `persist_tx_1` vencio su
+deadline de 2000ms -> `chat.persist_abandoned`... y despues `chat.hook_late_settlement` reporto
+**`settled: "fulfilled"` a los 2454ms**. O sea: la transaccion SI commiteo, 454ms tarde.
+
+Es la primera confirmacion EN VIVO de que la semantica de DEADLINE-ONFINISH es la correcta:
+"abandonado" significa desenlace DESCONOCIDO, no perdido - y el `onLateSettle`, que existe
+justamente para distinguir esos dos casos, hizo su trabajo. El diseno se valido solo.
+
+### Modo anomalo: turno que no persiste (PREEXISTENTE, no tocado)
+
+Aparecio dos veces durante la verificacion. La segunda (corrida C5, conversacion
+`cmskw3rzl0025upjkzonbb6nl`) dio el mecanismo completo. Log guardado aparte para el sprint que
+lo tome.
+
+Secuencia: dos steps COMPLETOS (`provider.stream_chunks` x2, los dos `reason=natural`), lead
+capturado (`capture_lead.created` + `tool.lead_captured`), y **cero texto en todo el run**.
+Entonces el watchdog dispara con `assistantTextLength=0`; el `onIdle` sale por su early-return
+(`if (accumulatedAssistantText.trim().length === 0) return`) sin persistir; y `onFinish` nunca
+corre. Resultado: NO hay fila ASSISTANT, ni `chat.llm_request_finished`, ni
+`chat.onfinish_phases`, ni contabilidad de costo. El lead - lo comercialmente critico -
+sobrevive.
+
+Tasa observada: ~1 de cada 8-13 turnos entre todas las sesiones de verificacion.
+
+**Es PREEXISTENTE**: aparecio tambien con el codigo stasheado (sin ninguna costura aplicada),
+que es como quedo descartado que lo causara el refactor.
+
+Detalle util para ese sprint: el `chat.watchdog_fired` de C5 trae `window=initial` con
+`contentChunks=4` - el watchdog estaba en la ventana corta pese a haber visto contenido,
+probablemente porque `beginStep()` la resetea al arrancar el step 2 (WATCHDOG-3). Vale
+revisarlo junto con el resto.
+
+Relacionado, visto en otra corrida: `assistantMessageLength=0` con `emptyFallback=false` - el
+modelo emitio texto en el step 1 (asi que el transform no inyecta el fallback) pero el `text`
+final viene vacio, y se persiste una fila ASSISTANT vacia. El visitante vio texto; la DB no.
+Probablemente el mismo problema visto desde otro lado.
+
+### Bugs anotados en Fase 0 - NO tocados (invariante del sprint)
+
+1. `chat.llm_request_start` reporta el par SOLICITADO, no el efectivo: loguea `bot.llmProvider`
+   / `plan.llmModel`, pero si `resolveEffectiveModel` degrado, el modelo que corre es otro.
+   COST-1 arreglo el camino del costo; este log quedo. Recuperable via
+   `chat.cost_model_unknown`, pero enganoso leido solo.
+2. Comentario stale de H.3 en el `onChunk`: dice "conteo + heartbeat (throttled)" y el heartbeat
+   ya no existe.
+3. Condicion duplicada: el discriminante `specificationVersion === 'v3'` se evalua dos veces
+   sobre el mismo valor (el wrap del middleware y el mark de `provider.stream_close_skipped`).
+4. `timings.quota_reserve_ms` usa `stepStart` a mano en vez de `mark()`, a diferencia del resto.
+
+### Oportunidad que abre el sprint (no ejecutada)
+
+`createToolSuspensionController` y `createPersistTurn` son ahora modulos con dependencias
+inyectables: por primera vez la suspension por contador y la persistencia del turno son
+testeables en aislamiento, sin DB ni servidor. Cierra parte del Hallazgo 0. No se hizo aca (el
+sprint era un movimiento, no una feature).
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Tras el deploy, en una conversacion NUEVA con el flujo entero (mensaje simple -> nombre y
+telefono -> captura de lead -> "Que me contacten" -> WhatsApp), que TODO siga igual:
+`step_count > 0`, `costUsd != 0`, `chat.onfinish_phases` con `persist_tx_1: ok`,
+`watchdog_settled reason: "closed"`, `provider.stream_chunks reason: "natural"`, filas ASSISTANT
+en ChatMessage y el lead en ChatbotLead. **Cualquier diferencia contra eso es una regresion del
+refactor, no un descubrimiento.**
+
+---
+
+## BLOQUE MUDEZ - ningun turno puede terminar sin decir nada
+
+Objetivo: enumerar TODOS los caminos por los que un turno del chatbot puede terminar sin texto
+del asistente llegando al visitante, y cerrarlos por estructura. Cuatro commits. La Fase 0 (mapa
+del espacio de estados + premortem adversarial) es el entregable mas durable del bloque, mas que
+los fixes.
+
+Version del SDK: **ai@6.0.214** (NO 6.0.177 como decia el brief - el `^` del package.json nos
+movio de version sin que nadie lo decidiera; ver Deuda). Todas las lineas del SDK citadas abajo
+son de esa version instalada.
+
+### El caso que abrio el bloque (variante C5, preexistente)
+
+Capturado durante MS-E6.2: dos steps completos (`reason: natural` los dos), lead capturado, CERO
+texto, el watchdog dispara con `assistantTextLength: 0`, el `onIdle` sale por su early-return sin
+persistir, `onFinish` nunca corre. El visitante da sus datos y el bot no dice nada; no se
+persiste, no se registra costo, el cupo queda cobrado. ~1 de cada 8-13 turnos con captura de lead
+en dev.
+
+### Fase 0 - el mapa de 16 caminos
+
+Como se llega, que ve el visitante, que queda en DB, si el costo se registra. Los 4 primeros son
+PRE-LLM (el USER se persiste recien en handleChatRequest.ts:598, despues de todos los gates - todo
+return anterior sale sin USER persistido). Los demas, con el stream ya arrancado (USER persistido:
+un camino mudo deja "USER sin respuesta" en DB).
+
+| # | Camino | Mecanismo | Visitante | DB / costo | Estado |
+|---|---|---|---|---|---|
+| 1 | 400 body / 404 bot / 500 sin KB | return pre-LLM | NADA (widget descarta status error) | nada | abierto (widget) |
+| 2 | 429 rate-limit | return pre-LLM | NADA (server manda mensaje que el widget no muestra) | nada | abierto (widget) |
+| 3 | Degradados (dominio/cuota/TOCTOU/hard-cap) | degradedResponse JSON | DegradedBanner | conv nueva descartada | manejado |
+| 4 | 500 catch externo | catch pre-return | banner connection_failed tras 3 retries | compensado | manejado |
+| 5 | Cierre normal con texto | - | texto | ok | sano |
+| 6 | Ultimo step = tool client-side (CONTACT-PATH) | continuacion imposible -> finish -> fallback inyecta | card + canned | canned persistido | manejado |
+| 7 | stepCountIs(3) agotado / run vacio | finish -> fallback | canned | ok | manejado |
+| 8 | chunkMs abort, 0 steps (orig3) | abort silencioso, sin onFinish | NADA | nada, cobrado | **CERRADO commit 1** |
+| 9 | chunkMs abort, >=1 step | onFinish con text='' | NADA o parcial | fila ASSISTANT vacia | **CERRADO commit 1** |
+| 10 | doStream pendiente >12s (C5) | watchdog corta, onIdle early-return, tee congela | NADA + chime | nada, cobrado | **CERRADO commits 1+2** |
+| 11 | onFinish.text = ultimo step (BUG-D) | visitante vio texto step 1, text='' | fila vacia | vacia | **CERRADO commit 3** |
+| 12 | NoOutputGeneratedError (provider cierra sin output ni finish) | error part -> onError -> frame "An error occurred." | NADA (widget ignora error frame) | nada | **CERRADO commit 2** (borde) + abierto (widget) |
+| 13 | Provider-close cierra con output parcial sin finish | flush procede, onFinish, usage 0 | texto parcial | subreporte ok | manejado |
+| 14 | Tool execute lanza | vuelve como tool-error = output, el run continua (index.js:3065-3087) | texto del paso siguiente | ok | manejado |
+| 15 | Cliente se desconecta | cancel -> tee congela (onAbort NO corre desde abajo) | se fue | retry INFRA.2 recupera | abierto a proposito |
+| 16 | Errorizacion no-abort de la cadena (callbacks que lanzan / chunk desconocido) | body muere sin frame ni [DONE] | NADA | nada | teorico (no usamos esos callbacks) |
+
+### Premortem adversarial - lo que la enumeracion lineal NO produjo
+
+Un agente adversarial independiente ataco el mapa y el plan de fixes. Dos hallazgos reales que la
+enumeracion no daba, mas condiciones de implementacion de los fixes:
+
+1. **BUG NUEVO (cerrado en commit 4): la ventana inicial de providerStreamClose era de 1s, no 12s.**
+   `stream-start` lo emite el adapter de Google al RESOLVER doStream (headers HTTP, ANTES de
+   cualquier token: `@ai-sdk/google/dist/internal/index.js:1650`), y el transform lo tomaba como
+   "primer chunk" -> ventana colapsada a `idleMs` (1s). Si Gemini "pensaba" >1s, se cerraba su
+   stream sano -> NoOutputGeneratedError -> turno mudo. Latente hoy solo porque Vertex entrega los
+   headers pegados al burst.
+2. **Agujero en el plan de fixes: el camino de error (fila 12) cierra el body limpio y rapido, sin
+   idle.** El fix de la red colgado del timer de idle no disparaba ahi. Se cubrio con `onSilentClose`
+   en el flush del watchdog (commit 2).
+3. El transform del watchdog seguia encolando post-`settled` -> chunks revividos durante el `await`
+   de la persistencia -> doble texto con la red. Cerrado con el descarte post-settled (commit 2).
+4. La forma del frame de UI usa `delta`, NO `text`, y el cliente valida con `z.strictObject`
+   (index.js:5504-5519) -> un campo mal = throw = el fix de la mudez produce mudez. Respetado en
+   silenceFrames.ts (commit 2).
+5. Persistir el canned y compensar el cupo son EXCLUYENTES (la compensacion borra la fila
+   Conversation). Decision tomada: COBRAR Y PERSISTIR (el transcript vale mas que el cupo de una
+   conversacion; sin el, el dueno ve una conversacion cortada y el motor de insights lee justo
+   esas). Distinguible por `source: watchdog_canned`.
+
+Descartes del atacante (con linea): `stepCountIs(3)` no tiene camino a 4 steps (index.js:8078 +
+8022 + 7251-7253); el retry de INFRA.2 no envenena el historial (un stream mudo no commitea
+mensaje assistant en el cliente porque el `start` sin messageId no hace write, index.js:6206-6214);
+la sospecha sobre el acumulador quedo REFUTADA (onChunk corre aguas abajo del descarte del pull,
+index.js:7406 vs 7379-7381: un chunk descartado por abort nunca se acumula).
+
+### TRES APRENDIZAJES QUE NO SE PIERDEN
+
+**1. PATRON del proyecto: "frame de transporte contado como primer chunk" - TERCERA aparicion.**
+Ya paso tres veces: el watchdog del borde (arreglado en WATCHDOG-4), el `chunkMs` del SDK, y
+providerStreamClose (premortem #1, commit 4). REGLA: **todo mecanismo que decida algo mirando "el
+primer chunk" tiene que distinguir TRANSPORTE de CONTENIDO del modelo.** El transporte
+(`start`/`stream-start`/`response-metadata`) llega antes de que el modelo genere nada; tomarlo como
+contenido colapsa cualquier ventana de cold-start y mata respuestas sanas. Un byte resetea el timer
+(es actividad), pero solo el contenido real del modelo elige la ventana corta. El discriminador
+correcto en el borde es `onChunk` del SDK (solo dispara para chunks del modelo, nunca para frames
+estructurales, index.js:7105-7107); en el middleware crudo, excluir `stream-start`/`response-metadata`.
+
+**2. El hallazgo del tee (el aprendizaje mas durable de la Fase 0).**
+`toUIMessageStream` se construye sobre `this.fullStream`, que sale de `teeStream()` (index.js:8219-8223:
+`const [s1, s2] = this.baseStream.tee(); this.baseStream = s2; return s1`). CONSECUENCIA:
+**cancelar una rama del tee NO cancela la fuente** - `ReadableStream.tee()` solo cancela el origen
+cuando AMBAS ramas cancelan. Por eso el `terminate()` del watchdog (que cancela la rama del body)
+nunca alcanza el `cancel()` del stream del SDK (index.js:7392-7394): muere en el tee. Y por eso
+`onAbort` era CASI INALCANZABLE - el unico disparador real era el AbortController interno de
+`chunkMs` (removido en commit 1). La pieza que SI drena el pipeline congelado es
+**`result.consumeStream()`**: abre una rama NUEVA del tee y la drena activamente, lo que hace correr
+el reconcile del SDK (onAbort/onFinish) tras nuestro terminate. Es lo que recupera la contabilidad
+del turno cuando hay >=1 step registrado. Verificado empiricamente (sonda P4: sin consumeStream, el
+tool del step 2 NO ejecuta y el run queda congelado).
+
+**3. Regla de gates: NUNCA encadenar comandos de gate ni pipear su salida.**
+En el commit 1, con la cwd del shell reseteada, un `tsc | head` enmascaro que ni tsc ni eslint
+corrieron (eslint hasta instalo un paquete global equivocado) - un falso verde. Casi mete a
+produccion un `consumeStream()` sin `.catch` (PromiseLike sin metodo catch, error de tipo real que
+la corrida enmascarada no vio). REGLA: **uno por vez, cwd confirmada primero (`pwd`), salida
+completa leida, sin pipes.** Un falso verde de tsc/eslint es PEOR que no correrlos, porque genera
+confianza.
+
+### Validacion en vivo (no anecdota): un C5 real atrapado end-to-end
+
+Durante la verificacion del commit 3, un turno REAL de dev paso por la red del commit 2. Numeros:
+`chat.watchdog_fired reason:idle chunks:1 contentChunks:0 window:initial elapsedMs:12019
+assistantTextLength:0` (C5 puro: doStream pendiente 12s, cero contenido). Resultado:
+`chat.onfinish_phases source:"watchdog_canned" assistantMessageLength:106 persist_tx_1.outcome:ok
+completed_event.outcome:ok costUsd:0`. Y la compensacion del drain: `chat.quota_compensated
+trigger:stream_abort compensated:false` (una sola compensacion, logueada dos veces por
+chatbotLog + logChatbotEvent). El `compensated:false` es el orden `NO REORDENAR` validado FUERA del
+test: el canned se persistio PRIMERO, la compensacion del drain llego DESPUES, encontro la fila
+ASSISTANT y NO la borro -> transcript conservado + cupo cobrado = exactamente "cobrar y persistir".
+Reaparecio otra vez en la verificacion del commit 4 (`source:watchdog_canned chunks_total:0`),
+mismo desenlace correcto.
+
+### Los cuatro commits
+
+- **1/4 - remueve chunkMs, da al handler la senal de abort.** `timeout:{chunkMs}` fuera (era la
+  causa raiz de la variante orig3: su timer corre durante la ejecucion de los tools -el SDK retiene
+  el finish hasta que terminan, index.js:6655/6618- y un capture_lead >5s abortaba el run en
+  silencio). A cambio: un `AbortController` por request (la unica senal que mata un fetch de Vertex
+  pendiente, porque la cancelacion del body muere en el tee), disparado por el watchdog al actuar
+  (DESPUES de persistir - ver el orden abajo) y ante `cancelled`; + `consumeStream()` al disparar
+  para drenar el tee. `STREAM_CHUNK_TIMEOUT_MS` removido de reconcile.ts con lapida.
+- **2/4 - la red que habla.** `onIdle`/`onSilentClose` del watchdog devuelven frames SSE (triada
+  text-start/text-delta/text-end, campo `delta`) que se encolan justo antes del terminate SIN await
+  entre medio; el turno canned se persiste con `source:watchdog_canned`. Cubre C5 (via idle) y
+  NoOutputGeneratedError (via flush/cierre limpio). NUNCA en `cancel`. Descarte post-settled en el
+  transform. Cierra tambien el timer huerfano del techo de tools en el disparo idle (premortem #13).
+- **3/4 - persiste el texto que el visitante vio (BUG-D).** `pickPersistedAssistantText(text,
+  accumulated)`: si `onFinish.text` (solo ultimo step) viene vacio pero el visitante vio texto de
+  steps anteriores, se persiste el acumulado de onChunk. El mas silencioso de la familia.
+- **4/4 - stream-start no colapsa la ventana de providerStreamClose (premortem #1, PATRON 3ra vez).**
+
+**El orden persist -> abort del commit 1 (NO REORDENAR).** El abort del watchdog va DESPUES del
+persist, no antes. Parecen dos lineas independientes y NO lo son: el drain que arranca con el abort
+puede disparar onAbort -> compensacion de cupo, que borra la fila Conversation en su tx; si le gana
+la carrera al persist, el turno (canned incluido) se queda sin fila. Persistir primero hace que el
+delete condicional de la compensacion ("solo si no hay ASSISTANT persistido") encuentre la fila y
+no borre nada. Documentado inline con ese porque - es exactamente el tipo de dependencia que
+alguien rompe en seis meses reordenando dos lineas que parecen ortogonales.
+
+### El test - test:mudez (bateria: 17 -> 18)
+
+Contra el streamText REAL + watchdog REAL + builder REAL + transform de fallback REAL. 6 casos:
+C5 (canned visible + persistido via idle), NoOutput (via silent_close, verificando closed y no
+idle), paridad sana (texto real, cero canned, la red no interviene), cancel (nunca habla ni
+persiste), descarte post-settled (chunk revivido no sale, canned si), BUG-D (multi-step con texto
+en step anterior -> se persiste el acumulado). Cada fix con su falla-primero ejecutada. El caso A7
+de provider-close cubre el commit 4 (gap tras el transporte no colapsa la ventana). Limite honesto
+(hallazgo 0 de MS-E6.2): el closure de produccion vive en handleChatRequest y no es invocable sin
+server; el test cablea un espejo minimo SOBRE los mecanismos reales, que es donde vivia el bug.
+
+### Estado final de la familia
+
+**Cerrados:** caminos 8, 9 (commit 1), 10 (commits 1+2), 11 (commit 3), 12 en el BORDE (commit 2),
+mas el bug del premortem #1 (commit 4). Todo turno que llega al borde ahora produce texto visible O
+queda persistido con su costo (source distinguible), y en el caso canned, las dos cosas.
+
+**Abiertos A PROPOSITO** (no valen la pena, con su porque):
+- Desconexion del cliente (camino 15): no hay a quien hablarle; el retry de INFRA.2 recupera el
+  turno.
+- Degradados (camino 3): el banner es la UX correcta por diseno.
+- Cierre con tool client-side cardeado (camino 6): card + canned es UX aceptable.
+- Stream de contenido infinito: hoy tampoco tiene techo (cada chunk resetea el timer); lo mata
+  Netlify a los 30s. Preexistente, fuera del alcance de la mudez.
+- Errorizacion no-abort de la cadena (camino 16): teorico, no usamos los callbacks que la
+  disparan.
+
+**Para el SPRINT SIGUIENTE** (bug distinto, verificacion visual propia): el WIDGET que descarta
+`status: 'error'` cuando el server SI le esta hablando - caminos 1, 2 y 12 del lado cliente. El 429
+manda un mensaje amable que nadie ve; el error-frame del stream y todo 4xx directo terminan en
+`status:'error'` que useChatbot ignora (no destructura `error`, no pasa `onError`), cero UI. Es la
+otra mitad del camino 12: el borde ya habla (commit 2), pero cuando el server responde un
+error-frame o un 4xx, el widget lo descarta. Sprint corto, banner estilo connection_failed.
+
+### Deuda
+
+- `^` en `"ai"` del package.json nos movio de 6.0.177 a 6.0.214 sin decision humana. Considerar
+  pineo exacto (sprint aparte).
+- Camino 14 (BUG-D residual): si el step final trae texto y uno anterior TAMBIEN, el transcript
+  conserva solo el final. Decision de formato de transcript, no de mudez.
+- Drift de messageCount en turnos mudos historicos (premortem #14): el `+2` vive solo en la tx del
+  turno; los turnos que murieron mudos antes de este bloque dejaron un USER sin ese incremento.
+  Anotar para E2 (historial desde DB).
+- Resto de la deuda conocida sin cambios: superficie de insights para el dueno (chat Panel, ya
+  bloqueante) - BREVO_API_KEY + Telegram - PII en stderr de show_whatsapp_handoff - hashes de IP
+  divergentes (route.ts:73 sin salt) - CHATBOT_IP_HASH_SALT - rotar key de Vertex - promesas
+  detached de captureLead.ts - demo-chat/[slug]/route.ts sin el middleware -
+  BotConfig.allowedNavigationPaths - timeout de 20s de generate-insights-cron - insights no
+  deduplican entre corridas - los 4 bugs anotados en Fase 0 de MS-E6.2 - la orquestacion sigue sin
+  cobertura de tests salvo lo que test:mudez ahora cubre del borde.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+En produccion, conversacion nueva, flujo completo (mensaje simple -> nombre y telefono -> captura
+-> "Que me contacten" -> y en otra, WhatsApp): que TODO turno produzca texto, y que en el log esten
+step_count > 0, costUsd != 0, chat.onfinish_phases con persist_tx_1: ok, y fila ASSISTANT en
+ChatMessage. Y el discriminador nuevo: si aparece `source: watchdog_canned`, es un turno que iba a
+ser mudo y la red lo salvo - confirmar que el visitante vio la derivacion. La ventana de
+providerStreamClose ya no debe colapsar: `provider.stream_chunks` con `reason:idle totalChunks:1
+chunk_stream_start:1` seria el bug reapareciendo.
+
+---
+
+## BLOQUE VOZ - lo que el visitante ve cuando el camino no es el feliz
+
+Contraparte cliente del mapa de MUDEZ: aquel bloque cerro el borde del servidor; este cierra lo
+que llega a la pantalla. Dos problemas, dos commits: (1) el fallback de respuesta vacia se
+disculpaba en el momento de conversion, pegado a una tarjeta que lo contradecia (camino 6);
+(2) el widget descartaba errores que el server SI mandaba (caminos 1, 2 y 12 del lado cliente).
+Copy decidido por Valentino en la parada dura de Fase 0. Sin clientes reales activos.
+
+### Fase 0 - el mapa extendido: que hace el WIDGET con lo que el server manda
+
+Los tres transportes del lado cliente, verificados contra el SDK instalado (ai@6.0.214):
+
+- T1, error HTTP antes del stream: el wrapper de fetch (useChatbot.ts) intercepta primero.
+  Red caida y 5xx son transitorios -> retry x3 con backoff 2s/4s (chatRetryPolicy) -> agotado,
+  banner connection_failed. Los 4xx pasaban "tal cual al SDK": el transport hace
+  `throw new Error(await response.text())` (ai/dist/index.js:13397-13401) -> catch ->
+  onError?/setStatus error (:13826-13829). useChatbot no destructuraba `error` ni pasaba
+  onError -> moria ahi. El Error.message del SDK NO trae el status HTTP - por eso el fix vive
+  en el wrapper, donde el status existe.
+- T2, frame de error DENTRO del stream: processUIMessageStream lo relanza como
+  `new Error(chunk.errorText)` (:6233-6235) via un onError interno `(e) => { throw e }`
+  (:13806-13808) -> mismo catch -> status 'error'. El texto parcial ya streameado queda
+  commiteado en messages. MATIZ NUEVO: el throw ABORTA el consumo, asi que los frames
+  POSTERIORES al de error se descartan - los silence frames de onSilentClose (MUDEZ commit 2)
+  viajan en el wire pero el cliente los tira. La fila 12 decia "CERRADO (borde) + abierto
+  (widget)": el canned del borde queda en DB pero la pantalla no lo veia.
+- T3, frame `abort`: solo marca isAborted (:6304-6306) -> status 'ready', sin error, texto
+  parcial conservado. Casi siempre es el propio visitante cancelando (camino 15) - sin fix,
+  a proposito.
+
+Mapa (columna cliente; solo filas con novedad respecto de MUDEZ):
+
+| Camino | Server manda | Widget ANTES | Widget AHORA |
+|---|---|---|---|
+| 1a 400 body | JSON tecnico EN (handleChatRequest:137,:594) | NADA | banner chat_unavailable |
+| 1b 404 bot inexistente o pausado | JSON tecnico EN (:155) | NADA | banner chat_unavailable |
+| 1c 403 origin (fila nueva) | JSON tecnico EN (route.ts:62) | NADA | banner chat_unavailable |
+| 1d 500 sin KB | JSON tecnico EN (:165) | CORRECCION al mapa MUDEZ: nunca fue NADA - es 5xx, INFRA.2 lo reintenta y muestra connection_failed | igual (sin cambios) |
+| 2a 429 sesion | JSON con mensaje amable (:192-201) | NADA - el copy existia y nadie lo vio nunca | banner rate_limited con EL TEXTO DEL SERVER |
+| 2b 429 origen+IP (fila nueva - hay DOS rate limits) | texto plano EN 'Too many requests' (route.ts:82-88) | NADA | banner rate_limited con canned local espejo |
+| 6 cierre en tool cardeada | tarjeta + fallback inyectado | tarjeta + disculpa que la contradecia | tarjeta + conector neutral (commit 1) |
+| 12 NoOutputGeneratedError | error frame + silence frames DESPUES | NADA (throw del error frame descarta el canned que venia atras) | banner stream_interrupted; el canned del borde sigue viajando y sigue sin verse (orden del wire) - divergencia leve transcript/pantalla, documentada abajo |
+
+### Inventario de copy (Fase 0) - hallazgos del conjunto
+
+Primera vez que se miro todo el copy canned junto. Lo que salio:
+
+1. La familia de degradados es coherente entre si (quota/tope/fallback comparten formula;
+   connection_failed y ConfigLoadError comparten lenguaje ambar). El bug del conjunto era la
+   fila 6: UN texto para dos situaciones opuestas.
+2. El copy del 429 de sesion existia y era invisible. El 429 outer ni tenia copy de visitante.
+3. Todos los cuerpos 4xx/5xx son ingles tecnico ('Invalid request body', 'Bot not found or
+   inactive', 'Origin not allowed', 'Too many requests', y el 'An error occurred.' del SDK).
+   REGLA DEL FIX: jamas renderizar body/error.message crudo - allowlist. El UNICO texto del
+   server que se muestra es el `error` del 429 JSON de sesion (escrito para el visitante),
+   con cota defensiva de 200 chars.
+4. Para el SPRINT DE COPY (fuera de scope aca, base = este inventario): el empty-state on-site
+   'Sistema Listo / Protocolo de consultoria iniciado. Como puedo asistirle hoy?'
+   (ChatWindow.tsx) rompe el voseo del resto del widget y usa jerga de sistema; y
+   'WhatsApp no configurado.' (WhatsappHandoffCard.tsx) le muestra al visitante un problema
+   de configuracion del dueno.
+
+### Commit 1 (servidor) - el conector de tarjeta
+
+Cuando el run cierra en un tool CARDEADO sin texto, la tarjeta ES la respuesta: el transform
+inyecta un conector neutral en vez de la disculpa. Copy aprobado (aca ascii; el codigo lleva
+tildes): offer_handoff_options -> 'Listo. Elegi abajo como preferis que sigamos.' /
+show_whatsapp_handoff -> 'Listo, te dejo el acceso directo a WhatsApp.' / navigate_to_page ->
+'Te dejo el enlace aca abajo.'
+
+- El catalogo `CARD_RENDERING_TOOL_CONNECTORS` vive AL LADO de TOOL_BUILDERS (getTools.ts),
+  a proposito: quien agrega un tool cardeado lo ve, y si no lo suma, la disculpa vuelve.
+  `show_whatsapp_handoff` esta aunque es server-side: si el modelo no agrega texto despues,
+  su tarjeta tambien queda como unica respuesta.
+- Mecanica en reconcile.ts, MISMA regla dura del deadlock: cero retencion, la decision sigue
+  en el chunk terminal `finish`. Solo UNA variable acumulada mas en el closure
+  (`cardConnectorText`, seteada al pasar cada tool-call cardeado). NO se resetea entre steps
+  A PROPOSITO: la tarjeta renderizada persiste en pantalla (el widget rendea el acumulado de
+  toolCalls del mensaje) - un reset por step reintroduciria la disculpa sobre la tarjeta en
+  show_whatsapp_handoff -> step vacio. Un tool no cardeado jamas la setea, asi que
+  capture_lead -> step vacio cae en la derivacion (correcto). Pinneado en ambas direcciones
+  (C4a/C4b de test:emptyfallback).
+- Id propio en el wire: 'voz-card-connector' (vs 'onf1-empty-fallback'). Telemetria nueva:
+  `chat.card_connector_injected` (solo metadatos). Ambos kinds marcan `emptyFallbackInjected`:
+  compensacion de cupo y guard de onSilentClose sin cambios (con tools ejecutadas se cobra,
+  tabla de shouldCompensateQuota intacta).
+- PARIDAD DE PERSISTENCIA verificada en vivo y en test: el texto inyectado pasa por onChunk
+  (onfinish_phases salio con chunks_text_delta:1 y assistantMessageLength 45 = len(conector)),
+  asi que pickPersistedAssistantText persiste EXACTAMENTE lo que la pantalla mostro.
+- Falla-primero EJECUTADA: plomeria sin comportamiento -> ambos tests fallaron con
+  ['derivation'] vs ['card_connector'] -> comportamiento -> verde. Casos nuevos: C1-C5 en
+  test:emptyfallback (conector/disculpa/passthrough/no-reset/callers-legacy) y caso 7 en
+  test:mudez contra el streamText real + watchdog real + mapa REAL (lee el texto del mapa:
+  un ajuste de copy no rompe el test; la red del watchdog no habla encima del conector).
+- Diff de telemetria contra baseline PRE-cambio (la herramienta de MS-E6.2 era andamio de
+  scratchpad - se reconstruyo y el baseline se capturo ANTES de tocar codigo, contra el
+  endpoint real de dev, bot develop): estructura identica, dos deltas exactos - el evento
+  nuevo x1 y assistantMessageLength 106 -> 45. El camino 6 real (capture_lead +
+  offer_handoff_options, toolCallCount:2, step_count:2) se reprodujo en ambas corridas.
+- Gates: tsc 0 errores; eslint 0 errores (2 warnings _ctx preexistentes en getTools.ts);
+  bateria 18/18 verde, uno por vez, sin pipes.
+
+### Commit 2 (cliente) - el widget deja de descartar lo que el server manda
+
+Diff minimo, SOLO useChatbot.ts y DegradedBanner.tsx. Tres reasons nuevos en DegradedReason,
+todos SIN bloquear el input (NON_LOCKING_DEGRADES, mismo trato que connection_failed;
+sendMessage ya limpiaba el degrade reactivo al reenviar - cero cambios ahi):
+
+- rate_limited (429): la rama 4xx del wrapper deja de entregar el response al SDK y lo
+  resuelve ahi (patron existente: degradedInfo + stream vacio 200). Muestra el `error` del
+  JSON de sesion; texto plano del outer -> RATE_LIMITED_MESSAGE local (espejo deliberado del
+  texto del server: misma situacion, mismo mensaje). Sub-linea: 'Espera un momento y volve a
+  escribir.' Icono Clock.
+- chat_unavailable (400/403/404): 'El chat no esta disponible en este momento.' + sub 'Proba
+  de nuevo en un rato.' Un solo copy para los tres (indistinguibles para el visitante).
+- stream_interrupted (frame de error mid-stream): onError del useChat (el wrapper no puede
+  verlo: el fetch ya resolvio 200) -> 'Se corto la respuesta.' + sub 'Escribi de nuevo y
+  seguimos.' SIEMPRE banner, sin discriminador de estado (E3 descartado: metia estado en
+  useChatbot). El texto parcial ya streameado queda. Guard de bot_paused (no se pisa).
+- DegradedBanner: la variante ambar pasa de `reason === 'connection_failed'` a AMBER_REASONS,
+  con sub-linea e icono por reason. Nada mas se toco: ni mensajes, ni scroll, ni retry
+  INFRA.2, ni ChatWindow/ChatbotEmbed/widget.js.
+
+Humo real (browser + dev server): camino feliz intacto; rafaga de 11 POSTs auto-limpiantes
+(bodies sin mensaje user: consumen el bucket 10/min pero salen por el 400 no_user_message,
+que compensa cupo y descarta fila - cero LLM) -> mensaje real desde el widget -> banner ambar
+con el texto del server, Clock, historial intacto, input habilitado. La fila 2a quedo cerrada
+de punta a punta. chat_unavailable y stream_interrupted quedan para la verificacion humana
+(pasos abajo).
+
+Gates commit 2: tsc 0 errores; eslint 1 error PREEXISTENTE en useChatbot.ts
+(react-hooks/set-state-in-effect sobre el setPendingSubmit del flag B3.7 - codigo no tocado,
+parte del baseline de ~80 errores de la auditoria CLEAN; arreglarlo = tocar pendingSubmit,
+prohibido en este sprint). DegradedBanner limpio.
+
+### Abierto / deuda que deja este bloque
+
+- Divergencia leve fila 12: la DB persiste el canned del borde ('Se me complico...') pero la
+  pantalla muestra el banner stream_interrupted (el throw del cliente descarta los silence
+  frames que vienen DESPUES del error frame). Compatible semanticamente; eliminarla exigiria
+  tocar el borde (fuera de scope, y el borde es de MUDEZ).
+- El frame abort (T3) queda sin UI a proposito (camino 15: visitante ido).
+- SPRINT DE COPY pendiente (pedido por Valentino, base = inventario de Fase 0): voseo del
+  empty-state on-site + 'WhatsApp no configurado.'.
+- Consolidar los DOS rate limits (chatbotPerSession route + chatbotPerBotSession handler) -
+  deuda previa de B14.1, este bloque solo la hizo visible.
+- Ruido de dev de la verificacion: ~5 cupos de QuotaUsage consumidos por conversaciones de
+  prueba creadas-y-borradas (los deletes manuales no devuelven cupo), ChatbotEvents huerfanos
+  (SetNull, los purga T0.2). Gotcha reconfirmado: 'Jest worker exceptions' en dev = server
+  colgado, reciclar (paso durante el humo; matar el node del puerto, no el wrapper npm).
+- Resto de la deuda conocida sin cambios (ver cierre de MUDEZ): insights para el dueno
+  (bloqueante), BREVO/Telegram, PII en stderr de show_whatsapp_handoff, hashes IP
+  divergentes, CHATBOT_IP_HASH_SALT, rotar key Vertex, promesas detached de captureLead,
+  demo-chat sin middleware, allowedNavigationPaths, timeout del cron de insights, insights
+  sin dedup, pin exacto de `ai`, orquestacion sin cobertura salvo test:mudez.
+
+### Verificacion humana declarada (Valentino) - el agente NO da por bueno nada
+
+Commit 1 (servidor): conversacion nueva -> nombre y telefono -> 'quiero que me contacten' ->
+el texto pegado a la tarjeta debe ser 'Listo. Elegi abajo como preferis que sigamos.' (con
+tildes en pantalla), nunca la disculpa. En el log: chat.card_connector_injected + step_count>0,
+costUsd!=0, persist_tx_1 ok. La disculpa SIGUE siendo correcta donde algo se rompe de verdad
+(watchdog_canned).
+
+Commit 2 (cliente), desktop y mobile:
+1. rate_limited: 11+ mensajes cortos seguidos en menos de un minuto (limite 10/min por
+   sesion) -> banner ambar con reloj y el texto del server; el input sigue habilitado; al
+   minuto, reenviar -> el banner se limpia y responde normal.
+2. chat_unavailable: con el panel abierto y la config ya cargada, PAUSAR el bot desde el
+   admin -> mandar un mensaje -> banner 'El chat no esta disponible en este momento.'
+   (resolveBotBySlug filtra inactivos -> 404). Reactivar el bot al terminar.
+3. stream_interrupted: en dev, romper la credencial de Vertex (GOOGLE_APPLICATION_CREDENTIALS
+   a un path invalido, o modelo inexistente) con el server corriendo -> mandar un mensaje ->
+   banner 'Se corto la respuesta.' Restaurar al terminar.
+4. Regresion connection_failed: DevTools -> Network -> Offline -> mandar un mensaje -> banner
+   'No pudimos conectar...' tras ~6s de reintentos (2s+4s), header 'Conectando...' mientras.
+5. Regresion de siempre en un turno sano: step_count>0, costUsd!=0, persist_tx_1 ok,
+   watchdog_settled reason 'closed', provider.stream_chunks reason 'natural', cero
+   watchdog_canned.
+
+---
+
+
+---
+
+## BLOQUE PRIVACIDAD â€” datos de terceros fuera de los logs de plataforma
+
+**Objetivo:** que ningun dato personal de los visitantes de los clientes
+llegue a los logs de plataforma (Netlify Logs), y que el hash de IP sea lo
+que su docstring promete. Fase 0 de barrido read-only con parada dura +
+3 commits atomicos con compuerta humana entre cada uno. Fechas: 2026-08-10/11.
+Arbol: worktree logic-core-runtime (branch main). Reporte de Fase 0 completo
+entregado en sesion; lo durable quedo aca y en docs/privacidad-afirmaciones-cliente.md.
+
+### Fase 0 â€” barrido (aprobado por Valentino con 3 decisiones)
+- ~135 puntos unicos de emision console/stderr inventariados y verificados
+  adversarialmente. UN solo derrame incondicional de PII de visitantes a
+  consola: handoff.whatsapp (showWhatsappHandoff), que filtraba MAS de lo que
+  decia el brief: visitorName, visitorContact, topicSummary, purchaseSignals
+  y reason (via el spread de metadata en persistentLogger).
+- Correccion de premisas del brief, con evidencia: (a) el hash salteado de
+  ipHash.ts NO participaba del rate-limit pese a su docstring â€” la clave real
+  del chat era un segundo hash inline SIN salt en route.ts; (b) habia 4
+  esquemas de hash, no 2; (c) la retencion de 30 dias SI estaba cableada en
+  Netlify (cleanup-old-events-cron).
+- DB: chatbot_events.metadata esta bien â€” todo org-scoped via forOrg, cero
+  caminos tenant->tenant. El problema era exclusivamente el camino consola y
+  sus espejos.
+- Sinks externos no contemplados por el brief: Sentry (espejo parcial de la
+  consola via breadcrumbs; scrub por regex no cubre texto libre) y el
+  Telegram interno de la agencia (PII de visitantes por diseno â€” decision de
+  producto). Verificado por NOMBRES de env en Netlify (nunca valores):
+  no existe SENTRY_DSN ni NEXT_PUBLIC_SENTRY_DSN en ningun contexto â€”
+  Sentry esta INACTIVO en prod; su superficie es teorica.
+- CORRECCION DE DEUDA VIEJA: "dev no llega a Vertex" es FALSO hoy â€” dev
+  (dev:qa) SI llega a un LLM (Gemini API, respuestas reales). Lo que falla en
+  dev es la persistencia intermitente (ver P2002 abajo). Sacado de la deuda.
+- Decisiones aprobadas: allowlist con redactedKeys (no denylist); salt con
+  ABORT en produccion (argumento decisivo: docs/env-vars.md y check-env.js ya
+  prometian "error en arranque" â€” el codigo mentia respecto de su propia doc);
+  el commit 3 de redaccion de errores ENTRA en el bloque.
+
+### Commit 1 â€” allowlist del camino consola (feat(privacidad): P1)
+- persistentLogger.ts: el relay a consola de logChatbotEvent emite SOLO las
+  claves de CONSOLE_METADATA_ALLOWLIST (43 claves â€” la union exacta de las
+  claves seguras de los 18 callsites, re-enumerada del codigo). Lo excluido se
+  reemplaza por redactedKeys (los NOMBRES, nunca los valores). El camino DB
+  queda intacto (la metadata completa y message siguen yendo a la columna
+  org-scoped que consume el panel). Una clave nueva queda FUERA del log por
+  omision â€” el modo de falla seguro, exactamente el inverso del bug.
+- Test nuevo test:pii (console-pii.invariant.ts), falla-primero con rojo
+  documentado: marcadores de PII + un campo inventado no listado -> nada sale;
+  message jamas toca consola; lo seguro pasa intacto; y pinnea la FORMA de los
+  4 eventos de telemetria permanente (chat.onfinish_phases, watchdog_settled,
+  provider.stream_chunks, chat.watchdog_fired â€” verificados libres de PII, no
+  perdieron ningun campo). El allowlist esta DUPLICADO a proposito en el test:
+  cambiarlo en produccion sin decidirlo tambien ahi lo pone en rojo.
+
+### Commit 2 â€” hash de IP unificado + salt con ABORT (feat(privacidad): P2)
+- route.ts del chat usa hashIp(extractClientIp(request)): UN solo esquema
+  (salted, 16 hex) en todo el chatbot; muere el hash inline sin salt de 24 hex
+  y el parsing duplicado de headers (extractClientIp, fallback 'unknown',
+  exportada por el facade index.server). Mismos presets, ventanas y codigos.
+  Unico efecto operativo: los buckets chatbotPerSession se resetean UNA vez en
+  el deploy (ventana de 60s; filas viejas las barre el cleanup perezoso).
+- ipHash.ts: en produccion sin CHATBOT_IP_HASH_SALT ahora TIRA (antes: warning
+  por request + fallback a un salt hardcodeado en un repo PUBLICO). Docstring
+  reescrita a la verdad. check-env.js sale con codigo 1 en prod sin la
+  variable; envValidator la marca required condicional a prod. Cumple el
+  criterio de aceptacion que S7-03 dejo escrito en la auditoria de julio.
+- AVISO CRITICO DE DEPLOY: deployar el ABORT sin CHATBOT_IP_HASH_SALT en
+  Netlify tira el chatbot de prod al primer request (500). La variable fue
+  creada en Netlify por Valentino ANTES del push, y el mensaje del commit lo
+  dice explicito. El build NO se rompe sin la variable (el abort es por
+  request, verificado: next build local pasa sin salt).
+- Test nuevo test:iphash, falla-primero: abort en prod, determinismo, el salt
+  participa, dev sigue funcionando, extractClientIp pinneada, y un pin del
+  FUENTE del route (sin createHash inline â€” el bug que motivo el sprint).
+
+### Commit 3 â€” redaccion de la clase de error que ecoa argumentos (feat(privacidad): P3)
+- sanitizeErrorMessage (logger.ts): redacta message (y stack) SOLO de
+  PrismaClientValidationError â€” la unica clase de Prisma que ecoa los
+  ARGUMENTOS de la query (nombre/email/telefono de un lead, contenido de
+  mensajes, la KB entera). Todo otro error pasa intacto (los P1017/P2024 del
+  diagnostico INFRA conservan su message â€” pinneado por test).
+- Aplicado en: extractDbErrorInfo (message + causeMessage), chatbotError
+  (ademas omite stack para esa clase y le manda a Sentry un Error saneado
+  equivalente), fallback de persistentLogger, capture_lead.error (el peor:
+  su try cubre chatbotLead.create con name/email/phone), catch de notifyClient
+  en captureLead, confirm_contact_request.error, saveBotConfig y
+  saveKnowledgeBase. Inventario exhaustivo previo: 15 puntos PRISMA-POSIBLE,
+  8 con PII en los args de la query.
+- FUGA AL BROWSER, no solo a consola: saveBotConfig y saveKnowledgeBase
+  devolvian el message crudo AL CLIENTE via { success: false, error: msg } â€”
+  un PrismaClientValidationError ahi habria devuelto al browser el
+  leadNotificationEmail del cliente o la knowledge base completa. El mismo
+  msg saneado corrige el log Y el return.
+- Los 3 throws de admin (createClientOnly, createClientWithBot, updateClient)
+  ya no interpolan el email en el mensaje que termina en stderr.
+- scrub-pii.ts: claves de IP a la denylist por CLAVE (x-forwarded-for,
+  x-real-ip, x-nf-client-connection-ip, client_ip, ^ip$, ip_address,
+  remote_addr, ^forwarded$) â€” una IPv6 pasa los regex de texto libre.
+  Blindaje pre-activacion: Sentry sigue inactivo (sin DSN).
+- test:pii extendido a 13 checks (rojo documentado 3/12 antes del fix).
+
+### Hallazgo colateral â€” P2002: el PRIMER mensaje de un visitante puede devolver 500 (SPRINT APARTE)
+- Evidencia: 21 de las 23 lineas de error capturadas en los diffs de
+  telemetria son EL MISMO error determinista: PrismaClientKnownRequestError
+  P2002, unique(sessionId), en prisma.conversation.create() â€” stage unhandled.
+- Mecanismo: carrera de creacion en getOrCreateConversation. Varios
+  primeros-turnos concurrentes de la MISMA sesion hacen find -> "no existe" ->
+  create; el primero commitea y los demas chocan contra el unique y escapan
+  como 500.
+- Exposicion real en produccion (el analisis completo): el camino es el retry
+  del widget (INFRA.2) contra el PRIMER turno de una sesion. La ventana se
+  abre justo con Neon fria: con un cold start de 6-7 segundos, el request
+  original sigue en vuelo cuando el retry dispara; ambos ven "no existe" y el
+  perdedor devuelve 500. Es decir: EL PRIMER MENSAJE DE UN VISITANTE NUEVO
+  PUEDE FALLAR â€” la primera impresion del producto, en el peor momento
+  (funcion fria). El harness del bloque lo amplifico (14 turnos concurrentes
+  de la misma sesion) pero el mecanismo es real.
+- Forma del fix (para el sprint aparte): catch de P2002 en
+  getOrCreateConversation + re-fetch de la fila ganadora (la conversacion ya
+  existe â€” el perdedor debe adoptarla, no fallar).
+- Threat model: el message de P2002 nombra el CAMPO (sessionId), nunca
+  valores. Solo PrismaClientValidationError ecoa datos â€” y esa es la clase
+  que el commit 3 redacta.
+- Las otras 2 lineas: DeadlineExceededError (2000ms, persist_tx_1) â€” el
+  timeout intermitente de persistencia conocido (familia INFRA.3), consistente
+  con Neon dev lenta bajo rafaga. Sin novedades; sigue gated en la firma real
+  de prod.
+
+### Verificacion (por commit, gates de a uno, sin pipes)
+- tsc --noEmit (.\node_modules\.bin\tsc.cmd): limpio en los 3 commits.
+- eslint sobre los archivos tocados: limpio; unicos hallazgos PREEXISTENTES y
+  fuera de los diffs: check-env.js:10-11 (require de dotenv, 2 errores que ya
+  estaban) y scrub-pii.ts:118 (warning _hint sin uso).
+- Bateria completa de invariantes del chatbot: 26/26, 27/27 y 28/28 verdes
+  (crece porque cada commit suma su test nuevo).
+- npm run build: exit 0 en los 3 (local necesita
+  NODE_OPTIONS=--max-old-space-size=6144 â€” OOM con el heap default de Node 24;
+  Netlify ya tiene su NODE_OPTIONS). prisma migrate status: 86 migraciones al
+  dia en los 3.
+- Telemetria: baseline capturado ANTES de tocar codigo contra dev:qa (puerto
+  3002), set fijo de 16 requests (14 turnos concurrentes de una sesion + body
+  invalido + shape invalida; el limiter interno da 10-pasan/4x429
+  deterministico). METODO DECLARADO: dev es un camino MIXTO no deterministico
+  (el LLM responde a veces, la persistencia falla intermitente), asi que el
+  diff compara FORMAS (tipo de evento -> set de claves), no valores. Los 3
+  diffs pre/post: IDENTICOS en los tipos comunes (10 tipos, mismos sets).
+  chat.rate_limited conserva su ipHash. Filas de prueba de dev-DB borradas
+  tras cada corrida; los chatbot_events generados los purga T0.2 a los 30 dias.
+
+### Que se puede afirmar al cliente
+- Archivo propio: docs/privacidad-afirmaciones-cliente.md â€” legible sin haber
+  leido nada de esto; es el insumo de Franco para escribir el contrato sin
+  mentir. Condicionado a: 3 commits deployados + verificacion post-deploy.
+
+### Deuda / fuera de bloque (anotado, NO tocado)
+- P2002 race del primer turno (sprint aparte, analisis arriba).
+- Telegram con PII de visitantes al chat interno de la agencia: decision de
+  PRODUCTO para Franco antes del primer cliente â€” o queda y se declara en
+  contrato, o manda solo un identificador y el dueno entra al panel.
+- Valores historicos de Conversation.ipHash generados con el salt publico:
+  limpieza de datos pendiente (operacion de datos, NO migracion de schema).
+- S7-09 vigente: Conversation.ipHash viaja al browser del cliente via RSC
+  (findMany sin select en el dashboard de conversaciones).
+- Resto de la superficie de Sentry (IPv6 en x-forwarded-for pasa el scrub de
+  texto, consoleIntegration espeja la consola como breadcrumbs, dual
+  instrumentation files): deuda TEORICA mientras no haya DSN.
+- chat.bad_request arrastra un snippet corto del body crudo en el message del
+  SyntaxError/ZodError (no-Prisma, acotado por V8).
+- Sinks fuera del modulo chatbot con el mismo patron: lib/alerts.ts:145
+  (console.error con el Error crudo; su try envuelve prisma) y syncLeadToCrm
+  via lib/logger (args sin PII de visitante).
+- Esquemas C/D de hash de la plataforma (auth-rate-limit.ts) siguen sin salt.
+- admin/settings/reports/page.tsx usa prisma crudo fuera de la frontera de
+  isolation.
+- .env.local del worktree logic-core-runtime sin IMPERSONATION_SECRET ni
+  DEVELOP_ALERTS_EMAIL (check-env sale 1 en dev por eso; preexistente, deuda
+  de entorno).
+- vercel.json registra un set de crons DISTINTO al de netlify.toml (el que
+  corre es Netlify; desincronizados desde T0.2).
+
+### Pendiente del humano
+1. Push de los 3 commits (CHATBOT_IP_HASH_SALT ya creada en Netlify). Tras el
+   deploy: mandar un mensaje real al bot de prod que dispare un handoff o un
+   lead y verificar en Netlify Logs que la linea sale con redactedKeys y SIN
+   visitorName/visitorContact/topicSummary.
+2. Verificar la retencion de logs del plan de Netlify: lo YA derramado antes
+   de este bloque expira segun esa retencion, no segun nuestro codigo.
+3. Decision de producto (Franco): Telegram con PII de visitantes.
+4. Priorizar el sprint del P2002 (primer mensaje de un visitante puede dar
+   500 con Neon fria).
+5. Opcional: completar IMPERSONATION_SECRET y DEVELOP_ALERTS_EMAIL en el
+   .env.local del worktree para que check-env vuelva a verde en dev.

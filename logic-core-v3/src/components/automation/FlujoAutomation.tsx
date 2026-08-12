@@ -141,10 +141,10 @@ const flowEdgeById = Object.fromEntries(flowEdges.map(edge => [edge.id, edge])) 
 const outputNodeIds = new Set(['whatsapp_out', 'vendedor_out', 'sheets_out'])
 const arrivalMessageByNodeId: Record<string, string> = {
   lead: 'Pago detectado en MercadoPago',
-  calificar: 'Validacion de pago completada',
+  calificar: 'Validación de pago completada',
   registrar: 'Factura AFIP generada con exito',
   dispatch: 'Orquestador disparando acciones',
-  whatsapp_out: 'WhatsApp de confirmacion enviado',
+  whatsapp_out: 'WhatsApp de confirmación enviado',
   vendedor_out: 'Slack: alerta de nueva venta',
   sheets_out: 'Excel: venta registrada',
 }

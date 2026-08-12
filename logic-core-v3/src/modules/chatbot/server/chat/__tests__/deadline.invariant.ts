@@ -19,6 +19,12 @@
  *   7. `computeHookBudgetMs`: el presupuesto se techa contra el `maxDuration` de
  *      la ruta, nunca es negativo.
  *   8. La decisión del gate del retry (deadline → NO reintentar).
+ *   9. WATCHDOG-2/3: calibración de las dos ventanas (`idleMs`/`initialIdleMs`),
+ *      APLICADAS POR STEP (WATCHDOG-3: el cold start es de cada step, no del
+ *      stream completo — tras un tool, el step que genera el texto final
+ *      necesita la ventana LARGA), y del techo de suspensión por tools
+ *      (`STREAM_WATCHDOG_TOOL_MAX_MS`) contra los presupuestos de persistencia
+ *      y el `maxDuration` de la ruta.
  */
 import assert from 'node:assert/strict'
 import {
@@ -37,6 +43,9 @@ import {
   PERSIST_TX_RETRY_BACKOFF_MS,
   QUOTA_COMPENSATION_DEADLINE_MS,
   ROUTE_MAX_DURATION_MS,
+  STREAM_WATCHDOG_IDLE_MS,
+  STREAM_WATCHDOG_INITIAL_IDLE_MS,
+  STREAM_WATCHDOG_TOOL_MAX_MS,
   computeHookBudgetMs,
 } from '../reconcile.ts'
 
@@ -278,6 +287,121 @@ async function main(): Promise<void> {
     retryPath + QUOTA_COMPENSATION_DEADLINE_MS > ONFINISH_TOTAL_BUDGET_MS,
     'con una fase condicional previa el nominal se pasa del techo → el clamp es el que corta',
   )
+}
+
+// ── 9. WATCHDOG-2/3: la calibración de las DOS ventanas —POR STEP— deja vivir
+// a la persistencia y no corta respuestas sanas ──────────────────────────────
+// Reemplaza al bloque que pinneaba `stepMs` (removido: beneficio medido cero y
+// truncaba generaciones legítimas). Quien cierra el stream es el watchdog de
+// nuestro borde, con dos ventanas separadas (WATCHDOG-2: bajar la ventana
+// post-chunk de 3000 a 1200ms sin romper el arranque) que ahora aplican POR
+// STEP, no por stream completo (WATCHDOG-3: el arranque en frío del provider es
+// una propiedad de CADA step — tras un tool, el step 2 que genera el texto
+// final es una llamada nueva al provider con su propio cold start). Lo que hay
+// que pinnear: que cada ventana dispare a tiempo para que `persistTurn`
+// conserve su presupuesto, y que ninguna corte una respuesta sana. Acá falla
+// el test, no prod.
+{
+  // Elapsed real medido en prod: el watchdog se crea (~return de la respuesta)
+  // a los ~4.9s; el único chunk de Gemini llega ~1.5s después, a los ~6.4s.
+  const WATCHDOG_CREATED_ELAPSED_MS = 4_900
+  const LAST_CHUNK_ELAPSED_MS = 6_400
+
+  // 9a. Camino real (CON chunk): dispara idleMs después del último chunk.
+  const firesAtMsWithChunk = LAST_CHUNK_ELAPSED_MS + STREAM_WATCHDOG_IDLE_MS
+  assert.equal(
+    computeHookBudgetMs(firesAtMsWithChunk),
+    ONFINISH_TOTAL_BUDGET_MS,
+    `con idle=${STREAM_WATCHDOG_IDLE_MS} el watchdog dispara a ${firesAtMsWithChunk}ms y la ` +
+      'persistencia todavía recibe el presupuesto COMPLETO',
+  )
+  assert.ok(
+    firesAtMsWithChunk + ONFINISH_TOTAL_BUDGET_MS + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    'disparo + persistencia + colchón entran holgados antes del kill de la plataforma',
+  )
+
+  // 9b. Camino patológico (SIN ningún chunk jamás): dispara initialIdleMs
+  // desde la creación del watchdog. Sin texto acumulado no hay nada que
+  // persistir, así que lo único que importa es que cierre antes del kill.
+  const firesAtMsNoChunk = WATCHDOG_CREATED_ELAPSED_MS + STREAM_WATCHDOG_INITIAL_IDLE_MS
+  assert.ok(
+    firesAtMsNoChunk + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    `sin ningún chunk, el watchdog igual cierra a ${firesAtMsNoChunk}ms, antes del kill de 30s`,
+  )
+
+  // 9c. Camino con un tool al límite del techo de seguridad: el peor caso de
+  // suspensión (STREAM_WATCHDOG_TOOL_MAX_MS agotado) todavía deja el
+  // presupuesto COMPLETO para persistTurn — si esto falla, TOOL_MAX_MS quedó
+  // calibrado demasiado alto.
+  const firesAtMsAfterToolMax =
+    WATCHDOG_CREATED_ELAPSED_MS + STREAM_WATCHDOG_TOOL_MAX_MS + STREAM_WATCHDOG_IDLE_MS
+  // PROVIDER-CLOSE — al subir `STREAM_WATCHDOG_IDLE_MS` de 1200 a 3000 (el
+  // watchdog del borde pasó a ser RED DE SEGURIDAD, ver reconcile.ts), este
+  // peor caso ya NO conserva el presupuesto COMPLETO: quedan ~4100ms en vez de
+  // 5000ms. Es un trade-off aceptado y medido, no una regresión silenciosa —
+  // `persistTurn` tarda ~300-1600ms en producción, así que 4100ms sigue siendo
+  // holgado. Lo que se pinnea ahora es lo que de verdad importa: que alcance
+  // para un intento completo de persistencia MÁS su evento de cierre.
+  const persistenceFloorMs = PERSIST_TX_DEADLINE_MS + EVENT_LOG_DEADLINE_MS
+  assert.ok(
+    computeHookBudgetMs(firesAtMsAfterToolMax) >= persistenceFloorMs,
+    `con TOOL_MAX_MS=${STREAM_WATCHDOG_TOOL_MAX_MS} el peor caso de suspensión dispara a ` +
+      `${firesAtMsAfterToolMax}ms y el presupuesto (${computeHookBudgetMs(firesAtMsAfterToolMax)}ms) ` +
+      `sigue alcanzando para un intento de persistencia + su evento (${persistenceFloorMs}ms)`,
+  )
+  assert.ok(
+    firesAtMsAfterToolMax + computeHookBudgetMs(firesAtMsAfterToolMax) < ROUTE_MAX_DURATION_MS,
+    'el peor caso de suspensión sigue cerrando antes del kill de la plataforma',
+  )
+  // Nota sobre 9c: modela el resume() del PROPIO techo de seguridad — dispara
+  // con la ventana CORTA (`idleMs`) porque en ese punto `beginStep()` todavía
+  // no corrió (el tool ni terminó). Sigue siendo el comportamiento correcto:
+  // no cambia con WATCHDOG-3.
+
+  // 9d. WATCHDOG-3 — camino REALISTA: el tool termina DENTRO de su cold start
+  // esperado (Neon fría: 6-7s medidos, bien por debajo de TOOL_MAX_MS), y el
+  // step 2 arranca con la ventana LARGA (`beginStep()` → `initialIdleMs`), no
+  // con la corta — que es exactamente el bug que este sprint arregla. Aun con
+  // el cold start COMPLETO del step 2 sumado encima, sigue cerrando antes del
+  // kill de la plataforma.
+  const TYPICAL_TOOL_DURATION_MS = 7_000
+  const firesAtMsStep2NoChunk =
+    WATCHDOG_CREATED_ELAPSED_MS + TYPICAL_TOOL_DURATION_MS + STREAM_WATCHDOG_INITIAL_IDLE_MS
+  assert.ok(
+    firesAtMsStep2NoChunk + HOOK_SAFETY_MARGIN_MS < ROUTE_MAX_DURATION_MS,
+    `tool (${TYPICAL_TOOL_DURATION_MS}ms) + cold start COMPLETO del step 2 con la ventana LARGA ` +
+      `(dispara a ${firesAtMsStep2NoChunk}ms) sigue cerrando antes del kill de la plataforma`,
+  )
+  // ⚠️ RESIDUAL, fuera de scope de este sprint (no se tocan constantes): en el
+  // caso EXTREMO donde el techo de seguridad fuerza el resume (TOOL_MAX_MS
+  // agotado) Y el tool termina poco después Y el step 2 necesita su cold start
+  // COMPLETO, la suma teórica puede superar ROUTE_MAX_DURATION_MS:
+  //   WATCHDOG_CREATED(~4.9s) + TOOL_MAX_MS(15s) + IDLE_MS(~1.2s de margen) +
+  //   INITIAL_IDLE_MS(12s) ≈ 33.1s > 30s.
+  // Es un doble-edge-case (tool casi colgado + step 2 lento) que no se
+  // resuelve en este sprint — si aparece en prod, revisar TOOL_MAX_MS con
+  // Valentino/Franco.
+
+  // Piso de la ventana INICIAL: los gaps medidos hasta el primer chunk fueron
+  // 1470 y 1664ms. Tiene que superarlos con margen o cortaría respuestas sanas
+  // que tardan en arrancar.
+  const MAX_OBSERVED_GAP_TO_FIRST_CHUNK_MS = 1_664
+  assert.ok(
+    STREAM_WATCHDOG_INITIAL_IDLE_MS > MAX_OBSERVED_GAP_TO_FIRST_CHUNK_MS * 1.5,
+    `initialIdleMs demasiado bajo: el gap máximo medido hasta el primer chunk fue ` +
+      `${MAX_OBSERVED_GAP_TO_FIRST_CHUNK_MS}ms y cortaría el arranque de respuestas sanas`,
+  )
+  // La ventana post-chunk tiene que ser la CORTA — si no, separar las dos
+  // ventanas no logra nada (WATCHDOG-2 existe para poder bajar justo esta).
+  assert.ok(
+    STREAM_WATCHDOG_IDLE_MS < STREAM_WATCHDOG_INITIAL_IDLE_MS,
+    'idleMs (post-chunk) tiene que ser más corto que initialIdleMs — si no, no hay para qué separarlas',
+  )
+  // MUDEZ (commit 1) — la aserción "watchdog antes que chunkMs" se removió
+  // JUNTO con STREAM_CHUNK_TIMEOUT_MS: la premisa que pinneaba (que chunkMs
+  // existe y es benigno) resultó falsa — su timer corría durante la ejecución
+  // de tools legítimos y abortaba el run en silencio (variante orig3 del turno
+  // mudo). Sin chunkMs, la relación que este bloque protegía ya no existe.
 }
 
 console.log(

@@ -13,7 +13,7 @@
  */
 import assert from 'node:assert/strict'
 import { GET } from '../route'
-import { getProvidedCronSecret } from '../cron-secret'
+import { getProvidedCronSecret } from '@/lib/cron/cron-secret'
 
 let passed = 0
 function check(label: string, fn: () => void): void {

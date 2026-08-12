@@ -96,11 +96,11 @@ Lucide React: always `strokeWidth={1.5}`. No exceptions.
 AnimatePresence: always `mode="wait"` for state transitions.
 Glassmorphism: `bg-white/[0.04] backdrop-blur-[20px] backdrop-saturate-[180%] border border-white/[0.08]`
 
-Service accent colors (do not change):
+Service accent colors (do not change) — verificado contra `globals.css` y las landings:
 - Web Dev → Cyan `#06b6d4`
-- AI → Violet `#8b5cf6`
-- Automation → Green `#10b981`
-- Software → Amber `#f59e0b`
+- AI → Green/emerald `#10b981`
+- Automation → Amber `#f59e0b`
+- Software → Violet `#8b5cf6`
 
 ---
 

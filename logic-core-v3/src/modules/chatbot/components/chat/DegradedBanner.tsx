@@ -1,11 +1,28 @@
 'use client'
 
-import { MessageCircle, ExternalLink, WifiOff } from 'lucide-react'
+import { MessageCircle, ExternalLink, WifiOff, Clock } from 'lucide-react'
 import { motion } from 'motion/react'
-import type { DegradedInfo } from '../../hooks/useChatbot'
+import type { DegradedInfo, DegradedReason } from '../../hooks/useChatbot'
 
 interface DegradedBannerProps {
   info: DegradedInfo
+}
+
+// BLOQUE VOZ — familia ámbar: estados honestos "probá de nuevo" con el input
+// HABILITADO (ver NON_LOCKING_DEGRADES en useChatbot). La primera línea viene
+// en info.message; la sub-línea y el ícono se eligen acá por reason.
+const AMBER_REASONS: ReadonlySet<DegradedReason> = new Set([
+  'connection_failed',
+  'rate_limited',
+  'chat_unavailable',
+  'stream_interrupted',
+])
+
+const AMBER_SUBLINES: Partial<Record<DegradedReason, string>> = {
+  connection_failed: 'Escribí de nuevo y seguimos.',
+  rate_limited: 'Esperá un momento y volvé a escribir.',
+  chat_unavailable: 'Probá de nuevo en un rato.',
+  stream_interrupted: 'Escribí de nuevo y seguimos.',
 }
 
 // MS-2 — Render del estado degradado en el widget del visitante.
@@ -18,7 +35,11 @@ export function DegradedBanner({ info }: DegradedBannerProps) {
   // INFRA.2 — connection_failed NO es un handoff a WhatsApp: es un estado honesto
   // "probá de nuevo" tras agotar los reintentos del cold-start. El input queda
   // habilitado (ver inputLockedByDegrade), así que invitamos a reintentar a mano.
-  if (info.reason === 'connection_failed') {
+  // BLOQUE VOZ — la misma variante ámbar cubre los caminos que el widget
+  // descartaba: 429 (rate_limited), 400/403/404 (chat_unavailable) y el frame
+  // de error mid-stream (stream_interrupted).
+  if (AMBER_REASONS.has(info.reason)) {
+    const AmberIcon = info.reason === 'rate_limited' ? Clock : WifiOff
     return (
       <motion.div
         initial={{ opacity: 0, y: 8, scale: 0.98 }}
@@ -51,7 +72,7 @@ export function DegradedBanner({ info }: DegradedBannerProps) {
             flexShrink: 0,
           }}
         >
-          <WifiOff size={16} strokeWidth={1.5} color="rgba(245, 158, 11, 0.95)" />
+          <AmberIcon size={16} strokeWidth={1.5} color="rgba(245, 158, 11, 0.95)" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <div
@@ -70,7 +91,7 @@ export function DegradedBanner({ info }: DegradedBannerProps) {
               lineHeight: 1.5,
             }}
           >
-            Escribí de nuevo y seguimos.
+            {AMBER_SUBLINES[info.reason] ?? 'Escribí de nuevo y seguimos.'}
           </div>
         </div>
       </motion.div>

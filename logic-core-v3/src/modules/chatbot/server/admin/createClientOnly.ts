@@ -61,7 +61,9 @@ export async function createClientOnly(input: z.infer<typeof CreateClientOnlyInp
     'TENANT-MGMT: unicidad global de email de usuario al alta de cliente (User.email @unique)',
     (c) => c.user.findUnique({ where: { email: parsed.userEmail }, select: { id: true } }),
   )
-  if (existingUser) throw new Error(`El email ${parsed.userEmail} ya está registrado en el sistema.`)
+  // PRIVACIDAD: sin interpolar el email — el throw de un server action termina
+  // en stderr (Netlify Logs) y el admin ya sabe qué email tipeó en el form.
+  if (existingUser) throw new Error('El email ingresado ya está registrado en el sistema.')
 
   const tempPassword = generateTempPassword()
   const passwordHash = await bcrypt.hash(tempPassword, 10)

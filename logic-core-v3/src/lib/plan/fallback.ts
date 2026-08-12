@@ -49,7 +49,11 @@ export const PLAN_FALLBACK: EffectivePlan = {
   setupFloorPrice: 700,
   quota: 500,
   llmModel: 'gemini-2.5-flash',
-  tools: ['capture_lead', 'show_whatsapp_handoff'],
+  // CONTACT-PATH — `confirm_contact_request` va también en el fallback: es el
+  // único tool que hace que el camino "que me contacten" cierre con texto (su
+  // `execute` fuerza el step final). Sin él acá, una org sin plan real
+  // reproduciría el bug. Espejo de STARTER_TOOLS en `prisma/seeds/sync-plans.ts`.
+  tools: ['capture_lead', 'show_whatsapp_handoff', 'confirm_contact_request'],
   maxDomains: 1,
   reportsEnabled: false,
   insightEnabled: false,

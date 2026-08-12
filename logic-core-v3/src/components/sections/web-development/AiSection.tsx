@@ -47,7 +47,7 @@ const cards: AiCard[] = [
     {
         icon: <ChatIcon />,
         title: 'Responde al instante',
-        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios y disponibilidad, sin que vos toques el telefono.',
+        copy: 'Un asistente IA contesta preguntas de tus clientes las 24hs. Precios, horarios y disponibilidad, sin que vos toques el teléfono.',
         tag: 'ChatBot · IA conversacional',
         accentFrom: '#22d3ee',
         accentTo: '#38bdf8',
@@ -56,8 +56,8 @@ const cards: AiCard[] = [
     {
         icon: <CalcIcon />,
         title: 'Cotiza y agenda solo',
-        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automatico. Vos recibis el pedido listo para confirmar.',
-        tag: 'Automatizacion · WhatsApp API',
+        copy: 'El cliente completa un formulario inteligente y recibe su presupuesto automático. Vos recibis el pedido listo para confirmar.',
+        tag: 'Automatización · WhatsApp API',
         accentFrom: '#38bdf8',
         accentTo: '#a78bfa',
         accentRgb: '56,189,248',
@@ -65,8 +65,8 @@ const cards: AiCard[] = [
     {
         icon: <TrendIcon />,
         title: 'Se posiciona solo',
-        copy: 'Contenido generado y optimizado por IA para que Google te encuentre en cada busqueda local de tu rubro.',
-        tag: 'SEO automatico · Contenido IA',
+        copy: 'Contenido generado y optimizado por IA para que Google te encuentre en cada búsqueda local de tu rubro.',
+        tag: 'SEO automático · Contenido IA',
         accentFrom: '#67e8f9',
         accentTo: '#8b5cf6',
         accentRgb: '139,92,246',
@@ -360,7 +360,7 @@ export default function AiSection() {
                         </div>
                         <div style={{ textAlign: 'left' }}>
                             <div style={{ fontSize: '13px', fontWeight: 600, color: 'white', lineHeight: 1.3 }}>
-                                Queres verlo en accion?
+                                ¿Querés verlo en acción?
                             </div>
                             <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.56)', lineHeight: 1.4 }}>
                                 Proba el asistente IA {'->'} habla con la mascota

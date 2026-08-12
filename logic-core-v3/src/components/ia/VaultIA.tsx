@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react'
 import { motion, AnimatePresence, useInView, useReducedMotion } from 'motion/react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 interface FAQItem {
   question: string
@@ -10,34 +11,34 @@ interface FAQItem {
 
 const faqItems: FAQItem[] = [
   {
-    question: 'Tengo que cambiar mi numero de WhatsApp?',
+    question: '¿Tengo que cambiar mi número de WhatsApp?',
     answer:
-      'No. Conectamos la IA a tu numero actual usando la API oficial de Meta. Tus clientes escriben al mismo numero de siempre, pero ahora reciben respuesta inmediata, 24/7.',
+      'No. Conectamos la IA a tu número actual usando la API oficial de Meta. Tus clientes escriben al mismo número de siempre, pero ahora reciben respuesta inmediata, 24/7.',
   },
   {
-    question: 'La IA puede inventar precios o informacion incorrecta?',
+    question: '¿La IA puede inventar precios o información incorrecta?',
     answer:
-      'No. Los agentes trabajan con reglas estrictas y solo responden con tus datos reales (precios, stock y politicas). Si algo no corresponde, deriva a un humano de tu equipo.',
+      'No. Los agentes trabajan con reglas estrictas y solo responden con tus datos reales (precios, stock y políticas). Si algo no corresponde, deriva a un humano de tu equipo.',
   },
   {
-    question: 'La IA puede cobrar por MercadoPago?',
+    question: '¿La IA puede cobrar por MercadoPago?',
     answer:
-      'Si. Puede generar y enviar links de pago por WhatsApp y verificar acreditacion, todo dentro de la misma conversacion.',
+      'Si. Puede generar y enviar links de pago por WhatsApp y verificar acreditación, todo dentro de la misma conversación.',
   },
   {
-    question: 'Necesito saber programar para usarlo despues?',
+    question: '¿Necesito saber programar para usarlo después?',
     answer:
-      'No. Te entregamos un panel simple para revisar conversaciones, actualizar informacion y seguir resultados. No hace falta tocar codigo.',
+      'No. Te entregamos un panel simple para revisar conversaciones, actualizar información y seguir resultados. No hace falta tocar código.',
   },
   {
-    question: 'Cuanto tiempo lleva implementarlo?',
+    question: '¿Cuánto tiempo lleva implementarlo?',
     answer:
-      'La primera version funcional suele estar en 2 semanas. Se arranca con los casos de mayor impacto y se escala en iteraciones.',
+      'La primera versión funcional suele estar en 2 semanas. Se arranca con los casos de mayor impacto y se escala en iteraciones.',
   },
   {
-    question: 'Que pasa si quiero pausar o cancelar?',
+    question: '¿Qué pasa si quiero pausar o cancelar?',
     answer:
-      'Sin contrato largo. La suscripcion mensual se puede pausar o cancelar cuando quieras.',
+      'Sin contrato largo. La suscripción mensual se puede pausar o cancelar cuando quieras.',
   },
 ]
 
@@ -181,9 +182,9 @@ function SocialProof({ isInView }: { isInView: boolean }) {
       </div>
 
       <div style={{ flex: 1, minWidth: '200px' }}>
-        <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: '0 0 3px' }}>+47 negocios ya automatizados en NOA</p>
+        <p style={{ fontSize: '14px', fontWeight: 700, color: 'white', margin: '0 0 3px' }}>Automatizaciones funcionando en negocios del NOA</p>
         <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', margin: 0 }}>
-          Restaurantes - Clinicas - Comercios - Inmobiliarias en Tucuman y alrededores
+          Restaurantes - Clínicas - Comercios - Inmobiliarias en Tucumán y alrededores
         </p>
       </div>
 
@@ -327,17 +328,17 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
       />
 
       <p style={{ fontSize: '11px', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', margin: '0 0 20px' }}>
-        SEGUIS MANEJANDO TODO A MANO?
+        ¿SEGUÍS MANEJANDO TODO A MANO?
       </p>
 
       <h2 style={{ fontSize: 'clamp(32px, 5vw, 68px)', fontWeight: 900, lineHeight: 1.1, margin: '0 0 20px', letterSpacing: '-0.02em' }}>
-        <span style={{ color: 'white' }}>Tu competencia ya</span>
+        <span style={{ color: 'white' }}>¿Tu competencia ya</span>
         <br />
-        <span style={{ color: '#34d399', textShadow: '0 0 16px rgba(52,211,153,0.22)' }}>integro IA? Y tu?</span>
+        <span style={{ color: '#34d399', textShadow: '0 0 16px rgba(52,211,153,0.22)' }}>integró IA? ¿Y vos?</span>
       </h2>
 
       <p style={{ fontSize: '16px', color: 'rgba(255,255,255,0.4)', maxWidth: '480px', margin: '0 auto clamp(32px, 5vh, 52px)', lineHeight: 1.65 }}>
-        El momento de integrar IA no es el ano que viene. Es hoy.
+        El momento de integrar IA no es el año que viene. Es hoy.
         <br />
         Sin contrato largo. Resultados visibles desde el primer mes.
       </p>
@@ -362,9 +363,7 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: 'clamp(24px, 4vh, 40px)' }}>
         <motion.a
-          href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=${encodeURIComponent(
-            'Hola DevelOP, vi la pagina de IA y quiero ver como funciona para mi negocio'
-          )}`}
+          href={getWhatsappHref('Hola DevelOP, vi la página de IA y quiero ver como funciona para mi negocio')}
           target="_blank"
           rel="noopener noreferrer"
           whileHover={reduced ? {} : { scale: 1.04 }}
@@ -389,7 +388,7 @@ function CTAFinal({ isInView }: { isInView: boolean }) {
         </motion.a>
 
         <motion.a
-          href="#live-chat"
+          href="#demo-ia"
           whileHover={reduced ? {} : { scale: 1.02, borderColor: 'rgba(0,255,136,0.4)' }}
           whileTap={reduced ? {} : { scale: 0.97 }}
           style={{

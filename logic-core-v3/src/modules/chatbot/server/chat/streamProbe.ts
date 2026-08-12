@@ -1,15 +1,29 @@
 /**
- * PROBE-STREAM — Instrumentación TEMPORAL de diagnóstico para localizar el
- * punto EXACTO donde el stream del chatbot se cuelga en producción.
+ * PROBE-STREAM — Instrumento de diagnóstico APAGADO POR DEFECTO, para localizar
+ * el punto EXACTO donde el stream del chatbot se cuelga.
  *
- * CONTEXTO: en prod, una invocación colgada muestra `chat.llm_request_start` y
- * después, directo, `Duration: 30000` (el kill de Netlify). `chat.onfinish_phases`
- * —que vive en un `finally` y corre SIEMPRE si `onFinish` llega a entrar— NO
- * aparece. Eso prueba que el cuelgue está AGUAS ARRIBA de `onFinish`, en algún
- * `await` del tramo `streamText()` → tools → `onFinish` que hoy no loguea nada.
+ * ESTADO (H.3). El cuelgue que motivó este módulo YA ESTÁ RESUELTO: era nuestro
+ * propio `createEmptyResponseFallbackTransform` reteniendo el chunk
+ * `finish-step` y deadlockeando el pipeline del SDK (ver DEADLOCK-FINISH-STEP en
+ * la bitácora). Este instrumento fue el que lo encontró, después de tres sprints
+ * de hipótesis equivocadas sobre el provider.
  *
- * ESTE MÓDULO ES TEMPORAL Y REVERSIBLE. Cada línea que emite lleva el campo
- * `probe: 'stream'` para poder localizarla y revertirla de una.
+ * POR QUÉ SE QUEDA IGUAL. Reconstruirlo si aparece OTRO cuelgue sería tirar ese
+ * trabajo. Con `CHATBOT_STREAM_PROBE` sin setear cuesta una lectura de env var
+ * por request y un `return` sobre un booleano: cero líneas de log, cero
+ * overhead. H.3 sacó los puntos que emitían en el CAMINO SANO (eran ~20 líneas
+ * ERROR por conversación) y dejó los que sirven para diagnosticar algo nuevo:
+ * los pares enter/exit alrededor de cada await a DB de los tools, y las entradas
+ * de `onError`/`onAbort`.
+ *
+ * NO CONFUNDIR con la telemetría permanente, que NO pasa por acá y se emite
+ * siempre vía `chatbotLog`: `chat.watchdog_fired`, `watchdog_settled`,
+ * `provider.stream_chunks`, `chat.onfinish_phases`, `chat.persist_abandoned`.
+ * Ese es el diagnóstico de rutina; esto es el instrumento que se prende cuando
+ * el diagnóstico de rutina no alcanza.
+ *
+ * CÓMO PRENDERLO: `CHATBOT_STREAM_PROBE=1` en el entorno. Cada línea que emite
+ * lleva el campo `probe: 'stream'` para poder aislarlas de un grep.
  *
  * POR QUÉ CADA LÍNEA ES AUTOSUFICIENTE PARA REORDENAR A MANO
  * Netlify bufferea y reordena logs — se comprobó una línea `Duration` apareciendo

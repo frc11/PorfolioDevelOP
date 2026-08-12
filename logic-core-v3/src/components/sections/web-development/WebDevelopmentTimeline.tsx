@@ -10,6 +10,7 @@ import {
     useTransform,
 } from 'motion/react'
 import { ArrowRight, CircleCheckBig, Search, Sparkles, Wrench, type LucideIcon } from 'lucide-react'
+import { getWhatsappHref } from '@/lib/whatsapp'
 
 const ease = [0.16, 1, 0.3, 1] as const
 const TITLE_CLOCK_MS = 1200
@@ -53,17 +54,17 @@ const milestones: Milestone[] = [
     {
         step: '01',
         week: 'Semana 01',
-        title: 'Estrategia y diseno',
-        description: 'Aterrizamos tu oferta, ordenamos el mensaje y definimos una experiencia qué se sienta seria desde el primer segundo.',
-        deliverable: 'Diseno aprobado antes de construir',
+        title: 'Estrategia y diseño',
+        description: 'Aterrizamos tu oferta, ordenamos el mensaje y definimos una experiencia que se sienta seria desde el primer segundo.',
+        deliverable: 'Diseño aprobado antes de construir',
         side: 'left',
         icon: Sparkles,
     },
     {
         step: '02',
         week: 'Semana 02',
-        title: 'Construccion',
-        description: 'Convertimos ese sistema en una web rapida, clara y solida para qué cada clic se sienta inmediato.',
+        title: 'Construcción',
+        description: 'Convertimos ese sistema en una web rápida, clara y sólida para que cada clic se sienta inmediato.',
         deliverable: 'Web funcional en entorno de prueba',
         side: 'right',
         icon: Wrench,
@@ -72,8 +73,8 @@ const milestones: Milestone[] = [
         step: '03',
         week: 'Semana 03',
         title: 'Posicionamiento Google',
-        description: 'Ajustamos estructura, velocidad y senales locales para qué Google te entienda y te muestre donde importa.',
-        deliverable: 'Search listo para salir a produccion',
+        description: 'Ajustamos estructura, velocidad y señales locales para que Google te entienda y te muestre donde importa.',
+        deliverable: 'Search listo para salir a producción',
         side: 'left',
         icon: Search,
     },
@@ -82,7 +83,7 @@ const milestones: Milestone[] = [
 const launchChecks = [
     'Entrega completa y acceso total a tu web',
     'Base de posicionamiento lista para Google',
-    'Soporte y acompanamiento durante el lanzamiento',
+    'Soporte y acompañamiento durante el lanzamiento',
 ]
 
 function TimelineStageVisual({
@@ -828,7 +829,7 @@ export function WebDevelopmentTimeline() {
                         }}
                         className="mx-auto mt-7 max-w-2xl text-base leading-8 text-white/52 md:text-xl"
                     >
-                        Un proceso corto, visible y concreto para pasar de una idea suelta a una presencia digital qué ya vende y posiciona.
+                        Un proceso corto, visible y concreto para pasar de una idea suelta a una presencia digital que ya vende y posiciona.
                     </motion.p>
                 </div>
 
@@ -916,11 +917,11 @@ export function WebDevelopmentTimeline() {
                                                 Lanzamiento
                                                 <br />
                                                 <span className="bg-gradient-to-r from-cyan-200 to-violet-200 bg-clip-text text-transparent">
-                                                    y ventas en produccion.
+                                                    y ventas en producción.
                                                 </span>
                                             </h3>
                                             <p className="mt-5 max-w-xl text-sm leading-7 text-white/55 md:text-base">
-                                                Publicamos, conectamos conversiones y dejamos todo listo para qué tu operación tenga una nueva sucursal activa desde el dia uno.
+                                                Publicamos, conectamos conversiones y dejamos todo listo para que tu operación tenga una nueva sucursal activa desde el día uno.
                                             </p>
 
                                             <div className="mt-8 space-y-3">
@@ -938,7 +939,7 @@ export function WebDevelopmentTimeline() {
                                             </div>
 
                                             <motion.a
-                                                href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}?text=Hola%20DevelOP%2C%20quiero%20iniciar%20la%20transformaci%C3%B3n%20de%20mi%20negocio`}
+                                                href={getWhatsappHref('Hola DevelOP, quiero iniciar la transformación de mi negocio')}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 whileHover={enableLaunchBtnAutoHover || prefersReduced ? {} : { scale: 1.03, y: -1 }}

@@ -1,26 +1,29 @@
 import { createHash } from 'crypto'
 
 /**
- * Hashes an IP address with SHA-256 + secret salt.
+ * Hashes an IP address with SHA-256 + secret salt (CHATBOT_IP_HASH_SALT).
  *
- * GDPR-friendly: stores a non-reversible identifier instead of the
- * raw IP. Used for rate limiting and abuse detection without storing PII.
+ * Usos reales (mantener sincronizado con la realidad, no al revés):
+ *   - clave del rate-limit `chatbotPerSession` (route del chat)
+ *   - telemetría `chat.rate_limited` y columna `Conversation.ipHash`
  *
- * Set CHATBOT_IP_HASH_SALT in env. If not set, falls back to a default
- * (NEVER acceptable in production — the module logs a warning).
+ * La no-reversibilidad depende del salt: sin salt SECRETO, el hash de una
+ * IPv4 se revierte por fuerza bruta trivial (espacio chico + este repo es
+ * público, así que el fallback de abajo es de dominio público). Por eso en
+ * producción la variable es OBLIGATORIA y su ausencia ABORTA (S7-03):
+ * docs/env-vars.md y docs/operations/00-entornos.md prometen "error en
+ * arranque si vacía" — un warning por request ya demostró que no alcanza.
+ *
+ * En development/test cae al fallback fijo NO secreto: suficiente para que
+ * el flujo local funcione, inaceptable en prod.
  */
 export function hashIp(ip: string): string {
   const salt = process.env.CHATBOT_IP_HASH_SALT
-  if (!salt) {
-    if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        JSON.stringify({
-          type: 'ip_hash.missing_salt',
-          level: 'warn',
-          message: 'CHATBOT_IP_HASH_SALT not set in production — using default',
-        })
-      )
-    }
+  if (!salt && process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'CHATBOT_IP_HASH_SALT is required in production (generate with: openssl rand -hex 32). ' +
+        'Aborting instead of hashing with the public fallback salt (S7-03).'
+    )
   }
   const effectiveSalt = salt ?? 'chatbot-dev-salt-do-not-use-in-prod'
   return createHash('sha256')
