@@ -50,7 +50,7 @@ import { prisma } from '@/lib/prisma'
 import { buildScope } from './registry'
 import { IsolationError } from './scoped-model'
 
-export { IsolationError, IsolationNotFoundError } from './scoped-model'
+export { IsolationError, IsolationNotFoundError, isUniqueConstraintError } from './scoped-model'
 
 /**
  * ONF-1 — Accessors scoped SIN la envoltura transaccional: el tipo del `tx`

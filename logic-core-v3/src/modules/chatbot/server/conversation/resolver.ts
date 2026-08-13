@@ -1,5 +1,6 @@
-import { forOrg, unsafeGlobalQuery } from '@/lib/isolation'
+import { forOrg, unsafeGlobalQuery, isUniqueConstraintError } from '@/lib/isolation'
 import type { BotConfig, KnowledgeBase, Conversation } from '@prisma/client'
+import { chatbotLog } from '../logging'
 
 type BotConfigWithRelations = BotConfig & {
   knowledgeBase: KnowledgeBase | null
@@ -93,21 +94,52 @@ export async function getOrCreateConversation(
     return { conversation, isNew: false }
   }
 
-  const conversation = await scope.conversation.create({
-    botConfigId: input.botConfigId,
-    sessionId: input.sessionId,
-    currentPath: input.currentPath ?? null,
-    referrerUrl: input.referrer ?? null,
-    // UTM.1 — first-touch: create-only, igual que referrerUrl arriba.
-    // NUNCA agregar esto al update{} del branch `existing` de más arriba —
-    // eso rompería en silencio la semántica de "primer contacto".
-    utmSource: input.utmSource ?? null,
-    utmMedium: input.utmMedium ?? null,
-    utmCampaign: input.utmCampaign ?? null,
-    ipHash: input.visitorIpHash ?? null,
-    userAgent: input.visitorUserAgent ?? null,
-    startedAt: now,
-    lastMessageAt: now,
-  })
-  return { conversation, isNew: true }
+  try {
+    const conversation = await scope.conversation.create({
+      botConfigId: input.botConfigId,
+      sessionId: input.sessionId,
+      currentPath: input.currentPath ?? null,
+      referrerUrl: input.referrer ?? null,
+      // UTM.1 — first-touch: create-only, igual que referrerUrl arriba.
+      // NUNCA agregar esto al update{} del branch `existing` de más arriba —
+      // eso rompería en silencio la semántica de "primer contacto".
+      utmSource: input.utmSource ?? null,
+      utmMedium: input.utmMedium ?? null,
+      utmCampaign: input.utmCampaign ?? null,
+      ipHash: input.visitorIpHash ?? null,
+      userAgent: input.visitorUserAgent ?? null,
+      startedAt: now,
+      lastMessageAt: now,
+    })
+    return { conversation, isNew: true }
+  } catch (error) {
+    // CARRERAS — P2002: otro request del mismo sessionId ganó la carrera del
+    // create (dos mensajes concurrentes del widget; el findFirst de arriba
+    // corrió antes del commit del ganador). El perdedor ADOPTA la fila del
+    // ganador con isNew:false — PINNEADO por test:p2002: la reserva atómica
+    // de cupo (handleChatRequest §5.b) se dispara solo con isNew, así que
+    // adoptar jamás re-reserva (el ganador ya cobró el suyo). Sin update de
+    // lastMessageAt a propósito: el ganador la acaba de crear con `now` (ms
+    // de diferencia) y un update acá podría pisar P2025 si un gate degradado
+    // del ganador descarta la fila en vuelo.
+    if (!isUniqueConstraintError(error)) throw error
+    const adopted = await scope.conversation.findFirst({
+      where: {
+        botConfigId: input.botConfigId,
+        sessionId: input.sessionId,
+      },
+    })
+    // Sin fila que adoptar, el P2002 NO vino de este par (bot, sessionId):
+    // p.ej. la colisión cross-bot del sessionId global (@unique sin
+    // botConfigId — micro-sprint aparte, no se enmascara acá) o la fila del
+    // ganador ya descartada por un gate degradado. Se relanza el error
+    // original: mismo desenlace que pre-fix.
+    if (!adopted) throw error
+    chatbotLog('chat.conversation_race_adopted', {
+      conversationId: adopted.id,
+      botConfigId: input.botConfigId,
+      sessionId: input.sessionId,
+    })
+    return { conversation: adopted, isNew: false }
+  }
 }

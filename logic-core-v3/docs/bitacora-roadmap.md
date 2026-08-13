@@ -16899,3 +16899,104 @@ entregado en sesion; lo durable quedo aca y en docs/privacidad-afirmaciones-clie
    500 con Neon fria).
 5. Opcional: completar IMPERSONATION_SECRET y DEVELOP_ALERTS_EMAIL en el
    .env.local del worktree para que check-env vuelva a verde en dev.
+
+## BLOQUE CARRERAS — concurrencia y ciclo de vida del request (EN CURSO)
+
+**Objetivo:** que dos requests concurrentes del mismo visitante no rompan al
+chatbot: hoy el perdedor de cada carrera muere con P2002 crudo (500 al widget)
+o le miente al visitante ("no pude guardar tus datos" con el lead ya
+guardado). Fase 0 (barrido + mapa 2a/2b/2c) aprobada por Valentino el
+2026-08-12 con: commits 1, 2 y 4 del mapa, el 3 (smoke) como DEPRECACION
+previa verificacion de consumidores, y un commit nuevo del gate botBusy en
+HandoffOptionsCard (R3 se dispara con DOS CLICKS — reproducido a mano en
+prod: transcript USER,USER,ASSISTANT,ASSISTANT y doble costo de Vertex).
+Arbol: worktree logic-core-runtime (branch main). Compuerta humana entre
+commits; gates uno por vez.
+
+### Commit 1 — P2002 perdedor-adopta (resolver + captureLead + guard + test)
+- resolver.ts (getOrCreateConversation): catch P2002 en el create → re-find
+  por (botConfigId, sessionId) → adopta la fila del ganador con isNew:false.
+  El pinneo de isNew es LA asercion: la reserva atomica de cupo
+  (handleChatRequest §5.b) se dispara solo con isNew — el perdedor jamas
+  re-reserva; sin eso cobraria dos veces. Re-find null → rethrow del error
+  ORIGINAL (no enmascara la colision cross-bot del sessionId @unique global,
+  micro-sprint aparte; tampoco la fila del ganador descartada en vuelo). Sin
+  update de lastMessageAt en la adopcion (el ganador la creo con `now` ms
+  antes; un update podria pisar P2025 con un descarte en vuelo). Telemetria
+  nueva: chat.conversation_race_adopted (consola, cero DB write) — mide la
+  frecuencia real de la carrera en prod.
+- captureLead.ts: catch P2002 → re-fetch del lead por conversationId →
+  contrato alreadyCaptured:true YA existente del pre-check, con race:true en
+  el log capture_lead.already_captured. Re-fetch vacio o fallido → fallback
+  generico reportando el error ORIGINAL. El leadCaptured de la conversacion
+  lo dejo la tx del ganador; el perdedor no re-escribe nada.
+- Type-guard compartido isUniqueConstraintError en la frontera de aislamiento
+  (scoped-model.ts + re-export en index.ts): la frontera que traduce
+  P2025/P2003 y deja pasar P2002 a proposito ahora exporta su clasificacion.
+  NO hay helper generico de recuperacion: las dos recuperaciones divergen en
+  tabla, re-fetch, contrato de retorno y fallback — seria todo parametros y
+  nada de cuerpo (decision aprobada en Fase 0).
+- Invariant nuevo test:p2002 (conversation/__tests__/p2002-adopcion
+  .invariant.ts) contra la Neon DEV real: la constraint la enforcea Postgres,
+  esto no se pinnea con mocks. Guard de host exacto (patron evals/shared),
+  bot QA qaseed-evals-base, sessionId con prefijo evals-carrera- (red de
+  seguridad: evals:purge barre el prefijo evals- si un crash deja filas),
+  cleanup en finally. captureLeadExecute exportado SOLO para este invariant.
+
+### Fail-first (baseline de telemetria del bloque)
+- Pre-fix, seccion resolver: RED — 3 de 4 callers concurrentes rechazan con
+  "Unique constraint failed on the fields: (`sessionId`)". En prod ese P2002
+  crudo atraviesa el Promise.all de la seccion 4&5 y muere en el catch
+  externo: chat.unhandled_failed (stderr) + evento chat.unhandled_error +
+  Sentry + 500 al widget.
+- Pre-fix, seccion captureLead: RED — el perdedor devuelve success:false
+  ("No pude guardar tus datos en este momento. Probemos por WhatsApp.") con
+  capture_lead.error en consola y el lead YA guardado por el ganador: el bot
+  le miente al visitante.
+- Post-fix: 3/3 secciones verdes con el catch CUBIERTO de verdad — en la
+  salida se ven 3x chat.conversation_race_adopted (los 3 perdedores del
+  burst) y capture_lead.already_captured con race:true.
+
+### Hallazgo de harness: el pool frio hace mentir a un invariante de concurrencia
+- La PRIMERA corrida fail-first dio VERDE PLACEBO en la seccion del resolver:
+  con el cliente Prisma frio hay una sola conexion y la rafaga se SERIALIZA —
+  el findFirst de los perdedores corre despues del commit del ganador, todos
+  salen por la rama `existing` y la carrera del create nunca ocurre. El
+  invariante quedo con warm-up explicito del pool (N counts paralelos antes
+  de la rafaga); asi reproduce la topologia serverless real (una lambda = un
+  request, la carrera es entre lambdas). REGLA para futuros tests de carrera:
+  sin calentar el pool, el verde es placebo.
+
+### Evidencia empirica D1/D2 (trabajo detached) desde el harness
+- El finally del invariante necesita un settle de 3s: notifyClient y
+  syncLeadToCrm quedan corriendo DETACHED (void) tras el return del tool. En
+  la corrida sin settle suficiente, el $disconnect del cleanup corto al sync
+  del CRM a mitad de query ("Response from the Engine was empty", atrapado
+  por su catch interno). Es el problema D1/D2 del mapa tocado desde adentro:
+  en serverless ese mismo trabajo corre carrera contra el freeze de la
+  lambda. Refuerza el commit 4 (detached) y la decision de outbox diferida.
+
+### Gates del commit 1
+- Baseline pre-cambio: npm run build exit 0; tsc --noEmit exit 0; prisma
+  migrate status 86 migraciones al dia.
+- Post-sprint: tsc --noEmit exit 0; npm run build exit 0; migrate status al
+  dia; eslint exit 0 en los 5 archivos TS tocados (uno por vez); bateria
+  completa: check:invariants 18/18 + test:* del chatbot 28/28 (incluye
+  test:pii sobre los logs nuevos y el test:p2002 nuevo).
+- Revision adversarial (workflow de 3 lentes + verificadores escepticos): NO
+  corrio — los 3 agentes murieron por limite de cuota (mismo destino que los
+  verificadores de Fase 0). Queda PENDIENTE; el diff NO esta "revisado
+  limpio", esta sin revisar por terceros.
+
+### Deuda / fuera de bloque (anotado, NO tocado)
+- Clasificador P2002 duplicado: motor/domain/prisma-errors.ts
+  (isUniqueViolation, con param `field` opcional) queda como copia local del
+  motor. NO se consolido a proposito: unificar habria estrenado el PRIMER
+  import cruzado chatbot↔motor (hoy cero precedente en src/modules) o tocado
+  archivos del motor fuera del scope del sprint. Deuda de consolidacion:
+  migrar el motor al guard de la frontera de aislamiento en un sprint propio.
+- Ventana residual conocida (misma clase que la rama `existing` pre-existente):
+  el ganador puede descartar su fila (gate degradado / compensacion) DESPUES
+  de que el perdedor la adopto; el persist del perdedor falla logueado.
+  Pre-fix ese perdedor moria con 500 igual — el fix solo mejora. El cierre
+  real es la clave de idempotencia por turno (migracion, abierto con parada).

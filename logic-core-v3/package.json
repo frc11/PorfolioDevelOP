@@ -63,6 +63,7 @@
     "test:fixorigin": "npx tsx \"src/app/api/chatbot/[slug]/config/__tests__/fix-origin-same-origin.invariant.ts\"",
     "test:pii": "npx tsx src/modules/chatbot/server/logging/__tests__/console-pii.invariant.ts",
     "test:iphash": "npx tsx src/modules/chatbot/server/safety/__tests__/ip-hash.invariant.ts",
+    "test:p2002": "npx tsx src/modules/chatbot/server/conversation/__tests__/p2002-adopcion.invariant.ts",
     "evals": "npx tsx src/modules/chatbot/evals/runner.ts",
     "evals:seed": "npx tsx src/modules/chatbot/evals/seed-eval-bots.ts",
     "evals:purge": "npx tsx src/modules/chatbot/evals/cleanup.ts",

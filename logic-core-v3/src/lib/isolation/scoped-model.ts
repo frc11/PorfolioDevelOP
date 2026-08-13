@@ -43,6 +43,25 @@ export class IsolationNotFoundError extends IsolationError {
 }
 
 /**
+ * CARRERAS — Type-guard compartido de violación de unique (P2002).
+ *
+ * translateDbError traduce P2025/P2003 al contrato del helper pero deja pasar
+ * P2002 CRUDO a propósito: qué significa un unique violado depende del
+ * call-site. Este guard es la clasificación compartida de las recuperaciones
+ * "perdedor-adopta" del chatbot (conversation/resolver.ts,
+ * tools/captureLead.ts); la recuperación en sí vive en cada call-site —
+ * divergen en tabla, re-fetch, contrato de retorno y fallback, así que un
+ * helper genérico de recuperación sería todo parámetros y nada de cuerpo.
+ *
+ * El motor tiene su clasificador local equivalente (motor/domain/
+ * prisma-errors.ts, isUniqueViolation): NO se consolida acá para no estrenar
+ * un import cruzado entre módulos — queda anotado como deuda de consolidación.
+ */
+export function isUniqueConstraintError(error: unknown): boolean {
+  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002'
+}
+
+/**
  * Args/data internos ya validados por las firmas públicas. El tipado fuerte
  * vive en la API (genéricos Prisma.Args/Prisma.Result y los tipos de write
  * del registro); estos Record son el canal interno hacia el delegate.

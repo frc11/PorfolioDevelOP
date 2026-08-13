@@ -2,7 +2,7 @@ import { tool } from 'ai'
 import { z } from 'zod'
 import type { Prisma, ChatbotLeadIntent } from '@prisma/client'
 import { revalidateTag } from 'next/cache'
-import { forOrg } from '@/lib/isolation'
+import { forOrg, isUniqueConstraintError } from '@/lib/isolation'
 import { logChatbotEvent, sanitizeErrorMessage } from '../logging'
 import { notifyClientOfLead } from '@/lib/client-notifications'
 import { calculateLeadScore, buildSignalsSnapshot, isValidArgentinePhone } from '../scoring'
@@ -194,8 +194,12 @@ const isValidEmailFormat = (raw: string): boolean =>
 /**
  * Execute function for capture_lead. Performs the DB write and
  * returns a structured result the LLM can reason about.
+ *
+ * Exportada SOLO para el invariant de carrera P2002
+ * (conversation/__tests__/p2002-adopcion.invariant.ts); el camino de
+ * producción sigue entrando por buildCaptureLeadTool.
  */
-async function captureLeadExecute(
+export async function captureLeadExecute(
   input: CaptureLeadInput,
   ctx: ToolCallContext
 ): Promise<ToolExecuteResult<CaptureLeadResult>> {
@@ -553,6 +557,42 @@ async function captureLeadExecute(
       },
     }
   } catch (error) {
+    // CARRERAS — P2002: dos capture_lead concurrentes para la MISMA
+    // conversación (p.ej. doble click en la card de handoff → dos turnos con
+    // la tool) pasan ambos el pre-check del paso 1 y el perdedor choca el
+    // @unique de conversationId en el create. El lead SÍ existe (lo creó el
+    // ganador, con su leadCaptured en la misma tx): adoptar con el contrato
+    // alreadyCaptured del paso 1 en vez de hacerle decir al modelo "no pude
+    // guardar tus datos". El re-fetch valida solo: si el P2002 viniera de
+    // otra constraint, no habría lead para esta conversación y se cae al
+    // fallback genérico de abajo con el error ORIGINAL.
+    if (isUniqueConstraintError(error)) {
+      try {
+        const winner = await scope.chatbotLead.findFirst({
+          where: { conversationId: ctx.conversationId },
+        })
+        if (winner) {
+          console.log(
+            JSON.stringify({
+              type: 'capture_lead.already_captured',
+              conversationId: ctx.conversationId,
+              leadId: winner.id,
+              race: true,
+            })
+          )
+          return {
+            success: true,
+            data: {
+              leadId: winner.id,
+              alreadyCaptured: true,
+            },
+          }
+        }
+      } catch {
+        // El re-fetch falló: cae al fallback genérico — se reporta el error
+        // ORIGINAL (el secundario no aporta nada al triage).
+      }
+    }
     // PRIVACIDAD: sanitizado — el try cubre el chatbotLead.create con
     // name/email/phone; un PrismaClientValidationError los ecoaría enteros.
     const errorMsg = sanitizeErrorMessage(error)
