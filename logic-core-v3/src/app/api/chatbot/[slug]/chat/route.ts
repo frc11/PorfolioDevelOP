@@ -47,7 +47,12 @@ export async function POST(
     )
 
     if (validation.botConfigId && validation.organizationId) {
-      forOrg(validation.organizationId)
+      // CARRERAS commit 4 (D5) — await: sin él, devolver el 403 congela la
+      // lambda y este write corría carrera contra el freeze — la telemetría
+      // SECURITY.BLOCKED_ORIGIN se perdía en silencio (justo la señal de que
+      // alguien está probando origins). El .catch(() => {}) SE QUEDA: un
+      // fallo del evento jamás debe romper ni demorar el 403 en sí.
+      await forOrg(validation.organizationId)
         .chatbotEvent.create({
           botConfigId: validation.botConfigId,
           type: 'SECURITY.BLOCKED_ORIGIN',

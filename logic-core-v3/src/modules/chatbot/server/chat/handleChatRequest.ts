@@ -1390,6 +1390,14 @@ export async function handleChatRequest(
       tags: { module: 'chatbot', stage: 'unhandled' },
       extra: { botSlug: slug, botId: bot?.id },
     })
+    // CARRERAS commit 4 (D10) — flush con techo: captureException solo
+    // ENCOLA, y devolver el 500 congela la lambda — el evento del caso MÁS
+    // crítico corría carrera contra el freeze. Best-effort acotado a 2s:
+    // flush() nunca lanza (resuelve false si no llegó) y sin DSN resuelve al
+    // toque. SOLO acá, en el borde pre-return del 500 — los hooks del stream
+    // tienen su propio régimen de presupuesto (DEADLINE-ONFINISH) y no se
+    // tocan.
+    await Sentry.flush(2000)
     return Response.json(
       {
         error: 'Internal server error in chatbot. Check server logs.',

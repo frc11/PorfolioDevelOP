@@ -17102,3 +17102,60 @@ commits; gates uno por vez.
   tsc --noEmit exit 0 post-build, migrate status al dia, eslint 3/3 exit 0.
   Nota de harness: `cmd | tail; echo $?` reporta el exit del tail — los gates
   con pipe quedan con ${PIPESTATUS[0]} de aca en adelante.
+
+### REGLA DE METODO — el exit code no sobrevive a un pipe (dos precedentes)
+- REGLA: en los gates, el exit code se lee SIN pipe en el medio, o con
+  ${PIPESTATUS[0]} (bash) si el pipe es inevitable. `cmd | head`/`cmd | tail`
+  seguido de `$?` reporta el exit del head/tail — SIEMPRE 0 — y el gate da
+  verde falso. La regla "sin pipes en los gates" existia por PowerShell
+  (NativeCommandError); resulta que ademas enmascara el exit code en bash.
+- Precedente 1 (MUDEZ commit 1): un `| head` en el gate casi mete a
+  produccion el consumeStream sin .catch — el fallo estaba en la cola del
+  output que el head cortaba, y el $? del pipe daba 0.
+- Precedente 2 (CARRERAS commit 3): todos los `echo EXIT:$?` tras
+  `tsc/build | tail` de los cierres del bloque reportaban el exit del tail.
+  Los veredictos siguieron validos porque el output vacio de tsc/eslint es
+  determinante por si mismo, pero el rotulo "EXIT:0" era del comando
+  equivocado. Detectado cuando el tsc post-borrado del smoke MOSTRO errores
+  (los .next/types viejos) y el rotulo siguio diciendo 0.
+- Corolario del precedente 2: tras BORRAR una ruta, `tsc --noEmit` puede
+  fallar por los tipos GENERADOS de .next/types del build anterior que aun la
+  referencian — rebuilddear primero, despues tipos.
+
+### Commit 4 — detached: lo que el freeze de la lambda se estaba comiendo
+- D5 (codigo): el chatbotEvent SECURITY.BLOCKED_ORIGIN del 403 en
+  chat/route.ts era fire-and-forget — devolver el 403 congela la lambda y el
+  write corria carrera contra el freeze: la senal de "alguien esta probando
+  origins" se perdia en silencio. Ahora se awaitea, CONSERVANDO el
+  .catch(() => {}): un fallo del evento jamas rompe ni demora el 403.
+- D10 (codigo): Sentry.flush(2000) en el catch externo de handleChatRequest,
+  entre captureException y el return del 500 — captureException solo ENCOLA y
+  el evento del caso mas critico (500 al visitante) corria la misma carrera.
+  Best-effort acotado (flush nunca lanza; sin DSN resuelve al toque — Sentry
+  sigue INACTIVO en prod, esto lo deja listo). SOLO en el borde pre-return
+  del 500: los hooks del stream tienen su regimen propio (DEADLINE-ONFINISH)
+  y NO se tocan.
+- D1/D2/D3/D4/D11 (DECISION DOCUMENTADA, no codigo): todo el trabajo detached
+  post-turno del runtime — notifyClient (Brevo + revalidateTag), el Telegram
+  interno, syncLeadToCrm (n8n) y los demas `void ...().catch(...)` de esa
+  familia — corre carrera contra el freeze en cada request y puede perderse.
+  DECISION: se acepta HOY, sin outbox. Fundamento: (1) Brevo y Telegram estan
+  sin configurar en prod — la mayoria de ese trabajo es no-op (skip por
+  env/config); (2) el unico con efecto real (sync CRM) requiere una
+  CrmIntegration habilitada que hoy ningun tenant tiene; (3) el fix durable
+  es una migracion y el bloque no abre migraciones; (4) DB-primero ya
+  garantiza que el LEAD nunca se pierde — lo que se pierde es la
+  notificacion, no el dato.
+- EVIDENCIA EMPIRICA (del harness del commit 1, vale mas que el analisis
+  teorico): el invariante test:p2002 necesito un settle de 3s en su finally
+  porque el $disconnect cortaba al syncLeadToCrm detached A MITAD DE QUERY
+  ("Response from the Engine was empty", atrapado por su catch interno). Es
+  exactamente la carrera del freeze, tocada desde adentro: el detached
+  sobrevive solo si algo mantiene vivo el proceso.
+- FORMA DEL FIX DURABLE (para cuando se configuren Brevo/Telegram o haya un
+  tenant con CRM): OUTBOX transaccional — tabla (tipo, payload, orgId,
+  estado, attempts, nextAttemptAt) escrita EN LA MISMA transaccion que el
+  hecho de negocio (p.ej. el chatbotLead.create), + cron que drena con
+  reintentos e idempotencia por fila. El detached del request queda como
+  acelerador best-effort; la garantia la da el cron. Es migracion → sprint
+  propio, con parada.
