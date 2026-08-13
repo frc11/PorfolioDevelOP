@@ -395,11 +395,18 @@ export function ChatbotEmbed({ slug }: ChatbotEmbedProps) {
                   >
                     {m.toolCalls.map((tc) => (
                       <div key={tc.toolCallId}>
-                        {renderToolCall(tc, config, {
-                          onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
-                          onSelectCallback: chatbot.triggerCallbackHandoff,
-                          onNavigate: handleNavigate,
-                        })}
+                        {renderToolCall(
+                          tc,
+                          config,
+                          {
+                            onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
+                            onSelectCallback: chatbot.triggerCallbackHandoff,
+                            onNavigate: handleNavigate,
+                          },
+                          // R3 — el embed no tiene typewriter: su botBusy es
+                          // isStreaming, el mismo gate que usa su input.
+                          chatbot.isStreaming,
+                        )}
                       </div>
                     ))}
                   </div>

@@ -9,6 +9,14 @@ interface HandoffOptionsCardProps {
   preamble: string
   onSelectWhatsapp: () => void
   onSelectCallback: () => void
+  /**
+   * R3 (CARRERAS) — true mientras el turno sigue en vuelo: los botones se
+   * deshabilitan con el MISMO gate que el textarea y el botón de enviar. Sin
+   * esto, apretar "Que me contacten" con el turno anterior abierto manda el
+   * mensaje duplicado (transcript USER,USER,ASSISTANT,ASSISTANT y doble costo
+   * de Vertex — reproducido en prod con dos clicks).
+   */
+  disabled?: boolean
 }
 
 export function HandoffOptionsCard({
@@ -16,6 +24,7 @@ export function HandoffOptionsCard({
   preamble,
   onSelectWhatsapp,
   onSelectCallback,
+  disabled,
 }: HandoffOptionsCardProps) {
   return (
     <motion.div
@@ -32,7 +41,8 @@ export function HandoffOptionsCard({
       <div className="grid grid-cols-2 gap-2 mt-1">
         <button
           onClick={onSelectWhatsapp}
-          className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02]"
+          disabled={disabled}
+          className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02] disabled:opacity-50 disabled:pointer-events-none"
           style={{
             background: '#25D366',
             color: 'white',
@@ -43,7 +53,8 @@ export function HandoffOptionsCard({
         </button>
         <button
           onClick={onSelectCallback}
-          className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02] border"
+          disabled={disabled}
+          className="flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all hover:scale-[1.02] border disabled:opacity-50 disabled:pointer-events-none"
           style={{
             background: 'rgba(255,255,255,0.06)',
             borderColor: 'rgba(255,255,255,0.12)',

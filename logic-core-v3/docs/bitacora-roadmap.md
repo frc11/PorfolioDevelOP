@@ -17000,3 +17000,34 @@ commits; gates uno por vez.
   de que el perdedor la adopto; el persist del perdedor falla logueado.
   Pre-fix ese perdedor moria con 500 igual — el fix solo mejora. El cierre
   real es la clave de idempotencia por turno (migracion, abierto con parada).
+
+### Commit R3 — gate botBusy en los botones de HandoffOptionsCard
+- La via practica del turno duplicado (corregida del mapa por evidencia de
+  Valentino): NO hace falta que el edge falle — los botones de la card de
+  handoff no respetaban botBusy, asi que "Que me contacten" con el turno
+  siguiente en vuelo mandaba el mensaje de nuevo: transcript
+  USER,USER,ASSISTANT,ASSISTANT y doble costo de Vertex, reproducido a mano
+  en prod con dos clicks. El textarea y el boton de enviar ya se bloqueaban;
+  la card era el agujero.
+- Fix (diff minimo, 5 archivos, sin refactor): HandoffOptionsCard gana prop
+  `disabled` (ambos botones: atributo disabled + disabled:opacity-50 +
+  disabled:pointer-events-none); renderToolCall gana 4to parametro `busy` y
+  solo lo cablea a esa card (la unica cuyas acciones MANDAN mensaje);
+  ChatWindow pasa su botBusy REAL (stream + typewriter) por el prop
+  renderToolCall; LogicCompanion lo reenvia; el embed pasa isStreaming (no
+  tiene typewriter — mismo gate que ya usaba su input). Paridad por
+  superficie, no un booleano global.
+- El fix de servidor sigue abierto: clave de idempotencia por turno
+  (migracion). Este gate cierra la via practica, no la teorica.
+- Gates: tsc exit 0, build exit 0, migrate status al dia, eslint 4/5 exit 0.
+  El 5to (ChatbotEmbed.tsx) trae un error PREEXISTENTE react-hooks/refs en
+  el map de mensajes (317:34) — verificado linteando la version HEAD del
+  archivo: mismo error, misma linea. El diff de R3 no suma ni resta errores.
+  NO tocado (fuera de scope; candidato a la lista de los 80 de la auditoria
+  CLEAN).
+- NO verificado visualmente: visual-qa esta roto en esta config (precedente
+  del bloque home-clasico) y forzar una card de handoff real exige un turno
+  de LLM en dev. Verificacion manual de Valentino: abrir el widget, hacer que
+  el bot ofrezca contacto, apretar "Que me contacten" y — con el turno en
+  vuelo — verificar que los botones quedan apagados y un segundo click no
+  hace nada; el transcript no debe mostrar USER duplicado.

@@ -38,7 +38,11 @@ export interface ToolCallCallbacks {
 export function renderToolCall(
   toolCall: ToolCallInUIMessage,
   config: PublicBotConfig,
-  callbacks: ToolCallCallbacks
+  callbacks: ToolCallCallbacks,
+  // R3 (CARRERAS) — true mientras el turno sigue en vuelo. Hoy solo gatea los
+  // botones de HandoffOptionsCard: es la única card cuyas acciones MANDAN un
+  // mensaje (doble click = turno duplicado y doble costo de Vertex).
+  busy = false
 ): ReactNode {
   switch (toolCall.toolName) {
     case 'offer_handoff_options': {
@@ -50,6 +54,7 @@ export function renderToolCall(
           preamble={parsed.data.preamble}
           onSelectWhatsapp={callbacks.onSelectWhatsapp}
           onSelectCallback={callbacks.onSelectCallback}
+          disabled={busy}
         />
       )
     }

@@ -82,7 +82,12 @@ export interface ChatWindowProps {
   reconnecting?: boolean
   /** INFRA.2 — true si el degradado BLOQUEA el input (todos menos connection_failed). */
   inputLockedByDegrade?: boolean
-  renderToolCall?: (toolCall: ToolCallInUIMessage) => React.ReactNode
+  /**
+   * R3 (CARRERAS) — recibe `botBusy` para que las cards con acciones que
+   * mandan mensaje (HandoffOptionsCard) se deshabiliten con el MISMO gate que
+   * el textarea y el botón de enviar de esta ventana.
+   */
+  renderToolCall?: (toolCall: ToolCallInUIMessage, botBusy: boolean) => React.ReactNode
   muted?: boolean
   onToggleMute?: () => void
 }
@@ -388,7 +393,7 @@ export function ChatWindow({
                           <div className="flex flex-col gap-2 w-full max-w-[90%]">
                             {m.toolCalls.map((tc) => (
                               <div key={tc.toolCallId}>
-                                {renderToolCall(tc)}
+                                {renderToolCall(tc, botBusy)}
                               </div>
                             ))}
                           </div>

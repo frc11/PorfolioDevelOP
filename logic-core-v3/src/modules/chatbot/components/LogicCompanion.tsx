@@ -155,12 +155,18 @@ export function LogicCompanion({ slug }: LogicCompanionProps) {
             degradedInfo={chatbot.degradedInfo}
             reconnecting={chatbot.reconnecting}
             inputLockedByDegrade={chatbot.inputLockedByDegrade}
-            renderToolCall={(tc: ToolCallInUIMessage) =>
-              renderToolCall(tc, chatbot.config!, {
-                onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
-                onSelectCallback: chatbot.triggerCallbackHandoff,
-                onNavigate: chatbot.navigateTo,
-              })
+            renderToolCall={(tc: ToolCallInUIMessage, busy: boolean) =>
+              renderToolCall(
+                tc,
+                chatbot.config!,
+                {
+                  onSelectWhatsapp: chatbot.triggerWhatsappHandoff,
+                  onSelectCallback: chatbot.triggerCallbackHandoff,
+                  onNavigate: chatbot.navigateTo,
+                },
+                // R3 — el botBusy REAL de la ventana (stream + typewriter).
+                busy,
+              )
             }
             muted={sounds.muted}
             onToggleMute={sounds.toggleMute}
