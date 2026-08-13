@@ -159,7 +159,7 @@ or query the BD:
 SELECT * FROM chatbot_conversation WHERE "sessionId" = 'manual-test-001';
 ```
 
-## Health & Smoke Test Endpoints
+## Health Endpoint
 
 ### `GET /api/chatbot/[slug]/health`
 
@@ -172,13 +172,10 @@ curl https://your-domain.com/api/chatbot/develop/health
 
 Returns 200 if healthy, 503 if not.
 
-### `GET /api/chatbot/[slug]/smoke`
-
-Full smoke test. Includes health check + actual LLM call.
-Consumes ~10 tokens per invocation. Use sparingly.
-
-```bash
-curl https://your-domain.com/api/chatbot/develop/smoke
-```
-
-Returns 200 only if end-to-end works. 503 with details otherwise.
+> `GET /api/chatbot/[slug]/smoke` fue eliminado (CARRERAS commit 3): era un
+> GET público sin auth ni rate limit que quemaba una llamada real a Vertex
+> por hit, y nadie medía su resultado. Para verificar el camino LLM
+> end-to-end: `scripts/_b14-4-smoke-prod.mjs` (prod, post-deploy) o
+> `scripts/regression/run-baseline.ts --smoke` (dev). Si algún día hace
+> falta alerting automático del camino LLM, se construye autenticado y con
+> provider-close desde el día uno — ver bitácora.

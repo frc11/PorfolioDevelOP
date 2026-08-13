@@ -97,8 +97,9 @@ export type { HandoffEvent, LeadDashboardFilters } from './server/admin/multiTen
 export { getMonthlyAnalysisForOrg } from './server/analysis/getMonthlyAnalysisForOrg'
 export type { MonthlyAnalysisData } from './server/analysis/getMonthlyAnalysisForOrg'
 
-// Health (Sprint S20)
-export { checkChatbotHealth, runLLMSmokeTest } from './server/health'
-export type { HealthCheckResult, SmokeTestResult } from './server/health'
+// Health (Sprint S20; runLLMSmokeTest eliminado en CARRERAS commit 3 junto
+// con el endpoint /smoke — ver server/health/index.ts)
+export { checkChatbotHealth } from './server/health'
+export type { HealthCheckResult } from './server/health'
 export { checkChatbotEnv, requireChatbotEnv } from './server/config/envValidator'
 export type { EnvVarStatus, EnvCheckResult } from './server/config/envValidator'

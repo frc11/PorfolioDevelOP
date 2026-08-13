@@ -17066,3 +17066,39 @@ commits; gates uno por vez.
   demo del panel y el test de prompt del editor y ver que responden igual y
   la funcion no queda 30s viva — en Netlify Logs, provider.stream_chunks con
   route admin/*).
+
+### Commit 3 — deprecacion de /api/chatbot/[slug]/smoke
+- Verificacion de consumidores ANTES de borrar (barrido completo, reportado y
+  aprobado): netlify.toml CERO, vercel.json CERO, package.json scripts CERO,
+  workflows de .github CERO, codigo fuente CERO (nadie fetchea /smoke desde
+  ninguna superficie). Consumidor real encontrado: tests/e2e/04-health.spec.ts
+  pegaba a /smoke esperando [200,503] — suite local-only (baseURL
+  localhost:3000, la CI e2e.yml nunca corrio) con assertion que pasaba incluso
+  con el LLM caido. Monitores externos: verificado por Valentino en sus
+  dashboards — NO hay ninguno apuntando a /smoke.
+- Por que se depreca y no se gatea: (1) GET publico sin auth ni rate limit que
+  quemaba una llamada REAL a Vertex por hit — factura abierta a cualquiera con
+  la URL; (2) hoy NADIE mide su resultado — costo puro sin senal; (3) gatearlo
+  dejaba vivo un camino LLM sin provider-close, sin watchdog y sin telemetria
+  de costo: deuda a mantener a la par del runtime para siempre; (4) /health ya
+  cubre uptime sin tokens.
+- Borrado: smoke/route.ts + server/health/smokeTest.ts (huerfano: el endpoint
+  era su unico caller) + re-exports de runLLMSmokeTest/SmokeTestResult en
+  health/index.ts e index.server.ts. Ajustados en el mismo commit:
+  04-health.spec.ts (queda solo la parte de /health, que sigue valida) y la
+  seccion del README del chatbot.
+- LO QUE SE PIERDE, sin suavizar: era la UNICA forma HTTP de verificar el
+  camino LLM end-to-end. Los reemplazos existentes son todos PUSH (alguien los
+  corre): scripts/_b14-4-smoke-prod.mjs (prod post-deploy, via /chat real —
+  mas senal que el "hola" de una palabra), regression/run-baseline.ts --smoke
+  (dev), o una conversacion a mano. NINGUNO es PULL (un monitor que alerta
+  solo).
+- DEUDA (con esta forma, no como "reactivar el smoke"): si algun dia hace
+  falta alerting automatico del camino LLM, se construye AUTENTICADO y con
+  provider-close DESDE EL DIA UNO — nunca un GET publico que quema tokens sin
+  que nadie mire el resultado.
+- Gates: build exit 0 (regenera .next/types — los tipos generados del build
+  anterior referenciaban la ruta borrada y ensuciaban el tsc hasta rebuilddear),
+  tsc --noEmit exit 0 post-build, migrate status al dia, eslint 3/3 exit 0.
+  Nota de harness: `cmd | tail; echo $?` reporta el exit del tail — los gates
+  con pipe quedan con ${PIPESTATUS[0]} de aca en adelante.
