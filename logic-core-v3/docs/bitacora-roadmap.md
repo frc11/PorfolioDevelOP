@@ -17031,3 +17031,38 @@ commits; gates uno por vez.
   el bot ofrezca contacto, apretar "Que me contacten" y — con el turno en
   vuelo — verificar que los botones quedan apagados y un segundo click no
   hace nada; el transcript no debe mostrar USER duplicado.
+
+### Commit 2 — provider-close en demo-chat y test-prompt + fuga String(error)
+- Las dos rutas admin con carril LLM propio (demo-chat del panel y test-prompt
+  del editor de KB) llamaban a streamText SIN el provider-close: el stream de
+  Gemini no cierra solo, asi que cada demo/prueba dejaba la funcion colgada
+  hasta maxDuration (30s) — el mismo sintoma que el runtime ya habia resuelto
+  (step_count 0 / funcion viva sin motivo). Ambas quedan envueltas con
+  wrapLanguageModel + createProviderStreamCloseMiddleware, patron identico a
+  handleChatRequest: guard por specificationVersion (sin casts; modelo no-V3
+  → se usa sin envolver, se pierde el cierre y no la respuesta), ventanas
+  canonicas de reconcile.ts (idle 1000ms / inicial 12000ms), y el onClose
+  emite el mismo provider.stream_chunks permanente con discriminador `route`
+  (admin/demo-chat con botSlug, admin/test-prompt) — warn solo en reason
+  idle, igual que el runtime.
+- ALCANCE CONTENIDO a proposito: sin watchdog, sin rate-limit, sin
+  persistencia — son rutas SUPER_ADMIN-only detras de requireSuperAdmin, no
+  un segundo runtime. Lo unico que se cierra es el stream.
+- Fuga en test-prompt: el catch devolvia `details: String(error)` AL CLIENTE
+  — error interno crudo (un fallo de provider puede arrastrar URLs/ids de
+  proyecto GCP). Ahora: console.error server-side con sanitizeErrorMessage
+  (mismo helper del bloque privacidad) y respuesta generica { ok:false,
+  error:'LLM error' }. El details de Zod del 400 se queda: es feedback de
+  validacion del propio input del admin, no estado interno.
+- ANOTADO, NO tocado (decision de producto): test-prompt sigue con
+  'gemini-2.5-flash' hardcodeado (no resuelve por plan/bot — es una prueba de
+  KB draft sin bot persistido). demo-chat usa prisma crudo fuera de la
+  frontera de isolation (ruta admin preexistente, misma clase que
+  admin/settings/reports anotada en el bloque privacidad).
+- Gates: tsc exit 0, build exit 0, migrate status al dia, eslint 2/2 exit 0,
+  test:cost2b PASS (la resolucion de modelo de demo-chat no se toco),
+  test:providerclose PASS (el middleware sigue pinneado contra el streamText
+  real). Verificacion en vivo de las dos rutas admin: de Valentino (probar el
+  demo del panel y el test de prompt del editor y ver que responden igual y
+  la funcion no queda 30s viva — en Netlify Logs, provider.stream_chunks con
+  route admin/*).

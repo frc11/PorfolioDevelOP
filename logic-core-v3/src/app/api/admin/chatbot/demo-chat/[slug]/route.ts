@@ -1,7 +1,15 @@
-import { streamText, type ModelMessage } from 'ai'
+import { streamText, wrapLanguageModel, type ModelMessage } from 'ai'
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { normalizeLlmProvider, resolveEffectiveModel } from '@/modules/chatbot/server/llm'
+// CARRERAS commit 2 — PROVIDER-CLOSE: mismo import directo que usa
+// handleChatRequest (el middleware no forma parte del API público de llm/).
+import { createProviderStreamCloseMiddleware } from '@/modules/chatbot/server/llm/providerStreamClose'
+import {
+  PROVIDER_STREAM_IDLE_MS,
+  PROVIDER_STREAM_INITIAL_IDLE_MS,
+} from '@/modules/chatbot/server/chat/reconcile'
+import { chatbotLog } from '@/modules/chatbot/server/logging'
 import { buildSystemPrompt, formatDateTimeArgentina } from '@/modules/chatbot/server/prompts'
 import { prisma } from '@/lib/prisma'
 import { requireSuperAdmin } from '@/modules/chatbot/server/admin/requireSuperAdmin'
@@ -47,8 +55,35 @@ export async function POST(
   // Prisma) y el cast `as` mentía al compilador — el switch de getLLMProvider
   // compara en minúsculas y caía al default, throw para el 100% de los bots.
   const effectiveModel = resolveEffectiveModel(normalizeLlmProvider(bot.llmProvider), bot.llmModel)
+
+  // CARRERAS commit 2 — PROVIDER-CLOSE, mismo patrón que handleChatRequest:
+  // el stream de Gemini no cierra solo, y sin esto la función queda colgada
+  // hasta maxDuration (30s) en cada demo. Cerrar, nunca abortar (ver el
+  // encabezado de llm/providerStreamClose.ts). Guard por specificationVersion
+  // en vez de castear: si el modelo no fuera V3 se usa sin envolver
+  // (degradación silenciosa: se pierde el cierre, no la respuesta). A
+  // PROPÓSITO sin watchdog, rate-limit ni persistencia: esta ruta es un demo
+  // admin-only, no un segundo runtime.
+  const rawModel = effectiveModel.model
+  const model =
+    typeof rawModel === 'object' && rawModel.specificationVersion === 'v3'
+      ? wrapLanguageModel({
+          model: rawModel,
+          middleware: createProviderStreamCloseMiddleware({
+            idleMs: PROVIDER_STREAM_IDLE_MS,
+            initialIdleMs: PROVIDER_STREAM_INITIAL_IDLE_MS,
+            onClose: (report) =>
+              chatbotLog(
+                'provider.stream_chunks',
+                { route: 'admin/demo-chat', botSlug: slug, ...report },
+                report.reason === 'idle' ? 'warn' : 'info',
+              ),
+          }),
+        })
+      : rawModel
+
   const result = streamText({
-    model: effectiveModel.model,
+    model,
     system: buildSystemPrompt({
       botConfig: {
         botName: bot.botName,
