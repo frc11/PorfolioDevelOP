@@ -4284,3 +4284,97 @@ lo cierra él en el preview. Si estorba, la variante barata es comprimirlo fuera
 **Worktree** en `C:\tmp\wt-f2-motivo` (rama `f2/motivo-rechazo`, sobre F1). Al desarmarlo:
 sacar primero la junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue
 el enlace y borra el `node_modules` real.
+
+---
+
+## F3 · Que toda acción que escribe acuse recibo donde el setter hizo el clic
+
+**Rama** `f3/acuse-recibo`, sobre F2 (`2d456390`). **Sin pushear.**
+
+### El censo, que dio vuelta el sprint
+
+El sprint venía a extender el patrón "a donde falta". El censo dice que ya casi no falta:
+**24 acciones de escritura, 29 call-sites, 18 componentes** — y **una sola** fuera del patrón.
+
+| Clase | Cuántas | Cuáles |
+|---|---|---|
+| YA LO USA | 28 call-sites | todo el resto |
+| **NO AVISA** | **1** | **«Saltar»** del foco (`foco-surface.tsx`) |
+| AVISA DISTINTO | 0 | — |
+| **CONTRADICE** | **0** | la clase quedó vacía — ver abajo |
+
+El patrón de referencia no es sólo `lead-card-actions` (que es la versión a mano): está
+**abstraído** en `src/lib/use-step-action.ts`. Dos señales — `useTransition()` apaga el control
+en el acto, y `toast` escribe en la región `aria-live="polite"` que monta el `Toaster` de sonner
+en el root layout. `<AutosaveStatus>` (`role="status"`) es la misma pareja para la escritura
+continua, no un segundo patrón.
+
+### CONTRADICE quedó vacía, y está medido
+
+La corrida de experiencia levantó B-P3 —«el aviso confirma y la pantalla sigue mostrando la
+instrucción anterior», cinco veces— y la re-verificación no pudo cerrarlo: el panel no componía
+frames. Se midió ahora en la app, **sin recargar**, sobre las pantallas que B-P3 nombró:
+
+| Pantalla | Lo que decía la corrida | Medición |
+|---|---|---|
+| m5 · registrar toque | seguía `Toques: 1 de 3` | anunció **y** pasó a `Toques: 2 de 3` |
+| m4 · registrar opener | seguía «TU PASO AHORA — Mandá el opener» | anunció **y** el badge pasó a **«Completada»** |
+| mc1 · arrancar construcción | seguía «Primero arrancá la construcción» | anunció **y** ese texto **desapareció** |
+
+**B-P3 está refutado en el código actual.** Lo cerraron P5-B / P6-B / P7 sin que quedara
+registrado. Y de paso: `router.refresh()` **sí** funciona en la sub-ruta del manual, aunque
+ninguna action revalide `/setter/leads/[leadId]/manual/[paso]`.
+
+### Lo único que se tocó
+
+`foco-surface.tsx` — «Saltar» suma su `toast.success`. Era la única acción que escribe y no
+acusaba, y el contraste estaba **en la misma tarjeta**: «Pausar», al lado, sí anuncia. Sus
+hermanas mudas («Ir a trabajarlo», «Abrir») no lo necesitan — navegan, y la pantalla entera
+cambia. «Saltar» se queda donde está y sólo cambia el nombre adentro de la tarjeta.
+
+No se migraron los 10 componentes que implementan el patrón a mano. Producen señales
+**idénticas** para el setter; migrarlos era refactor sin cambio de experiencia, con riesgo de
+tocar comportamiento (`escalar-modal` refresca ANTES del toast, `importar` usa `toast.message`).
+
+### La red — `check:invariant:acuse` (invariantes 21 → 22)
+
+`src/lib/leados/acuse-recibo.invariant.ts`. Lee los exports de `_actions/*.actions.ts` (no una
+lista a mano) y exige las dos señales en **cada call-site**, dentro de su propio bloque de
+transición.
+
+**Por qué por call-site y no por archivo — el dato del sprint.** La primera versión medía por
+archivo y pasó **en verde** con el acuse de «Saltar» removido: `foco-surface` está lleno de
+toasts. Segunda causa, más fina: contar `toast.error` como acuse también daba verde — el error
+es el aviso del **fallo**, no el acuse de que la escritura quedó. Con las dos correcciones:
+
+```
+AssertionError: _components/foco-surface.tsx::anclarFoco escribe y NO acusa recibo:
+en su bloque no hay toast/successToast ni router.push.
+```
+
+Distingue los **dos** call-sites de `anclarFoco` en el mismo archivo: `irATrabajar` navega y
+pasa; `saltar` sin toast se cae. Restaurado → verde.
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | exit 0 |
+| `npm run check:invariants` | **22/22** (era 21 — sube por el invariante nuevo) |
+| `npm run test:leados` | 25/25 |
+| `npm run test:setter` | 62/62 — `:3003` estaba ocupado por otra sesión: puerto propio `:3013` con `SETTER_EXTERNAL_SERVER=1` + `SETTER_PORT`, sin matar nada ajeno |
+
+### Notas de terreno
+
+**El caso del duplicado (B-B2) ya estaba resuelto** — `seguimiento-form` usa `useStepAction`.
+Verificado igual, sin recargar: anuncio ✓, chip `Prospecto`→`Postergado` ✓, historial
+`1`→`2 movimiento` ✓, y en la base **`POSTERGADO count = 1`**. El duplicado no puede volver a
+pasar por el motivo que lo causó.
+
+**Quedan en la base dos leads de sondeo** — `F3-PROBE Opener` y `F3-PROBE Brief`, creados para
+medir m4/mc1/m13. No se borran: la regla del sprint era cero operaciones destructivas sobre la
+base. Se pueden borrar cuando convenga.
+
+**Worktree** en `C:\tmp\wt-f3-acuse` (rama `f3/acuse-recibo`). Al desarmarlo: sacar primero la
+junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra
+el `node_modules` real.
