@@ -75,8 +75,15 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
             return;
         }
 
+        // S2-motion, Bloque 4b: `duration` bajó de 1.5s a 1.1s. 1.5s es un 25%
+        // más lento que el default documentado de la propia librería (1.2s) —
+        // cada gesto de scroll tardaba más en asentar de lo que Lenis considera
+        // su propio punto de referencia. Con la identidad "precisa y sólida, no
+        // lánguida" del sistema (Bloque 2), 1.1s queda apenas MÁS ajustado que
+        // el default, no solo revertido a él. `easing` no se tocó: la fórmula
+        // ya era el expo-out default de Lenis (no un valor propio a recalibrar).
         const lenis = new Lenis({
-            duration: 1.5,
+            duration: 1.1,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
             orientation: 'vertical',
             gestureOrientation: 'vertical',
@@ -101,12 +108,17 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
 
         function raf(time: number) {
             lenis.raf(time);
-            requestAnimationFrame(raf);
+            rafId = requestAnimationFrame(raf);
         }
 
-        requestAnimationFrame(raf);
+        // S2-motion, Bloque 4b (limpieza aprobada): faltaba cancelar este rAF en
+        // el cleanup — `lenis.destroy()` para la instancia, pero el loop seguía
+        // pidiendo frames indefinidamente si el componente se desmontaba (cambio
+        // de ruta) antes de que el navegador lo recolectara solo.
+        let rafId = requestAnimationFrame(raf);
 
         return () => {
+            cancelAnimationFrame(rafId);
             lenis.destroy();
             setLenisInstance(null);
         };

@@ -119,14 +119,32 @@
      invertirse con el tema, así que está en la capa semántica más abajo
      (`--shadow-ds-control`). Ver la nota de ese bloque. */
 
-  /* ── Motion ─────────────────────────────────────────────────────────────
-     Reveal de entrada del sistema (B2-S1). En CSS y NO en Framer Motion
-     a propósito: un `initial={{opacity:0}}` de Framer se serializa en el HTML
-     del SSR, así que el bloque nace con `opacity:0` y queda invisible hasta que
-     hidrata — si el JS tarda o falla, no se ve nada. Una animación CSS corre
-     con el primer paint, sin depender de JS, y el bloque global de
-     `prefers-reduced-motion` (al final de este archivo) la aterriza en su
-     keyframe final —visible— en 1ms.
+  /* ── Motion — vocabulario del sistema (S2-motion, Bloque 2) ──────────────
+     Espejo 1:1 por nombre de `design-system/motion/tokens.ts` — ese módulo
+     tiene la justificación completa de cada valor (por qué estas dos curvas
+     y no las otras 6 que el B1 encontró conviviendo, por qué 20px y no los
+     16/24/28/40px sueltos de las secciones legacy, etc.). Framer consume el
+     módulo TS; cualquier CSS puro (como `ds-reveal`/`ds-rise`, abajo) consume
+     estas variables directo por `var()`.
+     ───────────────────────────────────────────────────────────────────── */
+  --duration-ds-micro: 0.15s;
+  --duration-ds-elemento: 0.6s;
+  --duration-ds-seccion: 0.8s;
+  --duration-ds-pagina: 1.2s;
+
+  --ease-ds-arrive: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-ds-shift: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --motion-ds-reveal-distance: 20px;
+  --motion-ds-stagger: 0.06s;
+
+  /* ── Reveal de entrada del sistema (B2-S1, reparametrizado en S2) ────────
+     En CSS y NO en Framer Motion a propósito: un `initial={{opacity:0}}` de
+     Framer se serializa en el HTML del SSR, así que el bloque nace con
+     `opacity:0` y queda invisible hasta que hidrata — si el JS tarda o
+     falla, no se ve nada. Una animación CSS corre con el primer paint, sin
+     depender de JS, y el bloque global de `prefers-reduced-motion` (al final
+     de este archivo) la aterriza en su keyframe final —visible— en 1ms.
 
      `both` es obligatorio: sin fill-mode el elemento parpadea a su estado
      final antes de arrancar.
@@ -141,12 +159,12 @@
      animación apagada, en el MISMO frame que FCP. Para esos casos está
      `ds-rise`, abajo.
      ───────────────────────────────────────────────────────────────────── */
-  --animate-ds-reveal: ds-reveal 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  --animate-ds-reveal: ds-reveal var(--duration-ds-elemento) var(--ease-ds-arrive) both;
 
   @keyframes ds-reveal {
     from {
       opacity: 0;
-      transform: translateY(16px);
+      transform: translateY(var(--motion-ds-reveal-distance));
     }
 
     to {
@@ -163,11 +181,11 @@
 
      Solo transform: se compone en la GPU igual que el reveal y no dispara
      layout, así que no suma CLS. */
-  --animate-ds-rise: ds-rise 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  --animate-ds-rise: ds-rise var(--duration-ds-elemento) var(--ease-ds-arrive) both;
 
   @keyframes ds-rise {
     from {
-      transform: translateY(16px);
+      transform: translateY(var(--motion-ds-reveal-distance));
     }
 
     to {
@@ -413,11 +431,17 @@
   --color-accent: #00e1ff;
 }
 
+/* `background-color`/`color` quedan (los sigue leyendo `--color-void`/
+   `--color-obsidian` en vivo desde `setter-shell.tsx`/`shortcuts-help.tsx`,
+   documentado en S1). La `transition` que tenían ANTES se borra (S2-motion,
+   Bloque 2, limpieza aprobada): era una TERCERA física de cambio de tema
+   (0.6s `cubic-bezier(0.16,1,0.3,1)`) corriendo en paralelo al tween de
+   `HomeWrapper` (0.8s `easeInOut`) — invisible porque `HomeWrapper` pinta
+   por encima, pero real. "Una sola física viva en el home" incluye matar las
+   que quedaron tapadas, no solo las que se ven. */
 body {
   background-color: var(--color-void);
   color: var(--color-obsidian);
-  /* Fluid transition physics */
-  transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -784,5 +808,15 @@ canvas {
 
   html {
     scroll-behavior: auto !important;
+  }
+
+  /* S2-motion, Bloque 2: además de la duración (arriba, ya a 1ms), la
+     DISTANCIA del reveal CSS baja a 0. A 1ms el movimiento ya es
+     imperceptible, pero `ds-reveal`/`ds-rise` seguían interpolando 20px por
+     valor — esto lo hace explícito en el propio token en vez de depender
+     solo de que la duración lo enmascare. Las primitivas de Framer (Bloque
+     3) leen `REDUCED_MOTION.distancePx` en JS; esto cubre el lado CSS. */
+  :root {
+    --motion-ds-reveal-distance: 0px;
   }
 }
