@@ -4043,6 +4043,170 @@ tests, cero config. Worktree y scripts de navegación borrados. Sin push.
 
 ---
 
+## Sprint F0 — Reconciliar las ramas y re-verificar los baches sobre el producto podado — 2026-08-12
+
+Dos fases. La A cerró antes de arrancar la B.
+
+### Fase A — las ramas
+
+**El diagnóstico.** `main` local estaba en `4dadd274`, **56 commits atrás** de `origin/main` y
+contenido en él (avance directo, sin conflicto). `redesign/home` sí había divergido de `origin/main`
+(34 adelante / 30 atrás) pero **en archivos distintos**: setter y home de un lado,
+`src/modules/chatbot/` del otro. Y **P11 no estaba en ninguna rama**: vivía en `stash@{0}`
+(`507afe2d`), con `turno.ts` y `turno.invariant.ts` en el tercer padre — sin esos dos, no compila.
+
+**El hallazgo que reencuadró la Fase B.** El reporte de la corrida de experiencia declara `4dadd274`,
+y ese commit **no tiene ni uno solo de los diez bloques de la poda**. La corrida no midió el producto
+medio podado: midió el producto **sin podar**. El propio reporte lo había visto sin poder explicarlo
+("la evaluación fusionada no existe: son dos"; las de construcción "son seis").
+
+**Paso 0 — P11 primero.** `git stash apply` (nunca `pop`) sobre `leados/p11-turno`, rama nueva anclada
+en la base real del stash (`0f6fee58`), en un worktree aislado. Los dos archivos del tercer padre
+verificados por hash contra `stash@{0}^3`. Commit `513f38b4`, árbol limpio en la misma pasada.
+
+**Concurrencia.** A mitad del diagnóstico **otra sesión tomó el checkout principal**, commiteó la
+corrida (`daed0270`), mergeó `origin/main` (`8b60c176`) y pusheó — también `redesign/home`. Auditado
+antes de seguir: `55b967af → 8b60c176` suma bitácora + doc de baches + `.gitignore`, y **borra cero
+líneas**. De ahí en adelante todo el trabajo se hizo en worktree propio.
+
+**El único conflicto no fue código:** `bitacora-beta-3.md`, en los dos merges. `.gitignore`,
+`next.config.ts` y `package.json` automergearon limpio. Resuelto por concatenación cronológica y
+**verificado mecánicamente**: conteo de líneas = base + los dos lados (3888 y 4042 exactos), cada
+tramo idéntico a lo que sumó su lado, ninguna línea faltante por multiset en ninguna dirección,
+ninguna línea inventada, 81 secciones = 68 + 1 + 11 + 1, cero marcadores sobrevivientes.
+
+**Gates.** `npx tsc --noEmit` **exit 0, cero errores** — la línea base tenía 4, todos de `.next/`
+generado apuntando a `src/app/styleguide`, que no existía en `main` y volvió con el merge.
+`npm run check:invariants` **19/19** (eran 17; suman `pantallas` y `turno`).
+
+**Push** en orden de riesgo: `redesign/home` → `leados/p11-turno` → `HEAD:main`
+(`8b60c176..05ae1a87`). Verificado que `origin/main`, `redesign/home`, `origin/redesign/home` y
+`leados/p11-turno` tienen **0 commits** fuera de la rama reconciliada.
+
+### Fase B — qué baches siguen vivos
+
+Salida en [`docs/manual-usuario/BACHES-RE-VERIFICADOS.md`](manual-usuario/BACHES-RE-VERIFICADOS.md).
+Build de producción aislado en el worktree, `:3006`, seeds `v1-qa-wizard-states` + `qa-manual-m5-m16`.
+
+**Los tres bugs de datos.** Dos vivos y reproducidos, uno refutado.
+
+- **La postergación se guarda un día antes: VIVO, dos de dos.** 25/8 → "se retoma el 24/8"; 1/9 →
+  "31/8". La causa entera: `<input type="date">` manda `'2026-08-25'`, `z.coerce.date()` hace
+  `new Date('2026-08-25')` y una fecha ISO sin hora **se parsea como UTC**; `formatFechaCorta` la
+  formatea en huso argentino (UTC−3) y cae al día anterior. **No es sólo la etiqueta**: el instante
+  guardado es 21:00 del día previo, así que el panel reactiva de verdad un día antes. La forma
+  correcta ya está en el producto — el pausar de la cartera guarda fin del día local
+  (`2026-08-20T02:59:59Z` = 19/8 23:59:59 AR).
+- **El contador de DMs sube sin mandar nada: VIVO.** `0/10 → 1/10 → 2/10` postergando.
+  `contarDmsHoy` cuenta toda `OsLeadActivity` del canal `INSTAGRAM_DM` del día sin mirar el `result`:
+  cuenta registros en el canal, no mensajes enviados.
+- **"Pausar en tu cartera" no hace nada: REFUTADO.** No es una acción, es un **disclosure**: abre un
+  panel con atajos y campo de fecha. El commit persiste y **anuncia** ("Pausado — vuelve a tu cartera
+  el 19/8"). El componente es **byte a byte idéntico** al de `4dadd274`, así que se comportaba igual
+  durante la corrida — la corrida midió label/`disabled`/`aria-live`, que son las señales de un botón
+  de acción, y nunca miró si se abría un panel. Residuos reales y chicos: el disclosure no tiene
+  `aria-expanded`, y las tres acciones de la tarjeta comparten un `isPending`.
+
+**El motivo del rechazo (B-A1): VIVO, con la mecánica corregida.** No se destruye — `dossier.rechazos`
+**sobrevive** intacto a la reapertura. Lo que pasa es que **ninguna de las 8 pantallas lo muestra** una
+vez que el lead sale de RECHAZADA. Es un arreglo de presentación, no de persistencia: mucho más barato
+de lo que el reporte hacía pensar. De paso, reabrir ahora **anuncia** y aterriza en m14, no en m7.
+
+**Los patrones, re-contados.** El 2 ("el puntero miente") quedó casi cerrado: en 26 combinaciones
+lead×pantalla, "Ir a tu paso actual" apunta al paso real en todas. El 1 (acuse de recibo) bajó de 10
+casos a 3 vivos verificados; **el modelo a replicar es `ActionButton` de `lead-card-actions.tsx`** —
+`useTransition` que deshabilita en el acto + `toast` que escribe en la región `aria-live` — y es
+justo el par de señales que le falta a "Saltar". El 3 ("el dato no viaja") sigue siendo patrón. El 6
+quedó diferido casi entero por ser de celular.
+
+**Una limitación declarada.** El panel del navegador no compone frames: sin capturas, y **la mitad
+"la pantalla sigue mostrando el estado anterior" del patrón 1 queda no verificable**. El anuncio sí
+es fiable — es client-side. Donde el reporte dice "no anuncia", está medido.
+
+**Cobertura honesta.** 23 baches no-celular clasificados contra la aplicación; **22 quedan pendientes**
+y están listados por ID en el reporte — no se clasificaron de memoria. El barrido de celular queda
+diferido por decisión de Franco (10 baches). Las 4 herramientas sin URL siguen bloqueando lo suyo.
+
+**El contraste (B-D10) no se difirió:** aplica en computadora y está vivo — **46 de 103** textos
+visibles de `/setter` incumplen AA, el peor a **1,97:1** en 10px. Medido convirtiendo `oklch` a sRGB,
+porque los tokens del sistema son oklch y un lector de contraste que sólo entiende `rgb()` no ve nada.
+
+**El diff:** el reporte y esta entrada. Cero `src/`, cero tests, cero config.
+
+---
+
+## Sprint A2-S1 — /setter deja de ser embebible — 2026-08-15
+
+**El agujero.** La auditoría A2 lo encontró en `next.config.ts`: `X-Frame-Options: DENY` se aplicaba
+sobre `source: '/(admin|dashboard)(.*)'`. `/setter` quedaba afuera. La CSP global sí trae
+`frame-ancestors 'none'`, pero viaja en `Content-Security-Policy-**Report-Only**` — un header que el
+navegador **reporta y no aplica**. Neto: las seis pantallas donde un setter carga prospectos y opera
+leads (`/setter`, `/setter/leads`, `/setter/leads/[leadId]`, `.../manual/[paso]`, `/setter/nuevo`,
+`/setter/nuevo/importar`) se podían montar en un iframe de un sitio ajeno. Superficie de clickjacking
+sobre acciones autenticadas.
+
+**Qué se cambió.** Dos bloques en `headers()`, nada más:
+
+1. `source: '/(admin|dashboard)(.*)'` → `'/(admin|dashboard|setter)(.*)'`. Un término en la
+   alternancia. `/admin` y `/dashboard` reciben exactamente los mismos headers que antes.
+2. Bloque nuevo `source: '/setter(.*)'` con `Content-Security-Policy: frame-ancestors 'none'`.
+
+**Por qué la CSP va en bloque aparte y no en el compartido.** Sumarla al bloque de arriba le
+estrenaría una CSP en modo **enforce** a `/admin` y `/dashboard`, que hoy sólo reciben la global en
+Report-Only — un cambio de comportamiento fuera del objetivo del sprint, y la clase de cambio que
+rompe en producción y no en dev. Aislada en `/setter(.*)`, el radio de impacto es el que se quiso
+tocar. Una CSP con una sola directiva **sólo restringe esa directiva**: `frame-ancestors` no cae por
+`default-src`, así que el resto del contenido de `/setter` no queda sujeto a ninguna política nueva.
+Se suma a `X-Frame-Options` en vez de reemplazarlo porque XFO es el header legacy y `frame-ancestors`
+el mecanismo vigente — con anidamiento de varios niveles, los navegadores modernos hacen caso al
+segundo.
+
+**Lo que NO se tocó**, por regla del sprint: la CSP global sigue en `Report-Only` (sacarla de ahí es
+otra decisión, con riesgo real sobre el widget embebible), `middleware`/`proxy.ts` intacto, headers de
+`/admin` y `/dashboard` intactos.
+
+**El widget sigue embebible — probado, no asumido.** `/embed/[slug]` es la única ruta bajo
+`src/app/embed/`, y ni `/(admin|dashboard|setter)(.*)` ni `/setter(.*)` pueden alcanzar un path que
+arranca con `/embed`. Confirmado además contra el server, no sólo por lectura.
+
+**Evidencia — `next dev` en `:3000`.**
+
+```
+$ curl -I http://localhost:3000/setter
+HTTP/1.1 307 Temporary Redirect
+...
+Content-Security-Policy-Report-Only: default-src 'self'; ...; frame-ancestors 'none'; ...
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+location: /login?callbackUrl=%2Fsetter
+```
+
+Barrido del resto (sólo las líneas de framing):
+
+```
+/setter/leads            X-Frame-Options: DENY   +  Content-Security-Policy: frame-ancestors 'none'
+/setter/nuevo/importar   X-Frame-Options: DENY   +  Content-Security-Policy: frame-ancestors 'none'
+/embed/test-slug         Content-Security-Policy: frame-ancestors *;      (sin X-Frame-Options)
+/embed/demo              Content-Security-Policy: frame-ancestors *;      (sin X-Frame-Options)
+/admin                   X-Frame-Options: DENY    (sin CSP enforce — igual que antes)
+/dashboard               X-Frame-Options: DENY    (sin CSP enforce — igual que antes)
+```
+
+Las dos rutas de `/embed` salen con `frame-ancestors *` y **sin** `X-Frame-Options`: la regla nueva no
+las alcanza. `/admin` y `/dashboard` salen sin CSP en enforce: el bloque compartido no cambió lo que
+entregan.
+
+**Gate.** `npx tsc --noEmit` **exit 0**.
+
+**El diff:** `next.config.ts` y esta entrada. Cero `src/`, cero tests, cero middleware.
+
+**Queda para verificación humana.** Confirmar en el deploy de Netlify que los dos headers se sirven en
+producción sobre `/setter`. Los headers de `next.config.ts` los aplica el plugin de Netlify, no Next
+directamente — que anden en `next dev` **no prueba** que anden en prod. No se da por bueno hasta verlo
+con un `curl -I` contra el dominio real.
+
+---
+
 ## Verificación de arranque OSLead VII — qué hay realmente en el código hoy — 2026-08-18
 
 Read-only. Cero `src/`, cero tests, cero configuración. Salida en
