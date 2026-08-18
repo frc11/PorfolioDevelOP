@@ -57,6 +57,6 @@ export function ServiceRow({ name, timeline, accentToken, last = false }: Servic
 export const SERVICE_ROWS: readonly ServiceRowData[] = [
   { name: 'Sitios & landings', service: 'web', timeline: '15 días' },
   { name: 'Inteligencia artificial', service: 'ia', timeline: '7 días' },
-  { name: 'Automatización', service: 'automation', timeline: '5 días' },
+  { name: 'Automatización', service: 'ia', timeline: '5 días' },
   { name: 'Software a medida', service: 'software', timeline: '[PENDIENTE]' },
 ]

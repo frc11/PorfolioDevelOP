@@ -257,7 +257,7 @@ export function ComponentStates() {
           <SgLabel>DataStat</SgLabel>
           <div className="flex flex-wrap gap-10">
             <DataStat value="[PENDIENTE]" label="Sin acento" />
-            <DataStat value="[PENDIENTE]" label="Con acento" accent="automation" />
+            <DataStat value="[PENDIENTE]" label="Con acento" accent="ia" />
           </div>
         </div>
       </div>

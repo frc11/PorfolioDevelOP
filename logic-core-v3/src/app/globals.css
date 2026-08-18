@@ -2,8 +2,8 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-chivo-sans);
+  --font-mono: var(--font-chivo-mono);
   --width-hero-left: 60%;
   --width-hero-right: 40%;
   --color-metric-bg: rgba(255, 255, 255, 0.03);
@@ -17,50 +17,97 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   SISTEMA DE DISEÑO — REDISEÑO B1
+   SISTEMA DE DISEÑO — REDISEÑO B1 (revalidado en S1-cimiento: base clara)
    Dirección: "instrumento de precisión, editorial".
    Base monocroma, superficies planas y quietas, acento en dosis mínimas.
 
+   S1-cimiento invierte la identidad primaria: la base clara ("papel") pasa a
+   ser el tema por defecto del sitio público; la sección oscura queda como
+   tema secundario, alternado por `SectionShell`. La paleta crema del
+   rediseño abandonado (`#F2EEE6`/`#EAE5DA`) y el acento ámbar mueren acá.
+
    Prefijo `ds` en todos los tokens: el sitio actual todavía consume
    --color-void / --color-obsidian / --color-accent (definidos más abajo,
-   fuera de @theme). Esos tokens viejos se conservan hasta el bloque final
-   del rediseño; el sistema nuevo no los pisa.
+   fuera de @theme). Esos tokens viejos son el mecanismo de `HomeWrapper`
+   (B2, Bloque 2) y no se tocan en este bloque.
 
    `static` y no `@theme` a secas: Tailwind 4.3 hace tree-shaking de las
    variables de tema que ningún utility usa. Verificado contra el build —
    sin `static` estos tokens NO aparecen en el CSS emitido, y las secciones
    que los leen por `var()` crudo (la inversión de tema de SectionShell)
    se quedarían sin valor. Va en su propio bloque para forzar solo estos
-   ~35 tokens, sin arrastrar el tema default entero de Tailwind.
+   tokens, sin arrastrar el tema default entero de Tailwind.
    ══════════════════════════════════════════════════════════════════════════ */
 @theme static {
 
-  /* ── Base dark (tema por defecto) ───────────────────────────────────── */
-  --color-ds-void: #0D0B09;
-  --color-ds-surface: #151210;
-  --color-ds-ink: #EDE9E1;
-  --color-ds-ink-muted: #A39C8F;
-  --color-ds-border: rgba(237, 233, 225, 0.10);
+  /* ── Base dark (tema secundario, alternado por SectionShell) ─────────────
+     ⚠ COLISIÓN DE NOMBRE: `--color-ds-ink` valía acá `#EDE9E1` (el texto del
+     tema oscuro). S1-cimiento reusa ESE NOMBRE para un rol nuevo y distinto:
+     la "tinta" universal `#111111` (ver más abajo, fuera de este bloque). El
+     texto propio del tema oscuro se renombró a `--color-ds-dark-ink`. Quien
+     lea código o comentarios viejos que mencionen `--color-ds-ink` como
+     "texto sobre oscuro" está leyendo el significado ANTERIOR — ya no vale.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-void: #0E0E0E;
+  --color-ds-surface: #161615;
+  --color-ds-dark-ink: #F7F7F5;
+  --color-ds-ink-muted: #A5A5A4;
+  --color-ds-border: #333333;
 
-  /* ── Tema claro (secciones invertidas) ──────────────────────────────── */
-  --color-ds-light-bg: #F2EEE6;
-  --color-ds-light-surface: #EAE5DA;
-  --color-ds-light-ink: #1A1713;
-  --color-ds-light-ink-muted: #6E675C;
-  --color-ds-light-border: rgba(26, 23, 19, 0.12);
+  /* ── Tema claro ("papel" — identidad primaria del sitio) ────────────────
+     Verificados por cálculo WCAG (ver `ink-muted` más abajo, que además es
+     `--color-ds-light-ink-muted` acá): 5.77:1 tinta sobre papel · 7.83:1
+     texto-sobre-oscuro sobre sección oscura. `rule` es decorativa (línea
+     divisoria, no texto): 1.34:1 claro / 1.53:1 oscuro — no le aplica el
+     mínimo de 4.5:1 de texto.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-light-bg: #F7F7F5;
+  --color-ds-light-surface: #EFEFEC;
+  --color-ds-light-ink: #111111;
+  --color-ds-light-ink-muted: #616161;
+  --color-ds-light-border: #D7D7D5;
+
+  /* ── Tinta — token plano, NO se invierte por tema ────────────────────────
+     "El CTA es siempre tinta #111111" (regla no negociable del documento):
+     los acentos identifican servicios, nunca son color de acción, y el CTA
+     no se pinta con `--color-ds-fg` (que sí invierte) sino con este token
+     fijo. Coincide en valor con `--color-ds-light-ink` porque tinta ES el
+     texto natural del tema claro — son el mismo color por diseño, con dos
+     roles distintos: uno depende del tema que lo rodea, el otro no.
+     ⚠ Pendiente fuera de este sprint: `ui/Button.tsx` (frozen para S1) sigue
+     pintando su variante `ds-primary` con `bg-ds-fg` (invertible). Hasta que
+     se actualice para usar este token plano, el CTA todavía invierte por
+     tema — la regla "CTA siempre tinta" queda declarada en tokens, no
+     aplicada en el componente. Reportado en el cierre del sprint.
+     ───────────────────────────────────────────────────────────────────── */
+  --color-ds-ink: #111111;
 
   /* ── Acentos de servicio ────────────────────────────────────────────────
-     Valores tomados del código actual (OurServices.tsx:77/95/113/131), que
-     es la fuente internamente coherente. Son los tonos sobrios de cada
-     familia; los neón (#00ff88, #00e5ff/#00e1ff) quedan descartados.
-     ⚠ PENDIENTE GATE 1: CLAUDE.md asigna estos mismos cuatro hex a otros
-     servicios (permutación alternativa). El styleguide (B1-S3) muestra las
-     dos opciones; Franco elige. NO resolver acá.
+     Gate 1 cerrado: paleta congelada en CLAUDE.md. El ámbar muere — IA y
+     Automatización son un solo servicio, verde. Cada acento trae 4 variantes:
+     sólido (sobre papel), chip (fondo+texto, para pills/badges), wash
+     (fondo de sección con el color "sentido, no visto" — casi imperceptible,
+     ver la regla del documento) y on-dark (mismo servicio, legible sobre
+     sección oscura). Ninguna variante se consume todavía: son la capacidad
+     que S5 usa.
      ───────────────────────────────────────────────────────────────────── */
-  --color-ds-accent-web: #06b6d4;
-  --color-ds-accent-ia: #10b981;
-  --color-ds-accent-automation: #f59e0b;
-  --color-ds-accent-software: #8b5cf6;
+  --color-ds-accent-web: #1D5B8F;
+  --color-ds-accent-web-chip-bg: #DBE7F2;
+  --color-ds-accent-web-chip-fg: #134063;
+  --color-ds-accent-web-wash: #F1F5FA;
+  --color-ds-accent-web-on-dark: #8FC0E8;
+
+  --color-ds-accent-ia: #1B6B4C;
+  --color-ds-accent-ia-chip-bg: #DAEBE1;
+  --color-ds-accent-ia-chip-fg: #124B33;
+  --color-ds-accent-ia-wash: #F1F7F3;
+  --color-ds-accent-ia-on-dark: #7FCBA4;
+
+  --color-ds-accent-software: #57429E;
+  --color-ds-accent-software-chip-bg: #E3DEF1;
+  --color-ds-accent-software-chip-fg: #3E2E75;
+  --color-ds-accent-software-wash: #F5F3FB;
+  --color-ds-accent-software-on-dark: #AFA0E8;
 
   /* ── Radios y elevación ─────────────────────────────────────────────────
      Radio 0 en superficies (planas, no se aprietan). El radio y el relieve
@@ -151,13 +198,29 @@
        · `lead` / `body` ≥ 1.20  → mínimo real 1.25 (a 320px)
        · `data` / `display-lg` ≤ 0.75 → máximo real 0.71 (a 1372px)
      ───────────────────────────────────────────────────────────────────── */
+  /* ── Peso como eje de jerarquía ──────────────────────────────────────────
+     Chivo (variable, 100–900) reemplaza a Geist con una regla del documento:
+     "jerarquía por peso", no por familia — una sola cara tipográfica para
+     todo el sistema. Antes solo `data` declaraba su peso (500, mono); ahora
+     cada escalón de la escala lo declara, porque el peso es lo que antes
+     hacía la familia. Ladder: 700 (display-xl) → 600 (display-lg, subhead,
+     eyebrow) → 500 (data, control — ya vigente) → 400 (lead, body, lectura).
+
+     Tracking de los display: RE-VERIFICADO para Chivo (x-height mayor y
+     aperturas más cerradas que Geist a tamaños grandes en peso 700/600 se
+     leen sueltas con el tracking viejo). Ajuste direccional, mismo signo y
+     misma arquitectura de escala — no recalculado desde cero. Pendiente de
+     confirmación visual humana en el navegador (este sprint no la hace).
+     ───────────────────────────────────────────────────────────────────── */
   --text-ds-display-xl: clamp(3.25rem, 8vw, 7rem);
   --text-ds-display-xl--line-height: 0.98;
-  --text-ds-display-xl--letter-spacing: -0.03em;
+  --text-ds-display-xl--letter-spacing: -0.035em;
+  --text-ds-display-xl--font-weight: 700;
 
   --text-ds-display-lg: clamp(2.25rem, 5vw, 4.25rem);
   --text-ds-display-lg--line-height: 1.05;
-  --text-ds-display-lg--letter-spacing: -0.02em;
+  --text-ds-display-lg--letter-spacing: -0.025em;
+  --text-ds-display-lg--font-weight: 600;
 
   /* Peldaño intermedio: subtítulo de bloque. Existe porque entre el titular de
      capítulo y el subhead había un salto de 3.09× sin nada en el medio, y las
@@ -165,17 +228,21 @@
      del titular directo a la mono de 12px. Es escala, no una familia nueva. */
   --text-ds-subhead: clamp(1.625rem, 2.9vw, 2.375rem);
   --text-ds-subhead--line-height: 1.25;
-  --text-ds-subhead--letter-spacing: -0.01em;
+  --text-ds-subhead--letter-spacing: -0.015em;
+  --text-ds-subhead--font-weight: 600;
 
   --text-ds-lead: clamp(1.25rem, 1.6vw, 1.375rem);
   --text-ds-lead--line-height: 1.55;
+  --text-ds-lead--font-weight: 400;
 
   --text-ds-body: clamp(1rem, 1.18vw, 1.0625rem);
   --text-ds-body--line-height: 1.7;
+  --text-ds-body--font-weight: 400;
 
   --text-ds-eyebrow: 0.75rem;
   --text-ds-eyebrow--line-height: 1.2;
   --text-ds-eyebrow--letter-spacing: 0.18em;
+  --text-ds-eyebrow--font-weight: 600;
 
   --text-ds-data: clamp(1.5rem, 3.5vw, 3rem);
   --text-ds-data--line-height: 1;
@@ -207,9 +274,12 @@
   --container-ds-lead: 42ch;
 
   /* Tamaño de control. La escala de S1 no traía uno, y `--text-ds-body`
-     arrastra line-height 1.7 — demasiado suelto para un botón. */
+     arrastra line-height 1.7 — demasiado suelto para un botón. Peso 500:
+     coincide con el `font-medium` que ya trae `BASE_CLASSES` de `ui/Button`,
+     así que declarar el peso acá no le suma ni le resta nada al CTA hoy. */
   --text-ds-control: 1rem;
   --text-ds-control--line-height: 1;
+  --text-ds-control--font-weight: 500;
 
   /* ── Agregado en B2-S2 ──────────────────────────────────────────────────
      Alto de la barra de navegación fija. Es un token y no un `h-16` suelto
@@ -218,6 +288,20 @@
      ancla del sitio aterriza con su encabezado tapado por la barra.
      ───────────────────────────────────────────────────────────────────── */
   --spacing-ds-nav: 4rem;
+
+  /* ── Agregado en S1-cimiento, Bloque 2 ────────────────────────────────────
+     Distancia de la transición cromática de `SectionShell`. Cada sección funde
+     su propio `--color-ds-canvas` a transparente en los primeros y los últimos
+     `--spacing-ds-section-fade` de su alto — no con `mask-image` (que también
+     desvanecería el CONTENIDO cerca del borde, no solo el fondo), sino con un
+     `background-image: linear-gradient(...)` de 4 paradas que solo pinta el
+     fondo. Lo que se revela detrás en esa franja es el fondo compartido de
+     `HomeWrapper`, que anima con Framer Motion entre los colores de tema — así
+     el cruce entre dos secciones de tema distinto es un fundido, no un corte:
+     el efecto central de la identidad nueva. Sin neighbor-awareness: cada
+     `SectionShell` funde hacia lo que sea que haya detrás, sin necesitar saber
+     de qué color es la sección vecina. */
+  --spacing-ds-section-fade: clamp(2rem, 6vh, 4.5rem);
 
   /* ── Capa semántica (se invierte por sección) ───────────────────────────
      Los tokens de arriba son la paleta literal y NO se mueven. Estos son los
@@ -230,41 +314,52 @@
      ───────────────────────────────────────────────────────────────────── */
   --color-ds-canvas: var(--color-ds-void);
   --color-ds-panel: var(--color-ds-surface);
-  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg: var(--color-ds-dark-ink);
   --color-ds-fg-muted: var(--color-ds-ink-muted);
   --color-ds-rule: var(--color-ds-border);
 
   /* Borde del control secundario. Es un token PROPIO y no el de regla
      (`--color-ds-rule`) porque son dos cosas distintas: la regla divide, este
      borde es la frontera de un objeto que se aprieta. WCAG 1.4.11 pide 3:1
-     para el borde de un componente interactivo, y el token de regla da 1.23:1
-     en oscuro y 1.27:1 en crema — el secundario quedaba sin ninguna señal de
-     que era un botón, y prácticamente aparecía recién en hover (1.23 → 16.23),
-     o sea nunca en touch. Medido: 3.55:1 en oscuro, 3.48:1 en crema. */
-  --color-ds-control-stroke: rgba(237, 233, 225, 0.42);
+     para el borde de un componente interactivo. Alpha recalculada sobre la
+     tinta/texto-sobre-oscuro nuevos: 3.41:1 sobre sección oscura, 3.44:1 sobre
+     su panel — mismo criterio de la nota original (sin esto el secundario no
+     tenía ninguna señal de ser un botón, y solo aparecía en hover). */
+  --color-ds-control-stroke: rgba(247, 247, 245, 0.38);
 
   /* Relieve del control primario: un canto duro que da el grosor físico y una
      difusa corta que lo apoya. Vive en la capa semántica, y no en la paleta,
-     porque estaba calculado contra lienzo oscuro (negro al 90%) y sobre crema
-     se leía como una mancha sucia en vez de un objeto apoyado. Misma FORMA en
-     los dos temas —dos capas, mismos offsets— con la opacidad bajada en crema:
-     lo que cambia es cuánta sombra proyecta la superficie, no la geometría del
-     relieve. */
-  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
+     porque es de los pocos valores que se invierten con el tema.
+
+     ⚠ Con la tinta ahora fija (`--color-ds-ink`, no invertible), el CTA es un
+     botón casi-negro `#111111` que puede caer sobre una sección oscura
+     `#0E0E0E` — botón y fondo a menos de 1 punto de luminancia de distancia.
+     Ninguna sombra resuelve eso solo: acá se sube la opacidad del relieve
+     oscuro al máximo razonable (0.9/0.55) para dar la mejor separación
+     posible por sombra, pero la legibilidad real de esa combinación queda
+     pendiente de verificación visual humana, y probablemente necesite un
+     borde o el tratamiento de `--color-ds-control-stroke` el día que
+     `ui/Button.tsx` adopte "CTA siempre tinta" (fuera de este sprint). */
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.55);
 
   /* ── Familias ───────────────────────────────────────────────────────────
-     Fuente única de verdad de las familias del sistema. `next/font` deja
-     `--font-geist-sans` / `--font-geist-mono` en el <html> (ver el className
+     Fuente única de verdad de las familias del sistema. S1-cimiento reemplaza
+     Geist por Chivo + Chivo Mono (`next/font/google`, variables — eje `wght`
+     100–900, sin array de `weight`): es la familia única del documento,
+     "jerarquía por peso" en vez de por familia. `next/font` deja
+     `--font-chivo-sans` / `--font-chivo-mono` en el <html> (ver el className
      de `layout.tsx`), que es el mismo elemento donde Tailwind emite `@theme`,
-     así que el `var()` resuelve acá y hereda correcto hacia abajo.
+     así que el `var()` resuelve acá y hereda correcto hacia abajo. Alcanza a
+     TODO el sitio (`--font-sans`/`--font-mono` arriba, en el `@theme` base):
+     sitio público, landings y portal — decisión aprobada, no solo el home.
 
      B1 había duplicado estas dos líneas en un `[data-ds-theme]` para esquivar
      el bug de scope: las variables vivían en el <body>, más abajo que `:root`,
      y esta declaración quedaba inválida. Con el scope arreglado esa segunda
      copia era redundante y se quitó.
      ───────────────────────────────────────────────────────────────────── */
-  --font-ds-sans: var(--font-geist-sans);
-  --font-ds-mono: var(--font-geist-mono);
+  --font-ds-sans: var(--font-chivo-sans);
+  --font-ds-mono: var(--font-chivo-mono);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -280,11 +375,11 @@
 [data-ds-theme='dark'] {
   --color-ds-canvas: var(--color-ds-void);
   --color-ds-panel: var(--color-ds-surface);
-  --color-ds-fg: var(--color-ds-ink);
+  --color-ds-fg: var(--color-ds-dark-ink);
   --color-ds-fg-muted: var(--color-ds-ink-muted);
   --color-ds-rule: var(--color-ds-border);
-  --color-ds-control-stroke: rgba(237, 233, 225, 0.42);
-  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.5);
+  --color-ds-control-stroke: rgba(247, 247, 245, 0.38);
+  --shadow-ds-control: 0 2px 0 rgba(0, 0, 0, 0.9), 0 3px 6px rgba(0, 0, 0, 0.55);
 }
 
 [data-ds-theme='light'] {
@@ -293,8 +388,8 @@
   --color-ds-fg: var(--color-ds-light-ink);
   --color-ds-fg-muted: var(--color-ds-light-ink-muted);
   --color-ds-rule: var(--color-ds-light-border);
-  --color-ds-control-stroke: rgba(26, 23, 19, 0.52);
-  --shadow-ds-control: 0 2px 0 rgba(26, 23, 19, 0.30), 0 3px 6px rgba(26, 23, 19, 0.16);
+  --color-ds-control-stroke: rgba(17, 17, 17, 0.50);
+  --shadow-ds-control: 0 2px 0 rgba(17, 17, 17, 0.32), 0 3px 6px rgba(17, 17, 17, 0.18);
 }
 
 /* Logic Core V3: The Inversion System */

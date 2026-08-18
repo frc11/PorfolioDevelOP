@@ -52,7 +52,7 @@ export const FRENTES: readonly Frente[] = [
     timeline: '7 días',
   },
   {
-    service: 'automation',
+    service: 'ia',
     nombre: 'Automatización de procesos',
     paraQuien: 'Para operaciones que viven pegadas con planillas y copiar-pegar.',
     entregable: 'Los procesos conectados, corriendo solos.',

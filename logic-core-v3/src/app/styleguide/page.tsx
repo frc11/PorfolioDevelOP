@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { RuleDivider } from '@/components/design-system'
-import { AccentPermutations } from './_components/AccentPermutations'
 import { ComponentStates } from './_components/ComponentStates'
 import {
   SkeletonClose,
@@ -28,7 +27,6 @@ export const metadata: Metadata = {
 
 const GATE_ITEMS: readonly { id: string; label: string }[] = [
   { id: 'paleta', label: 'Paleta' },
-  { id: 'acentos', label: 'Acentos — decisión' },
   { id: 'tipografia', label: 'Tipografía — decisión' },
   { id: 'componentes', label: 'Componentes' },
   { id: 'home', label: 'Las 6 secciones' },
@@ -86,17 +84,8 @@ export default function StyleguidePage() {
       </SgBlock>
 
       <SgBlock
-        id="acentos"
-        index="02"
-        title="Acentos — decisión de Gate 1"
-        note="El código y CLAUDE.md asignan los MISMOS cuatro hex a servicios distintos. Cyan queda en web en las dos opciones; los otros tres rotan. Hoy los tokens tienen la opción A. Elegir una."
-      >
-        <AccentPermutations />
-      </SgBlock>
-
-      <SgBlock
         id="tipografia"
-        index="03"
+        index="02"
         title="Tipografía — decisión de Gate 1"
         note="La escala es la misma en las dos opciones: lo único en juego es la familia del display. Sin serif de lujo, y sin sumar una familia solo para el display si Geist alcanza."
       >
@@ -105,7 +94,7 @@ export default function StyleguidePage() {
 
       <SgBlock
         id="componentes"
-        index="04"
+        index="03"
         title="Componentes y estados"
         note="Los interactivos van dos veces: vivos (interactuar) y con el estado forzado, para poder comparar los cinco de un vistazo."
       >
@@ -114,7 +103,7 @@ export default function StyleguidePage() {
 
       <SgBlock
         id="home"
-        index="05"
+        index="04"
         title="Las 6 secciones del home — esqueleto"
         note="Arquitectura de temas: alternancia estricta — S1 oscura · S2 crema · S3 oscura · S4 crema · S5 oscura · S6 crema. La inversión es el dispositivo de ritmo del sistema, y antes había dos secciones oscuras seguidas (S3 y S4): 236px de fondo idéntico entre dos capítulos distintos, sin ningún corte. Los cuatro frentes se movieron a S5 porque son la única sección con acentos, y tres de los cuatro no llegan a 3:1 sobre crema. Es maqueta de estructura y jerarquía, no la sección terminada: no hay motion, no hay 3D y no hay contenido que no esté decidido."
       >

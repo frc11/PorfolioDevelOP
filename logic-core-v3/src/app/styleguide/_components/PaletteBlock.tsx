@@ -46,7 +46,7 @@ function Swatch({ token, swatchClass, role }: SwatchProps) {
 const BASE_DARK: readonly SwatchProps[] = [
   { token: '--color-ds-void', swatchClass: 'bg-ds-void', role: 'Fondo de sección' },
   { token: '--color-ds-surface', swatchClass: 'bg-ds-surface', role: 'Panel' },
-  { token: '--color-ds-ink', swatchClass: 'bg-ds-ink', role: 'Texto' },
+  { token: '--color-ds-dark-ink', swatchClass: 'bg-ds-dark-ink', role: 'Texto' },
   { token: '--color-ds-ink-muted', swatchClass: 'bg-ds-ink-muted', role: 'Texto secundario' },
   { token: '--color-ds-border', swatchClass: 'bg-ds-border', role: 'Borde y regla' },
 ]

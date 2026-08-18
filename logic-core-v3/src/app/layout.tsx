@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Chivo, Chivo_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const chivoSans = Chivo({
+  variable: "--font-chivo-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const chivoMono = Chivo_Mono({
+  variable: "--font-chivo-mono",
   subsets: ["latin"],
 });
 
@@ -65,13 +65,13 @@ export default function RootLayout({
     // Las variables de `next/font` van en el <html>, no en el <body>: `globals.css`
     // declara `--font-sans` / `--font-mono` dentro de `@theme`, que Tailwind emite
     // en `:root` (= el <html>). Un custom property se resuelve en el elemento donde
-    // se declara, así que `var(--font-geist-sans)` leído desde `:root` no encontraba
+    // se declara, así que `var(--font-chivo-sans)` leído desde `:root` no encontraba
     // nada si la variable vivía en el <body> → `--font-sans` quedaba inválida y todo
     // el sitio caía en la fuente del sistema. Con la clase acá, `:root` tiene las dos
     // variables definidas y la cadena resuelve.
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${chivoSans.variable} ${chivoMono.variable}`}
       suppressHydrationWarning
     >
       <head>
