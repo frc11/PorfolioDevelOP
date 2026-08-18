@@ -4040,3 +4040,110 @@ se tocaron en ninguno de los cinco recorridos; el formulario quedó documentado 
 **Cierre:** `git diff --stat` sin cambios en archivos versionados; el único agregado es
 `docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md` más esta entrada. Cero `src/`, cero
 tests, cero config. Worktree y scripts de navegación borrados. Sin push.
+
+---
+
+## Verificación de arranque OSLead VII — qué hay realmente en el código hoy — 2026-08-18
+
+Read-only. Cero `src/`, cero tests, cero configuración. Salida en
+[`docs/verificacion-arranque-oslead-vii.md`](verificacion-arranque-oslead-vii.md).
+
+**Por qué existió.** El handoff decía qué se hizo, no cómo estaba el código. En este repo la
+documentación de estado ya mintió dos veces. Se verificó antes de planificar nada.
+
+**Fase 0 — el criterio de frenada se disparó.** El working tree tenía cambios sin commitear ajenos,
+incluido un archivo de **configuración**. No había servidor contra este checkout (el único listener,
+`:3000`, es de `RG-CRM`, otro proyecto). Se montaron dos worktrees propios fuera del repo —
+`C:/tmp/wt-verif-vii` (F1+F2+F3) y `C:/tmp/wt-verif-main` (`05ae1a87`) — con `node_modules` por
+junction, build propio y puerto **3013**. No se tocó nada ajeno: ni stashes, ni worktrees, ni procesos.
+
+### Lo que dio verde
+
+**Las cuatro suites, exit 0 las cuatro**, sobre F1+F2+F3: `npx tsc --noEmit` **0 líneas** ·
+`check:invariants` **22/22** · `test:leados` **25/25** · `test:setter` **62/62** (62, no 60: F2 sumó
+`14-motivo-rechazo.spec.ts`). Sobre `main` por separado: `tsc` exit 0 y `check:invariants` **19/19**.
+
+**Los fixtures del wizard están sanos.** `QA-W Rechazada` sigue en `stage=RECHAZADA` con su rechazo
+íntegro (`motivo`/`donde`/`arreglo`/`detalle`), sin tocar desde el 12/8: **la pantalla de reentrada
+reproduce**. El barrido A no lo dejó en CONSTRUCCIÓN.
+
+### Lo que dio rojo
+
+**El trabajo no está íntegro ni en un solo lugar, y el handoff se equivoca dos veces.** No hay
+«F0–F4»: hay **dos** commits F. `F1` (`34e15156`) y `F2` (`2d456390`) están **sin pushear**
+(`git branch -r --contains` vacío para los dos, y `merge-base --is-ancestor` da NO contra `main` y
+contra `origin/main`). **F3 nunca llegó a commit** — `f3/acuse-recibo` apunta al commit de F2 y su
+trabajo vive sin commitear en `C:/tmp/wt-f3-acuse`. **F4 no existe.** Y en el checkout principal
+quedaron sin commitear el reporte de F0, su entrada de bitácora y **un fix de seguridad**.
+
+**Los 22 invariantes existen, pero en un árbol que no está en ningún commit.** `main` tiene **19**;
+F1 suma `postergacion` y `contador-dms` (21); el 22 es `acuse`, y **está sin commitear**. No faltan
+tres: **nunca llegaron** — no hay commit donde buscarlos borrados.
+
+**`/setter` es hoy embebible en un iframe ajeno.** En `main`, `next.config.ts:85` cubre solo
+`admin|dashboard`, y la CSP global es **Report-Only**, así que su `frame-ancestors` no aplica. El fix
+ya está escrito… sin commitear.
+
+**`tsx` no es dependencia declarada del repo** (ni en `package.json`, ni en el lock, ni en
+`node_modules/`). Resuelve por un binario global de esta máquina, y de él dependen ~60 invariantes,
+`prisma db seed` y todos los seeds QA — incluidos los tres nuevos.
+
+### El censo, que cierra exacto
+
+**15 pasos sobre 6 rutas.** Contra `probe-poda-terreno.md` §10 R9 (20 pasos, del 31/7): **7 censadas
+ya no existen** (`m3`, `m7`–`m12`), **2 existen sin censar** (`mc1`, `mc2`), **13 coinciden** — y de
+esas 13, **3 cambiaron encabezado** (`m2`, `m6`, `m14`). 20 − 7 + 2 = 15.
+
+Dos correcciones al estado que se daba por conocido: **`m3` no cambió, desapareció**; y **«m5 cambió»
+queda refutado** — su bloque en `PANTALLAS` es byte-idéntico al commit fundacional, lo que cambió fue
+su componente. Trampa registrada: los títulos de `espera` y `revision` en `PANTALLAS` son **código
+muerto en pantalla** (esas rutas pintan `TEXTO_TURNO[turno]`), así que auditar su copy contra el
+registro da un resultado falso.
+
+### Galería y manual: el que los desactualiza no es ninguna F
+
+**50 capturas y 13 capítulos** (contados, los dos números del encargo son exactos). **12 capturas
+desfasadas confirmadas + 3 por inferencia; 9 capítulos de 14.** La causa es **P11 (`513f38b4`), que
+SÍ está en `main`** y reescribió el vocabulario de las tres esperas. Y **regenerar hoy no alcanza:**
+P11 actualizó el spec de captura pero no el catálogo de textos del índice, que sigue diciendo frases
+que P11 borró del producto. De paso: `35-home-foco.png` y `36-home-cartera.png` son **byte-idénticos**
+(md5 verificado) — la cartera nunca se fotografió, y el índice declara «0 huecos».
+
+### Los 22 baches: 0 muertos, 19 por lectura, 3 para manejar
+
+El triage pasó por **una segunda pasada adversarial** que intentó refutar la primera. Cambió 4
+dictámenes de 22 — sin ella este reporte habría dicho «0 exige manejar la app», que es falso.
+
+**La expectativa no se cumplió: ningún bache murió con la poda.** Las pantallas murieron, pero los
+controles **migraron** y el defecto viajó con ellos. El caso testigo es `B-A5`: se reportó «en m7»,
+`m7` no existe, y sin embargo el control **no cambió de archivo** — `m-construccion.tsx` se
+re-parametrizó de `m7…m12` a `mc1/mc2` y la cadena rota sigue ahí. **Poda de pantalla ≠ muerte de
+bache.**
+
+Los **3 que exigen manejar la app** (`B-B11`, `B-C3/C4/C5`, `B-C8`) comparten un patrón que conviene
+recordar: **el código fuente dice una cosa y la corrida midió la contraria, en el mismo commit**. El
+`aria-label` de `B-C8` ya estaba cuando la corrida reportó el bug; el listbox de `B-C4` se enfoca con
+un `requestAnimationFrame` en una línea byte-idéntica a la medida. Ninguna lectura arbitra eso.
+
+Un dictamen corregido por la refutación: **`B-P9`** tiene la mitad que le da nombre (el «hace hace»)
+**ya arreglada en `main`** por `c2160792`, anterior a la corrida. Dictaminarlo «VIVO» sin matizar
+mandaba a arreglar un string que ya no existe.
+
+### El entorno no está listo para que un humano verifique lo perceptual
+
+Las **4 URLs de herramientas siguen en `null`** y **no hay pantalla que las cargue**: no viven en
+Prisma, viven hardcodeadas en `herramientas.ts` — el único camino es editar el `.ts` y redeployar.
+**Cal.com está NULL en las 16 organizaciones**, incluida `develop`, y **nadie escribe esos campos en
+todo el código** (cero writes, barrido repo-wide); `m16` no bloquea, falla recién al hacer clic. Y el
+**panel de novedades del setter tiene 80 avisos sin leer, de los cuales 77 son huérfanos** — su lead
+fue borrado. Es 96% residuo de corridas de test.
+
+**Contaminación propia, declarada.** Correr las suites era parte del encargo y toca la base. Se
+censó **antes** y se midió el delta: **0 leads creados, 0 usuarios creados, 0 fixtures alterados, 1
+novedad huérfana** (`2026-08-18T04:55:04Z`). El censo previo daba 79 novedades; el posterior, 80. Esa
+diferencia es de esta corrida. **No se re-seedeó nada.**
+
+**Cierre.** El único diff versionado son el reporte y esta entrada. Cero `src/`, cero tests, cero
+configuración. Sin push. Los dos worktrees propios quedan declarados en el reporte; el WIP ajeno del
+checkout —bitácora de F0, `next.config.ts`, los 3 docs de auditoría y `BACHES-RE-VERIFICADOS.md`— se
+dejó **intacto y sin commitear**.
