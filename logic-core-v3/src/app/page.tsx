@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/hooks/useThemeObserver'
 import { HomeWrapper } from '@/components/layout/HomeWrapper'
+import { HomeIntro } from '@/components/layout/HomeIntro'
 import { SectionShell, Eyebrow, DisplayHeading } from '@/components/design-system'
 
 // Componentes actuales del home, montados tal cual (S1-cimiento, Bloque 3).
@@ -9,7 +10,7 @@ import { SectionShell, Eyebrow, DisplayHeading } from '@/components/design-syste
 // componente ya es 'use client' por su cuenta, así que sigue siendo una isla
 // de JS — lo que se saca es el code-splitting artificial de la composición,
 // no la interactividad de cada pieza.
-import { Hero } from '@/components/layout/Hero'
+import { HeroSection } from '@/components/layout/HeroSection'
 import { About } from '@/components/sections/home/About'
 import { Portfolio } from '@/components/sections/home/Portfolio'
 import OurServices from '@/components/sections/home/OurServices'
@@ -67,11 +68,17 @@ import { Footer } from '@/components/sections/home/Footer'
 export default function Home() {
   return (
     <ThemeProvider>
+      {/* Preloader del home (S3): capa encima del contenido, nunca un gate.
+          Va en el HTML del server siempre; el script pre-paint de
+          HomeIntroBoot (layout <head>) decide si se ve. Ver HomeIntro.tsx. */}
+      <HomeIntro />
       <HomeWrapper>
-        {/* 1 · Hero — claro. Hero.tsx trae su propio id="inicio". */}
-        <SectionShell theme="light" contained={false} spacing="none">
-          <Hero />
-        </SectionShell>
+        {/* 1 · Hero — claro. S3: `HeroSection` trae su PROPIO `SectionShell`
+            (con su tema, su id="inicio" y su ritmo vertical), así que acá no va
+            envuelto — anidarlo duplicaría el shell y con él el disparador de
+            tema y el fundido de bordes. El hero legacy (`Hero.tsx`) sí
+            necesitaba el wrapper porque no era una sección del sistema. */}
+        <HeroSection />
 
         {/* 2 · Quiénes somos — oscuro (tabla). Conflicto con About.tsx
             documentado arriba: no resuelto en este sprint. */}

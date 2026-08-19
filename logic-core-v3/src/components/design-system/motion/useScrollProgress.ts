@@ -51,5 +51,24 @@ export function useScrollProgress(
     offset: options?.offset ?? ['start end', 'end start'],
   })
 
+  // motion 12.42 marca este valor como "acelerable" cuando el offset mapea a
+  // un rango nombrado de ViewTimeline (el default de arriba mapea a "cover").
+  // Con eso puesto, cualquier consumidor que lo derive con `useTransform` y lo
+  // alimente a `style` en las keys `opacity`/`clipPath`/`filter`/`transform`
+  // es promovido en silencio a una animación WAAPI nativa con ViewTimeline —
+  // que trackea al sujeto contra su SCROLL CONTAINER ancestro más cercano, no
+  // contra la ventana: un `overflow: hidden`/`auto` en cualquier ancestro la
+  // congela sin error, solo en navegadores con ViewTimeline. Además bifurca
+  // la física (compositor vs JS) entre consumidores del mismo MotionValue.
+  // Se neutraliza acá para que TODOS los consumidores corran por el mismo
+  // camino JS determinista (S3-hero, Bloque 0 — diagnóstico con evidencia).
+  // Tiene que ser una mutación EN RENDER, no en un efecto: `useScroll`
+  // re-asigna `accelerate` en cada render, y `useTransform` hereda el config
+  // en el momento en que se llama (también en render) — un efecto llegaría
+  // después del primer binding del consumidor, con la animación nativa ya
+  // creada. Es simétrico a cómo el propio upstream lo asigna.
+  // eslint-disable-next-line react-hooks/immutability
+  scrollYProgress.accelerate = undefined
+
   return scrollYProgress
 }

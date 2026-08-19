@@ -1,12 +1,13 @@
 'use client'
 
-import { motion, useReducedMotion } from 'motion/react'
-import { useState } from 'react'
+import { motion, useMotionValueEvent, useReducedMotion } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 import {
   MOTION_DURATION,
   MOTION_EASE,
   Parallax,
   Reveal,
+  useScrollProgress,
   type MotionEaseName,
 } from '@/components/design-system/motion'
 import { SgLabel } from './SgBlock'
@@ -263,6 +264,36 @@ function RevealAndStaggerShowcase() {
 
 // ── Parallax ──────────────────────────────────────────────────────────────
 
+/**
+ * Instrumentación permanente del sistema (S3-hero, Bloque 0): el progreso del
+ * hook impreso en vivo. La física del parallax es un diferencial de ~8% de la
+ * velocidad de página — imperceptible sin referencia — así que la vitrina no
+ * puede depender de "ver el desplazamiento" para saber si `useScrollProgress`
+ * entrega valores. Si el número avanza, el hook funciona; se acabó el juicio
+ * perceptual. Escribe `textContent` directo al DOM (cero setState por frame).
+ */
+function ProgressReadout() {
+  const boxRef = useRef<HTMLDivElement>(null)
+  const valueRef = useRef<HTMLSpanElement>(null)
+  const progress = useScrollProgress(boxRef)
+
+  useMotionValueEvent(progress, 'change', (latest) => {
+    if (valueRef.current) valueRef.current.textContent = latest.toFixed(3)
+  })
+
+  useEffect(() => {
+    if (valueRef.current) valueRef.current.textContent = progress.get().toFixed(3)
+  }, [progress])
+
+  return (
+    <div ref={boxRef} className="pointer-events-none absolute inset-0">
+      <p className="absolute right-6 top-6 font-ds-mono text-[0.7rem] uppercase text-ds-fg-muted">
+        useScrollProgress → <span ref={valueRef} className="text-ds-fg" />
+      </p>
+    </div>
+  )
+}
+
 function ParallaxShowcase() {
   return (
     <div>
@@ -270,14 +301,16 @@ function ParallaxShowcase() {
       <p className="mb-6 max-w-ds-prose text-sm leading-relaxed text-ds-fg-muted">
         <code className="font-ds-mono">intensityPx</code> acá es 160 — generoso a propósito para
         que el efecto sea inequívoco en la vitrina; un uso real probablemente pida menos
-        (&ldquo;sutil&rdquo;).
-        Scrolleá el bloque de abajo.
+        (&ldquo;sutil&rdquo;). Scrolleá el bloque: la tarjeta se corre respecto de la línea
+        central (la referencia fija), y el número de arriba a la derecha es el progreso del
+        hook en vivo — si avanza, la primitiva entrega valores.
       </p>
 
       <div className="relative h-[100vh] overflow-hidden rounded-ds-surface border border-ds-rule bg-ds-panel">
         <p className="absolute left-6 top-6 max-w-[14rem] font-ds-mono text-[0.7rem] uppercase text-ds-fg-muted">
           Scrolleá este bloque
         </p>
+        <div aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-ds-rule" />
         <Parallax intensityPx={160} className="flex h-full items-center justify-center">
           <div className="rounded-ds-surface border border-ds-rule bg-ds-canvas px-10 py-8 text-center">
             <span className="font-ds-mono text-ds-eyebrow uppercase text-ds-fg-muted">
@@ -286,6 +319,7 @@ function ParallaxShowcase() {
             <p className="mt-2 text-ds-body text-ds-fg">intensityPx=160</p>
           </div>
         </Parallax>
+        <ProgressReadout />
       </div>
     </div>
   )

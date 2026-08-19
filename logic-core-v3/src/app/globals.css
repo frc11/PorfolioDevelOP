@@ -446,6 +446,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Preloader del home (S3-hero, Bloque 1): el overlay viaja SIEMPRE en el HTML
+   del server (el server no conoce sessionStorage) y solo existe visualmente
+   cuando el script pre-paint de `HomeIntroBoot` marcó `data-home-intro` en el
+   <html> — primera visita de la sesión, hard-load a `/`, sin reduced-motion,
+   sin automation. Sin la marca: display none desde el primer paint (cero
+   flash para visitas repetidas) hasta que la hidratación lo desmonta.
+   El contrato completo vive en `components/layout/HomeIntro.tsx`. */
+html:not([data-home-intro]) [data-home-intro-overlay] {
+  display: none;
+}
+
 /* Ghost Mode: Scrollbar Exterminated */
 @layer base {
 

@@ -47,7 +47,7 @@ import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
 import { ChatWidgetMount } from "@/components/layout/ChatWidgetMount";
-import { EarlyScrollLock } from "@/components/layout/EarlyScrollLock";
+import { HomeIntroBoot } from "@/components/layout/HomeIntro";
 import { Toaster } from "sonner";
 
 export default function RootLayout({
@@ -56,12 +56,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // suppressHydrationWarning: dos razones. (1) El <script> de EarlyScrollLock
-    // setea overflow:hidden en el <html> ANTES de hidratar (scroll-lock temprano
-    // del intro en home) mientras el SSR no lo trae → mismatch legítimo y
-    // esperado SOLO en el style del <html>. (2) El `data-theme` que
-    // `ThemeProvider` escribe en el <html> antes de hidratar. Es shallow (un
-    // nivel): no enmascara mismatches de los hijos.
+    // suppressHydrationWarning: dos razones. (1) El <script> de HomeIntroBoot
+    // marca `data-home-intro` en el <html> ANTES de hidratar (gate pre-paint
+    // del preloader del home, S3 — reemplazó al overflow:hidden de
+    // EarlyScrollLock, que bloqueaba el scroll) mientras el SSR no lo trae →
+    // mismatch legítimo y esperado SOLO en atributos del <html>. (2) El
+    // `data-theme` que `ThemeProvider` escribe en el <html> antes de hidratar.
+    // Es shallow (un nivel): no enmascara mismatches de los hijos.
     // Las variables de `next/font` van en el <html>, no en el <body>: `globals.css`
     // declara `--font-sans` / `--font-mono` dentro de `@theme`, que Tailwind emite
     // en `:root` (= el <html>). Un custom property se resuelve en el elemento donde
@@ -77,7 +78,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://grainy-gradients.vercel.app" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
-        <EarlyScrollLock />
+        <HomeIntroBoot />
       </head>
       <body className="antialiased">
         {/*
@@ -119,8 +120,12 @@ export default function RootLayout({
               </PublicOnlyComponents>
             </TransitionProvider>
           </SmoothScroll>
+          {/* S3: el intro del HOME lo maneja HomeIntro (montado en la página
+              del home); acá el orquestador viejo queda SOLO por su rama de
+              marketing (Route B — MarketingIntro en las landings). Con
+              isHomePage=false su rama home no corre ni renderiza el velo. */}
           <PublicOnlyComponents>
-            <Preloader />
+            <Preloader isHomePage={false} />
           </PublicOnlyComponents>
           <Toaster 
             theme="dark" 

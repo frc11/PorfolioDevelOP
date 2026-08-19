@@ -1,10 +1,11 @@
 "use client"
 
-import { Canvas, useThree, useLoader } from '@react-three/fiber'
+import { Canvas, useLoader } from '@react-three/fiber'
 import { Suspense, useEffect } from 'react'
 import { SVGLoader } from 'three-stdlib'
 import { Environment, Lightformer } from '@react-three/drei'
 import { HeroArtifact } from '@/components/3d/HeroArtifact'
+import { HERO_INBOX_CAMERA, heroInboxLogoScale } from '@/lib/logo-footprint'
 
 // HDRI self-hosteado (public/hdri): el preset 'studio' de drei lo bajaba de
 // raw.githubusercontent.com en cada visita. Mismo archivo, mismo look, servido
@@ -15,52 +16,28 @@ import { HeroArtifact } from '@/components/3d/HeroArtifact'
 // plano. `ambientLight` sola no lo resuelve.
 const HDRI_STUDIO_PATH = '/hdri/studio_small_03_1k.hdr'
 
-/**
- * Feed de puntero. El canvas va con `pointer-events: none` (no debe interceptar
- * ni un click del hero), así que r3f no actualiza `state.pointer` por su cuenta.
+/*
+ * ── Mouse-follow: DESACTIVADO (S3b) ─────────────────────────────────────────
  *
- * La normalización es relativa al CENTRO DE LA CAJA del canvas pero con la
- * escala del viewport: así el artefacto orienta hacia el cursor en toda la
- * pantalla, no solo cuando el mouse pasa por encima.
+ * Acá vivía `PointerSync`, un feed que escuchaba `pointermove` en toda la
+ * ventana y escribía `state.pointer` de r3f (hace falta un feed propio porque
+ * el canvas va con `pointer-events: none` y r3f no lo actualiza solo).
  *
- * El rect se cachea y se refresca en resize/scroll en vez de medirse en cada
- * `pointermove`: un `getBoundingClientRect()` por evento de mouse es una
- * lectura de layout por frame.
+ * Se eliminó: el logo va a obedecer al SCROLL y a nada más.
+ *
+ * Dónde quedó cada mitad, que importa para el sprint de coreografía:
+ *   · La ROTACIÓN por puntero vive dentro de `HeroArtifact.tsx`, que está
+ *     FROZEN — sigue ahí, leyendo `state.pointer` en cada frame.
+ *   · Su ENTRADA vivía acá. Sin el feed, `state.pointer` se queda en (0,0) y el
+ *     componente frozen amortigua la rotación hacia 0: el logo queda de frente,
+ *     quieto. O sea que el follow queda neutralizado SIN tocar el frozen.
+ *
+ * Consecuencia para quien construya la coreografía: la única entrada de
+ * rotación que el componente frozen expone es `state.pointer`. Para rotar con
+ * el scroll hay dos caminos — escribir `state.pointer` desde el progreso (usar
+ * la entrada que ya existe), o rotar el `<group>` padre desde afuera. La
+ * segunda no pelea con la amortiguación interna del frozen; la primera sí.
  */
-function PointerSync() {
-  const { pointer, gl } = useThree()
-
-  useEffect(() => {
-    const canvas = gl.domElement
-    let rect = canvas.getBoundingClientRect()
-
-    const measure = () => {
-      rect = canvas.getBoundingClientRect()
-    }
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (rect.width <= 0 || rect.height <= 0) return
-
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-
-      pointer.x = (event.clientX - centerX) / (window.innerWidth / 2)
-      pointer.y = -(event.clientY - centerY) / (window.innerHeight / 2)
-    }
-
-    window.addEventListener('pointermove', handlePointerMove, { passive: true })
-    window.addEventListener('resize', measure, { passive: true })
-    window.addEventListener('scroll', measure, { passive: true })
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('resize', measure)
-      window.removeEventListener('scroll', measure)
-    }
-  }, [pointer, gl])
-
-  return null
-}
 
 /**
  * Señal de "listo". Comparte el cache de `useLoader` con `HeroArtifact` (mismo
@@ -91,17 +68,19 @@ function ReadySignal({ onReady }: { onReady: () => void }) {
  * El logo, siempre en su estado final (`phase='done'`: escala 1, opacidad 1,
  * orientado al puntero). `HeroArtifact` está congelado — se consume tal cual.
  *
- * La escala se deriva del aspecto de la caja para que el objeto no se recorte
- * en cajas que no sean cuadradas.
+ * La escala sale de `heroInboxLogoScale()` (calibración B de
+ * `logo-footprint.ts`) y no de una fórmula propia sobre el aspecto: define qué
+ * fracción de su caja ocupa el logo, derivada de la MISMA cámara que se le pasa
+ * al `<Canvas>`. El slot es cuadrado y r3f ajusta el aspect solo, así que la
+ * relación se conserva en todo viewport — por eso este componente ya no lee
+ * `size`.
+ *
+ * `position` en el origen: el mesh flota perpetuamente dentro del componente
+ * frozen (`sin(t·0.65)·0.08`), así que oscila alrededor del centro de su caja.
  */
 function HeroLogo() {
-  const { size } = useThree()
-
-  const aspect = size.width / Math.max(size.height, 1)
-  const scale = Math.min(1.28, Math.max(1.02, aspect * 0.78))
-
   return (
-    <group scale={scale} position={[0, 0.02, 0]}>
+    <group scale={heroInboxLogoScale()}>
       <HeroArtifact phase="done" />
     </group>
   )
@@ -144,7 +123,10 @@ export default function HeroCanvas({
     <Canvas
       className="h-full w-full"
       frameloop={frameloop}
-      camera={{ position: [0, 0, 13], fov: 30 }}
+      // Desde `logo-footprint.ts` (calibración B) y no literales acá: la
+      // escala del logo se deriva de ESTA misma cámara, así que si divergen el
+      // 2D y el 3D dejan de calzar sin que nada falle a la vista.
+      camera={{ position: [0, 0, HERO_INBOX_CAMERA.z], fov: HERO_INBOX_CAMERA.fov }}
       gl={{
         alpha: true,
         powerPreference: 'high-performance',
@@ -154,7 +136,6 @@ export default function HeroCanvas({
       }}
       dpr={[1, 1.5]}
     >
-      <PointerSync />
       <Suspense fallback={null}>
         <ReadySignal onReady={onReady} />
 
