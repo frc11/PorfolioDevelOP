@@ -23,7 +23,13 @@ export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as 
  * cualquier juicio sobre "superficies planas y quietas" se toma mirando
  * glassmorphism.
  */
-export const CHROME_FREE_PREFIXES = ['/styleguide'] as const
+/**
+ * `/probe-escena` (PROBE-ESCENA) es la misma clase de superficie que
+ * `/styleguide`: un instrumento interno donde se JUZGA cómo se ve algo. El
+ * canvas ocupa la ventana entera y el chrome público le pintaría el launcher
+ * del chat y la barra encima justo del objeto bajo prueba.
+ */
+export const CHROME_FREE_PREFIXES = ['/styleguide', '/probe-escena'] as const
 
 export function isPortalRoute(pathname: string): boolean {
   return PORTAL_PREFIXES.some((prefix) => pathname.startsWith(prefix))

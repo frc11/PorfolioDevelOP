@@ -23,6 +23,13 @@
 # — artefacto, nunca código. `/.next/` es ancla exacta y NO los cubre.
 /.next-setter/
 /.next-galeria/
+# `.next-probe/`: build de medición del probe de escena 3D (PROBE-ESCENA), que
+# corre en paralelo al `next dev` del checkout. Se agrega ACÁ ANTES de correr el
+# build, por la lección ya documentada: un distDir fuera de `.gitignore` deja
+# megabytes de JS minificado a la vista de la auto-detección de fuentes de
+# Tailwind 4 (que respeta `.gitignore`) y tira abajo la compilación del CSS con
+# un error que apunta a un archivo sano.
+/.next-probe/
 
 # production
 /build
