@@ -4649,3 +4649,93 @@ base. Se pueden borrar cuando convenga.
 **Worktree** en `C:\tmp\wt-f3-acuse` (rama `f3/acuse-recibo`). Al desarmarlo: sacar primero la
 junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra
 el `node_modules` real.
+
+---
+
+## Integración — el carril F entra sobre `origin/main`, en una rama propia — 2026-08-20
+
+**Rama:** `leados/v1-integracion` (worktree propio en `C:\tmp\wt-v1-integracion`)
+**Base:** `origin/main` = `17727117` · **Entra:** `f3/acuse-recibo` = `fc9ea865` (F1 + F2 + F3)
+**Merge-base:** `05ae1a87` · **Resultado del merge:** `7e18f9a7`
+
+### Por qué la rama nace de main y no de f3
+
+El trabajo de los tres sprints F vivía 8 commits atrás de `origin/main`, y cada sprint
+apilado encima encarecía la reconciliación. La rama se creó **desde `origin/main`** y el
+carril F entró como merge: así la base es lo pusheado y compartido, y main no queda en la
+historia como el que se sumó tarde. `main` no se tocó y no se pusheó a `main`.
+
+### El merge
+
+Exactamente lo que predijo el diagnóstico: **un solo conflicto**, en este archivo.
+`package.json` auto-mergeó. **Cero conflictos en `src/`, cero en `tests/`** — los 8 commits
+de main (carril chatbot/home + auditorías + verificación VII) y los 3 del carril F no
+comparten un solo archivo de código.
+
+### La resolución de la bitácora, verificada mecánicamente
+
+Los dos lados resultaron **appends puros** sobre la base (main sumó 271 líneas, f3 sumó 338),
+cada uno formado por bloques `[separador + entrada]`. La resolución es **concatenación
+cronológica por fecha de entrada**, conservando los dos lados enteros:
+
+`F0 (08-12)` → `F1 (08-12)` → `F2 (08-12)` → `A2-S1 (08-15)` → `VII (08-18 02:21)` → `F3 (08-18 15:28)`
+
+Ningún lado se eligió, nada se resumió, ninguna línea se borró. Los ocho chequeos, contra
+`git show :1: / :2: / :3:`:
+
+| # | Chequeo | Resultado |
+|---|---|---|
+| 1 | Conteo de líneas = base + lado A + lado B | 4042 + 271 + 338 = **4651** = resultado — OK |
+| 2 | El tramo común es idéntico a la base | `diff` contra `:1:` vacío — OK |
+| 3 | Cada tramo nuevo es idéntico a lo que sumó su lado | lado A 271 líneas y lado B 338, `diff` vacío en ambos — OK |
+| 4 | Ninguna línea de `origin/main` falta | multiset: 0 líneas deficitarias, 0 ocurrencias faltantes — OK |
+| 5 | Ninguna línea de `f3` falta | multiset: 0 deficitarias, 0 faltantes — OK |
+| 6 | No aparecen líneas que no estén en ningún lado | multiset inverso: 0 sobrantes — OK |
+| 7 | Conteo de secciones de segundo nivel = suma de las tres | 81 + 3 + 3 = **87** = resultado — OK |
+| 8 | Marcadores de conflicto sobrevivientes | **0** en el archivo y 0 en todo el árbol — OK |
+
+El blob efectivamente indexado se re-verificó contra la resolución antes de commitear
+(4651 líneas, 0 marcadores).
+
+### Las cuatro suites, secuenciales, sobre el árbol integrado
+
+| Suite | Exit code | Resultado | Referencia |
+|---|---|---|---|
+| `npx tsc --noEmit` | **0** | 0 líneas de salida | esperado 0 / 0 |
+| `npm run check:invariants` | **0** | **22 verdes** | main tenía 19; F1 sumó postergación y contador-dms, F3 sumó acuse |
+| `npm run test:leados` | **0** | **25 passed** (43.5s) | esperado 25 |
+| `npm run test:setter` | **0** | **62 passed** (4.7m) | eran 60 antes de F2, que sumó dos |
+
+Los 22 invariantes por nombre: assignment-trail, setter-meta, escalamiento, novedades,
+mis-numeros, timeline, foco, particion, flow, alta-propia, prospecto-import, gate-envio,
+self-check, progreso, reloop-selfcheck, manual, pantallas, turno, **postergacion**,
+**contador-dms**, **acuse**, security.
+
+El type-check se confirmó no vacío: 1.466 archivos del worktree integrado, incluidos los
+tres invariantes nuevos y `src/lib/dates-ar.ts`. El merge **no tocó** `prisma/schema.prisma`,
+así que no hizo falta regenerar el cliente. El build de producción (con directorio de build
+aislado) cerró verde antes de la suite del panel.
+
+### Que no se perdió nada
+
+`git log --oneline origin/main ^HEAD` y `git log --oneline f3/acuse-recibo ^HEAD` dan **los
+dos vacíos**. El diff `origin/main → HEAD` en `src/` es exactamente el aporte de F1/F2/F3
+(12 archivos, 866 inserciones); el diff `f3 → HEAD` en `src/` es exactamente el aporte de
+main (51 archivos, carril chatbot/home). Sin solapamiento.
+
+El fix de clickjacking de `next.config.ts` **está presente** en la rama integrada y es
+byte-idéntico al de main (el diff `origin/main → HEAD` sobre ese archivo es vacío): viene de
+`17727117` y suma el bloque de `/setter` con su header de política de encuadre.
+
+### Lo que este sprint NO hizo
+
+No se pusheó a `main` ni a `origin/main` — solo la rama `leados/v1-integracion`. No se
+rebaseó, no hubo `--force` ni `reset --hard`. `f1/datos-fecha-contador`, `f2/motivo-rechazo`
+y `f3/acuse-recibo` quedan congeladas como registro histórico. Los 2 stashes y los 11
+worktrees ajenos quedaron intactos; ningún proceso ajeno se mató. Ninguna migración, seed ni
+`db push`. Ninguna dependencia agregada o quitada — `tsx` sigue sin estar declarado como
+dependencia (es B1, se anota y no se toca acá).
+
+**Queda para Franco:** si `leados/v1-integracion` pasa a ser `main`, y cuándo. Y mirar el fix
+de clickjacking de `next.config.ts`, que es un cambio de comportamiento de producción que
+todavía no revisó.
