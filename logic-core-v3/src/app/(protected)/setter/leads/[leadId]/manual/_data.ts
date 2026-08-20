@@ -13,7 +13,7 @@ import {
   parseFicha,
   parseProgreso,
   parseSelfCheck,
-  ultimoRechazo,
+  partirRechazos,
 } from '@/lib/leados/flow'
 import { derivarPantalla, type PosicionManual } from '@/lib/leados/manual'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
@@ -33,8 +33,11 @@ export type ManualDelLead = {
   posicion: PosicionManual
   /** ISO del próximo toque agendado (estado de espera) — null si no hay. */
   proximoToque: string | null
-  /** Último rechazo de Franco — la nota al frente de la reentrada M-R. */
+  /** Último rechazo de Franco — la nota al frente de TODO el retrabajo (F2). */
   rechazo: Rechazo | null
+  /** F2 — Las vueltas ANTERIORES (más reciente primero), contexto secundario del
+   * bloque. `[]` si es la primera: sin previos el bloque no promete historial. */
+  rechazosPrevios: Rechazo[]
   /** M1 — identidad + links del negocio (mismo shape que consume el wizard). */
   leadCopy: CopyBlockLead
   /** M1 — la ficha guardada, re-servida tal cual llega al wizard. */
@@ -167,6 +170,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   // Hoisted: el booking alimenta la derivación (m16 completada) Y el resumen del
   // traspaso de M16. Un solo parse de `agendaJson`.
   const agenda = parseAgenda(dossier?.agendaJson ?? null)
+  // F2 — Un solo parse del historial de rechazos: el último es la guía vigente y
+  // los anteriores son el contexto secundario del bloque.
+  const rechazos = partirRechazos(dossier?.rechazos ?? null)
 
   // El opener queda como nota del PRIMER contacto (`registrarOpener`, prefijo
   // `Opener: `) — con `actividades` ordenada desc, es la más VIEJA (última del
@@ -212,7 +218,8 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     stage,
     posicion,
     proximoToque: lead.nextFollowUpAt?.toISOString() ?? null,
-    rechazo: ultimoRechazo(dossier?.rechazos ?? null),
+    rechazo: rechazos.ultimo,
+    rechazosPrevios: rechazos.previos,
     leadCopy: {
       businessName: lead.businessName,
       industry: lead.industry,

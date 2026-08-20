@@ -15,7 +15,12 @@
  * Módulo puro (solo tipos/enum de Prisma, sin acceso a DB) para que el chequeo
  * de invariante (`assignment-trail.invariant.ts`) lo verifique sin tocar Neon.
  */
-import { ActivityChannel, type OsSetterNoticeKind, type Prisma } from '@prisma/client'
+import {
+  ActivityChannel,
+  ActivityResult,
+  type OsSetterNoticeKind,
+  type Prisma,
+} from '@prisma/client'
 
 /** Filtro de un lead individual del setter (anti-IDOR: id + dueño). */
 export function ownedLeadWhere(
@@ -118,6 +123,33 @@ export const SOLO_CONTACTOS_COMERCIALES: Prisma.OsLeadActivityWhereInput = {
  */
 export function esContactoComercial(channel: ActivityChannel): boolean {
   return channel !== ActivityChannel.SISTEMA
+}
+
+/**
+ * Fragmento `where` de los DMs que el setter EFECTIVAMENTE MANDÓ — el conteo de
+ * la capa de seguridad de canal (`contarDmsHoy`), que cuida la cuenta de
+ * Instagram contra el spam de outreach en frío.
+ *
+ * El discriminador es `result`, y no lo inventa esta pieza: `countFollowUps`
+ * (lib/follow-up) ya define «un toque mandado» como una fila `SIN_RESPUESTA`, y
+ * sobre ese conteo corre la cadencia. Acá se usa la MISMA definición.
+ *
+ * Los demás resultados registran lo que hizo el PROSPECTO —respondió, pidió
+ * esperar, rechazó— o un evento (reunión confirmada por Cal.com): son reacciones
+ * a un mensaje que ya se contó cuando se mandó, no mensajes nuevos. Sin este
+ * filtro, postergar un contacto inflaba el contador sin que saliera un solo DM.
+ */
+export const SOLO_MENSAJES_ENVIADOS: Prisma.OsLeadActivityWhereInput = {
+  result: ActivityResult.SIN_RESPUESTA,
+}
+
+/**
+ * Predicado puro espejo de `SOLO_MENSAJES_ENVIADOS` — para derivaciones
+ * in-memory y para el chequeo de invariante. `result` es opcional en el modelo:
+ * una fila sin resultado no acredita un mensaje mandado.
+ */
+export function esMensajeEnviado(result: ActivityResult | null): boolean {
+  return result === ActivityResult.SIN_RESPUESTA
 }
 
 /**

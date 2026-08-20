@@ -9,7 +9,7 @@
  */
 import type { OsLeadActivity } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
+import { SOLO_CONTACTOS_COMERCIALES, SOLO_MENSAJES_ENVIADOS } from '@/lib/leados/isolation'
 import { getOwnedLead } from '@/lib/leados/ownership'
 
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
@@ -53,8 +53,12 @@ export async function listOwnedLeadActivities(
 }
 
 /**
- * DMs de Instagram que ESTE setter registró hoy (día argentino, todos sus
- * leads). Conteo derivado para la capa de seguridad de canal.
+ * DMs de Instagram que ESTE setter MANDÓ hoy (día argentino, todos sus leads).
+ * Conteo derivado para la capa de seguridad de canal.
+ *
+ * `SOLO_MENSAJES_ENVIADOS` es lo que separa un mensaje de un registro: sin ese
+ * filtro contaba toda fila del canal, así que postergar un contacto —que no
+ * manda nada— subía el número igual. Sigue siendo informativo: nada acá bloquea.
  */
 export async function contarDmsHoy(userId: string): Promise<number> {
   const { desde, hasta } = limitesDelDiaArgentino(new Date())
@@ -62,6 +66,7 @@ export async function contarDmsHoy(userId: string): Promise<number> {
     where: {
       performedById: userId,
       channel: 'INSTAGRAM_DM',
+      ...SOLO_MENSAJES_ENVIADOS,
       createdAt: { gte: desde, lte: hasta },
     },
   })

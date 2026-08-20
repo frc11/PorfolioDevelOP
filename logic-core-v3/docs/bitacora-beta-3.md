@@ -4135,6 +4135,250 @@ porque los tokens del sistema son oklch y un lector de contraste que sólo entie
 
 ---
 
+## F1 — Dos bugs de datos: la fecha que se corría un día y el contador que contaba de más
+
+**Rama:** `f1/datos-fecha-contador` (worktree propio en `C:\tmp\wt-f1-datos`) · **Base:** `05ae1a87`
+
+### Las dos causas, confirmadas antes de tocar
+
+Las dos venían diagnosticadas. Se reprodujeron primero, contra el camino real, y **las dos
+seguían siendo la causa**:
+
+**La fecha.** `ResultadoInputSchema` tomaba `reactivateAt` con `z.coerce.date()`, o sea
+`new Date('2026-08-25')` — que por especificación es medianoche **UTC**. En AR (UTC-3) ese
+instante todavía es el 24 a las 21:00. Reproducido con cinco fechas antes de tocar nada:
+
+| elegida | guardado | mostraba | el panel lo traía |
+|---|---|---|---|
+| 25/08 | `2026-08-25T00:00:00Z` | 24/8 | 24/08 21:00 |
+| 31/08 | `2026-08-31T00:00:00Z` | 30/8 | 30/08 21:00 |
+| 01/09 | `2026-09-01T00:00:00Z` | 31/8 | 31/08 21:00 |
+| 31/12 | `2026-12-31T00:00:00Z` | 30/12 | 30/12 21:00 |
+
+No era un bug de formateo: el mismo instante gobierna `postergadoVencido` (home.ts) y el cron,
+así que el lead **volvía la noche anterior**. Las dos mitades rotas por la misma raíz.
+
+**El contador.** `contarDmsHoy` filtraba por `performedById` + `channel: INSTAGRAM_DM` y nada
+más. Como `registrarResultado` deja una fila de ese canal para *todo* resultado, postergar
+sumaba sin que saliera un mensaje. Medido en la DB de dev el mismo día: **contador viejo = 2,
+mensajes reales = 0**.
+
+### Qué se cambió
+
+**Arreglo 1 — una fecha sin hora es un día del calendario, no un instante.** El helper
+canónico `src/lib/dates-ar.ts` (que ya modela AR = UTC-3 fijo) suma `parseCalendarDayAR`:
+toma el `YYYY-MM-DD` y construye el instante **desde los componentes del calendario**, con la
+misma regla que ya usaba `startOfMonthAR` — 00:00 AR ≡ 03:00 UTC del mismo día. **No se
+desplazan horas** sobre un `Date` ya mal parseado: ese es el arreglo ingenuo que corre el día
+en la dirección contraria. Round-trip contra los componentes pedidos para rechazar los días
+que no existen (`2026-02-31`, que `Date.UTC` normalizaría en silencio al 3 de marzo).
+
+El schema del setter lo aplica en el borde, vía `preprocess` que **solo toca strings
+date-only**. Eso lo hace idempotente, y hacía falta: el form valida y manda `parsed.data`
+(ya un `Date`), y la action re-valida. Con un desplazamiento de horas la segunda pasada
+habría corrido el día otra vez.
+
+**Arreglo 2 — el contador cuenta mensajes, no registros.** El discriminador existía en el
+modelo (`OsLeadActivity.result`) y **no se inventó acá**: `countFollowUps` ya define «un toque
+mandado» como una fila `SIN_RESPUESTA`, y sobre ese conteo corre la cadencia. `isolation.ts`
+suma `SOLO_MENSAJES_ENVIADOS` + su predicado espejo `esMensajeEnviado`, mismo patrón que
+`SOLO_CONTACTOS_COMERCIALES`. Los otros resultados registran lo que hizo el prospecto
+(respondió, pidió esperar, rechazó) o un evento (reunión de Cal.com): reacciones a un mensaje
+que ya se contó cuando se mandó. **Cero bloqueo agregado** — sigue siendo informativo.
+
+### Los dos invariantes, demostrados fallando
+
+`check:invariants` sube de **19 a 21** (los dos nuevos quedan encadenados).
+
+- `postergacion.invariant.ts` — saboteado volviendo a `z.coerce.date()`:
+  `AssertionError: 2099-08-25: guardado == elegido (día AR) / + '2099-08-24' - '2099-08-25'`, exit 1.
+- `contador-dms.invariant.ts` — saboteado en dos puntos. Con el `where` vacío:
+  `AssertionError: el where del conteo filtra por resultado, no solo por canal / + {} - { result: 'SIN_RESPUESTA' }`, exit 1.
+  Con el predicado aflojado a `result !== null`:
+  `AssertionError: RESPONDIO: NO cuenta como mensaje mandado / true !== false`, exit 1.
+
+Restaurados, los dos vuelven a verde. El de la fecha cubre 25/08, **31/08**, **01/09**,
+31/12, 01/01 y el bisiesto 29/02/2028, y afirma las dos mitades por separado: lo mostrado
+(mismo `formatFechaCorta` de la pantalla) y el día de reactivación (misma comparación de
+`home.ts`, verificando que el interruptor da vuelta en el borde exacto y no un día antes).
+
+### Verificación en la aplicación
+
+Prod-QA propio (build aislado en `.next-f1`, puerto 3013) para no tocar el `:3003` de otra
+sesión. **Sin capturas: el panel del navegador no compone frames** (el mismo instrumento roto
+que ya está anotado en la corrida de experiencia) — se afirma por navegación real y lectura
+del DOM.
+
+| qué se hizo | qué mostró | correcto |
+|---|---|---|
+| Abrir `m5` de «QA-M5 Toque» (dato viejo, `…25T00:00:00Z`) | "se retoma el **24/8**" | ✅ *(es el bug: evidencia del dato pre-arreglo)* |
+| Postergar al **25/08** | "se retoma el **25/8**" | ✅ |
+| Contador tras postergar | **0 / 10 DMs** (no se movió) | ✅ |
+| Postergar al **31/08** (fin de mes) | "se retoma el **31/8**" | ✅ |
+| Contador tras la 2ª postergación | **0 / 10 DMs** | ✅ |
+| Registrar «No respondió — mandé un toque» | **1 / 10 DMs** | ✅ |
+
+El instante que quedó guardado en la postergación nueva es `2026-08-31T03:00:00.000Z` → el
+panel lo trae el **31/08 a las 00:00 AR**, el arranque del día elegido.
+
+### Las postergaciones ya guardadas: qué les pasa
+
+**El arreglo NO cambia cómo se interpreta un dato guardado.** Un `reactivateAt` sigue siendo
+un instante y se lee igual que antes: **ningún lead se reactiva un día distinto del que venía**.
+Lo que cambia es cómo se *escribe* una postergación nueva.
+
+Censo en Neon dev al abrir el sprint: **6 leads** con `reactivateAt`, todos POSTERGADO. De
+esos, **2 con la marca del bug** (medianoche UTC exacta: «QA-M5 Toque» y «QA-M5 Agotada»,
+ambos fixtures de QA) y 4 con hora real, cargados desde admin (`Date.now() + N días`) y por
+lo tanto nunca afectados. Los 2 con la marca siguen mostrando —y trayendo— el día anterior
+**hasta que se los vuelva a postergar**; uno de ellos se re-posterguió durante la verificación
+y quedó anclado, así que **queda 1**. **No se migró nada.** El número es de la DB de dev: en
+producción hay que volver a contarlo.
+
+### Fuera de scope, anotado y no tocado
+
+- **El admin no tiene este bug.** `updateLeadStatus` recibe `new Date(Date.now() + N días)`
+  —un instante real— desde `change-status-select` y `lead-pipeline`; su `type="date"` es solo
+  para filtros de rango. `optionalReactivateAtSchema` usa `z.coerce.date()`, o sea la trampa
+  sigue armada si alguien le enchufa un date-picker: si eso pasa, `parseCalendarDayAR` ya está.
+- `limitesDelDiaArgentino` (outreach.ts) duplica lo que `dayRangeAR` ya hace, y usa `lte
+  23:59:59.999` donde `dates-ar` usa rango semiabierto. Funciona; es consolidación, no bug.
+- `check:invariant:dates-ar` **existe pero no estaba encadenado** en `check:invariants` — otra
+  cara de «dos listas que divergieron». No se agregó: no es de este sprint.
+- Lo declarado fuera por el encargo (motivo del rechazo que no se muestra, contraste de texto,
+  acuse de recibo, lo diferido de celular): sin tocar.
+
+### Gates
+
+| gate | resultado | exit |
+|---|---|---|
+| `npx tsc --noEmit` | 0 errores | **0** |
+| `npm run check:invariants` | **21/21** (sube de 19: los dos nuevos) | **0** |
+| `npm run test:leados` | **25/25** | **0** |
+| `npm run test:setter` | **60/60** (aislada: `.next-f1` + puerto 3013, sin tocar el `:3003` ajeno) | **0** |
+
+`git diff --stat`: 5 archivos tocados + 2 invariantes nuevos. **Cero gates, cero transiciones,
+cero aislamiento entre setters, cero schema, cero migraciones.** El único archivo del write-path
+que se tocó es el schema de entrada, y el cambio es cómo se lee la fecha — las transiciones de
+`registrarResultado` y `postergarLead` quedaron intactas. Nada pusheado.
+
+**Fixtures movidos** (Neon dev, por la verificación en la app): «QA-M5 Toque» quedó POSTERGADO
+al **31/08** con `2026-08-31T03:00:00.000Z` (anclado, ya sin la marca del bug) y con dos
+postergaciones más en su historial. «M0-GAL 09-m5-toque-vencido» sumó un toque: quedó en
+2 de 3 de cadencia. «QA-M5 Agotada» **no se tocó a propósito** — es la muestra viva del dato
+pre-arreglo (sigue mostrando 31/8 cuando dice 01/09).
+
+**Worktree conservado** en `C:\tmp\wt-f1-datos` (rama `f1/datos-fecha-contador`) para que
+Franco levante el preview. Al desarmarlo: sacar primero la junction de `node_modules` con
+`cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra el `node_modules` real.
+
+---
+
+## F2 — El pedido de Franco acompaña la corrección (2026-08-12)
+
+**Encargo.** Que el setter tenga a la vista qué le pidió corregir Franco, en las pantallas
+donde va a corregirlo. El dato ya estaba guardado y sobrevivía: había que mostrarlo.
+
+### El terreno (lo que el descubrimiento encontró antes de tocar nada)
+
+**Qué se guarda.** `OsLeadDossier.rechazos` es un **array** (`RechazosSchema`), no un campo:
+guarda **todas** las vueltas. Cada entrada tiene cinco campos — `fecha` (la estampa el motor),
+`motivo` (obligatorio, ≤280), `donde` (sección/elemento, ≤280), `arreglo` (≤2000) y `detalle`
+(texto libre **pre-B5**: el formulario del admin ya no lo captura y **ninguna** superficie del
+setter lo mostraba). Lo escribe SOLO `transitionDossier` en EN_REVISION→RECHAZADA, appendeando
+al final. Nadie lo borra: el re-loop resetea `selfCheckJson` y nada más.
+
+**Quién lo mostraba.** Tres superficies, todas atadas al stage RECHAZADA: la card del panel
+(`home-sections.tsx`), la pantalla `mr` del manual (`GuiaRetrabajo`, gate
+`pantalla.tipo === 'reentrada'`) y el `RechazosPanel` del admin. **El hallazgo, confirmado:** al
+reabrir la construcción el stage pasa a CONSTRUCCION, `mr` deja de ser alcanzable y el gate del
+home deja de aplicar → **el pedido desaparecía de todas las superficies del setter justo cuando
+empezaba a corregir**. El dato seguía intacto en la DB.
+
+**El recorrido de la corrección.** `mr` → [Reabrir construcción] → `mc1` → `mc2` → `m13` →
+`m14` → revisión. Esas cinco pantallas son la lista.
+
+### Qué se hizo
+
+El **mismo** `GuiaRetrabajo` (una sola fuente de la nota, no un Callout por pantalla) al frente
+de las cinco pantallas del retrabajo, en el slot `encabezado` que `mr` ya usaba — mismo
+tratamiento visual, ninguna pantalla rediseñada. En `mc1`/`mc2` va arriba del banner de urgencia;
+en `m14` queda pegado al chequeo, que es donde hay que verificar contra el pedido antes de
+reenviar.
+
+**El gate es exacto, no aproximado:** hay rechazo **y** el stage es RECHAZADA o CONSTRUCCION.
+`rechazos` solo se appendea en EN_REVISION→RECHAZADA y el único camino de vuelta a CONSTRUCCION
+es el re-loop (`LEGAL_TRANSITIONS`), así que esa condición equivale a «hay una corrección en
+curso». Sin rechazo el bloque **no existe** — ni vacío ni de relleno; en `revision`/`m15`/`m16`
+tampoco, porque ahí la corrección ya pasó.
+
+**La promesa que se cerró (C-19 de la auditoría de cierre).** `mr` decía «el historial de
+rechazos se conserva» y el setter no lo veía por ningún lado. Ahora las vueltas anteriores van
+**dentro del mismo bloque**, plegadas y **anunciadas con su cuenta** («Lo que te pidió en las
+vueltas anteriores (N)», con la fecha de cada una); lo que importa —el último pedido— nunca se
+pliega. Y el texto de `mr` dejó de prometer un archivo invisible: ahora dice que el pedido lo
+sigue en cada pantalla. Sin vueltas anteriores, el plegado no se renderiza.
+
+De paso, el bloque muestra `detalle` cuando existe: es dato guardado del pedido que el setter
+no podía leer en ninguna pantalla (el lead sembrado «Studio Yoga Balance» lo tiene).
+
+### El salto al lugar correcto: DESCARTADO, con su razón
+
+`donde` es **texto libre** de hasta 280 caracteres («Hero, título principal», «Sección hero y
+fondo general»). No hay enum, ni lista cerrada, ni relación con `FASE_IDS`/`PANTALLA_DE_FASE`,
+y un «Hero» no distingue estructura (`mc1`) de calidad/mobile (`mc2`). No es mapeable de forma
+confiable y un salto al lugar equivocado es peor que ninguno: **comportamiento actual intacto**.
+Si algún día el rechazo se estructura (un select de sección en el panel del admin), el mapeo
+pasa a ser trivial — es el prerequisito, no el trabajo.
+
+### Verificación en la aplicación
+
+Lead sembrado con **dos** vueltas de rechazo, recorrido completo contra el prod-QA propio
+(`.next-setter` + puerto 3013, sin tocar el `:3003` ajeno). Navegación real + lectura del DOM,
+afirmado por CONTENIDO (las redirecciones viajan en el payload de streaming) + capturas de las
+cinco pantallas.
+
+| pantalla | ¿se ve el motivo? | ¿se entiende qué corregir? |
+|---|---|---|
+| `mr` aterrizaje (RECHAZADA) | sí — qué / dónde / arreglo + «vueltas anteriores (1)» | sí |
+| `mc1` construir (tras reabrir) | **sí** — antes desaparecía acá | sí |
+| `mc2` refinar | **sí** | sí |
+| `m13` borrador | **sí** | sí |
+| `m14` chequeo final | **sí**, pegado al link del borrador y al brief | sí, se verifica contra el pedido |
+| las mismas cinco, lead sin rechazo | no existe el bloque (0 nodos) | — |
+
+### Fuera de scope, anotado y no tocado
+
+- **El rechazo y la reapertura NO quedan como movimientos.** `HistorialDelLead` lee solo
+  `OsLeadActivity`, y ni `rechazarRevision` ni `reabrirConstruccion` escriben actividad — por eso
+  un lead rechazado sin toques dice «sin movimientos». Registrarlos exige escribir datos nuevos:
+  no es de este sprint.
+- El acuse de recibo (F3), el contraste de texto, que un rechazo no aparezca en el panel de
+  inicio, y lo diferido de celular: sin tocar.
+
+### Gates
+
+| gate | resultado | exit |
+|---|---|---|
+| `npx tsc --noEmit` | 0 errores | **0** |
+| `npm run check:invariants` | **21/21** (sin cambios respecto de F1) | **0** |
+| `npm run test:leados` | **25/25** | **0** |
+| `npm run test:setter` | **62/62** (sube de 60: los dos casos de F2) | **0** |
+
+`git diff --stat`: 4 archivos tocados + 1 spec nueva. **Cero gates, cero transiciones, cero
+aislamiento entre setters, cero schema, cero migraciones.** Nada pusheado.
+
+**Queda para Franco (criterio de producto).** Un bloque de contexto permanente en una pantalla
+de trabajo puede volverse ruido: el equilibrio entre «lo tengo a la vista» y «no me estorba»
+lo cierra él en el preview. Si estorba, la variante barata es comprimirlo fuera de `mr`
+(solo el «qué», con el resto plegado) sin tocar nada más.
+
+**Worktree** en `C:\tmp\wt-f2-motivo` (rama `f2/motivo-rechazo`, sobre F1). Al desarmarlo:
+sacar primero la junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue
+el enlace y borra el `node_modules` real.
+
+---
+
 ## Sprint A2-S1 — /setter deja de ser embebible — 2026-08-15
 
 **El agujero.** La auditoría A2 lo encontró en `next.config.ts`: `X-Frame-Options: DENY` se aplicaba
@@ -4311,3 +4555,97 @@ diferencia es de esta corrida. **No se re-seedeó nada.**
 configuración. Sin push. Los dos worktrees propios quedan declarados en el reporte; el WIP ajeno del
 checkout —bitácora de F0, `next.config.ts`, los 3 docs de auditoría y `BACHES-RE-VERIFICADOS.md`— se
 dejó **intacto y sin commitear**.
+
+---
+
+## F3 · Que toda acción que escribe acuse recibo donde el setter hizo el clic
+
+**Rama** `f3/acuse-recibo`, sobre F2 (`2d456390`). **Sin pushear.**
+
+### El censo, que dio vuelta el sprint
+
+El sprint venía a extender el patrón "a donde falta". El censo dice que ya casi no falta:
+**24 acciones de escritura, 29 call-sites, 18 componentes** — y **una sola** fuera del patrón.
+
+| Clase | Cuántas | Cuáles |
+|---|---|---|
+| YA LO USA | 28 call-sites | todo el resto |
+| **NO AVISA** | **1** | **«Saltar»** del foco (`foco-surface.tsx`) |
+| AVISA DISTINTO | 0 | — |
+| **CONTRADICE** | **0** | la clase quedó vacía — ver abajo |
+
+El patrón de referencia no es sólo `lead-card-actions` (que es la versión a mano): está
+**abstraído** en `src/lib/use-step-action.ts`. Dos señales — `useTransition()` apaga el control
+en el acto, y `toast` escribe en la región `aria-live="polite"` que monta el `Toaster` de sonner
+en el root layout. `<AutosaveStatus>` (`role="status"`) es la misma pareja para la escritura
+continua, no un segundo patrón.
+
+### CONTRADICE quedó vacía, y está medido
+
+La corrida de experiencia levantó B-P3 —«el aviso confirma y la pantalla sigue mostrando la
+instrucción anterior», cinco veces— y la re-verificación no pudo cerrarlo: el panel no componía
+frames. Se midió ahora en la app, **sin recargar**, sobre las pantallas que B-P3 nombró:
+
+| Pantalla | Lo que decía la corrida | Medición |
+|---|---|---|
+| m5 · registrar toque | seguía `Toques: 1 de 3` | anunció **y** pasó a `Toques: 2 de 3` |
+| m4 · registrar opener | seguía «TU PASO AHORA — Mandá el opener» | anunció **y** el badge pasó a **«Completada»** |
+| mc1 · arrancar construcción | seguía «Primero arrancá la construcción» | anunció **y** ese texto **desapareció** |
+
+**B-P3 está refutado en el código actual.** Lo cerraron P5-B / P6-B / P7 sin que quedara
+registrado. Y de paso: `router.refresh()` **sí** funciona en la sub-ruta del manual, aunque
+ninguna action revalide `/setter/leads/[leadId]/manual/[paso]`.
+
+### Lo único que se tocó
+
+`foco-surface.tsx` — «Saltar» suma su `toast.success`. Era la única acción que escribe y no
+acusaba, y el contraste estaba **en la misma tarjeta**: «Pausar», al lado, sí anuncia. Sus
+hermanas mudas («Ir a trabajarlo», «Abrir») no lo necesitan — navegan, y la pantalla entera
+cambia. «Saltar» se queda donde está y sólo cambia el nombre adentro de la tarjeta.
+
+No se migraron los 10 componentes que implementan el patrón a mano. Producen señales
+**idénticas** para el setter; migrarlos era refactor sin cambio de experiencia, con riesgo de
+tocar comportamiento (`escalar-modal` refresca ANTES del toast, `importar` usa `toast.message`).
+
+### La red — `check:invariant:acuse` (invariantes 21 → 22)
+
+`src/lib/leados/acuse-recibo.invariant.ts`. Lee los exports de `_actions/*.actions.ts` (no una
+lista a mano) y exige las dos señales en **cada call-site**, dentro de su propio bloque de
+transición.
+
+**Por qué por call-site y no por archivo — el dato del sprint.** La primera versión medía por
+archivo y pasó **en verde** con el acuse de «Saltar» removido: `foco-surface` está lleno de
+toasts. Segunda causa, más fina: contar `toast.error` como acuse también daba verde — el error
+es el aviso del **fallo**, no el acuse de que la escritura quedó. Con las dos correcciones:
+
+```
+AssertionError: _components/foco-surface.tsx::anclarFoco escribe y NO acusa recibo:
+en su bloque no hay toast/successToast ni router.push.
+```
+
+Distingue los **dos** call-sites de `anclarFoco` en el mismo archivo: `irATrabajar` navega y
+pasa; `saltar` sin toast se cae. Restaurado → verde.
+
+### Gates
+
+| Gate | Resultado |
+|---|---|
+| `npx tsc --noEmit` | exit 0 |
+| `npm run check:invariants` | **22/22** (era 21 — sube por el invariante nuevo) |
+| `npm run test:leados` | 25/25 |
+| `npm run test:setter` | 62/62 — `:3003` estaba ocupado por otra sesión: puerto propio `:3013` con `SETTER_EXTERNAL_SERVER=1` + `SETTER_PORT`, sin matar nada ajeno |
+
+### Notas de terreno
+
+**El caso del duplicado (B-B2) ya estaba resuelto** — `seguimiento-form` usa `useStepAction`.
+Verificado igual, sin recargar: anuncio ✓, chip `Prospecto`→`Postergado` ✓, historial
+`1`→`2 movimiento` ✓, y en la base **`POSTERGADO count = 1`**. El duplicado no puede volver a
+pasar por el motivo que lo causó.
+
+**Quedan en la base dos leads de sondeo** — `F3-PROBE Opener` y `F3-PROBE Brief`, creados para
+medir m4/mc1/m13. No se borran: la regla del sprint era cero operaciones destructivas sobre la
+base. Se pueden borrar cuando convenga.
+
+**Worktree** en `C:\tmp\wt-f3-acuse` (rama `f3/acuse-recibo`). Al desarmarlo: sacar primero la
+junction de `node_modules` con `cmd /c rmdir`, o `git worktree remove` sigue el enlace y borra
+el `node_modules` real.

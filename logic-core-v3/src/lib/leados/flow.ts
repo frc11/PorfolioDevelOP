@@ -140,10 +140,24 @@ export function parseRechazos(json: unknown): Rechazo[] {
   return parsed.success ? parsed.data : []
 }
 
+/**
+ * F2 — El historial partido para presentarlo: el ÚLTIMO rechazo es la guía de
+ * retrabajo vigente (va al frente) y los anteriores son contexto secundario, del
+ * más reciente al más viejo. Un solo parse, y una sola copia de la regla "cuál
+ * es el último" (`ultimoRechazo` delega acá).
+ */
+export function partirRechazos(json: unknown): { ultimo: Rechazo | null; previos: Rechazo[] } {
+  const rechazos = parseRechazos(json)
+  if (rechazos.length === 0) return { ultimo: null, previos: [] }
+  return {
+    ultimo: rechazos[rechazos.length - 1],
+    previos: rechazos.slice(0, -1).reverse(),
+  }
+}
+
 /** B5: el rechazo más reciente del historial — guía de retrabajo del setter. */
 export function ultimoRechazo(json: unknown): Rechazo | null {
-  const rechazos = parseRechazos(json)
-  return rechazos.length > 0 ? rechazos[rechazos.length - 1] : null
+  return partirRechazos(json).ultimo
 }
 
 /** B7: agenda de la reunión (booking Cal.com + traspaso + cierre). */

@@ -94,6 +94,12 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
         toast.error(result.error)
         return
       }
+      // F3 — el par de señales del patrón (`lead-card-actions`): el control ya se
+      // deshabilitaba en el acto, faltaba el anuncio. «Saltar» era la única acción
+      // que escribe y no acusaba: se queda en la MISMA pantalla y sólo cambia el
+      // nombre adentro de la tarjeta — al lado de «Pausar», que sí anuncia. Sus
+      // hermanas mudas («Ir a trabajarlo», «Abrir») no lo necesitan: navegan.
+      toast.success(`Saltado — ahora tu foco es ${proximo.businessName}.`)
       setSnoozeAbierto(false)
       router.refresh()
     })
