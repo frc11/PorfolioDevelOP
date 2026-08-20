@@ -1,0 +1,9 @@
+# Los PNG del diagnostico NO van al repo (mismo patron que la galeria del manual):
+# son artefactos de consulta, pesados y regenerables. La fuente de verdad de esta
+# carpeta es el MANIFIESTO.md + el REPORTE.md, no los binarios.
+#
+# Esta carpeta es DIAGNOSTICO, no documentacion: es descartable y NO reemplaza a
+# docs/manual-usuario/galeria/.
+png/
+filas.json
+pares.json

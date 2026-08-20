@@ -4739,3 +4739,71 @@ dependencia (es B1, se anota y no se toca acá).
 **Queda para Franco:** si `leados/v1-integracion` pasa a ser `main`, y cuándo. Y mirar el fix
 de clickjacking de `next.config.ts`, que es un cambio de comportamiento de producción que
 todavía no revisó.
+
+---
+
+## Corrida de experiencia — las primeras 47 capturas del panel del setter — 2026-08-20
+
+**Rama:** `leados/v1-integracion` (worktree `C:\tmp\wt-v1-integracion`)
+**Base:** `cbfaa27f` · **Puerto:** `127.0.0.1:3021` · **distDir:** `.next-corrida-visual`
+**Salida:** `docs/diagnostico-visual-2026-08/` — PNG gitignorados (patrón de la galería),
+`MANIFIESTO.md` + `REPORTE.md` commiteados.
+
+Hasta hoy no había una sola captura del producto: las dos corridas anteriores frenaron
+porque el panel del navegador no compone frames, y la galería del 10/08 tiene 12 fotos
+desfasadas de 50 con dos archivos byte-idénticos. Todo lo que se sabía del panel se sabía
+por descripciones. Esta corrida cierra ese hueco con navegador real.
+
+### La matriz se midió, no se adivinó
+
+En vez de mapear 78 leads a ojo, se importó la **`derivarPantalla` real** y se corrió sobre
+la cartera entera replicando el ensamblado de `cargarManualDelLead`. Corrigió tres cosas que
+un mapeo a mano habría errado: `QA-W Construccion` tiene `progresoJson` en `null` (su
+pantalla es `mc1`, no `m14`); ningún fixture es `PERDIDO`, que es la única puerta a
+`archivo`; y los dos leads postergados caen en `m4`, no en `m5`, porque no tienen contactos.
+
+### La trampa del fold
+
+El shell es `fixed inset-0` con el scroller en el `<main>` interno. **No se usó `fullPage`
+en ninguna toma**: se mide el alto real del `<main>` y se agranda el *viewport* a ese alto.
+Las dimensiones se leen del IHDR del PNG. Alturas reales de 788 px a 10.085 px — con
+`fullPage` las 47 habrían salido de 900.
+
+### Lo que quedó medido
+
+El error de `m13` que ve el setter es literal `Invalid literal value, expected true` — Zod
+crudo, en inglés — y se verificó que el guardado **no persiste nada**. `espera` y `revision`
+muestran el **mismo** encabezado («Le toca a Franco»), porque salen por `EstadoManual` con
+`TEXTO_TURNO[turno]` y los títulos de `PANTALLAS` son código muerto en pantalla. Y el patrón
+«la pantalla no acompaña al dato», que la re-verificación había declarado NO VERIFICABLE,
+quedó capturado dos veces: registrar el opener mueve `actividades 0→1` y la pantalla sigue
+diciendo «Mandá el opener»; enviar a revisión mueve `CONSTRUCCION→EN_REVISION` y la pantalla
+sigue diciendo «Chequeá la demo antes de mandarla».
+
+### Los huecos, con causa
+
+Las 15 pantallas tienen captura, pero **cuatro estados sólo se alcanzaron con leads
+pre-existentes** (`archivo`, `m14` gate cerrado, `m13` virgen, `m16` con horarios): los 17
+fixtures no los producen, y sembrar otros habría roto la Regla 13. Dos ítems obligatorios
+quedaron sin foto: `m5` postergado (exige un postergado con contactos > 0 — el único era
+`F3-PROBE Opener`, que el Paso 1 ordenaba borrar) y «el panel sin nada para trabajar» (exige
+un setter con cero leads, o sea crear un fixture).
+
+**Y una consecuencia que hay que mirar:** limpiar las novedades huérfanas era parte del
+Paso 1 y se hizo, pero esas 78 eran el **96%** del bloque (81 → 3). El bloque de novedades
+quedó retratado con 3 items, así que la observación «ocupa más pantalla que el foco, la
+cartera y los números juntos» **no se puede re-verificar contra estas fotos**.
+
+### Lo que este sprint NO hizo
+
+Cero cambios en `src/`, `tests/` y configuración — el diff son tres archivos nuevos bajo
+`docs/` más esta entrada. No se pusheó a `main`. No se instaló nada: `tsx` **no está** en
+`node_modules` ni declarado (la Regla 9 asumía que sí), y todo corrió con `npx --offline tsx`
+desde la caché ya presente — en una máquina sin esa caché los seeds del Paso 1 no arrancan.
+Ninguna migración ni `db push`. La base quedó restaurada a la línea base del Paso 1,
+verificada por censo idéntico. Los worktrees y stashes ajenos, intactos; ningún proceso
+ajeno se mató.
+
+**Queda para Franco:** todo el juicio visual — jerarquía, densidad, aglomeración y copy. Y
+rotar la credencial de la branch Neon dev: un prefijo del password quedó impreso en el log
+de la sesión por un enmascarado mal cortado.
