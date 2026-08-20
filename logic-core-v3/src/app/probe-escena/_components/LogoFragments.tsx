@@ -11,13 +11,19 @@ import {
 } from './probeScene'
 
 /**
- * Arcos sueltos de la marca, flotando lejos y muy tenues.
+ * Arcos sueltos de la marca: **las piezas que todavía no se ensamblaron.**
  *
- * **Es el único elemento de esta escena que no podría estar en el estudio de
- * otro.** El papel, las marcas de piso, los softboxes y el polvo son el
- * vocabulario genérico de un set: bien hechos dan un render de estudio, y
- * cualquiera podría tener el mismo. Estos arcos son lo que hace que sea el
- * estudio de develOP.
+ * Esa es la lectura que S5 les da, y es la que cierra el mundo de la escena. Si
+ * el espacio es la maqueta de algo a medio construir y el logo es la única pieza
+ * terminada, estos arcos son el resto de la pieza — todavía sueltos, todavía
+ * flotando, todavía sin encastrar. Por eso en S5 dejaron de ser claros y pasaron
+ * a material oscuro (ver `FRAGMENT_COLOR`): una pieza de lo mismo se ve del
+ * material de lo mismo.
+ *
+ * **Es el único elemento de esta escena que no podría estar en el espacio de
+ * otro.** El piso, las marcas, los planos y el polvo son vocabulario genérico:
+ * bien hechos dan un render elegante, y cualquiera podría tener el mismo. Estos
+ * arcos son lo que lo hace de develOP.
  *
  * **Los radios salen del propio SVG del logo, no de un ojo.** El `path` está
  * construido con dos arcos —uno de 153 y otro de 257 unidades del viewBox de
@@ -26,7 +32,10 @@ import {
  *
  * **Con moderación: tres.** Es un acento. Cuatro ya empezarían a leerse como un
  * motivo, y un motivo competiría con el logo, que es exactamente lo que la
- * escena no puede hacer.
+ * escena no puede hacer. S5 habilitaba sumar alguno más si la composición lo
+ * pedía; con once planos, una retícula y tres pilares nuevos alrededor, lo que
+ * la composición pide es lo contrario, así que siguen siendo tres. Lo que cambió
+ * es el tono, que es lo que les da la lectura.
  *
  * Ni proyectan ni reciben sombra: están muy fuera de la ortográfica del shadow
  * map (±13) y meterlos ahí solo achicaría la resolución útil sobre el logo, que

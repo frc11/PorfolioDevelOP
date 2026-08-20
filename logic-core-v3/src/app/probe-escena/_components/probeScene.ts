@@ -1,8 +1,15 @@
 import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
 
 /**
- * Constantes y matemática de la escena del probe. Un solo lugar para todos los
- * números que el sprint de coreografía va a querer mover.
+ * EL OBJETO, LA PALETA, EL PISO Y LA CÁMARA.
+ *
+ * Era "un solo lugar para todos los números de la escena" hasta S6, y dejó de
+ * serlo porque el archivo se hizo largo: la luz salió a `probeLighting.ts`, la
+ * niebla y la sombra a `probeAtmosphere.ts`, las partículas y sus generadores de
+ * sprite a `probeParticles.ts`, y las marcas y la arquitectura ya vivían en
+ * `floorMarks.ts` y `probeArchitecture.ts` desde S5. Lo que queda acá es la
+ * escena en su sentido más literal: **qué hay, de qué color, apoyado sobre qué y
+ * mirado con qué lente.**
  *
  * NO se toca `logo-footprint.ts`: de ahí solo se LEE `LOGO_BOX_WORLD`, que es
  * el tamaño en unidades de mundo de la caja 1024 del SVG (0.007 × 1024). Las
@@ -59,6 +66,24 @@ export const PROBE_EXTRUDE = {
 export const PAPER_COLOR = '#F7F7F5'
 /** Tinta del logo. Mate, no cromado: negro casi puro con un pelo de vida. */
 export const INK_COLOR = '#0F0F0F'
+/**
+ * ── LA RUGOSIDAD DE LA TINTA (S6) ──────────────────────────────────────────
+ *
+ * **Bajó de 0,52 a 0,34, y es lo que hace que el logo tenga forma.**
+ *
+ * Un negro de albedo casi nulo no se describe con luz difusa: por más que se
+ * suba la intensidad, `0,0046 × lo que sea` sigue siendo negro. Lo único que
+ * dibuja la forma de una pieza negra es el **reflejo especular**, que no depende
+ * del albedo (con `metalness` 0, three usa el 4% de un dieléctrico), y cuya
+ * fuerza la maneja este número: a rugosidad alta el lóbulo se abre y se apaga —
+ * la pieza queda plana— y a rugosidad baja se cierra y brilla.
+ *
+ * 0,34 es la banda donde la cara y el canto se separan por un degradé
+ * especular ancho pero legible, sin volverse un plástico. Es el número que hay
+ * que mover si al mirarlo el logo se ve cromado (subirlo) o todavía plano
+ * (bajarlo), y es el que le da al contraluz una superficie donde dibujarse.
+ */
+export const INK_ROUGHNESS = 0.34
 /** Marcas de registro sobre el papel: `--color-ds-light-border`. */
 export const MARK_COLOR = '#D7D7D5'
 /** Marco exterior: más claro, se va hacia el fondo y no compite con el interior. */
@@ -67,12 +92,41 @@ export const MARK_SOFT_COLOR = '#E6E6E3'
 export const MARK_TAPE_COLOR = '#CFCFCC'
 /** Rebote del papel hacia arriba (piso del hemisférico). Cálido apenas. */
 export const BOUNCE_COLOR = '#EDEAE3'
-/** Cuerpo del softbox: apenas por encima del papel. */
-export const SOFTBOX_COLOR = '#FCFCFA'
-/** Marco del softbox: lo que hace que el panel se lea como un objeto y no como una mancha. */
-export const SOFTBOX_FRAME_COLOR = '#DFDFDC'
-/** Arcos sueltos del logo. Muy tenues: apenas separados del papel. */
-export const FRAGMENT_COLOR = '#E2E2DF'
+/**
+ * ── EL NEGRO DE LA ESCENA (S5) ─────────────────────────────────────────────
+ *
+ * Los planos suspendidos son la fuente principal de masa oscura, y son la razón
+ * por la que la escena deja de ser toda clara. Dos familias:
+ *
+ * - **Oscuro.** Negro mate, y **más claro que la tinta del logo a propósito**:
+ *   en lineal `#191917` es del orden de tres veces más luminoso que `#0F0F0F`,
+ *   así que hay masa oscura de verdad sin que nada le dispute al logo el punto
+ *   más negro del cuadro. Es la perilla del balance: subirlo aclara la masa,
+ *   bajarlo la acerca al logo.
+ * - **Claro.** Apenas por encima del papel. Es el mismo valor que tenían los
+ *   softboxes de S4, elegido para lo mismo: que el plano se separe del fondo por
+ *   el sombreado y no por el color.
+ */
+export const PLANE_DARK_COLOR = '#191917'
+export const PLANE_PALE_COLOR = '#FCFCFA'
+/** Retícula del techo: oscura, un escalón por encima de los planos. */
+export const AERIAL_COLOR = '#3A3A35'
+/** Las vigas altas de la retícula: más oscuras, se leen detrás de la trama fina. */
+export const AERIAL_BEAM_COLOR = '#2A2A26'
+/** Pilares lejanos. Muy tenues: apenas se despegan del papel. */
+export const PILLAR_COLOR = '#E9E9E6'
+/**
+ * Arcos sueltos del logo — las piezas que todavía no se ensamblaron.
+ *
+ * **Cambió en S5: eran `#E2E2DF`, apenas separados del papel.** Con esa lectura
+ * el tono claro los volvía el fantasma de otra cosa; en material oscuro se leen
+ * como pedazos del mismo objeto que el logo, que es lo que son. Quedan varios
+ * escalones por encima de la tinta y por encima también de los planos, así que
+ * suman masa sin disputar.
+ *
+ * Volver a la lectura fantasma es este único número.
+ */
+export const FRAGMENT_COLOR = '#3C3C38'
 /** Partículas grandes desenfocadas. Ver `BOKEH_*`. */
 export const BOKEH_COLOR = '#B9B9B4'
 
@@ -80,8 +134,30 @@ export const BOKEH_COLOR = '#B9B9B4'
 
 /**
  * Altura de la cara superior del papel. El logo está centrado en el origen, así
- * que su borde inferior cae en `-LOGO_BOX_WORLD / 2`; el papel va un poco más
+ * que su borde inferior cae en `-LOGO_BOX_WORLD / 2`; el papel va 0,72 más
  * abajo para que el objeto FLOTE sobre él y la sombra se despegue.
+ *
+ * ⚠️ **Ese 0,72 no es estético y no se puede achicar sin cambiar otra cosa.**
+ * S6 lo revisó, porque "el logo tiene que apoyar en el piso" pedía justamente
+ * eso, y el número está tomado por abajo:
+ *
+ * - El keyframe más bajo del recorrido deja la cámara en **−3,50** (y el rango
+ *   del slider llega a −3,90), contra un piso en **−4,304**.
+ * - Encima de eso, el offset de mouse mueve la altura ±`0,045 × distancia ×
+ *   escala`, que a la distancia de ese keyframe (6,3) y con el multiplicador en
+ *   1 son ±0,28.
+ *
+ * O sea que la holgura real entre la cámara más baja y el papel es de ~0,12.
+ * Subir el piso para que el logo apoye mete a la cámara ABAJO de la hoja en el
+ * tramo de Demos, donde no hay escena. **Bajar el logo tampoco sirve**: la
+ * órbita y el encuadre están centrados en el origen, así que correrlo
+ * descentraría el pivote y el objeto se bambolearía en cuadro al girar.
+ *
+ * Así que el apoyo se resuelve donde se ve y no donde se mide: con la **oclusión
+ * de contacto** (`probeLighting.ts`), que es lo que le dice al ojo que el objeto
+ * pertenece al piso. Si igual se quiere el contacto geométrico, es un sprint con
+ * tres números atados — este, el mínimo del slider de altura y el keyframe de
+ * Demos — y no un cambio suelto.
  */
 export const FLOOR_Y = -LOGO_BOX_WORLD / 2 - 0.72
 
@@ -127,43 +203,17 @@ export const CYC_WALL_TOP = 150
 export const CYC_COVE_STEPS = 16
 
 /**
- * ── LAS MARCAS DE PISO (S4) ────────────────────────────────────────────────
+ * ── LAS MARCAS DE PISO ─────────────────────────────────────────────────────
  *
- * Las cuatro esquinas de registro pasaron a ser un **sistema de marcas de set**:
- * marco de encuadre, cruces y cintas de posición. El piso deja de estar vacío y
- * pasa a ser un lugar donde se trabaja — que es el lenguaje de precisión de la
- * dirección, y de paso multiplica los objetos de tamaño conocido apoyados en el
- * suelo, que es lo que da la lectura de perspectiva al orbitar.
+ * Las medidas y el armado del set completo viven en `floorMarks.ts`. Se movieron
+ * ahí en S5, cuando el set pasó de "marcas de estudio" a **lenguaje de plano**:
+ * a las esquinas de encuadre, las cruces de registro y las cintas se les
+ * sumaron los ejes, dos cotas y una escala graduada. Son treinta líneas de
+ * geometría con su porqué, y viven al lado del código que las arma.
  *
- * Las 32 barras van en **un solo `<instancedMesh>`**: un draw call, contra los
- * ocho que costaban las cuatro esquinas de antes.
- *
- * Tres tonos, por `instanceColor`, y cada uno dice algo distinto: el marco
- * interior y las cruces son línea fina de registro; el marco exterior es más
- * claro y se va hacia el fondo; las cintas son más anchas y más oscuras, porque
- * una cinta de piso es cinta y no una línea trazada.
+ * Acá quedan los colores, que son paleta: `MARK_COLOR`, `MARK_SOFT_COLOR` y
+ * `MARK_TAPE_COLOR`, más arriba.
  */
-export const MARK_HEIGHT = 0.012
-/** Semi-lado del cuadro interior. Encierra la huella del logo. */
-export const MARK_SPAN = 4.7
-export const MARK_LENGTH = 1.15
-export const MARK_WIDTH = 0.05
-/** Ticks a media cara del cuadro interior, apuntando hacia adentro. */
-export const MARK_TICK_LENGTH = 0.5
-/** Cruz de centro, debajo del logo. */
-export const MARK_CENTER_ARM = 1
-/** Dos cruces de registro en cuadrantes opuestos. */
-export const MARK_CROSS_OFFSET = 3.1
-export const MARK_CROSS_ARM = 0.62
-/** Marco exterior: el doble de span, brazos más largos. Da una segunda escala. */
-export const MARK_OUTER_SPAN = 9.4
-export const MARK_OUTER_LENGTH = 1.9
-/** Cintas de posición en T, donde se pararía alguien en un set. */
-export const TAPE_RADIUS = 7.6
-export const TAPE_WIDTH = 0.14
-export const TAPE_BAR = 0.9
-export const TAPE_STEM = 0.55
-export const TAPE_AZIMUTHS_DEG: readonly number[] = [30, 150, 270]
 
 // ── La cámara ──────────────────────────────────────────────────────────────
 
@@ -202,143 +252,74 @@ export const AUTO_ORBIT_DEG_PER_S = 24
 // ── Las luces ──────────────────────────────────────────────────────────────
 
 /**
- * Rig FIJO al mundo, no a la cámara. Es la decisión de diseño del probe y hay
- * que tenerla presente al mirar:
+ * **Se fueron a `probeLighting.ts` en S6.** Dejaron de ser tres constantes de
+ * posición para ser un sistema con reglas propias: un rig de tres puntos donde
+ * la principal y el relleno son del ESPACIO (fijos al mundo, así que orbitar
+ * cambia la iluminación) y el contraluz es del OBSERVADOR (solidario a la
+ * cámara en azimut y en altura, así que el filo existe en toda la órbita).
  *
- * Con las luces fijas, orbitar cambia la iluminación además del punto de vista
- * — que es exactamente lo que va a pasar en la escena final ("iluminación que
- * cambia en el recorrido") y lo que hace que los cuatro tramos puedan ser
- * distintos entre sí. Si la luz viajara con la cámara, todos los ángulos se
- * verían igual de bien y el probe daría un falso positivo.
- *
- * El costo es que confunde dos variables: un ángulo puede verse pobre por la
- * GEOMETRÍA o por quedar a contraluz. Para separarlas está el toggle "la luz
- * sigue a la cámara", que fija la relación luz-observador y deja sola a la
- * geometría bajo prueba.
+ * Ahí viven también la niebla, la sombra y la oclusión de contacto. La curva que
+ * sube y baja el nivel general a lo largo del recorrido es `LIGHT_ARC`, en
+ * `choreography.ts`, junto al resto de lo que se calibra.
  */
-export const KEY_LIGHT_POSITION: readonly [number, number, number] = [-11, 12, 10]
-/** Contraluz fijo: le da canto al logo cuando la cámara pasa por atrás. */
-export const RIM_LIGHT_POSITION: readonly [number, number, number] = [10, 7, -15]
-export const RIM_LIGHT_INTENSITY = 1.15
-/** Cielo/piso del hemisférico: el papel rebotando hacia arriba. */
-export const HEMI_INTENSITY = 1.5
+
+// ── Geometría instanciada ───────────────────────────────────────────────────
 
 /**
- * Cuando la luz sigue a la cámara: 3/4 clásico, arriba y a la izquierda del
- * observador.
+ * Una caja con posición, tamaño, giro y color propios, para dibujarse junto a
+ * muchas otras en un solo draw call (ver `InstancedBars.tsx`).
+ *
+ * **Es el vocabulario compartido de casi toda la escena nueva.** Las marcas de
+ * piso, los planos suspendidos, la retícula del techo y los pilares son todos
+ * cajas: cambia la escala, el giro y el tono, no la forma. Una sola primitiva
+ * para las cuatro familias es lo que hace que cada una cueste un draw call en
+ * vez de uno por pieza.
+ *
+ * `rotation` se interpreta en orden **YXZ**: primero el azimut, y la
+ * inclinación DESPUÉS, adentro del marco ya girado. Con el XYZ que three usa
+ * por default, la inclinación se aplicaría sobre el eje X del padre y cada
+ * pieza se inclinaría en una dirección distinta según su azimut — el mismo
+ * problema que los softboxes de S4 resolvían con dos grupos anidados.
  */
-export const KEY_FOLLOW = { azimuthOffsetDeg: -38, height: 13, distance: 20 } as const
-
-/** Ortográfica del shadow map. Cubre el logo y el largo de su sombra sobre el papel. */
-export const SHADOW_ORTHO = 13
-export const SHADOW_MAP_SIZE = 2048
-
-// ── Los softboxes (S4) ──────────────────────────────────────────────────────
-
-/**
- * Paneles rectangulares suspendidos alrededor del logo. Es lo que más espacio
- * aporta por menos costo: son objetos de tamaño y forma conocidos a media
- * distancia, así que al orbitar generan **paralaje y ocultamientos** — y un
- * ocultamiento es la señal de profundidad más fuerte que hay.
- *
- * **No brillan por sí mismos.** Van con `meshStandardMaterial`, no `basic`: la
- * regla del sprint es que nada se ilumine solo, y además así se apagan con la
- * sala cuando la luz muere en el cierre. Lo que los hace "apenas más luminosos
- * que el fondo" es el color, medio punto por encima del papel, no una emisión.
- *
- * **Dos de los tres están donde están las luces**: el primero en el azimut de
- * `KEY_LIGHT_POSITION` (−48°), el segundo en el de `RIM_LIGHT_POSITION` (146°).
- * No es decorativo — hace que la escena EXPLIQUE su propia iluminación, que es
- * exactamente lo que un estudio deja ver.
- *
- * `tiltDeg` positivo = el panel mira hacia abajo. El de arriba apunta al logo,
- * el de abajo apunta apenas hacia arriba.
- */
-export type SoftboxPlacement = {
-  readonly azimuthDeg: number
-  readonly radius: number
-  readonly y: number
-  readonly width: number
-  readonly height: number
-  readonly tiltDeg: number
+export type BarPlacement = {
+  readonly position: readonly [number, number, number]
+  readonly scale: readonly [number, number, number]
+  readonly rotation?: readonly [number, number, number]
+  readonly color: string
 }
 
-export const SOFTBOXES: readonly SoftboxPlacement[] = [
-  // El key: alto, vertical, inclinado hacia el logo.
-  { azimuthDeg: -48, radius: 12.6, y: 6.4, width: 5.4, height: 7.6, tiltDeg: 18 },
-  // El contraluz: apaisado, a media altura, casi de canto.
-  { azimuthDeg: 146, radius: 13.8, y: 3.2, width: 8.6, height: 5, tiltDeg: 8 },
-  // Un panel bajo, casi apoyado en el piso: es el que ancla la escala.
-  { azimuthDeg: 62, radius: 10.4, y: -0.9, width: 4.6, height: 6.4, tiltDeg: -6 },
-]
+// ── El espacio arquitectónico (S5) ──────────────────────────────────────────
 
-/** Cuánto asoma el marco por detrás del cuerpo, en unidades de mundo. */
-export const SOFTBOX_FRAME_MARGIN = 0.16
+/**
+ * Los planos suspendidos, la retícula aérea y los pilares viven en
+ * `probeArchitecture.ts`.
+ *
+ * **Reemplazan a los softboxes de S4.** La idea que se conserva es la del panel
+ * suspendido —masa de tamaño conocido a media distancia, que genera paralaje y
+ * tapa cosas al orbitar, que es la señal de profundidad más fuerte que hay—; lo
+ * que se va es la referencia al estudio de fotos. Un softbox tiene marco, tela y
+ * una razón de ser: iluminar. Un plano arquitectónico no explica nada, solo
+ * ocupa espacio con intención, que es lo que esta escena necesita.
+ */
 
 // ── Las partículas ─────────────────────────────────────────────────────────
 
 /**
- * Se reserva el buffer del máximo una sola vez y el slider mueve el
- * `drawRange`. Cambiar la cantidad no reasigna ni recalcula nada.
- */
-export const PARTICLES_MAX = 4000
-/**
- * Media esfera de radio `PARTICLE_R_MIN..PARTICLE_R_MAX` alrededor del logo,
- * recortada por el papel. El mínimo deja libre el volumen del logo; el máximo
- * pasa la órbita más lejana (30), así que siempre hay partículas MÁS CERCA y
- * MÁS LEJOS que la cámara — que es la condición para que haya paralaje real
- * entre ellas y no una calcomanía de fondo.
- */
-export const PARTICLE_R_MIN = 5
-export const PARTICLE_R_MAX = 34
-export const PARTICLE_SIZE = 0.055
-/** Cerca oscuras, lejos claras: perspectiva atmosférica sobre papel blanco. */
-export const PARTICLE_NEAR_COLOR = '#6E6E6B'
-export const PARTICLE_FAR_COLOR = '#C9C9C6'
-/** Semilla fija: el campo es idéntico en cada carga, así dos capturas se comparan. */
-export const PARTICLE_SEED = 0x5eed1a
-
-// ── La segunda escala de partículas (S4) ────────────────────────────────────
-
-/**
- * Pocas partículas **grandes y desenfocadas**, cerca de la cámara. El desenfoque
- * es lo que más profundidad da por menos polígonos: no hay forma más barata de
- * decirle al ojo "esto está adelante del plano de foco" que un disco blando.
+ * Los dos campos y los tres generadores de máscara viven en
+ * `probeParticles.ts`. Se mudaron en S6, cuando el rediseño —**pocas y grandes
+ * en vez de muchas y chicas**— los convirtió en una decisión con sus cuentas en
+ * vez de dos bloques de constantes.
  *
- * **Van fijas al mundo, no pegadas a la cámara.** Pegadas al lente serían una
- * calcomanía que no se mueve: fijas al mundo barren rápido al orbitar, que es
- * de dónde sale la sensación de volumen.
- *
- * El §7.8 del reporte del probe anotaba como defecto que "a distancias cortas
- * alguna partícula pasa a menos de dos unidades de la cámara y se lee como un
- * disco grande". **Acá eso es el efecto, deliberado.**
- *
- * `BOKEH_R_MIN` y `BOKEH_SIZE` son la perilla de costo: son sprites grandes y
- * transparentes, o sea el único overdraw nuevo de esta escena. Con 4,2 y 1,0 un
- * sprite en el radio mínimo ocupa ~38% del alto del cuadro. Subir el tamaño o
- * bajar el radio mínimo lo multiplica rápido.
+ * Acá queda solo su color: `BOKEH_COLOR`, más arriba, que es paleta.
  */
-export const BOKEH_COUNT = 70
-export const BOKEH_R_MIN = 4.2
-export const BOKEH_R_MAX = 30
-/**
- * Exponente de la distribución radial. Por debajo de 1 carga el campo hacia la
- * cámara — que es donde el desenfoque se ve. Uniforme en volumen (r³) dejaría
- * casi todas lejos, justo donde no sirven.
- */
-export const BOKEH_RADIUS_BIAS = 0.85
-export const BOKEH_SIZE = 1
-export const BOKEH_OPACITY = 0.14
-/** Semilla propia: no puede compartir la del polvo o los dos campos coincidirían. */
-export const BOKEH_SEED = 0xb04e12
-export const BOKEH_SPRITE_SIZE = 64
 
 // ── Los fragmentos del logo (S4) ────────────────────────────────────────────
 
 /**
- * Arcos sueltos flotando lejos, muy tenues. **Es el único elemento de la escena
- * que no podría estar en el estudio de otro**: todo lo demás (papel, marcas,
- * softboxes, polvo) es genérico de un set; esto es lo que la hace de develOP.
+ * Arcos sueltos flotando lejos: **las piezas de la marca que todavía no se
+ * ensamblaron** (S5). **Es el único elemento de la escena que no podría estar en
+ * el espacio de otro**: todo lo demás (piso, marcas, planos, polvo) es
+ * vocabulario genérico; esto es lo que la hace de develOP.
  *
  * Los radios salen del propio SVG: el `path` del logo está construido con dos
  * arcos, uno de 153 y otro de 257 unidades del viewBox de 1024. Escalados por
@@ -391,7 +372,8 @@ export const FRAGMENT_TUBULAR_SEGMENTS = 44
 
 // ── Utilidades ─────────────────────────────────────────────────────────────
 
-function clamp01(value: number): number {
+/** Recorte a [0,1]. Lo comparten los generadores de sprite y la curva de kelvin. */
+export function clamp01(value: number): number {
   return value < 0 ? 0 : value > 1 ? 1 : value
 }
 
@@ -429,78 +411,3 @@ export function kelvinToSrgb(kelvin: number): { r: number; g: number; b: number 
  * Blanca con alfa en degrade: el color de cada particula lo pone el atributo
  * de vertice, la textura solo aporta la forma.
  */
-export function createDotSpriteData(size: number): Uint8Array {
-  const data = new Uint8Array(size * size * 4)
-  const center = (size - 1) / 2
-  const radius = size / 2
-
-  for (let y = 0; y < size; y += 1) {
-    for (let x = 0; x < size; x += 1) {
-      const dx = (x - center) / radius
-      const dy = (y - center) / radius
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      // Borde suave en el ultimo 25% del radio: sin eso el disco aliasa igual
-      // que el cuadrado que vino a reemplazar.
-      const alpha = clamp01((1 - distance) / 0.25)
-      const i = (y * size + x) * 4
-      data[i] = 255
-      data[i + 1] = 255
-      data[i + 2] = 255
-      data[i + 3] = Math.round(alpha * 255)
-    }
-  }
-
-  return data
-}
-
-export const PARTICLE_SPRITE_SIZE = 64
-
-/**
- * La forma de una particula DESENFOCADA.
- *
- * Difiere del sprite de polvo en una sola cosa, y es la que importa: el polvo
- * es opaco en el centro y se ablanda en el ultimo 25% del radio; este se ablanda
- * en el 55% exterior y deja una meseta plana adentro. Esa meseta es lo que
- * distingue un disco fuera de foco de una mancha gaussiana — un lente
- * desenfocado reparte la luz de un punto sobre un DISCO, no sobre una campana.
- *
- * Pura, igual que la otra: puede vivir en un `useMemo` sin violar
- * `react-hooks/purity`.
- */
-export function createBokehSpriteData(size: number): Uint8Array {
-  const data = new Uint8Array(size * size * 4)
-  const center = (size - 1) / 2
-  const radius = size / 2
-
-  for (let y = 0; y < size; y += 1) {
-    for (let x = 0; x < size; x += 1) {
-      const dx = (x - center) / radius
-      const dy = (y - center) / radius
-      const distance = Math.sqrt(dx * dx + dy * dy)
-      const alpha = clamp01((1 - distance) / 0.55)
-      const i = (y * size + x) * 4
-      data[i] = 255
-      data[i + 1] = 255
-      data[i + 2] = 255
-      data[i + 3] = Math.round(alpha * 255)
-    }
-  }
-
-  return data
-}
-
-/**
- * PRNG determinista (mulberry32). `Math.random()` no puede ir en un `useMemo`
- * —la regla `react-hooks/purity` lo prohíbe, y con razón: el render dejaría de
- * ser puro— y además un campo de partículas irrepetible haría incomparables dos
- * capturas del mismo ángulo.
- */
-export function createRandom(seed: number): () => number {
-  let state = seed >>> 0
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0
-    let x = Math.imul(state ^ (state >>> 15), 1 | state)
-    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296
-  }
-}

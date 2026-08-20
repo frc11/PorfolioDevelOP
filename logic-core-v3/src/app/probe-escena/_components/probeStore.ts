@@ -1,4 +1,6 @@
-import { PLAY_SPEED_DEFAULT } from './choreography'
+import { PLAY_SPEED_DEFAULT } from './choreographyPhysics'
+import { KEY_INTENSITY } from './probeLighting'
+import { PARTICLES_MAX } from './probeParticles'
 
 /**
  * Store numérico del probe: el puente entre los controles del DOM y el loop de
@@ -113,9 +115,21 @@ export type ProbeParams = {
   frameX: number
   /** Encuadre vertical. 0 = centrado · +1 = arriba · −1 = abajo. */
   frameY: number
-  /** Intensidad de la luz principal (unidades físicas de three ≥ r155: ~π× las viejas). */
+  /**
+   * Intensidad de la luz principal (unidades físicas de three ≥ r155: ~π× las
+   * viejas).
+   *
+   * **Desde S6 es el maestro del rig, no una luz suelta.** En modo manual el
+   * loop lo lee como una FRACCIÓN de `KEY_INTENSITY` y con esa fracción mueve
+   * las tres luces, el hemisférico y la niebla — las mismas proporciones que usa
+   * el arco de la coreografía. Un slider que moviera solo la principal daría un
+   * modo manual iluminado distinto que el recorrido, y las mediciones dejarían
+   * de ser comparables entre modos.
+   *
+   * En coreografía y en el editor es TELEMETRÍA: lo escribe el arco.
+   */
   keyIntensity: number
-  /** Temperatura de color de la luz principal, en kelvin. */
+  /** Temperatura de color de la principal y del relleno, en kelvin. Ídem. */
   keyKelvin: number
   /** Partículas dibujadas de las que hay reservadas. */
   particleCount: number
@@ -159,7 +173,10 @@ export const PROBE_RANGES: { readonly [K in ProbeParamKey]: ProbeRange } = {
   frameY: { min: -1, max: 1, step: 0.01 },
   keyIntensity: { min: 0, max: 9, step: 0.05 },
   keyKelvin: { min: 2000, max: 10000, step: 50 },
-  particleCount: { min: 0, max: 4000, step: 50 },
+  // El tope sale de `PARTICLES_MAX`, que es el buffer reservado de verdad: con
+  // el número escrito a mano, bajar el máximo del campo dejaba un slider que
+  // prometía partículas que no existían.
+  particleCount: { min: 0, max: PARTICLES_MAX, step: 10 },
 }
 
 /** Orden fijo, en pantalla y en el texto que se copia. */
@@ -194,12 +211,16 @@ export const PROBE_DEFAULTS: ProbeParams = {
   // siguen valiendo.
   frameX: 0,
   frameY: 0,
-  keyIntensity: 3.4,
+  // Arranca en la luz plena del rig, o sea nivel 1: el modo manual y el
+  // progreso 0 de la coreografía muestran exactamente la misma iluminación.
+  keyIntensity: KEY_INTENSITY,
   // 6500 K = D65, el blanco neutro. Con 5600 (luz de dia "calida") el papel
   // renderizaba rosado y el default del instrumento tenia un sesgo de color
   // que no era una decision, era un descuido — medido en captura.
   keyKelvin: 6500,
-  particleCount: 900,
+  // Poco más de la mitad del campo. Con partículas de 0,19 en vez de 0,055, el
+  // default de S4 (900 de 4.000) sería una tormenta.
+  particleCount: 220,
 }
 
 // ── Medición (no se manipula: se lee) ───────────────────────────────────────
@@ -225,18 +246,26 @@ export const PROBE_STATS_DEFAULTS: ProbeStats = { fps: 0, logoW: 0, logoH: 0, lo
 // ── El rig de coreografía ───────────────────────────────────────────────────
 
 /**
- * Los dos modos del instrumento.
+ * Los tres modos del instrumento.
  *
  * - `coreografia` — el progreso 0→1 maneja la cámara a través del track. Los
  *   siete sliders de parámetro pasan a ser TELEMETRÍA: siguen mostrando el
  *   valor exacto de cada frame y la línea copiable sigue funcionando, así que
  *   scrubear y copiar una pose es el flujo de calibración.
+ * - `editor` (S5) — se elige un keyframe y los siete sliders vuelven a estar
+ *   ACTIVOS, pero ahora escriben sobre ESE keyframe en vez de sobre la cámara.
+ *   El progreso queda clavado en su `at`, así que lo que se ve es exactamente
+ *   el momento que se está ajustando. Sin física: acá se compone una pose, no
+ *   se juzga un movimiento, y la amortiguación pelearía con el slider.
  * - `manual` — el probe de siempre, idéntico: los sliders mandan, sin inercia,
  *   sin mouse y sin vira. Es lo que permite seguir componiendo posiciones
  *   nuevas con precisión, y lo que hace que las mediciones ya publicadas sigan
  *   valiendo.
+ *
+ * Los tres comparten el mismo track vivo (`choreographyEditor.ts`): lo que se
+ * ajusta en `editor` es lo que `coreografia` reproduce.
  */
-export type ProbeMode = 'coreografia' | 'manual'
+export type ProbeMode = 'coreografia' | 'editor' | 'manual'
 
 /**
  * Estado numérico del rig. Va en un store aparte del de parámetros a propósito:

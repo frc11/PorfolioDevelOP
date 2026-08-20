@@ -3,8 +3,8 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
+import { BOKEH_COLOR, FLOOR_Y } from './probeScene'
 import {
-  BOKEH_COLOR,
   BOKEH_COUNT,
   BOKEH_OPACITY,
   BOKEH_RADIUS_BIAS,
@@ -13,10 +13,9 @@ import {
   BOKEH_SEED,
   BOKEH_SIZE,
   BOKEH_SPRITE_SIZE,
-  FLOOR_Y,
   createBokehSpriteData,
   createRandom,
-} from './probeScene'
+} from './probeParticles'
 
 /**
  * La segunda escala de partículas: pocas, grandes y **desenfocadas**.

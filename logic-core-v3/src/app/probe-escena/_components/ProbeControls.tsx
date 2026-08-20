@@ -3,6 +3,9 @@
 import { useCallback, useId, useState } from 'react'
 
 import { ChoreographyControls } from './ChoreographyControls'
+import type { ChoreoEditor } from './choreographyEditor'
+import { CHOREO_CHANNELS } from './choreographyTypes'
+import { KeyframeEditor } from './KeyframeEditor'
 import { ProbeReadout } from './ProbeReadout'
 import { StoreSlider } from './StoreSlider'
 import {
@@ -10,6 +13,7 @@ import {
   PROBE_PARAM_SPECS,
   PROBE_RANGES,
   type ProbeMode,
+  type ProbeParamKey,
   type ProbeParamsStore,
   type ProbeRigStore,
   type ProbeStatsStore,
@@ -24,31 +28,52 @@ import {
  * hay solo para lo que cambia por click —el modo, los toggles, el panel— nunca
  * por frame.
  *
- * ── Los dos modos ──────────────────────────────────────────────────────────
+ * ── Los tres modos ─────────────────────────────────────────────────────────
  *
  * En **coreografía** los siete sliders de escena quedan deshabilitados pero
  * siguen vivos como telemetría: muestran lo que el track dicta en cada frame, y
  * la línea copiable de abajo sirve para llevarse una pose. `particulas` sigue
- * habilitado en los dos modos, porque no es parte del recorrido.
+ * habilitado en los tres modos, porque no es parte del recorrido.
  *
- * En **manual** el panel es exactamente el de siempre.
+ * En **editor** (S5) los CINCO de pose vuelven a estar habilitados, pero lo que
+ * mueven es la pose del keyframe seleccionado, no la cámara suelta. Es el mismo
+ * control con otro destinatario, y por eso no hay un segundo juego de sliders.
+ * Los dos de luz quedan de lectura: desde S6 la iluminación no es del keyframe.
+ *
+ * En **manual** el panel es exactamente el de siempre, con una diferencia que
+ * vale la pena saber: el slider de intensidad pasó a ser el maestro del rig
+ * entero, no el de una sola lámpara.
  */
 
-/** Los canales que la coreografía maneja. Se bloquean cuando el track está al mando. */
-const CHOREOGRAPHED = new Set<string>([
-  'angleDeg',
-  'height',
-  'distance',
-  'frameX',
-  'frameY',
-  'keyIntensity',
-  'keyKelvin',
-])
+/** Los cinco canales de pose que la coreografía maneja. */
+const POSE_KEYS = new Set<string>(CHOREO_CHANNELS)
+/** Los dos de luz. Desde S6 no son de la pose: los dicta el arco. */
+const LIGHT_KEYS = new Set<string>(['keyIntensity', 'keyKelvin'])
+
+/**
+ * Qué sliders quedan de solo lectura en cada modo.
+ *
+ * - **coreografía** — todo es telemetría: la pose la dicta el track y la luz el
+ *   arco.
+ * - **editor** — los cinco de pose vuelven a ser entrada, porque eso es lo que
+ *   se está componiendo. Los dos de luz siguen bloqueados **y siguen vivos**:
+ *   muestran lo que el arco dicta en el `at` del keyframe seleccionado, así que
+ *   la pose se compone bajo la luz que ese momento va a tener de verdad. Ya no
+ *   se pueden mover porque ya no son del keyframe.
+ * - **manual** — todo es entrada. El de intensidad es además el maestro del rig
+ *   entero (ver `ProbeParams.keyIntensity`).
+ */
+function isLocked(mode: ProbeMode, key: ProbeParamKey): boolean {
+  if (mode === 'coreografia') return POSE_KEYS.has(key) || LIGHT_KEYS.has(key)
+  if (mode === 'editor') return LIGHT_KEYS.has(key)
+  return false
+}
 
 type ProbeControlsProps = {
   store: ProbeParamsStore
   stats: ProbeStatsStore
   rig: ProbeRigStore
+  editor: ChoreoEditor
   mode: ProbeMode
   onModeChange: (next: ProbeMode) => void
   playing: boolean
@@ -63,14 +88,22 @@ type ProbeControlsProps = {
 }
 
 const MODE_BUTTON_BASE =
-  'flex-1 rounded-sm border px-2 py-1.5 text-[0.7rem] transition-colors'
+  'flex-1 rounded-sm border px-1.5 py-1.5 text-[0.68rem] transition-colors'
 const MODE_BUTTON_ON = 'border-neutral-900 bg-neutral-900 text-white'
 const MODE_BUTTON_OFF = 'border-neutral-300 text-neutral-600 hover:bg-neutral-100'
+
+/** Los tres modos, en el orden en que se usan: mirar, ajustar, componer. */
+const MODES: readonly { readonly value: ProbeMode; readonly label: string }[] = [
+  { value: 'coreografia', label: 'coreografía' },
+  { value: 'editor', label: 'editor' },
+  { value: 'manual', label: 'manual' },
+]
 
 export function ProbeControls({
   store,
   stats,
   rig,
+  editor,
   mode,
   onModeChange,
   playing,
@@ -87,6 +120,7 @@ export function ProbeControls({
   const followId = useId()
 
   const isChoreo = mode === 'coreografia'
+  const isEditor = mode === 'editor'
 
   // Mover el ángulo a mano corta la órbita automática. Si no, el slider y el
   // loop se pelean por el mismo valor y no se puede parar en un ángulo.
@@ -122,24 +156,18 @@ export function ProbeControls({
       </header>
 
       <div className="flex gap-2" role="group" aria-label="modo del probe">
-        <button
-          type="button"
-          onClick={() => onModeChange('coreografia')}
-          aria-pressed={isChoreo}
-          data-probe="mode-coreografia"
-          className={`${MODE_BUTTON_BASE} ${isChoreo ? MODE_BUTTON_ON : MODE_BUTTON_OFF}`}
-        >
-          coreografía
-        </button>
-        <button
-          type="button"
-          onClick={() => onModeChange('manual')}
-          aria-pressed={!isChoreo}
-          data-probe="mode-manual"
-          className={`${MODE_BUTTON_BASE} ${!isChoreo ? MODE_BUTTON_ON : MODE_BUTTON_OFF}`}
-        >
-          manual
-        </button>
+        {MODES.map((entry) => (
+          <button
+            key={entry.value}
+            type="button"
+            onClick={() => onModeChange(entry.value)}
+            aria-pressed={mode === entry.value}
+            data-probe={`mode-${entry.value}`}
+            className={`${MODE_BUTTON_BASE} ${mode === entry.value ? MODE_BUTTON_ON : MODE_BUTTON_OFF}`}
+          >
+            {entry.label}
+          </button>
+        ))}
       </div>
 
       {isChoreo ? (
@@ -153,11 +181,23 @@ export function ProbeControls({
         />
       ) : null}
 
+      {isEditor ? <KeyframeEditor editor={editor} store={store} rig={rig} /> : null}
+
       <div className="flex flex-col gap-3 border-t border-neutral-200 pt-3">
         {isChoreo ? (
           <p className="text-[0.66rem] leading-snug text-neutral-400">
-            Con la coreografía al mando, estos siete son la lectura de lo que el track dicta
-            en este frame. Para componer una posición nueva, pasá a manual.
+            Con la coreografía al mando, estos siete son la lectura de lo que el track y el
+            arco de luz dictan en este frame. Para ajustar el keyframe que se está viendo,
+            pasá al editor; para componer una posición nueva desde cero, a manual.
+          </p>
+        ) : null}
+
+        {isEditor ? (
+          <p className="text-[0.66rem] leading-snug text-neutral-400">
+            Los cinco de pose escriben sobre el keyframe seleccionado arriba, en vivo. Los dos
+            de luz son lectura: desde S6 la iluminación no es del keyframe sino de una curva
+            del recorrido (<code>LIGHT_ARC</code>), y lo que muestran es lo que a este momento
+            le toca.
           </p>
         ) : null}
 
@@ -168,14 +208,14 @@ export function ProbeControls({
             paramKey={key}
             range={PROBE_RANGES[key]}
             spec={PROBE_PARAM_SPECS[key]}
-            disabled={isChoreo && CHOREOGRAPHED.has(key)}
+            disabled={isLocked(mode, key)}
             onManualChange={key === 'angleDeg' ? stopAutoOrbit : undefined}
           />
         ))}
       </div>
 
       <div className="flex flex-col gap-2 border-t border-neutral-200 pt-3">
-        {!isChoreo ? (
+        {mode === 'manual' ? (
           <button
             type="button"
             onClick={() => onAutoOrbitChange(!autoOrbit)}
@@ -199,8 +239,9 @@ export function ProbeControls({
           <label htmlFor={followId} className="text-[0.7rem] leading-snug text-neutral-600">
             la luz sigue a la cámara
             <span className="block text-neutral-400">
-              apagado: luces fijas al estudio, la vuelta cambia la iluminación. Encendido: la
-              relación luz-observador queda fija y solo cambia la geometría.
+              apagado: principal y relleno fijos al estudio, así que la vuelta cambia la
+              iluminación. Encendido: los dos pasan a ser solidarios y solo cambia la
+              geometría. El contraluz ya es solidario siempre — de eso vive.
             </span>
           </label>
         </div>

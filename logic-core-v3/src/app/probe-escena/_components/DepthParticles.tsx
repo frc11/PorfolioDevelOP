@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
+import { FLOOR_Y } from './probeScene'
 import {
-  FLOOR_Y,
   PARTICLES_MAX,
   PARTICLE_FAR_COLOR,
   PARTICLE_NEAR_COLOR,
@@ -15,7 +15,7 @@ import {
   PARTICLE_SPRITE_SIZE,
   createDotSpriteData,
   createRandom,
-} from './probeScene'
+} from './probeParticles'
 import type { ProbeParamsStore } from './probeStore'
 
 /**

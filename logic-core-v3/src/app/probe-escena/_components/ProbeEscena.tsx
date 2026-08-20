@@ -5,8 +5,9 @@ import { Component, useCallback, useState, type ReactNode } from 'react'
 
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 
+import { createChoreoEditor } from './choreographyEditor'
 import { ProbeControls } from './ProbeControls'
-import { PAPER_COLOR } from './probeScene'
+import { FOG_COLOR } from './probeAtmosphere'
 import {
   PROBE_DEFAULTS,
   PROBE_RIG_DEFAULTS,
@@ -19,13 +20,19 @@ import {
 } from './probeStore'
 
 /**
- * Raíz del probe. Dueña de los TRES stores y de lo que sí es estado de React
- * porque cambia por click: el modo, la reproducción, la física, la órbita
- * automática, la luz solidaria y la escena lista.
+ * Raíz del probe. Dueña de los TRES stores, del track editable (S5) y de lo que
+ * sí es estado de React porque cambia por click: el modo, la reproducción, la
+ * física, la órbita automática, la luz solidaria y la escena lista.
  *
  * Nada más vive acá. Ni los valores de los sliders ni el progreso de la
  * coreografía pasan por el árbol de React: viven en los stores y el `useFrame`
  * los lee y escribe directo.
+ *
+ * El track editable se crea acá y no adentro del canvas porque lo comparten los
+ * dos lados: el `useFrame` lo muestrea y el panel del editor lo modifica. Su
+ * constructor no valida nada a propósito —ver la nota en `choreographyEditor.ts`
+ * sobre por qué el track es perezoso—, así que crearlo no puede tirar y el
+ * `StageErrorBoundary` sigue siendo el que contiene los errores de datos.
  *
  * `three` entra por `dynamic(ssr:false)` — sin eso el bundle del servidor se
  * lleva la librería entera, y de paso ese import es lo que aísla el peso de la
@@ -71,6 +78,7 @@ export function ProbeEscena() {
   const [store] = useState(() => createNumericStore<ProbeParams>(PROBE_DEFAULTS))
   const [stats] = useState(() => createNumericStore<ProbeStats>(PROBE_STATS_DEFAULTS))
   const [rig] = useState(() => createNumericStore<ProbeRig>(PROBE_RIG_DEFAULTS))
+  const [editor] = useState(() => createChoreoEditor())
 
   const [mode, setMode] = useState<ProbeMode>('coreografia')
   const [playing, setPlaying] = useState(false)
@@ -103,13 +111,16 @@ export function ProbeEscena() {
   return (
     // El color sale de la MISMA constante que pinta el fondo de la escena 3D:
     // si divergieran, se vería un salto en el momento en que el canvas monta.
-    <main className="fixed inset-0 overflow-hidden" style={{ backgroundColor: PAPER_COLOR }}>
+    // Desde S6 ese fondo es el de la niebla, no el del papel — son casi el mismo
+    // valor, pero el que hay que igualar es el que el canvas pinta.
+    <main className="fixed inset-0 overflow-hidden" style={{ backgroundColor: FOG_COLOR }}>
       <div className="absolute inset-0">
         <StageErrorBoundary>
           <ProbeStage
             store={store}
             rig={rig}
             stats={stats}
+            editor={editor}
             mode={mode}
             physicsEnabled={physicsEnabled}
             playing={playing}
@@ -132,6 +143,7 @@ export function ProbeEscena() {
         store={store}
         stats={stats}
         rig={rig}
+        editor={editor}
         mode={mode}
         onModeChange={handleModeChange}
         playing={playing}

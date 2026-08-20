@@ -1,12 +1,14 @@
-import { MOTION_EASE, type MotionEaseName } from '@/components/design-system/motion/tokens'
+import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes'
 
 /**
  * LA COREOGRAFÍA — datos, no lógica.
  *
- * Este archivo es el que se abre para calibrar el movimiento. Todo lo que
- * define el recorrido y su física vive acá: los keyframes, los tramos y los
- * parámetros de inercia, mouse y vira. La matemática que los consume está en
- * `choreographySampler.ts` y no hay que tocarla para mover la cámara.
+ * Este archivo es el que se abre para calibrar el movimiento: los keyframes de
+ * cámara, los tramos y la curva de luz. El vocabulario que los describe está en
+ * `choreographyTypes.ts`, la matemática que los consume en
+ * `choreographySampler.ts` y la física que los modula en
+ * `choreographyPhysics.ts`. Ninguno de los tres hay que tocarlo para mover la
+ * cámara o la luz.
  *
  * ── Las 8 pantallas ────────────────────────────────────────────────────────
  *
@@ -16,129 +18,55 @@ import { MOTION_EASE, type MotionEaseName } from '@/components/design-system/mot
  *
  * ── De dónde salen los números ─────────────────────────────────────────────
  *
- * 15 de los 17 keyframes son **posiciones capturadas por el humano** componiendo
- * cada momento en pantalla con el probe. No se les tocó un decimal: no son una
- * propuesta a mejorar, son el dato. Los 2 restantes están marcados
- * `derived: true` y existen porque la descripción del recorrido pide
- * sub-movimientos SECUENCIALES ("en ese orden", "y luego") que dos posiciones
- * no pueden expresar. Cada uno explica en su comentario qué inventó y qué
- * habría que mirar para corregirlo.
+ * Los 23 keyframes salen de una sesión de calibración completa: el humano
+ * recorrió el track con el editor de S5 mirando la escena, ajustó las posiciones
+ * capturadas y agregó **siete sostenes** con el botón de duplicar. Dos siguen
+ * marcados `derived: true`: existen porque la descripción del recorrido pide
+ * sub-movimientos SECUENCIALES ("en ese orden", "y luego") que dos posiciones no
+ * pueden expresar.
+ *
+ * ⚠️ **La calibración vivió en memoria durante una sesión entera y casi se
+ * pierde.** El editor exporta al portapapeles, y si ese texto no se pega acá,
+ * recargar la página lo borra todo. Ver el aviso grande en
+ * `choreographyEditor.ts`: **exportar no es guardar.**
+ *
+ * **S6 tocó cinco cosas y todas están documentadas en el keyframe que cambió**:
+ * el ease y el reparto del descenso de Números, el nombre del keyframe que
+ * subía llamándose "se aleja", el ángulo repetido del giro de Demos, el final
+ * reducido a tres beats limpios y el sostén del cierre. Ninguna pose compuesta
+ * se movió.
+ *
+ * ── Cómo se edita esto ─────────────────────────────────────────────────────
+ *
+ * A mano, o con el **editor de keyframes** del propio probe (modo `editor` en
+ * `/probe-escena`, S5): se elige un keyframe de la lista, se lo ajusta con los
+ * sliders mirando la escena, y el botón de exportar devuelve este bloque
+ * entero, actualizado y con estos mismos comentarios, para pegarlo acá. Las
+ * ediciones del probe viven en memoria y no tocan el disco: **este archivo
+ * sigue siendo la fuente de verdad.**
+ *
+ * Un detalle que importa si se edita a mano: **los comentarios de adentro del
+ * array se editan en `choreographyNotes.ts`**, que es de donde el exportador
+ * los saca. Cambiar uno acá y no allá se pierde en el próximo pegado. Todo lo
+ * demás de este archivo —este doc, los tramos, el arco de luz— es comentario de
+ * verdad y el editor no lo toca.
  *
  * ── Lo que se calibra primero ──────────────────────────────────────────────
  *
- * 1. **La pose de cada tramo cae en su BORDE, no se sostiene.** Con este
- *    reparto el hero queda perfectamente encuadrado en el instante en que se
- *    lo deja de ver. Se arregla duplicando el keyframe con otro `at` (uno para
- *    llegar, otro para sostener) — es una edición de datos, sin lógica. Se
- *    calibra mirando, no calculando, y por eso no se hizo acá.
- * 2. **El keyframe 1 es lo que se ve al aterrizar**: altura 9,00, casi desde
- *    arriba, y el descenso al hero se come la primera pantalla entera.
- * 3. **El giro de Demos son 262° en una sola pantalla.** Si se siente
- *    latigazo, la salida es repartirlo hacia Portfolio y Movimiento final:
- *    ediciones de la columna `at`, nada más.
+ * 1. **Los dos movimientos más violentos del recorrido**, medidos en alturas de
+ *    cuadro por unidad de progreso: la caída de `demos · giro ½` (106) y el
+ *    levantarse de `final · se levanta` (51). El resto del track corre entre 12
+ *    y 31. Los dos son intención calibrada y el sprint no los marcó, pero si el
+ *    recorrido se siente brusco, empiezan ahí.
+ * 2. **`frameY` no hace nada por debajo de una distancia de 11,4** — la mitad
+ *    del alto visible no llega a superar la media altura del logo, así que el
+ *    recorrido disponible es cero. El recorrido calibrado usa distancias de 7 a
+ *    16, o sea que el canal solo vive en cuatro de sus diez poses. Es
+ *    probablemente por eso que quedó en cero en todas.
+ * 3. **Dos de los siete sostenes ya no sostienen**: se los duplicó y después se
+ *    les movió la pose, así que el nombre miente. Están marcados en su
+ *    comentario.
  */
-
-// ── Tipos ───────────────────────────────────────────────────────────────────
-
-/**
- * Los 7 canales que la coreografía maneja. `particleCount` NO entra: es una
- * perilla de medición del instrumento, no un parámetro del recorrido.
- */
-export type ChoreoPose = {
-  /**
-   * Azimut de la cámara, en grados. **No es un rumbo de brújula: es el ángulo
-   * ACUMULADO.** Una vuelta entera se escribe como una diferencia de 360 (ver
-   * `turn`), no como un módulo. El sampler lo envuelve a 0–360 solo para
-   * publicarlo en el panel.
-   */
-  readonly angleDeg: number
-  readonly height: number
-  readonly distance: number
-  /** Dónde cae el logo en pantalla. 0 = centrado · +1 = derecha · −1 = izquierda. */
-  readonly frameX: number
-  /** Ídem vertical. +1 = arriba · −1 = abajo. */
-  readonly frameY: number
-  readonly keyIntensity: number
-  readonly keyKelvin: number
-}
-
-export type ChoreoChannel = keyof ChoreoPose
-
-/** Versión escribible: el `useFrame` muestrea sobre un objeto reusado, sin asignar. */
-export type MutableChoreoPose = { -readonly [K in ChoreoChannel]: number }
-
-/**
- * Orden fijo de los canales. Se recorre por frame, así que es un array y no
- * `Object.keys` — enumerar un objeto por frame asigna un array nuevo cada vez.
- */
-export const CHOREO_CHANNELS: readonly ChoreoChannel[] = [
-  'angleDeg',
-  'height',
-  'distance',
-  'frameX',
-  'frameY',
-  'keyIntensity',
-  'keyKelvin',
-]
-
-/**
- * Curva con la que se LLEGA a un keyframe desde el anterior.
- *
- * Las dos con nombre son las del sistema de motion (`MOTION_EASE`), sin
- * inventar una tercera:
- *
- * - `arrive` — ease-out-quad, la curva canónica de `CLAUDE.md` para lo que
- *   ENTRA a pantalla. Reservada para las dos llegadas grandes del recorrido:
- *   el hero y el cierre.
- * - `shift` — la simétrica de Material, ya en producción como `DOCK_EASE`.
- *   Entra y sale suave, así que la pose de destino de cada sección "encastra":
- *   la cámara se asienta al llegar y arranca sin tirón al salir.
- * - `linear` — **no es una curva nueva: es no aplicar ninguna.** Va en los
- *   waypoints que viven ADENTRO de una sola gesticulación continua (los tres
- *   del giro de Demos, los dos derivados). Con `shift` en cada uno, el giro se
- *   convertiría en un trinquete de cuatro frenadas. Es además la postura que
- *   el propio `tokens.ts` documenta para lo ligado a scroll: "no necesitan una
- *   curva temporal — su forma la da el mapeo del rango".
- */
-export type ChoreoEase = MotionEaseName | 'linear'
-
-/**
- * Cómo se recorre el ángulo desde el keyframe anterior.
- *
- * - `short` (default, la regla del sprint): por el camino corto — la
- *   diferencia se normaliza a (−180°, 180°].
- * - `literal`: se respeta la diferencia tal cual está escrita, valga las
- *   vueltas que valga. **Es lo que hace que el tramo de 360° dé la vuelta
- *   entera en vez de volver por donde vino.**
- *
- * Con los ángulos de hoy las dos opciones dan idéntico (ningún salto entre
- * keyframes consecutivos pasa de 180°), así que la marca no cambia un píxel
- * ahora mismo. Está para que el giro SOBREVIVA a que se editen los ángulos: el
- * día que un keyframe diga 302 y el siguiente 30 queriendo seguir para
- * adelante, `short` lo haría volver y `literal` no.
- */
-export type ChoreoTurn = 'short' | 'literal'
-
-export type ChoreoKeyframe = {
-  /** Punto en el progreso 0→1. Estrictamente creciente a lo largo del array. */
-  readonly at: number
-  /** Nombre legible del momento. Es lo que el simulador muestra en pantalla. */
-  readonly name: string
-  /** `true` = derivado por Claude, no capturado por el humano. */
-  readonly derived?: boolean
-  /** Curva de llegada. Default `shift`. En el PRIMER keyframe se ignora. */
-  readonly ease?: ChoreoEase
-  /** Default `short`. */
-  readonly turn?: ChoreoTurn
-  readonly pose: ChoreoPose
-}
-
-export type ChoreoTramo = {
-  readonly name: string
-  readonly screens: number
-  readonly from: number
-  readonly to: number
-}
 
 // ── Los tramos ──────────────────────────────────────────────────────────────
 
@@ -161,42 +89,75 @@ export const CHOREO_TRAMOS: readonly ChoreoTramo[] = [
 
 // ── Los keyframes ───────────────────────────────────────────────────────────
 
-/** Iluminación de casi todo el recorrido. Solo el cierre se aparta. */
-const LIT = { keyIntensity: 3.4, keyKelvin: 6500 } as const
-
 /**
- * El recorrido. 17 keyframes: 15 capturados + 2 derivados.
+ * El recorrido. 23 keyframes: 21 capturados + 2 derivados.
  *
- * **La iluminación arranca clara y termina apagándose** (3,40 → 0,20 y
- * 6500 K → 7850 K, todo en la última pantalla). Ese apagado es parte de la
- * coreografía, no un detalle: es el cierre.
+ * ⚠️ El censo de arriba cuenta 21 "capturados", y **siete de esos son sostenes
+ * creados con el editor**, no capturas: los que terminan en `· sostén`. El
+ * origen es un dato de la SESIÓN de edición y muere al pegar el bloque en el
+ * archivo, así que desde acá la única marca que queda es el nombre. Dos de esos
+ * siete, además, ya no sostienen nada: se los duplicó y después se les movió la
+ * pose. Cada uno lo dice en su comentario.
+ *
+ * La pose son CINCO canales: ángulo, altura, distancia y los dos de encuadre.
+ * La luz salió de acá en S6 y vive en `LIGHT_ARC`, abajo.
  */
 export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
-  // ── Tramo 1 · Hero ────────────────────────────────────────────────────────
+  // ── Tramo 1 · Hero ───────────────────────────────────────────────────────
+  //
   // "la cámara mira alto y baja hasta encuadrar el hero"
   {
+    // Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado.
+    //
+    // Hasta S5 este keyframe llevaba `keyIntensity: 0` adentro de su pose, o sea
+    // que el recorrido arrancaba literalmente a oscuras y subía la luz en la
+    // primera transición. Nadie diseñó eso: es lo que queda cuando se compone una
+    // posición con el slider de luz en el piso. La luz ya no vive en la pose.
     at: 0,
     name: 'entrada · mirada alta',
-    // Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado.
-    pose: { angleDeg: 0, height: 9, distance: 16.2, frameX: 0.85, frameY: 0.02, ...LIT },
+    pose: { angleDeg: 0, height: 9, distance: 15, frameX: 0.9, frameY: 0 },
   },
   {
+    // `arrive` — la curva del sistema para lo que ENTRA. El descenso desde 9,00
+    // aterriza en el encuadre del hero, no lo cruza, y se acerca de 15 a 11
+    // mientras baja.
     at: 0.125,
     name: 'hero',
-    // `arrive` — la curva del sistema para lo que ENTRA. El descenso desde 9,00
-    // aterriza en el encuadre del hero, no lo cruza.
     ease: 'arrive',
-    pose: { angleDeg: 0, height: -0.2, distance: 16.2, frameX: 0.85, frameY: 0.02, ...LIT },
+    pose: { angleDeg: 0, height: 0, distance: 11, frameX: 0.75, frameY: 0 },
+  },
+  {
+    // El patrón de sostén: misma pose que el keyframe anterior, más adelante en el
+    // recorrido. La cámara LLEGA al hero en 0,125 y se queda quieta hasta 0,188,
+    // así que el encuadre se puede leer en vez de cruzarse. Es el arreglo del
+    // pendiente №1 de S4 ("la pose de cada tramo cae en su borde") y se hace con el
+    // botón "duplicar" del editor.
+    at: 0.188,
+    name: 'hero · sostén',
+    ease: 'arrive',
+    pose: { angleDeg: 0, height: 0, distance: 11, frameX: 0.75, frameY: 0 },
   },
 
   // ── Tramo 2 · Quiénes somos (dos personas) ───────────────────────────────
   {
     // "baja el encuadre horizontal, sube el vertical y se acerca al logo, TODO
     // AL MISMO TIEMPO" — una sola transición, sin intermedios.
+    //
+    // La ambigüedad de "el vertical" quedó resuelta al calibrar, y a favor de la
+    // ALTURA DE CÁMARA: `frameY` está en cero en todo el recorrido. No es un
+    // olvido — ver la nota de `demos · giro ½` sobre por qué ese canal casi no
+    // tiene efecto a las distancias que este recorrido usa.
     at: 0.25,
     name: 'quiénes somos · persona 1',
     ease: 'shift',
-    pose: { angleDeg: 0, height: 3.5, distance: 10.5, frameX: -0.5, frameY: -0.11, ...LIT },
+    pose: { angleDeg: 0, height: 5, distance: 9, frameX: -0.8, frameY: 0 },
+  },
+  {
+    // Sostén de verdad: pose idéntica a la anterior. Se llega y se aguanta.
+    at: 0.293,
+    name: 'quiénes somos · persona 1 · sostén',
+    ease: 'shift',
+    pose: { angleDeg: 0, height: 5, distance: 9, frameX: -0.8, frameY: 0 },
   },
   {
     // ═══ DERIVADO ═══
@@ -204,31 +165,41 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     // "sube el vertical, sube el horizontal, y LUEGO vuelve a bajar el
     // vertical". Ese "luego" pide un intermedio que las capturas no tienen.
     //
-    // Ambigüedad real, resuelta a la vista: "el vertical" puede ser la ALTURA
-    // de cámara o el ENCUADRE vertical, y las dos capturas dicen cosas
-    // distintas — `frameY` vuelve exacto a −0,11 (la firma de "vuelve a
-    // bajar"), pero la altura sube neto 3,50 → 4,25. Así que **suben y bajan
-    // las dos**: es una sola gesticulación coherente (la cámara se levanta y
-    // barre el logo en arco de izquierda a derecha, y después se asienta) y
-    // satisface las dos lecturas.
+    // Lo que hace es el **cruce**: `frameX` barre de −0,80 a +0,80 —el logo cruza
+    // la pantalla entera de izquierda a derecha, que es lo que deja lugar para la
+    // segunda persona— y acá va por el medio, en −0,16. La altura hace una
+    // excursión chica hacia abajo (5,00 → 4,54 → 5,00) y la distancia una hacia
+    // afuera (9,00 → 10,70 → 9,00): la cámara se abre un poco en el cruce y vuelve.
+    // Es lo que impide que el barrido se lea como un desplazamiento plano.
     //
-    // Para quedarse con una sola lectura: bajar `height` a 4.25 mata la
-    // excursión de altura; subir `frameY` a −0.11 mata la del encuadre. Un
-    // número cada una.
-    //
-    // `frameX` ya llega acá a su valor final (0,77): "sube el horizontal" pasa
-    // JUNTO con la subida, y lo único que queda después es el asentamiento.
+    // **Los cinco números son interpolación, no captura.** Para matar la excursión
+    // de altura, poner 5; para la de distancia, poner 9. Un número cada una.
     at: 0.335,
     name: 'persona 2 · cruce (apex)',
     derived: true,
     ease: 'linear',
-    pose: { angleDeg: 0, height: 4.9, distance: 10.6, frameX: 0.77, frameY: 0.38, ...LIT },
+    pose: { angleDeg: 0, height: 4.5431, distance: 10.7012, frameX: -0.1568, frameY: 0 },
   },
   {
     at: 0.375,
     name: 'quiénes somos · persona 2',
     ease: 'shift',
-    pose: { angleDeg: 0, height: 4.25, distance: 10.7, frameX: 0.77, frameY: -0.11, ...LIT },
+    pose: { angleDeg: 0, height: 5, distance: 9, frameX: 0.8, frameY: 0 },
+  },
+  {
+    // ⚠️ **Se llama "sostén" pero NO sostiene.** Salió del botón duplicar y después
+    // se le movió la pose: la altura baja de 5,00 a 2,65, la distancia se abre a
+    // 9,83 y el encuadre vuelve del borde (0,80 → 0,57). Es un beat propio —el
+    // arranque del descenso a Números— con el nombre que le quedó del duplicado.
+    //
+    // Es además el segmento más rápido del primer medio recorrido: 28,0 alturas de
+    // cuadro por unidad de progreso. Renombrarlo son dos strings (acá y en
+    // `choreography.ts`); se deja como está para no romper la referencia del video
+    // ya grabado.
+    at: 0.395,
+    name: 'quiénes somos · persona 2 · sostén',
+    ease: 'shift',
+    pose: { angleDeg: 0, height: 2.6492, distance: 9.8298, frameX: 0.5698, frameY: 0 },
   },
 
   // ── Tramo 3 · Números ────────────────────────────────────────────────────
@@ -236,30 +207,80 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     // ═══ DERIVADO ═══
     //
     // "reduce altura, aumenta distancia (EN ESE ORDEN, SECUENCIAL)". Secuencial
-    // = un keyframe en el medio: la altura ya abajo en el −0,30 que se capturó,
-    // con la distancia todavía en el 10,7 que traía.
+    // = un keyframe en el medio: la altura ya abajo, con la distancia todavía sin
+    // abrir.
     //
-    // El encuadre "se reacomoda a cero" a mitad de camino acá y termina en el
-    // keyframe siguiente. Nada de esto está capturado: los dos valores de
-    // encuadre son interpolación explícita.
-    at: 0.415,
+    // Al calibrar, la altura de este keyframe bajó hasta **−3,90, el piso del
+    // rango**: la cámara rasa el papel. Es la pose más baja del recorrido junto con
+    // las tres de Demos.
+    //
+    // ── S6 · 1: `linear` → `shift` ─────────────────────────────────────────
+    //
+    // Con `linear` la cámara llegaba al fondo a velocidad plena y el keyframe
+    // siguiente la frenaba de golpe. `linear` es para los waypoints que viven
+    // ADENTRO de una gesticulación, y éste no lo es: la propia descripción dice
+    // SECUENCIAL, o sea que acá TERMINA el "baja la altura" y recién entonces
+    // arranca el "se aleja". Un final de gesto pide una curva de llegada.
+    //
+    // ── S6 · 2: `at` 0,464 → 0,445 ─────────────────────────────────────────
+    //
+    // Éste es el arreglo del tirón, y hay que medirlo en **alturas de cuadro** —
+    // cuánto se mueve y cuánto cambia de tamaño el objeto EN PANTALLA, que es la
+    // única unidad en la que una bajada y un alejamiento se comparan.
+    //
+    // Los tres beats de la pantalla de Números corrían a **17,9 / 47,4 / 19,3** por
+    // unidad de progreso: el del medio —bajar a −3,90 y volver a subir a 1,00 en
+    // 0,024 de progreso— iba a **más del doble** que sus dos vecinos. Eso es el
+    // tirón, y se lee como un rebote.
+    //
+    // Con los `at` en 0,445 y 0,491 quedan en **24,7 / 24,7 / 25,8**, o sea una
+    // dispersión del 4,5% contra el 105% que había. **La pantalla dura exactamente
+    // lo mismo y ninguna pose se tocó**: lo único que cambió es cuánto le toca a
+    // cada beat.
+    at: 0.445,
     name: 'números · baja la altura',
     derived: true,
-    ease: 'linear',
-    pose: { angleDeg: 0, height: -0.3, distance: 10.7, frameX: 0.42, frameY: -0.05, ...LIT },
-  },
-  {
-    at: 0.45,
-    name: 'números · se aleja',
     ease: 'shift',
-    pose: { angleDeg: 0, height: -0.3, distance: 22.3, frameX: 0.01, frameY: 0.01, ...LIT },
+    pose: { angleDeg: 0, height: -3.9, distance: 9, frameX: 0.4762, frameY: 0 },
   },
   {
-    // "y luego vuelve a subir altura y a acercarse" — las dos juntas.
+    // ── S6: renombrado, y el `at` 0,488 → 0,491 ────────────────────────────
+    //
+    // ANTES se llamaba `números · se aleja`, y el nombre mentía: de −3,90 a 1,00
+    // son 4,90 de altura contra 2,00 de distancia. Medido en pantalla, la subida
+    // pesa **más del triple** que el alejamiento. Un keyframe que dice una cosa y
+    // hace otra es la clase de dato que después nadie se anima a tocar.
+    //
+    // El movimiento no cambió — cambió el nombre, que ahora dice las dos cosas en
+    // el orden en que pesan. El `at` es la otra mitad del arreglo del tirón, y está
+    // explicado en el keyframe anterior.
+    at: 0.491,
+    name: 'números · sube y se aleja',
+    ease: 'shift',
+    pose: { angleDeg: 0, height: 1, distance: 11, frameX: 0.0129, frameY: 0 },
+  },
+  {
+    // "y luego vuelve a subir altura y a acercarse".
+    //
+    // Ojo con esa frase, porque el dato calibrado la reparte distinto: la subida de
+    // altura ya ocurrió en el keyframe anterior, acá la cámara **se sigue alejando**
+    // (11,0 → 14,1) y el acercarse llega recién en el sostén (14,1 → 12,0). El
+    // gesto descrito existe, pero repartido en tres keyframes y no en uno.
     at: 0.5,
     name: 'números',
     ease: 'shift',
-    pose: { angleDeg: 0, height: 5.1, distance: 15.2, frameX: 0.01, frameY: 0.01, ...LIT },
+    pose: { angleDeg: 0, height: 1, distance: 14.1, frameX: 0, frameY: 0 },
+  },
+  {
+    // ⚠️ **Otro que se llama "sostén" y no sostiene**: baja la altura a 0 y se
+    // acerca a 12. Además vive en 0,563, o sea DENTRO de la pantalla de Portfolio y
+    // no de la de Números. Las dos cosas son deliberadas —es el cierre del gesto de
+    // Números derramándose en la pantalla siguiente— pero se leen mal desde el
+    // nombre.
+    at: 0.563,
+    name: 'números · sostén',
+    ease: 'shift',
+    pose: { angleDeg: 0, height: 0, distance: 12, frameX: 0, frameY: 0 },
   },
 
   // ── Tramo 4 · Portfolio ──────────────────────────────────────────────────
@@ -268,10 +289,20 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     // DIAGONAL": las tres a la vez, una sola transición sobre toda la pantalla.
     // `frameX` −1,00 deja el logo pegado a la izquierda para que el contenido
     // ocupe arriba a la derecha.
+    //
+    // Es el segmento más cargado del recorrido fuera de Demos: 31,2 alturas de
+    // cuadro por unidad de progreso, con 726 grados por unidad encima.
     at: 0.625,
     name: 'portfolio',
     ease: 'shift',
-    pose: { angleDeg: 39.5, height: 5.65, distance: 6.3, frameX: -1, frameY: 0.1, ...LIT },
+    pose: { angleDeg: 45, height: 6, distance: 7, frameX: -1, frameY: 0 },
+  },
+  {
+    // Sostén de verdad: pose idéntica a la anterior.
+    at: 0.643,
+    name: 'portfolio · sostén',
+    ease: 'shift',
+    pose: { angleDeg: 45, height: 6, distance: 7, frameX: -1, frameY: 0 },
   },
 
   // ── Tramo 5 · Demos ──────────────────────────────────────────────────────
@@ -279,207 +310,263 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // "rota 360° MIENTRAS baja la altura, y termina con la cámara mirando el logo
   // desde abajo a la izquierda hacia arriba a la derecha".
   //
-  // Los tres waypoints intermedios son capturados, y su `at` está repartido
-  // PROPORCIONAL AL ÁNGULO recorrido (74° / 31° / 83,5° / 74° sobre 262,5°
-  // totales) para que el giro sea de velocidad pareja y no lurchee.
+  // ── S6: el giro dejó de frenar en el medio ───────────────────────────────
   //
-  // Los cuatro van `turn: 'literal'`: es la marca explícita de "acá se da la
+  // ANTES `giro ¼` y `giro ½` tenían el MISMO ángulo, así que entre los dos la
+  // cámara no rotaba: solo caía. El giro corría a **5294 / 0 / 2250 / 2571**
+  // grados por unidad de progreso — arrancaba al doble de velocidad, frenaba en
+  // seco y volvía a arrancar. Eso es el frenar-caer-arrancar.
+  //
+  // AHORA corre a **2500 / 2500 / 2500 / 2571**, con una dispersión del 2,8%. Lo
+  // consiguen dos cambios y ninguno toca una pose compuesta: el ángulo repetido
+  // de `giro ½` pasa a 180 (el punto medio exacto de sus vecinos) y los `at` de
+  // `giro ¼` y `giro ½` se corren a 0,679 y 0,697. El primer tramo tenía 0,017
+  // de progreso para 90°: era el doble de rápido que cualquier otro.
+  //
+  // El comentario viejo prometía "proporcional al ángulo (74° / 31° / 83,5° /
+  // 74° sobre 262,5°)". Esos números eran de una captura anterior y hacía rato
+  // que no describían el dato. La vuelta ahora va **45 → 135 → 180 → 225 → 315**
+  // y el tramo 6 la completa hasta 360.
+  //
+  // Los cinco van `turn: 'literal'`: es la marca explícita de "acá se da la
   // vuelta entera, no se vuelve por donde se vino".
   {
-    at: 0.66,
+    at: 0.679,
     name: 'demos · giro ¼',
     ease: 'linear',
     turn: 'literal',
-    pose: { angleDeg: 113.5, height: 4.25, distance: 6.3, frameX: -1, frameY: 0.1, ...LIT },
+    pose: { angleDeg: 135, height: 3.9, distance: 7, frameX: -0.5, frameY: 0 },
   },
   {
-    at: 0.675,
+    // ── S6: 135° → 180°, y el `at` 0,675 → 0,697 ───────────────────────────
+    //
+    // ANTES este keyframe tenía **el mismo ángulo que `giro ¼`**, así que entre los
+    // dos la cámara no rotaba: solo se desplomaba 7,8 de altura. El 135 repetido no
+    // era una composición — es lo que queda cuando se compone un waypoint moviendo
+    // altura, distancia y encuadre sin tocar el slider de ángulo.
+    //
+    // 180 es exactamente el punto medio entre sus dos vecinos (135 y 225), así que
+    // la vuelta pasa por su mitad en la mitad del tramo. El porqué completo está en
+    // el separador del tramo, arriba.
+    //
+    // **Este es el momento más violento de todo el recorrido**: 106 alturas de
+    // cuadro por unidad de progreso, cuatro veces cualquier otro. Es la caída de
+    // 3,90 a −3,90 en 0,018. No se tocó —es intención calibrada y el sprint no la
+    // marcó— pero queda medido, porque es lo primero que va a doler si el recorrido
+    // se siente brusco.
+    //
+    // Su `frameY` de 0,10 es el único distinto de cero del recorrido, y **no hace
+    // nada**: el encuadre vertical solo tiene recorrido cuando la mitad del alto
+    // visible supera la media altura del logo, o sea a partir de una distancia de
+    // **11,4**. Acá la cámara está a 8. Se deja porque cambiarlo tampoco haría nada.
+    at: 0.697,
     name: 'demos · giro ½',
     ease: 'linear',
     turn: 'literal',
-    pose: { angleDeg: 144.5, height: -1.9, distance: 6.3, frameX: -1, frameY: 0.1, ...LIT },
+    pose: { angleDeg: 180, height: -3.9, distance: 8, frameX: 0, frameY: 0.1 },
   },
   {
     at: 0.715,
     name: 'demos · giro ¾',
     ease: 'linear',
     turn: 'literal',
-    pose: { angleDeg: 228, height: -3.5, distance: 6.3, frameX: -1, frameY: 0.1, ...LIT },
+    pose: { angleDeg: 225, height: -3.9, distance: 7, frameX: -0.5, frameY: 0 },
   },
   {
-    // La cámara termina ABAJO (altura −2,70) y el logo salta a la derecha
-    // (`frameX` +1,00) para dejarle abajo a la izquierda a las demos.
+    // La cámara termina ABAJO (altura −3,90, el piso del rango) y el logo salta a
+    // la derecha (`frameX` +1,00) para dejarle abajo a la izquierda a las demos.
     at: 0.75,
     name: 'demos',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 302, height: -2.7, distance: 7.7, frameX: 1, frameY: 0.1, ...LIT },
+    pose: { angleDeg: 315, height: -3.9, distance: 7, frameX: 1, frameY: 0 },
+  },
+  {
+    // Sostén de verdad: pose idéntica a la anterior. Es el más largo del recorrido
+    // (0,038 de progreso), y tiene por qué: viene de la vuelta entera.
+    at: 0.788,
+    name: 'demos · sostén',
+    ease: 'shift',
+    turn: 'literal',
+    pose: { angleDeg: 315, height: -3.9, distance: 7, frameX: 1, frameY: 0 },
   },
 
   // ── Tramo 6 · Movimiento final + cierre ──────────────────────────────────
   //
-  // "se levanta, gira un poco, baja, y se aleja": cuatro beats, y hay cuatro
-  // transiciones capturadas. Nada derivado acá. Cada uno va `shift` para que se
-  // lean como beats y no como un barrido continuo.
+  // "se levanta, gira un poco, baja, y se aleja".
+  //
+  // ── S6: de cuatro beats a TRES ───────────────────────────────────────────
+  //
+  // ANTES había un cuarto keyframe entre `gira` y el cierre —`final · baja`, en
+  // 354,09°— y el ángulo del final iba **315 → 360 → 354,09 → 0**. Ese retroceso
+  // de casi 6° no está en la intención descrita y se lee como una vacilación,
+  // seguida de otro cambio tan chico que no se percibe.
+  //
+  // AHORA son tres beats limpios: **se levanta, gira hasta 360, se aleja al
+  // cierre.** El "baja" de la descripción no se perdió: la altura cae de 4,50 a
+  // 1,50 dentro del último beat, junto con el alejamiento, y ahí se lee como una
+  // sola cosa en vez de como dos.
+  //
+  // Cada uno va `shift` para que se lean como beats y no como un barrido
+  // continuo. El cierre es la excepción y explica su curva en su comentario.
+  //
+  // Lo que NO se tocó y conviene tener medido: el levantarse corre a **51,4
+  // alturas de cuadro por unidad de progreso** —8,4 de altura en 0,037— y es el
+  // segundo movimiento más violento del recorrido, después de la caída de
+  // `giro ½`. Es intención calibrada y el sprint no lo marcó.
   {
-    at: 0.792,
+    at: 0.825,
     name: 'final · se levanta',
     ease: 'shift',
-    pose: { angleDeg: 312, height: 3.55, distance: 7.7, frameX: 1, frameY: 0.14, ...LIT },
+    pose: { angleDeg: 315, height: 4.5, distance: 7, frameX: 1, frameY: 0 },
   },
   {
-    at: 0.833,
+    // El beat que cierra la vuelta: 315 → 360. Desde S6 la cierra ACÁ y no en el
+    // keyframe siguiente, que es lo que deja al cierre dedicado a alejarse.
+    at: 0.85,
     name: 'final · gira',
     ease: 'shift',
-    pose: { angleDeg: 347, height: 3.55, distance: 7.7, frameX: -0.02, frameY: 0, ...LIT },
+    pose: { angleDeg: 360, height: 4.5, distance: 8, frameX: 0, frameY: 0 },
   },
   {
-    at: 0.875,
-    name: 'final · baja',
-    ease: 'shift',
-    pose: { angleDeg: 360, height: -2.05, distance: 7.7, frameX: -0.02, frameY: 0, ...LIT },
-  },
-  {
-    // "se aleja del todo y queda el logo" — centrado, con la sala apagándose.
-    // `arrive` para que la luz muera rápido y después se demore, en vez de
-    // desvanecerse plano.
+    // ── S6: `at` 0,938 → 0,890, y el encuadre a cero ───────────────────────
     //
-    // El track TERMINA ACÁ. La cola que describe el recorrido ("después las
-    // letras se van, la cámara se mueve a otros ángulos y termina en el CTA
-    // final") no tiene posiciones capturadas y no se inventó: cuando se
-    // compongan esos ángulos, se agregan a este array.
+    // Acá llega el cierre y desde acá se sostiene. **El sostén pasó de media
+    // pantalla a 0,88 de pantalla**, que es lo que pedía "el cierre no sostiene".
+    //
+    // Se paga con velocidad: el alejamiento de 0,850 a 0,890 corre a 27,7 alturas
+    // de cuadro por unidad de progreso, contra las 12,6 que corría en 0,088. Es un
+    // intercambio real y es un número — pero 12,6 lo dejaba como el segmento más
+    // lento del recorrido justo antes del final, y con `arrive` el alejamiento
+    // resuelve en el primer tercio y se demora en el resto igual.
+    //
+    // `frameX` va de −0,02 a **0 exacto**: una pantalla de cierre con el logo
+    // centrado y dos textos simétricos no puede tener un descentrado que nadie
+    // eligió. −0,02 sobre un recorrido de ±1 es ruido de arrastrar un slider.
+    at: 0.89,
+    name: 'cierre · sostén',
+    ease: 'arrive',
+    pose: { angleDeg: 360, height: 1.5, distance: 16, frameX: 0, frameY: 0 },
+  },
+  {
+    // "se aleja del todo y queda el logo", con la sala apagándose. `arrive` para
+    // que el alejamiento resuelva rápido y después se demore. El arco de luz usa la
+    // misma curva en su último tramo, así que la sala termina de apagarse en el
+    // mismo momento en que la cámara se detiene.
+    //
+    // ── S6: la presencia del cierre ────────────────────────────────────────
+    //
+    // Acá va a ir "develOP" arriba y el slogan abajo, así que la composición se
+    // midió para eso: con FOV 35 y distancia de ojo 16,07, **el logo ocupa el 70,7%
+    // del alto del cuadro y deja 14,6% de aire arriba y 14,6% abajo** — sobre una
+    // ventana de 1080 son 158 px de cada lado, que alcanzan de sobra para un
+    // wordmark y una línea de slogan.
+    //
+    // **La distancia y la altura NO se tocaron, y es una decisión.** El sprint pedía
+    // "más presencia del logo" leyendo un cierre que se veía chico y apenas visible;
+    // medido, el logo ya ocupaba dos tercios del cuadro. Lo que lo hacía invisible
+    // era la luz: 2,0 de intensidad a **2000 K** —ámbar profundo— sobre un objeto
+    // casi negro. Con el arco, el cierre queda en nivel 0,34 neutro-frío y el
+    // contraluz se resiste hasta 0,59, que es lo que lo recorta. Agrandarlo más se
+    // comería el aire donde va el texto.
+    //
+    // El ángulo dice 360 y no 0: es la misma posición de cámara, pero este archivo
+    // guarda el ángulo ACUMULADO y escribir 0 después de un 360 contradice su propia
+    // convención. El panel lo publica envuelto, así que ahí se sigue leyendo 0,0°.
+    //
+    // El track TERMINA ACÁ. La cola que describe el recorrido ("después las letras
+    // se van, la cámara se mueve a otros ángulos y termina en el CTA final") no
+    // tiene posiciones capturadas y no se inventó: cuando se compongan esos ángulos,
+    // se agregan a este array.
     at: 1,
     name: 'cierre',
     ease: 'arrive',
-    pose: { angleDeg: 360, height: 6.25, distance: 30, frameX: -0.02, frameY: 0, keyIntensity: 0.2, keyKelvin: 7850 },
+    pose: { angleDeg: 360, height: 1.5, distance: 16, frameX: 0, frameY: 0 },
   },
 ]
 
-/** Puntos de control de cada curva nombrada, tal cual los define el sistema. */
-export const CHOREO_EASE_POINTS: Record<MotionEaseName, readonly [number, number, number, number]> =
-  MOTION_EASE
-
-// ════════════════════════════════════════════════════════════════════════════
-// FÍSICA
-// ════════════════════════════════════════════════════════════════════════════
-//
-// Todo lo de acá abajo se aplica SOLO en modo coreografía y solo con la física
-// encendida. En modo manual el probe se comporta exactamente como antes —
-// directo, sin inercia, sin mouse y sin vira — para que siga sirviendo de
-// instrumento de precisión y las mediciones ya publicadas sigan valiendo.
-//
-// Bajo `prefers-reduced-motion` no hay nada de esto: la cámara va directo a la
-// posición del progreso.
-
-// ── Inercia ─────────────────────────────────────────────────────────────────
+// ── El arco de luz (S6) ─────────────────────────────────────────────────────
 
 /**
- * Constante de tiempo de la persecución amortiguada, POR CANAL, en segundos.
- * Es el tiempo en que se cubre el 63% de la distancia al objetivo; en ~3τ ya
- * llegó. τ más grande = más pesado, más inercia, más asentamiento al frenar.
+ * LA LUZ ES UNA CURVA, NO UN NÚMERO POR KEYFRAME.
  *
- * No son todos iguales a propósito: el ángulo y la distancia mueven una masa
- * grande y se sienten mejor pesados, el encuadre tiene que responder o el
- * scroll se siente pegajoso, y la luz asienta más lento porque un dimmer no
- * salta.
+ * ── Qué reemplaza ──────────────────────────────────────────────────────────
  *
- * La fórmula es independiente del framerate (`1 − e^(−dt/τ)`), así que estos
- * números significan lo mismo a 30 que a 144 fps.
+ * Hasta S5 cada keyframe llevaba `keyIntensity` y `keyKelvin` adentro de su
+ * pose. Eran dos sliders más mientras se componían posiciones, y quedaron sin
+ * diseñar: el primer keyframe arrancaba en intensidad 0 —el recorrido empezaba
+ * literalmente a oscuras—, el hero saltaba a 9 (el tope del slider), y el cierre
+ * terminaba en 2,0 a 2000 K, un ámbar profundo sobre un objeto casi negro. No
+ * era una curva: eran veinticuatro valores sueltos. La iluminación no es una
+ * propiedad de la cámara.
+ *
+ * ── Qué se conserva ────────────────────────────────────────────────────────
+ *
+ * La narrativa, que es la que valía: **la escena arranca clara y se va apagando
+ * hacia el cierre.** Lo que cambia es que ahora es una curva con forma y con
+ * razones, editable de un solo lado.
+ *
+ * ── La forma, y por qué esta ───────────────────────────────────────────────
+ *
+ * Los cinco puntos caen todos en bordes de pantalla (0, 4/8, 6/8, 7/8, 8/8), la
+ * misma retícula que usa el resto del recorrido:
+ *
+ * - **0 → 0,5 · meseta.** Hero, quiénes somos y números van a luz plena. Son
+ *   los tramos donde se lee contenido, y bajarle la luz a una sección que
+ *   alguien está leyendo es cobrarle al lector el efecto.
+ * - **0,5 → 0,75 · el primer escalón, y es chico** (a 0,84). Empieza a bajar
+ *   justo cuando la cámara empieza a moverse de verdad: portfolio se acerca y
+ *   demos da la vuelta. **El giro es el momento más fuerte del recorrido y no
+ *   se le baja la luz**; lo que se le baja es lo suficiente para que se note
+ *   que algo cambió.
+ * - **0,75 → 0,875 · la caída real** (a 0,60). El movimiento final ya ocurre en
+ *   penumbra.
+ * - **0,875 → 1 · el cierre** (a 0,34), con `arrive`, la misma curva que la
+ *   cámara: la luz muere rápido y después se demora, así que la última pantalla
+ *   llega apagada y se SOSTIENE apagada en vez de seguir bajando hasta el final.
+ *
+ * **0,34, y el cierre calibrado tenía 0,22.** El cierre venía en 2,0 sobre un
+ * tope de 9, y el humano lo describió como "apenas visible". Un tercio de la luz
+ * plena sigue siendo con claridad el momento más oscuro del recorrido —el
+ * anterior más oscuro es 0,60— y alcanza para que el logo, el piso y el texto
+ * que va a ir arriba y abajo se lean. Súmese que el contraluz no baja a 0,34
+ * sino a 0,59: es lo que de verdad recorta el logo en esa pantalla.
+ *
+ * **La temperatura acompaña, y hacia el AZUL — y ésta es la decisión más
+ * opinable de todo el sprint, así que va con su porqué y con su número para
+ * darla vuelta.**
+ *
+ * El recorrido calibrado terminaba en **2000 K**: ámbar profundo, una sala que
+ * se apaga como se apaga una lámpara de tungsteno. Es una imagen fuerte y es lo
+ * único que se sabe del gusto del humano acá. Va para el otro lado igual, por
+ * una razón que ya está en el repo: **este set es papel neutro**, y S4 ya había
+ * rechazado un default cálido (5600 K) justo porque "el papel renderizaba
+ * rosado y el default del instrumento tenía un sesgo de color que no era una
+ * decisión". A 2000 K el papel entero se tiñe de naranja, y con él el ciclorama,
+ * los planos y la niebla — o sea la escena entera, no solo el logo.
+ *
+ * Así que 6500 K (D65, el blanco con el que el papel se ve papel) sube a 7700 K,
+ * que es el vuelco de la tarde sobre un set iluminado por cielo. Es más suave
+ * que el 7850 que proponía el arco original de S4, y sube repartido en tres
+ * tramos en vez de todo en la última transición.
+ *
+ * **Para el cierre ámbar: cambiar el 7700 de abajo por ~2200.** Un número.
+ *
+ * ── Lo que NO está acá ─────────────────────────────────────────────────────
+ *
+ * Cómo se reparte ese nivel entre las tres luces, el hemisférico y la niebla
+ * está en `probeLighting.ts`, y no es un reparto plano: el ambiente se apaga
+ * más rápido que la principal y el contraluz se resiste. Es lo que hace que la
+ * escena gane contraste al oscurecerse en vez de volverse gris.
  */
-export const SETTLE_TAU: Record<ChoreoChannel, number> = {
-  angleDeg: 0.28,
-  height: 0.24,
-  distance: 0.26,
-  frameX: 0.2,
-  frameY: 0.2,
-  keyIntensity: 0.35,
-  keyKelvin: 0.35,
-}
-
-/**
- * Umbral de asentamiento por canal, en las unidades de cada canal. Debajo de
- * esta diferencia se pega al objetivo en vez de seguir persiguiéndolo: una
- * exponencial nunca llega, y sin esto el store se escribiría eternamente con
- * micras de cambio que nadie ve.
- */
-export const SETTLE_EPSILON: Record<ChoreoChannel, number> = {
-  angleDeg: 0.01,
-  height: 0.002,
-  distance: 0.002,
-  frameX: 0.0005,
-  frameY: 0.0005,
-  keyIntensity: 0.002,
-  keyKelvin: 0.5,
-}
-
-// ── Offset de mouse ─────────────────────────────────────────────────────────
-
-/**
- * El mouse MODULA la posición que determina el progreso, no la reemplaza.
- *
- * Toca dos canales y ninguno es el encuadre: así la pose que se copia del panel
- * sigue siendo exactamente la del track, sin el mouse encima.
- *
- * **Es relativo, no absoluto.** El azimut ya lo es (2,2° se ven igual a 6,3 que
- * a 30 de distancia); la altura se multiplica por la distancia para que el
- * desplazamiento EN PANTALLA sea el mismo en toda la órbita. Un offset fijo en
- * unidades de mundo sería un cimbronazo de cerca y nada de lejos.
- *
- * El feed del puntero es `state.pointer` de r3f — **no se agrega un listener
- * propio**: por la lección ya documentada del repo, r3f v9 lo actualiza por su
- * cuenta sobre la caja del canvas.
- *
- * El signo es "mirar alrededor": mouse a la derecha → la cámara se corre a la
- * derecha y se ve más del costado derecho del objeto. Invertirlo es cambiarle
- * el signo a estas dos constantes.
- */
-export const MOUSE_ANGLE_DEG = 2.2
-export const MOUSE_HEIGHT_FACTOR = 0.045
-/** El mouse ARRASTRA, no salta: constante de tiempo propia, más lenta que la del track. */
-export const MOUSE_TAU = 0.45
-export const MOUSE_EPSILON = 0.0005
-
-// ── Vira en reposo ──────────────────────────────────────────────────────────
-
-/**
- * Balanceo lento y continuo del logo — no una rotación. Es lo que impide que la
- * escena parezca congelada cuando el progreso está quieto.
- *
- * Dos senos de período INCONMENSURABLE (13 y 9,5 s): la combinación no se
- * repite a la vista, así que no se lee como un bucle. Amplitudes en grados,
- * deliberadamente por debajo del umbral en que se leería como "el objeto gira".
- *
- * Corre siempre, no solo con el progreso quieto: durante el recorrido queda
- * tapado por el movimiento de la cámara y apagarlo y prenderlo sería una
- * discontinuidad gratis.
- */
-export const VIRA_YAW_DEG = 1.15
-export const VIRA_PITCH_DEG = 0.7
-export const VIRA_YAW_PERIOD_S = 13
-export const VIRA_PITCH_PERIOD_S = 9.5
-/** Desfase del pitch, en radianes. Sin él los dos senos cruzan el cero juntos. */
-export const VIRA_PITCH_PHASE = 1.1
-
-/**
- * ⚠️ **EL GASTO NUEVO MÁS GRANDE DE ESTE SPRINT, Y EL PRIMER CANDIDATO A
- * APAGAR SI MOBILE NO CIERRA.**
- *
- * Hoy el shadow map se calcula UNA VEZ y nunca más (`gl.shadowMap.autoUpdate =
- * false`): con la luz fija al mundo y el objeto quieto, el mapa de profundidad
- * es idéntico frame a frame. Que la cámara se mueva no lo invalida — una luz
- * direccional solo depende de la luz y de quién proyecta.
- *
- * Pero la vira mueve al que proyecta. Con el mapa congelado, la sombra se queda
- * desfasada del objeto que se balancea. Así que la vira obliga a **una pasada
- * de render de sombra completa por frame** (mapa de 2048²).
- *
- * `false` acá = se acepta la sombra estática y se recupera esa pasada. El
- * balanceo es de ~1°, así que el desfase es chico; es un intercambio real y
- * está a un booleano de distancia.
- */
-export const VIRA_UPDATES_SHADOW = true
-
-// ── Reproducción ────────────────────────────────────────────────────────────
-
-/** Progreso por segundo del botón de reproducción. 0,07 = pasada completa en ~14 s. */
-export const PLAY_SPEED_DEFAULT = 0.07
+export const LIGHT_ARC: readonly LightStop[] = [
+  { at: 0, level: 1, kelvin: 6500 },
+  // Meseta: nada cambia hasta el final de Números.
+  { at: 0.5, level: 1, kelvin: 6500, ease: 'linear' },
+  // Portfolio y Demos. Baja apenas: al giro no se le apaga la luz.
+  { at: 0.75, level: 0.84, kelvin: 6850, ease: 'shift' },
+  // El movimiento final, ya en penumbra.
+  { at: 0.875, level: 0.6, kelvin: 7300, ease: 'linear' },
+  // El cierre. `arrive` = llega apagado temprano y sostiene.
+  { at: 1, level: 0.34, kelvin: 7700, ease: 'arrive' },
+]

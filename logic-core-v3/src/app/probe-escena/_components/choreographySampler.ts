@@ -1,92 +1,25 @@
+import { cubicBezierEase } from './bezier'
+import { CHOREO_TRAMOS, LIGHT_ARC } from './choreography'
 import {
   CHOREO_CHANNELS,
   CHOREO_EASE_POINTS,
-  CHOREO_TRAMOS,
   type ChoreoKeyframe,
   type MutableChoreoPose,
-} from './choreography'
+  type MutableLightLevels,
+} from './choreographyTypes'
 
 /**
  * La matemática de la coreografía. Puro: sin React, sin three, sin DOM.
  *
  * Se separa de `choreography.ts` porque ese archivo tiene que poder editarse
  * para calibrar el movimiento sin leer una línea de lógica. Acá está lo que no
- * se toca: el evaluador de bezier, el desenvuelto del ángulo, el muestreo del
- * track y la amortiguación.
+ * se toca: el desenvuelto del ángulo, el muestreo del track, el del arco de luz
+ * y la amortiguación. El evaluador de curvas está un escalón más abajo, en
+ * `bezier.ts`, porque lo usan los dos muestreos y no sabe qué es un keyframe.
  *
  * Todo lo que corre por frame escribe sobre objetos que recibe, sin asignar
  * memoria: el `useFrame` no puede ir dejando basura para el recolector.
  */
-
-// ── Bezier ──────────────────────────────────────────────────────────────────
-
-/**
- * Un cubic-bezier de CSS es una curva de (0,0) a (1,1) con dos puntos de
- * control; `MOTION_EASE` guarda exactamente esos cuatro números. Para evaluarla
- * hay que invertir x(t) —no hay forma cerrada— y recién ahí leer y(t).
- *
- * `component` y `slope` son la Bernstein de grado 3 con P0=0 y P3=1, ya
- * simplificada.
- */
-function bezierComponent(a: number, b: number, t: number): number {
-  const u = 1 - t
-  return 3 * u * u * t * a + 3 * u * t * t * b + t * t * t
-}
-
-function bezierSlope(a: number, b: number, t: number): number {
-  const u = 1 - t
-  return 3 * u * u * a + 6 * u * t * (b - a) + 3 * t * t * (1 - b)
-}
-
-const NEWTON_ITERATIONS = 8
-const NEWTON_EPSILON = 1e-6
-const BISECTION_ITERATIONS = 24
-
-/**
- * Evalúa la curva en `x` ∈ [0,1].
- *
- * Newton-Raphson desde `t = x` —que para curvas de easing razonables converge
- * en dos o tres pasos— con bisección como red: si la pendiente se acerca a cero
- * (curvas con tramos casi planos, que las hay), Newton diverge y hay que
- * caerse a un método que no puede fallar.
- *
- * Corre UNA vez por frame: los siete canales de un mismo segmento comparten el
- * `t` resultante.
- */
-export function cubicBezierEase(
-  points: readonly [number, number, number, number],
-  x: number
-): number {
-  if (x <= 0) return 0
-  if (x >= 1) return 1
-
-  const [x1, y1, x2, y2] = points
-
-  let t = x
-  for (let i = 0; i < NEWTON_ITERATIONS; i += 1) {
-    const error = bezierComponent(x1, x2, t) - x
-    if (Math.abs(error) < NEWTON_EPSILON) return bezierComponent(y1, y2, t)
-
-    const slope = bezierSlope(x1, x2, t)
-    if (Math.abs(slope) < NEWTON_EPSILON) break
-
-    t -= error / slope
-    if (t < 0 || t > 1) break
-  }
-
-  let low = 0
-  let high = 1
-  t = x
-  for (let i = 0; i < BISECTION_ITERATIONS; i += 1) {
-    const value = bezierComponent(x1, x2, t)
-    if (Math.abs(value - x) < NEWTON_EPSILON) break
-    if (value > x) high = t
-    else low = t
-    t = (low + high) / 2
-  }
-
-  return bezierComponent(y1, y2, t)
-}
 
 // ── Ángulo ──────────────────────────────────────────────────────────────────
 
@@ -159,8 +92,8 @@ export function buildTrack(keyframes: readonly ChoreoKeyframe[]): ChoreoTrack {
  * Índice del keyframe de LLEGADA del segmento que contiene a `progress` (o sea:
  * el segmento va de `index - 1` a `index`). Nunca devuelve 0.
  *
- * Barrido lineal: son 17 keyframes y corre una vez por frame. Una búsqueda
- * binaria acá sería más código para ahorrar catorce comparaciones.
+ * Barrido lineal: son dieciséis keyframes y corre una vez por frame. Una
+ * búsqueda binaria acá sería más código para ahorrar trece comparaciones.
  */
 export function segmentIndexAt(track: ChoreoTrack, progress: number): number {
   const { keyframes } = track
@@ -215,7 +148,13 @@ export function sampleTrack(
   const to = keyframes[index]
 
   const span = to.at - from.at
-  const raw = span > 0 ? (clamped - from.at) / span : 1
+  // Acotado a [0,1], y no es defensa gratuita: desde S5 el `at` del primer y del
+  // último keyframe se puede mover con el editor. Con el primero en 0,05 el
+  // progreso 0 cae ANTES del segmento y da una fracción negativa; `linear` no
+  // pasa por `cubicBezierEase` —que ya recorta— así que extrapolaría la pose
+  // hacia afuera del track. Un `min`/`max` lo cierra para los dos extremos.
+  const unclamped = span > 0 ? (clamped - from.at) / span : 1
+  const raw = unclamped <= 0 ? 0 : unclamped >= 1 ? 1 : unclamped
 
   const ease = to.ease ?? 'shift'
   const t = ease === 'linear' ? raw : cubicBezierEase(CHOREO_EASE_POINTS[ease], raw)
@@ -228,6 +167,51 @@ export function sampleTrack(
 
   const a = unwrappedAngles[index - 1]
   out.angleDeg = a + (unwrappedAngles[index] - a) * t
+}
+
+// ── El arco de luz ──────────────────────────────────────────────────────────
+
+/**
+ * Muestrea `LIGHT_ARC` en `progress` y ESCRIBE sobre `out`.
+ *
+ * Misma máquina que el track de cámara —bordes, recorte de la fracción y el
+ * mismo evaluador de bezier— sobre una tabla propia. **No comparte los
+ * keyframes a propósito**: la luz tiene su forma y sus puntos de quiebre, y
+ * atarla a los de la cámara la obligaría a inventar un valor cada vez que se
+ * agrega un keyframe de pose, que es exactamente el problema que S6 vino a
+ * resolver.
+ *
+ * No pasa por el editor: el arco no es editable desde el panel, así que la tabla
+ * se lee directo del módulo igual que los tramos.
+ */
+export function sampleLightArc(progress: number, out: MutableLightLevels): void {
+  const first = LIGHT_ARC[0]
+
+  // Un arco de un solo punto es una luz constante, no un error: se contesta con
+  // ese punto en vez de indexar fuera del array.
+  if (LIGHT_ARC.length < 2) {
+    out.level = first.level
+    out.kelvin = first.kelvin
+    return
+  }
+
+  const clamped = progress <= 0 ? 0 : progress >= 1 ? 1 : progress
+
+  let index = 1
+  while (index < LIGHT_ARC.length - 1 && clamped > LIGHT_ARC[index].at) index += 1
+
+  const from = LIGHT_ARC[index - 1]
+  const to = LIGHT_ARC[index]
+
+  const span = to.at - from.at
+  const unclamped = span > 0 ? (clamped - from.at) / span : 1
+  const raw = unclamped <= 0 ? 0 : unclamped >= 1 ? 1 : unclamped
+
+  const ease = to.ease ?? 'shift'
+  const t = ease === 'linear' ? raw : cubicBezierEase(CHOREO_EASE_POINTS[ease], raw)
+
+  out.level = from.level + (to.level - from.level) * t
+  out.kelvin = from.kelvin + (to.kelvin - from.kelvin) * t
 }
 
 // ── Amortiguación ───────────────────────────────────────────────────────────

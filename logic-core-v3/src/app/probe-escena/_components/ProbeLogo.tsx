@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react'
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
-import { INK_COLOR, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
+import { INK_COLOR, INK_ROUGHNESS, PROBE_EXTRUDE, PROBE_SVG_SCALE } from './probeScene'
 import type { ProbeStatsStore } from './probeStore'
 
 /**
@@ -90,15 +90,18 @@ export function ProbeLogo({ stats, onReady }: ProbeLogoProps) {
       {geometries.built.map((geometry, index) => (
         <mesh key={index} geometry={geometry} castShadow receiveShadow>
           {/*
-            Negro MATE, la decisión ya tomada del sprint. `metalness=0` +
-            `roughness` alta: la forma se lee por sombreado difuso, que existe
-            en todas las orientaciones, en vez de por reflejo especular, que
-            necesita un entorno que reflejar (el HDRI de 1,27 MiB) y se ensucia
-            en ángulos oblicuos.
+            Negro MATE, la decisión ya tomada del sprint: `metalness=0`, sin
+            entorno que reflejar (el HDRI de 1,27 MiB del hero) y sin cromado.
 
-            No es negro puro: con `#0F0F0F` y este `roughness` el canto biselado
-            se despega apenas de la cara frontal, que es justo lo que hace que
-            una lámina se lea como un sólido.
+            **Lo que S6 corrigió es la rugosidad, y es el número que le da forma
+            al objeto.** Un negro de albedo casi nulo no se describe con luz
+            difusa —por más intensidad que se le ponga, sigue siendo negro—; lo
+            único que dibuja su volumen es el reflejo especular, que no depende
+            del albedo. Con 0,52 ese reflejo estaba tan repartido que el logo se
+            leía plano; con `INK_ROUGHNESS` el lóbulo se cierra lo suficiente
+            para que la cara, el bisel y el canto se separen, y para que el
+            contraluz tenga dónde dibujarse. El porqué del valor está en
+            `probeScene.ts`.
 
             `DoubleSide` igual que el frozen — el SVG no garantiza el sentido de
             giro de sus contornos, y de paso llena el shadow map por atrás, que
@@ -106,7 +109,7 @@ export function ProbeLogo({ stats, onReady }: ProbeLogoProps) {
           */}
           <meshStandardMaterial
             color={INK_COLOR}
-            roughness={0.52}
+            roughness={INK_ROUGHNESS}
             metalness={0}
             side={THREE.DoubleSide}
           />
