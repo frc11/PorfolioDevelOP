@@ -1,3 +1,7 @@
+import type { ChoreoSection } from './choreographyTypes'
+import { NOTES_FRONTAL } from './choreographyNotesFrontal'
+import { NOTES_GIRO } from './choreographyNotesGiro'
+
 /**
  * LOS COMENTARIOS DEL ARRAY DE KEYFRAMES, como dato.
  *
@@ -19,6 +23,14 @@
  *
  * Todo lo demás de `choreography.ts` —el doc de módulo, los tramos, el arco de
  * luz— son comentarios de verdad y no pasan por acá: el editor no los toca.
+ *
+ * ── Por qué son tres archivos y no uno ─────────────────────────────────────
+ *
+ * La tabla de comentarios pasó de 500 líneas y se partió **por la mitad del
+ * recorrido**: `choreographyNotesFrontal.ts` de la entrada a Números —donde la
+ * cámara vive en azimut 0— y `choreographyNotesGiro.ts` de Portfolio al cierre,
+ * que es la mitad que gira. Acá quedan el doc del array, los separadores de
+ * tramo y la unión de las dos mitades, que es de donde el exportador lee.
  *
  * ── Cómo se indexa ─────────────────────────────────────────────────────────
  *
@@ -48,251 +60,26 @@ export const CHOREO_ARRAY_DOC: readonly string[] = [
   'siete, además, ya no sostienen nada: se los duplicó y después se les movió la',
   'pose. Cada uno lo dice en su comentario.',
   '',
+  'Los derivados son dos de S4 (sub-movimientos que las capturas no expresaban)',
+  'y **siete de S7**: los que se llaman `· arco de …` y le dan curvatura a su',
+  'tramo. Se pueden borrar los siete sin perder una sola pose compuesta — el',
+  'recorrido vuelve a ser el de S6, en línea recta entre pose y pose.',
+  '',
   'La pose son CINCO canales: ángulo, altura, distancia y los dos de encuadre.',
-  'La luz salió de acá en S6 y vive en `LIGHT_ARC`, abajo.',
+  'La luz salió de acá en S6 y vive en `LIGHT_ARC`, abajo — que desde S7 lleva',
+  'además la posición del sol, porque el sol Y la luz principal son lo mismo.',
 ]
 
 /** Bloque de comentario que va ANTES del keyframe, indexado por su `name`. */
-export const CHOREO_NOTES: Readonly<Record<string, readonly string[]>> = {
-  'entrada · mirada alta': [
-    'Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado.',
-    '',
-    'Hasta S5 este keyframe llevaba `keyIntensity: 0` adentro de su pose, o sea',
-    'que el recorrido arrancaba literalmente a oscuras y subía la luz en la',
-    'primera transición. Nadie diseñó eso: es lo que queda cuando se compone una',
-    'posición con el slider de luz en el piso. La luz ya no vive en la pose.',
-  ],
+/** La tabla de comentarios, indexada por el `name` del keyframe. */
+export type KeyframeNotes = Readonly<Record<string, readonly string[]>>
 
-  hero: [
-    '`arrive` — la curva del sistema para lo que ENTRA. El descenso desde 9,00',
-    'aterriza en el encuadre del hero, no lo cruza, y se acerca de 15 a 11',
-    'mientras baja.',
-  ],
-
-  'hero · sostén': [
-    'El patrón de sostén: misma pose que el keyframe anterior, más adelante en el',
-    'recorrido. La cámara LLEGA al hero en 0,125 y se queda quieta hasta 0,188,',
-    'así que el encuadre se puede leer en vez de cruzarse. Es el arreglo del',
-    'pendiente №1 de S4 ("la pose de cada tramo cae en su borde") y se hace con el',
-    'botón "duplicar" del editor.',
-  ],
-
-  'quiénes somos · persona 1': [
-    '"baja el encuadre horizontal, sube el vertical y se acerca al logo, TODO',
-    'AL MISMO TIEMPO" — una sola transición, sin intermedios.',
-    '',
-    'La ambigüedad de "el vertical" quedó resuelta al calibrar, y a favor de la',
-    'ALTURA DE CÁMARA: `frameY` está en cero en todo el recorrido. No es un',
-    'olvido — ver la nota de `demos · giro ½` sobre por qué ese canal casi no',
-    'tiene efecto a las distancias que este recorrido usa.',
-  ],
-
-  'quiénes somos · persona 1 · sostén': [
-    'Sostén de verdad: pose idéntica a la anterior. Se llega y se aguanta.',
-  ],
-
-  'persona 2 · cruce (apex)': [
-    '═══ DERIVADO ═══',
-    '',
-    '"sube el vertical, sube el horizontal, y LUEGO vuelve a bajar el',
-    'vertical". Ese "luego" pide un intermedio que las capturas no tienen.',
-    '',
-    'Lo que hace es el **cruce**: `frameX` barre de −0,80 a +0,80 —el logo cruza',
-    'la pantalla entera de izquierda a derecha, que es lo que deja lugar para la',
-    'segunda persona— y acá va por el medio, en −0,16. La altura hace una',
-    'excursión chica hacia abajo (5,00 → 4,54 → 5,00) y la distancia una hacia',
-    'afuera (9,00 → 10,70 → 9,00): la cámara se abre un poco en el cruce y vuelve.',
-    'Es lo que impide que el barrido se lea como un desplazamiento plano.',
-    '',
-    '**Los cinco números son interpolación, no captura.** Para matar la excursión',
-    'de altura, poner 5; para la de distancia, poner 9. Un número cada una.',
-  ],
-
-  'quiénes somos · persona 2 · sostén': [
-    '⚠️ **Se llama "sostén" pero NO sostiene.** Salió del botón duplicar y después',
-    'se le movió la pose: la altura baja de 5,00 a 2,65, la distancia se abre a',
-    '9,83 y el encuadre vuelve del borde (0,80 → 0,57). Es un beat propio —el',
-    'arranque del descenso a Números— con el nombre que le quedó del duplicado.',
-    '',
-    'Es además el segmento más rápido del primer medio recorrido: 28,0 alturas de',
-    'cuadro por unidad de progreso. Renombrarlo son dos strings (acá y en',
-    '`choreography.ts`); se deja como está para no romper la referencia del video',
-    'ya grabado.',
-  ],
-
-  'números · baja la altura': [
-    '═══ DERIVADO ═══',
-    '',
-    '"reduce altura, aumenta distancia (EN ESE ORDEN, SECUENCIAL)". Secuencial',
-    '= un keyframe en el medio: la altura ya abajo, con la distancia todavía sin',
-    'abrir.',
-    '',
-    'Al calibrar, la altura de este keyframe bajó hasta **−3,90, el piso del',
-    'rango**: la cámara rasa el papel. Es la pose más baja del recorrido junto con',
-    'las tres de Demos.',
-    '',
-    '── S6 · 1: `linear` → `shift` ─────────────────────────────────────────',
-    '',
-    'Con `linear` la cámara llegaba al fondo a velocidad plena y el keyframe',
-    'siguiente la frenaba de golpe. `linear` es para los waypoints que viven',
-    'ADENTRO de una gesticulación, y éste no lo es: la propia descripción dice',
-    'SECUENCIAL, o sea que acá TERMINA el "baja la altura" y recién entonces',
-    'arranca el "se aleja". Un final de gesto pide una curva de llegada.',
-    '',
-    '── S6 · 2: `at` 0,464 → 0,445 ─────────────────────────────────────────',
-    '',
-    'Éste es el arreglo del tirón, y hay que medirlo en **alturas de cuadro** —',
-    'cuánto se mueve y cuánto cambia de tamaño el objeto EN PANTALLA, que es la',
-    'única unidad en la que una bajada y un alejamiento se comparan.',
-    '',
-    'Los tres beats de la pantalla de Números corrían a **17,9 / 47,4 / 19,3** por',
-    'unidad de progreso: el del medio —bajar a −3,90 y volver a subir a 1,00 en',
-    '0,024 de progreso— iba a **más del doble** que sus dos vecinos. Eso es el',
-    'tirón, y se lee como un rebote.',
-    '',
-    'Con los `at` en 0,445 y 0,491 quedan en **24,7 / 24,7 / 25,8**, o sea una',
-    'dispersión del 4,5% contra el 105% que había. **La pantalla dura exactamente',
-    'lo mismo y ninguna pose se tocó**: lo único que cambió es cuánto le toca a',
-    'cada beat.',
-  ],
-
-  'números · sube y se aleja': [
-    '── S6: renombrado, y el `at` 0,488 → 0,491 ────────────────────────────',
-    '',
-    'ANTES se llamaba `números · se aleja`, y el nombre mentía: de −3,90 a 1,00',
-    'son 4,90 de altura contra 2,00 de distancia. Medido en pantalla, la subida',
-    'pesa **más del triple** que el alejamiento. Un keyframe que dice una cosa y',
-    'hace otra es la clase de dato que después nadie se anima a tocar.',
-    '',
-    'El movimiento no cambió — cambió el nombre, que ahora dice las dos cosas en',
-    'el orden en que pesan. El `at` es la otra mitad del arreglo del tirón, y está',
-    'explicado en el keyframe anterior.',
-  ],
-
-  números: [
-    '"y luego vuelve a subir altura y a acercarse".',
-    '',
-    'Ojo con esa frase, porque el dato calibrado la reparte distinto: la subida de',
-    'altura ya ocurrió en el keyframe anterior, acá la cámara **se sigue alejando**',
-    '(11,0 → 14,1) y el acercarse llega recién en el sostén (14,1 → 12,0). El',
-    'gesto descrito existe, pero repartido en tres keyframes y no en uno.',
-  ],
-
-  'números · sostén': [
-    '⚠️ **Otro que se llama "sostén" y no sostiene**: baja la altura a 0 y se',
-    'acerca a 12. Además vive en 0,563, o sea DENTRO de la pantalla de Portfolio y',
-    'no de la de Números. Las dos cosas son deliberadas —es el cierre del gesto de',
-    'Números derramándose en la pantalla siguiente— pero se leen mal desde el',
-    'nombre.',
-  ],
-
-  portfolio: [
-    '"se acerca, rota hacia la derecha y sube la altura — un ACERCAMIENTO',
-    'DIAGONAL": las tres a la vez, una sola transición sobre toda la pantalla.',
-    '`frameX` −1,00 deja el logo pegado a la izquierda para que el contenido',
-    'ocupe arriba a la derecha.',
-    '',
-    'Es el segmento más cargado del recorrido fuera de Demos: 31,2 alturas de',
-    'cuadro por unidad de progreso, con 726 grados por unidad encima.',
-  ],
-
-  'portfolio · sostén': ['Sostén de verdad: pose idéntica a la anterior.'],
-
-  'demos · giro ½': [
-    '── S6: 135° → 180°, y el `at` 0,675 → 0,697 ───────────────────────────',
-    '',
-    'ANTES este keyframe tenía **el mismo ángulo que `giro ¼`**, así que entre los',
-    'dos la cámara no rotaba: solo se desplomaba 7,8 de altura. El 135 repetido no',
-    'era una composición — es lo que queda cuando se compone un waypoint moviendo',
-    'altura, distancia y encuadre sin tocar el slider de ángulo.',
-    '',
-    '180 es exactamente el punto medio entre sus dos vecinos (135 y 225), así que',
-    'la vuelta pasa por su mitad en la mitad del tramo. El porqué completo está en',
-    'el separador del tramo, arriba.',
-    '',
-    '**Este es el momento más violento de todo el recorrido**: 106 alturas de',
-    'cuadro por unidad de progreso, cuatro veces cualquier otro. Es la caída de',
-    '3,90 a −3,90 en 0,018. No se tocó —es intención calibrada y el sprint no la',
-    'marcó— pero queda medido, porque es lo primero que va a doler si el recorrido',
-    'se siente brusco.',
-    '',
-    'Su `frameY` de 0,10 es el único distinto de cero del recorrido, y **no hace',
-    'nada**: el encuadre vertical solo tiene recorrido cuando la mitad del alto',
-    'visible supera la media altura del logo, o sea a partir de una distancia de',
-    '**11,4**. Acá la cámara está a 8. Se deja porque cambiarlo tampoco haría nada.',
-  ],
-
-  demos: [
-    'La cámara termina ABAJO (altura −3,90, el piso del rango) y el logo salta a',
-    'la derecha (`frameX` +1,00) para dejarle abajo a la izquierda a las demos.',
-  ],
-
-  'demos · sostén': [
-    'Sostén de verdad: pose idéntica a la anterior. Es el más largo del recorrido',
-    '(0,038 de progreso), y tiene por qué: viene de la vuelta entera.',
-  ],
-
-  'final · gira': [
-    'El beat que cierra la vuelta: 315 → 360. Desde S6 la cierra ACÁ y no en el',
-    'keyframe siguiente, que es lo que deja al cierre dedicado a alejarse.',
-  ],
-
-  'cierre · sostén': [
-    '── S6: `at` 0,938 → 0,890, y el encuadre a cero ───────────────────────',
-    '',
-    'Acá llega el cierre y desde acá se sostiene. **El sostén pasó de media',
-    'pantalla a 0,88 de pantalla**, que es lo que pedía "el cierre no sostiene".',
-    '',
-    'Se paga con velocidad: el alejamiento de 0,850 a 0,890 corre a 27,7 alturas',
-    'de cuadro por unidad de progreso, contra las 12,6 que corría en 0,088. Es un',
-    'intercambio real y es un número — pero 12,6 lo dejaba como el segmento más',
-    'lento del recorrido justo antes del final, y con `arrive` el alejamiento',
-    'resuelve en el primer tercio y se demora en el resto igual.',
-    '',
-    '`frameX` va de −0,02 a **0 exacto**: una pantalla de cierre con el logo',
-    'centrado y dos textos simétricos no puede tener un descentrado que nadie',
-    'eligió. −0,02 sobre un recorrido de ±1 es ruido de arrastrar un slider.',
-  ],
-
-  cierre: [
-    '"se aleja del todo y queda el logo", con la sala apagándose. `arrive` para',
-    'que el alejamiento resuelva rápido y después se demore. El arco de luz usa la',
-    'misma curva en su último tramo, así que la sala termina de apagarse en el',
-    'mismo momento en que la cámara se detiene.',
-    '',
-    '── S6: la presencia del cierre ────────────────────────────────────────',
-    '',
-    'Acá va a ir "develOP" arriba y el slogan abajo, así que la composición se',
-    'midió para eso: con FOV 35 y distancia de ojo 16,07, **el logo ocupa el 70,7%',
-    'del alto del cuadro y deja 14,6% de aire arriba y 14,6% abajo** — sobre una',
-    'ventana de 1080 son 158 px de cada lado, que alcanzan de sobra para un',
-    'wordmark y una línea de slogan.',
-    '',
-    '**La distancia y la altura NO se tocaron, y es una decisión.** El sprint pedía',
-    '"más presencia del logo" leyendo un cierre que se veía chico y apenas visible;',
-    'medido, el logo ya ocupaba dos tercios del cuadro. Lo que lo hacía invisible',
-    'era la luz: 2,0 de intensidad a **2000 K** —ámbar profundo— sobre un objeto',
-    'casi negro. Con el arco, el cierre queda en nivel 0,34 neutro-frío y el',
-    'contraluz se resiste hasta 0,59, que es lo que lo recorta. Agrandarlo más se',
-    'comería el aire donde va el texto.',
-    '',
-    'El ángulo dice 360 y no 0: es la misma posición de cámara, pero este archivo',
-    'guarda el ángulo ACUMULADO y escribir 0 después de un 360 contradice su propia',
-    'convención. El panel lo publica envuelto, así que ahí se sigue leyendo 0,0°.',
-    '',
-    'El track TERMINA ACÁ. La cola que describe el recorrido ("después las letras',
-    'se van, la cámara se mueve a otros ángulos y termina en el CTA final") no',
-    'tiene posiciones capturadas y no se inventó: cuando se compongan esos ángulos,',
-    'se agregan a este array.',
-  ],
-}
-
-export type ChoreoSection = {
-  /** Texto del separador. El exportador lo rellena con `─` hasta el ancho fijo. */
-  readonly title: string
-  /** Bloque que sigue al separador. Vacío = solo el separador. */
-  readonly body: readonly string[]
-}
+/**
+ * Las dos mitades, unidas. **Es el único lugar del que el exportador lee**, así
+ * que un keyframe cuyo comentario esté en cualquiera de los dos archivos sale
+ * emitido igual.
+ */
+export const CHOREO_NOTES: KeyframeNotes = { ...NOTES_FRONTAL, ...NOTES_GIRO }
 
 /**
  * Separador de tramo, indexado por el `name` del keyframe que lo SIGUE.
@@ -309,17 +96,17 @@ export const CHOREO_SECTIONS: Readonly<Record<string, ChoreoSection>> = {
     body: ['"la cámara mira alto y baja hasta encuadrar el hero"'],
   },
 
-  'quiénes somos · persona 1': {
+  'quiénes somos · arco de entrada': {
     title: 'Tramo 2 · Quiénes somos (dos personas)',
     body: [],
   },
 
-  'números · baja la altura': {
+  'números · arco de caída': {
     title: 'Tramo 3 · Números',
     body: [],
   },
 
-  portfolio: {
+  'portfolio · arco de aproximación': {
     title: 'Tramo 4 · Portfolio',
     body: [],
   },
@@ -353,7 +140,7 @@ export const CHOREO_SECTIONS: Readonly<Record<string, ChoreoSection>> = {
     ],
   },
 
-  'final · se levanta': {
+  'final · arco de subida': {
     title: 'Tramo 6 · Movimiento final + cierre',
     body: [
       '"se levanta, gira un poco, baja, y se aleja".',
@@ -377,6 +164,11 @@ export const CHOREO_SECTIONS: Readonly<Record<string, ChoreoSection>> = {
       'alturas de cuadro por unidad de progreso** —8,4 de altura en 0,037— y es el',
       'segundo movimiento más violento del recorrido, después de la caída de',
       '`giro ½`. Es intención calibrada y el sprint no lo marcó.',
+      '',
+      '── S7: el ascensor se convirtió en arco ─────────────────────────────────',
+      '',
+      'El levantarse ya no sube por una vertical: un intermedio derivado lo saca de',
+      'la recta. El detalle está en su propio comentario, acá abajo.',
     ],
   },
 }

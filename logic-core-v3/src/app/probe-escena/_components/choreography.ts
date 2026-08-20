@@ -18,12 +18,29 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  *
  * ── De dónde salen los números ─────────────────────────────────────────────
  *
- * Los 23 keyframes salen de una sesión de calibración completa: el humano
- * recorrió el track con el editor de S5 mirando la escena, ajustó las posiciones
- * capturadas y agregó **siete sostenes** con el botón de duplicar. Dos siguen
- * marcados `derived: true`: existen porque la descripción del recorrido pide
- * sub-movimientos SECUENCIALES ("en ese orden", "y luego") que dos posiciones no
- * pueden expresar.
+ * Veintiuno de los treinta keyframes salen de una sesión de calibración
+ * completa: el humano recorrió el track con el editor de S5 mirando la escena,
+ * ajustó las posiciones capturadas y agregó **siete sostenes** con el botón de
+ * duplicar. Los otros nueve van marcados `derived: true` y son míos: dos de S4,
+ * que existen porque la descripción del recorrido pide sub-movimientos
+ * SECUENCIALES ("en ese orden", "y luego") que dos posiciones no pueden
+ * expresar, y **siete de S7, que le dan curvatura a los tramos**.
+ *
+ * ── S7 · los siete arcos ───────────────────────────────────────────────────
+ *
+ * El recorrido iba **en línea recta entre pose y pose**: la interpolación era
+ * continua pero el CAMINO no tenía forma. Los siete intermedios lo sacan de la
+ * recta —un arco, una demora, una anticipación— sin tocar una sola pose
+ * compuesta ni un solo `at` existente. Cada uno documenta cuánto desvía el
+ * camino (entre 1,08 y 3,03 de mundo) y por qué esa forma y no otra.
+ *
+ * **Demos no lleva ninguno**: el giro ya tiene cuatro waypoints y velocidad
+ * pareja, y ahí no hay nada que arreglar.
+ *
+ * La vuelta de 360° sobrevive exacta: la tabla desenvuelta sigue terminando en
+ * 360. Y el salto de velocidad más grande de todo el track **bajó** de 75,6 a
+ * 49,7 alturas de cuadro por unidad de progreso, porque el arco del cierre
+ * reparte entre dos segmentos el arranque brusco que tenía el `arrive`.
  *
  * ⚠️ **La calibración vivió en memoria durante una sesión entera y casi se
  * pierde.** El editor exporta al portapapeles, y si ese texto no se pega acá,
@@ -90,7 +107,7 @@ export const CHOREO_TRAMOS: readonly ChoreoTramo[] = [
 // ── Los keyframes ───────────────────────────────────────────────────────────
 
 /**
- * El recorrido. 23 keyframes: 21 capturados + 2 derivados.
+ * El recorrido. 30 keyframes: 21 capturados + 9 derivados.
  *
  * ⚠️ El censo de arriba cuenta 21 "capturados", y **siete de esos son sostenes
  * creados con el editor**, no capturas: los que terminan en `· sostén`. El
@@ -99,8 +116,14 @@ export const CHOREO_TRAMOS: readonly ChoreoTramo[] = [
  * siete, además, ya no sostienen nada: se los duplicó y después se les movió la
  * pose. Cada uno lo dice en su comentario.
  *
+ * Los derivados son dos de S4 (sub-movimientos que las capturas no expresaban)
+ * y **siete de S7**: los que se llaman `· arco de …` y le dan curvatura a su
+ * tramo. Se pueden borrar los siete sin perder una sola pose compuesta — el
+ * recorrido vuelve a ser el de S6, en línea recta entre pose y pose.
+ *
  * La pose son CINCO canales: ángulo, altura, distancia y los dos de encuadre.
- * La luz salió de acá en S6 y vive en `LIGHT_ARC`, abajo.
+ * La luz salió de acá en S6 y vive en `LIGHT_ARC`, abajo — que desde S7 lleva
+ * además la posición del sol, porque el sol Y la luz principal son lo mismo.
  */
 export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // ── Tramo 1 · Hero ───────────────────────────────────────────────────────
@@ -116,6 +139,26 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     at: 0,
     name: 'entrada · mirada alta',
     pose: { angleDeg: 0, height: 9, distance: 15, frameX: 0.9, frameY: 0 },
+  },
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // La bajada del hero era una RECTA: la cámara caía 9 de altura y se acercaba 4
+    // sobre la línea que une las dos poses. Este intermedio la saca de esa línea:
+    // se corre 7° de azimut y **se queda lejos** (15,4 contra los 15 de arranque)
+    // mientras baja, así que el acercamiento resuelve al final en vez de repartirse
+    // parejo. El camino se desvía **2,77 de mundo** de la recta — 0,57 alturas de
+    // cuadro, o sea medio cuadro de excursión.
+    //
+    // `linear` y no `shift`: la bajada es UNA gesticulación y este punto vive
+    // adentro. Con `shift` la cámara se frenaría en el medio del descenso.
+    //
+    // Ninguna pose del humano se tocó: el arco va ENTRE las dos.
+    at: 0.068,
+    name: 'hero · arco de bajada',
+    derived: true,
+    ease: 'linear',
+    pose: { angleDeg: -7, height: 4.6, distance: 15.4, frameX: 0.9, frameY: 0 },
   },
   {
     // `arrive` — la curva del sistema para lo que ENTRA. El descenso desde 9,00
@@ -139,6 +182,27 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
 
   // ── Tramo 2 · Quiénes somos (dos personas) ───────────────────────────────
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // Entre el sostén del hero y la persona 1 la cámara subía 5, se acercaba 2 y
+    // barría el logo de un lado al otro de la pantalla, todo sobre una recta. Acá
+    // el gesto se ordena en dos tiempos: **primero sube** (3,40 de 5,00) y **se
+    // mantiene lejos** (10,70), y recién después el logo cruza. El `frameX` queda
+    // en 0,30 —todavía a la derecha— para que el barrido no arranque hasta que la
+    // cámara ya se levantó.
+    //
+    // Desvío de la recta: 1,39 de mundo. Es el más chico de los siete, y tiene por
+    // qué: acá la excursión que importa es la de TIEMPO, no la de espacio.
+    //
+    // `shift`: el intermedio ES un beat. La cámara se demora arriba antes del
+    // cruce, que es lo que la referencia hace y este recorrido no hacía.
+    at: 0.223,
+    name: 'quiénes somos · arco de entrada',
+    derived: true,
+    ease: 'shift',
+    pose: { angleDeg: 5.5, height: 3.4, distance: 10.7, frameX: 0.3, frameY: 0 },
+  },
   {
     // "baja el encuadre horizontal, sube el vertical y se acerca al logo, TODO
     // AL MISMO TIEMPO" — una sola transición, sin intermedios.
@@ -203,6 +267,27 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
 
   // ── Tramo 3 · Números ────────────────────────────────────────────────────
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // La caída a Números era el tramo recto más largo de la primera mitad: 6,5 de
+    // altura en línea, con la distancia apenas moviéndose. Acá la caída **se abre
+    // hacia afuera** (9,83 → 10,60 → 9,00) y **se demora arriba**: la altura queda
+    // en 0,10 cuando la recta ya la habría llevado a −0,75. La cámara se aleja un
+    // paso, se cuelga, y recién ahí se desploma.
+    //
+    // El azimut NO se toca y es deliberado: Números es la pantalla frontal del
+    // recorrido —todo el tramo vive en 0°— y un barrido lateral rompería esa
+    // frontalidad. Acá la curvatura es de altura y distancia, no de ángulo.
+    //
+    // Desvío de la recta: 1,08. Es el más chico de los siete en espacio, y el que
+    // más cambia el TIEMPO del gesto.
+    at: 0.414,
+    name: 'números · arco de caída',
+    derived: true,
+    ease: 'shift',
+    pose: { angleDeg: 0, height: 0.1, distance: 10.6, frameX: 0.6, frameY: 0 },
+  },
   {
     // ═══ DERIVADO ═══
     //
@@ -272,6 +357,28 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     pose: { angleDeg: 0, height: 1, distance: 14.1, frameX: 0, frameY: 0 },
   },
   {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // **Este arreglo el segmento más lento de todo el recorrido.** De `números` a
+    // su sostén la cámara derivaba en línea recta a 4,5 alturas de cuadro por
+    // unidad de progreso, contra las 12 a 31 del resto del track: una pantalla
+    // entera de deriva plana.
+    //
+    // Ahora el camino pasa **por arriba**: sube a 2,00 (por encima de sus dos
+    // extremos, que están en 1,00 y 0,00) y se abre a 14,60 (por encima de 14,10 y
+    // de 12,00), con 4° de barrido lateral que vuelven a cero. Es un arco de verdad
+    // —la cámara sale de la recta por los dos canales a la vez— y el tramo pasa de
+    // un pico de 12,0 a uno de 34,0.
+    //
+    // `linear`: la deriva es una sola gesticulación lenta y no quiere un beat en el
+    // medio.
+    at: 0.531,
+    name: 'números · deriva en arco',
+    derived: true,
+    ease: 'linear',
+    pose: { angleDeg: -4, height: 2, distance: 14.6, frameX: -0.1, frameY: 0 },
+  },
+  {
     // ⚠️ **Otro que se llama "sostén" y no sostiene**: baja la altura a 0 y se
     // acerca a 12. Además vive en 0,563, o sea DENTRO de la pantalla de Portfolio y
     // no de la de Números. Las dos cosas son deliberadas —es el cierre del gesto de
@@ -284,6 +391,25 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
 
   // ── Tramo 4 · Portfolio ──────────────────────────────────────────────────
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // **Es el intermedio que más desvía el camino: 3,03 de mundo, 0,82 alturas de
+    // cuadro.** Y va en el segmento más cargado del recorrido fuera de Demos.
+    //
+    // El "acercamiento diagonal" era una recta que hacía las tres cosas repartidas
+    // parejo. Acá la cámara **toma la curva por afuera**: el ángulo se ADELANTA (27
+    // de 45 cuando la recta daría 24), la distancia se SOSTIENE (11,00 cuando la
+    // recta ya iría por 9,50) y la altura LLEGA TARDE (1,90 contra 3,20). O sea:
+    // primero gira quedándose lejos, y recién sobre el final se mete y sube.
+    //
+    // Es el mismo movimiento con otra forma. La pose de `portfolio` no se tocó.
+    at: 0.589,
+    name: 'portfolio · arco de aproximación',
+    derived: true,
+    ease: 'shift',
+    pose: { angleDeg: 27, height: 1.9, distance: 11, frameX: -0.24, frameY: 0 },
+  },
   {
     // "se acerca, rota hacia la derecha y sube la altura — un ACERCAMIENTO
     // DIAGONAL": las tres a la vez, una sola transición sobre toda la pantalla.
@@ -414,6 +540,33 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // alturas de cuadro por unidad de progreso** —8,4 de altura en 0,037— y es el
   // segundo movimiento más violento del recorrido, después de la caída de
   // `giro ½`. Es intención calibrada y el sprint no lo marcó.
+  //
+  // ── S7: el ascensor se convirtió en arco ─────────────────────────────────
+  //
+  // El levantarse ya no sube por una vertical: un intermedio derivado lo saca de
+  // la recta. El detalle está en su propio comentario, acá abajo.
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // De `demos · sostén` a `final · se levanta` la cámara subía **8,4 en línea
+    // recta vertical**, con el ángulo y la distancia clavados: un ascensor. Era el
+    // movimiento más geométricamente pobre del recorrido, y a la vez el segundo más
+    // rápido (51,4 alturas de cuadro por unidad de progreso).
+    //
+    // Ahora es un arco: **se aleja a 8,60** y **se corre 9° de azimut** mientras
+    // sube, y las dos excursiones vuelven a su valor en el keyframe siguiente. La
+    // cámara sale de la vertical, describe una curva y llega a la misma pose.
+    // Desvío de la recta: 2,01 de mundo.
+    //
+    // Los 9° van hacia ATRÁS (315 → 306 → 315), en contra del sentido en que la
+    // vuelta venía girando. Es lo que hace que se lea como un impulso y no como el
+    // principio del giro siguiente.
+    at: 0.809,
+    name: 'final · arco de subida',
+    derived: true,
+    ease: 'shift',
+    pose: { angleDeg: 306, height: 0.9, distance: 8.6, frameX: 0.86, frameY: 0 },
+  },
   {
     at: 0.825,
     name: 'final · se levanta',
@@ -427,6 +580,29 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     name: 'final · gira',
     ease: 'shift',
     pose: { angleDeg: 360, height: 4.5, distance: 8, frameX: 0, frameY: 0 },
+  },
+  {
+    // ═══ DERIVADO · S7 · curvatura ═══
+    //
+    // La retirada al cierre era un deslizamiento recto: bajar 3 y alejarse 8 al
+    // mismo tiempo. Acá la cámara **pasa por arriba**: la altura sube a 5,40 —por
+    // encima de sus DOS extremos (4,50 y 1,50)— antes de asentarse, y la distancia
+    // se adelanta a 12,60. Se levanta para irse, y recién entonces baja.
+    //
+    // **Y de paso disuelve el tirón más grande del recorrido.** El `arrive` del
+    // cierre arranca a 1,84× la velocidad de cuerda, así que en `final · gira` la
+    // velocidad saltaba de 3,4 a 74,2 alturas de cuadro por unidad de progreso: 75,6
+    // de salto, el mayor de todo el track. Con el intermedio en el medio el salto
+    // baja a **49,7** y el pico del tramo de 77,4 a 54,5. No se tocó ni el `arrive`
+    // ni ninguna pose: el salto se reparte entre dos segmentos.
+    //
+    // `linear`: la retirada es UNA gesticulación, y un `shift` acá pondría a la
+    // cámara a frenar justo cuando tiene que estar yéndose.
+    at: 0.868,
+    name: 'cierre · arco de retirada',
+    derived: true,
+    ease: 'linear',
+    pose: { angleDeg: 360, height: 5.4, distance: 12.6, frameX: 0, frameY: 0 },
   },
   {
     // ── S6: `at` 0,938 → 0,890, y el encuadre a cero ───────────────────────
@@ -485,88 +661,118 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
 ]
 
-// ── El arco de luz (S6) ─────────────────────────────────────────────────────
+// ── El arco del sol (S6 · reescrito en S7) ──────────────────────────────────
 
 /**
- * LA LUZ ES UNA CURVA, NO UN NÚMERO POR KEYFRAME.
+ * EL SOL Y LA LUZ PRINCIPAL SON LA MISMA COSA, Y ESTA ES SU TABLA.
  *
- * ── Qué reemplaza ──────────────────────────────────────────────────────────
+ * ── Qué reemplaza, y en dos etapas ─────────────────────────────────────────
  *
  * Hasta S5 cada keyframe llevaba `keyIntensity` y `keyKelvin` adentro de su
- * pose. Eran dos sliders más mientras se componían posiciones, y quedaron sin
- * diseñar: el primer keyframe arrancaba en intensidad 0 —el recorrido empezaba
- * literalmente a oscuras—, el hero saltaba a 9 (el tope del slider), y el cierre
- * terminaba en 2,0 a 2000 K, un ámbar profundo sobre un objeto casi negro. No
- * era una curva: eran veinticuatro valores sueltos. La iluminación no es una
- * propiedad de la cámara.
+ * pose: veinticuatro valores sueltos, con el recorrido arrancando literalmente
+ * a oscuras y el cierre en 2,0 a 2000 K. S6 los sacó de la pose y los convirtió
+ * en esta curva.
  *
- * ── Qué se conserva ────────────────────────────────────────────────────────
+ * **S7 le sumó la posición, y ese es el cambio de fondo.** Hasta acá el cuerpo
+ * visible del sol no existía y la principal era una constante fija del rig. Un
+ * sol dibujado por un lado y una key por el otro son **dos soles**: en cuanto
+ * uno se mueve, la sombra deja de caer desde donde se ve la fuente y el espacio
+ * deja de ser creíble. Así que hay una sola tabla y una sola dirección:
  *
- * La narrativa, que es la que valía: **la escena arranca clara y se va apagando
- * hacia el cierre.** Lo que cambia es que ahora es una curva con forma y con
- * razones, editable de un solo lado.
+ * - lo que ilumina,
+ * - lo que proyecta la sombra,
+ * - y lo que se ve en el cuadro
+ *
+ * son el mismo objeto en la misma posición. `probeSun.ts` dibuja el cuerpo;
+ * `lightRig.ts` coloca la luz; los dos leen de acá.
+ *
+ * ── La relación que ata el nivel con la elevación ──────────────────────────
+ *
+ * > **`level` = sin(elevación) / sin(36°)**
+ *
+ * No es una coincidencia bonita: es la definición. La irradiancia que una
+ * fuente lejana deposita sobre una superficie horizontal es proporcional al
+ * seno de su elevación, así que **la sala no se apaga porque bajamos un
+ * número: se apaga porque el sol baja.** Los cuatro niveles de S6 —1 · 1 ·
+ * 0,84 · 0,60 · 0,34— salen de las cuatro elevaciones de abajo, y 36° es la
+ * elevación que S6 había calibrado para la principal. O sea: **el arco arranca
+ * exactamente en la key de S6 y desciende desde ahí.** Nada de lo calibrado se
+ * perdió.
+ *
+ * ⚠️ Si se mueve un `level` hay que mover su `elevationDeg`, y al revés. Son
+ * dos caras del mismo dato y el reporte de S7 tiene la cuenta.
  *
  * ── La forma, y por qué esta ───────────────────────────────────────────────
  *
  * Los cinco puntos caen todos en bordes de pantalla (0, 4/8, 6/8, 7/8, 8/8), la
  * misma retícula que usa el resto del recorrido:
  *
- * - **0 → 0,5 · meseta.** Hero, quiénes somos y números van a luz plena. Son
+ * - **0 → 0,5 · mediodía.** Hero, quiénes somos y números van a luz plena. Son
  *   los tramos donde se lee contenido, y bajarle la luz a una sección que
- *   alguien está leyendo es cobrarle al lector el efecto.
- * - **0,5 → 0,75 · el primer escalón, y es chico** (a 0,84). Empieza a bajar
- *   justo cuando la cámara empieza a moverse de verdad: portfolio se acerca y
- *   demos da la vuelta. **El giro es el momento más fuerte del recorrido y no
- *   se le baja la luz**; lo que se le baja es lo suficiente para que se note
- *   que algo cambió.
- * - **0,75 → 0,875 · la caída real** (a 0,60). El movimiento final ya ocurre en
- *   penumbra.
- * - **0,875 → 1 · el cierre** (a 0,34), con `arrive`, la misma curva que la
- *   cámara: la luz muere rápido y después se demora, así que la última pantalla
- *   llega apagada y se SOSTIENE apagada en vez de seguir bajando hasta el final.
+ *   alguien está leyendo es cobrarle al lector el efecto. La elevación no se
+ *   mueve; **el azimut sí** (de −42° a −32°), que es exactamente lo que hace un
+ *   sol cerca del mediodía: barre en horizontal sin bajar.
+ * - **0,5 → 0,75 · la tarde empieza.** Nivel 0,84, elevación 29,6°. El azimut
+ *   cruza el frente (−32° → +6°) mientras la cámara está del otro lado dando la
+ *   vuelta: **es ahí donde el sol entra en cuadro.**
+ * - **0,75 → 0,875 · la caída real.** Nivel 0,60, elevación 20,7°. El
+ *   movimiento final ya ocurre en penumbra y la sombra se alarga.
+ * - **0,875 → 1 · el cierre.** Nivel 0,34, elevación 11,5°, con `arrive`: la
+ *   luz muere rápido y después se demora, así que la última pantalla llega
+ *   apagada y se SOSTIENE apagada en vez de seguir bajando hasta el final.
  *
- * **0,34, y el cierre calibrado tenía 0,22.** El cierre venía en 2,0 sobre un
- * tope de 9, y el humano lo describió como "apenas visible". Un tercio de la luz
- * plena sigue siendo con claridad el momento más oscuro del recorrido —el
- * anterior más oscuro es 0,60— y alcanza para que el logo, el piso y el texto
- * que va a ir arriba y abajo se lean. Súmese que el contraluz no baja a 0,34
- * sino a 0,59: es lo que de verdad recorta el logo en esa pantalla.
+ * ── El azimut: por qué barre, cuánto, y hacia dónde ────────────────────────
  *
- * **La temperatura acompaña, y hacia el AZUL — y ésta es la decisión más
- * opinable de todo el sprint, así que va con su porqué y con su número para
- * darla vuelta.**
+ * **92° en todo el recorrido** — menos de un cuarto de vuelta. No es una vuelta
+ * y no puede serlo: la principal tiene que modelar el logo en TODO el track, y
+ * un sol que barre de más deja tramos con la cara vista a oscuras.
  *
- * El recorrido calibrado terminaba en **2000 K**: ámbar profundo, una sala que
- * se apaga como se apaga una lámpara de tungsteno. Es una imagen fuerte y es lo
- * único que se sabe del gusto del humano acá. Va para el otro lado igual, por
- * una razón que ya está en el repo: **este set es papel neutro**, y S4 ya había
- * rechazado un default cálido (5600 K) justo porque "el papel renderizaba
- * rosado y el default del instrumento tenía un sesgo de color que no era una
- * decisión". A 2000 K el papel entero se tiñe de naranja, y con él el ciclorama,
- * los planos y la niebla — o sea la escena entera, no solo el logo.
+ * El barrido está colocado para que el sol cruce el eje de la cámara **cuando
+ * la cámara está abajo mirando hacia arriba**, que es el único momento en que
+ * un sol puede entrar en cuadro. Los números están en el reporte de S7; el
+ * resumen es:
  *
- * Así que 6500 K (D65, el blanco con el que el papel se ve papel) sube a 7700 K,
- * que es el vuelco de la tarde sobre un set iluminado por cielo. Es más suave
- * que el 7850 que proponía el arco original de S4, y sube repartido en tres
- * tramos en vez de todo en la última transición.
+ * | | key fija de S6 | este arco |
+ * |---|---:|---:|
+ * | sol en cuadro, todo el recorrido | 2,6% | **4,2%** |
+ * | sol en cuadro, dentro de Demos + final | 6,9% | **11,2%** |
+ * | γ mínimo de modelado en todo el track | **5°** (luz plana) | **29°** |
+ *
+ * Ese γ es el ángulo entre la luz y el observador medido desde el objeto: 0 =
+ * luz plana desde atrás de la cámara, 45–70 = tres cuartos, >130 = contraluz.
+ * **El arco no solo hace visible al sol: arregla un punto de luz plana que la
+ * key fija tenía en `final · se levanta`.**
+ *
+ * ── La temperatura ────────────────────────────────────────────────────────
+ *
+ * Sube hacia el AZUL, y sigue siendo la decisión más opinable del rig. El
+ * recorrido calibrado a mano terminaba en **2000 K**: ámbar profundo, una sala
+ * que se apaga como se apaga el tungsteno. Va para el otro lado por una razón
+ * que ya está en el repo: **este set es papel neutro**, y S4 rechazó un default
+ * cálido justo porque el papel renderizaba rosado. A 2000 K se tiñen el
+ * ciclorama, los planos y la niebla, o sea la escena entera y no solo el logo.
  *
  * **Para el cierre ámbar: cambiar el 7700 de abajo por ~2200.** Un número.
  *
  * ── Lo que NO está acá ─────────────────────────────────────────────────────
  *
- * Cómo se reparte ese nivel entre las tres luces, el hemisférico y la niebla
- * está en `probeLighting.ts`, y no es un reparto plano: el ambiente se apaga
- * más rápido que la principal y el contraluz se resiste. Es lo que hace que la
- * escena gane contraste al oscurecerse en vez de volverse gris.
+ * Cómo se reparte el nivel entre las tres luces, el hemisférico, la niebla y el
+ * cuerpo del sol está en `probeLighting.ts`, y no es un reparto plano: el
+ * ambiente se apaga más rápido que la principal y el contraluz se resiste. Es
+ * lo que hace que la escena gane contraste al oscurecerse en vez de volverse
+ * gris.
  */
 export const LIGHT_ARC: readonly LightStop[] = [
-  { at: 0, level: 1, kelvin: 6500 },
-  // Meseta: nada cambia hasta el final de Números.
-  { at: 0.5, level: 1, kelvin: 6500, ease: 'linear' },
-  // Portfolio y Demos. Baja apenas: al giro no se le apaga la luz.
-  { at: 0.75, level: 0.84, kelvin: 6850, ease: 'shift' },
-  // El movimiento final, ya en penumbra.
-  { at: 0.875, level: 0.6, kelvin: 7300, ease: 'linear' },
+  // Mediodía. La elevación es la que S6 calibró para la key: el arco arranca ahí.
+  { at: 0, level: 1, kelvin: 6500, azimuthDeg: -42, elevationDeg: 36 },
+  // Meseta de luz: el nivel y la elevación no se mueven hasta el final de Números.
+  // El azimut sí, y despacio — un sol cerca del mediodía barre sin bajar.
+  { at: 0.5, level: 1, kelvin: 6500, azimuthDeg: -32, elevationDeg: 36, ease: 'linear' },
+  // Portfolio y Demos. Baja apenas: al giro no se le apaga la luz. El azimut cruza
+  // el frente mientras la cámara está atrás — acá es donde el sol entra en cuadro.
+  { at: 0.75, level: 0.84, kelvin: 6850, azimuthDeg: 6, elevationDeg: 29.6, ease: 'shift' },
+  // El movimiento final, ya en penumbra y con la sombra alargándose.
+  { at: 0.875, level: 0.6, kelvin: 7300, azimuthDeg: 38, elevationDeg: 20.7, ease: 'linear' },
   // El cierre. `arrive` = llega apagado temprano y sostiene.
-  { at: 1, level: 0.34, kelvin: 7700, ease: 'arrive' },
+  { at: 1, level: 0.34, kelvin: 7700, azimuthDeg: 50, elevationDeg: 11.5, ease: 'arrive' },
 ]

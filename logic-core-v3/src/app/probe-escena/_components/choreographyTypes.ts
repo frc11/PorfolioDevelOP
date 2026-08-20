@@ -126,16 +126,36 @@ export type ChoreoTramo = {
   readonly to: number
 }
 
+/**
+ * Separador de tramo dentro del array exportado, indexado por el `name` del
+ * keyframe que lo SIGUE. Vive acá y no en `choreographyNotes.ts` porque desde
+ * S7 lo usan también las tres variantes de recorrido, y cada una trae el suyo.
+ */
+export type ChoreoSection = {
+  /** Texto del separador. El exportador lo rellena con `─` hasta el ancho fijo. */
+  readonly title: string
+  /** Bloque que sigue al separador. Vacío = solo el separador. */
+  readonly body: readonly string[]
+}
+
 /** Puntos de control de cada curva nombrada, tal cual los define el sistema. */
 export const CHOREO_EASE_POINTS: Record<MotionEaseName, readonly [number, number, number, number]> =
   MOTION_EASE
 
-// ── El arco de luz ──────────────────────────────────────────────────────────
+// ── El arco del sol (S7) ────────────────────────────────────────────────────
 
 /**
- * Un punto de la curva de luz. **No es un keyframe de cámara**: no tiene pose,
- * no se edita con el editor de keyframes y no hace falta que coincida con
- * ninguno. Es una curva propia sobre el mismo eje de progreso.
+ * Un punto del arco. **No es un keyframe de cámara**: no tiene pose, no se
+ * edita con el editor de keyframes y no hace falta que coincida con ninguno. Es
+ * una curva propia sobre el mismo eje de progreso.
+ *
+ * ── S7: la luz y el sol son la MISMA tabla ─────────────────────────────────
+ *
+ * Hasta S6 esto llevaba solo `level` y `kelvin`: la posición de la principal
+ * era una constante fija del rig. **Un cuerpo visible por un lado y una key por
+ * el otro son dos soles conceptuales**, y en cuanto uno se mueve la sombra deja
+ * de coincidir con la fuente que se ve. Así que la posición entró acá: los
+ * cuatro canales describen el mismo objeto en el mismo instante.
  *
  * - `level` — nivel general de la sala, 1 = luz plena. Multiplica a las tres
  *   luces del rig, al hemisférico y a la niebla, cada uno con su propia
@@ -143,14 +163,67 @@ export const CHOREO_EASE_POINTS: Record<MotionEaseName, readonly [number, number
  *   más rápido que la principal y el contraluz se resiste, que es lo que hace
  *   que la escena gane contraste al oscurecerse en vez de volverse gris.
  * - `kelvin` — temperatura de color de la principal y del relleno.
+ * - `azimuthDeg` / `elevationDeg` — **dónde está el sol**, o sea dónde está la
+ *   luz principal, o sea desde dónde cae la sombra. Las tres cosas son una.
+ *
+ * ⚠️ **`level` y `elevationDeg` no son independientes.** La relación que los
+ * ata está escrita en `LIGHT_ARC` y es la que le da causa física al apagado:
+ * la sala no se oscurece porque bajamos un número, se oscurece porque el sol
+ * baja. Mover uno sin el otro rompe esa lectura.
  */
 export type LightStop = {
   readonly at: number
   readonly level: number
   readonly kelvin: number
+  /** Azimut del sol, en grados. 0 = de frente al logo desde +Z. */
+  readonly azimuthDeg: number
+  /** Elevación del sol sobre el horizonte, en grados. Nunca baja de 0. */
+  readonly elevationDeg: number
   /** Curva de llegada desde el stop anterior. Default `shift`. */
   readonly ease?: ChoreoEase
 }
 
 /** Lo que el arco devuelve en un progreso. Se escribe sobre un objeto reusado. */
-export type MutableLightLevels = { level: number; kelvin: number }
+export type MutableLightLevels = {
+  level: number
+  kelvin: number
+  azimuthDeg: number
+  elevationDeg: number
+}
+
+// ── Las variantes de recorrido (S7) ─────────────────────────────────────────
+
+/**
+ * Los cuatro recorridos que el probe puede reproducir.
+ *
+ * `base` es **la coreografía que el humano calibró a mano** con el editor de S5
+ * y que S6 arregló. Es la que se carga por default y la que no se pierde.
+ *
+ * Las otras tres son **propuestas**, no ajustes de la base: cada una tiene una
+ * tesis distinta sobre qué mira esta escena, y todas sus poses son inventadas
+ * (por eso van marcadas `derived`). Existen para compararse en pantalla.
+ */
+export type ChoreoVariantId = 'base' | 'intima' | 'arquitectonica' | 'dramatica'
+
+/**
+ * Un recorrido completo con todo lo que hace falta para reproducirlo, editarlo
+ * y volver a exportarlo al archivo del que salió.
+ */
+export type ChoreoVariant = {
+  readonly id: ChoreoVariantId
+  /** Cómo se llama en el panel. */
+  readonly label: string
+  /** Una línea: de qué se trata. También va en el panel. */
+  readonly thesis: string
+  /** Nombre de la constante que el exportador tiene que emitir. */
+  readonly constName: string
+  /** Archivo donde se pega el bloque exportado. Lo dice el panel de export. */
+  readonly file: string
+  readonly keyframes: readonly ChoreoKeyframe[]
+  /** Doc que va arriba del array (sin el censo: lo recalcula el exportador). */
+  readonly doc: readonly string[]
+  /** Comentario por keyframe, indexado por `name`. Puede estar vacío. */
+  readonly notes: Readonly<Record<string, readonly string[]>>
+  /** Separador de tramo, indexado por el `name` del keyframe que lo sigue. */
+  readonly sections: Readonly<Record<string, ChoreoSection>>
+}

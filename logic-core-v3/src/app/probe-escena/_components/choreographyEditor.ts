@@ -1,10 +1,12 @@
-import { CHOREO_KEYFRAMES } from './choreography'
+import { CHOREO_VARIANTS, DEFAULT_VARIANT_ID, findVariant } from './choreographyVariants'
 import { buildTrack, type ChoreoTrack } from './choreographySampler'
 import {
   CHOREO_CHANNELS,
   type ChoreoChannel,
   type ChoreoEase,
   type ChoreoTurn,
+  type ChoreoVariant,
+  type ChoreoVariantId,
   type MutableChoreoPose,
 } from './choreographyTypes'
 
@@ -28,9 +30,9 @@ import {
  * **Ya costó una sesión de calibración entera y conviene tenerlo escrito.**
  *
  * El botón de exportar copia el bloque al portapapeles. Eso es todo lo que hace.
- * La calibración solo existe cuando ese texto se **pega en `choreography.ts`**;
- * hasta entonces vive en el portapapeles del sistema —que la siguiente copia
- * pisa— y en este módulo, que muere al recargar la página.
+ * La calibración solo existe cuando ese texto se **pega en el archivo**; hasta
+ * entonces vive en el portapapeles del sistema —que la siguiente copia pisa— y
+ * en este módulo, que muere al recargar la página.
  *
  * En S6 pasó exactamente eso: veinticuatro keyframes calibrados mirando la
  * escena, grabados en video, exportados... y nunca pegados. El archivo siguió
@@ -40,6 +42,18 @@ import {
  * El rodeo del portapapeles es deliberado —lo que se queda tiene que ser un acto
  * explícito del humano— pero eso significa que **el paso que guarda es el
  * pegado, no el click.** El panel lo dice en voz alta por la misma razón.
+ *
+ * ── Las CUATRO sesiones (S7) ───────────────────────────────────────────────
+ *
+ * Desde que hay cuatro recorridos, el editor tiene **una sesión por variante**,
+ * no una sola con la variante adentro. Cambiar de variante no descarta nada: se
+ * puede ir a la íntima, mover tres cosas, volver a la base, comparar, y volver a
+ * la íntima con los tres cambios ahí.
+ *
+ * Es una decisión de seguridad además de comodidad: si cambiar de variante
+ * borrara la sesión, cambiar sería una acción destructiva y necesitaría
+ * confirmación — o sea un click más entre el humano y la comparación que el
+ * panel existe para permitir.
  *
  * ── Las tres invariantes ───────────────────────────────────────────────────
  *
@@ -52,7 +66,7 @@ import {
  *    explícito.
  * 3. **El track se reconstruye por evento, no por frame.** Cada mutación lo
  *    invalida y el siguiente acceso lo rearma. Con el humano arrastrando un
- *    slider eso es una reconstrucción por evento de input — diecisiete restas.
+ *    slider eso es una reconstrucción por evento de input — treinta restas.
  *
  * ── Por qué el track es perezoso ───────────────────────────────────────────
  *
@@ -71,7 +85,7 @@ export type EditableKeyframe = {
   readonly id: number
   at: number
   name: string
-  /** `true` = derivado por Claude en S4, no capturado por el humano. */
+  /** `true` = derivado por Claude, no capturado por el humano. */
   readonly derived: boolean
   ease?: ChoreoEase
   turn?: ChoreoTurn
@@ -122,70 +136,109 @@ function clone(seed: KeyframeSeed, id: number, origin: KeyframeOrigin): Editable
   }
 }
 
+/** La sesión de trabajo de UNA variante. Hay una por cada una, siempre viva. */
+type VariantSession = {
+  keyframes: EditableKeyframe[]
+  track: ChoreoTrack | null
+  dirty: boolean
+  nextId: number
+}
+
 export type ChoreoEditor = {
-  /** El array vivo, en orden. Se lee; se muta por los métodos. */
+  /** La variante activa: su descriptor completo (nombre, tesis, archivo, notas). */
+  readonly variant: ChoreoVariant
+  readonly variantId: ChoreoVariantId
+  /** Cambia de recorrido. NO descarta la sesión de la variante que se deja. */
+  setVariant(id: ChoreoVariantId): void
+  /** `true` = esa variante tiene cambios sin exportar. Para marcarla en el panel. */
+  isDirty(id: ChoreoVariantId): boolean
+  /** El array vivo de la ACTIVA, en orden. Se lee; se muta por los métodos. */
   readonly keyframes: readonly EditableKeyframe[]
-  /** El track muestreable. Se rearma solo, después de cada mutación. */
+  /** El track muestreable de la ACTIVA. Se rearma solo, después de cada mutación. */
   readonly track: ChoreoTrack
   /** Sube con cada cambio que la pantalla tenga que reflejar. */
   readonly version: number
-  /** `true` = hay algo distinto del archivo. Es lo que habilita el reset. */
+  /** `true` = la activa tiene algo distinto del archivo. Es lo que habilita el reset. */
   readonly dirty: boolean
   subscribe(listener: () => void): () => void
   find(id: number): EditableKeyframe | undefined
   indexOf(id: number): number
   /** Mueve el punto del recorrido. Devuelve el `at` EFECTIVO, ya acotado. */
   setAt(id: number, at: number): number
-  /** Escribe los siete canales de una. Ignora lo que no cambió. */
+  /** Escribe los cinco canales de una. Ignora lo que no cambió. */
   applyPose(id: number, values: Readonly<Record<ChoreoChannel, number>>): void
   /** Copia con la misma pose y un `at` nuevo. `null` = no había lugar. */
   duplicate(id: number): EditableKeyframe | null
   /** Solo los que creó el editor. `false` = no se borró. */
   remove(id: number): boolean
-  /** Vuelve a los valores del archivo. Descarta toda la sesión. */
+  /** Vuelve a los valores del archivo. Descarta la sesión de la variante ACTIVA. */
   reset(): void
 }
 
 export function createChoreoEditor(): ChoreoEditor {
-  let nextId = 0
-  let keyframes: EditableKeyframe[] = []
-  let track: ChoreoTrack | null = null
+  const sessions = new Map<ChoreoVariantId, VariantSession>()
+  let activeId: ChoreoVariantId = DEFAULT_VARIANT_ID
   let version = 0
-  let dirty = false
 
   const listeners = new Set<() => void>()
 
-  const load = () => {
-    nextId = 0
-    keyframes = CHOREO_KEYFRAMES.map((keyframe) => clone(keyframe, nextId++, 'archivo'))
-    track = null
-    dirty = false
+  const load = (variant: ChoreoVariant): VariantSession => {
+    let nextId = 0
+    return {
+      keyframes: variant.keyframes.map((keyframe) => clone(keyframe, nextId++, 'archivo')),
+      track: null,
+      dirty: false,
+      nextId,
+    }
   }
+
+  for (const variant of CHOREO_VARIANTS) sessions.set(variant.id, load(variant))
+
+  /** La sesión activa. Nunca es `undefined`: se cargan las cuatro al construir. */
+  const active = (): VariantSession => sessions.get(activeId) ?? sessions.get('base')!
 
   /** Invalida el track y despierta a la pantalla. Solo para cambios VISIBLES. */
   const publish = () => {
-    track = null
+    active().track = null
     version += 1
     for (const listener of listeners) listener()
   }
 
-  const indexOf = (id: number) => keyframes.findIndex((keyframe) => keyframe.id === id)
-
-  load()
+  const indexOf = (id: number) => active().keyframes.findIndex((keyframe) => keyframe.id === id)
 
   return {
+    get variant() {
+      return findVariant(activeId)
+    },
+    get variantId() {
+      return activeId
+    },
+    setVariant(id) {
+      if (id === activeId || !sessions.has(id)) return
+      activeId = id
+      // No se invalida el track de la que se deja: sigue armado para cuando se
+      // vuelva. Lo que sube es la versión, que es lo que hace que el panel
+      // re-siembre los sliders y la lista con el recorrido nuevo.
+      version += 1
+      for (const listener of listeners) listener()
+    },
+    isDirty(id) {
+      return sessions.get(id)?.dirty === true
+    },
+
     get keyframes() {
-      return keyframes
+      return active().keyframes
     },
     get track() {
-      if (!track) track = buildTrack(keyframes)
-      return track
+      const session = active()
+      if (!session.track) session.track = buildTrack(session.keyframes)
+      return session.track
     },
     get version() {
       return version
     },
     get dirty() {
-      return dirty
+      return active().dirty
     },
 
     subscribe(listener) {
@@ -196,18 +249,19 @@ export function createChoreoEditor(): ChoreoEditor {
     },
 
     find(id) {
-      return keyframes.find((keyframe) => keyframe.id === id)
+      return active().keyframes.find((keyframe) => keyframe.id === id)
     },
 
     indexOf,
 
     setAt(id, at) {
+      const session = active()
       const index = indexOf(id)
       if (index < 0) return at
 
-      const keyframe = keyframes[index]
-      const previous = keyframes[index - 1]
-      const next = keyframes[index + 1]
+      const keyframe = session.keyframes[index]
+      const previous = session.keyframes[index - 1]
+      const next = session.keyframes[index + 1]
 
       // Acotado entre los vecinos: el array nunca se reordena, así que la lista
       // no salta mientras se arrastra y `buildTrack` no puede tirar. Para pasar
@@ -222,13 +276,14 @@ export function createChoreoEditor(): ChoreoEditor {
 
       keyframe.at = value
       keyframe.edited = true
-      dirty = true
+      session.dirty = true
       publish()
       return value
     },
 
     applyPose(id, values) {
-      const keyframe = keyframes.find((candidate) => candidate.id === id)
+      const session = active()
+      const keyframe = session.keyframes.find((candidate) => candidate.id === id)
       if (!keyframe) return
 
       let changed = false
@@ -241,13 +296,13 @@ export function createChoreoEditor(): ChoreoEditor {
 
       if (!changed) return
 
-      dirty = true
+      session.dirty = true
 
       // La pose NO se dibuja en la lista, así que arrastrar un slider de escena
       // no re-renderiza React: lo único visible es la marca "editado", y esa
       // cambia una sola vez. El track sí se invalida en cada cambio.
       if (keyframe.edited) {
-        track = null
+        session.track = null
         return
       }
 
@@ -256,12 +311,13 @@ export function createChoreoEditor(): ChoreoEditor {
     },
 
     duplicate(id) {
+      const session = active()
       const index = indexOf(id)
       if (index < 0) return null
 
-      const source = keyframes[index]
-      const previous = keyframes[index - 1]
-      const next = keyframes[index + 1]
+      const source = session.keyframes[index]
+      const previous = session.keyframes[index - 1]
+      const next = session.keyframes[index + 1]
 
       // A mitad de camino hacia el SIGUIENTE: es el patrón de sostén — se llega
       // en el original y se sostiene hasta la copia. En el último keyframe no
@@ -285,31 +341,34 @@ export function createChoreoEditor(): ChoreoEditor {
           turn: source.turn,
           pose: source.pose,
         },
-        nextId++,
+        session.nextId++,
         'editor'
       )
 
-      keyframes.splice(next ? index + 1 : index, 0, copy)
-      dirty = true
+      session.keyframes.splice(next ? index + 1 : index, 0, copy)
+      session.dirty = true
       publish()
       return copy
     },
 
     remove(id) {
+      const session = active()
       const index = indexOf(id)
       if (index < 0) return false
       // Un keyframe del archivo no se pierde por un click. Y el track necesita
       // dos para existir.
-      if (keyframes[index].origin !== 'editor' || keyframes.length <= 2) return false
+      if (session.keyframes[index].origin !== 'editor' || session.keyframes.length <= 2) {
+        return false
+      }
 
-      keyframes.splice(index, 1)
-      dirty = true
+      session.keyframes.splice(index, 1)
+      session.dirty = true
       publish()
       return true
     },
 
     reset() {
-      load()
+      sessions.set(activeId, load(findVariant(activeId)))
       publish()
     },
   }

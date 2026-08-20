@@ -8,6 +8,7 @@ import { CHOREO_CHANNELS } from './choreographyTypes'
 import { KeyframeEditor } from './KeyframeEditor'
 import { ProbeReadout } from './ProbeReadout'
 import { StoreSlider } from './StoreSlider'
+import { VariantPicker } from './VariantPicker'
 import {
   PROBE_PARAM_ORDER,
   PROBE_PARAM_SPECS,
@@ -170,9 +171,19 @@ export function ProbeControls({
         ))}
       </div>
 
+      {/*
+        EL SELECTOR DE RECORRIDO (S7). Va arriba de todo y fuera de los modos:
+        se cambia de variante tanto mirando (coreografía) como componiendo
+        (editor), y la lectura de cuál está activa tiene que estar a la vista en
+        los dos. En manual no aplica —ahí no hay recorrido— pero se deja igual,
+        porque esconderlo obligaría a volver de modo para ver en cuál se estaba.
+      */}
+      <VariantPicker editor={editor} />
+
       {isChoreo ? (
         <ChoreographyControls
           rig={rig}
+          editor={editor}
           playing={playing}
           onPlayingChange={onPlayingChange}
           physicsEnabled={physicsEnabled}

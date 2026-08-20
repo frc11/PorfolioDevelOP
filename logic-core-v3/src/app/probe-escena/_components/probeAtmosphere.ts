@@ -38,12 +38,39 @@ export const SHADOW_MAP_SIZE = 1024
 
 /**
  * Rango de profundidad de la cámara de sombra. Con la luz a 22 del centro, el
- * objeto ocupa de 16,9 a 27,1, y el punto del piso más lejano que recibe su
- * sombra queda a 40,5. Apretar el rango es lo que le da precisión al buffer de
- * profundidad, o sea menos acné con menos bias.
+ * objeto ocupa de 16,9 a 27,1. Apretar el rango es lo que le da precisión al
+ * buffer de profundidad, o sea menos acné con menos bias.
+ *
+ * ⚠️ **`SHADOW_FAR` subió de 46 a 64 en S7, y no es holgura: es obligatorio.**
+ *
+ * Desde que el sol recorre un arco, su elevación baja hasta 11,5° en el cierre,
+ * y una luz rasante tira una sombra larga: el borde superior del logo proyecta a
+ * **38,8 unidades** del objeto, contra las 10,9 que proyectaba a 36°. Ese punto
+ * queda a 60,9 de profundidad desde la cámara de sombra.
+ *
+ * Y lo que pasa si el rango se queda corto no es que la sombra se degrade: el
+ * shader de three descarta el test (`shadowCoord.z <= 1.0`) y devuelve
+ * "iluminado", así que **la sombra se corta en seco** a mitad del piso. Un tajo
+ * recto donde no hay nada que lo justifique.
+ *
+ * | elevación | largo de la sombra | profundidad máxima |
+ * |---:|---:|---:|
+ * | 36,0° (mediodía) | 10,9 | 33,3 |
+ * | 20,7° | 21,7 | 43,8 |
+ * | 11,5° (cierre) | **38,8** | **60,9** |
+ *
+ * El precio es precisión: el slab pasa de 34 a 52 de rango, así que el mismo
+ * `SHADOW_BIAS` normalizado equivale a 0,016 de mundo en vez de 0,010. Sobre un
+ * logo de 7 unidades es despreciable, y `SHADOW_NORMAL_BIAS` —que es el que
+ * hace el trabajo fino— se mide en mundo y no cambia.
+ *
+ * La ortográfica NO hay que tocarla: la sombra cae sobre la silueta del objeto
+ * en el espacio de la luz, así que su huella sigue cabiendo en la esfera
+ * envolvente de 5,08 por rasante que sea la luz. Lo que crece es la
+ * profundidad, no el ancho.
  */
 export const SHADOW_NEAR = 12
-export const SHADOW_FAR = 46
+export const SHADOW_FAR = 64
 
 /**
  * El par que decide entre acné y peter-panning.
@@ -118,19 +145,34 @@ export const SHADOW_RADIUS = 4
  *   O sea: **el logo NUNCA se vela, en ningún frame.** Es la condición para que
  *   sea el punto de mayor contraste de la escena.
  * - **El anillo de planos suspendidos cae entre 23 y 33 de la cámara** en las
- *   poses de frente, así que le toca entre 2% y 9%: un velo, no un lavado.
- * - **El ciclorama cae entre 45 y 87**, o sea entre 19% y 52%. Ahí es donde la
- *   niebla trabaja de verdad: el fondo se despega del piso y la profundidad se
- *   lee sin una sola geometría nueva.
+ *   poses de frente, así que le toca entre **0,2% y 2,8%**: apenas un velo.
+ * - **El ciclorama cae entre 45 y 87**, o sea entre **10% y 52%**. Ahí es donde
+ *   la niebla trabaja de verdad: el fondo se despega del piso y la profundidad
+ *   se lee sin una sola geometría nueva.
  *
- * ⚠️ **La perilla delicada del sprint, y hay que saber en qué dirección tira.**
- * La mezcla ocurre en lineal contra un color casi blanco, así que un 9% de
- * niebla sobre un `#191917` ya multiplica su luminancia por diez: los planos del
- * fondo del hero pasan de un sRGB de 0,10 a uno de ~0,30. **Eso es el efecto
- * —lo lejano se aclara y se aleja— pero se come parte de la masa oscura que S5
- * compuso.** Si al mirarlo los planos quedan lavados hay dos salidas, y son un
- * número cada una: subir `FOG_NEAR` (menos velo en el medio campo) o bajar
- * `PLANE_DARK_COLOR` (más negro de base para compensar).
+ * ⚠️ **CORRECCIÓN DE S7, y cambia decisiones futuras: la niebla de three es
+ * `smoothstep`, no lineal — y se mezcla en sRGB, no en lineal.**
+ *
+ * `fog_fragment.glsl.js` hace `smoothstep(fogNear, fogFar, depth)`, y el
+ * `#include <fog_fragment>` va DESPUÉS de `<tonemapping_fragment>` y de
+ * `<colorspace_fragment>`, así que la mezcla ocurre sobre el valor de salida ya
+ * convertido. S6 la contó lineal y en espacio lineal, y por eso sobreestimó el
+ * velo del medio campo:
+ *
+ * | distancia | S6 dijo (lineal) | es (smoothstep) |
+ * |---:|---:|---:|
+ * | 23 | 2,3% | **0,2%** |
+ * | 33 | 10,0% | **2,8%** |
+ * | 46 | 20,0% | **10,4%** |
+ * | 84 | 49,2% | **48,8%** |
+ *
+ * O sea: **cerca casi no vela y lejos vela casi lo mismo.** El miedo de S6 —que
+ * la niebla se comiera la masa oscura que S5 compuso— era cuatro veces mayor de
+ * lo real: los planos del fondo del hero pasan de 5/255 a 10/255, no a 77/255
+ * como daba la cuenta vieja. Si igual se quiere menos velo en el medio campo la
+ * perilla sigue siendo `FOG_NEAR`; si se quiere más masa oscura,
+ * `PLANE_DARK_COLOR`. Pero el problema es mucho más chico de lo que estaba
+ * escrito.
  *
  * ── El halo, que es lo que hay que no hacer ────────────────────────────────
  *

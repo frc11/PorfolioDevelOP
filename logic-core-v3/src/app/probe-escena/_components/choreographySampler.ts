@@ -181,6 +181,10 @@ export function sampleTrack(
  * agrega un keyframe de pose, que es exactamente el problema que S6 vino a
  * resolver.
  *
+ * Desde S7 devuelve además **dónde está el sol** (azimut y elevación), que es
+ * lo mismo que decir dónde está la luz principal: los cuatro canales describen
+ * un solo objeto. Ver `LIGHT_ARC` en `choreography.ts`.
+ *
  * No pasa por el editor: el arco no es editable desde el panel, así que la tabla
  * se lee directo del módulo igual que los tramos.
  */
@@ -192,6 +196,8 @@ export function sampleLightArc(progress: number, out: MutableLightLevels): void 
   if (LIGHT_ARC.length < 2) {
     out.level = first.level
     out.kelvin = first.kelvin
+    out.azimuthDeg = first.azimuthDeg
+    out.elevationDeg = first.elevationDeg
     return
   }
 
@@ -212,6 +218,13 @@ export function sampleLightArc(progress: number, out: MutableLightLevels): void 
 
   out.level = from.level + (to.level - from.level) * t
   out.kelvin = from.kelvin + (to.kelvin - from.kelvin) * t
+  // El azimut se interpola LINEALMENTE y no por el camino corto: el arco es
+  // acotado por diseño (92° en todo el recorrido) y nunca cruza el ±180 donde
+  // un desenvuelto haría falta. Un sol que tomara "el camino corto" podría dar
+  // media vuelta de golpe si alguien escribiera dos stops muy separados; con la
+  // interpolación directa, lo que se escribe es lo que se recorre.
+  out.azimuthDeg = from.azimuthDeg + (to.azimuthDeg - from.azimuthDeg) * t
+  out.elevationDeg = from.elevationDeg + (to.elevationDeg - from.elevationDeg) * t
 }
 
 // ── Amortiguación ───────────────────────────────────────────────────────────

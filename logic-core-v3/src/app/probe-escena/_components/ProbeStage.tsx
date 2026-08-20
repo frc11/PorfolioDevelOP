@@ -10,7 +10,9 @@ import { ContactOcclusion } from './ContactOcclusion'
 import { DepthParticles } from './DepthParticles'
 import { InstancedBars } from './InstancedBars'
 import { LogoFragments } from './LogoFragments'
+import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
+import { SunBody } from './SunBody'
 import {
   AERIAL_PLACEMENTS,
   PILLAR_PLACEMENTS,
@@ -122,6 +124,13 @@ export default function ProbeStage({
   /** Los dos campos de partículas. Mismo patrón: el rig los deriva por afuera. */
   const dustGroupRef = useRef<THREE.Group>(null)
   const bokehGroupRef = useRef<THREE.Group>(null)
+  /**
+   * El cuerpo del sol y la pantalla de rendijas. Los dos siguen la misma regla
+   * que los grupos de arriba: el componente declara la pieza, el único
+   * `useFrame` de la escena la mueve.
+   */
+  const sunRef = useRef<THREE.Sprite>(null)
+  const moireRef = useRef<MoireHandle>(null)
 
   return (
     <Canvas
@@ -200,6 +209,15 @@ export default function ProbeStage({
         <directionalLight ref={fillLightRef} />
         <directionalLight ref={rimLightRef} />
 
+        {/*
+          EL SOL (S7). No es un objeto más: es el CUERPO de la principal, puesto
+          sobre su mismo eje por `applyLightRig` en el mismo frame en que la
+          coloca. La escena tenía luz sin fuente; ahora la sombra viene de algo
+          que se ve. Su posición y su opacidad las escribe el rig — acá solo se
+          declara la pieza. El porqué de cada número está en `probeSun.ts`.
+        */}
+        <SunBody ref={sunRef} />
+
         <group ref={logoGroupRef}>
           <ProbeLogo stats={stats} onReady={onReady} />
         </group>
@@ -217,6 +235,19 @@ export default function ProbeStage({
         <InstancedBars placements={PLANE_PLACEMENTS} roughness={0.92} />
         <InstancedBars placements={AERIAL_PLACEMENTS} roughness={0.85} />
         <InstancedBars placements={PILLAR_PLACEMENTS} roughness={0.95} />
+
+        {/*
+          LA PANTALLA DE RENDIJAS (S7). Un cilindro alrededor de la escena con
+          dos tramas propias de develOP —el campo de puntos, fijo, y las
+          rendijas, que derivan— en las dos ranuras de textura del mismo
+          material. La interferencia entre las dos es el moiré, y se mueve mucho
+          más rápido que cualquiera de sus capas.
+
+          Un draw call y una sola superficie transparente. El aliasing está
+          medido contra el recorrido real: quince veces de margen sobre el
+          límite de muestreo. Los números están en `probeMoire.ts`.
+        */}
+        <MoireScreen ref={moireRef} />
 
         <LogoFragments />
 
@@ -253,6 +284,8 @@ export default function ProbeStage({
           logoGroupRef={logoGroupRef}
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
+          sunRef={sunRef}
+          moireRef={moireRef}
         />
       </Suspense>
     </Canvas>

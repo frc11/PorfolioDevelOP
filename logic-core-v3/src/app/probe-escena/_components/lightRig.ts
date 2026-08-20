@@ -22,6 +22,7 @@ import {
   RIM_INTENSITY,
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
+import { SUN_RADIUS, sunOpacityFor } from './probeSun'
 import { kelvinToSrgb } from './probeScene'
 
 /**
@@ -57,10 +58,26 @@ export type LightRigTargets = {
   fog: THREE.Fog | null
   /** El color de fondo de la escena, si es un color plano. Sigue a la niebla. */
   background: THREE.Color | null
+  /**
+   * El CUERPO del sol. Va en el mismo rig y no en un componente aparte porque es
+   * **la misma luz**: se coloca sobre el mismo eje que la principal, en el mismo
+   * frame y con la misma cuenta. Tenerlos en dos lugares sería habilitar que se
+   * desincronicen, y una sombra que no viene de donde se ve la fuente es
+   * exactamente lo que rompe la ilusión que el sol vino a construir.
+   */
+  sun: THREE.Sprite | null
 }
 
 export function createLightRigTargets(): LightRigTargets {
-  return { key: null, fill: null, rim: null, hemi: null, fog: null, background: null }
+  return {
+    key: null,
+    fill: null,
+    rim: null,
+    hemi: null,
+    fog: null,
+    background: null,
+    sun: null,
+  }
 }
 
 /** Lo que el rig necesita saber de este frame. */
@@ -68,6 +85,12 @@ export type LightRigInput = {
   /** Nivel general del arco. 1 = luz plena. */
   level: number
   kelvin: number
+  /**
+   * Dónde está el sol — que es dónde está la principal, que es de dónde cae la
+   * sombra. Sale de `LIGHT_ARC` y es un solo dato para las tres cosas.
+   */
+  sunAzimuthDeg: number
+  sunElevationDeg: number
   /** Azimut de la cámara, en radianes. El rim es solidario a él. */
   cameraAzimuth: number
   /** Altura de la cámara. El rim la sigue (ver la tabla en `probeLighting.ts`). */
@@ -77,7 +100,15 @@ export type LightRigInput = {
 }
 
 export function createLightRigInput(): LightRigInput {
-  return { level: 1, kelvin: 6500, cameraAzimuth: 0, cameraHeight: 0, followsCamera: false }
+  return {
+    level: 1,
+    kelvin: 6500,
+    sunAzimuthDeg: KEY_AZIMUTH_DEG,
+    sunElevationDeg: KEY_ELEVATION_DEG,
+    cameraAzimuth: 0,
+    cameraHeight: 0,
+    followsCamera: false,
+  }
 }
 
 export type LightRigCache = {
@@ -103,6 +134,12 @@ export function createLightRigCache(): LightRigCache {
 }
 
 const RAD = Math.PI / 180
+
+/**
+ * La dirección del sol, reusada por frame. Es el eje que comparten la principal
+ * y el cuerpo, y por eso se calcula UNA vez y la usan los dos.
+ */
+const SUN_DIRECTION = new THREE.Vector3()
 
 /** Posición de una luz fija, en polares alrededor del origen. */
 function place(
@@ -146,7 +183,31 @@ export function applyLightRig(
   input: LightRigInput,
   cache: LightRigCache
 ): void {
-  const { level, kelvin, cameraAzimuth, cameraHeight, followsCamera } = input
+  const {
+    level,
+    kelvin,
+    sunAzimuthDeg,
+    sunElevationDeg,
+    cameraAzimuth,
+    cameraHeight,
+    followsCamera,
+  } = input
+
+  // 0 · EL EJE DEL SOL, que es el de la principal. Se resuelve una sola vez y lo
+  //     usan las dos cosas: la luz que proyecta la sombra y el cuerpo que se ve.
+  //     Con el toggle "la luz sigue a la cámara" encendido el azimut pasa a ser
+  //     relativo a la cámara, y el sol se corre con él — que es lo correcto: si
+  //     la luz se movió, la fuente se movió.
+  const sunAzimuth = followsCamera
+    ? cameraAzimuth + KEY_FOLLOW_AZIMUTH_OFFSET_DEG * RAD
+    : sunAzimuthDeg * RAD
+  const sunElevation = sunElevationDeg * RAD
+  const sunHorizontal = Math.cos(sunElevation)
+  SUN_DIRECTION.set(
+    Math.sin(sunAzimuth) * sunHorizontal,
+    Math.sin(sunElevation),
+    Math.cos(sunAzimuth) * sunHorizontal
+  )
 
   // 1 · El color de la temperatura, compartido por la principal y el relleno.
   if (kelvin !== cache.lastKelvin) {
@@ -155,17 +216,16 @@ export function applyLightRig(
     cache.lastKelvin = kelvin
   }
 
-  // 2 · Principal. Es la única que proyecta sombra.
+  // 2 · Principal. Es la única que proyecta sombra, y va sobre el eje del sol.
+  //     `KEY_DISTANCE` no es "dónde está el sol": una direccional no tiene
+  //     posición física, solo dirección. Ese número es dónde se para la CÁMARA
+  //     DE SOMBRA, y se la deja cerca para que su rango de profundidad quede
+  //     apretado (ver `SHADOW_NEAR` / `SHADOW_FAR`).
   const key = targets.key
   if (key) {
     key.intensity = KEY_INTENSITY * level
     key.color.copy(cache.warm)
-
-    if (followsCamera) {
-      placeFollowing(key, cameraAzimuth, KEY_FOLLOW_AZIMUTH_OFFSET_DEG, KEY_ELEVATION_DEG, KEY_DISTANCE)
-    } else {
-      place(key, KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_DISTANCE)
-    }
+    key.position.copy(SUN_DIRECTION).multiplyScalar(KEY_DISTANCE)
   }
 
   // 3 · Relleno. Baja proporcional, igual que la principal: las dos son fuentes.
@@ -219,6 +279,17 @@ export function applyLightRig(
   if (fogLevel !== cache.lastFogLevel) {
     cache.fogTint.copy(cache.fogBase).multiplyScalar(fogLevel)
     cache.lastFogLevel = fogLevel
+  }
+
+  // 6b · EL CUERPO DEL SOL, sobre el mismo eje y con la misma cuenta. Es la
+  //      línea que garantiza que lo que se ve y lo que ilumina sean el mismo
+  //      objeto: si alguien mueve el arco, se mueven los dos o no se mueve
+  //      ninguno.
+  const sun = targets.sun
+  if (sun) {
+    sun.position.copy(SUN_DIRECTION).multiplyScalar(SUN_RADIUS)
+    const material = sun.material
+    if (material instanceof THREE.SpriteMaterial) material.opacity = sunOpacityFor(level)
   }
 
   if (targets.fog) targets.fog.color.copy(cache.fogTint)

@@ -106,7 +106,23 @@ export function KeyframeEditor({ editor, store, rig }: KeyframeEditorProps) {
   const [notice, setNotice] = useState<string | null>(null)
 
   const keyframes = editor.keyframes
-  const selected = editor.find(selectedId)
+
+  /**
+   * La selección efectiva, DERIVADA en el render y no corregida por un efecto.
+   *
+   * Cambiar de variante deja `selectedId` apuntando a un id que ya no existe —
+   * cada recorrido tiene su propia sesión y sus propios ids—, y la salida
+   * obvia sería un efecto que reselecciona. Sería un render de más y lo prohíbe
+   * `react-hooks/set-state-in-effect`, con razón: esto no es sincronizar con un
+   * sistema externo, es una cuenta.
+   *
+   * Así que el id que no existe simplemente cae en el primero de la variante
+   * nueva. Consecuencia a saber: **al cambiar de recorrido DESDE el editor, la
+   * cámara vuelve al principio.** Desde el modo coreografía —que es donde se
+   * comparan las variantes— el progreso no se toca.
+   */
+  const selected = editor.find(selectedId) ?? keyframes[0]
+  const activeId = selected.id
 
   /**
    * Llevar la escena al keyframe seleccionado: el progreso a su `at` y su pose
@@ -119,12 +135,12 @@ export function KeyframeEditor({ editor, store, rig }: KeyframeEditorProps) {
    * comparan y no notifican a nadie.
    */
   useEffect(() => {
-    const keyframe = editor.find(selectedId)
+    const keyframe = editor.find(activeId)
     if (!keyframe) return
 
     rig.set('progress', keyframe.at)
     store.setMany(keyframe.pose)
-  }, [editor, rig, store, selectedId, version])
+  }, [editor, rig, store, activeId, version])
 
   /**
    * El otro sentido: lo que el humano mueve en los sliders cae sobre la pose del
@@ -136,8 +152,8 @@ export function KeyframeEditor({ editor, store, rig }: KeyframeEditorProps) {
    * ser lo que eran en cada modo.
    */
   useEffect(
-    () => store.subscribe((values) => editor.applyPose(selectedId, values)),
-    [editor, store, selectedId]
+    () => store.subscribe((values) => editor.applyPose(activeId, values)),
+    [editor, store, activeId]
   )
 
   const handleSelect = useCallback((id: number) => {
@@ -150,27 +166,27 @@ export function KeyframeEditor({ editor, store, rig }: KeyframeEditorProps) {
   // lo acota y devuelve el efectivo, y devolvérselo al store hace que el pulgar
   // se frene contra la pared en vez de seguir de largo mintiendo.
   const handleAtChange = useCallback(() => {
-    const effective = editor.setAt(selectedId, rig.current.progress)
+    const effective = editor.setAt(activeId, rig.current.progress)
     rig.set('progress', effective)
-  }, [editor, rig, selectedId])
+  }, [editor, rig, activeId])
 
   const handleDuplicate = useCallback(() => {
-    const copy = editor.duplicate(selectedId)
+    const copy = editor.duplicate(activeId)
     if (!copy) {
       setNotice('No entra una copia entre este keyframe y su vecino: separá los `at` primero.')
       return
     }
     setNotice(null)
     setSelectedId(copy.id)
-  }, [editor, selectedId])
+  }, [editor, activeId])
 
   const handleRemove = useCallback(() => {
-    const index = editor.indexOf(selectedId)
-    if (!editor.remove(selectedId)) return
+    const index = editor.indexOf(activeId)
+    if (!editor.remove(activeId)) return
     setConfirming('none')
     const fallback = editor.keyframes[Math.max(0, index - 1)]
     setSelectedId(fallback.id)
-  }, [editor, selectedId])
+  }, [editor, activeId])
 
   const handleReset = useCallback(() => {
     editor.reset()
@@ -181,7 +197,7 @@ export function KeyframeEditor({ editor, store, rig }: KeyframeEditorProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <KeyframeList keyframes={keyframes} selectedId={selectedId} onSelect={handleSelect} />
+      <KeyframeList keyframes={keyframes} selectedId={activeId} onSelect={handleSelect} />
 
       {selected ? (
         <>

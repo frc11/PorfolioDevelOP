@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useId, useRef } from 'react'
 
-import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from './choreography'
+import { CHOREO_TRAMOS } from './choreography'
+import type { ChoreoEditor } from './choreographyEditor'
 import { StoreSlider } from './StoreSlider'
 import {
   PROBE_RIG_RANGES,
@@ -17,13 +18,21 @@ import {
  *
  * **La lectura sale del `useFrame` sin un solo `setState`.** El rig escribe dos
  * ÍNDICES numéricos en el store (el del tramo y el del keyframe más cercano) y
- * este panel los traduce a nombres contra el mismo array de datos, escribiendo
- * `textContent` directo. Es lo que permite que el nombre del momento se
- * actualice a 75 fps sin que React se entere.
+ * este panel los traduce a nombres, escribiendo `textContent` directo. Es lo que
+ * permite que el nombre del momento se actualice a 75 fps sin que React se
+ * entere.
+ *
+ * ⚠️ **Los nombres salen del EDITOR, no del módulo.** Desde S7 hay cuatro
+ * recorridos con distinta cantidad de keyframes, así que traducir el índice
+ * contra el array importado daría el nombre equivocado —o un `undefined`— en
+ * cuanto se cambie de variante. `editor.keyframes` es siempre el de la activa, y
+ * como se lee en el momento de escribir, la lectura acompaña al cambio sin
+ * necesidad de resuscribirse.
  */
 
 type ChoreographyControlsProps = {
   rig: ProbeRigStore
+  editor: ChoreoEditor
   playing: boolean
   onPlayingChange: (next: boolean) => void
   physicsEnabled: boolean
@@ -33,7 +42,7 @@ type ChoreographyControlsProps = {
 }
 
 /** Lectura del tramo y del keyframe. Se suscribe al store; nunca re-renderiza. */
-function ChoreographyReadout({ rig }: { rig: ProbeRigStore }) {
+function ChoreographyReadout({ rig, editor }: { rig: ProbeRigStore; editor: ChoreoEditor }) {
   const tramoRef = useRef<HTMLSpanElement>(null)
   const keyframeRef = useRef<HTMLSpanElement>(null)
 
@@ -43,13 +52,14 @@ function ChoreographyReadout({ rig }: { rig: ProbeRigStore }) {
         CHOREO_TRAMOS.length - 1,
         Math.max(0, Math.round(values.tramoIndex))
       )
+      const keyframes = editor.keyframes
       const keyframeIndex = Math.min(
-        CHOREO_KEYFRAMES.length - 1,
+        keyframes.length - 1,
         Math.max(0, Math.round(values.keyframeIndex))
       )
 
       const tramo = CHOREO_TRAMOS[tramoIndex]
-      const keyframe = CHOREO_KEYFRAMES[keyframeIndex]
+      const keyframe = keyframes[keyframeIndex]
 
       const tramoNode = tramoRef.current
       if (tramoNode) {
@@ -67,7 +77,7 @@ function ChoreographyReadout({ rig }: { rig: ProbeRigStore }) {
 
     write(rig.current)
     return rig.subscribe(write)
-  }, [rig])
+  }, [rig, editor])
 
   return (
     <div className="flex flex-col gap-0.5 rounded-sm bg-neutral-100 p-2 font-ds-mono text-[0.68rem] leading-relaxed text-neutral-800">
@@ -85,6 +95,7 @@ function ChoreographyReadout({ rig }: { rig: ProbeRigStore }) {
 
 export function ChoreographyControls({
   rig,
+  editor,
   playing,
   onPlayingChange,
   physicsEnabled,
@@ -122,7 +133,7 @@ export function ChoreographyControls({
         onManualChange={stopPlaying}
       />
 
-      <ChoreographyReadout rig={rig} />
+      <ChoreographyReadout rig={rig} editor={editor} />
 
       <button
         type="button"

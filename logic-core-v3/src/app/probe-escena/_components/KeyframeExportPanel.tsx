@@ -8,6 +8,12 @@ import { buildKeyframesSource } from './choreographyExport'
 /**
  * EL CAMINO DE VUELTA: de la sesión de edición al archivo.
  *
+ * ⚠️ **Desde S7 el destino depende de la variante activa.** El bloque que sale
+ * de acá lleva el nombre de constante y va al archivo que el panel indica: la
+ * base a `choreography.ts`, cada variante al suyo. Pegar el bloque de una
+ * variante sobre la base pisaría la única coreografía calibrada a mano que
+ * existe, así que el texto de abajo dice el archivo en voz alta.
+ *
  * Genera el bloque entero de `CHOREO_KEYFRAMES` —con su doc, sus separadores de
  * tramo y los comentarios de cada keyframe— y lo deja en el portapapeles. El
  * humano lo pega en `choreography.ts` y ahí termina el viaje.
@@ -54,7 +60,7 @@ export function KeyframeExportPanel({ editor, version }: KeyframeExportPanelProp
   const current = snapshot && snapshot.version === version ? snapshot : null
 
   const handleExport = useCallback(async () => {
-    const text = buildKeyframesSource(editor.keyframes)
+    const text = buildKeyframesSource(editor.keyframes, editor.variant)
 
     // El texto se muestra ya, sin esperar al portapapeles: la exportación no
     // depende de él. Sin `clipboard` —contexto no seguro, o permiso denegado—
@@ -89,9 +95,10 @@ export function KeyframeExportPanel({ editor, version }: KeyframeExportPanelProp
         <div className="flex flex-col gap-1">
           <p className="text-[0.66rem] leading-snug text-neutral-500">
             <strong className="font-semibold">Pegá esto ahora</strong>, reemplazando el bloque{' '}
-            <code>export const CHOREO_KEYFRAMES</code> de <code>choreography.ts</code>. Copiarlo
-            no guarda nada: hasta que no esté pegado, la sesión se pierde al recargar. El texto
-            desaparece apenas toques algo más, porque a partir de ahí ya no dice la verdad.
+            <code>export const {editor.variant.constName}</code> de{' '}
+            <code>{editor.variant.file}</code>. Copiarlo no guarda nada: hasta que no esté
+            pegado, la sesión se pierde al recargar. El texto desaparece apenas toques algo más,
+            porque a partir de ahí ya no dice la verdad.
           </p>
           <textarea
             readOnly

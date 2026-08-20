@@ -87,11 +87,24 @@
 /**
  * Key: 3/4 alto por delante-izquierda. Es la única que proyecta sombra.
  *
+ * ⚠️ **Desde S7 su POSICIÓN no está acá: está en `LIGHT_ARC`.** La principal y
+ * el sol son el mismo objeto, así que su azimut y su elevación viajan con el
+ * nivel y la temperatura, en una sola tabla ligada al progreso. Los valores de
+ * abajo quedan como el punto de arranque de ese arco y como la posición que el
+ * modo manual usa cuando no hay recorrido que muestrear.
+ *
  * La elevación (36°) no es libre: fija el largo de la sombra sobre el papel, y
- * con ella el tamaño de la ortográfica del shadow map. Más rasante = sombra más
+ * con ella el rango de profundidad del shadow map. Más rasante = sombra más
  * larga y más dramática; más alta = sombra corta y objeto aplanado. 36° cae en
  * la banda de retrato y deja la sombra saliendo del objeto en diagonal, que es
- * lo que la hace leer como sombra proyectada y no como una mancha debajo.
+ * lo que la hace leer como sombra proyectada y no como una mancha debajo. **Y
+ * es el techo del arco**: el sol arranca ahí y baja hasta 11,5° en el cierre.
+ *
+ * `KEY_DISTANCE` no es la distancia del SOL —el cuerpo se dibuja a
+ * `SUN_RADIUS`, 34— sino la de la cámara de sombra. Una direccional no tiene
+ * posición en el sentido físico: lo único que cuenta de ella es su dirección, y
+ * ésa es idéntica en los dos casos. La cámara de sombra se queda más cerca a
+ * propósito, para que su rango de profundidad sea lo más apretado posible.
  */
 export const KEY_AZIMUTH_DEG = -42
 export const KEY_ELEVATION_DEG = 36
@@ -113,6 +126,29 @@ export const FILL_AZIMUTH_DEG = 58
 export const FILL_ELEVATION_DEG = 14
 export const FILL_DISTANCE = 20
 export const FILL_INTENSITY = 1.35
+
+/**
+ * ⚠️ **El relleno NO acompaña al sol, y hay un costo medido que conviene saber.**
+ *
+ * El arco lleva la principal de −42° a +50°, y el relleno se queda en 58°: al
+ * final del recorrido las dos quedan a **8° una de otra**. En ese tramo el rig
+ * de tres puntos degrada de hecho a dos (principal + contraluz) más el
+ * hemisférico, porque key y fill iluminan la misma mitad del canto. Medido: la
+ * fracción del contorno del logo que recibe luz directa cae de 64% a 43% en el
+ * cierre.
+ *
+ * **Se dejó así, y con tres razones.** (1) El relleno es del ESPACIO, que es la
+ * decisión de S6: es el rebote de la sala, no un satélite del sol. (2) La cara
+ * que la cámara ve nunca queda peor iluminada que con la key fija — se midió
+ * pose por pose y da igual o mejor en todas. (3) Donde ocurre la convergencia el
+ * nivel ya está en 0,34 y el borde lo dibuja el contraluz, que es solidario a la
+ * cámara y no se entera del arco.
+ *
+ * Se probó la alternativa —el relleno siguiendo al sol a un offset fijo— y da
+ * PEOR: la cara vista pierde luz en el cierre (1,20 contra 1,44) y el canto
+ * queda igual. Si igual se quiere separar las dos luces, la perilla es este
+ * número.
+ */
 
 // ── El contraluz ────────────────────────────────────────────────────────────
 

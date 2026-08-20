@@ -1,11 +1,6 @@
 import type { EditableKeyframe } from './choreographyEditor'
-import { CHOREO_CHANNELS } from './choreographyTypes'
-import {
-  CHOREO_ARRAY_DOC,
-  CHOREO_NOTES,
-  CHOREO_SECTIONS,
-  SECTION_RULE_WIDTH,
-} from './choreographyNotes'
+import { CHOREO_CHANNELS, type ChoreoVariant } from './choreographyTypes'
+import { SECTION_RULE_WIDTH } from './choreographyNotes'
 
 /**
  * EL EXPORT — de la sesión de edición de vuelta a `choreography.ts`.
@@ -35,6 +30,17 @@ import {
  * - **El censo del doc se recalcula** (cuántos capturados, derivados y agregados
  *   hay de verdad), en vez de repetir un número escrito a mano que quedaría
  *   viejo al primer duplicado.
+ *
+ * ── Cuatro recorridos, cuatro destinos (S7) ────────────────────────────────
+ *
+ * El exportador recibe la VARIANTE, no solo los keyframes, y de ella saca tres
+ * cosas que antes eran constantes: el nombre de la constante a emitir, el doc de
+ * arriba del array y la tabla de comentarios.
+ *
+ * **No es una generalización de más: es lo que impide un error grave.** Con el
+ * nombre fijo, exportar la variante íntima habría emitido `CHOREO_KEYFRAMES`, y
+ * pegar ese bloque habría pisado la coreografía calibrada a mano con una
+ * propuesta. El panel de export dice además en qué archivo va.
  *
  * ── La luz ya no está en la pose ───────────────────────────────────────────
  *
@@ -97,7 +103,7 @@ function count(value: number, singular: string, plural = `${singular}s`): string
 }
 
 /** El doc que va arriba del array, con el censo recalculado sobre los datos vivos. */
-function arrayDoc(keyframes: readonly EditableKeyframe[]): string[] {
+function arrayDoc(keyframes: readonly EditableKeyframe[], variant: ChoreoVariant): string[] {
   const derived = keyframes.filter((keyframe) => keyframe.derived).length
   const added = keyframes.filter((keyframe) => keyframe.origin === 'editor').length
   const captured = keyframes.length - derived - added
@@ -122,7 +128,7 @@ function arrayDoc(keyframes: readonly EditableKeyframe[]): string[] {
   }
 
   lines.push(' *')
-  for (const line of CHOREO_ARRAY_DOC) lines.push(line.length > 0 ? ` * ${line}` : ' *')
+  for (const line of variant.doc) lines.push(line.length > 0 ? ` * ${line}` : ' *')
   lines.push(' */')
 
   return lines
@@ -134,14 +140,17 @@ function arrayDoc(keyframes: readonly EditableKeyframe[]): string[] {
  * Puro: no toca el DOM, no toca el store y no escribe nada. Lo llama el botón
  * del editor y su salida va al portapapeles.
  */
-export function buildKeyframesSource(keyframes: readonly EditableKeyframe[]): string {
+export function buildKeyframesSource(
+  keyframes: readonly EditableKeyframe[],
+  variant: ChoreoVariant
+): string {
   const lines: string[] = [
-    ...arrayDoc(keyframes),
-    'export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [',
+    ...arrayDoc(keyframes, variant),
+    `export const ${variant.constName}: readonly ChoreoKeyframe[] = [`,
   ]
 
   keyframes.forEach((keyframe, index) => {
-    const section = CHOREO_SECTIONS[keyframe.name]
+    const section = variant.sections[keyframe.name]
     if (section) {
       // Renglón en blanco antes de cada tramo menos el primero: es lo que separa
       // los bloques a la vista.
@@ -155,7 +164,7 @@ export function buildKeyframesSource(keyframes: readonly EditableKeyframe[]): st
 
     lines.push(`${INDENT}{`)
 
-    const note = CHOREO_NOTES[keyframe.name]
+    const note = variant.notes[keyframe.name]
     if (note) for (const line of note) lines.push(commentLine(ITEM_INDENT, line))
 
     lines.push(`${ITEM_INDENT}at: ${formatNumber(keyframe.at)},`)

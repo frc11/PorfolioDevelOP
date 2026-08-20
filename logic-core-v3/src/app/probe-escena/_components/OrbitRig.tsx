@@ -49,7 +49,9 @@ import {
   type LightRigInput,
   type LightRigTargets,
 } from './lightRig'
-import { KEY_INTENSITY } from './probeLighting'
+import type { MoireHandle } from './MoireScreen'
+import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
+import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
 import { AUTO_ORBIT_DEG_PER_S, ORBIT_TARGET_Y } from './probeScene'
 import type {
   ProbeMode,
@@ -184,6 +186,10 @@ type OrbitRigProps = {
   /** Los dos campos de partículas. Es lo que deriva (ver `choreographyPhysics.ts`). */
   dustGroupRef: RefObject<THREE.Group | null>
   bokehGroupRef: RefObject<THREE.Group | null>
+  /** El cuerpo del sol. Lo coloca `applyLightRig`, sobre el eje de la principal. */
+  sunRef: RefObject<THREE.Sprite | null>
+  /** La pantalla de rendijas. El loop le desplaza la trama que se mueve. */
+  moireRef: RefObject<MoireHandle | null>
 }
 
 export function OrbitRig({
@@ -205,6 +211,8 @@ export function OrbitRig({
   logoGroupRef,
   dustGroupRef,
   bokehGroupRef,
+  sunRef,
+  moireRef,
 }: OrbitRigProps) {
   const shadowModeRef = useRef<boolean | null>(null)
   const modeRef = useRef<ProbeMode | null>(null)
@@ -227,7 +235,12 @@ export function OrbitRig({
     live: createPose(),
     patch: createPatch(),
     lightPatch: { keyIntensity: 0, keyKelvin: 0 },
-    arc: { level: 1, kelvin: 6500 },
+    arc: {
+      level: 1,
+      kelvin: 6500,
+      azimuthDeg: KEY_AZIMUTH_DEG,
+      elevationDeg: KEY_ELEVATION_DEG,
+    },
     mouse: { x: 0, y: 0 },
     lightTargets: createLightRigTargets(),
     lightInput: createLightRigInput(),
@@ -260,10 +273,18 @@ export function OrbitRig({
     // siendo el gasto que `VIRA_UPDATES_SHADOW` permite apagar; desde S6 cuesta
     // la cuarta parte, porque el mapa bajó de 2048² a 1024².
     //
+    // **Y desde S7 lo invalida algo más: el sol se mueve.** La principal recorre
+    // un arco ligado al progreso, así que en cuanto el recorrido avanza la luz
+    // cambia de dirección y la sombra con ella — que es justamente lo que hace
+    // que el espacio se lea como real. Por eso `trackDriven` entra en la cuenta.
+    // No suma costo sobre lo que ya había: en coreografía la vira ya obligaba a
+    // recalcular el mapa en cada cuadro. En manual, con el sol quieto y sin
+    // vira, el mapa sigue congelándose como desde S4.
+    //
     // Va acá y no en un `useEffect` porque `state.gl` es el argumento del loop:
     // mutar el renderer que devuelve `useThree` es lo que la regla
     // `react-hooks/immutability` prohíbe, con razón.
-    const shadowMoves = keyFollowsCamera || (physics && VIRA_UPDATES_SHADOW)
+    const shadowMoves = keyFollowsCamera || trackDriven || (physics && VIRA_UPDATES_SHADOW)
     if (shadowModeRef.current !== shadowMoves) {
       state.gl.shadowMap.autoUpdate = shadowMoves
       state.gl.shadowMap.needsUpdate = true
@@ -471,10 +492,13 @@ export function OrbitRig({
     targets.hemi = hemiLightRef.current
     targets.fog = fogRef.current
     targets.background = backgroundRef.current
+    targets.sun = sunRef.current
 
     const lightInput = scratch.lightInput
     lightInput.level = arc.level
     lightInput.kelvin = arc.kelvin
+    lightInput.sunAzimuthDeg = arc.azimuthDeg
+    lightInput.sunElevationDeg = arc.elevationDeg
     lightInput.cameraAzimuth = azimuth
     lightInput.cameraHeight = height
     lightInput.followsCamera = keyFollowsCamera
@@ -526,6 +550,22 @@ export function OrbitRig({
         bokeh.position.y =
           Math.sin((elapsed / BOKEH_BOB_PERIOD_S) * TWO_PI) * BOKEH_BOB_AMPLITUDE
       }
+    }
+
+    // 6b · La trama de rendijas que se desplaza. UNA escritura por frame sobre el
+    //      `offset` de una textura: el moiré no cuesta nada por píxel de más que
+    //      la propia superficie, porque lo que se mueve es la matriz de UV.
+    //
+    //      El módulo mantiene el offset en [0,1): la textura repite, así que
+    //      envolver es invisible y evita que el número crezca sin techo durante
+    //      una sesión larga.
+    //
+    //      Se apaga con movimiento reducido, igual que la deriva del aire y la
+    //      vira. NO se apaga con el toggle de física: apagar la física es para
+    //      juzgar el track crudo de la cámara y el fondo no interfiere con eso.
+    const moire = moireRef.current
+    if (moire) {
+      moire.slats.offset.x = reducedMotion ? 0 : (elapsed / MOIRE_DRIFT_PERIOD_S) % 1
     }
 
     // 7 · FPS promediado en ventanas de medio segundo. Sin promedio el número
