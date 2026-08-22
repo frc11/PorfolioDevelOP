@@ -4807,3 +4807,75 @@ ajeno se mató.
 **Queda para Franco:** todo el juicio visual — jerarquía, densidad, aglomeración y copy. Y
 rotar la credencial de la branch Neon dev: un prefijo del password quedó impreso en el log
 de la sesión por un enmascarado mal cortado.
+
+---
+
+## Corrida de experiencia — las primeras 52 capturas del lado de Franco — 2026-08-22
+
+**Rama:** `leados/v1-integracion` (worktree propio `C:\tmp\wt-corrida-admin`, detached)
+**Base:** `cbfaa27f` · **Puerto:** `127.0.0.1:3022` · **distDir:** `.next-corrida-admin`
+**Salida:** `docs/diagnostico-visual-admin-2026-08/` — PNG gitignorados (patrón de la galería
+y de la corrida del setter), `MANIFIESTO.md` + `REPORTE.md` commiteados.
+
+El admin nunca se había fotografiado. 34 rutas UI bajo `/admin`, todas en
+`src/app/(protected)/admin/**` (no existe `src/app/admin/`), con un único gate en
+`layout.tsx:41-48` y sin `middleware.ts`. Se cubrieron 32/34: quedan afuera el redirect legacy
+sin UI y `/admin/projects/[projectId]/hours`, recortada por el techo de 45.
+
+### Lo que la corrida vino a contestar, contestado
+
+- **Las URLs de herramientas no tienen pantalla.** Son literales en `herramientas.ts`; son
+  **cinco**, y cuatro están en `null` con `TODO`. `grep -rni "herramienta"` sobre el árbol
+  admin da **0 resultados**. No hay modelo Prisma que las guarde.
+- **Cal.com tampoco.** Cero escrituras a `calComUsername`/`calComEmbedUrl` en todo el repo;
+  solo lecturas, en LeadOS y en el módulo cliente. Confirmado contra la base: las 16 orgs en
+  `NULL`. `agenda.ts:44` busca la org **globalmente**, así que cargar el campo en una org
+  cliente rompe LeadOS con "Config Cal.com ambigua".
+- **El rechazo no puede señalar un check.** Escribe `motivo` + `donde` + `arreglo`, los tres
+  texto libre, appendeados al JSON `rechazos`. La infraestructura de ids de hard-check existe
+  (`HARD_CHECKS`, `HARD_CHECK_PROMPT`, `guidance-content.checkId`) y **el formulario no la usa**.
+- **Aprobar y rechazar no salen del sistema**: Postgres + `revalidatePath` + novedad in-app.
+  La asimetría es intencional: el `escalarConstruccion` del setter **sí** hace `fetch` a
+  Telegram. Por eso se pudieron apretar los botones y no se tocó el escalamiento.
+- **"Me trabé" aterriza en `OsLeadDossier.escaladoAt`/`escaladoNota`** y se muestra en un solo
+  lugar: el bloque "Setters trabados" de `/admin/leados`. Es un slot único, no un historial:
+  cualquier cambio de stage lo borra.
+- **`/admin/team` lista solo `SUPER_ADMIN`.** Los seis setters no aparecen. No hay pantalla de
+  setters; la gestión es el selector de asignación en la ficha del lead.
+
+### Aprobar sin cargar el link permanente no es ejecutable
+
+Era la mitad del PAR 2. `AprobarRevisionSchema` exige `finalUrl` https válida, validada en
+cliente **y** servidor. El estado existe en el modelo (`turnoDelLead` → `'franco'` si
+`APROBADA && finalUrl === null`) pero **ningún camino del admin lo produce**. Se ejecutó el
+camino real y se fotografió aparte el fixture que ya está en ese estado: el setter ahí ve
+"Seguí la cadencia", **no** un aviso de que Franco no cargó el link.
+
+### El fold del admin es la misma trampa, y la primera pasada salió capada
+
+Shell `fixed inset-0`, scroller en el `<main>` interno. La primera pasada solo expandía las
+cuatro superficies marcadas como densas y disparó las otras 37 a 1440×900 sobre contenidos de
+hasta 10 259 px. Se rehízo con expansión en **toda** toma. Medido: la **cola de revisión**
+tiene 8 662 px de contenido y se ven 756 — **entra el 9 %**; las evaluaciones de un setter,
+el 7 %.
+
+`/admin/leados/[leadId]` **no tiene una "página completa" canónica**: su columna de preview es
+`xl:h-[calc(100vh-12.5rem)]`, así que crece 1:1 con el viewport y el faltante (193–228 px) es
+constante. Tabulado en el manifiesto, no escondido.
+
+### Dos cabos de método
+
+1. **`TaskStop` no mató el proceso de captura.** Tres corridas quedaron vivas escribiendo el
+   mismo `filas.json` y el mismo directorio de PNG: el resultado fue una mezcla de dos códigos
+   distintos que casi se declara como buena. Se detectó comparando los nombres de archivo con
+   el código vigente. Hay que matar por PID y **verificar que no quedan**, no confiar en el
+   TaskStop.
+2. **El build de Next modifica `tsconfig.json`** cuando se usa un `distDir` alternativo: le
+   agrega los `include` del directorio. Revertido antes del commit (el diff del repo ya
+   arrastra `.next-perf-b` y `.next-perf-base` de corridas viejas que no lo revirtieron).
+
+**Estado de datos:** la base volvió a la línea base del Paso 1, verificado campo por campo.
+Las dos novedades que emitieron el rechazo y la aprobación se borraron con filtro estrecho
+(exactamente 2, por setter + lead + kind). No se ejecutó la impersonación ni el escalamiento.
+
+**Queda para Franco:** todo el juicio visual. Esta corrida fotografía y declara; no opina.
