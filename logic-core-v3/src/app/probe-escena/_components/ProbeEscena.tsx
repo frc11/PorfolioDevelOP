@@ -42,6 +42,27 @@ import {
 const ProbeStage = dynamic(() => import('./ProbeStage'), { ssr: false })
 
 /**
+ * EL PRELOADER DEL HOME, CORRIENDO SOBRE ESTA ESCENA — solo desarrollo.
+ *
+ * Se enciende con `/probe-escena?intro`; sin el parámetro devuelve `null` en su
+ * primer render y no instancia nada, así que el probe queda idéntico. En el
+ * build de producción este ternario se pliega a `null` —`NODE_ENV` es una
+ * constante literal ahí— y con la única referencia al `import()` en la rama
+ * muerta, webpack descarta el chunk entero.
+ *
+ * **Es lo único que S8c tocó del probe**, y es la excepción que la instrucción
+ * autoriza: la escena, la coreografía y el panel no se tocaron. El día que se
+ * limpie, se borran estas dos inserciones y `IntroPreview.tsx`.
+ */
+const IntroPreview =
+  process.env.NODE_ENV === 'production'
+    ? null
+    : dynamic(
+        () => import('@/components/layout/home-intro/IntroPreview').then((m) => m.IntroPreview),
+        { ssr: false }
+      )
+
+/**
  * Contención del canvas. `<Canvas>` re-lanza hacia afuera cualquier error de su
  * árbol, así que sin esto un fallo de WebGL —o de la validación del track de
  * coreografía, que corre al importar el módulo del rig— se lleva puesta la ruta
@@ -156,6 +177,8 @@ export function ProbeEscena() {
         keyFollowsCamera={keyFollowsCamera}
         onKeyFollowsCameraChange={setKeyFollowsCamera}
       />
+
+      {IntroPreview ? <IntroPreview /> : null}
     </main>
   )
 }
