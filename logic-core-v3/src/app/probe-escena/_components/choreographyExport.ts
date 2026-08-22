@@ -31,7 +31,7 @@ import { SECTION_RULE_WIDTH } from './choreographyNotes'
  *   hay de verdad), en vez de repetir un número escrito a mano que quedaría
  *   viejo al primer duplicado.
  *
- * ── Cuatro recorridos, cuatro destinos (S7) ────────────────────────────────
+ * ── Un destino por recorrido (S7 · cinco desde S9) ─────────────────────────
  *
  * El exportador recibe la VARIANTE, no solo los keyframes, y de ella saca tres
  * cosas que antes eran constantes: el nombre de la constante a emitir, el doc de
@@ -39,8 +39,8 @@ import { SECTION_RULE_WIDTH } from './choreographyNotes'
  *
  * **No es una generalización de más: es lo que impide un error grave.** Con el
  * nombre fijo, exportar la variante íntima habría emitido `CHOREO_KEYFRAMES`, y
- * pegar ese bloque habría pisado la coreografía calibrada a mano con una
- * propuesta. El panel de export dice además en qué archivo va.
+ * pegar ese bloque habría pisado la coreografía que corre con una propuesta. El
+ * panel de export dice además en qué archivo va.
  *
  * ── La luz ya no está en la pose ───────────────────────────────────────────
  *

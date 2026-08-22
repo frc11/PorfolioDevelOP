@@ -22,8 +22,9 @@ import {
  * permite que el nombre del momento se actualice a 75 fps sin que React se
  * entere.
  *
- * ⚠️ **Los nombres salen del EDITOR, no del módulo.** Desde S7 hay cuatro
- * recorridos con distinta cantidad de keyframes, así que traducir el índice
+ * ⚠️ **Los nombres salen del EDITOR, no del módulo.** Desde S7 hay varios
+ * recorridos con distinta cantidad de keyframes —desde S9 son cinco, y van de 8
+ * a 30—, así que traducir el índice
  * contra el array importado daría el nombre equivocado —o un `undefined`— en
  * cuanto se cambie de variante. `editor.keyframes` es siempre el de la activa, y
  * como se lee en el momento de escribir, la lectura acompaña al cambio sin

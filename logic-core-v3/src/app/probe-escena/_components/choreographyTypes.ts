@@ -194,16 +194,27 @@ export type MutableLightLevels = {
 // ── Las variantes de recorrido (S7) ─────────────────────────────────────────
 
 /**
- * Los cuatro recorridos que el probe puede reproducir.
+ * Los cinco recorridos que el probe puede reproducir.
  *
- * `base` es **la coreografía que el humano calibró a mano** con el editor de S5
- * y que S6 arregló. Es la que se carga por default y la que no se pierde.
+ * `definitiva` es **la coreografía elegida en S9**: un mix de la arquitectónica
+ * (distancia y encuadre) y la dramática (altura y contraste entre tramos), con
+ * seis poses y cero derivados. Vive en `choreography.ts`, es la que se carga
+ * por default, y es la que el preloader lee para saber dónde aterrizar el logo.
  *
- * Las otras tres son **propuestas**, no ajustes de la base: cada una tiene una
- * tesis distinta sobre qué mira esta escena, y todas sus poses son inventadas
- * (por eso van marcadas `derived`). Existen para compararse en pantalla.
+ * `calibrada` es **la coreografía que el humano compuso mirando** con el editor
+ * de S5, arreglada en S6 y curvada en S7. Fue la activa hasta S8. Se conserva
+ * como material de referencia y no se pierde.
+ *
+ * Las otras tres son **propuestas** de S7: cada una tiene una tesis distinta
+ * sobre qué mira esta escena, y todas sus poses son calculadas (por eso van
+ * marcadas `derived`). Existen para compararse en pantalla.
  */
-export type ChoreoVariantId = 'base' | 'intima' | 'arquitectonica' | 'dramatica'
+export type ChoreoVariantId =
+  | 'definitiva'
+  | 'calibrada'
+  | 'intima'
+  | 'arquitectonica'
+  | 'dramatica'
 
 /**
  * Un recorrido completo con todo lo que hace falta para reproducirlo, editarlo

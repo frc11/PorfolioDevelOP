@@ -1,13 +1,20 @@
 /**
- * COMPROBACIONES DE S7 · los cuatro recorridos y los siete arcos de curvatura.
+ * COMPROBACIONES DE S7 · los recorridos y los siete arcos de curvatura.
  *
  *     npx tsx src/app/probe-escena/__tests__/s7-recorridos.invariant.ts
  *
- * Lo que verifica, en una línea: que las cuatro coreografías sean reproducibles,
- * que ninguna pose calibrada por el humano se haya movido, que los intermedios
+ * Lo que verifica, en una línea: que las coreografías sean reproducibles, que
+ * ninguna pose calibrada por el humano se haya movido, que los intermedios
  * curven de verdad y que ninguna cámara se meta donde no hay escena.
+ *
+ * ⚠️ **S9 reapuntó este archivo.** Todo lo que S7 verificaba sobre "la base"
+ * ahora se verifica sobre `variantCalibrada.ts`, que es donde ese recorrido
+ * vive desde que el mix definitivo ocupó `choreography.ts`. **Es a propósito:
+ * es la prueba de que la calibración de S5/S6/S7 sobrevivió intacta al cambio.**
+ * Lo que le toca al recorrido definitivo está en `s9-definitiva.invariant.ts`.
  */
-import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../_components/choreography'
+import { CHOREO_TRAMOS } from '../_components/choreography'
+import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import type { ChoreoKeyframe } from '../_components/choreographyTypes'
 import { PLANE_PLACEMENTS, SUSPENDED_PLANES } from '../_components/probeArchitecture'
@@ -32,8 +39,8 @@ import {
 /**
  * El recorrido tal cual lo dejó S6, con las 21 posiciones calibradas por el
  * humano y los 2 derivados de S4. **Es la referencia contra la que se verifica
- * que S7 no tocó una sola pose.** Si esta tabla y el archivo divergen, uno de
- * los dos está mal y hay que mirar cuál.
+ * que ni S7 ni S9 tocaron una sola pose.** Si esta tabla y el archivo divergen,
+ * uno de los dos está mal y hay que mirar cuál.
  */
 const S6_POSES: readonly (readonly [string, number, number, number, number, number, number])[] = [
   ['entrada · mirada alta', 0, 0, 9, 15, 0.9, 0],
@@ -72,12 +79,14 @@ const S7_ARCS: readonly string[] = [
   'cierre · arco de retirada',
 ]
 
-/** El recorrido de S6 reconstruido: la base MENOS los siete arcos. */
-const WITHOUT_ARCS = CHOREO_KEYFRAMES.filter((keyframe) => !S7_ARCS.includes(keyframe.name))
+/** El recorrido de S6 reconstruido: la calibrada MENOS los siete arcos. */
+const WITHOUT_ARCS = VARIANT_CALIBRADA_KEYFRAMES.filter(
+  (keyframe) => !S7_ARCS.includes(keyframe.name)
+)
 
 // ── 1 · Estructura de los cuatro recorridos ─────────────────────────────────
 
-section('Los cuatro recorridos son reproducibles')
+section('Todos los recorridos son reproducibles')
 
 for (const variant of CHOREO_VARIANTS) {
   const { keyframes, label } = variant
@@ -128,10 +137,10 @@ for (const variant of CHOREO_VARIANTS) {
 
 // ── 2 · Ninguna pose del humano se movió ────────────────────────────────────
 
-section('S7 no tocó una sola pose calibrada')
+section('Ni S7 ni S9 tocaron una sola pose calibrada')
 
 check(
-  'la base sin los siete arcos tiene exactamente los 23 keyframes de S6',
+  'la calibrada sin los siete arcos tiene exactamente los 23 keyframes de S6',
   WITHOUT_ARCS.length === S6_POSES.length,
   `${WITHOUT_ARCS.length} contra ${S6_POSES.length}`
 )
@@ -164,7 +173,7 @@ check(
 
 section('Los siete arcos de curvatura')
 
-const arcs = CHOREO_KEYFRAMES.filter((keyframe) => S7_ARCS.includes(keyframe.name))
+const arcs = VARIANT_CALIBRADA_KEYFRAMES.filter((keyframe) => S7_ARCS.includes(keyframe.name))
 check('los siete están en el archivo', arcs.length === 7, `${arcs.length} encontrados`)
 check(
   'los siete van marcados `derived: true`',
@@ -178,14 +187,14 @@ check(
   `Demos va de ${demos.from} a ${demos.to}`
 )
 
-const baseTrack = makeTrack(CHOREO_KEYFRAMES)
+const calibradaTrack = makeTrack(VARIANT_CALIBRADA_KEYFRAMES)
 const s6Track = makeTrack(WITHOUT_ARCS)
 
 for (const arc of arcs) {
-  const index = CHOREO_KEYFRAMES.indexOf(arc)
-  const from = CHOREO_KEYFRAMES[index - 1].at
-  const to = CHOREO_KEYFRAMES[index + 1].at
-  const bow = bowBetween(baseTrack, from, to)
+  const index = VARIANT_CALIBRADA_KEYFRAMES.indexOf(arc)
+  const from = VARIANT_CALIBRADA_KEYFRAMES[index - 1].at
+  const to = VARIANT_CALIBRADA_KEYFRAMES[index + 1].at
+  const bow = bowBetween(calibradaTrack, from, to)
   const before = bowBetween(s6Track, from, to)
   check(
     `${arc.name}: curva de verdad`,
@@ -210,7 +219,7 @@ function worstJump(track: ReturnType<typeof makeTrack>, keyframes: readonly Chor
 }
 
 const jumpBefore = worstJump(s6Track, WITHOUT_ARCS)
-const jumpAfter = worstJump(baseTrack, CHOREO_KEYFRAMES)
+const jumpAfter = worstJump(calibradaTrack, VARIANT_CALIBRADA_KEYFRAMES)
 check(
   'el tirón más grande del recorrido BAJA con los arcos',
   jumpAfter.worst < jumpBefore.worst,
@@ -223,7 +232,7 @@ check(
 let demosUntouched = true
 for (let i = 1; i < 200; i += 1) {
   const p = demos.from + ((demos.to - demos.from) * i) / 200
-  if (Math.abs(speedAt(baseTrack, p) - speedAt(s6Track, p)) > 0.01) demosUntouched = false
+  if (Math.abs(speedAt(calibradaTrack, p) - speedAt(s6Track, p)) > 0.01) demosUntouched = false
 }
 check('la velocidad DENTRO de Demos es idéntica a la de S6', demosUntouched)
 
@@ -246,12 +255,16 @@ for (const variant of CHOREO_VARIANTS) {
       lowestName = keyframe.name
     }
   }
-  if (variant.id === 'base') {
+  if (variant.id === 'calibrada') {
     // ⚠️ HALLAZGO HEREDADO, no tocado: con el offset de mouse en su máximo, la
     // pose `números · baja la altura` deja la cámara **1 milímetro de mundo por
-    // debajo del papel**. Es una pose calibrada por el humano y este sprint no
-    // toca poses, así que queda medido y reportado. S6 midió la holgura sobre
-    // otra pose (la de Demos, a distancia 7) y por eso no lo vio.
+    // debajo del papel**. Es una pose calibrada por el humano y ni S7 ni S9
+    // tocan poses de este recorrido, así que queda medido y reportado. S6 midió
+    // la holgura sobre otra pose (la de Demos, a distancia 7) y por eso no lo vio.
+    //
+    // S9 arregló el mismo problema en el recorrido definitivo, pero no copiando
+    // el −3,89 que el sprint traía escrito: ese número es el margen a distancia
+    // 9, y la pose baja del definitivo vive a 11,5. Ver `s9-definitiva`.
     check(
       `${label}: la holgura contra el papel es la que dejó S6`,
       lowest > -0.01,
@@ -264,6 +277,15 @@ for (const variant of CHOREO_VARIANTS) {
       `holgura mínima ${lowest.toFixed(3)} en "${lowestName}"`
     )
   }
+
+  // ⚠️ **El recorrido definitivo se salta este chequeo, y no es un permiso: es
+  // que la regla cambió de signo.** S9 pide explícitamente que "el entorno pase
+  // por delante del logo" en Quiénes somos, así que ahí un plano interponiéndose
+  // es la INTENCIÓN y no un defecto. Lo que sí tiene que valer —que ninguna POSE
+  // de keyframe quede tapada, o sea que el logo nunca esté oculto cuando la
+  // cámara para— se verifica en `s9-definitiva.invariant.ts`, junto con cuánto
+  // dura cada barrido.
+  if (variant.id === 'definitiva') continue
 
   // Un plano solo puede estorbar si su radio es menor que la distancia de la
   // cámara: si está más lejos que ella, queda DETRÁS del logo por construcción.

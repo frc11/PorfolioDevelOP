@@ -52,8 +52,9 @@ function section(title: string): void {
 section('1 · El destino sale del recorrido, y del recorrido ACTIVO')
 
 check(
-  'el recorrido activo es la base — el atajo de `scene-framing` sigue valiendo',
-  DEFAULT_VARIANT_ID === 'base' && findVariant(DEFAULT_VARIANT_ID).keyframes === CHOREO_KEYFRAMES,
+  'el recorrido activo es el definitivo — el atajo de `scene-framing` sigue valiendo',
+  DEFAULT_VARIANT_ID === 'definitiva' &&
+    findVariant(DEFAULT_VARIANT_ID).keyframes === CHOREO_KEYFRAMES,
   `activo: ${DEFAULT_VARIANT_ID}`
 )
 check(
@@ -97,21 +98,34 @@ check(
 
 // ── 3 · La proyección, contra los números publicados ────────────────────────
 
-section('3 · La proyección en 1440×810, contra el reporte de S8b')
+/**
+ * ⚠️ **Las cifras de esta sección cambiaron en S9 y era esperable.** El destino
+ * sale del primer keyframe del recorrido, y S9 cambió el recorrido: la pose de
+ * entrada pasó de `h 9 · d 15 · frameX 0,90` a `h 6,4 · d 19 · frameX 0,68`.
+ * Lo que NO cambió es de dónde sale el número — sigue leyéndose del track, no
+ * hay una sola constante escrita a mano.
+ *
+ * ⚠️ **Y hay un número histórico que NO hay que volver a usar.** Este archivo
+ * publicaba 523 × 364 px, pero `S8-PRELOADER.md` e `introHandoff.ts` dicen
+ * 504 × 351 — los dos salieron del MISMO commit, así que el doc quedó con una
+ * medición intermedia que el código nunca produjo. S9 corrigió los dos textos.
+ * Si alguien vuelve a leer 504 en algún lado, es de ahí.
+ */
+section('3 · La proyección en 1440×810, con la pose de entrada de S9')
 
 const desktop = frameSceneEntry(1440, 810)
 if (!desktop) {
   check('hay destino en 1440×810', false)
 } else {
   check(
-    'el centro cae en (1086, 466)',
-    Math.abs(desktop.centerXPx - 1086) < 1.5 && Math.abs(desktop.centerYPx - 466) < 1.5,
+    'el centro cae en (1018, 428)',
+    Math.abs(desktop.centerXPx - 1018) < 1.5 && Math.abs(desktop.centerYPx - 428) < 1.5,
     `(${desktop.centerXPx.toFixed(0)}, ${desktop.centerYPx.toFixed(0)})`
   )
   check(
-    'la tinta mide 524 × 365 px',
-    Math.abs(desktop.inkWidthPx - 524) < 2 && Math.abs(desktop.inkHeightPx - 365) < 2,
-    `${desktop.inkWidthPx.toFixed(0)} × ${desktop.inkHeightPx.toFixed(0)}px`
+    'la tinta mide 451 × 313 px — un 14% más chica que con la calibrada',
+    Math.abs(desktop.inkWidthPx - 451) < 2 && Math.abs(desktop.inkHeightPx - 313) < 2,
+    `${desktop.inkWidthPx.toFixed(0)} × ${desktop.inkHeightPx.toFixed(0)}px, contra 523 × 364`
   )
   check(
     'el logo NO cae centrado: la composición lo manda a la derecha',
@@ -195,8 +209,14 @@ section('6 · Control negativo: la proyección no es la aproximación lineal')
 /**
  * La aproximación que S8 usaba —`frameX × travel / halfWidth`— ignora que el
  * `lookAt` con el target corrido ROTA la cámara. Si algún día alguien la
- * "simplifica" así, esto se pone en verde... y el logo aterriza 5 px corrido y
- * 61 px más arriba de donde la escena lo va a tener.
+ * "simplifica" así, el logo aterriza en otro lado.
+ *
+ * ⚠️ **S9 tuvo que cambiarle la métrica a este control.** Con la pose vieja el
+ * error se repartía 5 px en X y 61 px en Y; con la de S9 —`frameX` 0,68 en vez
+ * de 0,90 y una elevación de 18,6° en vez de 31,0°— la componente HORIZONTAL
+ * cae a 0,9 px y deja de discriminar. La vertical sigue en 23 px, así que el
+ * control se mide sobre el desplazamiento total y no sobre uno de sus ejes:
+ * es el mismo control, medido donde todavía tiene señal.
  */
 if (desktop) {
   const TAN = Math.tan((35 * Math.PI) / 360)
@@ -204,13 +224,17 @@ if (desktop) {
   const halfW = TAN * eye * (1440 / 810)
   const travelX = Math.max(0, halfW - SCENE_LOGO_MESH_WORLD.width / 2) * 0.88
   const approxX = (0.5 + (SCENE_ENTRY_POSE.frameX * travelX) / halfW / 2) * 1440
+  // La aproximación lineal no mueve el centro en Y: se queda en el medio de la
+  // pantalla. La proyección real sí, y por eso el error total es sobre todo
+  // vertical.
+  const error = Math.hypot(desktop.centerXPx - approxX, desktop.centerYPx - 405)
   check(
     'la proyección real NO coincide con la aproximación lineal',
-    Math.abs(desktop.centerXPx - approxX) > 2,
-    `real ${desktop.centerXPx.toFixed(0)} vs aproximada ${approxX.toFixed(0)} · ${Math.abs(desktop.centerXPx - approxX).toFixed(1)}px`
+    error > 15,
+    `${error.toFixed(1)}px de error total · ${Math.abs(desktop.centerXPx - approxX).toFixed(1)} en X, ${Math.abs(desktop.centerYPx - 405).toFixed(1)} en Y`
   )
   check(
-    'y la aproximación tampoco ve el corrimiento vertical',
+    'y el grueso del error es el corrimiento vertical que la aproximación no ve',
     Math.abs(desktop.centerYPx - 405) > 20,
     `real y = ${desktop.centerYPx.toFixed(0)} · centro de pantalla 405`
   )

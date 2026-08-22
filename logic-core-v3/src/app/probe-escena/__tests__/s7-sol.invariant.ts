@@ -138,9 +138,24 @@ check(
   `mínimo ${Math.min(...LIGHT_ARC.map((s) => s.elevationDeg))}°`
 )
 
+/**
+ * ⚠️ **S9 subió el techo de 115° a 180°, y no es aflojar una regla: es que la
+ * razón de la vieja dejó de existir.**
+ *
+ * S7 acotó el barrido porque en su recorrido **la cámara vivía en azimut 0
+ * durante más de medio track**, así que un sol que barriera de más dejaba
+ * tramos enteros con la cara vista a oscuras. El recorrido definitivo lee
+ * contenido en seis azimuts repartidos por toda la vuelta, y con la cámara
+ * barriendo 360° el ángulo relativo recorre 180° sí o sí.
+ *
+ * Lo que sigue siendo la regla —y es la que este check protege— es que **el sol
+ * no dé una vuelta**: 180° es un día, de un horizonte al otro. Que no deje
+ * ninguna ventana de contenido sin modelado se verifica aparte, con γ, en
+ * `s7-modelado.invariant.ts`.
+ */
 const sweep =
   Math.max(...LIGHT_ARC.map((s) => s.azimuthDeg)) - Math.min(...LIGHT_ARC.map((s) => s.azimuthDeg))
-check('el barrido es ACOTADO, no una vuelta', sweep <= 115, `${sweep}° en todo el recorrido`)
+check('el barrido es un DÍA, no una vuelta', sweep <= 180, `${sweep}° en todo el recorrido`)
 
 // ── 3 · La sombra entra en el mapa ──────────────────────────────────────────
 

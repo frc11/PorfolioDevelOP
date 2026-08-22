@@ -11,27 +11,34 @@ import { useSyncExternalStore } from 'react'
  *
  * ── Por qué NO hay un vuelo del logo ───────────────────────────────────────
  *
- * S8 midió el destino y no existe todavía. La pose inicial de la coreografía es
- * distinta en cada uno de los CUATRO recorridos candidatos, y cuál de los cuatro
- * es EL recorrido sigue sin decidirse (`DIRECCION-ESCENA.md` §7.1). En una
- * ventana de 1440×810 el logo 3D cae así:
+ * S8 midió el destino y no existía todavía: la pose inicial era distinta en cada
+ * uno de los cuatro recorridos candidatos y la elección seguía sin hacerse.
  *
- *   base (calibrado a mano) · 504×351 px · centro X 1091 px (75,7% del ancho)
- *   íntima                  · 665×463 px · centro X  891 px (61,8%)
- *   arquitectónica          · 290×202 px · centro X  897 px (62,3%)
- *   dramática               · 587×409 px · centro X  795 px (55,2%)
+ * **S9 la hizo**, y el destino ahora es uno solo. En una ventana de 1440×810 el
+ * logo 3D cae en **451×313 px, con el centro X en 1018 px (70,7% del ancho)** y
+ * una elevación de entrada de 18,6°. Los otros cuatro recorridos siguen en el
+ * repo como referencia y dan esto:
  *
- * 2,3× de dispersión en tamaño y 296 px en posición — el 20,6% del ancho del
- * viewport. Un vuelo medido necesita coordenadas, y hoy hay cuatro juegos. Se
- * suman tres decisiones abiertas más: cómo se ata el recorrido al scroll real
- * (§7.2), el encuadre por relación de aspecto (§7.6, con el desborde lateral ya
- * documentado en ventana angosta) y mobile sin medir (§7.5).
+ *   calibrado a mano · 523×364 px · centro X 1086 px (75,4% del ancho)
+ *   íntima           · 669×466 px · centro X  890 px (61,8%)
+ *   arquitectónica   · 292×203 px · centro X  897 px (62,3%)
+ *   dramática        · 588×409 px · centro X  795 px (55,2%)
  *
- * Así que se construyó **lo que la fuente de verdad ya decidió** (§1.3): el
- * preloader es un momento cerrado, no le entrega el logo a nadie, se desvanece
- * y la escena aparece detrás con su propia coreografía. Esto de acá no es el
- * vuelo: es el **aviso** para que la escena sepa cuándo está tapada, cuándo
- * está entrando en cámara y cuándo puede soltarse.
+ * ⚠️ **Las cifras de arriba corrigen las que este bloque publicaba.** Decía
+ * "504×351 · 1091 px" para el calibrado; el código nunca produjo ese número —
+ * `scene-framing.invariant.ts` publicaba 523×364 desde el mismo commit. Si
+ * aparece un 504 en algún otro lado, viene de acá y está mal.
+ *
+ * Lo que sigue sin decidirse son las otras tres: cómo se ata el recorrido al
+ * scroll real (§7.2), el encuadre por relación de aspecto (§7.6, con el
+ * desborde lateral ya documentado en ventana angosta) y mobile sin medir
+ * (§7.5). Por eso **el preloader sigue sin volar el logo**, que además es lo que
+ * la fuente de verdad decidió (§1.3).
+ *
+ * El preloader es un momento cerrado, no le entrega el logo a nadie, se
+ * desvanece y la escena aparece detrás con su propia coreografía. Esto de acá
+ * no es el vuelo: es el **aviso** para que la escena sepa cuándo está tapada,
+ * cuándo está entrando en cámara y cuándo puede soltarse.
  *
  * ── Cómo lo consume la escena (el sprint que la monte) ─────────────────────
  *

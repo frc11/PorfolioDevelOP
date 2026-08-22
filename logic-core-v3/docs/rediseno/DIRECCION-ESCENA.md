@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20). Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido. Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -64,14 +64,18 @@ No es un fondo. Es la pieza principal del home: el contenido de cada sección co
 
 El progreso va de 0 a 1 y cubre 8 pantallas, así que **cada pantalla vale 0,125 exacto** y los bordes de tramo caen en múltiplos de esa fracción.
 
-| # | Tramo | Pantallas | Progreso |
-|---|---|---|---|
-| 1 | Hero | 1 | 0,000 – 0,125 |
-| 2 | Quiénes somos (dos personas) | 2 | 0,125 – 0,375 |
-| 3 | Números | 1 | 0,375 – 0,500 |
-| 4 | Portfolio | 1 | 0,500 – 0,625 |
-| 5 | Demos | 1 | 0,625 – 0,750 |
-| 6 | Movimiento final y cierre | 2 | 0,750 – 1,000 |
+| # | Tramo | Pantallas | Progreso | Órbita | Qué hace la cámara |
+|---|---|---|---|---|---|
+| 1 | Hero | 1 | 0,000 – 0,125 | 0° | Reposo. Es el punto de llegada del preloader |
+| 2 | Quiénes somos (dos personas) | 2 | 0,125 – 0,375 | 0° → 130° | Baja y se mete entre los planos: el entorno pasa por delante del logo |
+| 3 | Números | 1 | 0,375 – 0,500 | 130° → 185° | Sube y se aleja. Órbita corta, desplazamiento vertical fuerte |
+| 4 | Trabajos | 1 | 0,500 – 0,625 | 185° → 195° | Casi se detiene y mira al fondo profundo. Encuadre despejado |
+| 5 | Demos | 1 | 0,625 – 0,750 | 195° → 310° | Vuelve al nivel del logo y se acerca. El momento más íntimo |
+| 6 | Cierre | 2 | 0,750 – 1,000 | 310° → 360° | Retroceso largo. Se clava en 0,950 para el wordmark |
+
+**El recorrido está decidido desde S9** y es **un mix de la arquitectónica y la dramática**: distancia y encuadre de la primera —el espacio es el protagonista y el logo no llena el cuadro salvo en Demos—, altura y contraste entre tramos de la segunda. **Seis poses, una por tramo, cero relleno.** Los cuatro recorridos candidatos se conservan como material de referencia y se siguen eligiendo desde el panel.
+
+Una regla de amplitud que S9 propuso —"ningún tramo mueve la cámara menos de 90° de órbita"— **quedó anulada**: cinco tramos que se mueven × 90° son 450° sobre una vuelta de 360. La alternativa de dos vueltas (720°) se descartó con el número: pondría cuatro poses en azimuts donde el anillo de planos suspendidos limita la cámara a 13–15 de distancia, que es justo lo que el mix hereda de la arquitectónica. **Si algún día se quieren las dos vueltas, la salida es abrirle un hueco al anillo, no acortar la cámara.**
 
 ### 2.3 · Cómo se mueve la cámara
 
@@ -82,7 +86,7 @@ El progreso va de 0 a 1 y cubre 8 pantallas, así que **cada pantalla vale 0,125
 
 ### 2.4 · Dónde empieza y dónde termina
 
-- **Empieza** en la pose inicial que el preloader entrega (§1.1, paso 8) y baja al hero.
+- **Empieza** en la pose del hero, y se queda ahí la pantalla entera. Desde S9 la pose inicial **ES** la del hero: el recorrido ya no baja a encuadrarlo, llega encuadrado. Es lo que hace que "la cámara no se mueve apenas entrás" sea literal, y lo que le da al preloader un destino que no se mueve.
 - **Termina** en el cierre: el logo se aleja y la sala se apaga.
 - **Después del cierre la escena SE APAGA.** No se tapa con un bloque y no queda una franja asomando. Entran las secciones de servicios y panel.
 - **Vuelve para el diferencial.**
@@ -92,7 +96,9 @@ El progreso va de 0 a 1 y cubre 8 pantallas, así que **cada pantalla vale 0,125
 La iluminación no es una propiedad de la cámara: es del espacio. Vive en dos lugares y ninguno es el keyframe.
 
 - **Un rig de tres puntos.** La principal y el relleno son **del espacio** (fijos al mundo, así que orbitar cambia la iluminación además del punto de vista). El contraluz es **del observador** (solidario a la cámara), porque el problema que resuelve —que el logo se despegue del fondo que le toque detrás— es un problema de vista.
-- **Un arco ligado al progreso.** Meseta a luz plena hasta el final de Números —a una sección que alguien está leyendo no se le baja la luz—, un escalón chico en Portfolio y Demos, la caída real en el movimiento final, y el cierre en penumbra.
+- **Un arco ligado al progreso.** Meseta a luz plena hasta el final de Números —a una sección que alguien está leyendo no se le baja la luz—, un escalón chico en Trabajos y Demos, la caída real en el cierre, y la última pantalla en penumbra.
+- **El sol barre 180°, y ese barrido lo fijó el recorrido.** Con la cámara orbitando 360° y leyendo contenido en seis azimuts, el ángulo entre la luz y el observador recorre media vuelta sí o sí: el contraluz cae en algún lado. Está puesto donde el recorrido lo pide —el fondo de Demos, con la cámara abajo mirando hacia arriba— y desde ahí la escena va cada vez más a contraluz hasta el final. **Eso es atardecer.** El sol entra en cuadro al empezar Demos y se pone dentro del encuadre.
+- **El arco es una TARDE, no un día entero.** Se evaluó arrancar con el sol rasante y subirlo hasta Números, y no se puede: con `nivel = sin(elevación)/sin(36°)`, un sol bajo en el hero deja la sala en nivel 0,26–0,35, o sea que el home arrancaría más oscuro que su propio cierre.
 - **El apagado no es plano.** El ambiente muere antes que las fuentes y el contraluz se resiste: la sala **gana contraste** al apagarse en vez de volverse gris.
 - **El sol ES la luz principal**, no una representación de ella. El mismo dato dice dónde está la fuente que se ve, de dónde viene la luz y desde dónde cae la sombra. Los tres se mueven juntos o no se mueve ninguno.
 - **Y los dos recorren un arco: el paso del día.** El nivel de luz no es una perilla que baja — es el seno de la elevación del sol. La sala no se apaga porque bajamos un número: se apaga porque atardece. La sombra del logo se alarga y gira con él, que es lo que más comunica que el espacio es real.
@@ -166,10 +172,12 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 
 | Decisión | Archivo |
 |---|---|
-| Los keyframes del recorrido y el arco de luz | `src/app/probe-escena/_components/choreography.ts` |
-| Los comentarios de cada keyframe (se editan **ahí**, no en el array) | `choreographyNotes.ts` + `choreographyNotesFrontal.ts` + `choreographyNotesGiro.ts` |
-| Las tres variantes de recorrido | `choreographyVariants.ts`, `variantIntima.ts`, `variantArquitectonica.ts`, `variantDramatica.ts` |
-| Los comentarios de las variantes | `variantNotes.ts` |
+| **El recorrido definitivo** y el arco de luz | `src/app/probe-escena/_components/choreography.ts` |
+| Los comentarios de cada keyframe (se editan **ahí**, no en el array) | `choreographyNotes.ts` |
+| El recorrido calibrado a mano, conservado como referencia | `variantCalibrada.ts` + `variantCalibradaNotes.ts` (+ `choreographyNotesFrontal.ts` y `choreographyNotesGiro.ts`) |
+| Las tres propuestas de S7 | `choreographyVariants.ts`, `variantIntima.ts`, `variantArquitectonica.ts`, `variantDramatica.ts` |
+| Los comentarios de las propuestas | `variantNotes.ts` |
+| Dónde cae el logo en pantalla — lo que el preloader lee | `src/lib/scene-framing.ts` |
 | El rig de tres puntos y cómo se apaga cada luz | `probeLighting.ts` |
 | El sol — que es la luz principal | `probeSun.ts`, `SunBody.tsx`, y su posición en `LIGHT_ARC` |
 | Niebla, shadow map y oclusión de contacto | `probeAtmosphere.ts` |
@@ -188,6 +196,8 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | `outputs/S5-EDITOR.md` | El editor y el espacio arquitectónico |
 | `outputs/S6-LUZ.md` | La luz, la atmósfera y la coreografía calibrada |
 | `outputs/S7-ESCENA.md` | El sol, el moiré, la curvatura de los tramos y las variantes |
+| `outputs/S8-PRELOADER.md` + `S8b/S8c/S8d` | El preloader, el trazo y el acomodamiento |
+| `outputs/S9-COREOGRAFIA.md` | **El recorrido definitivo**, el borrado de los derivados y el reapuntado del sol |
 
 > ⚠️ **Exportar no es guardar.** El botón del editor copia al portapapeles. La calibración solo existe cuando ese texto se **pega** en el archivo. Ya costó una sesión entera de trabajo.
 
@@ -197,7 +207,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 
 Está acá para que nadie lo dé por resuelto.
 
-1. **Cuál de los cuatro recorridos es EL recorrido.** La base calibrada a mano y las tres variantes (íntima, arquitectónica, dramática) existen para compararse en pantalla. La elección es del dueño del proyecto y no está hecha.
+1. ~~**Cuál de los cuatro recorridos es EL recorrido.**~~ **DECIDIDO en S9** — ver §2.2. Lo que queda abierto de esa decisión es una sola perilla, y es de composición: **la elevación de la pose de entrada quedó en 18,6°** contra los 31,0° del recorrido calibrado, y eso es lo que el preloader usa para rotar el logo al aterrizar. Subir la altura del hero de 6,40 a ~7,50 la lleva a 23,2° y cuesta 1,1 de caída en el tramo siguiente. **Se juzga por grabación.**
 2. **Cómo se ata el recorrido al scroll real.** Hoy el progreso es un slider del probe. Falta el mapeo a las ocho pantallas del layout, con su comportamiento en mobile.
 3. **La cola del cierre.** *"Después las letras se van, la cámara se mueve a otros ángulos y termina en el CTA final"* no tiene poses compuestas. El track termina en el cierre.
 4. **Cómo entra y sale la escena** cuando se apaga después del cierre y vuelve para el diferencial: si es un fundido, un corte, o la propia luz que se va.

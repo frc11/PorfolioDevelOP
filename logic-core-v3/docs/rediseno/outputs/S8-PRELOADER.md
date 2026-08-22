@@ -84,10 +84,21 @@ Pose inicial de cada uno de los **cuatro recorridos candidatos**, proyectada a p
 
 | Recorrido | pose inicial | Tamaño en pantalla | Centro X |
 |---|---|---|---|
-| base (calibrado a mano) | h 9 · d 15 · frameX 0,90 | 504 × 351 px | **1091 px** (75,7%) |
-| íntima | h 6,6 · d 11,5 · frameX 0,50 | 665 × 463 px | **891 px** (61,8%) |
-| arquitectónica | h 9 · d 29 · frameX 0,35 | 290 × 202 px | **897 px** (62,3%) |
-| dramática | h 9 · d 12 · frameX 0,20 | 587 × 409 px | **795 px** (55,2%) |
+| base (calibrado a mano) | h 9 · d 15 · frameX 0,90 | ~~504 × 351 px~~ **523 × 364 px** | ~~1091 px~~ **1086 px** (75,4%) |
+| íntima | h 6,6 · d 11,5 · frameX 0,50 | ~~665 × 463 px~~ **669 × 466 px** | ~~891 px~~ **890 px** (61,8%) |
+| arquitectónica | h 9 · d 29 · frameX 0,35 | ~~290 × 202 px~~ **292 × 203 px** | 897 px (62,3%) |
+| dramática | h 9 · d 12 · frameX 0,20 | ~~587 × 409 px~~ **588 × 409 px** | 795 px (55,2%) |
+
+> ⚠️ **Corrección de S9 (2026-08-22).** Los cuatro tamaños tachados son de una
+> medición intermedia de este sprint que **el código nunca produjo**:
+> `scene-framing.invariant.ts` publicaba 523 × 364 para la base desde este mismo
+> commit. Los números en negrita son los que el repo devuelve, verificados con
+> `npx tsx src/lib/scene-framing.invariant.ts`. Si algún sprint arranca de un
+> 504, viene de acá.
+>
+> **Y el destino ya no es "cuatro números distintos": S9 eligió el recorrido.**
+> La pose de entrada definitiva (h 6,4 · d 19 · frameX 0,68) da **451 × 313 px
+> con el centro X en 1018 px (70,7%)**. Ver `outputs/S9-COREOGRAFIA.md`.
 
 **2,3× de dispersión en tamaño y 296 px en posición — el 20,6% del ancho del viewport.** Y cuál de los cuatro es EL recorrido *"es del dueño del proyecto y no está hecha"* (§7.1). Se suman tres decisiones abiertas más que mueven el mismo blanco: cómo se ata el recorrido al scroll real (§7.2), el encuadre por relación de aspecto (§7.6, con el desborde lateral ya documentado en ventana angosta) y mobile sin medir (§7.5).
 

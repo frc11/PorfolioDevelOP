@@ -1,13 +1,15 @@
 import type { KeyframeNotes } from './choreographyNotes'
 
 /**
- * COMENTARIOS DEL ARRAY · segunda mitad del recorrido.
+ * COMENTARIOS DEL RECORRIDO CALIBRADO · segunda mitad.
  *
  * De `portfolio` a `cierre`: **la mitad que gira.** Acá está la vuelta entera de
  * Demos, el movimiento final y el cierre, y con ellos los dos movimientos más
  * violentos del track y sus tres arreglos de S6.
  *
- * Ver `choreographyNotesFrontal.ts` para la primera mitad y el porqué del corte.
+ * Ver `choreographyNotesFrontal.ts` para la primera mitad y el porqué del corte,
+ * y `variantCalibradaNotes.ts` para la unión de las dos, que es de donde el
+ * exportador lee desde S9.
  */
 export const NOTES_GIRO: KeyframeNotes = {
   portfolio: [

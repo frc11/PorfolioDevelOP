@@ -13,7 +13,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { CHOREO_KEYFRAMES } from '../_components/choreography'
-import { CHOREO_VARIANTS, VARIANT_BASE } from '../_components/choreographyVariants'
+import { CHOREO_VARIANTS, VARIANT_DEFINITIVA } from '../_components/choreographyVariants'
 import { buildKeyframesSource } from '../_components/choreographyExport'
 import { createChoreoEditor } from '../_components/choreographyEditor'
 import { SUN_CORE, createSunSpriteData } from '../_components/probeSun'
@@ -168,7 +168,7 @@ section('El export devuelve el archivo')
 
 {
   const editor = createChoreoEditor()
-  const emitted = buildKeyframesSource(editor.keyframes, VARIANT_BASE)
+  const emitted = buildKeyframesSource(editor.keyframes, VARIANT_DEFINITIVA)
 
   const source = readFileSync(
     join(process.cwd(), 'src/app/probe-escena/_components/choreography.ts'),
@@ -180,7 +180,7 @@ section('El export devuelve el archivo')
   const onFile = start >= 0 && end >= 0 ? `${source.slice(start, end + 3)}` : ''
 
   check(
-    'exportar la base sin tocar nada devuelve el bloque del archivo, byte por byte',
+    'exportar la definitiva sin tocar nada devuelve el bloque del archivo, byte por byte',
     emitted === onFile,
     `${emitted.length} bytes emitidos contra ${onFile.length} en el archivo`
   )
@@ -188,15 +188,15 @@ section('El export devuelve el archivo')
   editor.setVariant('intima')
   const intima = buildKeyframesSource(editor.keyframes, editor.variant)
   check(
-    'exportar una variante NO emite el nombre de la base',
+    'exportar una variante NO emite el nombre del recorrido definitivo',
     intima.includes('export const VARIANT_INTIMA_KEYFRAMES') &&
       !intima.includes('export const CHOREO_KEYFRAMES'),
-    'pegar una variante sobre `choreography.ts` pisaría la única coreografía calibrada'
+    'pegar una variante sobre `choreography.ts` pisaría la coreografía definitiva'
   )
   check('el censo del doc cuenta las poses de la variante activa', intima.includes('24 keyframes'))
 
-  editor.setVariant('base')
-  check('volver a la base no perdió su sesión', editor.keyframes.length === CHOREO_KEYFRAMES.length)
+  editor.setVariant('definitiva')
+  check('volver a la definitiva no perdió su sesión', editor.keyframes.length === CHOREO_KEYFRAMES.length)
   check('y sigue sin estar sucia', editor.dirty === false)
 }
 

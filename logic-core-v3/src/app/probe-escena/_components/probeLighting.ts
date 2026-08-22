@@ -45,8 +45,11 @@
  *   desde la cámara no se ve: un plano extruido no tiene nada que rimear de
  *   frente si la luz está justo detrás. Corriéndola 32° empieza a rasar el canto
  *   de un lado, que es donde el filo se dibuja. El corrimiento va hacia el lado
- *   OPUESTO al de la principal (que está a −42°), así que key y rim se leen como
- *   dos luces distintas y no como una sola repartida.
+ *   OPUESTO al de la principal cuando el recorrido arranca (la key sale de
+ *   −42°), así que key y rim se leen como dos luces distintas y no como una sola
+ *   repartida. **Desde S9 la principal barre hasta +138°**, así que sobre el
+ *   final del recorrido las dos convergen — y no importa, porque ahí la key ya
+ *   está a contraluz por diseño y el rim es lo único que recorta el logo.
  * - **Altura.** `rim.y = RIM_HEIGHT_BASE + cámara.y × RIM_HEIGHT_TRACK`. La
  *   altura del rim SIGUE a la de la cámara en vez de espejarla, y ésa es la
  *   parte que se puede hacer mal: desde arriba se ve el canto de arriba y desde
@@ -55,11 +58,12 @@
  *
  *   | momento              | cámara.y | rim.y  |
  *   |----------------------|---------:|-------:|
- *   | entrada              |    +9,00 |  +9,05 |
- *   | hero                 |    −0,20 |  +1,23 |
- *   | portfolio            |    +5,65 |  +6,20 |
- *   | demos · giro ¾       |    −3,50 |  −1,58 |
- *   | cierre               |    +1,90 |  +3,02 |
+ *   | hero                 |    +6,40 |  +6,84 |
+ *   | quiénes somos        |    −3,60 |  −1,66 |
+ *   | números              |    +9,00 |  +9,05 |
+ *   | trabajos             |    +4,50 |  +5,23 |
+ *   | demos                |    −2,60 |  −0,81 |
+ *   | cierre               |    −1,40 |  +0,21 |
  *
  *   Siempre detrás, siempre del lado que se está mirando, y nunca por debajo del
  *   papel (`FLOOR_Y` = −4,30). Es el mismo lugar donde un fotógrafo pone el
@@ -67,9 +71,9 @@
  *
  * ── Lo que el rim NO resuelve, dicho en voz alta ───────────────────────────
  *
- * Con la cámara **de frente al logo** (azimut ~0 o ~180, o sea hero, quiénes
- * somos, números y cierre) el canto está de perfil y proyecta un ancho casi
- * nulo: ahí no hay superficie donde dibujar un filo, por bien puesta que esté la
+ * Con la cámara **de frente al logo** (azimut ~0 o ~180, o sea hero, números,
+ * trabajos y cierre en el recorrido definitivo) el canto está de perfil y
+ * proyecta un ancho casi nulo: ahí no hay superficie donde dibujar un filo, por bien puesta que esté la
  * luz. Lo que separa al logo del fondo en esos momentos es otra cosa y también
  * es de este sprint: **la niebla**, que sube el valor de los planos lejanos y
  * deja al logo como lo único que conserva su negro. De frente separa la niebla,

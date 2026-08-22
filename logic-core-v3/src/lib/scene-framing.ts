@@ -211,12 +211,12 @@ export function frameScenePose(
  * Se lee del recorrido, no se hardcodea — si el humano recalibra ese keyframe,
  * el preloader lo sigue sin que nadie edite un segundo lugar.
  *
- * Hoy el recorrido activo es la base (`DEFAULT_VARIANT_ID` en
- * `choreographyVariants.ts`, cuyo `VARIANT_BASE.keyframes` ES este array). Se
- * importa `choreography.ts` y no el registro de variantes porque el registro
- * arrastra las tres variantes con todos sus comentarios —decenas de KB de
- * strings— y esto viaja en el bundle de la primera visita. La comprobación
- * estática verifica que el atajo siga siendo cierto.
+ * Hoy el recorrido activo es el definitivo de S9 (`DEFAULT_VARIANT_ID` en
+ * `choreographyVariants.ts`, cuyo `VARIANT_DEFINITIVA.keyframes` ES este
+ * array). Se importa `choreography.ts` y no el registro de variantes porque el
+ * registro arrastra los otros cuatro recorridos con todos sus comentarios
+ * —decenas de KB de strings— y esto viaja en el bundle de la primera visita. La
+ * comprobación estática verifica que el atajo siga siendo cierto.
  */
 export const SCENE_ENTRY_POSE: ChoreoPose = CHOREO_KEYFRAMES[0].pose
 
@@ -232,9 +232,10 @@ export function frameSceneEntry(
  * viewport —solo del keyframe—, así que es constante y el preloader la puede
  * usar para rotar su mesh sin recalcular nada por frame.
  *
- * Con la pose base: **azimut 0°, elevación 31,0°.** El preloader aterriza el
- * logo rotado exactamente así, o sea presentando la misma cara que la escena va
- * a presentar. La rotación del objeto es la INVERSA del movimiento de la
+ * Con la pose definitiva de S9: **azimut 0°, elevación 18,6°** (era 31,0° con
+ * la coreografía calibrada, que estaba más alta y más cerca). El preloader
+ * aterriza el logo rotado exactamente así, o sea presentando la misma cara que
+ * la escena va a presentar. La rotación del objeto es la INVERSA del movimiento de la
  * cámara: la cámara subiendo `p` equivale al objeto inclinando su parte de
  * arriba `p` hacia el observador, y la cámara girando `a` equivale al objeto
  * girando `−a`.

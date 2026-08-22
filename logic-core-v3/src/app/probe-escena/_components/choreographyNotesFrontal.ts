@@ -1,7 +1,7 @@
 import type { KeyframeNotes } from './choreographyNotes'
 
 /**
- * COMENTARIOS DEL ARRAY · primera mitad del recorrido.
+ * COMENTARIOS DEL RECORRIDO CALIBRADO · primera mitad.
  *
  * De `entrada · mirada alta` a `números · sostén`: **el medio recorrido frontal**,
  * donde la cámara vive en azimut 0 y lo que cambia es la altura, la distancia y
@@ -9,12 +9,14 @@ import type { KeyframeNotes } from './choreographyNotes'
  *
  * La partición es por tamaño —el archivo pasaba de 500 líneas— pero el corte no
  * es arbitrario: cae exactamente donde el recorrido cambia de naturaleza. Las
- * dos mitades se vuelven a unir en `choreographyNotes.ts`, que es el único
- * lugar del que el exportador lee.
+ * dos mitades se vuelven a unir en `variantCalibradaNotes.ts`, que es el único
+ * lugar del que el exportador lee. (Hasta S8 se unían en `choreographyNotes.ts`;
+ * cuando el mix definitivo ocupó `choreography.ts`, estos textos se fueron con
+ * su recorrido a `variantCalibrada.ts` y no se editó ni una línea de ellos.)
  *
- * ⚠️ La regla de siempre: **estos textos son la FUENTE de los `//` que están
- * adentro de `CHOREO_KEYFRAMES`.** El export los regenera; cambiar un
- * comentario allá y no acá se pierde en el próximo pegado.
+ * ⚠️ La regla de siempre: **estos textos son la FUENTE de los `//` del array.**
+ * El export los regenera; cambiar un comentario allá y no acá se pierde en el
+ * próximo pegado.
  */
 export const NOTES_FRONTAL: KeyframeNotes = {
   'entrada · mirada alta': [

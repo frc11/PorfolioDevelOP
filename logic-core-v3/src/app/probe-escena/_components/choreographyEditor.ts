@@ -43,12 +43,12 @@ import {
  * explícito del humano— pero eso significa que **el paso que guarda es el
  * pegado, no el click.** El panel lo dice en voz alta por la misma razón.
  *
- * ── Las CUATRO sesiones (S7) ───────────────────────────────────────────────
+ * ── Una sesión por recorrido (S7 · cinco desde S9) ─────────────────────────
  *
- * Desde que hay cuatro recorridos, el editor tiene **una sesión por variante**,
- * no una sola con la variante adentro. Cambiar de variante no descarta nada: se
- * puede ir a la íntima, mover tres cosas, volver a la base, comparar, y volver a
- * la íntima con los tres cambios ahí.
+ * Desde que hay más de un recorrido, el editor tiene **una sesión por
+ * variante**, no una sola con la variante adentro. Cambiar de variante no
+ * descarta nada: se puede ir a la íntima, mover tres cosas, volver a la
+ * definitiva, comparar, y volver a la íntima con los tres cambios ahí.
  *
  * Es una decisión de seguridad además de comodidad: si cambiar de variante
  * borrara la sesión, cambiar sería una acción destructiva y necesitaría
@@ -194,8 +194,9 @@ export function createChoreoEditor(): ChoreoEditor {
 
   for (const variant of CHOREO_VARIANTS) sessions.set(variant.id, load(variant))
 
-  /** La sesión activa. Nunca es `undefined`: se cargan las cuatro al construir. */
-  const active = (): VariantSession => sessions.get(activeId) ?? sessions.get('base')!
+  /** La sesión activa. Nunca es `undefined`: se cargan las cinco al construir. */
+  const active = (): VariantSession =>
+    sessions.get(activeId) ?? sessions.get(DEFAULT_VARIANT_ID)!
 
   /** Invalida el track y despierta a la pantalla. Solo para cambios VISIBLES. */
   const publish = () => {
