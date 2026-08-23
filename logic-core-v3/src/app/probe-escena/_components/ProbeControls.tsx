@@ -31,10 +31,13 @@ import {
  *
  * ── Los tres modos ─────────────────────────────────────────────────────────
  *
- * En **coreografía** los siete sliders de escena quedan deshabilitados pero
- * siguen vivos como telemetría: muestran lo que el track dicta en cada frame, y
- * la línea copiable de abajo sirve para llevarse una pose. `particulas` sigue
- * habilitado en los tres modos, porque no es parte del recorrido.
+ * En **coreografía** los siete de escena (cinco de pose + dos de luz) quedan
+ * deshabilitados pero siguen vivos como telemetría: muestran lo que el track
+ * dicta en cada frame, y la línea copiable de abajo sirve para llevarse una pose.
+ *
+ * Los otros dos —**partículas** y **desajuste del fondo**— siguen habilitados en
+ * los tres modos, porque no son parte del recorrido: son las dos perillas que se
+ * calibran mirando la escena correr.
  *
  * En **editor** (S5) los CINCO de pose vuelven a estar habilitados, pero lo que
  * mueven es la pose del keyframe seleccionado, no la cámara suelta. Es el mismo
@@ -197,9 +200,11 @@ export function ProbeControls({
       <div className="flex flex-col gap-3 border-t border-neutral-200 pt-3">
         {isChoreo ? (
           <p className="text-[0.66rem] leading-snug text-neutral-400">
-            Con la coreografía al mando, estos siete son la lectura de lo que el track y el
-            arco de luz dictan en este frame. Para ajustar el keyframe que se está viendo,
-            pasá al editor; para componer una posición nueva desde cero, a manual.
+            Con la coreografía al mando, los primeros siete son la lectura de lo que el
+            track y el arco de luz dictan en este frame. Para ajustar el keyframe que se
+            está viendo, pasá al editor; para componer una posición nueva desde cero, a
+            manual. Los dos últimos —partículas y desajuste del fondo— siguen activos: son
+            de la escena, no del recorrido.
           </p>
         ) : null}
 
@@ -271,6 +276,12 @@ export function ProbeControls({
           El ángulo se publica envuelto a 0–360, así que el keyframe del cierre —documentado como
           360°— se lee 0,0°. Es la misma posición de cámara: el recorrido acumula la vuelta entera
           por dentro.
+        </p>
+        <p>
+          Desajuste del fondo: cuántas bandas de batido hay en una vuelta de la envolvente. En 0
+          las dos tramas quedan en 2:1 exacto y el batido de TEXTURA desaparece — lo que sigue
+          viéndose ahí es el que produce el paralaje entre las dos capas, que están separadas en
+          profundidad.
         </p>
       </div>
     </aside>

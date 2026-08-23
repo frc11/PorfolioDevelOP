@@ -134,8 +134,8 @@ export const VIRA_UPDATES_SHADOW = true
 // ── Deriva del aire (S6) ────────────────────────────────────────────────────
 
 /**
- * Los dos campos de partículas GIRAN, muy despacio, cada uno a su ritmo y en
- * sentido contrario.
+ * Los campos de partículas GIRAN, muy despacio, cada uno a su ritmo y en sentido
+ * contrario.
  *
  * El sprint pide partículas "que se muevan lento y con vida propia, no
  * estáticas". Hay tres formas de conseguirlo y esta es la única que cuesta
@@ -163,12 +163,33 @@ export const VIRA_UPDATES_SHADOW = true
  * apagada: apagar la física es para juzgar el track crudo de la cámara, y el
  * aire no interfiere con eso.
  */
-export const DUST_SPIN_DEG_S = 0.9
-export const DUST_BOB_AMPLITUDE = 0.1
-export const DUST_BOB_PERIOD_S = 17
-export const BOKEH_SPIN_DEG_S = -1.6
-export const BOKEH_BOB_AMPLITUDE = 0.16
-export const BOKEH_BOB_PERIOD_S = 11.5
+/**
+ * ── S10: LA DERIVA PASA A SER DIFERENCIAL ──────────────────────────────────
+ *
+ * Con 2.400 motas en vez de 220, girar el campo entero como un bloque deja de
+ * funcionar: una nube rígida de ese tamaño se lee como un fondo que gira, que es
+ * exactamente lo que la nota de arriba dice que hay que evitar. Y la salida NO
+ * puede ser mover partícula por partícula — 2.400 motas son 7.200 floats y una
+ * subida de buffer por cuadro.
+ *
+ * Cada campo se parte en **conchas por radio** (ver `DUST_SHELLS`) y cada concha
+ * gira y cabecea con su propio período, **la interior más rápido**. Es rotación
+ * diferencial: sigue costando una matriz por concha y cero por partícula, pero
+ * ahora las capas se descorrelacionan entre sí y el aire se lee como aire.
+ *
+ * Los períodos son inconmensurables entre ellos, con los dos de la vira (13 y
+ * 9,5) y con el de la envolvente (18,7), así que nada se sincroniza con nada.
+ *
+ * Un índice por concha, de adentro hacia afuera. Los arrays tienen que tener
+ * `DUST_SHELLS.length - 1` y `BOKEH_SHELLS.length - 1` entradas — se verifica en
+ * `s10-escena.invariant.ts`.
+ */
+export const DUST_SPIN_DEG_S: readonly number[] = [1.5, 0.9, 0.55]
+export const DUST_BOB_AMPLITUDE: readonly number[] = [0.14, 0.1, 0.07]
+export const DUST_BOB_PERIOD_S: readonly number[] = [12.7, 17, 22.3]
+export const BOKEH_SPIN_DEG_S: readonly number[] = [-2.3, -1.6]
+export const BOKEH_BOB_AMPLITUDE: readonly number[] = [0.16, 0.12]
+export const BOKEH_BOB_PERIOD_S: readonly number[] = [11.5, 15.7]
 
 // ── Reproducción ────────────────────────────────────────────────────────────
 

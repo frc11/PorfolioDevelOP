@@ -27,13 +27,17 @@ import { clamp01 } from './probeScene'
  * exactamente sobre el eje de la luz.
  *
  * **No conviene, por dos razones concretas.** Un cuerpo a distancia fija de una
- * cámara que se mueve entra y sale de la geometría (cruzaría la retícula del
- * techo, los planos, la pared del ciclorama) de forma impredecible. Y sin
+ * cámara que se mueve entra y sale de la geometría de forma impredecible. Y sin
  * paralaje el sol no pertenece al espacio: se lee como una calcomanía sobre el
- * lente. A 34 unidades el sol es un cuerpo de la sala —lo tapan las barras del
- * techo, lo tapan los planos— y la dirección sigue coincidiendo con la de la
- * luz **en el origen, que es donde está el logo y donde la coincidencia se
- * lee**.
+ * lente. A 34 unidades el sol es un cuerpo de la sala —queda por delante de la
+ * envolvente, que le pone un fondo con textura— y la dirección sigue
+ * coincidiendo con la de la luz **en el origen, que es donde está el logo y
+ * donde la coincidencia se lee**.
+ *
+ * ⚠️ **S10 midió lo que esa pertenencia costaba y era mucho: los planos
+ * suspendidos tapaban entre el 46% y el 68% del disco** en toda su ventana. El
+ * 33,4% que S9 publicó era cobertura de encuadre, no visibilidad. Sin los planos
+ * el disco visible pasa de 13–36% a 28–71%.
  *
  * ── Blanco sobre blanco: por qué el sol es GRANDE ──────────────────────────
  *
@@ -46,6 +50,7 @@ import { clamp01 } from './probeScene'
  * | el sol (blanco, sin tone mapping, con niebla) | **254/255** |
  * | la pared del ciclorama DETRÁS del sol | **213/255** |
  * | el piso de papel a luz plena | 248/255 |
+ * | **el mismo fondo, con la envolvente de S10 encima** | **146** (demos) · **91** (cierre) |
  *
  * Los 41 puntos de contraste salen de un hecho estructural y no de una perilla:
  * **la pared contra la que se ve el sol es, por construcción, la única que el
@@ -54,6 +59,11 @@ import { clamp01 } from './probeScene'
  *
  * Cuarenta y un puntos alcanzan para un disco, no para un destello. Por eso la
  * forma la da el TAMAÑO y el DEGRADÉ, no el brillo: núcleo chico y halo ancho.
+ *
+ * **S10 dio vuelta esa restricción sin tocar el sol.** La envolvente oscura baja
+ * el fondo a 146 y 91, así que el disco pasa de 41 a **109 y 164 puntos**. El
+ * tamaño ya no es lo único que lo hace legible — pero se conserva, porque es lo
+ * que lo hace un SOL y no un punto.
  *
  * ── "Parcial, nunca completo" ──────────────────────────────────────────────
  *
@@ -68,12 +78,17 @@ import { clamp01 } from './probeScene'
 /**
  * Distancia del cuerpo al origen. La dirección la da `LIGHT_ARC`.
  *
- * 34 no es libre: es el valor que deja al sol **fuera del anillo de planos
- * suspendidos** (radio máximo 22, así que nunca queda adentro de uno), **dentro
- * del cuadrado de la retícula aérea** (±31 en X y en Z, así que las barras del
- * techo lo cruzan por delante y la oclusión sale gratis) y **por delante de la
- * pantalla de rendijas** (radio 38), que le da un fondo con textura en vez de
- * pared lisa. A lo largo del arco su radio horizontal va de 27,5 a 33,3.
+ * 34 no es libre: deja al sol **por delante de la envolvente de rendijas** (la
+ * capa fina está en radio 38), que es lo que le da un fondo con textura en vez de
+ * pared lisa, y **más lejos que cualquier partícula** (`PARTICLE_R_MAX` es
+ * también 34), que es lo que evita que el ordenamiento por profundidad de three
+ * ponga una mota detrás del sol delante de él. A lo largo del arco su radio
+ * horizontal va de 27,5 a 33,3.
+ *
+ * Las dos razones de S5 que fijaban este número —quedar fuera del anillo de
+ * planos y dentro del cuadrado de la retícula aérea— **murieron con S10**, que
+ * borró las dos familias. El valor se conserva porque las dos razones nuevas lo
+ * piden igual.
  */
 export const SUN_RADIUS = 34
 
@@ -98,6 +113,84 @@ export const SUN_GLOW_FALLOFF = 2.4
 export const SUN_GLOW_OPACITY = 0.5
 
 export const SUN_SPRITE_SIZE = 128
+
+// ── El washout (S10) ────────────────────────────────────────────────────────
+
+/**
+ * EL DISCO QUE APAGA LA TRAMA — por qué existe y por qué arranca bajo.
+ *
+ * S7 midió el problema del sol como un problema de contraste: el disco a 254
+ * contra una pared a 213, o sea **41 puntos**. La envolvente de S10 lo resuelve
+ * sola por ser oscura: el fondo detrás del sol baja a **146 en demos y 91 en el
+ * cierre**, o sea **109 y 164 puntos**. El sol no necesita ayuda de luminancia.
+ *
+ * Lo que sí le hace falta es que la trama no le compita el borde. El sol pasa a
+ * leerse como **el único lugar del cuadro sin patrón**, y ése es el trabajo de
+ * este sprite: un disco aditivo que satura la zona del núcleo y devuelve la trama
+ * a medida que se aleja.
+ *
+ * ⚠️ **Y por eso arranca bajo.** Todo lo que este disco suba se lo come al
+ * contraste que la envolvente ya ganó: con un washout a plena opacidad el
+ * contraste del núcleo caería de 109 a 36 puntos. No está pagando por contraste,
+ * está pagando por textura. La perilla está en el panel y su costo está medido en
+ * las dos posiciones en `s10-fondo.invariant.ts`.
+ *
+ * **Aditivo y no mezcla normal**, que es la diferencia entre un glare y una
+ * calcomanía: un glare SUMA luz sobre lo que hay detrás y la trama se apaga
+ * porque se satura, no porque se la tape con un color inventado. Es además el
+ * patrón que el repo ya documenta para halos falsos.
+ */
+
+/** Radio del washout, en múltiplos del radio del NÚCLEO del sol. 2,2 cubre el
+ * disco duro más un anillo del mismo ancho alrededor. */
+export const SUN_WASHOUT_SCALE = 2.2
+/** Opacidad en el centro, a luz plena. Se multiplica por el nivel del arco. */
+export const SUN_WASHOUT_OPACITY = 0.28
+/** Exponente de la caída. Más alto = el disco limpio termina antes. */
+export const SUN_WASHOUT_FALLOFF = 1.8
+export const SUN_WASHOUT_SPRITE_SIZE = 64
+
+/**
+ * Orden de dibujo. three ordena los transparentes por la posición del OBJETO, y
+ * los cilindros de la envolvente están centrados en el origen: sin esto la
+ * envolvente se dibuja encima del sol. Ver la nota de `probeMoire.ts`.
+ */
+export const SUN_WASHOUT_ORDER = -2
+export const SUN_BODY_ORDER = -1
+
+/** La opacidad del washout en este punto del arco. */
+export function sunWashoutOpacityFor(level: number): number {
+  return clamp01(level) * SUN_WASHOUT_OPACITY
+}
+
+/**
+ * La máscara del washout: plena en el centro y cayendo con exponente hasta cero
+ * en el borde. Sin escalón — a diferencia del sol, esto no es un cuerpo, es la
+ * luz que se dispersa alrededor de él, y la dispersión no tiene canto.
+ *
+ * Pura, como los otros generadores del módulo.
+ */
+export function createWashoutSpriteData(size: number, falloff: number): Uint8Array {
+  const data = new Uint8Array(size * size * 4)
+  const center = (size - 1) / 2
+  const radius = size / 2
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const dx = (x - center) / radius
+      const dy = (y - center) / radius
+      const distance = Math.sqrt(dx * dx + dy * dy)
+      const alpha = Math.pow(clamp01(1 - distance), falloff)
+      const i = (y * size + x) * 4
+      data[i] = 255
+      data[i + 1] = 255
+      data[i + 2] = 255
+      data[i + 3] = Math.round(clamp01(alpha) * 255)
+    }
+  }
+
+  return data
+}
 
 /**
  * El sol es blanco, no cálido. La temperatura de la escena la lleva la luz que

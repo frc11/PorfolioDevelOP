@@ -22,7 +22,7 @@ import {
   RIM_INTENSITY,
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
-import { SUN_RADIUS, sunOpacityFor } from './probeSun'
+import { SUN_RADIUS, sunOpacityFor, sunWashoutOpacityFor } from './probeSun'
 import { kelvinToSrgb } from './probeScene'
 
 /**
@@ -66,6 +66,12 @@ export type LightRigTargets = {
    * exactamente lo que rompe la ilusión que el sol vino a construir.
    */
   sun: THREE.Sprite | null
+  /**
+   * El washout: el disco aditivo que apaga la trama de la envolvente donde el sol
+   * pasa. Va sobre el MISMO eje y con la MISMA cuenta que el cuerpo, por la misma
+   * razón: si se desincronizara, el glare quedaría al lado del sol.
+   */
+  sunWashout: THREE.Sprite | null
 }
 
 export function createLightRigTargets(): LightRigTargets {
@@ -77,6 +83,7 @@ export function createLightRigTargets(): LightRigTargets {
     fog: null,
     background: null,
     sun: null,
+    sunWashout: null,
   }
 }
 
@@ -290,6 +297,18 @@ export function applyLightRig(
     sun.position.copy(SUN_DIRECTION).multiplyScalar(SUN_RADIUS)
     const material = sun.material
     if (material instanceof THREE.SpriteMaterial) material.opacity = sunOpacityFor(level)
+  }
+
+  // 6c · EL WASHOUT, sobre el mismo eje y a la misma distancia. El orden de
+  //      dibujo contra el cuerpo lo fija `renderOrder`, no la distancia, así que
+  //      compartir posición no es ambiguo (ver `probeMoire.ts`).
+  const washout = targets.sunWashout
+  if (washout) {
+    washout.position.copy(SUN_DIRECTION).multiplyScalar(SUN_RADIUS)
+    const material = washout.material
+    if (material instanceof THREE.SpriteMaterial) {
+      material.opacity = sunWashoutOpacityFor(level)
+    }
   }
 
   if (targets.fog) targets.fog.color.copy(cache.fogTint)

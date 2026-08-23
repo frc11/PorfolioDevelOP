@@ -23,8 +23,8 @@ import {
 import { KEY_DISTANCE, KEY_ELEVATION_DEG } from '../_components/probeLighting'
 import { SHADOW_FAR, SHADOW_NEAR } from '../_components/probeAtmosphere'
 import { SUN_RADIUS, sunOpacityFor } from '../_components/probeSun'
-import { MOIRE_RADIUS } from '../_components/probeMoire'
-import { AERIAL_SPAN } from '../_components/probeArchitecture'
+import { PARTICLE_R_MAX } from '../_components/probeParticles'
+import { MOIRE_NEAR_RADIUS } from '../_components/probeMoire'
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
 
 const RAD = Math.PI / 180
@@ -196,7 +196,7 @@ section('El cuerpo del sol contra la escena')
 {
   let aboveFloor = true
   let insideScreen = true
-  let insideGrid = true
+  let outsideParticles = true
   let minHeight = Infinity
   let maxRadius = 0
   for (let i = 0; i <= 200; i += 1) {
@@ -205,19 +205,35 @@ section('El cuerpo del sol contra la escena')
     minHeight = Math.min(minHeight, p[1])
     maxRadius = Math.max(maxRadius, radius)
     if (p[1] <= FLOOR_Y) aboveFloor = false
-    if (radius >= MOIRE_RADIUS) insideScreen = false
-    if (Math.abs(p[0]) > AERIAL_SPAN + 1 || Math.abs(p[2]) > AERIAL_SPAN + 1) insideGrid = false
+    if (radius >= MOIRE_NEAR_RADIUS) insideScreen = false
+    // El cuerpo se dibuja a `SUN_RADIUS` del origen; el campo de polvo llega
+    // exactamente hasta ahí. Si el sol quedara MÁS CERCA que la mota más lejana,
+    // el ordenamiento por distancia de three pondría una mota de atrás por
+    // delante del sol.
+    if (SUN_RADIUS < PARTICLE_R_MAX) outsideParticles = false
   }
   check('el sol nunca se mete abajo del papel', aboveFloor, `altura mínima ${minHeight.toFixed(1)}`)
   check(
-    'el sol siempre queda POR DELANTE de la pantalla de rendijas',
+    'el sol siempre queda POR DELANTE de la envolvente de rendijas',
     insideScreen,
-    `radio horizontal máximo ${maxRadius.toFixed(1)} contra una pantalla en ${MOIRE_RADIUS}`
+    `radio horizontal máximo ${maxRadius.toFixed(1)} contra la capa fina en ${MOIRE_NEAR_RADIUS}`
   )
+  /**
+   * ⚠️ **Reemplaza al chequeo de la retícula aérea, que S10 borró.**
+   *
+   * Aquel verificaba que el sol quedara dentro del cuadrado de la retícula del
+   * techo "así que las barras lo cruzan y la oclusión sale gratis". La retícula ya
+   * no existe — y S10 midió que esa oclusión gratis no era gratis: los planos
+   * tapaban entre el 46% y el 68% del disco.
+   *
+   * Lo que sí hay que proteger ahora es el otro extremo: que **nada transparente
+   * quede más lejos que el sol**, porque three ordena los transparentes por la
+   * posición del objeto y una mota detrás del sol se dibujaría delante.
+   */
   check(
-    'el sol queda dentro del cuadrado de la retícula, así que las barras lo cruzan',
-    insideGrid,
-    `±${AERIAL_SPAN} en X y en Z`
+    'ninguna partícula puede quedar más lejos que el sol',
+    outsideParticles,
+    `el cuerpo a ${SUN_RADIUS} contra un campo de polvo que llega a ${PARTICLE_R_MAX}`
   )
 }
 

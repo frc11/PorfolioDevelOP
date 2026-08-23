@@ -113,9 +113,42 @@ import type {
 
 const VIRA_YAW_RAD = THREE.MathUtils.degToRad(VIRA_YAW_DEG)
 const VIRA_PITCH_RAD = THREE.MathUtils.degToRad(VIRA_PITCH_DEG)
-const DUST_SPIN_RAD_S = THREE.MathUtils.degToRad(DUST_SPIN_DEG_S)
-const BOKEH_SPIN_RAD_S = THREE.MathUtils.degToRad(BOKEH_SPIN_DEG_S)
+const DUST_SPIN_RAD_S = DUST_SPIN_DEG_S.map((deg) => THREE.MathUtils.degToRad(deg))
+const BOKEH_SPIN_RAD_S = BOKEH_SPIN_DEG_S.map((deg) => THREE.MathUtils.degToRad(deg))
 const TWO_PI = Math.PI * 2
+
+/**
+ * La deriva diferencial de un campo de partículas: cada CONCHA gira y cabecea con
+ * su propio período, la interior más rápido.
+ *
+ * Recorre los hijos del grupo en vez de recibir un ref por concha, y eso no es
+ * pereza: mantiene el contrato del rig en dos refs —uno por campo— aunque el
+ * componente cambie de cuántas capas tiene, y no asigna nada por frame. Si el
+ * grupo trae más hijos que constantes, las de más se ignoran; se verifica que las
+ * cantidades coincidan en `s10-escena.invariant.ts`.
+ */
+function driftShells(
+  group: THREE.Group,
+  elapsed: number,
+  spin: readonly number[],
+  amplitude: readonly number[],
+  period: readonly number[],
+  reducedMotion: boolean
+): void {
+  const shells = group.children
+  for (let i = 0; i < shells.length; i += 1) {
+    const shell = shells[i]
+    if (reducedMotion) {
+      if (shell.rotation.y !== 0) shell.rotation.y = 0
+      if (shell.position.y !== 0) shell.position.y = 0
+      continue
+    }
+    const index = i < spin.length ? i : spin.length - 1
+    shell.rotation.y = elapsed * spin[index]
+    shell.position.y =
+      Math.sin((elapsed / period[index]) * TWO_PI) * amplitude[index]
+  }
+}
 
 /** Ventana de promediado del contador de FPS. */
 const FPS_WINDOW_S = 0.5
@@ -188,7 +221,9 @@ type OrbitRigProps = {
   bokehGroupRef: RefObject<THREE.Group | null>
   /** El cuerpo del sol. Lo coloca `applyLightRig`, sobre el eje de la principal. */
   sunRef: RefObject<THREE.Sprite | null>
-  /** La pantalla de rendijas. El loop le desplaza la trama que se mueve. */
+  /** El washout del sol. Mismo eje, misma cuenta, mismo frame. */
+  sunWashoutRef: RefObject<THREE.Sprite | null>
+  /** La envolvente. El loop le desplaza la capa gruesa hacia abajo. */
   moireRef: RefObject<MoireHandle | null>
 }
 
@@ -212,6 +247,7 @@ export function OrbitRig({
   dustGroupRef,
   bokehGroupRef,
   sunRef,
+  sunWashoutRef,
   moireRef,
 }: OrbitRigProps) {
   const shadowModeRef = useRef<boolean | null>(null)
@@ -493,6 +529,7 @@ export function OrbitRig({
     targets.fog = fogRef.current
     targets.background = backgroundRef.current
     targets.sun = sunRef.current
+    targets.sunWashout = sunWashoutRef.current
 
     const lightInput = scratch.lightInput
     lightInput.level = arc.level
@@ -530,42 +567,48 @@ export function OrbitRig({
     // aire no interfiere con eso. Sí se apaga con movimiento reducido.
     const dust = dustGroupRef.current
     if (dust) {
-      if (reducedMotion) {
-        if (dust.rotation.y !== 0) dust.rotation.y = 0
-        if (dust.position.y !== 0) dust.position.y = 0
-      } else {
-        dust.rotation.y = elapsed * DUST_SPIN_RAD_S
-        dust.position.y =
-          Math.sin((elapsed / DUST_BOB_PERIOD_S) * TWO_PI) * DUST_BOB_AMPLITUDE
-      }
+      driftShells(
+        dust,
+        elapsed,
+        DUST_SPIN_RAD_S,
+        DUST_BOB_AMPLITUDE,
+        DUST_BOB_PERIOD_S,
+        reducedMotion
+      )
     }
 
     const bokeh = bokehGroupRef.current
     if (bokeh) {
-      if (reducedMotion) {
-        if (bokeh.rotation.y !== 0) bokeh.rotation.y = 0
-        if (bokeh.position.y !== 0) bokeh.position.y = 0
-      } else {
-        bokeh.rotation.y = elapsed * BOKEH_SPIN_RAD_S
-        bokeh.position.y =
-          Math.sin((elapsed / BOKEH_BOB_PERIOD_S) * TWO_PI) * BOKEH_BOB_AMPLITUDE
-      }
+      driftShells(
+        bokeh,
+        elapsed,
+        BOKEH_SPIN_RAD_S,
+        BOKEH_BOB_AMPLITUDE,
+        BOKEH_BOB_PERIOD_S,
+        reducedMotion
+      )
     }
 
-    // 6b · La trama de rendijas que se desplaza. UNA escritura por frame sobre el
-    //      `offset` de una textura: el moiré no cuesta nada por píxel de más que
-    //      la propia superficie, porque lo que se mueve es la matriz de UV.
+    // 6b · LA CAPA GRUESA DE LA ENVOLVENTE, QUE BAJA. UNA escritura por frame
+    //      sobre el `offset` de una textura: el moiré no cuesta nada por píxel de
+    //      más que la propia superficie, porque lo que se mueve es la matriz de
+    //      UV.
     //
-    //      El módulo mantiene el offset en [0,1): la textura repite, así que
-    //      envolver es invisible y evita que el número crezca sin techo durante
-    //      una sesión larga.
+    //      Va sobre `offset.y` y no sobre `offset.x`, que es lo que cambió en
+    //      S10: la trama BAJA en vez de girar alrededor del cilindro, igual que
+    //      la retícula del hero del sitio, de donde sale. Como la V del cilindro
+    //      crece hacia arriba, subir el offset mueve el patrón hacia abajo.
+    //
+    //      Un período completo mueve la trama UNA celda. El módulo mantiene el
+    //      offset en [0,1): la textura repite, así que envolver es invisible y
+    //      evita que el número crezca sin techo durante una sesión larga.
     //
     //      Se apaga con movimiento reducido, igual que la deriva del aire y la
     //      vira. NO se apaga con el toggle de física: apagar la física es para
     //      juzgar el track crudo de la cámara y el fondo no interfiere con eso.
     const moire = moireRef.current
     if (moire) {
-      moire.slats.offset.x = reducedMotion ? 0 : (elapsed / MOIRE_DRIFT_PERIOD_S) % 1
+      moire.drift.offset.y = reducedMotion ? 0 : (elapsed / MOIRE_DRIFT_PERIOD_S) % 1
     }
 
     // 7 · FPS promediado en ventanas de medio segundo. Sin promedio el número

@@ -4,6 +4,7 @@ import { forwardRef, useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
 import {
+  SUN_BODY_ORDER,
   SUN_COLOR,
   SUN_CORE,
   SUN_GLOW_FALLOFF,
@@ -41,12 +42,16 @@ import {
  *    un poco y, sobre todo, **se apaga con ella** cuando la sala se oscurece,
  *    porque el color de la niebla sigue al arco.
  *
- * 3. **`depthWrite: false`, `depthTest: true`.** Lo tapan las barras de la
- *    retícula, los planos y los pilares —que es lo que lo mete adentro del
- *    espacio en vez de encima de él— pero no recorta a las partículas que pasen
- *    por delante. El orden entre transparentes lo resuelve el ordenamiento por
- *    distancia de three: el sol está más lejos que las partículas y que la
- *    pantalla de rendijas, así que dibuja primero.
+ * 3. **`depthWrite: false`, `depthTest: true`.** Lo tapa lo opaco que se le
+ *    cruce —el logo y el piso—, pero no recorta a las partículas que pasen por
+ *    delante.
+ *
+ *    ⚠️ **Y el orden entre transparentes NO lo resuelve la distancia**, que es lo
+ *    que este mismo comentario afirmaba hasta S10 y era falso: three ordena por
+ *    la posición del OBJETO, y la envolvente está centrada en el origen, así que
+ *    su distancia es la de la cámara (9 a 27) contra los 34 del sol — o sea que
+ *    **la envolvente se dibujaba ENCIMA del sol**. Lo fija `renderOrder`, que
+ *    tiene prioridad sobre la distancia. Ver la nota de `probeMoire.ts`.
  *
  * ── Lo que NO hace ─────────────────────────────────────────────────────────
  *
@@ -71,7 +76,11 @@ export const SunBody = forwardRef<THREE.Sprite>(function SunBody(_props, ref) {
   useEffect(() => () => sprite.dispose(), [sprite])
 
   return (
-    <sprite ref={ref} scale={[SUN_SPRITE_RADIUS * 2, SUN_SPRITE_RADIUS * 2, 1]}>
+    <sprite
+      ref={ref}
+      scale={[SUN_SPRITE_RADIUS * 2, SUN_SPRITE_RADIUS * 2, 1]}
+      renderOrder={SUN_BODY_ORDER}
+    >
       <spriteMaterial
         map={sprite}
         color={SUN_COLOR}

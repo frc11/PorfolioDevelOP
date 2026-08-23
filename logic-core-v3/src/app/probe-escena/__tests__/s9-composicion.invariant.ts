@@ -6,73 +6,118 @@
  * La otra mitad de `s9-recorrido.invariant.ts`: ésta no mira el dato, mira lo
  * que ese dato produce **dentro del espacio que S5 construyó**.
  *
- *   1. El entorno pasa por delante del logo —que acá es la INTENCIÓN, no un
- *      defecto— pero nunca en una pose de keyframe y nunca por mucho tiempo.
- *   2. El corredor que Trabajos le deja al efecto Star Wars.
+ *   1. Que NADA se cruce entre la cámara y el logo — con su control positivo, sin
+ *      el cual el chequeo quedaría verde por vacío (S10).
+ *   2. El corredor que la escena vaciada le deja al efecto Star Wars.
  *   3. La amplitud y la velocidad, contra los otros cuatro recorridos.
  */
 import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../_components/choreography'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { cameraAt, check, emptyPose, halfFovDeg, makeTrack, report, section, speedAt } from './harness'
-import { backCone, logoOcclusionAt } from './occlusion'
+import {
+  SCENE_OCCLUDERS,
+  backCone,
+  backDepth,
+  logoOcclusionAt,
+  syntheticOccluder,
+} from './occlusion'
 
 const ASPECT = 16 / 9
 const track = makeTrack(CHOREO_KEYFRAMES)
 
-// ── 4 · El entorno por delante del logo ─────────────────────────────────────
+// ── 4 · Nada se cruza entre la cámara y el logo ─────────────────────────────
 
-section('El entorno pasa por delante del logo, y eso es la intención')
+section('El instrumento de oclusión DETECTA una oclusión (control positivo)')
+
+/**
+ * ⚠️ **Este control existe porque el de abajo no puede fallar solo.**
+ *
+ * Hasta S9 la escena tenía once planos suspendidos y acá se verificaba que el
+ * entorno cruzara por delante del logo entre tres y seis veces — eso era una
+ * afirmación con contenido. S10 borró los planos, así que la afirmación se dio
+ * vuelta: ahora hay que verificar que **nada** se cruce.
+ *
+ * Y "nada se cruza" contra una escena sin geometría es verdadero por vacío: el
+ * chequeo pasaría igual si el instrumento estuviera roto, y seguiría pasando el
+ * día que alguien agregue una masa que sí tape el logo. Por eso primero se le
+ * pone al instrumento una losa sintética delante y se comprueba que la ve.
+ */
+{
+  // Una losa encarada al centro, en el azimut del hero y a la mitad de su
+  // distancia: no hay forma de que no se cruce.
+  const blocker = [syntheticOccluder(0, 9)]
+  const occluded = logoOcclusionAt(track, 0, blocker)
+  check(
+    'con una losa sintética delante, la oclusión del logo es TOTAL',
+    occluded === 1,
+    `${(occluded * 100).toFixed(0)}% de la silueta tapada por ${blocker[0].label}`
+  )
+
+  // Una losa chica y descentrada tapa parte y no todo: verifica que el
+  // instrumento discrimina y no devuelve 0 ó 1 y nada más.
+  const partial = logoOcclusionAt(track, 0, [syntheticOccluder(0, 9, 3.2, 11)])
+  check(
+    'y con una losa angosta, tapa una PARTE — el instrumento discrimina',
+    partial > 0 && partial < 1,
+    `${(partial * 100).toFixed(0)}% de la silueta`
+  )
+
+  const cone = backCone(track, 0.625, [syntheticOccluder(15, 20)])
+  const free = backCone(track, 0.625)
+  check(
+    'y una losa en el fondo le come el cono libre',
+    cone < free,
+    `±${cone.toFixed(0)}° con la losa contra ±${free.toFixed(1)}° sin ella`
+  )
+}
+
+section('La escena vaciada: el logo nunca queda tapado')
 
 check(
-  'en las seis poses el logo está limpio: nunca queda tapado cuando la cámara para',
+  'la lista de ocluyentes de la escena está vacía, y es la intención',
+  SCENE_OCCLUDERS.length === 0,
+  'S10 borró los once planos suspendidos, la retícula aérea y los pilares'
+)
+
+const N = 2000
+let covered = 0
+for (let i = 0; i <= N; i += 1) {
+  if (logoOcclusionAt(track, i / N) > 0) covered += 1
+}
+check(
+  'nada cruza por delante del logo en ningún punto del recorrido',
+  covered === 0,
+  `0% del recorrido, contra el 9,7% en cinco pasadas que publicó S9`
+)
+check(
+  'y tampoco en las ocho poses',
   CHOREO_KEYFRAMES.every((keyframe) => logoOcclusionAt(track, keyframe.at) === 0),
   'oclusión 0% en las ocho entradas'
 )
 
-const N = 2000
-const windows: { from: number; to: number }[] = []
-let open = -1
-let covered = 0
-for (let i = 0; i <= N; i += 1) {
-  const progress = i / N
-  const occluded = logoOcclusionAt(track, progress) > 0
-  if (occluded) covered += 1
-  if (occluded && open < 0) open = progress
-  if (!occluded && open >= 0) {
-    windows.push({ from: open, to: progress })
-    open = -1
-  }
-}
-if (open >= 0) windows.push({ from: open, to: 1 })
-
-const total = covered / (N + 1)
-const longest = Math.max(...windows.map((window) => window.to - window.from))
-check(
-  'el entorno cruza por delante del logo, y cruza pocas veces',
-  windows.length >= 3 && windows.length <= 6,
-  `${windows.length} pasadas: ${windows.map((w) => `${w.from.toFixed(3)}→${w.to.toFixed(3)}`).join(' · ')}`
-)
-check(
-  'ninguna pasada dura más de media pantalla de scroll',
-  longest < 0.0625,
-  `la más larga ${longest.toFixed(3)} de progreso, contra 0,0625 que vale media pantalla`
-)
-check(
-  'y en total tapan menos de una pantalla del recorrido',
-  total < 0.125,
-  `${(total * 100).toFixed(1)}% del recorrido`
-)
-
 // ── 5 · El corredor de Trabajos (la plataforma del Star Wars) ───────────────
 
-section('Trabajos: el corredor que hereda el efecto Star Wars')
+section('El corredor que hereda el efecto Star Wars')
 
-const trabajos = CHOREO_TRAMOS.find((tramo) => tramo.name === 'trabajos')!
+/**
+ * ⚠️ **S10 invalidó la nota de §7.1 de S9, y ésta es la cifra nueva.**
+ *
+ * S9 publicó que el corredor libre era exclusivo de Trabajos y Números (±29°,
+ * contra ±10° en el hero y ±0° en los otros tres): el límite eran los planos. Sin
+ * ellos, **el cuadro entero queda libre hacia el fondo en los SEIS tramos**, así
+ * que dejó de ser una propiedad de Trabajos y pasó a ser una propiedad de la
+ * escena.
+ *
+ * Lo que sí sigue variando por pose es la PROFUNDIDAD, y ahora la limitan dos
+ * cosas distintas: la envolvente cuando la cámara mira nivelada o hacia arriba, y
+ * **el piso** cuando mira hacia abajo. En el hero y en Números el eje óptico se
+ * clava en el papel a 13,8 y a 10,0 unidades, mucho antes de llegar a la pared.
+ */
 let worstCone = 99
 let worstAt = 0
-for (let i = 0; i <= 40; i += 1) {
-  const progress = trabajos.from + ((trabajos.to - trabajos.from) * i) / 40
+for (let i = 0; i <= 240; i += 1) {
+  const progress = i / 240
   const cone = backCone(track, progress)
   if (cone < worstCone) {
     worstCone = cone
@@ -80,20 +125,22 @@ for (let i = 0; i <= 40; i += 1) {
   }
 }
 check(
-  'el cuadro entero queda libre hacia el fondo durante todo el tramo',
-  worstCone >= halfFovDeg(ASPECT).h - 1,
-  `cono libre mínimo ±${worstCone.toFixed(1)}° (medio cuadro horizontal es ±${halfFovDeg(ASPECT).h.toFixed(1)}°) en p=${worstAt.toFixed(3)}`
+  'el cuadro entero queda libre hacia el fondo en TODO el recorrido, no solo en Trabajos',
+  worstCone >= halfFovDeg(ASPECT).h - 1e-9,
+  `cono libre mínimo ±${worstCone.toFixed(1)}° (medio cuadro horizontal es ±${halfFovDeg(ASPECT).h.toFixed(1)}°), peor punto p=${worstAt.toFixed(3)}`
 )
+
+const trabajos = CHOREO_TRAMOS.find((tramo) => tramo.name === 'trabajos')!
+const depths = CHOREO_TRAMOS.map((tramo) => {
+  const middle = (tramo.from + tramo.to) / 2
+  const probe = backDepth(track, middle)
+  return `${tramo.name} ${probe.depth.toFixed(1)} (${probe.limit})`
+})
+const trabajosDepth = backDepth(track, (trabajos.from + trabajos.to) / 2)
 check(
-  'y el logo no queda tapado en ningún punto del tramo',
-  (() => {
-    for (let i = 0; i <= 60; i += 1) {
-      const progress = trabajos.from + ((trabajos.to - trabajos.from) * i) / 60
-      if (logoOcclusionAt(track, progress) > 0) return false
-    }
-    return true
-  })(),
-  'oclusión 0% de p=0,500 a p=0,625'
+  'y la profundidad del corredor la limita la envolvente o el piso, nunca una masa',
+  trabajosDepth.depth > 15,
+  depths.join(' · ')
 )
 
 // ── 6 · Amplitud y velocidad ────────────────────────────────────────────────

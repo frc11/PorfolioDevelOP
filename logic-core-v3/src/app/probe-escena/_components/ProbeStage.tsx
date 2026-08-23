@@ -8,16 +8,10 @@ import { BokehParticles } from './BokehParticles'
 import type { ChoreoEditor } from './choreographyEditor'
 import { ContactOcclusion } from './ContactOcclusion'
 import { DepthParticles } from './DepthParticles'
-import { InstancedBars } from './InstancedBars'
-import { LogoFragments } from './LogoFragments'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
 import { SunBody } from './SunBody'
-import {
-  AERIAL_PLACEMENTS,
-  PILLAR_PLACEMENTS,
-  PLANE_PLACEMENTS,
-} from './probeArchitecture'
+import { SunWashout } from './SunWashout'
 import {
   FOG_COLOR,
   FOG_FAR,
@@ -48,8 +42,8 @@ import {
 } from './probeStore'
 
 /**
- * La escena. Un espacio arquitectónico abstracto con el logo mate adentro, sin
- * HDRI.
+ * La escena. **Cinco cosas y nada más** (S10): el piso con sus marcas, la
+ * envolvente de rendijas, el sol, las partículas y el logo.
  *
  * **Sin HDRI es media respuesta del probe.** El artefacto del hero es un espejo
  * (`metalness=1`, `clearcoat=1`) y por eso necesita 1,27 MiB de entorno
@@ -63,12 +57,15 @@ import {
  * opaco y de página, así que el composer sería legal, pero no hace falta nada de
  * post: el bloom sobre un objeto negro mate no aporta.
  *
- * **El mundo, definido en S5.** La maqueta a escala real de algo que todavía no
- * se terminó de construir: piso claro, luz limpia, planos y estructura
- * suspendidos en el aire, y el logo como única pieza terminada en el centro. No
- * es un taller ni un estudio fotográfico — no hay herramientas ni objetos
- * reconocibles, y no hay una sola imagen de "tecnología": ni nodos, ni
- * circuitos, ni pantallas, ni engranajes. Nada orgánico tampoco.
+ * **El mundo, vaciado en S10.** S5 lo había poblado con once planos
+ * suspendidos, una retícula aérea y tres pilares; los tres se borraron, y con
+ * ellos los arcos sueltos del logo. El argumento es uno solo: **geometría sin
+ * significado**. Lo que queda tiene todo una razón — el piso da escala y ancla el
+ * logo, la envolvente es el fondo con vida, el sol es la fuente que se ve, las
+ * partículas son el aire y el logo es la pieza.
+ *
+ * No hay una sola imagen de "tecnología": ni nodos, ni circuitos, ni pantallas,
+ * ni engranajes. Nada orgánico tampoco. Geometría, y nada más que geometría.
  *
  * **La atmósfera, en S6.** Tres puntos de luz en vez de dos, niebla lineal,
  * sombra cuatro veces más barata con una penumbra que ahora se elige, y una
@@ -77,9 +74,16 @@ import {
  * contacto); acá solo se cablean.
  *
  * La regla que ordena todo lo que se agrega: **nada brilla por sí mismo** —todo
- * es `meshStandardMaterial` y responde a las mismas luces, así que la sala
- * entera se apaga con el cierre— y **nada compite en peso visual con el logo**,
- * que sigue siendo el único negro puro del cuadro.
+ * responde a las mismas luces, así que la sala entera se apaga con el cierre; la
+ * única excepción es el sol, que es una fuente, y aun así se apaga con el arco— y
+ * **nada compite en peso visual con el logo**, que sigue siendo el único negro
+ * puro del cuadro.
+ *
+ * ⚠️ **El orden de dibujo de los transparentes es explícito y no accidental.**
+ * three ordena por la posición del OBJETO, y los cilindros de la envolvente están
+ * centrados en el origen: sin `renderOrder` la envolvente se dibuja encima del
+ * sol. La cadena queda gruesa → fina → washout → sol → partículas. Ver la nota de
+ * `probeMoire.ts`.
  */
 
 type ProbeStageProps = {
@@ -125,11 +129,12 @@ export default function ProbeStage({
   const dustGroupRef = useRef<THREE.Group>(null)
   const bokehGroupRef = useRef<THREE.Group>(null)
   /**
-   * El cuerpo del sol y la pantalla de rendijas. Los dos siguen la misma regla
-   * que los grupos de arriba: el componente declara la pieza, el único
-   * `useFrame` de la escena la mueve.
+   * El cuerpo del sol, su washout y la envolvente de rendijas. Los tres siguen la
+   * misma regla que los grupos de arriba: el componente declara la pieza, el
+   * único `useFrame` de la escena la mueve.
    */
   const sunRef = useRef<THREE.Sprite>(null)
+  const sunWashoutRef = useRef<THREE.Sprite>(null)
   const moireRef = useRef<MoireHandle>(null)
 
   return (
@@ -218,6 +223,14 @@ export default function ProbeStage({
         */}
         <SunBody ref={sunRef} />
 
+        {/*
+          EL WASHOUT (S10). El disco aditivo que apaga la trama de la envolvente
+          donde el sol pasa. Va sobre el mismo eje que el cuerpo y lo coloca el
+          mismo `applyLightRig`. Arranca bajo a propósito: el contraste ya lo
+          resolvió el fondo oscuro, y todo lo que este disco suba se lo come.
+        */}
+        <SunWashout ref={sunWashoutRef} />
+
         <group ref={logoGroupRef}>
           <ProbeLogo stats={stats} onReady={onReady} />
         </group>
@@ -226,36 +239,28 @@ export default function ProbeStage({
         <ContactOcclusion />
 
         {/*
-          Las tres familias del espacio, cada una un draw call. Ninguna proyecta
-          ni recibe sombra, y es una decisión, no un olvido: la ortográfica del
-          shadow map cubre solo la esfera del logo, así que nada de esto entraría
-          al mapa aunque se lo marcara. Meterlo costaría bajar la resolución
-          sobre lo único que importa.
+          LA ENVOLVENTE DE RENDIJAS (S10). Dos cilindros coaxiales alrededor de la
+          escena, cada uno con una trama de cuadrados derivada del vocabulario del
+          sitio: la gruesa es la retícula del hero y BAJA como allá, la fina es la
+          misma a la mitad del paso con un punto en cada cruce.
+
+          **Separadas en profundidad**, que es el cambio respecto de S7: la
+          separación produce paralaje, así que al orbitar las dos capas se
+          desalinean solas y el moiré cambia con el movimiento además del batido
+          de la textura.
+
+          Dos draw calls y dos superficies transparentes que cubren el 51% y el
+          57% del cuadro en promedio. El aliasing está medido en las DOS
+          direcciones contra los cinco recorridos: 26 veces de margen. Los números
+          están en `probeMoire.ts`.
         */}
-        <InstancedBars placements={PLANE_PLACEMENTS} roughness={0.92} />
-        <InstancedBars placements={AERIAL_PLACEMENTS} roughness={0.85} />
-        <InstancedBars placements={PILLAR_PLACEMENTS} roughness={0.95} />
+        <MoireScreen ref={moireRef} store={store} />
 
         {/*
-          LA PANTALLA DE RENDIJAS (S7). Un cilindro alrededor de la escena con
-          dos tramas propias de develOP —el campo de puntos, fijo, y las
-          rendijas, que derivan— en las dos ranuras de textura del mismo
-          material. La interferencia entre las dos es el moiré, y se mueve mucho
-          más rápido que cualquiera de sus capas.
-
-          Un draw call y una sola superficie transparente. El aliasing está
-          medido contra el recorrido real: quince veces de margen sobre el
-          límite de muestreo. Los números están en `probeMoire.ts`.
-        */}
-        <MoireScreen ref={moireRef} />
-
-        <LogoFragments />
-
-        {/*
-          Los dos campos van en grupos propios porque el rig los hace DERIVAR:
-          un giro lento sobre el eje vertical, en sentidos opuestos y con
-          períodos inconmensurables. Es el mismo patrón que la vira del logo —
-          una matriz, cero costo por partícula— y el porqué está en
+          Los dos campos van en grupos propios porque el rig los hace DERIVAR.
+          Cada uno contiene una concha por radio, y el rig gira cada concha a su
+          propio ritmo —la interior más rápido—: es rotación diferencial, una
+          matriz por concha y cero costo por partícula. El porqué está en
           `choreographyPhysics.ts`.
         */}
         <group ref={dustGroupRef}>
@@ -285,6 +290,7 @@ export default function ProbeStage({
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
           sunRef={sunRef}
+          sunWashoutRef={sunWashoutRef}
           moireRef={moireRef}
         />
       </Suspense>

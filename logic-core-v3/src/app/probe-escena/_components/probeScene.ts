@@ -6,10 +6,9 @@ import { LOGO_BOX_WORLD } from '@/lib/logo-footprint'
  * Era "un solo lugar para todos los números de la escena" hasta S6, y dejó de
  * serlo porque el archivo se hizo largo: la luz salió a `probeLighting.ts`, la
  * niebla y la sombra a `probeAtmosphere.ts`, las partículas y sus generadores de
- * sprite a `probeParticles.ts`, y las marcas y la arquitectura ya vivían en
- * `floorMarks.ts` y `probeArchitecture.ts` desde S5. Lo que queda acá es la
- * escena en su sentido más literal: **qué hay, de qué color, apoyado sobre qué y
- * mirado con qué lente.**
+ * sprite a `probeParticles.ts`, y las marcas a `floorMarks.ts` desde S5. Lo que
+ * queda acá es la escena en su sentido más literal: **qué hay, de qué color,
+ * apoyado sobre qué y mirado con qué lente.**
  *
  * NO se toca `logo-footprint.ts`: de ahí solo se LEE `LOGO_BOX_WORLD`, que es
  * el tamaño en unidades de mundo de la caja 1024 del SVG (0.007 × 1024). Las
@@ -93,40 +92,24 @@ export const MARK_TAPE_COLOR = '#CFCFCC'
 /** Rebote del papel hacia arriba (piso del hemisférico). Cálido apenas. */
 export const BOUNCE_COLOR = '#EDEAE3'
 /**
- * ── EL NEGRO DE LA ESCENA (S5) ─────────────────────────────────────────────
+ * ── EL NEGRO DE LA ESCENA, Y QUIÉN LO LLEVA AHORA (S10) ────────────────────
  *
- * Los planos suspendidos son la fuente principal de masa oscura, y son la razón
- * por la que la escena deja de ser toda clara. Dos familias:
+ * Hasta S9 la masa oscura eran los **planos suspendidos**: `#191917` sobre el
+ * 30% al 49% del cuadro según la pose. S10 los borró —se leían como descarte, no
+ * como arquitectura— y con ellos se fueron los tonos de la retícula aérea, los
+ * pilares y los fragmentos.
  *
- * - **Oscuro.** Negro mate, y **más claro que la tinta del logo a propósito**:
- *   en lineal `#191917` es del orden de tres veces más luminoso que `#0F0F0F`,
- *   así que hay masa oscura de verdad sin que nada le dispute al logo el punto
- *   más negro del cuadro. Es la perilla del balance: subirlo aclara la masa,
- *   bajarlo la acerca al logo.
- * - **Claro.** Apenas por encima del papel. Es el mismo valor que tenían los
- *   softboxes de S4, elegido para lo mismo: que el plano se separe del fondo por
- *   el sombreado y no por el color.
+ * **Lo que queda en tinta es el logo y nada más**, y eso es entre el 2,8% y el
+ * 23,2% del cuadro según la pose. El peso tonal pasó a la **envolvente de
+ * rendijas** (`probeMoire.ts`), que no es masa sino trama: baja el fondo de 247
+ * a 200-219 en las poses claras, con la línea en 137-159.
+ *
+ * ⚠️ **Y no alcanza en dos poses, que es un pendiente medido y no un olvido.** En
+ * el hero y en Números el cuadro es 65% y 78% PISO, así que la envolvente solo
+ * llega al 31% y al 17% de la pantalla y ninguna perilla suya lo cambia. Los
+ * valores medios están en `S10-FONDO.md` §2, para que el sprint del piso arranque
+ * del número en vez de calibrar a ciegas.
  */
-export const PLANE_DARK_COLOR = '#191917'
-export const PLANE_PALE_COLOR = '#FCFCFA'
-/** Retícula del techo: oscura, un escalón por encima de los planos. */
-export const AERIAL_COLOR = '#3A3A35'
-/** Las vigas altas de la retícula: más oscuras, se leen detrás de la trama fina. */
-export const AERIAL_BEAM_COLOR = '#2A2A26'
-/** Pilares lejanos. Muy tenues: apenas se despegan del papel. */
-export const PILLAR_COLOR = '#E9E9E6'
-/**
- * Arcos sueltos del logo — las piezas que todavía no se ensamblaron.
- *
- * **Cambió en S5: eran `#E2E2DF`, apenas separados del papel.** Con esa lectura
- * el tono claro los volvía el fantasma de otra cosa; en material oscuro se leen
- * como pedazos del mismo objeto que el logo, que es lo que son. Quedan varios
- * escalones por encima de la tinta y por encima también de los planos, así que
- * suman masa sin disputar.
- *
- * Volver a la lectura fantasma es este único número.
- */
-export const FRAGMENT_COLOR = '#3C3C38'
 /** Partículas grandes desenfocadas. Ver `BOKEH_*`. */
 export const BOKEH_COLOR = '#B9B9B4'
 
@@ -269,17 +252,18 @@ export const AUTO_ORBIT_DEG_PER_S = 24
  * Una caja con posición, tamaño, giro y color propios, para dibujarse junto a
  * muchas otras en un solo draw call (ver `InstancedBars.tsx`).
  *
- * **Es el vocabulario compartido de casi toda la escena nueva.** Las marcas de
- * piso, los planos suspendidos, la retícula del techo y los pilares son todos
- * cajas: cambia la escala, el giro y el tono, no la forma. Una sola primitiva
- * para las cuatro familias es lo que hace que cada una cueste un draw call en
- * vez de uno por pieza.
+ * **Después de S10 le queda un solo consumidor: las marcas de piso.** Nació como
+ * el vocabulario compartido de cuatro familias —marcas, planos suspendidos,
+ * retícula del techo y pilares—, y las otras tres se borraron. Se conserva
+ * igual, y no por inercia: las 48 marcas siguen siendo un solo draw call gracias
+ * a esto, y es lo que va a necesitar cualquier familia de cajas que se sume
+ * después.
  *
  * `rotation` se interpreta en orden **YXZ**: primero el azimut, y la
  * inclinación DESPUÉS, adentro del marco ya girado. Con el XYZ que three usa
  * por default, la inclinación se aplicaría sobre el eje X del padre y cada
  * pieza se inclinaría en una dirección distinta según su azimut — el mismo
- * problema que los softboxes de S4 resolvían con dos grupos anidados.
+ * problema que S4 resolvía con dos grupos anidados.
  */
 export type BarPlacement = {
   readonly position: readonly [number, number, number]
@@ -287,20 +271,6 @@ export type BarPlacement = {
   readonly rotation?: readonly [number, number, number]
   readonly color: string
 }
-
-// ── El espacio arquitectónico (S5) ──────────────────────────────────────────
-
-/**
- * Los planos suspendidos, la retícula aérea y los pilares viven en
- * `probeArchitecture.ts`.
- *
- * **Reemplazan a los softboxes de S4.** La idea que se conserva es la del panel
- * suspendido —masa de tamaño conocido a media distancia, que genera paralaje y
- * tapa cosas al orbitar, que es la señal de profundidad más fuerte que hay—; lo
- * que se va es la referencia al estudio de fotos. Un softbox tiene marco, tela y
- * una razón de ser: iluminar. Un plano arquitectónico no explica nada, solo
- * ocupa espacio con intención, que es lo que esta escena necesita.
- */
 
 // ── Las partículas ─────────────────────────────────────────────────────────
 
@@ -313,62 +283,27 @@ export type BarPlacement = {
  * Acá queda solo su color: `BOKEH_COLOR`, más arriba, que es paleta.
  */
 
-// ── Los fragmentos del logo (S4) ────────────────────────────────────────────
+// ── Lo que S10 borró ────────────────────────────────────────────────────────
 
 /**
- * Arcos sueltos flotando lejos: **las piezas de la marca que todavía no se
- * ensamblaron** (S5). **Es el único elemento de la escena que no podría estar en
- * el espacio de otro**: todo lo demás (piso, marcas, planos, polvo) es
- * vocabulario genérico; esto es lo que la hace de develOP.
+ * **Los planos suspendidos, la retícula aérea y los pilares** vivían en
+ * `probeArchitecture.ts`, y **los tres arcos sueltos del logo** en
+ * `LogoFragments.tsx` con sus medidas acá. Los cinco elementos se borraron en
+ * S10, archivo incluido.
  *
- * Los radios salen del propio SVG: el `path` del logo está construido con dos
- * arcos, uno de 153 y otro de 257 unidades del viewBox de 1024. Escalados por
- * `PROBE_SVG_SCALE` dan 1,07 y 1,80 de mundo; acá van amplificados ~2,2× para
- * que se lean a la distancia a la que flotan. O sea: no son "unos arcos", son
- * LOS arcos de la marca.
+ * El argumento es uno solo y vale para todos: **geometría sin significado**.
+ * Rectángulos negros en ángulos arbitrarios que se leen como descarte, no como
+ * arquitectura — y medido, en p=0,200 y p=0,300 uno de ellos ocupaba el 100% del
+ * cuadro con el logo detrás.
  *
- * **Con moderación: tres.** Es un acento, no un motivo.
+ * Lo que se conserva de esa etapa es lo que sí significa algo: **el piso y las
+ * marcas de replanteo**, que son planas, dan escala y son lo único que ancla el
+ * logo al suelo.
+ *
+ * Si algún día vuelve a hacer falta masa a media distancia, el instrumento para
+ * medirla sigue en el repo: `__tests__/occlusion.ts` mide oclusión y cono libre
+ * contra una lista de cajas, y hoy esa lista está vacía a propósito.
  */
-export type FragmentPlacement = {
-  /** Radio del anillo. */
-  readonly ringRadius: number
-  /** Grosor del trazo (radio del tubo). */
-  readonly tube: number
-  /** Porción del anillo que existe, en radianes. */
-  readonly arc: number
-  readonly position: readonly [number, number, number]
-  readonly rotation: readonly [number, number, number]
-}
-
-export const LOGO_FRAGMENTS: readonly FragmentPlacement[] = [
-  // El arco grande (257 → 1,80 × 2,2), atrás a la izquierda.
-  {
-    ringRadius: 3.96,
-    tube: 0.34,
-    arc: 2.35,
-    position: [-24, 7.2, -18],
-    rotation: [0.42, 0.9, -0.35],
-  },
-  // El chico (153 → 1,07 × 2,2), casi de canto, atrás a la derecha.
-  {
-    ringRadius: 2.36,
-    tube: 0.28,
-    arc: 3.1,
-    position: [27, 4.4, -21],
-    rotation: [-0.3, -0.6, 0.8],
-  },
-  // Uno intermedio, alto y adelante: el único que puede cruzarse con la cámara.
-  {
-    ringRadius: 3.2,
-    tube: 0.31,
-    arc: 1.7,
-    position: [12, 9.5, 30],
-    rotation: [1.1, 0.25, 0.55],
-  },
-]
-
-export const FRAGMENT_RADIAL_SEGMENTS = 10
-export const FRAGMENT_TUBULAR_SEGMENTS = 44
 
 // ── Utilidades ─────────────────────────────────────────────────────────────
 

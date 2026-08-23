@@ -14,7 +14,7 @@ import {
   CONTACT_WIDTH,
 } from './probeAtmosphere'
 import { FLOOR_Y } from './probeScene'
-import { createContactSpriteData } from './probeParticles'
+import { createContactSpriteData } from './particleTextures'
 
 /**
  * LA OCLUSIÓN DE CONTACTO — la mancha que hace que el logo pertenezca al piso.

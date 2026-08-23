@@ -17,21 +17,16 @@ import { CHOREO_TRAMOS } from '../_components/choreography'
 import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import type { ChoreoKeyframe } from '../_components/choreographyTypes'
-import { PLANE_PLACEMENTS, SUSPENDED_PLANES } from '../_components/probeArchitecture'
 import { MOUSE_HEIGHT_FACTOR } from '../_components/choreographyPhysics'
 import { PROBE_RANGES } from '../_components/probeStore'
 import {
   FLOOR_Y,
   bowBetween,
-  cameraAt,
   check,
-  emptyPose,
   makeTrack,
   report,
   section,
-  segmentBoxDistance,
   speedAt,
-  type Vec3,
 } from './harness'
 
 // ── Las 23 poses de S6, congeladas ──────────────────────────────────────────
@@ -238,7 +233,7 @@ check('la velocidad DENTRO de Demos es idéntica a la de S6', demosUntouched)
 
 // ── 4 · La cámara no se mete donde no hay escena ────────────────────────────
 
-section('Composición: piso y planos suspendidos')
+section('Composición: la cámara contra el papel')
 
 for (const variant of CHOREO_VARIANTS) {
   const { keyframes, label } = variant
@@ -278,48 +273,21 @@ for (const variant of CHOREO_VARIANTS) {
     )
   }
 
-  // ⚠️ **El recorrido definitivo se salta este chequeo, y no es un permiso: es
-  // que la regla cambió de signo.** S9 pide explícitamente que "el entorno pase
-  // por delante del logo" en Quiénes somos, así que ahí un plano interponiéndose
-  // es la INTENCIÓN y no un defecto. Lo que sí tiene que valer —que ninguna POSE
-  // de keyframe quede tapada, o sea que el logo nunca esté oculto cuando la
-  // cámara para— se verifica en `s9-definitiva.invariant.ts`, junto con cuánto
-  // dura cada barrido.
-  if (variant.id === 'definitiva') continue
-
-  // Un plano solo puede estorbar si su radio es menor que la distancia de la
-  // cámara: si está más lejos que ella, queda DETRÁS del logo por construcción.
-  let blocked = ''
-  let closest = Infinity
-  const pose = emptyPose()
-  const track = makeTrack(keyframes)
-  for (let i = 0; i <= 400; i += 1) {
-    const cam = cameraAt(track, i / 400, 16 / 9, pose)
-    const camRadius = Math.hypot(cam.position[0], cam.position[2])
-    for (let j = 0; j < PLANE_PLACEMENTS.length; j += 1) {
-      const plane = SUSPENDED_PLANES[j]
-      // Si el plano está MÁS LEJOS que la cámara, queda detrás del logo por
-      // construcción y no puede estorbar. Es la mitad de la regla de S5.
-      if (plane.radius >= camRadius) continue
-      const placement = PLANE_PLACEMENTS[j]
-      const distance = segmentBoxDistance(
-        cam.position,
-        [0, 0, 0],
-        placement.position as Vec3,
-        [placement.scale[0] / 2, placement.scale[1] / 2, placement.scale[2] / 2],
-        (placement.rotation ?? [0, 0, 0]) as Vec3
-      )
-      if (distance < closest) closest = distance
-      if (distance <= 0 && !blocked) {
-        blocked = `plano en azimut ${plane.azimuthDeg}° a radio ${plane.radius} (p≈${(i / 400).toFixed(3)})`
-      }
-    }
-  }
-  check(
-    `${label}: ningún plano se mete entre la cámara y el logo`,
-    blocked === '',
-    blocked || (closest === Infinity ? 'ninguno queda por delante' : `el más cerca pasa a ${closest.toFixed(2)} de mundo`)
-  )
+  /**
+   * ⚠️ **ACÁ VIVÍA EL CHEQUEO DE LOS PLANOS SUSPENDIDOS, y S10 lo borró con
+   * ellos.**
+   *
+   * Verificaba que ninguna de las once losas se metiera entre la cámara y el logo
+   * en los cuatro recorridos de referencia. Era una comprobación con contenido —
+   * encontró que la arquitectónica cruzaba dos planos y obligó a rehacerla contra
+   * caja orientada en vez de esfera envolvente— pero su objeto ya no existe.
+   *
+   * Lo que la reemplaza NO es nada: es el par de chequeos de
+   * `s9-composicion.invariant.ts`, que verifica que la escena no tiene ocluyentes
+   * **y** que el instrumento sabría detectar uno si lo hubiera. Sin ese segundo
+   * chequeo, afirmar "no hay oclusión" sobre una escena vacía sería verde por
+   * vacío.
+   */
 }
 
 report('s7 · recorridos')

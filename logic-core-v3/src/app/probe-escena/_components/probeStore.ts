@@ -1,5 +1,6 @@
 import { PLAY_SPEED_DEFAULT } from './choreographyPhysics'
 import { KEY_INTENSITY } from './probeLighting'
+import { MOIRE_MISMATCH, MOIRE_MISMATCH_MAX } from './probeMoire'
 import { PARTICLES_MAX } from './probeParticles'
 
 /**
@@ -133,6 +134,19 @@ export type ProbeParams = {
   keyKelvin: number
   /** Partículas dibujadas de las que hay reservadas. */
   particleCount: number
+  /**
+   * EL DESAJUSTE DE LAS DOS TRAMAS DEL FONDO, en bandas de batido por vuelta.
+   *
+   * `finas = 2 × gruesas + este número`. Entero, porque las dos tramas tienen que
+   * cerrar alrededor del cilindro; y como entero **nombra directamente lo que
+   * produce**: cuántas bandas de batido hay en una vuelta.
+   *
+   * Se calibra mirando, que es para lo que está en el panel. En **0** el cociente
+   * de textura es 2:1 exacto y el batido de textura desaparece — lo que queda
+   * entonces es el que produce el paralaje entre las dos capas, que es el control
+   * que muestra cuánto aporta cada mitad. Ver `probeMoire.ts`.
+   */
+  moireMismatch: number
 }
 
 export type ProbeParamKey = keyof ProbeParams
@@ -177,6 +191,9 @@ export const PROBE_RANGES: { readonly [K in ProbeParamKey]: ProbeRange } = {
   // el número escrito a mano, bajar el máximo del campo dejaba un slider que
   // prometía partículas que no existían.
   particleCount: { min: 0, max: PARTICLES_MAX, step: 10 },
+  // Entero: el paso es 1 y el rango arranca en 0 a propósito (ver el doc del
+  // parámetro). El tope sale de `probeMoire.ts`.
+  moireMismatch: { min: 0, max: MOIRE_MISMATCH_MAX, step: 1 },
 }
 
 /** Orden fijo, en pantalla y en el texto que se copia. */
@@ -189,6 +206,7 @@ export const PROBE_PARAM_ORDER: readonly ProbeParamKey[] = [
   'keyIntensity',
   'keyKelvin',
   'particleCount',
+  'moireMismatch',
 ]
 
 export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = {
@@ -200,6 +218,7 @@ export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = 
   keyIntensity: { label: 'intensidad de la luz', unit: '', decimals: 2 },
   keyKelvin: { label: 'temperatura de la luz', unit: ' K', decimals: 0 },
   particleCount: { label: 'partículas dibujadas', unit: '', decimals: 0 },
+  moireMismatch: { label: 'desajuste del fondo', unit: ' bandas', decimals: 0 },
 }
 
 export const PROBE_DEFAULTS: ProbeParams = {
@@ -218,9 +237,11 @@ export const PROBE_DEFAULTS: ProbeParams = {
   // renderizaba rosado y el default del instrumento tenia un sesgo de color
   // que no era una decision, era un descuido — medido en captura.
   keyKelvin: 6500,
-  // Poco más de la mitad del campo. Con partículas de 0,19 en vez de 0,055, el
-  // default de S4 (900 de 4.000) sería una tormenta.
-  particleCount: 220,
+  // El 80% del campo. S10 subió el campo de 400 a 3.000 porque las partículas
+  // dejaron de ser atmósfera para ser el relleno de una escena vacía; el default
+  // deja margen de slider hacia arriba para buscar dónde deja de rendir.
+  particleCount: 2400,
+  moireMismatch: MOIRE_MISMATCH,
 }
 
 // ── Medición (no se manipula: se lee) ───────────────────────────────────────
