@@ -4879,3 +4879,81 @@ Las dos novedades que emitieron el rechazo y la aprobación se borraron con filt
 (exactamente 2, por setter + lead + kind). No se ejecutó la impersonación ni el escalamiento.
 
 **Queda para Franco:** todo el juicio visual. Esta corrida fotografía y declara; no opina.
+
+---
+
+## A3 · Auditoría externa de viabilidad — las decisiones de OSLead VII contra el código — 2026-08-24
+
+**Qué se hizo.** El paso 1 de A3 del plan v4: sesión limpia, read-only, con los ocho documentos de
+`docs/decisiones-oslead-vii/` cargados y sin el historial de las conversaciones que los produjeron.
+La pregunta nunca fue "¿está bien?". Entregable: `docs/auditorias/A3-VIABILIDAD-DECISIONES-2026-08.md`.
+
+**Base:** `leados/v1-integracion` @ `58a383f7`. Los 22 invariantes verdes al arrancar. Cero consultas
+a la base (el esquema se leyó de `schema.prisma` y de `prisma/migrations/`).
+
+### Lo que devolvió
+
+- **Diez decisiones no se pueden construir como están escritas.** Las tres que más pesan son el tercer
+  estado del chequeo, el encabezado etiquetado que el producto tendría que leer, y `mc1`/`mc2` con su
+  número de tildes nuevo.
+- **Catorce deltas de schema: siete aditivos y siete destructivos.** Dos de los destructivos son el
+  mismo mecanismo que ya vació progreso guardado en este proyecto —cambiar un identificador
+  persistido— y los dos se vacían en silencio, todo o nada, sin error y sin registro.
+- **Ninguna decisión relaja el aislamiento por setter.** Dos lo tocarían de rebote (el reporte semanal
+  y las alertas de LeadOS agregan por organización, no por setter).
+- **Cuatro invariantes darían falso verde.** `pantallas-construccion` y `progreso-isolation` comparan
+  `FASE_IDS` contra cosas derivadas de `FASE_IDS`; `self-check-gate` deriva sus fixtures de
+  `HARD_CHECKS` en vivo —y lo declara en su encabezado—; y `particion` no tiene ninguna aserción que
+  ate "construir" al veredicto.
+- **Diez decisiones ya estaban construidas.** Entre ellas la marca de caliente con su gate ya
+  cableado y gateando de verdad hoy, y `soltarFoco`, que existe y no lo llama nadie.
+
+### Los tres hallazgos que cambian una decisión cerrada
+
+**1 · `EVALUADA` ya no tiene pantalla propia.** `m2` es la pantalla del stage **`FICHA`**
+(`manual.ts:508-519`, con el comentario *"La evaluación ocurre con stage=FICHA: registrar el veredicto
+ES la transición"*). Un lead en `EVALUADA` cae en `m4`/`m6`/`m5`/`espera`, nunca en `m2`. Fusionar `m2`
+en `m1` es unir dos pantallas del mismo stage: mucho más barato de lo que la decisión asume. Los que
+quedan sin superficie son **`DESCARTADA`** —cuyo terminal ES `m2`— y un lead en `FICHA` con señal.
+
+**2 · Sacar la etapa deja al opener sin camino.** `m4` aparece **sólo** dentro del case `EVALUADA` de
+`posicionDe`. Y `m4-opener.tsx:36-47` degrada a un vacío que dice *"la ficha y la evaluación tienen que
+estar registradas"* — no crashea: pide algo que ya no existiría. Es el modo de falla más caro porque
+es mudo.
+
+**3 · El presupuesto del bloque más grande se apoya en una afirmación falsa.** El asistente de alta de
+cliente no es un patrón reutilizable: `OnboardingWizard` no recibe una sola prop, tiene 30 campos de
+estado hardcodeados y despacha con cinco condicionales JSX fijos; el "autoguardado" es un borrador de
+`localStorage` con **una clave global** (`develop:onboarding:draft`), tipado al alta de cliente, que
+no toca servidor ni base. **Lo reutilizable son 32 líneas** (`ProgressBar.tsx`), y viven en
+`src/modules/chatbot/`.
+
+### Cinco afirmaciones de los documentos que el código refuta
+
+1. *"El admin renderiza lo que el setter tildó y no muestra lo que dejó sin tildar"* — lo muestra, y
+   en rojo (`dossier-panels.tsx:164-176`). El 6-vs-10 es vintage de blob: la lista pasó de 6 a 10 en P7.
+2. *"El bloque que llegaba a Claude Design contenía solo CONCEPTO y SECCIONES"* — lleva **once**
+   secciones (`copy-blocks.ts:205-241`). Lo que sí falta es paleta, tipografía y tono.
+3. *"La infraestructura de G4 ya existe, hay que conectarla"* — los tres símbolos existen pero van en
+   la dirección *check → ayuda*. Falta el extremo que guarda: `RechazoSchema` no tiene `checkId`.
+4. *"`espera` y `revision` dicen lo mismo palabra por palabra"* — las pantallas ya difieren
+   (`manual.ts:275-287`). Lo que comparte texto es la capa del turno, una capa más abajo.
+5. **El comentario de `OsLead.caliente` en `schema.prisma:874-878` es falso**: dice que nadie lo setea
+   ni lo lee, y hay escritor (`lead.actions.ts:165`), lectores, y el gate del brief ya sale del campo.
+
+### Cabos de método
+
+- **El fan-out murió entero.** Los nueve agentes del workflow cayeron juntos con `session limit`; la
+  auditoría se rehízo en una sola pasada secuencial. El techo de cobertura quedó **declarado** en el
+  §0 y §9 del reporte en vez de disimulado: ocho frentes sin dictamen, nombrados uno por uno.
+- **La regla que más rindió** fue la de refutar antes de reportar: cinco afirmaciones de los
+  documentos cayeron ahí, y tres hallazgos propios se corrigieron a enunciados más chicos.
+
+**Estado de datos:** intacto. Cero escrituras. `git diff --stat HEAD` sin salida; lo único que este
+sprint agrega es el reporte y esta entrada.
+
+**Queda para Franco:** los siete cambios de schema destructivos, y la decisión que el reporte deja
+planteada sin resolver — sacar el Evaluador son **dos** operaciones con reversibilidades opuestas
+(la pantalla, reversible; el valor del enum, no), y los documentos las tratan como una sola.
+
+**El paso 2 de A3 —la revisión adversarial del diseño, sin código— no se corrió.**
