@@ -5047,3 +5047,132 @@ justo el árbol donde vive el 100% de lo que C4 propone tocar.
 planteada — hoy nada corre solo en este repositorio.
 
 **El paso 2 de A3 —la revisión adversarial del diseño, sin código— sigue sin correrse.**
+
+---
+
+## C0 · La red de verificación, sometida a sabotaje — 2026-08-25
+
+**Qué se hizo.** Medir si este repositorio tiene un gate automático, cuánta deuda hay debajo
+del que falta, y someter seis invariantes a un sabotaje controlado de lo que cada uno promete
+proteger. Cero arreglos: el encargo lo prohíbe explícitamente y no se desvió. Entregable:
+`docs/auditorias/C0-RED-DE-VERIFICACION-2026-08.md`.
+
+**Base:** `leados/v1-integracion` @ `5ed0c24a`, worktree de sabotaje descartable
+`C:/tmp/wt-c0-sabotaje` (detached, `node_modules` por junction, `.env` copiados). Cero
+consultas a la base de datos.
+
+### Lo que el encargo daba por cierto y no lo era
+
+**No hay deuda de tipos.** `npx tsc --noEmit` sale en **0, sin una línea de salida** — en frío
+(1.466 archivos) y con los artefactos de build presentes (1.604, 137 de tipos de ruta). En
+`src/app/(protected)/`, los 425 archivos que el rediseño quiere tocar: **cero**. Y sacar
+`ignoreBuildErrors` deja el build en verde: `BUILD EXIT: 0`, `Finished TypeScript in 84s`.
+El encargo pedía el número que decide si el gate se enciende de golpe o escalonado. El número
+es cero; se enciende de golpe.
+
+La deuda está en otro eje y no la tapa `ignoreBuildErrors`: **`npm run lint` = 212 problemas
+(102 errores, 110 warnings)**, 21 errores dentro de `(protected)`. Y el build **no corre
+eslint** — probado por el hecho de que sale verde con esos 102 encima.
+
+**El sabotaje 4 no era un sabotaje.** El encargo pedía "hacé que un lead sin `evaluacionJson`
+reciba el rótulo de construir". Con el código intacto, cero cambios, un lead con
+`evaluacion: null` ya lo recibe en `CONSTRUCCION`, `BRIEF` y `EVALUADA` — y
+`particion.invariant.ts:187` lo **afirma como correcto**. `trabajoTier` (`flow.ts:666`) nunca
+lee `lead.evaluacion`: despacha por `stage`. Sabotear lo que el invariante sí promete
+(`FICHA` → tier CONSTRUIR) da rojo limpio.
+
+**El sabotaje 5 quedó parcialmente refutado.** La aserción de `pantallas-construccion:97-101`
+no compara "por referencia" —es `deepEqual` sobre dos spreads— pero los dos operandos salen
+del mismo array (`manual.ts:310` aliasea `PANTALLAS_CONSTRUCCION`), y probado contra seis
+valores arbitrarios **no puede fallar**. Ahora: rompiendo el alias, **sí dispara**. Es un
+guard latente correcto, no código muerto.
+
+### El resultado de los seis
+
+| # | Invariante | Resultado |
+|---|---|---|
+| 1 | `pantallas-construccion` (`FASE_IDS` × 6 ids nuevos) | **ROJO** — por el compilador (TS7053), no por una aserción |
+| 2 | `progreso-isolation` (ídem + blob viejo) | **ROJO** en la lista · **ciego** al blob persistido |
+| 3 | `self-check-gate` (+1 check, 1 renombrado) | **VERDE** — suite 22/22, exit 0 |
+| 4 | `particion` | **NO CONCLUYENTE** — premisa falsa (arriba) · 4b **ROJO** |
+| 5 | la aserción vacua | **vacua hoy** · **ROJO** al romper el alias |
+| 6 | `contador-dms` + `timeline` (+1 `ActivityChannel`) | **VERDE** — suite 22/22, exit 0 |
+
+### El hallazgo de método que condiciona todo lo demás
+
+**19 de los 22 invariantes corren con `ts-node`, que type-chequea. Tres corren con `tsx`, que
+no.** Probado con un archivo con error deliberado: `ts-node` → `diagnosticCodes: [2322]`,
+exit 1; `tsx` → llega al runtime, exit 0. Los tres sin chequeo son `postergacion`,
+`contador-dms` y `acuse`.
+
+Consecuencia concreta: el único guard de compilador de `contador-dms` —un
+`Record<ActivityResult, boolean>` exhaustivo— **es inerte**. Probado con un `Record`
+deliberadamente incompleto: bajo `tsx` llega al runtime con 3 claves de 5; bajo `ts-node`,
+`error TS2739`.
+
+Y el sabotaje 1 dio rojo **por el compilador**. Si ese script migrara a `tsx` —como ya pasó
+con otros tres— esa protección desaparece sin que nada lo anuncie.
+
+Segundo cabo: la cadena `check:invariants` usa `&&`, así que **corta en el primer fallo**. En
+los cuatro sabotajes que dieron rojo reportó 13, 7, 16 y 7 verdes y nunca llegó al resto.
+
+### El falso verde más caro, y lo que rompe
+
+`self-check-gate`. Se agregó un hard-check inventado y se renombró uno existente: **22/22 en
+verde**. La causa es que todos los fixtures del archivo se derivan de `HARD_CHECKS` en vivo —
+su propio encabezado lo declara como virtud. Detrás del verde: el gate une el blob guardado
+con la lista vigente por `item.nombre === check.nombre`, o sea **por el texto visible**. Con
+un blob congelado a mano de 10/10 tildados, `selfCheckAprobado(...)` pasa a `false`. Una
+corrección de redacción desaprueba todos los self-checks guardados.
+
+Mismo patrón en `progreso-isolation`: `parseProgreso` (`flow.ts:133`) se traga cualquier blob
+inválido y devuelve `{ completadas: [] }`. Medido: cinco tildes del setter desaparecen sin
+throw, sin log, sin señal, y es todo-o-nada.
+
+### Lo que no vigila nadie
+
+`LEGAL_TRANSITIONS` —la única puerta del `stage`— **no tiene ningún invariante**, y no puede
+tenerlo como está: es `const` sin `export` en `dossier.ts`, que importa `@/lib/prisma`. Los
+tres invariantes que la nombran lo hacen solo en comentarios. Su única cobertura es
+`test:leados`, uno de los dos jobs que nunca corrieron.
+
+De los otros dos huecos que el reporte anterior nombró: el del **grupo del check** se confirma
+a medias (el gate exige los 3 de "esto lo mira Franco" y ningún invariante toca el eje
+`grupo`), y el del **`checkId` del rechazo** queda **refutado**: `RechazoSchema` no tiene ese
+campo, y el `checkId` que sí existe (`guidance-content.ts:121`) no está poblado en ningún
+archivo del árbol.
+
+Sumado en esta corrida: **21 scripts `check:invariant:*` huérfanos** (existen 42, la cadena
+corre 22) más ~30 `test:*` del chatbot que tampoco están en ningún agregado; y cero aserción
+de unicidad sobre `HARD_CHECKS[].nombre`, que es la llave del gate.
+
+### El costo, enumerado sin orden
+
+Mover `e2e.yml` a la raíz **no alcanza**: tiene cero `working-directory` y cero `defaults`, y
+en la raíz no hay `package.json` — simulado, los tres jobs mueren en `npm ci` con `EUSAGE`.
+El job `invariants` es el único que no necesita ni base ni secrets: **117 s** medidos. Los
+otros dos exigen `secrets.DATABASE_URL_TEST` — **NO VERIFICADO** si existen, no se consultó
+la configuración de GitHub. `tsc --noEmit` standalone en frío: **76 s**.
+
+### Desvíos declarados
+
+El **sabotaje 6 se midió por inyección en runtime, no regenerando el cliente de Prisma**: el
+`node_modules` del worktree es una junction al del checkout principal y `prisma generate`
+habría mutado 124 MB de estado compartido. El sabotaje del schema se aplicó de verdad y la
+suite corrió encima; el valor nuevo del enum se inyectó con la forma que emitiría el
+generador. Se verificó antes que el `schema.prisma` de esta rama es byte-idéntico al de
+`main` (`01cd3747` en los dos) para poder reutilizar el cliente ya generado.
+
+El **commit se hizo desde `C:/tmp/wt-v1-integracion`**, no desde el checkout principal como
+pedía el encargo: la rama ya está chequeada ahí y el principal está en `main`. Mover el ref de
+una rama con checkout activo desde afuera desincroniza a la otra sesión.
+
+**Estado de datos:** intacto. Cero escrituras fuera de `docs/`. Los seis sabotajes revertidos
+y verificados **por blob** (`git hash-object` contra `git rev-parse HEAD:<path>`), no por
+`git checkout --`. Suite de vuelta en 22/22 exit 0. Worktree de sabotaje destruido con la
+junction desarmada primero (`cmd /c rmdir`), con conteo del `node_modules` real antes y
+después. `git diff 17727117` del checkout principal, sin salida.
+
+**Queda para Franco:** la decisión de fondo sigue en pie —hoy nada corre solo—, y ahora con el
+número que faltaba: encender el chequeo de tipos no cuesta arreglar nada, cuesta 84 s de build.
+Lo que sí cuesta trabajo es el eje de lint (102 errores) y los dos falsos verdes.
