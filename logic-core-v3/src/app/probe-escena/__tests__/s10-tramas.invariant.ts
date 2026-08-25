@@ -28,6 +28,7 @@ import {
   MOIRE_HEIGHT_SEGMENTS,
   MOIRE_MISMATCH,
   MOIRE_NEAR_ORDER,
+  MOIRE_NEAR_RADIUS,
   MOIRE_SEGMENTS,
   MOIRE_TILE_SIZE,
   dotDiameter,
@@ -35,7 +36,7 @@ import {
   lineDuty,
   verticalPitch,
 } from '../_components/probeMoire'
-import { SUN_BODY_ORDER, SUN_WASHOUT_ORDER } from '../_components/probeSun'
+import { PARTICLE_R_MAX } from '../_components/probeParticles'
 import { TAN_HALF_V, check, report, section } from './harness'
 
 const PX_V = 1080
@@ -176,17 +177,21 @@ section('La deriva y el orden de dibujo')
   /**
    * ⚠️ three ordena los transparentes por la posición del OBJETO
    * (`reversePainterSortStable`), y los cilindros están centrados en el origen:
-   * su distancia es la de la cámara (9 a 27) contra los 34 del sol. Sin
-   * `renderOrder` la envolvente se dibuja ENCIMA del sol, que es lo que pasaba
-   * con la pantalla de S7.
+   * su distancia es la de la cámara (9 a 27) aunque su superficie esté a 38 y 44.
+   * Sin `renderOrder` la envolvente se dibuja ENCIMA de cualquier transparente
+   * más lejano, que es lo que pasaba con la pantalla de S7 contra el sol.
+   *
+   * **S11 sacó dos eslabones**: el washout y el cuerpo del sol se borraron con el
+   * disco. La cadena que queda es más corta y más fácil de sostener — lo único
+   * transparente que queda por delante son las partículas, y `PARTICLE_R_MAX` las
+   * mantiene por dentro de los dos radios.
    */
   check(
-    'el orden de dibujo es explícito: gruesa → fina → washout → sol',
+    'el orden de dibujo es explícito: gruesa → fina → partículas',
     MOIRE_FAR_ORDER < MOIRE_NEAR_ORDER &&
-      MOIRE_NEAR_ORDER < SUN_WASHOUT_ORDER &&
-      SUN_WASHOUT_ORDER < SUN_BODY_ORDER &&
-      SUN_BODY_ORDER < 0,
-    `${MOIRE_FAR_ORDER} → ${MOIRE_NEAR_ORDER} → ${SUN_WASHOUT_ORDER} → ${SUN_BODY_ORDER} → 0 (partículas, por distancia)`
+      MOIRE_NEAR_ORDER < 0 &&
+      PARTICLE_R_MAX < MOIRE_NEAR_RADIUS,
+    `${MOIRE_FAR_ORDER} → ${MOIRE_NEAR_ORDER} → 0 (partículas, por distancia, con el campo hasta ${PARTICLE_R_MAX} contra la capa fina en ${MOIRE_NEAR_RADIUS})`
   )
   check(
     'la faceta del cilindro es sub-píxel: la retícula no se ve poligonal',

@@ -27,8 +27,9 @@ import {
   verticalPitch,
   verticalRepeat,
 } from '../_components/probeMoire'
-import { SUN_RADIUS } from '../_components/probeSun'
+import { celosiaCrossings, celosiaLayers } from '../_components/celosiaGeometry'
 import {
+  FLOOR_Y,
   TAN_HALF_V,
   cameraAt,
   check,
@@ -62,11 +63,33 @@ section('Las dos capas caben donde tienen que caber')
     MOIRE_FAR_RADIUS > MOIRE_NEAR_RADIUS,
     `${MOIRE_NEAR_RADIUS} → ${MOIRE_FAR_RADIUS}, separación ${MOIRE_FAR_RADIUS - MOIRE_NEAR_RADIUS}`
   )
-  check(
-    'el sol queda por DELANTE de las dos',
-    SUN_RADIUS < MOIRE_NEAR_RADIUS,
-    `sol a ${SUN_RADIUS}, capa fina en ${MOIRE_NEAR_RADIUS}`
-  )
+  /**
+   * ⚠️ **Reemplaza a "el sol queda por DELANTE de las dos" (S10).**
+   *
+   * Aquel comparaba `SUN_RADIUS` (34) con el radio de la capa fina, y protegía
+   * que el CUERPO del sol se dibujara adelante de la envolvente. S11 borró el
+   * cuerpo: el sol dejó de tener radio. Lo que hay que proteger ahora es lo
+   * contrario y es más fuerte — que la luz llegue **de afuera**, o sea que el
+   * rayo al sol salga cruzando las dos capas. Si alguien acercara un radio o
+   * bajara un tope, esto lo ve.
+   */
+  {
+    const layers = celosiaLayers(MOIRE_MISMATCH)
+    const noon: readonly [number, number, number] = [
+      Math.sin(-42 * (Math.PI / 180)) * Math.cos(36 * (Math.PI / 180)),
+      Math.sin(36 * (Math.PI / 180)),
+      Math.cos(-42 * (Math.PI / 180)) * Math.cos(36 * (Math.PI / 180)),
+    ]
+    const center: readonly [number, number, number] = [0, FLOOR_Y, 0]
+    const crossings = layers.map((layer) => celosiaCrossings(center, noon, layer, 0))
+    check(
+      'la luz llega de AFUERA: el rayo al sol sale cruzando las dos capas',
+      crossings.every((found) => found.length === 1),
+      `sale por y = ${crossings
+        .map((found, i) => `${(FLOOR_Y + noon[1] * found[0].t).toFixed(1)} (r=${layers[i].radius})`)
+        .join(' y ')} — las bandas van de ${layers[0].bottom} a ${layers[0].top} y de ${layers[1].bottom} a ${layers[1].top}`
+    )
+  }
 
   // El ciclorama es una superficie de revolución: cerca del piso está en radio 39
   // y se abre hacia arriba. Cada capa tiene que arrancar donde ya hay lugar.

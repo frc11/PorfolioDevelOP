@@ -22,7 +22,8 @@ import {
   RIM_INTENSITY,
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
-import { SUN_RADIUS, sunOpacityFor, sunWashoutOpacityFor } from './probeSun'
+import type { CelosiaUniforms } from './celosiaShader'
+import { CELOSIA_BAR } from './probeCelosia'
 import { kelvinToSrgb } from './probeScene'
 
 /**
@@ -59,19 +60,18 @@ export type LightRigTargets = {
   /** El color de fondo de la escena, si es un color plano. Sigue a la niebla. */
   background: THREE.Color | null
   /**
-   * El CUERPO del sol. Va en el mismo rig y no en un componente aparte porque es
-   * **la misma luz**: se coloca sobre el mismo eje que la principal, en el mismo
-   * frame y con la misma cuenta. Tenerlos en dos lugares sería habilitar que se
-   * desincronicen, y una sombra que no viene de donde se ve la fuente es
-   * exactamente lo que rompe la ilusión que el sol vino a construir.
+   * LA CELOSÍA (S11). Hasta S10 acá vivían el cuerpo del sol y su washout: dos
+   * sprites que el rig colocaba sobre el eje de la principal para que la fuente
+   * se viera. **Los dos se borraron** — un sol no es un círculo en el cielo, es
+   * una dirección de la que viene la luz, y sobre papel blanco un disco claro no
+   * tiene contra qué recortarse.
+   *
+   * Lo que queda es el mismo eje con otro consumidor: `SUN_DIRECTION` se escribe
+   * en este uniform y el shader lo usa para proyectar la rendija sobre todo lo
+   * que recibe la key. La garantía que S7 protegía —que la fuente y la sombra no
+   * se puedan desincronizar— sigue siendo la misma línea de código.
    */
-  sun: THREE.Sprite | null
-  /**
-   * El washout: el disco aditivo que apaga la trama de la envolvente donde el sol
-   * pasa. Va sobre el MISMO eje y con la MISMA cuenta que el cuerpo, por la misma
-   * razón: si se desincronizara, el glare quedaría al lado del sol.
-   */
-  sunWashout: THREE.Sprite | null
+  celosia: CelosiaUniforms | null
 }
 
 export function createLightRigTargets(): LightRigTargets {
@@ -82,8 +82,7 @@ export function createLightRigTargets(): LightRigTargets {
     hemi: null,
     fog: null,
     background: null,
-    sun: null,
-    sunWashout: null,
+    celosia: null,
   }
 }
 
@@ -104,6 +103,20 @@ export type LightRigInput = {
   cameraHeight: number
   /** El toggle del panel: la principal y el relleno pasan a ser solidarios. */
   followsCamera: boolean
+  /**
+   * Cuánto del hemisférico llega con la celosía puesta (S11). 1 = cielo abierto.
+   *
+   * Lo calcula el loop con `celosiaSkyFactor(barra)` y entra acá porque **el
+   * hemisférico de esta escena es "el cielo del estudio"** (`probeLighting.ts`),
+   * o sea que está afuera de la celosía igual que el sol. Es una constante, no
+   * una oclusión por fragmento: el porqué y su error medido están en
+   * `probeCelosia.ts`.
+   */
+  skyFactor: number
+  /** Deriva de la capa gruesa, en celdas. La MISMA que se le escribe a la textura. */
+  celosiaDrift: number
+  /** La barra de la celosía, del slider del panel. */
+  celosiaBar: number
 }
 
 export function createLightRigInput(): LightRigInput {
@@ -115,6 +128,9 @@ export function createLightRigInput(): LightRigInput {
     cameraAzimuth: 0,
     cameraHeight: 0,
     followsCamera: false,
+    skyFactor: 1,
+    celosiaDrift: 0,
+    celosiaBar: CELOSIA_BAR,
   }
 }
 
@@ -198,6 +214,9 @@ export function applyLightRig(
     cameraAzimuth,
     cameraHeight,
     followsCamera,
+    skyFactor,
+    celosiaDrift,
+    celosiaBar,
   } = input
 
   // 0 · EL EJE DEL SOL, que es el de la principal. Se resuelve una sola vez y lo
@@ -276,8 +295,20 @@ export function applyLightRig(
 
   // 5 · Ambiente. Baja MÁS rápido que las fuentes: es lo que cierra las sombras
   //     cuando la sala se apaga, en vez de dejar todo gris parejo.
+  //
+  //     ⚠️ **Y desde S11 lleva el factor de cielo.** El hemisférico de esta
+  //     escena es "el cielo del estudio", o sea que está AFUERA de la celosía
+  //     igual que el sol: si la rendija rodea la sala, entra menos cielo. Va
+  //     sobre la intensidad y no sobre el color de cielo porque la diferencia
+  //     entre el cielo y el rebote del papel es lo que dibuja la cove
+  //     (`probeLighting.ts`), y tocando solo el color esa diferencia se
+  //     invertiría. El porqué completo y su error medido están en
+  //     `probeCelosia.ts`.
+  //
+  //     No toca `HEMI_INTENSITY`: ese número lo comparte `home-intro/`, que
+  //     tiene su propio rig y no pasa por acá.
   const hemi = targets.hemi
-  if (hemi) hemi.intensity = HEMI_INTENSITY * Math.pow(level, HEMI_DIM_GAMMA)
+  if (hemi) hemi.intensity = HEMI_INTENSITY * skyFactor * Math.pow(level, HEMI_DIM_GAMMA)
 
   // 6 · La niebla y el fondo. El aire está iluminado por el ambiente, así que se
   //     apaga con él: sin esto, la escena se oscurecería con un fondo blanco
@@ -288,27 +319,22 @@ export function applyLightRig(
     cache.lastFogLevel = fogLevel
   }
 
-  // 6b · EL CUERPO DEL SOL, sobre el mismo eje y con la misma cuenta. Es la
-  //      línea que garantiza que lo que se ve y lo que ilumina sean el mismo
-  //      objeto: si alguien mueve el arco, se mueven los dos o no se mueve
-  //      ninguno.
-  const sun = targets.sun
-  if (sun) {
-    sun.position.copy(SUN_DIRECTION).multiplyScalar(SUN_RADIUS)
-    const material = sun.material
-    if (material instanceof THREE.SpriteMaterial) material.opacity = sunOpacityFor(level)
-  }
-
-  // 6c · EL WASHOUT, sobre el mismo eje y a la misma distancia. El orden de
-  //      dibujo contra el cuerpo lo fija `renderOrder`, no la distancia, así que
-  //      compartir posición no es ambiguo (ver `probeMoire.ts`).
-  const washout = targets.sunWashout
-  if (washout) {
-    washout.position.copy(SUN_DIRECTION).multiplyScalar(SUN_RADIUS)
-    const material = washout.material
-    if (material instanceof THREE.SpriteMaterial) {
-      material.opacity = sunWashoutOpacityFor(level)
-    }
+  // 6b · LA CELOSÍA, sobre el MISMO eje que acaba de colocar la principal.
+  //
+  //      Es la línea que garantiza que la luz que proyecta la sombra y la
+  //      dirección que dibuja las bandas sean la misma: `SUN_DIRECTION` se
+  //      calculó una sola vez arriba y la usan las dos. Si alguien mueve el
+  //      arco, se mueven las dos o no se mueve ninguna — es la misma garantía
+  //      que S7 escribió para el cuerpo del sol, con otro consumidor.
+  //
+  //      La deriva y la barra entran por acá y no por un store propio para que
+  //      el shader y la textura de la envolvente lean el MISMO número: la sombra
+  //      de la rendija baja exactamente cuando baja la rendija.
+  const celosia = targets.celosia
+  if (celosia) {
+    celosia.uCelosiaSun.value.copy(SUN_DIRECTION)
+    celosia.uCelosiaKnobs.value.x = celosiaBar
+    celosia.uCelosiaKnobs.value.y = celosiaDrift
   }
 
   if (targets.fog) targets.fog.color.copy(cache.fogTint)

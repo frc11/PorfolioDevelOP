@@ -3,14 +3,26 @@
  *
  *     npx tsx src/app/probe-escena/__tests__/s7-sol.invariant.ts
  *
- * La primera sección es la más importante de todo el sprint: **que el cuerpo del
- * sol y la luz que proyecta la sombra estén sobre el mismo eje.** Un sol
- * dibujado por un lado y una key por el otro son dos soles, y en cuanto uno se
- * mueve el espacio deja de ser creíble. Es exactamente el tipo de acuerdo que se
- * rompe solo en un refactor sin que nadie se entere.
+ * La primera sección era la más importante de S7: **que el cuerpo del sol y la
+ * luz que proyecta la sombra estén sobre el mismo eje.** Un sol dibujado por un
+ * lado y una key por el otro son dos soles, y en cuanto uno se mueve el espacio
+ * deja de ser creíble.
+ *
+ * ⚠️ **S11 borró el cuerpo, así que ese chequeo cambió de OBJETO — no
+ * desapareció.** La dirección del sol ya no coloca un sprite: alimenta la
+ * celosía, que proyecta la rendija sobre todo lo que recibe la key. La garantía
+ * es la misma y vale lo mismo: **el eje que dibuja las bandas y el eje que tira la
+ * sombra tienen que ser el mismo vector.** Lo que se verifica ahora es que
+ * `applyLightRig` escriba en el uniform exactamente lo que le escribe a la key, en
+ * el mismo frame.
+ *
+ * Y la sección 4, que medía dónde vivía el cuerpo, pasó a verificar que el rayo al
+ * sol **cruce las dos capas** desde el piso — y se mudó a
+ * `s11-proyeccion.invariant.ts`, que es donde vive la proyección.
  */
 import * as THREE from 'three'
 
+import { createCelosiaUniforms } from '../_components/celosiaShader'
 import { LIGHT_ARC } from '../_components/choreography'
 import { sampleLightArc } from '../_components/choreographySampler'
 import type { MutableLightLevels } from '../_components/choreographyTypes'
@@ -22,38 +34,27 @@ import {
 } from '../_components/lightRig'
 import { KEY_DISTANCE, KEY_ELEVATION_DEG } from '../_components/probeLighting'
 import { SHADOW_FAR, SHADOW_NEAR } from '../_components/probeAtmosphere'
-import { SUN_RADIUS, sunOpacityFor } from '../_components/probeSun'
+import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../_components/probeMoire'
 import { PARTICLE_R_MAX } from '../_components/probeParticles'
-import { MOIRE_NEAR_RADIUS } from '../_components/probeMoire'
-import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
+import { FLOOR_Y, check, report, section } from './harness'
 
 const RAD = Math.PI / 180
 const arc: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
 
-function sunAt(p: number, radius = SUN_RADIUS): Vec3 {
-  sampleLightArc(p, arc)
-  const horizontal = Math.cos(arc.elevationDeg * RAD) * radius
-  return [
-    Math.sin(arc.azimuthDeg * RAD) * horizontal,
-    Math.sin(arc.elevationDeg * RAD) * radius,
-    Math.cos(arc.azimuthDeg * RAD) * horizontal,
-  ]
-}
+// ── 1 · La celosía Y la key son la misma dirección ──────────────────────────
 
-// ── 1 · El sol Y la key son el mismo objeto ─────────────────────────────────
-
-section('El sol y la luz principal comparten eje')
+section('La celosía y la luz principal comparten eje')
 
 {
   const targets = createLightRigTargets()
   targets.key = new THREE.DirectionalLight()
-  targets.sun = new THREE.Sprite(new THREE.SpriteMaterial())
+  targets.celosia = createCelosiaUniforms()
   const input = createLightRigInput()
   const cache = createLightRigCache()
 
   let collinear = true
   let worstAngle = 0
-  let opacityOk = true
+  let unit = true
   for (let i = 0; i <= 100; i += 1) {
     const p = i / 100
     sampleLightArc(p, arc)
@@ -66,38 +67,45 @@ section('El sol y la luz principal comparten eje')
     applyLightRig(targets, input, cache)
 
     const key = targets.key.position.clone().normalize()
-    const sun = targets.sun.position.clone().normalize()
-    const angle = (key.angleTo(sun) * 180) / Math.PI
+    const gobo = targets.celosia.uCelosiaSun.value
+    const angle = (key.angleTo(gobo.clone().normalize()) * 180) / Math.PI
     if (angle > worstAngle) worstAngle = angle
     if (angle > 1e-4) collinear = false
-
-    const material = targets.sun.material as THREE.SpriteMaterial
-    if (Math.abs(material.opacity - sunOpacityFor(arc.level)) > 1e-9) opacityOk = false
+    // El shader la usa SIN normalizar: si dejara de ser unitaria, el parámetro de
+    // la cuadrática dejaría de estar en unidades de mundo y el cruce se correría.
+    if (Math.abs(gobo.length() - 1) > 1e-9) unit = false
   }
 
   check(
-    'el cuerpo del sol y la key apuntan EXACTAMENTE en la misma dirección',
+    'la dirección que proyecta la celosía y la key apuntan EXACTAMENTE igual',
     collinear,
     `desvío máximo ${worstAngle.toExponential(1)}° en 101 puntos del recorrido`
   )
   check(
-    'están a distancias distintas y es a propósito',
-    Math.abs(targets.key.position.length() - KEY_DISTANCE) < 1e-6 &&
-      Math.abs(targets.sun.position.length() - SUN_RADIUS) < 1e-6,
-    `key a ${KEY_DISTANCE} (cámara de sombra), cuerpo a ${SUN_RADIUS}`
+    'y el vector que recibe el shader es unitario',
+    unit,
+    'el gobo marcha el rayo en unidades de mundo: sin normalizar, el cruce se corre'
   )
-  check('el cuerpo se apaga con el arco, proporcional al nivel', opacityOk)
+  check(
+    'la key sigue parada donde va la cámara de sombra',
+    Math.abs(targets.key.position.length() - KEY_DISTANCE) < 1e-6,
+    `${KEY_DISTANCE} — la celosía no la movió`
+  )
 
-  // Con el toggle "la luz sigue a la cámara" los dos tienen que seguir juntos:
-  // si el sol se quedara donde estaba, la sombra vendría de otro lado.
+  // Con el toggle "la luz sigue a la cámara" los dos tienen que seguir juntos: si
+  // la celosía se quedara donde estaba, las bandas vendrían de otro lado que la
+  // sombra.
   input.followsCamera = true
   input.cameraAzimuth = 1.2
   applyLightRig(targets, input, cache)
   const followAngle =
-    (targets.key.position.clone().normalize().angleTo(targets.sun.position.clone().normalize()) *
+    (targets.key.position
+      .clone()
+      .normalize()
+      .angleTo(targets.celosia.uCelosiaSun.value.clone().normalize()) *
       180) /
     Math.PI
-  check('con el toggle de luz solidaria, el sol se mueve con ella', followAngle < 1e-6)
+  check('con el toggle de luz solidaria, la celosía gira con ella', followAngle < 1e-6)
 }
 
 // ── 2 · El arco: una tabla, dos curvas que no pueden contradecirse ──────────
@@ -143,15 +151,18 @@ check(
  * razón de la vieja dejó de existir.**
  *
  * S7 acotó el barrido porque en su recorrido **la cámara vivía en azimut 0
- * durante más de medio track**, así que un sol que barriera de más dejaba
- * tramos enteros con la cara vista a oscuras. El recorrido definitivo lee
- * contenido en seis azimuts repartidos por toda la vuelta, y con la cámara
- * barriendo 360° el ángulo relativo recorre 180° sí o sí.
+ * durante más de medio track**, así que un sol que barriera de más dejaba tramos
+ * enteros con la cara vista a oscuras. El recorrido definitivo lee contenido en
+ * seis azimuts repartidos por toda la vuelta, y con la cámara barriendo 360° el
+ * ángulo relativo recorre 180° sí o sí.
  *
  * Lo que sigue siendo la regla —y es la que este check protege— es que **el sol
- * no dé una vuelta**: 180° es un día, de un horizonte al otro. Que no deje
- * ninguna ventana de contenido sin modelado se verifica aparte, con γ, en
- * `s7-modelado.invariant.ts`.
+ * no dé una vuelta**: 180° es un día, de un horizonte al otro.
+ *
+ * **S11 le agregó un segundo significado a este número**: como el patrón de la
+ * celosía está anclado al azimut del sol, esos 180° son también cuánto rota la
+ * proyección sobre el piso — 51 celdas finas de fase pasando por un punto fijo.
+ * El barrido de las bandas ES el barrido del arco.
  */
 const sweep =
   Math.max(...LIGHT_ARC.map((s) => s.azimuthDeg)) - Math.min(...LIGHT_ARC.map((s) => s.azimuthDeg))
@@ -189,52 +200,33 @@ section('La sombra del sol bajo')
   )
 }
 
-// ── 4 · Dónde vive el cuerpo del sol ────────────────────────────────────────
+/**
+ * ⚠️ **La sección 4 se mudó a `s11-proyeccion.invariant.ts`.**
+ *
+ * Medía que el rayo al sol cruzara las dos capas desde el piso, que es lo que
+ * reemplazó a "dónde vive el cuerpo del sol". Es una afirmación sobre la
+ * PROYECCIÓN y no sobre el arco, así que vive con las otras — junto con el
+ * control positivo que la destapó: la celosía tiene alcance, y ese alcance se
+ * abre con el atardecer.
+ */
 
-section('El cuerpo del sol contra la escena')
+// ── 5 · El orden de dibujo después de borrar el sol ─────────────────────────
 
-{
-  let aboveFloor = true
-  let insideScreen = true
-  let outsideParticles = true
-  let minHeight = Infinity
-  let maxRadius = 0
-  for (let i = 0; i <= 200; i += 1) {
-    const p = sunAt(i / 200)
-    const radius = Math.hypot(p[0], p[2])
-    minHeight = Math.min(minHeight, p[1])
-    maxRadius = Math.max(maxRadius, radius)
-    if (p[1] <= FLOOR_Y) aboveFloor = false
-    if (radius >= MOIRE_NEAR_RADIUS) insideScreen = false
-    // El cuerpo se dibuja a `SUN_RADIUS` del origen; el campo de polvo llega
-    // exactamente hasta ahí. Si el sol quedara MÁS CERCA que la mota más lejana,
-    // el ordenamiento por distancia de three pondría una mota de atrás por
-    // delante del sol.
-    if (SUN_RADIUS < PARTICLE_R_MAX) outsideParticles = false
-  }
-  check('el sol nunca se mete abajo del papel', aboveFloor, `altura mínima ${minHeight.toFixed(1)}`)
-  check(
-    'el sol siempre queda POR DELANTE de la envolvente de rendijas',
-    insideScreen,
-    `radio horizontal máximo ${maxRadius.toFixed(1)} contra la capa fina en ${MOIRE_NEAR_RADIUS}`
-  )
-  /**
-   * ⚠️ **Reemplaza al chequeo de la retícula aérea, que S10 borró.**
-   *
-   * Aquel verificaba que el sol quedara dentro del cuadrado de la retícula del
-   * techo "así que las barras lo cruzan y la oclusión sale gratis". La retícula ya
-   * no existe — y S10 midió que esa oclusión gratis no era gratis: los planos
-   * tapaban entre el 46% y el 68% del disco.
-   *
-   * Lo que sí hay que proteger ahora es el otro extremo: que **nada transparente
-   * quede más lejos que el sol**, porque three ordena los transparentes por la
-   * posición del objeto y una mota detrás del sol se dibujaría delante.
-   */
-  check(
-    'ninguna partícula puede quedar más lejos que el sol',
-    outsideParticles,
-    `el cuerpo a ${SUN_RADIUS} contra un campo de polvo que llega a ${PARTICLE_R_MAX}`
-  )
-}
+section('Los transparentes, sin el sol en el medio')
+
+/**
+ * ⚠️ **Reemplaza al chequeo de "ninguna partícula más lejos que el sol".**
+ *
+ * Aquel protegía el orden entre el cuerpo del sol y el polvo. Sin cuerpo no hay
+ * nada que proteger ahí, pero el problema de fondo sigue: three ordena los
+ * transparentes por la posición del OBJETO y los cilindros están centrados en el
+ * origen. Lo que garantiza que ninguna mota se dibuje delante de la envolvente es
+ * que el campo entero viva por DENTRO de los dos radios.
+ */
+check(
+  'el campo de partículas vive por dentro de las dos capas',
+  PARTICLE_R_MAX < MOIRE_NEAR_RADIUS && PARTICLE_R_MAX < MOIRE_FAR_RADIUS,
+  `polvo hasta ${PARTICLE_R_MAX} contra capas en ${MOIRE_NEAR_RADIUS} y ${MOIRE_FAR_RADIUS}`
+)
 
 report('s7 · el sol')

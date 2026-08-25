@@ -35,9 +35,16 @@ import {
  * deshabilitados pero siguen vivos como telemetría: muestran lo que el track
  * dicta en cada frame, y la línea copiable de abajo sirve para llevarse una pose.
  *
- * Los otros dos —**partículas** y **desajuste del fondo**— siguen habilitados en
- * los tres modos, porque no son parte del recorrido: son las dos perillas que se
- * calibran mirando la escena correr.
+ * Los otros tres —**partículas**, **desajuste del fondo** y **barra de la
+ * celosía**— siguen habilitados en los tres modos, porque no son parte del
+ * recorrido: son las perillas que se calibran mirando la escena correr.
+ *
+ * La barra de la celosía entró en S11 y es la que más mueve el cuadro de las
+ * tres: fija cuánta luz corta la rendija, y con eso el contraste de las bandas
+ * sobre el papel, la amplitud del batido proyectado y —a través del factor de
+ * cielo— la exposición de la sala entera. En **0** apaga la celosía y el piso
+ * vuelve exactamente a lo que midió S10, que es el control contra el que se
+ * juzga todo lo demás.
  *
  * En **editor** (S5) los CINCO de pose vuelven a estar habilitados, pero lo que
  * mueven es la pose del keyframe seleccionado, no la cámara suelta. Es el mismo
@@ -203,8 +210,8 @@ export function ProbeControls({
             Con la coreografía al mando, los primeros siete son la lectura de lo que el
             track y el arco de luz dictan en este frame. Para ajustar el keyframe que se
             está viendo, pasá al editor; para componer una posición nueva desde cero, a
-            manual. Los dos últimos —partículas y desajuste del fondo— siguen activos: son
-            de la escena, no del recorrido.
+            manual. Los tres últimos —partículas, desajuste del fondo y barra de la
+            celosía— siguen activos: son de la escena, no del recorrido.
           </p>
         ) : null}
 

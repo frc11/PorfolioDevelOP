@@ -49,7 +49,9 @@ import {
   type LightRigInput,
   type LightRigTargets,
 } from './lightRig'
+import { writeCelosiaLayers, type CelosiaUniforms } from './celosiaShader'
 import type { MoireHandle } from './MoireScreen'
+import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
 import { AUTO_ORBIT_DEG_PER_S, ORBIT_TARGET_Y } from './probeScene'
@@ -219,10 +221,13 @@ type OrbitRigProps = {
   /** Los dos campos de partículas. Es lo que deriva (ver `choreographyPhysics.ts`). */
   dustGroupRef: RefObject<THREE.Group | null>
   bokehGroupRef: RefObject<THREE.Group | null>
-  /** El cuerpo del sol. Lo coloca `applyLightRig`, sobre el eje de la principal. */
-  sunRef: RefObject<THREE.Sprite | null>
-  /** El washout del sol. Mismo eje, misma cuenta, mismo frame. */
-  sunWashoutRef: RefObject<THREE.Sprite | null>
+  /**
+   * LA CELOSIA (S11). Reemplaza a los dos refs de sprite que habia hasta S10 —el
+   * cuerpo del sol y su washout— y no es un ref: es el objeto de uniforms que
+   * comparten el papel, las marcas y el logo. `applyLightRig` le escribe el eje
+   * del sol, la barra y la deriva, una vez por frame para todos.
+   */
+  celosia: CelosiaUniforms
   /** La envolvente. El loop le desplaza la capa gruesa hacia abajo. */
   moireRef: RefObject<MoireHandle | null>
 }
@@ -246,12 +251,14 @@ export function OrbitRig({
   logoGroupRef,
   dustGroupRef,
   bokehGroupRef,
-  sunRef,
-  sunWashoutRef,
+  celosia,
   moireRef,
 }: OrbitRigProps) {
   const shadowModeRef = useRef<boolean | null>(null)
   const modeRef = useRef<ProbeMode | null>(null)
+  // El ultimo desajuste volcado a los uniforms de la celosia. Empieza en null
+  // para forzar la primera escritura sin comparar contra un valor inventado.
+  const mismatchRef = useRef<number | null>(null)
   const framesRef = useRef(0)
   const elapsedRef = useRef(0)
   // La niebla y el fondo se declaran en el JSX de `ProbeStage` y viven en la
@@ -528,8 +535,21 @@ export function OrbitRig({
     targets.hemi = hemiLightRef.current
     targets.fog = fogRef.current
     targets.background = backgroundRef.current
-    targets.sun = sunRef.current
-    targets.sunWashout = sunWashoutRef.current
+    targets.celosia = celosia
+
+    // LA DERIVA, calculada UNA vez y usada en dos lugares: la textura de la
+    // envolvente (paso 6b) y la sombra que esa misma envolvente proyecta. Si
+    // cada uno tuviera su cuenta, la rendija y su sombra se irían separando.
+    const elapsedNow = state.clock.elapsedTime
+    const drift = reducedMotion ? 0 : (elapsedNow / MOIRE_DRIFT_PERIOD_S) % 1
+
+    // El desajuste redefine la trama fina y por lo tanto la celosía que proyecta.
+    // Se mueve por click, no por frame: se compara y solo se escribe si cambió.
+    const mismatch = Math.round(params.moireMismatch)
+    if (mismatch !== mismatchRef.current) {
+      mismatchRef.current = mismatch
+      writeCelosiaLayers(celosia, mismatch)
+    }
 
     const lightInput = scratch.lightInput
     lightInput.level = arc.level
@@ -539,6 +559,9 @@ export function OrbitRig({
     lightInput.cameraAzimuth = azimuth
     lightInput.cameraHeight = height
     lightInput.followsCamera = keyFollowsCamera
+    lightInput.celosiaBar = params.celosiaBar
+    lightInput.celosiaDrift = drift
+    lightInput.skyFactor = celosiaSkyFactor(params.celosiaBar)
 
     applyLightRig(targets, lightInput, scratch.lightCache)
 
@@ -607,9 +630,7 @@ export function OrbitRig({
     //      vira. NO se apaga con el toggle de física: apagar la física es para
     //      juzgar el track crudo de la cámara y el fondo no interfiere con eso.
     const moire = moireRef.current
-    if (moire) {
-      moire.drift.offset.y = reducedMotion ? 0 : (elapsed / MOIRE_DRIFT_PERIOD_S) % 1
-    }
+    if (moire) moire.drift.offset.y = drift
 
     // 7 · FPS promediado en ventanas de medio segundo. Sin promedio el número
     // titila tanto que no se puede leer mientras se juzga la escena.

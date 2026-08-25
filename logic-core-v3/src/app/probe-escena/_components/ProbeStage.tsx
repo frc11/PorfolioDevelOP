@@ -1,17 +1,16 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
-import { Suspense, useRef } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import { BokehParticles } from './BokehParticles'
+import { createCelosiaUniforms } from './celosiaShader'
 import type { ChoreoEditor } from './choreographyEditor'
 import { ContactOcclusion } from './ContactOcclusion'
 import { DepthParticles } from './DepthParticles'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
 import { OrbitRig } from './OrbitRig'
-import { SunBody } from './SunBody'
-import { SunWashout } from './SunWashout'
 import {
   FOG_COLOR,
   FOG_FAR,
@@ -42,8 +41,10 @@ import {
 } from './probeStore'
 
 /**
- * La escena. **Cinco cosas y nada más** (S10): el piso con sus marcas, la
- * envolvente de rendijas, el sol, las partículas y el logo.
+ * La escena. **Cuatro cosas y nada más** (S11): el piso con sus marcas, la
+ * envolvente de rendijas, las partículas y el logo. El sol ya no es una de
+ * ellas: se borró su cuerpo y quedó su dirección, que es lo que proyecta la
+ * rendija sobre todo lo demás (ver `probeCelosia.ts`).
  *
  * **Sin HDRI es media respuesta del probe.** El artefacto del hero es un espejo
  * (`metalness=1`, `clearcoat=1`) y por eso necesita 1,27 MiB de entorno
@@ -61,8 +62,8 @@ import {
  * suspendidos, una retícula aérea y tres pilares; los tres se borraron, y con
  * ellos los arcos sueltos del logo. El argumento es uno solo: **geometría sin
  * significado**. Lo que queda tiene todo una razón — el piso da escala y ancla el
- * logo, la envolvente es el fondo con vida, el sol es la fuente que se ve, las
- * partículas son el aire y el logo es la pieza.
+ * logo, la envolvente es el fondo con vida y la que proyecta, las partículas son
+ * el aire y el logo es la pieza.
  *
  * No hay una sola imagen de "tecnología": ni nodos, ni circuitos, ni pantallas,
  * ni engranajes. Nada orgánico tampoco. Geometría, y nada más que geometría.
@@ -74,16 +75,17 @@ import {
  * contacto); acá solo se cablean.
  *
  * La regla que ordena todo lo que se agrega: **nada brilla por sí mismo** —todo
- * responde a las mismas luces, así que la sala entera se apaga con el cierre; la
- * única excepción es el sol, que es una fuente, y aun así se apaga con el arco— y
+ * responde a las mismas luces, así que la sala entera se apaga con el cierre— y
  * **nada compite en peso visual con el logo**, que sigue siendo el único negro
- * puro del cuadro.
+ * puro del cuadro. **Desde S11 la regla no tiene excepción**: el sol era la
+ * única, y ya no hay ningún cuerpo que la pida.
  *
- * ⚠️ **El orden de dibujo de los transparentes es explícito y no accidental.**
- * three ordena por la posición del OBJETO, y los cilindros de la envolvente están
- * centrados en el origen: sin `renderOrder` la envolvente se dibuja encima del
- * sol. La cadena queda gruesa → fina → washout → sol → partículas. Ver la nota de
- * `probeMoire.ts`.
+ * ⚠️ **El orden de dibujo de los transparentes sigue siendo explícito.** La cadena
+ * quedó en gruesa → fina → partículas: se fueron los dos eslabones del sol. El
+ * porqué está en `probeMoire.ts`.
+ *
+ * **La celosía no agrega ningún objeto**: es un gobo analítico adentro del shader
+ * de los materiales que ya existían. Ver `celosiaShader.ts`.
  */
 
 type ProbeStageProps = {
@@ -128,14 +130,21 @@ export default function ProbeStage({
   /** Los dos campos de partículas. Mismo patrón: el rig los deriva por afuera. */
   const dustGroupRef = useRef<THREE.Group>(null)
   const bokehGroupRef = useRef<THREE.Group>(null)
-  /**
-   * El cuerpo del sol, su washout y la envolvente de rendijas. Los tres siguen la
-   * misma regla que los grupos de arriba: el componente declara la pieza, el
-   * único `useFrame` de la escena la mueve.
-   */
-  const sunRef = useRef<THREE.Sprite>(null)
-  const sunWashoutRef = useRef<THREE.Sprite>(null)
+  /** La envolvente de rendijas: el loop le desplaza la capa gruesa hacia abajo. */
   const moireRef = useRef<MoireHandle>(null)
+  /**
+   * LOS UNIFORMS DE LA CELOSÍA (S11). **Uno solo para toda la escena**: el papel,
+   * el ciclorama, las 48 marcas y el logo comparten este objeto, así que el rig
+   * escribe el eje del sol una vez por frame y lo ven los cuatro.
+   *
+   * Va en un `useMemo` sin dependencias y NO en un `useRef`, aunque el ref sea lo
+   * que uno escribe primero: leer `ref.current` durante el render es exactamente
+   * lo que `react-hooks/refs` prohíbe, y con razón. Y el `useMemo` además cierra
+   * el caso que preocupaba —que el objeto se recree y los materiales queden
+   * apuntando al viejo—, porque los tres receptores arman sus materiales en un
+   * `useMemo` que depende de ÉSTE: si se rehiciera, se rehacen con él.
+   */
+  const celosia = useMemo(() => createCelosiaUniforms(), [])
 
   return (
     <Canvas
@@ -215,27 +224,17 @@ export default function ProbeStage({
         <directionalLight ref={rimLightRef} />
 
         {/*
-          EL SOL (S7). No es un objeto más: es el CUERPO de la principal, puesto
-          sobre su mismo eje por `applyLightRig` en el mismo frame en que la
-          coloca. La escena tenía luz sin fuente; ahora la sombra viene de algo
-          que se ve. Su posición y su opacidad las escribe el rig — acá solo se
-          declara la pieza. El porqué de cada número está en `probeSun.ts`.
+          EL SOL (S11). **Ya no hay ningún cuerpo que dibujar.** Hasta S10 acá
+          vivían un sprite y su washout; el disco se borró entero y el arco quedó
+          intacto. Lo que se ve ahora no es la fuente sino lo que la fuente
+          PROYECTA — sobre papel blanco no se puede agregar luz, solo sacarla.
         */}
-        <SunBody ref={sunRef} />
-
-        {/*
-          EL WASHOUT (S10). El disco aditivo que apaga la trama de la envolvente
-          donde el sol pasa. Va sobre el mismo eje que el cuerpo y lo coloca el
-          mismo `applyLightRig`. Arranca bajo a propósito: el contraste ya lo
-          resolvió el fondo oscuro, y todo lo que este disco suba se lo come.
-        */}
-        <SunWashout ref={sunWashoutRef} />
 
         <group ref={logoGroupRef}>
-          <ProbeLogo stats={stats} onReady={onReady} />
+          <ProbeLogo stats={stats} onReady={onReady} celosia={celosia} />
         </group>
 
-        <StudioFloor />
+        <StudioFloor celosia={celosia} />
         <ContactOcclusion />
 
         {/*
@@ -289,8 +288,7 @@ export default function ProbeStage({
           logoGroupRef={logoGroupRef}
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
-          sunRef={sunRef}
-          sunWashoutRef={sunWashoutRef}
+          celosia={celosia}
           moireRef={moireRef}
         />
       </Suspense>

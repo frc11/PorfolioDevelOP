@@ -9,7 +9,8 @@
  *   1. El instrumento de tinta, contra una medición independiente.
  *   2. **El balance de negro**, que es la cifra que este sprint tenía que
  *      publicar — incluido el techo que la envolvente no puede levantar.
- *   3. El sol: contra qué se recorta ahora, y qué le cuesta el washout.
+ *   3. ~~El sol: contra qué se recorta ahora, y qué le cuesta el washout.~~
+ *      **Borrado en S11 con el cuerpo del sol** — ver la nota de la sección 4.
  *
  * Las partículas —conteo, conchas y el recorte de `gl_PointSize`— están en
  * `s10-particulas.invariant.ts`.
@@ -19,24 +20,12 @@ import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { sampleLightArc } from '../_components/choreographySampler'
 import type { MutableLightLevels } from '../_components/choreographyTypes'
 import { MOIRE_MISMATCH } from '../_components/probeMoire'
-import { PAPER_COLOR } from '../_components/probeScene'
-import {
-  SUN_CORE,
-  SUN_GLOW_FALLOFF,
-  SUN_GLOW_OPACITY,
-  SUN_RADIUS,
-  SUN_SPRITE_RADIUS,
-  SUN_WASHOUT_FALLOFF,
-  SUN_WASHOUT_SCALE,
-  sunWashoutOpacityFor,
-} from '../_components/probeSun'
-import { check, halfFovDeg, report, section, type Vec3 } from './harness'
-import { INK_HEIGHT, INK_WIDTH, layerMeanAlpha, mask, sampleFrame } from './frameProbe'
-import { levelAt, over, shadeSurface } from './shading'
+import { CELOSIA_BAR, celosiaSkyFactor } from '../_components/probeCelosia'
+import { check, report, section } from './harness'
+import { INK_HEIGHT, INK_WIDTH, mask, sampleFrame } from './frameProbe'
 
 const RAD = Math.PI / 180
-const ASPECT = 16 / 9
-const half = halfFovDeg(ASPECT)
+const CELOSIA = { bar: CELOSIA_BAR, sky: celosiaSkyFactor(CELOSIA_BAR) }
 const arc: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
 
 /** Las seis poses, con el azimut y la altura que el contraluz necesita saber. */
@@ -82,7 +71,12 @@ section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
  * Los once planos suspendidos eran el 30% al 49% del cuadro en `#191917`.
  * Borrarlos sube el valor medio del cuadro entre 45 y 113 puntos, y la envolvente
  * lo recupera solo en parte. La decisión fue aceptar la escena más clara y dejar
- * el PISO como sprint propio; estos números son de dónde arranca ese sprint.
+ * el PISO como sprint propio.
+ *
+ * ⚠️ **S11 mide las dos ramas CON la celosía puesta**, y no es un detalle: lo que
+ * este bloque afirma es cuánto aporta **la envolvente**, así que las dos ramas
+ * tienen que diferir en la envolvente y en nada más. Los valores absolutos de la
+ * escena de hoy están en `s11-piso.invariant.ts`, contra los seis de S10.
  */
 {
   const rows: string[] = []
@@ -90,8 +84,14 @@ section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
   let worstFloorPose = ''
   for (const [name, at, azimuth, height] of POSES) {
     const view = { progress: at, cameraAzimuthDeg: azimuth, cameraHeight: height }
-    const empty = sampleFrame(at, view, { backdrop: false }, 200, 113)
-    const withBackdrop = sampleFrame(at, view, { backdrop: true, mismatch: MOIRE_MISMATCH }, 200, 113)
+    const empty = sampleFrame(at, view, { backdrop: false, celosia: CELOSIA }, 200, 113)
+    const withBackdrop = sampleFrame(
+      at,
+      view,
+      { backdrop: true, mismatch: MOIRE_MISMATCH, celosia: CELOSIA },
+      200,
+      113
+    )
     rows.push(
       `${name} tinta ${(withBackdrop.ink * 100).toFixed(1)}% · vacía ${empty.mean.toFixed(0)} → con fondo ${withBackdrop.mean.toFixed(0)}`
     )
@@ -106,8 +106,8 @@ section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
     POSES.every(([, at, azimuth, height]) => {
       const view = { progress: at, cameraAzimuthDeg: azimuth, cameraHeight: height }
       return (
-        sampleFrame(at, view, { backdrop: true, mismatch: MOIRE_MISMATCH }, 120, 68).mean <
-        sampleFrame(at, view, { backdrop: false }, 120, 68).mean
+        sampleFrame(at, view, { backdrop: true, mismatch: MOIRE_MISMATCH, celosia: CELOSIA }, 120, 68)
+          .mean < sampleFrame(at, view, { backdrop: false, celosia: CELOSIA }, 120, 68).mean
       )
     }),
     rows.join(' · ')
@@ -142,65 +142,24 @@ section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
 
 // ── 4 · El sol ──────────────────────────────────────────────────────────────
 
-section('El sol: contra qué se recorta ahora')
-
-/** El valor del fondo detrás del sol: ciclorama + las dos capas de la envolvente. */
-function backgroundBehindSun(progress: number, cameraAzimuthDeg: number, cameraHeight: number) {
-  const view = { progress, cameraAzimuthDeg, cameraHeight }
-  const backAzimuth = cameraAzimuthDeg + 180
-  const normal: Vec3 = [-Math.sin(backAzimuth * RAD), 0, -Math.cos(backAzimuth * RAD)]
-  const cyclorama = shadeSurface(PAPER_COLOR, normal, view, 60)
-  const screen = shadeSurface('#3E3E40', normal, view, 41)
-  const alphaFar = layerMeanAlpha(50)
-  const alphaNear = layerMeanAlpha(102)
-  return {
-    cyclorama,
-    withGrid: over(screen, alphaNear, over(screen, alphaFar, cyclorama)),
-  }
-}
-
-{
-  // Demos y el cierre, que es donde el sol está en cuadro.
-  const demos = backgroundBehindSun(0.75, 310, -2.6)
-  const cierre = backgroundBehindSun(0.95, 360, -1.4)
-  check(
-    'la envolvente le da al sol el contraste que S7 no tenía',
-    255 - demos.withGrid > 90 && 255 - cierre.withGrid > 140,
-    `demos: pared ${demos.cyclorama.toFixed(0)} → con trama ${demos.withGrid.toFixed(0)}, o sea ${(255 - demos.withGrid).toFixed(0)} puntos · cierre: ${cierre.cyclorama.toFixed(0)} → ${cierre.withGrid.toFixed(0)}, ${(255 - cierre.withGrid).toFixed(0)} puntos · S7 publicó 41`
-  )
-
-  /**
-   * El washout es aditivo: suma `255 × opacidad × máscara` sobre lo que haya
-   * detrás. Se mide justo AFUERA del núcleo, que es donde el halo del sol ya cayó
-   * y la trama vuelve a asomar — el anillo que este disco existe para limpiar.
-   */
-  function washoutAt(progress: number, background: number, opacityScale: number) {
-    const level = levelAt(progress)
-    // Radio de muestra: 1,5 núcleos, o sea afuera del disco duro.
-    const sample = 1.5
-    const halo =
-      SUN_GLOW_OPACITY *
-      Math.pow(Math.max(0, 1 - (sample * SUN_CORE) / 1) / (1 - SUN_CORE), SUN_GLOW_FALLOFF)
-    const withHalo = over(255, halo, background)
-    const washMask = Math.pow(Math.max(0, 1 - sample / SUN_WASHOUT_SCALE), SUN_WASHOUT_FALLOFF)
-    const added = 255 * sunWashoutOpacityFor(level) * (opacityScale / 1) * washMask
-    return Math.min(255, withHalo + added)
-  }
-
-  const off = washoutAt(0.75, demos.withGrid, 0)
-  const on = washoutAt(0.75, demos.withGrid, 1)
-  const full = washoutAt(0.75, demos.withGrid, 255 / (255 * sunWashoutOpacityFor(levelAt(0.75))))
-  check(
-    'el washout arranca BAJO: suma poco y por eso cuesta poco contraste',
-    255 - on > 60 && on > off,
-    `afuera del núcleo el fondo va de ${off.toFixed(0)} sin washout a ${on.toFixed(0)} con el default · contraste del núcleo ${(255 - off).toFixed(0)} → ${(255 - on).toFixed(0)} puntos · a plena opacidad quedaría en ${(255 - full).toFixed(0)}`
-  )
-  check(
-    'y a plena opacidad el costo sería el que se decidió no pagar',
-    255 - full < 255 - on,
-    `${(255 - full).toFixed(0)} puntos contra ${(255 - on).toFixed(0)} — la perilla está en el panel`
-  )
-}
+/**
+ * ⚠️ **LA SECCIÓN DEL SOL SE BORRÓ EN S11.**
+ *
+ * Eran tres chequeos: contra qué fondo se recortaba el disco (109 y 157 puntos de
+ * contraste con la envolvente detrás), cuánto le costaba el washout (109 → 64) y
+ * que el halo midiera más que el cuadro. Los tres medían un cuerpo que ya no se
+ * dibuja.
+ *
+ * El diagnóstico que los mata está en `probeCelosia.ts` y vale la pena repetirlo
+ * acá: **el problema del sol nunca fue el contraste.** S10 lo llevó de 41 a 157
+ * puntos y el veredicto humano siguió siendo que no se lee como un sol. Un sol no
+ * es un círculo en el cielo, es una dirección de la que viene la luz — y sobre
+ * papel blanco lo único que se puede hacer con luz es sacarla.
+ *
+ * Lo que reemplaza a estas mediciones no es otro chequeo del disco: es el rango
+ * tonal del piso (`s11-piso.invariant.ts`) y el batido proyectado
+ * (`s11-celosia.invariant.ts`).
+ */
 
 section('La sombra se alarga, que es la otra mitad del tiempo pasando')
 
@@ -219,11 +178,23 @@ section('La sombra se alarga, que es la otra mitad del tiempo pasando')
     `${lengths.map((value) => value.toFixed(1)).join(' → ')} unidades de mundo · ×${(lengths[lengths.length - 1] / lengths[0]).toFixed(1)}`
   )
 
-  const sunHalf = (Math.atan(SUN_SPRITE_RADIUS / SUN_RADIUS) * 180) / Math.PI
+  /**
+   * ⚠️ **Y las bandas de la celosía se alargan con la MISMA cuenta.** El chequeo
+   * de "el halo del sol nunca entra entero" se fue con el halo; lo que ocupa su
+   * lugar es esto: la celda proyectada sobre el piso mide 2,34 de ancho por
+   * 3,22 de largo en la meseta y por 11,51 en el cierre — el mismo ×3,6 que la
+   * sombra de arriba, porque las dos son 1/tan(elevación). La sombra del logo y
+   * las bandas del piso crecen juntas o no crece ninguna.
+   */
+  const bandLengths = [0, 0.5, 0.75, 0.875, 0.95, 1].map((p) => {
+    sampleLightArc(p, arc)
+    return 1 / Math.tan(arc.elevationDeg * RAD)
+  })
+  const ratio = bandLengths[bandLengths.length - 1] / bandLengths[0]
   check(
-    'y el halo del sol sigue midiendo más que el cuadro: nunca entra entero',
-    sunHalf * 2 > half.v * 2,
-    `${(sunHalf * 2).toFixed(0)}° de diámetro contra un cuadro de ${(half.v * 2).toFixed(0)}° de alto`
+    'las bandas del piso se alargan con la MISMA razón que la sombra del logo',
+    Math.abs(ratio - lengths[lengths.length - 1] / lengths[0]) < 1e-9,
+    `×${ratio.toFixed(1)} las dos — 1/tan(elevación) es la única cuenta que hay`
   )
 }
 

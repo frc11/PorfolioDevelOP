@@ -108,8 +108,31 @@ export type ViewContext = {
   readonly cameraHeight: number
 }
 
-/** Valor sRGB 0..255 de una superficie mate de albedo `hex` con normal `n`. */
-export function shadeSurface(hex: string, n: Vec3, view: ViewContext, depth: number): number {
+/**
+ * Valor sRGB 0..255 de una superficie mate de albedo `hex` con normal `n`.
+ *
+ * ── Los dos parámetros que agregó S11 ──────────────────────────────────────
+ *
+ * `keyGobo` es la transmitancia de la celosía hacia el sol en ESTE punto, o sea
+ * el patrón de la rendija; `sky` es cuánto del hemisférico llega con la celosía
+ * rodeando la sala. **Los dos valen 1 por default y con eso esta función es
+ * exactamente la de S10**, así que los seis valores medios que aquel reporte
+ * publicó se siguen reproduciendo con el mismo instrumento — que es el control
+ * con el que se mide lo que S11 cambió.
+ *
+ * El reparto no es arbitrario: la key es el sol y está afuera de la celosía, el
+ * hemisférico es "el cielo del estudio" y también, y el relleno ("el rebote de la
+ * sala") y el contraluz ("solidario a la cámara") están adentro y no se tocan.
+ * Ver `probeCelosia.ts`.
+ */
+export function shadeSurface(
+  hex: string,
+  n: Vec3,
+  view: ViewContext,
+  depth: number,
+  keyGobo = 1,
+  sky = 1
+): number {
   sampleLightArc(view.progress, arc)
   const level = arc.level
   const albedo = hexToLinear(hex)
@@ -129,20 +152,22 @@ export function shadeSurface(hex: string, n: Vec3, view: ViewContext, depth: num
   const dotRim = Math.max(0, n[0] * rim[0] + n[1] * rim[1] + n[2] * rim[2])
 
   const direct =
-    (KEY_INTENSITY * level * dotSun +
+    (KEY_INTENSITY * level * dotSun * keyGobo +
       FILL_INTENSITY * level * dotFill +
       RIM_INTENSITY * (1 - (1 - level) * RIM_DIM_SHARE) * dotRim) /
     Math.PI
 
-  const sky = hexToLinear(PAPER_COLOR)
+  const skyColor = hexToLinear(PAPER_COLOR)
   const ground = hexToLinear(BOUNCE_COLOR)
   const hemisphereMix = 0.5 * n[1] + 0.5
-  const hemisphere = HEMI_INTENSITY * Math.pow(level, HEMI_DIM_GAMMA)
+  // El factor de cielo va sobre la INTENSIDAD, igual que en `lightRig.ts`: sobre
+  // el color de cielo invertiría el gradiente que dibuja la cove.
+  const hemisphere = HEMI_INTENSITY * sky * Math.pow(level, HEMI_DIM_GAMMA)
 
   const linear: [number, number, number] = [0, 0, 0]
   for (let c = 0; c < 3; c += 1) {
     const indirect =
-      ((ground[c] + (sky[c] - ground[c]) * hemisphereMix) * hemisphere) / Math.PI
+      ((ground[c] + (skyColor[c] - ground[c]) * hemisphereMix) * hemisphere) / Math.PI
     linear[c] = albedo[c] * (direct + indirect)
   }
 
@@ -170,6 +195,25 @@ export function shadeUnlit(hex: string): number {
 /** Composición alfa de una capa sobre un fondo, en 0..255. */
 export function over(top: number, alpha: number, bottom: number): number {
   return top * alpha + bottom * (1 - alpha)
+}
+
+/**
+ * La dirección al sol en un progreso, unitaria.
+ *
+ * Vive acá y no en `frameProbe.ts` porque no es del muestreo del cuadro: es del
+ * ARCO, igual que `levelAt`, y desde S11 la consumen las cuatro suites de la
+ * celosía además del sampler. Es el mismo dato que `applyLightRig` le escribe a
+ * la key y al gobo en cada frame.
+ */
+export function sunDirectionAt(progress: number): Vec3 {
+  sampleLightArc(progress, arc)
+  const azimuth = arc.azimuthDeg * RAD
+  const elevation = arc.elevationDeg * RAD
+  return [
+    Math.sin(azimuth) * Math.cos(elevation),
+    Math.sin(elevation),
+    Math.cos(azimuth) * Math.cos(elevation),
+  ]
 }
 
 /** El nivel del arco en este progreso. Lo comparten las dos suites de S10. */

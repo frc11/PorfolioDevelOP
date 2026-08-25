@@ -13,11 +13,12 @@ import {
   fineCells,
   lineDuty,
 } from '../_components/probeMoire'
+import { celosiaTransmittance } from '../_components/celosiaGeometry'
 import { FLOOR_RADIUS, INK_COLOR, PAPER_COLOR, PROBE_SVG_SCALE } from '../_components/probeScene'
 
 import { FLOOR_Y, TAN_HALF_V, cameraAt, emptyPose, halfFovDeg, makeTrack, type Vec3 } from './harness'
 import { buildLogoMask } from './logoInk'
-import { over, shadeSurface, type ViewContext } from './shading'
+import { over, shadeSurface, sunDirectionAt, type ViewContext } from './shading'
 
 /**
  * EL MUESTREO DEL CUADRO — una grilla de rayos y qué toca cada uno.
@@ -143,6 +144,8 @@ export type FrameSample = {
    * hay piso, no hay envolvente detrás que valga.
    */
   readonly floor: number
+  /** Fracción del PISO EN CUADRO que queda bajo una barra de la celosía (S11). */
+  readonly floorShaded: number
 }
 
 /** Alfa medio de una capa de la envolvente: hueco y línea, pesados por cobertura. */
@@ -157,6 +160,19 @@ export type SceneVariant = {
   /** ¿Se compone la envolvente encima? */
   readonly backdrop: boolean
   readonly mismatch?: number
+  /**
+   * LA CELOSÍA (S11). Ausente = la escena de S10 exactamente, que es lo que hace
+   * que los seis valores medios de aquel reporte se sigan reproduciendo con este
+   * mismo instrumento.
+   */
+  readonly celosia?: {
+    /** La barra. 0 apaga el patrón. */
+    readonly bar: number
+    /** El factor de cielo que le corresponde a esa barra. */
+    readonly sky: number
+    /** La deriva de la capa gruesa, en celdas. Default 0: el cuadro en reposo. */
+    readonly drift?: number
+  }
 }
 
 /**
@@ -177,12 +193,16 @@ export function sampleFrame(
   const fine = fineCells(variant.mismatch ?? 0)
   const alphaFar = layerMeanAlpha(MOIRE_COARSE_CELLS)
   const alphaNear = layerMeanAlpha(fine)
+  const celosia = variant.celosia
+  const sun = celosia ? sunDirectionAt(progress) : null
+  const sky = celosia ? celosia.sky : 1
 
   let ink = 0
   let sum = 0
   let near = 0
   let far = 0
   let paper = 0
+  let shaded = 0
   const total = columns * rows
 
   for (let iy = 0; iy < rows; iy += 1) {
@@ -210,7 +230,8 @@ export function sampleFrame(
         }
       }
       const tInk = rayLogoInk(cam.position, dir)
-      if (tInk < depth) {
+      const onLogo = tInk < depth
+      if (onLogo) {
         depth = tInk
         color = INK_COLOR
         normal = [0, 0, dir[2] < 0 ? 1 : -1]
@@ -219,7 +240,25 @@ export function sampleFrame(
         paper += 1
       }
 
-      let value = shadeSurface(color, normal, view, isFinite(depth) ? depth : 200)
+      // LA CELOSÍA. Se evalúa en el punto de impacto, que es donde el shader la
+      // evalúa: la misma cuenta, el mismo gemelo (`celosiaGeometry.ts`).
+      let gobo = 1
+      if (celosia && sun && isFinite(depth)) {
+        gobo = celosiaTransmittance(
+          [
+            cam.position[0] + dir[0] * depth,
+            cam.position[1] + dir[1] * depth,
+            cam.position[2] + dir[2] * depth,
+          ],
+          sun,
+          celosia.bar,
+          variant.mismatch ?? 0,
+          celosia.drift ?? 0
+        )
+        if (!onLogo && hitsFloor && gobo < 0.5) shaded += 1
+      }
+
+      let value = shadeSurface(color, normal, view, isFinite(depth) ? depth : 200, gobo, sky)
 
       if (variant.backdrop) {
         for (const [radius, bottom, top, alpha] of [
@@ -235,7 +274,8 @@ export function sampleFrame(
             0,
             -(cam.position[2] + dir[2] * t) / radius,
           ]
-          value = over(shadeSurface(MOIRE_COLOR, n, view, t), alpha, value)
+          // La envolvente no se proyecta sombra a sí misma: es la celosía.
+          value = over(shadeSurface(MOIRE_COLOR, n, view, t, 1, sky), alpha, value)
         }
       }
 
@@ -249,5 +289,6 @@ export function sampleFrame(
     nearLayer: near / total,
     farLayer: far / total,
     floor: paper / total,
+    floorShaded: paper > 0 ? shaded / paper : 0,
   }
 }

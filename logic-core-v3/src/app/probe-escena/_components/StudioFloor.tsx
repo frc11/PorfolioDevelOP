@@ -3,6 +3,7 @@
 import { useEffect, useMemo } from 'react'
 import * as THREE from 'three'
 
+import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
 import { MARK_PLACEMENTS } from './floorMarks'
 import { InstancedBars } from './InstancedBars'
 import {
@@ -36,6 +37,18 @@ import {
  * pedir atención. Son objetos de tamaño conocido apoyados en el piso, así que al
  * orbitar dan la lectura de perspectiva que un plano vacío no da; y ninguno
  * compite en peso visual con el logo.
+ *
+ * ── S11: el papel recibe la celosía ────────────────────────────────────────
+ *
+ * Los dos materiales se arman acá y no en el JSX porque `applyCelosia` tiene que
+ * correr sobre la instancia antes del primer render. **Siguen siendo el mismo
+ * material**: `meshStandardMaterial`, mismo color, misma rugosidad. Lo único que
+ * cambia es que la key llega modulada por la trama de la rendija.
+ *
+ * ⚠️ **La losa Y el ciclorama, las dos.** Con el gobo solo en la losa, las bandas
+ * terminarían en una circunferencia en el radio 34 — justo donde S4 puso la cove
+ * para que **no** hubiera una línea. Son dos materiales y no uno porque el
+ * ciclorama va en `DoubleSide` y la losa no, pero llevan el mismo shader.
  */
 
 /**
@@ -65,14 +78,37 @@ const CYC_PROFILE: readonly THREE.Vector2[] = (() => {
   return points
 })()
 
-export function StudioFloor() {
+type StudioFloorProps = {
+  /** Los uniforms compartidos de la celosía. El papel es su receptor principal. */
+  celosia: CelosiaUniforms
+}
+
+export function StudioFloor({ celosia }: StudioFloorProps) {
   const cycGeometry = useMemo(
     () => new THREE.LatheGeometry(CYC_PROFILE.slice(), FLOOR_SEGMENTS),
     []
   )
 
-  // r3f solo libera lo que declara el JSX; ésta la creó `useMemo`.
+  const materials = useMemo(() => {
+    const paper = () =>
+      new THREE.MeshStandardMaterial({ color: PAPER_COLOR, roughness: 0.94, metalness: 0 })
+    const slab = paper()
+    const cyclorama = paper()
+    cyclorama.side = THREE.DoubleSide
+    applyCelosia(slab, celosia)
+    applyCelosia(cyclorama, celosia)
+    return { slab, cyclorama }
+  }, [celosia])
+
+  // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(() => () => cycGeometry.dispose(), [cycGeometry])
+  useEffect(
+    () => () => {
+      materials.slab.dispose()
+      materials.cyclorama.dispose()
+    },
+    [materials]
+  )
 
   return (
     <group>
@@ -86,9 +122,12 @@ export function StudioFloor() {
         meterla en el shadow map solo arriesgaba acné sobre su propia cara y
         sobre las marcas, que están apoyadas encima.
       */}
-      <mesh position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]} receiveShadow>
+      <mesh
+        position={[0, FLOOR_Y - FLOOR_THICKNESS / 2, 0]}
+        material={materials.slab}
+        receiveShadow
+      >
         <cylinderGeometry args={[FLOOR_RADIUS, FLOOR_RADIUS, FLOOR_THICKNESS, FLOOR_SEGMENTS]} />
-        <meshStandardMaterial color={PAPER_COLOR} roughness={0.94} metalness={0} />
       </mesh>
 
       {/*
@@ -103,16 +142,14 @@ export function StudioFloor() {
         confirmado en pantalla, pasarlo a `THREE.FrontSide` es una línea y ahorra
         el descarte de caras traseras.
       */}
-      <mesh position={[0, FLOOR_Y, 0]} geometry={cycGeometry} receiveShadow>
-        <meshStandardMaterial
-          color={PAPER_COLOR}
-          roughness={0.94}
-          metalness={0}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
+      <mesh
+        position={[0, FLOOR_Y, 0]}
+        geometry={cycGeometry}
+        material={materials.cyclorama}
+        receiveShadow
+      />
 
-      <InstancedBars placements={MARK_PLACEMENTS} receiveShadow />
+      <InstancedBars placements={MARK_PLACEMENTS} celosia={celosia} receiveShadow />
     </group>
   )
 }

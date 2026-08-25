@@ -88,10 +88,9 @@
  * | Nyquist | 2 px | 2 px |
  *
  * **26× de margen**, contra los 15× de S7. Pero el riesgo real de una trama de
- * LÍNEAS no es el período sino el **grosor**: con el trazo en
- * `MOIRE_LINE_DEG`, la línea mide **2,85 px en el peor caso** y ~4 px en la
- * mediana. Sigue arriba de Nyquist, y donde la incidencia es rasante el mipmap la
- * promedia a gris en vez de dejarla titilar.
+ * LÍNEAS no es el período sino el **grosor**: con el trazo en `MOIRE_LINE_DEG`, la
+ * línea mide **2,85 px en el peor caso** y ~4 px en la mediana — arriba de
+ * Nyquist, y donde la incidencia es rasante el mipmap la promedia a gris.
  */
 
 // ── La envolvente ───────────────────────────────────────────────────────────
@@ -104,8 +103,11 @@
  *   así que nunca se mete entre la cámara y el logo;
  * - **más cerca que el ciclorama**, con la diferencia de velo que separa las dos
  *   superficies sin una sola luz de por medio;
- * - **más lejos que el sol** (34), que es lo que le deja al sol un fondo con
- *   textura para recortarse.
+ * - ~~**más lejos que el sol** (34)~~ **— sin objeto desde S11**, que borró el
+ *   cuerpo. El radio se conserva porque las dos razones de arriba lo piden igual,
+ *   y porque ahora además fija **dónde proyecta**: la separación de 6 unidades es
+ *   la que hace que las dos tramas caigan sobre el piso con pasos distintos, y de
+ *   ahí sale el batido proyectado (`probeCelosia.ts`).
  */
 export const MOIRE_NEAR_RADIUS = 38
 
@@ -142,8 +144,9 @@ export const MOIRE_HEIGHT_SEGMENTS = 20
  * `MOIRE_FAR_RADIUS`), y no importa: a esa altura lo que se ve es piso.
  *
  * Los topes salen de medir hasta dónde barre el borde superior del cuadro: la
- * fina llega a y = 30,2 en la pose más baja del recorrido y la gruesa a 34,3.
- * Quedan 4 y 6 unidades de margen.
+ * fina llega a y = 30,2 en la pose más baja y la gruesa a 34,3. Quedan 4 y 6 de
+ * margen. **Desde S11 también fijan el ALCANCE de la sombra**: la luz entra por
+ * encima del borde y la celosía cubre el 82% de la losa, no el 100%.
  */
 export const MOIRE_NEAR_BOTTOM = -4
 export const MOIRE_NEAR_TOP = 34
@@ -285,14 +288,13 @@ export const MOIRE_TILE_SIZE = 128
  *
  * three ordena los transparentes por la posición del OBJETO, no por el fragmento
  * (`reversePainterSortStable`). Los cilindros están centrados en el origen, así
- * que su distancia es la de la cámara (9 a 27) y el sol está a 34: sin
- * `renderOrder`, **la envolvente se dibuja ENCIMA del sol**. Es lo que pasa hoy
- * con la pantalla de S7.
+ * que su distancia es la de la cámara (9 a 27) aunque su superficie esté a 38 y
+ * 44: sin `renderOrder`, **la envolvente se dibuja ENCIMA de cualquier
+ * transparente más lejano** — es lo que pasaba con la pantalla de S7 contra el sol.
  *
- * `renderOrder` tiene prioridad sobre la distancia, así que estos cuatro números
- * fijan el orden: gruesa → fina → washout → sol. Las partículas quedan en 0 y se
- * ordenan por distancia, que es correcto: llegan como mucho a radio 34, o sea el
- * radio del sol.
+ * Estos dos números fijan el orden: gruesa → fina → partículas, que quedan en 0.
+ * **S11 sacó dos eslabones** —el washout y el cuerpo del sol— y lo que queda es
+ * más simple: `PARTICLE_R_MAX` (34) está por dentro de los dos radios.
  */
 export const MOIRE_FAR_ORDER = -20
 export const MOIRE_NEAR_ORDER = -19

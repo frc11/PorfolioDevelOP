@@ -114,13 +114,23 @@ Una regla de amplitud que S9 propuso —"ningún tramo mueve la cámara menos de
 
 **El desajuste es una perilla del panel**, entero, y nombra lo que produce: cuántas bandas de batido hay en una vuelta. Default 2.
 
-### 2.7 · El sol se ve porque el fondo es oscuro
+**Desde S11 estas dos capas no solo se ven: PROYECTAN.** El sol las atraviesa y dibuja su trama sobre el piso y sobre el logo — ver §2.7. Ahí la separación de radios vuelve a mandar: la relación de pasos proyectados sobre el papel es (44/50)·(102/38) = **2,362**, y con el desajuste en 0 sigue en 2,316, o sea que sobre el piso el batido lo produce el paralaje casi por completo.
 
-S7 midió el problema del sol como contraste: el disco a 254 contra una pared a 213, o sea **41 puntos**. La envolvente lo resuelve por ser oscura: el fondo detrás del sol baja a **146 en Demos y 98 en el cierre**, o sea **109 y 157 puntos**. **El arco no se tocó** — azimut, elevación, nivel y kelvin siguen siendo los de S9, y la narrativa sigue siendo una tarde.
+### 2.7 · El sol NO se ve: se ve lo que proyecta (S11)
 
-Y hay un segundo hallazgo, que nadie había medido: **los planos suspendidos tapaban entre el 46% y el 68% del disco** en toda su ventana. El 33,4% que S9 publicó era cobertura de encuadre, no visibilidad.
+~~El sol se ve porque el fondo es oscuro.~~ S7 leyó el problema del sol como contraste (41 puntos) y S10 lo llevó a **109 y 157** oscureciendo el fondo. **No alcanzó**: el humano lo grabó y el veredicto fue que no se lee como un sol, se lee como una mancha clara difusa. El diagnóstico no era de visibilidad.
 
-Encima del sol va un **washout aditivo** que apaga la trama en el anillo del núcleo, para que el sol se lea como el único lugar del cuadro sin patrón. **Arranca bajo a propósito:** no está pagando por contraste —eso ya lo resolvió el fondo— y todo lo que sume se lo come.
+**Un sol no es un círculo en el cielo: es una dirección de la que viene la luz.** Y sobre papel blanco no se puede AGREGAR luz, solo sacarla — que es exactamente por qué el disco no se veía. Así que S11 borró el cuerpo entero (`SunBody.tsx`, `SunWashout.tsx` y `probeSun.ts`) y dejó la dirección, que ahora **proyecta la rendija** sobre el papel, sobre las 48 marcas y sobre el logo.
+
+**El arco no se tocó**: azimut, elevación, nivel y kelvin siguen siendo los de S9 y la narrativa sigue siendo una tarde. Es el mismo dato con otro consumidor.
+
+**Lo que se ve es la sombra**, y tiene tres propiedades medidas:
+
+- **Lleva el moiré adentro**, porque atraviesa las dos capas: batido de **15,3 de mundo** sobre el piso, **de 2,4 a 4,6 bandas a lo ancho del cuadro**, con una amplitud de **10,8 puntos sRGB** en el hero.
+- **Barre con el arco.** El patrón está anclado al azimut del sol, así que los 180° de barrido son **51 celdas de fase pasando sobre un punto fijo del piso** — 119 unidades de mundo de banda. No es una deriva: es el mismo reloj que la sombra del logo.
+- **Se alarga ×3,6**, de 3,22 a 11,51 de largo, que es exactamente el factor con el que crece la sombra del logo. Las dos son 1/tan(elevación): crecen juntas o no crece ninguna.
+
+**Y la celosía tiene alcance.** Los cilindros están abiertos arriba, así que con el sol a 36° la luz entra por encima del borde y cae sobre la parte de la losa opuesta al sol: la sombra cubre el **82% de la losa durante la meseta y el 100% desde p=0,875**. La creciente de sol abierto se cierra a medida que atardece.
 
 ### 2.8 · Las partículas son el relleno
 
@@ -149,7 +159,7 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
 1. **Blanco y negro.** Sin luces de color. Base clara `#F7F7F5`, tinta `#111111`.
 2. **Nada de iconografía de tecnología.** Ni nodos de red, ni circuitos, ni burbujas de chat, ni ventanas de navegador, ni pantallas, ni engranajes, ni cerebros. Es el imaginario por defecto de "tecnología" y es exactamente lo que este proyecto evita.
 3. **Nada orgánico.** Sin rocas, terreno, agua ni vegetación.
-4. **Nada brilla por sí mismo.** Todo responde a las mismas luces, así que la sala entera se apaga con el cierre. La única excepción es el sol, que es una fuente y por eso tiene permiso — y aun así se apaga con el arco.
+4. **Nada brilla por sí mismo.** Todo responde a las mismas luces, así que la sala entera se apaga con el cierre. ~~La única excepción es el sol.~~ **Desde S11 la regla no tiene excepciones**: el sol era la única y ya no hay ningún cuerpo que la pida.
 5. **Nada compite en peso visual con el logo.** El logo es el único negro puro del cuadro.
 6. ~~**La cuña de adelante queda libre.**~~ **Sin objeto desde S10:** no queda ninguna masa suspendida que pudiera meterse entre la cámara y el logo. El instrumento que lo medía sigue en el repo (`__tests__/occlusion.ts`) con su lista de ocluyentes vacía y **un control positivo** que verifica que sabría detectar uno — sin eso el chequeo quedaría verde por vacío.
 7. ~~**El fondo de una pose es el azimut opuesto al de su cámara.**~~ Era el corolario de la anterior, y con la envolvente el fondo es el mismo en toda la vuelta por construcción. Lo que sí cambia con el azimut es el paralaje entre las dos capas, que es el efecto.
@@ -172,7 +182,7 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
 
 ~~masa oscura `#191917`~~ y ~~estructura aérea `#3A3A35`/`#2A2A26`~~ **se fueron con S10**, junto con los objetos que las llevaban.
 
-### 4.1 · El balance de negro, y el pendiente que deja
+### 4.1 · El balance de negro, y el pendiente que S11 cerró
 
 Los planos eran la única masa oscura: el 30% al 49% del cuadro según la pose. Sin ellos **la tinta que queda es solo el logo, entre el 2,8% y el 23,2%**, y el valor medio del cuadro sube entre 45 y 113 puntos. La envolvente lo recupera en parte:
 
@@ -187,9 +197,35 @@ Los planos eran la única masa oscura: el 30% al 49% del cuadro según la pose. 
 
 *(Valor medio del cuadro sobre 255, medido con el shading real de three. Las partículas suman otros 7 a 8 puntos de bajada.)*
 
-> ⚠️ **Se aceptó la escena más clara, y hay un techo que ninguna perilla del fondo levanta.** En el hero y en Números el cuadro es **65% y 73% PISO**, así que la envolvente solo alcanza el 31% y el 17% de la pantalla. Se probó una envolvente el doble de pesada: arregla las tres poses bajas (quiénes somos a 143, demos a 103) y **casi no mueve las dos altas** (212 y 224), o sea que separa más los extremos.
->
-> **El piso queda como sprint propio**, después de ver la rendija funcionando: es el último elemento en pie y calibrarlo a ciegas es apostar. Esta tabla es de dónde arranca.
+> ⚠️ **Se aceptó la escena más clara, y hay un techo que ninguna perilla del fondo levanta.** En el hero y en Números el cuadro es **60% y 73% PISO**, así que la envolvente apenas aparece. Se probó una envolvente el doble de pesada: arregla las tres poses bajas y **casi no mueve las dos altas**, o sea que separa más los extremos.
+
+#### El techo era de EXPOSICIÓN, no de fondo (S11)
+
+**El piso está sobreexpuesto y eso lo explica todo.** Medido: el papel a luz plena da **249,4/255** y su propia sombra dura —la del logo, que apaga la key entera— da **236,9**. **Doce puntos y medio es TODO el rango** que una sombra proyectada puede usar mientras el cielo esté abierto, porque la key es el 46% de la irradiancia del piso y `NeutralToneMapping` comprime todo lo que pasa de 0,76 lineal. El mismo aplastamiento se come las marcas: `#D7D7D5` sobre papel iluminado queda a **3,7 puntos** de él.
+
+Por eso la proyección sola no alcanzaba: hero 216 → 211, Números 222 → 219.
+
+**Lo que lo abre es que la celosía no tapa solo al sol: tapa el cielo.** El hemisférico de esta escena se llama, literalmente, *"el cielo del estudio y el rebote del papel"*, así que está afuera de la rendija igual que el sol. El relleno (*"el rebote de la sala"*) y el contraluz (*"solidario a la cámara"*) están adentro y no se tocan.
+
+| | a luz plena | en sombra | rango |
+|---|---:|---:|---:|
+| S10 (cielo abierto) | 249,4 | 236,9 | **12,5 puntos** |
+| **S11 (cielo tapado)** | **248,3** | **218,7** | **29,6 puntos** |
+
+El alto casi no se mueve y la sombra baja 18: es lo que hace una fotografía. Y con eso los seis valores medios quedan:
+
+| pose | S10 | **S11** | Δ | del piso en sombra |
+|---|---:|---:|---:|---:|
+| **hero** | 216 | **201** | −15 | 67% |
+| quiénes somos | 172 | 166 | −6 | — |
+| **números** | 222 | **213** | −9 | 53% |
+| trabajos | 208 | 185 | −23 | 66% |
+| demos | 136 | 129 | −7 | — |
+| cierre | 120 | 104 | −16 | 76% |
+
+> ⚠️ **El factor de cielo es una CONSTANTE, no una oclusión posición a posición.** Ω —la fracción de la irradiancia del hemisferio que la celosía intercepta— sale de integrar el hemisferio contra la geometría de `probeMoire.ts`, una vez, al cargar el módulo: **no hay ningún número escrito a mano**, y si cambian los radios o las bandas se mueve solo. La forma cerrada es `cielo = 1 − Ω·(1 − (1−cobertura)²)` con **Ω = 0,4366 → cielo = 0,6743**, y su acuerdo con la integral numérica es de **3,9/1000 en el peor punto del slider**. Se evalúa en el CENTRO de la losa; en el borde Ω sube a 0,5413 (**±24%**), y ésa es la simplificación que se acepta a cambio de no correr una integral de hemisferio por píxel.
+
+**Dos consecuencias que no se buscaron.** La sombra propia del logo gana los mismos 18,2 puntos de profundidad sin tocar el shadow map — nunca fue un problema de celosía, era el mismo aplastamiento. Y **las 48 marcas se despiertan**: `#D7D7D5` está a 5,0 puntos del papel en la luz y a **30,3 adentro de una banda**, o sea seis veces más. El **67% al 82%** del replanteo en cuadro cae bajo una banda en las cuatro poses que lo muestran. No se agregó contraste: se destapó el que ya estaba.
 
 Los acentos de servicio (cian, verde, ámbar, violeta) **no entran en la escena del home**. Su lugar está en las páginas internas — ver §5.2.
 
@@ -238,10 +274,13 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | Los comentarios de las propuestas | `variantNotes.ts` |
 | Dónde cae el logo en pantalla — lo que el preloader lee | `src/lib/scene-framing.ts` |
 | El rig de tres puntos y cómo se apaga cada luz | `probeLighting.ts` |
-| El sol — que es la luz principal | `probeSun.ts`, `SunBody.tsx`, y su posición en `LIGHT_ARC` |
+| El sol — que es la luz principal, y **solo una dirección** | `LIGHT_ARC` (en `choreography.ts`) y `lightRig.ts`. ~~`probeSun.ts`, `SunBody.tsx`~~ **borrados en S11** |
 | Niebla, shadow map y oclusión de contacto | `probeAtmosphere.ts` |
 | **La envolvente de rendijas**: las dos capas, el desajuste y el batido | `probeMoire.ts` + `moireTextures.ts` (los generadores) + `MoireScreen.tsx` |
-| El washout del sol | `probeSun.ts`, `SunWashout.tsx` |
+| ~~El washout del sol~~ | ~~`SunWashout.tsx`~~ — **borrado en S11 con el cuerpo** |
+| **La celosía**: qué luces tapa, la barra y el factor de cielo | `probeCelosia.ts` |
+| La geometría de la proyección — y el gemelo en TypeScript del shader | `celosiaGeometry.ts` |
+| El GLSL del gobo y el parche del chunk de three | `celosiaShader.ts` |
 | ~~El espacio: planos suspendidos, retícula aérea, pilares~~ | ~~`probeArchitecture.ts`~~ — **borrado en S10**, con `LogoFragments.tsx` |
 | Las marcas de replanteo del piso | `floorMarks.ts` |
 | La física: inercia, mouse, vira, deriva del aire | `choreographyPhysics.ts` |
@@ -250,7 +289,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | Las partículas: los dos campos, las conchas y el recorte de `gl_PointSize` | `probeParticles.ts`, `DepthParticles.tsx`, `BokehParticles.tsx` |
 | Las comprobaciones estáticas | `src/app/probe-escena/__tests__/*.invariant.ts` |
 | El instrumento de oclusión y cono libre — con su lista de ocluyentes **vacía** | `__tests__/occlusion.ts` |
-| El instrumento de tinta, shading y muestreo de cuadro (S10) | `__tests__/logoInk.ts`, `shading.ts`, `frameProbe.ts` |
+| El instrumento de tinta, shading y muestreo de cuadro (S10, ampliado en S11 con el gobo y el cielo) | `__tests__/logoInk.ts`, `shading.ts`, `frameProbe.ts` |
 
 | Reporte | Qué decidió |
 |---|---|
@@ -262,6 +301,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | `outputs/S8-PRELOADER.md` + `S8b/S8c/S8d` | El preloader, el trazo y el acomodamiento |
 | `outputs/S9-COREOGRAFIA.md` | **El recorrido definitivo**, el borrado de los derivados y el reapuntado del sol |
 | `outputs/S10-FONDO.md` | **El vaciado de la escena**, la envolvente de rendijas, el sol contra el fondo oscuro y las partículas como relleno |
+| `outputs/S11-LUZ.md` | **El borrado del cuerpo del sol**, la celosía proyectada sobre el piso y el logo, y el techo de exposición del papel |
 
 > ⚠️ **Exportar no es guardar.** El botón del editor copia al portapapeles. La calibración solo existe cuando ese texto se **pega** en el archivo. Ya costó una sesión entera de trabajo.
 
@@ -279,5 +319,19 @@ Está acá para que nadie lo dé por resuelto.
 6. **El encuadre por relación de aspecto.** El recorrido está compuesto en horizontal; en vertical el logo no entra igual y falta decidir si se reencuadra o se recompone.
 7. **Qué contenido va en cada una de las ocho pantallas**, más allá de los nombres de los tramos.
 8. **La temperatura del cierre**: 7700 K (frío, lo que está hoy) contra los 2000 K (ámbar) que tenía la calibración a mano. Es un número y está argumentado en los dos sentidos.
-9. **EL PISO.** Es el pendiente que deja S10 y tiene sprint propio. Con la escena vaciada, en el hero y en Números el cuadro es 65% y 73% papel liso, y **ninguna perilla de la envolvente llega ahí** — está medido en §4.1. Se decidió mirarlo DESPUÉS de ver la rendija corriendo, porque es el último elemento en pie y calibrarlo a ciegas es apostar.
+9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto es una sola perilla**, `CELOSIA_BAR` (0,29), que se calibra mirando: sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido.
 10. **Si el recorrido debería dar dos vueltas.** El argumento que lo descartaba murió con los planos (ver §2.2). Es decisión de recorrido, no de escena.
+11. ⚠️ **EL ESCALÓN DE EXPOSICIÓN — requisito del sprint de las partículas del preloader (S11).** No es una nota suelta: es una condición de entrada.
+    **El intro termina con el ambiente en `HEMI_INTENSITY` exacto** (`introShading.ts` hace `HEMI_INTENSITY * reveal`, y `introShading.invariant.ts` lo compara por identidad) **y la escena arranca en `HEMI_INTENSITY × 0,6743`**: el ambiente de la sala **cae un 32,6% en el instante del traspaso, en un corte**. Sobre las mismas superficies eso es −1,1 puntos en el papel iluminado, **−18,2 en el papel en sombra** y **−15 en el valor medio del cuadro de la pose del hero (216 → 201)**.
+    `home-intro/` tiene su propio rig y no pasa por `applyLightRig`, así que **ninguna de sus comprobaciones se movió** —279 verdes en las cuatro suites limpias y 140+1 en `introSampling`, idénticas antes y después—. **Que no se haya movido no quiere decir que esté resuelto: quiere decir que todavía no se tocó.**
+    **Ese sprint tiene que resolverlo o declararlo.** Resolverlo es que el intro termine en el mismo ambiente en que la escena empieza —una constante compartida, no dos—; declararlo es medir que el corte no se ve y escribir por qué. Detalle en `outputs/S11-LUZ.md` §9.3.
+12. **Los haces de luz visibles.** Medidos y NO construidos: la tabla de fondos aéreos y el alfa aditivo por pose está en `probeCelosia.ts`, para que la decisión sea revocable con datos. Las tres razones para no ponerlos —overdraw sobre las poses más caras, que lo aditivo se come el contraste recién ganado, y que un volumen saliendo de una celosía ES el efecto Star Wars— están en `outputs/S11-LUZ.md` §6.
+13. **DEUDA DE TAMAÑO — para un sprint de limpieza, los tres juntos.** La regla del repo es partir arriba de 300 líneas. Estos tres están arriba, **los tres crecieron con S11 y ninguno se partió ahí a propósito**: hacerlo de a uno, en el sprint que lo agrandó, es la peor forma de hacerlo.
+
+    | archivo | líneas | antes de S11 | de quién es el exceso |
+    |---|---:|---:|---|
+    | `OrbitRig.tsx` | **647** | 626 | heredado; S11 sumó 21 (la deriva compartida y el volcado del desajuste) |
+    | `probeStore.ts` | **378** | 352 | heredado; S11 sumó 26 (la perilla `celosiaBar` y su porqué) |
+    | `lightRig.ts` | **345** | 319 (ya cruzado por S10) | heredado; S11 sumó 26 (el uniform de la celosía y el factor de cielo) |
+
+    **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos del módulo (`choreography.ts` 462, `choreographyEditor.ts` 376, `probeScene.ts` 348, `KeyframeEditor.tsx` 310) son heredados sin delta de S11 y pueden entrar al mismo sprint.

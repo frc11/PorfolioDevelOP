@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
+import { applyCelosia, type CelosiaUniforms } from './celosiaShader'
 import type { BarPlacement } from './probeScene'
 
 /**
@@ -43,6 +44,14 @@ type InstancedBarsProps = {
   roughness?: number
   castShadow?: boolean
   receiveShadow?: boolean
+  /**
+   * Si viene, las barras reciben la celosía igual que el papel sobre el que
+   * están apoyadas (S11). **No es opcional por gusto**: una marca que siguiera
+   * iluminada pareja mientras el piso que la rodea lleva bandas se leería como
+   * una línea encendida cruzando la sombra. El eje de X mide 13 unidades de
+   * largo; atraviesa cinco bandas.
+   */
+  celosia?: CelosiaUniforms
 }
 
 export function InstancedBars({
@@ -50,14 +59,16 @@ export function InstancedBars({
   roughness = 0.9,
   castShadow = false,
   receiveShadow = false,
+  celosia,
 }: InstancedBarsProps) {
   const meshRef = useRef<THREE.InstancedMesh>(null)
 
   const geometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), [])
-  const material = useMemo(
-    () => new THREE.MeshStandardMaterial({ roughness, metalness: 0 }),
-    [roughness]
-  )
+  const material = useMemo(() => {
+    const built = new THREE.MeshStandardMaterial({ roughness, metalness: 0 })
+    if (celosia) applyCelosia(built, celosia)
+    return built
+  }, [roughness, celosia])
 
   // r3f solo libera lo que declara el JSX; éstas las creó `useMemo`.
   useEffect(

@@ -1,4 +1,5 @@
 import { PLAY_SPEED_DEFAULT } from './choreographyPhysics'
+import { CELOSIA_BAR, CELOSIA_BAR_MAX } from './probeCelosia'
 import { KEY_INTENSITY } from './probeLighting'
 import { MOIRE_MISMATCH, MOIRE_MISMATCH_MAX } from './probeMoire'
 import { PARTICLES_MAX } from './probeParticles'
@@ -147,6 +148,24 @@ export type ProbeParams = {
    * que muestra cuánto aporta cada mitad. Ver `probeMoire.ts`.
    */
   moireMismatch: number
+  /**
+   * LA BARRA DE LA CELOSÍA (S11): qué fracción de la celda tapa la rendija
+   * cuando le pega el sol.
+   *
+   * **No es el trazo de la trama** —ése es del dibujo del fondo y no se toca—:
+   * es la densidad ÓPTICA de la misma rendija, o sea cuánta luz corta. Mueve tres
+   * cosas a la vez y por eso está en el panel: el contraste de las bandas sobre
+   * el papel, la amplitud del batido proyectado y —a través del factor de
+   * cielo— la exposición general de la sala.
+   *
+   * **0,29 es el máximo medido del batido** (10,8 puntos sRGB en el hero) y la
+   * teoría coincide: la modulación es c − c², máxima en cobertura 0,5. Subir a
+   * 0,35 baja tres puntos más el valor medio del cuadro **a costa de aflojar el
+   * batido**; bajar aclara el piso y lo afloja también. En **0** no hay celosía:
+   * el piso vuelve exactamente a lo que S10 midió, que es el control con el que
+   * se juzga todo lo demás. Ver `probeCelosia.ts`.
+   */
+  celosiaBar: number
 }
 
 export type ProbeParamKey = keyof ProbeParams
@@ -194,6 +213,10 @@ export const PROBE_RANGES: { readonly [K in ProbeParamKey]: ProbeRange } = {
   // Entero: el paso es 1 y el rango arranca en 0 a propósito (ver el doc del
   // parámetro). El tope sale de `probeMoire.ts`.
   moireMismatch: { min: 0, max: MOIRE_MISMATCH_MAX, step: 1 },
+  // El tope sale de `probeCelosia.ts`: con la barra en la mitad de la celda la
+  // cobertura de una capa ya es del 75% y el batido se ahoga. El mínimo es 0 y
+  // es el control: apaga la celosía entera sin tocar nada más.
+  celosiaBar: { min: 0, max: CELOSIA_BAR_MAX, step: 0.01 },
 }
 
 /** Orden fijo, en pantalla y en el texto que se copia. */
@@ -207,6 +230,7 @@ export const PROBE_PARAM_ORDER: readonly ProbeParamKey[] = [
   'keyKelvin',
   'particleCount',
   'moireMismatch',
+  'celosiaBar',
 ]
 
 export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = {
@@ -219,6 +243,7 @@ export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = 
   keyKelvin: { label: 'temperatura de la luz', unit: ' K', decimals: 0 },
   particleCount: { label: 'partículas dibujadas', unit: '', decimals: 0 },
   moireMismatch: { label: 'desajuste del fondo', unit: ' bandas', decimals: 0 },
+  celosiaBar: { label: 'barra de la celosía', unit: ' de celda', decimals: 2 },
 }
 
 export const PROBE_DEFAULTS: ProbeParams = {
@@ -242,6 +267,7 @@ export const PROBE_DEFAULTS: ProbeParams = {
   // deja margen de slider hacia arriba para buscar dónde deja de rendir.
   particleCount: 2400,
   moireMismatch: MOIRE_MISMATCH,
+  celosiaBar: CELOSIA_BAR,
 }
 
 // ── Medición (no se manipula: se lee) ───────────────────────────────────────
