@@ -1,0 +1,206 @@
+# CI — el gate de verificación del repo.
+#
+# ── Por qué este archivo está en la RAÍZ ──────────────────────────────────────
+# GitHub Actions SOLO descubre workflows en <repo_root>/.github/workflows/.
+# Hasta C1 la red de verificación vivía en `logic-core-v3/.github/workflows/e2e.yml`,
+# un directorio que Actions no lee: el workflow existía, estaba bien escrito, y
+# NUNCA se ejecutó una sola vez. `db-backup.yml` ya dejaba anotado el pendiente.
+#
+# El archivo anidado no se podía mover verbatim: al correr desde la raíz moría en
+# `npm ci` con EUSAGE, porque el package.json vive en logic-core-v3/ y el workflow
+# no declaraba `working-directory`. De ahí el bloque `defaults` de abajo.
+#
+# ── Por qué los chequeos NO cortan entre sí ──────────────────────────────────
+# Mismo motivo por el que `check:invariants` dejó de ser una cadena `&&`: si el
+# primer chequeo falla y aborta el resto, el rojo temprano ESCONDE todo lo demás.
+# Un CI que dice "tipos rotos" cuando además hay 3 invariantes caídos informa la
+# mitad del problema. Por eso cada chequeo lleva `continue-on-error: true` y el
+# veredicto se consolida al final, con los resultados de todos a la vista.
+#
+# ── Por qué el lint NO está acá ──────────────────────────────────────────────
+# Deuda medida en C1 sobre código fuente (excluyendo artefactos de build):
+# 212 problemas — 102 errores y 110 warnings. Encender el lint hoy dejaría este
+# workflow en rojo permanente desde el primer push, y un CI siempre rojo es
+# indistinguible de no tener CI: se aprende a ignorarlo y deja de proteger.
+# El lint entra cuando la deuda esté saldada, no antes. `npm run lint` sigue
+# disponible a mano.
+#   (Nota al pasar, sin arreglar: `npm run lint` a secas reporta ~108.000
+#   problemas porque `globalIgnores` de eslint.config.mjs cubre `.next/**` pero
+#   no los distDir alternativos `.next-setter/`, `.next-galeria/` y
+#   `.next-corrida-visual/`, y termina linteando bundles minificados. Los 212 de
+#   arriba son con esos directorios excluidos.)
+#
+# ── Sobre el chequeo de tipos ────────────────────────────────────────────────
+# `npm run check:types` (tsc --noEmit) es EL gate de tipos. `npm run build` no lo
+# es: un build verde prueba que el proyecto bundlea, no que los tipos cierran.
+
+name: CI
+
+on: [push, pull_request]
+
+# Todo `run:` corre dentro del proyecto Next. Sin esto, `npm ci` falla con EUSAGE
+# en la raíz, que es exactamente por lo que el workflow anidado no se podía mover
+# tal cual estaba.
+defaults:
+  run:
+    working-directory: logic-core-v3
+
+jobs:
+  # ── Tipos + invariantes ────────────────────────────────────────────────────
+  # Van juntos en un job porque comparten el mismo setup caro (npm ci + prisma
+  # generate) y ninguno necesita DB ni secrets. Corren los dos SIEMPRE: el
+  # veredicto es el último paso.
+  verificacion:
+    name: Tipos e invariantes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: logic-core-v3/package-lock.json
+
+      - run: npm ci
+
+      # Los tipos de Prisma se generan; sin esto `tsc --noEmit` no encuentra
+      # @prisma/client y falla por una razón que no es deuda de tipos real.
+      - run: npx prisma generate
+
+      - name: 'Tipos: tsc --noEmit'
+        id: tipos
+        continue-on-error: true
+        run: npm run check:types
+
+      - name: 'Invariantes: los 43, sin cortar'
+        id: invariantes
+        continue-on-error: true
+        run: npm run check:invariants
+
+      # El veredicto consolidado. Sin este paso el job saldría VERDE aunque los
+      # chequeos hayan fallado, porque `continue-on-error` se traga el exit code.
+      - name: Veredicto
+        run: |
+          echo "tipos:       ${{ steps.tipos.outcome }}"
+          echo "invariantes: ${{ steps.invariantes.outcome }}"
+          if [ "${{ steps.tipos.outcome }}" != "success" ] || [ "${{ steps.invariantes.outcome }}" != "success" ]; then
+            echo "::error::Falló al menos un chequeo. El detalle está en los pasos de arriba."
+            exit 1
+          fi
+          echo "Tipos e invariantes en verde."
+
+  # ── Tests de integración de LeadOS ─────────────────────────────────────────
+  # Necesita una DB de test dedicada. Al 2026-08-25 el repo NO tiene ningún
+  # secret configurado (`gh api .../actions/secrets` devuelve total_count: 0),
+  # así que este job se saltea con un warning VISIBLE en vez de fallar: un rojo
+  # permanente por infraestructura ausente enseña a ignorar el CI.
+  # Para encenderlo, Franco carga el secret:
+  #   gh secret set DATABASE_URL_TEST --repo frc11/PorfolioDevelOP
+  # y el job empieza a correr solo, sin tocar este archivo.
+  test-leados:
+    name: Tests LeadOS (requiere DATABASE_URL_TEST)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chequear si está el secret
+        id: gate
+        env:
+          DB: ${{ secrets.DATABASE_URL_TEST }}
+        run: |
+          if [ -z "$DB" ]; then
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::DATABASE_URL_TEST no está configurado — los tests de LeadOS NO corrieron. Cargalo con: gh secret set DATABASE_URL_TEST"
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.listo == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.listo == 'true'
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: logic-core-v3/package-lock.json
+
+      - run: npm ci
+        if: steps.gate.outputs.listo == 'true'
+
+      - run: npx prisma generate
+        if: steps.gate.outputs.listo == 'true'
+
+      - run: npx prisma migrate deploy
+        if: steps.gate.outputs.listo == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+
+      - run: npm run test:leados
+        if: steps.gate.outputs.listo == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+
+  # ── E2E Playwright ─────────────────────────────────────────────────────────
+  # Mismo criterio de gate que el job de arriba. Los secrets que necesita salen
+  # del workflow anidado que este archivo reemplaza; ninguno existe hoy.
+  # Para encenderlo hacen falta los seis:
+  #   DATABASE_URL_TEST, AUTH_SECRET, CHATBOT_GCP_PROJECT_ID,
+  #   GOOGLE_VERTEX_CREDENTIALS_JSON, CHATBOT_IP_HASH_SALT, CRON_SECRET
+  e2e:
+    name: E2E Playwright (requiere secrets)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chequear si están los secrets
+        id: gate
+        env:
+          DB: ${{ secrets.DATABASE_URL_TEST }}
+          AUTH: ${{ secrets.AUTH_SECRET }}
+        run: |
+          if [ -z "$DB" ] || [ -z "$AUTH" ]; then
+            echo "listo=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Faltan secrets (DATABASE_URL_TEST y/o AUTH_SECRET) — los E2E NO corrieron."
+          else
+            echo "listo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.listo == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.listo == 'true'
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: logic-core-v3/package-lock.json
+
+      - run: npm ci
+        if: steps.gate.outputs.listo == 'true'
+
+      - run: npx prisma generate
+        if: steps.gate.outputs.listo == 'true'
+
+      - run: npx prisma migrate deploy
+        if: steps.gate.outputs.listo == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+
+      - run: npx playwright install --with-deps chromium
+        if: steps.gate.outputs.listo == 'true'
+
+      - run: npm run test:e2e
+        if: steps.gate.outputs.listo == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_TEST }}
+          AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          CHATBOT_GCP_PROJECT_ID: ${{ secrets.CHATBOT_GCP_PROJECT_ID }}
+          GOOGLE_VERTEX_CREDENTIALS_JSON: ${{ secrets.GOOGLE_VERTEX_CREDENTIALS_JSON }}
+          CHATBOT_IP_HASH_SALT: ${{ secrets.CHATBOT_IP_HASH_SALT }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.gate.outputs.listo == 'true'
+        with:
+          name: playwright-report
+          path: logic-core-v3/playwright-report/

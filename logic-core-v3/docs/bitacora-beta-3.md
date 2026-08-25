@@ -5176,3 +5176,133 @@ después. `git diff 17727117` del checkout principal, sin salida.
 **Queda para Franco:** la decisión de fondo sigue en pie —hoy nada corre solo—, y ahora con el
 número que faltaba: encender el chequeo de tipos no cuesta arreglar nada, cuesta 84 s de build.
 Lo que sí cuesta trabajo es el eje de lint (102 errores) y los dos falsos verdes.
+
+---
+
+## C1 · Encender el gate — tipos, los 43 invariantes, y un workflow que Actions lee — 2026-08-25
+
+C0 dejó el diagnóstico y el número que faltaba. C1 lo ejecuta: no toca la lógica de ningún
+invariante ni arregla un solo error de lint. Cambia **qué se ejecuta y cómo se reporta**.
+
+### El agregado dejó de mentir por dos vías distintas
+
+`check:invariants` era una cadena `npm run a && npm run b && …` escrita a mano. Tenía dos
+fallas, y cada una escondía cosas diferentes.
+
+La primera: `&&` **corta en el primer fallo**. La segunda es peor porque no se ve — la cadena
+era una **segunda lista**, mantenida a mano, que había divergido de los scripts reales. Existen
+**43** scripts de invariante (42 con prefijo `check:invariant:` más el `check:invariant` pelado
+de `assignment-trail`). La cadena invocaba **22**. Los otros **21 eran huérfanos**: existían,
+pasaban, y ningún agregado los llamaba nunca.
+
+Ahora `check:invariants` es `node scripts/run-invariants.mjs`, que **descubre la lista desde
+`package.json`** en vez de repetirla. No hay segunda lista que mantener: un invariante nuevo
+entra solo. Corre los 43 sin cortar, imprime una línea por script, junta la salida de los que
+fallaron al final, y sale distinto de cero si alguno falló.
+
+El descubrimiento dinámico trae su propio modo de fallar en verde: si el patrón deja de
+matchear, el runner descubre 0, corre 0, no falla ninguno y sale 0 — verde impecable sobre una
+red apagada. `PISO_MINIMO = 43` lo impide, con un fallo ruidoso. Borrar un invariante a
+propósito ahora cuesta bajar el piso en el mismo commit y decir por qué. Que cueste un renglón
+es el punto.
+
+### La demostración de que sirve
+
+En un worktree descartable (`wt-c1-sabotaje`, junction al `node_modules` del principal,
+destruido al terminar desarmando la junction primero) se rompieron **tres** invariantes de
+perfiles distintos: `foco` (ts-node, **posición 7** de la vieja cadena), `dates-ar` (tsx,
+huérfano) y `cron-secret` (tsx, huérfano y **último** de los 43).
+
+Sobre exactamente el mismo sabotaje:
+
+| | invocó | exit | qué vio |
+|---|---|---|---|
+| cadena vieja `&&` | **7** de 43 | 1 | murió en `foco`; los otros 36 nunca corrieron |
+| runner nuevo | **43** de 43 | 1 | `corridos 43 · pasaron 40 · fallaron 3`, con la salida de los tres |
+
+Los dos sabotajes en huérfanos son el punto fino: la cadena vieja **no los habría detectado ni
+en verde**, porque nunca los invocaba. El guard del piso se probó aparte renombrando 5 scripts
+— descubrió 38, abortó con exit 1 y el motivo escrito.
+
+### El chequeo de tipos, encendido en las dos puntas
+
+`check:types` (`tsc --noEmit`) es nuevo y es **el** gate de tipos. Verificado en las dos
+direcciones, que es lo que prueba que el exit code es del chequeo y no arrastrado: **exit 0**
+sobre el árbol limpio, **exit 2** con un error de tipo inyectado (`TS2322`), y de vuelta a 0 al
+sacarlo.
+
+Con la deuda de tipos en cero, `typescript.ignoreBuildErrors` salió de `next.config.ts`. El
+build completo quedó **verde, exit 0**, con `Running TypeScript … Finished TypeScript in 57s`
+en el log — o sea que type-chequeó de verdad, no lo salteó. Queda anotado en el propio archivo:
+el build en verde prueba que el proyecto **bundlea**, no que los tipos cierran. El gate sigue
+siendo `tsc --noEmit`.
+
+### El workflow, donde Actions lo lee
+
+`logic-core-v3/.github/workflows/e2e.yml` estaba en un directorio que GitHub Actions no mira.
+El propio `db-backup.yml` ya tenía anotado el pendiente. Confirmado contra la API: Actions
+conoce **un solo workflow**, `db-backup.yml`.
+
+No se podía mover verbatim — sin `working-directory`, los tres jobs mueren en `npm ci` con
+`EUSAGE`. El archivo nuevo es `.github/workflows/ci.yml`, con `defaults.run.working-directory:
+logic-core-v3`, disparando en `push` y `pull_request`. Corre **tipos → invariantes → tests**, y
+los chequeos llevan `continue-on-error` con un paso de veredicto al final: mismo motivo que el
+runner, un rojo temprano escondería el resto.
+
+### Deuda declarada, no arreglada
+
+**El lint queda afuera.** Deuda medida: **212 problemas — 102 errores y 110 warnings**.
+Encenderlo hoy dejaría el CI en rojo permanente, y un CI siempre rojo es indistinguible de no
+tener CI.
+
+Al medirlo apareció algo que **no se arregló** (fuera de scope): `npm run lint` a secas reporta
+**108.208** problemas, no 212. El `globalIgnores` de `eslint.config.mjs` cubre el directorio de
+build por defecto pero **no los distDir alternativos** que crean las suites de test, así que
+eslint termina linteando bundles minificados. Los 212 son excluyéndolos. Mismo patrón que ya
+mordió a Tailwind con estos directorios.
+
+**Los tests no corren, y no por este sprint.** El repo **no tiene ningún secret configurado** —
+`gh api .../actions/secrets` devuelve `total_count: 0`, consultado con permisos de admin. No
+hay `DATABASE_URL_TEST` ni ninguno de los otros cinco. No se inventaron valores ni se pusieron
+placeholders: los jobs de test quedan **gateados por existencia del secret**, y se saltean con
+un `::warning::` visible en vez de fallar. Cargando el secret empiezan a correr solos, sin
+tocar el archivo.
+
+Ese `total_count: 0` alcanza también a `db-backup.yml`, que usa tres secrets que tampoco
+existen — **no se tocó**, pero explica el P0 del backup.
+
+### Lo que este sprint NO hizo
+
+Cero cambios en `src/`. `git diff` sobre `*.invariant.ts`: **vacío**. Los dos falsos verdes que
+C0 encontró —`self-check-gate` y `contador-dms` pasaron sabotajes reales en verde— **siguen
+ahí**, y el gate encendido los va a correr y van a seguir mintiendo. Eso es C1b.
+
+### De paso, tres preguntas que C0 dejó abiertas
+
+**Runner por script.** De los 43: **19 con `ts-node`** (que type-chequea) y **24 con `tsx`**
+(que no). El corte no es casual — los 19 de ts-node están **todos** en el agregado viejo, y los
+**21 huérfanos corren todos con tsx**. La cadena a mano se quedó congelada en la época de
+ts-node y todo lo que se sumó después con tsx quedó afuera.
+
+**`HardCheck` sí tiene `id`, y el blob no lo guarda.** El tipo (`flow-content.ts:128`) tiene
+`id` **y** `nombre`. `SelfCheckSchema` (`contracts.ts:125`) persiste **solo `nombre`** y `ok`.
+`buildSelfCheck` usa `check.id` para leer el formulario pero escribe `check.nombre` en el blob:
+el `id` es la llave del lado del form, el `nombre` la del lado persistido. `selfCheckAprobado`
+y `chequeo-form.tsx:51` matchean los dos por `nombre`. La llave estable existe pero no llega al
+disco.
+
+**No hay precedente de matcher con fallback en cadena.** El repo sí tiene un patrón de
+retrocompatibilidad, consistente y documentado, pero es **aditivo**: campo nuevo `.optional()`
+más `?? ''` en el read-path, de modo que el blob viejo sigue parseando con los campos nuevos
+vacíos (`contracts.ts:68` para `materiales`, `contracts.ts:194` para `AgendaSchema`). Probar
+una llave y si no matchea probar otra **no existe en el árbol** — buscado por comparación doble
+`id`/`nombre`, por `find(…) ?? find(…)` y por vocabulario de migración. Migrar el blob de
+`nombre` a `id` no tiene de dónde copiar.
+
+### Queda para la verificación humana
+
+Que la corrida en GitHub Actions **pase de verdad** — este proyecto ya tuvo un workflow que
+existía y nunca se ejecutó, así que escrito no es corriendo.
+
+Y la decisión sobre los secrets: mientras `total_count` siga en 0, dos de los tres jobs se
+saltean. El comando es `gh secret set DATABASE_URL_TEST --repo frc11/PorfolioDevelOP`.

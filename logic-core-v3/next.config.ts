@@ -28,9 +28,15 @@ const nextConfig = {
     'require-in-the-middle',
     'import-in-the-middle',
   ],
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // Sin `typescript.ignoreBuildErrors`: el build vuelve a fallar ante un error de
+  // tipos. Estuvo en `true` mientras había deuda; C1 midió la deuda en CERO
+  // (`tsc --noEmit` sale 0 sobre los 1.466 archivos del proyecto), así que
+  // apagarlo no cuesta más que los ~84s que el chequeo suma al build.
+  //
+  // Ojo con lo que prueba cada cosa: el build en verde prueba que el proyecto
+  // BUNDLEA. El gate de tipos sigue siendo `npm run check:types` (tsc --noEmit),
+  // que es lo que corre el CI — `next build` type-chequea distinto (respeta
+  // exclusiones del tsconfig y no alcanza todo lo que alcanza tsc).
   images: {
     remotePatterns: [
       {
