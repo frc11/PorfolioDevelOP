@@ -5306,3 +5306,45 @@ existía y nunca se ejecutó, así que escrito no es corriendo.
 
 Y la decisión sobre los secrets: mientras `total_count` siga en 0, dos de los tres jobs se
 saltean. El comando es `gh secret set DATABASE_URL_TEST --repo frc11/PorfolioDevelOP`.
+
+### Post scriptum — lo que encontró la primera corrida real
+
+El workflow corrió (run `32868515255`, disparado por el push de `15af6c26`). Actions lo
+reconoce como `active`, que es la primera vez que este repo tiene una red de verificación
+ejecutándose. **Falló**, y lo que falló vale más que si hubiera pasado.
+
+**Los gates de secret fallaron por un motivo que no era el suyo.**
+`defaults.run.working-directory: logic-core-v3` aplica a **todo** `run:`, incluidos los que
+preceden a `actions/checkout` — y antes del checkout ese directorio no existe. Los gates
+estaban primero y murieron por directorio inexistente, no por su lógica. El checkout pasó a ser
+el primer paso de los tres jobs, sin `if`.
+
+**19 invariantes no corren en Node 20.** El job de verificación llegó hasta el final y reportó
+`corridos 43 · pasaron 23 · fallaron 20`. Los 19 que fallan con
+`ERR_UNKNOWN_FILE_EXTENSION: Unknown file extension ".ts"` son **exactamente los 19 de
+`ts-node`** — que en Node 20 no carga `.ts` sin registrar su loader ESM. Local pasan los 43
+porque el proyecto se desarrolla en Node **v24.13.0**, donde los levanta el type-stripping
+nativo. El workflow pasó a Node 24, con la advertencia escrita en el archivo para que nadie lo
+baje sin saber qué rompe. La deuda de fondo —19 invariantes atados a ts-node y 24 a tsx— no se
+tocó: es C1b.
+
+**Y el hallazgo que más importa: uno de los 43 no es un invariante.**
+`check:invariant:client-monthly-report-pdf` hace `prisma.botConfig.findFirst()` y falla con
+`Environment variable not found: DATABASE_URL`. Local pasaba porque hay `.env.local`. Estaba
+clasificado entre las "invariantes puras del dominio, sin DB ni server" del workflow viejo, y
+no lo es. Queda **excluido del agregado con el motivo impreso en cada corrida** — no borrado
+del `package.json`, ni salteado en silencio, porque un script excluido sin ruido es otra vez un
+huérfano, solo que escondido en el runner. El piso sigue vigilando el **descubrimiento** (43),
+así que excluir uno no afloja el guard. Reclasificarlo al job que sí tiene base es C1b.
+
+El runner ahora cierra con `descubiertos 43 · excluidos 1 · corridos 42 · pasaron 42 ·
+fallaron 0`.
+
+Vale subrayar cómo se enteró el proyecto de las tres cosas: **la cadena `&&` habría muerto en
+el primer invariante y habría reportado un fallo en vez de veinte.** El gate encendido pagó su
+costo en la primera corrida.
+
+**Detalle de lectura para la próxima:** en la UI de Actions, un paso con `continue-on-error`
+aparece con ✓ aunque haya fallado. En esa corrida `Tipos` e `Invariantes` se veían los dos en
+verde y el rojo estaba solo en `Veredicto`. El tilde verde ahí significa "no abortó el job", no
+"pasó" — el veredicto es el único que dice la verdad.

@@ -29,6 +29,19 @@
 // por qué. Que cueste un renglón es el punto.
 const PISO_MINIMO = 43;
 
+// ── Exclusiones ──────────────────────────────────────────────────────────────
+// Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen
+// en cada corrida a propósito: un script excluido en silencio es otra vez un
+// huérfano, solo que escondido en el runner en vez de en package.json.
+// El piso de arriba vigila el DESCUBRIMIENTO (los 43 siguen apareciendo), así que
+// excluir uno no afloja el guard.
+const EXCLUIDOS = {
+  'check:invariant:client-monthly-report-pdf':
+    'no es un invariante puro: hace prisma.botConfig.findFirst() y necesita DATABASE_URL. ' +
+    'Local pasa porque hay .env.local; en CI sin DB falla. Reclasificarlo al job que tiene ' +
+    'base es trabajo de C1b.',
+};
+
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -52,10 +65,22 @@ if (invariantes.length < PISO_MINIMO) {
   process.exit(1);
 }
 
-console.log(`\nCorriendo ${invariantes.length} invariantes (sin cortar en el primer fallo)\n`);
+const aCorrer = invariantes.filter((nombre) => !(nombre in EXCLUIDOS));
+const excluidos = invariantes.filter((nombre) => nombre in EXCLUIDOS);
+
+console.log(
+  `\nDescubiertos ${invariantes.length} invariantes; corriendo ${aCorrer.length} ` +
+    `(sin cortar en el primer fallo)\n`,
+);
+
+if (excluidos.length > 0) {
+  console.log('EXCLUIDOS de esta corrida:');
+  for (const nombre of excluidos) console.log(`  · ${nombre}\n      ${EXCLUIDOS[nombre]}`);
+  console.log('');
+}
 
 const resultados = [];
-for (const nombre of invariantes) {
+for (const nombre of aCorrer) {
   // El nombre viene de las llaves de package.json y se interpola en un comando de
   // shell. Validarlo es barato y evita que una llave rara ejecute algo que no es.
   if (!/^[a-z0-9:_-]+$/i.test(nombre)) {
@@ -102,7 +127,9 @@ if (fallados.length > 0) {
 
 console.log('\n' + '─'.repeat(78));
 console.log(
-  `corridos ${resultados.length}  |  pasaron ${resultados.length - fallados.length}  |  fallaron ${fallados.length}`,
+  `descubiertos ${invariantes.length}  |  excluidos ${excluidos.length}  |  ` +
+    `corridos ${resultados.length}  |  pasaron ${resultados.length - fallados.length}  |  ` +
+    `fallaron ${fallados.length}`,
 );
 console.log('─'.repeat(78) + '\n');
 

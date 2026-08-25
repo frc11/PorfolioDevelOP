@@ -33,6 +33,17 @@
 # ── Sobre el chequeo de tipos ────────────────────────────────────────────────
 # `npm run check:types` (tsc --noEmit) es EL gate de tipos. `npm run build` no lo
 # es: un build verde prueba que el proyecto bundlea, no que los tipos cierran.
+#
+# ── Por qué Node 24 y no 20 ──────────────────────────────────────────────────
+# NO bajar esta versión sin leer esto. La primera corrida real de este workflow
+# usaba Node 20 y **19 de los 43 invariantes fallaron** con
+# `ERR_UNKNOWN_FILE_EXTENSION: Unknown file extension ".ts"`. Son exactamente los
+# 19 que corren con `ts-node`, que en Node 20 no carga `.ts` sin registrar su
+# loader ESM. Con Node 24 (la versión donde el proyecto se desarrolla, v24.13.0)
+# los carga el type-stripping nativo y pasan.
+# La deuda de fondo sigue viva y es de C1b: 19 invariantes atados a `ts-node`
+# mientras los otros 24 usan `tsx`. Subir la versión de Node los hace correr; no
+# los desata.
 
 name: CI
 
@@ -58,7 +69,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: logic-core-v3/package-lock.json
 
@@ -73,7 +84,7 @@ jobs:
         continue-on-error: true
         run: npm run check:types
 
-      - name: 'Invariantes: los 43, sin cortar'
+      - name: 'Invariantes: todos, sin cortar en el primer fallo'
         id: invariantes
         continue-on-error: true
         run: npm run check:invariants
@@ -102,6 +113,12 @@ jobs:
     name: Tests LeadOS (requiere DATABASE_URL_TEST)
     runs-on: ubuntu-latest
     steps:
+      # El checkout va PRIMERO y sin `if`, aunque el gate pueda saltear todo lo
+      # demás. Motivo: `defaults.run.working-directory` apunta a logic-core-v3/,
+      # y ese directorio no existe hasta que el repo está chequeado — un `run:`
+      # antes del checkout falla por directorio inexistente, no por su lógica.
+      - uses: actions/checkout@v4
+
       - name: Chequear si está el secret
         id: gate
         env:
@@ -114,13 +131,10 @@ jobs:
             echo "listo=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
-        if: steps.gate.outputs.listo == 'true'
-
       - uses: actions/setup-node@v4
         if: steps.gate.outputs.listo == 'true'
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: logic-core-v3/package-lock.json
 
@@ -150,6 +164,10 @@ jobs:
     name: E2E Playwright (requiere secrets)
     runs-on: ubuntu-latest
     steps:
+      # Ver la nota del job de arriba: el checkout tiene que preceder a cualquier
+      # `run:`, porque el working-directory por defecto no existe antes.
+      - uses: actions/checkout@v4
+
       - name: Chequear si están los secrets
         id: gate
         env:
@@ -163,13 +181,10 @@ jobs:
             echo "listo=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/checkout@v4
-        if: steps.gate.outputs.listo == 'true'
-
       - uses: actions/setup-node@v4
         if: steps.gate.outputs.listo == 'true'
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: logic-core-v3/package-lock.json
 
