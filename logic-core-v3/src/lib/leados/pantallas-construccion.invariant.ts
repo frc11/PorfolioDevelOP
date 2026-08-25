@@ -94,10 +94,34 @@ assert.equal(
 )
 
 // ── 4. El indicador "paso N de M" cuenta sobre la MISMA lista ──
+// OJO CON LA FORMA DE ESTA ASERCIÓN. Hasta C1b comparaba
+// `[...FASES_MANUAL.construccion.pantallas]` contra `[...PANTALLAS_CONSTRUCCION]`,
+// y los dos operandos salían DEL MISMO ARRAY: `manual.ts:310` hace
+// `pantallas: PANTALLAS_CONSTRUCCION`, sin copia. Era una tautología. C0 reprodujo
+// la topología contra seis valores arbitrarios —incluido invertir el orden, que
+// SÍ cambia el "paso N de M"— y la aserción pasó los seis.
+//
+// El fixture congelado de abajo es la única fuente INDEPENDIENTE que existe acá.
+// Cada lado se compara contra él, así que la aserción ya puede fallar por los dos
+// caminos por los que el "paso N de M" contaría otra cosa: que la lista cambie
+// (los dos lados se moverían juntos y nadie se enteraría) o que el manual deje de
+// leerla. Si las pantallas de Construcción cambian a propósito, se actualiza acá
+// EN EL MISMO COMMIT.
+const PANTALLAS_CONSTRUCCION_CONGELADAS = ['mc1', 'mc2'] as const
+
+assert.deepEqual(
+  [...PANTALLAS_CONSTRUCCION],
+  [...PANTALLAS_CONSTRUCCION_CONGELADAS],
+  'PANTALLAS_CONSTRUCCION cambió (se agregó, se borró o se reordenó una pantalla). El ' +
+    '"paso N de M" del manual cuenta sobre esta lista: actualizá ' +
+    'PANTALLAS_CONSTRUCCION_CONGELADAS en este mismo commit si el cambio es a propósito.',
+)
+
 assert.deepEqual(
   [...FASES_MANUAL.construccion.pantallas],
-  [...PANTALLAS_CONSTRUCCION],
-  'FASES_MANUAL.construccion.pantallas divergió de PANTALLAS_CONSTRUCCION (el "paso N de M" contaría otra cosa)',
+  [...PANTALLAS_CONSTRUCCION_CONGELADAS],
+  'FASES_MANUAL.construccion.pantallas divergió de PANTALLAS_CONSTRUCCION (el "paso N de M" ' +
+    'contaría otra cosa): el manual dejó de leer la lista de Construcción.',
 )
 
 // ── 5. La inversa es exacta: unión de fases == FASE_IDS, sin duplicados ──

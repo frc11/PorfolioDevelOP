@@ -5374,3 +5374,452 @@ Queda para Franco, sin cambiar nada del archivo: cargar
 solos. Y lo de fondo, que este sprint no tocó: los dos falsos verdes que C0 encontró
 (`self-check-gate` y `contador-dms`) ahora corren en cada push — y van a seguir mintiendo en
 verde hasta C1b.
+
+---
+
+## C1b · Que un invariante pruebe lo que promete — 2026-08-25
+
+C1 encendió el gate: 43 descubiertos, 42 corridos, 42 verdes, en cada push. Lo que C0 había
+medido es que **al menos dos de esos verdes son mentira**, y que la protección de otros no
+vive donde parece. Este sprint no toca el gate ni el workflow: toca **aserciones**. Cuatro
+invariantes que prometían algo y no lo probaban ahora lo prueban, y cada uno se aceptó recién
+tras verse **fallar** ante el sabotaje que C0 midió.
+
+Cero cambios de comportamiento de producción: `git diff` fuera de `*.invariant.ts` está
+vacío. Los cuatro archivos tocados son invariantes.
+
+---
+
+### Fase 1 · Qué se hizo para que los 19 de `ts-node` carguen, y si eso borró protección
+
+**Respuesta corta: se subió Node de 20 a 24 en el workflow, y nada más. No se debilitó nada.**
+
+El diff completo del arreglo, en `2515cb29`, son tres renglones idénticos —uno por job— en
+`.github/workflows/ci.yml`:
+
+```diff
+       - uses: actions/setup-node@v4
+         with:
+-          node-version: '20'
++          node-version: '24'
+```
+
+No se fijó la versión en `package.json`, no se cambió el runner de ningún script, no se tocó
+ninguna invocación, no se agregó ninguna bandera. `git diff 5ed0c24a 3f636437 -- '*.invariant.ts'`
+está **vacío**, y también lo está para `contracts.ts`, `flow-content.ts`, `flow.ts`,
+`manual.ts` y `schema.prisma`. Entre la base de C0 y la de C1b, lo único que cambió es el
+andamio.
+
+**La explicación que escribió C1 es incorrecta, y conviene corregirla acá porque de ella
+dependía la sospecha.** El comentario del workflow dice que con Node 24 «los levanta el
+type-stripping nativo». Si eso fuera cierto, los 19 correrían **sin chequeo de tipos** y el
+gate sería ciego justo a lo que C0 midió como su única protección real. Medido, no es así:
+
+```
+$ ./node_modules/.bin/ts-node src/lib/leados/__probe-esm.ts     # archivo con import + error de tipos
+TSError: ⨯ Unable to compile TypeScript:
+src/lib/leados/__probe-esm.ts(3,7): error TS2322: Type 'string' is not assignable to type 'number'.
+    at Object.require.extensions.<computed> [as .ts] (…/ts-node/src/index.ts:1621:12)   ← el hook CJS de ts-node
+EXIT 1
+
+$ node --no-experimental-strip-types ./node_modules/ts-node/dist/bin.js …/__probe-esm.ts
+… mismo TS2322, EXIT 1        ← con el type-stripping nativo APAGADO sigue chequeando
+```
+
+Quien carga los `.ts` es `require.extensions['.ts']` de `ts-node`, que compila **y
+type-chequea**. Apagar el stripping nativo no lo mueve. Lo que sí cambia entre versiones es
+otra cosa: reproducido local con un binario de Node 20 traído al vuelo,
+
+```
+$ npx node@20.19.5 ./node_modules/ts-node/dist/bin.js src/lib/leados/pantallas-construccion.invariant.ts
+TypeError: Unknown file extension ".ts"      at …/modules/esm/get_format:189    ERR_UNKNOWN_FILE_EXTENSION
+$ node          ./node_modules/ts-node/dist/bin.js src/lib/leados/pantallas-construccion.invariant.ts   # v24.13.0
+✓ invariante OK: el eslabón pantalla↔fase está atado en las DOS direcciones …
+```
+
+En Node 20 el entrypoint se va por el loader ESM y muere; en Node 24 lo toma el hook CJS de
+`ts-node`. **Subir la versión no reemplazó al compilador: lo destrabó.** La corrida verde de
+CI lo corrobora por otro lado — los 19 de `ts-node` tardan 2,2–2,8 s y los 24 de `tsx` tardan
+~1,0 s; esa diferencia es el chequeo de tipos, que no existiría bajo stripping.
+
+#### Tabla de runners de los 43
+
+| # | Script | Runner | ¿Type-chequea? |
+|---|---|---|---|
+| 1 | `check:invariant` (assignment-trail) | `ts-node` | **sí** |
+| 2 | `check:invariant:setter-meta` | `ts-node` | **sí** |
+| 3 | `check:invariant:escalamiento` | `ts-node` | **sí** |
+| 4 | `check:invariant:novedades` | `ts-node` | **sí** |
+| 5 | `check:invariant:mis-numeros` | `ts-node` | **sí** |
+| 6 | `check:invariant:timeline` | `ts-node` | **sí** |
+| 7 | `check:invariant:foco` | `ts-node` | **sí** |
+| 8 | `check:invariant:particion` | `ts-node` | **sí** |
+| 9 | `check:invariant:flow` | `ts-node` | **sí** |
+| 10 | `check:invariant:alta-propia` | `ts-node` | **sí** |
+| 11 | `check:invariant:prospecto-import` | `ts-node` | **sí** |
+| 12 | `check:invariant:gate-envio` | `ts-node` | **sí** |
+| 13 | `check:invariant:self-check` | `ts-node` | **sí** |
+| 14 | `check:invariant:progreso` | `ts-node` | **sí** |
+| 15 | `check:invariant:reloop-selfcheck` | `ts-node` | **sí** |
+| 16 | `check:invariant:manual` | `ts-node` | **sí** |
+| 17 | `check:invariant:pantallas` | `ts-node` | **sí** |
+| 18 | `check:invariant:turno` | `ts-node` | **sí** |
+| 19 | `check:invariant:security` (idor-tokens) | `ts-node` | **sí** |
+| 20 | `check:invariant:postergacion` | `npx tsx` | no |
+| 21 | `check:invariant:contador-dms` | `npx tsx` | no |
+| 22 | `check:invariant:acuse` | `npx tsx` | no |
+| 23 | `check:invariant:lead-scoring` | `npx tsx` | no |
+| 24 | `check:invariant:dates-ar` | `npx tsx` | no |
+| 25 | `check:invariant:lead-status` | `npx tsx` | no |
+| 26 | `check:invariant:home-metrics` | `npx tsx` | no |
+| 27 | `check:invariant:lead-detail` | `npx tsx` | no |
+| 28 | `check:invariant:recommendations` | `npx tsx` | no |
+| 29 | `check:invariant:gbp-connection` | `npx tsx` | no |
+| 30 | `check:invariant:modules` | `npx tsx` | no |
+| 31 | `check:invariant:motor-resenas-view` | `npx tsx` | no |
+| 32 | `check:invariant:upsell-dedup` | `npx tsx` | no |
+| 33 | `check:invariant:announcements` | `npx tsx` | no |
+| 34 | `check:invariant:referrals` | `npx tsx` | no |
+| 35 | `check:invariant:client-notifications` | `npx tsx` | no |
+| 36 | `check:invariant:executive-report-plan` | `npx tsx` | no |
+| 37 | `check:invariant:executive-report-prefs` | `npx tsx` | no |
+| 38 | `check:invariant:brief-input` | `npx tsx` | no |
+| 39 | `check:invariant:client-monthly-report` | `npx tsx` | no |
+| 40 | `check:invariant:client-monthly-report-pdf` | `npx tsx` | no *(excluido del agregado)* |
+| 41 | `check:invariant:notifications-brevo` | `npx tsx` | no |
+| 42 | `check:invariant:mask-secret` | `npx tsx` | no |
+| 43 | `check:invariant:cron-secret` | `npx tsx` | no |
+
+19 `ts-node` / 24 `tsx`, idéntico al corte que midió C0. Probado con un archivo con error de
+tipos deliberado: `ts-node` → `TS2322`, exit 1; `npx tsx` → `PROBE CORRIO SIN CHEQUEAR TIPOS`,
+exit 0.
+
+#### Los seis sabotajes de C0, re-corridos
+
+Worktree descartable `C:/tmp/wt-c1b` (detached sobre `3f636437`), `node_modules` por junction,
+uno por vez, revirtiendo por copia byte a byte (nunca `git checkout --`).
+
+| # | Sabotaje | C0 | C1b (sobre HEAD, antes de arreglar) | ¿Cambió? |
+|---|---|---|---|---|
+| 1 | `FASE_IDS` × 6 ids nuevos → `pantallas` | ROJO (TS7053) | **ROJO**, los mismos dos TS7053 | no |
+| 2a | ídem → `progreso` | ROJO (aserción) | **ROJO**, la misma aserción | no |
+| 2b | `progresoJson` con ids viejos | ciego | **ciego** | no |
+| 3 | +1 hard-check y 1 renombrado | VERDE 22/22 | **VERDE 42/42**, exit 0 | no |
+| 4 | «lead sin `evaluacionJson` → construir» | no concluyente | **no concluyente**: `trabajoTier` sigue sin leer `lead.evaluacion` | no |
+| 4b | `FICHA` → tier CONSTRUIR | ROJO | **ROJO**, la misma aserción de orden del foco | no |
+| 5 | la aserción vacua | 0 fallos / 6 valores | **0 fallos / 6 valores** | no |
+| 5b | romper el alias de `manual.ts:310` | ROJO | **ROJO** | no |
+| 6 | +1 valor en `ActivityChannel` | VERDE 22/22 | **VERDE 42/42**, exit 0 | no |
+
+**Ningún sabotaje que daba rojo pasó a verde. No hubo frenada.** Lo único que cambió es para
+mejor y es mérito del runner: bajo el sabotaje 1, la cadena `&&` de C0 moría en el 14.º y
+`pantallas` **ni llegaba a correr**; el runner reporta los dos —`progreso` **y** `pantallas`—
+en la misma corrida (`corridos 42 | pasaron 40 | fallaron 2`).
+
+---
+
+### Fase 2 · Los cuatro arreglos
+
+#### 2.1 · `self-check-gate` — el más caro
+
+```
+INVARIANTE   src/lib/leados/self-check-gate.invariant.ts  (check:invariant:self-check, ts-node)
+
+PROMESA      «selfCheckAprobado exige TODOS los hard-blocks VIGENTES (HARD_CHECKS) en verde —
+             valida contra la lista, no contra lo que el blob afirme; cada hard es dealbreaker
+             y un hard faltante no aprueba (dientes ante el drift de FG-2).»
+
+ANTES        Sabotaje 3 de C0 (un hard-check inventado + el `nombre` de otro renombrado):
+             VERDE. `check:invariant:self-check` exit 0, suite 42/42 exit 0.
+
+DESPUÉS      ROJO.
+```
+
+**Causa, y por qué el archivo no podía verlo.** Todos sus fixtures se derivaban de
+`HARD_CHECKS` en vivo (`HARD_CHECKS.map((c) => ({ nombre: c.nombre, ok: true }))`). Si la
+lista crece, el fixture crece con ella; si un nombre cambia, el fixture cambia con él. El
+archivo probaba la lógica de `selfCheckAprobado` —que es correcta— y nada más. Es el patrón
+que ya está anotado como trampa: un invariante que deriva sus fixtures de la lista que vigila
+da falso verde.
+
+**Lo que se agregó** son tres aserciones, y la fuente de las tres está escrita **a mano**:
+
+- **6 · censo congelado.** Los diez `{ id, nombre }` vigentes, literales, afirmados contra
+  `HARD_CHECKS`. Ve agregados, borrados, renombres y reordenamientos.
+- **7 · un self-check guardado ayer tiene que seguir aprobando.** Un blob congelado con los
+  diez nombres tildados, pasado por `selfCheckAprobado`. No es redundante con el 6: es el que
+  dice **qué cuesta** el renombre.
+- **8 · `nombre` es llave.** Ni los `nombre` ni los `id` pueden repetirse.
+
+**Las preguntas de diseño, contestadas contra el código:**
+
+`HardCheck` **sí** tiene `id` además de `nombre` (`flow-content.ts:128`). El blob **no** lo
+guarda: `SelfCheckSchema.itemsDuros` es `{ nombre, ok }` (`contracts.ts:125`) y
+`buildSelfCheck` escribe solo el nombre (`flow.ts:188`). El gate une por
+`item.nombre === check.nombre` (`flow.ts:207`) y el formulario re-encuentra el tilde por el
+mismo texto (`chequeo-form.tsx:51`). Y **no hay ningún precedente de matcher con fallback en
+cadena** en todo el árbol: cero ocurrencias de `nombresPrevios`, `aliasPrevios`,
+`legacyNombre` o `?? item.id`.
+
+Conclusión: **un fallback `id → nombre → nombres previos` NO es aditivo y NO entra en este
+sprint.** Exige agregar `id` al `SelfCheckSchema`, cambiar el write path, cambiar el gate y
+cambiar el formulario — cuatro archivos de producción y un cambio de forma del dato guardado.
+Eso es lógica de negocio, no una aserción. Por eso se tomó la otra rama que el encargo
+permite: **el invariante lo declara en rojo.** La aserción 7 es exactamente esa declaración.
+
+**DEMOSTRACIÓN.** Tres sabotajes, uno por vez.
+
+*(a) Solo agregar un check a la lista:*
+
+```diff
+  export const HARD_CHECKS: HardCheck[] = [
++   { id: 'sabotajeNuevo', nombre: 'SABOTAJE: chequeo nuevo agregado por C0', … },
+    { id: 'carga', nombre: 'La demo carga', …
+```
+```
+AssertionError [ERR_ASSERTION]: HARD_CHECKS divergió del censo congelado de este invariante:
+se agregó, se borró, se renombró o se reordenó un hard-check. …
+EXIT 1
+```
+
+*(b) Solo renombrar un check:*
+
+```diff
+-   nombre: 'La demo carga',
++   nombre: 'SABOTAJE: la demo abre sin error',
+```
+```
+AssertionError [ERR_ASSERTION]: HARD_CHECKS divergió del censo congelado …
++     nombre: 'SABOTAJE: la demo abre sin error'
+-     nombre: 'La demo carga'
+EXIT 1
+```
+
+*(c) El caso que importa — renombrar **y** actualizar el censo, o sea lo que haría un dev
+disciplinado leyendo el mensaje del 6. El rediseño de m14 va a hacer exactamente esto:*
+
+```diff
+  // flow-content.ts
+- nombre: 'La demo carga',
++ nombre: 'SABOTAJE: la demo abre sin error',
+  // self-check-gate.invariant.ts  (el censo, actualizado como pide el mensaje)
+- { id: 'carga', nombre: 'La demo carga' },
++ { id: 'carga', nombre: 'SABOTAJE: la demo abre sin error' },
+```
+```
+AssertionError [ERR_ASSERTION]: un self-check guardado con los nombres vigentes DEJÓ DE
+APROBAR. Se renombró o se agregó un hard-check y todos los self-checks ya guardados quedaron
+desaprobados en silencio: el setter ve el envío a revisión trabado sin ningún error. El
+vínculo blob↔lista es por `nombre` (texto visible), no por `id` — el blob no guarda el id.
+  false !== true
+EXIT 1
+```
+
+Y el sabotaje 3 completo de C0, el mismo de antes: **exit 1**.
+
+#### 2.2 · `contador-dms` — el `Record` inerte
+
+```
+INVARIANTE   src/lib/leados/contador-dms.invariant.ts  (check:invariant:contador-dms, tsx)
+
+PROMESA      «el contador de DMs cuenta MENSAJES MANDADOS (SIN_RESPUESTA: opener y toques) […]
+             y el número coincide con la definición de «toque mandado» de la cadencia.»
+
+ANTES        Sabotaje 6 de C0 (un valor nuevo en `ActivityChannel`): VERDE, suite 42/42 exit 0.
+             Y el `Record<ActivityResult, boolean>` de la línea 35, incompleto a propósito:
+             VERDE también — el guard del compilador es decoración bajo `tsx`.
+
+DESPUÉS      ROJO en los dos.
+```
+
+**La decisión que pedía el encargo: se afirma en runtime, no se cambia el runner.** Cambiar
+`contador-dms` a `ts-node` arrastraría a los otros 23 scripts de `tsx` y tocaría justo el
+mecanismo que la Fase 1 estaba midiendo; el encargo pedía frenar si esa era la salida, así que
+no lo es. Los dos enums se censan enumerándolos en runtime, que es la forma que **sí** corre
+bajo el runner que este script tiene hoy.
+
+- `Object.keys(esperado)` vs `Object.keys(ActivityResult)` — vuelve real la exhaustividad que
+  el `Record` prometía.
+- Bloque 4 nuevo: `CENSO_CANALES`, un renglón por canal escrito a mano con **las dos
+  decisiones explícitas** (¿suma al tope de Instagram? ¿es contacto comercial?), afirmado
+  contra `Object.keys(ActivityChannel)` y verificado canal por canal contra `contarDms` y
+  `esContactoComercial`.
+- `Fila` y `contarDms` subieron al scope del módulo: los dos ejes tienen que medir con la
+  **misma** réplica del `where`, o podrían divergir sin que nadie se entere.
+
+**DEMOSTRACIÓN.** El sabotaje 6, con el mismo método que usó C0 para la mitad de runtime
+(`prisma generate` escribiría en el `node_modules` compartido por junction, así que el valor
+del enum se inyecta con la forma que emitiría el generador — los enums de Prisma son objetos
+planos):
+
+```diff
+  enum ActivityChannel {
+    INSTAGRAM_DM
++   SABOTAJE_TIKTOK_DM
+    WHATSAPP
+```
+```
+canales tras la inyeccion: INSTAGRAM_DM,WHATSAPP,EMAIL,LLAMADA,LOOM_VIDEO,OTRO,SISTEMA,SABOTAJE_TIKTOK_DM
+AssertionError [ERR_ASSERTION]: apareció (o desapareció) un valor de ActivityChannel y el censo
+de este invariante no lo cubre. No lo agregues sin decidir las dos cosas: si suma al tope de
+Instagram y si cuenta como contacto comercial (que gasta un toque de la cadencia). Ojo: un
+canal nuevo entra al conteo comercial POR DEFECTO — `esContactoComercial` es `!== SISTEMA`.
+EXIT 1
+```
+
+Y el `Record` incompleto, la misma línea sacada de las dos versiones:
+
+```diff
+-   [ActivityResult.RECHAZADO]: false, // reacción del prospecto
+```
+```
+ANTES   (invariante de HEAD, tsx)   → ✓ invariante OK …            EXIT 0
+DESPUÉS (invariante arreglado, tsx) → AssertionError: el mapa de arriba dejó de cubrir todo
+                                      ActivityResult …             EXIT 1
+```
+
+#### 2.3 · La aserción vacua de `pantallas-construccion`
+
+```
+INVARIANTE   src/lib/leados/pantallas-construccion.invariant.ts, aserción 4 (líneas 96-101)
+
+PROMESA      «FASES_MANUAL.construccion.pantallas divergió de PANTALLAS_CONSTRUCCION (el
+             "paso N de M" contaría otra cosa)»
+
+ANTES        Los dos operandos salían del MISMO array (`manual.ts:310` hace
+             `pantallas: PANTALLAS_CONSTRUCCION`, sin copia). Reproducida la topología contra
+             seis valores arbitrarios: 0 fallos sobre 6, incluido invertir el orden.
+
+DESPUÉS      Cada lado se compara contra un fixture congelado independiente.
+```
+
+**El fixture congelado —`['mc1','mc2']`, escrito a mano— es la única fuente independiente que
+existe acá.** Con él la aserción puede fallar por los dos caminos por los que el "paso N de M"
+contaría otra cosa: que la lista cambie (antes los dos lados se movían juntos y nadie se
+enteraba) o que el manual deje de leerla.
+
+**DEMOSTRACIÓN.** El sabotaje que separa las dos versiones es **invertir el orden** — que le
+da vuelta el «paso 1 de 2» y el «paso 2 de 2» al setter y que C0 ya había medido como
+invisible:
+
+```diff
+- export const PANTALLAS_CONSTRUCCION = ['mc1', 'mc2'] as const
++ export const PANTALLAS_CONSTRUCCION = ['mc2', 'mc1'] as const
+```
+```
+ANTES   (invariante de HEAD)   → ✓ invariante OK: el eslabón pantalla↔fase …    EXIT 0
+DESPUÉS (invariante arreglado) → AssertionError: PANTALLAS_CONSTRUCCION cambió (se agregó, se
+                                 borró o se reordenó una pantalla) …            EXIT 1
+```
+
+Y el sabotaje 5b de C0 —romper el alias— sigue en rojo, ahora con un mensaje que dice qué se
+rompió: `el manual dejó de leer la lista de Construcción`. **EXIT 1**.
+
+#### 2.4 · `progreso` — la ceguera al blob persistido
+
+```
+INVARIANTE   src/lib/leados/progreso-isolation.invariant.ts  (check:invariant:progreso, ts-node)
+
+PROMESA      «ProgresoSchema valida contra FASE_IDS y el default es un checklist fresco; los
+             ids del shell son exactamente FASE_IDS.»
+
+ANTES        Sabotaje 2b de C0: el invariante nunca pregunta qué le pasa a un progreso YA
+             GUARDADO cuando la lista cambia. `parseProgreso` (flow.ts:133) se traga cualquier
+             blob que no valide y devuelve `{ completadas: [] }`. Sin throw, sin log.
+
+DESPUÉS      ROJO, con el costo escrito en el mensaje.
+```
+
+**Y hay un agujero más grande del que C0 no llegó a medir.** La aserción 5 ata
+`SHELL_CONSTRUCCION` contra `FASE_IDS`, pero **las dos listas se mueven juntas**: un renombre
+*coordinado* de los ids —el refactor natural, y el único que compila— la deja en verde. Medido:
+renombrar `estructura → estructuraV2` en las tres listas donde vive
+(`contracts.ts`, `flow-content.ts`, `manual.ts`) pasa **la suite entera**:
+
+```
+descubiertos 43  |  excluidos 1  |  corridos 42  |  pasaron 42  |  fallaron 0     EXIT 0
+```
+
+…y borra el checklist de **todos** los setters a la vez. Es todo-o-nada: un solo id fuera de
+la lista descarta el blob entero, no filtra el id malo.
+
+**Lo que se agregó**: un `PROGRESO_GUARDADO_AYER` congelado a mano —cinco fases tildadas y una
+`faseActual`, o sea lo que hay en la base hoy— pasado por el camino real de lectura, más su
+contracara (un id inventado descarta el blob entero) para que la aserción no pueda pasar por
+accidente.
+
+**DEMOSTRACIÓN.** El renombre coordinado, la suite completa, las dos versiones:
+
+```diff
+  // contracts.ts        - 'estructura',       + 'estructuraV2',
+  // flow-content.ts     - id: 'estructura',   + id: 'estructuraV2',
+  // manual.ts           - estructura: 'mc1',  + estructuraV2: 'mc1',
+```
+```
+ANTES   (los 4 invariantes en su versión de HEAD)
+        descubiertos 43 | excluidos 1 | corridos 42 | pasaron 42 | fallaron 0     EXIT 0
+
+DESPUÉS (los 4 arreglados)
+        ✗ FALLA   check:invariant:progreso
+        descubiertos 43 | excluidos 1 | corridos 42 | pasaron 41 | fallaron 1     EXIT 1
+
+        AssertionError: un progresoJson guardado con los ids vigentes DEJÓ DE PARSEAR:
+        `parseProgreso` lo descartó y devolvió un checklist fresco. Cambió `FASE_IDS` y los
+        tildes de todos los setters se pierden en silencio (todo-o-nada, no solo la fase
+        renombrada). Si el cambio es a propósito, migrá los blobs guardados y actualizá este
+        fixture en el mismo commit.
+```
+
+---
+
+### Qué NO se arregló, y por qué
+
+**`timeline` sigue sin guard exhaustivo de canal.** C0 agrupó `timeline` con `contador-dms` en
+el sabotaje 6; el encargo de C1b nombra solo a `contador-dms`. El censo de canales nuevo hace
+que el sabotaje 6 **caiga la suite**, que es lo que el bloque de cierre pedía, pero el eje de
+canal de `timeline` —que promete «SISTEMA se muestra pero NO cuenta»— sigue probándose con
+casos puntuales. Es barato y es el mismo patrón; queda anotado.
+
+**`check:invariant:client-monthly-report-pdf` sigue excluido.** La nota de C1 se lo asignó a
+C1b, pero reclasificarlo al job que tiene base **es tocar el workflow**, y la primera regla de
+este sprint es no tocarlo. Queda para el sprint que abra `.github/workflows/ci.yml`.
+
+**`LEGAL_TRANSITIONS` sigue sin invariante y sigue sin poder tenerlo.** Es `const` sin
+`export` en `dossier.ts`, que importa `@/lib/prisma`. Es la única puerta del stage y nadie la
+vigila. Sprint propio.
+
+**El lint sigue afuera y sigue midiendo mal** (108.208 problemas reportados porque
+`globalIgnores` no cubre los `distDir` alternativos y se lintean bundles minificados). Sprint
+propio y barato.
+
+**Los tests de LeadOS siguen sin correr** hasta que exista `DATABASE_URL_TEST`.
+
+---
+
+### Declaración de cierre
+
+**Comportamiento de producción: sin cambios.** Los únicos archivos modificados son cuatro
+`*.invariant.ts`. `git status --porcelain` del worktree de sabotaje, tras revertir todo,
+muestra exactamente esos cuatro y nada más; los cinco archivos de producción que se sabotearon
+—`contracts.ts` `7ddfc162`, `flow-content.ts` `6ba88e57`, `flow.ts` `bc4d60e5`, `manual.ts`
+`e1745fcd`, `schema.prisma` `01cd3747`— quedaron **byte a byte idénticos a HEAD**, verificado
+con `git hash-object` contra `git rev-parse HEAD:<path>` (nunca `git checkout --`: la
+conversión de fin de línea marca archivos como modificados sin cambio real).
+
+**Verificación:**
+
+```
+npx tsc --noEmit                → EXIT 0, sin salida
+npm run check:invariants        → descubiertos 43 | excluidos 1 | corridos 42 |
+                                  pasaron 42 | fallaron 0        EXIT 0
+```
+
+No se corrió `prisma generate` (no se tocó el schema) ni ninguna operación sobre la base.
+
+**El worktree de sabotaje se destruyó con la junction de `node_modules` desarmada primero**
+(`cmd /c rmdir`, que borra el enlace y no el destino), verificando el conteo de entradas del
+`node_modules` real antes y después. **Ningún sabotaje sobrevivió.**
+
+Desvío declarado: el commit se hizo desde `C:/tmp/wt-v1-integracion`, que es el worktree que
+tiene chequeada `leados/v1-integracion` — mismo motivo que en C0. El checkout principal quedó
+en `main`, intacto. Sin push.

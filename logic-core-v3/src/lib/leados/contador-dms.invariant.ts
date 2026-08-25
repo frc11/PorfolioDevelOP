@@ -20,7 +20,12 @@
 import assert from 'node:assert/strict'
 import { ActivityChannel, ActivityResult } from '@prisma/client'
 import { countFollowUps } from '../follow-up.ts'
-import { esMensajeEnviado, SOLO_MENSAJES_ENVIADOS } from './isolation.ts'
+import {
+  esContactoComercial,
+  esMensajeEnviado,
+  SOLO_CONTACTOS_COMERCIALES,
+  SOLO_MENSAJES_ENVIADOS,
+} from './isolation.ts'
 
 // ── 1. El fragmento `where` y el predicado puro son ESPEJO ───────────────────
 {
@@ -39,6 +44,19 @@ import { esMensajeEnviado, SOLO_MENSAJES_ENVIADOS } from './isolation.ts'
     [ActivityResult.RECHAZADO]: false, // reacción del prospecto
     [ActivityResult.CALL_AGENDADA]: false, // booking de Cal.com, no un DM
   }
+  // El `Record<ActivityResult, boolean>` de arriba es un guard DEL COMPILADOR, y
+  // este script corre con `tsx`, que NO type-chequea (C0 §3.0: con un Record
+  // deliberadamente incompleto, `tsx` llegó al runtime con 3 claves de 5 mientras
+  // `ts-node` daba TS2739). Mientras el runner sea `tsx`, esa exhaustividad es
+  // decoración. Esta aserción la vuelve real: enumera el enum EN RUNTIME.
+  assert.deepEqual(
+    Object.keys(esperado).sort(),
+    Object.keys(ActivityResult).sort(),
+    'el mapa de arriba dejó de cubrir todo ActivityResult: apareció (o desapareció) un valor ' +
+      'del enum y nadie decidió si cuenta como mensaje mandado. Agregalo al mapa con su ' +
+      'decisión — no lo dejes entrar al conteo por defecto.',
+  )
+
   for (const [result, cuenta] of Object.entries(esperado)) {
     assert.equal(
       esMensajeEnviado(result as ActivityResult),
@@ -51,15 +69,19 @@ import { esMensajeEnviado, SOLO_MENSAJES_ENVIADOS } from './isolation.ts'
   assert.equal(esMensajeEnviado(null), false, 'fila sin resultado no cuenta')
 }
 
+// Réplica in-memory del `where` de `contarDmsHoy` (canal + mensajes mandados).
+// Vive en el scope del módulo porque la usan DOS bloques: la jornada real (2) y
+// el censo exhaustivo de canales (4). Una sola réplica — con dos, los dos ejes
+// podrían medir cosas distintas y no nos enteraríamos.
+type Fila = { channel: ActivityChannel; result: ActivityResult | null }
+
+const contarDms = (filas: Fila[]): number =>
+  filas.filter(
+    (fila) => fila.channel === ActivityChannel.INSTAGRAM_DM && esMensajeEnviado(fila.result),
+  ).length
+
 // ── 2. LAS DOS DIRECCIONES sobre un día de trabajo real ──────────────────────
 {
-  type Fila = { channel: ActivityChannel; result: ActivityResult | null }
-
-  // Réplica in-memory del `where` de `contarDmsHoy` (canal + mensajes mandados).
-  const contarDms = (filas: Fila[]): number =>
-    filas.filter(
-      (fila) => fila.channel === ActivityChannel.INSTAGRAM_DM && esMensajeEnviado(fila.result),
-    ).length
 
   const opener: Fila = { channel: ActivityChannel.INSTAGRAM_DM, result: ActivityResult.SIN_RESPUESTA }
   const toque: Fila = { channel: ActivityChannel.INSTAGRAM_DM, result: ActivityResult.SIN_RESPUESTA }
@@ -122,9 +144,68 @@ import { esMensajeEnviado, SOLO_MENSAJES_ENVIADOS } from './isolation.ts'
   assert.equal(typeof esMensajeEnviado(ActivityResult.SIN_RESPUESTA), 'boolean', 'predicado puro')
 }
 
+
+// ── 4. CENSO EXHAUSTIVO DE CANALES, en runtime ──────────────────────────────
+// El falso verde que midió C0: un valor nuevo en `ActivityChannel` pasaba con la
+// suite entera en verde, y en runtime ese canal entraba al conteo comercial
+// (`esContactoComercial` → true: gasta un toque de la cadencia +2/+2/+3) sin sumar
+// al tope que cuida la cuenta de Instagram (`contarDms` → 0). Las dos definiciones
+// que este invariante existe para mantener unidas divergían sin una sola señal.
+//
+// El eje de canal se probaba con un único caso puntual —`contarDms([whatsapp]) === 0`—
+// que un valor nuevo no toca. Y no hay ningún `Record<ActivityChannel, …>` en todo
+// `src/`; aunque lo hubiera, sería inerte bajo `tsx`. Por eso el censo es de RUNTIME.
+{
+  // Escrito A MANO, un renglón por canal, con las DOS decisiones explícitas.
+  const CENSO_CANALES: Record<string, { sumaAlTopeDeInstagram: boolean; esComercial: boolean }> = {
+    INSTAGRAM_DM: { sumaAlTopeDeInstagram: true, esComercial: true },
+    WHATSAPP: { sumaAlTopeDeInstagram: false, esComercial: true },
+    EMAIL: { sumaAlTopeDeInstagram: false, esComercial: true },
+    LLAMADA: { sumaAlTopeDeInstagram: false, esComercial: true },
+    LOOM_VIDEO: { sumaAlTopeDeInstagram: false, esComercial: true },
+    OTRO: { sumaAlTopeDeInstagram: false, esComercial: true },
+    // Evento interno: ni suma al tope ni gasta cadencia.
+    SISTEMA: { sumaAlTopeDeInstagram: false, esComercial: false },
+  }
+
+  assert.deepEqual(
+    Object.keys(CENSO_CANALES).sort(),
+    Object.keys(ActivityChannel).sort(),
+    'apareció (o desapareció) un valor de ActivityChannel y el censo de este invariante no lo ' +
+      'cubre. No lo agregues sin decidir las dos cosas: si suma al tope de Instagram y si ' +
+      'cuenta como contacto comercial (que gasta un toque de la cadencia). Ojo: un canal ' +
+      'nuevo entra al conteo comercial POR DEFECTO — `esContactoComercial` es `!== SISTEMA`.',
+  )
+
+  for (const [canal, decision] of Object.entries(CENSO_CANALES)) {
+    const mandado: Fila = {
+      channel: canal as ActivityChannel,
+      result: ActivityResult.SIN_RESPUESTA,
+    }
+    assert.equal(
+      contarDms([mandado]),
+      decision.sumaAlTopeDeInstagram ? 1 : 0,
+      `${canal}: ${decision.sumaAlTopeDeInstagram ? 'suma' : 'NO suma'} al tope de Instagram`,
+    )
+    assert.equal(
+      esContactoComercial(canal as ActivityChannel),
+      decision.esComercial,
+      `${canal}: ${decision.esComercial ? 'es' : 'NO es'} contacto comercial (gasta cadencia)`,
+    )
+  }
+
+  // El `where` y el predicado siguen siendo espejo sobre el censo entero.
+  assert.deepEqual(
+    SOLO_CONTACTOS_COMERCIALES,
+    { channel: { not: ActivityChannel.SISTEMA } },
+    'el where de contactos comerciales dejó de ser espejo del predicado del censo',
+  )
+}
 console.log(
   '✓ invariante OK: el contador de DMs cuenta MENSAJES MANDADOS (SIN_RESPUESTA: ' +
     'opener y toques), no registros de actividad — postergar/responder/rechazar/agendar ' +
     'no lo mueven, registrar un toque suma 1, y el número coincide con la definición de ' +
-    '«toque mandado» de la cadencia. Sigue siendo informativo: cero bloqueo.',
+    '«toque mandado» de la cadencia. Los DOS enums se censan EN RUNTIME (el runner es ' +
+    '`tsx` y no type-chequea): un ActivityResult o un ActivityChannel nuevo se cae acá en ' +
+    'vez de entrar al conteo comercial por defecto. Sigue siendo informativo: cero bloqueo.',
 )
