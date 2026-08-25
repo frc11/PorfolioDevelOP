@@ -5348,3 +5348,29 @@ costo en la primera corrida.
 aparece con ✓ aunque haya fallado. En esa corrida `Tipos` e `Invariantes` se veían los dos en
 verde y el rojo estaba solo en `Veredicto`. El tilde verde ahí significa "no abortó el job", no
 "pasó" — el veredicto es el único que dice la verdad.
+
+### El gate corre, y pasa
+
+Segunda corrida sobre `2515cb29` — run `32870120782`, **`conclusion: success`**, los tres jobs
+en verde. Es la primera vez que este repo tiene una red de verificación que se ejecuta sola.
+
+Del log del job de verificación, que es lo que vale (el tilde de la UI no alcanza — ver el
+detalle de lectura de arriba):
+
+```
+Descubiertos 43 invariantes; corriendo 42 (sin cortar en el primer fallo)
+descubiertos 43  |  excluidos 1  |  corridos 42  |  pasaron 42  |  fallaron 0
+tipos:       success
+invariantes: success
+Tipos e invariantes en verde.
+```
+
+Los dos jobs de test salieron verdes **con su warning arriba de todo**: `DATABASE_URL_TEST no
+está configurado — los tests de LeadOS NO corrieron`. Ni rojo permanente ni silencio: el
+salteo queda escrito en las anotaciones de cada corrida hasta que el secret exista.
+
+Queda para Franco, sin cambiar nada del archivo: cargar
+`gh secret set DATABASE_URL_TEST --repo frc11/PorfolioDevelOP` y los dos jobs empiezan a correr
+solos. Y lo de fondo, que este sprint no tocó: los dos falsos verdes que C0 encontró
+(`self-check-gate` y `contador-dms`) ahora corren en cada push — y van a seguir mintiendo en
+verde hasta C1b.
