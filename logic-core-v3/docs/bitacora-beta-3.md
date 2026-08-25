@@ -4957,3 +4957,93 @@ planteada sin resolver — sacar el Evaluador son **dos** operaciones con revers
 (la pantalla, reversible; el valor del enum, no), y los documentos las tratan como una sola.
 
 **El paso 2 de A3 —la revisión adversarial del diseño, sin código— no se corrió.**
+
+---
+
+## A3-BIS · Los ocho frentes sin dictamen, y cinco preguntas nuevas — 2026-08-24
+
+**Qué se hizo.** Cerrar los ocho frentes que el §9 de `A3-VIABILIDAD-DECISIONES-2026-08.md` dejó
+declarados sin dictamen cuando su fan-out murió, más las cinco preguntas que nacieron al corregir las
+decisiones contra ese reporte. Read-only, sin proponer nada. Entregable:
+`docs/auditorias/A3-VIABILIDAD-BIS-2026-08.md`.
+
+**Base:** `leados/v1-integracion` @ `8e6c3c3d`, worktree `C:/tmp/wt-v1-integracion`. Cero consultas a la
+base. Cero corridas: ni build, ni tests, ni invariantes, ni navegador.
+
+### La parada que hubo que reportar
+
+**`correccion-decisiones-vs-A3.md` no existe.** El encargo lo declara el documento que manda sobre todos
+los demás y ordena frenar si no está. Se verificó por cuatro vías —la carpeta, las 28 ramas, los
+identificadores `D-C4-bis`/`D26-ter`/`D-cartera-bis` sobre todos los `.md`, y el estado sin commitear de
+`docs/`— y no está en ninguna. Los documentos que sí existen son la versión **anterior**: `plan-de-accion-v4.md`
+§C6 todavía dice "la cartera se agrupa por turno", que es justo lo que el encargo da por corregido.
+
+**No se frenó la corrida entera**, porque los trece frentes son preguntas sobre el código y el código no
+cambia según qué documento las formule. Todo enunciado que sólo vive en el encargo se trató como
+enunciado del encargo, y se dejó declarado qué no se pudo verificar por eso.
+
+### Lo que devolvió
+
+- **El mecanismo propio NO alcanza para S2, S3 ni S4.** `D-C4-bis` acierta en la premisa y falla en la
+  conclusión. `progresoJson` es un enum cerrado de seis que sólo cubre Construcción y cuya semántica es
+  navegación libre —lo contrario de S2—; `PosicionManual` devuelve tres listas de ids, ni acción ni
+  motivo; y "lo que falta" no es derivable porque `ORDEN_MANUAL` es privada, cubre 11 de 15 ids y `m4`/`m5`
+  se saltean sin dejar rastro.
+- **Siete decisiones nuevas no construibles**, que se suman a las diez del reporte anterior. La más
+  cara: *"las demos aprobadas y los rechazos entran a la cola de trabajo"* — **la cola de trabajo no se
+  renderiza en ninguna parte**: `grupos.trabajar` tiene un solo consumidor, `seleccionarFoco`.
+- **Un cambio de schema DESTRUCTIVO que el encargo daba por descartado.** `D26-ter` —pasar el match del
+  self-check de `nombre` a `id`— rompe blobs guardados en las dos variantes: con `id` requerido el admin
+  acusa "llegó a revisión sin self-check" en toda demo histórica; con `id` opcional los diez tildes se
+  re-hidratan vacíos **sin error, sin log y sin flag**.
+- **Seis errores del reporte anterior**, buscados a propósito. El que más pesa abajo.
+
+### El hallazgo transversal — no hay ningún gate automático sobre este repo
+
+No estaba en ningún frente; salió al verificar B1, y cambia cómo se lee toda afirmación de "el compilador
+lo atrapa":
+
+1. `next.config.ts:31-32` — `typescript: { ignoreBuildErrors: true }`. El build no chequea tipos.
+2. No existe script `tsc`/`typecheck` en `package.json`.
+3. El workflow que corre `check:invariants`, `test:leados` y `test:e2e` vive en
+   **`logic-core-v3/.github/workflows/e2e.yml`** — un `.github` **anidado**. GitHub Actions sólo lee
+   `<raíz>/.github/workflows/`, donde hay **un solo archivo: `db-backup.yml`**.
+
+Los 22 invariantes son reales y atrapan lo que dicen atrapar. **Corren sólo si alguien los corre a
+mano.** Y el único chequeo de tipos efectivo es `ts-node` dentro de esos invariantes: cubre `manual.ts`,
+`contracts.ts`, `flow.ts`, `paso.ts` y `turno.ts`, y deja **todo `src/app/(protected)/**` sin red** —
+justo el árbol donde vive el 100% de lo que C4 propone tocar.
+
+### Tres falsos verdes encontrados
+
+- **`pantallas-construccion.invariant.ts:96-101` es tautológico**: compara
+  `[...FASES_MANUAL.construccion.pantallas]` contra `[...PANTALLAS_CONSTRUCCION]`, y `manual.ts:310`
+  asigna **el mismo objeto por referencia**. Esa aserción no puede fallar nunca.
+- **`particion.invariant.ts` asume el acoplamiento en vez de probarlo**: su fixture pone `grupo` y
+  `accionable` a mano y nunca llama a `grupoPara`. Es estructuralmente incapaz de detectar que las dos
+  funciones divergen.
+- **`progreso-isolation.invariant.ts` no ejecuta su promesa de no-gate**: sólo afirma que el default es
+  `{completadas: []}`. Volver secuencial a `mc2` pasaría en verde por ese invariante.
+
+### Cabos de método
+
+- **El fan-out volvió a caer, pero tarde y distinto.** Trece de los catorce frentes entregaron dictamen
+  completo antes del límite; murieron **A1a** y **los once agentes de refutación**. Se banquearon los
+  trece resultados a disco antes de tocar nada, y tras el reset se relanzaron A1a y una refutación
+  dirigida a B3/B4 con `Agent` en lote chico — **no se rehizo secuencial**, que fue lo que costó
+  cobertura la vez anterior.
+- **La refutación adversarial rindió y hay que declararla.** De los seis hallazgos que pasaron por ella,
+  **dos se corrigieron** (el falso verde del self-check es de segundo orden, no de entrada; el lead
+  ganado canónico cae en `seguimiento`, no en `trabajar`) y **una lectura intermedia del propio auditor
+  quedó refutada**: la cartera **no** agrupa hoy — `cartera-view.tsx:36` degrada `'colas'` a `'urgencia'`
+  y el valor ni siquiera está en `ORDEN_OPCIONES`, así que es inalcanzable desde la UI.
+- **Los subagentes también corrigieron al padre**, y quedó en el reporte: `NavCompletadas` no existe (es
+  `NavAtras`, con dos call-sites), `archivo-manual.tsx` no monta la tira de completadas, y `mc2` tiene
+  tres prompts, no cuatro.
+
+**Estado de datos:** intacto. Cero escrituras fuera de `docs/`. `git diff --stat 8e6c3c3d` sin salida.
+
+**Queda para Franco:** el cambio destructivo de `D26-ter`, y la decisión de fondo que el §4 deja
+planteada — hoy nada corre solo en este repositorio.
+
+**El paso 2 de A3 —la revisión adversarial del diseño, sin código— sigue sin correrse.**
