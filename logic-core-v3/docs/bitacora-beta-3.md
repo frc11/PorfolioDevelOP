@@ -6370,3 +6370,156 @@ número es **desconocido**: este sprint no se conectó a la base de producción.
   todas revertidas y verificadas revertidas en la misma corrida.
 - Trabajado desde `C:/tmp/wt-v1-integracion`. El checkout principal quedó en `main`, intacto.
 - Sin push.
+
+---
+
+## Sprint V1-A-MAIN — la rama a salvo y el merge a main preparado, sin pushear a main
+
+Cuatro sprints de trabajo (el gate en CI, los 43 invariantes, los cuatro falsos verdes, F1, F2, F3)
+vivían en `leados/v1-integracion` y `main` no los tenía. Además la rama tenía **5 commits sin
+pushear**: todo eso existía en un solo disco. Este sprint pone la rama a salvo, prepara el merge en
+una rama de integración aparte y lo verifica. **El push a main es de Franco.**
+
+### El terreno (Fase 0)
+
+| ref | hash |
+|-----|------|
+| `leados/v1-integracion` (local) | `b3ea27db` |
+| `origin/leados/v1-integracion` (antes del sprint) | `3f636437` |
+| `main` (local) | `17727117` |
+| `origin/main` | `17727117` |
+
+Distancias: la rama estaba **5 adelante / 0 atrás** de su propio origin, y **18 adelante / 0 atrás**
+de `origin/main`. `main` local y `origin/main` en **0 y 0**.
+
+El dato que reencuadra todo el sprint: **merge-base(`origin/main`, rama) == `origin/main` ==
+`17727117`**. `origin/main` es ancestro de la rama — no se movió desde la integración anterior. El
+merge no es un merge: es un **fast-forward**. No hay conflicto que resolver, ni de código ni de
+bitácora.
+
+Cambios ajenos sin commitear: `docs/` sin trackear en el checkout principal (no está en el repo; no
+se tocó) y un `png.zip` sin trackear en `wt-v1-integracion`. Doce worktrees vivos, dos stashes: nada
+de eso se tocó.
+
+### La rama, a salvo (paso 1 — el que solo ya justificaba el sprint)
+
+Push con refspec explícito de `refs/heads/leados/v1-integracion` a la rama homónima:
+`3f636437..b3ea27db`, exit 0. Verificación: `rev-list --left-right --count` contra
+`origin/leados/v1-integracion` da **0 y 0**, mismo hash de los dos lados. Los cuatro sprints dejaron
+de vivir en un solo disco.
+
+### Diagnóstico del merge, sin mergear (paso 2)
+
+`git merge-tree --write-tree origin/main leados/v1-integracion` → exit 0, una sola línea de salida
+(el árbol) y **0 conflictos**. El árbol que produciría, `9f68b9d5`, es **idéntico** al árbol de la
+rama: fast-forward puro. `origin/main` aporta **0 commits** que la rama no tenga, así que ninguno
+toca `setter/`, `lib/leados/` ni `prisma/` — no hay nada que tocar.
+
+`prisma/` tiene el **mismo hash de subárbol** en los dos lados (`eabeec30`): el merge no trae schema
+ni migraciones. Por eso no corresponde `prisma generate`.
+
+### El merge, en rama de integración aparte (paso 3)
+
+`main` no se tocó. Se creó `leados/v1-a-main` desde `origin/main` con `--no-track` — un branch que
+trackea `origin/main` convierte un push pelado en un push a main — y se mergeó ahí, en un worktree
+propio en `C:/tmp/wt-v1-a-main`. El worktree `wt-v1-integracion` quedó intacto.
+
+Resultado: **fast-forward a `b3ea27db`**, árbol de trabajo limpio, **0 marcadores de conflicto** en
+todo el árbol.
+
+### Los ocho chequeos de la bitácora
+
+No hubo conflicto, así que no hubo resolución que verificar. Se corrieron igual sobre el archivo,
+porque la bitácora es lo que más se toca en las dos ramas:
+
+| chequeo | resultado |
+|---|---|
+| bitácora del resultado vs la de la rama | **0 líneas de diff** — idéntica |
+| líneas borradas respecto de `origin/main` | **0** |
+| `origin/main` sobrevive en orden dentro del resultado | **sí**, subsecuencia exacta |
+| ninguna línea de `origin/main` falta (multiset) | **0 ausentes** |
+| ninguna línea de la rama falta (multiset) | **0 ausentes** |
+| líneas que no vienen de ningún lado | **0** |
+| secciones de segundo nivel | `origin/main` 84 · rama 97 · resultado **97** |
+| marcadores de conflicto sobrevivientes | **0** |
+
+De 4.313 líneas a 6.372, todo agregado, nada perdido. Las entradas se insertan cronológicamente, no
+al final: por eso el prefijo no coincide y la prueba correcta es la de subsecuencia, no la de
+prefijo.
+
+### Los cuatro gates, sobre el resultado
+
+| gate | exit | resultado |
+|---|---|---|
+| `npx tsc --noEmit` | **0** | 0 líneas de salida |
+| `npm run check:invariants` | **0** | 44 descubiertos, 1 excluido con motivo, **43 corridos / 43 pasaron / 0 fallaron** |
+| `npm run build` | **0** | sin errores |
+| `npx prisma migrate status` | **0** | al día, 86 migraciones, sin drift |
+
+Los 43, por nombre: `check:invariant`, `setter-meta`, `escalamiento`, `novedades`, `mis-numeros`,
+`timeline`, `foco`, `particion`, `flow`, `alta-propia`, `prospecto-import`, `gate-envio`,
+`self-check`, `progreso`, `reloop-selfcheck`, `manual`, `pantallas`, `turno`, `postergacion`,
+`contador-dms`, `acuse`, `dossier-stage`, `security`, `lead-scoring`, `dates-ar`, `lead-status`,
+`home-metrics`, `lead-detail`, `recommendations`, `gbp-connection`, `modules`,
+`motor-resenas-view`, `upsell-dedup`, `announcements`, `referrals`, `client-notifications`,
+`executive-report-plan`, `executive-report-prefs`, `brief-input`, `client-monthly-report`,
+`notifications-brevo`, `mask-secret`, `cron-secret`.
+
+Nota sobre el gate 4: en el worktree nuevo salió **exit 1** por `P1012 — Environment variable not
+found: DATABASE_URL`. No es drift: los archivos de entorno están ignorados y viven solo en el
+checkout principal. Como `prisma/` es **idéntico byte a byte** entre los dos lados, se corrió en el
+checkout principal, que es el mismo árbol de schema y de migraciones. Verde. El checkout principal
+quedó como estaba.
+
+### Que no se perdió nada (paso 5)
+
+- Commits de `origin/main` ausentes del resultado: **0**.
+- Commits de `leados/v1-integracion` ausentes del resultado: **0**.
+- Diff total resultado vs rama de trabajo: **0 líneas**, mismo árbol `9f68b9d5`.
+- Contra `origin/main`: 18 archivos bajo `src/`, +1.462 / −69.
+
+### F1, F2 y F3 — por contenido, no por mensaje de commit
+
+- **F1-a, la postergación es un día de calendario.** `parseCalendarDayAR` en `src/lib/dates-ar.ts`
+  ancla un día ISO a las 03:00Z (medianoche AR) y valida el round-trip contra los componentes
+  pedidos, porque `Date.UTC` normaliza los desbordes en vez de fallar. Lo consume
+  `reactivateAtSchema` en `outreach.schemas.ts`, un `z.preprocess` que reemplazó al
+  `z.coerce.date()` pelado y que pasa de largo lo que ya es instante — el preprocess corre dos veces
+  sobre el mismo dato y la segunda no vuelve a mover el día.
+- **F1-b, el contador cuenta mensajes.** `SOLO_MENSAJES_ENVIADOS` en `isolation.ts` filtra por
+  `result: SIN_RESPUESTA`, y `contarDmsHoy` en `outreach.ts` lo suma a su `where`. Sin ese filtro
+  contaba toda fila del canal: postergar un contacto, que no manda nada, subía el número igual.
+- **F2, el motivo acompaña la corrección.** `CamposDelRechazo` en `guia-retrabajo.tsx` renderiza
+  qué / dónde / detalle / arreglo; `_data.ts` parte el historial una sola vez y expone `rechazo` y
+  `rechazosPrevios`; el paso del manual monta `GuiaRetrabajo` con el gate exacto por stage
+  (`rechazo` no nulo y stage en `RECHAZADA` o `CONSTRUCCION`).
+- **F3, el acuse de recibo.** `src/lib/leados/acuse-recibo.invariant.ts` existe, está encadenado
+  como `check:invariant:acuse` y **corrió verde en el gate 2** (4.338 ms). Mira el call-site y no el
+  archivo, que es lo que hace la diferencia entre una red y un adorno.
+
+### Las suites de test — no se corrieron, y por qué
+
+`test:leados` y `test:setter` cargan `.env.local` por dotenv y necesitan la base: `test:setter` usa
+Prisma para **seed y teardown**. Este sprint tiene prohibida toda operación sobre la base de datos,
+y además no existe ningún `.env.test` en el repo ni archivos de entorno en el worktree nuevo. No se
+corrieron y no se inventan.
+
+### Desvíos declarados
+
+- **No se pusheó a main.** `main` local sigue en `17727117`, igual que `origin/main`.
+- **Cero cambios de contenido fuera de esta bitácora.** El merge fue fast-forward: ningún archivo se
+  editó a mano.
+- La rama de integración queda un commit por delante de la rama de trabajo, y ese commit es este
+  bloque de bitácora.
+- Trabajado desde `C:/tmp/wt-v1-a-main`, worktree propio. El checkout principal quedó en `main`,
+  intacto. `wt-v1-integracion`, los worktrees de F1/F2/F3 y los dos stashes no se tocaron.
+
+### Lo que queda para el humano
+
+El push a main, con este comando exacto:
+
+    git push origin refs/heads/leados/v1-a-main:refs/heads/main
+
+Es un fast-forward sobre `17727117`. Después de eso, la corrida de CI sobre `main` — va a ser la
+primera vez que el gate corre sobre la rama que importa, y el día que suba, los dos bugs de datos
+dejan de estar vivos donde corren las corridas.
