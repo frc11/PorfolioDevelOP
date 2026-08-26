@@ -6214,3 +6214,159 @@ no hizo.
   `main`, intacto.
 - **Sin push.** Los dos commits (`c219d830` y `7eeacdef`) quedan locales, para que Franco decida
   cuándo dispara el gate.
+
+---
+
+## Sprint F1-VERIF — los dos bugs de datos, ya arreglados en la rama: verificación de punta a punta
+
+**Qué pasó, y por qué este sprint no escribió una línea de código.**
+
+El pedido traía dos defectos medidos con navegador real: la postergación que se guarda un día
+antes, y el contador de DMs que sube al postergar. Los dos son ciertos y están reproducidos acá
+abajo. Lo que el terreno agregó es que **ya estaban arreglados en la rama base**: los arregló F1
+(`34e15156`, «la fecha de postergación es un día del calendario, y el contador cuenta mensajes»),
+que entró a `leados/v1-integracion` por la integración del carril F (`cbfaa27f`).
+
+Dónde siguen vivos: en `main`. `main` tiene `reactivateAt: z.coerce.date().optional()`
+(`outreach.schemas.ts:58`), `contarDmsHoy` filtrando solo por canal (`outreach.ts:59-68`) y cero
+apariciones de `parseCalendarDayAR`. La corrida visual que los encontró midió ese código.
+Re-implementarlos sobre la rama habría sido escribir el mismo arreglo dos veces, así que el
+sprint se convirtió en lo único que faltaba: **verificar que el arreglo cubre las cuatro
+afirmaciones de cada bug, medido contra la base, no leído del diff.**
+
+### La cadena de la postergación, censada — los tres consumos
+
+El día que el setter elige entra por el date-picker de `seguimiento-form.tsx:166` (estado
+`fechaReactivacion`), viaja como string crudo (`seguimiento-form.tsx:109`), lo valida
+`ResultadoInputSchema` → `reactivateAtSchema` (`outreach.schemas.ts:59-62`), la action lo
+desestructura y llama a `postergarLead` (`outreach.actions.ts:178,194-195`), que escribe
+`status: POSTERGADO` + `reactivateAt` (`os-commercial.ts:181-192`). De ahí salen **tres** consumos,
+no uno:
+
+1. **La pantalla** — `formatFechaCorta(reactivateAt)` en `m5-seguimiento.tsx:90`, que formatea en
+   huso de Buenos Aires (`flow.ts:259-265`).
+2. **El foco** — `postergadoVencido` en `home.ts:54-57`: `reactivateAt.getTime() <= ahora`. Es lo
+   que decide si el lead vuelve a ser trabajo, y alimenta `TRABAJO_TIER.ESPERA_TU_ACCION`
+   (`flow.ts:677`).
+3. **El cron** — `isReactivationLead` en `api/cron/os-follow-up/route.ts:112-118`:
+   `reactivateAt <= endOfDay`, con `endOfDay` = 23:59:59.999 menos tres horas del día AR
+   (`route.ts:57`). Es el que avisa «se reactiva hoy».
+
+El diagnóstico «es el formateo» habría arreglado 1 y dejado 2 y 3 rotos. La raíz es tratar un día
+de calendario como un instante, y ahí se corrigió.
+
+### Medición de la fecha — escritura real, lectura desde la base
+
+Camino de producción completo: parseo con el schema, después `postergarLead`, después `findUnique`
+sobre Neon. Dos fechas distintas, una común y una de cambio de mes. El brazo ANTES usa el schema
+tal cual está hoy en `main`. Estado del lead restaurado al terminar (verificado: `PROSPECTO` /
+`null`).
+
+| elige | rama | en la base | eso en AR | pantalla | cron el día previo | cron el día elegido |
+|---|---|---|---|---|---|---|
+| 2026-09-25 | `main` | `2026-09-25T00:00:00.000Z` | 24/09 21:00 | **24/9** | **LO REACTIVA** | lo reactiva |
+| 2026-10-01 | `main` | `2026-10-01T00:00:00.000Z` | 30/09 21:00 | **30/9** | **LO REACTIVA** | lo reactiva |
+| 2026-09-25 | rama | `2026-09-25T03:00:00.000Z` | 25/09 00:00 | 25/9 | no lo toca | LO REACTIVA |
+| 2026-10-01 | rama | `2026-10-01T03:00:00.000Z` | 01/10 00:00 | 1/10 | no lo toca | LO REACTIVA |
+
+Las cuatro afirmaciones del pedido quedan verdaderas en la rama, y las tres primeras falsas en
+`main`. La cuarta —un lead ya postergado con el dato viejo sigue funcionando— se sostiene porque
+el arreglo **no reinterpreta nada**: un `reactivateAt` sigue siendo un instante y se compara igual;
+solo cambió quién lo construye.
+
+**Sobre el patrón que el pedido señalaba para copiar.** El pausar de la cartera arma el instante
+concatenando la fecha elegida con la hora `T23:59:59` y pasándosela a `new Date`
+(`cartera.actions.ts:83`) — eso NO es fin del día argentino, es fin del día **del huso del
+servidor**. En una máquina local en AR da la hora que el pedido describe; en Vercel (UTC) el mismo
+código guarda 23:59:59 UTC, que en AR son las 20:59:59. No produce el corrimiento de un día porque
+restar 3 horas a las 23:59 no cruza la medianoche, así que el bug queda tapado — pero el patrón es
+dependiente del entorno. F1 no lo copió: ancló el día con `parseCalendarDayAR`
+(`dates-ar.ts:107-130`), la misma regla «00:00 AR es 03:00 UTC del mismo día» que ya usaban
+`startOfDayAR` y `startOfMonthAR`. Y el ancla al **arranque** del día es la correcta para el
+consumo 2: con fin de día, `postergadoVencido` recién daría vuelta a las 23:59 del día elegido —
+o sea, el lead volvería en la práctica al día siguiente. El patrón propuesto habría cambiado un
+corrimiento por otro.
+
+### Medición del contador — mismo camino de escritura que el panel
+
+Filas creadas con `registrarContactoComercial`, contadas con las dos consultas (la de `main` y la
+de la rama) después de cada paso. Las 6 actividades se borraron y los 2 leads se restauraron.
+
+| paso | `main` | rama |
+|---|---|---|
+| punto de partida | 0 / 10 | 0 / 10 |
+| postergo el lead A | **1 / 10** | 0 / 10 |
+| postergo el lead B | **2 / 10** | 0 / 10 |
+| registro un opener | 3 / 10 | **1 / 10** |
+| registro un toque | 4 / 10 | **2 / 10** |
+| el prospecto rechaza | **5 / 10** | 2 / 10 |
+| el prospecto responde | **6 / 10** | 2 / 10 |
+
+`main` reproduce exactamente lo reportado (0 → 1 → 2 sin mandar un solo mensaje). En la rama las
+cuatro afirmaciones se cumplen: postergar no mueve, opener sí, toque sí, rechazar y responder no.
+
+El filtro que separa contacto comercial de evento interno (`SOLO_CONTACTOS_COMERCIALES`,
+`isolation.ts:116-118`, negativo: todo lo que no sea SISTEMA) **no se tocó** — sigue con su
+definición y sigue alimentando el opener pendiente y el grupo del lead. El contador usa un filtro
+distinto y aparte, `SOLO_MENSAJES_ENVIADOS` (`isolation.ts:142-144`), positivo por `result`.
+
+### Los tests, demostrados fallando contra el código viejo
+
+Los dos invariantes ya existen y ya están encadenados (`check:invariant:postergacion`,
+`check:invariant:contador-dms`). Lo que faltaba era la demostración, y se hizo restaurando los
+archivos pre-F1 desde `34e15156^` y corriendo cada uno:
+
+- **postergación** — con `outreach.schemas.ts` pre-F1: `AssertionError: 2099-08-25: guardado ==
+  elegido (día AR)`, actual `2099-08-24`, esperado `2099-08-25`. Exit 1.
+- **contador** — con `isolation.ts` y `outreach.ts` pre-F1: `AssertionError: el where del conteo
+  filtra por resultado, no solo por canal`, actual `undefined`, esperado
+  `{ result: 'SIN_RESPUESTA' }`. Exit 1.
+
+Los tres archivos se restauraron desde respaldo y se verificaron por md5 idénticos al original;
+`git status` quedó limpio.
+
+### Un falso verde encontrado en el camino (no se tocó)
+
+Sonda: dejar `isolation.ts` **arreglado** y revertir solo el `where` de `contarDmsHoy`
+(`outreach.ts:63-73`) al de `main`. Resultado: `check:invariant:contador-dms` **pasa en verde** y
+`npx tsc --noEmit` sale **0**. El invariante afirma sobre el fragmento `where` y sobre una réplica
+in-memory del filtro, no sobre la consulta real; el fragmento puede quedar exportado y sin usar sin
+que nada avise. O sea: el bug reportado podría volver a entrar entero por ese archivo con el gate
+verde. Es el patrón de falso verde que ya está registrado en el repo, y queda **anotado, no
+arreglado** — tocar el invariante estaba fuera de alcance.
+
+### Postergaciones con el desvío — contadas, no migradas
+
+Consulta usada: todos los `OsLead` con `reactivateAt` no nulo, marcando los que caen en medianoche
+UTC exacta (`getUTCHours`, `getUTCMinutes`, `getUTCSeconds` y `getUTCMilliseconds` todos en 0) — la
+firma que deja `new Date` sobre un `YYYY-MM-DD` y que un instante real no produce por casualidad.
+
+En la base de desarrollo: **4 filas con `reactivateAt`, 0 con el desvío**. Las dos POSTERGADO
+viejas están a las 13:00Z y las dos QA a las 23:xxZ — todas instantes reales. En producción el
+número es **desconocido**: este sprint no se conectó a la base de producción. Nada se migró.
+
+### Los otros `z.coerce.date()` sobre fecha sin hora — listados, sin tocar
+
+- `admin/projects/_actions/project.schemas.ts:23` → `estimatedEndDate`, alimentado por dos
+  date-pickers (`project-form.tsx:297`, `convert-lead-dialog.tsx:242`). **Mismo bug, vivo.**
+- `admin/team/_actions/time-entry.schemas.ts:33-34` → `date`, `from`, `to`, alimentado por
+  `time-entry-panel.tsx:252`. **Mismo bug, vivo.**
+- `admin/leads/_actions/lead.schemas.ts:40` → `optionalReactivateAtSchema`. Hoy **no** está
+  afectado: quien lo alimenta manda un instante real (`Date.now()` más N días,
+  `change-status-select.tsx:42` y `lead-pipeline.tsx:127`). La trampa queda armada para el día que
+  alguien le enchufe un date-picker.
+
+### Gates
+
+`npx tsc --noEmit` exit 0 · invariantes **43/43** (44 descubiertos, 1 excluido por necesitar DB) ·
+`npm run build` exit 0 · `prisma migrate status` al día, 86 migraciones, sin drift.
+
+### Desvíos declarados
+
+- **Cero líneas de código escritas.** El sprint pedía arreglar dos bugs que la rama base ya tenía
+  arreglados. Se verificó en vez de re-implementar.
+- **Cero commits de código.** Este bloque de bitácora es lo único que se agrega.
+- Se hicieron escrituras reales en la base de desarrollo para medir (2 leads, 6 actividades),
+  todas revertidas y verificadas revertidas en la misma corrida.
+- Trabajado desde `C:/tmp/wt-v1-integracion`. El checkout principal quedó en `main`, intacto.
+- Sin push.
