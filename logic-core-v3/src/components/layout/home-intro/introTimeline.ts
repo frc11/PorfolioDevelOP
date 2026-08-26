@@ -28,6 +28,32 @@ import {
  *     el relevo 2D→3D ocurre adentro de ella.
  *  3. **El acomodamiento mueve y gira a la vez**, con un solo número.
  *
+ * ── S8e: los tiempos del preloader clásico ─────────────────────────────────
+ *
+ * Los MECANISMOS de S8d quedaron intactos; lo que cambió son los números. Cada
+ * perilla con equivalente en el preloader clásico (`src/components/ui/
+ * Preloader.tsx` + `IntroLockupText.tsx`, los de `main`) tomó su valor:
+ *
+ *     trazo   0,85 s  ← HOME_STROKE_SECONDS
+ *     relleno 0,45 s  ← HOME_FILL_SECONDS
+ *     color   1,40 s  ← VEIL_FADE_SECONDS
+ *
+ * Dos perillas con equivalente NO lo tomaron, cada una por su motivo:
+ *
+ *  · La espera bajó de los 1,5 s del clásico (`READ_HOLD_MS`) a 0,95 s, que era
+ *    la instrucción: ese hold era tiempo literalmente muerto.
+ *  · **El acomodamiento NO adoptó `COMPRESS_SECONDS` (0,78 s)**, y quedó en
+ *    2,4 s. Allá el gesto era un deslizamiento corto sobre una pantalla que ya
+ *    tenía el contenido detrás; acá es un viaje con giro que entrega la escena
+ *    3D. Ver su docblock: **es la única perilla que se decide mirando.**
+ *
+ * Y otros tres números del clásico no se adoptaron porque acá ni siquiera hay
+ * perilla que mover: su equivalente está atado por una propiedad —
+ * `WRITE_MS`/`ERASE_MS` (1,5 s, ver `LINE_IN_DURATION_FRAC`) y
+ * `HOME_CROSSFADE_SECONDS` (0,4 s, ver `SWAP_FRAC`).
+ *
+ * Total: **7,35 s**, contra los 7,27 s del clásico y los 8,15 s de S8d.
+ *
  * Cómo se LEE este ritmo en un instante vive en `introSampling.ts`, separado por
  * la misma regla que separa `choreography.ts` de `choreographySampler.ts` en el
  * probe: el archivo que se abre para calibrar tiene que ser todo dato.
@@ -56,71 +82,132 @@ export const HOME_INTRO_PHASES: HomeIntroPhases = {
    *
    * La pantalla oscura no se cobra tiempo aparte: el velo ya está pintado desde
    * el primer paint, así que la red y la hidratación SON el hold oscuro.
+   *
+   * S8e: **0,85 s, el `HOME_STROKE_SECONDS` del clásico.**
    */
-  strokeS: 1.4,
-  /** EL RELLENO. El contorno se completa y la tinta blanca lo llena. */
-  fillS: 0.35,
+  strokeS: 0.85,
+  /**
+   * EL RELLENO. El contorno se completa y la tinta blanca lo llena.
+   *
+   * S8e: **0,45 s, el `HOME_FILL_SECONDS` del clásico.**
+   */
+  fillS: 0.45,
   /**
    * LA ESPERA. Quietud con el lockup ya completo y legible.
    *
-   * **Bajó de 1,0 s a 0,6 s.** En S8b y S8c era larga porque tenía que crear la
-   * tensión que el chasquido descargaba; sin chasquido no hay tensión que
-   * construir, solo un estado terminado que se deja leer. 0,6 s es
-   * `MOTION_DURATION.elemento`: el tiempo que el sistema considera suficiente
-   * para que algo se registre.
+   * Es el `READ_HOLD_MS` del clásico (1,5 s) y **la única perilla que S8e NO
+   * copia**: era tiempo literalmente muerto (`await wait(READ_HOLD_MS)`, sin un
+   * solo canal animándose) y la instrucción fue bajarla.
+   *
+   * Se bajó preservando la LECTURA, no el número. En el clásico el lockup queda
+   * terminado en pantalla 1,70 s (la escritura cerraba en 3,05 s y el borrado
+   * arrancaba en 4,75 s). Acá las letras terminan de aparecer 0,535 s antes de
+   * que empiece la espera —el 10% final del trazo más el relleno entero corren
+   * con el texto ya completo y quieto—, así que 1,50 − 0,535 ≈ 0,95 s deja
+   * **1,485 s de lockup terminado**, casi lo mismo, con 0,55 s menos de reloj.
+   *
+   * Si al mirarlo se siente apurada, esta es la perilla: 1,15 s reconstruye la
+   * ventana de lectura del clásico exacta.
    */
-  holdS: 0.6,
+  holdS: 0.95,
   /**
    * LA TRANSFORMACIÓN DE COLOR. El fondo pasa de oscuro a claro, la tinta de
    * blanco a negro, y **adentro de esta ventana el logo pasa de SVG a mesh**.
    *
-   * 0,9 s para que se lea como transformación y no como corte: por debajo de
-   * ~0,4 s el ojo la reconstruye como un salto. Las tres cosas que cambian acá
-   * no comparten la misma sub-ventana — ver `INK_FLIP_FRAC`.
+   * S8e: **1,4 s, el `VEIL_FADE_SECONDS` del clásico** — el mismo recorrido
+   * (oscuro → claro) que allá abría la secuencia y acá la parte al medio. Las
+   * tres cosas que cambian acá no comparten la misma sub-ventana — ver
+   * `INK_FLIP_FRAC`.
+   *
+   * Consecuencia medida, ahora en segundos (S8e arregló el instrumento): el
+   * cruce de contraste pasa de **0,031 s a 0,038 s** por debajo de 1,25:1, y de
+   * 0,013 s a 0,015 s por debajo de 1,10:1. Los topes de `introSampling.
+   * invariant.ts` son 0,100 s y 0,050 s —los 6 y 3 cuadros de S8d—, así que
+   * queda con casi el triple de margen. Sin re-anclar `INK_FLIP_FRAC` habría
+   * dado 0,048 s.
    */
-  colorS: 0.9,
+  colorS: 1.4,
   /**
    * SE VA LA LETRA. `MOTION_DURATION.elemento`, el espejo exacto de su entrada
    * — mismo efecto, misma curva, misma duración. **Aprobado, no se toca.**
+   *
+   * S8e NO adoptó el `ERASE_MS` del clásico (1,5 s): es el espejo de su
+   * `WRITE_MS` (1,5 s), y esa entrada no entra en un trazo de 0,85 s (ver
+   * `LINE_IN_DURATION_FRAC`). Copiar solo la salida rompería la simetría que
+   * las dos secuencias comparten, y además metería un número suelto donde la
+   * comprobación exige el token del sistema.
    */
   letterOutS: MOTION_DURATION.elemento,
   /**
    * SE VA EL FONDO, y recién cuando la letra terminó de irse: van en ese orden
    * y no a la vez. 0,7 s, un poco más que la letra, porque lo que se disuelve
    * acá es toda la pantalla y no un elemento.
+   *
+   * **Sin equivalente en el clásico:** allá el fondo no se disuelve al final —
+   * ya era blanco desde el primer paso, y lo único que quedaba era esperar
+   * 240 ms a que entrara el contenido. Queda como estaba.
    */
   veilOutS: 0.7,
   /**
    * EL ACOMODAMIENTO. Lo último, y lo único que queda del final.
    *
-   * **3,6 s.** El humano reportó que a 3 s todavía se veía rápido, y la causa
-   * no era solo la duración: era la curva. S8c usaba un expo-out que cubría el
-   * 28% del camino en los primeros 90 ms — a 3 s eso son **~690 px/s desde el
-   * primer frame**, y un arranque violento se lee como velocidad por más que el
-   * gesto entero dure.
+   * 🔴 **LA ÚNICA PERILLA DE S8e QUE SE DECIDE MIRANDO, Y NO MIDIENDO.** Las
+   * otras seis salen del clásico o de una propiedad; ésta no tiene respuesta
+   * correcta en un archivo. **Los dos vecinos, para la grabación: si el final
+   * queda atropellado, 3,0; si queda lento, 1,8.**
    *
-   * Con `MOTION_EASE.shift` (ease-in-out, ver `samplePlace`) el gesto sale de
-   * quieto y llega a quieto. Su pendiente máxima es 2,735, así que sobre los
-   * 371 px de recorrido de desktop el pico queda en **282 px/s** —y solo en el
-   * medio del gesto, no al principio—, con la rotación a 23,5°/s. Es menos de la
-   * mitad del arranque anterior, repartido sobre 3,6 s en vez de 3.
+   * **2,4 s.** No es el `COMPRESS_SECONDS` del clásico (0,78 s) y tampoco son
+   * los 3,6 s de S8d:
    *
-   * Es la perilla más cara de la secuencia: **es la primera que yo recortaría**
-   * si el total de 8,15 s molesta.
+   *  · **0,78 s está rechazado.** Allá el gesto era un deslizamiento corto sobre
+   *    una pantalla que ya tenía el contenido detrás; acá es un viaje con giro
+   *    que **entrega la escena 3D**, y es el último cuadro antes del home. A
+   *    0,78 s el pico se va a 1049 px/s y 65,3°/s — 4,6× la calibración que el
+   *    dueño del proyecto aprobó mirando la pantalla.
+   *  · **3,6 s tampoco**, porque entonces el sprint no acorta nada.
+   *
+   * Con `MOTION_EASE.shift` (pendiente máxima 2,735, ver `samplePlace`), sobre
+   * los 299,3 px de recorrido y los 18,6° de rotación de desktop 1440×810, el
+   * pico queda en **341 px/s y 21,2°/s**: 1,5× los 227 px/s y 14,1°/s de la
+   * calibración aprobada, no 4,6×. Y solo en el medio del gesto, no al arranque.
+   *
+   * ⚠ **Los 371 px y los 23,5°/s que publica S8d son de antes de S9.** Aquel
+   * recorrido salía del destino viejo (1086, 466); el definitivo es (1018, 428)
+   * y acorta el viaje a 299,3 px — ver `scene-framing.invariant.ts`. Sobre la
+   * base vieja los mismos 2,4 s dan 423 px/s y 35,3°/s contra 282 y 23,5: **el
+   * 1,5× es el mismo en las dos bases**, porque es 3,6 / 2,4.
    */
-  placeS: 3.6,
+  placeS: 2.4,
 }
 
 /**
  * Fases de REFERENCIA: el punto de calibración de las fracciones, no un valor
  * editable. Existe para que "en su default el intro usa exactamente la física
  * de S2" sea código y no una promesa.
+ *
+ * **Espeja siempre el `strokeS` del default**, y no se elige aparte: si se
+ * quedara atrás, las líneas dejarían de entrar en `MOTION_DURATION.elemento` y
+ * la comprobación `introTimeline.invariant.ts` lo canta.
  */
-const REFERENCE_PHASES = { strokeS: 1.4 } as const
+const REFERENCE_PHASES = { strokeS: 0.85 } as const
 
 // ── Las fracciones ──────────────────────────────────────────────────────────
 
-/** Entrada de cada línea: `MOTION_DURATION.elemento` (0,6 s). */
+/**
+ * Entrada de cada línea: `MOTION_DURATION.elemento` (0,6 s).
+ *
+ * **El `WRITE_MS` del clásico (1,5 s) no se puede adoptar**, y no por gusto:
+ * allá la escritura corría EN PARALELO al trazo, al relleno y al crossfade
+ * (1,7 s de ventana), y acá las letras viven ADENTRO del trazo y tienen que
+ * asentar antes de que la línea se cierre. Con el trazo del clásico en 0,85 s
+ * el techo es `0,85 × (1 − LINE_SETTLE_MARGIN_FRAC) = 0,765 s`, la mitad de lo
+ * que el clásico usaba. Estirar el trazo para que entre sería cambiar el
+ * número que sí se adoptó; dejar que se derrame sería cambiar el mecanismo.
+ *
+ * Efecto lateral bienvenido del trazo más corto: con 0,6 s de entrada sobre
+ * 0,85 s de trazo, la primera línea arranca en 0,105 s — o sea prácticamente
+ * junto con el trazo, que es el `TEXT_LEAD_MS = 0` del clásico.
+ */
 const LINE_IN_DURATION_FRAC = MOTION_DURATION.elemento / REFERENCE_PHASES.strokeS
 /** Desfase entre las dos líneas: `REVEAL_STAGGER_S` (0,06 s). */
 const LINE_STAGGER_FRAC = REVEAL_STAGGER_S / REFERENCE_PHASES.strokeS
@@ -142,13 +229,33 @@ const LINE_SETTLE_MARGIN_FRAC = 0.1
  * desaparece. Es inevitable con dos recorridos continuos de luminancia; lo único
  * que se puede elegir es **cuánto dura**.
  *
- * Por eso la tinta no usa la ventana entera: invierte en el **34% central** de
- * la transformación, con la misma curva. El fondo se transforma despacio —eso es
- * lo que se ve— y la tinta lo cruza rápido por el medio. El cruce de contraste
- * pasa de durar una fracción larga de la transición a durar unos pocos cuadros,
- * y la comprobación estática lo mide y exige que se mantenga corto.
+ * Por eso la tinta no usa la ventana entera: invierte en una franja central, con
+ * la misma curva. El fondo se transforma despacio —eso es lo que se ve— y la
+ * tinta lo cruza rápido por el medio. El cruce de contraste pasa de durar una
+ * fracción larga de la transición a durar unas pocas decenas de milisegundos, y
+ * la comprobación estática lo mide **en segundos, por interpolación** y exige
+ * que se mantenga corto.
+ *
+ * **Este número no viene del clásico: allá no hay inversión de tinta.** El logo
+ * se dibujaba NEGRO sobre un fondo que ya estaba yendo a blanco, así que no hay
+ * un `HOME_*_SECONDS` que copiar. Lo que S8e sí hizo es re-anclarlo: al alargar
+ * la transformación de 0,9 s a 1,4 s el 34% original habría ensanchado la
+ * inversión de 0,306 s a 0,476 s, y `0,2186 × 1,4 s = 0,306 s` la deja en el
+ * **mismo ancho** que S8d calibró.
+ *
+ * ⚠ **Preserva el ancho de la INVERSIÓN, no el del CRUCE.** S8e lo escribió como
+ * si fueran lo mismo porque su instrumento contaba cuadros y no podía verlo. El
+ * cruce depende de la velocidad RELATIVA de las dos luminancias, y el fondo pasó
+ * a tardar 1,4 s en vez de 0,9 s: medido en segundos, el cruce por debajo de
+ * 1,25:1 va de 0,031 s a **0,038 s**, un 22% más largo, no igual. Reproducirlo
+ * exacto pediría la fracción 0,1607.
+ *
+ * **No se re-ancló de nuevo, y no es por conservadurismo:** 0,1607 × 1,4 s =
+ * 0,225 s dejaría la inversión MÁS ANGOSTA que el relevo 2D→3D (0,252 s), y la
+ * propiedad `3b · el relevo, adentro de la inversión` se rompería. Con 0,038 s
+ * contra un tope de 0,100 s no hay nada que comprar con ese riesgo.
  */
-const INK_FLIP_FRAC = 0.34
+const INK_FLIP_FRAC = 0.2186
 
 /**
  * EL RELEVO 2D→3D, como fracción de la transformación y centrado en ella.
@@ -159,6 +266,16 @@ const INK_FLIP_FRAC = 0.34
  * mismo color en cada instante (`introShading.ts` resuelve la emisiva del mesh
  * contra el mismo color que pinta el SVG), el cruce es invisible incluso si la
  * silueta estuviera corrida un sub-píxel.
+ *
+ * **El `HOME_CROSSFADE_SECONDS` del clásico (0,4 s) no se puede adoptar.** Allá
+ * el relevo era un paso suelto de la secuencia y podía durar lo que quisiera;
+ * acá tiene que esconderse ADENTRO de la inversión de la tinta, que dura 0,306 s
+ * por diseño (ver `INK_FLIP_FRAC`). 0,4 s no entra en 0,306 s, y ensanchar la
+ * inversión para que entre sería estirar el cruce de contraste, que es
+ * exactamente el bug que S8d peleó.
+ *
+ * Queda en 0,18, que sobre la transformación del clásico da 0,252 s — más largo
+ * que los 0,162 s de S8d, porque es fracción y el color creció.
  */
 const SWAP_FRAC = 0.18
 

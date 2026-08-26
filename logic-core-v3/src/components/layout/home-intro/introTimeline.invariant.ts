@@ -113,14 +113,14 @@ section('los números publicados del default')
 
 const d = buildTimeline(HOME_INTRO_PHASES)
 
-check('el trazo cierra', Math.abs(d.strokeEndS - 1.4) < EPS, s(d.strokeEndS))
-check('el relleno termina', Math.abs(d.fillEndS - 1.75) < EPS, s(d.fillEndS))
-check('arranca la transformación', Math.abs(d.colorStartS - 2.35) < EPS, s(d.colorStartS))
-check('termina la transformación', Math.abs(d.colorEndS - 3.25) < EPS, s(d.colorEndS))
-check('la letra terminó de irse', Math.abs(d.letterOutEndS - 3.85) < EPS, s(d.letterOutEndS))
-check('el fondo terminó de irse', Math.abs(d.veilOutEndS - 4.55) < EPS, s(d.veilOutEndS))
-check('arranca el acomodamiento', Math.abs(d.placeStartS - 4.55) < EPS, s(d.placeStartS))
-check('la secuencia dura', Math.abs(d.totalS - 8.15) < EPS, s(d.totalS))
+check('el trazo cierra', Math.abs(d.strokeEndS - 0.85) < EPS, s(d.strokeEndS))
+check('el relleno termina', Math.abs(d.fillEndS - 1.3) < EPS, s(d.fillEndS))
+check('arranca la transformación', Math.abs(d.colorStartS - 2.25) < EPS, s(d.colorStartS))
+check('termina la transformación', Math.abs(d.colorEndS - 3.65) < EPS, s(d.colorEndS))
+check('la letra terminó de irse', Math.abs(d.letterOutEndS - 4.25) < EPS, s(d.letterOutEndS))
+check('el fondo terminó de irse', Math.abs(d.veilOutEndS - 4.95) < EPS, s(d.veilOutEndS))
+check('arranca el acomodamiento', Math.abs(d.placeStartS - 4.95) < EPS, s(d.placeStartS))
+check('la secuencia dura', Math.abs(d.totalS - 7.35) < EPS, s(d.totalS))
 
 check(
   'la inversión de la tinta es corta',
@@ -132,10 +132,26 @@ check(
   d.swapEndS - d.swapStartS < d.inkFlipEndS - d.inkFlipStartS,
   `${s(d.swapEndS - d.swapStartS)} · ${((d.swapEndS - d.swapStartS) * 60).toFixed(0)} cuadros a 60 fps`
 )
+/**
+ * ⚠ **Este es el número que S8e movió**, y no es una propiedad: es una cifra
+ * publicada del default, como las ocho de arriba. S8d publicó "el acomodamiento
+ * se lleva el 44% de la secuencia" con `placeS` en 3,6 s; el clásico, con sus
+ * 0,78 s, lo dejaría en 14%. **S8e no eligió ninguno de los dos: 2,4 s dan 33%.**
+ *
+ * Que nunca fue una propiedad se ve en que la calibración 'corto' de
+ * `introChecks.ts` ya la violaba (32%) y por eso este `check` corre solo sobre
+ * el default, fuera del arreglo `PROPERTIES`.
+ *
+ * La banda no es decorativa: **rechaza los dos valores descartados** (14% y 44%)
+ * y **acepta los dos vecinos que la instrucción deja para calibrar mirando** —
+ * `placeS` 3,0 da 38% y 1,8 da 27%. O sea que mover la perilla adentro del rango
+ * previsto no la pone roja, y salirse a cualquiera de los dos extremos sí.
+ */
+const placeFrac = (d.totalS - d.placeStartS) / d.totalS
 check(
-  'el acomodamiento se lleva el grueso de la secuencia',
-  (d.totalS - d.placeStartS) / d.totalS > 0.4,
-  `${((100 * (d.totalS - d.placeStartS)) / d.totalS).toFixed(0)}% del total`
+  'el acomodamiento pesa un tercio: ni el grueso de S8d ni el deslizamiento del clásico',
+  placeFrac > 0.25 && placeFrac < 0.4,
+  `${(100 * placeFrac).toFixed(0)}% del total — 44% con placeS en 3,6 s · 14% con 0,78 s`
 )
 
 section('las líneas usan los tokens del sistema, no números sueltos')
@@ -157,7 +173,7 @@ check(
 )
 check(
   'las letras quedan quietas antes del cierre del trazo',
-  Math.abs(d.strokeEndS - (d.sloganInS + d.lineInDurationS) - 0.14) < EPS,
+  Math.abs(d.strokeEndS - (d.sloganInS + d.lineInDurationS) - 0.085) < EPS,
   s(d.strokeEndS - (d.sloganInS + d.lineInDurationS))
 )
 
