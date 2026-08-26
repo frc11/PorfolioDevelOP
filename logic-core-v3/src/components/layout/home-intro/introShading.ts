@@ -1,10 +1,4 @@
-import {
-  FILL_INTENSITY,
-  HEMI_INTENSITY,
-  KEY_INTENSITY,
-} from '@/app/probe-escena/_components/probeLighting'
-
-import { INTRO_COLORS, INTRO_SHADOW } from './introTimeline'
+import { INTRO_COLORS } from './introTimeline'
 
 /**
  * EL COLOR Y LA LUZ DEL LOGO — una sola fuente de verdad para las dos capas.
@@ -22,14 +16,16 @@ import { INTRO_COLORS, INTRO_SHADOW } from './introTimeline'
  * el cruce oscuro→claro pasaría por un gris embarrado. Es además el espacio en
  * el que trabaja el shader, así que las dos capas hacen la misma cuenta.
  *
- * ── El bug que S8c arregló, y que esto conserva ────────────────────────────
+ * ── ⚠ La LUZ no vive acá: S13 la mudó a `introRig.ts` ───────────────────────
  *
- * Con `reveal` en 0 el mesh **no tiene una sola luz encima**: su color sale de
- * la emisiva. Iluminarlo de frente para que se lea plano —lo que hacía S8b— es
- * el peor caso posible del especular: pone `dotNH = 1` sobre toda la cara, o sea
- * el pico del lóbulo GGX, y con `INK_ROUGHNESS` en 0,34 la cara salía en
- * **#D9D9D9** (el 99,3% de esa luz era especular). Sin luces no hay especular
- * posible y el color es el que se pide, sea cual sea.
+ * `sampleInkShading` y su tipo se fueron a `home-intro/introRig.ts`, y no fue
+ * cosmético: al resolver el escalón de exposición de §7.11 el rig pasó a
+ * necesitar `probeCelosia.ts` —cinco módulos y una integral de hemisferio— y
+ * este archivo lo consume el bundle de la PRIMERA visita. Con la mudanza esa
+ * cadena viaja en el chunk diferido de `three` y **`probeLighting.ts` salió del
+ * grafo de primera carga**. El porqué completo está allá.
+ *
+ * Lo que quedó acá es solo color, y no importa una sola luz.
  *
  * ── La emisiva está resuelta contra el tone mapping ────────────────────────
  *
@@ -83,6 +79,31 @@ export function mixSrgbInLinearLight(from: Srgb, to: Srgb, t: number): Srgb {
     linearToSrgb(srgbToLinear(from[i]) * (1 - p) + srgbToLinear(to[i]) * p)
   ) as unknown as Srgb
 
+}
+
+// ── Contraste, que es como se decide si algo se ve ──────────────────────────
+
+/**
+ * Luminancia relativa (WCAG) de un color sRGB.
+ *
+ * Vive acá desde S13 y no en una comprobación: la usan **dos** —el cruce de
+ * tinta de `introSampling.invariant.ts` y la legibilidad de las partículas en
+ * `introParticleTiming.invariant.ts`—, y el umbral con el que se decide "esto ya
+ * no se ve" tiene que ser uno solo en las dos.
+ */
+export function luminance(color: Srgb): number {
+  return (
+    0.2126 * srgbToLinear(color[0]) +
+    0.7152 * srgbToLinear(color[1]) +
+    0.0722 * srgbToLinear(color[2])
+  )
+}
+
+/** Razón de contraste WCAG. 1 = indistinguibles. */
+export function contrastRatio(a: Srgb, b: Srgb): number {
+  const la = luminance(a)
+  const lb = luminance(b)
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
 }
 
 // ── Los dos recorridos de color ─────────────────────────────────────────────
@@ -148,38 +169,3 @@ export function solveEmissiveForSrgb(color: Srgb): readonly [number, number, num
 export const INTRO_FLAT_EMISSIVE_LINEAR = solveNeutralToneMapGray(
   srgbToLinear(hexToSrgb(INTRO_COLORS.inkOnLight)[0])
 )
-
-// ── El cruce de dibujo a objeto ─────────────────────────────────────────────
-
-export type IntroInkShading = {
-  /** Cuánta emisiva plana queda. 1 = dibujo sin luz · 0 = objeto iluminado. */
-  readonly emissiveMix: number
-  readonly keyIntensity: number
-  readonly fillIntensity: number
-  readonly hemiIntensity: number
-  /** Opacidad del plano que recibe la sombra. */
-  readonly shadowOpacity: number
-}
-
-/**
- * De dibujo a objeto, con una sola perilla — y esa perilla es el progreso del
- * **acomodamiento**, así que la transición ocurre exactamente durante el gesto
- * final, ni antes ni después.
- *
- * Las tres intensidades son las **de la escena** (`probeLighting.ts`), no
- * inventadas acá. Falta el contraluz, que en la escena es solidario a la cámara
- * y necesita la órbita — anotado, no olvidado.
- *
- * En `reveal` 0 **las tres valen cero y no hay sombra**. Es lo que hace que el
- * logo se lea plano por construcción y no por calibración.
- */
-export function sampleInkShading(reveal: number): IntroInkShading {
-  const t = Math.min(1, Math.max(0, reveal))
-  return {
-    emissiveMix: 1 - t,
-    keyIntensity: KEY_INTENSITY * t,
-    fillIntensity: FILL_INTENSITY * t,
-    hemiIntensity: HEMI_INTENSITY * t,
-    shadowOpacity: INTRO_SHADOW.opacity * t,
-  }
-}

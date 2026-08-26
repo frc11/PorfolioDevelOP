@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido y en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, y en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`. Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -49,6 +49,18 @@
 
 - **El texto del preloader NO es el del intro de marketing.** `IntroLockupText.tsx` escribe letra por letra (`WRITE_MS`, wipe de izquierda a derecha) y su slogan es *"Construimos lo que imaginas"*. El preloader del home usa **aparición** y el slogan **"Ingeniería para negocios reales"**. Son dos piezas distintas y la de marketing no se toca.
 - **El preloader es un momento cerrado.** Tiene su propio logo (SVG 2D), sube con el resto de la secuencia y desaparece; **no le entrega nada a nadie**. El paso 8 no es una continuidad medida entre el logo 2D y el 3D: es la escena que aparece detrás y arranca su propia coreografía. Esta separación es la lección de S3b y no se revierte.
+
+### 1.4 · Las partículas, y por qué NO hay relevo (S13)
+
+> *"Las pelotitas van apareciendo en el preloader, como en el viejo. Cuando llega el momento de desaparecer la letra, desaparece la letra, las pelotitas hacen el efecto de bajar —literalmente se van hacia abajo— y luego desaparece lo blanco. Y ahí está toda la magia: las pelotitas ya se encontraban flotando en el entorno."*
+
+**No hace falta ningún relevo, y ésa es la decisión.** Las del intro **bajan antes** de que se vaya el blanco: esa bajada es la tapadera. Las que quedan flotando son las de la escena, que ya estaban ahí. Es el mismo truco que S8d usó con el cruce de contraste — no se resuelve la continuidad, se esconde el corte.
+
+**El requisito que lo sostiene es uno solo, y se mide:** en ningún instante pueden ser legibles dos poblaciones distintas. Medido con el umbral de contraste de WCAG que el repo ya usa para el cruce de tinta (1,10): la última del intro deja de ser legible en **4,168 s** y la primera de la escena a los **4,278 s** — **110,4 ms de margen**. Y la escena se vuelve legible solo **28,3 ms** después de que el velo arranca, así que la salida **no podía derramarse** adentro de esa ventana: tenía que cerrar antes.
+
+**La especie no se calibra: se proyecta.** El campo del intro **es** el de la escena —mismo generador, mismos radios, mismo sesgo, mismos colores, mismo material— proyectado por la cámara de la pose inicial. Lo único propio es la semilla, y **eso también se comprueba**: con la misma, las motas caerían desde exactamente los lugares donde las de la escena vuelven a estar, y eso no se lee como dos poblaciones sino como una que se teletransportó.
+
+Detalle y números en `outputs/S13-PARTICULAS.md`.
 
 ---
 
@@ -302,6 +314,9 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | El editor de keyframes y el export | `choreographyEditor.ts`, `choreographyExport.ts` |
 | El intro que hoy corre en el home | `src/components/layout/HomeIntro.tsx` |
 | Las partículas: los dos campos, las conchas y el recorte de `gl_PointSize` | `probeParticles.ts`, `DepthParticles.tsx`, `BokehParticles.tsx` |
+| **Las partículas del PRELOADER**: la especie, el campo proyectado y su ritmo | `home-intro/introParticles.ts`, `introParticleField.ts`, `introParticleTiming.ts`, `IntroParticleCanvas.tsx`, `introParticleSprites.ts` |
+| La cámara de la escena sin three, y la proyección de un punto cualquiera | `src/lib/scene-camera.ts` |
+| El rig del intro — y el ambiente en el que TERMINA, que es el de la escena | `home-intro/introRig.ts` |
 | Las comprobaciones estáticas | `src/app/probe-escena/__tests__/*.invariant.ts` |
 | El instrumento de oclusión y cono libre — con su lista de ocluyentes **vacía** | `__tests__/occlusion.ts` |
 | El instrumento de tinta, shading y muestreo de cuadro (S10, ampliado en S11 con el gobo y el cielo) | `__tests__/logoInk.ts`, `shading.ts`, `frameProbe.ts` |
@@ -317,6 +332,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | `outputs/S9-COREOGRAFIA.md` | **El recorrido definitivo**, el borrado de los derivados y el reapuntado del sol |
 | `outputs/S10-FONDO.md` | **El vaciado de la escena**, la envolvente de rendijas, el sol contra el fondo oscuro y las partículas como relleno |
 | `outputs/S11-LUZ.md` | **El borrado del cuerpo del sol**, la celosía proyectada sobre el piso y el logo, y el techo de exposición del papel |
+| `outputs/S13-PARTICULAS.md` | **Las partículas del preloader sin relevo**, el escalón de exposición resuelto y la cámara de `harness.ts` |
 
 > ⚠️ **Exportar no es guardar.** El botón del editor copia al portapapeles. La calibración solo existe cuando ese texto se **pega** en el archivo. Ya costó una sesión entera de trabajo.
 
@@ -336,10 +352,9 @@ Está acá para que nadie lo dé por resuelto.
 8. **La temperatura del cierre**: 7700 K (frío, lo que está hoy) contra los 2000 K (ámbar) que tenía la calibración a mano. Es un número y está argumentado en los dos sentidos.
 9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto son DOS perillas**, las dos de calibrar mirando: `CELOSIA_BAR` (0,29), que sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido; y desde S12 el **radio angular del sol** (0,266°, rango 0 … 1,5°), que ablanda el borde a costa de devolver parte de esos 29,6 puntos. Medido: de 0 a 0,5° no se pierde nada; desde 0,75° empieza a caer la portadora del piso. En **0** las dos apagan lo suyo y devuelven el estado anterior, que es el control.
 10. **Si el recorrido debería dar dos vueltas.** El argumento que lo descartaba murió con los planos (ver §2.2). Es decisión de recorrido, no de escena.
-11. ⚠️ **EL ESCALÓN DE EXPOSICIÓN — requisito del sprint de las partículas del preloader (S11).** No es una nota suelta: es una condición de entrada.
-    **El intro termina con el ambiente en `HEMI_INTENSITY` exacto** (`introShading.ts` hace `HEMI_INTENSITY * reveal`, y `introShading.invariant.ts` lo compara por identidad) **y la escena arranca en `HEMI_INTENSITY × 0,6743`**: el ambiente de la sala **cae un 32,6% en el instante del traspaso, en un corte**. Sobre las mismas superficies eso es −1,1 puntos en el papel iluminado, **−18,2 en el papel en sombra** y **−15 en el valor medio del cuadro de la pose del hero (216 → 201)**.
-    `home-intro/` tiene su propio rig y no pasa por `applyLightRig`, así que **ninguna de sus comprobaciones se movió** —279 verdes en las cuatro suites limpias y 140+1 en `introSampling`, idénticas antes y después—. **Que no se haya movido no quiere decir que esté resuelto: quiere decir que todavía no se tocó.**
-    **Ese sprint tiene que resolverlo o declararlo.** Resolverlo es que el intro termine en el mismo ambiente en que la escena empieza —una constante compartida, no dos—; declararlo es medir que el corte no se ve y escribir por qué. Detalle en `outputs/S11-LUZ.md` §9.3.
+11. ~~**EL ESCALÓN DE EXPOSICIÓN.**~~ **RESUELTO en S13** — `home-intro/introRig.ts`. El intro termina en `HEMI_INTENSITY × celosiaSkyFactor(CELOSIA_BAR)`, o sea **en el mismo ambiente con el que la escena empieza**: una constante compartida, leída de la misma función, sin un solo literal. `introRig.invariant.ts` custodia la igualdad, y de paso verifica que el nivel del arco en p=0 siga valiendo 1 — que es lo único por lo que la key y el relleno no tenían escalón.
+    ⚠️ **Y §7.11 sobreestimaba el escalón, con una confusión de superficie que conviene no repetir.** Los **−18,2 puntos en el papel en sombra** y los **−15 en el valor medio del cuadro** son sobre el piso y sobre el cuadro **de la escena**, y el intro no renderiza ninguna de las dos cosas: no tiene papel, y su plano de sombra es un `ShadowMaterial` —oscurece lo que hay detrás, no recibe luz—. La ÚNICA superficie iluminada del intro es el logo, y ahí la tinta `#0F0F0F` queda tan abajo que el toe del tone map la aplasta: **0,39 puntos sRGB de 255** en la cara frontal (1,68 → 1,28), 0,33 en el canto superior, 0,25 en el inferior. Medido en `introRig.invariant.ts`, con el mismo instrumento que reproduce los 249,4 / 236,9 / 248,3 / 218,7 de S11 como control positivo.
+    **Se resolvió igual, y no por los 0,39 puntos: por la mudanza.** Traer el factor de cielo obliga a importar `probeCelosia.ts`, que arrastra cuatro módulos más —**10,6 KiB de código**— y corre una integral de hemisferio de 24.000 muestras al cargar el módulo: **1,54 ms**. Hacerlo en `introShading.ts` habría puesto todo eso en el bundle de la PRIMERA visita, que es exactamente la visita en la que el preloader corre. Sacando el rig a su propio módulo esa cadena cae en el chunk diferido de `three` y **`probeLighting.ts` sale del grafo de primera carga**: el grafo del intro pasó de 25 a **24 módulos**.
 12. **Los haces de luz visibles.** Medidos y NO construidos: la tabla de fondos aéreos y el alfa aditivo por pose está en `probeCelosia.ts`, para que la decisión sea revocable con datos. Las tres razones para no ponerlos —overdraw sobre las poses más caras, que lo aditivo se come el contraste recién ganado, y que un volumen saliendo de una celosía ES el efecto Star Wars— están en `outputs/S11-LUZ.md` §6.
 13. **DEUDA DE TAMAÑO — para un sprint de limpieza, los tres juntos.** La regla del repo es partir arriba de 300 líneas. Estos tres están arriba, **los tres crecieron con S11 y ninguno se partió ahí a propósito**: hacerlo de a uno, en el sprint que lo agrandó, es la peor forma de hacerlo.
 
@@ -369,3 +384,26 @@ Está acá para que nadie lo dé por resuelto.
     | **4** | **Acortar la celda proyectada**, que es el ×3,6 | **un sprint de coreografía** | Es la elevación del arco. Mueve **todo** a la vez —la sombra del logo, el alcance de la creciente, los seis valores medios— y es decisión de recorrido, no de escena. §7.8 discute la temperatura del mismo tramo |
 
     La decisión es del humano por grabación. Lo que este pendiente fija es que **no se resuelve esperando al arco**.
+
+15. ⚠️ **LA CÁMARA DE `harness.ts` NO ES LA DEL RIG — toda cifra de cuadro de S9 en adelante la arrastra (S13).**
+
+    `__tests__/harness.ts:25` declara la caja del logo como **7,168 × 7,168** —el cuadrado de `LOGO_BOX_WORLD`— y con ella calcula el recorrido del encuadre en `cameraAt`. El rig real le pasa a `aimWithFraming` la caja del **mesh medida en runtime** (`OrbitRig.tsx:506`, `stats.current.logoW/logoH`), que es la que `lib/scene-camera.ts` deriva: **6,863 × 4,779**. Con `frameX ≠ 0` las dos cámaras apuntan a lugares distintos.
+
+    **Cuánto, medido pose por pose sobre 1920×1080** (proyección del origen con cada cámara):
+
+    | pose | frameX | harness | rig | Δ |
+    |---|---:|---|---|---:|
+    | hero | 0,68 | (1350, 569) | (1358, 570) | **7,9 px** · 0,41% |
+    | quiénes somos | −0,80 | (643, 522) | (628, 520) | 15,3 px · 0,80% |
+    | números | −0,45 | (699, 559) | (694, 560) | 5,1 px · 0,26% |
+    | trabajos | −0,85 | (467, 570) | (457, 572) | 9,8 px · 0,51% |
+    | **demos** | **1,00** | (1228, 528) | (1252, 526) | **24,6 px** · **1,28%** |
+    | cierre | 0,00 | (960, 540) | (960, 540) | **0,0 px** |
+
+    **Donde el encuadre está centrado las dos coinciden exactamente**, y el error crece con `|frameX|`: el peor caso es Demos, con 1,28% del ancho del cuadro.
+
+    **Qué cifras lo arrastran.** `__tests__/frameProbe.ts:197` —el muestreador de cuadro— llama a `cameraAt`, así que **todo lo que salió de `sampleFrame` viaja con esa cámara**: los seis valores medios de S10 y S11 (216 → 201, 222 → 213, …), los porcentajes de piso en sombra, la cobertura de la losa, el batido de la celosía de S12 (`celosiaBeat.ts`) y el conteo de partículas en cuadro de S10. Las suites afectadas son las que importan `cameraAt` o `angularOffset`: `s9-composicion`, `s10-fondo`, `s10-batido`, `s10-particulas`, `s11-pantalla`, `s11-piso`, `s7-modelado`, más `frameProbe`, `celosiaBeat`, `celosiaFloor` y `occlusion` por dependencia.
+
+    **El caso concreto que lo destapó:** S10 publica **1.008 partículas en cuadro en la pose inicial** (924 de polvo + 84 de bokeh). S13 reprodujo ese número exacto con la cámara de `harness.ts`, y con la del rig el mismo campo da **996** (913 + 83): **−1,2%**.
+
+    **NO se re-midió y NO se arregló**: es `probe-escena/`, y estaba fuera del scope de S13. Lo que este pendiente fija es qué toca el sprint que lo tome — `LOGO_W`/`LOGO_H` de `harness.ts`, y después volver a correr las once suites de arriba para ver cuáles de sus cifras publicadas se mueven.

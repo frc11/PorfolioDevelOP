@@ -5,7 +5,7 @@ import type { MotionValue } from 'motion/react'
 import { useRef } from 'react'
 import * as THREE from 'three'
 
-import { sampleInkShading } from './introShading'
+import { sampleInkShading } from './introRig'
 import { INTRO_SHADOW } from './introTimeline'
 
 /**

@@ -17,7 +17,7 @@ import {
 } from './introFlight'
 import { HOME_INTRO_PHASES, buildTimeline, type HomeIntroPhases } from './introTimeline'
 import { useIntroChannels, type IntroChannels } from './useIntroChannels'
-import { useViewportSize } from './useViewportSize'
+import { useViewportSize, type ViewportSize } from './useViewportSize'
 import type { IntroDevApi } from './IntroDevController'
 import type { IntroTimeline } from './introTimeline'
 
@@ -79,6 +79,8 @@ export type IntroEngine = {
   ink: IntroInkSize
   /** Cuerpos y separación del texto, derivados de ese tamaño. */
   text: IntroLockupText
+  /** El tamaño de la ventana. Lo consumen las partículas para proyectar el campo. */
+  viewport: ViewportSize
   timelineRef: React.RefObject<IntroTimeline>
   /** `null` en producción: ver la nota abajo. */
   devApi: IntroDevApi | null
@@ -196,5 +198,5 @@ export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
     [progress, phases, replay]
   )
 
-  return { progress, channels, ink: plan.ink, text, timelineRef, devApi, handleMeshReady }
+  return { progress, channels, ink: plan.ink, text, viewport, timelineRef, devApi, handleMeshReady }
 }

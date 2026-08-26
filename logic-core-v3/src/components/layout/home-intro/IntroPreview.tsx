@@ -93,6 +93,9 @@ function IntroPreviewRunner() {
       {running && (
         <IntroOverlay
           channels={engine.channels}
+          progress={engine.progress}
+          timelineRef={engine.timelineRef}
+          viewport={engine.viewport}
           ink={engine.ink}
           text={engine.text}
           onMeshReady={engine.handleMeshReady}

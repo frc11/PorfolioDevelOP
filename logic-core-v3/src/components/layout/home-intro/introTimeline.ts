@@ -216,8 +216,14 @@ const LINE_STAGGER_FRAC = REVEAL_STAGGER_S / REFERENCE_PHASES.strokeS
  * QUIETUD ANTES DE QUE CIERRE EL TRAZO, como fracción de `strokeS`. Las letras
  * asientan este respiro antes de que la línea se junte, así que el cierre y el
  * relleno ocurren sobre una pantalla quieta.
+ *
+ * **Exportada desde S13**, sin cambiar de valor: las dos ventanas de las
+ * partículas se cierran con el MISMO respiro antes del final de su fase — la
+ * densidad completa antes de que se vaya la letra, y el campo afuera antes de
+ * que arranque el fondo. Es un respiro compartido, no dos números iguales por
+ * casualidad (`introParticleTiming.ts`).
  */
-const LINE_SETTLE_MARGIN_FRAC = 0.1
+export const LINE_SETTLE_MARGIN_FRAC = 0.1
 
 /**
  * ⚠ **POR QUÉ LA TINTA NO INVIERTE AL MISMO RITMO QUE EL FONDO.**

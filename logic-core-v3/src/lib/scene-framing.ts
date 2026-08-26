@@ -1,13 +1,8 @@
 import { CHOREO_KEYFRAMES } from '@/app/probe-escena/_components/choreography'
 import type { ChoreoPose } from '@/app/probe-escena/_components/choreographyTypes'
-import {
-  CAMERA_FOV,
-  FRAME_TRAVEL_SAFETY,
-  ORBIT_TARGET_Y,
-  PROBE_EXTRUDE,
-  PROBE_SVG_SCALE,
-} from '@/app/probe-escena/_components/probeScene'
+import { ORBIT_TARGET_Y, PROBE_SVG_SCALE } from '@/app/probe-escena/_components/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
+import { projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 
 /**
  * DÓNDE CAE EL LOGO DE LA ESCENA EN LA PANTALLA — la proyección de una pose del
@@ -41,23 +36,6 @@ import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
  * fuente línea por línea.
  */
 
-// ── La caja de la tinta, en unidades de mundo ───────────────────────────────
-
-/**
- * Lo que el rig le pasa a `aimWithFraming` como `logoW`/`logoH`: la caja del
- * mesh **extruido**, o sea la de la tinta más el bisel (`PROBE_EXTRUDE.bevelSize`
- * por lado, +2 en cada dimensión). Derivada, no copiada: si el bisel cambia,
- * esto cambia con él.
- *
- * Da 6,863 × 4,779, contra los 6,86 × 4,78 que `PROBE-ESCENA.md` publica de la
- * medición en runtime. Dos caminos independientes al mismo número.
- */
-const BEVEL_VB = PROBE_EXTRUDE.bevelSize * 2
-export const SCENE_LOGO_MESH_WORLD = {
-  width: (LOGO_INK_VIEWBOX.width + BEVEL_VB) * PROBE_SVG_SCALE,
-  height: (LOGO_INK_VIEWBOX.height + BEVEL_VB) * PROBE_SVG_SCALE,
-} as const
-
 /**
  * ⚠ **RESPUESTA PARCIAL A §7.6 — el encuadre por relación de aspecto.**
  *
@@ -77,33 +55,6 @@ export const SCENE_LOGO_MESH_WORLD = {
  * pantalla es el mismo y el número tiene que ser uno solo.
  */
 export const DEST_WIDTH_MARGIN = 0.86
-
-// ── Vectores, sin three ─────────────────────────────────────────────────────
-
-type Vec3 = readonly [number, number, number]
-
-const sub = (a: Vec3, b: Vec3): Vec3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-const dot = (a: Vec3, b: Vec3): number => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-const cross = (a: Vec3, b: Vec3): Vec3 => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-]
-const norm = (a: Vec3): Vec3 => {
-  const length = Math.hypot(a[0], a[1], a[2])
-  return [a[0] / length, a[1] / length, a[2] / length]
-}
-
-/** La base que `Object3D.lookAt` construye, idéntica a la del rig. */
-function lookAtBasis(position: Vec3, target: Vec3) {
-  const z = norm(sub(position, target))
-  const x = norm(cross([0, 1, 0], z))
-  const y = cross(z, x)
-  return { right: x, up: y, forward: [-z[0], -z[1], -z[2]] as Vec3 }
-}
-
-const TAN_HALF_FOV = Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180)
-const DEG = Math.PI / 180
 
 // ── El resultado ────────────────────────────────────────────────────────────
 
@@ -137,55 +88,27 @@ export function frameScenePose(
   viewportWidthPx: number,
   viewportHeightPx: number
 ): SceneFrame | null {
-  if (!(viewportWidthPx > 0) || !(viewportHeightPx > 0)) return null
-
-  const aspect = viewportWidthPx / viewportHeightPx
-  const azimuth = pose.angleDeg * DEG
-  const position: Vec3 = [
-    Math.sin(azimuth) * pose.distance,
-    pose.height,
-    Math.cos(azimuth) * pose.distance,
-  ]
-  const target: Vec3 = [0, ORBIT_TARGET_Y, 0]
-
-  // 1 · La cámara mira al origen; 2 · el encuadre corre el TARGET, no la cámara
-  //     (`cameraFraming.ts`: el offset va en la base de pantalla, y el signo es
-  //     negativo porque para ver el logo a la derecha hay que apuntar a su
-  //     izquierda).
-  let basis = lookAtBasis(position, target)
-  const eyeDistance = Math.hypot(pose.distance, pose.height - ORBIT_TARGET_Y)
-  const halfHeight = TAN_HALF_FOV * eyeDistance
-  const halfWidth = halfHeight * aspect
-  const travelX =
-    Math.max(0, halfWidth - SCENE_LOGO_MESH_WORLD.width / 2) * FRAME_TRAVEL_SAFETY
-  const travelY =
-    Math.max(0, halfHeight - SCENE_LOGO_MESH_WORLD.height / 2) * FRAME_TRAVEL_SAFETY
-
-  if (pose.frameX !== 0 || pose.frameY !== 0) {
-    const aim: Vec3 = [0, 1, 2].map(
-      (i) =>
-        target[i] +
-        basis.right[i] * -pose.frameX * travelX +
-        basis.up[i] * -pose.frameY * travelY
-    ) as unknown as Vec3
-    basis = lookAtBasis(position, aim)
-  }
+  // 1 y 2 · La cámara de la pose, con el encuadre ya aplicado. Es la MISMA que
+  //         `projectScenePoint` consume: una sola cámara para el logo y para
+  //         cualquier otro punto de la escena.
+  const camera = sceneCameraAt(pose, viewportWidthPx, viewportHeightPx)
+  if (!camera) return null
 
   // 3 · Proyección real del origen (= el centro de la tinta) sobre la pantalla.
   //     NO la aproximación lineal "frameX × travel / halfWidth": el `lookAt` con
   //     el target corrido ROTA la cámara, y esa rotación mete una componente
   //     vertical que la aproximación no ve. Medido en la pose de entrada: 5 px
   //     de error en X, 14 px en el alto y 61 px en Y.
-  const toTarget = sub(target, position)
-  const depth = dot(toTarget, basis.forward)
-  if (!(depth > 0)) return null
-
-  const ndcX = dot(toTarget, basis.right) / depth / (TAN_HALF_FOV * aspect)
-  const ndcY = dot(toTarget, basis.up) / depth / TAN_HALF_FOV
+  const center = projectScenePoint(
+    camera,
+    [0, ORBIT_TARGET_Y, 0],
+    viewportWidthPx,
+    viewportHeightPx
+  )
+  if (!center) return null
 
   // 4 · Tamaño: cuántos píxeles mide una unidad de mundo a esa profundidad.
-  const pxPerWorld = viewportHeightPx / (2 * TAN_HALF_FOV * depth)
-  const pxPerViewBoxUnit = pxPerWorld * PROBE_SVG_SCALE
+  const pxPerViewBoxUnit = center.pxPerWorld * PROBE_SVG_SCALE
   const rawInkWidthPx = LOGO_INK_VIEWBOX.width * pxPerViewBoxUnit
   const rawInkHeightPx = LOGO_INK_VIEWBOX.height * pxPerViewBoxUnit
 
@@ -195,8 +118,8 @@ export function frameScenePose(
   const widthClamp = rawInkWidthPx > maxInkWidthPx ? maxInkWidthPx / rawInkWidthPx : 1
 
   return {
-    centerXPx: (0.5 + ndcX / 2) * viewportWidthPx,
-    centerYPx: (0.5 - ndcY / 2) * viewportHeightPx,
+    centerXPx: center.xPx,
+    centerYPx: center.yPx,
     inkWidthPx: rawInkWidthPx * widthClamp,
     inkHeightPx: rawInkHeightPx * widthClamp,
     widthClamp,

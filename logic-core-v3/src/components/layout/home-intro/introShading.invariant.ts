@@ -1,9 +1,3 @@
-import {
-  FILL_INTENSITY,
-  HEMI_INTENSITY,
-  KEY_INTENSITY,
-} from '@/app/probe-escena/_components/probeLighting'
-
 import { check, report, section } from './introChecks'
 import {
   INTRO_INK_FROM,
@@ -12,15 +6,13 @@ import {
   linearToSrgb,
   mixSrgbInLinearLight,
   neutralToneMapGray,
-  sampleInkShading,
   solveEmissiveForSrgb,
   solveNeutralToneMapGray,
   srgbToBytes,
   srgbToHex,
   srgbToLinear,
-  type IntroInkShading,
 } from './introShading'
-import { INTRO_COLORS, INTRO_SHADOW } from './introTimeline'
+import { INTRO_COLORS } from './introTimeline'
 
 /**
  * COMPROBACIÓN ESTÁTICA DEL COLOR Y LA LUZ — **que las dos capas del logo
@@ -38,13 +30,11 @@ import { INTRO_COLORS, INTRO_SHADOW } from './introTimeline'
  * acá, punto por punto sobre el recorrido entero de la tinta** — y no se puede
  * ver en un navegador, porque el intro no corre bajo automatización.
  *
- * ── Lo que NO está acá, dicho en voz alta ──────────────────────────────────
+ * ── Lo que NO está acá ─────────────────────────────────────────────────────
  *
- * No se reimplementa el BRDF de three. El diagnóstico del bug de S8b —que con
- * luz frontal la cara daba #D9D9D9 porque `D_GGX` vale 23,82 con `dotNH = 1`—
- * se calculó una vez y está en el reporte de S8c. Lo que se comprueba es la
- * garantía estructural que lo reemplaza: con `reveal` en 0 no hay ninguna luz
- * encendida, así que no hay especular posible.
+ * **La luz.** Vive en `introRig.ts` desde S13 y la comprueba
+ * `introRig.invariant.ts`, incluido el escalón de exposición de §7.11. Acá quedó
+ * solo el color, que es lo que las dos capas tienen que compartir.
  */
 
 const EPS = 1e-9
@@ -147,7 +137,6 @@ check(
 
 section('y los dos extremos son los tokens del sistema')
 
-const flat = sampleInkShading(0)
 const inkEnd = rendered(solveEmissiveForSrgb(hexToSrgb(INTRO_COLORS.inkOnLight)))
 const inkStart = rendered(solveEmissiveForSrgb(hexToSrgb(INTRO_COLORS.inkOnDark)))
 check(
@@ -161,56 +150,9 @@ check(
   `${inkStart.join(',')}`
 )
 
-// ── La garantía estructural ─────────────────────────────────────────────────
-
-section('🔴 con el logo plano NO hay una sola luz encendida')
-
-/** La propiedad, como predicado: es lo que hace imposible el bug de S8b. */
-const UNLIT = (shading: IntroInkShading): boolean =>
-  shading.keyIntensity === 0 && shading.fillIntensity === 0 && shading.hemiIntensity === 0
-
-check('key, fill y hemisférico en cero', UNLIT(flat))
-check('la emisiva entera', flat.emissiveMix === 1)
-check('y no hay sombra que proyectar', flat.shadowOpacity === 0)
-
-section('con el volumen revelado, el rig es el de la escena')
-
-const lit = sampleInkShading(1)
-check('la emisiva se apagó', lit.emissiveMix === 0)
-check('key', lit.keyIntensity === KEY_INTENSITY, `${KEY_INTENSITY}`)
-check('fill', lit.fillIntensity === FILL_INTENSITY, `${FILL_INTENSITY}`)
-check('hemisférico', lit.hemiIntensity === HEMI_INTENSITY, `${HEMI_INTENSITY}`)
-check('la sombra llegó a su opacidad', lit.shadowOpacity === INTRO_SHADOW.opacity)
-check(
-  'ninguna intensidad es inventada acá',
-  lit.keyIntensity + lit.fillIntensity + lit.hemiIntensity ===
-    KEY_INTENSITY + FILL_INTENSITY + HEMI_INTENSITY
-)
-
-section('el cruce es monótono en las dos direcciones')
-
-let emissiveFalls = true
-let lightsRise = true
-let previousEmissive = Infinity
-let previousKey = -Infinity
-for (let i = 0; i <= 400; i += 1) {
-  const shading = sampleInkShading(i / 400)
-  if (shading.emissiveMix > previousEmissive + EPS) emissiveFalls = false
-  if (shading.keyIntensity < previousKey - EPS) lightsRise = false
-  previousEmissive = shading.emissiveMix
-  previousKey = shading.keyIntensity
-}
-check('la emisiva solo baja', emissiveFalls)
-check('las luces y la sombra solo suben', lightsRise)
-check('fuera de rango se recorta', sampleInkShading(-3).keyIntensity === 0)
-check('y por arriba también', sampleInkShading(9).emissiveMix === 0)
-
 // ── Control negativo ────────────────────────────────────────────────────────
 
-section('control negativo — el bug de S8b, en su forma de datos')
-
-const conLuzFrontal: IntroInkShading = { ...flat, keyIntensity: 3.2 }
-check('detecta una luz prendida sobre el logo plano', !UNLIT(conLuzFrontal))
+section('control negativo — la emisiva sin resolver')
 
 const crudo = rendered([
   srgbToLinear(hexToSrgb(INTRO_COLORS.inkOnLight)[0]),

@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { IntroFlightPlan } from './introFlight'
 import { introPhaseName, sampleIntro } from './introSampling'
-import { sampleInkShading, srgbToHex } from './introShading'
+import { sampleInkShading } from './introRig'
+import { srgbToHex } from './introShading'
 import { type HomeIntroPhases, type IntroTimeline } from './introTimeline'
 
 /**

@@ -1,6 +1,7 @@
 import { MOTION_DURATION, REVEAL_STAGGER_S } from '@/components/design-system/motion/tokens'
 
 import { CALIBRATIONS, check, report, s, section } from './introChecks'
+import { introParticleWindows } from './introParticleTiming'
 import { HOME_INTRO_PHASES, buildTimeline, type IntroTimeline } from './introTimeline'
 
 /**
@@ -21,6 +22,8 @@ import { HOME_INTRO_PHASES, buildTimeline, type IntroTimeline } from './introTim
  *   3. El relevo 2D→3D cae adentro de la inversión de la tinta, y ésta adentro
  *      de la transformación de color.
  *   4. Ninguna calibración rompe el orden.
+ *   5. **(S13)** Las partículas del intro se van antes de que el fondo empiece
+ *      a disolverse — si no, se ven dos poblaciones a la vez.
  *
  * (Que el logo no cambie de tamaño y que el acomodamiento mueva y gire a la vez
  * son del vuelo: viven en `introFlight.invariant.ts`.)
@@ -68,6 +71,27 @@ const SWAP_INSIDE_INK = (t: IntroTimeline): boolean =>
   t.swapEndS < t.inkFlipEndS &&
   Math.abs((t.swapStartS + t.swapEndS) / 2 - (t.inkFlipStartS + t.inkFlipEndS) / 2) < EPS
 
+/**
+ * 7 · **EL SÉPTIMO, DE S13.** El campo de partículas del intro termina de irse
+ * **estrictamente antes** de que el fondo empiece a disolverse.
+ *
+ * Es el hermano exacto de `LETTER_BEFORE_VEIL` y es lo que hace posible el
+ * mecanismo entero: las del intro bajan, y recién después el blanco se va y
+ * aparecen las de la escena, que ya estaban ahí. **Si las dos poblaciones se
+ * ven a la vez, se lee el corte.** Cuánto margen queda —y contra qué instante
+ * exacto— se mide en `introParticleTiming.invariant.ts`; acá solo se custodia
+ * el orden, que es lo que un slider puede romper sin avisar.
+ */
+const PARTICLES_BEFORE_VEIL = (t: IntroTimeline): boolean => {
+  const windows = introParticleWindows(t)
+  return (
+    windows.outStartS === t.letterOutStartS &&
+    windows.outEndS < t.veilOutStartS &&
+    windows.inStartS === t.colorStartS &&
+    windows.inEndS < t.letterOutStartS
+  )
+}
+
 /** Las letras asientan antes de que la línea del trazo se cierre. */
 const LINES_SETTLE = (t: IntroTimeline): boolean =>
   t.wordmarkInS < t.sloganInS && t.sloganInS + t.lineInDurationS <= t.strokeEndS + EPS
@@ -79,11 +103,12 @@ const PROPERTIES: readonly (readonly [string, (t: IntroTimeline) => boolean])[] 
   ['3a · la tinta invierte adentro del color', INK_INSIDE_COLOR],
   ['3b · el relevo, adentro de la inversión', SWAP_INSIDE_INK],
   ['las letras asientan antes del cierre', LINES_SETTLE],
+  ['7 · las partículas se van antes que el fondo', PARTICLES_BEFORE_VEIL],
 ]
 
 // ── Las once calibraciones ──────────────────────────────────────────────────
 
-section('las seis propiedades, en las once calibraciones')
+section('las siete propiedades, en las once calibraciones')
 
 for (const [name, phases] of CALIBRATIONS) {
   const t = buildTimeline(phases)
@@ -204,6 +229,23 @@ check('detecta el relevo fuera de la inversión', !SWAP_INSIDE_INK(relevoFuera))
 /** Las letras todavía apareciendo cuando la línea se cierra. */
 const letrasTarde: IntroTimeline = { ...d, sloganInS: d.strokeEndS - 0.1 }
 check('detecta las letras sin asentar', !LINES_SETTLE(letrasTarde))
+
+/**
+ * El campo de partículas yendose JUNTO con el velo en vez de antes — que es la
+ * forma obvia de escribirlo, y exactamente la que rompe el mecanismo.
+ */
+const particulasConElVelo: IntroTimeline = { ...d, veilOutStartS: d.letterOutStartS + 0.1 }
+check(
+  'detecta las partículas todavía cayendo cuando el fondo arranca',
+  !PARTICLES_BEFORE_VEIL(particulasConElVelo)
+)
+
+/** Y la letra yendose antes de que el campo termine de aparecer. */
+const letraAntesDeLaDensidad: IntroTimeline = { ...d, letterOutStartS: d.colorStartS }
+check(
+  'detecta la letra yendose con el campo todavía apareciendo',
+  !PARTICLES_BEFORE_VEIL(letraAntesDeLaDensidad)
+)
 
 /** Y el orden, roto por el lado del relleno. */
 const ordenRoto: IntroTimeline = { ...d, fillEndS: d.colorStartS + 0.5 }

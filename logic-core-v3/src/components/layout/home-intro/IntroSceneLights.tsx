@@ -13,7 +13,7 @@ import {
 } from '@/app/probe-escena/_components/probeLighting'
 import { BOUNCE_COLOR, PAPER_COLOR } from '@/app/probe-escena/_components/probeScene'
 
-import { sampleInkShading } from './introShading'
+import { sampleInkShading } from './introRig'
 
 /**
  * EL RIG DE LA ESCENA, ENTRANDO DURANTE EL ACOMODAMIENTO.

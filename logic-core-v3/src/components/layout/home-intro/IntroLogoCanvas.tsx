@@ -16,7 +16,8 @@ import { SCENE_ENTRY_VIEW } from '@/lib/scene-framing'
 import type { IntroLogoCanvasProps } from './IntroLogo3D'
 import { IntroSceneLights } from './IntroSceneLights'
 import { IntroShadowPlane } from './IntroShadowPlane'
-import { hexToSrgb, sampleInkShading, solveEmissiveForSrgb } from './introShading'
+import { sampleInkShading } from './introRig'
+import { hexToSrgb, solveEmissiveForSrgb } from './introShading'
 
 /**
  * EL LOGO 3D DEL PRELOADER — el mismo objeto de la escena, que hasta el final se

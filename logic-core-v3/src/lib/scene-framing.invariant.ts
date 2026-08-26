@@ -13,6 +13,9 @@
  *   3. Que la proyección dé los números publicados en el reporte de S8b.
  *   4. Que el clamp de ancho (§7.6) haga lo que dice, y solo donde hace falta.
  *   5. Que un viewport degenerado devuelva `null` y no basura.
+ *
+ * La cámara y la proyección de un punto cualquiera salieron a
+ * `lib/scene-camera.ts` en S13, y las comprueba `scene-camera.invariant.ts`.
  */
 import { CHOREO_KEYFRAMES } from '@/app/probe-escena/_components/choreography'
 import {
@@ -21,11 +24,11 @@ import {
 } from '@/app/probe-escena/_components/choreographyVariants'
 import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '@/app/probe-escena/_components/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
+import { SCENE_LOGO_MESH_WORLD } from '@/lib/scene-camera'
 import {
   DEST_WIDTH_MARGIN,
   SCENE_ENTRY_POSE,
   SCENE_ENTRY_VIEW,
-  SCENE_LOGO_MESH_WORLD,
   frameSceneEntry,
 } from '@/lib/scene-framing'
 

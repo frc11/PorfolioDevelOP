@@ -14,7 +14,7 @@ import {
   sampleSwap,
   sampleVeilOpacity,
 } from './introSampling'
-import { srgbToHex, srgbToLinear, type Srgb } from './introShading'
+import { contrastRatio, srgbToHex } from './introShading'
 import {
   HOME_INTRO_PHASES,
   INTRO_COLORS,
@@ -48,21 +48,12 @@ import {
 
 const EPS = 1e-12
 
-/** Luminancia relativa (WCAG) de un color sRGB. */
-function luminance(color: Srgb): number {
-  return (
-    0.2126 * srgbToLinear(color[0]) +
-    0.7152 * srgbToLinear(color[1]) +
-    0.0722 * srgbToLinear(color[2])
-  )
-}
-
-/** Razón de contraste WCAG. 1 = indistinguibles. */
-function contrast(a: Srgb, b: Srgb): number {
-  const la = luminance(a)
-  const lb = luminance(b)
-  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
-}
+/**
+ * El contraste vive en `introShading.ts` desde S13: lo comparte con la
+ * legibilidad de las partículas, y el umbral con el que se decide "esto ya no se
+ * ve" tiene que ser el mismo en las dos. La fórmula no cambió ni un byte.
+ */
+const contrast = contrastRatio
 
 // ── Monotonicidad ───────────────────────────────────────────────────────────
 
