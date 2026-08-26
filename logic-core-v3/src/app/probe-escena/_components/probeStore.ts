@@ -1,4 +1,5 @@
 import { PLAY_SPEED_DEFAULT } from './choreographyPhysics'
+import { CELOSIA_SUN_RADIUS_DEG, CELOSIA_SUN_RADIUS_MAX_DEG } from './celosiaPenumbra'
 import { CELOSIA_BAR, CELOSIA_BAR_MAX } from './probeCelosia'
 import { KEY_INTENSITY } from './probeLighting'
 import { MOIRE_MISMATCH, MOIRE_MISMATCH_MAX } from './probeMoire'
@@ -158,14 +159,34 @@ export type ProbeParams = {
    * el papel, la amplitud del batido proyectado y —a través del factor de
    * cielo— la exposición general de la sala.
    *
-   * **0,29 es el máximo medido del batido** (10,8 puntos sRGB en el hero) y la
-   * teoría coincide: la modulación es c − c², máxima en cobertura 0,5. Subir a
-   * 0,35 baja tres puntos más el valor medio del cuadro **a costa de aflojar el
-   * batido**; bajar aclara el piso y lo afloja también. En **0** no hay celosía:
-   * el piso vuelve exactamente a lo que S10 midió, que es el control con el que
-   * se juzga todo lo demás. Ver `probeCelosia.ts`.
+   * **0,29 es el máximo teórico de la modulación**: es c − c², máxima en
+   * cobertura 0,5, o sea con la barra en 1 − √0,5. Subir a 0,35 baja tres puntos
+   * más el valor medio del cuadro **a costa de aflojar el batido**; bajar aclara
+   * el piso y lo afloja también. En **0** no hay celosía: el piso vuelve
+   * exactamente a lo que S10 midió, que es el control con el que se juzga todo
+   * lo demás. Ver `probeCelosia.ts`.
+   *
+   * ⚠️ **El "10,8 puntos sRGB en el hero" que S11 escribió acá era prosa, no
+   * medición** — no existía instrumento que lo produjera. Desde S12 lo mide
+   * `celosiaBeat.ts` con su método declarado; el número de esa barra en el hero
+   * es **23,1 sobre una portadora de 28,6**.
    */
   celosiaBar: number
+  /**
+   * EL RADIO ANGULAR DEL SOL (S12), en grados: de acá sale la penumbra.
+   *
+   * El sol real mide **0,266°** y ése es el default, pero esto es un estudio
+   * estilizado y el valor definitivo **se calibra mirando** — para eso está en el
+   * panel. Lo que mueve: cuánto se ablanda el borde de la banda y, con él, cuánto
+   * del contraste que S11 compró se devuelve.
+   *
+   * En **0** el sol no tiene tamaño y el gobo es exactamente el de S11: borde
+   * filoso, que es el control. El tope de 1,5° llega hasta donde la penumbra pasa
+   * media celda y **el moiré del piso se lava** — está para poder ver ese extremo.
+   * Medido: de 0 a 0,5° la portadora del piso no se mueve un punto; desde 0,75°
+   * empieza a caer. Ver `celosiaPenumbra.ts` y `outputs/S12-PENUMBRA.md`.
+   */
+  celosiaSunRadiusDeg: number
 }
 
 export type ProbeParamKey = keyof ProbeParams
@@ -217,6 +238,10 @@ export const PROBE_RANGES: { readonly [K in ProbeParamKey]: ProbeRange } = {
   // cobertura de una capa ya es del 75% y el batido se ahoga. El mínimo es 0 y
   // es el control: apaga la celosía entera sin tocar nada más.
   celosiaBar: { min: 0, max: CELOSIA_BAR_MAX, step: 0.01 },
+  // El tope sale de `celosiaPenumbra.ts`: ahi la penumbra ya pasa media celda
+  // y el patron fino se reemplaza por su media. El minimo es 0 y es el control:
+  // sol sin tamano angular, o sea el borde filoso de S11.
+  celosiaSunRadiusDeg: { min: 0, max: CELOSIA_SUN_RADIUS_MAX_DEG, step: 0.005 },
 }
 
 /** Orden fijo, en pantalla y en el texto que se copia. */
@@ -231,6 +256,7 @@ export const PROBE_PARAM_ORDER: readonly ProbeParamKey[] = [
   'particleCount',
   'moireMismatch',
   'celosiaBar',
+  'celosiaSunRadiusDeg',
 ]
 
 export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = {
@@ -244,6 +270,7 @@ export const PROBE_PARAM_SPECS: { readonly [K in ProbeParamKey]: SliderSpec } = 
   particleCount: { label: 'partículas dibujadas', unit: '', decimals: 0 },
   moireMismatch: { label: 'desajuste del fondo', unit: ' bandas', decimals: 0 },
   celosiaBar: { label: 'barra de la celosía', unit: ' de celda', decimals: 2 },
+  celosiaSunRadiusDeg: { label: 'radio angular del sol', unit: '°', decimals: 3 },
 }
 
 export const PROBE_DEFAULTS: ProbeParams = {
@@ -268,6 +295,7 @@ export const PROBE_DEFAULTS: ProbeParams = {
   particleCount: 2400,
   moireMismatch: MOIRE_MISMATCH,
   celosiaBar: CELOSIA_BAR,
+  celosiaSunRadiusDeg: CELOSIA_SUN_RADIUS_DEG,
 }
 
 // ── Medición (no se manipula: se lee) ───────────────────────────────────────

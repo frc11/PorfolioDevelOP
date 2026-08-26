@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
 import { celosiaLayers } from './celosiaGeometry'
+import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from './celosiaPenumbra'
 import { CELOSIA_BAR } from './probeCelosia'
 import { MOIRE_FADE, MOIRE_MISMATCH } from './probeMoire'
 
@@ -124,18 +125,33 @@ const VERTEX_BODY = [
  * De paso resuelve solo el corte de `atan`: en la costura la fase salta una
  * vuelta entera, `fwidth` se dispara y ese píxel devuelve la media en vez de un
  * destello.
+ *
+ * ── La penumbra (S12), y por qué comparte ese mismo perfil ─────────────────
+ *
+ * El sol tiene tamaño angular, así que cada cruce trae su propio ancho de borde
+ * —derivado de la distancia a ESE cruce, ver `celosiaPenumbra.ts`— y entra por
+ * la misma puerta: **`w = max(fwidth(fase), penumbra)`**. No se suma, se toma el
+ * mayor: cerca de la cámara manda la penumbra física, en la lonja rasante manda
+ * el filtro, y sumarlos lavaría el piso lejano dos veces.
+ *
+ * Que compartan el perfil no es economía, es que las dos cosas piden lo mismo:
+ * una rampa del ancho que se les pase y, pasada media celda, el reemplazo del
+ * patrón por su propia media. Para el antialias eso es lo que hace un mipmap;
+ * para la penumbra es literalmente cierto —una penumbra más ancha que la celda
+ * ES el promedio de la trama—. **Con `uCelosiaKnobs.w` en 0 el gobo vuelve a ser
+ * el de S11, línea por línea.**
  */
 const FRAGMENT_PARS = [
   'uniform vec3 uCelosiaSun;',
   'uniform vec4 uCelosiaNear;',
   'uniform vec4 uCelosiaFar;',
-  'uniform vec3 uCelosiaKnobs;',
+  'uniform vec4 uCelosiaKnobs;',
   'varying vec3 vCelosiaWorld;',
   '',
   '#define CELOSIA_TWO_PI 6.283185307179586',
   '',
-  'float celosiaBar( const in float phase ) {',
-  '\tfloat w = max( fwidth( phase ), 1e-5 );',
+  'float celosiaBar( const in float phase, const in float penumbra ) {',
+  '\tfloat w = max( max( fwidth( phase ), penumbra ), 1e-5 );',
   '\tfloat d = abs( phase - floor( phase + 0.5 ) );',
   '\tfloat hard = clamp( ( uCelosiaKnobs.x * 0.5 - d ) / w + 0.5, 0.0, 1.0 );',
   '\treturn mix( hard, uCelosiaKnobs.x, clamp( w * 2.0 - 1.0, 0.0, 1.0 ) );',
@@ -153,8 +169,14 @@ const FRAGMENT_PARS = [
   '\tfloat pitch = CELOSIA_TWO_PI * layer.x / layer.w;',
   '\tfloat u = atan( q.x, q.z ) / CELOSIA_TWO_PI * layer.w;',
   '\tfloat v = ( q.y - layer.y ) / pitch + drift;',
+  '\t// LA PENUMBRA (S12): el tamaño angular del sol pasado a ancho de FASE con la',
+  '\t// distancia a ESTE cruce. La derivación entera está en `celosiaPenumbra.ts`.',
+  '\tfloat cosine = dot( q.xz, uCelosiaSun.xz ) / layer.x;',
+  '\tfloat spread = uCelosiaKnobs.w * t / ( pitch * max( abs( cosine ), 1e-4 ) );',
+  '\tvec2 penumbra = spread * vec2( length( uCelosiaSun.xz ),',
+  '\t\tsqrt( uCelosiaSun.y * uCelosiaSun.y + cosine * cosine ) );',
   '\tfloat inside = step( layer.y, q.y ) * step( q.y, layer.z );',
-  '\tfloat mark = max( celosiaBar( u ), celosiaBar( v ) );',
+  '\tfloat mark = max( celosiaBar( u, penumbra.x ), celosiaBar( v, penumbra.y ) );',
   '\treturn 1.0 - valid * inside * celosiaEnvelope( ( q.y - layer.y ) / span ) * mark;',
   '}',
   '',
@@ -190,8 +212,13 @@ export type CelosiaUniforms = {
   readonly uCelosiaSun: { value: THREE.Vector3 }
   readonly uCelosiaNear: { value: THREE.Vector4 }
   readonly uCelosiaFar: { value: THREE.Vector4 }
-  /** x = barra · y = deriva de la capa gruesa · z = desvanecido de banda. */
-  readonly uCelosiaKnobs: { value: THREE.Vector3 }
+  /**
+   * x = barra · y = deriva de la capa gruesa · z = desvanecido de banda ·
+   * **w = `2·tan(α)` (S12)**, el ancho angular COMPLETO del disco del sol. En 0
+   * el gobo es exactamente el de S11: borde filoso, y el único ancho de borde lo
+   * pone `fwidth`.
+   */
+  readonly uCelosiaKnobs: { value: THREE.Vector4 }
 }
 
 export function createCelosiaUniforms(): CelosiaUniforms {
@@ -199,7 +226,9 @@ export function createCelosiaUniforms(): CelosiaUniforms {
     uCelosiaSun: { value: new THREE.Vector3(0, 1, 0) },
     uCelosiaNear: { value: new THREE.Vector4() },
     uCelosiaFar: { value: new THREE.Vector4() },
-    uCelosiaKnobs: { value: new THREE.Vector3(CELOSIA_BAR, 0, MOIRE_FADE) },
+    uCelosiaKnobs: {
+      value: new THREE.Vector4(CELOSIA_BAR, 0, MOIRE_FADE, celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG)),
+    },
   }
   writeCelosiaLayers(uniforms, MOIRE_MISMATCH)
   return uniforms

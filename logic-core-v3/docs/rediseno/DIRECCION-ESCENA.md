@@ -126,11 +126,25 @@ Una regla de amplitud que S9 propuso —"ningún tramo mueve la cámara menos de
 
 **Lo que se ve es la sombra**, y tiene tres propiedades medidas:
 
-- **Lleva el moiré adentro**, porque atraviesa las dos capas: batido de **15,3 de mundo** sobre el piso, **de 2,4 a 4,6 bandas a lo ancho del cuadro**, con una amplitud de **10,8 puntos sRGB** en el hero.
+- **Lleva el moiré adentro**, porque atraviesa las dos capas: batido de **15,3 de mundo** sobre el piso y **de 2,4 a 4,6 bandas a lo ancho del cuadro**. ~~Con una amplitud de 10,8 puntos sRGB en el hero.~~ **Ese número era prosa** (regla 11 de §3): no lo produce ningún archivo del repo. Medido con el instrumento de S12 (`__tests__/celosiaBeat.ts`), la portadora del piso en el hero vale **28,6 puntos** y el batido **23,1** sobre un tramo de cinco períodos.
 - **Barre con el arco.** El patrón está anclado al azimut del sol, así que los 180° de barrido son **51 celdas de fase pasando sobre un punto fijo del piso** — 119 unidades de mundo de banda. No es una deriva: es el mismo reloj que la sombra del logo.
 - **Se alarga ×3,6**, de 3,22 a 11,51 de largo, que es exactamente el factor con el que crece la sombra del logo. Las dos son 1/tan(elevación): crecen juntas o no crece ninguna.
 
 **Y la celosía tiene alcance.** Los cilindros están abiertos arriba, así que con el sol a 36° la luz entra por encima del borde y cae sobre la parte de la losa opuesta al sol: la sombra cubre el **82% de la losa durante la meseta y el 100% desde p=0,875**. La creciente de sol abierto se cierra a medida que atardece.
+
+### 2.7.1 · El sol tiene tamaño: la penumbra (S12)
+
+S11 dejó la forma bien y **el material mal**: las bandas se leían como piso embaldosado, no como luz. La causa es física — **el sol no tenía tamaño angular**, así que el único ancho de borde era el del filtro de huella de píxel, que es antialias y no óptica.
+
+**Desde S12 el sol mide 0,266° de radio** —el sol real— **y es perilla del panel** (0 … 1,5°). De ahí sale una penumbra **por fragmento**, derivada de la distancia del punto sombreado al cruce contra cada capa: `ancho = 2·tan(α)·(t/paso)·oblicuidad`, en celdas de la trama. **No hay ningún desenfoque**: se ensancha el borde de la barra, y se combina con el filtro que ya existía tomando **el mayor de los dos**, nunca la suma.
+
+**Lo que la penumbra sí hace, medido:** el borde de la banda fina pasa a medir **0,18–0,21 celdas** de mediana en cuadro, y **varía 6,3× entre el punto del piso pegado a la celosía y el más lejano** — ésa variación es lo que distingue una sombra de una textura. Lo paga barato: el hero sube de 201 a 203,5 (techo acordado: 210), **la portadora del piso no se mueve un punto** y el batido queda dentro de ±11%.
+
+> ⚠️ **Tres cosas del diagnóstico que la medición corrigió, y quedan escritas para que nadie las repita:**
+>
+> 1. **`R/cos(elevación)`, no `1/tan`.** La distancia de un punto del piso al manto **baja** con el atardecer (47,0 → 38,8 en el centro de la losa): el rayo llega antes. Lo que crece ×3,6 es la CELDA proyectada. Resultado: **la penumbra NO se ensancha al atardecer** — como fracción de la banda **se achica un 32%** (0,230 → 0,157 celdas). **El cierre no se arregla solo** — ver §7.14.
+> 2. **La diferencia entre las dos capas es del 16%, no "la mitad del efecto".** En mundo la gruesa es `44/38 = 1,16×` la fina; en fracción de celda se invierte y queda **2,1× más DURA** (0,101 contra 0,209). Lo que rompe la lectura de baldosa es el **6,3× de cerca contra lejos**, que es geométrico y **no depende de α**: la perilla elige la escala, no la variación.
+> 3. **La creciente de sol abierto ya tenía el borde blando.** Mide **6,1 celdas finas (14,20 de mundo) con α = 0** y lo pone `MOIRE_FADE`, no la penumbra: con el sol real **no se mueve** —14,20, o sea 0,0% al paso del barrido— y ni con α = 1° pasa de **+2,5%**.
 
 ### 2.8 · Las partículas son el relleno
 
@@ -166,6 +180,7 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
 8. **Sin tipografía en la escena 3D.** Sumar una fuente es sumar un activo y una dependencia. La escala graduada del piso da la unidad de medida sin escribir un número.
 9. **Los patrones del fondo salen del vocabulario propio.** Retículas, tramas de rendijas y campos de puntos: lo que el sitio ya usa, leído en el repo. No se importan referencias de afuera. Ver §2.6.
 10. **Nada de geometría sin significado.** Es la regla que S10 destiló al borrar cuatro familias de una vez: si una pieza solo "ocupa espacio con intención", se lee como descarte. Todo lo que quedó tiene una razón nombrable — el piso da escala y ancla, la envolvente es el fondo con vida, el sol es la fuente que se ve, las partículas son el aire.
+11. ⚠️ **UNA CIFRA QUE SE PUBLICA EN UN REPORTE Y NO TIENE INSTRUMENTO QUE LA PRODUZCA ES PROSA, NO MEDICIÓN.** Regla del proyecto desde S12, y no es de estilo: si más adelante hay que comparar contra ella, no se puede; si hay que defenderla, tampoco. **El caso que la obligó** son los cuatro números de amplitud de batido de S11 —10,8 / 7,1 / 13,1 / 6,5 puntos sRGB— que viven en la prosa de `outputs/S11-LUZ.md` §4.2 y en un string de `s11-celosia.invariant.ts`, y que **ningún archivo del repo produce**: su commit no agregó un solo script que los calcule. S12 los reemplazó por los de `__tests__/celosiaBeat.ts`, que sí tiene método declarado —tramo, ventana, muestreo— y control positivo. La regla se cumple escribiendo el instrumento **antes** de escribir el número, no después. **El inventario de lo que quedó sin instrumento está en `outputs/S12-PENUMBRA.md` §8.1** —el peso del canvas, los triángulos y draw calls, los MFLOP, la comparación con el mapa de sombras, el grano de papel y la tabla de los haces—: **auditado con `grep` sobre las veinte suites y NO re-medido**, que es trabajo del sprint que lo necesite. El caso más engañoso de esa lista es la tabla de los haces: **tiene chequeo pero no tiene productor** —los dos checks que la leen validan su forma contra sí misma— así que parece instrumentada y no lo está.
 
 ---
 
@@ -319,7 +334,7 @@ Está acá para que nadie lo dé por resuelto.
 6. **El encuadre por relación de aspecto.** El recorrido está compuesto en horizontal; en vertical el logo no entra igual y falta decidir si se reencuadra o se recompone.
 7. **Qué contenido va en cada una de las ocho pantallas**, más allá de los nombres de los tramos.
 8. **La temperatura del cierre**: 7700 K (frío, lo que está hoy) contra los 2000 K (ámbar) que tenía la calibración a mano. Es un número y está argumentado en los dos sentidos.
-9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto es una sola perilla**, `CELOSIA_BAR` (0,29), que se calibra mirando: sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido.
+9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto son DOS perillas**, las dos de calibrar mirando: `CELOSIA_BAR` (0,29), que sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido; y desde S12 el **radio angular del sol** (0,266°, rango 0 … 1,5°), que ablanda el borde a costa de devolver parte de esos 29,6 puntos. Medido: de 0 a 0,5° no se pierde nada; desde 0,75° empieza a caer la portadora del piso. En **0** las dos apagan lo suyo y devuelven el estado anterior, que es el control.
 10. **Si el recorrido debería dar dos vueltas.** El argumento que lo descartaba murió con los planos (ver §2.2). Es decisión de recorrido, no de escena.
 11. ⚠️ **EL ESCALÓN DE EXPOSICIÓN — requisito del sprint de las partículas del preloader (S11).** No es una nota suelta: es una condición de entrada.
     **El intro termina con el ambiente en `HEMI_INTENSITY` exacto** (`introShading.ts` hace `HEMI_INTENSITY * reveal`, y `introShading.invariant.ts` lo compara por identidad) **y la escena arranca en `HEMI_INTENSITY × 0,6743`**: el ambiente de la sala **cae un 32,6% en el instante del traspaso, en un corte**. Sobre las mismas superficies eso es −1,1 puntos en el papel iluminado, **−18,2 en el papel en sombra** y **−15 en el valor medio del cuadro de la pose del hero (216 → 201)**.
@@ -330,8 +345,27 @@ Está acá para que nadie lo dé por resuelto.
 
     | archivo | líneas | antes de S11 | de quién es el exceso |
     |---|---:|---:|---|
-    | `OrbitRig.tsx` | **647** | 626 | heredado; S11 sumó 21 (la deriva compartida y el volcado del desajuste) |
-    | `probeStore.ts` | **378** | 352 | heredado; S11 sumó 26 (la perilla `celosiaBar` y su porqué) |
-    | `lightRig.ts` | **345** | 319 (ya cruzado por S10) | heredado; S11 sumó 26 (el uniform de la celosía y el factor de cielo) |
+    | `OrbitRig.tsx` | **651** | 626 | heredado; S11 sumó 21, **S12 sumó 4** (el volcado del radio angular) |
+    | `probeStore.ts` | **406** | 352 | heredado; S11 sumó 26, **S12 sumó 28** (la perilla del radio angular y su porqué, más la corrección de la cifra sin instrumento) |
+    | `lightRig.ts` | **357** | 319 (ya cruzado por S10) | heredado; S11 sumó 26, **S12 sumó 12** (el canal del radio angular) |
+
+    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `celosiaPenumbra.ts` (162), `celosiaBeat.ts` (246), `s12-penumbra` (275) y `s12-tension` (258).
 
     **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos del módulo (`choreography.ts` 462, `choreographyEditor.ts` 376, `probeScene.ts` 348, `KeyframeEditor.tsx` 310) son heredados sin delta de S11 y pueden entrar al mismo sprint.
+
+14. ⚠️ **EL CIERRE SIGUE LEYÉNDOSE COMO SENDA PEATONAL — pendiente abierto, con el número (S12).**
+
+    El sprint de la penumbra suponía que el atardecer lo iba a arreglar solo. **No lo arregla, y está medido:** la celda proyectada se estira ×3,6 con `1/tan(elevación)` (de 3,22 a 11,51 de largo, S11 §4.1) mientras la penumbra **como fracción de la banda se achica un 32%** (0,230 → 0,157 celdas), porque la distancia del piso al manto es `R/cos(elevación)` y **baja** con el sol. En unidades de mundo el borde parece ensancharse ×2,4, pero es la banda la que creció debajo. **Lo que se ve es la fracción: la senda peatonal sobrevive a S12.**
+
+    Lo que S12 sí le da al cierre: la mediana del borde en cuadro queda en 0,18 celdas, igual que en el hero, así que **no empeora** — simplemente no mejora por sí solo.
+
+    **Las cuatro palancas, ordenadas de la MÁS BARATA a la más cara**, para que el sprint que lo tome no tenga que rehacer el análisis. Ninguna se tocó acá, y ninguna es un blur:
+
+    | # | palanca | costo | qué cuesta de verdad |
+    |---:|---|---|---|
+    | **1** | **Subir el radio angular solo en el tramo final**, atándolo al arco | **una línea** en `OrbitRig` | El valor ya viaja por frame del store al uniform: solo hay que hacerlo función del progreso, y toca **únicamente el gobo**. Lo que cuesta no es código: **rompe la premisa física** —el sol no cambia de tamaño a la tarde— y hay que aceptarlo como licencia declarada |
+    | **2** | **Bajar `CELOSIA_BAR` hacia el final** | **una línea, más re-medición** | Misma mecánica, pero la barra alimenta además `celosiaSkyFactor`, o sea la intensidad del hemisférico: moverla con el arco mueve **la exposición de la sala**. Hay que volver a medir el valor medio del cierre, que ya vale 104 |
+    | **3** | **Que en el cierre proyecte solo la capa gruesa** | **un canal de uniform y un término de shader** | Hoy el gobo es el producto fijo de dos `celosiaLayer`; hace falta un peso por capa que viaje por frame. Y **se pierde el batido**, que es la interferencia entre las dos: hay que re-medir portadora y batido. A cambio da otra lectura — su celda mide 27,18 de largo, o sea una sola banda ancha en vez de trama |
+    | **4** | **Acortar la celda proyectada**, que es el ×3,6 | **un sprint de coreografía** | Es la elevación del arco. Mueve **todo** a la vez —la sombra del logo, el alcance de la creciente, los seis valores medios— y es decisión de recorrido, no de escena. §7.8 discute la temperatura del mismo tramo |
+
+    La decisión es del humano por grabación. Lo que este pendiente fija es que **no se resuelve esperando al arco**.

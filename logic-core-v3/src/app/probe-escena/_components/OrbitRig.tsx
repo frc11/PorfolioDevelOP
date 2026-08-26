@@ -49,6 +49,7 @@ import {
   type LightRigInput,
   type LightRigTargets,
 } from './lightRig'
+import { celosiaSunSpread } from './celosiaPenumbra'
 import { writeCelosiaLayers, type CelosiaUniforms } from './celosiaShader'
 import type { MoireHandle } from './MoireScreen'
 import { celosiaSkyFactor } from './probeCelosia'
@@ -562,6 +563,9 @@ export function OrbitRig({
     lightInput.celosiaBar = params.celosiaBar
     lightInput.celosiaDrift = drift
     lightInput.skyFactor = celosiaSkyFactor(params.celosiaBar)
+    // El radio angular llega como `2·tan(α)` porque es lo que consume el shader:
+    // la trigonometría se hace una vez acá y no cuatro veces por fragmento.
+    lightInput.celosiaSpread = celosiaSunSpread(params.celosiaSunRadiusDeg)
 
     applyLightRig(targets, lightInput, scratch.lightCache)
 

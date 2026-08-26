@@ -172,6 +172,11 @@ export type SceneVariant = {
     readonly sky: number
     /** La deriva de la capa gruesa, en celdas. Default 0: el cuadro en reposo. */
     readonly drift?: number
+    /**
+     * EL TAMAÑO ANGULAR DEL SOL (S12), ya como `2·tan(α)`. Default 0: el sol sin
+     * diámetro de S11, o sea borde filoso. Ver `celosiaPenumbra.ts`.
+     */
+    readonly spread?: number
   }
 }
 
@@ -253,7 +258,8 @@ export function sampleFrame(
           sun,
           celosia.bar,
           variant.mismatch ?? 0,
-          celosia.drift ?? 0
+          celosia.drift ?? 0,
+          celosia.spread ?? 0
         )
         if (!onLogo && hitsFloor && gobo < 0.5) shaded += 1
       }

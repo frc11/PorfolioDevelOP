@@ -1,3 +1,4 @@
+import { CELOSIA_NO_PENUMBRA, celosiaPenumbraAt, type CelosiaPenumbra } from './celosiaPenumbra'
 import { bandEnvelope } from './moireTextures'
 import {
   MOIRE_COARSE_CELLS,
@@ -75,6 +76,12 @@ export type CelosiaCrossing = {
   readonly envelope: number
   /** Distancia a la que cruza, en unidades de mundo. */
   readonly t: number
+  /**
+   * El ancho de penumbra en ese cruce, en celdas, una por familia de barras
+   * (S12). Con el sol sin tamaño angular es `{u: 0, v: 0}` y el borde vuelve a
+   * ser el de S11. Ver `celosiaPenumbra.ts`.
+   */
+  readonly penumbra: CelosiaPenumbra
 }
 
 /**
@@ -90,7 +97,8 @@ export function celosiaCrossings(
   point: Point3,
   sun: Point3,
   layer: CelosiaLayer,
-  drift: number
+  drift: number,
+  spread = 0
 ): readonly CelosiaCrossing[] {
   const a = sun[0] * sun[0] + sun[2] * sun[2]
   if (a <= 1e-8) return []
@@ -115,6 +123,10 @@ export function celosiaCrossings(
       v: (y - layer.bottom) / pitch + (layer.drifts ? drift : 0),
       envelope: bandEnvelope((y - layer.bottom) / height, MOIRE_FADE),
       t,
+      penumbra:
+        spread > 0
+          ? celosiaPenumbraAt([x, y, z], sun, layer.radius, pitch, t, spread)
+          : CELOSIA_NO_PENUMBRA,
     })
   }
 
@@ -162,12 +174,19 @@ export function celosiaTransmittance(
   sun: Point3,
   bar: number,
   mismatch: number,
-  drift = 0
+  drift = 0,
+  spread = 0
 ): number {
   let transmittance = 1
   for (const layer of celosiaLayers(mismatch)) {
-    for (const crossing of celosiaCrossings(point, sun, layer, drift)) {
-      const mark = Math.max(celosiaBarAt(crossing.u, bar), celosiaBarAt(crossing.v, bar))
+    for (const crossing of celosiaCrossings(point, sun, layer, drift, spread)) {
+      // El gemelo no tiene derivadas de pantalla, así que su ancho de borde es
+      // SOLO la penumbra: es el shader con un píxel infinitesimal. Con el sol
+      // sin tamaño el perfil vuelve a ser binario — el control de S12.
+      const mark = Math.max(
+        celosiaBarFiltered(crossing.u, bar, crossing.penumbra.u),
+        celosiaBarFiltered(crossing.v, bar, crossing.penumbra.v)
+      )
       transmittance *= 1 - crossing.envelope * mark
     }
   }

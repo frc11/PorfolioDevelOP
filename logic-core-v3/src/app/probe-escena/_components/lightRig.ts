@@ -23,6 +23,7 @@ import {
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
 import type { CelosiaUniforms } from './celosiaShader'
+import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from './celosiaPenumbra'
 import { CELOSIA_BAR } from './probeCelosia'
 import { kelvinToSrgb } from './probeScene'
 
@@ -117,6 +118,14 @@ export type LightRigInput = {
   celosiaDrift: number
   /** La barra de la celosía, del slider del panel. */
   celosiaBar: number
+  /**
+   * El tamaño angular del sol ya como `2·tan(α)` (S12), del slider del panel.
+   *
+   * Entra por acá y no por un store propio por el mismo motivo que la barra: es
+   * una propiedad de la MISMA fuente que la key, así que la sombra y la luz que
+   * la tira salen del mismo número. En 0 el borde vuelve a ser el de S11.
+   */
+  celosiaSpread: number
 }
 
 export function createLightRigInput(): LightRigInput {
@@ -131,6 +140,7 @@ export function createLightRigInput(): LightRigInput {
     skyFactor: 1,
     celosiaDrift: 0,
     celosiaBar: CELOSIA_BAR,
+    celosiaSpread: celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG),
   }
 }
 
@@ -217,6 +227,7 @@ export function applyLightRig(
     skyFactor,
     celosiaDrift,
     celosiaBar,
+    celosiaSpread,
   } = input
 
   // 0 · EL EJE DEL SOL, que es el de la principal. Se resuelve una sola vez y lo
@@ -335,6 +346,7 @@ export function applyLightRig(
     celosia.uCelosiaSun.value.copy(SUN_DIRECTION)
     celosia.uCelosiaKnobs.value.x = celosiaBar
     celosia.uCelosiaKnobs.value.y = celosiaDrift
+    celosia.uCelosiaKnobs.value.w = celosiaSpread
   }
 
   if (targets.fog) targets.fog.color.copy(cache.fogTint)
