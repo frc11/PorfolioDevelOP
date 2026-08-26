@@ -6523,3 +6523,219 @@ El push a main, con este comando exacto:
 Es un fast-forward sobre `17727117`. Después de eso, la corrida de CI sobre `main` — va a ser la
 primera vez que el gate corre sobre la rama que importa, y el día que suba, los dos bugs de datos
 dejan de estar vivos donde corren las corridas.
+
+---
+
+## Sprint CALLEJONES — tres pantallas que nombraban una salida y no la ofrecían — 2026-08-26
+
+Base: `leados/v1-a-main` @ `d167df16`. Rama de trabajo `fix/callejones`, worktree propio en
+`C:/tmp/wt-callejones`, distDir `.next-callejones`, puerto 3007. No se pusheó nada.
+
+### Fase 0 — la base no era `main`
+
+El pedido decía «base: `main` con todo lo construido, gate corriendo, 43 invariantes verdes». En
+`main` (`17727117`) eso no existe: no hay workflow en la raíz que Actions lea, `check:invariants`
+sigue siendo la cadena escrita a mano y `scripts/run-invariants.mjs` no está. El único árbol donde
+las tres condiciones se cumplen es `leados/v1-a-main`, que es `main` + 19 commits (F1, F2, F3, C0,
+C1, C1b, C2, las 47 y las 52 capturas) y que la bitácora anterior deja listo para un fast-forward
+que **todavía no se hizo**. `main` es ancestro estricto de esa rama, así que basarse ahí no descarta
+nada de `main`. Se trabajó sobre `leados/v1-a-main` y se declara acá.
+
+Sobre esa base, antes de tocar nada: `npx tsc --noEmit` exit 0; `npm run check:invariants`
+**descubiertos 44 · corridos 43 · pasaron 43 · fallaron 0**.
+
+Y los tres callejones se verificaron VIVOS operando la aplicación, no leyendo código — build de
+producción en `.next-callejones`, `next start -p 3007`, sesión por `POST /api/qa/login` como
+`setter-qa@develop.test`, y leads QA que **ya existían** en la branch Neon dev (no se sembró nada).
+
+### Callejón 1 · El error del borrador, crudo y en el campo equivocado
+
+**Por qué se descartaba el mensaje en castellano.** No es traducción: es el mapa de errores de zod.
+En `node_modules/zod/v3/types.js:55-67`, `processCreateParams` arma un `customMap` que aplica el
+`message` de los create-params **solo** en tres casos: `invalid_enum_value`, dato `undefined`, o
+`invalid_type`. La línea 63 es la que mata: para cualquier otro code devuelve `ctx.defaultError`. Un
+interruptor sin tildar manda `false` —definido, no `undefined`— y `z.literal(true)` falla con
+`invalid_literal`. Ninguno de los tres casos: el mensaje escrito se tiraba y salía el default en
+inglés.
+
+Medido contra el schema real, antes de tocarlo:
+
+    ### URL válida + checkbox SIN tildar (false)
+      code = invalid_literal   path = ["confirmoCarga"]
+      message = "Invalid literal value, expected true"
+    ### URL válida + checkbox ausente (undefined)
+      code = invalid_literal   path = ["confirmoCarga"]
+      message = "Abrí el link en otra pestaña y confirmá que carga antes de guardar"
+
+Ahí está la trampa que explica la auditoría: el castellano **sí** salía, pero solo por el camino
+`undefined`, que la UI nunca produce. Cualquier prueba que mirara ese caso pasaba en verde sobre el
+bug.
+
+**Por qué el error se colgaba del campo de URL.** El `path` del issue ya decía `confirmoCarga`. Lo
+que faltaba era no tirarlo: `borrador-form.tsx:34` hacía `setError(parsed.error.issues[0]?.message)`
+— un string plano, sin path — y ese string alimentaba el `Field` de la URL y su `Input`. Medido en
+el navegador: el input de URL con `aria-invalid="true"` y `aria-describedby` apuntando al error, y
+el interruptor con `aria-invalid`, `aria-describedby` y `aria-required` en `null`. El asterisco
+estaba en «URL del borrador» y en el interruptor no había ninguno: lo obligatorio marcado como
+opcional, y al revés.
+
+**Los otros validadores con el mismo patrón — listados, sin tocar.** Censo de todo `src/`: hay
+**4** usos de create-params con `message` y **1 solo** cae en la clase rota — el de este sprint.
+
+| archivo:línea | factory | code de la falla | ¿sobrevive el mensaje? |
+|---|---|---|---|
+| `setter/_actions/dossier.schemas.ts:75` | `z.literal()` | `invalid_literal` | **NO** — el arreglado |
+| `setter/_actions/dossier.schemas.ts:23` | `z.enum()` | `invalid_enum_value` | sí |
+| `setter/_actions/outreach.schemas.ts:71` | `z.enum()` | `invalid_enum_value` | sí |
+| `api/admin/chatbot/test-prompt/route.ts:19` | `z.object()` | `invalid_type` | sí |
+
+El repo además **ya tenía escrito el idioma correcto** en tres lugares —
+`admin/clients/_actions/plan.schemas.ts:6` y `dashboard/_actions/executive-report-prefs.schemas.ts:9`
+y `:15` usan un `errorMap` que devuelve el mensaje, y `processCreateParams` lo devuelve tal cual
+(línea 53-54), por eso aplica a TODOS los codes. El arreglo adopta ese idioma, no inventa uno.
+
+**El arreglo.** Tres archivos:
+
+- `dossier.schemas.ts` — `message` pasa a `errorMap`. El tipo inferido sigue siendo el literal `true`.
+- `Toggle.tsx` — tres props ADITIVAS (`required`, `invalid`, `describedBy`) para que un interruptor
+  pueda ser el control que falla. Ningún call site existente cambia (11 usos, todos intactos).
+- `borrador-form.tsx` — los errores pasan de un string plano a un objeto por control, ruteado por
+  `issue.path[0]`. El error del server, que no trae path, va al pie — nunca al campo de URL.
+
+**Verificación operando la app.** Mismo recorrido, misma pantalla (`M0-GAL 21-m13-borrador-vacio`,
+CONSTRUCCION sin borrador): URL válida, «Guardar borrador» sin tocar el interruptor.
+
+| lo que ve el setter | antes | después |
+|---|---|---|
+| mensaje | `Invalid literal value, expected true` | `Abrí el link en otra pestaña y confirmá que la demo carga — sin eso no se guarda` |
+| input URL `aria-invalid` | `"true"` | `null` |
+| input URL borde rojo | sí | no |
+| interruptor `aria-invalid` | `null` | `"true"` |
+| interruptor `aria-required` | `null` | `"true"` |
+| interruptor `aria-describedby` | `null` | apunta al error, en castellano |
+| asteriscos | solo en «URL del borrador» | en los dos campos |
+
+### Callejón 2 · La pantalla del borrador congelada tras un rechazo
+
+**Censo, con archivo:línea.** El corte está en `m13-borrador.tsx:79`: con stage distinto de
+CONSTRUCCION y borrador publicado devuelve el resumen de consulta — link + «El borrador ya quedó
+publicado», sin un solo control. RECHAZADA cae ahí. En CONSTRUCCION cae en `BorradorForm`, que en su
+estado verificado (`borrador-form.tsx:53-85`) sí ofrece «Cambiar el link del borrador».
+
+Medido en el navegador sobre `QA-W Rechazada` — cuyo rechazo sembrado dice, textual: *«Arreglo:
+Reemplazá los textos por las reseñas reales del negocio (están en la ficha) y re-publicá el draft»*
+— la zona de Registro devolvió `"botones": []`. Cero.
+
+**El desvío, declarado.** El pedido decía «no hay que construir nada: hay que dejarlo visible».
+Mostrar «Cambiar el link del borrador» en RECHAZADA se probó contra el motor y **no funciona**:
+`dossier.ts:288` (`saveOwnedDraftUrl`) tiene un guard duro que tira `DossierTransitionError` si el
+stage no es CONSTRUCCION, así que el botón rebotaría siempre. Sería el mismo callejón con un paso
+más, justo lo que el paso 3 del pedido prohíbe. Ensanchar ese guard es habilitar un camino de
+escritura nuevo, que la regla 3 también prohíbe. Y sería un dead end de todos modos: el único camino
+de vuelta a EN_REVISION es RECHAZADA → CONSTRUCCION → EN_REVISION, así que un link cambiado sin
+reabrir queda sin forma de reenviarse.
+
+Lo que se hizo, entonces, es literalmente **mostrar un control que ya existe**: `ReabrirConstruccion`
+— la misma action de siempre, la única transición legal de vuelta — pasa a estar también en la
+pantalla del borrador, con el texto que faltaba. Un clic, y la misma pantalla ofrece cambiar el
+link. Después de F2 la nota de Franco sobrevive a la reapertura, así que reabrir ya no cuesta el
+pedido.
+
+**Ninguna transición cambió.** `git diff -- src/lib/leados/dossier-stage.ts` sale **vacío**.
+`LEGAL_TRANSITIONS` intacto. Actualizar el link del borrador nunca movió el stage y sigue sin
+moverlo: `saveOwnedDraftUrl` escribe `draftUrl` con un `updateMany` filtrado por stage y no toca
+`stage` — el test lo afirma releyendo el dossier de la base después del arreglo.
+
+**Verificación operando la app.** `QA-W Rechazada`, `/manual/m13`: `"botones": ["Reabrir
+construcción"]`, el link viejo sigue a la vista, y la pantalla dice qué hacer.
+
+### Callejón 3 · El chequeo final se nombraba y no se linkeaba
+
+**Censo.** Durante la construcción el chequeo final se nombra en dos pantallas:
+
+- `borrador-form.tsx:70` (m13, estado verificado) — «…el chequeo final se hace siempre sobre el
+  borrador vigente».
+- `m-construccion.tsx:184` (mc1/mc2) — «El único chequeo que gatea es el final».
+
+Ninguna enlazaba. El mecanismo: el chip de navegación sale de `NavAtras` (`manual-nav.tsx:172`), que
+recorre **solo `posicion.completadas`**, y `completadasDe` (`manual.ts:462`) marca m14 recién con
+`STAGES_POST_CHEQUEO`, o sea EN_REVISION y APROBADA. En CONSTRUCCION m14 está en `habilitadas`, y
+ninguna nav recorre esa lista. Resultado: el link aparece cuando el chequeo ya se hizo. La asimetría
+estaba a la vista — m14 **sí** enlaza a m13 (`m14-chequeo.tsx:127`), la vuelta no existía.
+
+Medido: `"linksAM14": []` en m13, mc1 y mc2.
+
+**El arreglo.** `enlace-chequeo.tsx`, fuente única del salto y de su gate. Con borrador publicado
+lleva a m14. **Sin borrador no ofrece el chequeo**: m14 no está habilitada y la guardia del server
+redirige en silencio — otro callejón con más pasos. Ahí el enlace dice «el chequeo final — se abre
+cuando publiques el borrador» y lleva a m13, donde se resuelve.
+
+**Verificación operando la app.** `QA-W Construccion` (borrador publicado, fases a medias): m13, mc1
+y mc2 devuelven un enlace con texto «el chequeo final» y href a `/manual/m14`.
+
+### Los tres tests, demostrados fallando contra el código viejo
+
+**1 · `check:invariant:draft-url-mensaje`** — invariante puro, sin DB ni server, descubierto solo por
+el runner. La aserción central **no depende de la redacción**: el mismo campo, fallando por la misma
+razón, tiene que decir lo mismo con `false` que con `undefined`. Contra el código viejo:
+
+    AssertionError: el mensaje sigue siendo el default en inglés de zod:
+    "Invalid literal value, expected true"          (exit 1)
+
+**2 y 3 · `tests/setter/15-callejones-borrador-chequeo.spec.ts`** — tres pruebas contra el build de
+producción. Se revirtió el código de producción, se reconstruyó, y las tres dieron rojo:
+
+    x 1 Callejón 2 · el borrador rechazado deja de ser una pantalla muda
+        Expected substring: "reabrí la construcción"
+        Received: "…Registro https://smoke-callejones-draft.netlify.app
+                   El borrador ya quedó publicado — desde acá se hizo el chequeo final…"
+    x 2 Callejón 3 · cada mención del chequeo final durante la construcción enlaza a él
+        m13 enlaza al chequeo final — Expected: 1   Received: 0
+    x 3 Callejón 3 · sin borrador el enlace dice qué falta en vez de rebotar
+
+Un detalle del seed que importa: el lead de la prueba 2 lleva las fases **a medias** a propósito. Con
+las seis tildadas, `posicionDe` pone `actual` en m14 y la pantalla saca sola un «Ir a tu paso actual»
+que apunta ahí — un atajo genérico que tapaba el hallazgo. Con el checklist incompleto —el estado
+normal de quien acaba de publicar el borrador— el único enlace posible a m14 es el que este sprint
+agrega.
+
+### Cierre
+
+- `npx tsc --noEmit` → **exit 0**.
+- `npm run check:invariants` → **descubiertos 45 · excluidos 1 · corridos 44 · pasaron 44 ·
+  fallaron 0**. Los 43 de la base siguen verdes; el 44º es el nuevo. El piso (43) no se tocó.
+- `npm run build` → **exit 0**.
+- `test:setter` (suite completa, contra el build de producción en 3007) → **65 passed**: las 62
+  previas más las 3 nuevas. Cero regresiones.
+- `test:leados` → **25 passed**.
+- `prisma generate`: no corresponde — el schema no se tocó.
+- Ningún invariante existente se modificó: `git status` sobre los `.invariant.ts` muestra solo el
+  nuevo, como archivo sin trackear.
+- El gate y el workflow, intactos: `git status` sobre `.github/` y `scripts/run-invariants.mjs` sale
+  vacío. Lo único que cambió en `package.json` es una línea, el script del invariante nuevo — que es
+  la vía de extensión que el propio runner documenta: «un script nuevo entra solo».
+
+### Desvíos y hallazgos fuera de scope
+
+- **La base fue `leados/v1-a-main`, no `main`** — ver Fase 0.
+- **Callejón 2 se resolvió con la reapertura, no con el editor del link** — ver arriba, con el motivo
+  y la línea del motor que lo impone.
+- **Ninguna operación sobre la base de datos** para armar los casos: los leads QA ya existían. Las
+  escrituras que hubo son las que hace la propia app al operarla (guardar un borrador, reabrir la
+  construcción) y las de seed/teardown de la suite de tests al correrla.
+- **Fuera de scope, anotado sin tocar:** en m13 con el lead RECHAZADA, la Munición sigue diciendo
+  «Copiá la URL que te da Netlify y pegala acá abajo» — el texto sale de `GUIA_DRAFT.pasos`, que es
+  compartido y en CONSTRUCCION es correcto. Con el arreglo el botón de reabrir queda justo debajo,
+  pero la frase sigue prometiendo un campo que en ese estado no existe.
+- **Fuera de scope, anotado sin tocar:** el toast «Borrador guardado — ahora pasá el chequeo final»
+  (`borrador-form.tsx:45`) nombra el chequeo y no puede llevar un enlace. Queda mitigado porque tras
+  guardar la pantalla se refresca al estado verificado, que ahora sí lo enlaza.
+- **No se pusheó a main.** `main` local sigue en `17727117`, igual que `origin/main`. La rama
+  `fix/callejones` no tiene upstream configurado.
+
+### Lo que queda para la verificación humana
+
+Que los textos nuevos suenen como el resto del producto — ningún test lo valida. Son cuatro: el
+mensaje del interruptor, el párrafo del borrador congelado, y las dos formas del enlace al chequeo.
+Y que el recorrido completo, de punta a punta, ya no tenga callejones — eso se prueba recorriéndolo,
+y es de la corrida de comportamiento pendiente.

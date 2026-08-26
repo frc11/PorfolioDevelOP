@@ -72,8 +72,19 @@ export const DraftUrlInputSchema = z.object({
     .url('Eso no parece una URL — copiala completa desde la barra del navegador')
     .refine((url) => url.startsWith('https://'), 'La URL tiene que empezar con https://')
     .refine((url) => url.length <= 500, 'Esa URL es demasiado larga — revisá que sea la del borrador'),
+  // `errorMap`, NO `message`. En zod 3 el `message` de los create-params pasa
+  // por `processCreateParams`, cuyo mapa solo lo aplica a `invalid_enum_value`,
+  // a `invalid_type` y al dato `undefined`: para cualquier otro code devuelve
+  // `ctx.defaultError`. Un interruptor sin tildar manda `false` (definido) y
+  // `z.literal(true)` falla con `invalid_literal` → el mensaje de acá se
+  // DESCARTABA y al setter le llegaba el default en inglés («Invalid literal
+  // value, expected true»). `errorMap` se devuelve tal cual y aplica a TODOS los
+  // codes — el mismo idioma que ya usan plan.schemas.ts y
+  // executive-report-prefs.schemas.ts. El tipo inferido sigue siendo `true`.
   confirmoCarga: z.literal(true, {
-    message: 'Abrí el link en otra pestaña y confirmá que carga antes de guardar',
+    errorMap: () => ({
+      message: 'Abrí el link en otra pestaña y confirmá que la demo carga — sin eso no se guarda',
+    }),
   }),
 })
 

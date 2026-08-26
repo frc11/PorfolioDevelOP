@@ -264,6 +264,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                       fases={fasesConstruccion}
                       completadas={manual.progreso.completadas}
                       stage={manual.stage}
+                      draftUrl={manual.draftUrl}
                       escaladoAt={manual.escaladoAt}
                       escaladoNota={manual.escaladoNota}
                     />

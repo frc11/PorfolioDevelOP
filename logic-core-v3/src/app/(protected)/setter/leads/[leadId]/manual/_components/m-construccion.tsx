@@ -7,6 +7,7 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { BadgeProvisorio } from '../../_components/badge-provisorio'
 import { ArrancarConstruccion } from './construccion-ctas'
+import { EnlaceChequeoFinal } from './enlace-chequeo'
 import { EscalamientoConstruccion } from './escalamiento-construccion'
 import { FaseAutoReporte } from './fase-auto-reporte'
 
@@ -155,6 +156,7 @@ export function ConstruccionRegistro({
   fases,
   completadas,
   stage,
+  draftUrl,
   escaladoAt,
   escaladoNota,
 }: {
@@ -162,6 +164,8 @@ export function ConstruccionRegistro({
   fases: readonly FaseId[]
   completadas: FaseId[]
   stage: DossierStage | null
+  /** Solo para el gate del enlace al chequeo final — acá no se escribe nada. */
+  draftUrl: string | null
   escaladoAt: string | null
   escaladoNota: string | null
 }) {
@@ -181,7 +185,8 @@ export function ConstruccionRegistro({
       {puedeGuardar && (
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
           Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el
-          orden que te sirva. El único chequeo que gatea es el final.
+          orden que te sirva. El único chequeo que gatea es{' '}
+          <EnlaceChequeoFinal leadId={leadId} draftUrl={draftUrl} />.
         </p>
       )}
 

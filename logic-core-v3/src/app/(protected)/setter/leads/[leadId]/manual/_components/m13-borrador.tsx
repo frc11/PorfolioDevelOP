@@ -1,11 +1,13 @@
 import { ExternalLink } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
+import { Badge } from '@/components/ui'
 import type { Brief } from '@/lib/leados/contracts'
 import { GUIA_DRAFT } from '@/lib/leados/guidance-content'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { BriefResumen } from '../../_components/brief-form'
 import { BorradorForm } from './borrador-form'
+import { ReabrirConstruccion } from './construccion-ctas'
 
 /**
  * M13 — «Publicá y registrá el link del borrador» (5.4, tramo Borrador del
@@ -63,8 +65,25 @@ export function M13Municion() {
   )
 }
 
-/** Registro: el form del borrador (captura/verificado) en construcción, o el
- * resumen de consulta con el link cuando el borrador ya quedó fijo (post-envío). */
+/** El link publicado, como pieza de consulta — el mismo bloque en los dos
+ * estados read-only (rechazo y post-envío). */
+function LinkDelBorrador({ draftUrl }: { draftUrl: string }) {
+  return (
+    <a
+      href={draftUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1.5 break-all text-sm font-medium text-cyan-300 hover:text-cyan-200"
+    >
+      <ExternalLink size={13} strokeWidth={1.5} className="shrink-0" />
+      {draftUrl}
+    </a>
+  )
+}
+
+/** Registro: el form del borrador (captura/verificado) en construcción, la
+ * reapertura cuando el rechazo dejó el borrador congelado, o el resumen de
+ * consulta con el link cuando el borrador ya quedó fijo (post-envío). */
 export function M13Registro({
   leadId,
   stage,
@@ -74,20 +93,37 @@ export function M13Registro({
   stage: DossierStage | null
   draftUrl: string | null
 }) {
-  // Post-construcción (EN_REVISION / APROBADA / RECHAZADA) con borrador ya
-  // publicado: el link quedó fijo — resumen de consulta, sin editar.
+  // RECHAZADA con borrador publicado: la guía de retrabajo manda ACÁ («volvé a
+  // Borrador y re-publicá»), y hasta este sprint la pantalla no tenía un solo
+  // control — solo el link viejo y un texto que hablaba en pasado. El motor
+  // guarda el link SOLO en CONSTRUCCION (`saveOwnedDraftUrl`), así que mostrar
+  // «Cambiar el link» acá sería un botón que rebota: un callejón con un paso
+  // más. Lo que falta es lo de antes — reabrir la construcción, la ÚNICA
+  // transición legal de vuelta (`LEGAL_TRANSITIONS.RECHAZADA`) y la misma
+  // action que ya ofrece la reentrada. Al reabrir, esta pantalla vuelve sola al
+  // form editable y la nota de Franco sigue arriba (F2).
+  if (stage === 'RECHAZADA' && draftUrl) {
+    return (
+      <div className="space-y-3">
+        <Badge tone="rose" variant="soft">
+          Borrador congelado por el rechazo
+        </Badge>
+        <LinkDelBorrador draftUrl={draftUrl} />
+        <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
+          Este es el borrador que Franco rechazó. Para publicar uno nuevo y cambiar el link,
+          reabrí la construcción — el pedido de arriba te sigue en cada pantalla y el chequeo
+          final se vuelve a pasar antes de reenviar.
+        </p>
+        <ReabrirConstruccion leadId={leadId} />
+      </div>
+    )
+  }
+  // Post-construcción (EN_REVISION / APROBADA) con borrador ya publicado: el
+  // link quedó fijo — resumen de consulta, sin editar.
   if (stage !== 'CONSTRUCCION' && draftUrl) {
     return (
       <div className="space-y-2">
-        <a
-          href={draftUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 break-all text-sm font-medium text-cyan-300 hover:text-cyan-200"
-        >
-          <ExternalLink size={13} strokeWidth={1.5} className="shrink-0" />
-          {draftUrl}
-        </a>
+        <LinkDelBorrador draftUrl={draftUrl} />
         <p className="text-xs leading-relaxed text-zinc-500">
           El borrador ya quedó publicado — desde acá se hizo el chequeo final.
         </p>
