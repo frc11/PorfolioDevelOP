@@ -5823,3 +5823,394 @@ No se corrió `prisma generate` (no se tocó el schema) ni ninguna operación so
 Desvío declarado: el commit se hizo desde `C:/tmp/wt-v1-integracion`, que es el worktree que
 tiene chequeada `leados/v1-integracion` — mismo motivo que en C0. El checkout principal quedó
 en `main`, intacto. Sin push.
+
+---
+
+## C2 · El grafo de stage sale de `dossier.ts` y estrena red — 2026-08-25
+
+C1a dejó el gate corriendo en cada push. C1b dejó cuatro falsos verdes arreglados. Lo que
+quedaba sin red era `LEGAL_TRANSITIONS`: **la única puerta del stage del dossier**, y ningún
+invariante la miraba. No podía mirarla — era un `const` sin `export` adentro de `dossier.ts`,
+que importa `@/lib/prisma`; un invariante que lo importara habría arrastrado el cliente a una
+corrida que se define por no necesitar base. C1b lo dejó anotado con esas palabras:
+«LEGAL_TRANSITIONS sigue sin invariante posible».
+
+Este sprint hace que sea posible y lo hace. Mueve una constante y escribe un invariante. Cero
+cambio de comportamiento: `transitionDossier()` consulta el mismo grafo, byte a byte.
+
+**Por qué ahora y no después.** El rediseño pendiente fusiona m1 y m2 en una sola pantalla del
+stage FICHA. El reporte A3 verificó que ahí vive una garantía que el código declara así:
+«construir nunca se sugiere para un lead sin veredicto… La garantía es estructural, no un
+`if`». Es estructural porque FICHA tiene **una sola salida** y es EVALUADA: no existe camino de
+FICHA a BRIEF que no pase por el veredicto. El día que FICHA→BRIEF sea legal, la garantía se
+evapora sin que nada se rompa —compila, corre, y el bug es que el setter construye a ciegas—.
+Hoy no hay nada que lo atrape. Esto es lo que lo atrapa.
+
+---
+
+### Paso 1 · El grafo censado, antes de moverlo
+
+Ocho stages, ocho aristas. Tal como estaba en `dossier.ts:50` (blob de `8a4b30f7`):
+
+| desde | salidas legales | qué exige la transición |
+|---|---|---|
+| `FICHA` | `EVALUADA` | la evaluación entera, parseada con `EvaluacionSchema`; estampa `fecha` si el caller no la trae |
+| `EVALUADA` | `DESCARTADA`, `BRIEF` | **→DESCARTADA:** `motivoDescarte` no vacío **y** que el `evaluacionJson` existente parsee · **→BRIEF:** ningún dato del caller, pero sí el gate comercial `gateBriefAbierto(lead.status, lead.caliente)`, que se lee del lead adentro de la función |
+| `BRIEF` | `CONSTRUCCION` | nada |
+| `CONSTRUCCION` | `EN_REVISION` | nada |
+| `EN_REVISION` | `APROBADA`, `RECHAZADA` | **→APROBADA:** `finalUrl` opcional; estampa `aprobadaAt` · **→RECHAZADA:** `motivo` no vacío, que se appendea al historial `rechazos` (`detalle`/`donde`/`arreglo` opcionales) |
+| `RECHAZADA` | `CONSTRUCCION` | nada. Es el re-loop; `esReloopRechazo()` en `escalamiento.ts:56` reconoce exactamente este par para limpiar el self-check |
+| `APROBADA` | — | terminal |
+| `DESCARTADA` | — | terminal |
+
+**Quién lo consumía.** Al ser `const` sin `export`, sus lectores estaban todos en el mismo
+archivo, y el censo dio **uno solo**:
+
+- `src/lib/leados/dossier.ts:50` — la declaración.
+- `src/lib/leados/dossier.ts:147` — **el único lector**, dentro de `transitionDossier()`.
+- `src/lib/leados/dossier.ts:115` y `:183` — comentarios que lo nombran.
+- `src/app/(protected)/setter/leads/[leadId]/manual/[paso]/page.tsx:147` — comentario, no código.
+
+No hay una segunda copia del grafo en ningún lado. Sí hay dos listas **adyacentes** que no son
+grafos y que este sprint no toca: `admin/leados/page.tsx:67` (qué stages entran al filtro «en
+vuelo») y `manual.ts:420` (`STAGES_POST_CHEQUEO`). Anotadas, no tocadas.
+
+---
+
+### Paso 2 · La extracción, y las cuatro pruebas de que fue neutral
+
+El grafo se movió **verbatim** a `src/lib/leados/dossier-stage.ts`, con su comentario de
+diagrama. Mismos stages, mismas aristas, mismo orden. Ni una transición agregada, sacada ni
+corregida.
+
+**Prueba 1 — igualdad estructural, no textual.** Se parseó el grafo del blob de HEAD y se
+comparó contra el módulo nuevo cargado en runtime:
+
+```
+stages, mismo orden : True
+aristas, mismo orden: True
+IGUALDAD ESTRUCTURAL: True
+stages: 8 | aristas: 8
+```
+
+**Prueba 2 — `npx tsc --noEmit`** → EXIT 0, sin salida.
+
+**Prueba 3 — la suite completa sigue en 42/42**, corrida *antes* de sumar el invariante nuevo:
+`descubiertos 43 | excluidos 1 | corridos 42 | pasaron 42 | fallaron 0`, EXIT 0.
+
+**Prueba 4 — el diff de `dossier.ts` es solo la mudanza.** Tres hunks, ninguno de comportamiento:
+
+```diff
+-import type { DossierStage, OsLeadDossier, Prisma } from '@prisma/client'
++import type { OsLeadDossier, Prisma } from '@prisma/client'
+...
+ } from '@/lib/leados/escalamiento'
+-
+-/**
+- * Transiciones legales de la maquina de produccion. Ninguna otra existe.
+- *   [diagrama]
+- */
+-const LEGAL_TRANSITIONS: Record<DossierStage, readonly DossierStage[]> = {
+-  FICHA: ['EVALUADA'],
+-  ... las 8 aristas ...
+-}
++import { LEGAL_TRANSITIONS } from '@/lib/leados/dossier-stage'
+```
+
+`DossierStage` sale del `import type` porque, al irse la constante, quedó sin uso en el archivo
+(`grep` lo confirmó: la única referencia era la anotación de la constante). Es la consecuencia
+mecánica de la mudanza, no un cambio aparte.
+
+**El módulo destino no arrastra Prisma, siguiendo la cadena de imports.** La cadena tiene un
+solo nivel: el único import de `dossier-stage.ts` es `import type { DossierStage } from
+'@prisma/client'`, que TypeScript borra al compilar (`isolatedModules: true` en el tsconfig lo
+garantiza). No hay segundo nivel que seguir. Y se probó por la salida, no por lectura — el JS
+emitido del módulo tiene **cero** `import` y cero `require`:
+
+```
+export const LEGAL_TRANSITIONS = { FICHA: ['EVALUADA'], ... };
+--- imports/require en el emitido: 0
+```
+
+Es el mismo patrón que ya usan `flow.ts` y `turno.ts`, que también se importan desde
+invariantes de `ts-node` sin tocar la base.
+
+---
+
+### Paso 3 · El invariante, y los siete sabotajes
+
+`src/lib/leados/dossier-stage.invariant.ts`, censo congelado **a mano** —no derivado de
+`LEGAL_TRANSITIONS`, que es el modo de falla exacto de C1b— más aserciones sobre él.
+
+Una decisión de orden: **la aserción 2 va primero**, antes del censo. Si fuera al revés, quien
+haga legal FICHA→BRIEF leería el mensaje genérico («el grafo cambió respecto del censo») en vez
+del que explica qué garantía está por perder. El sabotaje 2 de abajo lo confirma: dispara con
+su propio mensaje.
+
+#### Aserción 1 — el grafo es exactamente el censado
+
+```
+ASERCIÓN     Mismos stages, mismas salidas por stage (como conjunto) y mismo total de
+             aristas. El total se chequea aparte para que un cambio compensado —una
+             arista que se va y otra que entra— no pase.
+SABOTAJE 1a  BRIEF: ['CONSTRUCCION'] → BRIEF: ['CONSTRUCCION', 'EN_REVISION']
+RESULTADO    ROJO (exit 1)
+             AssertionError: las salidas de BRIEF cambiaron y nadie tocó el censo.
+               censadas:    [CONSTRUCCION]
+               en el grafo: [CONSTRUCCION, EN_REVISION]
+               Una transición NUEVA abre un camino que el producto nunca decidió; una
+               que FALTA deja atrapados a los dossiers que ya están en ese stage — sin
+               salida legal, `transitionDossier` los rechaza para siempre y hay que
+               tocar la DB a mano.
+               Si el cambio es a propósito: actualizá GRAFO_CENSADO en el MISMO commit
+               y decí por qué. Que cueste un renglón es el punto.
+
+SABOTAJE 1b  EN_REVISION: ['APROBADA', 'RECHAZADA'] → EN_REVISION: ['APROBADA']
+RESULTADO    ROJO (exit 1)
+             AssertionError: las salidas de EN_REVISION cambiaron y nadie tocó el censo.
+               censadas:    [APROBADA, RECHAZADA]
+               en el grafo: [APROBADA]
+```
+
+El **orden** de las salidas de un stage no se congela, a propósito: el consumo es
+`.includes()`, que no lo mira. Congelarlo daría un rojo ante un reordenamiento inocuo, y un
+rojo que no significa nada es lo que enseña a ignorar la red.
+
+#### Aserción 2 — FICHA → BRIEF no es legal
+
+```
+ASERCIÓN     FICHA no tiene a BRIEF entre sus salidas, y además tiene UNA sola salida
+             y es EVALUADA (lo segundo cierra la puerta a cualquier otro atajo que no
+             se llame BRIEF).
+SABOTAJE     FICHA: ['EVALUADA'] → FICHA: ['EVALUADA', 'BRIEF']
+RESULTADO    ROJO (exit 1)
+             AssertionError: FICHA→BRIEF quedó LEGAL. Eso borra una garantía estructural
+             del producto:
+               hoy «construir nunca se sugiere para un lead sin veredicto» NO es un if que
+               alguien pueda olvidar — es la forma del grafo. FICHA tiene UNA salida
+               (EVALUADA), así que no existe camino de FICHA a BRIEF sin pasar por el
+               veredicto del Evaluador. Con esta arista el camino existe, y el setter puede
+               entrar a construir una demo para un lead que nadie evaluó.
+               Si estás fusionando m1 y m2 en una sola pantalla de FICHA: ESTE es el punto
+               donde hay que decidir explícitamente qué reemplaza a la garantía, en vez de
+               perderla en silencio. No borres esta aserción para seguir: cambiala por la
+               garantía nueva, o el producto se queda sin ninguna.
+```
+
+#### Aserción 3 — todo stage del enum aparece en el grafo
+
+La fuente del enum es **`prisma/schema.prisma`**, no el cliente generado. Importar
+`DossierStage` como *valor* desde `@prisma/client` habría arrastrado el cliente a la corrida —
+justo lo que la extracción vino a evitar. Y leer el schema atrapa el caso real: alguien agrega
+un stage y no toca el grafo, cosa que el compilador no ve hasta que alguien corra
+`prisma generate`.
+
+```
+ASERCIÓN     El conjunto de stages del enum de schema.prisma es el del grafo; y cada
+             stage o tiene salidas o está declarado terminal en STAGES_TERMINALES.
+SABOTAJE     enum DossierStage { +PAUSADA, FICHA, ... } en prisma/schema.prisma.
+             Sin `prisma generate` a propósito: node_modules es una junction al
+             checkout principal y regenerar habría tocado el de todas las sesiones.
+RESULTADO    ROJO (exit 1)
+             AssertionError: el enum DossierStage de prisma/schema.prisma y el grafo
+             dejaron de coincidir.
+               en el schema: APROBADA, BRIEF, CONSTRUCCION, DESCARTADA, EN_REVISION,
+                             EVALUADA, FICHA, PAUSADA, RECHAZADA
+               en el grafo:  APROBADA, BRIEF, CONSTRUCCION, DESCARTADA, EN_REVISION,
+                             EVALUADA, FICHA, RECHAZADA
+               Un stage del enum SIN entrada en el grafo es un agujero mudo: un dossier
+               que llegue ahí no tiene ninguna transición legal y queda trabado. Y el
+               compilador no lo ve hasta que alguien corra `prisma generate` — puede
+               vivir en main varios commits.
+```
+
+Y se verificó la afirmación de ese mensaje en vez de dejarla como retórica: **con el sabotaje 3
+puesto, `npx tsc --noEmit` sale 0.** El invariante es lo único que lo atrapa.
+
+#### Aserción 4 — ningún stage sin camino de entrada, salvo el inicial
+
+```
+ASERCIÓN     Se calcula el grado de entrada de cada stage desde el propio grafo. Todos
+             tienen al menos una entrada, salvo FICHA, que tiene que tener cero (volver
+             a FICHA re-abriría la ficha de un lead que ya tiene veredicto).
+SABOTAJE     EVALUADA: ['DESCARTADA', 'BRIEF'] → EVALUADA: ['DESCARTADA']
+             — la única arista que llega a BRIEF. Se actualizó TAMBIÉN el censo
+             congelado, para que la aserción 1 no lo enmascare: así se demuestra que la
+             4 atrapa lo que un censo diligente dejaría pasar.
+RESULTADO    ROJO (exit 1)
+             AssertionError: BRIEF quedó INALCANZABLE: ninguna transición legal llega a él.
+               Un stage sin entrada es código muerto que parece vivo — el enum lo tiene,
+               la UI probablemente lo pinte, y ningún dossier va a estar ahí nunca. Si
+               además había dossiers en ese stage, quedaron sin forma de llegar y sin
+               forma de salir.
+               Suele pasar por sacar «una arista que no se usaba»: era la única que llegaba.
+```
+
+#### Aserción 5 — las transiciones que exigen un dato lo declaran
+
+Las exigencias **no se copiaron** al módulo del grafo. Duplicarlas como una tabla a mano habría
+creado la segunda lista de siempre. Se verifican contra su fuente real, y la fuente son dos
+lugares distintos, así que la aserción tiene dos patas.
+
+**Pata A — el tipo.** Tres `@ts-expect-error` contra `DossierTransitionInput`: `{ to:
+'DESCARTADA' }`, `{ to: 'RECHAZADA' }` y `{ to: 'EVALUADA' }` sin sus datos no deben compilar.
+Si alguien afloja una exigencia, el error que esperan desaparece y el compilador corta con
+TS2578.
+
+```
+SABOTAJE 5a  dossier.ts: | { to: 'EVALUADA'; evaluacion: Evaluacion }
+                       → | { to: 'EVALUADA'; evaluacion?: Evaluacion }
+RESULTADO    ROJO (exit 1)
+             TSError: Unable to compile TypeScript:
+             src/lib/leados/dossier-stage.invariant.ts(222,1):
+               error TS2578: Unused '@ts-expect-error' directive.
+```
+
+**Pata B — los guards de runtime**, leídos de la fuente real de `dossier.ts` y **acotados al
+`case` que los contiene**. Acotar importa: el archivo está lleno de `throw new
+DossierTransitionError`, así que buscar en el archivo entero daría verde sobre un `case`
+vaciado. Misma granularidad que `acuse-recibo.invariant.ts`.
+
+```
+SABOTAJE 5b  En case 'DESCARTADA': se reemplaza el guard
+               const evaluacion = EvaluacionSchema.safeParse(dossier.evaluacionJson)
+               if (!evaluacion.success) { throw new DossierTransitionError(...) }
+             por  const evaluacion = EvaluacionSchema.parse(dossier.evaluacionJson)
+             (compila perfecto: tsc --noEmit sale 0 con el sabotaje puesto)
+RESULTADO    ROJO (exit 1)
+             AssertionError: EVALUADA→DESCARTADA perdió el guard del `evaluacionJson`
+             VÁLIDO dentro de su `case`.
+               Ese guard es lo que hace que el descarte no pise la evaluación: el case
+               reescribe `evaluacionJson` con `{...evaluacion.data, motivoDescarte}`, así
+               que sin verificar primero que lo que había parsea, un dossier con
+               evaluacionJson corrupto o ausente termina con un blob que solo tiene el
+               motivo — y el veredicto del Evaluador se pierde, sin error y sin forma de
+               recuperarlo.
+```
+
+---
+
+### Paso 4 · El runner, elegido con criterio
+
+**`ts-node`, y la aserción 5 es el motivo.** C1b midió que los 19 de `ts-node` type-chequean y
+los 24 de `tsx` no. Este invariante pone su aserción 5 en el compilador, así que con `tsx` sería
+un adorno. Medido acá, no citado: con el **sabotaje 5a puesto**, el mismo archivo corrido con
+`npx tsx` sale **0** e imprime su `✓ invariante OK`. Con `ts-node` sale 1 con el TS2578 de
+arriba.
+
+Se agregó a `package.json` con el prefijo `check:invariant:` y **el runner de C1a lo descubrió
+solo** — no hubo que tocar ninguna lista:
+
+```
+Descubiertos 44 invariantes; corriendo 43 (sin cortar en el primer fallo)
+...
+✓ ok      check:invariant:dossier-stage                4392ms
+──────────────────────────────────────────────────────────────────────────────
+descubiertos 44  |  excluidos 1  |  corridos 43  |  pasaron 43  |  fallaron 0
+──────────────────────────────────────────────────────────────────────────────
+```
+
+---
+
+### Hallazgo al pasar, sin arreglar: un invariante que solo importe tipos no corre
+
+Buscando cómo cargaba `ts-node` la aserción 5, apareció esto y conviene dejarlo escrito antes
+de que muerda a alguien. Un archivo cuyos imports son **todos** `import type` se compila y
+**type-chequea**, pero su cuerpo **nunca se ejecuta**: sale 0 y no imprime nada. Probado con un
+`throw` de primer nivel que no explota.
+
+```
+archivo sin ningún import                → corre. TS2322 deliberado → exit 1
+archivo con SOLO `import type`           → type-chequea (TS2322 → exit 1)
+                                            pero el cuerpo NO corre: un `throw` de primer
+                                            nivel sale 0 y en silencio
+archivo con al menos un import de VALOR  → corre (vía la reparsa a ESM de Node 24) y
+                                            type-chequea
+```
+
+Un invariante en ese estado sería un falso verde perfecto: exit 0, ninguna aserción evaluada.
+**Se auditaron los 19 `.invariant.ts` de `ts-node`: los 19 tienen al menos un import de valor,
+así que ninguno está en la trampa hoy.** El nuevo también (`node:assert`, `node:fs`,
+`node:path` y el grafo), y se verificó que efectivamente **imprime** su línea de cierre, no
+solo que sale 0. No se arregla nada porque no hay nada roto; queda como la razón por la que
+un invariante nuevo tiene que probarse imprimiendo, no saliendo 0.
+
+---
+
+### Verificación
+
+```
+npx tsc --noEmit                → EXIT 0, sin salida
+npm run check:invariants        → descubiertos 44 | excluidos 1 | corridos 43 |
+                                  pasaron 43 | fallaron 0        EXIT 0
+```
+
+No se corrió `prisma generate` (no se tocó el schema en el commit) ni **ninguna operación sobre
+la base** — tampoco `prisma migrate status`, que la habría tocado.
+
+**El worktree de sabotaje se destruyó con la junction de `node_modules` desarmada primero**
+(`cmd /c rmdir` sobre el enlace, que no toca el destino), verificando el conteo del
+`node_modules` real antes y después: 760 entradas en los dos momentos. Tras revertir, el
+`git status --porcelain` del worktree de sabotaje quedó vacío y el invariante volvió a verde
+antes de borrarlo. `git worktree list` ya no lo lista y el directorio no existe. **Ningún
+sabotaje sobrevivió.**
+
+---
+
+### Qué queda para la verificación humana
+
+**Si el grafo censado es el que Franco quiere.** Este sprint congela el grafo tal como está, no
+como debería estar. Si alguna transición no debería existir —o falta alguna—, es una decisión de
+producto y va en otro sprint, con premortem. Lo que este invariante garantiza es que esa
+decisión no se pueda tomar sin querer.
+
+**Anotación para el rediseño.** Con esto puesto, el día que se toque el grafo para fusionar m1
+y m2, la aserción 2 se va a poner en rojo. **Eso es lo que tiene que pasar**: obliga a decidir
+explícitamente qué reemplaza a la garantía, en vez de perderla en silencio.
+
+---
+
+### Fuera de scope, anotado y no hecho
+
+**`PISO_MINIMO` quedó con un renglón de holgura.** El runner de C1a descubre 44 y su piso sigue
+en 43. Antes de C2 el piso era exacto; ahora alguien puede borrar un invariante y la corrida
+sigue verde. Subirlo a 44 es una línea en `scripts/run-invariants.mjs`, pero eso es tocar el
+gate y C1a está cerrado. Va en el próximo sprint que lo toque, junto con la regla que el propio
+comentario del runner ya pide: el piso se mueve en el mismo commit que la cantidad.
+
+**`esReloopRechazo()` codifica una arista del grafo y vive en otro archivo.**
+`escalamiento.ts:56` devuelve `from === 'RECHAZADA' && to === 'CONSTRUCCION'` — exactamente la
+arista 6. Hoy nada ata las dos cosas: si esa arista cambiara, la función seguiría compilando y
+devolviendo `false` para siempre, y el re-loop dejaría de limpiar el self-check en silencio.
+Atarlo es una aserción más y no estaba en el pedido de este sprint.
+
+**`client-monthly-report-pdf` sigue excluido**, con el mismo motivo que dejó C1b.
+
+---
+
+### Microsprint aparte · el comentario de `ci.yml` que mentía
+
+Commit propio, `7eeacdef`. El comentario decía que con Node 24 «los carga el type-stripping
+nativo». Es falso: quien carga los `.ts` es el hook CJS de `ts-node` (`require.extensions`), que
+además type-chequea. Subir de Node 20 a 24 destrabó el arranque; no reemplazó al compilador.
+
+El riesgo era concreto y direccional: quien leyera «ya lo hace Node solo» podía sacar `ts-node`
+«porque no hace falta», y con eso borrar en silencio el type-check de 20 invariantes — el modo
+de falla que C0 predijo. Ahora el comentario dice qué pasa de verdad, nombra el caso que depende
+de eso (la aserción 5 de este sprint) y actualiza el conteo que C2 movió: 20 con `ts-node`, 24
+con `tsx`.
+
+**El diff no toca ni una línea que no empiece con `#`** (verificado contando las líneas `+`/`-`
+que no son comentario: cero). Los tres jobs siguen en `node-version: '24'` y el YAML parsea
+igual. La verificación de que el gate sigue verde en Actions requiere un push, que este sprint
+no hizo.
+
+---
+
+### Desvíos declarados
+
+- El commit se hizo desde `C:/tmp/wt-v1-integracion`, que es el worktree que tiene chequeada
+  `leados/v1-integracion` — mismo motivo que en C0, C1 y C1b. El checkout principal quedó en
+  `main`, intacto.
+- **Sin push.** Los dos commits (`c219d830` y `7eeacdef`) quedan locales, para que Franco decida
+  cuándo dispara el gate.
