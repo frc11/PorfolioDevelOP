@@ -40,6 +40,7 @@
     "check:invariant:postergacion": "npx tsx src/lib/leados/postergacion.invariant.ts",
     "check:invariant:contador-dms": "npx tsx src/lib/leados/contador-dms.invariant.ts",
     "check:invariant:acuse": "npx tsx src/lib/leados/acuse-recibo.invariant.ts",
+    "check:invariant:dossier-stage": "ts-node src/lib/leados/dossier-stage.invariant.ts",
     "test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",
     "test:ev2": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts",
     "test:ev3:golden": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts",

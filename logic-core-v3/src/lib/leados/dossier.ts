@@ -14,7 +14,7 @@
  * del lead (`LeadStatus` + cron de follow-up) y no la pisa: de `OsLead` solo
  * se LEEN `status` y `caliente` para el gate de BRIEF — jamás se escriben.
  */
-import type { DossierStage, OsLeadDossier, Prisma } from '@prisma/client'
+import type { OsLeadDossier, Prisma } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { getOwnedLead } from '@/lib/leados/ownership'
 import {
@@ -38,25 +38,7 @@ import {
   ESCALADO_RESET,
   RELOOP_RESET,
 } from '@/lib/leados/escalamiento'
-
-/**
- * Transiciones legales de la máquina de producción. Ninguna otra existe.
- *
- *   FICHA → EVALUADA → BRIEF → CONSTRUCCION → EN_REVISION → APROBADA
- *              │                     ▲              │
- *              ▼                     └── RECHAZADA ◄┘
- *          DESCARTADA
- */
-const LEGAL_TRANSITIONS: Record<DossierStage, readonly DossierStage[]> = {
-  FICHA: ['EVALUADA'],
-  EVALUADA: ['DESCARTADA', 'BRIEF'],
-  BRIEF: ['CONSTRUCCION'],
-  CONSTRUCCION: ['EN_REVISION'],
-  EN_REVISION: ['APROBADA', 'RECHAZADA'],
-  RECHAZADA: ['CONSTRUCCION'],
-  APROBADA: [],
-  DESCARTADA: [],
-}
+import { LEGAL_TRANSITIONS } from '@/lib/leados/dossier-stage'
 
 // RESPONDED_STATUSES vive en flow.ts (B3): es regla pura compartida con la UI
 // del setter — acá solo se consume para el gate EVALUADA→BRIEF.
