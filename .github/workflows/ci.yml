@@ -38,12 +38,27 @@
 # NO bajar esta versión sin leer esto. La primera corrida real de este workflow
 # usaba Node 20 y **19 de los 43 invariantes fallaron** con
 # `ERR_UNKNOWN_FILE_EXTENSION: Unknown file extension ".ts"`. Son exactamente los
-# 19 que corren con `ts-node`, que en Node 20 no carga `.ts` sin registrar su
-# loader ESM. Con Node 24 (la versión donde el proyecto se desarrolla, v24.13.0)
-# los carga el type-stripping nativo y pasan.
-# La deuda de fondo sigue viva y es de C1b: 19 invariantes atados a `ts-node`
-# mientras los otros 24 usan `tsx`. Subir la versión de Node los hace correr; no
-# los desata.
+# que corren con `ts-node`, que en Node 20 no carga `.ts` sin registrar su loader
+# ESM. Con Node 24 (la versión donde el proyecto se desarrolla, v24.13.0) pasan.
+#
+# CUIDADO CON EL PORQUÉ. NO los levanta el type-stripping nativo de Node — eso
+# decía este comentario hasta C2 y es falso. Quien carga los `.ts` es el hook CJS
+# de `ts-node` (`require.extensions`), que ADEMÁS type-chequea: C1b lo probó con
+# un archivo con un TS2322 deliberado, que sigue dando rojo incluso con
+# `--no-experimental-strip-types`. Subir de Node 20 a 24 DESTRABÓ el arranque (el
+# entrypoint dejaba de morir en el loader ESM y pasó a tomarlo el hook); no
+# reemplazó al compilador.
+#
+# Por qué importa el matiz y no es pedantería: quien lea «ya lo hace Node solo»
+# puede sacar `ts-node` «porque no hace falta», y con eso borra EN SILENCIO el
+# type-check de 20 invariantes. Al menos uno depende de él para proteger algo:
+# `dossier-stage.invariant.ts` (C2) pone su aserción 5 en tres
+# `@ts-expect-error`, que se ponen en rojo (TS2578) cuando alguien afloja una
+# exigencia de `DossierTransitionInput`. Medido: ese mismo sabotaje corrido con
+# `tsx` sale 0 — `tsx` no type-chequea.
+#
+# La deuda de fondo sigue viva: 20 invariantes atados a `ts-node` mientras los
+# otros 24 usan `tsx`. Subir la versión de Node los hace correr; no los desata.
 
 name: CI
 
