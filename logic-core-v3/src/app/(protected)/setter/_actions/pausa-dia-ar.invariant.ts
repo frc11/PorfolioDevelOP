@@ -54,29 +54,47 @@ const bordeIngenuo = (dia: string): Date => new Date(`${dia}T23:59:59`)
 
 const HUSO_DEL_PROCESO = Intl.DateTimeFormat().resolvedOptions().timeZone
 
+/** Offset del huso del PROCESO en minutos al oeste de UTC (AR = 180). */
+const OFFSET_PROCESO = new Date('2026-08-28T12:00:00.000Z').getTimezoneOffset()
+/** AR = UTC-3 fijo, sin horario de verano. */
+const OFFSET_AR = 180
+
 // ── 0. LA PREMISA: el huso del proceso NO es el argentino ────────────────────
-// Sin esto el invariante es decoración: en AR las dos fórmulas coinciden y pasa
-// en verde sobre el bug que existe para atrapar.
-{
-  const dia = '2026-08-28'
-  assert.notEqual(
-    bordeIngenuo(dia).getTime(),
-    finDePausaAR(dia)!.getTime(),
-    `esta corrida NO está probando nada: el huso del proceso es ${HUSO_DEL_PROCESO} y ahí el\n` +
-      '  cálculo ingenuo (hora local) coincide con el anclado a AR. El invariante necesita\n' +
-      '  correr con el huso forzado a otro — el script lo hace con `cross-env TZ=UTC`.\n' +
-      '  Si alguien le sacó el `TZ` al script, o lo cambió por un huso que este sistema\n' +
-      '  ignora en silencio (medido en Windows: Asia/Tokyo, Europe/Madrid y\n' +
-      '  America/Los_Angeles caen de vuelta al huso del sistema), reponelo: no borres esto.',
-  )
-  // Y la dirección del desvío, para que el mensaje de arriba no sea abstracto:
-  // con el proceso en UTC el cálculo viejo guardaba TRES HORAS antes.
-  assert.equal(
-    finDePausaAR(dia)!.getTime() - bordeIngenuo(dia).getTime(),
-    3 * 3_600_000,
-    'con el proceso en UTC el borde viejo caía exactamente 3 h antes del borde AR',
-  )
-}
+// Sin esto el invariante es decoración: en AR el cálculo viejo y el nuevo dan el
+// MISMO instante, así que la corrida pasaría en verde sobre el bug que existe
+// para atrapar.
+//
+// Se mide con `getTimezoneOffset()` y NO comparando las dos fórmulas: si el
+// sujeto volviera al cálculo ingenuo, las dos coincidirían y un guard escrito así
+// culparía al huso —diciendo «esta corrida no prueba nada»— cuando el problema
+// sería el código. El diagnóstico tiene que distinguir esos dos casos: el huso se
+// afirma contra el reloj, y la regresión del código la atrapa el bloque 1.
+assert.notEqual(
+  OFFSET_PROCESO,
+  OFFSET_AR,
+  `esta corrida NO está probando nada: el huso del proceso es ${HUSO_DEL_PROCESO} ` +
+    `(UTC${OFFSET_PROCESO <= 0 ? '+' : '-'}${Math.abs(OFFSET_PROCESO) / 60}), que es el mismo\n` +
+    '  offset que AR. Acá el cálculo viejo y el nuevo dan el mismo instante y no se distinguen.\n' +
+    '  El invariante necesita el huso forzado a otro — el script lo hace con `cross-env TZ=UTC`.\n' +
+    '  Si alguien le sacó el `TZ`, o lo cambió por un huso que este sistema ignora EN SILENCIO\n' +
+    '  (medido en Windows/Node 24: Asia/Tokyo, Europe/Madrid y America/Los_Angeles caen de\n' +
+    '  vuelta al huso del sistema y `TZ=UTC` no), reponelo: no borres esto.',
+)
+
+// ── 0b. LA PREMISA DEL BUG: el cálculo sin zona se corre con el huso ─────────
+// `bordeIngenuo` es una copia LOCAL de lo que hacía `pausarLead`, no el sujeto:
+// documenta por qué el arreglo hacía falta, sin depender de él.
+assert.equal(
+  bordeIngenuo('2026-08-28').toISOString(),
+  '2026-08-28T23:59:59.000Z',
+  `con el proceso en ${HUSO_DEL_PROCESO} el cálculo sin designador de zona cae en ese huso`,
+)
+assert.equal(
+  finDePausaAR('2026-08-28')!.getTime() - bordeIngenuo('2026-08-28').getTime(),
+  OFFSET_AR * 60_000,
+  'el borde viejo, corrido en un proceso UTC, caía exactamente 3 h antes del borde AR — ' +
+    'que es el desvío que este invariante existe para impedir',
+)
 
 // ── 1. EL ANCLAJE: el borde es 23:59:59 en hora ARGENTINA, no la del proceso ─
 // Los esperados están escritos A MANO como instantes UTC: 23:59:59 AR ≡ 02:59:59Z
