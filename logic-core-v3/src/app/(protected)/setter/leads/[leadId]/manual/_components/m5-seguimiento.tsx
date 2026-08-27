@@ -42,12 +42,15 @@ export function M5Contexto({
   followUpCount,
   proximoToque,
   reactivateAt,
+  postergadoVencido,
   leadPhone,
 }: {
   status: LeadStatus
   followUpCount: number
   proximoToque: string | null
   reactivateAt: string | null
+  /** La fecha de reactivación ya pasó (reloj request-time, resuelto en `_data.ts`). */
+  postergadoVencido: boolean
   leadPhone: string | null
 }) {
   const respondio = leadRespondio(status)
@@ -87,11 +90,21 @@ export function M5Contexto({
             {PLANTILLAS_FOLLOW_UP.length}
           </span>
         </span>
+        {/* Vencido y futuro decían LO MISMO («se retoma el DD/MM») aunque el
+            postergado vencido ya sea trabajo de ahora en el panel: el cron avisa
+            pero no reactiva. Mismo tratamiento ámbar que el toque vencido. */}
         {status === 'POSTERGADO' && reactivateAt ? (
-          <span>
-            Postergado — se retoma el{' '}
-            <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
-          </span>
+          postergadoVencido ? (
+            <span className="text-amber-300/90">
+              Se venció el <span className="font-semibold">{formatFechaCorta(reactivateAt)}</span> —
+              retomá el contacto
+            </span>
+          ) : (
+            <span>
+              Postergado — vuelve el{' '}
+              <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
+            </span>
+          )
         ) : toqueVencido ? (
           <span className="text-amber-300/90">
             Toque vencido — era para el{' '}

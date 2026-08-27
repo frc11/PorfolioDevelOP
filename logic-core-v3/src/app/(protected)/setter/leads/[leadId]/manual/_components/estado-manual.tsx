@@ -1,8 +1,10 @@
 import Link from 'next/link'
-import { ArrowRight, Hourglass } from 'lucide-react'
-import { formatFechaCorta } from '@/lib/leados/flow'
+import { ArrowRight, ExternalLink, Hourglass } from 'lucide-react'
+import { cadenciaInfo, formatFechaCorta, PLANTILLAS_FOLLOW_UP } from '@/lib/leados/flow'
+import { GUIA_ESPERA } from '@/lib/leados/guidance-content'
 import { rutaManual, type PosicionManual } from '@/lib/leados/manual'
-import { TEXTO_TURNO, type Turno } from '@/lib/leados/turno'
+import { TEXTO_TURNO, TURNO_DE_CAUSA, type CausaEspera } from '@/lib/leados/turno'
+import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { ManualHeader, NavAtras, type CabeceraLead } from './manual-nav'
 
 type EstadoManualProps = {
@@ -11,15 +13,31 @@ type EstadoManualProps = {
   cabecera: CabeceraLead
   tipo: 'espera' | 'revision'
   /**
-   * De quién es el turno, derivado en el server con `turnoDelLead` (fuente
-   * única). NO es lo mismo que `tipo`: la pantalla de espera se muestra tanto
-   * cuando falta que conteste el negocio como cuando Franco aprobó y todavía no
-   * cargó el link — dos turnos distintos en la MISMA pantalla, que es
-   * exactamente lo que antes se decía con una sola frase.
+   * QUÉ se está esperando, derivado en el server con `causaDeEspera` (fuente
+   * única). De acá sale TAMBIÉN el turno (`TURNO_DE_CAUSA`), así que el titular
+   * y su porqué no pueden decir cosas distintas.
+   *
+   * NO es lo mismo que `tipo`: la pantalla de espera se muestra tanto cuando
+   * falta que conteste el negocio como cuando Franco aprobó y todavía no cargó
+   * el link — dos causas distintas en la MISMA pantalla, que es exactamente lo
+   * que antes se decía con una sola frase.
    */
-  turno: Turno
+  causa: CausaEspera
   /** ISO del próximo toque agendado — solo lo usa el estado de espera. */
   proximoToque: string | null
+  /**
+   * Conteo de SIN_RESPUESTA (opener incluido) — el MISMO que alimenta `cadenciaInfo`
+   * en m5. Vive acá porque «cuándo es el próximo toque» sin «en cuál vas» se lee
+   * idéntico con cero toques y con dos: de ese número depende algo concreto —
+   * cuántos le quedan antes de que el negocio se enfríe.
+   */
+  followUpCount: number
+  /**
+   * El borrador publicado (`dossier.draftUrl`). Es lo que Franco está mirando
+   * mientras la espera dura: sin él, la pantalla decía a quién se espera pero no
+   * sobre qué. `null` = todavía no se publicó nada.
+   */
+  draftUrl: string | null
   posicion: PosicionManual
 }
 
@@ -34,25 +52,44 @@ type EstadoManualProps = {
  * tuvo que enseñar a leer la etiqueta de estado al lado del nombre del negocio
  * para saber si la espera era del negocio o de Franco (H-02). Una pantalla que
  * necesita esa lectura auxiliar no está diciendo lo que hace falta.
+ *
+ * Y debajo del turno, QUÉ se espera. El turno solo no alcanzaba: «Le toca a
+ * Franco» cubría por igual la demo en su cola de revisión y la demo ya aprobada
+ * a la que le falta su link permanente — una dura lo que dure una revisión, la
+ * otra se destraba con un campo. El texto que las distingue ya existía en el
+ * envío (m15) y en el pie del wizard; acá se REUSA, no se reescribe.
  */
 export function EstadoManual({
   leadId,
   cabecera,
   tipo,
-  turno,
+  causa,
   proximoToque,
+  followUpCount,
+  draftUrl,
   posicion,
 }: EstadoManualProps) {
   const esEspera = tipo === 'espera'
-  const texto = TEXTO_TURNO[turno]
-  // Lo que está pasando, además del turno. Con el turno de Franco la causa es él
-  // (revisa la demo, o le falta cargar el link) y su texto ya lo cubre.
-  const situacion =
-    turno !== 'negocio'
-      ? null
-      : proximoToque
-        ? `Próximo toque el ${formatFechaCorta(proximoToque)} — el foco te lo trae cuando llegue.`
-        : 'Sin próximo toque agendado — si contesta, registralo y el flujo sigue solo.'
+  const texto = TEXTO_TURNO[TURNO_DE_CAUSA[causa]]
+  // Las palabras de la causa salen de una TABLA indexada por el dato derivado —
+  // no de un `if` sobre stage/finalUrl acá adentro. `null` = esta causa no tiene
+  // frase propia porque ya la dice el turno, o porque la dice el dato (abajo).
+  const palabrasDeLaCausa = GUIA_ESPERA[causa]
+
+  // Lo que la cadencia sabe y el turno no: en cuál toque va y cuándo es el
+  // próximo. La maquinaria la calcula (`cadenciaInfo`, la misma de m5); acá solo
+  // se muestra. Clampado igual que m5 — nunca «4 de 3».
+  const cadencia = cadenciaInfo(followUpCount)
+  const toques =
+    followUpCount > 0
+      ? `Toques: ${Math.min(cadencia.toquesHechos, PLANTILLAS_FOLLOW_UP.length)} de ${PLANTILLAS_FOLLOW_UP.length}`
+      : null
+  const situacionDelNegocio = proximoToque
+    ? `Próximo toque el ${formatFechaCorta(proximoToque)}${toques ? ` · ${toques}` : ''} — el foco te lo trae cuando llegue.`
+    : cadencia.agotada
+      ? `${toques ?? 'Sin toques registrados'} — la cadencia se completó: no queda otro toque para mandar. Si no respondió, el lead se enfría y el cierre lo decide Franco.`
+      : `Sin próximo toque agendado${toques ? ` · ${toques}` : ''} — si contesta, registralo y el flujo sigue solo.`
+
   const puedeRegistrar = esEspera && posicion.habilitadas.includes('m5')
 
   return (
@@ -72,15 +109,35 @@ export function EstadoManual({
         <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-zinc-100 sm:text-2xl">
           {texto.titulo}
         </h2>
-        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">
-          {texto.detalle}
-          {situacion ? ` ${situacion}` : ''}
+        <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">{texto.detalle}</p>
+
+        {/* Qué se está esperando. Frase propia de la causa, o —cuando la causa es
+            el negocio— el estado real de la cadencia, que es más preciso. */}
+        <p className="mt-2 max-w-xl text-xs leading-relaxed text-zinc-400">
+          {palabrasDeLaCausa ? (
+            <LineaRicaText linea={palabrasDeLaCausa} />
+          ) : (
+            situacionDelNegocio
+          )}
         </p>
+
+        {/* Sobre QUÉ es la espera: el borrador que el setter publicó. */}
+        {draftUrl && (
+          <a
+            href={draftUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[11px] font-medium text-zinc-400 transition-colors hover:bg-white/[0.07] hover:text-zinc-200"
+          >
+            <ExternalLink size={12} strokeWidth={1.5} aria-hidden className="shrink-0" />
+            <span className="truncate">{draftUrl}</span>
+          </a>
+        )}
 
         {puedeRegistrar && (
           <Link
             href={rutaManual(leadId, 'm5')}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-zinc-100"
+            className="mt-4 flex w-fit items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-zinc-100"
           >
             ¿Respondió o pasó algo antes? Registralo
             <ArrowRight size={12} strokeWidth={1.5} aria-hidden />

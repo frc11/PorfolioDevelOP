@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft, ArrowLeftRight, Check, ExternalLink, Flame } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight, CalendarClock, Check, ExternalLink, Flame } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
-import { STAGE_LABELS, STATUS_LABELS } from '@/lib/leados/flow'
+import { formatFechaCorta, STAGE_LABELS, STATUS_LABELS } from '@/lib/leados/flow'
 import {
   PANTALLAS,
   PANTALLAS_CONSTRUCCION,
@@ -37,6 +37,15 @@ export type CabeceraLead = {
   notas: string | null
   /** ISO de la última asignación; null si no hay rastro. */
   asignadoEl: string | null
+  /**
+   * ISO de la reactivación de un POSTERGADO (`lead.reactivateAt`); null si no
+   * está postergado. Va en la cabecera —y no en una pantalla— porque es la única
+   * superficie que aparece en TODAS: el postergado aterriza donde lo deje su
+   * stage (m5, `espera`, …) y la fecha tiene que leerse ahí, sin buscarla.
+   */
+  reactivateAt: string | null
+  /** Esa fecha ya pasó (reloj request-time, resuelto en `_data.ts`). */
+  postergadoVencido: boolean
 }
 
 /**
@@ -46,7 +55,18 @@ export type CabeceraLead = {
  * vivía en el header de la página del wizard.
  */
 export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
-  const { lead, status, stage, caliente, contactName, phone, notas, asignadoEl } = cabecera
+  const {
+    lead,
+    status,
+    stage,
+    caliente,
+    contactName,
+    phone,
+    notas,
+    asignadoEl,
+    reactivateAt,
+    postergadoVencido,
+  } = cabecera
 
   const links = [
     { label: 'Instagram', href: lead.instagramUrl },
@@ -97,6 +117,25 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
             <Badge tone="zinc" variant="outline">
               {STAGE_LABELS[stage]}
             </Badge>
+          )}
+          {/* Al lado de la etiqueta «Postergado», que sola no dice cuándo vuelve.
+              Vencido en ámbar (mismo tono que el toque vencido de m5): sin esta
+              distinción, un postergado que ya volvió y uno que todavía no se
+              leen igual — y con la fecha a la vista el rótulo es verificable. */}
+          {status === 'POSTERGADO' && reactivateAt && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium',
+                postergadoVencido
+                  ? 'bg-amber-500/10 text-amber-300/90'
+                  : 'bg-white/[0.04] text-zinc-400',
+              )}
+            >
+              <CalendarClock size={11} strokeWidth={1.5} aria-hidden className="shrink-0" />
+              {postergadoVencido
+                ? `Se venció el ${formatFechaCorta(reactivateAt)}`
+                : `Vuelve el ${formatFechaCorta(reactivateAt)}`}
+            </span>
           )}
         </div>
       </div>

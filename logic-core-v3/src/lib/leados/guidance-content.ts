@@ -33,6 +33,10 @@
  * de un selector no se desincronizan del dominio (ver `GUIA_FICHA.igManejadoPor`).
  */
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
+// Solo el TIPO de la causa de espera (`turno.ts` es el único lugar donde se
+// decide): así el registro de palabras de abajo no puede quedarse corto cuando
+// aparezca una causa nueva. Import de tipo — no ata este módulo a nada en runtime.
+import type { CausaEspera } from '@/lib/leados/turno'
 
 // ── Primitivas de copy ───────────────────────────────────────────────────────
 
@@ -929,6 +933,53 @@ export const GUIA_ENVIO = {
     ],
   },
 } satisfies EnvioGuia
+
+// ── Contenido: QUÉ se está esperando (las pantallas de estado) ───────────────
+
+/**
+ * Las palabras de cada CAUSA de espera (`causaDeEspera`, turno.ts). El turno ya
+ * dice de quién es la pelota; esto dice qué tiene que pasar para que vuelva.
+ *
+ * Existe porque las pantallas de estado nombraban el turno y nada más: la demo
+ * en la cola de revisión y la demo aprobada-sin-link-permanente son dos esperas
+ * muy distintas —una dura lo que tarde una revisión, la otra se destraba con un
+ * campo— y mostraban EL MISMO texto. El producto ya sabía distinguirlas: lo decía
+ * el envío (m15) con el gate cerrado, y el pie del wizard para la revisión. Ese
+ * texto no viajaba. Acá NO se reescribe: se referencia el que ya funciona.
+ *
+ * `null` = esta causa no tiene frase propia porque ya está dicha:
+ *   - `accionPropia` la dice entera `TEXTO_TURNO.setter.detalle`;
+ *   - `respuesta` la dice el DATO (cuándo es el próximo toque y en cuál va la
+ *     cadencia), que es más preciso que cualquier frase fija.
+ *
+ * `satisfies Record<CausaEspera, …>`: una causa nueva no compila hasta decidir
+ * sus palabras — o hasta decidir, explícitamente, que no lleva.
+ */
+export const GUIA_ESPERA = {
+  reunion: [
+    'La reunión ',
+    { enfasis: 'la corre Franco' },
+    ' — el resultado lo carga él cuando termine.',
+  ],
+  cierre: [
+    'El cierre ',
+    { enfasis: 'lo decide Franco' },
+    ' desde el panel — no se automatiza, y no hay nada del manual para hacer acá.',
+  ],
+  descarte: [
+    'La evaluación ',
+    { enfasis: 'descartó el negocio' },
+    ' — bien filtrado: el trabajo de este lead terminó acá.',
+  ],
+  // El pie del wizard para EN_REVISION, tal cual: ya dice qué está pasando y
+  // dónde te enterás. No se duplica.
+  revision: GUIA_REVISION.enRevision,
+  // El «todavía no» que m15 muestra con el gate cerrado. Es EL texto que este
+  // sprint vino a hacer viajar: nombra la causa exacta y descarta al negocio.
+  linkPermanente: GUIA_ENVIO.espera.aprobadaSinLink,
+  accionPropia: null,
+  respuesta: null,
+} satisfies Record<CausaEspera, LineaRica | null>
 
 // ── Contenido: ejemplos del ESTADO IDEAL (para las pantallas vacías) ─────────
 

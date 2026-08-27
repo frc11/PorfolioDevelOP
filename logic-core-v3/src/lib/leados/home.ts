@@ -55,6 +55,9 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
         lead.status === 'POSTERGADO' &&
         lead.reactivateAt !== null &&
         lead.reactivateAt.getTime() <= ahora,
+      // CUÁNDO vuelve, no sólo si ya venció: la sugerencia de la card y del foco
+      // la muestran. Dato ya persistido y ya leído acá — cero queries nuevas.
+      reactivateAt: lead.reactivateAt,
       demoEnviada: Boolean(lead.dossier?.enviadaAt),
       // B-beta: organización propia del setter (privada, aislada por setterId).
       pinned: meta.pinned,

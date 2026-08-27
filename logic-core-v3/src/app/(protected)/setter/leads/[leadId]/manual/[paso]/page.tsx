@@ -7,7 +7,7 @@ import {
   rutaManual,
   type PantallaId,
 } from '@/lib/leados/manual'
-import { turnoDelLead } from '@/lib/leados/turno'
+import { causaDeEspera } from '@/lib/leados/turno'
 import { GuiaRetrabajo } from '../../_components/guia-retrabajo'
 import { UrgenciaBanner } from '../../_components/urgencia-banner'
 import { ArchivoManual } from '../_components/archivo-manual'
@@ -91,6 +91,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
     phone: manual.leadPhone,
     notas: manual.notas,
     asignadoEl: manual.asignadoEl,
+    // La fecha de vuelta de un POSTERGADO viaja en la cabecera —la única
+    // superficie común a TODAS las pantallas— porque el postergado aterriza
+    // donde lo deje su stage, no siempre en «Registrá lo que pasó».
+    reactivateAt: manual.reactivateAt,
+    postergadoVencido: manual.postergadoVencido,
   }
 
   // 5.6 — La memoria del lead, al pie de toda pantalla (colapsable).
@@ -120,16 +125,20 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
           leadId={leadId}
           cabecera={cabecera}
           tipo={pantalla.id === 'espera' ? 'espera' : 'revision'}
-          // El turno sale de la fuente única. `accionPendiente: false` no es una
-          // decisión de esta página: aterrizar en una pantalla de ESTADO es,
-          // por construcción de `posicionDe`, no tener nada para hacer ahora.
-          turno={turnoDelLead({
+          // La causa sale de la fuente única — y el turno se deriva de ella, así
+          // que la pantalla no puede nombrar un turno y explicar otra cosa.
+          // `accionPendiente: false` no es una decisión de esta página: aterrizar
+          // en una pantalla de ESTADO es, por construcción de `posicionDe`, no
+          // tener nada para hacer ahora.
+          causa={causaDeEspera({
             status: manual.leadStatus,
             stage: manual.stage,
             finalUrl: manual.finalUrl,
             accionPendiente: false,
           })}
           proximoToque={manual.proximoToque}
+          followUpCount={manual.followUpCount}
+          draftUrl={manual.draftUrl}
           posicion={posicion}
         />
         {historial}
@@ -366,6 +375,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                                 followUpCount={manual.followUpCount}
                                 proximoToque={manual.proximoToque}
                                 reactivateAt={manual.reactivateAt}
+                                postergadoVencido={manual.postergadoVencido}
                                 leadPhone={manual.leadPhone}
                               />
                             ),

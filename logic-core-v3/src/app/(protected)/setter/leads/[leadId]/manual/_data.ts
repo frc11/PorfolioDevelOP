@@ -83,10 +83,18 @@ export type ManualDelLead = {
    * (toques hechos, próximo toque, cadencia agotada). MISMO `countFollowUps` que
    * la maquinaria; el manual solo PRESENTA la cadencia, jamás la calcula. */
   followUpCount: number
-  /** M5 — ISO de la reactivación de un lead POSTERGADO (`lead.reactivateAt`); null
-   * si no está postergado. El panel lo retoma en esa fecha por el reloj existente
-   * — el manual solo lo muestra, no re-implementa ese regreso al foco. */
+  /** M5 + cabecera — ISO de la reactivación de un lead POSTERGADO (`lead.reactivateAt`);
+   * null si no está postergado. El panel lo retoma en esa fecha por el reloj existente
+   * — el manual solo lo muestra, no re-implementa ese regreso al foco. Desde el
+   * sprint de los datos que viajan lo lee TAMBIÉN la cabecera: es la única
+   * superficie que está en todas las pantallas del lead, así que la fecha se lee
+   * caiga donde caiga el postergado (m5, `espera`, o donde lo deje su stage). */
   reactivateAt: string | null
+  /** Cabecera/M5 — esa fecha ya pasó. MISMO criterio de reloj request-time que
+   * `followUpVencido` (fuera del render): el cron avisa pero NO reactiva, así que
+   * el lead sigue POSTERGADO y las dos situaciones se ven idénticas si nadie las
+   * distingue. `false` cuando el lead no está postergado. */
+  postergadoVencido: boolean
   /** M5/M16 — teléfono del lead (A-14): re-servido para seguir la conversación o
    * coordinar el horario sin volver a la ficha. Mismo `lead.phone` que el wizard. */
   leadPhone: string | null
@@ -155,6 +163,11 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   const followUpVencido = lead.nextFollowUpAt
     ? lead.nextFollowUpAt.getTime() <= Date.now()
     : false
+  // Mismo reloj, misma regla que `buildHomeLeads`: postergado cuya fecha ya pasó.
+  const postergadoVencido =
+    lead.status === 'POSTERGADO' &&
+    lead.reactivateAt !== null &&
+    lead.reactivateAt.getTime() <= Date.now()
 
   const stage = dossier?.stage ?? null
   const ficha = parseFicha(dossier?.fichaJson ?? null)
@@ -243,6 +256,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     demoEnviadaAt: dossier?.enviadaAt?.toISOString() ?? null,
     followUpCount,
     reactivateAt: lead.reactivateAt?.toISOString() ?? null,
+    postergadoVencido,
     leadPhone: lead.phone,
     agenda,
     contactName: lead.contactName,

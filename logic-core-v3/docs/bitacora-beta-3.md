@@ -7133,3 +7133,122 @@ Barrido final sobre el árbol: cero «posponer», cero «producir la demo», cer
 
 - **«Correcciones» (mr) no está en el rail de Construcción.** Las pantallas de Construcción del rail son mc1 y mc2, así que desde mc1 con el lead rechazado la instrucción ya nombra a dónde ir, pero no hay un link que lleve. Sumarlo al rail es un cambio de navegación, no de vocabulario.
 - El vocabulario de **brief**, **Gem** y **herramientas**, listado arriba.
+
+---
+
+## Sprint DATOS QUE VIAJAN — el dato existe, vive en una pantalla, y hace falta en otras cuatro — 2026-08-27
+
+Rama `fix/datos-viajan` sobre `fix/vocabulario` (`6ef28432`) — que es `leados/v1-a-main` + callejones + municiones + vocabulario. Worktree propio en `C:/tmp/wt-datos`, puerto 3011, `E2E_DIST_DIR=.next-datos`.
+
+**El patrón, en una frase:** el dato ya está persistido y ya se lee; lo que no hace es viajar. El setter tiene que pararse en el lugar exacto para enterarse de algo que necesita en otro lado.
+
+### Fase 0 — terreno
+
+`git fetch --all --prune` limpio. `git status --porcelain` con un solo `?? docs/` (untracked previo, ajeno — no se tocó). 13 worktrees ajenos vivos, ninguno sobre esta base. 2 stashes ajenos, intactos.
+
+Base verde antes de tocar nada: `tsc` exit 0 · invariantes **45/45** (46 descubiertos, 1 excluido) · `test:setter` **76/76** · `test:leados` **25/25** · build verde.
+
+**Los tres casos siguen vivos** — verificado en código antes de escribir una línea:
+
+| Caso | Prueba de que sigue vivo |
+|---|---|
+| 1 · la fecha de postergación | `HomeLeadInput` (flow.ts) no proyecta `reactivateAt`; la única superficie que lo renderiza es `M5Contexto` (`m5-seguimiento.tsx:90`). La tarjeta decía `Postergado — se retoma cuando se reactive` (`flow.ts:458`). La cabecera del lead no lo recibía. |
+| 2 · las dos esperas | `estado-manual.tsx:50` — `situacion = turno !== 'negocio' ? null : …`. Con el turno de Franco la pantalla mostraba `TEXTO_TURNO.franco.detalle` y nada más: idéntico para «está revisando» y para «aprobó y no cargó el link». |
+| 3 · el contador de toques | `EstadoManual` no recibía `followUpCount`. El conteo existía en `_data.ts:169` y sólo llegaba a m5. |
+
+### Censo 1 — la fecha de postergación
+
+- **Dónde vive:** `OsLead.reactivateAt` (columna existente; ningún cambio de schema).
+- **Quién la formatea:** `formatFechaCorta` (`flow.ts`, huso AR fijo). Un único consumidor de la fecha en el panel del setter: `M5Contexto`.
+- **Las cuatro superficies donde aparece el lead:** foco (`FocoSurface`, lee `lead.proximaAccion`), tarjeta de cartera (`LeadCard`, lee `lead.proximaAccion`), ficha (cualquier pantalla del manual — la cabecera `ManualHeader` es la única común a todas), pantalla de espera (`EstadoManual`, que también monta la cabecera).
+
+**Lo que se movió:** `reactivateAt` entra a `HomeLeadInput` como campo **opcional** (`Date | null`) y `buildHomeLeads` lo pasa — el dato ya se leía ahí para derivar `postergadoVencido`, así que no hay query nueva. `proximaAccionPara` lo usa: la fecha **reemplaza** al texto vago, no se suma encima (la tarjeta ya está cargada y son 76).
+
+| Antes | Ahora |
+|---|---|
+| `Postergado — se retoma cuando se reactive` | `Postergado — vuelve el 5/9` |
+| `Se venció la postergación — retomá el contacto` | `Se venció el 24/8 — retomá el contacto` |
+
+Sin fecha conocida las dos frases viejas siguen siendo el fallback (la columna es nullable): por eso `flow.invariant.ts` —que fija esas dos frases— **quedó intacto y en verde**, y no hizo falta relajarlo.
+
+En la ficha, la fecha va en la **cabecera**, no en una pantalla: el postergado aterriza donde lo deje su stage (m5, `espera`, …) y la fecha tiene que leerse caiga donde caiga. Chip corto al lado de la etiqueta «Postergado», ámbar cuando ya venció.
+
+Y en m5 se arregló lo que el sprint pedía verificar: vencido y futuro **decían lo mismo** (`Postergado — se retoma el DD/MM` en los dos casos). Ahora el vencido dice `Se venció el DD/MM — retomá el contacto` en ámbar, mismo tratamiento que el toque vencido de al lado.
+
+### Censo 2 — qué se está esperando
+
+**Los casos que hoy derivan en el turno de Franco, enumerados** (`turno.ts`, precedencia de arriba abajo — y `turno.invariant.ts:149-155` ya los listaba como «estructuralmente de Franco»):
+
+| # | Condición | Dónde aterriza (`manual.ts: posicionDe`) | ¿Llega a una pantalla de espera? |
+|---|---|---|---|
+| 1 | `status = CALL_AGENDADA` | m6 / mc / m16 según stage | sólo junto al #6 |
+| 2 | `status = CERRADO` | ídem | sólo junto al #6 |
+| 3 | `status = PERDIDO` | `archivo` (`manual.ts:500`) | **no** |
+| 4 | `stage = DESCARTADA` | `m2` (`manual.ts:522`) | **no** |
+| 5 | `stage = EN_REVISION` | `revision` (`manual.ts:568`) | **sí** |
+| 6 | `stage = APROBADA` **y** `finalUrl === null` | `espera` (`manual.ts:602`) | **sí** |
+
+O sea: seis condiciones producen el turno de Franco; **dos llegan a las pantallas de estado**, y ésas eran las que mostraban el mismo texto. Con `finalUrl` cargado el gate del envío abre y el lead va a m15, no a la espera — por eso #1 y #2 sólo alcanzan `espera` cuando además se cumple #6.
+
+**Qué dato distingue cada caso:** `stage` separa revisión de aprobada; `finalUrl` (la URL permanente que Franco carga al aprobar) separa «aprobada y lista» de «aprobada y trabada de este lado»; `status` separa reunión y cierre. Los tres ya estaban disponibles en la pantalla (`manual.finalUrl` se pasaba a `turnoDelLead` desde `[paso]/page.tsx:129`) — el turno los leía y los **colapsaba en una palabra**.
+
+**Dónde vive el texto que sí nombra la causa, y por qué no llegaba:** `GUIA_ENVIO.espera.aprobadaSinLink` (`guidance-content.ts:917`), que **m15** muestra con el gate cerrado. Y `GUIA_REVISION.enRevision` para la revisión. No llegaban porque `EstadoManual` no tenía a quién preguntarle *qué* se espera: sólo *de quién* es el turno.
+
+**Lo que se movió — la distinción sale del dato, no de un `if` en la pantalla:**
+
+- `turno.ts` gana `CausaEspera` (siete causas) y `causaDeEspera(input)`. La lista plana `STATUS_DE_FRANCO` pasó a ser `CAUSA_POR_STATUS` (decía quién y perdía el qué).
+- `turnoDelLead` **se deriva de la causa** vía `TURNO_DE_CAUSA`: una sola cadena de precedencia, imposible que el titular y su porqué digan cosas distintas. Refactor de comportamiento idéntico, y quien lo prueba es `turno.invariant.ts` — **sin tocarlo**: sus 432 combinaciones de status × stage × finalUrl × acción-pendiente siguen en verde.
+- `guidance-content.ts` gana `GUIA_ESPERA`, un `satisfies Record<CausaEspera, LineaRica | null>` — una causa nueva no compila hasta decidir sus palabras. **Los dos textos que importan se REFERENCIAN, no se reescriben.** `null` para `accionPropia` (ya lo dice entero el texto del turno) y para `respuesta` (lo dice el dato).
+- `EstadoManual` recibe `causa` en vez de `turno` y hace un lookup en tabla.
+
+**Además, el borrador a la vista.** Las dos esperas decían a quién se espera y no sobre qué: ahora muestran el `draftUrl` que el setter publicó. El dato ya estaba en `manual.draftUrl`.
+
+### Censo 3 — el contador de toques
+
+`countFollowUps` → `manual.followUpCount` → sólo m5. `cadenciaInfo` (la maquinaria, `flow.ts`) es la que sabe en cuál va. La espera decía cuándo es el próximo toque y no en cuál vas: con cero toques y con dos se leía idéntica.
+
+Ahora la espera arma una sola línea: `Próximo toque el 31/8 · Toques: 1 de 3 — el foco te lo trae cuando llegue.` Clampado igual que m5 (nunca «4 de 3» con cuatro filas sembradas). Con la cadencia agotada dice `Toques: 3 de 3 — la cadencia se completó: no queda otro toque para mandar…`, que es un número que no invita a insistir.
+
+### Verificación operando la app (1440, build de producción)
+
+Capturas en `docs/proof-screenshots/datos-que-viajan/` (gitignored):
+
+1. **Postergué un lead de verdad** desde el formulario de m5, eligiendo la fecha a mano. La ficha muestra el chip con **la fecha que elegí** (afirmado contra el string tipeado, no contra un `Date` reparseado: el desvío de un día que arregló F1 se vería) y la tarjeta de cartera dice `Postergado — vuelve el 5/9` sin abrir el lead. `v1-01`, `v1-02`, `v1-03`.
+2. **Vencido y futuro, lado a lado** en la cartera: uno neutro con su fecha de vuelta, el otro en cyan accionable con `Se venció el 24/8 — retomá el contacto`. `v2`.
+3. **Las dos esperas**, cada una nombrando lo suyo bajo el mismo titular «Le toca a Franco». `v3-01`, `v3-02`.
+4. **El contador en dos estados**: cadencia viva y cadencia agotada. `v4-01`, `v4-02`.
+5. A **390** el chip envuelve a la fila de badges y la causa entra sin desborde horizontal (medido: 0 px). `v5-01`, `v5-02`.
+
+### Tests
+
+`tests/setter/17-datos-que-viajan.spec.ts` — 7 casos, todos **demostrados fallando contra el código viejo** antes de escribir la implementación:
+
+| Test | Falló en |
+|---|---|
+| 1a tarjeta de cartera | `Postergado — vuelve el 1/9` no visible |
+| 1b vencido vs futuro | ídem |
+| 1c la ficha | `Vuelve el 1/9` no visible |
+| 2a en revisión | `revisión de Franco` no visible |
+| 2b aprobada sin link | `todavía no cargó su link permanente` no visible |
+| 3a contador | `Toques: 1 de 3` no visible |
+| 3b cadencia agotada | `Toques: 3 de 3` no visible |
+
+En los siete rojos **sí** pasaban `Le toca a Franco` y `Próximo toque el DD/MM`: el turno y la fecha del próximo ya estaban bien, lo que faltaba era exactamente la causa y el contador. Se afirma por `toBeVisible`, nunca por presencia.
+
+### Estado
+
+`npx tsc --noEmit` exit 0 · invariantes **45/45** (46 descubiertos, 1 excluido — ninguno tocado, ninguno en rojo) · `npm run build` verde · `test:setter` **83/83** (76 + 7) · `test:leados` **25/25**. `prisma generate` no corresponde: el schema no se tocó.
+
+**Ninguna llave de datos se tocó**: ni un nombre de hard-check, ni un id de fase, ni un id de pantalla, ni un texto que se compare contra un blob guardado. Ningún campo nuevo en la base. Ninguna transición nueva ni modificada. `CausaEspera` es un tipo de presentación: no se persiste ni se compara contra nada guardado.
+
+### Lo que queda para Franco
+
+- **Que la tarjeta no quede más cargada.** La fecha reemplaza texto, no se suma: la línea de la sugerencia pasó de 44 a 28 caracteres en el postergado futuro. Pero son 76 tarjetas y eso lo cierra él mirando.
+- **Que las dos esperas se entiendan sin explicación.**
+- Nota de lectura: en m5 la fecha aparece dos veces (el chip de la cabecera y el recuadro de cadencia), igual que ya pasa con la etiqueta de estado. Si molesta, se saca del recuadro.
+
+### Fuera de scope, medido y anotado
+
+- **La tarjeta de cartera no puede ver `finalUrl`, y por eso miente en un caso.** Un lead APROBADA **sin** link permanente muestra en el panel `Demo aprobada — mandá el link al negocio`, en cyan accionable, mandando a enviar un link que no existe; y su hermano con link cargado y sin respuesta dice `Le toca al negocio…`. Se ve en la captura `v2`: «Optica Central» (sin link) vs «Taller Muñoz» (con link). Es la MISMA raíz de este sprint, en una quinta superficie. **Costo de cerrarlo:** proyectar `finalUrl` en `HomeLeadInput` (flow.ts) + `buildHomeLeads` (home.ts) + partir la rama APROBADA de `proximaAccionPara` + el conteo por turno del panel (`setter/page.tsx:60-64`, que hoy tampoco lo pasa y por eso cuenta esas demos como «esperando al negocio»). Ningún invariante lo afirma hoy, así que **no se pondría en rojo** — pero cambia el copy y los contadores del panel para todo lead aprobado-sin-link: es otro objetivo, no éste.
+- **Referencia de plazo en las dos esperas: el dato NO existe.** No hay marca de cuándo entró a revisión (`OsLeadDossier` tiene `aprobadaAt` y `enviadaAt`, no un `enRevisionAt`) ni ningún SLA persistido. No se inventó ninguno. Cerrarlo pide un campo nuevo — fuera de las reglas de este sprint.
+- **«Correcciones» (mr) sigue sin estar en el rail de Construcción** (heredado del sprint anterior). Merece el barrido propio que el pedido nombra: todo destino que el producto nombra tiene que ser alcanzable desde donde se lo nombra.

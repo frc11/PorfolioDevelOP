@@ -353,6 +353,17 @@ export type HomeLeadInput = {
    * del render), igual que `followUpVencido`.
    */
   postergadoVencido: boolean
+  /**
+   * `lead.reactivateAt` — CUÁNDO vuelve un POSTERGADO. Hasta este sprint el panel
+   * solo proyectaba el booleano de arriba, así que la tarjeta de cartera y el foco
+   * podían decir que el lead estaba postergado pero no cuándo volvía: para saberlo
+   * había que entrar al lead. Con setenta y seis en cartera eso no se sostiene.
+   *
+   * Opcional (`undefined` = la superficie no lo proyecta): la sugerencia cae a la
+   * frase sin fecha, igual que antes. Nullable porque la columna lo es — un
+   * POSTERGADO sin fecha es raro, pero no imposible, y no se inventa una.
+   */
+  reactivateAt?: Date | null
   /** B6: la demo aprobada ya se envió (dossier.enviadaAt). */
   demoEnviada: boolean
   /** B-beta: el setter fijó este lead en su cartera (organización propia, privada). */
@@ -453,9 +464,28 @@ function proximaAccionPara(
   if (input.status === 'POSTERGADO') {
     // 2.1b/D6: vencida la postergación, retomar el contacto es acción de ahora;
     // con la fecha aún en el futuro, sigue pausado a la espera de reactivarse.
-    return input.postergadoVencido
-      ? { proximaAccion: 'Se venció la postergación — retomá el contacto', accionable: true }
-      : { proximaAccion: 'Postergado — se retoma cuando se reactive', accionable: false }
+    //
+    // La FECHA reemplaza al texto vago, no se suma encima: la card ya está
+    // cargada y son setenta y seis. «se retoma cuando se reactive» no le servía
+    // a nadie —el setter le dijo al negocio «te escribo el 25» y para saber
+    // cuándo vuelve tenía que abrir el lead—; «vuelve el 25/08» ocupa menos y
+    // dice todo. Y hace verificable el rótulo: sin fecha en pantalla, un
+    // vencido rotulado como futuro (o al revés) era indetectable.
+    const fecha = input.reactivateAt ? formatFechaCorta(input.reactivateAt.toISOString()) : null
+    if (input.postergadoVencido) {
+      return {
+        proximaAccion: fecha
+          ? `Se venció el ${fecha} — retomá el contacto`
+          : 'Se venció la postergación — retomá el contacto',
+        accionable: true,
+      }
+    }
+    return {
+      proximaAccion: fecha
+        ? `Postergado — vuelve el ${fecha}`
+        : 'Postergado — se retoma cuando se reactive',
+      accionable: false,
+    }
   }
   // B8A/H3: el lead con reunión agendada lo cierra Franco — la próxima acción
   // es la reunión, no el paso del dossier (que puede estar atrás). Sin este
