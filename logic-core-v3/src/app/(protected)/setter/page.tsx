@@ -4,13 +4,12 @@ import { PageHeader } from '@/components/ui'
 import { requireSetter } from '@/lib/auth-guards'
 import { seleccionarFoco } from '@/lib/leados/foco'
 import { leerFocoLeadId } from '@/lib/leados/foco-cookie'
-import { particionarCartera } from '@/lib/leados/flow'
+import { contarEnVueloPorTurno, particionarCartera } from '@/lib/leados/flow'
 import { buildHomeLeads } from '@/lib/leados/home'
 import { derivarMisNumeros } from '@/lib/leados/mis-numeros'
 import { getNovedadesSetter } from '@/lib/leados/novedades'
 import { listOwnedLeads } from '@/lib/leados/ownership'
 import { getProgresoSemana } from '@/lib/leados/progreso'
-import { turnoDelLead, type Turno } from '@/lib/leados/turno'
 import { CarteraView } from './_components/cartera-view'
 import { FocoSurface } from './_components/foco-surface'
 import { HomeEmpty } from './_components/home-empty'
@@ -50,20 +49,18 @@ export default async function SetterHomePage() {
   // solo número rotulado «esperando respuesta», que contaba también las demos
   // paradas en la cola de Franco. La partición ya garantiza que nada de acá es
   // accionable — el turno traduce esa decisión, no la vuelve a tomar.
+  //
+  // El conteo es una FUNCIÓN (`contarEnVueloPorTurno`, flow.ts) y no un bucle
+  // acá: armado a mano, este bloque le pasaba al turno tres campos y se olvidaba
+  // de `finalUrl`, así que las demos aprobadas sin el link de Franco figuraban
+  // como «esperando al negocio». Un conteo dentro del componente no lo puede
+  // afirmar ningún chequeo; una función sí.
   const enVuelo = [
     ...particion.grupos.seguimiento,
     ...particion.grupos.revision,
     ...particion.grupos.agendadas,
   ]
-  const enVueloPorTurno: Record<Turno, number> = { negocio: 0, franco: 0, setter: 0 }
-  for (const lead of enVuelo) {
-    const turno = turnoDelLead({
-      status: lead.status,
-      stage: lead.stage,
-      accionPendiente: lead.accionable,
-    })
-    enVueloPorTurno[turno] += 1
-  }
+  const enVueloPorTurno = contarEnVueloPorTurno(enVuelo)
   const pausados = particion.pausados.length
   const fijados = particion.fijados.length
 

@@ -58,6 +58,11 @@ export function buildHomeLeads(leads: OwnedLeadWithDossier[]): HomeLead[] {
       // CUÁNDO vuelve, no sólo si ya venció: la sugerencia de la card y del foco
       // la muestran. Dato ya persistido y ya leído acá — cero queries nuevas.
       reactivateAt: lead.reactivateAt,
+      // La URL permanente que Franco carga al aprobar: CONDICIÓN del envío. El
+      // dossier ya viene incluido en la query (`listOwnedLeads`) — cero queries
+      // nuevas. Sin esto la tarjeta de una aprobada-sin-link pedía «mandá el
+      // link» y el contador del panel la ponía a esperar al negocio.
+      finalUrl: lead.dossier?.finalUrl ?? null,
       demoEnviada: Boolean(lead.dossier?.enviadaAt),
       // B-beta: organización propia del setter (privada, aislada por setterId).
       pinned: meta.pinned,

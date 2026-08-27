@@ -139,6 +139,19 @@ export function turnoDelLead(input: TurnoInput): Turno {
   return TURNO_DE_CAUSA[causaDeEspera(input)]
 }
 
+/**
+ * Lo que le falta a Franco cuando la demo ya está aprobada. Es UNA cadena y vive
+ * acá —módulo hoja, alcanzable desde `flow.ts` bajo el harness ts-node— porque
+ * la COMPARTEN dos superficies que no comparten grafo de imports: la frase larga
+ * del envío (`GUIA_ENVIO.espera.aprobadaSinLink`, que la enfatiza en el medio) y
+ * la sugerencia CORTA de la tarjeta de cartera, que no puede llevar la frase
+ * entera —son setenta y seis cards—. El texto no se reescribió: la frase larga
+ * ya lo decía bien, así que se extrajo el fragmento y las dos lo referencian. Si
+ * Franco lo edita, las dos lo siguen, y no puede quedar una diciendo una cosa y
+ * la otra otra.
+ */
+export const FALTA_LINK_PERMANENTE = 'todavía no cargó su link permanente'
+
 export type TextoTurno = {
   /**
    * La forma contable, para los conteos del panel: «2 esperando a Franco».

@@ -33,10 +33,12 @@
  * de un selector no se desincronizan del dominio (ver `GUIA_FICHA.igManejadoPor`).
  */
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
-// Solo el TIPO de la causa de espera (`turno.ts` es el único lugar donde se
-// decide): así el registro de palabras de abajo no puede quedarse corto cuando
-// aparezca una causa nueva. Import de tipo — no ata este módulo a nada en runtime.
-import type { CausaEspera } from '@/lib/leados/turno'
+// El TIPO de la causa de espera (`turno.ts` es el único lugar donde se decide):
+// así el registro de palabras de abajo no puede quedarse corto cuando aparezca
+// una causa nueva. Y UNA cadena: el fragmento del link permanente, que la
+// tarjeta de cartera también muestra (ver `FALTA_LINK_PERMANENTE`) — vive en el
+// módulo hoja porque `flow.ts` no puede importar este archivo bajo ts-node.
+import { FALTA_LINK_PERMANENTE, type CausaEspera } from '@/lib/leados/turno'
 
 // ── Primitivas de copy ───────────────────────────────────────────────────────
 
@@ -918,7 +920,7 @@ export const GUIA_ENVIO = {
     ],
     aprobadaSinLink: [
       'Franco aprobó la demo pero ',
-      { enfasis: 'todavía no cargó su link permanente' },
+      { enfasis: FALTA_LINK_PERMANENTE },
       ' — sin ese link no hay nada que mandar, y el negocio no tiene nada que ver con esto. Cuando lo registre, el envío se destraba solo.',
     ],
     engancheSinAprobar: [

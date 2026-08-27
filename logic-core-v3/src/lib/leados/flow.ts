@@ -22,7 +22,7 @@ import type { DossierStage, LeadStatus } from '@prisma/client'
 // revision solo `import type`) — por eso `flow.invariant.ts` puede importar
 // `clasificarLead` de verdad. Es además el patrón ya usado por home.ts/foco.ts.
 import { calculateNextFollowUp } from '../follow-up.ts'
-import { TEXTO_TURNO, turnoDelLead } from './turno.ts'
+import { FALTA_LINK_PERMANENTE, TEXTO_TURNO, turnoDelLead, type Turno } from './turno.ts'
 import {
   AgendaSchema,
   BriefSchema,
@@ -364,6 +364,21 @@ export type HomeLeadInput = {
    * POSTERGADO sin fecha es raro, pero no imposible, y no se inventa una.
    */
   reactivateAt?: Date | null
+  /**
+   * `dossier.finalUrl` — la URL permanente que Franco registra AL APROBAR. Es la
+   * CONDICIÓN del envío (`gateEnvioDemo`): sin ella no hay link que mandar.
+   *
+   * Hasta este sprint el panel no la proyectaba, así que la tarjeta de cartera
+   * de una demo aprobada-sin-link decía «mandá el link al negocio», en cyan
+   * accionable, y mandaba al setter a una pantalla que le explica que el link
+   * todavía no existe. El dato ya estaba persistido y ya venía en la query del
+   * dossier — cero queries nuevas.
+   *
+   * Opcional (`undefined` = la superficie no lo proyecta): sin él, la derivación
+   * se comporta EXACTAMENTE como antes. Sólo `null` afirma «no está cargado»;
+   * la columna es nullable, así que el null es el dato, no un placeholder.
+   */
+  finalUrl?: string | null
   /** B6: la demo aprobada ya se envió (dossier.enviadaAt). */
   demoEnviada: boolean
   /** B-beta: el setter fijó este lead en su cartera (organización propia, privada). */
@@ -413,6 +428,14 @@ function grupoPara(input: HomeLeadInput, gateAbierto: boolean): HomeGroupKey {
     return 'seguimiento'
   }
   if (input.stage === 'APROBADA') {
+    // Sin el link permanente de Franco NINGUNA rama de este stage es accionable
+    // antes de mandar la demo (`proximaAccionPara` cae siempre a la espera), así
+    // que el lead no es trabajo del setter: es una espera, y la espera es de
+    // Franco. El toque vencido tampoco lo rescata — la sugerencia de esta rama
+    // nunca ofrece el toque, y mandarlo a «Para trabajar» lo pondría en la cola
+    // (pudiendo ser el FOCO, con su CTA grande) con una card que dice «esperá».
+    // `undefined` (superficie que no proyecta el campo) no afirma nada.
+    if (input.finalUrl === null && !input.demoEnviada) return 'seguimiento'
     // B6: demo lista para enviar, o toque de seguimiento vencido → trabajo.
     if (!input.demoEnviada && gateAbierto) return 'trabajar'
     if (input.followUpVencido) return 'trabajar'
@@ -444,10 +467,15 @@ function esperaDe(
   input: HomeLeadInput,
   detalle: string,
 ): { proximaAccion: string; accionable: boolean } {
-  // El turno lo decide `turno.ts` — acá no se vuelve a decidir. El panel no
-  // proyecta `finalUrl`, así que la rama «aprobada sin el link de Franco» no se
-  // puede afirmar desde esta superficie y no se afirma (queda `undefined`).
-  const turno = turnoDelLead({ status: input.status, stage: input.stage, accionPendiente: false })
+  // El turno lo decide `turno.ts` — acá no se vuelve a decidir. `finalUrl` viaja
+  // tal cual: con `null` se afirma la rama «aprobada sin el link de Franco»; con
+  // `undefined` (superficie que no lo proyecta) esa rama no se afirma, como antes.
+  const turno = turnoDelLead({
+    status: input.status,
+    stage: input.stage,
+    finalUrl: input.finalUrl,
+    accionPendiente: false,
+  })
   return { proximaAccion: `${TEXTO_TURNO[turno].titulo} — ${detalle}`, accionable: false }
 }
 
@@ -499,12 +527,22 @@ function proximaAccionPara(
     case 'EN_REVISION':
       return esperaDe(input, 'está revisando tu demo')
     case 'APROBADA': {
+      // Sin el link permanente no hay envío que ofrecer: pedirlo es mandar al
+      // setter a una acción imposible, y la pantalla a la que lo manda ya le dice
+      // que le toca a Franco. El texto corto es EL MISMO que el envío muestra con
+      // el gate cerrado (`FALTA_LINK_PERMANENTE`) — no uno nuevo.
+      const linkPendiente = input.finalUrl === null
       // El envío del link vive en «Envío» (m15) desde el corte 5.6.
-      if (!input.demoEnviada && gateAbierto) {
+      if (!input.demoEnviada && gateAbierto && !linkPendiente) {
         return { proximaAccion: 'Demo aprobada — mandá el link al negocio', accionable: true }
       }
       if (!input.demoEnviada) {
-        return esperaDe(input, 'la demo está aprobada y el link sale cuando conteste')
+        return esperaDe(
+          input,
+          linkPendiente
+            ? FALTA_LINK_PERMANENTE
+            : 'la demo está aprobada y el link sale cuando conteste',
+        )
       }
       if (input.followUpVencido) {
         return { proximaAccion: 'Demo enviada — te toca un toque', accionable: true }
@@ -807,6 +845,37 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
     (a, b) => (a.snoozedUntil?.getTime() ?? 0) - (b.snoozedUntil?.getTime() ?? 0),
   )
   return { fijados, pausados, grupos }
+}
+
+/**
+ * El desglose POR TURNO de los leads EN VUELO (seguimiento + revisión +
+ * agendadas) — el contador que el panel de inicio muestra cuando no hay foco.
+ *
+ * Vive acá y no en la página porque es una CLASIFICACIÓN, no presentación: el
+ * panel armaba el `TurnoInput` a mano, campo por campo, y se olvidaba de
+ * `finalUrl`. Consecuencia medida: las demos aprobadas a las que Franco todavía
+ * no les cargó el link contaban como «esperando al negocio» —el negocio ya
+ * había contestado y no tenía nada que hacer—, y ningún chequeo podía verlo
+ * porque el conteo no era una función: era diez líneas dentro de un componente.
+ *
+ * Ahora recibe el `HomeLead` COMPLETO y arma el input él: la superficie no puede
+ * volver a olvidarse de un campo, y el conteo es afirmable en frío.
+ *
+ * `finalUrl` viaja tal cual (sin `?? null`): `undefined` sigue significando «esta
+ * superficie no lo proyecta», que es distinto de «no está cargado».
+ */
+export function contarEnVueloPorTurno(enVuelo: readonly HomeLead[]): Record<Turno, number> {
+  const conteo: Record<Turno, number> = { negocio: 0, franco: 0, setter: 0 }
+  for (const lead of enVuelo) {
+    const turno = turnoDelLead({
+      status: lead.status,
+      stage: lead.stage,
+      finalUrl: lead.finalUrl,
+      accionPendiente: lead.accionable,
+    })
+    conteo[turno] += 1
+  }
+  return conteo
 }
 
 /** Órdenes elegibles. `colas` = vista agrupada por defecto; el resto, lista plana. */

@@ -90,21 +90,17 @@ export function M5Contexto({
             {PLANTILLAS_FOLLOW_UP.length}
           </span>
         </span>
-        {/* Vencido y futuro decían LO MISMO («se retoma el DD/MM») aunque el
-            postergado vencido ya sea trabajo de ahora en el panel: el cron avisa
-            pero no reactiva. Mismo tratamiento ámbar que el toque vencido. */}
+        {/* La FECHA de la postergación la dice el chip de la cabecera
+            (`ManualHeader`, presente en TODAS las pantallas del lead): repetirla
+            acá era decir lo mismo dos veces a diez centímetros. Queda sólo lo
+            que el chip no dice — que un postergado vencido es trabajo de ahora
+            (ámbar, mismo tratamiento que el toque vencido). La rama sigue
+            existiendo aunque no pinte nada en el caso futuro: sin ella un
+            POSTERGADO caería al «Próximo toque», que es la fecha equivocada. */}
         {status === 'POSTERGADO' && reactivateAt ? (
           postergadoVencido ? (
-            <span className="text-amber-300/90">
-              Se venció el <span className="font-semibold">{formatFechaCorta(reactivateAt)}</span> —
-              retomá el contacto
-            </span>
-          ) : (
-            <span>
-              Postergado — vuelve el{' '}
-              <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
-            </span>
-          )
+            <span className="text-amber-300/90">Retomá el contacto</span>
+          ) : null
         ) : toqueVencido ? (
           <span className="text-amber-300/90">
             Toque vencido — era para el{' '}

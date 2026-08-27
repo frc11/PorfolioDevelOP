@@ -7252,3 +7252,151 @@ En los siete rojos **sí** pasaban `Le toca a Franco` y `Próximo toque el DD/MM
 - **La tarjeta de cartera no puede ver `finalUrl`, y por eso miente en un caso.** Un lead APROBADA **sin** link permanente muestra en el panel `Demo aprobada — mandá el link al negocio`, en cyan accionable, mandando a enviar un link que no existe; y su hermano con link cargado y sin respuesta dice `Le toca al negocio…`. Se ve en la captura `v2`: «Optica Central» (sin link) vs «Taller Muñoz» (con link). Es la MISMA raíz de este sprint, en una quinta superficie. **Costo de cerrarlo:** proyectar `finalUrl` en `HomeLeadInput` (flow.ts) + `buildHomeLeads` (home.ts) + partir la rama APROBADA de `proximaAccionPara` + el conteo por turno del panel (`setter/page.tsx:60-64`, que hoy tampoco lo pasa y por eso cuenta esas demos como «esperando al negocio»). Ningún invariante lo afirma hoy, así que **no se pondría en rojo** — pero cambia el copy y los contadores del panel para todo lead aprobado-sin-link: es otro objetivo, no éste.
 - **Referencia de plazo en las dos esperas: el dato NO existe.** No hay marca de cuándo entró a revisión (`OsLeadDossier` tiene `aprobadaAt` y `enviadaAt`, no un `enRevisionAt`) ni ningún SLA persistido. No se inventó ninguno. Cerrarlo pide un campo nuevo — fuera de las reglas de este sprint.
 - **«Correcciones» (mr) sigue sin estar en el rail de Construcción** (heredado del sprint anterior). Merece el barrido propio que el pedido nombra: todo destino que el producto nombra tiene que ser alcanzable desde donde se lo nombra.
+
+---
+
+## Sprint LA QUINTA SUPERFICIE — la tarjeta de cartera, el contador del panel, y el invariante que faltaba
+
+**Rama** `fix/quinta-superficie` sobre `fix/datos-viajan` (`b87bc821`) = `leados/v1-a-main` + callejones + municiones + vocabulario + datos-viajan.
+
+`dossier.finalUrl` —la URL permanente que Franco registra AL APROBAR— es la **condición** del envío: sin ella no hay link que mandar. La misma omisión apareció en cinco superficies, una por sprint: la superficie no proyectaba el campo, trataba «aprobada» como sinónimo de «lista para mandar», y le pedía al setter una acción imposible o contaba la demo como espera del negocio. Las cuatro primeras se cerraron a mano. Ésta es la quinta, y por eso el sprint cierra con un invariante.
+
+**El dato que hizo peligroso el sprint, verificado en Fase 0:** ningún chequeo del repo afirmaba la distinción. Se podía romper cualquiera de las cinco y todo seguía en verde — por eso la verificación fue operando la aplicación y por eso el invariante no era opcional.
+
+### El bug, reproducido en vivo sobre la base (antes de tocar código)
+
+Dos leads idénticos salvo el link, en la misma cartera y en la misma imagen. Medido contra el DOM, no leído de la captura:
+
+| | Optica Central (`finalUrl` null) | Taller Muñoz (con link) |
+|---|---|---|
+| sugerencia | `Demo aprobada — mandá el link al negocio` | idéntica |
+| acento de la card | cyan accionable | idéntico |
+| rótulo de orden | `La demo está lista para mandar` | idéntico |
+
+Y los grupos/contadores de la cartera real de 78 leads, con el mismo instrumento:
+
+```
+trabajar 49 · revision 10 · seguimiento 11 · agendadas 2 · archivo 5 · fijados 1 · pausados 0  → 78
+contador del panel (lo que page.tsx computaba): negocio 11 · franco 12  = 23 en vuelo
+```
+
+### Paso 1 — El censo de superficies que derivan del stage aprobado
+
+| # | Dónde | Qué deriva | ¿Leía `finalUrl`? |
+|---|---|---|---|
+| 1 | `m15-envio.tsx:98,110,120` | gate del envío + turno + el «todavía no» | **sí** (cerrada en 5.4/P11) |
+| 2 | `estado-manual.tsx` ← `manual/[paso]/page.tsx:133` | pantalla de espera: turno + causa | **sí** (cerrada en datos-viajan) |
+| 3 | `manual.ts:585` `posicionDe` case APROBADA | a qué pantalla aterriza (m15 vs espera) | **sí**, vía `gateEnvioDemo` |
+| 4 | `admin/leados/[leadId]/page.tsx:197` | el link permanente en el detalle | **sí** |
+| 5 | `flow.ts:530` `proximaAccionPara` case APROBADA | la sugerencia de la tarjeta + `accionable` | **NO** ← el copy |
+| 6 | `flow.ts:430` `grupoPara` case APROBADA | en qué cola de la cartera cae | **NO** ← la clasificación |
+| 7 | `flow.ts:467` `esperaDe` | el turno de toda espera del panel | **NO** (no lo pasaba) |
+| 8 | `setter/page.tsx:59-64` | el contador por turno del panel | **NO** ← el conteo |
+| 9 | `flow.ts:710` `trabajoTier` + `motivoOrden` | orden de la cola + su rótulo | **NO** (indirecto, vía el grupo) ← **la sexta** |
+
+**Copy vs clasificación, separados a propósito.** Copy = 5. Clasificación = 6, 8 y 9 — y la clasificación es la que se rompe en silencio: 8 no lo veía nadie porque el conteo no era una función, era diez líneas dentro de un componente.
+
+**La sexta apareció: es el criterio de ORDEN (#9).** `trabajoTier` mandaba un aprobado-sin-link al tier `CONTACTAR_CON_DEMO` (por encima de «evaluar» y del contacto viejo) y `motivoOrden` lo rotulaba `La demo está lista para mandar`. Se ve en la captura del antes, sobre Optica Central. Se cerró **sin tocar `trabajoTier`**: el rótulo se apaga solo fuera de la cola de trabajo, y el aprobado-sin-link ya no entra a esa cola. Fijado por el censo del invariante (`rotulo-orden`: el rótulo con link, `null` sin link).
+
+**Una séptima, LATENTE y no renderizada:** `paso.ts:165` `describirFoco` case APROBADA diría `Enviá el link de la demo` mirando sólo el gate del brief. Hoy es inofensiva porque su salida no llega a ninguna pantalla — el único consumidor (`posicionDe`) lee `paso.foco`/`paso.anchor` sólo en la rama EVALUADA, y para APROBADA llama a `gateEnvioDemo` directo. Se dejó **el código intacto** y se anotó la trampa en el propio archivo, con el puntero al invariante.
+
+**Lo que NO es superficie, medido:** `novedades.ts:57` (`DEMO_APROBADA` dice «Enviá el link ya») es un SNAPSHOT del momento de aprobar y su disparador —`aprobarRevision`— exige `finalUrl` por schema, así que no puede nacer mintiendo. `pipeline.ts` excluye APROBADA de las etapas de producción. `leados-ui.ts` y `flow-content.ts` son mapas de rótulo. `m13` y `m14` derivan de CONSTRUCCION, no de APROBADA.
+
+### Paso 2 — La tarjeta
+
+- `HomeLeadInput` gana `finalUrl` **opcional** (mismo criterio que `reactivateAt`): `undefined` = la superficie no lo proyecta y la derivación se comporta igual que antes; sólo `null` afirma «no está cargado». Opcional a propósito — obligatorio habría exigido tocar los fixtures de cuatro invariantes existentes, y este sprint no toca ninguno.
+- `buildHomeLeads` lo proyecta desde el dossier que la query ya traía: **cero queries nuevas**.
+- `esperaDe` le pasa `finalUrl` al turno, así que la mitad izquierda de la frase la sigue decidiendo `turno.ts` y no un `if` nuevo.
+- `proximaAccionPara` parte la rama: con link `Demo aprobada — mandá el link al negocio`; sin link `Le toca a Franco — todavía no cargó su link permanente`, no accionable.
+
+**El texto no se reescribió.** `GUIA_ENVIO.espera.aprobadaSinLink` ya lo decía bien y m15 ya lo mostraba, pero es una frase larga y la card no la aguanta (son setenta y seis). Se extrajo el fragmento ENFATIZADO de esa misma frase a `FALTA_LINK_PERMANENTE` (`turno.ts`, módulo hoja alcanzable desde `flow.ts` bajo ts-node) y ahora **la frase larga lo compone y la card lo usa**: una sola cadena, imposible que digan cosas distintas.
+
+**Se distinguen a simple vista, no por el texto chico:** al no ser accionable, la card sin link pierde el borde cyan, la barra de acento cyan y el fondo cyan de la píldora — y pierde también el rótulo de orden. Queda **más liviana**, no más cargada.
+
+### Paso 3 — Los contadores
+
+El bucle de `setter/page.tsx` pasó a `contarEnVueloPorTurno(enVuelo)` en `flow.ts`. No es cosmética: **recibe el `HomeLead` completo y arma el input él**, así que la superficie no puede volver a olvidarse de un campo — y el conteo pasa a ser afirmable en frío, que era la razón por la que nadie lo veía.
+
+Cartera real (78 leads), mismo instrumento antes y después:
+
+| | antes | después |
+|---|---|---|
+| trabajar | 49 | 47 |
+| revision | 10 | 10 |
+| seguimiento | 11 | 13 |
+| agendadas | 2 | 2 |
+| archivo | 5 | 5 |
+| fijados | 1 | 1 |
+| pausados | 0 | 0 |
+| **total** | **78** | **78** |
+| en vuelo | 23 | 25 |
+| contador del panel | negocio 11 · franco 12 | negocio 10 · franco 15 |
+
+**Los totales cierran**: 78 = 78. Se movieron **dos** leads de `trabajar` a `seguimiento` (`M0-GAL 29-m15-espera-sin-final-url` y el sembrado del sprint) y **uno** cambió de columna dentro del contador sin moverse de grupo (`QA-W Aprobada Gate Cerrado`, que ya estaba en seguimiento y se contaba como espera del negocio). 11+12 = 23 → 10+15 = 25; el +2 es exactamente el de los dos que entraron a en-vuelo.
+
+**El foco y el orden de la cola NO cambiaron**, medido con el mismo instrumento sobre las dos versiones: `QA-W Evaluada Gate Abierto` sigue siendo el foco y los primeros cinco de la cola son los mismos. Los dos que se movieron eran tier `CONTACTAR_CON_DEMO`, detrás de tres leads de tier `CONSTRUIR`.
+
+### Paso 4 — El invariante, para que no haya una sexta
+
+`src/lib/leados/aprobada-sin-link.invariant.ts` (`check:invariant:aprobada-sin-link`), en dos partes:
+
+**A · el censo congelado.** Diez derivaciones, cada una con su archivo, qué decide, y qué tiene que dar con y sin link. De cada una se afirma que **los dos casos difieren Y que cada uno da el resultado correcto** — que difieran solo no alcanza: dos ramas invertidas también difieren. Y una tercera aserción **anti-vacuidad**: si las dos expectativas de una entrada son iguales, falla — porque una entrada así pasaría en verde sobre una derivación que ignore `finalUrl` por completo, que es la forma exacta de los falsos verdes anteriores de este repo.
+
+**B · el guard de descubrimiento.** El censo de A es a mano, así que por sí solo no ve una superficie nueva. B congela el **conjunto de archivos** que pueden derivar algo de un lead aprobado —los que nombran el literal del stage, los que leen `finalUrl`, o los que llaman a los deciders— y falla si el conjunto cambió, en cualquier dirección. Un alta es un candidato a sexta; una baja es la distinción perdiéndose.
+
+**Demostrado fallando, tres veces:**
+
+| Reversión | Rojo |
+|---|---|
+| saco la lectura de `finalUrl` en `grupoPara` | `[grupo-cartera] … decidió "trabajar" en vez de "seguimiento" — lo mismo que decide con el link cargado.` |
+| saco `finalUrl` del contador | `[contador-panel] … decidió {"negocio":1,"franco":0,…} en vez de {"negocio":0,"franco":1,…}` |
+| agrego un archivo que compara contra el stage | `Aparecieron archivos que tocan la derivación del lead APROBADO y no están en el censo: · src/lib/leados/_sexta-superficie-demo.ts` |
+
+Los mensajes dicen **qué se rompió y por qué importa** («le pide al setter una acción que no puede hacer», «cuenta la demo como espera del negocio, que ya contestó»), no que una comparación falló.
+
+**Lo que este invariante NO puede afirmar:** que una superficie NUEVA distinga los dos casos. Sólo puede exigir que aparezca en el censo. La parte B es lo más cerca que se puede estar de eso sin parsear el árbol de tipos, y su modo de falla es ruido (un archivo que menciona el campo entra igual), nunca silencio.
+
+### Paso 5 — Verificación operando la aplicación
+
+Build de producción propio (`.next-quinta`) en `:3021`, worktree aislado. Capturas en `docs/proof-screenshots/quinta-superficie/` (gitignored):
+
+1. **Los dos aprobados lado a lado en la cartera, a 1440.** Antes: idénticos —mismo borde cyan, mismo rótulo de orden, misma píldora cyan— con el acento leído del DOM (la misma clase de acento cyan en los dos). Después: el sin-link queda neutro y sin rótulo de orden, el con-link conserva el cyan. `antes-cartera-1440`, `despues-cartera-1440`.
+2. **El contador del panel, antes y después, con los dos leads.** Un setter con sólo dos leads en vuelo, idénticos salvo el link: antes el contador daba `negocio 2 · franco 0` y las dos cards decían «Le toca al negocio»; después el panel muestra los dos chips, `1 esperando a Franco` y `1 esperando al negocio`. `despues-panel-1440`.
+3. **El que no tiene link no invita a mandarlo:** su card no es accionable y abrir el lead aterriza en la pantalla de espera (`/manual/espera`), no en el envío.
+4. **A 390** las dos cards y los dos chips entran con **0 px** de desborde horizontal (medido por `scrollWidth - clientWidth`, no a ojo). `despues-cartera-390`, `despues-panel-390`.
+
+### Tests
+
+`tests/setter/18-quinta-superficie.spec.ts` — 6 casos. Los **cuatro que cubren el bug** se demostraron fallando contra el código viejo (mismo build, spec nueva):
+
+| Test | Rojo contra el código viejo |
+|---|---|
+| 1a la tarjeta sin link | `Le toca a Franco — todavía no cargó su link permanente` no visible |
+| 1c distinguibles a simple vista | el acento del sin-link era el cyan accionable, igual que el del con-link |
+| 2a el contador | ídem 1a, sobre el lead en vuelo |
+| 3a la fecha una sola vez (microsprint) | 2 nodos visibles con la fecha en vez de 1 |
+
+Los otros dos (1b «con link sí manda a enviarlo», 1d «el aterrizaje del manual») pasan en las dos versiones **a propósito**: son el lado de control y la superficie que ya estaba cerrada. Se dice acá para no contarlos como si atraparan algo.
+
+Se afirma por `toBeVisible`, nunca por presencia. El acento se lee del DOM: el alto de un PNG no prueba un color. La fecha se formatea con `formatFechaCorta` —el mismo helper que pinta la UI— porque `es-AR` da `24/8` y no `24/08`: un regex de dos dígitos pasaba en verde sobre el bug, y de hecho pasó en el primer intento.
+
+### Microsprint
+
+En la pantalla de seguimiento la fecha de la postergación aparecía dos veces: el chip de la cabecera (`ManualHeader`, presente en todas las pantallas del lead) y el recuadro de cadencia de `M5Contexto`. Se sacó del recuadro. La rama **sigue existiendo** aunque no pinte nada en el caso futuro: sin ella un POSTERGADO caería a «Próximo toque», que es la fecha equivocada. Lo que el chip no dice —que un vencido es trabajo de ahora— quedó: `Retomá el contacto`, en ámbar.
+
+### Estado
+
+`npx tsc --noEmit` exit 0 · invariantes **46/46** (47 descubiertos, 1 excluido; antes eran 45/45 sobre 46 — el nuevo entró por descubrimiento y ninguno existente se tocó ni quedó en rojo) · `npm run build` verde · `test:setter` **89/89** (83 + 6 nuevos) · `test:leados` **25/25**. `prisma generate` no corresponde: el schema no se tocó.
+
+**Ninguna llave de datos se tocó**: ni un nombre de hard-check, ni un id de fase, ni un id de pantalla, ni un texto que se compare contra un blob guardado. `FALTA_LINK_PERMANENTE` es copy de presentación — nunca se compara contra nada persistido. **Ningún campo nuevo**: `finalUrl` ya existía y ya venía en la query. **Ninguna transición nueva ni modificada.** Ninguna operación sobre la base fuera de los fixtures de verificación, borrados al terminar.
+
+### Lo que queda para Franco
+
+- **Que la tarjeta no quede más cargada.** La card sin link tiene ahora **una línea menos** que antes (pierde el rótulo de orden) y ninguna de más. Pero son setenta y seis: lo cierra él mirando.
+- **Que el copy del caso sin link no suene a error.** No es un error: es que le toca a Franco. El texto es el mismo que el envío ya venía mostrando, así que la voz es la de siempre.
+
+### Fuera de scope, medido y anotado
+
+- **Una inconsistencia PREEXISTENTE que este sprint no crea ni arregla:** un APROBADA con la demo sin mandar, gate cerrado y toque vencido cae en `trabajar` (`flow.ts:433`, rama `followUpVencido`) con una sugerencia **no accionable** (`proximaAccionPara` corta antes, en `if (!input.demoEnviada)`). O sea: un lead en la cola de trabajo cuya card dice «esperá», que además puede ser el foco. Es otra raíz —grupo y accionabilidad derivados por dos escaleras independientes—, no la de este sprint. El caso del link **no** suma un ejemplo nuevo: la rama nueva de `grupoPara` lo saca de `trabajar` antes de llegar ahí.
+- **El admin no tiene superficie que le avise que aprobó y no cargó el link.** `pipeline.ts` excluye APROBADA de las etapas de producción y le da SLA infinito, así que esas demos no aparecen como atascos en su panorama. No es una superficie que mienta: es una que falta. Es otra cosa, y no se tocó.
+- **La única puerta de UI a APROBADA exige `finalUrl`** (`AprobarRevisionSchema`). El caso sin link entra por seeds y por tooling (`scripts/b2-verify-dossier.ts:266`) — o por filas viejas. En la cartera QA hay tres hoy.
