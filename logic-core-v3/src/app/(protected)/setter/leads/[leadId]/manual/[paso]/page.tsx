@@ -18,6 +18,7 @@ import {
   ConstruccionContexto,
   ConstruccionMunicion,
   ConstruccionRegistro,
+  ReentradaMunicion,
 } from '../_components/m-construccion'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
 import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
@@ -282,6 +283,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                         ficha={manual.ficha}
                       />
                     ),
+                    // El bloque copiable de arriba va a Claude Design y `mr` era
+                    // la única pantalla de Construcción que no nombraba la
+                    // herramienta: se copiaba sin acceso, sin qué esperar y —con
+                    // el link sin cargar— sin la salida.
+                    municion: <ReentradaMunicion />,
                     // 5.6 — El re-loop necesita SU transición: reabrir la
                     // construcción (RECHAZADA→CONSTRUCCION, action intacta del
                     // wizard). Sin esto, el chequeo final queda futuro para siempre.
@@ -304,7 +310,14 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                 : pantalla.id === 'm13'
                   ? {
                       contexto: <M13Contexto brief={manual.brief} />,
-                      municion: <M13Municion />,
+                      // Congelado = RECHAZADA con el borrador publicado: el mismo
+                      // estado que el registro dibuja read-only. Sin esto la
+                      // munición mandaba a pegar la URL en un campo inexistente.
+                      municion: (
+                        <M13Municion
+                          congelado={manual.stage === 'RECHAZADA' && Boolean(manual.draftUrl)}
+                        />
+                      ),
                       captura: (
                         <M13Registro
                           leadId={leadId}

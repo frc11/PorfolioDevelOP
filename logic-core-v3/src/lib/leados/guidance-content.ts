@@ -632,6 +632,23 @@ export const GUIA_DRAFT = {
   },
 } satisfies PasoGuia
 
+/**
+ * Los mismos pasos, para m13 con el borrador CONGELADO por un rechazo. El último
+ * de `GUIA_DRAFT.pasos` dice «pegala acá abajo», y en RECHAZADA abajo no hay
+ * campo: el motor guarda el link SOLO en CONSTRUCCION (`saveOwnedDraftUrl`), así
+ * que esa pantalla muestra el borrador congelado y el botón de reabrir. La
+ * munición prometía un campo que no existe — el mismo callejón que P3 cerró en
+ * el registro, un piso más arriba.
+ *
+ * Los tres pasos previos se DERIVAN de la lista viva, no se copian: si Franco
+ * edita el instructivo, esta variante lo sigue sola. Solo cambia el destino de
+ * la URL, que es lo único que el estado congelado desmiente.
+ */
+export const GUIA_DRAFT_PASOS_CONGELADO: readonly string[] = [
+  ...GUIA_DRAFT.pasos.slice(0, -1),
+  'Copiá la URL que te da Netlify — el campo para pegarla se abre cuando reabrís la construcción.',
+]
+
 export const GUIA_OPENER = {
   titulo: 'El opener (primer contacto)',
   intro: [

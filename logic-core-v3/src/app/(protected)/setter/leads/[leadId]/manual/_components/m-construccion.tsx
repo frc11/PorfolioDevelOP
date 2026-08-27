@@ -136,6 +136,18 @@ export function ConstruccionMunicion({ fases }: { fases: readonly FaseId[] }) {
   )
 }
 
+/**
+ * Munición de la REENTRADA (M-R). `mr` no llenaba este slot: servía el bloque
+ * copiable «Bloque para Claude Design» (su contexto, el mismo de mc1/mc2) sin la
+ * herramienta que lo recibe — sin lanzador, sin qué-le-das/qué-te-devuelve y, con
+ * el link todavía sin cargar, sin la salida. El bloque se copiaba y no había a
+ * dónde llevarlo. Es la MISMA pieza de las dos pantallas de Construcción: mr
+ * pertenece a esa fase y se corrige en la misma herramienta.
+ */
+export function ReentradaMunicion() {
+  return <ToolGuide id="claudeDesign" />
+}
+
 /** Registro: UN tilde de auto-reporte por fase de la pantalla (mismo camino que
  * el checklist del wizard, sin gatear nada) + las capas que el corte 5.6 trae
  * del wizard: el CTA «Arrancar construcción» mientras el dossier sigue en BRIEF

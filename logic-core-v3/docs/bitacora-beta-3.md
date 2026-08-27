@@ -6739,3 +6739,310 @@ Que los textos nuevos suenen como el resto del producto — ningún test lo vali
 mensaje del interruptor, el párrafo del borrador congelado, y las dos formas del enlace al chequeo.
 Y que el recorrido completo, de punta a punta, ya no tenga callejones — eso se prueba recorriéndolo,
 y es de la corrida de comportamiento pendiente.
+
+---
+
+## Sprint MUNICIONES — qué se pliega, qué no, y qué promete cada título — 2026-08-26
+
+Base: `fix/callejones` @ `a2004edb` — que es `leados/v1-a-main` @ `d167df16` + un commit. Rama de
+trabajo `fix/municiones`, worktree propio en `C:/tmp/wt-municiones`, distDir `.next-municiones`,
+puerto 3021. No se pusheó nada.
+
+### Fase 0 — por qué la base no fue `leados/v1-a-main` a secas
+
+El pedido dice «base: `leados/v1-a-main`, el único árbol con el gate», y después pide cerrar **los
+dos pendientes que dejó P3**. Los dos pendientes son de P3: uno vive en la munición de la pantalla
+que P3 arregló (m13 en RECHAZADA), el otro en el toast del formulario que P3 tocó. Sobre
+`leados/v1-a-main` esos arreglos no existen todavía.
+
+`fix/callejones` es `leados/v1-a-main` + 1 commit, cero atrás — un superconjunto estricto, con el
+mismo gate y los mismos 44 invariantes. Basarse ahí no descarta nada de la base pedida y es la única
+manera de cerrar pendientes de un sprint sin el sprint. Se declara acá; la bitácora de P3, además,
+deja los dos pendientes escritos palabra por palabra en su sección de hallazgos fuera de scope.
+
+Terreno, antes de tocar nada:
+
+- `git status --porcelain` en el checkout principal: solo `?? docs/` — **cambios ajenos, no se
+  tocaron**. `git stash list`: dos stashes viejos (`redesign/home`, `fix/home-sanidad`), ajenos.
+- Trece worktrees vivos; ninguno en `/c/tmp/wt-municiones`. Ningún puerto 300x–302x escuchando: no
+  había otra sesión sirviendo.
+- `npx tsc --noEmit` → **exit 0**.
+- `npm run check:invariants` → **descubiertos 45 · excluidos 1 · corridos 44 · pasaron 44 ·
+  fallaron 0**.
+- `npm run test:leados` → **25 passed**.
+- `npm run build` (aislado) → **exit 0**; `test:setter` (suite completa) → **65 passed**.
+
+---
+
+### Paso 1 · El censo
+
+Veinte bloques de munición en las once pantallas del manual, más las dos piezas compartidas que los
+dibujan. Las líneas son las de la base (`a2004edb`).
+
+| Pantalla | Título visible | Tipo | ¿Plegado hoy? | ¿El título promete? | ¿Contiene una salida? |
+|---|---|---|---|---|---|
+| m1 | «Ver ejemplo de una ficha bien hecha» (`ejemplo-ideal.tsx:80`) | Ejemplo | **Sí** | Sí — el estándar | No |
+| m2 | «Chat de evaluación (Sonnet)» + píldora (`tool-guide.tsx:60-65`) | Herramienta | No | — (no es plegable) | — |
+| m2 | «Qué es y cómo se usa» (`tool-guide.tsx:68`) | Fundamento | **Sí** | **NO** | **SÍ — la del link pendiente** |
+| m2 | «Qué se mira en la evaluación (y por qué importa)» (`m2-evaluador.tsx:89`) | Fundamento | No | Sí | No |
+| m4 | «Gem de outreach» + píldora | Herramienta | No | — | — |
+| m4 | «Qué es y cómo se usa» | Fundamento | **Sí** | **NO** | **SÍ** |
+| m4 | «Canal Instagram — hoy» + aviso (`canal-seguridad.tsx:29-41`) | Guardrail | No | — | No |
+| m4 | «Disciplina de canal y ritmo de arranque» (`canal-seguridad.tsx:44`) | Fundamento | **Sí** | Sí | No |
+| m5 | «Mensaje base del toque N de 3» (`m5-seguimiento.tsx:163`) | Material | No | Sí | No |
+| m5 | «Canal Instagram — hoy» + su plegable | Guardrail / Fundamento | parcial | Sí | No |
+| m5 | «No cotizás ni negociás» + guion (`guardrail-rol.tsx:28`) | Guardrail / Material | No | Sí | No |
+| m5 | «¿Te tiraron una objeción? Armá el input del Gem» (`m5-seguimiento.tsx:180`) | Ejemplo + herramienta | **Sí** | Sí | **NO, y le falta** |
+| m6 | «Gem de diseño» + píldora | Herramienta | No | — | — |
+| m6 | «Qué es y cómo se usa» | Fundamento | **Sí** | **NO** | **SÍ** |
+| mc1/mc2 | «Guía preliminar — en validación» (`badge-provisorio.tsx`) | Guardrail | No | — | No |
+| mc1/mc2 | Los 3 bloques de fase + sus prompts (`m-construccion.tsx:76-117`) | Instructivo + Material | No | Sí | No |
+| mc1/mc2 | «Claude Design» + píldora | Herramienta | No | — | — |
+| mc1/mc2 | «Qué es y cómo se usa» | Fundamento | **Sí** | **NO** | **SÍ** |
+| **mr** | **— sin zona de munición** (`page.tsx:273-303`) | — | — | — | **NO, y le falta** |
+| m13 | Encuadre de publicar (`GUIA_DRAFT.intro`) | Fundamento | No | — | No |
+| m13 | «Netlify Drop» + «Abrir Netlify Drop» | Herramienta | No | — | — (tiene link) |
+| m13 | «Qué es y cómo se usa» | Fundamento | **Sí** | **NO** | No (sin pared) |
+| m13 | Los 4 pasos (`GUIA_DRAFT.pasos`) | Instructivo | No | — | No — **pero miente en RECHAZADA** |
+| m14 | «¿Por qué importa?» (`teach-panel.tsx:135`) | Fundamento | **Sí** | **NO** | No |
+| m14 | «Ver ejemplo de un chequeo final bien hecho» (`ejemplo-ideal.tsx:112`) | Ejemplo | **Sí** | Sí | No |
+| m15 | El porqué del momento (`GUIA_ENVIO.intro`) | Fundamento | No | — | No |
+| m16 | El how-to del paso (`GUIA_AGENDA.intro` + `pasos`) | Fundamento + Instructivo | No | — | No |
+
+`espera`, `revision` y `archivo` son pantallas de estado: no tienen zona de munición. No entran.
+
+**La columna que más importa.** El caso conocido no era el único, pero tampoco eran muchos: la salida
+es **una sola**, y vive en un solo lugar del código (`tool-guide.tsx:73-77`). Lo que se multiplicaba
+era dónde se renderizaba plegada.
+
+### Cuántas salidas estaban plegadas, y dónde
+
+**Cinco pantallas.** `m2` (Chat de evaluación), `m4` (Gem de outreach), `m6` (Gem de diseño), `mc1` y
+`mc2` (Claude Design): las cuatro herramientas cuyo `url` sigue en `null` en el registro. En las
+cinco el texto estaba en el DOM, dentro de un `<details>` cerrado titulado «Qué es y cómo se usa».
+
+**Y dos pantallas donde la salida no existía en absoluto**, que es peor que plegada:
+
+- **m5** — la píldora sale suelta («Abrí el Gem para pegarlo:») dentro del bloque de objeciones, sin
+  `ToolGuide` y por lo tanto sin salida de ningún tipo.
+- **mr** — no llena el slot de munición. Sirve el bloque copiable de Claude Design (su contexto, el
+  mismo de mc1/mc2) y ahí termina: ni lanzador, ni qué esperar, ni salida.
+
+Total: **siete lugares del recorrido donde el setter puede chocar con la pared, y cero donde la
+respuesta se leía sin abrir un plegable.**
+
+### La cuarta categoría — tres, en realidad
+
+Tres familias del censo no entran limpio en salida / ejemplo / fundamento, y forzarlas sería mentir:
+
+1. **Instructivo** — el how-to mecánico numerado de la tarea: los 4 pasos de m13, los de m16, los
+   items de cada fase de Construcción. No es un porqué, no es un modelo de resultado y no destraba
+   nada: es la secuencia de la tarea misma.
+2. **Material** — lo que se *lleva* a la herramienta, no lo que se lee: los `CopyBlock` (ficha,
+   brief, construcción, objeciones), la plantilla del toque de m5, los prompts de diseño, el guion
+   fijo de precio. Es carga útil, no explicación.
+3. **Guardrail** — un límite vivo: el contador de DMs de `CanalSeguridad` (cuyo texto cambia con el
+   número), la regla de rol, y el badge «Guía preliminar — en validación», que es un descargo sobre
+   la madurez de la guía misma.
+
+Ninguna de las tres está plegada hoy, así que la regla «una salida nunca se pliega» no las toca. La
+regla del título sí aplica a los plegables que viven adentro — y el único que hay
+(`CanalSeguridad`) ya cumplía.
+
+---
+
+### Paso 2 · Las salidas, a la vista
+
+**Una sola fuente para las siete pantallas.** La línea sale de `ToolGuide` a un componente propio,
+`SalidaLinkPendiente`, que se renderiza **fuera de todo plegable** y devuelve `null` cuando la
+herramienta sí tiene link. Así la salida no puede quedarse atrás de la píldora en ninguna pantalla
+nueva: quien pone la píldora pone la salida, porque las dos vienen del mismo módulo.
+
+- **Las cinco pantallas del `ToolGuide`** — la salida pasó a la cabecera del bloque, debajo del
+  nombre y del lanzador. Sigue siendo **una línea**, no un párrafo: el «qué es / qué le das / qué te
+  devuelve» se queda plegado, que es exactamente lo que el sprint pedía cuando el bloque queda largo.
+- **m5** — recibe la misma aclaración que m4, al lado de su píldora. Con una precisión que el
+  censo obliga a declarar: en m5 la píldora **ya vivía dentro** del plegable de objeciones, y eso
+  está bien (una objeción es un caso, no el estado normal del toque) y ese plegable **sí** promete lo
+  que hay adentro. Lo que se garantiza —y lo que el test fija— es que la salida no quede **más
+  adentro que la pared que destraba**: sin abrir nada no se ve ninguna de las dos; al abrir, se ven
+  las dos.
+- **mr** — estrena zona de munición con el mismo `ToolGuide id="claudeDesign"` de mc1/mc2
+  (`ReentradaMunicion`). Ahí queda nombrada la herramienta a la que va el bloque copiable de arriba,
+  con su acceso y con su salida.
+
+Un matiz sobre `mr`, para no dejar el diagnóstico más grande de lo que es: el bloque **sí** llevaba
+el nombre en su título («Bloque para Claude Design»). Lo que no había era la herramienta: ni acceso,
+ni qué esperar, ni salida. El bloque se copiaba y no había a dónde llevarlo.
+
+### Paso 3 · Los títulos que prometen
+
+Dos plegables tenían título genérico. Los dos ahora dicen qué hay adentro, con la gramática del
+estándar que ya existía en el producto («Ver ejemplo de una ficha bien hecha»):
+
+| Dónde | Antes | Ahora |
+|---|---|---|
+| `ToolGuide` — las 5 pantallas de herramienta | «Qué es y cómo se usa» | «Ver para qué sirve, qué le das y qué te devuelve» |
+| `TeachPanel` plegado — m14 | «¿Por qué importa?» | «Por qué marcar en verde sin mirar vuelve como rechazo» |
+
+El título nuevo del `ToolGuide` nombra sus tres párrafos, uno por uno. El de m14 dice lo que dicen
+sus dos párrafos (`GUIA_SELF_CHECK.porque`): que un check falso vuelve como rechazo y enfría al
+negocio.
+
+`TeachPanel` gana un prop `titulo` con el valor de siempre por default — su otro uso (m5,
+`collapsible={false}`) no es un plegable sino un encabezado dentro de uno que ya promete, y queda
+igual. Los cuatro plegables que ya prometían no se tocaron: los dos ejemplos, la disciplina de canal
+y el bloque de objeciones.
+
+### Paso 4 · Los dos pendientes de P3
+
+**m13 con el lead rechazado.** El cuarto paso decía «Copiá la URL que te da Netlify y pegala acá
+abajo», y en RECHAZADA abajo no hay campo: el motor guarda el link **solo** en CONSTRUCCION
+(`saveOwnedDraftUrl`), así que el registro muestra el borrador congelado y el botón de reabrir. Ahora
+`M13Municion` recibe `congelado` y en ese estado el último paso dice «Copiá la URL que te da Netlify
+— el campo para pegarla se abre cuando reabrís la construcción». Los otros tres pasos **se derivan**
+de la lista viva (`GUIA_DRAFT.pasos.slice(0, -1)`), no se copian: si Franco edita el instructivo, la
+variante lo sigue sola. Publicar en Netlify se hace igual, antes o después del rechazo.
+
+**El aviso de guardado.** Un toast no lleva a ninguna parte y se va solo a los pocos segundos:
+nombrar ahí el chequeo final era nombrar un destino sin poder enlazarlo. Se resolvió por el lado de
+«o lo enlaza», no por el de esconderlo: el acuse pasa a decir lo que pasó («Borrador guardado.») y
+el paso siguiente se mudó al panel que ese mismo guardado deja en pantalla, donde **sí** puede ser un
+enlace — «Ya podés pasar *el chequeo final*», con el `EnlaceChequeoFinal` que P3 dejó como fuente
+única del salto y de su gate. No se inventó un formato: el repo no usa acciones en toasts en ninguno
+de sus 92 llamados.
+
+---
+
+### Paso 5 · Verificación operando la aplicación
+
+Build de producción en `.next-municiones`, `next start -p 3021`, sesión de `setter-qa@develop.test`,
+y los leads QA-W que **ya existían** en la branch Neon dev — no se sembró nada. Se midió en los dos
+anchos, 1440 y 390, sobre la zona de Munición de cada pantalla:
+
+1. **La salida se lee sin abrir nada** en m2, m4, m6, mc1, mc2 y mr — las seis, en los dos anchos,
+   con `details[open] === 0` en la zona: la pantalla se leyó tal como carga. En 390 la línea envuelve
+   a dos renglones (36 px de alto) y termina en x=344 sobre un viewport de 390: **cero desborde
+   horizontal** en las doce mediciones.
+2. **m5 y m4 dicen lo mismo ante el mismo problema** — misma línea, misma fuente. En m5, medido
+   antes y después de abrir el plegable de objeciones: antes, ni píldora ni salida visibles; después,
+   las dos. Nunca una sin la otra.
+3. **mr nombra su herramienta** — «Claude Design», con lanzador, con salida y con el plegable que
+   promete.
+4. **m13 en RECHAZADA no promete un campo que no existe** — el paso 4 dice «Copiá la URL que te da
+   Netlify — el campo para pegarla se abre cuando reabrís la construcción», y el registro muestra el
+   badge «Borrador congelado por el rechazo» con el botón de reabrir. En CONSTRUCCION el paso 4
+   vuelve a ser «…y pegala acá abajo»: la variante es del estado, no un reemplazo.
+5. **Ningún título plegado sigue siendo genérico** — en m14 los dos plegables son «Por qué marcar en
+   verde sin mirar vuelve como rechazo» y «Ver ejemplo de un chequeo final bien hecho», y
+   «¿Por qué importa?» no aparece en la pantalla.
+
+Y el panel del borrador publicado (m13 en CONSTRUCCION) dice «Ya podés pasar **el chequeo final**»,
+con `href` a `/manual/m14`: el pendiente 2 cerrado, y la cobertura de P3 sobre esa mención intacta.
+
+**Una trampa de medición, anotada.** El primer sondeo del estado congelado dio un falso negativo:
+`innerText` sobre el `main` no devolvía el texto del badge. Con `textContent` aparece. Es el mismo
+patrón ya conocido —`innerText` no devuelve contenido que el layout no está pintando— y vale
+recordarlo: medir copy con `innerText` reporta como ausente lo que está presente.
+
+### El test, demostrado fallando contra el código viejo
+
+`tests/setter/16-municiones-salida.spec.ts` — diez pruebas contra el build de producción. Se
+revirtió **solo** el código (`git checkout -- src/`, el spec quedó), se reconstruyó y se corrió:
+
+    8 failed
+      x m2  · la salida del link pendiente se lee sin abrir nada
+      x m6  · la salida del link pendiente se lee sin abrir nada
+      x mc1 · la salida del link pendiente se lee sin abrir nada
+      x mc2 · la salida del link pendiente se lee sin abrir nada
+      x m4  · la salida del link pendiente se lee sin abrir nada
+      x mr  · la salida del link pendiente se lee sin abrir nada
+      x m5  · la salida nunca queda más adentro que la pared que destraba
+      x m13 congelado · la munición deja de mandar a un campo que no existe
+    2 passed
+
+Los mensajes dicen exactamente el hallazgo. En las cinco del `ToolGuide`:
+
+    Error: m2 dice qué hacer con el link pendiente
+    expect(locator).toBeVisible() failed
+    Locator: getByText('pedíselo a Franco y lo vas a poder abrir desde acá')…
+    Expected: visible
+
+En `mr`, un paso antes — no hay ni pared:
+
+    Error: mr muestra la pared
+    Locator: getByText('Link pendiente')… Expected: visible
+
+Y en m13 congelado, el texto recibido trae el paso 4 entero: «…Copiá la URL que te da Netlify y
+pegala acá abajo. Registro Borrador congelado por el rechazo…».
+
+**Por qué se afirma por visibilidad y no por presencia.** El texto plegado dentro de un `<details>`
+cerrado **existe en el DOM** — así estaba antes del sprint. Un `toContainText` habría pasado en verde
+sobre el bug exacto que este sprint arregla. Solo `toBeVisible()` distingue «está» de «se lee».
+
+**Las dos que pasan en rojo son a propósito.** Una es el guard del registro: afirma contra
+`herramientas.ts` que las cuatro URLs siguen en `null`, y su trabajo es que el día que Franco las
+cargue el spec **falle ruidoso** pidiendo actualizarse, en vez de pasar en verde sobre una pared que
+ya no está — sin píldora no hay salida que mostrar, y «no la encontré» se leería igual que «está
+bien». La otra es el contra-ejemplo de m13 con Netlify Drop, que **sí** tiene link: prueba que la
+salida es condicional y no una línea que se agregó a todas las pantallas por las dudas.
+
+### Cierre
+
+- `npx tsc --noEmit` → **exit 0**.
+- `npm run check:invariants` → **descubiertos 45 · excluidos 1 · corridos 44 · pasaron 44 ·
+  fallaron 0**. Los mismos 44 de la base: este sprint no agrega ni modifica invariantes.
+- `npm run test:leados` → **25 passed**.
+- `npm run build` → **exit 0**.
+- `test:setter` (suite completa, build de producción en 3021) → **75 passed**: las 65 previas más
+  las 10 nuevas.
+- `prisma generate`: no corresponde — el schema no se tocó.
+
+**Dos aserciones de test fijaban los títulos viejos y se actualizaron.** No es limpieza de paso: es
+la consecuencia directa del Paso 3, y la suite la encontró sola — la primera corrida completa dio
+**1 failed**, `01-flow.spec.ts:229`, que afirmaba `getByText('¿Por qué importa?')` sobre m14. Se
+cambió por el título nuevo, sin debilitar la aserción (sigue exigiendo que el teach esté visible).
+La segunda, `tests/qa-persona/corrida-1-novato-frio.spec.ts:104`, **manejaba** el plegable por
+`getByText('Qué es y cómo se usa')`: no está en la batería de cierre del setter, así que no habría
+gritado — habría quedado un selector muerto esperando a la próxima corrida de persona. Se actualizó
+igual. Ninguna otra referencia a los dos títulos viejos quedó en `tests/`, `scripts/` ni `src/`
+fuera de los comentarios que explican el cambio.
+
+**Ninguna cadena que sea llave de datos se tocó.** `git status` sale vacío sobre `flow.ts`
+(los `HARD_CHECKS`), `contracts.ts` (los `FASE_IDS`), `manual.ts` (los `PANTALLA_IDS` y
+`PANTALLA_DE_FASE`), `dossier-stage.ts` (las transiciones) y `prisma/schema.prisma`. Y **ningún
+invariante se puso en rojo**: los 44 pasan, incluidos `self-check`, `progreso`, `manual`, `pantallas`
+y `dossier-stage`, que son los que gritarían si un nombre de check o un id de fase se hubiera movido.
+
+`git status` también sale vacío sobre `.github/`, `scripts/run-invariants.mjs`, `package.json` y
+todos los `*.invariant.ts`: el gate y el workflow, intactos. Ninguna transición nueva ni modificada,
+ningún cambio de schema, ninguna operación sobre la base de datos fuera del seed/teardown que la
+propia suite hace al correr.
+
+### Desvíos y hallazgos fuera de scope
+
+- **La base fue `fix/callejones`, no `leados/v1-a-main`** — ver Fase 0. Es superconjunto estricto.
+- **El rail «Tus herramientas» también muestra «pendiente» sin salida** (`tools-rail.tsx:41-43`). No
+  se tocó: no es un bloque de munición —es el panel persistente del rail— y su presentación es otra
+  (una etiqueta, no la píldora). Anotado.
+- **El diagnóstico de `mr` era un poco más grande que el hallazgo** — el bloque sí nombraba «Claude
+  Design» en su título; lo que faltaba era la herramienta entera. Se declara arriba.
+- **No se pusheó a main.** `main` local sigue en `17727117`, igual que `origin/main`.
+
+### Lo que este sprint NO resuelve
+
+**Las cuatro herramientas siguen sin URL** — `evaluador`, `gemDiseno`, `claudeDesign` y `gemOutreach`
+siguen con `url: null` en `herramientas.ts`. Este sprint hace que el setter sepa qué hacer cuando
+choca con esa pared; no saca la pared. Sacarla son cuatro campos, y son de Franco.
+
+**Y no unifica el vocabulario** — eso es el sprint siguiente. Acá solo se decidió qué se pliega y qué
+título lleva.
+
+### Lo que queda para la verificación humana
+
+- **Que los títulos nuevos suenen como el resto del producto.** Ningún test lo valida. Son dos: «Ver
+  para qué sirve, qué le das y qué te devuelve» y «Por qué marcar en verde sin mirar vuelve como
+  rechazo». Lo cierra Franco mirando.
+- **Que la salida sirva de verdad** — o sea, que un setter que se traba encuentre qué hacer. El test
+  prueba que se lee sin abrir nada; que alcance para destrabarlo solo se prueba con alguien
+  recorriéndolo.

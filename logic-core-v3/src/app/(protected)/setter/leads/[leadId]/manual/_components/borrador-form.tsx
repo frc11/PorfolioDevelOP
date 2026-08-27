@@ -70,7 +70,11 @@ export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: s
         toast.error(result.error)
         return
       }
-      toast.success('Borrador guardado — ahora pasá el chequeo final.')
+      // El acuse dice lo que PASÓ. Nombrar acá el chequeo final era nombrar un
+      // destino sin poder enlazarlo: un toast no lleva a ninguna parte y se va
+      // solo a los pocos segundos. El paso siguiente vive abajo, en el panel que
+      // este mismo guardado deja en pantalla — nombrado Y enlazado.
+      toast.success('Borrador guardado.')
       setEditando(false)
       setConfirmoCarga(false)
       router.refresh()
@@ -94,9 +98,9 @@ export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: s
           {draftUrl}
         </a>
         <p className="text-xs leading-relaxed text-zinc-500">
-          Si rehiciste la demo, volvé a publicar en Netlify Drop y actualizá el link acá —{' '}
-          <EnlaceChequeoFinal leadId={leadId} draftUrl={draftUrl} /> se hace siempre sobre el
-          borrador vigente.
+          Ya podés pasar <EnlaceChequeoFinal leadId={leadId} draftUrl={draftUrl} />. Si rehiciste
+          la demo, volvé a publicar en Netlify Drop y actualizá el link acá — se chequea siempre
+          el borrador vigente.
         </p>
         <Button
           variant="ghost"

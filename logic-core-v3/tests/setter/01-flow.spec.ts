@@ -225,8 +225,12 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     // El chequeo final vive en m14 (se habilita con el borrador publicado).
     await page.goto(pantalla(leadId, 'm14'), { waitUntil: 'domcontentloaded' })
 
-    // Self-check: TeachPanel + ejemplo presentes.
-    await expect(firstVisible(page.getByText('¿Por qué importa?'))).toBeVisible()
+    // Self-check: TeachPanel + ejemplo presentes. El rótulo del teach dejó de ser
+    // «¿Por qué importa?» (genérico, igual en cualquier pantalla): ahora nombra lo
+    // que hay adentro, como el ejemplo de la línea de abajo ya hacía.
+    await expect(
+      firstVisible(page.getByText('Por qué marcar en verde sin mirar vuelve como rechazo')),
+    ).toBeVisible()
     await expect(firstVisible(page.getByText('Ver ejemplo de un chequeo final bien hecho'))).toBeVisible()
 
     // P7 · los dos grupos están rotulados y separados en la pantalla.

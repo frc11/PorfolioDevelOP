@@ -74,7 +74,15 @@ export function M14Contexto({
 export function M14Municion() {
   return (
     <div className="space-y-4">
-      <TeachPanel id="selfCheck" />
+      {/* El rótulo dice QUÉ vas a entender adentro, no que adentro hay un porqué:
+          «¿Por qué importa?» era el mismo título genérico en cualquier pantalla y
+          no prometía nada. El de acá es exactamente lo que dicen sus dos párrafos
+          (`GUIA_SELF_CHECK.porque`). Mismo estándar que el ejemplo de abajo, que
+          ya lo cumplía: «Ver ejemplo de un chequeo final bien hecho». */}
+      <TeachPanel
+        id="selfCheck"
+        titulo="Por qué marcar en verde sin mirar vuelve como rechazo"
+      />
       <SelfCheckEjemplo />
     </div>
   )

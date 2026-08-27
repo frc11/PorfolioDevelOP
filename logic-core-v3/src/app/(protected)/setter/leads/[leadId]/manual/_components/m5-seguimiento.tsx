@@ -14,7 +14,10 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
+import {
+  HerramientaLauncher,
+  SalidaLinkPendiente,
+} from '@/app/(protected)/setter/_components/tool-guide'
 import { resultadoEtiqueta, resultadoTono } from '../../_components/lead-timeline.helpers'
 import { SeguimientoForm } from './seguimiento-form'
 
@@ -186,9 +189,18 @@ export function M5Municion({
             instruccion="Pegale la objeción al final. El Gem deflecta a reunión: nunca cotiza."
             texto={buildObjecionInputBlock(lead)}
           />
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
-            <HerramientaLauncher id="gemOutreach" />
+          {/* La misma salida que m4 da al lado de su píldora. Acá faltaba, y es
+              el peor momento para chocar mudo contra «Link pendiente»: al setter
+              le acaban de tirar una objeción. La píldora vive dentro de este
+              plegable —la objeción es un caso, no el estado normal del toque—,
+              así que la salida va a su lado: nunca más adentro que la pared que
+              destraba. */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
+              <HerramientaLauncher id="gemOutreach" />
+            </div>
+            <SalidaLinkPendiente id="gemOutreach" />
           </div>
         </div>
       </details>

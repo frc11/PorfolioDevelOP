@@ -2,7 +2,7 @@ import { ExternalLink } from 'lucide-react'
 import type { DossierStage } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import type { Brief } from '@/lib/leados/contracts'
-import { GUIA_DRAFT } from '@/lib/leados/guidance-content'
+import { GUIA_DRAFT, GUIA_DRAFT_PASOS_CONGELADO } from '@/lib/leados/guidance-content'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { BriefResumen } from '../../_components/brief-form'
@@ -45,8 +45,18 @@ export function M13Contexto({ brief }: { brief: Brief | null }) {
   )
 }
 
-/** Munición: Netlify Drop + los pasos para exportar y publicar el borrador. */
-export function M13Municion() {
+/**
+ * Munición: Netlify Drop + los pasos para exportar y publicar el borrador.
+ *
+ * `congelado` = el rechazo dejó el borrador fijo (RECHAZADA con link publicado).
+ * El instructivo por defecto termina en «pegala acá abajo» y ahí abajo, en ese
+ * estado, no hay campo: el registro muestra el borrador congelado y el botón de
+ * reabrir. La pantalla mentía sobre lo que se puede hacer — el último paso pasa a
+ * decir dónde aparece el campo de verdad (`GUIA_DRAFT_PASOS_CONGELADO`). Los
+ * otros tres no cambian: publicar en Netlify se hace igual, antes o después.
+ */
+export function M13Municion({ congelado }: { congelado: boolean }) {
+  const pasos = congelado ? GUIA_DRAFT_PASOS_CONGELADO : GUIA_DRAFT.pasos
   return (
     <div className="space-y-4">
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
@@ -54,7 +64,7 @@ export function M13Municion() {
       </p>
       <ToolGuide id="netlifyDrop" />
       <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
-        {GUIA_DRAFT.pasos.map((paso, index) => (
+        {pasos.map((paso, index) => (
           <li key={paso} className="flex gap-2">
             <span className="font-semibold text-cyan-300/80">{index + 1}.</span>
             {paso}
