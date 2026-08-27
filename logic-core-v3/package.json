@@ -98,6 +98,7 @@
     "check:invariant:notifications-brevo": "npx tsx src/modules/chatbot/server/notifications/notifications-brevo.invariant.ts",
     "check:invariant:mask-secret": "npx tsx src/lib/mask-secret.invariant.ts",
     "check:invariant:cron-secret": "npx tsx src/lib/cron/cron-secret.invariant.ts",
+    "check:invariant:pausa-dia": "cross-env TZ=UTC npx tsx \"src/app/(protected)/setter/_actions/pausa-dia-ar.invariant.ts\"",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",

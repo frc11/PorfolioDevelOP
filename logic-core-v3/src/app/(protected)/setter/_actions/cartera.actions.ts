@@ -22,7 +22,7 @@ import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import { getOwnedLead } from '@/lib/leados/ownership'
 import { upsertSetterMeta } from '@/lib/leados/setter-meta'
 import { LeadIdSchema } from './dossier.schemas'
-import { NotaSchema, PinSchema, SnoozeSchema } from './cartera.schemas'
+import { finDePausaAR, NotaSchema, PinSchema, SnoozeSchema } from './cartera.schemas'
 
 function mapError(error: unknown, fallback: string): ActionResult<never> {
   if (error instanceof Error && error.message === 'Unauthorized') {
@@ -85,8 +85,13 @@ export async function pausarLead(
       return fail(hasta.error.issues[0]?.message ?? 'Elegí una fecha válida')
     }
     // Fin del día elegido → pausado durante toda esa fecha, retoma al siguiente.
-    const until = new Date(`${hasta.data}T23:59:59`)
-    if (Number.isNaN(until.getTime()) || until.getTime() <= Date.now()) {
+    // El borde sale de la hora ARGENTINA (`finDePausaAR`), no del huso del proceso:
+    // el `new Date('...T23:59:59')` que estaba acá se parsea en hora local, así que
+    // daba lo correcto en la máquina de Franco y tres horas antes en el servidor.
+    // `null` = día de calendario imposible (31-feb), que el regex de SnoozeSchema
+    // deja pasar; cae en la misma rama que antes tomaba el `Invalid Date`.
+    const until = finDePausaAR(hasta.data)
+    if (until === null || until.getTime() <= Date.now()) {
       return fail('Elegí una fecha futura para la pausa')
     }
 
