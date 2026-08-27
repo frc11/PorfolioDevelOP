@@ -139,9 +139,9 @@ export function esContactoComercial(channel: ActivityChannel): boolean {
  * a un mensaje que ya se contó cuando se mandó, no mensajes nuevos. Sin este
  * filtro, postergar un contacto inflaba el contador sin que saliera un solo DM.
  */
-export const SOLO_MENSAJES_ENVIADOS: Prisma.OsLeadActivityWhereInput = {
+export const SOLO_MENSAJES_ENVIADOS = {
   result: ActivityResult.SIN_RESPUESTA,
-}
+} as const satisfies Prisma.OsLeadActivityWhereInput
 
 /**
  * Predicado puro espejo de `SOLO_MENSAJES_ENVIADOS` — para derivaciones
@@ -149,7 +149,63 @@ export const SOLO_MENSAJES_ENVIADOS: Prisma.OsLeadActivityWhereInput = {
  * una fila sin resultado no acredita un mensaje mandado.
  */
 export function esMensajeEnviado(result: ActivityResult | null): boolean {
-  return result === ActivityResult.SIN_RESPUESTA
+  return result === SOLO_MENSAJES_ENVIADOS.result
+}
+
+/**
+ * El `where` del CONTADOR de la capa de seguridad de canal, entero: canal +
+ * discriminador de mensaje mandado. `contarDmsHoy` NO arma ninguno propio.
+ *
+ * ── Por qué existe (P8, caso 1) ─────────────────────────────────────────────
+ * Hasta acá el eje de CANAL estaba escrito dos veces: literal `channel:
+ * 'INSTAGRAM_DM'` inline en la consulta, y otra vez —a mano— en la réplica
+ * in-memory que `contador-dms.invariant.ts` usaba para afirmar. El invariante
+ * nunca tocaba la consulta real: afirmaba sobre `SOLO_MENSAJES_ENVIADOS` (un
+ * fragmento exportado) y sobre su propia réplica. Medido en P1: revertir SOLO
+ * el `where` de `contarDmsHoy` —sacarle el discriminador de resultado, que es
+ * exactamente el bug que F1 arregló— dejaba el invariante en verde y `tsc` en 0.
+ * Era el quinto falso verde del repo.
+ *
+ * Ahora hay UNA fuente. El discriminador vive acá y en ningún otro lado: la
+ * consulta lo consume entero y el invariante afirma sobre ESTE objeto y sobre
+ * `esDmMandado`, que lo LEE. Sacarle el `result` para reintroducir el bug pone
+ * en rojo las dos mitades a la vez.
+ */
+export const SOLO_DMS_MANDADOS = {
+  channel: ActivityChannel.INSTAGRAM_DM,
+  ...SOLO_MENSAJES_ENVIADOS,
+} as const satisfies Prisma.OsLeadActivityWhereInput
+
+/**
+ * Predicado puro del contador: LEE `SOLO_DMS_MANDADOS` en vez de repetirlo, así
+ * el `where` que va a Prisma y la derivación in-memory no pueden divergir.
+ */
+export function esDmMandado(fila: {
+  channel: ActivityChannel
+  result: ActivityResult | null
+}): boolean {
+  return fila.channel === SOLO_DMS_MANDADOS.channel && fila.result === SOLO_DMS_MANDADOS.result
+}
+
+/**
+ * El `where` COMPLETO que `contarDmsHoy` le pasa a Prisma: performer + canal +
+ * mensaje mandado + la ventana del día. Es pura construcción de objeto (sin
+ * cliente Prisma), así que el invariante puede afirmar sobre el MISMO objeto que
+ * ve la base — no sobre una réplica que él mismo escribe.
+ *
+ * La ventana entra por parámetro a propósito: el borde del día argentino se
+ * calcula en `outreach.ts` y este módulo no toca fechas.
+ */
+export function dmsMandadosHoyWhere(
+  userId: string,
+  desde: Date,
+  hasta: Date,
+): Prisma.OsLeadActivityWhereInput {
+  return {
+    performedById: userId,
+    ...SOLO_DMS_MANDADOS,
+    createdAt: { gte: desde, lte: hasta },
+  }
 }
 
 /**

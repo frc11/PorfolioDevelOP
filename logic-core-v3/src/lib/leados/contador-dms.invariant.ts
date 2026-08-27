@@ -21,11 +21,57 @@ import assert from 'node:assert/strict'
 import { ActivityChannel, ActivityResult } from '@prisma/client'
 import { countFollowUps } from '../follow-up.ts'
 import {
+  dmsMandadosHoyWhere,
   esContactoComercial,
+  esDmMandado,
   esMensajeEnviado,
   SOLO_CONTACTOS_COMERCIALES,
+  SOLO_DMS_MANDADOS,
   SOLO_MENSAJES_ENVIADOS,
 } from './isolation.ts'
+
+// ── 0. EL `WHERE` DE LA CONSULTA REAL, no una réplica ────────────────────────
+// Va primero a propósito: es el agujero que P8 cierra. Hasta acá este invariante
+// afirmaba sobre `SOLO_MENSAJES_ENVIADOS` y sobre una réplica in-memory que él
+// mismo escribía, y NUNCA sobre lo que `contarDmsHoy` le pasa a Prisma. El eje de
+// canal vivía inline en la consulta. Medido en P1: revertir el `where` del
+// contador —sacarle el discriminador de resultado, que es el bug que F1 arregló—
+// dejaba los 46 invariantes en verde y `tsc` en 0.
+//
+// Ahora el `where` sale entero de `dmsMandadosHoyWhere` y esto lo afirma contra un
+// esperado escrito A MANO: derivarlo del propio fragmento daría verde contra
+// cualquier cosa.
+{
+  const desde = new Date('2026-08-25T03:00:00.000Z')
+  const hasta = new Date('2026-08-26T02:59:59.999Z')
+
+  assert.deepEqual(
+    dmsMandadosHoyWhere('setter-1', desde, hasta),
+    {
+      performedById: 'setter-1',
+      channel: ActivityChannel.INSTAGRAM_DM,
+      result: ActivityResult.SIN_RESPUESTA,
+      createdAt: { gte: desde, lte: hasta },
+    },
+    'el `where` que `contarDmsHoy` le pasa a Prisma dejó de ser el censado.\n' +
+      '  Si le falta `result`, volvió el bug de F1: el contador cuenta FILAS del canal y no\n' +
+      '  mensajes mandados, así que postergar un contacto —sin mandar nada— empuja al setter\n' +
+      '  contra un tope que no alcanzó.\n' +
+      '  Si le falta `channel`, el tope de Instagram cuenta DMs de otros canales.\n' +
+      '  Si le falta `performedById`, un setter ve los DMs de otro.\n' +
+      '  Este esperado está escrito a mano a propósito: derivarlo de `SOLO_DMS_MANDADOS`\n' +
+      '  daría verde contra cualquier cosa.',
+  )
+
+  // Y el fragmento del que sale, por separado: el mensaje de arriba habla del
+  // `where` completo, éste del discriminador que es la fuente única.
+  assert.deepEqual(
+    SOLO_DMS_MANDADOS,
+    { channel: ActivityChannel.INSTAGRAM_DM, result: ActivityResult.SIN_RESPUESTA },
+    'SOLO_DMS_MANDADOS es LA fuente del `where` del contador y de su predicado ' +
+      '`esDmMandado`. Cambiarlo mueve las dos cosas a la vez — que es el punto.',
+  )
+}
 
 // ── 1. El fragmento `where` y el predicado puro son ESPEJO ───────────────────
 {
@@ -69,16 +115,15 @@ import {
   assert.equal(esMensajeEnviado(null), false, 'fila sin resultado no cuenta')
 }
 
-// Réplica in-memory del `where` de `contarDmsHoy` (canal + mensajes mandados).
-// Vive en el scope del módulo porque la usan DOS bloques: la jornada real (2) y
-// el censo exhaustivo de canales (4). Una sola réplica — con dos, los dos ejes
-// podrían medir cosas distintas y no nos enteraríamos.
+// Derivación in-memory del conteo. Ya NO re-implementa el `where`: llama a
+// `esDmMandado`, que LEE `SOLO_DMS_MANDADOS` —el mismo objeto que viaja a Prisma
+// dentro de `dmsMandadosHoyWhere`—. Eso es lo que ata los bloques de abajo a la
+// consulta real: si alguien le saca el discriminador de resultado al fragmento,
+// esta derivación deja de contar el opener y la jornada real (2) se cae, además
+// del `where` censado en (0).
 type Fila = { channel: ActivityChannel; result: ActivityResult | null }
 
-const contarDms = (filas: Fila[]): number =>
-  filas.filter(
-    (fila) => fila.channel === ActivityChannel.INSTAGRAM_DM && esMensajeEnviado(fila.result),
-  ).length
+const contarDms = (filas: Fila[]): number => filas.filter(esDmMandado).length
 
 // ── 2. LAS DOS DIRECCIONES sobre un día de trabajo real ──────────────────────
 {
