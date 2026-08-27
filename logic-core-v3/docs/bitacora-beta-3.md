@@ -7400,3 +7400,163 @@ En la pantalla de seguimiento la fecha de la postergación aparecía dos veces: 
 - **Una inconsistencia PREEXISTENTE que este sprint no crea ni arregla:** un APROBADA con la demo sin mandar, gate cerrado y toque vencido cae en `trabajar` (`flow.ts:433`, rama `followUpVencido`) con una sugerencia **no accionable** (`proximaAccionPara` corta antes, en `if (!input.demoEnviada)`). O sea: un lead en la cola de trabajo cuya card dice «esperá», que además puede ser el foco. Es otra raíz —grupo y accionabilidad derivados por dos escaleras independientes—, no la de este sprint. El caso del link **no** suma un ejemplo nuevo: la rama nueva de `grupoPara` lo saca de `trabajar` antes de llegar ahí.
 - **El admin no tiene superficie que le avise que aprobó y no cargó el link.** `pipeline.ts` excluye APROBADA de las etapas de producción y le da SLA infinito, así que esas demos no aparecen como atascos en su panorama. No es una superficie que mienta: es una que falta. Es otra cosa, y no se tocó.
 - **La única puerta de UI a APROBADA exige `finalUrl`** (`AprobarRevisionSchema`). El caso sin link entra por seeds y por tooling (`scripts/b2-verify-dossier.ts:266`) — o por filas viejas. En la cartera QA hay tres hoy.
+
+---
+
+## Sprint UNA SOLA FUENTE — cuatro veces lo mismo escrito dos veces — 2026-08-27
+
+Cuatro casos acumulados desde hace seis sprints, con la misma forma: **existen dos fuentes para lo mismo, y la que la red mira no es la que el producto usa.** Un objetivo compartido —que haya una sola fuente— hecho en cuatro pasadas separadas, cada una con su demostración.
+
+Base: `fix/quinta-superficie` @ `035f90a1`, que es `leados/v1-a-main` con la cadena lineal de P3 a P7 encima. Rama: `fix/una-sola-fuente`. Al arrancar: `tsc --noEmit` exit 0, suite **46/46** (47 descubiertos, 1 excluido).
+
+Los cuatro se reprodujeron ANTES de tocar código. Ninguno había desaparecido.
+
+### Caso 1 · El contador afirmaba sobre una réplica
+
+**Censo.** La consulta real (`outreach.ts:63`, `contarDmsHoy`) armaba su `where` con el canal **inline** y el discriminador de resultado spreadeado: `performedById`, `channel: 'INSTAGRAM_DM'`, `...SOLO_MENSAJES_ENVIADOS`, `createdAt`.
+
+El invariante afirmaba tres cosas, y **ninguna era esa consulta**: que `SOLO_MENSAJES_ENVIADOS` es el fragmento del resultado, que el predicado `esMensajeEnviado` es su espejo, y una **réplica in-memory que el propio invariante escribía** (`contarDms`, con su propia comparación de canal más `esMensajeEnviado`). El eje de canal estaba escrito **dos veces** —literal en la consulta, constante en la réplica— y el discriminador de resultado se afirmaba como constante suelta, nunca como parte del `where` que viaja a Prisma.
+
+**Reproducido.** Sobre `035f90a1`, el sabotaje que P1 midió —borrar el renglón del spread en `contarDmsHoy`, nada más—: invariante **verde**, `tsc` **exit 0**. El bug que F1 arregló vuelve entero con el gate en verde.
+
+**La fuente única.** `SOLO_DMS_MANDADOS` (canal + resultado, construido spreadeando `SOLO_MENSAJES_ENVIADOS`) y `dmsMandadosHoyWhere(userId, desde, hasta)`, los dos en `isolation.ts`, que no importa el cliente de Prisma. `contarDmsHoy` quedó en una sola línea que pasa ese `where`: no arma ninguno propio. El predicado `esDmMandado` **lee** los campos de `SOLO_DMS_MANDADOS` en vez de repetirlos, y la derivación in-memory del invariante pasó a filtrar con él.
+
+**Demostrado.** Mismo sabotaje, ahora sobre la única fuente que queda:
+
+```
+AssertionError: el `where` que `contarDmsHoy` le pasa a Prisma dejó de ser el censado.
+  Si le falta `result`, volvió el bug de F1: el contador cuenta FILAS del canal y no
+  mensajes mandados, así que postergar un contacto —sin mandar nada— empuja al setter
+  contra un tope que no alcanzó.
++ actual - expected
+  { channel: 'INSTAGRAM_DM', createdAt: {...}, performedById: 'setter-1',
+-   result: 'SIN_RESPUESTA' }
+```
+
+Y se cae por los dos lados: medido con el sabotaje puesto, el fragmento queda sin su `result` y `esDmMandado(opener)` pasa a `false`, así que la aserción conductual («el opener es un mensaje mandado») también se rompe. El esperado del bloque 0 está escrito **a mano**: derivarlo del fragmento daría verde contra cualquier cosa.
+
+### Caso 2 · Una arista del grafo vivía en dos archivos
+
+**Censo.** `esReloopRechazo` (`escalamiento.ts:56`) codificaba el destino con un literal. Esa arista también está en `LEGAL_TRANSITIONS` (`dossier-stage.ts`). Nada las ataba, y el invariante del grafo no ve la copia.
+
+**Reproducido.** Sobre `035f90a1`: se sacó `CONSTRUCCION` de las salidas de RECHAZADA y se actualizó `GRAFO_CENSADO` **en el mismo commit**, que es exactamente lo que el mensaje del invariante del grafo instruye hacer cuando el cambio es a propósito. Resultado: **suite entera 46/46 en verde**, y `esReloopRechazo('RECHAZADA','CONSTRUCCION')` devolviendo **`true`** sobre una arista que ya no existe — con `transitionDossier` aplicando `RELOOP_RESET`, que borra el self-check, sobre una transición ilegal.
+
+Matiz que corresponde decir: si se saca la arista **sin** tocar el censo, `dossier-stage` sí se cae — pero por su censo congelado, no por la copia. La copia queda muda en los dos casos. El hueco es el de arriba.
+
+**La fuente única.** El destino sale del grafo: el origen sigue siendo el literal `RECHAZADA` —que es el concepto que la función nombra, no una arista— y el destino se consulta contra las salidas de RECHAZADA en `LEGAL_TRANSITIONS`.
+
+Leer el grafo abre una puerta nueva: si RECHAZADA gana una **segunda** salida, el predicado la aceptaría sola y el reset se extendería a ella sin que nadie lo decida. Por eso `reloop-selfcheck-reset.invariant.ts` estrena un bloque 0 que fija la arity.
+
+**Demostrado.** Mismo sabotaje, ahora sobre el arreglo: `check:invariant:reloop-selfcheck` en **rojo**, suite 45/46.
+
+```
+AssertionError: RECHAZADA dejó de tener UNA sola salida.
+  `esReloopRechazo` lee `LEGAL_TRANSITIONS.RECHAZADA`, así que toda salida nueva pasa a
+  contar como re-loop y se lleva puesto el self-check del dossier (RELOOP_RESET).
++ []   - [ 'CONSTRUCCION' ]
+```
+
+Y el predicado dejó de mentir: con la arista fuera, ahora devuelve `false`.
+
+**El grafo no arrastró Prisma.** Verificado como pide C1c, y además empíricamente: `reloop-selfcheck`, `escalamiento` y `dossier-stage` pasan los tres **sin `DATABASE_URL` y con el `.env.local` sacado del árbol**. `dossier-stage.ts` sigue sin un solo import de valor.
+
+### Caso 3 · Dos formas de calcular el borde de un día
+
+**Censo.** `pausarLead` (`cartera.actions.ts:88`) calculaba el fin de la pausa con `new Date` sobre el día elegido más `T23:59:59`. Un date-time **sin designador de zona** se parsea en la hora local del proceso. Medido en este entorno:
+
+| Huso del proceso | El día 2026-08-28 a las 23:59:59 resuelve a |
+|---|---|
+| `America/Buenos_Aires` (la máquina de Franco) | `2026-08-29T02:59:59.000Z` — correcto |
+| `UTC` (el servidor) | `2026-08-28T23:59:59.000Z` — **tres horas antes** |
+
+F1 ya había establecido el ancla correcta (`parseCalendarDayAR`), pero para el otro campo: la postergación comercial (`reactivateAt`). La pausa personal (`snoozedUntil`) nunca la usó. Y ahora el filtro «Pausados por vos» de la cartera se decide con ese campo.
+
+**La fuente única.** `finDePausaAR(dia)` en `cartera.schemas.ts` —al lado de `SnoozeSchema`, que ya era el contrato de ese string—: ancla con `parseCalendarDayAR` y suma el último segundo del día. `pausarLead` la consume.
+
+**En desarrollo no cambia nada.** Medido en el huso de Franco, viejo contra nuevo:
+
+| Día elegido | Código viejo | Código nuevo | |
+|---|---|---|---|
+| 2026-08-28 | `2026-08-29T02:59:59.000Z` | `2026-08-29T02:59:59.000Z` | idéntico |
+| 2026-08-31 (fin de mes) | `2026-09-01T02:59:59.000Z` | `2026-09-01T02:59:59.000Z` | idéntico |
+| 2026-12-31 (fin de año) | `2027-01-01T02:59:59.000Z` | `2027-01-01T02:59:59.000Z` | idéntico |
+| 2028-02-29 (bisiesto) | `2028-03-01T02:59:59.000Z` | `2028-03-01T02:59:59.000Z` | idéntico |
+| 2026-09-01 | `2026-09-02T02:59:59.000Z` | `2026-09-02T02:59:59.000Z` | idéntico |
+
+5/5. El arreglo cambia **de dónde sale** el borde, no cuál es. La rama de error tampoco se movió: un día imposible (`2026-02-31`, que el regex de `SnoozeSchema` deja pasar) daba `Invalid Date` y ahora da `null`, y cae en el mismo `return fail` con el mismo texto.
+
+**El invariante nuevo corre con el huso forzado.** `check:invariant:pausa-dia` arranca con `cross-env TZ=UTC`, y eso es parte del invariante: en AR el cálculo viejo y el nuevo dan el mismo instante, así que una corrida ahí no distingue el arreglo de no hacer nada.
+
+Hallazgo que obligó a un segundo intento: **`TZ` no siempre se respeta.** Medido en Windows con Node 24, `TZ=UTC` toma efecto, pero `TZ=Asia/Tokyo`, `TZ=Europe/Madrid`, `TZ=America/Los_Angeles` y `TZ=Etc/GMT-9` **caen de vuelta al huso del sistema en silencio**. Un invariante que asumiera el huso forzado pasaría en verde sin ejercer nada. Por eso el bloque 0 exige la premisa —y la mide con `getTimezoneOffset()`, **no** comparando el sujeto contra el cálculo ingenuo: escrito así, una regresión del sujeto los volvía a igualar y el guard culpaba al huso, diciendo «esta corrida no prueba nada» cuando el problema era el código. El primer intento tenía ese defecto y se corrigió.
+
+**Demostrado.** El invariante contra el código viejo, con el huso forzado a UTC:
+
+```
+AssertionError: 2026-08-28: el fin de la pausa dejó de ser 23:59:59 en hora argentina.
+  Si este valor se movió con el huso del proceso (UTC), volvió el bug:
+  el borde tiene que salir de `parseCalendarDayAR`, no del date-time sin zona.
++ '2026-08-28T23:59:59.000Z'
+- '2026-08-29T02:59:59.000Z'
+```
+
+**La vista de postergados sigue conteniendo lo mismo.** `vista-cartera` y `postergacion` siguen en verde sin tocarse, y el invariante nuevo afirma el interruptor del filtro: a las 20:59:59 AR del día elegido —el punto exacto donde el borde viejo en un servidor UTC ya lo había soltado— el lead **todavía está pausado**.
+
+### Caso 4 · El piso tenía cuatro renglones de holgura
+
+**Censo.** El piso en `scripts/run-invariants.mjs` era 43; el descubrimiento daba **47**.
+
+**Reproducido.** Sobre `035f90a1`, sacando `check:invariant:turno` de `package.json`: la suite corrió 45, reportó `pasaron 45 | fallaron 0` y salió **exit 0**. Verde sobre una red con un invariante menos.
+
+**La decisión: cuenta exacta, con fallo en las dos direcciones.** En una línea: *un piso que solo falla hacia abajo se atrasa por construcción —cada sprint que suma uno ensancha la holgura— y avisar sin fallar es exactamente lo que ya pasó cuatro veces seguidas sin que nadie lo levantara.* Quedó `INVARIANTES_ESPERADOS = 48`. Subirlo cuesta el mismo renglón que el archivo ya pedía para bajarlo, y se paga en el commit donde ya estás parado.
+
+**Demostrado**, las dos direcciones:
+
+```
+✗ ABORTADO: se descubrieron 47 invariantes y se esperaban 48.
+  Hay 1 de MENOS. O se borraron scripts sin ajustar la cuenta, o el patrón de
+  descubrimiento dejó de matchear.
+
+✗ ABORTADO: se descubrieron 49 invariantes y se esperaban 48.
+  Hay 1 de MÁS: se agregaron invariantes y la cuenta quedó atrás. Subila a 49
+  en scripts/run-invariants.mjs, en este mismo commit.
+```
+
+Del gate se tocó **solo el piso**. `ci.yml` no se tocó.
+
+### Otras consultas con el mismo patrón que el caso 1 — listadas, sin tocar
+
+Es otro objetivo. Quedan medidas:
+
+1. **`excludeDqWhere`** (`modules/chatbot/server/scoring/dqFilter.ts`) — **7 consumidores de producto y CERO invariantes**. Misma forma que el caso 1, pero sin red de ningún tipo.
+2. **`dossier.ts:266, 291, 319, 345, 377, 404, 422`** — siete `updateMany` con el guard de stage **inline** en su `where` (FICHA, CONSTRUCCION cuatro veces, APROBADA dos). Es la máquina de stage que `LEGAL_TRANSITIONS` posee, re-escrita en el `where` de cada consulta: el caso 2 aplicado a consultas.
+3. **`assignment-trail.ts:75`** — el canal SISTEMA inline, que es la negación exacta de `SOLO_CONTACTOS_COMERCIALES`. El discriminador, dos veces.
+4. **`admin/layout.tsx:23`, `admin/leados/[leadId]/page.tsx:89`, `admin/leados/page.tsx:34`** — el stage EN_REVISION inline en tres lugares: la cola de revisión del admin, tres copias de un discriminador.
+5. **`outreach.actions.ts:127-128` y `:190`, `agenda.actions.ts:241-242`** — el lado de ESCRITURA de lo que el contador cuenta: el par canal + resultado escrito inline, sin fragmento que lo posea. `SOLO_DMS_MANDADOS` ahora nombra ese par para las lecturas; para las escrituras sigue suelto.
+6. **`api/cron/os-follow-up/route.ts:168, 176`** — el status POSTERGADO inline, dos veces.
+
+Y la familia del caso 3, el borde del día argentino, hoy en cuatro implementaciones: `dates-ar.ts` (la canónica), `outreach.ts:15-33` (copia privada correcta), el cron `os-follow-up:7` (copia privada propia, ya anotada por el comentario de `outreach.ts`), y cuatro helpers de filtro **del lado del cliente** con la misma forma sin zona (`admin/alerts`, `admin/audit-log`, `admin/leads`, `chatbot/activity`). Ninguna se tocó.
+
+### Lo que estos arreglos NO cierran
+
+Se dice en vez de dejarlo implícito:
+
+- **Casos 1 y 3 — la costura del pass-through.** El invariante afirma ahora el objeto exacto que `contarDmsHoy` le entrega a Prisma, y el instante exacto que `pausarLead` guarda. Lo que no puede afirmar es que esas dos funciones **sigan llamando** a la fuente única: es un renglón. Cerrarlo pediría correr la consulta (que cambiaría lo que es un invariante en este repo) o un chequeo por ARCHIVO — y F3 ya midió que un chequeo así pasa en verde sobre el bug que vigila. Es el techo alcanzable sin base.
+- **Caso 4 — el renombre coordinado.** Un script que se va y otro que entra conserva la cuenta y pasa. Vigilarlo pide fijar los NOMBRES, que es la segunda lista que este runner existe para no tener.
+
+### Estado
+
+`npx tsc --noEmit` exit 0 · invariantes **47/47** (48 descubiertos, 1 excluido; antes 46/46 sobre 47 — el nuevo entró por descubrimiento) · `npm run build` verde · `prisma generate` no corresponde: el schema no se tocó.
+
+**Ninguna llave de datos se tocó**: ni un nombre de hard-check, ni un id de fase, ni un id de pantalla, ni un texto que se compare contra un blob guardado. `SOLO_DMS_MANDADOS` y `finDePausaAR` son piezas nuevas; el piso es una constante de un script de Node, no un dato. **Ningún cambio de schema. Ninguna transición nueva ni modificada** — el grafo quedó idéntico; el caso 2 cambia quién lo lee, no qué dice. **Ninguna operación sobre la base de datos**: los cuatro casos se resolvieron y se demostraron en frío.
+
+**Ningún invariante existente se debilitó**: el diff de `035f90a1..HEAD` sobre los archivos de invariante no borra ni modifica una sola aserción — 19 renglones nuevos de aserción, cero eliminados.
+
+Los cuatro sabotajes corrieron **de a uno** en un worktree propio y descartable, verificados revertidos por contenido antes de seguir, y el worktree se destruyó al terminar.
+
+### Nada visual
+
+Este sprint no cambia una sola pantalla. No hay nada para mirar. Lo que cambia es que cuatro cosas que podían romperse en silencio ahora gritan.
+
+### Anotado para el sprint siguiente
+
+El barrido de destinos que el producto nombra sin enlazar: «Correcciones» fuera del rail de construcción, y lo que aparezca al censarlo.
