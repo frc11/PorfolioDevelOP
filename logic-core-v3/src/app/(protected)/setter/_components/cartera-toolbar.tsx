@@ -22,7 +22,12 @@ const ESTADO_OPCIONES: { value: EstadoFiltro; label: string }[] = [
   { value: 'seguimiento', label: 'En seguimiento' },
   { value: 'revision', label: 'Esperando revisión' },
   { value: 'agendadas', label: 'Agendadas' },
+  // Las dos esperas con fecha, separadas por QUIÉN la decidió: la de arriba la
+  // pediste vos (pausa personal, privada); la de abajo la pidió el negocio
+  // (status POSTERGADO). Antes solo estaba la primera y el postergado caía en
+  // «En seguimiento» — se lo buscaba acá y la lista salía vacía.
   { value: 'pausados', label: 'Pausados por vos' },
+  { value: 'postergados', label: 'Postergados por el negocio' },
   // A-09: el archivo se filtra por causa real, no como bloque único.
   { value: 'archivo-descartado', label: 'Descartados (antes de la demo)' },
   { value: 'archivo-perdido', label: 'Perdidos (cerrados por Franco)' },

@@ -26,12 +26,12 @@ import { useKeyboardShortcuts, type ShortcutMap } from './use-keyboard-shortcuts
  * protagonista (negocio + paso + porqué + CTA), no un tablero. Cuando el setter
  * termina (lo trabaja en el detalle y sale de la cola) o parquea (snooze), el
  * próximo render le da el siguiente. El foco solo PRESENTA y CALCULA: navega,
- * ancla el sticky y pospone — nunca transiciona stages.
+ * ancla el sticky y pausa — nunca transiciona stages.
  *
  *   - "Ir a trabajarlo": ancla el lead como foco (sticky D7) y abre su detalle.
  *     Al volver, retomás el MISMO lead aunque haya entrado uno más urgente.
  *   - "Pausar": snooze personal (reusa `pausarLead`) → sale de la cola → próximo.
- *   - "Saltar": ancla el próximo como foco → te corre al siguiente sin posponer.
+ *   - "Saltar": ancla el próximo como foco → te corre al siguiente sin pausarlo.
  *
  * El padre (server) ya eligió foco/próximo con `seleccionarFoco`; acá no hay
  * motor de prioridad nuevo. Cuando NO hay accionable (cola `trabajar` vacía) el
@@ -48,7 +48,7 @@ type FocoSurfaceProps = {
 
 const ATAJOS_FOCO: Atajo[] = [
   { accion: 'Ir a trabajar el lead', teclas: ['t'] },
-  { accion: 'Pausar (posponer)', teclas: ['p'] },
+  { accion: 'Pausar el lead', teclas: ['p'] },
   { accion: 'Saltar al próximo', teclas: ['s'] },
   { accion: 'Esta ayuda', teclas: ['?'] },
 ]
@@ -226,7 +226,7 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
             type="button"
             onClick={saltar}
             disabled={!proximo || isPending}
-            title={proximo ? 'Pasar al próximo sin posponer éste' : 'No hay próximo'}
+            title={proximo ? 'Pasar al próximo sin pausar éste' : 'No hay próximo'}
             className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-zinc-400 outline-none transition-colors hover:bg-white/[0.06] hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-cyan-400/40 disabled:opacity-40"
           >
             Saltar

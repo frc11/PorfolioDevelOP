@@ -7046,3 +7046,90 @@ título lleva.
 - **Que la salida sirva de verdad** — o sea, que un setter que se traba encuentre qué hacer. El test
   prueba que se lee sin abrir nada; que alcance para destrabarlo solo se prueba con alguien
   recorriéndolo.
+
+---
+
+## Sprint VOCABULARIO — un concepto, un nombre
+
+**Rama** `fix/vocabulario` · **base** `fix/municiones` (`fa4af2a0`) · worktree propio, puerto propio.
+
+El problema medido: el mismo concepto tenía distintos nombres según la pantalla, y en un caso el sinónimo mandaba al lugar equivocado.
+
+### Paso 1 — La medición: ¿pausar y postergar son lo mismo?
+
+**No. Son dos conceptos, con dos escrituras, dos alcances y dos consumidores.** Las cuatro respuestas, con archivo:línea:
+
+| | **Pausa personal** | **Postergación comercial** |
+|---|---|---|
+| **Qué escribe** | `upsertSetterMeta(leadId, setterId, { snoozedUntil })` → `OsLeadSetterMeta.snoozedUntil` (`cartera.actions.ts:74`) | `osLead.update({ status: POSTERGADO, reactivateAt })` (`os-commercial.ts:181`) + una `OsLeadActivity` con resultado POSTERGADO |
+| **Transición** | ninguna — no toca `status` ni `stage` | ninguna de dossier; mueve el `status` del lead |
+| **Quién la dispara** | el setter, desde su propio panel (`foco-surface.tsx:108`, `lead-card-actions.tsx:68`) | el setter registrando **el resultado de un toque** (`outreach.actions.ts:195`), y el admin desde el pipeline (`lead-pipeline.tsx:125`) |
+| **Alcance** | privada: la fila va keyed por `(leadId, setterId)` — otro setter no la ve | global: la ve el admin y el lead entero cambia de estado |
+| **Efecto en el foco** | sale de todas las colas → `pausados` (`flow.ts:766`) | grupo `seguimiento`; vencida vuelve a `trabajar` (`flow.ts:396-398`) |
+| **Cron** | **ninguno lo mira** — buscar `snoozedUntil` bajo `src/app/api/cron/` da cero | `os-follow-up` lo levanta y avisa «Se reactiva hoy» (`route.ts:112-119`, `188-192`) |
+
+**¿Puede estar en los dos a la vez?** Sí, nada lo impide. La precedencia ya existía y es correcta: la pausa personal gana (`particionarCartera`: el snooze pesa sobre la cola natural) — el setter lo busca donde él lo escondió.
+
+**Por qué «Pausados por vos» salía vacío.** No estaba roto: `vistaDeLead` devolvía la vista `pausados` sólo cuando el lead estaba snoozeado, y un lead postergado no lo está → caía en `seguimiento`. El filtro contenía exactamente lo que su nombre decía. **Lo roto era el vocabulario**: «Postergar» se explicaba con la palabra «Pausa» (`seguimiento-form.tsx:51`), así que el setter postergaba y se iba a buscarlo al único filtro que sonaba parecido.
+
+Lo que faltaba no era arreglar ese filtro, era **el otro**: la postergación no tenía filtro que la nombrara. La decisión del brief pedía que *cada* filtro contenga lo que su nombre dice — y para eso tienen que existir los dos.
+
+### El censo, y qué palabra ganó
+
+| # | Concepto | Variantes encontradas | Gana | Por qué |
+|---|---|---|---|---|
+| 1a | esconder un lead de tu vista | «Pausar» (7 lugares) · «posponer» (`foco-surface.tsx:51,229`) | **Pausar** | es la palabra de todos los botones, toasts, contadores y del filtro; «posponer» aparecía sólo como aclaración entre paréntesis de «Pausar» |
+| 1b | el negocio pidió que lo llames después | «Postergar» (etiqueta + toast) · «Pausa» (el detalle que lo explicaba) | **Postergar** | ya era la etiqueta, el toast y el estado del lead; «Pausa» era el préstamo que causaba el choque |
+| 2 | abrir la construcción | «Arrancar construcción» · «Reabrir construcción» | **las dos** | no son el mismo botón: `iniciarConstruccion` (BRIEF→CONSTRUCCION) y `reabrirConstruccion` (RECHAZADA→CONSTRUCCION) son dos actions con dos precondiciones. Arrancar de cero no es volver a entrar con un rechazo encima |
+| 3 | el destino del rail | «Cartera» (nav) · «Ver toda la cartera» (despliegue) · «Volver a tu cartera» (×4) | **«Tu día»** para el destino, **«cartera»** para el conjunto | `/setter` se titula «Tu día»; la cartera es su sección colapsada. El ítem prometía una lista y aterrizaba en otra pantalla |
+| 4 | construir la demo | «construir» · «arrancar la construcción» · «producir la demo» (`seguimiento-form.tsx:67`, `guidance-content.ts:425` y `:923`) | **construir** | es la palabra del título de mc1, del rail, de las acciones y de las novedades; «producir» era jerga de agencia en 3 lugares sueltos |
+| 5 | paréntesis con nombre de pantalla | «(Evaluación)» en `outreach.actions.ts:111` | **ninguno** | P11 ya había sacado el «(Brief)» del detalle de m5; éste era el último que quedaba visible en todo el recorrido |
+
+**Fuera de alcance a propósito, anotado y sin tocar:** el vocabulario de **brief** («se abrió el brief», «Brief de diseño», el `dondeSeUsa` de la herramienta), el de **Gem** («Gem de diseño», «Gem de outreach») y los **nombres de las herramientas** («Chat de evaluación (Sonnet)», «Claude Design», «Netlify Drop»). El rediseño de m6 los cambia igual.
+
+### Qué cambió comportamiento, y qué fue sólo copy
+
+**Comportamiento (2 cambios, cada uno con su test demostrado fallando):**
+
+1. **El filtro que faltaba.** `vistaDeLead` (`flow.ts`) suma la vista `postergados`, y la toolbar suma «Postergados por el negocio». Esto **cambia qué leads muestra** «En seguimiento»: el postergado sale de ahí. Guardia deliberada: sólo entra el postergado **vigente** — el vencido ya volvió a la cola de trabajar (el cron avisa, no reactiva) y esconderlo detrás del filtro nuevo sacaría trabajo accionable de «Para trabajar» en silencio.
+   → **Test:** `src/lib/leados/vista-cartera.invariant.ts` (`check:invariant:vista-cartera`). Contra el código viejo falla con el bug exacto: recibido `seguimiento`, esperado `postergados`.
+
+2. **La instrucción que mandaba al botón equivocado.** `m-construccion.tsx` deriva el motivo del tilde apagado según el stage que ya recibía. El motivo era uno solo y fijo — «Primero arrancá la construcción — el botón está arriba» — cierto en BRIEF y falso en RECHAZADA, que es el otro stage que llega a mc1/mc2 (`posicionDe` habilita `mr` más las dos pantallas de Construcción). Ahí el bloque de BRIEF no se monta, no hay botón arriba, y la reapertura se llama «Reabrir construcción» y vive en «Correcciones» (mr).
+   → **Test:** `tests/setter/11-fase-disabled.spec.ts`, caso «vocabulario · RECHAZADA». Contra el código viejo falla mostrando el texto del bug en el recibido.
+
+**Sólo copy (sin test, lo verifica el ojo):** las cuatro palabras del grupo 1 reducidas a dos; el ítem del rail y las cuatro vueltas al mismo destino; los tres «producir la demo»; el paréntesis de «(Evaluación)».
+
+### Tests que seleccionaban por copy
+
+| Test | Qué hacía | Qué se hizo |
+|---|---|---|
+| `00-surfaces.spec.ts:79` | elegía el ítem del rail filtrando por el texto «Cartera» | **pasó a selector estable**: el rol de la navegación más el botón con `aria-current`. Afirma el rol y el estado, no el label — el nombre del destino es copy y acaba de renombrarse una vez |
+| `00-surfaces.spec.ts:146` | buscaba el link «Volver a tu cartera» | actualizado a «Volver a tu día» (es una aserción **sobre** el copy, no un manejo por texto — se queda) |
+| `11-fase-disabled.spec.ts:63` | afirmaba el motivo viejo palabra por palabra | actualizado al motivo nuevo; es la aserción del bug, tiene que ser literal |
+
+### Verificación operando la app (1440, build de producción)
+
+Capturas en `docs/proof-screenshots/vocabulario/`:
+
+- **Postergué un lead de verdad** desde el formulario de toques y lo busqué en el filtro: aparece bajo «Postergados por el negocio» (2 leads en la lista, el nuevo entre ellos) y **no** aparece bajo «Pausados por vos» (0 leads — que ahora es la respuesta correcta a la pregunta que hace ese nombre, no un lead perdido). `03-filtro-postergados.png`, `04-filtro-pausados.png`.
+- **El botón se llama igual en la instrucción y donde vive**: mc1 con el lead rechazado dice que el botón «Reabrir construcción» está en «Correcciones»; en «Correcciones» está ese botón, con ese nombre. `05-mc1-instruccion.png`, `06-mr-boton.png`.
+- **El rail nombra el destino**: «Tu día» activo, la pantalla titulada «Tu día», y «cartera» viva donde nombra el conjunto («Ver toda la cartera», «Buscar en tu cartera»). `07-nav-tu-dia.png`, `08-volver-a-tu-dia.png`.
+- **El detalle de «Postergar»** ya no dice «Pausa». `01-m5-postergar.png`, `02-m5-postergado.png`.
+
+Barrido final sobre el árbol: cero «posponer», cero «producir la demo», cero «Volver a tu cartera», cero paréntesis con nombre de pantalla en strings visibles.
+
+**Ninguna llave de datos se tocó**: ni un nombre de hard-check, ni un id de fase, ni un id de pantalla, ni un texto que se compare contra un blob guardado. Los 45 invariantes en verde lo confirman — incluidos `self-check`, `manual`, `pantallas` y `progreso`, que son los que gritarían.
+
+### Estado
+
+`npx tsc --noEmit` exit 0 · invariantes **45/45** (46 descubiertos, 1 excluido — el piso 43 intacto, el nuevo entró por descubrimiento) · `npm run build` verde · `test:setter` **76/76** · `test:leados` **25/25**.
+
+### Lo que queda para Franco
+
+- **Que las palabras suenen a como hablás vos.** Es criterio, no test.
+- **Que «pausar» y «postergar» se entiendan sin explicación**, ahora que son dos. La apuesta es que el dueño de la decisión alcanza para distinguirlas: la pausa la elegís vos, la postergación te la pidió el negocio — y así están rotuladas en el filtro.
+
+### Fuera de scope, anotado
+
+- **«Correcciones» (mr) no está en el rail de Construcción.** Las pantallas de Construcción del rail son mc1 y mc2, así que desde mc1 con el lead rechazado la instrucción ya nombra a dónde ir, pero no hay un link que lleve. Sumarlo al rail es un cambio de navegación, no de vocabulario.
+- El vocabulario de **brief**, **Gem** y **herramientas**, listado arriba.

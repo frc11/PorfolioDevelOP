@@ -40,15 +40,14 @@ const OPCIONES: OpcionResultado[] = [
   {
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
-    // P11 — el último paréntesis con nombre de pantalla del recorrido, y con él
-    // «la producción de la demo», un tercer sinónimo de construir la demo.
     detalle:
       'Frena los toques y te habilita a construir la demo. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
   },
   {
     valor: 'POSTERGADO',
     etiqueta: 'Postergar',
-    detalle: 'Pausa el contacto hasta la fecha que elijas; el panel lo retoma ahí.',
+    detalle:
+      'El negocio te pidió que lo contactes más adelante: elegí la fecha y el panel lo retoma ahí.',
   },
   {
     valor: 'RECHAZADO',
@@ -64,7 +63,7 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
         ? 'Toque registrado — el próximo toque ya quedó agendado.'
         : 'Toque registrado — la cadencia ya cortó: sin más toques automáticos.'
     case 'RESPONDIO':
-      return 'Respondió 🎉 — se abrió el brief. A producir la demo.'
+      return 'Respondió 🎉 — se abrió el brief. A construir la demo.'
     case 'POSTERGADO':
       return 'Postergado — el panel lo retoma en la fecha que marcaste.'
     default:

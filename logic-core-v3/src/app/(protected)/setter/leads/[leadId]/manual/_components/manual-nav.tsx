@@ -71,7 +71,7 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
         className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
       >
         <ArrowLeft size={13} strokeWidth={1.5} aria-hidden />
-        Volver a tu cartera
+        Volver a tu día
       </Link>
 
       {/* Eyebrow redundante en mobile: la instrucción de abajo ya nombra el paso.

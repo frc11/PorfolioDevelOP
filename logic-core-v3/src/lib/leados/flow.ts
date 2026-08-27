@@ -783,14 +783,32 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
 export type OrdenCartera = 'colas' | 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
 
 /** Vista de un lead para el filtro por estado (la cola que el setter ve). A-09:
- * el archivo se filtra por causa real, no como bloque único sin categoría. */
-export type VistaCartera = Exclude<HomeGroupKey, 'archivo'> | `archivo-${ArchivoCausa}` | 'pausados'
+ * el archivo se filtra por causa real, no como bloque único sin categoría.
+ *
+ * VOCABULARIO — la pausa y la postergación son DOS cosas y tienen su vista cada
+ * una: `pausados` es la pausa PERSONAL del setter (`OsLeadSetterMeta.snoozedUntil`,
+ * privada, no toca el lead) y `postergados` es el estado COMERCIAL del lead
+ * (`status = POSTERGADO` + `reactivateAt`, global — lo ve el admin y lo levanta
+ * el cron). Antes solo existía la primera: postergar un lead lo mandaba a
+ * «En seguimiento» y el filtro de la pausa —el único que sonaba parecido— salía
+ * vacío. */
+export type VistaCartera =
+  | Exclude<HomeGroupKey, 'archivo'>
+  | `archivo-${ArchivoCausa}`
+  | 'pausados'
+  | 'postergados'
 export type EstadoFiltro = 'todos' | VistaCartera
 
 /** En qué cola cae el lead a ojos del setter (snooze pesa sobre la cola natural). */
 export function vistaDeLead(lead: HomeLead): VistaCartera {
   if (lead.grupo === 'archivo') return `archivo-${archivoCausaDe(lead)}`
+  // La pausa personal gana: si el setter lo escondió, lo busca donde lo escondió.
+  // Misma precedencia que `particionarCartera` (snooze pesa sobre la cola natural).
   if (lead.snoozed) return 'pausados'
+  // Postergado CON la fecha todavía por delante. El vencido NO entra acá: `grupoPara`
+  // ya lo devolvió a `trabajar` (el cron avisa, no reactiva) y esconderlo detrás de
+  // este filtro sacaría trabajo accionable de «Para trabajar».
+  if (lead.status === 'POSTERGADO' && lead.grupo === 'seguimiento') return 'postergados'
   return lead.grupo
 }
 

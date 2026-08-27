@@ -22,6 +22,7 @@ const tracker: SmokeTracker = newTracker()
 let setterId: string
 let briefLeadId: string
 let construccionLeadId: string
+let rechazadaLeadId: string
 
 test.beforeAll(async () => {
   const setter = await getSetterQa()
@@ -43,6 +44,17 @@ test.beforeAll(async () => {
     stage: 'CONSTRUCCION',
   })
   construccionLeadId = construccion.id
+
+  // RECHAZADA: el OTRO stage que llega a mc1/mc2 con el tilde apagado
+  // (`posicionDe`: habilitadas = ['mr', ...PANTALLAS_CONSTRUCCION]). Acá el
+  // bloque de BRIEF no se monta —no hay botón arriba— y la reapertura vive en
+  // «Correcciones» (mr), que ni siquiera está en el rail de Construcción.
+  const rechazada = await createLead(tracker, {
+    setterId,
+    businessName: 'Fase Disabled RECHAZADA vocabulario',
+    stage: 'RECHAZADA',
+  })
+  rechazadaLeadId = rechazada.id
 })
 
 test.afterAll(async () => {
@@ -60,7 +72,9 @@ test('B-07 · BRIEF: el tilde está disabled y muestra el motivo', async ({ page
   const tilde = firstVisible(page.locator('main section[aria-label="Registro"] button[aria-pressed]'))
   await expect(tilde).toBeVisible()
   await expect(tilde).toBeDisabled()
-  await expect(tilde).toContainText('Primero arrancá la construcción — el botón está arriba.')
+  await expect(tilde).toContainText(
+    'Primero arrancá la construcción — el botón «Arrancar construcción» está acá arriba.',
+  )
 
   // P6-B: los tres tildes de la pantalla, uno por fase — no un tilde fusionado.
   await expect(page.locator('main section[aria-label="Registro"] button[aria-pressed]')).toHaveCount(3)
@@ -99,6 +113,34 @@ test('C-08 · CONSTRUCCION: el tilde funciona normal', async ({ page }) => {
   // Tildar UNA fase no arrastra a las otras dos: el progreso sigue siendo por fase.
   await expect(tildes.nth(1)).toHaveAttribute('aria-pressed', 'false')
   await expect(tildes.nth(2)).toHaveAttribute('aria-pressed', 'false')
+
+  expectNoConsoleErrors(guard)
+})
+
+test('vocabulario · RECHAZADA: el motivo nombra el botón que existe y dice dónde está', async ({
+  page,
+}) => {
+  const guard = attachConsoleGuard(page)
+  await qaLogin(page, 'setter')
+
+  await page.goto(`/setter/leads/${rechazadaLeadId}/manual/mc1`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/manual\/mc1$/)
+
+  const tilde = firstVisible(page.locator('main section[aria-label="Registro"] button[aria-pressed]'))
+  await expect(tilde).toBeVisible()
+  await expect(tilde).toBeDisabled()
+
+  // El bug: el motivo era fijo y mandaba a «arrancá la construcción — el botón
+  // está arriba». En RECHAZADA no hay botón arriba, el botón se llama «Reabrir
+  // construcción» y vive en otra pantalla.
+  await expect(tilde).toContainText(
+    'Primero reabrí la construcción — el botón «Reabrir construcción» está en «Correcciones».',
+  )
+  await expect(tilde).not.toContainText('Arrancar construcción')
+
+  // Y se afirma lo que hacía falsa a la instrucción vieja: no hay ningún botón
+  // «Arrancar construcción» en esta pantalla.
+  await expect(page.getByRole('button', { name: 'Arrancar construcción' })).toHaveCount(0)
 
   expectNoConsoleErrors(guard)
 })

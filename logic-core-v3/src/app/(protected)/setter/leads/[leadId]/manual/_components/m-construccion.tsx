@@ -148,6 +148,33 @@ export function ReentradaMunicion() {
   return <ToolGuide id="claudeDesign" />
 }
 
+/**
+ * Por qué el tilde está apagado, y a QUÉ botón mandar — nombrándolo como se
+ * llama y diciendo dónde vive.
+ *
+ * El motivo era uno solo y fijo: «Primero arrancá la construcción — el botón
+ * está arriba». Es cierto en BRIEF (`ArrancarConstruccion` se renderiza acá
+ * mismo, unos píxeles más arriba) y mentía en RECHAZADA, que es el otro stage
+ * que llega a mc1/mc2: ahí el bloque de BRIEF no se monta —no hay botón
+ * arriba—, la reapertura se llama «Reabrir construcción» (otra action, otra
+ * transición: RECHAZADA→CONSTRUCCION) y vive en otra pantalla, «Correcciones»,
+ * que además NO está en el rail de Construcción (`PANTALLAS_CONSTRUCCION` son
+ * mc1 y mc2). El setter leía una instrucción que no podía seguir.
+ *
+ * Son dos botones distintos a propósito — arrancar de cero no es volver a
+ * entrar con un rechazo encima—: lo que se unifica no es el nombre, es que la
+ * instrucción use el nombre real de cada uno.
+ */
+function motivoDelTilde(stage: DossierStage | null): string {
+  if (stage === 'BRIEF') {
+    return 'Primero arrancá la construcción — el botón «Arrancar construcción» está acá arriba.'
+  }
+  if (stage === 'RECHAZADA') {
+    return 'Primero reabrí la construcción — el botón «Reabrir construcción» está en «Correcciones».'
+  }
+  return 'Las fases se marcan mientras la demo está en construcción.'
+}
+
 /** Registro: UN tilde de auto-reporte por fase de la pantalla (mismo camino que
  * el checklist del wizard, sin gatear nada) + las capas que el corte 5.6 trae
  * del wizard: el CTA «Arrancar construcción» mientras el dossier sigue en BRIEF
@@ -211,7 +238,7 @@ export function ConstruccionRegistro({
               titulo={shellDeFase(faseId)?.titulo ?? faseId}
               completadas={completadas}
               puedeGuardar={puedeGuardar}
-              motivo="Primero arrancá la construcción — el botón está arriba."
+              motivo={motivoDelTilde(stage)}
             />
           </li>
         ))}

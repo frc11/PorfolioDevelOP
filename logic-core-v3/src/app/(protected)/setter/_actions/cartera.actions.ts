@@ -9,8 +9,12 @@
  *     setter sólo organiza leads de SU cartera.
  *   - el meta se escribe SIEMPRE keyed por (leadId, setterId) — un setter no
  *     puede pisar la organización de otro ni leer su nota.
- *   - esto NO toca status/reactivateAt comerciales (el "Postergar" del Paso 9 es
- *     otra cosa: pausa el lead para todos; esto es la vista privada del setter).
+ *   - esto NO toca status/reactivateAt comerciales. POSTERGAR es otra cosa y se
+ *     llama distinto a propósito: lo pide el NEGOCIO («contactame el 25»), mueve
+ *     `status`+`reactivateAt` del lead —lo ve el admin, lo levanta el cron— y
+ *     vive en `os-commercial.ts#postergarLead`. Esto de acá es la PAUSA personal:
+ *     privada del setter, no toca el lead, el cron no la mira. Dos palabras para
+ *     dos cosas; cada una tiene su filtro en la cartera (`vistaDeLead`).
  */
 import { revalidatePath } from 'next/cache'
 import { requireSetter } from '@/lib/auth-guards'

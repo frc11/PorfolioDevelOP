@@ -37,6 +37,7 @@
     "check:invariant:manual": "ts-node src/lib/leados/manual.invariant.ts",
     "check:invariant:pantallas": "ts-node src/lib/leados/pantallas-construccion.invariant.ts",
     "check:invariant:turno": "ts-node src/lib/leados/turno.invariant.ts",
+    "check:invariant:vista-cartera": "ts-node src/lib/leados/vista-cartera.invariant.ts",
     "check:invariant:postergacion": "npx tsx src/lib/leados/postergacion.invariant.ts",
     "check:invariant:contador-dms": "npx tsx src/lib/leados/contador-dms.invariant.ts",
     "check:invariant:acuse": "npx tsx src/lib/leados/acuse-recibo.invariant.ts",

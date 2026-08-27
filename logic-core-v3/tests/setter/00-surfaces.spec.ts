@@ -75,8 +75,17 @@ test('A2 · navegación + rail de herramientas + aria-current activo', async ({ 
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
   await expect(firstVisible(page.getByRole('navigation', { name: 'Navegación del setter' }))).toBeVisible()
-  // Cartera es el destino activo (aria-current=page).
-  await expect(firstVisible(page.locator('button[aria-current="page"]').filter({ hasText: 'Cartera' }))).toBeVisible()
+  // El destino del rail queda marcado activo (aria-current=page). Se afirma por
+  // el ROL y el estado, no por el label: el nombre del destino es copy y ya se
+  // renombró una vez (era «Cartera», ahora «Tu día») — un selector por texto
+  // habría muerto en silencio con el próximo cambio de palabra.
+  await expect(
+    firstVisible(
+      page
+        .getByRole('navigation', { name: 'Navegación del setter' })
+        .locator('button[aria-current="page"]'),
+    ),
+  ).toBeVisible()
   // Rail "Tus herramientas" (links externos).
   await expect(firstVisible(page.getByRole('navigation', { name: 'Herramientas externas del setter' }))).toBeVisible()
 })
@@ -143,7 +152,7 @@ test('A5 · detalle de lead: el manual (instrucción + historial) carga sin erro
   await firstVisible(page.getByText('Ver historial del lead')).click()
   await expect(firstVisible(page.getByRole('heading', { name: 'Historial del lead' }))).toBeVisible()
   // Cabecera del lead.
-  await expect(firstVisible(page.getByRole('link', { name: /Volver a tu cartera/i }))).toBeVisible()
+  await expect(firstVisible(page.getByRole('link', { name: /Volver a tu día/i }))).toBeVisible()
 
   await page.waitForLoadState('networkidle').catch(() => undefined)
   expectNoConsoleErrors(guard)

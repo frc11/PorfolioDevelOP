@@ -26,8 +26,15 @@ type NavItem = {
  * resalta en todo el subárbol `/setter`. Es un array para que sprints
  * posteriores agreguen destinos sin reescribir la barra; NO se inventan rutas.
  */
+// El label nombra el DESTINO, no una de sus secciones: `/setter` se titula «Tu
+// día» (foco + novedades + cartera + números) y la cartera es la sección
+// colapsada de más abajo, la que abre «Ver toda la cartera». Con el ítem
+// llamado «Cartera» el setter clickeaba esperando su lista y aterrizaba en una
+// pantalla que se llama distinto y que no la muestra hasta desplegarla.
+// «Cartera» sigue siendo la palabra del CONJUNTO de leads — acá no se pierde,
+// se deja de usar para nombrar la página.
 const NAV_ITEMS: NavItem[] = [
-  { href: '/setter', label: 'Cartera', icon: LayoutDashboard },
+  { href: '/setter', label: 'Tu día', icon: LayoutDashboard },
 ]
 
 export function SetterNav({ onNavigate }: SetterNavProps) {

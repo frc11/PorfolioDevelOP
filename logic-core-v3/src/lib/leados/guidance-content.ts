@@ -422,7 +422,7 @@ export const GUIA_EVALUACION = {
     [
       'El score marca el camino: ',
       { enfasis: '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' },
-      ' (y deja producir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
+      ' (y deja construir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
     ],
   ],
   ejemplos: [
@@ -920,7 +920,7 @@ export const GUIA_ENVIO = {
     engancheSinAprobar: [
       'El link se envía cuando ',
       { enfasis: 'Franco apruebe la demo' },
-      ' (la producción pasa por brief, construcción y chequeo final). Hasta ahí, este paso no lo ofrece.',
+      ' (la demo pasa por brief, construcción y chequeo final). Hasta ahí, este paso no lo ofrece.',
     ],
     niEngancheNiAprobada: [
       'El link de la demo se envía recién cuando el negocio ',
