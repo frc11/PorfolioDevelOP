@@ -1,5 +1,5 @@
 // scripts/run-invariants.mjs
-// Corre TODOS los scripts de invariante del repo y reporta los 43 resultados.
+// Corre TODOS los scripts de invariante del repo y reporta cada resultado.
 // Uso: npm run check:invariants
 //
 // ── Por qué existe este archivo ───────────────────────────────────────────────
@@ -17,24 +17,43 @@
 //      pasaban, y ningún agregado los invocaba.
 //
 // Este runner ataca las dos: descubre la lista desde package.json (no hay
-// segunda lista que mantener — un script nuevo entra solo) y corre los 43
+// segunda lista que mantener — un script nuevo entra solo) y los corre TODOS
 // SIEMPRE, sin cortar, acumulando el veredicto.
 //
-// ── El guard del piso ─────────────────────────────────────────────────────────
+// ── El guard de la cuenta ─────────────────────────────────────────────────────
 // Descubrir dinámicamente tiene su propio modo de fallar en verde: si el patrón
 // deja de matchear (alguien renombra el prefijo), el runner descubre 0 scripts,
 // corre 0, no falla ninguno, y sale 0. Verde impecable sobre una red apagada.
-// PISO_MINIMO lo impide: menos scripts que el piso es un fallo ruidoso.
-// Si borrás un invariante a propósito, bajá el piso EN EL MISMO COMMIT y decí
-// por qué. Que cueste un renglón es el punto.
-const PISO_MINIMO = 43;
+// Este número lo impide: descubrir algo distinto de lo esperado es un fallo
+// ruidoso. Si agregás o borrás un invariante, ajustá este renglón EN EL MISMO
+// COMMIT y decí por qué. Que cueste un renglón es el punto.
+//
+// ── Por qué EXACTO y no un piso (P8, caso 4) ─────────────────────────────────
+// Hasta acá esto era `PISO_MINIMO = 43` y solo fallaba hacia abajo. Un piso que
+// solo mira para un lado se atrasa POR CONSTRUCCIÓN: cada sprint que suma un
+// invariante ensancha la holgura, y con holgura de N se pueden borrar N
+// invariantes sin que la suite se entere. Medido: el piso era 43 y el
+// descubrimiento había llegado a 47 — cuatro renglones de holgura, y la distancia
+// creció sola en cada uno de los cuatro sprints anteriores.
+//
+// La alternativa era avisar cuando la distancia crece en vez de fallar. Se
+// descartó: un aviso sobre una suite en verde es exactamente lo que ya pasó
+// cuatro veces seguidas sin que nadie lo levantara. Fallar en las DOS
+// direcciones cuesta el mismo renglón que el archivo ya pedía para borrar, se
+// arregla en el commit donde ya estás parado, y es la única versión que no se
+// puede volver a atrasar.
+//
+// Lo que este guard NO ve, y queda anotado: un RENOMBRE COORDINADO (un script
+// que se va y otro que entra) conserva la cuenta y pasa. Vigilar eso pide fijar
+// los NOMBRES, que es la segunda lista que este runner existe para no tener.
+const INVARIANTES_ESPERADOS = 48;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen
 // en cada corrida a propósito: un script excluido en silencio es otra vez un
 // huérfano, solo que escondido en el runner en vez de en package.json.
-// El piso de arriba vigila el DESCUBRIMIENTO (los 43 siguen apareciendo), así que
-// excluir uno no afloja el guard.
+// La cuenta de arriba vigila el DESCUBRIMIENTO (el excluido sigue apareciendo), así
+// que excluir uno no afloja el guard.
 const EXCLUIDOS = {
   'check:invariant:client-monthly-report-pdf':
     'no es un invariante puro: hace prisma.botConfig.findFirst() y necesita DATABASE_URL. ' +
@@ -56,11 +75,19 @@ const invariantes = Object.keys(scripts).filter(
   (nombre) => nombre === 'check:invariant' || nombre.startsWith('check:invariant:'),
 );
 
-if (invariantes.length < PISO_MINIMO) {
+if (invariantes.length !== INVARIANTES_ESPERADOS) {
+  const faltan = INVARIANTES_ESPERADOS - invariantes.length;
   console.error(
-    `\n✗ ABORTADO: se descubrieron ${invariantes.length} invariantes y el piso es ${PISO_MINIMO}.\n` +
-      `  O se borraron scripts sin bajar el piso, o el patrón de descubrimiento dejó de matchear.\n` +
-      `  Correr con menos de lo esperado sería un falso verde: revisá package.json.\n`,
+    `\n✗ ABORTADO: se descubrieron ${invariantes.length} invariantes y se esperaban ` +
+      `${INVARIANTES_ESPERADOS}.\n` +
+      (faltan > 0
+        ? `  Hay ${faltan} de MENOS. O se borraron scripts sin ajustar la cuenta, o el patrón de\n` +
+          `  descubrimiento dejó de matchear. Correr con menos de lo esperado es un falso verde:\n` +
+          `  revisá package.json.\n`
+        : `  Hay ${-faltan} de MÁS: se agregaron invariantes y la cuenta quedó atrás. Subila a\n` +
+          `  ${invariantes.length} en scripts/run-invariants.mjs, en este mismo commit.\n` +
+          `  No es burocracia: mientras la cuenta esté atrasada por N, se pueden borrar N\n` +
+          `  invariantes sin que esta suite lo note. Así se atrasó de 43 a 47.\n`),
   );
   process.exit(1);
 }
