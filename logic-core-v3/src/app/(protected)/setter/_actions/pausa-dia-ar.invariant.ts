@@ -89,12 +89,6 @@ assert.equal(
   '2026-08-28T23:59:59.000Z',
   `con el proceso en ${HUSO_DEL_PROCESO} el cálculo sin designador de zona cae en ese huso`,
 )
-assert.equal(
-  finDePausaAR('2026-08-28')!.getTime() - bordeIngenuo('2026-08-28').getTime(),
-  OFFSET_AR * 60_000,
-  'el borde viejo, corrido en un proceso UTC, caía exactamente 3 h antes del borde AR — ' +
-    'que es el desvío que este invariante existe para impedir',
-)
 
 // ── 1. EL ANCLAJE: el borde es 23:59:59 en hora ARGENTINA, no la del proceso ─
 // Los esperados están escritos A MANO como instantes UTC: 23:59:59 AR ≡ 02:59:59Z
@@ -122,6 +116,17 @@ assert.equal(
     assert.equal(horaAR(until), '23:59:59', `${elegido}: el borde es el último segundo del día AR`)
   }
 }
+
+// ── 1b. EL TAMAÑO DEL DESVÍO QUE SE EVITA ───────────────────────────────────
+// Va DESPUÉS del anclaje a propósito: si el sujeto volviera al cálculo ingenuo,
+// el bloque 1 se cae primero y dice exactamente eso. Acá el número queda anotado
+// —tres horas— para que el motivo del arreglo no sea una afirmación de comentario.
+assert.equal(
+  finDePausaAR('2026-08-28')!.getTime() - bordeIngenuo('2026-08-28').getTime(),
+  OFFSET_AR * 60_000,
+  'el borde viejo, corrido en un proceso UTC, caía exactamente 3 h antes del borde AR — ' +
+    'que es el desvío que este invariante existe para impedir',
+)
 
 // ── 2. NO SE CORRE UN DÍA: ni el anterior ni el siguiente quedan pisados ─────
 {
