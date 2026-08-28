@@ -1,1 +1,11 @@
 docs/bitacora-roadmap.md merge=union
+
+# Los binarios de fuente NO pasan por conversion de fin de linea. Git los
+# detecta como binarios solo (tienen NUL), pero la trazabilidad del sistema
+# tipografico de v3 se apoya en el sha256 EXACTO de estos archivos contra el
+# manifiesto de descarga de S0 (`v3/_lib/__tests__/fuentes.invariant.ts`): un
+# byte cambiado en un checkout rompe esa cadena. Se declara explicito.
+*.woff2 binary
+*.woff binary
+*.ttf binary
+*.otf binary

@@ -30,6 +30,13 @@
 # Tailwind 4 (que respeta `.gitignore`) y tira abajo la compilación del CSS con
 # un error que apunta a un archivo sano.
 /.next-probe/
+# `.next-s1-control/`: build aislado del PLAN B del control positivo de la
+# compuerta de 1025 (S1). El plan A es la ruta gemela `/v3/control-estatico` en
+# el mismo build; este directorio existe para el caso en que webpack hoistee el
+# módulo del escenario a un chunk compartido y haya que separar los dos builds.
+# Se agrega ACÁ ANTES de correr cualquier build, por la misma lección que
+# `.next-probe/`.
+/.next-s1-control/
 
 # production
 /build

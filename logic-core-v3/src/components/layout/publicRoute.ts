@@ -29,7 +29,17 @@ export const PORTAL_PREFIXES = ['/admin', '/dashboard', '/embed', '/setter'] as 
  * canvas ocupa la ventana entera y el chrome público le pintaría el launcher
  * del chat y la barra encima justo del objeto bajo prueba.
  */
-export const CHROME_FREE_PREFIXES = ['/styleguide', '/probe-escena'] as const
+/**
+ * `/v3` (S1) es el sitio NUEVO en construcción, y el chrome público de acá es
+ * el del sitio VIEJO: la Navbar, el Shutter y el launcher del chat pertenecen
+ * a un sistema de diseño que /v3 viene a reemplazar. Montados encima, cualquier
+ * juicio sobre el esqueleto se toma mirando dos sistemas superpuestos.
+ * Hay además una razón estructural: el esqueleto es un canvas a viewport
+ * completo con paneles encima, y una barra fija le pinta justo arriba.
+ * SE SACA de esta lista el día que /v3 reemplace al home y herede el chrome
+ * que le corresponda.
+ */
+export const CHROME_FREE_PREFIXES = ['/styleguide', '/probe-escena', '/v3'] as const
 
 export function isPortalRoute(pathname: string): boolean {
   return PORTAL_PREFIXES.some((prefix) => pathname.startsWith(prefix))

@@ -1,0 +1,802 @@
+/* =========================================================================
+ * theme.css — SISTEMA DE DISEÑO DE develOP  ·  v3
+ * =========================================================================
+ *
+ * Emitido      : 2026-08-28 por el sprint S0 (las tres mediciones).
+ * Procede de   : el theme.css del sistema de Franco, transferido entero
+ *                salvo la tipografía y la paleta, que son de develOP.
+ * Reporte      : REPORTE-S0.md, en esta misma carpeta.
+ * Instrumentos : medicion-1-tipografia/ · medicion-2-contraste/ ·
+ *                prueba-tailwind/
+ *
+ * -------------------------------------------------------------------------
+ * ENTRADA AL REPO — S1 (rama `rediseno/cimientos`), 2026-08-28.
+ * -------------------------------------------------------------------------
+ * El archivo de S0 entró ENTERO, con todos sus comentarios. Se le aplicaron
+ * CINCO cambios mecánicos, ninguno estético, cada uno con su comentario en
+ * el lugar donde ocurre y todos aprobados por Valentino en una parada del
+ * sprint. Están listados acá para que la diferencia contra
+ * `docs/rediseno/s0/theme-develop.css` —que se conserva sin tocar como
+ * original— no haya que reconstruirla.
+ *
+ *   1. `@theme` → `@theme static`.  MEDIDO en este repo, no citado.  (Parada 1)
+ *   2. `--font-mono` → `--font-codigo`.  Única colisión de las 89.   (Parada 1)
+ *   3. Las tres familias apuntan a la variable de `next/font/local`. (Parada 1)
+ *   4. Los nueve `--spacing-*` de px a rem. MISMO valor, otra especie.(Parada 1)
+ *   5. `--text-base` de 16px a 1rem. El MISMO defecto que el 4.      (Parada 2)
+ *
+ * El instrumento que produce y verifica esas cuatro diferencias es
+ * `src/app/v3/_lib/__tests__/tokens.invariant.ts` (`npm run test:s1-tokens`).
+ * Cualquier otra diferencia contra el original de S0 la hace fallar.
+ *
+ * -------------------------------------------------------------------------
+ * QUÉ CAMBIÓ RESPECTO DEL ARCHIVO DE FRANCO, Y POR QUÉ
+ * -------------------------------------------------------------------------
+ *
+ * 1. TIPOGRAFÍA — Instrument Sans → Chivo + Chivo Mono. [decidido]
+ *    La escala NO se reescaló: x-height Chivo 511 contra 510 de Instrument
+ *    Sans, factor 0,998, dentro de la banda de corte 0,98–1,02 fijada en
+ *    B6.5b. Reescalar movería 0 de 14 valores. Se corrió el criterio que ya
+ *    existía; no se inventó uno nuevo.
+ *
+ * 2. TEMA POR DEFECTO — oscuro → CLARO. [decidido]
+ *    Este es el cambio estructural. El sistema de Franco es de base oscura
+ *    PORQUE sus cuatro acentos fallan como texto sobre claro (2,10 · 2,19 ·
+ *    1,86 · 3,66, reproducidos en este sprint). Los tres acentos de develOP
+ *    pasan AA sobre las cuatro superficies claras, peor caso 4,65:1.
+ *    La base clara no es una desviación de su sistema: es la consecuencia de
+ *    que la paleta de develOP resuelve la restricción que a él lo obligó al
+ *    fondo negro.
+ *
+ * 3. ACENTOS — cuatro → TRES. El ámbar está muerto. [decidido]
+ *    Automatización se pliega sobre IA y comparten acento.
+ *
+ * 4. VARIANTES BRILLANTES — ocho tokens → CERO. [derivado]
+ *    En el sistema de Franco existen porque su violeta falla como texto
+ *    sobre las tres superficies elevadas (4,40 · 4,04 · 3,58). Los tres
+ *    acentos de develOP pasan en las cuatro superficies claras. No hacen
+ *    falta y el sistema se simplifica.
+ *
+ * 5. ANILLO DE FOCO — color propio → var(--color-tinta). [decidido]
+ *    Franco lo fija en su tinta con un valor literal. Acá es la tinta POR
+ *    REFERENCIA, así la sección invertida lo da vuelta sin un segundo token.
+ *    Verificado en un build real: la cadena de dos niveles queda entera.
+ *
+ * 6. --opacidad-* y --envoltorio-* → --opacity-* y --container-*. [medido]
+ *    Salen del bloque SIN UTILIDAD y generan utilidad. El sufijo en español
+ *    no se toca: es la convención que el archivo ya seguía.
+ *
+ * -------------------------------------------------------------------------
+ * ETIQUETAS DE EVIDENCIA — cada token lleva la suya. Ninguna es [supuesto].
+ *   [medido]              medido en este sprint, con instrumento que lo
+ *                         produce y queda en la carpeta.
+ *   [medido, transferido] estructura o valor medido sobre la referencia que
+ *                         no depende de su marca ni de su tipografía.
+ *   [derivado]            cálculo nuestro sobre datos [medido].
+ *   [decidido]            verdadero porque lo elegimos. Con su razón.
+ *   [pendiente]           hueco declarado, con su disparador escrito.
+ *
+ * -------------------------------------------------------------------------
+ * ADVERTENCIA DE `@theme` CONTRA `@theme inline` — el acento contextual y la
+ * sección invertida DEPENDEN de esto, y en este sprint dejó de ser una cita
+ * de la documentación para ser una medición.
+ * Con `@theme` (como acá) Tailwind emite la custom property y la utilidad la
+ * consume por var(), así que redefinirla en un ancestro retiñe la utilidad:
+ *     .text-acento { color: var(--color-acento) }
+ * Con `@theme inline` el valor queda incrustado y el override NO llega:
+ *     .text-acento { color: var(--color-acento-web) }
+ * Las dos variantes se construyeron con Tailwind 4.3.1 y next build; el CSS
+ * emitido está en prueba-tailwind/salida/. NO CAMBIAR A `inline`.
+ *
+ * CAMBIO 1 DE S1 — `@theme` → `@theme static`, y por qué. [medido]
+ * S0 publicó que Tailwind 4.3.1 "NO poda: los declarados llegan todos al
+ * :root, los use alguien o no". ES FALSO. Medido por el pipeline REAL de este
+ * repo (@tailwindcss/postcss 4.3.1 sobre este mismo globals.css), con el
+ * detector verificado por control positivo:
+ *
+ *     @theme static   0 de 89 ausentes del :root · override contextual OK
+ *     @theme          21 de 89 ausentes (2026-08-28) · override contextual OK
+ *     @theme inline   33 de 89 ausentes · Y EL OVERRIDE SE ROMPE
+ *
+ * ⚠ EL 21 NO ES UNA CONSTANTE, Y ÉSE ES EL PUNTO. La poda de Tailwind es POR
+ * USO: sobrevive el token que consume una utilidad, un valor arbitrario o una
+ * regla de CSS común de la misma hoja. Se comprobó en carne propia — al
+ * escribir tres nombres de token como literales en el invariante (que vive en
+ * `src/`, o sea que Tailwind lo escanea), esos tres dejaron de podarse y el
+ * conteo bajó de 24 a 21 sin tocar una línea de este archivo.
+ *
+ * O sea: SIN `static`, qué contiene el sistema de diseño en el navegador es
+ * función de qué componentes existan ese día. Un token puede estar acá y no
+ * estar en el `:root`, y cuál depende de lo que el escáner vea. `static` cierra
+ * eso: los 89 declarados son los 89 servidos, siempre.
+ *
+ * POR QUÉ S0 CONCLUYÓ LO CONTRARIO — y su instrumento está bien hecho: su
+ * `poda.mjs` comparó dos builds de un fixture de 30 tokens quitándole a la
+ * página DOS clases de valor arbitrario y UN consumidor directo. Todo lo demás
+ * del fixture seguía en uso, así que el delta dio cero. Midió bien y generalizó
+ * de más: "estos tres consumidores no son los que mantienen vivos a estos
+ * tokens" no es "Tailwind no poda". Su propio docblock guarda la señal que lo
+ * contradecía —"en una corrida temprana, seis tokens declarados en @theme no
+ * llegaron al :root"— y esa observación quedó explicada en vez de reconciliada.
+ * Ver la corrección completa en REPORTE-S0.md (Medición 3).
+ *
+ * `static` NO es `inline`, y esa es toda la diferencia que importa: la tabla de
+ * arriba muestra que con `static` las utilidades siguen consumiendo
+ * var(--color-acento) y el override contextual sigue vivo. La regla no
+ * negociable del sprint —nunca `inline`— se cumple.
+ * Instrumento: `_lib/__tests__/tokens.invariant.ts`, que compila las tres
+ * variantes por el pipeline real y falla si `static` deja de emitir los 89 o si
+ * `inline` deja de romper el override.
+ *
+ * ADVERTENCIA DE NAMESPACE — Tailwind 4.3.1 genera utilidades solo para los
+ * namespaces que reconoce. Se sondearon 26 candidatos con builds reales:
+ * VIVOS (23): --animate-* --aspect-* --blur-* --border-width-* --breakpoint-*
+ *   --color-* --container-* --drop-shadow-* --ease-* --font-* --font-weight-*
+ *   --inset-shadow-* --leading-* --opacity-* --perspective-* --radius-*
+ *   --shadow-* --spacing-* --text-* --text-shadow-* --tracking-*
+ *   --transition-duration-* --z-index-*
+ * MUERTOS (3): --duration-*  --z-*  --mix-blend-*
+ * Los tokens del bloque SIN UTILIDAD existen como custom property y se
+ * consumen con var() o con valor arbitrario, pero no generan clase. Un token
+ * fuera de namespace es un token muerto que parece vivo.
+ * ⚠ S1 CORRIGE la afirmación que estaba acá —"se verificó que Tailwind 4.3.1
+ * NO poda"—: sí poda, y por eso el bloque abre con `static`. Ver CAMBIO 1.
+ * Matiz medido: un token de este bloque sobrevive igual si alguna regla de CSS
+ * común de la misma hoja lo referencia con var() — así sobreviven hoy
+ * --foco-grosor y --pad-lateral-compacto. Pero eso depende de que ese
+ * consumidor exista, que es justamente lo que `static` deja de suponer.
+ * ========================================================================= */
+
+@theme static {
+
+  /* =====================================================================
+   * COLOR — 14 tokens contra los 25 de Franco. Once menos: mueren las cuatro
+   * variantes brillantes, el cuarto acento y los cinco tokens paralelos del
+   * tema claro, que acá los reemplaza un bloque de override de cuatro líneas.
+   * (Conteo producido por prueba-tailwind/verificar-archivo-final.mjs y por
+   * comparar-tokens.mjs, no contado a mano.)
+   *
+   * REGLA QUE GOBIERNA LA PALETA [decidido]:
+   *   Base clara de papel, y UN acento por contexto. Nunca los tres a la vez.
+   *   La home usa uno. Cada landing de servicio tiene el suyo y tiñe su
+   *   escena.
+   *
+   * LA REGLA DE LA VOZ ÚNICA: nunca dos acentos en una misma vista. El
+   * acento identifica al servicio; dos acentos no identifican nada.
+   * LA REGLA DEL ACENTO PLANO: color sólido. Nunca gradiente, nunca glow,
+   * nunca sombra de color.
+   *
+   * La taxonomía (fondo · superficie · texto primario · secundario ·
+   * terciario · borde · foco · acento) es [medido, transferido]: esa
+   * agrupación por función sirve. Los VALORES son de develOP.
+   * ------------------------------------------------------------------- */
+
+  /* --- Base clara, el tema POR DEFECTO -------------------------------
+   * En la marca y en el brief a este color se lo llama "el papel". Acá se
+   * llama --color-fondo porque el nombre del token dice la FUNCIÓN, que es
+   * la convención que transfiere del archivo de Franco. */
+
+  --color-fondo: #F7F7F5;          /* el papel — 17,60:1 con --color-tinta [decidido] */
+
+  /* Las tres superficies elevadas. [derivado]
+   * develOP no las tenía. Se derivaron con la lógica de Franco —escalones
+   * sucesivos desde el fondo hacia el otro extremo— de forma reproducible:
+   * se midieron las razones de contraste de SUS tres superficies contra SU
+   * fondo (1,0533 · 1,1483 · 1,2957) y se buscó, desde el papel y hacia
+   * oscuro, el color que da esa misma razón. El matiz del papel se conserva
+   * escalando los tres canales en espacio lineal.
+   * NO se replicó una cosa suya: su sesgo cálido CRECE con cada escalón
+   * (R−B va de 4 a 9). El papel de develOP es casi neutro y el método
+   * conserva esa proporción en vez de aumentarla. Es estética y está
+   * abierta. */
+
+  --color-superficie-1: #F1F1EF;   /* panel elevado sobre el papel — 1,0543:1 */
+  --color-superficie-2: #E8E8E6;   /* tarjeta sobre panel — 1,1438:1 */
+  --color-superficie-3: #DBDBD9;   /* estado activo / hover — 1,2925:1 */
+
+  /* Las tres tintas. La primaria es [decidido]; las otras dos [derivado],
+   * con el mismo método espejado: se midieron las razones de SUS tintas
+   * contra SU fondo (7,2122 y 6,4741) y se buscó, desde #111111 y hacia
+   * claro, el color que da esa razón contra el papel.
+   *
+   * LO QUE HAY QUE SABER ANTES DE USARLAS: media y tenue quedan a 1,1153:1
+   * entre sí (ΔL* 2,94). Están al borde de ser indistinguibles — pero las
+   * de Franco están igual de cerca (1,1140:1, ΔL* 3,29). Es una propiedad
+   * HEREDADA de su sistema, no un defecto introducido acá. Las dos pasan AA
+   * en las cuatro superficies, así que no se forzó ni se degradó ninguna.
+   * Si se quisieran más separadas, la terciaria puede llegar a 5,8165:1
+   * contra el papel (#616161) y seguir pasando AA en la peor superficie. */
+
+  --color-tinta: #111111;          /* texto primario — AA en las 4 superficies (peor 13,62:1) [decidido] */
+  --color-tinta-media: #535353;    /* texto secundario — AA en las 4 (peor 5,55:1) [derivado] */
+  --color-tinta-tenue: #5A5A5A;    /* texto terciario — AA en las 4 (peor 4,97:1) [derivado] */
+
+  /* Bordes: la tinta con alfa, compuesta sobre la superficie. [derivado]
+   *
+   * CRITERIO DE TRANSFERENCIA PARA TOKENS DEFINIDOS CON ALFA COMPUESTO.
+   * No es una nota sobre este token: es el método, y aplica a CUALQUIER otro
+   * token de Franco definido como un rgba() sobre un fondo.
+   *
+   * La composición alfa NO es simétrica. Un mismo alfa da razones de
+   * contraste distintas según el color se componga sobre oscuro o sobre
+   * claro, porque la luminancia resultante cae en tramos distintos de la
+   * curva gamma. Acá, medido: el alfa 0,38 de Franco da 3,09:1 sobre su
+   * fondo oscuro, y la MISMA alfa con tinta oscura sobre papel claro da
+   * 2,37:1 — por debajo del mínimo de 3:1 de un límite de componente.
+   *
+   * Su comentario documenta el token como "límite de componente — 3,09:1".
+   * Lo que define la intención ahí es LA RAZÓN, no el alfa: el alfa es cómo
+   * la consiguió sobre SU fondo. Así que lo que transfiere es la razón, y el
+   * alfa se vuelve a derivar sobre el fondo nuestro.
+   *   0,38 copiado  ->  2,37:1  ->  token que PARECE transferido y no cumple
+   *                                  lo que su propio comentario promete
+   *   0,47 derivado ->  3,01:1 sobre la peor superficie clara
+   *                     4,62:1 sobre la sección invertida
+   * Un solo número sirve para los dos temas.
+   *
+   * REGLA GENERAL: cuando un token de Franco esté definido con alfa y su
+   * comentario declare una razón de contraste, transferir la RAZÓN y
+   * re-derivar el alfa. Copiar el alfa es copiar el resultado de un cálculo
+   * hecho sobre otro fondo. */
+
+  --color-borde: rgba(17, 17, 17, 0.10);        /* separador decorativo — sin mínimo */
+  --color-borde-fuerte: rgba(17, 17, 17, 0.47); /* límite de componente — peor caso 3,01:1 */
+
+  /* Anillo de foco. [decidido]
+   * NO es un color propio: es la tinta, POR REFERENCIA. Dos razones.
+   * La primera es la de Franco y no cambia: el acento cambia por página y no
+   * puede decidir si un foco se ve. La segunda es de develOP: como el foco
+   * ES la tinta, la sección invertida lo da vuelta sola al redefinir
+   * --color-tinta, sin un segundo token y sin una clase condicional.
+   * Es una cadena de DOS niveles de var(), uno más que el acento, y se
+   * verificó entera en un build real. Pasa 3:1 en los dos sentidos:
+   * 13,62:1 peor caso sobre claro, 18,00:1 sobre la sección invertida. */
+  --color-foco: var(--color-tinta);
+
+  /* --- Los tres acentos de servicio ----------------------------------
+   * [decidido] · Valores de la marca vigente de develOP. Este archivo los
+   * transcribe, no los elige. Cada uno con su medición al lado.
+   *
+   * LA REGLA DEL ACENTO SOBRE CLARO — y es la que da vuelta la de Franco:
+   * los tres pasan AA como TEXTO sobre las cuatro superficies claras. Peor
+   * caso del sistema 4,65:1. Sobre claro el acento SÍ puede ser texto.
+   *
+   * LA REGLA DEL ACENTO SOBRE LA SECCIÓN INVERTIDA [medido]: ahí el acento
+   * va como RELLENO o como SUBRAYADO. Nunca como texto, y nunca como el
+   * único indicador de un límite de componente.
+   * Los tres números, porque la regla sale de ellos y no de la simetría con
+   * el sistema de Franco: sobre #0E0E0E los acentos dan 2,71 · 2,99 · 2,46.
+   * No sólo fallan AA como texto (4,5:1) — tampoco llegan a 3:1, que es el
+   * mínimo de un componente de interfaz. Por eso un BORDE de acento acá es
+   * decorativo y nada más: si el borde es lo único que marca dónde termina
+   * una tarjeta o un campo, ese límite no se ve.
+   * Ver el bloque de la sección invertida, más abajo. */
+
+  --color-acento-web: #1D5B8F;              /* Azul — Desarrollo web. 6,65:1 sobre papel · peor 5,14:1 */
+  --color-acento-ia-automatizacion: #1B6B4C;/* Verde — IA y Automatización. 6,02:1 sobre papel · peor 4,65:1 */
+  --color-acento-software: #57429E;         /* Violeta — Software a medida. 7,31:1 sobre papel · peor 5,66:1 */
+
+  /* --- Acento contextual ---------------------------------------------
+   * [decidido] · EL MECANISMO CENTRAL DE LA PALETA.
+   *
+   * Este token es el que consume TODO el sistema. Ningún componente
+   * referencia --color-acento-web ni ninguno de los otros dos directamente:
+   * referencian --color-acento, y el contexto lo resuelve. Es lo que permite
+   * un acento por página sin duplicar el sistema entero tres veces.
+   *
+   * NO EXISTE --color-acento-brillante. Franco lo necesita porque su violeta
+   * falla como texto sobre sus superficies elevadas. Acá los tres pasan.
+   *
+   * El valor de acá es el DEFECTO (home). Los overrides por contexto están
+   * fuera de @theme, más abajo. */
+
+  --color-acento: var(--color-acento-web);
+
+  /* =====================================================================
+   * TIPOGRAFÍA — familia y pesos
+   *
+   * FAMILIA [decidido]: Chivo y Chivo Mono, de Omnibus-Type, fundición de
+   * Buenos Aires. NO es la de la referencia ni la de Franco.
+   *
+   * LICENCIA VERIFICADA EN FUENTE PRIMARIA [medido]: el OFL.txt de los
+   * directorios `ofl/chivo` y `ofl/chivomono` del repo google/fonts —el
+   * mismo archivo en los dos— dice literalmente, en su línea 3, "This Font
+   * Software is licensed under the SIL Open Font License, Version 1.1.", y
+   * en su línea 1 "Copyright 2019 The Chivo Project Authors
+   * (https://github.com/Omnibus-Type/Chivo)". El METADATA.pb de los dos
+   * directorios dice license: OFL. El binario upstream lo repite en su
+   * nameID 13. OS/2 fsType = 0 en los cuatro binarios: Installable
+   * Embedding, sin restricción de incrustación ni de subseteo.
+   * Costo USD 0. Auto-hospedarla no tiene restricción ni costo.
+   * REGISTRO, no problema: el binario de Chivo Mono declara "Copyright 2018"
+   * mientras su OFL.txt dice 2019. Misma licencia, mismos autores.
+   *
+   * MÉTRICAS MEDIDAS del binario que sirve fonts.gstatic.com —el mismo que
+   * next/font auto-hospeda—, sobre em de 1000 [medido]:
+   *   unitsPerEm 1000 · x-height 511 · cap height 686
+   *   ascender 940 · descender −250 · lineGap 0
+   * Chivo y Chivo Mono son métricamente IDÉNTICAS: mismas verticales, mismo
+   * eje, mismas instancias. Chivo Mono es de paso fijo, avance 600.
+   * Las verticales están corroboradas contra el bounding box real de los
+   * glifos, en las NUEVE instancias nombradas y con tres lecturas
+   * independientes de cada caja: 'x' cierra en 511 y 'H' en 686, exacto.
+   * No hay tabla MVAR: las métricas declaradas no varían con el peso.
+   *
+   * EJES VARIABLES [medido]: uno solo.
+   *   wght 100 → 900 (defecto del binario 500)
+   *   NO hay eje de ancho. Instrument Sans tenía wdth 75→100; es lo único
+   *   que se pierde en el cambio de familia.
+   * ------------------------------------------------------------------- */
+
+  /* CAMBIO 2 DE S1 — `--font-mono` se llama acá `--font-codigo`. [medido]
+   * Es la ÚNICA colisión de nombre de los 89 tokens contra los 93 que ya
+   * declara `globals.css` (contadas por `tokens.invariant.ts`, no a mano).
+   * Ahí `--font-mono` vale `var(--font-chivo-mono)`, la variable que
+   * `next/font/google` deja en el <html> para TODO el sitio vivo. Si este
+   * archivo lo pisara con el literal `"Chivo Mono"` —que no es el nombre de
+   * ninguna familia cargada, porque next/font genera uno con hash— la
+   * utilidad `font-mono` caería a `ui-monospace` en admin, dashboard y las
+   * landings. El sufijo en español es además la convención que el propio
+   * archivo ya seguía: --font-titulo, --font-cuerpo, --font-codigo.
+   *
+   * CAMBIO 3 DE S1 — las tres apuntan a la variable de `next/font/local`.
+   * Las fuentes se auto-hospedan con los binarios exactos de S0 (ver
+   * `v3/_fuentes/`, sha256 verificado contra el manifiesto de descarga en
+   * `fuentes.invariant.ts`). Con auto-hospedaje el nombre de familia lo
+   * GENERA Next con un hash; el literal `"Chivo"` no resuelve contra nada.
+   * La familia real entra por la custom property que `next/font` escribe, y
+   * el literal queda de comentario para que se sepa cuál es.
+   * Es la misma adaptación que este repo ya hace con `--font-ds-sans`.
+   * Dónde se declaran las dos variables: `v3/layout.tsx`. Fuera del árbol de
+   * /v3 no están definidas y la cadena cae al fallback, que es correcto:
+   * este sistema todavía no gobierna el resto del sitio. */
+
+  --font-titulo: var(--font-v3-chivo), system-ui, sans-serif;      /* "Chivo" */
+  --font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;      /* "Chivo" */
+  --font-codigo: var(--font-v3-chivo-mono), ui-monospace, monospace; /* "Chivo Mono" */
+
+  /* CUATRO pesos. [medido] Los cuatro que Franco declara existen los cuatro
+   * en Chivo, así que transfieren sin hueco.
+   * DATO QUE CAMBIA respecto de su archivo: el eje de Chivo arranca en 100,
+   * no en 400. El peso 300 (Light) que él documenta como INEXISTENTE en
+   * Instrument Sans SÍ EXISTE acá. No se agrega un quinto token porque
+   * agregarlo es una decisión de sistema y no una consecuencia de la
+   * medición; queda escrito para que la decisión se pueda tomar con el dato. */
+
+  --font-weight-normal: 400;  /* instancia nombrada Regular */
+  --font-weight-medio: 500;   /* instancia nombrada Medium — defecto del binario */
+  --font-weight-semi: 600;    /* instancia nombrada SemiBold */
+  --font-weight-fuerte: 700;  /* instancia nombrada Bold */
+
+  /* =====================================================================
+   * TIPOGRAFÍA — escala de tamaño
+   *
+   * ESTRUCTURA [medido, transferido]: ocho niveles, seis de ellos fluidos,
+   * banda de 375 a 1440px.
+   *
+   * LOS PX TRANSFIEREN SIN REESCALAR, y ahora con el número de Chivo detrás
+   * [medido] + [decidido]:
+   *   x-height Instrument Sans  510   sobre em de 1000  [medido, Franco]
+   *   x-height Chivo            511   sobre em de 1000  [medido, S0]
+   *   factor = 510 / 511 =      0,998                   [derivado]
+   * El factor cae DENTRO de la banda de corte 0,98–1,02 que fijó B6.5b, a
+   * 0,018 del borde más cercano, así que NO se aplica [decidido].
+   * Criterio, con el número: aplicarlo y redondear mueve 0 de los 14 valores
+   * y deja las seis clamp() idénticas coeficiente por coeficiente. A Franco
+   * le movía 2; a nosotros ninguno.
+   *
+   * LO QUE EL CRITERIO NO MIRA [medido]: la cap height. Instrument Sans 720,
+   * Chivo 686 — factor 1,0496, FUERA de la banda, −4,72%. La razón cap/x
+   * pasa de 1,4118 a 1,3425. No cambia la respuesta, porque el criterio
+   * vigente es de x-height y este sprint no lo cambia, pero es lo único que
+   * la medición deja abierto.
+   *
+   * VERIFICACIÓN ÓPTICA PENDIENTE, y ahora con objeto concreto: mirar los
+   * NIVELES DE DISPLAY en Chivo en un navegador. A igual tamaño en px las
+   * mayúsculas son 4,72% más chicas, y en Title Case la mayúscula domina el
+   * tamaño percibido. Es en titulo-l y titulo-xl donde se vería.
+   * ------------------------------------------------------------------- */
+
+  /* CAMBIO 5 DE S1 — `--text-base` pasa de 16px a 1rem. [decidido, medido]
+   *
+   * Es el MISMO defecto que el CAMBIO 4 corrigió en el espaciado, y la razón
+   * es la misma palabra por palabra: `--text-base` es el ÚNICO de estos ocho
+   * que cae en un nombre que Tailwind ya usa. Su defecto es `1rem`; con `16px`
+   * queda pisado y la escala de texto de Tailwind queda MEZCLADA EN ESPECIE —
+   * `text-base` en px mientras `text-sm` y `text-lg` siguen en rem, en la misma
+   * pantalla. Los otros siete son nombres nuevos y no pisan nada.
+   *
+   * NO cambia un valor de S0: con raíz de 16px, 16px = 1rem exacto, verificado
+   * por instrumento con control positivo (`tokens.invariant.ts`). Lo que Franco
+   * midió es EL NÚMERO; el px es implementación, no contrato. Misma distinción
+   * que S0 aplicó a --color-borde-fuerte, donde transfirió la RAZÓN de
+   * contraste y volvió a derivar el alfa en vez de copiarlo.
+   *
+   * Y a diferencia del CAMBIO 4, éste no pisa nada: RESTITUYE el defecto de
+   * Tailwind en vez de sobreescribirlo. Es el cambio más conservador de los
+   * cinco.
+   *
+   * Historia, porque importa para el método: en el cierre del sprint este token
+   * quedó ANOTADO Y NO CAMBIADO, porque la Parada 1 falló sobre `--spacing-*` y
+   * sobre éste no hubo decisión — un valor de S0 no se cambia por analogía. Se
+   * reportó con su disparador escrito y la decisión llegó en la Parada 2. */
+
+  --text-micro: 10px;      /* etiquetas */
+  --text-caption: 12px;    /* metadatos */
+  --text-cuerpo: 15px;     /* párrafo */
+  --text-base: 1rem;       /* base heredada — 16px con raíz 16 */
+  --text-titulo-s: 20px;
+  --text-titulo-m: 32px;
+  --text-titulo-l: 44px;
+  --text-titulo-xl: 56px;
+
+  /* Seis expresiones fluidas [medido, transferido]. Transferidas sin tocar.
+   * Método, verificado en este sprint reproduciendo las seis publicadas:
+   *   a = (max − min) / (1440 − 375)   →  pendiente, ×100 para vw
+   *   b = min − a × 375                →  independiente, /16 para rem
+   * Las seis se re-derivaron con ese método y dieron los mismos
+   * coeficientes, dígito por dígito. Error máximo en los extremos de la
+   * banda: 0,00053px. */
+
+  --text-fluido-micro: clamp(8px, 0.456rem + 0.1878vw, 10px);
+  --text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12px);
+  --text-fluido-titulo-s: clamp(16px, 0.912rem + 0.3756vw, 20px);
+  --text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 32px);
+  --text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 44px);
+  --text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);
+
+  /* =====================================================================
+   * TIPOGRAFÍA — interlineado [medido, transferido]
+   * Multiplicador adimensional, no escala de px. Adimensionales a propósito:
+   * heredan bien y reescalan con el fontSize del elemento. No dependen de la
+   * familia: son razones, y por eso sobreviven al cambio a Chivo sin tocar.
+   * ------------------------------------------------------------------- */
+
+  --leading-texto: 1.6;
+  --leading-titulo: 1.09;
+  --leading-micro: 1.1;
+
+  /* =====================================================================
+   * TIPOGRAFÍA — interletrado [medido, transferido]
+   * Escala en em, no en px. Cuatro tokens, uno solo positivo.
+   * Al ser em escalan con el tamaño y sobreviven al cambio de familia.
+   * ------------------------------------------------------------------- */
+
+  --tracking-titulo: -0.03em;
+  --tracking-display: -0.02em;
+  --tracking-texto: -0.01em;   /* el más usado */
+  --tracking-micro: 0.025em;   /* único positivo */
+
+  /* =====================================================================
+   * ESPACIADO [medido, transferido] — unidad base 4px.
+   * No depende de la familia ni de la marca. El sufijo es el múltiplo de la
+   * unidad base.
+   *
+   * CAMBIO 4 DE S1 — los nueve pasan de px a rem. MISMO VALOR, otra especie.
+   * NO se cambia un valor de S0: con raíz de 16px, 4px = 0,25rem exacto, y
+   * las nueve equivalencias están verificadas por instrumento con control
+   * positivo (`tokens.invariant.ts`). Lo que Franco midió es EL NÚMERO; el px
+   * es implementación, no contrato. Es la misma distinción que S0 ya aplicó a
+   * --color-borde-fuerte, donde transfirió la RAZÓN de contraste y volvió a
+   * derivar el alfa en vez de copiarlo: lo que transfiere es la magnitud, no
+   * la forma en que el otro sistema la consiguió.
+   *
+   * POR QUÉ HUBO QUE ELEGIR, y es un dato de este repo, no del sistema
+   * [medido]: `--spacing-*` es namespace de Tailwind, así que declarar estos
+   * nueve REEMPLAZA la fórmula de las utilidades correspondientes en TODO el
+   * sitio —admin y dashboard incluidos— y quince de ellas cambian:
+   *     .p-4  antes calc(var(--spacing) * 4)   después var(--spacing-4)
+   *     .p-1 .p-2 .p-3 .p-5 .p-6 .p-8 .p-12 .p-20 .gap-4 .m-20
+   *     .space-y-2 .leading-6 .md:p-4 .lg:p-4
+   * Los múltiplos NO declarados (p-7, p-16, w-64, h-96, mt-1.5, p-0.5) siguen
+   * en `calc(var(--spacing) * N)`, que es rem.
+   *
+   * En px la escala quedaba MEZCLADA EN ESPECIE —p-4 en px y p-7 en rem, en
+   * el mismo sitio y en la misma pantalla— y encima los nueve declarados
+   * dejaban de escalar con el tamaño de fuente del navegador mientras los
+   * otros sí. Eso es peor que cualquiera de las dos escalas puras: es un bug
+   * latente que solo aparece cuando alguien agranda la tipografía del sistema.
+   * En rem la escala vuelve a ser una sola, y las quince utilidades computan
+   * el mismo píxel que antes con raíz 16.
+   * ------------------------------------------------------------------- */
+
+  --spacing-1: 0.25rem;   /* 4px  con raíz 16 */
+  --spacing-2: 0.5rem;    /* 8px  */
+  --spacing-3: 0.75rem;   /* 12px */
+  --spacing-4: 1rem;      /* 16px */
+  --spacing-5: 1.25rem;   /* 20px */
+  --spacing-6: 1.5rem;    /* 24px */
+  --spacing-8: 2rem;      /* 32px */
+  --spacing-12: 3rem;     /* 48px */
+  --spacing-20: 5rem;     /* 80px */
+
+  /* =====================================================================
+   * RADIOS [medido, transferido] — seis.
+   * ------------------------------------------------------------------- */
+
+  --radius-sutil: 4px;
+  --radius-medio: 8px;
+  --radius-fuerte: 10px;
+  --radius-pastilla-s: 80px;
+  --radius-pastilla-l: 100px;
+  --radius-circulo: 50%;
+
+  /* =====================================================================
+   * SOMBRA [medido, transferido] — una sola, y usada con criterio.
+   * La referencia NO construye profundidad con elevación: la construye con
+   * superposición, mix-blend-mode, backdrop-filter y la escena WebGL.
+   * Reconstruir con elevación tipo Material sería un error de dirección.
+   * Este token existe para el caso puntual, no como sistema.
+   *
+   * A REVISAR EN LA VERIFICACIÓN ÓPTICA [pendiente]: la opacidad 0,45 se
+   * eligió sobre una base OSCURA. Sobre papel claro una sombra negra al 45%
+   * es otra cosa. El valor se transfiere sin tocar porque cambiarlo sin
+   * mirarlo sería inventar; queda anotado como lo primero a mirar.
+   * ------------------------------------------------------------------- */
+
+  --shadow-flotante: 0 0 16px -4px rgba(0, 0, 0, 0.45);
+
+  /* =====================================================================
+   * DESENFOQUE [medido, transferido]
+   * ------------------------------------------------------------------- */
+
+  --blur-panel: 12px;
+
+  /* =====================================================================
+   * CURVAS DE CSS [medido, transferido] — vocabulario 1 de 2.
+   * La referencia mantiene DOS vocabularios de easing separados:
+   * cubic-bezier propios en CSS que no coinciden con ninguna curva de GSAP,
+   * y power1.out en el 84,5% de los tweens de JS. Es decisión, no accidente,
+   * y se transfiere como tal. Este bloque es el de CSS.
+   * ------------------------------------------------------------------- */
+
+  --ease-principal: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-salida: cubic-bezier(0.64, 0.1, 0, 1);
+
+  /* =====================================================================
+   * BREAKPOINTS [medido, transferido]
+   * 1025px es además la compuerta estructural de coreografía decidida en
+   * B6.1: arriba, experiencia completa; abajo, HTML, CSS, tipografía fluida
+   * y transiciones nativas.
+   * ------------------------------------------------------------------- */
+
+  --breakpoint-tablet: 768px;
+  --breakpoint-medio: 860px;
+  --breakpoint-escritorio: 1025px;
+
+  /* =====================================================================
+   * RECUPERADOS DEL BLOQUE "SIN UTILIDAD" [medido]
+   *
+   * En el archivo de Franco estos seis viven abajo, entre los que no generan
+   * clase. En Tailwind 4.3.1 sus namespaces SÍ existen —solo que con el
+   * nombre en inglés— así que acá suben y generan utilidad.
+   * El sufijo en español no se toca: --color-fondo, --ease-principal y
+   * --breakpoint-escritorio ya seguían esa convención; estos dos grupos eran
+   * la excepción.
+   * Verificado con el CSS emitido de un build real y con control negativo:
+   *   .opacity-tenue   { opacity: var(--opacity-tenue) }
+   *   .max-w-dominante { max-width: var(--container-dominante) }
+   * ------------------------------------------------------------------- */
+
+  --opacity-tenue: 0.3;
+  --opacity-media: 0.4;
+  --opacity-alta: 0.5;
+  --opacity-casi: 0.6;
+
+  --container-dominante: 100%;   /* envoltorio dominante — valor USADO, no declarado */
+  --container-tope: 1920px;      /* envoltorio tope */
+
+  /* =====================================================================
+   * SIN UTILIDAD — Tailwind 4.3.1 no reconoce estos namespaces.
+   * Existen como custom property —se verificó que Tailwind 4.3.1 NO poda los
+   * tokens del tema: los declarados llegan todos al :root, los use alguien o
+   * no— y se consumen con var() o con valor arbitrario, por ejemplo
+   * duration-[var(--duracion-media)]. Pero NO generan clase.
+   *
+   * ⚠️ LO QUE EL SPRINT ENCONTRÓ Y NO SE APLICÓ [medido]:
+   * estos tres grupos NO están muertos por lo que SON sino por CÓMO SE
+   * LLAMAN. El concepto tiene namespace vivo en 4.3.1; la grafía elegida no.
+   * Medido con builds reales y con control negativo en el mismo build.
+   *
+   * LA LISTA EXACTA, para que el sprint que lo decida no tenga que medir de
+   * nuevo — 10 tokens, todos con el valor sin cambios:
+   *
+   *   --duracion-rapida     → --transition-duration-rapida     .duration-rapida
+   *   --duracion-media      → --transition-duration-media      .duration-media
+   *   --duracion-lenta      → --transition-duration-lenta      .duration-lenta
+   *   --duracion-muy-lenta  → --transition-duration-muy-lenta  .duration-muy-lenta
+   *   --z-base              → --z-index-base                   .z-base
+   *   --z-elevado           → --z-index-elevado                .z-elevado
+   *   --z-sticky            → --z-index-sticky                 .z-sticky
+   *   --z-cabecera          → --z-index-cabecera               .z-cabecera
+   *   --z-overlay           → --z-index-overlay                .z-overlay
+   *   --border-hairline     → --border-width-hairline          .border-hairline
+   *
+   * Qué gana cada uno: dejar de consumirse como duration-[var(--duracion-x)]
+   * —valor arbitrario, sin autocompletado, sin verificación— y pasar a ser
+   * una clase de primera con el mismo nombre en español.
+   * Qué NO cambia: el valor, ni la posibilidad de seguir usándolos con var().
+   *
+   * --blend-inversion se queda acá con certeza: --mix-blend-* se sondeó y NO
+   * es namespace.
+   *
+   * NO se renombraron: la Parada 1 autorizó dos renombres y quedan dos.
+   * Sumados a --opacity-* y --container-*, las excepciones del bloque
+   * "SIN UTILIDAD" no eran dos: eran CINCO.
+   * ------------------------------------------------------------------- */
+
+  /* Duraciones de CSS [medido, transferido]. La más frecuente es la más
+   * lenta: la transición es narrativa, no de feedback. */
+  --duracion-rapida: 300ms;
+  --duracion-media: 400ms;
+  --duracion-lenta: 500ms;
+  --duracion-muy-lenta: 700ms;
+
+  /* Apilado [medido, transferido]. La referencia escala por encima de
+   * --z-overlay hasta 2147483647 (INT32_MAX). Esa escalada está medida pero
+   * NO se transfiere: copiarla sería heredar el problema. */
+  --z-base: 0;
+  --z-elevado: 1;
+  --z-sticky: 10;
+  --z-cabecera: 100;
+  --z-overlay: 10000;
+
+  /* Grosor de borde [medido, transferido]. Binario: 0 o este valor. */
+  --border-hairline: 1px;
+
+  /* Modo de fusión [medido, transferido]. Decisión de diseño medida, no
+   * accidente: presente en desktop y ausente en mobile.
+   * (--mix-blend-* se sondeó y NO es namespace: este se queda acá.) */
+  --blend-inversion: difference;
+
+  /* Geometría del anillo de foco [decidido]. El color está arriba, en
+   * namespace. Estos dos no tienen namespace de Tailwind. */
+  --foco-grosor: 2px;
+  --foco-desplazamiento: 2px;
+
+  /* Contenedores y grilla [medido, transferido]. Valores USADOS —lo que el
+   * navegador computó— no los declarados. Los dos envoltorios subieron al
+   * bloque de arriba; estos cuatro no tienen namespace. */
+  --columna-lateral: 140px;
+  --pad-lateral-compacto: 32px;
+  --grilla-canal-compacto: 12px;
+  --grilla-canal-amplio: 16px;
+
+  /* Extremos de la banda fluida [derivado]. No son breakpoints: no hay media
+   * query en ninguno de los dos. Son los puntos donde el clamp() deja de
+   * interpolar. */
+  --fluido-piso: 375px;
+  --fluido-techo: 1440px;
+}
+
+/* =========================================================================
+ * ACENTO CONTEXTUAL — los overrides.
+ * =========================================================================
+ * FUERA de @theme a propósito: @theme define el defecto y esto lo reasigna
+ * por contexto. Cada landing de servicio declara su atributo en un ancestro
+ * —el <html> o el contenedor de la escena— y todo lo que consuma
+ * --color-acento se retiñe solo, sin una sola clase condicional.
+ *
+ * Es el mecanismo que hace que "cada servicio tiene su mundo" cueste tres
+ * reglas en vez de tres copias del sistema. [decidido]
+ *
+ * VERIFICADO, no citado: se construyó con Tailwind 4.3.1 y next build, con
+ * estos nombres de atributo, y el CSS emitido muestra las tres reglas vivas
+ * y las utilidades consumiendo var(--color-acento). El control con
+ * `@theme inline` demuestra que ahí el override NO llega.
+ *
+ * La home NO declara atributo: usa el defecto de @theme (azul).
+ * ========================================================================= */
+
+[data-servicio="web"] {
+  --color-acento: var(--color-acento-web);
+}
+
+[data-servicio="ia-automatizacion"] {
+  --color-acento: var(--color-acento-ia-automatizacion);
+}
+
+[data-servicio="software"] {
+  --color-acento: var(--color-acento-software);
+}
+
+/* =========================================================================
+ * SECCIÓN INVERTIDA — la banda oscura.
+ * =========================================================================
+ * develOP invierte secciones enteras, igual que la referencia alterna bandas
+ * claras y oscuras. Franco lo resuelve con CINCO tokens paralelos
+ * (--color-claro-fondo, --color-claro-tinta, …) porque su tema base es el
+ * oscuro y el claro es la excepción.
+ *
+ * Acá se resuelve con el MISMO mecanismo del acento contextual, y por eso no
+ * cuesta ni un token nuevo: el bloque redefine la base y todo lo que la
+ * consuma por var() se da vuelta solo. [decidido]
+ *
+ * El foco entra gratis en el trato: como --color-foco ES var(--color-tinta),
+ * al redefinir la tinta el anillo se invierte sin que este bloque lo
+ * mencione. Es una cadena de dos niveles y se verificó entera en el build.
+ * Pasa 3:1 en los dos sentidos: 13,62:1 peor caso sobre claro, 18,00:1 acá.
+ *
+ * LA TINTA CLARA ES EL PROPIO PAPEL. [decidido] No se inventó un hex: el
+ * mismo color es fondo del tema claro y tinta del oscuro, y da 18,00:1 sobre
+ * #0E0E0E. Franco NO tiene esa simetría —su fondo claro es #F2EEE6 y su
+ * tinta clara #EDE9E1, dos colores distintos a 1,0464:1 entre sí— porque su
+ * sistema es cálido. El de develOP es neutro y la simetría exacta se puede.
+ * ========================================================================= */
+
+[data-seccion="invertida"] {
+  --color-fondo: #0E0E0E;                          /* [decidido] */
+  --color-tinta: #F7F7F5;                          /* el papel, dado vuelta — 18,00:1 [decidido] */
+  --color-borde: rgba(247, 247, 245, 0.10);        /* [derivado] */
+  --color-borde-fuerte: rgba(247, 247, 245, 0.47); /* misma alfa que el claro — 4,62:1 [derivado] */
+
+  /* NO se redefinen --color-superficie-1/2/3. [pendiente]
+   * La sección invertida es UNA superficie: el brief de develOP declara
+   * #0E0E0E y nada más. Derivar tres superficies oscuras acá sería inventar
+   * tres colores que nadie pidió.
+   * DISPARADOR: si una sección invertida necesita paneles elevados, se
+   * derivan con el mismo método espejado —las razones 1,0533 · 1,1483 ·
+   * 1,2957 aplicadas desde #0E0E0E hacia claro— y se verifica que la tinta
+   * clara siga pasando AA sobre las tres.
+   *
+   * NO se redefine --color-acento ni se emiten variantes claras. [pendiente]
+   *
+   * LA REGLA, y sale de la medición, no del espejo con Franco:
+   *   el acento acá va como RELLENO o como SUBRAYADO.
+   *   NUNCA como texto. NUNCA como único indicador de un límite.
+   *
+   * Sobre #0E0E0E los tres acentos dan 2,71 · 2,99 · 2,46. Eso es dos cosas
+   * a la vez: fallan AA como texto (4,5:1) Y no llegan a 3:1, que es el
+   * mínimo de un componente de interfaz. La primera se esperaba —es el
+   * espejo de la restricción de Franco— pero la segunda no, y es la que
+   * corrige la regla: un borde de acento acá es DECORATIVO. Sirve para
+   * acompañar un límite que ya se ve por otra cosa; no sirve para ser ese
+   * límite. Si el borde es lo único que marca dónde termina una tarjeta o
+   * un campo, el límite no se ve.
+   * Como RELLENO sí funciona, y con holgura: el papel encima da
+   * 6,65 · 6,02 · 7,31, los tres pasan AA.
+   * DISPARADOR: si una sección oscura necesita el acento como TEXTO, se
+   * emiten tres variantes claras con ≥4,5:1 sobre #0E0E0E, es decir
+   * luminancia relativa Y ≥ 0,19476 (un gris neutro de #7A7A7A o más claro).
+   * Los tres valores de arriba quedan escritos para que esta decisión sea
+   * revocable con datos y no de memoria. */
+}
+
+/* =========================================================================
+ * EL ANILLO DE FOCO — regla única, emitida desde el primer componente.
+ * =========================================================================
+ * AGREGADO POR S1. No estaba en el archivo de S0: S0 emitió los tokens
+ * (--color-foco, --foco-grosor, --foco-desplazamiento) y el sprint S1 emite
+ * la REGLA que los consume, que es lo que el token solo no hace.
+ *
+ * Por qué ahora y no cuando haya componentes: la referencia tiene 88 reglas
+ * de hover contra 5 de foco y ningún indicador visible. Una regla única es la
+ * ventaja más barata que hay disponible, y solo es barata si existe ANTES que
+ * los componentes — después hay que ir a buscarla a ochenta y ocho lugares.
+ *
+ * El foco se da vuelta SOLO en la sección invertida y no cuesta ni una línea
+ * acá: --color-foco es var(--color-tinta), y [data-seccion="invertida"]
+ * redefine la tinta. Cadena de dos niveles. Pasa 3:1 en los dos sentidos —
+ * 13,62:1 peor caso sobre claro, 18,00:1 sobre la invertida.
+ *
+ * ⚠ ALCANCE — POR QUÉ ESTÁ ACOTADA AL ÁRBOL DE /v3, Y NO ES GLOBAL DE VERDAD.
+ * El sprint pide "regla global de :focus-visible". Está acotada al árbol de
+ * /v3 con `[data-v3]` por una razón medida, no por prudencia: --color-foco
+ * vale #111111, y el portal (admin y dashboard) es zinc-950. Un anillo
+ * #111111 sobre #09090B da 1,0611:1 — invisible. Una regla verdaderamente
+ * global cambiaría el foco de admin y dashboard por uno que no se ve, en un
+ * sprint cuya primera regla es no tocar el sitio vivo. La cifra la produce
+ * `superficies.invariant.ts`.
+ * DISPARADOR para volverla global: el día que el sistema de develOP gobierne
+ * también el portal, o el día que exista un --color-foco propio del tema
+ * oscuro. Es sacar `[data-v3] ` del selector, nada más.
+ *
+ * Sin @layer a propósito: así gana contra el `@layer base` de Tailwind, donde
+ * viven los defaults del navegador normalizados.
+ * ========================================================================= */
+
+[data-v3] :focus-visible,
+[data-v3]:focus-visible {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-desplazamiento);
+}
