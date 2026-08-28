@@ -81,10 +81,30 @@ const nextConfig = {
       },
       // ── Clickjacking protection for authenticated routes ───────────────────
       // /embed/* is intentionally excluded — those routes must be iframeable.
+      // /setter incluido (A2): la zona del setter quedaba fuera del patrón y era
+      // embebible por cualquier sitio — clickjacking sobre las pantallas donde
+      // se cargan prospectos y se opera sobre leads.
       {
-        source: '/(admin|dashboard)(.*)',
+        source: '/(admin|dashboard|setter)(.*)',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
+        ],
+      },
+      // ── frame-ancestors para /setter ───────────────────────────────────────
+      // X-Frame-Options es el header legacy; frame-ancestors es el mecanismo
+      // vigente y el único que respetan los navegadores modernos en algunos
+      // casos de anidamiento. Va en un bloque propio y NO en el de arriba a
+      // propósito: sumarlo al bloque compartido le estrenaría una CSP en modo
+      // enforce a /admin y /dashboard, que hoy solo reciben la CSP global en
+      // Report-Only. Este bloque no toca esa CSP global (header distinto:
+      // `Content-Security-Policy` vs `Content-Security-Policy-Report-Only`) ni
+      // alcanza /embed/*, que sigue con su `frame-ancestors *`.
+      // Una CSP con una sola directiva solo restringe esa directiva: el resto
+      // del contenido de /setter no queda sujeto a ninguna política nueva.
+      {
+        source: '/setter(.*)',
+        headers: [
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
         ],
       },
       // ── Widget JS ─────────────────────────────────────────────────────────

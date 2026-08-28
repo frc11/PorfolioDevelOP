@@ -4040,3 +4040,274 @@ se tocaron en ninguno de los cinco recorridos; el formulario quedó documentado 
 **Cierre:** `git diff --stat` sin cambios en archivos versionados; el único agregado es
 `docs/manual-usuario/BACHES-CORRIDA-EXPERIENCIA.md` más esta entrada. Cero `src/`, cero
 tests, cero config. Worktree y scripts de navegación borrados. Sin push.
+
+---
+
+## Sprint F0 — Reconciliar las ramas y re-verificar los baches sobre el producto podado — 2026-08-12
+
+Dos fases. La A cerró antes de arrancar la B.
+
+### Fase A — las ramas
+
+**El diagnóstico.** `main` local estaba en `4dadd274`, **56 commits atrás** de `origin/main` y
+contenido en él (avance directo, sin conflicto). `redesign/home` sí había divergido de `origin/main`
+(34 adelante / 30 atrás) pero **en archivos distintos**: setter y home de un lado,
+`src/modules/chatbot/` del otro. Y **P11 no estaba en ninguna rama**: vivía en `stash@{0}`
+(`507afe2d`), con `turno.ts` y `turno.invariant.ts` en el tercer padre — sin esos dos, no compila.
+
+**El hallazgo que reencuadró la Fase B.** El reporte de la corrida de experiencia declara `4dadd274`,
+y ese commit **no tiene ni uno solo de los diez bloques de la poda**. La corrida no midió el producto
+medio podado: midió el producto **sin podar**. El propio reporte lo había visto sin poder explicarlo
+("la evaluación fusionada no existe: son dos"; las de construcción "son seis").
+
+**Paso 0 — P11 primero.** `git stash apply` (nunca `pop`) sobre `leados/p11-turno`, rama nueva anclada
+en la base real del stash (`0f6fee58`), en un worktree aislado. Los dos archivos del tercer padre
+verificados por hash contra `stash@{0}^3`. Commit `513f38b4`, árbol limpio en la misma pasada.
+
+**Concurrencia.** A mitad del diagnóstico **otra sesión tomó el checkout principal**, commiteó la
+corrida (`daed0270`), mergeó `origin/main` (`8b60c176`) y pusheó — también `redesign/home`. Auditado
+antes de seguir: `55b967af → 8b60c176` suma bitácora + doc de baches + `.gitignore`, y **borra cero
+líneas**. De ahí en adelante todo el trabajo se hizo en worktree propio.
+
+**El único conflicto no fue código:** `bitacora-beta-3.md`, en los dos merges. `.gitignore`,
+`next.config.ts` y `package.json` automergearon limpio. Resuelto por concatenación cronológica y
+**verificado mecánicamente**: conteo de líneas = base + los dos lados (3888 y 4042 exactos), cada
+tramo idéntico a lo que sumó su lado, ninguna línea faltante por multiset en ninguna dirección,
+ninguna línea inventada, 81 secciones = 68 + 1 + 11 + 1, cero marcadores sobrevivientes.
+
+**Gates.** `npx tsc --noEmit` **exit 0, cero errores** — la línea base tenía 4, todos de `.next/`
+generado apuntando a `src/app/styleguide`, que no existía en `main` y volvió con el merge.
+`npm run check:invariants` **19/19** (eran 17; suman `pantallas` y `turno`).
+
+**Push** en orden de riesgo: `redesign/home` → `leados/p11-turno` → `HEAD:main`
+(`8b60c176..05ae1a87`). Verificado que `origin/main`, `redesign/home`, `origin/redesign/home` y
+`leados/p11-turno` tienen **0 commits** fuera de la rama reconciliada.
+
+### Fase B — qué baches siguen vivos
+
+Salida en [`docs/manual-usuario/BACHES-RE-VERIFICADOS.md`](manual-usuario/BACHES-RE-VERIFICADOS.md).
+Build de producción aislado en el worktree, `:3006`, seeds `v1-qa-wizard-states` + `qa-manual-m5-m16`.
+
+**Los tres bugs de datos.** Dos vivos y reproducidos, uno refutado.
+
+- **La postergación se guarda un día antes: VIVO, dos de dos.** 25/8 → "se retoma el 24/8"; 1/9 →
+  "31/8". La causa entera: `<input type="date">` manda `'2026-08-25'`, `z.coerce.date()` hace
+  `new Date('2026-08-25')` y una fecha ISO sin hora **se parsea como UTC**; `formatFechaCorta` la
+  formatea en huso argentino (UTC−3) y cae al día anterior. **No es sólo la etiqueta**: el instante
+  guardado es 21:00 del día previo, así que el panel reactiva de verdad un día antes. La forma
+  correcta ya está en el producto — el pausar de la cartera guarda fin del día local
+  (`2026-08-20T02:59:59Z` = 19/8 23:59:59 AR).
+- **El contador de DMs sube sin mandar nada: VIVO.** `0/10 → 1/10 → 2/10` postergando.
+  `contarDmsHoy` cuenta toda `OsLeadActivity` del canal `INSTAGRAM_DM` del día sin mirar el `result`:
+  cuenta registros en el canal, no mensajes enviados.
+- **"Pausar en tu cartera" no hace nada: REFUTADO.** No es una acción, es un **disclosure**: abre un
+  panel con atajos y campo de fecha. El commit persiste y **anuncia** ("Pausado — vuelve a tu cartera
+  el 19/8"). El componente es **byte a byte idéntico** al de `4dadd274`, así que se comportaba igual
+  durante la corrida — la corrida midió label/`disabled`/`aria-live`, que son las señales de un botón
+  de acción, y nunca miró si se abría un panel. Residuos reales y chicos: el disclosure no tiene
+  `aria-expanded`, y las tres acciones de la tarjeta comparten un `isPending`.
+
+**El motivo del rechazo (B-A1): VIVO, con la mecánica corregida.** No se destruye — `dossier.rechazos`
+**sobrevive** intacto a la reapertura. Lo que pasa es que **ninguna de las 8 pantallas lo muestra** una
+vez que el lead sale de RECHAZADA. Es un arreglo de presentación, no de persistencia: mucho más barato
+de lo que el reporte hacía pensar. De paso, reabrir ahora **anuncia** y aterriza en m14, no en m7.
+
+**Los patrones, re-contados.** El 2 ("el puntero miente") quedó casi cerrado: en 26 combinaciones
+lead×pantalla, "Ir a tu paso actual" apunta al paso real en todas. El 1 (acuse de recibo) bajó de 10
+casos a 3 vivos verificados; **el modelo a replicar es `ActionButton` de `lead-card-actions.tsx`** —
+`useTransition` que deshabilita en el acto + `toast` que escribe en la región `aria-live` — y es
+justo el par de señales que le falta a "Saltar". El 3 ("el dato no viaja") sigue siendo patrón. El 6
+quedó diferido casi entero por ser de celular.
+
+**Una limitación declarada.** El panel del navegador no compone frames: sin capturas, y **la mitad
+"la pantalla sigue mostrando el estado anterior" del patrón 1 queda no verificable**. El anuncio sí
+es fiable — es client-side. Donde el reporte dice "no anuncia", está medido.
+
+**Cobertura honesta.** 23 baches no-celular clasificados contra la aplicación; **22 quedan pendientes**
+y están listados por ID en el reporte — no se clasificaron de memoria. El barrido de celular queda
+diferido por decisión de Franco (10 baches). Las 4 herramientas sin URL siguen bloqueando lo suyo.
+
+**El contraste (B-D10) no se difirió:** aplica en computadora y está vivo — **46 de 103** textos
+visibles de `/setter` incumplen AA, el peor a **1,97:1** en 10px. Medido convirtiendo `oklch` a sRGB,
+porque los tokens del sistema son oklch y un lector de contraste que sólo entiende `rgb()` no ve nada.
+
+**El diff:** el reporte y esta entrada. Cero `src/`, cero tests, cero config.
+
+---
+
+## Sprint A2-S1 — /setter deja de ser embebible — 2026-08-15
+
+**El agujero.** La auditoría A2 lo encontró en `next.config.ts`: `X-Frame-Options: DENY` se aplicaba
+sobre `source: '/(admin|dashboard)(.*)'`. `/setter` quedaba afuera. La CSP global sí trae
+`frame-ancestors 'none'`, pero viaja en `Content-Security-Policy-**Report-Only**` — un header que el
+navegador **reporta y no aplica**. Neto: las seis pantallas donde un setter carga prospectos y opera
+leads (`/setter`, `/setter/leads`, `/setter/leads/[leadId]`, `.../manual/[paso]`, `/setter/nuevo`,
+`/setter/nuevo/importar`) se podían montar en un iframe de un sitio ajeno. Superficie de clickjacking
+sobre acciones autenticadas.
+
+**Qué se cambió.** Dos bloques en `headers()`, nada más:
+
+1. `source: '/(admin|dashboard)(.*)'` → `'/(admin|dashboard|setter)(.*)'`. Un término en la
+   alternancia. `/admin` y `/dashboard` reciben exactamente los mismos headers que antes.
+2. Bloque nuevo `source: '/setter(.*)'` con `Content-Security-Policy: frame-ancestors 'none'`.
+
+**Por qué la CSP va en bloque aparte y no en el compartido.** Sumarla al bloque de arriba le
+estrenaría una CSP en modo **enforce** a `/admin` y `/dashboard`, que hoy sólo reciben la global en
+Report-Only — un cambio de comportamiento fuera del objetivo del sprint, y la clase de cambio que
+rompe en producción y no en dev. Aislada en `/setter(.*)`, el radio de impacto es el que se quiso
+tocar. Una CSP con una sola directiva **sólo restringe esa directiva**: `frame-ancestors` no cae por
+`default-src`, así que el resto del contenido de `/setter` no queda sujeto a ninguna política nueva.
+Se suma a `X-Frame-Options` en vez de reemplazarlo porque XFO es el header legacy y `frame-ancestors`
+el mecanismo vigente — con anidamiento de varios niveles, los navegadores modernos hacen caso al
+segundo.
+
+**Lo que NO se tocó**, por regla del sprint: la CSP global sigue en `Report-Only` (sacarla de ahí es
+otra decisión, con riesgo real sobre el widget embebible), `middleware`/`proxy.ts` intacto, headers de
+`/admin` y `/dashboard` intactos.
+
+**El widget sigue embebible — probado, no asumido.** `/embed/[slug]` es la única ruta bajo
+`src/app/embed/`, y ni `/(admin|dashboard|setter)(.*)` ni `/setter(.*)` pueden alcanzar un path que
+arranca con `/embed`. Confirmado además contra el server, no sólo por lectura.
+
+**Evidencia — `next dev` en `:3000`.**
+
+```
+$ curl -I http://localhost:3000/setter
+HTTP/1.1 307 Temporary Redirect
+...
+Content-Security-Policy-Report-Only: default-src 'self'; ...; frame-ancestors 'none'; ...
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+location: /login?callbackUrl=%2Fsetter
+```
+
+Barrido del resto (sólo las líneas de framing):
+
+```
+/setter/leads            X-Frame-Options: DENY   +  Content-Security-Policy: frame-ancestors 'none'
+/setter/nuevo/importar   X-Frame-Options: DENY   +  Content-Security-Policy: frame-ancestors 'none'
+/embed/test-slug         Content-Security-Policy: frame-ancestors *;      (sin X-Frame-Options)
+/embed/demo              Content-Security-Policy: frame-ancestors *;      (sin X-Frame-Options)
+/admin                   X-Frame-Options: DENY    (sin CSP enforce — igual que antes)
+/dashboard               X-Frame-Options: DENY    (sin CSP enforce — igual que antes)
+```
+
+Las dos rutas de `/embed` salen con `frame-ancestors *` y **sin** `X-Frame-Options`: la regla nueva no
+las alcanza. `/admin` y `/dashboard` salen sin CSP en enforce: el bloque compartido no cambió lo que
+entregan.
+
+**Gate.** `npx tsc --noEmit` **exit 0**.
+
+**El diff:** `next.config.ts` y esta entrada. Cero `src/`, cero tests, cero middleware.
+
+**Queda para verificación humana.** Confirmar en el deploy de Netlify que los dos headers se sirven en
+producción sobre `/setter`. Los headers de `next.config.ts` los aplica el plugin de Netlify, no Next
+directamente — que anden en `next dev` **no prueba** que anden en prod. No se da por bueno hasta verlo
+con un `curl -I` contra el dominio real.
+
+---
+
+## Verificación de arranque OSLead VII — qué hay realmente en el código hoy — 2026-08-18
+
+Read-only. Cero `src/`, cero tests, cero configuración. Salida en
+[`docs/verificacion-arranque-oslead-vii.md`](verificacion-arranque-oslead-vii.md).
+
+**Por qué existió.** El handoff decía qué se hizo, no cómo estaba el código. En este repo la
+documentación de estado ya mintió dos veces. Se verificó antes de planificar nada.
+
+**Fase 0 — el criterio de frenada se disparó.** El working tree tenía cambios sin commitear ajenos,
+incluido un archivo de **configuración**. No había servidor contra este checkout (el único listener,
+`:3000`, es de `RG-CRM`, otro proyecto). Se montaron dos worktrees propios fuera del repo —
+`C:/tmp/wt-verif-vii` (F1+F2+F3) y `C:/tmp/wt-verif-main` (`05ae1a87`) — con `node_modules` por
+junction, build propio y puerto **3013**. No se tocó nada ajeno: ni stashes, ni worktrees, ni procesos.
+
+### Lo que dio verde
+
+**Las cuatro suites, exit 0 las cuatro**, sobre F1+F2+F3: `npx tsc --noEmit` **0 líneas** ·
+`check:invariants` **22/22** · `test:leados` **25/25** · `test:setter` **62/62** (62, no 60: F2 sumó
+`14-motivo-rechazo.spec.ts`). Sobre `main` por separado: `tsc` exit 0 y `check:invariants` **19/19**.
+
+**Los fixtures del wizard están sanos.** `QA-W Rechazada` sigue en `stage=RECHAZADA` con su rechazo
+íntegro (`motivo`/`donde`/`arreglo`/`detalle`), sin tocar desde el 12/8: **la pantalla de reentrada
+reproduce**. El barrido A no lo dejó en CONSTRUCCIÓN.
+
+### Lo que dio rojo
+
+**El trabajo no está íntegro ni en un solo lugar, y el handoff se equivoca dos veces.** No hay
+«F0–F4»: hay **dos** commits F. `F1` (`34e15156`) y `F2` (`2d456390`) están **sin pushear**
+(`git branch -r --contains` vacío para los dos, y `merge-base --is-ancestor` da NO contra `main` y
+contra `origin/main`). **F3 nunca llegó a commit** — `f3/acuse-recibo` apunta al commit de F2 y su
+trabajo vive sin commitear en `C:/tmp/wt-f3-acuse`. **F4 no existe.** Y en el checkout principal
+quedaron sin commitear el reporte de F0, su entrada de bitácora y **un fix de seguridad**.
+
+**Los 22 invariantes existen, pero en un árbol que no está en ningún commit.** `main` tiene **19**;
+F1 suma `postergacion` y `contador-dms` (21); el 22 es `acuse`, y **está sin commitear**. No faltan
+tres: **nunca llegaron** — no hay commit donde buscarlos borrados.
+
+**`/setter` es hoy embebible en un iframe ajeno.** En `main`, `next.config.ts:85` cubre solo
+`admin|dashboard`, y la CSP global es **Report-Only**, así que su `frame-ancestors` no aplica. El fix
+ya está escrito… sin commitear.
+
+**`tsx` no es dependencia declarada del repo** (ni en `package.json`, ni en el lock, ni en
+`node_modules/`). Resuelve por un binario global de esta máquina, y de él dependen ~60 invariantes,
+`prisma db seed` y todos los seeds QA — incluidos los tres nuevos.
+
+### El censo, que cierra exacto
+
+**15 pasos sobre 6 rutas.** Contra `probe-poda-terreno.md` §10 R9 (20 pasos, del 31/7): **7 censadas
+ya no existen** (`m3`, `m7`–`m12`), **2 existen sin censar** (`mc1`, `mc2`), **13 coinciden** — y de
+esas 13, **3 cambiaron encabezado** (`m2`, `m6`, `m14`). 20 − 7 + 2 = 15.
+
+Dos correcciones al estado que se daba por conocido: **`m3` no cambió, desapareció**; y **«m5 cambió»
+queda refutado** — su bloque en `PANTALLAS` es byte-idéntico al commit fundacional, lo que cambió fue
+su componente. Trampa registrada: los títulos de `espera` y `revision` en `PANTALLAS` son **código
+muerto en pantalla** (esas rutas pintan `TEXTO_TURNO[turno]`), así que auditar su copy contra el
+registro da un resultado falso.
+
+### Galería y manual: el que los desactualiza no es ninguna F
+
+**50 capturas y 13 capítulos** (contados, los dos números del encargo son exactos). **12 capturas
+desfasadas confirmadas + 3 por inferencia; 9 capítulos de 14.** La causa es **P11 (`513f38b4`), que
+SÍ está en `main`** y reescribió el vocabulario de las tres esperas. Y **regenerar hoy no alcanza:**
+P11 actualizó el spec de captura pero no el catálogo de textos del índice, que sigue diciendo frases
+que P11 borró del producto. De paso: `35-home-foco.png` y `36-home-cartera.png` son **byte-idénticos**
+(md5 verificado) — la cartera nunca se fotografió, y el índice declara «0 huecos».
+
+### Los 22 baches: 0 muertos, 19 por lectura, 3 para manejar
+
+El triage pasó por **una segunda pasada adversarial** que intentó refutar la primera. Cambió 4
+dictámenes de 22 — sin ella este reporte habría dicho «0 exige manejar la app», que es falso.
+
+**La expectativa no se cumplió: ningún bache murió con la poda.** Las pantallas murieron, pero los
+controles **migraron** y el defecto viajó con ellos. El caso testigo es `B-A5`: se reportó «en m7»,
+`m7` no existe, y sin embargo el control **no cambió de archivo** — `m-construccion.tsx` se
+re-parametrizó de `m7…m12` a `mc1/mc2` y la cadena rota sigue ahí. **Poda de pantalla ≠ muerte de
+bache.**
+
+Los **3 que exigen manejar la app** (`B-B11`, `B-C3/C4/C5`, `B-C8`) comparten un patrón que conviene
+recordar: **el código fuente dice una cosa y la corrida midió la contraria, en el mismo commit**. El
+`aria-label` de `B-C8` ya estaba cuando la corrida reportó el bug; el listbox de `B-C4` se enfoca con
+un `requestAnimationFrame` en una línea byte-idéntica a la medida. Ninguna lectura arbitra eso.
+
+Un dictamen corregido por la refutación: **`B-P9`** tiene la mitad que le da nombre (el «hace hace»)
+**ya arreglada en `main`** por `c2160792`, anterior a la corrida. Dictaminarlo «VIVO» sin matizar
+mandaba a arreglar un string que ya no existe.
+
+### El entorno no está listo para que un humano verifique lo perceptual
+
+Las **4 URLs de herramientas siguen en `null`** y **no hay pantalla que las cargue**: no viven en
+Prisma, viven hardcodeadas en `herramientas.ts` — el único camino es editar el `.ts` y redeployar.
+**Cal.com está NULL en las 16 organizaciones**, incluida `develop`, y **nadie escribe esos campos en
+todo el código** (cero writes, barrido repo-wide); `m16` no bloquea, falla recién al hacer clic. Y el
+**panel de novedades del setter tiene 80 avisos sin leer, de los cuales 77 son huérfanos** — su lead
+fue borrado. Es 96% residuo de corridas de test.
+
+**Contaminación propia, declarada.** Correr las suites era parte del encargo y toca la base. Se
+censó **antes** y se midió el delta: **0 leads creados, 0 usuarios creados, 0 fixtures alterados, 1
+novedad huérfana** (`2026-08-18T04:55:04Z`). El censo previo daba 79 novedades; el posterior, 80. Esa
+diferencia es de esta corrida. **No se re-seedeó nada.**
+
+**Cierre.** El único diff versionado son el reporte y esta entrada. Cero `src/`, cero tests, cero
+configuración. Sin push. Los dos worktrees propios quedan declarados en el reporte; el WIP ajeno del
+checkout —bitácora de F0, `next.config.ts`, los 3 docs de auditoría y `BACHES-RE-VERIFICADOS.md`— se
+dejó **intacto y sin commitear**.
