@@ -1,4 +1,15 @@
 @import "tailwindcss";
+/* SISTEMA DE DISEÑO DE develOP v3 — los 89 tokens de S0, en su propio archivo.
+   Aparte y no pegado acá porque este archivo ya pasa las 800 líneas y la regla
+   del repo parte a las 300. Va inmediatamente después de `tailwindcss` para
+   que sus overrides ganen contra los defaults del framework y para que las
+   reglas de abajo (que son CSS común, no @import) queden después: un @import
+   tiene que preceder a toda regla que no sea @charset o @layer.
+   Hoy lo consume SOLO el árbol de /v3. El resto del sitio sigue con los
+   tokens `--color-ds-*` de más abajo, que este archivo no toca — hay una sola
+   colisión de nombre en 89 tokens y está resuelta adentro (`--font-codigo`),
+   verificada por `v3/_lib/__tests__/tokens.invariant.ts`. */
+@import "./theme-develop.css";
 @plugin "@tailwindcss/typography";
 
 @theme {

@@ -99,7 +99,13 @@
     "seed:galeria": "tsx scripts/dev/m0-galeria-seed.ts",
     "galeria:capturar": "playwright test --config=playwright.galeria.config.ts",
     "galeria:indice": "tsx scripts/dev/m0-galeria-indice.ts",
-    "galeria": "npm run seed:galeria && npm run galeria:capturar && npm run galeria:indice"
+    "galeria": "npm run seed:galeria && npm run galeria:capturar && npm run galeria:indice",
+    "test:s1-tokens": "npx tsx src/app/v3/_lib/__tests__/tokens.invariant.ts",
+    "test:s1-fuentes": "npx tsx src/app/v3/_lib/__tests__/fuentes.invariant.ts",
+    "test:s1-compuerta": "npx tsx src/app/v3/_lib/__tests__/compuerta.invariant.ts",
+    "test:s1-superficies": "npx tsx src/app/v3/_lib/__tests__/superficies.invariant.ts",
+    "test:s1-bundle": "npx tsx src/app/v3/_lib/__tests__/bundle.invariant.ts",
+    "test:s1": "npm run test:s1-tokens && npm run test:s1-fuentes && npm run test:s1-compuerta && npm run test:s1-superficies && npm run test:s1-bundle"
   },
   "dependencies": {
     "@ai-sdk/google-vertex": "^4.0.128",

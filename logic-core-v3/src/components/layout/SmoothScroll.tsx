@@ -33,6 +33,21 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
             return;
         }
 
+        // ── /v3 corre con scroll NATIVO (S1) ──────────────────────────────────
+        // Lenis ya está instalada y es global en todo lo que no sea portal, así
+        // que /v3 la heredaba sin que nadie la eligiera. El esqueleto de v3
+        // pinnea con `position: sticky` y la afirmación que hay que poder juzgar
+        // es "el ritmo funciona SIN UNA LÍNEA DE JS": con un motor de scroll
+        // encima, esa afirmación no se puede sostener ni desmentir.
+        //
+        // ⚠ La decisión pendiente del lane de motion NO es "sumar Lenis" — ya
+        // está instalada, y sacarla del proyecto es otra conversación. Es
+        // "dejarla en /v3 o no". Excluirla acá deja la decisión abierta y el
+        // pinneado medible; incluirla la cerraba por omisión.
+        if (pathname && pathname.startsWith('/v3')) {
+            return;
+        }
+
         const isHome = pathname === '/';
 
         // Este forzado a scroll 0 existía para que el velo del intro tapara la
