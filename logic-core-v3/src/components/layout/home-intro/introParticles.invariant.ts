@@ -2,14 +2,11 @@ import {
   BOKEH_R_MAX,
   BOKEH_SIZE,
   PARTICLES_MAX,
-  PARTICLE_FAR_COLOR,
-  PARTICLE_NEAR_COLOR,
   PARTICLE_R_MAX,
   PARTICLE_SIZE,
 } from '@/app/probe-escena/_components/probeParticles'
 import { ORBIT_TARGET_Y } from '@/app/probe-escena/_components/probeScene'
 import { PROBE_DEFAULTS } from '@/app/probe-escena/_components/probeStore'
-import { shadeUnlit } from '@/app/probe-escena/__tests__/shading'
 import { pointSizePx } from '@/lib/scene-camera'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 
@@ -18,12 +15,11 @@ import {
   DUST_MATERIAL_ALPHA,
   DUST_RADIUS_BIAS,
   FLOOR_CLEARANCE,
+  INTRO_DUST_SCALE,
   INTRO_DUST_SHARE,
-  INTRO_TINT_STEPS,
+  INTRO_DUST_SIZE,
+  INTRO_FALL_WORLD,
   dustDepthFloor,
-  introTintColor,
-  moteRampColor,
-  type IntroMote,
 } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
 import {
@@ -34,7 +30,6 @@ import {
   sceneParticleField,
   seededDustField,
 } from './introParticleProbe'
-import { hexToSrgb, mixSrgbInLinearLight, srgbToHex } from './introShading'
 
 /**
  * COMPROBACIÓN ESTÁTICA DE LA ESPECIE — **que las del intro y las de la escena
@@ -46,16 +41,22 @@ import { hexToSrgb, mixSrgbInLinearLight, srgbToHex } from './introShading'
  *
  *  · **Misma población.** Si el ojo registra un cambio de especie al disolverse
  *    el blanco, el truco se rompe. Por eso el campo del intro no se calibra: es
- *    el de la escena, proyectado. Acá se mide cuánto se parecen.
+ *    el de la escena, proyectado. Acá se mide cuánto se parecen — y desde S14,
+ *    **en qué se diferencian a propósito**: el tamaño y la densidad del polvo
+ *    son propios del intro, y la comprobación exige que la diferencia sea
+ *    exactamente la perilla. El color, el material y la forma no se tocan.
  *  · **Distinta muestra.** Con la misma semilla las motas caerían desde
  *    exactamente los lugares donde, tres décimas más tarde, las de la escena
  *    vuelven a estar — y eso no se lee como dos poblaciones sino como UNA que se
  *    teletransportó. **La divergencia se comprueba, no se supone**, y el control
  *    positivo demuestra que este instrumento vería la coincidencia si existiera.
  *
- * La caída está en `introParticleField.invariant.ts` y el ritmo en
- * `introParticleTiming.invariant.ts`; el banco de medición que las tres
- * comparten, en `introParticleProbe.ts`.
+ * El color se fue a `introParticleTint.invariant.ts` con su módulo. La caída
+ * está en `introParticleField.invariant.ts`, el ritmo en
+ * `introParticleTiming.invariant.ts`, la lectura en
+ * `introParticleReading.invariant.ts` y la perilla de tamaño en
+ * `introParticleScale.invariant.ts`; el banco que comparten, en
+ * `introParticleProbe.ts`.
  */
 
 const W = 1440
@@ -91,10 +92,25 @@ check(
   DEPTH_SRC.includes(`opacity={${DUST_MATERIAL_ALPHA}}`),
   `${DUST_MATERIAL_ALPHA}`
 )
+/**
+ * 🔴 **Acá S14 suelta una restricción, y conviene dejar dicho cuál.** Hasta S13
+ * el intro dibujaba la MISMA fracción que el probe embarca —era la mezcla de la
+ * escena— y esta comprobación exigía la igualdad. La correspondencia de
+ * población nunca fue el requisito del mecanismo: el requisito es que no se vean
+ * las dos poblaciones juntas, y de eso se ocupa `PARTICLES_BEFORE_VEIL` con su
+ * control negativo. Lo que se custodia ahora es que las dos cosas propias del
+ * intro —la densidad y la escala— sean **declaradas y en el sentido que el
+ * sprint pide**: menos motas y más grandes.
+ */
 check(
-  'y la fracción del campo dibujada es el default que el probe embarca',
-  Math.round(INTRO_DUST_SHARE * PARTICLES_MAX) === PROBE_DEFAULTS.particleCount,
-  `${INTRO_DUST_SHARE} × ${PARTICLES_MAX} = ${PROBE_DEFAULTS.particleCount}`
+  'la fracción dibujada es propia del intro, y menor que la de la escena',
+  INTRO_DUST_SHARE < PROBE_DEFAULTS.particleCount / PARTICLES_MAX,
+  `${Math.round(INTRO_DUST_SHARE * PARTICLES_MAX)} motas contra las ${PROBE_DEFAULTS.particleCount} de la escena — el ${((INTRO_DUST_SHARE * PARTICLES_MAX * 100) / PROBE_DEFAULTS.particleCount).toFixed(0)}%`
+)
+check(
+  'y el tamaño también es propio, y mayor',
+  INTRO_DUST_SIZE > PARTICLE_SIZE,
+  `${PARTICLE_SIZE} × ${INTRO_DUST_SCALE} = ${INTRO_DUST_SIZE.toFixed(4)} de mundo`
 )
 /** Control positivo: si el `grep` no encontrara nada, los cuatro pasarían igual. */
 check(
@@ -116,23 +132,39 @@ const sceneDust = scene.filter((m) => m.kind === 'dust').map((m) => m.sizePx)
 const introBokeh = intro.motes.filter((m) => m.kind === 'bokeh').map((m) => m.sizePx)
 const sceneBokeh = scene.filter((m) => m.kind === 'bokeh').map((m) => m.sizePx)
 
+/**
+ * 🔴 **La densidad y el tamaño del polvo YA NO coinciden con los de la escena, y
+ * es el punto del sprint.** Lo que se comprueba en su lugar es más fuerte que la
+ * igualdad que había: que la diferencia sea **exactamente la perilla y nada
+ * más**. Si el polvo del intro fuera otra distribución —y no la misma corrida
+ * por un factor— los tres cuantiles no se moverían por el mismo número.
+ */
 check(
-  'la densidad en cuadro es la misma dentro del 5%',
-  Math.abs(intro.motes.length / scene.length - 1) < 0.05,
+  'la densidad en cuadro es menor, y esa es la mitad del cambio',
+  intro.motes.length < scene.length * 0.6,
   `${intro.motes.length} contra ${scene.length} — ${(((intro.motes.length - scene.length) / scene.length) * 100).toFixed(1)}%`
 )
-for (const [label, a, b, tolerance] of [
-  ['polvo · mediana', quantile(introDust, 0.5), quantile(sceneDust, 0.5), 0.1],
-  ['polvo · p10', quantile(introDust, 0.1), quantile(sceneDust, 0.1), 0.1],
-  ['polvo · p90', quantile(introDust, 0.9), quantile(sceneDust, 0.9), 0.3],
-  ['bokeh · mediana', quantile(introBokeh, 0.5), quantile(sceneBokeh, 0.5), 0.6],
+for (const [label, a, b] of [
+  ['polvo · mediana', quantile(introDust, 0.5), quantile(sceneDust, 0.5)],
+  ['polvo · p10', quantile(introDust, 0.1), quantile(sceneDust, 0.1)],
+  ['polvo · p90', quantile(introDust, 0.9), quantile(sceneDust, 0.9)],
 ] as const) {
   check(
-    `${label}: mismo diámetro en píxeles`,
-    near(a, b, tolerance),
-    `${a.toFixed(2)} contra ${b.toFixed(2)} px`
+    `${label}: el de la escena por la escala, y nada más`,
+    near(a / b, INTRO_DUST_SCALE, 0.1),
+    `${a.toFixed(2)} contra ${b.toFixed(2)} px — ×${(a / b).toFixed(3)} contra la perilla en ${INTRO_DUST_SCALE}`
   )
 }
+/**
+ * El bokeh, en cambio, **no se tocó**: sigue siendo el mismo disco que la escena
+ * proyecta en esta pose. La escala grande del campo ya estaba donde tenía que
+ * estar; lo que no se leía era el polvo.
+ */
+check(
+  'bokeh · mediana: mismo diámetro en píxeles, sin escala de por medio',
+  near(quantile(introBokeh, 0.5), quantile(sceneBokeh, 0.5), 0.6),
+  `${quantile(introBokeh, 0.5).toFixed(2)} contra ${quantile(sceneBokeh, 0.5).toFixed(2)} px`
+)
 
 // ── 3 · La divergencia de la semilla ────────────────────────────────────────
 
@@ -167,88 +199,23 @@ check(
   `mediana ${quantile(introVsScene, 0.5).toFixed(1)} px contra ${quantile(thirdVsScene, 0.5).toFixed(1)} de una tercera semilla`
 )
 
-// ── 4 · El color ────────────────────────────────────────────────────────────
+// ── 4 · El recorte de las dos escalas ───────────────────────────────────────
 
-section('4 · El color de cada mota es el que la escena renderiza')
-
-/**
- * La rampa del intro contra `shadeUnlit`, que es como la escena mide el valor de
- * una mota: el color del vértice —la mezcla en luz lineal de cerca a lejos, que
- * es donde `THREE.Color.lerp` trabaja— pasa directo al tone mapping, porque
- * `PointsMaterial` no recibe luz.
- *
- * Son dos caminos independientes al mismo número: acá el del intro
- * (`moteRampColor`, con la versión para grises del operador) y allá el de la
- * escena (`neutralToneMap` entero, canal por canal).
- */
-const NEAR = hexToSrgb(PARTICLE_NEAR_COLOR)
-const FAR = hexToSrgb(PARTICLE_FAR_COLOR)
-const greenOf = (hex: string) => parseInt(hex.slice(3, 5), 16)
-
-let worstColor = 0
-let exactColors = 0
-for (let i = 0; i <= 200; i += 1) {
-  const t = i / 200
-  const raw = srgbToHex(mixSrgbInLinearLight(NEAR, FAR, t))
-  const difference = Math.abs(greenOf(moteRampColor(NEAR, FAR, t)) - Math.round(shadeUnlit(raw)))
-  if (difference === 0) exactColors += 1
-  worstColor = Math.max(worstColor, difference)
-}
-check(
-  'la rampa del intro es la que la escena renderiza — 201 puntos, dos caminos',
-  worstColor <= 1,
-  `${exactColors} de 201 exactos · el resto a un byte, que es el redondeo`
-)
-check(
-  'y los dos extremos son las motas cercana y lejana de la escena',
-  near(shadeUnlit(PARTICLE_NEAR_COLOR), 70.6, 0.1) &&
-    near(shadeUnlit(PARTICLE_FAR_COLOR), 214.5, 0.1),
-  `${shadeUnlit(PARTICLE_NEAR_COLOR).toFixed(1)} → ${shadeUnlit(PARTICLE_FAR_COLOR).toFixed(1)}`
-)
-
-/** El error que introduce cuantizar la rampa en escalones para poder teñir. */
-let worstTint = 0
-for (const mote of intro.motes as readonly IntroMote[]) {
-  if (mote.tint < 0) continue
-  worstTint = Math.max(
-    worstTint,
-    Math.abs(greenOf(mote.color) - greenOf(introTintColor(mote.tint)))
-  )
-}
-check(
-  'y el escalonado del teñido queda acotado por la mitad del paso',
-  worstTint <= 3.2,
-  `${INTRO_TINT_STEPS} escalones sobre ${(shadeUnlit(PARTICLE_FAR_COLOR) - shadeUnlit(PARTICLE_NEAR_COLOR)).toFixed(0)} bytes · peor mota ${worstTint.toFixed(1)} de 255`
-)
-
-/**
- * Control positivo: repartir los escalones parejo en `t` —que es lo obvio y lo
- * que estaba primero— **duplica el peor error**, y lo concentra en las motas
- * cercanas. Sin esta medición, el reparto por valor parecería una elección de
- * estilo en vez de la que baja el error a la mitad.
- */
-let worstEven = 0
-for (let step = 1; step < INTRO_TINT_STEPS; step += 1) {
-  const a = greenOf(moteRampColor(NEAR, FAR, (step - 1) / (INTRO_TINT_STEPS - 1)))
-  const b = greenOf(moteRampColor(NEAR, FAR, step / (INTRO_TINT_STEPS - 1)))
-  worstEven = Math.max(worstEven, (b - a) / 2)
-}
-check(
-  'control positivo — con escalones parejos en `t` el error sería el doble',
-  worstEven > worstTint * 1.8,
-  `${worstEven.toFixed(1)} contra ${worstTint.toFixed(1)} de 255`
-)
-
-// ── 5 · El recorte de las dos escalas ───────────────────────────────────────
-
-section('5 · El único recorte, y sale de la regla de las dos escalas de S10')
+section('4 · El único recorte, y sale de la regla de las dos escalas de S10')
 
 const eye = Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y)
 const floor = dustDepthFloor(eye)
+/**
+ * ⚠ **Entra `INTRO_DUST_SIZE`, no `PARTICLE_SIZE` (S14).** El borde se corre CON
+ * la mota: el tamaño está arriba y abajo de la misma cuenta y se cancela, así
+ * que **el diámetro del corte no se mueve ni un píxel** al agrandar el polvo —
+ * lo que se mueve es la profundidad a la que cae, de 3,97 a 8,15, y con ella
+ * cuántas motas quedan afuera.
+ */
 check(
   'el piso de profundidad del polvo ES el diámetro del bokeh más chico',
-  near(pointSizePx(PARTICLE_SIZE, floor, H), pointSizePx(BOKEH_SIZE, eye + BOKEH_R_MAX, H), 1e-9),
-  `${floor.toFixed(3)} de profundidad → ${pointSizePx(PARTICLE_SIZE, floor, H).toFixed(2)} px, el mismo disco`
+  near(pointSizePx(INTRO_DUST_SIZE, floor, H), pointSizePx(BOKEH_SIZE, eye + BOKEH_R_MAX, H), 1e-9),
+  `${floor.toFixed(3)} de profundidad → ${pointSizePx(INTRO_DUST_SIZE, floor, H).toFixed(2)} px, el mismo disco`
 )
 check(
   'ninguna mota de polvo del intro proyecta más que el bokeh más chico',
@@ -257,18 +224,21 @@ check(
 )
 check(
   'la escena, en esta pose, ya lo cumple sola — no se le está imponiendo nada',
-  Math.max(...sceneDust) < pointSizePx(PARTICLE_SIZE, floor, H),
-  `su mota más grande mide ${Math.max(...sceneDust).toFixed(2)} px contra ${pointSizePx(PARTICLE_SIZE, floor, H).toFixed(2)}`
+  Math.max(...sceneDust) < pointSizePx(INTRO_DUST_SIZE, floor, H),
+  `su mota más grande mide ${Math.max(...sceneDust).toFixed(2)} px contra ${pointSizePx(INTRO_DUST_SIZE, floor, H).toFixed(2)}`
 )
 /**
- * Control positivo: el recorte tiene que estar cubriendo un caso REAL. El campo
- * llega a radio 34 con la cámara a 20,05 del origen, así que una mota puede
- * quedar a dos unidades de la lente — y con la semilla del intro, una queda.
+ * 🔴 **Control positivo: el recorte tiene que estar sacando motas de verdad**, o
+ * las tres comprobaciones de arriba serían verdes por vacío. Se cuenta contra el
+ * MISMO campo con un tamaño de mundo ínfimo, donde el borde se va a cero y no
+ * deja afuera a nadie: las posiciones no dependen del tamaño, así que la
+ * diferencia son exactamente las motas que el recorte se lleva.
  */
+const unclipped = buildIntroParticles(W, H, INTRO_FALL_WORLD, INTRO_DUST_SIZE * 0.01).dustCount
 check(
   'control positivo — el recorte cubre un caso que el campo produce de verdad',
-  PARTICLE_R_MAX > eye && intro.motes.length > 900,
-  `el campo llega a radio ${PARTICLE_R_MAX} con la cámara a ${eye.toFixed(2)}: una mota puede quedar a ${(PARTICLE_R_MAX - eye).toFixed(2)} por delante · quedan ${intro.motes.length} en cuadro`
+  PARTICLE_R_MAX > eye && unclipped > intro.dustCount,
+  `el campo llega a radio ${PARTICLE_R_MAX} con la cámara a ${eye.toFixed(2)}: una mota puede quedar a ${(PARTICLE_R_MAX - eye).toFixed(2)} por delante · el recorte se lleva ${unclipped - intro.dustCount} de ${unclipped} (${(((unclipped - intro.dustCount) / unclipped) * 100).toFixed(2)}%)`
 )
 
 report('introParticles')

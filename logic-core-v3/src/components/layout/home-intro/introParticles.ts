@@ -1,29 +1,17 @@
 import {
   BOKEH_R_MAX,
   BOKEH_SIZE,
-  PARTICLE_FAR_COLOR,
-  PARTICLE_NEAR_COLOR,
   PARTICLE_SIZE,
 } from '@/app/probe-escena/_components/probeParticles'
-import { BOKEH_COLOR } from '@/app/probe-escena/_components/probeScene'
-
-import {
-  hexToSrgb,
-  linearToSrgb,
-  neutralToneMapGray,
-  srgbToHex,
-  srgbToLinear,
-  type Srgb,
-} from './introShading'
 
 /**
  * LAS PARTÍCULAS DEL PRELOADER — LA ESPECIE.
  *
- * Qué es una mota: de dónde salen sus tamaños, sus colores y el borde entre las
- * dos escalas. **Cómo se arma el campo** vive en `introParticleField.ts` y **el
- * ritmo** en `introParticleTiming.ts`, por la misma regla que separa
- * `introTimeline.ts` de `introSampling.ts`: los datos de un lado, la aritmética
- * que los lee del otro.
+ * Qué es una mota: de dónde salen sus tamaños y el borde entre las dos escalas.
+ * **El color** vive en `introParticleTint.ts`, **cómo se arma el campo** en
+ * `introParticleField.ts` y **el ritmo** en `introParticleTiming.ts`, por la
+ * misma regla que separa `introTimeline.ts` de `introSampling.ts`: los datos de
+ * un lado, la aritmética que los lee del otro.
  *
  * Módulo puro: sin React, sin `motion`, sin DOM. Corre en node.
  *
@@ -37,21 +25,34 @@ import {
  * requisito del mecanismo. La bajada es la tapadera, igual que la inversión de
  * la tinta es la tapadera del relevo 2D→3D.
  *
- * El margen está medido, no estimado — `introParticles.invariant.ts`.
+ * El margen está medido, no estimado — `introParticleTiming.invariant.ts`.
  *
- * ── La especie no se calibra: se PROYECTA ──────────────────────────────────
+ * ── La especie se PROYECTA. El TAMAÑO, no ─────────────────────────────────
  *
- * "Que se parezcan a las de la escena" no se resuelve eligiendo tamaños a ojo.
  * El campo del intro **es** el campo de la escena —el mismo generador, los
  * mismos radios, el mismo sesgo, los mismos colores, el mismo material—
- * **proyectado por la cámara de la pose inicial**. De ahí salen solas la
- * distribución de tamaños en píxeles, la densidad, el reparto sobre la pantalla
- * y la perspectiva atmosférica. Lo único propio es la SEMILLA.
+ * **proyectado por la cámara de la pose inicial**. De ahí salen solos el reparto
+ * sobre la pantalla, la perspectiva atmosférica y el paralaje de la caída. Lo
+ * propio son la SEMILLA, la ESCALA y la DENSIDAD.
  *
  * **Por qué otra semilla y no la misma.** Con la misma, las motas del intro
  * caerían desde exactamente los lugares donde, tres décimas más tarde, las de la
  * escena vuelven a estar. Es el único modo de que el corte se note: no por
  * parecerse poco, sino por parecerse demasiado.
+ *
+ * 🔴 **Por qué otra escala — S14.** S13 hizo que el intro copiara también la
+ * MEZCLA de la escena (957 de polvo contra 76 de bokeh, mediana 3,16 px), y esa
+ * restricción se soltó: **la lectura no depende solo de la especie, depende del
+ * fondo.** En la escena ese polvo tiene paralaje, se mueve con las conchas y cae
+ * sobre un piso con bandas — se lee como atmósfera. En el intro está quieto,
+ * sobre papel blanco liso y sin nada más en el cuadro: ahí se lee como ruido de
+ * sensor. El relevo nunca pidió que las poblaciones se correspondieran; pidió
+ * que no se vieran las dos juntas, y de eso se ocupa `PARTICLES_BEFORE_VEIL`.
+ *
+ * Lo que **sí** se conserva de la especie es el color (`introParticleTint.ts`),
+ * el material (`DUST_MATERIAL_ALPHA`, `BOKEH_OPACITY`) y la forma (los sprites
+ * de la escena, importados tal cual). Un cambio de tamaño se perdona; un cambio
+ * de sustancia, no.
  *
  * ── La bajada es una caída en el MUNDO, no un deslizamiento en pantalla ────
  *
@@ -80,15 +81,59 @@ export const FLOOR_CLEARANCE = 0.4
 export const DUST_MATERIAL_ALPHA = 0.9
 
 /**
- * Qué fracción del campo reservado se dibuja.
+ * 🔴 LA ESCALA DEL POLVO DEL INTRO — la perilla de tamaño de S14.
  *
- * Es el default que el probe embarca (`PROBE_DEFAULTS.particleCount` = 2.400 de
- * `PARTICLES_MAX` = 3.000). **No se importa de `probeStore.ts`**: ese módulo
- * arrastra el store entero del panel —con la celosía y su integral de
- * hemisferio— a un bundle que corre en la PRIMERA visita. La comprobación exige
- * que los dos números sigan siendo el mismo.
+ * Multiplica `PARTICLE_SIZE` **solo del lado del intro**: el campo de la escena
+ * no se toca, y el bokeh del intro tampoco. Como el tamaño en pantalla es
+ * `size × (altoCSS/2) / profundidad`, la escala mueve el reparto entero por un
+ * factor —p10, mediana y p90 se multiplican por lo mismo— sin cambiar su forma:
+ * la dispersión de tamaños sigue siendo la que produce la profundidad del campo.
+ *
+ * ── De dónde sale el 2,05 ──────────────────────────────────────────────────
+ *
+ * De la **referencia de lectura** que el sprint manda mirar: el campo de puntos
+ * del preloader clásico, que sobre el mismo blanco se lee como puntos contables
+ * y con presencia propia. Su punto proyecta **4,28 px** en 1440×810
+ * (`introReadingProbe.ts` lo mide leyendo `DotMatrix.tsx` y `Hero.tsx`), y esa
+ * es la escala de visibilidad que se toma de ahí — **no** su grilla regular, que
+ * no se quiere.
+ *
+ * Con 2,05 el **p10** del polvo del intro llega a 4,26 px: nueve de cada diez
+ * motas están en la escala de lectura del clásico o por encima. Con el reparto
+ * de S13 la que llegaba era una de cada cinco, y la mediana —3,16 px— caía justo
+ * en el régimen de "dos o tres píxeles" que el humano describió como grano.
+ *
+ * **Los dos vecinos, para la grabación:** si se leen demasiado grandes, **1,35**
+ * (ahí lo que llega al punto del clásico es la MEDIANA, no el p10); si todavía
+ * se leen chicas, **2,4** (el p25 llega a 6,36 px). La banda de
+ * `introParticleReading.invariant.ts` acepta los dos y rechaza los extremos:
+ * 1,0 —el reparto de S13, cuya mediana no llega al punto del clásico— y 3,0,
+ * donde el recorte de la regla de las dos escalas ya se come el 4,3% del campo.
  */
-export const INTRO_DUST_SHARE = 0.8
+export const INTRO_DUST_SCALE = 2.05
+
+/** El tamaño de mundo con el que el intro proyecta una mota de polvo. */
+export const INTRO_DUST_SIZE = PARTICLE_SIZE * INTRO_DUST_SCALE
+
+/**
+ * QUÉ FRACCIÓN DEL CAMPO RESERVADO SE DIBUJA — la otra mitad de S14.
+ *
+ * S13 embarcaba el default del probe (0,8 = 2.400 de `PARTICLES_MAX`), que era
+ * la mezcla de la escena. **Con motas al doble de tamaño, esa densidad ya no es
+ * la del clásico sino la del grano**: el campo pasa a 366 motas de polvo en
+ * cuadro contra 957, o sea un paso medio de **51 px** contra los 34 de S13.
+ *
+ * El número no copia la grilla del clásico —el sprint es explícito en que la
+ * distribución sigue siendo la del campo, no un patrón regular— pero sí queda
+ * del lado denso de ella: el clásico muestra sus puntos con `DOT_SPACING_SPARSE`
+ * y ahí su paso es **81 px**, o sea que el campo del intro sigue siendo **1,6×
+ * más denso** que la referencia que se está tomando.
+ *
+ * El recorte se aplica **por concha** (ver `drawnRanges`), así que ralear no
+ * corre el campo hacia afuera: las tres conchas conservan su proporción y la
+ * rampa de color queda intacta de punta a punta — medido, no supuesto.
+ */
+export const INTRO_DUST_SHARE = 0.3
 
 /** Semillas propias: mismo campo estadístico que la escena, otra muestra. */
 export const INTRO_DUST_SEED = 0x1de1a
@@ -99,10 +144,10 @@ export const INTRO_PHASE_SEED = 0x5ca10a
 /**
  * CUÁNTO BAJA EL CAMPO, en unidades de mundo.
  *
- * 🔴 **La única perilla de este sprint que se decide MIRANDO.** Todo lo demás
- * sale de la escena o de una propiedad; esto no tiene respuesta correcta en un
- * archivo — es la misma clase de número que `placeS` en `introTimeline.ts`, y se
- * anota igual, con sus dos vecinos.
+ * 🔴 **La única perilla de S13 que se decide MIRANDO.** Todo lo demás sale de la
+ * escena o de una propiedad; esto no tiene respuesta correcta en un archivo — es
+ * la misma clase de número que `placeS` en `introTimeline.ts`, y se anota igual,
+ * con sus dos vecinos.
  *
  * ── Lo que este número gobierna, y por qué es UNO SOLO ─────────────────────
  *
@@ -112,20 +157,27 @@ export const INTRO_PHASE_SEED = 0x5ca10a
  *
  *     recorrido = INTRO_FALL_WORLD / (tamaño × tan(fov/2))
  *
- * o sea **33,8 diámetros** para el polvo y 4,8 para el bokeh, idénticos en
- * 1440×810, 1920×1080 y 390×844 — verificado en las tres. Repartidos sobre los
- * 17,8 cuadros de la ventana de salida son **1,90 diámetros por cuadro**, que es
- * el número que decide si la caída se lee como movimiento o como una fila de
- * puntos (ver `sampleParticleOut`).
+ * o sea **16,5 diámetros** para el polvo del intro con la escala de S14 —eran
+ * 33,8 con la de S13, exactamente el doble—, idénticos en 1440×810, 1920×1080 y
+ * 390×844: verificado en las tres. Repartidos sobre los 17,8 cuadros de la
+ * ventana de salida son **0,93 diámetros por cuadro**, que es el número que
+ * decide si la caída se lee como movimiento o como una fila de puntos (ver
+ * `sampleParticleOut`).
  *
- * En píxeles, sobre desktop 1440×810: mediana **107 px**, de 47 en la mota más
- * lejana a 377 en la más cercana. Esa dispersión ×8 es el paralaje, y es lo que
- * hace que el campo se lea con profundidad en vez de como una capa que se
- * desliza.
+ * ⚠ **`INTRO_FALL_WORLD` no cambió: lo que bajó el paso fue la mota, que creció.**
+ * Y eso no refuerza el argumento de `linear` contra `shift` — lo vuelve
+ * innecesario, porque a esta escala `shift` tampoco se saldría de la banda. El
+ * número está medido en `introParticleField.invariant.ts`.
+ *
+ * En píxeles, sobre desktop 1440×810: mediana **109 px**, de 47 en la mota más
+ * lejana a 248 en la más cercana. Esa dispersión ×5,3 es el paralaje, y es lo
+ * que hace que el campo se lea con profundidad en vez de como una capa que se
+ * desliza. (Con el reparto de S13 el extremo llegaba a 377 y la razón a ×8,1:
+ * los extremos de una muestra dependen de su tamaño, y S14 la ralea. Lo que no
+ * se movió es la ley — el cociente entre deciles, ×2,21 contra ×2,11.)
  *
  * **Los dos vecinos, para la grabación:** si la caída estrobea o se lee
- * violenta, **1,2** (1,20 diámetros por cuadro, 68 px de mediana); si se lee
- * como un desvanecimiento en el lugar, **3,0** (3,00 por cuadro, 169 px).
+ * violenta, **1,2**; si se lee como un desvanecimiento en el lugar, **3,0**.
  */
 export const INTRO_FALL_WORLD = 1.9
 
@@ -145,14 +197,16 @@ export const INTRO_FALL_WORLD = 1.9
  * bokeh —`BOKEH_R_MAX` detrás del origen—, y de ahí sale una profundidad mínima
  * para el polvo, en unidades de mundo y sin depender de la ventana:
  *
- *     depthMin = PARTICLE_SIZE × (ojo + BOKEH_R_MAX) / BOKEH_SIZE
+ *     depthMin = INTRO_DUST_SIZE × (ojo + BOKEH_R_MAX) / BOKEH_SIZE
  *
- * Con los números que el repo embarca son **3,97**, y deja afuera al 0,21% del
- * campo dibujado. La escena, en esta pose, ya lo cumple sola: su mota más grande
- * mide 11,0 px contra los 17,3 del bokeh más chico.
+ * ⚠ **Entra el tamaño del intro, no el de la escena** (S14): al agrandar la mota
+ * el borde se aleja en la misma proporción —de 3,97 a **8,15**— y el diámetro
+ * del corte **no se mueve**, porque los dos factores se cancelan. Lo que sube es
+ * cuánto campo queda afuera: de **0,21% a 0,81%** del polvo dibujado. La escena,
+ * en esta pose, sigue cumpliéndolo sola.
  */
 export function dustDepthFloor(eyeDistance: number): number {
-  return (PARTICLE_SIZE * (eyeDistance + BOKEH_R_MAX)) / BOKEH_SIZE
+  return (INTRO_DUST_SIZE * (eyeDistance + BOKEH_R_MAX)) / BOKEH_SIZE
 }
 
 // ── La especie ──────────────────────────────────────────────────────────────
@@ -184,93 +238,4 @@ export type IntroParticleField = {
   readonly motes: readonly IntroMote[]
   readonly dustCount: number
   readonly bokehCount: number
-}
-
-/**
- * El color con el que la escena RENDERIZA una mota.
- *
- * `PointsMaterial` no recibe luz, así que el color del vértice pasa directo al
- * tone mapping. El degradé cerca→lejos se interpola en **luz lineal**, que es
- * donde `THREE.Color.lerp` trabaja con el manejo de color prendido — no en sRGB.
- */
-export function moteRampColor(near: Srgb, far: Srgb, t: number): string {
-  const mixed: Srgb = [0, 1, 2].map((i) =>
-    linearToSrgb(
-      neutralToneMapGray(srgbToLinear(near[i]) * (1 - t) + srgbToLinear(far[i]) * t)
-    )
-  ) as unknown as Srgb
-  return srgbToHex(mixed)
-}
-
-/**
- * EL COLOR DEL BOKEH EN PANTALLA. Un solo valor: las noventa escriben el mismo.
- */
-export const INTRO_BOKEH_COLOR = moteRampColor(
-  hexToSrgb(BOKEH_COLOR),
-  hexToSrgb(BOKEH_COLOR),
-  0
-)
-
-/**
- * ESCALONES DE LA RAMPA DEL POLVO, para el teñido de los sprites.
- *
- * `drawImage` no tiñe, así que el rasterizado necesita un sprite por color y la
- * rampa continua hay que cuantizarla. **El dato de cada mota conserva su color
- * exacto** —es lo que la comprobación compara contra la escena— y lo que se
- * cuantiza es solo el dibujo.
- *
- * ⚠ **Los escalones NO están repartidos parejo en la rampa: están repartidos
- * parejo en el VALOR QUE SALE.** La mezcla va en luz lineal, así que del lado
- * oscuro la rampa avanza más del doble por unidad de `t`: con escalones parejos
- * en `t`, el peor error se iba a **7,0 de 255** —concentrado justo en las motas
- * cercanas, que son las que más se ven— y con escalones parejos en valor queda
- * acotado por la mitad del paso, **3,2**. Cuesta una búsqueda binaria por
- * escalón, una sola vez al cargar el módulo.
- *
- * 24 escalones sobre un recorrido de 144 bytes: cada canvas de 64 × 64 cuesta
- * 16 KiB, así que subirlos no es gratis.
- */
-export const INTRO_TINT_STEPS = 24
-
-/** El byte que la escena renderiza para una posición de la rampa. */
-function rampValue(t: number): number {
-  return parseInt(
-    moteRampColor(hexToSrgb(PARTICLE_NEAR_COLOR), hexToSrgb(PARTICLE_FAR_COLOR), t).slice(3, 5),
-    16
-  )
-}
-
-const RAMP_FROM = rampValue(0)
-const RAMP_TO = rampValue(1)
-
-/** Las posiciones de la rampa que reparten el VALOR de salida en partes iguales. */
-const TINT_POSITIONS: readonly number[] = Array.from({ length: INTRO_TINT_STEPS }, (_, step) => {
-  const target = RAMP_FROM + ((RAMP_TO - RAMP_FROM) * step) / (INTRO_TINT_STEPS - 1)
-  let low = 0
-  let high = 1
-  for (let i = 0; i < 40; i += 1) {
-    const mid = (low + high) / 2
-    if (rampValue(mid) < target) low = mid
-    else high = mid
-  }
-  return (low + high) / 2
-})
-
-/** A qué escalón cae una posición de la rampa. Por valor, no por `t`. */
-export function introTintStep(t: number): number {
-  const value = rampValue(Math.min(1, Math.max(0, t)))
-  const step = Math.round(
-    ((value - RAMP_FROM) / (RAMP_TO - RAMP_FROM)) * (INTRO_TINT_STEPS - 1)
-  )
-  return Math.min(INTRO_TINT_STEPS - 1, Math.max(0, step))
-}
-
-/** El color exacto de un escalón. Lo comparten el atlas y la comprobación. */
-export function introTintColor(step: number): string {
-  const clamped = Math.min(INTRO_TINT_STEPS - 1, Math.max(0, step))
-  return moteRampColor(
-    hexToSrgb(PARTICLE_NEAR_COLOR),
-    hexToSrgb(PARTICLE_FAR_COLOR),
-    TINT_POSITIONS[clamped]
-  )
 }

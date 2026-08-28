@@ -26,38 +26,24 @@ import {
 } from '@/lib/scene-camera'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 
-import {
-  DUST_RADIUS_BIAS,
-  FLOOR_CLEARANCE,
-  type IntroMote,
-} from './introParticles'
-import { sampleMote } from './introParticleTiming'
-import { sampleBackgroundColor, sampleVeilOpacity } from './introSampling'
-import { contrastRatio, hexToSrgb, type Srgb } from './introShading'
-import type { IntroTimeline } from './introTimeline'
+import { DUST_RADIUS_BIAS, FLOOR_CLEARANCE } from './introParticles'
+import type { Srgb } from './introShading'
 
 /**
  * EL BANCO DE MEDICIÓN DE LAS PARTÍCULAS — no es código de la aplicación.
  *
- * Lo importan los tres `*.invariant.ts` del sprint y **nadie más**: no hay un
+ * Lo importan los `*.invariant.ts` de las partículas y **nadie más**: no hay un
  * solo `import` desde un componente, un hook o una ruta, así que no viaja a
  * ningún bundle. Es el mismo reparto que `__tests__/harness.ts` y
  * `__tests__/frameProbe.ts` hacen del lado de la escena — **el instrumento de un
- * lado, las comprobaciones del otro**, para que las tres suites midan con
+ * lado, las comprobaciones del otro**, para que todas las suites midan con
  * exactamente el mismo método.
  *
- * Dos cosas viven acá:
- *
- *  1. **El campo de la ESCENA, proyectado**, contra el que se compara la especie.
- *  2. **La legibilidad**, que es cómo se decide si una mota se ve: la razón de
- *     contraste de WCAG, con el mismo umbral que `introSampling.invariant.ts`
- *     usa para el cruce de tinta.
+ * Acá vive **el campo de la ESCENA, proyectado** —contra el que se compara la
+ * especie— más los utilitarios que comparten todas. **La legibilidad** salió a
+ * `introLegibilityProbe.ts` en S14 (el archivo cruzaba las 300 líneas) y **la
+ * lectura** a `introReadingProbe.ts`.
  */
-
-/** El umbral de "ya no se distingue del fondo". El del cruce de tinta. */
-export const LEGIBLE = 1.1
-/** Muestras por segundo del bracket. La misma grilla fina del cruce de tinta. */
-export const CROSSING_HZ = 4_000
 
 export const quantile = (values: readonly number[], t: number): number => {
   const sorted = [...values].sort((a, b) => a - b)
@@ -189,63 +175,4 @@ export function nearestDistances(
     }
     return best
   })
-}
-
-// ── La legibilidad ──────────────────────────────────────────────────────────
-
-/** El contraste de una mota del intro contra el fondo del velo, en un instante. */
-export function introContrastAt(
-  timeline: IntroTimeline,
-  mote: IntroMote,
-  timeS: number
-): number {
-  const progress = timeS / timeline.totalS
-  const sample = sampleMote(timeline, progress, mote)
-  if (sample.alpha <= 0) return 1
-  const background = sampleBackgroundColor(timeline, progress)
-  return contrastRatio(over(hexToSrgb(mote.color), sample.alpha, background), background)
-}
-
-/**
- * El contraste de una mota de la ESCENA contra su fondo, **vista a través del
- * velo que se disuelve**. Las dos capas —la mota y su fondo— se componen contra
- * el mismo velo, así que la diferencia se achica con la opacidad que queda.
- */
-export function sceneContrastAt(
-  timeline: IntroTimeline,
-  mote: Srgb,
-  background: Srgb,
-  timeS: number
-): number {
-  const progress = timeS / timeline.totalS
-  const alpha = sampleVeilOpacity(timeline, progress)
-  const veil = sampleBackgroundColor(timeline, progress)
-  return contrastRatio(over(veil, alpha, mote), over(veil, alpha, background))
-}
-
-/**
- * El instante exacto de un cruce del umbral, **interpolando entre las dos
- * muestras que lo encierran**. Es la técnica que S8e dejó escrita: contar
- * cuadros hace que la respuesta dependa de la fase de la grilla y no del diseño.
- */
-export function crossingS(
-  valueAt: (timeS: number) => number,
-  fromS: number,
-  toS: number,
-  last: boolean
-): number {
-  const steps = Math.ceil((toS - fromS) * CROSSING_HZ)
-  const dt = (toS - fromS) / steps
-  let found = NaN
-  for (let i = 0; i <= steps; i += 1) {
-    const timeS = fromS + i * dt
-    const previous = valueAt(timeS - dt) - LEGIBLE
-    const current = valueAt(timeS) - LEGIBLE
-    if (previous < 0 !== current < 0) {
-      const root = previous / (previous - current)
-      found = timeS - dt + root * dt
-      if (!last) break
-    }
-  }
-  return found
 }

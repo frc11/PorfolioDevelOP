@@ -12,7 +12,6 @@ import {
   PARTICLE_NEAR_COLOR,
   PARTICLE_R_MAX,
   PARTICLE_R_MIN,
-  PARTICLE_SIZE,
   buildParticleField,
   createRandom,
 } from '@/app/probe-escena/_components/probeParticles'
@@ -30,28 +29,27 @@ import {
   DUST_MATERIAL_ALPHA,
   DUST_RADIUS_BIAS,
   FLOOR_CLEARANCE,
-  INTRO_BOKEH_COLOR,
   INTRO_BOKEH_SEED,
   INTRO_DUST_SEED,
   INTRO_DUST_SHARE,
+  INTRO_DUST_SIZE,
   INTRO_FALL_WORLD,
   INTRO_PHASE_SEED,
   dustDepthFloor,
-  introTintStep,
-  moteRampColor,
   type IntroMote,
   type IntroMoteKind,
   type IntroParticleField,
 } from './introParticles'
+import { INTRO_BOKEH_COLOR, introTintStep, moteRampColor } from './introParticleTint'
 
 /**
  * EL CAMPO DEL INTRO, PROYECTADO — la construcción, separada de la especie.
  *
  * Salió de `introParticles.ts` por el límite de 300 líneas del repo, con la
- * costura donde corresponde: **allá está QUÉ es una mota** (de dónde salen sus
- * tamaños, sus colores y el borde entre las dos escalas), **acá cómo se arma el
- * campo**. Es la misma costura que separa `probeParticles.ts` de
- * `particleTextures.ts` en la escena.
+ * costura donde corresponde: **allá está QUÉ es una mota** (su escala, su
+ * densidad y el borde entre las dos escalas), **acá cómo se arma el campo**. El
+ * color vive en `introParticleTint.ts`. Es la misma costura que separa
+ * `probeParticles.ts` de `particleTextures.ts` en la escena.
  *
  * Módulo puro: sin React, sin `motion`, sin DOM. Corre en node.
  *
@@ -95,8 +93,10 @@ function drawnRanges(
 export function buildIntroParticles(
   viewportWidthPx: number,
   viewportHeightPx: number,
-  /** Solo la comprobación lo mueve, para barrer la perilla y sus vecinos. */
-  fallWorld: number = INTRO_FALL_WORLD
+  /** Las tres solo las mueve la comprobación, para barrer las perillas. */
+  fallWorld: number = INTRO_FALL_WORLD,
+  dustSize: number = INTRO_DUST_SIZE,
+  dustShare: number = INTRO_DUST_SHARE
 ): IntroParticleField {
   const camera = sceneCameraAt(SCENE_ENTRY_POSE, viewportWidthPx, viewportHeightPx)
   if (!camera) return EMPTY_PARTICLE_FIELD
@@ -107,9 +107,14 @@ export function buildIntroParticles(
   const dustSpan = PARTICLE_R_MAX - PARTICLE_R_MIN
   const phaseOf = createRandom(INTRO_PHASE_SEED)
   const floorLimit = FLOOR_Y + FLOOR_CLEARANCE
-  const depthFloor = dustDepthFloor(
-    Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y)
-  )
+  // El borde entre las dos escalas se corre CON el tamaño del polvo: los dos
+  // factores se cancelan y el diámetro del corte no se mueve — ver
+  // `dustDepthFloor`. Por eso entra `dustSize` y no la constante.
+  const depthFloor =
+    (dustSize / INTRO_DUST_SIZE) *
+    dustDepthFloor(
+      Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height - ORBIT_TARGET_Y)
+    )
 
   const motes: IntroMote[] = []
   let dustCount = 0
@@ -167,13 +172,13 @@ export function buildIntroParticles(
     floorLimit,
     DUST_SHELLS
   )
-  for (const [from, to] of drawnRanges(PARTICLES_MAX, DUST_SHELLS, INTRO_DUST_SHARE)) {
+  for (const [from, to] of drawnRanges(PARTICLES_MAX, DUST_SHELLS, dustShare)) {
     for (let i = from; i < to; i += 1) {
       const radius = dust.radii[i]
       push(
         'dust',
         [dust.positions[i * 3], dust.positions[i * 3 + 1], dust.positions[i * 3 + 2]],
-        PARTICLE_SIZE,
+        dustSize,
         moteRampColor(near, far, (radius - PARTICLE_R_MIN) / dustSpan),
         introTintStep((radius - PARTICLE_R_MIN) / dustSpan),
         DUST_MATERIAL_ALPHA

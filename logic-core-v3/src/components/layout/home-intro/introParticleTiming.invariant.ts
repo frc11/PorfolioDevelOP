@@ -10,13 +10,8 @@ import {
 import { CALIBRATIONS, check, report, s, section } from './introChecks'
 import { DUST_MATERIAL_ALPHA } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
-import {
-  LEGIBLE,
-  crossingS,
-  introContrastAt,
-  over,
-  sceneContrastAt,
-} from './introParticleProbe'
+import { over } from './introParticleProbe'
+import { crossingS, introLegibility, sceneContrastAt } from './introLegibilityProbe'
 import {
   introParticleWindows,
   sampleMote,
@@ -41,7 +36,7 @@ import { HOME_INTRO_TIMELINE, buildTimeline, type IntroTimeline } from './introT
  * deja de distinguirse del fondo. El umbral es conservador en las DOS
  * direcciones — les exige a las del intro bajar de un contraste con el que un
  * logo entero ya no se ve, y declara legibles a las de la escena apenas lo
- * cruzan. El instrumento vive en `introParticleProbe.ts`.
+ * cruzan. El instrumento vive en `introLegibilityProbe.ts`.
  */
 
 const W = 1440
@@ -184,30 +179,8 @@ check(
 
 section('4 · 🔴 La superposición: cuándo deja de verse una y cuándo se ve la otra')
 
-let firstLegibleS = Infinity
-let lastLegibleS = -Infinity
-let everLegible = 0
-let peakContrast = 1
-const travelAtLast: number[] = []
-for (const mote of FIELD.motes) {
-  const at = (timeS: number) => introContrastAt(T, mote, timeS)
-  let seen = false
-  for (let i = 0; i <= 400; i += 1) {
-    const timeS = WIN.inStartS + ((WIN.outEndS - WIN.inStartS) * i) / 400
-    const value = at(timeS)
-    if (value > peakContrast) peakContrast = value
-    if (value >= LEGIBLE) seen = true
-  }
-  if (!seen) continue
-  everLegible += 1
-  const first = crossingS(at, WIN.inStartS, WIN.inEndS, false)
-  const last = crossingS(at, WIN.outStartS, WIN.outEndS, true)
-  if (Number.isFinite(first)) firstLegibleS = Math.min(firstLegibleS, first)
-  if (Number.isFinite(last)) {
-    lastLegibleS = Math.max(lastLegibleS, last)
-    travelAtLast.push(sampleParticleOut(T, last / T.totalS, mote.phase))
-  }
-}
+const { everLegible, peakContrast, firstLegibleS, lastLegibleS, travelAtLast } =
+  introLegibility(T, WIN, FIELD.motes)
 
 /**
  * 🔴 **CONTROL POSITIVO, ANTES DEL NÚMERO.** "Ninguna del intro es legible

@@ -11,7 +11,7 @@ import {
   INTRO_BOKEH_COLOR,
   INTRO_TINT_STEPS,
   introTintColor,
-} from './introParticles'
+} from './introParticleTint'
 
 /**
  * LOS SPRITES DE LAS PARTÍCULAS DEL INTRO — la escena, rasterizada en 2D.
@@ -30,8 +30,8 @@ import {
  * ── El teñido ──────────────────────────────────────────────────────────────
  *
  * `drawImage` no tiñe, así que hace falta un sprite por color; los escalones y
- * su error medido están en `introParticles.ts` (`INTRO_TINT_STEPS`). Acá solo se
- * pintan: se pega el sprite blanco con su alfa y después se pinta el color
+ * su error medido están en `introParticleTint.ts` (`INTRO_TINT_STEPS`). Acá solo
+ * se pintan: se pega el sprite blanco con su alfa y después se pinta el color
  * entero "adentro" de lo que ya hay, con `source-in`. Dos operaciones por
  * escalón, una sola vez por montaje.
  */

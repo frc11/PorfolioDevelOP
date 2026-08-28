@@ -158,11 +158,17 @@ export function sampleParticleIn(
  *   de la profundidad**, porque el desplazamiento y el tamaño se dividen los dos
  *   por ella. Un solo número gobierna el campo entero.
  * · Con `linear` ese paso es el mínimo posible para una distancia dada. Con
- *   `shift` la pendiente máxima es **2,735×** (medida en `samplePlace`), o sea
- *   que el mismo recorrido se ve a más del doble de velocidad en el medio del
- *   gesto: 5,2 diámetros por cuadro en vez de 1,90. Un punto de 3 px que salta
- *   cinco veces su tamaño por cuadro no se lee como que baja: se lee como una
- *   fila de puntos.
+ *   `shift` la pendiente máxima es **2,7346×** —medida sobre el evaluador que el
+ *   repo embarca, en `introParticleField.invariant.ts`—, o sea que el mismo
+ *   recorrido se ve a más del doble de velocidad en el medio del gesto.
+ *
+ * ⚠ **S14 cambió el peso de este argumento, no su conclusión.** Con las motas de
+ * S13 el paso era 1,90 por cuadro con `linear` y **5,20 con `shift`**: un punto
+ * de 3 px saltando cinco veces su tamaño, que es una fila de puntos y está fuera
+ * de la banda. Con las motas de S14 —el doble de grandes— los dos números se
+ * dividen por la escala: **0,93 y 2,54**, y `shift` ya NO se saldría de la banda.
+ * `linear` sigue siendo lo correcto porque sigue siendo el mínimo posible, pero
+ * el modo de falla del que protegía no ocurre a esta escala.
  *
  * Y el apagado, que cuelga del mismo número, queda lineal — que es lo que hace
  * verdadero "bajan de verdad, no se desvanecen en el lugar": la mota **ya

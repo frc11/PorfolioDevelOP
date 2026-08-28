@@ -1,8 +1,13 @@
+import { cubicBezierEase } from '@/app/probe-escena/_components/bezier'
+import { PARTICLE_SIZE } from '@/app/probe-escena/_components/probeParticles'
+import { MOTION_EASE } from '@/components/design-system/motion/tokens'
+
 import { check, report, section } from './introChecks'
-import { INTRO_FALL_WORLD } from './introParticles'
+import { INTRO_DUST_SCALE, INTRO_FALL_WORLD } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
 import { introParticleWindows } from './introParticleTiming'
 import { near, quantile, readSource } from './introParticleProbe'
+import { s13Field } from './introReadingProbe'
 import { HOME_INTRO_TIMELINE } from './introTimeline'
 
 /**
@@ -38,28 +43,48 @@ const WINDOWS: readonly (readonly [number, number])[] = [
 
 section('1 · La dirección dominante es hacia abajo, y el paralaje es real')
 
+/** El recorrido de la mota mediana, en diámetros de sí misma. */
+const travelIn = (
+  motes: readonly { dxPx: number; dyPx: number; sizePx: number; kind: string }[]
+): number =>
+  quantile(
+    motes.filter((m) => m.kind === 'dust').map((m) => Math.hypot(m.dxPx, m.dyPx) / m.sizePx),
+    0.5
+  )
+
 for (const [width, height] of WINDOWS) {
   const field = buildIntroParticles(width, height)
   const dy = field.motes.map((m) => m.dyPx)
   const dx = field.motes.map((m) => Math.abs(m.dxPx))
-  const steps = field.motes
-    .filter((m) => m.kind === 'dust')
-    .map((m) => Math.hypot(m.dxPx, m.dyPx) / m.sizePx)
 
   check(
     `${width}×${height} — todas bajan, y ninguna deriva más de lo que baja`,
     field.motes.every((m) => m.dyPx > 0 && m.dyPx > Math.abs(m.dxPx)),
     `${field.motes.length} motas · |dy| mediana ${quantile(dy, 0.5).toFixed(0)} px · deriva mediana ${quantile(dx, 0.5).toFixed(0)} px`
   )
+  /**
+   * ⚠ **Por deciles y no por extremos (S14).** El máximo y el mínimo de una
+   * muestra dependen del tamaño de la muestra, y S14 ralea el campo a 0,30: los
+   * extremos se encogen —de ×8,11 a ×5,26— sin que la ley del paralaje cambie un
+   * ápice. El cociente entre deciles es prácticamente el mismo antes y después
+   * (2,21 → 2,11), y es lo que dice que la ley sigue ahí. El extremo se sigue
+   * publicando, porque es el número que se ve; lo que ya no se comprueba es él.
+   */
   check(
-    `${width}×${height} — la más cercana barre mucho más que la lejana`,
-    quantile(dy, 1) / quantile(dy, 0) > 4,
-    `de ${quantile(dy, 0).toFixed(0)} a ${quantile(dy, 1).toFixed(0)} px — el paralaje, gratis`
+    `${width}×${height} — la cercana barre mucho más que la lejana: el paralaje`,
+    quantile(dy, 0.9) / quantile(dy, 0.1) > 1.8,
+    `p90/p10 ×${(quantile(dy, 0.9) / quantile(dy, 0.1)).toFixed(2)} · de ${quantile(dy, 0).toFixed(0)} a ${quantile(dy, 1).toFixed(0)} px en los extremos, ×${(quantile(dy, 1) / quantile(dy, 0)).toFixed(2)}`
   )
+  /**
+   * Y el recorrido en diámetros **no se compara contra un literal**: se compara
+   * contra el del campo de S13 medido en la misma corrida, dividido por la
+   * escala. Es la forma exacta de la propiedad — `INTRO_FALL_WORLD` no se tocó,
+   * así que lo único que pudo mover el recorrido es el tamaño de la mota.
+   */
   check(
-    `${width}×${height} — el recorrido en diámetros no depende de la ventana`,
-    near(quantile(steps, 0.5), 33.79, 0.2),
-    `${quantile(steps, 0.5).toFixed(2)} diámetros · ${(quantile(steps, 0.5) / FRAMES).toFixed(2)} por cuadro a 60 fps`
+    `${width}×${height} — el recorrido en diámetros es el de S13 sobre la escala`,
+    near(travelIn(field.motes) * INTRO_DUST_SCALE, travelIn(s13Field(width, height).motes), 0.5),
+    `${travelIn(s13Field(width, height).motes).toFixed(2)} ÷ ${INTRO_DUST_SCALE} = ${travelIn(field.motes).toFixed(2)} diámetros · ${(travelIn(field.motes) / FRAMES).toFixed(2)} por cuadro a 60 fps`
   )
 }
 
@@ -90,8 +115,8 @@ section('2 · 🔴 `INTRO_FALL_WORLD` es una banda, no un valor: se decide miran
  * desvanecimiento en el lugar; por encima de 4 salta cuatro veces su tamaño y se
  * lee como una fila de puntos.
  */
-const stepFor = (fall: number): number => {
-  const field = buildIntroParticles(1440, 810, fall)
+const stepFor = (fall: number, scale: number = INTRO_DUST_SCALE): number => {
+  const field = buildIntroParticles(1440, 810, fall, PARTICLE_SIZE * scale)
   const dust = field.motes.filter((m) => m.kind === 'dust')
   return quantile(dust.map((m) => Math.hypot(m.dxPx, m.dyPx) / m.sizePx), 0.5) / FRAMES
 }
@@ -112,15 +137,59 @@ check(
   !inBand(0),
   `0 → ${stepFor(0).toFixed(2)} diámetros por cuadro: se desvanecerían en el lugar`
 )
+/**
+ * ⚠ **El control de arriba se movió, y es un resultado de S14.** Con las motas
+ * de S13 alcanzaba una caída de 6 para salir de la banda (5,66 por cuadro); con
+ * las de hoy, la misma caída da **2,76** y está adentro. No es que la banda se
+ * aflojó: es que **el mismo desplazamiento estrobea la mitad**, porque el paso
+ * se mide en diámetros de la propia mota y la mota se duplicó. Para llegar al
+ * régimen de fila de puntos ahora hace falta el doble de caída.
+ */
 check(
-  'control negativo — y con una caída de 6 también',
-  !inBand(6),
-  `6 → ${stepFor(6).toFixed(2)} diámetros por cuadro: una fila de puntos`
+  'control negativo — y con una caída de 12 también',
+  !inBand(12),
+  `12 → ${stepFor(12).toFixed(2)} diámetros por cuadro: una fila de puntos · con la escala de S13 alcanzaba 6 (${stepFor(6, 1).toFixed(2)}), que hoy da ${stepFor(6).toFixed(2)} y entra en la banda`
 )
 check(
   'la banda es monótona en la perilla, así que rechaza por el lado que dice',
-  stepFor(0) < stepFor(1.2) && stepFor(1.2) < stepFor(3) && stepFor(3) < stepFor(6),
-  `${stepFor(0).toFixed(2)} < ${stepFor(1.2).toFixed(2)} < ${stepFor(3).toFixed(2)} < ${stepFor(6).toFixed(2)}`
+  stepFor(0) < stepFor(1.2) && stepFor(1.2) < stepFor(3) && stepFor(3) < stepFor(12),
+  `${stepFor(0).toFixed(2)} < ${stepFor(1.2).toFixed(2)} < ${stepFor(3).toFixed(2)} < ${stepFor(12).toFixed(2)}`
+)
+
+/**
+ * 🔴 **Y `linear` contra `shift`, con la pendiente MEDIDA.** El docblock de
+ * `sampleParticleOut` argumenta contra `shift` con una pendiente máxima de
+ * 2,735× que hasta acá era prosa: ningún instrumento la producía. Se mide sobre
+ * el evaluador que el repo embarca, y con ella el paso por cuadro que `shift`
+ * habría dado. ⚠ El muestreo no puede ser arbitrariamente fino: `cubicBezierEase`
+ * resuelve `x` con `NEWTON_EPSILON` = 1e-6, y una diferencia hacia adelante
+ * multiplica ese error por el número de muestras — con 20.000 el ruido del
+ * solver ya vale 0,011. Con 2.000 la medida es estable de 200 a 5.000.
+ *
+ * ⚠ **El resultado corrige la expectativa del sprint.** Con las motas de S13 el
+ * argumento era categórico: `shift` daba 5,2 diámetros por cuadro, o sea una
+ * fila de puntos, fuera de la banda. Con las de S14 daría **2,5**, que está
+ * ADENTRO. `linear` sigue siendo lo correcto —es el mínimo posible para una
+ * distancia dada, y eso es aritmética que no depende de la escala— pero el modo
+ * de falla del que protegía **ya no ocurre a esta escala**: el argumento no se
+ * refuerza, se vuelve innecesario.
+ */
+const SHIFT_SAMPLES = 2_000
+let shiftSlope = 0
+for (let i = 1; i <= SHIFT_SAMPLES; i += 1) {
+  const from = cubicBezierEase(MOTION_EASE.shift, (i - 1) / SHIFT_SAMPLES)
+  const to = cubicBezierEase(MOTION_EASE.shift, i / SHIFT_SAMPLES)
+  shiftSlope = Math.max(shiftSlope, (to - from) * SHIFT_SAMPLES)
+}
+check(
+  'control positivo — la pendiente máxima de `shift` es la que el docblock cita',
+  near(shiftSlope, 2.735, 0.005) && near(cubicBezierEase(MOTION_EASE.shift, 1), 1, 1e-9),
+  `${shiftSlope.toFixed(4)}× medida sobre ${SHIFT_SAMPLES} muestras del evaluador que embarca, contra el 2,735 que estaba escrito`
+)
+check(
+  '⚠ con `shift` el paso por cuadro ya NO se saldría de la banda',
+  stepFor(INTRO_FALL_WORLD) * shiftSlope < 4 && stepFor(INTRO_FALL_WORLD, 1) * shiftSlope > 4,
+  `${(stepFor(INTRO_FALL_WORLD) * shiftSlope).toFixed(2)} diámetros por cuadro con la escala de hoy · ${(stepFor(INTRO_FALL_WORLD, 1) * shiftSlope).toFixed(2)} con la de S13, que sí quedaba afuera`
 )
 
 // ── 3 · Dónde cuelga la capa, y `prefers-reduced-motion` ───────────────────

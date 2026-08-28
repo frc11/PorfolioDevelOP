@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, y en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo. Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -50,17 +50,19 @@
 - **El texto del preloader NO es el del intro de marketing.** `IntroLockupText.tsx` escribe letra por letra (`WRITE_MS`, wipe de izquierda a derecha) y su slogan es *"Construimos lo que imaginas"*. El preloader del home usa **aparición** y el slogan **"Ingeniería para negocios reales"**. Son dos piezas distintas y la de marketing no se toca.
 - **El preloader es un momento cerrado.** Tiene su propio logo (SVG 2D), sube con el resto de la secuencia y desaparece; **no le entrega nada a nadie**. El paso 8 no es una continuidad medida entre el logo 2D y el 3D: es la escena que aparece detrás y arranca su propia coreografía. Esta separación es la lección de S3b y no se revierte.
 
-### 1.4 · Las partículas, y por qué NO hay relevo (S13)
+### 1.4 · Las partículas, y por qué NO hay relevo (S13 · S14)
 
 > *"Las pelotitas van apareciendo en el preloader, como en el viejo. Cuando llega el momento de desaparecer la letra, desaparece la letra, las pelotitas hacen el efecto de bajar —literalmente se van hacia abajo— y luego desaparece lo blanco. Y ahí está toda la magia: las pelotitas ya se encontraban flotando en el entorno."*
 
 **No hace falta ningún relevo, y ésa es la decisión.** Las del intro **bajan antes** de que se vaya el blanco: esa bajada es la tapadera. Las que quedan flotando son las de la escena, que ya estaban ahí. Es el mismo truco que S8d usó con el cruce de contraste — no se resuelve la continuidad, se esconde el corte.
 
-**El requisito que lo sostiene es uno solo, y se mide:** en ningún instante pueden ser legibles dos poblaciones distintas. Medido con el umbral de contraste de WCAG que el repo ya usa para el cruce de tinta (1,10): la última del intro deja de ser legible en **4,168 s** y la primera de la escena a los **4,278 s** — **110,4 ms de margen**. Y la escena se vuelve legible solo **28,3 ms** después de que el velo arranca, así que la salida **no podía derramarse** adentro de esa ventana: tenía que cerrar antes.
+**El requisito que lo sostiene es uno solo, y se mide:** en ningún instante pueden ser legibles dos poblaciones distintas. Medido con el umbral de contraste de WCAG que el repo ya usa para el cruce de tinta (1,10): la última del intro deja de ser legible en **4,166 s** y la primera de la escena a los **4,278 s** — **112,4 ms de margen** (eran 110,4 con el reparto de S13; S14 lo agrandó al ralear el campo). Y la escena se vuelve legible solo **28,3 ms** después de que el velo arranca, así que la salida **no podía derramarse** adentro de esa ventana: tenía que cerrar antes.
 
-**La especie no se calibra: se proyecta.** El campo del intro **es** el de la escena —mismo generador, mismos radios, mismo sesgo, mismos colores, mismo material— proyectado por la cámara de la pose inicial. Lo único propio es la semilla, y **eso también se comprueba**: con la misma, las motas caerían desde exactamente los lugares donde las de la escena vuelven a estar, y eso no se lee como dos poblaciones sino como una que se teletransportó.
+**La especie se proyecta. El TAMAÑO, no (S14).** El campo del intro **es** el de la escena —mismo generador, mismos radios, mismo sesgo, mismos colores, mismo material— proyectado por la cámara de la pose inicial. Lo propio son la semilla, la escala y la densidad, y **las tres se comprueban**: con la misma semilla las motas caerían desde exactamente los lugares donde las de la escena vuelven a estar, y eso no se lee como dos poblaciones sino como una que se teletransportó.
 
-Detalle y números en `outputs/S13-PARTICULAS.md`.
+**Y la mezcla del intro NO tiene que ser la de la escena.** S13 se puso esa restricción de más y S14 la soltó: **la misma especie no produce la misma lectura sobre los dos fondos.** En la escena el polvo tiene paralaje, se mueve con las conchas y cae sobre un piso con bandas — se lee como atmósfera. En el intro está quieto sobre papel blanco liso: se lee como ruido de sensor. El campo del intro corre su polvo a la escala grande —**×2,05 de tamaño y 0,30 de densidad**, contra la referencia de lectura del preloader clásico— y lo único que el relevo necesitaba, que al final de la caída no quede ninguna, lo garantiza `PARTICLES_BEFORE_VEIL`.
+
+Detalle y números en `outputs/S13-PARTICULAS.md` y `outputs/S14-LECTURA.md`.
 
 ---
 
@@ -315,6 +317,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | El intro que hoy corre en el home | `src/components/layout/HomeIntro.tsx` |
 | Las partículas: los dos campos, las conchas y el recorte de `gl_PointSize` | `probeParticles.ts`, `DepthParticles.tsx`, `BokehParticles.tsx` |
 | **Las partículas del PRELOADER**: la especie, el campo proyectado y su ritmo | `home-intro/introParticles.ts`, `introParticleField.ts`, `introParticleTiming.ts`, `IntroParticleCanvas.tsx`, `introParticleSprites.ts` |
+| El COLOR de una mota del preloader — la rampa y su cuantización para el teñido | `home-intro/introParticleTint.ts` |
 | La cámara de la escena sin three, y la proyección de un punto cualquiera | `src/lib/scene-camera.ts` |
 | El rig del intro — y el ambiente en el que TERMINA, que es el de la escena | `home-intro/introRig.ts` |
 | Las comprobaciones estáticas | `src/app/probe-escena/__tests__/*.invariant.ts` |
@@ -333,6 +336,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 | `outputs/S10-FONDO.md` | **El vaciado de la escena**, la envolvente de rendijas, el sol contra el fondo oscuro y las partículas como relleno |
 | `outputs/S11-LUZ.md` | **El borrado del cuerpo del sol**, la celosía proyectada sobre el piso y el logo, y el techo de exposición del papel |
 | `outputs/S13-PARTICULAS.md` | **Las partículas del preloader sin relevo**, el escalón de exposición resuelto y la cámara de `harness.ts` |
+| `outputs/S14-LECTURA.md` | **El reparto de tamaños del campo del intro**: menos motas y más grandes, contra la escala de lectura del preloader clásico |
 
 > ⚠️ **Exportar no es guardar.** El botón del editor copia al portapapeles. La calibración solo existe cuando ese texto se **pega** en el archivo. Ya costó una sesión entera de trabajo.
 
