@@ -1,0 +1,13 @@
+{
+  "name": "logic-core-v3",
+  "private": true,
+  "scripts": {
+    "build": "next build --webpack",
+<<<<<<< HEAD
+    "test:s1": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s1",
+=======
+    "test:s2": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s2",
+>>>>>>> rediseno/motion
+    "lint": "eslint"
+  }
+}

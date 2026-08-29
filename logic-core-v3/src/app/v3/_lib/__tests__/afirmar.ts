@@ -13,10 +13,27 @@
  * emite `border-radius: var(--radius-lg)` pase lo que pase con el valor, así
  * que un cambio de valor le pasaba por al lado sin que se notara. Lo cazó un
  * control positivo, no una relectura.
+ *
+ * ── `noCorre` — la tercera categoría, agregada por S4 ──────────────────────
+ *
+ * Una comprobación puede no ser ni verdadera ni falsa: puede estar FUERA DE SU
+ * VENTANA DE VALIDEZ. Los checks que comparan el árbol de trabajo contra `HEAD`
+ * miden el momento del sprint, no una propiedad del código; una vez commiteados
+ * y mergeados, `HEAD` ya contiene los cambios y el diff es vacío por
+ * construcción.
+ *
+ * Las dos salidas obvias son las dos equivocadas: hacerlas fallar convierte un
+ * cierre normal en cinco falsos rojos, y hacerlas pasar deja un **verde
+ * indistinguible entre "verifiqué" y "no había nada que verificar"** — el modo
+ * de falla que este proyecto viene cazando desde S10.
+ *
+ * `noCorre` es la tercera salida: no suma afirmación, no suma falla, **imprime
+ * que no corrió y por qué**, y `cerrar` la cuenta aparte en el resumen.
  */
 
 let fallas = 0
 let afirmaciones = 0
+let fueraDeVentana = 0
 
 export function afirmar(condicion: boolean, descripcion: string, detalle?: string): void {
   afirmaciones += 1
@@ -60,15 +77,32 @@ export function controlPositivo<T>(
   console.error(`  FALLA [control positivo] ${descripcion} — el predicado NO ve el error: está ciego`)
 }
 
+/**
+ * La comprobación NO corrió porque su base ya no existe. No es un ok y no es
+ * una falla: es un hueco declarado, con su motivo, visible en la salida y
+ * contado aparte en el resumen.
+ */
+export function noCorre(descripcion: string, razon: string): void {
+  fueraDeVentana += 1
+  console.warn(`  NO CORRE  ${descripcion}`)
+  console.warn(`            fuera de ventana — ${razon}`)
+}
+
 export function titulo(texto: string): void {
   console.log(`\n${texto}`)
 }
 
 export function cerrar(nombre: string): never {
-  console.log(`\n${nombre}: ${afirmaciones} afirmaciones, ${fallas} fallas`)
-  if (afirmaciones === 0) {
+  const cola = fueraDeVentana > 0 ? `, ${fueraDeVentana} fuera de ventana` : ''
+  console.log(`\n${nombre}: ${afirmaciones} afirmaciones, ${fallas} fallas${cola}`)
+  if (afirmaciones === 0 && fueraDeVentana === 0) {
     console.error('FALLA: cero afirmaciones. Un invariante sin afirmaciones es verde por vacío.')
     process.exit(1)
+  }
+  if (fueraDeVentana > 0) {
+    console.warn(
+      `${nombre}: ${fueraDeVentana} comprobación(es) NO CORRIERON — este verde es parcial, no limpio.`,
+    )
   }
   process.exit(fallas === 0 ? 0 : 1)
 }

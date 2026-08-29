@@ -29,6 +29,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
+import { cardinalidadEsperada, comoSeDeriva } from '../../__tests__/padron-de-tokens'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 // Seis niveles: __tests__ → motion → _lib → v3 → app → src → raíz del proyecto.
@@ -88,7 +89,30 @@ const palabras = [...new Set(textoDeTodo.match(/[a-zA-Z][a-zA-Z0-9:_/[\]().,%-]*
 titulo('U0 · Alcance del escaneo')
 
 afirmar(fuentes.length > 0, `el escaneo mira ${fuentes.length} archivos del sprint`)
-afirmar(TOKENS.length === 89, `y el tema declara ${TOKENS.length} tokens`, TOKENS.length === 89 ? '89' : String(TOKENS.length))
+/**
+ * ⚠ EL CONTEO NO ES UN LITERAL — S4.
+ *
+ * Decía `TOKENS.length === 89`. Eran 89 cuando se escribió y son 90 desde la
+ * corrección aprobada en la parada de S3 —`--color-superficie-translucida`, el
+ * papel translúcido que le dio superficie a `--blur-panel`—, así que este
+ * instrumento empezó a fallar **por crecer bien**.
+ *
+ * Un instrumento que afirma una cardinalidad escrita a mano se rompe cada vez
+ * que el sistema crece legítimamente, y entrena a que se lo actualice sin
+ * pensar. Ahora el número sale del mismo padrón declarado que usa
+ * `tokens.invariant.ts`, con su lista de excepciones nombradas: si aparece un
+ * token que nadie declaró, esto sigue fallando, que es para lo que existe.
+ */
+afirmar(
+  TOKENS.length === cardinalidadEsperada(),
+  `y el tema declara ${TOKENS.length} tokens`,
+  comoSeDeriva(),
+)
+controlPositivo(
+  'el conteo derivado NO se cumple solo: un token de más lo rompe',
+  [...TOKENS, '--token-que-nadie-declaro'],
+  (lista: string[]) => lista.length === cardinalidadEsperada(),
+)
 afirmar(ESPACIADOS.size === 9, `de los cuales ${ESPACIADOS.size} son múltiplos de espaciado`, [...ESPACIADOS].join(' '))
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -1,51 +1,54 @@
 /**
- * INVARIANTE — las fronteras del sprint. Lo que NO tocó, lo que NO importó y
- * lo que NO agregó.
+ * CHECK DE FRONTERA — propiedades del MOMENTO del sprint, no del código.
  *
- * Corre con `npm run test:s3-frontera`.
+ * Corre con `npm run test:s3-frontera`, o con `npm run test:frontera` junto al
+ * resto. **NO entra en ningún agregado, y corre ANTES del commit.**
  *
- * ── Por qué esto es un instrumento y no un párrafo del reporte ────────────
+ * ── Por qué está separado de `s3-codigo.invariant.ts` ─────────────────────
  *
- * "No toqué `theme-develop.css`", "no agregué dependencias", "no toqué base de
- * datos" son exactamente el tipo de afirmación que se escribe de memoria al
- * cerrar y que nadie puede contradecir sin repetir el trabajo. Acá las produce
- * `git` y un escáner de imports, así que el reporte cita una corrida en vez de
- * una intención.
+ * Todo lo de acá compara el árbol de trabajo contra `HEAD`. Durante el sprint,
+ * con los cambios sin commitear, mide algo real: qué tocó el sprint y qué no.
+ * **Commiteado y mergeado, `HEAD` ya contiene los cambios y el diff es vacío
+ * por construcción** — no porque el sprint se haya portado mal, sino porque el
+ * check se quedó sin base.
  *
- * ── Qué afirma ────────────────────────────────────────────────────────────
+ * Eso no lo vuelve inútil: lo vuelve **fechado**. Y la fecha ahora está
+ * declarada. `evaluarVentana()` decide si hay base; si no la hay, cada
+ * comprobación usa `noCorre()` —imprime que NO corrió y por qué— en vez de
+ * fallar o, peor, pasar en verde.
+ *
+ * ── Qué afirma, cuando está dentro de su ventana ──────────────────────────
  *
  *   1. Los archivos prohibidos están **intactos**: `/v3/page.tsx`, el home,
- *      `/probe-escena`, `home-intro/` y los seis congelados. Medido con
- *      `git status --porcelain`.
- *   1b. `theme-develop.css` SÍ cambió —la corrección aprobada en la parada—
- *      y se compara token por token contra HEAD: el único nombre nuevo es el
- *      declarado, y ningún valor previo se movió.
+ *      `/probe-escena`, `home-intro/` y los congelados.
+ *   1b. `theme-develop.css` cambió sólo en la corrección aprobada: el único
+ *      nombre nuevo es el declarado y ningún valor previo se movió.
  *   2. `package.json` cambió **sólo en `scripts`**. Ni una dependencia nueva.
- *      Medido contra `git show HEAD:package.json`.
- *   3. Ningún archivo del sprint importa base de datos, ni las zonas del otro
- *      socio, ni ningún módulo fuera de una lista blanca corta.
- *   4. Cero `any`, cero `router.push`.
- *   5. Ningún archivo pasa las 300 líneas — la regla del repo, aplicada
- *      también a los instrumentos.
+ *
+ * Los controles positivos corren SIEMPRE, dentro o fuera de ventana: prueban
+ * que los detectores no están ciegos, y eso no depende del momento.
  */
 
-import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { ARCHIVOS_DE_CODIGO, ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
-import { quitarComentarios } from './s3-escaneo'
-import { enElRepo, git, PREFIJO, rutasTocadas, tokensDeclaradosEn } from './s3-git'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
+import { ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
+import { enElRepo, git, rutasTocadas, tokensDeclaradosEn } from './s3-git'
+import { AGREGADOS } from './padron-de-tokens'
+import { encabezadoDeFrontera, evaluarVentana } from './s4-ventana'
+
+const tocados = rutasTocadas()
+
+/**
+ * El testigo de la ventana son los archivos del propio sprint: son altas, así
+ * que mientras el sprint esté sin commitear tienen que estar tocados. Si
+ * ninguno aparece, este árbol de trabajo ya no es el de S3.
+ */
+const TESTIGOS = ARCHIVOS_DEL_SPRINT.map(enElRepo)
+const ventana = evaluarVentana(TESTIGOS, tocados)
+console.log(`\n${encabezadoDeFrontera('s3-frontera', ventana)}`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Los archivos prohibidos están intactos')
 
-/**
- * Las rutas que la instrucción declara intocables, tal cual las nombra.
- *
- * ⚠ `theme-develop.css` NO está en esta lista, y la ausencia es deliberada:
- * S3 le agregó un token con aprobación explícita en la parada. Sacarlo de acá
- * sin más dejaría el archivo sin guardia, así que la afirmación se muda a §1b
- * y se vuelve más filosa que "intacto": que su ÚNICO cambio contra HEAD sea la
- * corrección declarada, y que ningún valor previo se haya movido.
- */
 const PROHIBIDOS = [
   'src/app/v3/page.tsx',
   'src/app/page.tsx',
@@ -66,37 +69,40 @@ const DIRECTORIOS_PROHIBIDOS = [
   'src/app/leados/',
 ]
 
-/** Lo que `git status` reporta como tocado, en rutas relativas a la raíz. */
-const tocados = git('status', '--porcelain')
-  .split('\n')
-  .map((linea) => linea.slice(3).trim().replace(/^"|"$/g, ''))
-  .filter((ruta) => ruta.length > 0)
-
 const prohibidosEnElRepo = PROHIBIDOS.map(enElRepo)
 const directoriosEnElRepo = DIRECTORIOS_PROHIBIDOS.map(enElRepo)
 
 const prohibidosTocados = tocados.filter(
   (ruta) => prohibidosEnElRepo.includes(ruta) || directoriosEnElRepo.some((d) => ruta.startsWith(d)),
 )
-afirmarIgual(prohibidosTocados, [], `ninguno de los ${PROHIBIDOS.length} archivos prohibidos fue tocado`)
-
-/**
- * EL CONTRAPESO, y es el que encontró el error de prefijo.
- *
- * Si las rutas del padrón y las de `git status` no hablan el mismo idioma, la
- * afirmación de arriba pasa en verde SIEMPRE. La única forma de saber que se
- * están comparando de verdad es exigir que las rutas del propio sprint —que
- * seguro están tocadas, porque son altas— aparezcan en la lista.
- */
-const propiosVistosPorGit = ARCHIVOS_DEL_SPRINT.map(enElRepo).filter((ruta) =>
+const propiosVistosPorGit = TESTIGOS.filter((ruta) =>
   tocados.some((t) => t === ruta || (t.endsWith('/') && ruta.startsWith(t))),
 )
-afirmar(
-  propiosVistosPorGit.length > 0,
-  `git status ve ${propiosVistosPorGit.length} de los ${ARCHIVOS_DEL_SPRINT.length} archivos del sprint`,
-  'sin esto la afirmación de arriba pasaría en verde aunque comparara peras con manzanas',
-)
-afirmar(tocados.length > 0, `y ve ${tocados.length} rutas tocadas en total`)
+
+if (ventana.dentro) {
+  afirmarIgual(prohibidosTocados, [], `ninguno de los ${PROHIBIDOS.length} archivos prohibidos fue tocado`)
+  /**
+   * EL CONTRAPESO, y es el que encontró el error de prefijo.
+   *
+   * Si las rutas del padrón y las de `git status` no hablan el mismo idioma, la
+   * afirmación de arriba pasa en verde SIEMPRE. La única forma de saber que se
+   * están comparando de verdad es exigir que las rutas del propio sprint
+   * aparezcan en la lista.
+   */
+  afirmar(
+    propiosVistosPorGit.length > 0,
+    `git status ve ${propiosVistosPorGit.length} de los ${TESTIGOS.length} archivos del sprint`,
+    'sin esto la afirmación de arriba pasaría en verde aunque comparara peras con manzanas',
+  )
+  afirmar(tocados.length > 0, `y ve ${tocados.length} rutas tocadas en total`)
+} else {
+  noCorre(
+    `ninguno de los ${PROHIBIDOS.length} archivos prohibidos fue tocado`,
+    'sin diff contra HEAD, `git status` no distingue "no lo toqué" de "ya está commiteado"',
+  )
+  noCorre(`git status ve N de los ${TESTIGOS.length} archivos del sprint`, ventana.razon)
+  noCorre('y ve N rutas tocadas en total', ventana.razon)
+}
 
 controlPositivo(
   'el filtro reconocería un prohibido si apareciera en la lista de tocados',
@@ -107,16 +113,9 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1b · El sistema cambió SÓLO en la corrección aprobada')
 
-/**
- * El archivo del sistema se compara contra HEAD token por token. Lo que se
- * afirma no es que no se tocó —se tocó— sino las dos cosas que importan:
- * qué se agregó, y que **nada de lo que ya estaba se movió**.
- *
- * Un token que cambia de valor en silencio es el peor cambio posible en este
- * archivo: no rompe nada, no da error, y mueve la mitad del sitio.
- */
 const TEMA = 'src/app/theme-develop.css'
-const CORRECCION_DE_S3 = ['--color-superficie-translucida']
+/** Sale del padrón declarado, no de un literal repetido acá. */
+const CORRECCION_APROBADA = AGREGADOS.map((a) => a.token).sort()
 
 const temaAntes = tokensDeclaradosEn(git('show', `HEAD:${enElRepo(TEMA)}`))
 const temaAhora = tokensDeclaradosEn(leer(TEMA))
@@ -127,13 +126,23 @@ const valoresMovidos = [...temaAntes.entries()]
   .filter(([n, v]) => temaAhora.has(n) && temaAhora.get(n) !== v)
   .map(([n, v]) => ({ token: n, antes: v, ahora: temaAhora.get(n) }))
 
-afirmarIgual(nombresNuevos, CORRECCION_DE_S3, 'el único token nuevo es la corrección declarada')
-afirmarIgual(nombresPerdidos, [], 'no se perdió ninguno')
-afirmarIgual(valoresMovidos, [], 'y ningún valor previo se movió')
+if (ventana.dentro) {
+  afirmarIgual(nombresNuevos, CORRECCION_APROBADA, 'el único token nuevo es la corrección declarada')
+  afirmarIgual(nombresPerdidos, [], 'no se perdió ninguno')
+  afirmarIgual(valoresMovidos, [], 'y ningún valor previo se movió')
+} else {
+  noCorre(
+    `el único token nuevo es la corrección declarada [${CORRECCION_APROBADA.join(' ')}]`,
+    'HEAD ya trae la corrección, así que el conjunto de nombres nuevos es vacío por construcción',
+  )
+  noCorre('no se perdió ninguno', ventana.razon)
+  noCorre('y ningún valor previo se movió', ventana.razon)
+}
+
 afirmar(
   temaAntes.size > 80,
   `el comparador leyó ${temaAntes.size} tokens en HEAD y ${temaAhora.size} ahora`,
-  'no es verde por vacío',
+  'no es verde por vacío — esto se lee de HEAD y vale dentro o fuera de ventana',
 )
 
 controlPositivo(
@@ -155,15 +164,25 @@ interface Paquete {
 const antes = JSON.parse(git('show', `HEAD:${enElRepo('package.json')}`)) as Paquete
 const ahora = JSON.parse(leer('package.json')) as Paquete
 
-afirmarIgual(ahora.dependencies, antes.dependencies, '`dependencies` idéntico a HEAD')
-afirmarIgual(ahora.devDependencies, antes.devDependencies, '`devDependencies` idéntico a HEAD')
-
 const scriptsNuevos = Object.keys(ahora.scripts ?? {}).filter((k) => !(k in (antes.scripts ?? {})))
 const scriptsCambiados = Object.keys(antes.scripts ?? {}).filter(
   (k) => (antes.scripts ?? {})[k] !== (ahora.scripts ?? {})[k],
 )
-afirmar(scriptsNuevos.length > 0, `${scriptsNuevos.length} scripts nuevos`, scriptsNuevos.join(' · '))
-afirmarIgual(scriptsCambiados, [], 'y ningún script previo se modificó')
+
+if (ventana.dentro) {
+  afirmarIgual(ahora.dependencies, antes.dependencies, '`dependencies` idéntico a HEAD')
+  afirmarIgual(ahora.devDependencies, antes.devDependencies, '`devDependencies` idéntico a HEAD')
+  afirmar(scriptsNuevos.length > 0, `${scriptsNuevos.length} scripts nuevos`, scriptsNuevos.join(' · '))
+  afirmarIgual(scriptsCambiados, [], 'y ningún script previo se modificó')
+} else {
+  noCorre('`dependencies` idéntico a HEAD', ventana.razon)
+  noCorre('`devDependencies` idéntico a HEAD', ventana.razon)
+  noCorre(
+    'N scripts nuevos',
+    'HEAD ya trae los scripts del sprint: el conjunto de nuevos es vacío por construcción',
+  )
+  noCorre('y ningún script previo se modificó', ventana.razon)
+}
 
 controlPositivo(
   'el comparador de dependencias vería un agregado',
@@ -172,102 +191,28 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Los imports del sprint, uno por uno')
+titulo('3 · El detector de ventana distingue los dos estados')
 
 /**
- * La lista blanca. Todo lo demás es una dependencia nueva o un cruce de
- * frontera, y las dos cosas tienen que fallar acá antes que en una revisión.
+ * Sin esto, un detector que siempre dijera "fuera de ventana" apagaría este
+ * archivo entero para siempre y nadie lo notaría: la salida diría "no corrió"
+ * en vez de "falló", que es exactamente lo que se espera ver.
  */
-const IMPORTS_PERMITIDOS = [
-  'react',
-  'react-dom',
-  'react-dom/server',
-  'next',
-  'next/font/local',
-  'next/dynamic',
-  'next/image',
-  'lucide-react',
-  '@/lib/utils',
-]
-
-function importsDe(codigo: string): string[] {
-  const limpio = quitarComentarios(codigo)
-  const desde = [...limpio.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)].map((m) => m[1])
-  const dinamicos = [...limpio.matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)].map((m) => m[1])
-  return [...desde, ...dinamicos]
-}
-
-const externosPorArchivo = ARCHIVOS_DE_CODIGO.map((archivo) => ({
-  archivo,
-  externos: importsDe(leer(archivo)).filter(
-    (m) => !m.startsWith('.') && !m.startsWith('node:') && !IMPORTS_PERMITIDOS.includes(m),
-  ),
-})).filter((r) => r.externos.length > 0)
-
-afirmarIgual(externosPorArchivo, [], 'ningún archivo importa fuera de la lista blanca')
-
-const cuantosImports = ARCHIVOS_DE_CODIGO.reduce((n, a) => n + importsDe(leer(a)).length, 0)
-afirmar(cuantosImports > 0, `el escáner miró ${cuantosImports} imports`, 'no es verde por vacío')
-
-controlPositivo(
-  'el escáner ve un import fuera de la lista',
-  "import { PrismaClient } from '@prisma/client'",
-  (codigo) =>
-    importsDe(codigo).filter(
-      (m) => !m.startsWith('.') && !m.startsWith('node:') && !IMPORTS_PERMITIDOS.includes(m),
-    ).length === 0,
+const UN_TESTIGO = TESTIGOS[0]
+afirmar(
+  evaluarVentana(TESTIGOS, [UN_TESTIGO]).dentro,
+  'con un testigo sin commitear, el detector dice DENTRO',
+  UN_TESTIGO,
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · Nada de base de datos, y ninguna zona del otro socio')
-
-const PROHIBIDOS_EN_CODIGO: readonly [string, RegExp][] = [
-  ['prisma', /\bprisma\b/i],
-  ['PrismaClient', /\bPrismaClient\b/],
-  ['OsLead', /\bOsLead\w*/],
-  ['ActivityChannel', /\bActivityChannel\b/],
-  ['/setter', /['"@/][^'"]*\/setter\b/],
-  ['/leados', /['"@/][^'"]*\/leados\b/],
-  ['router.push', /\brouter\.push\s*\(/],
-  ['any', /:\s*any\b|<any>|\bas\s+any\b/],
-]
-
-for (const [nombre, patron] of PROHIBIDOS_EN_CODIGO) {
-  const donde = ARCHIVOS_DE_CODIGO.filter((a) => patron.test(quitarComentarios(leer(a))))
-  afirmarIgual(donde, [], `ningún archivo del sprint usa ${nombre}`)
-}
-
-controlPositivo(
-  'el detector de `any` lo ve',
-  'const x: any = 1',
-  (codigo) => !PROHIBIDOS_EN_CODIGO.some(([, p]) => p.test(codigo)),
+afirmar(
+  !evaluarVentana(TESTIGOS, []).dentro,
+  'con el árbol limpio, dice FUERA',
+  evaluarVentana(TESTIGOS, []).razon,
 )
 controlPositivo(
-  'y el de `router.push` también',
-  'router.push("/a")',
-  (codigo) => !PROHIBIDOS_EN_CODIGO.some(([, p]) => p.test(codigo)),
+  'el detector no dice DENTRO por una ruta ajena',
+  ['un/archivo/que/no/es/del/sprint.ts'],
+  (lista) => evaluarVentana(TESTIGOS, lista).dentro,
 )
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Ningún archivo pasa las 300 líneas')
-
-/** Los instrumentos también. La regla del repo no tiene una excepción para el
- *  arnés, y un invariante de 600 líneas es tan ilegible como un componente. */
-const INSTRUMENTOS = tocados
-  .filter((r) => /_lib\/__tests__\/s3-/.test(r))
-  .map((r) => r.slice(PREFIJO.length))
-const TODOS = [...new Set([...ARCHIVOS_DEL_SPRINT, ...INSTRUMENTOS])]
-
-const largos = TODOS.map((archivo) => ({ archivo, lineas: leer(archivo).split('\n').length })).filter(
-  (r) => r.lineas > 300,
-)
-afirmarIgual(largos, [], `ninguno de los ${TODOS.length} archivos pasa las 300 líneas`)
-
-const masLargo = TODOS.map((archivo) => ({ archivo, lineas: leer(archivo).split('\n').length })).sort(
-  (a, b) => b.lineas - a.lineas,
-)[0]
-console.log(`  el más largo: ${masLargo.archivo} — ${masLargo.lineas} líneas`)
-
-afirmar(INSTRUMENTOS.length > 0, `${INSTRUMENTOS.length} instrumentos incluidos en la cuenta`)
 
 cerrar('s3-frontera.invariant')

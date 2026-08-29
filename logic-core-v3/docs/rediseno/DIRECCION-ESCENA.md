@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17. Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -195,6 +195,19 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
 9. **Los patrones del fondo salen del vocabulario propio.** Retículas, tramas de rendijas y campos de puntos: lo que el sitio ya usa, leído en el repo. No se importan referencias de afuera. Ver §2.6.
 10. **Nada de geometría sin significado.** Es la regla que S10 destiló al borrar cuatro familias de una vez: si una pieza solo "ocupa espacio con intención", se lee como descarte. Todo lo que quedó tiene una razón nombrable — el piso da escala y ancla, la envolvente es el fondo con vida, el sol es la fuente que se ve, las partículas son el aire.
 11. ⚠️ **UNA CIFRA QUE SE PUBLICA EN UN REPORTE Y NO TIENE INSTRUMENTO QUE LA PRODUZCA ES PROSA, NO MEDICIÓN.** Regla del proyecto desde S12, y no es de estilo: si más adelante hay que comparar contra ella, no se puede; si hay que defenderla, tampoco. **El caso que la obligó** son los cuatro números de amplitud de batido de S11 —10,8 / 7,1 / 13,1 / 6,5 puntos sRGB— que viven en la prosa de `outputs/S11-LUZ.md` §4.2 y en un string de `s11-celosia.invariant.ts`, y que **ningún archivo del repo produce**: su commit no agregó un solo script que los calcule. S12 los reemplazó por los de `__tests__/celosiaBeat.ts`, que sí tiene método declarado —tramo, ventana, muestreo— y control positivo. La regla se cumple escribiendo el instrumento **antes** de escribir el número, no después. **El inventario de lo que quedó sin instrumento está en `outputs/S12-PENUMBRA.md` §8.1** —el peso del canvas, los triángulos y draw calls, los MFLOP, la comparación con el mapa de sombras, el grano de papel y la tabla de los haces—: **auditado con `grep` sobre las veinte suites y NO re-medido**, que es trabajo del sprint que lo necesite. El caso más engañoso de esa lista es la tabla de los haces: **tiene chequeo pero no tiene productor** —los dos checks que la leen validan su forma contra sí misma— así que parece instrumentada y no lo está.
+12. ⚠️ **UN CHECK QUE COMPARA CONTRA `git` MIDE EL MOMENTO DEL SPRINT, NO EL CÓDIGO.** Regla del proyecto desde S4 del sitio, y es una clase de defecto, no un caso. **El caso que la obligó:** cinco afirmaciones de `s3-frontera.invariant.ts` —"git status ve 0 de los 35 archivos del sprint", "0 rutas tocadas", "el único token nuevo es la corrección declarada — obtenido `[]`", "0 scripts nuevos", "0 instrumentos incluidos en la cuenta"— fallaron al correr los tres sprints juntos. **Ninguna estaba rota:** las cinco comparan el árbol de trabajo contra `HEAD`, y commiteado y mergeado el diff es **vacío por construcción**. Tenían fecha de vencimiento y nadie la había declarado. Cómo se cumple, en tres partes:
+    - **Se separan las dos naturalezas, explícitamente.** *Invariantes permanentes* = propiedades del código, se leen del disco, corren siempre y entran en el agregado. *Checks de frontera* = propiedades del momento, comparan contra `git`, **corren antes del commit, en su propio script, y NO entran en el agregado**. Mezclados, los segundos arrastran a los primeros: al mergear, cinco afirmaciones de momento tiraron abajo el archivo entero, incluidas las siete que sí eran del código. En el repo hoy: `s3-codigo.invariant.ts` (permanente) contra `s3-frontera.invariant.ts` (frontera), y `npm run test:frontera` aparte de `npm run verificar`.
+    - **Cada check de frontera declara su ventana en su propia salida.** Cuando detecta que su base ya está en `HEAD` no falla: usa `noCorre()` —`afirmar.ts`—, que **imprime que no corrió y por qué**, lo cuenta aparte del total y sale en cero. La ventana la decide `evaluarVentana()` (`s4-ventana.ts`) contra un testigo declarado: las rutas cuyo diff el check necesita.
+    - ⚠️ **"No aplica" NO puede pasar en verde silencioso.** Un verde indistinguible entre "verifiqué" y "no había nada que verificar" es exactamente el modo de falla que este proyecto viene cazando desde S10, y apagar el check sería la forma más limpia de introducirlo. Por eso el detector de ventana tiene su propio invariante permanente —`s4-ventana.invariant.ts`— que afirma las dos direcciones: que dice DENTRO cuando hay base y FUERA cuando no. Un detector que dijera siempre "fuera" apagaría el check para siempre **y la salida se vería igual de bien**.
+
+    **Con siete lanes por venir, cada uno va a dejar los suyos.** El lane que escriba un check contra `git` lo pone en su propio archivo desde el principio; el nombre `test:<lane>-frontera` tiene que estar declarado en `CHECKS_DE_FRONTERA` (`s4-suites.ts`) o la derivación de suites **falla** — no se lo excluye del agregado por adivinanza.
+13. ⚠️ **UN INVARIANTE AFIRMA LO QUE SU SPRINT CONTROLA. LO QUE HEREDA SE PUBLICA CON ATRIBUCIÓN Y SE VIGILA, PERO NO SE AFIRMA.** Regla del proyecto desde SITIO-S4, y es la **segunda vez** que el mismo error de diseño aparece — por eso deja de ser un caso y pasa a ser regla. **El caso:** `s3-peso.invariant.ts` afirmaba que la carga inicial de `/v3` no crecía más de 1 KiB gzip ni sumaba archivos contra la línea de base de S1. Falló al mergear —424,0 contra 422,0 KiB gzip, 25 archivos contra 24— y **la falla era legítima: el número había crecido**. Pero ese número no era de S3: de los 25 archivos, **24 son heredados del layout raíz** —el chrome viejo, compartido con el home, que esos sprints tienen prohibido tocar— y **1 es propio de `/v3`**, que no se movió. El invariante estaba puesto a fallar por algo que su sprint no produce ni puede arreglar, y **un check así no protege: entrena a ignorarlo.** Las tres partes:
+    - **La afirmación es sobre lo propio**, con su umbral y su control positivo. **S1 ya lo hacía bien** y es el modelo a copiar: `bundle.invariant.ts` afirma `lo PROPIO de /v3 < 30 KiB` y deja el total como cifra impresa con su veredicto. `s3-peso` no copió esa forma, y ése fue todo el defecto.
+    - **Lo heredado se publica con atribución**: cuánto es, de quién es y por qué este sprint no puede tocarlo. Una cifra sin dueño se lee como responsabilidad de quien la imprime.
+    - **Y se vigila con una línea de base de regresión**, que no es un objetivo: existe para que lo heredado no engorde en silencio. ⚠️ **La línea de base no puede depender del estado de hoy.** La de `s4-heredado.invariant.ts` escala con las rutas de demo que existan en el build —`base + N × techo por ruta`—, así que borrar una la baja y agregar una la sube; no hay que tocarla nunca.
+    En el repo: `s3-peso.invariant.ts` §1 (lo de S3) contra `s4-heredado.invariant.ts` (lo heredado, que es del sistema y de ningún sprint).
+
+14. ⚠️ **UN AGREGADO DE INVARIANTES SE DERIVA, NO SE LISTA.** Regla desde SITIO-S4. **El hallazgo que la obligó es peor que un check en rojo:** `test:s3-peso` existía como script, tenía su archivo, y **no estaba en la cadena de `test:s3`**. Nunca corrió en ningún agregado y nadie lo notó — **un check en rojo se ve; un check que no está en ninguna cadena no se ve nunca.** Una lista escrita a mano no se queja de lo que le falta. La suite ahora sale de `package.json` (`s4-suites.ts`): un script `test:sN-loquesea` entra al agregado por existir. Los dos agujeros que quedan tienen su guardia en `s4-cobertura.invariant.ts`: un **archivo** de invariante sin ningún script que lo corra —invisible desde `package.json`, así que se busca en el disco— y un **agregado que vuelva a encadenar con `&&`**. Corolario, y es la mitad de la regla: **derivar destapó el problema que listar escondía.** El primer agregado derivado corrió `s3-peso` por primera vez, y ahí apareció la regla 13.
 
 ---
 
@@ -340,6 +353,36 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 
 > ⚠️ **Exportar no es guardar.** El botón del editor copia al portapapeles. La calibración solo existe cuando ese texto se **pega** en el archivo. Ya costó una sesión entera de trabajo.
 
+### 6.1 · Cómo se corre la verificación (SITIO-S4)
+
+| qué | comando |
+|---|---|
+| **La compuerta de cierre** — `package.json`, `tsc --noEmit` y todos los agregados, en orden y **sin `&&`** | `npm run verificar` |
+| **Los checks de frontera** — miden el momento del sprint. **Van ANTES del commit** y no entran en el gate (ver §3.12) | `npm run test:frontera` |
+| Un agregado suelto | `npm run test:s1` · `test:s2` · `test:s3` · `test:s4` |
+| Un invariante suelto | `npm run test:<suite>-<nombre>` |
+
+> ⚠️ **CORRECCIÓN — EL OOM DEL BUILD NO SE ARREGLA CON `--max-old-space-size`. HAY QUE ACOTAR LOS WORKERS.**
+>
+> Los prompts de sprint vienen pidiendo `NODE_OPTIONS=--max-old-space-size=8192` **desde hace seis sprints, y es el flag equivocado**. El problema no es el heap de un proceso: es la máquina. **13,9 GB de RAM y 16 CPUs**, y Next lanza `os.cpus().length - 1` = **15 workers** para "Collecting page data". Subirle el heap a cada uno de los quince empeora el reparto, no lo mejora.
+>
+> **La firma:** el compilado termina bien —`✓ Compiled successfully in 24.0min`— y recién ahí revienta, en `Collecting page data using 15 workers`, con `FATAL ERROR: Zone Allocation failed - process out of memory`. Que sea *después* del compilado es lo que despista: parece un problema del build y es un problema de reparto de memoria.
+>
+> **El comando que SÍ terminó**, con las siete rutas de `/v3` prerenderizadas:
+>
+> ```bash
+> # bash
+> NODE_OPTIONS=--max-old-space-size=8192 CIRCLE_NODE_TOTAL=3 npm run build
+> ```
+> ```powershell
+> # PowerShell
+> $env:NODE_OPTIONS = "--max-old-space-size=8192"; $env:CIRCLE_NODE_TOTAL = "3"; npm run build
+> ```
+>
+> **Por qué `CIRCLE_NODE_TOTAL`, que no tiene nada que ver con CircleCI:** es la variable que Next lee para el defecto de `experimental.cpus` —`node_modules/next/dist/server/config-shared.js:202`, `Math.max(1, (Number(process.env.CIRCLE_NODE_TOTAL) || os.cpus().length) - 1)`—. Con `3` quedan **2 workers**. Es la única forma de acotarlos **sin tocar `next.config`**, que está fuera del scope de estos sprints.
+>
+> ⚠️ **Lo que NO está aislado:** la corrida buena llevaba las dos variables, así que no está medido si el heap de 8192 solo es inocuo o si además estorba. Lo que sí está medido es que **lo que cambió entre la corrida que revienta y la que termina fue la cantidad de workers**. Si alguien quiere el dato limpio, la prueba es una corrida con `CIRCLE_NODE_TOTAL=3` y sin `NODE_OPTIONS`.
+
 ---
 
 ## 7 · Lo que todavía no está decidido
@@ -411,3 +454,31 @@ Está acá para que nadie lo dé por resuelto.
     **El caso concreto que lo destapó:** S10 publica **1.008 partículas en cuadro en la pose inicial** (924 de polvo + 84 de bokeh). S13 reprodujo ese número exacto con la cámara de `harness.ts`, y con la del rig el mismo campo da **996** (913 + 83): **−1,2%**.
 
     **NO se re-midió y NO se arregló**: es `probe-escena/`, y estaba fuera del scope de S13. Lo que este pendiente fija es qué toca el sprint que lo tome — `LOGO_W`/`LOGO_H` de `harness.ts`, y después volver a correr las once suites de arriba para ver cuáles de sus cifras publicadas se mueven.
+
+16. ⚠️ **PREDICCIÓN DEL MAPA — comprobación diferida, unificada en SITIO-S4. Se activa sola.**
+
+    S2 dejó una predicción —al borrar `/v3/motion` y `/v3/motion/control-estatico`, el peso heredado de `/v3` vuelve solo ±3,4 KiB— y S3 iba camino a dejar la suya con tres rutas más. **Es un solo fenómeno:** cada ruta nueva agrega su entrada a estructuras que viajan en chunks **compartidos con el home**, así que una ruta no le cobra a su propia página sino a las que ya existían. Dos predicciones separadas sobre un solo fenómeno se verifican mal: la primera que se cierre deja a la otra sin línea de base. **Quedan como UNA**, en `s4-rutas-de-demo.ts`:
+
+    | ruta | sprint |
+    |---|---|
+    | `/v3/motion` · `/v3/motion/control-estatico` | S2 |
+    | `/v3/componentes` · `/v3/tipografia` · `/v3/tipografia/muestra` | S3 |
+
+    `/v3/control-estatico` **no** está en la lista: es la ruta gemela que `bundle.invariant.ts` usa como control positivo, ya estaba en la línea de base de S1, y vive mientras viva ese instrumento.
+
+    **El número.** S1 midió el heredado en **1381,3 KiB crudo · 23 archivos** (2026-08-28), sin ninguna de las cinco. Hoy, con las cinco: **1386,1 KiB · 24 archivos**. Al borrarlas todas tiene que **volver solo a 1381,3 ±2,0 KiB**, o sea recuperar **4,8 KiB**, sin tocar ninguna otra cosa. Si vuelve, el delta era el costo de existir de N rutas sea cual sea el mecanismo. Si no vuelve, el diagnóstico estaba mal y hay que buscar en un chunk compartido.
+
+    ⚠️ **El costo por ruta NO es lineal ni constante, y las dos observaciones lo dicen:** 1,7 KiB/ruta (S2, dos rutas) contra 0,96 (S4, cinco acumuladas). Es empírica y sirve para el orden de magnitud. El mecanismo exacto **sigue sin identificarse** — S2 probó que no es la coreografía y que el manifiesto de rutas de Sentry explica sólo el 3,5 % de los bytes. Lo que cierra la pregunta no es una hipótesis: es el borrado.
+
+    **Quién la cierra:** el sprint que reemplace al home, que es el que borra estas rutas. **No hay que construir nada.** `npm run test:s4-heredado` la declara `NO CORRE` con su motivo mientras las rutas existan, y **pasa a afirmarla sola** el día que dejen de existir en el build.
+
+17. **DEUDA DE TAMAÑO EN LOS INSTRUMENTOS — cuatro arriba de 300 líneas, y ningún check los cubre.** Anotada en SITIO-S4 y **no arreglada**: partirlos no era el scope del sprint.
+
+    | archivo | líneas | de quién |
+    |---|---:|---|
+    | `_lib/__tests__/tokens.invariant.ts` | **456** | S1 — bajó de 463 al extraer `poda.ts`, pero sigue arriba |
+    | `_lib/motion/__tests__/motion-bundle.invariant.ts` | **341** | S2 |
+    | `_lib/motion/__tests__/cronograma.invariant.ts` | **324** | S2 |
+    | `_lib/__tests__/bundle.invariant.ts` | **323** | S1 |
+
+    **Lo que agrava la deuda es la cobertura, no el tamaño:** el único check de las 300 líneas es el de `s3-codigo.invariant.ts`, y mira los archivos del sprint de S3 más los instrumentos `s3-*`; `s4-cobertura.invariant.ts` mira los de S4. **Los de S1 y S2 no los mira nadie**, así que pueden seguir creciendo sin que nada falle. El sprint que los parta tiene que además extender la cobertura, o la deuda vuelve.

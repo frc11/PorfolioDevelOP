@@ -6,13 +6,18 @@
  *
  * Qué afirma, y por qué cada cosa:
  *
- *   1. El archivo del repo declara los mismos 89 tokens que el original de S0,
- *      salvo el renombre aprobado. Un token perdido en la copia es un token
- *      que nadie va a extrañar hasta que algo se vea mal.
+ *   1. El archivo del repo declara los tokens del PADRÓN —los de S0, más los
+ *      agregados aprobados, con el renombre aprobado—, y ni uno más. La cuenta
+ *      NO es un literal: sale de `padron-de-tokens.ts` (S4). Un token perdido
+ *      en la copia es un token que nadie va a extrañar hasta que algo se vea
+ *      mal; uno de más es un token que nadie decidió.
  *   2. Las diferencias de VALOR contra el original son exactamente 12 líneas:
  *      3 familias + 9 espaciados. Ni una más.
  *   3. `@theme static` — y las tres variantes compiladas, con sus números.
- *      Es la medición que corrige a S0 y no se puede dejar como prosa.
+ *      Es la medición que corrige a S0 y no se puede dejar como prosa. **El
+ *      testigo de la poda es sintético desde S4**: los reales se agotaron dos
+ *      veces en dos sprints, porque los sprints les dan consumidor. Ver
+ *      `poda.ts`.
  *   4. `@theme inline` rompe el override contextual. Es la regla no negociable
  *      del sprint y acá queda medida, no citada.
  *   5. Una sola colisión de nombre contra `globals.css`, y está resuelta.
@@ -22,29 +27,27 @@
  */
 
 import { readFileSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 import { ESCENARIO_MIN_ANCHO_PX } from '../compuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import {
+  AGREGADOS,
+  ORIGINAL_DE_S0,
+  RAIZ_DEL_PROYECTO,
+  TEMA_EN_EL_REPO,
+  cardinalidadEsperada,
+  comoSeDeriva,
+  declarados,
+  sinComentarios,
+} from './padron-de-tokens'
+import { ausentesDelRoot, conTestigos, emitirCss, testigosSinteticos, tokensDelRoot } from './poda'
 
-const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
-const ORIGINAL_S0 = path.join(RAIZ, 'docs/rediseno/s0/theme-develop.css')
-const EN_EL_REPO = path.join(RAIZ, 'src/app/theme-develop.css')
-const GLOBALS = path.join(RAIZ, 'src/app/globals.css')
+const GLOBALS = path.join(RAIZ_DEL_PROYECTO, 'src/app/globals.css')
 
-const original = readFileSync(ORIGINAL_S0, 'utf8')
-const enElRepo = readFileSync(EN_EL_REPO, 'utf8')
+const original = readFileSync(ORIGINAL_DE_S0, 'utf8')
+const enElRepo = readFileSync(TEMA_EN_EL_REPO, 'utf8')
 const globals = readFileSync(GLOBALS, 'utf8')
-
-/** Quita comentarios para no leer nombres de token citados en prosa. */
-const sinComentarios = (css: string): string => css.replace(/\/\*[\s\S]*?\*\//g, '')
-
-/** Nombres de custom property DECLARADOS (no referenciados). */
-function declarados(css: string): string[] {
-  const encontrados = [...sinComentarios(css).matchAll(/(?:^|[;{}\s])(--[a-zA-Z0-9-]+)\s*:/g)]
-  return [...new Set(encontrados.map((m) => m[1]))]
-}
 
 /** Las líneas de declaración, ya sin comentarios ni vacías. */
 function declaraciones(css: string): string[] {
@@ -54,103 +57,54 @@ function declaraciones(css: string): string[] {
     .filter((l) => l.length > 0)
 }
 
-/**
- * Compila por EL PIPELINE REAL: `@tailwindcss/postcss` sobre el `globals.css`
- * de este repo, que es literalmente lo que corre `next build`.
- *
- * ⚠ NO se usa la API `compile()` de `tailwindcss/dist/lib.mjs`, y hay una razón
- * medida: sin el escaneo de fuentes que hace el plugin, esa API no ve casi
- * ningún candidato y poda de más — dio 80 de 89 contra los ~21 del pipeline.
- * Es un artefacto del arnés, no del framework, y estuvo a punto de publicarse
- * como la cifra que retracta a S0. Medir la poda con un compilador que no
- * escanea el proyecto es medir otra cosa.
- *
- * ⚠ `from` DISTINTO por corrida: el plugin cachea el resultado por ruta de
- * entrada. Con el mismo `from`, la segunda corrida devuelve el CSS de la
- * primera y las tres variantes dan el mismo número — un falso "no poda". Lo
- * cazó el control positivo del detector, no una relectura.
- */
-interface PluginPostcss {
-  (opciones: { optimize: boolean }): unknown
-}
-interface Postcss {
-  (plugins: unknown[]): { process: (css: string, opciones: { from: string; to: string }) => Promise<{ css: string }> }
-}
-
-let corrida = 0
-async function emitirCss(cuerpoDelTema: string): Promise<string> {
-  corrida += 1
-  const url = (rel: string): string => `file://${path.join(RAIZ, rel).replace(/\\/g, '/')}`
-  const postcss = ((await import(/* webpackIgnore: true */ url('node_modules/postcss/lib/postcss.mjs'))) as { default: Postcss }).default
-  const tw = ((await import(/* webpackIgnore: true */ url('node_modules/@tailwindcss/postcss/dist/index.mjs'))) as { default: PluginPostcss }).default
-  const entrada = globals.replace('@import "./theme-develop.css";', cuerpoDelTema)
-  const res = await postcss([tw({ optimize: false })]).process(entrada, {
-    from: path.join(RAIZ, 'src/app', `.invariante-${corrida}.css`),
-    to: path.join(RAIZ, `.invariante-salida-${corrida}.css`),
-  })
-  return res.css
-}
-
-/** Los nombres declarados en el `:root` de la capa `theme`, sin comentarios. */
-function tokensDelRoot(css: string): Set<string> | null {
-  const limpio = sinComentarios(css)
-  const i = limpio.indexOf('@layer theme')
-  if (i < 0) return null
-  const j = limpio.indexOf('{', limpio.indexOf('{', i) + 1)
-  let prof = 1
-  let k = j + 1
-  while (k < limpio.length && prof > 0) {
-    if (limpio[k] === '{') prof += 1
-    else if (limpio[k] === '}') prof -= 1
-    k += 1
-  }
-  return new Set([...limpio.slice(j + 1, k - 1).matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)].map((m) => m[1]))
-}
-
 async function principal(): Promise<void> {
   // ─────────────────────────────────────────────────────────────────────────
-  titulo('1 · Los 89 tokens llegaron enteros, más la corrección de S3')
+  titulo(`1 · Los ${cardinalidadEsperada()} tokens del padrón, y ni uno más`)
 
   /**
-   * ⚠ ACTUALIZADO POR S3 (2026-08-29), con aprobación en su parada.
+   * ⚠ EL CONTEO NO ES UN LITERAL — S4.
    *
-   * S3 agregó UN token: `--color-superficie-translucida`, la superficie sobre
-   * la cual `--blur-panel` significa algo. S0 había emitido el desenfoque sin
-   * emitir la superficie, así que era un token muerto que parecía vivo.
+   * Decía `89` escrito a mano, y `89 + AGREGADOS_DECLARADOS.length` en el otro
+   * lado. Eran 89 cuando se escribió y son 90 desde la corrección aprobada en
+   * la parada de S3, así que el mismo número vivía en tres archivos y ya se
+   * había desincronizado en uno de ellos.
    *
-   * El conteo NO se subió a 90 a secas, y la diferencia importa: eso
-   * convertiría este invariante en un contador y dejaría entrar cualquier
-   * token futuro. Lo que se hace es nombrar la excepción. Un token nuevo que
-   * no sea éste sigue rompiendo la comprobación, que es para lo que existe.
+   * Ahora sale del padrón compartido —`padron-de-tokens.ts`—, que lo deriva de
+   * dos hechos verificables: cuántos tokens declara el original de S0, y qué se
+   * aprobó agregar o renombrar después, con su sprint y su motivo.
+   *
+   * **No se convierte en un contador**: el padrón nombra las excepciones una por
+   * una. Un token nuevo que no esté declarado ahí sigue rompiendo esta
+   * comprobación, que es para lo que existe.
    */
-  const AGREGADOS_POR_S3 = ['--color-superficie-translucida']
+  const AGREGADOS_DECLARADOS = AGREGADOS.map((a) => a.token)
 
   const nombresS0 = declarados(original)
   const nombresRepo = declarados(enElRepo)
   afirmarIgual(nombresS0.length, 89, 'S0 declara 89 tokens')
   afirmarIgual(
     nombresRepo.length,
-    89 + AGREGADOS_POR_S3.length,
-    `el archivo del repo declara ${89 + AGREGADOS_POR_S3.length}: los 89 de S0 más ${AGREGADOS_POR_S3.length} de S3`,
+    cardinalidadEsperada(),
+    `el archivo del repo declara ${cardinalidadEsperada()} — ${comoSeDeriva()}`,
   )
 
   const perdidos = nombresS0.filter((n) => n !== '--font-mono' && !nombresRepo.includes(n))
   afirmarIgual(perdidos, [], 'ningún token de S0 se perdió en la copia')
 
   const agregados = nombresRepo.filter(
-    (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_POR_S3.includes(n),
+    (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_DECLARADOS.includes(n),
   )
   afirmarIgual(agregados, [], 'no se agregó ningún token fuera de la corrección declarada')
 
-  const declaradosQueNoEstan = AGREGADOS_POR_S3.filter((n) => !nombresRepo.includes(n))
-  afirmarIgual(declaradosQueNoEstan, [], 'y la corrección de S3 está donde dice estar')
+  const declaradosQueNoEstan = AGREGADOS_DECLARADOS.filter((n) => !nombresRepo.includes(n))
+  afirmarIgual(declaradosQueNoEstan, [], 'y las correcciones declaradas están donde dicen estar')
 
   controlPositivo(
     'el filtro de agregados vería un token que nadie declaró',
     '--token-colado-por-la-ventana',
     (nombre) =>
       [...nombresRepo, nombre].filter(
-        (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_POR_S3.includes(n),
+        (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_DECLARADOS.includes(n),
       ).length === 0,
   )
 
@@ -249,70 +203,109 @@ async function principal(): Promise<void> {
     `${rootMutilado?.size ?? 0} tokens en el :root de la corrida mutilada`,
   )
 
-  const ausentes = async (cuerpo: string): Promise<string[]> => {
-    const enRoot = tokensDelRoot(await emitirCss(cuerpo))
-    if (enRoot === null) return nombresRepo
-    return nombresRepo.filter((n) => !enRoot.has(n))
-  }
+  const ausentes = (cuerpo: string): Promise<string[]> => ausentesDelRoot(cuerpo, nombresRepo)
 
   const cssStatic = await emitirCss(cuerpoRepo)
   const cssInline = await emitirCss(cuerpoInline)
 
-  afirmarIgual((await ausentes(cuerpoRepo)).length, 0, '`@theme static` — los 89 llegan al :root')
+  afirmarIgual(
+    (await ausentes(cuerpoRepo)).length,
+    0,
+    `\`@theme static\` — los ${nombresRepo.length} llegan al :root`,
+  )
 
   /**
-   * LA MEDICIÓN QUE CORRIGE A S0. Tailwind 4.3.1 SÍ poda, y poda POR USO.
+   * LA MEDICIÓN QUE CORRIGE A S0, CON UN TESTIGO QUE NO SE PUEDE AGOTAR — S4.
    *
-   * ⚠ NO SE AFIRMA UN NÚMERO EXACTO, Y LA RAZÓN ES UN HALLAZGO DEL SPRINT:
-   * el conteo es INESTABLE POR CONSTRUCCIÓN. Tailwind escanea `src/` entero, y
-   * este archivo está adentro de `src/`. Al escribir los nombres
-   * `--radius-pastilla-l`, `--ease-principal` y `--grilla-canal-compacto` como
-   * literales en una afirmación, esos tres DEJARON DE PODARSE: el conteo pasó
-   * de 24 a 21 sin que cambiara una línea del tema. El instrumento estaba
-   * creando lo que medía.
+   * Tailwind SÍ poda, y poda POR USO. La afirmación siempre fue ésa; lo que
+   * cambió tres veces es con qué se demuestra.
    *
-   * Es la misma clase de contaminación que la lección del `distDir` fuera de
-   * `.gitignore`, y acá enseña algo más útil que un número: **qué contiene el
-   * sistema de diseño en el navegador es función de lo que el escáner vea ese
-   * día.** Un token puede existir en el archivo y no existir en el `:root`, y
-   * cuál depende de qué componentes haya. Eso es exactamente lo que `static`
-   * cierra, y por eso vale más que la cifra puntual.
+   *   · S1 la demostró con las seis expresiones fluidas, que nadie consumía.
+   *     Medía 21 podados de 89.
+   *   · S3 construyó la tipografía, les dio consumidor a las seis, y el testigo
+   *     tuvo que mudarse a los radios.
+   *   · S2 —mergeado después— les dio consumidor a los radios también. **Hoy se
+   *     podan 0 de 90.**
    *
-   * Lo que sí se afirma: con `static` no se poda NINGUNO, sin `static` se poda
-   * AL MENOS UNO, y el listado del día se imprime para que quede fechado.
+   * O sea que **cualquier token real es un mal testigo por construcción**: el
+   * trabajo normal de un sprint es darle consumidor a los tokens, así que el
+   * testigo no se rompe cuando algo anda mal — se rompe cuando todo anda bien.
+   * Se agotó dos veces en dos sprints seguidos.
+   *
+   * El testigo de ahora es SINTÉTICO: dos tokens inventados que se inyectan en
+   * el fixture en memoria —el archivo del repo no se toca— y que nadie puede
+   * consumir sin escribir su nombre. Su nombre no está escrito en ninguna
+   * parte: se arma por concatenación en `poda.ts`, así que el escáner de
+   * Tailwind no lo ve. Si algún día alguien lo escribe, esta comprobación falla
+   * y el arreglo es gratis — se cambia el nombre inventado. Con un token real
+   * no había arreglo gratis, y por eso éste es el tercer sprint que toca lo
+   * mismo.
    */
-  const podados = await ausentes(cuerpoLlano)
-  afirmar(podados.length > 0, `\`@theme\` a secas — ${podados.length} de 89 NO llegan al :root`)
-  console.log(`       podados hoy: ${podados.join(' ')}`)
+  const testigos = testigosSinteticos()
+  const conLosDos = [...nombresRepo, testigos.propio, testigos.enFamiliaDeColor]
+  const testigosStatic = await ausentesDelRoot(conTestigos(cuerpoRepo), conLosDos)
+  const testigosLlano = await ausentesDelRoot(conTestigos(cuerpoLlano), conLosDos)
+
+  afirmar(
+    !testigosStatic.includes(testigos.propio) && !testigosStatic.includes(testigos.enFamiliaDeColor),
+    '`@theme static` — los dos testigos sintéticos SOBREVIVEN aunque nadie los consuma',
+    'que es exactamente lo que `static` promete',
+  )
+  afirmar(
+    testigosLlano.includes(testigos.propio),
+    '`@theme` a secas — el testigo sintético SE PODA: la poda sigue siendo real, medida hoy',
+  )
   /**
-   * ⚠ ACTUALIZADO POR S3. Esta afirmación decía que entre los podados estaban
-   * las seis expresiones fluidas, "escala medida que ningún componente consume
-   * todavía". **Ya no es cierto, y ésa es la noticia**: S3 construyó los
-   * componentes de tipografía y los seis `--text-fluido-*` tienen consumidor,
-   * así que sobreviven a la poda aun sin `static`.
-   *
-   * No se borra la afirmación: se da vuelta. Lo que antes probaba que la poda
-   * es real con un grupo sin usar, ahora lo prueba con el grupo que quedó sin
-   * usar —los radios que ningún componente de /v3 pide todavía— y afirma
-   * además el hecho nuevo. Si mañana alguien consume esos radios, esta
-   * comprobación va a fallar y va a haber que elegir otro testigo; eso es
-   * correcto y es barato.
+   * La contracara, y reemplaza a la afirmación vieja —"los referenciados
+   * sobreviven"— que hoy sería verde por vacío, porque con 0 podados se cumple
+   * sola. Ésta se mide: dos tokens del MISMO namespace `--color-*`, uno
+   * consumido y otro no, y sólo se poda el que nadie usa.
    */
+  afirmar(
+    testigosLlano.includes(testigos.enFamiliaDeColor) && !testigosLlano.includes('--color-fondo'),
+    '  y se poda también dentro de `--color-*`, donde `--color-fondo` sobrevive: la poda es por USO, no por namespace',
+  )
+
+  /**
+   * EL HECHO NUEVO, PUBLICADO CON SU NÚMERO.
+   *
+   * Cero tokens reales podados quiere decir que **el sistema está enteramente
+   * consumido**: los 90 tienen al menos un consumidor en el repo. Es un buen
+   * resultado y hay que publicarlo.
+   *
+   * ⚠ Y NO ES UN ARGUMENTO PARA VOLVER A `@theme` A SECAS. La poda es por uso:
+   * que hoy se poden 0 no dice que Tailwind dejó de podar, dice que hoy todos
+   * tienen consumidor. El primer token que quede sin consumidor —uno nuevo que
+   * todavía no se usa, o uno viejo cuyo último consumidor se borró— se va a
+   * podar, y va a desaparecer del `:root` sin error de build y sin diff. El
+   * testigo sintético de arriba es exactamente ese caso, y se poda en cada
+   * corrida.
+   */
+  const podados = testigosLlano.filter((n) => n !== testigos.propio && n !== testigos.enFamiliaDeColor)
+  afirmarIgual(
+    podados,
+    [],
+    `\`@theme\` a secas — 0 de ${nombresRepo.length} tokens reales se podan: el sistema está ENTERAMENTE CONSUMIDO`,
+  )
+  console.log(`       tokens reales podados hoy: ${podados.length === 0 ? '(ninguno)' : podados.join(' ')}`)
   afirmar(
     !podados.some((n) => n.startsWith('--text-fluido-')),
     '  las seis expresiones fluidas YA NO se podan: S3 les dio consumidor',
-    `podados: ${podados.join(' ')}`,
   )
   afirmar(
-    podados.some((n) => n.startsWith('--radius-')),
-    '  y el testigo de que la poda sigue siendo real son los radios sin consumidor',
-    podados.filter((n) => n.startsWith('--radius-')).join(' '),
+    !podados.some((n) => n.startsWith('--radius-')),
+    '  ni los radios: S2 les dio consumidor, y por eso el testigo pasó a ser sintético',
   )
-  // La contracara acota el alcance: los referenciados sobreviven aun sin
-  // `static`, así que el problema no es de namespace sino de uso.
-  afirmar(
-    !podados.includes('--color-foco') && !podados.includes('--pad-lateral-compacto'),
-    '  los referenciados sobreviven: la poda es por uso, no por namespace',
+
+  controlPositivo(
+    'sin inyectar, el testigo NO existe en el tema: es sintético, no un token del sistema',
+    cuerpoRepo,
+    (cuerpo) => cuerpo.includes(testigos.propio),
+  )
+  controlPositivo(
+    'y el inyector no inyecta en el vacío: sin bloque `@theme` no inventa uno',
+    ':root { --algo: 1px; }',
+    (cuerpo) => conTestigos(cuerpo).includes(testigos.propio),
   )
 
   // ─────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,10 @@
+{
+  "name": "logic-core-v3",
+  "private": true,
+  "scripts": {
+    "build": "next build --webpack",
+    "test:s1": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s1",
+    "lint": "eslint",
+    "test:s1": "echo el merge lo pisó y nadie se enteró"
+  }
+}

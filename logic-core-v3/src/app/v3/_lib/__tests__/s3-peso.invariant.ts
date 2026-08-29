@@ -1,125 +1,99 @@
 /**
- * INVARIANTE — cuánto pesa este sprint, sobre LA SALIDA DEL BUILD.
+ * INVARIANTE — cuánto pesa lo que ESTE SPRINT CONTROLA, sobre la salida del
+ * build.
  *
  * Corre con `npm run build` y después `npm run test:s3-peso`.
  * Acepta un distDir alternativo: `npx tsx …/s3-peso.invariant.ts .next-otro`.
  *
- * ── Qué se mide, y contra qué ─────────────────────────────────────────────
+ * ── REDISEÑADO EN S4, Y POR QUÉ ───────────────────────────────────────────
  *
- * S1 midió la carga inicial de `/v3` en **1385,8 KiB crudo · 422,0 KiB gzip**,
- * en 24 archivos, de los cuales 23 son heredados del layout raíz —el chrome
- * viejo, que este sprint tiene prohibido tocar—. La pregunta que este
- * instrumento responde es qué le agregó S3 a ese número.
+ * La versión anterior afirmaba que la carga inicial de `/v3` no se movía más de
+ * 1 KiB gzip ni sumaba archivos contra la línea de base de S1. **Falló al
+ * correr los tres sprints juntos** —424,0 contra 422,0 KiB gzip, 25 archivos
+ * contra 24— y la falla era legítima: el número había crecido.
  *
- * La respuesta se descompone en tres, porque son tres cosas distintas:
+ * Pero **ese número no es de este sprint**. De los 25 archivos, 24 son
+ * heredados del layout raíz —el chrome viejo, compartido con el home, que estos
+ * sprints tienen PROHIBIDO tocar— y 1 es propio de `/v3`, que no se movió.
+ * Afirmar el total ponía a este invariante a fallar por algo que su sprint no
+ * produce ni puede arreglar, y un check así no protege: entrena a ignorarlo.
  *
- *   · **JS de `/v3`**: el sprint no monta ninguna pieza en el home nuevo —eso
- *     es del sprint de secciones—, así que tiene que quedar igual.
- *   · **CSS**: las cinco hojas del chrome se importan en el layout de /v3, así
- *     que sí entran en la carga inicial de la ruta. Se miden extrayendo del
- *     CSS SERVIDO las reglas del sprint —las que nombran `data-pieza` o
- *     `data-parte`— y pesándolas crudas y comprimidas.
- *   · **Las dos rutas de demostración**: peso propio, que se va con ellas.
+ * ⚠️ **Era la SEGUNDA vez que aparecía el mismo error, y S1 lo había hecho
+ * bien**: `bundle.invariant.ts` afirma `lo PROPIO de /v3 < 30 KiB` y deja el
+ * total como cifra impresa. La regla que quedó —§3.13 de
+ * `DIRECCION-ESCENA.md`— es: *un invariante afirma lo que su sprint controla;
+ * lo que hereda se publica con atribución y se vigila, pero no se afirma.*
  *
- * ── Y la compuerta del cursor, sobre el build ─────────────────────────────
+ * **La vigilancia de lo heredado se mudó a `s4-heredado.invariant.ts`**, junto
+ * con la línea de base de regresión y la predicción diferida del mapa. Acá
+ * queda lo de S3, y sólo eso.
  *
- * Un chunk que no se descarga no se prueba a ojo. La marca del cursor tiene
- * que existir en algún chunk (el buscador no está ciego) y no estar en la
- * carga inicial de la ruta que lo monta.
+ * ── Qué afirma ────────────────────────────────────────────────────────────
+ *
+ *   1. El peso PROPIO de `/v3`, con umbral y control positivo.
+ *   2. El CSS que el sprint agrega: las cinco hojas del chrome.
+ *   3. Las rutas de demostración, con su peso propio aparte.
+ *   4. La compuerta del cursor, sobre la salida del build.
+ *   5. Que las utilidades del sistema que el sprint escribe existen.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { gzipSync } from 'node:zlib'
 
 import { MARCA_CURSOR } from '../marcaCursor'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { RAIZ } from './s3-archivos'
+import {
+  DIST,
+  conjuntoInicial,
+  contiene,
+  exigirBuild,
+  hojasDe,
+  htmlDe,
+  kib,
+  partirCargaInicial,
+  pesar,
+  todosLosChunks,
+} from './s3-bundle'
 import { partesDeSelector, reglas } from './s3-css'
+import { RUTAS_DE_DEMO } from './s4-rutas-de-demo'
 
-const DIST = path.join(RAIZ, process.argv[2] ?? '.next')
-
-if (!existsSync(DIST)) {
-  console.error(`\nNo existe ${DIST}. Corré \`npm run build\` primero.`)
-  process.exit(1)
-}
-
-/** La línea de base que midió S1, para poder decir "no creció". */
-const BASE_S1 = { crudoKiB: 1385.8, gzipKiB: 422.0, archivos: 24 }
-
-function htmlDe(ruta: string): string {
-  const nombre = ruta === '/' ? 'index' : ruta.replace(/^\//, '')
-  const archivo = path.join(DIST, 'server', 'app', `${nombre}.html`)
-  return existsSync(archivo) ? readFileSync(archivo, 'utf8') : ''
-}
-
-/** Los `.js` que pide la carga inicial de una ruta: sus `<script src>`. */
-function conjuntoInicial(ruta: string): string[] {
-  const encontrados = htmlDe(ruta).matchAll(/\/_next\/(static\/[^"']+?\.js)/g)
-  return [...new Set([...encontrados].map((m) => m[1]))].sort()
-}
-
-/** Las hojas que pide una ruta: sus `<link rel=stylesheet>`. */
-function hojasDe(ruta: string): string[] {
-  const encontrados = htmlDe(ruta).matchAll(/\/_next\/(static\/css\/[^"']+?\.css)/g)
-  return [...new Set([...encontrados].map((m) => m[1]))].sort()
-}
-
-const pesar = (archivos: readonly string[]): { crudo: number; gzip: number } => {
-  let crudo = 0
-  let gzip = 0
-  for (const f of archivos) {
-    const p = path.join(DIST, f)
-    if (!existsSync(p)) continue
-    crudo += statSync(p).size
-    gzip += gzipSync(readFileSync(p)).length
-  }
-  return { crudo, gzip }
-}
-
-const kib = (n: number): string => `${(n / 1024).toFixed(1)} KiB`
-
-function todosLosChunks(dir = path.join(DIST, 'static', 'chunks'), acumulado: string[] = []): string[] {
-  if (!existsSync(dir)) return acumulado
-  for (const entrada of readdirSync(dir, { withFileTypes: true })) {
-    const completo = path.join(dir, entrada.name)
-    if (entrada.isDirectory()) todosLosChunks(completo, acumulado)
-    else if (entrada.name.endsWith('.js')) acumulado.push(path.relative(DIST, completo).replace(/\\/g, '/'))
-  }
-  return acumulado
-}
-
-const contiene = (relativo: string, aguja: string): boolean => {
-  const p = path.join(DIST, relativo)
-  return existsSync(p) && readFileSync(p, 'utf8').includes(aguja)
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · La carga inicial de /v3 no creció')
+exigirBuild()
 
 const inicialV3 = conjuntoInicial('/v3')
+const inicialHome = conjuntoInicial('/')
+const { propios, pesoPropio } = partirCargaInicial(inicialV3, inicialHome)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('1 · Lo que este sprint CONTROLA: el peso propio de /v3')
+
 afirmar(inicialV3.length > 0, `la carga inicial de /v3 son ${inicialV3.length} archivos`)
+/** Sin el home, la partición daría "todo propio" y el umbral pasaría por vacío. */
+afirmar(inicialHome.length > 0, `  y la del home ${inicialHome.length}, contra la que se parte`)
 
-const pesoV3 = pesar(inicialV3)
-console.log(`  /v3   ${kib(pesoV3.crudo)} crudo · ${kib(pesoV3.gzip)} gzip   (S1 midió ${BASE_S1.crudoKiB} KiB · ${BASE_S1.gzipKiB} KiB en ${BASE_S1.archivos})`)
-
-/**
- * "No creció" sería mentira: crece 0,3 KiB gzip, y hay que decirlo. El cambio
- * es el `import` de las cinco hojas en el layout de /v3, que mueve el chunk del
- * layout unos bytes. Lo que se afirma es el orden de magnitud: **el sprint no
- * pone JavaScript nuevo en la carga inicial del home**, porque no monta
- * ninguna pieza ahí — eso es del sprint de secciones.
- */
+/** El mismo umbral que S1: es el sprint el que lo controla, y no lo movió. */
+const PRESUPUESTO_PROPIO_KIB = 30
 afirmar(
-  pesoV3.gzip / 1024 <= BASE_S1.gzipKiB + 1,
-  'el JS inicial de /v3 se mantiene dentro de 1 KiB gzip de la línea de base de S1',
-  `${kib(pesoV3.gzip)} gzip contra ${BASE_S1.gzipKiB} KiB — ${(pesoV3.gzip / 1024 - BASE_S1.gzipKiB).toFixed(1)} KiB de diferencia`,
+  pesoPropio.crudo / 1024 < PRESUPUESTO_PROPIO_KIB,
+  `lo PROPIO de /v3 < ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
+  `${kib(pesoPropio.crudo)} crudo · ${kib(pesoPropio.gzip)} gzip en ${propios.length} archivo(s)`,
 )
 afirmar(
-  inicialV3.length <= BASE_S1.archivos,
-  'ni sumó archivos: este sprint no monta ninguna pieza en el home nuevo',
-  `${inicialV3.length} contra ${BASE_S1.archivos}`,
+  propios.length <= 2,
+  '  y a lo sumo dos archivos propios: el sprint no monta ninguna pieza en el home nuevo',
+  propios.join(' · ') || '(ninguno)',
+)
+
+controlPositivo(
+  'el umbral de lo propio vería un exceso',
+  { crudo: (PRESUPUESTO_PROPIO_KIB + 1) * 1024 },
+  (p) => p.crudo / 1024 < PRESUPUESTO_PROPIO_KIB,
+)
+controlPositivo(
+  'y el partidor no llama propio a un archivo que el home también pide',
+  inicialHome,
+  (delHome) => partirCargaInicial(inicialV3, delHome).propios.length === inicialV3.length,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -168,9 +142,9 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Las dos rutas de demostración, aparte')
+titulo('3 · Las rutas de demostración, aparte')
 
-for (const ruta of ['/v3/componentes', '/v3/tipografia', '/v3/tipografia/muestra']) {
+for (const { ruta } of RUTAS_DE_DEMO.filter((r) => r.sprint === 'S3')) {
   const inicial = conjuntoInicial(ruta)
   const peso = pesar(inicial)
   const propios = inicial.filter((f) => !inicialV3.includes(f))
