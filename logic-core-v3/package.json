@@ -117,7 +117,7 @@
     "test:s3-peso": "npx tsx src/app/v3/_lib/__tests__/s3-peso.invariant.ts",
     "test:s3": "npm run test:s3-tokens && npm run test:s3-layout && npm run test:s3-tipografia && npm run test:s3-cta && npm run test:s3-navegacion && npm run test:s3-cursor && npm run test:s3-foco && npm run test:s3-imagen && npm run test:s3-papel && npm run test:s3-frontera",
     "test:s3-frontera": "npx tsx src/app/v3/_lib/__tests__/s3-frontera.invariant.ts",
-    "test:s3-papel": "npx tsx src/app/v3/_lib/__tests__/s3-papel-translucido.invariant.ts"
+    "test:s3-papel": "npx tsx src/app/v3/_lib/__tests__/s3-papel-translucido.invariant.ts",
     "test:s2-curvas": "npx tsx src/app/v3/_lib/motion/__tests__/curvas.invariant.ts",
     "test:s2-traduccion": "npx tsx src/app/v3/_lib/motion/__tests__/traduccion.invariant.ts",
     "test:s2-cronograma": "npx tsx src/app/v3/_lib/motion/__tests__/cronograma.invariant.ts",
