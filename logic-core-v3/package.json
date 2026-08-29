@@ -118,6 +118,18 @@
     "test:s3": "npm run test:s3-tokens && npm run test:s3-layout && npm run test:s3-tipografia && npm run test:s3-cta && npm run test:s3-navegacion && npm run test:s3-cursor && npm run test:s3-foco && npm run test:s3-imagen && npm run test:s3-papel && npm run test:s3-frontera",
     "test:s3-frontera": "npx tsx src/app/v3/_lib/__tests__/s3-frontera.invariant.ts",
     "test:s3-papel": "npx tsx src/app/v3/_lib/__tests__/s3-papel-translucido.invariant.ts"
+    "test:s2-curvas": "npx tsx src/app/v3/_lib/motion/__tests__/curvas.invariant.ts",
+    "test:s2-traduccion": "npx tsx src/app/v3/_lib/motion/__tests__/traduccion.invariant.ts",
+    "test:s2-cronograma": "npx tsx src/app/v3/_lib/motion/__tests__/cronograma.invariant.ts",
+    "test:s2-anclas": "npx tsx src/app/v3/_lib/motion/__tests__/anclas.invariant.ts",
+    "test:s2-epoca": "npx tsx src/app/v3/_lib/motion/__tests__/epoca.invariant.ts",
+    "test:s2-lineas": "npx tsx src/app/v3/_lib/motion/__tests__/lineas.invariant.tsx",
+    "test:s2-reducido": "npx tsx src/app/v3/_lib/motion/__tests__/reducido.invariant.tsx",
+    "test:s2-tokens": "npx tsx src/app/v3/_lib/motion/__tests__/tokens-de-uso.invariant.ts",
+    "test:s2-bundle": "npx tsx src/app/v3/_lib/motion/__tests__/motion-bundle.invariant.ts",
+    "test:s2-css": "npx tsx src/app/v3/_lib/motion/__tests__/motion-css.invariant.ts",
+    "test:s2-galeria": "npx tsx src/app/v3/_lib/motion/__tests__/galeria.invariant.tsx",
+    "test:s2": "npm run test:s2-curvas && npm run test:s2-traduccion && npm run test:s2-cronograma && npm run test:s2-anclas && npm run test:s2-epoca && npm run test:s2-lineas && npm run test:s2-reducido && npm run test:s2-tokens && npm run test:s2-galeria && npm run test:s2-bundle && npm run test:s2-css"
   },
   "dependencies": {
     "@ai-sdk/google-vertex": "^4.0.128",
