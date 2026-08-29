@@ -7560,3 +7560,122 @@ Este sprint no cambia una sola pantalla. No hay nada para mirar. Lo que cambia e
 ### Anotado para el sprint siguiente
 
 El barrido de destinos que el producto nombra sin enlazar: «Correcciones» fuera del rail de construcción, y lo que aparezca al censarlo.
+
+---
+
+## Sprint EL ASCENSO — cinco sprints salen del disco de Franco — 2026-08-29
+
+No construye nada. Verifica, sube, y deja un comando.
+
+### Fase 0 · El mapa de ramas
+
+La rama de P3, que en su reporte no quedó nombrada, es **`fix/callejones`**.
+
+La cadena es **lineal**: cada rama es ancestro de la siguiente, verificado con `merge-base --is-ancestor` en los seis eslabones. No divergen, así que no hay ninguna decisión de Franco pendiente acá.
+
+| # | Rama | Hash | Aporta | Sobre | ¿Estaba en origin? |
+|---|---|---|---|---|---|
+| — | `leados/v1-a-main` | `d167df16` | base | `origin/main` | **sí**, desde hace seis sprints |
+| P3 | `fix/callejones` | `a2004edb` | 1 | `leados/v1-a-main` | no |
+| P4 | `fix/municiones` | `fa4af2a0` | 1 | `fix/callejones` | no |
+| P5 | `fix/vocabulario` | `6ef28432` | 1 | `fix/municiones` | no |
+| P6 | `fix/datos-viajan` | `b87bc821` | 1 | `fix/vocabulario` | no |
+| P7 | `fix/quinta-superficie` | `035f90a1` | 1 | `fix/datos-viajan` | no |
+| P8 | `fix/una-sola-fuente` | `0c92dd08` | 7 | `fix/quinta-superficie` | no |
+
+El `merge-base` de **todas** con `origin/main` es `17727117`, que **es** `origin/main`: la rama que corre es ancestro de la cadena entera.
+
+Censo del riesgo real al arrancar: **seis ramas con 27 commits que no existían en ninguna ref de `origin`**. `leados/v1-a-main` ya estaba a salvo; las otras seis, no.
+
+### Paso 1 · Todo a salvo
+
+Las seis pusheadas una por una con refspec explícito (`refs/heads/X:refs/heads/X`), antes de cualquier verificación. Después del `fetch`, `rev-list --left-right --count <rama>...origin/<rama>`:
+
+| Rama | left/right |
+|---|---|
+| `leados/v1-a-main` | `0  0` |
+| `fix/callejones` | `0  0` |
+| `fix/municiones` | `0  0` |
+| `fix/vocabulario` | `0  0` |
+| `fix/datos-viajan` | `0  0` |
+| `fix/quinta-superficie` | `0  0` |
+| `fix/una-sola-fuente` | `0  0` |
+
+Y el barrido general: **ninguna** rama local del repo tiene un solo commit fuera de `origin`. Esto solo ya justifica el sprint, y no dependía de que lo demás saliera bien.
+
+### Paso 2 · La punta
+
+**`fix/una-sola-fuente` @ `0c92dd08`.** Verificado, no asumido: `git log --oneline <rama> ^<punta>` sale **vacío** para las seis de la cadena y además para `f1/datos-fecha-contador`, `f2/motivo-rechazo`, `f3/acuse-recibo` y `leados/v1-integracion`. Ninguna aporta un commit que la punta no tenga.
+
+Todo lo que sigue —los cuatro gates y el diagnóstico del ascenso— se midió sobre `0c92dd08`. Este mismo commit de bitácora queda **encima** de esa medición y no toca una línea de código: `git status` mostraba un único archivo modificado. El `build` se volvió a correr después de escribirlo, porque Tailwind escanea `docs/**/*.md` y una vez un renglón de bitácora rompió el build.
+
+### Paso 3 · Los cuatro gates sobre la punta
+
+Secuenciales, en un solo carril.
+
+| Gate | Exit | Resultado |
+|---|---|---|
+| `npx tsc --noEmit` | **0** | 0 líneas de salida |
+| `npm run check:invariants` | **0** | 48 descubiertos · 1 excluido · **47 corridos, 47 pasaron, 0 fallaron** |
+| `npm run build` | **0** | compilado en 90 s, 34 páginas estáticas |
+| `npx prisma migrate status` | **0** | 86 migraciones, *Database schema is up to date!* — **sin drift** |
+
+Los 47 por nombre: `check:invariant`, `setter-meta`, `escalamiento`, `novedades`, `mis-numeros`, `timeline`, `foco`, `particion`, `flow`, `alta-propia`, `prospecto-import`, `gate-envio`, `self-check`, `progreso`, `reloop-selfcheck`, `manual`, `pantallas`, `turno`, `vista-cartera`, `postergacion`, `contador-dms`, `acuse`, `dossier-stage`, `aprobada-sin-link`, `draft-url-mensaje`, `security`, `lead-scoring`, `dates-ar`, `lead-status`, `home-metrics`, `lead-detail`, `recommendations`, `gbp-connection`, `modules`, `motor-resenas-view`, `upsell-dedup`, `announcements`, `referrals`, `client-notifications`, `executive-report-plan`, `executive-report-prefs`, `brief-input`, `client-monthly-report`, `notifications-brevo`, `mask-secret`, `cron-secret`, `pausa-dia`. El excluido sigue siendo `client-monthly-report-pdf`, que necesita base.
+
+**Las suites de Playwright NO se corrieron, y no se inventan.** No existe `.env.test`: tanto `playwright.leados.config.ts` como `playwright.setter.config.ts` hacen `dotenv.config({ path: '.env.local' })`, o sea que resolverían contra la base **dev de Neon**. Y las specs de `tests/leados` escriben: `osLead.create`, `osLead.update`, `osLeadDossier.update`, `organization.delete`, `deleteMany`. Correrlas violaba la regla de cero escrituras sobre la base. `test:setter` además levanta `start:setter` (build de producción + server). Queda pendiente para cuando exista una base de test dedicada — que es lo mismo que ya pide el job `test-leados` del CI.
+
+### Paso 4 · El diagnóstico del ascenso
+
+`origin/main` **no se movió**: sigue en `17727117`, del 18 de agosto. El censo vale.
+
+- **¿Fast-forward?** Sí. `merge-base --is-ancestor origin/main <punta>` da verdadero, y `rev-list --left-right --count origin/main...<punta>` da **`0  31`**: cero commits que la rama que corre tenga y la punta no.
+- **¿Conflictos?** Ninguno. `git merge-tree --write-tree origin/main <punta>` sale con exit **0** y una sola línea de salida — el OID del árbol resultante, `77662f44…`, que es **idéntico** al `<punta>^{tree}`. Un merge que produce exactamente el árbol de la punta es la definición operativa de un fast-forward.
+
+Por lo tanto **no hubo conflicto de bitácora que resolver**, y los ocho chequeos de concatenación de P2 no corresponden: no se concatenó nada. No se tocó una sola línea de `src/`.
+
+`prisma/` no lo toca la cadena — cero archivos —, así que `prisma generate` no corresponde.
+
+Fuera de `src/` y `docs/`, la cadena toca: `.github/workflows/ci.yml` (el gate que enciende C1), `logic-core-v3/.github/workflows/e2e.yml`, `next.config.ts`, `package.json`, `scripts/run-invariants.mjs` y nueve specs de `tests/`.
+
+### Paso 5 · Nada se perdió
+
+`git log --oneline origin/main ^<punta>` → **vacío**. `git diff origin/main <punta> --stat -- src/` → **50 archivos, 3.340 inserciones, 239 borrados**.
+
+Los seis frentes, afirmados **por contenido** contra el árbol commiteado de la punta y contrastados contra `origin/main`:
+
+| Frente | Marcador | punta | origin/main |
+|---|---|---|---|
+| Las salidas visibles sin desplegar | `SalidaLinkPendiente` en `tool-guide.tsx` | 2 | 0 |
+| La fecha de postergación | `parseCalendarDayAR` en `dates-ar.ts` | 1 | 0 |
+| …y que viaja a la tarjeta | `reactivateAt` en `flow.ts` | 5 | 1 |
+| Las causas de espera | `export type CausaEspera` en `turno.ts` | 1 | 0 |
+| La tarjeta del aprobado sin link | `FALTA_LINK_PERMANENTE` en `turno.ts` | 1 | 0 |
+| …y su contador | `contarEnVueloPorTurno` en `flow.ts` | 1 | 0 |
+| El fragmento único del contador | `SOLO_DMS_MANDADOS` / `dmsMandadosHoyWhere` | 5 | 0 |
+| …consumido por la consulta | `where: dmsMandadosHoyWhere` en `outreach.ts` | 1 | 0 |
+| El piso exacto de invariantes | `INVARIANTES_ESPERADOS = 48` | 4 | 0 |
+
+**Una corrección de conteo.** El pedido hablaba de «las seis causas de espera»; la unión `CausaEspera` tiene **siete** miembros. Reconcilia: seis son esperas reales —`reunion`, `cierre`, `descarte`, `revision`, `linkPermanente` (las cinco de Franco) y `respuesta` (la del negocio)— y la séptima, `accionPropia`, mapea a `'setter'` y está documentada en el propio tipo como «**No es espera**: hay algo trabado esperando al setter». Las siete están desde `fix/datos-viajan`; `fix/quinta-superficie` no agregó ninguna causa, agregó la cadena de copy `FALTA_LINK_PERMANENTE`.
+
+### El comando para Franco — NO se corrió
+
+**No se pusheó a `main`. Ni una vez.** Lo que quedó pusheado son las seis ramas de la cadena, cada una a su propio nombre.
+
+El ascenso es de Franco:
+
+    git fetch origin
+    git push origin refs/heads/fix/una-sola-fuente:refs/heads/main
+
+El refspec es explícito de los dos lados a propósito: un `git push` pelado sobre una rama que trackea `origin/main` apunta a `main` sin decirlo, y ese es exactamente el accidente que este sprint existe para no tener.
+
+Como es fast-forward puro, no hace falta `--force` ni nada parecido. Si el push rebota, es porque `origin/main` se movió después de este censo: en ese caso **no forzar** — volver a correr el diagnóstico del Paso 4, que es lo que decide si sigue siendo fast-forward.
+
+### Qué queda para la verificación humana
+
+- **El push a `main`.** Es de Franco y de nadie más.
+- **La corrida de CI sobre `main` después.** Va a ser la **primera vez** que el gate corre sobre `main`: hasta hoy `ci.yml` vivió solo en ramas. Los tres jobs de secrets (`test-leados`, `e2e`) van a saltearse con warning visible mientras no haya `DATABASE_URL_TEST` — eso es lo esperado, no una falla.
+
+### Anotado, sin hacer
+
+- No existe `.env.test`. Mientras no exista, las dos suites de Playwright solo pueden correr contra la base dev, y ninguna verificación de cierre puede incluirlas sin escribir en datos reales.
+- Las seis ramas quedaron pusheadas **sin upstream configurado** (refspec explícito, sin `-u`). Es deliberado: no se tocó configuración. Pero significa que un `git push` pelado parado en cualquiera de ellas sigue siendo ambiguo.
