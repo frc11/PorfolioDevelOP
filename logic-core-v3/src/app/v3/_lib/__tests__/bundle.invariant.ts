@@ -247,7 +247,7 @@ afirmarIgual(perezosos.length, 1, 'hay exactamente un chunk perezoso con el esce
 afirmar(extra.crudo > 0, '  y pesa más de cero bytes: existe de verdad')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('CSS — los 89 tokens llegan al :root en el CSS que se sirve')
+titulo('CSS — los 90 tokens llegan al :root en el CSS que se sirve')
 
 const cssDir = path.join(DIST, 'static', 'css')
 const hojas = existsSync(cssDir) ? readdirSync(cssDir).filter((f) => f.endsWith('.css')) : []
@@ -258,8 +258,14 @@ const tokens = [...new Set([...tema.matchAll(/(?:^|[;{}\s])(--[a-zA-Z0-9-]+)\s*:
 const cssServido = hojas.map((f) => readFileSync(path.join(cssDir, f), 'utf8')).join('\n')
 const faltantes = tokens.filter((t) => !new RegExp(`${t}\\s*:`).test(cssServido))
 
-afirmarIgual(tokens.length, 89, 'el tema declara 89 tokens')
-afirmarIgual(faltantes, [], 'los 89 llegan al CSS servido — `@theme static` hace lo que promete')
+/**
+ * 90 y no 89 desde S3 (2026-08-29): entró `--color-superficie-translucida`,
+ * la superficie que le faltaba a `--blur-panel`. El nombre de la excepción lo
+ * afirma `tokens.invariant.ts`; acá sólo importa que TODOS lleguen al CSS que
+ * se sirve, sean 89 o 90.
+ */
+afirmarIgual(tokens.length, 90, 'el tema declara 90 tokens — los 89 de S0 más la corrección de S3')
+afirmarIgual(faltantes, [], 'los 90 llegan al CSS servido — `@theme static` hace lo que promete')
 
 controlPositivo(
   'el buscador de tokens ve uno que NO está en el CSS servido',

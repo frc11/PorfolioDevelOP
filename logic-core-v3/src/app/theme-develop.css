@@ -194,6 +194,48 @@
   --color-superficie-2: #E8E8E6;   /* tarjeta sobre panel — 1,1438:1 */
   --color-superficie-3: #DBDBD9;   /* estado activo / hover — 1,2925:1 */
 
+  /* --- La cuarta superficie: el papel TRANSLÚCIDO ---------------------
+   * ⚠ CORRECCIÓN A S0, agregada por S3 (2026-08-29), aprobada por Valentino.
+   *
+   * POR QUÉ ES UNA CORRECCIÓN Y NO UN TOKEN NUEVO. S0 emitió `--blur-panel:
+   * 12px` —medido en la pastilla flotante de la referencia— y NO emitió
+   * ninguna superficie translúcida sobre la cual ese desenfoque signifique
+   * algo. `backdrop-filter` sobre un fondo opaco no se ve: el sistema
+   * declaró un desenfoque sin declarar sobre qué. Era exactamente lo que la
+   * cabecera de este archivo llama un token muerto que parece vivo.
+   *
+   * DERIVACIÓN, con el método de las tres superficies de arriba —reproducir
+   * lo medido y corregir sólo lo que el piso de accesibilidad obligue:
+   *
+   *   1. La única alfa clara MEDIDA en la referencia es 0,4 — el halo del
+   *      cursor sobre sección clara, `rgba(236, 236, 236, 0.4)`.
+   *   2. Reproducida acá, la tinta sobre el papel al 0,4 con el peor fondo
+   *      detrás da 3,54:1 en claro y 2,63:1 en la sección invertida. Las
+   *      dos FALLAN AA como texto (4,5:1).
+   *   3. Se sube al mínimo escalón de la escala de opacidad del sistema que
+   *      pasa en LOS DOS sentidos. 0,5 pasa en claro (4,98:1) y falla
+   *      invertida (3,54:1). 0,6 pasa las dos.
+   *   4. 0,6 es `--opacity-casi`, que ya estaba declarada: la alfa no se
+   *      inventó, se eligió de la escala.
+   *
+   * PEOR CASO, y es el que hay que mirar: la pastilla flotante NO se
+   * invierte con lo que pasa por atrás —su tema lo fija su ancestro en el
+   * DOM, no lo que se ve—, así que una pastilla clara sobre una sección
+   * invertida es una configuración real. Ése es el fondo peor caso de cada
+   * tema, y es contra ése que se verificó.
+   *
+   *   claro     tinta #111111 sobre #9A9A99  →  6,70:1   AA ✓
+   *   invertida papel #F7F7F5 sobre #6B6B6A  →  4,97:1   AA ✓
+   *
+   * Los dos números los produce `s3-papel-translucido.invariant.ts`, que
+   * compone el color y mide, con control positivo sobre la alfa medida de
+   * 0,4 —que tiene que fallar—.
+   *
+   * Se escribe como `rgba()` literal y no con `color-mix()` por la misma
+   * razón que `--color-borde`: es la convención que este archivo ya usa
+   * para sus dos colores con alfa, y no depende de soporte de navegador. */
+  --color-superficie-translucida: rgba(247, 247, 245, 0.60);
+
   /* Las tres tintas. La primaria es [decidido]; las otras dos [derivado],
    * con el mismo método espejado: se midieron las razones de SUS tintas
    * contra SU fondo (7,2122 y 6,4741) y se buscó, desde #111111 y hacia
@@ -729,6 +771,13 @@
   --color-tinta: #F7F7F5;                          /* el papel, dado vuelta — 18,00:1 [decidido] */
   --color-borde: rgba(247, 247, 245, 0.10);        /* [derivado] */
   --color-borde-fuerte: rgba(247, 247, 245, 0.47); /* misma alfa que el claro — 4,62:1 [derivado] */
+
+  /* La cuarta superficie, dada vuelta. MISMA ALFA que el claro —0,60, que es
+   * `--opacity-casi`— porque el piso de accesibilidad se calculó para los dos
+   * sentidos a la vez: acá la tinta clara sobre el oscuro al 60% con el papel
+   * detrás da 4,97:1. Ver la derivación completa arriba, en la superficie
+   * translúcida del tema claro. [derivado, CORRECCIÓN A S0 por S3] */
+  --color-superficie-translucida: rgba(14, 14, 14, 0.60);
 
   /* NO se redefinen --color-superficie-1/2/3. [pendiente]
    * La sección invertida es UNA superficie: el brief de develOP declara

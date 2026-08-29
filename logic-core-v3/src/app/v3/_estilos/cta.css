@@ -1,0 +1,197 @@
+/* =========================================================================
+ * EL CTA DE ROLLOVER DE DOS COPIAS
+ * =========================================================================
+ * El componente más usado del sistema medido: 26 apariciones entre sus dos
+ * variantes, 17 sólo en la home. Y el más caro de construir.
+ *
+ * ── Qué es, exactamente ───────────────────────────────────────────────────
+ *
+ * NO es un desplazamiento vertical simple. Dos copias del rótulo viven dentro
+ * de una ventana con `overflow: hidden` que CRECE en el hover, y el
+ * intercambio es una rotación con traslación más un barrido de `clip-path`:
+ *
+ *   copia A sale   rotando +6°  y trasladándose (+20, −33,75) px, opacidad → 0
+ *   copia B entra  desde +10°   y (−30, +24,75) px, con clip-path de
+ *                  inset(80% 0 0) a inset(0), opacidad → 1
+ *   en paralelo    un subrayado, 0,6s con 0,4s de retardo
+ *   el intercambio 1,3s con --ease-salida
+ *
+ * ── De dónde sale cada número ─────────────────────────────────────────────
+ *
+ * Los valores están medidos y se transfieren; la implementación es nuestra.
+ * Ni un selector, ni un nombre de clase, ni un bloque de CSS de la referencia.
+ * Cada propiedad personalizada de abajo lleva su etiqueta de evidencia, y
+ * `s3-cta.invariant.ts` contrasta las derivadas contra `_lib/cta.ts`.
+ *
+ * ── El foco dispara lo mismo que el hover ─────────────────────────────────
+ *
+ * Es la corrección más barata del sprint. En la referencia el rollover NO se
+ * dispara con Tab: un usuario de teclado no recibe ninguna señal. Acá cada
+ * regla de estado nombra `:hover` y `:focus-visible` juntos, y hay un
+ * instrumento que falla si aparece un `:hover` sin su gemelo.
+ *
+ * `[data-forzado~="…"]` existe sólo para la galería de estados de
+ * `/v3/componentes`, que tiene que poder mostrar el hover sin un puntero.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="cta"] {
+  /* --- Geometría del intercambio. [medido, COMPONENTS.md §3.3] ----------- */
+  --cta-giro-salida: 6deg;
+  --cta-salida-x: 20px;
+  --cta-salida-y: -33.75px;
+  --cta-giro-entrada: 10deg;
+  --cta-entrada-x: -30px;
+  --cta-entrada-y: 24.75px;
+  --cta-recorte-inicial: inset(80% 0 0);
+  --cta-recorte-final: inset(0);
+
+  /* --- Tiempos. [derivado] de las cuatro duraciones del sistema ---------
+   * 1,3s y 0,6s no son tokens y no se inventa ninguno: se COMPONEN.
+   *   700 + 2×300 = 1300ms   ·   2×300 = 600ms   ·   400ms es un token exacto.
+   * El instrumento resuelve las tres cuentas y las compara contra la
+   * medición, así que si alguien mueve una duración del sistema, falla. */
+  --cta-intercambio: calc(var(--duracion-muy-lenta) + 2 * var(--duracion-rapida));
+  --cta-subrayado-duracion: calc(2 * var(--duracion-rapida));
+  --cta-subrayado-retardo: var(--duracion-media);
+
+  /* --- La ventana. [derivado] de NUESTRA tipografía ---------------------
+   * Ellos miden 24,5 → 28,5 px. Los extremos dependen de la familia; lo que
+   * transfiere entero es la RESTA: +4,0 px exactos, que es --spacing-1, la
+   * unidad base del sistema. Acá el reposo es nuestra caja de línea
+   * (15px × 1,6 = 24) y el hover le suma esa misma unidad. */
+  --cta-ventana-reposo: calc(var(--text-cuerpo) * var(--leading-texto));
+  --cta-ventana-hover: calc(var(--text-cuerpo) * var(--leading-texto) + var(--spacing-1));
+
+  /* --- El subrayado. [derivado] -----------------------------------------
+   * Su ancho medido es 120px, que es el ancho de SU rótulo, no una medida
+   * del sistema: acá vale el 100% de la ventana, o sea el ancho del nuestro.
+   * El alto sí transfiere: 3px = tres filetes. */
+  --cta-subrayado-alto: calc(var(--border-hairline) * 3);
+
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2);
+  border: 0;
+  background-color: transparent;
+  /* EL CTA ES SIEMPRE TINTA, NUNCA ACENTO. Regla cerrada de la paleta. */
+  color: var(--color-tinta);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* La variante `block`: 9 de las 26 apariciones medidas. */
+[data-v3] [data-pieza="cta"][data-variante="bloque"] {
+  display: flex;
+  inline-size: 100%;
+}
+
+/* --- La ventana de recorte ---------------------------------------------- */
+[data-v3] [data-pieza="cta"] [data-parte="ventana"] {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  block-size: var(--cta-ventana-reposo);
+  transition-property: block-size;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-salida);
+}
+
+/* --- Las dos copias ----------------------------------------------------- */
+[data-v3] [data-pieza="cta"] [data-parte="copia-a"],
+[data-v3] [data-pieza="cta"] [data-parte="copia-b"] {
+  display: block;
+  white-space: nowrap;
+  transition-property: transform, opacity, clip-path;
+  transition-duration: var(--cta-intercambio);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3] [data-pieza="cta"] [data-parte="copia-b"] {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--cta-giro-entrada))
+    translate(var(--cta-entrada-x), var(--cta-entrada-y));
+  opacity: 0;
+  clip-path: var(--cta-recorte-inicial);
+}
+
+/* --- El subrayado ------------------------------------------------------- */
+[data-v3] [data-pieza="cta"] [data-parte="subrayado"] {
+  display: block;
+  inline-size: 100%;
+  block-size: var(--cta-subrayado-alto);
+  background-color: var(--color-tinta);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--cta-subrayado-duracion);
+  transition-timing-function: var(--ease-salida);
+  /* Sin retardo al SALIR: el retardo vive en la regla de estado, así que
+     sólo se aplica al entrar. Con el retardo acá, la raya se quedaría 0,4s
+     colgada después de sacar el puntero. */
+  transition-delay: 0s;
+}
+
+/* =========================================================================
+ * LOS ESTADOS — hover y foco dicen exactamente lo mismo.
+ * ========================================================================= */
+
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="ventana"] {
+  block-size: var(--cta-ventana-hover);
+}
+
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="copia-a"] {
+  transform: rotate(var(--cta-giro-salida)) translate(var(--cta-salida-x), var(--cta-salida-y));
+  opacity: 0;
+}
+
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="copia-b"] {
+  transform: none;
+  opacity: 1;
+  clip-path: var(--cta-recorte-final);
+}
+
+[data-v3]
+  [data-pieza="cta"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="subrayado"] {
+  transform: scaleX(1);
+  transition-delay: var(--cta-subrayado-retardo);
+}
+
+/* --- Deshabilitado ------------------------------------------------------
+ * El `:not(:disabled)` de las reglas de estado ya apaga el rollover; esto es
+ * la señal visible. `:hover` en CSS SÍ matcha un botón deshabilitado, así que
+ * sin ese `:not()` el rollover correría igual y el estado sería una mentira. */
+[data-v3] [data-pieza="cta"]:disabled {
+  opacity: var(--opacity-alta);
+  cursor: not-allowed;
+}

@@ -2,6 +2,25 @@ import localFont from 'next/font/local'
 
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
 
+/* ── LAS HOJAS DEL CHROME (S3) ───────────────────────────────────────────────
+ * Cinco archivos y no uno: la regla del repo parte a las 300 líneas, y cada
+ * pieza se revisa entera de una sentada. Se importan acá y no desde los
+ * componentes por dos razones. La primera es de alcance: son las hojas del
+ * árbol de /v3 y este layout es su frontera. La segunda es de instrumentos —
+ * un componente que importa un `.css` no se puede cargar desde una
+ * comprobación con `tsx`, que no sabe qué hacer con una hoja de estilos; con
+ * los componentes limpios, los invariantes los renderizan y afirman sobre el
+ * marcado de verdad.
+ *
+ * Todos los selectores empiezan por `[data-v3]`: nada de esto puede tocar el
+ * sitio vivo, y hay una comprobación que lo afirma archivo por archivo.
+ * ────────────────────────────────────────────────────────────────────────── */
+import './_estilos/cta.css'
+import './_estilos/navegacion.css'
+import './_estilos/cursor.css'
+import './_estilos/pie.css'
+import './_estilos/foco.css'
+
 /**
  * EL ESQUELETO DEL SITIO v3 — canvas permanente + paneles encima.
  *

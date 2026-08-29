@@ -1,0 +1,143 @@
+/* =========================================================================
+ * LA PASTILLA DE NAVEGACIÓN FLOTANTE
+ * =========================================================================
+ * No es un header que se encoge: **es una pastilla que viaja**. Nace cerca del
+ * pie de la primera pantalla y sube hasta fijarse arriba. En la referencia va
+ * de `top: 816` a `top: 24` con umbral en 792px, y esos tres números son de SU
+ * héroe a 1440×900 — no entran acá. El nuestro se deriva, y la aritmética
+ * completa está en `_lib/navegacion.ts`.
+ *
+ * ── El mecanismo ──────────────────────────────────────────────────────────
+ *
+ * `position: sticky` con un `top` NEGATIVO igual a −umbral, y la pastilla
+ * `absolute` adentro a `top: nacimiento`. Con eso la posición sale sola:
+ *
+ *   scrollY < umbral   el envoltorio fluye → la pastilla está en
+ *                      nacimiento − scrollY
+ *   scrollY ≥ umbral   el envoltorio se pega → la pastilla está en reposo
+ *
+ * O sea `top = nacimiento − scrollY` hasta topar en `reposo`, que es la misma
+ * curva medida. **Sin JavaScript, sin listener y sin nada atado al scroll.**
+ *
+ * ── El desenfoque medido, y la superficie que le faltaba ─────────────────
+ *
+ * La referencia mide `backdrop-filter: blur(12px)` en esta pastilla, y S0
+ * emitió ese valor como `--blur-panel`. Lo que S0 NO emitió es una superficie
+ * translúcida: sobre un fondo opaco, `backdrop-filter` no se ve. El token
+ * estaba muerto y parecía vivo.
+ *
+ * `--color-superficie-translucida` es la mitad que faltaba, y entró como
+ * CORRECCIÓN A S0 aprobada en la parada de este sprint. Su alfa —0,60, que es
+ * `--opacity-casi`— no se eligió por gusto: es el mínimo escalón de la escala
+ * del sistema con el que la tinta pasa AA como texto sobre la superficie
+ * compuesta **con el fondo peor caso detrás**, en los dos temas. La alfa
+ * medida en la referencia (0,4) no llega: da 3,54:1 en claro y 2,63:1 en la
+ * sección invertida. La derivación completa está en `theme-develop.css` y la
+ * verifica `s3-papel-translucido.invariant.ts`.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="navegacion"] {
+  /* --- La derivación del umbral. Ver `_lib/navegacion.ts`. -------------- */
+  --nav-reposo: var(--spacing-6);
+  --nav-alto: calc(var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto));
+  --nav-margen-al-pie: var(--spacing-6);
+  --nav-nacimiento: calc(100svh - var(--nav-margen-al-pie) - var(--nav-alto));
+  --nav-umbral: calc(var(--nav-nacimiento) - var(--nav-reposo));
+
+  position: sticky;
+  top: calc(var(--nav-umbral) * -1);
+  block-size: 0;
+  z-index: var(--z-cabecera);
+}
+
+[data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"] {
+  position: absolute;
+  top: var(--nav-nacimiento);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  block-size: var(--nav-alto);
+  padding-inline: var(--spacing-4);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-pastilla-l);
+  background-color: var(--color-superficie-translucida);
+  backdrop-filter: blur(var(--blur-panel));
+  box-shadow: var(--shadow-flotante);
+}
+
+[data-v3] [data-pieza="navegacion"] [data-parte="lista"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* =========================================================================
+ * EL ENLACE — el hover medido, con el foco haciendo lo mismo.
+ * =========================================================================
+ * Medido: `translateX(8px)` en 0,5s con --ease-principal, y un marcador que
+ * entra desde `scale(0.8) translateX(−16px)` con la misma curva y duración.
+ * El retardo de 0,04s existe sólo en reposo: al entrar es inmediato y al salir
+ * arrastra un poco. Es la única cifra de este bloque sin token equivalente y
+ * va declarada como medida.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="nav-enlace"] {
+  --nav-retardo-reposo: 40ms; /* [medido, COMPONENTS.md §3.2] */
+  --nav-marcador-escala: 0.8; /* [medido, COMPONENTS.md §3.2] */
+  --nav-marcador-desplazamiento: calc(var(--spacing-4) * -1); /* −16px [medido] */
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding-inline: var(--spacing-2);
+  color: var(--color-tinta);
+  text-decoration: none;
+  transform: translateX(0);
+  transition-property: transform;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+  transition-delay: var(--nav-retardo-reposo);
+}
+
+[data-v3] [data-pieza="nav-enlace"] [data-parte="marcador"] {
+  display: block;
+  flex: none;
+  inline-size: var(--spacing-1);
+  block-size: var(--spacing-1);
+  border-radius: var(--radius-circulo);
+  background-color: var(--color-tinta);
+  opacity: 0;
+  transform: scale(var(--nav-marcador-escala))
+    translateX(var(--nav-marcador-desplazamiento));
+  transition-property: transform, opacity;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3]
+  [data-pieza="nav-enlace"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  ) {
+  transform: translateX(var(--spacing-2));
+  transition-delay: 0s;
+}
+
+[data-v3]
+  [data-pieza="nav-enlace"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="marcador"] {
+  opacity: 1;
+  transform: none;
+}

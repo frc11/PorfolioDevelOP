@@ -109,18 +109,50 @@ function tokensDelRoot(css: string): Set<string> | null {
 
 async function principal(): Promise<void> {
   // ─────────────────────────────────────────────────────────────────────────
-  titulo('1 · Los 89 tokens llegaron enteros')
+  titulo('1 · Los 89 tokens llegaron enteros, más la corrección de S3')
+
+  /**
+   * ⚠ ACTUALIZADO POR S3 (2026-08-29), con aprobación en su parada.
+   *
+   * S3 agregó UN token: `--color-superficie-translucida`, la superficie sobre
+   * la cual `--blur-panel` significa algo. S0 había emitido el desenfoque sin
+   * emitir la superficie, así que era un token muerto que parecía vivo.
+   *
+   * El conteo NO se subió a 90 a secas, y la diferencia importa: eso
+   * convertiría este invariante en un contador y dejaría entrar cualquier
+   * token futuro. Lo que se hace es nombrar la excepción. Un token nuevo que
+   * no sea éste sigue rompiendo la comprobación, que es para lo que existe.
+   */
+  const AGREGADOS_POR_S3 = ['--color-superficie-translucida']
 
   const nombresS0 = declarados(original)
   const nombresRepo = declarados(enElRepo)
   afirmarIgual(nombresS0.length, 89, 'S0 declara 89 tokens')
-  afirmarIgual(nombresRepo.length, 89, 'el archivo del repo declara 89 tokens')
+  afirmarIgual(
+    nombresRepo.length,
+    89 + AGREGADOS_POR_S3.length,
+    `el archivo del repo declara ${89 + AGREGADOS_POR_S3.length}: los 89 de S0 más ${AGREGADOS_POR_S3.length} de S3`,
+  )
 
   const perdidos = nombresS0.filter((n) => n !== '--font-mono' && !nombresRepo.includes(n))
   afirmarIgual(perdidos, [], 'ningún token de S0 se perdió en la copia')
 
-  const agregados = nombresRepo.filter((n) => n !== '--font-codigo' && !nombresS0.includes(n))
-  afirmarIgual(agregados, [], 'no se agregó ningún token que S0 no tuviera')
+  const agregados = nombresRepo.filter(
+    (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_POR_S3.includes(n),
+  )
+  afirmarIgual(agregados, [], 'no se agregó ningún token fuera de la corrección declarada')
+
+  const declaradosQueNoEstan = AGREGADOS_POR_S3.filter((n) => !nombresRepo.includes(n))
+  afirmarIgual(declaradosQueNoEstan, [], 'y la corrección de S3 está donde dice estar')
+
+  controlPositivo(
+    'el filtro de agregados vería un token que nadie declaró',
+    '--token-colado-por-la-ventana',
+    (nombre) =>
+      [...nombresRepo, nombre].filter(
+        (n) => n !== '--font-codigo' && !nombresS0.includes(n) && !AGREGADOS_POR_S3.includes(n),
+      ).length === 0,
+  )
 
   afirmar(!nombresRepo.includes('--font-mono'), 'CAMBIO 2 — `--font-mono` ya no se declara acá')
   afirmar(nombresRepo.includes('--font-codigo'), 'CAMBIO 2 — `--font-codigo` ocupa su lugar')
@@ -170,6 +202,11 @@ async function principal(): Promise<void> {
     '--spacing-12: 3rem;',
     '--spacing-20: 5rem;',
     '--text-base: 1rem;',
+    // ⚠ AGREGADO POR S3 (2026-08-29), aprobado en su parada: la superficie
+    // translúcida que le faltaba a `--blur-panel`. Son DOS líneas porque el
+    // token se declara en el tema claro y se redefine en la sección invertida.
+    '--color-superficie-translucida: rgba(247, 247, 245, 0.60);',
+    '--color-superficie-translucida: rgba(14, 14, 14, 0.60);',
     // La regla de foco que agrega S1. Su `}` de cierre NO aparece acá porque
     // esa línea ya existe idéntica en el archivo de S0 — el comparador es de
     // conjuntos, no de posiciones.
@@ -247,9 +284,29 @@ async function principal(): Promise<void> {
   const podados = await ausentes(cuerpoLlano)
   afirmar(podados.length > 0, `\`@theme\` a secas — ${podados.length} de 89 NO llegan al :root`)
   console.log(`       podados hoy: ${podados.join(' ')}`)
+  /**
+   * ⚠ ACTUALIZADO POR S3. Esta afirmación decía que entre los podados estaban
+   * las seis expresiones fluidas, "escala medida que ningún componente consume
+   * todavía". **Ya no es cierto, y ésa es la noticia**: S3 construyó los
+   * componentes de tipografía y los seis `--text-fluido-*` tienen consumidor,
+   * así que sobreviven a la poda aun sin `static`.
+   *
+   * No se borra la afirmación: se da vuelta. Lo que antes probaba que la poda
+   * es real con un grupo sin usar, ahora lo prueba con el grupo que quedó sin
+   * usar —los radios que ningún componente de /v3 pide todavía— y afirma
+   * además el hecho nuevo. Si mañana alguien consume esos radios, esta
+   * comprobación va a fallar y va a haber que elegir otro testigo; eso es
+   * correcto y es barato.
+   */
   afirmar(
-    podados.some((n) => n.startsWith('--text-fluido-')),
-    '  entre ellos las seis expresiones fluidas: escala medida que ningún componente consume todavía',
+    !podados.some((n) => n.startsWith('--text-fluido-')),
+    '  las seis expresiones fluidas YA NO se podan: S3 les dio consumidor',
+    `podados: ${podados.join(' ')}`,
+  )
+  afirmar(
+    podados.some((n) => n.startsWith('--radius-')),
+    '  y el testigo de que la poda sigue siendo real son los radios sin consumidor',
+    podados.filter((n) => n.startsWith('--radius-')).join(' '),
   )
   // La contracara acota el alcance: los referenciados sobreviven aun sin
   // `static`, así que el problema no es de namespace sino de uso.

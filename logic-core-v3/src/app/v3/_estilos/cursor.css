@@ -1,0 +1,104 @@
+/* =========================================================================
+ * EL CURSOR DE DOS CAPAS
+ * =========================================================================
+ * Dos `div` de DOM, no canvas. Núcleo de 4×4 sin filtro y halo de 36×36 con
+ * desenfoque, los dos circulares, los dos con `pointer-events: none`, y los
+ * dos interpolando hacia el puntero — la interpolación la hace el componente
+ * con `requestAnimationFrame`, no una transición: acá sólo se transiciona la
+ * opacidad y el tamaño, que es lo medido.
+ *
+ * ⚠ **EL CURSOR NATIVO NUNCA SE OCULTA.** En este archivo, y en todo el
+ * sprint, la cadena `cursor: none` no existe — hay un instrumento que lo
+ * afirma con control positivo. El cursor propio se dibuja ENCIMA del nativo,
+ * no en su lugar. Es lo que evita el problema de accesibilidad clásico del
+ * cursor custom, y está medido: `cursor: none` aparece en 0 de los 4.270
+ * elementos que recorrió la medición.
+ *
+ * ── El color acompaña a la sección, no a la página ────────────────────────
+ *
+ * El componente copia el `data-seccion="invertida"` de lo que hay debajo del
+ * puntero a la raíz del cursor. El bloque que S0 ya trae redefine ahí mismo
+ * `--color-tinta` y `--color-borde`, así que las dos capas se dan vuelta solas
+ * sin un token nuevo y sin una clase condicional.
+ *
+ * ── La segunda compuerta, por si acaso ────────────────────────────────────
+ *
+ * El componente ya no se monta con `prefers-reduced-motion`. La regla de abajo
+ * es redundante A PROPÓSITO: si alguien monta el cursor sin la compuerta —o si
+ * la preferencia cambia entre el render y el efecto— el CSS lo apaga igual.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="cursor"] {
+  /* --- Las medidas. [medido, COMPONENTS.md §4.1], compuestas con tokens --
+   * 4px  = --spacing-1
+   * 36px = --spacing-8 (32) + --spacing-1 (4)
+   * 4px de desenfoque = --blur-panel (12) / 3
+   * El instrumento resuelve las tres cuentas contra `_lib/cursor.ts`. */
+  --cursor-nucleo-lado: var(--spacing-1);
+  --cursor-halo-lado: calc(var(--spacing-8) + var(--spacing-1));
+  --cursor-halo-desenfoque: calc(var(--blur-panel) / 3);
+
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  pointer-events: none;
+}
+
+[data-v3] [data-pieza="cursor"] [data-parte="nucleo"],
+[data-v3] [data-pieza="cursor"] [data-parte="halo"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: var(--radius-circulo);
+  pointer-events: none;
+}
+
+[data-v3] [data-pieza="cursor"] [data-parte="nucleo"] {
+  inline-size: var(--cursor-nucleo-lado);
+  block-size: var(--cursor-nucleo-lado);
+  background-color: var(--color-tinta);
+  /* Las coordenadas las escribe el componente por propiedad personalizada:
+     son datos del puntero en tiempo de ejecución, no valores de diseño. */
+  transform: translate3d(var(--cursor-nucleo-x, 0), var(--cursor-nucleo-y, 0), 0)
+    translate(-50%, -50%);
+  transition-property: opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3] [data-pieza="cursor"] [data-parte="halo"] {
+  inline-size: var(--cursor-halo-lado);
+  block-size: var(--cursor-halo-lado);
+  background-color: var(--color-borde);
+  backdrop-filter: blur(var(--cursor-halo-desenfoque));
+  transform: translate3d(var(--cursor-halo-x, 0), var(--cursor-halo-y, 0), 0)
+    translate(-50%, -50%);
+  transition-property: inline-size, block-size, opacity;
+  transition-duration: var(--duracion-media);
+  transition-timing-function: var(--ease-salida);
+}
+
+/* --- Antes del primer movimiento no hay nada que dibujar -----------------
+ * El componente escribe `data-activo` recién cuando conoce la posición del
+ * puntero, y lo saca cuando el puntero se va de la ventana. Sin esto las dos
+ * capas aparecerían en el origen y viajarían desde la esquina al primer
+ * movimiento. */
+[data-v3] [data-pieza="cursor"]:not([data-activo="si"]) [data-parte="nucleo"],
+[data-v3] [data-pieza="cursor"]:not([data-activo="si"]) [data-parte="halo"] {
+  opacity: 0;
+}
+
+/* --- Sobre un control interactivo el propio se apaga y el nativo queda ----
+ * Es la regla medida: opacidad 0 en las dos capas sobre cualquier `a`,
+ * `button`, campo o elemento con rol de control. El nativo `pointer` toma el
+ * relevo, que es exactamente por qué nunca se lo oculta. */
+[data-v3] [data-pieza="cursor"][data-sobre="control"] [data-parte="nucleo"],
+[data-v3] [data-pieza="cursor"][data-sobre="control"] [data-parte="halo"] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-v3] [data-pieza="cursor"] {
+    display: none;
+  }
+}

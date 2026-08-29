@@ -1,0 +1,31 @@
+/* =========================================================================
+ * EL FOCO — el anillo del sistema, y cómo se muestra sin un teclado.
+ * =========================================================================
+ * La REGLA del anillo no está acá: vive en `theme-develop.css`, la emitió S1 y
+ * este sprint no la toca. Es una sola regla, acotada al árbol de `[data-v3]`,
+ * y cubre a todo descendiente focalizable — así que cada componente de este
+ * sprint la recibe por estar adentro, no por declararla otra vez.
+ *
+ * Lo que este archivo agrega son dos cosas que esa regla no puede dar:
+ *
+ *   1. **El anillo forzado**, para que la galería de `/v3/componentes` pueda
+ *      mostrar el estado de foco en una captura, sin un Tab. Usa exactamente
+ *      los mismos tres tokens que la regla real: si alguien cambia el grosor
+ *      del anillo del sistema, la galería se mueve con él.
+ *
+ *   2. **La garantía de que el anillo no se recorta.** El CTA tiene una
+ *      ventana con `overflow: hidden`, y un anillo con desplazamiento
+ *      positivo dibujado sobre un elemento recortado desaparece. Acá la
+ *      ventana NO es focalizable —el focalizable es el `<button>` que la
+ *      contiene— y hay un instrumento que lo afirma pieza por pieza.
+ *
+ * ⚠ En todo el sprint no existe un solo `outline: none`, `outline-width: 0`
+ * ni `outline-style: none`. Es la afirmación que `s3-foco.invariant.ts` corre
+ * sobre cada archivo, con control positivo. Quitar el anillo es gratis de
+ * escribir y carísimo de encontrar después.
+ * ========================================================================= */
+
+[data-v3] [data-forzado~="foco"] {
+  outline: var(--foco-grosor) solid var(--color-foco);
+  outline-offset: var(--foco-desplazamiento);
+}

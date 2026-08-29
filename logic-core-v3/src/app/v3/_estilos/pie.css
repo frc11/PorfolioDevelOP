@@ -1,0 +1,228 @@
+/* =========================================================================
+ * EL PIE — la estructura y sus estados. Sin contenido.
+ * =========================================================================
+ * Es el componente más replicado del sitio medido: **la mitad de las
+ * instancias de animación son un pie repetido en cada página**. Construirlo
+ * una vez y bien es la mitad del trabajo de animación del sitio entero.
+ *
+ * Sus piezas salen del inventario: link con icono (42 apariciones), botón
+ * social (21), link de contacto (3), link de texto (12), formulario de
+ * novedades (3) y título de cierre (3).
+ *
+ * ── Los textos y los enlaces NO están acá ─────────────────────────────────
+ *
+ * No existen todavía. Este archivo define cajas, estados y transiciones; el
+ * contenido lo pone quien lo use.
+ *
+ * ── Cada `:hover` trae su `:focus-visible` ────────────────────────────────
+ *
+ * En la referencia hay 88 reglas de hover contra 5 de foco, y ninguna aplica a
+ * ninguno de los cinco objetivos medidos: con Tab no pasa nada en ningún lado.
+ * Acá el foco dispara exactamente lo mismo que el puntero, y un instrumento
+ * falla si aparece un `:hover` sin su gemelo.
+ * ========================================================================= */
+
+/* El apilado y la separación entre bloques NO están acá: van en la caja de
+   contenido del envoltorio, que es la que tiene los hijos. Una regla de `gap`
+   sobre el `<footer>` —cuyo único hijo es el envoltorio— no haría nada, y una
+   regla que no hace nada es exactamente lo que este sprint no deja pasar. */
+[data-v3] [data-pieza="pie"] {
+  padding-block: var(--spacing-20);
+  background-color: var(--color-fondo);
+  color: var(--color-tinta);
+}
+
+/* =========================================================================
+ * LINK CON ICONO — 42 apariciones. El icono se adelanta.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="pie-enlace-icono"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  color: var(--color-tinta);
+  text-decoration: none;
+}
+
+[data-v3] [data-pieza="pie-enlace-icono"] [data-parte="icono"] {
+  display: inline-flex;
+  flex: none;
+  transform: translateX(0);
+  transition-property: transform;
+  transition-duration: var(--duracion-lenta);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3]
+  [data-pieza="pie-enlace-icono"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="icono"] {
+  transform: translateX(var(--spacing-1));
+}
+
+/* =========================================================================
+ * BOTÓN SOCIAL — 21 apariciones. Circular, con la superficie de estado.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="pie-social"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2);
+  border: var(--border-hairline) solid var(--color-borde);
+  border-radius: var(--radius-circulo);
+  background-color: transparent;
+  color: var(--color-tinta);
+  text-decoration: none;
+  transition-property: background-color;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3]
+  [data-pieza="pie-social"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  ) {
+  /* `--color-superficie-3` es, por su propio comentario en el sistema, la
+     superficie de "estado activo / hover". No se elige un gris: se usa el que
+     el sistema ya declaró para esto. */
+  background-color: var(--color-superficie-3);
+}
+
+/* =========================================================================
+ * LINK DE CONTACTO — el subrayado que barre. 0,3s con --ease-principal.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="pie-contacto"] {
+  position: relative;
+  display: inline-block;
+  color: var(--color-tinta);
+  text-decoration: none;
+}
+
+[data-v3] [data-pieza="pie-contacto"] [data-parte="subrayado"] {
+  position: absolute;
+  inset-inline: 0;
+  bottom: calc(var(--spacing-1) * -1);
+  block-size: var(--border-hairline);
+  background-color: var(--color-tinta);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-property: transform;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3]
+  [data-pieza="pie-contacto"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  )
+  [data-parte="subrayado"] {
+  transform: scaleX(1);
+}
+
+/* =========================================================================
+ * LINK DE TEXTO — inline, dentro de un párrafo.
+ * =========================================================================
+ * El de la referencia computa 17px, que no es ninguno de los ocho niveles de
+ * la escala: es uno de los dos huérfanos del inventario. Acá hereda el tamaño
+ * de su párrafo, que es lo que un link inline tiene que hacer.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="pie-enlace-texto"] {
+  color: var(--color-tinta);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--border-hairline);
+  text-underline-offset: var(--spacing-1);
+  transition-property: text-decoration-color;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-principal);
+}
+
+[data-v3]
+  [data-pieza="pie-enlace-texto"]:is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  ) {
+  text-decoration-color: var(--color-tinta);
+}
+
+/* =========================================================================
+ * FORMULARIO DE NOVEDADES — campo en píldora y botón de envío.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="novedades"] {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2);
+  border: var(--border-hairline) solid var(--color-borde-fuerte);
+  border-radius: var(--radius-pastilla-s);
+  background-color: transparent;
+  transition-property: border-color;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-salida);
+}
+
+/* El envoltorio marca que hay foco adentro, sin robarle el anillo al campo:
+   el anillo lo sigue pintando `:focus-visible` sobre el `input`. */
+[data-v3] [data-pieza="novedades"]:is(:focus-within, [data-forzado~="foco"]) {
+  border-color: var(--color-tinta);
+}
+
+[data-v3] [data-pieza="novedades"] [data-parte="campo"] {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--color-tinta);
+  font: inherit;
+}
+
+[data-v3] [data-pieza="novedades"] [data-parte="campo"]::placeholder {
+  color: var(--color-tinta-tenue);
+}
+
+[data-v3] [data-pieza="novedades-envio"] {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2);
+  border: 0;
+  border-radius: var(--radius-circulo);
+  background-color: var(--color-tinta);
+  color: var(--color-fondo);
+  cursor: pointer;
+  transition-property: opacity;
+  transition-duration: var(--duracion-rapida);
+  transition-timing-function: var(--ease-salida);
+}
+
+[data-v3]
+  [data-pieza="novedades-envio"]:not(:disabled):is(
+    :hover,
+    :focus-visible,
+    [data-forzado~="hover"],
+    [data-forzado~="foco"]
+  ) {
+  opacity: var(--opacity-casi);
+}
+
+[data-v3] [data-pieza="novedades-envio"]:disabled {
+  opacity: var(--opacity-tenue);
+  cursor: not-allowed;
+}
