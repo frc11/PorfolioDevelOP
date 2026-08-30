@@ -19,6 +19,7 @@ import {
   SalidaLinkPendiente,
 } from '@/app/(protected)/setter/_components/tool-guide'
 import { resultadoEtiqueta, resultadoTono } from '../../_components/lead-timeline.helpers'
+import { EnlacePantalla } from './enlace-pantalla'
 import { SeguimientoForm } from './seguimiento-form'
 
 /**
@@ -141,15 +142,26 @@ export function M5Contexto({
  * anti-spam (`CanalSeguridad`), el límite de rol (`GuardrailRol`) y el flujo de
  * objeciones (el Gem deflecta a reunión: nunca cotiza). */
 export function M5Municion({
+  leadId,
   status,
   followUpCount,
   lead,
   dmsHoy,
+  agendaAccesible,
 }: {
+  leadId: string
   status: LeadStatus
   followUpCount: number
   lead: CopyBlockLead
   dmsHoy: number
+  /**
+   * ¿La posición derivada alcanza «Agendá la reunión»? La munición nombraba esa
+   * pantalla desde que el negocio responde, y m16 no se habilita hasta APROBADA
+   * con la demo YA enviada: el nombre iba suelto, sin enlace, y buena parte de
+   * las veces sin destino alcanzable. Ahora el dato manda — con acceso es un
+   * salto, sin acceso dice qué falta.
+   */
+  agendaAccesible: boolean
 }) {
   const respondio = leadRespondio(status)
   const cadencia = cadenciaInfo(followUpCount)
@@ -157,7 +169,14 @@ export function M5Municion({
   const mensajeToque = respondio ? (
     <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
       El negocio respondió: la cadencia se frenó. De acá el objetivo es uno solo — la reunión, que
-      se agenda en «Agendá la reunión».
+      se agenda en{' '}
+      <EnlacePantalla
+        leadId={leadId}
+        destino="m16"
+        accesible={agendaAccesible}
+        cuandoFalta="se abre cuando la demo aprobada ya salió al negocio"
+      />
+      .
     </p>
   ) : status === 'POSTERGADO' ? (
     <p className="max-w-xl text-xs leading-relaxed text-zinc-500">

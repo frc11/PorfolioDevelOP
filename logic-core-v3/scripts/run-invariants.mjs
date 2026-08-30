@@ -46,7 +46,10 @@
 // Lo que este guard NO ve, y queda anotado: un RENOMBRE COORDINADO (un script
 // que se va y otro que entra) conserva la cuenta y pasa. Vigilar eso pide fijar
 // los NOMBRES, que es la segunda lista que este runner existe para no tener.
-const INVARIANTES_ESPERADOS = 48;
+// 49 desde el sprint de destinos alcanzables: suma `check:invariant:enlaces`
+// (los saltos pantalla→pantalla del manual no rebotan + ninguna guía manda a
+// una fase que no nombra ninguna pantalla).
+const INVARIANTES_ESPERADOS = 49;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

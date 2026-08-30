@@ -74,19 +74,24 @@ export function M4Registro({
   ultimoContacto,
   proximoToque,
   openerTexto,
+  seguimientoAccesible,
 }: {
   leadId: string
   openerEnviado: boolean
   ultimoContacto: string | null
   proximoToque: string | null
   openerTexto: string | null
+  /** ¿La posición derivada alcanza «Registrá lo que pasó»? (lo decide el server). */
+  seguimientoAccesible: boolean
 }) {
   if (openerEnviado) {
     return (
       <OpenerResumen
+        leadId={leadId}
         ultimoContacto={ultimoContacto}
         proximoToque={proximoToque}
         openerTexto={openerTexto}
+        seguimientoAccesible={seguimientoAccesible}
       />
     )
   }

@@ -41,7 +41,7 @@ const OPCIONES: OpcionResultado[] = [
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
     detalle:
-      'Frena los toques y te habilita a construir la demo. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
+      'Frena los toques y te habilita a construir la demo. Si aceptó reunirse, la agenda se abre después de mandarle la demo aprobada.',
   },
   {
     valor: 'POSTERGADO',

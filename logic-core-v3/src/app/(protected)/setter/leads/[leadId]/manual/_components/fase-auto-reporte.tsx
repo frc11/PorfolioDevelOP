@@ -28,6 +28,12 @@ import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actio
  * refresh la base optimista quedaría stale y el tilde volvería atrás al cerrar
  * la transición (mismo refresh que `OpenerForm`/`EscalarModal` en el manual).
  *
+ * El MOTIVO de por qué el tilde está apagado ya no vive acá: iba dentro del
+ * `<button>`, y el de RECHAZADA nombra otra pantalla («Correcciones») que ahí
+ * adentro no se puede enlazar —un `<a>` dentro de un `<button>` no es navegable—.
+ * Lo sirve `MotivoDelTilde` (m-construccion.tsx), una vez arriba del grupo y con
+ * el destino enlazado.
+ *
  * `puedeGuardar` (3.3, B-07): el server (`saveOwnedProgreso`, dossier.ts) YA
  * rechaza el guardado fuera de `stage === 'CONSTRUCCION'` — antes de esto el
  * tilde se ofrecía igual en BRIEF (con la CTA «Arrancar construcción» arriba)
@@ -43,7 +49,6 @@ export function FaseAutoReporte({
   titulo,
   completadas,
   puedeGuardar = true,
-  motivo,
 }: {
   leadId: string
   faseId: FaseId
@@ -51,8 +56,6 @@ export function FaseAutoReporte({
   completadas: FaseId[]
   /** false cuando el server va a rechazar el guardado (stage !== CONSTRUCCION). */
   puedeGuardar?: boolean
-  /** Motivo corto a mostrar cuando `puedeGuardar` es false. */
-  motivo?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -120,9 +123,6 @@ export function FaseAutoReporte({
         >
           {marcada ? 'Fase marcada como hecha' : 'Marcá esta fase cuando la termines'}
         </span>
-        {!puedeGuardar && motivo && (
-          <span className="mt-0.5 block text-xs leading-relaxed text-zinc-500">{motivo}</span>
-        )}
       </span>
     </button>
   )

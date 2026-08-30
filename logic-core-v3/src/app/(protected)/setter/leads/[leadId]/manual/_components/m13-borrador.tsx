@@ -98,10 +98,13 @@ export function M13Registro({
   leadId,
   stage,
   draftUrl,
+  chequeoAccesible,
 }: {
   leadId: string
   stage: DossierStage | null
   draftUrl: string | null
+  /** ¿La posición derivada alcanza el chequeo final? (lo decide el server). */
+  chequeoAccesible: boolean
 }) {
   // RECHAZADA con borrador publicado: la guía de retrabajo manda ACÁ («volvé a
   // Borrador y re-publicá»), y hasta este sprint la pantalla no tenía un solo
@@ -141,5 +144,5 @@ export function M13Registro({
     )
   }
   // CONSTRUCCION: captura viva (o verificado con opción de cambiar el link).
-  return <BorradorForm leadId={leadId} draftUrl={draftUrl} />
+  return <BorradorForm leadId={leadId} draftUrl={draftUrl} chequeoAccesible={chequeoAccesible} />
 }

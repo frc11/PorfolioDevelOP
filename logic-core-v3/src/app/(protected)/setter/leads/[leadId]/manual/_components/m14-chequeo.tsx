@@ -55,7 +55,8 @@ export function M14Contexto({
         </div>
       ) : (
         <p className="text-xs leading-relaxed text-zinc-500">
-          Publicá el borrador (pantalla anterior) para poder chequearlo acá.
+          Todavía no hay borrador publicado — el salto a «Borrador» está acá abajo, en el
+          registro.
         </p>
       )}
       {brief && brief.secciones.length > 0 && (

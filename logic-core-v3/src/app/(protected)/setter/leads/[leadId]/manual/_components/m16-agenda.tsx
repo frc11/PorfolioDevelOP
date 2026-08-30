@@ -22,6 +22,26 @@ import { AgendaForm } from './agenda-form'
  * El cierre de la reunión (y el paso a CERRADO) lo hace Franco desde admin.
  */
 
+/**
+ * En qué estado está el paso. Lo derivan la munición Y el registro de la MISMA
+ * función: hasta este sprint sólo lo derivaba el registro, y la munición servía
+ * su instructivo —«Tocá «Buscar horarios libres de Franco»», «Marcá el horario
+ * elegido…»— en los tres estados por igual. Con el gate cerrado ninguno de esos
+ * controles existe en la pantalla, y m16 ES la pantalla actual del setter en el
+ * estado más común del tramo final (demo aprobada y enviada, el negocio todavía
+ * sin contestar): la instrucción mandaba a tocar un botón que no está.
+ *
+ * El orden espeja EXACTAMENTE el de `M16Registro` — misma pregunta, mismas
+ * ramas, una sola fuente: no pueden decir cosas distintas sobre el mismo lead.
+ */
+export type EstadoAgenda = 'hecho' | 'espera' | 'agendar'
+
+export function estadoDeAgenda(status: LeadStatus, agenda: Agenda | null): EstadoAgenda {
+  if (reunionAgendada(agenda) || status === 'CALL_AGENDADA') return 'hecho'
+  if (status !== 'RESPONDIO') return 'espera'
+  return 'agendar'
+}
+
 /** Contexto: el teléfono a mano para coordinar el horario + el estado del lead. */
 export function M16Contexto({
   status,
@@ -47,22 +67,42 @@ export function M16Contexto({
   )
 }
 
-/** Munición: el how-to del paso (el orden real de la pantalla). El bloque
- * copiable con los horarios reales vive dentro del registro, tras buscarlos. */
-export function M16Municion() {
+/**
+ * Munición: el how-to del paso (el orden real de la pantalla). El bloque copiable
+ * con los horarios reales vive dentro del registro, tras buscarlos.
+ *
+ * Los pasos son IMPERATIVOS y nombran controles del registro («Tocá «Buscar
+ * horarios libres de Franco»»): sólo se leen como instrucción cuando esos
+ * controles están en pantalla. Con el gate cerrado la lista sigue —enseña el
+ * recorrido, que es media pantalla de valor— pero ANUNCIADA como lo que es: lo
+ * que vas a hacer cuando se abra. Con la reunión ya agendada no va: el recorrido
+ * terminó y el registro ya muestra el traspaso.
+ */
+export function M16Municion({ status, agenda }: { status: LeadStatus; agenda: Agenda | null }) {
+  const estado = estadoDeAgenda(status, agenda)
   return (
     <div className="space-y-2">
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
         <LineaRicaText linea={GUIA_AGENDA.intro} />
       </p>
-      <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
-        {GUIA_AGENDA.pasos.map((paso, index) => (
-          <li key={paso} className="flex gap-2">
-            <span className="font-semibold text-cyan-300/80">{index + 1}.</span>
-            {paso}
-          </li>
-        ))}
-      </ol>
+      {estado !== 'hecho' && (
+        <>
+          {estado === 'espera' && (
+            <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+              Todavía no: estos son los pasos que vas a hacer acá cuando el negocio acepte
+              reunirse — los controles aparecen recién ahí.
+            </p>
+          )}
+          <ol className="space-y-1.5 text-xs leading-relaxed text-zinc-400">
+            {GUIA_AGENDA.pasos.map((paso, index) => (
+              <li key={paso} className="flex gap-2">
+                <span className="font-semibold text-cyan-300/80">{index + 1}.</span>
+                {paso}
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
     </div>
   )
 }
@@ -145,13 +185,15 @@ export function M16Registro({
   leadEmail: string | null
   leadPhone: string | null
 }) {
+  const estado = estadoDeAgenda(status, agenda)
+
   // ── Reunión ya agendada: el resumen del traspaso ───────────────────────────
-  if (reunionAgendada(agenda) && agenda) {
+  if (estado === 'hecho' && reunionAgendada(agenda) && agenda) {
     return <ReunionAgendada agenda={agenda} leadPhone={leadPhone} />
   }
 
   // ── CALL_AGENDADA sin blob de agenda: reunión registrada por otra vía ──────
-  if (status === 'CALL_AGENDADA') {
+  if (estado === 'hecho') {
     return (
       <p className="flex items-start gap-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
         <CheckCircle2 size={14} strokeWidth={1.5} className="mt-0.5 shrink-0 text-emerald-400" />
@@ -164,7 +206,7 @@ export function M16Registro({
   }
 
   // ── Gate cerrado: se agenda cuando el negocio respondió (deshabilitado-con-motivo) ──
-  if (status !== 'RESPONDIO') {
+  if (estado === 'espera') {
     return (
       <div className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
         <p className="flex items-center gap-2 text-xs font-semibold text-zinc-300">

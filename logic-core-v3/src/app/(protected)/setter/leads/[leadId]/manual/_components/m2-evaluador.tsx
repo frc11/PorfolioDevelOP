@@ -63,7 +63,7 @@ export function M2Contexto({ lead, ficha }: { lead: CopyBlockLead; ficha: Ficha 
     // honesto por si la ficha se pierde entre carga y render.
     return (
       <p className="text-xs leading-relaxed text-zinc-500">
-        La ficha todavía no está guardada — completala en la pantalla anterior.
+        La ficha todavía no está guardada — completala en «Ficha».
       </p>
     )
   }

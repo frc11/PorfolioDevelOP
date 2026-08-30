@@ -31,7 +31,16 @@ import { EnlaceChequeoFinal } from './enlace-chequeo'
  */
 type ErroresBorrador = { draftUrl?: string; confirmoCarga?: string; general?: string }
 
-export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: string | null }) {
+export function BorradorForm({
+  leadId,
+  draftUrl,
+  chequeoAccesible,
+}: {
+  leadId: string
+  draftUrl: string | null
+  /** ¿La posición derivada alcanza el chequeo final? (lo decide el server). */
+  chequeoAccesible: boolean
+}) {
   const router = useRouter()
   const [url, setUrl] = useState(draftUrl ?? '')
   const [confirmoCarga, setConfirmoCarga] = useState(false)
@@ -98,7 +107,13 @@ export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: s
           {draftUrl}
         </a>
         <p className="text-xs leading-relaxed text-zinc-500">
-          Ya podés pasar <EnlaceChequeoFinal leadId={leadId} draftUrl={draftUrl} />. Si rehiciste
+          Ya podés pasar{' '}
+          <EnlaceChequeoFinal
+            leadId={leadId}
+            draftUrl={draftUrl}
+            destinoAccesible={chequeoAccesible}
+          />
+          . Si rehiciste
           la demo, volvé a publicar en Netlify Drop y actualizá el link acá — se chequea siempre
           el borrador vigente.
         </p>

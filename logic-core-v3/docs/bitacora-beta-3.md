@@ -7679,3 +7679,182 @@ Como es fast-forward puro, no hace falta `--force` ni nada parecido. Si el push 
 
 - No existe `.env.test`. Mientras no exista, las dos suites de Playwright solo pueden correr contra la base dev, y ninguna verificación de cierre puede incluirlas sin escribir en datos reales.
 - Las seis ramas quedaron pusheadas **sin upstream configurado** (refspec explícito, sin `-u`). Es deliberado: no se tocó configuración. Pero significa que un `git push` pelado parado en cualquiera de ellas sigue siendo ambiguo.
+
+---
+
+## Sprint DESTINOS ALCANZABLES — el censo de las quince pantallas — 2026-08-30
+
+**Base:** `fix/una-sola-fuente @ 1f43c7bf` (la punta de la cadena). Rama: `fix/destinos-alcanzables`.
+**Fase 0 en verde:** `tsc --noEmit` exit 0 · invariantes **47/47** (48 descubiertos, 1 excluido) · `test:leados` **25 passed** · `migrate status` sin drift.
+
+El patrón había aparecido tres veces sin que nadie lo buscara (P3, P5, P6) y una cuarta forma la había cerrado P4 en un caso. **Nunca se censó entero.** Este sprint lo censa y arregla.
+
+### Paso 1 · El censo — y el censo ES el hallazgo
+
+Recorrido por ESTADO, no por pantalla: la misma pantalla dice cosas distintas en construcción y en rechazada, y la tercera forma sólo aparece mirando estados. **19 menciones con defecto**, en **cinco formas** — apareció una quinta.
+
+#### Clase 1 — se nombra un destino y no hay enlace (4 casos)
+
+| Dónde se nombra | Qué se nombra | Tipo | ¿Alcanzable desde acá? | Si no: por qué |
+|---|---|---|---|---|
+| `m-construccion.tsx:173` · mc1/mc2 en RECHAZADA | «Correcciones» | Pantalla | **No** | Falta el enlace. Único camino: el «Ir a tu paso actual» genérico, que no dice a dónde lleva |
+| `m5-seguimiento.tsx:159` · m5 con el negocio respondido | «Agendá la reunión» | Pantalla | **No** | Falta el enlace — y en APROBADA-sin-envío m16 ni siquiera está habilitada |
+| `seguimiento-form.tsx:44` · m5, opción «Respondió» | «Agendá la reunión» | Pantalla | **No** | En ese momento del recorrido m16 no existe |
+| `opener-form.tsx:151` · m4 con el opener ya mandado | «Seguimiento» | Pantalla | **No** | Falta el enlace **y** el nombre no coincide |
+
+#### Clase 2 — el nombre no coincide con el del control real (8 casos)
+
+| Dónde se nombra | Qué se nombra | Tipo | ¿Alcanzable? | Si no: por qué |
+|---|---|---|---|---|
+| `herramientas.ts:71` · m6 | «el bloque … acá abajo» | Pantalla (zona) | Sí, **arriba** | La dirección es al revés: el bloque vive en «Contexto del lead», que el layout pinta ANTES de «Munición» |
+| `herramientas.ts:86` · mc1/mc2/mr | «el bloque … de acá abajo» | Pantalla (zona) | Sí, **arriba** | Ídem |
+| `flow-content.ts:56` · mc1 (fase Estructura) | «el bloque del brief … acá abajo» | Pantalla (zona) | Sí, **arriba** | Ídem + el bloque se llama «Bloque para Claude Design», no «del brief» |
+| `flow-content.ts:235` · m14, check `noPareceIa` en rojo | «Ojo de diseño» | Bloque | Sí (está abajo) | El rótulo real es «Delatores de siempre — no bloquean, pero Franco los ve» |
+| `guidance-content.ts:823` · m16 con el gate cerrado | «Seguimiento» | Pantalla | Sí (hay botón) | El botón de al lado se llama «Registrá lo que pasó» |
+| `flow-content.ts` · m14, 6 `arreglo` en rojo | «Construcción, fase Mobile/CTA/…» | Pantalla | Sí | «Construcción» es la FASE; las pantallas son «Construir» y «Refinar» — y no decía cuál |
+| `m14-chequeo.tsx:58` · m14 sin borrador | «pantalla anterior» | Pantalla | Sí | No la nombra |
+| `m2-evaluador.tsx:66` · m2 sin ficha (rama defensiva) | «la pantalla anterior» | Pantalla | — | No la nombra |
+
+#### Clase 3 — se instruye una acción que en ese estado no existe (3 casos)
+
+| Dónde se nombra | Qué se nombra | Tipo | ¿Se puede hacer? | Si no: por qué |
+|---|---|---|---|---|
+| `GUIA_AGENDA.pasos` · **m16 con el gate cerrado** | «Tocá «Buscar horarios libres de Franco»» + 2 pasos más | Acción | **No** | Los controles no se montan; `AgendaForm` sólo existe con status RESPONDIO |
+| `herramientas.ts:61` · m2 con el veredicto ya registrado | «Eso es lo que transcribís acá abajo» | Acción | **No** | Abajo hay un resumen read-only |
+| `herramientas.ts:100` · m13 con el borrador congelado | «pegás abajo como «URL del borrador»» | Acción | **No** | El motor guarda el link SÓLO en CONSTRUCCION |
+
+**El caso de m16 es el más caro del censo y no es un rincón:** con la demo aprobada y enviada y el negocio todavía sin contestar, `posicionDe` devuelve **`actual = 'm16'`**. Es la pantalla de AHORA del setter en el estado más común del tramo final, y le decía que tocara un botón que no está. Es la forma que P4 cerró en m13 («pegala acá abajo»), un piso más arriba.
+
+#### Clase 4 — herramienta sin manera de abrirla (0 en las quince; 1 en el shell)
+
+P4 puso la salida (`SalidaLinkPendiente`) y el censo la encontró **completa**: las apariciones de la píldora dentro de las quince pantallas —las de `ToolGuide` (m2, m4, m6, mc1/mc2/mr, m13) y la suelta del bloque de objeciones de m5— la traen. **Sin casos.**
+
+Lo único sin salida es el rail «Tus herramientas» del shell (`tools-rail.tsx:41`), que dice «pendiente» y nada más. No es una de las quince pantallas, y la salida sí está en cada pantalla donde la herramienta se usa. **Declarado, no tocado.**
+
+#### Clase 5 — LA FORMA NUEVA: el único camino es un enlace genérico que no nombra el destino (2 casos)
+
+No es «falta el enlace» ni «el nombre no coincide»: el enlace **está**, **funciona**, y **es genérico**. El setter no tiene cómo saber que ese botón lo lleva ahí.
+
+| Dónde | Destino nombrado | Único camino real |
+|---|---|---|
+| mc1/mc2 en RECHAZADA | «Correcciones» | «Ir a tu paso actual» (en RECHAZADA `actual` es SIEMPRE `mr` — medido sobre la derivación) |
+| m14 con checks en rojo | «Construcción, fase X» | «Ir a tu paso actual» o los chips «Construir»/«Refinar» de la nav |
+
+Esto reencuadra el hallazgo de P6: «Correcciones» **sí** era alcanzable — por un enlace que no la nombra. Por eso el censo se hizo midiendo, no leyendo: la matriz de 6.912 estados se recorrió importando `derivarPantalla`.
+
+#### Y una sexta, que encontró el invariante: el enlace que REBOTA
+
+Con el invariante puesto, la primera corrida levantó algo que el censo a ojo no vio, y **es pre-existente (P3)**:
+
+> `EnlaceChequeoFinal` se monta por **STAGE** (`stage === 'CONSTRUCCION'`) y la posición se deriva antes por **STATUS**. Un lead **PERDIDO** con el dossier en CONSTRUCCION cae a `archivo` con `habilitadas` vacía, mc1/mc2 siguen navegables como completadas, y los dos destinos del enlace dejan de existir: el salto rebotaba contra el `redirect` de la guardia. El mismo callejón que la pieza vino a cerrar, un status más allá.
+
+La misma trampa se comió mi primer intento del enlace a «Correcciones» (lo escribí como incondicional porque RECHAZADA devuelve `mr` en `habilitadas` — falso: PERDIDO corta antes). **Ninguno de los dos habría salido en rojo sin el barrido.**
+
+### Paso 2 · Qué se arregló, por clase
+
+Se arreglaron **las tres clases que frenan** (1, 2 y 3) — quince casos —, más el rebote que encontró el invariante.
+
+**Clase 2 (8 casos, la más numerosa — se empezó por acá).** «acá abajo» → «acá arriba» en los tres textos que apuntaban al bloque copiable; «Ojo de diseño» → «Delatores de siempre»; «Seguimiento» → «Registrá lo que pasó»; «Construcción, fase X» → «"Refinar", fase Mobile» / «"Construir", fase Assets reales» (la pantalla del rail, con la fase que es su `<h3>`); «pantalla anterior» → «Borrador» / «Ficha».
+
+**Clase 1 (4 casos).** Pieza nueva `EnlacePantalla`, hermana de `EnlaceChequeoFinal` y con su mismo contrato, generalizado: el nombre **sale del registro** (`PANTALLAS`), no se escribe a mano —así no puede volver a decir «Seguimiento» cuando la pantalla se llama «Registrá lo que pasó»—, y el salto sólo se ofrece si la posición derivada alcanza el destino; sin acceso nombra el destino igual y dice qué falta. La accesibilidad la calcula la página con el **mismo predicado que su guardia** (`alcanzable`).
+
+El motivo del tilde salió de adentro del `<button>` —donde un `<a>` no es navegable, y con tres tildes por pantalla era el mismo párrafo tres veces— y quedó una vez arriba del grupo, con «Correcciones» enlazada.
+
+**Clase 3 (3 casos).** `M16Municion` pasa a derivar el estado del paso con la MISMA función que el registro (`estadoDeAgenda`, exportada): con el gate cerrado los cuatro pasos siguen —enseñan el recorrido— pero anunciados como futuro («Todavía no: estos son los pasos que vas a hacer acá cuando el negocio acepte reunirse — los controles aparecen recién ahí»); con la reunión ya agendada no van. Los dos textos de herramienta que mandaban a un campo inexistente pasan a describir la salida sin apuntar a un control.
+
+**El rebote (pre-existente).** `EnlaceChequeoFinal` toma `destinoAccesible` y, sin acceso, nombra el chequeo sin ofrecer salto.
+
+### Paso 3 · Verificación
+
+**Operando la app** (build de producción aislado, `E2E_DIST_DIR=.next-setter`, :3007, viewport 1440×900, sesión minteada como el smoke). Diez casos, cada uno mostrando la MENCIÓN y el ALCANCE:
+
+| Caso | Mención en pantalla | Alcance |
+|---|---|---|
+| 1 · «Correcciones» desde mc1 (RECHAZADA) | «…el botón «Reabrir construcción» está en «Correcciones».» | `<a>` «Correcciones» → `/manual/mr` · **click → `/manual/mr`, h2 «Aplicá las correcciones de Franco»** |
+| 2 · el bloque que la munición nombra (mc1) | «…«para Claude Design» (está acá arriba)…» | bloque presente en «Contexto del lead» · orden real del DOM: **Contexto ARRIBA de Munición** |
+| 3 · el gate de la agenda (m16 cerrado) | «…cuando marcás «Respondió» en «Registrá lo que pasó»…» | `<a>` «Ir a «Registrá lo que pasó»» → `/manual/m5` |
+| 4 · m16 con el gate CERRADO | «Todavía no: estos son los pasos que vas a hacer acá cuando…» | botón «Buscar horarios libres de Franco» en pantalla: **0** |
+| 4b · m16 con el gate ABIERTO | sin el aviso de futuro: los pasos son órdenes | botón «Buscar horarios libres de Franco»: **1** |
+| 5 · el resumen del opener (m4) | «La conversación sigue en «Registrá lo que pasó».» | `<a>` → `/manual/m5` |
+| 6 · los arreglos del chequeo (m14) | «Volvé a Claude Design («Refinar», fase Mobile)…» | rótulo «Delatores de siempre» presente en pantalla |
+| 7 · «Agendá la reunión» desde m5, **con** acceso | «…la reunión, que se agenda en «Agendá la reunión».» | `<a>` → `/manual/m16` |
+| 8 · la MISMA mención **sin** acceso (aprobada sin link de Franco) | «…«Agendá la reunión» — se abre cuando la demo aprobada ya salió al negocio.» | **sin enlace, con el motivo al lado** |
+| 9 · m13 con el borrador congelado | «…Esa es la que se registra como «URL del borrador».» | no hay campo abajo — por eso el texto ya no manda a pegarla |
+| 10 · m2 con el veredicto registrado | «…y el razonamiento. Eso es lo que traés de vuelta al panel.» | abajo es el resumen read-only, no un formulario |
+
+Capturas en `docs/proof-screenshots/destinos-alcanzables/` (el directorio está gitignoreado: es registro local).
+
+**Tests — uno por CLASE, no por caso** (`tests/setter/17-destinos-alcanzables.spec.ts`, 4 tests). Se afirma por **visibilidad**, y el nombre esperado **no se escribe**: sale de `PANTALLAS`, el mismo registro del que sale el control. **Demostrados fallando contra el código viejo** (src revertido a la base, rebuild, misma suite):
+
+```
+clase 1 · «Correcciones»             → Error: element(s) not found  (a[href$="/manual/mr"])
+clase 2 · el gate de la agenda       → la instrucción nombra la pantalla, no la fase
+clase 2 · el bloque copiable         → toContainText('está acá arriba') falló
+clase 3 · la agenda con gate cerrado → la munición no declaraba el recorrido como futuro
+4 failed
+```
+
+Con el arreglo puesto: **4 passed**.
+
+**Invariante** (`check:invariant:enlaces`, `src/lib/leados/enlaces-manual.invariant.ts`) — dos reglas, las dos **afirmables sin leer prosa**:
+
+1. **Ningún enlace del manual rebota, y ninguno se gatea de más.** Los 7 saltos pantalla→pantalla que el manual ofrece se declaran con su condición de render y su garantía (`siempre` / `condicional`), y se barren los **6.912 estados** que la derivación distingue (**10.640 ejercicios**). Se afirman las DOS direcciones: un `siempre` que miente es un enlace roto; un `condicional` que nunca falla es una rama de copy que ningún estado muestra.
+2. **Ninguna guía manda a una fase que no es una pantalla.** El conjunto prohibido se **deriva** de tres registros — los títulos de `FASES_MANUAL` que no son también nombre de pantalla (`PANTALLAS`) ni etiqueta de stage (`STAGE_LABELS`, que sí se cita con razón). Hoy da `[Seguimiento]`, exactamente el nombre ambiguo. Barre **79 citas** de los registros de contenido exportados.
+
+**Demostrado fallando, las dos:**
+
+```
+// regla 2, contra el copy viejo
+AssertionError: "Seguimiento" es el titulo de una FASE y no el nombre de ninguna
+pantalla ni de ningun stage … En guidance-content.GUIA_AGENDA.gate.detalle[1].enfasis
+
+// regla 1, contra la suposición vieja (garantia: 'siempre' en mc1/mc2 → mr)
+AssertionError: enlace roto: desde "Construir" se ofrece el salto directo a
+"Correcciones", pero la derivacion no lo alcanza en stage=RECHAZADA status=PERDIDO
+```
+
+Y **dos guards contra el falso verde**, que no son decorativos — los dos frenaron algo en esta misma corrida:
+
+- `ejercitados > 0` por enlace: rechazó un renglón que agregué para `m14 → m13` («Ir a publicar el borrador»). Su condición de render es `CONSTRUCCION ∧ ¬draftUrl`, y en ese estado m14 **no** es accesible: es una rama defensiva que ningún estado alcanza. El renglón no afirmaba nada. Se sacó, con el motivo escrito.
+- `FASES_SIN_DESTINO.length > 0`: si toda fase pasara a nombrar una pantalla, la regla 2 pasaría en verde sin mirar nada — y falla ruidosa pidiendo borrarla a mano.
+
+**El alcance del invariante, dicho:** la regla 2 recorre los registros de contenido exportados (`guidance-content`, `herramientas`, `flow-content`). No recorre las literales sueltas en JSX —ahí el nombre ya no se escribe a mano: `EnlacePantalla` lo lee de `PANTALLAS`— ni el cartel del home (`paso.ts`), que es otra superficie.
+
+### Un falso verde que casi entra, y no era el sujeto del sprint
+
+El primer arreglo de la clase 1 dejó `01-flow · B5` en rojo. **Se midió antes de atribuirlo**: revertir `src/` a la base, rebuildear y correr B5 solo → **passed**. Era mío.
+
+La causa: `expectToast` (helper compartido) busca el texto del toast con `page.getByText(...)` **sobre la página entera**, no dentro del contenedor de toasts. Mi copy nueva decía «Los tildes se abren **con la construcción arrancada** — …», que satisface `expectToast(/Construcción arrancada/i)` **antes del click**; el test seguía y leía el dossier antes de que la transición commiteara.
+
+Arreglado en la copy (subjuntivo: «cuando arranques» / «cuando reabrís», que además deja las dos ramas paralelas), con la nota del porqué al lado para que no vuelva. Barrido el resto de la copy nueva contra los 8 patrones de `expectToast` de la suite: sin más colisiones.
+
+**El agujero del helper queda REPORTADO, no tocado** (es otra clase de trabajo): `expectToast` puede dar verde sobre texto del cuerpo. Fijarlo pide scopearlo al contenedor de Sonner y re-verificar sus call-sites.
+
+### Cierre
+
+- `npx tsc --noEmit` → **exit 0**
+- `npm run check:invariants` → **descubiertos 49 · corridos 48 · pasaron 48 · fallaron 0** (`INVARIANTES_ESPERADOS` 48 → 49, en este mismo commit)
+- `npm run test:setter` → **93 passed** (89 previos + los 4 nuevos)
+- `npm run test:leados` → **25 passed**
+- `npm run build` → **exit 0**
+- `npx prisma migrate status` → **Database schema is up to date!** (sin drift; no se tocó el schema, no hizo falta `prisma generate`)
+
+**Ninguna llave de datos se tocó.** `HardCheck.nombre` y `SoftCheck.etiqueta` (lo que persiste `selfCheckJson`) quedaron **literales**: sólo se editaron `arreglo` y `comoVerificar`, que no viajan al blob. `FaseId` / `SHELL_CONSTRUCCION[].id` (llave de `progresoJson`) intactos: se editó un `items[]`. `PANTALLA_IDS`, `PANTALLA_DE_FASE` y `FASES_MANUAL` sin tocar.
+
+**Ninguna transición cambió.** No se agregó ni modificó ningún camino de `LEGAL_TRANSITIONS`; `reabrirConstruccion` e `iniciarConstruccion` siguen exactamente donde estaban — lo que se agregó es un ENLACE a la pantalla que ya tenía el botón, no una segunda superficie para la action.
+
+**Ningún invariante quedó en rojo.** Ninguna escritura sobre la base fuera de los seeds de QA (borrados por `businessName` exacto). **No se pusheó a `main`.**
+
+### Anotado, sin hacer
+
+- **`expectToast` matchea sobre la página entera** (arriba). Es el agujero que más caro puede salir: hace verde un test sobre copy del cuerpo.
+- **`m5-seguimiento.tsx:63` — `Date.now()` en render** (`react-hooks/purity`, error de lint). **Pre-existente**, verificado contra el diff: mis hunks arrancan en las líneas 22 y 145+.
+- **El rail «Tus herramientas» dice «pendiente» sin salida** (`tools-rail.tsx:41`). Es shell, no una de las quince.
+- **`paso.ts:184`** — el cartel del home dice «mandá el link y seguí el contacto en «Seguimiento»». Nombra la fase, y además el envío tiene pantalla propia («Envío», m15) desde el corte 5.6. Es otra superficie: no entra en el censo ni en el invariante.
+- **Contenido muerto que nombra destinos**: `GUIA_CONSTRUCCION`, `GUIA_BRIEF.intro/gate/porque/ejemplos`, `GUIA_OPENER.porque/ejemplos`, `GUIA_SEGUIMIENTO.intro/porque/ejemplos`, `GUIA_TRASPASO` y `GUIA_REVISION.aprobada` **no tienen consumidores**. Sus dos menciones de «Seguimiento» se corrigieron igual (para que el invariante pueda barrer el módulo entero sin agujeros), pero **borrar el contenido muerto es otro sprint**.
+- **Menciones que NO son defecto y quedan como están**: las que declaran su condición en la misma frase (`GUIA_OPENER.gate` → «eso lo registrás en «Envío», **cuando el negocio respondió**»; los cuatro «todavía no» de `GUIA_ENVIO.espera`). Informan un futuro, no mandan a buscar nada.
+
+### Qué queda para la verificación humana
+
+- **Que los textos nuevos suenen como el resto.** Ningún test lo valida.
+- **Que el recorrido completo ya no mande a buscar nada.** Eso se prueba recorriéndolo entero, y es de la corrida de comportamiento pendiente.

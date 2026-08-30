@@ -492,7 +492,7 @@ export const GUIA_BRIEF = {
     detalle: [
       'El lead avanza, pero el brief se abre cuando ',
       { enfasis: 'el negocio responde el primer contacto' },
-      ' —o si Franco le da prioridad—. Mientras tanto, mandá el opener y registrá la conversación en «Seguimiento»: apenas responda, este paso se abre solo.',
+      ' —o si Franco le da prioridad—. Mientras tanto, mandá el opener y registrá la conversación en «Registrá lo que pasó»: apenas responda, este paso se abre solo.',
     ],
   },
   porque: [
@@ -820,7 +820,7 @@ export const GUIA_AGENDA = {
     titulo: 'Se agenda cuando el negocio respondió y acepta reunirse',
     detalle: [
       'Esto no se abre solo: el paso se abre cuando ',
-      { enfasis: 'marcás «Respondió» en «Seguimiento»' },
+      { enfasis: 'marcás «Respondió» en «Registrá lo que pasó»' },
       ' y en la charla el negocio acepta la reunión. Hasta entonces espera — agendar antes sería ofrecer un turno que nadie pidió.',
     ],
   },
@@ -844,7 +844,7 @@ export const GUIA_REVISION = {
   aprobada: [
     'Demo ',
     { enfasis: 'aprobada' },
-    ' 🎉 — el envío del link vive en «Seguimiento»: el panel arma el mensaje cuando el flujo lo habilita.',
+    ' 🎉 — el envío del link vive en «Envío»: el panel arma el mensaje cuando el flujo lo habilita.',
   ],
 } satisfies Record<'enRevision' | 'aprobada', LineaRica>
 

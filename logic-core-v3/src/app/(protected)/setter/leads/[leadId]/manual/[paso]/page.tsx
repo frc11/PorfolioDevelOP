@@ -73,6 +73,21 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
     posicion.completadas.includes(paso) || posicion.habilitadas.includes(paso)
   if (!accesible) redirect(destinoActual)
 
+  // Un destino es alcanzable si la posición derivada lo habilita o lo da por
+  // completada — EXACTAMENTE el mismo criterio que la guardia de más arriba usa
+  // para decidir si una pantalla se renderiza. Los enlaces que las pantallas
+  // ofrecen a OTRAS pantallas se calculan con esto: sin el chequeo, el salto
+  // rebota en silencio contra el `redirect` de la guardia (un callejón con un
+  // paso más), y sin el enlace el destino se nombra y no se alcanza.
+  const alcanzable = (destino: PantallaId) =>
+    posicion.completadas.includes(destino) || posicion.habilitadas.includes(destino)
+
+  // El destino de `EnlaceChequeoFinal` lo elige la MISMA rama de `draftUrl` que
+  // usa la pieza: con borrador publicado lleva al chequeo (m14), sin él a
+  // publicarlo (m13). Se resuelve una vez acá para que las dos superficies que lo
+  // sirven —el pie de Construcción y el borrador verificado— no puedan discrepar.
+  const chequeoAccesible = alcanzable(manual.draftUrl ? 'm14' : 'm13')
+
   const pantalla = PANTALLAS[paso]
   // Las fases del checklist que contiene esta pantalla (mc1: las tres que se
   // hacen con el brief; mc2: las tres que se hacen sobre la demo). Lista vacía
@@ -235,6 +250,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                   ultimoContacto={manual.ultimoContacto}
                   proximoToque={manual.proximoToque}
                   openerTexto={manual.openerTexto}
+                  seguimientoAccesible={alcanzable('m5')}
                 />
               ),
             }
@@ -277,6 +293,8 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                       draftUrl={manual.draftUrl}
                       escaladoAt={manual.escaladoAt}
                       escaladoNota={manual.escaladoNota}
+                      correccionesAccesible={alcanzable('mr')}
+                      chequeoAccesible={chequeoAccesible}
                     />
                   ),
                 }
@@ -332,6 +350,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                           leadId={leadId}
                           stage={manual.stage}
                           draftUrl={manual.draftUrl}
+                          chequeoAccesible={chequeoAccesible}
                         />
                       ),
                     }
@@ -381,10 +400,12 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                             ),
                             municion: (
                               <M5Municion
+                                leadId={leadId}
                                 status={manual.leadStatus}
                                 followUpCount={manual.followUpCount}
                                 lead={manual.leadCopy}
                                 dmsHoy={manual.dmsHoy}
+                                agendaAccesible={alcanzable('m16')}
                               />
                             ),
                             captura: (
@@ -403,7 +424,9 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                                   leadPhone={manual.leadPhone}
                                 />
                               ),
-                              municion: <M16Municion />,
+                              municion: (
+                                <M16Municion status={manual.leadStatus} agenda={manual.agenda} />
+                              ),
                               captura: (
                                 <M16Registro
                                   leadId={leadId}

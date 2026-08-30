@@ -53,7 +53,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     titulo: 'Estructura',
     detalle: 'Generá el esqueleto de la demo en Claude Design a partir del brief.',
     items: [
-      'Copiá el bloque del brief (está acá abajo) y pegalo en Claude Design como primer mensaje.',
+      'Copiá el bloque «para Claude Design» (está acá arriba) y pegalo ahí como primer mensaje.',
       'Pedile una landing de una sola página con las secciones del brief, en ese orden.',
       'No agregues secciones que el brief no pide — el brief es el plano.',
     ],
@@ -181,21 +181,21 @@ export const HARD_CHECKS: HardCheck[] = [
     nombre: 'Se ve bien en tu celular',
     comoVerificar:
       'Abrila en TU celular y recorrela entera: que se lea sin agrandar y que nada quede cortado.',
-    arreglo: 'Volvé a Claude Design (Construcción, fase Mobile), ajustá y re-publicá el borrador.',
+    arreglo: 'Volvé a Claude Design («Refinar», fase Mobile), ajustá y re-publicá el borrador.',
     grupo: 'setter',
   },
   {
     id: 'sinRelleno',
     nombre: 'No hay lorem ipsum ni textos de relleno',
     comoVerificar: 'Leé la página entera buscando texto de mentira o puesto para llenar espacio.',
-    arreglo: 'Reemplazá cada relleno con datos reales del negocio (Construcción, fase Personalización).',
+    arreglo: 'Reemplazá cada relleno con datos reales del negocio («Construir», fase Personalización).',
     grupo: 'setter',
   },
   {
     id: 'linksWhatsapp',
     nombre: 'Los links y el botón de WhatsApp funcionan',
     comoVerificar: 'Tocá cada link y el botón de WhatsApp: tiene que abrir el chat correcto.',
-    arreglo: 'Corregí los links rotos en Claude Design (Construcción, fase CTA) y re-publicá.',
+    arreglo: 'Corregí los links rotos en Claude Design («Refinar», fase CTA) y re-publicá.',
     grupo: 'setter',
   },
   {
@@ -206,7 +206,7 @@ export const HARD_CHECKS: HardCheck[] = [
     comoVerificar:
       'Entrá como si fueras un cliente: sin bajar, ¿ves un botón que te diga qué hacer (escribir, llamar, reservar)?',
     arreglo:
-      'Volvé a Claude Design (Construcción, fase CTA) y pedile UN botón grande y arriba, con el texto de la acción.',
+      'Volvé a Claude Design («Refinar», fase CTA) y pedile UN botón grande y arriba, con el texto de la acción.',
     grupo: 'setter',
   },
   {
@@ -215,14 +215,14 @@ export const HARD_CHECKS: HardCheck[] = [
     nombre: 'Usa los datos y assets reales del negocio',
     comoVerificar:
       'Logo, fotos, nombre y dirección del negocio de verdad — nada bajado de un banco de imágenes.',
-    arreglo: 'Insertá los assets del negocio (Construcción, fase Assets reales) y re-publicá.',
+    arreglo: 'Insertá los assets del negocio («Construir», fase Assets reales) y re-publicá.',
     grupo: 'setter',
   },
   {
     id: 'fielAlBrief',
     nombre: 'La demo dice lo que el brief pedía',
     comoVerificar: 'Compará sección por sección contra el brief: ¿está todo lo que pedía?',
-    arreglo: 'Volvé a Construcción con el brief al lado y completá lo que falta.',
+    arreglo: 'Volvé a la Construcción («Construir» o «Refinar») con el brief al lado y completá lo que falta.',
     grupo: 'setter',
   },
   {
@@ -232,7 +232,7 @@ export const HARD_CHECKS: HardCheck[] = [
     id: 'noPareceIa',
     nombre: 'No se nota que la hizo una IA',
     comoVerificar:
-      'Miralo de una: ¿parece hecha para este negocio o salida de una plantilla? Los delatores de siempre están abajo, en «Ojo de diseño».',
+      'Miralo de una: ¿parece hecha para este negocio o salida de una plantilla? Los delatores concretos están abajo, en «Delatores de siempre».',
     arreglo:
       'Pedile a Claude Design que baje a tres colores, elija una tipografía con intención y saque los efectos de vidrio. Después re-publicá.',
     grupo: 'franco',

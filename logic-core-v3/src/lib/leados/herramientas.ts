@@ -58,7 +58,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queLeDas:
       'El bloque de la ficha que armaste en Ficha (el botón «Copiar bloque» está acá arriba), como primer mensaje del chat.',
     queTeDevuelve:
-      'Un score del 1 al 5, un veredicto (descartar / avanzar / avanzar con prioridad) y el razonamiento. Eso es lo que transcribís acá abajo.',
+      'Un score del 1 al 5, un veredicto (descartar / avanzar / avanzar con prioridad) y el razonamiento. Eso es lo que traés de vuelta al panel.',
     dondeSeUsa: 'Evaluación',
     url: null, // TODO: URL — chat de evaluación en Sonnet (pedir a Franco)
   },
@@ -68,7 +68,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'Una IA que convierte la ficha + la evaluación en el brief de la demo: el plano de qué secciones lleva y qué dice cada una.',
     queLeDas:
-      'El bloque «para el Gem de diseño» que está acá abajo (la ficha y la evaluación juntas).',
+      'El bloque «para el Gem de diseño» que está acá arriba (la ficha y la evaluación juntas).',
     // P5-B: la lista tiene que nombrar los campos que la pantalla PIDE. Decía
     // «y notas de marca» — ese ya no se completa acá (lo junta la ficha), así
     // que prometía un campo inexistente justo arriba del formulario.
@@ -83,7 +83,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'La herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.',
     queLeDas:
-      'El bloque «para Claude Design» de acá abajo (el brief + los materiales reales del negocio), como primer mensaje.',
+      'El bloque «para Claude Design» de acá arriba (el brief + los materiales reales del negocio), como primer mensaje.',
     queTeDevuelve:
       'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».',
     dondeSeUsa: 'Construcción',
@@ -97,7 +97,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queLeDas:
       'El index.html que exportaste de Claude Design (o el .zip que lo contiene adentro).',
     queTeDevuelve:
-      'Una URL pública (algo.netlify.app). Esa es la que pegás abajo como «URL del borrador».',
+      'Una URL pública (algo.netlify.app). Esa es la que se registra como «URL del borrador».',
     // P9 — `dondeSeUsa` es el rótulo del rail de herramientas: nombra la pantalla
     // por su nombre del manual, no por lo que se hace ahí. Decía «Publicar el
     // borrador» y «Primer contacto», que no son nombres de ninguna pantalla.
@@ -110,7 +110,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'Una IA que redacta los mensajes del primer contacto y ayuda con las objeciones — siempre dolor-first, sin precio y sin link. Usarla es opcional: si te sale solo, mejor.',
     queLeDas:
-      'El bloque «para el Gem de outreach» (el del opener, o el de objeciones en «Seguimiento» si te tiraron una).',
+      'El bloque «para el Gem de outreach» (el del opener, o el de objeciones en «Registrá lo que pasó» si te tiraron una).',
     queTeDevuelve:
       'Un mensaje listo para adaptar y pegar en Instagram. Vos lo revisás antes de mandarlo.',
     dondeSeUsa: 'Opener y Seguimiento',

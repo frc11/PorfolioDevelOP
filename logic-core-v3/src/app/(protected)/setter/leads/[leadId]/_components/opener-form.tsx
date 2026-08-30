@@ -12,6 +12,7 @@ import { OpenerInputSchema } from '@/app/(protected)/setter/_actions/outreach.sc
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { EnlacePantalla } from '../manual/_components/enlace-pantalla'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
 /**
@@ -122,15 +123,24 @@ export function OpenerForm({ leadId }: { leadId: string }) {
  * un segundo).
  */
 export function OpenerResumen({
+  leadId,
   ultimoContacto,
   proximoToque,
   openerTexto,
+  seguimientoAccesible,
 }: {
+  leadId: string
   ultimoContacto: string | null
   proximoToque: string | null
   /** El texto del opener enviado (5.1, C-24) — a la vista sin volver a abrir
    * el historial. `null` si no se pudo recuperar la nota (dato viejo). */
   openerTexto: string | null
+  /**
+   * ¿La posición derivada alcanza «Registrá lo que pasó»? El resumen decía «la
+   * conversación sigue en «Seguimiento»» —el nombre de la FASE, no el de la
+   * pantalla— y sin enlace: desde m4 no había un solo control que la nombrara.
+   */
+  seguimientoAccesible: boolean
 }) {
   return (
     <Card variant="subtle" padding="lg">
@@ -148,7 +158,14 @@ export function OpenerResumen({
       <p className="mt-2 text-xs leading-relaxed text-zinc-500">
         Primer contacto registrado{ultimoContacto ? ` el ${formatFechaCorta(ultimoContacto)}` : ''}.
         {proximoToque ? ` Próximo toque: ${formatFechaCorta(proximoToque)}.` : ''}{' '}
-        La conversación sigue en «Seguimiento».
+        La conversación sigue en{' '}
+        <EnlacePantalla
+          leadId={leadId}
+          destino="m5"
+          accesible={seguimientoAccesible}
+          cuandoFalta="se abre con el primer toque de la cadencia"
+        />
+        .
       </p>
       {openerTexto && (
         <p className="mt-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-400">
