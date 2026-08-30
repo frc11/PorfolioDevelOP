@@ -8057,6 +8057,8 @@ setControlledSelect — ahora afirma que el valor quedó
 
 **Ninguna escritura sobre la base.** El único comando contra la DB fue `migrate status`, que es read-only.
 
+**La forma más probable de los rojos nuevos, dicha por adelantado:** los toasts de sonner se auto-desvanecen. El helper viejo buscaba sobre la página, y la copy de la página no se desvanece nunca — una prueba que llegara a la aserción DESPUÉS de que el toast se fue igual pasaba, si había un señuelo. El helper nuevo exige el aviso presente dentro del timeout. Un rojo de esa forma no es una regresión del arreglo: es una prueba que estaba afirmando sobre otra cosa.
+
 ### Qué queda para la verificación humana
 
 **Nada visual.** Este sprint no cambia una sola pantalla. Lo que cambia es cuánto vale el verde de la suite.
