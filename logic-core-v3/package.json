@@ -137,6 +137,7 @@
     "test:s4-paquete": "npx tsx src/app/v3/_lib/__tests__/s4-paquete.invariant.ts",
     "test:s4-ventana": "npx tsx src/app/v3/_lib/__tests__/s4-ventana.invariant.ts",
     "test:s4": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s4",
+<<<<<<< HEAD
     "test:s5-codigo": "npx tsx src/app/v3/_lib/__tests__/s5-codigo.invariant.ts",
     "test:s5-tokens": "npx tsx src/app/v3/_lib/__tests__/s5-tokens.invariant.ts",
     "test:s5-ritmo": "npx tsx src/app/v3/_lib/__tests__/s5-ritmo.invariant.ts",
@@ -149,6 +150,18 @@
     "test:s5-numeros": "npx tsx src/app/v3/secciones-a/numeros/numeros.invariant.tsx",
     "test:s5-trabajos": "npx tsx src/app/v3/secciones-a/trabajos/trabajos.invariant.tsx",
     "test:s5": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s5",
+=======
+    "test:s6-contrato": "npx tsx src/app/v3/secciones-b/_invariantes/s6-contrato.invariant.ts",
+    "test:s6-tokens": "npx tsx src/app/v3/secciones-b/_invariantes/s6-tokens.invariant.ts",
+    "test:s6-lane": "npx tsx src/app/v3/secciones-b/_invariantes/s6-lane.invariant.ts",
+    "test:s6-render": "npx tsx src/app/v3/secciones-b/_invariantes/s6-render.invariant.tsx",
+    "test:s6-contraste": "npx tsx src/app/v3/secciones-b/_invariantes/s6-contraste.invariant.ts",
+    "test:s6-servicios": "npx tsx src/app/v3/secciones-b/_s5-servicios/s6-servicios.invariant.tsx",
+    "test:s6-tu-panel": "npx tsx src/app/v3/secciones-b/_s6-tu-panel/s6-tu-panel.invariant.tsx",
+    "test:s6-por-que-develop": "npx tsx src/app/v3/secciones-b/_s7-por-que-develop/s7-por-que-develop.invariant.tsx",
+    "test:s6-cierre": "npx tsx src/app/v3/secciones-b/_s8-cierre/s8-cierre.invariant.tsx",
+    "test:s6": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s6",
+>>>>>>> rediseno/secciones-b
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },
