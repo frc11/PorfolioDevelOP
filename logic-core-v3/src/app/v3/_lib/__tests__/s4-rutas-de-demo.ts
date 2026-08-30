@@ -51,16 +51,16 @@ export const RUTAS_DE_DEMO: readonly RutaDeDemo[] = [
   { ruta: '/v3/tipografia', sprint: 'S3', motivo: 'la escala tipográfica' },
   { ruta: '/v3/tipografia/muestra', sprint: 'S3', motivo: 'la muestra de la escala' },
   {
-<<<<<<< HEAD
+  {
     ruta: '/v3/secciones-a',
     sprint: 'S5',
     motivo: 'las secciones 1 a 4 en orden, con sus superficies — se borra al componer el home',
-=======
+  },
+  {
     ruta: '/v3/secciones-b',
     sprint: 'S6',
     motivo: 'las secciones 5 a 8, para juzgarlas antes de componer el home',
->>>>>>> rediseno/secciones-b
-  },
+  },  },
 ]
 
 /** El heredado de `/v3` con CERO rutas de demo. Medido por S1 el 2026-08-28. */
