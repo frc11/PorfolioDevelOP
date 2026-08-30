@@ -212,9 +212,9 @@ titulo('10 · Cuántas pantallas ocupa — lo propio se afirma, lo heredado se p
 
 afirmarIgual(clasesIguales(QUIETO, 'min-h-svh'), PANTALLAS_DE_LA_SECCION, `la sección declara ${PANTALLAS_DE_LA_SECCION} tiempos de una pantalla cada uno, en el marcado`)
 const seccion = seccionDe(ID)
-console.log(`  la tabla del LANE A declara alto ${seccion.alto} → ${pantallasDe(seccion.alto)} pantalla(s) · pinneada: ${seccion.pinneada === true}`)
+console.log(`  la tabla del LANE A declara alto ${seccion.alto} → ${pantallasDe(seccion.alto)} pantalla(s) · pinneada: ${seccion.pinneada ?? 'no'}`)
 console.log(`  PEDIDO AL LANE A: \`alto\` debería decir '${PANTALLAS_DE_LA_SECCION * 100}svh'. El \`min-height\` es un mínimo, así que hoy no miente: subestima el recorrido.`)
-afirmar(seccion.pinneada !== true, 'esta sección NO va pinneada: la única secuencia del sprint es Servicios')
+afirmar(seccion.pinneada === undefined, 'esta sección NO va pinneada: la única secuencia del sprint es Servicios')
 afirmarIgual(/<section id="([^"]*)"/.exec(QUIETO)?.[1], ID, '  la `<section>` sale con el id de la tabla')
 afirmarIgual(valorDe(QUIETO, 'data-superficie'), seccion.superficie, '  y su superficie sale de la tabla del sitio: la sección no pinta un solo color')
 controlPositivo('el contador de tiempos ve un marcado con menos pantallas de las declaradas', '<div class="flex min-h-svh flex-col"></div>', (h) => clasesIguales(h, 'min-h-svh') === PANTALLAS_DE_LA_SECCION)

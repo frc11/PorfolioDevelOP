@@ -143,7 +143,7 @@ export const PANTALLAS_DEL_STICKY = 1
 export function ritmoDe(id: IdDeSeccionB): RitmoDeSeccion {
   const seccion = seccionDe(id)
   const pantallas = pantallasDe(seccion.alto)
-  const pinneada = seccion.pinneada === true
+  const pinneada = seccion.pinneada !== undefined
   const pantallasPinneadas = pinneada ? Math.max(0, pantallas - PANTALLAS_DEL_STICKY) : 0
   const secuencias = pinneada ? 1 : 0
   return {

@@ -245,7 +245,7 @@ controlPositivo('y uno de exactamente 40svh también, porque el rango queda en c
 titulo('9 · Una pantalla, sin pinneado')
 
 const seccion = seccionDe(ID)
-console.log(`  la tabla declara alto ${seccion.alto} · pinneada ${String(seccion.pinneada === true)}`)
+console.log(`  la tabla declara alto ${seccion.alto} · pinneada ${String(seccion.pinneada ?? 'no')}`)
 afirmarIgual(pantallasDe(seccion.alto), 1, 'la sección ocupa UNA pantalla según la tabla del sitio')
 afirmarIgual(seccion.pinneada, undefined, 'y no está pinneada')
 afirmarIgual(sinComentarios.flatMap((t) => [...t.matchAll(/\bsticky\b|position\s*:\s*sticky/g)].map((m) => m[0])), [], 'ningún archivo de la carpeta escribe `sticky`')
