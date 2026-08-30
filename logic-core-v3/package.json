@@ -103,6 +103,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
+    "test:helpers": "playwright test --config=playwright.helpers-probe.config.ts",
     "test:setter": "playwright test --config=playwright.setter.config.ts",
     "test:leados": "playwright test --config=playwright.leados.config.ts",
     "test:integration": "playwright test --config=playwright.integration.config.ts",

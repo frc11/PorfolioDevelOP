@@ -7858,3 +7858,217 @@ Arreglado en la copy (subjuntivo: «cuando arranques» / «cuando reabrís», qu
 
 - **Que los textos nuevos suenen como el resto.** Ningún test lo valida.
 - **Que el recorrido completo ya no mande a buscar nada.** Eso se prueba recorriéndolo entero, y es de la corrida de comportamiento pendiente.
+
+---
+
+## Sprint LOS HELPERS QUE PRUEBAN — la capa que verifica todo lo demás, sometida al mismo sabotaje — 2026-08-30
+
+**Rama:** `fix/helpers-que-prueban` sobre `fix/destinos-alcanzables` @`1596b1cb` (P10, sin pushear). Worktree propio en `C:/tmp/wt-helpers`, con junction al `node_modules` del checkout. **No se pusheó a `main`.**
+
+**El sujeto:** no el producto — los helpers. P10 encontró por accidente que `expectToast` buscaba el texto del toast con `page.getByText(...)` sobre la **página entera**: una copy que contuviera la frase lo satisfacía antes del click. El precio ya lo había pagado el producto — `m-construccion.tsx` tiene una nota de redacción explicando que su copy está en subjuntivo *para esquivar el helper*. La red de invariantes ya pasó por una auditoría de sabotaje (C0: dos de seis pasaban en verde ante el sabotaje real). La suite de pruebas nunca. Son 93 de setter más 25 de leados, y un helper roto no falla una prueba: falla todas las que lo usan, en silencio.
+
+### Fase 0 — el terreno
+
+- `npx tsc --noEmit` → **exit 0**
+- `npm run check:invariants` → **descubiertos 49 · excluidos 1 · corridos 48 · pasaron 48 · fallaron 0**
+- `npx prisma migrate status` → **Database schema is up to date!** (sin drift)
+- `playwright test --list` (sin correr nada): **93 pruebas de setter en 20 archivos**, **25 de leados en 6 archivos**
+- Cambios ajenos: `?? docs/` en el checkout principal. Trece worktrees vivos, dos stashes. No se tocó ninguno.
+
+**Y una corrección de la premisa del sprint, medida:** no es solo la suite de leados la que escribe. **Las dos escriben, y por el mismo archivo** — `tests/helpers/setter-db.ts` (`createSetter`, `createLead`, `registerActivity`, `createNotice`, `teardown`) lo importan las 6 specs de leados **y las 20 de setter**. Los datos van namespaced (`SMOKE-SETTER`) y el teardown borra por id exacto, pero son escrituras sobre la Neon dev compartida. Por la regla del sprint, **no se corrió ninguna de las dos**. Lo que eso cuesta está declarado abajo, en el Paso 3.
+
+### Paso 1 — el censo
+
+Los seis archivos de `tests/helpers/` exportan **19 símbolos**. La columna que decide es la tercera: la distancia entre lo que el nombre promete y el ámbito sobre el que el helper realmente afirma.
+
+| Helper | Promete | Afirma sobre | Llamadas / archivos / pruebas de las 118 en juego | ¿Puede pasar sin la conducta? |
+|---|---|---|---|---|
+| `expectToast` (`setter-ui.ts:50`) | que apareció un aviso | **la página entera** (`page.getByText`) | 19 / 3 / 11 | **SÍ — medido** |
+| `pickSelect` (`setter-ui.ts:26`) | que se eligió una opción | nada: hace dos clicks y vuelve | 7 / 4 / 13 | **SÍ — medido** |
+| `fieldControl` (`setter-ui.ts:42`) | el control de un campo por su etiqueta | cualquier `label` que **contenga** el texto | 21 / 4 / 16 | **SÍ — medido** (latente, ver abajo) |
+| `setControlledSelect` (`form.ts:20`) | que quedó elegido ese valor | nada: setea y despacha eventos | 6 / 3 / 0 | **SÍ — medido** |
+| `typeControlledInput` (`form.ts:14`) | que se tecleó el texto | nada: click + tipeo | 28 / 4 / 0 | **SÍ — medido** |
+| `setControlledInput` (`form.ts:3`) | escribir salteando React | nada; y saltea también el `readonly` | 0 / 0 / 0 | **SÍ — inherente a la técnica** |
+| `firstVisible` (`setter-ui.ts:17`) | el primer match **visible** | el locator, filtrado a visible | 240 / 19 / 81 | No |
+| `vis` (`setter-ui.ts:12`) | los matches visibles | el locator, filtrado a visible | 2 / 2 / 11 | No |
+| `expandCartera` (`setter-ui.ts:67`) | que la cartera quedó abierta | el buscador visible (post-condición real) | 12 / 6 / 33 | No |
+| `attachConsoleGuard` (`setter-auth.ts:100`) | acumular errores de consola | `console.error` + `pageerror` | 47 / 18 / 79 | No |
+| `expectNoConsoleErrors` (`setter-auth.ts:115`) | cero errores | la lista del guard | 46 / 17 / 79 | No |
+| `qaLogin` (`setter-auth.ts:67`) | sesión de esa persona | que la persona **existe en la DB** — no que la sesión sirva | 74 / 19 / 81 | No (falla ruidoso, lejos de la causa) |
+| `mintSessionCookie` (`setter-auth.ts:75`) | sesión de un usuario arbitrario | nada; el cookie se mintea y ya | 9 / 6 / 12 | No (mismo caso) |
+| `loginAsAdmin` / `loginAsClient` (`auth.ts:20,24`) | login por formulario | `waitForURL(/\/admin\|\/dashboard/)` | 18+16 / 14+10 / 0 | No |
+| `logout` (`auth.ts:28`) | cerrar sesión | `waitForURL(/\/login/)` | **0 / 0 / 0 — muerto** | — |
+| `qaLogout` (`setter-auth.ts:84`) | limpiar la sesión | nada | **0 / 0 / 0 — muerto** | — |
+| `getSetterQa` (`setter-db.ts:144`) | la persona QA | lanza con mensaje si no está seedeada | 74 / 18 / 81 | No |
+| `ensureClientBot` / `cleanupClientBot` | fixture de bot | lanza si falta la organización | 3+3 / 3 / 0 | No |
+| `createLead` / `createSetter` / `teardown` | seed/teardown | fixtures, no afirman | 102 / 25 / 88 | — (no son aserciones) |
+
+**Helpers de archivo** (compartidos dentro de una spec), revisados uno por uno: `main()` y `zona()` (14/15/16/17) son `firstVisible` sobre `main` — mismo veredicto; `linksAPantalla()` cuenta `a[href$=...]` — no vacuo; `nadaDesplegado()` (16) afirma `toHaveCount(0)` sobre `main details[open]` — **no es vacuo: hay `<details>` reales en 10 componentes del setter**; `beforeunloadPrevented()` (10/13) dispara el evento y lee `defaultPrevented` — real; `expectRejects()` / `expectThrows()` / `assertSinEnvio()` (leados) tienen post-condición verdadera; `esErrorDeConexion()` (06/12) **no saltea el test**: re-lanza con mejor mensaje.
+
+### Paso 2 — el sabotaje
+
+Un banco propio: **`tests/helpers-probe/`** con config sin `webServer` y sin DB — cada caso arma su DOM con `page.setContent()`. El sujeto es el helper, aislado del producto. Cada uno va **de a pares**: CONDUCTA (la conducta ocurrió → debe pasar) y SABOTAJE (no ocurrió, pero el señuelo está → debe fallar). Sin el par, un helper que falla siempre también estaría "verde".
+
+**Siete sabotajes que los helpers pasaron — siete falsos verdes:**
+
+```
+HELPER     expectToast — tests/helpers/setter-ui.ts:50
+PROMESA    que apareció el aviso «Construcción arrancada»
+ÁMBITO     la página entera: page.getByText(text)
+SABOTAJE   la frase en el cuerpo («Los tildes se abren con la construcción
+           arrancada — …», la copy REAL previa a P10) y CERO toasts emitidos
+RESULTADO  PASA (falso verde)
+ALCANCE    19 llamadas · 3 archivos · 11 de las 118 pruebas
+
+HELPER     expectToast (segundo ámbito)
+SABOTAJE   el aviso SÍ llegó, pero dice «No pudimos guardar. Reintentá.»
+RESULTADO  PASA (falso verde) — el error se leía como éxito
+
+HELPER     pickSelect — tests/helpers/setter-ui.ts:26
+PROMESA    que se eligió la opción del <Select> compartido
+ÁMBITO     ninguno: click en el trigger, click en la opción, return
+SABOTAJE   la opción se clickea y el commit NO ocurre (el trigger queda vacío)
+RESULTADO  PASA (falso verde)
+ALCANCE    7 llamadas · 4 archivos · 13 de las 118 pruebas
+
+HELPER     setControlledSelect — tests/helpers/form.ts:20
+PROMESA    que el <select> quedó en ese valor
+ÁMBITO     ninguno
+SABOTAJE   se pide un valor que NINGUNA opción tiene (opción renombrada)
+RESULTADO  PASA (falso verde) — el setter nativo lo descarta en silencio y
+           select.value queda en ""
+ALCANCE    6 llamadas · 3 archivos (todos en tests/e2e)
+
+HELPER     typeControlledInput — tests/helpers/form.ts:14
+PROMESA    que se tecleó el texto
+ÁMBITO     ninguno
+SABOTAJE   el input es readonly: pressSequentially no lanza y no escribe nada
+RESULTADO  PASA (falso verde)
+ALCANCE    28 llamadas · 4 archivos (todos en tests/e2e)
+
+HELPER     fieldControl — tests/helpers/setter-ui.ts:42
+PROMESA    el control del campo etiquetado X
+ÁMBITO     TODO label que CONTENGA X — y los 21 call sites lo envuelven en
+           firstVisible(), que hace .first() y elige en silencio
+SABOTAJE   dos campos en pantalla: «Notas de traspaso para Franco» y
+           «Nota (opcional)». Se pide «Nota»
+RESULTADO  PASA (falso verde): escribe en el campo que NO era
+ALCANCE    21 llamadas · 4 archivos · 16 de las 118 pruebas
+
+HELPER     setControlledInput — tests/helpers/form.ts:3
+SABOTAJE   el input es readonly
+RESULTADO  PASA — pero es INHERENTE: el setter nativo del prototipo existe para
+           saltear la intercepción de React, y de paso saltea el readonly.
+ALCANCE    0 llamadas — está muerto
+```
+
+**Seis sabotajes que los helpers resistieron.** Este prompt esperaba encontrar más agujeros de los que hay; se buscó activamente que estuviera equivocado, y en seis casos lo estaba:
+
+| Helper | Sabotaje | Resultado |
+|---|---|---|
+| `expectToast` | la frase vive en el `<select>` espejo `sr-only` que monta `<Select>` | **FALLA — protege** |
+| `pickSelect` | la opción ya estaba en el DOM y el click del trigger **cerró** el panel | **FALLA — protege** (el rol no se computa bajo `display:none`) |
+| `expandCartera` | el toggle deja `aria-expanded="true"` y el cuerpo nunca monta | **FALLA — protege** |
+| `firstVisible` | el texto existe SOLO en la copia responsive oculta | **FALLA — protege** |
+| `attachConsoleGuard` + `expectNoConsoleErrors` | la página emite un `console.error` | **FALLA — protege** |
+| `attachConsoleGuard` + `expectNoConsoleErrors` | excepción no manejada (`pageerror`) | **FALLA — protege** |
+
+El guard de consola era el segundo candidato más apalancado (46 pruebas afirman sobre una lista, y una lista que nunca se llenó también está vacía). **Protege.** Lo que sí quedó escrito y ejecutable es su condición de uso: solo ve lo que pasa **después** de engancharse. Hoy los 46 call sites lo atan como primera línea del test, antes de cualquier `page.goto` — se verificó los 46, cero excepciones — pero la regla no estaba en ningún lado.
+
+### Paso 3 — a quién arrastraba: lo que se midió y lo que NO se pudo correr
+
+**Lo que no se hizo, y por qué.** El Paso 3 pide correr todas las pruebas que usan cada helper arreglado y listar las que se caen. **No se corrió ninguna de las dos suites**: las dos escriben sobre la Neon dev compartida (arriba, Fase 0), y la regla del sprint es explícita. La consecuencia, dicha sin maquillar: **la lista empírica de pruebas caídas no existe en este sprint.** Queda como el primer trabajo de quien corra las suites.
+
+**Lo que sí se midió, sin base de datos.** Se barrió el radio estático de los 19 call sites de `expectToast`: para cada patrón, todas las coincidencias en **código vivo** de `src/` (excluyendo comentarios), clasificadas por si son el toast, otra pantalla, o copy del cuerpo.
+
+| Patrón | Call sites | Coincidencias vivas | Veredicto |
+|---|---|---|---|
+| `/Ficha guardada — ya tenés señal/i` | 2 | 1 — es el toast | el arreglo es **neutral** |
+| `/Opener registrado/i` | 2 | 2 — las dos ramas del mismo toast | **neutral** |
+| `/enviada a revisión/i` | 2 | 1 — es el toast | **neutral** |
+| `/preferencias del reporte guardadas/i` | 3 | 1 — es el toast | **neutral** |
+| `/Construcción arrancada/i` | 2 | 2 — el toast y `error-copy.ts:61` (toast de error) | señuelo de cuerpo **ya neutralizado por P10 en la copy** |
+| `/Evaluación registrada/i` | 2 | 5 — 2 toasts, 1 panel del admin, 2 mensajes de error | riesgo residual: son toasts |
+| `/Brief guardado/i` | 2 | 4 — el toast, el panel del admin, un `fail()` y `paso.ts:139` («Tenés el brief guardado — …») | `paso.ts` renderiza en el **foco del home**, no en la pantalla del manual donde afirma la prueba |
+| `/Draft guardado/i` | 1 | **0** | esa aserción **no la puede satisfacer nada**: la etiqueta real es «URL del borrador» |
+| `/Demo enviada\|enviada/i` y `/enviada/i` | 2 | **104** | ver abajo |
+
+**Nueve de los diecinueve call sites quedan probados neutrales**: ninguna copy viva puede satisfacerlos fuera del contenedor de toasts. Los demás tienen señuelos que **también son toasts** — el arreglo los sigue matcheando, y eso queda declarado como residual, no escondido.
+
+**Dos hallazgos que salieron del barrido y NO son del helper:**
+
+1. `tests/setter/01-flow.spec.ts:298` y `tests/qa-walkthrough/corrida-1.spec.ts:313` escriben `await expectToast(page, /Demo enviada|enviada/i).catch(() => undefined)`. El patrón `/enviada/i` tiene **104 coincidencias en código vivo** — es casi una tautología — y además el `.catch()` se come el fallo. **No afirman absolutamente nada.** Arreglarlo es cambiar la intención de la prueba, y eso pide correr la suite: queda anotado.
+2. `tests/qa-walkthrough/corrida-1.spec.ts:233` pide `fieldControl(page, 'URL del draft')`, y la etiqueta real del producto es **«URL del borrador»** (`guidance-content.ts:635`). Ese `.fill()` no puede resolver: la spec ya estaba rota ahí. `tests/qa-walkthrough` no tiene script en `package.json` — se corre a mano, y no entra en las 118.
+
+### Paso 4 — que no vuelva
+
+**Cuatro helpers arreglados**, cada uno demostrado fallando ante el **mismo** sabotaje del Paso 2:
+
+```
+expectToast — ahora el ámbito es el aviso, no la pantalla
+
+  Error: expect(locator).toBeVisible() failed
+  Locator: locator('[data-sonner-toast]')
+             .filter({ hasText: /Construcción arrancada/i })
+             .filter({ visible: true }).first()
+  Expected: visible
+  Error: element(s) not found
+
+pickSelect — ahora afirma la post-condición del propio <Select>
+
+  Error: el panel del select tiene que cerrar al elegir
+  expect(locator).toHaveAttribute(expected) failed
+  Locator: getByRole('button', { name: 'Veredicto del Evaluador' })…
+  Expected: "false"   Received: "true"
+
+typeControlledInput — ahora afirma que el valor aterrizó
+
+  Error: el valor tecleado tiene que quedar en el campo
+  expect(locator).toHaveValue(expected) failed
+  Expected: "hola"   Received: ""
+
+setControlledSelect — ahora afirma que el valor quedó
+  (medido contra la implementación vieja, inline, antes de tocarla:
+   «PASA (falso verde); select.value quedó en ""»)
+```
+
+`pickSelect` compara contra el **texto de la opción clickeada**, no contra `optionName`: `getByRole({ name })` matchea por subcadena, y el select de «Setter asignado» se elige por el nombre del setter mientras la etiqueta real trae además su carga («B · 3 activos»). Comparar contra lo que el caller pidió habría roto ese call site sin que hubiera nada roto.
+
+**La prueba de la prueba**, permanente: `npm run test:helpers` → **22 passed**. Config propia (`playwright.helpers-probe.config.ts`), sin server, sin Prisma, sin seed: corre en cualquier lado, CI sin base incluida, y no puede tocar la Neon dev. **No toca el gate, ni el workflow, ni ningún invariante**: el runner descubre por el prefijo `check:invariant`, y esto es `test:helpers` — la cuenta de 49 queda intacta, verificado corriéndola.
+
+**Dos hallazgos declarados y NO arreglados, con el motivo:**
+
+- **`fieldControl`** queda como está, y su caso de sabotaje queda **en rojo a propósito** (`test.fail()`). El `contains()` del xpath es **portante**: tres call sites piden por un prefijo de la etiqueta real («Tu opener» → «Tu opener (el texto que vas a pegar en Instagram)», «Qué intentaste» → «¿Qué intentaste y dónde te trabaste?», «Nota» → «Nota (opcional)»). Pasar a igualdad exacta rompe los tres. El locator **sí** devuelve los dos matches —el modo estricto gritaría— pero los 21 call sites lo envuelven en `firstVisible()`, que hace `.first()`. Cerrarlo de verdad pide tocar los 21: es otro objetivo. Se verificaron las **13 etiquetas** que la suite usa contra el producto: **hoy ninguna colisiona con otra en la misma pantalla** — la trampa está latente, no viva. Si alguien la arregla, el caso pasa a verde y Playwright lo reporta como fallo inesperado: esa es la señal para borrar la anotación.
+- **`setControlledInput`** queda como está: saltear el `readonly` es inherente al setter nativo del prototipo, que existe justamente para saltear la intercepción de React. Tiene **cero call sites**. Su caso pasó de sabotaje a **caracterización**: fija la conducta y deja escrito que este helper no sirve para probar que un campo es editable.
+
+**Ninguna prueba se borró y ninguna se debilitó.** Los cuatro arreglos **solo agregan** post-condiciones: la única forma de que una prueba existente se ponga en rojo es que estuviera pasando sin la conducta — que es exactamente lo que el sprint busca. `expectToast` estrenó un parámetro `timeout` opcional, que solo usa el banco de sabotaje; los tests reales no lo pasan y conservan sus 15s.
+
+**Cero código de producto tocado.** El diff son cuatro archivos: `tests/helpers/setter-ui.ts`, `tests/helpers/form.ts`, `package.json` (un script) y `playwright.helpers-probe.config.ts` + `tests/helpers-probe/` nuevos.
+
+### Cierre
+
+- `npx tsc --noEmit` → **exit 0**
+- `npm run check:invariants` → **descubiertos 49 · corridos 48 · pasaron 48 · fallaron 0** (igual que en Fase 0)
+- `npm run test:helpers` → **22 passed** (suite nueva; antes: 0)
+- `npm run build` → **exit 0**
+- `npx prisma migrate status` → **Database schema is up to date!**
+- `npm run test:setter` → **NO CORRIDA** (escribe). Listada: 93 pruebas en 20 archivos.
+- `npm run test:leados` → **NO CORRIDA** (escribe). Listada: 25 pruebas en 6 archivos.
+
+**Ninguna escritura sobre la base.** El único comando contra la DB fue `migrate status`, que es read-only.
+
+### Qué queda para la verificación humana
+
+**Nada visual.** Este sprint no cambia una sola pantalla. Lo que cambia es cuánto vale el verde de la suite.
+
+Lo que sí queda, y es de quien pueda correr las suites: **`npm run test:setter` y `npm run test:leados` sobre esta rama.** Las pruebas que se pongan en rojo son el hallazgo que este sprint no pudo cobrar — cada una estaba pasando sin probar.
+
+### Anotado, sin hacer
+
+- **La lista empírica de pruebas caídas** (arriba). Es el pendiente número uno.
+- **Los dos `expectToast` con `.catch(() => undefined)`** y patrón `/enviada/i`: no afirman nada. Arreglarlos cambia la intención de la prueba.
+- **`fieldControl` + `firstVisible` eligen en silencio** cuando dos etiquetas matchean. Latente hoy; cerrarlo pide tocar 21 call sites.
+- **`tests/qa-walkthrough/corrida-1.spec.ts:233`** pide una etiqueta que no existe («URL del draft»). Esa suite no tiene script y no entra en las 118.
+- **Tres helpers muertos**: `setControlledInput`, `qaLogout`, `logout` — cero call sites.
+- **La copy en subjuntivo de `m-construccion.tsx`** existe para esquivar el helper que este sprint arregló. Ya no hace falta que esté doblada por esa razón; **no se tocó**, porque es código de producto.
+- Y la deuda que venía de antes, sin cambios: la trampa latente de `describirFoco`, el cartel del home, el rail del shell sin salida, el contenido muerto de la guía, y `Date.now()` en render.
