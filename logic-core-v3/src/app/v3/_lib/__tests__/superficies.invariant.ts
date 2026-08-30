@@ -8,9 +8,11 @@
  *   1. Los tres modos existen, son tres, y producen marcado DISTINTO. Que un
  *      modo esté declarado en una tabla no prueba que haga algo: acá se
  *      renderiza cada uno y se mira lo que sale.
- *   2. **Las ocho secciones arrancan en `papel-opaco`.** La decisión estética
- *      es de Valentino y este sprint no la toma. El día que una cambie va a
- *      ser porque alguien lo decidió, no porque se coló.
+ *   2. **El recorrido de superficies de las ocho** es exactamente el decidido
+ *      en SITIO-S5 §0.2, tabla contra tabla, con la tabla esperada escrita
+ *      acá y no importada de `secciones.ts` — comparar un archivo contra sí
+ *      mismo no comprueba nada. S1 afirmaba "las ocho en `papel-opaco`"
+ *      porque la decisión estética todavía no estaba tomada.
  *   3. El contraste de la tinta sobre el canvas de prueba, en el modo
  *      transparente, con su peor caso.
  *   4. Por qué el anillo de foco está acotado a `/v3` — con el número que lo
@@ -25,7 +27,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { Panel } from '../../_componentes/Panel'
-import { SECCIONES, SUPERFICIE_INICIAL, type Seccion } from '../secciones'
+import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA, type Seccion } from '../secciones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX, type ModoSuperficie } from '../superficies'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
 
@@ -68,7 +70,7 @@ controlPositivo(
   (html) => !/#[0-9a-fA-F]{3,8}\b/.test(html),
 )
 
-titulo('2 · Las ocho secciones, y todas arrancan en papel-opaco')
+titulo('2 · Las ocho secciones y su recorrido de superficies')
 
 afirmarIgual(SECCIONES.length, 8, 'son ocho secciones')
 afirmarIgual(
@@ -77,21 +79,73 @@ afirmarIgual(
   'en el orden del sprint',
 )
 afirmarIgual(new Set(SECCIONES.map((s) => s.id)).size, 8, 'con ocho ids distintos')
+
+/**
+ * EL RECORRIDO ESPERADO — la tabla de SITIO-S5 §0.2, transcrita acá.
+ *
+ * Está en el instrumento y no en `secciones.ts` a propósito: si saliera del
+ * mismo archivo que verifica, la comparación sería una tautología. Son dos
+ * fuentes, y este check existe para que difieran cuando alguien mueva una sin
+ * decidirlo.
+ *
+ * ⚠ S1 afirmaba "las ocho en `papel-opaco`", que era verdad mientras la
+ * decisión estética no estuviera tomada. SITIO-S5 la tomó; lo que se afirma
+ * ahora es EL RECORRIDO, no un valor único — un check de "todas iguales" no
+ * podría distinguir un recorrido correcto de uno aplanado.
+ */
+const RECORRIDO_ESPERADO: readonly [string, ModoSuperficie][] = [
+  ['hero', 'papel-transparente'],
+  ['quienes-somos', 'papel-opaco'],
+  ['numeros', 'papel-opaco'],
+  ['trabajos', 'oscuro-opaco'],
+  ['servicios', 'papel-opaco'],
+  ['tu-panel', 'papel-opaco'],
+  ['por-que-develop', 'papel-transparente'],
+  ['cierre', 'oscuro-opaco'],
+]
+
 afirmarIgual(
-  SECCIONES.filter((s) => s.superficie !== SUPERFICIE_INICIAL).map((s) => s.id),
-  [],
-  'LAS OCHO arrancan en papel-opaco — este sprint no toma la decisión estética',
+  SECCIONES.map((s) => [s.id, s.superficie]),
+  RECORRIDO_ESPERADO,
+  'el recorrido de superficies es exactamente el decidido en SITIO-S5 §0.2',
 )
+
+/** Tres momentos de escena, no ocho: la cifra la produce esta cuenta. */
+const dejanVer = SECCIONES.filter((s) => SUPERFICIES[s.superficie].dejaVerElCanvas)
+afirmarIgual(
+  dejanVer.map((s) => s.id),
+  ['hero', 'por-que-develop'],
+  'sólo DOS paneles dejan ver el canvas — aparece, desaparece y vuelve',
+)
+afirmarIgual(
+  SECCIONES_QUE_DEJAN_VER_LA_ESCENA,
+  dejanVer.map((s) => s.id),
+  '  y la constante derivada de `secciones.ts` dice lo mismo que la tabla de superficies',
+)
+const invertidas = SECCIONES.filter((s) => SUPERFICIES[s.superficie].invertida)
+afirmarIgual(invertidas.map((s) => s.id), ['trabajos', 'cierre'], 'y DOS son la banda oscura')
+
 afirmar(SECCIONES.every((s) => /^\d+svh$/.test(s.alto)), 'las ocho declaran su altura en `svh`, no en `vh`')
 
 const pinneadas = SECCIONES.filter((s) => s.pinneada)
-afirmarIgual(pinneadas.map((s) => s.id), ['servicios'], 'exactamente una sección es la demostración de pinneado')
-afirmarIgual(pinneadas[0]?.alto, '300svh', '  con 300svh de recorrido y un hijo sticky de 100svh → 200svh de pin')
+afirmarIgual(pinneadas.map((s) => s.id), ['trabajos', 'servicios'], 'dos secciones son secuencias pinneadas')
+afirmarIgual(
+  pinneadas.map((s) => s.alto),
+  ['300svh', '300svh'],
+  '  las dos con 300svh de recorrido y un hijo sticky de 100svh → 200svh de pin cada una',
+)
 
 controlPositivo(
-  'el chequeo de "todas en papel-opaco" ve una que no lo está',
-  SECCIONES.map((s) => (s.id === 'cierre' ? { ...s, superficie: 'oscuro-opaco' as const } : s)),
-  (lista) => lista.filter((s) => s.superficie !== SUPERFICIE_INICIAL).length === 0,
+  'el comparador de recorridos ve una superficie cambiada',
+  SECCIONES.map((s) => (s.id === 'cierre' ? { ...s, superficie: 'papel-opaco' as const } : s)),
+  (lista) =>
+    JSON.stringify(lista.map((s) => [s.id, s.superficie])) === JSON.stringify(RECORRIDO_ESPERADO),
+)
+controlPositivo(
+  'y ve un recorrido APLANADO, que es el error que reemplaza a un recorrido',
+  SECCIONES.map((s) => ({ ...s, superficie: 'papel-opaco' as const })),
+  (lista) =>
+    JSON.stringify(lista.map((s) => [s.id, s.superficie])) === JSON.stringify(RECORRIDO_ESPERADO),
 )
 
 titulo('3 · Contraste de la tinta sobre el canvas de prueba, en modo transparente')

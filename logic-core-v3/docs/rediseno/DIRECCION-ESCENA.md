@@ -482,3 +482,50 @@ Está acá para que nadie lo dé por resuelto.
     | `_lib/__tests__/bundle.invariant.ts` | **323** | S1 |
 
     **Lo que agrava la deuda es la cobertura, no el tamaño:** el único check de las 300 líneas es el de `s3-codigo.invariant.ts`, y mira los archivos del sprint de S3 más los instrumentos `s3-*`; `s4-cobertura.invariant.ts` mira los de S4. **Los de S1 y S2 no los mira nadie**, así que pueden seguir creciendo sin que nada falle. El sprint que los parta tiene que además extender la cobertura, o la deuda vuelve.
+
+18. ⚠️ **LA COREOGRAFÍA DE LAS SECCIONES VIAJA EN LA CARGA INICIAL TAMBIÉN ABAJO DE 1025, Y SE RESUELVE UNA SOLA VEZ.** Abierto en SITIO-S5 y **deliberadamente no arreglado ahí**.
+
+    **La cifra**, producida por `s5-peso.invariant.ts` sobre un build real: lo propio de `/v3/secciones-a` son **38,1 KiB crudo · 12,8 KiB gzip** en 2 archivos, y **baja en todos los anchos**. El total de la ruta es 1429,1 KiB crudo · 436,8 KiB gzip, de los cuales 1386,1 KiB son heredados del layout raíz y no son de ningún lane.
+
+    **Por qué la compuerta de S1/S2 no aplica.** Esas dos gatean una RUTA entera con `dynamic(..., { ssr: false })`, y por eso abajo del umbral el chunk ni se pide. Acá lo gateado es el COMPORTAMIENTO de un contenido que tiene que renderizarse en los dos lados del umbral: abajo de 1025 no se monta el motor, no se parte el texto y no se escribe una transformada —`s5-compacto.invariant.tsx` lo afirma con su control positivo— pero el código de las secciones y del sistema de motion baja igual, porque la sección es un solo árbol.
+
+    **Por qué no se arregla por sección.** Partir cada sección en dos árboles —uno plano para abajo del umbral, otro con coreografía para arriba— obliga a escribir cada sección dos veces, y con dos lanes en paralelo son **dos implementaciones que divergen**. Es una decisión de la COMPOSICIÓN DEL HOME, se toma una vez y se aplica a las ocho.
+
+    **Quién la cierra:** el sprint que componga el home. El instrumento ya existe y publica el número en cada corrida.
+
+19. ⚠️ **`cn()` BORRA CLASES DEL SISTEMA v3 — `tailwind-merge` no conoce sus nombres.** Encontrado por SITIO-S5 y, **de forma independiente, por SITIO-S6**: dos hallazgos coincidentes de dos lanes aislados, sobre el mismo defecto y por caminos distintos.
+
+    **Las dos formas, las dos medidas en runtime con el `cn` de este repo:**
+
+    | entrada | salida | qué desaparece |
+    |---|---|---|
+    | `cn('text-fluido-micro', 'text-tinta-media')` | `text-tinta-media` | el **tamaño** |
+    | `cn('text-micro', 'text-tinta')` | `text-tinta` | el **tamaño** |
+    | `cn('font-titulo', 'font-fuerte')` | `font-fuerte` | la **familia** |
+    | `cn('font-cuerpo', 'font-medio')` | `font-medio` | la **familia** |
+
+    `tailwind-merge` no puede distinguir un `text-<tamaño>` de un `text-<color>` —los dos utilities se escriben igual— ni un `font-<familia>` de un `font-<peso>` cuyo nombre no esté en su lista (`medio`, `semi`, `fuerte` no lo están). Sin una lista que se lo diga, los mete en el mismo grupo y **descarta el primero, en silencio**.
+
+    ⚠️ **`src/lib/utils.ts` ya advierte por escrito de este mismísimo defecto**, y trae la lista `DS_FONT_SIZE_CLASSES` para los tokens del sistema VIEJO, con el caso medido: *"`text-ds-canvas` desaparecía del CTA primario (texto del mismo color que su fondo, ilegible)"*. La lista **nunca se extendió a los tokens de /v3**.
+
+    **No era teórico:** los cinco rótulos de la sección Números salían sin una sola clase de tamaño —a tamaño heredado en vez de a los 10 px de `micro`— justo en la sección cuyo punto entero es la asimetría de escala.
+
+    **El arreglo de raíz** es una línea en `src/lib/utils.ts`: agregar los `--text-*` y los `--font-weight-*` de /v3 a `extendTailwindMerge`. Está FUERA de los lanes de sección, por eso no lo tomó ninguno de los dos. Los dos dejaron **rodeos locales** —el color en un envoltorio que se hereda— y `s5-compacto.invariant.tsx` §5 lo vigila sobre el marcado renderizado (48 elementos con nivel declarado). **Los rodeos se sacan el día que se arregle la raíz**, y ese día el invariante sigue siendo válido: afirma el resultado, no el rodeo.
+
+20. ⚠️ **`test:s2-bundle` QUEDA EN ROJO A PROPÓSITO, Y SE ARREGLA EN LA INTEGRACIÓN.** Abierto por SITIO-S5, que **frenó y reportó en vez de tocarlo**: es un instrumento del sistema de motion.
+
+    **Qué falla:** el control positivo de `motion-bundle.invariant.ts` pide que las cinco huellas del sistema estén en los chunks que llevan `MARCA_MOTION`. Hoy `MARCA_MOTION` vive en `7416-….js` —el chunk perezoso del demo— y **cuatro de las cinco huellas se mudaron a `1379-….js`**, que es uno de los dos chunks propios de `/v3/secciones-a`.
+
+    **Por qué se mudaron:** al haber un SEGUNDO consumidor del sistema de motion —las secciones lo importan de forma estática— webpack lo factorizó en un chunk compartido. Es el comportamiento correcto del empaquetador, no una regresión.
+
+    **La propiedad que S2 protege sigue intacta**, y hay que decirlo: las tres afirmaciones de "ninguna huella en la carga inicial de `/v3`" pasan, `1379` **no** está en la carga inicial de `/v3`, y la marca tampoco aparece en su HTML. Lo que venció es la PREMISA del control —"el sistema vive en el chunk marcado"—, no la tesis.
+
+    **El arreglo (opción A):** que el control busque las huellas en TODOS los chunks del build en vez de sólo en los marcados. Es una línea.
+
+    **Quién lo cierra:** la integración de los dos lanes, junto con el mismo hallazgo que SITIO-S6 reportó por separado.
+
+21. ⚠️ **UNA CORRIDA DE `ultracode` CON CUATRO SUBAGENTES SE PUEDE QUEDAR A MITAD POR LÍMITE DE GASTO.** Observado en SITIO-S5, y **le pasó al otro lane también**: en el primer despacho los cuatro subagentes murieron a la vez con *"You've hit your monthly spend limit"* después de ~750k tokens y ~12 minutos, con una sola sección terminada y otra a medio escribir.
+
+    **Por qué importa y no es una anécdota de facturación:** el corte no avisa antes, deja el disco en un estado intermedio —carpetas a medio llenar, archivos de scratch sueltos— y **el reporte del workflow vuelve vacío**, así que el agente principal no sabe qué se entregó si no mira el disco.
+
+    **La regla que queda:** después de un despacho en paralelo, **inventariar el disco antes de creerle al reporte**. Y para un lane largo, despachar en tandas o dejar el padrón de archivos declarado ANTES —que es lo que permitió retomar acá sin perder nada: `archivosDeclaradosQueFaltan()` dijo exactamente qué faltaba.

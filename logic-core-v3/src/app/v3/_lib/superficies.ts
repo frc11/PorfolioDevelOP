@@ -17,8 +17,11 @@
  * `secciones.ts`, no reescribir el esqueleto. Es lo que hace que la decisión
  * estética sea barata y reversible.
  *
- * **Las ocho arrancan en `papel-opaco`.** Hay un invariante que lo afirma, así
- * que el día que alguien cambie una va a ser porque lo decidió.
+ * **S1 dejó las ocho en `papel-opaco`** con un invariante que lo afirmaba, así
+ * que el día que alguien cambiara una iba a ser porque lo decidió.
+ * **SITIO-S5 lo decidió**: el recorrido está escrito entero en `secciones.ts`
+ * y el invariante ahora afirma ESE recorrido, tabla contra tabla. Son tres
+ * momentos de escena —aparece, desaparece y vuelve— y no ocho.
  *
  * ── Por qué `oscuro-opaco` no cuesta un token ──────────────────────────────
  *
