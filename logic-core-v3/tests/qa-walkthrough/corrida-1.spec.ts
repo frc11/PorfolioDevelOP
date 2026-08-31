@@ -230,10 +230,10 @@ test('Corrida 1 · lead asignado → reunión agendada, ojos de setter novato', 
 
   // ── 6b. Draft ───────────────────────────────────────────────────────────────
   await test.step('6b. Draft', async () => {
-    await firstVisible(fieldControl(page, 'URL del draft')).fill('https://pizzeria-dona-clara-demo.netlify.app')
+    await firstVisible(fieldControl(page, 'URL del borrador')).fill('https://pizzeria-dona-clara-demo.netlify.app')
     await firstVisible(page.getByRole('switch', { name: /Confirmo que abrí el link y carga/i })).click()
-    await firstVisible(page.getByRole('button', { name: 'Guardar draft' })).click()
-    await expectToast(page, /Draft guardado/i)
+    await firstVisible(page.getByRole('button', { name: 'Guardar borrador' })).click()
+    await expectToast(page, /Borrador guardado/i)
     await snap(page, '19-draft-guardado.png', 'Draft publicado y guardado')
   })
 
@@ -310,7 +310,7 @@ test('Corrida 1 · lead asignado → reunión agendada, ojos de setter novato', 
     await snap(page, '26-listo-para-enviar-link.png', 'Listo para enviar el link — el momento del flujo invertido')
 
     await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).click()
-    await expectToast(page, /enviada/i).catch(() => undefined)
+    await expectToast(page, /Demo enviada registrada/i)
     await expect(async () => {
       const dossier = await prisma.osLeadDossier.findUnique({ where: { leadId: lead.id } })
       expect(dossier?.enviadaAt).not.toBeNull()

@@ -295,7 +295,12 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
     await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).click()
-    await expectToast(page, /Demo enviada|enviada/i).catch(() => undefined)
+    // El patrón era `/Demo enviada|enviada/i` y colgaba de un `.catch(() =>
+    // undefined)`: dos capas de nada. `/enviada/i` tiene 104 coincidencias en
+    // código vivo — es casi una tautología — y el `.catch()` se comía el fallo
+    // aunque no apareciera ningún aviso. `/Demo enviada registrada/i` tiene UNA
+    // (el toast de `envio-form.tsx`), y sin el `.catch()` la aserción afirma.
+    await expectToast(page, /Demo enviada registrada/i)
 
     await expect(async () => {
       const dossier = await getDossier(leadId)

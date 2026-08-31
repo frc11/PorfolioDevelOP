@@ -8074,3 +8074,134 @@ Lo que sí queda, y es de quien pueda correr las suites: **`npm run test:setter`
 - **Tres helpers muertos**: `setControlledInput`, `qaLogout`, `logout` — cero call sites.
 - **La copy en subjuntivo de `m-construccion.tsx`** existe para esquivar el helper que este sprint arregló. Ya no hace falta que esté doblada por esa razón; **no se tocó**, porque es código de producto.
 - Y la deuda que venía de antes, sin cambios: la trampa latente de `describirFoco`, el cartel del home, el rail del shell sin salida, el contenido muerto de la guía, y `Date.now()` en render.
+
+---
+
+## Sprint HELPERS QUE PRUEBAN · LA CORRIDA — las suites que P11 no pudo correr — 2026-08-31
+
+**Base:** `fix/helpers-que-prueban` @ `728b943e`, sobre la cadena. P11 arregló cuatro helpers compartidos y **no corrió ninguna de las dos suites**: su regla prohibía escribir en la base. Esa prohibición era un error de redacción — estaba pensada para las corridas de auditoría, no para la verificación normal. Las suites vienen corriendo así desde P3. Este sprint las corre y produce el número que faltaba.
+
+### Fase 0 — el terreno, y contra qué base se corrió
+
+**La base, dicha antes de escribir una fila.** Los dos configs (`playwright.setter.config.ts:31`, `playwright.leados.config.ts:25`) hacen `dotenv.config({ path: '.env.local' })`. La variable es **`DATABASE_URL`**, y resuelve a `ep-quiet-waterfall-acv0fpll-pooler.sa-east-1.aws.neon.tech/neondb` — la branch **`dev`** de Neon, confirmada contra `docs/audits/2026-05-cleanup-db-dev.md:4`, que la nombra por host. `npx prisma migrate status` re-confirma el mismo host al cerrar. **Nunca se tocó producción** (branch `main` de Neon, endpoint distinto).
+
+**La copia de `.env.local` que dejó P11 en su worktree es la que se usó**, y apunta al mismo endpoint dev que la del checkout principal. Diferencia de claves, medida y sin valores: el worktree tiene `CRON_SECRET` de más; el checkout principal tiene además un `.env` (que Prisma CLI sí lee) con `BREVO_API_KEY`, `SEED_*_PASSWORD`, `MOTOR_CHANNEL_SECRET_KEY` y `CHATBOT_IP_HASH_SALT`, que el worktree no tiene. Ninguna de esas hizo falta: las specs se auto-provisionan.
+
+**Gates de entrada:** `tsc --noEmit` exit 0 · invariantes **49 descubiertos / 1 excluido / 48 corridos / 48 pasaron / 0 fallaron** · `test:helpers` 22 passed. Checkout principal en `main` @`17727117` con sólo `?? docs/` — no se tocó. Quince worktrees y dos stashes ajenos, intactos.
+
+### El radio REAL, medido — la tabla del pedido contaba otra cosa
+
+Las 118 son **93 del setter + 25 de leados**. Antes de correr nada se midió a quién alcanzan los helpers, atribuyendo cada call site a su test contenedor:
+
+| | call sites en las dos suites | tests alcanzados |
+|---|---|---|
+| `expectToast` | 8 | 7 |
+| `fieldControl` | 15 | 10 |
+| `pickSelect` | 3 | 3 |
+| `typeControlledInput` · `setControlledSelect` | **0** | 0 |
+
+**`tests/leados` no importa ninguno de los helpers arreglados.** Sus 25 pruebas son inmunes por construcción — lo que comparten con el setter es `setter-db.ts` (la escritura), no la capa de UI. El radio real dentro de las 118 es **13 tests, 4 archivos, 26 call sites, todos del setter**: `01-flow` (8), `13-m16-memoria` (2), `10-unsaved-guard` (2), `07-admin-assign-caliente` (1).
+
+La tabla del pedido (11 / 16 / 13) contaba call sites sobre **todo** `tests/`, incluida `tests/e2e` — que es otra suite, no entra en las 118, y donde viven los 24 call sites de `typeControlledInput`/`setControlledSelect`. Dentro de las 118 esos dos helpers tienen cero, tal como decía la última fila.
+
+### Paso 1 — la línea base, con los helpers viejos
+
+Se sacaron los helpers de `1596b1cb` (el commit anterior a P11) y se corrieron las dos suites. Un solo `next build` sirve a las dos corridas: los helpers son código de test, el producto es idéntico byte a byte entre los dos brazos.
+
+```
+LÍNEA BASE (helpers pre-P11)
+  test:leados   25 passed (41.6s)
+  test:setter   93 passed (3.9m)
+  ─────────────────────────────
+  118 / 118 VERDE
+```
+
+### Paso 2 — con los cuatro arreglos
+
+```
+CON LOS ARREGLOS (728b943e)
+  test:setter   93 passed (3.8m)
+  test:leados   25 passed (41.6s)
+  ─────────────────────────────
+  118 / 118 VERDE — CERO rojos
+```
+
+### Paso 3 — el triaje: no hubo nada que triar, y por qué eso hay que probarlo
+
+**Cero rojos. Ninguna causa A, ninguna B, ninguna C.** Las 13 pruebas del radio ejercían de verdad la conducta que sus helpers ahora exigen: los avisos aparecen dentro del contenedor de sonner, los selects commitean, los valores aterrizan.
+
+Pero un helper que sólo AGREGA post-condiciones y no rompe nada admite dos lecturas, y son opuestas: o las pruebas ya ejercían la conducta, o **las aserciones nuevas no llegan a correr**. Un verde no distingue las dos. Hace falta un control.
+
+**Control, sobre la aplicación real — no sobre el banco de sabotaje.** `01-flow.spec.ts:84` afirma el aviso `/Ficha guardada — ya tenés señal/i`; dos líneas antes, en `:81`, el mismo test afirma que la copy «✓ Señal mínima lista — guardá y pasala por el Evaluador.» está **visible en el cuerpo**. Se apuntó la aserción del aviso a esa copy del cuerpo — el señuelo perfecto, y real.
+
+```
+CONTROL A · helper NUEVO, señuelo de cuerpo → B1 FALLA (en la línea 84, que es donde tiene que fallar)
+
+  Error: expect(locator).toBeVisible() failed
+  Locator: locator('[data-sonner-toast]')
+             .filter({ hasText: /Señal mínima lista/i })
+             .filter({ visible: true }).first()
+  Expected: visible   Error: element(s) not found
+
+CONTROL B · helper VIEJO, MISMO señuelo → la línea 84 PASA. El test sigue de largo
+            y muere recién en :88, contra la base:
+
+  Error: fichaJson persistido
+  expect(received).toBeTruthy()   Received: null
+```
+
+Los dos controles juntos prueban tres cosas. Uno: las aserciones **sí corren** — el verde de arriba es real, no un salteo. Dos: el ámbito nuevo **muerde contra la app**, no sólo contra `setContent`. Y tres, lo que no estaba escrito en ningún lado: el helper viejo no sólo daba falso verde, además **borraba la sincronización**. Su espera se satisfacía con texto que ya estaba en pantalla antes del click, así que el test corría al `getDossier` antes de que la server action persistiera. El aviso no era decoración: era la barrera que hacía esperar. Por eso el señuelo no produce un falso verde limpio sino un rojo **desplazado** — aparece dos líneas más abajo, en la base, disfrazado de bug de producto.
+
+### Paso 4 — los tres hallazgos sueltos
+
+**1 y 2 · Las dos aserciones sin filo.** `01-flow.spec.ts:298` y `qa-walkthrough/corrida-1.spec.ts:313` escribían `await expectToast(page, /Demo enviada|enviada/i).catch(() => undefined)`. Dos capas de nada, y hay que separarlas porque fallan distinto:
+
+- **El patrón.** `/Demo enviada|enviada/i` tiene **104 coincidencias en código vivo** de `src/` (se reprodujo el número de P11, contando por línea y excluyendo comentarios). Es una tautología sobre la pantalla. `/Demo enviada registrada/i` tiene **1**: el propio `successToast` de `envio-form.tsx:44`.
+- **El `.catch()`.** Este es el decisivo, y es el que **el arreglo de P11 no podía alcanzar**: por buena que quede la aserción, un `.catch(() => undefined)` en el call site la desarma entera. Medido con el helper YA arreglado y sin un solo aviso en la pantalla: la línea resuelve igual. No era una aserción débil — era una que no podía fallar nunca.
+
+Las dos quedaron en `/Demo enviada registrada/i`, sin `.catch()`.
+
+**3 · La etiqueta que no existe.** `corrida-1.spec.ts:233` pedía `fieldControl(page, 'URL del draft')`; la etiqueta real es «URL del borrador» (`borrador-form.tsx:139`). Las dos respuestas que pedía el pedido resultaron ser las dos, y las dos son hallazgo:
+
+- **El `contains()` no la salva.** El único «URL del draft» que queda en `src/` es un **comentario** (`dossier.ts:277`), y el xpath del helper busca un `<label>`. Resuelve a **cero** controles; el `.fill()` agotaría el timeout.
+- **La prueba nunca llega ahí porque la spec no corre.** `tests/qa-walkthrough` tiene config propio (`playwright.qa-walkthrough.config.ts`) pero **ningún script de `package.json` lo invoca**. No entra en las 118 y no lo mira ningún gate. Es una spec entera fuera de toda red.
+
+Y al corregirla apareció que el mismo renombre `draft → borrador` había roto **tres** líneas del mismo paso 6b, no una: el botón `Guardar draft` (ausente en `src/`; el real es `Guardar borrador`) y el aviso `/Draft guardado/i` (**0 coincidencias vivas**; el real es «Borrador guardado.»). Un renombre coordinado del producto, y del otro lado una spec que nadie corre: nada podía avisar.
+
+**Las demostraciones** se sumaron al banco de P11 (`tests/helpers-probe`, `setContent`, sin server y sin DB) — 22 → **26 casos**:
+
+```
+ok  envío · SABOTAJE de la forma vieja: el .catch() se come la ausencia total de aviso
+ok  envío · CONDUCTA: el aviso del envío recién registrado satisface el patrón nuevo
+ok  envío · SABOTAJE: el aviso dice que YA estaba registrado, no que se registró ahora
+ok  fieldControl · SABOTAJE: la etiqueta renombrada no resuelve a ningún control
+```
+
+El tercero es el que le da filo al patrón nuevo: la **otra rama del mismo `successToast`** («Ese envío ya estaba registrado — no se duplica nada.») no lo satisface. B8 afirma que el envío se registró en **este** click, y ahora la aserción distingue eso de «ya estaba».
+
+**Lo que no se pudo demostrar, y se dice:** dentro del contenedor de avisos, `/enviada/i` **no tiene hoy ningún señuelo vivo** — se barrió `src/` y ningún `toast.*` ni copy de error contiene «enviada». Las 104 coincidencias son de la pantalla, y por eso el patrón era peligroso bajo el helper VIEJO (ámbito de página), no bajo el nuevo. El defecto vivo hoy en ese call site era el `.catch()`; el patrón era deuda latente. Se arreglaron los dos, pero no se le atribuye al patrón un daño que hoy no puede hacer.
+
+### Paso 5 — el saldo
+
+**De las 118 pruebas, las que pasaban sin verificar la conducta que dicen verificar: CERO.**
+
+No es el número que el sprint esperaba, y por eso vale decir exactamente qué cubre y qué no:
+
+- **Las 13 del radio resistieron.** Los cuatro helpers arreglados les exigen ahora la post-condición y las 13 la cumplen. La conducta era real.
+- **Las 25 de leados nunca estuvieron en riesgo**: no importan ninguno de los helpers arreglados. Contarlas como «protegidas» habría sido inflar el número.
+- **Una aserción individual sí estaba inerte** dentro de las 118: `01-flow.spec.ts:298`, en **B8**. B8 no pasaba sin probar nada — sus aserciones duras (`enviadaAt` no nulo, 1 `OsDemo`, idempotencia tras recargar) sí probaban. Lo inerte era la línea del aviso, y sólo esa. Con el arreglo la línea afirma y B8 sigue verde: el aviso aparece de verdad.
+- **Fuera de las 118**, `corrida-1.spec.ts` tenía **cuatro** líneas rotas o inertes y nadie se enteró, porque ninguna corrida la ejecuta.
+
+El verde de las últimas nueve corridas, entonces, valía lo que decía valer **en lo que estos cuatro helpers cubren**. Lo que no cubre sigue abierto y sigue declarado: `fieldControl` no se arregló (P11 lo dejó en rojo a propósito con `test.fail`, porque su `contains()` es portante — tres call sites piden por prefijo), y sus **15 call sites dentro de las 118 no están medidos** contra la ambigüedad de dos etiquetas. Ese es el pendiente que este sprint no cobra.
+
+### Cierre
+
+`tsc --noEmit` exit 0 · invariantes **49 / 1 excluido / 48 corridos / 48 pasaron / 0 fallaron** · `test:helpers` **26 passed** · `test:setter` **93 passed** · `test:leados` **25 passed** · `npm run build` exit 0 · `migrate status` sin drift, sobre el host `ep-quiet-waterfall-acv0fpll` (dev).
+
+**Cero código de producto tocado.** Ninguna prueba borrada ni salteada; el `test.fail()` declarado de P11 se respeta. **Ningún helper se aflojó** — los cuatro quedan exactamente como los dejó P11; lo único que cambió son dos call sites que no afirmaban y tres selectores de una spec huérfana.
+
+### Anotado, sin hacer
+
+- **`tests/qa-walkthrough` no lo corre ningún script.** Una spec entera fuera de todo gate — por eso acumuló cuatro líneas rotas de un renombre. Darle script (o borrarla) es una decisión, no un arreglo.
+- **Los 15 call sites de `fieldControl` en las 118**, sin medir contra el sabotaje de dos etiquetas. Es el pendiente que hereda de P11.
+- **La copy en subjuntivo de `m-construccion.tsx`** sigue doblada para esquivar un helper que ya no lo necesita. Es código de producto: no se tocó.

@@ -332,3 +332,87 @@ test('setControlledInput · CARACTERIZACIÓN: escribe incluso sobre un readonly'
     'el setter nativo saltea el readonly: el valor entra igual',
   ).toHaveValue('hola')
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Las DOS aserciones sin filo del envío (01-flow:298 y corrida-1:313)
+//
+// No son un helper: son dos call sites que el sprint anterior midió y dejó
+// anotados. Valen su propio par porque muestran algo que el arreglo de
+// `expectToast` NO alcanzaba — un `.catch()` en el call site desarma cualquier
+// aserción, por buena que sea.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Las dos ramas REALES del `successToast` de `envio-form.tsx`. El emoji del
+ * original se omite a propósito: ninguno de los dos patrones lo mira, y así el
+ * fixture no depende de cómo cada editor guarde el par subrogado.
+ */
+const AVISO_ENVIO_OK = 'Demo enviada registrada — ahora el objetivo es la reunión.'
+const AVISO_ENVIO_YA_ESTABA = 'Ese envío ya estaba registrado — no se duplica nada.'
+
+/**
+ * El defecto DECISIVO de la forma vieja, y el que el arreglo de `expectToast` no
+ * podía tocar: `.catch(() => undefined)`. Con el helper YA ARREGLADO y sin un
+ * solo aviso en la pantalla, la línea igual resuelve. No es una aserción débil —
+ * es una aserción que no puede fallar nunca.
+ */
+test('envío · SABOTAJE de la forma vieja: el .catch() se come la ausencia total de aviso', async ({
+  page,
+}) => {
+  await montar(page, `<main><p>Nada. Ningún aviso.</p></main>${toaster([])}`)
+  let lanzo = false
+  try {
+    // La forma exacta que tenían 01-flow:298 y corrida-1:313.
+    await expectToast(page, /Demo enviada|enviada/i, { timeout: 2_000 }).catch(() => undefined)
+  } catch {
+    lanzo = true
+  }
+  expect(
+    lanzo,
+    'con el .catch() la línea pasa aunque no exista ningún aviso: no afirmaba nada',
+  ).toBe(false)
+})
+
+/** CONDUCTA: el envío ocurrió ahora — la aserción nueva lo reconoce. */
+test('envío · CONDUCTA: el aviso del envío recién registrado satisface el patrón nuevo', async ({
+  page,
+}) => {
+  await montar(page, `<main></main>${toaster([AVISO_ENVIO_OK])}`)
+  await expectToast(page, /Demo enviada registrada/i, { timeout: 3_000 })
+})
+
+/**
+ * SABOTAJE: el claim fue IDEMPOTENTE — no se registró nada nuevo. B8 afirma que
+ * el envío se registró en ESTE click; la otra rama del mismo `successToast` no
+ * puede satisfacer esa promesa.
+ */
+test('envío · SABOTAJE: el aviso dice que YA estaba registrado, no que se registró ahora', async ({
+  page,
+}) => {
+  await montar(page, `<main></main>${toaster([AVISO_ENVIO_YA_ESTABA])}`)
+  await debeFallar('el envío no se registró en este click: ya estaba', () =>
+    expectToast(page, /Demo enviada registrada/i, { timeout: 2_000 }),
+  )
+})
+
+/**
+ * El renombre `draft` → `borrador` (corrida-1:233). La etiqueta que la spec pedía
+ * no existe en ninguna pantalla: el único «URL del draft» que queda en `src/` es
+ * un COMENTARIO en `dossier.ts:277`. El xpath del helper busca un `<label>` — no
+ * puede resolver, y el `.fill()` agota el timeout.
+ */
+test('fieldControl · SABOTAJE: la etiqueta renombrada no resuelve a ningún control', async ({
+  page,
+}) => {
+  await montar(
+    page,
+    `<main><div><label>URL del borrador</label><input id="borrador" /></div></main>`,
+  )
+  expect(
+    await fieldControl(page, 'URL del draft').count(),
+    'la etiqueta vieja no matchea nada: la spec escribía al vacío',
+  ).toBe(0)
+  // Y con la etiqueta REAL sí resuelve — el arreglo del call site.
+  await fieldControl(page, 'URL del borrador').fill('https://demo.netlify.app')
+  await expect(page.locator('#borrador')).toHaveValue('https://demo.netlify.app')
+})
