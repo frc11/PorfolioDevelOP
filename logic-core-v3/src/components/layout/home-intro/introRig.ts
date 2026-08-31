@@ -2,8 +2,8 @@ import {
   FILL_INTENSITY,
   HEMI_INTENSITY,
   KEY_INTENSITY,
-} from '@/app/probe-escena/_components/probeLighting'
-import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/probe-escena/_components/probeCelosia'
+} from '@/app/v3/_lib/escena/probeLighting'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
 
 import { INTRO_SHADOW } from './introTimeline'
 

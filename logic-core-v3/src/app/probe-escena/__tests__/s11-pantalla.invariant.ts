@@ -18,12 +18,12 @@
  * la mediana a 1,2 px en el peor rayo rasante— y lo que decide no es la mediana
  * sino la cola.
  */
-import { celosiaBarAt, celosiaBarFiltered, celosiaCrossings, celosiaLayers } from '../_components/celosiaGeometry'
+import { celosiaBarAt, celosiaBarFiltered, celosiaCrossings, celosiaLayers } from '@/app/v3/_lib/escena/celosiaGeometry'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
-import { CELOSIA_BAR } from '../_components/probeCelosia'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
+import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 import {
   TAN_HALF_V,
   cameraAt,

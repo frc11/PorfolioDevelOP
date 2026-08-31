@@ -54,26 +54,54 @@ export interface DestinoDeLaRuta {
 export const ANCLAS_QUE_EXISTEN: readonly string[] = IDS_DE_SECCION.map((id) => `#${id}`)
 
 /**
- * ⚠ LAS SECCIONES QUE EL PIE ENLAZA, QUE NO SON TODAS LAS QUE EXISTEN.
+ * LAS SECCIONES QUE EL PIE ENLAZA — las ocho, **derivadas** (SITIO-S8).
  *
- * Son las mismas cuatro de siempre. **Ampliarlo a las ocho es una decisión de
- * CONTENIDO** —qué ofrece el pie como recorrido— y este sprint compone lo que
- * había, no decide lo que nadie decidió. Queda anotado como abierto para la
- * etapa de contenido, que es la que sigue.
+ * ── Qué eran, y por qué eran cuatro ────────────────────────────────────────
+ *
+ * Eran una lista escrita a mano —`servicios`, `tu-panel`, `por-que-develop`,
+ * `cierre`— y no eran cuatro por una decisión: eran las cuatro secciones del
+ * lane que escribió el pie, que era el único recorrido que ese lane conocía.
+ * SITIO-S7 montó las ocho en el home y **no la tocó**, con la razón escrita:
+ * ampliar lo que el pie OFRECE es contenido, y la instrucción de ese sprint
+ * prohibía cambiar el contenido de una sección. Quedó anotado en §7.24.
+ *
+ * ── Qué son ahora, y por qué se DERIVAN ────────────────────────────────────
+ *
+ * Las ocho, sacadas de `IDS_DE_SECCION` —o sea de `_lib/secciones.ts`, la única
+ * tabla del recorrido— y no de una lista escrita al lado. Es la regla del
+ * proyecto para esta forma exacta (§7.27): *un número que cuenta una lista que
+ * otro sprint puede alargar se deriva; uno que describe una decisión de
+ * composición se escribe y se explica*. Cuántas secciones tiene el sitio es lo
+ * primero: el sprint que agregue una novena la va a ver aparecer en el pie sin
+ * acordarse de esta línea, que es exactamente lo que tiene que pasar.
+ *
+ * **El orden es el del RECORRIDO**, porque es el que sale derivado y es el
+ * único defendible: el pie de un sitio que se lee de arriba abajo ofrece
+ * volver, y volver tiene el orden en que se pasó. El orden anterior arrancaba
+ * en Servicios —la QUINTA sección— y eso no era una composición: era dónde
+ * empezaban las cuatro del lane.
+ *
+ * ⚠️ **LA CONSECUENCIA QUE ESTO TUVO, Y CÓMO SE RESOLVIÓ.** `CTA_DE_CIERRE`
+ * tomaba su destino de `DESTINOS_DE_LA_RUTA[0]`, así que al cambiar el orden el
+ * CTA se iba de `#servicios` a `#hero` y su rótulo —«Ver los servicios»— dejaba
+ * de corresponder. Un botón que nombra un destino y lleva a otro es un defecto,
+ * aunque el rótulo esté declarado relleno.
+ *
+ * **Se resolvió preservando el comportamiento**, que es la única salida que este
+ * sprint podía tomar sin decidir contenido: el destino se ESCRIBIÓ —`#servicios`,
+ * el mismo de siempre— y quedó desacoplado del orden del pie. Ver su docblock.
+ * Cambiar a dónde empuja el cierre sigue siendo una decisión del humano.
  */
-const SECCIONES_QUE_EL_PIE_ENLAZA: readonly string[] = [
-  'servicios',
-  'tu-panel',
-  'por-que-develop',
-  'cierre',
-]
+const SECCIONES_QUE_EL_PIE_ENLAZA: readonly string[] = IDS_DE_SECCION
 
 /**
- * Los destinos del pie: las otras tres secciones del recorrido.
+ * Los destinos del pie: las otras SIETE secciones del recorrido.
  *
  * **El Cierre no se enlaza a sí mismo.** Un enlace a la sección en la que ya
  * estás no lleva a ningún lado en el sentido que importa: no cambia nada. Está
- * en `ANCLAS_QUE_EXISTEN` porque existe; no está acá porque no sirve.
+ * en `ANCLAS_QUE_EXISTEN` porque existe; no está acá porque no sirve. Esa razón
+ * es la misma de siempre y **el filtro se mantiene**: lo único que cambió es de
+ * cuántas se filtra.
  */
 export const DESTINOS_DE_LA_RUTA: readonly DestinoDeLaRuta[] = SECCIONES_QUE_EL_PIE_ENLAZA.filter(
   (id) => id !== 'cierre',
@@ -81,14 +109,36 @@ export const DESTINOS_DE_LA_RUTA: readonly DestinoDeLaRuta[] = SECCIONES_QUE_EL_
 
 /**
  * El CTA. Va en TINTA por instrucción —nunca acento— y lleva a un destino que
- * existe: la primera sección del recorrido.
+ * existe.
  *
  * ⚠️ El destino REAL de un cierre es contacto, y contacto no existe. Queda
  * reportado como pedido; mientras tanto el CTA no puede ser un botón muerto.
+ *
+ * ── Por qué el destino está ESCRITO y ya no sale de `[0]` (SITIO-S8) ───────
+ *
+ * Decía `DESTINOS_DE_LA_RUTA[0].ancla`, y eso funcionaba **por accidente**:
+ * mientras la lista arrancaba en Servicios, `[0]` era `#servicios` y el rótulo
+ * correspondía. Al derivar el recorrido del pie de la tabla, `[0]` pasó a ser
+ * `#hero` y el CTA quedó diciendo «Ver los servicios» y llevando a otro lado.
+ *
+ * Escribirlo NO es una decisión de contenido nueva: es **exactamente el destino
+ * que este botón tenía**, desacoplado del orden del pie, que es de donde nunca
+ * tendría que haber salido. El rótulo y el destino son una sola decisión de
+ * composición y por eso van juntos y escritos — la regla del proyecto es esa
+ * (§7.27): *un número que describe una decisión se escribe y se explica; uno
+ * que cuenta una lista que otro sprint puede alargar se deriva*. A dónde empuja
+ * el cierre es lo primero.
+ *
+ * ⚠️ Lo que SIGUE ABIERTO y lo decide el humano: el rótulo está declarado
+ * RELLENO en el docblock de este archivo, así que si el cierre tiene que
+ * empujar a otro lado, se cambian las dos líneas de abajo a la vez.
+ *
+ * `ANCLAS_QUE_EXISTEN` custodia que el destino exista: `s8-cierre.invariant`
+ * afirma que ningún `href` del marcado lleva a la nada.
  */
 export const CTA_DE_CIERRE = {
   rotulo: 'Ver los servicios',
-  destino: DESTINOS_DE_LA_RUTA[0].ancla,
+  destino: '#servicios',
 } as const
 
 /** Qué clase de columna es cada una. Decide qué cuerpo se renderiza. */

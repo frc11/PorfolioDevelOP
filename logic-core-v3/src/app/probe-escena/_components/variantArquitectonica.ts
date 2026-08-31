@@ -1,4 +1,4 @@
-import type { ChoreoVariant } from './choreographyTypes'
+import type { ChoreoVariant } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   ARQUITECTONICA_DOC,
   ARQUITECTONICA_NOTES,

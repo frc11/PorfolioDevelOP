@@ -1,4 +1,4 @@
-import { PROBE_SVG_SCALE } from '@/app/probe-escena/_components/probeScene'
+import { PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 import { SCENE_ENTRY_POSE, frameSceneEntry, frameScenePose } from '@/lib/scene-framing'
@@ -112,5 +112,12 @@ console.log(`
 scene-camera: ${passed} en verde, ${failures.length} en rojo`)
 if (failures.length > 0) {
   for (const failure of failures) console.log(`  ✗ ${failure}`)
+  process.exitCode = 1
+}
+// La guarda de «cero comprobaciones», igual que en los dos arneses compartidos:
+// un invariante sin comprobaciones sale verde y es indistinguible de uno que
+// verificó algo. Puesta en SITIO-S8, al cablear este archivo al gate del repo.
+if (passed === 0) {
+  console.log('  FALLA  cero comprobaciones. Un invariante sin comprobaciones es verde por vacío.')
   process.exitCode = 1
 }

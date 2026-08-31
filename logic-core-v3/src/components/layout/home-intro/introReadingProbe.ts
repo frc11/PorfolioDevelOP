@@ -1,8 +1,8 @@
 import {
   PARTICLES_MAX,
   PARTICLE_SIZE,
-} from '@/app/probe-escena/_components/probeParticles'
-import { PROBE_DEFAULTS } from '@/app/probe-escena/_components/probeStore'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 
 import { introContrastAt } from './introLegibilityProbe'
 import { INTRO_FALL_WORLD, type IntroMote } from './introParticles'

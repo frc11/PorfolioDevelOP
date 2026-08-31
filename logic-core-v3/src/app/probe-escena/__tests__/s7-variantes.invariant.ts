@@ -14,9 +14,9 @@
  * contra el recorrido definitivo diría otra cosa y no sería lo que las tesis
  * afirman. Lo que le toca al definitivo se verifica en `s9-definitiva`.
  */
-import { CHOREO_TRAMOS } from '../_components/choreography'
+import { CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
-import type { ChoreoKeyframe, ChoreoVariantId } from '../_components/choreographyTypes'
+import type { ChoreoKeyframe, ChoreoVariantId } from '@/app/v3/_lib/escena/choreographyTypes'
 import { LOGO_H, check, frameHeight, report, section } from './harness'
 
 // ── 5 · Las tesis de las variantes son ciertas ──────────────────────────────

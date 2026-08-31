@@ -1,4 +1,4 @@
-import { cubicBezierEase } from '@/app/probe-escena/_components/bezier'
+import { cubicBezierEase } from '@/app/v3/_lib/escena/bezier'
 import { MOTION_EASE } from '@/components/design-system/motion/tokens'
 
 import {

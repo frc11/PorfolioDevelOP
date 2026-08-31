@@ -13,18 +13,13 @@
  *
  * ── EL CONTROL POSITIVO, Y POR QUÉ NO ES UNA RUTA GEMELA ─────────────────
  *
- * S1 y S2 controlaron su compuerta con una ruta que hace el import ESTÁTICO del
- * mismo módulo (`/v3/control-estatico`, `/v3/motion/control-estatico`), y ahí la
- * marca TIENE que aparecer. Acá eso no se puede: **este sprint borra dos rutas
- * de demostración**, y el efecto de ese borrado sobre el peso heredado es una de
- * las mediciones que el sprint produce. Agregar una tercera ruta la
- * contaminaría.
- *
- * El control se consigue igual, y sobre el mismo predicado y el mismo conjunto
- * de archivos: el árbol QUIETO lleva su propia marca, y **tiene que estar** en
- * la carga inicial de `/v3`. Un buscador roto no encontraría ninguna de las dos;
- * uno sano encuentra exactamente una. Es la misma asimetría que da la ruta
- * gemela, sin pagar una ruta.
+ * S1 y S2 controlaron su compuerta con una ruta que importa el mismo módulo de
+ * forma ESTÁTICA. Acá no se podía: S7 borraba dos rutas de demostración y medía
+ * el efecto de ese borrado, así que agregar una tercera lo contaminaba. El
+ * control se consigue sobre el mismo predicado y el mismo conjunto de archivos:
+ * el árbol QUIETO lleva su marca y **tiene que estar** en la carga inicial de
+ * `/v3`. Un buscador roto no encontraría ninguna de las dos; uno sano encuentra
+ * exactamente una. Misma asimetría, sin pagar una ruta.
  *
  * ── Y las huellas del sistema, que la marca sola no cubre ────────────────
  *
@@ -147,20 +142,13 @@ titulo('6 · EL PESO — /v3 arriba y abajo del umbral')
 const abajo = pesar(inicialV3)
 
 /**
- * ⚠ LO QUE CUESTA CRUZAR EL UMBRAL NO ES EL CHUNK MARCADO: SON TODOS.
- *
- * Primera versión de este bloque: pesaba sólo los chunks con la marca, y dio
- * **3,5 KiB**. Es una cifra correcta y una respuesta equivocada — la marca vive
- * en el módulo que enchufa las primitivas, y ese módulo es glue; **el sistema de
- * motion que arrastra vive en otros chunks**, que se descargan con él y que la
- * marca no toca.
- *
- * Es el mismo error de forma que este sprint le corrigió al control de
- * `test:s2-bundle`: confundir "el archivo donde puse la marca" con "lo que pasa
- * al cruzar". Así que lo que se pesa es la UNIÓN de los chunks marcados y los
- * que llevan las huellas del sistema, menos lo que ya está en la carga inicial.
- * Es un piso, no un techo: si la coreografía arrastrara un módulo sin marca ni
- * huella, no se contaría — y eso queda dicho en vez de escondido.
+ * ⚠ LO QUE CUESTA CRUZAR EL UMBRAL NO ES EL CHUNK MARCADO: SON TODOS. Pesar
+ * sólo los marcados daba **3,5 KiB**: cifra correcta, respuesta equivocada — la
+ * marca vive en el módulo que enchufa las primitivas, que es glue, y el sistema
+ * que arrastra vive en otros chunks. Es el mismo error que este sprint le
+ * corrigió al control de `test:s2-bundle`. Se pesa la UNIÓN de los marcados y
+ * los que llevan huellas del sistema, menos la carga inicial. Es un piso, no un
+ * techo: un módulo sin marca ni huella no se contaría, y queda dicho.
  */
 const conElSistema = HUELLAS_DEL_SISTEMA.flatMap((h) => chunks.filter((f) => contiene(f, h)))
 const chunksDelArbolAnimado = [...new Set([...conLaMarcaAnimada, ...conElSistema])].filter(
@@ -203,27 +191,41 @@ console.log(
 console.log(`  propio de /v3           : ${propios.length} archivos · ${kib(pesoPropio.crudo)} crudo`)
 
 /**
- * ⚠ LA MEDICIÓN DEL BORRADO — prueba PARCIAL de la predicción del mapa.
+ * ⚠️⚠️ **ESTE BLOQUE ESTUVO A PUNTO DE PUBLICAR UNA ATRIBUCIÓN FALSA.**
  *
- * El padrón pasó de 7 a 5 rutas de demo. Si el diagnóstico de S2/S4 es correcto
- * —cada ruta le cobra peso a las que ya existían, en chunks compartidos con el
- * home— el heredado de `/v3` tiene que BAJAR. No cierra la predicción: quedan
- * cinco rutas. Pero es evidencia gratis, y va en los dos sentidos: si no se
- * mueve, el diagnóstico estaba mal.
+ * S7 lo escribió así: el padrón pasó de 7 a 5 rutas de demo, así que si el
+ * heredado BAJA, la predicción del mapa va bien. Era razonable **mientras borrar
+ * rutas fuera lo único que podía mover ese número**, y dejó de serlo: SITIO-S8
+ * le cambió UN especificador al layout raíz —`HomeIntroBoot` pasaba por el
+ * barril del preloader, que vive en el grupo de chunks de la PÁGINA DEL HOME y
+ * lo arrastraba entero a toda ruta— y el heredado se desplomó **sin borrar una
+ * sola ruta**. El texto viejo habría escrito *«BAJÓ: borrar rutas devuelve peso
+ * heredado»*, dándole a la predicción un respaldo que no le corresponde.
+ *
+ * Es la trampa de §6.1 —*dos cambios juntos y el mérito a uno*— salvo que acá
+ * **sí se sabe cuál fue**: `test:s8-peso` lo aisló ruta por ruta.
+ *
+ * La regla que queda: *un instrumento que compara contra una línea de base tiene
+ * que decir qué cambió ENTRE las dos mediciones, no sólo cuánto.* Una
+ * comparación sin inventario de cambios es una coincidencia con formato.
  */
 const delta = pesoHeredado.crudo / 1024 - HEREDADO_CON_SIETE_RUTAS_KIB
 console.log('')
-console.log(`  ── EL EFECTO DE BORRAR ${RUTAS_BORRADAS.length} RUTAS DE DEMO ──`)
-console.log(`  antes (7 rutas): ${HEREDADO_CON_SIETE_RUTAS_KIB} KiB crudo · ${HEREDADO_CON_SIETE_RUTAS_ARCHIVOS} archivos heredados`)
+console.log(`  ── EL HEREDADO CONTRA LA LÍNEA DE BASE DE S7 ──`)
+console.log(`  S7 (7 rutas de demo): ${HEREDADO_CON_SIETE_RUTAS_KIB} KiB crudo · ${HEREDADO_CON_SIETE_RUTAS_ARCHIVOS} archivos heredados`)
 console.log(
-  `  ahora (${RUTAS_DE_DEMO.length} rutas): ${kib(pesoHeredado.crudo)} crudo · ${heredados.length} archivos heredados`,
+  `  hoy (${RUTAS_DE_DEMO.length} rutas): ${kib(pesoHeredado.crudo)} crudo · ${heredados.length} archivos heredados`,
 )
 console.log(
   `  delta: ${delta >= 0 ? '+' : ''}${delta.toFixed(1)} KiB · ${heredados.length - HEREDADO_CON_SIETE_RUTAS_ARCHIVOS} archivo(s)`,
 )
+console.log(`  ⚠️ ENTRE LAS DOS MEDICIONES PASARON DOS COSAS, y sólo una explica el delta:`)
+console.log(`     · SITIO-S7 borró ${RUTAS_BORRADAS.length} rutas de demo — efecto medido entonces: +0,8 KiB.`)
+console.log('     · SITIO-S8 sacó el barril del preloader del grafo del layout raíz — es ESTE delta.')
+console.log('     La atribución la produce `test:s8-peso`, ruta por ruta, sobre el payload de flight.')
 console.log(
   delta < 0
-    ? '  → BAJÓ. La predicción del mapa va en la dirección correcta: borrar rutas devuelve peso heredado.'
+    ? '  → El heredado BAJÓ, y NO por el borrado de rutas: la predicción del mapa sigue sin evidencia a favor.'
     : '  → NO bajó. ⚠️ ES UNA MEDICIÓN SIN CAUSA ATRIBUIBLE, NO UNA REFUTACIÓN.',
 )
 
@@ -254,18 +256,40 @@ const heredadoPorRuta = ['/v3', ...RUTAS_DE_DEMO.map((r) => r.ruta), '/v3/contro
     kib: partirCargaInicial(conjuntoInicial(r), inicialHome).pesoHeredado.crudo / 1024,
   }))
 console.log('')
-console.log('  el heredado es el MISMO para todas las rutas de /v3 — no es de esta ruta:')
+console.log('  el heredado, ruta por ruta:')
 for (const f of heredadoPorRuta) console.log(`    ${f.ruta.padEnd(28)} ${f.kib.toFixed(1)} KiB`)
+
+/**
+ * ⚠ **DECÍA «SON TODAS IGUALES» Y SITIO-S8 LA ROMPIÓ A PROPÓSITO.** S7 la
+ * escribió para descartar el reflejo de *«el heredado subió porque `/v3` tiene
+ * ocho secciones»*: si fuera de ESTA ruta, las otras seis darían otro número.
+ * Daban el mismo, así que era del conjunto compartido.
+ *
+ * SITIO-S8 montó el preloader **en `/v3` y en ninguna otra ruta de `/v3`**, y su
+ * overlay tiene que viajar en el HTML del servidor (el gate es pre-paint). Como
+ * `/` monta el mismo componente, ese chunk es COMPARTIDO y cuenta como
+ * heredado. Hoy hay DOS números, y la diferencia es **una pieza que `/v3` monta
+ * de más**, no contenido de la ruta. Se afirma eso —más fuerte que la igualdad,
+ * y no se vence cuando `/v3` monte otra cosa— con la diferencia nombrada.
+ */
+const deLasOtras = heredadoPorRuta.filter((f) => f.ruta !== '/v3')
+const deV3 = heredadoPorRuta.find((f) => f.ruta === '/v3')
 afirmar(
-  new Set(heredadoPorRuta.map((f) => f.kib.toFixed(1))).size === 1,
-  '  y las cifras coinciden: el delta NO viene de que /v3 haya cambiado de contenido',
-  `${heredadoPorRuta.length} rutas medidas`,
+  new Set(deLasOtras.map((f) => f.kib.toFixed(1))).size === 1,
+  '  las OTRAS rutas de /v3 coinciden entre sí: el heredado no es del contenido de cada ruta',
+  `${deLasOtras.length} rutas · ${deLasOtras[0]?.kib.toFixed(1)} KiB`,
 )
-console.log('  ⚠️ SIN CAUSA ATRIBUIBLE: este commit borró dos rutas Y compuso el home. El delta')
-console.log('     está bien medido; a qué se debe, no se sabe. NO es una refutación.')
-console.log('     El experimento limpio —dos builds que difieran SÓLO en la existencia de las')
-console.log('     rutas— está escrito en `s4-rutas-de-demo.ts`. Es una corrida, no un sprint.')
-console.log('     Y ni ése cierra la predicción del mapa: quedan cinco rutas.')
+const extraDeV3 = conjuntoInicial('/v3').filter(
+  (f) => inicialHome.includes(f) && !conjuntoInicial('/v3/componentes').includes(f),
+)
+console.log(`  /v3 hereda ${extraDeV3.length} archivo(s) más, y la causa está nombrada: monta el preloader`)
+console.log('  (SITIO-S8), que `/` también monta — por eso el chunk es compartido y cuenta como heredado:')
+for (const f of extraDeV3) console.log(`    ${f}  ${kib(pesar([f]).crudo)} crudo · ${kib(pesar([f]).gzip)} gzip`)
+afirmar(
+  deV3 !== undefined && extraDeV3.length > 0 && deV3.kib > (deLasOtras[0]?.kib ?? 0),
+  '  y la diferencia está pesada: no es una cifra sin causa',
+  `+${((deV3?.kib ?? 0) - (deLasOtras[0]?.kib ?? 0)).toFixed(1)} KiB en ${extraDeV3.length} archivo(s)`,
+)
 
 /** Se publica, no se afirma: el heredado es del chrome viejo (regla 13). */
 afirmar(

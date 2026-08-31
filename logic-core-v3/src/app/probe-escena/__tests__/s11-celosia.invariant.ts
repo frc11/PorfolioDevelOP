@@ -20,15 +20,15 @@
  */
 import * as THREE from 'three'
 
-import { celosiaCoverage, celosiaLayers, celosiaTransmittance } from '../_components/celosiaGeometry'
+import { celosiaCoverage, celosiaLayers, celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
 import {
   CELOSIA_ANCHOR,
   CELOSIA_PATCHED_CHUNK,
   CELOSIA_SOURCE,
   createCelosiaUniforms,
   writeCelosiaLayers,
-} from '../_components/celosiaShader'
-import { CELOSIA_BAR } from '../_components/probeCelosia'
+} from '@/app/v3/_lib/escena/celosiaShader'
+import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
 import {
   MOIRE_COARSE_CELLS,
   MOIRE_DRIFT_PERIOD_S,
@@ -41,7 +41,7 @@ import {
   MOIRE_NEAR_RADIUS,
   MOIRE_NEAR_TOP,
   fineCells,
-} from '../_components/probeMoire'
+} from '@/app/v3/_lib/escena/probeMoire'
 import { FLOOR_Y, check, report, section } from './harness'
 import { sunDirectionAt } from './shading'
 

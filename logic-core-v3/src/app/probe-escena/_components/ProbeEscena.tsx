@@ -7,7 +7,7 @@ import { useReducedMotion } from '@/lib/use-reduced-motion'
 
 import { createChoreoEditor } from './choreographyEditor'
 import { ProbeControls } from './ProbeControls'
-import { FOG_COLOR } from './probeAtmosphere'
+import { FOG_COLOR } from '@/app/v3/_lib/escena/probeAtmosphere'
 import {
   PROBE_DEFAULTS,
   PROBE_RIG_DEFAULTS,
@@ -17,7 +17,7 @@ import {
   type ProbeParams,
   type ProbeRig,
   type ProbeStats,
-} from './probeStore'
+} from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * Raíz del probe. Dueña de los TRES stores, del track editable (S5) y de lo que
@@ -39,7 +39,7 @@ import {
  * escena en su propio chunk, que es lo que el reporte tiene que medir.
  */
 
-const ProbeStage = dynamic(() => import('./ProbeStage'), { ssr: false })
+const ProbeStage = dynamic(() => import('@/app/v3/_lib/escena/ProbeStage'), { ssr: false })
 
 /**
  * EL PRELOADER DEL HOME, CORRIENDO SOBRE ESTA ESCENA — solo desarrollo.

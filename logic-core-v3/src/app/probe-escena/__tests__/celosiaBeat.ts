@@ -1,7 +1,7 @@
-import { celosiaCrossings, celosiaLayers, celosiaTransmittance } from '../_components/celosiaGeometry'
-import { CELOSIA_BAR, celosiaSkyFactor } from '../_components/probeCelosia'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
-import { PAPER_COLOR } from '../_components/probeScene'
+import { celosiaCrossings, celosiaLayers, celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
+import { PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 
 import { TAN_HALF_V, cameraAt, emptyPose, type Vec3 } from './harness'
 import { rayFloor, track } from './frameProbe'

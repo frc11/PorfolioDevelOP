@@ -16,7 +16,7 @@ import {
   bandEnvelope,
   createDottedGridCellData,
   createGridCellData,
-} from '../_components/moireTextures'
+} from '@/app/v3/_lib/escena/moireTextures'
 import {
   MOIRE_BASE_ALPHA,
   MOIRE_COARSE_CELLS,
@@ -35,8 +35,8 @@ import {
   fineCells,
   lineDuty,
   verticalPitch,
-} from '../_components/probeMoire'
-import { PARTICLE_R_MAX } from '../_components/probeParticles'
+} from '@/app/v3/_lib/escena/probeMoire'
+import { PARTICLE_R_MAX } from '@/app/v3/_lib/escena/probeParticles'
 import { TAN_HALF_V, check, report, section } from './harness'
 
 const PX_V = 1080

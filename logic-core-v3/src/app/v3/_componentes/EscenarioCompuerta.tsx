@@ -43,13 +43,35 @@ import { useAnchoMinimo } from '../_lib/useAnchoMinimo'
  * el primer render de cliente es idéntico al HTML servido —los dos sin
  * escenario— y el valor real entra recién en el re-render. Nunca se lee
  * `window` durante el render.
+ *
+ * ── SITIO-S8: qué cambió acá, y qué NO ─────────────────────────────────────
+ *
+ * **Una línea: a qué módulo le apunta el `import()`.** Hasta S7 pedía
+ * `./EscenarioDePrueba`, el marcador de posición que S1 escribió para demostrar
+ * que el hueco funcionaba sin depender de WebGL. Ahora pide la escena de
+ * verdad, que es lo que catorce sprints construyeron en `/probe-escena` y que
+ * SITIO-S8 mudó a `_lib/escena/`.
+ *
+ * **El mecanismo no se tocó**, y era el punto: el docblock del marcador ya lo
+ * decía —*"cuando entre la escena real, se reemplaza ESTE módulo; el resto no
+ * se toca"*—. La compuerta, el umbral, el hook, el `ssr: false` y la razón por
+ * la que no hay salto de layout ni mismatch de hidratación son los mismos.
+ *
+ * **Y el marcador de posición sigue vivo, con su trabajo.** No es código
+ * muerto: `/v3/control-estatico` lo importa de forma ESTÁTICA y es el control
+ * positivo del mecanismo —demuestra que el buscador del build encuentra un
+ * módulo cuando SÍ está en la carga inicial—. Sin él, la afirmación "la escena
+ * no está en la carga inicial de `/v3`" pasaría en verde también si el buscador
+ * estuviera ciego. Por eso la escena real lleva su propia marca
+ * (`_lib/marcaEscena.ts`) y no reusa la del marcador: las dos tienen que poder
+ * buscarse por separado en el mismo build.
  */
-const EscenarioDePrueba = dynamic(() => import('./EscenarioDePrueba'), { ssr: false })
+const EscenaDelHome = dynamic(() => import('../_lib/escena/EscenaDelHome'), { ssr: false })
 
 export function EscenarioCompuerta() {
   const arribaDelUmbral = useAnchoMinimo(CONSULTA_ESCENARIO)
 
   if (!arribaDelUmbral) return null
 
-  return <EscenarioDePrueba />
+  return <EscenaDelHome />
 }

@@ -10,8 +10,6 @@
  * y la frase prohibida a propósito— y esa exclusión se afirma acá abajo.
  */
 
-import { renderToStaticMarkup } from 'react-dom/server'
-
 import { Panel } from '../../_componentes/Panel'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
@@ -156,7 +154,7 @@ titulo('7 · Ningún <a href> lleva a la nada')
 const hrefs = S.hrefsDe(SIN)
 afirmarIgual(S.aLaNada(hrefs), [], `los ${hrefs.length} enlaces del marcado apuntan a un ancla que existe`)
 console.log(`  destinos: ${[...new Set(hrefs)].join(' · ')}`)
-console.log(`  las cuatro anclas de la ruta son ${ANCLAS_QUE_EXISTEN.join(' ')}; \`#cierre\` existe y NO se enlaza: es la sección en la que ya estás.`)
+console.log(`  ⚠️ ESTA LÍNEA DECÍA "las cuatro anclas de la ruta" y ya eran OCHO: \`ANCLAS_QUE_EXISTEN\` se deriva de la tabla desde SITIO-S7 y la cadena se quedó vieja sin que nada se quejara. Corregido en SITIO-S8, derivando también la cuenta. Las ${ANCLAS_QUE_EXISTEN.length} anclas que existen son ${ANCLAS_QUE_EXISTEN.join(' ')}; el pie enlaza ${DESTINOS_DE_LA_RUTA.length} y \`#cierre\` NO, porque es la sección en la que ya estás.`)
 controlPositivo('el detector ve un ancla que no existe', ['#no-existe'], (l: readonly string[]) => S.aLaNada(l).length === 0)
 controlPositivo('y una URL externa inventada', ['https://develop.example/contacto'], (l: readonly string[]) => S.aLaNada(l).length === 0)
 
@@ -211,13 +209,8 @@ controlPositivo('y no se pone verde sobre un marcado sin niveles', '<p class="x"
 
 afirmarIgual(S.coloresDeTextoEnFuente(FUENTE), [], 'esta sección no escribe NINGUNA clase de color de texto: el color se hereda de la superficie')
 controlPositivo('el detector ve un color pasado por className', 'className="text-tinta-media uppercase"', (t: string) => S.coloresDeTextoEnFuente(t).length === 0)
-const comidas = S.familiasComidas(SIN)
-console.log(
-  `  ⚠️ HALLAZGO FUERA DE MI CARPETA: ${comidas.length} de los ${S.nivelesVistos(SIN)} elementos de texto se quedaron ` +
-    'SIN familia. Sale de `Textos.tsx`: `EtiquetaDeSeccion` pasa `peso="medio"` y `cn()` lee `font-medio` como una ' +
-    'FAMILIA —no es un peso que twMerge conozca— así que se come `font-cuerpo`. Se publica y no se afirma: el ' +
-    `arreglo es de un componente compartido. ${comidas.join(' · ')}`,
-)
+afirmarIgual(S.familiasComidas(SIN), [], `ninguno de los ${S.nivelesVistos(SIN)} elementos de texto se queda SIN familia. ⚠️ Esto ERA un hallazgo publicado y no afirmado: \`EtiquetaDeSeccion\` pasa \`peso="medio"\` y \`cn()\` leía \`font-medio\` como una FAMILIA, así que se comía \`font-cuerpo\`. SITIO-S7 lo arregló en la raíz (\`src/lib/utils.ts\`) y SITIO-S8 lo convierte en AFIRMACIÓN: lo que se publicaba ya no pasa, y si volviera, esto se pone rojo`)
+controlPositivo('el detector de familia comida no está ciego', '<p data-nivel="micro" class="text-micro leading-micro font-medio">x</p>', (h: string) => S.familiasComidas(h).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('12 · Las columnas suben ESCALONADAS — la desviación declarada de P2')
@@ -273,7 +266,12 @@ function tokenPx(nombre: string): number {
 const cajaDeLinea = (texto: string, interlineado: string): number => tokenPx(texto) * tokenPx(interlineado)
 const MICRO = cajaDeLinea('--text-micro', '--leading-micro')
 const CAMPO = 2 * tokenPx('--spacing-2') + cajaDeLinea('--text-caption', '--leading-texto')
-const COLUMNA = MICRO + tokenPx('--spacing-4') + MICRO + tokenPx('--spacing-2') + CAMPO + tokenPx('--spacing-2') + 2 * MICRO
+const ENLACE = cajaDeLinea('--text-cuerpo', '--leading-texto')
+const apilar = (n: number, caja: number): number => MICRO + tokenPx('--spacing-4') + n * caja + (n - 1) * tokenPx('--spacing-2')
+const COLUMNAS_PX = [apilar(DESTINOS_DE_LA_RUTA.length, ENLACE), apilar(PEDIDOS_DE_CONTACTO.length, cajaDeLinea('--text-caption', '--leading-texto') + MICRO), apilar(1, MICRO + tokenPx('--spacing-2') + CAMPO + tokenPx('--spacing-2') + 2 * MICRO)]
+const COLUMNA = Math.max(...COLUMNAS_PX)
+console.log(`  ⚠️ SITIO-S8 REEMPLAZA EL MODELO DE COLUMNA, no lo afloja: medía UNA sola —la de novedades— y la usaba para las tres. Con el recorrido del pie ampliado a ${DESTINOS_DE_LA_RUTA.length} enlaces (§7.24) la más alta pasó a ser la del recorrido, y el modelo viejo habría subestimado sin ponerse rojo. Las tres, derivadas de su lista: recorrido ${COLUMNAS_PX[0].toFixed(0)} · contacto ${COLUMNAS_PX[1].toFixed(0)} · novedades ${COLUMNAS_PX[2].toFixed(0)} px. EN FILA manda la más alta (${COLUMNA.toFixed(0)}); APILADAS, la suma (${COLUMNAS_PX.reduce((a, b) => a + b, 0).toFixed(0)}).`)
+controlPositivo('el alto de columna CRECE con su lista: no es un número escrito al lado', DESTINOS_DE_LA_RUTA.length, (n: number) => apilar(n + 1, ENLACE) === apilar(n, ENLACE))
 const CTA_ALTO = cajaDeLinea('--text-cuerpo', '--leading-texto') + 2 * tokenPx('--spacing-2')
 const LINEA_ALTO = cajaDeLinea('--text-caption', '--leading-texto') + tokenPx('--spacing-1') + MICRO
 const SEPARACIONES = 4 * tokenPx('--spacing-12')
@@ -284,7 +282,7 @@ afirmarIgual(ritmo.pantallas, 1, `la tabla declara \`${seccionDe('cierre').alto}
 afirmarIgual(ritmo.pantallasPinneadas, 0, 'y la sección NO va pinneada: la única pinneada del lane es Servicios')
 
 const ESCRITORIO = RELLENO + MICRO + cajaDeLinea('--text-titulo-xl', '--leading-titulo') + CTA_ALTO + COLUMNA + LINEA_ALTO + SEPARACIONES
-const MOBILE = RELLENO + MICRO + 3 * tokenPx('--text-fluido-titulo-xl') * tokenPx('--leading-titulo') + CTA_ALTO + 3 * COLUMNA + 2 * tokenPx('--grilla-canal-compacto') + LINEA_ALTO + SEPARACIONES
+const MOBILE = RELLENO + MICRO + 3 * tokenPx('--text-fluido-titulo-xl') * tokenPx('--leading-titulo') + CTA_ALTO + COLUMNAS_PX.reduce((a, b) => a + b, 0) + 2 * tokenPx('--grilla-canal-compacto') + LINEA_ALTO + SEPARACIONES
 console.log(`  alto derivado @escritorio (tres columnas en fila, titular de una línea): ${ESCRITORIO.toFixed(0)} px`)
 console.log(`  alto derivado @375 (columnas apiladas, titular de tres líneas al piso del clamp): ${MOBILE.toFixed(0)} px`)
 console.log('  ⚠️ Sale de sumar cajas de línea y tokens. NO está medido en un navegador y falta confirmarlo con ojo.')

@@ -1,5 +1,5 @@
 import { CHOREO_VARIANTS, DEFAULT_VARIANT_ID, findVariant } from './choreographyVariants'
-import { buildTrack, type ChoreoTrack } from './choreographySampler'
+import { buildTrack, type ChoreoTrack } from '@/app/v3/_lib/escena/choreographySampler'
 import {
   CHOREO_CHANNELS,
   type ChoreoChannel,
@@ -8,7 +8,7 @@ import {
   type ChoreoVariant,
   type ChoreoVariantId,
   type MutableChoreoPose,
-} from './choreographyTypes'
+} from '@/app/v3/_lib/escena/choreographyTypes'
 
 /**
  * EL TRACK EDITABLE — la coreografía viva, en memoria.

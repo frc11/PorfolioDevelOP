@@ -1,6 +1,6 @@
-import { PARTICLE_NEAR_COLOR } from '@/app/probe-escena/_components/probeParticles'
-import { PAPER_COLOR } from '@/app/probe-escena/_components/probeScene'
-import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/probe-escena/_components/probeCelosia'
+import { PARTICLE_NEAR_COLOR } from '@/app/v3/_lib/escena/probeParticles'
+import { PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
 import { shadeSurface } from '@/app/probe-escena/__tests__/shading'
 import {
   MOTION_DURATION,

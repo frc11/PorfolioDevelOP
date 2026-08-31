@@ -1,4 +1,4 @@
-import type { ChoreoSection } from './choreographyTypes'
+import type { ChoreoSection } from '@/app/v3/_lib/escena/choreographyTypes'
 import { NOTES_FRONTAL } from './choreographyNotesFrontal'
 import { NOTES_GIRO } from './choreographyNotesGiro'
 import type { KeyframeNotes } from './choreographyNotes'

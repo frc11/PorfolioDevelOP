@@ -2,7 +2,7 @@ import {
   BOKEH_R_MAX,
   BOKEH_SIZE,
   PARTICLE_SIZE,
-} from '@/app/probe-escena/_components/probeParticles'
+} from '@/app/v3/_lib/escena/probeParticles'
 
 /**
  * LAS PARTÍCULAS DEL PRELOADER — LA ESPECIE.

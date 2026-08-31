@@ -15,9 +15,9 @@ import {
   PARTICLE_SEED,
   PARTICLE_SIZE,
   buildParticleField,
-} from '@/app/probe-escena/_components/probeParticles'
-import { FLOOR_Y } from '@/app/probe-escena/_components/probeScene'
-import { PROBE_DEFAULTS } from '@/app/probe-escena/_components/probeStore'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { FLOOR_Y } from '@/app/v3/_lib/escena/probeScene'
+import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 import {
   pointSizePx,
   projectScenePoint,

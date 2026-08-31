@@ -1,6 +1,6 @@
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
-import { FOG_COLOR, FOG_FAR, FOG_NEAR } from '../_components/probeAtmosphere'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
+import { FOG_COLOR, FOG_FAR, FOG_NEAR } from '@/app/v3/_lib/escena/probeAtmosphere'
 import {
   FILL_AZIMUTH_DEG,
   FILL_ELEVATION_DEG,
@@ -15,8 +15,8 @@ import {
   RIM_HEIGHT_BASE,
   RIM_HEIGHT_TRACK,
   RIM_INTENSITY,
-} from '../_components/probeLighting'
-import { BOUNCE_COLOR, PAPER_COLOR } from '../_components/probeScene'
+} from '@/app/v3/_lib/escena/probeLighting'
+import { BOUNCE_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 
 import type { Vec3 } from './harness'
 

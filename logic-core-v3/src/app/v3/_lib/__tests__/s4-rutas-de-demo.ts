@@ -200,5 +200,12 @@ export function textoDeLaPrediccion(): string {
     '             compartido sin que las huellas lo detecten.',
     '  la cierra: el sprint que REEMPLACE al home, que es el que borra estas rutas.',
     '             No hay que construir nada: esta comprobación se activa sola.',
+    '  ⚠️ OJO   : el número de arriba está VENCIDO. Se midió el 2026-08-28, cuando el',
+    '             layout raíz arrastraba el grupo de chunks de la página del home a',
+    '             toda ruta. SITIO-S8 sacó ese arrastre y el heredado quedó ~270 KiB',
+    '             por debajo de esa base CON las cinco rutas puestas. Antes de cerrar',
+    '             la predicción hay que volver a medir la base, sin rutas de demo y',
+    '             con el layout de hoy: si no, se compara contra un mundo que ya no',
+    '             existe. Es la misma corrida de dos builds que ya estaba escrita.',
   ].join('\n')
 }

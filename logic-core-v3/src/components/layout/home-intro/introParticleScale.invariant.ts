@@ -2,7 +2,7 @@ import {
   DUST_SHELLS,
   PARTICLES_MAX,
   PARTICLE_SIZE,
-} from '@/app/probe-escena/_components/probeParticles'
+} from '@/app/v3/_lib/escena/probeParticles'
 
 import { check, report, s, section } from './introChecks'
 import { introLegibility } from './introLegibilityProbe'

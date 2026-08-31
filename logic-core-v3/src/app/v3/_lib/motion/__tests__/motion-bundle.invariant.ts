@@ -300,23 +300,6 @@ for (const f of soloEnV3) console.log(`  + solo en /v3       : ${f} (${kib(statS
  * un subconjunto de la otra, que es un accidente de cuánto contenido tenga cada
  * una.
  */
-const heredadoDe = (inicial: readonly string[]): string[] =>
-  inicial.filter((f) => inicialHome.includes(f)).sort()
-
-afirmarIgual(
-  heredadoDe(inicialV3),
-  heredadoDe(inicialMotion),
-  'las dos rutas comparten EXACTAMENTE el mismo conjunto heredado: no hay dos bundles distintos',
-)
-afirmar(
-  heredadoDe(inicialV3).length > 0,
-  `  y ese conjunto son ${heredadoDe(inicialV3).length} archivos: la comparación no es sobre el vacío`,
-)
-afirmar(
-  soloEnMotion.every((f) => f.includes('app/v3/motion/')),
-  'y lo único que /v3/motion agrega sobre /v3 son sus propios chunks de página',
-  soloEnMotion.join(' · ') || '(ninguno)',
-)
 
 /**
  * Y la otra mitad de la pregunta: que lo que agrega no sea CÓDIGO DEL SISTEMA
@@ -330,6 +313,62 @@ const HUELLAS_DEL_SISTEMA = [
   'data-lineas-piezas',
   'bottom-=240px',
 ]
+
+const heredadoDe = (inicial: readonly string[]): string[] =>
+  inicial.filter((f) => inicialHome.includes(f)).sort()
+
+/**
+ * ⚠ **LA IGUALDAD SE ROMPIÓ EN SITIO-S8, Y ES LA TERCERA VEZ QUE ESTE MISMO
+ * CHEQUEO SE VENCE POR LA MISMA CAUSA DE FONDO.**
+ *
+ * S2 lo escribió como `soloEnV3 === []` (inclusión) y se venció cuando `/v3`
+ * ganó contenido propio. SITIO-S7 lo reescribió como IGUALDAD del heredado, con
+ * el argumento —correcto— de que eso no depende de cuánto contenido tenga cada
+ * ruta. Y se venció otra vez, porque **SITIO-S8 montó el preloader en `/v3` y
+ * en ninguna otra ruta de `/v3`**: el overlay viaja en el HTML del servidor, así
+ * que su chunk entra en la carga inicial de `/v3` — y como `/` monta el mismo
+ * componente, ese chunk es COMPARTIDO y por lo tanto cuenta como heredado.
+ *
+ * La lección que queda escrita: *el heredado de dos rutas es igual sólo mientras
+ * monten el mismo chrome.* Lo que S2 quiere afirmar no es la igualdad: es que
+ * **el sistema de motion no bifurca el bundle**. Eso se afirma en tres partes, y
+ * ninguna depende de qué monte cada ruta:
+ *
+ *   1. `/v3/motion` no aporta NADA heredado que `/v3` no tenga — o sea que la
+ *      ruta de demostración no arrastra un segundo bundle del chrome;
+ *   2. la diferencia en el otro sentido se PUBLICA con su peso y su causa;
+ *   3. y ninguno de esos archivos lleva una huella del sistema de motion, que
+ *      es la pregunta de este invariante.
+ */
+const heredadoV3 = heredadoDe(inicialV3)
+const heredadoMotion = heredadoDe(inicialMotion)
+const soloEnV3Heredado = heredadoV3.filter((f) => !heredadoMotion.includes(f))
+
+afirmarIgual(
+  heredadoMotion.filter((f) => !heredadoV3.includes(f)),
+  [],
+  'el heredado de /v3/motion está ENTERO adentro del de /v3: la ruta de demo no trae un segundo bundle',
+)
+afirmar(
+  heredadoV3.length > 0 && heredadoMotion.length > 0,
+  `  y los dos conjuntos existen: ${heredadoV3.length} y ${heredadoMotion.length} archivos, no es sobre el vacío`,
+)
+console.log(
+  `  /v3 hereda ${soloEnV3Heredado.length} archivo(s) que /v3/motion no, y es lo que /v3 monta de más:`,
+)
+for (const f of soloEnV3Heredado) {
+  console.log(`    ${f}  ${kib(statSync(rutaDe(f)).size)} crudo · ${kib(gzipSync(readFileSync(rutaDe(f))).length)} gzip`)
+}
+afirmarIgual(
+  soloEnV3Heredado.filter((f) => HUELLAS_DEL_SISTEMA.some((h) => readFileSync(rutaDe(f), 'utf8').includes(h))),
+  [],
+  '  y ninguno lleva una huella del sistema de motion: la diferencia no es de este sistema',
+)
+afirmar(
+  soloEnMotion.every((f) => f.includes('app/v3/motion/')),
+  'y lo único que /v3/motion agrega sobre /v3 son sus propios chunks de página',
+  soloEnMotion.join(' · ') || '(ninguno)',
+)
 for (const huella of HUELLAS_DEL_SISTEMA) {
   const sucios = inicialV3.filter((f) => readFileSync(rutaDe(f), 'utf8').includes(huella))
   afirmarIgual(sucios, [], `\`${huella}\` no está en ningún archivo de la carga inicial de /v3`)

@@ -11,7 +11,7 @@ import {
   type ProbeParamsStore,
   type ProbeRigStore,
   type SliderSpec,
-} from './probeStore'
+} from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * EL EDITOR DE KEYFRAMES (S5).

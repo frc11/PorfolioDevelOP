@@ -98,10 +98,45 @@ afirmar(
 )
 console.log(`  rutas de demo en este build: ${demosEnElBuild.map((r) => r.ruta).join(' · ') || '(ninguna)'}`)
 
+/**
+ * ⚠️ **LA LÍNEA DE BASE DE ESTE CHEQUEO SE VENCIÓ EN SITIO-S8, Y CON ELLA SU
+ * CONTROL POSITIVO. NO SE AFLOJA NINGUNO DE LOS DOS: SE EXPLICAN.**
+ *
+ * `HEREDADO_SIN_DEMOS_KIB` son **1381,3 KiB medidos el 2026-08-28**, con CERO
+ * rutas de demo. El techo escala desde ahí, y el control positivo era: *con cero
+ * rutas, el heredado de HOY no entraría* — o sea, la prueba de que el techo no
+ * se cumple solo.
+ *
+ * SITIO-S8 sacó el barril del preloader del grafo del layout raíz y el heredado
+ * cayó a **1111,5 KiB CON las cinco rutas puestas**: 270 KiB por debajo de una
+ * base que se midió sin ninguna. El control positivo pasó a ser ciego —el
+ * predicado ya no puede fallar contra esa entrada— y eso es información, no
+ * ruido: **la base venía cargando un defecto que este sprint borró.**
+ *
+ * Qué se hace y qué NO:
+ *
+ *   · **NO se re-basea `HEREDADO_SIN_DEMOS_KIB`.** Sería inventar un número:
+ *     esa constante dice «el heredado SIN rutas de demo» y hoy no se puede
+ *     medir sin borrarlas. El experimento que lo mide está escrito en
+ *     `s4-rutas-de-demo.ts` y sigue siendo una corrida de dos builds.
+ *   · **Se declara la base VENCIDA**, con su fecha y su motivo, para que nadie
+ *     compare contra ella sin saberlo.
+ *   · **El control positivo se reemplaza por uno que SÍ puede fallar**, con la
+ *     misma forma que usa `s5-peso`: un techo de 1 KiB, que ningún heredado real
+ *     puede cumplir. Prueba lo mismo —que el predicado distingue— sin depender
+ *     de una constante que se movió.
+ */
+console.log('')
+console.log('  ⚠️ LA BASE DE ESTE TECHO ESTÁ VENCIDA — se publica, no se afirma:')
+console.log(`     ${HEREDADO_SIN_DEMOS_KIB} KiB se midieron el 2026-08-28 con CERO rutas de demo, y hoy el`)
+console.log(`     heredado es ${kib(pesoHeredado.crudo)} CON ${demosEnElBuild.length}. SITIO-S8 le sacó al layout raíz el barril del`)
+console.log('     preloader, que arrastraba el grupo de chunks de la página del home a toda ruta.')
+console.log('     La base no se re-basea acá: medirla pide un build sin las rutas de demo.')
+
 controlPositivo(
-  'el techo no se cumple solo: con cero rutas de demo, el heredado de hoy NO entra',
-  techoHeredadoKiB(0),
-  (t) => pesoHeredado.crudo / 1024 <= t,
+  'el techo no se cumple solo: con un techo de 1 KiB, el heredado de hoy NO entra',
+  1,
+  (t: number) => pesoHeredado.crudo / 1024 <= t,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

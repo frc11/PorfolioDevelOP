@@ -11,7 +11,7 @@
  *   2. El corredor que la escena vaciada le deja al efecto Star Wars.
  *   3. La amplitud y la velocidad, contra los otros cuatro recorridos.
  */
-import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../_components/choreography'
+import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { cameraAt, check, emptyPose, halfFovDeg, makeTrack, report, section, speedAt } from './harness'

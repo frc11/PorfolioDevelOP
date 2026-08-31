@@ -1,7 +1,7 @@
 import {
   PARTICLE_FAR_COLOR,
   PARTICLE_NEAR_COLOR,
-} from '@/app/probe-escena/_components/probeParticles'
+} from '@/app/v3/_lib/escena/probeParticles'
 import { shadeUnlit } from '@/app/probe-escena/__tests__/shading'
 
 import { check, report, section } from './introChecks'

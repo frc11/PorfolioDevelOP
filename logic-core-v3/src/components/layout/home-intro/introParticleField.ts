@@ -14,8 +14,8 @@ import {
   PARTICLE_R_MIN,
   buildParticleField,
   createRandom,
-} from '@/app/probe-escena/_components/probeParticles'
-import { FLOOR_Y, ORBIT_TARGET_Y } from '@/app/probe-escena/_components/probeScene'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { FLOOR_Y, ORBIT_TARGET_Y } from '@/app/v3/_lib/escena/probeScene'
 import {
   pointSizePx,
   projectScenePoint,

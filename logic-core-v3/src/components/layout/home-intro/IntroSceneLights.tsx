@@ -10,8 +10,8 @@ import {
   FILL_ELEVATION_DEG,
   KEY_AZIMUTH_DEG,
   KEY_ELEVATION_DEG,
-} from '@/app/probe-escena/_components/probeLighting'
-import { BOUNCE_COLOR, PAPER_COLOR } from '@/app/probe-escena/_components/probeScene'
+} from '@/app/v3/_lib/escena/probeLighting'
+import { BOUNCE_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 
 import { sampleInkShading } from './introRig'
 

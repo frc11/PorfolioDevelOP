@@ -26,7 +26,7 @@ import {
   MOIRE_NEAR_TOP,
   fineCells,
   lineDuty,
-} from '../_components/probeMoire'
+} from '@/app/v3/_lib/escena/probeMoire'
 import {
   TAN_HALF_V,
   cameraAt,

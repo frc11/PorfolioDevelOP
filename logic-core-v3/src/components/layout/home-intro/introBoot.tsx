@@ -10,6 +10,7 @@ import {
   isSceneHeld,
   setIntroStage,
 } from './introHandoff'
+import { CONDICION_DE_RUTA } from './introRutas'
 
 /**
  * EL GATE PRE-PAINT — quién decide si el intro corre, y cuándo.
@@ -32,8 +33,12 @@ import {
  * script: **aquel bloqueaba el scroll; este solo marca un atributo.**
  *
  * Los cuatro gates:
- *   · `location.pathname === '/'` — hard-load directo al home. Un client-nav al
- *     home nunca lo dispara: esa transición ya la cubre el Shutter.
+ *   · `location.pathname` en `RUTAS_DEL_INTRO` — hard-load directo al home. Un
+ *     client-nav al home nunca lo dispara: esa transición ya la cubre el
+ *     Shutter. **SITIO-S8 pasó la ruta única a una lista** (`introRutas.ts`)
+ *     para poder montar el intro también en `/v3`, que es el home nuevo. `'/'`
+ *     sigue siendo la primera entrada y arma exactamente igual; el porqué y la
+ *     consecuencia sobre `sessionStorage` están escritos en ese archivo.
  *   · `navigator.webdriver !== true` — **el intro no corre bajo automatización.**
  *     No es un descuido: es lo que impide que una corrida headless quede
  *     esperando la secuencia entera. Corolario: este componente NO se puede
@@ -43,7 +48,7 @@ import {
  *   · sesión sin intro previo — `sessionStorage`, sobrevive al F5.
  */
 const HOME_INTRO_BOOT_JS =
-  `try{if(location.pathname==='/'` +
+  `try{if(${CONDICION_DE_RUTA}` +
   `&&navigator.webdriver!==true` +
   `&&!matchMedia('(prefers-reduced-motion: reduce)').matches` +
   `&&sessionStorage.getItem('${INTRO_SESSION_KEY}')!=='1'){` +

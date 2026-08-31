@@ -47,20 +47,37 @@ import {
  * vuelta con ella y pasa AA en las dos superficies. El instrumento publica las
  * dos razones de contraste.
  *
- * ── ⚠️ `cn()` se come clases sin decir nada — la trampa medida ────────────
+ * ── ⚠️ `cn()` se comía clases sin decir nada — ARREGLADO EN LA RAÍZ ────────
  *
- * `cn()` es `twMerge` sobre `clsx` y **no conoce los nombres del sistema v3**:
- * mete `text-<tamaño>` y `text-<color>` en el mismo grupo y descarta uno de los
- * dos, en silencio; y como `font-medio` no es un peso que twMerge reconozca, lo
- * trata como FAMILIA. De ahí salen dos reglas para este archivo:
+ * `cn()` es `twMerge` sobre `clsx` y **no conocía los nombres del sistema v3**:
+ * metía `text-<tamaño>` y `text-<color>` en el mismo grupo y descartaba uno de
+ * los dos, en silencio; y como `font-medio` no es un peso que twMerge reconozca,
+ * lo trataba como FAMILIA. **SITIO-S7 lo arregló donde corresponde**
+ * (`src/lib/utils.ts`, `extendTailwindMerge` con los catorce `--text-*` de /v3 y
+ * con los tres pesos), y `test:s7-cn` lo custodia corriendo las dos
+ * configuraciones sobre el corpus de clases del sitio vivo.
+ *
+ * De aquella trampa salían dos reglas para este archivo. **Sobrevive una sola, y
+ * no por el mismo motivo:**
  *
  *   · **ningún `text-<color>` por `className`** a un componente de texto ni a
- *     una pieza del pie. El color se hereda de la superficie —que es además lo
- *     que hace a la sección correcta con las dos— y así no compite con nada;
- *   · **`font-codigo` sólo sin `peso`**. Con `peso="medio"` la pieza perdía la
- *     familia Y el peso a la vez. Sin `peso`, el `font-normal` del componente
- *     sobrevive porque ése sí es un peso conocido, y lo único que se reemplaza
- *     es la familia, que es exactamente lo que se quiso.
+ *     una pieza del pie. Esta regla **se queda**, y ya no es un rodeo: el color
+ *     se hereda de la superficie, que es lo que hace a la sección correcta con
+ *     las dos sin declararlo dos veces. El defecto de `cn()` era una segunda
+ *     razón para lo mismo; que la primera siga en pie es lo que la sostiene;
+ *   · ~~**`font-codigo` sólo sin `peso`**~~. **Esto era el rodeo, y SITIO-S8 lo
+ *     restaura.** Con `peso="medio"` la pieza perdía la familia Y el peso a la
+ *     vez, así que se la dejó sin `peso` y sobrevivía el `font-normal` del
+ *     componente. Con el arreglo puesto, `font-medio` cae en el grupo
+ *     `font-weight` y `font-codigo` en el de familia: los dos conviven y la
+ *     `<Caption>` del marcador vuelve a pesar 500 (`--font-weight-medio`) en vez
+ *     de 400. **Un arreglo de raíz que deja los parches es código muerto que
+ *     esconde el arreglo.**
+ *
+ * ⚠️ **Lo que ese cambio deja asimétrico, y NO se tocó acá:** `Cierre.tsx` tiene
+ * la misma forma —`<Caption como="p" className="font-codigo uppercase">`— en la
+ * línea de cierre del pie, y ese archivo no es de este frente. Queda reportado:
+ * hoy el marcador de contacto pesa 500 y la línea de cierre 400.
  *
  * El invariante lo afirma sobre el marcado renderizado: cada elemento con
  * `data-nivel` conserva su utilidad de tamaño.
@@ -128,9 +145,11 @@ function ColumnaDePedido(): React.JSX.Element {
     <ul className="flex flex-col gap-[var(--spacing-2)]">
       {PEDIDOS_DE_CONTACTO.map((pedido) => (
         <li key={pedido.descripcion} className="flex flex-col">
-          {/* SIN `peso`. Ver la nota de `cn()` arriba: con `peso="medio"` esta
-              misma línea perdía la familia Y el peso, en silencio. */}
-          <Caption como="span" className="font-codigo uppercase">
+          {/* CON `peso`. Es el rodeo del defecto de `cn()` restaurado en
+              SITIO-S8: esta misma línea perdía la familia Y el peso en
+              silencio, y el arreglo de raíz de SITIO-S7 la devuelve a
+              `font-medio` + `font-codigo`. Ver la nota de `cn()` arriba. */}
+          <Caption como="span" peso="medio" className="font-codigo uppercase">
             {pedido.marcador}
           </Caption>
           <Micro como="span" className="opacity-casi uppercase">

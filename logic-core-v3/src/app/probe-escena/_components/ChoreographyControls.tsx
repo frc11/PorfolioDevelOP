@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef } from 'react'
 
-import { CHOREO_TRAMOS } from './choreography'
+import { CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import type { ChoreoEditor } from './choreographyEditor'
 import { StoreSlider } from './StoreSlider'
 import {
@@ -10,7 +10,7 @@ import {
   PROBE_RIG_SPECS,
   type ProbeRig,
   type ProbeRigStore,
-} from './probeStore'
+} from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * El simulador de la coreografía: el control de progreso, la reproducción y la

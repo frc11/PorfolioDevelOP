@@ -25,7 +25,24 @@ import { COLORES_DEL_CANVAS_DE_PRUEBA } from '../_lib/superficies'
  * Por eso es DOM y no `<canvas>`: sin `three`, sin WebGL, sin contexto de
  * render, sin listener de resize. Un `<canvas>` acá no demostraría nada más y
  * traería una superficie de fallo que este sprint no necesita.
- * Cuando entre la escena real, se reemplaza ESTE módulo. El resto no se toca.
+ *
+ * ── SITIO-S8: la escena real entró, y este módulo se quedó ─────────────────
+ *
+ * S1 escribió acá que «cuando entre la escena real, se reemplaza ESTE módulo».
+ * La escena entró —`EscenarioCompuerta` pide ahora `_lib/escena/EscenaDelHome`,
+ * y fue una línea, que era el punto— pero **este archivo NO se reemplazó, y no
+ * es olvido: pasó a ser el control positivo del MECANISMO.**
+ *
+ * `/v3/control-estatico` lo importa de forma ESTÁTICA, así que su marca
+ * (`MARCA_ESCENARIO`) TIENE que aparecer en la carga inicial de esa ruta. Eso
+ * es lo que demuestra que el buscador del build encuentra un módulo cuando sí
+ * está — sin él, «la escena no viaja en la carga inicial de /v3» pasaría en
+ * verde también si el buscador estuviera ciego. La escena real lleva su propia
+ * marca (`_lib/marcaEscena.ts`) justamente para que las dos se puedan buscar
+ * por separado en el mismo build.
+ *
+ * Se borra el día que se borre `/v3/control-estatico`, y ese día su reemplazo
+ * es el control con build aislado que esa ruta ya deja escrito.
  *
  * ── Sin animación ──────────────────────────────────────────────────────────
  *

@@ -1,8 +1,8 @@
 import {
   PARTICLE_FAR_COLOR,
   PARTICLE_NEAR_COLOR,
-} from '@/app/probe-escena/_components/probeParticles'
-import { BOKEH_COLOR } from '@/app/probe-escena/_components/probeScene'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { BOKEH_COLOR } from '@/app/v3/_lib/escena/probeScene'
 
 import {
   hexToSrgb,

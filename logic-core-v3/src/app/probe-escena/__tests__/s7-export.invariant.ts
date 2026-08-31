@@ -22,7 +22,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-import { CHOREO_KEYFRAMES } from '../_components/choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import { VARIANT_DEFINITIVA } from '../_components/choreographyVariants'
 import { buildKeyframesSource } from '../_components/choreographyExport'
 import { createChoreoEditor } from '../_components/choreographyEditor'
@@ -37,7 +37,7 @@ section('El export devuelve el archivo')
   const emitted = buildKeyframesSource(editor.keyframes, VARIANT_DEFINITIVA)
 
   const source = readFileSync(
-    join(process.cwd(), 'src/app/probe-escena/_components/choreography.ts'),
+    join(process.cwd(), 'src/app/v3/_lib/escena/choreography.ts'),
     'utf8'
   )
   const start = source.indexOf('/**\n * El recorrido.')

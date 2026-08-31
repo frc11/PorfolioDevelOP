@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28). Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -22,7 +22,7 @@
 
 ## 1 · El preloader
 
-**No está construido. Se construye en un sprint posterior.** Acá queda registrado con precisión para que ese sprint no tenga que inventar nada.
+**Construido y montado en `/v3` desde SITIO-S8** (`_intro/IntroDelHome.tsx`, import ESTÁTICO desde `page.tsx`: el overlay tiene que viajar en el HTML del servidor porque quien decide si la secuencia corre es el `<script>` pre-paint del layout raíz, que no puede esperar a un chunk). Lo que sigue es la especificación con la que se construyó — se lee para verificar, no para inventar. Lo que el montaje volvió a medir está en §1.4 y §7.11.
 
 ### 1.1 · La secuencia acordada
 
@@ -56,7 +56,7 @@
 
 **No hace falta ningún relevo, y ésa es la decisión.** Las del intro **bajan antes** de que se vaya el blanco: esa bajada es la tapadera. Las que quedan flotando son las de la escena, que ya estaban ahí. Es el mismo truco que S8d usó con el cruce de contraste — no se resuelve la continuidad, se esconde el corte.
 
-**El requisito que lo sostiene es uno solo, y se mide:** en ningún instante pueden ser legibles dos poblaciones distintas. Medido con el umbral de contraste de WCAG que el repo ya usa para el cruce de tinta (1,10): la última del intro deja de ser legible en **4,166 s** y la primera de la escena a los **4,278 s** — **112,4 ms de margen** (eran 110,4 con el reparto de S13; S14 lo agrandó al ralear el campo). Y la escena se vuelve legible solo **28,3 ms** después de que el velo arranca, así que la salida **no podía derramarse** adentro de esa ventana: tenía que cerrar antes.
+**El requisito que lo sostiene es uno solo, y se mide:** en ningún instante pueden ser legibles dos poblaciones distintas. Medido con el umbral de contraste de WCAG que el repo ya usa para el cruce de tinta (1,10): la última del intro deja de ser legible en **4,166 s** y la primera de la escena a los **4,275 s** — **109,3 ms de margen** (eran 110,4 con el reparto de S13; S14 lo agrandó al ralear el campo hasta 112,4, y SITIO-S8 lo remidió con la ESCENA REAL detrás: −3,1 ms, porque la línea de base construía a mano la primera mota de la escena con un color crudo sobre un papel calculado y la de verdad cruza antes). Y la escena se vuelve legible solo **25,2 ms** después de que el velo arranca, así que la salida **no podía derramarse** adentro de esa ventana: tenía que cerrar antes.
 
 **La especie se proyecta. El TAMAÑO, no (S14).** El campo del intro **es** el de la escena —mismo generador, mismos radios, mismo sesgo, mismos colores, mismo material— proyectado por la cámara de la pose inicial. Lo propio son la semilla, la escala y la densidad, y **las tres se comprueban**: con la misma semilla las motas caerían desde exactamente los lugares donde las de la escena vuelven a estar, y eso no se lee como dos poblaciones sino como una que se teletransportó.
 
@@ -305,35 +305,37 @@ Es una condición, no un detalle: un menú que se mueve sin regla es un menú qu
 
 ## 6 · Dónde vive hoy cada decisión
 
-Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin un solo link entrante. **El home no se tocó.**
+**Vive en dos lugares desde SITIO-S8, y la partición no es de archivos sino de naturaleza.** La ESCENA —lo que el home renderiza— vive en `src/app/v3/_lib/escena/`; el PANEL DE CALIBRACIÓN —lo que sólo sirve para calibrarla— se quedó en `src/app/probe-escena/_components/`, junto con sus invariantes en `src/app/probe-escena/__tests__/`. `/probe-escena` sigue siendo una ruta interna con `noindex` y sin un solo link entrante, y tiene fecha de baja. En las filas de abajo `escena/` = `src/app/v3/_lib/escena/` y `_components/` = `src/app/probe-escena/_components/`.
+
+**El home vivo se tocó una sola vez y está declarado:** `src/app/layout.tsx` le pide el gate pre-paint al módulo real (`home-intro/introBoot`) y no al barril, que vivía en el grupo de chunks de la página del home y arrastraba 71,4 KiB gzip a toda ruta. `s8-diferido` afirma que la desviación es exactamente esa.
 
 | Decisión | Archivo |
 |---|---|
-| **El recorrido definitivo** y el arco de luz | `src/app/probe-escena/_components/choreography.ts` |
+| **El recorrido definitivo** y el arco de luz | `escena/choreography.ts`. Lo sirve al home `escena/pistaDelHome.ts`, que construye la pista con `buildTrack` sobre `CHOREO_KEYFRAMES` **sin una segunda fuente del recorrido** — el editor no se mudó, así que los catorce miembros del panel tiran a propósito |
 | Los comentarios de cada keyframe (se editan **ahí**, no en el array) | `choreographyNotes.ts` |
 | El recorrido calibrado a mano, conservado como referencia | `variantCalibrada.ts` + `variantCalibradaNotes.ts` (+ `choreographyNotesFrontal.ts` y `choreographyNotesGiro.ts`) |
 | Las tres propuestas de S7 | `choreographyVariants.ts`, `variantIntima.ts`, `variantArquitectonica.ts`, `variantDramatica.ts` |
 | Los comentarios de las propuestas | `variantNotes.ts` |
 | Dónde cae el logo en pantalla — lo que el preloader lee | `src/lib/scene-framing.ts` |
-| El rig de tres puntos y cómo se apaga cada luz | `probeLighting.ts` |
-| El sol — que es la luz principal, y **solo una dirección** | `LIGHT_ARC` (en `choreography.ts`) y `lightRig.ts`. ~~`probeSun.ts`, `SunBody.tsx`~~ **borrados en S11** |
-| Niebla, shadow map y oclusión de contacto | `probeAtmosphere.ts` |
-| **La envolvente de rendijas**: las dos capas, el desajuste y el batido | `probeMoire.ts` + `moireTextures.ts` (los generadores) + `MoireScreen.tsx` |
+| El rig de tres puntos y cómo se apaga cada luz | `escena/probeLighting.ts` |
+| El sol — que es la luz principal, y **solo una dirección** | `LIGHT_ARC` (en `escena/choreography.ts`) y `escena/lightRig.ts`. ~~`probeSun.ts`, `SunBody.tsx`~~ **borrados en S11** |
+| Niebla, shadow map y oclusión de contacto | `escena/probeAtmosphere.ts` (+ `escena/ContactOcclusion.tsx`) |
+| **La envolvente de rendijas**: las dos capas, el desajuste y el batido | `escena/probeMoire.ts` + `escena/moireTextures.ts` (los generadores) + `escena/MoireScreen.tsx` |
 | ~~El washout del sol~~ | ~~`SunWashout.tsx`~~ — **borrado en S11 con el cuerpo** |
-| **La celosía**: qué luces tapa, la barra y el factor de cielo | `probeCelosia.ts` |
-| La geometría de la proyección — y el gemelo en TypeScript del shader | `celosiaGeometry.ts` |
-| El GLSL del gobo y el parche del chunk de three | `celosiaShader.ts` |
+| **La celosía**: qué luces tapa, la barra y el factor de cielo | `escena/probeCelosia.ts` — de acá sale `celosiaSkyFactor`, que el rig del intro lee para terminar en el mismo ambiente con el que la escena empieza (§7.11) |
+| La geometría de la proyección — y el gemelo en TypeScript del shader | `escena/celosiaGeometry.ts` (+ `escena/celosiaPenumbra.ts`, el ancho de borde por fragmento de S12) |
+| El GLSL del gobo y el parche del chunk de three | `escena/celosiaShader.ts` |
 | ~~El espacio: planos suspendidos, retícula aérea, pilares~~ | ~~`probeArchitecture.ts`~~ — **borrado en S10**, con `LogoFragments.tsx` |
-| Las marcas de replanteo del piso | `floorMarks.ts` |
-| La física: inercia, mouse, vira, deriva del aire | `choreographyPhysics.ts` |
+| Las marcas de replanteo del piso | `escena/floorMarks.ts` (+ `escena/StudioFloor.tsx`, que las dibuja) |
+| La física: inercia, mouse, vira, deriva del aire | `escena/choreographyPhysics.ts` |
 | El editor de keyframes y el export | `choreographyEditor.ts`, `choreographyExport.ts` |
-| El intro que hoy corre en el home | `src/components/layout/HomeIntro.tsx` |
-| Las partículas: los dos campos, las conchas y el recorte de `gl_PointSize` | `probeParticles.ts`, `DepthParticles.tsx`, `BokehParticles.tsx` |
+| El intro — el mismo componente en las dos casas | `src/components/layout/HomeIntro.tsx`, montado en el home vivo y, desde SITIO-S8, en `/v3` por `src/app/v3/_intro/IntroDelHome.tsx` (import ESTÁTICO: el overlay viaja en el HTML del servidor). El gate pre-paint del layout raíz pide `home-intro/introBoot`, no el barril — el porqué está en `carga-diferida/contrato.ts` |
+| Las partículas: los dos campos, las conchas y el recorte de `gl_PointSize` | `escena/probeParticles.ts`, `escena/DepthParticles.tsx`, `escena/BokehParticles.tsx` (+ `escena/particleTextures.ts`) |
 | **Las partículas del PRELOADER**: la especie, el campo proyectado y su ritmo | `home-intro/introParticles.ts`, `introParticleField.ts`, `introParticleTiming.ts`, `IntroParticleCanvas.tsx`, `introParticleSprites.ts` |
 | El COLOR de una mota del preloader — la rampa y su cuantización para el teñido | `home-intro/introParticleTint.ts` |
 | La cámara de la escena sin three, y la proyección de un punto cualquiera | `src/lib/scene-camera.ts` |
 | El rig del intro — y el ambiente en el que TERMINA, que es el de la escena | `home-intro/introRig.ts` |
-| Las comprobaciones estáticas | `src/app/probe-escena/__tests__/*.invariant.ts` |
+| Las comprobaciones estáticas — en dos lugares desde SITIO-S8 | `src/app/probe-escena/__tests__/*.invariant.ts` (S7 a S12: la escena calibrada) + `src/app/v3/_lib/escena/__tests__/` (`s8-escena`, `s8-tinta`, `s8-tres`: la escena MONTADA) + `src/app/v3/_intro/__tests__/` (`s8-intro`, `s8-relevo`: el intro con la sala detrás). Los instrumentos compartidos —`harness.ts`, `frameProbe.ts`, `shading.ts`— se quedaron del lado del probe y los de `/v3` los importan de ahí |
 | El instrumento de oclusión y cono libre — con su lista de ocluyentes **vacía** | `__tests__/occlusion.ts` |
 | El instrumento de tinta, shading y muestreo de cuadro (S10, ampliado en S11 con el gobo y el cielo) | `__tests__/logoInk.ts`, `shading.ts`, `frameProbe.ts` |
 
@@ -359,7 +361,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 |---|---|
 | **La compuerta de cierre** — `package.json`, `tsc --noEmit` y todos los agregados, en orden y **sin `&&`** | `npm run verificar` |
 | **Los checks de frontera** — miden el momento del sprint. **Van ANTES del commit** y no entran en el gate (ver §3.12) | `npm run test:frontera` |
-| Un agregado suelto | `npm run test:s1` · `test:s2` · `test:s3` · `test:s4` · `test:s5` · `test:s6` · `test:s7` |
+| Un agregado suelto | `npm run test:s1` · `test:s2` · `test:s3` · `test:s4` · `test:s5` · `test:s6` · `test:s7` · `test:s8`. **La lista de arriba es prosa: la suite real se DERIVA de `package.json` (`s4-suites.ts`)**, así que un `test:sN-loquesea` nuevo entra al agregado por existir y esta fila puede quedar corta sin que nada falle — se lee, no se afirma |
 | Un invariante suelto | `npm run test:<suite>-<nombre>` |
 | **Regenerar el pedido de contenido** tras cambiar un `PEDIDO` | `npm run test:s7-pedido -- --escribir` |
 
@@ -368,7 +370,7 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 > ⚠️ **EL BUILD NECESITA LAS DOS VARIABLES. NINGUNA ALCANZA SOLA.**
 >
 > ```powershell
-> $env:CIRCLE_NODE_TOTAL = "3"; $env:NODE_OPTIONS = "--max-old-space-size=8192"; npm run build
+> $env:CIRCLE_NODE_TOTAL = "2"; $env:NODE_OPTIONS = "--max-old-space-size=6144"; npm run build
 > ```
 >
 > **Y no correr NADA al lado**: el build tarda entre 6 y 9 minutos, y con otro proceso encima se cae por memoria.
@@ -381,10 +383,44 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 >
 > | variable | qué arregla |
 > |---|---|
-> | `CIRCLE_NODE_TOTAL=3` | **que los workers no se pisen.** Son 2 en vez de 15, así que la RAM de la máquina alcanza para todos. |
-> | `NODE_OPTIONS=--max-old-space-size=8192` | **que cada worker no reviente por su cuenta.** El defecto de Node ronda los 2 GB y el grafo de este proyecto no entra. |
+> | `CIRCLE_NODE_TOTAL=2` | **que los workers no se pisen.** Es 1 en vez de 15, así que la RAM de la máquina alcanza. |
+> | `NODE_OPTIONS=--max-old-space-size=6144` | **que cada worker no reviente por su cuenta.** El defecto de Node ronda los 2 GB y el grafo de este proyecto no entra. ⚠️ **SITIO-S8 lo bajó de 8192 a 6144 y de `CIRCLE_NODE_TOTAL=3` a `2`**: con tres procesos autorizados a 8 GB en una máquina de 16 la sesión se congelaba por paginación. Con 6144 el build cierra. |
 >
 > ⚠️ El párrafo anterior tenía razón en el diagnóstico —el problema es el reparto— y se equivocó al concluir que el heap sobraba. Lo que había pasado es lo que su propio cierre declaraba como no aislado: **la corrida buena llevaba las dos, y se le atribuyó el mérito a una sola.** La regla de método que queda: *cuando dos cambios entran juntos y uno funciona, no se sabe cuál fue; escribir "es éste" es una hipótesis, y hay que decirlo así hasta aislarlo.* Acá el aislamiento se hizo al revés —sacando una— y dio la respuesta.
+>
+> ### La tercera corrección: `0xC0000142` NO es OOM del heap (SITIO-S8, 2026-08-31)
+>
+> Este bloque venía afinando el reparto de memoria de los workers, y con razón. **SITIO-S8 se topó con un modo de falla distinto que se le parece y no lo es**, y conviene distinguirlos antes de volver a mover una variable.
+>
+> **La firma.** El compilado termina limpio —`✓ Compiled successfully in 2.1min`, 104 chunks escritos— y el build muere después, en `Collecting page data using 1 worker`, con:
+>
+> ```
+> ⨯ Next.js build worker exited with code: 3221225794 and signal: null
+> ```
+>
+> `3221225794` es `0xC0000142` = **`STATUS_DLL_INIT_FAILED`** de Windows. **No es `FATAL ERROR: … out of memory` de V8**, que es lo que tira un heap chico: es el sistema operativo que no pudo inicializar las DLL del proceso worker. Subir `--max-old-space-size` no lo arregla, y bajarlo tampoco: el worker no llega a correr.
+>
+> **La causa, medida en el momento de la falla:**
+>
+> | | |
+> |---|---:|
+> | RAM total | 13,9 GB |
+> | **RAM libre** | **0,5 GB** |
+> | memoria comprometida | **48,4 GB de 55,9** |
+>
+> Con medio giga libre el sistema no tiene con qué mapear las DLL de un proceso nuevo. **Es el mismo problema de fondo que este bloque ya documenta —el reparto de memoria de la máquina, no el heap de un proceso— con otra cara y otro mensaje.**
+>
+> ⚠️ **La causa probable que quedó sin cerrar, y hay que mirarla primero:** había **34 procesos `node.exe` colgados de dos días antes**, ninguno de la sesión que corría el build. Entre todos sumaban 21 MB de working set —o sea que estaban paginados— pero **cada uno conserva su reserva de espacio de direcciones y su parte de la memoria comprometida**, que es justamente el recurso que se agotó. No se los mató: no eran de esta sesión y podían ser de otra corriendo sobre el mismo checkout. Quien retome esto **empieza por ahí**: `Get-Process node | Where StartTime -lt (Get-Date).Date` y ver si son zombies.
+>
+> **Qué hacer cuando aparece, en orden.** (1) Mirar si es `0xC0000142` o un `FATAL ERROR` de V8 — **son dos problemas distintos y la variable que arregla uno no toca al otro**. (2) Si es `0xC0000142`: medir la RAM libre y los procesos colgados **antes** de tocar `NODE_OPTIONS`. (3) Reintentar: la corrida que cerró en SITIO-S8 fue el segundo intento con los mismos valores, sin cambiar nada más que el momento.
+>
+> **Lo que SITIO-S8 corrió, y cerró:**
+>
+> ```powershell
+> $env:CIRCLE_NODE_TOTAL = "2"; $env:NODE_OPTIONS = "--max-old-space-size=6144"; npm run build
+> ```
+>
+> Con `4096` murió en la misma etapa, y con `6144` murió el primer intento y terminó el segundo. **Eso es lo que dice que el heap no era la variable**: el mismo valor da los dos resultados.
 >
 > ### El diagnóstico original, que sigue valiendo
 >
@@ -396,16 +432,16 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 >
 > ```bash
 > # bash
-> NODE_OPTIONS=--max-old-space-size=8192 CIRCLE_NODE_TOTAL=3 npm run build
+> NODE_OPTIONS=--max-old-space-size=6144 CIRCLE_NODE_TOTAL=2 npm run build
 > ```
 > ```powershell
 > # PowerShell
-> $env:CIRCLE_NODE_TOTAL = "3"; $env:NODE_OPTIONS = "--max-old-space-size=8192"; npm run build
+> $env:CIRCLE_NODE_TOTAL = "2"; $env:NODE_OPTIONS = "--max-old-space-size=6144"; npm run build
 > ```
 >
-> **Por qué `CIRCLE_NODE_TOTAL`, que no tiene nada que ver con CircleCI:** es la variable que Next lee para el defecto de `experimental.cpus` —`node_modules/next/dist/server/config-shared.js:202`, `Math.max(1, (Number(process.env.CIRCLE_NODE_TOTAL) || os.cpus().length) - 1)`—. Con `3` quedan **2 workers**. Es la única forma de acotarlos **sin tocar `next.config`**, que está fuera del scope de estos sprints.
+> **Por qué `CIRCLE_NODE_TOTAL`, que no tiene nada que ver con CircleCI:** es la variable que Next lee para el defecto de `experimental.cpus` —`node_modules/next/dist/server/config-shared.js:202`, `Math.max(1, (Number(process.env.CIRCLE_NODE_TOTAL) || os.cpus().length) - 1)`—. Con `3` quedan **2 workers**; con `2`, **uno solo**, que es lo que SITIO-S8 corrió. Es la única forma de acotarlos **sin tocar `next.config`**, que está fuera del scope de estos sprints.
 >
-> ✅ **Lo que estaba sin aislar, aislado (SITIO-S7).** Este bloque cerraba pidiendo exactamente la prueba que faltaba —*"una corrida con `CIRCLE_NODE_TOTAL=3` y sin `NODE_OPTIONS`"*— y esa corrida se hizo: **muere**. O sea que el heap de 8192 no es inocuo ni estorba: **es necesario**. La tabla de arriba es el resultado.
+> ✅ **Lo que estaba sin aislar, aislado (SITIO-S7).** Este bloque cerraba pidiendo exactamente la prueba que faltaba —*"una corrida con `CIRCLE_NODE_TOTAL=3` y sin `NODE_OPTIONS`"*— y esa corrida se hizo: **muere**. O sea que el heap no es inocuo ni estorba: **es necesario**. La tabla de arriba es el resultado. ⚠️ Lo que SITIO-S8 agregó es que **el tamaño del heap no es el único modo de falla** — ver la tercera corrección, arriba.
 
 ---
 
@@ -414,7 +450,27 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 Está acá para que nadie lo dé por resuelto.
 
 1. ~~**Cuál de los cuatro recorridos es EL recorrido.**~~ **DECIDIDO en S9** — ver §2.2. Lo que queda abierto de esa decisión es una sola perilla, y es de composición: **la elevación de la pose de entrada quedó en 18,6°** contra los 31,0° del recorrido calibrado, y eso es lo que el preloader usa para rotar el logo al aterrizar. Subir la altura del hero de 6,40 a ~7,50 la lleva a 23,2° y cuesta 1,1 de caída en el tramo siguiente. **Se juzga por grabación.**
-2. **Cómo se ata el recorrido al scroll real.** Hoy el progreso es un slider del probe. Falta el mapeo a las ocho pantallas del layout, con su comportamiento en mobile.
+2. ⚠️ **CÓMO SE ATA EL RECORRIDO AL SCROLL REAL — sigue abierto, pero ya NO es una pregunta en blanco: SITIO-S8 lo midió y la parada decidió su forma.**
+
+    **Lo que dejó de valer del enunciado viejo:** *"hoy el progreso es un slider del probe"*. Desde SITIO-S8 el progreso **sale del scroll de la página** —`_lib/escena/recorrido.ts`, con `progresoDelScroll` pura y un listener passive coalescido por `requestAnimationFrame`— y `/probe-escena` conserva su slider, que es lo suyo.
+
+    **La forma decidida: POR ANCLAJE, no por estiramiento.** Los seis keyframes llevan el nombre de la sección para la que se eligieron; se **anclan a esa sección** y se interpola entre ellos. No se decidió todavía cómo se ancla exactamente, y **no se construyó**: lo que hay montado es el provisional de abajo, declarado como tal en el código y en la salida de los dos invariantes.
+
+    **Por qué el provisional no alcanza, con las tres desalineaciones medidas** (`npm run test:s8-escena` §4):
+
+    | | |
+    |---|---|
+    | escala | la coreografía declara **8 pantallas** (`CHOREO_SCREENS`, tramos en múltiplos exactos de 1/8) y la tabla del home suma **14**. La recta corre estirada **×1,750** de documento (**×1,625** de scroll: 13 pantallas efectivas). |
+    | nombres | el tramo **`demos` no es ninguna sección**, y **servicios, tu-panel y por-que-develop no son ningún tramo**. |
+    | forma | §2.4 pide que la escena **se apague** después del cierre, entren servicios y tu-panel, y **vuelva** para el diferencial. **Un progreso monótono de 0 a 1 no tiene esa forma**, y ése es el defecto de fondo: no es una cuestión de escala, es que la coreografía no tiene la pieza que la dirección describe. |
+
+    El estiramiento es la consecuencia directa de la primera fila, y se ve en la tercera: con la recta, **Números cae adentro del tramo de Quiénes somos**, y tu-panel, por-que-develop y cierre caen los tres adentro del tramo de cierre.
+
+    **§2.4 —apagar y volver— entra en el mismo sprint que este mapeo.** No son dos trabajos: el segundo es la razón por la que el primero no se puede resolver con una función monótona.
+
+    **El provisional que quedó montado**, para que no se lea como una decisión: `progreso = scrollY / (alto del documento − alto de la ventana)`. Es lo más conservador que se podía defender —es literalmente lo que el contrato pide, sin agregar una decisión encima— y no deforma ningún tramo.
+
+    ⚠️ **Y arrastra a §7.29:** con el provisional, el diferencial llena el cuadro en p=0,923, donde la tinta no pasa AA. La parada decidió resolverlo **acá**, moviendo la sección, y no allá.
 3. **La cola del cierre.** *"Después las letras se van, la cámara se mueve a otros ángulos y termina en el CTA final"* no tiene poses compuestas. El track termina en el cierre.
 4. **Cómo entra y sale la escena** cuando se apaga después del cierre y vuelve para el diferencial: si es un fundido, un corte, o la propia luz que se va.
 5. **Mobile.** No se midió un solo teléfono ni un solo frame time. Toda la contabilidad publicada es estática. Lo primero que se apaga si no rinde, en orden: la capa gruesa de la envolvente, `BOKEH_COUNT`, el slider de partículas, `SHADOW_RADIUS`, el washout.
@@ -424,10 +480,14 @@ Está acá para que nadie lo dé por resuelto.
 9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto son DOS perillas**, las dos de calibrar mirando: `CELOSIA_BAR` (0,29), que sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido; y desde S12 el **radio angular del sol** (0,266°, rango 0 … 1,5°), que ablanda el borde a costa de devolver parte de esos 29,6 puntos. Medido: de 0 a 0,5° no se pierde nada; desde 0,75° empieza a caer la portadora del piso. En **0** las dos apagan lo suyo y devuelven el estado anterior, que es el control.
 10. **Si el recorrido debería dar dos vueltas.** El argumento que lo descartaba murió con los planos (ver §2.2). Es decisión de recorrido, no de escena.
 11. ~~**EL ESCALÓN DE EXPOSICIÓN.**~~ **RESUELTO en S13** — `home-intro/introRig.ts`. El intro termina en `HEMI_INTENSITY × celosiaSkyFactor(CELOSIA_BAR)`, o sea **en el mismo ambiente con el que la escena empieza**: una constante compartida, leída de la misma función, sin un solo literal. `introRig.invariant.ts` custodia la igualdad, y de paso verifica que el nivel del arco en p=0 siga valiendo 1 — que es lo único por lo que la key y el relleno no tenían escalón.
-    ⚠️ **Y §7.11 sobreestimaba el escalón, con una confusión de superficie que conviene no repetir.** Los **−18,2 puntos en el papel en sombra** y los **−15 en el valor medio del cuadro** son sobre el piso y sobre el cuadro **de la escena**, y el intro no renderiza ninguna de las dos cosas: no tiene papel, y su plano de sombra es un `ShadowMaterial` —oscurece lo que hay detrás, no recibe luz—. La ÚNICA superficie iluminada del intro es el logo, y ahí la tinta `#0F0F0F` queda tan abajo que el toe del tone map la aplasta: **0,39 puntos sRGB de 255** en la cara frontal (1,68 → 1,28), 0,33 en el canto superior, 0,25 en el inferior. Medido en `introRig.invariant.ts`, con el mismo instrumento que reproduce los 249,4 / 236,9 / 248,3 / 218,7 de S11 como control positivo.
+    ⚠️ **Y §7.11 sobreestimaba el escalón, con una confusión de superficie que conviene no repetir.** Los **−18,2 puntos en el papel en sombra** y los **−15 en el valor medio del cuadro** son sobre el piso y sobre el cuadro **de la escena**, y el intro no renderiza ninguna de las dos cosas: no tiene papel, y su plano de sombra es un `ShadowMaterial` —oscurece lo que hay detrás, no recibe luz—. La única superficie iluminada del intro es el logo, y ahí la tinta `#0F0F0F` queda tan abajo que el toe del tone map la aplasta: **0,39 puntos sRGB de 255** en la cara frontal (1,68 → 1,28), 0,33 en el canto superior, 0,25 en el inferior.
+
+    ⚠️ **Y esa corrección valía mientras detrás del velo no hubiera nada. SITIO-S8 puso la sala, y el sujeto volvió a cambiar (tercera vez).** Con la escena montada la superficie ya no es la tinta sola sino el CUADRO, y ahí el escalón vale **8,83 puntos** —media 218,30 con cielo abierto contra 209,47 con la celosía—: **×22,6 los 0,39**, y aun así menor que los −15 que §7.11 declaraba, o sea que la corrección apuntaba bien pero no tanto. Medido en `s8-relevo.invariant.ts` §3, con el mismo instrumento que reproduce los 249,4 / 236,9 / 248,3 / 218,7 del papel de S11 como control positivo, y con un control que verifica que el medidor no inventa escalón donde no lo hay (mismo cielo en las dos ramas da cero). **La igualdad de ambiente que S13 construyó sigue intacta:** el escalón AL CORTE es cero por construcción —el intro termina en el mismo `celosiaSkyFactor(CELOSIA_BAR) = 0,6743` que la escena—; los 8,83 son lo que ese escalón valdría si la igualdad se rompiera. Medido en `introRig.invariant.ts`, con el mismo instrumento que reproduce los 249,4 / 236,9 / 248,3 / 218,7 de S11 como control positivo.
     **Se resolvió igual, y no por los 0,39 puntos: por la mudanza.** Traer el factor de cielo obliga a importar `probeCelosia.ts`, que arrastra cuatro módulos más —**10,6 KiB de código**— y corre una integral de hemisferio de 24.000 muestras al cargar el módulo: **1,54 ms**. Hacerlo en `introShading.ts` habría puesto todo eso en el bundle de la PRIMERA visita, que es exactamente la visita en la que el preloader corre. Sacando el rig a su propio módulo esa cadena cae en el chunk diferido de `three` y **`probeLighting.ts` sale del grafo de primera carga**: el grafo del intro pasó de 25 a **24 módulos**.
+
+    ⚠️ **LA DIFERENCIA ANOTADA ENTRE LOS DOS LOGOS NO ES LA QUE EXISTE (SITIO-S8).** `IntroSceneLights.tsx` deja escrito que al intro le falta el CONTRALUZ, «la diferencia conocida entre el logo que aterriza y el que la escena va a mostrar». En la pose de entrada esa diferencia vale **0,0000 exacto**: el rim está a 148° del azimut de cámara —o sea detrás— y `max(0, n·rim)` lo apaga sobre la cara frontal. La niebla tampoco aporta (0,0001: el logo está justo en su borde, a 20,05 de la cámara). **La que existe es LA CELOSÍA —−0,6126 puntos sRGB sobre la cara frontal—**, porque en la escena el logo recibe el patrón de las rendijas (deja pasar el 38,9 % del sol sobre la tinta) y en el intro no. Y aun así no llega a UN byte: en pantalla ni siquiera puede cambiar de valor entero, y pesada por el 5,95 % de tinta en cuadro mueve la media 0,036 puntos. Medido en `s8-relevo.invariant.ts` §4, encendiendo un parámetro por vez.
 12. **Los haces de luz visibles.** Medidos y NO construidos: la tabla de fondos aéreos y el alfa aditivo por pose está en `probeCelosia.ts`, para que la decisión sea revocable con datos. Las tres razones para no ponerlos —overdraw sobre las poses más caras, que lo aditivo se come el contraste recién ganado, y que un volumen saliendo de una celosía ES el efecto Star Wars— están en `outputs/S11-LUZ.md` §6.
-13. **DEUDA DE TAMAÑO — para un sprint de limpieza, los tres juntos.** La regla del repo es partir arriba de 300 líneas. Estos tres están arriba, **los tres crecieron con S11 y ninguno se partió ahí a propósito**: hacerlo de a uno, en el sprint que lo agrandó, es la peor forma de hacerlo.
+13. **DEUDA DE TAMAÑO — para un sprint de limpieza, los tres juntos.** La regla del repo es partir arriba de 300 líneas. **Los tres viven en `src/app/v3/_lib/escena/` desde SITIO-S8**, y eso sube la apuesta sin cambiarles una línea: la deuda dejó de estar en una ruta interna con fecha de baja y pasó a estar en lo que el home renderiza. Estos tres están arriba, **los tres crecieron con S11 y ninguno se partió ahí a propósito**: hacerlo de a uno, en el sprint que lo agrandó, es la peor forma de hacerlo.
 
     | archivo | líneas | antes de S11 | de quién es el exceso |
     |---|---:|---:|---|
@@ -435,9 +495,9 @@ Está acá para que nadie lo dé por resuelto.
     | `probeStore.ts` | **406** | 352 | heredado; S11 sumó 26, **S12 sumó 28** (la perilla del radio angular y su porqué, más la corrección de la cifra sin instrumento) |
     | `lightRig.ts` | **357** | 319 (ya cruzado por S10) | heredado; S11 sumó 26, **S12 sumó 12** (el canal del radio angular) |
 
-    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `celosiaPenumbra.ts` (162), `celosiaBeat.ts` (246), `s12-penumbra` (275) y `s12-tension` (258).
+    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `escena/celosiaPenumbra.ts` (163), `__tests__/celosiaBeat.ts` (188), `s12-penumbra` (297) y `s12-tension` (266), remedidos en SITIO-S8 sobre el disco de hoy. **La conclusión aguanta y el margen no:** `s12-penumbra` está a tres líneas del corte, y el archivo de penumbra se fue con la escena mientras las tres suites se quedaron del lado del probe.
 
-    **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos del módulo (`choreography.ts` 462, `choreographyEditor.ts` 376, `probeScene.ts` 348, `KeyframeEditor.tsx` 310) son heredados sin delta de S11 y pueden entrar al mismo sprint.
+    **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos ya **no está en un solo módulo**: SITIO-S8 los repartió. Del lado de la escena, `escena/choreography.ts` (462) y `escena/probeScene.ts` (348); del lado del panel, `_components/choreographyEditor.ts` (376) y `_components/KeyframeEditor.tsx` (310). Los cuatro son heredados sin delta de S11 y pueden entrar al mismo sprint, **pero el sprint que los tome cruza dos módulos con ciclos de vida distintos**: el panel tiene fecha de baja y partir ahí es trabajo que se tira. El orden barato es escena primero.
 
 14. ⚠️ **EL CIERRE SIGUE LEYÉNDOSE COMO SENDA PEATONAL — pendiente abierto, con el número (S12).**
 
@@ -477,7 +537,7 @@ Está acá para que nadie lo dé por resuelto.
 
     **El caso concreto que lo destapó:** S10 publica **1.008 partículas en cuadro en la pose inicial** (924 de polvo + 84 de bokeh). S13 reprodujo ese número exacto con la cámara de `harness.ts`, y con la del rig el mismo campo da **996** (913 + 83): **−1,2%**.
 
-    **NO se re-midió y NO se arregló**: es `probe-escena/`, y estaba fuera del scope de S13. Lo que este pendiente fija es qué toca el sprint que lo tome — `LOGO_W`/`LOGO_H` de `harness.ts`, y después volver a correr las once suites de arriba para ver cuáles de sus cifras publicadas se mueven.
+    **NO se re-midió y NO se arregló.** El motivo de S13 —*«es `probe-escena/` y está fuera de scope»*— **se venció con la mudanza de SITIO-S8**: el rig real es hoy `src/app/v3/_lib/escena/OrbitRig.tsx:506` y renderiza el home, mientras `harness.ts` y las once suites se quedaron en `src/app/probe-escena/__tests__/`. O sea que la discrepancia ya no es interna a una ruta de laboratorio: es entre la cámara que el home usa y la que produjo las cifras que este documento publica. Lo que el pendiente fija sigue igual — tocar `LOGO_W`/`LOGO_H` de `harness.ts:25` y volver a correr las once suites de arriba para ver cuáles de sus cifras se mueven — con una prioridad nueva, porque ahora una de las dos cámaras es la de producción.
 
 16. ⚠️ **PREDICCIÓN DEL MAPA — comprobación diferida, unificada en SITIO-S4. Se activa sola.**
 
@@ -490,7 +550,7 @@ Está acá para que nadie lo dé por resuelto.
 
     `/v3/control-estatico` **no** está en la lista: es la ruta gemela que `bundle.invariant.ts` usa como control positivo, ya estaba en la línea de base de S1, y vive mientras viva ese instrumento.
 
-    **El número.** S1 midió el heredado en **1381,3 KiB crudo · 23 archivos** (2026-08-28), sin ninguna de las cinco. Hoy, con las cinco: **1386,1 KiB · 24 archivos**. Al borrarlas todas tiene que **volver solo a 1381,3 ±2,0 KiB**, o sea recuperar **4,8 KiB**, sin tocar ninguna otra cosa. Si vuelve, el delta era el costo de existir de N rutas sea cual sea el mecanismo. Si no vuelve, el diagnóstico estaba mal y hay que buscar en un chunk compartido.
+    **El número, y su base VENCIDA (SITIO-S8).** S1 midió el heredado en **1381,3 KiB crudo · 23 archivos** (2026-08-28), sin ninguna de las cinco, y con las cinco puestas llegó a 1386,1 · 24. **SITIO-S8 le sacó al layout raíz el barril del preloader** —el gate pre-paint le pedía el módulo al barril, que vive en el grupo de chunks de la página del home— **y el heredado cayó a 1111,5 KiB CON las cinco rutas adentro: 270 KiB por debajo de una base medida sin ninguna.** No se re-basea `HEREDADO_SIN_DEMOS_KIB`: esa constante dice «el heredado SIN rutas de demo» y hoy no se puede medir sin borrarlas — sigue siendo la corrida de dos builds de `s4-rutas-de-demo.ts`. Se declara vencida con su fecha y su motivo, y el control positivo se reemplazó por uno que sí puede fallar (un techo de 1 KiB). **La predicción del mapa no se refuta con esto:** la base venía cargando un defecto que este sprint borró, y eso es información, no ruido. Si vuelve, el delta era el costo de existir de N rutas sea cual sea el mecanismo. Si no vuelve, el diagnóstico estaba mal y hay que buscar en un chunk compartido.
 
     ⚠️ **El costo por ruta NO es lineal ni constante, y las dos observaciones lo dicen:** 1,7 KiB/ruta (S2, dos rutas) contra 0,96 (S4, cinco acumuladas). Es empírica y sirve para el orden de magnitud. El mecanismo exacto **sigue sin identificarse** — S2 probó que no es la coreografía y que el manifiesto de rutas de Sentry explica sólo el 3,5 % de los bytes. Lo que cierra la pregunta no es una hipótesis: es el borrado.
 
@@ -500,11 +560,15 @@ Está acá para que nadie lo dé por resuelto.
 
     |  | heredado | archivos |
     |---|---:|---:|
-    | antes (7 rutas) | 1386,2 KiB | 24 |
-    | ahora (5 rutas) | 1387,0 KiB | 25 |
+    | antes (7 rutas, S7) | 1386,2 KiB | 24 |
+    | después del borrado (5 rutas, S7) | 1387,0 KiB | 25 |
+    | **delta del borrado** | **+0,8 KiB** | **+1** |
+    | **hoy, las mismas 5 rutas, SITIO-S8** | **1111,5 KiB** (359,9 gzip) | — |
+
+    **La última fila NO es la respuesta a la pregunta de esta tabla.** No la produjo borrar rutas: la produjo sacarle al layout raíz el barril del preloader, que arrastraba el grupo de chunks de la página del home a toda ruta. Con eso el total de `/v3` bajó de 440,7 a **377,5 KiB gzip**. La pregunta de arriba —¿borrar una ruta devuelve peso heredado?— sigue abierta y con la misma medición sin causa atribuible.
     | **delta** | **+0,8 KiB** | **+1** |
 
-    **Lo que SÍ quedó descartado, porque se midió:** que el delta venga de que `/v3` cambió de contenido. El heredado es **1387,0 KiB para las siete rutas de `/v3`**, incluidas las tres que el sprint no tocó — es del conjunto compartido, no de esta ruta. Lo afirma `s7-compuerta`.
+    **Lo que SÍ quedó descartado, porque se midió:** que el delta venga de que `/v3` cambió de contenido. El heredado es del conjunto COMPARTIDO y no de esta ruta —eso no cambia—, pero desde SITIO-S8 ya no es idéntico entre rutas: `/v3` mide **1111,5 KiB** contra **1083,5** de las otras seis, y la diferencia entera es el chunk del overlay del intro (**28,0 KiB crudo · 8,7 KiB gzip**), que cuenta como heredado porque el home vivo monta el mismo componente y comparte el archivo. O sea: **montar el intro en `/v3` cuesta 8,7 KiB gzip, compartidos con el home.** Lo afirman `s7-compuerta` y `s2-bundle`; la cuenta está en `s8-intro.invariant.ts` §6.
 
     **Lo que NO se puede descartar:** el mismo commit **borró dos rutas y compuso el home**, y componer cambia el grafo de módulos, que es de donde webpack saca su partición. Dos causas entraron juntas. Cuando eso pasa no se sabe cuál fue — es la misma trampa de §6.1, que le atribuyó a una variable el mérito de una corrida que llevaba dos.
 
@@ -517,9 +581,11 @@ Está acá para que nadie lo dé por resuelto.
     | archivo | líneas | de quién |
     |---|---:|---|
     | `_lib/__tests__/tokens.invariant.ts` | **456** | S1 — bajó de 463 al extraer `poda.ts`, pero sigue arriba |
-    | `_lib/motion/__tests__/motion-bundle.invariant.ts` | **341** | S2 |
+    | `_lib/motion/__tests__/motion-bundle.invariant.ts` | **453** | S2 — eran 341; SITIO-S7 le sumó 112 al reescribir el control positivo que afirmaba el reparto de chunks (§7.20) |
     | `_lib/motion/__tests__/cronograma.invariant.ts` | **324** | S2 |
-    | `_lib/__tests__/bundle.invariant.ts` | **323** | S1 |
+    | `_lib/__tests__/bundle.invariant.ts` | **375** | S1 — eran 323 |
+
+    (Los otros dos siguen exactos: `tokens.invariant.ts` 456 y `cronograma.invariant.ts` 324. **Estos conteos se remidieron en SITIO-S8 sobre el disco**, y que dos de cuatro se hubieran movido sin que nada fallara es el punto del párrafo de abajo: a estos archivos no los mira ningún check.)
 
     **Lo que agrava la deuda es la cobertura, no el tamaño:** el único check de las 300 líneas es el de `s3-codigo.invariant.ts`, y mira los archivos del sprint de S3 más los instrumentos `s3-*`; `s4-cobertura.invariant.ts` mira los de S4. **Los de S1 y S2 no los mira nadie**, así que pueden seguir creciendo sin que nada falle. El sprint que los parta tiene que además extender la cobertura, o la deuda vuelve.
 
@@ -592,14 +658,14 @@ Está acá para que nadie lo dé por resuelto.
     - **Dos átomos tuvieron que mudarse fuera de `_lib/motion/`**: `acotar01` (a `_lib/acotar.ts`) y `palabrasDe`/`textoNormalizado` (a `_lib/palabras.ts`). Los usa el árbol quieto y estaban por vecindad en módulos que llevan huellas del sistema: importarlos habría arrastrado el sistema entero a la carga inicial. **Que hayan hecho falta dos dice algo del corte:** el sistema de motion tiene átomos de texto y de número que no son de motion.
     - **La compuerta se afirma dos veces, y las dos hacen falta.** `test:s7-compuerta` la mide sobre el BUILD —marca del árbol animado ausente de la carga inicial de `/v3`, marca del árbol quieto presente en el mismo conjunto como control, y las cinco huellas del sistema ausentes— y `test:s7-contrato` la mira sobre el FUENTE, que es donde se puede decir **cuál** import sobra. El del build prueba el resultado y no dice de dónde viene; el del fuente dice de dónde viene y no prueba el resultado.
 
-23. ⚠️ **EL CHROME DEL HOME NO ESTÁ COMPUESTO — abierto, y es de la etapa de contenido.**
+23. ✅ **EL CHROME DEL HOME — compuesto en SITIO-S8, en un componente propio.** Vive en `_chrome/ChromeDelHome.tsx` y `page.tsx` lo monta PRIMERO por geometría y no por orden de lectura: el envoltorio de la pastilla es `sticky` con alto CERO y la pastilla vive `absolute` a `100svh − 72px` adentro, así que su posición de nacimiento la define dónde está en el documento. **Devuelve un fragmento y no un `<div>`, y eso no es estilo:** un `sticky` se pega dentro de su contenedor de bloque y su rango es `alto del contenedor − alto propio`; con un `<div>` de por medio el contenedor mediría cero —el envoltorio declara `block-size: 0`— y la pastilla no se pegaría nunca. Con el fragmento el contenedor es el `<main>` del layout de `/v3`. `s8-chrome.invariant.ts` lo afirma sobre el marcado renderizado.
 
-    `/v3/page.tsx` monta la pastilla de navegación (primero, por la razón geométrica que su docblock explica) y las ocho secciones. El pie está adentro de la sección Cierre, que es donde lo puso el sprint que la construyó. **Lo que NO monta es el cursor propio de S3**, y no es un olvido: si el home nuevo corre con cursor propio es una decisión de composición que nadie tomó, y este sprint compone lo que ya estaba construido en vez de decidir lo que nadie decidió.
+    `/v3/page.tsx` monta la pastilla de navegación (primero, por la razón geométrica que su docblock explica) y las ocho secciones. El pie está adentro de la sección Cierre, que es donde lo puso el sprint que la construyó. **El cursor propio de S3 está montado y APAGADO**, que es la única forma de dejar la decisión al humano sin dejarle trabajo: `ChromeDelHome` incluye `CursorCompuerta` detrás de `CURSOR_PROPIO_EN_EL_HOME` (`_chrome/contrato.ts:85`), hoy en `false`. Si el home nuevo corre con cursor propio sigue siendo una decisión de composición que nadie tomó — lo que cambió es el costo de tomarla: una constante, no un sprint.
 
 24. ⚠️ **DOS COSAS DE LAS SECCIONES QUE SE ANOTARON Y NO SE HICIERON (SITIO-S7).** La instrucción prohibía cambiar el comportamiento de una sección; las dos son cambios de contenido y quedan para la etapa que sigue.
 
-    - **El pie enlaza CUATRO secciones y existen OCHO.** `DESTINOS_DE_LA_RUTA` sale de una lista declarada en `cierre/contenido.ts` que quedó en las cuatro del lane que lo escribió. `ANCLAS_QUE_EXISTEN` —contra la que el instrumento verifica que ningún `href` lleve a la nada— sí se derivó de las ocho, porque eso es un hecho y no una decisión. Ampliar el recorrido del pie es contenido.
-    - **`peso="medio"` sigue esquivado en Servicios.** Era un rodeo del defecto de `cn()`, que ya está arreglado, pero restaurarlo **cambia el peso tipográfico en pantalla** — o sea composición. Queda anotado con su lugar exacto.
+    - ✅ **El pie enlaza las OCHO menos el Cierre — cerrado en SITIO-S8, y derivado.** `SECCIONES_QUE_EL_PIE_ENLAZA` es hoy `IDS_DE_SECCION` y `DESTINOS_DE_LA_RUTA` filtra el propio Cierre —un enlace a la sección en la que ya estás no lleva a ningún lado en el sentido que importa—, así que son **siete destinos derivados de la tabla** y no una lista escrita a mano. **Lo que el arreglo destapó, y es la parte que vale:** el CTA tomaba su destino de `DESTINOS_DE_LA_RUTA[0]` y eso funcionaba **por accidente** mientras la lista arrancaba en Servicios; al derivar el orden, `[0]` pasó a ser `#hero` y el botón quedó diciendo «Ver los servicios» y llevando a otro lado. Se resolvió ESCRIBIENDO el destino —`#servicios`, el mismo de siempre—, que es lo que manda §7.27: el rótulo y el destino son una sola decisión de composición. A dónde empuja el cierre sigue siendo decisión del humano. `ANCLAS_QUE_EXISTEN` —contra la que el instrumento verifica que ningún `href` lleve a la nada— sí se derivó de las ocho, porque eso es un hecho y no una decisión. Ampliar el recorrido del pie es contenido.
+    - ✅ **El rodeo de `peso="medio"` — restaurado en SITIO-S8, y NO estaba en Servicios.** Vivía en `_secciones/cierre/ColumnasDelPie.tsx`: con el defecto de `cn()` la pieza perdía la familia Y el peso a la vez, así que se la había dejado sin `peso` y sobrevivía el `font-normal` del componente. Con el arreglo de raíz puesto (§7.19) `font-medio` cae en el grupo `font-weight` y `font-codigo` en el de familia: conviven, y la `<Caption>` del marcador vuelve a pesar 500 (`--font-weight-medio`). **Un arreglo de raíz que deja los parches es código muerto que esconde el arreglo.** La otra regla de ese archivo —ningún `text-<color>` por `className`— se queda, y ya no como rodeo: el color se hereda de la superficie. ⚠️ **Lo que queda asimétrico y no se tocó:** `Cierre.tsx` tiene la misma forma sin `peso` en la línea de cierre del pie, así que hoy el marcador de contacto pesa 500 y la línea de cierre 400.
 
 25. ⚠️ **UN INSTRUMENTO QUE SE MIDE A SÍ MISMO — cuarta y quinta aparición, y la regla general.**
 
@@ -635,13 +701,89 @@ Está acá para que nadie lo dé por resuelto.
 
     | viewport | alto derivado | pantallas | por qué |
     |---|---:|---:|---|
-    | 1440 × 900 | 609 px | **0,68** | las tres columnas del pie EN FILA |
-    | 375 × 667 | 913 px | **1,37** | las columnas APILADAS, titular de tres líneas |
+    | 1440 × 900 | **741 px** | **0,82** | las tres columnas del pie EN FILA |
+    | 375 × 667 | **1029 px** | **1,54** | las columnas APILADAS, titular de tres líneas |
 
-    Las produce `s8-cierre.invariant` sumando cajas de línea y tokens. **No está medido en un navegador**, y eso está declarado ahí.
+    ⚠️ **Las dos cifras se movieron en SITIO-S8, y no es que la sección cambió de alto: EL MODELO ESTABA MAL.** Publicaba 609 y 913 midiendo **una sola columna del pie** —la de novedades— usada para las tres. Con tres enlaces en la columna del recorrido subestimaba 4 px y nadie lo notaba; al ampliar el pie a las ocho secciones (§7.24) esa columna pasó a ser la más alta y la subestimación llegó a **132 px**. El instrumento ahora mide la más alta de las tres, que es la que gobierna la fila. **Las dos conclusiones sobreviven** —741 < 900 entra a escritorio, 1029 > 667 se pasa a 375 donde el `min-height` deja crecer la sección—, y por eso el valor no se toca; **lo que se achicó es el aire: de 291 px a 159.**
+
+    Las produce `_secciones/cierre/s8-cierre.invariant.tsx` sumando cajas de línea y tokens. **No está medido en un navegador**, y eso está declarado ahí. **Desde SITIO-S8 suma la MÁS ALTA de las tres columnas del pie y no una tomada por las tres**, que es el cambio de modelo que movió los dos números; y si el pie vuelve a crecer —una cuarta columna, más pedidos de contacto— hay un instrumento que se pone rojo el día que `100svh` deje de contenerlo.
 
     **La premisa valía sólo a 375.** A escritorio —que es el ancho donde este proyecto define el ritmo, y donde la referencia midió los suyos— la sección entra en `100svh` con aire. El `alto` de la tabla es un `min-height`: a 375 el contenido lo pasa, la sección crece y no se recorta nada.
 
-    **Por qué se queda en `100svh`, con las tres salidas recorridas:** subirlo a `200svh` mete **1,32 pantallas vacías** en el tramo final del recorrido, que es el defecto que el pinneo existe para no tener; dejarlo no recorta nada en ningún ancho; y declarar dos altos por ancho no existe en la tabla —el `alto` es uno—.
+    **Por qué se queda en `100svh`, con las tres salidas recorridas:** subirlo a `200svh` mete **1,18 pantallas vacías** en el tramo final del recorrido, que es el defecto que el pinneo existe para no tener; dejarlo no recorta nada en ningún ancho; y declarar dos altos por ancho no existe en la tabla —el `alto` es uno—.
 
     **Lo único que queda abierto de esto:** el ritmo de mobile subestimaría este tramo. No se arregla acá: el ritmo de 390 es otro número y SCROLL.md lo publica por separado con razón (§7 de SCROLL.md). Los dos números viven en la fila de `cierre` en `_lib/secciones.ts`.
+
+29. 🔴 **LA TINTA NO PASA AA EN EL DIFERENCIAL SOBRE LA ESCENA REAL — medido en SITIO-S8, y la salida ya está decidida.**
+
+    Los contrastes de los paneles transparentes se habían medido contra el **marcador de posición**, que es plano y pinta dos tokens: 13,62:1 en el peor caso. `s6-contraste` ya advertía por escrito que la sala real no hereda ese número. **No lo hereda:**
+
+    | sección | ventana de progreso | peor píxel | p05 | mediana | AA (4,5:1) |
+    |---|---|---:|---:|---:|---|
+    | **Hero** | p=[0,000 – 0,077] | **9,73:1** | 10,60 | 13,64 | ✅ pasa AA y AAA |
+    | **Por qué develOP** | p=[0,846 – 1,000] | **3,10:1** | 3,10 | 4,22 | ❌ **NO pasa** |
+
+    Lo produce `npm run test:s8-tinta`, con un muestreador de cuadro por píxel validado contra `sampleFrame` de S10/S11 —las seis poses coinciden hasta menos de 1e-9— y con `razonDeContraste` del arnés.
+
+    **La cifra que decide, y es del RECORRIDO y no del mapeo:** el contraste del peor píxel cae monótono de **9,73:1 en p=0 a 2,34:1 en p=1**, y **cruza AA en p=0,8782** (AAA en p=0,6490). Verificado en las dos direcciones: 4,72:1 en p=0,87 y 4,04:1 en p=0,89. O sea que **cualquier mapeo que deje el diferencial abajo de p=0,878 lo resuelve sin tocar la escena.**
+
+    **DECIDIDO EN LA PARADA DE SITIO-S8 — se resuelve por el MAPEO, opción (a):**
+
+    | # | salida | veredicto |
+    |---:|---|---|
+    | **a** | **mover la sección en el recorrido** | ✅ **ELEGIDA.** Es *downstream* de §7.2, que este sprint declaró provisional y mal en tres formas: arreglarlo en la escena sería tapar el síntoma de otra cosa. No toca la escena ni las superficies. |
+    | **b** | **componer la salida y la vuelta de la escena** (§7.4) | **la reserva.** Si después del mapeo sigue fallando, ésta es la salida: §2.4 ya la pide, y si al volver la escena arranca en una pose clara el problema desaparece por construcción. |
+    | c | pasar `por-que-develop` a `papel-opaco` | ❌ descartada: mata uno de los **tres momentos de escena**, y el recorrido de superficies fue deliberado (SITIO-S5 §0.2). |
+    | d | aclarar el cierre del arco de luz | ❌ descartada acá: es §7.14, con sus cuatro palancas ya analizadas, y es otra cosa. |
+    | · | un velo o una superficie intermedia detrás del texto | ❌ **nunca.** |
+
+    ⚠️ **Las cifras son un TECHO, no un piso.** No modelan las partículas (bajan el valor medio 7 a 8 puntos), ni la sombra proyectada del logo, ni el especular; los tres empujan hacia abajo. Y arrastran la cámara de `harness.ts` (§7.15): hasta 1,28% del ancho del cuadro. **El número real es peor que 3,10:1.**
+
+30. ⚠️ **EL SDK DE NAVEGADOR DE SENTRY — 142,1 KiB gzip en TODA ruta, el 47,4% del techo. Abierto, y no es de ningún sprint de este track.**
+
+    Medido en SITIO-S8 (`npm run test:s8-peso` §3) sobre `rootMainFiles` + `polyfillFiles` de `build-manifest.json`, o sea **lo que Next pide en toda ruta sin que ningún componente lo elija**:
+
+    | | archivos | crudo | gzip |
+    |---|---:|---:|---:|
+    | **el piso del framework** | 5 | 787,8 KiB | **248,3 KiB** |
+    | de los cuales `7149-*.js`, con el SDK de navegador de Sentry | 1 | 466,8 KiB | **142,1 KiB** |
+
+    Entra por `src/instrumentation-client.ts`. **No es de `/v3` ni del layout raíz**, así que ningún sprint de este track lo puede tocar, y por eso se publica con dueño en vez de afirmarse.
+
+    **La cifra que abre el pendiente: sin ese chunk, la carga inicial de `/v3` mediría 235,3 KiB gzip — ABAJO de los 300 del techo original.** Medida directo sobre el build; restar dos cifras ya redondeadas daría 235,4, y la buena es la medida.
+
+    ⚠️ **Y por eso el techo se re-fijó, con la forma de la regla 13** (`components/layout/carga-diferida/presupuesto.ts`). «300 KiB gzip de la carga inicial entera» **no lo puede cumplir nadie**: el piso ya se come 248,3 y deja 51,7 para el chrome, los límites de error y la ruta. **Un presupuesto que nadie puede cumplir es un presupuesto que nadie mira.** Ahora se **afirma lo propio** —lo que la ruta pide POR ENCIMA del piso: el chrome del layout más lo de `/v3`, hoy **129,2 KiB gzip**, con 170,8 de aire— y se **publica el piso** con su dueño y su número. El 300 no se eligió de nuevo: se conservó, sobre lo que de verdad depende del código de este repo.
+
+    Las dos salidas, para quien lo tome: lazy-init del SDK, o `browserTracingIntegration` fuera del bundle inicial. Las dos son un sprint aparte.
+
+31. ⚠️ **UN INSTRUMENTO QUE COMPARA CONTRA UNA LÍNEA DE BASE TIENE QUE DECIR QUÉ CAMBIÓ ENTRE LAS DOS MEDICIONES, NO SÓLO CUÁNTO.**
+
+    Regla del proyecto desde SITIO-S8, y el caso que la obligó **estuvo a punto de publicarse como conclusión en un reporte.**
+
+    `s7-compuerta` medía el heredado de `/v3` contra la línea de base de S7 y escribía el veredicto solo: *«el padrón pasó de 7 a 5 rutas de demo; si el heredado BAJA, la predicción del mapa (§7.16) va en la dirección correcta»*. Era razonable **mientras borrar rutas fuera lo único que podía mover ese número.**
+
+    Dejó de serlo en el mismo sprint. SITIO-S8 le cambió **un especificador de import** al layout raíz y el heredado se desplomó **−274,7 KiB crudo sin que se borrara una sola ruta**. Con el texto viejo, el instrumento habría escrito *«BAJÓ: borrar rutas devuelve peso heredado»* y le habría dado a la predicción del mapa **un respaldo que no le corresponde**.
+
+    Es la trampa de §6.1 —*dos cambios entran juntos y se le atribuye el mérito a uno*— con la diferencia que hace útil la regla: **acá sí se sabe cuál fue.** `test:s8-peso` lo aisló ruta por ruta, sobre el payload de flight, nombrando qué referencia de cliente pide cada chunk. La atribución no salió de razonar: salió de medir.
+
+    **Una comparación sin inventario de cambios no es una medición: es una coincidencia con formato.**
+
+    ⚠️ **Y deja vencida la base de §7.16.** `HEREDADO_SIN_DEMOS_KIB = 1381,3` se midió el 2026-08-28 **con cero rutas de demo**, y hoy el heredado es **1111,5 con las cinco puestas** — 270 KiB por debajo de una base medida sin ninguna. La predicción *«al borrarlas todas vuelve a 1381,3»* es falsa en su forma actual. **No se re-baseó**: esa constante dice «sin rutas de demo» y medirla pide un build sin ellas. Queda declarada vencida, con su fecha y su motivo, en `s4-heredado.invariant.ts` y en el texto de la propia predicción.
+
+32. ⚠️ **TRES AFIRMACIONES DE LA INSTRUCCIÓN DE SITIO-S8 QUE RESULTARON FALSAS.** Van acá porque la instrucción de un sprint es una fuente como cualquier otra, y una fuente que se equivoca se corrige con su medición al lado (regla 11).
+
+    - **«S7 no montó el chrome».** Media verdad, y trabajar sobre ella llevaba a reconstruir cosas que existen. S7 **sí** montaba la pastilla de navegación —estaba en `/v3/page.tsx`— y el pie **sí** estaba montado, adentro de la sección Cierre. Lo único que no estaba montado era el **cursor propio**, que es lo que §7.23 decía con esas palabras. Lo que SITIO-S8 hizo con el chrome fue **verificar** la pastilla contra el Hero real, **completar** el recorrido del pie y **montar** el cursor apagado.
+    - **«`peso="medio"` sigue esquivado en Servicios» (§7.24).** No estaba en Servicios: `servicios/ContenidoDeServicio.tsx` **no tiene un solo `peso=`** —lo que había ahí era un rodeo del mismo defecto de `cn()` pero sobre el COLOR, que SITIO-S7 ya sacó—. El único rodeo con su motivo escrito al lado estaba en **`cierre/ColumnasDelPie.tsx`**, o sea en el pie. Se restauró ahí, y **no se tocó Servicios**: restaurar algo allá para que la frase quedara cierta habría sido inventar composición.
+    - **«el escalón de exposición vale 0,39 puntos» (§7.11).** Vale 0,39 **sobre la tinta del intro sola**, que era la única superficie iluminada cuando detrás no había nada. **Con la sala montada detrás, el escalón del cuadro vale 8,83 puntos** (media 218,30 → 209,47): ×22,6. La corrección que §7.11 se había hecho a sí misma apuntaba bien —8,83 sigue siendo menor que los −15 que decía antes— pero el número que quedó escrito subestima 22 veces.
+
+33. ⚠️ **LOS 34 INVARIANTES DE LA ESCENA ENTRARON AL GATE, Y ENTRAR DESTAPÓ TRES COSAS DEL ARNÉS.**
+
+    Existían desde S7 y **ningún script los corría**: 890 afirmaciones que `npm run verificar` no miraba. Es la regla 14 en su forma más pura —*un check que no está en ninguna cadena no se ve nunca*— y encima eran la única prueba de que la mudanza de SITIO-S8 fue fiel. Se cablearon los 34, repartidos en ocho suites propias (`s7e` … `s14e`, con sufijo de letra porque el track del SITIO ya ocupa `s1` … `s8`).
+
+    **Los tres hallazgos que el cableado destapó, y ninguno era un invariante roto:**
+
+    1. **Este repo tiene DOS arneses y el lector del agregado conocía uno solo.** El track del SITIO cierra con `cerrar()` y escribe `nombre: N afirmaciones, M fallas`; el de la ESCENA cierra con `report()` y escribe **`nombre: N en verde, M en rojo`**. `leerResumen()` devolvía `null`, `resumio` quedaba en `false` y **`fallo()` daba los 34 por FALLADOS con 0 afirmaciones contadas**, con exit code 0 y sin un solo rojo real. *Un lector que no entiende un dialecto no reporta «no entiendo»: reporta «falló».* Se le enseñó el segundo dialecto, en vez de reescribir 34 instrumentos: lo que estaba mal era el lector.
+    2. **`report()` no tenía la guarda de «cero comprobaciones».** `cerrar()` la tiene desde S4 —un invariante sin afirmaciones sale verde y es indistinguible de uno que verificó algo—. Mientras estos archivos se corrían a mano no importaba; metidos en el gate, **un lane que puede pasar por vacío es un gate que miente**. Se agregó a los dos arneses compartidos y a las dos copias en línea de `src/lib/scene-*.invariant.ts`.
+    3. **El contador de controles positivos se contó a sí mismo.** Al enseñarle el marcador de la escena —`ok  control positivo —`, sin corchetes— la primera versión buscaba la frase suelta y contaba DOS donde había uno: lo destapó el fixture `pasa.invariant.ts`, cuya descripción dice *«y trae un control positivo, para que el contador tenga qué contar»*. Es §7.25 en su forma más chica: **un escáner que lee texto lee también el texto que lo describe.** Se ancló a la forma de la línea.
+
+    ⚠️ **Lo que queda abierto de esto:** el lane de la escena marca sus controles positivos de formas distintas —algunos abren la línea, otros viven en el título de una sección— así que el contador ve **14 de los 18** que hay. El número que publica el agregado para `s7e`…`s14e` está **subcontado, no inflado**, y eso es lo aceptable de los dos lados posibles. Unificar el marcador es un barrido de 34 archivos y no se hizo acá.

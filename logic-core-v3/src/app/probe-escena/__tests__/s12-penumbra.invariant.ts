@@ -22,17 +22,17 @@ import {
   celosiaCrossings,
   celosiaLayers,
   celosiaTransmittance,
-} from '../_components/celosiaGeometry'
+} from '@/app/v3/_lib/escena/celosiaGeometry'
 import {
   CELOSIA_SUN_RADIUS_DEG,
   CELOSIA_SUN_RADIUS_MAX_DEG,
   celosiaPenumbraAt,
   celosiaSunSpread,
-} from '../_components/celosiaPenumbra'
-import { CELOSIA_SOURCE, createCelosiaUniforms } from '../_components/celosiaShader'
-import { CELOSIA_BAR } from '../_components/probeCelosia'
-import { MOIRE_MISMATCH, MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../_components/probeMoire'
-import { PROBE_DEFAULTS, PROBE_PARAM_ORDER, PROBE_RANGES } from '../_components/probeStore'
+} from '@/app/v3/_lib/escena/celosiaPenumbra'
+import { CELOSIA_SOURCE, createCelosiaUniforms } from '@/app/v3/_lib/escena/celosiaShader'
+import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_MISMATCH, MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '@/app/v3/_lib/escena/probeMoire'
+import { PROBE_DEFAULTS, PROBE_PARAM_ORDER, PROBE_RANGES } from '@/app/v3/_lib/escena/probeStore'
 
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
 import { floorPenumbraAt, framePenumbraSpread } from './celosiaFloor'

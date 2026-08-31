@@ -17,12 +17,12 @@
  * La cámara y la proyección de un punto cualquiera salieron a
  * `lib/scene-camera.ts` en S13, y las comprueba `scene-camera.invariant.ts`.
  */
-import { CHOREO_KEYFRAMES } from '@/app/probe-escena/_components/choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import {
   DEFAULT_VARIANT_ID,
   findVariant,
 } from '@/app/probe-escena/_components/choreographyVariants'
-import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '@/app/probe-escena/_components/probeScene'
+import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { SCENE_LOGO_MESH_WORLD } from '@/lib/scene-camera'
 import {
@@ -246,5 +246,12 @@ if (desktop) {
 console.log(`\nscene-framing: ${passed} en verde, ${failures.length} en rojo`)
 if (failures.length > 0) {
   for (const failure of failures) console.log(`  ✗ ${failure}`)
+  process.exitCode = 1
+}
+// La guarda de «cero comprobaciones», igual que en los dos arneses compartidos:
+// un invariante sin comprobaciones sale verde y es indistinguible de uno que
+// verificó algo. Puesta en SITIO-S8, al cablear este archivo al gate del repo.
+if (passed === 0) {
+  console.log('  FALLA  cero comprobaciones. Un invariante sin comprobaciones es verde por vacío.')
   process.exitCode = 1
 }

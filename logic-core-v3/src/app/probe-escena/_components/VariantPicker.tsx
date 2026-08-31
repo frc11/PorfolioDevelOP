@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from 'react'
 
 import type { ChoreoEditor } from './choreographyEditor'
 import { CHOREO_VARIANTS } from './choreographyVariants'
-import type { ChoreoVariantId } from './choreographyTypes'
+import type { ChoreoVariantId } from '@/app/v3/_lib/escena/choreographyTypes'
 
 /**
  * EL SELECTOR DE RECORRIDO (S7 · cinco desde S9).

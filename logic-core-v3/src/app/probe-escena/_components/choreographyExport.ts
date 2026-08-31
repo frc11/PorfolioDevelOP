@@ -1,5 +1,5 @@
 import type { EditableKeyframe } from './choreographyEditor'
-import { CHOREO_CHANNELS, type ChoreoVariant } from './choreographyTypes'
+import { CHOREO_CHANNELS, type ChoreoVariant } from '@/app/v3/_lib/escena/choreographyTypes'
 import { SECTION_RULE_WIDTH } from './choreographyNotes'
 
 /**

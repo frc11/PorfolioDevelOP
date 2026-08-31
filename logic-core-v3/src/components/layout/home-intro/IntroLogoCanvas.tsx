@@ -9,7 +9,7 @@ import {
   INK_COLOR,
   INK_ROUGHNESS,
   PROBE_EXTRUDE,
-} from '@/app/probe-escena/_components/probeScene'
+} from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { SCENE_ENTRY_VIEW } from '@/lib/scene-framing'
 

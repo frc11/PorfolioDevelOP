@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 
-import { Navegacion } from './_componentes/chrome/Navegacion'
+import { ChromeDelHome } from './_chrome/ChromeDelHome'
+import { IntroDelHome } from './_intro/IntroDelHome'
 import { CompuertaDelHome } from './_secciones/CompuertaDelHome'
 import { Home } from './_secciones/Home'
 
 /**
- * EL HOME NUEVO — las ocho secciones, con la compuerta resuelta arriba.
+ * EL HOME NUEVO — el chrome, el intro, y las ocho secciones con la compuerta
+ * resuelta arriba.
  *
  * ── Por qué vive en /v3 y no reemplaza al home todavía ─────────────────────
  *
@@ -16,24 +18,38 @@ import { Home } from './_secciones/Home'
  *
  * El reemplazo del home es un sprint chico al final, y es reversible.
  *
- * ── Las tres cosas que esta página hace, y ninguna más ─────────────────────
+ * ── Las cuatro cosas que esta página hace, y ninguna más ───────────────────
  *
- *   1. Monta la **pastilla de navegación**, y va PRIMERO por una razón
- *      geométrica: su envoltorio es `sticky` con alto CERO y la pastilla vive
- *      `absolute` adentro, a `100svh − 72px`. Su posición de nacimiento la
- *      define dónde está en el documento, así que tiene que ser lo más arriba
- *      posible o nace tarde. No empuja nada: mide cero.
- *   2. Resuelve **la compuerta de la coreografía, una sola vez**, alrededor de
+ *   1. Monta **el chrome**, y va PRIMERO por una razón geométrica: el
+ *      envoltorio de la pastilla de navegación es `sticky` con alto CERO y la
+ *      pastilla vive `absolute` adentro, a `100svh − 72px`. Su posición de
+ *      nacimiento la define dónde está en el documento, así que tiene que ser
+ *      lo más arriba posible o nace tarde. No empuja nada: mide cero.
+ *   2. Monta **el intro**, que es el preloader del home. Import ESTÁTICO y no
+ *      perezoso: el overlay tiene que viajar en el HTML del servidor, porque el
+ *      servidor no conoce `sessionStorage` y quien decide si se ve es el
+ *      `<script>` pre-paint del layout raíz. El porqué completo está en
+ *      `_intro/contrato.ts`.
+ *   3. Resuelve **la compuerta de la coreografía, una sola vez**, alrededor de
  *      las ocho. El porqué está en `CompuertaDelHome.tsx`; en una línea: abajo
  *      de 1025 el árbol animado no se descarga, y arriba entra por `import()`
  *      perezoso sin que el contenido se escriba dos veces.
- *   3. Recorre el registro. No lista secciones a mano.
+ *   4. Recorre el registro. No lista secciones a mano.
  *
- * ⚠ **Lo que NO monta, y queda anotado:** el cursor propio de S3. Montarlo es
- * una decisión de composición del chrome —si el home nuevo corre con cursor
- * propio o no— y este sprint compone lo que ya estaba construido, no decide lo
- * que nadie decidió. El pie sí está: vive adentro de la sección Cierre, que es
- * donde lo puso el sprint que la construyó.
+ * ── Dónde NO está la escena, y por qué ─────────────────────────────────────
+ *
+ * La escena 3D **no se monta acá**: cuelga de `layout.tsx`, detrás de la
+ * compuerta de 1025, porque es PERMANENTE y no una sección. Sobrevive a la
+ * navegación entre páginas de /v3 sin remontarse, que es el hallazgo
+ * estructural entero —un canvas a viewport completo con paneles de DOM
+ * deslizándose encima—. Esta página no la nombra.
+ *
+ * ── El orden entre las tres capas ──────────────────────────────────────────
+ *
+ * Lo resuelve `z-index` y no el orden del documento, porque las tres capas
+ * están fuera del flujo: escenario `z-0`, contenido `z-10`, pastilla
+ * `--z-cabecera` = 100, overlay del intro 9999. El orden del JSX importa por
+ * una sola cosa, y es la de arriba: dónde NACE la pastilla.
  */
 export const metadata: Metadata = {
   title: 'v3 — el home nuevo · develOP',
@@ -47,7 +63,8 @@ export const metadata: Metadata = {
 export default function PaginaV3() {
   return (
     <>
-      <Navegacion />
+      <ChromeDelHome />
+      <IntroDelHome />
       <CompuertaDelHome>
         <Home />
       </CompuertaDelHome>

@@ -1,4 +1,4 @@
-import { MOIRE_NEAR_BOTTOM, MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '../_components/probeMoire'
+import { MOIRE_NEAR_BOTTOM, MOIRE_NEAR_RADIUS, MOIRE_NEAR_TOP } from '@/app/v3/_lib/escena/probeMoire'
 
 import {
   FLOOR_Y,

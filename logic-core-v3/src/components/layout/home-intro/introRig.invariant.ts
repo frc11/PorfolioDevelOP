@@ -6,9 +6,9 @@ import {
   KEY_AZIMUTH_DEG,
   KEY_ELEVATION_DEG,
   KEY_INTENSITY,
-} from '@/app/probe-escena/_components/probeLighting'
-import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/probe-escena/_components/probeCelosia'
-import { BOUNCE_COLOR, INK_COLOR, PAPER_COLOR } from '@/app/probe-escena/_components/probeScene'
+} from '@/app/v3/_lib/escena/probeLighting'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { BOUNCE_COLOR, INK_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 import {
   hexToLinear,
   levelAt,

@@ -1,6 +1,6 @@
-import { CHOREO_KEYFRAMES } from './choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import { CHOREO_ARRAY_DOC, CHOREO_NOTES, CHOREO_SECTIONS } from './choreographyNotes'
-import type { ChoreoVariant, ChoreoVariantId } from './choreographyTypes'
+import type { ChoreoVariant, ChoreoVariantId } from '@/app/v3/_lib/escena/choreographyTypes'
 import { VARIANT_ARQUITECTONICA } from './variantArquitectonica'
 import { VARIANT_CALIBRADA } from './variantCalibrada'
 import { VARIANT_DRAMATICA } from './variantDramatica'

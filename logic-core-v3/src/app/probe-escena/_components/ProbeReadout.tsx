@@ -9,7 +9,7 @@ import {
   type ProbeParamsStore,
   type ProbeStats,
   type ProbeStatsStore,
-} from './probeStore'
+} from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * La línea copiable con todos los valores, más lo que la escena mide sola.

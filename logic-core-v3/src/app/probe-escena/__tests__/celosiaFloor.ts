@@ -1,5 +1,5 @@
-import { celosiaCrossings, celosiaLayers } from '../_components/celosiaGeometry'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
+import { celosiaCrossings, celosiaLayers } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { TAN_HALF_V, cameraAt, emptyPose, type Vec3 } from './harness'
 import { rayFloor, track } from './frameProbe'

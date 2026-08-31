@@ -140,13 +140,38 @@ export function derivarSuites(scripts: Record<string, string>): Derivacion {
  * cadena". No cubre "el archivo existe y no tiene script": ese invariante no
  * corre nunca y desde `package.json` es invisible. Los directorios que se miran
  * son los de los invariantes ya cableados, así que un lane nuevo entra solo.
+ *
+ * ⚠ **EL DETECTOR ERA CIEGO A LA OTRA CADENA DE SCRIPTS, Y SITIO-S8 LO DESTAPÓ.**
+ * Contaba como «cableado» sólo lo que matchea `test:sN-<algo>`, así que un
+ * archivo corrido por `check:invariant:<algo>` —la cadena del producto, con casi
+ * cuarenta entradas— le figuraba como huérfano. Mientras ningún directorio
+ * mezclara las dos cadenas, no se notaba. Al cablear los invariantes de la
+ * escena, `src/lib/` pasó a tener las dos: `scene-camera.invariant.ts` con
+ * `test:`, y `dates-ar.invariant.ts` y `mask-secret.invariant.ts` con
+ * `check:invariant:`. El detector los habría reportado como sin correr, que es
+ * exactamente lo contrario de lo que pasa.
+ *
+ * Se arregla mirando **todos los scripts**, no sólo los derivados: un archivo
+ * está cableado si ALGÚN script lo nombra. `scriptsCompletos` es opcional para
+ * no romper a quien llame con la derivación sola, y cuando falta el detector se
+ * comporta como antes — con la ceguera declarada acá en vez de escondida.
  */
-export function instrumentosSinScript(derivacion: Derivacion): string[] {
+export function instrumentosSinScript(
+  derivacion: Derivacion,
+  scriptsCompletos: Record<string, string> = {},
+): string[] {
   const cableados = new Set(
     [...derivacion.permanentes.flatMap((s) => s.invariantes), ...derivacion.frontera.invariantes].map(
       (i) => i.archivo.replace(/\\/g, '/'),
     ),
   )
+  // Cualquier script que nombre un archivo lo cablea, corra con `tsx` o con
+  // `ts-node`, esté entre comillas o no.
+  for (const comando of Object.values(scriptsCompletos)) {
+    for (const m of comando.matchAll(/(?:"([^"]+\.invariant\.tsx?)"|(\S+\.invariant\.tsx?))/g)) {
+      cableados.add((m[1] ?? m[2]).replace(/\\/g, '/'))
+    }
+  }
   const directorios = [...new Set([...cableados].map((a) => path.posix.dirname(a)))].sort()
   const huerfanos: string[] = []
   for (const dir of directorios) {

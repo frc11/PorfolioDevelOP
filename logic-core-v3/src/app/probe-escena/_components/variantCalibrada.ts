@@ -1,4 +1,4 @@
-import type { ChoreoKeyframe, ChoreoVariant } from './choreographyTypes'
+import type { ChoreoKeyframe, ChoreoVariant } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   CALIBRADA_DOC,
   CALIBRADA_NOTES,

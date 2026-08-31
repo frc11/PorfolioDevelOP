@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, type FormEvent } from 'react'
 
-import type { NumericStore, ProbeRange, SliderSpec } from './probeStore'
+import type { NumericStore, ProbeRange, SliderSpec } from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * Un slider atado a un `NumericStore`, sin pasar por `setState`.

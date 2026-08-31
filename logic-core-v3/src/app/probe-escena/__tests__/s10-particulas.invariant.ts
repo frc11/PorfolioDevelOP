@@ -12,7 +12,7 @@
  *   3. El número que consume el sprint del preloader: cuántas partículas quedan
  *      en cuadro en la pose inicial.
  */
-import { CHOREO_KEYFRAMES } from '../_components/choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import {
   BOKEH_BOB_AMPLITUDE,
   BOKEH_BOB_PERIOD_S,
@@ -21,7 +21,7 @@ import {
   DUST_BOB_PERIOD_S,
   DUST_SPIN_DEG_S,
   MOUSE_HEIGHT_FACTOR,
-} from '../_components/choreographyPhysics'
+} from '@/app/v3/_lib/escena/choreographyPhysics'
 import {
   BOKEH_COUNT,
   BOKEH_RADIUS_BIAS,
@@ -39,8 +39,8 @@ import {
   PARTICLE_SEED,
   PARTICLE_SIZE,
   buildParticleField,
-} from '../_components/probeParticles'
-import { PROBE_DEFAULTS } from '../_components/probeStore'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 import {
   angularOffset,
   cameraAt,

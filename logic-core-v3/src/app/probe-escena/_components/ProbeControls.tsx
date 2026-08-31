@@ -4,7 +4,7 @@ import { useCallback, useId, useState } from 'react'
 
 import { ChoreographyControls } from './ChoreographyControls'
 import type { ChoreoEditor } from './choreographyEditor'
-import { CHOREO_CHANNELS } from './choreographyTypes'
+import { CHOREO_CHANNELS } from '@/app/v3/_lib/escena/choreographyTypes'
 import { KeyframeEditor } from './KeyframeEditor'
 import { ProbeReadout } from './ProbeReadout'
 import { StoreSlider } from './StoreSlider'
@@ -18,7 +18,7 @@ import {
   type ProbeParamsStore,
   type ProbeRigStore,
   type ProbeStatsStore,
-} from './probeStore'
+} from '@/app/v3/_lib/escena/probeStore'
 
 /**
  * El panel del probe. Sin pretensión estética: son sliders sobre una caja

@@ -34,11 +34,24 @@ export function section(title: string): void {
   console.log(`\n── ${title} ${'─'.repeat(Math.max(0, 66 - title.length))}`)
 }
 
-/** Cierra la corrida. Devuelve un exit code distinto de 0 si algo falló. */
+/**
+ * Cierra la corrida.
+ *
+ * ⚠️ **La guarda de «cero comprobaciones» la agregó SITIO-S8, al cablear estos
+ * invariantes al gate del repo.** `cerrar()` —el arnés del track del SITIO— la
+ * tiene desde S4: un invariante sin afirmaciones sale VERDE y es indistinguible
+ * de uno que verificó algo. Acá no estaba, y mientras estos archivos se corrían
+ * a mano no importaba demasiado; metidos en `npm run verificar`, un lane que
+ * puede pasar por vacío es un gate que miente.
+ */
 export function report(name: string): void {
   console.log(`\n${name}: ${passed} en verde, ${failures.length} en rojo`)
   if (failures.length > 0) {
     for (const failure of failures) console.log(`  ✗ ${failure}`)
+    process.exitCode = 1
+  }
+  if (passed === 0) {
+    console.log('  FALLA  cero comprobaciones. Un invariante sin comprobaciones es verde por vacío.')
     process.exitCode = 1
   }
 }

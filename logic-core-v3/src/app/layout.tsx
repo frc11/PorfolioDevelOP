@@ -47,7 +47,35 @@ import { TransitionProvider } from "@/context/TransitionContext";
 import { Shutter } from "@/components/layout/Shutter";
 import { PublicOnlyComponents } from "@/components/layout/PublicOnlyComponents";
 import { ChatWidgetMount } from "@/components/layout/ChatWidgetMount";
-import { HomeIntroBoot } from "@/components/layout/HomeIntro";
+// ⚠ SITIO-S8 · frente `peso`. **Lo único que cambió en este archivo es esta
+// línea, y cambió el ESPECIFICADOR, no el componente.** `HomeIntroBoot` es la
+// MISMA función: `@/components/layout/HomeIntro` la re-exporta con
+// `export { HomeIntroBoot } from './home-intro/introBoot'`. Mismo render, mismo
+// `<script>` pre-paint, mismo lugar en el `<head>`, cero `dynamic`, cero
+// `ssr:false`.
+//
+// Por qué: `HomeIntro.tsx` es el BARRIL del preloader del home — además de
+// re-exportar el gate, define `HomeIntro`, que importa el overlay, el motor y
+// la línea de tiempo. `src/app/page.tsx` lo importa, así que webpack lo puso en
+// el grupo de chunks de la PÁGINA DEL HOME. Pedirle el gate al barril desde el
+// layout RAÍZ hacía que la referencia de cliente del layout arrastrara ese
+// grupo entero — `static/chunks/app/page-*.js` incluido — a la carga inicial de
+// TODA ruta: `/contact`, `/login`, las cuatro landings de servicio, `/v3`.
+//
+// Medido sobre el build de la línea de base (commit 09113f42): los cuatro
+// archivos del grupo están en las ONCE rutas prerenderizadas, y en OCHO de
+// ellas —`/contact`, `/login`, `/forgot-password`, `/probe-escena` y las cuatro
+// landings— el ÚNICO que los pide es `HomeIntroBoot`: **4 archivos · 303,6 KiB
+// crudo · 71,4 KiB gzip**. En `/styleguide` son 2 de 4 (268,6 · 59,7): los
+// otros dos los comparte con sus propios bloques del sistema de diseño. En `/`
+// el grupo es suyo. El instrumento es `test:s8-peso`, que lo publica por ruta
+// con el nombre de quién pide cada chunk.
+//
+// Apuntar al módulo real deja al layout con la dependencia que de verdad usa
+// —`introBoot` sólo pide `react`, `next/navigation`, `introHandoff` y
+// `introRutas`— y no toca a `src/app/page.tsx`, que sigue pidiendo `HomeIntro`
+// al barril porque es el componente que monta.
+import { HomeIntroBoot } from "@/components/layout/home-intro/introBoot";
 import { Toaster } from "sonner";
 
 export default function RootLayout({

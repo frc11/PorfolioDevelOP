@@ -22,20 +22,20 @@
  */
 import * as THREE from 'three'
 
-import { createCelosiaUniforms } from '../_components/celosiaShader'
-import { LIGHT_ARC } from '../_components/choreography'
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
+import { createCelosiaUniforms } from '@/app/v3/_lib/escena/celosiaShader'
+import { LIGHT_ARC } from '@/app/v3/_lib/escena/choreography'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   applyLightRig,
   createLightRigCache,
   createLightRigInput,
   createLightRigTargets,
-} from '../_components/lightRig'
-import { KEY_DISTANCE, KEY_ELEVATION_DEG } from '../_components/probeLighting'
-import { SHADOW_FAR, SHADOW_NEAR } from '../_components/probeAtmosphere'
-import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '../_components/probeMoire'
-import { PARTICLE_R_MAX } from '../_components/probeParticles'
+} from '@/app/v3/_lib/escena/lightRig'
+import { KEY_DISTANCE, KEY_ELEVATION_DEG } from '@/app/v3/_lib/escena/probeLighting'
+import { SHADOW_FAR, SHADOW_NEAR } from '@/app/v3/_lib/escena/probeAtmosphere'
+import { MOIRE_FAR_RADIUS, MOIRE_NEAR_RADIUS } from '@/app/v3/_lib/escena/probeMoire'
+import { PARTICLE_R_MAX } from '@/app/v3/_lib/escena/probeParticles'
 import { FLOOR_Y, check, report, section } from './harness'
 
 const RAD = Math.PI / 180

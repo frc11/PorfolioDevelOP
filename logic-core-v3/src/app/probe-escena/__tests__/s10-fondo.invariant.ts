@@ -12,7 +12,7 @@
  * Las otras dos: `s10-batido.invariant.ts` (qué produce el desajuste y el
  * aliasing) y `s10-tramas.invariant.ts` (las texturas y el orden de dibujo).
  */
-import { CHOREO_KEYFRAMES } from '../_components/choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import {
   MOIRE_COARSE_CELLS,
   MOIRE_FAR_BOTTOM,
@@ -26,8 +26,8 @@ import {
   fineCells,
   verticalPitch,
   verticalRepeat,
-} from '../_components/probeMoire'
-import { celosiaCrossings, celosiaLayers } from '../_components/celosiaGeometry'
+} from '@/app/v3/_lib/escena/probeMoire'
+import { celosiaCrossings, celosiaLayers } from '@/app/v3/_lib/escena/celosiaGeometry'
 import {
   FLOOR_Y,
   TAN_HALF_V,

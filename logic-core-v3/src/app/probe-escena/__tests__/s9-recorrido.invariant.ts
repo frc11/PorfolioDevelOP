@@ -27,14 +27,14 @@
  * una vuelta de 360— y el dueño del proyecto la retiró. No se comprueba en
  * ningún lado y no se publica como propiedad.
  */
-import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../_components/choreography'
+import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import {
   MOUSE_HEIGHT_FACTOR,
   MOUSE_TAU,
   SETTLE_EPSILON,
   SETTLE_TAU,
-} from '../_components/choreographyPhysics'
-import { buildTrack, sampleTrack } from '../_components/choreographySampler'
+} from '@/app/v3/_lib/escena/choreographyPhysics'
+import { buildTrack, sampleTrack } from '@/app/v3/_lib/escena/choreographySampler'
 import { FLOOR_Y, check, emptyPose, makeTrack, report, section, speedAt } from './harness'
 
 const track = makeTrack(CHOREO_KEYFRAMES)

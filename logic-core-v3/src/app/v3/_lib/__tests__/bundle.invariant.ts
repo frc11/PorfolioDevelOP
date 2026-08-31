@@ -270,8 +270,33 @@ noCorre(
     'de quien la compuso, no de este sprint.',
 )
 
-afirmarIgual(perezosos.length, 1, 'hay exactamente un chunk perezoso con el escenario')
-afirmar(extra.crudo > 0, '  y pesa más de cero bytes: existe de verdad')
+/**
+ * ⚠ **ESTA PAREJA SE QUEDÓ SIN SU PREMISA EN SITIO-S8, Y NO POR UNA REGRESIÓN.**
+ *
+ * Afirmaba que hay **exactamente un chunk perezoso** con `MARCA_ESCENARIO` y que
+ * pesa más de cero. Valía mientras el marcador de posición FUERA el módulo que
+ * la compuerta pedía con `import()`. SITIO-S8 enchufó la escena real
+ * (`_lib/escena/EscenaDelHome`), así que hoy el marcador lo importa **un solo
+ * archivo, y de forma ESTÁTICA**: `/v3/control-estatico`. Su chunk cae en la
+ * carga inicial de esa ruta —que es justamente lo que A3 afirma— y por lo tanto
+ * `perezosos`, que resta las dos cargas iniciales, da **0 por construcción**.
+ *
+ * Es el mismo defecto de forma que este archivo ya corrigió dos veces más
+ * arriba: **una afirmación sobre el reparto de chunks depende de cuántos
+ * consumidores tenga el módulo**, y acá el módulo pasó de dos consumidores a
+ * uno. La tesis (A2) y el control (A3) no se movieron un milímetro.
+ *
+ * No se afloja y no se borra: **la afirmación se muda a donde vive hoy su
+ * objeto**. El chunk perezoso de la escena lo mide `test:s8-tres`, con la marca
+ * de la escena real, su peso y su control de asimetría. Acá queda el hueco
+ * declarado, y la cifra se sigue publicando arriba para poder verla moverse.
+ */
+noCorre(
+  'hay exactamente un chunk perezoso con el escenario, y pesa más de cero',
+  'el marcador de posición dejó de ser el módulo perezoso: SITIO-S8 enchufó la escena real y hoy ' +
+    'el marcador sólo lo importa `/v3/control-estatico`, de forma estática. El chunk perezoso de ' +
+    'la escena lo mide `test:s8-tres`, con su marca propia.',
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('CSS — los 90 tokens llegan al :root en el CSS que se sirve')

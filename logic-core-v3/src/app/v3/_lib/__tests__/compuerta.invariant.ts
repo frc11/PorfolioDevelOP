@@ -18,6 +18,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { CLASES_FUERA_DE_FLUJO, CONSULTA_ESCENARIO, ESCENARIO_MIN_ANCHO_PX, snapshotServidor } from '../compuerta'
+import { IMPORT_DE_LA_ESCENA } from '../escena/contrato'
 import { EscenarioCompuerta } from '../../_componentes/EscenarioCompuerta'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -83,7 +84,30 @@ const compuerta = leer('src/app/v3/_componentes/EscenarioCompuerta.tsx')
   .join('\n')
 
 afirmar(compuerta.includes("{ ssr: false }"), 'el import perezoso va con `ssr: false`')
-afirmar(/dynamic\(\(\) => import\('\.\/EscenarioDePrueba'\)/.test(compuerta), 'y es `next/dynamic`, no un import estático')
+
+/**
+ * ⚠ **ESTA AFIRMACIÓN TENÍA LA RUTA ESCRITA A MANO, Y SITIO-S8 LA ROMPIÓ AL
+ * ENCHUFAR LA ESCENA REAL.** Decía `import('./EscenarioDePrueba')`, o sea que
+ * afirmaba QUÉ módulo se pide y no la propiedad que le importa a S1: **que se
+ * pide con `next/dynamic` y no con un import estático**. El día que el marcador
+ * de posición fuera reemplazado —que era su destino declarado desde el primer
+ * día— esto se ponía en rojo sin que la compuerta se hubiera roto.
+ *
+ * No se afloja (regla 8): se afirma la misma propiedad contra la ÚNICA fuente
+ * del especificador, que es el contrato del enchufe. Si alguien cambia el
+ * módulo, se cambia en un solo lugar y esto lo sigue; si alguien lo pasa a
+ * estático, esto falla, que es para lo que existe.
+ */
+afirmar(
+  compuerta.includes(`dynamic(() => import('${IMPORT_DE_LA_ESCENA}')`),
+  'y es `next/dynamic`, no un import estático',
+  IMPORT_DE_LA_ESCENA,
+)
+controlPositivo(
+  'el detector ve un import estático del mismo módulo',
+  `import EscenaDelHome from '${IMPORT_DE_LA_ESCENA}'`,
+  (f: string) => f.includes(`dynamic(() => import('${IMPORT_DE_LA_ESCENA}')`),
+)
 afirmar(compuerta.includes('return null'), 'abajo del umbral devuelve `null`, no un placeholder con caja')
 
 controlPositivo(

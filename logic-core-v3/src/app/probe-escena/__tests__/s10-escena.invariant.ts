@@ -17,10 +17,10 @@
  */
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
-import { CELOSIA_BAR, celosiaSkyFactor } from '../_components/probeCelosia'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
 import { check, report, section } from './harness'
 import { INK_HEIGHT, INK_WIDTH, mask, sampleFrame } from './frameProbe'
 

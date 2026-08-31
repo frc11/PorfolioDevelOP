@@ -56,8 +56,20 @@ afirmar(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Ningún instrumento quedó sin script')
 
-const huerfanos = instrumentosSinScript(derivacion)
+/**
+ * ⚠ Se le pasan TODOS los scripts, no sólo los derivados. El repo tiene dos
+ * cadenas —`test:sN-*` y `check:invariant:*`— y desde SITIO-S8 hay un directorio
+ * (`src/lib/`) donde conviven. Un detector que sólo conociera la primera
+ * reportaría como huérfanos a los de la segunda. Ver `s4-suites.ts`.
+ */
+const todosLosScripts = scriptsDe(JSON.parse(readFileSync(path.join(RAIZ, 'package.json'), 'utf8')))
+const huerfanos = instrumentosSinScript(derivacion, todosLosScripts)
 afirmarIgual(huerfanos, [], 'todo archivo `.invariant.*` de los directorios cableados tiene su script')
+afirmar(
+  Object.keys(todosLosScripts).some((s) => s.startsWith('check:invariant:')),
+  '  y el detector ve las DOS cadenas: `check:invariant:*` también cablea',
+  `${Object.keys(todosLosScripts).filter((s) => s.startsWith('check:invariant:')).length} scripts de la otra cadena`,
+)
 
 controlPositivo(
   'el buscador de huérfanos vería uno',

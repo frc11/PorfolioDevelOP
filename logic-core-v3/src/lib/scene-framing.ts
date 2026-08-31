@@ -1,6 +1,6 @@
-import { CHOREO_KEYFRAMES } from '@/app/probe-escena/_components/choreography'
-import type { ChoreoPose } from '@/app/probe-escena/_components/choreographyTypes'
-import { ORBIT_TARGET_Y, PROBE_SVG_SCALE } from '@/app/probe-escena/_components/probeScene'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
+import type { ChoreoPose } from '@/app/v3/_lib/escena/choreographyTypes'
+import { ORBIT_TARGET_Y, PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 

@@ -13,12 +13,12 @@
  * es la prueba de que la calibración de S5/S6/S7 sobrevivió intacta al cambio.**
  * Lo que le toca al recorrido definitivo está en `s9-definitiva.invariant.ts`.
  */
-import { CHOREO_TRAMOS } from '../_components/choreography'
+import { CHOREO_TRAMOS } from '@/app/v3/_lib/escena/choreography'
 import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
-import type { ChoreoKeyframe } from '../_components/choreographyTypes'
-import { MOUSE_HEIGHT_FACTOR } from '../_components/choreographyPhysics'
-import { PROBE_RANGES } from '../_components/probeStore'
+import type { ChoreoKeyframe } from '@/app/v3/_lib/escena/choreographyTypes'
+import { MOUSE_HEIGHT_FACTOR } from '@/app/v3/_lib/escena/choreographyPhysics'
+import { PROBE_RANGES } from '@/app/v3/_lib/escena/probeStore'
 import {
   FLOOR_Y,
   bowBetween,

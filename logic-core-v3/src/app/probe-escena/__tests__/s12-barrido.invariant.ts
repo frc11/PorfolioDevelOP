@@ -18,9 +18,9 @@
  *      Ése es el techo práctico del parámetro, y es un número, no un gusto.
  *   3. El ancho de borde escala lineal con α en las cuatro poses a la vez.
  */
-import { celosiaSunSpread, CELOSIA_SUN_RADIUS_MAX_DEG } from '../_components/celosiaPenumbra'
-import { CELOSIA_BAR, celosiaSkyFactor } from '../_components/probeCelosia'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
+import { celosiaSunSpread, CELOSIA_SUN_RADIUS_MAX_DEG } from '@/app/v3/_lib/escena/celosiaPenumbra'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { BEAT_POSES, celosiaBeatAt } from './celosiaBeat'
 import { framePenumbraSpread } from './celosiaFloor'

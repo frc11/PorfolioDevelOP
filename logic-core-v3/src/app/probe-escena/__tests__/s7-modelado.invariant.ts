@@ -28,9 +28,9 @@
  *
  * Por eso las ventanas están partidas en dos listas y no en una.
  */
-import { CHOREO_KEYFRAMES } from '../_components/choreography'
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   cameraAt,
   check,

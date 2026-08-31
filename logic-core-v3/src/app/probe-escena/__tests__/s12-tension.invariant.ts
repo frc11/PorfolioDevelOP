@@ -18,10 +18,10 @@
  * como nota: la penumbra NO se ensancha al atardecer, la diferencia entre capas
  * es del 16%, y la creciente de sol abierto ya tenía el borde blando.
  */
-import { celosiaTransmittance } from '../_components/celosiaGeometry'
-import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from '../_components/celosiaPenumbra'
-import { CELOSIA_BAR, celosiaSkyFactor } from '../_components/probeCelosia'
-import { MOIRE_FADE, MOIRE_MISMATCH } from '../_components/probeMoire'
+import { celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from '@/app/v3/_lib/escena/celosiaPenumbra'
+import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_FADE, MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { BEAT_POSES, celosiaBeatAt } from './celosiaBeat'
 import { floorPenumbraAt } from './celosiaFloor'

@@ -1,4 +1,4 @@
-import { CHOREO_KEYFRAMES } from '../_components/choreography'
+import { CHOREO_KEYFRAMES } from '@/app/v3/_lib/escena/choreography'
 import {
   MOIRE_BASE_ALPHA,
   MOIRE_COARSE_CELLS,
@@ -12,9 +12,9 @@ import {
   MOIRE_OPACITY,
   fineCells,
   lineDuty,
-} from '../_components/probeMoire'
-import { celosiaTransmittance } from '../_components/celosiaGeometry'
-import { FLOOR_RADIUS, INK_COLOR, PAPER_COLOR, PROBE_SVG_SCALE } from '../_components/probeScene'
+} from '@/app/v3/_lib/escena/probeMoire'
+import { celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { FLOOR_RADIUS, INK_COLOR, PAPER_COLOR, PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
 
 import { FLOOR_Y, TAN_HALF_V, cameraAt, emptyPose, halfFovDeg, makeTrack, type Vec3 } from './harness'
 import { buildLogoMask } from './logoInk'

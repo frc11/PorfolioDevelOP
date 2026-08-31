@@ -21,8 +21,8 @@ import {
   CELOSIA_BAR,
   CELOSIA_SHAFT_ALPHA_FOR_5_PERCENT,
   celosiaSkyFactor,
-} from '../_components/probeCelosia'
-import { INK_COLOR, PAPER_COLOR } from '../_components/probeScene'
+} from '@/app/v3/_lib/escena/probeCelosia'
+import { INK_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 import { check, report, section, type Vec3 } from './harness'
 import { shadeSurface, type ViewContext } from './shading'
 
@@ -34,7 +34,7 @@ const UP: Vec3 = [0, 1, 0]
 section('El disco se fue, y esto lo verifica sin quedar verde por vacío')
 
 {
-  const componentsDir = join(process.cwd(), 'src/app/probe-escena/_components')
+  const componentsDir = join(process.cwd(), 'src/app/v3/_lib/escena')
 
   /** Cuenta declaraciones de sprite en un fuente. */
   function spriteDeclarations(source: string): number {

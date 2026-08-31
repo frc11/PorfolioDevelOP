@@ -1,11 +1,11 @@
 import {
   BOKEH_SPRITE_SIZE,
   PARTICLE_SPRITE_SIZE,
-} from '@/app/probe-escena/_components/probeParticles'
+} from '@/app/v3/_lib/escena/probeParticles'
 import {
   createBokehSpriteData,
   createDotSpriteData,
-} from '@/app/probe-escena/_components/particleTextures'
+} from '@/app/v3/_lib/escena/particleTextures'
 
 import {
   INTRO_BOKEH_COLOR,

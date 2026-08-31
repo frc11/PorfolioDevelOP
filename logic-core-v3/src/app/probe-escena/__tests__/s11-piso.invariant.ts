@@ -22,15 +22,15 @@ import {
   celosiaSkyIntegral,
   celosiaTransmittance,
   fitCelosiaSkyShare,
-} from '../_components/celosiaGeometry'
-import { MARK_PLACEMENTS } from '../_components/floorMarks'
+} from '@/app/v3/_lib/escena/celosiaGeometry'
+import { MARK_PLACEMENTS } from '@/app/v3/_lib/escena/floorMarks'
 import {
   CELOSIA_BAR,
   CELOSIA_SKY_SHARE,
   celosiaSkyFactor,
-} from '../_components/probeCelosia'
-import { MOIRE_MISMATCH } from '../_components/probeMoire'
-import { MARK_COLOR, PAPER_COLOR } from '../_components/probeScene'
+} from '@/app/v3/_lib/escena/probeCelosia'
+import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
+import { MARK_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 import {
   FLOOR_Y,
   angularOffset,

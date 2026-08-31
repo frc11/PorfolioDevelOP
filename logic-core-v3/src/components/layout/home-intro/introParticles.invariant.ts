@@ -4,9 +4,9 @@ import {
   PARTICLES_MAX,
   PARTICLE_R_MAX,
   PARTICLE_SIZE,
-} from '@/app/probe-escena/_components/probeParticles'
-import { ORBIT_TARGET_Y } from '@/app/probe-escena/_components/probeScene'
-import { PROBE_DEFAULTS } from '@/app/probe-escena/_components/probeStore'
+} from '@/app/v3/_lib/escena/probeParticles'
+import { ORBIT_TARGET_Y } from '@/app/v3/_lib/escena/probeScene'
+import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 import { pointSizePx } from '@/lib/scene-camera'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 
@@ -73,8 +73,8 @@ section('1 · Lo copiado de la escena sigue siendo lo mismo, leído del código'
  * Es el patrón de `introSilhouette.invariant.ts`, que verifica el clip leyendo
  * el SVG en vez de confiar en que nadie lo mueva.
  */
-const DEPTH_SRC = readSource('src/app/probe-escena/_components/DepthParticles.tsx')
-const BOKEH_SRC = readSource('src/app/probe-escena/_components/BokehParticles.tsx')
+const DEPTH_SRC = readSource('src/app/v3/_lib/escena/DepthParticles.tsx')
+const BOKEH_SRC = readSource('src/app/v3/_lib/escena/BokehParticles.tsx')
 
 check(
   'el sesgo radial del polvo es el mismo que el componente pasa',

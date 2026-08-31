@@ -4,8 +4,8 @@ import {
   ORBIT_TARGET_Y,
   PROBE_EXTRUDE,
   PROBE_SVG_SCALE,
-} from '@/app/probe-escena/_components/probeScene'
-import type { ChoreoPose } from '@/app/probe-escena/_components/choreographyTypes'
+} from '@/app/v3/_lib/escena/probeScene'
+import type { ChoreoPose } from '@/app/v3/_lib/escena/choreographyTypes'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 
 /**

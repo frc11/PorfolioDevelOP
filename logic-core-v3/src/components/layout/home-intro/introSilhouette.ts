@@ -1,4 +1,4 @@
-import { PROBE_EXTRUDE } from '@/app/probe-escena/_components/probeScene'
+import { PROBE_EXTRUDE } from '@/app/v3/_lib/escena/probeScene'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 
 import { sampleFill } from './introSampling'

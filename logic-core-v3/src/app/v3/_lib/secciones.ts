@@ -118,7 +118,7 @@ export interface Seccion {
  *                                 faltaba era que la tabla lo dijera.
  *     06 Tu panel        200svh   dos tiempos. Era 100svh y SUBESTIMABA.
  *     07 Por qué develOP 100svh   una pantalla
- *     08 Cierre          100svh   MEDIDO: 0,68 pantallas a 1440. Ver su fila.
+ *     08 Cierre          100svh   MEDIDO: 0,82 pantallas a 1440. Ver su fila.
  *
  * Las tres correcciones las pidió SITIO-S6 con su medición y no las pudo
  * escribir: este archivo era del otro lane. Es el ejemplo más limpio de por qué
@@ -178,20 +178,35 @@ export const SECCIONES: readonly Seccion[] = [
    * valor tiene que empezar por acá y no por la intuición — la intuición ya se
    * probó y dio al revés:
    *
-   *     @1440 × 900   609 px  →  0,68 pantallas   (las tres columnas EN FILA)
-   *     @375  × 667   913 px  →  1,37 pantallas   (las columnas APILADAS)
+   *     @1440 × 900   741 px  →  0,82 pantallas   (las tres columnas EN FILA)
+   *     @375  × 667  1029 px  →  1,54 pantallas   (las columnas APILADAS)
    *
    * Las produce `s8-cierre.invariant` sumando cajas de línea y tokens —no está
    * medido en un navegador, y eso está declarado ahí—.
    *
+   * ⚠️ **LAS DOS CIFRAS SE MOVIERON EN SITIO-S8, Y NO ES QUE LA SECCIÓN CAMBIÓ
+   * DE ALTO: EL MODELO ESTABA MAL.** Publicaba 609 y 913, medidos con UNA sola
+   * columna del pie —la de novedades— usada para las tres. Con tres enlaces en
+   * la columna del recorrido subestimaba 4 px y nadie lo notaba; al ampliar el
+   * pie a las ocho secciones (§7.24) esa columna pasó a ser la más alta y la
+   * subestimación llegó a 132 px. El instrumento ahora mide la más alta de las
+   * tres, que es lo que gobierna la fila.
+   *
+   * **Las conclusiones de abajo sobreviven las dos**, y por eso el valor no se
+   * toca: 741 < 900 sigue entrando en una pantalla a escritorio, y 1029 > 667
+   * sigue pasándose a 375, donde el `min-height` deja crecer la sección. Lo que
+   * se achicó es el aire: de 291 px a 159. Si el pie vuelve a crecer —una cuarta
+   * columna, más pedidos de contacto— `100svh` deja de contenerlo, y ahora hay
+   * un instrumento que se pone rojo el día que pase.
+   *
    * **Se queda en `100svh`, y no es conservadurismo:** el `alto` es un
    * `min-height` y la cuenta de ritmo del proyecto es la de ESCRITORIO, que es
-   * donde la referencia midió los suyos. A 1440 la sección entra en 0,68
+   * donde la referencia midió los suyos. A 1440 la sección entra en 0,82
    * pantallas, así que `100svh` ya la contiene con aire; declarar `200svh`
-   * metería **1,32 pantallas vacías** en el tramo final del recorrido, que es
+   * metería **1,18 pantallas vacías** en el tramo final del recorrido, que es
    * exactamente el defecto que el pinneo existe para no tener.
    *
-   * ⚠ A 375 el contenido SÍ pasa la pantalla —1,37— y ahí manda el
+   * ⚠ A 375 el contenido SÍ pasa la pantalla —1,54— y ahí manda el
    * `min-height`: la sección crece y no recorta nada. O sea que la premisa de
    * SITIO-S6 era correcta **para el ancho que estaba mirando** y no para el que
    * gobierna la cuenta. Lo que eso cuesta es que el ritmo de mobile —que este
@@ -200,7 +215,7 @@ export const SECCIONES: readonly Seccion[] = [
    * separado con razón.
    *
    * **Las tres salidas, para que quien lo reabra no las vuelva a recorrer:**
-   * subir el alto mete 1,32 pantallas vacías a 1440; dejarlo en 100svh no
+   * subir el alto mete 1,18 pantallas vacías a 1440; dejarlo en 100svh no
    * recorta nada en ningún ancho; y declarar dos altos por ancho no existe en
    * la tabla —el `alto` es uno y es un mínimo—. Se queda como está.
    */

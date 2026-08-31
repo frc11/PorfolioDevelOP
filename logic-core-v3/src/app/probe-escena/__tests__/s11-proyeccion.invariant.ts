@@ -13,9 +13,9 @@
  * Todo esto está en unidades de MUNDO. Cómo cae en pantalla —el batido en píxeles
  * por pose y el aliasing con su filtro— está en `s11-pantalla.invariant.ts`.
  */
-import { celosiaCrossings, celosiaLayers } from '../_components/celosiaGeometry'
-import { sampleLightArc } from '../_components/choreographySampler'
-import type { MutableLightLevels } from '../_components/choreographyTypes'
+import { celosiaCrossings, celosiaLayers } from '@/app/v3/_lib/escena/celosiaGeometry'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   MOIRE_COARSE_CELLS,
   MOIRE_DRIFT_PERIOD_S,
@@ -23,7 +23,7 @@ import {
   MOIRE_MISMATCH,
   MOIRE_NEAR_RADIUS,
   fineCells,
-} from '../_components/probeMoire'
+} from '@/app/v3/_lib/escena/probeMoire'
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
 import { sunDirectionAt } from './shading'
 

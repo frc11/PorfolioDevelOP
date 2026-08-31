@@ -1,5 +1,5 @@
-import { cubicBezierEase } from '@/app/probe-escena/_components/bezier'
-import { PARTICLE_SIZE } from '@/app/probe-escena/_components/probeParticles'
+import { cubicBezierEase } from '@/app/v3/_lib/escena/bezier'
+import { PARTICLE_SIZE } from '@/app/v3/_lib/escena/probeParticles'
 import { MOTION_EASE } from '@/components/design-system/motion/tokens'
 
 import { check, report, section } from './introChecks'

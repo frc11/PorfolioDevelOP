@@ -1,4 +1,4 @@
-import type { ChoreoSection } from './choreographyTypes'
+import type { ChoreoSection } from '@/app/v3/_lib/escena/choreographyTypes'
 
 /**
  * LOS COMENTARIOS DE LAS TRES VARIANTES, como dato.
