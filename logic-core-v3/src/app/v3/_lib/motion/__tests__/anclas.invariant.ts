@@ -31,11 +31,11 @@
  * traducción con un solo término mal no los reproduce.
  */
 
+import { acotar01 } from '../../acotar'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import {
   ANCLAS,
   RANGO_MINIMO_PX,
-  acotar01,
   posicionDeAncla,
   progresoEnRango,
   rangoDegenerado,

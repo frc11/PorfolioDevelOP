@@ -25,24 +25,15 @@
  *     primera pasaría en verde con un sistema que no anima nunca.
  */
 
-import { MotionConfig } from 'motion/react'
-import { renderToStaticMarkup } from 'react-dom/server'
-
-import { ProveedorDeCoreografia, type ModoDeCoreografia } from '../../secciones-a/_contrato/coreografia'
-import { textosDe } from '../../secciones-a/_contrato/marcadores'
-import { REGISTRO } from '../../secciones-a/_contrato/registro'
+import { textosDe } from '../../_secciones/_contrato/marcadores'
+import { marcar as marcarConPrimitivas } from '../../_secciones/_invariantes/render'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { MODULOS_DE_S5 as REGISTRO } from './s5-modulos'
 
-function marcar(indice: number, modo: ModoDeCoreografia): string {
+function marcar(indice: number, anima: boolean): string {
   const { Componente, seccion } = REGISTRO[indice]
-  return renderToStaticMarkup(
-    <MotionConfig reducedMotion="never">
-      <ProveedorDeCoreografia modo={modo}>
-        <Componente seccion={seccion} />
-      </ProveedorDeCoreografia>
-    </MotionConfig>,
-  )
+  return marcarConPrimitivas(<Componente seccion={seccion} />, { anima })
 }
 
 /** React escapa el texto al serializar; la búsqueda tiene que escapar igual o
@@ -115,7 +106,7 @@ titulo('1 · Abajo de 1025 no se escribe una sola transformada')
 
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id } = REGISTRO[i]
-  const quieto = marcar(i, 'nunca')
+  const quieto = marcar(i, false)
   afirmar(!quieto.includes('transform:'), `\`${id}\` — ninguna transformada en la rama quieta`)
   afirmar(!quieto.includes('will-change'), `  ni una capa de composición promovida`)
   afirmar(quieto.length > 0, `  y el marcado no está vacío`, `${quieto.length} caracteres`)
@@ -133,8 +124,8 @@ titulo('2 · CONTROL POSITIVO — arriba del umbral la coreografía SÍ cambia e
 let seccionesQueCambian = 0
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id } = REGISTRO[i]
-  const quieto = marcar(i, 'nunca')
-  const coreografiado = marcar(i, 'siempre')
+  const quieto = marcar(i, false)
+  const coreografiado = marcar(i, true)
   const cambia = quieto !== coreografiado
   afirmar(cambia, `\`${id}\` — con la compuerta abierta el árbol es OTRO`)
   if (cambia) seccionesQueCambian += 1
@@ -143,7 +134,7 @@ afirmarIgual(seccionesQueCambian, 4, 'las cuatro cambian: ninguna está quieta e
 
 /** Y al menos una escribe transformada de verdad en el primer cuadro: P2, P4 y
  *  P7 sí lo hacen. Sin esto, "el árbol cambia" podría ser sólo el envoltorio. */
-const conTransformada = REGISTRO.map((m, i) => ({ id: m.id, html: marcar(i, 'siempre') })).filter((r) =>
+const conTransformada = REGISTRO.map((m, i) => ({ id: m.id, html: marcar(i, true) })).filter((r) =>
   r.html.includes('transform:'),
 )
 afirmar(
@@ -154,8 +145,8 @@ afirmar(
 
 controlPositivo(
   'el comparador de árboles vería dos marcados iguales',
-  marcar(0, 'nunca'),
-  (html: string) => html !== marcar(0, 'nunca'),
+  marcar(0, false),
+  (html: string) => html !== marcar(0, false),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -175,7 +166,7 @@ const esReferencia = (t: string): boolean => /^[#/.]/.test(t)
 
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id, contenido } = REGISTRO[i]
-  const html = marcar(i, 'nunca')
+  const html = marcar(i, false)
   const textos = textosDe(contenido).filter((h) => !esReferencia(h.valor))
   const ausentes = textos.filter((h) => !html.includes(escapar(h.valor)))
   afirmarIgual(
@@ -199,15 +190,16 @@ titulo('4 · El foco: nativo, y nunca adentro de una caja recortada')
 let focalizablesTotales = 0
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id } = REGISTRO[i]
-  for (const modo of ['nunca', 'siempre'] as const) {
-    const html = marcar(i, modo)
+  for (const anima of [false, true]) {
+    const html = marcar(i, anima)
+    const rama = anima ? 'animada' : 'quieta'
     const recortados = focalizablesRecortados(html)
     afirmarIgual(
       recortados,
       [],
-      `\`${id}\` (${modo}) — ningún focalizable adentro de una caja con overflow oculto`,
+      `\`${id}\` (${rama}) — ningún focalizable adentro de una caja con overflow oculto`,
     )
-    if (modo === 'nunca') focalizablesTotales += focalizablesDe(html).length
+    if (!anima) focalizablesTotales += focalizablesDe(html).length
   }
 }
 console.log(`  focalizables en las cuatro secciones, rama quieta: ${focalizablesTotales}`)
@@ -265,14 +257,15 @@ export function nivelesSinTamano(html: string): string[] {
 let nivelesMirados = 0
 for (let i = 0; i < REGISTRO.length; i++) {
   const { id } = REGISTRO[i]
-  for (const modo of ['nunca', 'siempre'] as const) {
-    const html = marcar(i, modo)
+  for (const anima of [false, true]) {
+    const html = marcar(i, anima)
+    const rama = anima ? 'animada' : 'quieta'
     afirmarIgual(
       nivelesSinTamano(html),
       [],
-      `\`${id}\` (${modo}) — todo nivel declarado conserva su clase de tamaño`,
+      `\`${id}\` (${rama}) — todo nivel declarado conserva su clase de tamaño`,
     )
-    if (modo === 'nunca') nivelesMirados += (html.match(/data-nivel="/g) ?? []).length
+    if (!anima) nivelesMirados += (html.match(/data-nivel="/g) ?? []).length
   }
 }
 afirmar(

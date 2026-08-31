@@ -23,6 +23,12 @@ import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { RAIZ } from './s4-corrida'
+import {
+  EXCLUSIONES,
+  archivosDelRepo,
+  conflictosEnElRepo,
+  conflictosIncluyendoLoExcluido,
+} from './s4-conflictos'
 import { clavesDuplicadas, marcadoresDeConflicto, revisarPaquete } from './s4-paquete'
 
 const FIXTURES = 'src/app/v3/_lib/__tests__/s4-fixtures'
@@ -105,6 +111,68 @@ afirmarIgual(
   clavesDuplicadas('{ "a": { "x": 1, "x": 2 }, "b": [ { "y": 1, "y": 2 } ] }'),
   ['a.x', 'b[].y'],
   'y sí los ve anidados, con la ruta completa',
+)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('EL REPO ENTERO — marcadores de conflicto, y la exclusión que los hace posibles')
+
+/**
+ * Agregado en SITIO-S7. El gate miraba `package.json` porque ése fue el archivo
+ * que un merge rompió; este sprint mergeó DOS lanes y un marcador sin resolver
+ * adentro de un `.md`, un `.css` o un `.json` que nadie importa no rompe el
+ * build, no rompe los tipos, y se commitea.
+ */
+const conflictos = conflictosEnElRepo()
+afirmarIgual(
+  conflictos.map((h) => `${h.archivo} — ${h.detalle}`),
+  [],
+  'ningún archivo del repo tiene un merge sin resolver',
+)
+
+/**
+ * ⚠ EL CONTROL POSITIVO DE LA EXCLUSIÓN, QUE ES LO QUE LA HACE HONESTA.
+ *
+ * Sin esto, "cero conflictos" sería compatible con un escáner que no mira nada.
+ * El mismo escáner, sin la exclusión, TIENE que encontrar los marcadores que
+ * `s4-fixtures/` guarda a propósito. Y si un día dejaran de estar, esta
+ * comprobación falla y hay que borrar la exclusión — que es exactamente lo que
+ * impide que una exclusión sobreviva a su razón.
+ */
+const conLoExcluido = conflictosIncluyendoLoExcluido()
+afirmar(
+  conLoExcluido.length > conflictos.length,
+  `el MISMO escáner, sin la exclusión, encuentra ${conLoExcluido.length} marcador(es)`,
+  conLoExcluido.map((h) => h.archivo).join(' · '),
+)
+
+for (const exclusion of EXCLUSIONES) {
+  console.log(`  excluido: ${exclusion.ruta}`)
+  console.log(`            ${exclusion.motivo}`)
+  if (!exclusion.tieneMarcadoresAPropósito) continue
+  const adentro = conLoExcluido.filter((h) => h.archivo.startsWith(`${exclusion.ruta}/`))
+  afirmar(
+    adentro.length > 0,
+    `  y \`${exclusion.ruta}\` SIGUE teniendo los marcadores que justifican excluirlo`,
+    `${adentro.length} en ${new Set(adentro.map((h) => h.archivo)).size} archivo(s)`,
+  )
+}
+
+/** Y que el alcance no sea vacío: un escáner que no lee archivos no ve nada. */
+const archivos = archivosDelRepo()
+afirmar(archivos.length > 100, `el escáner recorrió ${archivos.length} archivos de texto del repo`)
+afirmar(
+  archivos.some((a) => a === 'package.json'),
+  '  incluido `package.json`, que es el que rompió el merge que motivó todo esto',
+)
+afirmar(
+  archivos.some((a) => a.endsWith('.md')),
+  '  y los `.md`, que es donde un marcador no rompe nada y se publica',
+)
+
+controlPositivo(
+  'el detector de conflictos ve un marcador en un texto cualquiera',
+  '<<<<<<< HEAD',
+  (texto: string) => marcadoresDeConflicto(texto).length === 0,
 )
 
 cerrar('s4-paquete.invariant')

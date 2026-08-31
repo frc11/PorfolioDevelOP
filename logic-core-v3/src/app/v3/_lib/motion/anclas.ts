@@ -56,6 +56,8 @@
  * consumidores corren por el mismo camino de JS.
  */
 
+import { acotar01 } from '../acotar'
+
 /** Un extremo del ancla: fracción de la longitud propia más píxeles. */
 export interface LadoDeAncla {
   /** 0 = borde superior, 0,5 = centro, 1 = borde inferior. */
@@ -221,13 +223,6 @@ export function rangoDegenerado(
   const inicio = posicionDeAncla(par.inicio, caja, altoViewport)
   const fin = posicionDeAncla(par.fin, caja, altoViewport)
   return fin - inicio < RANGO_MINIMO_PX
-}
-
-/** Acota a `[0, 1]`. El progreso entra acotado a todo lo que sigue. */
-export function acotar01(n: number): number {
-  if (n < 0) return 0
-  if (n > 1) return 1
-  return n
 }
 
 /**

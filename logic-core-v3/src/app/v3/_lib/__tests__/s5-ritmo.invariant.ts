@@ -26,12 +26,12 @@
  * Se publica con atribución y no se afirma.
  */
 
-import { compresionDe, momentosDe, ritmoDe, RITMO_DE_LA_REFERENCIA } from '../../secciones-a/_contrato/ritmo'
-import { pantallasDe } from '../../secciones-a/_contrato/forma'
-import { IDS_DE_SECCION_A } from '../../secciones-a/_contrato/forma'
+import { compresionDe, momentosDe, ritmoDe, RITMO_DE_LA_REFERENCIA } from '../../_secciones/_contrato/ritmo'
+import { pantallasDe } from '../../_secciones/_contrato/forma'
 import { SECCIONES, seccionPorId } from '../secciones'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { IDS_DE_S5 } from './s5-modulos'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La fórmula reproduce el número de la referencia')
@@ -55,7 +55,7 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Las cuatro secciones del lane, una por una')
 
-const DEL_LANE = IDS_DE_SECCION_A.map((id) => seccionPorId(id))
+const DEL_LANE = IDS_DE_S5.map((id) => seccionPorId(id))
 
 const ESPERADO: readonly { id: string; pantallas: number; pinneada: string }[] = [
   { id: 'hero', pantallas: 1, pinneada: 'no' },
@@ -84,10 +84,22 @@ titulo('3 · El ritmo del lane — la cifra que se publica')
 
 const ritmo = ritmoDe(DEL_LANE)
 
-afirmarIgual(ritmo.pantallas, 7, 'pantallas nominales del lane')
-afirmarIgual(ritmo.pantallasPinneadas, 3, 'de las cuales, pinneadas')
-afirmarIgual(ritmo.secuencias, 1, 'secuencias pinneadas — Trabajos, y cuenta como UN momento')
-afirmarIgual(ritmo.momentos, 5, 'MOMENTOS REALES del lane A')
+/**
+ * ⚠ LA CUENTA CAMBIÓ DE DEFINICIÓN EN SITIO-S7, y estos números son la
+ * corrección, no un ajuste.
+ *
+ * Este lane contaba la sección pinneada ENTERA (3 de 3); el otro contaba el
+ * recorrido del pin (2 de 3). Ganó el del otro **porque es el que la referencia
+ * midió**: `rangoPegado = alto del contenedor − alto del elemento pegado`
+ * (SCROLL.md §4). El porqué entero está en `_contrato/ritmo.ts`.
+ *
+ * Consecuencia: el ritmo de estas cuatro pasa de 5 a 6 momentos. No es que el
+ * tramo haya cambiado — es que una de las dos cuentas estaba mal.
+ */
+afirmarIgual(ritmo.pantallas, 7, 'pantallas nominales del tramo')
+afirmarIgual(ritmo.pantallasPinneadas, 2, 'de las cuales pinneadas: las que consume el pin de Trabajos')
+afirmarIgual(ritmo.secuencias, 1, 'una secuencia pinneada — Trabajos')
+afirmarIgual(ritmo.momentos, 6, 'MOMENTOS REALES de las cuatro primeras')
 
 const compresion = compresionDe(ritmo)
 const compresionDeLaReferencia = compresionDe({

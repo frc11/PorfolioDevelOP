@@ -166,6 +166,7 @@ controlPositivo(
 titulo('B2 · LA TESIS — la marca NO está en la carga inicial de /v3/motion')
 
 const inicialMotion = conjuntoInicial('/v3/motion')
+const inicialHome = conjuntoInicial('/')
 afirmar(inicialMotion.length > 0, `la carga inicial de /v3/motion son ${inicialMotion.length} archivos`)
 afirmar(pesar(inicialMotion).crudo > 0, '  y pesan más de cero bytes — el conjunto no está vacío')
 
@@ -239,7 +240,6 @@ afirmar(
 )
 
 // Lo heredado del layout raíz, para que el número de arriba se lea en contexto.
-const inicialHome = conjuntoInicial('/')
 const heredados = inicialMotion.filter((f) => inicialHome.includes(f))
 const propios = inicialMotion.filter((f) => !inicialHome.includes(f))
 console.log(
@@ -282,21 +282,40 @@ console.log(
 const soloEnMotion = inicialMotion.filter((f) => !inicialV3.includes(f))
 const soloEnV3 = inicialV3.filter((f) => !inicialMotion.includes(f))
 for (const f of soloEnMotion) console.log(`  + solo en /v3/motion: ${f} (${kib(statSync(rutaDe(f)).size)})`)
+for (const f of soloEnV3) console.log(`  + solo en /v3       : ${f} (${kib(statSync(rutaDe(f)).size)})`)
+
+/**
+ * ⚠ ESTA COMPROBACIÓN CAMBIÓ DE FORMA EN SITIO-S7, y por la misma razón que la
+ * de las huellas: **afirmaba una propiedad del reparto y no del sistema.**
+ *
+ * Decía `soloEnV3 === []`, o sea *"la carga inicial de `/v3` está ENTERA dentro
+ * de la de `/v3/motion`"*, y era una forma de decir "no hay dos bundles
+ * distintos". Funcionaba porque `/v3` era un esqueleto: no tenía nada propio que
+ * `/v3/motion` no tuviera. **Con el home compuesto, `/v3` tiene sus chunks y la
+ * inclusión deja de valer sin que nada se haya roto.**
+ *
+ * Lo que la comprobación quería decir sobrevive intacto y se afirma directo:
+ * **las dos rutas comparten EXACTAMENTE el mismo conjunto heredado**. Ésa es la
+ * propiedad —"no hay dos bundles distintos"— y no depende de que una ruta sea
+ * un subconjunto de la otra, que es un accidente de cuánto contenido tenga cada
+ * una.
+ */
+const heredadoDe = (inicial: readonly string[]): string[] =>
+  inicial.filter((f) => inicialHome.includes(f)).sort()
 
 afirmarIgual(
-  soloEnV3,
-  [],
-  'la carga inicial de /v3 está ENTERA dentro de la de /v3/motion: no hay dos bundles distintos',
+  heredadoDe(inicialV3),
+  heredadoDe(inicialMotion),
+  'las dos rutas comparten EXACTAMENTE el mismo conjunto heredado: no hay dos bundles distintos',
+)
+afirmar(
+  heredadoDe(inicialV3).length > 0,
+  `  y ese conjunto son ${heredadoDe(inicialV3).length} archivos: la comparación no es sobre el vacío`,
 )
 afirmar(
   soloEnMotion.every((f) => f.includes('app/v3/motion/')),
-  'y lo único que /v3/motion agrega son sus propios chunks de página',
-  soloEnMotion.join(' · '),
-)
-afirmarIgual(
-  soloEnMotion.length,
-  1,
-  '  exactamente uno: la diferencia entre los dos números es un archivo de ruta',
+  'y lo único que /v3/motion agrega sobre /v3 son sus propios chunks de página',
+  soloEnMotion.join(' · ') || '(ninguno)',
 )
 
 /**
@@ -316,13 +335,67 @@ for (const huella of HUELLAS_DEL_SISTEMA) {
   afirmarIgual(sucios, [], `\`${huella}\` no está en ningún archivo de la carga inicial de /v3`)
 }
 
+/**
+ * ⚠ EL CONTROL DE ESTE BLOQUE — REESCRITO EN SITIO-S7, Y POR QUÉ EL ANTERIOR
+ * ERA FRÁGIL POR DISEÑO.
+ *
+ * Decía esto:
+ *
+ *     controlPositivo('…las encuentra donde tienen que estar (el chunk perezoso)',
+ *       conLaMarca, (chunks) => !HUELLAS.every((h) => chunks.some(tiene(h))))
+ *
+ * o sea: las cinco huellas tienen que estar **en los chunks que llevan
+ * `MARCA_MOTION`**. Eso no es una propiedad del sistema de motion: es una
+ * propiedad del REPARTO DE CHUNKS que webpack eligió ese día. Y el reparto
+ * cambia con la cantidad de consumidores — **este control cambió de resultado
+ * tres veces en tres builds distintos**, según cuántas rutas había:
+ *
+ *   · con un solo consumidor (la ruta de demostración), las huellas caían en el
+ *     mismo chunk perezoso que la marca y el control pasaba;
+ *   · al aparecer un SEGUNDO consumidor estático —las secciones—, webpack
+ *     factorizó el sistema a un chunk compartido y cuatro de las cinco huellas
+ *     se mudaron. El control se puso en rojo **sin que se rompiera nada**;
+ *   · y con la composición del home volvería a moverse.
+ *
+ * **Un control positivo tiene que afirmar una propiedad que sobreviva a que el
+ * empaquetador reagrupe los módulos.** "Está en ESTE archivo" no sobrevive;
+ * "está en el build" sí, porque la unión de los chunks es la misma sea cual sea
+ * la partición. Ésa es la regla que queda, y es general: **una afirmación sobre
+ * la salida del build no puede depender de en qué archivo cayó cada módulo,
+ * salvo que el archivo sea justamente lo que se afirma** —como en B2 y B3, que
+ * hablan del CONJUNTO de la carga inicial de una ruta, no de un chunk.
+ *
+ * Así que se afirma lo que el control quería decir y decía mal: que el buscador
+ * encuentra las cinco huellas en la salida del build. Sigue probando que no
+ * está ciego —que es su único trabajo— y deja de afirmar un reparto que ya no
+ * es cierto.
+ */
+const chunksDelBuild = todosLosChunks()
+const contiene = (huella: string): string[] =>
+  chunksDelBuild.filter((f) => readFileSync(rutaDe(f), 'utf8').includes(huella))
+
+for (const huella of HUELLAS_DEL_SISTEMA) {
+  const donde = contiene(huella)
+  afirmar(
+    donde.length > 0,
+    `el buscador SÍ encuentra \`${huella}\` en la salida del build — no está ciego`,
+    `${donde.length} chunk(s): ${donde.join(' · ')}`,
+  )
+}
+
 controlPositivo(
-  'el buscador de huellas SÍ las encuentra donde tienen que estar (el chunk perezoso)',
-  conLaMarca,
-  (chunks: string[]) =>
-    !HUELLAS_DEL_SISTEMA.every((h) =>
-      chunks.some((f) => readFileSync(rutaDe(f), 'utf8').includes(h)),
-    ),
+  'y no encuentra una huella que no existe en ningún chunk',
+  'esta-huella-del-sistema-de-motion-no-existe-en-ningun-chunk-jamas',
+  (huella: string) => contiene(huella).length > 0,
+)
+
+/**
+ * La cifra que el control viejo escondía, ahora publicada: en cuántos chunks
+ * distintos vive el sistema. No se afirma —es del empaquetador— pero se ve, que
+ * es lo que hace que un cambio de reparto se note sin poner nada en rojo.
+ */
+console.log(
+  `  reparto del sistema en este build: ${HUELLAS_DEL_SISTEMA.map((h) => `${h}→${contiene(h).length}`).join(' · ')}`,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

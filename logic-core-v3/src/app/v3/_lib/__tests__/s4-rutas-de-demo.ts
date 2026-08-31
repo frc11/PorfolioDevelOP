@@ -50,18 +50,101 @@ export const RUTAS_DE_DEMO: readonly RutaDeDemo[] = [
   { ruta: '/v3/componentes', sprint: 'S3', motivo: 'la galería del chrome' },
   { ruta: '/v3/tipografia', sprint: 'S3', motivo: 'la escala tipográfica' },
   { ruta: '/v3/tipografia/muestra', sprint: 'S3', motivo: 'la muestra de la escala' },
-  {
+]
+
+/**
+ * LAS DOS QUE SE BORRARON, Y QUÉ MIDE SU BORRADO — SITIO-S7.
+ *
+ * `/v3/secciones-a` (S5) y `/v3/secciones-b` (S6) eran las rutas donde cada
+ * lane mostraba sus cuatro secciones para poder juzgarlas. Las dos declaraban su
+ * fecha de baja en el propio archivo: **se borran el día que `/v3` componga las
+ * ocho**. Ese día llegó.
+ *
+ * Se dejan escritas acá, y no se borra la constante, porque el borrado es una
+ * MEDICIÓN: el padrón pasó de 7 a 5 rutas, así que el heredado de `/v3` tiene
+ * que BAJAR. Es una prueba parcial de la predicción del mapa —quedan cinco
+ * rutas, así que no la cierra— pero es evidencia gratis, y sin la lista de lo
+ * que se borró el delta no se puede atribuir.
+ */
+export const RUTAS_BORRADAS: readonly RutaDeDemo[] = [
   {
     ruta: '/v3/secciones-a',
     sprint: 'S5',
-    motivo: 'las secciones 1 a 4 en orden, con sus superficies — se borra al componer el home',
+    motivo: 'las secciones 1 a 4 en orden, con sus superficies — borrada al componer el home',
   },
   {
     ruta: '/v3/secciones-b',
     sprint: 'S6',
-    motivo: 'las secciones 5 a 8, para juzgarlas antes de componer el home',
-  },  },
+    motivo: 'las secciones 5 a 8, para juzgarlas antes de componer el home — borrada al componerlo',
+  },
 ]
+
+/**
+ * EL HEREDADO MEDIDO CON LAS SIETE RUTAS, justo antes del borrado.
+ *
+ * Es la línea de base contra la que se lee el efecto de borrar las dos. Sale de
+ * la corrida de `test:s4-heredado` sobre el build del 2026-08-30, con las siete
+ * rutas de demo existiendo: **1386,2 KiB crudo en 24 archivos heredados**,
+ * sobre un total de 1391,1 KiB · 424,0 KiB gzip en 25 archivos.
+ *
+ * ⚠ No es un objetivo ni un techo: es una fotografía, y está acá porque la
+ * comparación "antes y después" no se puede hacer sin el antes.
+ */
+export const HEREDADO_CON_SIETE_RUTAS_KIB = 1386.2
+export const HEREDADO_CON_SIETE_RUTAS_ARCHIVOS = 24
+export const RUTAS_AL_MEDIR_EL_ANTES = 7
+
+/**
+ * ═══ LA OBSERVACIÓN DE SITIO-S7 — UNA MEDICIÓN SIN CAUSA ATRIBUIBLE ═══════
+ *
+ * Al borrar las dos rutas, el heredado de `/v3` **no bajó**:
+ *
+ *     antes (7 rutas)   1386,2 KiB · 24 archivos
+ *     ahora (5 rutas)   1387,0 KiB · 25 archivos
+ *     delta             +0,8 KiB · +1 archivo
+ *
+ * ⚠️ **Esto NO refuta la predicción, y tratarlo como refutación sería un error
+ * de método.** Lo único que se puede afirmar es el número. La causa no.
+ *
+ * Lo que SÍ quedó descartado, porque se midió: que el delta venga de que `/v3`
+ * cambió de contenido. El heredado es **1387,0 KiB para las siete rutas de
+ * `/v3`**, incluidas las tres que este sprint no tocó, así que es una propiedad
+ * del conjunto compartido y no de esta ruta. Eso lo afirma `s7-compuerta`.
+ *
+ * Lo que NO se puede descartar: **el mismo commit borró dos rutas y compuso el
+ * home**. Componer el home cambia el grafo de módulos, que es de donde webpack
+ * saca su partición de chunks compartidos. Dos causas posibles entraron juntas,
+ * y cuando dos cambios entran juntos y el resultado se mueve, **no se sabe cuál
+ * fue** — es la misma trampa en la que cayó §6.1 de `DIRECCION-ESCENA` al
+ * atribuirle a una sola variable el mérito de una corrida que llevaba dos.
+ *
+ * ── EL EXPERIMENTO LIMPIO — una corrida, y es de una línea ────────────────
+ *
+ * Dos builds que difieran **sólo** en la existencia de las rutas, sobre el
+ * árbol de hoy y sin tocar una línea de código:
+ *
+ *     git stash push -u -m "s4-prediccion"      # nada que guardar: el árbol ya está
+ *     # 1. medir el árbol tal como está (5 rutas)
+ *     npm run build && npm run test:s4-heredado
+ *     # 2. restaurar las dos rutas borradas y volver a medir (7 rutas)
+ *     git checkout <commit-de-SITIO-S6> --  *       src/app/v3/secciones-a/page.tsx src/app/v3/secciones-b/page.tsx
+ *     npm run build && npm run test:s4-heredado
+ *
+ * La diferencia entre esas dos cifras **sí** tiene una sola causa. Es una
+ * corrida de dos builds, no un sprint: no hay que construir nada.
+ *
+ * ⚠️ El paso 2 restaura DOS archivos y no revierte el commit. Las secciones
+ * viven en `_secciones/` y las rutas viejas ya no compilan tal cual, así que la
+ * corrida necesita apuntar sus imports al contrato unificado — cinco líneas, y
+ * se descartan al terminar. **No se commitea**: es un experimento.
+ *
+ * ── Qué NO cierra igual ──────────────────────────────────────────────────
+ *
+ * Ni ese experimento cierra la predicción del mapa: quedan cinco rutas. Lo que
+ * cierra es la pregunta más chica —*¿borrar una ruta devuelve peso heredado?*—
+ * que es la que hoy quedó sin respuesta.
+ */
+export const EXPERIMENTO_LIMPIO_PENDIENTE = true
 
 /** El heredado de `/v3` con CERO rutas de demo. Medido por S1 el 2026-08-28. */
 export const HEREDADO_SIN_DEMOS_KIB = 1381.3

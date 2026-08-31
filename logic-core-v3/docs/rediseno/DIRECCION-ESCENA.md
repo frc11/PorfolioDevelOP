@@ -359,16 +359,40 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 |---|---|
 | **La compuerta de cierre** — `package.json`, `tsc --noEmit` y todos los agregados, en orden y **sin `&&`** | `npm run verificar` |
 | **Los checks de frontera** — miden el momento del sprint. **Van ANTES del commit** y no entran en el gate (ver §3.12) | `npm run test:frontera` |
-| Un agregado suelto | `npm run test:s1` · `test:s2` · `test:s3` · `test:s4` |
+| Un agregado suelto | `npm run test:s1` · `test:s2` · `test:s3` · `test:s4` · `test:s5` · `test:s6` · `test:s7` |
 | Un invariante suelto | `npm run test:<suite>-<nombre>` |
+| **Regenerar el pedido de contenido** tras cambiar un `PEDIDO` | `npm run test:s7-pedido -- --escribir` |
 
-> ⚠️ **CORRECCIÓN — EL OOM DEL BUILD NO SE ARREGLA CON `--max-old-space-size`. HAY QUE ACOTAR LOS WORKERS.**
+> Los pasos de `verificar` son **cinco** desde SITIO-S7, no cuatro: entre el `package.json` y `tsc` entra el paso **1b**, que busca marcadores de conflicto en **todo el repo**. El paso 1 miraba sólo el archivo que un merge había roto; con dos lanes mergeándose, un marcador sin resolver adentro de un `.md` o de un `.css` no rompe el build, no rompe los tipos y se commitea igual. **Excluye `s4-fixtures/`**, que guarda marcadores a propósito como control positivo, y hay una comprobación que exige que los siga guardando — una exclusión que sobrevive a su razón es un agujero que parece una decisión.
+
+> ⚠️ **EL BUILD NECESITA LAS DOS VARIABLES. NINGUNA ALCANZA SOLA.**
 >
-> Los prompts de sprint vienen pidiendo `NODE_OPTIONS=--max-old-space-size=8192` **desde hace seis sprints, y es el flag equivocado**. El problema no es el heap de un proceso: es la máquina. **13,9 GB de RAM y 16 CPUs**, y Next lanza `os.cpus().length - 1` = **15 workers** para "Collecting page data". Subirle el heap a cada uno de los quince empeora el reparto, no lo mejora.
+> ```powershell
+> $env:CIRCLE_NODE_TOTAL = "3"; $env:NODE_OPTIONS = "--max-old-space-size=8192"; npm run build
+> ```
+>
+> **Y no correr NADA al lado**: el build tarda entre 6 y 9 minutos, y con otro proceso encima se cae por memoria.
+>
+> ### La corrección de la corrección (SITIO-S7, 2026-08-30)
+>
+> Este bloque decía que `--max-old-space-size` era **el flag equivocado** y que lo que arreglaba el OOM era acotar los workers. **Eso era media verdad, y la mitad que faltaba importa:** con `CIRCLE_NODE_TOTAL=3` y **sin** `NODE_OPTIONS`, el build **muere igual** — se queda en el límite de 2 GB que Node se pone por defecto. Está medido en este sprint.
+>
+> Las dos variables arreglan cosas distintas y por eso hacen falta las dos:
+>
+> | variable | qué arregla |
+> |---|---|
+> | `CIRCLE_NODE_TOTAL=3` | **que los workers no se pisen.** Son 2 en vez de 15, así que la RAM de la máquina alcanza para todos. |
+> | `NODE_OPTIONS=--max-old-space-size=8192` | **que cada worker no reviente por su cuenta.** El defecto de Node ronda los 2 GB y el grafo de este proyecto no entra. |
+>
+> ⚠️ El párrafo anterior tenía razón en el diagnóstico —el problema es el reparto— y se equivocó al concluir que el heap sobraba. Lo que había pasado es lo que su propio cierre declaraba como no aislado: **la corrida buena llevaba las dos, y se le atribuyó el mérito a una sola.** La regla de método que queda: *cuando dos cambios entran juntos y uno funciona, no se sabe cuál fue; escribir "es éste" es una hipótesis, y hay que decirlo así hasta aislarlo.* Acá el aislamiento se hizo al revés —sacando una— y dio la respuesta.
+>
+> ### El diagnóstico original, que sigue valiendo
+>
+> El problema no es sólo el heap de un proceso: es la máquina. **13,9 GB de RAM y 16 CPUs**, y Next lanza `os.cpus().length - 1` = **15 workers** para "Collecting page data". Quince procesos con 8 GB de techo cada uno no entran en 13,9 GB.
 >
 > **La firma:** el compilado termina bien —`✓ Compiled successfully in 24.0min`— y recién ahí revienta, en `Collecting page data using 15 workers`, con `FATAL ERROR: Zone Allocation failed - process out of memory`. Que sea *después* del compilado es lo que despista: parece un problema del build y es un problema de reparto de memoria.
 >
-> **El comando que SÍ terminó**, con las siete rutas de `/v3` prerenderizadas:
+> **El comando que SÍ termina** (SITIO-S7 lo corrió con las cinco rutas de `/v3` que quedan más el home):
 >
 > ```bash
 > # bash
@@ -376,12 +400,12 @@ Todo lo construido vive en `/probe-escena`, una ruta interna con `noindex` y sin
 > ```
 > ```powershell
 > # PowerShell
-> $env:NODE_OPTIONS = "--max-old-space-size=8192"; $env:CIRCLE_NODE_TOTAL = "3"; npm run build
+> $env:CIRCLE_NODE_TOTAL = "3"; $env:NODE_OPTIONS = "--max-old-space-size=8192"; npm run build
 > ```
 >
 > **Por qué `CIRCLE_NODE_TOTAL`, que no tiene nada que ver con CircleCI:** es la variable que Next lee para el defecto de `experimental.cpus` —`node_modules/next/dist/server/config-shared.js:202`, `Math.max(1, (Number(process.env.CIRCLE_NODE_TOTAL) || os.cpus().length) - 1)`—. Con `3` quedan **2 workers**. Es la única forma de acotarlos **sin tocar `next.config`**, que está fuera del scope de estos sprints.
 >
-> ⚠️ **Lo que NO está aislado:** la corrida buena llevaba las dos variables, así que no está medido si el heap de 8192 solo es inocuo o si además estorba. Lo que sí está medido es que **lo que cambió entre la corrida que revienta y la que termina fue la cantidad de workers**. Si alguien quiere el dato limpio, la prueba es una corrida con `CIRCLE_NODE_TOTAL=3` y sin `NODE_OPTIONS`.
+> ✅ **Lo que estaba sin aislar, aislado (SITIO-S7).** Este bloque cerraba pidiendo exactamente la prueba que faltaba —*"una corrida con `CIRCLE_NODE_TOTAL=3` y sin `NODE_OPTIONS`"*— y esa corrida se hizo: **muere**. O sea que el heap de 8192 no es inocuo ni estorba: **es necesario**. La tabla de arriba es el resultado.
 
 ---
 
@@ -472,6 +496,22 @@ Está acá para que nadie lo dé por resuelto.
 
     **Quién la cierra:** el sprint que reemplace al home, que es el que borra estas rutas. **No hay que construir nada.** `npm run test:s4-heredado` la declara `NO CORRE` con su motivo mientras las rutas existan, y **pasa a afirmarla sola** el día que dejen de existir en el build.
 
+    ⚠️ **SITIO-S7 borró DOS de las siete y el heredado NO bajó. Es una medición SIN CAUSA ATRIBUIBLE, no una refutación.**
+
+    |  | heredado | archivos |
+    |---|---:|---:|
+    | antes (7 rutas) | 1386,2 KiB | 24 |
+    | ahora (5 rutas) | 1387,0 KiB | 25 |
+    | **delta** | **+0,8 KiB** | **+1** |
+
+    **Lo que SÍ quedó descartado, porque se midió:** que el delta venga de que `/v3` cambió de contenido. El heredado es **1387,0 KiB para las siete rutas de `/v3`**, incluidas las tres que el sprint no tocó — es del conjunto compartido, no de esta ruta. Lo afirma `s7-compuerta`.
+
+    **Lo que NO se puede descartar:** el mismo commit **borró dos rutas y compuso el home**, y componer cambia el grafo de módulos, que es de donde webpack saca su partición. Dos causas entraron juntas. Cuando eso pasa no se sabe cuál fue — es la misma trampa de §6.1, que le atribuyó a una variable el mérito de una corrida que llevaba dos.
+
+    **EL EXPERIMENTO LIMPIO, pendiente, y es una corrida de dos builds:** dos builds que difieran **sólo** en la existencia de las rutas. Está escrito con sus pasos en `s4-rutas-de-demo.ts`, arriba de `EXPERIMENTO_LIMPIO_PENDIENTE`. No hay que construir nada y no se commitea: restaurar los dos `page.tsx`, apuntarles los imports al contrato unificado —cinco líneas—, `npm run build && npm run test:s4-heredado`, y comparar. **Esa diferencia sí tiene una sola causa.**
+
+    Ni ese experimento cierra la predicción del mapa —quedan cinco rutas—. Cierra la pregunta más chica: *¿borrar una ruta devuelve peso heredado?*, que es la que hoy quedó abierta.
+
 17. **DEUDA DE TAMAÑO EN LOS INSTRUMENTOS — cuatro arriba de 300 líneas, y ningún check los cubre.** Anotada en SITIO-S4 y **no arreglada**: partirlos no era el scope del sprint.
 
     | archivo | líneas | de quién |
@@ -483,7 +523,7 @@ Está acá para que nadie lo dé por resuelto.
 
     **Lo que agrava la deuda es la cobertura, no el tamaño:** el único check de las 300 líneas es el de `s3-codigo.invariant.ts`, y mira los archivos del sprint de S3 más los instrumentos `s3-*`; `s4-cobertura.invariant.ts` mira los de S4. **Los de S1 y S2 no los mira nadie**, así que pueden seguir creciendo sin que nada falle. El sprint que los parta tiene que además extender la cobertura, o la deuda vuelve.
 
-18. ⚠️ **LA COREOGRAFÍA DE LAS SECCIONES VIAJA EN LA CARGA INICIAL TAMBIÉN ABAJO DE 1025, Y SE RESUELVE UNA SOLA VEZ.** Abierto en SITIO-S5 y **deliberadamente no arreglado ahí**.
+18. ~~**LA COREOGRAFÍA DE LAS SECCIONES VIAJA EN LA CARGA INICIAL TAMBIÉN ABAJO DE 1025.**~~ **RESUELTO en SITIO-S7 — ver §7.22.** Abierto en SITIO-S5 y **deliberadamente no arreglado ahí**.
 
     **La cifra**, producida por `s5-peso.invariant.ts` sobre un build real: lo propio de `/v3/secciones-a` son **38,1 KiB crudo · 12,8 KiB gzip** en 2 archivos, y **baja en todos los anchos**. El total de la ruta es 1429,1 KiB crudo · 436,8 KiB gzip, de los cuales 1386,1 KiB son heredados del layout raíz y no son de ningún lane.
 
@@ -491,9 +531,9 @@ Está acá para que nadie lo dé por resuelto.
 
     **Por qué no se arregla por sección.** Partir cada sección en dos árboles —uno plano para abajo del umbral, otro con coreografía para arriba— obliga a escribir cada sección dos veces, y con dos lanes en paralelo son **dos implementaciones que divergen**. Es una decisión de la COMPOSICIÓN DEL HOME, se toma una vez y se aplica a las ocho.
 
-    **Quién la cierra:** el sprint que componga el home. El instrumento ya existe y publica el número en cada corrida.
+    **Quién la cerró:** SITIO-S7, con una compuerta resuelta UNA vez arriba de las ocho y las primitivas de coreografía enchufadas por contexto desde un módulo perezoso. El contenido sigue escrito una sola vez —lo que cambia son las primitivas, no el árbol— así que el modo de falla que los dos lanes temían no se abrió. Las cifras y los instrumentos están en §7.22.
 
-19. ⚠️ **`cn()` BORRA CLASES DEL SISTEMA v3 — `tailwind-merge` no conoce sus nombres.** Encontrado por SITIO-S5 y, **de forma independiente, por SITIO-S6**: dos hallazgos coincidentes de dos lanes aislados, sobre el mismo defecto y por caminos distintos.
+19. ~~**`cn()` BORRA CLASES DEL SISTEMA v3.**~~ **RESUELTO en SITIO-S7.** Encontrado por SITIO-S5 y, **de forma independiente, por SITIO-S6**: dos hallazgos coincidentes de dos lanes aislados, sobre el mismo defecto y por caminos distintos.
 
     **Las dos formas, las dos medidas en runtime con el `cn` de este repo:**
 
@@ -510,9 +550,15 @@ Está acá para que nadie lo dé por resuelto.
 
     **No era teórico:** los cinco rótulos de la sección Números salían sin una sola clase de tamaño —a tamaño heredado en vez de a los 10 px de `micro`— justo en la sección cuyo punto entero es la asimetría de escala.
 
-    **El arreglo de raíz** es una línea en `src/lib/utils.ts`: agregar los `--text-*` y los `--font-weight-*` de /v3 a `extendTailwindMerge`. Está FUERA de los lanes de sección, por eso no lo tomó ninguno de los dos. Los dos dejaron **rodeos locales** —el color en un envoltorio que se hereda— y `s5-compacto.invariant.tsx` §5 lo vigila sobre el marcado renderizado (48 elementos con nivel declarado). **Los rodeos se sacan el día que se arregle la raíz**, y ese día el invariante sigue siendo válido: afirma el resultado, no el rodeo.
+    **EL ARREGLO, aplicado en SITIO-S7.** `src/lib/utils.ts` extiende ahora `extendTailwindMerge` con dos listas y no una: los catorce `--text-*` de /v3 al grupo `font-size` —el mismo arreglo que el sistema viejo ya tenía— y los tres pesos que `tailwind-merge` no reconoce (`font-medio`, `font-semi`, `font-fuerte`) al grupo `font-weight`, que es de donde nunca tendrían que haber salido. `font-normal` **no** entra: ése sí lo reconoce.
 
-20. ⚠️ **`test:s2-bundle` QUEDA EN ROJO A PROPÓSITO, Y SE ARREGLA EN LA INTEGRACIÓN.** Abierto por SITIO-S5, que **frenó y reportó en vez de tocarlo**: es un instrumento del sistema de motion.
+    **Había una TERCERA forma, que ninguno de los dos lanes podía ver desde su lado:** no necesita que nadie pase una clase por `className`. Los componentes de texto emiten familia y peso juntos, así que **cualquier `<Caption peso="medio">` perdía su familia por su cuenta**. La arregla la misma lista de pesos.
+
+    **Cómo se verificó que el sitio vivo no cambia** (`test:s7-cn`): el corpus se DERIVA del código —**5.775 cadenas de clase distintas de 1.395 archivos**, todo `className` y todo argumento literal de `cn(`— y se corren las DOS configuraciones, la de antes y la de ahora. **Cero cambian.** El control positivo es el corpus de `/v3`, donde **8 cadenas** sí cambian: son las que recuperan su tamaño. El comentario del archivo decía "6/6 casos de control"; seis casos elegidos a mano no verifican una propiedad como ésa.
+
+    **Los rodeos se sacaron**, que era la otra mitad: un arreglo de raíz que deja los parches es código muerto que esconde el arreglo. Los invariantes que los vigilaban siguen valiendo sin tocarlos, porque afirmaban el resultado y no el rodeo.
+
+20. ~~**`test:s2-bundle` QUEDA EN ROJO A PROPÓSITO.**~~ **ARREGLADO en SITIO-S7.** Abierto por SITIO-S5, que **frenó y reportó en vez de tocarlo**: es un instrumento del sistema de motion.
 
     **Qué falla:** el control positivo de `motion-bundle.invariant.ts` pide que las cinco huellas del sistema estén en los chunks que llevan `MARCA_MOTION`. Hoy `MARCA_MOTION` vive en `7416-….js` —el chunk perezoso del demo— y **cuatro de las cinco huellas se mudaron a `1379-….js`**, que es uno de los dos chunks propios de `/v3/secciones-a`.
 
@@ -520,12 +566,82 @@ Está acá para que nadie lo dé por resuelto.
 
     **La propiedad que S2 protege sigue intacta**, y hay que decirlo: las tres afirmaciones de "ninguna huella en la carga inicial de `/v3`" pasan, `1379` **no** está en la carga inicial de `/v3`, y la marca tampoco aparece en su HTML. Lo que venció es la PREMISA del control —"el sistema vive en el chunk marcado"—, no la tesis.
 
-    **El arreglo (opción A):** que el control busque las huellas en TODOS los chunks del build en vez de sólo en los marcados. Es una línea.
+    **El arreglo aplicado, que es más que la opción A.** La opción A —buscar en todos los chunks— arregla el síntoma. Lo que SITIO-S7 escribió además es **por qué ese control era frágil por diseño**, porque eso es lo que impide que vuelva:
 
-    **Quién lo cierra:** la integración de los dos lanes, junto con el mismo hallazgo que SITIO-S6 reportó por separado.
+    > El control afirmaba una propiedad del **reparto de chunks** —"las huellas están en el chunk marcado"— y el reparto cambia con la cantidad de consumidores. Cambió de resultado **tres veces en tres builds**, sin que se rompiera nada. **Una afirmación sobre la salida del build no puede depender de en qué archivo cayó cada módulo**, salvo que el archivo sea justamente lo que se afirma. La unión de los chunks es invariante bajo repartición; un chunk concreto no.
+
+    Así que se afirma lo que el control quería decir y decía mal —que el buscador encuentra las cinco huellas **en el build**— con su control positivo (una huella que no existe no aparece). Y se publica el reparto de este build sin afirmarlo, para que un cambio se note sin poner nada en rojo.
 
 21. ⚠️ **UNA CORRIDA DE `ultracode` CON CUATRO SUBAGENTES SE PUEDE QUEDAR A MITAD POR LÍMITE DE GASTO.** Observado en SITIO-S5, y **le pasó al otro lane también**: en el primer despacho los cuatro subagentes murieron a la vez con *"You've hit your monthly spend limit"* después de ~750k tokens y ~12 minutos, con una sola sección terminada y otra a medio escribir.
 
     **Por qué importa y no es una anécdota de facturación:** el corte no avisa antes, deja el disco en un estado intermedio —carpetas a medio llenar, archivos de scratch sueltos— y **el reporte del workflow vuelve vacío**, así que el agente principal no sabe qué se entregó si no mira el disco.
 
     **La regla que queda:** después de un despacho en paralelo, **inventariar el disco antes de creerle al reporte**. Y para un lane largo, despachar en tandas o dejar el padrón de archivos declarado ANTES —que es lo que permitió retomar acá sin perder nada: `archivosDeclaradosQueFaltan()` dijo exactamente qué faltaba.
+
+22. ✅ **LA COMPUERTA DEL HOME — resuelta una vez, arriba (SITIO-S7).** Es el cierre de §7.18, y va acá con su forma porque la decisión de arquitectura vale más que el número.
+
+    **El problema.** Cada sección era UN árbol que importaba el sistema de motion de forma estática y decidía en tiempo de ejecución. Abajo de 1025 no se montaba el motor, no se partía el texto y no se escribía una transformada — **pero el código bajaba igual**, en todos los anchos.
+
+    **Por qué no se podía arreglar por sección.** Partir cada sección en dos árboles obliga a escribir el contenido dos veces, y dos árboles escritos a mano se desvían. El modo de falla es que **la persona de mobile lea un contenido distinto del de escritorio**, que es peor que cualquier cantidad de KiB. Los dos lanes lo dijeron con esas palabras y por eso ninguno partió.
+
+    **La forma que resuelve las dos cosas a la vez:** el contenido se escribe UNA vez y lo que cambia son **las primitivas que lo envuelven**. `_contrato/coreografia.tsx` declara `Bloque`, `CanalDePieza`, `CanalDeTitular` y `TextoPorLineas` y las implementa quietas —DOM plano, sin un import de valor del sistema—; `_contrato/coreografia-animada.tsx` las implementa con el sistema puesto y **es el único módulo del home que lo importa**. La compuerta (`_secciones/CompuertaDelHome.tsx`) pide ese módulo con `dynamic(() => import(...), { ssr: false })` —el mecanismo de S1, sin inventar otro— y lo instala por contexto.
+
+    **Tres detalles que no son detalles:**
+
+    - **El módulo perezoso INSTALA, no envuelve.** La forma evidente —`{arriba ? <ConCoreografía>{hijos}</ConCoreografía> : hijos}`— renderiza el fallback de `dynamic` (`null`) hasta que llega el chunk, o sea **la página en blanco**. Con el escenario de S1 no se nota porque es ornamento; con las ocho secciones sí. Acá el árbol cuelga de un proveedor estático y el módulo perezoso sólo le avisa cuáles son las primitivas.
+    - **Dos átomos tuvieron que mudarse fuera de `_lib/motion/`**: `acotar01` (a `_lib/acotar.ts`) y `palabrasDe`/`textoNormalizado` (a `_lib/palabras.ts`). Los usa el árbol quieto y estaban por vecindad en módulos que llevan huellas del sistema: importarlos habría arrastrado el sistema entero a la carga inicial. **Que hayan hecho falta dos dice algo del corte:** el sistema de motion tiene átomos de texto y de número que no son de motion.
+    - **La compuerta se afirma dos veces, y las dos hacen falta.** `test:s7-compuerta` la mide sobre el BUILD —marca del árbol animado ausente de la carga inicial de `/v3`, marca del árbol quieto presente en el mismo conjunto como control, y las cinco huellas del sistema ausentes— y `test:s7-contrato` la mira sobre el FUENTE, que es donde se puede decir **cuál** import sobra. El del build prueba el resultado y no dice de dónde viene; el del fuente dice de dónde viene y no prueba el resultado.
+
+23. ⚠️ **EL CHROME DEL HOME NO ESTÁ COMPUESTO — abierto, y es de la etapa de contenido.**
+
+    `/v3/page.tsx` monta la pastilla de navegación (primero, por la razón geométrica que su docblock explica) y las ocho secciones. El pie está adentro de la sección Cierre, que es donde lo puso el sprint que la construyó. **Lo que NO monta es el cursor propio de S3**, y no es un olvido: si el home nuevo corre con cursor propio es una decisión de composición que nadie tomó, y este sprint compone lo que ya estaba construido en vez de decidir lo que nadie decidió.
+
+24. ⚠️ **DOS COSAS DE LAS SECCIONES QUE SE ANOTARON Y NO SE HICIERON (SITIO-S7).** La instrucción prohibía cambiar el comportamiento de una sección; las dos son cambios de contenido y quedan para la etapa que sigue.
+
+    - **El pie enlaza CUATRO secciones y existen OCHO.** `DESTINOS_DE_LA_RUTA` sale de una lista declarada en `cierre/contenido.ts` que quedó en las cuatro del lane que lo escribió. `ANCLAS_QUE_EXISTEN` —contra la que el instrumento verifica que ningún `href` lleve a la nada— sí se derivó de las ocho, porque eso es un hecho y no una decisión. Ampliar el recorrido del pie es contenido.
+    - **`peso="medio"` sigue esquivado en Servicios.** Era un rodeo del defecto de `cn()`, que ya está arreglado, pero restaurarlo **cambia el peso tipográfico en pantalla** — o sea composición. Queda anotado con su lugar exacto.
+
+25. ⚠️ **UN INSTRUMENTO QUE SE MIDE A SÍ MISMO — cuarta y quinta aparición, y la regla general.**
+
+    El proyecto ya lo había cazado dos veces (S3 al sacar los instrumentos del padrón de archivos escaneados; SITIO-S6 al partir sus invariantes en módulos de apoyo). **En SITIO-S7 apareció tres veces más, en tres formas distintas**, y las tres las encontró un instrumento y no una lectura:
+
+    - un docblock que explicaba por qué un átomo se mudaba **escribía la huella del sistema de motion** que el escáner busca;
+    - el detector de "no quedan restos de los dos contratos" encontraba los restos **en la documentación que explica por qué ya no están**, y en los mensajes de afirmación que nombran lo que comprueban;
+    - el corpus de `cn()` extraído del código levantaba **los dos ejemplos del defecto escritos en el docblock del propio arreglo**, y los reportaba como regresiones del sitio vivo.
+
+    **La regla, general y escrita para no volver a descubrirla:** *un escáner que lee código fuente lee también los comentarios y las cadenas, y un comentario que ejemplifica lo que el escáner busca es indistinguible de lo que busca.* Se sacan comentarios y contenido de cadenas antes de escanear, siempre. Y su corolario, que es lo que hace honesta una exclusión: **todo escáner declara qué NO mira y por qué, con nombre y motivo —nunca por una heurística de sufijo— y hay una comprobación que exige que lo excluido SIGA teniendo lo que el detector busca.** Una exclusión que sobrevive a su razón es un agujero que parece una decisión. El paso 1b de `verificar` es el ejemplo cableado.
+
+26. ⚠️ **REPARTIR ARCHIVOS NO REPARTE UN SPRINT: EL TIPO DE UN DATO COMPARTIDO VIAJA IGUAL.**
+
+    SITIO-S5 cambió `pinneada` de `boolean` a la unión `'siempre' | 'desde-escritorio'`. SITIO-S6 no podía saberlo —`_lib/secciones.ts` era del otro lane y su regla era consumirlo sin tocarlo— y escribió contra el tipo viejo. **`tsc` lo agarró recién al mergear**, que es el momento más caro para enterarse.
+
+    El reparto por archivos protege contra el conflicto de TEXTO y no protege contra el cambio de CONTRATO. Un archivo que un lane escribe y otro consume es una frontera, y una frontera tiene una forma: el tipo. **Con siete lanes esto vuelve a pasar**, así que la regla es la que sigue:
+
+    > **Un archivo que un lane escribe y otro lee es una frontera, y su TIPO es parte del reparto.** Cambiar la forma de un dato compartido no es "tocar mi archivo": es cambiarle el contrato a alguien que no está en la conversación. Lo que hay que repartir antes de despachar no son las carpetas — son **los tipos de lo compartido**, congelados o versionados, y todo cambio de forma se anuncia.
+
+    El sprint dejó además el caso hermano, que es el mismo defecto con otra cara: los **dos contratos** que los lanes escribieron sin verse. Ocho divergencias, todas resolubles, ninguna detectable antes del merge — porque nada las ponía en el mismo archivo.
+
+27. ⚠️ **CARDINALIDADES ESCRITAS A MANO — barrido de SITIO-S7, con lo que quedó.**
+
+    La instrucción pedía revisar si había más después de arreglar la de `test:s5-integracion` (`RUTAS_DE_DEMO.length === 6`, que se rompió cuando un sprint agregó la séptima). Las que quedan **no son del mismo tipo y por eso no se tocaron**: son afirmaciones sobre una cantidad que el sprint DECIDIÓ, no sobre una lista que crece sola —`ITEMS_POR_SERVICIO = 11`, `PANTALLAS_DE_LA_SECCION = 2`, `PIEZAS_POR_PATRON`, las 14 capas promovidas de Servicios—. Un número que describe una decisión de composición **tiene** que estar escrito: es la decisión. Lo que no puede estarlo es un número que cuenta una lista que otro sprint puede alargar.
+
+    **El criterio, para el próximo barrido:** ¿alguien puede hacer crecer lo que este número cuenta sin tocar esta línea? Si sí, se deriva. Si no, se escribe y se explica.
+
+28. ✅ **EL ALTO DEL CIERRE — medido, y deliberadamente NO cambiado (SITIO-S7).**
+
+    Está acá para que **nadie lo reabra sin el dato**, porque la intuición ya se probó y dio al revés.
+
+    SITIO-S6 pidió revisarlo con la premisa *"pasa de una pantalla con el titular en `titulo-xl` más el pie entero"*. Se midió, y **la respuesta depende del ancho**:
+
+    | viewport | alto derivado | pantallas | por qué |
+    |---|---:|---:|---|
+    | 1440 × 900 | 609 px | **0,68** | las tres columnas del pie EN FILA |
+    | 375 × 667 | 913 px | **1,37** | las columnas APILADAS, titular de tres líneas |
+
+    Las produce `s8-cierre.invariant` sumando cajas de línea y tokens. **No está medido en un navegador**, y eso está declarado ahí.
+
+    **La premisa valía sólo a 375.** A escritorio —que es el ancho donde este proyecto define el ritmo, y donde la referencia midió los suyos— la sección entra en `100svh` con aire. El `alto` de la tabla es un `min-height`: a 375 el contenido lo pasa, la sección crece y no se recorta nada.
+
+    **Por qué se queda en `100svh`, con las tres salidas recorridas:** subirlo a `200svh` mete **1,32 pantallas vacías** en el tramo final del recorrido, que es el defecto que el pinneo existe para no tener; dejarlo no recorta nada en ningún ancho; y declarar dos altos por ancho no existe en la tabla —el `alto` es uno—.
+
+    **Lo único que queda abierto de esto:** el ritmo de mobile subestimaría este tramo. No se arregla acá: el ritmo de 390 es otro número y SCROLL.md lo publica por separado con razón (§7 de SCROLL.md). Los dos números viven en la fila de `cierre` en `_lib/secciones.ts`.

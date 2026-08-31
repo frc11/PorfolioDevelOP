@@ -1,6 +1,6 @@
 /**
- * INVARIANTE TRANSVERSAL — el peso del lane A: lo PROPIO se afirma, lo
- * HEREDADO se publica con atribución.
+ * INVARIANTE TRANSVERSAL — el peso de `/v3`: lo PROPIO se afirma, lo HEREDADO
+ * se publica con atribución.
  *
  * Corre con `npm run build` y después `npm run test:s5-peso`.
  *
@@ -13,120 +13,133 @@
  * por algo que su sprint no produce ni puede arreglar no protege: entrena a
  * ignorarlo.**
  *
- * Acá la partición es de tres, no de dos, y es lo que hace medible la pregunta
- * del sprint —*cuánto agrega ESTE lane*—:
+ * ═══ QUÉ CAMBIÓ EN SITIO-S7, Y POR QUÉ ESTE ARCHIVO SE PONE MEJOR ═════════
  *
- *     heredado   lo que la ruta comparte con el HOME  → del layout raíz
- *     de /v3     lo que comparte con /v3 y no con el home → de S1..S4
- *     del lane   lo que sólo pide `/v3/secciones-a`  → ESTO es lo nuestro
+ * Este invariante medía `/v3/secciones-a`, la ruta donde el lane mostraba sus
+ * cuatro secciones, y partía su carga inicial en TRES —heredado del home, de
+ * `/v3`, y del lane— porque eso era lo que hacía medible *cuánto agrega este
+ * lane*. **Esa ruta ya no existe**: se borró al componer el home, que es lo que
+ * su propio docblock declaraba como fecha de baja.
  *
- * ── El presupuesto propio, y de dónde sale ────────────────────────────────
+ * La partición de tres se fue con ella y **no se reemplaza por una peor**: las
+ * cuatro secciones ahora son parte de `/v3`, así que lo que se mide es `/v3`.
  *
- * No es un número elegido: es la suma de dos medidos.
- *   · S1 fijó **30 KiB** para lo propio de `/v3`, y ese presupuesto rige.
- *   · S2 midió el chunk de la coreografía en **28,2 KiB crudo**, y este lane lo
- *     carga de forma ESTÁTICA —no por la compuerta— porque las secciones tienen
- *     que renderizar su contenido en los dos lados del umbral.
- * 30 + 28,2 = 58,2, redondeado hacia arriba a **60 KiB**. Está escrito acá con
- * la cuenta a la vista para que se pueda discutir el número y no la intención.
+ * Y hay algo que este archivo puede afirmar hoy y no podía cuando se escribió.
+ * Su propio cierre decía:
  *
- * ⚠ **La consecuencia que este lane NO resuelve y publica:** el sistema de
- * motion viaja también abajo de 1025 en esta ruta. La compuerta de S2 saca el
- * chunk del bundle porque lo que gatea es una RUTA entera; acá lo gateado es el
- * comportamiento de un contenido que tiene que renderizarse en los dos lados.
- * Separarlo en dos chunks obligaría a escribir cada sección dos veces. Es una
- * decisión de la composición del home, no de este lane.
+ * > *"La consecuencia que este lane NO resuelve y publica: el sistema de motion
+ * > viaja también abajo de 1025 en esta ruta. […] Es una decisión de la
+ * > composición del home, no de este lane."*
+ *
+ * La composición del home llegó. **Ese pendiente se cierra acá, afirmándolo:**
+ * el presupuesto de este lane sumaba 28,2 KiB porque el sistema de motion
+ * bajaba estáticamente, y ahora **no baja**. Un instrumento que declaró una
+ * deuda es el lugar correcto para afirmar que se pagó.
  */
 
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
-import { conjuntoInicial, exigirBuild, htmlDe, kib, pesar } from './s3-bundle'
-import { RUTAS_DE_DEMO } from './s4-rutas-de-demo'
+import { DIST, conjuntoInicial, exigirBuild, htmlDe, kib, partirCargaInicial, pesar } from './s3-bundle'
+import { RUTAS_BORRADAS } from './s4-rutas-de-demo'
 
 exigirBuild()
 
-const RUTA = '/v3/secciones-a'
+const RUTA = '/v3'
 
-const inicialLane = conjuntoInicial(RUTA)
-const inicialV3 = conjuntoInicial('/v3')
+const inicial = conjuntoInicial(RUTA)
 const inicialHome = conjuntoInicial('/')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · La ruta existe en el build, y la partición no está vacía')
 
 afirmar(htmlDe(RUTA) !== '', `la ruta ${RUTA} está prerenderizada en el build`)
-afirmar(inicialLane.length > 0, `su carga inicial son ${inicialLane.length} archivos`)
+afirmar(inicial.length > 0, `su carga inicial son ${inicial.length} archivos`)
 afirmar(inicialHome.length > 0, `  y la del home ${inicialHome.length}, contra la que se parte`)
-afirmar(inicialV3.length > 0, `  y la de /v3 ${inicialV3.length}, contra la que se aísla lo del lane`)
 
-const heredados = inicialLane.filter((f) => inicialHome.includes(f))
-const deV3 = inicialLane.filter((f) => !inicialHome.includes(f) && inicialV3.includes(f))
-const delLane = inicialLane.filter((f) => !inicialHome.includes(f) && !inicialV3.includes(f))
-
-const pesoHeredado = pesar(heredados)
-const pesoDeV3 = pesar(deV3)
-const pesoDelLane = pesar(delLane)
-const pesoTotal = pesar(inicialLane)
+const { heredados, propios, pesoHeredado, pesoPropio } = partirCargaInicial(inicial, inicialHome)
+const pesoTotal = pesar(inicial)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · LA CIFRA PUBLICADA — el total, con su reparto y su dueño')
+titulo('2 · La cifra, con su reparto')
 
-console.log(`  ${RUTA}  ${kib(pesoTotal.crudo)} crudo · ${kib(pesoTotal.gzip)} gzip — ${inicialLane.length} archivos`)
-console.log(
-  `     heredado del layout RAÍZ (compartido con el home): ${heredados.length} archivos · ${kib(pesoHeredado.crudo)} crudo`,
-)
-console.log(
-  `     de /v3 (S1..S4, compartido con /v3 y no con el home): ${deV3.length} archivos · ${kib(pesoDeV3.crudo)} crudo`,
-)
-console.log(
-  `     PROPIO DEL LANE A (las cuatro secciones + contrato + motion): ${delLane.length} archivos · ${kib(pesoDelLane.crudo)} crudo · ${kib(pesoDelLane.gzip)} gzip`,
-)
-console.log(`     archivos propios del lane: ${delLane.join(' · ') || '(ninguno)'}`)
-console.log('  DE QUIÉN ES LO HEREDADO: el layout RAÍZ importa estáticamente el chrome viejo')
-console.log('  (Navbar, Shutter, Preloader, Lenis, sonner, el widget de chat). PublicOnlyComponents')
-console.log('  los apaga en /v3 devolviendo null, pero el import estático ya metió los chunks en la')
-console.log('  carga inicial de TODA ruta: apagar un componente no lo saca del bundle. Estos sprints')
-console.log('  tienen PROHIBIDO tocarlo; se vuelve alcanzable en el sprint que REEMPLACE al home.')
+console.log(`  /v3 entero  ${kib(pesoTotal.crudo)} crudo · ${kib(pesoTotal.gzip)} gzip — ${inicial.length} archivos`)
+console.log(`    heredado del layout raíz : ${heredados.length} archivos · ${kib(pesoHeredado.crudo)} crudo`)
+console.log(`    propio de /v3            : ${propios.length} archivos · ${kib(pesoPropio.crudo)} crudo · ${kib(pesoPropio.gzip)} gzip`)
+for (const f of propios) console.log(`      · ${f}`)
+console.log('  DE QUIÉN ES lo heredado: el layout RAÍZ importa estáticamente el chrome viejo.')
+console.log('  Estos sprints tienen PROHIBIDO tocarlo. Se publica, no se afirma (regla 13).')
+
+afirmar(pesoPropio.crudo > 0, 'lo propio pesa más de cero bytes: las ocho secciones existen en el build')
+afirmar(heredados.length > 0, 'y el heredado se pudo medir: la partición no está vacía')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · LO PROPIO — esto sí se afirma')
+titulo('3 · EL PRESUPUESTO PROPIO, con la cuenta a la vista')
 
-/** 30 KiB (presupuesto propio de /v3, S1) + 28,2 KiB (chunk de coreografía
- *  medido por S2, que acá viaja estático) = 58,2, redondeado a 60. */
+/**
+ * No es un número elegido: es la suma de dos medidos, y la cuenta cambió con la
+ * compuerta.
+ *
+ *   · S1 fijó **30 KiB** para lo propio de `/v3` cuando era el esqueleto.
+ *   · Las ocho secciones, con su árbol quieto, agregan lo que agregan — y **ya
+ *     no agregan los 28,2 KiB del sistema de motion**, que era la mitad del
+ *     presupuesto viejo de este lane: ese chunk ahora entra por la compuerta.
+ *
+ * 60 KiB es el mismo techo que este invariante tenía, y ahora cubre OCHO
+ * secciones en vez de cuatro **porque lo que salió del bundle hizo lugar**.
+ * Está escrito acá con la cuenta a la vista para que se pueda discutir el
+ * número y no la intención.
+ */
 const PRESUPUESTO_PROPIO_KIB = 60
-
 afirmar(
-  pesoDelLane.crudo / 1024 < PRESUPUESTO_PROPIO_KIB,
-  `lo PROPIO del lane A < ${PRESUPUESTO_PROPIO_KIB} KiB crudo — 30 (propio de /v3, S1) + 28,2 (coreografía, S2)`,
-  `${kib(pesoDelLane.crudo)} crudo · ${kib(pesoDelLane.gzip)} gzip · ${(PRESUPUESTO_PROPIO_KIB - pesoDelLane.crudo / 1024).toFixed(1)} KiB de aire`,
+  pesoPropio.crudo / 1024 < PRESUPUESTO_PROPIO_KIB,
+  `lo propio de /v3 entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
+  `${kib(pesoPropio.crudo)} — ${(PRESUPUESTO_PROPIO_KIB - pesoPropio.crudo / 1024).toFixed(1)} KiB de aire`,
 )
 
 controlPositivo(
-  'el presupuesto no se cumple solo: con un techo de cero, lo propio NO entra',
-  0,
-  (techo: number) => pesoDelLane.crudo / 1024 < techo,
-)
-
-afirmar(
-  pesoDelLane.crudo > 0,
-  'y lo propio pesa más de cero bytes: las cuatro secciones existen de verdad en el build',
-  `${pesoDelLane.crudo} B`,
+  'el presupuesto no se cumple solo: con un techo de 1 KiB, lo propio de hoy NO entra',
+  1,
+  (techo: number) => pesoPropio.crudo / 1024 < techo,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · La compuerta de 1025, y lo que este lane NO acota')
+titulo('4 · LA DEUDA QUE ESTE INVARIANTE DECLARÓ, PAGADA')
 
 /**
- * `/v3` sin secciones tiene su escenario detrás de un `dynamic(ssr:false)`, así
- * que abajo de 1025 ese chunk no se pide. Las secciones NO tienen esa
- * propiedad, y la diferencia hay que publicarla en vez de dejarla implícita.
+ * El sistema de motion ya NO viaja en la carga inicial. Es lo que este archivo
+ * publicaba como "la consecuencia que este lane no resuelve", y es lo que la
+ * composición del home resolvió. Se afirma con las mismas cinco huellas que
+ * `test:s2-bundle` usa: cinco módulos distintos del sistema, no una marca sola.
  */
-console.log(`  la coreografía de las secciones viaja en la carga inicial de ${RUTA} en TODOS los anchos.`)
-console.log('  Abajo de 1025 el comportamiento sí está gateado —no se monta el motor, no se parte el')
-console.log('  texto, no se escribe una transformada— pero el CÓDIGO baja igual. Acotar eso es partir')
-console.log('  cada sección en dos árboles, y es una decisión de la composición del home.')
-console.log(`  lo que este lane agrega sobre /v3 pelado: ${kib(pesoDelLane.crudo)} crudo · ${kib(pesoDelLane.gzip)} gzip`)
+const HUELLAS_DEL_SISTEMA = [
+  'salida-fuerte',
+  'atado-al-scroll',
+  'simetrica-suave',
+  'data-lineas-piezas',
+  'bottom-=240px',
+]
+const contiene = (f: string, aguja: string): boolean =>
+  readFileSync(path.join(DIST, f), 'utf8').includes(aguja)
 
-const enPadron = RUTAS_DE_DEMO.some((r) => r.ruta === RUTA)
-afirmar(enPadron, 'la ruta está en el padrón de rutas de demo: el techo del heredado escala con ella')
+for (const huella of HUELLAS_DEL_SISTEMA) {
+  afirmar(
+    inicial.filter((f) => contiene(f, huella)).length === 0,
+    `\`${huella}\` NO está en la carga inicial de /v3 — la deuda de este lane, pagada`,
+  )
+}
+console.log('  el chunk de la coreografía se pesa en `test:s7-compuerta`, que es de quien la construyó.')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · La ruta que este invariante medía ya no existe')
+
+for (const borrada of RUTAS_BORRADAS) {
+  afirmar(
+    htmlDe(borrada.ruta) === '',
+    `\`${borrada.ruta}\` no está en el build: se borró al componer el home`,
+    borrada.motivo,
+  )
+}
 
 cerrar('s5-peso.invariant')

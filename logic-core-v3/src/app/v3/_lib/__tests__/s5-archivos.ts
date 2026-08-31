@@ -1,5 +1,16 @@
 /**
- * EL PADRÓN DE ARCHIVOS DEL LANE A — declarado antes de escribir una línea.
+ * EL PADRÓN DE ARCHIVOS DE LAS CUATRO SECCIONES DE SITIO-S5.
+ *
+ * ⚠ **Qué cambió en SITIO-S7.** Este padrón era el del LANE A: sus cuatro
+ * secciones más el contrato que sólo ellas usaban, todo bajo `secciones-a/`.
+ * La integración borró los lanes —las ocho secciones viven juntas en
+ * `_secciones/`, con UN contrato— así que este padrón se quedó con la mitad que
+ * sigue siendo suya: **las cuatro carpetas que este sprint escribió**. El
+ * contrato compartido pasó a `s7-padron.ts`, que es de quien lo unificó.
+ *
+ * Es la regla 13 aplicada al padrón mismo: se afirma lo propio. Un padrón que
+ * siguiera declarando el contrato pondría a S5 a fallar por un archivo que hoy
+ * escribe otro sprint.
  *
  * ── Por qué se declara ANTES, y no después ────────────────────────────────
  *
@@ -26,25 +37,7 @@ import { fileURLToPath } from 'node:url'
 
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 
-const LANE = 'src/app/v3/secciones-a'
-
-/**
- * EL CONTRATO — escrito en la fase 0, antes de despachar a nadie.
- *
- * Seis archivos, y ninguna sección los modifica. Es la respuesta a "¿qué es un
- * archivo compartido?": esto.
- */
-export const ARCHIVOS_DEL_CONTRATO = [
-  `${LANE}/_contrato/forma.ts`,
-  `${LANE}/_contrato/marcadores.ts`,
-  `${LANE}/_contrato/pedido.ts`,
-  `${LANE}/_contrato/coreografia.tsx`,
-  `${LANE}/_contrato/piezas.tsx`,
-  `${LANE}/_contrato/medios.tsx`,
-  `${LANE}/_contrato/Seccion.tsx`,
-  `${LANE}/_contrato/ritmo.ts`,
-  `${LANE}/_contrato/registro.ts`,
-]
+const RAIZ_DE_SECCIONES = 'src/app/v3/_secciones'
 
 /** Las cuatro carpetas de sección, con su slug y sus tres archivos. */
 export interface CarpetaDeSeccion {
@@ -58,31 +51,31 @@ export interface CarpetaDeSeccion {
 export const CARPETAS_DE_SECCION: readonly CarpetaDeSeccion[] = [
   {
     id: 'hero',
-    carpeta: `${LANE}/hero`,
-    componente: `${LANE}/hero/Hero.tsx`,
-    contenido: `${LANE}/hero/contenido.ts`,
-    invariante: `${LANE}/hero/hero.invariant.tsx`,
+    carpeta: `${RAIZ_DE_SECCIONES}/hero`,
+    componente: `${RAIZ_DE_SECCIONES}/hero/Hero.tsx`,
+    contenido: `${RAIZ_DE_SECCIONES}/hero/contenido.ts`,
+    invariante: `${RAIZ_DE_SECCIONES}/hero/hero.invariant.tsx`,
   },
   {
     id: 'quienes-somos',
-    carpeta: `${LANE}/quienes-somos`,
-    componente: `${LANE}/quienes-somos/QuienesSomos.tsx`,
-    contenido: `${LANE}/quienes-somos/contenido.ts`,
-    invariante: `${LANE}/quienes-somos/quienes-somos.invariant.tsx`,
+    carpeta: `${RAIZ_DE_SECCIONES}/quienes-somos`,
+    componente: `${RAIZ_DE_SECCIONES}/quienes-somos/QuienesSomos.tsx`,
+    contenido: `${RAIZ_DE_SECCIONES}/quienes-somos/contenido.ts`,
+    invariante: `${RAIZ_DE_SECCIONES}/quienes-somos/quienes-somos.invariant.tsx`,
   },
   {
     id: 'numeros',
-    carpeta: `${LANE}/numeros`,
-    componente: `${LANE}/numeros/Numeros.tsx`,
-    contenido: `${LANE}/numeros/contenido.ts`,
-    invariante: `${LANE}/numeros/numeros.invariant.tsx`,
+    carpeta: `${RAIZ_DE_SECCIONES}/numeros`,
+    componente: `${RAIZ_DE_SECCIONES}/numeros/Numeros.tsx`,
+    contenido: `${RAIZ_DE_SECCIONES}/numeros/contenido.ts`,
+    invariante: `${RAIZ_DE_SECCIONES}/numeros/numeros.invariant.tsx`,
   },
   {
     id: 'trabajos',
-    carpeta: `${LANE}/trabajos`,
-    componente: `${LANE}/trabajos/Trabajos.tsx`,
-    contenido: `${LANE}/trabajos/contenido.ts`,
-    invariante: `${LANE}/trabajos/trabajos.invariant.tsx`,
+    carpeta: `${RAIZ_DE_SECCIONES}/trabajos`,
+    componente: `${RAIZ_DE_SECCIONES}/trabajos/Trabajos.tsx`,
+    contenido: `${RAIZ_DE_SECCIONES}/trabajos/contenido.ts`,
+    invariante: `${RAIZ_DE_SECCIONES}/trabajos/trabajos.invariant.tsx`,
   },
 ]
 
@@ -97,10 +90,17 @@ export const CARPETAS_DE_SECCION: readonly CarpetaDeSeccion[] = [
  * ⚠ Estas piezas SÍ pintan pantalla, así que entran en `ARCHIVOS_ESCANEABLES`
  * —a diferencia de `ARCHIVOS_DE_APOYO`, que son instrumentos.
  */
-export const ARCHIVOS_DE_PIEZA = [`${LANE}/numeros/Cifra.tsx`, `${LANE}/trabajos/Proyecto.tsx`]
+export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`]
 
-/** La ruta de demostración. Deuda con fecha de baja, registrada en S4. */
-export const ARCHIVOS_DE_RUTA = [`${LANE}/page.tsx`]
+/**
+ * La ruta de demostración del lane. **Borrada en SITIO-S7**, que es lo que su
+ * propio docblock declaraba: se iba el día que `/v3` compusiera las ocho.
+ *
+ * La lista queda vacía y NO se borra la constante: es lo que hace que
+ * `archivosSinRegistrar()` siga cerrando y que se lea, en el padrón, que acá
+ * hubo una ruta y ya no hay.
+ */
+export const ARCHIVOS_DE_RUTA: readonly string[] = []
 
 /** Los componentes de las cuatro secciones. */
 export const ARCHIVOS_DE_COMPONENTE = CARPETAS_DE_SECCION.map((c) => c.componente)
@@ -130,13 +130,12 @@ export const ARCHIVOS_DE_INVARIANTE = CARPETAS_DE_SECCION.map((c) => c.invariant
  * script, y `s4-cobertura` lo marcaría como huérfano.
  */
 export const ARCHIVOS_DE_APOYO = [
-  `${LANE}/quienes-somos/quienes-somos-piezas.tsx`,
-  `${LANE}/trabajos/trabajos-piezas.ts`,
+  `${RAIZ_DE_SECCIONES}/quienes-somos/quienes-somos-piezas.tsx`,
+  `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
 ]
 
-/** Todo lo que el lane escribe adentro de `secciones-a/`. */
+/** Todo lo que este sprint escribe adentro de sus cuatro carpetas. */
 export const ARCHIVOS_DEL_LANE = [
-  ...ARCHIVOS_DEL_CONTRATO,
   ...ARCHIVOS_DE_COMPONENTE,
   ...ARCHIVOS_DE_PIEZA,
   ...ARCHIVOS_DE_CONTENIDO,
@@ -150,7 +149,6 @@ export const ARCHIVOS_DEL_LANE = [
  * todo menos los instrumentos.
  */
 export const ARCHIVOS_ESCANEABLES = [
-  ...ARCHIVOS_DEL_CONTRATO,
   ...ARCHIVOS_DE_COMPONENTE,
   ...ARCHIVOS_DE_PIEZA,
   ...ARCHIVOS_DE_CONTENIDO,
@@ -189,7 +187,14 @@ export function existe(relativo: string): boolean {
   }
 }
 
-/** Recorre `secciones-a/` entero, en rutas relativas y con barras normales. */
+/**
+ * Recorre las CUATRO carpetas de este sprint, en rutas relativas y con barras
+ * normales.
+ *
+ * Recorría `secciones-a/` entero. Ya no existe esa carpeta: las ocho secciones
+ * viven juntas, así que recorrer la raíz vería también las cuatro del otro
+ * sprint y las reportaría como "sin registrar". Se recorre lo propio.
+ */
 export function recorrerElLane(): string[] {
   const encontrados: string[] = []
   const bajar = (dir: string): void => {
@@ -199,7 +204,9 @@ export function recorrerElLane(): string[] {
       else encontrados.push(hijo)
     }
   }
-  if (existe(LANE)) bajar(LANE)
+  for (const carpeta of CARPETAS_DE_SECCION) {
+    if (existe(carpeta.carpeta)) bajar(carpeta.carpeta)
+  }
   return encontrados.sort()
 }
 
@@ -226,9 +233,8 @@ export function duenoDe(archivo: string): string {
   for (const carpeta of CARPETAS_DE_SECCION) {
     if (archivo.startsWith(`${carpeta.carpeta}/`)) return carpeta.id
   }
-  if (archivo.startsWith(`${LANE}/_contrato/`)) return 'contrato'
-  if (ARCHIVOS_DE_RUTA.includes(archivo)) return 'ruta'
+  if (archivo.startsWith(`${RAIZ_DE_SECCIONES}/_contrato/`)) return 'contrato'
   return 'sin dueño'
 }
 
-export const RAIZ_DEL_LANE = LANE
+export const RAIZ_DEL_LANE = RAIZ_DE_SECCIONES

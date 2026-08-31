@@ -34,6 +34,12 @@
  * protección, que tiene que fallar.
  */
 
+import { palabrasDe, textoNormalizado } from '../palabras'
+
+/** Reexportadas: se mudaron a `_lib/palabras.ts` por empaquetado, y los
+ *  consumidores del sistema de motion las siguen pidiendo acá. */
+export { palabrasDe, textoNormalizado }
+
 /**
  * Tolerancia vertical para decidir que dos palabras están en la misma línea, en
  * píxeles.
@@ -51,14 +57,6 @@ export const ATRIBUTO_TEXTO_ACCESIBLE = 'data-lineas-accesible'
 
 /** El atributo que marca el envoltorio de las piezas visuales. */
 export const ATRIBUTO_PIEZAS = 'data-lineas-piezas'
-
-/**
- * Parte un texto en palabras. Colapsa cualquier espacio en blanco: los saltos de
- * línea del código fuente no son saltos de línea del texto.
- */
-export function palabrasDe(texto: string): readonly string[] {
-  return texto.trim().split(/\s+/u).filter(Boolean)
-}
 
 /**
  * Agrupa índices de palabra en líneas, a partir del tope medido de cada palabra.
@@ -105,14 +103,6 @@ export function textoDeLineas(
   lineas: readonly (readonly number[])[],
 ): readonly string[] {
   return lineas.map((indices) => indices.map((i) => palabras[i]).join(' '))
-}
-
-/**
- * El texto original, normalizado: palabras separadas por un espacio.
- * Es contra esto que se compara la reconstrucción.
- */
-export function textoNormalizado(texto: string): string {
-  return palabrasDe(texto).join(' ')
 }
 
 /** Una sola línea con todas las palabras: el estado previo a la medición. */

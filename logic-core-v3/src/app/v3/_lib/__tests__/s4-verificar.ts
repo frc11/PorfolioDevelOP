@@ -10,10 +10,15 @@
  * — no lee `package.json`. Recién `npm run` lo destapó. O sea: el árbol se dio
  * por verificado dos veces con un archivo de scripts partido al medio.
  *
- * ── Los cuatro pasos, EN ORDEN Y SIN `&&` ─────────────────────────────────
+ * ── Los cinco pasos, EN ORDEN Y SIN `&&` ──────────────────────────────────
  *
  *   1. `package.json` es JSON válido, sin marcadores de conflicto y sin claves
  *      duplicadas.
+ *   1b. **NINGÚN archivo del repo tiene marcadores de conflicto** — agregado en
+ *      SITIO-S7. El paso 1 miraba el archivo que el merge de `rediseno/motion`
+ *      había roto; este sprint mergeó dos lanes, y un marcador sin resolver
+ *      adentro de un `.md`, un `.css` o un `.json` que nadie importa no rompe
+ *      el build, no rompe los tipos y se commitea igual.
  *   2. `tsc --noEmit`.
  *   3. Los agregados de invariantes — todos los que existan.
  *   4. Resumen, y código de salida distinto de cero si algo falló.
@@ -42,6 +47,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { correrSuite, suitesDelPaquete, totalizar } from './s4-agregado'
+import { EXCLUSIONES, conflictosEnElRepo } from './s4-conflictos'
 import { RAIZ } from './s4-corrida'
 import { revisarPaquete } from './s4-paquete'
 
@@ -69,6 +75,30 @@ function paso1Paquete(ruta: string): Paso {
   for (const p of problemas) console.error(`  FALLA [${p.clase}] ${p.detalle}`)
   const clases = [...new Set(problemas.map((p) => p.clase))].join(', ')
   return { nombre: '1 · package.json', ok: false, detalle: `${problemas.length} problema(s): ${clases}` }
+}
+
+/**
+ * ⚠ La exclusión de `s4-fixtures/` no es una concesión: esa carpeta guarda los
+ * `package.json` rotos a propósito contra los que se prueba el detector, así
+ * que escanearla haría fallar el gate contra su propio arnés. Está declarada
+ * con su motivo en `s4-conflictos.ts`, y `s4-paquete.invariant` exige que lo
+ * excluido SIGA teniendo marcadores — una exclusión que sobrevive a su razón es
+ * un agujero que parece una decisión.
+ */
+function paso1bConflictos(): Paso {
+  console.log('\n═══ PASO 1b — marcadores de conflicto en TODO el repo')
+  const hallazgos = conflictosEnElRepo()
+  for (const e of EXCLUSIONES) console.log(`  excluido: ${e.ruta} — ${e.motivo}`)
+  if (hallazgos.length === 0) {
+    console.log('  ok   ningún archivo del repo tiene un merge sin resolver')
+    return { nombre: '1b · conflictos', ok: true, detalle: 'limpio' }
+  }
+  for (const h of hallazgos) console.error(`  FALLA ${h.archivo} — ${h.detalle}`)
+  return {
+    nombre: '1b · conflictos',
+    ok: false,
+    detalle: `${hallazgos.length} marcador(es) en ${new Set(hallazgos.map((h) => h.archivo)).size} archivo(s)`,
+  }
 }
 
 function paso2Tsc(): Paso {
@@ -125,7 +155,12 @@ function principal(): void {
       ? path.resolve(RAIZ, argumentos[i + 1])
       : path.join(RAIZ, 'package.json')
 
-  const pasos: Paso[] = [paso1Paquete(rutaDelPaquete), paso2Tsc(), ...paso3Agregados(completo)]
+  const pasos: Paso[] = [
+    paso1Paquete(rutaDelPaquete),
+    paso1bConflictos(),
+    paso2Tsc(),
+    ...paso3Agregados(completo),
+  ]
 
   console.log('\n═══ PASO 4 — resumen')
   for (const p of pasos) console.log(`  ${(p.ok ? 'ok' : 'FALLA').padEnd(6)} ${p.nombre.padEnd(22)} ${p.detalle}`)

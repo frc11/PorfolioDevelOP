@@ -56,7 +56,7 @@ import { fileURLToPath } from 'node:url'
 import { gzipSync } from 'node:zlib'
 
 import { MARCA_ESCENARIO } from '../marcaEscenario'
-import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 const DIST = path.join(RAIZ, process.argv[2] ?? '.next')
@@ -219,11 +219,34 @@ const pesoPropio = pesar(propios)
 console.log(`     heredado del layout raíz (compartido con el home): ${heredados.length} archivos · ${kib(pesoHeredado.crudo)} crudo`)
 console.log(`     propio de /v3                                    : ${propios.length} archivos · ${kib(pesoPropio.crudo)} crudo`)
 
+/**
+ * ⚠ ESTE PRESUPUESTO SE QUEDÓ SIN SU PREMISA — SITIO-S7.
+ *
+ * Los 30 KiB eran "lo propio de `/v3`" cuando `/v3` era **un esqueleto sin
+ * contenido**: ocho paneles con su nombre y nada más. La cifra medía lo que su
+ * sprint agregaba, y era correcta.
+ *
+ * SITIO-S7 compuso el home: `/v3` monta ahora las ocho secciones y la pastilla
+ * de navegación. **Lo propio de `/v3` dejó de ser lo que este sprint controla**
+ * y pasó a ser lo que controla el que lo compuso. Subirle el número a 60 sería
+ * exactamente el defecto que la regla 13 nombra —un check que afirma algo que
+ * su sprint no produce ni puede arreglar no protege: entrena a ignorarlo— y
+ * bajarlo tampoco sirve: la cifra no está mal, está midiendo otra cosa.
+ *
+ * Así que **no corre**, con su motivo, y la afirmación no se pierde: el
+ * presupuesto vigente lo afirma `test:s5-peso` sobre el mismo número, con su
+ * derivación escrita. La cifra se sigue publicando acá, que es lo que permite
+ * verla moverse.
+ */
 const PRESUPUESTO_PROPIO_KIB = 30
-afirmar(
-  (pesoPropio.crudo + extra.crudo) / 1024 < PRESUPUESTO_PROPIO_KIB,
-  `lo PROPIO de /v3 (lo que este sprint controla) < ${PRESUPUESTO_PROPIO_KIB} KiB`,
-  `${kib(pesoPropio.crudo + extra.crudo)} crudo · ${kib(pesoPropio.gzip + extra.gzip)} gzip`,
+console.log(
+  `  lo propio de /v3 más el chunk del escenario: ${kib(pesoPropio.crudo + extra.crudo)} crudo · ` +
+    `${kib(pesoPropio.gzip + extra.gzip)} gzip`,
+)
+noCorre(
+  `lo PROPIO de /v3 < ${PRESUPUESTO_PROPIO_KIB} KiB — el presupuesto del esqueleto`,
+  'SITIO-S7 compuso el home en esa ruta, así que lo propio de `/v3` ya no es lo que este ' +
+    'sprint controla. El presupuesto vigente lo afirma `test:s5-peso`, con su derivación.',
 )
 
 /**
@@ -237,10 +260,14 @@ afirmar(
   `el peso heredado no creció sobre la línea de base (${HEREDADO_BASE_KIB} KiB)`,
   kib(pesoHeredado.crudo),
 )
-afirmar(
-  propios.length <= 2,
+/** La cuenta de archivos propios es la otra cara del presupuesto de arriba, y
+ *  se quedó sin premisa por lo mismo: el esqueleto aportaba uno o dos chunks,
+ *  el home compuesto aporta los suyos. Se publica; la vigila `test:s5-peso`. */
+console.log(`  /v3 aporta ${propios.length} archivo(s) propio(s): ${propios.join(' · ')}`)
+noCorre(
   'y /v3 aporta a lo sumo dos archivos propios a la carga inicial',
-  `${propios.length}: ${propios.join(' · ')}`,
+  'la cuenta era la del esqueleto. SITIO-S7 compuso el home en esa ruta y sus chunks son ' +
+    'de quien la compuso, no de este sprint.',
 )
 
 afirmarIgual(perezosos.length, 1, 'hay exactamente un chunk perezoso con el escenario')

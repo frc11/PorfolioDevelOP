@@ -43,7 +43,7 @@ import { gzipSync } from 'node:zlib'
 
 import { MARCA_CURSOR } from '../marcaCursor'
 
-import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
 import {
   DIST,
   conjuntoInicial,
@@ -72,17 +72,30 @@ afirmar(inicialV3.length > 0, `la carga inicial de /v3 son ${inicialV3.length} a
 /** Sin el home, la partición daría "todo propio" y el umbral pasaría por vacío. */
 afirmar(inicialHome.length > 0, `  y la del home ${inicialHome.length}, contra la que se parte`)
 
-/** El mismo umbral que S1: es el sprint el que lo controla, y no lo movió. */
+/**
+ * ⚠ LAS DOS AFIRMACIONES DE ESTE BLOQUE SE QUEDARON SIN PREMISA — SITIO-S7.
+ *
+ * La segunda lo dice sola: *"el sprint no monta ninguna pieza en el home
+ * nuevo"*. Ésa era la restricción de S3 —construyó el chrome y NO lo montó— y
+ * **la composición del home la levantó a propósito**: `/v3` monta hoy la
+ * pastilla de navegación y el pie, que son piezas de este sprint.
+ *
+ * Con la premisa levantada, los 30 KiB miden otra cosa. No se sube el número
+ * —sería un check afirmando algo que su sprint ya no controla, que es la regla
+ * 13— ni se baja. **No corre**, con su motivo, y el presupuesto vigente lo
+ * afirma `test:s5-peso` con la derivación escrita.
+ *
+ * La cifra se sigue publicando, que es lo que permite verla moverse.
+ */
 const PRESUPUESTO_PROPIO_KIB = 30
-afirmar(
-  pesoPropio.crudo / 1024 < PRESUPUESTO_PROPIO_KIB,
-  `lo PROPIO de /v3 < ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
-  `${kib(pesoPropio.crudo)} crudo · ${kib(pesoPropio.gzip)} gzip en ${propios.length} archivo(s)`,
+console.log(
+  `  lo propio de /v3: ${kib(pesoPropio.crudo)} crudo · ${kib(pesoPropio.gzip)} gzip en ` +
+    `${propios.length} archivo(s) — ${propios.join(' · ') || '(ninguno)'}`,
 )
-afirmar(
-  propios.length <= 2,
-  '  y a lo sumo dos archivos propios: el sprint no monta ninguna pieza en el home nuevo',
-  propios.join(' · ') || '(ninguno)',
+noCorre(
+  `lo PROPIO de /v3 < ${PRESUPUESTO_PROPIO_KIB} KiB, y a lo sumo dos archivos propios`,
+  'la premisa era que este sprint NO montaba sus piezas en el home nuevo. SITIO-S7 las montó ' +
+    'al componerlo, que es lo que S3 dejó anotado que iba a pasar. Ver `test:s5-peso`.',
 )
 
 controlPositivo(

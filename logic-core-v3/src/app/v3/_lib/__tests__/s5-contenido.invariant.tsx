@@ -30,10 +30,7 @@
  * vería exactamente igual de bien.
  */
 
-import { MotionConfig } from 'motion/react'
-import { renderToStaticMarkup } from 'react-dom/server'
-
-import { ProveedorDeCoreografia } from '../../secciones-a/_contrato/coreografia'
+import { marcar } from '../../_secciones/_invariantes/render'
 import {
   LISTA_BLANCA_DE_CIFRAS,
   MARCADORES,
@@ -46,9 +43,9 @@ import {
   marcadoresDesconocidosDe,
   numerosDe,
   textosDe,
-} from '../../secciones-a/_contrato/marcadores'
-import { entradasColgadas, pedidoPorClase } from '../../secciones-a/_contrato/pedido'
-import { REGISTRO } from '../../secciones-a/_contrato/registro'
+} from '../../_secciones/_contrato/marcadores'
+import { entradasColgadas, pedidoPorClase, type EntradaDePedido } from '../../_secciones/_contrato/pedido'
+import { MODULOS_DE_S5 as REGISTRO } from './s5-modulos'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -66,13 +63,7 @@ const LA_DEUDA = {
 /** Renderiza una sección en su rama QUIETA — la de abajo de 1025. */
 function marcarQuieto(indice: number): string {
   const { Componente, seccion } = REGISTRO[indice]
-  return renderToStaticMarkup(
-    <MotionConfig reducedMotion="never">
-      <ProveedorDeCoreografia modo="nunca">
-        <Componente seccion={seccion} />
-      </ProveedorDeCoreografia>
-    </MotionConfig>,
-  )
+  return marcar(<Componente seccion={seccion} />, { anima: false })
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -244,8 +235,8 @@ for (const { id, contenido, pedido } of REGISTRO) {
 
 controlPositivo(
   'el detector ve una entrada del pedido que apunta a una ruta inexistente',
-  { contenido: { titular: 'x' }, pedido: [{ ruta: 'bajada', clase: 'prosa' as const, que: 'la bajada' }] },
-  (caso: { contenido: unknown; pedido: readonly { ruta: string; clase: 'prosa'; que: string }[] }) =>
+  { contenido: { titular: 'x' }, pedido: [{ ruta: 'bajada', clase: 'prosa' as const, marcador: null, que: 'la bajada', formato: 'texto plano' }] },
+  (caso: { contenido: unknown; pedido: readonly EntradaDePedido[] }) =>
     entradasColgadas(caso.contenido, caso.pedido).length === 0,
 )
 

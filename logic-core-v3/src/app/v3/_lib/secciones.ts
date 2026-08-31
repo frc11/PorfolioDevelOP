@@ -111,7 +111,18 @@ export interface Seccion {
  * Lo que sí está medido es que la secuencia cuenta como **UN momento** y no
  * como tres pantallas (SCROLL.md §6).
  *
- * Las alturas de 05 a 08 quedan como las dejó S1: son del lane de S6.
+ * ── Las alturas de 05 a 08, corregidas en SITIO-S7 ────────────────────────
+ *
+ *     05 Servicios       300svh   PINNEADA SIEMPRE · la secuencia de tres
+ *                                 canales. Ya estaba construida así; lo que
+ *                                 faltaba era que la tabla lo dijera.
+ *     06 Tu panel        200svh   dos tiempos. Era 100svh y SUBESTIMABA.
+ *     07 Por qué develOP 100svh   una pantalla
+ *     08 Cierre          100svh   MEDIDO: 0,68 pantallas a 1440. Ver su fila.
+ *
+ * Las tres correcciones las pidió SITIO-S6 con su medición y no las pudo
+ * escribir: este archivo era del otro lane. Es el ejemplo más limpio de por qué
+ * repartir archivos no alcanza para repartir un sprint.
  */
 export const SECCIONES: readonly Seccion[] = [
   { id: 'hero', numero: '01', nombre: 'Hero', superficie: 'papel-transparente', alto: '100svh' },
@@ -137,8 +148,62 @@ export const SECCIONES: readonly Seccion[] = [
    * abajo de la compuerta de 1025 — mobile conserva el ritmo gratis.
    */
   { id: 'servicios', numero: '05', nombre: 'Servicios', superficie: 'papel-opaco', alto: '300svh', pinneada: 'siempre' },
-  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '100svh' },
+  /**
+   * TU PANEL — DOS tiempos, y por eso 200svh. **Corrección de SITIO-S7.**
+   *
+   * S1 le puso `100svh` cuando la sección era un rótulo. SITIO-S6 la construyó
+   * con dos tiempos —qué es el panel y cómo se ve; qué se hace ahí adentro— y
+   * **no pudo corregir la tabla**, porque este archivo era del otro lane. Lo
+   * reportó con el número: `s6-tu-panel` cuenta los `min-h-svh` del marcado y
+   * son dos.
+   *
+   * Los dos tiempos están separados porque el ancla de P4 —`top bottom` →
+   * `bottom top`— recorre el alto del bloque MÁS un viewport entero: apretada
+   * contra la captura, la lista de capacidades entraría casi entera antes de
+   * que alguien la vea.
+   *
+   * ⚠ El `alto` de la tabla es un `min-height`, así que con 100svh la sección
+   * no se rompía: **subestimaba el recorrido**, que es peor que romperse
+   * porque no se ve. La cuenta de ritmo salía mal y nadie se enteraba.
+   */
+  { id: 'tu-panel', numero: '06', nombre: 'Tu panel', superficie: 'papel-opaco', alto: '200svh' },
   { id: 'por-que-develop', numero: '07', nombre: 'Por qué develOP', superficie: 'papel-transparente', alto: '100svh' },
+  /**
+   * CIERRE — el alto MEDIDO, y por qué se queda en 100svh. **SITIO-S7.**
+   *
+   * ⚠️ **NO SE REABRE SIN ESTOS DOS NÚMEROS.** SITIO-S6 pidió revisarlo con la
+   * premisa *"pasa de una pantalla con el titular en `titulo-xl` más el pie
+   * entero"*. Se midió: **la premisa vale sólo a 375, y no a escritorio**, que
+   * es el ancho donde este proyecto define el ritmo. Quien quiera cambiar este
+   * valor tiene que empezar por acá y no por la intuición — la intuición ya se
+   * probó y dio al revés:
+   *
+   *     @1440 × 900   609 px  →  0,68 pantallas   (las tres columnas EN FILA)
+   *     @375  × 667   913 px  →  1,37 pantallas   (las columnas APILADAS)
+   *
+   * Las produce `s8-cierre.invariant` sumando cajas de línea y tokens —no está
+   * medido en un navegador, y eso está declarado ahí—.
+   *
+   * **Se queda en `100svh`, y no es conservadurismo:** el `alto` es un
+   * `min-height` y la cuenta de ritmo del proyecto es la de ESCRITORIO, que es
+   * donde la referencia midió los suyos. A 1440 la sección entra en 0,68
+   * pantallas, así que `100svh` ya la contiene con aire; declarar `200svh`
+   * metería **1,32 pantallas vacías** en el tramo final del recorrido, que es
+   * exactamente el defecto que el pinneo existe para no tener.
+   *
+   * ⚠ A 375 el contenido SÍ pasa la pantalla —1,37— y ahí manda el
+   * `min-height`: la sección crece y no recorta nada. O sea que la premisa de
+   * SITIO-S6 era correcta **para el ancho que estaba mirando** y no para el que
+   * gobierna la cuenta. Lo que eso cuesta es que el ritmo de mobile —que este
+   * proyecto todavía no publica— subestimaría el tramo. Queda anotado, no
+   * arreglado: el ritmo de 390 es otro número y SCROLL.md lo publica por
+   * separado con razón.
+   *
+   * **Las tres salidas, para que quien lo reabra no las vuelva a recorrer:**
+   * subir el alto mete 1,32 pantallas vacías a 1440; dejarlo en 100svh no
+   * recorta nada en ningún ancho; y declarar dos altos por ancho no existe en
+   * la tabla —el `alto` es uno y es un mínimo—. Se queda como está.
+   */
   { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-opaco', alto: '100svh' },
 ]
 

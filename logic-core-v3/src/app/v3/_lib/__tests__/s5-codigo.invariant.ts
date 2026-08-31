@@ -95,7 +95,21 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Una sola puerta a las piezas de motion, y `three` no entra')
 
-const PUERTA = `${RAIZ_DEL_LANE}/_contrato/piezas.tsx`
+/**
+ * ⚠ LA PUERTA SE MUDÓ EN SITIO-S7, y el que la cruza cambió de naturaleza.
+ *
+ * Era `_contrato/piezas.tsx`, el único archivo de este lane que importaba la
+ * glue de la ruta de demostración de S2. Con los dos contratos unificados la
+ * puerta es una sola para las OCHO secciones —`_contrato/coreografia-animada.tsx`—
+ * y además es el módulo que **no baja abajo de 1025**, así que la propiedad que
+ * este bloque custodia pasó de "una sola puerta" a "una sola puerta, y del lado
+ * de afuera de la compuerta".
+ *
+ * Lo que este invariante sigue afirmando es lo suyo: que **ninguna de estas
+ * cuatro secciones** la cruza por su cuenta. Que la puerta sea una para las
+ * ocho lo afirma `s7-contrato`, que es de quien las unificó.
+ */
+const PUERTA = 'src/app/v3/_secciones/_contrato/coreografia-animada.tsx'
 
 const puertasDeMas = PANTALLA.filter(
   (a) => a !== PUERTA && importsDe(leer(a)).some((m) => m.includes('motion/_componentes')),
@@ -103,7 +117,7 @@ const puertasDeMas = PANTALLA.filter(
 afirmarIgual(
   puertasDeMas,
   [],
-  'sólo `_contrato/piezas.tsx` importa de `motion/_componentes/` — el día que esa carpeta se mueva, cambian dos líneas',
+  'ninguna de las cuatro secciones importa de `motion/_componentes/` por su cuenta',
 )
 afirmar(
   importsDe(leer(PUERTA)).some((m) => m.includes('motion/_componentes')),
