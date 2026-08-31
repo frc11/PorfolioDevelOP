@@ -155,11 +155,29 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Todo selector del sprint está acotado a [data-v3]')
 
+/**
+ * ⚠ **EL DETECTOR TENÍA UN PROXY, NO LA PROPIEDAD (SITIO-S9).** Lo que se
+ * custodia es *«ninguna regla puede alcanzar al sitio vivo»*, y `startsWith`
+ * era la forma barata de comprobarlo mientras todas las reglas colgaran del
+ * envoltorio. `scroll-padding` no puede: va sobre el CONTENEDOR DE SCROLL, que
+ * es el `<html>`, y el `<html>` no lleva la marca. `html:has([data-v3])`
+ * cumple la propiedad —**sólo matchea cuando hay un `[data-v3]` en el
+ * documento**, o sea nunca en el sitio vivo— y no cumplía el proxy.
+ *
+ * Se le enseña **esa forma exacta y nada más**, anclada a la cadena completa y
+ * no a un `includes('[data-v3]')`: un sustring bastaría para que `html, button`
+ * pasara con sólo nombrar la marca en otro lado, que es §7.25 otra vez. Los
+ * tres controles positivos de abajo cubren las tres formas de romperlo.
+ */
+const CONTENEDOR_DE_SCROLL_DE_V3 = 'html:has([data-v3])'
+
 function selectoresFueraDeAlcance(css: string): string[] {
+  const acotada = (parte: string): boolean =>
+    parte.startsWith('[data-v3]') || parte === CONTENEDOR_DE_SCROLL_DE_V3
   return reglas(css)
     .map((r) => r.selector)
     .filter((s) => !s.startsWith('@'))
-    .filter((s) => partesDeSelector(s).some((parte) => !parte.startsWith('[data-v3]')))
+    .filter((s) => partesDeSelector(s).some((parte) => !acotada(parte)))
 }
 
 const fuera = ARCHIVOS_DE_ESTILO.flatMap((a) => selectoresFueraDeAlcance(leer(a)))
@@ -174,6 +192,29 @@ controlPositivo(
   'y lo ve aunque esté en la segunda mitad de una lista de selectores',
   '[data-v3] .a:hover, button { color: red; }',
   (css) => selectoresFueraDeAlcance(css).length === 0,
+)
+controlPositivo(
+  'el `html` pelado NO pasa por parecerse al contenedor de scroll de /v3',
+  'html { scroll-padding-top: 1px; }',
+  (css) => selectoresFueraDeAlcance(css).length === 0,
+)
+controlPositivo(
+  '  ni un `:has()` que no es el de la marca',
+  'html:has(.cualquiera) { scroll-padding-top: 1px; }',
+  (css) => selectoresFueraDeAlcance(css).length === 0,
+)
+controlPositivo(
+  '  ni uno que sólo NOMBRA la marca en otro lado: la forma está anclada entera',
+  'html, .x[data-v3] { color: red; }',
+  (css) => selectoresFueraDeAlcance(css).length === 0,
+)
+const conLaForma = ARCHIVOS_DE_ESTILO.filter((a) =>
+  reglas(leer(a)).some((r) => r.selector === CONTENEDOR_DE_SCROLL_DE_V3),
+)
+afirmarIgual(
+  conLaForma.map((a) => a.split('/').pop()),
+  ['navegacion.css'],
+  '  y una sola hoja usa esa forma: la que la necesita, el `scroll-padding-top` de las anclas',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

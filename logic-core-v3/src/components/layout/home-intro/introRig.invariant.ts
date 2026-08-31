@@ -233,21 +233,21 @@ check('y por arriba también', sampleInkShading(9).emissiveMix === 0)
 
 // ── Controles positivos ─────────────────────────────────────────────────────
 
-section('control positivo — que estas comprobaciones puedan fallar')
+section('Que estas comprobaciones puedan fallar')
 
 const conLuzFrontal: IntroInkShading = { ...flat, keyIntensity: 3.2 }
-check('detecta una luz prendida sobre el logo plano', !UNLIT(conLuzFrontal))
+check('control positivo — detecta una luz prendida sobre el logo plano', !UNLIT(conLuzFrontal))
 check(
-  'detecta el ambiente de cielo abierto, que es el escalón que §7.11 reportó',
+  'control positivo — detecta el ambiente de cielo abierto, el escalón que §7.11 reportó',
   HEMI_INTENSITY !== HEMI_INTENSITY * SKY && SKY < 1,
   `cielo abierto ${HEMI_INTENSITY} contra ${(HEMI_INTENSITY * SKY).toFixed(4)} — ${((1 - SKY) * 100).toFixed(1)}% de caída`
 )
 check(
-  'y con la celosía abierta el factor vuelve a 1, que es el estado anterior',
+  'control positivo — con la celosía abierta el factor vuelve a 1, que es el estado anterior',
   celosiaSkyFactor(0) === 1
 )
 check(
-  'el modelo del logo responde a la luz: apagar la key lo oscurece de verdad',
+  'control positivo — el modelo responde a la luz: apagar la key lo oscurece de verdad',
   introShade(INK_COLOR, [0, 0, 1], SKY) > 0,
   `cara frontal ${introShade(INK_COLOR, [0, 0, 1], SKY).toFixed(2)} contra ${introShade(INK_COLOR, [0, 0, 1], 0).toFixed(2)} sin ambiente`
 )

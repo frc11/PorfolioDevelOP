@@ -114,7 +114,7 @@ section('El factor de cielo: forma cerrada contra la integral de hemisferio')
    * celosía no tapa nada y tiene que dar exactamente 1.
    */
   check(
-    'el instrumento se mueve: con la barra en 0 el cielo está abierto y vale 1',
+    'control positivo — el instrumento se mueve: con la barra en 0 el cielo está abierto y vale 1',
     celosiaSkyFactor(0) === 1 && celosiaSkyIntegral([0, FLOOR_Y, 0], 0, MOIRE_MISMATCH) === 1,
     'sin esto, dos funciones que devolvieran siempre lo mismo pasarían el chequeo de abajo'
   )

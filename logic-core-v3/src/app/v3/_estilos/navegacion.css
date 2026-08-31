@@ -36,6 +36,36 @@
  * verifica `s3-papel-translucido.invariant.ts`.
  * ========================================================================= */
 
+/* ── DÓNDE ATERRIZA UN ANCLA (SITIO-S9) ─────────────────────────────────────
+ *
+ * El pie de /v3 ofrece SIETE anclas y el sitio viejo declara
+ * `scroll-padding-top: var(--spacing-ds-nav)` = 64px sobre el `<html>`
+ * (`globals.css`, `@layer base`). Eso alcanza a /v3 porque el layout raíz
+ * importa esa hoja, y gobierna de verdad porque Lenis no corre acá
+ * (`SmoothScroll.tsx` se sale con `pathname.startsWith('/v3')`): el scroll es
+ * nativo. Medido en `s9-instrumentos.invariant.ts` §4: **el aterrizaje caía 8px
+ * CORTO** y el borde de la sección quedaba debajo de la pastilla.
+ *
+ * El valor correcto es el borde inferior de la pastilla EN REPOSO —reposo más
+ * alto— y sale de los mismos cuatro tokens que la derivan abajo: no es un 72
+ * escrito, es la misma cuenta.
+ *
+ * ⚠ **Por qué el selector es `html:has([data-v3])` y no `[data-v3]`.**
+ * `scroll-padding` va sobre el CONTENEDOR DE SCROLL, y acá el contenedor es el
+ * `<html>`, que no lleva la marca —vive en el envoltorio de `v3/layout.tsx`—.
+ * Con `:has()` la regla sigue sin poder alcanzar al sitio vivo, que es la
+ * propiedad que el repo custodia: **sólo matchea cuando hay un `[data-v3]` en el
+ * documento.** Lo que hubo que enseñarle al detector de `s3-tokens` §5 es que
+ * su `startsWith('[data-v3]')` era un PROXY de esa propiedad, no la propiedad —
+ * la misma lección que S8 aprendió con el lector de los dos arneses.
+ * ========================================================================= */
+
+html:has([data-v3]) {
+  scroll-padding-top: calc(
+    var(--spacing-6) + var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto)
+  );
+}
+
 [data-v3] [data-pieza="navegacion"] {
   /* --- La derivación del umbral. Ver `_lib/navegacion.ts`. -------------- */
   --nav-reposo: var(--spacing-6);

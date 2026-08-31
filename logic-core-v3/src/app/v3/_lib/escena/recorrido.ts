@@ -1,104 +1,191 @@
 /**
- * EL MAPEO DEL RECORRIDO CONTRA LAS OCHO PANTALLAS REALES — derivado, y
- * **PROVISIONAL**.
+ * EL MAPEO DEL RECORRIDO CONTRA LAS CATORCE PANTALLAS REALES — **por anclaje**.
  *
- * ⚠️ **ESTE MÓDULO NO CIERRA §7.2 DE `DIRECCION-ESCENA.md`. LA MIDE.**
+ * ⚠ **LA DECISIÓN NO VIVE ACÁ, Y NO SE REPITE.** Qué tramo corre sobre qué
+ * secciones, por qué se eligió la lectura *«el tramo OCUPA la sección»* y no
+ * *«la pose se alcanza cuando la sección empieza»*, qué keyframe cambia de dueño
+ * y por qué se interpola con una recta y no con una curva está escrito —con las
+ * cuatro cosas medidas que lo fuerzan— en `anclaje.ts`. Este módulo **implementa
+ * ese contrato**. Si alguien quiere discutir el anclaje, el archivo es el otro.
  *
- * La pregunta *"cómo se ata el recorrido al scroll real"* está declarada
- * ABIERTA desde S9 y sigue abierta: lo que hay acá es el mapeo más conservador
- * que se puede defender —una recta— puesto para que la escena se pueda montar y
- * mirar, más la tabla que muestra por qué la recta no alcanza. **La decisión de
- * composición es del humano.**
+ * ── QUÉ REEMPLAZA, Y POR QUÉ EL REEMPLAZO NO ES UNA PREFERENCIA ────────────
  *
- * ── LA CONTRADICCIÓN, con sus dos cifras ───────────────────────────────────
+ * Hasta SITIO-S8 acá había una recta única sobre el documento entero —`progreso
+ * = scrollY / (alto − ventana)`— declarada PROVISIONAL en su propio docblock, y
+ * no estaba mal: era **lo más conservador que se podía defender** mientras §7.2
+ * de `DIRECCION-ESCENA.md` siguiera sin decidir. §7.2 se decidió, y con eso la
+ * recta única dejó de ser la opción que no toma decisiones y pasó a ser una
+ * decisión de composición equivocada — repartía el recorrido a ritmo constante
+ * sobre catorce pantallas que **no pesan lo mismo**, y las tres desalineaciones
+ * que §7.2 midió eran su consecuencia directa.
  *
- * `choreography.ts` declara `CHOREO_SCREENS = 8` y compone sus seis tramos
- * sobre múltiplos exactos de 1/8. `_lib/secciones.ts` declara ocho secciones
- * cuyas alturas suman **CATORCE** pantallas. Las dos cifras son datos del repo
- * y este módulo las lee: no hay ninguna escrita a mano acá.
+ * ── LA FORMA: UNA RECTA POR TRAMOS SOBRE `ANCLAJE.nudos` ──────────────────
  *
- * Consecuencia directa: el recorrido corre a **8/14 = 0,571** de su ritmo
- * compuesto — cada pantalla de coreografía dura **1,75** pantallas de scroll—.
- * Y hay dos desalineaciones que no son de ritmo sino de contenido:
+ *     pantalla = pantallaDeScroll(scrollY, alto, ventana)      ← `anclaje.ts`
+ *     progreso = recta por tramos sobre los nudos              ← acá
  *
- *   1. **Los nombres no coinciden.** La coreografía tiene un tramo `demos` que
- *      no es ninguna de las ocho secciones, y las ocho tienen `servicios`,
- *      `tu-panel` y `por qué develOP`, que no son ninguno de los seis tramos.
- *   2. **§2.4 dice que la escena se APAGA después del cierre, entran servicios
- *      y tu panel, y VUELVE para el diferencial.** La coreografía no tiene esa
- *      forma: es monótona de 0 a 1 y su tramo `cierre` es el último.
+ * La primera mitad **es del contrato y no de este módulo**, y ésa es la parte
+ * que importa: `pantallaDeScroll` es la coordenada que comparten el mapeo y la
+ * visibilidad. Si cada frente tradujera el scroll por su cuenta, la escena se
+ * podría encender en una pantalla y posarse en otra sin que ningún invariante de
+ * ninguno de los dos lo viera.
  *
- * ── EL MAPEO PROVISIONAL: una recta sobre el scroll del documento ──────────
+ * ── POR QUÉ YA NO HAY UN «ESTIRAMIENTO» ───────────────────────────────────
  *
- * `progreso = scrollY / (alto del documento − alto de la ventana)`.
+ * `ESTIRAMIENTO_DE_DOCUMENTO` (×1,750) y `ESTIRAMIENTO_DE_SCROLL` (×1,625)
+ * medían **una** cosa: cuánto se estiraba la recta única. Con el anclaje no hay
+ * una recta sino seis, y ninguna cifra sola las describe —publicar un promedio
+ * sería esconder exactamente lo que el anclaje decidió—. Lo que las reemplaza es
+ * `RITMO_POR_SEGMENTO`: el ritmo real de cada segmento, en progreso por pantalla
+ * de scroll y como múltiplo del ritmo compuesto (`RITMO_COMPUESTO`, que es
+ * `1 / CHOREO_SCREENS` y sale de la coreografía).
  *
- * Es el más conservador que hay y por eso es el que se elige mientras nadie
- * decida: **es exactamente lo que dice el contrato** —*"el progreso sale del
- * scroll de la página y no de un control"*— sin agregar una sola decisión
- * encima. Es monótono, no deforma ningún tramo, no inventa un punto de anclaje
- * por sección y no toca `CHOREO_SCREENS`, ni los tramos, ni las alturas de la
- * tabla.
+ * ── LOS NUDOS SE DEVUELVEN LITERALES, Y NO ES UNA MICRO-OPTIMIZACIÓN ──────
  *
- * Lo que cuesta está medido y es el motivo del freno — ver
- * `__tests__/s8-tinta.invariant.ts`: con esta recta, **`por-que-develop` —una
- * de las dos únicas secciones que dejan ver la escena— llena el cuadro en
- * p = 12/13 = 0,923**, que cae adentro del tramo `cierre`, donde la sala está
- * en penumbra.
- *
- * ── Por qué la ventana se resta ────────────────────────────────────────────
- *
- * Porque el scroll de un documento llega hasta `alto − ventana`, no hasta
- * `alto`: normalizar contra el alto entero dejaría el progreso final en
- * 13/14 = 0,929 y el último keyframe del recorrido no se alcanzaría nunca.
+ * En el borde de un segmento las dos funciones cortocircuitan y devuelven el
+ * valor del nudo tal cual, sin interpolar. Es lo que hace que
+ * `progresoDePantalla(nudo.pantalla) === nudo.progreso` sea una igualdad
+ * **exacta** y no una a menos de épsilon; con eso, «la sección llena el cuadro
+ * en el progreso de su ancla» se puede afirmar con `===`, que es como este repo
+ * distingue una propiedad de una casualidad de redondeo.
  */
 
-import { SECCIONES } from '../secciones'
 import { CHOREO_SCREENS, CHOREO_TRAMOS } from './choreography'
+import { ANCLAJE, pantallaDeScroll, type Nudo } from './anclaje'
 
-/** Una pantalla es `100svh`. La unidad en la que la tabla declara sus altos. */
-const SVH_POR_PANTALLA = 100
+export { pantallasDe } from './anclaje'
+
+/** Las catorce y las trece. Salen del anclaje: acá no se suma nada. */
+export const PANTALLAS_DEL_DOCUMENTO = ANCLAJE.pantallasDelDocumento
+export const PANTALLAS_DE_SCROLL = ANCLAJE.pantallasDeScroll
 
 /**
- * Cuántas pantallas mide un `alto` de la tabla.
- *
- * Tira con una unidad que no sea `svh`: un alto que este módulo no sabe leer es
- * un error del que hay que enterarse, no un cero que se propaga hasta un
- * recorrido mal repartido.
+ * El ritmo al que la coreografía fue COMPUESTA: un octavo de progreso por
+ * pantalla, porque sus seis tramos reparten [0, 1] sobre `CHOREO_SCREENS`.
+ * Es la vara contra la que se lee cada segmento real.
  */
-export function pantallasDe(alto: string): number {
-  const m = /^(\d+(?:\.\d+)?)svh$/.exec(alto)
-  if (m === null) throw new Error(`alto que este módulo no sabe leer: ${alto}`)
-  return Number(m[1]) / SVH_POR_PANTALLA
+export const RITMO_COMPUESTO = 1 / CHOREO_SCREENS
+
+// ── La aritmética, pura de sus argumentos ───────────────────────────────────
+
+/**
+ * Los nudos tienen que crecer en los DOS ejes. Tira —no devuelve un mapeo
+ * degradado— porque un nudo fuera de orden no produce un recorrido raro sino un
+ * progreso que retrocede, y un progreso que retrocede hace que la cámara
+ * deshaga el recorrido en mitad de una sección sin que nada lo reporte.
+ *
+ * Está separada de `derivarAnclaje` a propósito: aquélla valida **la derivación**
+ * y ésta valida **lo que se le pasa a la interpolación**, que puede ser
+ * cualquier lista de nudos. Es lo que permite que un invariante corra estas dos
+ * funciones contra un mapeo deliberadamente roto.
+ */
+function exigirOrden(nudos: readonly Nudo[]): void {
+  if (nudos.length < 2) throw new Error('recorrido: una recta por tramos necesita dos nudos o más.')
+  for (let i = 1; i < nudos.length; i += 1) {
+    const a = nudos[i - 1]
+    const b = nudos[i]
+    if (!(b.pantalla > a.pantalla) || !(b.progreso > a.progreso)) {
+      throw new Error(
+        `recorrido: el nudo ${i} no avanza — pantalla ${a.pantalla}→${b.pantalla}, progreso ${a.progreso}→${b.progreso}.`,
+      )
+    }
+  }
 }
 
-/** Las catorce. Derivadas de la tabla, nunca escritas. */
-export const PANTALLAS_DEL_DOCUMENTO = SECCIONES.reduce((n, s) => n + pantallasDe(s.alto), 0)
+/** Progreso en una pantalla de scroll, sobre una lista de nudos cualquiera. */
+export function progresoEnNudos(nudos: readonly Nudo[], pantalla: number): number {
+  exigirOrden(nudos)
+  const primero = nudos[0]
+  const ultimo = nudos[nudos.length - 1]
+  if (pantalla <= primero.pantalla) return primero.progreso
+  if (pantalla >= ultimo.pantalla) return ultimo.progreso
+  for (let i = 1; i < nudos.length; i += 1) {
+    const a = nudos[i - 1]
+    const b = nudos[i]
+    if (pantalla === b.pantalla) return b.progreso
+    if (pantalla < b.pantalla) {
+      const t = (pantalla - a.pantalla) / (b.pantalla - a.pantalla)
+      return a.progreso + t * (b.progreso - a.progreso)
+    }
+  }
+  return ultimo.progreso
+}
+
+/** La inversa exacta de la anterior, sobre los mismos nudos. */
+export function pantallaEnNudos(nudos: readonly Nudo[], progreso: number): number {
+  exigirOrden(nudos)
+  const primero = nudos[0]
+  const ultimo = nudos[nudos.length - 1]
+  if (progreso <= primero.progreso) return primero.pantalla
+  if (progreso >= ultimo.progreso) return ultimo.pantalla
+  for (let i = 1; i < nudos.length; i += 1) {
+    const a = nudos[i - 1]
+    const b = nudos[i]
+    if (progreso === b.progreso) return b.pantalla
+    if (progreso < b.progreso) {
+      const t = (progreso - a.progreso) / (b.progreso - a.progreso)
+      return a.pantalla + t * (b.pantalla - a.pantalla)
+    }
+  }
+  return ultimo.pantalla
+}
+
+/** El progreso del recorrido en una pantalla de scroll del home. */
+export function progresoDePantalla(pantalla: number): number {
+  return progresoEnNudos(ANCLAJE.nudos, pantalla)
+}
+
+/** La pantalla de scroll en la que el recorrido llega a un progreso. */
+export function pantallaDeProgreso(progreso: number): number {
+  return pantallaEnNudos(ANCLAJE.nudos, progreso)
+}
+
+// ── El ritmo, segmento por segmento ─────────────────────────────────────────
+
+export type RitmoDeSegmento = {
+  /** El tramo de la coreografía que cierra en este segmento. */
+  readonly tramo: string
+  readonly desdePantalla: number
+  readonly hastaPantalla: number
+  /** Pantallas de scroll que dura. */
+  readonly pantallas: number
+  /** Progreso que cubre. */
+  readonly progreso: number
+  /** Progreso por pantalla de scroll: el ritmo real. */
+  readonly porPantalla: number
+  /** Ese ritmo como múltiplo del compuesto. 1 = corre a la velocidad escrita. */
+  readonly multiploDelCompuesto: number
+}
 
 /**
- * El recorrido de scroll: el documento menos la ventana. La ventana vale UNA
- * pantalla por definición de `svh`.
- */
-export const PANTALLAS_DE_SCROLL = PANTALLAS_DEL_DOCUMENTO - 1
-
-/**
- * Cuánto se estira el recorrido, con las DOS lecturas — porque difieren y la
- * diferencia es exactamente una pantalla.
+ * Los seis segmentos entre nudos, con su ritmo. Reemplaza a las dos cifras de
+ * estiramiento del provisional — ver la cabecera.
  *
- * `ESTIRAMIENTO_DE_DOCUMENTO` compara alto contra alto: 14 pantallas de tabla
- * contra las 8 que la coreografía declara.
- * `ESTIRAMIENTO_DE_SCROLL` compara recorrido contra recorrido: las 13 pantallas
- * que el documento efectivamente scrollea contra esas mismas 8.
- *
- * ⚠ Cuál de las dos es "la" cifra depende de si las 8 pantallas de
- * `CHOREO_SCREENS` son 8 de documento o 8 de scroll, y **`choreography.ts` no
- * lo dice**. Se publican las dos en vez de elegir: la ambigüedad es del dato,
- * no de la cuenta, y esconderla adentro de un número sería inventar la decisión
- * que este módulo existe para no tomar.
+ * El nombre del tramo sale de `CHOREO_TRAMOS` y no del `porQue` del nudo: la
+ * derivación ya garantizó que hay un nudo por tramo, en el mismo orden, y leer
+ * el nombre de una cadena de prosa sería inventar un acoplamiento frágil.
  */
-export const ESTIRAMIENTO_DE_DOCUMENTO = PANTALLAS_DEL_DOCUMENTO / CHOREO_SCREENS
-export const ESTIRAMIENTO_DE_SCROLL = PANTALLAS_DE_SCROLL / CHOREO_SCREENS
+export const RITMO_POR_SEGMENTO: readonly RitmoDeSegmento[] = ANCLAJE.nudos
+  .slice(1)
+  .map((b, i): RitmoDeSegmento => {
+    const a = ANCLAJE.nudos[i]
+    const pantallas = b.pantalla - a.pantalla
+    const progreso = b.progreso - a.progreso
+    const porPantalla = progreso / pantallas
+    return {
+      tramo: CHOREO_TRAMOS[i].name,
+      desdePantalla: a.pantalla,
+      hastaPantalla: b.pantalla,
+      pantallas,
+      progreso,
+      porPantalla,
+      multiploDelCompuesto: porPantalla / RITMO_COMPUESTO,
+    }
+  })
 
-/** Lo que le toca a una sección del recorrido, con el mapeo provisional. */
+// ── La tabla de las ocho ────────────────────────────────────────────────────
+
+/** Lo que le toca a una sección del recorrido, con el mapeo del anclaje. */
 export type TramoDeSeccion = {
   readonly id: string
   /** Pantallas de scroll acumuladas antes de esta sección. */
@@ -112,42 +199,49 @@ export type TramoDeSeccion = {
   readonly seVeDesde: number
   /** Progreso en el que **deja de verse** (sale por arriba). */
   readonly seVeHasta: number
-  /** Si esta sección deja ver la escena. Sale de la tabla, no de acá. */
+  /** Si esta sección deja ver la escena. Sale de la tabla de superficies. */
   readonly dejaVerLaEscena: boolean
 }
-
-const acotar01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v)
 
 /**
  * La tabla, derivada. Ocho filas, una por sección, en el orden del recorrido.
  *
- * `llena` es el intervalo en el que la sección ocupa la ventana entera —su
- * borde de arriba ya pasó y el de abajo todavía no—; `seVe` es el intervalo en
- * el que aparece en pantalla aunque sea parcialmente. Los dos hacen falta: el
- * primero dice qué pose le toca a la sección, el segundo dice sobre qué rango
- * de la escena tiene que ser legible su texto.
+ * ⚠ **Se llamaba `MAPEO_PROVISIONAL` y dejó de serlo en SITIO-S9.** El nombre
+ * no es cosmético: mientras §7.2 estaba abierta, el nombre era la advertencia de
+ * que estos números no se podían citar como decididos. Ahora se pueden, y el
+ * nombre lo tiene que decir — un `PROVISIONAL` que sobrevive a su decisión es
+ * peor que ninguna marca, porque enseña a ignorar las que quedan.
+ *
+ * `llena` es el intervalo en el que la sección ocupa la ventana entera —su borde
+ * de arriba ya pasó y el de abajo todavía no—; `seVe` es el intervalo en el que
+ * aparece en pantalla aunque sea parcialmente. Los dos hacen falta: el primero
+ * dice qué pose le toca a la sección, el segundo sobre qué rango de la escena
+ * tiene que ser legible su texto. La geometría entera —altos, acumulados y qué
+ * superficie deja ver el canvas— viene de `ANCLAJE.geometria`.
  */
-export const MAPEO_PROVISIONAL: readonly TramoDeSeccion[] = (() => {
-  const filas: TramoDeSeccion[] = []
-  let acumulado = 0
-  for (const seccion of SECCIONES) {
-    const alto = pantallasDe(seccion.alto)
-    filas.push({
-      id: seccion.id,
-      desdePantalla: acumulado,
-      altoEnPantallas: alto,
-      llenaDesde: acotar01(acumulado / PANTALLAS_DE_SCROLL),
-      llenaHasta: acotar01((acumulado + alto - 1) / PANTALLAS_DE_SCROLL),
-      seVeDesde: acotar01((acumulado - 1) / PANTALLAS_DE_SCROLL),
-      seVeHasta: acotar01((acumulado + alto) / PANTALLAS_DE_SCROLL),
-      dejaVerLaEscena: seccion.superficie === 'papel-transparente',
-    })
-    acumulado += alto
-  }
-  return filas
-})()
+export const MAPEO_DE_LAS_SECCIONES: readonly TramoDeSeccion[] = ANCLAJE.geometria.map(
+  (g): TramoDeSeccion => ({
+    id: g.id,
+    desdePantalla: g.desdePantalla,
+    altoEnPantallas: g.altoEnPantallas,
+    llenaDesde: progresoDePantalla(g.desdePantalla),
+    llenaHasta: progresoDePantalla(g.hastaPantalla - 1),
+    seVeDesde: progresoDePantalla(g.desdePantalla - 1),
+    seVeHasta: progresoDePantalla(g.hastaPantalla),
+    dejaVerLaEscena: g.dejaVerLaEscena,
+  }),
+)
 
-/** Qué tramo de la coreografía le toca a un progreso. `-1` si ninguno. */
+/**
+ * Qué tramo de la coreografía le toca a un progreso. `'ninguno'` si ninguno.
+ *
+ * ⚠ **En un borde devuelve el tramo que TERMINA, no el que empieza**, porque
+ * los `[from, to]` de `CHOREO_TRAMOS` son cerrados y `find` corta en el primero.
+ * Con el anclaje eso deja de ser un detalle: cada sección llena el cuadro
+ * exactamente sobre un nudo, o sea exactamente sobre un borde. Para leer a qué
+ * tramo pertenece una sección **no se usa esta función** sino `TRAMOS_ANCLADOS`,
+ * que es la declaración; ésta sirve para ubicar un progreso cualquiera.
+ */
 export function tramoEn(progreso: number): string {
   const tramo = CHOREO_TRAMOS.find((t) => progreso >= t.from && progreso <= t.to)
   return tramo?.name ?? 'ninguno'
@@ -157,19 +251,18 @@ export function tramoEn(progreso: number): string {
  * El progreso del recorrido a partir del scroll de la página.
  *
  * ⚠ **Los tres argumentos entran; no se leen de `window` acá.** Es lo que
- * permite que el invariante corra la MISMA función sin DOM, y es además la
- * mitad de la lección de `CLAUDE.md` sobre medir scroll con la pestaña oculta:
- * quien llama es el que tiene que decidir si sus números valen.
+ * permite que el invariante corra la MISMA función sin DOM, y es además la mitad
+ * de la lección de `CLAUDE.md` sobre medir scroll con la pestaña oculta: quien
+ * llama es el que tiene que decidir si sus números valen.
  *
  * Con un documento que no scrollea —o con la pestaña oculta, donde el alto da
- * cero— devuelve 0, que es la pose del hero: el lado seguro.
+ * cero— `pantallaDeScroll` devuelve 0 y esto devuelve el progreso del primer
+ * nudo, que es la pose del hero: el lado seguro.
  */
 export function progresoDelScroll(
   scrollY: number,
   altoDelDocumento: number,
   altoDeLaVentana: number,
 ): number {
-  const recorrido = altoDelDocumento - altoDeLaVentana
-  if (!(recorrido > 0)) return 0
-  return acotar01(scrollY / recorrido)
+  return progresoDePantalla(pantallaDeScroll(scrollY, altoDelDocumento, altoDeLaVentana))
 }

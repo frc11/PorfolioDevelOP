@@ -36,31 +36,29 @@
  *   hacia abajo**), la sombra proyectada del logo y el especular. **Las cifras
  *   de acá son un techo, no un piso.**
  *
- * ── ⚠️ POR QUÉ HAY UN `noCorre` Y NO UN ROJO ───────────────────────────────
+ * ── ⚠️ EL `noCorre` SE FUE: SITIO-S9 ANCLÓ EL MAPEO Y LA CIFRA CAMBIÓ ──────
  *
- * Porque la sección donde falla —`por-que-develop`— cae donde cae por el mapeo
- * **PROVISIONAL** de `recorrido.ts`, y el mapeo del recorrido al scroll está
- * declarado ABIERTO desde S9 (§7.2). Poner esa afirmación en rojo sería poner en
- * rojo el gate del repo por una decisión que este sprint no tiene permiso de
- * tomar; ponerla en verde sería peor. `noCorre` es la tercera salida del arnés:
- * **imprime que no corrió, por qué, y con qué número**, y hace que el resumen
- * diga en voz alta que este verde es parcial.
+ * SITIO-S8 dejó la afirmación del diferencial fuera de ventana —**no en rojo y
+ * no en verde**— porque la sección caía donde caía por un mapeo declarado
+ * PROVISIONAL. Con el anclaje construido (§7.2) la afirmación se hace: **el
+ * diferencial llena el cuadro sobre la pose `demos`, en p=0,750.**
+ *
+ * ⚠ **Y hay una segunda cifra que NO se afirma, y el porqué es la regla 13.** La
+ * ventana en la que la sección SE VE termina en p=1,000, en penumbra — y eso no
+ * lo decide el mapeo: es la anteúltima sección y la última mide una pantalla, así
+ * que su borde sale del cuadro en el final del scroll con **cualquier** mapeo
+ * monótono. §5 lo afirma y publica la cola con su dueño: §7.4.
  */
 
+import { ANCLAJE } from '../anclaje'
 import { CELOSIA_BAR, celosiaSkyFactor } from '../probeCelosia'
 import { MOIRE_MISMATCH } from '../probeMoire'
-import { MAPEO_PROVISIONAL } from '../recorrido'
+import { MAPEO_DE_LAS_SECCIONES, pantallaDeProgreso } from '../recorrido'
 import { TINTA_HEX } from '../../superficies'
 import { sampleFrame } from '@/app/probe-escena/__tests__/frameProbe'
-import {
-  afirmar,
-  cerrar,
-  controlPositivo,
-  noCorre,
-  razonDeContraste,
-  titulo,
-} from '../../__tests__/afirmar'
+import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from '../../__tests__/afirmar'
 import { grisHex, muestrearCuadro, percentil, vistaEn } from './cuadro'
+import { MAPEO_PROVISIONAL_HISTORICO } from './tablas'
 
 /** La escena real: envolvente puesta, desajuste del panel y celosía con su cielo. */
 const ESCENA_REAL = {
@@ -176,38 +174,50 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · LAS DOS SECCIONES TRANSPARENTES, con el mapeo PROVISIONAL')
+titulo('4 · LAS DOS SECCIONES TRANSPARENTES, con el ANCLAJE puesto')
 
-const transparentes = MAPEO_PROVISIONAL.filter((f) => f.dejaVerLaEscena)
-afirmar(transparentes.length === 2, 'son dos y salen de la tabla del home', transparentes.map((f) => f.id).join(' · '))
+const transparentes = MAPEO_DE_LAS_SECCIONES.filter((f) => f.dejaVerLaEscena)
+afirmar(
+  transparentes.length === 2,
+  'son dos y salen de la tabla del home',
+  transparentes.map((f) => f.id).join(' · '),
+)
 
+const bordesDe = (f: (typeof transparentes)[number]): readonly number[] => [
+  f.seVeDesde,
+  f.llenaDesde,
+  f.llenaHasta,
+  f.seVeHasta,
+]
+
+console.log('  sección           se ve en p=[…]        llena   C(mín)  C(p05)  C(p50)   peor de la ventana')
 for (const fila of transparentes) {
-  const puntos = [fila.seVeDesde, fila.llenaDesde, fila.llenaHasta, fila.seVeHasta]
-  const peor = Math.min(...puntos.map((p) => contrasteEn(p, 0)))
-  const peorP05 = Math.min(...puntos.map((p) => contrasteEn(p, 0.05)))
+  const peor = Math.min(...bordesDe(fila).map((p) => contrasteEn(p, 0)))
   console.log(
-    `  ${fila.id.padEnd(16)} se ve en p=[${fila.seVeDesde.toFixed(3)}, ${fila.seVeHasta.toFixed(3)}]` +
-      ` · llena el cuadro en p=${fila.llenaDesde.toFixed(3)}` +
-      ` · peor caso ${peor.toFixed(2)}:1 (mín) · ${peorP05.toFixed(2)}:1 (p05)`,
+    `  ${fila.id.padEnd(16)} [${fila.seVeDesde.toFixed(3)}, ${fila.seVeHasta.toFixed(3)}]` +
+      `   ${fila.llenaDesde.toFixed(3)}   ${contrasteEn(fila.llenaDesde, 0).toFixed(2).padStart(6)}` +
+      `  ${contrasteEn(fila.llenaDesde, 0.05).toFixed(2).padStart(6)}` +
+      `  ${contrasteEn(fila.llenaDesde, 0.5).toFixed(2).padStart(6)}   ${peor.toFixed(2)}:1`,
   )
 }
 
-const hero = transparentes[0]
-const heroPeor = Math.min(
-  ...[hero.seVeDesde, hero.llenaDesde, hero.llenaHasta, hero.seVeHasta].map((p) => contrasteEn(p, 0)),
-)
-
 /**
- * El Hero SÍ se afirma, y no depende del provisional: **cualquier** mapeo
- * monótono que arranque en 0 pone al Hero adentro del tramo `hero` de la
- * coreografía, que además es un sostén —la cámara no se mueve su pantalla
- * entera—. La afirmación vale para todos ellos.
+ * El Hero se afirma sobre su VENTANA ENTERA, y ahora eso significa algo más
+ * fuerte que antes: con el anclaje, la pantalla del Hero es exactamente el tramo
+ * `hero` de la coreografía, que es un SOSTÉN —los dos keyframes llevan la misma
+ * pose y el arco de luz tiene su stop en 0,125—, así que **el cuadro no cambia
+ * en toda la ventana** y el peor caso es el mismo en los cuatro bordes.
  */
+const hero = transparentes[0]
+const heroPeor = Math.min(...bordesDe(hero).map((p) => contrasteEn(p, 0)))
 afirmar(
   heroPeor >= AA,
   'HERO — la tinta pasa AA sobre la escena real en toda la ventana en que el Hero se ve',
   `peor caso ${heroPeor.toFixed(2)}:1 · también pasa AAA (${AAA}:1): ${heroPeor >= AAA ? 'sí' : 'no'}`,
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('5 · 🔴 EL DIFERENCIAL — la cifra que decide §7.29, y la que no la decide')
 
 const diferencial = transparentes[1]
 const difLlena = contrasteEn(diferencial.llenaDesde, 0)
@@ -215,50 +225,74 @@ const difP05 = contrasteEn(diferencial.llenaDesde, 0.05)
 const difMedia = contrasteEn(diferencial.llenaDesde, 0.5)
 
 /**
- * ⚠️ **LA DECISIÓN YA SE TOMÓ, Y ES POR QUÉ ESTO SIGUE EN `noCorre` Y NO EN ROJO.**
- *
- * El humano decidió en la parada de SITIO-S8: **se resuelve por el MAPEO**, que
- * es la opción (a) de la lista de abajo. El razonamiento es que este número es
- * *downstream* de un mapeo que este mismo sprint declaró provisional y mal en
- * tres formas — o sea que arreglarlo acá sería tapar el síntoma de otra cosa. Y
- * el número lo permite: el cruce está en p=0,878 y **cualquier mapeo que deje el
- * diferencial abajo de ese progreso lo resuelve sin tocar la escena**.
- *
- * Las cuatro salidas, con la decisión al lado, para que nadie las vuelva a
- * recorrer:
- *
- *   (a) **MOVER LA SECCIÓN EN EL RECORRIDO** — ✅ **ELEGIDA.** Depende de que se
- *       decida el mapeo (§7.2). No toca la escena, no toca las superficies.
- *   (b) **COMPONER LA SALIDA Y LA VUELTA DE LA ESCENA** (§7.4) — la reserva: si
- *       después del mapeo sigue fallando, ésta es la salida. §2.4 ya la pide con
- *       todas las letras («la escena se apaga después del cierre y vuelve para el
- *       diferencial»), y si al volver arranca en una pose clara el problema
- *       desaparece por construcción.
- *   (c) pasar `por-que-develop` a `papel-opaco` — ❌ **DESCARTADA**: mata uno de
- *       los tres momentos de escena, y el recorrido de superficies fue una
- *       decisión deliberada (SITIO-S5 §0.2).
- *   (d) aclarar el cierre del arco de luz — ❌ **DESCARTADA acá**: es §7.14, con
- *       sus cuatro palancas ya analizadas, y es otra cosa.
- *   (·) un velo o una superficie intermedia detrás del texto — ❌ **NUNCA.**
+ * ⚠️ **ESTA ES LA AFIRMACIÓN QUE SITIO-S8 NO PODÍA HACER.** Su `noCorre` decía,
+ * con todas las letras, que el número era *downstream* de un mapeo provisional y
+ * que **cualquier mapeo que dejara al diferencial abajo de p=0,878 lo resolvía
+ * sin tocar la escena**. El anclaje lo deja en p=0,750. Es la opción (a) que la
+ * parada de SITIO-S8 eligió, y se cierra con el número, no con el argumento.
  */
-noCorre(
-  `POR QUÉ DEVELOP — la tinta NO pasa AA con el mapeo provisional (${difLlena.toFixed(2)}:1)`,
-  'el mapeo del recorrido al scroll está SIN DECIDIR (§7.2 de DIRECCION-ESCENA.md) y este ' +
-    'sprint eligió la recta más conservadora que pudo defender. Afirmar AA acá sería afirmar ' +
-    'ESE provisional, no una propiedad del código. ' +
-    `MEDIDO: con la recta, "${diferencial.id}" llena el cuadro en p=${diferencial.llenaDesde.toFixed(3)} ` +
-    `y ahí la tinta da ${difLlena.toFixed(2)}:1 (mín), ${difP05.toFixed(2)}:1 (p05) y ${difMedia.toFixed(2)}:1 (mediana) ` +
-    `— los tres abajo de ${AA}:1. La escena cruza AA en p=${cruceAA.toFixed(4)}, así que cualquier mapeo ` +
-    `que ponga esta sección abajo de ese progreso la deja legible. ` +
-    'DECIDIDO EN LA PARADA DE SITIO-S8: se resuelve por el MAPEO (opción a); si después del mapeo ' +
-    'sigue fallando, la salida es componer la vuelta de la escena (§7.4). Descartadas: cambiar la ' +
-    'superficie y aclarar el cierre. Un velo, nunca. Ver el bloque de arriba.',
-)
+const viejo = MAPEO_PROVISIONAL_HISTORICO.find((f) => f.id === diferencial.id)
+if (viejo === undefined) throw new Error('el mapeo histórico no tiene al diferencial')
+const difViejo = contrasteEn(viejo.llenaDesde, 0)
 
 afirmar(
-  difLlena < AA,
-  '  y el instrumento lo ve: la medición del diferencial está por debajo del umbral, no cerca',
-  `${difLlena.toFixed(2)}:1 contra ${AA}:1 — la afirmación es sobre la MEDICIÓN, no sobre la decisión`,
+  difLlena >= AA,
+  `POR QUÉ DEVELOP — la tinta PASA AA donde la sección llena el cuadro (p=${diferencial.llenaDesde.toFixed(3)})`,
+  `${difLlena.toFixed(2)}:1 (mín) · ${difP05.toFixed(2)}:1 (p05) · ${difMedia.toFixed(2)}:1 (mediana), contra ${AA}:1`,
+)
+afirmar(
+  diferencial.llenaDesde < cruceAA,
+  '  y no por poco: llena el cuadro ANTES del cruce de AA de la escena',
+  `p=${diferencial.llenaDesde.toFixed(4)} contra el cruce en p=${cruceAA.toFixed(4)}`,
+)
+afirmar(
+  difLlena > difViejo,
+  `  contra el provisional, que la ponía en p=${viejo.llenaDesde.toFixed(3)}`,
+  `${difViejo.toFixed(2)}:1 → ${difLlena.toFixed(2)}:1 — la sección se movió ${(viejo.llenaDesde - diferencial.llenaDesde).toFixed(3)} de progreso hacia atrás`,
+)
+afirmar(
+  difMedia >= AAA,
+  '  y la mediana del cuadro pasa AAA, que el provisional no alcanzaba ni en AA',
+  `${difMedia.toFixed(2)}:1 contra ${AAA}:1`,
+)
+
+/**
+ * ⚠️ **LA COLA QUE NO SE AFIRMA, Y POR QUÉ NO ES AFLOJAR (regla 13).**
+ *
+ * La ventana en la que el diferencial SE VE termina en p=1,000, donde el peor
+ * píxel da 2,34:1. Podría parecer que la afirmación de arriba se hizo sobre el
+ * punto cómodo. No lo es, y la razón se afirma abajo: el borde inferior de
+ * `por-que-develop` sale del cuadro **exactamente en el final del scroll**, así
+ * que su ventana termina en p=1,000 **con cualquier mapeo monótono que complete
+ * el recorrido**, y un criterio que ningún mapeo puede cumplir no distingue un
+ * mapeo de otro. Lo que SÍ controla el mapeo es dónde cae la sección. Lo que
+ * queda —qué pasa mientras el panel se va y el Cierre lo tapa— es **§7.4**, la
+ * reserva (b) que la parada de SITIO-S8 ya había nombrado.
+ */
+const finDeLaVentana = contrasteEn(diferencial.seVeHasta, 0)
+const cruceEnPantallas = pantallaDeProgreso(cruceAA)
+const geometria = ANCLAJE.geometria.find((g) => g.id === diferencial.id)
+if (geometria === undefined) throw new Error('la geometría no tiene al diferencial')
+const enCuadroAlCruzar = Math.max(0, Math.min(1, geometria.hastaPantalla - cruceEnPantallas))
+
+afirmar(
+  geometria.hastaPantalla === ANCLAJE.pantallasDeScroll,
+  'LA COLA NO ES DEL MAPEO: el diferencial sale del cuadro en el final del scroll, por geometría',
+  `su borde inferior está en la pantalla ${geometria.hastaPantalla} de ${ANCLAJE.pantallasDeScroll} — con cualquier mapeo, su ventana termina en p=1`,
+)
+controlPositivo(
+  'y el detector distingue una sección que NO termina con el scroll',
+  'hero',
+  (id: string) => {
+    const g = ANCLAJE.geometria.find((f) => f.id === id)
+    return g !== undefined && g.hastaPantalla === ANCLAJE.pantallasDeScroll
+  },
+)
+console.log(
+  `  la cola, publicada con su dueño (§7.4): la tinta cruza AA en p=${cruceAA.toFixed(4)}, que es la pantalla ` +
+    `${cruceEnPantallas.toFixed(3)} de ${ANCLAJE.pantallasDeScroll}. Ahí el diferencial todavía ocupa el ` +
+    `${(enCuadroAlCruzar * 100).toFixed(1)}% del cuadro —el resto ya es el Cierre, que es opaco— y al terminar de salir ` +
+    `da ${finDeLaVentana.toFixed(2)}:1. El mapeo no puede moverlo; componer la salida de la escena, sí.`,
 )
 
 cerrar('s8-tinta.invariant')

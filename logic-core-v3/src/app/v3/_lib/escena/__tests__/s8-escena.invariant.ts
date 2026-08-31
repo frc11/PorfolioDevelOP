@@ -35,7 +35,7 @@ import { MARCA_ESCENA } from '../../marcaEscena'
 import { CLASES_DE_LA_ESCENA, PAQUETES_DE_TRES } from '../contrato'
 import { escenaRetenida } from '../retencion'
 // prettier-ignore
-import { MAPEO_PROVISIONAL, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, pantallasDe, progresoDelScroll } from '../recorrido'
+import { MAPEO_DE_LAS_SECCIONES, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, pantallasDe, progresoDelScroll } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
 import { DESTINO, MODULOS_MUDADOS, ORIGEN, RAIZ, SUBARBOL_DEL_EDITOR, archivosTs, escribeAtributo, especificadoresRotos, existe, importaValorDe, pesoDeUnFuente, quienImporta, referenciasA, resolverEspecificador, usaClassName } from './soporte'
@@ -139,41 +139,44 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · EL MAPEO DEL RECORRIDO — derivado de la tabla, y PROVISIONAL')
+titulo('4 · EL MAPEO DEL RECORRIDO — derivado de la tabla, y POR ANCLAJE desde S9')
 
+/**
+ * ⚠ **ESTA SECCIÓN CAMBIÓ EN SITIO-S9, Y SÓLO ESTA SECCIÓN.** §7.2 se decidió: el
+ * mapeo pasó a ser por anclaje y `MAPEO_PROVISIONAL` se llama ahora
+ * `MAPEO_DE_LAS_SECCIONES`. **Lo que S8 afirmaba acá se queda acá** —una fila por
+ * sección, monótono, cubre [0, 1], las transparentes salen de la tabla—: siguen
+ * siendo verdad, y por eso vale volver a correrlas contra el mapeo nuevo. La
+ * medición del anclaje en sí es de `s9-anclaje.invariant.ts`.
+ */
 imprimirMapeo()
 
-afirmarIgual(
-  MAPEO_PROVISIONAL.map((f) => f.id),
-  SECCIONES.map((s) => s.id),
-  'el mapeo tiene una fila por sección, en el orden de la tabla',
-)
-afirmar(
-  MAPEO_PROVISIONAL.every((f, i) => i === 0 || f.llenaDesde >= MAPEO_PROVISIONAL[i - 1].llenaHasta),
-  'es monótono: ninguna sección arranca antes de que termine la anterior',
-)
-afirmarIgual(
-  [MAPEO_PROVISIONAL[0].llenaDesde, MAPEO_PROVISIONAL[MAPEO_PROVISIONAL.length - 1].llenaHasta],
-  [0, 1],
-  'y cubre [0, 1]: la primera arranca en 0 y la última llega a 1',
-)
-afirmarIgual(
-  PANTALLAS_DE_SCROLL,
-  PANTALLAS_DEL_DOCUMENTO - 1,
-  'el recorrido de scroll es el documento menos una ventana',
-)
+// prettier-ignore
+afirmarIgual(MAPEO_DE_LAS_SECCIONES.map((f) => f.id), SECCIONES.map((s) => s.id),
+  'el mapeo tiene una fila por sección, en el orden de la tabla')
+// prettier-ignore
+afirmar(MAPEO_DE_LAS_SECCIONES.every((f, i) => i === 0 || f.llenaDesde >= MAPEO_DE_LAS_SECCIONES[i - 1].llenaHasta),
+  'es monótono: ninguna sección arranca antes de que termine la anterior')
+// prettier-ignore
+afirmarIgual([MAPEO_DE_LAS_SECCIONES[0].llenaDesde, MAPEO_DE_LAS_SECCIONES[MAPEO_DE_LAS_SECCIONES.length - 1].llenaHasta],
+  [0, 1], 'y cubre [0, 1]: la primera arranca en 0 y la última llega a 1')
+afirmarIgual(PANTALLAS_DE_SCROLL, PANTALLAS_DEL_DOCUMENTO - 1, 'el recorrido de scroll es el documento menos una ventana')
 
-const transparentes = MAPEO_PROVISIONAL.filter((f) => f.dejaVerLaEscena).map((f) => f.id)
-afirmarIgual(
-  transparentes,
-  [...SECCIONES_QUE_DEJAN_VER_LA_ESCENA],
-  'las dos secciones que dejan ver la escena salen de la tabla, no de acá',
-)
+const transparentes = MAPEO_DE_LAS_SECCIONES.filter((f) => f.dejaVerLaEscena).map((f) => f.id)
+// prettier-ignore
+afirmarIgual(transparentes, [...SECCIONES_QUE_DEJAN_VER_LA_ESCENA],
+  'las dos secciones que dejan ver la escena salen de la tabla, no de acá')
 
+/**
+ * ⚠ La desalineación **de nombres** sigue existiendo y publicándose: `demos` no
+ * es ninguna sección, y eso es un hecho de las dos tablas que el anclaje no
+ * cambia. Lo que cambia es que ya no deja huérfano a nadie. La cuenta por
+ * REPARTO —la que ahora significa algo— la publica `s9-anclaje` §5.
+ */
 const desalineacion = desalineacionDeNombres()
 afirmar(
   desalineacion.tramosSinSeccion.includes('demos'),
-  'LA DESALINEACIÓN DE NOMBRES sigue existiendo y no se tapó',
+  'LA DESALINEACIÓN DE NOMBRES sigue existiendo y no se tapó — el reparto que la resuelve es de S9',
   `tramos sin sección: ${desalineacion.tramosSinSeccion.join(', ')} · secciones sin tramo: ${desalineacion.seccionesSinTramo.join(', ')}`,
 )
 

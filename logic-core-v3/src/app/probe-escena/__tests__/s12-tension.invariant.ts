@@ -77,7 +77,7 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
    * mediría el modelo contra sí mismo y cualquier deriva pasaría desapercibida.
    */
   check(
-    'con α = 0 los seis valores medios siguen siendo los de S11',
+    'control positivo — con α = 0 los seis valores medios siguen siendo los de S11',
     control.every((value, i) => Math.abs(value - S11_MEAN[i]) < 1),
     control.map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} (S11 ${S11_MEAN[i]})`).join(' · ')
   )
@@ -247,7 +247,7 @@ section('⚠️ Tres cosas que el diagnóstico daba por ciertas y la medición c
    * huecos y la transmitancia media de la zona con bandas sube.
    */
   check(
-    'el instrumento sí ve la penumbra: la meseta de la zona con bandas responde a α',
+    'control positivo — el instrumento sí ve la penumbra: la meseta responde a α',
     huge.plateau > hard.plateau * 1.2 && Math.abs(soft.plateau - hard.plateau) > 0.002,
     `meseta ${hard.plateau.toFixed(3)} (α=0) → ${soft.plateau.toFixed(3)} (0,266°) → ${huge.plateau.toFixed(3)} (1°) · sin esto, lo de abajo pasaría con el parámetro desconectado. **No es monótona**: con una penumbra chica el borde blando corta un poco MÁS de lo que abre, y recién con la penumbra ancha domina el lavado`
   )

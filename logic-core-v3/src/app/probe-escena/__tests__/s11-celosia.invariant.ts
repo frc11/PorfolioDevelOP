@@ -111,7 +111,7 @@ section('El enganche en el shader, verificado contra el paquete instalado')
    */
   const countAnchor = (source: string) => source.split(CELOSIA_ANCHOR).length - 1
   check(
-    'el buscador del ancla sabe decir que NO está',
+    'control positivo — el buscador del ancla sabe decir que NO está',
     countAnchor('void main() { gl_FragColor = vec4( 1.0 ); }') === 0,
     'sin control positivo, un buscador roto daría "una sola vez" contra cualquier cosa'
   )

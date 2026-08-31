@@ -101,6 +101,8 @@ type ProbeStageProps = {
   autoOrbit: boolean
   keyFollowsCamera: boolean
   onReady: () => void
+  /** El lazo de r3f. `'never'` suspende sin desmontar — el porqué, en `visibilidad.ts`. */
+  frameloop?: 'always' | 'demand' | 'never'
 }
 
 export default function ProbeStage({
@@ -116,6 +118,7 @@ export default function ProbeStage({
   autoOrbit,
   keyFollowsCamera,
   onReady,
+  frameloop = 'always',
 }: ProbeStageProps) {
   const keyLightRef = useRef<THREE.DirectionalLight>(null)
   const fillLightRef = useRef<THREE.DirectionalLight>(null)
@@ -149,12 +152,13 @@ export default function ProbeStage({
   return (
     <Canvas
       className="h-full w-full"
+      frameloop={frameloop}
       // `PCFShadowMap` explícito, y NO el `PCFSoftShadowMap` que r3f pone con
-      // `shadows` en `true`. Suena al revés y no lo es: en three 0.182 el
-      // "soft" no tiene entrada en la tabla de defines del shader y compila
-      // como `SHADOWMAP_TYPE_BASIC`, o sea una sola muestra sin filtrar. El PCF
-      // común es el único que da un disco de muestreo, y su tamaño es
-      // `shadow.radius`. La cita del código de three está en `SHADOW_RADIUS`.
+      // `shadows` en `true`. Suena al revés y no lo es: en three 0.182 el "soft" no
+      // tiene entrada en la tabla de defines del shader y compila como
+      // `SHADOWMAP_TYPE_BASIC`, o sea una sola muestra sin filtrar. El PCF común es
+      // el único que da un disco de muestreo, y su tamaño es `shadow.radius`. La
+      // cita del código de three está en `SHADOW_RADIUS`.
       shadows={{ type: THREE.PCFShadowMap }}
       // La posición inicial la pisa `OrbitRig` en el primer frame; se declara
       // igual para que el primer render no salga desde el origen.
@@ -172,9 +176,8 @@ export default function ProbeStage({
         // antialias el escalonado del borde se confunde con el objeto.
         antialias: true,
         powerPreference: 'high-performance',
-        // r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el
-        // blanco del papel en vez de lavarlo, y mantiene el matiz de la luz de
-        // color cuando se mueve la temperatura.
+        // r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el blanco
+        // del papel y mantiene el matiz de la luz de color al mover la temperatura.
         toneMapping: THREE.NeutralToneMapping,
       }}
       dpr={[1, 1.5]}

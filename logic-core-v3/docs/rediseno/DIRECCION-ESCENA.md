@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28). Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28), y en SITIO-S9 (2026-08-31) con **el mapeo POR ANCLAJE construido** (§7.2, que pasa de decidido-sin-construir a construido), **el cierre de la tinta del diferencial con su número** (§7.29: 6,07:1 en p=0,750), **la escena que deja de renderizar cuando ningún panel transparente está en cuadro** (§7.34), **la decisión medida de NO diferir el SDK de Sentry** (§7.30) y tres pendientes con su medición (§7.36 el acoplamiento de tipo), y en su parada con **la regla de las instrucciones que se contradicen** (§7.37), el cierre de §7.4 y de §7.35 y las dos correcciones a §7.30. Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -201,6 +201,12 @@ Son las que hacen que la escena sea de develOP y no de cualquiera. No son prefer
     - ⚠️ **"No aplica" NO puede pasar en verde silencioso.** Un verde indistinguible entre "verifiqué" y "no había nada que verificar" es exactamente el modo de falla que este proyecto viene cazando desde S10, y apagar el check sería la forma más limpia de introducirlo. Por eso el detector de ventana tiene su propio invariante permanente —`s4-ventana.invariant.ts`— que afirma las dos direcciones: que dice DENTRO cuando hay base y FUERA cuando no. Un detector que dijera siempre "fuera" apagaría el check para siempre **y la salida se vería igual de bien**.
 
     **Con siete lanes por venir, cada uno va a dejar los suyos.** El lane que escriba un check contra `git` lo pone en su propio archivo desde el principio; el nombre `test:<lane>-frontera` tiene que estar declarado en `CHECKS_DE_FRONTERA` (`s4-suites.ts`) o la derivación de suites **falla** — no se lo excluye del agregado por adivinanza.
+
+    ⚠️ **COROLARIO DESCUBIERTO EN SITIO-S9: EL DETECTOR DE VENTANA NO SABE DE QUIÉN ES EL DIFF.** `evaluarVentana()` abre la ventana cuando alguno de sus testigos aparece en `git status`, y eso es correcto mientras el único que pueda tocar esos archivos sea el sprint que los declaró. **Deja de serlo en cuanto un sprint posterior toca uno.** SITIO-S9 editó dos archivos del padrón de S3 —`s3-tokens.invariant.ts` y `_estilos/navegacion.css`, los dos con razón declarada— y con eso `test:s3-frontera` **se despertó**: 2 de sus 35 testigos sin commitear, ventana ABIERTA, y sus afirmaciones de momento evaluadas contra un árbol que no es su base. Falló por dos cosas que son ciertas y ajenas: que S9 tocó archivos que S3 declaraba prohibidos **para S3**, y que el token que S3 declaraba como su única alta ya está en `HEAD` hace cinco sprints.
+
+    **No es un rojo que haya que arreglar en el momento, y por una razón que vale escribir: se apaga solo al commitear.** Un check de frontera mide el árbol de trabajo contra `HEAD`; con el trabajo adentro de `HEAD`, `git status` queda limpio, `vistos` queda vacío y el check vuelve a `noCorre`. **Lo que el rojo dice, leído bien, es «este árbol de trabajo no es mi momento» — que es exactamente lo que un check de frontera existe para decir.** Lo que le falta es poder decirlo con esas palabras en vez de con dos afirmaciones en rojo.
+
+    **El arreglo exacto, para el sprint que lo tome, y no es una heurística:** los testigos de `s3-frontera` son ALTAS —lo dice su propio comentario—, así que **el discriminador es si existen en `HEAD`**. Si todos existen, el sprint ya se commiteó y la ventana está cerrada para siempre, tocara quien tocara el archivo hoy. Un `git cat-file -e HEAD:<ruta>` por testigo lo decide sin adivinar. Mientras tanto: **`npm run test:frontera` puede quedar rojo por trabajo legítimo de OTRO sprint, y se verifica volviendo a correrlo después del commit.**
 13. ⚠️ **UN INVARIANTE AFIRMA LO QUE SU SPRINT CONTROLA. LO QUE HEREDA SE PUBLICA CON ATRIBUCIÓN Y SE VIGILA, PERO NO SE AFIRMA.** Regla del proyecto desde SITIO-S4, y es la **segunda vez** que el mismo error de diseño aparece — por eso deja de ser un caso y pasa a ser regla. **El caso:** `s3-peso.invariant.ts` afirmaba que la carga inicial de `/v3` no crecía más de 1 KiB gzip ni sumaba archivos contra la línea de base de S1. Falló al mergear —424,0 contra 422,0 KiB gzip, 25 archivos contra 24— y **la falla era legítima: el número había crecido**. Pero ese número no era de S3: de los 25 archivos, **24 son heredados del layout raíz** —el chrome viejo, compartido con el home, que esos sprints tienen prohibido tocar— y **1 es propio de `/v3`**, que no se movió. El invariante estaba puesto a fallar por algo que su sprint no produce ni puede arreglar, y **un check así no protege: entrena a ignorarlo.** Las tres partes:
     - **La afirmación es sobre lo propio**, con su umbral y su control positivo. **S1 ya lo hacía bien** y es el modelo a copiar: `bundle.invariant.ts` afirma `lo PROPIO de /v3 < 30 KiB` y deja el total como cifra impresa con su veredicto. `s3-peso` no copió esa forma, y ése fue todo el defecto.
     - **Lo heredado se publica con atribución**: cuánto es, de quién es y por qué este sprint no puede tocarlo. Una cifra sin dueño se lee como responsabilidad de quien la imprime.
@@ -450,29 +456,49 @@ Es una condición, no un detalle: un menú que se mueve sin regla es un menú qu
 Está acá para que nadie lo dé por resuelto.
 
 1. ~~**Cuál de los cuatro recorridos es EL recorrido.**~~ **DECIDIDO en S9** — ver §2.2. Lo que queda abierto de esa decisión es una sola perilla, y es de composición: **la elevación de la pose de entrada quedó en 18,6°** contra los 31,0° del recorrido calibrado, y eso es lo que el preloader usa para rotar el logo al aterrizar. Subir la altura del hero de 6,40 a ~7,50 la lleva a 23,2° y cuesta 1,1 de caída en el tramo siguiente. **Se juzga por grabación.**
-2. ⚠️ **CÓMO SE ATA EL RECORRIDO AL SCROLL REAL — sigue abierto, pero ya NO es una pregunta en blanco: SITIO-S8 lo midió y la parada decidió su forma.**
+2. ✅ **CÓMO SE ATA EL RECORRIDO AL SCROLL REAL — CONSTRUIDO en SITIO-S9. Va por ANCLAJE.**
 
-    **Lo que dejó de valer del enunciado viejo:** *"hoy el progreso es un slider del probe"*. Desde SITIO-S8 el progreso **sale del scroll de la página** —`_lib/escena/recorrido.ts`, con `progresoDelScroll` pura y un listener passive coalescido por `requestAnimationFrame`— y `/probe-escena` conserva su slider, que es lo suyo.
+    Estuvo abierto desde S9 y *decidido en forma y sin construir* desde SITIO-S8. Ya está construido, y la decisión que faltaba —**cómo se ancla exactamente**— está escrita con su razón en `_lib/escena/anclaje.ts`, que es el contrato, y derivada en `anclajeDerivacion.ts`. Lo implementa `_lib/escena/recorrido.ts`.
 
-    **La forma decidida: POR ANCLAJE, no por estiramiento.** Los seis keyframes llevan el nombre de la sección para la que se eligieron; se **anclan a esa sección** y se interpola entre ellos. No se decidió todavía cómo se ancla exactamente, y **no se construyó**: lo que hay montado es el provisional de abajo, declarado como tal en el código y en la salida de los dos invariantes.
+    **Lo único escrito a mano es qué tramo corre sobre qué secciones** (`TRAMOS_ANCLADOS`). Todo lo demás —los altos, los bordes, los nudos, las ventanas— se deriva de `secciones.ts` y de `choreography.ts`, con seis guardianes que **tiran** si el reparto deja de cerrar: un tramo declarado que no existe, un reparto que no cubre las secciones en orden, una sección con scroll propio y sin tramo, un tramo de ancho cero, un recorrido que no llega a 1.
 
-    **Por qué el provisional no alcanza, con las tres desalineaciones medidas** (`npm run test:s8-escena` §4):
+    | tramo | corre sobre | pantallas de scroll | progreso |
+    |---|---|---|---|
+    | `hero` | Hero | 0 → 1 | 0,000 → 0,125 |
+    | `quiénes somos` | Quiénes somos | 1 → 3 | 0,125 → 0,375 |
+    | `números` | Números | 3 → 4 | 0,375 → 0,500 |
+    | `trabajos` | Trabajos | 4 → 7 | 0,500 → 0,625 |
+    | `demos` | **Servicios + Tu panel** | 7 → 12 | 0,625 → 0,750 |
+    | `cierre` | **Por qué develOP** | 12 → 13 | 0,750 → 1,000 |
 
-    | | |
-    |---|---|
-    | escala | la coreografía declara **8 pantallas** (`CHOREO_SCREENS`, tramos en múltiplos exactos de 1/8) y la tabla del home suma **14**. La recta corre estirada **×1,750** de documento (**×1,625** de scroll: 13 pantallas efectivas). |
-    | nombres | el tramo **`demos` no es ninguna sección**, y **servicios, tu-panel y por-que-develop no son ningún tramo**. |
-    | forma | §2.4 pide que la escena **se apague** después del cierre, entren servicios y tu-panel, y **vuelva** para el diferencial. **Un progreso monótono de 0 a 1 no tiene esa forma**, y ése es el defecto de fondo: no es una cuestión de escala, es que la coreografía no tiene la pieza que la dirección describe. |
+    **La cuenta cierra sola y no hay que escribirla:** el documento mide 14 pantallas, el recorrido de scroll es 13, y las siete primeras secciones suman exactamente 13. La octava —el Cierre— mide una pantalla y es la última, así que **llena el cuadro exactamente en el final del scroll y no tiene recorrido propio**; un tramo sobre ella sería de ancho cero y el guardián 3 lo rechaza. Si mañana el Cierre deja de medir `100svh`, la derivación le da su propio tramo sola.
 
-    El estiramiento es la consecuencia directa de la primera fila, y se ve en la tercera: con la recta, **Números cae adentro del tramo de Quiénes somos**, y tu-panel, por-que-develop y cierre caen los tres adentro del tramo de cierre.
+    ⚠️ **LA LECTURA QUE SE ELIGIÓ, porque había dos y cambian el resultado.** *(i)* la pose que nombra a la sección se alcanza cuando la sección EMPIEZA a llenar el cuadro, o *(ii)* el tramo que la nombra OCUPA la sección y la pose la cierra. **Se eligió (ii)**, y hay cuatro cosas que la fuerzan: §2.2 declara los tramos en pantallas de su sección; con (i) el Hero llevaría 0,375 de progreso en una pantalla y la cámara haría los 130° completos ahí, o sea **6,5× lo que el keyframe `hero · sostén` fue escrito para impedir**; con (i) el tramo escondido arrancaría adentro de Trabajos y serían tres paneles opacos y no dos; y con (i) el tramo `demos` no sería el de Servicios y Tu panel. **Lo que (ii) cuesta, declarado:** tres de las seis secciones ancladas —Quiénes somos, Números, Trabajos— entran sobre la pose de la anterior y llegan a la suya al entregar el cuadro. Las tres que ARRIBAN sobre su pose son Hero (0,000), Por qué develOP (0,750) y Cierre (1,000), que son las que la medición de tinta necesita.
 
-    **§2.4 —apagar y volver— entra en el mismo sprint que este mapeo.** No son dos trabajos: el segundo es la razón por la que el primero no se puede resolver con una función monótona.
+    **Cómo se interpola entre dos anclas: recta por tramos sobre el scroll.** Es exactamente reversible en forma cerrada —error máximo medido **1,78e-15** ida y vuelta, exacto en los siete nudos—, no le pone una segunda curva encima a la que cada keyframe ya trae, y el escalón de ritmo en un nudo lo absorbe la amortiguación que §2.3 ya tiene (`SETTLE_TAU` 0,20 a 0,28 s). El progreso sigue siendo **estrictamente monótono**: la escena no retrocede nunca.
 
-    **El provisional que quedó montado**, para que no se lea como una decisión: `progreso = scrollY / (alto del documento − alto de la ventana)`. Es lo más conservador que se podía defender —es literalmente lo que el contrato pide, sin agregar una decisión encima— y no deforma ningún tramo.
+    **La coordenada compartida está en el contrato y no en ninguno de los dos consumidores.** `pantallaDeScroll` traduce el scroll de la página a pantallas del recorrido, y la usan el mapeo y la visibilidad: si cada uno tradujera por su cuenta, la escena podría encenderse en un momento y la cámara estar en otro sin que ningún invariante lo viera. Es **proporcional** al recorrido real —`PANTALLAS_DE_SCROLL × scrollY / (alto − ventana)`— y no absoluta, para que el final del scroll caiga SIEMPRE en el último nudo aunque el documento no mida lo que la tabla declara.
 
-    ⚠️ **Y arrastra a §7.29:** con el provisional, el diferencial llena el cuadro en p=0,923, donde la tinta no pasa AA. La parada decidió resolverlo **acá**, moviendo la sección, y no allá.
+    ── **LAS TRES DESALINEACIONES, antes y después** (`npm run test:s9-anclaje`)
+
+    | | con el provisional | con el anclaje |
+    |---|---|---|
+    | **escala** | UN ritmo para las trece pantallas: 0,0769 de progreso por pantalla, ×0,615 del compuesto (el recíproco del ×1,625 de estiramiento de scroll) | **seis ritmos**, uno por segmento: ×1,000 · ×1,000 · ×1,000 · ×0,333 · ×0,200 · ×2,000. **Tres corren al ritmo compuesto EXACTO** |
+    | **nombres** | 1 tramo sin sección (`demos`) y 3 secciones sin tramo. **Seis de las ocho** caían en un tramo que no llevaba su nombre | **0 tramos sin sección y 1 sección sin tramo** (el Cierre, por geometría). El desajuste baja de 6 a **3 de 8**, y las tres están declaradas en `TRAMOS_ANCLADOS` |
+    | **forma** | un progreso monótono no tiene la forma de §2.4 | la forma la da la **visibilidad**, no el mapeo: la escena deja de renderizar cuando ningún panel transparente está en cuadro. El progreso sigue monótono y **avanza sin que nadie lo vea** — ver §7.34 |
+
+    Los cuatro casos concretos que §7.2 medía se movieron así: **Números** pasa de 0,231 (adentro del tramo de Quiénes somos) a **0,375**, que es el borde de su propio tramo; **tu-panel** pasa de 0,769 a 0,700 y sale del tramo de cierre; **por-que-develop** pasa de 0,923 a **0,750**; el **Cierre** se queda en 1,000, que es donde tiene que estar.
+
+    ⚠️ **Lo que queda de esta decisión, y no es del mapeo:** `por-que-develop` ENTRA sobre la pose `demos` y su ventana recorre el tramo `cierre`, así que la sección llamada Cierre no ve nada del tramo que lleva su nombre — es opaca, con lo cual no cambia un píxel, pero la composición del final del recorrido se gasta en el diferencial. Es lo mismo que §7.29 publica como cola.
+
 3. **La cola del cierre.** *"Después las letras se van, la cámara se mueve a otros ángulos y termina en el CTA final"* no tiene poses compuestas. El track termina en el cierre.
-4. **Cómo entra y sale la escena** cuando se apaga después del cierre y vuelve para el diferencial: si es un fundido, un corte, o la propia luz que se va.
+4. ✅ **Cómo entra y sale la escena — CERRADO en SITIO-S9, y con MENOS trabajo del que este ítem imaginaba.**
+
+    Preguntaba si el apagado y la vuelta eran un fundido, un corte o la propia luz. **La respuesta medida es que para suspender no hace falta ningún efecto:** el panel opaco ya tapa la sala, verificado sobre el marcado renderizado de las ocho secciones (§7.34). Lo que faltaba no era un efecto visual — era dejar de renderizar, y eso no cambia un píxel de lo que se ve.
+
+    ⚠️ **Y la COLA DEL DIFERENCIAL tampoco abre este ítem, aunque lo parezca.** La ventana en la que `por-que-develop` se ve termina en p=1,000, donde el peor píxel da 2,34:1. **No es del mapeo y no es de la composición: es de la geometría.** Es la anteúltima sección y la última mide una pantalla, así que su borde inferior sale del cuadro exactamente en el final del scroll — **con cualquier mapeo monótono que complete el recorrido su ventana termina en p=1**. `s8-tinta` §5 lo afirma como tal. Y cuando la tinta cruza AA —pantalla 12,513 de 13— el diferencial ya ocupa sólo el **48,7% del cuadro**: el resto es el Cierre, que es opaco.
+
+    **Un criterio que ningún mapeo puede cumplir no distingue un mapeo de otro.** Por eso la cola se publica con su dueño y no se afirma, y **no hace falta un sprint para componer nada.** La decisión se tomó en la parada de SITIO-S9.
 5. **Mobile.** No se midió un solo teléfono ni un solo frame time. Toda la contabilidad publicada es estática. Lo primero que se apaga si no rinde, en orden: la capa gruesa de la envolvente, `BOKEH_COUNT`, el slider de partículas, `SHADOW_RADIUS`, el washout.
 6. **El encuadre por relación de aspecto.** El recorrido está compuesto en horizontal; en vertical el logo no entra igual y falta decidir si se reencuadra o se recompone.
 7. **Qué contenido va en cada una de las ocho pantallas**, más allá de los nombres de los tramos.
@@ -491,13 +517,17 @@ Está acá para que nadie lo dé por resuelto.
 
     | archivo | líneas | antes de S11 | de quién es el exceso |
     |---|---:|---:|---|
-    | `OrbitRig.tsx` | **651** | 626 | heredado; S11 sumó 21, **S12 sumó 4** (el volcado del radio angular) |
-    | `probeStore.ts` | **406** | 352 | heredado; S11 sumó 26, **S12 sumó 28** (la perilla del radio angular y su porqué, más la corrección de la cifra sin instrumento) |
-    | `lightRig.ts` | **357** | 319 (ya cruzado por S10) | heredado; S11 sumó 26, **S12 sumó 12** (el canal del radio angular) |
+    | `src/app/v3/_lib/escena/OrbitRig.tsx` | **651** | 626 | heredado; S11 sumó 21, **S12 sumó 4** (el volcado del radio angular) |
+    | `src/app/v3/_lib/escena/probeStore.ts` | **406** | 352 | heredado; S11 sumó 26, **S12 sumó 28** (la perilla del radio angular y su porqué, más la corrección de la cifra sin instrumento) |
+    | `src/app/v3/_lib/escena/lightRig.ts` | **357** | 319 (ya cruzado por S10) | heredado; S11 sumó 26, **S12 sumó 12** (el canal del radio angular) |
 
-    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `escena/celosiaPenumbra.ts` (163), `__tests__/celosiaBeat.ts` (188), `s12-penumbra` (297) y `s12-tension` (266), remedidos en SITIO-S8 sobre el disco de hoy. **La conclusión aguanta y el margen no:** `s12-penumbra` está a tres líneas del corte, y el archivo de penumbra se fue con la escena mientras las tres suites se quedaron del lado del probe.
+    **S12 los declara otra vez y no los parte, por el mismo motivo:** son el contrato panel ↔ loop y las dos mitades de un frame. Los tres módulos nuevos del sprint sí nacieron partidos y ninguno cruza el límite — `src/app/v3/_lib/escena/celosiaPenumbra.ts` (163), `src/app/probe-escena/__tests__/celosiaBeat.ts` (188), `src/app/probe-escena/__tests__/s12-penumbra.invariant.ts` (297) y `src/app/probe-escena/__tests__/s12-tension.invariant.ts` (266), remedidos en SITIO-S8 sobre el disco de hoy. **La conclusión aguanta y el margen no:** `s12-penumbra.invariant.ts` está a tres líneas del corte, y el archivo de penumbra se fue con la escena mientras las tres suites se quedaron del lado del probe.
 
-    **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos ya **no está en un solo módulo**: SITIO-S8 los repartió. Del lado de la escena, `escena/choreography.ts` (462) y `escena/probeScene.ts` (348); del lado del panel, `_components/choreographyEditor.ts` (376) y `_components/KeyframeEditor.tsx` (310). Los cuatro son heredados sin delta de S11 y pueden entrar al mismo sprint, **pero el sprint que los tome cruza dos módulos con ciclos de vida distintos**: el panel tiene fecha de baja y partir ahí es trabajo que se tira. El orden barato es escena primero.
+    ⚠️ **SITIO-S9 ESCRIBIÓ LAS RUTAS ENTERAS, Y ÉSA ERA LA DEUDA.** Este bloque nombraba sus archivos por el nombre pelado —`OrbitRig.tsx`, `probeStore.ts`— y con prefijos cortos —`escena/…`, `_components/…`— que después de la mudanza de SITIO-S8 **no resuelven contra nada del disco**. Un pendiente que apunta a una ruta inexistente no se puede verificar, y es exactamente así como éste se venció la primera vez: la mudanza cambió la carpeta y el documento se quedó donde estaba, sin que nada se quejara. Ahora cada ruta es repo-relativa y `src/app/v3/_lib/__tests__/s9-instrumentos.invariant.ts` §3 **afirma que todas existen en el disco**, con un control positivo que exige que una ruta inventada haga fallar al detector. Los doce largos que este bloque nombra se remidieron con `contarLineas` de `s8-largos.ts` sobre el disco de hoy: **ninguno se movió** — los seis heredados dan exactamente los de `LARGOS_HEREDADOS` y los seis restantes, los que el propio texto declara.
+
+    ⚠️ **Y el que faltaba en la lista: `src/app/v3/_lib/escena/probeMoire.ts` (300).** Está declarado en `LARGOS_HEREDADOS` y **no estaba nombrado acá**, así que la tabla de base y el texto que la explica decían cosas distintas. Mide exactamente 300, y el límite se compara con `>`: **no lo pasa**. Su entrada en la línea de base no vigila un exceso, vigila el BORDE — sólo se pone en rojo el día que alguien le agregue una línea. Entra al sprint de limpieza por vecindad, no por deuda.
+
+    **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos ya **no está en un solo módulo**: SITIO-S8 los repartió. Del lado de la escena, `src/app/v3/_lib/escena/choreography.ts` (462) y `src/app/v3/_lib/escena/probeScene.ts` (348); del lado del panel, `src/app/probe-escena/_components/choreographyEditor.ts` (376) y `src/app/probe-escena/_components/KeyframeEditor.tsx` (310). Los cuatro son heredados sin delta de S11 y pueden entrar al mismo sprint, **pero el sprint que los tome cruza dos módulos con ciclos de vida distintos**: el panel tiene fecha de baja y partir ahí es trabajo que se tira. El orden barato es escena primero.
 
 14. ⚠️ **EL CIERRE SIGUE LEYÉNDOSE COMO SENDA PEATONAL — pendiente abierto, con el número (S12).**
 
@@ -714,7 +744,17 @@ Está acá para que nadie lo dé por resuelto.
 
     **Lo único que queda abierto de esto:** el ritmo de mobile subestimaría este tramo. No se arregla acá: el ritmo de 390 es otro número y SCROLL.md lo publica por separado con razón (§7 de SCROLL.md). Los dos números viven en la fila de `cierre` en `_lib/secciones.ts`.
 
-29. 🔴 **LA TINTA NO PASA AA EN EL DIFERENCIAL SOBRE LA ESCENA REAL — medido en SITIO-S8, y la salida ya está decidida.**
+29. ✅ **LA TINTA DEL DIFERENCIAL — CERRADO en SITIO-S9 por la opción (a), con el número: 6,07:1 en p=0,750.**
+
+    **El anclaje de §7.2 lo resolvió sin tocar la escena, que es exactamente lo que la parada de SITIO-S8 predijo.** El diferencial llena el cuadro sobre la pose `demos` —p=0,750, que es el borde del cruce de AA por un margen de 0,128 de progreso— y ahí la tinta da **6,07:1 (mínimo) · 6,46:1 (p05) · 7,58:1 (mediana)**, contra los 3,10 / 3,10 / 4,22 que daba en p=0,923. **La mediana pasa AAA**, que el provisional no alcanzaba ni en AA. El Hero pasa AA y AAA en su ventana entera —**9,73:1 en los cuatro bordes**, y ahora eso significa algo más fuerte: con el anclaje su pantalla es exactamente el tramo `hero`, que es un sostén, así que el cuadro no cambia en toda la ventana. Lo produce `npm run test:s8-tinta` §4 y §5, y el `noCorre` que S8 había dejado se convirtió en afirmación.
+
+    ⚠️ **LA COLA, publicada y NO afirmada — y eso también quedó cerrado en la parada.** La ventana en la que la sección SE VE termina en p=1,000, donde el peor píxel da 2,34:1. `s8-tinta` §5 lo afirma como propiedad de la GEOMETRÍA y no del mapeo —el borde inferior del diferencial está en la pantalla 13 de 13, así que **cualquier** mapeo monótono termina ahí— y publica la cola con su número: cuando cruza AA, en la pantalla 12,513, el diferencial ya ocupa sólo el 48,7% del cuadro y el resto es Cierre opaco. **Un criterio que ningún mapeo puede cumplir no distingue un mapeo de otro**, así que ésta es la forma correcta y no abre §7.4 ni pide un sprint. La reserva (b) queda sin usar.
+
+    ⚠️ **Y CERRARLO PUSO A `s8-tinta` EN ROJO, QUE ES EL SPRINT FUNCIONANDO.** SITIO-S8 había dejado, al lado de su `noCorre`, un guardián escrito para que la falla no se leyera como un roce: `difLlena < AA` — *«la medición del diferencial está por debajo del umbral, no cerca»*. Con el anclaje puesto esa afirmación **dejó de ser cierta**, y el invariante se puso en rojo por eso. **Un invariante que se pone en rojo porque el problema que custodiaba se resolvió no es una regresión: es la señal de que el trabajo llegó.** El frente que construyó el mapeo lo vio y **no lo tocó** —su permiso en ese archivo eran dos líneas—; la re-medición la hizo el agente principal en la integración. Las dos cosas están bien, y conviene que la próxima vez se reconozca de una: **un rojo cuya causa es la desaparición del defecto se lee distinto de un rojo cuya causa es un defecto nuevo, y el que lo encuentra no siempre es el que lo puede arreglar.**
+
+    ── **El registro de SITIO-S8, que sigue valiendo como fuente**
+
+29b. 🔴 **LA TINTA NO PASA AA EN EL DIFERENCIAL SOBRE LA ESCENA REAL — medido en SITIO-S8, y la salida ya estaba decidida.**
 
     Los contrastes de los paneles transparentes se habían medido contra el **marcador de posición**, que es plano y pinta dos tokens: 13,62:1 en el peor caso. `s6-contraste` ya advertía por escrito que la sala real no hereda ese número. **No lo hereda:**
 
@@ -737,9 +777,9 @@ Está acá para que nadie lo dé por resuelto.
     | d | aclarar el cierre del arco de luz | ❌ descartada acá: es §7.14, con sus cuatro palancas ya analizadas, y es otra cosa. |
     | · | un velo o una superficie intermedia detrás del texto | ❌ **nunca.** |
 
-    ⚠️ **Las cifras son un TECHO, no un piso.** No modelan las partículas (bajan el valor medio 7 a 8 puntos), ni la sombra proyectada del logo, ni el especular; los tres empujan hacia abajo. Y arrastran la cámara de `harness.ts` (§7.15): hasta 1,28% del ancho del cuadro. **El número real es peor que 3,10:1.**
+    ⚠️ **Las cifras son un TECHO, no un piso, y eso vale igual para las de S9.** No modelan las partículas (bajan el valor medio 7 a 8 puntos), ni la sombra proyectada del logo, ni el especular; los tres empujan hacia abajo. Y arrastran la cámara de `harness.ts` (§7.15): hasta 1,28% del ancho del cuadro. **El número real es peor que 3,10:1 — y peor que los 6,07:1 de S9.** Lo que la holgura de S9 compra es margen contra esa ventana, no exactitud.
 
-30. ⚠️ **EL SDK DE NAVEGADOR DE SENTRY — 142,1 KiB gzip en TODA ruta, el 47,4% del techo. Abierto, y no es de ningún sprint de este track.**
+30. ✅ **EL SDK DE NAVEGADOR DE SENTRY — CERRADO en SITIO-S9: NO SE DIFIERE. La cifra de este ítem estaba INFLADA al doble y la corrección va abajo.**
 
     Medido en SITIO-S8 (`npm run test:s8-peso` §3) sobre `rootMainFiles` + `polyfillFiles` de `build-manifest.json`, o sea **lo que Next pide en toda ruta sin que ningún componente lo elija**:
 
@@ -754,7 +794,43 @@ Está acá para que nadie lo dé por resuelto.
 
     ⚠️ **Y por eso el techo se re-fijó, con la forma de la regla 13** (`components/layout/carga-diferida/presupuesto.ts`). «300 KiB gzip de la carga inicial entera» **no lo puede cumplir nadie**: el piso ya se come 248,3 y deja 51,7 para el chrome, los límites de error y la ruta. **Un presupuesto que nadie puede cumplir es un presupuesto que nadie mira.** Ahora se **afirma lo propio** —lo que la ruta pide POR ENCIMA del piso: el chrome del layout más lo de `/v3`, hoy **129,2 KiB gzip**, con 170,8 de aire— y se **publica el piso** con su dueño y su número. El 300 no se eligió de nuevo: se conservó, sobre lo que de verdad depende del código de este repo.
 
-    Las dos salidas, para quien lo tome: lazy-init del SDK, o `browserTracingIntegration` fuera del bundle inicial. Las dos son un sprint aparte.
+    ── 🔴 **LA CIFRA DE ARRIBA ESTÁ INFLADA, Y LA DECISIÓN QUE HABILITÓ SE TOMÓ SOBRE ELLA.**
+
+    **«Sin ese chunk la carga inicial de `/v3` mediría 235,3 KiB gzip» supone que el chunk se puede sacar, y no se puede.** La frase que lo produce —*«entra por `src/instrumentation-client.ts`»*— es cierta y no es completa: el chunk tiene **263 módulos de webpack** y **19 chunks de la carga inicial de `/v3` le piden módulos**, no uno. `instrumentation-client.ts` es la puerta más grande —arrastra 125,4 KiB gzip— pero soltarla no borra el chunk: lo achica.
+
+    **La causa del error es una resta de archivos donde hacía falta un grafo.** §7.30 restó el archivo entero de la carga inicial; el techo real sale de partir el chunk en módulos y quedarse con los que NADIE MÁS pide (`carga-diferida/__tests__/grafo-de-chunks.ts`):
+
+    | | módulos | gzip |
+    |---|---:|---:|
+    | siguen *eager* aunque `instrumentation-client.ts` suelte el SDK | 142 | 61,3 KiB |
+    | **el techo REAL de la salida (a)** | **121** | **77,9 KiB** — el 54,8% del chunk |
+    | lo que §7.30 le atribuía | 263 | 142,1 KiB |
+
+    **Con eso `/v3` quedaría en 299,6 KiB gzip, no en 235,3.** O sea que la deferencia nunca iba a bajar el total abajo de los 300 originales: **iba a quedar justo arriba.** La decisión de la parada de SITIO-S8 —*«esto vale un sprint aparte»*— se tomó sobre un lever del doble de tamaño que el real. Queda corregido acá para que nadie lo vuelva a proponer con el número viejo.
+
+    ── 🔴 **Y AUNQUE VALIERA 142: DIFERIR DEJA MUDO AL LÍMITE DE «LA APP NO PUDO CARGAR».**
+
+    Ésta es la razón que decide, y no es de peso. `src/app/error.tsx` y `src/app/global-error.tsx` llaman `Sentry.captureException` y viajan en la carga inicial de **las 11 rutas prerenderizadas** — medido, no supuesto. Sin `init` corrido:
+
+    > `Scope.captureException` **devuelve un id de evento y descarta el evento** (`@sentry/core/build/esm/scope.js:471-474`), y en producción `DEBUG_BUILD` es `false`, así que **no avisa por consola ni por ningún otro lado**.
+
+    **Un evento descartado que devuelve un id y no avisa es peor que no tener Sentry, porque parece que funciona.** El código que reporta recibe un identificador válido, lo puede mostrar al usuario y lo puede loguear; el evento no existe en ningún lado. Y `global-error.tsx` existe exactamente para el caso en que la app no pudo cargar — o sea que la ventana en la que diferir lo deja mudo **es su única ventana**.
+
+    Por eso **el SDK arranca en línea y así se queda**. Lo que una deferencia dejaría descubierto está enumerado y no estimado: **cinco integraciones instalan algo en el `init`** —`globalHandlers` (`window.onerror` y `onunhandledrejection`), `browserApiErrors`, `breadcrumbs` (el contexto de cada error), `browserSession` y `browserTracing`— y las otras ocho corren en el momento del evento y no pierden nada por llegar tarde. **Cuánto DURA esa ventana en milisegundos no se midió**: pide un navegador con la pestaña visible, y una medición de tiempo con la pestaña ocluida es cero por construcción.
+
+    ⚠️ **El orden correcto, si alguien vuelve a tomarlo:** primero sacarle el `captureException` estático a los dos límites de error —o darles un camino de reporte que no dependa del `init`—, y **recién ahí** diferir. Sin eso no es un ahorro con riesgo: es un ahorro de 77,9 KiB con los dos límites de error del sitio público mudos.
+
+    ── **LAS OTRAS DOS PALANCAS, con lo que dio cada una**
+
+    **(b) `browserTracingIntegration` fuera del bundle — 52,0 KiB crudo · 17,6 KiB gzip, el 12,4% del chunk. NO APLICADA, y es decisión de producto.** No cuesta captura de errores, pero cuesta **todo el monitoreo de performance** —pageload, navegación, web vitals— y hoy `tracesSampleRate` es 0,1 en producción. No se alcanza desde el `init`: el de `@sentry/nextjs` evalúa `getDefaultIntegrations(options)` mientras arma las opciones (`client/index.js:56`), así que la integración se construye pase lo que pase con `integrations`; el único interruptor es el global de build `__SENTRY_TRACING__`, y lo prende `withSentryConfig(…, { webpack: { treeshake: { removeTracing: true } } })`.
+
+    **(c) `removeDebugLogging` — APLICADA en la parada de SITIO-S9, y devolvió CERO.** Es la palanca que §7.30 no anotaba y la única que no cuesta un gramo de cobertura. Se aplicó en `next.config.ts` y **funciona**: las **8 guardas `__SENTRY_DEBUG__` sin resolver que el chunk conservaba pasaron a 0**, afirmado sobre el build. **Y el peso no se movió: −0,1 KiB crudo y +0,0 KiB gzip.**
+
+    > ⚠️ **Eso no es una contradicción y hay que dejarlo escrito, porque es la clase de cosa que se vuelve a proponer.** La bandera resuelve el GLOBAL, no el cuerpo de los `logger.*`, que el minificador ya trataba como muerto. **La palanca es real y el lever valía cero.** Se deja puesta —no cuesta nada y saca guardas muertas— y se publica el número para que nadie la vuelva a listar como una salida de peso.
+
+    ⚠️ **UN HALLAZGO DE OBSERVABILIDAD QUE NO ES DE PESO: `replaysOnErrorSampleRate: 1.0` ESTABA MUERTO — BORRADO EN LA PARADA.** Con `@sentry/nextjs` 10.62.0 el default son **13 integraciones y `replayIntegration` no está entre ellas**; nadie la agrega, y `replayIntegration` y `rrweb` aparecen en **cero chunks** del build. O sea: **costaba 0 bytes y capturaba 0 replays**, mientras el comentario del archivo afirmaba que se preservaban los session replays on error. **Las dos opciones se borraron, y no por peso: por honestidad — un flag que dice preservar algo que no existe es peor que no estar**, porque le hace creer al próximo que hay replays cuando no hay ninguno. Borrarlas no cambió un byte ni una captura. El día que se quieran replays de verdad hay que agregar `replayIntegration()` —que SÍ pesa— y ahí volver a poner las tasas; `s9-sentry` §4 lo custodia.
+
+    ⚠️ **Y deja una fragilidad reportada y no arreglada:** `presupuesto.ts:62` fija `CHUNK_DE_SENTRY = '7149'` —el prefijo del chunk, escrito a mano— y `s8-peso.invariant.ts:262` lo usa para publicar «sin Sentry `/v3` mediría X». **Si webpack renumera el chunk, el filtro no saca nada, la cifra publicada pasa a ser el total entero y no hay rojo.** El reemplazo ya existe y está probado: `chunkConHuella()` identifica el chunk por su contenido (`browserTracingIntegration`) y no por su nombre.
 
 31. ⚠️ **UN INSTRUMENTO QUE COMPARA CONTRA UNA LÍNEA DE BASE TIENE QUE DECIR QUÉ CAMBIÓ ENTRE LAS DOS MEDICIONES, NO SÓLO CUÁNTO.**
 
@@ -786,4 +862,103 @@ Está acá para que nadie lo dé por resuelto.
     2. **`report()` no tenía la guarda de «cero comprobaciones».** `cerrar()` la tiene desde S4 —un invariante sin afirmaciones sale verde y es indistinguible de uno que verificó algo—. Mientras estos archivos se corrían a mano no importaba; metidos en el gate, **un lane que puede pasar por vacío es un gate que miente**. Se agregó a los dos arneses compartidos y a las dos copias en línea de `src/lib/scene-*.invariant.ts`.
     3. **El contador de controles positivos se contó a sí mismo.** Al enseñarle el marcador de la escena —`ok  control positivo —`, sin corchetes— la primera versión buscaba la frase suelta y contaba DOS donde había uno: lo destapó el fixture `pasa.invariant.ts`, cuya descripción dice *«y trae un control positivo, para que el contador tenga qué contar»*. Es §7.25 en su forma más chica: **un escáner que lee texto lee también el texto que lo describe.** Se ancló a la forma de la línea.
 
-    ⚠️ **Lo que queda abierto de esto:** el lane de la escena marca sus controles positivos de formas distintas —algunos abren la línea, otros viven en el título de una sección— así que el contador ve **14 de los 18** que hay. El número que publica el agregado para `s7e`…`s14e` está **subcontado, no inflado**, y eso es lo aceptable de los dos lados posibles. Unificar el marcador es un barrido de 34 archivos y no se hizo acá.
+    ✅ **RESUELTO en SITIO-S9, y el barrido corrigió el número que lo describía.** El lane marcaba sus controles de formas distintas y el contador veía **14**. Lo primero que la medición destapó es que **el «18» nunca fue la cuenta de controles: era la cuenta de LÍNEAS con la frase**. Los cuatro que el contador se perdía eran tres títulos de `section()` —`introSampling:344`, `s9-composicion:31`, `introRig:236`— y un DETALLE de check (`s11-celosia:116`), que el patrón anclado a la forma de la línea descarta a propósito.
+
+    Se unificó el marcador **en el prefijo de la ETIQUETA**, que es la misma unidad que `controlPositivo()` del lane del SITIO —una llamada, una afirmación— y es lo que hace comparable el número: 11 de los 34 archivos, 20 ediciones una por una, **sin mover una sola línea de ningún archivo**. El contador ahora ve **36**, y no es que aparecieran controles: **cambió la unidad**, de 18 sitios declarados a 36 comprobaciones de control (un título de `section()` encabeza un grupo de tres o cuatro checks, y contarlo como uno era subcontar).
+
+    **`contarControles` NO se tocó**, y ésa es la parte que importa: el barrido movió los controles a la forma que el contador ya sabía leer, así que sus dos patrones siguen en uso y el **anclaje a la forma de la línea** —la protección de §7.25— queda intacto. `s9-instrumentos` §1 deja dos controles positivos que lo custodian, uno de ellos usando la línea real de `s11-celosia:116`, que se dejó sin marcar a propósito para que siga siendo el espécimen.
+
+    ⚠️ **Y el número comparable destapó el agujero que el subconteo escondía:** `s7e` y `s10e` corren **10 invariantes y 152 afirmaciones sin un solo control positivo**. No es un problema de marcador: no existen. Escribirlos es un sprint, no un barrido. Quedan además **siete controles que el lane EJERCE sin declarar con la frase**, listados con archivo y línea en el reporte de SITIO-S9: marcarlos es una decisión de contenido, no de marcador.
+
+34. ✅ **LA ESCENA SE APAGA Y VUELVE — construido en SITIO-S9, y resultó más barato de lo que §2.4 imaginaba.**
+
+    §2.4 pide que la escena *"se apague y vuelva"* y §7.2 lo leía como un efecto que había que componer. **La premisa se midió antes de construir nada, y da vuelta el trabajo:** si en las secciones opacas el panel ya tapa la sala, lo que falta no es un efecto visual — es **dejar de renderizar**.
+
+    **La premisa se sostiene, y no se verificó sobre el fuente sino sobre el marcado que sale.** `s9-visibilidad.invariant.ts` §1 renderiza el `Panel` REAL de las ocho secciones con `renderToStaticMarkup`: las ocho emiten el relleno que su superficie declara, **ninguna lo punciona** —sin margen, radio, alfa ni modo de mezcla—, la pila no deja un hueco entre secciones, y el relleno vive en la `<section>` que lleva el recorrido y **no en el hijo `sticky`**, que era el riesgo real (Trabajos y Servicios miden 300svh con un hijo clavado de 100svh: si el relleno viviera ahí, 200svh de cada una dejarían ver la escena). **No hay ningún momento en que la sala asome detrás de un panel opaco, así que no hay efecto que componer.**
+
+    ⚠️ **Y de paso corrige una cifra de la instrucción del sprint, con su medición al lado (regla 11):** *"en cinco de las ocho secciones el panel es opaco"* — son **SEIS de las ocho** (Quiénes somos, Números, Trabajos, Servicios, Tu panel y Cierre), y dos transparentes. El cinco es la cuenta correcta sobre otro denominador: las **siete que llevan recorrido de scroll**, o sea sin el Cierre. El **85,7%** del documento es panel opaco.
+
+    **Cómo se construyó: `_lib/escena/visibilidad.ts`, sin desmontar nada.** El lazo de r3f pasa a `frameloop="never"` cuando ninguna ventana transparente está en cuadro: no dibuja un cuadro y no corre un `useFrame`, pero **el contexto de WebGL, las texturas, el shadow map y el árbol siguen vivos**. Volver cuesta un cuadro, no un montaje.
+
+    ⚠️ **Volver sin salto no sale gratis, y por eso hay TRES fases y no un booleano.** Mientras el lazo está suspendido el enchufe sigue escribiendo `rig.progress` —es un listener de scroll, no un `useFrame`— así que al volver el objetivo está al día y **la pose amortiguada está vieja**; y el `delta` del primer cuadro no la salva, porque `setFrameloop` de r3f reinicia el reloj. Con `SETTLE_TAU` entre 0,20 y 0,28 s, volver sin hacer nada sería **un latigazo de ~1 s** visto por la rendija del panel que entra. La fase `reanudando` corre el lazo **con la física apagada**, que es el camino que `OrbitRig` ya tiene escrito: con `physics` en `false` la pose se escribe con `live[canal] = target[canal]`, o sea la pose exacta del progreso. **No agrega una línea al rig.**
+
+    | | |
+    |---|---|
+    | banda suspendida | **75,0%** del recorrido (76,9% si el margen fuera cero) |
+    | cuadros que no se dibujan en una pasada | **2.700 de 3.600** — supuesto declarado: 60 Hz y 60 s para las 13 pantallas |
+    | **página QUIETA en una sección opaca** | **3.600 cuadros por minuto → CERO**, y no tiene tope: crece con el tiempo que la pestaña quede ahí |
+    | lo que cuesta el mecanismo | 2 cuadros sin inercia por reanudación = **0,07%** de lo que ahorra |
+
+    **Dos constantes con su cuenta y no con su gusto.** `MARGEN_DE_REANUDACION = 0,125` pantallas: la ventana derivada no tiene holgura —el diferencial está en cuadro exactamente mientras el scroll va de 11 a 13— y sin margen el lazo arrancaría en el instante en que el borde del panel toca el del cuadro, con el primer cuadro pintado un `rAF` después; lo que se vería en esa rendija **no es negro sino la pose vieja**, porque con el lazo en `never` el canvas conserva lo último que pintó. El margen tiene que durar los dos cuadros de la reanudación: 0,0625 pantallas por cuadro = **3,75 pantallas por segundo a 60 Hz**, o 112 px por cuadro en una ventana de 900. Cubre la rueda y el teclado; **no cubre una barra de scroll arrastrada, y ningún margen finito la cubre** — ahí se ve a lo sumo UN cuadro de pose vieja. Cuesta 1,9 puntos de banda. Y `CUADROS_DE_REANUDACION = 2` y no 1, aunque por la matemática alcanzara uno: el pulso que despacha «pintado» vive en un `rAF` del documento y el lazo de r3f en el suyo, y **nada ordena uno respecto del otro**; con un solo cuadro, si el pulso corriera primero, la física se encendería antes del cuadro exacto y el latigazo vuelve entero, como falla intermitente. ⚠️ Ese orden se **dedujo leyendo el código, no se midió**: si alguien lo mide y r3f siempre corre primero, la constante baja a 1 y la reanudación cuesta la mitad.
+
+    ⚠️ **Lo que este ítem NO cierra:** que el navegador efectivamente deje de dibujar, y que volver no tenga salto. El invariante afirma la CADENA —qué fase pide qué lazo y qué física—, no su efecto. **Falta la verificación visual, y tiene que hacerse con la pestaña AL FRENTE**: con la pestaña ocluida toda medición de scroll da cero por construcción, y eso invalida cualquier corrida automatizada que no lo garantice.
+
+35. ✅ **`scroll-padding-top` — ARREGLADO en la parada de SITIO-S9: 72 px, sin tocar el sitio vivo.**
+
+    `src/app/globals.css:488` declara `scroll-padding-top: var(--spacing-ds-nav)` sobre el `<html>`, en `@layer base`, y `--spacing-ds-nav` vale `4rem` = **64 px**. Alcanza a `/v3` porque el layout raíz importa `globals.css`, y **gobierna de verdad** porque Lenis no corre en `/v3` (`SmoothScroll.tsx` se sale con `pathname.startsWith('/v3')`): el scroll es nativo, así que el navegador lo respeta.
+
+    **Con dos varas, y las dos importan porque miden cosas distintas:**
+
+    | vara | valor correcto | desvío de hoy |
+    |---|---:|---|
+    | despejar la pastilla de navegación de `/v3` | 72 px (24 de reposo + 48 de alto) | **8 px cortos** — el borde de la sección queda abajo de la pastilla |
+    | que el bloque toque el borde del cuadro | 0 px — `/v3` no tiene barra fija que despejar | **64 px de sobra** — la sección aterriza corrida hacia abajo, y a un panel pinneado (`sticky top-0 h-svh`) se le va el pie fuera de cuadro |
+
+    Afecta a las **siete** anclas del pie (`DESTINOS_DE_LA_RUTA`). **La parada eligió la vara de la pastilla: un ancla que aterriza debajo de la pastilla no sirve.**
+
+    **El arreglo NO toca `globals.css`, y eso no era gratis.** `scroll-padding` va sobre el CONTENEDOR DE SCROLL —el `<html>`— y el `<html>` no lleva `[data-v3]`: la marca vive en el envoltorio de `v3/layout.tsx`. La salida es **`html:has([data-v3])`**, declarado en `_estilos/navegacion.css`, que es donde vive la geometría de la pastilla. La regla **sólo matchea cuando hay un `[data-v3]` en el documento**, así que sigue sin poder alcanzar al sitio vivo — que es la propiedad que el repo custodia — y el sitio viejo conserva sus 64 px.
+
+    **El valor no es un 72 escrito:** es `calc(var(--spacing-6) + var(--spacing-3) * 2 + var(--text-cuerpo) * var(--leading-texto))`, o sea la MISMA cuenta que `_lib/navegacion.ts` deriva para el borde inferior de la pastilla en reposo (`BORDE_INFERIOR_EN_REPOSO_PX`). `s9-instrumentos` §4 lo comprueba **resolviendo el `calc()` contra los tokens reales del tema**, no comparando texto: si mañana alguien mueve `--spacing-3`, el número se mueve en los dos lados o el invariante falla.
+
+    ⚠️ **Y hubo que enseñarle algo al detector, que es la parte que vale.** `s3-tokens` §5 comprobaba «ninguna hoja de /v3 alcanza al sitio vivo» con un `startsWith('[data-v3]')`. Eso era un **PROXY de la propiedad, no la propiedad**: `html:has([data-v3])` la cumple y no cumplía el proxy. Se le enseñó **esa forma exacta y nada más** —anclada a la cadena completa y no a un `includes`, que dejaría pasar `html, button` con sólo nombrar la marca en otro lado (§7.25)— con **tres controles positivos**: el `html` pelado no pasa, un `:has()` de otra cosa no pasa, y un selector que sólo nombra la marca en otra parte tampoco. Es la misma lección que SITIO-S8 aprendió con el lector de los dos arneses: *un lector que no entiende un dialecto no reporta «no entiendo», reporta «falló»* — acá, reportaba «alcanza al sitio vivo» algo que no lo alcanza.
+
+    ⚠️ **Lo que queda:** el aterrizaje REAL de las siete anclas en un navegador sigue declarado `noCorre`. Los 72 px son geométricos, derivados de tokens; confirmarlos pide la pestaña al frente.
+
+36. ⚠️ **EL ACOPLAMIENTO DE TIPO HACIA `/probe-escena` — medido en SITIO-S9, declarado, y con el plan de resolución escrito.**
+
+    Quedan **tres `import type { ChoreoEditor }`** hacia `@/app/probe-escena/_components/choreographyEditor`, desde `pistaDelHome.ts`, `OrbitRig.tsx` y `ProbeStage.tsx`. **Cuestan 0 bytes**, y eso ya no es memoria: está verificado sobre el fuente por cuatro caminos —las tres líneas son `import type`, `ChoreoEditor` está declarado `export type`, ninguno usa el nombre en posición de valor, y `tsconfig.json` declara `isolatedModules`—.
+
+    ⚠️ **Lo que sí cambia el diagnóstico:** el día que `/probe-escena` se borre, `tsc --noEmit` corta con `TS2307` **pero `npm run build` SIGUE EN VERDE y el bundle no cambia un byte**, porque `next.config.ts` declara `typescript.ignoreBuildErrors: true`. **El acoplamiento no tiene guardia en el build.**
+
+    **No se resolvió en SITIO-S9 a propósito, y es §7.26 con todas las letras:** resolverlo obliga a tocar `s8-escena.invariant.ts` §3 —que otro frente estaba reescribiendo en la misma pasada— y `ProbeStage.tsx`, que está en exactamente 300 líneas. **El plan exacto, para que el próximo no lo rehaga:** crear `_lib/escena/choreographyEditorTypes.ts` (módulo nuevo, y NO `choreographyTypes.ts`, que mide 240 y con los dos tipos pasaría de 300), mover ahí `ChoreoEditor` y `EditableKeyframe` —el único tipo del que depende y que todavía vive del lado del panel—, que `choreographyEditor.ts` los re-exporte para que ningún consumidor de `/probe-escena` cambie, y apuntar los tres imports al módulo nuevo, una línea cada uno y sin sumar ninguna. **La afirmación que cambia de valor es `s8-escena.invariant.ts` §3**, que hoy espera exactamente esos tres nombres y pasaría a esperar la lista vacía. Costo total: 1 archivo nuevo, 4 líneas cambiadas, 1 afirmación reescrita.
+
+37. 🔴 **UNA INSTRUCCIÓN QUE SE CONTRADICE PRODUCE TRABAJO CORRECTO SÓLO SI ALGUIEN LA LEE ENTERA.**
+
+    Regla del proyecto desde SITIO-S9, y es **el hallazgo más importante de ese sprint** — más que el mapeo, porque el mapeo salió bien gracias a ella.
+
+    ── **EL CASO: la frase que, tomada literal, rompía la escena**
+
+    La instrucción de SITIO-S9 decía, sobre el frente del anclaje:
+
+    > *«Cada sección llena el cuadro en el progreso de su ancla.»*
+
+    Los seis keyframes llevan el nombre de la sección para la que se compusieron, y esa frase admite **dos lecturas que dan resultados distintos**:
+
+    | | lectura | qué implica |
+    |---|---|---|
+    | **(i)** | **LLEGADA** — la pose que nombra a la sección se alcanza cuando la sección EMPIEZA a llenar el cuadro | es la lectura LITERAL de la frase, y vale para las seis |
+    | **(ii)** | **TRAMO** — el tramo que nombra a la sección OCUPA la sección, y la pose lo cierra | la frase vale literal sólo para tres de las seis |
+
+    **Con (i) el Hero llevaría 0,375 de progreso en UNA pantalla.** La cámara saldría de la pose del hero a un tercio de la primera pantalla y haría **los 130° de órbita completos** mientras el panel se va — en la única ventana, junto con el diferencial, donde la sala se ve. Y el docblock del keyframe `hero · sostén` dice, con esas palabras, que existe para que *«la cámara no esté orbitando ~20° durante la pantalla del hero»*: con (i) orbitaría **130°, o sea 6,5× lo que ese keyframe fue escrito para impedir**. Habría anulado un valor de la escena sin tocarlo, que es justamente lo que la regla 4 del sprint prohibía.
+
+    ── **LO QUE DECIDIÓ: dos frases de la MISMA instrucción**
+
+    No se eligió (ii) por criterio propio contra la instrucción. Se eligió porque **la instrucción se contradice, y sus otras dos frases sólo son verdaderas con (ii)**:
+
+    1. *«entre Trabajos y Por qué develOP avanza sin que nadie la vea, detrás de **dos paneles opacos**»* — con (ii) son exactamente dos, Servicios y Tu panel. **Con (i) son tres**, porque el tramo escondido arrancaría adentro de Trabajos.
+    2. Las dos filas *(avanza oculto)* de su propia tabla son **Servicios y Tu panel** — que con (ii) son literalmente el tramo `demos`, y con (i) no.
+
+    Y hay dos fuentes más que apuntan al mismo lado: §2.2 declara los tramos en pantallas de su sección (*«Quiénes somos · 2 pantallas · 0° → 130°»*), y §2.4 dice que la cámara *«se queda ahí la pantalla entera»*.
+
+    **Se eligió (ii), y lo que cuesta se declaró en vez de esconderse:** la frase literal vale para **tres** de las seis —Hero (0,000), Por qué develOP (0,750) y Cierre (1,000), las que ARRIBAN sobre su pose— y para las otras tres la pose es la de **salida**. Las tres que arriban son, además, las que la medición de tinta necesitaba.
+
+    ── **LA REGLA, y por qué no es «leé con cuidado»**
+
+    > **Una instrucción es una fuente como cualquier otra (§7.32), y una fuente puede contradecirse a sí misma. Cuando una frase tomada literal choca con otra frase de la misma fuente, no se elige la que suena más específica: se buscan TODAS las frases que discriminan entre las lecturas, se elige la que las satisface, y se DECLARA qué parte de la instrucción quedó sin cumplirse literalmente y por qué.**
+
+    Lo que hace operativa la regla es la última parte. Un ejecutor que elige en silencio produce trabajo que nadie puede auditar: el que lea después ve una instrucción y un resultado que no coinciden, y no puede saber si fue criterio o descuido. **La elección se escribe con las frases que la forzaron** — acá, en `_lib/escena/anclaje.ts`, antes de despachar un solo frente.
+
+    ── **LAS OTRAS DOS AFIRMACIONES DE LA INSTRUCCIÓN DE SITIO-S9 QUE LA MEDICIÓN CORRIGIÓ**
+
+    - **«en cinco de las ocho secciones el panel es opaco»** — son **SEIS** (Quiénes somos, Números, Trabajos, Servicios, Tu panel y Cierre) y dos transparentes. El cinco es la cuenta correcta sobre otro denominador: las **siete que llevan recorrido de scroll**, o sea sin el Cierre. Las dos cuentas quedan afirmadas en `s9-visibilidad` §1.2 para que la de la instrucción no se lea como un desacuerdo sino como otro conjunto.
+    - **«sin ese chunk `/v3` mediría 235,3»** (heredada de §7.30) — el techo real de la deferencia es **77,9 KiB gzip y no 142,1**, así que `/v3` quedaría en **299,6**. La corrección entera, con su causa, está en §7.30.

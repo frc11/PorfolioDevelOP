@@ -251,4 +251,26 @@ export default withSentryConfig(nextConfig, {
   silent: !process.env.CI,
   widenClientFileUpload: true,
   tunnelRoute: "/monitoring",
+  // ── SITIO-S9 · la única palanca de peso del SDK que NO cuesta cobertura ────
+  //
+  // El chunk del SDK de navegador son 142,1 KiB gzip en TODA ruta (§7.30 de
+  // `docs/rediseno/DIRECCION-ESCENA.md`). De las tres palancas que ese pendiente
+  // deja, ésta es la única gratis: poda los `logger.*` internos del SDK — el
+  // global `__SENTRY_DEBUG__` — y **no saca una sola línea de captura**. Se veía
+  // que no estaba puesta: el chunk conservaba 8 guardas `__SENTRY_DEBUG__` sin
+  // resolver, contadas por `npm run test:s9-sentry`.
+  //
+  // ⚠️ `removeTracing` NO se pone, y es una decisión y no un olvido: vale 17,6
+  // KiB gzip más pero apaga `browserTracingIntegration`, o sea todo el
+  // monitoreo de performance (pageload, navegación y web vitals), y hoy
+  // `tracesSampleRate` es 0,1 en producción. Es decisión de producto.
+  //
+  // Los flags de Session Replay tampoco: `replayIntegration` no está en las 13
+  // integraciones por default del SDK instalado y aparece en cero chunks del
+  // build, así que podar su código no puede devolver bytes que no están.
+  webpack: {
+    treeshake: {
+      removeDebugLogging: true,
+    },
+  },
 });

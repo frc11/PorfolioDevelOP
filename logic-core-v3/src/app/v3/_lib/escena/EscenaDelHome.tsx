@@ -18,6 +18,14 @@ import { crearPistaDelHome } from './pistaDelHome'
 import { progresoDelScroll } from './recorrido'
 import { escenaRetenida } from './retencion'
 import {
+  ESTADO_INICIAL,
+  escenaEnCuadro,
+  fisicaEn,
+  frameloopDe,
+  siguiente,
+  type EstadoDeLaEscena,
+} from './visibilidad'
+import {
   PROBE_DEFAULTS,
   PROBE_RIG_DEFAULTS,
   PROBE_STATS_DEFAULTS,
@@ -64,15 +72,24 @@ import {
  * `OrbitRig` ya lee `rig.get('progress')` en su `useFrame`, en modo
  * `coreografia` y con `playing = false` para que nada lo auto-avance. Lo único
  * que hace falta es que alguien lo escriba desde el scroll, y eso es
- * `useProgresoDelScroll` de acá abajo: **consumir lo que existe, sin tocar el
+ * `useEscenaAtadaAlScroll` de acá abajo: **consumir lo que existe, sin tocar el
  * rig y sin inventar un segundo camino.**
  *
- * ⚠️ **EL MAPEO ES PROVISIONAL Y EL SPRINT FRENÓ SOBRE ÉL.** La coreografía
- * está compuesta sobre OCHO pantallas y la tabla del home declara CATORCE, los
- * nombres de tramo no coinciden con los de las secciones, y §2.4 pide que la
- * escena se apague y vuelva —que es una forma que un progreso monótono no
- * tiene—. El mapeo, la tabla derivada y el porqué están en `recorrido.ts`; lo
- * que cuesta está medido en `__tests__/s8-tinta.invariant.ts`.
+ * ── ESTE ARCHIVO ES EL ENCHUFE, y por eso no decide nada (SITIO-S9) ────────
+ *
+ * Lo escribió el agente principal en la Fase 0, antes de despachar los frentes,
+ * y las dos decisiones que consume viven afuera:
+ *
+ * - **cuánto progreso le toca a cada posición de scroll** — `recorrido.ts`,
+ *   sobre los nudos que `anclaje.ts` deriva de `secciones.ts` y de la
+ *   coreografía. Acá sólo se llama a `progresoDelScroll`.
+ * - **cuándo la escena tiene que estar dibujando** — `visibilidad.ts`, sobre las
+ *   ventanas que salen de la misma derivación. Acá sólo se pasan `frameloop` y
+ *   `physicsEnabled`.
+ *
+ * Las dos salen de **una sola lectura del scroll por cuadro**, que es la razón
+ * por la que el enchufe existe en vez de que cada frente monte su propio
+ * listener.
  *
  * ── `prefers-reduced-motion` y el aviso del intro ──────────────────────────
  *
@@ -86,15 +103,24 @@ import {
 const PROGRESO_RETENIDO = 0
 
 /**
- * Ata `rig.progress` al scroll de la página.
+ * ATA LA ESCENA AL SCROLL DE LA PÁGINA — el progreso y la visibilidad, de UNA
+ * sola lectura por cuadro.
+ *
+ * ⚠ **Las dos cosas salen de la misma medición, y por eso viven en el mismo
+ * efecto.** `scrollY`, el alto del documento y el alto de la ventana se leen una
+ * vez; de ahí sale el progreso (`recorrido.ts`) y de ahí sale si hay un panel
+ * transparente en cuadro (`visibilidad.ts`). Leerlos dos veces sería medir el
+ * mismo scroll con dos relojes y arriesgarse a que un cuadro escriba un progreso
+ * de una lectura y una fase de otra.
  *
  * ── Por qué un listener con `requestAnimationFrame` y no un loop ───────────
  *
  * Porque el progreso sólo cambia cuando alguien scrollea. Un `useFrame` que lo
- * recalculara en los 60 cuadros de una página quieta haría el mismo trabajo
- * para escribir el mismo número. El `rAF` coalesce la ráfaga de eventos de
- * scroll a **como mucho una escritura por cuadro**, que es exactamente lo que
- * el rig necesita.
+ * recalculara en los 60 cuadros de una página quieta haría el mismo trabajo para
+ * escribir el mismo número. El `rAF` coalesce la ráfaga de eventos de scroll a
+ * **como mucho una escritura por cuadro**, que es exactamente lo que el rig
+ * necesita. Y sigue funcionando con el lazo del canvas suspendido: este `rAF` es
+ * del documento, no del renderer.
  *
  * ── ⚠️ La guarda de la pestaña oculta ──────────────────────────────────────
  *
@@ -102,13 +128,15 @@ const PROGRESO_RETENIDO = 0
  * `window.innerHeight` devuelve 0 y toda medición de scroll o layout da cero
  * (lección ya escrita en `CLAUDE.md`). Acá eso pondría el progreso en 0 y
  * mandaría la cámara al hero sin que nadie haya scrolleado. Se comprueba
- * `document.visibilityState` **y** que la ventana tenga alto antes de escribir
- * un solo número.
+ * `document.visibilityState` **y** que la ventana tenga alto antes de escribir un
+ * solo número.
  */
-function useProgresoDelScroll(
+function useEscenaAtadaAlScroll(
   rig: ReturnType<typeof createNumericStore<ProbeRig>>,
   retenida: boolean,
-): void {
+): EstadoDeLaEscena {
+  const [estado, setEstado] = useState<EstadoDeLaEscena>(ESTADO_INICIAL)
+
   useEffect(() => {
     let pedido = 0
 
@@ -117,13 +145,21 @@ function useProgresoDelScroll(
       if (document.visibilityState !== 'visible') return
       const ventana = window.innerHeight
       if (!(ventana > 0)) return
+      const documento = document.documentElement.scrollHeight
+      const desplazamiento = window.scrollY
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
       const progreso = quieta
         ? PROGRESO_RETENIDO
-        : progresoDelScroll(window.scrollY, document.documentElement.scrollHeight, ventana)
-
+        : progresoDelScroll(desplazamiento, documento, ventana)
       rig.set('progress', progreso)
+
+      const enCuadro = escenaEnCuadro(desplazamiento, documento, ventana)
+      // `siguiente` devuelve el MISMO objeto cuando no hay transición, así que
+      // React descarta la actualización y esto no re-renderiza por cuadro de
+      // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por
+      // identidad en su invariante — no una esperanza sobre esta línea.
+      setEstado((previo) => siguiente(previo, { tipo: 'cuadro', enCuadro }))
     }
 
     const pedir = (): void => {
@@ -146,6 +182,21 @@ function useProgresoDelScroll(
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.
   }, [rig, retenida])
+
+  /**
+   * El pulso de la reanudación. Sólo corre mientras la fase lo pide, y avisa
+   * **un cuadro por vez**: cuántos hacen falta antes de volver a la física lo
+   * decide `siguiente()`, no este efecto. Acá no hay política.
+   */
+  useEffect(() => {
+    if (estado.fase !== 'reanudando') return
+    const pedido = requestAnimationFrame(() => {
+      setEstado((previo) => siguiente(previo, { tipo: 'pintado' }))
+    })
+    return () => cancelAnimationFrame(pedido)
+  }, [estado])
+
+  return estado
 }
 
 export default function EscenaDelHome() {
@@ -161,7 +212,7 @@ export default function EscenaDelHome() {
   const etapaDelIntro = useIntroStage()
   const retenida = escenaRetenida(etapaDelIntro, introEnteredClean())
 
-  useProgresoDelScroll(rig, retenida)
+  const estadoDeLaEscena = useEscenaAtadaAlScroll(rig, retenida)
 
   // `ProbeLogo` lo dispara UNA vez, en su efecto de montaje. Acá no enciende
   // ninguna pantalla —el home ya está entero detrás— pero el prop es
@@ -176,6 +227,7 @@ export default function EscenaDelHome() {
       className={CLASES_DE_LA_ESCENA}
       data-escena={MARCA_ESCENA}
       data-intro={etapaDelIntro}
+      data-escena-fase={estadoDeLaEscena.fase}
       aria-hidden="true"
     >
       <EscudoDeLaEscena>
@@ -185,16 +237,22 @@ export default function EscenaDelHome() {
           stats={stats}
           editor={pista}
           mode="coreografia"
-          // La física es inercia + mouse + vira. Mientras el intro tapa la
-          // escena tiene que estar QUIETA (contrato de `introHandoff`, punto 2),
-          // y `OrbitRig` ya la apaga entera con este mismo prop.
-          physicsEnabled={!retenida}
+          // La física es inercia + mouse + vira. Se apaga en DOS casos y los dos
+          // son el mismo mecanismo: mientras el intro tapa la escena (contrato de
+          // `introHandoff`, punto 2) y en el cuadro en que la escena vuelve de
+          // estar suspendida, para que la pose sea la del progreso de HOY y no
+          // una persecución desde la de hace diez pantallas.
+          physicsEnabled={!retenida && fisicaEn(estadoDeLaEscena)}
           // El progreso sale del scroll, nunca de una reproducción: con
           // `playing` en `false` el rig no auto-avanza y sólo lee lo que
-          // `useProgresoDelScroll` escribió.
+          // `useEscenaAtadaAlScroll` escribió.
           playing={false}
           onPlayEnd={alTerminarLaPasada}
           reducedMotion={reducedMotion}
+          // SUSPENDER NO ES DESMONTAR: `'never'` para el lazo de r3f y no dibuja
+          // un cuadro, con el contexto de WebGL y el árbol enteros. Volver cuesta
+          // un cuadro.
+          frameloop={frameloopDe(estadoDeLaEscena)}
           // Dos automatismos del panel que en el home no existen: la órbita
           // automática es del modo manual y la luz solidaria es una perilla de
           // calibración.

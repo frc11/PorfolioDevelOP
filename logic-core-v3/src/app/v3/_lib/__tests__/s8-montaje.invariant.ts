@@ -38,6 +38,7 @@ import {
 } from './s8-padron'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { invariantesCableados } from './s4-suites'
 import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, medirLargos, propiosQuePasan, repartir, type Largo } from './s8-largos'
 
 const RUTAS_DEL_INTRO = ['/', '/v3']
@@ -220,14 +221,13 @@ for (const a of deMas) console.log(`    · ${a}`)
 console.log('  (no es falla: un frente puede partir un archivo que pasó las 300 líneas)')
 
 /**
- * Lo que SÍ es falla: un `.invariant` suelto sin script. Es un instrumento que
- * no corre nunca, y desde `package.json` es invisible — el hallazgo que obligó
- * a la regla 14. `s4-cobertura` ya lo caza para los directorios cableados; acá
- * se afirma sobre las carpetas de los frentes, que son nuevas.
+ * Lo que SÍ es falla: un `.invariant` suelto sin script (regla 14). ⚠ **La
+ * pregunta se le hace a `package.json`, no al padrón** — preguntársela al padrón
+ * de S8 puso esto en rojo cuando S9 sumó tres invariantes CON script acá.
  */
-const instrumentosDeclarados = new Set(FRENTES.flatMap((f) => f.instrumentos))
+const cableados = invariantesCableados()
 const sueltos = FRENTES.flatMap((f) => recorrer(f.carpeta)).filter(
-  (a) => /\.invariant\.tsx?$/.test(a) && !instrumentosDeclarados.has(a),
+  (a) => /\.invariant\.tsx?$/.test(a) && !cableados.has(a),
 )
 afirmarIgual(sueltos, [], 'ningún `.invariant` suelto sin script en las carpetas de los frentes')
 

@@ -31,7 +31,7 @@
  * en silencio es la misma clase de agujero que este sprint viene tapando.
  */
 
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { RAIZ } from './s4-corrida'
@@ -156,10 +156,10 @@ export function derivarSuites(scripts: Record<string, string>): Derivacion {
  * no romper a quien llame con la derivación sola, y cuando falta el detector se
  * comporta como antes — con la ceguera declarada acá en vez de escondida.
  */
-export function instrumentosSinScript(
+export function archivosCableados(
   derivacion: Derivacion,
   scriptsCompletos: Record<string, string> = {},
-): string[] {
+): Set<string> {
   const cableados = new Set(
     [...derivacion.permanentes.flatMap((s) => s.invariantes), ...derivacion.frontera.invariantes].map(
       (i) => i.archivo.replace(/\\/g, '/'),
@@ -172,6 +172,28 @@ export function instrumentosSinScript(
       cableados.add((m[1] ?? m[2]).replace(/\\/g, '/'))
     }
   }
+  return cableados
+}
+
+/**
+ * Los que corre `package.json` HOY, sin que quien pregunte tenga que derivar
+ * nada. **Es la respuesta a «¿este instrumento tiene script?», que no es la
+ * misma pregunta que «¿está en la lista de entregables de tal sprint?»** —
+ * confundir las dos es lo que puso en rojo a `s8-montaje` §6 cuando SITIO-S9
+ * sumó tres invariantes a carpetas que el padrón de SITIO-S8 declaraba
+ * cerradas: los tres tenían script y aun así figuraban sueltos. Se deriva, no
+ * se lista; es la regla 14 aplicada al detector que la custodia.
+ */
+export function invariantesCableados(): Set<string> {
+  const scripts = scriptsDe(JSON.parse(readFileSync(path.join(RAIZ, 'package.json'), 'utf8')))
+  return archivosCableados(derivarSuites(scripts), scripts)
+}
+
+export function instrumentosSinScript(
+  derivacion: Derivacion,
+  scriptsCompletos: Record<string, string> = {},
+): string[] {
+  const cableados = archivosCableados(derivacion, scriptsCompletos)
   const directorios = [...new Set([...cableados].map((a) => path.posix.dirname(a)))].sort()
   const huerfanos: string[] = []
   for (const dir of directorios) {

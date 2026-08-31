@@ -71,6 +71,18 @@ export const ALTO_PASTILLA_PX =
 /** Cuánto se descuenta de `100svh` para ubicar el nacimiento. */
 export const DESCUENTO_NACIMIENTO_PX = TOKENS_DEL_UMBRAL.margenAlPie.px + ALTO_PASTILLA_PX
 
+/**
+ * DÓNDE TERMINA LA PASTILLA EN REPOSO — o sea **cuánto tiene que despejar un
+ * ancla para no aterrizar debajo de ella**. Es el `scroll-padding-top` de /v3,
+ * y lo declara `_estilos/navegacion.css` con estos mismos cuatro tokens.
+ *
+ * ⚠ Da el mismo número que `DESCUENTO_NACIMIENTO_PX` y **no es el mismo dato**:
+ * aquél es margen-al-pie + alto y éste es reposo + alto. Coinciden porque los
+ * dos márgenes son `--spacing-6`, que es la simetría que este archivo declara
+ * arriba. Si alguien rompe la simetría, los dos números se separan solos.
+ */
+export const BORDE_INFERIOR_EN_REPOSO_PX = TOKENS_DEL_UMBRAL.reposo.px + ALTO_PASTILLA_PX
+
 /** Cuánto se descuenta de `100svh` para obtener el umbral. */
 export const DESCUENTO_UMBRAL_PX = DESCUENTO_NACIMIENTO_PX + TOKENS_DEL_UMBRAL.reposo.px
 

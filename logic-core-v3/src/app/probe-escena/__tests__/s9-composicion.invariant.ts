@@ -28,7 +28,7 @@ const track = makeTrack(CHOREO_KEYFRAMES)
 
 // ── 4 · Nada se cruza entre la cámara y el logo ─────────────────────────────
 
-section('El instrumento de oclusión DETECTA una oclusión (control positivo)')
+section('El instrumento de oclusión DETECTA una oclusión')
 
 /**
  * ⚠️ **Este control existe porque el de abajo no puede fallar solo.**
@@ -49,7 +49,7 @@ section('El instrumento de oclusión DETECTA una oclusión (control positivo)')
   const blocker = [syntheticOccluder(0, 9)]
   const occluded = logoOcclusionAt(track, 0, blocker)
   check(
-    'con una losa sintética delante, la oclusión del logo es TOTAL',
+    'control positivo — con una losa sintética delante, la oclusión del logo es TOTAL',
     occluded === 1,
     `${(occluded * 100).toFixed(0)}% de la silueta tapada por ${blocker[0].label}`
   )
@@ -58,7 +58,7 @@ section('El instrumento de oclusión DETECTA una oclusión (control positivo)')
   // instrumento discrimina y no devuelve 0 ó 1 y nada más.
   const partial = logoOcclusionAt(track, 0, [syntheticOccluder(0, 9, 3.2, 11)])
   check(
-    'y con una losa angosta, tapa una PARTE — el instrumento discrimina',
+    'control positivo — con una losa angosta tapa una PARTE: el instrumento discrimina',
     partial > 0 && partial < 1,
     `${(partial * 100).toFixed(0)}% de la silueta`
   )
@@ -66,7 +66,7 @@ section('El instrumento de oclusión DETECTA una oclusión (control positivo)')
   const cone = backCone(track, 0.625, [syntheticOccluder(15, 20)])
   const free = backCone(track, 0.625)
   check(
-    'y una losa en el fondo le come el cono libre',
+    'control positivo — una losa en el fondo le come el cono libre',
     cone < free,
     `±${cone.toFixed(0)}° con la losa contra ±${free.toFixed(1)}° sin ella`
   )

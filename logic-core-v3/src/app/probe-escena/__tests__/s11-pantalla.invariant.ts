@@ -156,14 +156,14 @@ section('Aliasing: la huella sobre el piso y el filtro que la absorbe')
   const hardIn = celosiaBarFiltered(0, CELOSIA_BAR, 0)
   const hardOut = celosiaBarFiltered(0.4, CELOSIA_BAR, 0)
   check(
-    'con huella cero el perfil es binario: adentro 1, afuera 0',
+    'control positivo — con huella cero el perfil es binario: adentro 1, afuera 0',
     Math.abs(hardIn - 1) < 1e-9 && Math.abs(hardOut) < 1e-9,
     `${hardIn.toFixed(3)} en el centro de la barra contra ${hardOut.toFixed(3)} en el hueco`
   )
   const blurredIn = celosiaBarFiltered(0, CELOSIA_BAR, 1)
   const blurredOut = celosiaBarFiltered(0.4, CELOSIA_BAR, 1)
   check(
-    'con huella de una celda el patrón se reemplaza por su propia media',
+    'control positivo — con huella de una celda el patrón se reemplaza por su propia media',
     Math.abs(blurredIn - CELOSIA_BAR) < 1e-9 && Math.abs(blurredOut - CELOSIA_BAR) < 1e-9,
     `${blurredIn.toFixed(3)} y ${blurredOut.toFixed(3)} contra una barra de ${CELOSIA_BAR} — gris parejo en vez de titileo`
   )

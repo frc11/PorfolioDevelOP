@@ -71,7 +71,7 @@ section('El alcance: hasta dónde de la losa llega la celosía')
    * por encima del tope de las dos bandas.
    */
   check(
-    'el instrumento sabe decir que NO cruza: con el sol en el cenit el rayo sale por arriba',
+    'control positivo — el instrumento sabe decir que NO cruza: con el sol en el cenit sale por arriba',
     crossedFrom([0, FLOOR_Y, 0], [0, 1, 0]) === 0,
     `las bandas terminan en y = ${LAYERS[0].top} y ${LAYERS[1].top}`
   )

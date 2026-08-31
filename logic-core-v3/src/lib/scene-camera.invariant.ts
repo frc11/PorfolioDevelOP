@@ -78,12 +78,12 @@ section('Una sola cámara para el logo y para el resto de la escena')
   const right = camera ? projectScenePoint(camera, [3, 0, 0], 1440, 810) : null
   const up = camera ? projectScenePoint(camera, [0, 3, 0], 1440, 810) : null
   check(
-    'un punto a la derecha del origen proyecta más a la derecha',
+    'control positivo — un punto a la derecha del origen proyecta más a la derecha',
     right !== null && origin !== null && right.xPx > origin.xPx + 50,
     right && origin ? `${(right.xPx - origin.xPx).toFixed(0)}px por 3 de mundo` : ''
   )
   check(
-    'y uno más alto, más arriba',
+    'control positivo — y uno más alto, más arriba',
     up !== null && origin !== null && up.yPx < origin.yPx - 50,
     up && origin ? `${(origin.yPx - up.yPx).toFixed(0)}px por 3 de mundo` : ''
   )

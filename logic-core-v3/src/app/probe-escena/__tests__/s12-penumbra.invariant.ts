@@ -76,7 +76,7 @@ section('Con α = 0 el gobo es el de S11, línea por línea')
       ) > 0.01
   ).length
   check(
-    'el instrumento se mueve: con el sol de tamaño real el gobo cambia en el piso',
+    'control positivo — el instrumento se mueve: con el sol real el gobo cambia en el piso',
     moved > grid.length * 0.1,
     `${moved} de ${grid.length} puntos de la losa cambian más de 1% · sin esto, la identidad de abajo pasaría con el modelo desconectado`
   )

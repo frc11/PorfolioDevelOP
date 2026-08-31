@@ -341,7 +341,7 @@ for (const [time, name] of NAMED) {
 
 // ── Control positivo ────────────────────────────────────────────────────────
 
-section('control positivo — el instrumento detecta el cruce estirado')
+section('Que el instrumento detecte el cruce estirado')
 
 /**
  * **UNA COMPROBACIÓN QUE NO PUEDE FALLAR NO COMPRUEBA NADA**, y un instrumento
@@ -403,14 +403,14 @@ const STRETCHED: readonly Stretched[] = CROSSINGS.map(({ name, timeline, weakS }
 const factors = STRETCHED.map((row) => row.stretchedS / row.narrowS)
 const factorSpread = Math.max(...factors) - Math.min(...factors)
 check(
-  'la tinta a la par del fondo alarga el cruce, y por el MISMO factor en las once',
+  'control positivo — la tinta a la par del fondo alarga el cruce, por el MISMO factor en las once',
   factors.every((factor) => factor > 1) && factorSpread < 1e-3,
   `×${Math.min(...factors).toFixed(3)} · dispersión ${factorSpread.toExponential(1)}`
 )
 
 const violators = STRETCHED.filter((row) => row.stretchedS > WEAK_CAP_S)
 check(
-  'y donde el color es largo ese estirado VIOLA el tope: el tope muerde',
+  'control positivo — donde el color es largo ese estirado VIOLA el tope: el tope muerde',
   violators.length > 0,
   `${violators.map((row) => `${row.name} ${s(row.stretchedS)}`).join(' · ')} contra el tope de ${s(WEAK_CAP_S)}`
 )
@@ -420,7 +420,7 @@ const stretchedAtColorS = (colorS: number): number =>
 const belowBite = stretchedAtColorS(1.8)
 const aboveBite = stretchedAtColorS(2.2)
 check(
-  'y el punto de quiebre está acotado por los dos lados, no estimado',
+  'control positivo — el punto de quiebre está acotado por los dos lados, no estimado',
   belowBite <= WEAK_CAP_S && aboveBite > WEAK_CAP_S,
   `colorS 1,8 s → ${s(belowBite)} pasa · 2,2 s → ${s(aboveBite)} falla · tope ${s(WEAK_CAP_S)}`
 )
@@ -444,6 +444,6 @@ for (const frac of [inkFrac, 0.3, 0.4, 0.5, 0.7, 1]) {
   previousS = value
   trace.push(`${(100 * frac).toFixed(1)}%→${(value * 1000).toFixed(1)}ms`)
 }
-check('el cruce CRECE con el ancho de la ventana, sin excepción', widensMonotonically, trace.join(' · '))
+check('control positivo — el cruce CRECE con el ancho de la ventana, sin excepción', widensMonotonically, trace.join(' · '))
 
 report('introSampling')

@@ -48,7 +48,7 @@ section('El disco se fue, y esto lo verifica sin quedar verde por vacío')
    */
   const fixture = '<sprite ref={sunRef} scale={[32, 32, 1]}>\n  <spriteMaterial />\n</sprite>'
   check(
-    'el escáner encuentra un cuerpo de sol puesto a mano',
+    'control positivo — el escáner encuentra un cuerpo de sol puesto a mano',
     spriteDeclarations(fixture) === 1,
     'mismo criterio que `syntheticOccluder()` de S10'
   )
