@@ -49,7 +49,11 @@
 // 49 desde el sprint de destinos alcanzables: suma `check:invariant:enlaces`
 // (los saltos pantalla→pantalla del manual no rebotan + ninguna guía manda a
 // una fase que no nombra ninguna pantalla).
-const INVARIANTES_ESPERADOS = 49;
+// 50 desde el sprint de la configuración que falta: suma
+// `check:invariant:copy-sin-jerga` (ninguna frase que el setter pueda leer
+// nombra un código de sprint ni una columna de la base — el mensaje que mataba
+// el último paso del recorrido decía «Setup B7.0 … calComUsername»).
+const INVARIANTES_ESPERADOS = 50;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

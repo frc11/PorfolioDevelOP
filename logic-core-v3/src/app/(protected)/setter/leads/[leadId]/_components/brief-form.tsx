@@ -5,6 +5,7 @@ import { Button, Field, Input, TextArea } from '@/components/ui'
 import { fail } from '@/lib/action-utils'
 import type { Brief } from '@/lib/leados/contracts'
 import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
+import { faltaPorHerramientaSinLink, herramientaSinLink } from '@/lib/leados/herramientas'
 import { useAutosave } from '@/lib/use-autosave'
 import { erroresPorCampo, useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
@@ -101,6 +102,9 @@ export function BriefForm({
 
   const briefValido = useMemo(() => BriefInputSchema.safeParse(aPayloadBrief(form)).success, [form])
 
+  /** El Gem de diseño no se puede abrir todavía → su pegado no se puede exigir. */
+  const gemSinLink = herramientaSinLink('gemDiseno')
+
   // Autosave SOLO cuando el caller lo habilita (re-pegado BRIEF+editando): ahí
   // `guardarBrief` re-escribe `briefJson` SIN transición. La captura inicial en
   // EVALUADA NO se autoguarda a propósito — ese primer guardado ES la transición
@@ -143,11 +147,19 @@ export function BriefForm({
 
   return (
     <div className="space-y-5">
+      {/* El asterisco y el bloqueo se van JUNTOS: marcar como obligatorio algo
+          que el producto acepta vacío es la contradicción que este campo tenía.
+          Los dos salen del mismo `herramientaSinLink('gemDiseno')` que decide el
+          `superRefine` del schema y la píldora «Link pendiente» de arriba. */}
       <Field
         label={GUIA_BRIEF.campos.pegadoGem.label}
-        required
+        required={!gemSinLink}
         error={errors.pegadoGem}
-        hint={GUIA_BRIEF.campos.pegadoGem.hint}
+        hint={
+          gemSinLink
+            ? GUIA_BRIEF.campos.pegadoGem.hintSinHerramienta
+            : GUIA_BRIEF.campos.pegadoGem.hint
+        }
       >
         <TextArea
           value={form.pegadoGem}
@@ -241,7 +253,7 @@ export function BriefResumen({ brief }: { brief: Brief }) {
           <span className="font-semibold text-zinc-400">CTA:</span> {brief.cta}
         </p>
       )}
-      {brief.pegadoGem && (
+      {brief.pegadoGem ? (
         <details className="mt-3">
           <summary className="cursor-pointer text-xs text-zinc-500 hover:text-zinc-300">
             Ver respuesta completa del Gem
@@ -250,6 +262,15 @@ export function BriefResumen({ brief }: { brief: Brief }) {
             {brief.pegadoGem}
           </pre>
         </details>
+      ) : (
+        /* El pegado ausente se NOMBRA en vez de desaparecer: sin esto, un brief
+           guardado contra la pared («Link pendiente») se lee igual que uno donde
+           el Gem no aportó nada. Visible siempre — el faltante no se pliega. */
+        faltaPorHerramientaSinLink('gemDiseno', brief.pegadoGem) && (
+          <p className="mt-3 text-xs leading-relaxed text-amber-200/70">
+            {GUIA_BRIEF.campos.pegadoGem.faltante}
+          </p>
+        )
       )}
     </div>
   )

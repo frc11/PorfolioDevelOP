@@ -21,16 +21,31 @@ import { AgendaSchema, type Agenda, type ResultadoReunion } from '@/lib/leados/c
 import { getOwnedDossier } from '@/lib/leados/dossier'
 import type { SlotsPorDia } from '@/lib/integrations/cal-com-v2'
 
-// ── Config Cal.com de la org (setup B7.0, manual de Franco) ─────────────────
+// ── Config Cal.com de la org (la carga Franco a mano, fuera del panel) ──────
 
 export type CalConfigLeadOS =
   | { ok: true; username: string; eventTypeSlug: string }
   | { ok: false; motivo: string }
 
-const SETUP_B7 =
-  'Setup B7.0 pendiente: cargá en la organización develOP el username de Cal.com ' +
-  '(calComUsername) y el slug del event type (calComEmbedUrl, vale el slug pelado ' +
-  'o la URL https://cal.com/usuario/slug).'
+/**
+ * Lo que ve el SETTER cuando la agenda de Franco no está conectada.
+ *
+ * Este texto sale por `fail(config.motivo)` derecho a la pantalla: no pasa por
+ * `error-copy.ts` (que traduce las claves del motor de stages), así que se
+ * escribe en el idioma del setter acá, en el origen. Decía «Setup B7.0
+ * pendiente: cargá … calComUsername … calComEmbedUrl» — un código de sprint y
+ * dos columnas de la base, en imperativo, pidiéndole al setter una configuración
+ * a la que no tiene acceso y sin decirle a quién pedírsela. Era el último paso
+ * del recorrido y ahí se cortaba.
+ *
+ * La salida es la MISMA que ya usa la píldora «Link pendiente» de las
+ * herramientas: avisale a Franco. El detalle técnico no desaparece — se loguea
+ * del lado del servidor (`console.warn` abajo), que es donde Franco lo puede
+ * leer y el setter no lo necesita.
+ */
+const AGENDA_NO_CONECTADA =
+  'La agenda de Franco todavía no está conectada, así que los horarios no se pueden buscar desde acá. ' +
+  'Avisale a Franco: cuando la conecte, este paso funciona solo. Mientras tanto, coordiná la reunión con él directo.'
 
 /**
  * Resuelve la agenda de Franco desde Organization (calComUsername +
@@ -46,15 +61,25 @@ export async function getCalConfigLeadOS(): Promise<CalConfigLeadOS> {
   })
 
   if (orgs.length === 0) {
-    return { ok: false, motivo: SETUP_B7 }
+    console.warn(
+      '[leados agenda] Cal.com sin configurar: ninguna Organization tiene calComUsername. ' +
+        'Cargar calComUsername + calComEmbedUrl (slug pelado o URL https://cal.com/usuario/slug) en la org de develOP.',
+    )
+    return { ok: false, motivo: AGENDA_NO_CONECTADA }
   }
   if (orgs.length > 1) {
+    // El detalle (cuántas y cuáles) es diagnóstico de Franco, no del setter: va
+    // al log del servidor. En pantalla queda el riesgo concreto —reservar en el
+    // calendario equivocado— y a quién avisarle.
+    console.warn(
+      `[leados agenda] Cal.com ambiguo: ${orgs.length} organizaciones con calComUsername ` +
+        `(${orgs.map((org) => org.slug).join(', ')}). LeadOS necesita UNA sola.`,
+    )
     return {
       ok: false,
       motivo:
-        `Config Cal.com ambigua: ${orgs.length} organizaciones tienen calComUsername ` +
-        `(${orgs.map((org) => org.slug).join(', ')}). LeadOS necesita UNA sola — ` +
-        'limpiá las que no sean la agenda de Franco.',
+        'Hay más de una agenda conectada y el panel no sabe cuál es la de Franco: si agenda, la reunión puede ' +
+        'caer en el calendario equivocado. Avisale a Franco antes de seguir — él lo deja en una sola.',
     }
   }
 
@@ -62,7 +87,11 @@ export async function getCalConfigLeadOS(): Promise<CalConfigLeadOS> {
   const username = org.calComUsername?.trim()
   const eventTypeSlug = parseEventTypeSlug(org.calComEmbedUrl)
   if (!username || !eventTypeSlug) {
-    return { ok: false, motivo: SETUP_B7 }
+    console.warn(
+      `[leados agenda] Cal.com incompleto en la org "${org.slug}": ` +
+        `calComUsername=${username ? 'ok' : 'FALTA'}, calComEmbedUrl=${eventTypeSlug ? 'ok' : 'FALTA'}.`,
+    )
+    return { ok: false, motivo: AGENDA_NO_CONECTADA }
   }
   return { ok: true, username, eventTypeSlug }
 }

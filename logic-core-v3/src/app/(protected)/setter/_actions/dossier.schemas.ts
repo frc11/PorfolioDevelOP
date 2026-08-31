@@ -6,6 +6,7 @@
  */
 import { z } from 'zod'
 import { VEREDICTO_VALUES } from '@/lib/leados/contracts'
+import { herramientaSinLink } from '@/lib/leados/herramientas'
 
 export const LeadIdSchema = z.string().trim().min(1, 'Lead inválido')
 
@@ -43,19 +44,61 @@ export const EvaluacionInputSchema = z
 export type EvaluacionInput = z.infer<typeof EvaluacionInputSchema>
 
 /**
- * Captura del brief: pegado libre del Gem (obligatorio acá — es el corazón
- * del paso) + campos mínimos del BriefSchema con mensajes amigables.
+ * Captura del brief: pegado libre del Gem + campos mínimos del BriefSchema con
+ * mensajes amigables.
+ *
+ * `pegadoGem` es la TRANSCRIPCIÓN literal de lo que devuelve el Gem de diseño, y
+ * por eso su obligatoriedad SIGUE AL REGISTRO de herramientas en vez de estar
+ * clavada acá: si el Gem no tiene link cargado (`url: null`, la misma píldora
+ * «Link pendiente» que la pantalla ya muestra arriba), el campo no se puede
+ * exigir — no hay forma honesta de completarlo, solo inventarlo, y un pegado
+ * inventado viaja al bloque de construcción y a la revisión de Franco como si
+ * fuera la salida real del Gem. Cargar la URL en `herramientas.ts` lo vuelve
+ * obligatorio solo, sin tocar este archivo ni el formulario.
+ *
+ * El TIPO es el mismo en los dos casos (`string`, eventualmente vacío) a
+ * propósito: la exigencia viaja en un `superRefine`, no en un `.min(1)` que
+ * cambiaría `BriefInput` según el estado del registro. `BriefSchema` ya tenía
+ * `pegadoGem` como `textoLibre` (opcional) — el contrato persistido no se toca,
+ * y el vacío se guarda como ausente igual que `concepto` o `cta`.
+ *
+ * Por qué una FÁBRICA y no el `herramientaSinLink()` leído adentro: el registro
+ * es una constante de módulo, así que el estado «con link» no se puede alcanzar
+ * en una corrida de test sin re-buildear. Con el booleano por parámetro, los DOS
+ * lados de la regla se prueban contra el schema REAL (`tests/leados`), no contra
+ * una copia que puede desincronizarse. La app sigue usando una sola instancia,
+ * cableada abajo al registro.
+ *
+ * Lo demás sigue obligatorio y no entra en esta regla: `titulo` y `secciones` no
+ * se transcriben del Gem — son el plano que el setter puede escribir solo (el
+ * título arranca con el nombre del negocio; las secciones tienen sus ejemplos en
+ * el hint), y `secciones` es lo único que hace construible la demo.
  */
-export const BriefInputSchema = z.object({
-  titulo: z.string().trim().min(1, 'Poné un título — el nombre del negocio sirve'),
-  concepto: z.string().trim().optional(),
-  secciones: z
-    .array(z.string().trim().min(1))
-    .min(1, 'Anotá al menos una sección de la demo (una por línea)'),
-  notasMarca: z.string().trim().optional(),
-  cta: z.string().trim().optional(),
-  pegadoGem: z.string().trim().min(1, 'Pegá la respuesta completa del Gem de diseño'),
-})
+export function briefInputSchemaPara(gemConLink: boolean) {
+  return z
+    .object({
+      titulo: z.string().trim().min(1, 'Poné un título — el nombre del negocio sirve'),
+      concepto: z.string().trim().optional(),
+      secciones: z
+        .array(z.string().trim().min(1))
+        .min(1, 'Anotá al menos una sección de la demo (una por línea)'),
+      notasMarca: z.string().trim().optional(),
+      cta: z.string().trim().optional(),
+      pegadoGem: z.string().trim(),
+    })
+    .superRefine((value, ctx) => {
+      if (!gemConLink) return
+      if (value.pegadoGem === '') {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['pegadoGem'],
+          message: 'Pegá la respuesta completa del Gem de diseño',
+        })
+      }
+    })
+}
+
+export const BriefInputSchema = briefInputSchemaPara(!herramientaSinLink('gemDiseno'))
 
 export type BriefInput = z.infer<typeof BriefInputSchema>
 

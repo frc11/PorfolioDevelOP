@@ -84,6 +84,21 @@ export type CampoGuia = {
    * `ficha-calidad.ts` (heurística pura); acá viven solo las PALABRAS. [validación de calidad · 1.3]
    */
   mejora?: string
+  /**
+   * El MISMO campo cuando la herramienta externa que produce su contenido no
+   * tiene link cargado: ahí el campo deja de ser obligatorio y el hint tiene que
+   * decir por qué y qué hacer. Quién decide cuál de los dos se muestra es
+   * `herramientaSinLink()` (`herramientas.ts`), la misma lectura de la que sale
+   * la píldora «Link pendiente»; acá viven solo las PALABRAS.
+   */
+  hintSinHerramienta?: string
+  /**
+   * Cómo se NOMBRA este dato cuando falta por esa razón, para quien lo lee río
+   * abajo (la revisión de Franco, el resumen del setter, el bloque que se pega
+   * en la herramienta siguiente). Sin esto, el dato ausente se lee igual que uno
+   * que nadie quiso completar.
+   */
+  faltante?: string
   /** Opciones, si el campo es un selector. */
   opciones?: readonly CampoOpcion[]
 }
@@ -469,6 +484,23 @@ export const GUIA_BRIEF = {
     pegadoGem: {
       label: 'Respuesta del Gem (pegado completo)',
       hint: 'Pegala entera, sin editar. Los campos de abajo son el resumen estructurado.',
+      /**
+       * El MISMO campo cuando el Gem de diseño todavía no tiene link cargado:
+       * ahí el campo deja de ser obligatorio, porque pedir que se transcriba la
+       * salida de algo que no se puede abrir solo se obedece inventándola.
+       * `herramientaSinLink('gemDiseno')` decide cuál de los dos hints se ve —
+       * el mismo dato del que sale la píldora «Link pendiente» de arriba.
+       */
+      hintSinHerramienta:
+        'Todavía no lo podés traer: el Gem de diseño no tiene link cargado (pedíselo a Franco). Guardá el brief con las secciones que armes vos, y cuando tengas el link volvé y pegalo acá.',
+      /**
+       * Lo que ve quien LEE el brief después —Franco en la revisión, el setter
+       * al volver, y Claude Design en el bloque de construcción— cuando el
+       * pegado no está porque la herramienta no se pudo abrir. Una sola frase
+       * para las tres superficies: el dato faltante se nombra igual en todas.
+       */
+      faltante:
+        'Sin la respuesta del Gem de diseño: cuando se guardó este brief la herramienta todavía no tenía link cargado.',
     },
     titulo: {
       label: 'Título del brief',

@@ -8296,3 +8296,196 @@ env), así que el escalamiento «Me trabé» no salió hacia afuera; la pantalla
   transcripciones de herramientas inalcanzables.
 - **Tres leads `CORRIDA ` quedaron en la base dev** (postergado/descartado/evaluado). No se
   borraron: son la evidencia del recorrido.
+
+---
+
+## Sprint LA CONFIGURACIÓN QUE FALTA — el campo que no se puede llenar y el mensaje que no se puede leer — 2026-08-31
+
+**Rama** `fix/config-faltante` · **base** `fa36389a` (`corrida/recorrido-completo`, la punta con
+P12) · **worktree** `C:/tmp/wt-p13-config`, propio, `node_modules` por junction · **sin pushear**
+
+Los dos frenos de la corrida del novato, misma raíz: el producto exige algo que depende de una
+configuración que no existe, y no lo dice de una forma que el setter pueda accionar.
+
+### Fase 0 · terreno
+
+`tsc --noEmit` exit 0 · invariantes **48/48** (49 descubiertos, 1 excluido) · `test:helpers`
+**26/26** · `test:leados` **25/25** · `test:setter` **93/93** · `prisma migrate status`: 86
+migraciones, sin drift. Ajeno intacto: `docs/` sin trackear en el checkout principal, 2
+stashes, 17 worktrees, ramas de otros — nada tocado.
+
+**Los dos frenos, re-verificados operando la aplicación antes de tocar nada.** En m2 y en m6,
+la píldora «Link pendiente» arriba y los campos con `*(obligatorio)` abajo. En m16, tras tildar
+el decisor y apretar «Buscar horarios libres de Franco», el mensaje literal: «Setup B7.0
+pendiente: cargá en la organización develOP el username de Cal.com (calComUsername) y el slug
+del event type (calComEmbedUrl…)». Los 16 orgs de la base dev tienen `calComUsername` en null.
+
+### Paso 1 · el censo de dependencias — y lo que frenó
+
+Campos obligatorios que piden **transcribir la salida** de una herramienta sin URL:
+
+| El campo | Herramienta | Quién lo consume río abajo | Si llega vacío | ¿Gate? |
+|---|---|---|---|---|
+| **m2 · Score** (`evaluacion-form.tsx:191`) | evaluador (`herramientas.ts:63`, sin link) | `transitionDossier` EVALUADA (`dossier.ts:150`) · `registrarEvaluacion` descarta con score ≤ 2 (`dossier.actions.ts:154`) · `mis-numeros.ts:76` · `progreso.ts:82` · `notify.ts:144` · `buildBriefInputBlock` (`copy-blocks.ts:94`) · 4 pantallas de admin/setter | **ROMPE.** `EvaluacionSchema.parse()` lanza; sin score no hay descarte automático ni métrica | **SÍ** — `EvaluacionSchema` dentro de `transitionDossier`, más el guard de `EVALUADA→DESCARTADA` protegido por `dossier-stage.invariant.ts:271` |
+| **m2 · Veredicto** (`:212`) | evaluador | idem + badge del admin + métrica descarte/avance (`revision.ts`) | **ROMPE** — mismo `parse` | **SÍ** — idem |
+| **m2 · Razonamiento** (`:207`) | evaluador | `notify.ts:155` hace `.razonamiento.slice(0,300)` · `dossier-panels.tsx:83` y `setter-evaluaciones.tsx:87` lo renderizan crudo · `buildBriefInputBlock` lo interpola | **ROMPE** — `EvaluacionSchema` lo exige `min(1)`; el Telegram explotaría con `undefined` | **SÍ** — idem |
+| **m6 · Respuesta del Gem** (`brief-form.tsx:147`) | gemDiseno (`herramientas.ts:78`, sin link) | `buildConstruccionBlock` (`copy-blocks.ts:241`, vía `seccion()`) · `BriefResumen` (`brief-form.tsx:244`) · `BriefPanel` del admin (`dossier-panels.tsx:122`) | **DEGRADA, y nadie lo nota.** Los tres ya ramifican por ausencia: el bloque omite la sección, las dos pantallas no pintan nada | **NO** — `BriefSchema.pegadoGem` ya era `textoLibre` (opcional); el gate `EVALUADA→BRIEF` es `gateBriefAbierto(status, caliente)` y no mira el brief; el gate del envío es `draftUrl + selfCheckAprobado` |
+
+**FRENADO en m2, y ése es el hallazgo.** Los tres campos del evaluador tienen consumidores que
+asumen que están, y uno de ellos es un **gate duro con invariante**: `transitionDossier` parsea
+`EvaluacionSchema` y lanza. Aflojar el asterisco de m2 obliga a cambiar el contrato persistido
+(`contracts.ts:93-98`) y arrastra cinco consumidores más una aserción de
+`dossier-stage.invariant.ts`. Eso cambia lo que el producto garantiza —que un lead EVALUADA
+tiene evaluación— y no es una decisión de sprint. Queda reportado, sin tocar.
+
+**Fuera de la regla, con motivo:**
+- **mc1/mc2 (claudeDesign)** — la píldora está, pero no hay ningún campo obligatorio: los seis
+  tildes son auto-reporte y la propia pantalla dice que no bloquean nada.
+- **m4/m5 (gemOutreach)** — «Tu opener» es texto **del setter**, no una transcripción; el
+  propio registro dice «Usarla es opcional: si te sale solo, mejor».
+- **m6 · Título y Secciones** — siguen obligatorios. No se transcriben del Gem (el título
+  arranca con el nombre del negocio, las secciones tienen sus ejemplos en el hint) y
+  `secciones` es lo único que hace construible la demo.
+- **m13 (netlifyDrop)** — tiene link. Es el contra-ejemplo que la regla usa para probarse.
+
+### Paso 2 · el campo que dejó de bloquear lo que no se puede hacer
+
+`herramientas.ts` estrena dos funciones puras: `herramientaSinLink(id)` —la MISMA lectura de la
+que sale la píldora— y `faltaPorHerramientaSinLink(id, valor)`, que distingue «el setter lo
+dejó vacío» de «no lo podía traer».
+
+De ahí salen las cuatro cosas, sin que ningún componente decida por su cuenta:
+
+1. `BriefInputSchema` exige `pegadoGem` **solo** si el Gem tiene link (`superRefine`, no
+   `.min(1)`: el tipo `BriefInput` no cambia con el estado del registro).
+2. El `Field` pierde el `*` con el bloqueo, y el hint pasa a decir por qué.
+3. `BriefResumen`, el `BriefPanel` del admin y el bloque de Construcción **nombran** el dato
+   faltante en vez de omitirlo en silencio — una sola frase, en
+   `GUIA_BRIEF.campos.pegadoGem.faltante`.
+4. Cargar el link en `herramientas.ts` revierte las cuatro, sin tocar código.
+
+El bloque de Construcción es la **única excepción** a su propia regla («lo que está vacío se
+OMITE; nunca se rellena ni se anuncia como faltante»), y queda escrita al lado: omitirlo en
+silencio le manda a Claude Design un bloque más corto sin decir que le falta la pieza. Un CTA
+vacío se sigue omitiendo — `faltaPorHerramientaSinLink` solo es cierto cuando la herramienta es
+la que no está.
+
+**Nada se inventa y nada se guarda de más:** el brief guardado sin pegado queda
+`{"titulo":…,"secciones":[…]}` — la clave `pegadoGem` **no existe** en el blob.
+
+### Paso 3 · el mensaje que hablaba en jerga
+
+Censo de la prosa de `setter/**` + `lib/leados/**` + `cal-com-v2.ts`: **tres** mensajes con
+código de sprint o nombre de columna llegan a una pantalla del setter. Los tres reescritos:
+
+- `agenda.ts` · «Setup B7.0 pendiente: cargá … calComUsername … calComEmbedUrl» →
+  «La agenda de Franco todavía no está conectada, así que los horarios no se pueden buscar
+  desde acá. Avisale a Franco: cuando la conecte, este paso funciona solo. Mientras tanto,
+  coordiná la reunión con él directo.»
+- `agenda.ts` · la config ambigua ya no nombra `calComUsername` ni le pide al setter «limpiá
+  las que no sean la agenda de Franco»: dice el riesgo (reservar en el calendario equivocado)
+  y a quién avisarle.
+- `cal-com-v2.ts:200` · el 404 de Cal.com («revisá el username y el slug cargados en la org
+  (setup B7.0)») — viaja al setter tal cual por `mapError`, sin traducción.
+
+El detalle técnico **no se pierde**: los tres casos loguean por `console.warn` del lado del
+servidor, con los nombres de columna y los slugs de las orgs. Es donde Franco lo puede leer.
+
+**Lo demás que el censo encontró, y por qué no se toca:** los mensajes de `dossier.ts` /
+`error-copy.ts` son **claves del motor**, traducidas antes de salir al cliente (regla del
+propio `error-copy.ts`); los identificadores sueltos (`businessName`, `assignedToId`,
+`snoozedUntil`) son claves de Prisma y encabezados de CSV, no copy —la plantilla del import ya
+usa `nombre`/`instagram`/`web`—; y `'Enviada por el setter desde LeadOS (B6)'` es el `notes` de
+un registro `OsDemo`, que ninguna pantalla del setter renderiza (el timeline lee
+`Activity.notes`). Ese último queda **eximido con prueba** en el invariante nuevo.
+
+### El invariante nuevo — `check:invariant:copy-sin-jerga`
+
+Ninguna frase que el setter pueda leer nombra un código de sprint ni una columna de la base.
+El sujeto es la **prosa** (4 palabras o más), no los identificadores sueltos; de las columnas se
+vigilan solo las que tienen joroba, porque `lead`/`notas`/`zona` son además castellano y
+prohibirlas prohibiría el vocabulario del producto (límite conocido, escrito en el archivo).
+
+Tres dientes contra el falso verde: el piso de barrido (130 fuentes / 1276 frases), el piso de
+la lista de columnas leída de `schema.prisma` (352, fuente **distinta** del sujeto) y —el que
+prueba el detector— nueve pares CONDUCTA/SABOTAJE que le dan fuentes sintéticas y exigen que
+encuentre la jerga en un `fail()` y **no** la encuentre en un comentario ni en un `console.*`.
+Ese último par es el que le da sentido al perdón del log del servidor: no se perdona el texto,
+se perdona el destino.
+
+La única jerga permitida no está en una lista escrita a mano: se perdona **si y solo si**
+`error-copy.ts` la tiene como clave traducida. Si alguien borra la traducción, la frase deja de
+estar perdonada y esto se pone en rojo — que es justo cuando la jerga llegaría a la pantalla.
+
+`INVARIANTES_ESPERADOS` 49 → **50**, con el motivo en el mismo renglón.
+
+### Paso 4 · verificado operando la aplicación, a 1440
+
+1. **Sin link.** m6 muestra «Link pendiente», la etiqueta del pegado **sin** `*`, y el hint
+   «Todavía no lo podés traer: el Gem de diseño no tiene link cargado (pedíselo a Franco)…».
+   Se guarda el brief con el pegado vacío → «Brief guardado», stage EVALUADA→**BRIEF**, blob
+   sin la clave. Al volver, el faltante se lee **sin abrir ningún plegable**; el bloque de mc1
+   termina en «BRIEF COMPLETO DEL GEM DE DISEÑO / Sin la respuesta del Gem de diseño: …»; y el
+   panel del admin lo muestra en su callout ámbar.
+2. **Con link.** Cargado un link de prueba de Gemini en `herramientas.ts` y rebuildeado
+   —**nada más**—: la píldora desaparece (0), aparece «Abrir Gem de diseño» apuntando ahí, el
+   `*` **vuelve**, el hint vuelve al original y guardar con el pegado vacío rebota con «Pegá la
+   respuesta completa del Gem de diseño». **Revertido** y rebuildeado: el archivo quedó
+   idéntico al de la base.
+3. **El mensaje.** Antes: «Setup B7.0 pendiente: cargá … calComUsername … calComEmbedUrl».
+   Después: la frase de arriba, visible en el `role="alert"` del form, con `B7.0` y `calCom`
+   ausentes de todo el `main`.
+
+### Los tests, demostrados fallando
+
+`tests/setter/19-config-que-falta.spec.ts` (5) y `tests/leados/campo-sin-herramienta.spec.ts`
+(8). Contra un build del código **viejo** (los seis archivos revertidos con `git stash` y
+rebuildeado): **4 de 5** rojos en el browser y **5 de 8** en la lógica pura. Los que pasan son
+los dos guards de terreno —que afirman que el Gem sigue sin link— y los dos casos que describen
+el comportamiento que ya era correcto.
+
+Todo se afirma por **visibilidad**, no por presencia: `faltante` y `hintSinHerramienta` se
+buscan con `toBeVisible()`, y en m6 se cuenta `details[open] === 0`. La selección de controles
+va por rol y por `label[for]` (`fieldControl`), nunca por la copy que se está verificando.
+
+**El estado espejo se prueba donde se puede probar.** `HERRAMIENTAS` es una constante de
+módulo: «con link» no se alcanza en una corrida sin rebuildear. Por eso `BriefInputSchema` se
+extrajo a `briefInputSchemaPara(gemConLink)` y los DOS lados se afirman en `tests/leados`
+contra el schema real; el browser cubre el lado que hoy es cierto, y el otro quedó verificado a
+mano (punto 2 de arriba).
+
+**Una trampa del instrumento, anotada.** El interruptor del decisor de m16 no resuelve por
+`getByRole` apenas carga la pantalla: bajo el streaming de React el control existe en el DOM
+antes de entrar al árbol de accesibilidad, y `getByRole` —que excluye lo oculto— devuelve 0
+mientras el selector CSS ya devuelve 1. Sin una espera explícita, el test se lee como «el
+control no está». Y m16 solo es alcanzable con el link **ya enviado**: sin `enviadaAt`, la
+derivación manda el lead a m15 después de hidratar, y la aserción de URL pasa igual porque
+corre antes del salto.
+
+### Cierre
+
+`tsc --noEmit` exit 0 · invariantes **49/49** (50 descubiertos, 1 excluido) · `test:helpers`
+**26/26** · `test:leados` **33/33** · `test:setter` **98/98** · `npm run build` verde ·
+`migrate status` sin drift. Sin cambios de schema, de transiciones ni de llaves de datos
+(`HardCheck.nombre`, `FASE_IDS`, ids de pantalla: intactos). Ningún invariante en rojo.
+
+**El fixture que la verificación tocó, restaurado.** Completar m6 a mano movió `QA-W Evaluada
+Gate Abierto` a BRIEF; se devolvió a EVALUADA con `briefJson` en null (es un lead sembrado y
+nombrado por su estado). `M0-GAL 30-m16-virgen` quedó intacto: el gate de config aborta antes
+de escribir, `agendaJson` sigue en null.
+
+### Lo que este sprint NO resuelve
+
+Las cuatro herramientas siguen sin link y Cal.com sin configurar. Esto hace que el producto no
+mienta ni trabe mientras falten; no las carga — eso son minutos de Franco en `herramientas.ts`
+y en la org de develOP.
+
+Y **m2 sigue frenando el recorrido**, ahora con el motivo medido: los tres campos del evaluador
+son load-bearing de un gate con invariante. Destrabar ese paso es una decisión de producto
+—¿qué significa un lead EVALUADA sin evaluación?— y necesita su propio sprint.
+
+### Anotado y fuera de alcance
+
+Los otros siete baches de la corrida: la carrera de tildes del auto-reporte, el foco que no
+aparece, la vuelta de construcción que aterriza en el chequeo, el paso actual de un postergado,
+la pantalla que no acompaña al dato, la aglomeración de novedades y la novedad caducada.

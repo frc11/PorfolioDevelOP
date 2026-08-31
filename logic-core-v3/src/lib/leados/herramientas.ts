@@ -126,3 +126,37 @@ export const HERRAMIENTAS_ORDEN: HerramientaId[] = [
   'netlifyDrop',
   'gemOutreach',
 ]
+
+/**
+ * ¿Esta herramienta NO se puede abrir todavía? Es el MISMO dato del que sale la
+ * píldora «Link pendiente» del rail y de `ToolGuide` (`url === null`) — una sola
+ * lectura, así el registro de abajo y el acceso de arriba no pueden divergir.
+ *
+ * Por qué existe como función y no como `!HERRAMIENTAS[id].url` repetido: desde
+ * este sprint el dato decide algo más que un estilo de píldora — decide si el
+ * campo que pide TRANSCRIBIR la salida de esa herramienta se puede exigir. Un
+ * campo obligatorio cuya herramienta no se puede abrir es una pantalla imposible
+ * de obedecer: la única forma de completarlo es inventar el contenido, y un dato
+ * inventado viaja al resto del recorrido como si fuera real.
+ *
+ * Cargar la URL real en el registro de arriba vuelve a exigir el campo y apaga
+ * las marcas de faltante, SIN tocar ningún componente.
+ */
+export function herramientaSinLink(id: HerramientaId): boolean {
+  return HERRAMIENTAS[id].url === null
+}
+
+/**
+ * ¿Este dato FALTA porque la herramienta que lo produce no se puede abrir?
+ *
+ * La diferencia que marca es la que pide el producto: un campo vacío puede ser
+ * una decisión del setter (dejó el CTA en blanco) o una pared (no pudo abrir el
+ * Gem). Quien consume el dato río abajo necesita distinguirlas, porque en el
+ * segundo caso el dato no está y nadie lo omitió a propósito.
+ */
+export function faltaPorHerramientaSinLink(
+  id: HerramientaId,
+  valor: string | null | undefined,
+): boolean {
+  return !valor?.trim() && herramientaSinLink(id)
+}
