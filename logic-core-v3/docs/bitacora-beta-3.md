@@ -8205,3 +8205,94 @@ El verde de las últimas nueve corridas, entonces, valía lo que decía valer **
 - **`tests/qa-walkthrough` no lo corre ningún script.** Una spec entera fuera de todo gate — por eso acumuló cuatro líneas rotas de un renombre. Darle script (o borrarla) es una decisión, no un arreglo.
 - **Los 15 call sites de `fieldControl` en las 118**, sin medir contra el sabotaje de dos etiquetas. Es el pendiente que hereda de P11.
 - **La copy en subjuntivo de `m-construccion.tsx`** sigue doblada para esquivar un helper que ya no lo necesita. Es código de producto: no se tocó.
+
+---
+
+## CORRIDA DE RECORRIDO — el camino entero, de punta a punta (31/08/2026)
+
+**Base `2da5de41`** (`origin/fix/helpers-que-prueban`), elegida por ser descendiente de
+`origin/main` **y** de las diez ramas de sprint — verificado con `merge-base --is-ancestor`
+una por una. Worktree propio `C:/tmp/wt-corrida-recorrido`, puerto 3007, `E2E_DIST_DIR=.next-corrida`,
+build de producción exit 0, base Neon **dev**. Rama `corrida/recorrido-completo`, sin pushear.
+`git diff` sobre `src/`: **vacío**. Nada de código de producto se tocó.
+
+Reporte y manifiesto en `docs/corrida-recorrido-2026-08-31/`. 79 PNG a 1440 px, gitignorados.
+
+### Qué se recorrió
+
+Un lead propio (`CORRIDA Panaderia San Cayetano`) por el camino completo: alta → ficha →
+veredicto → opener → espera → respondió → brief → construir → refinar → **pedir ayuda** →
+borrador → chequeo → revisión → **rechazo de Franco** → retrabajo → reenvío → **aprobación** →
+mandar el link → **postergación** → agenda. Más, en leads aparte, un **descarte** completo.
+Los pasos de Franco se hicieron por la UI real de admin, no tocando la base.
+
+### Los nueve baches
+
+Dos **frenan**: (B1) cuatro de las cinco herramientas dicen «Link pendiente» y el registro
+igual exige, con asterisco de obligatorio, transcribir literalmente lo que devuelven —
+obedecer la pantalla es imposible, salí inventando el contenido; (B2) el último paso del
+camino, agendar, muere con «Setup B7.0 pendiente: cargá … calComUsername … calComEmbedUrl»,
+un mensaje que nombra un código de sprint y dos columnas de la base, y que ni siquiera dice a
+quién pedírselo.
+
+Tres **confunden**: (B3) tildar tres fases de construcción seguidas (400 ms) guarda una y la
+pantalla muestra tres — reproducido dos veces contra la base; (B4) el alta promete «aparece en
+tu foco» y con un pin y 48 en cola no aparece; (B8) un lead postergado al 15/9 tiene como paso
+actual «Agendá la reunión».
+
+Cuatro **molestan**: (B5) la pantalla no acompaña al dato; (B6) «Reabrir construcción»
+aterriza en el chequeo final; (B7) el bloque de novedades ocupa ~1000 px de un panel de 2366,
+con 12 tarjetas de texto idéntico; (B9) una novedad sigue diciendo «Enviá el link ya» con el
+link ya enviado.
+
+### El límite de B3, que es lo que lo vuelve accionable
+
+La carrera afecta a `progresoJson` (auto-reporte, no gatea) y **no** a `selfCheckJson`: tildé
+los 10 obligatorios de m14 al mismo ritmo y los 10 persistieron. El checklist que gatea el
+envío está a salvo; lo que se pierde en silencio es el registro del propio trabajo del setter.
+
+### Contra agosto: tres arreglados, dos vivos, dos nuevos
+
+**Arreglados** — el error de m13 ya no es `Invalid literal value, expected true` sino «Abrí el
+link en otra pestaña y confirmá que la demo carga» (y sigue sin persistir nada); `espera` y
+`revision` ya no comparten encabezado («Le toca al negocio» vs «Le toca a Franco»); el acuse
+de recibo existe (hay `aria-live` con «Opener registrado — próximo toque el 2/9»).
+**Vivos** — la pantalla no acompaña al dato, y la aglomeración de novedades (que agosto había
+declarado no re-verificable porque su limpieza borró el 96% del bloque; hoy vuelve a medirse).
+**Nuevos** — la carrera de los tildes y el mensaje de Cal.com.
+
+### Lo que el rechazo sí hace bien
+
+El re-loop completo se sostiene: novedad con el nombre del negocio → «Abrir» cae directo en la
+guía de retrabajo con el Qué/Dónde/Arreglo → «Reabrir construcción» conserva los 6 tildes y el
+pedido, y resetea el chequeo. El pedido de Franco se verificó presente en **las cuatro**
+pantallas del retrabajo, que es lo que la pantalla promete.
+
+### Seis falsos positivos, declarados
+
+El selector que «no abría» (faltaba `scrollIntoView` en el shell fijo), los 9 campos «sin
+nombre accesible» (todos con `label[for]`), el botón Postergar «ausente» (la línea del
+snapshot venía citada en YAML por llevar dos puntos), el chequeo que «no guardaba» (la clave
+es `itemsDuros`, no `marcados`), el descarte que «no registraba» (abre diálogo de
+confirmación) y «Ver toda la cartera» que «no navega» (es un `aria-expanded`). Se listan en el
+reporte para que se pueda medir la puntería del instrumento.
+
+### Lo que se documentó sin ejecutar
+
+**`confirmarReunion` → `POST /v2/bookings` de Cal.com.** El módulo declara que Cal.com escribe
+el evento en el Google Calendar conectado y manda los mails nativos: es una acción real hacia
+afuera. No se ejecutó. Se verificó además, leyendo `agenda.actions.ts`, que el guard de config
+corre **antes** de `getSlots`, y con `calComUsername` en null en los 8 orgs el botón no dispara
+ninguna llamada — confirmado con un censo de pedidos del browser: **0 pedidos fuera de
+localhost**. Telegram quedó inerte por falta de credenciales (ni en `AgencySettings` ni en
+env), así que el escalamiento «Me trabé» no salió hacia afuera; la pantalla lo dijo:
+«Guardamos tu pedido — Franco lo ve en el panel. El aviso por Telegram no salió».
+
+### Anotado, sin hacer
+
+- **El tiempo humano no se puede derivar de esta corrida.** El agente no lee ni delibera, y
+  no puede usar las herramientas porque no tienen link. Lo medible es latencia del sistema:
+  3-6 s por acción de escritura, 15 pantallas con registro, 4 campos obligatorios que son
+  transcripciones de herramientas inalcanzables.
+- **Tres leads `CORRIDA ` quedaron en la base dev** (postergado/descartado/evaluado). No se
+  borraron: son la evidencia del recorrido.
