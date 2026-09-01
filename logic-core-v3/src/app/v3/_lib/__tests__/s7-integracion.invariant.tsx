@@ -153,12 +153,32 @@ for (let i = 0; i < REGISTRO.length; i++) {
   )
 }
 
-/** El hijo pegado mide UNA pantalla. De ahí sale la cuenta de ritmo. */
+/**
+ * El hijo pegado declara UNA pantalla. De ahí sale la cuenta de ritmo.
+ *
+ * ⚠️ SITIO-S11: se lee la clase DEL elemento con `data-pinneado` y se compara
+ * por token exacto. La versión anterior hacía `html.includes('h-svh')` y era
+ * verde por subcadena —`min-h-svh` la contiene—, así que el cambio de S11 en el
+ * envoltorio (`siempre`: `h-svh` → `min-h-svh`, el arreglo del defecto 1) la
+ * habría dejado en verde diciendo algo falso. `desde-escritorio` la declara
+ * como alto FIJO; `siempre`, como PISO. La razón de la asimetría está en el
+ * docblock de `_contrato/Seccion.tsx`.
+ */
+const clasesDelPegado = (html: string, modo: string): string[] =>
+  (new RegExp(`data-pinneado="${modo}"\\s+class="([^"]*)"`).exec(html)?.[1] ?? '').split(/\s+/)
 for (const m of pinneadas) {
   const html = marcarSeccion(REGISTRO.indexOf(m))
-  const clase = m.seccion.pinneada === 'siempre' ? 'h-svh' : 'escritorio:h-svh'
-  afirmar(html.includes(clase), `\`${m.id}\` — su hijo pegado mide una pantalla (\`${clase}\`)`)
+  const clase = m.seccion.pinneada === 'siempre' ? 'min-h-svh' : 'escritorio:h-svh'
+  afirmar(
+    clasesDelPegado(html, m.seccion.pinneada ?? '').includes(clase),
+    `\`${m.id}\` — su hijo pegado declara una pantalla (\`${clase}\`)`,
+  )
 }
+controlPositivo(
+  'el lector de la clase del pegado no se cree una subcadena',
+  '<div data-pinneado="siempre" class="sticky top-0 h-[50svh]">',
+  (html: string) => clasesDelPegado(html, 'siempre').includes('min-h-svh'),
+)
 
 controlPositivo(
   'el detector de pinneo vería un sticky donde no corresponde',

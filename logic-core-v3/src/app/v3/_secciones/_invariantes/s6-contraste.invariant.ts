@@ -74,7 +74,14 @@ const mediaSobreCanvas = razonDeContraste(TINTA_MEDIA_HEX, peorCanvas)
 const mediaSobreOscuro = razonDeContraste(TINTA_MEDIA_HEX, OSCURO_HEX)
 afirmar(
   mediaSobreCanvas >= AA && mediaSobreOscuro < AA,
-  '  y `text-tinta-media` tampoco sirve: pasa sobre el canvas y NO sobre la sección invertida, que el tema no le da vuelta',
+  // ⚠️ SITIO-S11 corrigió la segunda mitad de esta frase, no su aritmética.
+  // Cuando se escribió, `[data-seccion="invertida"]` NO daba vuelta la tinta
+  // media, así que la MISMA utilidad pintaba este hex sobre #0E0E0E. Ese 2,51:1
+  // es el número con el que S11 la dio vuelta en el tema. La cuenta de acá
+  // sigue siendo sobre el hex CLARO —que es el que este lane pinta sobre el
+  // canvas— y por eso no cambia; lo que cambió es que ya no hay una sección
+  // donde ese hex caiga sobre el oscuro.
+  '  y `text-tinta-media` no servía por su cara oscura: pasa sobre el canvas, y el MISMO hex sobre la invertida no llegaba a AA — el número con el que SITIO-S11 la dio vuelta en el tema',
   `${mediaSobreCanvas.toFixed(4)}:1 sobre el canvas · ${mediaSobreOscuro.toFixed(4)}:1 sobre ${OSCURO_HEX}`,
 )
 

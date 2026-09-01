@@ -27,15 +27,16 @@
  *     la instancia por defecto de la variable, más angosta que `medio` o `semi`.
  *     Si la tinta sola ya no entra, la caja CRECE seguro.
  *   · **`anchoDeLaPastilla`** suma las piezas que `_estilos/navegacion.css`
- *     declara. También es un PISO, y por el mismo motivo del avance.
+ *     declara. También es un PISO, y por el mismo motivo del avance. Vive en
+ *     `./s10-mobile-pastilla` desde SITIO-S11, cuando este archivo cruzó las 300
+ *     líneas al enseñarle a ese modelo el tope que la hoja declara.
  *
  * El modelo del alto del Cierre vive en `./s10-mobile-pie`, que este archivo NO
  * importa: la costura va en un solo sentido y está explicada allá.
  */
 
-import { ALTO_PASTILLA_PX, DESCUENTO_NACIMIENTO_PX, ENLACES_DE_MUESTRA } from '../navegacion'
 import { NIVELES, NIVELES_TIPOGRAFICOS, type Nivel } from '../tipografia'
-import { FUENTE_CODIGO, FUENTE_TITULO, anchoDeTexto, lineasDeTexto } from './s10-avance'
+import { FUENTE_CODIGO, FUENTE_TITULO, lineasDeTexto } from './s10-avance'
 import { anchoDeContenido, clasesEfectivas, tokenPx } from './s10-css'
 import { atributo, nodosDe, textoDe, type Nodo } from './s10-recorrido'
 import { leerAvancesDe, type TablasDeAvance } from './s10-woff2'
@@ -198,47 +199,7 @@ export function tintaDeLaCajaClavada(html: string, ancho: number, seccion = 'ser
   return caja === undefined ? 0 : altoDeTinta(html, caja.indice, finDelSubarbol(html, caja), ancho)
 }
 
-// ── La pastilla ─────────────────────────────────────────────────────────────
-
-export interface EnlaceMedido {
-  readonly rotulo: string
-  readonly px: number
-}
-
-export interface Pastilla {
-  readonly total: number
-  readonly enlaces: EnlaceMedido[]
-  readonly alto: number
-  readonly nacimiento: (alto: number) => number
-}
-
-/**
- * EL ANCHO DE LA PASTILLA, sumado pieza por pieza de `_estilos/navegacion.css`:
- * relleno lateral de la pastilla, los cinco enlaces con su propio relleno, su
- * marcador de `--spacing-1` y su canaleta, y las cuatro separaciones de la
- * lista. **Es un PISO**: los rótulos van en `font-semi` y el lector de avances
- * mide la instancia por defecto, que es más angosta.
- */
-export function anchoDeLaPastilla(ancho: number): Pastilla {
-  const tam = tokenPx('--text-cuerpo', ancho)
-  const enlaces = ENLACES_DE_MUESTRA.map((e) => ({
-    rotulo: e.rotulo,
-    px:
-      2 * tokenPx('--spacing-2', ancho) +
-      2 * tokenPx('--spacing-1', ancho) +
-      anchoDeTexto(CHIVO, e.rotulo, tam, tracking('texto')),
-  }))
-  const total =
-    2 * tokenPx('--spacing-4', ancho) +
-    enlaces.reduce((a, e) => a + e.px, 0) +
-    (enlaces.length - 1) * tokenPx('--spacing-2', ancho)
-  return {
-    total,
-    enlaces,
-    alto: ALTO_PASTILLA_PX,
-    nacimiento: (alto: number): number => alto - DESCUENTO_NACIMIENTO_PX,
-  }
-}
+// ── La pastilla vive en `s10-mobile-pastilla.ts` desde SITIO-S11 ──────────
 
 // ── La escala ───────────────────────────────────────────────────────────────
 

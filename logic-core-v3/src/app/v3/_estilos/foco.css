@@ -29,3 +29,84 @@
   outline: var(--foco-grosor) solid var(--color-foco);
   outline-offset: var(--foco-desplazamiento);
 }
+
+/* =========================================================================
+ * EL ENLACE DE SALTO — fuera de cuadro, y de vuelta con el foco (SITIO-S11)
+ * =========================================================================
+ * Es la tercera cosa que la regla del anillo no puede dar, y la más delicada:
+ * **una parada de tabulación que no se ve hasta que se la enfoca.**
+ * `_chrome/SaltarAlContenido.tsx` tiene el porqué del enlace; acá está el
+ * porqué de cada declaración.
+ *
+ * ── Por qué NO es `display: none` ni `visibility: hidden` ─────────────────
+ *
+ * Porque las dos lo sacan del orden de foco. Un enlace de salto que no se
+ * puede enfocar no es un enlace de salto: es marcado muerto que parece un
+ * arreglo. La técnica es la del `sr-only` que este sistema ya usa —recortar la
+ * caja, fuera del flujo— con la diferencia de que ésta **se deshace al
+ * enfocarla**, que es justo lo que un `sr-only` no hace.
+ *
+ * ⚠ Y se recorta con `clip-path` SOLO, sin la caja de 1px de la receta
+ * clásica: **el sistema no tiene un token de 1px de tamaño** —`--border-hairline`
+ * es un grosor de borde y usarlo como medida sería mentir sobre lo que es— y
+ * `s3-tokens` §«ninguna declaración normal escribe un valor con unidad» rechaza
+ * el literal, con razón. No hace falta: la caja de 1px de la receta existe para
+ * que un elemento EN FLUJO no empuje nada, y éste no está en flujo. Lo que sí
+ * hacía la receta y `clip-path` no garantizaba solo es no comerse los clics del
+ * borde superior izquierdo, y eso lo cierra `pointer-events: none`, que se
+ * devuelve al enfocarlo.
+ *
+ * ── FUERA DEL FLUJO EN LAS DOS PUNTAS, y no es prolijidad ────────────────
+ *
+ * En reposo es `absolute` y al enfocarse es `fixed`: nunca ocupa alto en el
+ * flujo. Si lo ocupara —un solo píxel— empujaría hacia abajo al envoltorio
+ * `sticky` de la pastilla, que se emite justo después, y le movería el
+ * nacimiento. Esa cuenta es la que `s8-chrome` §2 verifica contra el Hero real
+ * (`100svh − 72px`, con los 72 derivados de tres tokens): un `block-size` acá
+ * la rompería en silencio. Por eso `s8-chrome` §1 afirma esta declaración
+ * leyendo ESTE archivo, y no el marcado — el marcado no puede decirlo.
+ *
+ * `fixed` y no `absolute` cuando se ve: el foco puede volver acá con
+ * `Shift+Tab` desde cualquier punto del recorrido, y un `absolute` quedaría
+ * dibujado en el tope del documento, a pantallas de distancia de donde está
+ * mirando quien lo enfocó. Con `fixed` aparece siempre en el borde superior del
+ * viewport, que es donde el patrón lo pone.
+ *
+ * ── La superficie es propia, y por eso el contraste es una sola cuenta ────
+ *
+ * Al flotar sobre lo que haya detrás —una sección clara, una invertida o la
+ * escena— no puede depender de nada de eso: pinta `--color-fondo` opaco y
+ * escribe con `--color-tinta`, que sobre el papel dan **17,60:1**, la misma
+ * cifra que `s10-acceso` §10 publica para el resto del texto sobre esa
+ * superficie. No hereda de ninguna sección porque no vive adentro de ninguna:
+ * cuelga de `[data-v3]`, arriba de las ocho.
+ *
+ * El anillo NO se declara acá. Lo pone la regla única de `theme-develop.css`
+ * acotada a `[data-v3]`, igual que a las otras 15 paradas, y por eso el
+ * desplazamiento de 2px cae sobre la superficie del propio enlace y no sobre lo
+ * que haya detrás.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="salto"] {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  clip-path: inset(50%);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+[data-v3] [data-pieza="salto"]:focus-visible {
+  position: fixed;
+  inset-block-start: var(--spacing-3);
+  inset-inline-start: var(--spacing-3);
+  clip-path: none;
+  pointer-events: auto;
+  z-index: var(--z-cabecera);
+  padding: var(--spacing-3) var(--spacing-4);
+  border: var(--border-hairline) solid var(--color-borde-fuerte);
+  border-radius: var(--radius-pastilla-l);
+  background-color: var(--color-fondo);
+  color: var(--color-tinta);
+  box-shadow: var(--shadow-flotante);
+}

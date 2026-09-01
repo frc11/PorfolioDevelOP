@@ -208,23 +208,6 @@ export function muestra(progreso: number, aspecto: number): MuestraDelLogo {
 }
 
 /**
- * EL CODO DE `travelX`, en relación de aspecto.
- *
- * `cameraFraming.ts` calcula `travelX = max(0, medioAncho − anchoDelLogo/2) ×
- * FRAME_TRAVEL_SAFETY`, y ese `max(0, …)` es un codo: **abajo de cierto aspecto
- * el encuadre lateral de una pose queda INERTE** —el logo es más ancho que el
- * cuadro y no hay a dónde correrlo—. El aspecto del codo depende del ancho de
- * caja que se le pase, así que la cámara de `harness.ts` y la del rig (§7.15) lo
- * cruzan en aspectos distintos: ahí el desvío del §7.15 deja de ser un
- * porcentaje chico y pasa a ser un cambio cualitativo.
- */
-export function codoDeEncuadre(nombreDelKeyframe: string, anchoDeLaCaja: number, tanMedioV: number): number {
-  const k = CHOREO_KEYFRAMES.find((f) => f.name === nombreDelKeyframe)
-  if (k === undefined) throw new Error(`keyframe desconocido: ${nombreDelKeyframe}`)
-  return anchoDeLaCaja / 2 / (tanMedioV * Math.hypot(k.pose.distance, k.pose.height))
-}
-
-/**
  * UNA MUESTRA CON UNA POSE HIPOTÉTICA — para medir una palanca sin moverla.
  *
  * Arma un track nuevo sobre una COPIA de `CHOREO_KEYFRAMES`. El archivo de la

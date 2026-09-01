@@ -47,9 +47,28 @@
  * mismo pendiente los declara como «heredados sin delta» y los deja entrar al
  * mismo sprint de limpieza.
  */
+/**
+ * ⚠️ **`choreography.ts` PASÓ DE 462 A 471 EN SITIO-S11, Y LA LÍNEA DE BASE SE
+ * MUEVE CON ÉL.**
+ *
+ * No es una excepción ni un umbral aflojado: es la línea de base de un censo, y
+ * el sprint que la mueve es el que existía para moverla. El defecto 18 de §7.40
+ * era que **el recorte por arriba de la pose `demos` no estaba declarado en
+ * ninguna línea del archivo** —«un recorte no escrito se lee como error»— y
+ * SITIO-S11 lo mandó declarar. Son **9 líneas de comentario y ni una de
+ * código**, y no se escribieron en este archivo: se escribieron en
+ * `choreographyNotes.ts`, que es de donde el exportador REGENERA el bloque de
+ * keyframes. `s7e-export-sprites` lo compara byte por byte.
+ *
+ * La distinción que hace que esto no sea aflojar, y vale la pena escribirla: lo
+ * que este mapa vigila es que un archivo heredado **no engorde de código sin
+ * que nadie lo mire**. Acá lo miró el sprint, la causa es una orden explícita,
+ * y el delta es prosa. El día que crezca por otra razón, la base sigue en 471 y
+ * el censo se pone rojo igual.
+ */
 export const LARGOS_HEREDADOS: Readonly<Record<string, number>> = {
   'src/app/v3/_lib/escena/OrbitRig.tsx': 651,
-  'src/app/v3/_lib/escena/choreography.ts': 462,
+  'src/app/v3/_lib/escena/choreography.ts': 471,
   'src/app/v3/_lib/escena/probeStore.ts': 406,
   'src/app/v3/_lib/escena/lightRig.ts': 357,
   'src/app/v3/_lib/escena/probeScene.ts': 348,

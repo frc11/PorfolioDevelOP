@@ -9,6 +9,25 @@ import {
   type ChoreoVariantId,
   type MutableChoreoPose,
 } from '@/app/v3/_lib/escena/choreographyTypes'
+import type {
+  ChoreoEditor,
+  EditableKeyframe,
+  KeyframeOrigin,
+} from '@/app/v3/_lib/escena/choreographyEditorTypes'
+
+/**
+ * ── ⚠️ LOS TRES TIPOS DEL EDITOR VIVEN DEL LADO DE LA ESCENA (SITIO-S11, §7.36)
+ *
+ * `KeyframeOrigin`, `EditableKeyframe` y `ChoreoEditor` se declaraban acá, y
+ * tres módulos de PRODUCCIÓN —`pistaDelHome.ts`, `OrbitRig.tsx` y
+ * `ProbeStage.tsx`— los importaban desde este archivo: el destino de la mudanza
+ * de SITIO-S8 nombrando al panel de calibración, que tiene fecha de vencimiento.
+ * Se mudaron a `_lib/escena/choreographyEditorTypes.ts`, donde está escrito el
+ * porqué completo, **y se RE-EXPORTAN desde acá**: ningún consumidor del panel
+ * —`ChoreographyControls`, `KeyframeEditor`, `KeyframeList`, `KeyframeExportPanel`,
+ * `ProbeControls`, `VariantPicker`, `choreographyExport`— cambió una línea.
+ */
+export type { ChoreoEditor, EditableKeyframe, KeyframeOrigin }
 
 /**
  * EL TRACK EDITABLE — la coreografía viva, en memoria.
@@ -77,24 +96,6 @@ import {
  * ocurre dentro del `useFrame`. El panel solo mira `.keyframes`, que no valida.
  */
 
-/** De dónde salió el keyframe. Los del archivo no se pueden borrar. */
-export type KeyframeOrigin = 'archivo' | 'editor'
-
-export type EditableKeyframe = {
-  /** Identidad estable. La selección apunta acá y no a un índice. */
-  readonly id: number
-  at: number
-  name: string
-  /** `true` = derivado por Claude, no capturado por el humano. */
-  readonly derived: boolean
-  ease?: ChoreoEase
-  turn?: ChoreoTurn
-  readonly pose: MutableChoreoPose
-  readonly origin: KeyframeOrigin
-  /** `true` = se le movió algo en esta sesión. Es la marca "esto lo tocaste". */
-  edited: boolean
-}
-
 /**
  * Separación mínima entre dos `at`, y el paso del slider de progreso. Todos los
  * `at` se redondean a esta resolución: sin eso, arrastrar deja colas de coma
@@ -142,37 +143,6 @@ type VariantSession = {
   track: ChoreoTrack | null
   dirty: boolean
   nextId: number
-}
-
-export type ChoreoEditor = {
-  /** La variante activa: su descriptor completo (nombre, tesis, archivo, notas). */
-  readonly variant: ChoreoVariant
-  readonly variantId: ChoreoVariantId
-  /** Cambia de recorrido. NO descarta la sesión de la variante que se deja. */
-  setVariant(id: ChoreoVariantId): void
-  /** `true` = esa variante tiene cambios sin exportar. Para marcarla en el panel. */
-  isDirty(id: ChoreoVariantId): boolean
-  /** El array vivo de la ACTIVA, en orden. Se lee; se muta por los métodos. */
-  readonly keyframes: readonly EditableKeyframe[]
-  /** El track muestreable de la ACTIVA. Se rearma solo, después de cada mutación. */
-  readonly track: ChoreoTrack
-  /** Sube con cada cambio que la pantalla tenga que reflejar. */
-  readonly version: number
-  /** `true` = la activa tiene algo distinto del archivo. Es lo que habilita el reset. */
-  readonly dirty: boolean
-  subscribe(listener: () => void): () => void
-  find(id: number): EditableKeyframe | undefined
-  indexOf(id: number): number
-  /** Mueve el punto del recorrido. Devuelve el `at` EFECTIVO, ya acotado. */
-  setAt(id: number, at: number): number
-  /** Escribe los cinco canales de una. Ignora lo que no cambió. */
-  applyPose(id: number, values: Readonly<Record<ChoreoChannel, number>>): void
-  /** Copia con la misma pose y un `at` nuevo. `null` = no había lugar. */
-  duplicate(id: number): EditableKeyframe | null
-  /** Solo los que creó el editor. `false` = no se borró. */
-  remove(id: number): boolean
-  /** Vuelve a los valores del archivo. Descarta la sesión de la variante ACTIVA. */
-  reset(): void
 }
 
 export function createChoreoEditor(): ChoreoEditor {

@@ -51,7 +51,13 @@ import {
   type EventoDeLaEscena,
 } from '../visibilidad'
 import {
+  CASILLAS,
+  CORRIENDO,
   DOCUMENTO,
+  ENTRA,
+  PINTADO,
+  SALE,
+  SUSPENDIDA,
   VENTANA,
   cuadrosDeUnaPasada,
   enPantalla,
@@ -203,25 +209,7 @@ afirmar(
 
 titulo('§3 · las nueve transiciones')
 
-const CORRIENDO = ESTADO_INICIAL
-const SUSPENDIDA = siguiente(CORRIENDO, { tipo: 'cuadro', enCuadro: false })
-const REANUDANDO = siguiente(SUSPENDIDA, { tipo: 'cuadro', enCuadro: true })
-const ENTRA: EventoDeLaEscena = { tipo: 'cuadro', enCuadro: true }
-const SALE: EventoDeLaEscena = { tipo: 'cuadro', enCuadro: false }
-const PINTADO: EventoDeLaEscena = { tipo: 'pintado' }
-
-/** Las nueve casillas: fase × evento, con la fase que sale y si el objeto cambia. */
-for (const [estado, evento, fase, mismo, nombre] of [
-  [CORRIENDO, ENTRA, 'corriendo', true, 'corriendo + entra'],
-  [CORRIENDO, SALE, 'suspendida', false, 'corriendo + sale'],
-  [CORRIENDO, PINTADO, 'corriendo', true, 'corriendo + pintado (no significa nada acá)'],
-  [SUSPENDIDA, ENTRA, 'reanudando', false, 'suspendida + entra'],
-  [SUSPENDIDA, SALE, 'suspendida', true, 'suspendida + sale'],
-  [SUSPENDIDA, PINTADO, 'suspendida', true, 'suspendida + pintado (el lazo está apagado)'],
-  [REANUDANDO, ENTRA, 'reanudando', true, 'reanudando + entra (no se reinicia la cuenta)'],
-  [REANUDANDO, SALE, 'suspendida', false, 'reanudando + sale (se apaga sin terminar)'],
-  [REANUDANDO, PINTADO, 'reanudando', false, 'reanudando + pintado (avanza la cuenta)'],
-] as const satisfies readonly (readonly [EstadoDeLaEscena, EventoDeLaEscena, string, boolean, string])[]) {
+for (const [estado, evento, fase, mismo, nombre] of CASILLAS) {
   const salida = siguiente(estado, evento)
   afirmar(salida.fase === fase, `${nombre.padEnd(46)} → ${fase}`)
   afirmar(

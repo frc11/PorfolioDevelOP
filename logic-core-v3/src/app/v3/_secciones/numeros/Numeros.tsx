@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
-import { Titular, type NivelDeTitular } from '../../_componentes/tipografia/Titular'
+import { Titular, idDelTitularDeSeccion, type NivelDeTitular } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -79,8 +79,16 @@ import { CONTENIDO, type ClaveDeCifra } from './contenido'
  * desplomes se van con ella, porque también son `tablet:`. Las seis cajas caen
  * en orden de documento —el orden de lectura declarado en `contenido.ts`— y la
  * asimetría que sobrevive es la de TAMAÑOS, que no depende del ancho: los
- * `clamp()` comprimen los cuatro niveles a 36 · 24 · 18 · 16px en 375, sin
+ * `clamp()` comprimen los cuatro niveles a 36 · 24 · 18 · 17px en 375, sin
  * aplastarlos a uno solo.
+ *
+ * ⚠️ **La última cifra era 16px hasta SITIO-S11, y eso era el defecto.** 16 es
+ * EXACTAMENTE `--text-base` y un solo píxel arriba de `--text-cuerpo`: la cifra
+ * más chica de la sección dejaba de leerse como cifra justo en el ancho donde
+ * vive la mitad de los visitantes. S11 subió el piso de `--text-fluido-titulo-s`
+ * de 16 a 17px —el único entero que pasa `base` y se queda abajo del piso de
+ * `titulo-m` (18)— sin tocar su techo. La cifra de este docblock la reproduce
+ * `s10-mobile` §4 leyendo el token, no copiándola.
  *
  * No se rompe por dos razones concretas: **ni una posición absoluta** —nada
  * puede quedar encima de otra cosa al angostar— y **ningún ancho en píxeles**:
@@ -199,7 +207,8 @@ export function Numeros({ seccion }: PropsDeSeccion): React.JSX.Element {
                       patron="P2"
                       className="flex flex-col gap-4"
                     >
-                      <Titular nivel="titulo-l" como="h2">
+                      {/* El `h2` que nombra la región de la sección (S11, defecto 10). */}
+                      <Titular nivel="titulo-l" como="h2" id={idDelTitularDeSeccion(seccion.id)}>
                         {CONTENIDO.titulo}
                       </Titular>
                       <Cuerpo>{CONTENIDO.entrada}</Cuerpo>

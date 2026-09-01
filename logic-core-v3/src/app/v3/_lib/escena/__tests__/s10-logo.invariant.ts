@@ -38,38 +38,22 @@
 import { afirmar, cerrar, controlPositivo, noCorre, razonDeContraste, titulo } from '../../__tests__/afirmar'
 import { ANCHOS } from '../../__tests__/s10-banco'
 import { tokenPx, variantesActivas } from '../../__tests__/s10-css'
-import { FUENTE_TITULO, lineasDeTexto } from '../../__tests__/s10-avance'
-import { leerAvancesDe } from '../../__tests__/s10-woff2'
 import { TINTA_HEX } from '../../superficies'
 import { ESCENARIO_MIN_ANCHO_PX } from '../../compuerta'
 import { CHOREO_KEYFRAMES } from '../choreography'
-import { FRAME_TRAVEL_SAFETY, LOGO_W, TAN_HALF_V } from '@/app/probe-escena/__tests__/harness'
-import { SCENE_LOGO_MESH_WORLD } from '@/lib/scene-camera'
+import { fuenteDe } from './s8-escena-soporte'
 import { muestrearCuadro, vistaEn } from './cuadro'
+// prettier-ignore
+import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, DEFECTO_7_ABIERTO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, RECORRIDOS, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
 import { muestrearLogo } from './s10-logo'
-import {
-  ESCENA_REAL,
-  TINTA_DEL_LOGO,
-  TRANSPARENTES,
-  VENTANAS,
-  barridoVertical,
-  cajaDelLogo,
-  cobertura,
-  codoDeEncuadre,
-  conPose,
-  contrasteSobreElFondo as contraElFondo,
-  contrasteSobreElLogo as contraste,
-  fraccionDentro,
-  mayorCaja,
-  muestra,
-  progresosDe,
-  superposicion,
-} from './s10-logo-lectura'
-import { SUPUESTOS_DE_LAS_CAJAS, aCuadroAlto, aCuadroX } from './s10-logo-cajas'
+// prettier-ignore
+import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
+import { SUPUESTOS_DE_LAS_CAJAS } from './s10-logo-cajas'
+// prettier-ignore
+import { MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraElRecorte, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
 const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
-const par = (a: number, b: number): string => `${a.toFixed(2).padStart(5)},${b.toFixed(2).padStart(5)}`
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · LA COMPUERTA — en cuatro de los cinco anchos la pregunta NO APLICA')
@@ -128,33 +112,15 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · CUÁNTO LOGO ENTRA EN EL CUADRO, por sección y por relación de aspecto')
 
-console.log('  sección           cuadro        p     dentro  del cuadro       x        y')
-let heroEntero = true
-let encerrado = true
-for (const fila of TRANSPARENTES) {
-  for (const v of VENTANAS) {
-    for (const p of progresosDe(fila)) {
-      const m = muestra(p, v.aspecto)
-      const c = cajaDelLogo(m)
-      if (m.tocaElBorde || c === null) {
-        encerrado = false
-        continue
-      }
-      if (fila.id === 'hero' && fraccionDentro(m) < 1) heroEntero = false
-      console.log(
-        `  ${fila.id.padEnd(16)} ${v.etiqueta.padEnd(9)} ${p.toFixed(3)}  ${pct(fraccionDentro(m))}  ${pct(cobertura(m))}` +
-          `   ${par(c.x0, c.x1)}  ${par(c.y0, c.y1)}`,
-      )
-    }
-  }
-}
+const FRACCION = tablaDeFraccion()
+for (const linea of FRACCION.lineas) console.log(`  ${linea}`)
 afirmar(
-  encerrado,
+  FRACCION.encerrado,
   'LA GRILLA EXTENDIDA ENCIERRA AL LOGO en las 32 muestras: ningún total está truncado',
   'sin este encierro, «entra entero» y «la grilla lo cortó» darían la misma cifra',
 )
 afirmar(
-  heroEntero,
+  FRACCION.heroEntero,
   'HERO — el logo entra ENTERO en el cuadro en los cuatro aspectos y en toda su ventana',
   'la premisa «queda cortado por el borde del cuadro» NO se reproduce con este instrumento',
 )
@@ -164,32 +130,16 @@ controlPositivo(
   (p: number) => fraccionDentro(muestra(p, VENTANAS[0].aspecto)) >= 1,
 )
 console.log(
-  '  🔴 DEFECTO — el diferencial entra sobre `demos` y ahí el logo SE SALE por arriba: la caja llega a y=+1,05 con el\n  borde del cuadro en +1,00. Es poca ÁREA (≈1%) y mucha MASA: ocupa hasta el 35,9% del cuadro a 1025×900, contra\n  el 6,5% del Hero a 1440×900. Publicado, no arreglado.',
+  `  EL DIFERENCIAL SÍ SE SALE, por arriba: la caja del logo llega a y=${FRACCION.arribaMaxima.toFixed(2)} con el borde del cuadro en\n` +
+    `  +1,00, y entra al ${(FRACCION.peorFraccionDentro * 100).toFixed(1)}% en el peor cuadro. Es poca ÁREA y mucha MASA: ocupa hasta el ` +
+    `${(FRACCION.mayorCobertura.valor * 100).toFixed(1)}% del cuadro a\n  ${FRACCION.mayorCobertura.cuadro}. Desde SITIO-S11 es una DECISIÓN escrita, no un defecto: ver §6.`,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · CUÁNTO SE SUPERPONE CON EL TEXTO — banda derivada, alto modelado, y la posición vertical BARRIDA en vez de inventada')
 
-console.log('  sección           cuadro    caja      p      banda x      sup.mín  máx  centrada')
-let inevitable = false
-for (const fila of TRANSPARENTES) {
-  for (const v of VENTANAS) {
-    const caja = mayorCaja(fila.id, v.ancho)
-    const x0 = aCuadroX(caja.banda.izquierda, v.ancho)
-    const x1 = aCuadroX(caja.banda.izquierda + caja.banda.ancho, v.ancho)
-    const alto = aCuadroAlto(caja.altoPx, v.alto)
-    for (const p of [fila.llenaDesde, (fila.llenaDesde + fila.seVeHasta) / 2]) {
-      const m = muestra(p, v.aspecto)
-      const b = barridoVertical(m, x0, x1, alto, 100)
-      const centrada = superposicion(m, { x0, x1, y0: -alto / 2, y1: alto / 2 }).fraccion
-      if (p === fila.llenaDesde && b.minima > 0) inevitable = true
-      console.log(
-        `  ${fila.id.padEnd(16)} ${v.etiqueta.padEnd(9)} ${caja.etiqueta.padEnd(3)} ${p.toFixed(3)}` +
-          `  ${par(x0, x1)}   ${pct(b.minima, 0)} ${pct(b.maxima, 0)}  ${pct(centrada, 0)}`,
-      )
-    }
-  }
-}
+const SUPERPOSICIONES = tablaDeSuperposicion()
+for (const linea of SUPERPOSICIONES.lineas) console.log(`  ${linea}`)
 controlPositivo(
   'el medidor de superposición sabe devolver CERO: una caja fuera de la caja del logo',
   { x0: -1, x1: -0.99, y0: -1, y1: -0.99 },
@@ -197,32 +147,26 @@ controlPositivo(
     superposicion(muestra(0.75, VENTANAS[0].aspecto), c).fraccion > 0,
 )
 console.log(
-  `  🔴 DEFECTO — en el diferencial la superposición mínima del titular es MAYOR QUE CERO (${inevitable ? 'sí' : 'no'}): no hay\n  altura de pantalla en la que ese bloque quede limpio, porque la banda del logo cruza la columna de texto entera.\n  En el Hero el mínimo SÍ es cero: ahí la superposición es de posición vertical, no de banda.`,
+  `  🔴 DEFECTO 7 — en el diferencial la superposición mínima del titular es MAYOR QUE CERO (${SUPERPOSICIONES.inevitable ? 'sí' : 'no'}): entre ` +
+    `${pct(SUPERPOSICIONES.minimaDelDiferencial.menor, 0).trim()} y ${pct(SUPERPOSICIONES.minimaDelDiferencial.mayor, 0).trim()}\n` +
+    '  sobre los cuatro cuadros, o sea que no hay altura de pantalla en la que ese bloque quede limpio: la banda del logo\n' +
+    '  cruza la columna de texto entera. En el Hero el mínimo SÍ es cero — ahí es de posición vertical, no de banda.\n' +
+    '  ⚠ RE-MEDIDO DESPUÉS del arreglo del encuadre (§7). Sigue abierto; las salidas están en el §8.',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · 🔴 EL CONTRASTE DONDE SE SUPERPONEN — el número que nadie tenía')
 
-for (const fila of TRANSPARENTES) {
-  const p = fila.llenaDesde
-  const m = muestra(p, VENTANAS[0].aspecto)
-  console.log(
-    `  ${fila.id.padEnd(16)} p=${p.toFixed(3)} — la tinta ${TINTA_HEX} contra EL LOGO: ${contraste(m, 0).toFixed(2)}:1 (peor) · ` +
-      `${contraste(m, 0.05).toFixed(2)}:1 (p05) · ${contraste(m, 0.5).toFixed(2)}:1 (mediana) · ${contraste(m, 1).toFixed(2)}:1 (el MEJOR` +
-      ` píxel) — contra el FONDO, que es lo que \`s8-tinta\` publica: ${contraElFondo(p).toFixed(2)}:1`,
-  )
-}
-const mejorSobreElLogo = Math.max(...TRANSPARENTES.map((f) => contraste(muestra(f.llenaDesde, VENTANAS[0].aspecto), 1)))
-const peorSobreElFondo = Math.min(...TRANSPARENTES.map((f) => contraElFondo(f.llenaDesde)))
+for (const linea of tablaDeContraste()) console.log(`  ${linea}`)
 afirmar(
-  mejorSobreElLogo < peorSobreElFondo,
+  MEJOR_SOBRE_EL_LOGO < PEOR_SOBRE_EL_FONDO,
   'las dos poblaciones son DISJUNTAS: el mejor píxel del logo es peor que el peor del fondo',
-  `${mejorSobreElLogo.toFixed(2)}:1 contra ${peorSobreElFondo.toFixed(2)}:1 — la exclusión de \`sinLogo\` no es conservadora`,
+  `${MEJOR_SOBRE_EL_LOGO.toFixed(2)}:1 contra ${PEOR_SOBRE_EL_FONDO.toFixed(2)}:1 — la exclusión de \`sinLogo\` no es conservadora`,
 )
 afirmar(
-  razonDeContraste(TINTA_HEX, TINTA_DEL_LOGO) < 3 && mejorSobreElLogo < AA,
+  TINTA_CONTRA_TINTA(TINTA_DEL_LOGO) < 3 && MEJOR_SOBRE_EL_LOGO < AA,
   '  y es por construcción: la tinta del texto y la del logo son el mismo negro',
-  `${razonDeContraste(TINTA_HEX, TINTA_DEL_LOGO).toFixed(2)}:1 sin sombrear · sombreado no llega a AA (${AA}:1) ni a 3:1 de texto grande`,
+  `${TINTA_CONTRA_TINTA(TINTA_DEL_LOGO).toFixed(2)}:1 sin sombrear · sombreado no llega a AA (${AA}:1) ni a 3:1 de texto grande`,
 )
 controlPositivo('razonDeContraste sabe reprobar: la tinta contra sí misma no pasa AA', TINTA_HEX, (h: string) =>
   razonDeContraste(TINTA_HEX, h) >= AA,
@@ -231,67 +175,120 @@ controlPositivo('razonDeContraste sabe reprobar: la tinta contra sí misma no pa
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · DEFECTO O DECISIÓN — lo que el keyframe declara por escrito')
 
+/**
+ * ⚠ **LA SEGUNDA AFIRMACIÓN ES NUEVA DE SITIO-S11, Y CIERRA EL DEFECTO 18.**
+ *
+ * SITIO-S10 midió que `demos` no sólo llena el cuadro: **se sale por arriba**, y
+ * que `choreography.ts` no mencionaba un recorte en ninguna línea. Llenar y
+ * salirse no son lo mismo, y un recorte que nadie escribió se lee como error.
+ * El valor NO se tocó —la pose está calibrada a ojo y aprobada por grabación—:
+ * lo que se agregó es la declaración, con su medición al lado. Desde acá, si
+ * alguien la borra, esta afirmación se pone en rojo.
+ */
+const CHOREO = fuenteDe('src/app/v3/_lib/escena/choreography.ts')
 afirmar(
   CHOREO_KEYFRAMES.some((k) => k.name === 'demos' && k.pose.frameX === 1),
   'DECISIÓN — que `demos` LLENE el cuadro está escrito en `choreography.ts` y en §2.2',
   '«Es la única pose donde el logo llena el cuadro —81% del alto en tinta— y es la excepción que la arquitectónica se reserva»',
 )
-console.log(
-  '  DEFECTO — que se SALGA no está escrito en ninguna parte: `choreography.ts` no contiene una sola mención de recorte,\n  y llenar el cuadro y salirse de él no son lo mismo. La decisión declarada cubre la masa; el recorte por arriba y la\n  superposición con el titular no las cubre nadie.',
+afirmar(
+  declaraElRecorte(CHOREO, 'demos'),
+  'DECISIÓN — y que se SALGA por arriba también está declarado ahora, en el docblock de esa pose',
+  `medido: y=${FRACCION.arribaMaxima.toFixed(2)} contra el borde en +1,00, ${(100 - FRACCION.peorFraccionDentro * 100).toFixed(1)}% del área afuera en el peor cuadro`,
+)
+controlPositivo(
+  'el detector del recorte no da verde contra cualquier keyframe: el del Hero no lo declara',
+  'hero',
+  (nombre: string) => declaraElRecorte(CHOREO, nombre),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · LAS PALANCAS, con su número. NINGUNA se aplica en este sprint')
+titulo('7 · EL ENCUADRE LATERAL — el codo en cero, sacado (SITIO-S11, defecto 14)')
 
-const codoHarness = codoDeEncuadre('demos', LOGO_W, TAN_HALF_V)
-const codoRig = codoDeEncuadre('demos', SCENE_LOGO_MESH_WORLD.width, TAN_HALF_V)
-const masAngosto = VENTANAS.reduce((a, b) => (b.aspecto < a.aspecto ? b : a))
+/**
+ * ⚠ **ESTA SECCIÓN CAMBIÓ DE SUJETO EN SITIO-S11.** En SITIO-S10 afirmaba que la
+ * palanca `frameX` de `demos` estaba **INERTE** en el cuadro más alto: `travelX =
+ * max(0, medioAncho − LOGO_W/2) × 0,88` tenía un codo en cero en aspecto 1,213
+ * (arnés) y 1,162 (rig), y 1025×900 da 1,139 — abajo de los dos. Era el censo de
+ * un DEFECTO, y el defecto se arregló en `_lib/escena/encuadre.ts`.
+ *
+ * **Ahora custodia las DOS mitades del arreglo**, y hacen falta las dos: que la
+ * perilla vuelva a mover el logo en los cuatro cuadros y en las dos cámaras, y
+ * que **donde ya funcionaba no se haya movido nada** — que es lo que garantiza
+ * que ninguna pose calibrada a ojo cambió. Sin la segunda, esto sería un retoque
+ * de composición disfrazado de arreglo.
+ */
+for (const linea of tablaDeRecorridos()) console.log(`  ${linea}`)
+
 afirmar(
-  masAngosto.aspecto < codoRig && masAngosto.aspecto < codoHarness,
-  'PALANCA `frameX` de `demos` — está INERTE en el cuadro más alto, en las DOS cámaras',
-  `codo en ${codoHarness.toFixed(3)} (harness) y ${codoRig.toFixed(3)} (rig, §7.15); ${masAngosto.etiqueta} da ` +
-    `${masAngosto.aspecto.toFixed(3)} — abajo de los dos, así que \`frameX: 1\` no corre el logo ni un píxel`,
+  PEOR_RECORRIDO > 0,
+  'PALANCA `frameX` de `demos` — vuelve a MOVER el logo en los CUATRO cuadros y en las DOS cámaras',
+  `el más chico de los ocho recorridos es ${PEOR_RECORRIDO.toFixed(4)} de mundo, y en ${MAS_ANGOSTO.etiqueta} era 0,0000`,
 )
 afirmar(
-  codoDeEncuadre('hero', LOGO_W, TAN_HALF_V) < masAngosto.aspecto,
-  '  el Hero no tiene ese problema: su codo queda abajo de todos los aspectos medidos',
-  `${codoDeEncuadre('hero', LOGO_W, TAN_HALF_V).toFixed(3)} contra ${masAngosto.aspecto.toFixed(3)}`,
+  ARRIBA_DEL_CERO.length === 6 && ARRIBA_DEL_CERO.every((f) => f.corregido === f.conCodo),
+  '  y donde la perilla YA funcionaba no se movió un bit: las dos fórmulas dan el MISMO número',
+  `${ARRIBA_DEL_CERO.length} de los 8 cuadros caen arriba del aspecto de recorrido nulo, y en los ${ARRIBA_DEL_CERO.length} coinciden`,
+)
+controlPositivo(
+  'el comparador no mide la fórmula nueva contra sí misma: con el codo, el cuadro más alto daba CERO',
+  RECORRIDOS[0].filas.filter((f) => f.ventana.etiqueta === MAS_ANGOSTO.etiqueta),
+  (filas: readonly RecorridoMedido[]) => filas.length > 0 && filas.every((f) => f.conCodo > 0),
+)
+afirmar(
+  CAMARAS.every((c) => MAS_ANGOSTO.aspecto < aspectoDeRecorridoNulo('demos', c.anchoDeLaCaja)),
+  '  el cuadro más alto SIGUE estando abajo del aspecto de recorrido nulo: por eso el codo lo mataba',
+  `${MAS_ANGOSTO.etiqueta} da ${MAS_ANGOSTO.aspecto.toFixed(3)} contra ` +
+    CAMARAS.map((c) => `${aspectoDeRecorridoNulo('demos', c.anchoDeLaCaja).toFixed(3)} (${c.id})`).join(' y '),
+)
+afirmar(
+  aspectoDeRecorridoNulo('hero', CAMARAS[0].anchoDeLaCaja) < MAS_ANGOSTO.aspecto,
+  '  el Hero nunca estuvo inerte: su aspecto de recorrido nulo queda abajo de todos los medidos',
+  `${aspectoDeRecorridoNulo('hero', CAMARAS[0].anchoDeLaCaja).toFixed(3)} contra ${MAS_ANGOSTO.aspecto.toFixed(3)}`,
 )
 
-const cajaDelHero = mayorCaja('hero', masAngosto.ancho)
-const derechaDelHero = aCuadroX(cajaDelHero.banda.izquierda + cajaDelHero.banda.ancho, masAngosto.ancho)
-const bordes = [0.8, 0.9, 1].map((fx) => {
-  const c = cajaDelLogo(conPose('hero', { frameX: fx }, 0, masAngosto.aspecto))
-  return `${fx}→${(c?.x0 ?? Number.NaN).toFixed(3)}`
-})
-console.log(
-  `  PALANCA \`frameX\` del Hero (hoy ${CHOREO_KEYFRAMES[0].pose.frameX}): el borde IZQUIERDO del logo va ${bordes.join(' · ')} y la ` +
-    `columna de texto termina en ${derechaDelHero.toFixed(3)} → ni en el tope de 1 libera la columna · costo: mueve el ` +
-    'destino del preloader (`scene-framing.ts` proyecta ESTE keyframe) y toca la perilla abierta de §7.1',
+/**
+ * ⚠ **LA CÁMARA CON LA QUE SE MIDE ES LA DE PRODUCCIÓN, Y ESO SE COMPRUEBA.**
+ * `harness.ts:93-94` conserva su copia de la fórmula —con el codo— y este frente
+ * no puede escribir en `/probe-escena`, así que el muestreo pasó a
+ * `camaraEnCuadro`, que le pide el recorrido a `encuadre.ts`. Las dos tienen que
+ * coincidir **bit a bit** arriba del recorrido nulo y separarse SÓLO abajo: si
+ * coincidieran abajo, el arreglo no habría llegado al muestreo; si se separaran
+ * arriba, la composición del encuadre estaría mal armada.
+ */
+afirmar(
+  CUADROS_SIN_CAMBIO.length === 3 && CUADROS_SIN_CAMBIO.every((v) => coincidenLasCamaras(v.aspecto)),
+  'la cámara del muestreo ES la del arnés donde la corrección es un no-op: coinciden bit a bit',
+  `posición y las tres direcciones de pantalla, en los ${CUADROS_SIN_CAMBIO.length} cuadros de arriba del recorrido nulo`,
 )
-const distancias = [11, 13, 15].map((d) => {
-  const m = conPose('demos', { distance: d }, 0.75, masAngosto.aspecto)
-  return `${d}→${(fraccionDentro(m) * 100).toFixed(1)}% dentro / ${(cobertura(m) * 100).toFixed(1)}% del cuadro`
-})
-console.log(
-  `  PALANCA distancia de \`demos\` (hoy ${CHOREO_KEYFRAMES.find((k) => k.name === 'demos')?.pose.distance}): ${distancias.join(' · ')}` +
-    ' · costo: rompe «el momento más íntimo» (§2.2) y la condición `altura ≤ −0,214 × distancia` que pone el sol en cuadro',
+controlPositivo(
+  'y NO coinciden en el cuadro donde el codo mataba la perilla: el arreglo sí llega al muestreo',
+  MAS_ANGOSTO.aspecto,
+  coincidenLasCamaras,
 )
-const canal = tokenPx('--grilla-canal-amplio', masAngosto.ancho)
-const anchoDeDos = (2 * (cajaDelHero.banda.ancho - 2 * canal)) / 3 + canal
-const lineasDeDos = lineasDeTexto(leerAvancesDe(FUENTE_TITULO), cajaDelHero.texto, anchoDeDos, cajaDelHero.tamanoPx, cajaDelHero.interletradoEm)
-console.log(
-  '  PALANCA medida del titular del Hero (3 de 5 columnas, `GEOMETRIA.columnasDeLaMedida`) → 2 de 5: la columna pasa de ' +
-    `${cajaDelHero.banda.ancho.toFixed(0)} a ${anchoDeDos.toFixed(0)}px y su borde derecho de ${derechaDelHero.toFixed(3)} a ` +
-    `${aCuadroX(cajaDelHero.banda.izquierda + anchoDeDos, masAngosto.ancho).toFixed(3)} · costo: el titular pasa de ${cajaDelHero.lineas} a ${lineasDeDos} líneas`,
+
+/**
+ * ⚠ **EL EJE VERTICAL SE ARREGLÓ IGUAL, Y ES UN NO-OP COMPROBADO.** El codo
+ * estaba en los dos ejes, así que la corrección va en los dos. En el vertical no
+ * puede mover nada: `frameY` es cero en los ocho keyframes **y entre ellos**, y
+ * el término `frameY × travelY` es cero valga lo que valga `travelY`. Se afirma
+ * sobre el MUESTREO del track, que es donde una interpolación podría sorprender.
+ */
+afirmar(
+  frameYMaximo(PISTA_REAL) === 0,
+  'el arreglo del eje VERTICAL no puede mover una composición: `frameY` es 0 en todo el recorrido',
+  'máximo de |frameY| sobre 2001 progresos muestreados del track real',
 )
-console.log(
-  `  PALANCA dónde cae la sección en el progreso: a p=0,875 el logo ocupa ${pct(cobertura(muestra(0.875, masAngosto.aspecto))).trim()} del cuadro ` +
-    `contra el ${pct(cobertura(muestra(0.75, masAngosto.aspecto))).trim()} de p=0,750 · costo: correr el diferencial hacia adelante lo lleva contra ` +
-    'el cruce de AA del FONDO (p=0,878, §7.29) y contra el anclaje entero de SITIO-S9. La más cara.\n' +
-    `  Y el margen del encuadre, \`FRAME_TRAVEL_SAFETY\` = ${FRAME_TRAVEL_SAFETY}: llevarlo a 1 corre el logo un ` +
-    `${pct((1 - FRAME_TRAVEL_SAFETY) / FRAME_TRAVEL_SAFETY).trim()} más de recorrido en las poses con encuadre, y CERO en las que el codo ya dejó ` +
-    'inertes — o sea que no toca el caso que este frente encontró.',
+controlPositivo(
+  'el barrido de `frameY` SÍ ve una perilla vertical distinta de cero',
+  PISTA_CON_FRAME_Y,
+  (pista: typeof PISTA_REAL) => frameYMaximo(pista, 50) === 0,
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('8 · LO QUE EL ARREGLO NO CERRÓ — las palancas del defecto 7, con su número')
+
+console.log(`  ${DEFECTO_7_ABIERTO}`)
+for (const linea of palancasDeComposicion(MAS_ANGOSTO)) console.log(`  ${linea}`)
 
 cerrar('s10-logo.invariant')

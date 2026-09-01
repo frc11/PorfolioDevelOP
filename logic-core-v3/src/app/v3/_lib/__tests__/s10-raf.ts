@@ -4,12 +4,13 @@
  *
  * ── LA PREGUNTA (§7.34 de `DIRECCION-ESCENA.md`) ───────────────────────────
  *
- * `CUADROS_DE_REANUDACION = 2` y no 1 «aunque por la matemática alcanzara uno»,
+ * `CUADROS_DE_REANUDACION` valía 2 y no 1 «aunque por la matemática alcanzara
+ * uno» (SITIO-S11 lo bajó a 1, citando lo que este módulo mide),
  * porque *«el pulso que despacha "pintado" vive en un `rAF` del documento
  * (`EscenaDelHome`) y el lazo de r3f en el suyo, y **nada ordena uno respecto
  * del otro**»*. Ese orden **se dedujo leyendo el código y no se midió**, y §7.34
  * lo dejó anotado: si alguien lo mide y r3f siempre corre primero, la constante
- * baja a 1.
+ * baja a 1. **Se midió acá, y bajó.**
  *
  * ── QUÉ SE PUEDE CONTESTAR SIN NAVEGADOR, Y QUÉ NO ─────────────────────────
  *

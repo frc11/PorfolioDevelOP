@@ -2,6 +2,7 @@ import { CursorCompuerta } from '../_componentes/chrome/CursorCompuerta'
 import { Navegacion } from '../_componentes/chrome/Navegacion'
 
 import { CURSOR_PROPIO_EN_EL_HOME } from './contrato'
+import { SaltarAlContenido } from './SaltarAlContenido'
 
 /**
  * EL CHROME DEL HOME — la pastilla que viaja, y el cursor detrás de su decisión.
@@ -40,7 +41,18 @@ import { CURSOR_PROPIO_EN_EL_HOME } from './contrato'
  * Con el fragmento, el contenedor de bloque de la pastilla es el `<main>` del
  * layout de /v3, que mide lo que miden las ocho secciones. Ése es el rango que
  * hace falta. `s8-chrome.invariant.ts` lo afirma sobre el marcado renderizado:
- * el primer elemento que este componente emite ES el envoltorio de la pastilla.
+ * el envoltorio de la pastilla es hijo DIRECTO del fragmento, sin un `<div>` que
+ * lo envuelva.
+ *
+ * ⚠ **SITIO-S11 le puso un hermano ANTES, y la afirmación se hizo más fina en
+ * vez de aflojarse.** El enlace de salto se emite primero —tiene que ser la
+ * primera parada del documento—, así que «el primer elemento es la pastilla»
+ * dejó de ser cierto. Lo que sostiene el mecanismo nunca fue el ORDEN sino dos
+ * propiedades distintas, y ahora se afirman las dos por separado: que nada
+ * ENVUELVE al envoltorio —eso lo dice el marcado— y que lo que lo precede está
+ * **fuera del flujo** —eso lo dice la hoja: `[data-pieza="salto"]` es
+ * `position: absolute`, y si ocupara un solo píxel de alto le correría el
+ * nacimiento a la pastilla—.
  *
  * ── Por qué se monta PRIMERO en el documento ───────────────────────────────
  *
@@ -77,6 +89,23 @@ import { CURSOR_PROPIO_EN_EL_HOME } from './contrato'
 export function ChromeDelHome(): React.JSX.Element {
   return (
     <>
+      {/**
+       * ⚠️ **VA PRIMERO, Y NO LE MUEVE UN PÍXEL A LA PASTILLA.**
+       *
+       * Es la única forma de que sea la PRIMERA parada de tabulación del
+       * documento: el chrome ya es el primer hijo del `<main>` por geometría, y
+       * adentro del chrome esto va antes que la pastilla. Con eso las cinco
+       * paradas de la pastilla dejan de ser el único camino hacia el contenido —
+       * el defecto que `s10-acceso` §2 y §3 publicaron como hallazgos 1 y 2.
+       *
+       * Y no compite con el nacimiento de la pastilla porque **está fuera del
+       * flujo**: `_estilos/foco.css` lo declara `position: absolute` en reposo y
+       * `fixed` al enfocarlo, así que no ocupa alto y el envoltorio `sticky`
+       * sigue naciendo exactamente donde nacía. Eso NO se puede ver en el
+       * marcado —es CSS— y por eso `s8-chrome` §1 lo afirma leyendo la hoja.
+       */}
+      <SaltarAlContenido />
+
       {/**
        * Los enlaces son los de `ENLACES_DE_MUESTRA`, que es el default de la
        * pieza. **No se le pasa una lista propia**, y es deliberado: el menú del

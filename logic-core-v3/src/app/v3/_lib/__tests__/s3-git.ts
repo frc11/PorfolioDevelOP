@@ -44,12 +44,52 @@ export const PREFIJO = git('rev-parse', '--show-prefix').trim()
 /** Una ruta del padrón, en el idioma de `git`. */
 export const enElRepo = (relativo: string): string => `${PREFIJO}${relativo}`
 
-/** Lo que `git status` reporta como tocado, ya normalizado. */
-export function rutasTocadas(): string[] {
+/** Una línea de `git status --porcelain`, partida en su estado y su ruta. */
+function lineasDeEstado(): { readonly estado: string; readonly ruta: string }[] {
   return git('status', '--porcelain')
     .split('\n')
-    .map((linea) => linea.slice(3).trim().replace(/^"|"$/g, ''))
-    .filter((ruta) => ruta.length > 0)
+    .filter((linea) => linea.trim().length > 0)
+    .map((linea) => ({
+      estado: linea.slice(0, 2),
+      ruta: linea.slice(3).trim().replace(/^"|"$/g, ''),
+    }))
+    .filter((x) => x.ruta.length > 0)
+}
+
+/** Lo que `git status` reporta como tocado, ya normalizado. */
+export function rutasTocadas(): string[] {
+  return lineasDeEstado().map((x) => x.ruta)
+}
+
+/**
+ * LAS RUTAS DADAS DE ALTA — sin trackear (`??`) o agregadas (`A`).
+ *
+ * ⚠ **Es una lista distinta de `rutasTocadas()`, y la distinción es la que
+ * arregla el detector de ventana de los checks de frontera (SITIO-S11).**
+ *
+ * Un check de frontera vale mientras SU sprint esté sin commitear, y lo prueba
+ * con testigos: los archivos que ese sprint CREÓ. Cruzarlos contra «tocados»
+ * confunde dos estados que no se parecen en nada —«el sprint dueño está en
+ * vuelo» y «un sprint POSTERIOR modificó un archivo que aquel creó»—, y el
+ * segundo pasa todo el tiempo: `_estilos/navegacion.css` es de S3 y lo tocaron
+ * S10 y S11. Un alta, en cambio, sólo la hace quien crea el archivo: los
+ * sprints que vienen después lo modifican (`M`), nunca lo dan de alta.
+ */
+export function rutasDadasDeAlta(): string[] {
+  return lineasDeEstado().filter((x) => esAlta(x.estado)).map((x) => x.ruta)
+}
+
+/**
+ * Si los dos caracteres de estado de `git status --porcelain` describen un ALTA.
+ *
+ * Se exporta aparte de `rutasDadasDeAlta()` **para que se pueda controlar**: esa
+ * lee `git` y no acepta una entrada fabricada, así que sin esta función el
+ * filtro que decide la ventana de un check de frontera no tendría cómo
+ * demostrar que distingue un alta de una modificación. Es la misma razón por la
+ * que `evaluarVentana` recibe la lista en vez de pedirla.
+ */
+export function esAlta(estado: string): boolean {
+  return estado === '??' || estado.includes('A')
 }
 
 /**

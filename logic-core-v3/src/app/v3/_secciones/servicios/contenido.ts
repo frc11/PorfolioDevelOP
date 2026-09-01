@@ -12,7 +12,8 @@
  *
  *   real      los tres nombres de servicio (salen de `_contrato/acento.ts`, no
  *             se escriben acá), el nombre de la sección (sale de
- *             `_lib/secciones.ts`) y los tres clientes: Esquina, El Garage y
+ *             `_lib/secciones.ts`), el TITULAR —que sólo dice lo que la sección
+ *             muestra abajo— y los tres clientes: Esquina, El Garage y
  *             Matsu Automotores.
  *   relleno   los párrafos, los rubros, los once ítems y la línea de caso.
  *             Tienen la LONGITUD y la ESTRUCTURA RETÓRICA de lo definitivo y
@@ -66,6 +67,35 @@ export interface ContenidoDeUnServicio {
 const CASO =
   'Caso de referencia — [TESTIMONIO], con el cliente que corresponda: ' +
   'Esquina, El Garage o Matsu Automotores.'
+
+/**
+ * EL TITULAR DE LA SECCIÓN — el encabezado que la NOMBRA (SITIO-S11, defecto 16).
+ *
+ * ── Por qué no estaba, y por qué es un defecto y no una omisión ───────────
+ *
+ * Servicios era la única de las ocho sin un encabezado propio: sus tres
+ * servicios entraban como `h2` HERMANOS de los titulares de las otras siete, y
+ * el árbol del documento leía tres secciones donde hay una. `s10-acceso` §4 lo
+ * publicó como el hallazgo 4 —gravedad baja, dueño esta sección— y su tabla es
+ * la especificación de este arreglo.
+ *
+ * ── Qué hace este texto, y qué NO dice ────────────────────────────────────
+ *
+ * Nombra el recorrido de la sección y nada más: que son tres frentes y que los
+ * atiende el mismo equipo. No hay un número que se pueda leer como un dato —
+ * «Tres» es la cuenta de lo que la propia sección muestra abajo, igual que el
+ * «Tres proyectos» del titular de Trabajos— y no hay una promesa que la sección
+ * no demuestre. `escanearContenido` lo revisa junto con el resto del texto
+ * renderizado, así que no hay una segunda regla para el titular.
+ *
+ * ── Y por qué vive acá y no en `secciones.ts` ─────────────────────────────
+ *
+ * Porque es COPY, y `secciones.ts` es el recorrido: nombre, número, alto y
+ * superficie. El rótulo «Servicios» sí sale de ahí —lo consume
+ * `EncabezadoDeSeccion`—; el titular es contenido y se edita acá, como el de
+ * las otras siete.
+ */
+export const TITULAR = 'Tres frentes, y el mismo equipo detrás de los tres.'
 
 export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = {
   web: {

@@ -9,9 +9,8 @@ import { Caption, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular } from '../../_componentes/tipografia/Titular'
 import { CLASES_DE_ACENTO, type Servicio } from '../_contrato/acento'
 import { CanalDePieza, CanalDePiezas, CanalDeUnaPieza } from '../_contrato/canales'
-import { seccionDe } from '../_contrato/forma'
 import { MarcoDeMedio } from '../_contrato/medios'
-import { ContenidoDeSeccion, EncabezadoDeSeccion } from '../_contrato/Seccion'
+import { ContenidoDeSeccion } from '../_contrato/Seccion'
 import {
   ALTO_DEL_MEDIO,
   ANCHO_DEL_MEDIO,
@@ -34,9 +33,11 @@ import { clasesDeNivel } from './geometria'
  * canales del contrato ya traen su rama quieta adentro, así que `progreso ===
  * null` no es una rama de este archivo, es una propiedad de lo que consume.
  *
- * El instrumento afirma la consecuencia sobre el marcado real: el texto de la
- * rama apilada es EXACTAMENTE la concatenación de los tres tramos de la rama
- * pinneada.
+ * El instrumento afirma la consecuencia sobre el marcado real: **las dos ramas
+ * dicen EXACTAMENTE lo mismo, carácter por carácter**. Hasta SITIO-S11 la
+ * afirmación era más débil —la apilada decía lo que decían los tres tramos
+ * juntos— porque la pinneada montaba un servicio por vez; con los tres siempre
+ * en el árbol, la comparación es directa y no hay que sumar estados.
  *
  * ── El progreso que entra acá es el LOCAL, no el de la sección ────────────
  *
@@ -65,9 +66,6 @@ export interface ContenidoDeServicioProps {
   /** El progreso LOCAL del tramo, o `null` cuando no hay coreografía. */
   readonly progreso: MotionValue<number> | null
 }
-
-/** El nombre visible de la sección sale de la tabla del sitio, no de acá. */
-const NOMBRE_DE_SECCION = seccionDe('servicios').nombre
 
 /**
  * El separador de acento debajo del nombre.
@@ -98,7 +96,10 @@ export function ContenidoDeServicio({
       {/* ── FILA 1 · el rótulo ── P2, un target ── */}
       <CanalDeUnaPieza progreso={progreso} patron="P2">
         <div data-fila="rotulo" className="flex flex-col gap-[var(--spacing-3)]">
-          <EncabezadoDeSeccion seccion={seccionDe('servicios')} nombre={NOMBRE_DE_SECCION} />
+          {/* El rótulo de la sección —el `05` y la palabra «Servicios»— SE FUE
+              de acá en SITIO-S11: se repetía una vez por servicio y en la rama
+              pinneada quedaba encima de la cabecera. Vive una sola vez, en
+              `CabeceraDeServicios`, que es la pieza que nombra la sección. */}
           {/* El color va DIRECTO en el componente de texto. Los dos lanes lo
               habían tenido que poner en un envoltorio para que `cn()` no se
               comiera la clase de tamaño; SITIO-S7 arregló la raíz en
@@ -107,7 +108,13 @@ export function ContenidoDeServicio({
           <Caption como="p" className={cn(CLASES_DE_ACENTO.texto, 'uppercase')}>
             {contenido.rubro}
           </Caption>
-          <Titular nivel="titulo-xl" como="h2">
+          {/* ⚠️ `h3`, y NO `h2`. El nivel bajó en SITIO-S11 porque la sección
+              ganó el suyo: los tres servicios eran `h2` hermanos de los
+              titulares de las otras siete secciones —el defecto 16— y ahora
+              cuelgan del `h2` de la cabecera. El TAMAÑO no se movió: `nivel` y
+              `como` son cosas distintas en `<Titular>` justamente para esto, y
+              la composición de la sección está calibrada a ojo. */}
+          <Titular nivel="titulo-xl" como="h3">
             {servicio.nombre}
           </Titular>
           <ReglaDeAcento />

@@ -40,6 +40,46 @@ import {
  * todos— pero el default es la medición.
  */
 
+/* ── EL NOMBRE ACCESIBLE DE UNA SECCIÓN (SITIO-S11, defecto 10) ─────────────
+ *
+ * `s10-acceso` §5 midió el home entero y encontró que **el documento tiene DOS
+ * landmarks —`main` y `navigation`— donde podría tener DIEZ**: una `<section>`
+ * sin nombre accesible NO aporta una `region` (así lo dice HTML-AAM y así lo
+ * modela `s10-lectura.ts`, que las descartaba una por una con la razón escrita
+ * al lado: *«no tiene nombre accesible, así que no aporta landmark»*). Navegar
+ * por regiones no servía para recorrer el home: se llegaba al `main` y ahí se
+ * terminaba la lista.
+ *
+ * ── Por qué `aria-labelledby` y no `aria-label` ────────────────────────────
+ *
+ * Porque el nombre de la región tiene que ser **el mismo texto que se lee en
+ * pantalla**, y ese texto ya existe: es el titular de la sección. Con
+ * `aria-label` habría una segunda copia del nombre —la de la tabla— que se
+ * puede desviar del titular sin que nada se queje, y encima el Hero no tiene
+ * rótulo visible (`Hero.tsx` declara con todas las letras que «Hero es el
+ * nombre del bloque en el recorrido, no una palabra que el visitante lea»), así
+ * que un `aria-label` ahí anunciaría una palabra que no está en ningún lado.
+ *
+ * ── El id se DERIVA de la tabla, no se escribe ocho veces ──────────────────
+ *
+ * `idDelTitularDeSeccion` es la única fórmula, y la usan las dos puntas: acá,
+ * que la CONSUME en el `aria-labelledby`, y cada sección, que la EMITE en su
+ * encabezado. Ninguna de las dos escribe la cadena. Si un día el id cambia de
+ * forma, cambia en una línea y las dos puntas se mueven juntas — que es la
+ * misma razón por la que `ATRIBUTO_DE_SECCION` vive en el contrato y no en cada
+ * instrumento.
+ *
+ * ⚠ **La punta que emite el id NO está de este lado, y por eso hay una regla:
+ * un `aria-labelledby` que apunta a un id inexistente deja la sección SIN
+ * nombre** —y por lo tanto sin `region`— **sin un solo error en consola**, que
+ * es la peor forma de fallar. `s10-acceso` §5 es el que lo ve: cuenta las ocho
+ * regiones sobre el marcado del documento, así que una sección cuyo encabezado
+ * se olvide del id se cae de la lista y se nota.
+ * ────────────────────────────────────────────────────────────────────────── */
+export function idDelTitularDeSeccion(id: string): string {
+  return `titular-${id}`
+}
+
 export type NivelDeTitular = 'titulo-s' | 'titulo-m' | 'titulo-l' | 'titulo-xl'
 type EtiquetaDeTitular = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' | 'p' | 'span' | 'div'
 

@@ -13,7 +13,7 @@
  * detecta con su control positivo; ése es el reparto.
  */
 
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { RAIZ } from './s4-corrida'
@@ -129,4 +129,94 @@ export function usosDeValor(fuente: string, nombre: string): string[] {
   const sinComentarios = fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
   const re = new RegExp(`(?:new\\s+|=\\s*|\\(\\s*|\\breturn\\s+)${nombre}\\b`, 'g')
   return [...sinComentarios.matchAll(re)].map((m) => m[0])
+}
+
+/**
+ * TODOS los imports del fuente, con el especificador y si es de TIPO.
+ *
+ * ⚠ **Existe porque `importaValorDe` contesta otra pregunta, y en SITIO-S11 la
+ * pregunta cambió.** Mientras el acoplamiento hacia `/probe-escena` era la
+ * situación a medir, lo que importaba era «¿cuesta bytes?», y para eso alcanzaba
+ * con mirar los imports de VALOR: un `import type` costaba cero y podía quedarse.
+ * Con el acoplamiento CERRADO la propiedad que hay que custodiar es más fuerte
+ * —**ninguna referencia al panel, ni siquiera de tipo**— y un detector que sólo
+ * mira valores la daría por buena con el import viejo de vuelta en su lugar.
+ *
+ * Los comentarios se descartan antes de escanear: los tres docblocks que
+ * cuentan la historia del acoplamiento **citan el especificador viejo**, y un
+ * escáner que los leyera reportaría un import que no existe.
+ */
+export type ImportLeido = { readonly especificador: string; readonly soloTipo: boolean }
+
+export function importsDe(fuente: string): ImportLeido[] {
+  return [...sinComentarios(fuente).matchAll(/^import\s+(type\s+)?[^'"]*?from\s*'([^']+)'/gm)].map((m) => ({
+    especificador: m[2],
+    soloTipo: m[1] !== undefined,
+  }))
+}
+
+/** ¿El fuente nombra ese especificador en ALGÚN import — de tipo o de valor? */
+export function importaDe(fuente: string, aguja: string): boolean {
+  return importsDe(fuente).some((leido) => leido.especificador.includes(aguja))
+}
+
+/** ¿El fuente DECLARA ese tipo, o sea que es el dueño del contrato? */
+export function declaraTipo(fuente: string, nombre: string): boolean {
+  return new RegExp(`^export type ${nombre} = `, 'm').test(sinComentarios(fuente))
+}
+
+/**
+ * ¿El fuente RE-EXPORTA ese tipo, trayéndolo de ese otro módulo?
+ *
+ * **Pide las dos mitades y no una**, y ahí está toda la gracia: que lo traiga
+ * con `import type … from <desde>` **y** que lo vuelva a sacar con
+ * `export type { … }`. La segunda mitad sola la cumple también un archivo que
+ * DECLARA el tipo y lo exporta —o sea el estado ANTERIOR al arreglo—, así que un
+ * detector de media regla no sabría distinguir el antes del después, que es
+ * exactamente lo único que este instrumento tiene que poder decir.
+ */
+export function reexportaTipoDesde(fuente: string, nombre: string, desde: string): boolean {
+  const limpio = sinComentarios(fuente)
+  const traido = [...limpio.matchAll(/^import\s+type\s*\{([^}]*)\}\s*from\s*'([^']+)'/gm)].some(
+    (m) => m[2].includes(desde) && nombresEnLlaves(m[1]).includes(nombre),
+  )
+  const sacado = [...limpio.matchAll(/^export\s+type\s*\{([^}]*)\}/gm)].some((m) =>
+    nombresEnLlaves(m[1]).includes(nombre),
+  )
+  return traido && sacado
+}
+
+/** Los nombres de una lista entre llaves, sin el `as` y sin los vacíos. */
+function nombresEnLlaves(cuerpo: string): string[] {
+  return cuerpo
+    .split(',')
+    .map((pieza) => pieza.trim().split(/\s+as\s+/)[0].trim())
+    .filter((pieza) => pieza.length > 0)
+}
+
+/** El fuente sin bloques ni comentarios de línea. */
+function sinComentarios(fuente: string): string {
+  return fuente.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
+}
+
+/**
+ * Los archivos del PANEL que siguen trayendo alguno de esos tipos desde
+ * `./choreographyEditor`, o sea los que la re-exportación sostiene.
+ *
+ * ⚠ **Se derivan del disco, no de una lista escrita a mano** (regla 14). Una
+ * lista fija diría siete para siempre: el día que alguien migre un consumidor al
+ * módulo de la escena —o borre uno— el número tiene que moverse solo, porque lo
+ * que se afirma con él es que la re-exportación NO es decorativa.
+ */
+export function consumidoresDelPanel(nombres: readonly string[]): string[] {
+  const carpeta = 'src/app/probe-escena/_components'
+  return readdirSync(path.join(RAIZ, carpeta))
+    .filter((archivo) => archivo.endsWith('.ts') || archivo.endsWith('.tsx'))
+    .map((archivo) => `${carpeta}/${archivo}`)
+    .filter((rel) =>
+      [...sinComentarios(leer(rel)).matchAll(/^import\s+type\s*\{([^}]*)\}\s*from\s*'\.\/choreographyEditor'/gm)].some(
+        (m) => nombresEnLlaves(m[1]).some((nombre) => nombres.includes(nombre)),
+      ),
+    )
+    .sort()
 }

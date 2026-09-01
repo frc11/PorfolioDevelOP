@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils'
 
-import type { Seccion } from '../_lib/secciones'
+import { SECCIONES, type Seccion } from '../_lib/secciones'
 import { SUPERFICIES } from '../_lib/superficies'
+import { idDelTitularDeSeccion } from './tipografia/Titular'
 
 /**
  * EL PANEL — un bloque del flujo del documento, encima del escenario.
@@ -37,6 +38,17 @@ import { SUPERFICIES } from '../_lib/superficies'
  */
 
 /**
+ * LA SECCIÓN DE ENTRADA — el destino del enlace de salto.
+ *
+ * Es la primera de la tabla y se deriva de ella: el «saltar al contenido» del
+ * chrome (`_chrome/SaltarAlContenido.tsx`) aterriza acá, y esta constante es la
+ * ÚNICA que dice cuál es. Las dos puntas la importan de este módulo, que es el
+ * que emite el `id` del ancla — el enlace no puede apuntar a una sección que no
+ * exista porque no escribe el nombre: lo lee.
+ */
+export const ID_DE_LA_SECCION_DE_ENTRADA: string = SECCIONES[0].id
+
+/**
  * La `<section>`: superficie, altura y atributos. Sin contenido propio.
  *
  * `minHeight` va en estilo inline y no en una clase porque el valor viene del
@@ -51,6 +63,24 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
   return (
     <section
       id={seccion.id}
+      // El nombre accesible de la región. La fórmula —y el porqué— viven en
+      // `tipografia/Titular.tsx`, que es la punta que EMITE el id.
+      aria-labelledby={idDelTitularDeSeccion(seccion.id)}
+      /**
+       * ⚠ `tabindex="-1"` SÓLO en la sección de entrada, y no es decorativo:
+       * es lo que hace que el «saltar al contenido» mueva el foco de verdad.
+       * Un ancla a un elemento NO focalizable mueve el punto de partida del
+       * foco secuencial en Chromium y en Gecko, pero WebKit no lo hace, y ahí
+       * el Tab siguiente vuelve al enlace de salto: el enlace parece andar y no
+       * anda. Con `-1` el destino recibe foco de verdad en los tres.
+       *
+       * No entra al orden de tabulación —`-1` es «focalizable pero no
+       * tabulable»— y `s10-lectura.paradasDeTabulacion` lo descarta
+       * explícitamente, así que las paradas del documento no cambian por esto.
+       * Y no pinta un anillo: el foco programático sobre un contenedor no
+       * dispara `:focus-visible`.
+       */
+      tabIndex={seccion.id === ID_DE_LA_SECCION_DE_ENTRADA ? -1 : undefined}
       data-panel={seccion.id}
       data-superficie={seccion.superficie}
       // El mecanismo de S0: redefine --color-fondo y --color-tinta, y el

@@ -1,6 +1,7 @@
 'use client'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Pie } from '../../_componentes/chrome/Pie'
 import { Caption, Micro } from '../../_componentes/tipografia/Textos'
 import { Bloque } from '../_contrato/coreografia'
@@ -75,14 +76,23 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
 
       <Bloque patron="P1">
         {(progreso) => (
-          <CanalDeTitular
-            progreso={progreso}
-            patron="P1"
-            texto={TITULAR_DE_CIERRE}
-            nivel="titulo-xl"
-            como="h2"
-            className="text-balance"
-          />
+          /* ⚠ El envoltorio lleva el `id` con el que la `<section>` se nombra
+             (S11, defecto 10). El `h2` sale de `CanalDeTitular`, que no tiene
+             prop `id` —`canales.tsx` no es de este frente—, así que el id va en
+             el elemento que lo contiene: el nombre accesible se computa del
+             contenido, y el contenido de este `div` es exactamente el titular.
+             Es una caja de bloque adentro del `Bloque`, que ya era una: no mueve
+             un píxel del apilado de `--spacing-12` del pie. */
+          <div id={idDelTitularDeSeccion(seccion.id)}>
+            <CanalDeTitular
+              progreso={progreso}
+              patron="P1"
+              texto={TITULAR_DE_CIERRE}
+              nivel="titulo-xl"
+              como="h2"
+              className="text-balance"
+            />
+          </div>
         )}
       </Bloque>
 

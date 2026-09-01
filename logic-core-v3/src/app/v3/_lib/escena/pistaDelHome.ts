@@ -31,44 +31,38 @@
  * estado. Un `no-op` silencioso o un array vacío serían la otra salida y son la
  * peor: dejarían pasar en silencio a un consumidor que cree estar editando.
  *
- * ⚠️ **EL ACOPLAMIENTO QUE QUEDA, DECLARADO CON SU NÚMERO (SITIO-S9).**
+ * ⚠️ **EL ACOPLAMIENTO HACIA `/probe-escena` SE CERRÓ EN SITIO-S11 (§7.36).**
  *
- * El `import type` de `ChoreoEditor` apunta a `/probe-escena`, que tiene fecha
- * de baja. Son **tres** los archivos del destino que lo hacen —éste,
- * `OrbitRig.tsx:28` y `ProbeStage.tsx:9`— y los tres importan **el mismo y único
- * tipo**. `s8-escena.invariant.ts` §3 los afirma nominalmente: ningún módulo de
- * la escena importa un VALOR del panel, y estos tres lo nombran sólo por el
- * tipo.
+ * Hasta SITIO-S10 el `import type` de `ChoreoEditor` de acá arriba apuntaba a
+ * `@/app/probe-escena/_components/choreographyEditor`, y eran **tres** los
+ * módulos de producción que lo hacían: éste, `OrbitRig.tsx` y `ProbeStage.tsx`.
+ * El costo en bytes era cero —`import type` con `isolatedModules`, y un alias de
+ * tipo no tiene valor en runtime— pero el otro costo no: **el día que
+ * `/probe-escena` se borre, `tsc --noEmit` cortaba con TS2307 en los tres y `npm
+ * run build` seguía en verde**, porque `next.config.ts` declara
+ * `typescript.ignoreBuildErrors`. Un acoplamiento sin guardia en el build es un
+ * acoplamiento que nadie ve hasta que duele.
  *
- * **Cero bytes, verificado sobre el fuente y no de memoria.** Las tres líneas
- * empiezan con `import type`, que TypeScript borra por especificación; el
- * símbolo importado está declarado `export type ChoreoEditor = { … }`
- * (`choreographyEditor.ts:147`), o sea un alias que **no tiene valor en tiempo
- * de ejecución** ni siquiera si alguien lo importara mal; y en los tres archivos
- * el nombre aparece únicamente en posición de tipo (`editor: ChoreoEditor` y
- * `): ChoreoEditor`). Con `isolatedModules: true` en `tsconfig.json`, un
- * `import type` es la forma que el compilador tiene garantizado poder borrar sin
- * mirar el módulo del otro lado.
+ * **Lo que se hizo:** los tres tipos —`ChoreoEditor`, `EditableKeyframe` y
+ * `KeyframeOrigin`— se mudaron a `./choreographyEditorTypes.ts`, del lado de la
+ * escena, y `choreographyEditor.ts` los **re-exporta**. Los tres imports de
+ * producción apuntan al módulo nuevo y ningún consumidor del panel cambió una
+ * línea. La flecha, que es lo único que importaba, ahora va del panel hacia
+ * producción: borrar el panel no rompe la escena.
  *
- * ⚠️ **Y lo que pasa el día que `/probe-escena` se borre es peor que un error:
- * es un error que el build NO muestra.** `npx tsc --noEmit` corta con TS2307 en
- * los tres archivos (más un TS2304 por cada uso del nombre), pero
- * `next.config.ts` declara `typescript.ignoreBuildErrors: true`, así que
- * **`npm run build` sigue pasando en verde** y el bundle no cambia un byte. El
- * acoplamiento no tiene guardia en el build: la única que lo ve es la
- * verificación de tipos, que hay que correr aparte.
+ * ⚠️ **El costo REAL fue mayor que el que §7.36 publicaba, y queda anotado:**
+ * decía *«1 archivo nuevo, 4 líneas de import y DOS instrumentos reescritos»*, y
+ * los tipos que hubo que mudar eran **tres y no dos** — `KeyframeOrigin` es del
+ * lado del panel y `EditableKeyframe` lo nombra, así que dejarlo allá habría
+ * movido el acoplamiento en vez de cerrarlo. Los dos instrumentos reescritos son
+ * `_lib/escena/__tests__/s8-escena.invariant.ts` §3 y
+ * `_lib/__tests__/s9-instrumentos.invariant.ts` §2, que es el que lo MIDE.
  *
- * **NO se resuelve acá, y no por falta de ganas.** Mover el tipo obliga a tocar
- * `s8-escena.invariant.ts` §3 —que otro frente está reescribiendo en este mismo
- * sprint— y a tocar `ProbeStage.tsx`, que está en **exactamente 300 líneas**, el
- * límite del repo. Es el caso de §7.26 con todas las letras: repartir archivos
- * no reparte un sprint cuando el TIPO de un dato compartido cruza la frontera.
- * El plan exacto —qué módulo definiría el tipo, qué tres imports cambian y qué
- * afirmación cambia de valor— está en el reporte de SITIO-S9; la decisión de
- * ejecutarlo es del agente principal.
- *
- * Es el costo declarado de NO mudar el editor; el otro camino lo cambia por
- * 66,7 KiB en el chunk de la escena.
+ * **Lo que NO cambió, y sigue siendo el provisional de arriba:** los catorce
+ * miembros del panel siguen tirando, el home sigue sin editor, y la decisión
+ * entre este provisional y mudar el editor entero —66,7 KiB en el chunk de la
+ * escena— sigue siendo del humano. Lo que se cerró es el vínculo de TIPO, que
+ * era la mitad barata.
  *
  * ── Por qué el track es perezoso acá también ───────────────────────────────
  *
@@ -80,7 +74,7 @@
 
 import { CHOREO_KEYFRAMES } from './choreography'
 import { buildTrack, type ChoreoTrack } from './choreographySampler'
-import type { ChoreoEditor } from '@/app/probe-escena/_components/choreographyEditor'
+import type { ChoreoEditor } from './choreographyEditorTypes'
 
 function sinEditor(miembro: string): never {
   throw new Error(

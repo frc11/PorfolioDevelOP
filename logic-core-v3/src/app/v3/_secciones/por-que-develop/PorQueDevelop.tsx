@@ -1,7 +1,7 @@
 'use client'
 
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Titular } from '../../_componentes/tipografia/Titular'
+import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTitular } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -70,13 +70,22 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
           {(progreso) => (
             <Grilla columnas={3} canal="amplio">
               <div className="flex flex-col gap-[var(--spacing-6)] tablet:col-span-2">
-                <CanalDeTitular
-                  progreso={progreso}
-                  patron="P1"
-                  texto={TITULAR}
-                  nivel="titulo-xl"
-                  como="h2"
-                />
+                {/* ⚠ El envoltorio lleva el `id` con el que la `<section>` se
+                    nombra (S11, defecto 10): el `h2` sale de `CanalDeTitular`, que no
+                    tiene prop `id`, así que el id va en el elemento que lo contiene.
+                    El nombre accesible se computa del contenido y el contenido de
+                    este `div` es exactamente el titular. Es una caja de bloque más
+                    adentro de la columna `flex`: la separación la sigue dando el
+                    `gap` del padre y ninguna medida se mueve. */}
+                <div id={idDelTitularDeSeccion(seccion.id)}>
+                  <CanalDeTitular
+                    progreso={progreso}
+                    patron="P1"
+                    texto={TITULAR}
+                    nivel="titulo-xl"
+                    como="h2"
+                  />
+                </div>
                 <Titular nivel="titulo-s" como="p">
                   {ENTRADA}
                 </Titular>

@@ -121,11 +121,21 @@ export const ESTADO_INICIAL: EstadoDeLaEscena = { fase: 'corriendo', cuadros: 0 
  * ── El número, derivado de lo que tiene que durar ──────────────────────────
  *
  * El margen tiene que durar **`CUADROS_DE_REANUDACION` cuadros al ritmo de
- * scroll que se quiera cubrir**. Con 0,125 pantallas y 2 cuadros eso es 0,0625
- * pantallas por cuadro: **3,75 pantallas por segundo a 60 Hz**, o sea 112 px por
- * cuadro en una ventana de 900. Cubre la rueda y el teclado; **no** cubre una
- * barra de scroll arrastrada, y ningún margen finito la cubre. Lo que ahí se ve
- * es a lo sumo UN cuadro de pose vieja, no una pantalla apagada.
+ * scroll que se quiera cubrir**. El número se calibró con la reanudación en DOS
+ * cuadros: 0,125 pantallas entre 2 son 0,0625 por cuadro, o sea **3,75 pantallas
+ * por segundo a 60 Hz** — 112 px por cuadro en una ventana de 900. Cubre la
+ * rueda y el teclado; **no** cubre una barra de scroll arrastrada, y ningún
+ * margen finito la cubre. Lo que ahí se ve es a lo sumo UN cuadro de pose vieja,
+ * no una pantalla apagada.
+ *
+ * ⚠ **El margen NO se bajó cuando la reanudación pasó de 2 cuadros a 1 en
+ * SITIO-S11, y es deliberado.** Con un solo cuadro, los mismos 0,125 cubren
+ * **7,5 pantallas por segundo**: el doble de ritmo de scroll. Lo que era exacto
+ * pasó a ser holgado, y holgado es el lado seguro de esta perilla —lo que el
+ * margen compra es que no se vea una pose de hace diez pantallas—. Bajarlo a
+ * 0,0625 recuperaría 0,125 pantallas de banda suspendida sobre 13, o sea menos
+ * de un punto de los 75, a cambio de perder toda la holgura. `s10-raf` §6 afirma
+ * la DESIGUALDAD y no la igualdad justamente por esto.
  *
  * ── Lo que cuesta, medido ──────────────────────────────────────────────────
  *
@@ -141,43 +151,58 @@ export const ESTADO_INICIAL: EstadoDeLaEscena = { fase: 'corriendo', cuadros: 0 
 export const MARGEN_DE_REANUDACION = 0.125
 
 /**
- * CUÁNTOS CUADROS SE QUEDA EN `reanudando`. **Dos.**
+ * CUÁNTOS CUADROS SE QUEDA EN `reanudando`. **Uno.**
  *
- * Por la matemática alcanzaría **uno**: con `physics` en `false`, `OrbitRig`
+ * Por la matemática alcanza **uno**: con `physics` en `false`, `OrbitRig`
  * escribe `live[canal] = target[canal]` en su primer `useFrame`, o sea la pose
  * exacta del progreso, sin perseguirla. Un cuadro y la pose está al día.
  *
- * **Eran dos porque el orden entre los dos `rAF` se creía indeterminado.** El
- * pulso que despacha `'pintado'` vive en un `requestAnimationFrame` del
- * documento (`EscenaDelHome`) y el lazo de r3f vive en el suyo. Con un solo
- * cuadro, si el pulso corriera primero, la física se encendería **antes** del
- * cuadro exacto y el latigazo vuelve entero — un fallo intermitente que depende
- * del orden de registro, que es la peor clase. Dos ticks garantizan que al menos
- * un cuadro de r3f corrió con la física apagada **sin depender de ese orden**.
+ * ── ⚠️ ERAN DOS, Y LA RAZÓN ERA UNA CREENCIA QUE SITIO-S10 MIDIÓ Y REFUTÓ ──
  *
- * ⚠ **SITIO-S10 LEYÓ EL ORDEN, Y NO ESTÁ INDETERMINADO: r3f REGISTRA PRIMERO.**
- * `__tests__/s10-raf.invariant.ts` deriva la cadena eslabón por eslabón del
- * código instalado (`@react-three/fiber` 9.6.1), con un control positivo por
- * eslabón. Los dos registros salen del MISMO commit y en fases distintas: el
- * `<Canvas>` reconfigura desde un efecto de **layout** sin arreglo de
- * dependencias → `setFrameloop('always')` escribe el estado →
- * `rootStore.subscribe(… invalidate …)` hace `requestAnimationFrame(loop)`
- * (registro 1); recién después corre el efecto **pasivo** que arma el pulso
- * (registro 2). React vacía layout antes que pasivos y `rAF` despacha en orden
- * de registro. Y una vez corriendo, `loop()` se re-registra como su primera
- * sentencia, antes de correr un solo efecto.
+ * El pulso que despacha `'pintado'` vive en un `requestAnimationFrame` del
+ * documento (`EscenaDelHome`) y el lazo de r3f vive en el suyo. **Eran dos
+ * porque el orden entre los dos se creía indeterminado**: con un solo cuadro, si
+ * el pulso corriera primero, la física se encendería ANTES del cuadro exacto y
+ * el latigazo vuelve entero — un fallo intermitente que depende del orden de
+ * registro, que es la peor clase. El segundo tick compraba independencia de ese
+ * orden. §7.34 lo escribía con estas palabras: *«nada ordena un `rAF` respecto
+ * del otro»*, y lo declaraba **deducido leyendo el código, no medido**.
  *
- * **Por la cadena leída, UNO alcanzaría.** El número NO se movió: lo que se
- * midió es el orden de REGISTRO, que es una propiedad del código; que el
- * planificador lo DESPACHE así en una corrida real pide una traza con la pestaña
- * al frente y está declarado como hueco en §5 de ese invariante. Bajarlo a 1 es
- * una decisión del humano —vale 16,7 ms de los 33— y §7.34 la deja abierta.
+ * **Está medido, y es al revés: el orden de registro ESTÁ determinado y r3f va
+ * PRIMERO.** Lo produce `_lib/__tests__/s10-raf.invariant.ts` —28 afirmaciones y
+ * 14 controles positivos— derivando la cadena eslabón por eslabón del código
+ * INSTALADO (`@react-three/fiber` 9.6.1), con un control positivo por eslabón.
+ * Los dos registros salen del MISMO commit y en fases distintas: el `<Canvas>`
+ * reconfigura desde un efecto de **layout** sin arreglo de dependencias →
+ * `setFrameloop('always')` escribe el estado → `rootStore.subscribe(… invalidate
+ * …)` hace `requestAnimationFrame(loop)` (registro 1); recién después corre el
+ * efecto **pasivo** que arma el pulso (registro 2). React vacía los efectos de
+ * layout antes que los pasivos y `rAF` despacha en orden de registro. Y una vez
+ * corriendo, `loop()` se re-registra como su primera sentencia, antes de correr
+ * un solo efecto — así que el orden se sostiene cuadro a cuadro y no sólo en el
+ * primero.
  *
- * Lo que cuesta hoy: **2 cuadros = 33 ms sin inercia por reanudación**, una vez
- * por pasada del recorrido. No se ve, porque la inercia sólo importa mientras la
- * pose se persigue y al reanudar ya está alcanzada.
+ * **SITIO-S10 midió y no tocó el número, a propósito**: bajarlo era una decisión
+ * y su instrucción se lo prohibía. SITIO-S11 la toma, citando esa medición.
+ *
+ * ── Lo que cuesta y lo que devuelve ───────────────────────────────────────
+ *
+ * Costaba **2 cuadros = 33 ms sin inercia por reanudación**; cuesta **1 = 16,7
+ * ms**. No se ve en ninguno de los dos casos, porque la inercia sólo importa
+ * mientras la pose se persigue y al reanudar ya está alcanzada — lo que se gana
+ * es que la ventana en la que la escena corre sin física sea la mínima que la
+ * mecánica admite, en vez de la mínima más un cuadro de seguro contra algo que
+ * no pasa.
+ *
+ * ⚠ **EL HUECO QUE QUEDA, DECLARADO.** Lo medido es el orden de REGISTRO, que es
+ * una propiedad del código. Que el planificador del navegador los DESPACHE en
+ * ese orden en una corrida real pide una traza con la pestaña AL FRENTE, y con
+ * la pestaña ocluida el navegador ni despacha `rAF` (`CLAUDE.md`): va como
+ * `noCorre` en el §5 de ese invariante. Si esa traza alguna vez mostrara lo
+ * contrario, **el arreglo es volver a 2 acá y nada más** — el margen de
+ * reanudación ya cubre los dos casos, ver abajo.
  */
-export const CUADROS_DE_REANUDACION = 2
+export const CUADROS_DE_REANUDACION = 1
 
 /**
  * ¿Hay un panel transparente en cuadro?

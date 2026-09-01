@@ -3,7 +3,7 @@
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Caption, Cuerpo, EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
-import { Titular } from '../../_componentes/tipografia/Titular'
+import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { sizesPorColumnas } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza, TextoPorLineas } from '../_contrato/canales'
@@ -195,6 +195,8 @@ export function QuienesSomos({ seccion }: PropsDeSeccion): React.JSX.Element {
                     patron="P1"
                     como="h2"
                     className="font-titulo text-fluido-titulo-l leading-titulo tracking-titulo"
+                    // El `h2` que nombra la región de la sección (S11, defecto 10).
+                    id={idDelTitularDeSeccion(seccion.id)}
                   />
                 )}
               </Bloque>

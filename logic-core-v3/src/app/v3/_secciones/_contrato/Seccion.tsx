@@ -53,12 +53,59 @@ import { ATRIBUTO_DE_SECCION } from './forma'
  *     Un envoltorio intermedio con altura automática le recorta el rango de
  *     pegado a cero.
  *
+ * ── EL ALTO DEL HIJO PEGADO ES UN PISO, NO UN TECHO (SITIO-S11) ───────────
+ *
+ * `pinneada: 'siempre'` emitía `h-svh` —alto FIJO— y ésa era la **doble
+ * contención** que dejó la unificación de S7: la rama pinneada del lane A se
+ * sumó a la contención propia que Servicios ya traía, y nadie las restó.
+ * Servicios pone adentro su `Bloque` de `min-height: 300svh` con los TRES
+ * bloques apilados, así que eran tres pantallas de contenido dentro de una caja
+ * clavada de una: abajo de 1025 los servicios 2 y 3 no subían nunca a cuadro.
+ * `s10-mobile` §3 lo midió —963 px @375×667 (1,44×) · 942 @390×844 (1,12×) ·
+ * 1583 @768×900 (1,76×) de tinta sola adentro de una caja de una pantalla—.
+ *
+ * **El envoltorio era el que estaba mal**, y el propio `servicios/geometria.ts`
+ * ya tenía escrita la regla que violaba: *«el alto de un bloque es `min-h-svh`,
+ * no `h-svh`»*. Con `min-h-svh` la caja CRECE con su contenido en vez de
+ * recortarlo, y el rango de pegado se acorta solo: si el hijo mide lo mismo que
+ * su sección, el pin no recorre y no clava nada. Es lo correcto en los dos
+ * casos — el que entra en una pantalla se sigue clavando igual, y el que no
+ * entra deja de esconder lo que no le cabe.
+ *
+ * ⚠ **LA ASIMETRÍA ENTRE LOS DOS MODOS ES DELIBERADA, y no es un descuido.**
+ * `desde-escritorio` conserva `escritorio:h-svh` porque ahí el alto fijo es
+ * PORTANTE: Trabajos cuelga su composición de un `h-full` —`Envoltorio` y
+ * escenario— y `height: 100%` contra un padre de altura automática resuelve a
+ * `auto`, con lo que el escenario de los tres planos `absolute inset-0`
+ * colapsaría a cero arriba de 1025. Esa geometría está medida y aprobada por
+ * grabación, y este sprint no la toca. El modo que se corrige es el único que
+ * tenía el defecto.
+ *
+ * **Dónde vive el pin de cada modo, después del arreglo:**
+ *
+ *   `desde-escritorio`  el hijo de ESTE envoltorio, `escritorio:h-svh`.
+ *   `siempre`           el hijo lo declara la sección: arriba de 1025 es el
+ *                       `sticky top-0 … min-h-svh` de `servicios/geometria.ts`
+ *                       adentro del `Bloque` de 300svh, con el mismo recorrido
+ *                       de 200svh que el envoltorio daba antes. Abajo de 1025
+ *                       no hay coreografía y no hay nada que clavar: los tres
+ *                       bloques se reparten las tres pantallas declaradas.
+ *
+ * `PANTALLAS_DEL_STICKY = 1` de `ritmo.ts` sigue valiendo, porque la cuenta que
+ * produce es la de escritorio y ahí el hijo pegado sigue midiendo una pantalla
+ * en los dos modos — lo que cambió es cuál elemento la lleva.
+ *
  * ── Sin una línea de JavaScript, y por eso cruza la compuerta ─────────────
  *
  * El pinneo es CSS puro, así que **sobrevive abajo de 1025** igual que en el
  * esqueleto. Es la mitad del ritmo que mobile conserva gratis, sin bajar un
  * byte de más, y es la razón por la que las dos secciones más pesadas del sitio
  * siguen teniendo forma cuando la coreografía no corre.
+ *
+ * ⚠ Con `min-h-svh` esa frase se acota: lo que sobrevive abajo del umbral es el
+ * MECANISMO, no necesariamente el pin. Una sección `siempre` cuyo contenido
+ * quieto mida más de una pantalla deja de clavarse abajo de 1025 — y eso es
+ * exactamente lo que se quiere, porque clavarla ahí es esconderla.
  */
 
 export interface SeccionProps {
@@ -99,7 +146,7 @@ export function Seccion({ seccion, className, children }: SeccionProps): React.J
      */
     const clasesDePin =
       seccion.pinneada === 'siempre'
-        ? 'sticky top-0 h-svh'
+        ? 'sticky top-0 min-h-svh'
         : 'escritorio:sticky escritorio:top-0 escritorio:h-svh'
 
     return (

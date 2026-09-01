@@ -3,8 +3,8 @@
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
-import { Titular } from '../../_componentes/tipografia/Titular'
-import { sizesPorTresTramos } from '../../_lib/imagen'
+import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
+import { sizesPorViewport } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
 import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
@@ -75,6 +75,25 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  * desborde ni banda vacía. La decisión está en `secciones.ts` con su razón, no
  * escondida en una clase de este archivo.
  *
+ * ⚠ **EL DESPINNEO SE ARREGLÓ A MEDIAS, Y LA MITAD QUE FALTABA ERA UNA BANDA
+ * DE DOS PANTALLAS VACÍAS (defecto 3 de SITIO-S10, arreglado en S11).**
+ *
+ * El párrafo de arriba supone que abajo del umbral la grilla está colapsada, y
+ * eso **sólo era cierto abajo de 768**: `Grilla columnas={3}` emite
+ * `grid-cols-1 tablet:grid-cols-3`, así que de 768 a 1024 los tres proyectos
+ * entraban EN FILA y la fila mide UNA pantalla. Contra las 300svh que la tabla
+ * declara, eso son **dos pantallas de banda oscura vacía** — medido por
+ * `s10-mobile` §2, que a 768 y 1024 leía «flujo 1, declarado 3» mientras a 375
+ * y 390 leía 3 = 3. El tramo sin dueño es exactamente el que queda entre los
+ * dos umbrales que nadie apareó: la fila arranca en 768 y el
+ * `escritorio:min-h-0` que la suelta arranca en 1025.
+ *
+ * El arreglo corre el colapso al MISMO umbral que el pin: la grilla se pide de
+ * una columna y la de tres vuelve con la variante `escritorio:`, que Tailwind
+ * genera desde `--breakpoint-escritorio`. Así los tres bordes —pin, colapso y
+ * pantalla-por-proyecto— caen en 1025 y no queda tramo huérfano. `Grilla` NO se
+ * toca: su tabla `3` la consumen otras secciones que sí quieren la fila en 768.
+ *
  * ── Sobre fondo oscuro el acento NO es texto ──────────────────────────────
  *
  * Medido: sobre `#0E0E0E` los tres acentos dan 2,71 · 2,99 · 2,46 — no sólo
@@ -132,20 +151,19 @@ export const GEOMETRIA = {
     ancho: 1600,
     alto: 800,
     /**
-     * Los porcentajes del `sizes`, y **por qué acá sí van tres tramos**.
+     * Los porcentajes del `sizes`, y **por qué el corte es 1025 y no 768**.
      *
-     * La caja de la captura es el ancho de la tarjeta, y la tarjeta es UNA
-     * COLUMNA DE TRES en las dos ramas: en la quieta, una de las tres de la
-     * fila; en la coreografiada, la del medio de la misma grilla de tres. O sea
-     * que la caja NO cambia en 1025 —cambia en 768, que es donde `Grilla`
-     * colapsa la de tres columnas—, y por eso el ayudante correcto es
-     * `sizesPorTresTramos` y no `sizesPorViewport`.
-     *
-     * Es exactamente el caso inverso al de Quiénes somos, que descartó los tres
-     * tramos porque su caja cambiaba EN 1025 y los dos tramos de arriba habrían
-     * dado el mismo número. Acá el que se repite es el de arriba, y se repite
-     * porque es verdad: de 768 para arriba la captura vale un tercio del ancho,
-     * anime o no anime.
+     * ⚠ CORREGIDO EN SITIO-S11, y no por gusto: el `sizes` describe la CAJA, y
+     * el arreglo del defecto 3 le movió el único corte que tenía. Hasta S10 era
+     * `sizesPorTresTramos(33, 33, 100)` con este argumento: la tarjeta es una
+     * columna de tres en las dos ramas y la grilla colapsaba en 768, o sea que
+     * la caja cambiaba en 768 y no en 1025. **La grilla ahora colapsa en 1025**
+     * —ver la rama quieta— y con eso los dos tramos de arriba dejaron de decir
+     * lo mismo: de 768 a 1024 la captura ocupa el ancho ENTERO. Dejarlos sería
+     * pedirle al navegador una imagen tres veces más chica que la caja justo en
+     * tablet, que es el defecto que este módulo existe para evitar con la otra
+     * cara. Con un solo corte el ayudante correcto vuelve a ser
+     * `sizesPorViewport`, y el caso queda igual al de Quiénes somos.
      */
     tercio: 33,
     completo: 100,
@@ -162,8 +180,7 @@ export const GEOMETRIA = {
 
 /** El `sizes` real de las capturas. Exportado para que el instrumento afirme el
  *  MISMO valor que se le pasa al marco, y no una copia escrita a mano. */
-export const SIZES_DE_LA_CAPTURA = sizesPorTresTramos(
-  GEOMETRIA.captura.tercio,
+export const SIZES_DE_LA_CAPTURA = sizesPorViewport(
   GEOMETRIA.captura.tercio,
   GEOMETRIA.captura.completo,
 )
@@ -190,7 +207,7 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
           <NumeroDeSeccion seccion={seccion} />
           <div className="flex flex-col gap-2">
             <EtiquetaDeSeccion>{CONTENIDO.etiqueta}</EtiquetaDeSeccion>
-            <Titular nivel="titulo-m" como="h2" className="max-w-[var(--breakpoint-medio)]">
+            <Titular nivel="titulo-m" como="h2" id={idDelTitularDeSeccion(seccion.id)} className="max-w-[var(--breakpoint-medio)]">
               {CONTENIDO.titular}
             </Titular>
             <Cuerpo className="max-w-[var(--breakpoint-medio)]">{CONTENIDO.bajada}</Cuerpo>
@@ -211,19 +228,31 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
                * Abajo de 1025 la sección **no se pinnea** —lo declara
                * `secciones.ts` con `pinneada: 'desde-escritorio'`— así que acá
                * no hay una caja clavada de `100svh` que respetar: hay 300svh de
-               * documento que scrollean. Con `Grilla columnas={3}` colapsada a
-               * una columna en 768, los tres proyectos caen uno abajo del otro,
-               * y `min-h-svh` le da a cada uno **su** pantalla: tres proyectos
-               * por tres pantallas es exactamente el alto declarado de la
-               * sección. Ni desborde ni tramo vacío.
+               * documento que scrollean. Con la grilla en UNA columna hasta
+               * 1025, los tres proyectos caen uno abajo del otro, y `min-h-svh`
+               * le da a cada uno **su** pantalla: tres proyectos por tres
+               * pantallas es exactamente el alto declarado de la sección. Ni
+               * desborde ni tramo vacío.
                *
-               * Desde 1025 la variante se apaga (`escritorio:min-h-0`), porque
-               * ahí esta rama sólo aparece con `prefers-reduced-motion` y el
-               * panel SÍ está clavado en una pantalla: tres cajas de `svh`
-               * adentro de una de `svh` es el mismo desborde, del otro lado.
+               * Desde 1025 pasan las dos a la vez y por la misma razón: vuelve
+               * la fila (`escritorio:grid-cols-3`) y la pantalla por proyecto se
+               * suelta (`escritorio:min-h-0`). Ahí esta rama sólo aparece con
+               * `prefers-reduced-motion` y el panel SÍ está clavado en una
+               * pantalla: tres cajas de `svh` adentro de una es el mismo
+               * desborde, del otro lado.
+               *
+               * ⚠ `columnas={1}` con la fila en `className` y no `columnas={3}`
+               * porque la tabla de `Grilla` no tiene una entrada de tres que
+               * conmute en 1025 —la de `5` sí, y por esta misma razón—, y
+               * `Grilla` la comparten las otras secciones: el pedido queda
+               * anotado y el arreglo no lo necesita. La clase va literal porque
+               * Tailwind escanea el fuente: una armada por template no se emite.
                */
               return (
-                <Grilla columnas={3} className="content-center escritorio:h-full">
+                <Grilla
+                  columnas={1}
+                  className="content-center escritorio:h-full escritorio:grid-cols-3"
+                >
                   {CONTENIDO.proyectos.map((proyecto) => (
                     <div
                       key={proyecto.nombre}

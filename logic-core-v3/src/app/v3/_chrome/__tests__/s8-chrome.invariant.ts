@@ -7,7 +7,9 @@
  *
  *   1. **La pastilla se monta como hija DIRECTA del flujo.** Un `<div>` de más
  *      entre el `<main>` y el envoltorio `sticky` le deja el rango de pegado en
- *      cero y la pastilla deja de viajar **sin un solo error en consola**.
+ *      cero y la pastilla deja de viajar **sin un solo error en consola**. Y
+ *      desde SITIO-S11, que **el enlace de salto va antes, fuera del flujo**: es
+ *      la primera parada del documento y no le mueve el nacimiento a la pastilla.
  *   2. **El umbral sigue valiendo contra el Hero REAL.** Se deriva de tokens y
  *      la derivación supone una primera pantalla de `100svh`: se comprueba
  *      contra la tabla del recorrido, no contra la memoria.
@@ -35,6 +37,8 @@ import {
   umbralPx,
 } from '../../_lib/navegacion'
 import { SECCIONES } from '../../_lib/secciones'
+import { marcadoDelDocumento } from '../../_lib/__tests__/s10-banco'
+import { paradasDeTabulacion } from '../../_lib/__tests__/s10-lectura'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from '../../_lib/__tests__/afirmar'
 import { DIST, conjuntoInicial, contiene, kib, pesar, todosLosChunks } from '../../_lib/__tests__/s3-bundle'
 import { Cierre } from '../../_secciones/cierre/Cierre'
@@ -50,6 +54,7 @@ import {
   PIEZAS_QUE_SE_CONSUMEN,
 } from '../contrato'
 import { ChromeDelHome } from '../ChromeDelHome'
+import { ROTULO_DEL_SALTO } from '../SaltarAlContenido'
 import * as S from './soporte'
 
 const CHROME = S.leer(MODULO_DEL_CHROME)
@@ -58,38 +63,48 @@ const MARCADO = marcar(createElement(ChromeDelHome), { anima: false })
 const PIE = marcar(createElement(Cierre, { seccion: seccionDe('cierre') }), { anima: false })
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · La pastilla se monta, y el envoltorio `sticky` es hijo DIRECTO del flujo')
+titulo('1 · Lo que el chrome emite: el salto primero, y el envoltorio `sticky` sin envoltorio')
 
 afirmar(S.existe(MODULO_DEL_CHROME), `el módulo existe: \`${MODULO_DEL_CHROME}\``)
 afirmar(CHROME_LIMPIO.includes(`export function ${EXPORT_DEL_CHROME}(`), `y exporta \`${EXPORT_DEL_CHROME}\` con nombre, que es lo que el home importa`)
 afirmar(MARCADO.includes('data-pieza="navegacion"'), 'el chrome monta la pastilla')
 
 /**
- * ⚠️ LA AFIRMACIÓN QUE SOSTIENE TODO EL MECANISMO.
+ * ⚠️ LAS DOS AFIRMACIONES QUE SOSTIENEN EL MECANISMO — y son de naturaleza
+ * distinta, así que se afirman por separado.
  *
  * El envoltorio de la pastilla es `sticky` con `block-size: 0`, y un `sticky` se
  * pega dentro de su CONTENEDOR DE BLOQUE: su rango de pegado es el alto del
- * contenedor menos el suyo. Si `ChromeDelHome` devolviera un `<div>` en vez de
- * un fragmento, ese `div` mediría lo que mide su contenido —cero— y el rango
- * quedaría en **cero**: la pastilla se iría con el scroll como cualquier
- * elemento del flujo. Con el fragmento, el contenedor es el `<main>` del layout,
- * que mide lo que miden las ocho secciones.
- *
- * Y falla como el pinneo de `_contrato/Seccion.tsx`: sin error, sin aviso, con
- * un marcado que se ve correcto. Por eso se afirma sobre el marcado y no se
- * confía en el JSX.
+ * contenedor menos el suyo. **(a) Nada lo puede ENVOLVER** —un `<div>` de alto
+ * automático mediría lo que mide su contenido, cero, y el rango quedaría en cero:
+ * la pastilla se iría con el scroll—, y eso lo dice el marcado. **(b) Lo que lo
+ * precede no puede ocupar ALTO** —SITIO-S11 puso el enlace de salto antes que la
+ * pastilla, y si midiera un píxel le correría el nacimiento—, y eso sólo lo puede
+ * decir la hoja: `position: static` ahí rompe la cuenta de §2 sin cambiar una
+ * línea de marcado. Por eso «el primer elemento es la pastilla» se partió en dos
+ * en vez de aflojarse; el porqué del salto está en `_estilos/foco.css` y en
+ * `_chrome/SaltarAlContenido.tsx`. Las dos fallan igual que el pinneo de
+ * `_contrato/Seccion.tsx`: sin error, sin aviso, y con un marcado que se ve bien.
  */
-afirmar(
-  S.primerElemento(MARCADO).includes('data-pieza="navegacion"'),
-  'el PRIMER elemento que emite el chrome es el envoltorio de la pastilla: ningún `<div>` intermedio le recorta el rango de pegado a cero',
-  S.primerElemento(MARCADO),
-)
-controlPositivo(
-  'el detector ve un envoltorio intermedio',
-  S.MARCADO_CON_ENVOLTORIO,
-  (h: string) => S.primerElemento(h).includes('data-pieza="navegacion"'),
-)
-controlPositivo('y no se pone verde con un marcado vacío', '', (h: string) => S.primerElemento(h).includes('data-pieza="navegacion"'))
+afirmarIgual(S.profundidadDeLaPieza(MARCADO, 'navegacion'), 0, 'el envoltorio de la pastilla NO está envuelto: es hijo directo del fragmento, así que su contenedor de bloque es el `<main>` y el rango de pegado es el alto de las ocho secciones')
+controlPositivo('el detector ve un envoltorio intermedio', S.MARCADO_CON_ENVOLTORIO, (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
+controlPositivo('y no se pone verde con un marcado vacío', '', (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
+
+const FOCO_CSS = S.leer('src/app/v3/_estilos/foco.css')
+const SEL_SALTO = '[data-v3] [data-pieza="salto"]'
+afirmarIgual(S.declaracionCss(FOCO_CSS, SEL_SALTO, 'position'), 'absolute', 'en reposo el enlace de salto está FUERA DEL FLUJO: no ocupa alto, así que la pastilla nace exactamente donde nacía')
+afirmarIgual(S.declaracionCss(FOCO_CSS, `${SEL_SALTO}:focus-visible`, 'position'), 'fixed', '  y al enfocarlo se ve contra el VIEWPORT: el foco puede volver acá con `Shift+Tab` desde cualquier punto del recorrido')
+controlPositivo('el detector ve un enlace de salto DENTRO del flujo', S.CSS_DEL_SALTO_EN_FLUJO, (c: string) => S.declaracionCss(c, SEL_SALTO, 'position') === 'absolute')
+controlPositivo('y sabe decir que una propiedad NO está declarada, que es distinto de estar en otro valor', FOCO_CSS, (c: string) => S.declaracionCss(c, SEL_SALTO, 'display') !== null)
+
+/* La primera parada del DOCUMENTO, con el banco y el lector de SITIO-S10 —acá no se escribe
+   una segunda forma de contar paradas—: cierra los hallazgos 1 y 2 de `s10-acceso` §2 y §3. */
+const PARADAS = paradasDeTabulacion(marcadoDelDocumento('quieta'))
+afirmarIgual(PARADAS[0].rotulo, ROTULO_DEL_SALTO, `la PRIMERA de las ${PARADAS.length} paradas del documento es el enlace de salto: quien tabula ya no entra por los cinco de la pastilla`)
+afirmarIgual(paradasDeTabulacion(marcadoDelDocumento('animada'))[0].rotulo, ROTULO_DEL_SALTO, '  en las DOS ramas: el enlace es marcado y una hoja, no cuelga de la coreografía')
+afirmarIgual(PARADAS[0].destino, `#${SECCIONES[0].id}`, '  y salta a la PRIMERA sección de la tabla, no al `<main>` —que empieza ANTES que la pastilla y no saltearía nada—')
+afirmar(marcadoDelDocumento('quieta').includes(`id="${SECCIONES[0].id}"`), '  y ese id EXISTE en el marcado del documento: el salto aterriza en algo')
+controlPositivo('el buscador del ancla no está ciego', 'id="no-existe-en-el-documento"', (m: string) => marcadoDelDocumento('quieta').includes(m))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El umbral, derivado de tokens y verificado contra el Hero REAL')

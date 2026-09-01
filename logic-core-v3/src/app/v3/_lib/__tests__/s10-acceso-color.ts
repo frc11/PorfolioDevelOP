@@ -4,26 +4,33 @@
  *
  * Tercer archivo del frente por la regla de las 300 líneas, y el corte no es de
  * conveniencia: `s10-acceso.ts` LEE MARCADO —no sabe qué es un hex— y este
- * archivo resuelve COLOR —no sabe qué es un lector de pantalla—. Cambiar el
- * detector de duplicados no toca una razón de contraste, y agregar una tinta no
- * toca un detector.
+ * archivo resuelve COLOR —no sabe qué es un lector de pantalla—.
  *
- * ⚠ **Ningún hex se escribe acá: los seis se LEEN de `theme-develop.css`** con
- * el resolvedor del banco. Es la única forma de que la tabla del reporte se
- * mueva si alguien cambia un token, en vez de quedar publicada con el valor de
- * ayer. El único literal de color de este archivo está en el control positivo,
- * que necesita un valor fabricado por definición.
+ * ⚠ **Ningún hex se escribe acá: todos se LEEN de `theme-develop.css`** con el
+ * resolvedor del banco. Es la única forma de que la tabla del reporte se mueva
+ * si alguien cambia un token, en vez de quedar publicada con el valor de ayer.
+ * El único literal de color está en el control positivo, que necesita un valor
+ * fabricado por definición.
  *
  * ── LA ASIMETRÍA QUE ESTE ARCHIVO EXISTE PARA VER ──────────────────────────
  *
- * `[data-seccion="invertida"]` redefine CUATRO tokens: `--color-fondo`,
- * `--color-tinta`, `--color-borde` y `--color-borde-fuerte` (más la superficie
- * translúcida). **No redefine `--color-tinta-media`, `--color-tinta-tenue` ni
- * los acentos**, y el propio tema lo dice y lo mide. O sea: una utilidad
- * `text-tinta-media` escrita adentro de una sección invertida pinta el MISMO
+ * `[data-seccion="invertida"]` redefine unos tokens y hereda otros, y **cuál es
+ * cuál cambia con el tema**: por eso ningún hex se resuelve acá sin preguntar
+ * antes en qué sección cae. Hasta SITIO-S10 el bloque invertido redefinía
+ * `--color-fondo`, `--color-tinta`, los dos bordes y la superficie translúcida,
+ * y **NO** `--color-tinta-media` ni `--color-tinta-tenue`: una utilidad
+ * `text-tinta-media` escrita adentro de una sección invertida pintaba el MISMO
  * gris medio que sobre el papel, ahora sobre #0E0E0E. Eso no lo ve un
  * componente que se verificó solo, porque el componente no sabe en qué sección
  * lo van a montar — sólo se ve recorriendo las ocho juntas, que es el encargo.
+ *
+ * ⚠️ **SITIO-S11 REDEFINIÓ LAS DOS, y este modelo tuvo que seguir la cascada.**
+ * `tintaDeClases` devolvía el hex CLARO de media y tenue en las dos ramas, y era
+ * lo correcto mientras el tema no las diera vuelta. Ahora las da vuelta, y
+ * seguir devolviendo el claro no sería conservador: sería medir una hoja que ya
+ * no existe y publicar un fallo de AA que el navegador no comete. El modelo
+ * pregunta por `valorInvertido()` igual que ya hacía con `--color-tinta`, así
+ * que la asimetría se sigue VIENDO donde está.
  */
 
 import { TEMA, valorDeToken } from './s10-css'
@@ -63,6 +70,8 @@ export const COLOR = {
   tintaInvertida: hex(valorInvertido('--color-tinta')),
   media: hex(valorDeToken('--color-tinta-media')),
   tenue: hex(valorDeToken('--color-tinta-tenue')),
+  mediaInvertida: hex(valorInvertido('--color-tinta-media')),
+  tenueInvertida: hex(valorInvertido('--color-tinta-tenue')),
   acentoWeb: hex(valorDeToken('--color-acento-web')),
   acentoIa: hex(valorDeToken('--color-acento-ia-automatizacion')),
   acentoSoftware: hex(valorDeToken('--color-acento-software')),
@@ -130,16 +139,21 @@ export interface Tinta {
  * La tinta EFECTIVA de un elemento: la utilidad que declara, resuelta contra el
  * contexto de la sección.
  *
- * `text-tinta-media` y `text-tinta-tenue` devuelven el MISMO hex adentro y
- * afuera de la invertida — no es un descuido de esta función, es lo que la
- * cascada hace, y es el hallazgo.
+ * **Las TRES tintas se resuelven por contexto**, no sólo la primaria: cada una
+ * pregunta si el bloque invertido la redefine y usa el valor que la cascada
+ * dejaría vigente ahí. Hasta SITIO-S10 media y tenue devolvían el mismo hex en
+ * las dos ramas, y no era un descuido de esta función: era lo que la cascada
+ * hacía, y era el hallazgo. S11 dio vuelta las dos en el tema, así que ahora la
+ * cascada dice otra cosa y esta función dice lo mismo que ella.
  */
 export function tintaDeClases(clases: string, invertida: boolean, acento: string): Tinta {
   const lista = clases.split(/\s+/)
   const base = invertida ? COLOR.tintaInvertida : COLOR.tintaClara
   const alfa = lista.includes('opacity-casi') ? ALFA_CASI : 1
-  if (lista.includes('text-tinta-media')) return { token: '--color-tinta-media', hex: COLOR.media, alfa }
-  if (lista.includes('text-tinta-tenue')) return { token: '--color-tinta-tenue', hex: COLOR.tenue, alfa }
+  if (lista.includes('text-tinta-media'))
+    return { token: '--color-tinta-media', hex: invertida ? COLOR.mediaInvertida : COLOR.media, alfa }
+  if (lista.includes('text-tinta-tenue'))
+    return { token: '--color-tinta-tenue', hex: invertida ? COLOR.tenueInvertida : COLOR.tenue, alfa }
   if (lista.includes('text-acento')) return { token: '--color-acento', hex: acento, alfa }
   return { token: '--color-tinta', hex: base, alfa }
 }

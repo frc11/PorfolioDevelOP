@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
+import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
@@ -195,6 +196,8 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                       patron="P1"
                       como="h1"
                       className={TIPOGRAFIA_DEL_TITULAR}
+                      // El `h1` es el nombre accesible de la región del Hero (S11, defecto 10).
+                      id={idDelTitularDeSeccion(seccion.id)}
                     />
                   )}
                 </Bloque>

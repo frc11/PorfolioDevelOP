@@ -31,19 +31,38 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
 import { ARCHIVOS_DEL_SPRINT, leer } from './s3-archivos'
-import { enElRepo, git, rutasTocadas, tokensDeclaradosEn } from './s3-git'
+import { enElRepo, esAlta, git, rutasDadasDeAlta, rutasTocadas, tokensDeclaradosEn } from './s3-git'
 import { AGREGADOS } from './padron-de-tokens'
 import { encabezadoDeFrontera, evaluarVentana } from './s4-ventana'
 
 const tocados = rutasTocadas()
 
 /**
- * El testigo de la ventana son los archivos del propio sprint: son altas, así
- * que mientras el sprint esté sin commitear tienen que estar tocados. Si
- * ninguno aparece, este árbol de trabajo ya no es el de S3.
+ * El testigo de la ventana son los archivos del propio sprint, y **se los busca
+ * entre las ALTAS y no entre los tocados**.
+ *
+ * ⚠ **ESTO ERA UN DEFECTO DEL DETECTOR, Y LO DESTAPÓ SITIO-S11.** La premisa
+ * estaba escrita desde el principio —*«son altas, así que mientras el sprint
+ * esté sin commitear tienen que estar tocados»*— pero la comprobación cruzaba
+ * los testigos contra `rutasTocadas()`, que no distingue quién los tocó. Y esa
+ * diferencia importa: los 35 archivos de S3 están commiteados hace ocho
+ * sprints, pero cuatro de ellos —`_estilos/navegacion.css`, `_estilos/foco.css`,
+ * `chrome/Navegacion.tsx` y `tipografia/Titular.tsx`— los MODIFICÓ S11. Con eso
+ * el detector declaraba DENTRO DE VENTANA un sprint que no era el suyo, y las
+ * cuatro afirmaciones de abajo se ponían en rojo midiendo un diff que no les
+ * pertenece: dos por los toques declarados de S11 y dos por su propio fechado
+ * (`--color-superficie-translucida` ya no puede ser un token «nuevo» contra
+ * HEAD, ni puede haber scripts nuevos).
+ *
+ * **Un alta la hace UNA sola vez quien crea el archivo.** Los sprints que vienen
+ * después lo modifican (`M`), nunca lo dan de alta, así que `rutasDadasDeAlta()`
+ * separa exactamente los dos estados que se confundían. Es la regla 12 aplicada
+ * a su propio detector: un check de frontera fuera de su ventana **declara que
+ * no corrió y por qué**, no falla — y para eso el detector tiene que saber
+ * cuándo está fuera.
  */
 const TESTIGOS = ARCHIVOS_DEL_SPRINT.map(enElRepo)
-const ventana = evaluarVentana(TESTIGOS, tocados)
+const ventana = evaluarVentana(TESTIGOS, rutasDadasDeAlta())
 console.log(`\n${encabezadoDeFrontera('s3-frontera', ventana)}`)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -213,6 +232,25 @@ controlPositivo(
   'el detector no dice DENTRO por una ruta ajena',
   ['un/archivo/que/no/es/del/sprint.ts'],
   (lista) => evaluarVentana(TESTIGOS, lista).dentro,
+)
+
+/**
+ * ⚠ **EL CONTROL QUE FALTABA, Y ES EL QUE HABRÍA VISTO EL DEFECTO (SITIO-S11).**
+ *
+ * El detector se alimentaba de «tocados» y por eso no distinguía el alta de la
+ * modificación. Los tres controles de arriba no lo veían: los tres le pasan una
+ * lista sintética, y con una lista ya filtrada el filtro no se ejerce. Lo que
+ * hay que controlar es **el filtro**, con los tres estados que `git status`
+ * emite de verdad.
+ */
+afirmar(esAlta('??'), 'un archivo sin trackear ES un alta')
+afirmar(esAlta('A '), '  y uno agregado al índice también')
+controlPositivo('pero una MODIFICACIÓN no: es lo que hace un sprint posterior sobre un archivo ajeno', ' M', esAlta)
+controlPositivo('  ni una modificación ya indexada', 'M ', esAlta)
+afirmar(
+  rutasDadasDeAlta().every((r) => tocados.includes(r)),
+  `las ${rutasDadasDeAlta().length} altas son un subconjunto de las ${tocados.length} rutas tocadas`,
+  'si no lo fueran, las dos lecturas estarían hablando de árboles distintos',
 )
 
 cerrar('s3-frontera.invariant')

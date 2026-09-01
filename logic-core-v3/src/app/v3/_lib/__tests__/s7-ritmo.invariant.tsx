@@ -68,12 +68,34 @@ titulo('2 · La constante del pin se verifica contra el MARCADO, no se cree')
 const pinneadas = REGISTRO.filter((m) => m.seccion.pinneada !== undefined)
 afirmar(pinneadas.length > 0, `hay ${pinneadas.length} secciones pinneadas que verificar`)
 
+/**
+ * ⚠️ **SE LEE LA CLASE DEL ELEMENTO PEGADO, NO UNA SUBCADENA DEL DOCUMENTO
+ * (SITIO-S11), y la clase de `siempre` cambió.**
+ *
+ * Esta comprobación buscaba `'h-svh'` con `html.includes(...)`. **Era verde por
+ * subcadena**: `min-h-svh` la contiene, así que el día que el envoltorio pasara
+ * de una a la otra la línea habría seguido en verde diciendo algo falso. S11
+ * hizo exactamente ese cambio —`pinneada: 'siempre'` pasa de `h-svh` a
+ * `min-h-svh`, que es lo que arregla el defecto 1 de §7.38— así que la
+ * comprobación se rehace leyendo las clases DEL elemento que lleva
+ * `data-pinneado` y comparando por token exacto.
+ *
+ * Y lo que se afirma es lo que la cuenta necesita: que el hijo pegado declare
+ * UNA pantalla. En `desde-escritorio` la declara como alto FIJO
+ * (`escritorio:h-svh`); en `siempre`, como PISO (`min-h-svh`). El piso es lo
+ * que hace que una sección cuyo contenido quieto mide tres pantallas deje de
+ * esconder dos, y no cambia la cuenta de escritorio, que es la que este archivo
+ * produce.
+ */
+const clasesDelPegado = (html: string, modo: string): string[] =>
+  (new RegExp(`data-pinneado="${modo}"\\s+class="([^"]*)"`).exec(html)?.[1] ?? '').split(/\s+/)
+
 for (const m of pinneadas) {
   const html = marcar(<m.Componente seccion={m.seccion} />, { anima: false })
-  const clase = m.seccion.pinneada === 'siempre' ? 'h-svh' : 'escritorio:h-svh'
+  const clase = m.seccion.pinneada === 'siempre' ? 'min-h-svh' : 'escritorio:h-svh'
   afirmar(
-    html.includes(clase),
-    `\`${m.id}\` — el hijo pegado mide ${PANTALLAS_DEL_STICKY} pantalla (\`${clase}\`)`,
+    clasesDelPegado(html, m.seccion.pinneada ?? '').includes(clase),
+    `\`${m.id}\` — el hijo pegado declara ${PANTALLAS_DEL_STICKY} pantalla (\`${clase}\`)`,
   )
 }
 afirmarIgual(PANTALLAS_DEL_STICKY, 1, 'y la constante de la cuenta dice lo mismo')
@@ -81,7 +103,12 @@ afirmarIgual(PANTALLAS_DEL_STICKY, 1, 'y la constante de la cuenta dice lo mismo
 controlPositivo(
   'el lector de la clase del sticky ve un alto que no es una pantalla',
   '<div data-pinneado="siempre" class="sticky top-0 h-[50svh]">',
-  (html: string) => html.includes('h-svh'),
+  (html: string) => clasesDelPegado(html, 'siempre').includes('min-h-svh'),
+)
+controlPositivo(
+  '  y no se lo cree por subcadena: `min-h-svh` NO satisface a `h-svh`',
+  '<div data-pinneado="desde-escritorio" class="escritorio:sticky escritorio:min-h-svh">',
+  (html: string) => clasesDelPegado(html, 'desde-escritorio').includes('escritorio:h-svh'),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

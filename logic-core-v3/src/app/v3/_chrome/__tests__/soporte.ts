@@ -2,6 +2,8 @@ import { readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { atributo, nodosDe } from '../../_lib/__tests__/s10-recorrido'
+
 /**
  * LA PLOMERÍA DE `s8-chrome` — los detectores, afuera del archivo que los usa.
  *
@@ -179,6 +181,39 @@ export function importsDe(fuente: string): string[] {
   ]
 }
 
+/**
+ * LA PROFUNDIDAD DE UNA PIEZA en un marcado renderizado. `null` si no está.
+ *
+ * ⚠ **Es lo que reemplazó a «el primer elemento es la pastilla» en SITIO-S11**,
+ * y la diferencia importa: lo que sostiene el `sticky` no es que la pastilla sea
+ * la PRIMERA —el enlace de salto se emite antes que ella, y no le mueve nada
+ * porque está fuera del flujo— sino que **nada la ENVUELVA**. Un `<div>` de alto
+ * automático entre el `<main>` y el envoltorio le deja el rango de pegado en
+ * cero, y eso es exactamente lo que mide una profundidad de 0 contra una de 1.
+ *
+ * El recorrido no se reescribe acá: se reusa `nodosDe`, el lector con pila de
+ * SITIO-S10, que ya cuenta anidamiento y ya tiene sus propios controles.
+ */
+export function profundidadDeLaPieza(html: string, pieza: string): number | null {
+  const nodo = nodosDe(html).find((n) => atributo(n, 'data-pieza') === pieza)
+  return nodo === undefined ? null : nodo.profundidad
+}
+
+/**
+ * El valor de una propiedad en la regla de un selector EXACTO. `null` si no
+ * está declarada — que es distinto de estar declarada en otro valor.
+ *
+ * Sirve para afirmar sobre la HOJA lo que el marcado no puede decir: que el
+ * enlace de salto está fuera del flujo. Un `position: static` ahí le correría el
+ * nacimiento a la pastilla sin cambiar una línea de marcado.
+ */
+export function declaracionCss(css: string, selector: string, propiedad: string): string | null {
+  const regla = reglasPlanas(css).find((r) => r.selector === selector)
+  if (regla === undefined) return null
+  const m = new RegExp(`(?<![-\\w])${propiedad}\\s*:\\s*([^;}]+)`).exec(regla.cuerpo)
+  return m === null ? null : m[1].trim()
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
  * LAS ENTRADAS ROTAS — a propósito, para los controles positivos.
  * ═══════════════════════════════════════════════════════════════════════════ */
@@ -201,3 +236,11 @@ export const HREFS_A_LA_NADA: readonly string[] = ['#no-existe', 'https://develo
 
 /** El marcado de la pieza del pie SIN el peso restaurado. */
 export const MARCADO_SIN_PESO = '<span class="font-cuerpo text-caption font-normal font-codigo uppercase">[ENLACE]</span>'
+
+/**
+ * La hoja que dejaría al enlace de salto DENTRO del flujo. Es la trampa que
+ * ningún marcado puede mostrar: con esto el enlace mide alto, empuja al
+ * envoltorio `sticky` que se emite después y le corre el nacimiento a la
+ * pastilla —los `100svh − 72px` que §2 verifica contra el Hero real—.
+ */
+export const CSS_DEL_SALTO_EN_FLUJO = '[data-v3] [data-pieza="salto"] { position: static; block-size: 1px; }'

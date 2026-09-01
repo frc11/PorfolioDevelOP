@@ -25,7 +25,7 @@ import {
   VIRA_YAW_DEG,
   VIRA_YAW_PERIOD_S,
 } from './choreographyPhysics'
-import type { ChoreoEditor } from '@/app/probe-escena/_components/choreographyEditor'
+import type { ChoreoEditor } from './choreographyEditorTypes'
 import {
   dampTowards,
   nearestKeyframeIndex,

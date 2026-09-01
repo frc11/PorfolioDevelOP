@@ -205,6 +205,15 @@ export const CHOREO_NOTES: KeyframeNotes = {
     '(la tinta va de −2,39 a +2,39): es un contrapicado de 16°, no un picado.',
     '',
     'Holgura contra el piso: 1,299.',
+    '',
+    '── ⚠️ EL RECORTE POR ARRIBA ES DECISIÓN (SITIO-S11, defecto 18) ───────',
+    '',
+    'Llenar el cuadro y salirse de él NO son lo mismo, y hasta S10 acá sólo',
+    'estaba escrito lo primero: a p=0,750 la caja llega a y=+1,05 con el borde en',
+    '+1,00 y el logo entra al 98,9% en el peor cuadro — cerca del 1% del área',
+    'queda afuera. **El valor no se toca:** lo que se recorta es el filo superior',
+    'del trazo, no la forma, y un recorte por arriba que nadie declaró se lee como',
+    'un error. Lo midió `s10-logo.invariant.ts` §3, y su §6 lo custodia.',
   ],
 
   cierre: [

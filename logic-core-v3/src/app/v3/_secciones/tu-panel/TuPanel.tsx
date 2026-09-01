@@ -2,7 +2,7 @@
 
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
-import { Titular } from '../../_componentes/tipografia/Titular'
+import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeTitular, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
@@ -68,13 +68,23 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
 
         <Bloque patron="P1">
           {(progreso) => (
-            <CanalDeTitular
-              progreso={progreso}
-              patron="P1"
-              texto={TITULAR}
-              nivel="titulo-l"
-              como="h2"
-            />
+            /* ⚠ El envoltorio existe por UNA razón y está de paso: es el que lleva
+               el `id` con el que la `<section>` se nombra (S11, defecto 10). El `h2`
+               sale de `CanalDeTitular`, que NO tiene prop `id` —`canales.tsx` y
+               `coreografia-animada.tsx` no son de este frente—, así que el id va en
+               el elemento que lo contiene: el nombre accesible se computa del
+               contenido, y el contenido de este `div` es exactamente el titular. Es
+               una caja de bloque adentro de otra: no mueve un píxel. El día que el
+               canal acepte `id`, esto se borra y queda una línea. */
+            <div id={idDelTitularDeSeccion(seccion.id)}>
+              <CanalDeTitular
+                progreso={progreso}
+                patron="P1"
+                texto={TITULAR}
+                nivel="titulo-l"
+                como="h2"
+              />
+            </div>
           )}
         </Bloque>
 

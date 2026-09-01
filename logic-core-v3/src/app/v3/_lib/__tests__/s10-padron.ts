@@ -164,15 +164,21 @@ export interface NoEntregado {
  * `s5-archivos.ts` usa con `ARCHIVOS_DE_RUTA`, que queda como lista vacía y no
  * se borra: *«es lo que hace que se lea, en el padrón, que acá hubo una ruta y
  * ya no hay»*.
+ *
+ * ✅ **LA LISTA QUEDÓ VACÍA EN SITIO-S11, Y VACÍA NO ES BORRADA.** SITIO-S10
+ * declaró acá un solo no-entregado: `choreographyEditorTypes.ts`, el arreglo de
+ * §7.36, frenado porque su costo publicado estaba incompleto —le faltaba
+ * `s9-instrumentos.invariant.ts` §2, el instrumento que MIDE el acoplamiento—.
+ * SITIO-S11 lo entregó **con el costo real**: el módulo nuevo existe, los tres
+ * imports apuntan ahí, el panel re-exporta los tipos y los dos instrumentos
+ * están reescritos con sus controles. La entrada se borra porque **el propio
+ * padrón lo pide**: su comprobación afirma que ninguno de los declarados está
+ * en disco, *«si apareciera, la razón del freno ya no valdría y hay que
+ * borrarla»*. La constante se queda como lista vacía, igual que
+ * `ARCHIVOS_DE_RUTA`: es lo que hace que se lea, en el padrón, que acá hubo un
+ * freno y ya no hay.
  */
-export const NO_ENTREGADOS: readonly NoEntregado[] = [
-  {
-    frente: 'D',
-    archivo: `${ESCENA}/choreographyEditorTypes.ts`,
-    porQue:
-      'D3 se DECLARA en vez de resolverse, que es una de las dos salidas que la instrucción admite («resolvelo o declaralo con su razón»). El motivo es una medición: el costo que §7.36 publica —«1 archivo nuevo, 4 líneas cambiadas, 1 afirmación reescrita»— está INCOMPLETO. Nombra sólo `s8-escena.invariant.ts` §3 y se olvida de `s9-instrumentos.invariant.ts` §2, que es el instrumento que MIDE el acoplamiento: el arreglo le borra la premisa a cuatro de sus afirmaciones (los tres `IMPORT_DE_TIPO` sobre los tres archivos, y el `export type ChoreoEditor = {` sobre el editor, que con la re-exportación deja de matchear). Y hay una quinta consecuencia que ningún costo nombraba: las tres afirmaciones de «no importa un VALOR del panel» pasarían a ser verdaderas POR VACÍO, que es el modo de falla que este repo caza. El costo real es 1 archivo nuevo, 4 líneas de import y DOS instrumentos reescritos con sus controles',
-  },
-]
+export const NO_ENTREGADOS: readonly NoEntregado[] = []
 
 /** El banco compartido: lo escribió el agente principal en la Fase 0. */
 export const BANCO: readonly string[] = [

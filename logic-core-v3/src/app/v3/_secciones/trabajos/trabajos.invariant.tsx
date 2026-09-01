@@ -33,7 +33,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
-import { sizesPorTresTramos } from '../../_lib/imagen'
+import { sizesPorViewport } from '../../_lib/imagen'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { cuentaDeMarcadores, hallazgosDeCifraConSimbolo, hallazgosDeDigito, hallazgosDeMarcadorDesconocido, marcadoresPedidos, numerosDe, textosDe } from '../_contrato/marcadores'
 import { MarcoDeMedio } from '../_contrato/medios'
@@ -263,7 +263,7 @@ titulo('13 · Las capturas: relación de aspecto y `sizes`, sobre el marcado')
 afirmarIgual(veces(quieto, `aspect-ratio:${GEOMETRIA.captura.ancho} / ${GEOMETRIA.captura.alto}`), 3, 'los tres marcos declaran su relación de aspecto EN EL MARCADO, no en un comentario')
 controlPositivo('el chequeo de la relación de aspecto ve una caja sin ella', '<div role="img"></div>', (html: string) => html.includes('aspect-ratio:'))
 afirmar(SIZES_DE_LA_CAPTURA.trim().length > 0, 'el `sizes` no es vacío', SIZES_DE_LA_CAPTURA)
-afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorTresTramos(GEOMETRIA.captura.tercio, GEOMETRIA.captura.tercio, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano')
+afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorViewport(GEOMETRIA.captura.tercio, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano. ⚠ DOS tramos desde SITIO-S11 y no tres: el arreglo del defecto 3 corrió el colapso de la grilla de 768 a 1025, así que la caja cambia EN el umbral y el tramo del medio —33vw de 768 a 1024, donde la captura pasó a ocupar el ancho entero— dejó de ser verdad')
 
 /** El `sizes` sobre el marcado. Con `fuente={null}` la etiqueta `<img>` todavía
  *  no existe, así que se renderiza EL MISMO marco con los MISMOS valores y una

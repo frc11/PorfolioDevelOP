@@ -15,6 +15,7 @@
 
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../../_lib/tipografia'
 import { valoresDeAcentoDelTema } from '../_invariantes/soporte'
+import { CAPA_APAGADA, CAPA_VIGENTE, CLASE_DE_CAPA_APAGADA } from './geometria'
 
 /** Cuántas veces casa una expresión en un texto. */
 export function cuenta(texto: string, aguja: RegExp): number {
@@ -185,4 +186,112 @@ export function familiasDeTituloPerdidas(html: string): string[] {
 /** La invisible: se publica, no se afirma en cero. Ver el bloque de arriba. */
 export function familiasDeCuerpoPerdidas(html: string): string[] {
   return familiaPerdidaEn(html, false)
+}
+
+
+// ── LAS CAPAS DE SERVICIO: quién está en el árbol y quién está pintado ──────
+
+/**
+ * UNA CAPA DE SERVICIO — una caja `[data-servicio]` con la forma que declara.
+ *
+ * Existe por el arreglo del defecto 1 de SITIO-S10, mitad de arriba. Hasta S10
+ * la rama pinneada montaba UN servicio, así que la voz única —un acento por
+ * contexto, nunca los tres— se podía afirmar contando el atributo. Con los TRES
+ * en el árbol esa cuenta ya no dice nada, y lo que hay que afirmar es lo que la
+ * regla siempre quiso decir: **de las capas que existen, hay exactamente UNA
+ * pintada.** El porqué de las dos formas está entero en `geometria.ts`; acá
+ * está sólo cómo se leen: se cruza lo que la capa DICE ser (`data-capa`) con lo
+ * que su clase HACE (`sr-only`, o su ausencia). Una sola de las dos fuentes
+ * podría mentir sin que nadie lo note; las dos juntas, no.
+ */
+export interface CapaDeServicio {
+  readonly id: string
+  readonly clases: readonly string[]
+  /** Dice `vigente` y no lleva la clase que esconde: es la que se ve. */
+  readonly vigente: boolean
+  /** Dice `apagada` y lleva la clase: está en el árbol y no se pinta. */
+  readonly apagada: boolean
+}
+
+/**
+ * La etiqueta de apertura de una capa, entera. Se lee el TAG y no una pareja de
+ * atributos pegados: el orden en el que React los emite es el del JSX, y atarse
+ * a él dejaba al instrumento ciego ante un reordenamiento inofensivo.
+ */
+const ETIQUETA_DE_CAPA = /<[a-z][a-z0-9]*\b[^>]*\bdata-servicio="([^"]*)"[^>]*>/gi
+
+/** Las capas de servicio de un marcado, en orden del documento. */
+export function capasDeServicio(html: string): CapaDeServicio[] {
+  return [...html.matchAll(ETIQUETA_DE_CAPA)].map((m) => {
+    const clases = (/\bclass="([^"]*)"/.exec(m[0])?.[1] ?? '').split(/\s+/)
+    const dice = /\bdata-capa="([^"]*)"/.exec(m[0])?.[1] ?? ''
+    const esconde = clases.includes(CLASE_DE_CAPA_APAGADA)
+    return {
+      id: m[1],
+      clases,
+      vigente: dice === CAPA_VIGENTE && !esconde,
+      apagada: dice === CAPA_APAGADA && esconde,
+    }
+  })
+}
+
+/** Los servicios que se PINTAN. En la rama pinneada tiene que ser exactamente uno. */
+export function serviciosVigentes(html: string): string[] {
+  return capasDeServicio(html).filter((c) => c.vigente).map((c) => c.id)
+}
+
+/** Los servicios que están en el árbol y NO se pintan. */
+export function serviciosApagados(html: string): string[] {
+  return capasDeServicio(html).filter((c) => c.apagada).map((c) => c.id)
+}
+
+/**
+ * Las capas que no declaran NINGUNA de las dos formas, o declaran las DOS. Es el
+ * contrapeso de las dos de arriba: sin esto, una capa a la que alguien le borre
+ * las clases se caería de las dos listas y las dos seguirían pareciendo
+ * correctas. Vacío o hay defecto.
+ */
+export function capasSinDeclararSuForma(html: string): string[] {
+  return capasDeServicio(html)
+    .filter((c) => c.vigente === c.apagada)
+    .map((c) => `${c.id}: "${c.clases.join(' ')}"`)
+}
+
+/**
+ * Las capas que no piden al menos una pantalla de alto. Se mide sobre las TRES
+ * CAJAS y no sobre todo el marcado: contar `min-h-svh` en el documento ataría
+ * esta sección a las clases de su envoltorio, que no son suyas.
+ */
+export function capasSinPantalla(html: string): string[] {
+  return capasDeServicio(html).filter((c) => !c.clases.includes('min-h-svh')).map((c) => c.id)
+}
+
+/**
+ * LAS CAPAS QUE SE CAERÍAN DEL ÁRBOL DE ACCESIBILIDAD.
+ *
+ * ⚠️ **Es el detector del defecto que el arreglo existe para no reintroducir.**
+ * Apagar una capa con cualquiera de estas cinco formas la saca del árbol, y
+ * volveríamos exactamente a los 24 encabezados y los 33 marcadores que
+ * `s10-acceso` midió. El único apagado admitido es `opacity`, que apaga la
+ * pintura y deja el nodo entero para un lector de pantalla.
+ *
+ * Mira la etiqueta de apertura de la capa, que es donde vivirían las cinco. Lo
+ * que un `<style>` externo le haga no se ve desde el marcado: límite declarado.
+ */
+const FORMAS_QUE_SACAN_DEL_ARBOL: readonly { readonly aguja: RegExp; readonly que: string }[] = [
+  { aguja: /\baria-hidden="true"/, que: 'aria-hidden="true"' },
+  { aguja: /\shidden(?:[=\s>]|$)/, que: 'el atributo `hidden`' },
+  { aguja: /\binert(?:[=\s>]|$)/, que: 'el atributo `inert`' },
+  { aguja: /(^|\s)(?:invisible|hidden)(\s|")/, que: 'una clase que apaga la caja entera' },
+  { aguja: /(?:display|content-visibility)\s*:\s*(?:none|hidden)/, que: 'un estilo que la esconde' },
+]
+
+export function capasFueraDelArbol(html: string): string[] {
+  const salida: string[] = []
+  for (const m of html.matchAll(ETIQUETA_DE_CAPA)) {
+    for (const forma of FORMAS_QUE_SACAN_DEL_ARBOL) {
+      if (forma.aguja.test(m[0])) salida.push(`${m[1]}: ${forma.que}`)
+    }
+  }
+  return salida
 }

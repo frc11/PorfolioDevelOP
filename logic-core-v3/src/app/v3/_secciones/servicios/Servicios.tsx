@@ -4,6 +4,7 @@ import { SERVICIOS } from '../_contrato/acento'
 import { Bloque } from '../_contrato/coreografia'
 import { seccionDe, type PropsDeSeccion } from '../_contrato/forma'
 import { Seccion } from '../_contrato/Seccion'
+import { CabeceraDeServicios } from './CabeceraDeServicios'
 import { ContenidoDeServicio } from './ContenidoDeServicio'
 import { CLASE_DE_BLOQUE_DE_SERVICIO } from './geometria'
 import { ServiciosEnSecuencia } from './ServiciosEnSecuencia'
@@ -55,14 +56,22 @@ const ALTO_DECLARADO = seccionDe('servicios').alto
 const INERCIA_DE_LA_SECUENCIA: number | null = null
 
 /**
- * LA RAMA SIN COREOGRAFÍA — tres bloques, uno por servicio.
+ * LA RAMA SIN COREOGRAFÍA — la cabecera y tres bloques, uno por servicio.
  *
- * Hermanos y nunca anidados, cada uno de una pantalla de alto: así nunca hay
- * dos acentos en el mismo cuadro, que es la regla de la voz única cumplida por
- * estructura y no por disciplina. Es una lectura declarada —"una pantalla por
- * bloque" es lo verificable en el marcado; "nunca dos en el mismo cuadro" es lo
- * que eso implica en una ventana— y el instrumento afirma la mitad que se puede
- * afirmar: tres ocurrencias del atributo, cero anidamientos.
+ * Los tres bloques son hermanos y nunca están anidados, cada uno de una pantalla
+ * de alto: así nunca hay dos acentos en el mismo cuadro, que es la regla de la
+ * voz única cumplida por estructura y no por disciplina. Es una lectura
+ * declarada —"una pantalla por bloque" es lo verificable en el marcado; "nunca
+ * dos en el mismo cuadro" es lo que eso implica en una ventana— y el instrumento
+ * afirma la mitad que se puede afirmar: tres cajas con su pantalla, cero
+ * anidamientos.
+ *
+ * La cabecera va ARRIBA de los tres y no adentro de ninguno (SITIO-S11): es el
+ * encabezado que nombra a la sección entera, y adentro de un bloque se repetiría
+ * tres veces. Acá no es una caja de pantalla, así que el flujo sigue midiendo
+ * las TRES declaradas —`s10-mobile` §2 lo cuenta en los cuatro anchos— y lo
+ * único que la sección gana de alto es la tinta de la cabecera, sobre un
+ * `min-height` que es un piso.
  *
  * No lleva ningún aviso de que acá no hay coreografía. Un texto que sólo
  * aparece abajo del umbral rompería justamente lo que esta rama existe para
@@ -71,6 +80,7 @@ const INERCIA_DE_LA_SECUENCIA: number | null = null
 function ServiciosApilados(): React.JSX.Element {
   return (
     <div className="flex w-full flex-col">
+      <CabeceraDeServicios />
       {SERVICIOS.map((servicio) => (
         <div key={servicio.id} data-servicio={servicio.id} className={CLASE_DE_BLOQUE_DE_SERVICIO}>
           <ContenidoDeServicio servicio={servicio} progreso={null} />

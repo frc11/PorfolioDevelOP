@@ -37,9 +37,9 @@ import { escenaRetenida } from '../retencion'
 import { MAPEO_DE_LAS_SECCIONES, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, pantallasDe, progresoDelScroll } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
-import { DESTINO, ORIGEN, MODULOS_MUDADOS, RAIZ, SUBARBOL_DEL_EDITOR, escribeAtributo, existe, importaValorDe, pesoDeUnFuente, resolverEspecificador, usaClassName } from './soporte'
+import { DESTINO, ORIGEN, MODULOS_MUDADOS, RAIZ, SUBARBOL_DEL_EDITOR, escribeAtributo, existe, importaValorDe, pesoDeUnFuente, referenciasA, resolverEspecificador, usaClassName } from './soporte'
 // prettier-ignore
-import { TODOS, conTipoDelPanel, conValorDelPanel, consumidoresDeLaMarca, fuenteDe, rotosDeLaMudanza, soloAplicacion } from './s8-escena-soporte'
+import { TODOS, conTipoDelPanel, conValorDelPanel, consumidoresDeLaMarca, fuenteDe, rotosDeLaMudanza, soloAplicacion, vinculoConElPanel } from './s8-escena-soporte'
 import { desalineacionDeNombres, imprimirMapeo, pesoDelEditor } from './tablas'
 
 const ESCENA_DEL_HOME = fuenteDe(`${DESTINO}/EscenaDelHome.tsx`)
@@ -95,23 +95,45 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · El único vínculo que queda del destino hacia /probe-escena es de TIPO')
+titulo('3 · La escena YA NO nombra a /probe-escena: el vínculo de tipo se cortó')
 
-const deLaAplicacion = soloAplicacion(TODOS)
-afirmarIgual(
-  conValorDelPanel(TODOS),
-  [],
-  'ningún módulo de la escena importa un VALOR del panel de calibración',
-)
-
+/**
+ * ⚠ **ESTA SECCIÓN CAMBIÓ DE SUJETO EN SITIO-S11 (§7.36), y el cambio ES el
+ * trabajo.** Hasta SITIO-S10 afirmaba que **tres** módulos del destino nombraban
+ * al panel —`OrbitRig.tsx`, `ProbeStage.tsx` y `pistaDelHome.ts`— sólo por el tipo
+ * `ChoreoEditor`: era el censo de una deuda declarada, y la deuda se pagó.
+ *
+ * ⚠️ **Una lista vacía es el modo de falla que este repo caza**, así que va
+ * acompañada de tres cosas: el detector corrido contra la línea que los tres
+ * tenían hasta S10, la comprobación de que el módulo nuevo **no** mira al panel
+ * —sin eso el acoplamiento se habría mudado un archivo más allá— y la de que el
+ * panel los re-exporta y ya no los declara, que es lo que hace que sus siete
+ * consumidores no cambien una línea.
+ */
+const VINCULO = vinculoConElPanel()
+afirmarIgual(conValorDelPanel(TODOS), [], 'ningún módulo de la escena importa un VALOR del panel')
 afirmarIgual(
   conTipoDelPanel(TODOS),
-  ['OrbitRig.tsx', 'ProbeStage.tsx', 'pistaDelHome.ts'].sort(),
-  'y los TRES que lo nombran lo hacen SOLO por el tipo `ChoreoEditor` — ver el freno del reporte',
+  [],
+  'y desde SITIO-S11 tampoco por TIPO: ni un módulo del destino nombra `/probe-escena`',
 )
-
+afirmarIgual(
+  VINCULO.panelEnLosTipos,
+  [],
+  '  y el módulo que ahora los declara no importa nada del panel: el vínculo no se mudó, se dio vuelta',
+)
+afirmar(
+  VINCULO.panelReExporta && !VINCULO.panelTodaviaDeclara,
+  '  el panel los RE-EXPORTA y ya no los DECLARA: la definición vive en un solo lado',
+  'ChoreoEditor · EditableKeyframe · KeyframeOrigin',
+)
 controlPositivo(
-  'el detector distingue un import de VALOR de uno de tipo',
+  'el detector de referencias al panel NO está ciego: ve la línea que los tres tenían hasta S10',
+  "import type { ChoreoEditor } from '@/app/probe-escena/_components/choreographyEditor'",
+  (fuente: string) => referenciasA(fuente, 'probe-escena').length === 0,
+)
+controlPositivo(
+  '  y distingue un import de VALOR de uno de tipo',
   "import { algo } from '@/app/probe-escena/_components/choreographyEditor'",
   (fuente: string) => !importaValorDe(fuente, 'probe-escena'),
 )
@@ -226,6 +248,8 @@ titulo('7 · La marca la importa UN archivo, y la escena no toca el sistema de m
  * mismo reportaría dos consumidores donde hay uno. La afirmación de abajo exige
  * que lo excluido SIGA teniendo lo que el detector busca.
  */
+/** El corpus sin instrumentos: los `__tests__/` llevan fixtures que el detector encontraría. */
+const deLaAplicacion = soloAplicacion(TODOS)
 const consumidores = consumidoresDeLaMarca(deLaAplicacion)
 afirmarIgual(
   consumidores,

@@ -15,8 +15,8 @@
  * diferencia que obliga: `cuadro.ts` fija `ASPECT = 16/9` como constante de
  * módulo, y el eje que este frente tiene que medir es justamente **la relación
  * de aspecto** (§7.6, abierto: *«en vertical el logo no entra igual»*). Acá el
- * aspecto entra por parámetro y llega hasta `cameraAt`, que es donde decide el
- * encuadre.
+ * aspecto entra por parámetro y llega hasta `camaraEnCuadro`, que es donde se
+ * decide el encuadre.
  *
  * ── LO QUE HACE HONESTA A ESTA COPIA: dos controles de equivalencia ────────
  *
@@ -33,13 +33,18 @@
  *
  * ── LA VENTANA DE LA MEDICIÓN, heredada y declarada (§7.15, §7.29) ─────────
  *
- * 1. **La cámara es la de `harness.ts`, que NO es la del rig.** Declara la caja
- *    del logo como 7,168 × 7,168 y el rig le pasa el mesh medido en runtime,
- *    6,863 × 4,779; con `frameX ≠ 0` las dos apuntan a lugares distintos —hasta
- *    **1,28% del ancho del cuadro en la pose de Demos**, que es justamente la
- *    pose que este frente mide—. ⚠ Y acá el desvío deja de ser un porcentaje
- *    chico: `travelX = max(0, medioAncho − LOGO_W/2) × 0,88` tiene un **codo en
- *    cero**, y las dos cámaras lo cruzan en aspectos distintos. Se publica.
+ * 1. **La caja del logo es la de `harness.ts`, que NO es la del rig.** Declara
+ *    7,168 × 7,168 y el rig le pasa el mesh medido en runtime, 6,863 × 4,779;
+ *    con `frameX ≠ 0` las dos apuntan a lugares distintos —hasta **1,28% del
+ *    ancho del cuadro en la pose de Demos**, que es justamente la pose que este
+ *    frente mide—. Se publica; no se arregla acá.
+ *
+ *    ⚠ **Lo que SÍ cambió en SITIO-S11: el ENCUADRE ya no es el del arnés.** El
+ *    recorrido sale de `camaraEnCuadro`, que lo pide a `_lib/escena/encuadre.ts`
+ *    —el mismo módulo que usa el rig—, porque `harness.ts` conserva la fórmula
+ *    con el codo en cero y este frente no puede escribir en `/probe-escena`. Las
+ *    dos coinciden bit a bit arriba del codo, y eso se comprueba: ver el
+ *    docblock de `camaraDelCuadro.ts` y los §2 y §7 del invariante.
  * 2. **No modela las partículas, ni la sombra proyectada del logo, ni el
  *    especular.** Los tres empujan el valor del cuadro hacia abajo, o sea que
  *    todo contraste que salga de acá es un **TECHO, no un piso**.
@@ -69,13 +74,13 @@ import {
 } from '@/app/probe-escena/__tests__/frameProbe'
 import {
   TAN_HALF_V,
-  cameraAt,
   emptyPose,
   halfFovDeg,
   type Track,
   type Vec3,
 } from '@/app/probe-escena/__tests__/harness'
 import { shadeSurface, sunDirectionAt, type ViewContext } from '@/app/probe-escena/__tests__/shading'
+import { camaraEnCuadro } from './camaraDelCuadro'
 
 /** Una caja en coordenadas de cuadro: −1 es el borde izquierdo/inferior, +1 el otro. */
 export interface CajaEnCuadro {
@@ -133,7 +138,7 @@ export function muestrearLogo(
   pista: Track = track,
 ): MuestraDelLogo {
   const pose = emptyPose()
-  const cam = cameraAt(pista, progreso, aspecto, pose)
+  const cam = camaraEnCuadro(pista, progreso, aspecto, pose)
   const vista: ViewContext = {
     progress: progreso,
     cameraAzimuthDeg: pose.angleDeg,

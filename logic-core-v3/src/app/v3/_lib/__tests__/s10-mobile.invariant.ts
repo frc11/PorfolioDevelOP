@@ -11,28 +11,28 @@
  *
  * ⚠️ **LO QUE ESTE FRENTE MIDE Y LO QUE PUBLICA.** Se AFIRMA lo que es cierto y
  * este instrumento controla; se PUBLICA con `console.log` —con número, gravedad
- * y dueño— todo defecto que este sprint decidió no arreglar. Es la regla 13 del
- * repo. Un rojo acá sería un frente de medición bloqueando un sprint que no le
- * pidió que arregle nada.
+ * y dueño— todo defecto que el sprint decidió no arreglar (regla 13 del repo).
+ *
+ * ⚠️ **SITIO-S11 lo partió en tres.** El censo se dio vuelta —de afirmar la forma
+ * del defecto a afirmar la del arreglo— y con eso el archivo cruzó las 300
+ * líneas. Tres secciones salieron, y el corte es por tema y no por tamaño: §8 (la
+ * pastilla) vive con su modelo en `./s10-mobile-pastilla`, §9 (la escala) en
+ * `./s10-mobile-escala` —la única que mira la hoja y no el marcado— y §10 (el
+ * peso) en `./s10-mobile-peso`, la única que lee el disco de `.next`.
  */
 
-import { existsSync, statSync } from 'node:fs'
-import path from 'node:path'
 
-import { pisoDelFramework } from '../../../../components/layout/carga-diferida/__tests__/soporte'
 import { SERVICIOS } from '../../_secciones/_contrato/acento'
 import { pantallasDe } from '../../_secciones/_contrato/forma'
 import { GEOMETRIA } from '../../_secciones/numeros/Numeros'
 import { CONTENIDO as NUMEROS } from '../../_secciones/numeros/contenido'
 import { CONTENIDO as TRABAJOS } from '../../_secciones/trabajos/contenido'
-import { DESCUENTO_UMBRAL_PX, umbralPx } from '../navegacion'
 import { SECCIONES } from '../secciones'
-import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import {
   ALTOS,
   ALTOS_DECLARADOS,
   ANCHOS_DE_REFERENCIA,
-  HUECOS,
   QUE_SIRVE_CADA_RAMA,
   SUPUESTOS_DEL_BANCO,
   VIEWPORTS_MEDIDOS,
@@ -41,10 +41,11 @@ import {
 import { SUPUESTOS_DEL_MODELO_DE_CSS, anchoDeContenido, clasesEfectivas, tokenPx } from './s10-css'
 import { ordenDeSecciones } from './s10-lectura'
 import * as M from './s10-mobile'
+import { afirmarLaPastilla } from './s10-mobile-pastilla'
+import { afirmarLaEscala } from './s10-mobile-escala'
+import { afirmarElPeso } from './s10-mobile-peso'
 import { modeloDelCierre } from './s10-mobile-pie'
 import { atributo, nodosDe } from './s10-recorrido'
-import { DIST, conjuntoInicial, contiene, kib, pesar } from './s3-bundle'
-import { leer } from './s5-archivos'
 
 /** Los cuatro anchos de este frente: los cinco del banco menos 1025, que es el
  *  otro sitio. 1025 entra sólo como contraste, para que los detectores no
@@ -86,7 +87,19 @@ for (const rama of secciones) {
 }
 
 const SIN_CAJA_DE_PANTALLA = ['por-que-develop', 'cierre']
-for (const id of ['hero', 'quienes-somos', 'numeros', 'tu-panel']) {
+/**
+ * ⚠️ **`servicios` y `trabajos` ENTRAN A ESTA LISTA EN SITIO-S11.**
+ *
+ * Los dos estaban afuera porque los dos tenían un defecto de composición, y la
+ * lista es la de las secciones cuyo flujo llena lo que la tabla declara **en
+ * los cuatro anchos**. Servicios medía 1 de 3 en los cuatro (la caja clavada del
+ * §3) y Trabajos medía 1 de 3 a 768 y 1024 (la fila de la grilla arrancaba en
+ * 768 y el despinneo en 1025). Con los dos arreglos la lista pasa de cuatro
+ * secciones a seis, y **la afirmación suelta que cubría a Trabajos sólo en 375 y
+ * 390 se borra porque ésta la subsume**: cubrir dos anchos era todo lo que se
+ * podía afirmar mientras los otros dos estuvieran rotos.
+ */
+for (const id of ['hero', 'quienes-somos', 'numeros', 'trabajos', 'servicios', 'tu-panel']) {
   const decl = pantallasDe(SECCIONES.find((s) => s.id === id) ?? SECCIONES[0])
   const iguales = ANCHOS_DE_MOBILE.every((a) => flujo.get(id)?.get(a)?.pantallas === decl)
   afirmar(iguales, `${id}: el flujo llena las ${decl} pantallas declaradas en los cuatro anchos`)
@@ -94,12 +107,16 @@ for (const id of ['hero', 'quienes-somos', 'numeros', 'tu-panel']) {
 for (const id of SIN_CAJA_DE_PANTALLA) {
   afirmar(ANCHOS_DE_MOBILE.every((a) => flujo.get(id)?.get(a)?.pantallas === 0), `${id}: CERO cajas de pantalla — su alto es intrínseco y el \`min-height\` de la tabla es el piso`)
 }
-afirmar(ANCHOS_DE_MOBILE.slice(0, 2).every((a) => flujo.get('trabajos')?.get(a)?.pantallas === 3), 'trabajos: a 375 y 390 los tres proyectos llenan los 300svh — la decisión de SITIO-S5 se cumple donde la grilla colapsa')
 console.log(
-  '  🔴 DEFECTO 2 [gravedad alta · dueño: `Grilla` + `Trabajos.tsx`, NO se arregla acá] — a 768 y 1024 la grilla de tres NO colapsa ' +
-    `(\`tablet:grid-cols-3\` ya aplica en 768), así que los tres proyectos entran EN FILA y el flujo mide ${flujo.get('trabajos')?.get(768)?.pantallas} pantalla contra las 3 ` +
-    'declaradas: quedan DOS PANTALLAS DE BANDA OSCURA VACÍA. El `escritorio:min-h-0` que apaga la pantalla por proyecto arranca en ' +
-    '1025 y la fila arranca en 768: entre esos dos anchos nadie sostiene el alto. Es lo que la instrucción mandó a verificar.',
+  '  ✅ DEFECTO 3 — ARREGLADO en SITIO-S11 · `trabajos/Trabajos.tsx` — el colapso de la grilla se corrió de 768 a 1025, que es el MISMO ' +
+    'umbral donde el pin se apaga (`pinneada: "desde-escritorio"`) y donde `escritorio:min-h-0` deja de dar una pantalla por proyecto. ' +
+    `Los tres bordes caen ahora en el mismo píxel y no queda tramo huérfano: entre 768 y 1024 los tres proyectos entraban EN FILA y el flujo ` +
+    `medía 1 pantalla contra las 3 declaradas — DOS PANTALLAS DE BANDA OSCURA VACÍA. Hoy mide ${flujo.get('trabajos')?.get(768)?.pantallas} en los cuatro anchos.`,
+)
+console.log(
+  '    ⚠️ consecuencia forzada, y la sección la declara: el `sizes` de la captura describe la CAJA, y el arreglo le movió su único corte. ' +
+    'De 768 a 1024 la captura pasó a ocupar el ancho entero, así que los dos tramos de arriba de `sizesPorTresTramos` decían lo mismo; ' +
+    'con un solo corte el ayudante correcto es `sizesPorViewport`. Lo afirma `trabajos.invariant`, no este frente.',
 )
 for (const [a, alto] of [[375, 667], [390, 844], [768, 900]] as const) {
   const crecen = nodosDe(html).filter((n) => clasesEfectivas(atributo(n, 'class') ?? '', a).includes('min-h-svh'))
@@ -113,26 +130,56 @@ controlPositivo('el contador no se pone verde sobre un marcado sin cajas de pant
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Cajas CLAVADAS: `h-svh` es un alto fijo y `min-h-svh` es un piso')
 
-const desbordes = ANCHOS_DE_MOBILE.flatMap((a) => (flujo.get('servicios')?.get(a)?.desbordes ?? []).map((d) => ({ a, d })))
+/**
+ * ⚠️ **CENSO MOVIDO EN SITIO-S11, Y ES EL SPRINT QUE EXISTÍA PARA MOVERLO.**
+ *
+ * Hasta S10 esta sección afirmaba la FORMA DEL DEFECTO —«hay UNA caja de alto
+ * fijo y es la de servicios», «desborda en los cuatro anchos»— porque el frente
+ * medía y no arreglaba. S11 arregló el envoltorio (`_contrato/Seccion.tsx`:
+ * `pinneada: 'siempre'` pasa de `h-svh` a `min-h-svh`) y esas afirmaciones
+ * quedaron describiendo un marcado que ya no existe. Se dan vuelta: ahora se
+ * afirma que NO queda ninguna caja clavada abajo del umbral y que ninguna
+ * sección desborda. **Los dos controles positivos no se tocan** —corren sobre
+ * marcado fabricado— así que el detector sigue teniendo que ver una caja
+ * clavada desbordada donde la hay.
+ */
+const desbordes = ANCHOS_DE_MOBILE.flatMap((a) =>
+  secciones.flatMap((r) => M.medirPantallas(r, a).desbordes.map((d) => `${d.seccion}@${a}`)),
+)
 const clavadasPorAncho = (a: number): string[] =>
   nodosDe(html).filter((n) => clasesEfectivas(atributo(n, 'class') ?? '', a).includes('h-svh')).map((n) => n.seccion ?? '?')
 for (const a of ANCHOS_DE_MOBILE) {
-  afirmarIgual(clavadasPorAncho(a), ['servicios'], `@${a}: hay UNA sola caja de alto fijo en todo el home, y es la de servicios`)
+  afirmarIgual(clavadasPorAncho(a), [], `@${a}: NO queda una sola caja de alto fijo abajo del umbral — la de servicios era el defecto 1`)
 }
-afirmarIgual(clavadasPorAncho(1025).sort(), ['servicios', 'trabajos'], '@1025 aparece la segunda: el `escritorio:h-svh` de trabajos NO rige abajo del umbral')
-afirmar(desbordes.length === ANCHOS_DE_MOBILE.length, `la caja clavada de servicios desborda en los ${ANCHOS_DE_MOBILE.length} anchos de mobile`)
+afirmarIgual(clavadasPorAncho(1025).sort(), ['trabajos'], '@1025 aparece la única que queda, y es la que corresponde: el `escritorio:h-svh` de trabajos NO rige abajo del umbral')
+afirmarIgual(desbordes, [], 'y NINGUNA sección esconde contenido detrás de un alto fijo, en ninguno de los cuatro anchos')
+/** El envoltorio pinneado de Servicios, que es el que llevaba el alto fijo. */
+const envoltorioDeServicios = nodosDe(html).find((n) => atributo(n, 'data-pinneado') === 'siempre')
+const tintaDeServicios = (a: number): number =>
+  envoltorioDeServicios === undefined
+    ? 0
+    : M.altoDeTinta(html, envoltorioDeServicios.indice, M.finDelSubarbol(html, envoltorioDeServicios), a)
+afirmar(envoltorioDeServicios !== undefined, 'el envoltorio pinneado de servicios sigue existiendo: el arreglo cambió su alto, no lo borró')
+afirmarIgual(M.tintaDeLaCajaClavada(html, 375), 0, '  y ya no hay caja clavada suya que medir — el cero es «no hay caja», no «la caja está vacía»')
 console.log(
-  '  🔴 DEFECTO 1 [gravedad CRÍTICA · dueño: `_contrato/Seccion.tsx` + `servicios/Servicios.tsx`, NO se arregla acá] — ' +
-    `\`Seccion\` envuelve a Servicios en \`sticky top-0 h-svh\` (alto FIJO, una pantalla) y adentro Servicios pone su ` +
-    `propio \`Bloque\` de \`min-height: 300svh\` con los TRES bloques apilados: ${desbordes[0]?.d.contenido} pantallas de contenido dentro de ` +
-    'UNA clavada. Es la doble contención que dejó la unificación de contratos de SITIO-S7: la rama pinneada del lane A ' +
-    'se sumó a la contención propia que el lane B ya traía, y nadie las restó.',
+  '  ✅ DEFECTO 1 (mitad de abajo) — ARREGLADO en SITIO-S11 · `_contrato/Seccion.tsx` — el envoltorio pinneado de ' +
+    '`pinneada: "siempre"` pasa de `h-svh` (alto FIJO, una pantalla) a `min-h-svh` (piso), que es la regla que el propio ' +
+    '`servicios/geometria.ts` ya tenía escrita y que el envoltorio violaba. La caja CRECE con su contenido en vez de ' +
+    'recortarlo, así que los tres bloques de servicio se reparten las tres pantallas declaradas (ver §2) en vez de ' +
+    'quedar dos escondidos detrás de un pin de 200svh.',
 )
 for (const [a, alto] of [[375, 667], [390, 844], [768, 900]] as const) {
-  const tinta = M.tintaDeLaCajaClavada(html, a)
-  console.log(`    @${a}x${alto}: la TINTA sola de la caja clavada mide ${px0(tinta)} px contra los ${alto} de su caja — ${(tinta / alto).toFixed(2)}x. [piso: ignora rellenos y separaciones]`)
+  const tinta = tintaDeServicios(a)
+  console.log(
+    `    @${a}x${alto}: la TINTA sola de Servicios mide ${px0(tinta)} px · su caja son los 300svh declarados = ${3 * alto} px, ` +
+      `así que entra (${(tinta / (3 * alto)).toFixed(2)}x). [piso: ignora rellenos y separaciones]`,
+  )
 }
-console.log('    consecuencia leída del mecanismo (NO medida en navegador): la caja queda pegada 200svh, así que el 2º y el 3er servicio nunca suben a cuadro dentro del rango de pegado.')
+console.log(
+  '    ⚠️ contra los 963 / 942 / 1583 px que S10 midió: la tinta SUBIÓ, y no por este arreglo sino por el de §9 — ' +
+    '`--text-fluido-micro` 8→10 px y `--text-fluido-titulo-s` 16→17 px hacen más altas las mismas líneas. El cambio ' +
+    'que importa no es la tinta: es contra qué caja se compara (antes 1 pantalla, ahora las 3 declaradas).',
+)
 controlPositivo('el detector ve una caja clavada desbordada', M.CLAVADA_QUE_DESBORDA, (h: string) =>
   M.medirPantallas(M.arbolDe(h)[0], 375).desbordes.length === 0)
 afirmarIgual(M.medirPantallas(M.arbolDe(M.CLAVADA_QUE_ENTRA)[0], 375).desbordes, [], '  y no la ve donde el contenido entra — no está gritando por cualquier `h-svh`')
@@ -147,17 +194,24 @@ afirmarIgual(clasesDePosicion(375), [], `a 375 NO sobrevive ni una clase de posi
 afirmarIgual(clasesDePosicion(390), [], '  ni a 390')
 afirmarIgual(clasesDePosicion(768).length, CUANTAS, `a 768 vuelven las ${CUANTAS} — el detector no está ciego`)
 const tamanos = NUMEROS.cifras.map((c) => Number(tokenPx(`--text-fluido-${GEOMETRIA.celdas[c.clave].nivel}`, 375).toFixed(2)))
-afirmarIgual([...new Set(tamanos)].sort((x, y) => y - x), [36, 24, 18, 16], 'a 375 los cuatro niveles de display se comprimen a 36 · 24 · 18 · 16 px — reproduce la cifra del docblock de `Numeros.tsx`')
+afirmarIgual([...new Set(tamanos)].sort((x, y) => y - x), [36, 24, 18, 17], 'a 375 los cuatro niveles de display se comprimen a 36 · 24 · 18 · 17 px — reproduce la cifra del docblock de `Numeros.tsx`')
 afirmar(new Set(tamanos).size === 4, `y siguen siendo CUATRO tamaños distintos para las cinco cifras: la asimetría de escala sobrevive`, tamanos.map(px0).join(' · '))
 console.log(
   '  ⚠️ DECISIÓN, NO DEFECTO [dueño: `Numeros.tsx`] — a 375 y 390 la composición dispersa COLAPSA a una columna en orden ' +
     `de documento (${NUMEROS.cifras.map((c) => c.clave).join(' → ')}) y lo único que queda de la asimetría son los tamaños. ` +
     'Está declarado en el docblock y el docblock dice la verdad: lo verifiqué.',
 )
+afirmar(
+  tokenPx('--text-fluido-titulo-s', 375) > tokenPx('--text-base', 375),
+  `  y la más chica de las cinco (\`${GEOMETRIA.celdas.anios.nivel}\`) vuelve a leerse como cifra: a 375 pasa a \`--text-base\``,
+  `${px0(tokenPx('--text-fluido-titulo-s', 375))} px contra ${px0(tokenPx('--text-base', 375))} de base y ${px0(tokenPx('--text-cuerpo', 375))} de cuerpo`,
+)
 console.log(
-  `  ⚠️ HALLAZGO [gravedad media · dueño: la escala fluida de \`theme-develop.css\`] — a 375 la cifra más chica (\`${GEOMETRIA.celdas.anios.nivel}\`) resuelve a ` +
-    `${px0(tokenPx('--text-fluido-titulo-s', 375))} px, que es EXACTAMENTE \`--text-base\` (${px0(tokenPx('--text-base', 375))}) y un solo píxel arriba de \`--text-cuerpo\` ` +
-    `(${px0(tokenPx('--text-cuerpo', 375))}): en el ancho donde vive la mitad de los visitantes, una de las cinco cifras dejó de leerse como cifra.`,
+  `  ✅ DEFECTO 13 — ARREGLADO en SITIO-S11 · \`theme-develop.css\` — el piso de \`--text-fluido-titulo-s\` sube de 16 a 17 px. ` +
+    `A 375 resolvía a ${px0(tokenPx('--text-base', 375))} px EXACTOS, o sea \`--text-base\`, y un solo píxel arriba de \`--text-cuerpo\`: en el ancho donde vive ` +
+    `la mitad de los visitantes, una de las cinco cifras dejaba de leerse como cifra. 17 es el ÚNICO entero que pasa \`base\` y ` +
+    `se queda abajo del piso de \`titulo-m\` (${px0(tokenPx('--text-fluido-titulo-m', 375))}), que es donde el defecto volvería del otro lado. El techo, intacto: ` +
+    `${px0(tokenPx('--text-fluido-titulo-s', 1440))} px a 1440.`,
 )
 controlPositivo('el filtro de variantes distingue los dos lados del breakpoint', 767, (a: number) => clasesEfectivas('tablet:col-start-1', a).length === 1)
 
@@ -209,90 +263,19 @@ controlPositivo('el modelo distingue la familia de tokens: fluido y fijo NO dan 
 controlPositivo('el cortador de líneas no está ciego: el titular NO cabe en dos renglones de 40 px', 375, (a: number) =>
   modeloDelCierre(a).lineasDelTitular >= Math.ceil(anchoDeContenido(a) / 40))
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · La pastilla de navegación: dónde nace, dónde queda, y si entra')
+// ═════════════════════════════════════════════════════════════════════════
+// §8 vive en `s10-mobile-pastilla.ts`, con el modelo que la mide: la
+// comprobación y su aritmética son la misma pieza.
+afirmarLaPastilla(px0)
 
-const pastilla = M.anchoDeLaPastilla(375)
-afirmarIgual(DESCUENTO_UMBRAL_PX, 96, 'el umbral es `100svh − 96px`, derivado de los cuatro tokens de `_lib/navegacion.ts`')
-for (const alto of ALTOS) {
-  afirmar(umbralPx(alto) > 0, `@alto ${alto}: nace en ${px0(pastilla.nacimiento(alto))} y queda en reposo tras ${umbralPx(alto)} px de scroll (${((umbralPx(alto) / alto) * 100).toFixed(0)}% de la primera pantalla)`)
-}
-console.log(`  el alto de la pastilla es ${pastilla.alto} px y no depende del ancho (\`--text-cuerpo\` es invariante). ⚠️ el umbral se acorta con el viewport: ${ALTOS.map((h) => `${h}→${umbralPx(h)}`).join(' · ')}. A 667 el viaje dura ${umbralPx(667)} px, ${umbralPx(900) - umbralPx(667)} menos que a 900: el gesto se lee más rápido y no se rompe, porque la aritmética es relativa a \`100svh\` y no tiene un solo número copiado.`)
-const CSS_DE_LA_PASTILLA = leer('src/app/v3/_estilos/navegacion.css')
-afirmar(!/flex-wrap|max-inline-size|inline-size:\s*min/.test(CSS_DE_LA_PASTILLA), 'la pastilla NO declara `flex-wrap` ni ningún tope de ancho: es una fila de cinco enlaces que no puede plegarse')
-afirmar(!/@media|escritorio/.test(CSS_DE_LA_PASTILLA), '  y no tiene una sola media query: se monta idéntica en los cinco anchos')
-console.log(
-  `  🔴 DEFECTO 3 [gravedad alta · dueño: \`_componentes/chrome/Navegacion.tsx\` + \`_estilos/navegacion.css\`, NO se arregla acá] — ` +
-    `la pastilla mide ${px0(pastilla.total)} px de ancho [modelado con los avances del \`.woff2\` que /v3 sirve; es un PISO, porque los rótulos van ` +
-    `en \`font-semi\` y el lector mide la instancia por defecto]. Es \`position:absolute; left:50%; translateX(-50%)\`, así que a 375 se sale ` +
-    `${px0((pastilla.total - 375) / 2)} px por CADA lado y a 390, ${px0((pastilla.total - 390) / 2)}. Entra recién a partir de ~${px0(pastilla.total)} px de viewport.`,
-)
-console.log(`    enlace por enlace: ${pastilla.enlaces.map((e) => `${e.rotulo} ${px0(e.px)}`).join(' · ')}`)
-afirmar(pastilla.total < 768, `  y a 768 sí entra (${px0(pastilla.total)} < 768): el detector no está diciendo que nunca entra`)
-controlPositivo('el medidor de ancho reacciona al rótulo: no es un número escrito al lado', 375, (a: number) =>
-  M.anchoDeLaPastilla(a).enlaces[0].px === M.anchoDeLaPastilla(a).enlaces[1].px)
+// ═════════════════════════════════════════════════════════════════════════
+// §9 vive en `s10-mobile-escala.ts`: es la única sección que mira la hoja y no
+// el marcado del documento.
+afirmarLaEscala(px0)
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · La escala tipográfica a 375, que es el PISO de la banda fluida')
-
-const escala = M.escalaA(375)
-for (const n of escala) console.log(`  ${n.nivel.padEnd(10)} ${n.fluido ? 'fluido' : 'FIJO  '} ${n.token.padEnd(26)} ${n.px.toFixed(2).padStart(6)} px  (a 1440: ${tokenPx(n.token, 1440).toFixed(2)})`)
-afirmarIgual(escala.filter((n) => !n.fluido).map((n) => n.nivel), ['cuerpo', 'base'], 'los dos niveles invariantes son `cuerpo` y `base`, y a 375 valen lo mismo que a 1440')
-const fluidos = escala.filter((n) => n.fluido)
-afirmar(
-  fluidos.every((n) => Math.abs(n.px - tokenPx(n.token, 0)) < 0.01),
-  'los seis fluidos tocan el MÍNIMO de su propio `clamp()` a 375 (a menos de 0,01 px): 375 es `--fluido-piso`',
-  fluidos.map((n) => `${n.nivel} ${n.px.toFixed(4)} vs min ${tokenPx(n.token, 0)}`).join(' · '),
-)
-const VARA = tokenPx('--text-micro', 375)
-console.log(`  la vara: el escalón FIJO más chico que el propio sistema declara, \`--text-micro\` = ${px0(VARA)} px. No es WCAG —que no fija un tamaño mínimo de texto— y por eso se declara de dónde sale.`)
-const bajoLaVara = escala.filter((n) => n.px < VARA)
-afirmarIgual(bajoLaVara.map((n) => n.nivel), ['micro'], `contra esa vara cae UN nivel: \`micro\`, a ${px0(tokenPx('--text-fluido-micro', 375))} px`)
-console.log(
-  `  ⚠️ HALLAZGO [gravedad media · dueño: \`theme-develop.css\`, la banda fluida — NO se arregla acá] — \`--text-fluido-micro\` llega a ${px0(tokenPx('--text-fluido-micro', 375))} px en 375, ` +
-    `un 20% por debajo del propio piso fijo del sistema. Lo consumen los rótulos de las cifras, las etiquetas de sección y la nota legal del pie. ` +
-    `\`--text-fluido-caption\` queda en ${tokenPx('--text-fluido-caption', 375).toFixed(0)} px, arriba de la vara por 1 px.`,
-)
-console.log(`  el ancho útil de contenido es ${anchoDeContenido(375)} px a 375 y ${anchoDeContenido(390)} a 390: el relleno lateral es FIJO (32 px por lado) y no se afloja al angostar.`)
-controlPositivo('la escala no es una tabla escrita: si fuera fija, 375 y 1440 darían lo mismo', 1440, (a: number) => M.escalaA(a).every((n, i) => n.px === escala[i].px))
-controlPositivo('y el piso del `clamp()` no se toca a 1440: si se tocara, la banda fluida no sería fluida', 1440, (a: number) =>
-  M.escalaA(a).filter((n) => n.fluido).every((n) => Math.abs(n.px - tokenPx(n.token, 0)) < 0.01))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · El peso que baja abajo de 1025 — sobre el build que ya existe')
-
-const ID = path.join(DIST, 'BUILD_ID')
-if (!existsSync(ID)) {
-  noCorre('el peso de la carga inicial de /v3', `no existe ${DIST}: este frente tiene PROHIBIDO correr un build`)
-} else {
-  console.log(`  build leído: ${leer('.next/BUILD_ID').trim()} · manifiesto del ${statSync(path.join(DIST, 'build-manifest.json')).mtime.toISOString()}`)
-  const inicial = conjuntoInicial('/v3')
-  const piso = pisoDelFramework(DIST)
-  const sobre = inicial.filter((f) => !piso.includes(f))
-  const home = conjuntoInicial('/')
-  const propios = sobre.filter((f) => !home.includes(f))
-  afirmar(inicial.length > 0, `la carga inicial de /v3 son ${inicial.length} archivos y ${kib(pesar(inicial).gzip)} gzip`)
-  afirmar(pesar(sobre).gzip / 1024 < 300, `SOBRE EL PISO —lo que este repo puede mover— ${kib(pesar(sobre).gzip)} gzip en ${sobre.length} archivos, abajo del techo de 300`)
-  console.log(`  PISO del framework (se publica, no se afirma): ${kib(pesar(piso).gzip)} en ${piso.length} archivos, de los cuales ${kib(pesar(piso.filter((f) => contiene(f, 'browserTracingIntegration'))).gzip)} son el SDK de Sentry (§7.30: NO se difiere).`)
-  console.log(`  de los ${sobre.length} de arriba del piso, ${sobre.length - propios.length} (${kib(pesar(sobre.filter((f) => home.includes(f))).gzip)}) también los pide \`/\`: son del layout RAÍZ. Propios de /v3: ${propios.length} archivos, ${kib(pesar(propios).gzip)}.`)
-  for (const f of [...sobre].sort((x, y) => pesar([y]).gzip - pesar([x]).gzip)) {
-    console.log(`    ${kib(pesar([f]).gzip).padStart(10)}  ${home.includes(f) ? 'heredado' : 'DE /v3  '}  ${f}`)
-  }
-  const three = sobre.filter((f) => contiene(f, 'THREE.') || contiene(f, 'react-three-fiber'))
-  afirmarIgual(three, [], 'la ESCENA no viaja en la carga inicial: cero chunks con three o r3f — la compuerta de 1025 hace su trabajo')
-  const coreografia = sobre.filter((f) => contiene(f, 'InstaladorDeCoreografia'))
-  afirmarIgual(coreografia, [], '  y el instalador de coreografía tampoco: entra por `dynamic(..., { ssr: false })`')
-  const lenis = sobre.filter((f) => contiene(f, 'lenis'))
-  const motion = sobre.filter((f) => contiene(f, 'framer'))
-  console.log(
-    `  ⚠️ HALLAZGO DE PESO CON DUEÑO AJENO [gravedad baja · dueño: \`components/layout/SmoothScroll.tsx\` y el layout RAÍZ] — ${lenis.length} chunk(s) con Lenis, ` +
-      `${kib(pesar(lenis).gzip)} gzip, viajan en la carga inicial de /v3 **en todos los anchos**, y \`SmoothScroll\` se sale de /v3 por \`pathname.startsWith("/v3")\`: ` +
-      `es peso que ninguna rama de /v3 puede usar nunca. Y el candidato obvio NO lo es: los ${kib(pesar(motion).gzip)} gzip del sistema de motion ` +
-      `(${motion.join(', ')}) los pide \`/\` también, o sea que entran por el layout raíz. Diferirlos abajo de 1025 desde este track NO baja un byte de esta ruta.`,
-  )
-}
-for (const h of HUECOS.filter((x) => ['LCP', 'Lighthouse'].includes(x.nombre))) {
-  noCorre(`${h.nombre} de /v3 abajo de 1025`, `${h.porQue}. Lo cerraría: ${h.queLoCerraria}`)
-}
+// ═════════════════════════════════════════════════════════════════════════
+// §10 vive en `s10-mobile-peso.ts`: es la única sección que lee el disco de
+// `.next` en vez del marcado, y el archivo había cruzado las 300 líneas.
+afirmarElPeso()
 
 cerrar('s10-mobile.invariant')

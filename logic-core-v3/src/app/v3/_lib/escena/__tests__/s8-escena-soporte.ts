@@ -100,6 +100,29 @@ export function conTipoDelPanel(archivos: readonly string[]): string[] {
     .sort()
 }
 
+/**
+ * EL VÍNCULO CON EL PANEL DESPUÉS DE DARLO VUELTA (SITIO-S11, §7.36).
+ *
+ * Los tres tipos del editor —`ChoreoEditor`, `EditableKeyframe` y
+ * `KeyframeOrigin`— se declaran ahora en `_lib/escena/choreographyEditorTypes.ts`
+ * y el panel los RE-EXPORTA. Las tres propiedades que hacen que eso sea un corte
+ * y no una mudanza del problema se leen juntas: que el módulo nuevo no mire al
+ * panel, que el panel siga sirviéndolos, y que ya no los declare.
+ */
+export function vinculoConElPanel(): {
+  readonly panelEnLosTipos: readonly string[]
+  readonly panelReExporta: boolean
+  readonly panelTodaviaDeclara: boolean
+} {
+  const tipos = fuenteDe('src/app/v3/_lib/escena/choreographyEditorTypes.ts')
+  const panel = fuenteDe('src/app/probe-escena/_components/choreographyEditor.ts')
+  return {
+    panelEnLosTipos: referenciasA(tipos, 'probe-escena').map((e) => e.spec),
+    panelReExporta: /export type \{ ChoreoEditor, EditableKeyframe, KeyframeOrigin \}/.test(panel),
+    panelTodaviaDeclara: /^export type ChoreoEditor = \{$/m.test(panel),
+  }
+}
+
 // ── 3 · §7 · Quién importa la marca de la escena ────────────────────────────
 
 export const esLaMarca = (spec: string): boolean => /\/marcaEscena$/.test(spec)

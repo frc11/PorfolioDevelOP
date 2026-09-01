@@ -28,7 +28,7 @@ import { marcar } from '../_invariantes/render'
 import { cambiosDeTramo, canalesSincronizados, desincronizaciones, tramoDeSecuencia, type LectorDeCanales } from '../_contrato/secuencia'
 import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { cuentaDeAtributo, hayAnidamiento, valoresDeAtributo } from '../_invariantes/marcado'
-import { acentosConcretos, cuenta, elementosTipograficos, familiasDeCuerpoPerdidas, familiasDeTituloPerdidas, focalizablesDe, interiorDe, tamanosPerdidos, textoPegado } from './deteccion'
+import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinDeclararSuForma, capasSinPantalla, cuenta, elementosTipograficos, familiasDeCuerpoPerdidas, familiasDeTituloPerdidas, focalizablesDe, interiorDe, serviciosApagados, serviciosVigentes, tamanosPerdidos, textoPegado } from './deteccion'
 import { CONTENIDO, ITEMS_POR_SERVICIO, LONGITUDES, palabrasDelParrafo } from './contenido'
 import { Servicios } from './Servicios'
 import { CANTIDAD_DE_TRAMOS, PanelDeSecuencia } from './ServiciosEnSecuencia'
@@ -82,11 +82,15 @@ controlPositivo('el detector del divisor SÍ ve el atributo cuando está', `<spa
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El texto es el mismo en las dos ramas')
 
+/** ⚠️ CENSO MOVIDO EN SITIO-S11, Y MÁS FUERTE: decía «la apilada dice lo que
+ *  dicen los tres tramos JUNTOS» —lo máximo afirmable mientras la pinneada
+ *  montara un servicio por vez—. Ahora la comparación es DIRECTA. */
 const textoQuieto = textoVisible(quieto)
 const textosDeTramo = tramos.map(textoVisible)
-afirmarIgual(textoQuieto, textosDeTramo.join(' '), 'la rama apilada dice EXACTAMENTE lo que dicen los tres tramos juntos')
-afirmar(textoQuieto.length > 0, `${textoQuieto.length} caracteres de texto visible`, textosDeTramo.map((t) => `${t.length}`).join(' + '))
-controlPositivo('el comparador ve un tramo al que le falta una palabra', textosDeTramo.map((t, i) => (i === 1 ? t.replace('turnos, ', '') : t)), (partes) => textoQuieto === partes.join(' '))
+afirmarIgual(textoVisible(animado), textoQuieto, 'las DOS ramas dicen EXACTAMENTE lo mismo: los tres servicios están en el árbol aunque se vea uno')
+afirmarIgual(textosDeTramo.map((t) => t === textoQuieto), [true, true, true], '  y los tres tramos también: entre ellos cambia cuál se PINTA, no lo que dicen')
+afirmar(textoQuieto.length > 0, `${textoQuieto.length} caracteres de texto visible`, textosDeTramo.map((t) => `${t.length}`).join(' · '))
+controlPositivo('el comparador ve una rama a la que le falta una palabra', textoQuieto.replace('turnos, ', ''), (t) => t === textoQuieto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El contenido no tiene un solo número que se pueda leer como un hecho')
@@ -114,7 +118,7 @@ controlPositivo('los detectores ven un hex, un px suelto y un arbitrario sin var
 
 // El único estilo inline viene del DATO y está declarado en su lugar.
 afirmar(animado.includes(`min-height:${seccionDe('servicios').alto}`), 'el alto del bloque sale de la tabla del sitio, no de una clase muerta')
-afirmar(cuenta(animado, /aspect-ratio:/g) === 1, 'y la relación del hueco de medio es el otro estilo del dato')
+afirmar(cuenta(animado, /aspect-ratio:/g) === SERVICIOS.length, 'y la relación del hueco de medio es el otro estilo del dato — uno por servicio, y con la pila son los tres')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · Foco: nadie apaga el anillo, y no hay nada que lo capture')
@@ -179,16 +183,31 @@ for (const par of MUTILADAS) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · Un acento por contexto, nunca los tres')
+titulo('10 · Los TRES en el árbol, y UN acento por cuadro')
 
-afirmarIgual(cuentaDeAtributo(animado, 'data-servicio'), 1, 'con coreografía hay EXACTAMENTE un [data-servicio], en el sticky')
-afirmarIgual(valoresDeAtributo(animado, 'data-servicio'), ['web'], '  y su valor es el del tramo activo')
-afirmarIgual(tramos.map((h) => valoresDeAtributo(h, 'data-servicio')[0]), [...IDS_DE_SERVICIO], '  los tres tramos tiñen los tres servicios, en orden')
-afirmarIgual(cuentaDeAtributo(quieto, 'data-servicio'), 3, 'sin coreografía hay tres, uno por servicio')
-afirmar(!hayAnidamiento(quieto, 'data-servicio'), '  y son HERMANOS: ninguno adentro de otro')
-afirmarIgual(cuenta(quieto, /min-h-svh/g), 3, '  cada uno de al menos una pantalla: nunca dos acentos en el mismo cuadro')
+/** ⚠️ CENSO MOVIDO EN SITIO-S11, Y ES EL SPRINT QUE EXISTÍA PARA MOVERLO. Decía
+ *  «con coreografía hay EXACTAMENTE un `[data-servicio]`, en el sticky», y era
+ *  verdad porque la secuencia montaba UN servicio por vez — que ERA el defecto 1
+ *  de `s10-acceso`: 26 encabezados contra 24, 43 marcadores contra 33. Ahora hay
+ *  tres capas y la voz única se afirma donde vive: **exactamente UNA se pinta.**
+ *  Es más fuerte, no más floja — la vieja se conformaba con un solo nodo; ésta
+ *  exige uno vigente Y que las otras dos sigan en el árbol, la mitad que cierra
+ *  `capasFueraDelArbol`. */
+afirmarIgual(valoresDeAtributo(animado, 'data-servicio'), [...IDS_DE_SERVICIO], 'con coreografía los TRES están en el árbol, en el orden de la secuencia')
+afirmarIgual(serviciosVigentes(animado), ['web'], '  y UNA SOLA se pinta: la del tramo activo — un acento por cuadro')
+afirmarIgual(serviciosApagados(animado), ['ia-automatizacion', 'software'], '  las otras dos se apagan con `sr-only`, que NO las saca del árbol de accesibilidad')
+afirmarIgual(capasSinDeclararSuForma(animado), [], '  y ninguna capa se contradice: lo que dice ser y lo que su clase hace coinciden')
+afirmarIgual(capasFueraDelArbol(animado), [], 'ninguna se esconde con algo que la borre del árbol — es el defecto 1, y no vuelve')
+afirmarIgual(tramos.map((h) => serviciosVigentes(h)), IDS_DE_SERVICIO.map((id) => [id]), '  los tres tramos PINTAN los tres servicios, en orden')
+afirmarIgual(capasDeServicio(quieto).map((c) => c.id), [...IDS_DE_SERVICIO], 'sin coreografía están los mismos tres, en el mismo orden')
+afirmar(!hayAnidamiento(quieto, 'data-servicio') && !hayAnidamiento(animado, 'data-servicio'), '  y en las DOS ramas son HERMANOS: ninguno adentro de otro')
+afirmarIgual(capasSinPantalla(quieto), [], '  y cada bloque apilado pide al menos una pantalla: nunca dos acentos en el mismo cuadro')
+controlPositivo('el lector de la caja ve un bloque sin su pantalla', '<div data-servicio="web" class="flex w-full"></div>', (h) => capasSinPantalla(h).length === 0)
+controlPositivo('el detector ve DOS capas pintadas a la vez', '<div data-servicio="a" data-capa="vigente" class="w-full"></div><div data-servicio="b" data-capa="vigente" class="w-full"></div>', (h) => serviciosVigentes(h).length === 1)
+controlPositivo('y una capa que no declara ninguna de las dos formas', '<div data-servicio="a" class="col-start-1 row-start-1"></div>', (h) => capasSinDeclararSuForma(h).length === 0)
+controlPositivo('y la MENTIRA: una que se dice apagada sin la clase que la esconde', '<div data-servicio="a" data-capa="apagada" class="w-full"></div>', (h) => capasSinDeclararSuForma(h).length === 0)
+controlPositivo('y una apagada con `aria-hidden`, que sí la borra del árbol', '<div data-servicio="a" data-capa="apagada" aria-hidden="true" class="sr-only"></div>', (h) => capasFueraDelArbol(h).length === 0)
 controlPositivo('el detector de anidamiento lo vería', '<div data-servicio="a"><div data-servicio="b"></div></div>', (h) => !hayAnidamiento(h, 'data-servicio'))
-controlPositivo('y el contador vería un segundo acento', '<div data-servicio="a"></div><div data-servicio="b"></div>', (h) => cuentaDeAtributo(h, 'data-servicio') === 1)
 
 // Cero acento CONCRETO: se consume el alias, nunca el token por servicio.
 const acentos = valoresDeAcentoDelTema()
@@ -205,9 +224,13 @@ controlPositivo('el buscador ve el token concreto y el hex', `color: ${acentos[0
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · El párrafo se reconstruye IGUAL, palabra por palabra')
 
-for (let i = 0; i < SERVICIOS.length; i++) {
-  const id = SERVICIOS[i].id
-  const reconstruido = textoPegado(interiorDe(tramos[i], 'data-canal', 'parrafo'))
+/** ⚠️ S11: se acota primero a la CAPA de cada servicio, porque con los tres
+ *  montados `interiorDe(tramo, 'data-canal', 'parrafo')` devuelve siempre el
+ *  primero. De paso quedan cubiertas las DOS formas del canal: sólo `web` tiene
+ *  progreso, así que las otras dos se reconstruyen desde las piezas quietas. */
+for (const { id } of SERVICIOS) {
+  const capa = interiorDe(animado, 'data-servicio', id)
+  const reconstruido = textoPegado(interiorDe(capa, 'data-canal', 'parrafo'))
   afirmarIgual(reconstruido, CONTENIDO[id].parrafo, `${id}: las ${LONGITUDES[id]} piezas de P3 reconstruyen el párrafo exacto`)
 }
 const palabrasWeb = palabrasDelParrafo('web')
@@ -219,15 +242,15 @@ controlPositivo('el extractor devuelve vacío si el canal no está', '<div>nada<
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('12 · La lista es una lista, y las filas son filas')
 
-for (let i = 0; i < SERVICIOS.length; i++) {
-  const lista = interiorDe(tramos[i], 'data-canal', 'lista')
-  afirmarIgual(cuenta(lista, /<li\b/g), ITEMS_POR_SERVICIO, `${SERVICIOS[i].id}: <ul> con once <li> — quien navega por listas la encuentra`)
+for (const { id } of SERVICIOS) {
+  const lista = interiorDe(interiorDe(animado, 'data-servicio', id), 'data-canal', 'lista')
+  afirmarIgual(cuenta(lista, /<li\b/g), ITEMS_POR_SERVICIO, `${id}: <ul> con once <li> — quien navega por listas la encuentra`)
 }
 afirmarIgual(cuenta(quieto, /<ul\b/g), SERVICIOS.length, 'la rama apilada tiene las tres listas')
-afirmarIgual(cuentaDeAtributo(animado, 'data-fila'), 3, 'tres filas de P2 por tramo: rótulo, medio y caso')
-afirmarIgual(cuentaDeAtributo(quieto, 'data-fila'), 9, 'y nueve en la rama apilada — tres por servicio')
-afirmarIgual(cuentaDeAtributo(animado, 'data-medio'), 1, 'un hueco de medio por tramo, con su marcador y su sizes')
-afirmarIgual(valoresDeAtributo(animado, 'data-marcador'), ['[VIDEO]'], '  y es un VIDEO: está medido que es video, no imagen fija')
+afirmarIgual(cuentaDeAtributo(animado, 'data-fila'), 9, 'nueve filas de P2 con coreografía: rótulo, medio y caso por cada uno de los tres')
+afirmarIgual(cuentaDeAtributo(quieto, 'data-fila'), 9, 'y las mismas nueve en la rama apilada')
+afirmarIgual(cuentaDeAtributo(animado, 'data-medio'), SERVICIOS.length, 'un hueco de medio por servicio, con su marcador y su sizes')
+afirmarIgual(valoresDeAtributo(animado, 'data-marcador'), SERVICIOS.map(() => '[VIDEO]'), '  y los tres son VIDEO: está medido que es video, no imagen fija')
 afirmar(valoresDeAtributo(animado, 'data-sizes')[0].includes('vw'), '  con un sizes real compuesto por los ayudantes', valoresDeAtributo(animado, 'data-sizes')[0])
 controlPositivo('el contador de ítems vería una lista corta', '<ul><li>uno</li></ul>', (h) => cuenta(h, /<li\b/g) === ITEMS_POR_SERVICIO)
 
@@ -254,7 +277,7 @@ afirmar(elementos >= 3 * 5, `el contrapeso: ${elementos} elementos con data-nive
 const heredadas = familiasDeCuerpoPerdidas(quieto)
 console.log(`  ${heredadas.length} pérdidas de \`font-cuerpo\` HEREDADAS de piezas compartidas:`)
 for (const h of new Set(heredadas)) console.log(`    ${h}`)
-afirmar(heredadas.length <= 6, `no las agrega esta sección: ${heredadas.length} sobre ${elementos} elementos`, 'dos por servicio, de EtiquetaDeSeccion y del marco de medio')
+afirmar(heredadas.length <= 6, `no las agrega esta sección: ${heredadas.length} sobre ${elementos} elementos`, 'de `EtiquetaDeSeccion` y del marco de medio — el rótulo de sección quedó UNO en S11')
 /**
  * ⚠ ESTOS DOS CONTROLES AFIRMABAN EL DEFECTO, Y SITIO-S7 LO ARREGLÓ.
  *

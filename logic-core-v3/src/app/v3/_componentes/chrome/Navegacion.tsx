@@ -35,6 +35,22 @@ import type { EstadoForzado } from './Cta'
  * alto, así que no empuja nada, pero su posición natural es la que define el
  * nacimiento. Esta pieza NO se monta en `/v3` en este sprint — el home es del
  * sprint de secciones.
+ *
+ * ── Abajo de 1025 es EL MISMO MARCADO (SITIO-S11) ─────────────────────────
+ *
+ * `s10-mobile` §8 midió que la fila de cinco enlaces mide 600 px y se salía
+ * 112 px por lado a 375 (defecto 4). **El arreglo no toca una sola línea de
+ * este archivo**, y eso es lo que se quería: se resolvió con un tope de ancho
+ * relativo en `_estilos/navegacion.css` —`calc(100% - --pad-lateral-compacto
+ * × 2)`— y la fila recorriéndose de costado adentro de la pastilla. Sin media
+ * query, sin una rama de JavaScript y sin un marcado alternativo.
+ *
+ * La consecuencia que importa es de accesibilidad: **el árbol es idéntico en
+ * los cinco anchos**. Los cinco `<a>` siguen estando, las cinco paradas de
+ * tabulación siguen siendo cinco y el `<nav>` sigue teniendo el mismo nombre,
+ * así que lo que `s10-acceso` cuenta arriba del umbral es lo mismo que hay
+ * abajo. Un menú plegable habría sido un `<button>` más —una parada nueva y un
+ * estado nuevo— para un problema que era de ancho.
  */
 
 export interface NavegacionProps {

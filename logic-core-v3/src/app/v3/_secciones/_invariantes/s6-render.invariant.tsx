@@ -30,6 +30,9 @@ import { escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } fro
 import { seccionDe } from '../_contrato/forma'
 import { REGISTRO } from '../_contrato/registro'
 import { Cierre } from '../cierre/Cierre'
+// Los detectores de capa son de Servicios y se consumen tal cual: una segunda
+// lectura del mismo marcado se desviaría de la de la sección sin que nada avise.
+import { capasSinDeclararSuForma, serviciosApagados, serviciosVigentes } from '../servicios/deteccion'
 import { marcar } from './render'
 import { IDS_DE_S6 } from './soporte'
 import { cuentaDeAtributo, hayAnidamiento, quitarSubarbolesConAtributo, valoresDeAtributo } from './marcado'
@@ -99,56 +102,41 @@ afirmar(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Abajo de 1025 NO SE PIERDE TEXTO — la rama quieta contiene a la animada')
+titulo('3 · Abajo de 1025 NO SE PIERDE TEXTO — y desde SITIO-S11 es la MISMA')
 
 /** Saca los subárboles `aria-hidden`: el divisor emite una copia visual. */
-function textoAnunciado(html: string): string {
-  return textoVisible(quitarSubarbolesConAtributo(html, 'aria-hidden'))
-}
-
+const textoAnunciado = (html: string): string => textoVisible(quitarSubarbolesConAtributo(html, 'aria-hidden'))
 const textoQuieto = textoAnunciado(QUIETO)
 const textoAnimado = textoAnunciado(ANIMADO)
 
 /**
- * ⚠️ LA IGUALDAD LITERAL SERÍA FALSA, Y ES UN HALLAZGO, NO UN ATAJO.
+ * ⚠️ **ESTA SECCIÓN CAMBIÓ DE FORMA EN SITIO-S11, Y SU PREMISA VIEJA MURIÓ.**
  *
- * Servicios es una SECUENCIA: con coreografía muestra un servicio por vez y sin
- * ella los muestra los tres apilados. Las dos lecturas son deliberadas —es lo
- * que hace que mobile conserve el ritmo sin la maquinaria— así que exigir que
- * los dos textos sean iguales exigiría que la secuencia no exista.
+ * Decía que la igualdad literal sería falsa y que eso era un hallazgo: Servicios
+ * es una secuencia, con coreografía mostraba UN servicio por vez y sin ella los
+ * tres, así que lo máximo afirmable era la CONTENCIÓN —todo lo que se anuncia
+ * con coreografía se anuncia también sin ella—. Era correcto y era, a la vez, la
+ * descripción del defecto 3 de §7.39: los otros dos servicios no estaban en el
+ * árbol de accesibilidad.
  *
- * Lo que sí tiene que valer, y es la propiedad que le importa a la persona:
- * **todo lo que se anuncia con coreografía se anuncia también sin ella.** La
- * rama quieta es un superconjunto; abajo de 1025 no falta nada. La igualdad
- * exacta tramo por tramo la afirma el instrumento de Servicios, que es el único
- * que sabe cuántos tramos hay.
+ * S11 lo arregló —la secuencia elige cuál se PINTA, no cuál existe— y con eso
+ * las dos ramas anuncian EXACTAMENTE lo mismo. La contención se reemplaza por la
+ * igualdad, estrictamente más fuerte: un superconjunto pasaba en verde con la
+ * animada perdiendo cualquier cosa. El podador de `aria-hidden` se queda y se
+ * sigue controlando: sin él la comparación contaría dos veces lo que el divisor
+ * parte.
  */
-const FRASES = (texto: string): string[] =>
-  texto
-    .split(/(?<=\.)\s+|\s+·\s+/)
-    .map((f) => f.trim())
-    .filter((f) => f.length > 24)
-
-const frasesDeLaAnimada = FRASES(textoAnimado)
-const faltantes = frasesDeLaAnimada.filter((f) => !textoQuieto.includes(f))
-
-afirmarIgual(faltantes, [], `las ${frasesDeLaAnimada.length} frases de la rama animada están enteras en la quieta`)
-afirmar(frasesDeLaAnimada.length > 0, 'el contrapeso: hay frases que comparar', 'la contención no puede ser por vacío')
-afirmar(
-  textoQuieto.length >= textoAnimado.length,
-  `la rama quieta dice al menos tanto: ${textoQuieto.length} contra ${textoAnimado.length} caracteres`,
-  'la diferencia son los otros dos tramos de la secuencia de Servicios, que apilados se leen los tres',
-)
+afirmarIgual(textoAnimado, textoQuieto, `las dos ramas anuncian EXACTAMENTE lo mismo: ${textoQuieto.length} caracteres, idénticos`)
+afirmar(textoQuieto.length > 0, 'el contrapeso: hay texto que comparar', 'la igualdad no puede ser por vacío')
 afirmar(
   textoAnunciado(ANIMADO).length < textoVisible(ANIMADO).length,
   `el podador saca ${textoVisible(ANIMADO).length - textoAnunciado(ANIMADO).length} caracteres de copia visual`,
   'si no sacara nada, la comparación estaría contando el texto partido dos veces',
 )
-
 controlPositivo(
-  'el detector ve una frase que la rama quieta NO tiene',
+  'el comparador ve una rama a la que le sobra una frase',
   `${textoAnimado} Esta frase no existe en ninguna de las cuatro secciones del recorrido.`,
-  (texto: string) => FRASES(texto).filter((f) => !textoQuieto.includes(f)).length === 0,
+  (texto: string) => texto === textoQuieto,
 )
 controlPositivo(
   'y el podador de subárboles no deja pasar texto oculto',
@@ -184,8 +172,23 @@ controlPositivo('y el escáner la vería aunque llegara adentro del marcado', `<
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · El acento: por alias, uno por contexto, y nunca texto sobre oscuro')
 
+/**
+ * ⚠️ **LA VOZ ÚNICA CAMBIÓ DE SUJETO EN SITIO-S11, Y LA AFIRMACIÓN ES MÁS
+ * FUERTE, NO MÁS FLOJA.** Decía «con coreografía hay EXACTAMENTE un
+ * `[data-servicio]`», y era cierta **por un defecto**: la secuencia montaba un
+ * servicio por vez, así que arriba de 1025 los otros dos no existían ni para un
+ * lector de pantalla (§7.39, defecto 3). S11 puso los tres en el árbol y dejó
+ * que la secuencia elija cuál se PINTA, que es lo que la regla del acento
+ * siempre quiso decir: lo que no puede haber son dos acentos EN EL MISMO CUADRO,
+ * no dos nodos en el documento. Por eso ahora son varias afirmaciones y no una:
+ * la de la capa pintada es la que impide que la primera afloje la regla.
+ */
 const servicios = valoresDeAtributo(ANIMADO, 'data-servicio')
-afirmarIgual(servicios.length, 1, 'con coreografía hay EXACTAMENTE un `[data-servicio]` en todo el recorrido')
+afirmarIgual(servicios.length, 3, 'con coreografía los TRES `[data-servicio]` están en el árbol: la secuencia elige cuál se PINTA, no cuál existe')
+afirmarIgual(serviciosVigentes(ANIMADO).length, 1, '  y exactamente UNA capa declara estar pintada — un acento por cuadro, que es la regla')
+afirmarIgual(serviciosApagados(ANIMADO).length, 2, '  y las otras dos, apagadas sin salir del árbol')
+afirmarIgual(capasSinDeclararSuForma(ANIMADO), [], '  y ninguna se contradice: lo que dice ser y lo que su clase hace coinciden')
+controlPositivo('el detector de la capa pintada vería DOS acentos en el mismo cuadro', '<div data-servicio="web" data-capa="vigente" class="w-full"></div><div data-servicio="software" data-capa="vigente" class="w-full"></div>', (h: string) => serviciosVigentes(h).length === 1)
 const serviciosQuietos = valoresDeAtributo(QUIETO, 'data-servicio')
 afirmarIgual(serviciosQuietos.length, 3, 'sin coreografía hay uno por servicio, hermanos')
 afirmar(!hayAnidamiento(QUIETO, 'data-servicio'), 'y ninguno está anidado adentro de otro')

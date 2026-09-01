@@ -80,6 +80,83 @@ html:has([data-v3]) {
   z-index: var(--z-cabecera);
 }
 
+/* ── QUE ENTRE EN UN TELÉFONO, SIN UN SOLO BREAKPOINT (SITIO-S11) ───────────
+ *
+ * `s10-mobile` §8 midió esta pastilla y encontró el **defecto 4**: mide
+ * **600 px** —piso, con los avances reales del `.woff2` que /v3 sirve, y los
+ * rótulos van `font-semi`, que es más ancho que la instancia que el lector
+ * mide— contra un viewport de 375. Sin tope de ancho y `left: 50%` con
+ * `translateX(-50%)`, se salía **112 px por CADA lado** a 375 y 105 a 390.
+ *
+ * ── Por qué NO se pliega ni se achica: las dos salidas están cerradas ──────
+ *
+ * **Achicar es aritmética, y la aritmética no da.** Los cinco rótulos solos
+ * suman 415 px a `--text-cuerpo`; con relleno cero, marcador cero y las cuatro
+ * separaciones en `--spacing-1` ya son 431 contra los **311 px de ancho útil**
+ * que deja 375 (`--pad-lateral-compacto` por lado). Para que la fila entrara
+ * habría que bajar el texto a ~10,7 px: abajo del piso de
+ * `--text-fluido-caption` (11) y rozando `--text-micro` (10), que es la vara
+ * de tamaño mínimo que el propio sistema declara.
+ *
+ * **Plegar cuesta el ALTO, y el alto de esta pastilla no es decorativo.**
+ * `--nav-alto` gobierna `--nav-nacimiento` y `--nav-umbral` —o sea el viaje
+ * entero— y su gemelo en `_lib/navegacion.ts` publica los 48 / 72 / 96 px que
+ * `s3-navegacion` §2, `s10-medida` §1 y `s10-mobile` §8 comparan contra esta
+ * hoja. Una pastilla de dos o tres renglones abajo del umbral obliga a un
+ * `--nav-alto` compacto y a un gemelo compacto en ese módulo, que no es de
+ * este frente. Queda reportado como la alternativa, con su costo.
+ *
+ * ── El tope va en el ANCHO, y es una RELACIÓN, no un breakpoint ────────────
+ *
+ *     inline-size: max-content
+ *     max-inline-size: calc(100% - var(--pad-lateral-compacto) * 2)
+ *
+ * Por eso esta hoja sigue **sin una sola media query**. El `100%` es el ancho
+ * del `<main>` —el envoltorio `sticky` es el contenedor de bloque de la
+ * pastilla y no lleva relleno—, así que abajo del tope global de contenido el
+ * borde de la pastilla cae donde cae el borde del texto de las ocho
+ * secciones: la pastilla se alinea con la composición en vez de con un
+ * número propio. Donde la fila entra el tope no ata nada y la geometría queda
+ * idéntica —desde ~664 px de viewport (600 de pastilla + los 64 del relleno),
+ * y a 768 sobran 104—; donde no entra, la pastilla se acota al ancho útil y la
+ * fila se recorre de costado.
+ *
+ * ⚠ **`inline-size: max-content` NO es un adorno: sin él la pastilla ya venía
+ * apretada, y eso ningún instrumento lo vio.** Una caja `absolute` con `left`
+ * puesto y `right: auto` se dimensiona por shrink-to-fit contra
+ * `ancho del contenedor − left`, o sea contra **la mitad del viewport**: con
+ * 600 px de fila, a 1440 sobra (720) pero **de 1199 para abajo la fila se
+ * comprime y los rótulos se parten en dos renglones adentro de una caja de
+ * 48 px**. El modelo de `s10-mobile` no hace layout y por eso publica 600 en
+ * los cinco anchos. `max-content` deja la fila en su ancho natural en todos, y
+ * el único ancho grabado y aprobado —1440— computa exactamente lo mismo que
+ * antes. Va reportado: es una superficie de arriba del umbral.
+ *
+ * ── Por qué la fila se RECORRE ────────────────────────────────────────────
+ *
+ * Los cinco enlaces siguen estando: el árbol de accesibilidad no cambia, las
+ * cinco paradas de tabulación siguen siendo cinco y ninguna palabra se
+ * abrevia. A 375 se ven dos y medio, y el enlace cortado en el borde es la
+ * señal de que hay más. Tres detalles lo sostienen:
+ *
+ *   · `flex: none` en la lista. Sin eso la lista es un ítem flexible que se
+ *     encoge hasta el ancho de la pastilla y son los ENLACES los que se
+ *     aprietan: los rótulos se parten en dos renglones adentro de una caja de
+ *     48 px de alto. Con `flex: none` la lista conserva su ancho intrínseco y
+ *     lo que se desplaza es ella entera.
+ *   · `overscroll-behavior-inline: contain`, para que llegar al final de la
+ *     fila no arrastre la página detrás.
+ *   · `scroll-padding-inline` = desplazamiento + grosor del anillo de foco. Al
+ *     tabular, el navegador trae el enlace justo al borde del área visible; el
+ *     anillo se dibuja 2 px AFUERA del enlace, así que sin ese margen quedaría
+ *     comido por el recorte. Sale de los mismos dos tokens que dibujan el
+ *     anillo: si el sistema cambia el grosor, el margen se mueve con él.
+ *
+ * ⚠ El recorte NO alcanza al `sticky`. La regla es que ningún **ancestro** del
+ * elemento pegado tenga `overflow` distinto de `visible`; acá el recorte está
+ * en un DESCENDIENTE del envoltorio. El viaje sigue igual.
+ * ========================================================================= */
+
 [data-v3] [data-pieza="navegacion"] > [data-parte="pastilla"] {
   position: absolute;
   top: var(--nav-nacimiento);
@@ -88,6 +165,11 @@ html:has([data-v3]) {
   display: flex;
   align-items: center;
   block-size: var(--nav-alto);
+  inline-size: max-content;
+  max-inline-size: calc(100% - var(--pad-lateral-compacto) * 2);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: calc(var(--foco-desplazamiento) + var(--foco-grosor));
   padding-inline: var(--spacing-4);
   border: var(--border-hairline) solid var(--color-borde);
   border-radius: var(--radius-pastilla-l);
@@ -98,6 +180,7 @@ html:has([data-v3]) {
 
 [data-v3] [data-pieza="navegacion"] [data-parte="lista"] {
   display: flex;
+  flex: none;
   align-items: center;
   gap: var(--spacing-2);
   margin: 0;

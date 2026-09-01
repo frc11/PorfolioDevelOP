@@ -6,10 +6,10 @@
  *
  * ── ⚠️ QUÉ CAMBIA ESTE ARCHIVO Y QUÉ NO ────────────────────────────────────
  *
- * **NO cambia `CUADROS_DE_REANUDACION`.** Es un valor de la escena y este sprint
- * tiene prohibido mover uno. Lo que cambia es el ESTADO EPISTÉMICO de la razón
- * que lo sostiene: §7.34 decía *«nada ordena uno respecto del otro»* y lo
- * declaraba **deducido leyendo el código, no medido**. Acá el orden queda
+ * **SITIO-S10 NO cambió `CUADROS_DE_REANUDACION`** —era un valor de la escena y
+ * ese sprint tenía prohibido mover uno—: lo que cambió fue el ESTADO EPISTÉMICO
+ * de la razón que lo sostiene. §7.34 decía *«nada ordena uno respecto del otro»*
+ * y lo declaraba **deducido leyendo el código, no medido**. Acá el orden queda
  * derivado eslabón por eslabón del código INSTALADO, con un control positivo por
  * eslabón, y la conclusión es la contraria: **el orden de registro está
  * determinado y r3f va primero.**
@@ -167,10 +167,12 @@ controlPositivo(
 )
 
 console.log(
-  '  ⚠️ HALLAZGO PARA §7.34: la razón escrita para `CUADROS_DE_REANUDACION = 2` es «nada ordena uno\n' +
-    '     respecto del otro». Sobre el código instalado eso NO se sostiene: el orden queda determinado\n' +
-    '     y r3f corre PRIMERO, así que UN cuadro alcanzaría. La constante NO se movió — la decisión es\n' +
-    '     del humano y pide la traza del §5 antes de tomarse.',
+  '  ✅ HALLAZGO PARA §7.34 — CERRADO en SITIO-S11. La razón escrita para `CUADROS_DE_REANUDACION = 2` era\n' +
+    '     «nada ordena uno respecto del otro». Sobre el código instalado eso NO se sostiene: el orden queda\n' +
+    '     determinado y r3f corre PRIMERO, así que UN cuadro alcanza. S11 bajó la constante a 1 citando esta\n' +
+    '     medición — son 16,7 ms de los 33 que costaba la reanudación. El hueco del §5 sigue abierto y no\n' +
+    '     cambia la conclusión: en el mismo cuadro manda el orden de registro, y en el siguiente `loop` ya\n' +
+    '     se re-registró primero.',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -209,6 +211,6 @@ controlPositivo(
   3,
   (c: number) => MARGEN_DE_REANUDACION >= c * (RITMO_CUBIERTO_PANTALLAS_POR_SEGUNDO / HZ),
 )
-console.log(`  CUADROS_DE_REANUDACION = ${CUADROS_DE_REANUDACION} — sin tocar, y el porqué de arriba es lo que cambió`)
+console.log(`  CUADROS_DE_REANUDACION = ${CUADROS_DE_REANUDACION} — lo bajó SITIO-S11 citando la cadena de arriba, y el margen sigue cubriéndolo con holgura`)
 
 cerrar('s10-raf.invariant')

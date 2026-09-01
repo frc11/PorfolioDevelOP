@@ -1,6 +1,7 @@
 import * as THREE from 'three'
 
-import { CAMERA_FOV, FRAME_TRAVEL_SAFETY, ORBIT_TARGET_Y } from './probeScene'
+import { CAMERA_FOV, ORBIT_TARGET_Y } from './probeScene'
+import { recorridoDeEncuadre } from './encuadre'
 
 /**
  * EL ENCUADRE — correr el logo a un costado de la pantalla sin mover la cámara.
@@ -51,15 +52,17 @@ export function aimWithFraming(
   frameX: number,
   frameY: number
 ): void {
-  // Recorrido disponible: cuánto puede correrse el centro del logo antes de que
-  // su caja toque el borde. Se calcula por frame porque depende de la distancia
-  // y del aspecto del canvas — por eso ±1 es "pegado al costado" en cualquier
-  // ventana, y no un desplazamiento fijo en unidades de mundo.
+  // Recorrido disponible: cuánto puede correrse el centro del logo hasta que su
+  // caja y el cuadro compartan un borde. Se calcula por frame porque depende de
+  // la distancia y del aspecto del canvas — por eso ±1 es "pegado al costado" en
+  // cualquier ventana, y no un desplazamiento fijo en unidades de mundo. La
+  // magnitud —y por qué es `abs` y no `max(0, …)`— está en `encuadre.ts`,
+  // que es el único lugar donde vive esa aritmética.
   const halfHeight = Math.tan(THREE.MathUtils.degToRad(CAMERA_FOV) / 2) * eyeDistance
   const halfWidth = halfHeight * aspect
 
-  const travelX = Math.max(0, halfWidth - logoWidth / 2) * FRAME_TRAVEL_SAFETY
-  const travelY = Math.max(0, halfHeight - logoHeight / 2) * FRAME_TRAVEL_SAFETY
+  const travelX = recorridoDeEncuadre(halfWidth, logoWidth)
+  const travelY = recorridoDeEncuadre(halfHeight, logoHeight)
 
   SCREEN_RIGHT.set(1, 0, 0).applyQuaternion(camera.quaternion)
   SCREEN_UP.set(0, 1, 0).applyQuaternion(camera.quaternion)

@@ -20,7 +20,15 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Panel } from '../../../_componentes/Panel'
 import type { Seccion } from '../../secciones'
 import { ANCLAJE } from '../anclaje'
-import { CUADROS_DE_REANUDACION, MARGEN_DE_REANUDACION, escenaEnCuadro } from '../visibilidad'
+import {
+  CUADROS_DE_REANUDACION,
+  ESTADO_INICIAL,
+  MARGEN_DE_REANUDACION,
+  escenaEnCuadro,
+  siguiente,
+  type EstadoDeLaEscena,
+  type EventoDeLaEscena,
+} from '../visibilidad'
 
 /**
  * EL DOCUMENTO SINTÉTICO — catorce pantallas de 900 px.
@@ -112,3 +120,51 @@ export function imprimirCuadros(banda: Banda): void {
       'hoy dibujados, pasan a CERO',
   )
 }
+
+// ── LA MÁQUINA DE FASES — las casillas y sus estados de partida ─────────────
+
+/**
+ * LOS TRES ESTADOS DE PARTIDA, alcanzados CORRIENDO la máquina y no escritos.
+ *
+ * `SUSPENDIDA` y `REANUDANDO` salen de aplicarle eventos a `ESTADO_INICIAL`, no
+ * de un literal: un literal sería un modelo paralelo de la máquina, y lo que hay
+ * que probar es la máquina. Es la misma disciplina que el resto del módulo — se
+ * corre la función que se despacha.
+ */
+export const CORRIENDO = ESTADO_INICIAL
+export const ENTRA: EventoDeLaEscena = { tipo: 'cuadro', enCuadro: true }
+export const SALE: EventoDeLaEscena = { tipo: 'cuadro', enCuadro: false }
+export const PINTADO: EventoDeLaEscena = { tipo: 'pintado' }
+export const SUSPENDIDA = siguiente(CORRIENDO, SALE)
+export const REANUDANDO = siguiente(SUSPENDIDA, ENTRA)
+
+/** fase de partida · evento · fase que sale · si el objeto es el MISMO · nombre. */
+export type Casilla = readonly [EstadoDeLaEscena, EventoDeLaEscena, string, boolean, string]
+
+/**
+ * LAS NUEVE CASILLAS: fase × evento, con la fase que sale y si el objeto cambia.
+ *
+ * ⚠ **LA NOVENA CAMBIÓ EN SITIO-S11, y no es que se aflojó: es la casilla que
+ * MIDE `CUADROS_DE_REANUDACION`.** Con la constante en 2, `reanudando + pintado`
+ * dejaba la máquina en `reanudando` con la cuenta en 1; con la constante en 1
+ * —bajada en SITIO-S11 citando la medición del orden de los dos `rAF` que
+ * produce `_lib/__tests__/s10-raf.invariant.ts`, 28 afirmaciones y 14 controles
+ * positivos— ese primer cuadro pintado YA ES el cuadro exacto, y la máquina pasa
+ * a `corriendo` encendiendo la física.
+ *
+ * **La fase esperada NO se deriva de la constante, y es a propósito.** Escrita a
+ * mano, esta fila se pone en rojo si alguien mueve el número sin venir a leer
+ * por qué — que es exactamente lo que un invariante tiene que hacer. Derivada,
+ * seguiría cualquier valor en silencio y dejaría de custodiar nada.
+ */
+export const CASILLAS: readonly Casilla[] = [
+  [CORRIENDO, ENTRA, 'corriendo', true, 'corriendo + entra'],
+  [CORRIENDO, SALE, 'suspendida', false, 'corriendo + sale'],
+  [CORRIENDO, PINTADO, 'corriendo', true, 'corriendo + pintado (no significa nada acá)'],
+  [SUSPENDIDA, ENTRA, 'reanudando', false, 'suspendida + entra'],
+  [SUSPENDIDA, SALE, 'suspendida', true, 'suspendida + sale'],
+  [SUSPENDIDA, PINTADO, 'suspendida', true, 'suspendida + pintado (el lazo está apagado)'],
+  [REANUDANDO, ENTRA, 'reanudando', true, 'reanudando + entra (no se reinicia la cuenta)'],
+  [REANUDANDO, SALE, 'suspendida', false, 'reanudando + sale (se apaga sin terminar)'],
+  [REANUDANDO, PINTADO, 'corriendo', false, 'reanudando + pintado (el cuadro exacto llegó: enciende la física)'],
+]

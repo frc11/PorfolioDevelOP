@@ -478,11 +478,48 @@
    *   b = min − a × 375                →  independiente, /16 para rem
    * Las seis se re-derivaron con ese método y dieron los mismos
    * coeficientes, dígito por dígito. Error máximo en los extremos de la
-   * banda: 0,00053px. */
+   * banda: 0,00053px.
+   *
+   * ═══ DOS PISOS SUBIDOS EN SITIO-S11. LOS SEIS TECHOS, INTACTOS. ═══════
+   *
+   * `s10-mobile` §9 midió los ocho niveles resueltos a 375 —el piso de la
+   * banda— y encontró que DOS se caían del sistema justo ahí (§7.38):
+   *
+   *   `--text-fluido-micro`     8 px, un 20% POR DEBAJO del propio piso fijo
+   *                             del sistema (`--text-micro` = 10 px).
+   *   `--text-fluido-titulo-s`  16 px = EXACTAMENTE `--text-base`, y un solo
+   *                             píxel arriba de `--text-cuerpo` (15 px): la
+   *                             cifra más chica de Números dejaba de leerse
+   *                             como cifra.
+   *
+   * Una escala en la que dos niveles colisionan en un extremo no es una
+   * escala. Los dos pisos suben al MÍNIMO que cierra el defecto, y ni un
+   * píxel más; **los seis máximos no se tocan** —salen de medición y están
+   * anclados—, así que la costura con el token fijo de cada nivel sigue
+   * siendo la misma que `s3-tipografia` §2 afirma.
+   *
+   *   micro      8 → 10 px   el piso fijo del propio sistema. No hay un
+   *                          valor más chico que cierre el defecto: la vara
+   *                          ES `--text-micro`.
+   *   titulo-s  16 → 17 px   el ÚNICO entero que a la vez pasa `--text-base`
+   *                          (16) y se queda abajo del piso de `titulo-m`
+   *                          (18). Con 18 los dos niveles colisionarían en el
+   *                          otro extremo, que es el defecto de vuelta.
+   *
+   * ⚠️ **CONSECUENCIA FORZADA, Y SE DECLARA: `micro` DEJA DE SER FLUIDO.**
+   * Su piso no puede bajar de 10 sin reabrir el defecto y su techo está
+   * anclado en 10, así que la banda queda en CERO y el `clamp()` resuelve
+   * 10 px a todo ancho. De las tres cosas —piso ≥ el del sistema, techo
+   * anclado, banda no nula— sólo se pueden tener dos, y las dos que quedan
+   * son las que el sistema ya fijaba. Por eso el término preferido se
+   * escribe SIN `vw`: un `+ 0vw` haría pasar por fluida una expresión que no
+   * lo es, y `s3-tipografia` §2 lo dice ahora con la pendiente, no con la
+   * presencia de la unidad. El día que el techo de `micro` suba, la banda
+   * vuelve sola con el método de arriba. */
 
-  --text-fluido-micro: clamp(8px, 0.456rem + 0.1878vw, 10px);
+  --text-fluido-micro: clamp(10px, 0.625rem, 10px);
   --text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12px);
-  --text-fluido-titulo-s: clamp(16px, 0.912rem + 0.3756vw, 20px);
+  --text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 20px);
   --text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 32px);
   --text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 44px);
   --text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);
@@ -769,6 +806,41 @@
 [data-seccion="invertida"] {
   --color-fondo: #0E0E0E;                          /* [decidido] */
   --color-tinta: #F7F7F5;                          /* el papel, dado vuelta — 18,00:1 [decidido] */
+
+  /* LAS OTRAS DOS TINTAS, DADAS VUELTA. [derivado, SITIO-S11]
+   *
+   * Hasta S11 este bloque redefinía `--color-tinta` y NO las otras dos, y esa
+   * asimetría era una trampa cargada: una utilidad `text-tinta-media` o
+   * `text-tinta-tenue` escrita adentro de una sección invertida pintaba el
+   * MISMO gris oscuro que sobre el papel, ahora sobre #0E0E0E. `s10-acceso`
+   * §10 la encontró disparada: el `<p>` que explica por qué el envío de
+   * novedades está deshabilitado —el único texto que aclara un control
+   * apagado— daba **2,80:1**, el único fallo de AA de todo el home; y la
+   * media, todavía sin disparar, daba **2,51:1**. Ver §7.39, defectos 1 y 6.
+   *
+   * MÉTODO: el MISMO espejado con el que S0 derivó las dos del tema claro,
+   * corrido en el otro sentido. Allá se tomaron las razones de las tintas de
+   * Franco contra SU fondo (7,2122 y 6,4741) y se buscó, desde #111111 y
+   * hacia claro, el color que las diera contra el papel. Acá se buscan las
+   * mismas dos razones desde #F7F7F5 y hacia oscuro, contra #0E0E0E. No se
+   * copia un alfa ni se invierte un hex: se transfiere la RAZÓN, que es la
+   * regla que este archivo ya declara para todo token con contraste
+   * comprometido.
+   *
+   *   media  #9E9E9E → 7,2054:1 sobre #0E0E0E   (claro: 7,1713:1)  AA + AAA
+   *   tenue  #959595 → 6,4448:1 sobre #0E0E0E   (claro: 6,4298:1)  AA
+   *
+   * Las dos pasan AA como TEXTO (4,5:1) con holgura, que es lo que había que
+   * verificar. Y la propiedad heredada que S0 dejó anotada se conserva sin
+   * forzarla: media y tenue quedan a **1,1180:1** entre sí, contra los
+   * 1,1153:1 del tema claro — igual de cerca, ni más ni menos.
+   *
+   * Las tres razones las recalcula `s10-acceso.invariant` §10 sobre el
+   * marcado del documento entero, leyendo estos hex del tema: ninguna de las
+   * cifras de arriba está escrita en un instrumento. */
+  --color-tinta-media: #9E9E9E;                    /* texto secundario, invertido — 7,21:1 [derivado] */
+  --color-tinta-tenue: #959595;                    /* texto terciario, invertido — 6,44:1 [derivado] */
+
   --color-borde: rgba(247, 247, 245, 0.10);        /* [derivado] */
   --color-borde-fuerte: rgba(247, 247, 245, 0.47); /* misma alfa que el claro — 4,62:1 [derivado] */
 

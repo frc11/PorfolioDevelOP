@@ -140,6 +140,14 @@ async function principal(): Promise<void> {
     '--spacing-12: 48px;',
     '--spacing-20: 80px;',
     '--text-base: 16px;',
+    // ⚠ SITIO-S11: los DOS PISOS que se caían del sistema a 375, medidos por
+    // `s10-mobile` §9 y publicados en §7.38. Salen con su valor viejo y
+    // vuelven abajo con el nuevo; los seis TECHOS no se movieron, así que la
+    // costura de `s3-tipografia` §2 con el token fijo de cada nivel es la
+    // misma. `micro` llegaba a 8px, un 20% abajo del propio `--text-micro`;
+    // `titulo-s` resolvía a 16px, o sea EXACTAMENTE `--text-base`.
+    '--text-fluido-micro: clamp(8px, 0.456rem + 0.1878vw, 10px);',
+    '--text-fluido-titulo-s: clamp(16px, 0.912rem + 0.3756vw, 20px);',
   ]
   const ESPERADO_DENTRO = [
     '@theme static {',
@@ -168,6 +176,17 @@ async function principal(): Promise<void> {
     '[data-v3]:focus-visible {',
     'outline: var(--foco-grosor) solid var(--color-foco);',
     'outline-offset: var(--foco-desplazamiento);',
+    // ⚠ SITIO-S11 — los dos pisos subidos, del otro lado del diff.
+    '--text-fluido-micro: clamp(10px, 0.625rem, 10px);',
+    '--text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 20px);',
+    // ⚠ SITIO-S11 — las OTRAS DOS TINTAS, dadas vuelta en la sección
+    // invertida. Los nombres ya existían en S0 (con su valor claro, que no se
+    // tocó); lo que entra son las dos REDEFINICIONES del bloque
+    // `[data-seccion="invertida"]`, derivadas con el mismo método espejado.
+    // Cierran los defectos 5 y 11 de §7.39 en la raíz: el `<p>` de ayuda del
+    // formulario de novedades pasa de 2,80:1 a 6,44:1.
+    '--color-tinta-media: #9E9E9E;',
+    '--color-tinta-tenue: #959595;',
   ]
   afirmarIgual(soloEnS0.sort(), [...ESPERADO_FUERA].sort(), `las ${ESPERADO_FUERA.length} líneas que salieron son las previstas`)
   afirmarIgual(soloEnRepo.sort(), [...ESPERADO_DENTRO].sort(), `las ${ESPERADO_DENTRO.length} líneas que entraron son las previstas`)

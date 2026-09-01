@@ -6,7 +6,7 @@ import * as THREE from 'three'
 
 import { BokehParticles } from './BokehParticles'
 import { createCelosiaUniforms } from './celosiaShader'
-import type { ChoreoEditor } from '@/app/probe-escena/_components/choreographyEditor'
+import type { ChoreoEditor } from './choreographyEditorTypes'
 import { ContactOcclusion } from './ContactOcclusion'
 import { DepthParticles } from './DepthParticles'
 import { MoireScreen, type MoireHandle } from './MoireScreen'
