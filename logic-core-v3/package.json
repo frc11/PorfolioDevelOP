@@ -46,6 +46,7 @@
     "check:invariant:draft-url-mensaje": "npx tsx \"src/app/(protected)/setter/_actions/draft-url-mensaje.invariant.ts\"",
     "check:invariant:enlaces": "npx tsx src/lib/leados/enlaces-manual.invariant.ts",
     "check:invariant:copy-sin-jerga": "npx tsx src/lib/leados/copy-sin-jerga.invariant.ts",
+    "check:invariant:ficha-bloques": "npx tsx src/lib/leados/ficha-bloques.invariant.ts",
     "test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",
     "test:ev2": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts",
     "test:ev3:golden": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts",

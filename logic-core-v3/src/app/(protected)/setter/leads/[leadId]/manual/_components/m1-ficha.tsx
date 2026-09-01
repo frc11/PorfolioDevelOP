@@ -113,6 +113,18 @@ export function M1Municion() {
  * operativo del lead) — por eso en el manual la opción no dice «Caliente».
  * Los VALORES que viajan a la action no cambian (`VEREDICTO_VALUES`).
  */
+/**
+ * El nombre del último bloque del recorrido. NO reusa `GUIA_EVALUACION.titulo`
+ * («Tu veredicto») a propósito: ese texto ya es el nombre accesible del selector
+ * del veredicto (`aria-label="Tu veredicto"`), y la cabecera de un bloque es un
+ * `<button>`. Dos controles con el mismo nombre en la misma pantalla es una
+ * ambigüedad real —un lector de pantalla los anuncia igual, y cualquier búsqueda
+ * por rol+nombre agarra el primero de los dos—; acá se midió con el helper que
+ * elige opciones de un `<Select>`: apretaba la cabecera del bloque en vez del
+ * selector, plegaba el veredicto y el panel de opciones nunca abría.
+ */
+const TITULO_CIERRE = 'Tu decisión'
+
 const TEXTOS_M1: EvaluacionTextos = {
   scoreHint: 'Cuánto le ves, de 1 a 5: 1–2 descarta, 3 avanza, 4–5 sugiere prioridad.',
   veredictoHint: 'Tu decisión, coherente con el score que pusiste.',
@@ -124,16 +136,22 @@ const TEXTOS_M1: EvaluacionTextos = {
 }
 
 /**
- * Registro: las dos mitades de la pantalla, en el orden en que se hacen.
+ * Registro: el recorrido entero de la pantalla, en el orden en que se hace.
  *
- * Arriba la ficha —el form vivo mientras el veredicto no esté registrado, la
- * vista congelada después—; abajo el veredicto, que es lo que CIERRA el paso
- * (registrarlo transiciona `FICHA→EVALUADA` y la posición se re-deriva sola).
+ * P16 — La ficha dejó de ser una lista larga y pasó a ser el RECORRIDO por las
+ * fuentes que el setter visita (Instagram, Google, la web que ya tienen), con el
+ * material que se baja de cada una adentro del mismo bloque; el veredicto es el
+ * último tramo de ese mismo acordeón, no una sección aparte. Por eso entra como
+ * slot `cierre` de `FichaForm`: el único que sabe qué bloque tiene que estar
+ * abierto es el que ve lo que hay escrito en la ficha, y cuando ya no falta
+ * nada, el bloque abierto tiene que ser el veredicto.
  *
- * La señal mínima no se chequea acá: el gate vive donde vivía —en
- * `registrarEvaluacion`, server-side— y el aviso de faltantes lo sigue
- * mostrando `FichaForm`, ahora a un scroll del veredicto en vez de a una
- * pantalla de distancia.
+ * Lo que NO cambió: la ficha viva mientras el veredicto no esté registrado y
+ * congelada después; el veredicto sigue siendo lo que CIERRA el paso
+ * (registrarlo transiciona `FICHA→EVALUADA` y la posición se re-deriva sola). La
+ * señal mínima tampoco se chequea acá: el gate vive donde vivía —en
+ * `registrarEvaluacion`, server-side— y el aviso de faltantes lo sigue mostrando
+ * `FichaForm`, entero, debajo del acordeón.
  */
 export function M1Registro({
   leadId,
@@ -154,48 +172,54 @@ export function M1Registro({
   evaluacion: Evaluacion | null
   descartado: boolean
 }) {
-  return (
-    <div className="space-y-5">
-      <section aria-label="La ficha del negocio">
-        {editable ? (
-          <FichaForm leadId={leadId} ficha={ficha} />
-        ) : (
-          // Congelada: la MISMA vista solo-lectura del wizard (`FichaStep` con
-          // `editable={false}` es solo el `<details>` con el bloque de la ficha).
-          <FichaStep leadId={leadId} lead={lead} ficha={ficha} editable={false} />
-        )}
-      </section>
-
-      <section aria-label="Tu veredicto" className="border-t border-white/[0.08] pt-5">
-        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-          {evaluacion ? 'Tu veredicto' : 'Y ahora, tu veredicto'}
-        </p>
-        {evaluacion ? (
-          <div className="mt-2">
-            <EvaluacionResumen
-              evaluacion={evaluacion}
-              descartado={descartado}
-              titulo="Veredicto registrado"
-              veredictoLabels={TEXTOS_M1.veredictoLabels}
-            />
-          </div>
-        ) : (
-          <>
-            <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
-              Con lo que acabás de anotar arriba: cuánto le ves, si avanza o se descarta,
-              y por qué. Nadie lo puntuó antes que vos.
-            </p>
-            <div className="mt-4">
-              <EvaluacionForm
-                leadId={leadId}
-                leadStatus={leadStatus}
-                caliente={caliente}
-                textos={TEXTOS_M1}
-              />
-            </div>
-          </>
-        )}
-      </section>
+  // El cierre del recorrido — el mismo contenido de siempre: el resumen si el
+  // veredicto ya está registrado, el formulario si todavía no.
+  const veredicto = evaluacion ? (
+    <EvaluacionResumen
+      evaluacion={evaluacion}
+      descartado={descartado}
+      titulo="Veredicto registrado"
+      veredictoLabels={TEXTOS_M1.veredictoLabels}
+    />
+  ) : (
+    <div className="space-y-4">
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
+        Con lo que acabás de anotar arriba: cuánto le ves, si avanza o se descarta, y por
+        qué. Nadie lo puntuó antes que vos.
+      </p>
+      <EvaluacionForm
+        leadId={leadId}
+        leadStatus={leadStatus}
+        caliente={caliente}
+        textos={TEXTOS_M1}
+      />
     </div>
+  )
+
+  // Congelada (el veredicto ya está registrado): la MISMA vista solo-lectura de
+  // siempre, con el veredicto debajo. No hay recorrido que hacer — no queda nada
+  // por observar — así que acá no hay acordeón ni avance por completitud.
+  if (!editable) {
+    return (
+      <div className="space-y-5">
+        <section aria-label="La ficha del negocio">
+          <FichaStep leadId={leadId} lead={lead} ficha={ficha} editable={false} />
+        </section>
+        <section aria-label="Tu veredicto" className="border-t border-white/[0.08] pt-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+            Tu veredicto
+          </p>
+          <div className="mt-2">{veredicto}</div>
+        </section>
+      </div>
+    )
+  }
+
+  return (
+    <FichaForm
+      leadId={leadId}
+      ficha={ficha}
+      cierre={{ titulo: TITULO_CIERRE, contenido: veredicto }}
+    />
   )
 }

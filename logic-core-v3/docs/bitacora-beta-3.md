@@ -8789,3 +8789,405 @@ también intacto: `EVALUADA` sigue en el enum.
 - Que el copy del veredicto suene a criterio propio y no a trámite. Ningún test lo valida.
 - Que la pantalla fusionada no quede demasiado larga: son dos pantallas en una. Se ve entera en
   las capturas 02, 03, 04 y 05.
+
+---
+
+## Sprint P16 — LA FICHA POR FUENTES: un solo viaje, y el bloque siguiente se abre solo — 2026-09-01
+
+**Rama** `fix/ficha-por-fuentes` · **base** `f4332226` (`fix/fusion-m1-m2`, la pantalla fusionada de
+D15-bis) · **worktree** `C:/tmp/wt-p16-fuentes`, propio, `node_modules` por junction, puerto 3003,
+`E2E_DIST_DIR=.next-setter` · **sin pushear**
+
+D15-bis juntó la ficha y el veredicto en una pantalla, y con eso la duplicó. Este sprint no le saca
+nada: la reordena por el lugar del que sale cada dato. El setter recorre Instagram, Google y la web
+que ya tienen para anotar, y después los recorría OTRA VEZ para bajar el logo y las fotos — porque
+el formulario pedía las observaciones en un orden y el material («material para construir la demo»)
+al final, en un cajón aparte. Ahora cada fuente es un bloque con sus dos mitades juntas, y se visita
+una sola vez.
+
+Y es el PILOTO del avance por completitud: el bloque siguiente se abre solo cuando el anterior queda
+completo, sin botón de «siguiente». A3-bis midió que ningún mecanismo existente alcanzaba para S2.
+Acá se construyó, en la pantalla más larga del recorrido. Lo que Franco tiene que decidir con esto en
+la mano es si el patrón se propaga a las catorce pantallas.
+
+**Lo que NO se tocó, y está probado abajo con `git diff` vacío:** `contracts.ts` (`FichaSchema` y
+`EvaluacionSchema`), `flow.ts` (`fichaFaltantes`, el gate de señal mínima), `dossier-stage.ts`
+(`LEGAL_TRANSITIONS`), `dossier.ts` (`transitionDossier`), `dossier.actions.ts` (`guardarFicha` y
+`registrarEvaluacion`) y `prisma/schema.prisma`. Ni un campo se agregó, se sacó ni se renombró.
+
+### Fase 0 · el terreno
+
+`git fetch --all --prune` limpio. Base `f4332226`, worktree nuevo y limpio (`git status --porcelain`
+vacío al empezar). 19 worktrees vivos en la máquina, ninguno tocado; dos stashes ajenos
+(`epitaxy: pre-switch` de `redesign/home` y de `fix/home-sanidad`), ninguno tocado.
+
+`tsc --noEmit` **exit 0** · `check:invariants` **49/49 verde** (50 descubiertos, 1 excluido) ·
+`test:setter` **99/99** sobre la base.
+
+**La medición de la pantalla ANTES**, que es contra lo que se compara al cerrar. Dos trampas del
+shell que el instrumento evita, las dos ya conocidas: el shell del setter es `fixed inset-0` y el
+scroller es el `<main>`, no el documento (`document.scrollHeight` da el alto del viewport y
+`window.scrollY` es siempre 0), y React streamea a `body > div[id^="S:"]`, así que un selector de
+conteo ve el doble si no se acota al `<main>` visible.
+
+| | 1440×900 | 390×844 |
+|---|---|---|
+| Fold real (alto del `<main>`) | 788 px | 688 px |
+| Alto scrolleable | **3.155 px** | **4.162 px** |
+| Alto de la zona Registro | 2.297 px | 3.102 px |
+| Pantallas de scroll | **4,00** | **6,05** |
+| Campos montados a la vez | **14** | 14 |
+| Campos visibles sin scrollear | **0** | **0** |
+
+Los 14 son los 12 de la ficha más los 2 del veredicto que cuentan como control (`<select>` y
+razonamiento; el score es un `radiogroup` de botones).
+
+### Paso 1 · el censo de campos por fuente
+
+El mapa vive en código, en `src/lib/leados/ficha-bloques.ts`, con los casos ambiguos anotados ahí
+mismo. Doce campos, ninguno agregado ni sacado:
+
+| campo | control | obligatorio | fuente según su propio hint | bloque |
+|---|---|---|---|---|
+| `igManejadoPor` | select | sí (OR con notas) | Instagram — «fijate quién contesta los comentarios» | 1 · Instagram |
+| `identidadNotas` | textarea | sí (OR con el select) | **ambigua** | 1 · Instagram |
+| `contenidoReal` | textarea | sí (OR con reseñas) | Instagram — fotos, logo, tono | 1 · Instagram |
+| `comoSePresenta` | textarea | no | **ambigua** (bio ⊂ IG · quiénes-somos ⊂ web) | 1 · Instagram |
+| `imagenesUrl` | url | no | **ambigua** (Drive · la web vieja · el perfil) | 1 · Instagram |
+| `resenas` | textarea | sí (OR con contenido real) | Google / Maps | 2 · Google |
+| `resenasUrl` | url | no | Google — «la dirección de la ficha de Google» | 2 · Google |
+| `queVende` | textarea | no | **ambigua** (carta ⊂ web · highlights ⊂ IG · menú ⊂ Maps) | 3 · La web |
+| `presenciaDigital` | textarea | **sí** | **ninguna sola** — es el inventario de las tres | 4 · Balance |
+| `senalesOperativas` | textarea | no | **ninguna sola** — horarios ⊂ Maps, pedidos ⊂ IG, demoras ⊂ reseñas | 4 · Balance |
+| `otraRedUrl` | url | no | **ninguna** — apunta a una CUARTA red | 4 · Balance |
+| `otros` | textarea | no | **ninguna** — cajón | 4 · Balance |
+
+**Cuatro campos no salen de ninguna fuente sola: ése es el quinto bloque.** `presenciaDigital` pide
+«qué tienen y qué no» — un inventario que sólo se puede escribir DESPUÉS de mirar las tres;
+`senalesOperativas` reparte sus preguntas entre las tres; `otraRedUrl` apunta a una red que no es
+ninguna de las tres; `otros` es el cajón. Van juntos en **«4 · Mirando las tres juntas»**, después
+del recorrido, porque antes no hay con qué contestarlos. La forma quedó en cinco tramos y no en
+cuatro: tres fuentes + el balance + el cierre.
+
+**Las tres ambigüedades, y por qué se resolvieron así (no se forzó ninguna, se decidió y se anotó):**
+
+- `identidadNotas` — su ejemplo es de Instagram («la cuenta la firma "Marce"»), pero «hace cuánto
+  existe el negocio» también sale de Maps. Va a Instagram **forzado por el contrato**: `identidad` es
+  un solo objeto y `fichaFaltantes` lo evalúa como un OR con el selector. Separarlos partiría un
+  requisito del gate entre dos bloques sin ninguna necesidad.
+- `comoSePresenta` — «su bio, su eslogan o el quiénes somos»: la bio es de Instagram, el
+  quiénes-somos de la web. Desempata su propio ejemplo, que dice «bio de IG».
+- `imagenesUrl` — «una carpeta de Drive, la web vieja, el perfil con las mejores fotos»: las tres. Va
+  a Instagram para quedar **pegado a `contenidoReal`** («¿hay logo? ¿las fotos son reales?»), que es
+  la misma mirada al mismo perfil. Separarlos reconstruiría adentro de la pantalla el doble viaje que
+  este orden viene a sacar.
+
+**El hallazgo grande del censo: el bloque de la web queda con UN campo.** Ninguno de los doce campos
+existentes es web-first; `queVende` es el único que apunta ahí antes que a otro lado. El campo que
+llenaría ese bloque —«cómo se ve la web»— es uno de los cuatro que el rediseño pide y que la regla 1
+deja explícitamente afuera. Se deja el bloque con su único campo a propósito: es honesto, y además es
+el que prueba que un bloque flaco no fabrica un callejón.
+
+### Paso 2 · las cinco decisiones del avance por completitud
+
+El criterio del sprint —el que menos estado invente y menos clics agregue— se cumplió entero:
+**ninguna de las cinco inventó estado nuevo.** Cero claves en `progresoJson`, cero cookies, cero
+columnas, cero migraciones. Lo único que hay es una variable de UI efímera (`useState`) que arranca
+derivada de lo que hay escrito.
+
+**1 · ¿Qué significa «completo» para un bloque con campos opcionales?**
+**Completo = «no te debe nada y no está vacío».** Las dos mitades hacen falta y responden a cosas
+distintas: «no debe nada» es el gate (`fichaFaltantes`, sin tocar); «no está vacío» es lo que hace
+que el recorrido CAMINE.
+
+Sin la segunda mitad el patrón se rompe en silencio, y está medido: el bloque de la web no tiene
+requisitos propios, y el de Google deja de tener el suyo apenas el contenido real se escribió en
+Instagram (son un OR). Con «completo = no debe nada», los dos estarían completos desde que se abren y
+al terminar Instagram se desplegaría el balance de una: el recorrido por fuentes se perdería sin que
+nada fallara. El invariante lo ejerce con un sabotaje explícito — sacándole esa mitad,
+`bloqueSiguiente('instagram')` devuelve `balance` en vez de `google` y sale en rojo.
+
+**2 · ¿Qué pasa si el setter vuelve a un bloque anterior y lo vacía?**
+**No se le cierra nada.** El bloque en el que está sigue abierto; lo que cambia es la cabecera del
+que vació, que vuelve a decir qué falta, y el aviso de señal mínima, que reaparece entero. El avance
+automático sólo mira hacia adelante y sólo se dispara al salir de un bloque COMPLETO: nunca arrastra
+al setter de vuelta ni le mueve la pantalla bajo los pies. Lo escrito no se pierde nunca (el estado
+del formulario vive en el padre; plegar un bloque no lo toca). Verificado en V2.
+
+**3 · ¿Se puede saltear un bloque?**
+**Sí, y por eso las cinco cabeceras están SIEMPRE, plegadas pero visibles y clickeables.** Acá se
+tomó distancia del enunciado a propósito: la forma pedida decía «el siguiente no aparece hasta que le
+toque», y esconderlo es exactamente lo que fabrica el callejón que la decisión 3 quiere evitar. Un
+negocio sin web no tiene nada que escribir en ese bloque; si el siguiente no existiera hasta
+completarlo, no habría salida. Con la cabecera a la vista, la salida es un click, el bloque dice
+«Opcional — podés seguir sin esto», y no hay pared. El avance automático es una invitación, no una
+tranca. Verificado en V3.
+
+**4 · ¿El estado de apertura se persiste o se deriva?**
+**Se deriva, y no se persiste nada.** Al entrar: si la señal mínima ya está cumplida, se abre el
+cierre; si no, el primer bloque incompleto. La ficha ya guarda sola (autosave), así que al volver la
+derivación reconstruye el mismo lugar sin un dato nuevo. Después de eso lo mueven dos cosas, las dos
+efímeras: el click en una cabecera y el avance automático.
+
+**5 · ¿Qué pasa al volver con la ficha ya completa?**
+**Se abre el veredicto**, no el formulario. Es el motivo por el que la decisión 4 mira la señal
+mínima y no «el primer incompleto» a secas: un negocio sin web tiene ese bloque vacío para siempre, y
+con la regla ingenua volvería SIEMPRE a un formulario que nunca va a poder llenar en vez de a la
+decisión que sí puede tomar. Con el veredicto ya registrado la ficha queda congelada y **no hay
+acordeón**: la vista solo-lectura de siempre, sin cambios. Verificado en V4 y V5.
+
+### Paso 3 · lo que se construyó
+
+Cuatro archivos nuevos y tres tocados. `git diff --stat`: 472 inserciones, 295 borrados.
+
+- **`src/lib/leados/ficha-bloques.ts`** (nuevo) — el censo y las reglas, puro, sin React ni Prisma. A
+  qué bloque va cada campo, qué debe un bloque, qué significa completo, cuál se abre y a cuál se
+  avanza. **No reimplementa el gate**: los `REQUISITOS` son el mapa requisito→campos que
+  `fichaFaltantes` no expone porque devuelve prosa, y el invariante cruza los dos.
+- **`src/lib/leados/ficha-bloques.invariant.ts`** (nuevo) — cinco secciones, abajo el detalle.
+- **`src/app/(protected)/setter/_components/bloques-secuenciales.tsx`** (nuevo) — el acordeón. Es
+  presentación y mecánica de foco: qué es «completo» lo decide quien lo monta.
+- **`ficha-form.tsx`** — los mismos campos, dibujados desde el censo. `aPayload` idéntico.
+- **`m1-ficha.tsx`** — el veredicto entra como slot `cierre` del acordeón.
+- **`guidance-content.ts`** — las palabras de los cuatro bloques y de los estados de cabecera.
+  `GrupoGuia` sumó `material`: lo que hay que bajarse mientras esa pestaña está abierta.
+- **`package.json` + `scripts/run-invariants.mjs`** — el invariante nuevo, y la cuenta exacta 50 → 51.
+
+**Las tres decisiones del acordeón que no se ven venir, y por qué:**
+
+1. **El bloque plegado NO SE RENDERIZA** (no queda escondido con CSS). Dos razones, y la segunda
+   cierra la discusión: sus campos no pueden quedar en el orden de tabulación de una zona que no se
+   ve; y plegar con `overflow:hidden` deja a los inputs con su caja intacta, así que un
+   `toBeVisible()` los da por visibles y una prueba pasaría en VERDE sobre el bug que tendría que
+   ver. Sin montar, presencia y visibilidad dicen lo mismo. Lo escrito no se pierde: el estado vive
+   en el padre.
+
+2. **Con el mouse apretado, el avance ESPERA.** Es la parte que no se ve venir. Al hacer click el
+   foco se mueve en el `mousedown`, así que el avance se dispararía ANTES del `mouseup`; y como
+   plegar el bloque abierto cambia el alto de todo lo que hay debajo, el botón que se está apretando
+   se corre de lugar entre los dos, el `mouseup` cae sobre otra cosa y **el navegador no emite el
+   click**. El setter aprieta «Guardar ficha» y no pasa absolutamente nada: una acción sin acuse, que
+   es justo el patrón que este producto ya arrastró antes. Si hay un puntero apretado, el avance
+   queda pendiente y se aplica en el task posterior al `pointerup`, cuando el click ya se despachó.
+   Con teclado no hay nada que esperar. Hay un test dedicado que aprieta de verdad y exige las dos
+   cosas: que el guardado ocurra Y que el recorrido avance igual.
+   *Límite conocido y anotado en el código*: si el botón se suelta fuera de la ventana no llega
+   `pointerup` y ese salto se pierde. No rompe nada — el bloque siguiente sigue a un click.
+
+3. **Una sugerencia de calidad frena el avance hasta que se pueda leer.** Salió de un rojo real de
+   `01-flow · B1`: el nudge («eso queda corto, podés sumar…») se dispara al SALIR del campo, que es
+   exactamente el mismo momento en que ese campo puede completar el bloque. Con el avance ganando, el
+   bloque se plegaba con el mensaje adentro y el setter nunca leía la sugerencia que acababa de pedir
+   al terminar de escribir. Ahora el bloque espera.
+   **Esto NO convierte el nudge en un gate** (ver el límite duro de `ficha-calidad.ts`): no habilita
+   ni deshabilita ningún submit, no dispara ninguna transición y no bloquea nada — el bloque
+   siguiente sigue a un click, y el veredicto se registra igual. Lo único que hace es no robarle la
+   pantalla a un mensaje advisory en el instante en que aparece. **Queda a criterio de Franco**: es
+   la única decisión del sprint que roza un límite escrito, y se tomó del lado de que el mensaje se
+   lea.
+
+   Detalle de implementación que hace falta para que funcione: el `onBlur` del campo y el `focusout`
+   del bloque son el MISMO evento, así que leyendo el state de nudges el avance vería el valor viejo.
+   Hay un espejo síncrono en un ref, escrito sólo desde manejadores de evento.
+
+**Un renombre, y su motivo medido.** El último bloque se llama **«5 · Tu decisión»**, no «Tu
+veredicto». El selector del veredicto ya tiene `aria-label="Tu veredicto"` y la cabecera de un bloque
+es un `<button>`: dos controles con el mismo nombre accesible en la misma pantalla es una ambigüedad
+real. Se midió con el helper que elige opciones de un `<Select>` — apretaba la cabecera del bloque en
+vez del selector, plegaba el veredicto, y el panel de opciones nunca abría.
+
+**Dos frases ajustadas por el reordenamiento:**
+- El aviso de señal completa decía «guardá y **bajá** a dejar tu veredicto». Con el recorrido por
+  bloques el veredicto es el último y el aviso vive DEBAJO del acordeón, así que «bajá» apuntaba al
+  revés justo cuando el setter ya estaba parado en él. Ahora: «ya podés dejar tu veredicto».
+- El estado de un bloque opcional decía «si no tiene, seguí» — perfecto para la web, raro para
+  Google. Ahora: «podés seguir sin esto».
+
+### Paso 4 · verificación, operando la aplicación
+
+Cinco recorridos reales contra el build de producción en :3003, con capturas en
+`docs/proof-screenshots/p16/` y la salida completa en `verificaciones.txt`.
+
+**V1 · el recorrido entero de un lead nuevo, bloque por bloque.** Sin apretar un solo botón de avance:
+
+```
+al entrar,                          abierto = 1 · En Instagram
+tras completar Instagram,           abierto = 2 · En Google y Maps
+tras completar Google,              abierto = 3 · En la web que ya tienen
+tras completar la web,              abierto = 4 · Mirando las tres juntas
+tras el balance,                    abierto = 5 · Tu decisión
+```
+
+Y la señal mínima quedó cumplida por el recorrido, sin pedir nada aparte. El material de cada fuente
+se pide DENTRO de esa fuente: «¿De dónde bajás el logo y las fotos?» está en el bloque de Instagram,
+«¿Dónde se leen las reseñas?» en el de Google, con la línea de qué llevarse antes de cerrar la
+pestaña. (`v1-01` … `v1-04`.)
+
+**V2 · volver a un bloque anterior y cambiar algo.**
+
+```
+al volver a Instagram, «Identidad — notas» conserva: "La firma \"Marce\", aparece en las fotos…"
+tras vaciarlo,  abierto = 1 · En Instagram   (no se le cierra nada encima)
+y la cabecera vuelve a pedirlo: "1 · En Instagram / Falta: quién está detrás · reseñas o contenido real"
+```
+
+(`v2-01`, `v2-02`.)
+
+**V3 · un negocio sin web.** La cabecera del bloque dice «3 · En la web que ya tienen — Opcional,
+podés seguir sin esto»; un click en la cabecera del balance y ya está adentro; llega a cumplir la
+señal mínima **sin escribir una línea sobre una web que no existe**. (`v3-01`, `v3-02`.)
+
+**V4 · la pantalla con la ficha completa, y cuánto entra sin scrollear.** Al volver con la ficha
+lista, abre en «5 · Tu decisión». Pase a 390 incluido. (`v4-01` … `v4-04`.)
+
+**V5 · el veredicto sigue escribiendo lo mismo, leído de la base:**
+
+```
+stage = EVALUADA
+claves = ["fecha","razonamiento","score","veredicto"]
+forma  = {"fecha":"string","score":"number","veredicto":"string","razonamiento":"string"}
+valor  = {"fecha":"2026-09-01T…","score":4,"veredicto":"CALIENTE","razonamiento":"Dueño identificable…"}
+```
+
+Idéntica a `EvaluacionSchema`, que no se tocó (`git diff` vacío sobre `contracts.ts`). Post-veredicto
+la ficha queda congelada y no hay acordeón: la vista de siempre. (`v5-01`, `v5-02`,
+`v5-evaluacion.json`.)
+
+### La medición, antes y después
+
+| | ANTES 1440 | DESPUÉS 1440 | ANTES 390 | DESPUÉS 390 |
+|---|---|---|---|---|
+| Alto scrolleable | 3.155 px | **2.260 px** (−28%) | 4.162 px | **2.713 px** (−35%) |
+| Alto de la zona Registro | 2.297 px | **1.403 px** (−39%) | 3.102 px | **1.653 px** (−47%) |
+| Pantallas de scroll | 4,00 | **2,87** | 6,05 | **3,94** |
+| Campos montados a la vez | 14 | **5** (−64%) | 14 | **5** |
+| Campos visibles sin scrollear | 0 | **0** | 0 | **0** |
+
+Con la ficha ya cargada (que es como se ve al volver) el número baja más: **1.932 px y 2,45
+pantallas** a 1440, con 2 campos montados — sólo el veredicto.
+
+**Y el número que NO se movió, que es un hallazgo:** cero campos visibles sin scrollear, igual que
+antes. La zona Registro empieza a **756 px** y el fold real del `<main>` es de **788 px**: entran 32
+píxeles, apenas el rótulo «REGISTRO». La primera cabecera del recorrido queda unas decenas de píxeles
+por debajo del corte. **La pantalla se acortó un tercio y el primer campo sigue sin entrar**, porque
+lo que se come el primer scroll no es la ficha: son la instrucción, el «Contexto del lead» y la
+«Munición», que son zonas del layout-tipo de `PantallaManual` y valen para las catorce pantallas.
+Está fuera de alcance acá y **es lo que hay que atacar si se quiere que el setter pueda escribir sin
+scrollear**. Se ve en `v1-01b-fold-sin-scrollear.png` y `v4-01-fold-1440-ficha-completa.png`.
+
+### Las pruebas
+
+**Nuevas — `tests/setter/21-ficha-por-fuentes.spec.ts`, 6 tests.** El recorrido que avanza solo y sin
+botón de «siguiente»; el avance que no se come el click; la sugerencia de calidad que frena el
+avance; el negocio sin web que no queda encerrado; volver atrás sin perder nada; y el veredicto como
+último bloque con su gate intacto. Se afirma por VISIBILIDAD, no por presencia: el bloque plegado no
+está montado, así que las dos cosas coinciden y ninguna aserción puede pasar en verde sobre un bloque
+abierto de más.
+
+**Demostradas fallando contra el código viejo.** Con el `src/` del sprint stasheado y el build
+rehecho sobre `f4332226`, **6 de 6 en rojo**, cada una en su aserción estructural:
+
+```
+x 1 el recorrido abre el bloque siguiente SOLO…      Error: la cabecera «1 · En Instagram» está
+x 2 el avance no se come el click…                   waiting for getByRole('button', {name:'1 · En Instagram'})
+x 3 una sugerencia de calidad frena el avance…       waiting for getByRole('button', {name:'1 · En Instagram'})
+x 4 un negocio sin web se sigue con un click…        waiting for getByRole('button', {name:'1 · En Instagram'})
+x 5 volver a un bloque anterior no pierde…           Timeout while waiting on the predicate
+x 6 el veredicto cierra el recorrido y su gate…      Error: el veredicto es el bloque 5
+```
+
+**Sobre el sexto, para no vender lo que no es:** su mitad de GATE está verde en las dos versiones —el
+gate del veredicto no cambió, y ése es el punto. Lo que enrojece es la mitad estructural. Se dejan
+juntas a propósito porque lo que hay que poder afirmar de una sola vez es «se reordenó **y** el gate
+sigue cerrado».
+
+**Adaptadas — `01-flow.spec.ts`, dos tests, cada uno con su bloque de qué verificaba y qué verifica:**
+
+- **B1** verificaba el nudge advisory sobre `presenciaDigital`, la señal mínima y que guardar
+  persista, llenando los campos en cualquier orden por placeholder. Verifica lo MISMO, con los mismos
+  campos y textos; lo único que cambió es que hay que abrir el bloque de la fuente para llegar al
+  campo. Se conservó `presenciaDigital` como sujeto del nudge —en vez de mover la prueba a un campo
+  ya abierto— justamente para no cambiar lo que se verifica.
+- **B2** verificaba que las dos mitades de la fusión estuvieran en la misma pantalla y en orden,
+  leyendo las dos `<section aria-label>`. Ahora afirma sobre las cinco cabeceras y su orden, que es
+  lo que la fusión y el reordenamiento prometen juntos. Las dos `<section>` sobreviven en la vista
+  congelada, que no cambió.
+
+Las dos, en rojo contra el código viejo (`waiting for '4 · Mirando las tres juntas'` y `el bloque
+«1 · En Instagram»`). **Ninguna prueba se borró ni se salteó.**
+
+**El invariante — `check:invariant:ficha-bloques`, cinco secciones.** Lo que protege es que el mapa
+no se despegue del gate y que el recorrido camine sin encerrar a nadie:
+
+- **§1 · el mapa contra el gate.** Hay dos listas —los `REQUISITOS` de acá y los `if` de
+  `fichaFaltantes`— y eso es exactamente lo que puede divergir. Se cierra SIN copiar el criterio: se
+  le dan a `fichaFaltantes` fichas sintéticas armadas desde el mapa y se exige que el conteo coincida
+  en las dos direcciones (cumplir todo ⇒ cero faltantes; romper uno ⇒ exactamente uno).
+- **§2 · el piso.** La ficha vacía tiene que dar un faltante por requisito. Un `fichaFaltantes` que
+  devolviera `[]` siempre pasaría media §1 sin chistar.
+- **§3 · el recorrido camina.** Se recorre el camino entero de un lead nuevo exigiendo que en cada
+  paso el siguiente sea el que sigue, no dos más adelante.
+- **§4 · nadie queda encerrado.** El bloque de la web NO puede tener ningún campo obligatorio, y un
+  recorrido que nunca lo escribe igual cumple la señal mínima y llega al cierre.
+- **§5 · el censo cubre la ficha entera.** El compilador ya garantiza que todo campo tenga bloque (el
+  estado del formulario es un mapeo sobre `CampoFicha`, así que un campo sin bloque no compila). Lo
+  que no puede garantizar es que el puente `Ficha → valores` lea todos los campos: eso se prueba acá.
+
+**Sabotajes, para que no pase en verde sobre nada:**
+
+```
+1) «completo» = sólo «no debe nada» (sacándole la mitad de contenido):
+   AssertionError: Desde «instagram» el recorrido tiene que abrir «google» y abrió «balance».
+2) un requisito nuevo en fichaFaltantes sin mapear:
+   AssertionError: PISO: la ficha vacía tiene que dar un faltante por cada requisito mapeado…
+```
+
+Los dos revertidos y en verde después.
+
+### Cierre
+
+`tsc --noEmit` **exit 0** · `check:invariants` **50/50** (51 descubiertos, 1 excluido) ·
+`test:setter` **105/105** · `test:leados` **33/33** · `test:helpers` **26/26** · `build` **exit 0** ·
+`prisma migrate status`: 86 migraciones, **sin drift**.
+
+`git diff` **vacío** sobre todo lo que el sprint no podía tocar: `contracts.ts`, `flow.ts`,
+`dossier-stage.ts`, `dossier.ts`, `dossier.actions.ts` y `prisma/schema.prisma`. **Ni un campo se
+agregó, se sacó ni se renombró; ningún invariante quedó en rojo; ninguna transición cambió.**
+
+### Fuera de alcance, anotado
+
+- **Los cuatro campos nuevos del rediseño** (dirección, horarios, contacto exacto, cómo se ve la
+  web), los **dos umbrales de suficiencia** y el **corte de los diez minutos**. Son cambios del
+  contrato del blob o decisiones de Franco, y la regla 1 y 2 los dejan afuera. El primero de esos
+  cuatro campos es el que llenaría el bloque de la web.
+- **El primer scroll no lo come la ficha.** Con el Registro empezando a 756 px y el fold en 788, lo
+  que hay arriba —la instrucción, el «Contexto del lead» y la «Munición»— se lleva la primera
+  pantalla entera. Es del layout-tipo de `PantallaManual`, vale para las catorce, y **es la próxima
+  palanca real** para que el setter pueda escribir sin scrollear.
+- **El `<Select>` compartido se cierra ante cualquier scroll de la página** (listener en fase de
+  captura) y, al abrirse, enfoca su listbox con `.focus()` sin `preventScroll` — lo que puede
+  producir justo ese scroll. Resultado: el panel se cierra solo, de forma intermitente. Es anterior a
+  este sprint (ningún test operaba el selector de «¿Quién maneja el Instagram?» hasta ahora) y no se
+  tocó. En las pruebas se afirma que ese selector ESTÁ en su bloque, sin operarlo; el requisito de
+  identidad se cubre por su otro campo, que es un OR en el gate.
+- **`FichaStep` con `editable={true}` es código muerto.** Su único consumidor lo monta con
+  `editable={false}` (la vista congelada). La rama viva arrastra `GUIA_FICHA.intro`, `duracion` y el
+  `CopyBlock` de la ficha, que hoy no se renderizan en ningún lado. No se tocó: es limpieza, no
+  reordenamiento.
+- **El rail «Tus herramientas» sigue ofreciendo «Chat de evaluación (Sonnet) · Evaluación ·
+  PENDIENTE»**, que D15-bis ya había anotado. Sigue igual: `herramientas.ts` es configuración de
+  Franco.
+- Los siete baches restantes de la corrida del novato.
+
+### Para la verificación humana
+
+- **Que el recorrido por fuentes se sienta como UN viaje y no como cuatro formularios.** Es el punto
+  del cambio y ningún test lo valida. Las capturas `v1-01` … `v1-04` muestran los cuatro tramos.
+- **Que la sugerencia de calidad frenando el avance sea la decisión correcta** (Paso 3, punto 3). Es
+  la única del sprint que roza un límite escrito, y se tomó del lado de que el mensaje se lea.
+- **Si el patrón se propaga.** Con esto en la mano, la pregunta de si el avance por completitud
+  gobierna las catorce pantallas ya se puede contestar mirando código que corre. Lo que el piloto
+  dejó aprendido, y que va a reaparecer en cada pantalla que lo adopte: (a) «completo» necesita las
+  dos mitades o el recorrido se desarma en silencio; (b) el avance tiene que esperar al `pointerup` o
+  se come clics; (c) las cabeceras del futuro tienen que estar a la vista o se fabrican callejones;
+  (d) el nombre de un bloque compite con los nombres accesibles de los controles que tiene adentro.

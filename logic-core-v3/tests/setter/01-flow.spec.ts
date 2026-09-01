@@ -63,7 +63,28 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
+    /* ADAPTADO EN P16 — qué verificaba y qué verifica.
+     *
+     * Verificaba: el nudge de calidad advisory sobre `presenciaDigital`, la
+     * señal mínima completándose con identidad + presencia + reseñas, y que
+     * guardar persista. Los tres campos estaban en una sola lista larga, así que
+     * se llenaban en cualquier orden con `getByPlaceholder`.
+     *
+     * Verifica lo MISMO, con los mismos campos y los mismos textos. Lo único que
+     * cambió es que la ficha ahora es un recorrido por fuentes y cada campo vive
+     * en el bloque de la fuente de la que se saca: hay que abrir el bloque para
+     * llegar al campo. Eso NO es ruido de test — es el comportamiento nuevo, y el
+     * test se pondría rojo si un campo apareciera fuera de su bloque.
+     *
+     * Se conservó `presenciaDigital` como sujeto del nudge (en vez de mover la
+     * prueba a un campo que ya estuviera abierto) justamente para no cambiar lo
+     * que se está verificando.
+     */
+    const abrirBloque = (nombre: string) =>
+      firstVisible(page.getByRole('button', { name: nombre })).click()
+
     // Nudge de CALIDAD (advisory, NO bloquea): input flojo en blur → CampoMejora.
+    await abrirBloque('4 · Mirando las tres juntas')
     const presencia = firstVisible(page.getByPlaceholder(/IG activo/i))
     await presencia.fill('tiene Instagram') // 15 < 40 chars → flojo
     await presencia.blur()
@@ -72,13 +93,19 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await presencia.fill('IG activo, publican 2-3 veces por semana, sin web, Maps sin fotos.')
     await expect(page.getByText(/Eso queda corto/i)).toHaveCount(0)
 
-    // Señal mínima: identidad + presencia + reseñas.
+    // Señal mínima: identidad (Instagram) + presencia (balance) + reseñas (Google).
+    await abrirBloque('1 · En Instagram')
     await firstVisible(page.getByPlaceholder(/la cuenta la firma/i)).fill('La firma "Marce", dueño visible en las fotos del local.')
+    await abrirBloque('2 · En Google y Maps')
     await firstVisible(page.getByPlaceholder(/Nunca contestan/i)).fill('★☆☆☆☆ "Nunca contestan el WhatsApp" (mar 2026). Repetida 3 veces.')
 
-    // Banner de señal completa. D15-bis: la frase dejó de mandar a una
-    // herramienta externa — el veredicto se deja en esta misma pantalla.
-    await expect(firstVisible(page.getByText('✓ Señal mínima lista — guardá y bajá a dejar tu veredicto.'))).toBeVisible()
+    /* Banner de señal completa. D15-bis sacó de la frase el viaje a una
+     * herramienta externa; P16 le sacó además la dirección («bajá a dejar tu
+     * veredicto»): con el recorrido por bloques, el veredicto es el último y el
+     * aviso vive DEBAJO del acordeón, así que «bajá» quedó apuntando al revés
+     * justo cuando el setter ya está parado en él. Lo que se verifica es lo
+     * mismo: que el gate de la ficha se dé por cumplido y lo diga. */
+    await expect(firstVisible(page.getByText('✓ Señal mínima lista — ya podés dejar tu veredicto.'))).toBeVisible()
 
     // Guardar → toast + persistencia en DB.
     await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
@@ -100,11 +127,37 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     // en FICHA aterriza acá con o sin señal — no hay segundo destino al que ir.
     await page.goto(pantalla(leadId, 'm1'), { waitUntil: 'domcontentloaded' })
 
-    // Las dos mitades, en la misma pantalla y en orden: la ficha arriba, el
-    // veredicto abajo. Sin esto el test pasaría igual navegando a cualquier lado
-    // que monte el form — la fusión es justamente que estén juntas.
-    await expect(vis(page.getByRole('region', { name: 'La ficha del negocio' })), 'la ficha está').toHaveCount(1)
-    await expect(vis(page.getByRole('region', { name: 'Tu veredicto' })), 'y el veredicto también').toHaveCount(1)
+    /* ADAPTADO EN P16 — qué verificaba y qué verifica.
+     *
+     * Verificaba: que las dos mitades de la fusión —la ficha y el veredicto—
+     * estuvieran en la MISMA pantalla y en orden, leyendo las dos `<section
+     * aria-label>` que las envolvían. Sin eso, el test pasaba igual navegando a
+     * cualquier lado que montara el formulario.
+     *
+     * Verifica lo mismo, y un poco más: la ficha dejó de ser una sección y pasó a
+     * ser un recorrido de cuatro bloques por fuente, con el veredicto como quinto
+     * y último. Se afirma sobre las cinco cabeceras —que están siempre, plegadas
+     * o no— y sobre el orden, que es lo que la fusión y el reordenamiento
+     * prometen juntos. Las dos `<section>` ya no existen en el camino editable;
+     * sobreviven en la vista congelada (post-veredicto), que no cambió.
+     */
+    const CABECERAS = [
+      '1 · En Instagram',
+      '2 · En Google y Maps',
+      '3 · En la web que ya tienen',
+      '4 · Mirando las tres juntas',
+      '5 · Tu decisión',
+    ]
+    for (const nombre of CABECERAS) {
+      await expect(vis(page.getByRole('button', { name: nombre })), `el bloque «${nombre}»`).toHaveCount(1)
+    }
+    // El orden se lee del DOM, no del texto accesible: el nombre accesible de la
+    // cabecera incluye su línea de estado («Falta: …»), que cambia con lo cargado.
+    const enPantalla = await vis(page.getByRole('button', { name: /^\s*[1-5] · / }))
+      .evaluateAll((botones) =>
+        botones.map((boton) => boton.querySelector('span')?.textContent?.trim() ?? ''),
+      )
+    expect(enPantalla, 'y en el orden del recorrido').toEqual(CABECERAS)
 
     await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' })
       .getByRole('radio', { name: '3' })).click()

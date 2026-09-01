@@ -39,6 +39,11 @@ import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
 // tarjeta de cartera también muestra (ver `FALTA_LINK_PERMANENTE`) — vive en el
 // módulo hoja porque `flow.ts` no puede importar este archivo bajo ts-node.
 import { FALTA_LINK_PERMANENTE, type CausaEspera } from '@/lib/leados/turno'
+// [P16] El TIPO de los requisitos de la señal mínima (`ficha-bloques.ts` es el
+// único lugar donde se mapean a campos): así el nombre corto de cada requisito
+// que se lee en la cabecera de un bloque no puede quedarse corto si aparece uno
+// nuevo. Solo el tipo — este módulo sigue sin importar lógica.
+import type { RequisitoId } from '@/lib/leados/ficha-bloques'
 
 // ── Primitivas de copy ───────────────────────────────────────────────────────
 
@@ -131,6 +136,27 @@ export type ValidacionGuia = {
   pendienteTitulo: string
   /** Mensaje cuando el paso ya alcanzó la señal/calidad mínima. */
   completo: string
+  /**
+   * [P16] Estado de UN bloque, en la línea que entra en su cabecera. Es el
+   * mismo criterio que `pendienteTitulo`/`completo` —sale de `fichaFaltantes`—
+   * dicho corto: la lista larga sigue estando entera abajo del acordeón, esto
+   * solo permite leer de un vistazo, con el bloque plegado, qué le falta.
+   * `requisitos` casa 1:1 con los `REQUISITOS` de `ficha-bloques.ts`.
+   */
+  bloque?: {
+    /** El bloque ya no debe nada y tiene algo escrito. */
+    completo: string
+    /** No debe nada y está vacío: se puede saltear, y conviene decirlo. */
+    opcional: string
+    /** El nombre corto de cada requisito de la señal mínima. */
+    requisitos: Readonly<Record<RequisitoId, string>>
+    /** Prefijo de la línea cuando falta algo (se le concatena la lista corta). */
+    faltaPrefijo: string
+    /** El cierre (el veredicto) todavía no se puede dejar: falta señal arriba. */
+    cierrePendiente: string
+    /** El cierre está habilitado: la ficha ya alcanza. */
+    cierreListo: string
+  }
 }
 
 /**
@@ -197,6 +223,14 @@ export type GrupoGuia = {
   titulo: string
   /** Una línea de encuadre: para qué sirve lo que se pide adentro. */
   intro: string
+  /**
+   * [P16] Lo que hay que BAJARSE mientras la pestaña de esa fuente está abierta.
+   * Es lo que evita el doble viaje: la ficha pedía los datos en un momento y el
+   * material en otro, así que el setter recorría Instagram, Google y la web dos
+   * veces. Solo lo declaran los grupos que son una FUENTE (una pestaña que se
+   * abre); el grupo de cierre no tiene material que bajar.
+   */
+  material?: string
 }
 
 // ── Guía completa de un paso ─────────────────────────────────────────────────
@@ -365,17 +399,62 @@ export const GUIA_FICHA = {
       hint: 'Todo lo que viste y no entra arriba. Mejor que sobre a que falte.',
     },
   },
+  /**
+   * [P16] Los bloques de la ficha, en el orden del recorrido REAL: una entrada
+   * por fuente que se visita, más el balance que solo se puede escribir después
+   * de las tres. Las claves casan 1:1 con `BLOQUES_DE_FICHA` de
+   * `ficha-bloques.ts` (que decide qué campo cae en cuál); acá viven solo las
+   * palabras. `material` es la mitad que arregla el doble viaje: dice qué
+   * llevarse mientras esa pestaña está abierta, en vez de mandar a volver.
+   *
+   * Reemplazó al grupo único «material para construir la demo»: ese cajón
+   * juntaba links y textos de las TRES fuentes al final del formulario, que es
+   * exactamente lo que obligaba a recorrerlas de nuevo.
+   */
   grupos: {
-    materiales: {
-      titulo: 'Material para construir la demo',
+    instagram: {
+      titulo: 'En Instagram',
       intro:
-        'Esto viaja al bloque que pegás en la herramienta cuando construís. Todo es opcional: lo que no consigas, dejalo vacío — nada se inventa por vos.',
+        'Abrí el perfil y mirá quién contesta los comentarios, qué muestran en las fotos y cómo hablan.',
+      material:
+        'Antes de cerrar la pestaña: guardate el logo y las 3 o 4 mejores fotos, y copiá la bio tal cual está.',
+    },
+    google: {
+      titulo: 'En Google y Maps',
+      intro:
+        'Buscá el negocio y leé las reseñas — sobre todo las malas, y sobre todo la queja que se repite.',
+      material:
+        'Antes de cerrar la pestaña: copiá la dirección de la ficha, para volver a leerlas cuando armes la demo sin tener que buscarla de nuevo.',
+    },
+    web: {
+      titulo: 'En la web que ya tienen',
+      intro:
+        'Si tienen web, entrá y mirá qué ofrecen. Si no tienen, seguí de largo: que no tengan es un dato, y lo anotás en el balance.',
+      material:
+        'Antes de cerrar la pestaña: copiá los precios y los textos que sirvan tal cual — y si el logo en buena calidad está acá, esa es la dirección que va arriba.',
+    },
+    balance: {
+      titulo: 'Mirando las tres juntas',
+      intro:
+        'Ahora sí, el balance: qué tienen y qué les falta, cómo operan, y todo lo que viste y no entró arriba.',
     },
   },
   validacion: {
     pendienteTitulo:
       'No se puede juzgar a ciegas: sin esta señal mínima no hay con qué decidir. Todavía falta:',
-    completo: '✓ Señal mínima lista — guardá y bajá a dejar tu veredicto.',
+    completo: '✓ Señal mínima lista — ya podés dejar tu veredicto.',
+    bloque: {
+      completo: 'Listo',
+      opcional: 'Opcional — podés seguir sin esto',
+      requisitos: {
+        identidad: 'quién está detrás',
+        presencia: 'qué tienen y qué no',
+        evidencia: 'reseñas o contenido real',
+      },
+      faltaPrefijo: 'Falta: ',
+      cierrePendiente: 'Falta la señal mínima de arriba',
+      cierreListo: 'Te toca decidir',
+    },
   },
   copyBlock: {
     titulo: 'La ficha, en un bloque',
