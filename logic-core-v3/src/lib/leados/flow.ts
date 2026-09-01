@@ -304,7 +304,7 @@ export function fichaFaltantes(ficha: Ficha | null | undefined): string[] {
     faltantes.push('Presencia digital: contá qué tienen (IG, web, Maps) y qué tan vivo está')
   }
   if (!ficha?.resenas && !ficha?.contenidoReal) {
-    faltantes.push('Reseñas o contenido real: al menos uno de los dos — es la materia prima del Evaluador')
+    faltantes.push('Reseñas o contenido real: al menos uno de los dos — sin eso no hay con qué juzgar')
   }
   return faltantes
 }
@@ -585,7 +585,7 @@ function proximaAccionPara(
     }
     case 'FICHA':
       return fichaTieneSenal(input.ficha)
-        ? { proximaAccion: 'Pasala por el Evaluador', accionable: true }
+        ? { proximaAccion: 'Dejá tu veredicto', accionable: true }
         : { proximaAccion: 'Completá la ficha', accionable: true }
     default:
       return { proximaAccion: 'Completá la ficha', accionable: true }

@@ -25,7 +25,6 @@ import type { Agenda, Ficha, Progreso } from './contracts.ts'
 import { FASE_IDS, type FaseId } from './contracts.ts'
 import {
   cadenciaInfo,
-  fichaTieneSenal,
   gateBriefAbierto,
   gateEnvioDemo,
   reunionAgendada,
@@ -35,16 +34,16 @@ import { derivarPasoDelLead } from './paso.ts'
 // ── El registro de pantallas (mapa v1) ───────────────────────────────────────
 
 /**
- * Ids de pantalla del mapa: once del manual, sin m3 — P4 fusionó el registro del
- * veredicto dentro de m2; sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) +
- * mr (reentrada re-loop) + los estados de espera. El `[paso]` de la URL es uno
- * de estos — cualquier otra cosa redirige a la actual (así el `m3` de un
- * bookmark viejo, o un `m9` de la galería, aterrizan solos en la pantalla
- * vigente: la posición se re-deriva, nunca se guarda).
+ * Ids de pantalla del mapa: diez del manual (sin m3 — P4 fusionó el registro del
+ * veredicto dentro de m2; sin m2 — D15-bis fusionó ESA pantalla dentro de m1;
+ * sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) + mr (reentrada re-loop) +
+ * los estados de espera. El `[paso]` de la URL es uno de estos — cualquier otra
+ * cosa redirige a la actual (así el `m3` de un bookmark viejo, el `m2` de uno
+ * de ayer, o un `m9` de la galería, aterrizan solos en la pantalla vigente: la
+ * posición se re-deriva, nunca se guarda).
  */
 export const PANTALLA_IDS = [
   'm1',
-  'm2',
   'm4',
   'm5',
   'm6',
@@ -76,7 +75,6 @@ export type PantallaTipo = 'manual' | 'reentrada' | 'estado'
 
 export type FaseManualId =
   | 'ficha'
-  | 'evaluacion'
   | 'opener'
   | 'seguimiento'
   | 'brief'
@@ -156,22 +154,20 @@ export function fasesDePantallaConstruccion(id: PantallaId): readonly FaseId[] {
 }
 
 export const PANTALLAS: Record<PantallaId, PantallaDef> = {
+  // D15-bis — la ficha y el veredicto son UNA pantalla. Antes el veredicto vivía
+  // en m2 y salía de una herramienta externa: el setter copiaba la ficha, la
+  // pegaba en un chat de evaluación y transcribía la respuesta. Esa herramienta
+  // no tiene link cargado, así que los tres campos —obligatorios, porque
+  // sostienen el gate— no se podían llenar sin inventarlos. Ahora el juicio es
+  // del setter: mira lo que acaba de anotar y lo cierra ahí mismo.
   m1: {
     id: 'm1',
     tipo: 'manual',
     fase: 'ficha',
-    titulo: 'Cargá los datos del negocio',
-    detalle: 'Completá la ficha de observación — es la materia prima del Evaluador.',
-    corto: 'Ficha',
-  },
-  m2: {
-    id: 'm2',
-    tipo: 'manual',
-    fase: 'evaluacion',
-    titulo: 'Llevá la ficha a evaluar y registrá el veredicto',
+    titulo: 'Mirá el negocio y decidí si vale una demo',
     detalle:
-      'Copiá el bloque, pasalo por el chat de evaluación y transcribí acá lo que te devolvió: score, veredicto y razonamiento.',
-    corto: 'Evaluación',
+      'Anotá lo que ves y, con eso a la vista, dejá tu veredicto: cuánto le ves, si avanza o se descarta, y por qué.',
+    corto: 'Ficha',
   },
   m4: {
     id: 'm4',
@@ -303,7 +299,6 @@ export const FASES_MANUAL: Record<
   { titulo: string; pantallas: readonly PantallaId[] }
 > = {
   ficha: { titulo: 'Ficha', pantallas: ['m1'] },
-  evaluacion: { titulo: 'Evaluación', pantallas: ['m2'] },
   opener: { titulo: 'Opener', pantallas: ['m4'] },
   seguimiento: { titulo: 'Seguimiento', pantallas: ['m5'] },
   brief: { titulo: 'Brief', pantallas: ['m6'] },
@@ -380,7 +375,6 @@ export type PosicionManual = {
 /** Orden canónico del manual — `completadas` se devuelve siempre en este orden. */
 const ORDEN_MANUAL = [
   'm1',
-  'm2',
   'm4',
   'm5',
   'm6',
@@ -392,7 +386,7 @@ const ORDEN_MANUAL = [
   'm16',
 ] as const satisfies readonly PantallaId[]
 
-/** Stages donde la evaluación quedó registrada (m1–m2 atrás). */
+/** Stages donde el veredicto quedó registrado (m1, la pantalla fusionada, atrás). */
 const STAGES_POST_EVALUACION: readonly DossierStage[] = [
   'EVALUADA',
   'DESCARTADA',
@@ -428,11 +422,12 @@ function completadasDe(input: DerivacionManualInput): PantallaId[] {
   const done = new Set<PantallaId>()
   const { stage } = input
 
+  // D15-bis — m1 se completa con el VEREDICTO, no con la señal de la ficha.
+  // Antes eran dos pantallas: la ficha con señal cerraba m1 y el veredicto
+  // cerraba m2. Fusionadas, marcar m1 con la sola señal diría «hecho» sobre una
+  // pantalla cuya segunda mitad todavía está en blanco, y la pondría en el rail
+  // de completadas mientras es el paso de ahora.
   if (stage !== null && STAGES_POST_EVALUACION.includes(stage)) {
-    done.add('m1')
-    done.add('m2')
-  } else if (fichaTieneSenal(input.ficha)) {
-    // Todavía en FICHA pero con señal mínima: la ficha ya cumplió su gate.
     done.add('m1')
   }
 
@@ -507,19 +502,22 @@ function posicionDe(
     case null:
     case 'FICHA': {
       // La evaluación ocurre con stage=FICHA: registrar el veredicto ES la
-      // transición. Sin señal mínima, m2 es futuro (gate de la ficha).
-      if (!fichaTieneSenal(input.ficha)) {
-        return { actual: 'm1', habilitadas: ['m1'] }
-      }
-      // P4: el viaje a la herramienta y la vuelta con el resultado son UNA
-      // pantalla — no hace falta habilitar un destino aparte para la vuelta (no
-      // había dato que persistiera "ya fui a evaluar": la posición no se guarda).
-      return { actual: 'm2', habilitadas: ['m2'] }
+      // transición, y desde D15-bis ocurre en la MISMA pantalla que la ficha.
+      // Sin bifurcación por señal: no hay un segundo destino al que mandar. El
+      // gate de la señal mínima no se aflojó — sigue donde estaba, en
+      // `registrarEvaluacion` (server) y en el form, que no habilita el
+      // veredicto hasta que la ficha tenga con qué juzgar.
+      return { actual: 'm1', habilitadas: ['m1'] }
     }
     case 'DESCARTADA':
-      // Terminal del archivo: el manual muestra el veredicto registrado; no
-      // hay pantallas por delante. Con la fusión de P4 el veredicto vive en m2.
-      return { actual: 'm2', habilitadas: [] }
+      // Terminal del archivo. Hasta D15-bis aterrizaba en m2 «con el veredicto a
+      // la vista»: una pantalla titulada «llevá la ficha a evaluar y registrá el
+      // veredicto», que a un lead ya cerrado le proponía trabajo que no existe.
+      // Con la fusión el veredicto vive en m1, que queda completada y navegable;
+      // el aterrizaje es el ARCHIVO, la pantalla de cierre que ya sabía decir
+      // «Descartado» y mostrar el motivo (`causa`/`motivo` de la página, misma
+      // regla que el home: `archivoMotivo`).
+      return { actual: 'archivo', habilitadas: [] }
     case 'EVALUADA': {
       if (paso.anchor === 'opener') {
         return { actual: 'm4', habilitadas: ['m4'] }

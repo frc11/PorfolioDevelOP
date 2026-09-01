@@ -84,12 +84,27 @@ const vivoEvaluada = derivarPantalla(
 assert.notEqual(vivoEvaluada.actual, 'archivo', 'un lead vivo NO cae al archivo')
 assert.equal(vivoEvaluada.actual, 'm5', 'EVALUADA con toque vencido sigue derivando a m5 (sin cambios)')
 
-// ── 4. Regresión: DESCARTADA (terminal por STAGE) conserva su case (m2, sin toque) ──
-// P4: el veredicto se registra en m2 (pantalla fusionada) — la garantía que se
-// prueba es la misma (DESCARTADA no cae al archivo), cambió dónde vive.
+// ── 4. DESCARTADA (terminal por STAGE) aterriza en el archivo, sin toque ──
+// D15-bis invirtió esta afirmación, y el motivo es el punto del sprint. Hasta
+// acá decía «DESCARTADA sigue mostrando el veredicto en m2, no el archivo»: la
+// garantía que protegía era que un descartado no se confundiera con un PERDIDO.
+// Con la fusión, m2 no existe —su contenido vive en m1— y aterrizar ahí le
+// habría propuesto a un lead cerrado la tarea «mirá el negocio y decidí si vale
+// una demo», que ya está hecha. El archivo, que YA sabía decir «Descartado» y
+// mostrar el motivo (`causa`/`motivo` de la página), es el aterrizaje correcto.
+// Lo que se conserva se afirma abajo: el veredicto sigue alcanzable (m1
+// completada) y no se habilita ningún paso.
 const descartada = derivarPantalla(input({ status: 'PROSPECTO', stage: 'DESCARTADA' }))
-assert.equal(descartada.actual, 'm2', 'DESCARTADA sigue mostrando el veredicto en m2, no el archivo')
-assert.deepEqual(descartada.habilitadas, [], 'DESCARTADA no habilita ningún paso (C-17 apaga el cyan en presentación)')
+assert.equal(descartada.actual, 'archivo', 'DESCARTADA aterriza en el archivo (terminal por stage)')
+assert.ok(
+  descartada.completadas.includes('m1'),
+  'el veredicto del descartado sigue alcanzable: m1 (la pantalla fusionada) queda completada',
+)
+assert.deepEqual(
+  descartada.habilitadas,
+  ['archivo'],
+  'DESCARTADA no habilita ningún paso de trabajo — solo su propia pantalla de cierre',
+)
 
 // ── 5. Regresión: CERRADO (terminal GANADO) NO cae al archivo — mantiene m16 ──
 const cerrado = derivarPantalla(

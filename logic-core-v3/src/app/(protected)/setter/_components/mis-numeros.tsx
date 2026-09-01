@@ -48,8 +48,8 @@ export function MisNumeros({ numeros }: { numeros: MisNumerosData }) {
 
           {criterio === null ? (
             <p className="mt-2 text-sm leading-relaxed text-zinc-500">
-              Todavía no evaluaste leads. Acá vas a ver tu proporción de descarte una vez
-              que pases alguno por el Evaluador.
+              Todavía no evaluaste leads. Acá vas a ver tu proporción de descarte en cuanto
+              dejes tu primer veredicto.
             </p>
           ) : (
             <div className="mt-2 space-y-2.5">

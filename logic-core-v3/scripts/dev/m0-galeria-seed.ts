@@ -173,18 +173,18 @@ async function main() {
   // ── Tramo Ficha y Evaluación ──────────────────────────────────────────────
   await sembrar('01-m1-ficha-vacia', { setterId, stage: 'FICHA' })
   await sembrar('02-m1-ficha-cargada', { setterId, stage: 'FICHA' })
-  await sembrar('03-m2-al-evaluador', { setterId, stage: 'FICHA' })
-  // P4 fusionó m3 dentro de m2. Antes 03 y 04 se sembraban IDÉNTICOS (los dos
-  // FICHA + señal) y fotografiaban la misma pantalla dos veces: ahora 04 es la
-  // vuelta del Evaluador con el veredicto YA registrado (stage EVALUADA → m2
-  // queda completada y navegable), que es la variación real de esa pantalla.
-  await sembrar('04-m2-veredicto-registrado', { setterId, stage: 'EVALUADA' })
-  await sembrar('05-m2-veredicto-descartado', { setterId, stage: 'DESCARTADA' })
+  // D15-bis fusionó m2 dentro de m1 y mandó el descartado al archivo. El estado
+  // 03 («ir al Evaluador») se retiró: sin viaje a la herramienta sembraba y
+  // fotografiaba exactamente lo mismo que 02. 04 sigue siendo la variación real
+  // —veredicto YA registrado (stage EVALUADA → m1 congelada y navegable)— y 05
+  // pasó a fotografiar el archivo, que es donde aterriza un descartado.
+  await sembrar('04-m1-veredicto-registrado', { setterId, stage: 'EVALUADA' })
+  await sembrar('05-archivo-descartado', { setterId, stage: 'DESCARTADA' })
 
-  // 02/03 necesitan ficha CON señal (el gate de m2). `createLead` solo la pone en
-  // stages posteriores a FICHA → se completa acá, con la misma factory.
+  // 02 necesita ficha CON señal (el gate del veredicto). `createLead` solo la
+  // pone en stages posteriores a FICHA → se completa acá, con la misma factory.
   const { fichaConSenal } = await import('../../tests/helpers/setter-db')
-  for (const nombre of ['02-m1-ficha-cargada', '03-m2-al-evaluador']) {
+  for (const nombre of ['02-m1-ficha-cargada']) {
     const s = sembrados.find((x) => x.estado === nombre)!
     await prisma.osLeadDossier.update({
       where: { leadId: s.leadId },

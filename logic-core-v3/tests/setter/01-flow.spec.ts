@@ -76,8 +76,9 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await firstVisible(page.getByPlaceholder(/la cuenta la firma/i)).fill('La firma "Marce", dueño visible en las fotos del local.')
     await firstVisible(page.getByPlaceholder(/Nunca contestan/i)).fill('★☆☆☆☆ "Nunca contestan el WhatsApp" (mar 2026). Repetida 3 veces.')
 
-    // Banner de señal completa.
-    await expect(firstVisible(page.getByText('✓ Señal mínima lista — guardá y pasala por el Evaluador.'))).toBeVisible()
+    // Banner de señal completa. D15-bis: la frase dejó de mandar a una
+    // herramienta externa — el veredicto se deja en esta misma pantalla.
+    await expect(firstVisible(page.getByText('✓ Señal mínima lista — guardá y bajá a dejar tu veredicto.'))).toBeVisible()
 
     // Guardar → toast + persistencia en DB.
     await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
@@ -89,20 +90,25 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     expectNoConsoleErrors(guard)
   })
 
-  test('B2 · EVALUACIÓN: registrar (AVANZAR) transiciona FICHA→EVALUADA', async ({ page }) => {
-    // Lead en FICHA con señal ya sembrada (habilita el form de evaluación).
+  test('B2 · VEREDICTO: registrarlo (AVANZAR) transiciona FICHA→EVALUADA', async ({ page }) => {
+    // Lead en FICHA con señal ya sembrada (habilita el registro del veredicto).
     const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B2 Eval', stage: 'FICHA' })
     await prisma.osLeadDossier.update({ where: { leadId }, data: { fichaJson: fichaConSenal() } })
 
     await qaLogin(page, 'setter')
-    // P4: con señal, la raíz aterriza en m2 — la pantalla fusionada donde se
-    // lleva la ficha a evaluar Y se transcribe el veredicto, sin navegar en el medio.
-    await page.goto(pantalla(leadId, 'm2'), { waitUntil: 'domcontentloaded' })
+    // D15-bis: la ficha y el veredicto son UNA pantalla (m1). La raíz de un lead
+    // en FICHA aterriza acá con o sin señal — no hay segundo destino al que ir.
+    await page.goto(pantalla(leadId, 'm1'), { waitUntil: 'domcontentloaded' })
 
-    // El form de evaluación está habilitado (la ficha tiene señal).
+    // Las dos mitades, en la misma pantalla y en orden: la ficha arriba, el
+    // veredicto abajo. Sin esto el test pasaría igual navegando a cualquier lado
+    // que monte el form — la fusión es justamente que estén juntas.
+    await expect(vis(page.getByRole('region', { name: 'La ficha del negocio' })), 'la ficha está').toHaveCount(1)
+    await expect(vis(page.getByRole('region', { name: 'Tu veredicto' })), 'y el veredicto también').toHaveCount(1)
+
     await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' })
       .getByRole('radio', { name: '3' })).click()
-    await pickSelect(page, 'Veredicto del Evaluador', /^Avanzar$/i)
+    await pickSelect(page, 'Tu veredicto', /^Avanzar$/i)
     await firstVisible(fieldControl(page, 'Razonamiento')).fill('Negocio con presencia y reseñas reales — buen fit para una demo.')
 
     await firstVisible(page.getByRole('button', { name: /^Registrar evaluación$/i })).click()
@@ -321,21 +327,20 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
 
 // ── Ramas aparte (lead propio cada una) ──────────────────────────────────────
 
-test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al veredicto', async ({ page }) => {
+test('B9 · DESCARTADA: score bajo → modal → el manual colapsa al archivo', async ({ page }) => {
   const lead = await createLead(tracker, { setterId, businessName: 'Para Descartar', stage: 'FICHA' })
-  // Sembrar señal de ficha vía DB para llegar directo a la evaluación.
+  // Sembrar señal de ficha vía DB para llegar directo al veredicto.
   await prisma.osLeadDossier.update({
     where: { leadId: lead.id },
     data: { fichaJson: { identidad: { igManejadoPor: 'NO_SABE' }, presenciaDigital: 'IG muerto', resenas: 'sin reseñas reales' } },
   })
 
   await qaLogin(page, 'setter')
-  // P4: el veredicto se transcribe en m2, la pantalla fusionada (habilitada — la
-  // ficha tiene señal).
-  await page.goto(pantalla(lead.id, 'm2'), { waitUntil: 'domcontentloaded' })
+  // D15-bis: el veredicto se registra en m1, la pantalla fusionada.
+  await page.goto(pantalla(lead.id, 'm1'), { waitUntil: 'domcontentloaded' })
 
   await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' }).getByRole('radio', { name: '2' })).click()
-  await pickSelect(page, 'Veredicto del Evaluador', /^Descartar$/i)
+  await pickSelect(page, 'Tu veredicto', /^Descartar$/i)
   await firstVisible(fieldControl(page, 'Razonamiento')).fill('Sin presencia ni materia prima — no hay con qué hacer demo.')
   await firstVisible(page.getByRole('button', { name: /Registrar evaluación y descartar/i })).click()
 
@@ -347,14 +352,22 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
     expect((await getDossier(lead.id))?.stage).toBe('DESCARTADA')
   }).toPass({ timeout: 15_000 })
 
-  // El manual colapsa al veredicto: DESCARTADA es terminal — la raíz aterriza en
-  // m2 (sin pantallas por delante) y nada de producción se renderiza.
+  // El manual colapsa al ARCHIVO: DESCARTADA es terminal — la raíz aterriza en la
+  // pantalla de cierre (antes de D15-bis aterrizaba en m2, que le pedía registrar
+  // el veredicto que acababa de registrar) y nada de producción se renderiza.
   await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m2$/)
+  await expect(page).toHaveURL(/\/manual\/archivo$/)
   await expect(page.getByRole('heading', { name: 'Self-check' })).toHaveCount(0)
-  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige a m2.
+  // Y dice qué pasó y por qué, con las palabras del descarte (no las del PERDIDO).
+  await expect(vis(page.getByText('Archivo — Descartado'))).toBeVisible()
+  await expect(vis(page.getByText('Negocio sin señal digital aprovechable.'))).toBeVisible()
+  // El veredicto completo no se perdió: queda en m1, y el archivo lo enlaza.
+  await firstVisible(page.getByRole('link', { name: /Mirá el negocio y decidí/i })).click()
+  await expect(page).toHaveURL(/\/manual\/m1$/)
+  await expect(vis(page.getByText('Veredicto registrado'))).toBeVisible()
+  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige al archivo.
   await page.goto(pantalla(lead.id, 'm14'), { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m2$/)
+  await expect(page).toHaveURL(/\/manual\/archivo$/)
 })
 
 test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió cambios"', async ({ page }) => {

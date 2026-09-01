@@ -66,14 +66,15 @@ type Estado = {
 const ESTADOS: Estado[] = [
   { nombre: '01-m1-ficha-vacia', paso: 'm1' },
   { nombre: '02-m1-ficha-cargada', paso: 'm1' },
-  // P4 fusionó m3 dentro de m2 (llevar la ficha a evaluar + registrar el veredicto
-  // son una sola pantalla). 03 es la ida (ficha con señal, sin veredicto) y 04 la
-  // vuelta (veredicto ya registrado, m2 completada y navegable): antes los dos
-  // sembraban lo MISMO y fotografiaban la misma pantalla dos veces. Renombrados
-  // en la corrida G — los nombres viejos decían `m3`, una pantalla que no existe.
-  { nombre: '03-m2-al-evaluador', paso: 'm2' },
-  { nombre: '04-m2-veredicto-registrado', paso: 'm2' },
-  { nombre: '05-m2-veredicto-descartado', paso: 'm2' },
+  // D15-bis fusionó m2 dentro de m1 (cargar la ficha y dejar el veredicto son una
+  // sola pantalla) y mandó el descartado al archivo. `m2` salió del registro, así
+  // que estos tres estados fotografiaban redirects con nombres que mienten —
+  // mismo tratamiento que la corrida G le dio a m8…m12 con P6-B. 03 se RETIRÓ:
+  // sembraba lo mismo que 02 (FICHA + señal) y ahora, sin viaje a la herramienta,
+  // es literalmente la misma foto. 04 es la variación real de m1 (veredicto ya
+  // registrado → ficha congelada + resumen) y 05 pasó a ser el archivo.
+  { nombre: '04-m1-veredicto-registrado', paso: 'm1' },
+  { nombre: '05-archivo-descartado', paso: 'archivo' },
   { nombre: '06-m4-opener-pendiente', paso: 'm4' },
   { nombre: '07-m4-opener-enviado', paso: 'm4' },
   { nombre: '08-espera-post-opener', paso: 'espera' },

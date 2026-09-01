@@ -21,7 +21,6 @@ import {
   ReentradaMunicion,
 } from '../_components/m-construccion'
 import { M1Contexto, M1Municion, M1Registro } from '../_components/m1-ficha'
-import { M2Contexto, M2Municion, M2Registro } from '../_components/m2-evaluador'
 import { M4Contexto, M4Municion, M4Registro } from '../_components/m4-opener'
 import { M5Contexto, M5Municion, M5Registro } from '../_components/m5-seguimiento'
 import { M6Contexto, M6Municion, M6Registro } from '../_components/m6-brief'
@@ -129,7 +128,13 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
           : (manual.agenda?.resultado?.nota ?? null)
       return (
         <div className="space-y-5">
-          <ArchivoManual cabecera={cabecera} causa={causa} motivo={motivo} />
+          <ArchivoManual
+            leadId={leadId}
+            cabecera={cabecera}
+            causa={causa}
+            motivo={motivo}
+            veredictoAccesible={alcanzable('m1')}
+          />
           {historial}
         </div>
       )
@@ -204,6 +209,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   const slots =
     pantalla.id === 'm1'
       ? {
+          // D15-bis — pantalla fusionada: cargar la ficha y registrar el
+          // veredicto son un solo movimiento del setter, y el segundo se decide
+          // mirando el primero. Antes eran m1 y m2, dos pantallas del MISMO
+          // stage (FICHA) separadas por un viaje a una herramienta externa que
+          // no tiene link.
           contexto: <M1Contexto lead={manual.leadCopy} />,
           municion: <M1Municion />,
           captura: (
@@ -212,28 +222,14 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
               lead={manual.leadCopy}
               ficha={manual.ficha}
               editable={manual.fichaEditable}
+              leadStatus={manual.leadStatus}
+              caliente={manual.caliente}
+              evaluacion={manual.evaluacion}
+              descartado={manual.stage === 'DESCARTADA'}
             />
           ),
         }
-      : pantalla.id === 'm2'
-        ? {
-            // P4 — pantalla fusionada: el viaje a la herramienta y el registro
-            // del veredicto en una sola. La ficha (contexto) sirve a los dos
-            // movimientos: se copia para llevarla y queda abierta para
-            // transcribir contra ella a la vuelta.
-            contexto: <M2Contexto lead={manual.leadCopy} ficha={manual.ficha} />,
-            municion: <M2Municion />,
-            captura: (
-              <M2Registro
-                leadId={leadId}
-                leadStatus={manual.leadStatus}
-                caliente={manual.caliente}
-                evaluacion={manual.evaluacion}
-                descartado={manual.stage === 'DESCARTADA'}
-              />
-            ),
-          }
-        : pantalla.id === 'm4'
+      : pantalla.id === 'm4'
           ? {
               contexto: (
                 <M4Contexto

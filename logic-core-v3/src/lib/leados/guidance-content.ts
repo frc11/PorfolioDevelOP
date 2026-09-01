@@ -144,10 +144,10 @@ export type SelfCheckRazon = {
 }
 
 /**
- * Un criterio que mira una herramienta de evaluación externa, en el idioma del
- * setter: qué es y por qué pesa en el score. Lo consume m2 (la evaluación)
- * para mostrar «qué mira el Evaluador» sin hardcodear la lista en el componente.
- * El criterio REAL lo aplica el Evaluador externo; acá solo lo explicamos. [evaluación · 3.2]
+ * Un criterio del veredicto, en el idioma del setter: qué es y por qué pesa en
+ * el score. Lo consume m1 (la ficha y el veredicto, fusionadas) para mostrar en
+ * qué fijarse antes de decidir, sin hardcodear la lista en el componente.
+ * D15-bis: el criterio lo aplica el SETTER — esta lista es lo que mira. [3.2]
  */
 export type CriterioGuia = {
   /** Nombre del criterio (ej: «Dolor»). */
@@ -283,7 +283,7 @@ export const GUIA_FICHA = {
   intro: [
     'Anotá lo que ',
     { enfasis: 'ves' },
-    ', no lo que opinás: el diagnóstico lo hace el Evaluador después. Podés guardar a medias y volver.',
+    ', no lo que opinás. Primero juntás material; el veredicto lo dejás abajo, con todo esto a la vista. Podés guardar a medias y volver.',
   ],
   duracion: '~10 min. Si te pasaste, ya tenés de sobra.',
   campos: {
@@ -303,7 +303,7 @@ export const GUIA_FICHA = {
       hint: 'Nombre del dueño si aparece, hace cuánto existe el negocio, cualquier pista de quién decide.',
       ejemplo: "Ej: la cuenta la firma 'Marce', aparece en las fotos del local…",
       mejora:
-        'Podés sumar: ¿quién decide —dueño o encargado—? ¿su nombre si aparece? ¿hace cuánto abrió? Cuanto más concreto, mejor lo lee el Evaluador.',
+        'Podés sumar: ¿quién decide —dueño o encargado—? ¿su nombre si aparece? ¿hace cuánto abrió? Cuanto más concreto, más fácil te resulta decidir después.',
     },
     presenciaDigital: {
       label: 'Presencia digital',
@@ -374,36 +374,39 @@ export const GUIA_FICHA = {
   },
   validacion: {
     pendienteTitulo:
-      'El Evaluador no puede juzgar a ciegas: necesita esta señal mínima para puntuar. Todavía falta:',
-    completo: '✓ Señal mínima lista — guardá y pasala por el Evaluador.',
+      'No se puede juzgar a ciegas: sin esta señal mínima no hay con qué decidir. Todavía falta:',
+    completo: '✓ Señal mínima lista — guardá y bajá a dejar tu veredicto.',
   },
   copyBlock: {
-    titulo: 'Bloque para el Evaluador',
+    titulo: 'La ficha, en un bloque',
     instruccion:
-      'Se arma con lo último guardado. Copialo, pegalo en el Evaluador y volvé con el resultado a Evaluación.',
+      'Se arma con lo último guardado — lo que anotaste, junto y en orden, para releerlo de un saque antes de decidir.',
   },
   congelada: {
-    resumen: 'Ver la ficha de observación (congelada: el Evaluador ya la leyó)',
+    resumen: 'Ver la ficha de observación (congelada: el veredicto ya está registrado)',
     vacia: 'No hay ficha guardada.',
   },
 } satisfies PasoGuia
 
-// ── Contenido: m2 · Evaluación (transcribir el veredicto del Evaluador) ─────
+// ── Contenido: el veredicto del setter (segunda mitad de m1, fusionada) ────
 
 /**
- * Guía de la evaluación (m2). El setter NO juzga: pega la ficha en el
- * Evaluador externo y transcribe acá lo que devolvió (score, veredicto,
- * razonamiento). `campos` son los del formulario (score/veredicto/razonamiento);
- * `criterios` explica qué mira el Evaluador; `gate` explica el descarte
- * automático de score 1–2 (el criterio sigue en `dossier.actions.ts`, acá solo
- * el porqué). `porque`/`ejemplos` enseñan la disciplina de transcribir fiel.
+ * Guía del veredicto (m1, la pantalla fusionada). D15-bis: el juicio es DEL
+ * SETTER. Hasta acá el veredicto salía de un chat de evaluación externo y el
+ * setter transcribía la respuesta; el chat quedó afuera y los tres campos
+ * —score, veredicto, razonamiento— los escribe él, con la ficha que acaba de
+ * cargar a la vista. Los campos, sus tipos y su validación no cambiaron
+ * (`EvaluacionSchema`): cambió de dónde sale el dato. `criterios` es en qué
+ * fijarse; `gate` explica el descarte automático de score 1–2 (el criterio
+ * sigue en `dossier.actions.ts`, acá solo el porqué). `porque`/`ejemplos`
+ * enseñan la disciplina de puntuar honesto.
  */
 export const GUIA_EVALUACION = {
-  titulo: 'Evaluación',
+  titulo: 'Tu veredicto',
   intro: [
-    'No juzgás vos: pegás la ficha en el Evaluador (el bloque de esta pantalla), esperás su respuesta y la ',
-    { enfasis: 'transcribís acá tal cual' },
-    ' — score, veredicto y razonamiento. No hace falta interpretarla.',
+    'Con la ficha recién cargada a la vista, ',
+    { enfasis: 'decidís vos' },
+    ' — cuánto le ves al negocio, si avanza o se descarta, y por qué. Es tu lectura: nadie la puntuó antes que vos.',
   ],
   criterios: [
     { nombre: 'Rubro', porQue: 'hay rubros donde una demo web convierte mucho más que otros' },
@@ -415,30 +418,30 @@ export const GUIA_EVALUACION = {
   campos: {
     score: {
       label: 'Score',
-      hint: 'El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad.',
+      hint: 'Cuánto le ves, de 1 a 5. 1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad.',
     },
     veredicto: {
       label: 'Veredicto',
-      hint: 'El que eligió el Evaluador: Descartar, Avanzar o Avanzar con prioridad. Copialo, no lo cambies.',
+      hint: 'Tu decisión: Descartar, Avanzar o Avanzar con prioridad. Que coincida con el score que pusiste.',
     },
     razonamiento: {
       label: 'Razonamiento',
-      hint: 'Pegá el razonamiento completo del Evaluador, sin resumirlo.',
+      hint: 'Por qué le pusiste ese número, con lo que viste. Un par de líneas concretas alcanzan — lo relee Franco y lo releés vos en el próximo toque.',
     },
   },
   gate: {
     titulo: 'Score 1–2 = descarte automático',
     detalle: [
-      'No lo elegís vos y no es un fracaso: ',
+      'El número lo ponés vos; lo que sigue no se elige. Y no es un fracaso: ',
       { enfasis: 'filtrar rápido un lead flojo es exactamente el laburo' },
       '. Te ahorrás horas de demo para un negocio que no iba a cerrar. Al confirmar te pedimos el motivo en una línea.',
     ],
   },
   porque: [
     [
-      'El que juzga es el Evaluador, no vos: tu trabajo es ',
-      { enfasis: 'transcribir fiel' },
-      ', no suavizar ni inflar el número para salvar un lead que te cayó simpático. Un score editado ensucia toda la cola que viene después.',
+      'El que juzga sos vos, y por eso importa que puntúes ',
+      { enfasis: 'lo que viste, no lo que te gustaría' },
+      ': inflar el número para salvar un negocio que te cayó simpático ensucia toda la cola que viene después — y la demo la vas a construir vos.',
     ],
     [
       'El score marca el camino: ',
@@ -448,10 +451,10 @@ export const GUIA_EVALUACION = {
   ],
   ejemplos: [
     {
-      tema: 'Transcribir el veredicto',
-      asiSi: 'El Evaluador dio 2 → cargás 2 y descartás, aunque el lugar te guste.',
-      asiNo: 'Lo subís a 3 «para darle una chance» porque te cayó bien el negocio.',
-      porque: 'El score es del Evaluador; pisarlo mete leads flojos a la cola y te quema el tiempo.',
+      tema: 'Puntuar lo que viste',
+      asiSi: 'IG muerto hace ocho meses y cero reseñas → ponés 2 y descartás, aunque el lugar te guste.',
+      asiNo: 'Le ponés 3 «para darle una chance» porque te cayó bien el negocio.',
+      porque: 'El 3 te obliga a construirle una demo. Meter leads flojos a la cola te quema el tiempo a vos.',
     },
   ],
 } satisfies PasoGuia
@@ -1044,7 +1047,7 @@ export type FichaEjemplar = {
 export const GUIA_FICHA_EJEMPLAR = {
   titulo: 'Café de barrio · Instagram activo, pero pierde consultas',
   porque:
-    'Anota lo que se VE, no opiniones: datos concretos de cada red, reseñas textuales con la queja que se repite y señales operativas. Con esto el Evaluador decide sin tener que adivinar.',
+    'Anota lo que se VE, no opiniones: datos concretos de cada red, reseñas textuales con la queja que se repite y señales operativas. Con esto se decide sin tener que adivinar.',
   campos: {
     igManejadoPor: 'DUENO',
     identidadNotas:

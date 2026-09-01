@@ -84,29 +84,20 @@ const CATALOGO: EntradaDoc[] = [
     modo: 'directo',
   },
   {
-    archivo: '03-m2-al-evaluador',
+    archivo: '04-m1-veredicto-registrado',
     tramo: 'Ficha y Evaluación',
-    titulo: 'm2 llevar la ficha a evaluar',
-    pantalla: 'm2',
+    titulo: 'm1 con el veredicto ya registrado',
+    pantalla: 'm1',
     comoSeLlega:
-      'La ficha tiene señal: te toca copiar el bloque y pasarlo por el Evaluador. Ir y volver son UNA pantalla desde P4.',
+      'Dejaste tu veredicto y volvés a mirar la pantalla — la ficha queda congelada, el veredicto a la vista, y la pantalla navegable.',
     modo: 'directo',
   },
   {
-    archivo: '04-m2-veredicto-registrado',
+    archivo: '05-archivo-descartado',
     tramo: 'Ficha y Evaluación',
-    titulo: 'm2 con el veredicto ya registrado',
-    pantalla: 'm2',
-    comoSeLlega:
-      'Volviste del Evaluador, registraste score y veredicto, y volvés a mirar la pantalla — queda completada y navegable.',
-    modo: 'directo',
-  },
-  {
-    archivo: '05-m2-veredicto-descartado',
-    tramo: 'Ficha y Evaluación',
-    titulo: 'm2 descartado',
-    pantalla: 'm2',
-    comoSeLlega: 'El Evaluador dijo DESCARTAR: queda el veredicto a la vista y nada por delante.',
+    titulo: 'archivo — descartado',
+    pantalla: 'archivo',
+    comoSeLlega: 'Tu veredicto fue DESCARTAR: el lead cae al archivo, con el motivo a la vista y nada por delante.',
     modo: 'directo',
   },
   // ── Opener y Seguimiento ──────────────────────────────────────────────────

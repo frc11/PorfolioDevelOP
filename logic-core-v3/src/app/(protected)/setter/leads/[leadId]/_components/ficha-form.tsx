@@ -197,7 +197,7 @@ export function FichaForm({ leadId, ficha }: FichaFormProps) {
       }
       toast.success(
         result.data.faltantes.length === 0
-          ? 'Ficha guardada — ya tenés señal para pasar al Evaluador'
+          ? 'Ficha guardada — ya tenés señal para dejar tu veredicto'
           : 'Borrador guardado — podés volver cuando quieras',
       )
       autosave.markSaved()

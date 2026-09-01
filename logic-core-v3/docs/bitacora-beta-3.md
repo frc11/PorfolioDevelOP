@@ -8489,3 +8489,303 @@ son load-bearing de un gate con invariante. Destrabar ese paso es una decisión 
 Los otros siete baches de la corrida: la carrera de tildes del auto-reporte, el foco que no
 aparece, la vuelta de construcción que aterriza en el chequeo, el paso actual de un postergado,
 la pantalla que no acompaña al dato, la aglomeración de novedades y la novedad caducada.
+
+---
+
+## Sprint D15-bis — LA FUSIÓN: la ficha y el veredicto son una sola pantalla — 2026-09-01
+
+**Rama** `fix/fusion-m1-m2` · **base** `52ac5c62` (`fix/config-faltante`, la punta de la cadena
+con P14) · **worktree** `C:/tmp/wt-p15-fusion`, propio, `node_modules` por junction, puerto
+3007, `E2E_DIST_DIR=.next-p15` · **sin pushear**
+
+P14 midió que los tres campos del veredicto no se pueden aflojar: son load-bearing de un
+contrato persistido con invariante propio. Este sprint saca el freno por el otro lado — no
+aflojando el campo, sino cambiando de dónde sale el dato. El chat de evaluación externo deja de
+ser un paso; el veredicto lo escribe el setter, con su criterio, en la misma pantalla donde
+acaba de cargar la ficha.
+
+**Lo que NO se tocó, y está probado abajo con `git diff` vacío:** la etapa `EVALUADA`, la
+transición `FICHA → EVALUADA`, `LEGAL_TRANSITIONS`, `EvaluacionSchema` y el camino de escritura
+(`transitionDossier`). Lo que se elimina es el chat como paso, no la etapa ni el registro.
+
+### Fase 1 · las seis mediciones (bloqueantes)
+
+A3 midió esto hace semanas y once sprints tocaron estas pantallas. Se volvió a medir. Ninguna
+condición de frenada se disparó.
+
+**1 · ¿`m2` sigue siendo la pantalla del stage `FICHA`? ¿En qué otros estados aparece?**
+Sí. `manual.ts:517` (base) — `case null: case 'FICHA'` devuelve `{ actual: 'm2', habilitadas:
+['m2'] }` cuando la ficha tiene señal; sin señal devolvía `m1`. El comentario del código lo
+decía con todas las letras: «La evaluación ocurre con stage=FICHA: registrar el veredicto ES la
+transición». Aparece además en dos lugares más: como terminal de `DESCARTADA`
+(`manual.ts:522`, `habilitadas: []`) y como *completada* en los siete stages de
+`STAGES_POST_EVALUACION` (`manual.ts:433`). La premisa se sostiene.
+
+**2 · ¿A dónde aterriza hoy un `DESCARTADA`? ¿Qué pantalla puede recibirlo?**
+Hoy aterriza en `m2` (`manual.ts:520-522`). La pantalla que puede recibirlo **ya existe y ya
+está construida para él**: `archivo`. La página del manual la despacha con `page.tsx:126-129` —
+`const causa = manual.stage === 'DESCARTADA' ? 'descartado' : 'perdido'`, y el motivo sale de
+`manual.evaluacion?.motivoDescarte`. `ArchivoManual` tiene el label
+`CAUSA_LABEL.descartado = 'Descartado'` desde 2.3. Era código alcanzable solo por
+`status === 'PERDIDO'`: la rama `descartado` existía y ningún estado la ejercitaba. **No hace
+falta inventar ninguna pantalla.**
+
+**3 · ¿De qué se deriva el rail de fases y el indicador de paso? ¿Quién más lo lee?**
+El rail sale de `FASES_MANUAL` (`manual.ts:303-315`) y el indicador de `indicadorDeFase`
+(`manual.ts:321-331`), que cuenta `fase.pantallas.indexOf(id) + 1` sobre
+`fase.pantallas.length`. Lo leen tres consumidores, y ninguno más:
+
+- `pantalla-manual.tsx:71` — renderiza el indicador (con `m > 1` como condición de mostrar el
+  contador, disciplina P9);
+- `enlaces-manual.invariant.ts:315` — deriva `FASES_SIN_DESTINO` de los títulos de fase;
+- `pantallas-construccion.invariant.ts:121` — ata `FASES_MANUAL.construccion.pantallas` al
+  fixture congelado.
+
+Verificado además que **`derivarPasoDelLead().indice` (el rail de 5 pasos del wizard) no tiene
+un solo consumidor** desde el corte 5.6: el grep sobre `.indice` y `DossierStepper` devuelve solo
+comentarios. El único rail vivo es el del manual.
+
+**4 · ¿Qué invariantes tocan `m2`, la fase `evaluacion` o `FICHA → EVALUADA`?**
+Seis, de los 50:
+
+- `manual.invariant.ts:91` — afirmaba `descartada.actual === 'm2'`. **Se puso en rojo por diseño
+  y se adaptó** (bloque de pruebas, abajo).
+- `enlaces-manual.invariant.ts` — el vigía de P10 sobre los saltos pantalla→pantalla. **Sumó un
+  enlace declarado**, sigue verde.
+- `dossier-stage.invariant.ts:53-95` — el grafo: `FICHA: ['EVALUADA']`,
+  `EVALUADA: ['DESCARTADA','BRIEF']`, y la aserción de que no hay camino de FICHA a BRIEF sin
+  pasar por EVALUADA. **Intacto, verde.**
+- `pantallas-construccion.invariant.ts` — lee `FASES_MANUAL` y `PANTALLAS[p].fase`. Intacto.
+- `copy-sin-jerga.invariant.ts` — nombra `evaluacionJson` en su lista de columnas conocidas.
+  Intacto.
+- `turno.invariant.ts` / `particion.invariant.ts` / `gate-envio-demo.invariant.ts` nombran
+  `EVALUADA` como stage, no `m2`. Intactos.
+
+Falso positivo descartado: `modules.invariant.ts` usa `m1` y `m2` como ids de MÓDULO
+(`motor-resenas`, `email-marketing-pro`), sin relación con las pantallas del manual.
+
+**5 · ¿Cuántas de las pruebas tocan `m1` o `m2`?**
+El total real, medido con `playwright --list`: **98 en `test:setter` + 33 en `test:leados` = 131**
+(no 124 — la cuenta creció con los dos sprints anteriores). De esas, **tres** tocan m1/m2, y
+ninguna está en `test:leados`:
+
+- `tests/setter/01-flow.spec.ts:93` (B2 · evaluación) y `:324` (B9 · descartada);
+- `tests/setter/16-municiones-salida.spec.ts:141` (la fila `m2` de `PANTALLAS_CON_PARED`).
+
+Fuera de las suites contadas, `tests/galeria/captura.spec.ts` tiene 3 estados apuntados a `m2`
+(harness de capturas, con su sembrador y su índice en `scripts/dev/`).
+
+**6 · ¿Qué escribe cada uno de los tres campos y qué los valida?**
+Uno solo los escribe: `registrarEvaluacion` (`dossier.actions.ts:115-176`), que llama
+`transitionDossier(leadId, { to: 'EVALUADA', evaluacion: { score, veredicto, razonamiento } })`.
+Validación en dos capas, las dos intactas:
+
+- entrada — `EvaluacionInputSchema` (`dossier.schemas.ts:17-42`): `score` int 1-5, `veredicto`
+  enum de `VEREDICTO_VALUES`, `razonamiento` string trim min 1, más el `superRefine` que exige
+  `motivoDescarte` con score ≤ 2. Corre client-side (el form) y server-side (la action);
+- persistencia — `EvaluacionSchema` (`contracts.ts:93-107`), parseado dentro de
+  `transitionDossier` (`dossier.ts:151`) antes de estampar `evaluacionJson` con su `fecha`.
+
+El gate de señal mínima que habilita registrar es `fichaFaltantes(parseFicha(...))` en
+`dossier.actions.ts:139`, server-side. **No se movió.**
+
+### Qué se fusionó
+
+`m2` salió del registro; su contenido vive en `m1`:
+
+- **Registro** (`m1-ficha.tsx`) — arriba la ficha (`FichaForm` viva, o `FichaStep` congelada);
+  debajo, separado por una regla, el veredicto (`EvaluacionForm`, o `EvaluacionResumen` si ya
+  está registrado). En ese orden, porque el segundo se decide mirando el primero. Los dos
+  bloques son secciones con nombre accesible — «La ficha del negocio» y «Tu veredicto» — y la
+  prueba afirma sobre eso, no sobre la posición.
+- **Munición** — la ficha ejemplar más la tabla de criterios que traía m2. Lo que se fue es el
+  `ToolGuide` del evaluador: sin viaje a la herramienta no hay herramienta que presentar.
+- **Contexto** — quedó el de m1 (identidad y links del alta). El bloque copiable de m2 existía
+  para el viaje; sin viaje, la ficha ya está en la misma pantalla.
+
+El copy dice que el criterio es suyo. `GUIA_EVALUACION` pasó de «No juzgás vos: pegás la ficha
+en el Evaluador… transcribís acá tal cual» a «Con la ficha recién cargada a la vista, **decidís
+vos**… Es tu lectura: nadie la puntuó antes que vos». Se barrió el resto de la palabra
+«Evaluador» de todas las superficies que el setter lee: los hints de los tres campos, el gate de
+score 1-2, el `porque`, el ejemplo, el banner de señal completa de la ficha («guardá y pasala
+por el Evaluador» → «guardá y bajá a dejar tu veredicto»), el toast de guardado, los tres
+mensajes de error de Zod, el nombre accesible del select, la línea de «Mi criterio» del panel y
+la próxima acción de la tarjeta de cartera («Pasala por el Evaluador» → «Dejá tu veredicto»).
+Grep de «Evaluador» sobre superficies visibles: cero.
+
+### Lo que quedaba colgado de m2
+
+**El descarte aterriza en `archivo`.** No es una pantalla nueva: es la de cierre que ya sabía
+decir «Archivo — Descartado» y mostrar el motivo. Dos ajustes de copy, porque los dos cierres no
+son el mismo: el subrenglón decía «El cierre lo decide Franco» —falso para un descarte, que lo
+decidió el setter— y ahora se ramifica por causa; el rótulo del motivo dice «Por qué lo
+descartaste» en vez de «Qué pasó». Y el veredicto completo (score y razonamiento, no solo el
+motivo de una línea) **no se perdió**: vive en `m1`, que queda completada y navegable, y el
+archivo lo enlaza con `EnlacePantalla` — el nombre sale del registro y el salto se declaró en el
+invariante de enlaces en vez de descubrirse rebotando.
+
+**El conteo del rail cierra.** Medido importando los módulos de las dos ramas:
+
+| | base `52ac5c62` | `fix/fusion-m1-m2` |
+|---|---|---|
+| Fases del rail (`FASES_MANUAL`) | **10** (con `evaluacion`) | **9** |
+| `PANTALLA_IDS` | **15** (con `m2`) | **14** |
+| Pantallas de tipo `manual` | **11** | **10** |
+| Fases con contador visible (`m > 1`) | 1 (Construcción) | 1 (Construcción) |
+
+Ninguna fase quedó sin pantalla ni con el índice colgado: `indicadorDeFase` devuelve `n` menor o
+igual a `m` para las diez pantallas del manual. `FASES_SIN_DESTINO` del invariante de enlaces
+sigue no vacío (`[Seguimiento]`), así que su regla 2 sigue mirando algo.
+
+**Los enlaces.** El invariante de P10 sigue verde y con un enlace más: 6912 estados barridos,
+**8 enlaces declarados** (11408 ejercicios), 79 citas revisadas. El nuevo —`archivo → m1`— se
+declaró `siempre`, y no puede no serlo: `DESCARTADA` está en `STAGES_POST_EVALUACION`, así que
+`completadasDe` marca `m1` en todos los estados donde el enlace se renderiza.
+
+**El harness de la galería.** `m2` salió del registro, así que sus tres estados fotografiaban
+redirects con nombres que mienten — mismo tratamiento que la corrida G le dio a m8…m12 con P6-B.
+`03-m2-al-evaluador` se retiró (sin viaje a la herramienta sembraba y fotografiaba exactamente
+lo mismo que `02`), `04` pasó a `m1` y `05` al `archivo`, con su sembrador y su índice.
+
+### Un cambio de criterio, dicho
+
+`completadasDe` marcaba `m1` con la sola **señal de la ficha** (`fichaTieneSenal`), porque
+entonces la ficha era una pantalla entera y el veredicto era la siguiente. Fusionadas, eso diría
+«hecho» sobre una pantalla cuya segunda mitad está en blanco, y la pondría en el rail de
+completadas mientras es el paso de ahora. Ahora `m1` se completa con el **veredicto**
+(`STAGES_POST_EVALUACION`), que es lo que cierra el paso. Con esto la rama por señal del case
+`FICHA` de `posicionDe` desapareció: sin un segundo destino al que ir, no hay a qué bifurcar.
+El gate de la señal mínima **no se aflojó** — sigue donde estaba, server-side en
+`registrarEvaluacion`, y el aviso de faltantes lo sigue mostrando `FichaForm`, ahora a un scroll
+del veredicto en vez de a una pantalla de distancia.
+
+### Las pruebas adaptadas
+
+```
+PRUEBA       tests/setter/01-flow.spec.ts:80  (B1 · FICHA)
+VERIFICABA   el banner de senal completa dice «guarda y pasala por el Evaluador»
+VERIFICA     el mismo banner, con la frase que ya no manda a una herramienta:
+             «guarda y baja a dejar tu veredicto»
+
+PRUEBA       tests/setter/01-flow.spec.ts:93  (B2 · EVALUACION -> VEREDICTO)
+VERIFICABA   navegando a m2, que registrar score+veredicto+razonamiento transiciona
+             FICHA->EVALUADA por la via legal
+VERIFICA     lo mismo, en m1, y ADEMAS que las dos mitades estan en la misma pantalla:
+             afirma sobre las regiones «La ficha del negocio» y «Tu veredicto». Sin ese
+             agregado el test pasaria igual navegando a cualquier lado que monte el form,
+             y la fusion es justamente que esten juntas.
+
+PRUEBA       tests/setter/01-flow.spec.ts:324  (B9 · DESCARTADA)
+VERIFICABA   que el manual «colapsa al veredicto»: la raiz aterriza en /manual/m2 y m14
+             rebota a m2
+VERIFICA     que el manual colapsa al ARCHIVO: la raiz aterriza en /manual/archivo, que
+             dice «Archivo — Descartado» con el motivo textual, que el enlace al veredicto
+             lleva a m1 y ahi se lee «Veredicto registrado», y que m14 rebota al archivo.
+             La garantia que la prueba original protegia —que un descartado no se confunda
+             con nada y no tenga trabajo por delante— es la misma; cambio donde vive.
+
+PRUEBA       tests/setter/16-municiones-salida.spec.ts:141  (fila m2 de PANTALLAS_CON_PARED)
+VERIFICABA   que en m2 la pildora «Link pendiente» del chat de evaluacion y su salida se
+             leen sin abrir ningun plegable
+VERIFICA     nada: la fila se retiro, con el motivo escrito al lado. No es que la pared se
+             haya arreglado — la pantalla dejo de montar ese ToolGuide, porque la fusion
+             elimino el viaje. La herramienta `evaluador` SIGUE en el registro y el guard
+             del propio archivo la sigue contando (sinUrl === evaluador, gemDiseno,
+             claudeDesign, gemOutreach — intacto): lo que se fue es su consumidor. Las
+             otras cinco filas (m6, mc1, mc2, m4, mr) siguen verdes.
+
+PRUEBA       tests/galeria/captura.spec.ts:74-76  (3 estados de m2)
+VERIFICABA   capturaba m2 en tres estados (ida, veredicto registrado, descartado)
+VERIFICA     dos: 04-m1-veredicto-registrado (m1 congelada con el resumen) y
+             05-archivo-descartado. El tercero (03-m2-al-evaluador) se retiro: sin viaje
+             a la herramienta sembraba y fotografiaba lo mismo que 02.
+
+INVARIANTE   src/lib/leados/manual.invariant.ts:88  (caso 4)
+AFIRMABA     descartada.actual === 'm2' — «DESCARTADA sigue mostrando el veredicto en m2,
+             no el archivo»
+AFIRMA       descartada.actual === 'archivo', y las dos mitades de lo que esa afirmacion
+             protegia, ahora explicitas: que el veredicto sigue alcanzable (completadas
+             incluye m1) y que no se habilita ningun paso de trabajo (habilitadas es solo
+             archivo). El sprint invirtio la afirmacion a proposito y el motivo quedo
+             escrito en el archivo.
+```
+
+### El test nuevo, y cómo se demostró que tiene dientes
+
+`tests/setter/20-veredicto-abre-construir.spec.ts` (2 tests) fija la garantía que la fusión no
+puede aflojar: **un lead sin veredicto no llega a construir**. El invariante del grafo prueba
+que la transición no existe; esto prueba que tampoco existe la pantalla — que la guardia del
+server no habilita m6, mc1, mc2, m13 ni m14 mientras el dossier siga en FICHA. Se siembra el
+estado más favorable al bug: ficha completa **y** gate comercial abierto (`caliente`). Todo
+listo menos el veredicto.
+
+**El sabotaje fue contra el código de producción, no contra un fixture.** Se agregaron
+m6/mc1/mc2/m13/m14 a las `habilitadas` del case `FICHA` de `posicionDe` (`manual.ts`) y se
+rebuildeó — el estado exacto donde la garantía no existe. Los dos tests se pusieron rojos, cada
+uno en su primer destino:
+
+```
+Error: m6 no se alcanza sin veredicto — rebota a m1
+  Expected pattern: /manual/m1$
+  Received string:  ".../manual/m6"
+  2 failed
+```
+
+Revertido el sabotaje y rebuildeado: `2 passed`.
+
+### La verificación, operando la aplicación a 1440
+
+Capturas en `docs/proof-screenshots/d15-bis/` (10, gitignored como todas las del repo).
+
+1. **El recorrido entero, sin abrir una sola herramienta externa.** Cartera → abrir el lead
+   (aterriza en m1) → cargar la ficha → banner de señal → guardar → **bajar en la misma
+   pantalla y dejar el veredicto** (score 4, «Avanzar con prioridad», razonamiento propio) →
+   registrar → el brief queda abierto. Es exactamente lo que la corrida del novato no pudo
+   completar.
+2. **El descarte.** Score 2 → «Descartar» → modal de motivo → aterriza en `/manual/archivo`, que
+   dice «ARCHIVO — DESCARTADO», «Lo descartaste en la evaluación», «Por qué lo descartaste» con
+   el texto, y enlaza el veredicto completo.
+3. **El rail y el indicador**, con el conteo de la tabla de arriba: en m1 el indicador dice
+   «FICHA» sin contador (m = 1, disciplina P9), y con el veredicto registrado la Ficha aparece
+   como completada en el rail de m6.
+4. **`evaluacionJson`, leído de la base**, idéntico en forma al de antes de la fusión:
+
+```
+avanzar:   {"fecha":"2026-09-01T15:36:14.609Z","score":4,"veredicto":"CALIENTE",
+            "razonamiento":"Duena visible y decide ella. ..."}
+descartar: {"fecha":"2026-09-01T15:36:21.872Z","score":2,"veredicto":"DESCARTAR",
+            "razonamiento":"IG muerto hace casi un ano ...",
+            "motivoDescarte":"Negocio inactivo hace meses, sin senal digital aprovechable."}
+```
+
+Claves y tipos: `score` número, `veredicto` string, `razonamiento` string, `fecha` string, más
+`motivoDescarte` string en el descarte. Es la misma forma porque es el mismo camino: el
+`git diff` sobre `contracts.ts` (`EvaluacionSchema`) y sobre `dossier.ts` (`transitionDossier`,
+donde se estampa el blob) está **vacío**.
+
+### Cierre
+
+`tsc --noEmit` exit 0 · invariantes **49/49** (50 descubiertos, 1 excluido) · `test:setter`
+**99/99** · `test:leados` **33/33** · `test:helpers` **26/26** · `build` exit 0 ·
+`prisma migrate status`: 86 migraciones, sin drift.
+
+`git diff` **vacío** sobre los tres contratos que el sprint no podía tocar:
+`src/lib/leados/dossier-stage.ts` (`LEGAL_TRANSITIONS`), `src/lib/leados/contracts.ts`
+(`EvaluacionSchema`) y `src/lib/leados/dossier.ts` (`transitionDossier`). `prisma/schema.prisma`
+también intacto: `EVALUADA` sigue en el enum.
+
+### Fuera de alcance, anotado
+
+- **El rail «Tus herramientas» sigue ofreciendo «Chat de evaluación (Sonnet) · Evaluación ·
+  PENDIENTE».** Es una fila inerte (`url: null`, sin destino: no es un callejón), pero anuncia
+  una herramienta para un paso que el producto ya no tiene, y su subrótulo nombra una fase que
+  salió de `FASES_MANUAL`. **No se tocó a propósito**: `herramientas.ts` es la configuración
+  editable de Franco y borrarle una entrada es decisión suya, no de este sprint. Se ve en
+  `01-cartera.png` y en todas las capturas.
+- El rediseño de la ficha por fuentes, con los dos umbrales y el corte de los diez minutos.
+
+### Para la verificación humana
+
+- Que el copy del veredicto suene a criterio propio y no a trámite. Ningún test lo valida.
+- Que la pantalla fusionada no quede demasiado larga: son dos pantallas en una. Se ve entera en
+  las capturas 02, 03, 04 y 05.

@@ -134,11 +134,18 @@ test('la pared que este spec cubre sigue existiendo (guard del registro)', async
 
 /**
  * Las pantallas donde la píldora aparece dentro de `ToolGuide`, con el lead que
- * las hace alcanzables. Es el recorrido real: la evaluación, el brief, las dos
- * de construcción, el opener y la reentrada del re-loop.
+ * las hace alcanzables. Es el recorrido real: el brief, las dos de
+ * construcción, el opener y la reentrada del re-loop.
+ *
+ * D15-bis sacó de esta lista la fila `m2 · Chat de evaluación (Sonnet)`. No es
+ * que la pared se haya arreglado: la pantalla dejó de montar ese `ToolGuide`.
+ * La fusión eliminó el viaje a la herramienta —el veredicto lo escribe el setter
+ * con su criterio, en la misma pantalla que la ficha—, así que ya no hay
+ * herramienta que nombrar ahí ni salida que ofrecer. La herramienta `evaluador`
+ * sigue en el registro (el guard de abajo la cuenta): lo que se fue es su
+ * consumidor. Si algún día vuelve a montarse en una pantalla, vuelve la fila.
  */
 const PANTALLAS_CON_PARED = [
-  { paso: 'm2', lead: () => construyendoId, herramienta: 'Chat de evaluación (Sonnet)' },
   { paso: 'm6', lead: () => construyendoId, herramienta: 'Gem de diseño' },
   { paso: 'mc1', lead: () => construyendoId, herramienta: 'Claude Design' },
   { paso: 'mc2', lead: () => construyendoId, herramienta: 'Claude Design' },

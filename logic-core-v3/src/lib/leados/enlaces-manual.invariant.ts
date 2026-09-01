@@ -166,6 +166,19 @@ const ENLACES: readonly EnlaceDeclarado[] = [
     donde: 'M15Registro — m15-envio.tsx (gate cerrado)',
   },
   {
+    // D15-bis. El descartado dejó de aterrizar en m2 (la pantalla del veredicto,
+    // que además le pedía registrar lo que ya estaba registrado) y aterriza en el
+    // archivo. El veredicto completo quedó en m1, la pantalla fusionada: el
+    // archivo lo nombra y hay que poder llegar. Es 'siempre' y no puede no serlo:
+    // DESCARTADA ∈ STAGES_POST_EVALUACION, así que `completadasDe` marca m1 en
+    // todos los estados donde este enlace se renderiza.
+    desde: ['archivo'],
+    destino: 'm1',
+    renderiza: (input) => input.stage === 'DESCARTADA',
+    garantia: 'siempre',
+    donde: 'ArchivoManual — archivo-manual.tsx (causa descartado)',
+  },
+  {
     // 5.5: la salida del gate de la agenda es marcar «Respondió» en m5.
     desde: ['m16'],
     destino: 'm5',

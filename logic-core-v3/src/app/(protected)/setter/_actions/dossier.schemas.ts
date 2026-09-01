@@ -11,20 +11,22 @@ import { herramientaSinLink } from '@/lib/leados/herramientas'
 export const LeadIdSchema = z.string().trim().min(1, 'Lead inválido')
 
 /**
- * Transcripción de la respuesta del Evaluador externo (captura manual, no se
- * parsea prosa). Score 1–2 descarta en el mismo flujo → exige el motivo.
+ * El veredicto del setter (D15-bis: antes era la transcripción de un chat de
+ * evaluación externo). Score 1–2 descarta en el mismo flujo → exige el motivo.
+ * La FORMA no cambió con la fusión —mismos campos, mismos tipos, misma
+ * validación—; cambió de dónde sale el dato.
  */
 export const EvaluacionInputSchema = z
   .object({
     score: z
-      .number({ message: 'Elegí el score que dio el Evaluador (1 a 5)' })
+      .number({ message: 'Elegí cuánto le ves al negocio (1 a 5)' })
       .int()
       .min(1, 'El score va de 1 a 5')
       .max(5, 'El score va de 1 a 5'),
     veredicto: z.enum(VEREDICTO_VALUES, {
-      message: 'Elegí el veredicto que dio el Evaluador',
+      message: 'Elegí tu veredicto',
     }),
-    razonamiento: z.string().trim().min(1, 'Pegá el razonamiento del Evaluador'),
+    razonamiento: z.string().trim().min(1, 'Escribí por qué le pusiste ese score'),
     motivoDescarte: z
       .string()
       .trim()

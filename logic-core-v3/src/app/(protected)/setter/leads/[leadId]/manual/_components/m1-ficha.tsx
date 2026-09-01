@@ -1,19 +1,38 @@
-import { ExternalLink } from 'lucide-react'
-import type { Ficha } from '@/lib/leados/contracts'
+import type { LeadStatus } from '@prisma/client'
+import { ExternalLink, GraduationCap } from 'lucide-react'
+import type { Evaluacion, Ficha } from '@/lib/leados/contracts'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
+import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
 import { FichaEjemplo } from '@/app/(protected)/setter/_components/ejemplo-ideal'
+import {
+  EvaluacionForm,
+  EvaluacionResumen,
+  type EvaluacionTextos,
+} from '../../_components/evaluacion-form'
 import { FichaForm } from '../../_components/ficha-form'
 import { FichaStep } from '../../_components/ficha-step'
 
 /**
- * M1 — «Cargá los datos del negocio» (4.2, piloto del patrón del Bloque 4).
- * Este módulo solo LLENA los tres slots del layout-tipo (`PantallaManual`);
- * no trae lógica propia:
- *   - contexto: identidad + links del alta, re-servidos (lo que se observa);
- *   - munición: el ejemplo de ficha bien hecha (misma pieza del wizard);
- *   - registro: `FichaForm` compartido (campos, gate con faltantes, autosave y
- *     guardia — el MISMO camino de escritura del wizard) o, congelada, la vista
- *     solo-lectura que ya renderiza `FichaStep`.
+ * M1 — «Mirá el negocio y decidí si vale una demo». La pantalla fusionada.
+ *
+ * D15-bis juntó acá lo que eran dos pantallas del MISMO stage (`FICHA`): cargar
+ * la ficha (m1) y registrar el veredicto (m2). No es un reordenamiento
+ * cosmético: m2 pedía transcribir la salida de un chat de evaluación externo, y
+ * ese chat no tiene link cargado — sus tres campos son obligatorios porque
+ * sostienen el gate, así que el recorrido del setter novato frenaba ahí sin
+ * forma honesta de seguir. Ahora el veredicto es SUYO, y sale de la ficha que
+ * acaba de cargar: por eso las dos mitades tienen que estar a la vista juntas.
+ *
+ * Lo que NO cambió: la etapa `EVALUADA`, la transición `FICHA→EVALUADA`, el
+ * contrato persistido (`EvaluacionSchema`) y el camino de escritura
+ * (`registrarEvaluacion`, con su gate de señal mínima server-side). Cambió de
+ * dónde sale el dato, no su forma ni quién lo guarda.
+ *
+ * Los tres slots del layout-tipo (`PantallaManual`):
+ *   - contexto: identidad + links del alta (lo que se sale a observar);
+ *   - munición: la ficha ejemplar + en qué fijarse para puntuar;
+ *   - registro: la ficha (viva o congelada) y, debajo, el veredicto que cierra
+ *     el paso — en ese orden, porque el segundo se decide mirando el primero.
  */
 
 /** Contexto: lo capturado en el alta que esta tarea necesita para observar. */
@@ -57,27 +76,126 @@ export function M1Contexto({ lead }: { lead: CopyBlockLead }) {
   )
 }
 
-/** Munición: la referencia de cómo se ve una ficha bien hecha. */
+/**
+ * Munición: cómo se ve una ficha bien hecha + en qué fijarse para puntuar.
+ *
+ * La tabla de criterios venía de m2, donde explicaba qué miraba la herramienta
+ * externa antes de llevarle la ficha. Es la misma lista y sigue sirviendo para
+ * lo mismo —mirar antes de decidir—, solo que ahora el que mira es el setter.
+ * Lo que se fue con la fusión es el `ToolGuide` del chat de evaluación: sin
+ * viaje a la herramienta no hay herramienta que presentar.
+ */
 export function M1Municion() {
-  return <FichaEjemplo />
+  return (
+    <div className="space-y-4">
+      <FichaEjemplo />
+      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
+          <GraduationCap size={12} strokeWidth={1.5} />
+          En qué fijarte para puntuar (y por qué pesa)
+        </p>
+        <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+          {GUIA_EVALUACION.criterios.map((criterio) => (
+            <li key={criterio.nombre} className="text-[11px] leading-relaxed text-zinc-500">
+              <span className="font-semibold text-zinc-400">{criterio.nombre}:</span>{' '}
+              {criterio.porQue}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
 }
 
-/** Registro: el form vivo compartido, o la ficha congelada post-evaluación. */
+/**
+ * Labels de prioridad post-2.1/admin-1b para el veredicto: el CALIENTE de la
+ * evaluación solo SUGIERE prioridad (a Franco, que es quien marca el caliente
+ * operativo del lead) — por eso en el manual la opción no dice «Caliente».
+ * Los VALORES que viajan a la action no cambian (`VEREDICTO_VALUES`).
+ */
+const TEXTOS_M1: EvaluacionTextos = {
+  scoreHint: 'Cuánto le ves, de 1 a 5: 1–2 descarta, 3 avanza, 4–5 sugiere prioridad.',
+  veredictoHint: 'Tu decisión, coherente con el score que pusiste.',
+  veredictoLabels: {
+    DESCARTAR: 'Descartar',
+    AVANZAR: 'Avanzar',
+    CALIENTE: 'Avanzar con prioridad',
+  },
+}
+
+/**
+ * Registro: las dos mitades de la pantalla, en el orden en que se hacen.
+ *
+ * Arriba la ficha —el form vivo mientras el veredicto no esté registrado, la
+ * vista congelada después—; abajo el veredicto, que es lo que CIERRA el paso
+ * (registrarlo transiciona `FICHA→EVALUADA` y la posición se re-deriva sola).
+ *
+ * La señal mínima no se chequea acá: el gate vive donde vivía —en
+ * `registrarEvaluacion`, server-side— y el aviso de faltantes lo sigue
+ * mostrando `FichaForm`, ahora a un scroll del veredicto en vez de a una
+ * pantalla de distancia.
+ */
 export function M1Registro({
   leadId,
   lead,
   ficha,
   editable,
+  leadStatus,
+  caliente,
+  evaluacion,
+  descartado,
 }: {
   leadId: string
   lead: CopyBlockLead
   ficha: Ficha | null
   editable: boolean
+  leadStatus: LeadStatus
+  caliente: boolean
+  evaluacion: Evaluacion | null
+  descartado: boolean
 }) {
-  if (!editable) {
-    // Congelada: la MISMA vista solo-lectura del wizard (`FichaStep` con
-    // `editable={false}` es solo el `<details>` con el bloque de la ficha).
-    return <FichaStep leadId={leadId} lead={lead} ficha={ficha} editable={false} />
-  }
-  return <FichaForm leadId={leadId} ficha={ficha} />
+  return (
+    <div className="space-y-5">
+      <section aria-label="La ficha del negocio">
+        {editable ? (
+          <FichaForm leadId={leadId} ficha={ficha} />
+        ) : (
+          // Congelada: la MISMA vista solo-lectura del wizard (`FichaStep` con
+          // `editable={false}` es solo el `<details>` con el bloque de la ficha).
+          <FichaStep leadId={leadId} lead={lead} ficha={ficha} editable={false} />
+        )}
+      </section>
+
+      <section aria-label="Tu veredicto" className="border-t border-white/[0.08] pt-5">
+        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+          {evaluacion ? 'Tu veredicto' : 'Y ahora, tu veredicto'}
+        </p>
+        {evaluacion ? (
+          <div className="mt-2">
+            <EvaluacionResumen
+              evaluacion={evaluacion}
+              descartado={descartado}
+              titulo="Veredicto registrado"
+              veredictoLabels={TEXTOS_M1.veredictoLabels}
+            />
+          </div>
+        ) : (
+          <>
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
+              Con lo que acabás de anotar arriba: cuánto le ves, si avanza o se descarta,
+              y por qué. Nadie lo puntuó antes que vos.
+            </p>
+            <div className="mt-4">
+              <EvaluacionForm
+                leadId={leadId}
+                leadStatus={leadStatus}
+                caliente={caliente}
+                textos={TEXTOS_M1}
+              />
+            </div>
+          </>
+        )}
+      </section>
+    </div>
+  )
 }
