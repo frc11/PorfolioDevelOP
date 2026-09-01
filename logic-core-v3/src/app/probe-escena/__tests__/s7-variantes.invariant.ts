@@ -59,6 +59,33 @@ check(
   arq.over === 0,
   `ocupa entre ${(arq.min * 100).toFixed(0)}% y ${(arq.max * 100).toFixed(0)}% del alto`
 )
+
+/**
+ * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** Las tesis de arriba
+ * corrían sin una sola entrada equivocada: `occupancy()` podía estar devolviendo
+ * cualquier cosa y "nunca desborda" habría salido en verde igual. Se le dan dos
+ * recorridos FABRICADOS —uno pegado al logo y otro lejano— y se corre la MISMA
+ * función.
+ */
+function fabricar(distance: number, heights: readonly number[]): ChoreoKeyframe[] {
+  return heights.map((height, i) => ({
+    name: `f${i}`,
+    at: i / Math.max(1, heights.length - 1),
+    pose: { angleDeg: 0, height, distance, frameX: 0, frameY: 0 },
+  }))
+}
+const pegado = occupancy(fabricar(1, [0, 0]))
+check(
+  'control positivo — `occupancy` VE un recorrido pegado al logo: desborda en todas sus poses',
+  pegado.over === 2 && pegado.min > 1,
+  `${(pegado.min * 100).toFixed(0)}% del alto a distancia 1 — el predicado de "nunca desborda" da falso acá`
+)
+const lejano = occupancy(fabricar(200, [0, 0]))
+check(
+  'control positivo — y VE uno lejano: no desborda nunca, y ocupa dos órdenes menos',
+  lejano.over === 0 && lejano.max * 100 < pegado.min,
+  `${(lejano.max * 100).toFixed(2)}% del alto a distancia 200 contra ${(pegado.min * 100).toFixed(0)}% a distancia 1 — si los dos dieran lo mismo, la función no estaría midiendo la distancia`
+)
 check(
   'arquitectónica: siempre más lejos que la calibrada en su pose más lejana',
   Math.max(...byId.get('arquitectonica')!.keyframes.map((k) => k.pose.distance)) >
@@ -85,22 +112,44 @@ check(
   crossings(byId.get('dramatica')!.keyframes) > crossings(byId.get('calibrada')!.keyframes),
   `${crossings(byId.get('dramatica')!.keyframes)} contra ${crossings(byId.get('calibrada')!.keyframes)}`
 )
+check(
+  'control positivo — `crossings` da CERO en un recorrido que nunca baja del nivel del objeto',
+  crossings(fabricar(9, [1, 2, 3, 4])) === 0 && crossings(fabricar(9, [1, -1, 1, -1])) === 3,
+  'el contador cuenta cambios de signo, no keyframes: un recorrido alto da 0 y uno alternado da 3'
+)
 
 // ── 6 · Notas y separadores, sin huérfanos ──────────────────────────────────
 
 section('Notas y separadores')
 
+/**
+ * El buscador de huérfanos, contra un nombre que NINGUNA variante tiene. Sin
+ * esto, "ninguna nota apunta a un keyframe que no existe" sale en verde también
+ * si el `Set` de nombres estuviera mal armado y aceptara cualquier cosa.
+ */
+const huerfanos = (nombres: ReadonlySet<string>, claves: readonly string[]): string[] =>
+  claves.filter((name) => !nombres.has(name))
+check(
+  'control positivo — el buscador de huérfanos VE una nota que apunta a un keyframe inexistente',
+  CHOREO_VARIANTS.every(
+    (variant) =>
+      huerfanos(new Set(variant.keyframes.map((k) => k.name)), ['este-keyframe-no-existe']).length === 1
+  ),
+  'la misma función que arriba devuelve vacío, corrida contra una clave inventada'
+)
+
+
 for (const variant of CHOREO_VARIANTS) {
   const names = new Set(variant.keyframes.map((keyframe) => keyframe.name))
 
-  const orphanNotes = Object.keys(variant.notes).filter((name) => !names.has(name))
+  const orphanNotes = huerfanos(names, Object.keys(variant.notes))
   check(
     `${variant.label}: ninguna nota apunta a un keyframe que no existe`,
     orphanNotes.length === 0,
     orphanNotes.join(', ')
   )
 
-  const orphanSections = Object.keys(variant.sections).filter((name) => !names.has(name))
+  const orphanSections = huerfanos(names, Object.keys(variant.sections))
   check(
     `${variant.label}: ningún separador apunta a un keyframe que no existe`,
     orphanSections.length === 0,

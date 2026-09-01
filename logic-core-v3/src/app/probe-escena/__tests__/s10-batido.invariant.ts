@@ -109,6 +109,14 @@ function projectedRatio(progress: number, mismatch: number) {
     maxBeatPx = Math.max(maxBeatPx, beat)
   }
 
+  // ⚠️ CONTROLES POSITIVOS (S10): las once afirmaciones de acá cuelgan de `apparentPitch` y ninguna le daba una entrada equivocada.
+  const PASO = (p: number, cells: number, bottom: number, top: number) => apparentPitch(p, MOIRE_NEAR_RADIUS, cells, bottom, top)
+  const P = Array.from({ length: 201 }, (_, i) => i / 200).find((p) => PASO(p, FINE_CELLS, MOIRE_NEAR_BOTTOM, MOIRE_NEAR_TOP) !== null) ?? 0
+  const real = PASO(P, FINE_CELLS, MOIRE_NEAR_BOTTOM, MOIRE_NEAR_TOP)
+  const fino = PASO(P, FINE_CELLS * 100, MOIRE_NEAR_BOTTOM, MOIRE_NEAR_TOP)
+  check('control positivo — `apparentPitch` VE una trama 100× más fina: el paso cae 100 veces', real !== null && fino !== null && Math.abs(fino.h * 100 - real.h) < 1e-9, `${fino?.h.toFixed(4)} px contra ${real?.h.toFixed(2)} px a p=${P} — lee el conteo de celdas`)
+  check('control positivo — y devuelve `null` cuando el rayo no corta la banda', PASO(P, FINE_CELLS, 1e5, 1e5 + 1) === null, 'con la banda a 100.000 de altura no hay intersección: un número ahí sería inventado')
+
   check(
     'el paralaje SUBE el cociente aparente por encima del de textura',
     minRatio > FINE_CELLS / MOIRE_COARSE_CELLS,
@@ -273,6 +281,12 @@ section('Cobertura: el overdraw que este sprint suma')
     worstNear <= 1 && worstFar <= 1,
     `fina/gruesa por pose: ${rows.join(' · ')}`
   )
+  // ⚠️ «Nunca cubren más que el cuadro» es una cota SUPERIOR y el CERO también la cumple:
+  //    sin contrapeso, saldría en verde con el muestreador ciego.
+  const vista0 = { progress: POSES[0][1], cameraAzimuthDeg: POSES[0][2], cameraHeight: POSES[0][3] }
+  const conFondo = sampleFrame(POSES[0][1], vista0, { backdrop: true, mismatch: MOIRE_MISMATCH }, 160, 90)
+  const sinFondo = sampleFrame(POSES[0][1], vista0, { backdrop: false }, 160, 90)
+  check('control positivo — el mismo muestreador da CERO cobertura sin envolvente, y no cero con ella', sinFondo.nearLayer === 0 && sinFondo.farLayer === 0 && conFondo.nearLayer > 0, `sin fondo 0/0 contra ${(conFondo.nearLayer * 100).toFixed(0)}/${(conFondo.farLayer * 100).toFixed(0)}% con él`)
   check(
     'y hay poses donde la envolvente casi no se ve, porque el cuadro es piso',
     Math.min(...POSES.map(([, at, azimuth, height]) =>

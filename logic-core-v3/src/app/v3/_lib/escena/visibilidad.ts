@@ -147,17 +147,34 @@ export const MARGEN_DE_REANUDACION = 0.125
  * escribe `live[canal] = target[canal]` en su primer `useFrame`, o sea la pose
  * exacta del progreso, sin perseguirla. Un cuadro y la pose está al día.
  *
- * **Son dos porque el orden entre dos `rAF` no está garantizado.** El pulso que
- * despacha `'pintado'` vive en un `requestAnimationFrame` del documento
- * (`EscenaDelHome`) y el lazo de r3f vive en el suyo; nada ordena uno respecto
- * del otro. Con un solo cuadro, si el pulso corriera primero, la física se
- * encendería **antes** del cuadro exacto y el latigazo vuelve entero — un fallo
- * intermitente que depende del orden de registro, que es la peor clase. Dos
- * ticks garantizan que al menos un cuadro de r3f corrió con la física apagada
- * sin depender de ese orden.
+ * **Eran dos porque el orden entre los dos `rAF` se creía indeterminado.** El
+ * pulso que despacha `'pintado'` vive en un `requestAnimationFrame` del
+ * documento (`EscenaDelHome`) y el lazo de r3f vive en el suyo. Con un solo
+ * cuadro, si el pulso corriera primero, la física se encendería **antes** del
+ * cuadro exacto y el latigazo vuelve entero — un fallo intermitente que depende
+ * del orden de registro, que es la peor clase. Dos ticks garantizan que al menos
+ * un cuadro de r3f corrió con la física apagada **sin depender de ese orden**.
  *
- * Lo que cuesta: **2 cuadros = 33 ms sin inercia por reanudación**, una vez por
- * pasada del recorrido. No se ve, porque la inercia sólo importa mientras la
+ * ⚠ **SITIO-S10 LEYÓ EL ORDEN, Y NO ESTÁ INDETERMINADO: r3f REGISTRA PRIMERO.**
+ * `__tests__/s10-raf.invariant.ts` deriva la cadena eslabón por eslabón del
+ * código instalado (`@react-three/fiber` 9.6.1), con un control positivo por
+ * eslabón. Los dos registros salen del MISMO commit y en fases distintas: el
+ * `<Canvas>` reconfigura desde un efecto de **layout** sin arreglo de
+ * dependencias → `setFrameloop('always')` escribe el estado →
+ * `rootStore.subscribe(… invalidate …)` hace `requestAnimationFrame(loop)`
+ * (registro 1); recién después corre el efecto **pasivo** que arma el pulso
+ * (registro 2). React vacía layout antes que pasivos y `rAF` despacha en orden
+ * de registro. Y una vez corriendo, `loop()` se re-registra como su primera
+ * sentencia, antes de correr un solo efecto.
+ *
+ * **Por la cadena leída, UNO alcanzaría.** El número NO se movió: lo que se
+ * midió es el orden de REGISTRO, que es una propiedad del código; que el
+ * planificador lo DESPACHE así en una corrida real pide una traza con la pestaña
+ * al frente y está declarado como hueco en §5 de ese invariante. Bajarlo a 1 es
+ * una decisión del humano —vale 16,7 ms de los 33— y §7.34 la deja abierta.
+ *
+ * Lo que cuesta hoy: **2 cuadros = 33 ms sin inercia por reanudación**, una vez
+ * por pasada del recorrido. No se ve, porque la inercia sólo importa mientras la
  * pose se persigue y al reanudar ya está alcanzada.
  */
 export const CUADROS_DE_REANUDACION = 2

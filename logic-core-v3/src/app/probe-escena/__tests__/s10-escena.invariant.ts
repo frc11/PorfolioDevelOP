@@ -61,6 +61,30 @@ check(
   `${INK_WIDTH.toFixed(3)} × ${INK_HEIGHT.toFixed(3)} · con bisel el mesh mide 6,863 × 4,779`
 )
 
+/**
+ * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** El invariante corría
+ * ocho afirmaciones **sin una sola entrada equivocada**. Las dos de acá atacan la
+ * pieza de la que cuelga todo lo demás: la comparación de la caja de tinta con
+ * una tolerancia de 1e-3, que sale en verde igual si el comparador estuviera
+ * devolviendo siempre `true`.
+ */
+type Caja = { readonly x: number; readonly y: number; readonly width: number; readonly height: number }
+const cajaIgual = (a: Caja, b: Caja): boolean =>
+  Math.abs(a.x - b.x) < 1e-3 &&
+  Math.abs(a.y - b.y) < 1e-3 &&
+  Math.abs(a.width - b.width) < 1e-3 &&
+  Math.abs(a.height - b.height) < 1e-3
+check(
+  'control positivo — el mismo comparador VE una caja corrida una milésima por encima de su tolerancia',
+  !cajaIgual(LOGO_INK_VIEWBOX, { ...LOGO_INK_VIEWBOX, width: LOGO_INK_VIEWBOX.width + 0.002 }),
+  'la tolerancia es 1e-3: 0,002 de ancho tiene que hacerlo fallar'
+)
+check(
+  'control positivo — y el relleno de la marca NO da lo mismo medido contra su caja',
+  !(mask.fill > 0.99),
+  `${(mask.fill * 100).toFixed(2)}% — el 100% sería el síntoma de estar midiendo la caja y no la tinta`
+)
+
 // ── 2 · El balance de negro ─────────────────────────────────────────────────
 
 section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
@@ -100,6 +124,29 @@ section('El balance de negro: la escena SÍ queda más clara, y con cuánto')
       worstFloorPose = name
     }
   }
+
+  /**
+   * ⚠️ **EL CONTROL DEL MUESTREADOR, y es el que sostiene la tabla de arriba.** La
+   * afirmación es «con fondo el cuadro es MÁS OSCURO que sin fondo»; si
+   * `sampleFrame` ignorara la opción `backdrop`, las dos ramas darían lo mismo y
+   * el `<` fallaría — pero si devolviera un valor cualquiera y decreciente,
+   * pasaría igual. Se le pide la MISMA rama dos veces: ahí no puede ser menor.
+   */
+  const [, at0, az0, h0] = POSES[0]
+  const vista0 = { progress: at0, cameraAzimuthDeg: az0, cameraHeight: h0 }
+  const conFondoA = sampleFrame(at0, vista0, { backdrop: true, mismatch: MOIRE_MISMATCH, celosia: CELOSIA }, 120, 68)
+  const conFondoB = sampleFrame(at0, vista0, { backdrop: true, mismatch: MOIRE_MISMATCH, celosia: CELOSIA }, 120, 68)
+  const sinFondo = sampleFrame(at0, vista0, { backdrop: false, celosia: CELOSIA }, 120, 68)
+  check(
+    'control positivo — la MISMA rama contra sí misma NO baja el valor medio',
+    !(conFondoA.mean < conFondoB.mean) && conFondoA.mean === conFondoB.mean,
+    `${conFondoA.mean.toFixed(1)} = ${conFondoB.mean.toFixed(1)} — el muestreador es determinista, así que la baja de abajo es del fondo y no del ruido`
+  )
+  check(
+    'control positivo — y las dos ramas SÍ difieren: la opción `backdrop` no se ignora',
+    conFondoA.mean !== sinFondo.mean,
+    `con fondo ${conFondoA.mean.toFixed(1)} contra ${sinFondo.mean.toFixed(1)} sin él, en la misma pose`
+  )
 
   check(
     'la envolvente baja el valor medio del cuadro en TODAS las poses',
@@ -171,7 +218,14 @@ section('La sombra se alarga, que es la otra mitad del tiempo pasando')
     sampleLightArc(p, arc)
     lengths.push((top - floor) / Math.tan(arc.elevationDeg * RAD))
   }
-  const grows = lengths.every((value, i) => i === 0 || value >= lengths[i - 1])
+  const crece = (xs: readonly number[]): boolean =>
+    xs.every((value, i) => i === 0 || value >= xs[i - 1])
+  const grows = crece(lengths)
+  check(
+    'control positivo — el detector de crecimiento VE la MISMA lista dada vuelta',
+    !crece([...lengths].reverse()),
+    'la sombra recorrida al revés se acorta, y eso es exactamente lo que tiene que ver'
+  )
   check(
     'la sombra del borde superior del logo crece de punta a punta del recorrido',
     grows && lengths[lengths.length - 1] > lengths[0] * 3,

@@ -15,31 +15,18 @@
  * largos**, con la forma de la regla 13 — ver `s8-largos.ts`.
  */
 
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
-
 import { CURSOR_PROPIO_EN_EL_HOME, IMPORT_DEL_CHROME } from '../../_chrome/contrato'
 import { IMPORT_DEL_INTRO, MODULO_DEL_INTRO } from '../../_intro/contrato'
 import { IMPORT_DE_LA_ESCENA, MODULO_DE_LA_ESCENA } from '../escena/contrato'
 import { MARCA_ESCENA } from '../marcaEscena'
 import { MARCA_ESCENARIO } from '../marcaEscenario'
-import {
-  ENCHUFES,
-  FRENTES,
-  PUEDEN_IMPORTAR_LA_MARCA,
-  RAIZ,
-  SCRIPTS_DECLARADOS,
-  archivosSinRegistrar,
-  entregablesQueFaltan,
-  especificadoresDeImport,
-  existe,
-  leer,
-  recorrer,
-} from './s8-padron'
+// prettier-ignore
+import { ENCHUFES, FRENTES, PUEDEN_IMPORTAR_LA_MARCA, SCRIPTS_DECLARADOS, archivosSinRegistrar, entregablesQueFaltan, existe, leer } from './s8-padron'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { invariantesCableados } from './s4-suites'
-import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, medirLargos, propiosQuePasan, repartir, type Largo } from './s8-largos'
+// prettier-ignore
+import { TODO_SRC, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
+import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, propiosQuePasan, repartir, type Largo } from './s8-largos'
 
 const RUTAS_DEL_INTRO = ['/', '/v3']
 
@@ -103,21 +90,11 @@ afirmar(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · LA MARCA DE LA ESCENA la importa UN solo archivo de la aplicación')
 
-/**
- * ⚠ **Se miran los ESPECIFICADORES de import, no el texto del archivo**, y el
- * primer intento salió verde por vacío por no hacerlo: borrar comentarios y
- * cadenas es correcto para un IDENTIFICADOR (§7.25), pero **el especificador de
- * un import ES una cadena** y borrarlas borra justo lo que hay que encontrar.
- * Lo destapó su propio control positivo. El detector vive en `s8-padron.ts`,
- * afuera de acá, porque se prueba corriendo la MISMA función contra una rota.
- */
-const especificadores = especificadoresDeImport
-
-const TODO_SRC = recorrer('src').filter((a) => /\.tsx?$/.test(a))
+/** El detector mira los ESPECIFICADORES de import y no el texto del archivo. El
+ *  porqué —y el verde por vacío que lo obligó— está en `s8-montaje-soporte.ts`. */
 afirmar(TODO_SRC.length > 100, `el barrido mira ${TODO_SRC.length} archivos de \`src/\``)
 
-const veLaMarca = (fuente: string): boolean => especificadores(fuente).some((m) => /marcaEscena$/.test(m))
-const importanLaMarca = TODO_SRC.filter((a) => veLaMarca(leer(a)))
+const conLaMarca = importanLaMarca(TODO_SRC)
 
 /** La lista y su porqué viven en `s8-padron.ts`, con el contrato de entrega. */
 afirmar(
@@ -125,14 +102,14 @@ afirmar(
   'la lista de permitidos incluye al módulo perezoso: es el que la tiene que llevar',
 )
 afirmarIgual(
-  importanLaMarca.filter((a) => !PUEDEN_IMPORTAR_LA_MARCA.includes(a)),
+  conLaMarca.filter((a) => !PUEDEN_IMPORTAR_LA_MARCA.includes(a)),
   [],
   'ningún módulo de la aplicación importa `marcaEscena`: sólo el perezoso y los instrumentos declarados',
 )
 afirmar(
-  importanLaMarca.length > 0,
+  conLaMarca.length > 0,
   '  y el contrapeso: el barrido SÍ encontró importadores — no es cero por ceguera',
-  importanLaMarca.join(' · '),
+  conLaMarca.join(' · '),
 )
 
 for (const [que, fuente] of [
@@ -220,28 +197,19 @@ console.log(`  archivos en disco no declarados en el padrón: ${deMas.length}`)
 for (const a of deMas) console.log(`    · ${a}`)
 console.log('  (no es falla: un frente puede partir un archivo que pasó las 300 líneas)')
 
-/**
- * Lo que SÍ es falla: un `.invariant` suelto sin script (regla 14). ⚠ **La
- * pregunta se le hace a `package.json`, no al padrón** — preguntársela al padrón
- * de S8 puso esto en rojo cuando S9 sumó tres invariantes CON script acá.
- */
-const cableados = invariantesCableados()
-const sueltos = FRENTES.flatMap((f) => recorrer(f.carpeta)).filter(
-  (a) => /\.invariant\.tsx?$/.test(a) && !cableados.has(a),
+/** Lo que SÍ es falla: un `.invariant` suelto sin script (regla 14). A quién se
+ *  le hace la pregunta —y por qué no al padrón— está en el soporte. */
+afirmarIgual(invariantesSueltos(), [], 'ningún `.invariant` suelto sin script en las carpetas de los frentes')
+controlPositivo(
+  'el buscador de sueltos NO da vacío cuando ningún invariante está cableado',
+  new Set<string>(),
+  (c: ReadonlySet<string>) => invariantesSueltos(c).length === 0,
 )
-afirmarIgual(sueltos, [], 'ningún `.invariant` suelto sin script en las carpetas de los frentes')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · Los scripts declarados existen y apuntan a su archivo')
 
-const paquete: unknown = JSON.parse(readFileSync(path.join(RAIZ, 'package.json'), 'utf8'))
-const scripts: Record<string, string> = {}
-if (typeof paquete === 'object' && paquete !== null) {
-  const crudos = (paquete as { scripts?: unknown }).scripts
-  if (typeof crudos === 'object' && crudos !== null) {
-    for (const [k, v] of Object.entries(crudos)) if (typeof v === 'string') scripts[k] = v
-  }
-}
+const scripts = scriptsDelPaquete()
 
 for (const [script, archivo] of Object.entries(SCRIPTS_DECLARADOS)) {
   afirmar(scripts[script] === `npx tsx ${archivo}`, `\`${script}\` → \`${archivo}\``, scripts[script] ?? '(no existe)')
@@ -260,14 +228,9 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · Los largos — lo propio se afirma, lo heredado se publica y se vigila')
 
-/** Enchufes + entregables + los módulos de apoyo que los frentes dejaron sin
- *  declarar: la cobertura es del sprint entero, que es lo que §7.17 pedía. */
-const medidos = medirLargos(
-  [...ENCHUFES, ...FRENTES.flatMap((f) => f.entregables), ...archivosSinRegistrar()],
-  existe,
-  leer,
-)
-const reparto = repartir(medidos)
+/** Enchufes + entregables + los módulos de apoyo sin declarar: la cobertura es
+ *  del sprint entero, que es lo que §7.17 pedía. Se compone en el soporte. */
+const { medidos, reparto } = largosDelSprint()
 
 afirmar(medidos.length > 0, `el medidor miró ${medidos.length} archivos del sprint`)
 afirmarIgual(

@@ -90,11 +90,22 @@ const POINT_LIMIT = 1024
       BOKEH_BOB_PERIOD_S.length === BOKEH_SHELLS.length - 1,
     `${DUST_SHELLS.length - 1} conchas de polvo · ${BOKEH_SHELLS.length - 1} de bokeh`
   )
+  /**
+   * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** Corría once
+   * afirmaciones sin una sola entrada equivocada. El detector de deriva
+   * diferencial va primero con nombre, para poder darle una lista que la viola.
+   */
+  const decreceHaciaAfuera = (spins: readonly number[]): boolean =>
+    spins.every((spin, i) => i === 0 || Math.abs(spin) < Math.abs(spins[i - 1]))
   check(
     'la rotación es DIFERENCIAL: la concha interior gira más rápido',
-    DUST_SPIN_DEG_S.every((spin, i) => i === 0 || Math.abs(spin) < Math.abs(DUST_SPIN_DEG_S[i - 1])) &&
-      BOKEH_SPIN_DEG_S.every((spin, i) => i === 0 || Math.abs(spin) < Math.abs(BOKEH_SPIN_DEG_S[i - 1])),
+    decreceHaciaAfuera(DUST_SPIN_DEG_S) && decreceHaciaAfuera(BOKEH_SPIN_DEG_S),
     `polvo ${DUST_SPIN_DEG_S.join(' / ')} °/s · bokeh ${BOKEH_SPIN_DEG_S.join(' / ')} °/s`
+  )
+  check(
+    'control positivo — el mismo detector VE la MISMA lista dada vuelta',
+    !decreceHaciaAfuera([...DUST_SPIN_DEG_S].reverse()),
+    'una deriva que se acelera hacia afuera no es paralaje: es la escena girando entera'
   )
   check(
     'los dos campos giran en sentidos opuestos, como desde S6',
@@ -154,6 +165,16 @@ const POINT_LIMIT = 1024
     }
   }
   const worstPixels = pointPixels(BOKEH_SIZE, closest)
+  /** La MISMA cuenta a la separación que la propia afirmación publica como
+   *  umbral: ahí el recorte SÍ tiene que dispararse. Sin esto, «no llega al
+   *  recorte» pasaría también con un `pointPixels` que devolviera cualquier
+   *  número chico. */
+  const alBorde = (BOKEH_SIZE * DPR * (CSS_HEIGHT / 2)) / POINT_LIMIT
+  check(
+    'control positivo — la misma cuenta SÍ llega al recorte a la distancia que ella misma publica',
+    !(pointPixels(BOKEH_SIZE, alBorde / 2) < POINT_LIMIT),
+    `a ${(alBorde / 2).toFixed(3)} de la lente pide ${pointPixels(BOKEH_SIZE, alBorde / 2).toFixed(0)} px, contra un recorte de ${POINT_LIMIT}`
+  )
   check(
     'y por eso el `gl_PointSize` del bokeh NO puede llegar al recorte del driver',
     worstPixels < POINT_LIMIT,
@@ -217,6 +238,20 @@ const POINT_LIMIT = 1024
     PARTICLE_SIZE
   )
   const bokehFrame = inFrame(bokeh.positions, BOKEH_SHELLS, BOKEH_COUNT, BOKEH_COUNT, BOKEH_SIZE)
+  /**
+   * ⚠️ **EL CONTROL QUE SOSTIENE LA CIFRA QUE HEREDA EL PRELOADER.** «Más de 900
+   * partículas en cuadro» sale en verde también si `inFrame` contara todo lo que
+   * se le pasa sin mirar el cono de visión. Se le da el MISMO campo con las
+   * posiciones puestas MUY atrás de la cámara: ahí no puede quedar ninguna.
+   */
+  const detras = new Float32Array(dust.positions.length)
+  for (let i = 0; i < detras.length; i += 3) detras[i + 2] = 5e4
+  const fueraDeCuadro = inFrame(detras, DUST_SHELLS, PARTICLES_MAX, PROBE_DEFAULTS.particleCount, PARTICLE_SIZE)
+  check(
+    'control positivo — el MISMO contador da CERO con el campo entero fuera del cono de visión',
+    fueraDeCuadro.count === 0 && fueraDeCuadro.overdraw === 0,
+    `${fueraDeCuadro.count} en cuadro con todo a z=50000, contra ${dustFrame.count} con el campo real`
+  )
   check(
     'en la pose INICIAL el campo está poblado — el número que hereda el preloader',
     dustFrame.count + bokehFrame.count > 900,
@@ -237,6 +272,11 @@ const POINT_LIMIT = 1024
       return true
     })(),
     `cortes en ${DUST_SHELLS.slice(1, -1).map((s) => dust.radii[Math.round(s * PARTICLES_MAX)].toFixed(1)).join(' y ')} de radio`
+  )
+  check(
+    'control positivo — el MISMO umbral de 100 puntos NO separa un color de sí mismo',
+    !(shadeUnlit(PARTICLE_NEAR_COLOR) < shadeUnlit(PARTICLE_NEAR_COLOR) - 100),
+    'sin esto, "netamente más oscura" saldría en verde también con `shadeUnlit` devolviendo cualquier cosa'
   )
   check(
     'la mota cercana es netamente más oscura que la lejana',

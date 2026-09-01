@@ -26,7 +26,9 @@
  * piso— y el porqué entero está en `../presupuesto.ts`.
  */
 import { ARBOL_DEL_LAYOUT, LINEA_DE_BASE } from '../contrato'
-import { CHUNK_DE_SENTRY, TECHO_PROPIO_GZIP_KIB, publicarElTecho } from '../presupuesto'
+import { TECHO_PROPIO_GZIP_KIB, descontarElSdk, publicarElTecho } from '../presupuesto'
+import { HUELLA_DEL_SDK } from '../puertas-de-sentry'
+import { chunkConHuella } from './grafo-de-chunks'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../../../app/v3/_lib/__tests__/afirmar'
 import {
   DIST,
@@ -121,16 +123,11 @@ console.log(
 /** El chunk más pesado del piso lleva el SDK de navegador de Sentry, que entra
  *  por `src/instrumentation-client.ts` y no por un componente. Se NOMBRA y se
  *  pesa entero: separar su parte del runtime de Next pediría otro build. */
-const HUELLA_DE_SENTRY = 'browserTracingIntegration'
-const conSentry = piso.filter((f) => contiene(f, HUELLA_DE_SENTRY))
+const conSentry = piso.filter((f) => contiene(f, HUELLA_DEL_SDK))
 for (const f of conSentry) console.log(`  ⚠ \`${f}\` lleva el SDK de navegador de Sentry — ${kib(pesar([f]).gzip)} gzip del piso.`)
 afirmar(conSentry.length > 0, 'el piso lleva el SDK de Sentry: está medido, no supuesto', conSentry.join(' · '))
 
-controlPositivo(
-  'el buscador de huellas no encuentra una que no existe en esos chunks',
-  'esta-huella-no-existe-en-ningun-chunk-del-piso',
-  (h: string) => piso.some((f) => contiene(f, h)),
-)
+controlPositivo('el buscador de huellas no encuentra una que no existe en esos chunks', 'esta-huella-no-existe-en-ningun-chunk-del-piso', (h: string) => piso.some((f) => contiene(f, h)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · LA TESIS — el grupo de la PÁGINA DEL HOME no viaja donde no se la renderiza')
@@ -259,7 +256,10 @@ titulo('6 · EL TECHO — cuánto falta, sin maquillar')
  *  inicial ENTERA no lo cumple nadie: el piso ya se come 248,3. Forma de la
  *  regla 13 — se afirma lo que está SOBRE el piso. El porqué, en `presupuesto.ts`. */
 const sobreElPiso = pesar(inicial.filter((f) => !piso.includes(f)))
-const sinSentry = pesar(inicial.filter((f) => !f.includes(CHUNK_DE_SENTRY)))
+/** ⚠️ POR CONTENIDO Y NO POR NOMBRE (S10): acá iba el prefijo `'7149'` a mano — ver `presupuesto.ts`. */
+const sinElSdk = descontarElSdk(inicial, chunkConHuella(DIST, inicial, HUELLA_DEL_SDK))
+afirmar(sinElSdk !== null, `la cifra «sin Sentry» descuenta el chunk que lleva \`${HUELLA_DEL_SDK}\` — identificado por CONTENIDO, no por su nombre`)
+controlPositivo('sin portador, el descuento NO se vuelve el total entero en silencio', null, (c: string | null) => descontarElSdk(inicial, c) !== null)
 
 publicarElTecho({
   totalGzip: total.gzip,
@@ -267,7 +267,7 @@ publicarElTecho({
   pisoGzip: pesoPiso.gzip,
   archivosDelPiso: piso.length,
   sobreElPisoGzip: sobreElPiso.gzip,
-  sinSentryGzip: sinSentry.gzip,
+  sinSentryGzip: sinElSdk === null ? null : pesar(sinElSdk).gzip,
   faltabaEnLaBase: LINEA_DE_BASE.v3.gzipKiB - TECHO_PROPIO_GZIP_KIB,
 })
 

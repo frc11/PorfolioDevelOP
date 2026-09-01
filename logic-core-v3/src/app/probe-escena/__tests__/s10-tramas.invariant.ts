@@ -63,6 +63,28 @@ section('Las dos celdas: retícula, punto y mosaico que cierra')
     alphaAt(grid, 0, middle) > 0.9 && alphaAt(grid, middle, middle) < 0.5,
     `${alphaAt(grid, 0, middle).toFixed(2)} en el borde contra ${alphaAt(grid, middle, middle).toFixed(2)} en el centro`
   )
+
+  /**
+   * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** Corría diecisiete
+   * afirmaciones sin una sola entrada equivocada. Éste es el que sostiene a los
+   * cinco de la celda: se genera la MISMA trama con `duty = 0`, o sea sin línea.
+   * Si el sondeo del borde siguiera dando 0,9 ahí, no estaría leyendo la textura.
+   */
+  const sinLinea = createGridCellData(size, 0, MOIRE_BASE_ALPHA)
+  check(
+    'control positivo — el mismo sondeo NO ve línea en una celda generada con duty 0',
+    !(alphaAt(sinLinea, 0, middle) > 0.9),
+    `${alphaAt(sinLinea, 0, middle).toFixed(2)} en el borde sin línea contra ${alphaAt(grid, 0, middle).toFixed(2)} con ella`
+  )
+  /** `stroke` mide contra `min(u, 1−u)`, o sea el semiancho: la celda entera se
+   *  llena recién con duty > 1. Con 2 el centro sube y el predicado del centro
+   *  —`< 0,5`— tiene que dejar de cumplirse. */
+  const llena = createGridCellData(size, 2, MOIRE_BASE_ALPHA)
+  check(
+    'control positivo — y con duty 2 el CENTRO deja de estar por debajo del umbral',
+    !(alphaAt(llena, middle, middle) < 0.5),
+    `${alphaAt(llena, middle, middle).toFixed(2)} en el centro contra ${alphaAt(grid, middle, middle).toFixed(2)} con el duty real — el generador lee su argumento`
+  )
   check(
     'y la horizontal también: la retícula es la UNIÓN de las dos familias',
     alphaAt(grid, middle, 0) > 0.9,
@@ -122,12 +144,21 @@ section('La envolvente de banda va en el ALFA DE VÉRTICE')
   )
   check('y a uno en el medio', Math.abs(bandEnvelope(0.5, MOIRE_FADE) - 1) < 1e-9)
 
-  let monotone = true
-  for (let i = 0; i < 100; i += 1) {
-    const v = i / 200
-    if (bandEnvelope(v + 0.005, MOIRE_FADE) < bandEnvelope(v, MOIRE_FADE) - 1e-9) monotone = false
+  /** El detector de monotonía, con la muestra por parámetro: es lo que permite
+   *  darle la MISMA rampa recorrida al revés, que sí baja. */
+  const sube = (muestra: (v: number) => number): boolean => {
+    for (let i = 0; i < 100; i += 1) {
+      const v = i / 200
+      if (muestra(v + 0.005) < muestra(v) - 1e-9) return false
+    }
+    return true
   }
-  check('sube sin codos en la rampa de abajo', monotone)
+  check('sube sin codos en la rampa de abajo', sube((v) => bandEnvelope(v, MOIRE_FADE)))
+  check(
+    'control positivo — el mismo detector VE la MISMA rampa recorrida al revés',
+    !sube((v) => bandEnvelope(0.5 - v, MOIRE_FADE)),
+    'sin esto, "sube sin codos" saldría en verde también con una envolvente constante rota'
+  )
 
   /**
    * ⚠️ **Y tiene que ser de la geometría, no de la textura.** La capa gruesa
@@ -192,6 +223,21 @@ section('La deriva y el orden de dibujo')
       MOIRE_NEAR_ORDER < 0 &&
       PARTICLE_R_MAX < MOIRE_NEAR_RADIUS,
     `${MOIRE_FAR_ORDER} → ${MOIRE_NEAR_ORDER} → 0 (partículas, por distancia, con el campo hasta ${PARTICLE_R_MAX} contra la capa fina en ${MOIRE_NEAR_RADIUS})`
+  )
+  check(
+    'control positivo — el mismo orden de dibujo da falso con las dos capas intercambiadas',
+    !(MOIRE_NEAR_ORDER < MOIRE_FAR_ORDER && MOIRE_FAR_ORDER < 0 && PARTICLE_R_MAX < MOIRE_NEAR_RADIUS),
+    `${MOIRE_FAR_ORDER} y ${MOIRE_NEAR_ORDER} no son intercambiables: la gruesa tiene que dibujarse primero`
+  )
+
+  /** La MISMA cuenta de error de cuerda con un cilindro de ocho facetas: ahí la
+   *  poligonalidad tiene que verse, o la fórmula no está mirando `MOIRE_SEGMENTS`. */
+  const errorCon = (segmentos: number): number =>
+    ((MOIRE_FAR_RADIUS * (1 - Math.cos(Math.PI / segmentos))) / 60) * (PX_V / (2 * TAN_HALF_V))
+  check(
+    'control positivo — la misma cuenta pasa de 1,5 px con un cilindro de ocho facetas',
+    !(errorCon(8) < 1.5),
+    `${errorCon(8).toFixed(2)} px con 8 facetas contra ${errorCon(MOIRE_SEGMENTS).toFixed(2)} con las ${MOIRE_SEGMENTS} reales`
   )
   check(
     'la faceta del cilindro es sub-píxel: la retícula no se ve poligonal',

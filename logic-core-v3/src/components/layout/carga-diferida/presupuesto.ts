@@ -55,11 +55,33 @@ export const PISO_DEL_FRAMEWORK = {
 } as const
 
 /**
- * El chunk que lleva el SDK de navegador de Sentry, por su prefijo numérico.
- * Es el único lugar donde ese número está escrito, y está acá y no adentro de un
- * `filter` para que se pueda ver de un vistazo qué se está descontando.
+ * ⚠️ **EL CHUNK DEL SDK SE IDENTIFICA POR CONTENIDO, NO POR NOMBRE — SITIO-S10.**
+ *
+ * Acá vivía `CHUNK_DE_SENTRY = '7149'`, el prefijo del chunk escrito a mano, y
+ * `s8-peso.invariant.ts` lo usaba con un `includes()` para publicar «sin Sentry
+ * `/v3` mediría X». **Era una fragilidad reportada en §7.30 y no arreglada:** el
+ * nombre de un chunk lo elige webpack y cambia con el grafo, así que el día que
+ * renumerara, el filtro no habría sacado NADA, la cifra publicada habría pasado a
+ * ser el total entero — más alta, o sea peor— y **no habría habido un solo rojo**.
+ * Un descuento que falla hacia el lado que no se nota es peor que no tenerlo.
+ *
+ * El reemplazo identifica el portador por su HUELLA (`browserTracingIntegration`,
+ * en `puertas-de-sentry.ts`), que es la misma forma que `s9-sentry.invariant.ts`
+ * ya usaba. Y el modo de fallar se da vuelta: **cuando no hay portador, esto
+ * devuelve `null` y no la lista entera**, así que el invariante se pone en rojo
+ * en vez de publicar el total disfrazado de descuento.
+ *
+ * Las dos entradas que devuelven `null`, y las dos son la misma clase de mentira:
+ * ningún chunk lleva la huella, o el portador que se pasó no está en el conjunto
+ * que se está descontando (un chunk de otra ruta, o un nombre inventado).
  */
-export const CHUNK_DE_SENTRY = '7149'
+export function descontarElSdk(
+  archivos: readonly string[],
+  portador: string | null,
+): readonly string[] | null {
+  if (portador === null || !archivos.includes(portador)) return null
+  return archivos.filter((f) => f !== portador)
+}
 
 export interface CifrasDelTecho {
   readonly totalGzip: number
@@ -67,7 +89,8 @@ export interface CifrasDelTecho {
   readonly pisoGzip: number
   readonly archivosDelPiso: number
   readonly sobreElPisoGzip: number
-  readonly sinSentryGzip: number
+  /** `null` = no se pudo descontar por huella. Ver `descontarElSdk`. */
+  readonly sinSentryGzip: number | null
   readonly faltabaEnLaBase: number
 }
 
@@ -96,9 +119,12 @@ export function publicarElTecho(c: CifrasDelTecho): void {
       'archivos — el chrome del layout raíz más lo de /v3',
   )
   console.log(
-    `  ⚠️ SIN el chunk del SDK de Sentry, /v3 mediría ${kib(c.sinSentryGzip)} gzip: ABAJO de los ` +
-      `${TECHO_PROPIO_GZIP_KIB} del techo original. Entra por \`instrumentation-client.ts\`, que no es de ` +
-      '/v3 ni del layout: es el único lever de este tamaño y vive fuera de este sprint.',
+    c.sinSentryGzip === null
+      ? '  ⚠️ NO SE PUDO DESCONTAR el chunk del SDK: ningún archivo de la carga inicial lleva la huella. ' +
+          'La cifra «sin Sentry» NO se publica — publicarla sería publicar el total entero con otro nombre.'
+      : `  ⚠️ SIN el chunk del SDK de Sentry, /v3 mediría ${kib(c.sinSentryGzip)} gzip: ABAJO de los ` +
+          `${TECHO_PROPIO_GZIP_KIB} del techo original. Entra por \`instrumentation-client.ts\`, que no es de ` +
+          '/v3 ni del layout: es el único lever de este tamaño y vive fuera de este sprint.',
   )
   console.log(
     `  contra la carga inicial ENTERA, el techo original de ${TECHO_PROPIO_GZIP_KIB} sigue sin alcanzarse: ` +

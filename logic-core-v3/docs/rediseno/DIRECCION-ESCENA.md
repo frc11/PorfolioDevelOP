@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28), y en SITIO-S9 (2026-08-31) con **el mapeo POR ANCLAJE construido** (§7.2, que pasa de decidido-sin-construir a construido), **el cierre de la tinta del diferencial con su número** (§7.29: 6,07:1 en p=0,750), **la escena que deja de renderizar cuando ningún panel transparente está en cuadro** (§7.34), **la decisión medida de NO diferir el SDK de Sentry** (§7.30) y tres pendientes con su medición (§7.36 el acoplamiento de tipo), y en su parada con **la regla de las instrucciones que se contradicen** (§7.37), el cierre de §7.4 y de §7.35 y las dos correcciones a §7.30. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28), y en SITIO-S9 (2026-08-31) con **el mapeo POR ANCLAJE construido** (§7.2, que pasa de decidido-sin-construir a construido), **el cierre de la tinta del diferencial con su número** (§7.29: 6,07:1 en p=0,750), **la escena que deja de renderizar cuando ningún panel transparente está en cuadro** (§7.34), **la decisión medida de NO diferir el SDK de Sentry** (§7.30) y tres pendientes con su medición (§7.36 el acoplamiento de tipo), y en su parada con **la regla de las instrucciones que se contradicen** (§7.37), el cierre de §7.4 y de §7.35 y las dos correcciones a §7.30. y en SITIO-S10 (2026-08-31) con **el sitio de abajo de 1025 mirado por primera vez** (§7.38), **el inventario de accesibilidad sobre el home compuesto** (§7.39), **la composición del logo contra el texto con su contraste medido** (§7.40, que corrige el alcance del cierre de §7.29), **los 44 controles positivos que `s7e` y `s10e` no tenían** (§7.33, cerrado), **el chunk de Sentry identificado por contenido** (§7.30), **el orden de los dos `rAF` medido y contrario a lo que §7.34 declaraba**, y **el costo real de §7.36**, que la propia §7.36 publicaba incompleto; y en su parada con **el ACOTAMIENTO de §7.29** —cerrado contra el fondo, no contra el cuadro—, **el banco compartido probándose a sí mismo** (§7.41) y **las nueve cifras que no se reproducen, incluida una de la propia instrucción** (§7.42). Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -428,6 +428,22 @@ Es una condición, no un detalle: un menú que se mueve sin regla es un menú qu
 >
 > Con `4096` murió en la misma etapa, y con `6144` murió el primer intento y terminó el segundo. **Eso es lo que dice que el heap no era la variable**: el mismo valor da los dos resultados.
 >
+> ### La cuarta: UN BUILD INTERRUMPIDO ROMPE `tsc`, NO EL BUILD (SITIO-S10, 2026-08-31)
+>
+> **La firma es la peor posible: `npm run build` cierra en verde y `npm run verificar` se pone en rojo en el PASO 2**, con un error que apunta a un archivo que nadie escribió:
+>
+> ```
+> .next/dev/types/validator.ts(396,1): error TS1128: Declaration or statement expected.
+> ```
+>
+> **La causa no es el build: es un build ANTERIOR que murió a mitad de una escritura.** `tsconfig.json` incluye `.next/dev/types/**/*.ts`, y ese archivo lo genera Next. Al morir el proceso, el contenido nuevo —más corto— quedó escrito ENCIMA del viejo sin truncarlo, así que el archivo tiene 1435 líneas donde el contenido válido termina en la 394 y después hay una cola de basura (`eck` suelto, el final de un `__Check` anterior). **Un build en verde no lo arregla**, porque `next build` escribe `.next/types/` y no toca `.next/dev/types/`.
+>
+> ⚠️ **Es la misma clase de defecto que `CLAUDE.md` ya documenta con Tailwind** —*«un error de build que apunta a un archivo verificablemente correcto es señal de contaminación del scan, no del archivo»*— en su variante de `tsc`: lo que está contaminado es la lista de `include`, no el código.
+>
+> **El arreglo, y por qué NO es borrar `.next`:** se borra **sólo `.next/dev/`**, que es generado, está en `.gitignore` y **ningún invariante lo lee** (verificado con `grep`: `DIST` apunta a `.next` y los que pesan leen `build-manifest.json` y los chunks). Borrar `.next` entero dejaría a las seis suites que leen el build sin base y las pondría en `noCorre`, que es cambiar un rojo por un verde parcial sin haber arreglado nada.
+>
+> **Y la causa de la interrupción, para el próximo:** el build tarda 6–9 minutos y el techo de tiempo del harness que lo corría estaba en 10. **No fue memoria** —`node` en 0 y la comprometida en 44,9 GB de 55,9 al momento de morir—, así que ninguna de las dos variables de este bloque tenía nada que ver. La segunda corrida, con los mismos valores, cerró en verde.
+
 > ### El diagnóstico original, que sigue valiendo
 >
 > El problema no es sólo el heap de un proceso: es la máquina. **13,9 GB de RAM y 16 CPUs**, y Next lanza `os.cpus().length - 1` = **15 workers** para "Collecting page data". Quince procesos con 8 GB de techo cada uno no entran en 13,9 GB.
@@ -499,8 +515,8 @@ Está acá para que nadie lo dé por resuelto.
     ⚠️ **Y la COLA DEL DIFERENCIAL tampoco abre este ítem, aunque lo parezca.** La ventana en la que `por-que-develop` se ve termina en p=1,000, donde el peor píxel da 2,34:1. **No es del mapeo y no es de la composición: es de la geometría.** Es la anteúltima sección y la última mide una pantalla, así que su borde inferior sale del cuadro exactamente en el final del scroll — **con cualquier mapeo monótono que complete el recorrido su ventana termina en p=1**. `s8-tinta` §5 lo afirma como tal. Y cuando la tinta cruza AA —pantalla 12,513 de 13— el diferencial ya ocupa sólo el **48,7% del cuadro**: el resto es el Cierre, que es opaco.
 
     **Un criterio que ningún mapeo puede cumplir no distingue un mapeo de otro.** Por eso la cola se publica con su dueño y no se afirma, y **no hace falta un sprint para componer nada.** La decisión se tomó en la parada de SITIO-S9.
-5. **Mobile.** No se midió un solo teléfono ni un solo frame time. Toda la contabilidad publicada es estática. Lo primero que se apaga si no rinde, en orden: la capa gruesa de la envolvente, `BOKEH_COUNT`, el slider de partículas, `SHADOW_RADIUS`, el washout.
-6. **El encuadre por relación de aspecto.** El recorrido está compuesto en horizontal; en vertical el logo no entra igual y falta decidir si se reencuadra o se recompone.
+5. **Mobile.** ⚠️ **Sigue sin medirse un solo teléfono ni un solo frame time** —toda la contabilidad publicada es estática— pero **SITIO-S10 miró por primera vez el sitio que vive abajo de 1025**, y encontró tres defectos de composición: ver **§7.38**. Lo primero que se apaga si la ESCENA no rinde, en orden: la capa gruesa de la envolvente, `BOKEH_COUNT`, el slider de partículas, `SHADOW_RADIUS`, el washout — y conviene recordar que abajo de 1025 nada de eso se monta, así que lo que hay que mirar ahí no es la escena sino el DOM.
+6. **El encuadre por relación de aspecto.** El recorrido está compuesto en horizontal; en vertical el logo no entra igual y falta decidir si se reencuadra o se recompone. ⚠️ **SITIO-S10 le puso el número que faltaba, y es peor que «no entra igual»:** `travelX` tiene un **codo en cero** en aspecto **1,213 (harness) / 1,162 (rig)**, así que a **1025×900 el `frameX: 1` de la pose `demos` no corre el logo ni un píxel** — la perilla de composición lateral de la pose más íntima del recorrido está **inerte** en el cuadro más alto. Ver §7.40.
 7. **Qué contenido va en cada una de las ocho pantallas**, más allá de los nombres de los tramos.
 8. **La temperatura del cierre**: 7700 K (frío, lo que está hoy) contra los 2000 K (ámbar) que tenía la calibración a mano. Es un número y está argumentado en los dos sentidos.
 9. ~~**EL PISO.**~~ **RESUELTO en S11** — ver §2.7 y §4.1. El pendiente de S10 no era de fondo sino de **exposición**: el papel a luz plena da 249,4 y su propia sombra 236,9, o sea doce puntos y medio de rango. Lo abrió la celosía tapando el cielo además del sol, y con eso hero y Números bajaron a 201 y 213 con un rango de 29,6 puntos. **Lo que queda abierto de esto son DOS perillas**, las dos de calibrar mirando: `CELOSIA_BAR` (0,29), que sube el contraste de las bandas y la oscuridad de la sala a costa de aflojar el batido; y desde S12 el **radio angular del sol** (0,266°, rango 0 … 1,5°), que ablanda el borde a costa de devolver parte de esos 29,6 puntos. Medido: de 0 a 0,5° no se pierde nada; desde 0,75° empieza a caer la portadora del piso. En **0** las dos apagan lo suyo y devuelven el estado anterior, que es el control.
@@ -526,6 +542,8 @@ Está acá para que nadie lo dé por resuelto.
     ⚠️ **SITIO-S9 ESCRIBIÓ LAS RUTAS ENTERAS, Y ÉSA ERA LA DEUDA.** Este bloque nombraba sus archivos por el nombre pelado —`OrbitRig.tsx`, `probeStore.ts`— y con prefijos cortos —`escena/…`, `_components/…`— que después de la mudanza de SITIO-S8 **no resuelven contra nada del disco**. Un pendiente que apunta a una ruta inexistente no se puede verificar, y es exactamente así como éste se venció la primera vez: la mudanza cambió la carpeta y el documento se quedó donde estaba, sin que nada se quejara. Ahora cada ruta es repo-relativa y `src/app/v3/_lib/__tests__/s9-instrumentos.invariant.ts` §3 **afirma que todas existen en el disco**, con un control positivo que exige que una ruta inventada haga fallar al detector. Los doce largos que este bloque nombra se remidieron con `contarLineas` de `s8-largos.ts` sobre el disco de hoy: **ninguno se movió** — los seis heredados dan exactamente los de `LARGOS_HEREDADOS` y los seis restantes, los que el propio texto declara.
 
     ⚠️ **Y el que faltaba en la lista: `src/app/v3/_lib/escena/probeMoire.ts` (300).** Está declarado en `LARGOS_HEREDADOS` y **no estaba nombrado acá**, así que la tabla de base y el texto que la explica decían cosas distintas. Mide exactamente 300, y el límite se compara con `>`: **no lo pasa**. Su entrada en la línea de base no vigila un exceso, vigila el BORDE — sólo se pone en rojo el día que alguien le agregue una línea. Entra al sprint de limpieza por vecindad, no por deuda.
+
+    ✅ **SITIO-S10 PARTIÓ TRES QUE NO ESTABAN EN ESTA TABLA, y son los que tenían CERO margen:** `_lib/escena/__tests__/s8-escena.invariant.ts` (299 → 276 + `s8-escena-soporte.ts`, 115), `_lib/__tests__/s8-montaje.invariant.ts` (300 → 263 + `s8-montaje-soporte.ts`, 101) y `probe-escena/__tests__/s7-recorridos.invariant.ts` (293 → 269 + `s7-recorridos-soporte.ts`, 132, que cruzó las 300 al escribirle sus controles). La costura es de naturaleza y no de conveniencia —el barrido del disco por un lado, las afirmaciones con sus controles por el otro— y **cada función quedó recibiendo su entrada por parámetro**, que es lo que permite correrla contra una rota. **Partir no perdió una afirmación:** `test:s8` pasó de 390 a 393. ⚠️ **Y queda uno en el borde:** `carga-diferida/__tests__/s8-peso.invariant.ts` está en **299 exactas**, y para que D2 entrara hubo que colapsar un control positivo multilínea a una línea. El próximo que le agregue algo lo parte.
 
     **Van juntos porque el seam es el mismo:** `lightRig` y `OrbitRig` son las dos mitades de un solo frame —partirlas por separado deja el cuadro cortado al medio en dos archivos que igual hay que leer juntos— y `probeStore` es el contrato entre el panel y ese loop. El resto de los archivos largos ya **no está en un solo módulo**: SITIO-S8 los repartió. Del lado de la escena, `src/app/v3/_lib/escena/choreography.ts` (462) y `src/app/v3/_lib/escena/probeScene.ts` (348); del lado del panel, `src/app/probe-escena/_components/choreographyEditor.ts` (376) y `src/app/probe-escena/_components/KeyframeEditor.tsx` (310). Los cuatro son heredados sin delta de S11 y pueden entrar al mismo sprint, **pero el sprint que los tome cruza dos módulos con ciclos de vida distintos**: el panel tiene fecha de baja y partir ahí es trabajo que se tira. El orden barato es escena primero.
 
@@ -616,6 +634,12 @@ Está acá para que nadie lo dé por resuelto.
     | `_lib/__tests__/bundle.invariant.ts` | **375** | S1 — eran 323 |
 
     (Los otros dos siguen exactos: `tokens.invariant.ts` 456 y `cronograma.invariant.ts` 324. **Estos conteos se remidieron en SITIO-S8 sobre el disco**, y que dos de cuatro se hubieran movido sin que nada fallara es el punto del párrafo de abajo: a estos archivos no los mira ningún check.)
+
+    ⚠️ **SON CINCO, NO CUATRO — y el quinto lo destapó SITIO-S10 creciéndolo.** `_lib/__tests__/s9-instrumentos.invariant.ts` **ya estaba en 333** cuando este ítem se escribió, y **nadie lo anotó**: el que lo mira es el mismo defecto que el ítem describe, o sea nadie. SITIO-S10 le sumó **28 líneas de docblock** —el registro de por qué el censo de controles pasó de 36 a 80— y lo dejó en **361**. Se declara con su delta en vez de esconderlo: la deuda creció, la creció este sprint, y partirlo habría sido una cuarta partición sin scope al final de un sprint largo. Remedidos hoy sobre el disco: **456 · 453 · 375 · 361 · 324**.
+
+    | archivo | líneas | de quién |
+    |---|---:|---|
+    | `_lib/__tests__/s9-instrumentos.invariant.ts` | **361** | S9 — eran 333, y **SITIO-S10 le sumó 28** |
 
     **Lo que agrava la deuda es la cobertura, no el tamaño:** el único check de las 300 líneas es el de `s3-codigo.invariant.ts`, y mira los archivos del sprint de S3 más los instrumentos `s3-*`; `s4-cobertura.invariant.ts` mira los de S4. **Los de S1 y S2 no los mira nadie**, así que pueden seguir creciendo sin que nada falle. El sprint que los parta tiene que además extender la cobertura, o la deuda vuelve.
 
@@ -744,9 +768,28 @@ Está acá para que nadie lo dé por resuelto.
 
     **Lo único que queda abierto de esto:** el ritmo de mobile subestimaría este tramo. No se arregla acá: el ritmo de 390 es otro número y SCROLL.md lo publica por separado con razón (§7 de SCROLL.md). Los dos números viven en la fila de `cierre` en `_lib/secciones.ts`.
 
-29. ✅ **LA TINTA DEL DIFERENCIAL — CERRADO en SITIO-S9 por la opción (a), con el número: 6,07:1 en p=0,750.**
+29. ⚠️ **LA TINTA DEL DIFERENCIAL — CERRADO CONTRA EL FONDO en SITIO-S9 (6,07:1 en p=0,750), y ACOTADO en SITIO-S10: el cierre NO cubre el cuadro entero.**
+
+    **Se lee entero o se lee mal.** Lo que SITIO-S9 cerró es el contraste del texto **contra el fondo de la sala**, que es lo que su instrumento medía. Lo que SITIO-S10 midió es la región que ese instrumento **descartaba a propósito** —los píxeles del logo— y ahí el número es **1,11:1 en el MEJOR píxel**. Las dos cosas son ciertas, miden superficies distintas, y el alcance del cierre está escrito abajo, en este mismo ítem, para que nadie lea «cerrado» sin ver hasta dónde.
 
     **El anclaje de §7.2 lo resolvió sin tocar la escena, que es exactamente lo que la parada de SITIO-S8 predijo.** El diferencial llena el cuadro sobre la pose `demos` —p=0,750, que es el borde del cruce de AA por un margen de 0,128 de progreso— y ahí la tinta da **6,07:1 (mínimo) · 6,46:1 (p05) · 7,58:1 (mediana)**, contra los 3,10 / 3,10 / 4,22 que daba en p=0,923. **La mediana pasa AAA**, que el provisional no alcanzaba ni en AA. El Hero pasa AA y AAA en su ventana entera —**9,73:1 en los cuatro bordes**, y ahora eso significa algo más fuerte: con el anclaje su pantalla es exactamente el tramo `hero`, que es un sostén, así que el cuadro no cambia en toda la ventana. Lo produce `npm run test:s8-tinta` §4 y §5, y el `noCorre` que S8 había dejado se convirtió en afirmación.
+
+    ── 🔴 **EL ACOTAMIENTO: ESTE CIERRE NO CUBRE LA REGIÓN DONDE EL TEXTO CAE SOBRE EL LOGO (SITIO-S10).**
+
+    **La exclusión de `sinLogo` dejaba afuera exactamente la región mala, y no era conservadora.** Los 6,07:1 salen de `cuadro.ts`, que **descarta a propósito los píxeles del logo**: la pregunta que se contestó fue *«¿cuánto contrasta el texto contra el FONDO?»*. La que faltaba —*«¿y donde el texto cae ENCIMA del logo?»*— no la contestaba nadie, y el logo es **tinta casi negra** (`INK_COLOR`). Un descarte que se hace para aislar una superficie es correcto; lo que no se puede es leer su resultado como si valiera para el cuadro entero.
+
+    **En una línea, para que no se vuelva a mezclar: 6,07:1 vale para el FONDO; sobre el LOGO son 1,11:1 en el mejor píxel.**
+
+    **Medido en SITIO-S10 (`_lib/escena/__tests__/s10-logo.invariant.ts`), con el mismo shading y dos controles de equivalencia:**
+
+    | | peor | p05 | mediana | **mejor píxel** | contra el fondo |
+    |---|---:|---:|---:|---:|---:|
+    | Hero, p=0,000 | **1,11:1** | 1,11 | 1,11 | **1,11** | 9,73:1 |
+    | Por qué develOP, p=0,750 | **1,11:1** | 1,11 | 1,11 | **1,11** | 6,07:1 |
+
+    **No pasa AA, no pasa AAA, y no llega ni a 3:1 — ni en el mejor píxel.** Las dos poblaciones son **disjuntas**: el mejor píxel del logo (1,11) es peor que el peor del fondo (6,07). O sea que **la exclusión de `sinLogo` no era conservadora**: dejaba afuera exactamente la región mala.
+
+    Lo que esto NO dice es cuánta superficie de texto cae ahí — eso es composición y está en §7.40, con su número. Lo que sí dice es que **§7.29 no se puede leer como «la tinta del diferencial está resuelta»**: está resuelta contra el fondo, que es donde se midió, y ese alcance ahora está escrito.
 
     ⚠️ **LA COLA, publicada y NO afirmada — y eso también quedó cerrado en la parada.** La ventana en la que la sección SE VE termina en p=1,000, donde el peor píxel da 2,34:1. `s8-tinta` §5 lo afirma como propiedad de la GEOMETRÍA y no del mapeo —el borde inferior del diferencial está en la pantalla 13 de 13, así que **cualquier** mapeo monótono termina ahí— y publica la cola con su número: cuando cruza AA, en la pantalla 12,513, el diferencial ya ocupa sólo el 48,7% del cuadro y el resto es Cierre opaco. **Un criterio que ningún mapeo puede cumplir no distingue un mapeo de otro**, así que ésta es la forma correcta y no abre §7.4 ni pide un sprint. La reserva (b) queda sin usar.
 
@@ -830,7 +873,13 @@ Está acá para que nadie lo dé por resuelto.
 
     ⚠️ **UN HALLAZGO DE OBSERVABILIDAD QUE NO ES DE PESO: `replaysOnErrorSampleRate: 1.0` ESTABA MUERTO — BORRADO EN LA PARADA.** Con `@sentry/nextjs` 10.62.0 el default son **13 integraciones y `replayIntegration` no está entre ellas**; nadie la agrega, y `replayIntegration` y `rrweb` aparecen en **cero chunks** del build. O sea: **costaba 0 bytes y capturaba 0 replays**, mientras el comentario del archivo afirmaba que se preservaban los session replays on error. **Las dos opciones se borraron, y no por peso: por honestidad — un flag que dice preservar algo que no existe es peor que no estar**, porque le hace creer al próximo que hay replays cuando no hay ninguno. Borrarlas no cambió un byte ni una captura. El día que se quieran replays de verdad hay que agregar `replayIntegration()` —que SÍ pesa— y ahí volver a poner las tasas; `s9-sentry` §4 lo custodia.
 
-    ⚠️ **Y deja una fragilidad reportada y no arreglada:** `presupuesto.ts:62` fija `CHUNK_DE_SENTRY = '7149'` —el prefijo del chunk, escrito a mano— y `s8-peso.invariant.ts:262` lo usa para publicar «sin Sentry `/v3` mediría X». **Si webpack renumera el chunk, el filtro no saca nada, la cifra publicada pasa a ser el total entero y no hay rojo.** El reemplazo ya existe y está probado: `chunkConHuella()` identifica el chunk por su contenido (`browserTracingIntegration`) y no por su nombre.
+    ── ✅ **LA FRAGILIDAD DEL CHUNK POR NOMBRE — ARREGLADA EN SITIO-S10.**
+
+    `presupuesto.ts:62` fijaba `CHUNK_DE_SENTRY = '7149'` —el prefijo del chunk, escrito a mano— y `s8-peso.invariant.ts:262` lo usaba para publicar «sin Sentry `/v3` mediría X». **Si webpack renumeraba el chunk, el filtro no sacaba nada, la cifra publicada pasaba a ser el total entero y no había rojo.**
+
+    Se identifica **por contenido**, con `chunkConHuella()` y la huella `browserTracingIntegration` que `s9-sentry` ya usaba —importada de `puertas-de-sentry.ts`, sin dejar una segunda copia del literal—. Y el arreglo hace más que cambiar el filtro: `descontarElSdk()` devuelve **`null`** cuando no hay portador o el portador no está en el conjunto, `sinSentryGzip` pasó a `number | null`, y `publicarElTecho` imprime **«NO SE PUDO DESCONTAR»** en vez de publicar el total con otro nombre. `test:s8-peso` pasó de 43 a 45 afirmaciones.
+
+    ⚠️ **La cifra no se movió: 235,3 KiB gzip antes y después. Esa igualdad ES el resultado** — en el build de hoy el filtro por nombre y el filtro por huella seleccionan el mismo archivo. **Lo que cambió no es el número sino su modo de fallar**, y ésa es exactamente la clase de arreglo que no se puede justificar con un delta.
 
 31. ⚠️ **UN INSTRUMENTO QUE COMPARA CONTRA UNA LÍNEA DE BASE TIENE QUE DECIR QUÉ CAMBIÓ ENTRE LAS DOS MEDICIONES, NO SÓLO CUÁNTO.**
 
@@ -868,7 +917,23 @@ Está acá para que nadie lo dé por resuelto.
 
     **`contarControles` NO se tocó**, y ésa es la parte que importa: el barrido movió los controles a la forma que el contador ya sabía leer, así que sus dos patrones siguen en uso y el **anclaje a la forma de la línea** —la protección de §7.25— queda intacto. `s9-instrumentos` §1 deja dos controles positivos que lo custodian, uno de ellos usando la línea real de `s11-celosia:116`, que se dejó sin marcar a propósito para que siga siendo el espécimen.
 
-    ⚠️ **Y el número comparable destapó el agujero que el subconteo escondía:** `s7e` y `s10e` corren **10 invariantes y 152 afirmaciones sin un solo control positivo**. No es un problema de marcador: no existen. Escribirlos es un sprint, no un barrido. Quedan además **siete controles que el lane EJERCE sin declarar con la frase**, listados con archivo y línea en el reporte de SITIO-S9: marcarlos es una decisión de contenido, no de marcador.
+    ⚠️ **Y el número comparable destapó el agujero que el subconteo escondía:** `s7e` y `s10e` corrían **10 invariantes y 152 afirmaciones sin un solo control positivo**. No era un problema de marcador: no existían.
+
+    ✅ **ESCRITOS EN SITIO-S10 — 44 controles, y el censo se movió por primera vez porque APARECIERON controles y no porque cambiara la unidad.**
+
+    | | antes | después |
+    |---|---|---|
+    | `s7e` | 5 invariantes · 92 afirmaciones · **0 controles** | 5 · **114 afirmaciones · 22 controles** |
+    | `s10e` | 5 invariantes · 60 afirmaciones · **0 controles** | 5 · **82 afirmaciones · 22 controles** |
+    | el censo de `s9-instrumentos` §1 | 36 etiquetas en 17 de los 34 archivos | **80 en 27** |
+
+    **Lo que costó de verdad no fue escribir los controles: fue que varios predicados no se podían probar.** Un predicado escrito adentro de un bucle en línea, que mira una constante importada, **no se puede correr contra una entrada rota** — y un control que corre otra copia del código no prueba nada (§7.25). Hubo que sacar trece predicados a funciones con su entrada por parámetro (`noModela`, `atsCrecientes`, `fueraDeRango`, `seMovieron`, `crossings`, `occupancy`, `decreceHaciaAfuera`, `sube`, `bloqueDelArchivo`, `huerfanos`, `baja`, `barreEnUnSentido`, `sobreElHorizonte`). **Ésa es la mitad del trabajo, y la regla que deja:** *un invariante que no se puede controlar positivamente no es un invariante caro de controlar — es un invariante mal escrito, y el costo de arreglarlo se paga una sola vez.*
+
+    **Cuatro de las cifras que estos diez publicaban eran cotas que el CERO también cumple**, y ahora tienen contrapeso: «las capas nunca cubren más que el cuadro» (`s10-batido`: 0/0 sin fondo contra 31/24% con él), las 924 partículas en cuadro de `s10-particulas`, el «byte por byte» de `s7-export` —que podía estar comparando dos cadenas vacías— y el γ de contraluz de `s7-modelado`, que con la luz sobre el eje de la cámara cae a 0° y deja de cumplirse.
+
+    ⚠️ **Y el censo lo movió un frente que NO podía tocarlo.** `s9-instrumentos.invariant.ts` no estaba en los editables del frente de la deuda, así que se puso en rojo con dos afirmaciones y **el frente frenó en vez de tocarlo**; la re-medición la hizo el agente principal en la integración. Es exactamente la forma de §7.29, y conviene que quede escrita dos veces: **actualizar un censo que el sprint existía para mover no es aflojar una afirmación** — un umbral se afloja cuando la propiedad dejó de cumplirse y se baja la vara; acá la propiedad es una cuenta y la cuenta subió. `contarControles` **no se tocó**: los 44 nuevos usan el marcador de etiqueta que ya sabía leer.
+
+    Quedan los **siete controles que el lane EJERCE sin declarar con la frase**, listados con archivo y línea en el reporte de SITIO-S9: marcarlos es una decisión de contenido, no de marcador.
 
 34. ✅ **LA ESCENA SE APAGA Y VUELVE — construido en SITIO-S9, y resultó más barato de lo que §2.4 imaginaba.**
 
@@ -890,6 +955,24 @@ Está acá para que nadie lo dé por resuelto.
     | lo que cuesta el mecanismo | 2 cuadros sin inercia por reanudación = **0,07%** de lo que ahorra |
 
     **Dos constantes con su cuenta y no con su gusto.** `MARGEN_DE_REANUDACION = 0,125` pantallas: la ventana derivada no tiene holgura —el diferencial está en cuadro exactamente mientras el scroll va de 11 a 13— y sin margen el lazo arrancaría en el instante en que el borde del panel toca el del cuadro, con el primer cuadro pintado un `rAF` después; lo que se vería en esa rendija **no es negro sino la pose vieja**, porque con el lazo en `never` el canvas conserva lo último que pintó. El margen tiene que durar los dos cuadros de la reanudación: 0,0625 pantallas por cuadro = **3,75 pantallas por segundo a 60 Hz**, o 112 px por cuadro en una ventana de 900. Cubre la rueda y el teclado; **no cubre una barra de scroll arrastrada, y ningún margen finito la cubre** — ahí se ve a lo sumo UN cuadro de pose vieja. Cuesta 1,9 puntos de banda. Y `CUADROS_DE_REANUDACION = 2` y no 1, aunque por la matemática alcanzara uno: el pulso que despacha «pintado» vive en un `rAF` del documento y el lazo de r3f en el suyo, y **nada ordena uno respecto del otro**; con un solo cuadro, si el pulso corriera primero, la física se encendería antes del cuadro exacto y el latigazo vuelve entero, como falla intermitente. ⚠️ Ese orden se **dedujo leyendo el código, no se midió**: si alguien lo mide y r3f siempre corre primero, la constante baja a 1 y la reanudación cuesta la mitad.
+
+    ── ✅ **MEDIDO EN SITIO-S10, Y EL RESULTADO CONTRADICE A ESTE PÁRRAFO.**
+
+    «Nada ordena uno respecto del otro» **no se sostiene contra `@react-three/fiber` 9.6.1**: el orden de registro **está determinado, y r3f va PRIMERO**. Lo produce `_lib/__tests__/s10-raf.invariant.ts` (28 afirmaciones · 14 controles positivos), afirmando la cadena eslabón por eslabón sobre el código instalado, con un control por eslabón:
+
+    1. el `<Canvas>` corre `run()` desde un `useIsomorphicLayoutEffect` **sin arreglo de dependencias**, o sea que reconfigura en cada render y lo hace en la fase de **layout**;
+    2. `configure()` compara `state.frameloop` con el pedido y llama `setFrameloop`, **síncrono**;
+    3. ⚠️ **`setFrameloop` NO pide un cuadro** — sólo reinicia el reloj y escribe el estado. Éste es el eslabón que da vuelta la intuición;
+    4. quien lo pide es `rootStore.subscribe(state => invalidate(state))`, o sea **cualquier escritura del estado**;
+    5. `invalidate` ya no se sale por su guarda de `'never'` —el `set` ya escribió `'always'`— y hace `requestAnimationFrame(loop)` ← **REGISTRO 1**;
+    6. recién después corre el `useEffect` **pasivo** de `EscenaDelHome` que arma el pulso ← **REGISTRO 2**;
+    7. y una vez corriendo, `loop()` se re-registra **como su primera sentencia**, antes de correr un solo efecto.
+
+    React vacía los efectos de layout antes que los pasivos, y `rAF` despacha en orden de registro. **Por la cadena leída, `CUADROS_DE_REANUDACION = 1` alcanzaría**, y eso vale 16,7 ms de los 33.
+
+    ⚠️ **NO SE CAMBIÓ LA CONSTANTE, y no por prudencia: es un valor de la escena y este sprint tiene prohibido moverlos.** Lo que se cambió es el docblock de `visibilidad.ts`, que ahora declara lo que se sabe y cita el instrumento en vez de afirmar que no se sabe nada. **La decisión de bajarla a 1 es del humano.**
+
+    **Los dos huecos que quedan, declarados con `noCorre`:** que el planificador efectivamente lo *despache* en ese orden pide una traza con la pestaña al frente, y en qué cuadro exacto React vacía los pasivos no se deriva del fuente. **Ninguna de las dos ramas cambia la conclusión** — en el mismo cuadro manda el orden de registro; en el siguiente, `loop` ya se re-registró primero.
 
     ⚠️ **Lo que este ítem NO cierra:** que el navegador efectivamente deje de dibujar, y que volver no tenga salto. El invariante afirma la CADENA —qué fase pide qué lazo y qué física—, no su efecto. **Falta la verificación visual, y tiene que hacerse con la pestaña AL FRENTE**: con la pestaña ocluida toda medición de scroll da cero por construcción, y eso invalida cualquier corrida automatizada que no lo garantice.
 
@@ -920,7 +1003,20 @@ Está acá para que nadie lo dé por resuelto.
 
     ⚠️ **Lo que sí cambia el diagnóstico:** el día que `/probe-escena` se borre, `tsc --noEmit` corta con `TS2307` **pero `npm run build` SIGUE EN VERDE y el bundle no cambia un byte**, porque `next.config.ts` declara `typescript.ignoreBuildErrors: true`. **El acoplamiento no tiene guardia en el build.**
 
-    **No se resolvió en SITIO-S9 a propósito, y es §7.26 con todas las letras:** resolverlo obliga a tocar `s8-escena.invariant.ts` §3 —que otro frente estaba reescribiendo en la misma pasada— y `ProbeStage.tsx`, que está en exactamente 300 líneas. **El plan exacto, para que el próximo no lo rehaga:** crear `_lib/escena/choreographyEditorTypes.ts` (módulo nuevo, y NO `choreographyTypes.ts`, que mide 240 y con los dos tipos pasaría de 300), mover ahí `ChoreoEditor` y `EditableKeyframe` —el único tipo del que depende y que todavía vive del lado del panel—, que `choreographyEditor.ts` los re-exporte para que ningún consumidor de `/probe-escena` cambie, y apuntar los tres imports al módulo nuevo, una línea cada uno y sin sumar ninguna. **La afirmación que cambia de valor es `s8-escena.invariant.ts` §3**, que hoy espera exactamente esos tres nombres y pasaría a esperar la lista vacía. Costo total: 1 archivo nuevo, 4 líneas cambiadas, 1 afirmación reescrita.
+    **No se resolvió en SITIO-S9 a propósito, y es §7.26 con todas las letras:** resolverlo obliga a tocar `s8-escena.invariant.ts` §3 —que otro frente estaba reescribiendo en la misma pasada— y `ProbeStage.tsx`, que está en exactamente 300 líneas. **El plan exacto, para que el próximo no lo rehaga:** crear `_lib/escena/choreographyEditorTypes.ts` (módulo nuevo, y NO `choreographyTypes.ts`, que mide 240 y con los dos tipos pasaría de 300), mover ahí `ChoreoEditor` y `EditableKeyframe` —el único tipo del que depende y que todavía vive del lado del panel—, que `choreographyEditor.ts` los re-exporte para que ningún consumidor de `/probe-escena` cambie, y apuntar los tres imports al módulo nuevo, una línea cada uno y sin sumar ninguna.
+
+    🔴 **EL COSTO QUE ESTE ÍTEM PUBLICABA ESTÁ INCOMPLETO, Y LO DESTAPÓ SITIO-S10 AL IR A APLICARLO.** Decía *«1 archivo nuevo, 4 líneas cambiadas, 1 afirmación reescrita»*, nombrando sólo `s8-escena.invariant.ts` §3. **Falta un archivo entero, y no es opcional:** `_lib/__tests__/s9-instrumentos.invariant.ts` **§2 es el instrumento que MIDE este acoplamiento**, y el arreglo le borra la premisa a cuatro de sus afirmaciones:
+
+    | dónde | qué afirma | por qué se rompe |
+    |---|---|---|
+    | `s9-instrumentos:157-158` × 3 archivos | `IMPORT_DE_TIPO` — el especificador exacto `'@/app/probe-escena/_components/choreographyEditor'` | cambiar el especificador es justamente el arreglo |
+    | `s9-instrumentos:177` | `/^export type ChoreoEditor = \{$/` sobre `choreographyEditor.ts` | con la re-exportación el editor deja de DECLARAR el tipo |
+
+    **Y hay una quinta consecuencia que ningún costo nombraba:** las tres afirmaciones de «no importa un VALOR del panel» pasarían a ser verdaderas **por vacío** —el archivo ya no importaría nada del panel—, que es el modo de falla que este repo lleva diez sprints cazando. Reescribirlas bien significa cambiar el SUJETO de la sección: de *«el acoplamiento existe y es de tipo»* a *«el acoplamiento no existe, el tipo vive del lado de la escena y el panel lo re-exporta»*, con sus controles positivos nuevos.
+
+    **El costo REAL, medido:** 1 archivo nuevo, 4 líneas de import, y **DOS instrumentos reescritos** —`s8-escena` §3 y `s9-instrumentos` §2, unas cinco afirmaciones con sus controles—.
+
+    **SITIO-S10 lo DECLARÓ en vez de resolverlo**, que es una de las dos salidas que su instrucción admitía. El frente de la deuda lo vio, midió el costo verdadero y **frenó antes de escribir una línea**, porque `s9-instrumentos.invariant.ts` no estaba en sus editables. Queda registrado en `_lib/__tests__/s10-padron.ts` (`NO_ENTREGADOS`), que lo imprime con su razón en cada corrida — **un entregable que se saca de la lista sin dejar rastro convierte un freno en un olvido.**
 
 37. 🔴 **UNA INSTRUCCIÓN QUE SE CONTRADICE PRODUCE TRABAJO CORRECTO SÓLO SI ALGUIEN LA LEE ENTERA.**
 
@@ -962,3 +1058,179 @@ Está acá para que nadie lo dé por resuelto.
 
     - **«en cinco de las ocho secciones el panel es opaco»** — son **SEIS** (Quiénes somos, Números, Trabajos, Servicios, Tu panel y Cierre) y dos transparentes. El cinco es la cuenta correcta sobre otro denominador: las **siete que llevan recorrido de scroll**, o sea sin el Cierre. Las dos cuentas quedan afirmadas en `s9-visibilidad` §1.2 para que la de la instrucción no se lea como un desacuerdo sino como otro conjunto.
     - **«sin ese chunk `/v3` mediría 235,3»** (heredada de §7.30) — el techo real de la deferencia es **77,9 KiB gzip y no 142,1**, así que `/v3` quedaría en **299,6**. La corrección entera, con su causa, está en §7.30.
+
+38. 🔴 **MOBILE — EL SEGUNDO SITIO, MIRADO POR PRIMERA VEZ (SITIO-S10).**
+
+    Abajo de 1025 no hay escena ni coreografía, y eso está decidido y es correcto. **Lo que nadie había mirado es que abajo de 1025 hay un sitio entero**, y que todo lo construido se juzgó a 1440. Se midió a **375, 390 y 768**, con los tres altos que este repo declara (667 · 844 · 900), sobre el marcado renderizado y con los tokens resueltos por ancho. **Todo es cálculo estático:** el instrumento es `_lib/__tests__/s10-mobile.invariant.ts` y su modelo de alto declara sus supuestos.
+
+    ── 🔴 **1 · SERVICIOS MUESTRA UNO DE TRES SERVICIOS, Y EN LOS DOS LADOS DEL UMBRAL, POR CAUSAS DISTINTAS.**
+
+    Es el hallazgo más grande del sprint, y lo encontraron **dos frentes independientes desde lados opuestos**:
+
+    | | qué pasa | por qué |
+    |---|---|---|
+    | **abajo de 1025** | los servicios 2 y 3 **no se ven** | `_contrato/Seccion.tsx` le da a `pinneada: 'siempre'` un hijo `sticky top-0 `**`h-svh`** —alto FIJO— y adentro `ServiciosApilados` apila tres bloques `min-h-svh`. Tres pantallas de contenido dentro de una caja de una, clavada 200svh. Tinta sola adentro de la caja: **963 px @375×667 (1,44×) · 942 @390×844 (1,12×) · 1583 @768×900 (1,76×)** |
+    | **arriba de 1025** | los servicios 2 y 3 **no están en el árbol de accesibilidad** | `ServiciosEnSecuencia` monta **uno por vez** (`PanelDeSecuencia` renderiza `SERVICIOS[indice]`). El árbol pasa de 26 a 24 encabezados y de 43 a 33 marcadores. Quien navegue por encabezados sin scrollear no llega a los otros dos |
+
+    **La causa de abajo es la doble contención que dejó la unificación de contratos de SITIO-S7**: la rama pinneada del lane A se sumó a la contención propia que traía el lane B, y nadie las restó. Y el propio `servicios/geometria.ts` tiene escrito en su docblock *«el alto de un bloque es `min-h-svh`, no `h-svh`»* — la convención de la sección y la del envoltorio se contradicen, y gana la del envoltorio.
+
+    ── 🔴 **2 · TRABAJOS DEJA DOS PANTALLAS DE BANDA OSCURA VACÍA ENTRE 768 Y 1024.**
+
+    `tablet:grid-cols-3` **ya aplica en 768**, así que los tres proyectos entran en fila y el flujo mide **1 pantalla contra las 3 declaradas**. El `escritorio:min-h-0` que apaga la pantalla-por-proyecto arranca en **1025**, y la fila arranca en **768**: entre esos dos anchos nadie sostiene el alto. A 375 y 390 sí se llenan (3 = 3), o sea que la decisión de SITIO-S5 se cumple **sólo donde la grilla colapsa**.
+
+    ── 🔴 **3 · LA PASTILLA DE NAVEGACIÓN NO ENTRA EN UN TELÉFONO.**
+
+    Mide **600 px** (piso, con los avances reales del `.woff2`; los rótulos van `font-semi`, que es más ancho). Es `absolute; left:50%; translateX(-50%)`, **sin `flex-wrap`, sin tope de ancho y sin una sola media query** —los dos hechos afirmados sobre el CSS—. A 375 se sale **112 px por lado**; a 390, **105**. Entra recién desde ~600 px. Enlaces: Quiénes somos 131 · Trabajos 87 · Servicios 90 · Por qué develOP 139 · Contacto 88.
+
+    ── ⚠️ **Dos cifras heredadas que NO se reproducen** (regla 11: se corrigen con su medición al lado)
+
+    - **«~810 px»** —los tres proyectos apilados de Trabajos, en los docblocks de `_lib/secciones.ts` y `Trabajos.tsx`— da **624 px** a 375 con el instrumento nuevo. Y ya no gobierna nada: desde que cada proyecto lleva `min-h-svh`, la pila mide **tres pantallas** y no su alto intrínseco. **Describe un marcado que ya no existe.**
+    - **«1029 px @375»** (§7.28, `s8-cierre` §14) da **1018**. Sale de leer los tokens **FIJOS** donde el marcado emite las clases **FLUIDAS**, y de suponer tres líneas de titular donde el corte real da **dos**. **La conclusión de §7.28 no cambia** —1018 > 667 igual— y por eso el alto del Cierre sigue sin tocarse.
+    - **Confirmado y extendido:** la columna del recorrido sigue siendo la más alta del pie en los cinco anchos, y **las tres columnas se apilan abajo de 768, no abajo de 1025**.
+
+    ── **DECISIONES, que no son defectos**
+
+    - **Números colapsa a una columna a 375 y 390**: sus **21** clases de posición viven en `tablet:` y **ninguna** sobrevive. Lo que queda es la asimetría de TAMAÑO, que el docblock ya declara, y se reproduce: **36 · 24 · 18 · 16 px**.
+    - **El Cierre y Tu panel crecen** a 375 (1018 px y 800 px de tinta en su primera pantalla, contra 667). El `alto` es un `min-height`: crecen, no recortan. Lo que cuesta es que **el ritmo de mobile los subestima**, que es lo que §7.28 ya dejaba anotado.
+    - **El umbral de la pastilla se acorta con el alto** (667→571 · 844→748 · 900→804) y es correcto: la aritmética es relativa a `100svh` y no lleva un número copiado.
+
+    ── ⚠️ **DOS TAMAÑOS QUE SE CAEN DEL SISTEMA A 375**
+
+    - `--text-fluido-micro` cae a **8 px**, un **20% por debajo del propio piso fijo del sistema** (`--text-micro` = 10 px). Lo consumen los rótulos de las cifras, las etiquetas de sección y la nota legal del pie.
+    - `--text-fluido-titulo-s` resuelve a **16 px**, exactamente `--text-base` y 1 px arriba de `--text-cuerpo`: **la cifra más chica de Números deja de leerse como cifra.**
+
+    ── **EL PRESUPUESTO, repartido archivo por archivo**
+
+    377,4 KiB gzip · 24 archivos. **Piso del framework 248,2** en 5 archivos, de los cuales 142,1 son el SDK de Sentry (§7.30, no se difiere). **Sobre el piso: 129,2 KiB en 19 archivos**, y ahí está la respuesta a *«¿qué de esto no debería estar abajo de 1025?»*:
+
+    | | archivos | gzip | de quién |
+    |---|---:|---:|---|
+    | también los pide `/` | 16 | **111,7 KiB** | el layout raíz — no son de `/v3` |
+    | propios de `/v3` | 3 | **17,5 KiB** | de este track |
+
+    **La escena y el instalador de coreografía NO viajan** en la carga inicial: cero chunks con `three`, con r3f o con `InstaladorDeCoreografia`, afirmado. **Y el candidato obvio no sirve:** los 42,7 KiB del sistema de motion los pide `/` también, así que diferirlos abajo de 1025 **desde este track no baja un byte de esta ruta**. Lo único propio que aparece es **Lenis: 1 chunk, 5,5 KiB gzip, en todos los anchos, y `SmoothScroll` se sale de `/v3` por `pathname.startsWith('/v3')`** — o sea que viaja y no se usa nunca. Dueño: el layout raíz.
+
+    ⚠️ **`LCP` y `Lighthouse` son HUECOS y se declaran con `noCorre`, no se estiman.** Los dos piden un navegador con la pestaña al frente.
+
+39. 🔴 **ACCESIBILIDAD — LA VENTAJA, VERIFICADA SOBRE EL HOME COMPUESTO (SITIO-S10).**
+
+    Cada componente había verificado lo suyo; **nadie había recorrido las ocho secciones juntas**. Lo produce `_lib/__tests__/s10-acceso.invariant.ts` (62 afirmaciones · 10 controles positivos) sobre el marcado del documento entero, con los envoltorios del layout derivados del fuente.
+
+    ── **LO QUE GANAMOS, verificado y no citado**
+
+    **`<main>` existe**, y lo pone `src/app/v3/layout.tsx` — la referencia no lo tiene en cinco de sus seis URLs. Anillo de foco en **las 15** paradas, ≥3:1 en todas. **Cero `tabindex` positivos, cero saltos de nivel, un solo `h1`**, las 15 paradas con nombre accesible, ningún CTA ni titular anunciado dos veces, y `prefers-reduced-motion` apaga el sistema entero: 0 transformadas, 0 `will-change`, 0 piezas del divisor, texto completo.
+
+    ── **LOS DEFECTOS, por gravedad**
+
+    | # | gravedad | qué | dueño |
+    |---|---|---|---|
+    | 1 | **alta** | **un texto a 2,80:1** — `text-tinta-tenue` (`#5A5A5A`) sobre `#0E0E0E` en el `<p>` de ayuda del formulario de novedades. No llega a AA ni a 3:1, **y es el único texto que explica por qué el envío está deshabilitado**. Es el único fallo de AA de todo el home | `chrome/Novedades.tsx` dentro del Cierre |
+    | 2 | **alta** | **el sitio NO tiene landmark `contentinfo`**: el `<footer data-pieza="pie">` vive adentro de `<section id="cierre">`, y un `<footer>` dentro de contenido seccionante no mapea a `contentinfo`. El pie no se alcanza navegando por regiones | la sección Cierre |
+    | 3 | media | **el orden de foco no es el visual** (WCAG 2.4.3): las paradas **1 a 5 de 15** son la pastilla, que nace a `100svh − 72px`, o sea al **89,2% / 91,5% / 92,0%** de la primera pantalla según el alto. Quien tabula la encuentra primero y la ve abajo de todo el Hero | el chrome |
+    | 4 | media | **no hay enlace «saltar al contenido»**: cinco paradas de navegación antes de la primera del contenido, en las dos ramas | el chrome |
+    | 5 | media | **2 landmarks donde podría haber 10**: ninguna de las **ocho** `<section>` apunta con `aria-labelledby` a su titular, así que ninguna aporta `region` | las ocho secciones |
+    | 6 | media | **la trampa del tema**: `[data-seccion="invertida"]` redefine `--color-tinta` pero **no** `--color-tinta-media` ni `--color-tinta-tenue`. Hoy las 15 `text-tinta-media` caen todas en secciones claras; el día que una pase a invertida da **2,51:1** y nada se queja. **Es la causa del defecto 1** | `theme-develop.css` |
+    | 7 | baja | el `navigation` está **anidado en el `main`**, así que un «saltar al contenido principal» no saltearía la navegación; y no hay `banner` | el chrome |
+    | 8 | baja | Servicios es la única de las ocho **sin un encabezado que la nombre**: sus tres servicios entran como `h2` hermanos de los titulares de las otras siete | Servicios |
+
+    ── **DECISIÓN, no defecto: los 43 marcadores se leen en voz alta**
+
+    **43 verificados** (la cifra era correcta), 12 tipos, ninguno fuera del vocabulario cerrado, ninguno en un subárbol oculto. Por sección: quiénes somos 3 · números 5 · trabajos 6 · **servicios 15** · tu panel 4 · por qué develOP 5 · cierre 5. Cómo suena, transcrito:
+
+    > **Números**, cinco seguidos sin nada entre medio: *«Lo que se puede contar · CIFRA Proyectos entregados · CIFRA Clientes activos · CIFRA Años en el mercado · CIFRA Tiempo de respuesta · CIFRA Procesos automatizados»*
+    >
+    > **Trabajos**, tres tarjetas idénticas: *«CAPTURA · Esquina · Lo que cambió MÉTRICA · CAPTURA · El Garage · Lo que cambió MÉTRICA · CAPTURA · Matsu Automotores · Lo que cambió MÉTRICA»*
+    >
+    > **Cierre**, la línea legal entera: *«develOP · FECHA · NOMBRE · ENLACE»*
+
+    El mejor caso es el marcador adentro de la frase —*«…entre CIFRA negocios que ya operan con lo que construimos»*—; el peor son los **cuatro que se anuncian como una palabra suelta sin contexto**: `[FOTO DEL EQUIPO]`, `[CAPTURA]`, `[VIDEO]`, `[PÓSTER]`. **NO SE ARREGLA:** la regla del sprint es que el contenido inventado parezca inventado, y `marcadores.ts` declara la forma como deliberada.
+
+40. 🔴 **LA COMPOSICIÓN DEL LOGO CONTRA EL TEXTO — medida, con una premisa corregida (SITIO-S10).**
+
+    Lo produce `_lib/escena/__tests__/s10-logo.invariant.ts`, con un muestreador de **máscara de logo con posiciones** —que `cuadro.ts` no tenía— validado por **dos controles de equivalencia**: las celdas con tinta igualan a `muestrearCuadro(...).enLogo` exacto, y la suma de sus valores reproduce `media × total − Σ sinLogo`. El segundo valida **el sombreado del logo**, que ningún instrumento anterior podía comprobar porque `s8-tinta` descarta justamente esos píxeles. Hereda la ventana de `cuadro.ts`: cámara de `harness.ts` (§7.15), sin partículas, sin sombra proyectada, sin especular — **techo, no piso**.
+
+    ── ⚠️ **LA PREGUNTA NO APLICA EN CUATRO DE LOS CINCO ANCHOS, y eso es un resultado**
+
+    La escena sólo existe desde 1025, así que a 375, 390, 768 y 1024 **no hay canvas y el logo no compite con nada**: cuatro `noCorre` con su motivo, en vez de cuatro números inventados. Lo que sí varía y nadie había mirado es **la relación de aspecto**: a 1025 va de 1,139 a 1,537 según el alto, contra el 1,600 de 1440×900 con el que se compuso todo.
+
+    ── 🔴 **EL CONTRASTE DONDE SE SUPERPONEN: 1,11:1.** Ver §7.29, donde queda la corrección al cierre de la tinta.
+
+    ── **FRACCIÓN DENTRO DEL CUADRO Y SUPERPOSICIÓN**
+
+    | sección | cuadro | dentro | del cuadro | superposición con la caja de texto (mín – máx) |
+    |---|---|---:|---:|---|
+    | hero | 1440×900 | **100,0%** | 6,5% | **0%** – 13% |
+    | hero | 1025×900 | **100,0%** | 8,7% | **0%** – 32% |
+    | por qué develOP | 1440×900 | 99,4% | 25,5% | **6%** – 44% |
+    | por qué develOP | 1025×900 | **99,0%** | **35,9%** | **16%** – **72%** |
+
+    ⚠️ **LA PREMISA DE LA INSTRUCCIÓN NO SE REPRODUCE (regla 11).** *«En el Hero el logo queda cortado por el borde del cuadro»* — **no lo está**: entra al 100% en los cuatro aspectos y en toda su ventana. Lo que sí pasa a cuadros más altos es que **se corre hacia la izquierda, sobre la columna de texto** (su borde va de +0,04 a −0,16), porque `travelX` encoge con el aspecto. Queda un `afirmar` en verde como guardián: si un sprint decide recortar el Hero a propósito, esa afirmación se pone en rojo y ahí hay que escribir la decisión.
+
+    **En el diferencial la superposición MÍNIMA sobre todas las posiciones verticales es 6–16%, o sea mayor que cero:** no hay altura de pantalla que deje el titular limpio, porque la banda del logo cruza la columna entera. **En el Hero el mínimo SÍ es 0**, así que ahí es un problema de posición vertical y no de banda — dos defectos distintos que se veían como uno.
+
+    ── ⚠️ **QUE `demos` LLENE EL CUADRO ES DECISIÓN; QUE SE SALGA POR ARRIBA, NO ESTÁ DECLARADO**
+
+    `choreography.ts:287` lo dice con esas palabras: *«Es la única pose donde el logo llena el cuadro —81% del alto en tinta— y es la excepción que la arquitectónica se reserva»*. **Llenar y salirse no son lo mismo:** a p=0,750 la caja llega a y=+1,05 con el borde en +1,00, y `choreography.ts` **no menciona un recorte en ninguna línea**. Es poca área (≈1%) y es una decisión que nadie escribió.
+
+    ── 🔴 **EL CODO DEL ENCUADRE — §7.6 deja de ser una pregunta sin número**
+
+    `travelX = max(0, medioAncho − LOGO_W/2) × 0,88` tiene un **codo en cero** en aspecto **1,213 (harness) / 1,162 (rig)**. O sea que **a 1025×900 (aspecto 1,139) el `frameX: 1` de la pose `demos` no corre el logo ni un píxel, en las dos cámaras.** **La composición lateral de la pose más íntima del recorrido está INERTE en el cuadro más alto**, y la perilla que la gobierna no tiene recorrido. El Hero no tiene el problema: su codo está en 0,567.
+
+    ── **LAS PALANCAS, con su número. Ninguna aplicada.**
+
+    | palanca | qué mueve | qué rompe |
+    |---|---|---|
+    | `frameX` del Hero 0,68 → 0,8 / 0,9 / 1 | el borde izquierdo del logo **−0,106 / −0,083 / −0,035**; la columna de texto termina en **+0,297**, así que **ni en el tope de 1 libera la columna** | el destino del preloader (`scene-framing.ts` proyecta ESE keyframe) y la perilla abierta de §7.1 |
+    | `frameX` de `demos` | **sin recorrido**: ya está en 1 y el codo lo deja inerte a aspecto ≤1,21 | — |
+    | distancia de `demos` 9 → 11 / 13 / 15 | la cobertura del cuadro cae **35,9% → 24,4 / 17,6 / 13,2%**, y sigue dentro al 100% | «el momento más íntimo» de §2.2, y `altura ≤ −0,214 × distancia`, que pone el sol en cuadro |
+    | la medida del titular del Hero 3/5 → 2/5 | la columna pasa de **477 a 312 px** y su borde derecho de +0,297 a **−0,024**: limpia el logo a 1440 | el titular pasa de **2 a 4 líneas** |
+    | dónde cae la sección en el progreso | a p=0,875 el logo ocupa **5,3%** contra 35,9% en p=0,750 | el cruce de AA del fondo en p=0,878 (§7.29) y **el anclaje entero de SITIO-S9. La más cara.** |
+    | `FRAME_TRAVEL_SAFETY` 0,88 → 1 | +13,6% de recorrido **donde hay encuadre** | **cero** donde el codo ya lo dejó inerte: no toca el caso encontrado |
+
+41. ⚠️ **EL BANCO COMPARTIDO SE PROBÓ A SÍ MISMO, Y LO ROMPIERON SUS CONSUMIDORES — no su autor (SITIO-S10).**
+
+    Es la primera vez que el método de este repo —**escribir lo compartido ARRIBA, antes de despachar**— se somete a una prueba que puede fallar, y conviene escribir el resultado porque no era el esperado.
+
+    La Fase 0 de SITIO-S10 escribió un banco de medición compartido (once archivos, 94 afirmaciones, 17 controles positivos) y **lo verificó en verde antes de despachar un solo frente**. Aun así **tenía tres defectos**, y **los tres los encontraron los frentes que lo consumían, ninguno el que lo escribió**:
+
+    | # | qué estaba mal | quién lo vio | antes → después |
+    |---|---|---|---|
+    | 1 | `landmarks()` filtraba por «tiene rol», no por «tiene rol DE LANDMARK» | el frente de accesibilidad | publicaba **6 landmarks donde hay 2** — contaba los cuatro `<figure role="img">` |
+    | 2 | `marcadoConMovimientoReducido()` forzaba el árbol ANIMADO con la preferencia puesta | el frente de accesibilidad | **52 transformadas** de un estado que producción NUNCA sirve → 0, y el estado imposible queda aparte, rotulado como control |
+    | 3 | `cajasDeTexto` sólo miraba `data-nivel`, y `TextoPorLineas` no lo emite | el frente del logo | **no veía el titular del Hero**, o sea la caja más grande de la sección más importante, y devolvía una lista que se leía completa |
+
+    ── **POR QUÉ ESTO ES EL ARGUMENTO A FAVOR DEL BANCO Y NO EN SU CONTRA**
+
+    La lectura fácil es «el banco estaba mal, entonces escribirlo antes no sirvió». **Es al revés, y por tres razones que se pueden nombrar:**
+
+    1. **Los tres defectos existían igual.** Sin banco, cada frente habría escrito su propio lector de landmarks, su propio helper de movimiento reducido y su propio extractor de cajas — y **cada uno habría tenido su propia versión del error, sin forma de compararlas**. Un defecto compartido se encuentra una vez; cuatro defectos paralelos no se encuentran nunca, porque no hay contra qué contrastarlos.
+    2. **Los encontró quien lo USABA, que es el único que podía.** El defecto 3 sólo se ve desde la pregunta *«¿dónde cae el titular del Hero?»*, que es del frente del logo; el 2 sólo se ve desde *«¿qué sirve producción con la preferencia puesta?»*, que es del de accesibilidad. **El autor del banco no tenía la pregunta**, y ninguna relectura se la iba a dar. Es la misma forma que §7.19 registró con `cn()`: dos lanes aislados encontraron el mismo defecto por caminos distintos, y ninguno era el dueño del archivo.
+    3. **Los tres se arreglaron en la integración, con control positivo, y los tres frentes siguieron en verde.** Un defecto de instrumento encontrado durante el sprint cuesta una edición; encontrado después cuesta re-medir todo lo que publicó.
+
+    > **LA REGLA:** *un instrumento compartido no se valida releyéndolo — se valida entregándoselo a alguien que tenga una pregunta que el autor no tenía.* El banco no se escribe antes para que salga bien; se escribe antes **para que sus errores sean uno solo y aparezcan mientras todavía se pueden arreglar.**
+
+    Corolario operativo, para el próximo sprint con frentes en paralelo: **el reporte de cada frente tiene que poder decir «el banco está mal», y el agente principal tiene que arreglarlo en la integración en vez de defenderlo.** Los tres arreglos quedaron marcados en su lugar del código, con el número de antes y el de ahora, y con un control positivo cada uno (`s10-lectura.invariant.ts` y `s10-banco.invariant.ts` §1).
+
+42. ⚠️ **LAS CIFRAS HEREDADAS QUE NO SE REPRODUCEN — la lista completa de SITIO-S10, incluida la de su propia instrucción.**
+
+    Regla 11 del proyecto: una cifra publicada se corrige **con su medición al lado**, nunca borrándola. Y §7.32 ya había dejado escrito que **la instrucción de un sprint es una fuente como cualquier otra, y una fuente que se equivoca se corrige igual**. Éstas son las nueve de este sprint, con quién las publicaba y qué da hoy.
+
+    | # | lo que decía | dónde | lo que da | quién lo midió |
+    |---|---|---|---|---|
+    | 1 | *«en el Hero el logo queda cortado por el borde del cuadro»* | **la instrucción de SITIO-S10** | **NO lo está: entra al 100%** en los cuatro aspectos y en toda su ventana | `s10-logo.invariant` |
+    | 2 | *«nada ordena un `rAF` respecto del otro»* | §7.34 | el orden **SÍ está determinado y r3f va primero**, sobre r3f 9.6.1 | `s10-raf.invariant` |
+    | 3 | *«1 archivo nuevo, 4 líneas cambiadas, 1 afirmación reescrita»* | §7.36 | 1 archivo, 4 líneas y **DOS instrumentos** reescritos | el frente de la deuda, al ir a aplicarlo |
+    | 4 | *«los tres proyectos apilados miden ~810 px»* | docblocks de `secciones.ts` y `Trabajos.tsx` | **624 px** a 375 — y **ya no gobierna nada**: con `min-h-svh` la pila mide tres pantallas | `s10-mobile.invariant` |
+    | 5 | *«1029 px @375»* | §7.28 y `s8-cierre` §14 | **1018 px** — leía tokens FIJOS donde el marcado emite los FLUIDOS, y suponía 3 líneas donde el corte real da 2. **La conclusión de §7.28 sobrevive** | `s10-mobile-pie.ts` |
+    | 6 | *«cuatro instrumentos arriba de 300 líneas»* | §7.17 | **cinco** — faltaba `s9-instrumentos.invariant.ts`, que ya estaba en 333 | la integración |
+    | 7 | *«6 landmarks de 17 candidatos»* | el banco de la Fase 0 | **2** | el frente de accesibilidad |
+    | 8 | *«siete `<section>` sin nombre accesible»* | el banco de la Fase 0 | **ocho** | el frente de accesibilidad |
+    | 9 | *«`choreographyNotes.ts` no existe en el repo»* | el reporte del frente del logo | **sí existe**, en `probe-escena/_components/`. Es §7.13 otra vez: §6 lo nombra **sin ruta**, y después de la mudanza de SITIO-S8 un nombre pelado no resuelve contra nada | la integración |
+
+    ── ⚠️ **LA #1 ES DE LA INSTRUCCIÓN, Y ES LA QUE MÁS IMPORTA DEL MÉTODO**
+
+    La instrucción de SITIO-S10 pedía medir *«qué fracción del logo queda dentro del cuadro»* partiendo de que **en el Hero está cortado**. **No lo está**: la fracción dentro es **100,0%** a 1440×900 y a 1025×900, en toda la ventana de progreso del Hero. Lo que sí pasa —y es un problema real, sólo que otro— es que **a cuadros más altos el logo se corre hacia la IZQUIERDA, sobre la columna de texto**: su borde va de +0,04 a −0,16 porque `travelX` encoge con el aspecto.
+
+    **La instrucción vio bien el síntoma y le puso la causa equivocada**, que es exactamente lo que §7.32 describe. Si el frente hubiera aceptado la premisa habría medido un recorte que no existe y no habría encontrado el codo de `travelX` (§7.40), que es el hallazgo de verdad de esa sección. Quedó un `afirmar` **en verde** como guardián: el día que alguien decida recortar el Hero a propósito, esa afirmación se pone en rojo y ahí hay que escribir la decisión.
+
+    El recorte que **sí** existe es el de `demos`, por arriba, ≈1% del área — y **`choreography.ts` no lo menciona en ninguna línea**, así que es una decisión que nadie escribió (§7.40).

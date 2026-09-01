@@ -26,7 +26,6 @@
  * distingue un comentario de una constante; esas 890 sí.
  */
 
-import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
@@ -38,11 +37,11 @@ import { escenaRetenida } from '../retencion'
 import { MAPEO_DE_LAS_SECCIONES, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, pantallasDe, progresoDelScroll } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
-import { DESTINO, MODULOS_MUDADOS, ORIGEN, RAIZ, SUBARBOL_DEL_EDITOR, archivosTs, escribeAtributo, especificadoresRotos, existe, importaValorDe, pesoDeUnFuente, quienImporta, referenciasA, resolverEspecificador, usaClassName } from './soporte'
+import { DESTINO, ORIGEN, MODULOS_MUDADOS, RAIZ, SUBARBOL_DEL_EDITOR, escribeAtributo, existe, importaValorDe, pesoDeUnFuente, resolverEspecificador, usaClassName } from './soporte'
+// prettier-ignore
+import { TODOS, conTipoDelPanel, conValorDelPanel, consumidoresDeLaMarca, fuenteDe, rotosDeLaMudanza, soloAplicacion } from './s8-escena-soporte'
 import { desalineacionDeNombres, imprimirMapeo, pesoDelEditor } from './tablas'
 
-const TODOS = archivosTs(path.join(RAIZ, 'src'))
-const fuenteDe = (relativo: string): string => readFileSync(path.join(RAIZ, relativo), 'utf8')
 const ESCENA_DEL_HOME = fuenteDe(`${DESTINO}/EscenaDelHome.tsx`)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -68,23 +67,10 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Nadie importa un especificador de la mudanza que ya no existe')
 
-/**
- * ⚠ **EL BARRIDO SE ACOTA AL RADIO DE ESTE SPRINT, con nombre y motivo.** Un
- * barrido de todo `src` encuentra hoy seis "rotos" y **los seis son cadenas de
- * FIXTURE adentro de controles positivos de otros instrumentos**, escritas a
- * propósito para que un detector las encuentre (§7.25: *un escáner que lee
- * código fuente lee también las cadenas*). Se afirma sobre lo que este sprint
- * controla, y **se comprueba que lo excluido siga teniendo lo que el detector
- * busca** — sin esa segunda mitad, acotar sería un agujero con forma de decisión.
- */
-const DEL_SPRINT = (linea: string): boolean =>
-  MODULOS_MUDADOS.some((m) => linea.endsWith(`/${m.replace(/\.tsx?$/, '')}`)) ||
-  linea.includes(ORIGEN) ||
-  linea.includes(DESTINO) ||
-  linea.includes('probe-escena/_components')
-
-const todosLosRotos = especificadoresRotos(TODOS)
-const rotosDelSprint = todosLosRotos.filter(DEL_SPRINT)
+/** El acote al radio del sprint y su motivo viven en `s8-escena-soporte.ts`: el
+ *  barrido entero encuentra fixtures de otros instrumentos, y afirmar sobre ellos
+ *  sería afirmar sobre código que este sprint no controla. */
+const { todos: todosLosRotos, delSprint: rotosDelSprint } = rotosDeLaMudanza(TODOS)
 
 afirmarIgual(
   rotosDelSprint,
@@ -111,23 +97,15 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El único vínculo que queda del destino hacia /probe-escena es de TIPO')
 
-const deLaAplicacion = TODOS.filter((a) => !a.includes(`${path.sep}__tests__${path.sep}`))
-const enElDestino = deLaAplicacion.filter((a) => a.includes(path.join('v3', '_lib', 'escena')))
-const conValorDelPanel = enElDestino.filter((a) =>
-  importaValorDe(readFileSync(a, 'utf8'), 'probe-escena'),
-)
+const deLaAplicacion = soloAplicacion(TODOS)
 afirmarIgual(
-  conValorDelPanel.map((a) => path.relative(RAIZ, a).split(path.sep).join('/')),
+  conValorDelPanel(TODOS),
   [],
   'ningún módulo de la escena importa un VALOR del panel de calibración',
 )
 
-const conTipoDelPanel = enElDestino
-  .filter((a) => referenciasA(readFileSync(a, 'utf8'), 'probe-escena').length > 0)
-  .map((a) => path.basename(a))
-  .sort()
 afirmarIgual(
-  conTipoDelPanel,
+  conTipoDelPanel(TODOS),
   ['OrbitRig.tsx', 'ProbeStage.tsx', 'pistaDelHome.ts'].sort(),
   'y los TRES que lo nombran lo hacen SOLO por el tipo `ChoreoEditor` — ver el freno del reporte',
 )
@@ -248,15 +226,14 @@ titulo('7 · La marca la importa UN archivo, y la escena no toca el sistema de m
  * mismo reportaría dos consumidores donde hay uno. La afirmación de abajo exige
  * que lo excluido SIGA teniendo lo que el detector busca.
  */
-const esLaMarca = (spec: string): boolean => /\/marcaEscena$/.test(spec)
-const consumidoresDeLaMarca = quienImporta(deLaAplicacion, esLaMarca)
+const consumidores = consumidoresDeLaMarca(deLaAplicacion)
 afirmarIgual(
-  consumidoresDeLaMarca,
+  consumidores,
   [`${DESTINO}/EscenaDelHome.tsx`],
   'un solo archivo de la aplicación importa marcaEscena.ts',
 )
 afirmar(
-  quienImporta(TODOS, esLaMarca).length > consumidoresDeLaMarca.length,
+  consumidoresDeLaMarca(TODOS).length > consumidores.length,
   '  y lo excluido —los instrumentos— sigue importándola: la exclusión no está vacía',
 )
 

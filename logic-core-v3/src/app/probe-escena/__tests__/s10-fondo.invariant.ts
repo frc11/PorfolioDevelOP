@@ -58,6 +58,17 @@ section('Las dos capas caben donde tienen que caber')
     MOIRE_NEAR_RADIUS > farthestCamera + 5,
     `capa fina en ${MOIRE_NEAR_RADIUS}, cámara máxima en ${farthestCamera}`
   )
+  /**
+   * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** Corría trece
+   * afirmaciones sin una sola entrada equivocada. Ésta ataca la más barata de
+   * romper: la holgura de 5 unidades entre la capa y la cámara sale en verde
+   * también si `CHOREO_KEYFRAMES` se leyera mal y el máximo diera cualquier cosa.
+   */
+  check(
+    'control positivo — el mismo margen NO alcanza contra una cámara puesta sobre la capa',
+    !(MOIRE_NEAR_RADIUS > MOIRE_NEAR_RADIUS - 1 + 5),
+    `una cámara a ${MOIRE_NEAR_RADIUS - 1} contra una capa en ${MOIRE_NEAR_RADIUS}: el margen de 5 no entra`
+  )
   check(
     'la gruesa está DETRÁS de la fina, que es lo que produce el paralaje',
     MOIRE_FAR_RADIUS > MOIRE_NEAR_RADIUS,
@@ -82,6 +93,19 @@ section('Las dos capas caben donde tienen que caber')
     ]
     const center: readonly [number, number, number] = [0, FLOOR_Y, 0]
     const crossings = layers.map((layer) => celosiaCrossings(center, noon, layer, 0))
+    /**
+     * El MISMO buscador de cruces, con el rayo apuntando al NADIR: hacia abajo no
+     * hay capa que cruzar, así que tiene que devolver cero. Sin esto, «el rayo
+     * cruza las dos capas» pasaría también con un buscador que devolviera siempre
+     * un cruce — que es la forma en que un chequeo de geometría se muere callado.
+     */
+    const alPiso: readonly [number, number, number] = [0, -1, 0]
+    const abajo = layers.map((layer) => celosiaCrossings(center, alPiso, layer, 0))
+    check(
+      'control positivo — el mismo buscador NO encuentra cruces con el rayo apuntando al piso',
+      abajo.every((found) => found.length === 0),
+      `${abajo.map((f) => f.length).join(' y ')} cruces hacia abajo, contra los que encuentra hacia el sol`
+    )
     check(
       'la luz llega de AFUERA: el rayo al sol sale cruzando las dos capas',
       crossings.every((found) => found.length === 1),
@@ -104,6 +128,13 @@ section('Las dos capas caben donde tienen que caber')
     'y la gruesa también, que es lo que le fija el borde de abajo',
     MOIRE_FAR_RADIUS < farRoom,
     `${MOIRE_FAR_RADIUS} contra ${farRoom.toFixed(1)} a y=${MOIRE_FAR_BOTTOM} — a y=−4 el ciclorama está en ${cycloramaRadius(-4).toFixed(1)}, o sea que ahí no entraría`
+  )
+  /** El detalle de arriba nombra un caso que NO se estaba corriendo. Acá se corre:
+   *  la misma comparación, a la altura donde la capa gruesa no entraría. */
+  check(
+    'control positivo — la misma comparación VE la altura a la que la gruesa NO entra',
+    !(MOIRE_FAR_RADIUS < cycloramaRadius(-4)),
+    `a y=−4 el ciclorama está en ${cycloramaRadius(-4).toFixed(1)} y la capa mide ${MOIRE_FAR_RADIUS} — es el borde que le fija el bottom`
   )
 }
 
@@ -165,10 +196,28 @@ section('Las celdas: cuadradas en su superficie y cuadradas en ángulo')
     )
   }
 
+  /** La MISMA `verticalPitch`, con un conteo de celdas que no le corresponde al
+   *  radio: si la celda siguiera saliendo cuadrada, la función no estaría
+   *  mirando ninguno de sus dos argumentos. */
+  const torcida = Math.abs(
+    (2 * Math.PI * MOIRE_FAR_RADIUS) / MOIRE_COARSE_CELLS -
+      verticalPitch(MOIRE_FAR_RADIUS, MOIRE_COARSE_CELLS + 7)
+  )
+  check(
+    'control positivo — con siete celdas de más la celda YA NO es cuadrada',
+    torcida > 1e-9,
+    `${torcida.toFixed(4)} de mundo de diferencia contra una tolerancia de 1e-9`
+  )
+
   check(
     'la trama fina es el doble de la gruesa MÁS el desajuste',
     FINE_CELLS === 2 * MOIRE_COARSE_CELLS + MOIRE_MISMATCH,
     `${FINE_CELLS} = 2 × ${MOIRE_COARSE_CELLS} + ${MOIRE_MISMATCH}`
+  )
+  check(
+    'control positivo — la MISMA cuenta con otro desajuste da otro número de celdas',
+    fineCells(MOIRE_MISMATCH + 3) === FINE_CELLS + 3 && fineCells(MOIRE_MISMATCH + 3) !== FINE_CELLS,
+    `${fineCells(MOIRE_MISMATCH + 3)} contra ${FINE_CELLS} — \`fineCells\` lee su argumento, no devuelve una constante`
   )
   const ratio = FINE_CELLS / MOIRE_COARSE_CELLS
   check(

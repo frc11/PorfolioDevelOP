@@ -87,20 +87,48 @@ afirmarIgual(LANE.length, 34, 'los archivos del lane de la escena, derivados de 
  * (`s11-celosia.invariant.ts:116`), que el patrón anclado descarta a propósito.
  *
  * **Y los 18 nunca fueron los controles: eran las LÍNEAS con la frase.** Contados
- * por comprobación —la unidad del otro lane— los declarados son 36. El número
+ * por comprobación —la unidad del otro lane— los declarados eran 36. Ese número
  * subió porque cambió de unidad, no porque aparecieran controles nuevos.
+ *
+ * ── ⚠ Y EN SITIO-S10 SUBIÓ OTRA VEZ, Y AHORA SÍ ES PORQUE APARECIERON ──────
+ *
+ * **36 → 80.** Los 44 nuevos son los controles positivos que `s7e` y `s10e` no
+ * tenían, y que §7.33 dejaba anotados con esas palabras: *«corren 10 invariantes
+ * y 152 afirmaciones sin un solo control positivo. No es un problema de
+ * marcador: no existen.»* Ahora existen, repartidos en los diez archivos, y el
+ * reparto pasa de **17 de los 34** a **27**: los diez que no declaraban ninguno.
+ *
+ * **Actualizar estos dos números NO es aflojar una afirmación, y la distinción
+ * importa.** Un umbral se afloja cuando la propiedad que custodia dejó de
+ * cumplirse y se baja la vara para que pase. Acá la propiedad es un CENSO —
+ * cuántos controles declara el lane— y el sprint existía para moverlo. Es la
+ * misma forma de §7.29: *un invariante que se pone en rojo porque el problema
+ * que custodiaba se resolvió no es una regresión, es la señal de que el trabajo
+ * llegó*. Y como en aquél, **el frente que lo movió lo vio y NO lo tocó** —el
+ * archivo no estaba en sus editables— así que la re-medición la hizo el agente
+ * principal en la integración.
+ *
+ * `contarControles` **no se tocó**, y ésa sigue siendo la parte que importa: los
+ * 44 nuevos usan el marcador de etiqueta que el contador ya sabía leer, así que
+ * el anclaje a la forma de la línea —la protección de §7.25— queda intacto.
  */
-const MARCADOS_HOY = 36
+const MARCADOS_HOY = 80
+/** Los que había antes de SITIO-S10. Se conserva para que el delta se lea. */
+const MARCADOS_ANTES_DE_S10 = 36
 const marcadosPorArchivo = LANE.map((archivo) => etiquetasMarcadas(leer(archivo)))
 afirmarIgual(
   marcadosPorArchivo.reduce((n, m) => n + m, 0),
   MARCADOS_HOY,
-  'etiquetas con el marcador en el fuente de los 34 (la corrida real de S9 dio el mismo número)',
+  `etiquetas con el marcador en el fuente de los 34 — ${MARCADOS_ANTES_DE_S10} antes de SITIO-S10, ${MARCADOS_HOY} ahora`,
 )
-console.log(`  · 14 → ${MARCADOS_HOY} controles visibles; 18 líneas con la frase → ${MARCADOS_HOY}, ya sin diferencia`)
+console.log(`  · 14 → ${MARCADOS_ANTES_DE_S10} al unificar la unidad (SITIO-S9) → ${MARCADOS_HOY} al escribir los que faltaban (SITIO-S10): +${MARCADOS_HOY - MARCADOS_ANTES_DE_S10}, y éstos SÍ son controles nuevos`)
 
 const conMarcador = LANE.filter((_, i) => marcadosPorArchivo[i] > 0)
-afirmarIgual(conMarcador.length, 17, 'y los 36 se reparten entre 17 de los 34 archivos — la mitad del lane no declara ninguno')
+afirmarIgual(
+  conMarcador.length,
+  27,
+  `y los ${MARCADOS_HOY} se reparten entre 27 de los 34 archivos — eran 17, y los diez que se sumaron son exactamente los de \`s7e\` y \`s10e\``,
+)
 
 /** El contador SÍ ve una etiqueta marcada, en la forma exacta que el arnés imprime. */
 afirmarIgual(contarControles('  ok  control positivo — algo  · 3 de 4'), 1, 'el contador ve una etiqueta marcada')

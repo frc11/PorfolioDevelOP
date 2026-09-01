@@ -106,6 +106,27 @@ section('La celosía y la luz principal comparten eje')
       180) /
     Math.PI
   check('con el toggle de luz solidaria, la celosía gira con ella', followAngle < 1e-6)
+
+  /**
+   * ⚠️ **EL CONTROL POSITIVO DEL DETECTOR DE COLINEALIDAD (SITIO-S10).** Lo que
+   * afirma la sección es un ángulo por debajo de 1e-4° entre dos vectores, y eso
+   * sale en verde también si el comparador estuviera devolviendo siempre 0. Se le
+   * da el MISMO comparador con el gobo girado un grado alrededor de Y.
+   */
+  const key = targets.key.position.clone().normalize()
+  const torcido = targets.celosia.uCelosiaSun.value.clone().normalize()
+  torcido.applyAxisAngle(new THREE.Vector3(0, 1, 0), 1 * RAD)
+  const desvio = (key.angleTo(torcido) * 180) / Math.PI
+  check(
+    'control positivo — el mismo comparador VE un gobo girado un grado',
+    desvio > 1e-4,
+    `${desvio.toFixed(3)}° — el umbral de la afirmación es 1e-4°`
+  )
+  check(
+    'control positivo — y el medidor de longitud VE un vector que dejó de ser unitario',
+    Math.abs(torcido.clone().multiplyScalar(2).length() - 1) > 1e-9,
+    'la afirmación "el vector es unitario" mide la longitud, no la asume'
+  )
 }
 
 // ── 2 · El arco: una tabla, dos curvas que no pueden contradecirse ──────────
@@ -132,19 +153,37 @@ check(
   `${LIGHT_ARC[0].elevationDeg}°`
 )
 
-let descends = true
-let sweeps = true
-for (let i = 1; i < LIGHT_ARC.length; i += 1) {
-  if (LIGHT_ARC[i].elevationDeg > LIGHT_ARC[i - 1].elevationDeg) descends = false
-  if (LIGHT_ARC[i].azimuthDeg < LIGHT_ARC[i - 1].azimuthDeg) sweeps = false
-}
-check('la elevación nunca sube: el sol baja y no vuelve', descends)
-check('el azimut barre en un solo sentido: es un día, no un péndulo', sweeps)
+/**
+ * Los dos detectores de monotonía, con nombre y sobre una lista que entra por
+ * parámetro: es lo único que permite correrlos contra un arco FABRICADO que las
+ * viola. Sin eso, "la elevación nunca sube" sale en verde también con el bucle
+ * roto — que es exactamente la clase de defecto que un control positivo ve.
+ */
+type Tramo = { readonly elevationDeg: number; readonly azimuthDeg: number }
+const baja = (arco: readonly Tramo[]): boolean =>
+  arco.every((stop, i) => i === 0 || stop.elevationDeg <= arco[i - 1].elevationDeg)
+const barreEnUnSentido = (arco: readonly Tramo[]): boolean =>
+  arco.every((stop, i) => i === 0 || stop.azimuthDeg >= arco[i - 1].azimuthDeg)
+const sobreElHorizonte = (arco: readonly Tramo[]): boolean =>
+  arco.every((stop) => stop.elevationDeg > 0)
+
+check('la elevación nunca sube: el sol baja y no vuelve', baja(LIGHT_ARC))
+check('el azimut barre en un solo sentido: es un día, no un péndulo', barreEnUnSentido(LIGHT_ARC))
 check(
   'el sol nunca baja del horizonte',
-  LIGHT_ARC.every((stop) => stop.elevationDeg > 0),
+  sobreElHorizonte(LIGHT_ARC),
   `mínimo ${Math.min(...LIGHT_ARC.map((s) => s.elevationDeg))}°`
 )
+
+/** Un arco fabricado que viola las tres a la vez. Los tres detectores lo ven. */
+const ARCO_ROTO: readonly Tramo[] = [
+  { elevationDeg: 10, azimuthDeg: 0 },
+  { elevationDeg: 20, azimuthDeg: -30 },
+  { elevationDeg: -5, azimuthDeg: 90 },
+]
+check('control positivo — el detector de descenso VE una elevación que vuelve a subir', !baja(ARCO_ROTO))
+check('control positivo — el del barrido VE un azimut que se devuelve', !barreEnUnSentido(ARCO_ROTO))
+check('control positivo — y el del horizonte VE un sol bajo tierra', !sobreElHorizonte(ARCO_ROTO), 'el tramo del medio está en −5°')
 
 /**
  * ⚠️ **S9 subió el techo de 115° a 180°, y no es aflojar una regla: es que la

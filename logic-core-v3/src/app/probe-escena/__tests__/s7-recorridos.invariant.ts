@@ -18,7 +18,6 @@ import { VARIANT_CALIBRADA_KEYFRAMES } from '../_components/variantCalibrada'
 import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import type { ChoreoKeyframe } from '@/app/v3/_lib/escena/choreographyTypes'
 import { MOUSE_HEIGHT_FACTOR } from '@/app/v3/_lib/escena/choreographyPhysics'
-import { PROBE_RANGES } from '@/app/v3/_lib/escena/probeStore'
 import {
   FLOOR_Y,
   bowBetween,
@@ -28,93 +27,43 @@ import {
   section,
   speedAt,
 } from './harness'
-
-// ── Las 23 poses de S6, congeladas ──────────────────────────────────────────
-
-/**
- * El recorrido tal cual lo dejó S6, con las 21 posiciones calibradas por el
- * humano y los 2 derivados de S4. **Es la referencia contra la que se verifica
- * que ni S7 ni S9 tocaron una sola pose.** Si esta tabla y el archivo divergen,
- * uno de los dos está mal y hay que mirar cuál.
- */
-const S6_POSES: readonly (readonly [string, number, number, number, number, number, number])[] = [
-  ['entrada · mirada alta', 0, 0, 9, 15, 0.9, 0],
-  ['hero', 0.125, 0, 0, 11, 0.75, 0],
-  ['hero · sostén', 0.188, 0, 0, 11, 0.75, 0],
-  ['quiénes somos · persona 1', 0.25, 0, 5, 9, -0.8, 0],
-  ['quiénes somos · persona 1 · sostén', 0.293, 0, 5, 9, -0.8, 0],
-  ['persona 2 · cruce (apex)', 0.335, 0, 4.5431, 10.7012, -0.1568, 0],
-  ['quiénes somos · persona 2', 0.375, 0, 5, 9, 0.8, 0],
-  ['quiénes somos · persona 2 · sostén', 0.395, 0, 2.6492, 9.8298, 0.5698, 0],
-  ['números · baja la altura', 0.445, 0, -3.9, 9, 0.4762, 0],
-  ['números · sube y se aleja', 0.491, 0, 1, 11, 0.0129, 0],
-  ['números', 0.5, 0, 1, 14.1, 0, 0],
-  ['números · sostén', 0.563, 0, 0, 12, 0, 0],
-  ['portfolio', 0.625, 45, 6, 7, -1, 0],
-  ['portfolio · sostén', 0.643, 45, 6, 7, -1, 0],
-  ['demos · giro ¼', 0.679, 135, 3.9, 7, -0.5, 0],
-  ['demos · giro ½', 0.697, 180, -3.9, 8, 0, 0.1],
-  ['demos · giro ¾', 0.715, 225, -3.9, 7, -0.5, 0],
-  ['demos', 0.75, 315, -3.9, 7, 1, 0],
-  ['demos · sostén', 0.788, 315, -3.9, 7, 1, 0],
-  ['final · se levanta', 0.825, 315, 4.5, 7, 1, 0],
-  ['final · gira', 0.85, 360, 4.5, 8, 0, 0],
-  ['cierre · sostén', 0.89, 360, 1.5, 16, 0, 0],
-  ['cierre', 1, 360, 1.5, 16, 0, 0],
-]
-
-/** Los siete arcos que S7 agregó. */
-const S7_ARCS: readonly string[] = [
-  'hero · arco de bajada',
-  'quiénes somos · arco de entrada',
-  'números · arco de caída',
-  'números · deriva en arco',
-  'portfolio · arco de aproximación',
-  'final · arco de subida',
-  'cierre · arco de retirada',
-]
-
-/** El recorrido de S6 reconstruido: la calibrada MENOS los siete arcos. */
-const WITHOUT_ARCS = VARIANT_CALIBRADA_KEYFRAMES.filter(
-  (keyframe) => !S7_ARCS.includes(keyframe.name)
-)
+// La tabla de referencia de S6, los detectores y sus entradas rotas viven en el
+// soporte: acá quedan las afirmaciones. La costura, y su porqué, están allá.
+import {
+  REF_CORRIDA,
+  ROTO,
+  S6_POSES,
+  S7_ARCS,
+  WITHOUT_ARCS,
+  atsCrecientes,
+  fueraDeRango,
+  seMovieron,
+} from './s7-recorridos-soporte'
 
 // ── 1 · Estructura de los cuatro recorridos ─────────────────────────────────
 
 section('Todos los recorridos son reproducibles')
 
+check('control positivo — el detector de `at` crecientes VE uno que no avanza', !atsCrecientes(ROTO))
+check(
+  'control positivo — y el de rangos VE una pose fuera de los sliders, sin señalar la sana',
+  fueraDeRango(ROTO).length === 1 && fueraDeRango(ROTO)[0] === 'rota',
+  `señala "${fueraDeRango(ROTO).join(', ')}"`
+)
+
 for (const variant of CHOREO_VARIANTS) {
   const { keyframes, label } = variant
 
-  let increasing = true
-  for (let i = 1; i < keyframes.length; i += 1) {
-    if (keyframes[i].at <= keyframes[i - 1].at) increasing = false
-  }
-  check(`${label}: los \`at\` son estrictamente crecientes`, increasing, `${keyframes.length} keyframes`)
+  check(`${label}: los \`at\` son estrictamente crecientes`, atsCrecientes(keyframes), `${keyframes.length} keyframes`)
   check(
     `${label}: arranca en 0 y termina en 1`,
     keyframes[0].at === 0 && keyframes[keyframes.length - 1].at === 1
   )
 
-  let inRange = true
-  const offenders: string[] = []
-  for (const keyframe of keyframes) {
-    const { height, distance, frameX, frameY } = keyframe.pose
-    const ok =
-      height >= PROBE_RANGES.height.min &&
-      height <= PROBE_RANGES.height.max &&
-      distance >= PROBE_RANGES.distance.min &&
-      distance <= PROBE_RANGES.distance.max &&
-      Math.abs(frameX) <= 1 &&
-      Math.abs(frameY) <= 1
-    if (!ok) {
-      inRange = false
-      offenders.push(keyframe.name)
-    }
-  }
+  const offenders = fueraDeRango(keyframes)
   check(
     `${label}: todas las poses caben en los rangos de los sliders`,
-    inRange,
+    offenders.length === 0,
     offenders.length > 0 ? offenders.join(', ') : 'height, distance y encuadre'
   )
 
@@ -140,28 +89,19 @@ check(
   `${WITHOUT_ARCS.length} contra ${S6_POSES.length}`
 )
 
-let identical = true
-const drifted: string[] = []
-for (let i = 0; i < Math.min(WITHOUT_ARCS.length, S6_POSES.length); i += 1) {
-  const live = WITHOUT_ARCS[i]
-  const [name, at, angleDeg, height, distance, frameX, frameY] = S6_POSES[i]
-  const same =
-    live.name === name &&
-    live.at === at &&
-    live.pose.angleDeg === angleDeg &&
-    live.pose.height === height &&
-    live.pose.distance === distance &&
-    live.pose.frameX === frameX &&
-    live.pose.frameY === frameY
-  if (!same) {
-    identical = false
-    drifted.push(live.name)
-  }
-}
+const drifted = seMovieron(WITHOUT_ARCS, S6_POSES)
 check(
   'las 23 poses de S6 están intactas, `at` incluido',
-  identical,
+  drifted.length === 0,
   drifted.length > 0 ? drifted.join(', ') : 'nombre, at y los cinco canales'
+)
+/** Un milímetro de mundo corrido en la altura de la primera pose. Si la
+ *  comparación no lo viera, "están intactas" no estaría midiendo nada. */
+const corridas = seMovieron(WITHOUT_ARCS, REF_CORRIDA)
+check(
+  'control positivo — la misma comparación VE una referencia con 1 mm corrido',
+  corridas.length === 1,
+  `señala "${corridas.join(', ')}" y ninguna otra de las ${S6_POSES.length}`
 )
 
 // ── 3 · Los siete arcos ─────────────────────────────────────────────────────
@@ -198,6 +138,26 @@ for (const arc of arcs) {
   )
 }
 
+/**
+ * ⚠️ **EL CONTROL DE `bowBetween`, y es el que sostiene las siete cifras de
+ * arriba.** El umbral es `bow − before >= 1` de mundo; si el medidor devolviera
+ * cualquier cosa creciente, las siete pasarían igual. Se lo corre contra el
+ * MISMO tramo del recorrido de S6 comparado consigo mismo: ahí no hay arco, así
+ * que la diferencia tiene que ser exactamente cero.
+ */
+{
+  const arco = arcs[0]
+  const i = VARIANT_CALIBRADA_KEYFRAMES.indexOf(arco)
+  const from = VARIANT_CALIBRADA_KEYFRAMES[i - 1].at
+  const to = VARIANT_CALIBRADA_KEYFRAMES[i + 1].at
+  const sinArco = bowBetween(s6Track, from, to)
+  check(
+    'control positivo — el mismo medidor da CERO de ganancia sobre un tramo sin arco',
+    !(sinArco - sinArco >= 1),
+    `desvío ${sinArco.toFixed(2)} contra sí mismo — el umbral de "curva de verdad" es 1 de mundo`
+  )
+}
+
 /** El mayor salto de velocidad instantánea de un recorrido, y dónde. */
 function worstJump(track: ReturnType<typeof makeTrack>, keyframes: readonly ChoreoKeyframe[]) {
   let worst = 0
@@ -230,6 +190,22 @@ for (let i = 1; i < 200; i += 1) {
   if (Math.abs(speedAt(calibradaTrack, p) - speedAt(s6Track, p)) > 0.01) demosUntouched = false
 }
 check('la velocidad DENTRO de Demos es idéntica a la de S6', demosUntouched)
+
+/**
+ * El MISMO comparador, corrido sobre un tramo donde los dos recorridos SÍ
+ * difieren (el arco de bajada del hero). Si diera "idéntica" ahí también,
+ * `speedAt` no estaría leyendo el track que se le pasa.
+ */
+let heroCambio = false
+for (let i = 1; i < 200; i += 1) {
+  const p = 0.06 + (0.06 * i) / 200
+  if (Math.abs(speedAt(calibradaTrack, p) - speedAt(s6Track, p)) > 0.01) heroCambio = true
+}
+check(
+  'control positivo — el mismo comparador VE la diferencia en el tramo que el arco SÍ cambió',
+  heroCambio,
+  'entre p=0,06 y p=0,12, donde vive el arco de bajada del hero'
+)
 
 // ── 4 · La cámara no se mete donde no hay escena ────────────────────────────
 

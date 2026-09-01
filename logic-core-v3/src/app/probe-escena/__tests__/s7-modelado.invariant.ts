@@ -51,8 +51,15 @@ const track = makeTrack(CHOREO_KEYFRAMES)
 
 section('Modelado: γ entre la luz y el observador')
 
-/** γ: ángulo 3D entre la dirección a la luz y la dirección al observador. */
-function gammaAt(p: number, fixed = false): number {
+/**
+ * γ: ángulo 3D entre la dirección a la luz y la dirección al observador.
+ *
+ * `desdeLaCamara` es lo que hace que esto se pueda CONTROLAR: pone la luz sobre
+ * el eje de la cámara, o sea luz plana perfecta (γ = 0). Es la entrada
+ * deliberadamente equivocada con la que se prueba que el detector no esté ciego
+ * — sin ella, "la luz modela" saldría en verde también con la cuenta rota.
+ */
+function gammaAt(p: number, fixed = false, desdeLaCamara = false): number {
   const pose = emptyPose()
   const cam = cameraAt(track, p, 16 / 9, pose)
   const view = cam.position
@@ -60,21 +67,28 @@ function gammaAt(p: number, fixed = false): number {
   sampleLightArc(p, arc)
   const az = (fixed ? -42 : arc.azimuthDeg) * RAD
   const el = (fixed ? 36 : arc.elevationDeg) * RAD
-  const light: Vec3 = [Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)]
+  // La entrada equivocada NO cortocircuita la cuenta: pone el vector de luz sobre
+  // el eje del observador y deja que la MISMA trigonometría diga cuánto da.
+  const light: Vec3 = desdeLaCamara
+    ? [view[0] / length, view[1] / length, view[2] / length]
+    : [Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)]
   const cosine = (view[0] * light[0] + view[1] * light[1] + view[2] * light[2]) / length
   return (Math.acos(Math.min(1, Math.max(-1, cosine))) * 180) / Math.PI
 }
 
-function band(from: number, to: number, fixed = false): { min: number; max: number } {
+function band(from: number, to: number, fixed = false, desdeLaCamara = false): { min: number; max: number } {
   let min = 999
   let max = -1
   for (let i = 0; i <= 40; i += 1) {
-    const g = gammaAt(from + ((to - from) * i) / 40, fixed)
+    const g = gammaAt(from + ((to - from) * i) / 40, fixed, desdeLaCamara)
     min = Math.min(min, g)
     max = Math.max(max, g)
   }
   return { min, max }
 }
+
+/** EL PREDICADO, con nombre: es lo que se corre contra la entrada equivocada. */
+const noModela = ({ min, max }: { min: number; max: number }): boolean => min < 24 || max > 105
 
 /**
  * Las ventanas donde el logo TIENE que estar modelado: las que llevan texto que
@@ -94,12 +108,31 @@ const bands: string[] = []
 for (const [name, from, to] of MODELADAS) {
   const { min, max } = band(from, to)
   bands.push(`${name} ${min.toFixed(0)}–${max.toFixed(0)}°`)
-  if (min < 24 || max > 105) modeladasOk = false
+  if (noModela({ min, max })) modeladasOk = false
 }
 check(
   'en las cinco ventanas que llevan texto la luz modela (tres cuartos o lateral)',
   modeladasOk,
   bands.join(' · ')
+)
+
+/**
+ * ⚠️ **LOS CONTROLES POSITIVOS DE ESTE ARCHIVO (SITIO-S10).** El invariante corría
+ * cuatro afirmaciones sobre γ **sin una sola entrada equivocada**: nada probaba
+ * que `band()` supiera reportar una ventana mal iluminada, así que un γ roto
+ * —una cuenta que devolviera siempre 90°— habría salido en verde. Se le da la
+ * luz PLANA por antonomasia, la que viene del eje de la cámara.
+ */
+const planas = MODELADAS.map(([nombre, from, to]) => [nombre, band(from, to, false, true)] as const)
+check(
+  'control positivo — con la luz sobre el eje de la cámara, las cinco ventanas quedan SIN modelar',
+  planas.every(([, b]) => noModela(b)),
+  planas.map(([nombre, b]) => `${nombre} ${b.min.toFixed(0)}–${b.max.toFixed(0)}°`).join(' · ')
+)
+check(
+  'control positivo — y el mínimo del recorrido entero cae DEBAJO del umbral de luz plana',
+  !(Math.min(...Array.from({ length: 501 }, (_, i) => gammaAt(i / 500, false, true))) > 24),
+  'es el mismo predicado que la afirmación de "no hay un solo punto con luz plana"'
 )
 
 /**
@@ -123,6 +156,11 @@ check(
   'en Demos y en el cierre la luz viene de atrás, que es lo que el sprint pide',
   contraluzOk,
   contraluzBands.join(' · ')
+)
+check(
+  'control positivo — el MISMO umbral de contraluz da falso con la luz sobre el eje de la cámara',
+  !CONTRALUZ.every(([, from, to]) => band(from, to, false, true).min >= 130),
+  'sin esto, "viene de atrás" pasaría también con γ clavado en cualquier valor alto'
 )
 
 let gammaMinArc = 999
@@ -152,10 +190,7 @@ check(
  * rango** —Quiénes somos a 160° es contraluz puro— y deja una tercera
  * (Números, 104°) rozando el límite. Eso es lo que se verifica acá.
  */
-const rotas = MODELADAS.filter(([, from, to]) => {
-  const { min, max } = band(from, to, true)
-  return min < 24 || max > 105
-})
+const rotas = MODELADAS.filter(([, from, to]) => noModela(band(from, to, true)))
 check(
   'una key fija dejaría ventanas de texto sin modelar, y el arco no',
   rotas.length >= 2 && modeladasOk,
