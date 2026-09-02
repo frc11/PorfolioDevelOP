@@ -84,7 +84,11 @@ export type IntroEngine = {
   timelineRef: React.RefObject<IntroTimeline>
   /** `null` en producción: ver la nota abajo. */
   devApi: IntroDevApi | null
-  handleMeshReady: () => void
+  /**
+   * Lo llama el canvas del logo cuando empieza y cuando **deja** de pintar.
+   * Las dos direcciones importan: el porqué está en `introRelay.ts`.
+   */
+  handleMeshPainted: (painted: boolean) => void
 }
 
 export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
@@ -105,7 +109,7 @@ export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
   // reemplace la función de un `useTransform` al re-renderizar.
   const timelineRef = useRef(timeline)
   const planRef = useRef(EMPTY_FLIGHT_PLAN)
-  const meshReadyRef = useRef(false)
+  const meshPaintedRef = useRef(false)
   const meshLatchRef = useRef<boolean | null>(null)
   const controlsRef = useRef<AnimationPlaybackControls | null>(null)
 
@@ -113,12 +117,15 @@ export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
   const channels = useIntroChannels(progress, {
     timelineRef,
     planRef,
-    meshReadyRef,
+    meshPaintedRef,
     meshLatchRef,
   })
 
-  const handleMeshReady = useCallback(() => {
-    meshReadyRef.current = true
+  // Un ref y nada más: esto lo llama un `useFrame` y un escucha de contexto
+  // perdido, o sea que puede llegar en cualquier cuadro. Un `setState` acá
+  // rompería la regla de "cero re-renders durante la secuencia".
+  const handleMeshPainted = useCallback((painted: boolean) => {
+    meshPaintedRef.current = painted
   }, [])
 
   // ── Publicar el plan y el ritmo a los muestreadores ───────────────────────
@@ -181,11 +188,9 @@ export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
             getTimeline: () => timelineRef.current,
             getPlan: () => planRef.current,
             getMeshState: () =>
-              meshLatchRef.current === false
+              meshLatchRef.current === false || !meshPaintedRef.current
                 ? 'fallback SVG'
-                : meshReadyRef.current
-                  ? 'listo'
-                  : 'cargando',
+                : 'pintando',
             replay,
             play: () => controlsRef.current?.play(),
             pause: () => controlsRef.current?.pause(),
@@ -198,5 +203,5 @@ export function useIntroEngine(options: IntroEngineOptions): IntroEngine {
     [progress, phases, replay]
   )
 
-  return { progress, channels, ink: plan.ink, text, viewport, timelineRef, devApi, handleMeshReady }
+  return { progress, channels, ink: plan.ink, text, viewport, timelineRef, devApi, handleMeshPainted }
 }

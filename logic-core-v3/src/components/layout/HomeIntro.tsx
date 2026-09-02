@@ -170,7 +170,7 @@ export function HomeIntro() {
           viewport={engine.viewport}
           ink={engine.ink}
           text={engine.text}
-          onMeshReady={engine.handleMeshReady}
+          onMeshPainted={engine.handleMeshPainted}
         />
       )}
       {IntroDevController && engine.devApi ? (

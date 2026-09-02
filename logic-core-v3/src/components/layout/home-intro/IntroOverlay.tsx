@@ -47,7 +47,8 @@ type IntroOverlayProps = {
   /** Tamaño de la tinta. Constante durante toda la secuencia. */
   ink: IntroInkSize
   text: IntroLockupText
-  onMeshReady: () => void
+  /** Lo llama el canvas del logo cuando empieza y cuando deja de pintar. */
+  onMeshPainted: (painted: boolean) => void
 }
 
 export function IntroOverlay({
@@ -57,7 +58,7 @@ export function IntroOverlay({
   viewport,
   ink,
   text,
-  onMeshReady,
+  onMeshPainted,
 }: IntroOverlayProps) {
   return (
     <div
@@ -90,7 +91,7 @@ export function IntroOverlay({
         reveal={channels.logoReveal}
         opacity={channels.meshOpacity}
         ink={channels.ink}
-        onReady={onMeshReady}
+        onPainted={onMeshPainted}
       />
     </div>
   )

@@ -16,29 +16,51 @@ import {
  * Módulo puro: sin React, sin `motion`, sin DOM. Corre en node.
  *
  * ════════════════════════════════════════════════════════════════════════════
- * NO HAY RELEVO. LAS DEL INTRO **BAJAN** ANTES DE QUE SE VAYA EL BLANCO.
+ * 🔴 V3-A · LAS DEL INTRO SE **ACOMODAN** EN EL CAMPO DE LA ESCENA
  * ════════════════════════════════════════════════════════════════════════════
  *
- * Las que caen son las del intro; las que quedan flotando son las de la escena,
- * que ya estaban ahí desde siempre. Nadie puede notar que no son las mismas
- * **porque nunca se ven las dos poblaciones a la vez**, y ése es el único
- * requisito del mecanismo. La bajada es la tapadera, igual que la inversión de
- * la tinta es la tapadera del relevo 2D→3D.
+ * **Hasta acá bajaban.** El campo entero se desplazaba `INTRO_FALL_WORLD`
+ * unidades de mundo y se apagaba, y esa bajada era la tapadera del relevo:
+ * caían las del intro y quedaban las de la escena, que ya estaban ahí. El
+ * humano miró y dijo lo contrario: *«me gusta cómo empieza pero no cómo se van.
+ * Lo que podríamos hacer sería que esas mismas partículas se acomoden en la
+ * escena»*.
  *
- * El margen está medido, no estimado — `introParticleTiming.invariant.ts`.
+ * Ahora **cada mota viaja hasta una mota real del campo de la escena** y se
+ * queda: se corre hasta su posición, se encoge hasta su diámetro y se mueve
+ * hasta su color. El destino y la asignación viven en
+ * `introParticleLanding.ts`; el ritmo —acomodarse primero, relevarse después—
+ * en `introParticleTiming.ts`.
+ *
+ * ── Lo que NO cambia: nunca se ven las dos poblaciones ─────────────────────
+ *
+ * Sigue siendo el único requisito duro del mecanismo, y sigue garantizado por
+ * el mismo orden: el campo del intro termina de relevarse **antes** de que el
+ * fondo empiece a disolverse (`PARTICLES_BEFORE_VEIL`, sin tocar). Lo que
+ * cambió es qué esconde el relevo: antes, que las motas eran otras; ahora, que
+ * son las mismas pero de otra fase — ver `introParticleLanding.ts`.
+ *
+ * El margen se volvió a medir, no a estimar — `introParticleTiming.invariant.ts`
+ * y `introParticleSettle.invariant.ts`.
  *
  * ── La especie se PROYECTA. El TAMAÑO, no ─────────────────────────────────
  *
  * El campo del intro **es** el campo de la escena —el mismo generador, los
  * mismos radios, el mismo sesgo, los mismos colores, el mismo material—
  * **proyectado por la cámara de la pose inicial**. De ahí salen solos el reparto
- * sobre la pantalla, la perspectiva atmosférica y el paralaje de la caída. Lo
- * propio son la SEMILLA, la ESCALA y la DENSIDAD.
+ * sobre la pantalla y la perspectiva atmosférica. Lo propio son la SEMILLA, la
+ * ESCALA y la DENSIDAD.
  *
- * **Por qué otra semilla y no la misma.** Con la misma, las motas del intro
- * caerían desde exactamente los lugares donde, tres décimas más tarde, las de la
- * escena vuelven a estar. Es el único modo de que el corte se note: no por
- * parecerse poco, sino por parecerse demasiado.
+ * **Por qué otra semilla y no la misma.** S13 lo escribió así: con la misma, las
+ * motas del intro caerían desde exactamente los lugares donde, tres décimas más
+ * tarde, las de la escena vuelven a estar — *«el único modo de que el corte se
+ * note: no por parecerse poco, sino por parecerse demasiado»*.
+ *
+ * 🔴 **V3-A conserva la semilla propia y le da vuelta el argumento.** El defecto
+ * de nacer en el lugar del destino era que **no habría viaje**: la mota ya
+ * estaría acomodada antes de acomodarse. Con semilla propia el campo nace donde
+ * el humano lo aprobó y **termina** en el de la escena, que es el gesto que
+ * pidió. La semilla no cambia; cambia qué defecto evita.
  *
  * 🔴 **Por qué otra escala — S14.** S13 hizo que el intro copiara también la
  * MEZCLA de la escena (957 de polvo contra 76 de bokeh, mediana 3,16 px), y esa
@@ -54,15 +76,23 @@ import {
  * de la escena, importados tal cual). Un cambio de tamaño se perdona; un cambio
  * de sustancia, no.
  *
- * ── La bajada es una caída en el MUNDO, no un deslizamiento en pantalla ────
+ * 🔴 **Y desde V3-A esa diferencia de escala tiene fecha de vencimiento adentro
+ * de la propia secuencia**: la mota nace con la escala del intro (×2,05) y
+ * **termina con la de la escena**, porque su destino es una mota de la escena
+ * con su diámetro y su color. El reparto que S14 calibró mirando sigue siendo el
+ * de la ENTRADA y el de la espera, que es donde el humano lo aprobó; lo que se
+ * agrega es a dónde va después.
  *
- * El campo entero baja `INTRO_FALL_WORLD` unidades de mundo y se lo vuelve a
- * proyectar. Como la proyección divide por la profundidad, las motas cercanas
- * barren cientos de píxeles y las lejanas unas decenas: **el paralaje sale
- * gratis y es el que corresponde**, y de paso es la "dispersión" que la
- * instrucción permite — con una causa física en vez de un número al azar. La
- * dirección dominante es hacia abajo por construcción: el desplazamiento es −Y
- * de mundo y nada más.
+ * ── El acomodamiento es un viaje en PANTALLA, y por qué ───────────────────
+ *
+ * La bajada de S13 era un desplazamiento en el MUNDO —el campo entero bajando
+ * `INTRO_FALL_WORLD` y volviéndose a proyectar—, y de ahí salía el paralaje
+ * gratis. El acomodamiento no puede serlo: su destino no es una traslación
+ * rígida sino **un punto distinto por mota**, el de la mota de la escena que la
+ * recibe. Se resuelve en píxeles porque las dos puntas ya están proyectadas por
+ * la MISMA cámara, así que la perspectiva ya está adentro de los dos números y
+ * volver al mundo no agregaría nada — sólo pondría una segunda proyección donde
+ * hay una.
  */
 
 // ── Lo que el intro toma de la escena, y no puede importar ──────────────────
@@ -79,6 +109,23 @@ export const DUST_RADIUS_BIAS = 1.4
 export const FLOOR_CLEARANCE = 0.4
 /** `opacity` del material del polvo. El del bokeh sí se exporta. */
 export const DUST_MATERIAL_ALPHA = 0.9
+
+/**
+ * QUÉ FRACCIÓN DEL CAMPO DIBUJA **LA ESCENA** — `PROBE_DEFAULTS.particleCount`
+ * (2.400) sobre `PARTICLES_MAX` (3.000).
+ *
+ * Cuarto número copiado, y por la misma regla que los tres de arriba: **la
+ * comprobación lee `probeStore.ts` y exige que siga siendo el mismo**.
+ *
+ * ⚠ **Importarlo tiene un costo concreto y por eso no se importa.**
+ * `probeStore.ts` arrastra `probeCelosia`, `celosiaPenumbra`, `probeMoire`,
+ * `probeLighting` y `choreographyPhysics`; este módulo lo consume
+ * `IntroParticleCanvas.tsx`, que es un canvas 2D y por lo tanto **viaja en el
+ * bundle de la PRIMERA visita** —la única en la que el preloader corre—. Es
+ * exactamente el motivo por el que S13 mudó `introRig.ts` al chunk diferido de
+ * `three` (ver su docblock).
+ */
+export const SCENE_DUST_SHARE = 0.8
 
 /**
  * 🔴 LA ESCALA DEL POLVO DEL INTRO — la perilla de tamaño de S14.
@@ -142,44 +189,25 @@ export const INTRO_BOKEH_SEED = 0xb0cad0
 export const INTRO_PHASE_SEED = 0x5ca10a
 
 /**
- * CUÁNTO BAJA EL CAMPO, en unidades de mundo.
+ * 🔴 **LA PERILLA DE S13 QUE DESAPARECIÓ, Y QUÉ LA REEMPLAZA.**
  *
- * 🔴 **La única perilla de S13 que se decide MIRANDO.** Todo lo demás sale de la
- * escena o de una propiedad; esto no tiene respuesta correcta en un archivo — es
- * la misma clase de número que `placeS` en `introTimeline.ts`, y se anota igual,
- * con sus dos vecinos.
+ * `INTRO_FALL_WORLD` valía 1,9 unidades de mundo y era *«la única perilla de
+ * S13 que se decide MIRANDO»*: cuánto bajaba el campo. Con el acomodamiento no
+ * hay nada que bajar — **el destino de cada mota no es una traslación, es la
+ * mota de la escena que la recibe**, y ese punto no se elige, se calcula
+ * (`introParticleLanding.ts`).
  *
- * ── Lo que este número gobierna, y por qué es UNO SOLO ─────────────────────
+ * Lo que queda decidiéndose mirando es OTRA cosa y vive en
+ * `introParticleTiming.ts`: `PARTICLE_HANDOFF_FRAC`, qué parte del gesto de
+ * cada mota se va en el relevo con el campo de la escena. La perilla no se
+ * perdió: cambió de pregunta.
  *
- * Medido en **diámetros de la propia mota**, el recorrido de la caída no depende
- * de la profundidad: el desplazamiento y el tamaño se dividen los dos por ella y
- * el cociente se cancela. Tampoco depende de la ventana. Queda
- *
- *     recorrido = INTRO_FALL_WORLD / (tamaño × tan(fov/2))
- *
- * o sea **16,5 diámetros** para el polvo del intro con la escala de S14 —eran
- * 33,8 con la de S13, exactamente el doble—, idénticos en 1440×810, 1920×1080 y
- * 390×844: verificado en las tres. Repartidos sobre los 17,8 cuadros de la
- * ventana de salida son **0,93 diámetros por cuadro**, que es el número que
- * decide si la caída se lee como movimiento o como una fila de puntos (ver
- * `sampleParticleOut`).
- *
- * ⚠ **`INTRO_FALL_WORLD` no cambió: lo que bajó el paso fue la mota, que creció.**
- * Y eso no refuerza el argumento de `linear` contra `shift` — lo vuelve
- * innecesario, porque a esta escala `shift` tampoco se saldría de la banda. El
- * número está medido en `introParticleField.invariant.ts`.
- *
- * En píxeles, sobre desktop 1440×810: mediana **109 px**, de 47 en la mota más
- * lejana a 248 en la más cercana. Esa dispersión ×5,3 es el paralaje, y es lo
- * que hace que el campo se lea con profundidad en vez de como una capa que se
- * desliza. (Con el reparto de S13 el extremo llegaba a 377 y la razón a ×8,1:
- * los extremos de una muestra dependen de su tamaño, y S14 la ralea. Lo que no
- * se movió es la ley — el cociente entre deciles, ×2,21 contra ×2,11.)
- *
- * **Los dos vecinos, para la grabación:** si la caída estrobea o se lee
- * violenta, **1,2**; si se lee como un desvanecimiento en el lugar, **3,0**.
+ * Las cifras que S13 y S14 publicaban sobre la caída —16,5 diámetros de
+ * recorrido, mediana de 109 px, dispersión ×5,3 por el paralaje— **quedan
+ * vencidas y se reemplazan por las del acomodamiento**, medidas en
+ * `introParticleSettle.invariant.ts`. Regla 11: se corrigen con su medición al
+ * lado, no se borran.
  */
-export const INTRO_FALL_WORLD = 1.9
 
 /**
  * EL BORDE ENTRE LAS DOS ESCALAS — el único recorte que el campo del intro tiene.
@@ -216,21 +244,28 @@ export type IntroMoteKind = 'dust' | 'bokeh'
 
 export type IntroMote = {
   readonly kind: IntroMoteKind
-  /** Posición y diámetro en píxeles CSS, con el campo quieto. */
+  /** La concha del campo de la que salió. Ata el destino al origen. */
+  readonly shell: number
+  /** Posición y diámetro en píxeles CSS, donde la mota APARECE. */
   readonly xPx: number
   readonly yPx: number
   readonly sizePx: number
-  /** Cuánto se mueven esos tres cuando el campo terminó de bajar. */
-  readonly dxPx: number
-  readonly dyPx: number
-  readonly dSizePx: number
+  /**
+   * Cuánto se mueven esos tres al ACOMODARSE, o sea al llegar a la mota de la
+   * escena que la recibe. Los tres son cero si no hubo destino para ella.
+   */
+  readonly settleDxPx: number
+  readonly settleDyPx: number
+  readonly settleDSizePx: number
   /** El color que la escena renderiza para esta mota, ya con el tone mapping. */
   readonly color: string
   /** El escalón de la rampa con el que se la dibuja. −1 = bokeh. */
   readonly tint: number
+  /** Y el escalón de la mota de la escena en la que se acomoda. */
+  readonly settleTint: number
   /** La opacidad del material del campo del que salió. */
   readonly materialAlpha: number
-  /** 0 → 1: su lugar en el escalonado, de entrada y de salida. */
+  /** 0 → 1: su lugar en el escalonado, de entrada y de acomodamiento. */
   readonly phase: number
 }
 

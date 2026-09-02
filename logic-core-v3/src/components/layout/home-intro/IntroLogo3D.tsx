@@ -2,6 +2,9 @@
 
 import dynamic from 'next/dynamic'
 import type { MotionValue } from 'motion/react'
+import { useCallback } from 'react'
+
+import { IntroLogoEscudo } from './IntroLogoEscudo'
 
 /**
  * LA CAPA 3D DEL PRELOADER — el envoltorio que la difiere y la deja opcional.
@@ -29,6 +32,21 @@ import type { MotionValue } from 'motion/react'
  *
  * La respuesta se **latchea** en ese frame: si el chunk termina de bajar a
  * mitad de cruce, no aparece de golpe.
+ *
+ * ── 🔴 V3-A: LA PREGUNTA CAMBIÓ, Y ES LA MITAD DEL ARREGLO ─────────────────
+ *
+ * El párrafo de arriba describía **el único** modo de falla que el relevo
+ * cubría: *«el chunk no bajó»*. El que no cubría —y el que se veía en pantalla—
+ * es *«el chunk bajó y el canvas no dibuja»*. Desde `swapEndS` el SVG vale 0
+ * exacto durante 4,274 s (el 58,1% de la secuencia, y el acomodamiento entero),
+ * así que cualquier caída del 3D en esa ventana dejaba el logo sin nadie que lo
+ * pintara. La derivación completa está en `introRelay.ts`.
+ *
+ * Ahora el canvas no reporta *«existo»* sino **`onPainted`, en las dos
+ * direcciones**, y lo hace desde cuatro lugares: el primer cuadro real de
+ * `useFrame`, `webglcontextlost`/`webglcontextrestored`, el desmontaje del árbol
+ * y el escudo (`IntroLogoEscudo.tsx`). Con eso, el fallback plano de arriba pasa
+ * a cubrir **todos** los modos de falla y no sólo el primero.
  */
 
 export type IntroLogoCanvasProps = {
@@ -43,16 +61,26 @@ export type IntroLogoCanvasProps = {
   opacity: MotionValue<number>
   /** El `#RRGGBB` con el que se pinta el SVG. El mesh lo convierte en emisiva. */
   ink: MotionValue<string>
-  /** Se dispara una vez, cuando el objeto ya existe en la escena. */
-  onReady: () => void
+  /**
+   * `true` cuando el canvas empieza a pintar el objeto, `false` cuando deja de
+   * hacerlo. **Las dos direcciones**: ver `introRelay.ts`.
+   */
+  onPainted: (painted: boolean) => void
 }
 
 const IntroLogoCanvas = dynamic(() => import('./IntroLogoCanvas'), { ssr: false })
 
 export function IntroLogo3D(props: IntroLogoCanvasProps) {
+  const { onPainted } = props
+  // El escudo avisa además de contener: si el árbol del canvas tira, el SVG
+  // recupera el logo en el cuadro siguiente en vez de quedar la pantalla sin él.
+  const alCaer = useCallback(() => onPainted(false), [onPainted])
+
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-      <IntroLogoCanvas {...props} />
+      <IntroLogoEscudo onCaido={alCaer}>
+        <IntroLogoCanvas {...props} />
+      </IntroLogoEscudo>
     </div>
   )
 }

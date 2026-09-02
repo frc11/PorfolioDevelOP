@@ -98,7 +98,7 @@ function IntroPreviewRunner() {
           viewport={engine.viewport}
           ink={engine.ink}
           text={engine.text}
-          onMeshReady={engine.handleMeshReady}
+          onMeshPainted={engine.handleMeshPainted}
         />
       )}
       {engine.devApi ? <IntroDevController api={engine.devApi} /> : null}

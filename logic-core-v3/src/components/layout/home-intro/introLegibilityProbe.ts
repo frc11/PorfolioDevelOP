@@ -1,6 +1,6 @@
 import { over } from './introParticleProbe'
 import type { IntroMote } from './introParticles'
-import { sampleMote, sampleParticleOut } from './introParticleTiming'
+import { sampleMote, sampleParticleSettle } from './introParticleSampling'
 import { sampleBackgroundColor, sampleVeilOpacity } from './introSampling'
 import { contrastRatio, hexToSrgb, type Srgb } from './introShading'
 import type { IntroTimeline } from './introTimeline'
@@ -107,7 +107,15 @@ export type IntroLegibility = {
   readonly firstLegibleS: number
   /** Cuándo deja de serlo la ÚLTIMA. **El número del mecanismo.** */
   readonly lastLegibleS: number
-  /** Qué fracción de su caída llevaba cada una al dejar de ser legible. */
+  /**
+   * Qué fracción de su ACOMODAMIENTO llevaba cada una al dejar de ser legible.
+   *
+   * ⚠ Con la caída de S13 esto medía *«bajan de verdad, no se desvanecen en el
+   * lugar»* y daba 92%: la mota se apagaba MIENTRAS viajaba. Con el
+   * acomodamiento de V3-A mide lo contrario y tiene que dar **1**: la mota
+   * llega y recién entonces se releva, que es lo que hace verdadero *«se
+   * acomodan y se quedan»*.
+   */
   readonly travelAtLast: readonly number[]
 }
 
@@ -146,7 +154,7 @@ export function introLegibility(
     if (Number.isFinite(first)) firstLegibleS = Math.min(firstLegibleS, first)
     if (Number.isFinite(last)) {
       lastLegibleS = Math.max(lastLegibleS, last)
-      travelAtLast.push(sampleParticleOut(timeline, last / timeline.totalS, mote.phase))
+      travelAtLast.push(sampleParticleSettle(timeline, last / timeline.totalS, mote.phase))
     }
   }
 

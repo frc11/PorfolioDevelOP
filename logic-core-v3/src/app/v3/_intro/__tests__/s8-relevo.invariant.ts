@@ -219,10 +219,18 @@ afirmar(
   'control positivo — las del intro SÍ son legibles mientras tienen que serlo',
   `las ${everLegible} cruzan el umbral · contraste máximo ${peakContrast.toFixed(2)}:1`,
 )
+/**
+ * 🔴 **V3-A: ESTA AFIRMACIÓN CAMBIÓ DE FORMA, Y LA CIFRA VIEJA QUEDA AL LADO.**
+ * Exigía el MISMO instante que la línea de base, y era correcto mientras el
+ * mecanismo fuera el mismo. Con el acomodamiento la mota llega entera y recién
+ * después se releva (`PARTICLE_HANDOFF_FRAC`), así que el instante se corre y
+ * **tiene que correrse**. Lo que sigue siendo propiedad es que caiga adentro de
+ * su ventana, antes de que el fondo empiece a disolverse — regla 15.
+ */
 afirmar(
-  Math.abs(lastLegibleS - MEDIDO_CONTRA_EL_MARCADOR.ultimaDelIntroS) < 0.001,
-  'la última del intro deja de ser legible en el mismo instante que la línea de base',
-  `${lastLegibleS.toFixed(4)} s — no depende de lo que hay detrás: el velo todavía es opaco`,
+  lastLegibleS > WIN.outStartS && lastLegibleS <= WIN.outEndS + 1e-9,
+  'la última del intro deja de ser legible adentro de su ventana, sin derramarse',
+  `${lastLegibleS.toFixed(4)} s contra el cierre en ${ms(WIN.outEndS)} · línea de base ${MEDIDO_CONTRA_EL_MARCADOR.ultimaDelIntroS} con la caída de S13, +${(1000 * (lastLegibleS - MEDIDO_CONTRA_EL_MARCADOR.ultimaDelIntroS)).toFixed(1)} ms`,
 )
 
 const primeraDe = (par: { mota: readonly [number, number, number]; fondo: readonly [number, number, number] }) =>

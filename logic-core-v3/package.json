@@ -232,6 +232,11 @@
     "test:s14e-intro-escala": "npx tsx src/components/layout/home-intro/introParticleScale.invariant.ts",
     "test:s14e-intro-tinte": "npx tsx src/components/layout/home-intro/introParticleTint.invariant.ts",
     "test:s14e": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s14e",
+    "test:s15e-intro-relevo": "npx tsx src/components/layout/home-intro/introRelay.invariant.ts",
+    "test:s15e-intro-aterrizaje": "npx tsx src/components/layout/home-intro/introLanding.invariant.ts",
+    "test:s15e-intro-acomodo": "npx tsx src/components/layout/home-intro/introParticleSettle.invariant.ts",
+    "test:s15e-intro-muestreo": "npx tsx src/components/layout/home-intro/introParticleSampling.invariant.ts",
+    "test:s15e": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s15e",
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },

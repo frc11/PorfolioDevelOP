@@ -18,7 +18,6 @@ import {
   INTRO_DUST_SCALE,
   INTRO_DUST_SHARE,
   INTRO_DUST_SIZE,
-  INTRO_FALL_WORLD,
   dustDepthFloor,
 } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
@@ -234,7 +233,7 @@ check(
  * deja afuera a nadie: las posiciones no dependen del tamaño, así que la
  * diferencia son exactamente las motas que el recorte se lleva.
  */
-const unclipped = buildIntroParticles(W, H, INTRO_FALL_WORLD, INTRO_DUST_SIZE * 0.01).dustCount
+const unclipped = buildIntroParticles(W, H, INTRO_DUST_SIZE * 0.01).dustCount
 check(
   'control positivo — el recorte cubre un caso que el campo produce de verdad',
   PARTICLE_R_MAX > eye && unclipped > intro.dustCount,

@@ -5,7 +5,8 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 
 import { buildIntroParticles } from './introParticleField'
 import type { IntroParticleField } from './introParticles'
-import { introParticleWindows, sampleMote } from './introParticleTiming'
+import { introParticleWindows } from './introParticleTiming'
+import { sampleMote } from './introParticleSampling'
 import { buildIntroSpriteAtlas, type IntroSpriteAtlas } from './introParticleSprites'
 import { introTimeS } from './introSampling'
 import type { IntroTimeline } from './introTimeline'
@@ -117,7 +118,10 @@ export function IntroParticleCanvas({
       for (const mote of field.motes) {
         const sample = sampleMote(timeline, value, mote)
         if (sample.alpha <= MIN_ALPHA) continue
-        const sprite = mote.tint < 0 ? atlas.bokeh : atlas.dust[mote.tint]
+        // El escalón viene del MUESTREO y no de la mota: durante el
+        // acomodamiento el color viaja del suyo al de la mota de la escena que
+        // la recibe, así que el sprite cambia con él.
+        const sprite = sample.tint < 0 ? atlas.bokeh : atlas.dust[sample.tint]
         const size = sample.sizePx
         ctx.globalAlpha = sample.alpha
         ctx.drawImage(sprite, sample.xPx - size / 2, sample.yPx - size / 2, size, size)

@@ -7,9 +7,16 @@ import { HomeIntro } from '@/components/layout/HomeIntro'
  *
  * El preloader está TERMINADO desde S8d y verificado desde hace catorce
  * sprints: trazo, letras, transformación de color, relevo 2D→3D escondido en la
- * inversión de la tinta, partículas que caen y el logo acomodándose en la
- * escena. Nunca se había montado en `/v3`. Este sprint lo MONTA — no lo
- * reescribe, no lo copia y no le cambia un valor.
+ * inversión de la tinta, partículas y el logo acomodándose en la escena. Nunca
+ * se había montado en `/v3`. Este sprint lo MONTA — no lo reescribe, no lo copia
+ * y no le cambia un valor.
+ *
+ * ⚠️ **V3-A cambió dos de esas cosas del otro lado de la frontera, y este
+ * archivo sigue sin enterarse, que es lo correcto:** el relevo 2D→3D dejó de ser
+ * de una sola vía —el logo ya no se puede quedar sin nadie que lo dibuje— y las
+ * partículas dejaron de caerse para acomodarse en el campo de la escena. Las dos
+ * viven adentro del componente que se monta acá; este archivo no nombra ninguna
+ * de sus piezas y por eso no hubo que tocarlo.
  *
  * Todo lo que se ve lo pone `@/components/layout/HomeIntro`. Acá no hay una
  * fase, ni un color, ni un instante, ni un umbral: si alguno apareciera, habría

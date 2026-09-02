@@ -9,36 +9,36 @@ import { useSyncExternalStore } from 'react'
  * evento de fin, y el estado de la entrega a la escena 3D. Es lo único que el
  * intro le muestra a alguien que no es el intro.
  *
- * ── Por qué NO hay un vuelo del logo ───────────────────────────────────────
+ * ── 🔴 EL VUELO DEL LOGO: LO QUE ESTE BLOQUE DECÍA, Y LO QUE PASA HOY ──────
  *
- * S8 midió el destino y no existía todavía: la pose inicial era distinta en cada
- * uno de los cuatro recorridos candidatos y la elección seguía sin hacerse.
+ * Hasta V3-A acá decía, literal: *«el preloader sigue sin volar el logo, que
+ * además es lo que la fuente de verdad decidió (§1.3). El preloader es un
+ * momento cerrado, no le entrega el logo a nadie, se desvanece y la escena
+ * aparece detrás con su propia coreografía»*. **Eso estaba vencido y era la
+ * premisa equivocada del defecto que V3-A arregló** — regla 11: se corrige con
+ * su medición al lado, no se borra.
  *
- * **S9 la hizo**, y el destino ahora es uno solo. En una ventana de 1440×810 el
- * logo 3D cae en **451×313 px, con el centro X en 1018 px (70,7% del ancho)** y
- * una elevación de entrada de 18,6°. Los otros cuatro recorridos siguen en el
- * repo como referencia y dan esto:
+ * S8 escribió esa frase porque el destino no existía: la pose inicial era
+ * distinta en cada uno de los cuatro recorridos candidatos. **S9 eligió uno**, y
+ * desde entonces `introFlight.ts` planifica y ejecuta el vuelo: `samplePlace`
+ * alimenta `logoX`, `logoY`, `logoCenterX`, `logoCenterY` y `logoReveal`, y el
+ * logo viaja del centro de la pantalla al lugar de la escena. En 1440×810 sale
+ * de (720 · 405) y aterriza en **(1018,4 · 427,8)** con una tinta de 451×313 px:
+ * el **mismo píxel y el mismo tamaño** donde la escena dibuja el suyo, medido en
+ * `introLanding.invariant.ts` sobre tres ventanas con un error de 0,0000 px.
  *
- *   calibrado a mano · 523×364 px · centro X 1086 px (75,4% del ancho)
- *   íntima           · 669×466 px · centro X  890 px (61,8%)
- *   arquitectónica   · 292×203 px · centro X  897 px (62,3%)
- *   dramática        · 588×409 px · centro X  795 px (55,2%)
+ * Las cifras de los otros cuatro recorridos, que este bloque publicaba, siguen
+ * valiendo como referencia: calibrado a mano 523×364 px / centro X 1086;
+ * íntima 669×466 / 890; arquitectónica 292×203 / 897; dramática 588×409 / 795.
  *
- * ⚠️ **Las cifras de arriba corrigen las que este bloque publicaba.** Decía
- * "504×351 · 1091 px" para el calibrado; el código nunca produjo ese número —
- * `scene-framing.invariant.ts` publicaba 523×364 desde el mismo commit. Si
- * aparece un 504 en algún otro lado, viene de acá y está mal.
- *
- * Lo que sigue sin decidirse son las otras tres: cómo se ata el recorrido al
- * scroll real (§7.2), el encuadre por relación de aspecto (§7.6, con el
- * desborde lateral ya documentado en ventana angosta) y mobile sin medir
- * (§7.5). Por eso **el preloader sigue sin volar el logo**, que además es lo que
- * la fuente de verdad decidió (§1.3).
- *
- * El preloader es un momento cerrado, no le entrega el logo a nadie, se
- * desvanece y la escena aparece detrás con su propia coreografía. Esto de acá
- * no es el vuelo: es el **aviso** para que la escena sepa cuándo está tapada,
- * cuándo está entrando en cámara y cuándo puede soltarse.
+ * ⚠️ **Y la consecuencia que la premisa vencida dejó armada, declarada:** como
+ * *«el preloader no le entrega el logo a nadie»*, la escena dibuja el suyo desde
+ * el cuadro cero. Durante el acomodamiento —los últimos 2,4 s— hay **dos logos
+ * negros idénticos en pantalla**, uno quieto en su lugar y otro viajando hacia
+ * él. El humano lo describió como *«que se coloque en la posición del logo
+ * principal que estamos viendo»*, o sea que cuenta con verlo; que el aterrizaje
+ * sea exacto es lo que hace que el relevo no se note. Esconder el de la escena
+ * mientras el otro vuela sería `_lib/escena/`, y no es de este frente.
  *
  * ── Cómo lo consume la escena (el sprint que la monte) ─────────────────────
  *

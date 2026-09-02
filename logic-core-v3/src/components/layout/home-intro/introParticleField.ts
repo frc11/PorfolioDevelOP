@@ -33,13 +33,13 @@ import {
   INTRO_DUST_SEED,
   INTRO_DUST_SHARE,
   INTRO_DUST_SIZE,
-  INTRO_FALL_WORLD,
   INTRO_PHASE_SEED,
   dustDepthFloor,
   type IntroMote,
   type IntroMoteKind,
   type IntroParticleField,
 } from './introParticles'
+import { assignLandings, buildSceneParticles } from './introParticleLanding'
 import { INTRO_BOKEH_COLOR, introTintStep, moteRampColor } from './introParticleTint'
 
 /**
@@ -93,8 +93,7 @@ function drawnRanges(
 export function buildIntroParticles(
   viewportWidthPx: number,
   viewportHeightPx: number,
-  /** Las tres solo las mueve la comprobación, para barrer las perillas. */
-  fallWorld: number = INTRO_FALL_WORLD,
+  /** Las dos solo las mueve la comprobación, para barrer las perillas. */
   dustSize: number = INTRO_DUST_SIZE,
   dustShare: number = INTRO_DUST_SHARE
 ): IntroParticleField {
@@ -122,6 +121,7 @@ export function buildIntroParticles(
 
   const push = (
     kind: IntroMoteKind,
+    shell: number,
     point: SceneVec3,
     worldSize: number,
     color: string,
@@ -137,25 +137,21 @@ export function buildIntroParticles(
     if (at.xPx < 0 || at.xPx > viewportWidthPx) return
     if (at.yPx < 0 || at.yPx > viewportHeightPx) return
 
-    const fallen = projectScenePoint(
-      camera,
-      [point[0], point[1] - fallWorld, point[2]],
-      viewportWidthPx,
-      viewportHeightPx
-    )
-    if (!fallen) return
-
-    const sizePx = pointSizePx(worldSize, at.depth, viewportHeightPx)
+    // El destino se completa después, cuando el campo entero existe: la
+    // asignación es GLOBAL —cada destino se toma una sola vez— y por lo tanto
+    // no se puede resolver mota por mota mientras se construye.
     motes.push({
       kind,
+      shell,
       xPx: at.xPx,
       yPx: at.yPx,
-      sizePx,
-      dxPx: fallen.xPx - at.xPx,
-      dyPx: fallen.yPx - at.yPx,
-      dSizePx: pointSizePx(worldSize, fallen.depth, viewportHeightPx) - sizePx,
+      sizePx: pointSizePx(worldSize, at.depth, viewportHeightPx),
+      settleDxPx: 0,
+      settleDyPx: 0,
+      settleDSizePx: 0,
       color,
       tint,
+      settleTint: tint,
       materialAlpha,
       phase,
     })
@@ -172,11 +168,14 @@ export function buildIntroParticles(
     floorLimit,
     DUST_SHELLS
   )
-  for (const [from, to] of drawnRanges(PARTICLES_MAX, DUST_SHELLS, dustShare)) {
+  const rangos = drawnRanges(PARTICLES_MAX, DUST_SHELLS, dustShare)
+  for (let s = 0; s < rangos.length; s += 1) {
+    const [from, to] = rangos[s]
     for (let i = from; i < to; i += 1) {
       const radius = dust.radii[i]
       push(
         'dust',
+        s,
         [dust.positions[i * 3], dust.positions[i * 3 + 1], dust.positions[i * 3 + 2]],
         dustSize,
         moteRampColor(near, far, (radius - PARTICLE_R_MIN) / dustSpan),
@@ -195,16 +194,41 @@ export function buildIntroParticles(
     floorLimit,
     BOKEH_SHELLS
   )
-  for (let i = 0; i < BOKEH_COUNT; i += 1) {
-    push(
-      'bokeh',
-      [bokeh.positions[i * 3], bokeh.positions[i * 3 + 1], bokeh.positions[i * 3 + 2]],
-      BOKEH_SIZE,
-      bokehColor,
-      -1,
-      BOKEH_OPACITY
-    )
+  for (let s = 0; s < BOKEH_SHELLS.length - 1; s += 1) {
+    const from = Math.round(BOKEH_SHELLS[s] * BOKEH_COUNT)
+    const to = Math.round(BOKEH_SHELLS[s + 1] * BOKEH_COUNT)
+    for (let i = from; i < to; i += 1) {
+      push(
+        'bokeh',
+        s,
+        [bokeh.positions[i * 3], bokeh.positions[i * 3 + 1], bokeh.positions[i * 3 + 2]],
+        BOKEH_SIZE,
+        bokehColor,
+        -1,
+        BOKEH_OPACITY
+      )
+    }
   }
 
-  return { motes, dustCount, bokehCount }
+  // ── El destino: cada mota, a una mota REAL del campo de la escena ─────────
+  //
+  // Se resuelve acá y no adentro de `push` porque la asignación es global: un
+  // destino se toma UNA vez, así que hace falta el campo entero para elegir.
+  const destinos = assignLandings(motes, buildSceneParticles(viewportWidthPx, viewportHeightPx))
+  const acomodadas = motes.map((mote, i): IntroMote => {
+    const destino = destinos[i]
+    // Sin destino la mota se queda donde está y sólo se releva. No puede pasar
+    // con el campo real —la escena tiene 554 motas de sobra— pero un `null`
+    // silencioso que moviera la mota a (0,0) sería peor que no moverla.
+    if (!destino) return mote
+    return {
+      ...mote,
+      settleDxPx: destino.xPx - mote.xPx,
+      settleDyPx: destino.yPx - mote.yPx,
+      settleDSizePx: destino.sizePx - mote.sizePx,
+      settleTint: destino.tint,
+    }
+  })
+
+  return { motes: acomodadas, dustCount, bokehCount }
 }
