@@ -200,7 +200,9 @@ afirmar(
 )
 
 afirmar(
-  escenaEnCuadro(0, 0, 0) && escenaEnCuadro(0, VENTANA, VENTANA) && escenaEnCuadro(Number.NaN, DOCUMENTO, VENTANA),
+  escenaEnCuadro(0, 0, 0, 0) &&
+    escenaEnCuadro(0, 0, VENTANA, VENTANA) &&
+    escenaEnCuadro(Number.NaN, 0, DOCUMENTO, VENTANA),
   'con la pestaña oculta, un documento que no scrollea o una medición que no es número, la escena queda ENCENDIDA',
   'el lado seguro es el comportamiento de hoy, no una pantalla apagada',
 )

@@ -27,13 +27,22 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  * definido. El recorrido calibrado no se perdió: vive entero en
  * `variantCalibrada.ts` y se sigue eligiendo desde el panel.
  *
- * ── Seis poses, ocho entradas, cero relleno ────────────────────────────────
+ * ── Seis poses, siete entradas, cero relleno ───────────────────────────────
  *
- * Una pose por tramo. Las otras dos entradas son **sostenes**: copias exactas
- * de la pose del hero y de la del cierre, más adelante en el progreso. No son
- * relleno y no amortiguan nada — dos keyframes con la misma pose no mueven la
- * cámara, la dejan quieta, que es exactamente lo que las dos pantallas que
- * llevan texto necesitan.
+ * Una pose por tramo. La entrada que sobra es un **sostén**: una copia exacta
+ * de la pose del cierre, más adelante en el progreso. No es relleno y no
+ * amortigua nada — dos keyframes con la misma pose no mueven la cámara, la
+ * dejan quieta, que es exactamente lo que la pantalla del cierre necesita.
+ *
+ * ⚠️ **`hero · sostén` SE SACÓ EN V3-B, y su ausencia es una decisión medida.**
+ * Existía para que la cámara no se moviera en la primera pantalla —el punto de
+ * llegada del preloader— y el dueño lo retiró mirando: *«el fondo no scrollea con
+ * el mouse en un principio»*. Lo que se llevó puesto lo publica
+ * `s13b-escena.invariant.ts` §1: la primera pantalla pasa de **0,0000 a 3,4643
+ * alturas de cuadro por pantalla de scroll** y de 0° a **59,4° de azimut**; a
+ * cambio el tramo siguiente BAJA de 5,1959 a 3,3054 —los 130° dejan de estar
+ * apretados en dos pantallas—, el salto entre los dos primeros tramos se hace ×33
+ * más chico y el pico del recorrido (7,8303, el cierre) no se mueve.
  *
  * **Con puntos lejanos el rig interpola de verdad y la cámara recorre.** Es lo
  * que produce el movimiento grande, y se mide: el pico de velocidad
@@ -44,9 +53,8 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  * ⚠️ **El contrapeso, escrito para que nadie lo descubra mirando:** la amplitud
  * REAL sube (el salto de altura entre poses vecinas es 12,6, el mayor de las
  * cuatro coreografías; las distancias van de 9 a 27, el rango más grande), pero
- * lo que se PERCIBE es velocidad instantánea. Si en la grabación el recorrido
- * se siente más lento que la base, **la salida no es volver a meter tirones: es
- * reducir pantallas de scroll.** Ésa es la palanca.
+ * lo que se PERCIBE es velocidad instantánea. Si en la grabación se siente lento,
+ * **la salida no es volver a meter tirones: es reducir pantallas de scroll.**
  *
  * ── La regla de amplitud de los 90°, anulada ───────────────────────────────
  *
@@ -114,17 +122,16 @@ export const CHOREO_TRAMOS: readonly ChoreoTramo[] = [
 // ── Los keyframes ───────────────────────────────────────────────────────────
 
 /**
- * El recorrido. 8 keyframes: 8 capturados + 0 derivados.
+ * El recorrido. 7 keyframes: 7 capturados + 0 derivados.
  *
- * ⚠️ El censo de arriba dice "8 capturados" porque el exportador llama así a
- * todo lo que viene del archivo. **Ninguna de estas ocho se capturó con el
- * editor**: seis son poses compuestas y dos son sostenes. Lo que sí es literal
+ * ⚠️ El censo de arriba dice "7 capturados" porque el exportador llama así a
+ * todo lo que viene del archivo. **Ninguna de estas siete se capturó con el
+ * editor**: seis son poses compuestas y una es un sostén. Lo que sí es literal
  * es el "0 derivados" — este recorrido no tiene un solo keyframe de relleno.
  *
- * Una pose por tramo, más dos sostenes: el hero se queda quieto su pantalla
- * entera (es el punto de llegada del preloader y la cámara no se mueve apenas
- * entrás) y el cierre se clava desde 0,950 porque ahí van "develOP" y el
- * slogan, y el texto sobre una cámara que todavía deriva se lee peor.
+ * Una pose por tramo, más un sostén: el cierre se clava desde 0,950 porque ahí
+ * van "develOP" y el slogan, y el texto sobre una cámara que todavía deriva se
+ * lee peor. El hero **ya no** tiene el suyo — ver el aviso de la cabecera.
  *
  * Los cinco tramos que se mueven van `turn: 'literal'`: la vuelta se acumula
  * 130 + 55 + 10 + 115 + 50 = **360 exacto**. Con los ángulos de hoy `short`
@@ -164,20 +171,6 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     // 23,2° y cuesta 1,1 de caída en el tramo siguiente. Se juzga por grabación.
     at: 0,
     name: 'hero',
-    pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.68, frameY: 0 },
-  },
-  {
-    // El patrón de sostén: misma pose que el keyframe anterior, más adelante en el
-    // recorrido. Es lo que hace literalmente verdadera la fila "Hero · 1 pantalla ·
-    // 0° → 0°": sin él, el primer segmento arrancaría a interpolar hacia los 130°
-    // de Quiénes somos y la cámara ya estaría orbitando ~20° durante la pantalla
-    // del hero.
-    //
-    // No es relleno: dos keyframes con la misma pose no amortiguan un tramo, lo
-    // dejan quieto. La velocidad medida en todo el tramo es 0,0.
-    at: 0.125,
-    name: 'hero · sostén',
-    ease: 'shift',
     pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.68, frameY: 0 },
   },
 
@@ -449,10 +442,17 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
 export const LIGHT_ARC: readonly LightStop[] = [
   // Mediodía. La elevación es la que S6 calibró para la key: el arco arranca ahí.
   { at: 0, level: 1, kelvin: 6500, azimuthDeg: -42, elevationDeg: 36 },
-  // S9 · el sol se queda quieto mientras el hero se queda quieto. Sin este stop
-  // el barrido arranca en p=0 y para cuando la cámara todavía está clavada el sol
-  // ya se corrió 50°, que es justo lo que lo pone detrás de la cámara: γ se caía
-  // a 17°, o sea luz plana en la primera pantalla del sitio.
+  // S9 · el sol se queda quieto en la primera pantalla. Sin este stop el barrido
+  // arranca en p=0 y el sol se corre hacia el lado de la cámara: γ se caía a 17°,
+  // o sea luz plana en la primera pantalla del sitio.
+  //
+  // ⚠️ V3-B · **el VALOR no se tocó y la razón se re-midió**: la que estaba escrita
+  // —«el sol se queda quieto mientras el hero se queda quieto»— dejó de ser cierta
+  // al sacar `hero · sostén`. El stop sigue ganándose el lugar con otro número: γ
+  // en la ventana del hero da **40,8–95,2°** con él y **34,3–63,7°** sin él. Lo
+  // mide `s7-modelado.invariant.ts`, donde además el γ mínimo de TODO el track
+  // sube de 35,5° a 40,8°: la cámara que se mueve en la primera pantalla MEJORA
+  // el modelado.
   { at: 0.125, level: 1, kelvin: 6500, azimuthDeg: -42, elevationDeg: 36, ease: 'linear' },
   // Meseta de luz: el nivel y la elevación no se mueven hasta el final de Números.
   // El azimut sí, y ahora rápido — la cámara está dando media vuelta debajo y el

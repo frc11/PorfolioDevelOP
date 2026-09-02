@@ -139,6 +139,40 @@ export type {
  *   recorrido de scroll propio**: mide una pantalla y es la última, así que
  *   llena el cuadro exactamente en el final del scroll. Un tramo sobre ella
  *   sería un tramo de ancho cero, y el guardián 3 de la derivación lo rechaza.
+ *
+ * ── ⚠️ V3-B · EL ANCLA DEL DIFERENCIAL ESTÁ CUANTIZADA, Y ESO ES LO QUE HAY QUE
+ *    SACAR — decisión tomada, construcción para el sprint siguiente ──────────
+ *
+ * V3-B fue a re-anclar el diferencial (defecto 7 de §7.46: el logo tapa el
+ * titular y ahí el contraste es 1,00:1 **por construcción**, porque la tinta del
+ * texto y la del logo son el mismo negro) y midió las dos cosas juntas —cuánto
+ * cuadro cubre el logo y cuánto da el contraste del fondo— sobre todo el rango.
+ * `s13b-escena.invariant.ts` §4 publica la tabla. El resultado:
+ *
+ *   · **La ventana existe: p = [0,8232 · 0,8782].** Desde donde el titular puede
+ *     quedar limpio en los cuatro cuadros, hasta donde el peor píxel del fondo
+ *     deja de llegar a AA. Es ancha —0,055 de progreso— y es real.
+ *   · **Y no se puede llegar.** El invariante enumera el espacio ENTERO de este
+ *     array —28 particiones posibles, 12 derivan, el resto lo rechaza un
+ *     guardián— y el ancla del diferencial sólo puede tomar **DOS valores:
+ *     0,7500 y 0,9167**. El de hoy queda 0,0732 corto; el otro se pasa 0,0385 y
+ *     además pone `s8-tinta` §5 en rojo (3,24:1 contra AA 4,5:1).
+ *
+ * **Por qué está cuantizada, que es el punto:** una sección llena el cuadro en
+ * `progresoDePantalla(su desdePantalla)`, y ese progreso cae en un NUDO —o sea
+ * en el `to` de un tramo, un múltiplo exacto de 1/8— siempre que la sección sea
+ * la primera de su grupo. Los únicos valores libres salen de interpolar ADENTRO
+ * de un segmento, y el reparto sólo ofrece uno.
+ *
+ * ⚠️ **LA SALIDA ELEGIDA POR EL DUEÑO DEL PROYECTO: sacar la cuantización, sin
+ * tocar una pose y sin tocar `secciones.ts`.** De las tres que V3-B midió —(a)
+ * dejarlo en 0,7500 con la superposición; (b) moverlo a 0,9167 y perder el
+ * contraste y la pose `demos`; (c) hacer que exista un ancla adentro de la
+ * ventana— se elige la **(c)**, y en la forma que cae entera adentro de este
+ * archivo: que el reparto pueda declarar **dónde ADENTRO de su tramo** ancla una
+ * sección, en vez de heredar siempre el borde. **Es el sprint siguiente.** V3-B
+ * lo deja medido y no lo construye porque la instrucción decía «si no existe, no
+ * lo arregles» y éste es un tercer caso que no preveía.
  */
 export const TRAMOS_ANCLADOS: readonly TramoAnclado[] = [
   { tramo: 'hero', secciones: ['hero'] },
@@ -197,20 +231,40 @@ export function keyframeEn(progreso: number): string | null {
  * 12 es otro lugar, la escena se encendería en el momento equivocado sin que
  * ningún invariante de ninguno de los dos lo viera. Una sola definición.
  *
- * **Es PROPORCIONAL al recorrido real y no absoluta**, y ésa es la decisión:
+ * ── ⚠️ V3-B · EL DENOMINADOR ES LA EXTENSIÓN DE LAS SECCIONES, NO EL DOCUMENTO ─
  *
- *   pantalla = PANTALLAS_DE_SCROLL × scrollY / (altoDelDocumento − ventana)
+ * Hasta V3-B esta función recibía `altoDelDocumento` —o sea
+ * `document.documentElement.scrollHeight`, medido en `EscenaDelHome.tsx`— y
+ * §7.46 midió lo que eso cuesta: **el documento tiene cosas que no son
+ * secciones**, y el anclaje se deriva de la tabla de secciones. Las dos
+ * coincidían *mientras* todo lo que sumara alto fuera una de las ocho. Sacar el
+ * pie de la `<section id="cierre">` —el defecto 6, frenado por esto— le suma
+ * **485 px a 1440 y 746 px a 375** por fuera de la tabla, y con eso el progreso
+ * que vale **0,750** donde el diferencial llena el cuadro pasaba a **0,7201 y
+ * 0,6906**: movía el anclaje de SITIO-S9 sin tocar una línea del anclaje.
+ *
+ * Ahora entra **la extensión de las secciones**: dónde empieza la primera y
+ * dónde termina la última, en coordenadas del documento. Con eso el defecto 6 se
+ * destraba solo — el pie puede vivir donde quiera, adentro o afuera del `<main>`,
+ * y el progreso de cada sección **no se mueve un bit**, porque nada que no sea
+ * una sección entra en la cuenta. Lo mide `s13b-escena.invariant.ts` §3 con la
+ * regla vieja al lado como control.
+ *
+ * **Sigue siendo PROPORCIONAL y no absoluta**, y ésa es la decisión que NO
+ * cambió:
+ *
+ *   pantalla = PANTALLAS_DE_SCROLL × (scrollY − arriba) / ((abajo − arriba) − ventana)
  *
  * La alternativa —`scrollY / ventana`, o sea contar pantallas absolutas— es más
- * directa y tiene un modo de falla que este proyecto ya conoce: si el documento
- * real no mide exactamente lo que la tabla declara, el final del scroll deja de
- * caer en el último nudo y **el último keyframe del recorrido no se alcanza
- * nunca**. Es el mismo motivo por el que el mapeo provisional restaba la ventana
- * en vez de normalizar contra el alto entero. Con la forma proporcional, `0` y
- * el final del scroll caen SIEMPRE en `0` y en `PANTALLAS_DE_SCROLL`, y cuando
- * el documento mide lo que la tabla dice —que es el caso arriba de 1025, donde
- * el `alto` de cada sección es un `min-height` que el contenido no pasa— las dos
- * formas son la misma función.
+ * directa y tiene un modo de falla que este proyecto ya conoce: si las secciones
+ * reales no miden exactamente lo que la tabla declara, el final del recorrido
+ * deja de caer en el último nudo y **el último keyframe no se alcanza nunca**.
+ * Con la forma proporcional, el borde de arriba de la primera sección y el de
+ * abajo de la última caen SIEMPRE en `0` y en `PANTALLAS_DE_SCROLL`, y cuando
+ * las secciones miden lo que la tabla dice —que es el caso arriba de 1025, donde
+ * el `alto` de cada una es un `min-height` que el contenido no pasa— esta forma
+ * y la de antes son la misma función. Lo único que cambió es **de qué** es
+ * proporcional: de las ocho secciones, y no del documento que las contiene.
  *
  * ⚠ **La ventana de validez, declarada (regla 12):** una pantalla es `100svh` y
  * acá se mide con `altoDeLaVentana`. Los dos coinciden en escritorio, que es
@@ -219,17 +273,18 @@ export function keyframeEn(progreso: number): string | null {
  * navegador se retrae. La forma proporcional acota ese desajuste a un
  * reescalado del recorrido entero, nunca a un corrimiento de los anclajes.
  *
- * Con un documento que no scrollea —o con la pestaña oculta, donde el alto da
- * cero— devuelve 0, que es la primera pantalla: el lado seguro.
+ * Con unas secciones que no scrollean —o con la pestaña oculta, donde toda
+ * medida da cero— devuelve 0, que es la primera pantalla: el lado seguro.
  */
 export function pantallaDeScroll(
   scrollY: number,
-  altoDelDocumento: number,
+  arribaDeLasSecciones: number,
+  abajoDeLasSecciones: number,
   altoDeLaVentana: number,
 ): number {
-  const recorrido = altoDelDocumento - altoDeLaVentana
+  const recorrido = abajoDeLasSecciones - arribaDeLasSecciones - altoDeLaVentana
   if (!(recorrido > 0)) return 0
-  const fraccion = scrollY / recorrido
+  const fraccion = (scrollY - arribaDeLasSecciones) / recorrido
   const acotada = fraccion < 0 ? 0 : fraccion > 1 ? 1 : fraccion
   return acotada * ANCLAJE.pantallasDeScroll
 }

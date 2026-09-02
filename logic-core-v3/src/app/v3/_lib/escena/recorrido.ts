@@ -250,19 +250,27 @@ export function tramoEn(progreso: number): string {
 /**
  * El progreso del recorrido a partir del scroll de la página.
  *
- * ⚠ **Los tres argumentos entran; no se leen de `window` acá.** Es lo que
+ * ⚠ **Los cuatro argumentos entran; no se leen de `window` acá.** Es lo que
  * permite que el invariante corra la MISMA función sin DOM, y es además la mitad
  * de la lección de `CLAUDE.md` sobre medir scroll con la pestaña oculta: quien
  * llama es el que tiene que decidir si sus números valen.
  *
- * Con un documento que no scrollea —o con la pestaña oculta, donde el alto da
- * cero— `pantallaDeScroll` devuelve 0 y esto devuelve el progreso del primer
- * nudo, que es la pose del hero: el lado seguro.
+ * ⚠ **V3-B: el segundo y el tercero son la EXTENSIÓN DE LAS SECCIONES**, no el
+ * alto del documento. El porqué —y lo que costaba la forma anterior— está en
+ * `pantallaDeScroll`, en `anclaje.ts`, que es donde vive la decisión. Acá sólo se
+ * compone.
+ *
+ * Con unas secciones que no scrollean —o con la pestaña oculta, donde toda
+ * medida da cero— `pantallaDeScroll` devuelve 0 y esto devuelve el progreso del
+ * primer nudo, que es la pose del hero: el lado seguro.
  */
 export function progresoDelScroll(
   scrollY: number,
-  altoDelDocumento: number,
+  arribaDeLasSecciones: number,
+  abajoDeLasSecciones: number,
   altoDeLaVentana: number,
 ): number {
-  return progresoDePantalla(pantallaDeScroll(scrollY, altoDelDocumento, altoDeLaVentana))
+  return progresoDePantalla(
+    pantallaDeScroll(scrollY, arribaDeLasSecciones, abajoDeLasSecciones, altoDeLaVentana),
+  )
 }

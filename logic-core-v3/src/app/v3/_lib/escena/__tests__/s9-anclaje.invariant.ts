@@ -137,19 +137,20 @@ afirmarIgual(
   'en la pantalla 0 el progreso es 0 y en la última es 1, exacto',
 )
 afirmarIgual(
-  MUESTRAS_DE_SCROLL.map(([y, doc, ven]) => progresoDelScroll(y, doc, ven)),
+  MUESTRAS_DE_SCROLL.map(([y, arriba, abajo, ven]) => progresoDelScroll(y, arriba, abajo, ven)),
   [0, 1, 1, 0, 0],
   'progresoDelScroll: 0 arriba, 1 abajo, acotado a los dos lados, 0 si no hay recorrido',
 )
 afirmar(
-  progresoDelScroll(650, 1400, 100) === progresoDePantalla(pantallaDeScroll(650, 1400, 100)),
+  progresoDelScroll(650, 0, 1400, 100) ===
+    progresoDePantalla(pantallaDeScroll(650, 0, 1400, 100)),
   'progresoDelScroll es la composición literal de pantallaDeScroll con el mapeo',
   'la coordenada del contrato es la MISMA que lee la visibilidad: no hay dos traducciones',
 )
 controlPositivo(
   'el detector no daría por buena una composición que no es la del contrato',
-  (s: number) => progresoDePantalla(pantallaDeScroll(s, 1400, 100) + 1),
-  (falsa: (s: number) => number) => falsa(650) === progresoDelScroll(650, 1400, 100),
+  (s: number) => progresoDePantalla(pantallaDeScroll(s, 0, 1400, 100) + 1),
+  (falsa: (s: number) => number) => falsa(650) === progresoDelScroll(650, 0, 1400, 100),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
