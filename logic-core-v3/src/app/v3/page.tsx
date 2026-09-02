@@ -66,7 +66,9 @@ export default function PaginaV3() {
       <ChromeDelHome />
       <IntroDelHome />
       <CompuertaDelHome>
-        <Home />
+        <main className="relative z-10">
+          <Home />
+        </main>
       </CompuertaDelHome>
     </>
   )

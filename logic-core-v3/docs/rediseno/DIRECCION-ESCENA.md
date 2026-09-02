@@ -2,7 +2,7 @@
 
 - **Qué es esto:** el documento de decisiones consolidadas del rediseño del home. Hasta hoy estaban repartidas en seis reportes de sprint (`docs/rediseno/outputs/`) y en una conversación larga con el dueño del proyecto. Acá quedan en un solo lugar.
 - **Qué NO es:** un reporte de sprint. No cuenta qué se construyó ni cómo; cuenta **qué se decidió**. El cómo vive en los reportes y en los docs de módulo de cada archivo.
-- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28), y en SITIO-S9 (2026-08-31) con **el mapeo POR ANCLAJE construido** (§7.2, que pasa de decidido-sin-construir a construido), **el cierre de la tinta del diferencial con su número** (§7.29: 6,07:1 en p=0,750), **la escena que deja de renderizar cuando ningún panel transparente está en cuadro** (§7.34), **la decisión medida de NO diferir el SDK de Sentry** (§7.30) y tres pendientes con su medición (§7.36 el acoplamiento de tipo), y en su parada con **la regla de las instrucciones que se contradicen** (§7.37), el cierre de §7.4 y de §7.35 y las dos correcciones a §7.30. y en SITIO-S10 (2026-08-31) con **el sitio de abajo de 1025 mirado por primera vez** (§7.38), **el inventario de accesibilidad sobre el home compuesto** (§7.39), **la composición del logo contra el texto con su contraste medido** (§7.40, que corrige el alcance del cierre de §7.29), **los 44 controles positivos que `s7e` y `s10e` no tenían** (§7.33, cerrado), **el chunk de Sentry identificado por contenido** (§7.30), **el orden de los dos `rAF` medido y contrario a lo que §7.34 declaraba**, y **el costo real de §7.36**, que la propia §7.36 publicaba incompleto; y en su parada con **el ACOTAMIENTO de §7.29** —cerrado contra el fondo, no contra el cuadro—, **el banco compartido probándose a sí mismo** (§7.41) y **las nueve cifras que no se reproducen, incluida una de la propia instrucción** (§7.42). y en SITIO-S11 (2026-09-01) con **los dieciocho defectos que S10 midió, arreglados** (§7.43: quince cerrados con el instrumento que los encontró confirmándolo, y tres abiertos por decisión —la superposición del logo re-medida, el `contentinfo` con sus tres paredes y Lenis con su atribución corregida—), **el codo de `travelX` sacado** (§7.40), **`CUADROS_DE_REANUDACION` bajado a 1** con la medición de S10 citada (§7.34), **el acoplamiento de tipo cerrado** con el costo real de tres tipos (§7.36), **el aterrizaje del logo del preloader mal en un teléfono en vertical, en el sitio VIVO** (§7.44), **dos correcciones de método** —un número pedido que el arreglo correcto contradice, y `git stash` devolviendo el árbol en CRLF— (§7.45), y **lo que el sprint rompió al arreglar**: la banda de `micro` en cero, dos afirmaciones de S7 que estaban verdes por subcadena, la tercera copia de la voz única, el detector de ventana de los checks de frontera y las cinco copias de `travelX`. Se actualiza cuando una decisión cambia — no cuando se implementa.
+- **Estado:** escrito en S7 (2026-08-20), actualizado en S9 (2026-08-22) con la elección del recorrido, en S10 (2026-08-23) con el vaciado de la escena y el fondo de rendijas, en S13 (2026-08-26) con las partículas del preloader, el escalón de exposición resuelto y la cámara de `harness.ts`, y en S14 (2026-08-26) con el reparto de tamaños de ese campo, y en SITIO-S4 (2026-08-29) con las reglas 12, 13 y 14 de §3 —los checks contra `git`, qué puede afirmar un invariante, y que los agregados se derivan—, la §6.1 de verificación y los pendientes §7.16 y §7.17, en SITIO-S7 (2026-08-30) con la compuerta resuelta una vez arriba de las ocho (§7.22) y el arreglo de raíz de `cn()` (§7.19), y en SITIO-S8 (2026-08-31) con **la mudanza de la escena a `src/app/v3/_lib/escena/`** (§6), **su montaje en `/v3` detrás de la compuerta de 1025 con el progreso atado al scroll** (§7.2), el montaje del preloader (§1) y las cifras que ese montaje volvió a medir con la sala detrás (§1.4, §7.11, §7.16, §7.28), y en SITIO-S9 (2026-08-31) con **el mapeo POR ANCLAJE construido** (§7.2, que pasa de decidido-sin-construir a construido), **el cierre de la tinta del diferencial con su número** (§7.29: 6,07:1 en p=0,750), **la escena que deja de renderizar cuando ningún panel transparente está en cuadro** (§7.34), **la decisión medida de NO diferir el SDK de Sentry** (§7.30) y tres pendientes con su medición (§7.36 el acoplamiento de tipo), y en su parada con **la regla de las instrucciones que se contradicen** (§7.37), el cierre de §7.4 y de §7.35 y las dos correcciones a §7.30. y en SITIO-S10 (2026-08-31) con **el sitio de abajo de 1025 mirado por primera vez** (§7.38), **el inventario de accesibilidad sobre el home compuesto** (§7.39), **la composición del logo contra el texto con su contraste medido** (§7.40, que corrige el alcance del cierre de §7.29), **los 44 controles positivos que `s7e` y `s10e` no tenían** (§7.33, cerrado), **el chunk de Sentry identificado por contenido** (§7.30), **el orden de los dos `rAF` medido y contrario a lo que §7.34 declaraba**, y **el costo real de §7.36**, que la propia §7.36 publicaba incompleto; y en su parada con **el ACOTAMIENTO de §7.29** —cerrado contra el fondo, no contra el cuadro—, **el banco compartido probándose a sí mismo** (§7.41) y **las nueve cifras que no se reproducen, incluida una de la propia instrucción** (§7.42). y en SITIO-S11 (2026-09-01) con **los dieciocho defectos que S10 midió, arreglados** (§7.43: quince cerrados con el instrumento que los encontró confirmándolo, y tres abiertos por decisión —la superposición del logo re-medida, el `contentinfo` con sus tres paredes y Lenis con su atribución corregida—), **el codo de `travelX` sacado** (§7.40), **`CUADROS_DE_REANUDACION` bajado a 1** con la medición de S10 citada (§7.34), **el acoplamiento de tipo cerrado** con el costo real de tres tipos (§7.36), **el aterrizaje del logo del preloader mal en un teléfono en vertical, en el sitio VIVO** (§7.44), **dos correcciones de método** —un número pedido que el arreglo correcto contradice, y `git stash` devolviendo el árbol en CRLF— (§7.45), y **lo que el sprint rompió al arreglar**: la banda de `micro` en cero, dos afirmaciones de S7 que estaban verdes por subcadena, la tercera copia de la voz única, el detector de ventana de los checks de frontera y las cinco copias de `travelX`. y en SITIO-S12 (2026-09-01) con **los tres abiertos de §7.43 ejecutados** (§7.46: el modelo del documento parchado sin mover una cifra, el defecto 15 CERRADO —hay `banner` y el `navigation` salió del `main`—, y **las decisiones de §7.43 sobre los defectos 6 y 7 ANULADAS por la medición**: la del 7 porque su premisa es falsa —la columna del Hero empieza en 188 px y la del diferencial en 32, y lo que las separa es cuánto cuadro ocupa el logo— y la del 6 porque su orden era correcto pero no suficiente: una CUARTA pared que no vio nadie —el pie afuera suma 485 px a 1440 y 746 a 375 al documento fuera de la tabla y corre el progreso del anclaje de 0,750 a 0,7201/0,6906—. **Las dos salidas nuevas quedan anotadas y sin ejecutar**: para el 7, re-anclar el diferencial al progreso donde la cobertura del logo y el contraste pasan a la vez —y si esa ventana no existe, el diferencial pasa a `papel-opaco` y se pierde uno de los tres momentos de escena—; para el 6, derivar el progreso de la EXTENSIÓN DE LAS SECCIONES en vez de `scrollHeight`, con lo que un pie afuera deja de mover nada), **`travelX` con tres de cinco copias consumiendo la fuente y §7.44 medido en los tres teléfonos** (§7.47, más el codo real de `scene-camera.ts` en 0,542855 y no 0,567), y **tres correcciones de método** (§7.48: el CRLF es de toda escritura de `git` y no sólo de `stash`, una decisión tomada con un número vuelve a pasar por el instrumento antes de ejecutarse, y 17 de 18 lanes sin check de frontera propio). Se actualiza cuando una decisión cambia — no cuando se implementa.
 
 > **Regla de lectura.** Lo que está acá es decisión tomada. Lo que todavía no se decidió está en §7, marcado como pregunta abierta. Si algo no aparece en ninguna de las dos partes, no está decidido: se pregunta antes de construirlo.
 
@@ -1340,7 +1340,9 @@ Está acá para que nadie lo dé por resuelto.
 
     ── **POR QUÉ LA CUARTA NO ES COMO LAS OTRAS DOS**
 
-    En las otras tres el codo es inerte en toda la banda que importa: la escena de `/v3` sólo existe desde 1025, o sea aspecto ≥ **1,139**, y el codo de la pose del Hero está en **0,567** — muy por debajo. Ahí `max(0, ·)` y `abs(·)` devuelven el mismo número por construcción, y `s10-logo` §7 lo afirma en 6 de los 8 cuadros medidos.
+    En las otras tres el codo es inerte en toda la banda que importa: la escena de `/v3` sólo existe desde 1025, o sea aspecto ≥ **1,139**, y el codo de la pose del Hero está en ~~**0,567**~~ — muy por debajo. Ahí `max(0, ·)` y `abs(·)` devuelven el mismo número por construcción, y `s10-logo` §7 lo afirma en 6 de los 8 cuadros medidos.
+
+    🔴 **EL 0,567 ES DE OTRA CÁMARA, Y LO CORRIGIÓ SITIO-S12 (regla 11).** Ese número sale de la caja del ARNÉS (`LOGO_W` = 7,168). **`scene-camera.ts` no usa esa caja**: usa `SCENE_LOGO_MESH_WORLD.width` = 6,863213, y **su codo cae en 0,542855** — afirmado en `test:s8e-encuadre` §7. La corrección no es cosmética, y cambia qué se puede medir: **375×667 da aspecto 0,562219, que está ARRIBA de 0,542855**, así que en ese par —uno de los dos que el «orden para el sprint que lo tome» de abajo manda medir— **el arreglo es un no-op exacto**. Quien midiera 375×667 y 390×844 vería «uno cambia y el otro no» y lo leería como una inconsistencia del arreglo, cuando es la geometría. Los tres pares que sí caen debajo del codo real están en §7.47.
 
     **Pero `scene-camera.ts` no tiene compuerta de 1025: el preloader corre en TODO ancho, y el home vivo se abre en teléfonos.** Un 375×812 da aspecto **0,462**, y un 390×844 da **0,462** también: los dos **por debajo del codo de 0,567**. Ahí `travelX` vale **0** y el `frameX: 0,68` de `SCENE_ENTRY_POSE` —la pose que `scene-framing.ts` proyecta para saber dónde aterriza el logo 2D del preloader— **no corre el logo ni un píxel**. O sea: **en un teléfono en vertical el logo del preloader aterriza centrado cuando la pose pide que caiga corrido, y eso está pasando hoy en producción.**
 
@@ -1365,3 +1367,183 @@ Está acá para que nadie lo dé por resuelto.
     Para `git` no cambió nada —normaliza a LF al hashear, y el diff quedó idéntico— pero **puso en rojo dos agregados sin que una línea de código cambiara**. La firma es la peor posible: `s7-export.invariant.ts` busca el bloque de keyframes con `source.indexOf('/**\n * El recorrido.')`, deja de encontrarlo y reporta *«12357 bytes emitidos contra **0** en el archivo»* — un cero que se lee como «el exportador no emitió nada» cuando lo que pasó es que el archivo dejó de matchear.
 
     **La regla, y es de la familia de las dos que `CLAUDE.md` ya tiene** —Tailwind envenenado por un `distDir`, `tsc` roto por un build interrumpido—: *un instrumento que se pone en rojo sin que el código haya cambiado está midiendo el ENTORNO, no el archivo.* Y la operativa: **no se usa `git stash` en este repo para consultar `HEAD`.** Para eso está `git show HEAD:<ruta>`, que no toca el árbol de trabajo. Si igual hubo un `stash apply`, se vuelve a LF con un barrido sobre lo que devuelve `git status`.
+
+    🔴 **EL ALCANCE ERA CORTO, Y SITIO-S12 LO PAGÓ CON OTRO COMANDO.** La regla nombraba a `git stash`, y el culpable nunca fue `stash`: es **el filtro de `core.autocrlf`, que corre en toda escritura de `git` sobre el árbol de trabajo**. S12 revirtió UN archivo con `git checkout -- <ruta>` —una operación que no es `stash`, que no consulta nada y que parece inocua— y `Cierre.tsx` volvió con sus **154 líneas en CRLF**.
+
+    **La regla, ampliada:** *cualquier comando de `git` que ESCRIBA en el árbol —`checkout`, `restore`, `switch`, `stash apply`, `merge`, `revert`, `reset --hard`— aplica el filtro y devuelve CRLF. Los que sólo LEEN —`git show`, `git diff`, `git log`— no tocan un byte.* Operativa: para consultar `HEAD`, `git show HEAD:<ruta>`; para revertir, `git show HEAD:<ruta> > <ruta>`; y si hubo una escritura de `git`, **se vuelve a LF ANTES de correr un instrumento**, porque la firma del defecto es un rojo sin diff.
+
+46. 🔴 **LOS TRES ABIERTOS DE §7.43, EJECUTADOS EN SITIO-S12 — UNO CERRADO Y DOS DECISIONES ANULADAS POR LA MEDICIÓN.**
+
+    S11 dejó tres decisiones tomadas y sin construir. S12 fue a construirlas, y **dos de las tres quedaron ANULADAS** — no por alcance ni por tiempo, y no «abiertas»: **anuladas, porque la medición refuta la premisa sobre la que se tomaron**. Las dos van abajo con la premisa citada, el número que la refuta, y la salida NUEVA que ese número señala. Las salidas nuevas están **anotadas y no ejecutadas**: son de otro sprint.
+
+    ── ✅ **LA FASE 0: EL MODELO DEL DOCUMENTO, PARCHADO — y las cifras NO se movieron**
+
+    El patch que §7.43 dejó escrito está aplicado. `s10-banco.ts` ya no compone el documento como *«todo adentro del `<main>`»*: **deriva el ESQUELETO ENTERO del layout** —etiquetas literales con sus atributos, componentes desde un registro declarado, y `{children}` como ranura— en `_lib/__tests__/s10-esqueleto.ts` y `s10-jsx.ts`.
+
+    | | modelo VIEJO | modelo NUEVO |
+    |---|---:|---:|
+    | bytes del documento (rama quieta) | 62 351 | **62 351** |
+    | bytes del documento (rama animada) | 70 154 | **70 154** |
+    | landmarks · paradas · encabezados | 10 · 16 · 27 | **10 · 16 · 27** |
+
+    **Los dos documentos son idénticos byte a byte sobre el árbol de aquel momento**, así que el patch no traía sesgo escondido: lo que el modelo viejo componía a mano, el nuevo lo deriva y da lo mismo. **El control positivo que lo habilita como árbitro** —el que §7.43 exigía— está en `s10-banco` §2: el MISMO documento con el pie AFUERA del `<main>` cuenta **más** landmarks que con el pie adentro (11 → 12 hoy), y el que aparece es exactamente el `contentinfo`. Con tres controles más: el derivador no inventa un `<header>` ni un `<footer>` que el layout no tenga, y el modelo **TIRA** —no saltea en silencio— si el layout monta un componente que no está declarado.
+
+    ── ✅ **DEFECTO 15 — CERRADO: hay `banner` y el `navigation` salió del `main`**
+
+    | | antes | después | instrumento |
+    |---|---|---|---|
+    | landmarks | **10** | **11** | `test:s10-acceso` §5 |
+    | clases de landmark | `main · navigation · region` | **`banner · main · navigation · region`** | idem |
+    | `<nav>` anidados en `<main>` | 1 | **0** | idem, y `test:s8-chrome` §1 |
+
+    **Cómo, sin mover un píxel.** La forma obvia —envolver la pastilla en un `<header>`— **rompe el mecanismo en silencio**: `position: sticky` se pega dentro de su contenedor de bloque, y un `<header>` alrededor de un envoltorio de `block-size: 0` mide cero, así que el rango de pegado sería **cero** y la pastilla se iría con el scroll. Es el mismo defecto que `ChromeDelHome` documenta para un `<div>` intermedio, con otra cara. La salida es que **el envoltorio `sticky` SEA el `<header>`** (`Navegacion` recibió una prop `como`, con default `div` para la galería): no hay caja nueva, el contenedor de bloque pasa de `<main>` a `[data-v3]` —cuyo alto en flujo ES el del `<main>`, afirmado— y el rol se gana gratis.
+
+    ⚠️ **Y obligó a mudar el `<main>` del layout a la página, que es una consecuencia que sólo se ve pensando en el apilado.** `<main class="relative z-10">` crea un contexto de apilado. Con la pastilla (`--z-cabecera` = 100) afuera y el overlay del intro (z 9999) adentro, el overlay quedaba **aplastado al 10 del `<main>`** y la pastilla se habría pintado ENCIMA del preloader, en la primera visita de la sesión y sin que ningún instrumento lo viera. Con el `<main>` alrededor de las ocho y no alrededor de todo, los dos vuelven a compartir contexto.
+
+    **La propiedad que §7.39 celebra no cambió** —el documento TIENE un `<main>`, que la referencia no tiene en cinco de sus seis URLs— **cambió quién lo pone**, y `s10-banco` §2 lo afirma ahora sobre el documento compuesto y exigiendo que sea **exactamente uno**, con su control. Es la regla 15: la afirmación vieja estaba escrita contra el fuente del layout y se habría puesto en rojo por el arreglo que la instrucción mandaba hacer.
+
+    ── 🔴 **DEFECTO 6 — DECISIÓN ANULADA: EL ORDEN ERA CORRECTO Y NO ERA SUFICIENTE**
+
+    > **La premisa, citada:** *«EL ORDEN ESTÁ DECIDIDO, Y ES ÉSTE: PRIMERO EL MODELO, DESPUÉS EL PIE. La pared (3) es la que manda.»* (§7.43)
+
+    **El orden era correcto, y sobre las tres paredes que S11 midió era suficiente.** La pared (3) —que el instrumento no podía ver el arreglo— **está levantada**: el patch de la Fase 0 está aplicado y el modelo cuenta más landmarks con el pie afuera que adentro. Lo que anula la decisión no es un error de S11: **es una cuarta pared que no vio nadie**, ni S11 al decidir ni la instrucción de S12 al mandarlo ejecutar.
+
+    > **El progreso de la escena NO sale de la tabla de `secciones.ts`: sale de `document.documentElement.scrollHeight`** (`EscenaDelHome.tsx:148`). El anclaje de SITIO-S9 se DERIVA de la tabla. Las dos coinciden **mientras todo lo que suma alto de documento sea una de las ocho secciones.**
+
+    Sacar el pie de la `<section id="cierre">` rompe esa coincidencia, y el `alto` es un `min-height`: la sección **no se achica** al perder contenido —se queda en su pantalla— y el pie se suma entero.
+
+    | | hoy | sección partida | pie partido | agrega |
+    |---|---:|---:|---:|---:|
+    | @375 | 1046 px | 412 | **746** | +112 |
+    | @390 | 1047 px | 413 | **746** | +112 |
+    | @768 | 726 px | 354 | **484** | +112 |
+    | @1440 | 741 px | 368 | **485** | +112 |
+
+    Los +112 px son exactamente `2 × --spacing-20`: **el corte duplica el relleno vertical**, porque afuera de `Pie` la sección deja de heredar el `padding-block` de `_estilos/pie.css` y tiene que declararlo. Y lo que mueve el anclaje es el pie entero:
+
+    | | documento | con el pie afuera | el progreso que hoy vale **0,750** pasa a |
+    |---|---:|---:|---:|
+    | 1440×900 | 12 600 px | 13 085 px | **0,7201** |
+    | 375×667 | 9 338 px | 10 084 px | **0,6906** |
+
+    **0,750 es donde el diferencial llena el cuadro, y es el progreso exacto en el que §7.29 mide su tinta (6,07:1) y §7.40 su superposición.** Mover el pie corre el mapeo entero **sin tocar una línea del anclaje**, que la regla 4 del sprint prohíbe. Lo produce `test:s10-mobile` §7.
+
+    ✅ **EL GUARDIÁN DE LA CUARTA PARED — `test:s8-montaje` §4b.** Escrito DESPUÉS de pisar la trampa, y va con nombre porque ése es su trabajo: **es el control que la habría visto antes**. Afirma que **todos los hermanos del `<main>` están FUERA DEL FLUJO, y lo dice la HOJA, no el marcado** —hoy son el salto (`position: absolute`) y la pastilla (`block-size: 0`)—, con dos controles positivos: ve una pieza que sí está en el flujo, y ve una que la hoja no menciona. El día que alguien meta algo en el flujo afuera del `<main>`, se pone en rojo **antes** de que el anclaje se mueva en silencio.
+
+    ── ✅ **LA SALIDA NUEVA DEL DEFECTO 6 — ANOTADA, NO EJECUTADA: el desbloqueo no es el pie, es DE DÓNDE SALE EL PROGRESO**
+
+    **El defecto real no es que el pie esté adentro de la sección: es que el progreso se derive de `scrollHeight`.** `EscenaDelHome.tsx:148` mide `document.documentElement.scrollHeight`, o sea **un documento que incluye cosas que no son secciones**. Que hoy no haya ninguna es una coincidencia, no una garantía — y la coincidencia se rompe con el primer elemento en flujo que se agregue afuera de las ocho, sea el pie o cualquier otra cosa.
+
+    **Si el progreso se derivara de la EXTENSIÓN DE LAS SECCIONES** —lo que ya declara `_lib/secciones.ts` y de donde el anclaje de SITIO-S9 saca sus nudos— **un pie afuera del `<main>` no movería nada, y el defecto 6 se destraba solo.** Las dos fuentes dejarían de poder divergir, que es la propiedad que §4b custodia hoy por afuera.
+
+    Los números con los que hay que evaluarla, ya medidos: el pie afuera suma **485 px a 1440×900 y 746 px a 375×667**, y eso corre el progreso del diferencial de **0,750 → 0,7201** y de **0,750 → 0,6906**. Con el progreso derivado de las secciones, esos tres pares se vuelven **0,750 → 0,750** y la tabla entera de §7.29 y §7.40 sigue valiendo sin volver a medirse. **Es un cambio en la escena —`EscenaDelHome.tsx`— y por eso no es de este sprint.**
+
+    ── 🔴 **DEFECTO 7 — DECISIÓN ANULADA: LA PREMISA ES FALSA, MEDIDA**
+
+    > **La premisa, citada:** *«La salida es de LAYOUT: la columna de texto del diferencial se acota a la IZQUIERDA, fuera de la silueta del logo. Y no es una invención: **es lo que el Hero ya hace**, y es exactamente por eso que el Hero tiene superposición mínima 0% y el diferencial no.»* (§7.43)
+
+    🔴 **ES FALSA, y el número que la refuta es una resta: la columna del Hero empieza en 188 px y la del diferencial en 32.** El Hero **empieza más a la DERECHA**, no más a la izquierda, porque lleva la columna lateral de 140 px del rótulo; y las dos TERMINAN casi en el mismo lugar —el `h1` del Hero en **+0,27** a 1440 y el `h2` del diferencial en **+0,31**—. Si alguna de las dos está «acotada a la izquierda» es la del diferencial, o sea la que se iba a acotar.
+
+    **Lo que separa a las dos secciones no es la columna: es cuánto cuadro ocupa el logo.** En el Hero ocupa el **8,7%** y vive a la derecha, así que hay altura de pantalla donde el titular queda limpio; en `demos` ocupa el **35,7%** y su banda cruza el cuadro de lado a lado, así que no la hay. Está afirmado en `test:s10-logo` §9, con el instrumento que la propia instrucción nombraba como confirmación.
+
+    **Y la salida decidida tampoco llega a cero.**
+
+    **2 · La salida no llega a cero, y en dos de los cuatro cuadros EMPEORA.** Acotar la columna la hace más angosta; más angosta la hace más ALTA —`lineasDeTexto` recuenta con los avances reales del `.woff2`— y una caja más alta se queda sin altura de pantalla donde escapar (`barridoVertical`: `recorrido = max(0, 2 − alto)`).
+
+    | forma de la columna | 1025×667 | 1025×844 | 1025×900 | 1440×900 | **peor** |
+    |---|---:|---:|---:|---:|---:|
+    | **HOY** — `columnas={3}` `col-span-2` | 7% | 16% | 14% | 4% | **16%** |
+    | `columnas={7}` `col-span-4` (la mejor) | 6% | 11% | 6% | 0% | **11%** |
+    | `columnas={5}` `col-span-2` | 12% | 22% | 17% | 0% | **22%** |
+    | `columnas={3}` `col-span-1` | 10% | 28% | 26% | 0% | **28%** |
+
+    **Y el barrido es exhaustivo, no una muestra:** 81 bandas `(izquierda, ancho)` y **la mejor deja 11,2% en su peor cuadro**. La causa es geométrica y se publica al lado: a p=0,750 el logo deja **64 px libres a la izquierda y 197 a la derecha** en el cuadro de 1025×900, y con 165 px el titular de 107 caracteres corta en **19 líneas** —916 px de alto contra un cuadro de 900—. No hay banda horizontal legible que quede fuera de la silueta.
+
+    Lo produce `_lib/escena/__tests__/s10-logo-columna.ts` (`test:s10-logo` §9), con su control positivo —el barrido SÍ sabe encontrar un cero cuando la banda entra entera en el hueco libre— y con la afirmación en verde como **guardián**: el día que alguien cierre el defecto 7, `MEJOR.peor > 0` se pone en rojo y ahí hay que escribir con qué palanca se cerró.
+
+    ── ✅ **LA SALIDA NUEVA DEL DEFECTO 7 — ANOTADA, NO EJECUTADA: el problema no es la columna, es la POSE**
+
+    **`demos` se eligió para otra cosa.** `choreography.ts:287` lo dice con sus palabras: *«es la única pose donde el logo llena el cuadro —81% del alto en tinta— y es la excepción que la arquitectónica se reserva»*, **«el momento más íntimo»** de §2.2. Se compuso para una sección que mostraba DEMOS —capturas, pantallas, cosas que se ven— **no para una con un titular de 107 caracteres en `titulo-xl`**. Anclar el diferencial ahí fue una decisión de RECORRIDO (SITIO-S9), y es la que hay que revisar: acotar la columna es pelear contra la pose en vez de cambiarla.
+
+    **QUÉ MEDIR, y es una sola tabla:** para cada progreso del recorrido, **cuánto cuadro cubre el logo Y cuánto da el contraste de la tinta contra el fondo**, juntos. Buscar la ventana donde las dos cosas pasan a la vez, y anclar el diferencial ahí en vez de a `demos`. Los dos extremos ya están medidos y dejan lugar a que la ventana exista:
+
+    - el contraste **cruza AA en p=0,878** (§7.29), o sea que mejora al avanzar;
+    - el logo **se achica al alejarse**: a p=0,875 cubre **5,3%** del cuadro contra el **35,7%** de p=0,750 (§7.40, `test:s10-logo` §8).
+
+    O sea: hacia adelante el contraste sube y la mancha baja. **Puede existir una ventana entre medio**, y nadie la buscó porque nadie había medido las dos curvas juntas.
+
+    **LAS DOS OPCIONES, con su condición explícita:**
+
+    | | si la ventana EXISTE | si la ventana NO existe |
+    |---|---|---|
+    | **qué se hace** | se re-ancla el diferencial a ese progreso: es una entrada de `_lib/escena/anclaje.ts`, no una reescritura | **el diferencial pasa a `papel-opaco`** |
+    | **qué cuesta** | volver a derivar el mapeo de SITIO-S9 y re-medir §7.29 y §7.40 en el progreso nuevo | **se pierde uno de los TRES momentos de escena**: el sitio pasa de tres ventanas transparentes a dos, y §2.2 hay que reescribirla |
+    | **qué se gana** | la superposición cae a 0 sin tocar la columna, el contenido ni la tipografía | el defecto 7 desaparece por construcción: sin escena detrás no hay logo con el que competir |
+
+    **La condición es la medición, no el gusto:** la opción 2 sólo se toma **si la tabla de progreso contra (cobertura, contraste) no devuelve ninguna ventana**. Y de las palancas viejas de §7.40 ninguna sirve para esto: las tres que podrían llegar a cero —bajar el nivel tipográfico del `h2`, acortar el `TITULAR`, o mover la sección— son contenido o anclaje, y la tercera es exactamente esta salida, sólo que ahora con el criterio para elegir el destino en vez de a ojo.
+
+    ⚠️ **Y una consecuencia de método que hay que anotar antes de tomarla:** si el defecto 7 se cerrara, `s10-logo` §5 —*«EL CONTRASTE DONDE SE SUPERPONEN»*— **seguiría publicando 1,11:1 en verde**, porque `contrasteSobreElLogo` toma todos los píxeles de logo del cuadro y **no interseca con la caja de texto**. No sería un verde por vacío: sería un verde midiendo otra cosa, con un título que dice «donde se superponen» y sin un «donde». Quien cierre el 7 tiene que atar §5 a §4 en la misma pasada.
+
+47. ✅ **`travelX` — TRES DE LAS CINCO COPIAS CONSUMEN LA FUENTE, Y §7.44 ESTÁ MEDIDO (SITIO-S12).**
+
+    ── **LA UNIFICACIÓN, y las dos que quedan con su razón**
+
+    | copia | estado |
+    |---|---|
+    | `_lib/escena/encuadre.ts` | **ES la fuente**: `recorridoDeEncuadre` |
+    | `_lib/escena/__tests__/camaraDelCuadro.ts` | la consume desde S11; su `recorridoConCodo` es el **testigo declarado**, no una copia viva |
+    | `lib/scene-framing.invariant.ts` §6 | ✅ **unificada en S12** — era la quinta, con `35` y `0.88` escritos a mano. **Cambio numérico: CERO** (a 1440×810 el argumento es positivo: halfW 11,238 contra m/2 3,432) |
+    | `probe-escena/__tests__/harness.ts` | 🔴 **DEUDA** — vive en `/probe-escena`, que la regla 5 del sprint prohíbe tocar, **y unificarla pone en rojo el control positivo de `s10-logo` §7**, que existe justamente porque hay dos fórmulas |
+    | `lib/scene-camera.ts` | 🔴 **DEUDA** — es el PRELOADER DEL SITIO VIVO |
+
+    **La comprobación de que las cinco coinciden existe y NO cierra, que es lo correcto**: `test:s8e-encuadre` §8 lee las cinco fuentes, exige que las tres unificadas consuman `recorridoDeEncuadre` y que las dos restantes **conserven** su copia, con su razón por copia. El día que aparezca una sexta se pone en rojo sola; el día que se arregle una hay que sacarla de la lista. Con su control positivo: la firma reconoce `max(0, · − ·/2)` y rechaza `abs(· − ·/2)`.
+
+    ── ⚠️ **UNA CIFRA DE §7.44 QUE NO SE REPRODUCE (regla 11), Y ES OPERATIVA**
+
+    §7.44 dice *«el codo de la pose del Hero está en 0,567»* y manda medir en **375×667 y 390×844**. **0,567 es el codo con la caja del ARNÉS (7,168).** `scene-camera.ts` no usa esa caja: usa `SCENE_LOGO_MESH_WORLD.width` = 6,863213, y **su codo cae en 0,542855**. La diferencia decide qué se puede medir: **375×667 da aspecto 0,562, que está ARRIBA del codo real**, así que ahí el arreglo es un **no-op exacto** y quien midiera ese par concluiría que la corrección no hace nada.
+
+    ── **EL ATERRIZAJE, MEDIDO Y NO ARREGLADO**
+
+    Los tres teléfonos en vertical, los tres debajo del codo real:
+
+    | ventana | aspecto | HOY (centro de la tinta) | con `abs` | Δx |
+    |---|---:|---|---|---:|
+    | 375×812 | 0,461823 | **187,500 · 406,000** | 207,187 · 406,101 | **+19,69 px** (5,25% del ancho) |
+    | 390×844 | 0,462085 | **195,000 · 422,000** | 215,396 · 422,105 | **+20,40 px** (5,23%) |
+    | 393×852 | 0,461268 | **196,500 · 426,000** | 217,298 · 426,108 | **+20,80 px** (5,29%) |
+
+    **Hoy el logo aterriza EXACTAMENTE en el centro geométrico de la pantalla en los tres**, afirmado: con `travelX` en 0 el `aim` colapsa sobre el target, la cámara no rota y el `frameX: 0,68` de la pose de entrada no corre el logo ni un píxel. **El tamaño NO cambiaría** —el clamp de §7.6 binda en los tres y `inkWidthPx` queda en `0,86 × ancho`, independiente de la profundidad— así que lo único que se mueve es el punto.
+
+    El contrafactual se compone con `lib/scene-camera-medida.ts`, que consume la fuente única **sin tocar `scene-camera.ts`**, y trae los tres controles que lo hacen honesto: coincide bit a bit con la cámara de producción cuando `frameX: 0`, coincide bit a bit ARRIBA del codo, y **NO coincide debajo** —si coincidiera, toda la tabla sería una resta de un número contra sí mismo—.
+
+    **Qué rutas cambiarían el día que se arregle:** `/` (el home vivo, con clientes) y `/v3`. La cadena es `HomeIntro` → `useIntroEngine` → `planIntroFlight` → `frameSceneEntry` → `sceneCameraAt`; y en paralelo `IntroParticleCanvas` → `buildIntroParticles` → `sceneCameraAt`, o sea que el arreglo **mueve el logo y las motas juntos**, que es lo correcto. Ningún otro consumidor toca esos módulos.
+
+    ── 🔴 **UNA AFIRMACIÓN QUE ESTABA EN VERDE CERTIFICANDO EL DEFECTO — reescrita**
+
+    `scene-framing.invariant.ts` afirmaba *«el clamp achica, NO mueve: el centro es el de la composición»* con `Math.abs(phone.centerXPx - 195) < 1.5`. **195 es exactamente 390/2**, o sea el centro geométrico de la pantalla: el número que sale **sólo porque `travelX` vale 0**. No medía el clamp — clavaba el defecto, y el día que alguien arreglara `scene-camera.ts` se habría puesto en rojo como si fuera una regresión. Reescrita **contra la propiedad** (regla 15, §7.45.1): el centro ES la proyección del origen, sin pasar por el clamp; y el clamp SÍ mueve el TAMAÑO, que es lo único que le toca (457 px crudos contra 335 publicados).
+
+48. ⚠️ **TRES CORRECCIONES DE MÉTODO DE SITIO-S12.**
+
+    ── **1 · EL CRLF NO ES DE `git stash`: ES DE CUALQUIER ESCRITURA DE `git` EN EL ÁRBOL**
+
+    §7.45.2 dejó la regla como *«no se usa `git stash` en este repo para consultar `HEAD`»*. **La regla estaba bien y el alcance corto.** SITIO-S12 revirtió UN archivo con `git checkout -- <ruta>` —una operación que no es `stash`, que no consulta nada y que parece inocua— y el archivo volvió con **154 líneas en CRLF**. Es el mismo filtro de `core.autocrlf`, por otra puerta.
+
+    **La regla, ampliada:** *cualquier comando de `git` que ESCRIBA en el árbol de trabajo (`checkout`, `restore`, `stash apply`, `merge`, `revert`) aplica el filtro y devuelve CRLF.* Los que sólo LEEN (`git show`, `git diff`, `git log`) no tocan un byte. Si hubo escritura, se vuelve a LF antes de correr un instrumento.
+
+    ── **2 · UN INSTRUMENTO SE VALIDA DÁNDOSELO A ALGUIEN CON OTRA PREGUNTA — otra vez, y ahora con el frente de medición adentro del mismo sprint**
+
+    §7.41 dejó la regla escrita para el banco compartido. Acá volvió a pasar con la DECISIÓN, no con el instrumento: §7.43 eligió una salida de layout para el defecto 7 y §7.44 publicó un codo. **Las dos se cayeron al medirlas con el instrumento que ellas mismas nombraban como confirmación** —la superposición no baja a cero, y el codo de `scene-camera.ts` es 0,542855 y no 0,567—. La versión operativa: **una decisión que se toma con un número tiene que volver a pasar por el instrumento antes de ejecutarse**, aunque el número lo haya publicado el sprint anterior.
+
+    ── **3 · LOS CHECKS DE FRONTERA SON UNO DE DIECINUEVE, Y ESO ES EL HUECO**
+
+    §7.43 dejó anotado que con el detector bien fechado *«ningún instrumento vigila hoy los dos toques declarados en `/probe-escena`»*. SITIO-S12 escribió el que faltaba —`test:s11-frontera`, declarado en `CHECKS_DE_FRONTERA`— y al hacerlo midió el hueco entero: **de los 18 lanes con suite permanente, 17 no tienen check de frontera propio.**
+
+    El check de S11 **nace fuera de su ventana** —S11 está commiteado, así que su §1 sale con `noCorre()`— y eso no lo vuelve inútil: su §2 no mira `git` sino el DISCO, y afirma que **los dos toques siguen siendo lo declarado** (el panel RE-EXPORTA los tres tipos y no los declara; la declaración del recorte de `demos` sigue en el archivo del que el exportador la regenera), con sus dos controles positivos. Lo que no se puede recuperar es la mitad que mide el momento. **La salida no es escribir los diecisiete: es que cada sprint nuevo nazca con el suyo**, y este archivo es el molde.
+
+    ── **Y la contradicción `≤` contra `=` de §7.43, dirimida con la medición**
+
+    Los seis heredados miden **exactamente** su línea de base (Δ=0 en los seis), así que las dos reglas coinciden hoy y cambiar de una a otra no afloja nada verificable. Lo que decide es el día que se separen: §7.13 declara que `OrbitRig`, `probeStore` y `lightRig` van juntos a un sprint de limpieza, y **con la igualdad ese sprint pone la comprobación en rojo por el trabajo que ella existía para provocar**, con el mensaje «ninguno se movió», que como diagnóstico sería falso. **Gana `≤`**, y la segunda escritura no se corrigió: **se borró**. `s9-instrumentos` §3 consume ahora `heredadosQueCrecieron()` de `s8-largos.ts` — dos escrituras de la misma regla vuelven a divergir; una sola no puede. Lo único que la igualdad detectaba y `≤` no —que la base quedó vieja porque un archivo adelgazó— **se publica con su Δ**, que es la otra mitad de la regla 13.
+
+    ── **Y el residuo de §7.36 que la propia §7.36 no vio**
+
+    El acoplamiento de tipo está CERRADO y no hay un solo import de producción hacia `/probe-escena` desde `src/app/v3/`. Quedaban dos cosas por nombrar. La primera: **`usosDeValor` era el único detector de `s9-acoplamiento.ts` sin control positivo en ningún lugar del repo**, así que sus tres afirmaciones pasaban por AUSENCIA —un detector roto que devolviera siempre `[]` las habría dejado verdes—. Tiene dos controles desde S12. La segunda, sin arreglar y con dueño: **`lib/scene-framing.invariant.ts` importa un VALOR de `probe-escena/_components/choreographyVariants`**, y es el único import de valor hacia `_components/` que queda fuera del panel. §7.36 nunca lo alcanzó, y alimenta la cadena del preloader del home VIVO: el día que `/probe-escena` se borre, `tsc --noEmit` corta y `npm run build` NO, por `ignoreBuildErrors: true`.

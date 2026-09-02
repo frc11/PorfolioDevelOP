@@ -193,6 +193,16 @@ export const BANCO: readonly string[] = [
   `${TESTS}/s10-banco.invariant.ts`,
   `${TESTS}/s10-lectura.invariant.ts`,
   `${TESTS}/s10-medida.invariant.ts`,
+  /* ⚠ LOS CUATRO DE SITIO-S12, y entran al banco por la misma razón que los
+     once de arriba: los produce el agente principal en su Fase 0, antes de
+     despachar un solo frente, y **ningún frente los puede mover**. Son el patch
+     de §7.43 —el modelo del documento deja de ser «todo adentro del `<main>`»—
+     y las tres particiones que ese patch obligó, porque cruzó las 300 líneas a
+     `s10-banco.ts` y a `s10-banco.invariant.ts`. */
+  `${TESTS}/s10-jsx.ts`,
+  `${TESTS}/s10-esqueleto.ts`,
+  `${TESTS}/s10-marcado.ts`,
+  `${TESTS}/s10-banco-modelo.ts`,
 ]
 
 /**

@@ -84,9 +84,9 @@ afirmar(MARCADO.includes('data-pieza="navegacion"'), 'el chrome monta la pastill
  * línea de marcado. Por eso «el primer elemento es la pastilla» se partió en dos
  * en vez de aflojarse; el porqué del salto está en `_estilos/foco.css` y en
  * `_chrome/SaltarAlContenido.tsx`. Las dos fallan igual que el pinneo de
- * `_contrato/Seccion.tsx`: sin error, sin aviso, y con un marcado que se ve bien.
- */
-afirmarIgual(S.profundidadDeLaPieza(MARCADO, 'navegacion'), 0, 'el envoltorio de la pastilla NO está envuelto: es hijo directo del fragmento, así que su contenedor de bloque es el `<main>` y el rango de pegado es el alto de las ocho secciones')
+ * `_contrato/Seccion.tsx`: sin error, sin aviso, y con un marcado que se ve bien. */
+afirmarIgual(S.profundidadDeLaPieza(MARCADO, 'navegacion'), 0, 'el envoltorio de la pastilla NO está envuelto: es hijo directo del fragmento, así que su contenedor de bloque es el ancestro que le toque y el rango de pegado es el alto de ese ancestro')
+S.afirmarElChromeAfueraDelMain()
 controlPositivo('el detector ve un envoltorio intermedio', S.MARCADO_CON_ENVOLTORIO, (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
 controlPositivo('y no se pone verde con un marcado vacío', '', (h: string) => S.profundidadDeLaPieza(h, 'navegacion') === 0)
 
@@ -102,7 +102,7 @@ controlPositivo('y sabe decir que una propiedad NO está declarada, que es disti
 const PARADAS = paradasDeTabulacion(marcadoDelDocumento('quieta'))
 afirmarIgual(PARADAS[0].rotulo, ROTULO_DEL_SALTO, `la PRIMERA de las ${PARADAS.length} paradas del documento es el enlace de salto: quien tabula ya no entra por los cinco de la pastilla`)
 afirmarIgual(paradasDeTabulacion(marcadoDelDocumento('animada'))[0].rotulo, ROTULO_DEL_SALTO, '  en las DOS ramas: el enlace es marcado y una hoja, no cuelga de la coreografía')
-afirmarIgual(PARADAS[0].destino, `#${SECCIONES[0].id}`, '  y salta a la PRIMERA sección de la tabla, no al `<main>` —que empieza ANTES que la pastilla y no saltearía nada—')
+afirmarIgual(PARADAS[0].destino, `#${SECCIONES[0].id}`, '  y salta a la PRIMERA sección de la tabla — desde SITIO-S12 el `<main>` también sería un destino válido, y la constante NO se movió: ver `SaltarAlContenido.tsx`')
 afirmar(marcadoDelDocumento('quieta').includes(`id="${SECCIONES[0].id}"`), '  y ese id EXISTE en el marcado del documento: el salto aterriza en algo')
 controlPositivo('el buscador del ancla no está ciego', 'id="no-existe-en-el-documento"', (m: string) => marcadoDelDocumento('quieta').includes(m))
 
@@ -146,7 +146,7 @@ titulo('3 · La cadena de ancestros del `sticky` sigue sin `overflow` recortado'
  * —`publicRoute.ts` lo declara sin barra ni Shutter—, así que nada más se
  * interpone.
  */
-const ANCESTROS_CSS = ['html', 'body', ':root', '*', 'main', '[data-v3]']
+const ANCESTROS_CSS = ['html', 'body', ':root', '*', 'main', 'header', '[data-v3]']
 const HOJAS = ['src/app/globals.css', 'src/app/theme-develop.css', ...['cta', 'navegacion', 'cursor', 'pie', 'foco'].map((h) => `src/app/v3/_estilos/${h}.css`)]
 for (const hoja of HOJAS) {
   afirmarIgual(S.overflowsSobreAncestros(S.leer(hoja), ANCESTROS_CSS), [], `\`${hoja}\` no recorta el overflow de ningún ancestro`)

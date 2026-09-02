@@ -40,10 +40,27 @@ export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMA
   const CANDIDATOS = candidatosALandmark(QUIETA)
   imprimirLandmarks(CANDIDATOS)
   const LANDMARKS = CANDIDATOS.filter((l) => esRolDeLandmark(l.rol))
-  afirmarIgual(LANDMARKS.length, 10, 'el documento tiene DIEZ landmarks, contra los DOS que S10 midió')
-  afirmarIgual([...new Set(LANDMARKS.map((l) => l.rol))].sort(), ['main', 'navigation', 'region'], '  y son de tres clases: el `main`, la `navigation` y las ocho `region`')
+  afirmarIgual(LANDMARKS.length, 11, 'el documento tiene ONCE landmarks, contra los DOS que S10 midió y los DIEZ de S11')
+  afirmarIgual([...new Set(LANDMARKS.map((l) => l.rol))].sort(), ['banner', 'main', 'navigation', 'region'], '  y son de cuatro clases: el `banner`, el `main`, la `navigation` y las ocho `region`')
   afirmarIgual(LANDMARKS.filter((l) => l.rol === 'region').length, 8, '  una `region` por sección, las ocho')
-  afirmar(CANDIDATOS[0].etiqueta === 'main', 'el `<main>` EXISTE, y lo pone `src/app/v3/layout.tsx` — no la página', 'la referencia no lo tiene en 5 de sus 6 URLs')
+  /**
+   * ⚠ **LAS DOS AFIRMACIONES DEL DEFECTO 15, ESCRITAS CONTRA LA PROPIEDAD Y NO
+   * CONTRA UN ÍNDICE (SITIO-S12).** El defecto pedía dos cosas a la vez: que
+   * exista `banner` y que el `navigation` **deje de estar anidado** en el
+   * `main`. Un `CANDIDATOS[0].etiqueta === 'main'` no dice ninguna de las dos —
+   * dice cuál viene primero— y se ponía en rojo por el arreglo mismo.
+   */
+  const bannerEsPrimero = LANDMARKS[0].rol === 'banner'
+  afirmar(bannerEsPrimero, 'el `banner` EXISTE y abre el documento — el `<header>` es el envoltorio de la pastilla, hermano del `<main>`', LANDMARKS.map((l) => l.rol).join(' · '))
+  const navAnidado = nodosDe(QUIETA).filter((n) => n.etiqueta === 'nav' && n.ancestros.includes('main'))
+  afirmarIgual(navAnidado.length, 0, '  y el `navigation` YA NO está anidado en el `main`: un «saltar al contenido» sí saltea la navegación')
+  const mains = nodosDe(QUIETA).filter((n) => n.etiqueta === 'main')
+  afirmarIgual(mains.length, 1, 'el `<main>` EXISTE, y hay exactamente UNO — la referencia no lo tiene en 5 de sus 6 URLs')
+  controlPositivo(
+    'el detector de anidamiento no está ciego: ve un `<nav>` adentro de un `<main>`',
+    '<main><nav aria-label="x"></nav></main>',
+    (h: string) => nodosDe(h).filter((n) => n.etiqueta === 'nav' && n.ancestros.includes('main')).length === 0,
+  )
   afirmarIgual(CANDIDATOS.filter((l) => l.etiqueta === 'section' && l.rol === null).length, 0, 'ninguna `<section>` queda ya sin nombre accesible')
   /** Los `aria-labelledby` que apuntan a un id que NO existe en el documento. */
   const colgados = (html: string): string[] =>
@@ -62,12 +79,7 @@ export function afirmarLosLandmarks(QUIETA: string, marcado: (rama: (typeof RAMA
   publicar({
     n: 5, gravedad: 'alta', clase: 'defecto',
     dueño: 'la sección Cierre — el `<footer data-pieza="pie">` vive adentro de `<section id="cierre">`',
-    que: 'el sitio NO tiene landmark `contentinfo`. Un `<footer>` adentro de contenido seccionante no mapea a `contentinfo` (HTML-AAM), y éste está adentro de una `<section>`: el pie no se alcanza navegando por regiones. ⚠️ SITIO-S11 lo intentó y FRENÓ, con tres paredes medidas: (1) el `<footer>` no está adentro de la sección, ES la sección —`Pie` envuelve el encabezado, el titular, el CTA, las columnas y la línea legal—, así que sacarlo mueve la sección entera; (2) el alto lo declara `_lib/secciones.ts` (`cierre: 100svh`), que es entrada del anclaje de SITIO-S9 y este sprint tiene prohibido tocar, así que partir el pie deja un hueco oscuro de ≈532 px a 1440 y ≈218 a 375; (3) este instrumento NO PODRÍA CONFIRMARLO: `s10-banco.ts` compone el documento como «todo adentro del `<main>`», así que nada emitido afuera existe para el modelo. Queda ABIERTO, por decisión',
-  })
-  publicar({
-    n: 7, gravedad: 'baja', clase: 'defecto',
-    dueño: 'el chrome — `<nav>` se monta adentro del `<main>` del layout',
-    que: 'el `navigation` está ANIDADO en el `main`, así que un «saltar al contenido principal» no saltearía la navegación; y no hay `banner`. ⚠️ SITIO-S11 lo intentó y FRENÓ, por la MISMA tercera pared que el 5: `s10-banco.ts` compone el documento como «todo adentro del `<main>`», así que sacar la pastilla afuera BAJARÍA las cifras de este instrumento por ceguera del modelo y no por regresión. Y el punto de montaje es `src/app/v3/page.tsx`, que ningún frente tenía en su lista. Lo que S11 SÍ cerró es la consecuencia práctica: hay enlace de salto y llega al contenido en una pulsación (§3). Queda ABIERTO, por decisión',
+    que: 'el sitio NO tiene landmark `contentinfo`. Un `<footer>` adentro de contenido seccionante no mapea a `contentinfo` (HTML-AAM), y éste está adentro de una `<section>`: el pie no se alcanza navegando por regiones. ⚠️ SITIO-S12 levantó la tercera pared —el modelo del documento ya VE lo que se emite fuera del `<main>`, y `s10-banco` §2 lo demuestra con el pie afuera contando MÁS landmarks que adentro— y FRENÓ contra una CUARTA que nadie había medido: sacar el pie de la sección le suma 485 px a 1440 y 735 px a 375 al documento FUERA de la tabla de `secciones.ts`, y el progreso de la escena sale de `document.documentElement.scrollHeight`. El progreso que hoy vale 0,750 donde el diferencial llena el cuadro pasaría a 0,720 y 0,691: mueve el anclaje de SITIO-S9 sin tocar una línea del anclaje. Queda ABIERTO, y ahora con el número que dice qué hay que decidir: el `alto` del Cierre en la tabla. Ver §7.46',
   })
   publicar({
     n: 8, gravedad: 'baja', clase: 'defecto',

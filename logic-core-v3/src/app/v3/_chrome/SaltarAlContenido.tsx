@@ -36,9 +36,16 @@ import { ID_DE_LA_SECCION_DE_ENTRADA } from '../_componentes/Panel'
  * de la tabla. `ID_DE_LA_SECCION_DE_ENTRADA` lo deriva de ahí; este archivo no
  * escribe un id ni un `#`.
  *
- * Queda declarado el día que se cierre el hallazgo 7 —`navigation` anidado en
- * `main`—: cuando la pastilla viva afuera del `<main>`, el destino natural pasa
- * a ser el `<main>` y esta constante cambia de valor, no de forma.
+ * ⚠ **SITIO-S12 CERRÓ EL HALLAZGO 7 Y EL DESTINO NO SE MOVIÓ, a propósito.** La
+ * pastilla ya vive afuera del `<main>` —es un `<header>` hermano suyo— así que
+ * el `<main>` PASÓ a ser un destino válido: saltearía los cinco enlaces igual.
+ * No se cambió por dos razones medidas. La primera es que **no compra nada**:
+ * las dos anclas dejan la misma primera parada de contenido, y el `<main>` no
+ * lleva `tabindex="-1"` mientras que la sección de entrada sí —`Panel` se lo
+ * pone, y sin eso WebKit no mueve el foco de verdad, que es el defecto que esta
+ * pieza existe para no tener—. La segunda es que **cuesta**: `#hero` es el
+ * destino que `s8-chrome` y `s10-acceso` afirman, y moverlo sin ganar nada es
+ * mover un censo por gusto. La opción queda escrita para quien la necesite.
  *
  * ── Cómo se ve, y por qué NO es `display: none` ────────────────────────────
  *

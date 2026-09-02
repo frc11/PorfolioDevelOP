@@ -3,6 +3,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { atributo, nodosDe } from '../../_lib/__tests__/s10-recorrido'
+import { afirmar, controlPositivo } from '../../_lib/__tests__/afirmar'
+import { marcadoDelDocumento } from '../../_lib/__tests__/s10-banco'
 
 /**
  * LA PLOMERÍA DE `s8-chrome` — los detectores, afuera del archivo que los usa.
@@ -244,3 +246,46 @@ export const MARCADO_SIN_PESO = '<span class="font-cuerpo text-caption font-norm
  * pastilla —los `100svh − 72px` que §2 verifica contra el Hero real—.
  */
 export const CSS_DEL_SALTO_EN_FLUJO = '[data-v3] [data-pieza="salto"] { position: static; block-size: 1px; }'
+
+/**
+ * EL CHROME AFUERA DEL `<main>` — el cierre del defecto 15, afirmado sobre el
+ * documento compuesto.
+ *
+ * Sale de `s8-chrome.invariant.ts` porque lo cruzó las 300 líneas del repo. El
+ * corte es por tema: es la única parte de §1 que mira el DOCUMENTO entero en vez
+ * del marcado del chrome aislado, y esa diferencia es justamente la que hace
+ * falta —el chrome renderizado solo no puede saber quién lo envuelve—.
+ */
+export function afirmarElChromeAfueraDelMain(): void {
+  /**
+   * ⚠ **SITIO-S12 MOVIÓ EL CONTENEDOR DE BLOQUE, Y LA AFIRMACIÓN SE HIZO MÁS FINA
+   * EN VEZ DE AFLOJARSE (regla 15).** Hasta S11 el texto decía «su contenedor de
+   * bloque es el `<main>`», y eso era una consecuencia de dónde estaba montado el
+   * chrome, no una propiedad de lo que este archivo emite. Con el chrome afuera
+   * del `<main>` —el arreglo del defecto 15— el contenedor pasó a ser
+   * `[data-v3]`, cuyo alto en flujo es el del `<main>`: **el rango de pegado no
+   * cambia**, porque el `<main>` es su único hijo en el flujo. Eso último no se
+   * puede suponer: se afirma sobre el documento compuesto, y es la mitad que la
+   * frase vieja daba por sentada.
+   */
+  const DOC_DEL_CHROME = marcadoDelDocumento('quieta')
+  const HERMANOS = nodosDe(DOC_DEL_CHROME).filter((n) => n.profundidad === 1)
+  afirmar(
+    HERMANOS.filter((n) => n.etiqueta === 'main').length === 1,
+    '  y el `<main>` es hermano suyo, no su ancestro: el contenedor de bloque de la pastilla es `[data-v3]`',
+    HERMANOS.map((n) => atributo(n, 'data-pieza') ?? n.etiqueta).join(' · '),
+  )
+  afirmar(
+    nodosDe(DOC_DEL_CHROME).filter((n) => n.etiqueta === 'nav' && n.ancestros.includes('main')).length === 0,
+    '  y el `<nav>` ya no está anidado en el `<main>` — la otra mitad del defecto 15',
+  )
+  afirmar(
+    DOC_DEL_CHROME.includes('<header data-pieza="navegacion"'),
+    '  y el envoltorio `sticky` ES el `<header>`: el `banner` se gana sin una caja nueva',
+  )
+  controlPositivo(
+    'el detector de anidamiento no está ciego',
+    '<main><nav aria-label="x"></nav></main>',
+    (h: string) => nodosDe(h).filter((n) => n.etiqueta === 'nav' && n.ancestros.includes('main')).length === 0,
+  )
+}

@@ -114,7 +114,23 @@ export function ChromeDelHome(): React.JSX.Element {
        * a la nada — y el instrumento lo afirma contra la tabla del recorrido, no
        * contra una lista escrita al lado.
        */}
-      <Navegacion />
+      {/**
+       * ⚠️ **`como="header"` — EL `banner` QUE FALTABA, SIN UN ELEMENTO NUEVO
+       * (SITIO-S12, defecto 15).**
+       *
+       * La forma obvia de ganar el landmark —envolver la pastilla en un
+       * `<header>`— rompe el mecanismo en silencio: `sticky` se pega dentro de
+       * su contenedor de bloque, y un `<header>` alrededor de un envoltorio de
+       * `block-size: 0` mide cero, así que el rango de pegado sería cero. Con la
+       * etiqueta puesta EN el envoltorio no hay caja nueva y la geometría no se
+       * mueve un píxel. El porqué completo está en `Navegacion.tsx`.
+       *
+       * Y mapea a `banner` porque desde SITIO-S12 el chrome vive AFUERA del
+       * `<main>` —`page.tsx` pone el `<main>` alrededor de las ocho, no
+       * alrededor de todo—, que es la otra mitad del mismo defecto: el `<nav>`
+       * deja de estar anidado en el contenido principal.
+       */}
+      <Navegacion como="header" />
 
       {/**
        * ⚠️ **LA DECISIÓN QUE NADIE TOMÓ, MONTADA APAGADA.**

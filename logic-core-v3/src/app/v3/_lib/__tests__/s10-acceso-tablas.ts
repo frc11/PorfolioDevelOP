@@ -20,6 +20,7 @@
 
 import type { Landmark, Encabezado, Parada } from './s10-lectura'
 import { nodosDe } from './s10-recorrido'
+import { afirmarIgual, titulo } from './afirmar'
 import { esRolDeLandmark, rotuloDeParada, textoAnunciado, type MarcadorAnunciado } from './s10-acceso'
 import { AA, AAA, razon, type CajaDeColor } from './s10-acceso-color'
 
@@ -155,4 +156,50 @@ export function imprimirAnillos(caidas: readonly CaidaDelAnillo[]): void {
 /** Las caídas que NO llegan a 3:1, que es el mínimo de un componente de interfaz. */
 export function anillosFlojos(caidas: readonly CaidaDelAnillo[]): string[] {
   return caidas.filter((a) => a.sobre !== null && razon(a.anillo, a.sobre) < 3).map((a) => a.donde)
+}
+
+/**
+ * §11 DEL INVARIANTE DE ACCESIBILIDAD — el inventario, ordenado por gravedad.
+ *
+ * Sale del invariante en SITIO-S12, cuando el cierre del defecto 7 y la cuarta
+ * pared del 5 lo cruzaron las 300 líneas. El corte es por tema y por dueño: el
+ * registro de hallazgos (`publicar`/`publicados`) ya vivía acá, y el censo que lo
+ * cuenta es la otra mitad de la misma pieza.
+ */
+export function afirmarElInventario(): void {
+  titulo('11 · EL INVENTARIO, ordenado por gravedad')
+  imprimirInventario()
+  /**
+   * ⚠️ **EL INVENTARIO SE VACIÓ A LA MITAD EN SITIO-S11, Y LO QUE QUEDA QUEDA
+   * POR DECISIÓN O PORQUE YA ESTABA ARREGLADO.**
+   *
+   * De los 12 de S10 se cerraron SIETE: el 11 y el 12 en la Fase 0 (la tinta del
+   * bloque invertido, en la raíz), el 3 y el 4 en el frente de Servicios, y el 1,
+   * el 2 y el 6 en el de accesibilidad, y **el 7 en SITIO-S12**. Quedan CUATRO, y
+   * ninguno es un olvido:
+   *
+   *   5  `contentinfo` — ABIERTO, y ahora con CUATRO paredes: la tercera —que el
+   *      modelo no veía lo emitido fuera del `<main>`— la levantó la Fase 0 de
+   *      SITIO-S12; la cuarta la MIDIÓ ese mismo sprint y es la que manda: sacar
+   *      el pie de la sección le suma 485 px a 1440 (735 a 375) al documento
+   *      fuera de la tabla de `secciones.ts`, y con eso el progreso de la escena
+   *      —que sale de `scrollHeight`— pasa de 0,750 a 0,720 donde el diferencial
+   *      llena el cuadro. Mueve el anclaje de SITIO-S9 sin tocarlo.
+   *   8  el filtro de `landmarks()` — ya arreglado en la integración de S10.
+   *   9  los 43 marcadores leídos en voz alta — DECISIÓN de contenido, no defecto.
+   *  10  el helper de movimiento reducido — ya arreglado en la integración de S10.
+   *
+   * O sea que de defectos ABIERTOS de verdad queda UNO, declarado con su razón y
+   * su número. La cuenta se afirma para que el día que aparezca uno nuevo esto se
+   * ponga en rojo, que es para lo que la escribió S10.
+   *
+   * ⚠ **Bajar de 5 a 4 NO es aflojar la cuenta: es que el 7 se CERRÓ**, y su
+   * cierre se afirma arriba, en §5, con dos propiedades que pueden fallar —hay
+   * `banner` y no hay `<nav>` anidado en el `<main>`— y con su control positivo.
+   * Un censo que no baja cuando el trabajo llega no es un censo: es un espejo.
+   */
+  afirmarIgual(publicados().length, 4, 'quedan 4 hallazgos publicados: los 12 de S10 menos los OCHO cerrados (11 y 12 en la Fase 0 de S11; 3 y 4 en Servicios; 1, 2 y 6 en accesibilidad; 7 en SITIO-S12)')
+  afirmarIgual(publicados().filter((p) => p.clase === 'decisión').length, 1, '  tres defectos y UNA decisión de contenido, separadas y no mezcladas')
+  afirmarIgual(publicados().filter((p) => p.gravedad === 'alta').length, 1, '  una sola de gravedad alta: el `contentinfo` (5), abierto con su cuarta pared medida')
+  afirmarIgual(publicados().filter((p) => p.clase === 'defecto' && p.n === 5).length, 1, '  y el ÚNICO defecto abierto de verdad es el 5: los otros dos ya estaban arreglados cuando S10 los publicó')
 }

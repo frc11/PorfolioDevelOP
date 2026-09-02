@@ -25,7 +25,7 @@ import { ENCHUFES, FRENTES, PUEDEN_IMPORTAR_LA_MARCA, SCRIPTS_DECLARADOS, archiv
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 // prettier-ignore
-import { TODO_SRC, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
+import { TODO_SRC, afirmarQueNadaSumaAltoAfueraDelMain, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
 import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, propiosQuePasan, repartir, type Largo } from './s8-largos'
 
 const RUTAS_DEL_INTRO = ['/', '/v3']
@@ -154,6 +154,11 @@ afirmar(
   (fuenteHome.match(/<CompuertaDelHome/g) ?? []).length === 1,
   'la compuerta de la coreografía se sigue resolviendo UNA sola vez, arriba',
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+// §4b vive en `s8-montaje-soporte.ts`: el control nuevo cruzó este archivo las
+// 300 líneas. El corte es por tema — es la única sección que lee una HOJA.
+afirmarQueNadaSumaAltoAfueraDelMain()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · LAS DOS DECISIONES QUE NADIE TOMÓ, sin tomar')

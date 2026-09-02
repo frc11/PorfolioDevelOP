@@ -22,9 +22,11 @@ import {
   DEFAULT_VARIANT_ID,
   findVariant,
 } from '@/app/probe-escena/_components/choreographyVariants'
-import { PROBE_EXTRUDE, PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
+import { CAMERA_FOV, ORBIT_TARGET_Y, PROBE_EXTRUDE, PROBE_SVG_SCALE } from '@/app/v3/_lib/escena/probeScene'
+import { recorridoDeEncuadre } from '@/app/v3/_lib/escena/encuadre'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
-import { SCENE_LOGO_MESH_WORLD } from '@/lib/scene-camera'
+import { SCENE_LOGO_MESH_WORLD, projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
+import { afirmarLaDeudaDeTravelX } from '@/lib/scene-encuadre-deuda'
 import {
   DEST_WIDTH_MARGIN,
   SCENE_ENTRY_POSE,
@@ -167,10 +169,41 @@ if (!phone) {
     Math.abs(phone.inkWidthPx - DEST_WIDTH_MARGIN * 390) < 0.5,
     `${phone.inkWidthPx.toFixed(0)}px = ${DEST_WIDTH_MARGIN} × 390`
   )
+  /**
+   * ⚠ **ESTA COMPROBACIÓN ESTABA ESCRITA CONTRA UN LITERAL, Y EL LITERAL ERA EL
+   * DEFECTO (SITIO-S12).** Decía `Math.abs(phone.centerXPx - 195) < 1.5` con la
+   * etiqueta *«el centro es el de la composición»*. **195 es exactamente 390/2**,
+   * o sea el centro geométrico de la pantalla — el número que sale sólo porque
+   * `travelX` vale 0 debajo del codo (§7.44). La composición pide `frameX: 0,68`,
+   * que en portrait daría 215,4. La afirmación no medía el clamp: clavaba el
+   * defecto, y el día que alguien arregle `scene-camera.ts` se habría puesto en
+   * rojo como si fuera una regresión.
+   *
+   * Reescrita contra **la propiedad** que quiso afirmar —regla 15 del proyecto,
+   * §7.45.1—: el clamp achica y NO mueve, o sea que el centro es el MISMO con el
+   * clamp actuando y con el clamp desactivado. No nombra un número: compara los
+   * dos estados del mecanismo que la sección mide.
+   */
+  const camaraDelTelefono = sceneCameraAt(SCENE_ENTRY_POSE, 390, 844)
+  const origenProyectado =
+    camaraDelTelefono === null
+      ? null
+      : projectScenePoint(camaraDelTelefono, [0, ORBIT_TARGET_Y, 0], 390, 844)
   check(
-    'el clamp achica, NO mueve: el centro es el de la composición',
-    Math.abs(phone.centerXPx - 195) < 1.5,
-    `x = ${phone.centerXPx.toFixed(0)}`
+    'el clamp achica, NO mueve: el centro ES la proyección del origen, sin pasar por el clamp',
+    origenProyectado !== null &&
+      phone.widthClamp < 1 &&
+      phone.centerXPx === origenProyectado.xPx &&
+      phone.centerYPx === origenProyectado.yPx,
+    `x = ${phone.centerXPx.toFixed(3)} · proyección ${origenProyectado ? origenProyectado.xPx.toFixed(3) : 'null'} · clamp ×${phone.widthClamp.toFixed(3)}`
+  )
+  check(
+    '  y el clamp SÍ mueve el TAMAÑO, que es lo único que le toca: la tinta cruda no es la publicada',
+    origenProyectado !== null &&
+      Math.abs(LOGO_INK_VIEWBOX.width * origenProyectado.pxPerWorld * PROBE_SVG_SCALE - phone.inkWidthPx) > 50,
+    origenProyectado
+      ? `cruda ${(LOGO_INK_VIEWBOX.width * origenProyectado.pxPerWorld * PROBE_SVG_SCALE).toFixed(0)}px contra ${phone.inkWidthPx.toFixed(0)}px publicados`
+      : 'sin proyección'
   )
   check(
     'el ancho de la tinta nunca pasa del margen, en ninguna ventana razonable',
@@ -222,10 +255,14 @@ section('6 · Control negativo: la proyección no es la aproximación lineal')
  * es el mismo control, medido donde todavía tiene señal.
  */
 if (desktop) {
-  const TAN = Math.tan((35 * Math.PI) / 360)
+  // ⚠ SITIO-S12: esta era la QUINTA escritura de `travelX` (§7.44), con `35` y
+  // `0.88` a mano. Ahora consume `recorridoDeEncuadre` y los dos tokens de
+  // `probeScene`, y el número NO se mueve: a 1440×810 el argumento es positivo
+  // (halfW 11,238 contra m/2 3,432), así que `abs` y `max(0, ·)` dan el mismo bit.
+  const TAN = Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180)
   const eye = Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height)
   const halfW = TAN * eye * (1440 / 810)
-  const travelX = Math.max(0, halfW - SCENE_LOGO_MESH_WORLD.width / 2) * 0.88
+  const travelX = recorridoDeEncuadre(halfW, SCENE_LOGO_MESH_WORLD.width)
   const approxX = (0.5 + (SCENE_ENTRY_POSE.frameX * travelX) / halfW / 2) * 1440
   // La aproximación lineal no mueve el centro en Y: se queda en el medio de la
   // pantalla. La proyección real sí, y por eso el error total es sobre todo
@@ -242,6 +279,9 @@ if (desktop) {
     `real y = ${desktop.centerYPx.toFixed(0)} · centro de pantalla 405`
   )
 }
+
+
+afirmarLaDeudaDeTravelX({ check, section })
 
 console.log(`\nscene-framing: ${passed} en verde, ${failures.length} en rojo`)
 if (failures.length > 0) {

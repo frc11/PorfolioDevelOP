@@ -44,7 +44,7 @@ import * as M from './s10-mobile'
 import { afirmarLaPastilla } from './s10-mobile-pastilla'
 import { afirmarLaEscala } from './s10-mobile-escala'
 import { afirmarElPeso } from './s10-mobile-peso'
-import { modeloDelCierre } from './s10-mobile-pie'
+import { afirmarElCorteDelCierre, modeloDelCierre } from './s10-mobile-pie'
 import { atributo, nodosDe } from './s10-recorrido'
 
 /** Los cuatro anchos de este frente: los cinco del banco menos 1025, que es el
@@ -258,6 +258,8 @@ console.log(
     `FLUIDAS, y de suponer un titular de tres líneas donde el corte real da ${modeloDelCierre(375).lineasDelTitular}. Con las dos entradas corregidas da ` +
     `${px0(modeloDelCierre(375).total)} px. **La conclusión de §7.28 sobrevive**: sigue pasándose de una pantalla a 375 y sigue entrando a 1440.`,
 )
+afirmarElCorteDelCierre(px0)
+
 controlPositivo('el modelo distingue la familia de tokens: fluido y fijo NO dan lo mismo a 375', 375, (a: number) =>
   px0(modeloDelCierre(a, true).total) === px0(modeloDelCierre(a, false).total))
 controlPositivo('el cortador de líneas no está ciego: el titular NO cabe en dos renglones de 40 px', 375, (a: number) =>

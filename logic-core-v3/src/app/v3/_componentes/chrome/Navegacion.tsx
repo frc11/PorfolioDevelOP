@@ -58,15 +58,38 @@ export interface NavegacionProps {
   /** Rótulo de la región. `<nav>` sin nombre es una región sin nombre. */
   readonly rotulo?: string
   readonly className?: string
+  /**
+   * La etiqueta del ENVOLTORIO `sticky`. `div` por defecto; `header` cuando esta
+   * pieza es la cabecera del documento.
+   *
+   * ── ⚠️ POR QUÉ ES EL ENVOLTORIO Y NO UN `<header>` ALREDEDOR (SITIO-S12) ──
+   *
+   * El defecto 15 de §7.39 pide dos cosas a la vez: que el documento tenga
+   * `banner` y que el `<nav>` deje de estar anidado en el `<main>`. La forma
+   * obvia —envolver esta pieza en un `<header>`— **rompe el mecanismo en
+   * silencio**: `position: sticky` se pega dentro de su CONTENEDOR DE BLOQUE, y
+   * un `<header>` alrededor de un envoltorio de `block-size: 0` mide cero, así
+   * que el rango de pegado sería cero y la pastilla se iría con el scroll. Es el
+   * mismo defecto que `ChromeDelHome` documenta para un `<div>` intermedio.
+   *
+   * Con la etiqueta puesta EN el envoltorio no hay elemento nuevo: el contenedor
+   * de bloque sigue siendo el ancestro que ya era, y el rol de landmark se gana
+   * sin mover un píxel. Un `block-size: 0` no le quita el rol a un `<header>`.
+   *
+   * El default se queda en `div` porque la galería de `/v3/componentes` monta
+   * esta misma pieza y ahí no es la cabecera de nada.
+   */
+  readonly como?: 'div' | 'header'
 }
 
 export function Navegacion({
   enlaces = ENLACES_DE_MUESTRA,
   rotulo = 'Navegación principal',
   className,
+  como: Envoltorio = 'div',
 }: NavegacionProps) {
   return (
-    <div data-pieza="navegacion" className={className}>
+    <Envoltorio data-pieza="navegacion" className={className}>
       <nav data-parte="pastilla" aria-label={rotulo}>
         <ul data-parte="lista">
           {enlaces.map((enlace) => (
@@ -76,7 +99,7 @@ export function Navegacion({
           ))}
         </ul>
       </nav>
-    </div>
+    </Envoltorio>
   )
 }
 

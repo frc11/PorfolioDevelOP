@@ -42,7 +42,7 @@ import {
 import { COLOR, razon } from './s10-acceso-color'
 import {
   imprimirArbol, imprimirInventario, imprimirMarcadores, imprimirParadas, publicados, publicar,
-} from './s10-acceso-tablas'
+ afirmarElInventario } from './s10-acceso-tablas'
 import { afirmarElContraste, afirmarElFoco } from './s10-acceso-contraste'
 import { afirmarLosLandmarks } from './s10-acceso-landmarks'
 import { MARCADORES } from '../../_secciones/_contrato/marcadores'
@@ -266,29 +266,8 @@ afirmarElFoco()
 afirmarElContraste(QUIETA)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('11 · EL INVENTARIO, ordenado por gravedad')
-imprimirInventario()
-/**
- * ⚠️ **EL INVENTARIO SE VACIÓ A LA MITAD EN SITIO-S11, Y LO QUE QUEDA QUEDA
- * POR DECISIÓN O PORQUE YA ESTABA ARREGLADO.**
- *
- * De los 12 de S10 se cerraron SIETE: el 11 y el 12 en la Fase 0 (la tinta del
- * bloque invertido, en la raíz), el 3 y el 4 en el frente de Servicios, y el 1,
- * el 2 y el 6 en el de accesibilidad. Quedan CINCO, y ninguno es un olvido:
- *
- *   5  `contentinfo` — ABIERTO POR DECISIÓN, con sus tres paredes medidas.
- *   7  `banner` + `navigation` anidado — ABIERTO POR DECISIÓN, misma pared.
- *   8  el filtro de `landmarks()` — ya arreglado en la integración de S10.
- *   9  los 43 marcadores leídos en voz alta — DECISIÓN de contenido, no defecto.
- *  10  el helper de movimiento reducido — ya arreglado en la integración de S10.
- *
- * O sea que de defectos ABIERTOS de verdad quedan DOS, los dos declarados con su
- * razón y su costo. La cuenta se afirma para que el día que aparezca uno nuevo
- * esto se ponga en rojo, que es para lo que la escribió S10.
- */
-afirmarIgual(publicados().length, 5, 'quedan 5 hallazgos publicados: los 12 de S10 menos los SIETE que S11 cerró (11 y 12 en la Fase 0; 3 y 4 en Servicios; 1, 2 y 6 en accesibilidad)')
-afirmarIgual(publicados().filter((p) => p.clase === 'decisión').length, 1, '  cuatro defectos y UNA decisión de contenido, separadas y no mezcladas')
-afirmarIgual(publicados().filter((p) => p.gravedad === 'alta').length, 1, '  una sola de gravedad alta: el `contentinfo` (5), abierto por decisión')
-afirmarIgual(publicados().filter((p) => p.clase === 'defecto' && [5, 7].includes(p.n)).length, 2, '  y los DOS defectos abiertos de verdad son el 5 y el 7: los otros dos ya estaban arreglados cuando S10 los publicó')
+// §11 vive en `s10-acceso-tablas.ts`, con el registro que lo alimenta: el censo
+// y su publicación son la misma pieza.
+afirmarElInventario()
 
 cerrar('s10-acceso.invariant')

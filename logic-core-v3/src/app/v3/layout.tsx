@@ -34,11 +34,46 @@ import './_estilos/foco.css'
  *
  *     <div data-v3>            ← el piso de papel
  *       <EscenarioCompuerta/>  ← canvas fijo, viewport completo, z-0
- *       <main>                 ← el flujo del documento, z-10
+ *       {children}             ← la página, que trae su propio esqueleto
  *
  * El escenario está acá y no en `page.tsx` justamente por eso: es permanente,
  * no una sección. Sobrevive a la navegación entre páginas de /v3 sin
  * remontarse, que es lo que va a hacer falta cuando haya más de una.
+ *
+ * ── ⚠️ EL `<main>` SE MUDÓ A LA PÁGINA EN SITIO-S12, Y NO ES UN CAPRICHO ───
+ *
+ * Hasta S11 este layout envolvía a `{children}` en `<main className="relative
+ * z-10">`, y el chrome entero vivía adentro. El defecto 15 de §7.39 pide que la
+ * navegación deje de estar anidada en el `<main>` y que el documento tenga
+ * `banner`; para eso la pastilla tiene que ser HERMANA del `<main>`, y ahí
+ * aparece una consecuencia que sólo se puede evitar desde la PÁGINA:
+ *
+ * **El apilado contra el preloader.** `<main class="relative z-10">` crea un
+ * contexto de apilado. Con la pastilla (`--z-cabecera` = 100) afuera y el
+ * overlay del intro (z 9999) adentro, el overlay quedaría **aplastado al 10 del
+ * `<main>`** y la pastilla se pintaría ENCIMA del preloader — en la primera
+ * visita de la sesión, sin que ningún instrumento lo vea, porque no hay pintura
+ * en un render de servidor.
+ *
+ * Con el `<main>` alrededor de las ocho y no alrededor de todo, la pastilla y el
+ * overlay vuelven a compartir contexto y el 9999 gana como antes. Es la razón
+ * por la que `page.tsx` compone el esqueleto y este layout se queda con el piso
+ * de papel y el escenario.
+ *
+ * **La propiedad que §7.39 celebra —que el documento TENGA un `<main>`, que la
+ * referencia no tiene en cinco de sus seis URLs— no cambia; cambia quién lo
+ * pone**, y eso lo verifica `s10-banco` §2 sobre el documento compuesto, que es
+ * donde la propiedad vive.
+ *
+ * ⚠️ **Y el pie NO se mudó, con su medición.** El defecto 6 —el `contentinfo`
+ * que falta— pedía el mismo movimiento para el `<footer>`, y SITIO-S12 lo FRENÓ
+ * con una cuarta pared que §7.43 no tenía: sacarlo de la `<section id="cierre">`
+ * le suma **485 px a 1440 y 735 px a 375** al documento **fuera de la tabla de
+ * `secciones.ts`**, y el progreso de la escena sale de
+ * `document.documentElement.scrollHeight` (`EscenaDelHome.tsx`). El progreso que
+ * hoy vale 0,750 donde el diferencial llena el cuadro pasaría a **0,720 y
+ * 0,691**: mueve el anclaje de SITIO-S9 sin tocar una línea del anclaje. Ver
+ * §7.46 de `DIRECCION-ESCENA.md`.
  *
  * ── El piso de papel ───────────────────────────────────────────────────────
  *
@@ -116,7 +151,7 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
       className={`${chivo.variable} ${chivoMono.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
     >
       <EscenarioCompuerta />
-      <main className="relative z-10">{children}</main>
+      {children}
     </div>
   )
 }

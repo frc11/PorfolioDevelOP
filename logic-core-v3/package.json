@@ -118,6 +118,7 @@
     "test:s3": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s3",
     "test:s3-codigo": "npx tsx src/app/v3/_lib/__tests__/s3-codigo.invariant.ts",
     "test:s3-frontera": "npx tsx src/app/v3/_lib/__tests__/s3-frontera.invariant.ts",
+    "test:s11-frontera": "npx tsx src/app/v3/_lib/__tests__/s11-frontera.invariant.ts",
     "test:s3-papel": "npx tsx src/app/v3/_lib/__tests__/s3-papel-translucido.invariant.ts",
     "test:s2-curvas": "npx tsx src/app/v3/_lib/motion/__tests__/curvas.invariant.ts",
     "test:s2-traduccion": "npx tsx src/app/v3/_lib/motion/__tests__/traduccion.invariant.ts",

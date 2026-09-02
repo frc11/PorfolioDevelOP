@@ -37,7 +37,7 @@ import path from 'node:path'
 import { RAIZ } from './s4-corrida'
 
 /** Los scripts que miden el momento del sprint. Declarados, uno por uno. */
-export const CHECKS_DE_FRONTERA: readonly string[] = ['test:s3-frontera']
+export const CHECKS_DE_FRONTERA: readonly string[] = ['test:s3-frontera', 'test:s11-frontera']
 
 /** `test:s1-tokens` → suite `s1`. La cadena `test:s1` NO cae acá: pide guión. */
 const RE_INVARIANTE = /^test:(s\d+[a-z]?)-(.+)$/

@@ -25,6 +25,7 @@
  */
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmarElModeloDelDocumento } from './s10-banco-modelo'
 import {
   ALTOS_DECLARADOS,
   ANCHOS,
@@ -33,7 +34,6 @@ import {
   QUE_SIRVE_CADA_RAMA,
   RAMAS,
   SUPUESTOS_DEL_BANCO,
-  envoltorioDelLayout,
   marcadoAnimadoConPreferenciaForzada,
   marcadoConMovimientoReducido,
   marcadoDeSeccion,
@@ -128,18 +128,10 @@ for (const id of IDS_DE_SECCION) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · El envoltorio del layout se DERIVA del fuente, y trae el `<main>`')
-
-const envoltorio = envoltorioDelLayout()
-afirmar(envoltorio.raiz.includes('data-v3'), 'la raíz derivada lleva `data-v3`', envoltorio.raiz)
-afirmar(envoltorio.main.startsWith('<main'), 'y el `<main>` está en el layout, no en la página', envoltorio.main)
-afirmar(!envoltorio.raiz.includes('${'), '  y las interpolaciones de `next/font` no se cuelan al marcado')
-afirmar(DOC.startsWith(envoltorio.raiz), 'el documento del banco arranca por ese envoltorio')
-controlPositivo(
-  'el derivador NO inventa un `<main>` cuando el layout no tiene ninguno',
-  'export default function X(){ return <div data-v3=""><section/></div> }',
-  (fuente: string) => envoltorioDelLayout(fuente).main !== '',
-)
+// §2 vive en `s10-banco-modelo.ts`: el patch del esqueleto (§7.43) y sus
+// controles cruzaron este archivo las 300 líneas del repo. El corte es por
+// tema — no comparte una constante con lo que queda acá.
+afirmarElModeloDelDocumento(DOC)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Los cinco anchos y los tres altos, cada uno con su razón')

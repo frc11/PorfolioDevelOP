@@ -101,6 +101,26 @@ titulo('2 · EL ACOPLAMIENTO DE TIPO HACIA /probe-escena — CERRADO (SITIO-S11,
       `y ${quien} sigue sin usarlo como VALOR: el import se borra igual que antes`,
     )
   }
+  /**
+   * ⚠ **EL CONTROL QUE FALTABA, Y LO ENCONTRÓ SITIO-S12 AUDITANDO ESTA MISMA
+   * SECCIÓN.** `usosDeValor` era el ÚNICO detector de este archivo sin control
+   * positivo en ningún lugar del repo: las tres afirmaciones de «no se usa como
+   * VALOR» pasaban por AUSENCIA, y un detector roto que devolviera siempre `[]`
+   * las habría dejado verdes igual. Es el residuo del §2 viejo —cuando la
+   * pregunta era «¿cuesta bytes?»— sobrevivido a la reescritura que decía
+   * haberlo eliminado. La propiedad fuerte de arriba lo subsume, pero un
+   * detector sin control no es una comprobación: es una frase.
+   */
+  controlPositivo(
+    'el escáner de usos de VALOR no está ciego: ve una asignación del identificador',
+    'const editor = ChoreoEditor',
+    (fuente: string) => usosDeValor(fuente, 'ChoreoEditor').length === 0,
+  )
+  controlPositivo(
+    '  y también lo ve en posición de constructor',
+    'const editor = new ChoreoEditor()',
+    (fuente: string) => usosDeValor(fuente, 'ChoreoEditor').length === 0,
+  )
   controlPositivo(
     'el detector VE un `import type` del panel — que es exactamente el que el escáner de VALOR dejaba pasar',
     "import type { ChoreoEditor } from '@/app/probe-escena/_components/choreographyEditor'",

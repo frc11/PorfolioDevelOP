@@ -49,6 +49,7 @@ import { muestrearLogo } from './s10-logo'
 // prettier-ignore
 import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
 import { SUPUESTOS_DE_LAS_CAJAS } from './s10-logo-cajas'
+import { afirmarLaPalancaDeLayout } from './s10-logo-columna'
 // prettier-ignore
 import { MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraElRecorte, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
@@ -291,4 +292,9 @@ titulo('8 · LO QUE EL ARREGLO NO CERRÓ — las palancas del defecto 7, con su 
 console.log(`  ${DEFECTO_7_ABIERTO}`)
 for (const linea of palancasDeComposicion(MAS_ANGOSTO)) console.log(`  ${linea}`)
 
+// ═══════════════════════════════════════════════════════════════════════════
+// §9 vive en `s10-logo-columna.ts`: el barrido de la palanca de layout cruzó
+// este archivo las 300 líneas. El corte es por tema — es la única sección que
+// pregunta por el ANCHO de la columna, y no comparte constante con lo de acá.
+afirmarLaPalancaDeLayout()
 cerrar('s10-logo.invariant')

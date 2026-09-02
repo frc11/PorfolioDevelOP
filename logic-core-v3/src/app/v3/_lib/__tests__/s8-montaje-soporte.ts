@@ -30,6 +30,10 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
+import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
+import { marcadoDelDocumento } from './s10-banco'
+import { atributo, nodosDe } from './s10-recorrido'
+
 import { ENCHUFES, FRENTES, RAIZ, archivosSinRegistrar, especificadoresDeImport, existe, leer, recorrer } from './s8-padron'
 import { invariantesCableados } from './s4-suites'
 import { medirLargos, repartir, type Largo, type Reparto } from './s8-largos'
@@ -98,4 +102,76 @@ export function largosDelSprint(): { readonly medidos: Largo[]; readonly reparto
     leer,
   )
   return { medidos, reparto: repartir(medidos) }
+}
+
+/**
+ * §4b DEL INVARIANTE DEL MONTAJE — el control que faltaba, y que SITIO-S12 pagó
+ * antes de escribirlo.
+ *
+ * Sale del invariante porque lo cruzó las 300 líneas, y el corte es por tema:
+ * es la única sección que lee una HOJA DE ESTILOS para contestar una pregunta de
+ * layout. Todo lo demás del archivo mira imports, padrones y largos.
+ */
+export function afirmarQueNadaSumaAltoAfueraDelMain(): void {
+  titulo('4b · NADA SUMA ALTO DE DOCUMENTO AFUERA DEL `<main>` — el control que faltaba')
+
+  /**
+   * ⚠ **ESTE CONTROL NO EXISTÍA, Y SITIO-S12 LO PAGÓ ANTES DE ESCRIBIRLO.**
+   *
+   * El progreso de la escena NO sale de la tabla de `_lib/secciones.ts`: sale de
+   * `document.documentElement.scrollHeight` (`EscenaDelHome.tsx`), y el anclaje de
+   * SITIO-S9 se DERIVA de la tabla. Las dos coinciden mientras **todo lo que suma
+   * alto de documento sea una de las ocho secciones**. El día que algo más entre
+   * al flujo, el anclaje sigue derivando 14 pantallas mientras el navegador mide
+   * más — y `s9-anclaje` queda en verde porque sólo mira la tabla.
+   *
+   * Es exactamente lo que pasó al ir a cerrar el defecto 6: sacar el pie de la
+   * `<section id="cierre">` le suma **485 px a 1440 y 735 px a 375** al documento
+   * fuera de la tabla, y con eso el progreso que hoy vale **0,750** donde el
+   * diferencial llena el cuadro pasa a **0,720 / 0,691**. Ningún instrumento lo
+   * habría visto.
+   *
+   * Lo que se afirma es la propiedad: **los hermanos del `<main>` están todos
+   * fuera del flujo, y lo dice la HOJA, no el marcado.** Un elemento fuera del
+   * flujo no aporta alto de documento; uno en el flujo sí, y ahí hay que volver a
+   * medir el anclaje antes de tocar nada.
+   */
+  const HOJAS_DEL_CHROME = ['_estilos/navegacion.css', '_estilos/foco.css'].map((h) =>
+    leer(`src/app/v3/${h}`),
+  )
+  const HOJAS = HOJAS_DEL_CHROME.join('\n')
+
+  /** ¿La hoja saca a `[data-pieza="x"]` del flujo, o le da alto cero? */
+  function fueraDelFlujo(pieza: string): boolean {
+    const bloque = new RegExp(`\\[data-pieza="${pieza}"\\][^{]*\\{([^}]*)\\}`).exec(HOJAS)
+    if (bloque === null) return false
+    return /position:\s*(absolute|fixed)/.test(bloque[1]) || /block-size:\s*0/.test(bloque[1])
+  }
+
+  const DOCUMENTO = marcadoDelDocumento('quieta')
+  const hermanosDelMain = nodosDe(DOCUMENTO)
+    .filter((n) => n.profundidad === 1 && n.etiqueta !== 'main')
+    .map((n) => atributo(n, 'data-pieza') ?? n.etiqueta)
+
+  console.log(`  hermanos del \`<main>\` en el documento: ${hermanosDelMain.join(' · ')}`)
+  afirmarIgual(
+    hermanosDelMain.filter((pieza) => !fueraDelFlujo(pieza)),
+    [],
+    `los ${hermanosDelMain.length} hermanos del \`<main>\` están FUERA DEL FLUJO por hoja: ninguno le suma alto al documento`,
+  )
+  afirmar(
+    hermanosDelMain.length > 0,
+    '  y hay hermanos que mirar: no es verde por vacío',
+    hermanosDelMain.join(' · '),
+  )
+  controlPositivo(
+    'el detector ve una pieza que SÍ está en el flujo',
+    'pie',
+    (pieza: string) => fueraDelFlujo(pieza),
+  )
+  controlPositivo(
+    '  y también una que la hoja no menciona',
+    'una-pieza-que-no-existe',
+    (pieza: string) => fueraDelFlujo(pieza),
+  )
 }
