@@ -89,11 +89,17 @@ export function M1Municion() {
   return (
     <div className="space-y-4">
       <FichaEjemplo />
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-          <GraduationCap size={12} strokeWidth={1.5} />
-          En qué fijarte para puntuar (y por qué pesa)
-        </p>
+      {/* P17 — la tabla de criterios se pliega (regla de P4): es enseñanza, la
+          mirás las primeras veces y después ya sabés en qué fijarte. Era la
+          pieza más alta de la munición de m1 —275 px a 390— y empujaba el
+          primer campo de la ficha fuera del pliegue. El título promete lo que
+          hay adentro y nombra cuántos criterios son, así se sabe qué se abre. */}
+      <details className="group">
+        <summary className="inline-flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
+          <GraduationCap size={12} strokeWidth={1.5} aria-hidden className="shrink-0" />
+          En qué fijarte para puntuar, y por qué pesa ({GUIA_EVALUACION.criterios.length}{' '}
+          criterios)
+        </summary>
         <ul className="mt-2 grid gap-1 sm:grid-cols-2">
           {GUIA_EVALUACION.criterios.map((criterio) => (
             <li key={criterio.nombre} className="text-[11px] leading-relaxed text-zinc-500">
@@ -102,7 +108,7 @@ export function M1Municion() {
             </li>
           ))}
         </ul>
-      </div>
+      </details>
     </div>
   )
 }

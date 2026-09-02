@@ -9191,3 +9191,285 @@ agregó, se sacó ni se renombró; ningún invariante quedó en rojo; ninguna tr
   dos mitades o el recorrido se desarma en silencio; (b) el avance tiene que esperar al `pointerup` o
   se come clics; (c) las cabeceras del futuro tienen que estar a la vista o se fabrican callejones;
   (d) el nombre de un bloque compite con los nombres accesibles de los controles que tiene adentro.
+
+---
+
+## Sprint P17 — EL CROMO DEL PRIMER PLIEGUE: el layout-tipo achicado para las catorce — 2026-09-01
+
+**Rama** `fix/cromo-primer-pliegue` · **base** `8b8ecf23` (`fix/ficha-por-fuentes`, el piloto P16) ·
+**worktree** `C:/tmp/wt-p17-cromo`, propio, `node_modules` por junction, medición en `:3010` con
+build de producción · **sin pushear**
+
+El piloto P16 achicó la ficha un tercio y el primer campo siguió sin entrar en el pliegue. La causa
+no era el contenido de esa pantalla: era el cromo compartido de `PantallaManual`, que vale para las
+catorce. Este sprint lo achica una vez, con las catorce medidas antes y después a los dos anchos.
+
+### Fase 0 · el terreno, y el instrumento que faltaba
+
+`tsc --noEmit` **exit 0** · `check:invariants` **50/50** (51 descubiertos, 1 excluido) · `build`
+**exit 0** · `prisma migrate status`: 86 migraciones, **sin drift**. Sin cambios ajenos en el
+worktree.
+
+**El pliegue no es la altura del viewport.** El shell del setter es `fixed inset-0` y el scroller es
+el `<main>` interno: la altura del documento es siempre la de la ventana, así que cualquier medición
+contra el viewport (o cualquier `fullPage`) miente. El pliegue real sale de `main.clientHeight` —
+**788 px a 1440×900 y 688 px a 390×844**— y todas las alturas se miden contra el ORIGEN DEL CONTENIDO
+del scroller (`rect.top − mainRect.top + main.scrollTop`).
+
+Se construyó el instrumento: **`scripts/qa-corridas/medir-pliegue-manual.ts`**. Recorre las catorce
+pantallas a los dos anchos con una sesión real, y por pantalla mide el pliegue, dónde arranca el
+primer control accionable, dónde arranca el primer control de CAPTURA, el alto de cada pieza de
+cromo, los rótulos en versalita, las superficies anidadas, el alto total y el censo de lo que la
+pantalla ofrece. El reparto pantalla→lead es determinista (se deriva con `derivarPantalla` real y se
+prefiere el lead donde la pantalla ES el paso de ahora), así el antes y el después miden exactamente
+los mismos pares.
+
+Dos cosas hubo que arreglar para que midiera:
+
+- **`m16` no era alcanzable con ningún lead sembrado.** Es la única pantalla que exige `APROBADA` +
+  `enviadaAt` sin reunión agendada. Se agregó ese estado a la seed de QA
+  (`scripts/v1-qa-wizard-states.ts`, ahora 14 estados): sin él la tabla de las catorce salía con
+  trece. Es dato de QA, no producto.
+- **`tsx` compila con `keepNames`**, que envuelve cada función en un helper `__name` que no existe en
+  el navegador: todo `page.evaluate(fn)` moría con «`__name is not defined`». Se resuelve con un shim
+  en `addInitScript`.
+
+### La medición base — las catorce, antes
+
+A 1440 (pliegue **788**) y a 390 (pliegue **688**). `captura` = dónde arranca el primer control del
+bloque de trabajo; `accion` = dónde arranca el primer control interactivo fuera de la cabecera.
+
+| | 1440: captura · accion | 390: captura · accion |
+|---|---|---|
+| m1 | 773 · 773 | 965 · 965 |
+| m4 | 1166 · 445 | 1320 · 524 |
+| m5 | 1233 · 886 | 1513 · 1114 |
+| m6 | 1050 · 465 | 1145 · 544 |
+| mc1 | 1544 · 511 | 1850 · 626 |
+| mc2 | 2327 · 511 | 2928 · 601 |
+| m13 | 1022 · 750 | 1214 · 884 |
+| m14 | 1127 · 460 | 1391 · 523 |
+| m15 | 782 · 460 | 916 · 479 |
+| m16 | 782 · 782 | 937 · 937 |
+| mr | 1249 · 638 | 1510 · 845 |
+| espera / revision / archivo | — · 425 / 406 / 446 | — · 483 / 444 / 484 |
+
+**De las once pantallas de trabajo, la captura empezaba dentro del pliegue en 3 a 1440 y en 0 a
+390.** Y las tres del 1440 lo hacían por 6, 15 y 63 px: entraba el rótulo «REGISTRO» y nada más.
+
+### Paso 1 · dónde se va el primer pliegue
+
+**Qué pieza ocupa más.** En promedio, la munición (374 px a 1440, 499 a 390); en el peor caso,
+también ella (1365 / 1858 en mc2). Entre las que aparecen en las catorce, la más grande es la
+cabecera (187 / 190 de promedio) y es además la más constante.
+
+**Cuáles se repiten y cuáles son de una pantalla.** Ninguna pieza de cromo es de una pantalla sola:
+el padding del scroller y la cabecera están en las catorce; la instrucción, las tres zonas y sus
+rótulos en las once de trabajo; el avance y el rail de construcción en tres. **Todo el cromo es del
+layout-tipo** — por eso un sprint las toca a todas, y por eso ocho sprints pantalla por pantalla no
+habrían movido este número.
+
+**Cuáles informan cada vez y cuáles sólo la primera.** El nombre del negocio, sus badges y el título
+del paso informan siempre. El eyebrow «Manual paso a paso» no informa nunca: el título de abajo ya
+nombra el paso, y 7.1 ya lo había ocultado en mobile por redundante. Y el hallazgo grande: el
+**preview del bloque copiable**. `CopyBlock` servía un `<pre>` de `max-h-56` SIEMPRE abierto — **224
+px por bloque**, en las ocho pantallas que sirven uno. En mc2, con cuatro bloques, eran **896 px de
+preview** por encima del primer control. Es la pieza más grande del cromo del manual, medida. Se lee
+una vez para saber qué se está copiando; después se aprieta el botón.
+
+**Qué necesita ver un setter al abrir, y a qué altura estaba.** Necesita tres cosas: qué lead es
+(32 px ✓), qué hay que hacer (~240 px ✓) y dónde hacerlo — que estaba, en promedio, a 1.189 px a
+1440 y 1.420 a 390. **Una pantalla y media abajo del pliegue en desktop, dos en mobile.**
+
+### Paso 2 · achicar, y qué movió cada movimiento
+
+Cada movimiento se midió solo, sobre las catorce, a los dos anchos.
+
+**a · Un solo nivel de superficie.** `Zona` deja de ser tarjeta (`rounded-2xl border bg p-4`) y pasa
+a ser banda; la instrucción deja de ser tarjeta y conserva sólo un filo a la izquierda; el ritmo pasa
+de `space-y-5` a `space-y-4`. La única que conserva tarjeta es el bloque de trabajo.
+→ **−128 a −132 px a 1440 y −150 a −165 a 390, en las once.** Y **cero veredictos dados vuelta**: 3/11
+y 0/11 siguieron igual. Achicar el marco no alcanzó ni de cerca.
+
+**b · Menos rótulos y más contraste.** Se saca el eyebrow «Manual paso a paso»; el rótulo del
+bloque de trabajo se distingue (versalita clara) y los otros dos bajan de peso y salen de la
+versalita.
+→ **−28 px a 1440 y exactamente 0 a 390** (donde el eyebrow ya estaba oculto). Los rótulos en
+versalita por pantalla bajaron de 3–8 a 2–4. **Cero veredictos dados vuelta.** Su trabajo es de
+jerarquía, no de píxeles, y conviene decirlo así.
+
+**c · Un acento reservado a la acción.** El cyan sale de: el marco del bloque copiable, el cartel de
+asignación de la cabecera, los dos railes de navegación, el filo de la instrucción, las viñetas de
+las fases y el marco de «Tu borrador» en m14. Queda en: el bloque de trabajo activo, el badge «Tu
+paso ahora», los botones de acción, «Ir a tu paso actual» y los links que son salida.
+→ **0 px en nueve de las once.** Movió sólo donde el cyan además era una tarjeta anidada: mc1/mc2
+(−17/−36, la caja que envolvía «Arrancar construcción» dentro de la tarjeta del trabajo) y m14 (−26).
+**Cero veredictos dados vuelta.** Es un movimiento de disciplina de color y no tenía por qué mover el
+número.
+
+**d · Lo que el novato necesita y el experto no, plegado (regla de P4).** Sale del Paso 1, no de la
+lista de arriba. El `<pre>` de `CopyBlock` pasa detrás de un plegable titulado «Ver el texto que vas
+a copiar (N líneas)»; la tabla de criterios de m1 («En qué fijarte para puntuar») hace lo mismo. **Lo
+que NO se pliega, y es la mitad importante de la regla: el botón «Copiar bloque», el título que dice
+para qué es y la instrucción de dónde se pega siguen arriba, siempre visibles.**
+→ **−204 px en m4/m6/mc1/mr, −651 en mc2, −86 en m1** a 1440. Dio vuelta **dos veredictos** (m6 a
+1440, m1 a 390) y es el único movimiento que los dio vuelta.
+
+Y una consecuencia de c que se midió al final: el cartel de asignación y las notas del lead eran
+tarjetas dentro de la cabecera. Sacarles el marco bajó la cabecera de **158 a 132 px a 1440** en todo
+lead que tenga notas — que son todos los sembrados.
+
+### La medición, después — las catorce a los dos anchos
+
+| | 1440 antes→después (captura · accion) | 390 antes→después (captura · accion) | alto total |
+|---|---|---|---|
+| m1 | 773→**504** · 773→**504** | 965→**572** · 965→**572** | −14% / −18% |
+| m4 | 1166→**780** · 445→**318** | 1320→**939** · 524→**406** | −23% / −21% |
+| m5 | 1233→**1027** · 886→**720** | 1513→**1258** · 1114→**957** | −12% / −12% |
+| m6 | 1050→**664** · 465→**337** | 1145→**764** · 544→**425** | −19% / −17% |
+| mc1 | 1544→**1136** · 511→**379** | 1850→**1359** · 626→**454** | −19% / −20% |
+| mc2 | 2327→**1472** · 511→**379** | 2928→**1850** · 601→**454** | −29% / −30% |
+| m13 | 1022→**839** · 750→**584** | 1214→**1040** · 884→**731** | −15% / −12% |
+| m14 | 1127→**918** · 460→**319** | 1391→**1155** · 523→**411** | −9% / −7% |
+| m15 | 782→**599** · 460→**332** | 916→**722** · 479→**380** | −20% / −22% |
+| m16 | 782→**599** · 782→**599** | 937→**760** · 937→**760** | −16% / −14% |
+| mr | 1249→**858** · 638→**507** | 1510→**1115** · 845→**713** | −24% / −20% |
+| espera | — · 425→**371** | — · 483→**457** | 0% / −3% |
+| revision | — · 406→**351** | — · 444→**418** | 0% / −3% |
+| archivo | — · 446→**391** | — · 484→**458** | 0% / −1% |
+
+**En cuántas entra ahora algo accionable en el pliegue, de las once de trabajo:**
+
+| | antes | después |
+|---|---|---|
+| a 1440 · hay algo accionable dentro del pliegue | 10 / 11 | **11 / 11** |
+| a 1440 · la CAPTURA empieza dentro del pliegue | 3 / 11 | **5 / 11** |
+| a 390 · hay algo accionable dentro del pliegue | 6 / 11 | **7 / 11** |
+| a 390 · la CAPTURA empieza dentro del pliegue | 0 / 11 | **1 / 11** |
+
+Por pieza, sumando las catorce: cabecera **−29%** a 1440 y **−16%** a 390 · instrucción **−37% / −38%**
+· contexto **−50% / −45%** · munición **−23% / −25%**.
+
+**Lo que el número dice y no conviene maquillar.** A 1440 el objetivo se cumple para «algo
+accionable»: las once. Para «escribir sin scrollear» se cumple en cinco de once. **A 390 casi no se
+movió, y la razón está medida: lo que queda arriba del trabajo ya no es cromo, es contenido.** En
+m5 son 612 px de mensajes de seguimiento; en m16, 285 px de la guía numerada para agendar; en m13,
+364 + 257 de la guía del borrador y el resumen del brief. Plegar eso también cerraría el número —y
+frenó acá a propósito: **plegar la guía paso a paso de un manual paso a paso no es achicar cromo, es
+sacarle al manual lo que es.** Esa decisión es de Franco, no de este sprint.
+
+### Superficies anidadas (S1), medido
+
+Se midió la cadena real de tarjetas entre el scroller y el control de trabajo. Bajó **sólo en mc1 y
+mc2 (2→1)**, donde el cyan además envolvía una tarjeta dentro de la tarjeta. En las otras nueve
+quedó igual — y tiene explicación: el bloque de trabajo CONSERVA su tarjeta por diseño («una sola
+cosa lleva tarjeta: el bloque activo»), así que la cadena hasta un campo sigue pasando por ella. Lo
+que perdió un nivel es todo lo que el setter lee ANTES del trabajo: el contexto y la munición pasaron
+de tarjeta a banda, y la instrucción también. El test lo fija de forma binaria, que es más honesto
+que el número.
+
+### El censo — que no desapareció nada
+
+Regla 1 del sprint, probada con números y no con promesas. Contando presencia (no visibilidad: lo
+plegado tiene que seguir contando) sobre las catorce pantallas:
+
+| | antes | después |
+|---|---|---|
+| bloques copiables | 11 | **11** |
+| salidas externas (`target="_blank"`) | 6 | **6** |
+| enlaces internos del manual | 63 | **63** |
+| píldoras «Link pendiente» | 6 | **6** |
+| controles interactivos | 65 | **65** |
+| plegables (`<details>`) | 26 | **38** |
+
+Todo idéntico salvo los plegables, que suben exactamente **+12**: los once previews de bloque
+copiable y la tabla de criterios de m1. **Nada se sacó; doce cosas se plegaron.**
+
+### Qué se sacó de verdad
+
+Una sola cosa, y es cromo:
+
+- **El eyebrow «Manual paso a paso»** de la cabecera, en las catorce. Motivo: el título del paso, dos
+  líneas más abajo, ya nombra el paso; 7.1 ya lo había ocultado en mobile por exactamente eso, y lo
+  redundante no deja de serlo a 1440.
+
+Cuatro marcos perdieron su caja pero conservaron íntegro su contenido y sus hijos: la caja cyan que
+envolvía «Arrancar construcción», el marco de «Tu borrador» en m14, el marco de las notas del lead y
+el del cartel de asignación.
+
+### El test, y cómo se le probaron los dientes
+
+`tests/setter/22-cromo-primer-pliegue.spec.ts`, 12 casos. Recorre las **once pantallas de trabajo**
+con sus fixtures propias y afirma tres cosas:
+
+- **§1** — el bloque de trabajo es la única tarjeta: se afirma sobre el ESTILO COMPUTADO (marco +
+  fondo), no sobre clases, para «Contexto del lead», «Munición» y la instrucción.
+- **§2** — hay algo accionable **dentro del primer pliegue**, con el pliegue leído del scroller
+  (`main.clientHeight`) y las alturas contra el origen del contenido. Se afirma por VISIBILIDAD.
+- **§3** — se plegó el preview, nunca la salida: el botón «Copiar bloque» y el título se leen sin
+  abrir nada; el `<pre>` está PRESENTE y **no visible** (`toContainText` pasaría igual con el
+  plegable cerrado — sólo `toBeVisible()` separa «está» de «se lee»), ningún `details[open]` en la
+  carga, y abrirlo lo muestra.
+
+**Contra el código viejo fallan los 12 de 12.** Con las seis fuentes revertidas a `8b8ecf23` y el
+build rehecho, los once casos de pantalla fallan en §1 («`Contexto del lead` es banda, no tarjeta» —
+`Expected: false, Received: true`) y el de mc2 falla en §3. Y §2 tiene diente propio, medido con el
+instrumento sobre ese mismo build viejo: **m5 tenía su primer accionable a 886 px con el pliegue en
+788.**
+
+### Las pruebas adaptadas
+
+**Ninguna.** Las suites existentes pasaron sin tocar una línea, y hay dos razones concretas:
+
+- Los specs seleccionan las zonas por `section[aria-label="…"]`, no por clases ni por copy. Los
+  cuatro `aria-label` del layout-tipo se mantuvieron intactos a propósito: son nombre accesible y
+  selector estable a la vez.
+- `17-destinos-alcanzables` afirma `zona('Contexto del lead')).toContainText('Bloque para Claude
+  Design')`: es el TÍTULO del bloque copiable, que no se plegó.
+
+Y hay un spec que **protege** este cambio en vez de romperse con él: `16-municiones-salida` afirma
+`main details[open] === 0` en la carga y que la salida del link pendiente se lee sin abrir nada. Los
+doce plegables nuevos nacen cerrados y ninguno se tragó una salida, así que sigue en verde.
+
+Se agregaron dos hooks de medición al layout-tipo (`data-zona="contenido"` y
+`data-slot="encabezado"`) para poder separar el cromo del contenido sin que el contenido de cada
+pantalla contamine el número.
+
+### Cierre
+
+`tsc --noEmit` **exit 0** · `check:invariants` **50/50** (51 descubiertos, 1 excluido) ·
+`test:leados` **33/33** · `test:helpers` **26/26** · `test:setter` **117/117** (105 previas + 12 nuevas) · `build` **exit 0**
+· `prisma migrate status`: 86 migraciones, **sin drift**.
+
+**No cambió lógica, schema ni llaves de datos.** `git diff` vacío sobre `contracts.ts`, `flow.ts`,
+`manual.ts`, `dossier-stage.ts`, `dossier.actions.ts` y `prisma/schema.prisma`. Ninguna transición,
+ningún gate, ninguna derivación. Los dos invariantes que el brief marcaba —el de los enlaces y el de
+la jerga— siguen en verde, y ninguno de los 50 quedó en rojo.
+
+### Fuera de alcance, anotado
+
+- **El padding del scroller (`main py-8`, 32 px)** es del shell del setter, compartido con el home y
+  la cartera. Es cromo y cuenta en las catorce, pero tocarlo mueve pantallas fuera del manual.
+- **Las guías numeradas de m13, m16 y m5** son lo que queda arriba del trabajo a 390. Plegarlas
+  cerraría el número a mobile; es una decisión de producto sobre qué es un manual, no de cromo.
+- **`CopyBlock` sigue siendo una tarjeta dentro de su banda.** Es lectura deliberada de la regla: «una
+  sola cosa lleva tarjeta» se aplica a las zonas del layout-tipo, no a un artefacto copiable con su
+  propia acción adentro de una zona. Sin su marco, el botón queda flotando sin borde.
+- **La cabecera duplica los tres links externos que `M1Contexto` vuelve a servir en m1.** Son salidas
+  las dos veces, así que no se tocó ninguna.
+- **`copy-block.tsx` tiene `text-zinc-300` sobre el tinte esmeralda del estado «Copiado»** (el hook
+  de diseño lo marca). Es anterior a este sprint y no se tocó.
+
+### Para la verificación humana
+
+- **Todo el juicio estético.** Este sprint cambia cómo se ve el producto entero. Las 56 capturas
+  están en `docs/proof-screenshots/p17/{antes,despues}/`, las catorce a los dos anchos, tomadas al
+  alto del pliegue: son literalmente lo que el setter ve al llegar.
+- **Que las pantallas no queden pobres.** Achicar cromo puede pasarse. El par que mejor muestra el
+  cambio es `m1-1440`: antes se veía el rótulo «REGISTRO» y nada más; después entra el recorrido de
+  la ficha entero. El que más conviene mirar con desconfianza es `mc2-390`.
+- **Si plegar el preview del bloque copiable es la decisión correcta.** Es el movimiento que dio
+  vuelta los veredictos y el único que roza «esconder algo». El botón y el título quedaron arriba; lo
+  que se guardó es el texto crudo.
+- **Si el filo neutro de la instrucción alcanza para marcar «éste es tu paso»** ahora que el cyan se
+  mudó al bloque de trabajo. Es la decisión de color más discutible del sprint.

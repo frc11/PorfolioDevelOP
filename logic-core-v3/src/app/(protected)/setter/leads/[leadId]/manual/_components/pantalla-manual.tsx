@@ -16,15 +16,64 @@ import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './ma
  * (corte 5.6): las tres zonas siempre llegan con contenido real, así que acá
  * solo se enmarca — sin contenido no se renderiza nada (mismo criterio que ya
  * usaba la reentrada para sus zonas vacías, P3#10).
+ *
+ * P17 — deja de ser una TARJETA y pasa a ser una BANDA. Era
+ * `rounded-2xl border bg p-4`, y con la instrucción arriba (otra tarjeta) el
+ * setter miraba hasta cuatro superficies anidadas antes de llegar a un campo:
+ * página → tarjeta de zona → sub-tarjeta del contenido → campos. Las dos
+ * primeras zonas no aportaban nada que el rótulo y el espacio no aporten, y su
+ * `p-4` costaba 32 px verticales cada una encima del pliegue.
+ *
+ * La única que conserva tarjeta es el bloque de trabajo (`destacada`): es la
+ * regla del sistema —una sola cosa lleva tarjeta, el bloque activo— y de paso
+ * es lo que hace que se lo encuentre de un vistazo al volver a la pantalla.
  */
-function Zona({ etiqueta, children }: { etiqueta: string; children?: ReactNode }) {
+function Zona({
+  etiqueta,
+  children,
+  destacada = false,
+  acentuada = false,
+}: {
+  etiqueta: string
+  children?: ReactNode
+  /** El bloque de trabajo: la ÚNICA zona que lleva tarjeta. */
+  destacada?: boolean
+  /** …y el único acento de color de la pantalla, cuando es el paso de ahora. */
+  acentuada?: boolean
+}) {
   if (!children) return null
   return (
-    <section aria-label={etiqueta} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
+    <section
+      aria-label={etiqueta}
+      className={cn(
+        destacada &&
+          'rounded-2xl border p-4 sm:p-5 ' +
+            (acentuada
+              ? 'border-cyan-400/25 bg-cyan-500/[0.05] shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
+              : 'border-white/10 bg-white/[0.03]'),
+      )}
+    >
+      <p
+        className={cn(
+          'text-[11px] font-medium',
+          // S7 — el rótulo que pide ACCIÓN se distingue; los otros dos bajan de
+          // peso Y salen de la versalita. Antes eran tres versalitas del mismo
+          // tono y el mismo peso compitiendo entre sí, cuando sólo una nombra
+          // algo para hacer: el ojo no tenía dónde ir primero.
+          destacada
+            ? 'uppercase tracking-[0.18em] text-zinc-300'
+            : 'text-zinc-600',
+        )}
+      >
         {etiqueta}
       </p>
-      <div className="mt-2">{children}</div>
+      {/* `data-zona="contenido"` separa el CONTENIDO de la banda de su rótulo:
+          es lo que deja medir —y fijar con un test— cuánto pone el layout-tipo
+          por encima del bloque de trabajo sin que el contenido de la pantalla
+          contamine el número (`scripts/qa-corridas/medir-pliegue-manual.ts`). */}
+      <div data-zona="contenido" className="mt-2">
+        {children}
+      </div>
     </section>
   )
 }
@@ -72,37 +121,26 @@ export function PantallaManual({
   const esConstruccion = pantalla.fase === 'construccion'
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       <ManualHeader cabecera={cabecera} />
 
-      {encabezado}
+      {encabezado && <div data-slot="encabezado">{encabezado}</div>}
 
-      {/* La instrucción — protagonista. Marco cyan solo si es el paso de AHORA
-          (disciplina B9: el cyan se reserva a lo accionable). */}
+      {/* La instrucción — protagonista, y desde P17 una BANDA, no una tarjeta.
+          El `p-5` de la tarjeta costaba 40 px verticales en las catorce sin
+          decir nada que el título no diga; el filo de color sobrevive porque es
+          lo que marca «éste es tu paso», y ahora es lo único que lo marca acá
+          (el acento pleno se mudó al bloque de trabajo — S5). */}
       <section
         aria-label="Instrucción de esta pantalla"
         className={cn(
-          'relative overflow-hidden rounded-2xl border p-5',
-          esPasoActivo
-            ? 'border-cyan-400/25 bg-cyan-500/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.25)]'
-            : 'border-white/10 bg-white/[0.03]',
+          'border-l-2 pl-3.5',
+          esPasoActivo ? 'border-white/25' : 'border-white/10',
         )}
       >
-        <span
-          aria-hidden
-          className={cn(
-            'absolute inset-y-0 left-0 w-1',
-            esPasoActivo ? 'bg-cyan-400/80' : 'bg-zinc-600/60',
-          )}
-        />
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {indicador && (
-            <p
-              className={cn(
-                'text-[11px] font-medium uppercase tracking-[0.18em]',
-                esPasoActivo ? 'text-cyan-300/80' : 'text-zinc-500',
-              )}
-            >
+            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
               {/* P9 — el contador solo aparece donde la fase tiene más de una
                   pantalla. Con el colapso de Construcción (P6-B) nueve de las
                   diez fases quedaron con una sola, y «paso 1 de 1» no informa
@@ -132,27 +170,30 @@ export function PantallaManual({
         </div>
 
         {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
-        <h2 className="mt-2 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
+        <h2 className="mt-1 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
           {pantalla.titulo}
         </h2>
         {pantalla.detalle && (
-          <p className="mt-1.5 max-w-xl text-xs leading-relaxed text-zinc-400">
+          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
             {pantalla.detalle}
           </p>
         )}
       </section>
 
       {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan.
-          Zona no renderiza nada sin contenido (reentrada y cualquier slot vacío). */}
+          Zona no renderiza nada sin contenido (reentrada y cualquier slot vacío).
+          Sólo el Registro lleva tarjeta: es el bloque de trabajo. */}
       <Zona etiqueta="Contexto del lead">{contexto}</Zona>
       <Zona etiqueta="Munición">{municion}</Zona>
-      <Zona etiqueta="Registro">{captura}</Zona>
+      <Zona etiqueta="Registro" destacada acentuada={esPasoActivo}>
+        {captura}
+      </Zona>
 
       {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
       {!esActual && (
         <section
           aria-label="Avance"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
+          className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4"
         >
           <p className="text-xs leading-relaxed text-zinc-500">
             {completada

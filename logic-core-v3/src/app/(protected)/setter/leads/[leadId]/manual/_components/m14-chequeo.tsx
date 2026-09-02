@@ -35,8 +35,8 @@ export function M14Contexto({
   return (
     <div className="space-y-3">
       {draftUrl ? (
-        <div className="rounded-xl border border-cyan-400/20 bg-cyan-500/[0.05] p-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-cyan-300/80">
+        <div>
+          <p className="text-[11px] font-medium text-zinc-600">
             Tu borrador
           </p>
           <a

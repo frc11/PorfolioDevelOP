@@ -94,12 +94,6 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
         Volver a tu día
       </Link>
 
-      {/* Eyebrow redundante en mobile: la instrucción de abajo ya nombra el paso.
-          Se oculta en mobile para subir la acción hacia el fold (7.1). */}
-      <p className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 sm:block">
-        Manual paso a paso
-      </p>
-
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="line-clamp-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
           {lead.businessName}
@@ -160,22 +154,25 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
       )}
 
       {notas && (
-        <p className="line-clamp-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
+        /* P17 — deja de ser una tarjeta dentro de la cabecera (S1: un solo
+           nivel de superficie). El rótulo en negrita ya dice qué es; el marco
+           sólo agregaba un nivel más y 24 px. */
+        <p className="line-clamp-3 text-xs leading-relaxed text-zinc-500">
           <span className="font-semibold text-zinc-400">Notas del lead:</span> {notas}
         </p>
       )}
 
       {fechaAsignacion && (
-        <p className="flex items-center gap-2 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.05] px-3 py-2 text-xs text-cyan-200/90">
+        <p className="flex items-center gap-2 text-xs text-zinc-500">
           <ArrowLeftRight
             size={13}
             strokeWidth={1.5}
             aria-hidden
-            className="shrink-0 text-cyan-300"
+            className="shrink-0 text-zinc-500"
           />
           <span>
             Te asignaron este lead{' '}
-            <span className="font-semibold text-cyan-100">el {fechaAsignacion}</span>
+            <span className="font-semibold text-zinc-300">el {fechaAsignacion}</span>
           </span>
         </p>
       )}
@@ -218,11 +215,11 @@ export function NavAtras({
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
                   activo
-                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
+                    ? 'border-white/25 bg-white/[0.08] text-zinc-100'
                     : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
                 )}
               >
-                <Check size={11} strokeWidth={1.5} aria-hidden className="text-cyan-400/80" />
+                <Check size={11} strokeWidth={1.5} aria-hidden className="text-zinc-500" />
                 {PANTALLAS[id].corto}
               </Link>
             </li>
@@ -275,7 +272,7 @@ export function NavConstruccion({
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
                   activo
-                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
+                    ? 'border-white/25 bg-white/[0.08] text-zinc-100'
                     : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
                 )}
               >
@@ -283,7 +280,7 @@ export function NavConstruccion({
                   aria-hidden
                   className={cn(
                     'text-[10px] font-semibold',
-                    activo ? 'text-cyan-300' : 'text-zinc-600',
+                    activo ? 'text-zinc-300' : 'text-zinc-600',
                   )}
                 >
                   {index + 1}

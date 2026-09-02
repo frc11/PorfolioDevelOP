@@ -90,7 +90,7 @@ function BloqueDeFase({ faseId }: { faseId: FaseId }) {
             <li key={item} className="flex gap-2">
               <span
                 aria-hidden
-                className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-cyan-400/60"
+                className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-600"
               />
               <span>{item}</span>
             </li>
@@ -269,7 +269,7 @@ export function ConstruccionRegistro({
   return (
     <div className="space-y-4">
       {stage === 'BRIEF' && (
-        <div className="space-y-3 rounded-xl border border-cyan-400/20 bg-cyan-500/[0.05] p-4">
+        <div className="space-y-3">
           <p className="max-w-xl text-xs leading-relaxed text-zinc-300">
             El brief está listo — arrancá la construcción para habilitar el registro del
             borrador. Tildar fases no la arranca sola.
