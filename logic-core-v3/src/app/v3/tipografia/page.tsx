@@ -28,12 +28,20 @@ import { Titular } from '../_componentes/tipografia/Titular'
  *
  * Esta página no decide nada de eso. Lo pone donde se pueda mirar.
  *
- * ── Los tres anchos son tokens, no números ────────────────────────────────
+ * ── Los cuatro anchos son tokens, no números ──────────────────────────────
  *
- * 375 es `--fluido-piso`, 1440 es `--fluido-techo` —los dos extremos de la
- * banda, y ninguno de los dos es un breakpoint— y 860 es `--breakpoint-medio`,
- * que cae adentro. Los tres se consumen por `var()`: si la banda se moviera,
- * esta página se mueve con ella.
+ * 375 es `--fluido-piso` y 1440 es `--fluido-techo` —las dos ANCLAS MEDIDAS de
+ * la banda, y ninguna de las dos es un breakpoint—; 860 es `--breakpoint-medio`,
+ * que cae adentro; y 1920 es `--container-tope`, donde la banda deja de
+ * interpolar desde V3-C. Los cuatro se consumen por `var()`: si la banda se
+ * moviera, esta página se mueve con ella.
+ *
+ * ⚠️ **EL CUARTO MARCO LO AGREGA V3-C, Y SIN ÉL ESTA PÁGINA NO MOSTRABA EL
+ * CAMBIO.** Mientras la banda terminaba en 1440, el marco de `--fluido-techo`
+ * era a la vez el ancla y el techo y alcanzaba con tres. Desde que la recta se
+ * prolonga hasta `--container-tope`, el marco más ancho de los tres viejos
+ * mostraba el ANCLA y ningún tamaño de arriba de ella: los cinco techos nuevos
+ * no se veían en la única ruta que existe para mirarlos.
  *
  * El contenedor scrollea en horizontal a propósito. La alternativa sería
  * escalar los marcos para que entren, y un juicio óptico sobre tipografía
@@ -45,12 +53,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true },
 }
 
-/** Los tres anchos, cada uno con el token del que sale. La clase va escrita
+/** Los cuatro anchos, cada uno con el token del que sale. La clase va escrita
  *  entera: Tailwind escanea el fuente y no vería `w-[var(--${token})]`. */
 const ANCHOS = [
   { id: 'piso', token: '--fluido-piso', px: '375px', clase: 'w-[var(--fluido-piso)]' },
   { id: 'medio', token: '--breakpoint-medio', px: '860px', clase: 'w-[var(--breakpoint-medio)]' },
-  { id: 'techo', token: '--fluido-techo', px: '1440px', clase: 'w-[var(--fluido-techo)]' },
+  // `ancla` y no `techo`: desde V3-C este ancho es por donde PASA la recta
+  // —donde cada nivel vale su token fijo—, no donde deja de interpolar.
+  { id: 'ancla', token: '--fluido-techo', px: '1440px', clase: 'w-[var(--fluido-techo)]' },
+  { id: 'tope', token: '--container-tope', px: '1920px', clase: 'w-[var(--container-tope)]' },
 ] as const
 
 export default function PaginaTipografia() {
@@ -60,12 +71,12 @@ export default function PaginaTipografia() {
         <div className="flex flex-col gap-[var(--spacing-6)]">
           <EtiquetaDeSeccion>Instrumento interno · deuda con fecha de baja</EtiquetaDeSeccion>
           <Titular nivel="titulo-l" como="h1">
-            Los ocho niveles, en tres anchos
+            Los ocho niveles, en cuatro anchos
           </Titular>
           <Cuerpo className="max-w-[var(--breakpoint-medio)]">
             Cada marco es un viewport propio: los seis niveles fluidos usan{' '}
             <code className="font-codigo">clamp()</code> con <code className="font-codigo">vw</code>, que
-            se resuelve contra el viewport y no contra el contenedor. Sin marcos, los tres anchos
+            se resuelve contra el viewport y no contra el contenedor. Sin marcos, los cuatro anchos
             mostrarían el mismo tamaño. Nada está escalado.
           </Cuerpo>
         </div>

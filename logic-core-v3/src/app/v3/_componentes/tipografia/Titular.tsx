@@ -88,7 +88,20 @@ export interface TitularProps {
   readonly nivel: NivelDeTitular
   /** El elemento del documento. Sin default: elegirlo es una decisión. */
   readonly como: EtiquetaDeTitular
-  /** `false` fija el tamaño en el valor de arriba de 1440px. */
+  /**
+   * `false` fija el tamaño en el token FIJO del nivel — el valor que la
+   * medición de S0 ancló en 1440px.
+   *
+   * ⚠️ **Decía «el valor de arriba de 1440px» y V3-C lo dejó falso.** Mientras
+   * la banda terminaba en 1440, el token fijo y el techo del `clamp()` eran el
+   * mismo número y las dos frases decían lo mismo. Desde que la recta se
+   * prolonga hasta `--container-tope`, dejaron de decirlo: a 1920 el fluido de
+   * `titulo-xl` vale 65,01px y su token fijo sigue valiendo 56. **Lo que
+   * `fluido={false}` entrega es el ANCLA, no el tamaño de arriba de la banda.**
+   * Hoy no lo pide nadie —el home compuesto emite los seis niveles fluidos
+   * siempre en su familia fluida, contado sobre el marcado por
+   * `s3-tipografia` §10— y por eso esto es un disparador y no un defecto.
+   */
   readonly fluido?: boolean
   readonly interletrado?: Interletrado
   readonly peso?: Peso

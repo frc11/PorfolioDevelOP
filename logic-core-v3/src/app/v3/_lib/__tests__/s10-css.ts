@@ -144,8 +144,16 @@ function resolverProducto(expresion: string, anchoDeViewport: number): number {
     .reduce((acumulado, factor) => acumulado * resolverTermino(factor, anchoDeViewport), 1)
 }
 
-/** Parte por comas de primer nivel: `clamp()` lleva `calc()` adentro. */
-function partirPorComas(texto: string): string[] {
+/**
+ * Parte por comas de primer nivel: `clamp()` lleva `calc()` adentro.
+ *
+ * Exportada en V3-C: `s3-banda.ts` necesita los TRES términos de un `clamp()`
+ * por separado —el piso, la recta y el techo— para poder afirmar por dónde pasa
+ * la recta en cada ancla. Escribir un segundo partidor allá sería el mismo
+ * defecto que este archivo existe para no tener: dos modelos que divergen en el
+ * primer paréntesis anidado.
+ */
+export function partirPorComas(texto: string): string[] {
   const partes: string[] = []
   let profundidad = 0
   let actual = ''

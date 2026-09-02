@@ -41,7 +41,6 @@ import {
   hayToken,
   resolverLongitud,
   tokenPx,
-  valorDeToken,
   variantesActivas,
 } from './s10-css'
 import {
@@ -55,26 +54,46 @@ import {
 import { avanceDeCaracter, leerAvancesDe } from './s10-woff2'
 import { leerMetricas } from './s3-woff2'
 import { NIVELES, NIVELES_TIPOGRAFICOS } from '../tipografia'
+import { TOPE_DE_LA_BANDA, terminosDe } from './s3-banda'
 
 titulo('1 · El resolvedor de tokens, contra el método que el propio tema publica')
 
+/**
+ * ⚠️ **V3-C SEPARÓ EL ANCLA DEL TECHO, Y ESTA COMPROBACIÓN LO SIGUE.**
+ *
+ * Decía «interpola entre sus extremos» y evaluaba el `clamp()` en `--fluido-piso`
+ * y en `--fluido-techo`, esperando el mínimo y el máximo DECLARADOS. Valía
+ * mientras la banda terminara en 1440. Desde que termina en `--container-tope`,
+ * a 1440 el `clamp()` ya no da su máximo: da **el token FIJO del nivel**, que es
+ * lo que la medición de S0 ancló ahí.
+ *
+ * Los tres puntos se comprueban ahora por separado, que es lo que el tema
+ * publica: piso en `--fluido-piso`, token fijo en `--fluido-techo`, máximo en el
+ * tope. El modelo de la recta se importa de `s3-banda.ts` en vez de reescribirlo
+ * — es el mismo que `s3-tipografia` afirma, y dos lectores del mismo `clamp()`
+ * que divergen son exactamente el defecto que este archivo existe para cazar.
+ */
 const PISO = tokenPx('--fluido-piso', 0)
-const TECHO = tokenPx('--fluido-techo', 0)
+const ANCLA = tokenPx('--fluido-techo', 0)
 for (const nivel of NIVELES) {
   const definicion = NIVELES_TIPOGRAFICOS[nivel]
   if (definicion.claseFluida === null) continue
   const fluido = definicion.token.replace('--text-', '--text-fluido-')
+  const terminos = terminosDe(nivel)
+  if (terminos === null) continue
   const enElPiso = tokenPx(fluido, PISO)
-  const enElTecho = tokenPx(fluido, TECHO)
-  const declarado = /clamp\(\s*([\d.]+)px\s*,[\s\S]*,\s*([\d.]+)px\s*\)/.exec(valorDeToken(fluido))
-  const minimo = Number.parseFloat(declarado?.[1] ?? 'NaN')
-  const maximo = Number.parseFloat(declarado?.[2] ?? 'NaN')
+  const enElAncla = tokenPx(fluido, ANCLA)
+  const enElTope = tokenPx(fluido, TOPE_DE_LA_BANDA)
+  const fijo = tokenPx(definicion.token, 0)
   afirmar(
-    Math.abs(enElPiso - minimo) < 0.01 && Math.abs(enElTecho - maximo) < 0.01,
-    `\`${fluido}\` interpola entre sus extremos: ${enElPiso.toFixed(3)} en ${PISO} y ${enElTecho.toFixed(3)} en ${TECHO}`,
-    `declarados ${minimo} y ${maximo}`,
+    Math.abs(enElPiso - terminos.piso) < 0.01 &&
+      Math.abs(enElAncla - fijo) < 0.01 &&
+      Math.abs(enElTope - terminos.techo) < 0.01,
+    `\`${fluido}\` pasa por sus tres puntos: ${enElPiso.toFixed(3)} en ${PISO} · ${enElAncla.toFixed(3)} en ${ANCLA} · ${enElTope.toFixed(3)} en ${TOPE_DE_LA_BANDA}`,
+    `declarados piso ${terminos.piso}, token fijo ${fijo}, techo ${terminos.techo}`,
   )
 }
+
 afirmarIgual(tokenPx('--text-base', 375), 16, '`1rem` resuelve a 16px — el supuesto de la raíz, declarado')
 afirmarIgual(cajaDeLinea('--text-cuerpo', '--leading-texto', 375), 24, 'la caja de línea de cuerpo son 24px, igual que en `navegacion.ts`')
 afirmarIgual(

@@ -413,8 +413,11 @@
   /* =====================================================================
    * TIPOGRAFÍA — escala de tamaño
    *
-   * ESTRUCTURA [medido, transferido]: ocho niveles, seis de ellos fluidos,
-   * banda de 375 a 1440px.
+   * ESTRUCTURA [medido, transferido]: ocho niveles, seis de ellos fluidos.
+   * La banda se MIDIÓ entre 375 y 1440 y esos dos puntos no se han movido;
+   * desde V3-C la misma recta se deja interpolar hasta 1920 —el tope del
+   * contenido—, que es [decidido] y está justificado abajo, en el bloque de las
+   * seis expresiones.
    *
    * LOS PX TRANSFIEREN SIN REESCALAR, y ahora con el número de Chivo detrás
    * [medido] + [decidido]:
@@ -437,6 +440,34 @@
    * NIVELES DE DISPLAY en Chivo en un navegador. A igual tamaño en px las
    * mayúsculas son 4,72% más chicas, y en Title Case la mayúscula domina el
    * tamaño percibido. Es en titulo-l y titulo-xl donde se vería.
+   *
+   * ═══ EL ARGUMENTO QUE V3-C DEJA ABIERTO PARA EL PRÓXIMO SPRINT ══════════
+   *
+   * ⚠️ **COMPENSAR LA CAP HEIGHT PUEDE SER MÁS FIEL A LA MEDICIÓN, NO MENOS**,
+   * y hasta acá se venía razonando al revés.
+   *
+   * Los dos anclajes de la banda —375 y 1440— se transfirieron **midiendo
+   * Instrument Sans**. Lo que esos números capturan es un TAMAÑO ÓPTICO
+   * observado en esa familia; el píxel es sólo la unidad en la que quedó
+   * anotado. Como la cap height de Chivo es 4,72% más chica, **igualar el
+   * píxel NO iguala el tamaño óptico**: conservar los px exactos preserva la
+   * anotación y pierde lo anotado, justo en los niveles de display, que son
+   * los que se leen en mayúscula inicial.
+   *
+   * O sea que la disyuntiva no es «fidelidad contra corrección estética».
+   * Las dos opciones son lecturas de fidelidad y compiten entre sí:
+   *   · **fidelidad al px** — lo que el sistema hace hoy;
+   *   · **fidelidad al tamaño percibido** — compensar por 720/686 = 1,0496 en
+   *     los niveles de display.
+   *
+   * NO se resuelve acá, y la razón es de método: compensar mueve los valores
+   * en 375 y en 1440, que son los dos puntos que V3-C tenía prohibido tocar y
+   * sobre los que descansa todo el sistema. Es una decisión de sistema propia
+   * y necesita su propio sprint, su propia medición óptica y su propia parada.
+   *
+   * Lo que V3-C sí deja listo para tomarla: la ruta `/v3/tipografia` muestra
+   * los ocho niveles en CUATRO anchos —incluido el tope—, que es donde el
+   * efecto de la cap height se mira más grande y por lo tanto mejor.
    * ------------------------------------------------------------------- */
 
   /* CAMBIO 5 DE S1 — `--text-base` pasa de 16px a 1rem. [decidido, medido]
@@ -517,12 +548,66 @@
    * presencia de la unidad. El día que el techo de `micro` suba, la banda
    * vuelve sola con el método de arriba. */
 
+  /* ═══ V3-C: LA BANDA SIGUE HASTA 1920. LAS RECTAS, INTACTAS. ═══════════
+   *
+   * **Los cinco techos suben; ni un coeficiente se toca.** Cada nivel conserva
+   * su piso y su recta exactos, así que **los dos puntos medidos siguen dando
+   * el mismo número**: 375 → el piso, 1440 → el token fijo del nivel. Lo único
+   * que cambia es HASTA DÓNDE se deja interpolar a esa misma recta.
+   *
+   * ── El defecto, con su cifra ──────────────────────────────────────────
+   *
+   * Arriba de 1440 el `clamp()` topaba y el texto se quedaba clavado mientras
+   * la ventana seguía ensanchándose. Medido sobre el titular del Hero, como
+   * fracción del ancho de la ventana:
+   *
+   *     @1440  75,3 %      @1920  56,5 %      @2560  42,4 %
+   *
+   * Los 18,8 puntos que se pierden entre el ancla y 1920 son exactamente «se
+   * ve más chico»: no es que el texto encoja, es que deja de acompañar.
+   *
+   * ── Por qué 1920 y no «sin techo» ─────────────────────────────────────
+   *
+   * Porque `--container-tope` son 1920px y **la caja de texto deja de crecer
+   * ahí**: el ancho útil del contenido se clava en 1856px y la medida del
+   * titular del Hero en 1014px, la misma a 1920 y a 2560. Una tipografía que
+   * siguiera creciendo arriba del tope crecería contra una caja congelada, que
+   * es el defecto de vuelta y del lado peor. **El techo de la banda no es una
+   * preferencia: es el tope del contenido, que ya estaba medido.**
+   *
+   * ⚠️ **LA PREMISA QUE DISPARÓ ESTO ESTÁ REFUTADA, Y SE DECLARA.** La
+   * instrucción decía que la referencia no tiene este techo. `LAYOUT.md` §2.3
+   * la midió a 1440 y a 1920 y **los seis niveles valen lo mismo en los dos**:
+   * la referencia topa en 1440 igual que topábamos nosotros. Extender la banda
+   * es entonces una DECISIÓN de develOP y no una corrección hacia la
+   * referencia. Queda escrito para que nadie la lea como transferencia.
+   *
+   * ⚠️ **CONSECUENCIA FORZADA, Y SE DECLARA: arriba de 1440 el fluido de un
+   * nivel supera a su token FIJO.** Hasta acá los dos convergían en el ancla y
+   * el fluido nunca pasaba al fijo. Ahora `titulo-xl` fluido vale 65,01 px a
+   * 1920 mientras `--text-titulo-xl` sigue valiendo 56. **Sobre el home
+   * compuesto eso no se ve en ningún elemento**: los seis niveles fluidos se
+   * emiten SIEMPRE en su familia fluida —0 elementos con la clase fija de esos
+   * seis, contados sobre el marcado del servidor— y el único nivel que se emite
+   * fijo es `cuerpo`, que no tiene contraparte fluida por medición. El día que
+   * alguien pida un nivel con `fluido={false}`, va a recibir el valor del ANCLA
+   * y no el de arriba de la banda.
+   *
+   * ⚠️ **`micro` NO se toca y sigue sin ser fluido.** Su piso y su techo son el
+   * mismo 10px, así que prolongar su recta —que es constante— deja el techo
+   * donde estaba. La contradicción escrita abajo sigue en pie, sin excepción y
+   * sin un `vw` decorativo.
+   *
+   * Los cinco techos son la recta evaluada en 1920, a cuatro decimales. NO son
+   * enteros a propósito: los enteros de la línea de abajo salen de medición y
+   * éstos son derivados, así que llevan sus decimales a la vista. */
+
   --text-fluido-micro: clamp(10px, 0.625rem, 10px);
-  --text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12px);
-  --text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 20px);
-  --text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 32px);
-  --text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 44px);
-  --text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);
+  --text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12.4509px);
+  --text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 21.3526px);
+  --text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 38.3107px);
+  --text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 53.0141px);
+  --text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 65.0141px);
 
   /* =====================================================================
    * TIPOGRAFÍA — interlineado [medido, transferido]
@@ -741,9 +826,21 @@
   --grilla-canal-compacto: 12px;
   --grilla-canal-amplio: 16px;
 
-  /* Extremos de la banda fluida [derivado]. No son breakpoints: no hay media
-   * query en ninguno de los dos. Son los puntos donde el clamp() deja de
-   * interpolar. */
+  /* LAS DOS ANCLAS MEDIDAS de la banda fluida [derivado]. No son breakpoints:
+   * no hay media query en ninguno de los dos.
+   *
+   * ⚠️ **`--fluido-techo` dejó de ser «donde el clamp() deja de interpolar» en
+   * V3-C, y no cambió de valor: cambió de sentido.** Los dos siguen siendo los
+   * puntos que la medición fijó —375, donde los seis niveles tocan su piso;
+   * 1440, donde cada uno vale su token FIJO—, o sea **por dónde PASA la recta**.
+   * Dónde deja de interpolar es otra cosa y hoy vale otro número: es
+   * `--container-tope`. No se declara un token nuevo para eso, justamente
+   * porque no es un número nuevo.
+   *
+   * Se conservan con su nombre y su valor porque tres instrumentos los leen
+   * como los anchos medidos que son —`s10-medida`, `s10-mobile-escala` y
+   * `s10-logo-lectura`, éste último usando 1440 como el ancho de escritorio de
+   * referencia— y renombrarlos movería mediciones que no son de tipografía. */
   --fluido-piso: 375px;
   --fluido-techo: 1440px;
 }

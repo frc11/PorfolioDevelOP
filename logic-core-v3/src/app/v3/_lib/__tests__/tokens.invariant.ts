@@ -148,6 +148,16 @@ async function principal(): Promise<void> {
     // `titulo-s` resolvía a 16px, o sea EXACTAMENTE `--text-base`.
     '--text-fluido-micro: clamp(8px, 0.456rem + 0.1878vw, 10px);',
     '--text-fluido-titulo-s: clamp(16px, 0.912rem + 0.3756vw, 20px);',
+    // ⚠ V3-C: los CUATRO TECHOS restantes que suben al extender la banda hasta
+    // `--container-tope`. Salen con el valor de S0 —que es el que la referencia
+    // mide a 1440— y vuelven abajo con la recta prolongada hasta 1920. Ni un
+    // coeficiente cambia, así que los dos puntos medidos siguen dando lo mismo:
+    // 375 → el piso, 1440 → el token fijo del nivel. `micro` no está porque su
+    // recta es constante y prolongarla no la mueve.
+    '--text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12px);',
+    '--text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 32px);',
+    '--text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 44px);',
+    '--text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 56px);',
   ]
   const ESPERADO_DENTRO = [
     '@theme static {',
@@ -176,9 +186,22 @@ async function principal(): Promise<void> {
     '[data-v3]:focus-visible {',
     'outline: var(--foco-grosor) solid var(--color-foco);',
     'outline-offset: var(--foco-desplazamiento);',
-    // ⚠ SITIO-S11 — los dos pisos subidos, del otro lado del diff.
+    // ⚠ SITIO-S11 — el piso de `micro` subido, del otro lado del diff. Su techo
+    // sigue siendo el mismo 10px y por eso su banda es CERO: V3-C no lo tocó.
     '--text-fluido-micro: clamp(10px, 0.625rem, 10px);',
-    '--text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 20px);',
+    // ⚠ V3-C — los CINCO techos prolongados hasta `--container-tope` (1920px),
+    // que es donde `Envoltorio.tsx` deja de agrandar la caja de contenido. El
+    // techo de cada nivel es su propia recta evaluada ahí, a cuatro decimales.
+    // `titulo-s` lleva además el piso de 17px que subió SITIO-S11.
+    // ⚠️ La premisa que lo pidió está REFUTADA y se declara: `LAYOUT.md` §2.3
+    // mide la referencia a 1440 y a 1920 y da lo MISMO en los seis niveles. Es
+    // una decisión de develOP que se aparta de la referencia, no una
+    // transferencia. `s3-tipografia` §9 lo reproduce leyendo esa tabla.
+    '--text-fluido-caption: clamp(11px, 0.6655rem + 0.0939vw, 12.4509px);',
+    '--text-fluido-titulo-s: clamp(17px, 0.9965rem + 0.2817vw, 21.3526px);',
+    '--text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 38.3107px);',
+    '--text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 53.0141px);',
+    '--text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 65.0141px);',
     // ⚠ SITIO-S11 — las OTRAS DOS TINTAS, dadas vuelta en la sección
     // invertida. Los nombres ya existían en S0 (con su valor claro, que no se
     // tocó); lo que entra son las dos REDEFINICIONES del bloque

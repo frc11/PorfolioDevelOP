@@ -1,6 +1,7 @@
 /**
- * INVARIANTE — los ocho niveles existen, se consumen, y la cap height que hace
- * urgente la verificación óptica sale del binario que /v3 sirve.
+ * INVARIANTE — los ocho niveles existen, se consumen, pasan por sus anclas
+ * medidas a lo largo de toda la banda, y la cap height que hace urgente la
+ * verificación óptica sale del binario que /v3 sirve.
  *
  * Corre con `npm run test:s3-tipografia`.
  *
@@ -10,9 +11,11 @@
  *      tabla del sprint dice, y **seis tienen contraparte fluida y dos no**.
  *      Que falten los dos es tan importante como que estén los seis: `cuerpo`
  *      y `base` se midieron invariantes entre 768 y 1920.
- *   2. Cada `clamp()` **topa exactamente en el valor fijo de su nivel**. Es la
- *      costura del sistema: si el techo del fluido no coincide con el fijo,
- *      arriba de 1440 hay dos tamaños distintos para el mismo nivel.
+ *   2. Cada `clamp()` **pasa por sus TRES anclas**: el piso a 375, el token
+ *      FIJO del nivel a 1440 y el techo en el tope del contenido. Los dos
+ *      primeros son medidos y **no se mueven**; el tercero es donde V3-C
+ *      extendió la banda. Reemplaza a la comparación de literales que hacía
+ *      esta sección, y es más fuerte: ve una PENDIENTE movida, que la vieja no.
  *   3. Los tres interlineados y los CUATRO interletrados se consumen. El
  *      cuarto —`--tracking-display`— no lo usa ningún componente medido, y por
  *      eso lo ejercita la ruta de demostración: un token que no se usa en
@@ -20,8 +23,15 @@
  *   4. Los ocho niveles se consumen en el árbol del sprint.
  *   5. **La cap height se LEE del `.woff2`**, no se cita. De ahí sale el
  *      −4,72% que hace que la verificación óptica valga la pena.
+ *   6-10. **La banda de punta a punta, y con qué se la compara** (V3-C): los
+ *      ocho niveles en los cuatro anchos, la separación, el titular del Hero
+ *      como fracción de la ventana, la tinta de cada sección contra su alto
+ *      declarado, qué hace la referencia arriba de 1440 —leído de `LAYOUT.md`,
+ *      no citado— y qué familia emite cada elemento del home compuesto. Las
+ *      cinco viven en `s3-banda-afirmaciones.ts`.
  */
 
+import type { Nivel } from '../tipografia'
 import {
   CLASE_INTERLETRADO,
   CLASE_INTERLINEADO,
@@ -35,8 +45,17 @@ import {
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DE_CODIGO, leer } from './s3-archivos'
+import {
+  TOPE_DE_LA_BANDA,
+  declaradoDe,
+  terminosDe,
+  terminosDeExpresion,
+  type TerminosDeClamp,
+} from './s3-banda'
+import { afirmarLaBanda, afirmarLaReferencia } from './s3-banda-afirmaciones'
 import { resolver, tokensDelTema } from './s3-css'
 import { leerMetricas } from './s3-woff2'
+import { tokenPx } from './s10-css'
 
 const tokens = tokensDelTema()
 const fuenteDelSprint = ARCHIVOS_DE_CODIGO.map((a) => leer(a)).join('\n')
@@ -63,112 +82,137 @@ const fluidosQueFaltan = conFluido.filter((n) => !tokens.has(`--text-fluido-${n}
 afirmarIgual(fluidosQueFaltan, [], 'los seis --text-fluido-* existen en el tema')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('2 · Cada clamp() topa exactamente en el valor fijo de su nivel')
+titulo('2 · Las TRES anclas de cada clamp(): el piso, el token fijo y el tope')
 
-interface Costura {
-  readonly nivel: string
-  readonly techoDelClamp: string
-  readonly valorFijo: string
+/**
+ * ⚠️ **CAMBIÓ DE FORMA EN V3-C Y ES MÁS FUERTE QUE ANTES.** Decía «cada
+ * `clamp()` topa exactamente en el valor fijo de su nivel» comparando DOS
+ * LITERALES —el tercer término contra `--text-<n>`—, lo cual valía sólo
+ * mientras la banda terminara donde está el ancla. Ahora se afirman las TRES
+ * anclas **evaluando la recta**: `recta(375)` = el piso, `recta(1440)` = el
+ * token FIJO —**la comprobación de que la escala no se movió donde está
+ * anclada**— y `recta(tope)` = el techo. Las tres están explicadas nivel por
+ * nivel en `s3-banda.ts`. La vieja no veía un cambio de COEFICIENTE: mover la
+ * pendiente dejaba el literal del techo intacto y la comprobación seguía verde
+ * sobre una recta que ya no pasaba por 1440.
+ */
+const PISO = tokenPx('--fluido-piso', 0)
+const ANCLA = tokenPx('--fluido-techo', 0)
+afirmarIgual(PISO, 375, 'el ancla baja de la banda son 375px, y sale del tema')
+afirmarIgual(ANCLA, 1440, 'la alta son 1440px — las dos siguen siendo las MEDIDAS')
+afirmarIgual(
+  TOPE_DE_LA_BANDA,
+  tokenPx('--container-tope', 0),
+  'y el tope de la banda ES `--container-tope`: no se declaró un número nuevo para tenerlo',
+)
+
+// Los dos lectores de la hoja tienen que decir lo mismo. `tokens` sale de
+// `s3-css` y `terminosDe` de `s10-css`: son dos parsers distintos sobre el
+// mismo archivo, y si divergieran, medio invariante estaría midiendo otra cosa.
+afirmarIgual(
+  conFluido.filter((n) => (tokens.get(`--text-fluido-${n}`) ?? '') !== declaradoDe(n)),
+  [],
+  'los dos lectores de `theme-develop.css` leen la MISMA declaración en los seis',
+)
+
+interface AnclaRota {
+  readonly donde: string
+  readonly esperado: number
+  readonly obtenido: number
 }
 
-function costurasRotas(nombresPorNivel: readonly string[]): Costura[] {
-  const rotas: Costura[] = []
-  for (const nivel of nombresPorNivel) {
-    const fluido = tokens.get(`--text-fluido-${nivel}`)
-    const fijo = NIVELES_TIPOGRAFICOS[nivel as (typeof NIVELES)[number]].valorFijo
-    if (fluido === undefined) continue
-    const partes = /clamp\(([^,]+),([^,]+),([^)]+)\)/.exec(fluido)
-    if (partes === null) {
-      rotas.push({ nivel, techoDelClamp: '(no es un clamp)', valorFijo: fijo })
-      continue
-    }
-    const techo = resolver(partes[3].trim(), tokens)
-    const objetivo = resolver(fijo, tokens)
-    if (techo === null || objetivo === null || techo.n !== objetivo.n) {
-      rotas.push({ nivel, techoDelClamp: partes[3].trim(), valorFijo: fijo })
+/**
+ * Las anclas que NO dan. Vacío, o la escala se movió donde está anclada.
+ *
+ * Recibe el lector de términos como parámetro para que el control positivo
+ * pueda correr ESTA MISMA función sobre un `clamp()` equivocado.
+ */
+function anclasRotas(
+  niveles: readonly string[],
+  leer: (nivel: string) => TerminosDeClamp | null,
+): AnclaRota[] {
+  const rotas: AnclaRota[] = []
+  for (const nivel of niveles) {
+    const terminos = leer(nivel)
+    if (terminos === null) continue
+    const fijo = resolver(NIVELES_TIPOGRAFICOS[nivel as Nivel].valorFijo, tokens)?.n ?? Number.NaN
+    const puntos: readonly (readonly [string, number, number])[] = [
+      [`piso de ${nivel}`, terminos.piso, terminos.recta(PISO)],
+      [`ancla de ${nivel}`, fijo, terminos.recta(ANCLA)],
+      [`tope de ${nivel}`, terminos.techo, terminos.recta(TOPE_DE_LA_BANDA)],
+    ]
+    for (const [donde, esperado, obtenido] of puntos) {
+      // Tolerancia 0,001px: los coeficientes se publican a cuatro decimales y
+      // S0 declara un error máximo de 0,0006px en los extremos de la banda.
+      if (Math.abs(esperado - obtenido) > 0.001) rotas.push({ donde, esperado, obtenido })
     }
   }
   return rotas
 }
 
-afirmarIgual(costurasRotas(conFluido), [], 'los seis clamp() topan en el valor fijo de su nivel')
+const deLaHoja = (nivel: string): TerminosDeClamp | null => terminosDe(nivel as Nivel)
 
-// La banda: el piso y el techo son tokens, y ninguno de los dos es un
-// breakpoint — el clamp deja de interpolar adentro de la expresión.
-const piso = resolver('var(--fluido-piso)', tokens)
-const techo = resolver('var(--fluido-techo)', tokens)
-afirmarIgual(piso?.n, 375, 'la banda fluida arranca en 375px')
-afirmarIgual(techo?.n, 1440, 'y termina en 1440px')
+afirmarIgual(
+  anclasRotas(conFluido, deLaHoja),
+  [],
+  'los seis clamp() pasan por sus TRES anclas: el piso a 375, el token FIJO a 1440, el techo en el tope',
+)
+controlPositivo(
+  'el comparador de anclas ve una PENDIENTE movida — el modo de falla que la comprobación vieja NO veía',
+  'clamp(36px, 1.8099rem + 1.9vw, 65.0141px)',
+  (roto: string) => anclasRotas(['titulo-xl'], () => terminosDeExpresion(roto)).length === 0,
+)
+controlPositivo(
+  'y también un TECHO movido, que ya no se confunde con una pendiente movida',
+  'clamp(36px, 1.8099rem + 1.8779vw, 70px)',
+  (roto: string) => anclasRotas(['titulo-xl'], () => terminosDeExpresion(roto)).length === 0,
+)
 
 /**
  * ⚠️ **LA BANDA DE UN NIVEL SE MIDE POR SU PENDIENTE, NO POR LA PRESENCIA DE
- * `vw` (SITIO-S11).**
+ * `vw` (SITIO-S11).** Subir el piso de `--text-fluido-micro` hasta su propio
+ * `--text-micro` con el techo anclado en ese mismo valor deja la banda en CERO,
+ * y un `+ 0vw` escrito para no romper una comprobación la habría dejado verde
+ * sobre una expresión que no interpola. Se mide **techo − piso** y se separan
+ * los dos casos: los que tienen banda TIENEN que interpolar con `vw`, y el que
+ * no la tiene se DECLARA.
  *
- * Esta comprobación decía «los seis interpolan con `vw`: son fluidos de verdad»
- * y lo verificaba buscando la subcadena `vw` en la expresión. Alcanzaba
- * mientras los seis tuvieran banda, y dejó de alcanzar en S11: subir el piso de
- * `--text-fluido-micro` a su propio `--text-micro` con el techo anclado en el
- * mismo valor deja la banda en CERO, y un `+ 0vw` escrito para no romper esta
- * línea la habría dejado verde sobre una expresión que no interpola. Eso es
- * exactamente el modo de falla que este repo lleva diez sprints cazando.
- *
- * Ahora se mide lo que importa —**techo − piso**— y se separan los dos casos:
- * los que tienen banda TIENEN que interpolar con `vw`, y el que no la tiene se
- * DECLARA, con la razón por la que no la tiene y su disparador. Es una
- * comprobación más fuerte que la anterior en las dos direcciones: cazaría un
- * `vw` decorativo sobre banda cero, y cazaría una banda no nula escrita sin
- * `vw`.
+ * **V3-C no lo tocó, y es una consecuencia y no una excepción:** extender la
+ * banda sube los cinco techos que tenían pendiente, y el de `micro` se queda
+ * donde estaba porque prolongar una recta CONSTANTE no la mueve.
  */
-const bandaDe = (n: string): number => {
-  const partes = /clamp\(([^,]+),([^,]+),([^)]+)\)/.exec(tokens.get(`--text-fluido-${n}`) ?? '')
-  const piso = partes === null ? null : resolver(partes[1].trim(), tokens)
-  const techo = partes === null ? null : resolver(partes[3].trim(), tokens)
-  return piso === null || techo === null ? Number.NaN : techo.n - piso.n
+const bandaDe = (declarado: string): number => {
+  const terminos = terminosDeExpresion(declarado)
+  return terminos.techo - terminos.piso
 }
-const CON_BANDA = conFluido.filter((n) => bandaDe(n) > 0)
-const SIN_BANDA = conFluido.filter((n) => bandaDe(n) === 0)
+const CON_BANDA = conFluido.filter((n) => bandaDe(declaradoDe(n)) > 0)
+const SIN_BANDA = conFluido.filter((n) => bandaDe(declaradoDe(n)) === 0)
 afirmarIgual(
-  CON_BANDA.filter((n) => !(tokens.get(`--text-fluido-${n}`) ?? '').includes('vw')),
+  CON_BANDA.filter((n) => !declaradoDe(n).includes('vw')),
   [],
   `los ${CON_BANDA.length} niveles CON banda interpolan con vw: son fluidos de verdad`,
 )
 afirmarIgual(
-  SIN_BANDA.filter((n) => (tokens.get(`--text-fluido-${n}`) ?? '').includes('vw')),
+  SIN_BANDA.filter((n) => declaradoDe(n).includes('vw')),
   [],
-  `y el que NO la tiene no finge tenerla: cero \`vw\` decorativos`,
+  'y el que NO la tiene no finge tenerla: cero `vw` decorativos',
 )
 afirmarIgual(SIN_BANDA, ['micro'], 'el único nivel sin banda es `micro`, y el tema declara por qué')
 console.log(
-  `  banda por nivel: ${conFluido.map((n) => `${n} ${bandaDe(n)}px`).join(' · ')}`,
+  `  banda por nivel: ${conFluido.map((n) => `${n} ${bandaDe(declaradoDe(n)).toFixed(4)}px`).join(' · ')}`,
 )
 console.log(
-  '  ⚠️ `micro` quedó con banda CERO en SITIO-S11 y es una consecuencia forzada, no un descuido: su piso no puede ' +
-    'bajar de `--text-micro` (10px) sin reabrir el defecto 12 de §7.38, y su techo está anclado en ese mismo 10px por ' +
-    'medición. DISPARADOR: el día que el techo suba, la banda vuelve sola con el método que el tema publica.',
+  '  ⚠️ `micro` quedó con banda CERO en SITIO-S11 y V3-C lo dejó así: su piso no puede bajar de `--text-micro` (10px) ' +
+    'sin reabrir el defecto 12 de §7.38, y su techo está anclado en ese mismo 10px por medición. Prolongar su recta ' +
+    'hasta el tope no lo mueve, porque su recta es constante. DISPARADOR: el día que el techo suba, la banda vuelve ' +
+    'sola con el método que el tema publica.',
 )
 controlPositivo(
   'el medidor de banda ve una banda no nula donde la hay',
-  ['micro'],
-  (niveles: string[]) => {
-    const guardado = tokens.get('--text-fluido-micro')
-    tokens.set('--text-fluido-micro', 'clamp(8px, 0.456rem + 0.1878vw, 10px)')
-    const sinBanda = niveles.filter((n) => bandaDe(n) === 0)
-    if (guardado !== undefined) tokens.set('--text-fluido-micro', guardado)
-    return sinBanda.length === niveles.length
-  },
+  'clamp(8px, 0.456rem + 0.1878vw, 10px)',
+  (roto: string) => bandaDe(roto) === 0,
 )
 
-controlPositivo(
-  'el comparador de costura ve un techo que no coincide',
-  ['micro'],
-  (niveles) => {
-    const guardado = tokens.get('--text-fluido-micro')
-    tokens.set('--text-fluido-micro', 'clamp(8px, 0.456rem + 0.1878vw, 11px)')
-    const rotas = costurasRotas(niveles)
-    if (guardado !== undefined) tokens.set('--text-fluido-micro', guardado)
-    return rotas.length === 0
-  },
-)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Los tres interlineados y los cuatro interletrados se consumen')
@@ -245,5 +289,11 @@ controlPositivo(
   'src/app/v3/_lib/tipografia.ts',
   (ruta) => leerMetricas(ruta).capHeight > 0,
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+afirmarLaBanda()
+
+// ═══════════════════════════════════════════════════════════════════════════
+afirmarLaReferencia()
 
 cerrar('s3-tipografia.invariant')
