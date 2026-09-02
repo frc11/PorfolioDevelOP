@@ -1094,6 +1094,19 @@ export const GUIA_ESPERA = {
   // sprint vino a hacer viajar: nombra la causa exacta y descarta al negocio.
   linkPermanente: GUIA_ENVIO.espera.aprobadaSinLink,
   accionPropia: null,
+  // P19 — La pausa que puso el propio setter. Sin frase propia caía en la del
+  // negocio («puede contestar hoy, en dos semanas o no contestar nunca») más el
+  // estado de la cadencia, que en un postergado nombra un toque que no va a
+  // salir. La FECHA no se repite acá: la cabecera de toda pantalla ya la muestra
+  // al lado de la etiqueta «Postergado», y decirla dos veces no la hace más
+  // clara. Y dice «vuelve a tu cola», no «vuelve a tu foco»: el foco es UNO y lo
+  // decide el orden de la cola, así que prometerlo sería otra vez decir algo que
+  // no siempre pasa.
+  postergacion: [
+    'Lo postergaste vos: ',
+    { enfasis: 'el contacto está pausado' },
+    ' hasta la fecha de arriba — cuando llegue, el lead vuelve a tu cola de trabajo. Si el negocio contesta antes, registralo acá y sigue.',
+  ],
   respuesta: null,
 } satisfies Record<CausaEspera, LineaRica | null>
 

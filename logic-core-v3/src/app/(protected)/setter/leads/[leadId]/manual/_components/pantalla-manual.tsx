@@ -91,6 +91,17 @@ type PantallaManualProps = {
   contexto?: ReactNode
   municion?: ReactNode
   captura?: ReactNode
+  /**
+   * P19 — El nodo que SOLO declara la acción principal (`useAccionPrincipal`) y
+   * no renderiza nada, para la pantalla que no tiene bloque de trabajo propio.
+   *
+   * Existe por `mr`: su única interacción es el botón, y desde P18 el botón vive
+   * en la barra. Lo que quedaba en la zona de Registro era un párrafo solo
+   * dentro de la tarjeta acentuada —la superficie con la que el layout-tipo dice
+   * «acá se trabaja»— sin un control adentro. La zona se disuelve; el declarador
+   * se monta acá, hermano de las zonas, sin pintar nada.
+   */
+  accion?: ReactNode
 }
 
 /**
@@ -110,6 +121,7 @@ export function PantallaManual({
   contexto,
   municion,
   captura,
+  accion,
 }: PantallaManualProps) {
   const esActual = pantalla.id === posicion.actual
   // C-17: el cyan "Tu paso ahora" se reserva a lo accionable (disciplina B9). Un
@@ -195,6 +207,8 @@ export function PantallaManual({
         <Zona etiqueta="Registro" destacada acentuada={esPasoActivo}>
           {captura}
         </Zona>
+        {/* Declara la acción de la barra sin zona propia — ver `accion`. */}
+        {accion}
 
         {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
         {!esActual && (

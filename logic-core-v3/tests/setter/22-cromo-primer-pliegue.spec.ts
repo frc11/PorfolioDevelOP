@@ -254,11 +254,25 @@ for (const { paso, lead } of PANTALLAS_DE_TRABAJO) {
     // §1 — el bloque de trabajo es la única tarjeta de la pantalla. Contra el
     // código viejo esto falla en las tres: las tres zonas eran `rounded-2xl
     // border bg`, y encima la instrucción era una cuarta.
-    await expect(
-      firstVisible(page.locator('main section[aria-label="Registro"]')),
-      `${paso} tiene bloque de trabajo`,
-    ).toBeVisible()
-    expect(await esTarjeta(page, 'Registro'), `${paso}: el trabajo lleva tarjeta`).toBe(true)
+    //
+    // P19 — `mr` es la excepción, y se afirma al revés (no se afloja): es la
+    // única pantalla cuya interacción entera es un botón, y desde P18 ese botón
+    // vive en la barra. La zona quedaba montando la tarjeta acentuada del bloque
+    // de trabajo alrededor de un párrafo sin un solo control adentro, así que se
+    // disolvió. Se exige que NO esté — si alguien la vuelve a montar vacía, esto
+    // se pone en rojo igual que si le sacara la tarjeta a las otras diez.
+    if (paso === 'mr') {
+      await expect(
+        page.locator('main section[aria-label="Registro"]'),
+        `${paso}: su única acción vive en la barra — no monta bloque de trabajo`,
+      ).toHaveCount(0)
+    } else {
+      await expect(
+        firstVisible(page.locator('main section[aria-label="Registro"]')),
+        `${paso} tiene bloque de trabajo`,
+      ).toBeVisible()
+      expect(await esTarjeta(page, 'Registro'), `${paso}: el trabajo lleva tarjeta`).toBe(true)
+    }
     for (const banda of ['Contexto del lead', 'Munición'] as const) {
       const tarjeta = await esTarjeta(page, banda)
       if (tarjeta === null) continue // la zona puede no renderizarse: sin contenido, no hay banda

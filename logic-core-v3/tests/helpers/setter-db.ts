@@ -200,6 +200,12 @@ export type SeedLeadOpts = {
   /** Fecha del próximo toque (pasada = vencido; null = sin toque agendado). */
   nextFollowUpAt?: Date | null
   /**
+   * P19 — Fecha de reactivación de un POSTERGADO (`lead.reactivateAt`). Pasada =
+   * la pausa ya venció y el lead vuelve a ser trabajo; futura = sigue pausado.
+   * Es el dato que separa las dos postergaciones que el `status` solo no separa.
+   */
+  reactivateAt?: Date | null
+  /**
    * Tildes del chequeo final ya guardados, por NOMBRE de hard-check. Pisa el
    * self-check que el stage traiga por default. `[]` = grilla en cero pero con
    * blob presente (distinto de `undefined` = sin `selfCheckJson`).
@@ -267,6 +273,7 @@ export async function createLead(tracker: SmokeTracker, opts: SeedLeadOpts): Pro
     data: {
       businessName,
       ...(opts.nextFollowUpAt !== undefined ? { nextFollowUpAt: opts.nextFollowUpAt } : {}),
+      ...(opts.reactivateAt !== undefined ? { reactivateAt: opts.reactivateAt } : {}),
       industry: opts.industry ?? 'gastronomia',
       zone: opts.zone ?? 'Centro',
       status: opts.status ?? 'PROSPECTO',

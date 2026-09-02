@@ -183,6 +183,10 @@ function input(overrides: Partial<DerivacionManualInput> = {}): DerivacionManual
     progreso: { completadas: [] },
     agenda: null,
     contactos: 0,
+    // P19 — Construcción de PRIMERA vuelta: sin pausa comercial y sin rechazo
+    // previo, así el agrupamiento mc1/mc2 se prueba sobre el camino normal.
+    postergadoVencido: false,
+    hayRechazo: false,
     followUpCount: 0,
     followUpVencido: false,
     finalUrl: null,

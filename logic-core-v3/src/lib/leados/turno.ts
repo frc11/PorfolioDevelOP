@@ -48,6 +48,17 @@ export type TurnoInput = {
    */
   finalUrl?: string | null
   /**
+   * P19 — `status = POSTERGADO` cuya reactivación YA venció. Discrimina las dos
+   * postergaciones que el status solo no separa: la vencida ya volvió a ser
+   * trabajo; la que tiene la fecha por delante es una espera con nombre propio.
+   *
+   * `undefined` = la superficie no lo proyecta (el panel de inicio arma sus
+   * conteos sin él). Igual que con `finalUrl`: ahí esa rama no se puede afirmar
+   * y no se afirma — la causa se cae a la que indique el resto del estado, que
+   * es la que esas superficies ya venían mostrando.
+   */
+  postergadoVencido?: boolean
+  /**
    * Si hay algo para hacer AHORA, según lo que el producto YA decidió: en el
    * panel es `HomeLead.accionable`; en el manual, que la pantalla derivada sea
    * de acción y no de estado. Este módulo TRADUCE esa decisión a un turno — no
@@ -80,6 +91,8 @@ export type CausaEspera =
   | 'linkPermanente'
   /** No es espera: hay algo trabado esperando al setter. */
   | 'accionPropia'
+  /** El propio setter pausó el contacto hasta una fecha que todavía no llegó. */
+  | 'postergacion'
   /** La conversación está del lado del negocio. */
   | 'respuesta'
 
@@ -102,6 +115,11 @@ export const TURNO_DE_CAUSA = {
   revision: 'franco',
   linkPermanente: 'franco',
   accionPropia: 'setter',
+  // La pelota está afuera igual que en `respuesta` —el turno no cambia—, pero el
+  // porqué sí: acá el contacto no está esperando una respuesta, está pausado por
+  // decisión del setter hasta una fecha. Comparten turno y no texto: es
+  // exactamente para lo que la causa se separó del turno.
+  postergacion: 'negocio',
   respuesta: 'negocio',
 } as const satisfies Record<CausaEspera, Turno>
 
@@ -123,10 +141,18 @@ export function causaDeEspera(input: TurnoInput): CausaEspera {
   // mandarlo a mirar Instagram por algo que ya llegó.
   if (input.stage === 'APROBADA' && input.finalUrl === null) return 'linkPermanente'
 
-  // 2) Algo quedó trabado esperándolo a él. No es espera: es trabajo detenido.
+  // 2) La pausa que puso el propio setter. Va antes de `accionPendiente` porque
+  //    es justamente la razón por la que HOY no hay acción: postergar es decidir
+  //    no tocar el lead hasta esa fecha. Y va después del bloque de Franco, que
+  //    sigue ganando: una demo en su cola no la destraba ninguna postergación.
+  if (input.status === 'POSTERGADO' && input.postergadoVencido === false) {
+    return 'postergacion'
+  }
+
+  // 3) Algo quedó trabado esperándolo a él. No es espera: es trabajo detenido.
   if (input.accionPendiente) return 'accionPropia'
 
-  // 3) Resto: la conversación está del lado del negocio.
+  // 4) Resto: la conversación está del lado del negocio.
   return 'respuesta'
 }
 
@@ -175,13 +201,13 @@ export const TEXTO_TURNO: Record<Turno, TextoTurno> = {
     chip: 'esperando al negocio',
     titulo: 'Le toca al negocio',
     detalle:
-      'Puede contestar hoy, en dos semanas o no contestar nunca — eso no lo manejás vos. Cuando toque un toque te lo traemos al foco; mientras tanto, trabajá otro negocio.',
+      'Puede contestar hoy, en dos semanas o no contestar nunca — eso no lo manejás vos. Cuando toque un toque vuelve a tu cola de trabajo; mientras tanto, trabajá otro negocio.',
   },
   franco: {
     chip: 'esperando a Franco',
     titulo: 'Le toca a Franco',
     detalle:
-      'Está de este lado y va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas — cuando lo resuelva, el negocio vuelve solo a tu foco.',
+      'Está de este lado y va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas — cuando lo resuelva, el negocio vuelve solo a tu cola de trabajo.',
   },
   setter: {
     chip: 'esperándote a vos',

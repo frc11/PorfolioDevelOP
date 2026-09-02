@@ -53,11 +53,13 @@
 // `check:invariant:copy-sin-jerga` (ninguna frase que el setter pueda leer
 // nombra un código de sprint ni una columna de la base — el mensaje que mataba
 // el último paso del recorrido decía «Setup B7.0 … calComUsername»).
+// 52 desde P19 («el paso que corresponde»): suma `check:invariant:paso-admitido`,
+// el barrido de las 373.248 combinaciones de la derivación del manual.
 // 51 desde el sprint de la ficha por fuentes: suma `check:invariant:ficha-bloques`
 // (el mapa campo→fuente no se despega del gate de señal mínima, el recorrido no
 // se saltea bloques, y el bloque de la web no puede tener campos obligatorios —
 // si los tuviera, un negocio sin web no podría dejar su veredicto).
-const INVARIANTES_ESPERADOS = 51;
+const INVARIANTES_ESPERADOS = 52;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

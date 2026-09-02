@@ -154,6 +154,11 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
             status: manual.leadStatus,
             stage: manual.stage,
             finalUrl: manual.finalUrl,
+            // P19 — La espera de un postergado tiene nombre propio. Sin este
+            // dato la pantalla caía en la causa del negocio y servía el estado
+            // de la cadencia: «Próximo toque el …», sobre un lead que el propio
+            // setter pausó hasta otra fecha.
+            postergadoVencido: manual.postergadoVencido,
             accionPendiente: false,
           })}
           proximoToque={manual.proximoToque}
@@ -187,14 +192,12 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
   // respondió y está esperando la demo. Null-safe: sin respuesta no renderiza.
   const encabezado =
     pantalla.tipo === 'reentrada' ? (
-      // La reentrada suma el recordatorio de qué preservó y qué reseteó el motor.
-      <div className="space-y-2">
-        {guiaRetrabajo}
-        <p className="px-1 text-xs leading-relaxed text-zinc-400">
-          Checklist y borrador quedaron como estaban — rehacé lo marcado en las fases y volvé a
-          pasar el chequeo final (se reseteó).
-        </p>
-      </div>
+      // P19 — El recordatorio de qué preservó y qué reseteó el motor vivía acá
+      // Y en el párrafo de la zona de trabajo, diciendo lo mismo dos veces a dos
+      // alturas distintas. Ahora lo dice UNA vez, en la instrucción de la
+      // pantalla (`PANTALLAS.mr.detalle`), que es donde el layout-tipo pone «de
+      // qué va esta tarea»; acá queda sólo el pedido de Franco.
+      guiaRetrabajo
     ) : esConstruccion ? (
       <>
         {guiaRetrabajo}
@@ -314,21 +317,17 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
                     // 5.6 — El re-loop necesita SU transición: reabrir la
                     // construcción (RECHAZADA→CONSTRUCCION, action intacta del
                     // wizard). Sin esto, el chequeo final queda futuro para siempre.
-                    captura: (
-                      <div className="space-y-3">
-                        {/* F2 — Antes prometía «el historial de rechazos se
-                            conserva», un historial que el setter no veía por
-                            ningún lado. Ahora las vueltas anteriores están en el
-                            bloque de arriba, y el texto dice lo que de verdad
-                            importa: el pedido te acompaña mientras corregís. */}
-                        <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
-                          Reabrí la construcción para rehacer lo que Franco marcó (lo tenés
-                          arriba). Después volvés a publicar el borrador y a pasar el chequeo
-                          final antes de reenviar — el pedido te sigue en cada pantalla.
-                        </p>
-                        <ReabrirConstruccion leadId={leadId} />
-                      </div>
-                    ),
+                    //
+                    // P19 — Y va como `accion`, no como `captura`: es lo único
+                    // que esta pantalla tiene para hacer, y desde P18 se pinta en
+                    // la barra. Dejarlo en el Registro montaba la tarjeta
+                    // acentuada del bloque de trabajo alrededor de un párrafo sin
+                    // un solo control adentro — la superficie que grita «acá se
+                    // trabaja» sobre nada que se pueda tocar. El párrafo que la
+                    // acompañaba decía la secuencia del retrabajo, y esa es la
+                    // instrucción de la pantalla: se mudó a `PANTALLAS.mr.detalle`,
+                    // donde se lee arriba del todo y sin tarjeta que la disfrace.
+                    accion: <ReabrirConstruccion leadId={leadId} />,
                   }
                 : pantalla.id === 'm13'
                   ? {

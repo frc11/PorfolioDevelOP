@@ -9705,3 +9705,230 @@ ningún caso se borró: los 12 siguen en verde. El mismo par de correcciones se 
   evite: o hay banda, o m4 conserva 8 px de borde de textarea dentro del pliegue.
 - **Y la pregunta de fondo:** ¿la barra hace que el producto se lea como una aplicación, o sólo
   agrega una franja? Es la que decide si el patrón sigue.
+
+---
+
+## Sprint P19 — EL PASO QUE CORRESPONDE: el barrido de la derivación — 2026-09-02
+
+**Base:** `fix/accion-a-la-vista` @ `66d7fe64` · **Rama:** `fix/paso-que-corresponde`
+
+La corrida del novato encontró tres lugares donde el producto señalaba mal. Los tres salían de la
+misma capa: la derivación que decide cuál es el paso actual de un lead. Y P18 los encareció a los
+tres — con la acción principal siempre visible, un paso actual equivocado dejó de ser una etiqueta al
+pasar: es una acción incorrecta permanentemente en pantalla, invitando a hacerla.
+
+El sprint no arregló los tres casos. Barrió el espacio entero.
+
+### El instrumento
+
+`scripts/qa-corridas/barrido-derivacion.ts` — recorre TODAS las combinaciones que
+`derivarPantalla` admite y, por cada una, compara qué pantalla señala contra cuál correspondería.
+
+Lo que hace que el barrido pueda estar en desacuerdo con algo es el oráculo. Vive aparte
+(`src/lib/leados/paso-admitido.ts`) y **no** es una segunda copia de `posicionDe`: cada condición
+sale del CONTRATO de la pantalla —su título en `PANTALLAS`: «Mandá el opener», «Agendá la reunión»—
+y de los gates REALES del motor (`gateBriefAbierto`, `gateEnvioDemo`, `reunionAgendada`,
+`cadenciaInfo`), que no se tocan ni se reimplementan. La precedencia (cierre → revisión → pausa
+comercial → trabajo) es la que el panel de inicio ya aplica en `grupoPara`. Un oráculo derivado de la
+rama que eligió la pantalla habría coincidido siempre.
+
+**373.248 combinaciones.** Doce ejes: stage (9) × status (8) × postergación (3, sólo cruzada con
+POSTERGADO) × caliente × borrador × link final × demo enviada × progreso (6, con un caso NO-prefijo)
+× toque vencido × contactos × cadencia (3) × rechazo previo.
+
+| | antes | después |
+|---|---|---|
+| señalan una pantalla que su estado NO admite | **41.376** (11,1 %) | **10.368** (2,8 %) |
+| …de ésas, como PASO DE AHORA (badge «Tu paso ahora» + acción en la barra) | **29.856** | **0** |
+| …de ésas, aterrizaje terminal (sin acción, badge «Completada») | 11.520 | 10.368 |
+| clases distintas de desacuerdo | 23 | 7 (todas la misma, declarada) |
+
+### Las dos preguntas del barrido
+
+**¿El paso actual de un lead postergado depende de la fecha?** **No, y no podía.** El barrido lo
+midió sin leer código: fijando todo salvo el status, **POSTERGADO daba la misma pantalla que
+PROSPECTO en los 20.736 escenarios**. La fecha ni siquiera llegaba a la derivación —
+`DerivacionManualInput` no tenía el campo—, así que un lead pausado hasta dentro de una semana
+mostraba el paso de trabajo que le tocara por su stage. **Ese es el defecto de fondo, no un caso:**
+«Agendá la reunión» era sólo el stage en el que la corrida se topó con él. Después del arreglo,
+POSTERGADO difiere de PROSPECTO en **31.008 de 41.472** escenarios.
+
+**¿Hay combinaciones que caen en un default?** Sí, y el barrido las nombra. `posicionDe` consulta el
+`status` en UNA sola rama explícita (`PERDIDO` → archivo) y de refilón a través de los gates. Medido:
+`DEMO_ENVIADA`, `VIO_VIDEO` y `POSTERGADO` diferían de `PROSPECTO` en **0** escenarios cada uno —
+caían enteros al `switch` por stage. Ese pasaje silencioso es de donde salen los tres defectos de la
+corrida.
+
+### Lo que se arregló, y de fondo
+
+**① La postergación (15 clases, 14.928 estados, TODOS activos).** `DerivacionManualInput` recibe
+`postergadoVencido` — mismo nombre, mismo cálculo y mismo reloj del caller que `HomeLeadInput`. No es
+un dato nuevo: `_data.ts` ya lo calculaba **tres líneas más arriba** de la llamada, sólo que para la
+cabecera. La rama corta por status junto a la de `PERDIDO`, con la precedencia del panel: el cierre
+por stage (DESCARTADA) y la cola de Franco (EN_REVISION) ganan sobre la pausa.
+
+Esas dos exclusiones no estaban en el primer intento: **el barrido las encontró ya introducidas**. La
+primera versión mandaba a `espera` a un descartado postergado y a una demo en revisión — 9.216
+estados nuevos, en rojo, en la corrida siguiente.
+
+Y la espera tiene ahora causa propia (`turno.ts` suma `postergacion`, turno `negocio`): sin ella la
+pantalla decía «Le toca al negocio» y servía el estado de la cadencia —«Próximo toque el …»— sobre un
+lead que el propio setter pausó hasta otra fecha. Se habría cambiado una señal mala por otra.
+
+**② «Reabrir construcción» aterrizaba en el chequeo final.** El re-loop preserva el checklist y el
+borrador a propósito; la derivación leía esos seis tildes de la vuelta ANTERIOR como progreso de
+ésta, y saltaba al último paso sin que se hubiera rehecho nada. La pantalla de correcciones promete
+«rehacé → publicá → chequeá» y la derivación mandaba al tercero.
+
+El discriminador ya existía y es exacto, no aproximado: `hayRechazo`. `rechazos` sólo se appendea en
+EN_REVISION→RECHAZADA y el único camino de vuelta a CONSTRUCCION es el re-loop, así que
+*CONSTRUCCION + rechazo ⟺ vuelta de retrabajo en curso*. No hizo falta ninguna navegación nueva: con
+`actual = mc1`, la guardia de la página redirige `mr → mc1` sola.
+
+**③ «Aparece en tu foco» sobre un lead que no aparece.** El foco es UNO —la cima de la cola
+`trabajar`, `seleccionarFoco`— y un lead recién cargado entra en el tier `EVALUAR` (tercero de cinco)
+y último de su tier por antigüedad: con cualquier otro accionable encima, no aparece. La frase no se
+puede garantizar, así que cambió por la que sí se cumple siempre: **entra a tu cola**, y el foco lo
+trae cuando le toque. Cuatro sitios, no dos — la misma promesa vivía también en los textos de turno.
+
+| dónde | antes | ahora |
+|---|---|---|
+| `setter/nuevo` (bajada) | «y aparece en tu foco para que lo evalúes» | «entra a tu cola de trabajo y el foco te lo trae cuando le toque el turno» |
+| import CSV (reporte) | «ya aparecen en tu foco para evaluarlos» | «el foco te los va trayendo de a uno, por orden» |
+| `TEXTO_TURNO.negocio` | «te lo traemos al foco» | «vuelve a tu cola de trabajo» |
+| `TEXTO_TURNO.franco` | «vuelve solo a tu foco» | «vuelve solo a tu cola de trabajo» |
+| `estado-manual` (próximo toque) | «el foco te lo trae cuando llegue» | «vuelve a tu cola de trabajo cuando llegue» |
+
+### Lo que apareció además de los tres
+
+**La reunión ya agendada (7 clases, 10.368 estados).** Un APROBADA con la demo enviada y la reunión
+reservada aterriza en `m16`, cuyo título dice «Agendá la reunión». **Declarado, no arreglado**, y con
+motivo: es un aterrizaje TERMINAL —`habilitadas` viene vacía, el badge dice «Completada», ninguna
+acción llega a la barra— y el cuerpo de la pantalla renderiza el resumen del traspaso, que es
+correcto. Mudarlo a `espera` haría que `causaDeEspera` —que no mira la agenda— dijera «Le toca al
+negocio» sobre un lead con reunión reservada: se cambiaría una señal floja por una falsa. Queda
+declarado uno por uno en `paso-admitido.invariant.ts`, y el invariante **exige que siga ocurriendo**:
+una excepción que ya no pasa es una declaración que miente.
+
+**Y una que el barrido descartó:** `ficha` está en `DerivacionManualInput` y ninguna rama de la
+derivación de posición la lee. No se tocó (la consumen las pantallas), pero queda anotado.
+
+### La zona vacía de correcciones — se disuelve
+
+P18 se llevó el botón de `mr` a la barra y dejó la tarjeta acentuada del bloque de trabajo con un
+párrafo solo. **Decisión: disolverla.** Tres razones, y la tercera es la que decide:
+
+1. El `Registro` es, por contrato del layout-tipo, la ÚNICA zona con tarjeta y el único acento de la
+   pantalla. Es la superficie con la que el producto dice «acá se trabaja». Sobre un párrafo gris, es
+   el énfasis más fuerte posible sobre el contenido más débil posible.
+2. Lo que quedaba adentro no era un registro: era la secuencia del retrabajo. Eso es la INSTRUCCIÓN
+   de la pantalla, y se mudó a `PANTALLAS.mr.detalle`, donde se lee arriba del todo y sin tarjeta.
+   De paso absorbió el párrafo del encabezado, que decía lo mismo a otra altura.
+3. **Después de ① y ②, la explicación ya no hace falta.** El párrafo compensaba que el aterrizaje
+   fuera mentira. Ahora reabrir aterriza donde dice, y la frase describe lo que pasa.
+
+`mr` es la única pantalla cuya interacción entera es un botón, así que el declarador de la acción
+(`ReabrirConstruccion`, que no renderiza nada) se monta por una prop nueva y explícita —
+`PantallaManual.accion`—, hermana de las zonas. **Nada se perdió:** la acción sigue visible arriba y
+abajo, y `mr` GANÓ pliegue (1440: 1250 → 1140 px de alto total, y pasa a tener algo accionable dentro
+del primer pliegue; 390: 1577 → 1397).
+
+### La medición del pliegue — antes y después
+
+| | antes | después |
+|---|---|---|
+| 1440 · entra algo accionable en el pliegue | 7/14 | **8/14** |
+| 1440 · acción principal a la vista (arriba · abajo · SIEMPRE) | 9/9 · 9/9 · 9/9 | 9/9 · 9/9 · 9/9 |
+| 1440 · cromo del layout-tipo | 355–375 | 355–375 |
+| 390 · entra algo accionable en el pliegue | 4/14 | 4/14 |
+| 390 · acción principal a la vista | 9/9 · 9/9 · 9/9 | 9/9 · 9/9 · 9/9 |
+| 390 · cromo | 366–447 | 366–447 |
+| censo de las 14 (los dos anchos) | `copiar=11 · linksExternos=6 · linksInternos=63 · pendientes=6 · controles=65 · plegables=38` | idéntico |
+
+Ninguna pantalla perdió su accionable. El denominador de «pantallas de TRABAJO con captura» baja de
+11 a 10 porque `mr` dejó de tener zona de captura — es el cambio, no una pérdida.
+`docs/baselines/p19-pliegue-{antes,despues}.json`.
+
+### El invariante
+
+**`npm run check:invariant:paso-admitido`** — ninguna combinación señala como PASO DE AHORA una
+pantalla cuya tarea su estado no admite. Corre las 373.248 sin DB.
+
+Cuatro dientes contra el verde vacío: §1 piso de seis cifras en el barrido; §2 toda pantalla del
+registro se señala en algún estado; §3 **conducta/sabotaje** — al censo se le pasan derivaciones
+torcidas a propósito y se exige que las vea, y una de las dos es LITERALMENTE el comportamiento de
+antes del sprint (ignorar la postergación); §4 la excepción terminal se declara una por una y se
+exige viva.
+
+**Demostrado en rojo contra `66d7fe64`:** con `manual.ts` revertido al base, el invariante falla
+enumerando las 15 clases (`null/POSTERGADO/futuro → m1`, `BRIEF/POSTERGADO/futuro → mc1`,
+`APROBADA/POSTERGADO/futuro → m16`, …).
+
+Alcance honesto: el invariante cubre ① (la admisión). ② no lo cubre — `m14` en CONSTRUCCION con
+borrador ES una pantalla que el estado admite; lo que estaba mal era la INTENCIÓN del control, no la
+admisión. Eso lo fija el test §3.
+
+### Las pruebas
+
+**Nueva:** `tests/setter/24-paso-que-corresponde.spec.ts` — 5 casos, todos por VISIBILIDAD.
+**Contra el código viejo (build completo del base) fallan 4 de 5:** §1 (aterriza en `mc1` en vez de
+`espera`), §3 (aterriza en `m14`), §4 (la zona existe con un párrafo), §5 (la bajada promete el foco).
+
+**§2 pasa contra el viejo, y es correcto que pase:** afirma que un postergado VENCIDO sí señala
+trabajo, que es lo que el código viejo hacía con todos. Es la mitad de control del par — sin ella,
+§1 lo satisfaría un arreglo que mande a `espera` a todo POSTERGADO, vencido o no. **Que discrimina
+está medido:** contra ese arreglo por status, el vencido da `espera` en vez de `mc1`, y §2 se pone
+rojo. La red completa es §1 + §2.
+
+**Adaptada:** `22-cromo-primer-pliegue.spec.ts` (P17). `mr` pasa a afirmarse **al revés y de forma
+positiva** — se exige que NO monte bloque de trabajo. No se aflojó nada: si alguien vuelve a montar
+la zona vacía, esto se pone en rojo igual que si le sacara la tarjeta a las otras diez. Los otros 10
+casos intactos.
+
+**Adaptados por el compilador:** los cuatro fixtures de invariante que arman un `DerivacionManualInput`
+(el campo es requerido a propósito: un caller que no lo pase no compila). `enlaces-manual.invariant.ts`
+suma los dos ejes nuevos y pasa de 6.912 a 27.648 estados barridos — sin ellos habría seguido en
+verde sin visitar ninguna de las dos ramas nuevas.
+
+**Y el censo de `aprobada-sin-link` lo atrapó al vuelo:** `paso-admitido.ts` apareció como candidato a
+sexta superficie y exigió su entrada. La tiene: `admitePantalla('m15')` distingue el aprobado con
+link del aprobado sin link llamando a `gateEnvioDemo`, no re-derivándolo. Sin esa entrada, el
+oráculo podría haber admitido «Mandá el link» sobre un link que no existe.
+
+### Nada del grafo se tocó
+
+`git diff 66d7fe64 -- src/lib/leados/dossier-stage.ts src/lib/leados/dossier.ts src/lib/leados/flow.ts`
+sale **vacío**. `LEGAL_TRANSITIONS` intacto, ningún gate tocado, ningún campo de schema, ninguna
+llave de datos: los dos campos nuevos de la derivación se calculan de lo ya persistido
+(`lead.reactivateAt` y `dossier.rechazos`), y los dos ya se leían en `_data.ts`.
+
+### Fuera de alcance, anotado
+
+- **«Le toca al negocio» sobre un lead que pausó el setter.** El turno es correcto (no hay nada del
+  lado del setter ni del de Franco) y la causa lo aclara en la línea de abajo, pero el titular no
+  nombra al que decidió la pausa. Un cuarto turno es otro sprint.
+- **El límite del re-loop, y es de datos:** el producto no registra QUÉ correcciones se aplicaron, así
+  que mientras la vuelta siga abierta el paso señalado sigue siendo la construcción. No se inventó el
+  dato. Las salidas están: mc2, borrador y chequeo alcanzables, y el pie de Construcción sirve el
+  enlace directo al chequeo.
+- **`ficha` es un campo muerto en la derivación de posición.**
+- Los otros cuatro baches de la corrida (carrera de tildes, la pantalla que no acompaña al dato, la
+  aglomeración de novedades, la novedad caducada) no se tocaron.
+
+### Para la verificación humana
+
+- **Que el paso que el producto señala sea el que vos harías.** La derivación ahora es consistente —
+  eso está probado. Que elija bien lo dice el criterio, no el barrido.
+- **El titular de la espera de un postergado.** Capturas en `docs/proof-screenshots/p19/`.
+- **Si el aterrizaje del re-loop en `mc1` molesta tarde en la vuelta.** Es el precio declarado de no
+  inventar el dato de «correcciones aplicadas».
+
+### El cierre
+
+`tsc --noEmit` **exit 0** · invariantes **51/51 verdes** (52 descubiertos, 1 excluido; el piso de
+`run-invariants.mjs` sube 51 → 52 en este mismo commit) · `test:leados` **33/33** ·
+`test:helpers` **26/26** · `test:setter` **139/139** · `npm run build` **verde** ·
+`prisma migrate status` **«Database schema is up to date!»**, sin drift.
+
+Baselines del sprint: `docs/baselines/p19-barrido-{antes,despues}.json` y
+`docs/baselines/p19-pliegue-{antes,despues}.json`. Capturas: `docs/proof-screenshots/p19/`.

@@ -85,7 +85,7 @@ export function EstadoManual({
       ? `Toques: ${Math.min(cadencia.toquesHechos, PLANTILLAS_FOLLOW_UP.length)} de ${PLANTILLAS_FOLLOW_UP.length}`
       : null
   const situacionDelNegocio = proximoToque
-    ? `Próximo toque el ${formatFechaCorta(proximoToque)}${toques ? ` · ${toques}` : ''} — el foco te lo trae cuando llegue.`
+    ? `Próximo toque el ${formatFechaCorta(proximoToque)}${toques ? ` · ${toques}` : ''} — vuelve a tu cola de trabajo cuando llegue.`
     : cadencia.agotada
       ? `${toques ?? 'Sin toques registrados'} — la cadencia se completó: no queda otro toque para mandar. Si no respondió, el lead se enfría y el cierre lo decide Franco.`
       : `Sin próximo toque agendado${toques ? ` · ${toques}` : ''} — si contesta, registralo y el flujo sigue solo.`

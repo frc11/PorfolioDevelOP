@@ -56,6 +56,7 @@ import {
   type HomeLeadInput,
 } from './flow.ts'
 import { derivarPantalla, type DerivacionManualInput } from './manual.ts'
+import { admitePantalla } from './paso-admitido.ts'
 import { causaDeEspera, turnoDelLead, FALTA_LINK_PERMANENTE } from './turno.ts'
 
 const CON_LINK = 'https://demo-final.example.com'
@@ -97,6 +98,10 @@ function leadManual(finalUrl: string | null, respondio: boolean): DerivacionManu
     stage: 'APROBADA',
     status: respondio ? 'RESPONDIO' : 'PROSPECTO',
     caliente: false,
+    // P19 — El censo mide el borde `finalUrl`; ni la pausa comercial ni el
+    // re-loop entran en juego con este status/stage.
+    postergadoVencido: false,
+    hayRechazo: false,
     ficha: null,
     draftUrl: 'https://borrador.example.com',
     progreso: { completadas: [] },
@@ -222,6 +227,19 @@ const CENSO: readonly Derivacion[] = [
     conLink: 'm15',
     sinLink: 'espera',
   },
+  {
+    // P19 — La SEXTA que el censo estaba esperando, y llegó como oráculo: el
+    // módulo que decide si el estado admite la tarea de una pantalla. Si
+    // admitiera «Mandá el link» sin link cargado, `paso-admitido.invariant.ts`
+    // dejaría pasar en verde exactamente la derivación que este censo prohíbe.
+    // No re-deriva el gate: llama a `gateEnvioDemo`, el del motor.
+    id: 'admision-envio',
+    donde: 'paso-admitido.ts · admitePantalla(«m15»)',
+    decide: 'si el oráculo del paso señalado da por hacible «Mandá el link al negocio»',
+    derivar: (finalUrl) => admitePantalla('m15', leadManual(finalUrl, true)).admite,
+    conLink: true,
+    sinLink: false,
+  },
 ]
 
 const ids = CENSO.map((entrada) => entrada.id)
@@ -320,6 +338,7 @@ const ARCHIVOS_CENSADOS: readonly string[] = [
   'src/lib/leados/guidance-content.ts',
   'src/lib/leados/home.ts',
   'src/lib/leados/manual.ts',
+  'src/lib/leados/paso-admitido.ts',
   'src/lib/leados/paso.ts',
   'src/lib/leados/turno.ts',
 ]

@@ -27,10 +27,16 @@ export default async function NuevoProspectoPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
+      {/* P19 — La bajada decía «aparece en tu foco». El foco es UNO solo (la
+          cima de la cola `trabajar`, `seleccionarFoco`), y un lead recién
+          cargado entra en el tier EVALUAR —tercero de cinco— y último de su
+          tier por antigüedad: con cualquier otro lead accionable encima, no
+          aparece. Ahora se dice lo que sí pasa siempre — entra a la cola, y el
+          foco lo trae cuando le toque. */}
       <PageHeader
         eyebrow="LeadOS"
         title="Cargar un prospecto"
-        description="Un negocio que encontraste vos. Arranca en Ficha, como cualquier otro — y aparece en tu foco para que lo evalúes."
+        description="Un negocio que encontraste vos. Arranca en Ficha, como cualquier otro — entra a tu cola de trabajo y el foco te lo trae cuando le toque el turno."
         icon={UserPlus}
       />
       <NuevoProspectoForm nombresExistentes={nombresExistentes} />

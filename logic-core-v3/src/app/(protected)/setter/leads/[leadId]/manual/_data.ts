@@ -222,6 +222,13 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     contactos,
     followUpCount,
     followUpVencido,
+    // P19 — El estado de la postergación, que hasta acá se calculaba tres líneas
+    // más arriba SOLO para la cabecera: la derivación no lo recibía y por eso un
+    // lead pausado seguía mostrando el paso de trabajo de su stage.
+    postergadoVencido,
+    // P19 — Un rechazo en el dossier: en CONSTRUCCION es la marca del re-loop
+    // (checklist tildado de la vuelta anterior). Ya está parseado arriba.
+    hayRechazo: rechazos.ultimo !== null,
     finalUrl: dossier?.finalUrl ?? null,
     demoEnviada: Boolean(dossier?.enviadaAt),
   })

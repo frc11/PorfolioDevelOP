@@ -265,7 +265,13 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'reentrada',
     fase: 'construccion',
     titulo: 'Aplicá las correcciones de Franco',
-    detalle: 'La nota del rechazo al frente — checklist y borrador quedan como estaban; el chequeo final se resetea.',
+    // P19 — Absorbe el párrafo que quedó suelto en la zona de trabajo cuando P18
+    // se llevó el botón a la barra. Y cambia lo que promete: hasta este sprint
+    // decía «después volvés a publicar y a pasar el chequeo» mientras la
+    // derivación aterrizaba DIRECTO en el chequeo. Ahora reabrir aterriza en la
+    // construcción, y la frase describe lo que de verdad pasa.
+    detalle:
+      'Reabrí y rehacé lo que marcó: aterrizás en la construcción, con el checklist y el borrador como estaban y el pedido a la vista en cada pantalla. Después republicás el borrador y volvés a pasar el chequeo final, que se reseteó.',
     corto: 'Correcciones',
   },
   espera: {
@@ -352,6 +358,31 @@ export type DerivacionManualInput = {
   followUpCount: number
   /** El toque agendado ya venció (nextFollowUpAt <= ahora) — reloj del caller. */
   followUpVencido: boolean
+  /**
+   * P19 — La POSTERGACIÓN comercial ya venció (`status = POSTERGADO` y
+   * `reactivateAt <= ahora`). Mismo nombre, mismo cálculo y mismo reloj del
+   * caller que `HomeLeadInput.postergadoVencido`, del que sale la decisión del
+   * panel de inicio.
+   *
+   * Sin este campo la derivación no podía distinguir un postergado VENCIDO —que
+   * ya volvió a ser trabajo— de uno con la fecha todavía por delante, porque el
+   * status solo dice que HAY una postergación, nunca cuándo termina. El barrido
+   * lo midió: cambiando únicamente el status, POSTERGADO daba la MISMA pantalla
+   * que PROSPECTO en los 20.736 escenarios, así que un lead pausado seguía
+   * mostrando el paso de trabajo que le tocara por stage («Agendá la reunión»,
+   * «Construí la demo», «Aplicá las correcciones»…). No es una fecha nueva: es
+   * el mismo dato que la cabecera de estas pantallas YA muestra.
+   */
+  postergadoVencido: boolean
+  /**
+   * P19 — El dossier tiene al menos un rechazo de Franco (`dossier.rechazos`).
+   * En CONSTRUCCION equivale a «esta vuelta es un re-loop», y no por
+   * aproximación: el único camino a CONSTRUCCION con rechazos registrados es
+   * RECHAZADA→CONSTRUCCION (`reabrirConstruccion`). Distingue el checklist
+   * TILDADO DE LA VUELTA ANTERIOR —que el re-loop preserva a propósito— del
+   * progreso de la vuelta en curso.
+   */
+  hayRechazo: boolean
   /** URL permanente que registra el admin al aprobar (gate del envío). */
   finalUrl: string | null
   /** La demo aprobada ya se envió (dossier.enviadaAt). */
@@ -495,6 +526,33 @@ function posicionDe(
   if (input.status === 'PERDIDO') {
     return { actual: 'archivo', habilitadas: [] }
   }
+  // P19 — PAUSA COMERCIAL vigente: postergado a una fecha que todavía no llegó.
+  // Va acá arriba, junto al otro corte por status, porque es la MISMA precedencia
+  // que el panel de inicio ya aplica (`grupoPara` decide por status antes que por
+  // stage: POSTERGADO no vencido → «seguimiento», y `proximaAccionPara` lo
+  // devuelve `accionable: false`). Sin esta rama el manual derivaba solo por
+  // stage y le proponía al setter el trabajo que le tocara —construir, corregir,
+  // agendar— sobre un negocio que él mismo decidió no tocar hasta esa fecha.
+  //
+  // `m5` queda alcanzable por la misma razón que en el resto de las esperas: la
+  // respuesta puede llegar antes de la fecha y hay que poder registrarla (y ese
+  // registro es, además, lo que saca al lead de la pausa). Las completadas
+  // siguen navegables como en cualquier otra pantalla.
+  //
+  // La PRECEDENCIA es la del panel (`grupoPara`) y la de la causa de espera
+  // (`causaDeEspera`), no una nueva: el cierre por stage (DESCARTADA) y la cola
+  // de Franco (EN_REVISION) ganan sobre la pausa. Sin esas dos exclusiones un
+  // descartado postergado aterrizaba en «espera» en vez del archivo, y una demo
+  // en revisión decía «esperá al negocio» mientras la pelota la tenía Franco —
+  // los dos los encontró el barrido de este mismo sprint, ya introducidos.
+  if (
+    input.status === 'POSTERGADO' &&
+    !input.postergadoVencido &&
+    stage !== 'DESCARTADA' &&
+    stage !== 'EN_REVISION'
+  ) {
+    return { actual: 'espera', habilitadas: ['espera', 'm5'] }
+  }
   const gateAbierto = gateBriefAbierto(input.status, input.caliente)
   const openerPendiente = stage === 'EVALUADA' && !gateAbierto && input.contactos === 0
   const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)
@@ -548,9 +606,29 @@ function posicionDe(
       const primeraFase = FASE_IDS.find(
         (fase) => !input.progreso.completadas.includes(fase),
       )
+      // P19 — El re-loop reabre una construcción cuyo checklist quedó TILDADO
+      // de la vuelta anterior (`reabrirConstruccion` preserva checklist y
+      // borrador a propósito: son el punto de partida del retrabajo). Leer esos
+      // tildes como progreso DE ESTA vuelta hacía que «Reabrir construcción»
+      // aterrizara en el chequeo final —«Chequeá la demo antes de mandarla»—
+      // sin que se hubiera rehecho nada: la pantalla de correcciones promete
+      // «rehacer lo que Franco marcó, después publicar y después chequear», y la
+      // derivación mandaba directo al último paso de esa frase.
+      //
+      // Con un rechazo en el dossier la construcción reabierta arranca donde
+      // arranca el retrabajo: en la primera pantalla de Construcción. Nada se
+      // bloquea —mc2, el borrador y el chequeo siguen alcanzables, y el pie de
+      // Construcción sirve el enlace directo al chequeo—, y los seis tildes se
+      // conservan intactos (§6-3: auto-reporte, jamás gate).
+      //
+      // LÍMITE CONOCIDO, y es de datos: el producto no registra QUÉ correcciones
+      // se aplicaron, así que la derivación no puede saber cuándo el retrabajo
+      // terminó — mientras la vuelta siga abierta, el paso señalado sigue siendo
+      // la construcción. No se inventa el dato: se declara.
+      const reloop = enConstruccion && input.hayRechazo
       const actual: PantallaId = primeraFase
         ? pantallaDeFaseConstruccion(primeraFase)
-        : enConstruccion
+        : enConstruccion && !reloop
           ? input.draftUrl
             ? 'm14'
             : 'm13'

@@ -448,7 +448,7 @@ async function medir(
 async function main() {
   const { prisma } = await import('../../src/lib/prisma')
   const { derivarPantalla } = await import('../../src/lib/leados/manual')
-  const { parseFicha, parseProgreso, parseAgenda } = await import(
+  const { parseFicha, parseProgreso, parseAgenda, parseRechazos } = await import(
     '../../src/lib/leados/flow'
   )
   const { countFollowUps } = await import('../../src/lib/follow-up')
@@ -467,6 +467,12 @@ async function main() {
       status: true,
       caliente: true,
       nextFollowUpAt: true,
+      // P19 — Los dos datos que la derivación estrenó: la fecha de la
+      // postergación (que decide si el lead está pausado) y el historial de
+      // rechazos (que marca la construcción reabierta). Se leen acá por lo mismo
+      // que el resto: el reparto pantalla→lead sale de `derivarPantalla`, y sin
+      // estos campos mediría un reparto que la app ya no produce.
+      reactivateAt: true,
       dossier: {
         select: {
           stage: true,
@@ -476,6 +482,7 @@ async function main() {
           fichaJson: true,
           progresoJson: true,
           agendaJson: true,
+          rechazos: true,
         },
       },
       activities: { select: { result: true, createdAt: true } },
@@ -507,6 +514,11 @@ async function main() {
         followUpVencido: l.nextFollowUpAt
           ? l.nextFollowUpAt.getTime() <= ahora
           : false,
+        postergadoVencido:
+          l.status === 'POSTERGADO' &&
+          l.reactivateAt !== null &&
+          l.reactivateAt.getTime() <= ahora,
+        hayRechazo: parseRechazos(l.dossier?.rechazos ?? null).length > 0,
         finalUrl: l.dossier?.finalUrl ?? null,
         demoEnviada: Boolean(l.dossier?.enviadaAt),
       }),

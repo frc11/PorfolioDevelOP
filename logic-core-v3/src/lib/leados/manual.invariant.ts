@@ -48,6 +48,10 @@ function input(
     contactos: 0,
     followUpCount: 0,
     followUpVencido: false,
+    // P19 — El lead mínimo no está pausado ni viene de un rechazo; los casos que
+    // ejercitan esas ramas los fija el override.
+    postergadoVencido: false,
+    hayRechazo: false,
     finalUrl: null,
     demoEnviada: false,
     ...overrides,

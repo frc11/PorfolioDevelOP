@@ -229,7 +229,16 @@ const STATUSES: LeadStatus[] = [
   'POSTERGADO',
 ]
 
-/** Todos los estados que la derivación distingue, barridos exhaustivamente. */
+/**
+ * Todos los estados que la derivación distingue, barridos exhaustivamente.
+ *
+ * P19 sumó dos ejes, y no por completitud: son los dos que estrenaron rama
+ * propia en `posicionDe`. `postergadoVencido` corta por status ANTES del stage
+ * (un lead pausado aterriza en `espera`) y `hayRechazo` cambia el aterrizaje de
+ * la construcción reabierta — dos destinos nuevos que los enlaces declarados
+ * tienen que seguir alcanzando. Sin los ejes, el barrido pasaba en verde sin
+ * haber visitado ninguna de las dos.
+ */
 function* estados(): Generator<DerivacionManualInput> {
   const progresos: FaseId[][] = [[], [...FASE_IDS], [FASE_IDS[0]!]]
   for (const stage of STAGES) {
@@ -240,10 +249,14 @@ function* estados(): Generator<DerivacionManualInput> {
             for (const demoEnviada of [false, true]) {
               for (const completadas of progresos) {
                 for (const followUpVencido of [false, true]) {
+                 for (const postergadoVencido of [false, true]) {
+                  for (const hayRechazo of [false, true]) {
                   yield {
                     stage,
                     status,
                     caliente,
+                    postergadoVencido,
+                    hayRechazo,
                     ficha: fichaConSenal,
                     draftUrl,
                     progreso: { completadas },
@@ -254,6 +267,8 @@ function* estados(): Generator<DerivacionManualInput> {
                     finalUrl,
                     demoEnviada,
                   }
+                  }
+                 }
                 }
               }
             }
