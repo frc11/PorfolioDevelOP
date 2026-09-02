@@ -105,17 +105,19 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  * `--color-borde-fuerte` y da 4,62:1 sobre el oscuro. El invariante recalcula
  * los tres números y afirma que no hay ni `text-acento` ni `border-acento`.
  *
- * ── Nada es clickeable, y es una decisión ─────────────────────────────────
+ * ── Los tres nombres SÍ son clickeables, y el porqué cambió (V3-D) ────────
  *
- * No hay página de caso para ninguno de los tres, y las URLs de los clientes no
- * se inventan. Quedaba `href="#trabajos"`, que es un enlace que existe y no
- * lleva a ningún lado: tres paradas de tabulación que no hacen nada es peor que
- * ninguna. Así que la sección **no tiene un solo control**, no tiene un solo
- * `hover:` y no tiene ningún `div` haciendo de botón. La métrica no necesitaba
- * el hover: la referencia la revela al pasar el puntero, y acá va **siempre
- * visible**, porque esconder la métrica es esconder el pedido a Franco. El día
- * que haya páginas de caso, cada tarjeta pasa a ser un `CtaEnlace` y el énfasis
- * de hover se agrega con su `focus-visible:` gemela.
+ * La sección no tenía un solo control y la razón era exacta: *"no hay página de
+ * caso, y las URLs de los clientes no se inventan"*. **Ya no hay que
+ * inventarlas**: los tres dominios de producción llegaron —no estaban en el
+ * repo ni en su historial— y viven en `proyectos[].enlace`. Desapareció la
+ * premisa y con ella la decisión: el `h3` de cada proyecto es un `<a>` al sitio.
+ *
+ * Lo que NO cambió: **cero `hover:`**, y por lo tanto cero `focus-visible:` —
+ * van de a pares y siguen los dos en cero. El anillo de foco del tema cubre la
+ * parada de tabulación; el énfasis de puntero queda pedido, no escrito suelto.
+ * Y la métrica sigue **siempre visible y AFUERA del enlace**: adentro entraría
+ * en su nombre accesible.
  */
 
 /**
@@ -129,27 +131,25 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
 export const GEOMETRIA = {
   captura: {
     /**
-     * 1600 × 800, o sea **2:1 apaisado** — [decidido, con razón].
+     * 1920 × 1080, o sea **16:9** — [MEDIDO SOBRE LOS ARCHIVOS, V3-D].
      *
-     * Una captura de sitio es apaisada; la pregunta es cuánto. 16:10 sería el
-     * viewport ENTERO de un portátil, y una vitrina no muestra la página
-     * entera: muestra el pliegue. 1600 × 800 es literalmente eso —un ancho de
-     * trabajo de escritorio recortado a lo que se ve sin scrollear— así que los
-     * dos números salen de la misma medida y no de una proporción elegida.
+     * Decía `1600 × 800` (2:1) con un buen argumento —el pliegue, y que tres
+     * cajas 2:1 apiladas miden menos— **y las capturas llegaron en 16:9**. Con
+     * la relación declarada distinta de la del archivo, el navegador reserva
+     * 2:1, carga 16:9 y la caja CRECE: el salto de layout que declarar las
+     * dimensiones existe para evitar, producido por la declaración misma. Tiene
+     * que ser la del archivo, y el invariante lo comprueba abriéndolos.
      *
-     * Tiene además una consecuencia de layout que decide el empate: esta
-     * sección está pinneada a UNA pantalla, y tres cajas 16:10 apiladas miden
-     * un 25 % más que tres cajas 2:1. La relación más apaisada es la que hace
-     * que el tramo compacto entre.
-     *
-     * 1600 es el ARCHIVO que se pide, no una caja de pantalla: la caja más
-     * grande que produce esta composición es un tercio del tope de 1920, o sea
-     * ~640 px de CSS, y 1600 la cubre con margen para densidad alta sin pasarse
-     * del candidato de 1920 de la escalera de Next. Con `fuente={null}` hoy sólo
-     * se usa la relación; el día de la captura ya está el ancho pedido.
+     * **No se recorta a 2:1**: recortar una captura le saca justo la parte que
+     * prueba que el sitio existe entero — en la de Esquina, los 120 px que
+     * sobran llevan el pie con el crédito. Cuesta **12,5 % de alto** por caja
+     * (h = w/2 pasa a h = 9w/16) y no aprieta en ninguna rama: arriba de 1025 la
+     * pila es de UNA tarjeta por plano, y abajo cada proyecto tiene su
+     * `min-h-svh`. 1920 es el ARCHIVO, no una caja: la más grande de esta
+     * composición es un tercio del tope de 1920 —~640 px de CSS—.
      */
-    ancho: 1600,
-    alto: 800,
+    ancho: 1920,
+    alto: 1080,
     /**
      * Los porcentajes del `sizes`, y **por qué el corte es 1025 y no 768**.
      *

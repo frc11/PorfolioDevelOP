@@ -44,6 +44,7 @@ import {
   numerosDe,
   textosDe,
 } from '../../_secciones/_contrato/marcadores'
+import { NOMBRES_REALES } from '../../_secciones/_contrato/escaneo'
 import { entradasColgadas, pedidoPorClase, type EntradaDePedido } from '../../_secciones/_contrato/pedido'
 import { MODULOS_DE_S5 as REGISTRO } from './s5-modulos'
 
@@ -235,7 +236,7 @@ for (const { id, contenido, pedido } of REGISTRO) {
 
 controlPositivo(
   'el detector ve una entrada del pedido que apunta a una ruta inexistente',
-  { contenido: { titular: 'x' }, pedido: [{ ruta: 'bajada', clase: 'prosa' as const, marcador: null, que: 'la bajada', formato: 'texto plano' }] },
+  { contenido: { titular: 'x' }, pedido: [{ ruta: 'bajada', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'la bajada', formato: 'texto plano' }] },
   (caso: { contenido: unknown; pedido: readonly EntradaDePedido[] }) =>
     entradasColgadas(caso.contenido, caso.pedido).length === 0,
 )
@@ -255,10 +256,21 @@ titulo('8 · Los nombres que SÍ son verdad sobreviven')
  * que comprobar que sigue estando — un escáner demasiado celoso que empujara a
  * borrar los nombres reales convertiría una sección honesta en una vacía.
  */
+/**
+ * ⚠️ **LOS NOMBRES DE CLIENTE SE DERIVAN (V3-D).** Estaban escritos acá, uno
+ * por fila, y lo mismo pasaba en otros tres instrumentos: cuatro copias del
+ * mismo trío. Por eso `Matsu Automotores` —que NO es un cliente: ese trabajo no
+ * se hizo— pasó cinco revisiones en verde. Las copias no se pueden contradecir
+ * entre sí, así que ninguna comprobación estaba comprobando nada sobre la
+ * realidad: sólo que las cuatro decían lo mismo.
+ *
+ * Ahora salen de `NOMBRES_REALES`, que es la única lista. Eso NO prueba que los
+ * nombres sean reales —ningún instrumento puede probarlo— pero convierte
+ * corregir la realidad en una línea en vez de nueve, y deja un solo lugar donde
+ * una persona tiene que mirar y decir "sí, ése es cliente".
+ */
 const VERDADES: readonly { texto: string; donde: string }[] = [
-  { texto: 'Esquina', donde: 'trabajos' },
-  { texto: 'El Garage', donde: 'trabajos' },
-  { texto: 'Matsu Automotores', donde: 'trabajos' },
+  ...NOMBRES_REALES.map((texto) => ({ texto, donde: 'trabajos' })),
   { texto: 'Tucumán', donde: 'quienes-somos' },
 ]
 
@@ -271,7 +283,7 @@ for (const { texto, donde } of VERDADES) {
 controlPositivo(
   'el buscador de verdades vería una ausente',
   '<section>sin nombres</section>',
-  (html: string) => html.includes('Matsu Automotores'),
+  (html: string) => VERDADES.every((v) => html.includes(v.texto)),
 )
 
 cerrar('s5-contenido.invariant')

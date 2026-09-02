@@ -22,7 +22,7 @@ import { rangoDeScroll, rangoDegenerado } from '../../_lib/motion/anclas'
 import { propiedadesDePieza } from '../../_lib/motion/fotograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX } from '../../_lib/superficies'
-import { escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
+import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
 import { USOS_DECLARADOS, especificacionDe } from '../_contrato/motion'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
@@ -119,7 +119,7 @@ afirmarIgual(escanearContenido(textoMovido), [], 'y lo mismo en la rama animada'
 const marcadores = marcadoresEn(textoQuieto)
 console.log(`  marcadores en pantalla: ${marcadores.join(' · ')}`)
 afirmar(marcadores.length >= 4, `hay ${marcadores.length} marcadores distintos — "cero hallazgos" no es "cero contenido"`)
-afirmar(textoQuieto.includes('Esquina') && textoQuieto.includes('El Garage') && textoQuieto.includes('Matsu Automotores'), 'los tres nombres reales están escritos derecho, sin marcador')
+afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), 'los nombres reales están escritos derecho, sin marcador. DERIVADOS de NOMBRES_REALES: escritos acá, la lista y la afirmación eran la misma copia y no se podían contradecir', NOMBRES_REALES.join(' · '))
 
 controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t: string) => escanearContenido(t).length === 0)
 console.log(`  la frase de control dispara ${escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)

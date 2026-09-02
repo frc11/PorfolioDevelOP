@@ -65,6 +65,42 @@ export const CLASES_DE_PEDIDO = [
 
 export type ClaseDePedido = (typeof CLASES_DE_PEDIDO)[number]
 
+/**
+ * QUIÉN LO TIENE QUE TRAER. Cerrado, y con tres miembros porque son tres cosas
+ * distintas de hacer, no tres personas.
+ *
+ * ── Por qué el pedido no alcanzaba sin esto ───────────────────────────────
+ *
+ * `CONTENIDO-PENDIENTE.md` decía qué falta, dónde se edita y en qué formato
+ * entra — y no decía **a quién pedírselo**. Una lista de cuarenta y nueve cosas
+ * sin dueño se lee entera y no se empieza por ningún lado: quien la abre tiene
+ * que volver a decidir, ítem por ítem, si eso lo consigue él o lo tiene que
+ * pedir. El dueño es lo que convierte la lista en tres listas cortas.
+ *
+ * Y va como DATO, al lado de cada entrada, por la misma razón que el formato:
+ * una tabla de dueños escrita aparte se desincroniza en el primer pedido nuevo.
+ *
+ *   · `franco`     — lo tiene Franco o se lo tiene que pedir a un cliente:
+ *                    cifras de la operación, permisos, testimonios, los datos
+ *                    que sólo el negocio del cliente conoce.
+ *   · `valentino`  — sale de acá adentro: una captura, un video, un archivo, o
+ *                    el copy definitivo.
+ *   · `decision`   — no hay nada que traer. Hay que decidir algo —si la casilla
+ *                    va o no va, si la razón social figura, a qué canal empuja
+ *                    el contacto— y recién después queda un dato que buscar.
+ */
+export const QUIENES_TRAEN = ['franco', 'valentino', 'decision'] as const
+
+export type QuienLoTrae = (typeof QUIENES_TRAEN)[number]
+
+/** Cómo se llama cada dueño en el documento. Acá, y no en el generador: el
+ *  rótulo es parte de la definición del miembro, no de cómo se imprime. */
+export const ROTULO_DE_QUIEN: Readonly<Record<QuienLoTrae, string>> = {
+  franco: 'Franco (o un cliente)',
+  valentino: 'Valentino',
+  decision: 'Una decisión, antes que un dato',
+}
+
 export interface EntradaDePedido {
   /**
    * Dónde se edita, dentro del archivo de contenido de la sección.
@@ -81,6 +117,8 @@ export interface EntradaDePedido {
    * prosa y no se ve como agujero.
    */
   readonly marcador: Marcador | null
+  /** A quién se le pide. Obligatorio: sin dueño, la lista no se puede repartir. */
+  readonly quienLoTrae: QuienLoTrae
   /** Qué hay que traer, en una línea, dicho para Franco y no para un programador. */
   readonly que: string
   /** En qué formato entra: unidades, longitud, tamaño de archivo, forma. */
@@ -116,6 +154,20 @@ export function pedidoPorClase(
     if (lista === undefined) salida.set(entrada.clase, [entrada])
     else lista.push(entrada)
   }
+  return salida
+}
+
+/**
+ * El pedido agrupado por dueño, en el orden declarado de `QUIENES_TRAEN` y no
+ * en el de aparición: el documento tiene que listar los tres siempre igual, y
+ * un dueño sin entradas tiene que salir con cero y no desaparecer — un bucket
+ * vacío que no se imprime se lee como que no existe.
+ */
+export function pedidoPorQuien(
+  pedido: readonly EntradaDePedido[],
+): Map<QuienLoTrae, EntradaDePedido[]> {
+  const salida = new Map<QuienLoTrae, EntradaDePedido[]>(QUIENES_TRAEN.map((q) => [q, []]))
+  for (const entrada of pedido) salida.get(entrada.quienLoTrae)?.push(entrada)
   return salida
 }
 

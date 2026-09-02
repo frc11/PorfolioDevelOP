@@ -92,8 +92,21 @@ titulo('2 · EL ORDEN DE TABULACIÓN COMPLETO — las 16 paradas')
  */
 const PARADAS = paradasDeTabulacion(QUIETA)
 imprimirParadas(QUIETA, PARADAS)
-afirmarIgual(PARADAS.length, 16, 'el home entero tiene 16 paradas de tabulación: las 15 de S10 más el enlace de salto')
-afirmarIgual(paradasDeTabulacion(ANIMADA).length, 16, '  y la rama animada tiene las mismas 16')
+/**
+ * ⚠️ **CENSO MOVIDO EN V3-D — TRES PARADAS MÁS, Y SON LOS TRABAJOS.**
+ *
+ * Trabajos no tenía un solo control, y la razón escrita era exacta: no había
+ * página de caso y **las URLs de los clientes no se inventan**. Los tres
+ * dominios de producción llegaron, así que el `h3` de cada proyecto es ahora un
+ * `<a>` al sitio. Son paradas 12, 14 y 16 del documento —después del CTA del
+ * Hero y antes de las del pie— y las tres llevan a algo.
+ *
+ * Las 16 de antes no se movieron ni cambiaron de orden: las tres nuevas se
+ * intercalan donde vive la sección 04. Lo que la sección 3 afirma sobre la
+ * pastilla y el enlace de salto sigue en pie, y se comprueba abajo.
+ */
+afirmarIgual(PARADAS.length, 19, 'el home entero tiene 19 paradas de tabulación: las 16 de S11 más los tres sitios de Trabajos')
+afirmarIgual(paradasDeTabulacion(ANIMADA).length, 19, '  y la rama animada tiene las mismas 19')
 afirmarIgual(tabindexPositivos(QUIETA), [], 'ningún `tabindex` positivo rompe el orden del documento')
 afirmarIgual(
   PARADAS.filter((p) => rotuloDeParada(QUIETA, p).rotulo === '').map((p) => p.etiqueta),
@@ -222,10 +235,17 @@ titulo('7 · LOS MARCADORES — cómo suena el recorrido')
 
 const MARCAS = marcadoresAnunciados(QUIETA)
 imprimirMarcadores(MARCAS)
-afirmarIgual(MARCAS.length, 43, 'son 43 marcadores ANUNCIADOS en la rama quieta — la cifra de la instrucción, verificada')
-afirmarIgual(marcadoresAnunciados(ANIMADA).map((m) => m.marcador).sort(), MARCAS.map((m) => m.marcador).sort(), 'y los MISMOS 43 en la animada, marcador por marcador: no falta ninguno — eran 33 en S10, los 10 que Servicios no montaba')
+/**
+ * ⚠️ **ERAN 43 Y AHORA SON 40 (V3-D), Y LA BAJA ES LO QUE SE BUSCABA.** Los
+ * tres que se fueron son los `[CAPTURA]` de Trabajos: las capturas de los tres
+ * sitios llegaron y el hueco dejó de existir. Un marcador menos en este censo
+ * es un pedido cerrado — el único sentido en el que este número tiene que
+ * bajar—, y por eso se afirma la CIFRA y no un «al menos».
+ */
+afirmarIgual(MARCAS.length, 40, 'son 40 marcadores ANUNCIADOS en la rama quieta — eran 43 hasta que V3-D cerró las tres capturas')
+afirmarIgual(marcadoresAnunciados(ANIMADA).map((m) => m.marcador).sort(), MARCAS.map((m) => m.marcador).sort(), 'y los MISMOS 40 en la animada, marcador por marcador: no falta ninguno')
 afirmarIgual(MARCAS.map((m) => m.marcador).filter((m) => !(MARCADORES as readonly string[]).includes(m)), [], 'ninguno queda fuera del vocabulario cerrado de `marcadores.ts`')
-afirmarIgual(MARCAS.filter((m) => m.contexto === '').length, 0, 'los 43 caen adentro de una frase anunciada: ninguno vive en un subárbol oculto')
+afirmarIgual(MARCAS.filter((m) => m.contexto === '').length, 0, 'los 40 caen adentro de una frase anunciada: ninguno vive en un subárbol oculto')
 publicar({
   n: 9, gravedad: 'media', clase: 'decisión',
   dueño: 'el contenido de relleno — `_contrato/marcadores.ts` declara la forma como deliberada',
