@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MessageCircle, Send } from 'lucide-react'
-import { Badge, Button, Card, Field, TextArea } from '@/components/ui'
+import { Badge, Card, Field, TextArea } from '@/components/ui'
 import { CANAL_INSTAGRAM, contieneLink, formatFechaCorta } from '@/lib/leados/flow'
 import { GUIA_OPENER } from '@/lib/leados/guidance-content'
 import { registrarOpener } from '@/app/(protected)/setter/_actions/outreach.actions'
@@ -13,6 +13,7 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { EnlacePantalla } from '../manual/_components/enlace-pantalla'
+import { useAccionPrincipal } from '../manual/_components/barra-accion'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
 /**
@@ -65,6 +66,18 @@ export function OpenerForm({ leadId }: { leadId: string }) {
     })
   }
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`, no al final
+  // del formulario. Mismo handler, mismo `disabled`, mismo texto; el motivo del
+  // bloqueo es el título del gate que ya se muestra bajo el campo.
+  useAccionPrincipal({
+    etiqueta: 'Ya lo mandé en Instagram — registrar',
+    onClick: registrar,
+    loading: isPending,
+    disabled: tieneLink,
+    motivo: tieneLink ? GUIA_OPENER.gate.titulo : null,
+    icon: <Send size={14} strokeWidth={1.5} />,
+  })
+
   return (
     <div className="space-y-5">
       <Field
@@ -103,15 +116,6 @@ export function OpenerForm({ leadId }: { leadId: string }) {
       )}
 
       <GuardrailRol compacto />
-
-      <Button
-        onClick={registrar}
-        loading={isPending}
-        disabled={tieneLink}
-        icon={<Send size={14} strokeWidth={1.5} />}
-      >
-        Ya lo mandé en Instagram — registrar
-      </Button>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Field, Input, TextArea } from '@/components/ui'
+import { Field, Input, TextArea } from '@/components/ui'
 import { registrarResultado } from '@/app/(protected)/setter/_actions/outreach.actions'
 import {
   ResultadoInputSchema,
@@ -9,6 +9,7 @@ import {
 } from '@/app/(protected)/setter/_actions/outreach.schemas'
 import { useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M5 — El REGISTRO de un toque de la conversación (5.5, tramo Seguimiento). Es
@@ -123,6 +124,18 @@ export function SeguimientoForm({
     })
   }
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. El motivo
+  // viaja con ella: era el párrafo que estaba justo encima del botón y que
+  // existía sólo para que el disabled no quedara mudo (gap 3.6).
+  useAccionPrincipal({
+    etiqueta: 'Registrar resultado',
+    onClick: registrar,
+    loading: registro.isPending,
+    disabled: resultado === null,
+    variant: 'secondary',
+    motivo: 'Elegí arriba qué pasó en la conversación para habilitar el registro.',
+  })
+
   return (
     <div className="space-y-3">
       {cadenciaAgotada && (
@@ -185,22 +198,6 @@ export function SeguimientoForm({
         </p>
       )}
 
-      {/* El botón se habilita al elegir una opción: sin esto queda disabled sin
-          explicación (gap 3.6, mismo criterio que el seguimiento del wizard). */}
-      {resultado === null && (
-        <p className="text-[11px] leading-relaxed text-zinc-500">
-          Elegí arriba qué pasó en la conversación para habilitar el registro.
-        </p>
-      )}
-
-      <Button
-        onClick={registrar}
-        loading={registro.isPending}
-        disabled={resultado === null}
-        variant="secondary"
-      >
-        Registrar resultado
-      </Button>
     </div>
   )
 }

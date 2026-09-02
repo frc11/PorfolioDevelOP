@@ -9473,3 +9473,235 @@ la jerga— siguen en verde, y ninguno de los 50 quedó en rojo.
   que se guardó es el texto crudo.
 - **Si el filo neutro de la instrucción alcanza para marcar «éste es tu paso»** ahora que el cyan se
   mudó al bloque de trabajo. Es la decisión de color más discutible del sprint.
+
+---
+
+## Sprint P18 — LA ACCIÓN A LA VISTA: una barra, catorce pantallas — 2026-09-02
+
+**Base:** `fix/cromo-primer-pliegue` @ `c9b1db7a` · **Rama:** `fix/accion-a-la-vista`
+
+P17 arregló el ARRANQUE de la pantalla. Faltaba el otro extremo: la acción seguía al final de todo.
+En la ficha, después del formulario entero; en el chequeo, después de catorce controles. El setter
+recorría la pantalla para poder actuar, y después volvía a subir.
+
+Y viajaba con eso un segundo defecto: un botón deshabilitado no decía por qué.
+
+### El número que abre el sprint
+
+El instrumento de P17 (`scripts/qa-corridas/medir-pliegue-manual.ts`) se extendió con una columna
+nueva —dónde está la acción principal y si se ve sin scrollear— y se corrió sobre las catorce, a
+1440 y a 390, antes de tocar nada:
+
+| | 1440 | 390 |
+|---|---|---|
+| acción principal a la vista **arriba de todo** | **1/9** | **0/9** |
+| …**abajo de todo** | 9/9 | 7/9 |
+| …**siempre** (las dos puntas) | **1/9** | **0/9** |
+| scroll necesario para llegar a ella, promedio | **501 px** | **900 px** |
+
+En m14 hacían falta 1.376 px de scroll a 1440 y 2.259 px a 390: el «Enviar a revisión» estaba
+después de los catorce tildes. La única que ya la tenía a la vista era m15.
+
+(9 y no 11: dos de las once pantallas de trabajo no tienen acción principal con el lead que les
+toca — ver el censo.)
+
+### Paso 1 · El censo de las catorce
+
+| # | Acción principal | Otras acciones (por qué no) | Cuándo se bloquea | ¿Motivo como dato? | Dónde estaba |
+|---|---|---|---|---|---|
+| **m1** | `Registrar evaluación` / `… y descartar` — `evaluacion-form.tsx:238` | `Guardar ficha` (`ficha-form.tsx:446`) no avanza y hay autosave; los 5 radios del score son input; el modal de descarte es confirmación | **nunca** (la validación es un `safeParse` en el click; el gate real es server-side) | no hace falta | dentro del último bloque del acordeón, con `Guardar ficha` **más abajo** |
+| **m4** | `Ya lo mandé en Instagram — registrar` — `opener-form.tsx:107` | `Copiar bloque` ×2 y `Abrir el Gem` son munición | `disabled={tieneLink}` — `contieneLink(mensaje)`, `flow.ts:221` | **sí** — `GUIA_OPENER.gate.titulo` | último elemento del form |
+| **m5** | `Registrar resultado` — `seguimiento-form.tsx:196` | los 4 botones-opción son el INPUT (setean `resultado`), no la acción | `disabled={resultado === null}` | **a medias** — literal en el propio componente, no sale de ningún helper | último elemento, con el motivo justo encima |
+| **m6** | `Guardar brief` — `brief-form.tsx:220` | `Cancelar` sólo existe en el re-pegado; el par de `BriefSanity` no persiste nada | **nunca** (`briefValido` gobierna el autosave, no el botón) | no hace falta | en una fila con `Cancelar` y el autosave |
+| **mc1 / mc2** | `Arrancar construcción` — `construccion-ctas.tsx:25` (**sólo en stage BRIEF**) | los 3 tildes son auto-reporte y **no avanzan** (`m-construccion.tsx:232`); «Me trabé — avisar a Franco» es una salida | nunca | — | **arriba de todo**, antes del motivo y de los tildes |
+| **m13** | `Guardar borrador` — `borrador-form.tsx:197`; `Reabrir construcción` en RECHAZADA; **ninguna** con el borrador ya publicado | `Cambiar el link` abre la edición; `Cancelar`; el enlace al chequeo es un link de texto | **nunca** (validación click-time) | **a medias, y reactivo** — `ErroresBorrador` sólo aparece tras un click fallido | final del form |
+| **m14** | `Enviar a revisión` — `chequeo-form.tsx:285` | los tildes son input y autoguardan (`delayMs: 0`); ya no existe «Guardar el chequeo» | `disabled={!todosDurosOk}` | **sí, pero dice CUÁNTOS, no cuáles** — `faltantesDuros` | al final, en la fila del autosave |
+| **m15** | `Ya la envié — registrar` — `envio-form.tsx:69` | `Copiar bloque` es munición | **nunca lleva `disabled`: el gate es de RENDER** (`gateEnvioDemo`) — cerrado, el form no se monta | **sí, el más rico** — `GUIA_ENVIO.espera`, 4 ramas + `turnoDelLead` | último del form, dentro de la tarjeta esmeralda |
+| **m16** | `Confirmar y agendar` → `Sí, confirmar` — `agenda-form.tsx:320` / `:302` | `Buscar horarios libres de Franco` es una consulta que alimenta la elección | `disabled={confirmacion.isPending}` — anti-doble-click, no un bloqueo | **no para el bloqueo real** (el gating es estructural) | en el MEDIO de la pantalla, dentro de una tarjeta anidada |
+| **mr** | `Reabrir construcción` — `construccion-ctas.tsx:42` | `Copiar bloque` es munición | nunca | — (el PEDIDO sí es dato: `Rechazo.motivo/donde/detalle`) | al pie del slot de captura |
+| **espera** | **ninguna** | link de escape a m5 + `<a>` al borrador | — | sí, el de la ESPERA (`causaDeEspera`) | — |
+| **revision** | **ninguna** | sólo el `<a>` al borrador | — | sí (`causa = 'revision'`) | — |
+| **archivo** | **ninguna** | «Seguí con el próximo» es un `<Link>` | — | sí, el del CIERRE | — |
+
+`estado-manual.tsx` y `archivo-manual.tsx` no contienen un solo `<button>`: verificado por lectura
+completa de los dos archivos.
+
+### Paso 1 · Las cuatro respuestas
+
+**1 · Pantallas con dos candidatas — cinco, y ninguna quedó sin decidir.**
+
+- **m1** (la peor, y no estaba en la sospecha del brief): `Registrar evaluación` **vs** `Guardar
+  ficha`. **Gana el veredicto**: es el único que AVANZA (`FICHA→EVALUADA`). `Guardar ficha` se queda
+  donde está — no mueve el recorrido y encima hay autosave, así que su botón es una red, no un paso.
+  Que estuviera renderizado *más abajo* que el que sí avanza es parte del problema que esto arregla.
+- **m14**: los tildes **vs** `Enviar a revisión`. **Gana el envío**: los tildes son el input y ya
+  autoguardan.
+- **m16**: `Buscar horarios` **vs** `Confirmar y agendar` **vs** `Sí, confirmar`. **Gana confirmar**:
+  es lo que cierra la pantalla. `Buscar horarios` alimenta la elección y además ya cae dentro del
+  primer pliegue (599 px de 788).
+- **m6** (en stage BRIEF): `Guardar brief` **vs** el par de `BriefSanity`. **Gana `Guardar brief`**:
+  transiciona; el par de sanity no persiste nada.
+- **mc1/mc2**: `Arrancar construcción` **vs** los 3 tildes. **Gana arrancar**: es la única
+  transición real; tildar no gatea ni avanza, y el código lo dice.
+
+**m13 NO tiene dos candidatas** (la sospecha del brief no se confirma): tiene un *state-swap* —
+`Guardar borrador` ↔ `Reabrir construcción` ↔ nada.
+
+**2 · Pantallas sin acción principal — cinco situaciones, y la barra no aparece en ninguna.**
+
+`espera`, `revision` y `archivo` (los tres estados terminales, cero `<button>`), **m13 con el
+borrador ya publicado** (la salida es el enlace al chequeo; `Cambiar el link` abre la edición, no
+avanza) y **m16 sin horario elegido** (confirmar todavía no existe). No se pinta una barra vacía ni
+un botón apagado por defecto: eso sería peor que no tenerla.
+
+**3 · ¿El motivo del bloqueo existe? Sólo tres pantallas se bloquean de verdad, y las tres lo tienen.**
+
+- **m4** — sí: `GUIA_OPENER.gate.titulo` («El link NO va en el opener — sacalo»), bajo la MISMA
+  condición que apaga el botón.
+- **m5** — sí, aunque como literal: el párrafo que vivía justo encima del botón. **Viajó con él** a
+  la barra; no quedó huérfano.
+- **m14** — sí, **pero dice cuántos, no cuáles**: «Quedan N obligatorios en rojo». Se muestra ese
+  mismo conteo, sin recalcular nada. **No se inventó el "cuáles"**: los nombres de los hard-checks
+  son a la vez texto y LLAVE del tilde y del gate (P9), así que sacarlos a la barra habría metido
+  jerga en el único lugar donde el setter no puede ignorarla.
+- **m1, m6, m13, mr, mc1/mc2** — nunca se bloquean: no hay motivo que mostrar, y no se inventa uno.
+- **m16** — el `disabled` es anti-doble-click, no un bloqueo. La barra **no dice nada** ahí, a
+  propósito.
+
+**4 · ¿La acción cambia con el estado? Sí, en siete pantallas — y la barra las sigue.**
+
+`m1` (la etiqueta: con score 1–2 pasa a `Registrar evaluación y descartar`), `m13` (tres ramas por
+stage), `mr`/`mc1`/`mc2` (por stage), `m15` (gate de render), `m16` (cambia DENTRO de la pantalla:
+sin horario no hay ninguna, con horario es `Confirmar y agendar`, en la antesala es `Sí, confirmar`).
+
+### Paso 2 · La barra
+
+Un componente nuevo (`manual/_components/barra-accion.tsx`) montado UNA vez en `PantallaManual`,
+hijo directo de la raíz y último en el DOM. `sticky bottom-0`.
+
+**Por qué un contexto y no mover el botón en el JSX.** Para que la acción se vea en cualquier
+posición del scroll, el elemento tiene que ser `sticky` con su bloque contenedor abarcando todo el
+alto del contenido — o sea, hijo directo de la raíz. Pero el `disabled` de m4, m5 y m14 depende de
+estado LOCAL del formulario. Moverlo en el JSX habría obligado a subir ese estado, que es
+exactamente lo que el sprint prohíbe. Con el contexto cada formulario sigue siendo dueño de su
+estado, su handler y su expresión de `disabled`: sólo DECLARA su acción con
+`useAccionPrincipal({...})`, y el botón se pinta en la barra. **La expresión de bloqueo viaja
+copiada tal cual, sin una sola condición nueva.**
+
+**`sticky` y no `fixed`**, a propósito: al llegar al fondo del scroll la barra aterriza en su lugar
+del flujo en vez de quedar flotando encima, así el último control de la pantalla siempre se alcanza.
+Está fijado con una prueba a 390.
+
+### Paso 3 · La medición, antes y después
+
+El instrumento se extendió para medir **el pliegue EFECTIVO** (`main.clientHeight` − alto de la
+barra): la barra tapa la franja de abajo del scroller, y medir contra el pliegue a secas diría que
+es gratis. En el brazo viejo la barra vale 0, así que el «antes» sale idéntico al
+`p17-pliegue-despues.json` que dejó P17 — el instrumento no movió ningún número por sí solo.
+
+Tablas completas en `docs/baselines/p18-pliegue-{antes,despues}.json`.
+
+**Lo que ganó — la acción principal a la vista:**
+
+| | antes | después |
+|---|---|---|
+| 1440 · siempre (arriba **y** abajo) | 1/9 | **9/9** |
+| 390 · siempre | 0/9 | **9/9** |
+| scroll para llegar (prom. 1440) | 501 px | **0** |
+| scroll para llegar (prom. 390) | 900 px | **0** |
+
+**Lo que costó — el pliegue.** Una sola pantalla, a un solo ancho:
+
+| | antes | después | |
+|---|---|---|---|
+| **m4 @1440** — arranque de la captura | `si` (margen **8 px**) | `NO` (−49) | ⚠️ **el único veredicto que se dio vuelta** |
+| las otras 13 @1440 | — | — | sin cambio |
+| las 14 @390 | — | — | **sin cambio: 0 regresiones** |
+
+`entra` @1440: 5/11 → 4/11 · @390: 1/11 → 1/11 (idéntico).
+«entra algo accionable» @1440: 8/14 → 7/14 · @390: 4/14 → 4/14 (idéntico).
+
+**Sobre m4:** su margen era de 8 px — el borde superior de un `<textarea>` de 4 filas. **Ninguna
+altura de barra lo salva**: cualquier banda de más de 8 px lo da vuelta. Es exactamente la tensión
+que el brief anticipó, y acá está medida en vez de argumentada. El margen que queda más ajustado
+después es `m5 @1440`, con 9 px: su «primer accionable» ahora sólo *empieza* dentro del pliegue.
+
+### El costo vertical, y el saldo
+
+La barra mide **57 px** (59 con motivo de una línea a 1440; 66 a 390, donde el motivo va arriba del
+botón). Está por debajo del techo que fijaba el margen más ajustado del «primer accionable» (68 px
+en m5 @1440).
+
+Pero el **alto total de la pantalla no creció**: el botón que se fue liberó su bloque. Promedio en
+las nueve pantallas con barra: **−11,6 px a 1440 y −13,4 px a 390**. Sólo dos crecieron (m6 +1,
+m14 +18 a 1440).
+
+**Saldo neto: positivo.** Se pagan 57 px de pliegue una vez, y se dejan de pagar 501 px (1440) /
+900 px (390) de scroll por pantalla, en cada visita. El único punto rojo es m4 @1440, y era un borde
+de textarea.
+
+### Controles duplicados: cero
+
+La barra **no repite** nada. En las nueve pantallas el botón se MUDÓ, no se copió, y una prueba lo
+fija: `toHaveCount(1)` por etiqueta dentro de `main`. Lo que salió de su lugar:
+
+| Archivo | Control que se mudó |
+|---|---|
+| `evaluacion-form.tsx` | `Registrar evaluación` / `… y descartar` |
+| `opener-form.tsx` | `Ya lo mandé en Instagram — registrar` |
+| `seguimiento-form.tsx` | `Registrar resultado` **+ su párrafo de motivo** |
+| `brief-form.tsx` | `Guardar brief` |
+| `borrador-form.tsx` | `Guardar borrador` (la fila de `Cancelar` ahora sólo se pinta editando) |
+| `chequeo-form.tsx` | `Enviar a revisión` |
+| `envio-form.tsx` | `Ya la envié — registrar` |
+| `construccion-ctas.tsx` | `Arrancar construcción` y `Reabrir construcción` (los dos componentes ahora declaran y devuelven `null`) |
+| `agenda-form.tsx` | `Confirmar y agendar` y `Sí, confirmar` (el Callout conserva `Volver`) |
+
+**Y nada se sacó de las pantallas.** El censo del instrumento da idéntico en los dos brazos y a los
+dos anchos: `copiar=11 · linksExternos=6 · linksInternos=63 · pendientes=6 · controles=65 ·
+plegables=38`.
+
+### Las pruebas
+
+**Nueva:** `tests/setter/23-accion-a-la-vista.spec.ts` — 17 casos. §1 la acción se ve ENTERA en las
+dos puntas del scroll (criterio estricto: un botón que asoma 8 px no cuenta); §2 no quedó duplicada;
+§3 el bloqueado dice qué falta, sin scrollear, y con `aria-describedby`; §4 sin acción no hay barra.
+**Contra el código viejo fallan los 17.**
+
+Los cuatro casos de §4 son afirmaciones de AUSENCIA y por eso pasaban en verde en el código viejo
+—donde no hay barra ninguna, «no hay barra» es trivialmente cierto—. Se les agregó una segunda mitad
+en la misma sesión: ir a una pantalla que SÍ tiene acción y exigir que ahí aparezca. Con eso también
+fallan contra el viejo, y dejan de ser un verde vacío.
+
+**Adaptada:** `tests/setter/22-cromo-primer-pliegue.spec.ts` (P17) pasa a medir contra el pliegue
+EFECTIVO y a excluir la barra del «primer accionable». Sin las dos cosas se volvía un falso verde:
+(a) el pliegue sin descontar habría dejado pasar controles tapados, y (b) la barra, al ser `sticky`,
+se lee en su posición pegada y ganaba el «primer accionable» de todas las pantallas — el número
+habría pasado a decir «hay una barra», no «acá arranca el trabajo». Ningún selector se relajó y
+ningún caso se borró: los 12 siguen en verde. El mismo par de correcciones se aplicó al instrumento.
+
+### Fuera de alcance, anotado
+
+- **m16 no queda cubierta por la suite.** Su acción principal sólo existe una vez elegido un horario,
+  y elegirlo exige una búsqueda real de disponibilidad. Se verificó a mano.
+- **La barra se puebla en la hidratación** — el botón ya no viaja en el HTML del server. No hay salto
+  de layout (vive al final del contenido y no empuja nada de arriba), pero hay un instante sin barra
+  en la carga fría. Se puede cerrar pasando un descriptor server-side; es otro sprint.
+- **m1 con la ficha vacía no tiene acción en ningún lado.** El acordeón de P16 no monta lo plegado,
+  así que el veredicto no existe hasta abrir el último bloque. La barra refleja eso, no lo causa
+  (antes tampoco existía el botón). Si el veredicto debería estar disponible antes, es producto.
+- **La zona «Registro» de `mr` quedó sin ningún control adentro** (era `Reabrir construcción`, que se
+  mudó). La tarjeta de trabajo tiene sólo un párrafo. Puede pedir un rótulo distinto.
+- **`m5` a 390 pone el motivo arriba del botón** y la barra sube a 66 px. Es la única que varía.
+
+### Para la verificación humana
+
+- **Todo el juicio estético.** Una barra fija cambia el peso de la pantalla entera. Las capturas
+  están en `docs/proof-screenshots/p18/{antes,despues}/`, las catorce a los dos anchos.
+- **Que la barra no compita con el contenido.** Si el ojo va primero a la barra y no al trabajo, está
+  mal. Los pares que más lo muestran: `m14-1440` (la barra al lado de catorce tildes) y `mc2-390`
+  (la pantalla más larga).
+- **Si el precio de m4 vale la pena.** Es el único veredicto que se dio vuelta, y no hay barra que lo
+  evite: o hay banda, o m4 conserva 8 px de borde de textarea dentro del pliegue.
+- **Y la pregunta de fondo:** ¿la barra hace que el producto se lea como una aplicación, o sólo
+  agrega una franja? Es la que decide si el patrón sigue.

@@ -10,6 +10,7 @@ import {
   type PosicionManual,
 } from '@/lib/leados/manual'
 import { ManualHeader, NavAtras, NavConstruccion, type CabeceraLead } from './manual-nav'
+import { BarraAccion, ProveedorAccion } from './barra-accion'
 
 /**
  * Zona-slot del layout-tipo. Todas las pantallas del manual están migradas
@@ -121,100 +122,113 @@ export function PantallaManual({
   const esConstruccion = pantalla.fase === 'construccion'
 
   return (
-    <div className="space-y-4">
-      <ManualHeader cabecera={cabecera} />
+    // P18 — el proveedor envuelve TODO el contenido de la pantalla: la barra
+    // es hermana de las zonas (hija directa de la raíz) para que su `sticky`
+    // valga en cualquier posición del scroll, y los formularios del Registro
+    // le declaran su acción desde adentro sin que su estado local tenga que
+    // subir hasta acá.
+    <ProveedorAccion>
+      <div className="space-y-4">
+        <ManualHeader cabecera={cabecera} />
 
-      {encabezado && <div data-slot="encabezado">{encabezado}</div>}
+        {encabezado && <div data-slot="encabezado">{encabezado}</div>}
 
-      {/* La instrucción — protagonista, y desde P17 una BANDA, no una tarjeta.
-          El `p-5` de la tarjeta costaba 40 px verticales en las catorce sin
-          decir nada que el título no diga; el filo de color sobrevive porque es
-          lo que marca «éste es tu paso», y ahora es lo único que lo marca acá
-          (el acento pleno se mudó al bloque de trabajo — S5). */}
-      <section
-        aria-label="Instrucción de esta pantalla"
-        className={cn(
-          'border-l-2 pl-3.5',
-          esPasoActivo ? 'border-white/25' : 'border-white/10',
-        )}
-      >
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {indicador && (
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
-              {/* P9 — el contador solo aparece donde la fase tiene más de una
-                  pantalla. Con el colapso de Construcción (P6-B) nueve de las
-                  diez fases quedaron con una sola, y «paso 1 de 1» no informa
-                  nada: ahí se lee el nombre de la fase, y listo. */}
-              {indicador.fase}
-              {indicador.m > 1 && ` — paso ${indicador.n} de ${indicador.m}`}
-            </p>
-          )}
-          {pantalla.tipo === 'reentrada' && (
-            <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-rose-300/80">
-              Reentrada — correcciones de Franco
-            </p>
-          )}
-          {esPasoActivo ? (
-            <Badge tone="cyan" variant="soft">
-              Tu paso ahora
-            </Badge>
-          ) : completada ? (
-            <Badge tone="emerald" variant="soft">
-              Completada
-            </Badge>
-          ) : (
-            <Badge tone="zinc" variant="outline">
-              Disponible
-            </Badge>
-          )}
-        </div>
-
-        {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
-        <h2 className="mt-1 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
-          {pantalla.titulo}
-        </h2>
-        {pantalla.detalle && (
-          <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
-            {pantalla.detalle}
-          </p>
-        )}
-      </section>
-
-      {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan.
-          Zona no renderiza nada sin contenido (reentrada y cualquier slot vacío).
-          Sólo el Registro lleva tarjeta: es el bloque de trabajo. */}
-      <Zona etiqueta="Contexto del lead">{contexto}</Zona>
-      <Zona etiqueta="Munición">{municion}</Zona>
-      <Zona etiqueta="Registro" destacada acentuada={esPasoActivo}>
-        {captura}
-      </Zona>
-
-      {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
-      {!esActual && (
+        {/* La instrucción — protagonista, y desde P17 una BANDA, no una tarjeta.
+            El `p-5` de la tarjeta costaba 40 px verticales en las catorce sin
+            decir nada que el título no diga; el filo de color sobrevive porque es
+            lo que marca «éste es tu paso», y ahora es lo único que lo marca acá
+            (el acento pleno se mudó al bloque de trabajo — S5). */}
         <section
-          aria-label="Avance"
-          className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4"
+          aria-label="Instrucción de esta pantalla"
+          className={cn(
+            'border-l-2 pl-3.5',
+            esPasoActivo ? 'border-white/25' : 'border-white/10',
+          )}
         >
-          <p className="text-xs leading-relaxed text-zinc-500">
-            {completada
-              ? 'Esta pantalla ya quedó hecha — mirala tranquilo, no se resetea nada.'
-              : 'Esta pantalla está disponible — tu paso de ahora es otro.'}
-          </p>
-          <Link
-            href={rutaManual(leadId, posicion.actual)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20"
-          >
-            Ir a tu paso actual
-            <ArrowRight size={12} strokeWidth={1.5} aria-hidden />
-          </Link>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {indicador && (
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
+                {/* P9 — el contador solo aparece donde la fase tiene más de una
+                    pantalla. Con el colapso de Construcción (P6-B) nueve de las
+                    diez fases quedaron con una sola, y «paso 1 de 1» no informa
+                    nada: ahí se lee el nombre de la fase, y listo. */}
+                {indicador.fase}
+                {indicador.m > 1 && ` — paso ${indicador.n} de ${indicador.m}`}
+              </p>
+            )}
+            {pantalla.tipo === 'reentrada' && (
+              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-rose-300/80">
+                Reentrada — correcciones de Franco
+              </p>
+            )}
+            {esPasoActivo ? (
+              <Badge tone="cyan" variant="soft">
+                Tu paso ahora
+              </Badge>
+            ) : completada ? (
+              <Badge tone="emerald" variant="soft">
+                Completada
+              </Badge>
+            ) : (
+              <Badge tone="zinc" variant="outline">
+                Disponible
+              </Badge>
+            )}
+          </div>
+
+          {/* h2: con el corte 5.6 el h1 de la página es el negocio (cabecera). */}
+          <h2 className="mt-1 text-xl font-black leading-tight tracking-tight text-white sm:text-2xl">
+            {pantalla.titulo}
+          </h2>
+          {pantalla.detalle && (
+            <p className="mt-1 max-w-xl text-xs leading-relaxed text-zinc-400">
+              {pantalla.detalle}
+            </p>
+          )}
         </section>
-      )}
 
-      {esConstruccion && (
-        <NavConstruccion leadId={leadId} pasoActivo={pantalla.id} posicion={posicion} />
-      )}
+        {/* Las tres zonas del layout-tipo — slots que las pantallas reales llenan.
+            Zona no renderiza nada sin contenido (reentrada y cualquier slot vacío).
+            Sólo el Registro lleva tarjeta: es el bloque de trabajo. */}
+        <Zona etiqueta="Contexto del lead">{contexto}</Zona>
+        <Zona etiqueta="Munición">{municion}</Zona>
+        <Zona etiqueta="Registro" destacada acentuada={esPasoActivo}>
+          {captura}
+        </Zona>
 
-      <NavAtras leadId={leadId} pasoActivo={pantalla.id} posicion={posicion} />
-    </div>
+        {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
+        {!esActual && (
+          <section
+            aria-label="Avance"
+            className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4"
+          >
+            <p className="text-xs leading-relaxed text-zinc-500">
+              {completada
+                ? 'Esta pantalla ya quedó hecha — mirala tranquilo, no se resetea nada.'
+                : 'Esta pantalla está disponible — tu paso de ahora es otro.'}
+            </p>
+            <Link
+              href={rutaManual(leadId, posicion.actual)}
+              className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-[11px] font-medium text-cyan-200 transition-colors hover:bg-cyan-500/20"
+            >
+              Ir a tu paso actual
+              <ArrowRight size={12} strokeWidth={1.5} aria-hidden />
+            </Link>
+          </section>
+        )}
+
+        {esConstruccion && (
+          <NavConstruccion leadId={leadId} pasoActivo={pantalla.id} posicion={posicion} />
+        )}
+
+        <NavAtras leadId={leadId} pasoActivo={pantalla.id} posicion={posicion} />
+
+        {/* La acción principal. Va ÚLTIMA en el DOM a propósito: el rango de
+            un `sticky` termina en el borde de su padre, así que sólo siendo
+            hija directa de la raíz queda a la vista en todo el recorrido del
+            scroll. Si la pantalla no declaró acción, no se pinta nada. */}
+        <BarraAccion />
+      </div>
+    </ProveedorAccion>
   )
 }

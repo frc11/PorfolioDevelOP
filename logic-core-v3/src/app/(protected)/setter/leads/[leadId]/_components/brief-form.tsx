@@ -12,6 +12,7 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { guardarBrief } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { BriefInputSchema, type BriefInput } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
+import { useAccionPrincipal } from '../manual/_components/barra-accion'
 
 /**
  * El REGISTRO del brief (5.3, patrón 4.2/5.1/5.2). Extraído SIN cambio de
@@ -145,6 +146,15 @@ export function BriefForm({
     })
   }
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Nunca está
+  // bloqueada: la validación es un `safeParse` en el click y los errores se
+  // cuelgan de cada campo, así que no hay motivo que mostrar.
+  useAccionPrincipal({
+    etiqueta: 'Guardar brief',
+    onClick: guardar,
+    loading: isPending,
+  })
+
   return (
     <div className="space-y-5">
       {/* El asterisco y el bloqueo se van JUNTOS: marcar como obligatorio algo
@@ -217,9 +227,6 @@ export function BriefForm({
       )}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Button onClick={guardar} loading={isPending}>
-          Guardar brief
-        </Button>
         {onCancel && (
           <Button variant="ghost" onClick={onCancel} disabled={isPending}>
             Cancelar

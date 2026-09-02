@@ -27,7 +27,10 @@ import {
  *        de ser tarjetas; la ÚNICA tarjeta de la pantalla es el bloque de
  *        trabajo. Se afirma sobre el estilo computado, no sobre clases.
  *   §2 · Hay algo accionable dentro del primer pliegue, en las once pantallas
- *        de trabajo, a 1440. Se afirma por VISIBILIDAD y por geometría: el
+ *        de trabajo, a 1440. Desde P18 el pliegue se mide DESCONTANDO la barra
+ *        de acción (`sticky bottom-0`), que tapa la franja de abajo del
+ *        scroller: sin eso, la prueba pasaría sobre un control cubierto. Se
+ *        afirma por VISIBILIDAD y por geometría: el
  *        pliegue NO es la altura del viewport —el shell del setter es
  *        `fixed inset-0` y el scroller es el `<main>` interno—, así que se lee
  *        de `main.clientHeight` y las alturas se miden contra el origen del
@@ -73,11 +76,16 @@ async function primerAccionable(page: Page) {
     if (!scroller) return null
     const caja = scroller.getBoundingClientRect()
     const header = scroller.querySelector('header')
+    // P18 — la barra de acción se excluye igual que la cabecera: es cromo, y
+    // además es `sticky`, así que su caja se lee pegada al borde y ganaría este
+    // número siempre. Lo que esta prueba mide es dónde arranca el TRABAJO.
+    const barraAccion = scroller.querySelector('[data-slot="barra-accion"]')
     const SEL =
       'button, input, textarea, select, [role="button"], [contenteditable="true"], a[href]'
     let mejor: { top: number; etiqueta: string } | null = null
     for (const el of Array.from(scroller.querySelectorAll(SEL))) {
       if (header && header.contains(el)) continue
+      if (barraAccion && barraAccion.contains(el)) continue
       const r = el.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
       const cs = window.getComputedStyle(el)
@@ -90,7 +98,16 @@ async function primerAccionable(page: Page) {
       ).replace(/[\s ]+/g, ' ')
       if (!mejor || top < mejor.top) mejor = { top, etiqueta }
     }
-    return { pliegue: Math.round(scroller.clientHeight), accionable: mejor }
+    // P18 — la barra de acción es `sticky bottom-0`: tapa la franja de abajo del
+    // scroller, así que el pliegue REAL para el contenido es lo que queda. Sin
+    // descontarla, esta prueba pasaría en verde sobre un control cubierto.
+    const barra = scroller.querySelector('[data-slot="barra-accion"]')
+    const alturaBarra = barra ? Math.round(barra.getBoundingClientRect().height) : 0
+    return {
+      pliegue: Math.round(scroller.clientHeight) - alturaBarra,
+      barra: alturaBarra,
+      accionable: mejor,
+    }
   })
 }
 
@@ -263,7 +280,7 @@ for (const { paso, lead } of PANTALLAS_DE_TRABAJO) {
     ).not.toBeNull()
     expect(
       geo!.accionable!.top,
-      `${paso}: «${geo!.accionable?.etiqueta}» arranca a ${geo!.accionable?.top}px y el pliegue está en ${geo!.pliegue}px`,
+      `${paso}: «${geo!.accionable?.etiqueta}» arranca a ${geo!.accionable?.top}px y el pliegue efectivo está en ${geo!.pliegue}px (barra ${geo!.barra}px)`,
     ).toBeLessThan(geo!.pliegue)
 
     expectNoConsoleErrors(guard)

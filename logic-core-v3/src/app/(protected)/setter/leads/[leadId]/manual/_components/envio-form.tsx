@@ -2,13 +2,13 @@
 
 import { useState } from 'react'
 import { Rocket, Send } from 'lucide-react'
-import { Button } from '@/components/ui'
 import { buildDemoMensajeBlock, type CopyBlockLead } from '@/lib/leados/copy-blocks'
 import { GUIA_ENVIO } from '@/lib/leados/guidance-content'
 import { useStepAction } from '@/lib/use-step-action'
 import { enviarDemoAprobada } from '@/app/(protected)/setter/_actions/outreach.actions'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M15 — la acción de envío, presentada en el manual (5.4, tramo Envío). Es
@@ -45,6 +45,17 @@ export function EnvioForm({
     })
   }
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Nunca está
+  // bloqueada acá: el gate del envío es de RENDER (si está cerrado este form no
+  // se monta y el módulo muestra el motivo en su lugar), así que no hay disabled
+  // que explicar.
+  useAccionPrincipal({
+    etiqueta: 'Ya la envié — registrar',
+    onClick: registrarEnvioDemo,
+    loading: envio.isPending,
+    icon: <Send size={14} strokeWidth={1.5} />,
+  })
+
   return (
     <div className="space-y-3 rounded-2xl border border-emerald-400/25 bg-emerald-500/[0.05] p-4">
       <div className="flex items-center gap-2">
@@ -66,9 +77,6 @@ export function EnvioForm({
           {serverError}
         </p>
       )}
-      <Button onClick={registrarEnvioDemo} loading={envio.isPending} icon={<Send size={14} strokeWidth={1.5} />}>
-        Ya la envié — registrar
-      </Button>
     </div>
   )
 }

@@ -10,6 +10,7 @@ import { GUIA_DRAFT } from '@/lib/leados/guidance-content'
 import { guardarDraftUrl } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { DraftUrlInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { EnlaceChequeoFinal } from './enlace-chequeo'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M13 — la captura del borrador (5.4, tramo Borrador). Presentación del manual
@@ -89,6 +90,23 @@ export function BorradorForm({
       router.refresh()
     })
   }
+
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Con el
+  // borrador ya publicado y sin editar no hay acción que AVANCE (la salida es el
+  // enlace al chequeo, y «Cambiar el link» abre la edición): ahí se declara
+  // `null` y la barra no aparece. El hook va antes del early-return porque las
+  // reglas de hooks no admiten llamadas condicionales.
+  const enConsulta = Boolean(draftUrl) && !editando
+  useAccionPrincipal(
+    enConsulta
+      ? null
+      : {
+          etiqueta: 'Guardar borrador',
+          onClick: guardar,
+          loading: isPending,
+          icon: <UploadCloud size={14} strokeWidth={1.5} />,
+        },
+  )
 
   // ── Borrador publicado (y sin editar): estado verificado con el link ────────
   if (draftUrl && !editando) {
@@ -193,16 +211,13 @@ export function BorradorForm({
         </p>
       )}
 
-      <div className="flex items-center gap-3">
-        <Button onClick={guardar} loading={isPending} icon={<UploadCloud size={14} strokeWidth={1.5} />}>
-          Guardar borrador
-        </Button>
-        {editando && (
+      {editando && (
+        <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={() => setEditando(false)} disabled={isPending}>
             Cancelar
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

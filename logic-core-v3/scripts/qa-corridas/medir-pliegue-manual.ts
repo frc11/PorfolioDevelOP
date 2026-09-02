@@ -64,6 +64,33 @@ const CATORCE = [
 ] as const
 type PantallaId = (typeof CATORCE)[number]
 
+/**
+ * P18 — LA ACCIÓN PRINCIPAL de cada pantalla, por su etiqueta.
+ *
+ * El censo del sprint (bitácora) fijó cuál es, en las catorce, el control que
+ * hace AVANZAR el recorrido. Se busca POR ETIQUETA y no por un atributo nuevo
+ * a propósito: así el MISMO instrumento mide el brazo viejo (donde el botón
+ * está al final del formulario) y el nuevo (donde está en la barra), sin dos
+ * caminos de código que puedan divergir.
+ *
+ * Las pantallas sin entrada acá no tienen acción principal con el lead que les
+ * toca en el reparto: los tres estados terminales nunca la tienen, y m13 con
+ * un lead APROBADA cae en su rama de consulta (sin botón).
+ */
+const ACCION_ESPERADA: Partial<Record<PantallaId, readonly string[]>> = {
+  m1: ['Registrar evaluación', 'Registrar evaluación y descartar'],
+  m4: ['Ya lo mandé en Instagram — registrar'],
+  m5: ['Registrar resultado'],
+  m6: ['Guardar brief'],
+  mc1: ['Arrancar construcción'],
+  mc2: ['Arrancar construcción'],
+  m13: ['Guardar borrador', 'Reabrir construcción'],
+  m14: ['Enviar a revisión'],
+  m15: ['Ya la envié — registrar'],
+  m16: ['Confirmar y agendar', 'Sí, confirmar'],
+  mr: ['Reabrir construcción'],
+}
+
 const ANCHOS = [
   { nombre: '1440', width: 1440, height: 900 },
   { nombre: '390', width: 390, height: 844 },
@@ -93,6 +120,22 @@ type Medicion = {
   rotulos: number
   /** S1 — superficies (tarjetas) anidadas entre el scroller y el control de trabajo. */
   superficies: number
+  /**
+   * P18 — lo que la BARRA de acción le saca al pliegue. Es 0 en el brazo viejo
+   * (no existe), así que el mismo instrumento mide los dos y el «antes» sale
+   * idéntico al de P17. `pliegueEfectivo = pliegue - barra`: la barra tapa la
+   * franja de abajo del scroller, así que el pliegue REAL para el contenido es
+   * el que queda. Medir contra `pliegue` a secas diría que la barra es gratis.
+   */
+  barra: number
+  pliegueEfectivo: number
+  /** P18 — la acción principal (ACCION_ESPERADA), y si se ve sin scrollear. */
+  accionPrincipal: string | null
+  accionTop: number | null
+  accionBloqueada: boolean | null
+  /** ¿Se ve la acción principal con el scroll arriba de todo? ¿Y abajo de todo? */
+  accionVisibleArriba: boolean | null
+  accionVisibleAbajo: boolean | null
   /** Censo de lo que la pantalla ofrece — la prueba de que nada desapareció. */
   censo: Record<string, number>
   altoTotal: number
@@ -131,6 +174,7 @@ function geometria() {
     registro: pieza('[aria-label="Registro"]'),
     avance: pieza('[aria-label="Avance"]'),
     navConstruccion: pieza('nav[aria-label^="Fases de la construcción"]'),
+    barraAccion: pieza('[data-slot="barra-accion"]'),
     navAtras: pieza('nav[aria-label^="Pantallas completadas"]'),
     encabezado: pieza('[data-slot="encabezado"]'),
     ctxContenido: pieza('[aria-label="Contexto del lead"] [data-zona="contenido"]'),
@@ -140,13 +184,21 @@ function geometria() {
   // El primer control interactivo VISIBLE fuera de la cabecera. La cabecera se
   // excluye porque sus links son salida y contexto (volver a tu día, Instagram,
   // Maps), no el trabajo de la pantalla.
+  //
+  // P18 — la BARRA también se excluye, por la misma razón y por una segunda: al
+  // ser `sticky`, su caja se lee en la posición PEGADA, así que la coordenada de
+  // contenido que sale de ahí no significa nada. Sin excluirla, la barra ganaba
+  // el «primer accionable» de la pantalla y este número pasaba a decir «hay una
+  // barra», no «acá arranca el trabajo». La barra se mide aparte.
   const header = main.querySelector('header')
+  const barraAccion = main.querySelector('[data-slot="barra-accion"]')
   const SEL =
     'button, input, textarea, select, [role="button"], [contenteditable="true"], a[href]'
   let accionable: { top: number; etiqueta: string } | null = null
   let elAccionable: Element | null = null
   for (const el of Array.from(main.querySelectorAll(SEL))) {
     if (header && header.contains(el)) continue
+    if (barraAccion && barraAccion.contains(el)) continue
     if (!visible(el)) continue
     if (el instanceof HTMLElement && el.hidden) continue
     const t = origen(el)
@@ -243,6 +295,7 @@ function geometria() {
 
   return {
     pliegue: Math.round(main.clientHeight),
+    barra: piezas.barraAccion?.alto ?? 0,
     altoTotal: Math.round(main.scrollHeight),
     piezas,
     accionable,
@@ -251,6 +304,54 @@ function geometria() {
     censo,
     superficies: profundidad(elCaptura ?? elAccionable),
   }
+}
+
+/**
+ * P18 — ¿DÓNDE ESTÁ la acción principal, y se ve sin scrollear?
+ *
+ * Se busca por etiqueta (ACCION_ESPERADA) para que el brazo viejo y el nuevo
+ * pasen por el mismo código. «Se ve» es ESTRICTO: la caja del control tiene que
+ * entrar ENTERA en la parte visible del scroller. Un botón que asoma 8 px no se
+ * lee — y ese es justamente el falso verde que este sprint no puede fabricar.
+ *
+ * Se mide en las dos puntas del scroll (arriba de todo y abajo de todo): la
+ * promesa del sprint es «en cualquier posición de la pantalla», y esas dos son
+ * las que la pueden refutar.
+ */
+function inspeccionAccion(etiquetas: readonly string[]) {
+  const main = document.querySelector('main')
+  if (!main) return null
+  const SEL = 'button, a[href], [role="button"]'
+  const norm = (s: string) => s.replace(/[\s ]+/g, ' ').trim()
+  const objetivo = Array.from(main.querySelectorAll(SEL)).find((el) => {
+    const t = norm(el.textContent || '')
+    return etiquetas.some((e) => t === e || t.startsWith(e))
+  })
+  if (!objetivo) return null
+
+  const cajaMain = main.getBoundingClientRect()
+  const r = objetivo.getBoundingClientRect()
+  const dentro = r.top >= cajaMain.top - 0.5 && r.bottom <= cajaMain.bottom + 0.5
+  const bloqueada =
+    (objetivo as HTMLButtonElement).disabled === true ||
+    objetivo.getAttribute('aria-disabled') === 'true'
+  return {
+    etiqueta: norm(objetivo.textContent || '').slice(0, 42),
+    top: Math.round(r.top - cajaMain.top + main.scrollTop),
+    dentro,
+    bloqueada,
+  }
+}
+
+/** Lleva el scroller a una posición y devuelve la inspección de la acción. */
+async function medirAccion(page: Page, etiquetas: readonly string[], alFondo: boolean) {
+  await page.evaluate((fondo) => {
+    const m = document.querySelector('main')
+    if (m) m.scrollTop = fondo ? m.scrollHeight : 0
+  }, alFondo)
+  // Un frame para que el sticky se reposicione antes de medir.
+  await page.waitForTimeout(180)
+  return page.evaluate(inspeccionAccion, etiquetas)
 }
 
 async function medir(
@@ -291,7 +392,20 @@ async function medir(
         (g.piezas.ctxContenido?.alto ?? 0) -
         (g.piezas.muniContenido?.alto ?? 0)
   const referencia = esDeTrabajo ? captura : accionable
-  const entra = referencia !== null && referencia < g.pliegue
+  // P18 — el veredicto se juzga contra el pliegue EFECTIVO: lo que la barra
+  // tapa deja de ser pliegue. En el brazo viejo `barra` es 0 y el número sale
+  // idéntico al de P17.
+  const pliegueEfectivo = g.pliegue - g.barra
+  const entra = referencia !== null && referencia < pliegueEfectivo
+
+  // P18 — la acción principal, en las dos puntas del scroll.
+  const etiquetas = ACCION_ESPERADA[pantalla] ?? null
+  const arriba = etiquetas ? await medirAccion(page, etiquetas, false) : null
+  const abajo = etiquetas ? await medirAccion(page, etiquetas, true) : null
+  await page.evaluate(() => {
+    const m = document.querySelector('main')
+    if (m) m.scrollTop = 0
+  })
 
   if (SHOTS_DIR) {
     const dir = path.resolve(SHOTS_DIR)
@@ -315,6 +429,16 @@ async function medir(
     alturas,
     rotulos: g.rotulos,
     superficies: g.superficies,
+    barra: g.barra,
+    pliegueEfectivo,
+    accionPrincipal: arriba?.etiqueta ?? abajo?.etiqueta ?? null,
+    accionTop: arriba?.top ?? abajo?.top ?? null,
+    accionBloqueada: arriba?.bloqueada ?? abajo?.bloqueada ?? null,
+    // `null` = esta pantalla NO tiene acción principal con este lead (los tres
+    // estados terminales; m13 en su rama de consulta). Distinto de `false`, que
+    // es «la tiene y no se ve»: confundirlos inventaría un bache.
+    accionVisibleArriba: arriba || abajo ? Boolean(arriba?.dentro) : null,
+    accionVisibleAbajo: arriba || abajo ? Boolean(abajo?.dentro) : null,
     censo: g.censo,
     altoTotal: g.altoTotal,
     entra,
@@ -484,7 +608,11 @@ async function main() {
         'accion'.padStart(7),
         'registro'.padStart(9),
         'pliegue'.padStart(8),
+        'barra'.padStart(6),
+        'plgEfec'.padStart(8),
         'entra'.padStart(6),
+        'accArr'.padStart(7),
+        'accAba'.padStart(7),
         'cabec'.padStart(6),
         'instr'.padStart(6),
         'ctx'.padStart(5),
@@ -504,7 +632,21 @@ async function main() {
           String(f.accionable ?? '-').padStart(7),
           String(f.registro ?? '-').padStart(9),
           String(f.pliegue).padStart(8),
+          String(f.barra).padStart(6),
+          String(f.pliegueEfectivo).padStart(8),
           (f.entra ? 'si' : 'NO').padStart(6),
+          (f.accionVisibleArriba === null
+            ? '-'
+            : f.accionVisibleArriba
+              ? 'si'
+              : 'NO'
+          ).padStart(7),
+          (f.accionVisibleAbajo === null
+            ? '-'
+            : f.accionVisibleAbajo
+              ? 'si'
+              : 'NO'
+          ).padStart(7),
           String(f.alturas.cabecera ?? 0).padStart(6),
           String(f.alturas.instruccion ?? 0).padStart(6),
           String(f.alturas.contexto ?? 0).padStart(5),
@@ -532,6 +674,22 @@ async function main() {
       `  -> censo de las 14: ${Object.entries(totales)
         .map(([k, v]) => `${k}=${v}`)
         .join(' · ')}`,
+    )
+    // P18 — la acción principal a la vista, en las dos puntas del scroll.
+    const conAccion = grupo.filter((f) => f.accionVisibleArriba !== null)
+    const vistaArriba = conAccion.filter((f) => f.accionVisibleArriba).length
+    const vistaAbajo = conAccion.filter((f) => f.accionVisibleAbajo).length
+    const siempre = conAccion.filter(
+      (f) => f.accionVisibleArriba && f.accionVisibleAbajo,
+    ).length
+    console.log(
+      `  -> acción principal a la vista: arriba ${vistaArriba}/${conAccion.length} · abajo ${vistaAbajo}/${conAccion.length} · SIEMPRE ${siempre}/${conAccion.length}`,
+    )
+    const barras = grupo.filter((f) => f.barra > 0)
+    console.log(
+      `  -> barra presente en ${barras.length}/${grupo.length} · alto ${
+        barras.length ? `${Math.min(...barras.map((f) => f.barra))}–${Math.max(...barras.map((f) => f.barra))}` : '0'
+      } px`,
     )
     const cromos = trabajo.map((f) => f.cromoLayout ?? 0)
     console.log(

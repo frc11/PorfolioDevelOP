@@ -14,6 +14,7 @@ import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.a
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { cn } from '@/lib/utils'
+import { useAccionPrincipal } from '../manual/_components/barra-accion'
 
 /**
  * El REGISTRO del veredicto (5.1, patrón 4.2): score + veredicto + razonamiento
@@ -152,6 +153,16 @@ export function EvaluacionForm({
 
   const esDescarte = score !== null && score <= 2
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Nunca está
+  // bloqueada (la validación es un `safeParse` en el click y el gate real vive
+  // server-side), así que no hay motivo que mostrar. La etiqueta sí cambia con
+  // el score: con 1–2 el registro descarta en el mismo paso.
+  useAccionPrincipal({
+    etiqueta: esDescarte ? 'Registrar evaluación y descartar' : 'Registrar evaluación',
+    onClick: intentarEnviar,
+    loading: isPending && !confirmOpen,
+  })
+
   return (
     <div className="space-y-5">
       <Field
@@ -234,10 +245,6 @@ export function EvaluacionForm({
           {serverError}
         </p>
       )}
-
-      <Button onClick={intentarEnviar} loading={isPending && !confirmOpen}>
-        {esDescarte ? 'Registrar evaluación y descartar' : 'Registrar evaluación'}
-      </Button>
 
       <Modal
         open={confirmOpen}

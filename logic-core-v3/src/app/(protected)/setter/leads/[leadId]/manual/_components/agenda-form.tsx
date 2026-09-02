@@ -16,6 +16,7 @@ import {
   type ConfirmarReunionInput,
 } from '@/app/(protected)/setter/_actions/agenda.schemas'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
+import { useAccionPrincipal, type AccionPrincipal } from './barra-accion'
 import { useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
 
@@ -152,6 +153,35 @@ export function AgendaForm({
         `Reunión agendada 🎯 — ${formatFechaHora(data.slotStart)}. Franco ya tiene tus notas.`,
     })
   }
+
+  // P18 — la acción principal de m16 es la que CIERRA la pantalla: confirmar el
+  // booking. `Buscar horarios libres de Franco` se queda donde está — es una
+  // consulta que alimenta la elección, no el avance del recorrido, y además ya
+  // cae dentro del primer pliegue.
+  //
+  // La acción cambia DENTRO de la pantalla, no sólo con el estado del lead: sin
+  // horario elegido no hay ninguna (la barra no aparece), con horario elegido es
+  // «Confirmar y agendar», y en la antesala pasa a ser el irreversible «Sí,
+  // confirmar». El `disabled` es el de siempre —anti-doble-click— y por eso no
+  // lleva motivo: no hay nada que al setter le falte hacer.
+  const accionAgenda: AccionPrincipal | null =
+    slotElegido === null
+      ? null
+      : porConfirmar
+        ? {
+            etiqueta: 'Sí, confirmar',
+            onClick: () => confirmar(porConfirmar),
+            loading: confirmacion.isPending,
+            disabled: confirmacion.isPending,
+            icon: <CalendarCheck2 size={14} strokeWidth={1.5} />,
+          }
+        : {
+            etiqueta: 'Confirmar y agendar',
+            onClick: revisarAntesDeConfirmar,
+            disabled: confirmacion.isPending,
+            icon: <CalendarCheck2 size={14} strokeWidth={1.5} />,
+          }
+  useAccionPrincipal(accionAgenda)
 
   return (
     <div className="space-y-4">
@@ -292,21 +322,13 @@ export function AgendaForm({
               {/* 6.2 — La ÚNICA fricción del paso, y va acá: confirmar crea el
                   booking real y le avisa al prospecto. Inline (nada de
                   window.confirm), con el Callout del proyecto. */}
-              {porConfirmar ? (
+              {porConfirmar && (
                 <Callout tone="brand" icon={CalendarCheck2} title="Vas a confirmar la reunión">
                   <p className="text-xs leading-relaxed">
                     Vas a confirmar {formatFechaHora(porConfirmar.slotStart)} — esto le avisa al
                     prospecto.
                   </p>
                   <div className="mt-3 flex items-center gap-3">
-                    <Button
-                      onClick={() => confirmar(porConfirmar)}
-                      loading={confirmacion.isPending}
-                      disabled={confirmacion.isPending}
-                      icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
-                    >
-                      Sí, confirmar
-                    </Button>
                     <Button
                       variant="ghost"
                       onClick={() => setPorConfirmar(null)}
@@ -316,14 +338,6 @@ export function AgendaForm({
                     </Button>
                   </div>
                 </Callout>
-              ) : (
-                <Button
-                  onClick={revisarAntesDeConfirmar}
-                  disabled={confirmacion.isPending}
-                  icon={<CalendarCheck2 size={14} strokeWidth={1.5} />}
-                >
-                  Confirmar y agendar
-                </Button>
               )}
             </div>
           )}
