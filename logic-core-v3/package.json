@@ -48,6 +48,7 @@
     "check:invariant:copy-sin-jerga": "npx tsx src/lib/leados/copy-sin-jerga.invariant.ts",
     "check:invariant:ficha-bloques": "npx tsx src/lib/leados/ficha-bloques.invariant.ts",
     "check:invariant:paso-admitido": "npx tsx src/lib/leados/paso-admitido.invariant.ts",
+    "check:invariant:recorrido": "npx tsx src/lib/leados/recorrido.invariant.ts",
     "test:ev1": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev1.invariant.ts",
     "test:ev2": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev2.invariant.ts",
     "test:ev3:golden": "npx tsx src/modules/chatbot/server/verticals/__tests__/ev3.golden.invariant.ts",

@@ -9932,3 +9932,200 @@ llave de datos: los dos campos nuevos de la derivación se calculan de lo ya per
 
 Baselines del sprint: `docs/baselines/p19-barrido-{antes,despues}.json` y
 `docs/baselines/p19-pliegue-{antes,despues}.json`. Capturas: `docs/proof-screenshots/p19/`.
+
+---
+
+## Sprint P20 — LA FRANJA DEL RECORRIDO: el producto empieza a mostrar el futuro — 2026-09-02
+
+**Base:** `fix/paso-que-corresponde` @ `62c6273a` · **Rama:** `fix/franja-recorrido`
+
+El producto mostraba el pasado y nunca el futuro. Había una tira de completadas al pie y un rótulo
+con el nombre de la fase arriba, y ninguna de las dos decía cuánto falta ni qué viene. La única
+pregunta que la pantalla contestaba era **qué hiciste** — y el segundo valor declarado del brief es
+«no tener que pensar qué sigue».
+
+Por qué recién ahora: P19 midió que la derivación señalaba una pantalla no admitida en el 11 % de los
+casos, y como paso de ahora en 29.856 estados. Una franja que dijera «estás acá» sobre eso habría
+mentido con más superficie. Ahora está en cero.
+
+### Paso 1 — qué es «el recorrido». Las cinco respuestas
+
+**1 · La unidad son las nueve FASES del manual** (`FASES_MANUAL`, `manual.ts:293`): Ficha, Opener,
+Seguimiento, Brief, Construcción, Borrador, Chequeo final, Envío, Agenda.
+
+Conviven cuatro granularidades y las otras tres se descartan por motivo, no por gusto:
+
+| candidato | dónde vive | por qué no |
+|---|---|---|
+| **fases del manual** | `FASES_MANUAL` — `manual.ts:293` | **elegida** |
+| pantallas (catorce) | `PANTALLA_IDS` — `manual.ts:45` | `mc1`/`mc2` son DOS pantallas de UN paso — es la premisa que P6-B escribió al agruparlas («la unidad persistida sigue siendo la fase, la pantalla es presentación»). Y `espera`/`revision`/`archivo` no son pasos de nadie: son la ausencia de paso (`tipo: 'estado'`, `fase: null`). |
+| stages del dossier | `DossierStage` — `dossier-stage.ts` | son del sistema. El propio producto ya los muestra como badge al lado del nombre del negocio (`manual-nav.tsx:110`), no como recorrido. |
+| bloques de la ficha (P16) | `ficha-bloques.ts` | es el ADENTRO de un paso, no el recorrido. |
+
+**2 · Son nueve, y entran.** Medido, no estimado: la franja mide **26 px en las catorce, a los dos
+anchos** (`docs/baselines/p20-destinos-despues.json`). A 1440 los nueve nombres se escriben; a 390 se
+escriben dos —el paso de ahora y el que sigue— y el resto queda como posición numerada o tilde.
+
+**3 · La lista ya existe; el ORDEN se proyecta.** Los nombres salen de `FASES_MANUAL`. El orden
+**no se escribió a mano**: `FASES_EN_ORDEN` (`recorrido.ts:52`) se proyecta de `ORDEN_MANUAL`
+(`manual.ts:407`, la lista canónica del manual) leyendo la fase de cada pantalla y deduplicando.
+Escribirla a mano habría creado la segunda lista que se desincroniza en silencio — exactamente el
+defecto que `PANTALLA_DE_FASE` ya tuvo que cerrar con una tabla explícita. El invariante afirma las
+dos puntas.
+
+**4 · El paso de ahora sale de `posicion.actual`** — el dato que P19 dejó consistente — leído como
+`PANTALLAS[posicion.actual].fase` (`recorrido.ts:131`). No hay un cálculo paralelo. Y son **dos
+marcas, no una**: el acento cyan dice dónde está EL LEAD; `aria-current` de página dice qué pantalla
+estás MIRANDO. Coinciden casi siempre; cuando no —entraste a una completada— la franja sigue
+señalando el paso de ahora en vez de mudarse con el ojo.
+
+**5 · Los caminos que no son rectos: se muestran, y se muestran solos.**
+
+- **El rechazo que vuelve.** En `mr`/re-loop, `PANTALLAS.mr.fase = 'construccion'` → el paso de ahora
+  es Construcción, y **Borrador queda tildado por delante** (el re-loop preserva el `draftUrl`). La
+  franja dibuja el bucle sin que nadie lo programe: el paso de ahora está DETRÁS de uno completado.
+  Sale de `completadas` + `actual`, los dos ya derivados.
+- **La postergación y la espera.** `espera`/`revision` no tienen fase → **ningún paso queda marcado
+  como el de ahora**, que es la verdad: en una pausa comercial no hay paso del setter. Se lee lo
+  hecho y lo que falta; el porqué lo dice el titular de la pantalla («Le toca al negocio», «Le toca a
+  Franco»).
+- **El descarte.** `archivo` tampoco tiene fase. La franja muestra **hasta dónde llegó** el lead antes
+  de cerrarse — la única pregunta que el archivo puede contestar.
+
+### Paso 2 — la franja, y qué reemplazó
+
+`FranjaRecorrido` (`franja-recorrido.tsx`) va **entre la cabecera y el título de la pantalla, en las
+catorce**: en `PantallaManual` (once), en `EstadoManual` (espera/revisión) y en `ArchivoManual`.
+
+**Reemplaza a las dos cosas que el sprint nombró, y a nada más:**
+
+| se fue | dónde estaba | qué decía |
+|---|---|---|
+| **la tira de completadas** (`NavAtras`) | al PIE de 12 de 14 · 91 px a 1440, 108–146 a 390 | el pasado, y nada más |
+| **el indicador de paso** (`indicadorDeFase`) | primera fila de la instrucción | el nombre de la fase, y «paso N de M» sólo en Construcción |
+
+`indicadorDeFase` se borró de `manual.ts` (no lo usaba nadie más). **`NavConstruccion` NO se tocó**:
+es otra cosa —navegación libre entre `mc1` y `mc2`, auto-reporte §6-3— y no estaba en el encargo.
+
+**Lo alcanzable se toca; lo que no, no navega.** Un paso sin destino alcanzable se pinta como un
+`span`, no como un enlace: es el contrato de `EnlacePantalla` llevado a los nueve pasos. El criterio
+de alcance es el MISMO de la guardia de la página (`completadas ∪ habilitadas`), no una copia. Y el
+«todavía no» se escribe una sola vez, en el primer paso no habilitado **de los que vienen** — el censo
+de las catorce mostró que sin ese recorte un lead sin opener registrado leía «Opener · todavía no»
+dos pasos ATRÁS del que estaba haciendo.
+
+**Lo que NO se inventó, y queda dicho:** el «qué falta» ESPECÍFICO de cada paso no existe como dato a
+granularidad de fase. Lo más parecido, `admitePantalla().motivo` (P19), está escrito para el mensaje
+de fallo de un invariante, en jerga de máquina («gate», «stage posterior a FICHA», «contactos > 0») y
+contesta otra pregunta («¿esta tarea es hacible ahora?»). No se recicló como copy. La franja dice
+«todavía no»; el porqué lo dice la pantalla en la que el setter está parado.
+
+### La tensión del sprint — medida, y una regresión frenada a tiempo
+
+⚠️ **La primera versión rompió la regla 1 y la medición la levantó.** A 390 la franja se partía en dos
+líneas: costaba **62 px** en vez de 33, y con eso `m1` —la única pantalla de trabajo cuyo primer campo
+entra a ese ancho— **perdía su accionable por 3 px** (634 px de captura contra un pliegue efectivo de
+631). El arreglo no fue achicar la letra: fue **guardar los nombres que no contestan la pregunta** a
+menos de 640 px, y poner la fila en una sola línea con desborde horizontal como red, para que la
+franja se desplace en vez de partirse. Queda fijado por §4 del test, en las catorce.
+
+### Las dos mediciones base — antes y después
+
+`scripts/qa-corridas/medir-pliegue-manual.ts`, las catorce, a 1440 y 390.
+`docs/baselines/p20-pliegue-{antes,despues}.json`.
+
+| | antes | después |
+|---|---|---|
+| 1440 · entra algo accionable en el pliegue | 8/14 | **8/14** |
+| 1440 · acción principal a la vista (arriba · abajo · SIEMPRE) | 9/9 · 9/9 · 9/9 | **9/9 · 9/9 · 9/9** |
+| 1440 · de las 10 de trabajo, la captura arranca dentro del pliegue | 4 | **4** |
+| 1440 · cromo del layout-tipo | 355–375 | 388–408 |
+| 390 · entra algo accionable en el pliegue | 4/14 | **4/14** |
+| 390 · acción principal a la vista | 9/9 · 9/9 · 9/9 | **9/9 · 9/9 · 9/9** |
+| 390 · de las 10 de trabajo, la captura arranca dentro del pliegue | 1 | **1** |
+| 390 · cromo | 366–447 | 400–481 |
+| censo de las 14 (los dos anchos) | `copiar=11 · linksExternos=6 · pendientes=6 · controles=65 · plegables=38` | idéntico |
+
+**Ninguna pantalla perdió su accionable, y la acción sigue 9 de 9 a los dos anchos.**
+
+### El saldo vertical, pantalla por pantalla
+
+La franja cuesta **+33/34 px** encima del pliegue en las once de trabajo y **+45/46 px** en las tres
+de estado (viven en una pila de separación mayor que la del layout-tipo). Lo que devuelve es alto
+TOTAL, porque la tira que reemplaza estaba al pie:
+
+| | alto total 1440 | alto total 390 |
+|---|---|---|
+| las 12 que tenían tira de completadas | **−59 a −74 px** | **−69 a −128 px** |
+| `m1` y `archivo` (nunca la tuvieron) | +34 / +24 px | +34 / +24 px |
+
+O sea: **el pliegue paga 33 px y el scroll devuelve entre 59 y 128** en doce de las catorce. Las dos
+que pagan sin recibir son la primera pantalla del recorrido y el archivo, que no tenían nada que
+sacar. El margen más ajustado que queda es `m1` a 390: 606 px de captura contra 631 de pliegue
+efectivo — **25 px**, y es el número que §4 del test protege.
+
+### El censo de destinos — lo que se perdió, dicho
+
+`scripts/qa-corridas/capturar-franja.ts` mide, por pantalla, a qué destinos del manual se llega con un
+click. **La franja colapsa `mc1`+`mc2` en un solo chip** («Construcción»), que lleva a la primera
+alcanzable. Consecuencia real y acotada: desde `m13`/`m14`/`m15`/`m16`/`espera`/`revision`, `mc2` deja
+de ser un destino DIRECTO (era un chip de la tira de completadas) y pasa a estar a dos clicks —
+Construcción → `NavConstruccion`, que sigue sirviendo las dos. **Ningún otro destino se perdió**, y
+ninguno de los enlaces declarados en `enlaces-manual.invariant.ts` cambió.
+
+### El invariante
+
+**`npm run check:invariant:recorrido`** — corre sin DB, barre **73.728 estados** y **146.304 franjas**
+(cada estado se lee dos veces: parado en la actual y parado en una completada).
+
+Tres reglas: §1 los nueve pasos son los del manual, enteros y sin repetir; §2 **ningún chip navega a
+donde el motor no deja** (`destino ∈ completadas ∪ habilitadas`, el criterio de la guardia, no una
+copia); §3 el paso de ahora sale de `posicion.actual` y a lo sumo hay uno, y las pantallas sin fase no
+marcan ninguno.
+
+Cuatro dientes contra el verde vacío: el piso de estados; el piso de franjas (si la segunda lectura
+deja de ejercitarse, §3 ya no prueba nada); el piso por ESTADO de chip (los cuatro tienen que
+ocurrir — si no, §2 estaría afirmando sólo sobre chips alcanzables); y el par **CONDUCTA/SABOTAJE**,
+que le pasa al detector dos franjas torcidas a propósito y exige que las vea. Una de las dos es
+literalmente la forma en que este sprint podía salir mal: **enlazar los nueve pasos siempre**.
+
+`INVARIANTES_ESPERADOS` sube 52 → 53 en este mismo commit.
+
+### Las pruebas
+
+**Nueva:** `tests/setter/25-franja-recorrido.spec.ts` — **37 casos**, todos por VISIBILIDAD.
+
+- **§1** (×14) la franja está en las catorce, visible, con los nueve pasos nombrados desde el registro.
+- **§2** (×7) el paso de ahora es la fase de la pantalla que la derivación señala — y se le pregunta a
+  la derivación pidiendo un id retirado, no re-derivándola en el test. Incluye los dos caminos que no
+  son rectos (rechazado, pausado) y el caso que discrimina: **parado en una completada, la marca no se
+  muda con el ojo**.
+- **§3** los pasos que el motor no habilita se ven y NO son enlaces; y los que sí, se siguen de verdad
+  (se navega a cada uno y se exige que la URL no rebote).
+- **§4** (×14) a 390 la franja no se parte en dos líneas.
+
+**Adaptados, y con el mismo criterio que ya tenían:** `22-cromo-primer-pliegue.spec.ts` y el
+instrumento de medición excluyen la franja de «dónde arranca el trabajo», **igual que ya excluían la
+cabecera y la barra de acción**, y por lo mismo: es cromo de navegación y vive arriba de todo. Sin esa
+exclusión la franja ganaba el «primer accionable» de las catorce y §2 de P17 pasaba en verde midiendo
+la franja en vez del trabajo — el falso verde exacto que este sprint no podía fabricarse. El costo
+vertical de la franja **no se esconde** con eso: se sigue contando como cromo, empujando la captura y
+el registro hacia abajo, que es donde tiene que doler. El censo de links internos descuenta los nueve
+chips por la misma razón (si no, una salida perdida en el contenido quedaría tapada).
+
+### Nada de lógica, schema ni llaves de datos
+
+`derivarPantalla` no se tocó. Las transiciones legales, los gates, el schema y las llaves persistidas,
+tampoco: la franja es una LECTURA de `PosicionManual`. El único cambio en `manual.ts` fuera del
+borrado de `indicadorDeFase` es exportar `ORDEN_MANUAL`, que ya existía.
+
+### Para la verificación humana
+
+- **Que la franja oriente y no decore.** ¿Un setter que la mira sabe qué sigue sin pensarlo? Eso
+  ningún test lo dice. Capturas en `docs/proof-screenshots/p20/` — las catorce a los dos anchos, más
+  los tres caminos que no son rectos (`extra-pausado`, `extra-rechazado`, `extra-descartado`).
+- **Que las tres superficies fijas —franja, contenido y barra— no ahoguen el trabajo a 390.** El
+  número está: la franja cuesta 33 px y `m1` conserva 25 px de margen. Si al mirarlo se siente
+  apretado, el dato para decidir está.
+- **Y si el saldo no cierra, la franja se saca.** Es una decisión legítima: cuesta 33 px de pliegue y
+  devuelve 59–128 de scroll en doce de catorce. El sprint deja el número, no la conclusión.

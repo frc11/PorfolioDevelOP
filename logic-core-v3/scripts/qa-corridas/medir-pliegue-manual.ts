@@ -175,6 +175,7 @@ function geometria() {
     avance: pieza('[aria-label="Avance"]'),
     navConstruccion: pieza('nav[aria-label^="Fases de la construcción"]'),
     barraAccion: pieza('[data-slot="barra-accion"]'),
+    franja: pieza('[data-slot="franja-recorrido"]'),
     navAtras: pieza('nav[aria-label^="Pantallas completadas"]'),
     encabezado: pieza('[data-slot="encabezado"]'),
     ctxContenido: pieza('[aria-label="Contexto del lead"] [data-zona="contenido"]'),
@@ -192,6 +193,13 @@ function geometria() {
   // barra», no «acá arranca el trabajo». La barra se mide aparte.
   const header = main.querySelector('header')
   const barraAccion = main.querySelector('[data-slot="barra-accion"]')
+  // P20 — la FRANJA del recorrido se excluye por la misma razón que la
+  // cabecera: sus chips son navegación entre pasos, no el trabajo de esta
+  // pantalla. Sin excluirla ganaría el «primer accionable» de las catorce (vive
+  // arriba de todo) y este número pasaría a decir «hay una franja». El costo
+  // vertical de la franja NO se esconde con esto: se mide como cromo, empujando
+  // `captura`/`registro` hacia abajo, que es donde tiene que doler.
+  const franja = main.querySelector('[data-slot="franja-recorrido"]')
   const SEL =
     'button, input, textarea, select, [role="button"], [contenteditable="true"], a[href]'
   let accionable: { top: number; etiqueta: string } | null = null
@@ -199,6 +207,7 @@ function geometria() {
   for (const el of Array.from(main.querySelectorAll(SEL))) {
     if (header && header.contains(el)) continue
     if (barraAccion && barraAccion.contains(el)) continue
+    if (franja && franja.contains(el)) continue
     if (!visible(el)) continue
     if (el instanceof HTMLElement && el.hidden) continue
     const t = origen(el)
@@ -270,7 +279,13 @@ function geometria() {
       /^Copi(ar bloque|ado)$/.test(texto(b)),
     ).length,
     linksExternos: main.querySelectorAll('a[target="_blank"]').length,
-    linksInternos: main.querySelectorAll('a[href^="/setter"]').length,
+    // P20 — los links de la FRANJA se descuentan: son nueve por pantalla y, si
+    // se sumaran, una salida perdida en el contenido quedaría tapada por ellos.
+    // La franja se cuenta aparte (`franjaPasos`).
+    linksInternos:
+      main.querySelectorAll('a[href^="/setter"]').length -
+      main.querySelectorAll('[data-slot="franja-recorrido"] a[href^="/setter"]').length,
+    franjaPasos: main.querySelectorAll('[data-slot="franja-recorrido"] li').length,
     pendientes: Array.from(main.querySelectorAll('span')).filter(
       (e) => texto(e) === 'Link pendiente',
     ).length,

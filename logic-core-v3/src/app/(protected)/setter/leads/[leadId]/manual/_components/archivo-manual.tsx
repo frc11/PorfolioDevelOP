@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { Archive, ArrowRight } from 'lucide-react'
 import type { ArchivoCausa } from '@/lib/leados/flow'
+import type { PosicionManual } from '@/lib/leados/manual'
 import { EnlacePantalla } from './enlace-pantalla'
+import { FranjaRecorrido } from './franja-recorrido'
 import { ManualHeader, type CabeceraLead } from './manual-nav'
 
 type ArchivoManualProps = {
@@ -17,6 +19,8 @@ type ArchivoManualProps = {
    * en silencio (contrato de `EnlacePantalla`).
    */
   veredictoAccesible: boolean
+  /** La posición derivada — de acá sale la franja del recorrido (P20). */
+  posicion: PosicionManual
 }
 
 const CAUSA_LABEL: Record<ArchivoCausa, string> = {
@@ -38,10 +42,17 @@ export function ArchivoManual({
   causa,
   motivo,
   veredictoAccesible,
+  posicion,
 }: ArchivoManualProps) {
   return (
     <div className="space-y-5">
       <ManualHeader cabecera={cabecera} />
+
+      {/* P20 — la franja también acá, en el mismo lugar. En un negocio cerrado
+          ningún paso es el actual y sólo lo hecho queda alcanzable, así que la
+          franja muestra HASTA DÓNDE llegó este lead antes de cerrarse — que es
+          la única pregunta que el archivo puede contestar. */}
+      <FranjaRecorrido leadId={leadId} posicion={posicion} pantalla="archivo" />
 
       <section
         aria-label="Negocio cerrado"

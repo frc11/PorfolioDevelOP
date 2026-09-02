@@ -134,6 +134,7 @@ export default async function PantallaDelManualPage({ params }: PantallaPageProp
             causa={causa}
             motivo={motivo}
             veredictoAccesible={alcanzable('m1')}
+            posicion={posicion}
           />
           {historial}
         </div>

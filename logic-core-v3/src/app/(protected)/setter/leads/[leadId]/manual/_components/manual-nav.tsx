@@ -181,56 +181,6 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
 }
 
 /**
- * Navegación hacia atrás — SIEMPRE libre a pantallas completadas (contrato del
- * mapa): entrar a una completada no resetea nada, solo se mira/ajusta lo que
- * su pantalla permita. Sin completadas no se renderiza (lead recién arrancado).
- */
-export function NavAtras({
-  leadId,
-  pasoActivo,
-  posicion,
-}: {
-  leadId: string
-  pasoActivo: PantallaId
-  posicion: PosicionManual
-}) {
-  if (posicion.completadas.length === 0) return null
-
-  return (
-    <nav
-      aria-label="Pantallas completadas — navegación libre hacia atrás"
-      className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
-    >
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-        Completadas — podés volver cuando quieras
-      </p>
-      <ul className="mt-2.5 flex flex-wrap gap-2">
-        {posicion.completadas.map((id) => {
-          const activo = id === pasoActivo
-          return (
-            <li key={id}>
-              <Link
-                href={rutaManual(leadId, id)}
-                aria-current={activo ? 'page' : undefined}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
-                  activo
-                    ? 'border-white/25 bg-white/[0.08] text-zinc-100'
-                    : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
-                )}
-              >
-                <Check size={11} strokeWidth={1.5} aria-hidden className="text-zinc-500" />
-                {PANTALLAS[id].corto}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </nav>
-  )
-}
-
-/**
  * El rail de las pantallas de Construcción — navegación LIBRE entre todas, en
  * cualquier orden (auto-reporte, jamás gate: §6-3 del brief). Se muestra en
  * mc1/mc2 y en la reentrada M-R.

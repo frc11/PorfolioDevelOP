@@ -80,12 +80,19 @@ async function primerAccionable(page: Page) {
     // además es `sticky`, así que su caja se lee pegada al borde y ganaría este
     // número siempre. Lo que esta prueba mide es dónde arranca el TRABAJO.
     const barraAccion = scroller.querySelector('[data-slot="barra-accion"]')
+    // P20 — la FRANJA del recorrido se excluye por lo mismo que la cabecera:
+    // sus chips son navegación entre pasos, no el trabajo de esta pantalla, y
+    // vive arriba de todo. Sin excluirla ganaría este número en las catorce y
+    // §2 pasaría en verde midiendo la franja en vez del trabajo — el falso
+    // verde exacto que el sprint de la franja no puede fabricarse.
+    const franja = scroller.querySelector('[data-slot="franja-recorrido"]')
     const SEL =
       'button, input, textarea, select, [role="button"], [contenteditable="true"], a[href]'
     let mejor: { top: number; etiqueta: string } | null = null
     for (const el of Array.from(scroller.querySelectorAll(SEL))) {
       if (header && header.contains(el)) continue
       if (barraAccion && barraAccion.contains(el)) continue
+      if (franja && franja.contains(el)) continue
       const r = el.getBoundingClientRect()
       if (r.width === 0 && r.height === 0) continue
       const cs = window.getComputedStyle(el)

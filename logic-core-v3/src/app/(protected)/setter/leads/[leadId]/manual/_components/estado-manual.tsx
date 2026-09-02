@@ -5,7 +5,8 @@ import { GUIA_ESPERA } from '@/lib/leados/guidance-content'
 import { rutaManual, type PosicionManual } from '@/lib/leados/manual'
 import { TEXTO_TURNO, TURNO_DE_CAUSA, type CausaEspera } from '@/lib/leados/turno'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
-import { ManualHeader, NavAtras, type CabeceraLead } from './manual-nav'
+import { ManualHeader, type CabeceraLead } from './manual-nav'
+import { FranjaRecorrido } from './franja-recorrido'
 
 type EstadoManualProps = {
   leadId: string
@@ -43,10 +44,10 @@ type EstadoManualProps = {
 
 /**
  * Las dos pantallas de ESTADO del mapa (espera de respuesta / en revisión). No
- * son pantallas del manual: sin checklist, sin indicador de fase, sin captura —
- * tono de espera (zinc, sin cyan: la pelota no la tiene el setter). Desde acá
- * la navegación hacia atrás sigue libre, y en espera se puede saltar a
- * registrar un toque (m5) si algo pasa antes de la fecha.
+ * son pantallas del manual: sin checklist, sin captura — tono de espera (zinc,
+ * sin cyan: la pelota no la tiene el setter). Desde acá la navegación hacia
+ * atrás sigue libre (la franja del recorrido, P20), y en espera se puede saltar
+ * a registrar un toque (m5) si algo pasa antes de la fecha.
  *
  * El titular dice DE QUIÉN ES EL TURNO y lo dice solo: el manual de usuario
  * tuvo que enseñar a leer la etiqueta de estado al lado del nombre del negocio
@@ -96,6 +97,12 @@ export function EstadoManual({
     <div className="space-y-5">
       <ManualHeader cabecera={cabecera} />
 
+      {/* P20 — la franja va en el MISMO lugar que en las pantallas de trabajo:
+          entre la cabecera y el titular. Acá ningún paso queda marcado como el
+          actual, y es la verdad: en una espera no hay paso del setter. Lo que sí
+          se lee es cuánto quedó hecho y qué viene cuando la pelota vuelva. */}
+      <FranjaRecorrido leadId={leadId} posicion={posicion} pantalla={tipo} />
+
       <section
         aria-label={texto.titulo}
         className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-5"
@@ -144,8 +151,6 @@ export function EstadoManual({
           </Link>
         )}
       </section>
-
-      <NavAtras leadId={leadId} pasoActivo={tipo} posicion={posicion} />
     </div>
   )
 }

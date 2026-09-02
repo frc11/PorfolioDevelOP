@@ -315,20 +315,14 @@ export const FASES_MANUAL: Record<
   agenda: { titulo: 'Agenda', pantallas: ['m16'] },
 }
 
-/**
- * Indicador "paso N de M" POR FASE (contrato del mapa: nunca global). Estados y
- * reentrada no llevan indicador → null.
+/*
+ * P20 — Acá vivía `indicadorDeFase`, el "paso N de M" por fase. Lo reemplazó la
+ * franja del recorrido (`recorrido.ts`): el indicador decía el nombre de la
+ * fase y, cuando la fase tenía más de una pantalla, en cuál ibas — nunca cuántas
+ * fases faltaban ni cuál venía. La franja dice las tres cosas y en el mismo
+ * lugar, así que el rótulo pasó a repetir la mitad de lo que ya se lee al lado.
+ * `FASES_MANUAL` sigue: es de donde la franja saca los nombres.
  */
-export function indicadorDeFase(
-  id: PantallaId,
-): { fase: string; n: number; m: number } | null {
-  const def = PANTALLAS[id]
-  if (def.tipo !== 'manual' || def.fase === null) return null
-  const fase = FASES_MANUAL[def.fase]
-  const n = fase.pantallas.indexOf(id) + 1
-  if (n === 0) return null
-  return { fase: fase.titulo, n, m: fase.pantallas.length }
-}
 
 /** Ruta canónica de una pantalla del manual (ruta paralela al wizard). */
 export function rutaManual(leadId: string, paso: PantallaId): string {
@@ -404,7 +398,7 @@ export type PosicionManual = {
 }
 
 /** Orden canónico del manual — `completadas` se devuelve siempre en este orden. */
-const ORDEN_MANUAL = [
+export const ORDEN_MANUAL = [
   'm1',
   'm4',
   'm5',

@@ -59,7 +59,11 @@
 // (el mapa campo→fuente no se despega del gate de señal mínima, el recorrido no
 // se saltea bloques, y el bloque de la web no puede tener campos obligatorios —
 // si los tuviera, un negocio sin web no podría dejar su veredicto).
-const INVARIANTES_ESPERADOS = 52;
+// 53 desde P20 («la franja del recorrido»): suma `check:invariant:recorrido` —
+// los nueve pasos son los del manual, ningún chip de la franja navega a una
+// pantalla que el motor no habilita, y el paso marcado como el de ahora sale de
+// `posicion.actual` (el dato de P19) y no de la pantalla que se está mirando.
+const INVARIANTES_ESPERADOS = 53;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen
