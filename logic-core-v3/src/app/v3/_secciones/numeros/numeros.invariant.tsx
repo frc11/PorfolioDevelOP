@@ -282,7 +282,7 @@ titulo('10 · El pedido y los patrones declarados')
 
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta inexistente')
-controlPositivo('ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
+controlPositivo('ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
 afirmarIgual(PEDIDO.filter((e) => e.clase === 'cifra').length, 5, 'cinco entradas `cifra`, una por casilla vacía')
 afirmarIgual(PEDIDO.filter((e) => e.clase === 'prosa').length, 2, 'y dos de `prosa`: el titular y la bajada')
 afirmarIgual(PATRONES_DE_LA_SECCION, ['P2'], 'la sección declara consumir P2, y nada más')

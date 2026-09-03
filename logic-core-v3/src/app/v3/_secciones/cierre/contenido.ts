@@ -229,6 +229,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'PEDIDOS_DE_CONTACTO[0]',
     clase: 'enlace',
     marcador: '[ENLACE]',
+    quienLoTrae: 'decision',
     que: 'La dirección de contacto: mail, WhatsApp o el destino que corresponda.',
     formato: 'Una URL o un `mailto:`. El rótulo visible va aparte.',
   },
@@ -236,6 +237,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'PEDIDOS_DE_CONTACTO[1]',
     clase: 'enlace',
     marcador: '[ENLACE]',
+    quienLoTrae: 'valentino',
     que: 'Las redes, una por red, con el perfil real.',
     formato: 'Una URL por red.',
   },
@@ -243,6 +245,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'LINEA_DE_CIERRE.piezas',
     clase: 'prosa',
     marcador: '[FECHA]',
+    quienLoTrae: 'valentino',
     que: 'El año del pie de página.',
     formato: 'Cuatro dígitos. Se puede derivar de la fecha del build.',
   },
@@ -250,7 +253,24 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'LINEA_DE_CIERRE.piezas',
     clase: 'prosa',
     marcador: '[NOMBRE]',
+    quienLoTrae: 'decision',
     que: 'La razón social, si va a figurar.',
     formato: 'Nombre legal completo. Una línea.',
+  },
+  /**
+   * ⚠ FALTABA, y por eso se agrega en V3-D. `LINEA_DE_CIERRE.piezas` muestra
+   * TRES marcadores —`[FECHA]`, `[NOMBRE]` y `[ENLACE]`— y el pedido declaraba
+   * los dos primeros. El tercero pasaba el gate igual porque `s7-pedido` cruza
+   * CLASES de marcador y no ocurrencias, y `[ENLACE]` ya estaba declarado por
+   * la columna de contacto: el hueco de los legales quedaba en la pantalla y
+   * fuera de la lista que se le manda a Franco.
+   */
+  {
+    ruta: 'LINEA_DE_CIERRE.piezas',
+    clase: 'enlace',
+    marcador: '[ENLACE]',
+    quienLoTrae: 'decision',
+    que: 'Los legales del pie: a dónde llevan y si van a existir.',
+    formato: 'Una URL por documento, o ninguno si se decide que no van.',
   },
 ]

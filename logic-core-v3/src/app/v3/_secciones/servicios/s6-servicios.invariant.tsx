@@ -21,7 +21,7 @@ import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEnco
 import { rangoDeScroll, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS } from '../../_lib/motion/lineas'
 import { IDS_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
-import { escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
+import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
 import { ANCLA_DEL_PIN } from '../_contrato/motion'
 import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
@@ -100,7 +100,7 @@ afirmarIgual(hallazgos, [], `cero hallazgos sobre ${textoQuieto.length} caracter
 const marcadores = marcadoresEn(textoQuieto)
 afirmar(marcadores.length >= 4, `el contrapeso: el escáner miró un texto con ${marcadores.length} marcadores`, marcadores.join(' · '))
 afirmar(IDS_DE_SERVICIO.every((id) => textoQuieto.includes(CONTENIDO[id].rubro)), 'los tres rubros están en el documento')
-afirmar(['Esquina', 'El Garage', 'Matsu Automotores'].every((n) => textoQuieto.includes(n)), 'y los tres clientes REALES también')
+afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), `y los ${NOMBRES_REALES.length} clientes REALES también, DERIVADOS de NOMBRES_REALES y no escritos acá`, NOMBRES_REALES.join(' · '))
 controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearContenido(t).length === 0)
 afirmar(escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length > 0, `  y le encuentra ${escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
 

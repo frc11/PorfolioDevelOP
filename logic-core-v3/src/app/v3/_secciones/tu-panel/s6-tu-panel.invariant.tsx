@@ -31,7 +31,7 @@ import {
 import { sizesPorColumnas } from '../../_lib/imagen'
 import { ATRIBUTO_PIEZAS, ATRIBUTO_TEXTO_ACCESIBLE } from '../../_lib/motion/lineas'
 import { CLASE_PESO } from '../../_lib/tipografia'
-import { escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
+import { NOMBRES_REALES, escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 import { clasesEscritas, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
@@ -111,7 +111,7 @@ afirmarIgual(escanearContenido(visible), [], `cero hallazgos sobre ${visible.len
 afirmarIgual(preciosEncontrados(visible), [], '  y cero formas de precio: no están cerrados y no se inventan ni de ejemplo')
 console.log(`  marcadores en pantalla: ${marcadoresEn(visible).join(' · ')}`)
 afirmar(marcadoresEn(visible).length > 0, `  el contrapeso: ${marcadoresEn(visible).length} marcadores distintos — cero hallazgos no es cero contenido`)
-afirmar(visible.includes('Esquina') && visible.includes('El Garage') && visible.includes('Matsu Automotores'), '  los tres nombres reales están escritos: son clientes verificables, no testimonios inventados')
+afirmar(NOMBRES_REALES.every((n) => visible.includes(n)), '  los nombres reales están escritos: son clientes verificables, no testimonios inventados. DERIVADOS de NOMBRES_REALES', NOMBRES_REALES.join(' · '))
 
 controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearContenido(t).length === 0)
 controlPositivo('y el detector de precios ve el suyo', 'desde $99.000 por mes', (t) => preciosEncontrados(t).length === 0)

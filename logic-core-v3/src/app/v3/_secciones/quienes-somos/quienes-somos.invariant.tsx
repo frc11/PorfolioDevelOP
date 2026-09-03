@@ -277,7 +277,7 @@ afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
 controlPositivo(
   'el chequeo de entradas colgadas ve una ruta inventada',
-  [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, que: 'nada', formato: 'texto plano' }],
+  [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }],
   (p) => entradasColgadas(CONTENIDO, p).length === 0,
 )
 afirmarIgual(

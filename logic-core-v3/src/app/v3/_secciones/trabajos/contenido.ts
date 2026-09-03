@@ -14,37 +14,54 @@
  *
  * Verdad, y por eso NO va en `PEDIDO`:
  *
- *   · Los tres nombres. **Esquina · El Garage · Matsu Automotores** son
- *     clientes reales de develOP y el sprint los declara verdaderos. Van
- *     literales, sin adornar y sin agregarles rubro, ciudad ni fecha: todo eso
- *     lo tendríamos que inventar, y una ficha inventada se publica igual de
+ *   · Los tres nombres. **Esquina · El Garage · Banú** son clientes reales de
+ *     develOP y salen de `_contrato/escaneo.ts`, que es donde vive la lista.
+ *     Van literales, sin adornar y sin agregarles rubro, ciudad ni fecha: todo
+ *     eso lo tendríamos que inventar, y una ficha inventada se publica igual de
  *     fácil que una cifra inventada.
+ *   · `captura.fuente` y `enlace` — los archivos y los dominios existen y se
+ *     verificaron uno por uno. Ver abajo.
  *   · `etiqueta` = el nombre de la sección en el recorrido de `secciones.ts`.
  *
- * Relleno, y por eso va TODO en `PEDIDO` con clase `prosa`: `titular`,
- * `bajada`, `rotuloDeLaMetrica` y los tres `captura.alt`.
+ * ⚠️ **EL TERCER NOMBRE ERA FALSO, Y ESTUVO PUBLICADO (V3-D).** Decía **Matsu
+ * Automotores**, y ese trabajo no se hizo. No era relleno —no llevaba
+ * marcador— así que se leía como un hecho, que es exactamente lo que era: un
+ * hecho inventado. Los tres detectores del escáner lo dejaron pasar porque un
+ * nombre propio no tiene dígitos, ni símbolo, ni forma de precio. Queda
+ * anotado acá y en `escaneo.ts` para que la próxima vez que alguien agregue un
+ * cliente sepa que la lista se comprueba contra la realidad y no contra sí
+ * misma.
+ *
+ * Relleno, y por eso va en `PEDIDO` con clase `prosa`: `titular`, `bajada` y
+ * `rotuloDeLaMetrica`. Los tres `captura.alt` **ya no**: describen capturas que
+ * existen y se escribieron mirándolas.
  *
  * ── Lo que NO sabemos, declarado ausente ───────────────────────────────────
  *
- * Dos cosas por proyecto, y las dos son el pedido entero de esta sección:
+ * **Una sola cosa por proyecto**, y es el pedido entero de esta sección:
+ * **`metrica: '[MÉTRICA]'`** — el dato que dice qué cambió. Es LA pieza medida
+ * de esta sección: en la referencia la métrica va pegada al nombre. Acá va
+ * igual de pegada y **siempre visible**; el componente no la esconde detrás de
+ * ningún hover, porque esconder la métrica es esconder el pedido.
  *
- *   · **`metrica: '[MÉTRICA]'`** — el dato que dice qué cambió. Es LA pieza
- *     medida de esta sección: en la referencia la métrica va pegada al nombre.
- *     Acá va igual de pegada y **siempre visible**; el componente no la
- *     esconde detrás de ningún hover, porque esconder la métrica es esconder
- *     el pedido.
- *   · **`captura.marcador: '[CAPTURA]'`** — la imagen del sitio. Está en el
- *     CONTENIDO y no sólo en el componente a propósito: `marcadoresPedidos()`
- *     recorre este objeto para producir el pedido a Franco, y un marcador que
- *     sólo viviera en el `.tsx` no entraría en esa lista.
+ * `[CAPTURA]` ya no está: los tres archivos llegaron y `captura.fuente` los
+ * nombra. El marcador vuelve solo el día que una fuente sea `null` —
+ * `MarcoDeMedio` tiene las dos ramas escritas y el componente elige por el dato.
  *
- * ── Los tres `alt` dicen lo mismo, y es la respuesta honesta ───────────────
+ * ── Los tres `alt` ya no dicen lo mismo, y es por la misma razón ───────────
  *
- * No sabemos cómo es cada sitio. Escribir tres descripciones distintas sería
- * inventar tres sitios; escribir la misma frase con el nombre cambiado dice
- * exactamente lo que sabemos —que es una captura de la banda de arriba de ese
- * sitio— y deja el resto como pedido. La repetición acá es información, no
- * pereza.
+ * Antes decían la misma frase con el nombre cambiado, y era la respuesta
+ * honesta: no había capturas y describir tres sitios que nadie había visto
+ * habría sido inventarlos. Ahora las capturas están y **cada `alt` describe lo
+ * que se ve en la suya** — la marca, el rubro y lo que ocupa la pantalla— que
+ * es lo que la instrucción pide: describir el SITIO, no el archivo.
+ *
+ * ── Los dominios son reales y se enlazan ──────────────────────────────────
+ *
+ * `enlace` lleva al sitio en producción de cada cliente. No estaban en el repo
+ * —se buscaron en todo el árbol y en todo el historial— y los trajo el humano.
+ * Van en el CONTENIDO y no en el componente por la misma razón que el `destino`
+ * del CTA del Hero: es lo que cambia el día que un cliente muda de dominio.
  *
  * ── La única cantidad que aparece, y por qué está permitida ────────────────
  *
@@ -97,26 +114,29 @@ export const CONTENIDO = {
   proyectos: [
     {
       nombre: 'Esquina',
+      enlace: 'https://esquinaweb.com.ar',
       metrica: '[MÉTRICA]',
       captura: {
-        marcador: '[CAPTURA]',
-        alt: 'Captura del sitio de Esquina: la banda de arriba, tal como se ve al entrar.',
+        fuente: '/capturas/esquina.webp',
+        alt: 'Sitio de Esquina, un estudio de diseño: pantalla clara, casi vacía, con la marca escrita a mano arriba a la izquierda y una frase grande en el centro.',
       },
     },
     {
       nombre: 'El Garage',
+      enlace: 'https://elgarageautomoviles.com.ar',
       metrica: '[MÉTRICA]',
       captura: {
-        marcador: '[CAPTURA]',
-        alt: 'Captura del sitio de El Garage: la banda de arriba, tal como se ve al entrar.',
+        fuente: '/capturas/el-garage.webp',
+        alt: 'Sitio de El Garage, una concesionaria: una camioneta sobre una ruta costera al atardecer ocupa la pantalla entera, con el nombre en letras grandes encima.',
       },
     },
     {
-      nombre: 'Matsu Automotores',
+      nombre: 'Banú',
+      enlace: 'https://banupage.com.ar',
       metrica: '[MÉTRICA]',
       captura: {
-        marcador: '[CAPTURA]',
-        alt: 'Captura del sitio de Matsu Automotores: la banda de arriba, tal como se ve al entrar.',
+        fuente: '/capturas/banu.webp',
+        alt: 'Sitio de Banú, una tienda de perfumes: fondo oscuro, un frasco de vidrio tallado iluminado en el centro y un botón para ver el catálogo.',
       },
     },
   ],
@@ -125,21 +145,27 @@ export const CONTENIDO = {
 /**
  * LO QUE FALTA, dicho por el propio contenido.
  *
- * Las seis entradas son `prosa`: es la clase de relleno que **no se ve como
- * agujero**. Un `[MÉTRICA]` en la pantalla se nota; un párrafo con la cadencia
- * correcta se lee igual que uno definitivo, y ése es el mismo mecanismo de la
- * deuda que este sprint no repite, aplicado a las palabras en vez de a los
- * números.
+ * **Seis entradas, y eran doce.** V3-D cerró las seis de las capturas: las tres
+ * imágenes llegaron y los tres `alt` se escribieron mirándolas, así que dejaron
+ * de faltar. Una casilla que se llena **sale de esta lista** — no queda tildada,
+ * desaparece— y por eso el documento que produce `s7-documento` no necesita una
+ * columna de "hecho": lo que está acá es lo que falta.
+ *
+ * Las tres de `prosa` son la clase de relleno que **no se ve como agujero**. Un
+ * `[MÉTRICA]` en la pantalla se nota; un párrafo con la cadencia correcta se lee
+ * igual que uno definitivo, y ése es el mismo mecanismo de la deuda que este
+ * sprint no repite, aplicado a las palabras en vez de a los números.
  *
  * Los marcadores NO se listan acá: los extrae `marcadoresPedidos()` del propio
- * contenido, que devuelve `[MÉTRICA]` y `[CAPTURA]` con su cuenta de tres y
- * tres. Listarlos a mano sería una segunda fuente que se desincroniza.
+ * contenido, que hoy devuelve `[MÉTRICA]` y nada más, con su cuenta de tres.
+ * Listarlos a mano sería una segunda fuente que se desincroniza.
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
   {
     ruta: 'titular',
     clase: 'prosa',
     marcador: null,
+    quienLoTrae: 'valentino',
     que: 'La frase que abre la sección. Una idea, una línea, dicha como la decís vos.',
     formato: 'Una línea, ~90 caracteres. Texto plano.',
   },
@@ -147,6 +173,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'bajada',
     clase: 'prosa',
     marcador: null,
+    quienLoTrae: 'valentino',
     que: 'Qué se muestra acá y qué se promete, en dos o tres renglones. Sin plazos ni porcentajes.',
     formato: 'Dos o tres renglones, ~220 caracteres. Texto plano.',
   },
@@ -154,6 +181,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'rotuloDeLaMetrica',
     clase: 'prosa',
     marcador: null,
+    quienLoTrae: 'valentino',
     que: 'Cómo se titula el dato que va al lado de cada nombre. Dos o tres palabras.',
     formato: 'Dos o tres palabras. Texto plano.',
   },
@@ -161,6 +189,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'proyectos[0].metrica',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'franco',
     que: 'Qué cambió en Esquina, con el número que lo dice y de dónde sale.',
     formato: 'Frase corta con su número, ~30 caracteres. Ej.: `de 4 a 19 pedidos por día`.',
   },
@@ -168,6 +197,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'proyectos[1].metrica',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'franco',
     que: 'Qué cambió en El Garage, con el número que lo dice y de dónde sale.',
     formato: 'Frase corta con su número, ~30 caracteres.',
   },
@@ -175,50 +205,9 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'proyectos[2].metrica',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
-    que: 'Qué cambió en Matsu Automotores, con el número que lo dice y de dónde sale.',
+    quienLoTrae: 'franco',
+    que: 'Qué cambió en Banú, con el número que lo dice y de dónde sale.',
     formato: 'Frase corta con su número, ~30 caracteres.',
-  },
-  {
-    ruta: 'proyectos[0].captura.marcador',
-    clase: 'captura',
-    marcador: '[CAPTURA]',
-    que: 'La captura del sitio de Esquina: el pliegue, no la página entera.',
-    formato: 'PNG o WEBP, 1600 × 800 px (2:1). Se pone en `proyectos[0].captura.fuente`.',
-  },
-  {
-    ruta: 'proyectos[1].captura.marcador',
-    clase: 'captura',
-    marcador: '[CAPTURA]',
-    que: 'La captura del sitio de El Garage: el pliegue, no la página entera.',
-    formato: 'PNG o WEBP, 1600 × 800 px (2:1).',
-  },
-  {
-    ruta: 'proyectos[2].captura.marcador',
-    clase: 'captura',
-    marcador: '[CAPTURA]',
-    que: 'La captura del sitio de Matsu Automotores: el pliegue, no la página entera.',
-    formato: 'PNG o WEBP, 1600 × 800 px (2:1).',
-  },
-  {
-    ruta: 'proyectos[0].captura.alt',
-    clase: 'prosa',
-    marcador: null,
-    que: 'Qué se ve en la captura de Esquina, para quien no la puede ver.',
-    formato: 'Un renglón, ~90 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'proyectos[1].captura.alt',
-    clase: 'prosa',
-    marcador: null,
-    que: 'Qué se ve en la captura de El Garage, para quien no la puede ver.',
-    formato: 'Un renglón, ~90 caracteres. Texto plano.',
-  },
-  {
-    ruta: 'proyectos[2].captura.alt',
-    clase: 'prosa',
-    marcador: null,
-    que: 'Qué se ve en la captura de Matsu Automotores, para quien no la puede ver.',
-    formato: 'Un renglón, ~90 caracteres. Texto plano.',
   },
 ]
 

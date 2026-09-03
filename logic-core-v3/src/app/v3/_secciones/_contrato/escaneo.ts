@@ -16,7 +16,7 @@
  *   ──────────────────────────────────────    ─────────────────────────────
  *   [MÉTRICA] · [CIFRA] · [TESTIMONIO]        +340% · desde $99.000
  *   [CAPTURA DEL PANEL] · [VIDEO]             una imagen de banco
- *   Esquina · El Garage · Matsu Automotores   clientes inventados
+ *   Esquina · El Garage · Banú                clientes inventados
  *   relleno con la longitud correcta          copy que suene a definitivo
  *
  * **Los precios no están cerrados y no se inventan ni de ejemplo.**
@@ -40,8 +40,21 @@ import { MARCADORES, type Marcador } from './marcadores'
 /**
  * Los nombres que SÍ son reales. Son clientes de develOP y por eso se pueden
  * escribir: no son testimonios inventados, son nombres propios verificables.
+ *
+ * ⚠️ **CORREGIDO EN V3-D, Y ES LA DEUDA QUE ESTE ARCHIVO EXISTE PARA IMPEDIR.**
+ *
+ * Hasta acá la lista decía **Matsu Automotores**, y ese trabajo NO SE HIZO: el
+ * home publicaba como cliente a alguien que no lo es. Entró por una instrucción
+ * de sprint, se propagó a cuatro secciones y a cinco instrumentos, y **ninguno
+ * de los tres detectores lo vio** — un nombre propio no lleva dígitos, no lleva
+ * símbolo y no es un precio. El escáner cuida las cifras; los HECHOS no los
+ * cuidaba nadie.
+ *
+ * El tercer cliente real es **Banú**, y su sitio existe. La lista es ahora la
+ * verdadera, y es la única fuente: quien escriba un nombre de cliente en una
+ * sección tiene que poder encontrarlo acá.
  */
-export const NOMBRES_REALES = ['Esquina', 'El Garage', 'Matsu Automotores'] as const
+export const NOMBRES_REALES = ['Esquina', 'El Garage', 'Banú'] as const
 
 /** Un hallazgo del escáner: el fragmento y por qué se rechaza. */
 export interface Hallazgo {

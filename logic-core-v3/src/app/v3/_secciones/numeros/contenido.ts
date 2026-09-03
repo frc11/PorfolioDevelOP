@@ -83,6 +83,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'titulo',
     clase: 'prosa',
     marcador: null,
+    quienLoTrae: 'valentino',
     que: 'El título de la sección, dos o tres palabras. El que está puesto es relleno.',
     formato: 'Dos o tres palabras. Texto plano.',
   },
@@ -90,6 +91,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'entrada',
     clase: 'prosa',
     marcador: null,
+    quienLoTrae: 'valentino',
     que: 'La bajada, una o dos líneas: qué mira develOP y por qué son pocos números.',
     formato: 'Una o dos líneas, ~180 caracteres. Texto plano.',
   },
@@ -97,6 +99,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'cifras[0].valor',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que:
       'Cuántos proyectos se entregaron y se cerraron, contados de una lista real. Si el ' +
       'rótulo no nombra un dato que exista, cambiá el rótulo o sacá la casilla entera.',
@@ -106,6 +109,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'cifras[1].valor',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que: 'Cuántos clientes están activos hoy, con el corte de "activo" que uses vos.',
     formato: 'Un número entero, sin símbolo.',
   },
@@ -113,6 +117,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'cifras[2].valor',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'decision',
     que:
       'Hace cuánto existe develOP. Si te parece poco para mostrarlo, sacá la casilla: ' +
       'es mejor que redondear para arriba.',
@@ -122,6 +127,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'cifras[3].valor',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que:
       'Cuánto se tarda en contestar el primer mensaje, medido sobre los mensajes que ' +
       'entraron de verdad y no sobre la intención de contestar rápido.',
@@ -131,6 +137,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'cifras[4].valor',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que: 'Cuántos procesos automatizados están corriendo hoy en clientes.',
     formato: 'Un número entero, sin símbolo.',
   },

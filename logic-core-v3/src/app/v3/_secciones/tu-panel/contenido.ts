@@ -13,7 +13,7 @@
  * El relleno de este archivo tiene la LONGITUD y la ESTRUCTURA RETÓRICA que la
  * composición necesita: es para juzgar cómo cae el texto en la pantalla, no
  * para leerlo como definitivo. Lo que **no** es relleno son los tres nombres
- * —Esquina, El Garage, Matsu Automotores—, que son clientes reales y por eso se
+ * —Esquina, El Garage, Banú—, que son clientes reales y por eso se
  * pueden escribir, y la descripción del hueco, que es el pedido literal.
  *
  * **Ningún número.** Ni uno que se pueda leer como un hecho, ni un precio, ni
@@ -89,7 +89,7 @@ export const BLOQUES: readonly BloqueDeTexto[] = [
     rotulo: 'Quién entra',
     texto:
       'Un usuario por persona del equipo, y cada uno ve lo que le toca. Los datos de El Garage no se cruzan con ' +
-      'los de Esquina ni con los de Matsu Automotores: son organizaciones separadas, no un filtro sobre la misma ' +
+      'los de Esquina ni con los de Banú: son organizaciones separadas, no un filtro sobre la misma ' +
       'pantalla.',
   },
 ]
@@ -188,23 +188,26 @@ export const CAPTURA = {
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
   {
-    ruta: 'BLOQUES[2].texto',
+    ruta: 'BLOQUES[1].texto',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'valentino',
     que: 'Qué muestra el panel al día: el dato que se mira todos los días.',
     formato: 'Nombre del dato, sin número. Ej.: `consultas del día`.',
   },
   {
-    ruta: 'BLOQUES[2].texto',
+    ruta: 'BLOQUES[1].texto',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'valentino',
     que: 'El dato acumulado que el panel muestra al lado del diario.',
     formato: 'Nombre del dato acumulado, sin número.',
   },
   {
-    ruta: 'CAPACIDADES[…]',
+    ruta: 'CAPACIDADES[10]',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'valentino',
     que: 'Qué se compara semana contra semana en el panel.',
     formato: 'Nombre del dato comparado, sin número.',
   },
@@ -212,6 +215,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'CAPTURA',
     clase: 'captura',
     marcador: '[CAPTURA DEL PANEL]',
+    quienLoTrae: 'valentino',
     que:
       'La pantalla principal del panel de un cliente, con el estado de las entregas y el ' +
       'resumen de la semana. Con datos de muestra: ningún dato real de un cliente.',

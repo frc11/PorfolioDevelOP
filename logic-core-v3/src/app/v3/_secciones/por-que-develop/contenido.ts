@@ -5,7 +5,7 @@
  *
  * develOP puede decir sin inventar nada que construye su propio software, que
  * entrega un panel y que sus clientes existen y tienen nombre: **Esquina · El
- * Garage · Matsu Automotores**. Eso está escrito derecho, sin marcador, porque
+ * Garage · Banú**. Eso está escrito derecho, sin marcador, porque
  * no es relleno.
  *
  * Todo lo demás —cuántos son, cuánto más rápido, qué dijo alguien— es una
@@ -78,7 +78,7 @@ export const DIFERENCIALES: readonly Diferencial[] = [
     clave: 'clientes',
     titulo: 'Clientes con nombre',
     cuerpo:
-      'Esquina, El Garage y Matsu Automotores trabajan así hoy, entre [CIFRA] negocios ' +
+      'Esquina, El Garage y Banú trabajan así hoy, entre [CIFRA] negocios ' +
       'que ya operan con lo que construimos.',
   },
   {
@@ -95,7 +95,7 @@ export interface Testimonio {
   readonly marcador: Marcador
   /** La forma y la longitud de lo que va a ir ahí. Es el pedido. */
   readonly forma: string
-  /** La firma: un nombre propio real, y la persona como marcador. */
+  /** La firma entera como marcador: la persona Y de qué empresa es. */
   readonly firma: string
 }
 
@@ -105,13 +105,28 @@ export interface Testimonio {
  * develOP ya tiene deuda registrada por testimonios fabricados en sus cuatro
  * landings. Acá el bloque existe —la composición lo pide— y su contenido es el
  * pedido: qué forma tiene que tener, cuánto tiene que durar y de quién.
+ *
+ * ⚠️ **LA FIRMA TRAÍA UNA EMPRESA ESCRITA, Y ERAN DOS DEFECTOS EN UNA LÍNEA
+ * (corregido en V3-D).** Decía `[NOMBRE] · Matsu Automotores`:
+ *
+ *   · **Matsu Automotores no es un cliente.** Ese trabajo no se hizo. Un
+ *     nombre propio sin marcador se lee como un hecho, y el escáner no lo ve
+ *     porque no tiene dígitos.
+ *   · **Y aunque lo fuera, la empresa no estaba decidida.** Servicios dice, a
+ *     dos secciones de acá, *"con el cliente que corresponda: Esquina, El
+ *     Garage o Banú"*. Una sección declaraba el caso abierto y la otra ya lo
+ *     había cerrado.
+ *
+ * Ahora la firma es **el marcador solo**. De quién es el testimonio es parte de
+ * lo que falta, no del molde — y lo dice el PEDIDO, que pide *nombre · cargo ·
+ * empresa*. Elegir el cliente es una decisión comercial, no una de este archivo.
  */
 export const TESTIMONIO: Testimonio = {
   marcador: '[TESTIMONIO]',
   forma:
     'Dos o tres oraciones de quien abre el panel todos los días: qué hacía antes, ' +
     'qué hace ahora, y qué dejó de hacer. Sin cifras adentro — la cifra va aparte, como [MÉTRICA].',
-  firma: '[NOMBRE] · Matsu Automotores',
+  firma: '[NOMBRE]',
 }
 
 /**
@@ -169,23 +184,26 @@ export const ALTO_MINIMO_DEL_BLOQUE = `${ALTO_MINIMO_DEL_BLOQUE_SVH}svh`
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
   {
-    ruta: 'DIFERENCIALES[…].texto',
+    ruta: 'DIFERENCIALES[2].cuerpo',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que: 'Cuántos negocios trabajan así hoy. Contados, no estimados.',
     formato: 'Un número entero, sin símbolo.',
   },
   {
-    ruta: 'DIFERENCIALES[…].texto',
+    ruta: 'DIFERENCIALES[3].cuerpo',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'franco',
     que: 'Cuánto más rápido es el camino de develOP, medido sobre entregas reales.',
     formato: 'Un número con su unidad. Ej.: `3 semanas contra 9`.',
   },
   {
-    ruta: 'TESTIMONIO.texto',
+    ruta: 'TESTIMONIO.marcador',
     clase: 'testimonio',
     marcador: '[TESTIMONIO]',
+    quienLoTrae: 'franco',
     que:
       'Lo que dijo un cliente, con sus palabras: qué hace ahora y qué dejó de hacer. ' +
       'Sin cifras adentro — la cifra va aparte.',
@@ -195,6 +213,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'TESTIMONIO.firma',
     clase: 'testimonio',
     marcador: '[NOMBRE]',
+    quienLoTrae: 'franco',
     que: 'Quién lo dijo: nombre y cargo, con el permiso pedido.',
     formato: 'Nombre · cargo · empresa. Una línea.',
   },

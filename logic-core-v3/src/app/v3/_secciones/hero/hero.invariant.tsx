@@ -278,7 +278,7 @@ afirmar(quieto.includes(GEOMETRIA.claseDeLaMedida), '  y esa clase llega al marc
 controlPositivo('el chequeo de la medida ve una clase que no coincide con el número', { claseDeLaMedida: 'escritorio:col-span-4', columnasDeLaMedida: 3 }, (g) => g.claseDeLaMedida.endsWith(String(g.columnasDeLaMedida)))
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
-controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
+controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
 afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))], ['prosa'], 'y las dos son `prosa`: el relleno que NO se ve como agujero')
 afirmarIgual(PATRONES_DE_LA_SECCION, ['P1', 'P2'], 'la sección declara consumir P1 y P2, y nada más')
 

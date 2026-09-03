@@ -5,31 +5,29 @@
  *
  * Porque es lo que hay que reemplazar, y lo que hay que poder contar. Un
  * párrafo escrito adentro de un componente no se puede medir en palabras sin
- * renderizarlo, y el canal P3 necesita `palabras.length` ANTES de dibujar nada:
- * el escalonado del patrón se calcula sobre esa cantidad.
+ * renderizarlo, y el canal P3 necesita `palabras.length` ANTES de dibujar nada.
  *
  * ── Qué es real y qué es relleno ──────────────────────────────────────────
  *
- *   real      los tres nombres de servicio (salen de `_contrato/acento.ts`, no
- *             se escriben acá), el nombre de la sección (sale de
- *             `_lib/secciones.ts`), el TITULAR —que sólo dice lo que la sección
- *             muestra abajo— y los tres clientes: Esquina, El Garage y
- *             Matsu Automotores.
+ *   real      los tres nombres de servicio (salen de `_contrato/acento.ts`), el
+ *             nombre de la sección (sale de `_lib/secciones.ts`), el TITULAR —que
+ *             sólo dice lo que la sección muestra abajo— y los tres clientes:
+ *             Esquina, El Garage y Banú, que salen de `_contrato/escaneo.ts`.
  *   relleno   los párrafos, los rubros, los once ítems y la línea de caso.
  *             Tienen la LONGITUD y la ESTRUCTURA RETÓRICA de lo definitivo y
  *             llevan `[MÉTRICA]`, `[CIFRA]`, `[TESTIMONIO]`, `[VIDEO]` y
  *             `[PÓSTER]` donde iría una prueba, un archivo o un caso.
  *
  * **Ningún número que se pueda leer como un hecho. Ningún precio, ni de
- * ejemplo.** El único número visible de la sección es el `05` del rótulo, que
- * es estructura del recorrido y está declarado en `NUMEROS_PERMITIDOS`.
+ * ejemplo.** El único número visible es el `05` del rótulo: estructura del
+ * recorrido, declarada en `NUMEROS_PERMITIDOS`.
  *
  * ── Los párrafos entran en la banda MEDIDA de P3 ──────────────────────────
  *
  * P3 se midió entre 17 y 33 targets, y son palabras, no líneas. Los tres
- * párrafos de acá miden 33, 33 y 31 palabras: entran en la banda medida y
- * además en el rango de 30 a 45 que pide la instrucción. `LONGITUDES` las
- * publica, y el instrumento las imprime en vez de recalcularlas de otra forma.
+ * párrafos miden 33, 33 y 31: entran en la banda medida y en el rango de 30 a
+ * 45 que pide la instrucción. `LONGITUDES` las publica y el instrumento las
+ * imprime, en vez de recalcularlas de otra forma.
  */
 
 import { sizesPorTresTramos } from '../../_lib/imagen'
@@ -57,36 +55,34 @@ export interface ContenidoDeUnServicio {
 }
 
 /**
- * La línea de caso es la MISMA en los tres, a propósito.
- *
- * Un caso distinto por servicio obligaría a decidir qué cliente contrató qué
- * frente, y eso no es relleno: sería un hecho inventado sobre un cliente real,
- * que es peor que una cifra inventada. Acá la línea declara que es un hueco y
- * ofrece los tres nombres verdaderos para que se elija el que corresponda.
+ * La línea de caso es la MISMA en los tres, a propósito. Un caso distinto por
+ * servicio obligaría a decidir qué cliente contrató qué frente, y eso no es
+ * relleno: sería un hecho inventado sobre un cliente real, que es peor que una
+ * cifra inventada. Acá declara que es un hueco y ofrece los tres nombres
+ * verdaderos para que se elija el que corresponda.
  */
 const CASO =
   'Caso de referencia — [TESTIMONIO], con el cliente que corresponda: ' +
-  'Esquina, El Garage o Matsu Automotores.'
+  'Esquina, El Garage o Banú.'
 
 /**
  * EL TITULAR DE LA SECCIÓN — el encabezado que la NOMBRA (SITIO-S11, defecto 16).
  *
  * ── Por qué no estaba, y por qué es un defecto y no una omisión ───────────
  *
- * Servicios era la única de las ocho sin un encabezado propio: sus tres
- * servicios entraban como `h2` HERMANOS de los titulares de las otras siete, y
- * el árbol del documento leía tres secciones donde hay una. `s10-acceso` §4 lo
- * publicó como el hallazgo 4 —gravedad baja, dueño esta sección— y su tabla es
- * la especificación de este arreglo.
+ * Servicios era la única de las ocho sin encabezado propio: sus tres servicios
+ * entraban como `h2` HERMANOS de los titulares de las otras siete, y el árbol
+ * del documento leía tres secciones donde hay una. `s10-acceso` §4 lo publicó
+ * como el hallazgo 4 —gravedad baja, dueño esta sección— y su tabla es la
+ * especificación de este arreglo.
  *
  * ── Qué hace este texto, y qué NO dice ────────────────────────────────────
  *
- * Nombra el recorrido de la sección y nada más: que son tres frentes y que los
- * atiende el mismo equipo. No hay un número que se pueda leer como un dato —
- * «Tres» es la cuenta de lo que la propia sección muestra abajo, igual que el
- * «Tres proyectos» del titular de Trabajos— y no hay una promesa que la sección
- * no demuestre. `escanearContenido` lo revisa junto con el resto del texto
- * renderizado, así que no hay una segunda regla para el titular.
+ * Nombra el recorrido y nada más: que son tres frentes y que los atiende el
+ * mismo equipo. Ningún número que se pueda leer como un dato —«Tres» es la
+ * cuenta de lo que la sección muestra abajo, igual que el «Tres proyectos» de
+ * Trabajos— y ninguna promesa que la sección no demuestre. `escanearContenido`
+ * lo revisa con el resto del texto renderizado: no hay una segunda regla acá.
  *
  * ── Y por qué vive acá y no en `secciones.ts` ─────────────────────────────
  *
@@ -166,22 +162,19 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
   },
 }
 
-/**
- * LA RELACIÓN DE ASPECTO DEL HUECO. Es la del video, no una decisión de layout:
- * reservarla es lo que evita el salto el día que entre el archivo.
- */
+/** LA RELACIÓN DE ASPECTO DEL HUECO. Es la del video, no una decisión de layout:
+ *  reservarla es lo que evita el salto el día que entre el archivo. */
 export const ANCHO_DEL_MEDIO = 1920
 export const ALTO_DEL_MEDIO = 1080
 
 /**
  * El `sizes` REAL del hueco, compuesto por el ayudante y no escrito a mano.
  *
- * El medio vive en UNA de las DOS columnas de la grilla del cuerpo, y esa
- * grilla conmuta a dos columnas en `tablet`. Por eso son tres tramos y no dos:
- * arriba del umbral de escritorio la mitad, entre tablet y ese umbral también
- * la mitad, y abajo el viewport entero, que es cuando la grilla colapsa a una
- * columna. Con dos tramos, en la banda del medio el navegador bajaría el doble
- * de lo necesario.
+ * El medio vive en UNA de las DOS columnas de la grilla del cuerpo, que conmuta
+ * a dos en `tablet`. De ahí los tres tramos: la mitad arriba del umbral de
+ * escritorio, la mitad entre tablet y ese umbral, y el viewport entero abajo,
+ * donde la grilla colapsa. Con dos tramos el navegador bajaría el doble de lo
+ * necesario justo en la banda del medio.
  */
 export const SIZES_DEL_MEDIO = sizesPorTresTramos(50, 50, 100)
 
@@ -219,20 +212,22 @@ for (const id of IDS_DE_SERVICIO) {
 /**
  * EL PEDIDO — lo que falta en esta sección, con su formato.
  *
- * Se agrega en SITIO-S7: el lane que escribió la sección declaraba lo
- * provisional en prosa y con marcadores visibles, pero **el pedido no era un
- * dato**, así que no se podía producir un documento con él ni comprobar que no
- * se quedara viejo. `s7-pedido` cruza esta tabla contra el texto renderizado en
- * los dos sentidos: un marcador en pantalla sin entrada acá falla, y una
- * entrada que pide algo que ya no se ve, también.
+ * Se agrega en SITIO-S7 para que el pedido sea un DATO y no prosa: `s7-pedido`
+ * lo cruza contra el texto renderizado en los dos sentidos. El archivo donde se
+ * edita NO se escribe acá: sale del registro.
  *
- * El archivo donde se edita NO se escribe acá: sale del registro.
+ * ⚠️ **FALTABAN DOS `[CIFRA]` (V3-D).** Los párrafos de `ia-automatizacion` y de
+ * `software` muestran cada uno el suyo —«horas devueltas», «errores evitados»—
+ * y sólo el de `web` estaba declarado. `s7-pedido` no lo vio porque cruza CLASES
+ * de marcador y no ocurrencias: con uno declarado alcanzaba para los tres. Eran
+ * dos agujeros a la vista y fuera de la lista que se le manda a Franco.
  */
 export const PEDIDO: readonly EntradaDePedido[] = [
   {
     ruta: 'CONTENIDO.web.parrafo',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'valentino',
     que: 'Qué se mide en un sitio entregado —velocidad— y contra qué se compara.',
     formato: 'Frase con su número y su unidad, adentro del párrafo. Ej.: `1,2 s de carga`.',
   },
@@ -240,6 +235,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'CONTENIDO.web.parrafo',
     clase: 'cifra',
     marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
     que: 'La conversión de un sitio entregado, medida sobre datos del cliente.',
     formato: 'Un número con su unidad, adentro del párrafo.',
   },
@@ -247,20 +243,39 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'CONTENIDO.ia-automatizacion.parrafo',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'valentino',
     que: 'Cuántas consultas resuelve el bot sin intervención, sobre conversaciones reales.',
+    formato: 'Un número con su unidad, adentro del párrafo.',
+  },
+  {
+    ruta: 'CONTENIDO.ia-automatizacion.parrafo',
+    clase: 'cifra',
+    marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
+    que: 'Cuántas horas por semana deja de dedicarle el equipo del cliente a lo que el asistente resuelve.',
     formato: 'Un número con su unidad, adentro del párrafo.',
   },
   {
     ruta: 'CONTENIDO.software.parrafo',
     clase: 'metrica',
     marcador: '[MÉTRICA]',
+    quienLoTrae: 'franco',
     que: 'Cuántos procesos se migraron, contados de una lista real.',
+    formato: 'Un número entero, adentro del párrafo.',
+  },
+  {
+    ruta: 'CONTENIDO.software.parrafo',
+    clase: 'cifra',
+    marcador: '[CIFRA]',
+    quienLoTrae: 'franco',
+    que: 'Cuántos errores dejó de tener la operación desde que el sistema entró, contados contra lo de antes.',
     formato: 'Un número entero, adentro del párrafo.',
   },
   {
     ruta: 'CASO_DE_REFERENCIA',
     clase: 'testimonio',
     marcador: '[TESTIMONIO]',
+    quienLoTrae: 'franco',
     que: 'El caso de referencia de cada frente, con el cliente que corresponda y qué cambió.',
     formato: 'Dos o tres renglones, con el nombre del cliente. Texto plano.',
   },
@@ -268,6 +283,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'CONTENIDO.<servicio>.medio',
     clase: 'video',
     marcador: '[VIDEO]',
+    quienLoTrae: 'valentino',
     que: 'El video del frente: qué se ve, en veinte segundos y sin audio necesario.',
     formato: 'MP4 (h264), 1920 × 1080 px (16:9), ≤ 20 s, ≤ 4 MB. Sin audio obligatorio.',
   },
@@ -275,6 +291,7 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     ruta: 'CONTENIDO.<servicio>.medio',
     clase: 'video',
     marcador: '[PÓSTER]',
+    quienLoTrae: 'valentino',
     que: 'El primer cuadro del video, para que no arranque negro.',
     formato: 'JPG o WEBP, 1920 × 1080 px (16:9).',
   },
