@@ -6,6 +6,7 @@ import {
   createSetter,
   createLead,
   createNotice,
+  countNoticesFor,
   reassignLead,
   prisma,
   newTracker,
@@ -119,11 +120,28 @@ test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasig
   await expect(firstVisible(page.getByText('Te reasignaron un lead'))).toBeVisible()
   await expect(page.getByRole('link', { name: /Te reasignaron un lead/i }), 'saliente NO linkea').toHaveCount(0)
 
-  // B (entrante): ve "Te asignaron un lead".
+  // B (entrante): recibe el handoff. P21 movió DÓNDE lo ve, no SI lo ve.
+  //
+  // Hasta P21 este aserto buscaba el aviso "Te asignaron un lead" en el bloque de
+  // novedades. Desde P21 el aviso de un lead que YA es una tarea en la cola no se
+  // repite abajo (`excludeLeadIds`) — mostrarlo en los dos lugares es la
+  // duplicación que el sprint prohíbe. El lead recién asignado entra a `trabajar`
+  // (sin dossier → grupo `trabajar`), así que la cara del handoff para B es su
+  // fila en la COLA, con lo que hay que hacer y el control que lleva a hacerlo.
+  //
+  // Lo que este test garantiza no cambió: el handoff LLEGA a B, dirigido, y no
+  // se cruza con el de A. Sólo se movió la superficie donde se afirma.
   await page.context().clearCookies()
   await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
-  await expect(firstVisible(page.getByText('Te asignaron un lead'))).toBeVisible()
+  const colaDeB = page.locator('section[aria-label="Tu cola de hoy"]')
+  await expect(firstVisible(colaDeB.getByText(B_ONLY)), 'el lead asignado le llega a B como trabajo').toBeVisible()
+  // Y el aviso sigue existiendo y contándose sin leer (el badge del topbar lo
+  // refleja): dedup es presentación, no borrado.
+  expect(await countNoticesFor(bId, 'LEAD_ASIGNADO'), 'el aviso dirigido a B existe').toBe(1)
   // A's saliente novedad no aparece en el feed de B (aislamiento por setterId).
+  // Ojo: NO se afirma acá que B no vea el NEGOCIO de A — C3, arriba, reasigna
+  // ese lead a B a propósito, así que a esta altura del archivo es suyo. La
+  // cartera de A frente a B ya la cubre C2, con su fixture intacta.
   await expect(page.getByText('Te reasignaron un lead'), 'B no ve la novedad de A').toHaveCount(0)
 })

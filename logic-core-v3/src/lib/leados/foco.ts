@@ -28,6 +28,16 @@ export type FocoSeleccion = {
   foco: HomeLead | null
   /** El siguiente accionable (lo que viene después del foco), o null. */
   proximo: HomeLead | null
+  /**
+   * Todo lo accionable MENOS el foco, en el orden de la cola. Es el array que
+   * esta función ya construía para derivar `proximo` y `restantes`; se expone
+   * porque la COLA del panel (`cola.ts`) necesita el orden completo, no solo la
+   * cima. Exponerlo evita la única alternativa: reconstruir en otro módulo el
+   * mismo "sacá el foco de la cola", que es exactamente cómo dos criterios
+   * empiezan a divergir. `proximo === resto[0]` y `restantes === resto.length`
+   * por construcción — no son tres decisiones, es una.
+   */
+  resto: HomeLead[]
   /** Cuántos accionables quedan además del foco. */
   restantes: number
   /** Total de accionables en la cola "trabajar". */
@@ -42,7 +52,7 @@ export function seleccionarFoco(
 ): FocoSeleccion {
   const total = orden.length
   if (total === 0) {
-    return { foco: null, proximo: null, restantes: 0, total: 0, stickyActivo: false }
+    return { foco: null, proximo: null, resto: [], restantes: 0, total: 0, stickyActivo: false }
   }
 
   // El sticky solo vale si el lead anclado sigue en la cola accionable; si no,
@@ -57,6 +67,7 @@ export function seleccionarFoco(
   return {
     foco,
     proximo: resto[0] ?? null,
+    resto,
     restantes: resto.length,
     total,
     stickyActivo: ancladoIdx >= 0,

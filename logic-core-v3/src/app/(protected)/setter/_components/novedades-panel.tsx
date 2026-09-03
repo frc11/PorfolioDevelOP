@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import type { OsSetterNoticeKind } from '@prisma/client'
 import { cn } from '@/lib/utils'
-import type { AvisoView, NovedadesView } from '@/lib/leados/novedades'
+import type { FilaNovedad, NovedadesView } from '@/lib/leados/novedades'
 import { AbrirFocoButton } from './novedades-abrir-foco'
 import { MarcarVistoButton } from './novedades-marcar-visto'
 
@@ -26,6 +26,14 @@ import { MarcarVistoButton } from './novedades-marcar-visto'
  * Server component: la data llega ya formateada desde `getNovedadesSetter`. Si no
  * hay nada que mostrar, no renderiza (cero ruido). El acento cyan queda para lo
  * accionable; cada tipo lleva su color semántico en el borde.
+ *
+ * P21 — este bloque queda para NOTICIAS. Lo que exige una acción del setter ya
+ * no vive acá: si el lead está en la cola de hoy (arriba), su aviso no se
+ * repite (`getNovedadesSetter#excludeLeadIds`). Y bajó de lugar —después de la
+ * cola y de la cartera— porque medía 1.346 px de los 2.270 del panel a 1440, más
+ * que el foco y la cartera juntos, con doce filas de texto idéntico. Las filas
+ * llegan YA agrupadas (`agruparAvisos`): lo que no ofrece acción se pliega por
+ * tipo, lo que sí la ofrece nunca se pliega.
  */
 const KIND_META: Record<
   OsSetterNoticeKind,
@@ -49,9 +57,10 @@ const KIND_META: Record<
   },
 }
 
-function AvisoItem({ aviso }: { aviso: AvisoView }) {
-  const meta = KIND_META[aviso.kind]
+function AvisoItem({ fila }: { fila: FilaNovedad }) {
+  const meta = KIND_META[fila.kind]
   const Icon = meta.icon
+  const plegada = fila.cantidad > 1
 
   return (
     <li className="relative overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
@@ -64,14 +73,30 @@ function AvisoItem({ aviso }: { aviso: AvisoView }) {
           className={cn('mt-0.5 shrink-0', meta.iconColor)}
         />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-zinc-100">{aviso.title}</p>
-          <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{aviso.body}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-sm font-semibold text-zinc-100">{fila.title}</p>
+            {/* P21 — el pliegue. Doce filas con el mismo título eran una noticia
+                escrita doce veces; ahora es una, con su cuenta al lado. */}
+            {plegada && (
+              <span className="rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-zinc-400">
+                ×{fila.cantidad}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{fila.body}</p>
+          {plegada && (
+            <p className="mt-0.5 text-[11px] text-zinc-600">
+              Y {fila.cantidad - 1} {fila.cantidad - 1 === 1 ? 'aviso más' : 'avisos más'} del
+              mismo tipo.
+            </p>
+          )}
           <div className="mt-1.5 flex items-center gap-3">
-            <span className="text-[11px] tabular-nums text-zinc-600">{aviso.hace}</span>
+            <span className="text-[11px] tabular-nums text-zinc-600">{fila.hace}</span>
             {/* A-06: "Abrir" ANCLA el lead como foco y navega — no es un link
-                directo que reconstituye una cola paralela. El saliente (sin
-                `leadId`) no ofrece acción: solo informa. */}
-            {aviso.leadId && <AbrirFocoButton leadId={aviso.leadId} />}
+                directo que reconstituye una cola paralela. Una fila plegada
+                nunca trae `leadId` (sólo se pliega lo que no ofrecía acción),
+                así que el pliegue no puede esconder un "Abrir". */}
+            {fila.leadId && <AbrirFocoButton leadId={fila.leadId} />}
           </div>
         </div>
       </div>
@@ -80,10 +105,10 @@ function AvisoItem({ aviso }: { aviso: AvisoView }) {
 }
 
 export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
-  const { avisos, revision, totalSinLeer } = novedades
+  const { filas, ocultos, revision, totalSinLeer } = novedades
 
   // Nada que mostrar → el panel desaparece (no es una superficie permanente).
-  if (avisos.length === 0 && !revision) return null
+  if (filas.length === 0 && !revision) return null
 
   return (
     <section
@@ -107,12 +132,19 @@ export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
         {totalSinLeer > 0 && <MarcarVistoButton className="ml-auto" />}
       </div>
 
-      {avisos.length > 0 && (
+      {filas.length > 0 && (
         <ul className="space-y-2">
-          {avisos.map((aviso) => (
-            <AvisoItem key={aviso.id} aviso={aviso} />
+          {filas.map((fila) => (
+            <AvisoItem key={fila.key} fila={fila} />
           ))}
         </ul>
+      )}
+
+      {ocultos > 0 && (
+        <p className="mt-2 px-1 text-[11px] text-zinc-600">
+          Y {ocultos} {ocultos === 1 ? 'aviso más' : 'avisos más'} sin ver. «Marcar vistas» los
+          limpia todos.
+        </p>
       )}
 
       {/* A-06: RESUMEN, no lista navegable. Informa cuántas demos esperan a Franco
@@ -120,7 +152,7 @@ export function NovedadesPanel({ novedades }: { novedades: NovedadesView }) {
           «Esperando revisión», abajo en esta misma página), no por una cola
           propia que compita con el foco. */}
       {revision && (
-        <div className={cn('space-y-2', avisos.length > 0 && 'mt-4')}>
+        <div className={cn('space-y-2', filas.length > 0 && 'mt-4')}>
           <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-600">
             Tus demos esperando a Franco
           </p>

@@ -10,39 +10,44 @@ import {
   Flame,
   PlayCircle,
   Pin,
+  PinOff,
   SkipForward,
   Target,
 } from 'lucide-react'
 import { Badge, Field, Input } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { formatFechaCorta, motivoOrden, type HomeLead } from '@/lib/leados/flow'
-import { anclarFoco } from '@/app/(protected)/setter/_actions/foco.actions'
+import { anclarFoco, soltarFoco } from '@/app/(protected)/setter/_actions/foco.actions'
 import { pausarLead } from '@/app/(protected)/setter/_actions/cartera.actions'
 import { ShortcutsHelp, type Atajo } from './shortcuts-help'
 import { useKeyboardShortcuts, type ShortcutMap } from './use-keyboard-shortcuts'
 
 /**
- * LeadOS 2.1a — "Modo dirección": el home entrega UN lead accionable de
- * protagonista (negocio + paso + porqué + CTA), no un tablero. Cuando el setter
- * termina (lo trabaja en el detalle y sale de la cola) o parquea (snooze), el
- * próximo render le da el siguiente. El foco solo PRESENTA y CALCULA: navega,
- * ancla el sticky y pausa — nunca transiciona stages.
+ * LeadOS 2.1a — "Modo dirección": el lead protagonista (negocio + paso + porqué
+ * + CTA). El foco solo PRESENTA y CALCULA: navega, ancla el sticky, suelta y
+ * pausa — nunca transiciona stages.
  *
  *   - "Ir a trabajarlo": ancla el lead como foco (sticky D7) y abre su detalle.
  *     Al volver, retomás el MISMO lead aunque haya entrado uno más urgente.
  *   - "Pausar": snooze personal (reusa `pausarLead`) → sale de la cola → próximo.
  *   - "Saltar": ancla el próximo como foco → te corre al siguiente sin pausarlo.
+ *   - "Soltar": borra el anclaje → el foco vuelve a ser la cima de la cola.
  *
- * El padre (server) ya eligió foco/próximo con `seleccionarFoco`; acá no hay
- * motor de prioridad nuevo. Cuando NO hay accionable (cola `trabajar` vacía) el
- * padre NO monta esta superficie: muestra `HomeEnEspera` (2.1b) en su lugar — por
- * eso `foco` acá es siempre un lead real, nunca null.
+ * P21 — desde este sprint el foco es EL PRIMER ÍTEM DE LA COLA (`ColaDelDia`),
+ * no un bloque solo: se sigue dibujando igual (mismo card, mismos atajos), pero
+ * la cuenta "1 de N para trabajar" se fue al encabezado de la cola, que es donde
+ * el número significa algo. El padre (server) ya eligió foco/próximo con
+ * `seleccionarFoco`; acá no hay motor de prioridad nuevo. Cuando NO hay
+ * accionable, el padre no monta la cola: muestra `HomeEnEspera` (2.1b).
+ *
+ * P21 — "Soltar" cierra un cabo de 2.1a: había TRES lugares para anclar el foco
+ * ("Ir a trabajarlo", "Saltar", "Abrir" de un aviso) y ninguno para soltarlo. La
+ * action `soltarFoco` existía desde 2.1a, construida y sin un solo llamador; el
+ * botón sólo aparece con el sticky activo, que es cuando hay algo que soltar.
  */
 type FocoSurfaceProps = {
   foco: HomeLead
   proximo: HomeLead | null
-  restantes: number
-  total: number
   stickyActivo: boolean
 }
 
@@ -66,7 +71,7 @@ function fechaEnDias(dias: number): string {
   return fecha.toISOString().slice(0, 10)
 }
 
-export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: FocoSurfaceProps) {
+export function FocoSurface({ foco, proximo, stickyActivo }: FocoSurfaceProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [snoozeAbierto, setSnoozeAbierto] = useState(false)
@@ -119,6 +124,22 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
     })
   }
 
+  const soltar = () => {
+    startTransition(async () => {
+      const result = await soltarFoco()
+      if (!result.success) {
+        toast.error(result.error)
+        return
+      }
+      // Mismo par de señales que "Saltar" (F3): el control ya se deshabilita en
+      // el acto, y esto anuncia lo que pasó — se queda en la MISMA pantalla y lo
+      // único que cambia es cuál lead encabeza la cola.
+      toast.success('Soltado — el foco vuelve al primero de tu cola.')
+      setSnoozeAbierto(false)
+      router.refresh()
+    })
+  }
+
   const toggleSnooze = () => {
     setMinDate(fechaEnDias(1))
     setSnoozeAbierto((actual) => !actual)
@@ -148,14 +169,14 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
         {/* Acento cyan: es lo accionable, el protagonista del día. */}
         <span aria-hidden className="absolute inset-y-0 left-0 w-1 bg-cyan-400/80" />
 
+        {/* P21 — la cuenta "1 de N para trabajar" se fue al encabezado de la
+            cola: acá decía la posición de un cursor que el setter no mueve, y
+            repetía un total que ahora tiene su lugar propio arriba. */}
         <div className="flex items-center justify-between gap-3">
           <p className="inline-flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.18em] text-cyan-300/80">
             <Target size={13} strokeWidth={1.5} aria-hidden />
             Tu foco ahora
           </p>
-          <span className="shrink-0 text-[11px] font-medium tabular-nums text-zinc-500">
-            {total === 1 ? '1 para trabajar' : `1 de ${total} para trabajar`}
-          </span>
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -171,11 +192,21 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
 
         {meta && <p className="mt-1 text-xs text-zinc-500">{meta}</p>}
 
-        {/* El paso actual: el elemento más fuerte — qué hacer ahora salta solo. */}
-        <div className="mt-4 flex items-center gap-2 rounded-xl bg-cyan-500/10 px-3 py-2 text-sm font-medium text-cyan-100">
-          <ArrowRight size={16} strokeWidth={1.5} aria-hidden className="shrink-0 text-cyan-300" />
+        {/* El paso actual. P21 — dejó de ser una caja cyan rellena de ancho
+            completo: con ese tratamiento parecía más un botón que el botón
+            (que mide un tercio y está abajo), y el ojo iba a la fila que no se
+            puede tocar. Sigue siendo lo más fuerte que se LEE —cyan, con la
+            flecha— pero ya no imita un control: el único que parece pulsable es
+            el que lo es. */}
+        <p className="mt-4 flex items-start gap-2 text-sm font-semibold text-cyan-100">
+          <ArrowRight
+            size={16}
+            strokeWidth={1.5}
+            aria-hidden
+            className="mt-0.5 shrink-0 text-cyan-300"
+          />
           <span className="min-w-0">{foco.proximaAccion}</span>
-        </div>
+        </p>
 
         {/* Por qué es éste el foco (explicabilidad) + si lo sostiene el sticky. */}
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -232,6 +263,21 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
             Saltar
             <SkipForward size={14} strokeWidth={1.5} aria-hidden />
           </button>
+
+          {/* P21 — sólo con el sticky activo: sin anclaje no hay nada que
+              soltar, y un control que no hace nada es peor que su ausencia. */}
+          {stickyActivo && (
+            <button
+              type="button"
+              onClick={soltar}
+              disabled={isPending}
+              title="Dejar de fijar este lead: el foco vuelve al primero de la cola"
+              className="inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-medium text-zinc-400 outline-none transition-colors hover:bg-white/[0.06] hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-cyan-400/40 disabled:opacity-50"
+            >
+              <PinOff size={14} strokeWidth={1.5} aria-hidden />
+              Soltar
+            </button>
+          )}
         </div>
 
         {snoozeAbierto && (
@@ -272,15 +318,12 @@ export function FocoSurface({ foco, proximo, restantes, total, stickyActivo }: F
         )}
       </div>
 
-      {/* Lo que viene: que el setter vea el próximo sin abrir el tablero. */}
-      {proximo && (
-        <p className="px-1 text-xs text-zinc-600">
-          Después:{' '}
-          <span className="font-medium text-zinc-400">{proximo.businessName}</span>
-          {restantes > 1 && <span> · +{restantes - 1} más en la cola</span>}
-        </p>
-      )}
-
+      {/* P21 — el pie "Después: <negocio> · +N más en la cola" se fue. Existía
+          porque la cola NO se renderizaba: era la única forma de ver el próximo
+          sin abrir el tablero. Ahora el próximo es la fila de abajo, con su
+          acción y su botón — dejarlo sería el mismo negocio nombrado dos veces
+          a tres centímetros de distancia. Con él se fue `restantes`, que era su
+          único consumidor: "Saltar" mira `proximo`, no la cuenta. */}
       <ShortcutsHelp atajos={ATAJOS_FOCO} />
     </section>
   )

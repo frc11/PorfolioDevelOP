@@ -63,7 +63,12 @@
 // los nueve pasos son los del manual, ningún chip de la franja navega a una
 // pantalla que el motor no habilita, y el paso marcado como el de ahora sale de
 // `posicion.actual` (el dato de P19) y no de la pantalla que se está mirando.
-const INVARIANTES_ESPERADOS = 53;
+// 54 desde P21 («la cola de trabajo»): suma `check:invariant:cola` — el foco es
+// el PRIMER ítem de la cola y no se duplica con ella, lo que no entra se cuenta
+// (mostrados + ocultos = total), y el dedup contra novedades mide lo VISIBLE, no
+// el grupo entero: un accionable que la cola no llegó a mostrar conserva su
+// aviso en vez de desaparecer de las dos superficies.
+const INVARIANTES_ESPERADOS = 54;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

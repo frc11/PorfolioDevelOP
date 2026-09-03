@@ -10234,3 +10234,219 @@ En los leads de la seed que nacen directo en un stage avanzado, la franja muestr
 huecos** (`✓ · 2 · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9`): ficha y brief tildados, opener y seguimiento no. Es
 correcto — la franja lee lo que está registrado, no una barra de progreso lineal fingida. Vale
 saberlo antes de mirar las capturas: un lead sembrado no tiene la historia de uno trabajado.
+
+---
+
+## Sprint P21 — LA COLA DE TRABAJO: el panel deja de entregar un lead por vez — 2026-09-03
+
+Rama `fix/cola-de-trabajo`, base `29d0635f` (P20), worktree `C:/tmp/wt-p21-cola`. Veinte sprints
+sobre las pantallas del manual; el panel —lo primero que el setter abre— seguía como en agosto.
+**Los dos brazos vivos**: `:3021` el viejo (`.next-p21-viejo`), `:3020` el nuevo (`.next-p21`).
+
+### Fase 1 — la medición, antes de tocar nada
+
+Las decisiones venían de capturas de agosto. Se re-midió con un instrumento nuevo,
+`scripts/qa-corridas/medir-panel-setter.ts`, que hace con el panel lo que
+`medir-pliegue-manual.ts` hace con las catorce pantallas: pliegue real (`main.clientHeight`, no el
+viewport), alturas contra el origen del contenido del scroller, y un censo de conducta.
+
+**1 · Cuánto ocupa cada bloque, y qué entra en el pliegue.** Cartera real del setter QA: 84 leads,
+**49 accionables**, 37 avisos sin leer.
+
+| 1440 · pliegue 788 | top | alto | · | 390 · pliegue 688 | top | alto |
+|---|---|---|---|---|---|---|
+| cabecera | 32 | 98 | · | cabecera | 32 | 103 |
+| foco | 162 | 291 | · | foco | 167 | 278 |
+| **novedades** | 485 | **1.346** | · | **novedades** | 477 | **1.592** |
+| cartera | 1.863 | 45 | · | cartera | 2.100 | 45 |
+| mis números | 1.940 | 187 | · | mis números | 2.177 | 311 |
+| tu semana | 2.159 | 79 | · | tu semana | 2.520 | 111 |
+| **alto total** | | **2.270** | · | **alto total** | | **2.663** |
+
+Novedades es el **59 %** del panel a 1440 y el **60 %** a 390 — más que el foco, la cartera, los
+números y la semana **juntos**. La cifra de agosto («~1.000 de 2.366») quedó corta: creció.
+
+En el pliegue entraban `cabecera → foco → (arranque de) novedades`. Medido en unidades de trabajo:
+**1 lead accionable entero, de 49**, y **3 avisos** (2 a 390) — los tres con el mismo título.
+
+**2 · Los tipos de novedad, uno por uno.** El enum `OsSetterNoticeKind` tiene cuatro valores; el
+copy de cada uno está en `novedades.ts:61` (`copyNovedad`, con guard de exhaustividad). Más un
+quinto bloque que no es un aviso: el resumen live de la cola en revisión (`derivarColaRevision`,
+`novedades.ts:179`).
+
+| tipo | ¿exige acción del setter? | por qué |
+|---|---|---|
+| `DEMO_APROBADA` | **Sí** — «enviá el link ya» | el lead cae en `trabajar` (`flow.ts:430`) si hay `finalUrl` y el gate está abierto. **Sin `finalUrl` no**: la espera es de Franco y el lead va a `seguimiento` |
+| `DEMO_RECHAZADA` | **Sí** — «reabrí la construcción» | stage `RECHAZADA` cae en `trabajar` por la rama default (`flow.ts:444`) |
+| `LEAD_ASIGNADO` | **Sí** — «arrancá por la ficha» | un lead recién asignado no tiene dossier → `trabajar` |
+| `LEAD_REASIGNADO_SALIENTE` | **No** — informa | `leadId: null` por diseño: el setter ya no es dueño y no hay nada que abrir |
+| resumen «demos esperando a Franco» | **No** — informa | agregado, turno de Franco (A-06) |
+
+Los tres primeros son ambiguos **por lead, no por tipo**: una aprobada sin link no es trabajo. Por
+eso la regla que se construyó no es una lista de tipos (ver más abajo).
+
+**3 · De dónde sale «para trabajar», y quién lo consume.** `particionarCartera` (`flow.ts:813`)
+sobre `buildHomeLeads(listOwnedLeads(userId))`. `grupos.trabajar` tenía **un solo consumidor en toda
+la app**: `seleccionarFoco`, en `setter/page.tsx:38`. Confirmado por barrido: los demás hits son el
+propio `flow.ts`, los invariantes y comentarios. **Entrar a la cola era ser el foco: 1 de 49.**
+Para renderizarla no hacía falta ningún dato nuevo ni ninguna consulta: el grupo ya estaba armado y
+tirado a la basura salvo su primer elemento.
+
+**4 · Cómo llega hoy una demo aprobada y un rechazo.** Dos caminos, los dos ya existentes:
+`aprobarRevision` / `rechazarRevision` (`admin/leados/_actions/revision.actions.ts`) llaman a
+`avisarDecisionAlSetter` (`:36`) y revalidan `/setter` (`:26`). O sea: el aviso **y** la
+reclasificación del lead a `trabajar`. **Ninguno de los dos caminos lo mostraba como trabajo**: el
+aviso caía en el bloque pasivo, y el lead reclasificado entraba a un grupo sin superficie. Sólo se
+veía si ese lead ganaba el foco.
+
+**5 · Qué ancla y qué suelta el foco.** Anclan **tres**: «Ir a trabajarlo» y «Saltar»
+(`foco-surface.tsx:80` y `:92`) y «Abrir» de un aviso (`novedades-abrir-foco.tsx:25`). Suelta
+**ninguno**: `soltarFoco` existe en `foco.actions.ts:53`, completa y correcta, con **cero
+llamadores** — el barrido de `soltarFoco` en `src/`, `tests/` y `scripts/` devuelve exactamente su
+propia definición. Estaba construida desde 2.1a y nunca se conectó.
+
+**6 · Qué mide cada uno de los cuatro números.** Volcados del DOM, no leídos del código:
+
+| # | número | dónde | ¿habilita una acción? |
+|---|---|---|---|
+| 1 | `1 de 49 para trabajar` | `foco-surface.tsx:157` | el **49** sí (es el volumen del día); el «1 de» es la posición de un cursor que el setter no mueve |
+| 2 | `84` | badge del plegable, `cartera-view.tsx:57` | sí — abre la cartera |
+| 3 | `82` de `84` en tu cartera | `mis-numeros.tsx:32` | **no** — no se filtra por él, no lleva a ningún lado |
+| 4 | `77 evaluadas · 5 % descarte` | `mis-numeros.tsx:58` | **no**, y no es un número de volumen: es la proporción del propio filtro |
+
+(«Tu semana» —6 contactos · 3 demos · 2 cerrados— es un cuarto bloque, reflexivo, y no entró en el
+encargo.)
+
+**Condiciones de frenada: ninguna se cumplió.** No hace falta ningún dato nuevo ni consulta nueva.
+El dedup se puede ensanchar sin duplicar. Soltar el foco no persiste nada: borra una cookie.
+
+### Lo que se construyó
+
+**La cola de hoy** (`cola.ts`, `cola-del-dia.tsx`). Módulo puro: recibe el foco ya elegido y `resto`
+—la misma cola ordenada, sin el foco— y arma la lista. No clasifica, no prioriza, no transiciona: el
+criterio sigue en `flow.ts` y la selección en `foco.ts`.
+
+**El foco es el primer ítem de la cola, no un bloque al lado.** Se dibuja con la MISMA `FocoSurface`
+de siempre, adentro de la sección de la cola. `resto` salió de exponer el array que `seleccionarFoco`
+**ya construía** en su cuerpo (`foco.ts:55`) para derivar `proximo` y `restantes`: la alternativa era
+reconstruir en otro módulo el mismo «sacá el foco de la cola», que es como dos criterios empiezan a
+divergir. `proximo === resto[0]` y `restantes === resto.length` por construcción.
+
+**El tope es 5** (foco + 4). Con 49 accionables, mostrarlos todos devuelve una segunda cartera. Lo
+que no entra no se pierde ni se esconde: la cola dice «Quedan 44 más para trabajar, en tu cartera».
+Sin enlace, a propósito — la cartera es un plegable de esta misma página, no una ruta.
+
+**El dedup es por LEAD VISIBLE, no por tipo.** `getNovedadesSetter` pasó de `excludeLeadId` (un
+lead: el foco) a `excludeLeadIds` (los ids que la cola **renderiza**, `idsEnCola`). Es la regla que
+resuelve la ambigüedad del punto 2 sin una lista de tipos que mantener: *un aviso cuyo lead ya
+aparece como tarea no se repite; todos los demás se quedan.* Una aprobada **sin link** no está en la
+cola (no es trabajo, es espera de Franco), así que su aviso sigue abajo, que es lo correcto. Y se
+excluye lo VISIBLE y no el grupo entero a propósito: un accionable que quedó entre los `ocultos`
+conserva su aviso, en vez de desaparecer de las dos superficies.
+
+**Novedades quedó para noticias**: bajó después de la cola y de la cartera, y se agrupa
+(`novedades-agrupar.ts`, módulo puro para que el invariante lo ejecute de verdad). El criterio del
+pliegue **no es el tipo: es si el aviso ofrece una acción**. Plegar por tipo escondería el «Abrir»
+de una demo aprobada detrás de un contador; plegar por «no tiene acción» no puede esconder ninguna.
+Las 32 reasignaciones-salientes idénticas son ahora **una fila con su cuenta**. El corte de la query
+subió de 12 a 50 filas por honestidad, no por volumen: con `take: 12` el grupo decía «11 más» sobre
+32 reales. Misma query, mismo índice, mismo filtro por destinatario.
+
+**Los cuatro pendientes chicos.** (1) «Soltar» conectado — el botón aparece sólo con el sticky
+activo, que es cuando hay algo que soltar. (2) Se fue la tarjeta «Leads activos»: repetía el total
+de la cartera y su número propio no habilitaba nada; quedan **para trabajar** y **en cartera**, y el
+criterio —que no es volumen— se explica en su tarjeta. (3) La fila del próximo paso dejó de ser una
+caja cyan rellena de ancho completo: ahora es texto fuerte, y el único que parece pulsable es el que
+lo es. (4) Se fueron el eyebrow «LeadOS» —a tres centímetros del «LeadOS» del topbar— y el subtítulo
+que le explicaba el producto a alguien que lo abre todos los días.
+
+### Después
+
+| 1440 · pliegue 788 | top | alto | · | 390 · pliegue 688 | top | alto |
+|---|---|---|---|---|---|---|
+| cabecera | 32 | 60 | · | cabecera | 32 | 52 |
+| **cola** | 124 | **697** | · | **cola** | 116 | **880** |
+| · foco (adentro) | 156 | 247 | · | · foco (adentro) | 148 | 234 |
+| cartera | 853 | 45 | · | cartera | 1.028 | 45 |
+| novedades | 930 | **582** | · | novedades | 1.105 | **710** |
+| mis números | 1.544 | 187 | · | mis números | 1.847 | 187 |
+| tu semana | 1.763 | 79 | · | tu semana | 2.066 | 111 |
+| **alto total** | | **1.873** | · | **alto total** | | **2.208** |
+
+Novedades: **1.346 → 582** a 1440 (−57 %) y **1.592 → 710** a 390 (−55 %). Panel entero: **2.270 →
+1.873** y **2.663 → 2.208** (−17 % en los dos). Orden: `cabecera → cola → cartera → novedades →
+números → semana`.
+
+**Lo que entra en el pliegue, en unidades de trabajo** (lo que el sprint existe para mover):
+
+| | antes | después |
+|---|---|---|
+| leads accionables enteros, 1440 | **1** | **4** |
+| leads accionables enteros, 390 | **1** | **3** |
+| avisos en el pliegue, 1440 | 3 | **0** |
+| avisos en el pliegue, 390 | 2 | **0** |
+| filas de novedades renderizadas | 12 (mismo título) | 5 (4 con acción + 1 pliegue) |
+| números en pantalla | 21 | 13 |
+| «LeadOS» escrito en el DOM | 2 | 1 |
+
+### Las tres superficies fijas: sin mover un píxel
+
+`medir-pliegue-manual.ts` y `capturar-franja.ts`, corridos en las dos puntas y comparados campo por
+campo: **0 diferencias en 28 filas × 12 campos** (pliegue) y **0 diferencias en 28 filas** (franja).
+Entra algo accionable 8/14 a 1440 y 4/14 a 390 — idéntico. Acción principal a la vista 9/9. Barra en
+9/14. Baselines: `docs/baselines/p21-pliegue-antes.json`, `p21-pliegue-despues.json`,
+`p21-franja-antes.json`, `p21-franja-despues.json`.
+
+### Cómo se verificó
+
+**Rojo contra el código viejo:** la spec nueva (`26-cola-de-trabajo.spec.ts`) corrida contra `:3021`
+da **3 de 4 en rojo**. El cuarto (la cola vacía) pasa, y es correcto que pase: `HomeEnEspera` ya
+existía y ese test lo protege de una regresión que el sprint podría haber introducido. Se declara,
+no se disfraza.
+
+**Sabotaje del aislamiento, en dos pasos.** Con `listOwnedLeads` sin su `where` los cuatro tests se
+ponen rojos — pero P21-3 caía en su *primer* aserto, porque con cientos de leads el tope de la cola
+tapaba la fuga. Se repitió con el tope subido a 500 para que la fuga no quedara enmascarada: ahí el
+aserto que dispara es **el que corresponde** — «el lead del otro setter no aparece en NINGUNA parte
+del panel», esperado 0, recibido 1. Los dos sabotajes revertidos y el brazo reconstruido.
+
+**Operando la aplicación** (`_p21-corrida.ts`, siembra propia y borrado en `finally`), a 1440 y 390:
+
+- una demo **aprobada** y un **rechazo**: `cola: 1 · novedades: 0` cada uno, a los dos anchos; la
+  reasignación-saliente `cola: 0 · novedades: 1`. El conteo en los dos lugares, por unidad de
+  presentación (una tarjeta de la cola / una fila de novedades) y no por nodo de texto;
+- el foco **anclado y soltado**: botones «Soltar» 0 → 1 (con el chip «Fijado mientras lo trabajás»
+  visible) → click → acuse «Soltado — el foco vuelve al primero de tu cola» → 0, chip ido;
+- un setter **sin trabajo**: no hay cola colgada vacía — aparece el «todo en espera» con «1
+  esperando a Franco», dónde está la cartera y la salida para cargar un prospecto.
+
+Capturas en `docs/proof-screenshots/p21/`.
+
+### Una prueba que cambió de superficie (no se borró ni se salteó)
+
+`02-isolation.spec.ts:C4` se puso roja con el cambio, y es correcto: afirmaba que B ve el aviso «Te
+asignaron un lead» en el bloque de novedades, y desde P21 el aviso de un lead que ya es tarea no se
+repite. Se movió el aserto a la superficie donde el sprint pone ese handoff (la fila de B en la
+cola) y se le sumó que el aviso **sigue existiendo sin leer** (`countNoticesFor`) — el dedup es
+presentación, no borrado. Lo que el test garantiza —el handoff llega a B, dirigido, y no se cruza
+con el de A— no cambió.
+
+De paso, al ampliar C4 se metió un aserto de más («B tampoco ve el negocio de A») que era falso por
+la fixture compartida: **C3, dos tests más arriba, reasigna ese lead a B a propósito**. Se sacó, con
+el motivo escrito al lado. La cartera de A frente a B ya la cubre C2, con su fixture intacta.
+
+### Gates
+
+`tsc` 0 · invariantes **54 descubiertos / 53 corridos / 53 verdes** (suma `check:invariant:cola`,
+1.632 combinaciones de cola × tope × sticky; `check:invariant:novedades` se amplió con 3.157
+combinaciones del pliegue) · `test:setter` · `test:leados` 33/33 · `test:helpers` 26/26 · `build` 0 ·
+`migrate status` sin drift.
+
+### Lo que queda anotado, y no se hizo
+
+- **Dos avisos con acción del mismo negocio se muestran los dos** (visto en la cartera QA: «Franco
+  aprobó» y «Franco pidió cambios» del mismo lead, de dos vueltas distintas). No es duplicación —son
+  dos hechos— y plegarlos escondería un «Abrir». Queda como está, dicho.
+- La **cartera agrupada** no era este sprint.
+- El tope de 5 es un número elegido, no medido contra el ritmo real de un setter. Si con la cola
+  puesta resulta corto o largo, se cambia en una línea (`TOPE_COLA`).

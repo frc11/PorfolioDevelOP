@@ -19,6 +19,9 @@
  *   4. DOS EJES — el feed se aísla por DESTINATARIO (`setterId`) y la cola en
  *      revisión por DUEÑO ACTUAL (`assignedToId`): dimensiones distintas a
  *      propósito (el saliente ya no es dueño pero sí destinatario).
+ *   5. EL PLIEGUE NO ESCONDE NINGUNA ACCIÓN (P21) — `agruparAvisos` sólo pliega
+ *      avisos SIN `leadId`; ninguno de los que ofrecen "Abrir" pierde su fila, y
+ *      la cuenta de avisos se conserva (filas + ocultos = entrada).
  *
  * Importa solo módulos puros (isolation.ts) y los enums de Prisma (valores en
  * runtime, sin DB) — cero Neon, cero efectos.
@@ -32,6 +35,7 @@ import {
   ownSetterNoticeWhere,
   SOLO_CONTACTOS_COMERCIALES,
 } from './isolation.ts'
+import { agruparAvisos, type AvisoView } from './novedades-agrupar.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -127,8 +131,87 @@ assert.notEqual(
   'el feed (setterId) y la cola (assignedToId) son dimensiones distintas',
 )
 
+// ── 5. P21 — el pliegue no esconde ninguna acción ───────────────────────────
+// El bug que motivó el agrupamiento: doce filas con el mismo título. El riesgo
+// del arreglo es el opuesto — plegar algo que el setter podía abrir. Se barre el
+// eje entero: cuántos avisos, cuántos con acción, y qué tope.
+const aviso = (i: number, kind: OsSetterNoticeKind, leadId: string | null): AvisoView => ({
+  id: `a${i}`,
+  kind,
+  title: `T-${kind}`,
+  body: `b${i}`,
+  hace: 'hace 1 h',
+  leadId,
+})
+
+let casosPliegue = 0
+for (let sinAccion = 0; sinAccion <= 40; sinAccion += 1) {
+  for (let conAccion = 0; conAccion <= 6; conAccion += 1) {
+    const entrada: AvisoView[] = []
+    for (let i = 0; i < conAccion; i += 1) {
+      // Repartidos entre los tipos que SÍ traen lead, para que el pliegue por
+      // kind tenga la oportunidad de tragárselos si el criterio fuera el tipo.
+      const kind: OsSetterNoticeKind = i % 2 === 0 ? 'DEMO_APROBADA' : 'DEMO_RECHAZADA'
+      entrada.push(aviso(i, kind, `lead-${i}`))
+    }
+    for (let i = 0; i < sinAccion; i += 1) {
+      entrada.push(aviso(1000 + i, 'LEAD_REASIGNADO_SALIENTE', null))
+    }
+
+    for (let tope = 0; tope <= 10; tope += 1) {
+      casosPliegue += 1
+      const { filas, ocultos } = agruparAvisos(entrada, tope)
+
+      // Ninguna fila plegada trae acción: plegar y ofrecer "Abrir" es la
+      // combinación imposible — si apareciera, el contador estaría tapando un
+      // lead abrible.
+      for (const fila of filas) {
+        assert.ok(
+          fila.cantidad === 1 || fila.leadId === null,
+          'una fila plegada nunca trae un lead abrible',
+        )
+      }
+
+      // Cada aviso con acción tiene su PROPIA fila, o quedó fuera por el tope —
+      // nunca plegado dentro de otra.
+      const idsConAccion = filas.filter((f) => f.leadId !== null).map((f) => f.key)
+      assert.equal(
+        new Set(idsConAccion).size,
+        idsConAccion.length,
+        'los avisos con acción no se colapsan entre sí',
+      )
+      assert.ok(
+        idsConAccion.length === Math.min(conAccion, tope),
+        'los avisos con acción entran primero y uno por fila',
+      )
+
+      // Ningún aviso se pierde en la cuenta: lo mostrado más lo oculto es la
+      // entrada entera.
+      const mostrados = filas.reduce((suma, f) => suma + f.cantidad, 0)
+      assert.equal(
+        mostrados + ocultos,
+        entrada.length,
+        'filas + ocultos cubren exactamente los avisos de entrada',
+      )
+      assert.ok(filas.length <= tope, 'el tope corta filas, no se excede')
+    }
+  }
+}
+
+// El caso medido en la cartera real: 32 reasignaciones-salientes idénticas → UNA
+// fila con su cuenta, no doce entradas de texto repetido.
+const treintaYDos = Array.from({ length: 32 }, (_, i) =>
+  aviso(i, 'LEAD_REASIGNADO_SALIENTE', null),
+)
+const plegado = agruparAvisos(treintaYDos, 6)
+assert.equal(plegado.filas.length, 1, '32 avisos del mismo tipo sin acción son UNA fila')
+assert.equal(plegado.filas[0].cantidad, 32, 'y la fila dice que son 32')
+assert.equal(plegado.ocultos, 0, 'plegados no es lo mismo que ocultos: no se perdió ninguno')
+
 console.log(
-  '✓ invariante OK: novedades aisladas por destinatario (setterId), dirección ' +
-    'correcta (actual para asignar/aprobar/rechazar, previo para el saliente — el ' +
-    'cabo 0.5.8), y SISTEMA sigue fuera de lo comercial (novedad ≠ canal de actividad).',
+  `✓ invariante OK: novedades aisladas por destinatario (setterId), dirección ` +
+    `correcta (actual para asignar/aprobar/rechazar, previo para el saliente — el ` +
+    `cabo 0.5.8), SISTEMA sigue fuera de lo comercial (novedad ≠ canal de ` +
+    `actividad), y el pliegue de P21 (${casosPliegue} combinaciones) no esconde ` +
+    `ninguna acción ni pierde un solo aviso de la cuenta.`,
 )
