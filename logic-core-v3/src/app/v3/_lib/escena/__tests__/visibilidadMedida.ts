@@ -44,7 +44,7 @@ export const DOCUMENTO = ANCLAJE.pantallasDelDocumento * VENTANA
 
 /** La escena en cuadro en una posición dada **en pantallas** del recorrido. */
 export function enPantalla(p: number): boolean {
-  return escenaEnCuadro(p * VENTANA, DOCUMENTO, VENTANA)
+  return escenaEnCuadro(p * VENTANA, 0, DOCUMENTO, VENTANA)
 }
 
 /** El marcado real que emite el panel de una sección, y sus clases. */
@@ -70,7 +70,7 @@ export type Banda = {
 export function medirBanda(): Banda {
   const total = Math.round(DOCUMENTO - VENTANA) + 1
   let vistos = 0
-  for (let y = 0; y < total; y += 1) if (escenaEnCuadro(y, DOCUMENTO, VENTANA)) vistos += 1
+  for (let y = 0; y < total; y += 1) if (escenaEnCuadro(y, 0, DOCUMENTO, VENTANA)) vistos += 1
   const ancho = ANCLAJE.ventanasDeLaEscena.reduce((n, [a, b]) => n + (b - a), 0)
   return { conMargen: 1 - vistos / total, sinMargen: 1 - ancho / ANCLAJE.pantallasDeScroll }
 }

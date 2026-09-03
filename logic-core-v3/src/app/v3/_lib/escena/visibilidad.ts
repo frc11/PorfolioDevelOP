@@ -214,25 +214,34 @@ export const CUADROS_DE_REANUDACION = 1
  * lugar distinto de donde el mapeo cree que está, y ningún invariante de
  * ninguno de los dos frentes lo vería.
  *
- * Los tres argumentos entran; no se leen de `window` acá. Es lo que permite que
- * el invariante corra la MISMA función sin DOM, y es la mitad de la lección de
- * `CLAUDE.md` sobre medir scroll con la pestaña oculta: quien llama decide si
- * sus números valen.
+ * Los cuatro argumentos entran; no se leen de `window` acá: es lo que permite que
+ * el invariante corra la MISMA función sin DOM, y la mitad de la lección de
+ * `CLAUDE.md` sobre medir scroll con la pestaña oculta.
  *
- * ⚠ **Los dos casos degenerados devuelven `true`, y es el lado seguro.** Un
- * documento que no scrollea —o la pestaña oculta, donde el alto da cero— caen en
- * la pantalla 0, que es el hero y es transparente. Una medición que no es un
- * número se atrapa aparte: sin esa guarda, `NaN` fallaría las dos comparaciones
- * y **apagaría** la escena, que es exactamente el error que no se puede cometer
- * —quedarse encendido de más cuesta cuadros; quedarse apagado de más deja la
- * sala vieja en pantalla—.
+ * ⚠ **V3-B: el segundo y el tercero son la EXTENSIÓN DE LAS SECCIONES**, no el
+ * alto del documento — el mismo cambio que el mapeo y por la misma razón, que
+ * está en `pantallaDeScroll`. Tiene que ser el mismo o los dos frentes volverían
+ * a traducir el scroll con dos reglas distintas.
+ *
+ * ⚠ **Los dos casos degenerados devuelven `true`, y es el lado seguro.** Unas
+ * secciones que no scrollean —o la pestaña oculta, donde toda medida da cero—
+ * caen en la pantalla 0, que es el hero y es transparente. Una medición que no es
+ * un número se atrapa aparte: sin esa guarda, `NaN` fallaría las dos
+ * comparaciones y **apagaría** la escena, que es el error que no se puede cometer
+ * —encendido de más cuesta cuadros; apagado de más deja la sala vieja en cuadro—.
  */
 export function escenaEnCuadro(
   scrollY: number,
-  altoDelDocumento: number,
+  arribaDeLasSecciones: number,
+  abajoDeLasSecciones: number,
   altoDeLaVentana: number,
 ): boolean {
-  const pantalla = pantallaDeScroll(scrollY, altoDelDocumento, altoDeLaVentana)
+  const pantalla = pantallaDeScroll(
+    scrollY,
+    arribaDeLasSecciones,
+    abajoDeLasSecciones,
+    altoDeLaVentana,
+  )
   if (!Number.isFinite(pantalla)) return true
   return ANCLAJE.ventanasDeLaEscena.some(
     ([desde, hasta]) =>

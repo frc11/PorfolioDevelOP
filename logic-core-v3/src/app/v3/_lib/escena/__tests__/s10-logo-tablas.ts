@@ -161,11 +161,33 @@ export const TINTA_CONTRA_TINTA = (tintaDelLogo: string): number => razonDeContr
  * ⚠ El nombre se busca con `lastIndexOf` a propósito: `TRAMOS` nombra a los seis
  * tramos con las mismas cadenas más arriba en el archivo, y un `indexOf` caería
  * en esa tabla, que no tiene comentario por entrada.
+ *
+ * ── ⚠️ LOS DOS ARREGLOS DE V3-B, Y POR QUÉ ESTO ESTABA EN ROJO ─────────────
+ *
+ * Este detector daba **falso siempre** —o sea que §6 de `s10-logo.invariant.ts`
+ * estaba en rojo con el docblock intacto— por dos razones que se suman, y
+ * ninguna tiene que ver con lo que mide:
+ *
+ * 1. **El fin de línea.** El repo corre con `core.autocrlf=true`, así que el
+ *    fuente en disco lleva `\r\n` y el `'\n  {\n'` con el que se buscaba el
+ *    principio del bloque no aparece nunca. Es la lección de `CLAUDE.md` sobre
+ *    los invariantes que parsean el fuente salto de línea por medio: **se
+ *    normaliza antes de buscar**, no se escribe el separador de una plataforma.
+ * 2. **La caja.** El docblock que hay que encontrar dice *«EL RECORTE POR ARRIBA
+ *    ES DECISIÓN»* en mayúsculas —así lo escribió SITIO-S11 al cerrar el defecto
+ *    18— y la expresión estaba en minúsculas y sin `i`.
+ *
+ * El control positivo del §6 sobrevivía a los dos porque su forma es *«el
+ * detector NO da verde contra el Hero»*: un detector que devuelve `false`
+ * siempre lo pasa. **Es un control que no discriminaba**, y por eso el rojo
+ * podía leerse como «el docblock falta» durante tres sprints. Queda anotado acá
+ * porque el arreglo del detector sin el arreglo del control no cierra nada.
  */
 export function declaraElRecorte(fuente: string, nombreDelKeyframe: string): boolean {
-  const fin = fuente.lastIndexOf(`name: '${nombreDelKeyframe}'`)
+  const normalizado = fuente.replace(/\r\n/g, '\n')
+  const fin = normalizado.lastIndexOf(`name: '${nombreDelKeyframe}'`)
   if (fin < 0) return false
-  const inicio = fuente.lastIndexOf('\n  {\n', fin)
+  const inicio = normalizado.lastIndexOf('\n  {\n', fin)
   if (inicio < 0) return false
-  return /recorte por arriba/.test(fuente.slice(inicio, fin))
+  return /recorte por arriba/i.test(normalizado.slice(inicio, fin))
 }

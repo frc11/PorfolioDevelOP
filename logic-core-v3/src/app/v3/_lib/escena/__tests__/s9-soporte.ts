@@ -194,12 +194,12 @@ export function veredictoDelRitmo(): VeredictoDelRitmo {
  * todo, abajo de todo, pasado de rosca en los dos sentidos, y un documento que
  * no scrollea. Están acá para que el invariante afirme la lista, no la arme.
  */
-export const MUESTRAS_DE_SCROLL: readonly (readonly [number, number, number])[] = [
-  [0, 1400, 100],
-  [1300, 1400, 100],
-  [9999, 1400, 100],
-  [-50, 1400, 100],
-  [0, 100, 100],
+export const MUESTRAS_DE_SCROLL: readonly (readonly [number, number, number, number])[] = [
+  [0, 0, 1400, 100],
+  [1300, 0, 1400, 100],
+  [9999, 0, 1400, 100],
+  [-50, 0, 1400, 100],
+  [0, 0, 100, 100],
 ]
 
 export type VeredictoDeReasignacion = {

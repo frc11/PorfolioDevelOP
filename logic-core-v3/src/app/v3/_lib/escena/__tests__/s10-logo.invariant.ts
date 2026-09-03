@@ -178,24 +178,24 @@ titulo('6 · DEFECTO O DECISIÓN — lo que el keyframe declara por escrito')
 
 /**
  * ⚠ **LA SEGUNDA AFIRMACIÓN ES NUEVA DE SITIO-S11, Y CIERRA EL DEFECTO 18.**
- *
  * SITIO-S10 midió que `demos` no sólo llena el cuadro: **se sale por arriba**, y
  * que `choreography.ts` no mencionaba un recorte en ninguna línea. Llenar y
- * salirse no son lo mismo, y un recorte que nadie escribió se lee como error.
- * El valor NO se tocó —la pose está calibrada a ojo y aprobada por grabación—:
- * lo que se agregó es la declaración, con su medición al lado. Desde acá, si
- * alguien la borra, esta afirmación se pone en rojo.
+ * salirse no son lo mismo, y un recorte que nadie escribió se lee como error. El
+ * valor NO se tocó —la pose está calibrada y aprobada por grabación—: lo que se
+ * agregó es la declaración. Desde acá, si alguien la borra, esto se pone en rojo.
  */
 const CHOREO = fuenteDe('src/app/v3/_lib/escena/choreography.ts')
+/** El mismo fuente en finales de línea de Unix: el detector tiene que ver los dos. */
+const CHOREO_LF = CHOREO.replace(/\r\n/g, '\n')
 afirmar(
   CHOREO_KEYFRAMES.some((k) => k.name === 'demos' && k.pose.frameX === 1),
   'DECISIÓN — que `demos` LLENE el cuadro está escrito en `choreography.ts` y en §2.2',
   '«Es la única pose donde el logo llena el cuadro —81% del alto en tinta— y es la excepción que la arquitectónica se reserva»',
 )
 afirmar(
-  declaraElRecorte(CHOREO, 'demos'),
+  declaraElRecorte(CHOREO, 'demos') && declaraElRecorte(CHOREO_LF, 'demos'),
   'DECISIÓN — y que se SALGA por arriba también está declarado ahora, en el docblock de esa pose',
-  `medido: y=${FRACCION.arribaMaxima.toFixed(2)} contra el borde en +1,00, ${(100 - FRACCION.peorFraccionDentro * 100).toFixed(1)}% del área afuera en el peor cuadro`,
+  `y=${FRACCION.arribaMaxima.toFixed(2)} contra el borde en +1,00, ${(100 - FRACCION.peorFraccionDentro * 100).toFixed(1)}% del área afuera · lo encuentra con los DOS finales de línea (era el rojo que V3-B arregló)`,
 )
 controlPositivo(
   'el detector del recorte no da verde contra cualquier keyframe: el del Hero no lo declara',

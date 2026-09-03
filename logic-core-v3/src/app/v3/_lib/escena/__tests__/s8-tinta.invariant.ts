@@ -202,11 +202,13 @@ for (const fila of transparentes) {
 }
 
 /**
- * El Hero se afirma sobre su VENTANA ENTERA, y ahora eso significa algo más
- * fuerte que antes: con el anclaje, la pantalla del Hero es exactamente el tramo
- * `hero` de la coreografía, que es un SOSTÉN —los dos keyframes llevan la misma
- * pose y el arco de luz tiene su stop en 0,125—, así que **el cuadro no cambia
- * en toda la ventana** y el peor caso es el mismo en los cuatro bordes.
+ * ⚠ **LA RAZÓN DE ESTA AFIRMACIÓN SE CAYÓ CON `hero · sostén` (V3-B).** Decía que
+ * la ventana del Hero era un SOSTÉN y que por eso *«el cuadro no cambia en toda
+ * la ventana y el peor caso es el mismo en los cuatro bordes»*. V3-B sacó ese
+ * keyframe: el cuadro **sí** cambia —la cámara va de azimut 0°/altura
+ * 6,40/distancia 19,00 a 59,4°/1,83/15,57 entre p=0 y p=0,125— así que el
+ * `Math.min` de abajo dejó de ser una formalidad. El peor caso bajó de **9,73:1 a
+ * 8,71:1**: es lo que cuesta que la escena se mueva desde el primer píxel.
  */
 const hero = transparentes[0]
 const heroPeor = Math.min(...bordesDe(hero).map((p) => contrasteEn(p, 0)))

@@ -182,11 +182,11 @@ afirmar(
 
 afirmarIgual(
   [
-    progresoDelScroll(0, 1400, 100),
-    progresoDelScroll(1300, 1400, 100),
-    progresoDelScroll(9999, 1400, 100),
-    progresoDelScroll(-50, 1400, 100),
-    progresoDelScroll(0, 100, 100),
+    progresoDelScroll(0, 0, 1400, 100),
+    progresoDelScroll(1300, 0, 1400, 100),
+    progresoDelScroll(9999, 0, 1400, 100),
+    progresoDelScroll(-50, 0, 1400, 100),
+    progresoDelScroll(0, 0, 100, 100),
   ],
   [0, 1, 1, 0, 0],
   'progresoDelScroll: 0 arriba, 1 abajo, acotado a los dos lados, 0 si no hay recorrido',

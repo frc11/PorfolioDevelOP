@@ -190,6 +190,8 @@
     "test:s10-logo": "npx tsx src/app/v3/_lib/escena/__tests__/s10-logo.invariant.ts",
     "test:s10-raf": "npx tsx src/app/v3/_lib/__tests__/s10-raf.invariant.ts",
     "test:s10": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s10",
+    "test:s13b-escena": "npx tsx src/app/v3/_lib/escena/__tests__/s13b-escena.invariant.ts",
+    "test:s13b": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s13b",
     "test:s7e-export-sprites": "npx tsx src/app/probe-escena/__tests__/s7-export.invariant.ts",
     "test:s7e-modelado": "npx tsx src/app/probe-escena/__tests__/s7-modelado.invariant.ts",
     "test:s7e-recorridos": "npx tsx src/app/probe-escena/__tests__/s7-recorridos.invariant.ts",

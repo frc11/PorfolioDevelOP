@@ -14,6 +14,7 @@ import { CLASES_DE_LA_ESCENA } from './contrato'
 import { MARCA_ESCENA } from '../marcaEscena'
 import { EscudoDeLaEscena } from './EscudoDeLaEscena'
 import ProbeStage from './ProbeStage'
+import { medirLasSecciones } from './extensionDeLasSecciones'
 import { crearPistaDelHome } from './pistaDelHome'
 import { progresoDelScroll } from './recorrido'
 import { escenaRetenida } from './retencion'
@@ -107,11 +108,27 @@ const PROGRESO_RETENIDO = 0
  * sola lectura por cuadro.
  *
  * ⚠ **Las dos cosas salen de la misma medición, y por eso viven en el mismo
- * efecto.** `scrollY`, el alto del documento y el alto de la ventana se leen una
- * vez; de ahí sale el progreso (`recorrido.ts`) y de ahí sale si hay un panel
- * transparente en cuadro (`visibilidad.ts`). Leerlos dos veces sería medir el
- * mismo scroll con dos relojes y arriesgarse a que un cuadro escriba un progreso
- * de una lectura y una fase de otra.
+ * efecto.** `scrollY`, la extensión de las secciones y el alto de la ventana se
+ * leen una vez; de ahí sale el progreso (`recorrido.ts`) y de ahí sale si hay un
+ * panel transparente en cuadro (`visibilidad.ts`). Leerlos dos veces sería medir
+ * el mismo scroll con dos relojes y arriesgarse a que un cuadro escriba un
+ * progreso de una lectura y una fase de otra.
+ *
+ * ── ⚠️ V3-B · EL DENOMINADOR YA NO ES EL DOCUMENTO ────────────────────────
+ *
+ * Acá se leía `document.documentElement.scrollHeight`, y §7.46 midió lo que eso
+ * costaba: el documento tiene cosas que no son secciones —el pie, cuando salga
+ * de la `<section id="cierre">`, son 485 px a 1440 y 746 px a 375— y el anclaje
+ * se deriva de la TABLA de secciones, así que el progreso del diferencial se
+ * corría de 0,750 a 0,7201 / 0,6906 sin que nadie tocara el anclaje. Ahora se
+ * mide **la extensión de las ocho** (`extensionDeLasSecciones.ts`) y el
+ * denominador deja de depender de lo que no es una sección.
+ *
+ * **Si no hay secciones que medir, este cuadro no escribe nada.** No hay
+ * respaldo al alto del documento: volver a él en silencio sería reintroducir el
+ * defecto justo cuando el instrumento no puede verlo. Es la misma forma que las
+ * otras dos guardas de abajo — se sale del cuadro, se conserva lo último escrito
+ * y el próximo evento vuelve a intentar.
  *
  * ── Por qué un listener con `requestAnimationFrame` y no un loop ───────────
  *
@@ -145,16 +162,22 @@ function useEscenaAtadaAlScroll(
       if (document.visibilityState !== 'visible') return
       const ventana = window.innerHeight
       if (!(ventana > 0)) return
-      const documento = document.documentElement.scrollHeight
       const desplazamiento = window.scrollY
+      const secciones = medirLasSecciones(document, desplazamiento)
+      if (secciones === null) return
 
       const quieta = escenaRetenida(getIntroStage(), introEnteredClean())
       const progreso = quieta
         ? PROGRESO_RETENIDO
-        : progresoDelScroll(desplazamiento, documento, ventana)
+        : progresoDelScroll(desplazamiento, secciones.arriba, secciones.abajo, ventana)
       rig.set('progress', progreso)
 
-      const enCuadro = escenaEnCuadro(desplazamiento, documento, ventana)
+      const enCuadro = escenaEnCuadro(
+        desplazamiento,
+        secciones.arriba,
+        secciones.abajo,
+        ventana,
+      )
       // `siguiente` devuelve el MISMO objeto cuando no hay transición, así que
       // React descarta la actualización y esto no re-renderiza por cuadro de
       // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por
