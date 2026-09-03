@@ -10,7 +10,6 @@ import {
   INTRO_DUST_SCALE,
   INTRO_DUST_SHARE,
   INTRO_DUST_SIZE,
-  INTRO_FALL_WORLD,
 } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
 import { near, quantile } from './introParticleProbe'
@@ -31,7 +30,7 @@ import { HOME_INTRO_TIMELINE } from './introTimeline'
  *
  *     npx tsx src/components/layout/home-intro/introParticleScale.invariant.ts
  *
- * `INTRO_DUST_SCALE` es de la misma clase que `INTRO_FALL_WORLD` y que `placeS`:
+ * `INTRO_DUST_SCALE` es de la misma clase que `PARTICLE_HANDOFF_FRAC` y que `placeS`:
  * **se decide mirando**, así que lo que se comprueba no es su valor sino la
  * banda que lo contiene — que acepta los dos vecinos anotados y rechaza los dos
  * extremos.
@@ -52,7 +51,7 @@ const WIN = introParticleWindows(T)
 section('1 · 🔴 `INTRO_DUST_SCALE` es una banda, no un valor: se decide mirando')
 
 /**
- * 🔴 Misma clase que `INTRO_FALL_WORLD` y que `placeS`: la juzga el humano por
+ * 🔴 Misma clase que `PARTICLE_HANDOFF_FRAC` y que `placeS`: la juzga el humano por
  * grabación, así que la comprobación **no puede fijar su valor**. Acepta los dos
  * vecinos anotados y rechaza los dos extremos.
  *
@@ -78,7 +77,6 @@ section('1 · 🔴 `INTRO_DUST_SCALE` es una banda, no un valor: se decide miran
 const UNCLIPPED_DUST = buildIntroParticles(
   1440,
   810,
-  INTRO_FALL_WORLD,
   PARTICLE_SIZE * 0.01
 ).dustCount
 /** Cuántas se dibujan del buffer, para poder decir de cuántas se está hablando. */
@@ -88,7 +86,7 @@ const DRAWN_DUST = DUST_SHELLS.slice(0, -1).reduce((sum, _, shell) => {
   return sum + Math.round((to - from) * INTRO_DUST_SHARE)
 }, 0)
 const scaleReport = (scale: number) => {
-  const field = buildIntroParticles(1440, 810, INTRO_FALL_WORLD, PARTICLE_SIZE * scale)
+  const field = buildIntroParticles(1440, 810, PARTICLE_SIZE * scale)
   const dust = dustSizes(field.motes)
   return {
     median: quantile(dust, 0.5),
@@ -173,7 +171,7 @@ const lastLegibleWith = (scale: number, share: number) =>
   introLegibility(
     T,
     WIN,
-    buildIntroParticles(1440, 810, INTRO_FALL_WORLD, PARTICLE_SIZE * scale, share).motes
+    buildIntroParticles(1440, 810, PARTICLE_SIZE * scale, share).motes
   ).lastLegibleS
 
 const s13Last = lastLegibleWith(1, S13_DUST_SHARE)
@@ -204,7 +202,7 @@ check(
  * cada instante hay más de ella. Lo que no cambia es CUÁNDO deja de haberla.
  */
 const inkAt = (scale: number, share: number) => {
-  const field = buildIntroParticles(1440, 810, INTRO_FALL_WORLD, PARTICLE_SIZE * scale, share)
+  const field = buildIntroParticles(1440, 810, PARTICLE_SIZE * scale, share)
   return inkCoverage(
     field.motes.filter((mote) => isReadable(T, mote, 810)),
     1440,

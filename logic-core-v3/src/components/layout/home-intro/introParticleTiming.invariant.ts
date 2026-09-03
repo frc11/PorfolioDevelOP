@@ -12,12 +12,8 @@ import { DUST_MATERIAL_ALPHA } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
 import { over } from './introParticleProbe'
 import { crossingS, introLegibility, sceneContrastAt } from './introLegibilityProbe'
-import {
-  introParticleWindows,
-  sampleMote,
-  sampleParticleIn,
-  sampleParticleOut,
-} from './introParticleTiming'
+import { introParticleWindows } from './introParticleTiming'
+import { sampleParticleIn } from './introParticleSampling'
 import { hexToSrgb, type Srgb } from './introShading'
 import { HOME_INTRO_TIMELINE, buildTimeline, type IntroTimeline } from './introTimeline'
 
@@ -128,10 +124,21 @@ check(
   WIN.inDurationS > MOTION_DURATION.micro,
   `${s(WIN.inDurationS)} contra ${s(MOTION_DURATION.micro)}`
 )
+/**
+ * 🔴 **La cota se mudó de la salida entera al ACOMODAMIENTO, y es la mitad que
+ * corresponde.** El gesto es el viaje; el relevo es una extinción y que dure
+ * menos que un `micro` es lo correcto, porque su virtud es no verse. Ver
+ * `PARTICLE_HANDOFF_FRAC`.
+ */
 check(
-  'y en caer también',
-  WIN.outDurationS > MOTION_DURATION.micro,
-  `${s(WIN.outDurationS)}`
+  'y en acomodarse también: el viaje es el gesto',
+  WIN.settleDurationS > MOTION_DURATION.micro,
+  `${s(WIN.settleDurationS)} contra ${s(MOTION_DURATION.micro)} · ×${(WIN.settleDurationS / MOTION_DURATION.micro).toFixed(2)}`
+)
+check(
+  'y el relevo, que NO es un gesto, cabe adentro de lo que sobra',
+  WIN.handoffDurationS > 0 && WIN.settleDurationS + WIN.handoffDurationS <= WIN.outDurationS + 1e-12,
+  `${s(WIN.handoffDurationS)} de extinción · ${s(WIN.settleDurationS)} + ${s(WIN.handoffDurationS)} = ${s(WIN.outDurationS)}`
 )
 const halfway = (WIN.inStartS + WIN.inDurationS / 2) / T.totalS
 check(
@@ -140,46 +147,11 @@ check(
   `a mitad de la entrada de la primera: ${(sampleParticleIn(T, halfway, 0) * 100).toFixed(0)}% contra ${(sampleParticleIn(T, halfway, 1) * 100).toFixed(0)}% de la última`
 )
 
-// ── 3 · Los muestreadores ───────────────────────────────────────────────────
+// ── 3 · 🔴 La legibilidad, y el número que decide ──────────────────────────
 
-section('3 · Cada mota entra una vez, sale una vez, y no vuelve')
+section('3 · 🔴 La superposición: cuándo deja de verse una y cuándo se ve la otra')
 
-let monotone = true
-for (const phase of [0, 0.5, 1]) {
-  let previousIn = -Infinity
-  let previousOut = -Infinity
-  for (let i = 0; i <= 600; i += 1) {
-    const p = i / 600
-    const entered = sampleParticleIn(T, p, phase)
-    const gone = sampleParticleOut(T, p, phase)
-    if (entered < previousIn - 1e-12 || gone < previousOut - 1e-12) monotone = false
-    previousIn = entered
-    previousOut = gone
-  }
-}
-check('las dos rampas solo avanzan', monotone)
-check(
-  'antes de la transformación no hay una sola mota',
-  FIELD.motes.every((m) => sampleMote(T, (WIN.inStartS - 0.001) / T.totalS, m).alpha === 0)
-)
-check(
-  'y cuando el campo terminó de bajar tampoco',
-  FIELD.motes.every((m) => sampleMote(T, WIN.outEndS / T.totalS, m).alpha === 0)
-)
-check(
-  'en el medio están todas, con la opacidad de su material',
-  FIELD.motes.every((m) => {
-    const alpha = sampleMote(T, WIN.inEndS / T.totalS, m).alpha
-    return Math.abs(alpha - m.materialAlpha) < 1e-9
-  }),
-  `polvo ${DUST_MATERIAL_ALPHA} · el bokeh el suyo`
-)
-
-// ── 4 · 🔴 La legibilidad, y el número que decide ──────────────────────────
-
-section('4 · 🔴 La superposición: cuándo deja de verse una y cuándo se ve la otra')
-
-const { everLegible, peakContrast, firstLegibleS, lastLegibleS, travelAtLast } =
+const { everLegible, peakContrast, firstLegibleS, lastLegibleS } =
   introLegibility(T, WIN, FIELD.motes)
 
 /**
@@ -245,28 +217,6 @@ check(
   'control negativo — con la salida derramada adentro del velo, se solapan',
   conDerrame > sceneFirstS,
   `saldría a ${s(conDerrame)}, ${((conDerrame - sceneFirstS) * 1000).toFixed(0)} ms DESPUÉS de que la escena ya se lee`
-)
-
-// ── 5 · Bajan de verdad ─────────────────────────────────────────────────────
-
-section('5 · Bajan de verdad: no se desvanecen en el lugar')
-
-const travelSorted = [...travelAtLast].sort((a, b) => a - b)
-const medianTravel = travelSorted[Math.floor(travelSorted.length / 2)]
-check(
-  'al dejar de ser legible, la mota ya recorrió el grueso de su caída',
-  medianTravel > 0.5,
-  `mediana ${(medianTravel * 100).toFixed(0)}% del recorrido · máximo ${(travelSorted[travelSorted.length - 1] * 100).toFixed(0)}%`
-)
-check(
-  'y el apagado cuelga del MISMO número que el desplazamiento',
-  FIELD.motes.every((mote) => {
-    const p = (WIN.outStartS + WIN.outDurationS * 0.5) / T.totalS
-    const gone = sampleParticleOut(T, p, mote.phase)
-    const sample = sampleMote(T, p, mote)
-    return Math.abs(sample.xPx - (mote.xPx + mote.dxPx * gone)) < 1e-9
-  }),
-  'posición y opacidad no pueden desfasarse: son el mismo valor'
 )
 
 report('introParticleTiming')

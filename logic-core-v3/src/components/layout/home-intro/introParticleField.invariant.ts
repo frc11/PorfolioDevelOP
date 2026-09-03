@@ -1,30 +1,38 @@
 import { cubicBezierEase } from '@/app/v3/_lib/escena/bezier'
-import { PARTICLE_SIZE } from '@/app/v3/_lib/escena/probeParticles'
 import { MOTION_EASE } from '@/components/design-system/motion/tokens'
 
 import { check, report, section } from './introChecks'
-import { INTRO_DUST_SCALE, INTRO_FALL_WORLD } from './introParticles'
+import { INTRO_DUST_SCALE } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
+import { buildSceneParticles } from './introParticleLanding'
 import { introParticleWindows } from './introParticleTiming'
 import { near, quantile, readSource } from './introParticleProbe'
-import { s13Field } from './introReadingProbe'
 import { HOME_INTRO_TIMELINE } from './introTimeline'
 
 /**
- * COMPROBACIÓN ESTÁTICA DE LA CAÍDA — **que bajen, y que se lea como bajar.**
+ * COMPROBACIÓN ESTÁTICA DEL ACOMODAMIENTO — **que lleguen, y que se lea como
+ * llegar.**
  *
  *     npx tsx src/components/layout/home-intro/introParticleField.invariant.ts
  *
- * ── Por qué la unidad es el DIÁMETRO de la propia mota ─────────────────────
+ * ── 🔴 QUÉ MEDÍA ANTES, Y POR QUÉ EL SUJETO CAMBIÓ (V3-A) ──────────────────
  *
- * El campo baja `INTRO_FALL_WORLD` unidades **de mundo** y se lo vuelve a
- * proyectar, así que en píxeles cada mota recorre algo distinto: las cercanas
- * cientos, las lejanas decenas. Eso es el paralaje y es lo que se busca. Pero
- * medido en diámetros de la propia mota **el recorrido es el mismo para todas**
- * —el desplazamiento y el tamaño se dividen los dos por la profundidad y el
- * cociente se cancela— y tampoco depende de la ventana. Un solo número gobierna
- * el campo entero, y es el que decide si la caída se lee como movimiento o como
- * una fila de puntos.
+ * Hasta acá esto era «la comprobación estática de LA CAÍDA», y su unidad era el
+ * diámetro de la propia mota: el campo bajaba `INTRO_FALL_WORLD` unidades **de
+ * mundo**, así que en píxeles cada mota recorría algo distinto —cientos las
+ * cercanas, decenas las lejanas—, pero medido en diámetros el recorrido era el
+ * mismo para todas y un solo número gobernaba el campo entero.
+ *
+ * **El acomodamiento no tiene esa propiedad, y no es un descuido: es lo que lo
+ * define.** El destino ya no sale de una traslación rígida sino de una
+ * ASIGNACIÓN —cada mota va a la mota de la escena más cercana de su concha
+ * (`introParticleLanding.ts`)—, así que el recorrido depende de dónde había un
+ * lugar libre y no de la profundidad. Por eso acá se mide el reparto entero y no
+ * un número solo, y por eso las cifras de S13/S14 sobre la caída quedan vencidas
+ * en vez de reinterpretadas (regla 11).
+ *
+ * Lo que SÍ se conserva es la unidad —diámetros de la propia mota— porque sigue
+ * siendo lo que decide si el gesto se lee como movimiento o como un salto.
  *
  * Y acá va también **dónde cuelga la capa**, que es lo que responde qué pasa con
  * `prefers-reduced-motion`: nada, porque el intro entero se saltea y las
@@ -39,157 +47,119 @@ const WINDOWS: readonly (readonly [number, number])[] = [
   [390, 844],
 ]
 
-// ── 1 · Hacia abajo, con paralaje ───────────────────────────────────────────
+// ── 1 · Cada mota tiene destino, y el destino es una mota de la escena ──────
 
-section('1 · La dirección dominante es hacia abajo, y el paralaje es real')
+section('1 · Cada mota se acomoda en una mota REAL del campo de la escena')
 
 /** El recorrido de la mota mediana, en diámetros de sí misma. */
 const travelIn = (
-  motes: readonly { dxPx: number; dyPx: number; sizePx: number; kind: string }[]
+  motes: readonly { settleDxPx: number; settleDyPx: number; sizePx: number; kind: string }[]
 ): number =>
   quantile(
-    motes.filter((m) => m.kind === 'dust').map((m) => Math.hypot(m.dxPx, m.dyPx) / m.sizePx),
+    motes
+      .filter((m) => m.kind === 'dust')
+      .map((m) => Math.hypot(m.settleDxPx, m.settleDyPx) / m.sizePx),
     0.5
   )
 
+const clave = (x: number, y: number) => `${x.toFixed(6)}|${y.toFixed(6)}`
+
 for (const [width, height] of WINDOWS) {
   const field = buildIntroParticles(width, height)
-  const dy = field.motes.map((m) => m.dyPx)
-  const dx = field.motes.map((m) => Math.abs(m.dxPx))
+  const escena = buildSceneParticles(width, height)
+  const destinos = new Set(escena.map((m) => clave(m.xPx, m.yPx)))
+  const recorrido = field.motes.map((m) => Math.hypot(m.settleDxPx, m.settleDyPx))
+  const aterrizajes = field.motes.map((m) => clave(m.xPx + m.settleDxPx, m.yPx + m.settleDyPx))
+  const polvo = field.motes.filter((m) => m.kind === 'dust')
 
   check(
-    `${width}×${height} — todas bajan, y ninguna deriva más de lo que baja`,
-    field.motes.every((m) => m.dyPx > 0 && m.dyPx > Math.abs(m.dxPx)),
-    `${field.motes.length} motas · |dy| mediana ${quantile(dy, 0.5).toFixed(0)} px · deriva mediana ${quantile(dx, 0.5).toFixed(0)} px`
+    `${width}×${height} — TODAS aterrizan sobre una mota del campo de la escena`,
+    field.motes.length > 0 && aterrizajes.every((k) => destinos.has(k)),
+    `${field.motes.length} motas del intro contra ${escena.length} de la escena`
   )
-  /**
-   * ⚠ **Por deciles y no por extremos (S14).** El máximo y el mínimo de una
-   * muestra dependen del tamaño de la muestra, y S14 ralea el campo a 0,30: los
-   * extremos se encogen —de ×8,11 a ×5,26— sin que la ley del paralaje cambie un
-   * ápice. El cociente entre deciles es prácticamente el mismo antes y después
-   * (2,21 → 2,11), y es lo que dice que la ley sigue ahí. El extremo se sigue
-   * publicando, porque es el número que se ve; lo que ya no se comprueba es él.
-   */
   check(
-    `${width}×${height} — la cercana barre mucho más que la lejana: el paralaje`,
-    quantile(dy, 0.9) / quantile(dy, 0.1) > 1.8,
-    `p90/p10 ×${(quantile(dy, 0.9) / quantile(dy, 0.1)).toFixed(2)} · de ${quantile(dy, 0).toFixed(0)} a ${quantile(dy, 1).toFixed(0)} px en los extremos, ×${(quantile(dy, 1) / quantile(dy, 0)).toFixed(2)}`
+    `${width}×${height} — y ninguna comparte destino con otra`,
+    new Set(aterrizajes).size === field.motes.length,
+    'la asignación toma cada destino una sola vez'
   )
-  /**
-   * Y el recorrido en diámetros **no se compara contra un literal**: se compara
-   * contra el del campo de S13 medido en la misma corrida, dividido por la
-   * escala. Es la forma exacta de la propiedad — `INTRO_FALL_WORLD` no se tocó,
-   * así que lo único que pudo mover el recorrido es el tamaño de la mota.
-   */
   check(
-    `${width}×${height} — el recorrido en diámetros es el de S13 sobre la escala`,
-    near(travelIn(field.motes) * INTRO_DUST_SCALE, travelIn(s13Field(width, height).motes), 0.5),
-    `${travelIn(s13Field(width, height).motes).toFixed(2)} ÷ ${INTRO_DUST_SCALE} = ${travelIn(field.motes).toFixed(2)} diámetros · ${(travelIn(field.motes) / FRAMES).toFixed(2)} por cuadro a 60 fps`
+    `${width}×${height} — el viaje es corto: acomodarse, no mudarse`,
+    quantile(recorrido, 0.5) < 60,
+    `mediana ${quantile(recorrido, 0.5).toFixed(1)} px · p90 ${quantile(recorrido, 0.9).toFixed(1)} px · máximo ${quantile(recorrido, 1).toFixed(0)} px`
+  )
+  check(
+    `${width}×${height} — y se lee como movimiento, no como un salto`,
+    travelIn(field.motes) / FRAMES > 0.05 && travelIn(field.motes) / FRAMES < 4,
+    `${travelIn(field.motes).toFixed(2)} diámetros · ${(travelIn(field.motes) / FRAMES).toFixed(2)} por cuadro a 60 fps sobre ${FRAMES.toFixed(1)} cuadros`
+  )
+  check(
+    `${width}×${height} — la mota TERMINA con el diámetro de la escena, no con el suyo`,
+    quantile(polvo.map((m) => m.settleDSizePx), 0.9) < 0,
+    `mediana del cambio ${quantile(polvo.map((m) => m.settleDSizePx), 0.5).toFixed(2)} px — el polvo del intro mide ×${INTRO_DUST_SCALE} y se encoge hasta el de la escena`
   )
 }
 
 /**
- * La deriva lateral no es ruido inventado: es lo que la proyección de una caída
- * vertical en el mundo produce cuando la cámara no está a nivel. Que exista y
- * que sea CHICA es la "dispersión" que la instrucción permite.
+ * ⚠ **El acomodamiento NO tiene dirección dominante, y eso es la propiedad.**
+ * La caída de S13 era −Y de mundo para todas —por eso se podía afirmar «todas
+ * bajan»—. Acá cada mota va hacia su vecina, así que las direcciones se reparten
+ * en las cuatro. Que se repartan es lo que distingue «se acomodan» de «se van».
  */
 const desktop = buildIntroParticles(1440, 810)
+const haciaAbajo = desktop.motes.filter((m) => m.settleDyPx > 0).length
 check(
-  'hay deriva lateral, y es un accidente de la proyección, no un número al azar',
-  quantile(desktop.motes.map((m) => Math.abs(m.dxPx)), 0.5) > 1 &&
-    quantile(desktop.motes.map((m) => Math.abs(m.dxPx) / m.dyPx), 0.9) < 0.5,
-  `mediana ${quantile(desktop.motes.map((m) => Math.abs(m.dxPx)), 0.5).toFixed(0)} px · p90 del cociente |dx|/dy = ${quantile(desktop.motes.map((m) => Math.abs(m.dxPx) / m.dyPx), 0.9).toFixed(2)}`
+  'las direcciones se reparten: ninguna domina, que es lo contrario de irse',
+  haciaAbajo > desktop.motes.length * 0.3 && haciaAbajo < desktop.motes.length * 0.7,
+  `${haciaAbajo} de ${desktop.motes.length} van hacia abajo — ${((100 * haciaAbajo) / desktop.motes.length).toFixed(0)}%`
 )
 
-// ── 2 · La banda de la perilla ──────────────────────────────────────────────
+// ── 2 · La curva del gesto ──────────────────────────────────────────────────
 
-section('2 · 🔴 `INTRO_FALL_WORLD` es una banda, no un valor: se decide mirando')
+section('2 · 🔴 `arrive` y no `linear`: el estrobo dejó de ser el criterio')
 
 /**
- * 🔴 Es la única perilla del sprint que se decide **mirando** —misma clase que
- * `placeS`—, así que la comprobación no puede fijar su valor: **acepta los dos
- * vecinos anotados y rechaza los dos extremos.**
+ * 🔴 **El argumento de S13 contra `shift` se midió y se conserva medido, pero ya
+ * no aplica** — y eso hay que publicarlo, no borrarlo (regla 11).
  *
- * La unidad es el paso por cuadro en diámetros de la propia mota. Por debajo de
- * 0,5 la mota se mueve menos de media mota por cuadro y se lee como un
- * desvanecimiento en el lugar; por encima de 4 salta cuatro veces su tamaño y se
- * lee como una fila de puntos.
- */
-const stepFor = (fall: number, scale: number = INTRO_DUST_SCALE): number => {
-  const field = buildIntroParticles(1440, 810, fall, PARTICLE_SIZE * scale)
-  const dust = field.motes.filter((m) => m.kind === 'dust')
-  return quantile(dust.map((m) => Math.hypot(m.dxPx, m.dyPx) / m.sizePx), 0.5) / FRAMES
-}
-const inBand = (fall: number) => stepFor(fall) > 0.5 && stepFor(fall) < 4
-
-check(
-  'el default cae en la banda',
-  inBand(INTRO_FALL_WORLD),
-  `${INTRO_FALL_WORLD} → ${stepFor(INTRO_FALL_WORLD).toFixed(2)} diámetros por cuadro`
-)
-check(
-  'y los dos vecinos anotados también',
-  inBand(1.2) && inBand(3),
-  `1,2 → ${stepFor(1.2).toFixed(2)} · 3,0 → ${stepFor(3).toFixed(2)}`
-)
-check(
-  'control negativo — sin caída, la banda lo rechaza',
-  !inBand(0),
-  `0 → ${stepFor(0).toFixed(2)} diámetros por cuadro: se desvanecerían en el lugar`
-)
-/**
- * ⚠ **El control de arriba se movió, y es un resultado de S14.** Con las motas
- * de S13 alcanzaba una caída de 6 para salir de la banda (5,66 por cuadro); con
- * las de hoy, la misma caída da **2,76** y está adentro. No es que la banda se
- * aflojó: es que **el mismo desplazamiento estrobea la mitad**, porque el paso
- * se mide en diámetros de la propia mota y la mota se duplicó. Para llegar al
- * régimen de fila de puntos ahora hace falta el doble de caída.
- */
-check(
-  'control negativo — y con una caída de 12 también',
-  !inBand(12),
-  `12 → ${stepFor(12).toFixed(2)} diámetros por cuadro: una fila de puntos · con la escala de S13 alcanzaba 6 (${stepFor(6, 1).toFixed(2)}), que hoy da ${stepFor(6).toFixed(2)} y entra en la banda`
-)
-check(
-  'la banda es monótona en la perilla, así que rechaza por el lado que dice',
-  stepFor(0) < stepFor(1.2) && stepFor(1.2) < stepFor(3) && stepFor(3) < stepFor(12),
-  `${stepFor(0).toFixed(2)} < ${stepFor(1.2).toFixed(2)} < ${stepFor(3).toFixed(2)} < ${stepFor(12).toFixed(2)}`
-)
-
-/**
- * 🔴 **Y `linear` contra `shift`, con la pendiente MEDIDA.** El docblock de
- * `sampleParticleOut` argumenta contra `shift` con una pendiente máxima de
- * 2,735× que hasta acá era prosa: ningún instrumento la producía. Se mide sobre
- * el evaluador que el repo embarca, y con ella el paso por cuadro que `shift`
- * habría dado. ⚠ El muestreo no puede ser arbitrariamente fino: `cubicBezierEase`
- * resuelve `x` con `NEWTON_EPSILON` = 1e-6, y una diferencia hacia adelante
- * multiplica ese error por el número de muestras — con 20.000 el ruido del
- * solver ya vale 0,011. Con 2.000 la medida es estable de 200 a 5.000.
+ * S13 usaba `linear` porque la ventana era cortísima y sobre una ventana así la
+ * curva decide **cuánto ESTROBEA**: `shift` tiene una pendiente máxima de
+ * 2,735×, así que el mismo recorrido se ve a más del doble de velocidad en el
+ * medio del gesto. Con la caída de 109 px de mediana eso importaba.
  *
- * ⚠ **El resultado corrige la expectativa del sprint.** Con las motas de S13 el
- * argumento era categórico: `shift` daba 5,2 diámetros por cuadro, o sea una
- * fila de puntos, fuera de la banda. Con las de S14 daría **2,5**, que está
- * ADENTRO. `linear` sigue siendo lo correcto —es el mínimo posible para una
- * distancia dada, y eso es aritmética que no depende de la escala— pero el modo
- * de falla del que protegía **ya no ocurre a esta escala**: el argumento no se
- * refuerza, se vuelve innecesario.
+ * Con el acomodamiento el recorrido mediano es de unos pocos diámetros, así que
+ * **ninguna de las tres curvas se acerca al régimen de fila de puntos**. La
+ * elección pasa a ser de carácter y `arrive` es la curva del sistema para todo
+ * lo que llega. La pendiente se sigue midiendo acá porque es lo que demuestra
+ * que el argumento viejo era cierto y que hoy no muerde.
  */
 const SHIFT_SAMPLES = 2_000
-let shiftSlope = 0
-for (let i = 1; i <= SHIFT_SAMPLES; i += 1) {
-  const from = cubicBezierEase(MOTION_EASE.shift, (i - 1) / SHIFT_SAMPLES)
-  const to = cubicBezierEase(MOTION_EASE.shift, i / SHIFT_SAMPLES)
-  shiftSlope = Math.max(shiftSlope, (to - from) * SHIFT_SAMPLES)
+const pendienteMaxima = (curva: readonly [number, number, number, number]): number => {
+  let maxima = 0
+  for (let i = 1; i <= SHIFT_SAMPLES; i += 1) {
+    const from = cubicBezierEase(curva, (i - 1) / SHIFT_SAMPLES)
+    const to = cubicBezierEase(curva, i / SHIFT_SAMPLES)
+    maxima = Math.max(maxima, (to - from) * SHIFT_SAMPLES)
+  }
+  return maxima
 }
+const shiftSlope = pendienteMaxima(MOTION_EASE.shift)
+const arriveSlope = pendienteMaxima(MOTION_EASE.arrive)
+
 check(
   'control positivo — la pendiente máxima de `shift` es la que el docblock cita',
   near(shiftSlope, 2.735, 0.005) && near(cubicBezierEase(MOTION_EASE.shift, 1), 1, 1e-9),
-  `${shiftSlope.toFixed(4)}× medida sobre ${SHIFT_SAMPLES} muestras del evaluador que embarca, contra el 2,735 que estaba escrito`
+  `${shiftSlope.toFixed(4)}× medida sobre ${SHIFT_SAMPLES} muestras del evaluador que embarca`
 )
 check(
-  '⚠ con `shift` el paso por cuadro ya NO se saldría de la banda',
-  stepFor(INTRO_FALL_WORLD) * shiftSlope < 4 && stepFor(INTRO_FALL_WORLD, 1) * shiftSlope > 4,
-  `${(stepFor(INTRO_FALL_WORLD) * shiftSlope).toFixed(2)} diámetros por cuadro con la escala de hoy · ${(stepFor(INTRO_FALL_WORLD, 1) * shiftSlope).toFixed(2)} con la de S13, que sí quedaba afuera`
+  '`arrive` arranca más rápido que `linear` y frena antes que `shift`: es una llegada',
+  arriveSlope > 1 && arriveSlope < shiftSlope,
+  `arrive ×${arriveSlope.toFixed(3)} · shift ×${shiftSlope.toFixed(3)} · linear ×1`
+)
+const pasoConArrive = (travelIn(desktop.motes) / FRAMES) * arriveSlope
+check(
+  '⚠ con `arrive` el paso por cuadro sigue muy adentro de la banda de lectura',
+  pasoConArrive > 0.05 && pasoConArrive < 4,
+  `${pasoConArrive.toFixed(2)} diámetros por cuadro en el peor tramo`
 )
 
 // ── 3 · Dónde cuelga la capa, y `prefers-reduced-motion` ───────────────────

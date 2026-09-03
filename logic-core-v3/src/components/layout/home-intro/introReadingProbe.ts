@@ -5,7 +5,7 @@ import {
 import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 
 import { introContrastAt } from './introLegibilityProbe'
-import { INTRO_FALL_WORLD, type IntroMote } from './introParticles'
+import { type IntroMote } from './introParticles'
 import { buildIntroParticles } from './introParticleField'
 import { readSource } from './introParticleProbe'
 import { introParticleWindows } from './introParticleTiming'
@@ -183,7 +183,7 @@ export const S13_DUST_SHARE = PROBE_DEFAULTS.particleCount / PARTICLES_MAX
 
 /** El campo tal como S13 lo dejaba. */
 export const s13Field = (width: number, height: number) =>
-  buildIntroParticles(width, height, INTRO_FALL_WORLD, S13_DUST_SIZE, S13_DUST_SHARE)
+  buildIntroParticles(width, height, S13_DUST_SIZE, S13_DUST_SHARE)
 
 /** Y el que S14 embarca. */
 export const introField = (width: number, height: number) =>

@@ -5,6 +5,7 @@ import type { RefObject } from 'react'
 
 import type { IntroFlightPlan } from './introFlight'
 import { sampleLogoPose } from './introFlight'
+import { sampleRelay } from './introRelay'
 import {
   sampleBackgroundColor,
   sampleFill,
@@ -49,8 +50,12 @@ export type IntroSources = {
   timelineRef: RefObject<IntroTimeline>
   /** Las medidas vigentes. Cambian al cambiar el tamaño de la ventana. */
   planRef: RefObject<IntroFlightPlan>
-  /** ¿El mesh ya existe en la escena? Lo escribe el canvas. */
-  meshReadyRef: RefObject<boolean>
+  /**
+   * ¿El mesh está PINTANDO? Lo escribe el canvas, y cambia en las dos
+   * direcciones — ver `introRelay.ts`. **No es «¿existe?»**: ésa era la
+   * pregunta vieja y es la que dejaba el logo sin nadie que lo dibujara.
+   */
+  meshPaintedRef: RefObject<boolean>
   /** El latch del relevo: `null` = todavía no se preguntó. */
   meshLatchRef: RefObject<boolean | null>
 }
@@ -79,7 +84,7 @@ export function useIntroChannels(
   progress: MotionValue<number>,
   sources: IntroSources
 ): IntroChannels {
-  const { timelineRef, planRef, meshReadyRef, meshLatchRef } = sources
+  const { timelineRef, planRef, meshPaintedRef, meshLatchRef } = sources
 
   const strokeDraw = useTransform(progress, (p) => sampleStrokeDraw(timelineRef.current, p))
   const fill = useTransform(progress, (p) => sampleFill(timelineRef.current, p))
@@ -99,27 +104,31 @@ export function useIntroChannels(
   )
 
   /**
-   * EL RELEVO, **latcheado al empezar el cruce**.
+   * EL RELEVO. **La regla vive en `introRelay.ts` y acá sólo se cablea.**
    *
-   * La pregunta "¿llegó el mesh?" se hace UNA vez, en el primer frame del cruce:
-   * si el chunk termina de bajar a mitad de camino, no aparece de golpe. El
-   * latcheo vive adentro del propio `useTransform` y no en un suscriptor aparte
-   * porque **los suscriptores corren DESPUÉS de los valores derivados** — un
-   * latch en un suscriptor llegaría un cuadro tarde.
+   * El latcheo vive adentro del propio `useTransform` y no en un suscriptor
+   * aparte porque **los suscriptores corren DESPUÉS de los valores derivados**
+   * — un latch en un suscriptor llegaría un cuadro tarde.
    *
-   * Si no llegó, esto queda en 0 y **el SVG hace la transformación entera**,
-   * cambiando de blanco a negro igual que el mesh habría hecho. Se pierde el
-   * volumen del acomodamiento y nada más. Volver hacia atrás con el scrub lo
-   * resetea, que es lo que el controlador necesita para repetir el momento.
+   * ⚠️ **Cuelga de `progress` y no de `swap`, y ése es el arreglo de V3-A.**
+   * Un MotionValue derivado sólo recomputa cuando su FUENTE cambia, y `swap`
+   * queda clavado en 1 desde `swapEndS` hasta el final: colgado de ahí, el
+   * relevo dejaba de mirar el mundo justo en la ventana donde el mesh es lo
+   * único que dibuja el logo, y una caída del canvas ya no tenía forma de
+   * revertirse. Colgado del progreso se relee en cada cuadro. Cuesta un
+   * `sampleSwap` más por frame: unas pocas operaciones aritméticas.
+   *
+   * El porqué completo —y la medición de los 4,274 s en los que el SVG valía 0
+   * exacto— está en el docblock de `introRelay.ts`.
    */
-  const swap = useTransform(progress, (p) => sampleSwap(timelineRef.current, p))
-  const meshOpacity = useTransform(swap, (value): number => {
-    if (value <= 0) {
-      meshLatchRef.current = null
-      return 0
-    }
-    if (meshLatchRef.current === null) meshLatchRef.current = meshReadyRef.current
-    return meshLatchRef.current ? value : 0
+  const meshOpacity = useTransform(progress, (p): number => {
+    const relay = sampleRelay(
+      sampleSwap(timelineRef.current, p),
+      meshLatchRef.current,
+      meshPaintedRef.current
+    )
+    meshLatchRef.current = relay.latch
+    return relay.mesh
   })
   const svgOpacity = useTransform(meshOpacity, (shown) => 1 - shown)
 

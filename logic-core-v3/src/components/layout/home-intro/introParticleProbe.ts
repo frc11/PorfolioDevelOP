@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs'
 
+const DEG = Math.PI / 180
+
 import {
   BOKEH_COUNT,
   BOKEH_RADIUS_BIAS,
@@ -17,6 +19,11 @@ import {
   buildParticleField,
 } from '@/app/v3/_lib/escena/probeParticles'
 import { FLOOR_Y } from '@/app/v3/_lib/escena/probeScene'
+import {
+  DUST_BOB_AMPLITUDE,
+  DUST_BOB_PERIOD_S,
+  DUST_SPIN_DEG_S,
+} from '@/app/v3/_lib/escena/choreographyPhysics'
 import { PROBE_DEFAULTS } from '@/app/v3/_lib/escena/probeStore'
 import {
   pointSizePx,
@@ -26,7 +33,7 @@ import {
 } from '@/lib/scene-camera'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 
-import { DUST_RADIUS_BIAS, FLOOR_CLEARANCE } from './introParticles'
+import { DUST_RADIUS_BIAS, FLOOR_CLEARANCE, SCENE_DUST_SHARE } from './introParticles'
 import type { Srgb } from './introShading'
 
 /**
@@ -175,4 +182,56 @@ export function nearestDistances(
     }
     return best
   })
+}
+
+/**
+ * Cuánto se corre en pantalla una mota de la escena por segundo del reloj de SU
+ * canvas, con la rotación de concha y el cabeceo que `driftShells` aplica.
+ *
+ * Se reconstruye acá con las constantes reales de `choreographyPhysics.ts` y la
+ * misma cámara: es la deriva que el preloader NO puede compensar, porque el
+ * canvas de la escena arranca su reloj cuando termina de bajar el chunk de
+ * `three` y nada lo ata al reloj del intro.
+ */
+export function derivaDelCampoDeLaEscena(segundos: number, W: number, H: number): number[] {
+  const camera = sceneCameraAt(SCENE_ENTRY_POSE, W, H)
+  if (!camera) return []
+  const campo = buildParticleField(
+    PARTICLES_MAX,
+    PARTICLE_R_MIN,
+    PARTICLE_R_MAX,
+    1.4,
+    PARTICLE_SEED,
+    FLOOR_Y + FLOOR_CLEARANCE,
+    DUST_SHELLS
+  )
+  const salida: number[] = []
+  for (let shell = 0; shell < DUST_SHELLS.length - 1; shell += 1) {
+    const from = Math.round(DUST_SHELLS[shell] * PARTICLES_MAX)
+    const to = Math.round(DUST_SHELLS[shell + 1] * PARTICLES_MAX)
+    const hasta = from + Math.round((to - from) * SCENE_DUST_SHARE)
+    const giro = segundos * DUST_SPIN_DEG_S[Math.min(shell, DUST_SPIN_DEG_S.length - 1)] * DEG
+    const amp = DUST_BOB_AMPLITUDE[Math.min(shell, DUST_BOB_AMPLITUDE.length - 1)]
+    const periodo = DUST_BOB_PERIOD_S[Math.min(shell, DUST_BOB_PERIOD_S.length - 1)]
+    for (let i = from; i < hasta; i += 1) {
+      const x = campo.positions[i * 3]
+      const y = campo.positions[i * 3 + 1]
+      const z = campo.positions[i * 3 + 2]
+      const quieta = projectScenePoint(camera, [x, y, z], W, H)
+      if (!quieta || quieta.xPx < 0 || quieta.xPx > W || quieta.yPx < 0 || quieta.yPx > H) continue
+      const movida = projectScenePoint(
+        camera,
+        [
+          x * Math.cos(giro) + z * Math.sin(giro),
+          y + Math.sin((segundos / periodo) * 2 * Math.PI) * amp,
+          -x * Math.sin(giro) + z * Math.cos(giro),
+        ],
+        W,
+        H
+      )
+      if (!movida) continue
+      salida.push(Math.hypot(movida.xPx - quieta.xPx, movida.yPx - quieta.yPx))
+    }
+  }
+  return salida
 }

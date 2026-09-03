@@ -79,10 +79,12 @@ function IntroLogoMesh({
   reveal,
   opacity,
   ink,
-  onReady,
+  onPainted,
 }: IntroLogoCanvasProps) {
   const svgData = useLoader(SVGLoader, '/logodevelOP.svg')
   const size = useThree((state) => state.size)
+  const gl = useThree((state) => state.gl)
+  const paintedRef = useRef(false)
 
   const placer = useRef<THREE.Group>(null)
   const tilt = useRef<THREE.Group>(null)
@@ -129,11 +131,46 @@ function IntroLogoMesh({
    */
   const materialsRef = useRef<THREE.MeshStandardMaterial[]>([])
 
-  // Un efecto y no el render: `onReady` levanta estado en el componente de
-  // arriba. Se dispara UNA vez, cuando el objeto ya existe en la escena.
+  /**
+   * 🔴 **EL AVISO DE QUE EL CANVAS DEJÓ DE PINTAR.** Es la mitad del arreglo de
+   * V3-A; la otra mitad es que el aviso de que EMPEZÓ salió del efecto de
+   * montaje y se fue al `useFrame` (ver abajo).
+   *
+   * Hasta acá el canvas decía `onReady()` desde un efecto de montaje y no volvía
+   * a decir nada nunca. Eso es *«existo»*, no *«se me ve»*, y con el SVG en 0
+   * exacto desde `swapEndS` alcanzaba para que cualquier caída del 3D dejara el
+   * logo sin nadie que lo dibujara durante los últimos 4,274 s de la secuencia
+   * —el acomodamiento entero—. El porqué está en `introRelay.ts`.
+   *
+   * Tres bajadas, y las tres son modos de falla reales:
+   *
+   *  · `webglcontextlost` — el navegador recicla el contexto (dos renderers
+   *    vivos en `/v3`: éste y el de la escena). three ya llama `preventDefault`
+   *    en su propio escucha, así que acá sólo hay que enterarse.
+   *  · `webglcontextrestored` — vuelve el contexto pero **no se declara pintando
+   *    todavía**: se espera el próximo `useFrame`, que es la misma evidencia con
+   *    la que se declaró la primera vez.
+   *  · el desmontaje — que el árbol se suspenda (el `SVGLoader` volviendo a
+   *    tirar) o que el chunk falle es, para el logo, exactamente lo mismo que un
+   *    contexto perdido.
+   */
   useEffect(() => {
-    onReady()
-  }, [geometries, onReady])
+    const canvas = gl.domElement
+    const perdido = (): void => {
+      paintedRef.current = false
+      onPainted(false)
+    }
+    const recuperado = (): void => {
+      paintedRef.current = false
+    }
+    canvas.addEventListener('webglcontextlost', perdido)
+    canvas.addEventListener('webglcontextrestored', recuperado)
+    return () => {
+      canvas.removeEventListener('webglcontextlost', perdido)
+      canvas.removeEventListener('webglcontextrestored', recuperado)
+      perdido()
+    }
+  }, [gl, onPainted])
 
   // r3f solo libera lo que declara el JSX; estas las creó este componente.
   useEffect(() => {
@@ -143,6 +180,24 @@ function IntroLogoMesh({
   }, [geometries])
 
   useFrame(() => {
+    /**
+     * 🔴 **EL AVISO VA ACÁ Y NO EN UN EFECTO DE MONTAJE.** Que este callback
+     * corra prueba tres cosas que el efecto no probaba, porque el efecto corre
+     * antes de todas ellas: que `root.configure()` —que r3f `await`ea— resolvió,
+     * que el contenedor midió más de cero (r3f no configura si no) y que el lazo
+     * del renderer está vivo. Es la evidencia más fuerte que se puede tener sin
+     * leer píxeles, y es lo que le permite al relevo preguntar *«¿se ve?»* en
+     * vez de *«¿existe?»*.
+     *
+     * Va ANTES de la salida temprana a propósito: el objeto todavía no se
+     * dibuja —el SVG lo cubre hasta el cruce— pero el canvas SÍ está pintando, y
+     * es esa respuesta la que el relevo latchea en el primer cuadro del cruce.
+     */
+    if (!paintedRef.current) {
+      paintedRef.current = true
+      onPainted(true)
+    }
+
     const group = placer.current
     if (!group) return
 
