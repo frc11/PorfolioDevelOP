@@ -10129,3 +10129,108 @@ borrado de `indicadorDeFase` es exportar `ORDEN_MANUAL`, que ya existía.
   apretado, el dato para decidir está.
 - **Y si el saldo no cierra, la franja se saca.** Es una decisión legítima: cuesta 33 px de pliegue y
   devuelve 59–128 de scroll en doce de catorce. El sprint deja el número, no la conclusión.
+
+---
+
+## Sprint P20 · ADENDA — la re-verificación: todo reproducido, y un nombre que mentía — 2026-09-03
+
+**Base:** `fix/franja-recorrido` @ `795d8f31` · **Worktree propio** `C:/tmp/wt-p20-franja`,
+`node_modules` por junction, brazo nuevo en `:3010` (`E2E_DIST_DIR=.next-p20`) y brazo VIEJO —el
+código de P19, sin franja— en `:3011` (`.next-p20-viejo`, del worktree de P19).
+
+El sprint estaba commiteado y sin pushear. Esta pasada lo re-corrió entero desde cero, en un worktree
+limpio, para separar lo que el sprint **midió** de lo que el sprint **reprodujo**. Todo lo reportado
+se reprodujo con **cero diferencias**, y en el camino apareció un defecto que la primera corrida no
+podía ver porque el instrumento que lo delata es el censo de texto, no el del pliegue.
+
+### Lo que se reprodujo, número por número
+
+| gate | resultado |
+|---|---|
+| `tsc --noEmit` | **exit 0** |
+| `check:invariants` | **52/52** (53 descubiertos · 1 excluido · 0 fallaron) — incluye `recorrido`, `paso-admitido` y `enlaces` |
+| `test:leados` | **33/33** |
+| `test:helpers` | **26/26** |
+| `next build --webpack` | **exit 0** (dos veces: antes y después del arreglo de abajo) |
+| `prisma migrate status` | 86 migraciones · **sin drift** |
+| `eslint` sobre los 13 archivos del sprint | **0 hallazgos** |
+
+**Las dos mediciones base, re-corridas contra los dos brazos vivos:** los JSON nuevos salieron
+**idénticos** a los commiteados en los doce campos que deciden las reglas 1 y 2 (`pliegue`,
+`accionable`, `captura`, `registro`, `barra`, `pliegueEfectivo`, `altoTotal`, `cromoLayout`, `entra`,
+`accionVisibleArriba`, `accionVisibleAbajo`, `rotulos`): **0 diferencias en 28 filas**, para el antes
+y para el después. O sea: entra algo accionable en **8/14 a 1440 y 4/14 a 390, antes y después**, y la
+acción principal sigue **9 de 9 a los dos anchos**, arriba y abajo del scroll.
+
+**El censo de destinos, ahora con el brazo viejo medido de verdad.** El reporte original comparaba
+contra un JSON de destinos que sólo tenía el brazo nuevo. Acá se corrió el mismo instrumento contra
+`:3011` y se comparó fila por fila:
+
+| | resultado |
+|---|---|
+| destinos **perdidos** al sacar la tira de completadas | **0**, en las catorce, a los dos anchos |
+| destinos **ganados** | `m1` (en m1), `m4`, `m5`, `m6`, `m14`, `m15`, `m16`+`m5` (en m16), `m15` (en espera) |
+| franja presente | 0/14 en el viejo · **14/14 en el nuevo**, 26 px a los dos anchos |
+
+La afirmación fuerte del sprint —«sacar la tira no cerró ninguna puerta»— quedó **medida contra el
+código viejo**, no prometida. Y `mc2` sigue alcanzable desde donde lo era: el chip de Construcción
+lleva a `mc1` y `NavConstruccion` sirve las dos, que es la consecuencia acotada que el sprint declaró.
+
+### Los tests, demostrados fallando contra el código viejo
+
+`tests/setter/25-franja-recorrido.spec.ts` corrido íntegro contra `:3011` (el build del base, sin
+franja): **36 de 37 en rojo**. El único verde es `§0 · el recorrido tiene los nueve pasos del manual`,
+y **es correcto que pase**: no toca el navegador, importa `FASES_EN_ORDEN` del módulo y es el piso que
+evita que §1 pase comparando dos listas vacías. Los 36 fallan por lo mismo y con el mensaje que
+corresponde — `waiting for locator('[data-slot="franja-recorrido"]')`: la franja no existía.
+
+### El defecto que apareció midiendo: «Opener» prometido donde no hay paso
+
+A 390 la franja guarda los nombres y conserva dos: el paso de ahora y **el que sigue**. En las **tres
+pantallas de estado** —espera, revisión, archivo— no hay paso de ahora (es la verdad: ahí no le toca
+al setter). Pero `iSiguiente` se calculaba con `i > iActual` y **`iActual` vale −1**, así que el
+«siguiente» pasaba a ser el **primer paso del recorrido entero**. Medido, lo que se leía a 390:
+
+| pantalla | antes del arreglo | después |
+|---|---|---|
+| `espera` | `✓ · **Opener** · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9` | `✓ · 2 · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9` |
+| `revision` | `✓ · **Opener** · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9` | `✓ · 2 · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9` |
+| `archivo` | `✓ · **Opener** · 3 · 4 · 5 · 6 · 7 · 8 · 9` | `✓ · 2 · 3 · 4 · 5 · 6 · 7 · 8 · 9` |
+
+En un negocio **cerrado** eso nombraba «Opener» —un paso que nadie registró nunca— en el lugar
+reservado a «qué sigue». Es el mismo error que el sprint ya había cazado y cerrado para el «todavía
+no» (que sí se guarda cuando no hay paso de ahora), aplicado al otro recorte y no visto: **el
+instrumento que lo delata es el censo de texto de `capturar-franja.ts`, no la tabla del pliegue.**
+
+**El arreglo** (`franja-recorrido.tsx`): `iSiguiente` se guarda cuando `iActual === -1`, con el motivo
+escrito al lado. A 390, en esas tres pantallas, no se escribe ningún nombre — lo hecho sigue dicho por
+los tildes y el porqué lo dice el titular («Le toca al negocio», «Le toca a Franco», «Este negocio
+quedó cerrado»). **No mueve un solo píxel:** re-medidas las catorce a los dos anchos después del
+arreglo, los doce campos del pliegue dieron **0 diferencias** contra la corrida previa. Es texto, no
+layout.
+
+**Por qué no lleva test nuevo, dicho:** afirmar «a 390, en las tres de estado, ningún chip escribe su
+nombre» es una **aserción de ausencia** — pasa en verde contra el código viejo, donde no hay franja, y
+también pasaría si la franja desapareciera. El chequeo que sí discrimina es el censo de texto que ya
+existe y que acaba de correr en las dos puntas. Queda anotado en vez de fabricado.
+
+### Nada más se movió
+
+`git diff` del arreglo: **un archivo, +11/−4**, todo en el cuerpo de `FranjaRecorrido`. Ni lógica, ni
+schema, ni transiciones, ni llaves de datos, ni un invariante aflojado. Los 52 siguen verdes con el
+arreglo puesto.
+
+### Corrección de las citas del reporte anterior
+
+Las referencias `archivo:línea` de la entrada de arriba quedaron desplazadas respecto al árbol final.
+Verificadas contra `795d8f31`: `FASES_MANUAL` está en `manual.ts:303` (no 293), `ORDEN_MANUAL` en
+`manual.ts:401` (no 407), `FASES_EN_ORDEN` en `recorrido.ts:54` (no 52), la lectura de
+`posicion.actual` en `recorrido.ts:136` (no 131), y el badge de stage en `manual-nav.tsx:107` (no
+110). `PANTALLA_IDS` en `manual.ts:45` estaba bien.
+
+### Lo que la franja delata, y no es un defecto
+
+En los leads de la seed que nacen directo en un stage avanzado, la franja muestra el recorrido **con
+huecos** (`✓ · 2 · 3 · ✓ · 5 · ✓ · ✓ · 8 · 9`): ficha y brief tildados, opener y seguimiento no. Es
+correcto — la franja lee lo que está registrado, no una barra de progreso lineal fingida. Vale
+saberlo antes de mirar las capturas: un lead sembrado no tiene la historia de uno trabajado.

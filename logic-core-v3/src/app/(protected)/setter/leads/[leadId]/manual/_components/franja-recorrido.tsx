@@ -81,10 +81,18 @@ export function FranjaRecorrido({
   // Los dos pasos que contestan «¿dónde estoy?» y «¿qué sigue?». Son los que
   // conservan el nombre a cualquier ancho: sin ellos, a 390 la franja diría
   // cuánto falta pero no de qué se trata.
+  //
+  // «El que sigue» sólo existe si hay un paso de ahora. Sin él (las tres
+  // pantallas de estado) no se escribe ningún nombre a 390: la corrida de las
+  // catorce mostró que, si no, el archivo de un negocio cerrado y la espera de
+  // uno pausado nombraban «Opener» —el primer paso que nadie registró— como si
+  // fuera lo que viene, y ahí no viene nada del setter. Lo hecho sigue dicho
+  // por los tildes; el porqué lo dice el titular de la pantalla.
   const iActual = pasos.findIndex((p) => p.estado === 'actual')
-  const iSiguiente = pasos.findIndex(
-    (p, i) => i > iActual && p.estado !== 'completado',
-  )
+  const iSiguiente =
+    iActual === -1
+      ? -1
+      : pasos.findIndex((p, i) => i > iActual && p.estado !== 'completado')
   // El primero que el motor no deja abrir DE LOS QUE VIENEN. Dos recortes, y los
   // dos los encontró el censo de las catorce:
   //
