@@ -46,14 +46,25 @@ export function archivosDelLaneDeLaEscena(): string[] {
 }
 
 /**
- * Cuántas etiquetas de `check()` abren con el marcador, en el FUENTE.
+ * Las etiquetas de `check()` que abren con el marcador, en el FUENTE.
  *
- * Se cuenta sobre el código y no sobre la salida por una razón de costo: la
- * salida sale de correr 34 procesos, y este invariante corre en el mismo
- * agregado que ellos. El número estático y el de la corrida se compararon a mano
- * en SITIO-S9 y dieron lo mismo (36 y 36); lo que el invariante custodia es que
- * el estático no se mueva sin que alguien lo declare.
+ * Se lee el código y no la salida por una razón de costo: la salida sale de
+ * correr los 38 procesos del lane, y el invariante corre en el mismo agregado
+ * que ellos.
+ *
+ * ⚠ **Devuelve las ETIQUETAS y no un número desde V3-E**, y ahí está el cambio
+ * que importa: con el texto en la mano, el invariante puede renderizar cada una
+ * como la imprime el arnés y pasársela a `contarControles`. Eso convierte «el
+ * censo estático no se movió» —una cifra escrita a mano que ya envejeció tres
+ * veces— en «los dos instrumentos ven lo mismo», que es una propiedad y se
+ * deriva sola. La comparación estático-contra-corrida que SITIO-S9 hizo a mano
+ * (36 y 36) pasa a hacerse en cada corrida.
  */
+export function etiquetasDeControl(fuente: string): string[] {
+  return [...fuente.matchAll(/check\(\s*'(control positivo[^']*)'/g)].map((m) => m[1])
+}
+
+/** Cuántas etiquetas de `check()` abren con el marcador. */
 export function etiquetasMarcadas(fuente: string): number {
   return (fuente.match(/check\(\s*'control positivo\b/g) ?? []).length
 }

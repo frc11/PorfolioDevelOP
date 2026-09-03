@@ -185,11 +185,49 @@ try {
   enDisco = ''
 }
 
+/**
+ * ⚠️ **EL FIN DE LÍNEA SE NORMALIZA ANTES DE COMPARAR, Y ÉSE ERA EL ROJO.**
+ *
+ * V3-E llegó con la premisa de que el merge había desincronizado el documento
+ * del generador. **La medición la refuta:** normalizados, los dos textos son
+ * IDÉNTICOS —238 renglones contra 238, cero líneas distintas—; lo único que
+ * difiere son 237 `\r`. El documento nunca se quedó viejo.
+ *
+ * Lo que pasó es de configuración: este repo corre con `core.autocrlf` en true,
+ * así que git escribe el archivo en CRLF **cada vez que lo toca** —y un merge lo
+ * toca—, mientras `documentoDePedidos()` produce siempre LF (ECMAScript
+ * normaliza los terminadores de línea de un template literal al leer el fuente).
+ * O sea que la comparación cruda daba falso en cualquier checkout limpio de
+ * Windows, y sólo daba verde en la ventana entre correr `--escribir` y el
+ * siguiente merge.
+ *
+ * **Por eso no alcanzaba con regenerar.** Regenerar escribe LF, pone esto en
+ * verde, y lo vuelve a romper en el próximo merge: un arreglo que se deshace
+ * solo. Lo que se arregla es la COMPARACIÓN, que es la que estaba mal. Es el
+ * mismo defecto que `s7-export.invariant.ts` tenía en `bloqueDelArchivo`, y el
+ * mismo patrón de arreglo que `s10-logo.invariant.ts` §6.
+ *
+ * La escritura de `--escribir` se deja en LF a propósito: es lo que git guarda
+ * en el índice con `autocrlf`, así que el archivo commiteado no cambia de forma
+ * según quién lo regeneró.
+ */
+const enLf = (texto: string): string => texto.replace(/\r\n/g, '\n')
+
 afirmar(enDisco.length > 0, `\`${RUTA_DEL_DOCUMENTO}\` existe`, `${enDisco.split('\n').length} líneas`)
-afirmarIgual(
-  enDisco === esperado,
-  true,
+afirmar(
+  enLf(enDisco) === enLf(esperado),
   'y dice exactamente lo que el dato produce: el documento no se puede quedar viejo',
+  `${enLf(enDisco).split('\n').length} renglones, ${enLf(enDisco).length} caracteres — en disco con ${(enDisco.match(/\r\n/g) ?? []).length} CRLF`,
+)
+controlPositivo(
+  'el comparador ve un documento desactualizado — y NO confunde un fin de línea con un cambio',
+  `${esperado}\nuna línea de más`,
+  (otro: string) => enLf(enDisco) === enLf(otro),
+)
+controlPositivo(
+  'y da verde contra el MISMO documento escrito con el otro fin de línea',
+  enLf(esperado).replace(/\n/g, '\r\n'),
+  (otro: string) => enLf(enDisco) !== enLf(otro),
 )
 
 /** Y que el documento nombre de verdad lo que hay que llenar. */

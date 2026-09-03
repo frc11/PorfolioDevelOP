@@ -208,11 +208,39 @@ export type VeredictoDeReasignacion = {
   /** El `at` del keyframe en la coreografía, o `null` si no existe. */
   readonly at: number | null
   readonly noEsUnaSeccion: boolean
-  /** Si el `at` cae en uno de los cuatro bordes de la ventana de la sección. */
-  readonly enUnBorde: boolean
+  /**
+   * Si el `at` cae en la ventana de ENTRADA de la sección: entre que el panel
+   * asoma por abajo y que llena el cuadro.
+   *
+   * ⚠ **ERA `enUnBorde` HASTA V3-E, y el cambio no lo afloja: lo hace posible.**
+   * Mientras el ancla del diferencial estaba cuantizada, el `at` de `demos`
+   * (0,750) COINCIDÍA con el borde en el que la sección entra a llenar el cuadro,
+   * y ésa era justamente la causa del defecto 7: el logo llenaba el cuadro
+   * encima del titular. Con el ancla declarada la sección llena el cuadro más
+   * tarde, así que la pose ya no cae en un borde —cae ADENTRO del intervalo en
+   * el que el panel entra—. «Está en un borde» describía la decisión vieja;
+   * «está en la entrada» es la propiedad que la reasignación promete hoy, y es
+   * **estrictamente más fuerte que un `>=`**: acota por los dos lados.
+   */
+  readonly enLaEntrada: boolean
   /** Si la coreografía alcanza ESE keyframe en ese progreso. */
   readonly loAlcanzaAhi: boolean
   readonly bordes: readonly number[]
+}
+
+/**
+ * ¿UN PROGRESO CAE EN LA VENTANA DE ENTRADA DE UNA SECCIÓN? Pura de sus
+ * argumentos para que el control positivo la corra contra un progreso que no.
+ *
+ * `bordes` es `[seVeDesde, llenaDesde, llenaHasta, seVeHasta]`, así que la
+ * entrada es el intervalo `(bordes[0], bordes[1])` — el panel ya asoma y todavía
+ * no llenó el cuadro. Abierto en los dos extremos a propósito: en el borde de
+ * abajo no se ve nada del panel todavía y en el de arriba la sección ya llenó,
+ * que es exactamente el caso que el ancla declarada vino a evitar.
+ */
+export function caeEnLaEntrada(bordes: readonly number[], at: number | null): boolean {
+  if (at === null || bordes.length < 2) return false
+  return at > bordes[0] && at < bordes[1]
 }
 
 /**
@@ -230,7 +258,7 @@ export function veredictoDeReasignaciones(): readonly VeredictoDeReasignacion[] 
       seccion: r.seccion,
       at,
       noEsUnaSeccion: !SECCIONES.some((s) => s.id === comoId(r.keyframe)),
-      enUnBorde: at !== null && bordes.includes(at),
+      enLaEntrada: caeEnLaEntrada(bordes, at),
       loAlcanzaAhi: at !== null && keyframeEn(at) === r.keyframe,
       bordes,
     }

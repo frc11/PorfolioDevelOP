@@ -36,7 +36,7 @@
  * no llegan a ninguna pantalla.
  */
 
-import { readdirSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { quitarComentarios } from './s3-escaneo'
@@ -158,6 +158,21 @@ const DIR_INSTRUMENTOS = 'src/app/v3/_lib/__tests__'
  * lista salía de `git status` y después del commit medía CERO — con lo cual la
  * regla de las 300 líneas dejaba de cubrir a nadie, en silencio.
  */
+/**
+ * De una lista de rutas, las que ALGÚN archivo de la otra lista NOMBRA por su
+ * nombre de archivo.
+ *
+ * Se busca el `basename` y no la ruta entera porque un import relativo escribe
+ * `'./banu.png'`: exigir la ruta repo-relativa daría vacío contra un consumo que
+ * existe, que es la forma exacta del verde por vacío.
+ */
+export function archivosQueNombran(candidatos: readonly string[], fuentes: readonly string[]): string[] {
+  return candidatos.filter((candidato) => {
+    const nombre = path.basename(candidato)
+    return fuentes.some((fuente) => readFileSync(path.join(RAIZ, fuente), 'utf8').includes(nombre))
+  })
+}
+
 export function instrumentosDeS5(): string[] {
   return readdirSync(path.join(RAIZ, DIR_INSTRUMENTOS))
     .filter((nombre) => /^s5-.*\.tsx?$/.test(nombre))

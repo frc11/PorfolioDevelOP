@@ -19,13 +19,13 @@
 
 import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../choreography'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
-import { ANCLAJE, pantallaDeScroll, type Nudo } from '../anclaje'
+import { ANCLAJE, TRAMOS_ANCLADOS, pantallaDeScroll, type Nudo } from '../anclaje'
 // prettier-ignore
 import { MAPEO_DE_LAS_SECCIONES, PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL, RITMO_COMPUESTO, RITMO_POR_SEGMENTO, pantallaDeProgreso, progresoDePantalla, progresoDelScroll, tramoEn } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
-import { CUATRO_DE_LA_72, MUESTRAS_DE_SCROLL, NUDOS_FUERA_DE_ORDEN, PANTALLAS, PROGRESOS, RITMO_DEL_PROVISIONAL, errorDeVuelta, esEstrictamenteCreciente, esMonotonaLaTabla, llenaEn, losNudosSonExactos, progresosSobre, ventanaDelTramo, veredictoDeNombres, veredictoDeReasignaciones, veredictoDelRitmo } from './s9-soporte'
-import { ENTRADAS_DE_V3, RUTA_RECORRIDO, clausuraPorValor, veredictoDeLaCompuerta } from './s9-compuerta'
+import { CUATRO_DE_LA_72, MUESTRAS_DE_SCROLL, NUDOS_FUERA_DE_ORDEN, PANTALLAS, PROGRESOS, RITMO_DEL_PROVISIONAL, caeEnLaEntrada, errorDeVuelta, esEstrictamenteCreciente, esMonotonaLaTabla, llenaEn, losNudosSonExactos, progresosSobre, ventanaDelTramo, veredictoDeNombres, veredictoDeReasignaciones, veredictoDelRitmo } from './s9-soporte'
+import { afirmarLaCompuerta } from './s9-compuerta'
 // prettier-ignore
 import { MAPEO_PROVISIONAL_HISTORICO, bordesDe, imprimirAnclaje, imprimirComparacion, imprimirMapeo, imprimirReparto, imprimirVentanas, ventanasEnProgreso } from './tablas'
 
@@ -37,10 +37,20 @@ imprimirAnclaje()
 // prettier-ignore
 afirmarIgual([PANTALLAS_DEL_DOCUMENTO, PANTALLAS_DE_SCROLL], [ANCLAJE.pantallasDelDocumento, ANCLAJE.pantallasDeScroll],
   'el documento y el recorrido de scroll salen del anclaje, no de una cuenta propia')
+/**
+ * ⚠ **REESCRITA EN V3-E.** Decía el par `[12, 0.75]` para el quinto nudo, y ese
+ * par ERA la cuantización. Se parte en dos, y **ninguna mitad es más floja**: la
+ * primera es NUEVA e impide que descuantizar sea inventar un progreso.
+ */
 afirmarIgual(
-  ANCLAJE.nudos.map((n) => [n.pantalla, n.progreso]),
-  [[0, 0], [1, 0.125], [3, 0.375], [4, 0.5], [7, 0.625], [12, 0.75], [13, 1]],
-  'los siete nudos son los del contrato: el origen más un borde por tramo',
+  ANCLAJE.nudos.map((n) => n.progreso),
+  [CHOREO_TRAMOS[0].from, ...CHOREO_TRAMOS.map((t) => t.to)],
+  'los progresos de los SIETE nudos son los de la coreografía: descuantizar NO inventó un progreso',
+)
+afirmarIgual(
+  ANCLAJE.nudos.map((n) => Number(n.pantalla.toFixed(6))),
+  [0, 1, 3, 4, 7, 11.305085, 13],
+  '  y sus pantallas son los bordes de las secciones SALVO el quinto: el diferencial declara su ancla y `demos` cierra adentro de tu-panel',
 )
 afirmarIgual(RITMO_POR_SEGMENTO.length, CHOREO_TRAMOS.length, 'hay un ritmo por tramo: SEIS, no una cifra de estiramiento')
 afirmarIgual(RITMO_COMPUESTO, 0.125, 'el ritmo compuesto es 1 / CHOREO_SCREENS, leído de la coreografía')
@@ -91,9 +101,14 @@ afirmarIgual(
   ['quiénes somos', 'cierre', 'cierre', 'cierre'],
   'los CUATRO casos que §7.2 nombra —Números, tu-panel, por-que-develop y cierre— eran ciertos',
 )
+/**
+ * ⚠ **REESCRITA EN V3-E.** Decía `[0.375, 0.7, 0.75, 1]`. `por-que-develop` llena
+ * el cuadro en el ancla declarada y `tu-panel` se corre de 0,7000 a 0,7121: es el
+ * único de las otras siete que se mueve. `numeros` y `cierre`, ni un bit.
+ */
 afirmarIgual(
-  CUATRO_DE_LA_72.map((id) => llenaEn(MAPEO_DE_LAS_SECCIONES, id)),
-  [0.375, 0.7, 0.75, 1],
+  CUATRO_DE_LA_72.map((id) => Number(llenaEn(MAPEO_DE_LAS_SECCIONES, id).toFixed(6))),
+  [0.375, 0.712106, 0.8525, 1],
   '  y con el anclaje llenan el cuadro acá — en qué tramo cae cada ventana, en §5',
 )
 
@@ -197,19 +212,33 @@ afirmar(
  * La identidad más fuerte de la sección: la ventana de scroll de cada tramo —de
  * que su primera sección llena el cuadro a que la última deja de verse— **es** su
  * `[from, to]` en la coreografía.
+ *
+ * ⚠ **REESCRITA EN V3-E, Y ES EL PRECIO EXACTO DE DESCUANTIZAR.** El ancla
+ * declarada rompe la identidad **en los dos tramos que toca —y sólo en ésos**. Se
+ * afirma en dos mitades derivadas de `TRAMOS_ANCLADOS`: intacta en los otros
+ * cuatro, y en los dos tocados el borde que comparten **es el ancla declarada**.
  */
 const bordesDeLosTramos = CHOREO_TRAMOS.map((t) => [t.from, t.to])
+const iDeclarado = TRAMOS_ANCLADOS.findIndex((t) => t.ancla !== undefined)
+const anclaDeclarada = TRAMOS_ANCLADOS[iDeclarado].ancla
+const tocados = [iDeclarado - 1, iDeclarado]
+const intactos = CHOREO_TRAMOS.map((_, i) => i).filter((i) => !tocados.includes(i))
 afirmarIgual(
-  CHOREO_TRAMOS.map((_, i) => ventanaDelTramo(i)),
-  bordesDeLosTramos,
-  'la ventana de scroll de cada tramo ES su [from, to] en la coreografía — los seis, exactos',
+  intactos.map((i) => ventanaDelTramo(i)),
+  intactos.map((i) => bordesDeLosTramos[i]),
+  `la ventana de scroll de cada tramo ES su [from, to] en la coreografía — los ${intactos.length} que el ancla declarada no toca`,
+)
+afirmarIgual(
+  [ventanaDelTramo(tocados[0])[1], ventanaDelTramo(tocados[1])[0]],
+  [anclaDeclarada, anclaDeclarada],
+  `  y los DOS que sí toca comparten su borde en el ANCLA DECLARADA (${anclaDeclarada}), no en el \`to\` del tramo`,
 )
 controlPositivo(
   'el detector ve una ventana corrida un octavo',
   0.125,
   (delta: number) =>
-    JSON.stringify(CHOREO_TRAMOS.map((_, i) => ventanaDelTramo(i, delta))) ===
-    JSON.stringify(bordesDeLosTramos),
+    JSON.stringify(intactos.map((i) => ventanaDelTramo(i, delta))) ===
+    JSON.stringify(intactos.map((i) => bordesDeLosTramos[i])),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -223,7 +252,14 @@ titulo('6 · LA FORMA — las ventanas de progreso con panel transparente en cua
 imprimirVentanas()
 const ventanas = ventanasEnProgreso()
 
-afirmarIgual(ventanas, [[0, 0.125], [0.725, 1]], 'son DOS ventanas de progreso, una por sección transparente')
+/**
+ * ⚠ **REESCRITA EN V3-E.** Decía `[0.725, 1]`: el progreso una pantalla antes del
+ * ancla CUANTIZADA. Ahora el panel del diferencial asoma en **0,7411** —la escena
+ * se enciende 0,0161 más tarde—. La primera ventana no se mueve un bit.
+ */
+// prettier-ignore
+afirmarIgual(ventanas.map((v) => v.map((p) => Number(p.toFixed(6)))), [[0, 0.125], [0.741142, 1]],
+  'son DOS ventanas de progreso, una por sección transparente')
 afirmar(
   ventanas[1][0] > ventanas[0][1],
   '  y no se solapan: el hueco es real, no un artefacto de redondeo',
@@ -242,16 +278,16 @@ for (const v of reasignaciones) {
   afirmar(v.at !== null, `el keyframe "${v.keyframe}" existe en CHOREO_KEYFRAMES`, `at=${v.at}`)
   afirmar(v.noEsUnaSeccion, '  y su nombre no es el id de ninguna sección: por eso hacía falta adoptarlo')
   afirmar(
-    v.enUnBorde,
-    `  y su progreso cae en un BORDE de la ventana de "${v.seccion}"`,
-    `at=${v.at} — es el borde en el que la sección ENTRA a llenar el cuadro`,
+    v.enLaEntrada,
+    `  y su progreso cae en la ENTRADA de "${v.seccion}": entre que el panel asoma y que llena el cuadro`,
+    `at=${v.at} en (${v.bordes[0].toFixed(4)}, ${v.bordes[1].toFixed(4)}) — V3-E: hasta la descuantización coincidía con el borde de llenado, y ésa era la causa del defecto 7`,
   )
   afirmar(v.loAlcanzaAhi, '  y la coreografía alcanza ESE keyframe ahí, leído de la coreografía')
 }
 controlPositivo(
-  'el detector de bordes no acepta un progreso que cae ENTRE dos bordes',
-  0.8,
-  (at: number) => bordesDe('por-que-develop').includes(at),
+  'el detector de la entrada acota por los DOS lados: ni un progreso anterior a que el panel asome ni uno posterior al llenado',
+  [0.7, 0.9],
+  (ats: readonly number[]) => ats.some((at) => caeEnLaEntrada(bordesDe('por-que-develop'), at)),
 )
 controlPositivo(
   'y el de existencia no encuentra un keyframe que no está compuesto',
@@ -259,35 +295,6 @@ controlPositivo(
   (nombre: string) => CHOREO_KEYFRAMES.some((k) => k.name === nombre),
 )
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · ABAJO DE 1025 EL MAPEO NO SE MONTA — sobre el FUENTE, no sobre el build')
-
-/**
- * ⚠ **EL CONTROL POSITIVO ES LA MITAD QUE HACE QUE ESTO SIGNIFIQUE ALGO.** Con
- * los `import()` diferidos ENCENDIDOS la caminata SÍ llega; sin eso, «no está en
- * la carga inicial» pasaría en verde también con una caminata ciega.
- */
-const compuerta = veredictoDeLaCompuerta()
-console.log(
-  `  carga inicial de /v3: ${compuerta.enLaCarga} módulos · con los import() diferidos: ${compuerta.conDiferidos}`,
-)
-
-// prettier-ignore
-afirmarIgual(compuerta.losTresEnLaCarga, [false, false, false],
-  'ni recorrido.ts, ni anclaje.ts, ni EscenaDelHome.tsx están en la carga inicial de /v3')
-afirmar(
-  compuerta.compuertaEnLaCarga,
-  '  y el módulo que ABRE la compuerta sí está en esa carga: la caminata llega hasta el borde',
-)
-afirmar(
-  compuerta.losTresConDiferidos,
-  '  y cruzando el import() diferido la caminata SÍ los alcanza: lo único que los frena es la compuerta',
-  `${compuerta.conDiferidos - compuerta.enLaCarga} módulos entran sólo por el import() de EscenarioCompuerta`,
-)
-controlPositivo(
-  'la caminata no está ciega: con los diferidos encendidos deja de decir que recorrido.ts está afuera',
-  true,
-  (encendidos: boolean) => !clausuraPorValor(ENTRADAS_DE_V3, encendidos).has(RUTA_RECORRIDO),
-)
+afirmarLaCompuerta()
 
 cerrar('s9-anclaje.invariant')

@@ -23,7 +23,8 @@ import { useSyncExternalStore } from 'react'
  * desde entonces `introFlight.ts` planifica y ejecuta el vuelo: `samplePlace`
  * alimenta `logoX`, `logoY`, `logoCenterX`, `logoCenterY` y `logoReveal`, y el
  * logo viaja del centro de la pantalla al lugar de la escena. En 1440×810 sale
- * de (720 · 405) y aterriza en **(1018,4 · 427,8)** con una tinta de 451×313 px:
+ * de (720 · 405) y aterriza en **(939,7 · 417,5)** con una tinta de 445×310 px
+ * —V3-E movió `frameX` del hero de 0,68 a 0,5 y con él el destino—:
  * el **mismo píxel y el mismo tamaño** donde la escena dibuja el suyo, medido en
  * `introLanding.invariant.ts` sobre tres ventanas con un error de 0,0000 px.
  *

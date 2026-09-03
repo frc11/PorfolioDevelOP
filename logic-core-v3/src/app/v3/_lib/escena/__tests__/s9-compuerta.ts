@@ -27,6 +27,7 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { RAIZ, especificadoresDe, resolverEspecificador, sinComentarios } from './soporte'
+import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../__tests__/afirmar'
 
 // ── La caminata del grafo de módulos ────────────────────────────────────────
 
@@ -97,4 +98,47 @@ export function clausuraPorValor(entradas: readonly string[], conDiferidos: bool
     }
   }
   return vistos
+}
+
+// ── §8 DEL INVARIANTE, ENTERA ───────────────────────────────────────────────
+
+/**
+ * §8 DE `s9-anclaje.invariant.ts` — abajo de 1025 el mapeo no se monta.
+ *
+ * ⚠ **VIVE ACÁ DESDE V3-E, por la regla de las 300 líneas del repo**, con el
+ * mismo corte que `s10-logo-columna.ts` estrenó para el §9 de `s10-logo`: **por
+ * tema, y sin compartir una constante con lo que queda del otro lado.** Las
+ * afirmaciones sobre la descuantización del ancla crecieron el invariante y esta
+ * sección es la única que no habla de progreso: habla del grafo de módulos, que
+ * es exactamente lo que este archivo ya leía.
+ *
+ * ⚠ **EL CONTROL POSITIVO ES LA MITAD QUE HACE QUE ESTO SIGNIFIQUE ALGO.** Con
+ * los `import()` diferidos ENCENDIDOS la caminata SÍ llega; sin eso, «no está en
+ * la carga inicial» pasaría en verde también con una caminata ciega.
+ */
+export function afirmarLaCompuerta(): void {
+  titulo('8 · ABAJO DE 1025 EL MAPEO NO SE MONTA — sobre el FUENTE, no sobre el build')
+
+  const compuerta = veredictoDeLaCompuerta()
+  console.log(
+    `  carga inicial de /v3: ${compuerta.enLaCarga} módulos · con los import() diferidos: ${compuerta.conDiferidos}`,
+  )
+
+  // prettier-ignore
+  afirmarIgual(compuerta.losTresEnLaCarga, [false, false, false],
+    'ni recorrido.ts, ni anclaje.ts, ni EscenaDelHome.tsx están en la carga inicial de /v3')
+  afirmar(
+    compuerta.compuertaEnLaCarga,
+    '  y el módulo que ABRE la compuerta sí está en esa carga: la caminata llega hasta el borde',
+  )
+  afirmar(
+    compuerta.losTresConDiferidos,
+    '  y cruzando el import() diferido la caminata SÍ los alcanza: lo único que los frena es la compuerta',
+    `${compuerta.conDiferidos - compuerta.enLaCarga} módulos entran sólo por el import() de EscenarioCompuerta`,
+  )
+  controlPositivo(
+    'la caminata no está ciega: con los diferidos encendidos deja de decir que recorrido.ts está afuera',
+    true,
+    (encendidos: boolean) => !clausuraPorValor(ENTRADAS_DE_V3, encendidos).has(RUTA_RECORRIDO),
+  )
 }

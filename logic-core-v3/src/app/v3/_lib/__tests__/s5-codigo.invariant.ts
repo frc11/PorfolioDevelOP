@@ -11,8 +11,7 @@
  * Porque **ninguna sección puede afirmar el aislamiento**. Un subagente que
  * escribe sólo dentro de su carpeta no puede comprobar que las otras tres
  * respetaron la suya, y cuatro comprobaciones parciales del mismo aislamiento
- * son cuatro formas de no comprobarlo. Estas afirmaciones son de la fase 2 por
- * construcción, no por reparto.
+ * son cuatro formas de no comprobarlo.
  *
  * ── El alcance de cada bloque, y por qué no es el mismo ───────────────────
  *
@@ -24,7 +23,9 @@
  * en eso con cinco rojos, y los cinco eran falsos.
  *
  * Lo que NO se recorta es el alcance del padrón, de los prohibidos y de las 300
- * líneas: ahí los instrumentos cuentan como cualquier otro archivo.
+ * líneas: ahí los instrumentos cuentan como cualquier otro archivo. Los
+ * BINARIOS sí quedan afuera de las dos últimas, desde V3-E: ver
+ * `ARCHIVOS_DE_CODIGO`.
  */
 
 import path from 'node:path'
@@ -33,6 +34,7 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirma
 import { apagadosDeFoco, quitarComentarios } from './s3-escaneo'
 import {
   ARCHIVOS_DEL_LANE,
+  ARCHIVOS_DE_CODIGO,
   ARCHIVOS_ESCANEABLES,
   CARPETAS_DE_SECCION,
   RAIZ_DEL_LANE,
@@ -40,6 +42,7 @@ import {
   archivosSinRegistrar,
   leer,
 } from './s5-archivos'
+import { afirmarLosOriginales } from './s5-originales'
 import {
   IMPORTS_PERMITIDOS,
   PROHIBIDOS,
@@ -54,7 +57,7 @@ import {
 } from './s5-escaneo'
 
 /** Los `.ts` y `.tsx` del lane, instrumentos incluidos. */
-const ARCHIVOS_TS = ARCHIVOS_DEL_LANE.filter((a) => /\.tsx?$/.test(a))
+const ARCHIVOS_TS = ARCHIVOS_DE_CODIGO.filter((a) => /\.tsx?$/.test(a))
 /** Sólo lo que pinta pantalla. Ver el docblock de `s5-escaneo.ts`. */
 const PANTALLA = ARCHIVOS_ESCANEABLES.filter((a) => /\.tsx?$/.test(a))
 
@@ -74,6 +77,8 @@ afirmar(
   `${PANTALLA.length} archivos pintan pantalla y ${ARCHIVOS_TS.length - PANTALLA.length} son instrumentos`,
   'el recorte de alcance existe y no es decorativo',
 )
+
+afirmarLosOriginales()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Ninguna sección importa de otra')
@@ -251,7 +256,8 @@ controlPositivo(
 titulo('8 · Ningún archivo pasa las 300 líneas')
 
 const INSTRUMENTOS = instrumentosDeS5()
-const TODOS = [...new Set([...ARCHIVOS_DEL_LANE, ...INSTRUMENTOS])]
+/** Los binarios quedan afuera: contarle saltos de línea a un PNG no mide nada. */
+const TODOS = [...new Set([...ARCHIVOS_DE_CODIGO, ...INSTRUMENTOS])]
 
 const medidos = TODOS.map((archivo) => ({ archivo, lineas: leer(archivo).split('\n').length }))
 afirmarIgual(

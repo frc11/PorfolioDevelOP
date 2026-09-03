@@ -36,12 +36,34 @@ section('El export devuelve el archivo')
  * El recorte del bloque, como FUNCIÓN y no en línea. Es lo que permite correrlo
  * contra un fuente que no lo tiene: si devolviera algo en ese caso, la
  * comparación byte por byte de abajo estaría midiendo dos cadenas vacías.
+ *
+ * ⚠️ **NORMALIZA EL FIN DE LÍNEA ANTES DE BUSCAR, Y ÉSE ERA EL DEFECTO.**
+ *
+ * Las tres agujas —`'/**\n * El recorrido.'`, la del `const` y `'\n]\n'`— llevan
+ * `\n`, y `choreography.ts` está en disco con CRLF (`core.autocrlf` en true, que
+ * es la configuración de este repo en Windows). Las dos primeras `indexOf`
+ * fallaban y la función devolvía **cadena vacía**: la comparación "byte por
+ * byte" medía 11.703 bytes emitidos contra **0** en el archivo, o sea que dejó
+ * de mirar el archivo. No es una diferencia de contenido — con el fin de línea
+ * normalizado los dos lados coinciden carácter por carácter.
+ *
+ * Y el control positivo de abajo tampoco lo discriminaba: `'export const
+ * OTRA_COSA = []\n'` no tiene el bloque **ni con un fin de línea ni con el
+ * otro**, así que daba verde con la función rota. El que se agregó exige
+ * encontrarlo con los DOS —es el patrón de `s10-logo.invariant.ts` §6, donde el
+ * mismo detector se corre contra `CHOREO` y contra `CHOREO_LF`.
+ *
+ * El emisor produce `\n` siempre: ECMAScript normaliza los terminadores de línea
+ * de un template literal a LF al leer el fuente, así que `buildKeyframesSource`
+ * no depende de con qué finales de línea esté guardado su propio archivo. La
+ * normalización va de un solo lado, que es el que la necesita.
  */
 function bloqueDelArchivo(source: string): string {
-  const start = source.indexOf('/**\n * El recorrido.')
-  const constIndex = source.indexOf('export const CHOREO_KEYFRAMES')
-  const end = constIndex >= 0 ? source.indexOf('\n]\n', constIndex) : -1
-  return start >= 0 && end >= 0 ? source.slice(start, end + 3) : ''
+  const lf = source.replace(/\r\n/g, '\n')
+  const start = lf.indexOf('/**\n * El recorrido.')
+  const constIndex = lf.indexOf('export const CHOREO_KEYFRAMES')
+  const end = constIndex >= 0 ? lf.indexOf('\n]\n', constIndex) : -1
+  return start >= 0 && end >= 0 ? lf.slice(start, end + 3) : ''
 }
 
 {
@@ -63,6 +85,26 @@ function bloqueDelArchivo(source: string): string {
     'control positivo — el recorte devuelve VACÍO en un fuente que no lleva el bloque',
     bloqueDelArchivo('export const OTRA_COSA = []\n') === '',
     'sin esto, "byte por byte" podría estar comparando dos cadenas vacías y salir en verde'
+  )
+
+  /**
+   * ⚠ **EL CONTROL QUE FALTABA: el mismo bloque, con los DOS finales de línea.**
+   *
+   * El de arriba no discrimina la falla que este archivo tuvo: un fuente sin el
+   * bloque no lo tiene ni con `\n` ni con `\r\n`, así que daba verde con el
+   * recorte ciego a CRLF. Éste exige lo contrario — que el recorte ENCUENTRE el
+   * bloque en las dos escrituras del mismo archivo y devuelva **lo mismo**.
+   *
+   * Se construyen las dos a partir del fuente real y no de un fixture: un
+   * fixture escrito a mano puede quedarse viejo, y lo que hay que poder decir es
+   * que ESTE archivo se recorta igual esté guardado como esté.
+   */
+  const enLf = source.replace(/\r\n/g, '\n')
+  const enCrlf = enLf.replace(/\n/g, '\r\n')
+  check(
+    'control positivo — el recorte encuentra el bloque con LF y con CRLF, y devuelve lo mismo',
+    bloqueDelArchivo(enLf).length > 0 && bloqueDelArchivo(enCrlf) === bloqueDelArchivo(enLf),
+    `${bloqueDelArchivo(enLf).length} bytes desde el fuente en LF y ${bloqueDelArchivo(enCrlf).length} desde el mismo fuente en CRLF — el archivo en disco está en ${source.includes('\r\n') ? 'CRLF' : 'LF'}`
   )
 
   /**

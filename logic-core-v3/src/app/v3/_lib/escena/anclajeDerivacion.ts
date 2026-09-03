@@ -46,6 +46,15 @@ export type TramoAnclado = {
   readonly tramo: string
   /** Los `id` de `SECCIONES` sobre los que ese tramo corre, en orden. */
   readonly secciones: readonly string[]
+  /**
+   * **DÓNDE ADENTRO DE ESTE TRAMO ANCLA SU PRIMERA SECCIÓN.** Sin esto la
+   * sección hereda el borde —el `from` del tramo, que es el `to` del anterior— y
+   * su ancla queda CUANTIZADA a un múltiplo de la coreografía. Con esto, el
+   * reparto declara un progreso de adentro de `(from, to)` y la derivación corre
+   * la PANTALLA en la que cierra el tramo anterior hasta que la recta pase por
+   * ahí. Ver `cierreCorridoPorElAncla`, y la decisión en `anclaje.ts`.
+   */
+  readonly ancla?: number
 }
 
 /** Lo mínimo de un tramo que la derivación necesita. */
@@ -84,12 +93,81 @@ export type Anclaje = {
 }
 
 /**
+ * EL PROGRESO DE UNA PANTALLA SOBRE LA RECTA QUE UNE DOS NUDOS.
+ *
+ * ⚠ **Es la misma aritmética que `progresoEnNudos` de `recorrido.ts`, y está
+ * repetida a propósito**: aquél importa `anclaje.ts`, que importa este módulo,
+ * así que llamarlo desde acá sería un ciclo. La copia es de UNA línea y se paga
+ * con una afirmación: `s16-anclaje.invariant.ts` §2 corre las dos sobre el mismo
+ * segmento y exige que coincidan **al bit**, con su control positivo.
+ */
+export function progresoEntre(
+  pantallaA: number,
+  progresoA: number,
+  pantallaB: number,
+  progresoB: number,
+  pantalla: number,
+): number {
+  return progresoA + ((pantalla - pantallaA) / (pantallaB - pantallaA)) * (progresoB - progresoA)
+}
+
+/**
+ * LA PANTALLA EN LA QUE CIERRA EL TRAMO ANTERIOR cuando un tramo declara dónde
+ * ADENTRO de él ancla su primera sección — **la descuantización, en una línea.**
+ *
+ * Una sección llena el cuadro en `progresoDePantalla(su desdePantalla)`, y ese
+ * progreso cae en un NUDO —el `to` de un tramo, un múltiplo exacto de la
+ * coreografía— siempre que la sección sea la primera de su grupo. La única forma
+ * de que tome otro valor **sin tocar una pose y sin tocar `secciones.ts`** es que
+ * su pantalla deje de ser un nudo: que el tramo anterior cierre ANTES, adentro de
+ * su propio grupo, y que el ancla caiga sobre la recta que va de ese cierre al
+ * final del tramo que la contiene.
+ *
+ * Con `r` la fracción del tramo en la que se declara el ancla, el cierre sale de
+ * pedirle a la recta que pase por `(inicio, ancla)`:
+ *
+ *     r = (ancla − from) / (to − from)
+ *     x = (inicio − r · fin) / (1 − r)
+ *
+ * **Tira en las tres formas en que el dato puede no cerrar**, y la tercera es la
+ * que importa: un ancla que la recta no devuelve al bit sería una declaración que
+ * el mapeo no cumple, y todas las tablas la imprimirían igual.
+ */
+export function cierreCorridoPorElAncla(
+  ancla: number,
+  tramo: BordeDeTramo,
+  inicio: number,
+  fin: number,
+): number {
+  const r = (ancla - tramo.from) / (tramo.to - tramo.from)
+  if (!(r > 0 && r < 1)) {
+    throw new Error(
+      `anclaje: el ancla ${ancla} del tramo "${tramo.name}" no cae ADENTRO de (${tramo.from}, ${tramo.to}) — en el borde se hereda, no se declara.`,
+    )
+  }
+  if (!(fin > inicio)) {
+    throw new Error(
+      `anclaje: el tramo "${tramo.name}" no tiene pantallas propias: no hay adentro donde anclar.`,
+    )
+  }
+  const pantalla = (inicio - r * fin) / (1 - r)
+  const vuelta = progresoEntre(pantalla, tramo.from, fin, tramo.to, inicio)
+  if (!(Math.abs(vuelta - ancla) < 1e-12)) {
+    throw new Error(
+      `anclaje: el ancla ${ancla} del tramo "${tramo.name}" no vuelve del mapeo — la recta devuelve ${vuelta}.`,
+    )
+  }
+  return pantalla
+}
+
+/**
  * Deriva el anclaje entero de las tres fuentes.
  *
- * **Tira —no devuelve un anclaje degradado— en las seis formas en las que el
- * dato puede dejar de cerrar.** Un mapeo que no cubre el documento no es algo
- * que se renderice a medias, y el modo de falla que este repo persigue desde
- * S10 es exactamente el verde que no distingue «verifiqué» de «no había nada».
+ * **Tira —no devuelve un anclaje degradado— en las siete formas en las que el
+ * dato puede dejar de cerrar** (más las tres de `cierreCorridoPorElAncla`). Un
+ * mapeo que no cubre el documento no es algo que se renderice a medias, y el modo
+ * de falla que este repo persigue desde S10 es exactamente el verde que no
+ * distingue «verifiqué» de «no había nada».
  */
 export function derivarAnclaje(
   secciones: readonly Seccion[],
@@ -146,15 +224,41 @@ export function derivarAnclaje(
 
   // 4 · Los nudos: el borde de cada tramo contra el borde de sus secciones.
   const porId = new Map(geometria.map((g) => [g.id, g]))
+  const fila = (id: string): GeometriaDeSeccion => {
+    const g = porId.get(id)
+    if (g === undefined) throw new Error(`anclaje: sección desconocida: "${id}".`)
+    return g
+  }
+  for (let i = 0; i < anclados.length; i += 1) {
+    if (anclados[i].secciones.length === 0) {
+      throw new Error(`anclaje: el tramo "${tramos[i].name}" no tiene secciones.`)
+    }
+  }
+  /** Dónde empieza el grupo de un tramo y dónde termina, en pantallas de scroll. */
+  const inicioDe = (i: number): number => fila(anclados[i].secciones[0]).desdePantalla
+  const finDe = (i: number): number =>
+    Math.min(pantallasDeScroll, fila(anclados[i].secciones[anclados[i].secciones.length - 1]).hastaPantalla)
+
+  // 4b · El primer tramo no puede declarar un ancla: no hay cierre anterior que
+  //      correr —su nudo es el origen del recorrido, en la pantalla 0—.
+  if (anclados[0].ancla !== undefined) {
+    throw new Error(
+      `anclaje: el primer tramo ("${tramos[0].name}") no puede declarar un ancla: su sección arranca en el origen del recorrido.`,
+    )
+  }
+
   const nudos: Nudo[] = [
     { pantalla: 0, progreso: tramos[0].from, porQue: 'el principio del recorrido' },
   ]
   for (let i = 0; i < anclados.length; i += 1) {
     const ids = anclados[i].secciones
-    if (ids.length === 0) throw new Error(`anclaje: el tramo "${tramos[i].name}" no tiene secciones.`)
-    const ultima = porId.get(ids[ids.length - 1])
-    if (ultima === undefined) throw new Error(`anclaje: sección desconocida: "${ids[ids.length - 1]}".`)
-    const pantalla = Math.min(pantallasDeScroll, ultima.hastaPantalla)
+    const proximo: TramoAnclado | undefined = anclados[i + 1]
+    const declarado = proximo === undefined ? undefined : proximo.ancla
+    const natural = finDe(i)
+    const pantalla =
+      declarado === undefined
+        ? natural
+        : cierreCorridoPorElAncla(declarado, tramos[i + 1], inicioDe(i + 1), finDe(i + 1))
     const anterior = nudos[nudos.length - 1]
     if (!(pantalla > anterior.pantalla) || !(tramos[i].to > anterior.progreso)) {
       throw new Error(
@@ -164,7 +268,11 @@ export function derivarAnclaje(
     nudos.push({
       pantalla,
       progreso: tramos[i].to,
-      porQue: `cierra el tramo "${tramos[i].name}" sobre ${ids.join(' + ')}`,
+      porQue:
+        `cierra el tramo "${tramos[i].name}" sobre ${ids.join(' + ')}` +
+        (declarado === undefined
+          ? ''
+          : `, corrido de la pantalla ${natural} a la ${pantalla} porque "${tramos[i + 1].name}" declara su ancla en ${declarado}`),
     })
   }
 

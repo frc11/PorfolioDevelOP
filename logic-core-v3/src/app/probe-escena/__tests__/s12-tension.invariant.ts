@@ -76,10 +76,34 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
    * que devolver EXACTAMENTE los seis de S11. Sin esto, la comparación de abajo
    * mediría el modelo contra sí mismo y cualquier deriva pasaría desapercibida.
    */
+  /**
+   * ⚠️ **V3-E PARTIÓ ESTE CONTROL EN DOS, Y LA PARTICIÓN ES LA AFIRMACIÓN.**
+   *
+   * Pedía que los SEIS reprodujeran los enteros de S11 con menos de 1 de
+   * desvío. V3-E movió `frameX` del hero de 0,68 a 0,5 —la cámara ROTA, así que
+   * lo que entra en cuadro en la pose del hero cambia— y el hero pasó de 201 a
+   * **202,3**. Aflojar la tolerancia a 1,5 habría tapado exactamente lo que hay
+   * que poder ver.
+   *
+   * Lo que corre ahora dice **cuál puede moverse y cuáles no**, que es más
+   * fuerte que la tolerancia única: la pose del hero es **la única cuyo encuadre
+   * V3-E tocó**, así que es la única autorizada a moverse; las otras cinco
+   * siguen contra el entero de S11 **con la misma tolerancia de antes**. Si
+   * mañana se mueve una de esas cinco, esto se pone en rojo igual que siempre.
+   */
+  const HERO = 0
   check(
-    'control positivo — con α = 0 los seis valores medios siguen siendo los de S11',
-    control.every((value, i) => Math.abs(value - S11_MEAN[i]) < 1),
-    control.map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} (S11 ${S11_MEAN[i]})`).join(' · ')
+    'control positivo — con α = 0 las CINCO poses que V3-E no tocó siguen siendo las de S11',
+    control.every((value, i) => i === HERO || Math.abs(value - S11_MEAN[i]) < 1),
+    control
+      .filter((_, i) => i !== HERO)
+      .map((value, i) => `${POSES[i + 1][0]} ${value.toFixed(1)} (S11 ${S11_MEAN[i + 1]})`)
+      .join(' · ')
+  )
+  check(
+    '  y el hero se movió, que es lo que V3-E hizo: sólo por el encuadre, y hacia arriba',
+    control[HERO] > S11_MEAN[HERO] && control[HERO] - S11_MEAN[HERO] < 2,
+    `${control[HERO].toFixed(1)} contra los ${S11_MEAN[HERO]} de S11 — +${(control[HERO] - S11_MEAN[HERO]).toFixed(1)} por \`frameX\` 0,68 → 0,5, la única pose cuyo encuadre V3-E tocó`
   )
   check(
     'y el instrumento se mueve: con el sol de tamaño real las poses con piso suben',

@@ -38,6 +38,7 @@ import { recorridoDeEncuadre } from '../encuadre'
 import { CHOREO_KEYFRAMES } from '../choreography'
 import { camaraEnCuadro, mismaCamara, recorridoConCodo } from './camaraDelCuadro'
 import { aCuadroX } from './s10-logo-cajas'
+import type { TablaDeSuperposicion } from './s10-logo-tablas'
 import {
   VENTANAS,
   cajaDelLogo,
@@ -250,16 +251,40 @@ export const CUADROS_SIN_CAMBIO: readonly Ventana[] = VENTANAS.filter(
 )
 
 /**
- * EL PÁRRAFO DEL DEFECTO 7, re-medido DESPUÉS del arreglo del encuadre.
+ * EL PÁRRAFO DEL DEFECTO 7 — **derivado de la medición, no escrito.**
+ *
+ * ⚠ **Era una constante que decía «SIGUE ABIERTO», y en V3-E dejó de ser
+ * cierta.** El defecto 7 lo cerró el ancla declarada del diferencial (0,8525):
+ * la superposición mínima del titular pasó a **0% en los cuatro cuadros**, y el
+ * párrafo seguía imprimiendo el 🔴 al lado de una tabla que publicaba ceros.
+ * Un texto fijo al lado de una medición viva es la forma exacta del defecto que
+ * este archivo existe para no tener.
+ *
+ * Ahora es una **función de la misma bandera que la tabla calcula**
+ * (`inevitable`, de `tablaDeSuperposicion`), así que las dos no pueden volver a
+ * desacordar: si alguien devuelve el ancla al borde del tramo, la tabla vuelve
+ * a marcar 🔴 y este párrafo vuelve a decir que está abierto, sin que nadie
+ * tenga que acordarse de editarlo.
  *
  * Está acá y no en el invariante porque es texto derivado de una medición que
  * ya se publicó arriba (§4 y §5), y porque el invariante tiene que poder leerse
  * como una lista de afirmaciones.
  */
-export const DEFECTO_7_ABIERTO = [
-  '🔴 EL DEFECTO 7 SIGUE ABIERTO, RE-MEDIDO DESPUÉS DEL ARREGLO DEL ENCUADRE. La superposición mínima del titular',
-  'del diferencial sobre todas las posiciones verticales sigue siendo MAYOR QUE CERO en los cuatro cuadros (§4), y',
-  'ahí el contraste es 1,11:1 (§5). El encuadre corregido la bajó donde el codo la había dejado sin perilla y NO la',
-  'cerró: la banda del logo cruza la columna de texto entera. No se arregla acá — es decisión del humano, y la regla',
-  'ya está fijada: el texto no puede quedar encima del logo. Éstas son las salidas, con su costo:',
-].join('\n  ')
+export function parrafoDelDefecto7(tabla: TablaDeSuperposicion): string {
+  const pct = (v: number) => `${(v * 100).toFixed(1)}%`
+  if (tabla.inevitable) {
+    return [
+      '🔴 EL DEFECTO 7 SIGUE ABIERTO. La superposición mínima del titular del diferencial sobre todas las',
+      `posiciones verticales es MAYOR QUE CERO en algún cuadro (§4): entre ${pct(tabla.minimaDelDiferencial.menor)} y ${pct(tabla.minimaDelDiferencial.mayor)}, y ahí`,
+      'el contraste es 1,11:1 (§5). La banda del logo cruza la columna de texto entera. No se arregla acá — es',
+      'decisión del humano, y la regla ya está fijada: el texto no puede quedar encima del logo. Las salidas:',
+    ].join('\n  ')
+  }
+  return [
+    '✅ EL DEFECTO 7 ESTÁ CERRADO, Y NO LO CERRÓ ESTE ARCHIVO. La superposición mínima del titular del',
+    `diferencial es ${pct(tabla.minimaDelDiferencial.mayor)} en los cuatro cuadros (§4): hay una posición vertical que lo deja limpio en todos.`,
+    'Lo cerró V3-E **descuantizando el ancla** —la sección pasó a declarar dónde ADENTRO de su tramo llena el',
+    'cuadro, 0,8525 en vez del borde 0,7500— y no tocando el encuadre. Las palancas de composición de abajo',
+    'quedan medidas y SIN USAR: se publican porque son la reserva si el ancla se mueve, no porque hagan falta.',
+  ].join('\n  ')
+}

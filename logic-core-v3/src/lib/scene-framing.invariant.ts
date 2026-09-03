@@ -27,11 +27,13 @@ import { recorridoDeEncuadre } from '@/app/v3/_lib/escena/encuadre'
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 import { SCENE_LOGO_MESH_WORLD, projectScenePoint, sceneCameraAt } from '@/lib/scene-camera'
 import { afirmarLaDeudaDeTravelX } from '@/lib/scene-encuadre-deuda'
+import { afirmarElControlNegativo } from '@/lib/scene-framing-aproximacion'
 import {
   DEST_WIDTH_MARGIN,
   SCENE_ENTRY_POSE,
   SCENE_ENTRY_VIEW,
   frameSceneEntry,
+  frameScenePose,
 } from '@/lib/scene-framing'
 
 let passed = 0
@@ -123,19 +125,44 @@ if (!desktop) {
   check('hay destino en 1440×810', false)
 } else {
   check(
-    'el centro cae en (1018, 428)',
-    Math.abs(desktop.centerXPx - 1018) < 1.5 && Math.abs(desktop.centerYPx - 428) < 1.5,
+    'el centro cae en (940, 417)',
+    Math.abs(desktop.centerXPx - 940) < 1.5 && Math.abs(desktop.centerYPx - 417) < 1.5,
     `(${desktop.centerXPx.toFixed(0)}, ${desktop.centerYPx.toFixed(0)})`
   )
   check(
-    'la tinta mide 451 × 313 px — un 14% más chica que con la calibrada',
-    Math.abs(desktop.inkWidthPx - 451) < 2 && Math.abs(desktop.inkHeightPx - 313) < 2,
+    'la tinta mide 445 × 310 px — un 15% más chica que con la calibrada',
+    Math.abs(desktop.inkWidthPx - 445) < 2 && Math.abs(desktop.inkHeightPx - 310) < 2,
     `${desktop.inkWidthPx.toFixed(0)} × ${desktop.inkHeightPx.toFixed(0)}px, contra 523 × 364`
   )
+
+  /**
+   * ⚠️ **ESTA AFIRMACIÓN DEJÓ DE SER UN UMBRAL Y PASÓ A SER UNA PROPIEDAD
+   * (V3-E).** Decía `> 0.7` del ancho, y con `frameX: 0,68` daba 70,7%: era el
+   * literal de una pose, no la propiedad que el nombre promete. V3-E movió
+   * `frameX` a **0,5** —el eje óptico apuntaba 12,834° AFUERA de la caja del
+   * logo y lo que se perdía era la sala, no el logo— y el porcentaje bajó a
+   * 65,3%. Bajar el umbral a 0,6 habría sido aflojarlo.
+   *
+   * Lo que se afirma ahora es lo que la comprobación siempre quiso decir, y se
+   * deriva de la MISMA función con el contrafactual: **con `frameX: 0` el
+   * destino cae en el centro geométrico, y con la pose viva cae a la derecha de
+   * ése.** Sirve para cualquier `frameX > 0` y se rompe si alguien lo pone en 0
+   * o negativo, que es exactamente el defecto que hay que ver.
+   */
+  const centrado = frameScenePose({ ...SCENE_ENTRY_POSE, frameX: 0 }, 1440, 810)
   check(
     'el logo NO cae centrado: la composición lo manda a la derecha',
-    desktop.centerXPx / 1440 > 0.7,
-    `${((100 * desktop.centerXPx) / 1440).toFixed(1)}% del ancho`
+    centrado !== null &&
+      Math.abs(centrado.centerXPx - 720) < 0.5 &&
+      desktop.centerXPx > centrado.centerXPx,
+    `${((100 * desktop.centerXPx) / 1440).toFixed(1)}% del ancho, contra ${centrado === null ? '?' : ((100 * centrado.centerXPx) / 1440).toFixed(1)}% con \`frameX: 0\``
+  )
+  check(
+    'control positivo — el contrafactual NO se compara consigo mismo: con `frameX: 0` el destino ES el centro',
+    centrado !== null && Math.abs(desktop.centerXPx - centrado.centerXPx) > 100,
+    centrado === null
+      ? 'no hay contrafactual'
+      : `${(desktop.centerXPx - centrado.centerXPx).toFixed(1)} px de corrimiento — si diera cero, la afirmación de arriba sería una comparación de un número contra sí mismo`
   )
   check('en desktop el clamp no hace falta', desktop.widthClamp === 1)
 }
@@ -238,48 +265,7 @@ check('ancho 0 devuelve null', frameSceneEntry(0, 800) === null)
 check('alto 0 devuelve null', frameSceneEntry(1440, 0) === null)
 check('negativo devuelve null', frameSceneEntry(-1440, -810) === null)
 
-// ── 6 · Control negativo ────────────────────────────────────────────────────
-
-section('6 · Control negativo: la proyección no es la aproximación lineal')
-
-/**
- * La aproximación que S8 usaba —`frameX × travel / halfWidth`— ignora que el
- * `lookAt` con el target corrido ROTA la cámara. Si algún día alguien la
- * "simplifica" así, el logo aterriza en otro lado.
- *
- * ⚠️ **S9 tuvo que cambiarle la métrica a este control.** Con la pose vieja el
- * error se repartía 5 px en X y 61 px en Y; con la de S9 —`frameX` 0,68 en vez
- * de 0,90 y una elevación de 18,6° en vez de 31,0°— la componente HORIZONTAL
- * cae a 0,9 px y deja de discriminar. La vertical sigue en 23 px, así que el
- * control se mide sobre el desplazamiento total y no sobre uno de sus ejes:
- * es el mismo control, medido donde todavía tiene señal.
- */
-if (desktop) {
-  // ⚠ SITIO-S12: esta era la QUINTA escritura de `travelX` (§7.44), con `35` y
-  // `0.88` a mano. Ahora consume `recorridoDeEncuadre` y los dos tokens de
-  // `probeScene`, y el número NO se mueve: a 1440×810 el argumento es positivo
-  // (halfW 11,238 contra m/2 3,432), así que `abs` y `max(0, ·)` dan el mismo bit.
-  const TAN = Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180)
-  const eye = Math.hypot(SCENE_ENTRY_POSE.distance, SCENE_ENTRY_POSE.height)
-  const halfW = TAN * eye * (1440 / 810)
-  const travelX = recorridoDeEncuadre(halfW, SCENE_LOGO_MESH_WORLD.width)
-  const approxX = (0.5 + (SCENE_ENTRY_POSE.frameX * travelX) / halfW / 2) * 1440
-  // La aproximación lineal no mueve el centro en Y: se queda en el medio de la
-  // pantalla. La proyección real sí, y por eso el error total es sobre todo
-  // vertical.
-  const error = Math.hypot(desktop.centerXPx - approxX, desktop.centerYPx - 405)
-  check(
-    'la proyección real NO coincide con la aproximación lineal',
-    error > 15,
-    `${error.toFixed(1)}px de error total · ${Math.abs(desktop.centerXPx - approxX).toFixed(1)} en X, ${Math.abs(desktop.centerYPx - 405).toFixed(1)} en Y`
-  )
-  check(
-    'y el grueso del error es el corrimiento vertical que la aproximación no ve',
-    Math.abs(desktop.centerYPx - 405) > 20,
-    `real y = ${desktop.centerYPx.toFixed(0)} · centro de pantalla 405`
-  )
-}
-
+afirmarElControlNegativo({ check, section }, desktop)
 
 afirmarLaDeudaDeTravelX({ check, section })
 

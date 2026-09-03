@@ -209,12 +209,10 @@ export const TINTA_CONTRA_TINTA = razonDeContraste(TINTA_HEX, TINTA_HEX)
  * `s10-logo-columna.ts` estrenó para el §9 de `s10-logo`: **por tema, y sin
  * compartir una constante con lo que queda del otro lado.**
  *
- * ⚠️ **LA DECISIÓN YA ESTÁ TOMADA: la salida (c)** —sacarle la cuantización al
- * ancla, sin tocar poses ni `secciones.ts`—. El porqué completo, con los dos
- * valores alcanzables y la ventana, vive en el docblock de `TRAMOS_ANCLADOS`
- * (`anclaje.ts`). Acá queda su MEDICIÓN, corriendo: el día que el sprint
- * siguiente construya el ancla libre, «ninguno cae adentro» se pone en rojo y
- * **ése es el aviso de que ya se puede re-anclar**.
+ * ⚠️ **V3-E CONSTRUYÓ LA SALIDA (c) y esta sección cambió de pregunta:** ya no
+ * pregunta «¿se puede llegar?» sino «¿se llegó, y sigue haciendo falta la perilla?».
+ * La enumeración del reparto sigue dando DOS valores, los dos afuera; el ancla
+ * DECLARADA cae adentro. Si alguien la borrara, la segunda mitad se pone en rojo.
  */
 export function afirmarLaVentanaDelDiferencial(): void {
   titulo('4 · 🔴 LA VENTANA DEL DIFERENCIAL — cobertura y contraste juntos, y el espacio de anclajes')
@@ -275,26 +273,28 @@ export function afirmarLaVentanaDelDiferencial(): void {
   afirmarIgual(
     anclas.map((a) => Number(a.toFixed(6))),
     [0.75, 0.916667],
-    'EL ANCLA DEL DIFERENCIAL ESTÁ CUANTIZADA: `TRAMOS_ANCLADOS` sólo puede producir DOS valores',
+    'EL REPARTO SOLO SIGUE CUANTIZANDO: sin la perilla del ancla, `TRAMOS_ANCLADOS` produce DOS valores y nada más',
   )
   afirmar(
     anclas.every((a) => a < ventana.desde || a > ventana.hasta),
-    '🔴 Y NINGUNO DE LOS DOS CAE ADENTRO DE LA VENTANA — por eso el diferencial NO se re-ancla',
-    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}]` +
-      ` · el de hoy queda ${(ventana.desde - anclas[0]).toFixed(4)} corto y el otro se pasa ${(anclas[anclas.length - 1] - ventana.hasta).toFixed(4)}`,
+    '  y NINGUNO DE LOS DOS CAE ADENTRO DE LA VENTANA — por eso hubo que descuantizar',
+    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}] · el heredado queda ${(ventana.desde - anclas[0]).toFixed(4)} corto y el otro se pasa ${(anclas[anclas.length - 1] - ventana.hasta).toFixed(4)}`,
   )
-  const supHoy = CAJAS_DEL_DIFERENCIAL.map((c) => superposicionMinima(c, anclas[0]))
+  const declarada = TRAMOS_ANCLADOS.find((t) => t.ancla !== undefined)?.ancla ?? Number.NaN
+  afirmar(
+    declarada > ventana.desde && declarada < ventana.hasta,
+    '✅ Y EL ANCLA DECLARADA SÍ CAE ADENTRO — la salida (c), construida en V3-E',
+    `p=${declarada.toFixed(4)}: +${(declarada - ventana.desde).toFixed(4)} del borde de abajo y −${(ventana.hasta - declarada).toFixed(4)} del cruce de AA`,
+  )
+  const [supEnElAncla, supHoy] = [declarada, anclas[0]].map((p) => CAJAS_DEL_DIFERENCIAL.map((c) => superposicionMinima(c, p)))
+  afirmar(
+    supEnElAncla.every((s) => s === 0),
+    '  y ahí la superposición mínima del titular es CERO en los cuatro cuadros: el defecto 7, cerrado con el número',
+    `${supEnElAncla.map((s) => `${(100 * s).toFixed(1)}%`).join(' · ')} contra ${(100 * Math.min(...supHoy)).toFixed(1)}%–${(100 * Math.max(...supHoy)).toFixed(1)}% en el ancla heredada (${anclas[0].toFixed(4)}), donde el contraste es ${TINTA_CONTRA_TINTA.toFixed(2)}:1`,
+  )
   console.log(
-    '  LAS TRES SALIDAS, CON SU NÚMERO — y la decisión del dueño del proyecto al lado:\n' +
-      `   (a) dejarlo en ${anclas[0].toFixed(4)} — el titular se superpone con el logo entre ` +
-      `${(100 * Math.min(...supHoy)).toFixed(1)}% y ${(100 * Math.max(...supHoy)).toFixed(1)}% según el cuadro, y ahí el contraste\n` +
-      `       es ${TINTA_CONTRA_TINTA.toFixed(2)}:1. Es el defecto 7 tal como está. DESCARTADA.\n` +
-      `   (b) moverlo a ${anclas[anclas.length - 1].toFixed(4)} (\`cierre\` sobre tu-panel + por-que-develop) — el titular queda limpio en los cuatro\n` +
-      `       cuadros y el fondo cae a ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1: pone \`s8-tinta\` §5 en ROJO. Además la pose \`demos\`\n` +
-      '       deja de verse nunca. DESCARTADA.\n' +
-      '   (c) hacer que exista un ancla ADENTRO de la ventana. ✅ **ELEGIDA**, y en la forma que NO toca\n' +
-      '       ninguna pose ni `secciones.ts`: que el ancla deje de estar cuantizada a un borde de tramo —\n' +
-      '       que el reparto pueda declarar dónde ADENTRO de su tramo ancla una sección. Cae entera en\n' +
-      '       `anclaje.ts`, o sea en la zona de este lane, y es el SPRINT SIGUIENTE. Ver su docblock.',
+    '  LAS TRES SALIDAS QUE V3-B MIDIÓ: (a) dejarlo en el ancla heredada — es el defecto 7, DESCARTADA; (b) moverlo al otro\n' +
+      `   valor del reparto (${anclas[anclas.length - 1].toFixed(4)}) — el fondo cae a ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1 y pone \`s8-tinta\` §5 en ROJO, DESCARTADA;\n` +
+      '   (c) que exista un ancla ADENTRO de la ventana. ✅ CONSTRUIDA en V3-E — ver `anclaje.ts`.',
   )
 }

@@ -49,8 +49,8 @@ import { leerAvancesDe } from '../../__tests__/s10-woff2'
 import { aCuadroAlto, aCuadroX } from './s10-logo-cajas'
 import { VENTANAS, barridoVertical, cajaDelLogo, mayorCaja, muestra } from './s10-logo-lectura'
 
-/** El progreso donde el diferencial llena el cuadro. Es el que §4 mide. */
-export const PROGRESO_DEL_DIFERENCIAL = 0.75
+/** El progreso de la pose `demos`. ⚠️ V3-E: el diferencial ya NO llena el cuadro ahí —declara su ancla en 0,8525— y §9 sigue midiendo la palanca de LAYOUT contra ESTE caso a propósito, que es el que §7.43 preguntaba; la palanca que sí lo cerró fue el ANCLA, y la mide `s16-anclaje` §4. */
+export const PROGRESO_DE_LA_POSE_DEMOS = 0.75
 const ID = 'por-que-develop'
 
 /** La caja de referencia: la mayor del diferencial, leída a 1025. */
@@ -78,7 +78,7 @@ export interface HuecoLibre {
 
 export function huecosLibres(): HuecoLibre[] {
   return VENTANAS.map((v) => {
-    const caja = cajaDelLogo(muestra(PROGRESO_DEL_DIFERENCIAL, v.aspecto))
+    const caja = cajaDelLogo(muestra(PROGRESO_DE_LA_POSE_DEMOS, v.aspecto))
     if (caja === null) throw new Error(`sin caja de logo en ${v.etiqueta}`)
     return {
       cuadro: v.etiqueta,
@@ -117,7 +117,7 @@ export function minimaDeColumna(izquierdaPx: number, anchoPx: number, indiceDeVe
   const lineas = lineasDeTexto(AVANCES, BASE.texto, anchoPx, BASE.tamanoPx, BASE.interletradoEm)
   const alto = aCuadroAlto(lineas * BASE.tamanoPx * BASE.interlineado, v.alto)
   const b = barridoVertical(
-    muestra(PROGRESO_DEL_DIFERENCIAL, v.aspecto),
+    muestra(PROGRESO_DE_LA_POSE_DEMOS, v.aspecto),
     aCuadroX(izquierdaPx, v.ancho),
     aCuadroX(izquierdaPx + anchoPx, v.ancho),
     alto,
@@ -230,10 +230,12 @@ export function tablaDeHuecos(): string[] {
 /**
  * §9 DEL INVARIANTE DEL LOGO — el barrido, con su control y su guardián.
  *
- * ⚠ **La afirmación central está en verde y afirma un HECHO ROJO**, que es la
- * forma que este repo ya usa para una decisión que todavía no se tomó (§7.42, el
- * recorte del Hero): el día que alguien cierre el defecto 7, `MEJOR.peor > 0`
- * se pone en rojo y ahí hay que escribir con qué palanca se cerró.
+ * ⚠ **SU PROMESA VENCIÓ EN V3-E.** Prometía ponerse en rojo «el día que alguien
+ * cierre el defecto 7». El defecto SE CERRÓ —con el ancla, no con layout— y esto
+ * sigue en verde: mide sobre la pose `demos` a progreso FIJO, y ahí el logo
+ * sigue tapando la columna. Lo que afirma hoy es la propiedad que descartó la
+ * palanca de layout —**sobre esa pose ninguna banda lleva la superposición a
+ * cero**—, reserva si el ancla se mueve. El guardián del defecto 7 vive en §4 y §8.
  */
 export function afirmarLaPalancaDeLayout(): void {
   titulo('9 · LA PALANCA DE LAYOUT DE §7.43, MEDIDA — y NO alcanza')
@@ -241,18 +243,16 @@ export function afirmarLaPalancaDeLayout(): void {
   /**
    * ⚠ **SITIO-S12 FUE A EJECUTAR LA DECISIÓN DE §7.43 Y LA MEDICIÓN LA
    * CONTRADIJO.** La decisión era de LAYOUT —acotar la columna del diferencial a
-   * la izquierda— y su confirmación, según la propia instrucción, era que la
-   * superposición del §4 **cayera a 0 en los cuatro cuadros**. Esta sección es esa
-   * confirmación, corrida ANTES de tocar el producto, y da que no cae.
-   *
-   * El barrido es exhaustivo sobre las dos únicas variables que el layout puede
-   * mover —dónde empieza la columna y cuánto mide— así que el resultado no es «no
-   * encontré una»: es que **no existe**, sobre la rejilla probada, con la causa
-   * geométrica publicada al lado.
+   * la izquierda— y su confirmación era que la superposición del §4 **cayera a 0
+   * en los cuatro cuadros**. Esta sección es esa confirmación, corrida ANTES de
+   * tocar el producto, y da que no cae. El barrido es exhaustivo sobre las dos
+   * únicas variables que el layout puede mover —dónde empieza la columna y
+   * cuánto mide— así que el resultado no es «no encontré una»: es que **no
+   * existe**, con la causa geométrica publicada al lado.
    */
   console.log('  EL HUECO LIBRE DE LOGO, que es la cota dura de la palanca:')
   for (const linea of tablaDeHuecos()) console.log(linea)
-  console.log('  LAS FORMAS DE LA COLUMNA que la `Grilla` puede emitir, y que este instrumento lee solas:')
+  console.log('  LAS FORMAS DE LA COLUMNA que la `Grilla` emite, leídas por el instrumento:')
   for (const linea of tablaDeCandidatos()) console.log(linea)
 
   const BANDAS = barridoDeBandas()

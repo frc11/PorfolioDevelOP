@@ -134,6 +134,33 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
 ]
 
+/**
+ * LO QUE ESTÁ EN DISCO Y NO FORMA PARTE DEL LANE — declarado, con su razón.
+ *
+ * ⚠ **Los tres PNG de `trabajos/` NO se registran y NO se commitean.** V3-D los
+ * dejó al lado del componente y V3-E los había registrado; el dueño del proyecto
+ * lo revirtió: son los originales de 1920×1080 de las capturas, **nadie los
+ * consume** —`contenido.ts` nombra las `.webp` de `public/capturas/`, 284 KiB
+ * servidos— y pesan **3,83 MiB inertes** que no llegan al navegador. Quedan en
+ * disco hasta que el dueño los borre, y esta lista es lo que hace que el padrón
+ * cierre mientras tanto SIN registrarlos como parte del lane.
+ *
+ * La comprobación de que la razón sigue valiendo —que ningún archivo del lane
+ * los nombra— vive en `s5-originales.ts`, y sobrevive a que se borren.
+ */
+export const FUERA_DEL_LANE: readonly string[] = [
+  `${RAIZ_DE_SECCIONES}/trabajos/banu.png`,
+  `${RAIZ_DE_SECCIONES}/trabajos/esquina.png`,
+  `${RAIZ_DE_SECCIONES}/trabajos/garage.png`,
+]
+
+/** Las capturas SERVIDAS, una por original. Viven en `public/`, no en el lane. */
+export const CAPTURAS_SERVIDAS = [
+  'public/capturas/banu.webp',
+  'public/capturas/esquina.webp',
+  'public/capturas/el-garage.webp',
+]
+
 /** Todo lo que este sprint escribe adentro de sus cuatro carpetas. */
 export const ARCHIVOS_DEL_LANE = [
   ...ARCHIVOS_DE_COMPONENTE,
@@ -143,6 +170,14 @@ export const ARCHIVOS_DEL_LANE = [
   ...ARCHIVOS_DE_APOYO,
   ...ARCHIVOS_DE_RUTA,
 ]
+
+/**
+ * El padrón sin los binarios: lo que se puede leer como texto.
+ *
+ * Se deriva por extensión y no se declara aparte, para que un archivo nuevo del
+ * lane entre solo en las comprobaciones que miden código.
+ */
+export const ARCHIVOS_DE_CODIGO = ARCHIVOS_DEL_LANE.filter((a) => !/\.(png|jpe?g|webp|avif|mp4|woff2?)$/i.test(a))
 
 /**
  * Lo que se escanea buscando valores fuera de los tokens y cifras inventadas:
@@ -178,6 +213,15 @@ export function leer(relativo: string): string {
   return readFileSync(path.join(RAIZ, relativo), 'utf8')
 }
 
+/** El peso en bytes de un archivo. −1 si no está, para que se vea. */
+export function pesoDe(relativo: string): number {
+  try {
+    return statSync(path.join(RAIZ, relativo)).size
+  } catch {
+    return -1
+  }
+}
+
 export function existe(relativo: string): boolean {
   try {
     statSync(path.join(RAIZ, relativo))
@@ -210,10 +254,16 @@ export function recorrerElLane(): string[] {
   return encontrados.sort()
 }
 
-/** Lo que está en disco y no en el padrón: alguien escribió de más. */
+/**
+ * Lo que está en disco y no en el padrón: alguien escribió de más.
+ *
+ * Lo declarado en `FUERA_DEL_LANE` no cuenta: está en disco a sabiendas, con su
+ * razón escrita arriba, y no es del lane.
+ */
 export function archivosSinRegistrar(): string[] {
   const declarados = new Set(ARCHIVOS_DEL_LANE)
-  return recorrerElLane().filter((archivo) => !declarados.has(archivo))
+  const excluidos = new Set(FUERA_DEL_LANE)
+  return recorrerElLane().filter((archivo) => !declarados.has(archivo) && !excluidos.has(archivo))
 }
 
 /** Lo que está en el padrón y no en disco: alguien no entregó. */

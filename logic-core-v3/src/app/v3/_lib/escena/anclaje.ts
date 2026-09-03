@@ -49,11 +49,12 @@
  *
  * **Lo que (ii) cuesta, y se declara:** la línea de la instrucción *"cada
  * sección llena el cuadro en el progreso de su ancla"* es literal para **tres**
- * de las seis —Hero (0,000), Por qué develOP (0,750) y Cierre (1,000), que son
- * las tres que ARRIBAN sobre su pose— y para las otras tres la pose es la de
- * **salida**: Quiénes somos, Números y Trabajos entran sobre la pose de la
- * anterior y llegan a la suya al entregar el cuadro. Las tres que arriban son
- * las que la medición de tinta necesita, incluida la única que decide §7.29.
+ * de las seis —Hero (0,000), Por qué develOP y Cierre (1,000), que son las tres
+ * que ARRIBAN sobre su ancla— y para las otras tres la pose es la de **salida**:
+ * Quiénes somos, Números y Trabajos entran sobre la pose de la anterior y llegan
+ * a la suya al entregar el cuadro. Las tres que arriban son las que la medición
+ * de tinta necesita, incluida la única que decide §7.29. ⚠️ Desde V3-E el ancla
+ * del diferencial es **declarada** (0,8525) y ya no coincide con la pose `demos`.
  *
  * ── LA REASIGNACIÓN DE `demos`, escrita para que no se lea como accidente ──
  *
@@ -66,10 +67,11 @@
  *
  * No es una conveniencia de contraste, aunque también lo resuelva: el tramo
  * `demos` corre escondido detrás de Servicios y Tu panel, y **la pose con la que
- * ese tramo cierra es la pose con la que el diferencial ENTRA**. Por eso la
- * reasignación se declara acá como dato, con un guardián que exige que el
- * keyframe exista, que no sea el de ninguna sección, y que caiga en un borde de
- * la ventana de progreso de la sección que lo recibe.
+ * ese tramo cierra es la pose con la que el diferencial ASOMA** — desde V3-E el
+ * cierre pasó a caer ADENTRO de Tu panel y el ancla se declara más tarde. Por eso
+ * la reasignación se declara acá como dato, con un guardián que exige que el
+ * keyframe exista, que no sea el de ninguna sección, y que su progreso caiga en
+ * la ventana de ENTRADA de la sección que lo recibe: entre que asoma y que llena.
  *
  * ── LA CUENTA QUE CIERRA SOLA ──────────────────────────────────────────────
  *
@@ -140,39 +142,44 @@ export type {
  *   llena el cuadro exactamente en el final del scroll. Un tramo sobre ella
  *   sería un tramo de ancho cero, y el guardián 3 de la derivación lo rechaza.
  *
- * ── ⚠️ V3-B · EL ANCLA DEL DIFERENCIAL ESTÁ CUANTIZADA, Y ESO ES LO QUE HAY QUE
- *    SACAR — decisión tomada, construcción para el sprint siguiente ──────────
+ * ── ⚠️ V3-E · EL ANCLA DEL DIFERENCIAL YA NO ESTÁ CUANTIZADA: SE DECLARA ─────
  *
- * V3-B fue a re-anclar el diferencial (defecto 7 de §7.46: el logo tapa el
- * titular y ahí el contraste es 1,00:1 **por construcción**, porque la tinta del
- * texto y la del logo son el mismo negro) y midió las dos cosas juntas —cuánto
- * cuadro cubre el logo y cuánto da el contraste del fondo— sobre todo el rango.
- * `s13b-escena.invariant.ts` §4 publica la tabla. El resultado:
+ * V3-B midió el defecto 7 de §7.46 —en `por-que-develop` el logo tapa el titular
+ * y ahí el contraste es 1,00:1 **por construcción**, porque la tinta del texto y
+ * la del logo son el mismo negro— y publicó las dos mitades juntas en
+ * `s13b-escena.invariant.ts` §4: **la ventana existe, p = [0,8232 · 0,8782]**
+ * —desde donde el titular puede quedar limpio en los cuatro cuadros hasta donde
+ * el peor píxel del fondo deja de llegar a AA— **y con este array solo no se
+ * llegaba**: enumerados los 28 repartos posibles, el ancla sólo podía tomar
+ * **0,7500 y 0,9167**. Estaba cuantizada porque una sección llena el cuadro en
+ * `progresoDePantalla(su desdePantalla)`, y ese progreso cae en un NUDO —el `to`
+ * de un tramo, múltiplo exacto de 1/8— siempre que la sección sea la primera de
+ * su grupo. Esa enumeración **sigue corriendo y sigue dando dos valores**: no se
+ * aflojó nada, se le agregó una perilla que el reparto no tenía.
  *
- *   · **La ventana existe: p = [0,8232 · 0,8782].** Desde donde el titular puede
- *     quedar limpio en los cuatro cuadros, hasta donde el peor píxel del fondo
- *     deja de llegar a AA. Es ancha —0,055 de progreso— y es real.
- *   · **Y no se puede llegar.** El invariante enumera el espacio ENTERO de este
- *     array —28 particiones posibles, 12 derivan, el resto lo rechaza un
- *     guardián— y el ancla del diferencial sólo puede tomar **DOS valores:
- *     0,7500 y 0,9167**. El de hoy queda 0,0732 corto; el otro se pasa 0,0385 y
- *     además pone `s8-tinta` §5 en rojo (3,24:1 contra AA 4,5:1).
+ * ✅ **LA SALIDA (c), CONSTRUIDA: el ancla se DECLARA.** Un tramo puede decir
+ * dónde ADENTRO de él ancla su primera sección (`ancla`, en `TramoAnclado`) y la
+ * derivación corre la PANTALLA en la que cierra el tramo anterior hasta que la
+ * recta pase por ahí — `cierreCorridoPorElAncla`. No toca una pose, no toca
+ * `secciones.ts` y no agrega un nudo: los siete siguen siendo el origen más un
+ * borde por tramo, y sus siete progresos siguen siendo los de la coreografía.
  *
- * **Por qué está cuantizada, que es el punto:** una sección llena el cuadro en
- * `progresoDePantalla(su desdePantalla)`, y ese progreso cae en un NUDO —o sea
- * en el `to` de un tramo, un múltiplo exacto de 1/8— siempre que la sección sea
- * la primera de su grupo. Los únicos valores libres salen de interpolar ADENTRO
- * de un segmento, y el reparto sólo ofrece uno.
+ * **El valor: 0,8525**, con las cuatro cifras que lo eligen (`s16-anclaje` §5):
+ * queda **+0,0293** arriba del borde de abajo y **−0,0257** abajo del cruce de
+ * AA; el borde de abajo es un **escalón** cuyo próximo peldaño está en 0,8509 —el
+ * que aparece si el titular crece un 7%—, así que el ancla se pone arriba de ese
+ * peldaño y la superposición no vuelve por una recomposición tipográfica; el
+ * contraste ahí da **4,98:1**, 10,7% arriba de AA, contra 4,59:1 (1,9%) en
+ * 0,8750, o sea que comprar más margen de superposición cuesta contraste rápido;
+ * y **vuelve exacta del mapeo**: `progresoDePantalla(12) === 0,8525` al bit.
  *
- * ⚠️ **LA SALIDA ELEGIDA POR EL DUEÑO DEL PROYECTO: sacar la cuantización, sin
- * tocar una pose y sin tocar `secciones.ts`.** De las tres que V3-B midió —(a)
- * dejarlo en 0,7500 con la superposición; (b) moverlo a 0,9167 y perder el
- * contraste y la pose `demos`; (c) hacer que exista un ancla adentro de la
- * ventana— se elige la **(c)**, y en la forma que cae entera adentro de este
- * archivo: que el reparto pueda declarar **dónde ADENTRO de su tramo** ancla una
- * sección, en vez de heredar siempre el borde. **Es el sprint siguiente.** V3-B
- * lo deja medido y no lo construye porque la instrucción decía «si no existe, no
- * lo arregles» y éste es un tercer caso que no preveía.
+ * ⚠️ **LO QUE CUESTA, declarado (regla 12):** el ancla de `tu-panel` se corre de
+ * 0,7000 a 0,7121 (+0,0121). Es inevitable con siete nudos —si el nudo que lleva
+ * el progreso 0,750 se queda en la pantalla 12, el ancla del diferencial ES 0,750;
+ * si se corre, el segmento que lo precede cambia de ritmo— y `tu-panel` es
+ * `papel-opaco`: el tramo `demos` corre escondido detrás de él y su ancla no se
+ * ve. La forma que NO lo movería pide un nudo por sección (ocho nudos), y eso
+ * rompe `RITMO_POR_SEGMENTO` en `recorrido.ts`, que asume uno por tramo.
  */
 export const TRAMOS_ANCLADOS: readonly TramoAnclado[] = [
   { tramo: 'hero', secciones: ['hero'] },
@@ -180,7 +187,7 @@ export const TRAMOS_ANCLADOS: readonly TramoAnclado[] = [
   { tramo: 'números', secciones: ['numeros'] },
   { tramo: 'trabajos', secciones: ['trabajos'] },
   { tramo: 'demos', secciones: ['servicios', 'tu-panel'] },
-  { tramo: 'cierre', secciones: ['por-que-develop'] },
+  { tramo: 'cierre', secciones: ['por-que-develop'], ancla: 0.8525 },
 ]
 
 export type Reasignacion = {
@@ -204,8 +211,11 @@ export const REASIGNACIONES: readonly Reasignacion[] = [
       'sol en contraluz a gamma 155-166°— y es la unica compuesta para mirarse sin texto encima. ' +
       'El diferencial es la segunda de las dos secciones que dejan ver la sala y la que argumenta ' +
       'por que develOP: la pose que le faltaba es esa. El tramo demos corre escondido detras de ' +
-      'Servicios y Tu panel, asi que la pose con la que ese tramo CIERRA es la pose con la que el ' +
-      'diferencial ENTRA.',
+      'Servicios y Tu panel, y desde V3-E cierra ADENTRO de Tu panel: la pose con la que ese tramo ' +
+      'CIERRA es la pose con la que el diferencial ASOMA, y para cuando llena el cuadro —en el ancla ' +
+      'declarada— la camara ya se alejo lo suficiente para que el titular quede limpio. Antes de la ' +
+      'descuantizacion el diferencial LLENABA el cuadro sobre esa pose, y ahi el titular se superponia ' +
+      'con el logo entre 7,1% y 15,1% segun el cuadro: era el defecto 7.',
   },
 ]
 
@@ -240,8 +250,8 @@ export function keyframeEn(progreso: number): string | null {
  * coincidían *mientras* todo lo que sumara alto fuera una de las ocho. Sacar el
  * pie de la `<section id="cierre">` —el defecto 6, frenado por esto— le suma
  * **485 px a 1440 y 746 px a 375** por fuera de la tabla, y con eso el progreso
- * que vale **0,750** donde el diferencial llena el cuadro pasaba a **0,7201 y
- * 0,6906**: movía el anclaje de SITIO-S9 sin tocar una línea del anclaje.
+ * que entonces valía **0,750** donde el diferencial llena el cuadro pasaba a
+ * **0,7201 y 0,6906**: movía el anclaje de SITIO-S9 sin tocar una línea de él.
  *
  * Ahora entra **la extensión de las secciones**: dónde empieza la primera y
  * dónde termina la última, en coordenadas del documento. Con eso el defecto 6 se

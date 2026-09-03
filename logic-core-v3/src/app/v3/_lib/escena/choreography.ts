@@ -90,10 +90,10 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  * ── Lo que este recorrido le entrega al preloader ──────────────────────────
  *
  * `scene-framing.ts` proyecta **el primer keyframe** para saber a qué tamaño y
- * en qué lugar tiene que aterrizar el logo del preloader. Mover la pose del
- * hero mueve ese destino: hoy da **451 × 313 px** en una ventana de 1440×810 y
- * una elevación de entrada de **18,6°**. No se hardcodea en ningún lado, pero
- * tampoco es gratis — ver `scene-framing.invariant.ts`.
+ * en qué lugar tiene que aterrizar el logo del preloader. Mover la pose del hero
+ * mueve ese destino: hoy da **445 × 310 px** en 1440×810 y una elevación de
+ * **18,6°** — V3-E movió `frameX` y corrió el destino 78,7 px; la elevación no
+ * la toca. Ver `scene-framing.invariant.ts`.
  */
 
 // ── Los tramos ──────────────────────────────────────────────────────────────
@@ -150,28 +150,28 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   // "Reposo. Solo vira e inercia del mouse. Es el punto de llegada del
   // preloader: la cámara no se mueve apenas entrás."
   {
-    // Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado.
+    // Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado. **Esta
+    // pose es el destino del preloader**: `scene-framing.ts` la proyecta para saber
+    // dónde y de qué tamaño aterriza el logo 2D — 445 px de ancho de tinta en
+    // 1440×810, contra los 523 que daba la calibrada, un 15% más chico.
     //
-    // **Esta pose es el destino del preloader.** `scene-framing.ts` la proyecta
-    // para saber dónde y de qué tamaño aterriza el logo 2D, así que moverla mueve
-    // el final de la secuencia de entrada. Da 451 px de ancho de tinta en
-    // 1440×810, contra los 523 que daba la calibrada — un 14% más chico, aprobado
-    // a cambio del aire de sala.
+    // ⚠️ **V3-E bajó `frameX` de 0,68 a 0,5, y la premisa —«el logo queda
+    // cortado»— está REFUTADA:** con 0,68 entraba ENTERO en los siete cuadros. Lo
+    // que fallaba era la puntería: el eje óptico caía 0,0953 AFUERA de su caja y el
+    // margen derecho, 0,1317 del ancho, era el más chico de los cuatro. Con 0,5 el eje
+    // entra y ese margen ya no es el más chico. Lo mide `s16-encuadre.invariant.ts`.
     //
-    // La distancia es de la arquitectónica (su hero está en 20 y da el mismo 57%
-    // de caja); la altura es compuesta, porque la tabla del sprint pide que el
-    // tramo siguiente BAJE y 6,40 es lo que deja los 10,0 de caída sin gastar el
-    // techo del rango, que Números necesita entero. El azimut 0 vive en la cuña
-    // frontal libre: es el único sector donde la cámara puede irse lejos sin que
-    // un plano suspendido se le meta delante.
+    // La distancia es de la arquitectónica (su hero está en 20 y da el mismo 57% de
+    // caja); 6,40 de altura deja los 10,0 de caída del tramo siguiente sin gastar el
+    // techo del rango, que Números necesita entero; y el azimut 0 vive en la cuña
+    // frontal libre, donde la cámara puede irse lejos sin un plano por delante.
     //
-    // ⚠️ **Perilla de reserva, NO aplicada:** la elevación de entrada quedó en
-    // 18,6° contra los 31,0° de la calibrada, y eso es lo que el preloader usa
-    // para rotar su mesh al aterrizar. Subir la altura de 6,40 a ~7,50 la lleva a
-    // 23,2° y cuesta 1,1 de caída en el tramo siguiente. Se juzga por grabación.
+    // ⚠️ **Perilla de reserva, NO aplicada:** la elevación de entrada —18,6°, contra
+    // 31,0° de la calibrada— es la que el preloader usa para rotar su mesh; subir la
+    // altura a ~7,50 la lleva a 23,2° y cuesta 1,1 de caída. Se juzga por grabación.
     at: 0,
     name: 'hero',
-    pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.68, frameY: 0 },
+    pose: { angleDeg: 0, height: 6.4, distance: 19, frameX: 0.5, frameY: 0 },
   },
 
   // ── Tramo 2 · Quiénes somos (dos personas) ───────────────────────────────

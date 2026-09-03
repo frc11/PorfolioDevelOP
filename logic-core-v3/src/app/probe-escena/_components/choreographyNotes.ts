@@ -29,6 +29,17 @@ import type { ChoreoSection } from '@/app/v3/_lib/escena/choreographyTypes'
  * editaron: se fueron con él a `variantCalibradaNotes.ts`, que sigue armándose
  * con `choreographyNotesFrontal.ts` y `choreographyNotesGiro.ts` intactos.
  *
+ * ── Y en V3-E quedaron SIETE ───────────────────────────────────────────────
+ *
+ * V3-B sacó `hero · sostén` y no pudo tocar este archivo —su regla 4 se lo
+ * prohibía—, así que quedaron dos mentiras acá, las dos cerradas en V3-E: la
+ * **nota huérfana** de `CHOREO_NOTES`, que no indexa ningún keyframe y ponía en
+ * rojo a `s7-variantes.invariant.ts`; y el **censo de `CHOREO_ARRAY_DOC`**, que
+ * decía "ocho" y "dos son sostenes" contra siete y un sostén. El segundo no daba
+ * ningún rojo y era peor: el exportador emite ESTE texto, así que la mentira
+ * volvía al archivo en el próximo pegado. Lo custodia ahora el round-trip de
+ * `s7-export.invariant.ts`, byte por byte contra `choreography.ts`.
+ *
  * ── Cómo se indexa ─────────────────────────────────────────────────────────
  *
  * Por el `name` del keyframe, no por su posición. Un índice posicional se
@@ -49,15 +60,14 @@ import type { ChoreoSection } from '@/app/v3/_lib/escena/choreographyTypes'
  * peor que ninguno.
  */
 export const CHOREO_ARRAY_DOC: readonly string[] = [
-  '⚠️ El censo de arriba dice "8 capturados" porque el exportador llama así a',
-  'todo lo que viene del archivo. **Ninguna de estas ocho se capturó con el',
-  'editor**: seis son poses compuestas y dos son sostenes. Lo que sí es literal',
+  '⚠️ El censo de arriba dice "7 capturados" porque el exportador llama así a',
+  'todo lo que viene del archivo. **Ninguna de estas siete se capturó con el',
+  'editor**: seis son poses compuestas y una es un sostén. Lo que sí es literal',
   'es el "0 derivados" — este recorrido no tiene un solo keyframe de relleno.',
   '',
-  'Una pose por tramo, más dos sostenes: el hero se queda quieto su pantalla',
-  'entera (es el punto de llegada del preloader y la cámara no se mueve apenas',
-  'entrás) y el cierre se clava desde 0,950 porque ahí van "develOP" y el',
-  'slogan, y el texto sobre una cámara que todavía deriva se lee peor.',
+  'Una pose por tramo, más un sostén: el cierre se clava desde 0,950 porque ahí',
+  'van "develOP" y el slogan, y el texto sobre una cámara que todavía deriva se',
+  'lee peor. El hero **ya no** tiene el suyo — ver el aviso de la cabecera.',
   '',
   "Los cinco tramos que se mueven van `turn: 'literal'`: la vuelta se acumula",
   '130 + 55 + 10 + 115 + 50 = **360 exacto**. Con los ángulos de hoy `short`',
@@ -76,36 +86,25 @@ export type KeyframeNotes = Readonly<Record<string, readonly string[]>>
 
 export const CHOREO_NOTES: KeyframeNotes = {
   hero: [
-    'Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado.',
+    'Sin `ease`: es el primer keyframe, no se llega a él desde ningún lado. **Esta',
+    'pose es el destino del preloader**: `scene-framing.ts` la proyecta para saber',
+    'dónde y de qué tamaño aterriza el logo 2D — 445 px de ancho de tinta en',
+    '1440×810, contra los 523 que daba la calibrada, un 15% más chico.',
     '',
-    '**Esta pose es el destino del preloader.** `scene-framing.ts` la proyecta',
-    'para saber dónde y de qué tamaño aterriza el logo 2D, así que moverla mueve',
-    'el final de la secuencia de entrada. Da 451 px de ancho de tinta en',
-    '1440×810, contra los 523 que daba la calibrada — un 14% más chico, aprobado',
-    'a cambio del aire de sala.',
+    '⚠️ **V3-E bajó `frameX` de 0,68 a 0,5, y la premisa —«el logo queda',
+    'cortado»— está REFUTADA:** con 0,68 entraba ENTERO en los siete cuadros. Lo',
+    'que fallaba era la puntería: el eje óptico caía 0,0953 AFUERA de su caja y el',
+    'margen derecho, 0,1317 del ancho, era el más chico de los cuatro. Con 0,5 el eje',
+    'entra y ese margen ya no es el más chico. Lo mide `s16-encuadre.invariant.ts`.',
     '',
-    'La distancia es de la arquitectónica (su hero está en 20 y da el mismo 57%',
-    'de caja); la altura es compuesta, porque la tabla del sprint pide que el',
-    'tramo siguiente BAJE y 6,40 es lo que deja los 10,0 de caída sin gastar el',
-    'techo del rango, que Números necesita entero. El azimut 0 vive en la cuña',
-    'frontal libre: es el único sector donde la cámara puede irse lejos sin que',
-    'un plano suspendido se le meta delante.',
+    'La distancia es de la arquitectónica (su hero está en 20 y da el mismo 57% de',
+    'caja); 6,40 de altura deja los 10,0 de caída del tramo siguiente sin gastar el',
+    'techo del rango, que Números necesita entero; y el azimut 0 vive en la cuña',
+    'frontal libre, donde la cámara puede irse lejos sin un plano por delante.',
     '',
-    '⚠️ **Perilla de reserva, NO aplicada:** la elevación de entrada quedó en',
-    '18,6° contra los 31,0° de la calibrada, y eso es lo que el preloader usa',
-    'para rotar su mesh al aterrizar. Subir la altura de 6,40 a ~7,50 la lleva a',
-    '23,2° y cuesta 1,1 de caída en el tramo siguiente. Se juzga por grabación.',
-  ],
-
-  'hero · sostén': [
-    'El patrón de sostén: misma pose que el keyframe anterior, más adelante en el',
-    'recorrido. Es lo que hace literalmente verdadera la fila "Hero · 1 pantalla ·',
-    '0° → 0°": sin él, el primer segmento arrancaría a interpolar hacia los 130°',
-    'de Quiénes somos y la cámara ya estaría orbitando ~20° durante la pantalla',
-    'del hero.',
-    '',
-    'No es relleno: dos keyframes con la misma pose no amortiguan un tramo, lo',
-    'dejan quieto. La velocidad medida en todo el tramo es 0,0.',
+    '⚠️ **Perilla de reserva, NO aplicada:** la elevación de entrada —18,6°, contra',
+    '31,0° de la calibrada— es la que el preloader usa para rotar su mesh; subir la',
+    'altura a ~7,50 la lleva a 23,2° y cuesta 1,1 de caída. Se juzga por grabación.',
   ],
 
   'quiénes somos': [

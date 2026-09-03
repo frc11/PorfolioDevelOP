@@ -135,25 +135,73 @@ const sceneBokeh = scene.filter((m) => m.kind === 'bokeh').map((m) => m.sizePx)
  * 🔴 **La densidad y el tamaño del polvo YA NO coinciden con los de la escena, y
  * es el punto del sprint.** Lo que se comprueba en su lugar es más fuerte que la
  * igualdad que había: que la diferencia sea **exactamente la perilla y nada
- * más**. Si el polvo del intro fuera otra distribución —y no la misma corrida
- * por un factor— los tres cuantiles no se moverían por el mismo número.
+ * más**.
+ *
+ * ── ⚠️ CÓMO SE COMPRUEBA ESO, Y POR QUÉ CAMBIÓ EN V3-E ─────────────────────
+ *
+ * Se comprobaba comparando **tres cuantiles** del polvo del intro contra los del
+ * polvo de la escena y pidiendo que las tres razones dieran la perilla ±0,1.
+ * **Eso no era una identidad: era un estimador**, y frágil. Las dos poblaciones
+ * NO son la misma muestra —lo dice §3 abajo, es a propósito: otra semilla, otra
+ * fracción dibujada, y el corte de profundidad del intro— así que la razón de
+ * dos cuantiles es la razón de dos SORTEOS distintos de la misma distribución.
+ * En la cola baja, donde la densidad es poca, esa razón vale **1,943** y no
+ * 2,05: un desvío de 0,107 contra una tolerancia de 0,1.
+ *
+ * V3-E movió `frameX` del hero de 0,68 a 0,5 —la cámara rota, y con ella cambia
+ * qué motas caen en cuadro— y el p10 cruzó el umbral por **0,007**. Ensanchar la
+ * tolerancia habría sido aflojar una comprobación que ya estaba midiendo mal.
+ *
+ * **Lo que corre ahora es la identidad EXACTA, sin tolerancia y sin número
+ * escrito.** `buildIntroParticles` acepta el tamaño del polvo por parámetro, así
+ * que se construye el MISMO campo —misma semilla, misma fracción, misma cámara—
+ * con el tamaño de la escena, y se emparejan las motas **por su posición en
+ * pantalla**, que es idéntica porque los puntos son los mismos. Para cada una de
+ * las 386, la razón de tamaños es la perilla **al bit** (peor desvío 4,4×10⁻¹⁶).
+ * Las razones de cuantiles se siguen PUBLICANDO, porque describen lo que el ojo
+ * ve; lo que dejaron de ser es la afirmación.
  */
 check(
   'la densidad en cuadro es menor, y esa es la mitad del cambio',
   intro.motes.length < scene.length * 0.6,
   `${intro.motes.length} contra ${scene.length} — ${(((intro.motes.length - scene.length) / scene.length) * 100).toFixed(1)}%`
 )
-for (const [label, a, b] of [
-  ['polvo · mediana', quantile(introDust, 0.5), quantile(sceneDust, 0.5)],
-  ['polvo · p10', quantile(introDust, 0.1), quantile(sceneDust, 0.1)],
-  ['polvo · p90', quantile(introDust, 0.9), quantile(sceneDust, 0.9)],
-] as const) {
-  check(
-    `${label}: el de la escena por la escala, y nada más`,
-    near(a / b, INTRO_DUST_SCALE, 0.1),
-    `${a.toFixed(2)} contra ${b.toFixed(2)} px — ×${(a / b).toFixed(3)} contra la perilla en ${INTRO_DUST_SCALE}`
-  )
-}
+
+/** El mismo campo del intro con el tamaño de polvo de la escena. Mismos puntos. */
+const conTamanoDeEscena = buildIntroParticles(W, H, PARTICLE_SIZE)
+const porPosicion = new Map(
+  conTamanoDeEscena.motes.filter((m) => m.kind === 'dust').map((m) => [`${m.xPx}|${m.yPx}`, m.sizePx]),
+)
+const razones = intro.motes
+  .filter((m) => m.kind === 'dust')
+  .map((m) => {
+    const chico = porPosicion.get(`${m.xPx}|${m.yPx}`)
+    return chico === undefined ? null : m.sizePx / chico
+  })
+const emparejadas = razones.filter((r): r is number => r !== null)
+const peorDesvio = emparejadas.reduce((peor, r) => Math.max(peor, Math.abs(r - INTRO_DUST_SCALE)), 0)
+
+check(
+  'polvo: es el de la escena POR LA ESCALA, mota por mota y al bit',
+  emparejadas.length === introDust.length && peorDesvio < 1e-12,
+  `las ${emparejadas.length} motas de polvo emparejadas por posición · peor desvío de la razón ${peorDesvio.toExponential(1)} contra la perilla en ${INTRO_DUST_SCALE}`,
+)
+check(
+  'control positivo — el emparejamiento NO es vacío ni parcial: cubre todo el polvo del intro',
+  emparejadas.length > 0 && razones.every((r) => r !== null),
+  `${emparejadas.length} de ${razones.length} — si el campo chico fuera otro sorteo, ninguna posición emparejaría`,
+)
+check(
+  'control positivo — con OTRA escala la misma identidad da falso',
+  Math.abs(emparejadas[0] - INTRO_DUST_SCALE * 1.05) > 1e-12,
+  'la razón medida es la perilla, no cualquier número: contra la perilla ×1,05 el predicado se cae',
+)
+console.log(
+  `  razones de CUANTILES (publicadas, no afirmadas — dos sorteos distintos): ` +
+    `p10 ×${(quantile(introDust, 0.1) / quantile(sceneDust, 0.1)).toFixed(3)} · ` +
+    `mediana ×${(quantile(introDust, 0.5) / quantile(sceneDust, 0.5)).toFixed(3)} · ` +
+    `p90 ×${(quantile(introDust, 0.9) / quantile(sceneDust, 0.9)).toFixed(3)} · perilla ${INTRO_DUST_SCALE}`,
+)
 /**
  * El bokeh, en cambio, **no se tocó**: sigue siendo el mismo disco que la escena
  * proyecta en esta pose. La escala grande del campo ya estaba donde tenía que

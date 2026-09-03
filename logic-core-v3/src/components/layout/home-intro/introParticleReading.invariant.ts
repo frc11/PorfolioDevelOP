@@ -1,5 +1,6 @@
 import { check, report, section } from './introChecks'
-import { INTRO_DUST_SCALE, type IntroMote } from './introParticles'
+import { buildIntroParticles } from './introParticleField'
+import { INTRO_DUST_SCALE, INTRO_DUST_SHARE, INTRO_DUST_SIZE, type IntroMote } from './introParticles'
 import { near, quantile } from './introParticleProbe'
 import {
   CLASSIC_READ,
@@ -13,6 +14,8 @@ import {
   introField as after,
   isReadable,
   meanPitchPx,
+  S13_DUST_SHARE,
+  S13_DUST_SIZE,
   s13Field as before,
 } from './introReadingProbe'
 import { HOME_INTRO_TIMELINE } from './introTimeline'
@@ -87,20 +90,49 @@ check(
 section('2 · 🔴 El reparto nuevo: menos motas, más grandes')
 
 /**
- * 🔴 **CONTROL POSITIVO DE LA COLUMNA "ANTES".** Si el constructor con los
- * parámetros de S13 no reprodujera el reparto que S13 publicó, la comparación
- * entera sería contra un fantasma. Los cinco números son los del reporte.
+ * 🔴 **CONTROL POSITIVO DE LA COLUMNA "ANTES": que sea una MEDICIÓN y no un
+ * fantasma.**
+ *
+ * ── ⚠️ QUÉ CAMBIÓ EN V3-E, Y POR QUÉ NO SE PUEDE VOLVER A LOS CINCO NÚMEROS ──
+ *
+ * Esto pedía los cinco literales que S13 publicó —957 motas de polvo, 76 de
+ * bokeh, cuantiles 2,09 / 3,16 / 4,97 px— y era el control correcto mientras la
+ * cámara de entrada no se moviera. **V3-E movió `frameX` del hero de 0,68 a
+ * 0,5**: la cámara ROTA, cambia qué motas caen adentro del cuadro, y el mismo
+ * constructor con los mismos parámetros de S13 da hoy **1002 / 81 · 2,08 / 3,19
+ * / 4,96 px**. Los cinco números de S13 describen una pose que ya no existe y
+ * **no se pueden reproducir sin volver a mover la pose**: escribir los nuevos
+ * los dejaría igual de vencidos el día que alguien vuelva a tocar el encuadre.
+ *
+ * **Lo que se afirma en su lugar es la propiedad, y no tiene literales.** La
+ * columna "antes" no es un fantasma porque la produce **la misma función que la
+ * columna "después"**, diferenciándose ÚNICAMENTE en las dos perillas que S14
+ * movió. Se demuestra corriendo `s13Field` con las perillas de HOY y exigiendo
+ * que dé, mota por mota, exactamente lo mismo que `introField`: si fuera otro
+ * constructor —o si `s13Field` hubiera quedado apuntando a un campo congelado—
+ * eso no podría dar igual. Los cinco números de S13 se PUBLICAN al lado, con su
+ * fecha y su pose, que es lo que un número histórico puede seguir siendo.
  */
 const s13 = before(1440, 810)
 const s13Dust = dustSizes(s13.motes)
+/** El campo "antes" corrido con las perillas de HOY: tiene que ser el "después". */
+const mismoConstructor = buildIntroParticles(1440, 810, INTRO_DUST_SIZE, INTRO_DUST_SHARE)
+const hoy = after(1440, 810)
 check(
-  'control positivo — el constructor reproduce el reparto que S13 publicó',
-  s13.dustCount === 957 &&
-    s13.bokehCount === 76 &&
-    near(quantile(s13Dust, 0.1), 2.09, 0.01) &&
-    near(quantile(s13Dust, 0.5), 3.16, 0.01) &&
-    near(quantile(s13Dust, 0.9), 4.97, 0.01),
-  `${s13.dustCount} / ${s13.bokehCount} · ${quantile(s13Dust, 0.1).toFixed(2)} / ${quantile(s13Dust, 0.5).toFixed(2)} / ${quantile(s13Dust, 0.9).toFixed(2)} px`
+  'control positivo — la columna "antes" la produce EL MISMO constructor que la de "después"',
+  mismoConstructor.motes.length === hoy.motes.length &&
+    mismoConstructor.motes.every((m, i) => m.sizePx === hoy.motes[i].sizePx && m.xPx === hoy.motes[i].xPx),
+  `con las perillas de hoy da las mismas ${hoy.motes.length} motas, mota por mota — la única diferencia entre las dos columnas son \`${S13_DUST_SIZE}\` y \`${S13_DUST_SHARE.toFixed(4)}\``,
+)
+check(
+  'control positivo — y con las perillas de S13 da OTRA cosa: las perillas no son decorativas',
+  s13.motes.length !== hoy.motes.length,
+  `${s13.motes.length} contra ${hoy.motes.length} motas`,
+)
+console.log(
+  `  el reparto de S13, RE-MEDIDO con la pose de hoy: ${s13.dustCount} / ${s13.bokehCount} · ` +
+    `${quantile(s13Dust, 0.1).toFixed(2)} / ${quantile(s13Dust, 0.5).toFixed(2)} / ${quantile(s13Dust, 0.9).toFixed(2)} px\n` +
+    `  (S13 publicó 957 / 76 · 2,09 / 3,16 / 4,97 px con \`frameX: 0,68\` en el hero; V3-E lo movió a 0,5 y la cámara rotó)`,
 )
 
 for (const [width, height] of WINDOWS) {

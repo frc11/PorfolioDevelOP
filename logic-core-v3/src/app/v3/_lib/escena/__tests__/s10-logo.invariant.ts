@@ -44,7 +44,7 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import { fuenteDe } from './s8-escena-soporte'
 import { muestrearCuadro, vistaEn } from './cuadro'
 // prettier-ignore
-import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, DEFECTO_7_ABIERTO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, RECORRIDOS, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
+import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, RECORRIDOS, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, parrafoDelDefecto7, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
 import { muestrearLogo } from './s10-logo'
 // prettier-ignore
 import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
@@ -148,11 +148,11 @@ controlPositivo(
     superposicion(muestra(0.75, VENTANAS[0].aspecto), c).fraccion > 0,
 )
 console.log(
-  `  🔴 DEFECTO 7 — en el diferencial la superposición mínima del titular es MAYOR QUE CERO (${SUPERPOSICIONES.inevitable ? 'sí' : 'no'}): entre ` +
+  `  DEFECTO 7 — ¿la superposición mínima del titular del diferencial es MAYOR QUE CERO? ${SUPERPOSICIONES.inevitable ? '🔴 SÍ' : '✅ NO'}: entre ` +
     `${pct(SUPERPOSICIONES.minimaDelDiferencial.menor, 0).trim()} y ${pct(SUPERPOSICIONES.minimaDelDiferencial.mayor, 0).trim()}\n` +
-    '  sobre los cuatro cuadros, o sea que no hay altura de pantalla en la que ese bloque quede limpio: la banda del logo\n' +
-    '  cruza la columna de texto entera. En el Hero el mínimo SÍ es cero — ahí es de posición vertical, no de banda.\n' +
-    '  ⚠ RE-MEDIDO DESPUÉS del arreglo del encuadre (§7). Sigue abierto; las salidas están en el §8.',
+    '  sobre los cuatro cuadros. ⚠️ V3-E LO CERRÓ CON EL ANCLA, no con el layout ni con una pose: el diferencial dejó de\n' +
+    '  llenar el cuadro sobre la pose `demos` y lo llena en su ancla DECLARADA (`anclaje.ts`), donde el logo ya se alejó.\n' +
+    '  La medición se hace en `fila.llenaDesde`, así que este renglón sigue vivo: si alguien devuelve el ancla, vuelve el 🔴.',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -287,9 +287,9 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · LO QUE EL ARREGLO NO CERRÓ — las palancas del defecto 7, con su número')
+titulo('8 · EL DEFECTO 7 — su estado, derivado, y las palancas con su número')
 
-console.log(`  ${DEFECTO_7_ABIERTO}`)
+console.log(`  ${parrafoDelDefecto7(SUPERPOSICIONES)}`)
 for (const linea of palancasDeComposicion(MAS_ANGOSTO)) console.log(`  ${linea}`)
 
 // ═══════════════════════════════════════════════════════════════════════════

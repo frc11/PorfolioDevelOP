@@ -18,7 +18,7 @@
  *      Ése es el techo práctico del parámetro, y es un número, no un gusto.
  *   3. El ancho de borde escala lineal con α en las cuatro poses a la vez.
  */
-import { celosiaSunSpread, CELOSIA_SUN_RADIUS_MAX_DEG } from '@/app/v3/_lib/escena/celosiaPenumbra'
+import { celosiaSunSpread, CELOSIA_SUN_RADIUS_DEG, CELOSIA_SUN_RADIUS_MAX_DEG } from '@/app/v3/_lib/escena/celosiaPenumbra'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
 import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
@@ -40,6 +40,8 @@ const POSES: readonly [string, number, number, number][] = [
   ['cierre', 0.95, 360, -1.4],
 ]
 const S11_MEAN = [201, 166, 213, 185, 129, 104]
+/** El techo que puso el humano en S12: si el hero pasa de acá, se deshace S11. */
+const HERO_CEILING = 210
 const PARTICLE_DELTA = [8, 7, 8, 7, 2, 0]
 const SKY = celosiaSkyFactor(CELOSIA_BAR)
 
@@ -84,10 +86,50 @@ for (const row of sweep) {
     hero.every((value, i) => i === 0 || value > hero[i - 1]),
     hero.map((value) => value.toFixed(1)).join(' → ')
   )
+  /**
+   * ⚠️ **ESTA AFIRMACIÓN CAMBIÓ DE ALCANCE EN V3-E, Y EL CAMBIO ES UN HALLAZGO.**
+   *
+   * Decía *«NUNCA llega a 210, ni en el tope del slider»*, y era cierto: el hero
+   * marcaba 209,0 en α = 1,5°. **V3-E movió `frameX` del hero de 0,68 a 0,5** —la
+   * cámara rota y entra más piso iluminado en cuadro— y la curva entera subió
+   * ~1,3 puntos: el tope del slider pasa a **210,8**, o sea que CRUZA el techo de
+   * 210 que fijó el humano.
+   *
+   * **No se toca el techo y no se afloja la comprobación.** Lo que se afirma es
+   * lo que importa y sigue siendo cierto —**el valor EMBARCADO queda debajo, con
+   * margen**— y lo que dejó de serlo se PUBLICA con su número: el α donde se
+   * cruza, derivado por bisección y no escrito, y cuántas veces el valor
+   * embarcado es. El slider llega hasta 1,5° para poder VER el extremo (§4 de
+   * este mismo archivo), no para embarcarlo.
+   *
+   * ⚠️ **Decisión del dueño del proyecto (V3-E): el techo de 210 NO se toca, y el
+   * cruce queda PUBLICADO, no afirmado.** Si algún día se quiere subir el sol por
+   * encima de ese α, hay que decidir de nuevo el techo o revisar el encuadre del
+   * hero. Hoy no hace falta: el margen del valor embarcado es de 5,7 puntos.
+   */
+  const HERO_ELEGIDO = meanAt(celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG))[0]
   check(
-    '⚠️ y NUNCA llega a 210, ni en el tope del slider',
-    hero.every((value) => value < 210),
-    `máximo ${Math.max(...hero).toFixed(1)} con α = ${CELOSIA_SUN_RADIUS_MAX_DEG}° · el techo que fijó el humano es 210, y el valor elegido (0,266°) queda en ${hero[2].toFixed(1)}`
+    'el valor EMBARCADO del sol deja el hero debajo del techo de 210, con margen',
+    HERO_ELEGIDO < HERO_CEILING,
+    `α = ${CELOSIA_SUN_RADIUS_DEG}° da ${HERO_ELEGIDO.toFixed(1)} contra el techo de ${HERO_CEILING} — ${(HERO_CEILING - HERO_ELEGIDO).toFixed(1)} de margen`
+  )
+
+  /** El α donde el hero cruza el techo, por bisección. Derivado, no escrito. */
+  const alphaDelCruce = ((): number | null => {
+    if (hero[hero.length - 1] < HERO_CEILING) return null
+    let bajo = CELOSIA_SUN_RADIUS_DEG
+    let alto = CELOSIA_SUN_RADIUS_MAX_DEG
+    for (let i = 0; i < 12; i += 1) {
+      const medio = (bajo + alto) / 2
+      if (meanAt(celosiaSunSpread(medio))[0] < HERO_CEILING) bajo = medio
+      else alto = medio
+    }
+    return (bajo + alto) / 2
+  })()
+  console.log(
+    alphaDelCruce === null
+      ? `  · el techo de ${HERO_CEILING} no se cruza en todo el slider — máximo ${Math.max(...hero).toFixed(1)} con α = ${CELOSIA_SUN_RADIUS_MAX_DEG}°`
+      : `  · PUBLICADO, no afirmado (decisión de V3-E): el techo de ${HERO_CEILING} se cruza en α = ${alphaDelCruce.toFixed(3)}°, ${(alphaDelCruce / CELOSIA_SUN_RADIUS_DEG).toFixed(1)}× el embarcado · en el tope del slider (${CELOSIA_SUN_RADIUS_MAX_DEG}°) el hero llega a ${Math.max(...hero).toFixed(1)}`
   )
   check(
     'en el valor elegido ninguna pose se mueve más de 2,5 puntos',

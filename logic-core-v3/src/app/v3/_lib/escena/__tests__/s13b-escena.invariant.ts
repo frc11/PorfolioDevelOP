@@ -244,8 +244,8 @@ afirmar(
 const destinos = CUADROS_DE_V3B.map((v) => destinoEn(v))
 afirmar(
   destinos.every((d, i) => d !== null && cuantoSeMovio(d, destinoEn(CUADROS_DE_V3B[i], PRIMERO_DEL_ARRAY.pose)!) === 0),
-  '  y el destino se movió CERO píxeles: la pose que el intro proyecta no cambió de valor',
-  'V3-B no tocó `frameX`, `height`, `distance` ni `angleDeg` del hero — el encuadre que cambió es CUÁNTO DURA, no dónde está',
+  '  y el destino se movió CERO píxeles contra la pose VIVA: el intro proyecta el keyframe, no una copia',
+  'el detalle de V3-B —«no se tocó `frameX`»— dejó de ser cierto en V3-E, que lo movió de 0,68 a 0,5 y corrió el destino 78,7 px en 1440×810. Lo que esta comprobación protege NO cambió y por eso sigue en verde: que `destinoEn` lea `CHOREO_KEYFRAMES[0]` y no una pose escrita al lado — con una copia vieja acá, ESTO daría distinto de cero',
 )
 for (const linea of lineasDelDestino(CUADROS_DE_V3B)) console.log(`  ${linea}`)
 
