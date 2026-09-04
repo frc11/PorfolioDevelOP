@@ -83,7 +83,26 @@ function AvisoItem({ fila }: { fila: FilaNovedad }) {
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-xs leading-relaxed text-zinc-400">{fila.body}</p>
+          {/* P23 — el HECHO (el título) se queda; la ORDEN (el cuerpo) sólo se
+              lee como orden mientras siga en pie. Caducada, el cuerpo pasa a
+              tono apagado y tachado —la noticia sigue disponible, la instrucción
+              deja de estar vigente— y debajo va lo que el lead pide HOY, que
+              sale de `proximaAccion`: el mismo dato que ordena la cola de
+              arriba. Así las dos superficies no pueden mandar cosas distintas. */}
+          <p
+            className={cn(
+              'mt-0.5 text-xs leading-relaxed',
+              fila.vigente ? 'text-zinc-400' : 'text-zinc-600 line-through decoration-zinc-700',
+            )}
+          >
+            {fila.body}
+          </p>
+          {!fila.vigente && fila.enSuLugar && (
+            <p className="mt-1 text-xs leading-relaxed text-zinc-300">
+              <span className="font-medium text-zinc-500">Ahora: </span>
+              {fila.enSuLugar}
+            </p>
+          )}
           {plegada && (
             <p className="mt-0.5 text-[11px] text-zinc-600">
               Y {fila.cantidad - 1} {fila.cantidad - 1 === 1 ? 'aviso más' : 'avisos más'} del
@@ -96,7 +115,11 @@ function AvisoItem({ fila }: { fila: FilaNovedad }) {
                 directo que reconstituye una cola paralela. Una fila plegada
                 nunca trae `leadId` (sólo se pliega lo que no ofrecía acción),
                 así que el pliegue no puede esconder un "Abrir". */}
-            {fila.leadId && <AbrirFocoButton leadId={fila.leadId} />}
+            {/* P23 — un aviso caducado abre el lead pero NO lo ancla como foco:
+                anclar desde una orden que ya no corre es justamente la novedad
+                pisando al foco, y si el lead no está en «trabajar» el anclaje se
+                ignora en silencio y el foco vuelve a otro lado (foco.ts). */}
+            {fila.leadId && <AbrirFocoButton leadId={fila.leadId} anclar={fila.vigente} />}
           </div>
         </div>
       </div>

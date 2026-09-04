@@ -696,3 +696,30 @@ export function derivarPantalla(input: DerivacionManualInput): PosicionManual {
     habilitadas: actualAccesible ? habilitadas : [...habilitadas, actual],
   }
 }
+
+/**
+ * P23 — LA SALIDA QUE UNA PANTALLA DE ESTADO OFRECE.
+ *
+ * `espera` no es un paso: es el residuo honesto de un estado donde el setter no
+ * tiene trabajo. Pero ofrece UNA puerta —«¿Respondió o pasó algo antes?
+ * Registralo»— porque si el negocio contesta durante la pausa hay que poder
+ * registrarlo. Esa puerta es legítima y se queda.
+ *
+ * Existe acá, y no dentro del componente, por el ciclo que cerró: el bloque de
+ * avance de `PantallaManual` ofrece «Ir a tu paso actual» en TODA pantalla que
+ * no sea la actual, y en `m5` el paso actual es `espera` — la misma pantalla que
+ * acaba de mandar al setter a `m5`. Las dos derivaciones son correctas por
+ * separado; el ciclo lo hace la composición. Con el predicado en un solo lugar,
+ * la punta que ofrece y la punta que vuelve leen el MISMO dato: la vuelta no se
+ * pinta cuando la ida salió de la pantalla a la que volvería.
+ *
+ * `enlaces-manual.invariant.ts` barre este predicado contra el bloque de avance
+ * y falla si aparece un ciclo de dos nodos nuevo.
+ */
+export function ofreceSalida(
+  desde: PantallaId,
+  hacia: PantallaId,
+  posicion: PosicionManual,
+): boolean {
+  return desde === 'espera' && hacia === 'm5' && posicion.habilitadas.includes('m5')
+}

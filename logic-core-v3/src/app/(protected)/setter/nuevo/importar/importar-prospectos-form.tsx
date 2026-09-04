@@ -202,7 +202,7 @@ function ReporteImportacion({ report }: { report: ImportReport }) {
             // importada entra entera a la cola y sale de a uno, por orden. La
             // promesa que el producto sí cumple es la cola, no el foco.
             'Entraron a tu cartera sin marca de caliente, listos para completar la Ficha — el foco te los va trayendo de a uno, por orden.'
-          : 'No se creó ningún lead nuevo en esta tanda. Revisá el detalle de abajo.'}
+          : 'No se creó ningún lead nuevo en esta tanda. Revisá el detalle de las filas inválidas.'}
       </Callout>
 
       {invalidas.length > 0 && (

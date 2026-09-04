@@ -10641,3 +10641,225 @@ Capturas en `docs/proof-screenshots/p22/`, baselines en `docs/baselines/p22-*.js
 - El grupo que abre solo está fijo en `VISTA_ABIERTA`, la vista del trabajo. No es una preferencia
   del setter.
 - La cartera sigue colapsada por defecto: este sprint no tocó dónde vive ni cuándo se abre.
+
+---
+
+## P23 · El veredicto que se pierde, y el ciclo que no deja salir
+
+La segunda corrida del novato llegó por primera vez hasta la agenda —17 pasos— y trajo ocho
+baches. Cinco son de la misma clase: **una superficie que era correcta el día que se escribió y
+dejó de serlo cuando otro sprint movió lo que nombraba.** Este sprint cierra esos cinco.
+
+### Paso 1 · Qué se hace con el veredicto que se pierde — la decisión
+
+El defecto, reproducido antes de tocar nada: en m1 se cargan los tres campos (score 4, veredicto
+AVANZAR, razonamiento), se toca «Volver a tu día», **no avisa nada**, y al volver los tres están
+vacíos. La tarjeta, mientras tanto, decía «Se guarda solo mientras escribís. Podés cerrar y seguir
+después.» — a **content-top 1463**, o sea DEBAJO de los tres campos del veredicto (988 / 1099 /
+1206). Sin sujeto, la promesa se leía como que también los cubría.
+
+Las tres salidas, con su costo medido:
+
+| Salida | Costo real | Veredicto |
+|---|---|---|
+| **1 · Se autoguarda de verdad** | El veredicto vive en **una sola columna**, `evaluacionJson`, y hoy la escribe **exclusivamente** `transitionDossier` (`dossier.ts:154` y `:185`). Un borrador ahí es un veredicto a medias en la columna del veredicto. Los lectores de producción hacen `safeParse` y lo leerían como «sin evaluación», pero `prisma/seed-agency-os.ts:2034` ya usa `evaluacionJson != null` como proxy de verdad: el peligro no es hipotético. Hacerlo bien pide **columna nueva** (o un segundo contrato sobre una llave existente). | **FRENADO.** Las reglas del sprint prohíben las dos cosas: «no puede escribir un veredicto a medias» y «ningún cambio de schema ni llave de datos → es decisión de Franco». |
+| **3 · Autoguardar sólo lo que no dispara nada** | Mismo problema de columna, y encima incoherente para el setter: volver a un razonamiento restaurado con el score y el veredicto vacíos parece una decisión que perdió la cabeza. | Descartada. |
+| **2 · No se autoguarda, y la tarjeta deja de prometerlo** | Tres cambios de copy + la guardia de salida, que hacía falta **en las tres**. | **Elegida.** |
+
+Lo hecho: la promesa **nombra a su sujeto** («La ficha se guarda sola…»), el bloque del veredicto
+**dice que no** («Esto no se guarda solo: la decisión entra recién cuando registrás la evaluación»)
+antes del primer campo, y salir con algo cargado **pregunta**.
+
+La guardia de salida es lo único con maquinaria: `useUnsavedGuard` sólo ataba `beforeunload`, que
+**no dispara en la navegación SPA** —su propio encabezado lo decía, y confiaba en «el autosave + el
+indicador visible», que para el veredicto no existen—. Ahora publica el estado en un store de
+módulo (las dos puntas no comparten árbol: ensucia un formulario del Registro, pregunta el enlace
+de la cabecera) y es **opt-in**: lo pide el único formulario sin autosave detrás. Los otros seis no
+cambian en nada — prenderlo ahí sería preguntar por trabajo que se está guardando solo.
+
+**El control sigue siendo un `<Link>`.** La primera versión lo hizo `<button>` y eso le sacaba el
+`href` (el click del medio, «abrir en pestaña nueva», el anuncio como enlace) para ganar nada:
+`preventDefault` sobre el click del ancla alcanza. Además rompía dos tests ajenos —`00-surfaces`
+buscaba un `link`, y el `getByRole('button', { name: 'Volver' })` de `13-m16` matchea por
+**subcadena** y empezaba a agarrar este control en vez del suyo—. Los dos se pusieron rojos y
+señalaron el problema real.
+
+### Paso 2 · El ciclo — el censo, y cuál de las dos pantallas cede
+
+**No hay redirect loop.** `derivarPantalla` (`manual.ts:687-698`) parcha la accesibilidad de la
+actual, así que el `redirect` de la guardia no puede auto-referenciarse. El ping-pong lo hacen dos
+**enlaces** que se apuntan entre sí:
+
+| Arista | Dónde | Condición |
+|---|---|---|
+| `espera` → `m5` | `estado-manual.tsx:146` | `esEspera` y `m5` habilitada |
+| `m5` → `posicion.actual` (= `espera`) | `pantalla-manual.tsx:220` | `!esActual` |
+| `espera` → `m5` (tercera puerta) | `franja-recorrido.tsx:185` | el chip «Seguimiento» de la franja |
+
+Las dos primeras estaban **fuera** de la tabla `ENLACES` del invariante: la de `espera` nunca se
+declaró, y la de vuelta se excluyó a propósito (`enlaces-manual.invariant.ts:94-96`) con un
+argumento que prueba que el destino es **alcanzable** y no dice nada sobre que el destino
+**apunte de vuelta**.
+
+Los estados que lo producen (`posicionDe`): pausa comercial vigente (`manual.ts:542-549`), EVALUADA
+post-opener sin toque vencido (`:584-588`), y APROBADA con el envío cerrado (`:670-672`).
+
+**Cuál cede: la VUELTA.** El oráculo del repo ya lo decía — `admitePantalla('m5', …)` responde **NO**
+en esos estados («no hay toque vencido ni cadencia agotada»), y `admitePantalla('espera')` responde
+SÍ. Así que `espera` es el paso correcto y `m5` es un **desvío legítimo** que la propia espera
+ofrece («¿Respondió o pasó algo antes? Registralo» — si el negocio contesta durante la pausa hay que
+poder registrarlo). La premisa de «Ir a tu paso actual» —«no estás parado en tu paso, acá está el
+atajo»— es **falsa** cuando el paso actual es el que abrió la puerta. Se suprime esa arista, y la
+ida se queda.
+
+El predicado vive en **un solo lugar** (`ofreceSalida`, `manual.ts`) y lo leen **las dos puntas**:
+la que ofrece y la que decide si pinta la vuelta. Dos copias de la condición vuelven a divergir.
+
+**La salida que queda lleva a algún lado** (regla del sprint, verificada en la app): en m5 quedan su
+propia acción («Registrar resultado»), la franja con 2 destinos y «Volver a tu día». Y `espera`
+sigue siendo alcanzable siempre: `manual/page.tsx:21` redirige a `posicion.actual` en cada entrada.
+
+**¿Hay más ciclos?** El barrido dice que **no**, y dice por qué la pregunta no es «¿hay algún ciclo
+de dos nodos?»: `mc1` y `mc2` se enlazan en las dos direcciones por diseño, y `m5` y `m16` son dos
+pantallas de trabajo adyacentes donde cada una ofrece una acción distinta — ir y volver ahí es
+navegar. Lo que atrapa es el ciclo donde **uno de los dos nodos no tiene trabajo propio**: las
+pantallas de tipo estado no declaran acción principal (`BarraAccion` devuelve `null`), así que
+rebotar contra una es rebotar contra una puerta. La afirmación nueva barre **10.908 estados** con
+una pantalla de estado como paso actual y **2.076 salidas ofrecidas**, y sale en cero.
+
+El modelo del grafo **lee el componente** en vez de asumirlo: si diera por hecho que la vuelta no se
+pinta porque así está escrito en el invariante, la búsqueda sería una tautología que nunca falla. Se
+detecta la conducta de `pantalla-manual.tsx` y se modela lo que hace.
+
+### Paso 3 · Las referencias de ubicación — todas, contra dónde está la cosa hoy
+
+El instrumento (`scripts/qa-corridas/_p23/censo-ubicaciones.ts`) mide, por pantalla, cada frase
+visible que dice una ubicación y —cuando nombra un control entre comillas angulares— la altura y la
+posición computada de ESE control.
+
+**Antes: 13 frases, 2 apuntando mal.** Las dos son la misma, en mc1 y mc2: «el botón «Arrancar
+construcción» **está acá arriba**» a content-top 1496/2363, y el botón a 710 **con posición
+`sticky`** — o sea pegado al borde de ABAJO, en cualquier scroll. La copy era correcta hasta que P18
+mudó la acción a la barra.
+
+Las otras once no se podían verificar solas (nombran un bloque copiable, o no nombran nada), y la
+regla del sprint es explícita: **lo que no se pueda verificar solo, se cambia**. Se reescribieron
+las doce que hablaban del layout — se nombra el control, no se dice dónde está:
+
+`m-construccion.tsx` · `flow-content.ts:56` · `herramientas.ts` (×4) · `guidance-content.ts` (×6) ·
+`cola-del-dia.tsx` · `home-en-espera.tsx` · `m13-borrador.tsx` · `m14-chequeo.tsx` (×2) ·
+`importar-prospectos-form.tsx` — esta última **la encontró el invariante nuevo**, no el barrido a
+mano.
+
+**Después: 1 frase, 0 apuntando mal.** La que queda es la única excepción, y se justifica en el
+código: el «pegala acá abajo» de `copy-blocks.ts` habla de una posición **dentro del bloque que el
+setter copia y pega**, debajo del marcador de cierre. Ese texto no lo dibuja ningún layout.
+
+El invariante `copy-sin-ubicacion` prohíbe la clase entera. Escanea **el texto suelto de JSX además
+de los literales entre comillas**: el defecto vivía justamente ahí, y la primera versión del archivo
+**falló su propio caso de CONDUCTA** por mirar sólo literales.
+
+### Paso 4 · Las novedades que contradicen
+
+Un aviso es un **snapshot**: `copyNovedad` congela título y cuerpo en el handoff y no los vuelve a
+mirar. No había filtro de vigencia de ningún tipo — ni por estado, ni por supersesión, ni por edad.
+El único filtro existente (`excludeLeadIds`) suprime un aviso porque **el lead ya se ve arriba**, no
+porque el aviso **haya dejado de ser cierto**.
+
+**Por qué el aviso no estaba en la cola** (la pregunta del sprint): porque la cola tenía razón.
+`grupoPara` (`flow.ts:430-443`) manda una APROBADA con el **gate cerrado** a seguimiento, y
+`proximaAccionPara` (`:544`) ya decía «la demo está aprobada y el link sale cuando conteste» **en el
+mismo render** en que el aviso decía «Enviá el link ya». No es que faltara en la cola: el aviso
+estaba viejo.
+
+**Qué se hace con el caduco: ENVEJECE.** No se va (el hecho pasó y el setter puede no haberlo
+leído: borrarlo destruye información que nadie vio). No se marca leído («marcar vistas» es un gesto
+del setter, y una lectura no debe escribir). Envejece: se separa el **HECHO** (el título, que se
+queda) de la **ORDEN** (el cuerpo, que se tacha y debajo va lo que el lead pide HOY). Y ese
+reemplazo sale de **`proximaAccion`, el mismo dato que ordena la cola** — así las dos superficies
+coinciden por construcción y no por casualidad.
+
+El «Abrir» de un aviso caducado **abre pero ya no ancla el foco**: anclar desde una orden que no
+corre era la novedad pisando al foco, y con el lead fuera del grupo de trabajo el anclaje se ignora
+en silencio (`foco.ts:61-62`) y el foco vuelve a otro lado sin explicación.
+
+**El barrido encontró un agujero en la primera versión del predicado**, y vale anotarlo porque es el
+mismo defecto del sprint: la regla por kind **re-derivaba** «esto es trabajo de hoy» mirando el
+stage, y la cola corta por **status** antes — un `LEAD_ASIGNADO` sobre un lead sin dossier pero con
+la reunión agendada seguía diciendo «arrancá por la ficha». Ahora se **pregunta** (`grupo` y
+`accionable`, que ya calculó `clasificarLead`) en vez de recalcular.
+
+`aprobada-sin-link.invariant.ts` levantó el módulo nuevo como **candidato a séptima superficie**
+antes de que saliera y exigió probar que distingue el aprobado CON link del aprobado SIN link. Lo
+distingue (reusa `gateEnvioDemo`, el gate del motor) y quedó censado.
+
+### Verificado operando la aplicación, a 1440
+
+1. **El veredicto** — tres campos cargados y «Volver a tu día» → **avisa**, no navega; «Seguir acá»
+   vuelve con el score, el veredicto y el razonamiento **intactos**; «Salir y perderlo» sale.
+2. **El ciclo** — `espera` ofrece m5; en m5: **0 secciones de avance, 0 enlaces de vuelta**, y
+   quedan «Registrar resultado», la franja (2 destinos) y «Volver a tu día».
+3. **Las ubicaciones** — mc1 antes: 3 frases, una apuntando a un botón `sticky`. Después: **0**.
+4. **Los avisos** — el mismo lead con dos avisos contradictorios: los dos tachados, los dos con
+   «Ahora: …» diciendo lo mismo que la cola. Y el aviso cuya orden **sí** corre queda intacto — no
+   se grita donde no hay que gritar.
+5. **Las dos mediciones fijas** — abajo.
+
+### Las dos mediciones fijas: ninguna empeoró
+
+`medir-pliegue-manual.ts` (14 pantallas × 2 anchos = 28 filas): **24 filas idénticas**. Las 4 que
+cambian son `alturas.registro` — m1 **+64/+116** (el aviso nuevo del veredicto, que es información
+que faltaba) y mc1/mc2 **−19** (la copy más corta). **Sin cambios en**: `pliegue` (788/688), `barra`,
+`pliegueEfectivo`, `accionTop`, acción visible arriba y abajo (9/9 y 9/9), `entra` (4/14),
+`cromoLayout` (min 400 · max 481), `superficies`, `rotulos` y **el censo entero** (copiar 11 ·
+linksExternos 6 · linksInternos 26 · franjaPasos 126 · pendientes 6 · controles 65 · plegables 38).
+
+`medir-panel-setter.ts`: **cabecera, cola, foco y cartera idénticos** en top y alto, `pliegue`
+idéntico, censo idéntico (itemsCola 4 · avisos 6 · números 15 · botonesTrabajar 10). Lo único que
+crece es `novedades` (+94 a 1440, +114 a 390), que es el bloque que ahora dice la verdad, y está
+**debajo del pliegue**.
+
+### Los tests, demostrados fallando
+
+- **`copy-sin-ubicacion`** contra la copy vieja: **11 hallazgos** en 3 archivos, incluido
+  `m-construccion.tsx:200`.
+- **`enlaces-manual`** (sección nueva) con la supresión revertida: rojo nombrando los estados —
+  «Espera ⇄ Toque en stage=null status=POSTERGADO postergadoVencido=false», y cuatro más.
+- **`novedades-vigencia`** con el predicado en verdadero constante: rojo en CONDUCTA N5.
+- **`28-veredicto-y-ciclo.spec.ts`** contra un build del brazo viejo: **los tres rojos**, cada uno en
+  su aserto. El de N4 **recorre las dos pantallas** — entra por la puerta que abre `espera` y mide en
+  `m5` —, que es la única forma de verlo: el defecto no está en ninguna de las dos, está en la
+  composición.
+
+**Un falso verde propio, medido y cerrado:** la primera versión del test de N4 pasaba contra el
+brazo viejo **con el ciclo a la vista**. `toHaveCount(0)` se satisface en el primer tick posterior a
+la navegación, cuando todavía no se renderizó nada. Ahora espera a que la pantalla EXISTA (la zona
+de Registro visible) antes de afirmar la ausencia. Sin esa espera, el test daba verde sobre el
+defecto presente.
+
+### Gates
+
+`tsc` 0 · invariantes **56 descubiertos / 55 corridos / 55 verdes** (2 nuevos: `copy-sin-ubicacion`
+y `novedades-vigencia`; el contador de `run-invariants.mjs` subido a 56 en este mismo commit, como
+pide su propio mensaje) · `test:setter` **187/187** (184 previos + 3 nuevos) · `test:leados` 33/33 ·
+`test:helpers` 28/28 · `build` 0 · `migrate status` sin drift.
+
+Capturas en `docs/proof-screenshots/p23/despues/`, baselines en `docs/baselines/p23-*.json`.
+
+### Sin tocar
+
+Schema, transiciones (`LEGAL_TRANSITIONS`), llaves de datos: **nada**. `dossier-stage` y
+`paso-admitido` siguen verdes por sí solos. Ningún invariante se debilitó; los dos que se editaron
+(`novedades` y `aprobada-sin-link`) se **ampliaron**.
+
+### Lo que queda anotado, y no se hizo
+
+- **N2 (la carrera de tildes) y N8** — fuera de scope por la regla de un objetivo.
+- **El `Modal` compartido no declara `role="dialog"` ni `aria-modal`.** El diálogo de salida se ve y
+  funciona, pero no se anuncia como diálogo. Es del componente compartido —lo arrastran **todos** los
+  modales de la app— y por eso el test de N1 afirma por texto y no por rol. Dos atributos, un sprint
+  propio.
+- **La revisión que sale a internet sola** — anotada por la corrida, sprint propio.
+- El tope de la cola sigue en 5: un aviso **vigente** puede apuntar a un lead que es trabajo real y
+  no entró en las cinco filas. No es una contradicción (las dos superficies coinciden en que es
+  trabajo) y el panel lo dice: «Quedan N más para trabajar, en tu cartera».

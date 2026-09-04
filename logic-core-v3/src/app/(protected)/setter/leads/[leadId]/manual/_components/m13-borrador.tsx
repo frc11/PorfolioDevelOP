@@ -124,7 +124,7 @@ export function M13Registro({
         <LinkDelBorrador draftUrl={draftUrl} />
         <p className="max-w-xl text-xs leading-relaxed text-zinc-400">
           Este es el borrador que Franco rechazó. Para publicar uno nuevo y cambiar el link,
-          reabrí la construcción — el pedido de arriba te sigue en cada pantalla y el chequeo
+          reabrí la construcción — el pedido te sigue en cada pantalla y el chequeo
           final se vuelve a pasar antes de reenviar.
         </p>
         <ReabrirConstruccion leadId={leadId} />

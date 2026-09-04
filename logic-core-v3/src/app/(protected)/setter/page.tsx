@@ -88,7 +88,14 @@ export default async function SetterHomePage() {
   // accionable que no entró conserva su aviso en vez de desaparecer de las dos
   // superficies. Sin cola (en-espera / vacío) no hay a quién deduplicar.
   const [novedades, progreso] = await Promise.all([
-    getNovedadesSetter(userId, leads, { excludeLeadIds: idsEnCola(cola) }),
+    // P23 — `estados` es lo que le permite a un aviso caducar: la orden que
+    // trae congelada se contrasta contra `proximaAccion`, el MISMO dato que
+    // ordena la cola de arriba. Son los `homeLeads` ya construidos: cero
+    // queries nuevas y una sola clasificación para las dos superficies.
+    getNovedadesSetter(userId, leads, {
+      excludeLeadIds: idsEnCola(cola),
+      estados: homeLeads,
+    }),
     getProgresoSemana(userId, leads),
   ])
 

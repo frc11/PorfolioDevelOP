@@ -451,8 +451,14 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
           Guardar ficha
         </Button>
         <AutosaveStatus phase={autosave.phase} isDirty={autosave.isDirty} busy={isPending} />
+        {/* P23 — la promesa NOMBRA su sujeto. Esta fila vive debajo del acordeón
+            entero, y el último bloque es el veredicto, que NO tiene autosave: sin
+            el sujeto, «se guarda solo» se leía como que también lo cubría a él, y
+            el setter perdía su juicio al salir. El chip de estado de al lado es
+            del mismo sujeto (lee `autosave.isDirty` de la ficha). Lo que le pasa
+            al veredicto lo dice el veredicto, en su propio bloque. */}
         <p className="text-[11px] text-zinc-600">
-          Se guarda solo mientras escribís. Podés cerrar y seguir después.
+          La ficha se guarda sola mientras escribís. Podés cerrar y seguir después.
         </p>
       </div>
     </div>

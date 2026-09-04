@@ -53,7 +53,7 @@ export const SHELL_CONSTRUCCION: ShellFase[] = [
     titulo: 'Estructura',
     detalle: 'Generá el esqueleto de la demo en Claude Design a partir del brief.',
     items: [
-      'Copiá el bloque «para Claude Design» (está acá arriba) y pegalo ahí como primer mensaje.',
+      'Copiá el bloque «para Claude Design» y pegalo ahí como primer mensaje.',
       'Pedile una landing de una sola página con las secciones del brief, en ese orden.',
       'No agregues secciones que el brief no pide — el brief es el plano.',
     ],

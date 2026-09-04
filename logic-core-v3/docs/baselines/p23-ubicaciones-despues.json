@@ -1,0 +1,15 @@
+{
+  "base": "http://127.0.0.1:3023",
+  "hallazgos": [
+    {
+      "ruta": "/setter/leads/cmr035eba00099fl8patqziox/manual/m5",
+      "frase": "INPUT PARA EL GEM DE OUTREACH — objeción de QA-W Evaluada Gate Cerrado Pedido: el negocio preguntó por precio/condiciones u objetó. Redactá una respuesta corta que NO cotice ni negocie nada: redirigí a coordinar una reunión con el equipo. OBJECIÓN RECIBIDA (pegala acá abajo antes de enviar): >>>",
+      "fraseTop": 1465,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    }
+  ]
+}

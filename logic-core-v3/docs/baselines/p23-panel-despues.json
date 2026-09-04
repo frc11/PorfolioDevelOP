@@ -1,0 +1,162 @@
+[
+  {
+    "ancho": "1440",
+    "email": "setter-qa@develop.test",
+    "pliegue": 788,
+    "altoTotal": 2163,
+    "orden": [
+      "cabecera",
+      "cola",
+      "foco",
+      "cartera",
+      "novedades",
+      "misNumeros",
+      "progreso"
+    ],
+    "bloques": {
+      "cabecera": {
+        "top": 32,
+        "alto": 60,
+        "entra": true
+      },
+      "cola": {
+        "top": 124,
+        "alto": 697,
+        "entra": true
+      },
+      "foco": {
+        "top": 156,
+        "alto": 247,
+        "entra": true
+      },
+      "enEspera": null,
+      "novedades": {
+        "top": 930,
+        "alto": 872,
+        "entra": false
+      },
+      "cartera": {
+        "top": 853,
+        "alto": 45,
+        "entra": false
+      },
+      "misNumeros": {
+        "top": 1834,
+        "alto": 187,
+        "entra": false
+      },
+      "progreso": {
+        "top": 2053,
+        "alto": 79,
+        "entra": false
+      }
+    },
+    "censo": {
+      "itemsCola": 4,
+      "avisos": 6,
+      "numeros": 15,
+      "marcaLeadOS": 1,
+      "subtitulos": 0,
+      "eyebrows": 0,
+      "botonesTrabajar": 10,
+      "soltarFoco": 0
+    },
+    "numerosTexto": [
+      "47 para trabajar",
+      "85",
+      "46",
+      "hace 3 h",
+      "hace 4 h",
+      "hace 4 días",
+      "hace 4 días",
+      "hace 44 días",
+      "×39",
+      "hace 7 min",
+      "hace 84 días",
+      "79",
+      "10",
+      "2",
+      "3"
+    ]
+  },
+  {
+    "ancho": "390",
+    "email": "setter-qa@develop.test",
+    "pliegue": 688,
+    "altoTotal": 2557,
+    "orden": [
+      "cabecera",
+      "cola",
+      "foco",
+      "cartera",
+      "novedades",
+      "misNumeros",
+      "progreso"
+    ],
+    "bloques": {
+      "cabecera": {
+        "top": 32,
+        "alto": 52,
+        "entra": true
+      },
+      "cola": {
+        "top": 116,
+        "alto": 880,
+        "entra": true
+      },
+      "foco": {
+        "top": 148,
+        "alto": 234,
+        "entra": true
+      },
+      "enEspera": null,
+      "novedades": {
+        "top": 1105,
+        "alto": 1059,
+        "entra": false
+      },
+      "cartera": {
+        "top": 1028,
+        "alto": 45,
+        "entra": false
+      },
+      "misNumeros": {
+        "top": 2195,
+        "alto": 187,
+        "entra": false
+      },
+      "progreso": {
+        "top": 2414,
+        "alto": 111,
+        "entra": false
+      }
+    },
+    "censo": {
+      "itemsCola": 4,
+      "avisos": 6,
+      "numeros": 15,
+      "marcaLeadOS": 1,
+      "subtitulos": 0,
+      "eyebrows": 0,
+      "botonesTrabajar": 10,
+      "soltarFoco": 0
+    },
+    "numerosTexto": [
+      "47 para trabajar",
+      "85",
+      "46",
+      "hace 4 h",
+      "hace 4 h",
+      "hace 4 días",
+      "hace 4 días",
+      "hace 44 días",
+      "×39",
+      "hace 7 min",
+      "hace 84 días",
+      "79",
+      "10",
+      "2",
+      "3"
+    ]
+  }
+]

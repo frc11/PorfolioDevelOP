@@ -9,7 +9,7 @@ import { VEREDICTO_VALUES } from '@/lib/leados/contracts'
 import { gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
 import { erroresPorCampo, useStepAction } from '@/lib/use-step-action'
-import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+import { useOlvidarTrabajoSinRegistrar, useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
@@ -96,7 +96,11 @@ export function EvaluacionForm({
   // del razonamiento lo pierde entero.
   const hayCambiosSinGuardar =
     score !== null || veredicto !== '' || razonamiento.trim() !== '' || motivoDescarte.trim() !== ''
-  useUnsavedGuard(hayCambiosSinGuardar)
+  // P23: y como no hay autosave detrás, la salida INTERNA («Volver a tu día»,
+  // navegación SPA que no dispara `beforeunload`) también tiene que avisar. Es
+  // el único de los siete formularios que lo pide, justamente por eso.
+  useUnsavedGuard(hayCambiosSinGuardar, { avisaEnSalidaInterna: true })
+  const olvidarTrabajoSinRegistrar = useOlvidarTrabajoSinRegistrar()
 
   const enviar = (motivo?: string) => {
     setServerError(null)
@@ -120,7 +124,12 @@ export function EvaluacionForm({
     setErrors({})
     run(() => registrarEvaluacion(leadId, parsed.data), {
       onError: setServerError,
-      onSuccess: () => setConfirmOpen(false),
+      onSuccess: () => {
+        setConfirmOpen(false)
+        // El veredicto ENTRÓ: baja la marca antes de que la revalidación
+        // navegue, para no preguntar por trabajo que ya está registrado.
+        olvidarTrabajoSinRegistrar()
+      },
       successToast: (data) =>
         data.descartado
           ? 'Lead descartado. Bien filtrado: a otra cosa.'
@@ -165,6 +174,15 @@ export function EvaluacionForm({
 
   return (
     <div className="space-y-5">
+      {/* P23 — el veredicto DICE que no se guarda solo. La ficha de arriba sí, y
+          su fila de estado vive debajo de este bloque: sin esta línea el setter
+          leía la promesa de la ficha como si lo cubriera, cargaba los tres
+          campos, salía y perdía el juicio entero. Va antes del primer campo —
+          la advertencia sirve antes de escribir, no después. */}
+      <p className="rounded-xl border border-amber-400/20 bg-amber-500/[0.06] p-3 text-[11px] leading-relaxed text-amber-200/90">
+        Esto no se guarda solo: la decisión entra recién cuando registrás la
+        evaluación. Si salís antes, se pierde.
+      </p>
       <Field
         label={GUIA_EVALUACION.campos.score.label}
         required

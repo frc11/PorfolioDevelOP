@@ -142,6 +142,11 @@ const aviso = (i: number, kind: OsSetterNoticeKind, leadId: string | null): Avis
   body: `b${i}`,
   hace: 'hace 1 h',
   leadId,
+  // P23 — este barrido mide el PLIEGUE, no la vigencia: los avisos entran
+  // vigentes para que la única variable del eje siga siendo `leadId`. La
+  // vigencia tiene su propio barrido más abajo.
+  vigente: true,
+  enSuLugar: null,
 })
 
 let casosPliegue = 0

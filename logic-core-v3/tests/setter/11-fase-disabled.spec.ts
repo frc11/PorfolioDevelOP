@@ -76,17 +76,24 @@ test('B-07 · BRIEF: el tilde está disabled y muestra el motivo', async ({ page
   // El motivo vive en el REGISTRO, no dentro del `<button>` del tilde: el sprint
   // de destinos alcanzables lo sacó de adentro (con tres tildes por pantalla era
   // el mismo párrafo tres veces, y el de RECHAZADA necesita un enlace, que ahí
-  // adentro no sería navegable). Lo que se fija es lo mismo: que nombre el botón
-  // que existe y diga dónde está.
+  // adentro no sería navegable). Lo que se fija es que NOMBRE el botón que
+  // existe.
+  //
+  // P23 sacó «y diga dónde está»: el botón vive en la barra de acción, que es
+  // `sticky bottom-0`, así que «acá arriba» mandaba a buscarlo donde no está. La
+  // afirmación de la ubicación se retiró a propósito y en su lugar está el
+  // invariante `copy-sin-ubicacion`, que prohíbe la clase entera.
   const registro = firstVisible(page.locator('main section[aria-label="Registro"]'))
   await expect(registro).toContainText('arrancá la construcción')
   await expect(registro).toContainText('«Arrancar construcción»')
-  await expect(registro).toContainText('acá arriba')
+  await expect(registro, 'la copy no puede volver a ubicar el botón').not.toContainText(
+    'acá arriba',
+  )
 
   // P6-B: los tres tildes de la pantalla, uno por fase — no un tilde fusionado.
   await expect(page.locator('main section[aria-label="Registro"] button[aria-pressed]')).toHaveCount(3)
 
-  // El CTA «Arrancar construcción» sigue arriba, sin bloquear nada más de la pantalla.
+  // El CTA «Arrancar construcción» sigue existiendo, sin bloquear nada más de la pantalla.
   await expect(firstVisible(page.getByRole('button', { name: 'Arrancar construcción' }))).toBeVisible()
 
   // P6-B: una dirección vieja (m9, retirada del registro) no rompe — la guardia

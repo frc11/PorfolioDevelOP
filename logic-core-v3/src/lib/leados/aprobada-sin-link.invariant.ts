@@ -56,6 +56,7 @@ import {
   type HomeLeadInput,
 } from './flow.ts'
 import { derivarPantalla, type DerivacionManualInput } from './manual.ts'
+import { vigenciaDeAviso } from './novedades-vigencia.ts'
 import { admitePantalla } from './paso-admitido.ts'
 import { causaDeEspera, turnoDelLead, FALTA_LINK_PERMANENTE } from './turno.ts'
 
@@ -240,6 +241,31 @@ const CENSO: readonly Derivacion[] = [
     conLink: true,
     sinLink: false,
   },
+  {
+    // P23 — La SÉPTIMA, y la encontró este mismo guard antes de que saliera. El
+    // aviso «Franco aprobó tu demo · Enviá el link ya» es una superficie que
+    // deriva una ACCIÓN de un lead aprobado, y por eso podía repetir el defecto
+    // original: pedirle el link al setter cuando el link todavía no existe.
+    // No re-deriva el gate — llama a `gateEnvioDemo`, el del motor.
+    id: 'vigencia-aviso',
+    donde: 'novedades-vigencia.ts · vigenciaDeAviso(«DEMO_APROBADA»)',
+    decide: 'si el aviso del panel sigue pidiendo que se mande el link',
+    derivar: (finalUrl) => {
+      const lead = clasificarLead(leadAprobado(finalUrl, true))
+      return vigenciaDeAviso('DEMO_APROBADA', {
+        stage: lead.stage,
+        status: lead.status,
+        caliente: lead.caliente,
+        finalUrl: lead.finalUrl,
+        demoEnviada: lead.demoEnviada,
+        proximaAccion: lead.proximaAccion,
+        grupo: lead.grupo,
+        accionable: lead.accionable,
+      }).vigente
+    },
+    conLink: true,
+    sinLink: false,
+  },
 ]
 
 const ids = CENSO.map((entrada) => entrada.id)
@@ -339,6 +365,7 @@ const ARCHIVOS_CENSADOS: readonly string[] = [
   'src/lib/leados/home.ts',
   'src/lib/leados/manual.ts',
   'src/lib/leados/paso-admitido.ts',
+  'src/lib/leados/novedades-vigencia.ts',
   'src/lib/leados/paso.ts',
   'src/lib/leados/turno.ts',
 ]

@@ -32,6 +32,18 @@ export type AvisoView = {
    * (reasignación-saliente: el setter ya no es dueño → el aviso solo informa).
    */
   leadId: string | null
+  /**
+   * P23 — ¿la ORDEN de este aviso sigue siendo la que el lead pide? El título es
+   * un hecho y no caduca; el cuerpo lleva una orden y sí. Ver
+   * `novedades-vigencia.ts`.
+   */
+  vigente: boolean
+  /**
+   * Qué pide el lead HOY, cuando la orden del aviso ya no corre. Sale de
+   * `proximaAccion` — el MISMO dato que ordena la cola y el foco, así que las
+   * dos superficies no pueden mandar cosas distintas. `null` si la orden vale.
+   */
+  enSuLugar: string | null
 }
 
 /**
@@ -60,6 +72,11 @@ export type FilaNovedad = {
   cantidad: number
   /** Lead que "Abrir" ancla como foco. Siempre null en una fila plegada. */
   leadId: string | null
+  /** P23 — ver `AvisoView.vigente`. Una fila plegada es siempre vigente: los
+   *  avisos que se pliegan no dan órdenes (`leadId: null`). */
+  vigente: boolean
+  /** P23 — ver `AvisoView.enSuLugar`. */
+  enSuLugar: string | null
 }
 
 /**
@@ -95,6 +112,8 @@ export function agruparAvisos(
         hace: aviso.hace,
         cantidad: 1,
         leadId: aviso.leadId,
+        vigente: aviso.vigente,
+        enSuLugar: aviso.enSuLugar,
       })
       continue
     }
@@ -113,6 +132,10 @@ export function agruparAvisos(
       hace: aviso.hace,
       cantidad: 1,
       leadId: null,
+      // Los que se pliegan no tienen `leadId` y por eso no dan órdenes: no hay
+      // nada que pueda caducar. `vigenciaDeAviso` ya devuelve `true` para ellos.
+      vigente: aviso.vigente,
+      enSuLugar: aviso.enSuLugar,
     })
   }
 

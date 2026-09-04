@@ -3,7 +3,12 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Badge } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { rutaManual, type PantallaDef, type PosicionManual } from '@/lib/leados/manual'
+import {
+  ofreceSalida,
+  rutaManual,
+  type PantallaDef,
+  type PosicionManual,
+} from '@/lib/leados/manual'
 import { ManualHeader, NavConstruccion, type CabeceraLead } from './manual-nav'
 import { BarraAccion, ProveedorAccion } from './barra-accion'
 import { FranjaRecorrido } from './franja-recorrido'
@@ -205,8 +210,14 @@ export function PantallaManual({
         {/* Declara la acción de la barra sin zona propia — ver `accion`. */}
         {accion}
 
-        {/* Avance: si no estás parado en tu paso, la salida corta es volver a él. */}
-        {!esActual && (
+        {/* Avance: si no estás parado en tu paso, la salida corta es volver a él
+            — salvo que sea el paso actual el que te mandó acá. Ese caso (P23) es
+            el ciclo: `espera` ofrece «Registralo» → m5, y m5 ofrecía «Ir a tu
+            paso actual» → espera, que vuelve a ofrecer m5. Las dos puntas eran
+            correctas por separado; el ciclo lo hacía la composición. La que se
+            va es la VUELTA, no la ida: el setter entró a m5 a registrar algo y
+            m5 conserva su acción, su franja y «Volver a tu día». */}
+        {!esActual && !ofreceSalida(posicion.actual, pantalla.id, posicion) && (
           <section
             aria-label="Avance"
             className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4"

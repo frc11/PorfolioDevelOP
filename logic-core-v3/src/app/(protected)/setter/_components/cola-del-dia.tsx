@@ -122,8 +122,8 @@ export function ColaDelDia({ cola, proximo, stickyActivo }: ColaDelDiaProps) {
       {cola.ocultos > 0 && (
         <p className="px-1 text-xs text-zinc-600">
           {cola.ocultos === 1
-            ? 'Queda 1 más para trabajar, en tu cartera (acá abajo).'
-            : `Quedan ${cola.ocultos} más para trabajar, en tu cartera (acá abajo).`}
+            ? 'Queda 1 más para trabajar, en tu cartera.'
+            : `Quedan ${cola.ocultos} más para trabajar, en tu cartera.`}
         </p>
       )}
     </section>

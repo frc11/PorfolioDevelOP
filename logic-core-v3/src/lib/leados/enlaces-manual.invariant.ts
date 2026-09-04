@@ -54,6 +54,8 @@
  * el cartel del home (`paso.ts`), que es otra superficie.
  */
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { join, relative } from 'node:path'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { FASE_IDS, type FaseId } from './contracts.ts'
 import * as CONTENIDO_FLOW from './flow-content.ts'
@@ -64,6 +66,8 @@ import { HERRAMIENTAS } from './herramientas.ts'
 import {
   derivarPantalla,
   FASES_MANUAL,
+  ofreceSalida,
+  PANTALLA_IDS,
   PANTALLAS,
   PANTALLAS_CONSTRUCCION,
   type DerivacionManualInput,
@@ -397,3 +401,154 @@ console.log(
     `declarados (${marcador.reduce((n, m) => n + m.ejercitados, 0)} ejercicios), ` +
     `${citasVistas} citas revisadas contra [${FASES_SIN_DESTINO.join(', ')}]`,
 )
+
+// ── P23 · Ningún ciclo de dos nodos con una pantalla SIN TRABAJO ─────────────
+/**
+ * El defecto: el setter entraba a un lead pausado, caía en `espera`, tocaba la
+ * única puerta que esa pantalla ofrece («¿Respondió o pasó algo antes?
+ * Registralo» → m5) y desde m5 el bloque de avance le decía «tu paso de ahora es
+ * otro» y lo devolvía a `espera`, que vuelve a ofrecer m5. No salía.
+ *
+ * Las dos derivaciones eran correctas POR SEPARADO —m5 no es el paso de ahora, y
+ * `espera` sí ofrece registrar una respuesta temprana— y por eso ninguna prueba
+ * de pantalla suelta lo veía: el ciclo lo hace la COMPOSICIÓN. Esta sección mira
+ * el grafo, que es el único lugar donde el defecto existe.
+ *
+ * ── Qué se prohíbe, exactamente ─────────────────────────────────────────────
+ * NO todo ciclo de dos nodos: mc1 ⇄ mc2 es navegación libre por diseño, y m5 ⇄
+ * m16 son dos pantallas de trabajo adyacentes donde cada una ofrece una acción
+ * distinta — ir y volver ahí es navegar, no estar atrapado.
+ *
+ * Lo que atrapa es el ciclo donde uno de los dos nodos NO TIENE TRABAJO PROPIO:
+ * las pantallas `tipo: 'estado'` (espera / revisión / archivo) no declaran acción
+ * principal —`BarraAccion` devuelve null— así que rebotar contra una es rebotar
+ * contra una pantalla que no ofrece nada más que la puerta por la que entraste.
+ * Ese es el defecto, y es el que se fija acá.
+ *
+ * El grafo se arma con el predicado REAL del producto (`ofreceSalida`, que las
+ * DOS puntas leen): si alguien saca la supresión del bloque de avance, esto se
+ * pone en rojo.
+ */
+{
+  const RAIZ_SRC = join(process.cwd(), 'src')
+  const AVANCE = 'bloque de avance — pantalla-manual.tsx («Ir a tu paso actual»)'
+  let estadosConEstado = 0
+  let aristasVistas = 0
+  const ciclos: string[] = []
+
+  // La arista de VUELTA se DETECTA del componente, no se asume. Si el modelo
+  // dijera «la vuelta no se pinta» porque acá está escrito así, la búsqueda de
+  // ciclos sería `va && !va` — una tautología que nunca puede fallar. Se lee la
+  // fuente y se modela lo que el componente HACE: sin la supresión, el bloque de
+  // avance ofrece la vuelta en toda pantalla que no sea la actual, y el barrido
+  // encuentra el ciclo de verdad. Mismo criterio que el detector de conducta de
+  // `barrido-derivacion.ts`.
+  const FUENTE_AVANCE = join(
+    RAIZ_SRC,
+    'app',
+    '(protected)',
+    'setter',
+    'leads',
+    '[leadId]',
+    'manual',
+    '_components',
+    'pantalla-manual.tsx',
+  )
+  const suprimeVuelta = readFileSync(FUENTE_AVANCE, 'utf8').includes(
+    'ofreceSalida(posicion.actual, pantalla.id, posicion)',
+  )
+
+  for (const input of estados()) {
+    const posicion = derivarPantalla(input)
+    const actual = posicion.actual
+    if (PANTALLAS[actual].tipo !== 'estado') continue
+    estadosConEstado += 1
+
+    // Las pantallas donde el setter puede estar parado en este estado.
+    const alcanzables = PANTALLA_IDS.filter((id) => accesibleEn(posicion, id))
+
+    for (const aqui of alcanzables) {
+      if (aqui === actual) continue
+
+      // Arista de IDA: la pantalla de estado ofrece esta pantalla.
+      const va = ofreceSalida(actual, aqui, posicion)
+      // Arista de VUELTA: «Ir a tu paso actual», con o sin la supresión de P23.
+      const vuelve = suprimeVuelta ? !ofreceSalida(actual, aqui, posicion) : true
+      if (va) aristasVistas += 1
+
+      if (va && vuelve) {
+        ciclos.push(
+          `${PANTALLAS[actual].corto} ⇄ ${PANTALLAS[aqui].corto} en ` +
+            `stage=${String(input.stage)} status=${input.status} ` +
+            `postergadoVencido=${input.postergadoVencido} demoEnviada=${input.demoEnviada}`,
+        )
+      }
+    }
+  }
+
+  // Anti-vacuidad: si el barrido dejara de visitar estados de espera, o
+  // `ofreceSalida` dejara de renderizar en alguno, esto pasaría en verde sin
+  // haber mirado el grafo donde vivía el defecto.
+  assert.ok(
+    estadosConEstado > 100,
+    `el barrido visitó ${estadosConEstado} estados con pantalla de ESTADO como paso actual, ` +
+      'se esperaban >100 — sin ellos la busqueda de ciclos no mira nada',
+  )
+  assert.ok(
+    aristasVistas > 0,
+    'ninguna pantalla de estado ofreció una salida en todo el barrido: `ofreceSalida` dejó de ' +
+      'matchear y la busqueda de ciclos pasa en verde sobre un grafo vacío',
+  )
+
+  assert.deepEqual(
+    [...new Set(ciclos)].slice(0, 5),
+    [],
+    `hay un ciclo entre una pantalla SIN TRABAJO y la pantalla que ella misma ofrece: el setter ` +
+      `entra por la puerta que le abre el paso actual y el ${AVANCE} lo devuelve al paso actual, ` +
+      `que vuelve a ofrecerle la misma puerta. Una de las dos puntas tiene que ceder — y la que ` +
+      `cede es la VUELTA, porque la ida es trabajo real que el setter eligió hacer. ` +
+      `Estados afectados (primeros 5):\n  ${[...new Set(ciclos)].slice(0, 5).join('\n  ')}`,
+  )
+
+  // ── El grafo de arriba es un MODELO. Esto lo ata al código ────────────────
+  // Sin este pedazo, alguien podría sacar la supresión del bloque de avance y el
+  // barrido seguiría verde: el modelo dice que la vuelta no se pinta, y nadie
+  // chequea que el componente lo cumpla. Se exige que las DOS puntas —la que
+  // ofrece la salida y la que decide si pinta la vuelta— lean el MISMO
+  // predicado. Dos copias de la condición vuelven a divergir; una sola, no.
+  const PUNTAS: readonly { archivo: string; debeContener: string; porque: string }[] = [
+    {
+      archivo: join(
+        RAIZ_SRC,
+        'app',
+        '(protected)',
+        'setter',
+        'leads',
+        '[leadId]',
+        'manual',
+        '_components',
+        'estado-manual.tsx',
+      ),
+      debeContener: "ofreceSalida('espera', 'm5', posicion)",
+      porque:
+        'la pantalla de espera tiene que declarar su salida con el MISMO predicado que lee la ' +
+        'vuelta; con la condición copiada a mano las dos puntas vuelven a divergir',
+    },
+  ]
+  for (const punta of PUNTAS) {
+    const fuente = readFileSync(punta.archivo, 'utf8')
+    assert.ok(
+      fuente.includes(punta.debeContener),
+      `${relative(RAIZ_SRC, punta.archivo)} ya no contiene \`${punta.debeContener}\`. ` +
+        `${punta.porque}. El barrido de ciclos de arriba modela el grafo asumiendo esta línea: ` +
+        'sin ella el modelo y el producto dejan de ser la misma cosa y el barrido pasa en verde ' +
+        'sobre un ciclo real.',
+    )
+  }
+
+  console.log(
+    `OK sin ciclos de dos nodos con pantalla sin trabajo — ${estadosConEstado} estados de ` +
+      `espera/revisión/archivo, ${aristasVistas} salidas ofrecidas, ${PUNTAS.length} puntas ` +
+      'atadas al predicado compartido',
+  )
+}

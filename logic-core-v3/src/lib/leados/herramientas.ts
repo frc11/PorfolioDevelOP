@@ -56,7 +56,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'Un chat de Sonnet que lee la ficha del negocio y dice si vale la pena invertir tiempo en una demo: le pegás la ficha y te devuelve su lectura.',
     queLeDas:
-      'El bloque de la ficha que armaste en Ficha (el botón «Copiar bloque» está acá arriba), como primer mensaje del chat.',
+      'El bloque de la ficha que armaste en Ficha (lo copia el botón «Copiar bloque»), como primer mensaje del chat.',
     queTeDevuelve:
       'Un score del 1 al 5, un veredicto (descartar / avanzar / avanzar con prioridad) y el razonamiento. Eso es lo que traés de vuelta al panel.',
     dondeSeUsa: 'Evaluación',
@@ -68,12 +68,12 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'Una IA que convierte la ficha + la evaluación en el brief de la demo: el plano de qué secciones lleva y qué dice cada una.',
     queLeDas:
-      'El bloque «para el Gem de diseño» que está acá arriba (la ficha y la evaluación juntas).',
+      'El bloque «para el Gem de diseño» (la ficha y la evaluación juntas).',
     // P5-B: la lista tiene que nombrar los campos que la pantalla PIDE. Decía
     // «y notas de marca» — ese ya no se completa acá (lo junta la ficha), así
     // que prometía un campo inexistente justo arriba del formulario.
     queTeDevuelve:
-      'El brief estructurado: título, concepto, secciones en orden y CTA. Lo pegás y completás los campos de abajo.',
+      'El brief estructurado: título, concepto, secciones en orden y CTA. Lo pegás y completás los campos del formulario.',
     dondeSeUsa: 'Brief',
     url: null, // TODO: URL — Gem privado de diseño/brief (pedir a Franco)
   },
@@ -83,7 +83,7 @@ export const HERRAMIENTAS: Record<HerramientaId, Herramienta> = {
     queEs:
       'La herramienta donde se construye la demo de verdad: a partir del brief arma la landing de una página. El panel te guía fase por fase, no la construye por vos.',
     queLeDas:
-      'El bloque «para Claude Design» de acá arriba (el brief + los materiales reales del negocio), como primer mensaje.',
+      'El bloque «para Claude Design» (el brief + los materiales reales del negocio), como primer mensaje.',
     queTeDevuelve:
       'La demo lista para exportar como index.html — que después publicás en Netlify Drop, en «Borrador».',
     dondeSeUsa: 'Construcción',

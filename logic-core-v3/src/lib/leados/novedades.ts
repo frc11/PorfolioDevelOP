@@ -40,6 +40,12 @@ import {
 } from '@/lib/leados/novedades-agrupar'
 import { formatEspera } from '@/lib/leados/revision'
 import type { OwnedLeadWithDossier } from '@/lib/leados/ownership'
+import {
+  indiceDeEstados,
+  vigenciaDeAviso,
+  type EstadoDelLead,
+  type Vigencia,
+} from '@/lib/leados/novedades-vigencia'
 
 /**
  * Cuántos avisos sin leer se LEEN de la base (el contador del badge puede ser
@@ -168,6 +174,11 @@ function leadAbrible(kind: OsSetterNoticeKind, leadId: string | null): string | 
   return leadId
 }
 
+/** Aplana la `Vigencia` a los dos campos que viaja la vista. */
+function vigenciaComoCampos(v: Vigencia): { vigente: boolean; enSuLugar: string | null } {
+  return v.vigente ? { vigente: true, enSuLugar: null } : { vigente: false, enSuLugar: v.enSuLugar }
+}
+
 /**
  * Resumen de las demos del setter EN_REVISION: cuántas y hace cuánto la más
  * vieja. Derivado (cero campos nuevos) de los leads YA filtrados por
@@ -218,11 +229,27 @@ export function derivarColaRevision(
 export async function getNovedadesSetter(
   userId: string,
   leads: OwnedLeadWithDossier[],
-  opts?: { excludeLeadIds?: readonly string[] },
+  opts?: {
+    excludeLeadIds?: readonly string[]
+    /**
+     * P23 — los leads YA clasificados por el page (`buildHomeLeads`), para poder
+     * decir si la orden de cada aviso sigue en pie. Se pasan en vez de
+     * re-clasificar acá: el dato que decide es `proximaAccion`, el MISMO que
+     * ordena la cola, y calcularlo dos veces es exactamente cómo dos superficies
+     * terminan diciendo cosas distintas. Sin ellos, ningún aviso caduca (el
+     * comportamiento previo).
+     */
+    estados?: readonly (EstadoDelLead & { id: string })[]
+  },
 ): Promise<NovedadesView> {
   const ahora = new Date()
   const revision = derivarColaRevision(leads, ahora)
   const excluidos = new Set(opts?.excludeLeadIds ?? [])
+  // Sin `estados` no hay contra qué contrastar: TODO queda vigente (el
+  // comportamiento previo a P23). Un índice vacío diría lo contrario —«este lead
+  // ya no es tuyo» sobre cada aviso—, que es peor que no chequear.
+  const puedeCaducar = opts?.estados !== undefined
+  const estados = indiceDeEstados(opts?.estados ?? [])
 
   try {
     const [rows, totalSinLeer] = await Promise.all([
@@ -258,6 +285,16 @@ export async function getNovedadesSetter(
       body: row.body,
       hace: formatEspera(row.createdAt, ahora),
       leadId: leadAbrible(row.kind, row.leadId),
+      // P23 — la ORDEN del aviso se contrasta contra el estado de AHORA del
+      // lead. El aviso es un snapshot y no se entera de que el lead se movió:
+      // así es como «Enviá el link ya» sobrevivía sobre un lead que la cola
+      // mandaba a esperar, y como un rechazo viejo seguía pidiendo retrabajo al
+      // lado de la aprobación que lo dejó sin efecto.
+      ...vigenciaComoCampos(
+        puedeCaducar
+          ? vigenciaDeAviso(row.kind, estados.get(row.leadId ?? '') ?? null)
+          : { vigente: true },
+      ),
     }))
 
     const { filas, ocultos } = agruparAvisos(avisos, FILAS_NOVEDADES)

@@ -198,8 +198,8 @@ function MotivoDelTilde({
   if (stage === 'BRIEF') {
     return (
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
-        Los tildes se abren cuando arranques la construcción — el botón «Arrancar
-        construcción» está acá arriba.
+        Los tildes se abren cuando arranques la construcción, con el botón
+        «Arrancar construcción».
       </p>
     )
   }

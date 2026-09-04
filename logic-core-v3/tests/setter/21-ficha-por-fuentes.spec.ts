@@ -369,7 +369,7 @@ test('el veredicto cierra el recorrido y su gate sigue cerrado sin señal', asyn
   // el ÚLTIMO bloque del mismo recorrido, no una sección suelta debajo.
   await expect(cabecera(page, CABECERAS[4]), 'el veredicto es el bloque 5').toBeVisible()
   await expect(
-    cabecera(page, CABECERAS[4]).getByText('Falta la señal mínima de arriba'),
+    cabecera(page, CABECERAS[4]).getByText('Falta la señal mínima de la ficha'),
     'y avisa que todavía no se puede decidir',
   ).toBeVisible()
 

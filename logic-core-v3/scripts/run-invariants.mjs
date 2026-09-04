@@ -68,7 +68,17 @@
 // (mostrados + ocultos = total), y el dedup contra novedades mide lo VISIBLE, no
 // el grupo entero: un accionable que la cola no llegó a mostrar conserva su
 // aviso en vez de desaparecer de las dos superficies.
-const INVARIANTES_ESPERADOS = 54;
+// 56 desde P23 («el veredicto y el ciclo»): suma dos.
+// `check:invariant:copy-sin-ubicacion` — ninguna copy del setter dice DÓNDE está
+// una cosa. La frase «el botón «Arrancar construcción» está acá arriba» era
+// correcta hasta que P18 mudó la acción a una barra `sticky bottom-0`; nombrar el
+// control alcanza y no lo puede desmentir el CSS. Mira el texto suelto de JSX
+// además de los literales: el defecto vivía justamente ahí.
+// `check:invariant:novedades-vigencia` — un aviso vigente y la cola no pueden
+// mandar cosas distintas sobre el mismo lead. Un aviso es un snapshot congelado
+// en el handoff; cuando el lead se mueve, la orden caduca y el aviso pasa a decir
+// lo que la cola dice (`proximaAccion`, la misma fuente).
+const INVARIANTES_ESPERADOS = 56;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen

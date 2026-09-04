@@ -50,13 +50,13 @@ export function M14Contexto({
           </a>
           <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
             Abrilo en otra pestaña —mejor en incógnito y en tu celular— y chequealo punto por punto
-            contra la lista de abajo.
+            contra la lista.
           </p>
         </div>
       ) : (
         <p className="text-xs leading-relaxed text-zinc-500">
-          Todavía no hay borrador publicado — el salto a «Borrador» está acá abajo, en el
-          registro.
+          Todavía no hay borrador publicado — el salto a «Borrador» lo ofrece el
+          registro de esta pantalla.
         </p>
       )}
       {brief && brief.secciones.length > 0 && (

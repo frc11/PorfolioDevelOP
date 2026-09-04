@@ -191,10 +191,17 @@ test('clase 2 · el bloque copiable que la munición nombra está donde dice', a
   })
   await expect(page).toHaveURL(/\/manual\/mc1$/)
 
-  // El bloque vive en «Contexto del lead», que el layout-tipo pinta ANTES de
-  // «Munición»: la instrucción decía «está acá abajo» y estaba arriba.
+  // El bloque vive en «Contexto del lead» y la munición lo NOMBRA. Hasta P23 la
+  // instrucción además decía dónde estaba («está acá arriba»); el sprint retiró
+  // esa mitad porque una ubicación sobrevive a la mudanza que la vuelve falsa
+  // —P18 movió la acción principal a una barra sticky y la copy siguió apuntando
+  // hacia arriba—. Lo que se afirma es lo que importa: el nombre coincide.
   await expect(zona(page, 'Contexto del lead')).toContainText('Bloque para Claude Design')
-  await expect(zona(page, 'Munición')).toContainText('está acá arriba')
+  await expect(zona(page, 'Munición')).toContainText('«para Claude Design»')
+  await expect(
+    zona(page, 'Munición'),
+    'la munición no puede volver a ubicar el bloque',
+  ).not.toContainText('acá arriba')
   await expect(zona(page, 'Munición')).not.toContainText('está acá abajo')
 
   // Y se prueba la dirección, no solo la palabra: el contexto precede a la

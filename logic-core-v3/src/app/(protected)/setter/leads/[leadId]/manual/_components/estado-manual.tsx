@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowRight, ExternalLink, Hourglass } from 'lucide-react'
 import { cadenciaInfo, formatFechaCorta, PLANTILLAS_FOLLOW_UP } from '@/lib/leados/flow'
 import { GUIA_ESPERA } from '@/lib/leados/guidance-content'
-import { rutaManual, type PosicionManual } from '@/lib/leados/manual'
+import { ofreceSalida, rutaManual, type PosicionManual } from '@/lib/leados/manual'
 import { TEXTO_TURNO, TURNO_DE_CAUSA, type CausaEspera } from '@/lib/leados/turno'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { ManualHeader, type CabeceraLead } from './manual-nav'
@@ -91,7 +91,9 @@ export function EstadoManual({
       ? `${toques ?? 'Sin toques registrados'} — la cadencia se completó: no queda otro toque para mandar. Si no respondió, el lead se enfría y el cierre lo decide Franco.`
       : `Sin próximo toque agendado${toques ? ` · ${toques}` : ''} — si contesta, registralo y el flujo sigue solo.`
 
-  const puedeRegistrar = esEspera && posicion.habilitadas.includes('m5')
+  // P23: la condición vive en `ofreceSalida` — el bloque de avance de las otras
+  // pantallas la lee para NO ofrecer la vuelta que cerraba el ciclo.
+  const puedeRegistrar = esEspera && ofreceSalida('espera', 'm5', posicion)
 
   return (
     <div className="space-y-5">

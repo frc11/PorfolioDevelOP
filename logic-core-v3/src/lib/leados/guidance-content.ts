@@ -452,7 +452,7 @@ export const GUIA_FICHA = {
         evidencia: 'reseñas o contenido real',
       },
       faltaPrefijo: 'Falta: ',
-      cierrePendiente: 'Falta la señal mínima de arriba',
+      cierrePendiente: 'Falta la señal mínima de la ficha',
       cierreListo: 'Te toca decidir',
     },
   },
@@ -556,7 +556,7 @@ export const GUIA_EVALUACION = {
 export const GUIA_BRIEF = {
   titulo: 'Brief de diseño',
   intro: [
-    'Copiá el bloque de abajo, pegalo en el ',
+    'Copiá el bloque de esta pantalla, pegalo en el ',
     { enfasis: 'Gem de diseño' },
     ' y traé su respuesta acá. El brief es el ',
     { enfasis: 'plano de la demo' },
@@ -565,7 +565,7 @@ export const GUIA_BRIEF = {
   campos: {
     pegadoGem: {
       label: 'Respuesta del Gem (pegado completo)',
-      hint: 'Pegala entera, sin editar. Los campos de abajo son el resumen estructurado.',
+      hint: 'Pegala entera, sin editar. Los demás campos son el resumen estructurado.',
       /**
        * El MISMO campo cuando el Gem de diseño todavía no tiene link cargado:
        * ahí el campo deja de ser obligatorio, porque pedir que se transcriba la
@@ -741,8 +741,8 @@ export const GUIA_DRAFT = {
   pasos: [
     'En Claude Design: Export → HTML standalone (o el .zip si lo ofrece).',
     'Asegurate de que el archivo se llame index.html (si bajó un .zip, que lo tenga adentro).',
-    'Abrí Netlify Drop (el botón de acá arriba) y arrastrá el archivo (o la carpeta) ahí.',
-    'Copiá la URL que te da Netlify y pegala acá abajo.',
+    'Abrí Netlify Drop (lo abre el botón «Netlify Drop») y arrastrá el archivo (o la carpeta) ahí.',
+    'Copiá la URL que te da Netlify y pegala en «URL del borrador».',
   ],
   campos: {
     draftUrl: {
@@ -1105,7 +1105,7 @@ export const GUIA_ESPERA = {
   postergacion: [
     'Lo postergaste vos: ',
     { enfasis: 'el contacto está pausado' },
-    ' hasta la fecha de arriba — cuando llegue, el lead vuelve a tu cola de trabajo. Si el negocio contesta antes, registralo acá y sigue.',
+    ' hasta la fecha que fijaste — cuando llegue, el lead vuelve a tu cola de trabajo. Si el negocio contesta antes, registralo acá y sigue.',
   ],
   respuesta: null,
 } satisfies Record<CausaEspera, LineaRica | null>

@@ -234,20 +234,23 @@ test('m13 congelado · la munición deja de mandar a un campo que no existe', as
 
   // RECHAZADA con borrador publicado: el motor guarda el link SOLO en
   // CONSTRUCCION, así que el registro muestra el borrador congelado y el botón de
-  // reabrir — abajo no hay campo. La munición seguía diciendo «pegala acá abajo».
+  // reabrir — el campo no se monta. La munición seguía mandando a un campo que no
+  // existe. P23 cambió la forma de nombrarlo: ya no dice DÓNDE está el campo
+  // («acá abajo»), lo NOMBRA («URL del borrador») — misma afirmación, sin atarla
+  // a una posición que el próximo sprint mueve.
   await page.goto(`/setter/leads/${rechazadoId}/manual/m13`, { waitUntil: 'domcontentloaded' })
   await expect(page).toHaveURL(/\/manual\/m13$/)
 
   await expect(main(page), 'el estado es el congelado').toContainText(
     'Borrador congelado por el rechazo',
   )
-  await expect(main(page)).not.toContainText('pegala acá abajo')
+  await expect(main(page)).not.toContainText('pegala en «URL del borrador»')
   await expect(main(page)).toContainText('se abre cuando reabrís la construcción')
 
   // Y en construcción el instructivo vuelve a ser el de siempre — la variante es
   // del estado, no un reemplazo permanente.
   await page.goto(`/setter/leads/${construyendoId}/manual/m13`, { waitUntil: 'domcontentloaded' })
-  await expect(main(page)).toContainText('pegala acá abajo')
+  await expect(main(page)).toContainText('pegala en «URL del borrador»')
 
   expectNoConsoleErrors(guard)
 })

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowLeft, ArrowLeftRight, CalendarClock, Check, ExternalLink, Flame } from 'lucide-react'
+import { ArrowLeftRight, CalendarClock, Check, ExternalLink, Flame } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import { cn } from '@/lib/utils'
@@ -12,6 +12,7 @@ import {
   type PantallaId,
   type PosicionManual,
 } from '@/lib/leados/manual'
+import { SalidaDelManual } from './salida-manual'
 
 const STATUS_TONES: Record<LeadStatus, 'cyan' | 'emerald' | 'amber' | 'rose' | 'violet' | 'zinc' | 'blue'> = {
   PROSPECTO: 'cyan',
@@ -86,13 +87,10 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
 
   return (
     <header className="space-y-2 sm:space-y-3">
-      <Link
-        href="/setter"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ArrowLeft size={13} strokeWidth={1.5} aria-hidden />
-        Volver a tu día
-      </Link>
+      {/* P23: era un `<Link>` pelado y salir con el veredicto cargado lo perdía
+          sin avisar. El control pregunta SÓLO si la pantalla declaró trabajo sin
+          registrar; si no hay nada cargado se comporta igual que antes. */}
+      <SalidaDelManual />
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="line-clamp-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
