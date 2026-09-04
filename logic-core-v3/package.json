@@ -243,6 +243,9 @@
     "test:s16-tipografia": "npx tsx src/app/v3/_lib/__tests__/s16-tipografia.invariant.ts",
     "test:s16-anclaje": "npx tsx src/app/v3/_lib/escena/__tests__/s16-anclaje.invariant.ts",
     "test:s16": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s16",
+    "test:s17-revelado": "npx tsx src/app/v3/_lib/escena/__tests__/s17-revelado.invariant.ts",
+    "test:s17-marca": "npx tsx src/app/v3/_lib/__tests__/s17-marca.invariant.tsx",
+    "test:s17": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s17",
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },

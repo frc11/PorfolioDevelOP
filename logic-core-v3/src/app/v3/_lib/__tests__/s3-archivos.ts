@@ -72,6 +72,7 @@ export const ARCHIVOS_DE_RUTA = [
   `${V3}/componentes/_bloques/Ficha.tsx`,
   `${V3}/componentes/_bloques/GaleriaCta.tsx`,
   `${V3}/componentes/_bloques/GaleriaLayout.tsx`,
+  `${V3}/componentes/_bloques/GaleriaMarca.tsx`,
   `${V3}/componentes/_bloques/GaleriaMedios.tsx`,
   `${V3}/componentes/_bloques/GaleriaNavegacion.tsx`,
   `${V3}/componentes/_bloques/GaleriaPie.tsx`,

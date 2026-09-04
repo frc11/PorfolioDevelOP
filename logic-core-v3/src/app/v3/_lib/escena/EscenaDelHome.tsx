@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 import { useReducedMotion } from '@/lib/use-reduced-motion'
 import {
@@ -17,6 +17,7 @@ import ProbeStage from './ProbeStage'
 import { medirLasSecciones } from './extensionDeLasSecciones'
 import { crearPistaDelHome } from './pistaDelHome'
 import { progresoDelScroll } from './recorrido'
+import { aplicarRevelado } from './revelado'
 import { escenaRetenida } from './retencion'
 import {
   ESTADO_INICIAL,
@@ -151,6 +152,7 @@ const PROGRESO_RETENIDO = 0
 function useEscenaAtadaAlScroll(
   rig: ReturnType<typeof createNumericStore<ProbeRig>>,
   retenida: boolean,
+  reveladoRef: RefObject<HTMLDivElement | null>,
 ): EstadoDeLaEscena {
   const [estado, setEstado] = useState<EstadoDeLaEscena>(ESTADO_INICIAL)
 
@@ -183,6 +185,10 @@ function useEscenaAtadaAlScroll(
       // scroll. Es una propiedad del contrato de `visibilidad.ts`, afirmada por
       // identidad en su invariante — no una esperanza sobre esta línea.
       setEstado((previo) => siguiente(previo, { tipo: 'cuadro', enCuadro }))
+
+      // B3 · EL REVELADO, de la MISMA lectura de scroll: sólo una máscara CSS en
+      // el envoltorio, jamás la pose ni el progreso. Ver `revelado.ts`.
+      aplicarRevelado(reveladoRef.current, ventana, !quieta && enCuadro)
     }
 
     const pedir = (): void => {
@@ -204,7 +210,7 @@ function useEscenaAtadaAlScroll(
     }
     // `retenida` entra en las dependencias para que soltar la escena vuelva a
     // leer el scroll de una vez, sin esperar al próximo evento.
-  }, [rig, retenida])
+  }, [rig, retenida, reveladoRef])
 
   /**
    * El pulso de la reanudación. Sólo corre mientras la fase lo pide, y avisa
@@ -235,7 +241,8 @@ export default function EscenaDelHome() {
   const etapaDelIntro = useIntroStage()
   const retenida = escenaRetenida(etapaDelIntro, introEnteredClean())
 
-  const estadoDeLaEscena = useEscenaAtadaAlScroll(rig, retenida)
+  const reveladoRef = useRef<HTMLDivElement>(null) // el envoltorio, para la máscara del revelado (B3)
+  const estadoDeLaEscena = useEscenaAtadaAlScroll(rig, retenida, reveladoRef)
 
   // `ProbeLogo` lo dispara UNA vez, en su efecto de montaje. Acá no enciende
   // ninguna pantalla —el home ya está entero detrás— pero el prop es
@@ -247,11 +254,15 @@ export default function EscenaDelHome() {
 
   return (
     <div
+      ref={reveladoRef}
       className={CLASES_DE_LA_ESCENA}
       data-escena={MARCA_ESCENA}
       data-intro={etapaDelIntro}
       data-escena-fase={estadoDeLaEscena.fase}
       aria-hidden="true"
+      // B3: la máscara del revelado. El `mask-image` lo escribe el scroll por
+      // frame; estas dos fijan que cubra el envoltorio y no se repita.
+      style={{ maskRepeat: 'no-repeat', maskSize: '100% 100%' }}
     >
       <EscudoDeLaEscena>
         <ProbeStage

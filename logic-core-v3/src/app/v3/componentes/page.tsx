@@ -11,6 +11,7 @@ import { CURSOR_MIN_ANCHO_PX } from '../_lib/cursor'
 import { Estado, Ficha } from './_bloques/Ficha'
 import { GaleriaCta } from './_bloques/GaleriaCta'
 import { GaleriaLayout } from './_bloques/GaleriaLayout'
+import { GaleriaMarca } from './_bloques/GaleriaMarca'
 import { GaleriaMedios } from './_bloques/GaleriaMedios'
 import { GaleriaNavegacion } from './_bloques/GaleriaNavegacion'
 import { GaleriaPie } from './_bloques/GaleriaPie'
@@ -70,6 +71,7 @@ export default function PaginaComponentes() {
           <Grilla columnas={2} canal="conmutado">
             <GaleriaLayout />
             <GaleriaCta />
+            <GaleriaMarca />
             <GaleriaNavegacion />
             <FichaDelCursor />
             <GaleriaMedios />
