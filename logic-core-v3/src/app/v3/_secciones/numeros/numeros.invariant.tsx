@@ -14,16 +14,21 @@
  * distintos; una barra de cuatro columnas pierde el efecto entero"*— es una
  * propiedad de la FORMA, y una forma se puede afirmar. Por eso las celdas no se
  * leen de `GEOMETRIA`: se **parsean de las clases renderizadas**, y sobre esos
- * números se comprueba que no hay barra de columnas iguales, que las cinco
- * difieren en columna, ancho y fila, que ninguna se sale de las doce y que
- * ninguna se superpone. Leer la constante en vez del marcado quedaría verde el
- * día que una clase armada por interpolación dejara de emitirse — el modo de
- * falla que `GEOMETRIA` documenta.
+ * números se comprueba que no hay barra de columnas iguales, que ninguna se
+ * sale de las doce y que ninguna se superpone. Leer la constante en vez del
+ * marcado quedaría verde el día que una clase armada por interpolación dejara
+ * de emitirse — el modo de falla que `GEOMETRIA` documenta.
+ *
+ * ⚠ **B2 le agrega una coordenada a esa forma: la PANTALLA.** La sección se
+ * compone en cuatro cajas de pantalla y las filas son locales a su caja, así
+ * que una celda sin su pantalla ya no ubica nada. El censo corta por
+ * `data-pantalla` y afirma que **ninguna cifra comparte renglón con otra** —más
+ * fuerte que las tres filas distintas que se pedían cuando las cinco vivían en
+ * una sola pantalla—.
  *
  * ⚠ Acá no hay P1, así que no hay fase de medición que esperar: los seis bloques
- * son P2 y escriben transformada en el primer cuadro. Ése es el control positivo
- * de "abajo de 1025 no se mueve nada".
- */
+ * son P2 y escriben transformada en el primer cuadro — ése es el control
+ * positivo de "abajo de 1025 no se mueve nada". */
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -43,7 +48,7 @@ import { entradasColgadas } from '../_contrato/pedido'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
-import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
+import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, type ClaveDeCifra } from './contenido'
 import { GEOMETRIA, Numeros } from './Numeros'
 
 const seccion = seccionDe('numeros')
@@ -54,23 +59,16 @@ const seccionMontada = <Numeros seccion={seccion} />
 const quieto = marcar(seccionMontada, { anima: false })
 /** El control positivo: la coreografía forzada, sin la preferencia. */
 const conMotion = marcar(seccionMontada, { anima: true })
-/** Y la preferencia mandando sobre el modo forzado: la política de S2 es total. */
 /**
- * ⚠ QUÉ SIGNIFICA `conPreferencia` DESPUÉS DE SITIO-S7.
- *
- * Antes, la sección consultaba la compuerta por su cuenta y la política de
- * movimiento reducido de S2 la apagaba desde adentro: por eso el render forzaba
- * el modo Y la preferencia, para ver quién ganaba.
- *
- * Ahora la compuerta se resuelve UNA vez, arriba de las ocho, y **la preferencia
- * se lee ahí**: con `prefers-reduced-motion` puesto, `CompuertaDelHome` no
- * instala una sola primitiva animada. O sea que lo que una persona con la
- * preferencia recibe **es el árbol quieto**, y eso es lo que este render
- * reproduce. La política de S2 no cambió de fuerza: cambió de lugar, y ahora se
- * aplica antes de que exista un árbol animado que apagar.
- *
- * La tabla de verdad que lo decide es `deberiaAnimar`, que es pura y se afirma
- * abajo — sin montar React, sin navegador y sin depender de esta sección.
+ * ⚠ QUÉ SIGNIFICA `conPreferencia` DESPUÉS DE SITIO-S7. Antes la sección
+ * consultaba la compuerta por su cuenta y la política de movimiento reducido la
+ * apagaba desde adentro. Ahora la compuerta se resuelve UNA vez arriba de las
+ * ocho y **la preferencia se lee ahí**: con `prefers-reduced-motion` puesto,
+ * `CompuertaDelHome` no instala una sola primitiva animada, o sea que esa
+ * persona recibe **el árbol quieto** — que es lo que este render reproduce. La
+ * política no cambió de fuerza: cambió de lugar, y se aplica antes de que
+ * exista un árbol animado que apagar. La tabla de verdad es `deberiaAnimar`,
+ * pura y afirmada abajo, sin montar React ni depender de esta sección.
  */
 const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'always' })
 
@@ -82,33 +80,38 @@ const FUENTE = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url
 
 /** Una celda de la composición, leída del marcado y no de la constante. */
 interface CeldaLeida {
+  /** La caja de pantalla en la que cae. B2: la fila es local a su caja. */
+  readonly pantalla: string
   readonly col: number
   readonly ancho: number
   readonly fila: number
 }
 
-function celdaDe(clases: string): CeldaLeida {
+function celdaDe(clases: string, pantalla: string): CeldaLeida {
   const n = (re: RegExp): number => {
     const m = re.exec(clases)
     if (m === null) throw new Error(`falta ${re.source} en "${clases}"`)
     return Number.parseInt(m[1], 10)
   }
-  return {
-    col: n(/tablet:col-start-(\d+)/),
-    ancho: n(/tablet:col-span-(\d+)/),
-    fila: n(/tablet:row-start-(\d+)/),
-  }
+  return { pantalla, col: n(/tablet:col-start-(\d+)/), ancho: n(/tablet:col-span-(\d+)/), fila: n(/tablet:row-start-(\d+)/) }
 }
 
-/** Los ítems posicionados, en orden de documento: la cabecera y las cinco cifras. */
+/** Los ítems posicionados, POR PANTALLA y en orden de documento: la cabecera y
+ *  las cinco cifras. Sin el corte por `data-pantalla` la fila no ubica nada. */
 const celdasDe = (html: string): CeldaLeida[] =>
-  [...html.matchAll(/class="([^"]*tablet:col-start-\d+[^"]*)"/g)].map((m) => celdaDe(m[1]))
+  html.split('data-pantalla="').slice(1).flatMap((t) => {
+    const pantalla = t.slice(0, t.indexOf('"'))
+    return [...t.matchAll(/class="([^"]*tablet:col-start-\d+[^"]*)"/g)].map((m) => celdaDe(m[1], pantalla))
+  })
 
-/** Dos celdas de la misma fila cuyos rangos de columna se pisan. */
+/** Dos celdas de la MISMA pantalla y fila cuyas columnas se pisan. Pantallas
+ *  distintas nunca se pisan: son cajas distintas del flujo. */
 const seSuperponen = (c: readonly CeldaLeida[]): boolean =>
-  c.some((a, i) =>
-    c.some((b, j) => i !== j && a.fila === b.fila && a.col < b.col + b.ancho && b.col < a.col + a.ancho),
-  )
+  c.some((a, i) => c.some((b, j) => i !== j && a.pantalla === b.pantalla && a.fila === b.fila && a.col < b.col + b.ancho && b.col < a.col + a.ancho))
+
+/** La pantalla que la tabla le asigna a una cifra. */
+const pantallaDe = (clave: ClaveDeCifra): string =>
+  GEOMETRIA.pantallas.find((p) => p.cifras.includes(clave))?.id ?? '(ninguna)'
 
 /** Los `grid-cols-N` numéricos del marcado, sin repetir y ordenados. */
 const columnasDe = (html: string): number[] => [
@@ -123,11 +126,20 @@ const nivelesDe = (html: string): string[][] =>
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
 
 afirmarIgual(seccion.superficie, 'papel-opaco', 'la superficie es papel-opaco: el canvas no se ve')
-afirmarIgual(pantallasDe(seccion), 1, 'ocupa UNA pantalla')
+afirmarIgual(pantallasDe(seccion), 4, 'ocupa CUATRO pantallas — B2 la subió de una, ver el docblock de su fila en `secciones.ts`')
 afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: la pantalla scrollea')
 afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')
-afirmarIgual(veces(quieto, 'min-h-svh'), 1, 'y una sola caja de pantalla, no dos')
-controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '200svh' }, (s) => pantallasDe(s) === 1)
+/** ⚠ **B2 · ERA `1` Y AHORA SON CUATRO, atadas a la tabla.** La Fase 0 subió la
+ *  sección a 400svh y la composición seguía siendo UNA caja: `s10-mobile` §2 lo
+ *  publicaba en rojo y el censo medía CERO grupos adentro de `[4320, 8640]`,
+ *  porque los seis bloques aterrizaban entre 3720 y 4320, fuera de la sección. */
+afirmarIgual(veces(quieto, 'min-h-svh'), pantallasDe(seccion), 'y CUATRO cajas de pantalla, una por pantalla declarada: la composición se reparte sobre las cuatro')
+afirmarIgual(veces(quieto, 'data-pantalla='), pantallasDe(seccion), '  y las cuatro se declaran en el marcado — la cuenta sale de la tabla, no de un número escrito acá')
+afirmarIgual(GEOMETRIA.pantallas.length, pantallasDe(seccion), '  y la tabla de la composición declara las mismas cuatro')
+afirmarIgual(GEOMETRIA.pantallas.flatMap((p) => p.cifras), CONTENIDO.cifras.map((c) => c.clave), '  que reparten las CINCO cifras en el orden de lectura, sin repetir ni perder ninguna')
+afirmarIgual(GEOMETRIA.pantallas.filter((p) => p.cabecera).map((p) => p.id), ['entrada'], '  y UNA sola lleva la cabecera: es lo que la separa del primer aterrizaje de cifra')
+controlPositivo('el reparto vería una cifra perdida', GEOMETRIA.pantallas.map((p) => ({ ...p, cifras: p.cifras.slice(1) })), (ps: readonly { readonly cifras: readonly ClaveDeCifra[] }[]) => ps.flatMap((p) => p.cifras).length === CONTENIDO.cifras.length)
+controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '200svh' }, (s) => pantallasDe(s) === 4)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El contenido no se puede leer como un dato — la sección donde más cuesta')
@@ -164,7 +176,7 @@ afirmarIgual(COLUMNAS, [1, 12], 'las únicas grillas numéricas del marcado son 
 const sinBarra = (h: string): boolean => !columnasDe(h).includes(4) && !columnasDe(h).includes(5)
 afirmar(sinBarra(quieto), 'no hay barra de cuatro ni de cinco columnas iguales: el efecto no se pierde')
 controlPositivo('ve una barra de cuatro columnas iguales', '<div class="grid grid-cols-4"><i>a</i></div>', sinBarra)
-afirmarIgual(veces(quieto, 'data-composicion="dispersa"'), 1, 'y hay UNA composición dispersa, no varias')
+afirmarIgual(veces(quieto, 'data-composicion="dispersa"'), pantallasDe(seccion), 'y hay UNA composición dispersa POR PANTALLA declarada, ni una suelta de más: B2 la repartió sobre las cuatro y la cuenta se ata a la tabla')
 afirmar(quieto.includes(`tablet:grid-cols-${GEOMETRIA.columnas}`), 'la grilla tiene las columnas que declara GEOMETRIA')
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -174,34 +186,30 @@ const CELDAS = celdasDe(quieto)
 const CIFRAS = CELDAS.slice(1)
 afirmarIgual(CELDAS.length, 6, 'hay seis ítems posicionados: la cabecera y las cinco cifras')
 afirmarIgual(CIFRAS.length, 5, '  y cinco de ellos son cifras: la cuenta no es vacía')
-afirmarIgual(
-  CIFRAS,
-  CONTENIDO.cifras.map((c) => celdaDe(GEOMETRIA.celdas[c.clave].celda)),
-  '  y son las que declara GEOMETRIA, en el orden de lectura del contenido',
-)
+afirmarIgual(CIFRAS, CONTENIDO.cifras.map((c) => celdaDe(GEOMETRIA.celdas[c.clave].celda, pantallaDe(c.clave))), '  y son las que declara GEOMETRIA, en la pantalla que le toca a cada una y en el orden de lectura')
 afirmar(distintos(CIFRAS.map((c) => c.col)) >= 4, 'al menos cuatro columnas de arranque distintas', CIFRAS.map((c) => c.col).join(' · '))
-afirmar(distintos(CIFRAS.map((c) => c.fila)) >= 3, 'al menos tres filas distintas: no es una fila', CIFRAS.map((c) => c.fila).join(' · '))
 afirmar(distintos(CIFRAS.map((c) => c.ancho)) >= 3, 'al menos tres anchos distintos: no son iguales', CIFRAS.map((c) => c.ancho).join(' · '))
-controlPositivo(
-  've cinco celdas idénticas',
-  Array.from({ length: 5 }, () => ({ col: 1, ancho: 3, fila: 1 })),
-  (c: readonly CeldaLeida[]) => distintos(c.map((x) => x.col)) >= 4 && distintos(c.map((x) => x.ancho)) >= 3,
-)
+/** ⚠ **B2 · REEMPLAZA A «al menos tres filas distintas», y es más exigente.**
+ *  Aquélla toleraba que dos cifras compartieran renglón, y las dos que lo
+ *  compartían se separaban con 80 px de desplome —menos de un paso del censo,
+ *  así que aterrizaban juntas—. Ahora las CINCO tienen renglón propio en
+ *  pantalla propia: cinco pares `(pantalla, fila)` distintos. */
+afirmar(distintos(CIFRAS.map((c) => `${c.pantalla}·${c.fila}`)) === 5, 'ninguna cifra comparte renglón con otra: cada una tiene su fila en su pantalla', CIFRAS.map((c) => `${c.pantalla}·${c.fila}`).join(' · '))
+afirmar(distintos(CIFRAS.map((c) => c.pantalla)) === 3, '  y se reparten en TRES pantallas: la cuarta es la de la cabecera', CIFRAS.map((c) => c.pantalla).join(' · '))
+controlPositivo('ve cinco celdas idénticas', Array.from({ length: 5 }, () => ({ pantalla: 'volumen', col: 1, ancho: 3, fila: 1 })), (c: readonly CeldaLeida[]) => distintos(c.map((x) => x.col)) >= 4 && distintos(c.map((x) => x.ancho)) >= 3)
+controlPositivo('ve dos cifras compartiendo renglón en la misma pantalla', [{ pantalla: 'volumen', col: 1, ancho: 5, fila: 1 }, { pantalla: 'volumen', col: 9, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => distintos(c.map((x) => `${x.pantalla}·${x.fila}`)) === c.length)
 const desborda = (c: readonly CeldaLeida[]): number => c.filter((x) => x.col + x.ancho - 1 > GEOMETRIA.columnas).length
 afirmarIgual(desborda(CELDAS), 0, 'ninguna celda se sale de las doce columnas: nada desborda al angostar')
 afirmar(!seSuperponen(CELDAS), 'ninguna celda se superpone con otra: nada tapa a nada')
-controlPositivo('ve dos celdas pisadas', [{ col: 1, ancho: 6, fila: 1 }, { col: 4, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => !seSuperponen(c))
+controlPositivo('ve dos celdas pisadas', [{ pantalla: 'volumen', col: 1, ancho: 6, fila: 1 }, { pantalla: 'volumen', col: 4, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => !seSuperponen(c))
+controlPositivo('  y NO las ve en pantallas distintas: son cajas distintas del flujo', [{ pantalla: 'volumen', col: 1, ancho: 6, fila: 1 }, { pantalla: 'tiempo', col: 4, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => seSuperponen(c))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · Cuatro tamaños distintos entre las cinco cifras, contados en el marcado')
 
 const NIVELES = nivelesDe(quieto)
 afirmarIgual(NIVELES.length, 5, 'las cinco cifras declaran su nivel tipográfico en el marcado')
-afirmarIgual(
-  NIVELES,
-  CONTENIDO.cifras.map((c) => [c.clave, GEOMETRIA.celdas[c.clave].nivel]),
-  '  y cada una es la que le asignó GEOMETRIA',
-)
+afirmarIgual(NIVELES, CONTENIDO.cifras.map((c) => [c.clave, GEOMETRIA.celdas[c.clave].nivel]), '  y cada una es la que le asignó GEOMETRIA')
 const tamanos = (h: string): number => distintos(nivelesDe(h).map((n) => n[1]))
 afirmar(tamanos(quieto) >= 4, 'al menos CUATRO tamaños distintos entre las cinco: la jerarquía existe', NIVELES.map((n) => n[1]).join(' · '))
 afirmarIgual(tamanos(quieto), 4, '  cuatro y no cinco: la escala de display tiene exactamente cuatro niveles')

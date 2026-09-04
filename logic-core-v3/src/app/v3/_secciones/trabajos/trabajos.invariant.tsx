@@ -4,23 +4,20 @@
  * Corre con `npx tsx src/app/v3/_secciones/trabajos/trabajos.invariant.tsx`.
  *
  * La sección se renderiza DE VERDAD tres veces, en el mismo proceso y sin
- * navegador: rama quieta (`modo="nunca"`, la de abajo de 1025), coreografía
- * forzada, y la preferencia de movimiento reducido mandando sobre el modo
- * forzado. Todo se afirma sobre el MARCADO que sale.
- *
- * Las dos ramas están porque cada una sola miente: "abajo de 1025 no se escribe
- * una transformada" pasa en verde si el sistema no anima nunca. El control es la
- * rama con coreografía —y **P7 sí escribe transformada en el primer cuadro**.
+ * navegador: rama quieta (la de abajo de 1025), coreografía forzada, y la
+ * preferencia de movimiento reducido mandando sobre el modo forzado. Todo se
+ * afirma sobre el MARCADO que sale. Las dos ramas están porque cada una sola
+ * miente: "abajo de 1025 no se escribe una transformada" pasa en verde si el
+ * sistema no anima nunca, y el control es la rama con coreografía.
  *
  * Lo propio de esta sección, además de lo que el lane pide a las cuatro:
  *
  *   · **La métrica nunca está oculta**, ni ella ni ningún ancestro suyo.
- *   · **Cero `three`**, leído del disco. · **El ritmo**: tres pantallas
- *     pinneadas son UN momento. · **El despinneo abajo de 1025.**
- *   · **Los pasos de la tabla SON los proyectos del contenido** (B1): el alto
- *     de la sección se deriva de ahí, y acá la igualdad se comprueba.
+ *   · **Cero `three`**, del disco. · **El ritmo**: tres pantallas pinneadas son
+ *     UN momento. · **El despinneo.** · **Los pasos = los proyectos** (B1).
  *   · **El acento no puede ser texto**: los hex se LEEN del tema. · **Las tres
  *     capturas** (V3-D): que el ARCHIVO mida la relación declarada.
+ *   · **B2 · el reparto de los tres planos** (§15), sobre la función pura.
  *
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en
  * `trabajos-piezas.ts`, que es su módulo de apoyo declarado. Donde hubo que
@@ -43,8 +40,8 @@ import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
 import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, sinTres, veces } from './soporte'
-import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
-import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
+import { ancestrosDe, aterrizajesMedidos, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, desviosDelContrato, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, repartoMonotono, separacionMinima, type MedidasDeImagen } from './trabajos-piezas'
+import { ATERRIZAJES_DE_LOS_PLANOS, GEOMETRIA, SIZES_DE_LA_CAPTURA, localDelPlano } from './geometria'
 import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
@@ -55,12 +52,10 @@ const seccionMontada = <Trabajos seccion={seccion} />
 const quieto = marcar(seccionMontada, { anima: false })
 /** El control positivo: la coreografía forzada, sin la preferencia. */
 const conMotion = marcar(seccionMontada, { anima: true })
-/**
- * Y la preferencia mandando sobre el modo forzado. ⚠ DESDE SITIO-S7 la
- * compuerta se resuelve arriba de las ocho y **la preferencia se lee ahí**: con
- * `prefers-reduced-motion` puesto no se instala una sola primitiva animada, así
- * que lo que esa persona recibe **es el árbol quieto**.
- */
+/** Y la preferencia mandando sobre el modo forzado. ⚠ DESDE SITIO-S7 la
+ *  compuerta se resuelve arriba de las ocho y **la preferencia se lee ahí**:
+ *  con ella puesta no se instala una sola primitiva animada, así que lo que esa
+ *  persona recibe **es el árbol quieto**. */
 const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'always' })
 
 const TEXTOS = textosDe(CONTENIDO) // las hojas de texto del contenido, con su ruta
@@ -78,28 +73,21 @@ afirmarIgual(seccion.pinneada, 'desde-escritorio', 'y es PINNEADA DESDE 1025: ab
 afirmarIgual(veces(quieto, 'data-pinneado="desde-escritorio"'), 1, '  y hay UN solo hijo pinneado en el marcado')
 afirmarIgual(veces(quieto, 'escritorio:sticky'), 1, '  con el sticky acotado a la variante de 1025, no suelto')
 // La contracara del despinneo: los tres proyectos suman los 300svh declarados.
-afirmarIgual(veces(quieto, 'min-h-svh'), 3, '  y los tres proyectos toman una pantalla cada uno abajo del umbral')
+afirmarIgual(veces(quieto, 'min-h-svh'), GEOMETRIA.planos, '  y los tres proyectos toman una pantalla cada uno abajo del umbral')
 afirmarIgual(veces(quieto, 'escritorio:min-h-0'), 3, '    y la sueltan desde 1025, donde el panel sí está clavado')
 afirmar(quieto.includes('data-seccion="invertida"'), 'el panel escribe `data-seccion="invertida"`: el tema se da vuelta solo')
-/**
- * ⚠ **B1 · LOS TRES `h-full` SE QUEDAN, y que hayan VUELTO a su valor viejo es
- * la prueba de que el arreglo fue del contrato y no un parche acá.** Hubo una
- * versión intermedia con dos: el bloque llevaba `minHeight: seccion.alto` para
- * que el ancla del pin no degenerara, y con el escenario en 3240 px la grilla
- * quieta no podía colgar de su `h-full`. Con `anclaje: 'seccion'` el bloque
- * vuelve a `min-h-0 flex-1` y la cadena es la de siempre.
- */
+/** ⚠ **B1 · LOS TRES `h-full` SE QUEDAN, y que hayan VUELTO a su valor viejo es
+ *  la prueba de que el arreglo fue del contrato y no un parche acá.** La versión
+ *  intermedia tenía dos: el bloque llevaba `minHeight: seccion.alto` y con el
+ *  escenario en 3240 px la grilla quieta no podía colgar de su `h-full`. Con
+ *  `anclaje: 'seccion'` vuelve a `min-h-0 flex-1`. */
 afirmarIgual(veces(quieto, 'h-full'), 3, 'el alto de escritorio lo ponen los TRES envoltorios encadenados con `h-full`')
 afirmarIgual(veces(quieto, 'escritorio:h-svh'), 1, '  y la ÚNICA pantalla pedida arriba de 1025 es la del hijo pinneado')
-/** ── 1b · EL PUENTE ENTRE LAS DOS FUENTES DEL ATRIBUTO DEL PANEL (B1). El nombre
- *  se escribe dos veces —constante en `forma.ts`, literal en `Panel.tsx`— porque
- *  `s13b-escena` lo afirma literal y vive en `_lib/escena/`, congelado. El modo de
- *  falla es mudo: `closest()` de un atributo inexistente devuelve `null`. */
-afirmar(
-  FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`),
-  'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite',
-  `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`,
-)
+/** ── 1b · EL PUENTE ENTRE LAS DOS FUENTES DEL ATRIBUTO DEL PANEL (B1). Se
+ *  escribe dos veces —`forma.ts` y literal en `Panel.tsx`— porque `s13b-escena`
+ *  lo exige literal y está congelado. El modo de falla es mudo: `closest()` de
+ *  un atributo inexistente devuelve `null`. */
+afirmar(FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`), 'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite', `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`)
 controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viejo={seccion.id}', (t: string) => t.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`))
 
 afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla SON los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
@@ -111,13 +99,9 @@ titulo('2 · El ritmo: la secuencia cuenta como UN momento, no como tres pantall
 
 const ritmo = ritmoDe([seccion])
 afirmarIgual(ritmo.pantallas, 3, 'tres pantallas nominales')
-/**
- * ⚠ CORRECCIÓN DE SITIO-S7: este lane contaba la sección ENTERA como pinneada
- * (3 de 3); el otro contaba el recorrido del pin (2 de 3). Ganó el del otro
- * **porque es el que la referencia midió** —`rangoPegado = alto del contenedor
- * − alto del elemento pegado`, SCROLL.md §4—. O sea que este número estaba mal.
- * La derivación entera está en `_contrato/ritmo.ts`.
- */
+/** ⚠ CORRECCIÓN DE SITIO-S7: este lane contaba la sección ENTERA como pinneada
+ *  (3 de 3); el otro contaba el recorrido del pin (2 de 3), que es el que la
+ *  referencia midió (SCROLL.md §4). La derivación: `_contrato/ritmo.ts`. */
 afirmarIgual(ritmo.pantallasPinneadas, 2, '  las DOS que consume el pin: 3 de sección menos la pantalla del `sticky`')
 afirmarIgual(ritmo.secuencias, 1, '  que es UNA sola secuencia')
 afirmarIgual(ritmo.momentos, 2, 'momentos = 3 − 2 + 1 = DOS (SCROLL.md §4 y §6)')
@@ -180,14 +164,15 @@ titulo('7 · CONTROL POSITIVO — con la compuerta abierta, P7 SÍ escribe trans
 
 afirmar(conMotion.includes('transform:'), 'P7 escribe transformada ya en el primer cuadro')
 afirmarIgual(veces(conMotion, 'translate3d(0px, 0px, -3000px) scale(0.6)'), 3, '  y los tres planos arrancan en el extremo medido: −3000 de profundidad, escala 0,6')
-afirmarIgual(veces(conMotion, 'will-change-transform'), 3, 'son exactamente TRES piezas, una por proyecto')
+/** ⚠ **B2 · ERAN TRES Y AHORA SON CUATRO.** La cuarta es el MARCO, que hasta B2
+ *  no se animaba: por eso el censo medía el primer aterrizaje recién en
+ *  `scrollY` 10200, 1.560 px después de que la sección arranca. Entra con P2 y
+ *  su rango cierra antes del pin, así que sigue siendo el plano quieto. */
+afirmarIgual(veces(conMotion, 'will-change-transform'), GEOMETRIA.planos + 1, 'son CUATRO piezas: una por proyecto y el marco')
 afirmarIgual(veces(conMotion, 'pointer-events:none'), 3, 'y lo que está lejos no es clickeable')
-/**
- * ⚠ DESDE SITIO-S7 la perspectiva vive sólo en la rama animada: sin transformada
- * 3D no hay nada que poner en perspectiva. Su efecto secundario —crear bloque
- * contenedor para descendientes posicionados— lo cubre `s7-arboles`, que afirma
- * que la rama quieta de esta sección no tiene ni un `absolute`.
- */
+/** ⚠ DESDE SITIO-S7 la perspectiva vive sólo en la rama animada: sin
+ *  transformada 3D no hay nada que poner en perspectiva. Su efecto secundario
+ *  —crear bloque contenedor— lo cubre `s7-arboles`. */
 afirmarIgual(veces(conMotion, 'perspective:1000px'), 1, 'la perspectiva va UNA vez, en el ancestro de los planos')
 afirmarIgual(veces(quieto, 'perspective:1000px'), 0, '  y NO en la rama quieta, donde no hay nada que poner en perspectiva')
 
@@ -269,9 +254,7 @@ controlPositivo('el detector ve un archivo de otra relación', { ...DECLARADA, a
 afirmar(SIZES_DE_LA_CAPTURA.trim().length > 0, 'el `sizes` no es vacío', SIZES_DE_LA_CAPTURA)
 afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorColumnas(GEOMETRIA.captura.columnasDelPlano, GEOMETRIA.captura.columnasDeLaGrilla, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano. ⚠ B1: sale de las COLUMNAS del plano (2 de 3 = 67vw) y no de un porcentaje escrito. Describe la caja de la rama ANIMADA — la quieta de escritorio muestra 1 de 3 y baja el doble de lo que necesita: sobre-pedir cuesta bytes, sub-pedir sirve una captura borrosa a la mayoría')
 
-/** El `sizes` sobre el marcado REAL, que ya no hace falta simular. Es lo que
- *  demuestra que el pipeline produce descriptores de ANCHO y no de densidad —el
- *  defecto medido en las 134 imágenes de la referencia—. */
+/** El `sizes` sobre el marcado REAL: demuestra descriptores de ANCHO. */
 afirmarIgual(veces(quieto, `sizes="${SIZES_DE_LA_CAPTURA}"`), 3, 'las tres imágenes emiten el `sizes` en el HTML')
 afirmar(quieto.includes('w"') && !quieto.includes('2x'), '  y su srcset usa descriptores de ANCHO')
 controlPositivo('el chequeo del srcset ve descriptores de densidad', '<img srcSet="/a.jpg 1x, /b.jpg 2x"/>', (html: string) => html.includes('w"') && !html.includes('2x'))
@@ -279,8 +262,7 @@ controlPositivo('el chequeo del srcset ve descriptores de densidad', '<img srcSe
 /** Y el marco SIGUE teniendo su rama de hueco: el día que una captura se caiga
  *  vuelve el marcador con su relación de aspecto, y no una imagen rota. */
 const sinArchivo = renderToStaticMarkup(
-  <MarcoDeMedio marcador="[CAPTURA]" fuente={null} alt={CONTENIDO.proyectos[0].captura.alt}
-    ancho={GEOMETRIA.captura.ancho} alto={GEOMETRIA.captura.alto} sizes={SIZES_DE_LA_CAPTURA} />,
+  <MarcoDeMedio marcador="[CAPTURA]" fuente={null} alt={CONTENIDO.proyectos[0].captura.alt} ancho={GEOMETRIA.captura.ancho} alto={GEOMETRIA.captura.alto} sizes={SIZES_DE_LA_CAPTURA} />,
 )
 afirmar(sinArchivo.includes('[CAPTURA]') && sinArchivo.includes(`aspect-ratio:${GEOMETRIA.captura.ancho} / ${GEOMETRIA.captura.alto}`), 'la rama sin archivo sigue viva: marcador y relación de aspecto, no una imagen rota')
 
@@ -294,6 +276,24 @@ afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))].sort(), ['metrica', 'prosa
 afirmarIgual(PEDIDO.filter((e) => e.marcador !== null).length, 3, '  tres con marcador visible: las tres métricas, y ninguna captura')
 afirmarIgual(PEDIDO.filter((e) => e.ruta.includes('captura')).map((e) => e.ruta), [], '  y no queda una sola entrada pidiendo algo de las capturas: llenar una casilla la SACA de la lista')
 afirmar(PEDIDO.every((e) => e.formato.length > 0), '  y todas dicen en qué formato entra el dato')
-afirmarIgual(PATRONES_DE_LA_SECCION, ['P7'], 'la sección declara consumir P7, y nada más')
+afirmarIgual(PATRONES_DE_LA_SECCION, ['P7'], 'la tabla de `contenido.ts` declara P7, y nada más')
+const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].map((m) => m[1]))].sort()
+afirmarIgual(patronesDelFuente, ['P2', 'P7'], '  y el componente consume DOS: P7 para los planos y P2 para el marco (B2)')
+console.log(
+  '  ⚠️ DESINCRONIZACIÓN REPORTADA, NO ARREGLADA [dueño: `trabajos/contenido.ts`] — `PATRONES_DE_LA_SECCION` sigue diciendo ' +
+    'sólo P7. `contenido.ts` está FUERA del scope del frente B de B2 (regla 3 de la instrucción: el contenido no se toca), así que ' +
+    'la tabla queda vieja y las dos afirmaciones de arriba dejan la diferencia a la vista en vez de esconderla en un igual que mienta.',
+)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('15 · B2 · El reparto de los tres planos: cada proyecto, su tercio del scroll')
+
+const ATERRIZAJES = aterrizajesMedidos(localDelPlano, GEOMETRIA.planos)
+afirmarIgual(ATERRIZAJES, [...ATERRIZAJES_DE_LOS_PLANOS], 'los tres planos dejan de cambiar en 1/3, 2/3 y 1 del recorrido — con el escalonado de P7 haciendo el reparto terminaban en 0,814 · 0,907 · 1, amontonados en las últimas dos décimas, y el censo los leía como DOS grupos pegados al final')
+afirmar(separacionMinima(ATERRIZAJES) >= 1 / GEOMETRIA.planos - 1e-9, 'y entre dos aterrizajes hay al menos un tercio del recorrido', separacionMinima(ATERRIZAJES).toFixed(6))
+afirmar(repartoMonotono(localDelPlano, GEOMETRIA.planos), 'ningún plano retrocede: uno que volviera atrás se desarmaría solo mientras el visitante baja')
+afirmarIgual(desviosDelContrato(localDelPlano, GEOMETRIA.planos), [], 'y el plano vigente lee el MISMO `local` que `tramoDeSecuencia` del contrato: es la secuencia de Servicios, no una copia parecida')
+controlPositivo('el detector ve un reparto que NO separa: con los tres leyendo el progreso entero, los tres terminan en el mismo punto', (p: number) => p, (r: (p: number, i: number) => number) => separacionMinima(aterrizajesMedidos(r, GEOMETRIA.planos)) >= 1 / GEOMETRIA.planos - 1e-9)
+controlPositivo('  y ve un reparto que retrocede', (p: number) => 1 - p, (r: (p: number, i: number) => number) => repartoMonotono(r, GEOMETRIA.planos))
 
 cerrar('trabajos.invariant')

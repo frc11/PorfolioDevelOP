@@ -1,7 +1,11 @@
 'use client'
 
+import { cn } from '@/lib/utils'
+
 import { Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, type NivelDeTitular } from '../../_componentes/tipografia/Titular'
+import { CanalDeUnaPieza } from '../_contrato/canales'
+import { Bloque } from '../_contrato/coreografia'
 
 import type { ClaveDeCifra } from './contenido'
 
@@ -39,13 +43,6 @@ import type { ClaveDeCifra } from './contenido'
  * exigiéndole a cada elemento con `data-nivel` que conserve su clase de tamaño,
  * sobre el marcado renderizado. Afirmaba el resultado, no el rodeo — por eso
  * sigue valiendo.
- *
- * ── Por qué el NIVEL entra por prop y no se lee de `GEOMETRIA` ─────────────
- *
- * Porque `GEOMETRIA` vive en `Numeros.tsx`, que es quien importa esta pieza:
- * leerla desde acá cerraría un ciclo de VALORES entre los dos módulos. Con el
- * nivel como prop la dependencia va en un solo sentido y esta pieza no sabe
- * nada de la composición — que es lo correcto: no es asunto suyo dónde cae.
  */
 export function Cifra({
   clave,
@@ -71,5 +68,71 @@ export function Cifra({
         {rotulo}
       </Micro>
     </p>
+  )
+}
+
+/**
+ * DÓNDE CAE UNA CIFRA — el tamaño y la celda, sin el contenido.
+ *
+ * ⚠ Las clases son CADENAS LITERALES y no una clase armada por interpolación:
+ * Tailwind escanea el código fuente, una clase construida no la ve nadie, la
+ * regla no se emite nunca y la cifra queda en la columna 1 sin un error en
+ * consola. El instrumento lee los números DEL MARCADO —parseados de la clase
+ * renderizada— así que la comprobación no se desincroniza de lo que se ve.
+ *
+ * El tipo vive acá y no en `Numeros.tsx` por la misma razón por la que el nivel
+ * entra por prop: `GEOMETRIA` es de allá, esta pieza es de acá, y la dependencia
+ * va en un solo sentido. Que el tipo esté del lado del consumidor es lo que
+ * permite que la tabla de allá se escriba contra él sin cerrar un ciclo.
+ */
+export interface Celda {
+  /** El tamaño. De los cuatro niveles de display; no hay un quinto. */
+  readonly nivel: NivelDeTitular
+  /** Columna de arranque, ancho y fila DE SU PANTALLA, desde 768. Literales. */
+  readonly celda: string
+  /**
+   * El desplome dentro de la fila. **Vacío en las cinco desde B2**, y no es una
+   * simplificación: existía para romper la alineación de dos cifras que
+   * compartían fila —80 px de la escala de espaciado, `tablet:mt-20`— y ya no
+   * hay ninguna que la comparta. El porqué está en `Numeros.tsx`.
+   */
+  readonly desplome: string
+}
+
+/**
+ * UNA CIFRA COLGADA DE SU PROPIO BLOQUE — de acá sale el escalonado real.
+ *
+ * P2 tiene **un solo target por instancia**, así que su `escalonado` declarado
+ * (0,1 s) queda inerte: el cronograma lo aplica sobre `cantidad − 1 = 0`. Un
+ * bloque con las cinco cifras adentro las entraría a las cinco juntas. Con un
+ * bloque POR CIFRA, el ancla de P2 —`top bottom → bottom bottom`— se resuelve
+ * contra la caja de ESE bloque, así que cada cifra aterriza cuando su propio
+ * borde inferior toca el pie del viewport: cajas a distinta altura, aterrizajes
+ * a distinto scroll. El escalonado es geométrico y no del cronograma.
+ *
+ * ⚠ El bloque lleva la CELDA y no un envoltorio con la celda adentro: el
+ * elemento que la grilla posiciona tiene que ser el hijo directo de la grilla, y
+ * el `Bloque` es justo ese hijo. Un `div` intermedio con la celda dejaría al
+ * bloque sin posición y a la cifra en la columna 1.
+ */
+export function CifraDeLaComposicion({
+  clave,
+  valor,
+  rotulo,
+  celda,
+}: {
+  readonly clave: ClaveDeCifra
+  readonly valor: string
+  readonly rotulo: string
+  readonly celda: Celda
+}): React.JSX.Element {
+  return (
+    <Bloque patron="P2" className={cn(celda.celda, celda.desplome)}>
+      {(progreso) => (
+        <CanalDeUnaPieza progreso={progreso} patron="P2">
+          <Cifra clave={clave} nivel={celda.nivel} valor={valor} rotulo={rotulo} />
+        </CanalDeUnaPieza>
+      )}
+    </Bloque>
   )
 }

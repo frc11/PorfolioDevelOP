@@ -1,13 +1,16 @@
 'use client'
 
+import { useTransform, type MotionValue } from 'motion/react'
+
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Pie } from '../../_componentes/chrome/Pie'
 import { Caption, Micro } from '../../_componentes/tipografia/Textos'
-import { Bloque } from '../_contrato/coreografia'
-import { CanalDeTitular } from '../_contrato/canales'
+import { Bloque, type Progreso } from '../_contrato/coreografia'
+import { CanalDeTitular, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { EncabezadoDeSeccion, Seccion } from '../_contrato/Seccion'
+import { asentar } from './asentamiento'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import {
   CTA_DE_CIERRE,
@@ -139,43 +142,33 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
       <EncabezadoDeSeccion seccion={seccion} nombre={ETIQUETA_DE_SECCION} />
 
       <Bloque patron="P1">
-        {(progreso) => (
-          /* ⚠ El envoltorio lleva el `id` con el que la `<section>` se nombra
-             (S11, defecto 10). El `h2` sale de `CanalDeTitular`, que no tiene
-             prop `id` —`canales.tsx` no es de este frente—, así que el id va en
-             el elemento que lo contiene: el nombre accesible se computa del
-             contenido, y el contenido de este `div` es exactamente el titular.
-             Es una caja de bloque adentro del `Bloque`, que ya era una: no mueve
-             un píxel del apilado de `--spacing-12` del pie.
-
-             ⚠ Y ES TAMBIÉN LA CAJA DE LA MEDIDA (B1). El `max-width` va acá y
-             no en el `h2`: `CanalDeTitular` parte el texto línea por línea
-             MIDIENDO el ancho de su caja, así que acotar el contenedor es lo
-             que cambia el corte; acotar el `h2` desde afuera obligaría a pasar
-             la clase por `className`, que es donde `cn()` mezcla utilidades de
-             texto. Un `div` de bloque con `max-width` no toca ni el árbol de
-             encabezados ni el nombre accesible. */
-          <div id={idDelTitularDeSeccion(seccion.id)} className={GEOMETRIA.claseDeLaMedidaDelTitular}>
-            <CanalDeTitular
-              progreso={progreso}
-              patron="P1"
-              texto={TITULAR_DE_CIERRE}
-              nivel="titulo-xl"
-              como="h2"
-              className="text-balance"
-            />
-          </div>
-        )}
+        {(progreso) => <TitularDelCierre seccion={seccion} progreso={progreso} />}
       </Bloque>
 
-      {/* El CTA no cuelga de ningún progreso: la instrucción le asigna P1 al
-          titular y P2 a las columnas, y ninguno de los dos es esto. Un tercer
-          bloque para un solo enlace sería coreografía que nadie pidió. El
-          envoltorio evita que el `inline-flex` del CTA se estire a lo ancho
-          del apilado del pie, que es un contenedor `flex` en columna. */}
-      <div>
-        <CtaEnlace href={CTA_DE_CIERRE.destino} rotulo={CTA_DE_CIERRE.rotulo} />
-      </div>
+      {/* ── B2 · EL CTA ENTRA, Y ENTRA CON LAS COLUMNAS ──────────────────────
+          Hasta B2 no colgaba de ningún progreso, y la razón escrita era que la
+          instrucción le asignaba P1 al titular y P2 a las columnas. B2 lo nombra
+          entre las tres piezas que "entran hoy juntas", así que ahora entra.
+
+          **P1 y no P2, y es una decisión medida.** Con P2 el enlace aterrizaría
+          en 17828 —dentro del grupo de `por-que-develop`, que cierra en 17760— y
+          eso volvería a fundir los dos grupos que el asentamiento del titular
+          acaba de separar. Con P1 aterriza en 18081, o sea con las columnas del
+          pie (18099 → 18175), y el Cierre queda con UN momento propio y nítido.
+          P1 sobre un enlace no es una desviación del corpus: `a` es uno de los
+          seis elementos que el patrón mide en la referencia.
+
+          El `Bloque` reemplaza al envoltorio que ya estaba —el que evita que el
+          `inline-flex` del CTA se estire a lo ancho del apilado del pie— y la
+          pieza pone otro adentro: dos cajas de bloque donde había una, ninguna
+          con medida propia. */}
+      <Bloque patron="P1">
+        {(progreso) => (
+          <CanalDeUnaPieza progreso={progreso} patron="P1">
+            <CtaEnlace href={CTA_DE_CIERRE.destino} rotulo={CTA_DE_CIERRE.rotulo} />
+          </CanalDeUnaPieza>
+        )}
+      </Bloque>
 
       <Bloque patron="P2">
         {(progreso) => <ColumnasDelPie progreso={progreso} />}
@@ -184,6 +177,71 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
       <LineaDeCierre />
     </Pie>
   )
+}
+
+/**
+ * EL TITULAR — con su medida, su `id` y su asentamiento.
+ *
+ * ⚠ El envoltorio lleva el `id` con el que la `<section>` se nombra (S11,
+ * defecto 10). El `h2` sale de `CanalDeTitular`, que no tiene prop `id`
+ * —`canales.tsx` no es de este frente—, así que el id va en el elemento que lo
+ * contiene: el nombre accesible se computa del contenido, y el contenido de
+ * este `div` es exactamente el titular. Es una caja de bloque adentro del
+ * `Bloque`, que ya era una: no mueve un píxel del apilado de `--spacing-12`.
+ *
+ * ⚠ Y ES TAMBIÉN LA CAJA DE LA MEDIDA (B1). El `max-width` va acá y no en el
+ * `h2`: `CanalDeTitular` parte el texto línea por línea MIDIENDO el ancho de su
+ * caja, así que acotar el contenedor es lo que cambia el corte; acotar el `h2`
+ * desde afuera obligaría a pasar la clase por `className`, que es donde `cn()`
+ * mezcla utilidades de texto.
+ */
+function CajaDelTitular({
+  seccion,
+  progreso,
+}: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+  return (
+    <div id={idDelTitularDeSeccion(seccion.id)} className={GEOMETRIA.claseDeLaMedidaDelTitular}>
+      <CanalDeTitular
+        progreso={progreso}
+        patron="P1"
+        texto={TITULAR_DE_CIERRE}
+        nivel="titulo-xl"
+        como="h2"
+        className="text-balance"
+      />
+    </div>
+  )
+}
+
+/**
+ * ── B2 · EL TITULAR ATERRIZA ANTES DEL PIE, Y ASÍ EL CIERRE TIENE MOMENTO ──
+ *
+ * `asentar` satura el progreso de P1 en la fracción del rango donde el bloque
+ * terminó de ENTRAR al cuadro; los 240 px que el ancla declara de más quedan de
+ * asentamiento. De dónde sale la fracción y qué se midió para necesitarla está
+ * en `asentamiento.ts`. En una línea: el titular aterrizaba a 135 px de las
+ * columnas del pie y el censo de acontecimientos leía las dos cosas —y las de
+ * `por-que-develop`— como un solo grupo, así que el Cierre medía CERO
+ * acontecimientos propios.
+ *
+ * Vive en su propio componente porque `useTransform` es un hook: llamarlo
+ * detrás de un `if` sería llamarlo condicionalmente. Es la misma forma que
+ * `ServiciosEnSecuencia` y `tu-panel/Capacidades` ya usan.
+ */
+function TitularDelCierre({
+  seccion,
+  progreso,
+}: PropsDeSeccion & { readonly progreso: Progreso }): React.JSX.Element {
+  if (progreso === null) return <CajaDelTitular seccion={seccion} progreso={null} />
+  return <TitularAsentado seccion={seccion} progreso={progreso} />
+}
+
+function TitularAsentado({
+  seccion,
+  progreso,
+}: PropsDeSeccion & { readonly progreso: MotionValue<number> }): React.JSX.Element {
+  const asentado = useTransform(progreso, asentar)
+  return <CajaDelTitular seccion={seccion} progreso={asentado} />
 }
 
 /**

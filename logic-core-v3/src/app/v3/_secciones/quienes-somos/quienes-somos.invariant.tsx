@@ -33,25 +33,29 @@ import {
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
 
 afirmarIgual(seccion.superficie, 'papel-opaco', 'la superficie es papel-opaco: el canvas no se ve')
-afirmarIgual(pantallasDe(seccion), 2, 'ocupa DOS pantallas — el tramo más largo sin escena')
-afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: las dos pantallas scrollean')
+afirmarIgual(pantallasDe(seccion), 3, 'ocupa TRES pantallas — B2 la subió de dos, ver el docblock de su fila en `secciones.ts`')
+afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: las tres pantallas scrollean')
 afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')
 
-afirmarIgual(
-  veces(quieto, 'data-pantalla='),
-  2,
-  'el marcado reparte el alto en dos cajas de pantalla, no en una',
-)
-afirmar(
-  quieto.includes('data-pantalla="agencia"') && quieto.includes('data-pantalla="personas"'),
-  '  y son las dos declaradas: la agencia primero, las personas después',
-)
-afirmarIgual(veces(quieto, 'min-h-svh'), 2, '  cada una pide una pantalla: 1 + 1 = los 200svh')
+/**
+ * ⚠ **B2 · DOS CAJAS PASARON A TRES, y el número NO se subió para que un rojo se
+ * ponga verde: se subió porque la composición cambió.** La Fase 0 llevó la fila de
+ * `secciones.ts` a 300svh y la composición se quedó en dos pantallas: el panel medía
+ * 3.240 px con 1.080 px de flujo VACÍO al pie, que es el defecto que `s10-mobile` §2
+ * publica como «el flujo llena las N pantallas declaradas». La sección compone ahora
+ * tres, una por grupo de piezas, y acá va el valor NUEVO.
+ */
+afirmarIgual(veces(quieto, 'data-pantalla='), 3, 'el marcado reparte el alto en TRES cajas de pantalla, una por grupo de piezas')
+const DONDE = ['agencia', 'equipo', 'foto'].map((n) => quieto.indexOf(`data-pantalla="${n}"`))
+afirmarIgual(DONDE.filter((i) => i >= 0).length, 3, '  y son las tres declaradas: la agencia, el equipo y la foto')
+afirmar(DONDE[0] < DONDE[1] && DONDE[1] < DONDE[2], '  en el orden del documento: la agencia · el equipo · la foto', DONDE.join(' < '))
+afirmarIgual(veces(quieto, 'min-h-svh'), 3, '  cada una pide una pantalla: 1 + 1 + 1 = los 300svh')
+controlPositivo('la cuenta de cajas de pantalla ve un marcado con una sola', '<div data-pantalla="agencia" class="min-h-svh"></div>', (html: string) => veces(html, 'data-pantalla=') === 3)
 
 controlPositivo(
   'la lectura del alto ve un alto distinto',
-  { ...seccion, alto: '300svh' },
-  (s) => pantallasDe(s) === 2,
+  { ...seccion, alto: '200svh' },
+  (s) => pantallasDe(s) === 3,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -136,7 +140,7 @@ afirmar(conMotion.includes('transform:'), 'con coreografía los bloques P2 SÍ e
 afirmarIgual(
   veces(conMotion, 'will-change-transform'),
   5,
-  'y son exactamente los CINCO bloques P2 declarados: bajada, cómo trabajamos, foto, y las dos personas',
+  'y son exactamente los CINCO bloques P2 declarados: bajada, cómo trabajamos, las dos personas y la foto',
 )
 afirmar(
   quieto.includes('data-texto-por-lineas="entero"') &&

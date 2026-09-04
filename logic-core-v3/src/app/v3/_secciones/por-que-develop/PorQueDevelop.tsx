@@ -27,11 +27,14 @@ import {
  * medio de la página: su superficie de contrato es `papel-transparente`, o sea
  * que el panel **no pinta fondo** y deja ver lo que hay detrás.
  *
- * ⚠️ La tabla que renderiza —`_lib/secciones.ts`, que escribe el otro lane—
- * declara hoy `papel-opaco` para esta sección. **Esta sección es correcta con
- * las dos y no hay que tocarle una línea el día que cambie**, porque no pinta
- * un color: consume `text-tinta` heredado del panel, `--color-borde` para las
- * separaciones y nada más. Queda reportado como divergencia, no resuelto acá.
+ * ⚠️ **LA DIVERGENCIA QUE ESTE DOCBLOCK REPORTABA YA NO EXISTE, y se dice en
+ * vez de borrarse.** Decía que `_lib/secciones.ts` declaraba `papel-opaco` para
+ * esta sección; leída hoy, la fila 07 declara **`papel-transparente`**, que es
+ * lo que el contrato acordó. O sea que la escena SÍ vuelve acá, y por eso B2
+ * puede llamar a esa vuelta un momento. **Esta sección sigue siendo correcta
+ * con las dos y no hay que tocarle una línea si cambia**, porque no pinta un
+ * color: consume `text-tinta` heredado del panel, `--color-borde` para las
+ * separaciones y nada más.
  *
  * Y por la misma razón, lo que este archivo **no** hace: no agrega una capa, ni
  * un velo, ni un gradiente, ni un fondo para "asegurar" la lectura sobre el

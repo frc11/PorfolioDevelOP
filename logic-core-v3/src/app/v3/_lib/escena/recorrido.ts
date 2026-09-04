@@ -66,6 +66,7 @@ export const PANTALLAS_DE_SCROLL = ANCLAJE.pantallasDeScroll
  */
 export const RITMO_COMPUESTO = 1 / CHOREO_SCREENS
 
+
 // ── La aritmética, pura de sus argumentos ───────────────────────────────────
 
 /**

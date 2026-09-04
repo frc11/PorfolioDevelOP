@@ -12,6 +12,8 @@
  * escáneres persiguen.
  */
 
+import { tramoDeSecuencia } from '../_contrato/secuencia'
+
 /** Los elementos que no cierran, para que la pila de ancestros no se desbalancee. */
 const VACIOS = new Set(['img', 'br', 'hr', 'input', 'meta', 'link', 'source'])
 
@@ -180,4 +182,90 @@ export function coloresDelTema(css: string): ColoresDelTema {
     tinta: hex(bloque[1], /--color-tinta:\s*(#[0-9A-Fa-f]{6})/),
     acentos: [...css.matchAll(/--color-acento-[a-z-]+:\s*(#[0-9A-Fa-f]{6})/g)].map((m) => m[1]),
   }
+}
+
+// ─── EL REPARTO DE LOS TRES PLANOS (B2) ──────────────────────────────────────
+
+/**
+ * Un reparto: de un punto del recorrido y un índice de plano, el progreso LOCAL
+ * de ese plano. El de producción es `localDelPlano`, en `geometria.ts`; el
+ * control positivo pasa uno equivocado por acá mismo.
+ */
+export type RepartoDePlanos = (progreso: number, indice: number) => number
+
+/** Cuántas muestras barre el detector. Impar y fina: cae exacto en los bordes
+ *  de los tercios, que es donde el reparto tiene que cambiar de plano. */
+export const MUESTRAS_DEL_REPARTO = 601
+
+/**
+ * DÓNDE DEJA DE CAMBIAR CADA PLANO, barrido sobre la función real y no leído de
+ * una constante. Es la definición de aterrizaje del censo de `B2-DELTAS.md` §0
+ * —la última muestra en la que algo cambió— aplicada a la matemática en vez de
+ * al navegador, así que se puede afirmar sin abrir Chrome.
+ */
+export function aterrizajesMedidos(
+  reparto: RepartoDePlanos,
+  planos: number,
+  muestras: number = MUESTRAS_DEL_REPARTO,
+): number[] {
+  const salida: number[] = []
+  for (let i = 0; i < planos; i += 1) {
+    let ultimo = 0
+    let anterior = reparto(0, i)
+    for (let k = 1; k < muestras; k += 1) {
+      const p = k / (muestras - 1)
+      const actual = reparto(p, i)
+      if (actual !== anterior) ultimo = p
+      anterior = actual
+    }
+    salida.push(ultimo)
+  }
+  return salida
+}
+
+/** La distancia más corta entre dos aterrizajes consecutivos. Con los tres
+ *  planos moviéndose a la vez da 0: los tres terminan en el mismo punto. */
+export function separacionMinima(aterrizajes: readonly number[]): number {
+  if (aterrizajes.length < 2) return 0
+  return Math.min(...aterrizajes.slice(1).map((a, i) => a - aterrizajes[i]))
+}
+
+/** Si el reparto nunca retrocede. Un plano que volviera atrás se desarmaría
+ *  solo mientras el visitante sigue bajando. */
+export function repartoMonotono(
+  reparto: RepartoDePlanos,
+  planos: number,
+  muestras: number = MUESTRAS_DEL_REPARTO,
+): boolean {
+  for (let i = 0; i < planos; i += 1) {
+    let anterior = reparto(0, i)
+    for (let k = 1; k < muestras; k += 1) {
+      const actual = reparto(k / (muestras - 1), i)
+      if (actual < anterior) return false
+      anterior = actual
+    }
+  }
+  return true
+}
+
+/**
+ * LOS PUNTOS DONDE EL REPARTO NO ES EL DEL CONTRATO. Vacío es lo correcto.
+ *
+ * `tramoDeSecuencia` es la cuenta que `_contrato/secuencia.ts` ya hacía para la
+ * secuencia de Servicios. Esta sección no la reescribe: se le exige que el plano
+ * VIGENTE en cada punto lea exactamente el mismo `local`. Sin esto, dos
+ * secuencias del mismo sitio podrían avanzar parecido y no igual.
+ */
+export function desviosDelContrato(
+  reparto: RepartoDePlanos,
+  planos: number,
+  muestras: number = MUESTRAS_DEL_REPARTO,
+): number[] {
+  const fuera: number[] = []
+  for (let k = 0; k < muestras; k += 1) {
+    const p = k / (muestras - 1)
+    const esperado = tramoDeSecuencia(p, planos)
+    if (reparto(p, esperado.indice) !== esperado.local) fuera.push(p)
+  }
+  return fuera
 }

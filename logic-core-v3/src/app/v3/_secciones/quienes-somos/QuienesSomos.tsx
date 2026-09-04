@@ -16,69 +16,72 @@ import type { PropsDeSeccion } from '../_contrato/forma'
 import { CONTENIDO } from './contenido'
 
 /**
- * 02 · QUIÉNES SOMOS — dos pantallas de papel, sin canvas y sin pinneo.
+ * 02 · QUIÉNES SOMOS — TRES pantallas de papel, sin canvas y sin pinneo.
  *
- * `secciones.ts` le da `papel-opaco` y **200svh**, sin `pinneada`, y ninguna de
+ * `secciones.ts` le da `papel-opaco` y **300svh**, sin `pinneada`, y ninguna de
  * las tres se declara acá. Es el tramo más largo del sitio en el que el canvas
- * NO se ve: la escena vale porque desaparece un rato largo. El corte entre las
- * dos pantallas cae donde **cambia el sujeto** —la agencia primero, las dos
- * personas después— y como no es pinneada, las dos scrollean.
+ * NO se ve: la escena vale porque desaparece un rato largo.
  *
- * ── B1 · LA RESTA. Qué se midió y qué se cambió. [medido] ─────────────────
+ * ── B2 · POR QUÉ SON TRES, Y POR QUÉ EL CORTE CAE DONDE CAE ───────────────
  *
- * Antes, a 1920×1080: **65,09 % de aire muerto y una banda vacía continua de
- * 600 px**. La causa no es el alto declarado: es que cada pantalla centraba su
- * contenido y le sobraba caja.
+ * La Fase 0 subió la tabla de 200 a 300svh por dos números medidos —el techo de
+ * velocidad de la cámara y la densidad de la referencia (cinco piezas a 0,67
+ * pantallas = 3,35)—. **La composición se quedó en DOS, así que la tercera
+ * pantalla quedó vacía**: a 1920×1080 el panel iba de `y` 1080 a 4320 y el flujo
+ * terminaba en 3240: 1080 px de nada, y `s10-mobile` §2 en rojo.
  *
- *     pantalla 1   204,70 px de tinta en 1080 → dos huecos de 437 y 438 px
- *     pantalla 2   770,05 px de tinta en 1080 → dos huecos de 155 px
- *     la juntura   642 → 1234 px = **592 px continuos sin nada**
+ * El corte sale de las CINCO piezas que enumera la fila de `secciones.ts`:
  *
- * Tres cambios, y los tres salen de un número:
+ *     01 la agencia   etiqueta · titular (P1) · bajada (P2) · el lugar
+ *     02 el equipo    cómo trabajamos (P2) · Franco (P2) · Valentino (P2)
+ *     03 la foto      el [FOTO DEL EQUIPO] con su epígrafe (P2)
  *
- *   1. **La medida de lectura deja de crecer con la ventana** (ver `medida`):
- *      la nuestra valía la columna entera, 1700 px, con el titular en UNA línea.
- *   2. **El hueco se reparte en vez de acumularse.** Las cinco piezas de la
- *      pantalla 1 son filas de una grilla de doce que reparte su espacio libre
- *      con `content-evenly`: el hueco es el MISMO entre todas y se recalcula
- *      solo con el alto de la ventana, cosa que un `gap` fijo no puede hacer.
- *   3. **La foto ocupa su lugar.** Pasa de 3 a 4 columnas de 5 —de 738 a 987,7
- *      px de alto a 1920— y las dos personas se reparten el alto de la pantalla
- *      en vez de apilarse arriba.
+ * **La foto entra sola, que es lo que la instrucción pide.** Ya llenaba el 94,4 %
+ * de su pantalla con su epígrafe (1.019,64 px de 1.080): no le sobraba lugar para
+ * nadie al lado, y darle el suyo no le cambia un píxel — sigue en 4 de 5 columnas,
+ * la decisión que B1 midió (`B2-DELTAS.md` §4.1).
  *
- * ── La coreografía y lo que pasa abajo de 1025 ───────────────────────────
+ * ── Lo que el corte hace con los ATERRIZAJES, que es el gate del bloque ───
  *
- * P1 para el titular; P2 para los cinco bloques de cuerpo —bajada, cómo
- * trabajamos, la foto, Franco y Valentino—, cada uno en **su propio `Bloque`**,
- * porque P2 tiene un solo target por instancia y el escalonado no sale de un
- * `stagger` sino de la GEOMETRÍA. Abajo de 1025 `Bloque` entrega `progreso:
- * null` y sale el árbol quieto; el reparto vive en la variante `escritorio:`,
- * así que ahí las cinco piezas caen en una columna con el `gap-y` fijo — a 375
- * la caja no sobra: sobra tinta, y no hay hueco que repartir.
+ * El ancla de P2 es `top bottom` → `bottom bottom`: un bloque **aterriza** en
+ * `borde inferior del bloque − alto de ventana`, o sea cuando termina de entrar
+ * al cuadro. Con dos pantallas los aterrizajes caían en `y` 600–1200 y 2160, y
+ * no pasaba nada más hasta el primero de Números, en 3720: **1,44 pantallas de
+ * hueco**, el segundo pozo del sitio. Con tres, cada pantalla pone su grupo.
+ *
+ * **Las tres decisiones medidas de B1 siguen en pie y no se tocan**, cada una
+ * en su docblock: la medida de lectura que no crece con la ventana (`medida`),
+ * el hueco repartido en vez de acumulado (`CLASES_DEL_REPARTO`) y la foto en
+ * 4 de 5 columnas (`GEOMETRIA.foto.columnas`).
+ *
+ * P1 para el titular; P2 para los cinco bloques de cuerpo, cada uno en **su
+ * propio `Bloque`**, porque P2 tiene un solo target por instancia y el
+ * escalonado no sale de un `stagger` sino de la GEOMETRÍA. Abajo de 1025 `Bloque`
+ * entrega `progreso: null` y sale el árbol quieto; el reparto vive en la variante
+ * `escritorio:`, así que ahí las piezas caen en una columna con el `gap-y` fijo.
  */
 
-/** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los
- *  decide quien construye la sección y no cambian cuando llegue la foto real. */
+/** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los decide
+ *  quien construye la sección y no cambian cuando llegue la foto real. */
 export const GEOMETRIA = {
   foto: {
     /** 3:2 apaisado — [decidido]. Es una foto de DOS personas una al lado de la
      *  otra: el encuadre que pide es horizontal y de plano medio. 16:9 deja
-     *  demasiado aire o corta las cabezas; 1:1 obliga a apilarlas, que es lo que
-     *  la sección no quiere decir. 1800 × 1200 es el ARCHIVO, no una caja. */
+     *  aire o corta las cabezas; 1:1 obliga a apilarlas, que es lo que la
+     *  sección no quiere decir. 1800 × 1200 es el ARCHIVO, no una caja. */
     ancho: 1800,
     alto: 1200,
     /**
      * Cuántas columnas ocupa, de cuántas. **Es la entrada del `sizes`**, y por
-     * eso la grilla de la segunda pantalla es de CINCO: `sizesPorColumnas`
-     * compone su condición desde el breakpoint de escritorio (1025), y de las
-     * grillas del sistema **la de 5 es la única que colapsa ahí**; las de 2, 3 y
-     * 4 colapsan en 768, con lo cual el `sizes` MENTIRÍA entre 768 y 1024.
+     * eso la grilla de la tercera pantalla es de CINCO: `sizesPorColumnas` compone
+     * su condición desde el breakpoint de escritorio (1025) y de las grillas del
+     * sistema **la de 5 es la única que colapsa ahí**; las de 2, 3 y 4 colapsan en
+     * 768, con lo cual el `sizes` MENTIRÍA entre 768 y 1024.
      *
-     * ⚠ **B1 · de 3 a 4 columnas [medido].** Con 3 la caja valía 1107,2 px a
-     * 1920 y la foto medía 738,1 px en una pantalla de 1080: 310 px de hueco.
-     * Con 4 vale 1481,6 px y la foto mide 987,7 px, que con su epígrafe llena la
-     * pantalla; los 1800 px del archivo siguen cubriendo esa caja con margen.
-     */
+     * ⚠ **B1 · de 3 a 4 columnas [medido]. B2 NO lo toca.** Con 3 la caja valía
+     * 1107,2 px a 1920 y la foto medía 738,1 px en una pantalla de 1080: 310 px de
+     * hueco. Con 4 vale 1481,6 px y la foto mide 987,7 px. Darle su propia pantalla
+     * no cambia ni la caja ni la relación: cambia con quién la comparte. */
     columnas: 4,
     columnasTotales: 5,
   },
@@ -86,11 +89,10 @@ export const GEOMETRIA = {
    * LA MEDIDA DE LECTURA — una sola para las tres piezas de texto. [medido]
    *
    * ⚠ **No es un ancho de columna: es un TOPE.** La columna sigue siendo fluida
-   * y el tope sólo manda arriba de ~1025, donde la columna se vuelve demasiado
-   * ancha para una línea. Es la forma medida en la referencia externa: *la caja
-   * de texto no acompaña al viewport*.
-   * `--fluido-piso` menos un escalón de la escala de espaciado: 375 − 48 = 327
-   * px. El número sale de comparar en el navegador, a 1920, los altos que
+   * y el tope sólo manda arriba de ~1025, donde se vuelve demasiado ancha para
+   * una línea. Es la forma medida en la referencia externa: *la caja de texto no
+   * acompaña al viewport*. `--fluido-piso` menos un escalón de espaciado:
+   * 375 − 48 = 327 px, sacado de comparar en el navegador, a 1920, los altos que
    * produce cada tope — que es lo que decide cuánta tinta hay para repartir:
    *
    *     tope   titular   bajada   cómo   tinta    juntura
@@ -98,51 +100,69 @@ export const GEOMETRIA = {
    *     343     288,91       96    120   543,8      89,4
    *     327     346,69      120    120   617,6      77,1
    *
-   * Y no deja el texto fuera de registro: 327 px sobre un titular de 53 px son
-   * 6,2 em de línea, contra los 6,67 em de la referencia (480 px sobre 72).
-   */
+   * Y no deja el texto fuera de registro: 327 px sobre un titular de 53 px son 6,2
+   * em de línea, contra los 6,67 em de la referencia (480 px sobre 72). */
   medida: 'max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]',
   /**
-   * EL REPARTO de la pantalla 1: doce columnas usadas como primitiva de
-   * posición, una fila por pieza. Mismo instrumento que usa Números, y las
-   * cadenas van enteras porque Tailwind escanea el código fuente.
+   * EL REPARTO de las dos pantallas de texto: doce columnas usadas como
+   * primitiva de posición, una fila por pieza. Mismo instrumento que usa
+   * Números, y las cadenas van enteras porque Tailwind escanea el código fuente.
    *
-   * Las tres primeras arrancan en la columna 1 y las dos últimas en la 9. La 9
-   * y no la 7 está medida: a 1920 la pastilla de navegación ocupa de x 658 a
-   * x 1262 y una caja que arranca en la columna 9 empieza en x 1332 — por fuera
-   * de la pastilla en todo su recorrido. Es lo único que esta sección puede
-   * hacer por ese choque sin tocar la pastilla, que no es suya.
+   * La columna 9 no es una preferencia: a 1920 la pastilla de navegación ocupa de
+   * x 658 a x 1262 y una caja que arranca en la 9 empieza en x 1332, por fuera de
+   * la pastilla en todo su recorrido. Por eso **la última fila de cada pantalla
+   * arranca en la 9**: con `content-evenly` queda contra el pie del cuadro.
    */
   reparto: {
     etiqueta: 'escritorio:col-start-1 escritorio:col-span-3 escritorio:row-start-1',
     titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
-    comoTrabajamos: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-4',
-    lugar: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-5',
+    lugar: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-4',
+    comoTrabajamos: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-1',
+    primeraPersona: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-2',
+    segundaPersona: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-3',
   },
   /** Cuántas líneas promete el titular. Es inerte para P1 —`LineasDeTexto` las
-   *  recalcula midiendo— y va declarado igual porque hace comparable la sección
-   *  con el rango medido del patrón (1 a 6): cinco a 1920, cuatro a 1440. */
+   *  recalcula midiendo— y va declarado porque hace comparable la sección con el
+   *  rango medido del patrón (1 a 6): cinco a 1920, cuatro a 1440. */
   lineasDelTitular: 5,
 } as const
 
-/** El `sizes` real de la foto. Exportado para que el instrumento afirme el
- *  MISMO valor que se pasa al marco y no una copia escrita a mano. */
+/** El `sizes` real de la foto. Exportado para que el instrumento afirme el MISMO
+ *  valor que se pasa al marco y no una copia escrita a mano. */
 export const SIZES_DE_LA_FOTO = sizesPorColumnas(GEOMETRIA.foto.columnas, GEOMETRIA.foto.columnasTotales)
 
-/** LA GRILLA DE LA PANTALLA 1 — doce columnas desde 1025, UNA abajo, y el hueco
- *  repartido en vez de acumulado. `grow` + `content-evenly` es el par que hace
- *  la resta: la grilla crece hasta el alto de la pantalla y reparte lo que le
- *  sobra **por igual entre las seis junturas**. Por eso `gap-y` se apaga arriba
- *  de 1025: sumado al reparto daría junturas desparejas. Abajo del umbral
- *  vuelve, porque ahí no sobra caja. */
-const CLASES_DE_LA_AGENCIA = cn(
+/** LA GRILLA DE LAS DOS PANTALLAS DE TEXTO — doce columnas desde 1025, UNA abajo,
+ *  y el hueco repartido en vez de acumulado. `grow` + `content-evenly` es el par
+ *  que hace la resta: la grilla crece hasta el alto de la pantalla y reparte lo
+ *  que le sobra **por igual entre todas las junturas**. Por eso `gap-y` se apaga
+ *  arriba de 1025: sumado al reparto daría junturas desparejas. */
+const CLASES_DEL_REPARTO = cn(
   'grid w-full grow grid-cols-1 content-evenly items-start gap-y-12',
   'escritorio:grid-cols-12 escritorio:gap-y-0',
   'gap-x-[var(--grilla-canal-compacto)] escritorio:gap-x-[var(--grilla-canal-amplio)]',
 )
 
-/** Una persona: nombre en h3, rol real, y el hueco rotulado al lado del rol. */
+/** El contenedor de una pantalla de texto. `escritorio:py-0` y no un relleno fijo:
+ *  arriba de 1025 el borde lo pone el propio reparto —la juntura de arriba mide lo
+ *  mismo que las de adentro— y un `padding` lo duplicaría. */
+function Pantalla(props: {
+  readonly nombre: string
+  readonly children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <div
+      data-pantalla={props.nombre}
+      className="flex min-h-svh w-full flex-col justify-center py-12 escritorio:py-0"
+    >
+      {props.children}
+    </div>
+  )
+}
+
+/** Una persona: nombre en h3, rol real, y el hueco rotulado al lado del rol.
+ *  El borde punteado es el mismo lenguaje de `MarcoDeMedio`: un pedido se ve
+ *  igual en toda la sección. */
 function Persona({
   persona,
   rotulo,
@@ -152,41 +172,26 @@ function Persona({
 }): React.JSX.Element {
   return (
     <div data-pieza-a="persona" className="flex flex-col gap-2">
-      <Titular nivel="titulo-s" como="h3">
-        {persona.nombre}
-      </Titular>
+      <Titular nivel="titulo-s" como="h3">{persona.nombre}</Titular>
       <Caption como="p">{persona.rol}</Caption>
-      {/* El hueco, con la estructura a la vista: rótulo + marcador. El borde
-          punteado es el mismo lenguaje de `MarcoDeMedio` — un pedido se ve
-          igual en toda la sección. */}
       <p className="border-borde-fuerte flex flex-wrap items-baseline gap-2 border border-dashed px-3 py-2">
-        <Micro como="span" className="uppercase opacity-casi">
-          {rotulo}
-        </Micro>
-        <Micro como="span" className="font-codigo uppercase">
-          {persona.enUnProyecto}
-        </Micro>
+        <Micro como="span" className="uppercase opacity-casi">{rotulo}</Micro>
+        <Micro como="span" className="font-codigo uppercase">{persona.enUnProyecto}</Micro>
       </p>
     </div>
   )
 }
 
-/** PANTALLA 1 · LA AGENCIA — cinco piezas repartidas sobre la pantalla entera.
- *  `escritorio:py-0` y no un relleno fijo: arriba de 1025 el borde lo pone el
- *  propio reparto —la juntura de arriba mide lo mismo que las de adentro— y
- *  sumarle un `padding` lo duplicaría. Abajo del umbral vuelve. */
+/** PANTALLA 1 · LA AGENCIA — quiénes somos y qué somos, repartido sobre la pantalla
+ *  entera. El lugar cierra abajo a la derecha: deja la juntura pareja y esquiva la
+ *  pastilla. */
 function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
-    <div
-      data-pantalla="agencia"
-      className="flex min-h-svh w-full flex-col justify-center py-12 escritorio:py-0"
-    >
+    <Pantalla nombre="agencia">
       <Grilla columnas="lateral" className="grow">
         <NumeroDeSeccion seccion={seccion} />
-        <div data-composicion="agencia" className={CLASES_DE_LA_AGENCIA}>
-          <EtiquetaDeSeccion className={GEOMETRIA.reparto.etiqueta}>
-            {CONTENIDO.etiqueta}
-          </EtiquetaDeSeccion>
+        <div data-composicion="agencia" className={CLASES_DEL_REPARTO}>
+          <EtiquetaDeSeccion className={GEOMETRIA.reparto.etiqueta}>{CONTENIDO.etiqueta}</EtiquetaDeSeccion>
 
           <Bloque patron="P1" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
             {(progreso) => (
@@ -210,6 +215,25 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
           </Bloque>
 
+          <Caption como="p" className={cn(GEOMETRIA.reparto.lugar, 'opacity-casi')}>{CONTENIDO.lugar}</Caption>
+        </div>
+      </Grilla>
+    </Pantalla>
+  )
+}
+
+/** PANTALLA 2 · EL EQUIPO — cómo trabajamos, y quiénes son «la misma gente de punta
+ *  a punta» que ese párrafo nombra. Las dos personas llegan en filas distintas: cada
+ *  una resuelve su ancla contra su propia caja, así que son dos aterrizajes y no uno.
+ *  El `div` vacío de la columna lateral no es un descuido: reserva los 156 px que en
+ *  la pantalla 1 lleva el número, y sin él el reparto de doce arrancaría a la
+ *  izquierda del de la otra pantalla de texto. */
+function ElEquipo(): React.JSX.Element {
+  return (
+    <Pantalla nombre="equipo">
+      <Grilla columnas="lateral" className="grow">
+        <div />
+        <div data-composicion="equipo" className={CLASES_DEL_REPARTO}>
           <Bloque patron="P2" className={cn(GEOMETRIA.reparto.comoTrabajamos, GEOMETRIA.medida)}>
             {(progreso) => (
               <CanalDeUnaPieza progreso={progreso} patron="P2">
@@ -218,31 +242,28 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
           </Bloque>
 
-          {/* El lugar cierra la pantalla en vez de colgar del rótulo: es la
-              quinta pieza, y sin ella el reparto tendría cinco junturas en vez
-              de seis y cada una mediría 18 px más. */}
-          <Caption como="p" className={cn(GEOMETRIA.reparto.lugar, 'opacity-casi')}>
-            {CONTENIDO.lugar}
-          </Caption>
+          {CONTENIDO.personas.map((persona, indice) => (
+            <Bloque key={persona.nombre} patron="P2" className={indice === 0 ? GEOMETRIA.reparto.primeraPersona : GEOMETRIA.reparto.segundaPersona}>
+              {(progreso) => (
+                <CanalDeUnaPieza progreso={progreso} patron="P2">
+                  <Persona persona={persona} rotulo={CONTENIDO.rotuloDelPedido} />
+                </CanalDeUnaPieza>
+              )}
+            </Bloque>
+          ))}
         </div>
       </Grilla>
-    </div>
+    </Pantalla>
   )
 }
 
-/** PANTALLA 2 · LAS DOS PERSONAS — la foto en cuatro columnas y los dos nombres
- *  repartidos sobre el alto de la pantalla, no apilados arriba.
- *  `escritorio:py-2` es un hilo, y está medido: a 1920 la foto con su epígrafe
- *  mide 1019,65 px en una caja de 1080, así que un `py-20` la desbordaría y la
- *  sección crecería por encima de los 200svh de la tabla. Con 8 px la juntura
- *  contra la pantalla de arriba queda en el hueco del reparto. */
-function LasPersonas(): React.JSX.Element {
+/** PANTALLA 3 · LA FOTO — cuatro columnas de cinco y su epígrafe, solos.
+ *  `escritorio:py-2` es un hilo y está medido: la caja con el epígrafe mide 1.019,64
+ *  px en una pantalla de 1.080, así que un `py-20` la desbordaría. */
+function LaFoto(): React.JSX.Element {
   return (
-    <div
-      data-pantalla="personas"
-      className="flex min-h-svh w-full flex-col justify-center py-20 escritorio:py-2"
-    >
-      <Grilla columnas={5} className="escritorio:grow">
+    <div data-pantalla="foto" className="flex min-h-svh w-full flex-col justify-center py-20 escritorio:py-2">
+      <Grilla columnas={GEOMETRIA.foto.columnasTotales}>
         <Bloque patron="P2" className="escritorio:col-span-4">
           {(progreso) => (
             <CanalDeUnaPieza progreso={progreso} patron="P2">
@@ -255,33 +276,11 @@ function LasPersonas(): React.JSX.Element {
                   alto={GEOMETRIA.foto.alto}
                   sizes={SIZES_DE_LA_FOTO}
                 />
-                <figcaption>
-                  <Caption como="p">{CONTENIDO.equipo.pie}</Caption>
-                </figcaption>
+                <figcaption><Caption como="p">{CONTENIDO.equipo.pie}</Caption></figcaption>
               </figure>
             </CanalDeUnaPieza>
           )}
         </Bloque>
-
-        {/* Los dos en bloques separados: cada uno resuelve su ancla contra su
-            propia caja, así que Valentino entra después de Franco sin `stagger`.
-            `escritorio:justify-between` es la otra mitad de la resta: la columna
-            se estira con la pantalla y los dos nombres se van a los bordes, con
-            lo cual la tinta llega hasta abajo del todo en vez de terminar donde
-            termina la foto. Medido a 1920: sin él quedaba un hueco de 221,75 px
-            debajo del epígrafe; con él son 61,75 px. Abajo de 1025 no aplica:
-            ahí la columna mide su contenido y no hay nada que repartir. */}
-        <div className="flex flex-col gap-12 escritorio:col-span-1 escritorio:justify-between">
-          {CONTENIDO.personas.map((persona) => (
-            <Bloque key={persona.nombre} patron="P2">
-              {(progreso) => (
-                <CanalDeUnaPieza progreso={progreso} patron="P2">
-                  <Persona persona={persona} rotulo={CONTENIDO.rotuloDelPedido} />
-                </CanalDeUnaPieza>
-              )}
-            </Bloque>
-          ))}
-        </div>
       </Grilla>
     </div>
   )
@@ -292,7 +291,8 @@ export function QuienesSomos({ seccion }: PropsDeSeccion): React.JSX.Element {
     <Seccion seccion={seccion}>
       <Envoltorio>
         <LaAgencia seccion={seccion} />
-        <LasPersonas />
+        <ElEquipo />
+        <LaFoto />
       </Envoltorio>
     </Seccion>
   )

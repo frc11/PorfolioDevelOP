@@ -114,7 +114,7 @@ afirmarIgual(
 const pantallasOpacas = opacas.reduce((n, g) => n + g.altoEnPantallas, 0)
 afirmarIgual(
   [pantallasOpacas, ANCLAJE.pantallasDelDocumento],
-  [12, 14],
+  [16, 18],
   'pantallas de panel opaco sobre pantallas del documento',
 )
 console.log(
@@ -171,7 +171,7 @@ afirmarIgual(
   ANCLAJE.ventanasDeLaEscena,
   [
     [0, 1],
-    [11, 13],
+    [15, 17],
   ],
   'las ventanas salen de la derivación, no de una lista escrita a mano',
 )
@@ -183,19 +183,19 @@ for (const [p, esperado, porQue] of [
   [1 + M, true, 'el borde exterior del margen de la primera ventana'],
   [1 + M + 0.001, false, 'un pelo más allá del margen: se suspende'],
   [6, false, 'el medio de la banda opaca — cuatro paneles de distancia'],
-  [11 - M - 0.001, false, 'un pelo antes del margen de la segunda ventana'],
-  [11 - M, true, 'el margen enciende la escena antes de que el diferencial asome'],
-  [12, true, 'el diferencial llena el cuadro'],
-  [13, true, 'el final del scroll'],
+  [15 - M - 0.001, false, 'un pelo antes del margen de la segunda ventana'],
+  [15 - M, true, 'el margen enciende la escena antes de que el diferencial asome'],
+  [16, true, 'el diferencial llena el cuadro'],
+  [17, true, 'el final del scroll'],
 ] as const) {
   afirmar(enPantalla(p) === esperado, `pantalla ${String(p).padEnd(9)} → ${esperado ? 'se ve' : 'suspendida'}`, porQue)
 }
 
 controlPositivo('el detector NO dice «se ve» en el medio de la banda opaca', 6, enPantalla)
-controlPositivo('el detector NO dice «se ve» detrás de Trabajos', 5.5, enPantalla)
+controlPositivo('el detector NO dice «se ve» detrás de Trabajos', 9.5, enPantalla)
 
 afirmar(
-  enPantalla(0.5) && enPantalla(12.5),
+  enPantalla(0.5) && enPantalla(16.5),
   'y SÍ ve las dos secciones transparentes donde están — el detector no es un «false» constante',
 )
 

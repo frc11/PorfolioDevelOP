@@ -386,6 +386,119 @@ alto lo fijan los `min-h-svh` que cada sección pone adentro. La tabla sólo man
 en Trabajos —3240 declarados contra 1080 naturales— y en Cierre. **La resta de
 una sección se hace en su composición.**
 
+### 5.6 · El techo de velocidad de la cámara (B2)
+
+> *«El fondo de Star Wars avanza demasiado rápido cuando yo todavía no llegué a
+> esa zona.»* — el humano, sobre el recorrido.
+
+**Estado: DECIDIDO Y CONSTRUIDO en cuatro de los seis tramos. Los otros dos están
+trabados y se dice por qué.**
+
+#### La queja, medida
+
+El arco de la cámara se integra con `speedAt` —el instrumento que `s13b` ya
+usaba— y mide **12,29 alturas de cuadro** de punta a punta. La fracción de ese
+arco ya consumida cuando el visitante llega a cada sección:
+
+| llega a | progreso | arco recorrido | ¿se ve la sala? |
+|---|---|---|---|
+| hero | 0,0000 | 0,0 % | **sí** |
+| quiénes somos | 0,1250 | 14,1 % | no |
+| números | 0,3750 | 31,2 % | no |
+| trabajos | 0,5000 | 49,0 % | no |
+| servicios | 0,6250 | 52,9 % | no |
+| tu panel | 0,7121 | 79,7 % | no |
+| **por qué develOP** | **0,8525** | **96,8 %** | **sí** |
+| cierre | 1,0000 | 100,0 % | no |
+
+**Cuando el visitante llega a la segunda —y última— sección donde la sala se ve,
+la cámara ya hizo el 96,8 % de su camino.** El resto lo hizo detrás de seis
+paneles opacos, que son el 88,9 % del documento, donde nadie lo vio.
+
+#### El techo, derivado DOS veces de la pantalla
+
+`_lib/escena/techoDeVelocidad.ts` = **1,0 altura de cuadro por pantalla de
+scroll**. Un techo sobre la POSE sería acortar el recorrido de la cámara —o sea
+tocar la coreografía—; un techo sobre la PANTALLA es repartir el mismo recorrido
+sobre más scroll. Las dos derivaciones, a 5,8 % una de otra:
+
+1. **El ritmo de la propia página.** Scrollear una pantalla mueve la página
+   exactamente una pantalla: una cámara más rápida que eso se le adelanta a la
+   página que la tapa. → 1,0.
+2. **El ritmo parejo del propio recorrido.** 12,29 alturas sobre 13 pantallas de
+   scroll. → 0,9451.
+
+#### Lo que costó y lo que compró
+
+Dos alturas de `secciones.ts` suben —`quienes-somos` 200 → 300svh y `numeros`
+100 → 400svh—, el documento pasa de 14 a **18 pantallas** y **el pico de
+velocidad del recorrido baja de 6,0945 a 4,6198 alturas por pantalla de scroll,
+−24,2 %**, medido por `s13b-escena.invariant` §1. El tramo de Números, que era el
+pico, baja **−75,0 %**.
+
+**El anclaje no se movió un bit:** los siete nudos conservan sus progresos
+(0 · 0,125 · 0,375 · 0,5 · 0,625 · 0,75 · 1) y **las ocho secciones llenan el
+cuadro en el mismo progreso, al bit** —incluida `tu-panel` en 0,7121062992 y el
+ancla declarada del diferencial en 0,8525—. Lo que se movió son las *pantallas*
+de los nudos, que es el punto de estirar: `[0, 1, 3, 4, 7, 11,305085, 13]` →
+`[0, 1, 4, 8, 11, 15,305085, 17]`.
+
+#### Los dos tramos que NO cumplen, y lo que los traba
+
+- **`hero`, 1,7275** (73 % arriba). Pide 2 pantallas y no se le pueden dar:
+  `s8-chrome.invariant.ts` §2 afirma `pantallasDe(primera) === 1` porque de ahí
+  sale el nacimiento de la pastilla de navegación, y aflojar una afirmación está
+  prohibido.
+- **`cierre`, 1,3294** (33 % arriba). Su largo no es libre: vale exactamente
+  `1,694915 × (pantallas de por-que-develop)`, fijado por el ancla declarada
+  0,8525, y `por-que-develop` no puede crecer sin mover el ancla de `tu-panel`.
+
+#### Lo que el techo NO arregla
+
+**El adelanto ADENTRO de cada tramo no se movió un punto**: la cámara sigue
+haciendo el 90 % del camino de un tramo entre un 5,1 % y un 49,6 % antes de que
+el visitante llegue al final. Eso no es del reparto: es de las curvas `shift` y
+`arrive` de cada keyframe, y tocarlas es tocar una pose.
+
+La medición entera, con sus instrumentos, en `docs/rediseno/sprints/B2-DELTAS.md`.
+
+### 5.7 · Los momentos, y la métrica que reemplaza al aire muerto (B2)
+
+**Estado: CERRADO en la métrica que el bloque declaró, con una sección que no
+pudo aportar y está anotada.**
+
+`B1-DELTAS.md` §1-bis dejó escrito que la métrica pasaba de aire muerto a
+momentos. B2 la midió y **corrigió la premisa con la que se escribió**:
+
+> **No nos faltaban acontecimientos: nos faltaba REGULARIDAD.** Nuestra densidad
+> media ya era mejor que la de la referencia —0,90 pantallas entre
+> acontecimientos contra 1,11— y el defecto era **un pozo de 2,44 pantallas**
+> donde no pasaba nada, contra un máximo de 1,56 en nk.
+
+**El gate del bloque es el hueco MÁXIMO, no el total.**
+
+| a 1920×1080 | antes de B2 | después | `nk.studio` |
+|---|---|---|---|
+| pantallas del documento | 14,00 | **18,00** | 22,62 |
+| momentos estructurales | 12,0 | **16,0** | 20,5 |
+| acontecimientos medidos | 9 | **22** | 12 |
+| **hueco máximo entre acontecimientos** | **2,44 pantallas** | **1,11** | **1,56** |
+| hueco medio | 0,90 | **0,67** | 1,11 |
+
+⚠️ **Y hay un instrumento nuevo, porque la métrica no tenía uno.** `s7-ritmo`
+calcula `pantallas − pinneadas + secuencias` desde `secciones.ts` y **no puede
+ver un acontecimiento**: las cinco cifras de Números entrando de a una lo mueven
+en cero. Las dos cantidades son distintas y las dos se publican, con nombres
+distintos para que nadie las sume. El censo está en `B2-DELTAS.md` §0 y corre
+igual sobre un sitio propio y sobre uno ajeno.
+
+⚠️ **El techo del gate estructural es 16,0 y lo pone la propia regla del
+sprint.** Arriba de 18 pantallas de documento el ancla del diferencial se corre
+un ULP (1,11e−16), y *«el anclaje no se mueve un bit»* es literal. Las tres
+salidas para pasar de ahí —aceptar ese ULP, aflojar la premisa de la pastilla, o
+despinnear una secuencia— están en `B2-DELTAS.md` §3.2 con lo que cuesta cada
+una.
+
 ---
 
 ## 6 · Dónde vive hoy cada decisión

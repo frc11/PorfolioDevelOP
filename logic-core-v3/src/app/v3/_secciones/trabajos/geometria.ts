@@ -15,6 +15,7 @@
  * excepción es por donde vuelve a entrar la primera cifra inventada.
  */
 
+import { acotar01 } from '../../_lib/acotar'
 import { sizesPorColumnas } from '../../_lib/imagen'
 
 import type { CajaDeLaCaptura } from './Proyecto'
@@ -80,6 +81,68 @@ export const GEOMETRIA = {
    */
   planos: 3,
 } as const
+
+/**
+ * EL REPARTO DE LOS TRES PLANOS SOBRE EL RECORRIDO. **[B2 · frente B]**
+ *
+ * ── El defecto, medido en el navegador ────────────────────────────────────
+ *
+ * Los tres planos se consumían con `cantidad = 3` e `indice = i`, o sea con el
+ * ESCALONADO de P7 haciendo el reparto: 0,4 s de desfase sobre 3,5 s de
+ * duración dan un total aplicado de 4,3 y tres ventanas de
+ * `[0 · 0,814]`, `[0,093 · 0,907]` y `[0,186 · 1]` — **más del 80 % de
+ * superposición**. Los tres vuelan a la vez de punta a punta y ninguno tiene un
+ * lugar propio del scroll.
+ *
+ * El censo de acontecimientos de `B2-DELTAS.md` §0, a 1920×1080 sobre la página
+ * viva, barriendo `[7440, 12000]`:
+ *
+ *     acontecimientos: 2
+ *     grupos: 10200 (1 pieza) · 10560–10800 (2 piezas)
+ *
+ * o sea que **el primer aterrizaje de la sección caía 1.560 px después de que
+ * la sección empieza**, y los tres caían amontonados en las últimas seis
+ * décimas de pantalla del recorrido. Ésa es la segunda mitad del pozo de 5,44
+ * pantallas del documento.
+ *
+ * ── El reparto nuevo, y de dónde sale ─────────────────────────────────────
+ *
+ * El recorrido se parte en **tres tramos iguales, uno por plano**, con la misma
+ * cuenta que `_contrato/secuencia.ts` hace para Servicios: el plano `i` vale 0
+ * antes de su tramo, corre de 0 a 1 adentro, y se queda en 1 después. Cada
+ * plano llega, pasa y deja el lugar al siguiente en SU tercio del scroll.
+ *
+ * **El escalonado de P7 no se cambia: se apaga por donde ya estaba previsto.**
+ * Cada plano se consume con `cantidad = 1`, y ahí el cronograma aplica el
+ * escalonado sobre `cantidad − 1 = 0` — exactamente lo que le pasa a P2 en
+ * Números, y por la misma razón: **el reparto pasa a ser del scroll y no del
+ * cronograma.** Ni una clave, ni una curva, ni una duración de P7 se toca.
+ *
+ * ⚠ **Por qué el recorrido entero y no sólo el pin.** El ancla de P7 es
+ * `top bottom → bottom bottom` sobre la `<section>` —lo fijó B1 con
+ * `anclaje: 'seccion'`— así que el gesto arranca cuando la sección entra por el
+ * pie del viewport y cierra cuando el pin suelta. Remapearlo al pin sería
+ * pisar un ancla medida por la puerta de atrás.
+ *
+ * ⚠ **LO QUE ESTO NO PUEDE DAR, Y SE REPORTA: la meseta.** Para que cada
+ * proyecto *se quede quieto* —el asentamiento que el frente C le construyó a
+ * Servicios— el progreso local tendría que saturar donde TERMINA la llegada de
+ * P7, que es `3 / 3,5` de su ventana. Ese número vive en
+ * `_lib/motion/patrones-piezas.ts` y **una sección no puede importar un valor
+ * del sistema de motion** (`s7-contrato` §3), ni escribirlo acá, que sería una
+ * segunda fuente de un valor medido. Sin la meseta, lo que el censo registra de
+ * cada plano es el final de su SALIDA. Queda reportado, no arreglado.
+ */
+export function localDelPlano(progreso: number, indice: number): number {
+  return acotar01(acotar01(progreso) * GEOMETRIA.planos - indice)
+}
+
+/** Los puntos del recorrido donde cada plano termina el suyo: 1/3, 2/3 y 1. Es
+ *  lo que el censo mide como aterrizaje, y lo que el invariante compara. */
+export const ATERRIZAJES_DE_LOS_PLANOS: readonly number[] = Array.from(
+  { length: GEOMETRIA.planos },
+  (_, i) => (i + 1) / GEOMETRIA.planos,
+)
 
 /** El `sizes` real de las capturas. Exportado para que el instrumento afirme el
  *  MISMO valor que se le pasa al marco, y no una copia escrita a mano. */
