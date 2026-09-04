@@ -1,0 +1,114 @@
+{
+  "mediciones": [
+    {
+      "ancho": "1440",
+      "email": "setter-qa@develop.test",
+      "pliegue": 788,
+      "altoTotal": 8225,
+      "cartera": {
+        "top": 853,
+        "alto": 6397,
+        "entra": false
+      },
+      "tarjetas": 49,
+      "tarjetasEnPliegue": 0,
+      "tarjetasEnPantallazo": 4,
+      "altoTarjeta": 206,
+      "topPrimeraTarjeta": 1009,
+      "censo": {
+        "tarjetas": 49,
+        "badgesEstado": 0,
+        "gruposCartera": 7,
+        "buscadores": 1,
+        "selects": 2
+      },
+      "nombresAccesibles": [
+        "QA-W Evaluada Gate AbiertoVeterinaria · Yerba Buena · hace 66 díasFijado por vos — va primeroDecidí cómo va a ser la demo",
+        "Quitar de fijados",
+        "Pausar en tu cartera",
+        "Agregar nota"
+      ]
+    },
+    {
+      "ancho": "390",
+      "email": "setter-qa@develop.test",
+      "pliegue": 688,
+      "altoTotal": 14257,
+      "cartera": {
+        "top": 1028,
+        "alto": 12094,
+        "entra": false
+      },
+      "tarjetas": 49,
+      "tarjetasEnPliegue": 0,
+      "tarjetasEnPantallazo": 2,
+      "altoTarjeta": 206,
+      "topPrimeraTarjeta": 1230,
+      "censo": {
+        "tarjetas": 49,
+        "badgesEstado": 0,
+        "gruposCartera": 7,
+        "buscadores": 1,
+        "selects": 2
+      },
+      "nombresAccesibles": [
+        "QA-W Evaluada Gate AbiertoVeterinaria · Yerba Buena · hace 66 díasFijado por vos — va primeroDecidí cómo va a ser la demo",
+        "Quitar de fijados",
+        "Pausar en tu cartera",
+        "Agregar nota"
+      ]
+    }
+  ],
+  "estados": [
+    {
+      "value": "todos",
+      "label": "Todos los estados",
+      "leads": 49
+    },
+    {
+      "value": "trabajar",
+      "label": "Para trabajar",
+      "leads": 49
+    },
+    {
+      "value": "seguimiento",
+      "label": "En seguimiento",
+      "leads": 14
+    },
+    {
+      "value": "revision",
+      "label": "Esperando revisión",
+      "leads": 11
+    },
+    {
+      "value": "agendadas",
+      "label": "Agendadas",
+      "leads": 2
+    },
+    {
+      "value": "pausados",
+      "label": "Pausados por vos",
+      "leads": 0
+    },
+    {
+      "value": "postergados",
+      "label": "Postergados por el negocio",
+      "leads": 2
+    },
+    {
+      "value": "archivo-descartado",
+      "label": "Descartados (antes de la demo)",
+      "leads": 4
+    },
+    {
+      "value": "archivo-perdido",
+      "label": "Perdidos (cerrados por Franco)",
+      "leads": 2
+    }
+  ],
+  "busqueda": {
+    "nombre": "M0-GAL 34-archivo-perdido",
+    "acciones": 2,
+    "quedan": 1
+  }
+}

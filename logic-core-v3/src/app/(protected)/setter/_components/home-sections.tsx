@@ -10,13 +10,10 @@ import {
 } from 'lucide-react'
 import { Badge, Callout, Card } from '@/components/ui'
 import { cn } from '@/lib/utils'
-import { stageTone } from '@/lib/leados-ui'
 import {
   archivoMotivo,
   formatFechaCorta,
   motivoOrden,
-  STAGE_LABELS,
-  STATUS_LABELS,
   type HomeLead,
 } from '@/lib/leados/flow'
 import { LeadCardActions } from './lead-card-actions'
@@ -48,6 +45,10 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
     <Card
       variant="interactive"
       padding="md"
+      // P22 — marca de medición, mismo recurso que `data-slot="item-cola"` de la
+      // cola: deja contar tarjetas sin depender de la estructura del grid, que
+      // este sprint cambió al agrupar.
+      data-slot="tarjeta-cartera"
       className={cn(
         'flex h-full flex-col overflow-hidden',
         lead.accionable && 'border-cyan-400/25 hover:border-cyan-400/40',
@@ -76,19 +77,19 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
             {lead.pinned && (
               <Pin size={13} strokeWidth={1.5} aria-label="Fijado" className="text-cyan-400" />
             )}
+            {/* P22 — acá había también un badge de ETAPA («En revisión»,
+                «Aprobada», «Ficha»…). Decía lo mismo que la fila de próxima
+                acción de más abajo, pero en jerga de la máquina de estados: para
+                los 84 leads eran 84 rótulos que el setter tiene que traducir para
+                leer lo que la fila de abajo ya le dice en su idioma («Le toca a
+                Franco — está revisando tu demo»). Y desde que la cartera agrupa,
+                el encabezado del grupo lo dice una tercera vez. Queda la fila.
+                El de «Caliente» se queda: no es etapa, es una señal que no está
+                escrita en ningún otro lado de la tarjeta. */}
             {lead.caliente && (
               <Badge tone="amber" variant="soft" pulse icon={<Flame size={10} strokeWidth={1.5} />}>
                 Caliente
               </Badge>
-            )}
-            {lead.status === 'PERDIDO' ? (
-              <Badge tone="rose" variant="soft">{STATUS_LABELS.PERDIDO}</Badge>
-            ) : lead.stage ? (
-              <Badge tone={stageTone(lead.stage)} variant="soft">
-                {STAGE_LABELS[lead.stage]}
-              </Badge>
-            ) : (
-              <Badge tone="zinc" variant="outline">Sin ficha</Badge>
             )}
           </div>
         </div>
@@ -175,6 +176,13 @@ export function LeadCard({ lead }: { lead: HomeLead }) {
       <LeadCardActions
         leadId={lead.id}
         pinned={lead.pinned}
+        // P22 — `snoozed` (la pausa VIGENTE) además de la fecha. Los controles
+        // decidían "está pausado" con `snoozedUntil !== null`, que también es
+        // cierto para una pausa YA VENCIDA: medido en el estado real, la primera
+        // tarjeta ofrecía «Cambiar la pausa» y «Reanudar» sobre un lead que el
+        // filtro «Pausados por vos» contaba como 0 y cuyo propio cuerpo no
+        // mostraba la línea «Pausado hasta el…» (esa sí mira `snoozed`).
+        snoozed={lead.snoozed}
         snoozedUntil={lead.snoozedUntil}
         note={lead.note}
       />

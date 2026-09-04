@@ -10450,3 +10450,194 @@ combinaciones del pliegue) · `test:setter` · `test:leados` 33/33 · `test:help
 - La **cartera agrupada** no era este sprint.
 - El tope de 5 es un número elegido, no medido contra el ritmo real de un setter. Si con la cola
   puesta resulta corto o largo, se cambia en una línea (`TOPE_COLA`).
+
+---
+
+## P22 · Para qué sirve la cartera
+
+Rama `fix/cartera-para-que`, base `c8e0da7a` (P21). Worktree `C:/tmp/wt-p22-cartera`, medición en
+`:3022` (`.next`), suite en `:3003` (`.next-setter`).
+
+### Fase 1 — las seis respuestas, con la aplicación corriendo
+
+Instrumento nuevo: `scripts/qa-corridas/medir-cartera.ts`. `medir-panel-setter.ts` (P21) mide el
+panel con la cartera COLAPSADA, así que el bloque salía con la altura del toggle y no decía nada de
+lo que hay adentro. Éste la abre y la mide con el mismo método (pliegue = `main.clientHeight`,
+alturas relativas al origen del scroller, sólo lo VISIBLE).
+
+**1. Qué se puede hacer en la cartera que no se pueda en el panel.** Cinco cosas, y cuatro son
+exclusivas:
+
+- **Alcanzar un lead que no es trabajo de hoy.** La cola (`ColaDelDia`) renderiza sólo
+  `grupos.trabajar` y hasta 5 (`TOPE_COLA`); `HomeEnEspera` da CONTEOS por turno, no leads. La
+  cartera es la única superficie donde un lead en seguimiento, en revisión, agendado, postergado o
+  archivado existe como ítem individual. Medido: 35 de los 84.
+- **Fijar / desfijar** (`fijarLead`, `lead-card-actions.tsx:121`). El `Pin`/`PinOff` del foco es
+  otra cosa: el anclaje sticky de la cookie («Soltar»), no el `pinned` persistido.
+- **La nota privada** (`guardarNota`) — `LeadCardActions` tiene UN consumidor: la card de la
+  cartera (`home-sections.tsx:176`).
+- **Reanudar** un lead pausado (`reanudarLead`, `lead-card-actions.tsx:143`).
+- **Ver el motivo del archivo** (`archivoMotivo`, `home-sections.tsx:99`).
+
+No exclusivo: **pausar** (el foco también lo ofrece, `foco-surface.tsx:251`).
+
+**2. Qué ofrece para encontrar un negocio puntual.** Búsqueda, filtro y orden — los tres **ya
+existían**. `cartera-toolbar.tsx:70` es un buscador sobre nombre, rubro, zona y nota propia
+(`leadCoincideBusqueda`, acento-insensible); el filtro tiene 9 opciones y el orden 4. Todo en
+cliente, instantáneo. **Medido: llegar a un negocio por nombre cuesta DOS acciones** (abrir la
+cartera + tipear) y deja 1 tarjeta. El caso peor no es peor: el negocio medido
+(`M0-GAL 34-archivo-perdido`) está en el archivo, un grupo que la cartera no abre sola.
+
+**3. Qué grupos produce la partición, y cuántos leads caen en cada uno.** `vistaDeLead` (flow.ts) —
+la misma función que decide el filtro por estado. Medido a través del producto, recorriendo el
+filtro opción por opción:
+
+| vista | leads |
+|---|---|
+| Para trabajar | 49 |
+| En seguimiento | 14 |
+| Esperando revisión | 11 |
+| Agendadas | 2 |
+| Pausados por vos | 0 |
+| Postergados por el negocio | 2 |
+| Descartados (antes de la demo) | 4 |
+| Perdidos (cerrados por Franco) | 2 |
+| **total** | **84** |
+
+Quién la consumía: `particionarCartera` la usa `setter/page.tsx:44` (cola, foco, en-espera) y
+`vistaDeLead` sólo el filtro. **Ninguna superficie agrupaba.**
+
+**4. Qué quedó del agrupamiento muerto.** Cuatro líneas, y no se construyó NADA:
+`OrdenCartera` incluía el valor `colas` rotulado «vista agrupada por defecto» (flow.ts:882, desde
+`4148e32d`), `filtrarYOrdenarCartera` lo excluía de su firma dos veces con un `Exclude`, y
+`cartera-view.tsx:36` lo mapeaba a `urgencia`. Degradaba porque la función **no lo acepta por
+tipo**, así que la vista tenía que traducirlo para compilar. Y era inalcanzable: `ORDEN_OPCIONES`
+nunca tuvo esa opción.
+
+**5. Qué hacen los tres botones de ícono.** Fijar, pausar y nota. **La premisa era falsa: ya tenían
+nombre accesible** — `aria-label` + `title` desde B-beta (`lead-card-actions.tsx:243-244`). Medido
+en el DOM real: `["Quitar de fijados","Cambiar la pausa","Agregar nota","Reanudar"]`. Lo que NO
+tenían era rótulo VISIBLE: tres íconos del mismo tamaño y peso, uno al lado del otro. En mobile no
+hay hover, así que ahí el `title` no existe. Ninguno duplica una ACCIÓN; los tres duplican un ESTADO
+que la card ya muestra (el `Pin` del encabezado, la línea «Pausado hasta el…», el texto de la nota).
+
+**6. Cuánto mide la cartera.** A 1440: pliegue 788, la sección arranca en 853 (**debajo del
+pliegue** — P21 puso la cola primero) y mide 9.588 px; 84 tarjetas de 206 px, **0 enteras en el
+pliegue de la página** y 6 en el primer pantallazo de la cartera. A 390: pliegue 688, sección en
+1.028, alto 18.608; 0 y 2.
+
+### La decisión: AGRUPAR
+
+Buscar ya existe y ya cuesta dos acciones. Construirlo sería construir lo que hay. Lo que falta es
+**orientarse**: 84 tarjetas con el mismo peso visual, cero encabezados, y ver el reparto exige
+recorrer ~14 pantallazos a 1440 y ~42 a 390.
+
+Corrobora la decisión algo que ya estaba escrito en el producto: el vacío de la cartera promete
+«Aparecen acá, **agrupados por lo que toca hacer con cada uno**» (`home-empty.tsx:18`, desde
+`94af9ee5`). La promesa era falsa desde entonces. Y la bitácora de P21 lo dejó anotado: «La cartera
+agrupada no era este sprint».
+
+Ninguna condición de frenada se cumplió: `agruparCartera` es una función PURA sobre los
+`HomeLead[]` que ya están en memoria — **cero queries nuevas, ninguna lectura que cruce setters** —
+y la taxonomía es la que ya existía (`vistaDeLead`), no una cuarta.
+
+### Qué se hizo
+
+- **`agruparCartera` + `VISTAS_CARTERA`** (flow.ts). Los grupos salen de `vistaDeLead`; los rótulos
+  de `VISTAS_CARTERA`, que es ahora la **fuente única** de los encabezados Y de las opciones del
+  filtro (antes los rótulos vivían sólo en `ESTADO_OPCIONES`; copiarlos habría dejado dos listas del
+  mismo dominio libres de divergir). El `satisfies` obliga a que estén todas.
+- **El agrupamiento muerto se SACÓ**, y el agrupamiento se construyó como ESTRUCTURA. Agrupar no es
+  una forma de ordenar: es otra dimensión, y los cuatro órdenes siguen valiendo dentro de cada
+  grupo. Resucitarlo como quinta opción de orden habría sido un error de categoría. Con él se
+  fueron los dos `Exclude`.
+- **«Para trabajar» abre solo; los otros siete, plegados con su conteo.** Plegado NO renderiza las
+  tarjetas (con 84 leads, ocho grids montados y ocultos costarían el mismo DOM que la lista plana).
+- **Buscando no se agrupa**: la lista vuelve a ser plana.
+- **La tarjeta perdió el badge de etapa en jerga** («En revisión», «Aprobada», «Ficha»…): decía lo
+  mismo que la fila de próxima acción, en idioma de máquina de estados. Medido: 84 → 0. El de
+  «Caliente» se queda — no es etapa.
+- **Los tres botones tienen rótulo visible** (Fijar/Fijado · Pausar · Nota) **además** del accesible.
+  El `aria-label` no se reemplaza: el visible dice la acción corta, el accesible la dice con estado.
+
+### Dos cosas que la medición encontró y se arreglaron
+
+1. **Filtrar por un estado dejaba al setter mirando un encabezado plegado.** Con «Para trabajar»
+   como único grupo abierto por defecto, elegir «En seguimiento» mostraba `14` y cero tarjetas. Un
+   grupo se abre solo también cuando es el ÚNICO — que es exactamente el caso de filtrar.
+2. **La pausa vencida se ofrecía como vigente.** `LeadCardActions` decidía «está pausado» con
+   `snoozedUntil` no nulo, y esa fecha sobrevive al vencimiento (`home.ts:69` deriva `snoozed`
+   contra el reloj justamente porque no son lo mismo). La primera tarjeta del estado real era ese
+   caso: ofrecía «Cambiar la pausa» y «Reanudar» mientras el filtro «Pausados por vos» contaba 0.
+   Ahora recibe `snoozed`.
+
+### El falso verde que el agrupamiento introduce, y cómo se cerró
+
+Un grupo plegado no monta sus tarjetas. Entonces un aserto de AUSENCIA sobre la cartera —«el lead de
+B no aparece», que es la garantía de aislamiento— **pasa en verde por el motivo equivocado** si el
+lead ajeno se filtró dentro de un grupo cerrado: `toHaveCount(0)` no distingue «no está» de «no se
+montó». Es la misma clase de trampa que P21 encontró con el tope de la cola.
+
+Se cerró con un helper, `expandirGruposCartera` (`tests/helpers/setter-ui.ts`), que abre la cartera
+y **cada** grupo, y falla si alguno quedó plegado. Lo usan `02-isolation.spec.ts` C1 y **C2** — C2
+afirmaba la ausencia contra una cartera COLAPSADA, o sea que ya medía poco antes de este sprint. El
+helper tiene su par CONDUCTA/SABOTAJE en el probe, como el resto.
+
+### Mediciones
+
+| | 1440 antes | 1440 después | 390 antes | 390 después |
+|---|---|---|---|---|
+| alto de la cartera | 9.588 | **6.397** (−33 %) | 18.608 | **12.094** (−35 %) |
+| alto total de la página | 11.416 | **8.225** | 20.771 | **14.257** |
+| tarjetas renderizadas | 84 | **49** | 84 | **49** |
+| enteras en el pliegue de la página | 0 | 0 | 0 | 0 |
+| enteras en el 1er pantallazo de la cartera | 6 | **4** | 2 | 2 |
+| encabezados de grupo | 0 | **7** | 0 | **7** |
+| badges de etapa en jerga | 84 | **0** | 84 | **0** |
+| acciones para llegar a un negocio por nombre | 2 | **2** | — | — |
+
+El pliegue de la PÁGINA da 0 en los cuatro casos y va a seguir dando 0: la cartera vive debajo de la
+cola, que P21 puso primero a propósito.
+
+**El costo, dicho:** a 1440 entran 2 tarjetas MENOS en el primer pantallazo de la cartera (6 → 4),
+porque los encabezados suman cromo por encima de la primera tarjeta (964 → 1.009 px). Se pagan 2
+tarjetas y se compra el mapa de las otras 35.
+
+**Superficies fijas:** `medir-pliegue-manual.ts` y `capturar-franja.ts` corridos antes y después →
+los dos JSON salieron **idénticos byte a byte**. No empeoraron: no cambiaron.
+
+**Cartera vacía** (`m0-gal-vacio@develop.test`, 0 leads): no hay cartera. `page.tsx:120` no monta
+`CarteraView` sin leads; el setter ve el vacío del panel («Tu cartera está vacía» + «Cargar un
+prospecto» + «¿Tenés una lista? Importá varios de una») y la página entera entra en el pliegue
+(788/788 y 688/688). Sin cambios de este sprint.
+
+### El aislamiento, demostrado fallando
+
+Sabotaje: `ownedListWhere` devuelve el objeto vacío (se cae el filtro por dueño), rebuild completo,
+suite contra ese build. `27-cartera-agrupada.spec.ts` D4 se puso **roja en el aserto correcto** —
+`spec.ts:242`, «el lead del otro setter no aparece en ningún grupo de la cartera», esperado 0
+recibido 1— y no en un piso ni por timeout: los tres asertos de piso (lo propio SÍ se ve, en los
+tres grupos) pasaron antes, y D1/D2/D3 siguieron verdes. `02-isolation` C1 y C2 también rojos en
+«A no ve el lead de B» / «B no ve el lead de A». Restaurado y rebuildeado.
+
+### Gates
+
+`tsc` 0 · invariantes **54 descubiertos / 53 corridos / 53 verdes** (`check:invariant:vista-cartera`
+ampliado con el barrido grupo-vs-filtro sobre las 8 vistas, el reparto sin pérdidas, el orden
+declarado, los rótulos, y un piso anti-verde-sobre-nada) · `test:setter` **184/184** (180 previos +
+4 nuevos) · `test:leados` 33/33 · `test:helpers` **28/28** (26 + el par del helper nuevo) · `build`
+0 · `migrate status` sin drift.
+
+Capturas en `docs/proof-screenshots/p22/`, baselines en `docs/baselines/p22-*.json`.
+
+### Lo que queda anotado, y no se hizo
+
+- **El mapa está abajo de todo.** Con «Para trabajar» abierto en 49 tarjetas, los otros siete
+  encabezados arrancan a **6.125 px** del inicio de la cartera a 1440 y a **11.822 px** a 390 — o
+  sea, detrás de las 49. El reparto se lee de un vistazo sólo si el setter pliega «Para trabajar»
+  (un click, y el estado se recuerda mientras dure la visita). Es el punto a mirar con ojos de
+  usuario: si el mapa tiene que estar arriba, la salida sería una franja de conteos en la cabecera
+  de la cartera — pero eso es una superficie nueva y no era este sprint.
+- El grupo que abre solo está fijo en `VISTA_ABIERTA`, la vista del trabajo. No es una preferencia
+  del setter.
+- La cartera sigue colapsada por defecto: este sprint no tocó dónde vive ni cuándo se abre.

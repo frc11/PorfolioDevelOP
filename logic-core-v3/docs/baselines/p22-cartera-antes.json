@@ -1,0 +1,116 @@
+{
+  "mediciones": [
+    {
+      "ancho": "1440",
+      "email": "setter-qa@develop.test",
+      "pliegue": 788,
+      "altoTotal": 11416,
+      "cartera": {
+        "top": 853,
+        "alto": 9588,
+        "entra": false
+      },
+      "tarjetas": 84,
+      "tarjetasEnPliegue": 0,
+      "tarjetasEnPantallazo": 6,
+      "altoTarjeta": 206,
+      "topPrimeraTarjeta": 964,
+      "censo": {
+        "tarjetas": 84,
+        "badgesEstado": 84,
+        "gruposCartera": 0,
+        "buscadores": 1,
+        "selects": 2
+      },
+      "nombresAccesibles": [
+        "QA-B3 Panadería Doña RosaEn revisiónPanadería · Tafí Viejo · hace 84 díasLe toca a Franco — está revisando tu demo",
+        "Quitar de fijados",
+        "Cambiar la pausa",
+        "Agregar nota",
+        "Reanudar"
+      ]
+    },
+    {
+      "ancho": "390",
+      "email": "setter-qa@develop.test",
+      "pliegue": 688,
+      "altoTotal": 20771,
+      "cartera": {
+        "top": 1028,
+        "alto": 18608,
+        "entra": false
+      },
+      "tarjetas": 84,
+      "tarjetasEnPliegue": 0,
+      "tarjetasEnPantallazo": 2,
+      "altoTarjeta": 174,
+      "topPrimeraTarjeta": 1185,
+      "censo": {
+        "tarjetas": 84,
+        "badgesEstado": 84,
+        "gruposCartera": 0,
+        "buscadores": 1,
+        "selects": 2
+      },
+      "nombresAccesibles": [
+        "QA-B3 Panadería Doña RosaEn revisiónPanadería · Tafí Viejo · hace 84 díasLe toca a Franco — está revisando tu demo",
+        "Quitar de fijados",
+        "Cambiar la pausa",
+        "Agregar nota",
+        "Reanudar"
+      ]
+    }
+  ],
+  "estados": [
+    {
+      "value": "todos",
+      "label": "Todos los estados",
+      "leads": 84
+    },
+    {
+      "value": "trabajar",
+      "label": "Para trabajar",
+      "leads": 49
+    },
+    {
+      "value": "seguimiento",
+      "label": "En seguimiento",
+      "leads": 14
+    },
+    {
+      "value": "revision",
+      "label": "Esperando revisión",
+      "leads": 11
+    },
+    {
+      "value": "agendadas",
+      "label": "Agendadas",
+      "leads": 2
+    },
+    {
+      "value": "pausados",
+      "label": "Pausados por vos",
+      "leads": 0
+    },
+    {
+      "value": "postergados",
+      "label": "Postergados por el negocio",
+      "leads": 2
+    },
+    {
+      "value": "archivo-descartado",
+      "label": "Descartados (antes de la demo)",
+      "leads": 4
+    },
+    {
+      "value": "archivo-perdido",
+      "label": "Perdidos (cerrados por Franco)",
+      "leads": 2
+    }
+  ],
+  "busqueda": {
+    "nombre": "CORRIDA Bicicleteria La Rueda",
+    "acciones": 2,
+    "quedan": 1
+  }
+}

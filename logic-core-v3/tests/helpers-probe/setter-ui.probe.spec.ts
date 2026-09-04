@@ -6,6 +6,7 @@ import {
   fieldControl,
   expectToast,
   expandCartera,
+  expandirGruposCartera,
 } from '../helpers/setter-ui'
 import { typeControlledInput, setControlledInput, setControlledSelect } from '../helpers/form'
 
@@ -244,6 +245,75 @@ test('expandCartera · SABOTAJE: el toggle dice abierto y el cuerpo nunca monta'
   await debeFallar('aria-expanded quedó en true sin que el cuerpo montara', () =>
     expandCartera(page),
   )
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// expandirGruposCartera — P22: la cartera agrupada
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * La cartera agrupada: un grupo abierto y dos plegados. `abreDeVerdad: false` es
+ * el señuelo exacto del falso verde que este helper existe para impedir — el
+ * encabezado se marca abierto y las tarjetas nunca montan, así que un aserto de
+ * ausencia sobre el lead ajeno pasaría sin que el lead esté ni deje de estar.
+ */
+function carteraAgrupadaHtml(opts: { abreDeVerdad: boolean }): string {
+  const cuerpo = opts.abreDeVerdad
+    ? "grupo.querySelector('.tarjetas').style.display = 'block'"
+    : '/* las tarjetas no se montan */'
+  return `
+    <main>
+      <button type="button" aria-expanded="true" id="toggle">Ver toda la cartera</button>
+      <div>
+        <input type="search" aria-label="Buscar en tu cartera" />
+        <div data-slot="grupo-cartera">
+          <button type="button" aria-expanded="true">Para trabajar</button>
+          <div class="tarjetas"><p>Panaderia Doña Rosa</p></div>
+        </div>
+        <div data-slot="grupo-cartera">
+          <button type="button" aria-expanded="false">En seguimiento</button>
+          <div class="tarjetas" style="display:none"><p>Bicicleteria La Rueda</p></div>
+        </div>
+        <div data-slot="grupo-cartera">
+          <button type="button" aria-expanded="false">Agendadas</button>
+          <div class="tarjetas" style="display:none"><p>Cafeteria Nandu</p></div>
+        </div>
+      </div>
+    </main>
+    <script>
+      for (const boton of document.querySelectorAll('[data-slot="grupo-cartera"] > button')) {
+        boton.addEventListener('click', () => {
+          const grupo = boton.parentElement
+          boton.setAttribute('aria-expanded', 'true')
+          ${cuerpo}
+        })
+      }
+    </script>`
+}
+
+test('expandirGruposCartera · CONDUCTA: abre los plegados y sus tarjetas quedan visibles', async ({
+  page,
+}) => {
+  await montar(page, carteraAgrupadaHtml({ abreDeVerdad: true }))
+  await expandirGruposCartera(page)
+  // Las tres, incluidas las dos que arrancaban plegadas: sin esto un aserto de
+  // ausencia sobre «Cafeteria Nandu» sería verde por no estar montada.
+  await expect(firstVisible(page.getByText('Panaderia Doña Rosa'))).toBeVisible()
+  await expect(firstVisible(page.getByText('Bicicleteria La Rueda'))).toBeVisible()
+  await expect(firstVisible(page.getByText('Cafeteria Nandu'))).toBeVisible()
+})
+
+test('expandirGruposCartera · SABOTAJE: el grupo dice abierto y las tarjetas nunca montan', async ({
+  page,
+}) => {
+  await montar(page, carteraAgrupadaHtml({ abreDeVerdad: false }))
+  // El `aria-expanded` pasa a true, así que el helper termina sin quejarse: lo
+  // que tiene que fallar es el aserto de VISIBILIDAD sobre la tarjeta del grupo
+  // que decía haberse abierto. Es la distinción presencia/visibilidad de siempre.
+  await expandirGruposCartera(page)
+  await debeFallar('el grupo se marcó abierto pero su tarjeta nunca montó', async () => {
+    await expect(firstVisible(page.getByText('Cafeteria Nandu'))).toBeVisible({ timeout: 2_000 })
+  })
 })
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@
 
 import { Search, X } from 'lucide-react'
 import { Input, Select } from '@/components/ui'
-import type { EstadoFiltro, OrdenCartera } from '@/lib/leados/flow'
+import { VISTAS_CARTERA, type EstadoFiltro, type OrdenCartera } from '@/lib/leados/flow'
 
 type CarteraToolbarProps = {
   query: string
@@ -16,21 +16,17 @@ type CarteraToolbarProps = {
   onLimpiar: () => void
 }
 
+/**
+ * P22 — Las opciones del filtro SALEN de `VISTAS_CARTERA` (flow.ts), que es la
+ * misma lista con la que la cartera rotula sus grupos. Antes esta lista era la
+ * única fuente de los rótulos y estaba escrita acá a mano; agrupar necesitaba
+ * los mismos nombres, y copiarlos habría dejado dos listas del mismo dominio
+ * libres de divergir. `todos` se antepone acá porque es propio del filtro (no
+ * es una vista: es la ausencia de filtro) y no tiene grupo que rotular.
+ */
 const ESTADO_OPCIONES: { value: EstadoFiltro; label: string }[] = [
   { value: 'todos', label: 'Todos los estados' },
-  { value: 'trabajar', label: 'Para trabajar' },
-  { value: 'seguimiento', label: 'En seguimiento' },
-  { value: 'revision', label: 'Esperando revisión' },
-  { value: 'agendadas', label: 'Agendadas' },
-  // Las dos esperas con fecha, separadas por QUIÉN la decidió: la de arriba la
-  // pediste vos (pausa personal, privada); la de abajo la pidió el negocio
-  // (status POSTERGADO). Antes solo estaba la primera y el postergado caía en
-  // «En seguimiento» — se lo buscaba acá y la lista salía vacía.
-  { value: 'pausados', label: 'Pausados por vos' },
-  { value: 'postergados', label: 'Postergados por el negocio' },
-  // A-09: el archivo se filtra por causa real, no como bloque único.
-  { value: 'archivo-descartado', label: 'Descartados (antes de la demo)' },
-  { value: 'archivo-perdido', label: 'Perdidos (cerrados por Franco)' },
+  ...VISTAS_CARTERA.map((v) => ({ value: v.vista as EstadoFiltro, label: v.label })),
 ]
 
 const ORDEN_OPCIONES: { value: OrdenCartera; label: string }[] = [

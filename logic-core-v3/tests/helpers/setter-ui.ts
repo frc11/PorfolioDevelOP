@@ -126,3 +126,41 @@ export async function expandCartera(page: Page): Promise<void> {
     state: 'visible',
   })
 }
+
+/**
+ * LeadOS P22 — La cartera ya no es una lista plana: se dibuja AGRUPADA por vista
+ * («Para trabajar», «En seguimiento», …), con el grupo del setter abierto y los
+ * demás PLEGADOS. Un grupo plegado no renderiza sus tarjetas: no están ocultas
+ * por CSS, no están en el DOM.
+ *
+ * ⚠️ Por qué esto es un helper y no una línea suelta en cada test. Un aserto de
+ * AUSENCIA sobre la cartera —«el lead de B no aparece», que es la garantía de
+ * aislamiento— pasa en verde por el motivo equivocado si el lead ajeno se filtró
+ * dentro de un grupo plegado: `toHaveCount(0)` no distingue «no está» de «no se
+ * montó». Todo test que afirme ausencia en la cartera tiene que abrir TODOS los
+ * grupos primero, y por eso la apertura vive en un solo lugar.
+ *
+ * Expande la cartera y después cada grupo que siga plegado. Idempotente: lee
+ * `aria-expanded` y sólo clickea lo cerrado. Devuelve cuando no queda ninguno
+ * cerrado — si un click no abriera de verdad, esto agota el timeout en vez de
+ * seguir de largo (es lo que prueba su SABOTAJE en el probe de helpers).
+ */
+export async function expandirGruposCartera(page: Page): Promise<void> {
+  const { expect } = await import('@playwright/test')
+  await expandCartera(page)
+  const cerrados = page.locator('[data-slot="grupo-cartera"] > button[aria-expanded="false"]')
+  // La cartera puede no tener grupos (buscando, o cartera vacía): 0 cerrados es
+  // un final legítimo, y el bucle sale solo.
+  for (let intento = 0; intento < 20; intento += 1) {
+    const restantes = await cerrados.count()
+    if (restantes === 0) break
+    await cerrados.first().click()
+    // El conteo tiene que BAJAR en uno. Sin este aserto, un click que no abre
+    // nada haría girar el bucle hasta el tope y el helper saldría de largo.
+    await expect(cerrados).toHaveCount(restantes - 1, { timeout: 5_000 })
+  }
+  await expect(
+    cerrados,
+    'quedaron grupos de la cartera plegados: un aserto de ausencia sobre ella sería un falso verde',
+  ).toHaveCount(0)
+}

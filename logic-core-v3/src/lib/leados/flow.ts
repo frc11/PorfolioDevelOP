@@ -878,8 +878,20 @@ export function contarEnVueloPorTurno(enVuelo: readonly HomeLead[]): Record<Turn
   return conteo
 }
 
-/** Órdenes elegibles. `colas` = vista agrupada por defecto; el resto, lista plana. */
-export type OrdenCartera = 'colas' | 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
+/**
+ * Órdenes elegibles de la cartera.
+ *
+ * P22 — acá vivía un quinto valor, `'colas'`, rotulado «vista agrupada por
+ * defecto». La vista agrupada nunca se construyó: el valor no figuraba entre las
+ * opciones del `<select>` (así que era inalcanzable), `filtrarYOrdenarCartera` lo
+ * excluía de su firma (`Exclude<OrdenCartera, 'colas'>`, dos veces) y la vista lo
+ * mapeaba a `'urgencia'` para satisfacer el tipo. O sea: un valor que no se podía
+ * elegir y que, si se elegía, no hacía nada. Se sacó, y el agrupamiento se
+ * construyó donde corresponde —como ESTRUCTURA de la lista (`agruparCartera`), no
+ * como un orden— porque agrupar no es una forma de ordenar: es otra dimensión, y
+ * los cuatro órdenes de acá siguen valiendo DENTRO de cada grupo.
+ */
+export type OrdenCartera = 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
 
 /** Vista de un lead para el filtro por estado (la cola que el setter ve). A-09:
  * el archivo se filtra por causa real, no como bloque único sin categoría.
@@ -909,6 +921,79 @@ export function vistaDeLead(lead: HomeLead): VistaCartera {
   // este filtro sacaría trabajo accionable de «Para trabajar».
   if (lead.status === 'POSTERGADO' && lead.grupo === 'seguimiento') return 'postergados'
   return lead.grupo
+}
+
+/**
+ * P22 — LAS VISTAS DE LA CARTERA, en el orden en que se muestran y con el
+ * nombre que el setter lee. UNA sola fuente para los DOS consumidores: los
+ * encabezados de grupo de la cartera y las opciones del filtro por estado.
+ *
+ * Por qué una sola y no dos listas: hasta este sprint el rótulo de cada vista
+ * vivía sólo en `ESTADO_OPCIONES` (cartera-toolbar.tsx), y agrupar necesitaba
+ * los mismos nombres. Copiarlos habría dejado dos listas sobre el mismo dominio,
+ * que es exactamente cómo se separan (el filtro diciendo «Esperando revisión» y
+ * el grupo diciendo otra cosa para los mismos once leads). El `satisfies` obliga
+ * a que estén TODAS: si mañana se agrega una vista a `VistaCartera` y no se le da
+ * rótulo acá, no compila.
+ *
+ * El orden es deliberado y es el que ya tenía el filtro: primero el trabajo,
+ * después lo que está en vuelo, después las dos esperas con fecha, y el archivo
+ * al final. No es alfabético ni por tamaño: es el recorrido.
+ */
+export const VISTAS_CARTERA = [
+  { vista: 'trabajar', label: 'Para trabajar' },
+  { vista: 'seguimiento', label: 'En seguimiento' },
+  { vista: 'revision', label: 'Esperando revisión' },
+  { vista: 'agendadas', label: 'Agendadas' },
+  // Las dos esperas con fecha, separadas por QUIÉN la decidió: la de arriba la
+  // pidió el setter (pausa personal, privada); la de abajo la pidió el negocio
+  // (status POSTERGADO).
+  { vista: 'pausados', label: 'Pausados por vos' },
+  { vista: 'postergados', label: 'Postergados por el negocio' },
+  // A-09: el archivo se muestra por causa real, no como bloque único.
+  { vista: 'archivo-descartado', label: 'Descartados (antes de la demo)' },
+  { vista: 'archivo-perdido', label: 'Perdidos (cerrados por Franco)' },
+] as const satisfies readonly { vista: VistaCartera; label: string }[]
+
+/** La vista que la cartera abre sola: la del trabajo que le toca al setter. */
+export const VISTA_ABIERTA: VistaCartera = 'trabajar'
+
+export type GrupoCartera = {
+  vista: VistaCartera
+  label: string
+  leads: HomeLead[]
+}
+
+/**
+ * P22 — Reparte una lista YA filtrada y ordenada en los grupos de `VISTAS_CARTERA`.
+ *
+ * No es una taxonomía nueva: el que decide en qué grupo cae cada lead es
+ * `vistaDeLead`, el MISMO que ya decidía qué muestra el filtro por estado (y que
+ * `vista-cartera.invariant.ts` ya vigila). Por eso el conteo de un grupo y el
+ * conteo del filtro homónimo no pueden divergir — son la misma función.
+ *
+ * Preserva el orden de entrada dentro de cada grupo (recorrido único, `push`),
+ * así que los fijados siguen arriba de SU grupo y el orden elegido
+ * (`filtrarYOrdenarCartera`) sigue valiendo adentro: agrupar es otra dimensión,
+ * no reemplaza al orden.
+ *
+ * Devuelve SOLO los grupos con leads. Un grupo vacío no se dibuja: un encabezado
+ * «Agendadas 0» es cromo que ocupa lugar y no dice nada que el setter necesite.
+ */
+export function agruparCartera(leads: HomeLead[]): GrupoCartera[] {
+  const porVista = new Map<VistaCartera, HomeLead[]>()
+  for (const lead of leads) {
+    const vista = vistaDeLead(lead)
+    const actual = porVista.get(vista)
+    if (actual) actual.push(lead)
+    else porVista.set(vista, [lead])
+  }
+  const grupos: GrupoCartera[] = []
+  for (const { vista, label } of VISTAS_CARTERA) {
+    const suyos = porVista.get(vista)
+    if (suyos && suyos.length > 0) grupos.push({ vista, label, leads: suyos })
+  }
+  return grupos
 }
 
 /**
@@ -953,10 +1038,7 @@ export function leadCoincideBusqueda(lead: HomeLead, queryNorm: string): boolean
   return campos.some((campo) => campo != null && normalizar(campo).includes(queryNorm))
 }
 
-const COMPARADORES: Record<
-  Exclude<OrdenCartera, 'colas'>,
-  (a: HomeLead, b: HomeLead) => number
-> = {
+const COMPARADORES: Record<OrdenCartera, (a: HomeLead, b: HomeLead) => number> = {
   urgencia: ordenUrgencia,
   reciente: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
   antiguo: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
@@ -973,7 +1055,7 @@ export function filtrarYOrdenarCartera(
   leads: HomeLead[],
   query: string,
   estado: EstadoFiltro,
-  orden: Exclude<OrdenCartera, 'colas'>,
+  orden: OrdenCartera,
 ): HomeLead[] {
   const queryNorm = normalizar(query.trim())
   const filtrados = leads.filter(

@@ -27,7 +27,14 @@
  * los invariantes de este árbol: se carga con ts-node sin Neon ni tsconfig-paths.
  */
 import assert from 'node:assert/strict'
-import { filtrarYOrdenarCartera, vistaDeLead, type HomeLead } from './flow.ts'
+import {
+  agruparCartera,
+  filtrarYOrdenarCartera,
+  VISTAS_CARTERA,
+  vistaDeLead,
+  type HomeLead,
+  type VistaCartera,
+} from './flow.ts'
 
 /** Fixture de un `HomeLead` YA clasificado (mismo patrón que particion.invariant). */
 function lead(overrides: Partial<HomeLead> & { id: string }): HomeLead {
@@ -129,4 +136,73 @@ assert.deepEqual(idsDe('seguimiento'), ['en-seguimiento'], '«En seguimiento» y
 assert.deepEqual(idsDe('trabajar'), ['postergado-vencido'], '«Para trabajar» conserva el postergado vencido')
 assert.equal(idsDe('todos').length, 4, 'ningún lead queda sin filtro que lo alcance')
 
+// ── 6. P22 · El grupo y el filtro homónimo NO pueden divergir ────────────────
+// El valor de agrupar depende de que el conteo del encabezado sea el mismo que
+// el del filtro: si «En seguimiento 14» abriera 11 tarjetas, el número mentiría.
+// No puede pasar porque los dos salen de `vistaDeLead`, y esto lo FIJA: para
+// cada vista, el grupo y el filtro traen exactamente los mismos ids.
+for (const { vista } of VISTAS_CARTERA) {
+  const delGrupo = agruparCartera(filtrarYOrdenarCartera(cartera, '', 'todos', 'urgencia'))
+    .filter((g) => g.vista === vista)
+    .flatMap((g) => g.leads.map((l) => l.id))
+  assert.deepEqual(
+    delGrupo,
+    idsDe(vista),
+    `el grupo «${vista}» y su filtro homónimo traen los mismos leads`,
+  )
+}
+
+// ── 7. Agrupar no pierde ni duplica ──────────────────────────────────────────
+// Un reparto que se come un lead deja al setter sin forma de encontrarlo: no
+// está en ningún grupo y la cartera ya no tiene lista plana por defecto.
+const ordenada = filtrarYOrdenarCartera(cartera, '', 'todos', 'urgencia')
+const repartidos = agruparCartera(ordenada).flatMap((g) => g.leads.map((l) => l.id))
+assert.equal(repartidos.length, ordenada.length, 'agrupar no pierde ni duplica leads')
+assert.deepEqual(
+  [...repartidos].sort(),
+  ordenada.map((l) => l.id).sort(),
+  'los leads de los grupos son EXACTAMENTE los de la lista',
+)
+
+// ── 8. Ningún grupo vacío, y el orden de los grupos es el declarado ──────────
+const grupos = agruparCartera(ordenada)
+assert.ok(
+  grupos.every((g) => g.leads.length > 0),
+  'un grupo sin leads no se devuelve: un encabezado «0» es cromo que no orienta',
+)
+const declarado = VISTAS_CARTERA.map((v) => v.vista as VistaCartera)
+assert.deepEqual(
+  grupos.map((g) => g.vista),
+  declarado.filter((v) => grupos.some((g) => g.vista === v)),
+  'los grupos salen en el orden de VISTAS_CARTERA, no en el de llegada de los leads',
+)
+
+// ── 9. Cada vista tiene rótulo, y es el que el grupo muestra ─────────────────
+// `VISTAS_CARTERA` es la fuente única del filtro Y de los encabezados: si el
+// rótulo del grupo no saliera de ahí, las dos superficies podrían nombrar
+// distinto a los mismos leads.
+const rotulos = new Map(VISTAS_CARTERA.map((v) => [v.vista as VistaCartera, v.label]))
+for (const g of grupos) {
+  assert.equal(g.label, rotulos.get(g.vista), `el grupo «${g.vista}» usa el rótulo de VISTAS_CARTERA`)
+}
+assert.ok(
+  VISTAS_CARTERA.every((v) => v.label.trim() !== ''),
+  'ninguna vista queda sin nombre que el setter pueda leer',
+)
+
+// ── 10. SABOTAJE — que el chequeo 6 no pase en verde sobre nada ──────────────
+// Un `for` sobre una lista vacía, o un `agruparCartera` que devolviera siempre
+// [], darían VERDE sin comparar nada. El piso: la fixture tiene que producir al
+// menos tres grupos distintos y no vacíos, y el barrido tiene que haber
+// comparado esas mismas vistas.
+assert.ok(
+  grupos.length >= 3,
+  `la fixture tiene que producir al menos 3 grupos para que el barrido compare algo (dio ${grupos.length})`,
+)
+assert.ok(
+  VISTAS_CARTERA.length >= 8,
+  `VISTAS_CARTERA quedó corta (${VISTAS_CARTERA.length}): el barrido del chequeo 6 dejaría vistas sin comparar`,
+)
+
 console.log('✓ vista-cartera: la pausa personal y la postergación del negocio tienen cada una su filtro')
+console.log('✓ vista-cartera: el grupo y el filtro homónimo traen lo mismo; agrupar no pierde leads')
