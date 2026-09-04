@@ -145,9 +145,64 @@ export function useCoreografiaActiva(): boolean {
  */
 export type FuenteDelBloque = IdDePatron | 'pin'
 
+/**
+ * QUÉ CAJA MIDE EL BLOQUE. **[B1 · medido]**
+ *
+ *   `'propia'`   la caja del bloque. Es el defecto y es lo correcto para una
+ *                sección que scrollea: el gesto empieza y termina con el
+ *                elemento que lo lleva.
+ *   `'seccion'`  la caja de la `<section>` del recorrido —el ancestro más
+ *                cercano con `ATRIBUTO_DE_PANEL`—, o sea la que lleva el alto
+ *                declarado de la tabla. **Las anclas siguen siendo las del
+ *                patrón**: lo único que cambia es contra qué caja se resuelven.
+ *
+ * ── Por qué existe, con los dos números que la fuerzan ────────────────────
+ *
+ * **Un bloque adentro de un hijo `sticky` no se mueve, así que su patrón se
+ * consume antes de que la sección llegue a cuadro.** Medido en Trabajos a
+ * 1920×1080, con la página recién cargada y `visibilityState: 'visible'`: los
+ * tres planos de P7 pasan de opacidad 0 a 1 y vuelven a 0 entre `scrollY` 3595
+ * y 4270, y la sección empieza en 4320. **Terminan de desaparecer 50 px ANTES
+ * de que la sección toque el tope del viewport**, y durante sus tres pantallas
+ * —4320 a 7560— las tres tarjetas están en opacidad 0: 85,65 % de aire muerto
+ * sobre el píxel y una banda vacía continua de 849 px.
+ *
+ * La cuenta: el ancla de P7 es `top bottom` → `bottom bottom`, o sea `rango =
+ * alto del elemento medido` = 826 px para el bloque, resuelto contra su
+ * posición NATURAL (el motor mide `caja.top + window.scrollY` una vez por
+ * época). Un elemento de 826 px adentro de una sección de 3240 consume su
+ * patrón en el 25 % del recorrido. Con la `<section>` como caja medida el mismo
+ * ancla da `rango = 3240`, del `scrollY` 3240 al 6480: el gesto arranca cuando
+ * la sección entra y cierra cuando el pin suelta.
+ *
+ * ⚠️ **LA PRIMERA FORMA DE ESTA PROPIEDAD ESTABA MAL, Y SE DECLARA.** Nació
+ * como `'patron' | 'pin'`, donde `'pin'` cambiaba el ANCLA a `ANCLA_DEL_PIN` y
+ * seguía midiendo la caja del bloque. **Medido: eso lo empeoraba.** Con un
+ * bloque de 826 px, `alto − viewport` da −254 y `rangoDeScroll` lo acota a
+ * `RANGO_MINIMO_PX = 1`: los tres planos saltaban de `translateZ −3000` a
+ * `+1000` entre `scrollY` 4540 y 4550 y quedaban en opacidad 0 **en todo el
+ * documento**. La pregunta no era cuál ancla, era **qué caja**: el ancla del
+ * patrón sobre la caja correcta ya dice lo que hay que decir.
+ *
+ * ⚠ **No alcanza con `patron: 'pin'`.** Esa palabra cambia las anclas Y pierde
+ * los fotogramas del patrón: `estiloDelBloque` deja de emitir la perspectiva de
+ * 1000 px que P7 declara, y sin perspectiva un `translateZ` no se ve.
+ *
+ * Servicios no la necesita: su secuencia pide `patron: 'pin'` sobre un bloque
+ * que YA mide la sección entera, y no consume fotogramas de profundidad.
+ */
+export type AnclajeDelBloque = 'propia' | 'seccion'
+
 export interface BloqueProps {
   /** Qué mide. Por NOMBRE: ningún objeto del sistema cruza el seam. */
   readonly patron: FuenteDelBloque
+  /**
+   * Qué caja se mide. Por defecto, la propia. `'seccion'` sólo tiene sentido
+   * adentro de una sección `pinneada` de `secciones.ts` —en una que scrollea las
+   * dos cajas se mueven juntas y la distinción no compra nada—, y el invariante
+   * de la sección que lo usa lo afirma contra la tabla.
+   */
+  readonly anclaje?: AnclajeDelBloque
   readonly className?: string
   readonly style?: React.CSSProperties
   /** Recibe el progreso, o `null` cuando no hay coreografía. */

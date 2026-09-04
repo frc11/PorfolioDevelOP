@@ -10,19 +10,17 @@
  *
  * Las dos ramas están porque cada una sola miente: "abajo de 1025 no se escribe
  * una transformada" pasa en verde si el sistema no anima nunca. El control es la
- * rama con coreografía —y **P7 sí escribe transformada en el primer cuadro**, a
- * diferencia de P1, que en un render de servidor sale en su fase de medición.
+ * rama con coreografía —y **P7 sí escribe transformada en el primer cuadro**.
  *
  * Lo propio de esta sección, además de lo que el lane pide a las cuatro:
  *
  *   · **La métrica nunca está oculta**, ni ella ni ningún ancestro suyo.
  *   · **Cero `three`**, leído del disco. · **El ritmo**: tres pantallas
  *     pinneadas son UN momento. · **El despinneo abajo de 1025.**
- *   · **El acento no puede ser texto**: los hex se LEEN del tema y se
- *     recalcula la razón contra el oscuro.
- *   · **Las tres capturas y los tres enlaces** (V3-D): que el archivo MIDA la
- *     relación declarada —abriéndolo—, que llegue codificado por el
- *     optimizador, y que ningún `href` salga de otro lado que del contenido.
+ *   · **Los pasos de la tabla SON los proyectos del contenido** (B1): el alto
+ *     de la sección se deriva de ahí, y acá la igualdad se comprueba.
+ *   · **El acento no puede ser texto**: los hex se LEEN del tema. · **Las tres
+ *     capturas** (V3-D): que el ARCHIVO mida la relación declarada.
  *
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en
  * `trabajos-piezas.ts`, que es su módulo de apoyo declarado. Donde hubo que
@@ -30,14 +28,12 @@
  */
 
 import { renderToStaticMarkup } from 'react-dom/server'
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
-import { sizesPorViewport } from '../../_lib/imagen'
+import { sizesPorColumnas } from '../../_lib/imagen'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
+import { ATRIBUTO_DE_PANEL } from '../_contrato/forma'
 import { cuentaDeMarcadores, hallazgosDeCifraConSimbolo, hallazgosDeDigito, hallazgosDeMarcadorDesconocido, marcadoresPedidos, numerosDe, textosDe } from '../_contrato/marcadores'
 import { MarcoDeMedio } from '../_contrato/medios'
 import { entradasColgadas } from '../_contrato/pedido'
@@ -46,8 +42,10 @@ import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
+import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, sinTres, veces } from './soporte'
 import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
-import { GEOMETRIA, SIZES_DE_LA_CAPTURA, Trabajos } from './Trabajos'
+import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
+import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
 
@@ -57,36 +55,19 @@ const seccionMontada = <Trabajos seccion={seccion} />
 const quieto = marcar(seccionMontada, { anima: false })
 /** El control positivo: la coreografía forzada, sin la preferencia. */
 const conMotion = marcar(seccionMontada, { anima: true })
-/** Y la preferencia mandando sobre el modo forzado: la política de S2 es total. */
 /**
- * ⚠ DESDE SITIO-S7 la compuerta se resuelve arriba de las ocho y **la
- * preferencia se lee ahí**: con `prefers-reduced-motion` puesto no se instala
- * una sola primitiva animada, así que lo que esa persona recibe **es el árbol
- * quieto**. La política de S2 no cambió de fuerza: cambió de lugar.
+ * Y la preferencia mandando sobre el modo forzado. ⚠ DESDE SITIO-S7 la
+ * compuerta se resuelve arriba de las ocho y **la preferencia se lee ahí**: con
+ * `prefers-reduced-motion` puesto no se instala una sola primitiva animada, así
+ * que lo que esa persona recibe **es el árbol quieto**.
  */
 const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'always' })
 
-const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
 const TEXTOS = textosDe(CONTENIDO) // las hojas de texto del contenido, con su ruta
 const PROYECTOS = CONTENIDO.proyectos // y sus `enlace`, que §11 compara contra el marcado
-const AQUI = path.dirname(fileURLToPath(import.meta.url))
-const leer = (relativa: string): string => readFileSync(path.join(AQUI, relativa), 'utf8')
-
-/** El archivo real de una captura: la ruta del contenido es de la web. */
-const abrirCaptura = (rutaWeb: string): Uint8Array => readFileSync(path.join(AQUI, '../../../../..', 'public', rutaWeb))
-
-/** Los DOS archivos que llegan al navegador. **Este invariante queda afuera a
- *  propósito**: lleva adentro el literal `three` como entrada del control
- *  positivo del detector, y no se despacha — incluirlo daría un rojo producido
- *  por la propia comprobación. */
-const FUENTES = ['Trabajos.tsx', 'contenido.ts'].map((f) => ({ archivo: f, texto: leer(f) }))
-const CSS = leer('../../../theme-develop.css')
 
 /** Los colores del tema invertido, derivados del CSS por el módulo de apoyo. */
 const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS } = coloresDelTema(CSS)
-
-const IMPORTA_3D = /from\s+['"](three(\/[^'"]*)?|drei|@react-three\/[^'"]+)['"]/
-const sinTres = (src: string): boolean => !IMPORTA_3D.test(src)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
@@ -100,10 +81,29 @@ afirmarIgual(veces(quieto, 'escritorio:sticky'), 1, '  con el sticky acotado a l
 afirmarIgual(veces(quieto, 'min-h-svh'), 3, '  y los tres proyectos toman una pantalla cada uno abajo del umbral')
 afirmarIgual(veces(quieto, 'escritorio:min-h-0'), 3, '    y la sueltan desde 1025, donde el panel sí está clavado')
 afirmar(quieto.includes('data-seccion="invertida"'), 'el panel escribe `data-seccion="invertida"`: el tema se da vuelta solo')
-// ⚠ Decía `min-h-svh === 0` y era correcta con el pin en todos los anchos:
-// adentro de una caja clavada de 100svh, una caja de svh es desborde. Con el
-// despinneo la verdad se dio vuelta — la pantalla la ponen los PROYECTOS.
-afirmarIgual(veces(quieto, 'h-full'), 3, 'el alto de escritorio lo siguen poniendo los envoltorios con `h-full`')
+/**
+ * ⚠ **B1 · LOS TRES `h-full` SE QUEDAN, y que hayan VUELTO a su valor viejo es
+ * la prueba de que el arreglo fue del contrato y no un parche acá.** Hubo una
+ * versión intermedia con dos: el bloque llevaba `minHeight: seccion.alto` para
+ * que el ancla del pin no degenerara, y con el escenario en 3240 px la grilla
+ * quieta no podía colgar de su `h-full`. Con `anclaje: 'seccion'` el bloque
+ * vuelve a `min-h-0 flex-1` y la cadena es la de siempre.
+ */
+afirmarIgual(veces(quieto, 'h-full'), 3, 'el alto de escritorio lo ponen los TRES envoltorios encadenados con `h-full`')
+afirmarIgual(veces(quieto, 'escritorio:h-svh'), 1, '  y la ÚNICA pantalla pedida arriba de 1025 es la del hijo pinneado')
+/** ── 1b · EL PUENTE ENTRE LAS DOS FUENTES DEL ATRIBUTO DEL PANEL (B1). El nombre
+ *  se escribe dos veces —constante en `forma.ts`, literal en `Panel.tsx`— porque
+ *  `s13b-escena` lo afirma literal y vive en `_lib/escena/`, congelado. El modo de
+ *  falla es mudo: `closest()` de un atributo inexistente devuelve `null`. */
+afirmar(
+  FUENTE_DEL_PANEL.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`),
+  'el atributo que `anclaje: "seccion"` busca es el que `Panel.tsx` emite',
+  `${ATRIBUTO_DE_PANEL} — dos fuentes, atadas acá porque el invariante que lo exige literal está congelado`,
+)
+controlPositivo('el puente vería a las dos fuentes separadas', 'data-panel-viejo={seccion.id}', (t: string) => t.includes(`${ATRIBUTO_DE_PANEL}={seccion.id}`))
+
+afirmarIgual(seccion.pasosDeLaSecuencia, CONTENIDO.proyectos.length, 'los pasos declarados en la tabla SON los proyectos del contenido: el alto se DERIVA y la igualdad es comprobable')
+controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccion, pasosDeLaSecuencia: 4 }, (s: EntradaDeSeccion) => s.pasosDeLaSecuencia === CONTENIDO.proyectos.length)
 controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '100svh' }, (s: EntradaDeSeccion) => pantallasDe(s) === 3)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -203,7 +203,7 @@ controlPositivo('el chequeo de la métrica ve una métrica escondida en un `sr-o
 titulo('9 · Cero `three`: el efecto es HTML con perspectiva, no geometría 3D')
 
 for (const { archivo, texto } of FUENTES) afirmar(sinTres(texto), `${archivo} no importa three, @react-three ni drei`)
-afirmarIgual(FUENTES.length, 2, 'y se leyeron del disco los DOS archivos que se despachan, no cero')
+afirmarIgual(FUENTES.length, 3, 'y se leyeron del disco los TRES archivos que se despachan, no cero — B1: la geometría salió a su archivo y también se despacha')
 controlPositivo('el detector ve un import de three', "import * as T from 'three'", sinTres)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -267,7 +267,7 @@ const DECLARADA: MedidasDeImagen = { ancho: GEOMETRIA.captura.ancho, alto: GEOME
 afirmarIgual(capturasConOtraRelacion(PROYECTOS, DECLARADA, abrirCaptura), [], '  y los tres ARCHIVOS miden lo declarado: sin esto el salto de layout vuelve en silencio')
 controlPositivo('el detector ve un archivo de otra relación', { ...DECLARADA, alto: DECLARADA.alto + 1 }, (d: MedidasDeImagen) => capturasConOtraRelacion(PROYECTOS, d, abrirCaptura).length === 0)
 afirmar(SIZES_DE_LA_CAPTURA.trim().length > 0, 'el `sizes` no es vacío', SIZES_DE_LA_CAPTURA)
-afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorViewport(GEOMETRIA.captura.tercio, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano. ⚠ DOS tramos desde SITIO-S11 y no tres: el arreglo del defecto 3 corrió el colapso de la grilla de 768 a 1025, así que la caja cambia EN el umbral y el tramo del medio —33vw de 768 a 1024, donde la captura pasó a ocupar el ancho entero— dejó de ser verdad')
+afirmarIgual(SIZES_DE_LA_CAPTURA, sizesPorColumnas(GEOMETRIA.captura.columnasDelPlano, GEOMETRIA.captura.columnasDeLaGrilla, GEOMETRIA.captura.completo), '  y está ARMADO con el ayudante de _lib/imagen, no escrito a mano. ⚠ B1: sale de las COLUMNAS del plano (2 de 3 = 67vw) y no de un porcentaje escrito. Describe la caja de la rama ANIMADA — la quieta de escritorio muestra 1 de 3 y baja el doble de lo que necesita: sobre-pedir cuesta bytes, sub-pedir sirve una captura borrosa a la mayoría')
 
 /** El `sizes` sobre el marcado REAL, que ya no hace falta simular. Es lo que
  *  demuestra que el pipeline produce descriptores de ANCHO y no de densidad —el

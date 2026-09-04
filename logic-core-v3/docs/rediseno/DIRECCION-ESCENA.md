@@ -307,6 +307,85 @@ Es una condición, no un detalle: un menú que se mueve sin regla es un menú qu
 
 **Se lanza con el home solo.** Las páginas internas se desarrollan después, respetando el patrón pero **con movimientos y escenas propias**.
 
+### 5.5 · La resta — la condición de publicación de Franco (B1)
+
+> *«Se construye el layout completo y **se resta después**. La resta tiene que
+> ocurrir antes de publicar. Un layout diseñado para densidad, vacío, rinde peor
+> que el sitio actual.»*
+
+⚠️ **Esta condición no estaba escrita en este documento hasta B1**, y por eso pudo
+llegar sin cumplirse hasta la grabación en la que el humano dijo *«está a medias
+de construir»*. Queda acá, con su estado y sus números, y no como prosa.
+
+**Estado: CUMPLIDA EN PARTE, y la parte que falta está medida y nombrada.**
+
+#### Lo que se midió, con el mismo instrumento en los dos sitios
+
+El aire muerto se mide **sobre el píxel**: una fila de la pantalla tiene
+contenido si en algún punto hay un borde de luminancia > 0,02. Un panel liso o un
+degradé suave es fondo, no contenido. Corre igual sobre `/v3` y sobre una captura
+de un sitio ajeno, así que los números son comparables. La receta está en
+`docs/rediseno/MEDICION-NAVEGADOR.md` y la tabla entera en
+`docs/rediseno/sprints/B1-DELTAS.md`.
+
+| a 1920×1080 | antes de B1 | después de B1 | `nk.studio` |
+|---|---|---|---|
+| aire muerto promedio, 8 pantallas | **45,30 %** | **31,47 %** | 10,31 % |
+| **banda vacía continua máxima** | **849 px** | **102 px** | **50 px** |
+| alto del home | 14,00 pantallas | **14,00** (sin cambio) | 22,62 |
+| momentos reales del recorrido | 12,0 | **12,0** | **20,5** |
+
+⚠️ **Y el hallazgo que da vuelta el diagnóstico está en `B1-DELTAS.md` §1-bis:
+no somos largos, somos cortos y vacíos.** La resta llegó hasta donde podía; los
+ocho momentos y las ocho pantallas de diferencia con la referencia **no salen de
+recomponer lo que hay, salen de agregar acontecimientos**. Eso reencuadra el
+bloque siguiente y cambia la métrica: de aire muerto a momentos.
+
+Por sección, la banda vacía continua máxima: Trabajos **849 → 66 px**, Quiénes
+somos **600 → 102**, Tu panel **445 → 80**, Cierre **337 → 97**, Números
+**178 → 98**, Servicios **104 → 88**, y Hero y Por qué develOP en 0 los dos —
+son las dos `papel-transparente` y ahí la escena llena la pantalla de textura.
+**Ninguna sección queda por encima del techo operativo de 104 px.**
+
+#### Lo que NO se cumplió, con su razón
+
+1. **El home no se acortó, y no tenía que acortarse.** nk mide 22,6 pantallas y
+   está más lleno que el nuestro de 14: la resta era del vacío de adentro de cada
+   pantalla, no de la longitud. Ninguna altura de `secciones.ts` cambió, así que
+   **el anclaje de la escena no se movió un bit** — los siete nudos siguen en
+   0 · 0,125 · 0,375 · 0,5 · 0,625 · 0,75 · 1 sobre las pantallas 0 · 1 · 3 · 4 ·
+   7 · 11,305085 · 13, y el ancla declarada del diferencial sigue en **0,8525**.
+2. **La reducción de altura de Quiénes somos se intentó y se frenó, con los
+   números.** Está autorizada, se aplicó, y **la medición la rechazó**: con la
+   tabla en `100svh` la sección **sigue midiendo 2160 px** —su composición
+   declara dos cajas de pantalla y sólo el hueco de la foto mide 987,72 px—, así
+   que la tabla pasaría a declarar 13 pantallas contra 14 renderizadas y el mapeo
+   proporcional estiraría. Con la fórmula del propio módulo: el tramo «quiénes
+   somos» caería en `scrollY` 2340 cuando la sección termina en 3240, **900 px
+   antes**; trabajos, 540 antes; números, 270 después. Los progresos no se mueven;
+   **se mueve dónde los alcanza el visitante**. El detalle entero está en el
+   docblock de esa fila en `_lib/secciones.ts`, con la salida en orden: primero la
+   composición entra en una pantalla, después la tabla.
+3. **Por qué develOP se pasa 23,70 px de su alto a 1440** (era 43,52 antes de B1
+   y 109,72 antes de la Fase 1). El piso del bloque de P5 bajó de 55 a 50 `svh`,
+   que es **el último valor que compra algo**: con 45 la sección mide lo mismo,
+   porque el bloque renderiza 475,19 px de contenido propio contra un piso de 450.
+   Lo que queda es composición de los diferenciales, no un número.
+4. **El aire muerto de Servicios no bajó de 33,52 %, y así queda.** La Fase 1 lo
+   había subido a 44,72 % achicando el hueco de `[VIDEO]` de 30,79 % a 16,12 %
+   del área; se revirtió, porque **un marcador de medio es contenido visual** y
+   ese marco punteado era la única tinta de esas filas. La banda sí mejoró —104 →
+   88 px— por una separación, no por el hueco.
+
+#### El hallazgo que cambia el diagnóstico, y que no hay que volver a recorrer
+
+*«`secciones.ts` declara alturas en `svh` y el contenido no las llena»* es cierto
+como síntoma y **falso como causa**. Con el `min-height` de la tabla puesto en
+cero en runtime, **seis de las ocho secciones miden exactamente lo mismo**: el
+alto lo fijan los `min-h-svh` que cada sección pone adentro. La tabla sólo manda
+en Trabajos —3240 declarados contra 1080 naturales— y en Cierre. **La resta de
+una sección se hace en su composición.**
+
 ---
 
 ## 6 · Dónde vive hoy cada decisión
@@ -419,6 +498,29 @@ Es una condición, no un detalle: un menú que se mueve sin regla es un menú qu
 > ⚠️ **La causa probable que quedó sin cerrar, y hay que mirarla primero:** había **34 procesos `node.exe` colgados de dos días antes**, ninguno de la sesión que corría el build. Entre todos sumaban 21 MB de working set —o sea que estaban paginados— pero **cada uno conserva su reserva de espacio de direcciones y su parte de la memoria comprometida**, que es justamente el recurso que se agotó. No se los mató: no eran de esta sesión y podían ser de otra corriendo sobre el mismo checkout. Quien retome esto **empieza por ahí**: `Get-Process node | Where StartTime -lt (Get-Date).Date` y ver si son zombies.
 >
 > **Qué hacer cuando aparece, en orden.** (1) Mirar si es `0xC0000142` o un `FATAL ERROR` de V8 — **son dos problemas distintos y la variable que arregla uno no toca al otro**. (2) Si es `0xC0000142`: medir la RAM libre y los procesos colgados **antes** de tocar `NODE_OPTIONS`. (3) Reintentar: la corrida que cerró en SITIO-S8 fue el segundo intento con los mismos valores, sin cambiar nada más que el momento.
+>
+> ### ⚠️ B1 · EL BUILD CERRÓ CON 0,61 GB LIBRES, Y ESO NO ABSUELVE AL CHEQUEO
+>
+> El chequeo previo de B1, medido justo antes de lanzar:
+>
+> | | |
+> |---|---:|
+> | RAM total | 13,9 GB |
+> | **RAM libre** | **0,61 GB** |
+> | memoria comprometida | 34,66 GB de 53,06 |
+> | procesos `node` | 6, **cero colgados de días anteriores** |
+>
+> **Es la condición exacta que este bloque describe como causa del
+> `0xC0000142`** —SITIO-S8 falló con 0,5 GB libres— y sin embargo el build cerró
+> **al primer intento, exit 0**. Lo que se libera antes cuenta: la única pestaña
+> de Chrome con la escena 3D se cerró a propósito, y aun así Chrome se quedó con
+> 4,09 GB en 51 procesos, que son del humano y no se tocan.
+>
+> **Lo que queda escrito es la regla de método, no el resultado:** una corrida
+> que cierra en el borde no mueve el borde. La diferencia entre B1 y SITIO-S8 no
+> fue una variable —fueron las mismas dos— sino **cero procesos `node` colgados**.
+> Ése es el número que hay que mirar primero, y el `Get-Process node | Where
+> StartTime -lt (Get-Date).Date` de arriba sigue siendo el primer paso.
 >
 > **Lo que SITIO-S8 corrió, y cerró:**
 >

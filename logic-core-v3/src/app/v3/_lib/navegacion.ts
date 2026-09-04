@@ -80,6 +80,42 @@ export const DESCUENTO_NACIMIENTO_PX = TOKENS_DEL_UMBRAL.margenAlPie.px + ALTO_P
  * aquél es margen-al-pie + alto y éste es reposo + alto. Coinciden porque los
  * dos márgenes son `--spacing-6`, que es la simetría que este archivo declara
  * arriba. Si alguien rompe la simetría, los dos números se separan solos.
+ *
+ * ── ⚠️ B1 · EL MISMO NÚMERO DECIDE QUÉ TINTA QUEDA DEBAJO DE LA PASTILLA ───
+ *
+ * El aterrizaje de un ancla era la PRIMERA consecuencia de esta cifra. Hay una
+ * segunda, medida en B1 y hasta ahora sin escribir: **cualquier tinta que viva
+ * entre el tope de una sección y estos 72 px queda tapada por la pastilla
+ * cuando esa sección está apoyada arriba.** Con una sección que sólo pasa, es
+ * un tránsito; con una **pinneada** —hijo `sticky top-0`— la sección se queda
+ * apoyada dos pantallas enteras y la tinta se queda debajo todo ese rato.
+ *
+ * Barriendo el documento cada 0,25 de pantalla, con scroll real:
+ *
+ *     ancho   choques   de ésos, de las dos pinneadas
+ *     1920      23              10   (Trabajos 10 · Servicios 0)
+ *     1440      31              21   (Trabajos 11 · Servicios 10)
+ *
+ * Y la tinta más alta del hijo clavado de cada una, medida con la sección
+ * apoyada en el tope —el número es su distancia al tope de la sección—:
+ *
+ *     sección     1440                       1920
+ *     trabajos    titular a  49 px  ✗        titular a 48 px  ✗
+ *     servicios   bajada  a  61,91 px  ✗     bajada  a > 72 px  ✓
+ *
+ * **Las dos que fallan lo hacen por estar arriba de esta línea, y la que no
+ * falla es la que la despeja.** O sea que el criterio no hay que inventarlo:
+ * es esta constante, y la salida es que la primera tinta de una sección
+ * pinneada arranque en `BORDE_INFERIOR_EN_REPOSO_PX` o más abajo. La otra
+ * salida —correr la pastilla— toca una geometría aprobada por grabación y no
+ * arregla el tránsito de las secciones que no están pinneadas.
+ *
+ * ⚠ **Y no es un problema de contraste:** medido sobre el píxel real con la
+ * pastilla encima del peor caso —el titular de 56 px de Servicios a 1440— el
+ * peor píxel del núcleo de sus rótulos da **7,51:1** contra la superficie
+ * compuesta, y **cero** píxeles bajan de AA. La superficie translúcida al 0,60
+ * y el `blur(12px)` hacen su trabajo; lo que se pierde es la tinta de ATRÁS,
+ * no la de la pastilla.
  */
 export const BORDE_INFERIOR_EN_REPOSO_PX = TOKENS_DEL_UMBRAL.reposo.px + ALTO_PASTILLA_PX
 

@@ -132,6 +132,13 @@ export const ARCHIVOS_DE_INVARIANTE = CARPETAS_DE_SECCION.map((c) => c.invariant
 export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/quienes-somos/quienes-somos-piezas.tsx`,
   `${RAIZ_DE_SECCIONES}/trabajos/trabajos-piezas.ts`,
+  // ── B1 · los dos que salieron de Trabajos cuando pasó las 300 líneas ──────
+  // `geometria.ts` son los números de la sección —el mismo corte que Servicios
+  // ya tenía— y `soporte.ts` el arnés del invariante, el mismo que Cierre.
+  // Ninguno de los dos es una heurística de sufijo: entran acá porque alguien
+  // lo decidió y lo escribió, que es la regla de esta lista.
+  `${RAIZ_DE_SECCIONES}/trabajos/geometria.ts`,
+  `${RAIZ_DE_SECCIONES}/trabajos/soporte.ts`,
 ]
 
 /**

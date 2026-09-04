@@ -29,14 +29,39 @@ import { Titular } from '../tipografia/Titular'
  * valor, no una reescritura.
  */
 
+/**
+ * ── B1 · LAS DOS CLASES QUE BAJAN AL ENVOLTORIO, y por qué hacían falta ────
+ *
+ * `Pie` tenía `className` para el `<footer>` y nada más, así que **la cadena de
+ * alto moría en la caja de contenido**: el `<footer>` podía estirarse y el
+ * `[data-parte="contenido"]` quedaba de altura automática. Con eso, un consumidor
+ * que quisiera repartir su apilado sobre la pantalla —el Cierre— no tenía dónde
+ * agarrarse, y B1 lo midió: **337 px de banda vacía continua** debajo del último
+ * renglón a 1920.
+ *
+ * Las dos props nuevas son **exactamente las que `Envoltorio` ya expone**
+ * (`className` y `claseDeContenido`), con sus nombres. No se inventa una API:
+ * se deja pasar la que hay. Las dos se MEZCLAN con `cn()` sobre las clases del
+ * pie, así que ningún consumidor pierde el apilado de `--spacing-12`.
+ *
+ * ⚠ **Sin props, el marcado que emite es byte a byte el de antes**, y eso lo
+ * afirma `s8-cierre.invariant` §16 contra el literal. Es la garantía de que los
+ * otros consumidores —la galería de componentes y el arnés de piezas— no se
+ * mueven. `Pie` no lo importa nadie fuera de `/v3`: el sitio vivo tiene su
+ * propio pie y no pasa por acá.
+ */
 export interface PieProps {
   readonly children: React.ReactNode
   /** Escribe `data-seccion="invertida"`. El default NO decide la estética. */
   readonly invertido?: boolean
   readonly className?: string
+  /** Clases para la caja A SANGRE del envoltorio. */
+  readonly claseDeEnvoltorio?: string
+  /** Clases para la caja de contenido, la que lleva el apilado. */
+  readonly claseDeContenido?: string
 }
 
-export function Pie({ children, invertido = false, className }: PieProps) {
+export function Pie({ children, invertido = false, className, claseDeEnvoltorio, claseDeContenido }: PieProps) {
   return (
     <footer
       data-pieza="pie"
@@ -46,7 +71,12 @@ export function Pie({ children, invertido = false, className }: PieProps) {
       {/* El apilado va en la caja de CONTENIDO, que es la que tiene los hijos:
           un `gap` sobre el `<footer>`, cuyo único hijo es el envoltorio, no
           separaría nada. */}
-      <Envoltorio claseDeContenido="flex flex-col gap-[var(--spacing-12)]">{children}</Envoltorio>
+      <Envoltorio
+        className={claseDeEnvoltorio}
+        claseDeContenido={cn('flex flex-col gap-[var(--spacing-12)]', claseDeContenido)}
+      >
+        {children}
+      </Envoltorio>
     </footer>
   )
 }

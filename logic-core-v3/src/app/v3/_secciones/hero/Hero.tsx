@@ -117,6 +117,66 @@ export const GEOMETRIA = {
    */
   claseDeLaMedida: 'escritorio:col-span-3',
   /**
+   * ── B1 · LA CAJA DEL TITULAR: 2 de 3 de la medida. [medido] ─────────────
+   *
+   * **Es forzado, no estético: con la medida entera el titular se mete adentro
+   * del logo.** Medido sobre el píxel real —captura del hero con el texto
+   * ocultado en runtime, tinta `rgb(17,17,17)` contra el fondo capturado—:
+   *
+   *     ancho   borde seguro    fin del titular    peor contraste   % bajo AA
+   *     1440    x = 683         x = 803  (+120)        1,00:1         12,66 %
+   *     1920    x = 957         x = 1077 (+120)        1,00:1          9,22 %
+   *     2560    x = 1275        x = 1365 (+90)         1,00:1         10,22 %
+   *
+   * **1,00:1 no es poco contraste: es tinta negra sobre el logo negro.** El
+   * «borde seguro» es la primera columna de píxeles en la que más del 10 % de
+   * la banda vertical del texto deja la tinta por debajo de AA (4,5:1); no es
+   * «el primer píxel oscuro», porque la escena tiene partículas sueltas por
+   * toda la pantalla y un punto de 3 px no vuelve ilegible un renglón. En los
+   * tres anchos ese borde coincide al píxel con el arranque de la masa oscura.
+   *
+   * Con 2 de 3 la caja queda en 478,4 · 670,4 · 732,8 px y termina en 666 ·
+   * 858 · 1209: **por dentro del borde seguro en los tres**, con 16,6 · 98,6 ·
+   * 66,2 px de margen. La sub-grilla de 3 reproduce EXACTO las columnas de la
+   * grilla de 5 —la medida son 3 columnas más 2 canaletas, así que dividirla en
+   * 3 con la misma canaleta devuelve la misma columna— o sea que esto no
+   * inventa una grilla nueva: usa la que ya está.
+   *
+   * ⚠ El NIVEL tipográfico no cambia y está verificado: `titulo-xl` es el más
+   * grande de los cuatro (`Titular.tsx`) y el hero ya lo usa en su familia
+   * fluida — 56 px a 1440 y 65,01 px a 1920 y 2560, medidos en el navegador.
+   * Lo que se acota es la caja, no la letra.
+   */
+  columnasDeLaCajaDelTitular: 3,
+  columnasDelTitular: 2,
+  claseDelTitular: 'tablet:col-span-2',
+  /**
+   * ── B1 · LA BAJADA: MEDIA MEDIA COLUMNA. [decidido por el humano] ────────
+   *
+   * *«La bajada se acota a media columna. Que termine antes de donde empieza el
+   * logo: así se arreglan el ancho de línea y la colisión de una.»*
+   *
+   * «La columna» es **la medida del hero** —3 de 5— y no la columna fluida de
+   * la grilla lateral, y la propia instrucción lo decide: media columna fluida
+   * daría 610 px a 1440 y terminaría en x 798, **afuera** del borde seguro de
+   * 683. Media medida da 354,8 · 498,8 · 545,6 px y termina en 543 · 687 · 1022:
+   * por dentro en los tres, con 140 · 270 · 253 px de margen.
+   *
+   * Lo que arregla, medido:
+   *
+   *     antes   1440  2 líneas de 70,5 caracteres · termina en x 902 (+219)
+   *             1920  1 línea  de 141  caracteres · termina en x 1169 (+212)
+   *             2560  1 línea  de 141  caracteres · termina en x 1457 (+182)
+   *
+   * Una línea de 141 caracteres es casi el doble del techo de lectura, y en
+   * `nk.studio` —medido con el mismo instrumento— **la caja de texto del hero
+   * mide 480 px y no crece con la ventana**: 0,25 del viewport a 1920 contra
+   * 0,53 que teníamos. La resta va en esa dirección sin copiarle un valor.
+   *
+   * Una sub-grilla de 2 es la mitad exacta de la medida, canaleta incluida.
+   */
+  columnasDeLaCajaDeLaBajada: 2,
+  /**
    * Cuántas líneas promete el titular. Es inerte para P1 —`LineasDeTexto`
    * recalcula la cantidad con las líneas que MIDE, que es el punto entero del
    * divisor— y va declarado igual porque es lo que el bloque promete y lo que
@@ -188,33 +248,45 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                     escala, otra función, declarada. */}
                 <EtiquetaDeSeccion>{CONTENIDO.slogan}</EtiquetaDeSeccion>
 
-                <Bloque patron="P1">
-                  {(progreso) => (
-                    <TextoPorLineas
-                      texto={CONTENIDO.titular}
-                      progreso={progreso}
-                      patron="P1"
-                      como="h1"
-                      className={TIPOGRAFIA_DEL_TITULAR}
-                      // El `h1` es el nombre accesible de la región del Hero (S11, defecto 10).
-                      id={idDelTitularDeSeccion(seccion.id)}
-                    />
-                  )}
-                </Bloque>
+                {/* La caja del titular: 2 de 3 de la medida. El porqué —y los
+                    tres bordes seguros medidos sobre el píxel— están en
+                    `GEOMETRIA.columnasDeLaCajaDelTitular`. La clase del tramo va
+                    en el Bloque, que es el elemento que se mide: un envoltorio
+                    de más entre la celda y el bloque no agrega nada. */}
+                <Grilla columnas={GEOMETRIA.columnasDeLaCajaDelTitular}>
+                  <Bloque patron="P1" className={GEOMETRIA.claseDelTitular}>
+                    {(progreso) => (
+                      <TextoPorLineas
+                        texto={CONTENIDO.titular}
+                        progreso={progreso}
+                        patron="P1"
+                        como="h1"
+                        className={TIPOGRAFIA_DEL_TITULAR}
+                        // El `h1` es el nombre accesible de la región del Hero (S11, defecto 10).
+                        id={idDelTitularDeSeccion(seccion.id)}
+                      />
+                    )}
+                  </Bloque>
+                </Grilla>
 
-                <Bloque patron="P2">
-                  {(progreso) => (
-                    <CanalDePieza
-                      progreso={progreso}
-                      patron="P2"
-                      cantidad={GEOMETRIA.piezasDelBloqueDeEntrada}
-                      indice={0}
-                      className="flex flex-col items-start gap-6"
-                    >
-                      <BajadaYCta />
-                    </CanalDePieza>
-                  )}
-                </Bloque>
+                {/* La bajada y el CTA en media medida. El CTA viaja adentro de la
+                    misma caja a propósito: `items-start` lo deja en su ancho, así
+                    que acotar la caja no lo estira ni lo corta. */}
+                <Grilla columnas={GEOMETRIA.columnasDeLaCajaDeLaBajada}>
+                  <Bloque patron="P2">
+                    {(progreso) => (
+                      <CanalDePieza
+                        progreso={progreso}
+                        patron="P2"
+                        cantidad={GEOMETRIA.piezasDelBloqueDeEntrada}
+                        indice={0}
+                        className="flex flex-col items-start gap-6"
+                      >
+                        <BajadaYCta />
+                      </CanalDePieza>
+                    )}
+                  </Bloque>
+                </Grilla>
               </div>
             </Grilla>
           </Grilla>

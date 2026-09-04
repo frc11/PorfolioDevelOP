@@ -151,12 +151,37 @@ export const INDICE_DEL_TESTIMONIO = DIFERENCIALES.length
  * y el patrón se lee como un salto. O sea que el piso duro son 40 unidades de
  * `svh` y ahí el rango es exactamente cero.
  *
- * 55 deja el rango en 15 unidades de `svh` de recorrido —a un viewport de 900
- * son 135 píxeles de scroll— y sigue entrando en la pantalla junto con el
- * rótulo, el titular y la bajada. El invariante afirma las dos mitades: que no
- * degenera con este alto, y que sí degenera con uno por debajo del piso.
+ * El invariante afirma las dos mitades: que no degenera con este alto, y que sí
+ * degenera con uno por debajo del piso.
+ *
+ * ── ⚠️ B1 · BAJA DE 55 A 50, Y ES UN DEFECTO ARREGLADO A MEDIAS ────────────
+ *
+ * **Con 55 la sección se pasaba de su propio alto declarado.** Medido a 1440×900
+ * con la página recién cargada: `por-que-develop` medía **943,52 px contra los
+ * 900 de una pantalla**, o sea 43,52 px de más, y ésa era la causa de que el
+ * titular quedara con píxeles bajo AA a esa altura de scroll — la sección
+ * llenaba el cuadro en la pantalla 11,888 en vez de la 12, que es donde el ancla
+ * declarada del diferencial (0,8525) la espera.
+ *
+ * **50 es el MÍNIMO recorte, y está medido que más no compra nada.** El desvío
+ * baja de 43,52 px a **23,70**, y las dos mitades de por qué se quedó ahí:
+ *
+ *   · con 55 el piso valía 495 px a 900 y **ataba**; con 50 vale 450 y el bloque
+ *     renderiza **475,19 px de contenido propio**, así que el piso dejó de ser
+ *     lo que gobierna. Los 19,82 px que se ganaron son exactamente 495 − 475,19.
+ *   · **con 45 la sección mide lo mismo: 923,70 px.** Probado en el navegador,
+ *     no modelado. Bajar de 50 sólo acorta el recorrido de P5 —de 10 unidades a
+ *     5— a cambio de cero píxeles.
+ *
+ * La cuenta de la sección a 1440, entera: 48 px de relleno + 48 de tres costuras
+ * + 11 del rótulo + 276,13 del titular + 65,39 de la bajada + **475,19 del
+ * bloque** = 923,70. **Los 23,70 que sobran son el contenido del propio bloque**
+ * —los cuatro diferenciales y el testimonio— y eso ya no se arregla con un
+ * número: es composición, y queda reportado sin arreglar.
+ *
+ * A 1920 no cambia nada: la sección medía y sigue midiendo 1080 px exactos.
  */
-export const ALTO_MINIMO_DEL_BLOQUE_SVH = 55
+export const ALTO_MINIMO_DEL_BLOQUE_SVH = 50
 
 /**
  * El mismo número, con su unidad, listo para `style`.

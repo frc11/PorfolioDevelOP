@@ -56,9 +56,7 @@ const ARCHIVOS = codigoDeLaSeccion('servicios')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Qué se construyó, y las cifras que van al reporte')
 
-for (const archivo of ARCHIVOS) {
-  console.log(`  ${String(leer(archivo).split('\n').length).padStart(4)} líneas  ${archivo}`)
-}
+for (const a of ARCHIVOS) console.log(`  ${String(leer(a).split('\n').length).padStart(4)} líneas  ${a}`)
 console.log(`  párrafos: ${IDS_DE_SERVICIO.map((id) => `${id} ${LONGITUDES[id]} palabras`).join(' · ')}`)
 console.log(`  marcado: rama quieta ${quieto.length} caracteres · rama animada ${animado.length}`)
 afirmar(ARCHIVOS.length > 0, `${ARCHIVOS.length} archivos de producto en la carpeta`, ARCHIVOS.map((a) => a.split('/').pop()).join(' · '))
@@ -170,6 +168,9 @@ const CAJA = { topDoc: 5000, alto: VIEWPORT * 3 }
 const rango = rangoDeScroll(ANCLA_DEL_PIN, CAJA, VIEWPORT)
 afirmarIgual(rango.fin - rango.inicio, CAJA.alto - VIEWPORT, `300svh con un hijo de 100svh: el pin recorre ${rango.fin - rango.inicio} px de 200svh`)
 afirmarIgual(rango.inicio, CAJA.topDoc, 'el progreso vale 0 justo cuando el bloque llega al tope del viewport')
+// B1: el alto de la sección se DERIVA de los pasos, y los pasos son los servicios del contenido.
+afirmarIgual(seccionDeServicios.pasosDeLaSecuencia, Object.keys(CONTENIDO).length, `los ${CANTIDAD_DE_TRAMOS} pasos de la tabla SON los servicios de \`contenido.ts\`: la derivación del alto es comprobable`)
+controlPositivo('la afirmación de los pasos vería una tabla desincronizada', { ...seccionDeServicios, pasosDeLaSecuencia: 4 }, (s: typeof seccionDeServicios) => s.pasosDeLaSecuencia === Object.keys(CONTENIDO).length)
 const lado = (fraccion: number) => ({ fraccion, px: 0 })
 const MUTILADAS: readonly ParDeAnclas[] = [
   { inicio: { declarado: 'top bottom', elemento: lado(0), viewport: lado(1) }, fin: ANCLA_DEL_PIN.fin },

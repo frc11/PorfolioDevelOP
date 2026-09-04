@@ -4,14 +4,14 @@ import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { sizesPorViewport } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
 import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
 import { CONTENIDO } from './contenido'
-import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
+import { CAJA_DE_LA_CAPTURA, GEOMETRIA } from './geometria'
+import { Proyecto } from './Proyecto'
 
 /**
  * 04 · TRABAJOS — la banda oscura, pinneada, con tres planos que vienen de atrás.
@@ -39,17 +39,33 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  *
  * ── UN bloque, tres piezas, apiladas en el mismo lugar ────────────────────
  *
- * `BloqueDeSeccion patron="P7" piezas={3}` y los tres proyectos como tres
- * `Pieza` con índice 0, 1 y 2, cada una `absolute inset-0`: **superpuestas, no
- * en fila**. Es lo que pide P7 —`translateZ` de −3000 a +1000 con sus dos
- * tramos contiguos, `autoAlpha` 0→1→0, `scale` 0,6→1 y `pointerEvents`
- * conmutando para que lo que está lejos no sea clickeable— y es también la
- * razón de que sea UN bloque y no tres: la perspectiva la escribe
- * `BloqueDeSeccion` en el ANCESTRO, no en cada plano. Tres bloques serían tres
- * puntos de fuga distintos y la pila dejaría de leerse como una escena.
+ * Un `Bloque patron="P7"` y los tres proyectos como tres piezas con índice 0, 1
+ * y 2, cada una `absolute` en el mismo lugar: **superpuestas, no en fila**. Es
+ * lo que pide P7 —`translateZ` de −3000 a +1000 con sus dos tramos contiguos,
+ * `autoAlpha` 0→1→0, `scale` 0,6→1 y `pointerEvents` conmutando— y es la razón
+ * de que sea UN bloque y no tres: la perspectiva la escribe `Bloque` en el
+ * ANCESTRO. Tres bloques serían tres puntos de fuga y la pila dejaría de leerse
+ * como una escena.
  *
- * El escalonado de 0,4 s reparte los tres dentro del mismo rango de scroll, así
- * que los 200svh de pinneo son exactamente el recorrido de los tres pasajes.
+ * ⚠ **Y la caja contra la que se reparten es la de la SECCIÓN, no la del
+ * bloque** (`anclaje="seccion"`, B1). El ancla de P7 no cambia; lo que cambia
+ * es contra qué se resuelve. Con la caja del bloque —826 px adentro de un hijo
+ * `sticky` que no se mueve— los tres pasajes se consumían ANTES de que la
+ * sección llegara al tope: medido, opacidad 0 en las tres pantallas, 85,65 % de
+ * aire y 849 px de banda vacía. Con la caja de la sección el mismo ancla da
+ * `rango = 3240`, del `scrollY` 3240 al 6480: arranca cuando la sección entra y
+ * cierra cuando el pin suelta.
+ *
+ * ⚠ **LOS 268 px DEL FRAME DE LLEGADA SON EL PATRÓN, NO AIRE. No se «arreglan».**
+ * En `scrollY` 4320 —el instante en que la sección toca el tope— el instrumento
+ * de píxel mide 52,69 % de aire y una banda continua de 268 px, y eso es P7
+ * haciendo lo que declara: su primer fotograma es `translateZ(−3000) scale(0,6)
+ * autoAlpha 0`, o sea que **los planos todavía están viniendo**. Se disuelve en
+ * los 675 px siguientes —a 4995 hay una tarjeta arriba de 0,5 y a 5400 las tres,
+ * con 17,96 % de aire y 82 px de banda—. Bajarlo pediría que el gesto ya hubiera
+ * terminado cuando la sección llega, que es lo contrario de lo que un patrón de
+ * llegada hace. La cifra que califica a esta sección es la del recorrido, no la
+ * del primer cuadro.
  *
  * ── La rama quieta: el MISMO proyecto, en fila ────────────────────────────
  *
@@ -63,17 +79,11 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  * ⚠ **ABAJO DE 1025 NO SE PINNEA, Y ESO ARREGLA UN DESBORDE MEDIDO.**
  *
  * La primera versión se pinneaba en todos los anchos y desbordaba: abajo de 768
- * la grilla de tres colapsa a una —es la regla medida de `Grilla`— y las tres
- * tarjetas apiladas miden ~810 px [derivado de la relación de aspecto y del
- * ancho de contenido de 375 px] contra los ~555 px de `svh` que deja un
- * teléfono. El contenido no se perdía, pero se leía tarde y recortado.
- *
- * La tabla lo resuelve declarándolo: `pinneada: 'desde-escritorio'`. Abajo del
- * umbral **no hay coreografía**, así que el pin no estaba sosteniendo ningún
- * gesto — sólo clavaba una caja que no entra. Sin pin, los 300svh de la sección
- * se reparten entre los tres proyectos, uno por pantalla, y no queda ni
- * desborde ni banda vacía. La decisión está en `secciones.ts` con su razón, no
- * escondida en una clase de este archivo.
+ * la grilla de tres colapsa a una y las tres tarjetas apiladas miden ~810 px
+ * contra los ~555 px de `svh` que deja un teléfono. La tabla lo resuelve
+ * declarándolo: `pinneada: 'desde-escritorio'`. Sin pin, los 300svh se reparten
+ * entre los tres proyectos, uno por pantalla, y no queda desborde ni banda
+ * vacía. La decisión está en `secciones.ts`, no escondida en una clase de acá.
  *
  * ⚠ **EL DESPINNEO SE ARREGLÓ A MEDIAS, Y LA MITAD QUE FALTABA ERA UNA BANDA
  * DE DOS PANTALLAS VACÍAS (defecto 3 de SITIO-S10, arreglado en S11).**
@@ -81,16 +91,10 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  * El párrafo de arriba supone que abajo del umbral la grilla está colapsada, y
  * eso **sólo era cierto abajo de 768**: `Grilla columnas={3}` emite
  * `grid-cols-1 tablet:grid-cols-3`, así que de 768 a 1024 los tres proyectos
- * entraban EN FILA y la fila mide UNA pantalla. Contra las 300svh que la tabla
- * declara, eso son **dos pantallas de banda oscura vacía** — medido por
- * `s10-mobile` §2, que a 768 y 1024 leía «flujo 1, declarado 3» mientras a 375
- * y 390 leía 3 = 3. El tramo sin dueño es exactamente el que queda entre los
- * dos umbrales que nadie apareó: la fila arranca en 768 y el
- * `escritorio:min-h-0` que la suelta arranca en 1025.
- *
- * El arreglo corre el colapso al MISMO umbral que el pin: la grilla se pide de
- * una columna y la de tres vuelve con la variante `escritorio:`, que Tailwind
- * genera desde `--breakpoint-escritorio`. Así los tres bordes —pin, colapso y
+ * entraban EN FILA —una pantalla contra las tres declaradas: **dos pantallas de
+ * banda oscura vacía**, medidas por `s10-mobile` §2—. El arreglo corre el
+ * colapso al MISMO umbral que el pin: la grilla se pide de una columna y la de
+ * tres vuelve con la variante `escritorio:`. Así los tres bordes —pin, colapso y
  * pantalla-por-proyecto— caen en 1025 y no queda tramo huérfano. `Grilla` NO se
  * toca: su tabla `3` la consumen otras secciones que sí quieren la fila en 768.
  *
@@ -109,95 +113,28 @@ import { Proyecto, type CajaDeLaCaptura } from './Proyecto'
  *
  * La sección no tenía un solo control y la razón era exacta: *"no hay página de
  * caso, y las URLs de los clientes no se inventan"*. **Ya no hay que
- * inventarlas**: los tres dominios de producción llegaron —no estaban en el
- * repo ni en su historial— y viven en `proyectos[].enlace`. Desapareció la
- * premisa y con ella la decisión: el `h3` de cada proyecto es un `<a>` al sitio.
- *
- * Lo que NO cambió: **cero `hover:`**, y por lo tanto cero `focus-visible:` —
- * van de a pares y siguen los dos en cero. El anillo de foco del tema cubre la
- * parada de tabulación; el énfasis de puntero queda pedido, no escrito suelto.
- * Y la métrica sigue **siempre visible y AFUERA del enlace**: adentro entraría
- * en su nombre accesible.
+ * inventarlas**: los tres dominios de producción viven en `proyectos[].enlace`,
+ * y el `h3` de cada proyecto es un `<a>` al sitio. Lo que NO cambió: **cero
+ * `hover:`** y por lo tanto cero `focus-visible:` —van de a pares—, y la métrica
+ * sigue visible y AFUERA del enlace: adentro entraría en su nombre accesible.
  */
 
-/**
- * LA GEOMETRÍA — todos los números de la sección, juntos y fuera del contenido.
- *
- * Están acá y no en `contenido.ts` porque son técnicos: los decide quien
- * construye la sección y no cambian el día que lleguen las capturas. Mezclarlos
- * con el contenido obligaría a exceptuarlos del escáner de cifras, y una
- * excepción es por donde vuelve a entrar la primera cifra inventada.
- */
-export const GEOMETRIA = {
-  captura: {
-    /**
-     * 1920 × 1080, o sea **16:9** — [MEDIDO SOBRE LOS ARCHIVOS, V3-D].
-     *
-     * Decía `1600 × 800` (2:1) con un buen argumento —el pliegue, y que tres
-     * cajas 2:1 apiladas miden menos— **y las capturas llegaron en 16:9**. Con
-     * la relación declarada distinta de la del archivo, el navegador reserva
-     * 2:1, carga 16:9 y la caja CRECE: el salto de layout que declarar las
-     * dimensiones existe para evitar, producido por la declaración misma. Tiene
-     * que ser la del archivo, y el invariante lo comprueba abriéndolos.
-     *
-     * **No se recorta a 2:1**: recortar una captura le saca justo la parte que
-     * prueba que el sitio existe entero — en la de Esquina, los 120 px que
-     * sobran llevan el pie con el crédito. Cuesta **12,5 % de alto** por caja
-     * (h = w/2 pasa a h = 9w/16) y no aprieta en ninguna rama: arriba de 1025 la
-     * pila es de UNA tarjeta por plano, y abajo cada proyecto tiene su
-     * `min-h-svh`. 1920 es el ARCHIVO, no una caja: la más grande de esta
-     * composición es un tercio del tope de 1920 —~640 px de CSS—.
-     */
-    ancho: 1920,
-    alto: 1080,
-    /**
-     * Los porcentajes del `sizes`, y **por qué el corte es 1025 y no 768**.
-     *
-     * ⚠ CORREGIDO EN SITIO-S11, y no por gusto: el `sizes` describe la CAJA, y
-     * el arreglo del defecto 3 le movió el único corte que tenía. Hasta S10 era
-     * `sizesPorTresTramos(33, 33, 100)` con este argumento: la tarjeta es una
-     * columna de tres en las dos ramas y la grilla colapsaba en 768, o sea que
-     * la caja cambiaba en 768 y no en 1025. **La grilla ahora colapsa en 1025**
-     * —ver la rama quieta— y con eso los dos tramos de arriba dejaron de decir
-     * lo mismo: de 768 a 1024 la captura ocupa el ancho ENTERO. Dejarlos sería
-     * pedirle al navegador una imagen tres veces más chica que la caja justo en
-     * tablet, que es el defecto que este módulo existe para evitar con la otra
-     * cara. Con un solo corte el ayudante correcto vuelve a ser
-     * `sizesPorViewport`, y el caso queda igual al de Quiénes somos.
-     */
-    tercio: 33,
-    completo: 100,
-  },
-  /**
-   * Cuántos planos anima el patrón. Es lo que define el escalonado real de P7 y
-   * tiene que coincidir con la cantidad de proyectos del contenido: el
-   * invariante lo afirma, con su control positivo. Declararlo acá y no leerlo
-   * del contenido es lo que hace que la coincidencia sea COMPROBABLE en vez de
-   * cierta por construcción.
-   */
-  planos: 3,
-} as const
-
-/** El `sizes` real de las capturas. Exportado para que el instrumento afirme el
- *  MISMO valor que se le pasa al marco, y no una copia escrita a mano. */
-export const SIZES_DE_LA_CAPTURA = sizesPorViewport(
-  GEOMETRIA.captura.tercio,
-  GEOMETRIA.captura.completo,
-)
-
-/** La caja de la captura, en un solo objeto: es lo que `Proyecto` recibe para
- *  no tener que importar la geometría de vuelta y cerrar un ciclo. */
-export const CAJA_DE_LA_CAPTURA: CajaDeLaCaptura = {
-  ancho: GEOMETRIA.captura.ancho,
-  alto: GEOMETRIA.captura.alto,
-  sizes: SIZES_DE_LA_CAPTURA,
-}
 
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Seccion seccion={seccion}>
+      {/* ── EL DESPEJE DE LA PASTILLA, arriba de 1025 ───────────────────────
+          `escritorio:pt-16` y no `escritorio:py-8`, y el número sale de la
+          pastilla y no del gusto: `BORDE_INFERIOR_EN_REPOSO_PX` son **72 px**
+          —24 de reposo más 48 de alto— y esta sección es pinneada, así que su
+          hijo se queda apoyado en el tope DOS pantallas enteras. Con 32 px de
+          relleno el titular arrancaba en y 48 a 1920 y en y 49 a 1440, o sea
+          **debajo** de la pastilla: 24 px de solape sobre el renglón, el 20,31 %
+          de su alto, durante todo el pinneo. Con 64 arranca en 83 y 81.
+          El costo está medido y es del escenario, que pierde 32 px de los 825
+          que le quedaban; la tarjeta mide 736 y sigue entrando. */}
       <Envoltorio
-        className="flex h-full flex-col py-4 escritorio:py-8"
+        className="flex h-full flex-col py-4 escritorio:pt-16 escritorio:pb-8"
         claseDeContenido="flex h-full flex-col gap-4 escritorio:gap-8"
       >
         {/* ── EL MARCO QUIETO ─────────────────────────────────────────────
@@ -218,8 +155,15 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
             `relative` porque las tres piezas se posicionan contra él, y
             `min-h-0 flex-1` para que ocupe lo que queda de la pantalla sin
             empujar al marco. La perspectiva de 1000px la escribe
-            `BloqueDeSeccion` acá mismo, en el ancestro de los tres planos. */}
-        <Bloque patron="P7" className="relative min-h-0 flex-1">
+            `BloqueDeSeccion` acá mismo, en el ancestro de los tres planos.
+
+            `anclaje="seccion"` es lo único que B1 agrega, y es lo que hace que
+            el gesto exista: el ancla de P7 se resuelve contra la `<section>` de
+            300svh y no contra este bloque de 826 px, que adentro de un hijo
+            `sticky` no se mueve. Sin eso, los tres planos terminaban su vuelo
+            50 px ANTES de que la sección tocara el tope del viewport y sus tres
+            pantallas se veían vacías. El porqué está en `AnclajeDelBloque`. */}
+        <Bloque patron="P7" anclaje="seccion" className="relative min-h-0 flex-1">
           {(progreso) => {
             if (progreso === null) {
               /**
@@ -277,11 +221,13 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
                 indice={indice}
                 className="absolute inset-0 flex items-center"
               >
-                {/* La MISMA grilla de tres: el plano ocupa la columna del medio,
-                    así que su ancho es el de la tarjeta de la rama quieta y el
-                    `sizes` dice la verdad en las dos. */}
+                {/* La MISMA grilla de tres, y el plano ocupa DOS de sus tres
+                    columnas — ver `columnasDelPlano`: con una sola, la tarjeta
+                    medía 394 px adentro de una pantalla que le deja 825 y
+                    quedaban 463 px de banda vacía debajo. La clase va literal
+                    porque Tailwind escanea el fuente. */}
                 <Grilla columnas={3}>
-                  <div className="tablet:col-start-2">
+                  <div className="tablet:col-span-2">
                     <Proyecto
                       proyecto={proyecto}
                       rotulo={CONTENIDO.rotuloDeLaMetrica}

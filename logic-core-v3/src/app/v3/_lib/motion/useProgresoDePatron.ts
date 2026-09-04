@@ -74,7 +74,17 @@ export interface OpcionesDelMotor {
    * adentro, el hook lo usa donde corresponde —en un efecto— y el componente lo
    * pone en su `div` sin leer nada.
    */
-  readonly ref: RefObject<HTMLDivElement | null>
+  /**
+   * ⚠ **`HTMLElement` y no `HTMLDivElement` desde B1, y es un ensanche de tipo,
+   * no de comportamiento.** El motor sólo le pide `getBoundingClientRect()`, que
+   * es de `Element`. Lo que el tipo angosto impedía era legítimo y hacía falta:
+   * un bloque adentro de un hijo `sticky` no se mueve, así que su patrón se
+   * consume antes de que la sección llegue a cuadro, y la salida es medir la
+   * `<section>` —`anclaje: 'seccion'` del contrato de secciones—. Una `<section>`
+   * es `HTMLElement` y no `HTMLDivElement`; el tipo viejo obligaba a mentirle con
+   * una aserción. Un `div` sigue entrando, porque lo extiende.
+   */
+  readonly ref: RefObject<HTMLElement | null>
   /** El par de anclas del patrón. */
   readonly anclas: ParDeAnclas
   /**

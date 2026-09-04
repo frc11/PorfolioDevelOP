@@ -58,18 +58,73 @@ import {
  * Es lo que permite que el invariante renderice las dos ramas sin inventar un
  * atributo de forzado en el producto. Quien consulta la compuerta es el
  * envoltorio de abajo, y lo usa la ruta.
+ *
+ * ═══ B1 · LA RESTA — LO QUE SE MIDIÓ ACÁ Y QUÉ CAMBIÓ POR ESO ═════════════
+ *
+ * Sobre el píxel, con la sección apoyada en el tope del viewport, tres capturas
+ * (dos del fondo con el contenido ocultado en runtime y una con el texto) y el
+ * contraste calculado **bajo el glifo**, no bajo la caja de línea:
+ *
+ * | pieza | 1920 | 1440 |
+ * |---|---|---|
+ * | titular | peor **4,14:1** · 8 px bajo AA de 47.544 (0,02 %) · sin masa oscura en su banda (`bordeSeguroX = 1920`) | peor **1,07:1** · 55 px bajo AA de 32.153 · masa oscura desde **x = 716** y la tercera línea llega a x 916,6 |
+ * | bajada | peor **1,10:1** · 87 px bajo AA · masa desde x 1007, la bajada llega a x 1190 | peor 1,63:1 · 10 px bajo AA |
+ * | tarjetas, 2ª columna | peor **1,09:1** · 142 px bajo AA (**26,69 %**) | — |
+ * | tarjetas, 1ª columna | peor 13,08:1 · 0 bajo AA | — |
+ * | testimonio | peor 16,08:1 · 0 bajo AA | — |
+ *
+ * **La afirmación de que "el titular ya está limpio" se sostiene a 1920 y NO a
+ * 1440**, y la causa está medida y no es la caja del titular: a 1440 la sección
+ * mide **1009,72 px contra los 900 de una pantalla**, así que llena el cuadro en
+ * la pantalla 11,888 en vez de la 12 — **101,5 px antes de la pose para la que
+ * se eligió el ancla 0,8525**. Repetida la medición en la pantalla 12 exacta, el
+ * mismo titular, con la misma caja, da **1 píxel bajo AA de 40.161 y peor
+ * 2,90:1, y su banda vuelve a no tener masa oscura**. El defecto es de ALTO.
+ *
+ * Tres cambios, ninguno de contenido y ninguno de tipografía:
+ *
+ *   1. **La sección se acorta.** `min-h-svh` con `justify-between` y costuras en
+ *      tokens chicos: a 1920 el sobrante se reparte entre las costuras y a 1440
+ *      se saca del alto. El `pt` del titular es el despeje de la pastilla
+ *      —nace en `100svh − 24 − 48` y mide 48 de alto, o sea que los primeros
+ *      72 px del cuadro no son de esta sección.
+ *   2. **La bajada se acota a 2 de 3 de la medida**, que es el mismo constructo
+ *      con el que B1 arregló el hero. Termina en x 848 (1920) y x 634,7 (1440),
+ *      por dentro del borde seguro de 915 y 676.
+ *   3. **Las tarjetas se van a la primera columna** y se reparten sobre el alto
+ *      del bloque; el testimonio pasa a la segunda, apoyado abajo. Saca los
+ *      diferenciales de arriba del logo —era el 26,69 % de sus píxeles bajo AA—
+ *      y de paso reparte los **443,06 px de banda vacía** que el bloque de P5
+ *      tenía adentro (301,3 a 1440): su `min-height` de 55svh son 594 px con
+ *      189 de contenido.
+ *
+ * ⚠️ **LO QUE NO SE PUDO CERRAR, con su número.** A 1440 la sección sigue sin
+ * entrar en una pantalla, y la cuenta dice por qué: 72 px de despeje de la
+ * pastilla + 13 del rótulo + 244 del titular (cuatro líneas) + 96 de la bajada
+ * acotada + **495 del piso de 55svh del bloque de P5** ya son 920 de los 900, y
+ * todavía faltan cuatro costuras y el pie. El número que lo desbloquea es
+ * `ALTO_MINIMO_DEL_BLOQUE_SVH` en `contenido.ts` —hoy 55, con piso duro en 40—
+ * y **este frente no toca `contenido.ts`**. Queda reportado.
  */
 
 export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Seccion seccion={seccion}>
-      <ContenidoDeSeccion claseDeContenido="flex flex-col gap-[var(--spacing-12)] py-[var(--spacing-12)]">
+      <ContenidoDeSeccion
+        className="flex min-h-svh flex-col"
+        claseDeContenido="flex flex-1 flex-col justify-between gap-[var(--spacing-4)] pt-[var(--spacing-4)] pb-[var(--spacing-8)]"
+      >
         <EncabezadoDeSeccion seccion={seccion} nombre={NOMBRE_DE_SECCION} />
 
-        <Bloque patron="P1">
+        {/* El `pt` es el despeje de la pastilla, no simetría: la pastilla nace a
+            `24px` del tope y mide 48 de alto, así que lo que empiece antes de
+            los 72 px queda debajo suyo. El rótulo no lo necesita —vive en la
+            columna lateral, a la izquierda de la pastilla— y por eso el despeje
+            va acá y no en el `pt` del contenido, donde costaría 64 px más. */}
+        <Bloque patron="P1" className="pt-[var(--spacing-8)]">
           {(progreso) => (
             <Grilla columnas={3} canal="amplio">
-              <div className="flex flex-col gap-[var(--spacing-6)] tablet:col-span-2">
+              <div className="tablet:col-span-2">
                 {/* ⚠ El envoltorio lleva el `id` con el que la `<section>` se
                     nombra (S11, defecto 10): el `h2` sale de `CanalDeTitular`, que no
                     tiene prop `id`, así que el id va en el elemento que lo contiene.
@@ -86,13 +141,35 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
                     como="h2"
                   />
                 </div>
+              </div>
+            </Grilla>
+          )}
+        </Bloque>
+
+        {/* LA BAJADA — 2 DE 3 DE LA MEDIDA. [medido]
+            La medida es la caja del titular: 2 de las 3 columnas, o sea 1232 px
+            a 1920 y 912 a 1440. Con esa caja entera la bajada terminaba en
+            x 1190 (1920) y x 930 (1440), y ahí el fondo es el logo: peor
+            contraste **1,10:1** con 87 píxeles de glifo bajo AA. El borde
+            seguro de su banda —la primera columna en la que más del 10 % de la
+            banda deja la tinta bajo AA— está en x 915 (1920) y x 676 (1440).
+            Una sub-grilla de 3 sobre la medida reproduce EXACTO sus columnas
+            —3 columnas más 2 canaletas, dividida en 3 con la misma canaleta— y
+            2 de esas 3 dan 816 px (1920) y 602,7 (1440): la bajada termina en
+            x 848 y x 634,7, por dentro en los dos anchos. No inventa una
+            grilla: usa la que ya está. Es el mismo constructo con el que B1
+            arregló el titular del hero. */}
+        <Grilla columnas={3} canal="amplio">
+          <div className="tablet:col-span-2">
+            <Grilla columnas={3} canal="amplio">
+              <div className="tablet:col-span-2">
                 <Titular nivel="titulo-s" como="p">
                   {ENTRADA}
                 </Titular>
               </div>
             </Grilla>
-          )}
-        </Bloque>
+          </div>
+        </Grilla>
 
         {/* El `min-height` va en estilo inline porque el valor viene del DATO y
             lleva unidad: una clase armada como `min-h-[${n}svh]` no la ve el
@@ -100,10 +177,23 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
             excepción que `Panel` declara para el alto de la sección y
             `HuecoDeMedio` para su relación de aspecto, y es la ÚNICA de esta
             carpeta. Su derivación está en `contenido.ts`. */}
-        <Bloque patron="P5" style={{ minHeight: ALTO_MINIMO_DEL_BLOQUE }}>
+        <Bloque
+          patron="P5"
+          style={{ minHeight: ALTO_MINIMO_DEL_BLOQUE }}
+          className="flex flex-col"
+        >
           {(progreso) => (
-            <Grilla columnas={3} canal="amplio">
-              <ul className="grid grid-cols-1 gap-[var(--grilla-canal-amplio)] tablet:col-span-2 tablet:grid-cols-2">
+            /* `flex-1` para que la grilla mida los 55svh del bloque: sin un alto
+               contra el que repartir, `content-between` no tiene nada que dar y
+               la lista se apila arriba, que es de donde salían los 443 px. */
+            <Grilla columnas={3} canal="amplio" className="flex-1">
+              {/* A escritorio las cuatro tarjetas bajan a UNA columna de las tres
+                  —la primera— y se reparten el alto del bloque. Las dos razones
+                  están medidas: en dos columnas la segunda caía sobre el logo
+                  (peor 1,09:1, 26,69 % de sus píxeles de glifo bajo AA, contra
+                  13,08:1 y cero de la primera), y cuatro filas repartidas dan
+                  costuras de ~75 px donde dos filas dejaban una sola de 410. */}
+              <ul className="grid grid-cols-1 content-between gap-[var(--grilla-canal-amplio)] tablet:col-span-2 tablet:grid-cols-2 escritorio:col-span-1 escritorio:grid-cols-1">
                 {DIFERENCIALES.map((diferencial, indice) => (
                   <li key={diferencial.clave}>
                     <CanalDePieza
@@ -117,11 +207,17 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
                   </li>
                 ))}
               </ul>
+              {/* El testimonio se apoya ABAJO de su columna: es la franja del
+                  cuadro que la escena deja limpia —medido, el borde seguro de
+                  las bandas de abajo es 1275 y 1920 a 1920 px de ancho— y de
+                  paso cierra el bloque contra el pie en vez de dejar la columna
+                  colgada del tope. */}
               <CanalDePieza
                 progreso={progreso}
                 patron="P5"
                 cantidad={PIEZAS_DE_P5}
                 indice={INDICE_DEL_TESTIMONIO}
+                className="escritorio:self-end"
               >
                 <BloqueDeTestimonio testimonio={TESTIMONIO} />
               </CanalDePieza>

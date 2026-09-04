@@ -23,7 +23,7 @@ import { seccionDe } from '../_contrato/forma'
 import { ritmoDe } from '../_contrato/ritmo'
 import { marcar } from '../_invariantes/render'
 import { CARPETAS_DE_SECCION, clasesEscritas, codigoDeLaSeccion, existe, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
-import { Cierre, ContenidoDelCierre } from './Cierre'
+import { Cierre, ContenidoDelCierre, GEOMETRIA } from './Cierre'
 import { ANCLAS_QUE_EXISTEN, COLUMNAS, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA, ETIQUETA_DE_SECCION, LINEA_DE_CIERRE, NOVEDADES, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
 import * as S from './soporte'
 
@@ -253,37 +253,22 @@ console.log(`  Mis archivos usan \`opacity-casi\` sobre la tinta en vez de esa c
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('14 · Cuántas pantallas ocupa — [derivado de tokens], NO medido')
 
-const RAIZ_PX = 16
-function tokenPx(nombre: string): number {
-  const v = (new RegExp(`${nombre}\\s*:\\s*([^;]+);`).exec(TEMA)?.[1] ?? '').trim()
-  const clamp = /^clamp\((-?[\d.]+)px/.exec(v)
-  if (clamp !== null) return Number.parseFloat(clamp[1])
-  const rem = /^(-?[\d.]+)rem$/.exec(v)
-  if (rem !== null) return Number.parseFloat(rem[1]) * RAIZ_PX
-  const px = /^(-?[\d.]+)px$/.exec(v)
-  return px !== null ? Number.parseFloat(px[1]) : Number.parseFloat(v)
-}
-const cajaDeLinea = (texto: string, interlineado: string): number => tokenPx(texto) * tokenPx(interlineado)
-const MICRO = cajaDeLinea('--text-micro', '--leading-micro')
-const CAMPO = 2 * tokenPx('--spacing-2') + cajaDeLinea('--text-caption', '--leading-texto')
-const ENLACE = cajaDeLinea('--text-cuerpo', '--leading-texto')
-const apilar = (n: number, caja: number): number => MICRO + tokenPx('--spacing-4') + n * caja + (n - 1) * tokenPx('--spacing-2')
+// B1: el lector de tokens, la caja de línea y el modelo del pie viven en `soporte.ts` — son aritmética de CSS, no afirmaciones sobre el Cierre.
+const tokenPx = S.lectorDeTokens(TEMA)
+const cajaDeLinea = S.cajaDeLineaCon(tokenPx)
+const { MICRO, CAMPO, ENLACE, apilar, CTA_ALTO, LINEA_ALTO, SEPARACIONES, RELLENO } = S.modeloDelPie(tokenPx, cajaDeLinea)
 const COLUMNAS_PX = [apilar(DESTINOS_DE_LA_RUTA.length, ENLACE), apilar(PEDIDOS_DE_CONTACTO.length, cajaDeLinea('--text-caption', '--leading-texto') + MICRO), apilar(1, MICRO + tokenPx('--spacing-2') + CAMPO + tokenPx('--spacing-2') + 2 * MICRO)]
 const COLUMNA = Math.max(...COLUMNAS_PX)
 console.log(`  ⚠️ SITIO-S8 REEMPLAZA EL MODELO DE COLUMNA, no lo afloja: medía UNA sola —la de novedades— y la usaba para las tres. Con el recorrido del pie ampliado a ${DESTINOS_DE_LA_RUTA.length} enlaces (§7.24) la más alta pasó a ser la del recorrido, y el modelo viejo habría subestimado sin ponerse rojo. Las tres, derivadas de su lista: recorrido ${COLUMNAS_PX[0].toFixed(0)} · contacto ${COLUMNAS_PX[1].toFixed(0)} · novedades ${COLUMNAS_PX[2].toFixed(0)} px. EN FILA manda la más alta (${COLUMNA.toFixed(0)}); APILADAS, la suma (${COLUMNAS_PX.reduce((a, b) => a + b, 0).toFixed(0)}).`)
 controlPositivo('el alto de columna CRECE con su lista: no es un número escrito al lado', DESTINOS_DE_LA_RUTA.length, (n: number) => apilar(n + 1, ENLACE) === apilar(n, ENLACE))
-const CTA_ALTO = cajaDeLinea('--text-cuerpo', '--leading-texto') + 2 * tokenPx('--spacing-2')
-const LINEA_ALTO = cajaDeLinea('--text-caption', '--leading-texto') + tokenPx('--spacing-1') + MICRO
-const SEPARACIONES = 4 * tokenPx('--spacing-12')
-const RELLENO = 2 * tokenPx('--spacing-20')
-
 const ritmo = ritmoDe([seccionDelCierre])
 afirmarIgual(ritmo.pantallas, 1, `la tabla declara \`${seccionDe('cierre').alto}\` — una pantalla`)
 afirmarIgual(ritmo.pantallasPinneadas, 0, 'y la sección NO va pinneada: la única pinneada del lane es Servicios')
 
-const ESCRITORIO = RELLENO + MICRO + cajaDeLinea('--text-titulo-xl', '--leading-titulo') + CTA_ALTO + COLUMNA + LINEA_ALTO + SEPARACIONES
+const ESCRITORIO = RELLENO + MICRO + GEOMETRIA.lineasDelTitularEnEscritorio * cajaDeLinea('--text-titulo-xl', '--leading-titulo') + CTA_ALTO + COLUMNA + LINEA_ALTO + SEPARACIONES
 const MOBILE = RELLENO + MICRO + 3 * tokenPx('--text-fluido-titulo-xl') * tokenPx('--leading-titulo') + CTA_ALTO + COLUMNAS_PX.reduce((a, b) => a + b, 0) + 2 * tokenPx('--grilla-canal-compacto') + LINEA_ALTO + SEPARACIONES
-console.log(`  alto derivado @escritorio (tres columnas en fila, titular de una línea): ${ESCRITORIO.toFixed(0)} px`)
+console.log(`  alto derivado @escritorio (tres columnas en fila, titular de ${GEOMETRIA.lineasDelTitularEnEscritorio} líneas por la medida de §15): ${ESCRITORIO.toFixed(0)} px`)
+console.log(`  ⚠️ ERA 741 px con el titular en UNA línea. La cifra que el docblock de \`_lib/secciones.ts\` cita para el Cierre se mueve a ${ESCRITORIO.toFixed(0)}; la CONCLUSIÓN no se mueve —sigue entrando en una pantalla a 1440— y ese archivo no es de este frente.`)
 console.log(`  alto derivado @375 (columnas apiladas, titular de tres líneas al piso del clamp): ${MOBILE.toFixed(0)} px`)
 console.log('  ⚠️ Sale de sumar cajas de línea y tokens. NO está medido en un navegador y falta confirmarlo con ojo.')
 afirmar(ESCRITORIO < 900, `a 1440×900 entra en una pantalla (${ESCRITORIO.toFixed(0)} < 900): el 100svh de la tabla es correcto y no hay que cambiarlo`)
@@ -295,4 +280,21 @@ const DEBAJO = 3 * tokenPx('--spacing-12') + CTA_ALTO + COLUMNA + LINEA_ALTO + t
 afirmar(DEBAJO > EXIGE_P1, `el titular alcanza a completarse: su ancla exige ${EXIGE_P1} px de documento por debajo y hay ${DEBAJO.toFixed(0)}`, 'los 240 salen de `bottom bottom-=240px`, leídos del ancla y no escritos acá')
 console.log('  P2 (`bottom bottom`) no corre ese riesgo: su fin es `topDoc + alto − viewport`, que nunca pasa el fin del documento.')
 
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('15 · B1 · La medida del titular: seis cuerpos, FIJA, y más angosta que la caja')
+
+/** ⚠️ EL MODELO DE §14 CAMBIÓ CON ESTO Y NO ES QUE LA SECCIÓN CAMBIÓ DE ALTO: sumaba UNA caja de línea porque el titular entraba en una. La conclusión —«a 1440×900 entra en una pantalla»— sigue; lo que se achica es el aire. */
+const MEDIDA_PX = tokenPx('--text-titulo-xl') * GEOMETRIA.cuerposDeLaMedidaDelTitular
+const CAJA_A_1440 = 1440 - 2 * tokenPx('--pad-lateral-compacto')
+const claseDe = (cuerpos: number): string => `max-w-[calc(var(--text-titulo-xl)*${cuerpos})]`
+const escapada = GEOMETRIA.claseDeLaMedidaDelTitular.replace(/[[\]()*]/g, '\\$&')
+afirmar(GEOMETRIA.claseDeLaMedidaDelTitular === claseDe(GEOMETRIA.cuerposDeLaMedidaDelTitular), `la clase literal y el número declarado dicen lo mismo: ${GEOMETRIA.cuerposDeLaMedidaDelTitular} cuerpos`, GEOMETRIA.claseDeLaMedidaDelTitular)
+controlPositivo('el chequeo ve una clase que no coincide con el número', claseDe(4), (c: string) => c === claseDe(GEOMETRIA.cuerposDeLaMedidaDelTitular))
+afirmarIgual([...SIN.matchAll(new RegExp(escapada, 'g'))].length, 1, 'la medida está EN EL MARCADO renderizado, y una sola vez')
+afirmar(new RegExp(`id="[^"]*"[^>]*class="[^"]*${escapada}`).test(SIN), '  y va en el mismo elemento que lleva el `id` con el que la sección se nombra: no hay una caja nueva')
+afirmar(MEDIDA_PX < CAJA_A_1440, `la caja del titular (${MEDIDA_PX.toFixed(0)} px) es MÁS ANGOSTA que el contenido a 1440 (${CAJA_A_1440.toFixed(0)} px): es lo que lo saca de una sola línea`, `${((100 * MEDIDA_PX) / CAJA_A_1440).toFixed(1)} % del ancho de contenido`)
+afirmar(!/%|vw/.test(GEOMETRIA.claseDeLaMedidaDelTitular), '  y NO acompaña a la ventana: sale de un token de tipografía, no de un porcentaje ni de una columna fluida')
+console.log(`  [medido en el navegador] 1 línea antes en los dos anchos → ${GEOMETRIA.lineasDelTitularEnEscritorio} a 1440 y 4 a 1920. Banda vacía continua bajo el último renglón: 210,78 → 88,69 px a 1440; 380,22 → 167,64 px a 1920.`)
+
+// El control de que `Pie` sin props emite byte a byte lo de antes de B1 vive en `s3-layout.invariant`: la cadena de contención es su sujeto.
 cerrar('s8-cierre.invariant')

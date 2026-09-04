@@ -276,6 +276,20 @@ afirmar(
 )
 afirmar(quieto.includes(GEOMETRIA.claseDeLaMedida), '  y esa clase llega al marcado')
 controlPositivo('el chequeo de la medida ve una clase que no coincide con el número', { claseDeLaMedida: 'escritorio:col-span-4', columnasDeLaMedida: 3 }, (g) => g.claseDeLaMedida.endsWith(String(g.columnasDeLaMedida)))
+
+/**
+/** ── B1 · LAS DOS CAJAS DE LA MEDIDA. La aritmética, no el píxel (`GEOMETRIA` y `B1-DELTAS.md` §4). Las grillas se cuentan por `data-columnas`, que emite `Grilla`. */
+afirmar(GEOMETRIA.claseDelTitular.endsWith(String(GEOMETRIA.columnasDelTitular)), 'la clase del titular y el número declarado dicen lo mismo', GEOMETRIA.claseDelTitular)
+afirmar(quieto.includes(GEOMETRIA.claseDelTitular), '  y esa clase llega al marcado')
+afirmar(GEOMETRIA.columnasDelTitular < GEOMETRIA.columnasDeLaCajaDelTitular, 'la caja del titular es MÁS ANGOSTA que la medida: es lo que la saca del logo', `${GEOMETRIA.columnasDelTitular} de ${GEOMETRIA.columnasDeLaCajaDelTitular}`)
+afirmarIgual(GEOMETRIA.columnasDeLaCajaDeLaBajada, 2, 'la bajada vive en media medida: una sub-grilla de DOS')
+controlPositivo('el chequeo del titular ve una clase que no coincide con el número', { claseDelTitular: 'tablet:col-span-3', columnasDelTitular: 2 }, (g) => g.claseDelTitular.endsWith(String(g.columnasDelTitular)))
+controlPositivo('  y el de la angostura ve una caja que NO acota', { columnasDelTitular: 3, columnasDeLaCajaDelTitular: 3 }, (g) => g.columnasDelTitular < g.columnasDeLaCajaDelTitular)
+afirmarIgual(
+  [GEOMETRIA.columnasTotales, GEOMETRIA.columnasDeLaCajaDelTitular, GEOMETRIA.columnasDeLaCajaDeLaBajada].map((n) => veces(quieto, `data-columnas="${n}"`)),
+  [1, 1, 1],
+  'las TRES grillas del hero salen una vez cada una: la medida, la del titular y la de la bajada',
+)
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
 controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)

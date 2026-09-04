@@ -63,6 +63,61 @@ import {
  */
 
 /**
+ * LA GEOMETRÍA — los números de composición de la sección, juntos y fuera del
+ * contenido. Están acá, y no en `contenido.ts`, porque son técnicos: los decide
+ * quien compone y no cambian el día que llegue el copy definitivo.
+ */
+export const GEOMETRIA = {
+  /**
+   * ── B1 · LA MEDIDA DEL TITULAR: SEIS CUERPOS, Y NO ACOMPAÑA A LA VENTANA ──
+   *
+   * **El titular de cierre entraba en UNA línea y flotaba en el tercio de
+   * arriba de una pantalla vacía.** Medido en el navegador, con la receta de
+   * `docs/rediseno/MEDICION-NAVEGADOR.md`:
+   *
+   *     ancho   caja del titular   líneas   tinta del titular
+   *     1440    1376 px (entera)     1          61,03 px
+   *     1920    1856 px (entera)     1          70,86 px
+   *
+   * Una línea de 957,4 px sobre un cuadro de 1856 con 210,78 px (1440) y
+   * 380,22 px (1920) de banda vacía debajo del último renglón. La tabla de
+   * deltas (`docs/rediseno/sprints/B1-DELTAS.md` §1) publica de dónde sale la
+   * corrección: **las cajas de texto de la referencia son angostas y FIJAS**
+   * —480 px a 1440 y a 1920, 0,25 del viewport— y las nuestras crecían con la
+   * ventana. Acá se acota igual, y por eso la medida NO es una columna de
+   * grilla: una columna fluida vuelve a crecer.
+   *
+   * **Seis cuerpos del titular** —`calc(var(--text-titulo-xl) * 6)` = 336 px,
+   * al lado de los 6,67 cuerpos de la referencia (480 / 72)—. El 6 no es un
+   * gusto: es la única banda que parte el titular en 3 líneas a 1440 y en 4 a
+   * 1920 sin que la sección se pase de su pantalla. Barrida de 4 en 4 px sobre
+   * el titular real, con su tipografía y con `text-wrap: balance` puestos:
+   *
+   *     ancho   4 líneas       3 líneas       2 líneas
+   *     1440    192 – 315 px   316 – 447 px   448 – 827 px
+   *     1920    224 – 363 px   364 – 519 px   520 – 959 px
+   *
+   * La intersección «3 a 1440 · 4 a 1920» es **[316, 363]**; 336 cae en el
+   * medio, con 20 px de margen abajo y 27 arriba. Y la palabra más larga del
+   * titular mide 243,5 px a 1440 y 282,7 a 1920: entra en la caja en los dos.
+   *
+   * ⚠ El NIVEL tipográfico no se toca: `titulo-xl` sigue siendo el más grande
+   * de la escala. Lo que se acota es la caja, no la letra — la misma decisión
+   * que la Fase 0 tomó en el Hero, por otra razón y con el mismo instrumento.
+   */
+  claseDeLaMedidaDelTitular: 'max-w-[calc(var(--text-titulo-xl)*6)]',
+  /** Cuántos cuerpos mide la caja. El literal de arriba lo repite y el
+   *  invariante afirma que los dos dicen lo mismo. */
+  cuerposDeLaMedidaDelTitular: 6,
+  /**
+   * Cuántas líneas ocupa el titular a escritorio, con la medida puesta. Es
+   * MEDIDO —no una promesa— y entra en el modelo de alto de §14 del
+   * invariante, que hasta ahora sumaba una sola caja de línea.
+   */
+  lineasDelTitularEnEscritorio: 3,
+} as const
+
+/**
  * El contenido de la sección, SIN su `<section>`.
  *
  * Está separado para que el instrumento pueda montarlo bajo una superficie
@@ -71,7 +126,16 @@ import {
  */
 export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
-    <Pie>
+    /* ── B1 · LA CADENA DE ALTO, para que el apilado se reparta ────────────
+       Tres `grid` encadenados y un `content-between`. El `<footer>`, el
+       envoltorio y la caja de contenido son cada uno ítem de grilla del de
+       arriba, así que **se estiran** hasta el `min-h-svh` de la sección; sin
+       esa cadena la caja de contenido queda de altura automática y el apilado
+       se amontona arriba. Medido antes: 337 px de banda vacía continua debajo
+       del último renglón a 1920. `content-between` y no `justify-between`
+       porque la caja de contenido es una GRILLA de una columna: reparte las
+       filas, que es lo mismo que el `justify` hace en un flex. */
+    <Pie className="grid" claseDeEnvoltorio="grid" claseDeContenido="grid content-between">
       <EncabezadoDeSeccion seccion={seccion} nombre={ETIQUETA_DE_SECCION} />
 
       <Bloque patron="P1">
@@ -82,8 +146,16 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
              el elemento que lo contiene: el nombre accesible se computa del
              contenido, y el contenido de este `div` es exactamente el titular.
              Es una caja de bloque adentro del `Bloque`, que ya era una: no mueve
-             un píxel del apilado de `--spacing-12` del pie. */
-          <div id={idDelTitularDeSeccion(seccion.id)}>
+             un píxel del apilado de `--spacing-12` del pie.
+
+             ⚠ Y ES TAMBIÉN LA CAJA DE LA MEDIDA (B1). El `max-width` va acá y
+             no en el `h2`: `CanalDeTitular` parte el texto línea por línea
+             MIDIENDO el ancho de su caja, así que acotar el contenedor es lo
+             que cambia el corte; acotar el `h2` desde afuera obligaría a pasar
+             la clase por `className`, que es donde `cn()` mezcla utilidades de
+             texto. Un `div` de bloque con `max-width` no toca ni el árbol de
+             encabezados ni el nombre accesible. */
+          <div id={idDelTitularDeSeccion(seccion.id)} className={GEOMETRIA.claseDeLaMedidaDelTitular}>
             <CanalDeTitular
               progreso={progreso}
               patron="P1"
@@ -147,7 +219,13 @@ function LineaDeCierre(): React.JSX.Element {
  */
 export function Cierre({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
-    <Seccion seccion={seccion}>
+    /* `grid min-h-svh` es el primer eslabón de la cadena de alto del pie (B1):
+       da la pantalla contra la que repartir y hace del `<footer>` un ítem de
+       grilla, que estira. La caja de pantalla es NUEVA en esta sección —antes
+       su alto era intrínseco y el `min-height` de la tabla el único piso— y
+       `s10-mobile` lo declara. No cambia el alto en ningún ancho: la sección ya
+       tenía `min-height: 100svh` de la tabla. */
+    <Seccion seccion={seccion} className="grid min-h-svh">
       <ContenidoDelCierre seccion={seccion} />
     </Seccion>
   )

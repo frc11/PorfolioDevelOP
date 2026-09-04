@@ -92,7 +92,12 @@ export function ContenidoDeServicio({
   const palabras = palabrasDelParrafo(servicio.id)
 
   return (
-    <ContenidoDeSeccion claseDeContenido="flex w-full flex-col gap-[var(--spacing-8)] py-[var(--spacing-12)]">
+    // El `py` baja de `--spacing-12` a `--spacing-8` (48 → 32 px por lado): con
+    // 48, la banda entre el titular de la sección y el rótulo del servicio medía
+    // 104 px en el frame del medio del pin y 125 px en el del tercer cuarto —
+    // arriba del techo del bloque. Es aire de composición, no separación que
+    // alguien lea. Medido en B1 a 1920.
+    <ContenidoDeSeccion claseDeContenido="flex w-full flex-col gap-[var(--spacing-8)] py-[var(--spacing-8)]">
       {/* ── FILA 1 · el rótulo ── P2, un target ── */}
       <CanalDeUnaPieza progreso={progreso} patron="P2">
         <div data-fila="rotulo" className="flex flex-col gap-[var(--spacing-3)]">
@@ -121,6 +126,22 @@ export function ContenidoDeServicio({
         </div>
       </CanalDeUnaPieza>
 
+      {/* ── EL CUERPO — MITAD Y MITAD, y el hueco del medio se queda GRANDE ──
+          ⚠️ **B1 ACHICÓ ESTE HUECO Y SE REVIRTIÓ, CON LOS DOS NÚMEROS. No se
+          vuelve a achicar sin leer esto.**
+          El hueco de `[VIDEO]` a 1920 mide 920 × 517,5 px: **30,79 % del área
+          del bloque** y 101,5 px más alto que la columna de texto de al lado. B1
+          lo leyó como «el hueco domina la sección» y lo bajó a 608 × 342
+          (**16,12 %**) metiendo una tercera columna. **El resultado medido fue
+          peor:** el aire muerto de Servicios subió de **33,52 % a 44,72 %** y su
+          banda vacía continua máxima de **104 a 120 px** — porque ese marco
+          punteado era la ÚNICA tinta de esas filas, y al achicarlo el bloque
+          bajó de 805,28 a 671,78 px adentro de una pantalla de 1080.
+          La lectura correcta es la contraria: **un marcador de medio es
+          contenido visual, y grande es lo que corresponde.** El día que entre el
+          archivo, ahí va un video, y un video chico en una sección que existe
+          para mostrarlo sería el defecto de verdad. La proporción se queda en
+          mitad y mitad. */}
       <Grilla columnas={2} className="items-start">
         <div className="flex flex-col gap-[var(--spacing-6)]">
           {/* ── CANAL P3 · el párrafo que se enciende, palabra por palabra ──

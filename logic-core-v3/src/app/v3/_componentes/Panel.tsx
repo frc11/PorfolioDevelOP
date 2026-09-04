@@ -81,6 +81,21 @@ export function Panel({ seccion, children }: { seccion: Seccion; children?: Reac
        * dispara `:focus-visible`.
        */
       tabIndex={seccion.id === ID_DE_LA_SECCION_DE_ENTRADA ? -1 : undefined}
+      /**
+       * ⚠ **VA COMO LITERAL, Y NO ES UN DESCUIDO (B1).** El nombre del atributo
+       * también vive en `_secciones/_contrato/forma.ts` como `ATRIBUTO_DE_PANEL`,
+       * porque la coreografía animada lo necesita para resolver
+       * `anclaje: 'seccion'`. Lo natural sería consumirlo acá y tener una sola
+       * fuente — y no se puede: `s13b-escena.invariant.ts` afirma sobre el
+       * FUENTE de este archivo que la línea dice `data-panel={seccion.id}`, y ese
+       * invariante vive en `_lib/escena/`, congelado para este sprint.
+       *
+       * Lo que evita que las dos se desincronicen mientras tanto está en
+       * `trabajos.invariant.tsx` §1b: afirma que la constante del contrato
+       * aparece LITERALMENTE en el fuente de este archivo. El día que
+       * `_lib/escena/` se pueda tocar, esto pasa a `{...{ [ATRIBUTO_DE_PANEL]: … }}`
+       * y esa afirmación se borra.
+       */
       data-panel={seccion.id}
       data-superficie={seccion.superficie}
       // El mecanismo de S0: redefine --color-fondo y --color-tinta, y el

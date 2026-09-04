@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 
 import { Titular } from '../../_componentes/tipografia/Titular'
 import type { ParDeAnclas } from '../../_lib/motion/anclas'
@@ -17,6 +17,7 @@ import type {
   TextoPorLineasProps,
 } from './canales'
 import type { BloqueProps, PrimitivasDeCoreografia } from './coreografia'
+import { ATRIBUTO_DE_PANEL } from './forma'
 import { MARCA_COREOGRAFIA_DEL_HOME } from './marcaCoreografia'
 import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from './motion'
 
@@ -67,6 +68,24 @@ function anclasDe(props: BloqueProps): ParDeAnclas {
 }
 
 /**
+ * QUÉ ELEMENTO SE MIDE. **[B1]**
+ *
+ * `anclaje: 'seccion'` sube al ancestro que lleva el alto del recorrido. Es lo
+ * único que esa propiedad hace: **no toca el ancla**, que sigue siendo la del
+ * patrón. El porqué —con el número que lo fuerza y con la forma anterior, que
+ * estaba mal y lo empeoraba— está en `AnclajeDelBloque` (`coreografia.tsx`).
+ *
+ * Si el ancestro no existe devuelve el propio bloque, que es el defecto: una
+ * sección que no es un panel del recorrido no tiene por qué romperse, y el
+ * invariante de la sección que pide `'seccion'` afirma que ahí SÍ existe.
+ */
+function elementoMedido(el: HTMLElement, anclaje: BloqueProps['anclaje']): HTMLElement {
+  if (anclaje !== 'seccion') return el
+  const panel = el.closest(`[${ATRIBUTO_DE_PANEL}]`)
+  return panel instanceof HTMLElement ? panel : el
+}
+
+/**
  * La inercia del `scrub`, o `null`.
  *
  * El pin no lleva inercia y no es un valor por defecto: es la decisión que el
@@ -75,6 +94,12 @@ function anclasDe(props: BloqueProps): ParDeAnclas {
  */
 function inerciaDelBloque(props: BloqueProps): number | null {
   if (props.patron === 'pin') return null
+  // ⚠ `anclaje: 'pin'` NO entra acá, y la asimetría es deliberada: lo que esa
+  // propiedad cambia es contra qué recorrido se reparte el patrón, no cómo
+  // persigue el cabezal. La inercia es una decisión del PATRÓN —`scrub` en
+  // SCROLL.md— y quitársela porque la sección esté pinneada sería anular un
+  // valor medido por la puerta de atrás. P7 declara `scrub: true`, así que hoy
+  // esto devuelve `null` para Trabajos por la razón correcta.
   return inerciaDe(PATRONES[props.patron])
 }
 
@@ -97,12 +122,30 @@ function estiloDelBloque(props: BloqueProps): React.CSSProperties | undefined {
 }
 
 function BloqueConMotor(props: BloqueProps): React.JSX.Element {
-  // El `ref` se crea acá y baja al motor. No sube: leer una propiedad que
-  // contiene un `ref` durante el render dispara `react-hooks/refs`, y el `div`
-  // de abajo es el único lugar donde se usa.
-  const ref = useRef<HTMLDivElement | null>(null)
+  // El `ref` que baja al motor apunta al ELEMENTO MEDIDO, que con
+  // `anclaje: 'seccion'` no es este `div` sino su `<section>`. No sube: leer una
+  // propiedad que contiene un `ref` durante el render dispara
+  // `react-hooks/refs`.
+  const refDeMedida = useRef<HTMLElement | null>(null)
+  const anclaje = props.anclaje
+
+  /**
+   * ⚠ **Un `ref` de callback y no un `useEffect`, y es la condición de que esto
+   * funcione.** El motor resuelve su rango adentro de un `useEffect` propio, y
+   * los efectos de un hook corren ANTES que los del componente que lo llama: un
+   * `useEffect` acá poblaría `refDeMedida` después de que el motor ya lo leyó
+   * nulo, y el patrón se quedaría sin rango en el primer montaje. Un `ref` de
+   * callback corre en el commit, antes de cualquier efecto.
+   */
+  const montar = useCallback(
+    (el: HTMLDivElement | null) => {
+      refDeMedida.current = el === null ? null : elementoMedido(el, anclaje)
+    },
+    [anclaje],
+  )
+
   const progreso = useProgresoDePatron({
-    ref,
+    ref: refDeMedida,
     anclas: anclasDe(props),
     inerciaSegundos: inerciaDelBloque(props),
   })
@@ -113,8 +156,9 @@ function BloqueConMotor(props: BloqueProps): React.JSX.Element {
     // mecanismo que S2 usa para su chunk, y la razón es la misma — una
     // constante exportada y no usada la puede podar el empaquetador.
     <div
-      ref={ref}
+      ref={montar}
       data-arbol={MARCA_COREOGRAFIA_DEL_HOME}
+      data-anclaje={anclaje ?? 'propia'}
       className={props.className}
       style={estiloDelBloque(props)}
     >

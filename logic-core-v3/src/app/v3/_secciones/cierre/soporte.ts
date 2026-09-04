@@ -250,3 +250,46 @@ export function piezasDelPieSinTamano(html: string): string[] {
     .map((m) => m[1])
     .filter((clases) => !clases.split(/\s+/).includes('text-cuerpo'))
 }
+
+/** ── B1 · EL LECTOR DE TOKENS DEL TEMA y la caja de línea. Mudados del
+ *  invariante con el corte que este archivo declara —plomería, no
+ *  afirmaciones—: leer un `clamp()` y quedarse con su piso es aritmética de CSS.
+ *  `tokenPx` es FÁBRICA porque necesita el tema y se instancia una vez. */
+const RAIZ_PX = 16
+
+export function lectorDeTokens(tema: string): (nombre: string) => number {
+  return (nombre: string): number => {
+    const v = (new RegExp(`${nombre}\s*:\s*([^;]+);`).exec(tema)?.[1] ?? '').trim()
+    const clamp = /^clamp\((-?[\d.]+)px/.exec(v)
+    if (clamp !== null) return Number.parseFloat(clamp[1])
+    const rem = /^(-?[\d.]+)rem$/.exec(v)
+    if (rem !== null) return Number.parseFloat(rem[1]) * RAIZ_PX
+    const px = /^(-?[\d.]+)px$/.exec(v)
+    return px !== null ? Number.parseFloat(px[1]) : Number.parseFloat(v)
+  }
+}
+
+/** El alto de una caja de línea: tamaño por interlineado, los dos como tokens. */
+export function cajaDeLineaCon(tokenPx: (n: string) => number): (texto: string, interlineado: string) => number {
+  return (texto: string, interlineado: string): number => tokenPx(texto) * tokenPx(interlineado)
+}
+
+/** ── B1 · EL MODELO DE ALTO DEL PIE, derivado de tokens. Las cajas que suman el
+ *  alto del Cierre; las AFIRMACIONES —a 1440 entra, a 375 se pasa— se quedan en
+ *  el invariante. `apilar` sale con ellas porque el control positivo la usa para
+ *  demostrar que el alto de una columna CRECE con su lista. */
+export function modeloDelPie(tokenPx: (n: string) => number, cajaDeLinea: (t: string, i: string) => number) {
+  const MICRO = cajaDeLinea('--text-micro', '--leading-micro')
+  const apilar = (n: number, caja: number): number =>
+    MICRO + tokenPx('--spacing-4') + n * caja + (n - 1) * tokenPx('--spacing-2')
+  return {
+    MICRO,
+    apilar,
+    CAMPO: 2 * tokenPx('--spacing-2') + cajaDeLinea('--text-caption', '--leading-texto'),
+    ENLACE: cajaDeLinea('--text-cuerpo', '--leading-texto'),
+    CTA_ALTO: cajaDeLinea('--text-cuerpo', '--leading-texto') + 2 * tokenPx('--spacing-2'),
+    LINEA_ALTO: cajaDeLinea('--text-caption', '--leading-texto') + tokenPx('--spacing-1') + MICRO,
+    SEPARACIONES: 4 * tokenPx('--spacing-12'),
+    RELLENO: 2 * tokenPx('--spacing-20'),
+  }
+}

@@ -144,3 +144,22 @@ export interface PropsDeSeccion {
  * existe, así que el atributo se llama por lo que marca.
  */
 export const ATRIBUTO_DE_SECCION = 'data-seccion-id'
+
+/**
+ * El atributo con el que se marca **la `<section>` del recorrido**, o sea la
+ * caja que lleva el alto declarado de la tabla. Lo emite `_componentes/Panel.tsx`.
+ *
+ * ── Por qué son DOS atributos y no uno ────────────────────────────────────
+ *
+ * `ATRIBUTO_DE_SECCION` marca la caja de CONTENIDO —que en una sección pinneada
+ * es el hijo `sticky`, o sea UNA pantalla— y éste marca la caja del RECORRIDO,
+ * que en esa misma sección son tres. Las dos existían ya; lo que faltaba era
+ * poder nombrar la segunda desde el código y no sólo desde el marcado.
+ *
+ * ⚠ Vive acá, y no en `Panel.tsx`, por el peso: `coreografia-animada.tsx` —el
+ * único módulo del home que entra por `import()` perezoso— necesita este nombre
+ * para resolver `anclaje: 'seccion'`, y hacerle importar el componente entero
+ * para leer una cadena metería `Panel` en la conversación del empaquetador sin
+ * ninguna necesidad. Este módulo ya está del lado de la carga inicial y no pesa.
+ */
+export const ATRIBUTO_DE_PANEL = 'data-panel'

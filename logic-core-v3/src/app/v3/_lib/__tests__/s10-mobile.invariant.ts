@@ -21,7 +21,6 @@
  * peso) en `./s10-mobile-peso`, la única que lee el disco de `.next`.
  */
 
-
 import { SERVICIOS } from '../../_secciones/_contrato/acento'
 import { pantallasDe } from '../../_secciones/_contrato/forma'
 import { GEOMETRIA } from '../../_secciones/numeros/Numeros'
@@ -86,27 +85,43 @@ for (const rama of secciones) {
   console.log(`  ${id.padEnd(16)} declarado ${decl}  ·  flujo @375/390/768/1024:${cols}`)
 }
 
-const SIN_CAJA_DE_PANTALLA = ['por-que-develop', 'cierre']
 /**
- * ⚠️ **`servicios` y `trabajos` ENTRAN A ESTA LISTA EN SITIO-S11.**
+ * ⚠️ **LA LISTA `SIN_CAJA_DE_PANTALLA` SE BORRA EN B1, y no queda vacía: se va.**
  *
- * Los dos estaban afuera porque los dos tenían un defecto de composición, y la
- * lista es la de las secciones cuyo flujo llena lo que la tabla declara **en
- * los cuatro anchos**. Servicios medía 1 de 3 en los cuatro (la caja clavada del
- * §3) y Trabajos medía 1 de 3 a 768 y 1024 (la fila de la grilla arrancaba en
- * 768 y el despinneo en 1025). Con los dos arreglos la lista pasa de cuatro
- * secciones a seis, y **la afirmación suelta que cubría a Trabajos sólo en 375 y
- * 390 se borra porque ésta la subsume**: cubrir dos anchos era todo lo que se
- * podía afirmar mientras los otros dos estuvieran rotos.
+ * Tenía dos —`por-que-develop` y `cierre`— y afirmaba de las dos que su alto era
+ * intrínseco: el contenido caía apilado y el `min-height` de la tabla sólo hacía
+ * de piso. **Eso era también su defecto.** Sin una caja de pantalla no hay contra
+ * qué repartir, y las dos acumulaban su aire en una banda al final: 443,06 px en
+ * por qué develOP y 337 px en el Cierre, a 1920.
+ *
+ * Las dos reciben UNA caja en B1 y reparten sobre ella: la banda baja a 88,90 px
+ * y a la del Cierre se le suma la cadena de tres `grid` que estira el pie. **En
+ * ninguna de las dos cambia el alto en ningún ancho de esta tabla** —las dos ya
+ * tenían `min-height: 100svh` de la tabla— así que las dos pasan a la lista de
+ * arriba y se afirman con la misma cuenta que las otras seis: su flujo llena las
+ * pantallas que declaran.
+ *
+ * ⚠ La lista se BORRA en vez de quedar vacía. Un `for` sobre una lista sin
+ * elementos no afirma nada y se pone verde igual: es exactamente la comprobación
+ * vacía que la regla 8 de este proyecto prohíbe. **Con las dos adentro, el
+ * recorrido pasa a ser `SECCIONES` entero y no una lista escrita a mano**, que
+ * es lo que impide que una sección nueva quede sin afirmar por olvido.
+ *
+ * ── Cómo llegó a ser una lista de ocho, en dos pasos ──────────────────────
+ *
+ * **SITIO-S11 metió a `servicios` y `trabajos`**, que estaban afuera porque los
+ * dos tenían un defecto de composición: Servicios medía 1 de 3 pantallas en los
+ * cuatro anchos (la caja clavada del §3) y Trabajos 1 de 3 a 768 y 1024 (la fila
+ * de la grilla arrancaba en 768 y el despinneo en 1025). Con los dos arreglos la
+ * lista pasó de cuatro a seis, y la afirmación suelta que cubría a Trabajos sólo
+ * en 375 y 390 se borró porque ésta la subsume. **B1 mete las dos últimas.**
  */
-for (const id of ['hero', 'quienes-somos', 'numeros', 'trabajos', 'servicios', 'tu-panel']) {
-  const decl = pantallasDe(SECCIONES.find((s) => s.id === id) ?? SECCIONES[0])
-  const iguales = ANCHOS_DE_MOBILE.every((a) => flujo.get(id)?.get(a)?.pantallas === decl)
-  afirmar(iguales, `${id}: el flujo llena las ${decl} pantallas declaradas en los cuatro anchos`)
+for (const s of SECCIONES) {
+  const decl = pantallasDe(s)
+  const iguales = ANCHOS_DE_MOBILE.every((a) => flujo.get(s.id)?.get(a)?.pantallas === decl)
+  afirmar(iguales, `${s.id}: el flujo llena las ${decl} pantallas declaradas en los cuatro anchos`)
 }
-for (const id of SIN_CAJA_DE_PANTALLA) {
-  afirmar(ANCHOS_DE_MOBILE.every((a) => flujo.get(id)?.get(a)?.pantallas === 0), `${id}: CERO cajas de pantalla — su alto es intrínseco y el \`min-height\` de la tabla es el piso`)
-}
+controlPositivo('la cuenta ve una sección cuyo flujo NO llena lo declarado', 'cierre', (id: string) => ANCHOS_DE_MOBILE.every((a) => (flujo.get(id)?.get(a)?.pantallas ?? 0) === 0))
 console.log(
   '  ✅ DEFECTO 3 — ARREGLADO en SITIO-S11 · `trabajos/Trabajos.tsx` — el colapso de la grilla se corrió de 768 a 1025, que es el MISMO ' +
     'umbral donde el pin se apaga (`pinneada: "desde-escritorio"`) y donde `escritorio:min-h-0` deja de dar una pantalla por proyecto. ' +
