@@ -4311,3 +4311,160 @@ diferencia es de esta corrida. **No se re-seedeó nada.**
 configuración. Sin push. Los dos worktrees propios quedan declarados en el reporte; el WIP ajeno del
 checkout —bitácora de F0, `next.config.ts`, los 3 docs de auditoría y `BACHES-RE-VERIFICADOS.md`— se
 dejó **intacto y sin commitear**.
+
+## Sprint P25 — La carrera de los tildes: tres clics, una marca — 2026-09-04
+
+El defecto más viejo vivo. Tres clics seguidos en los tildes de Construcción y
+las tres fases dicen «marcada como hecha»; al recargar quedaba UNA. El chequeo
+final, con los mismos diez obligatorios tildados al mismo ritmo, no perdía
+ninguno. Dos escrituras del mismo tipo —marcar algo en un blob— y solo una se
+pisaba. Esa diferencia era el hallazgo.
+
+### Las cinco respuestas de la Fase 1
+
+**1 · Cómo escribe cada blob.** Los cuatro writes del server son
+ESTRUCTURALMENTE IDÉNTICOS y ninguno manda delta: `updateMany` con guard
+optimista por `stage` y `data` con el blob ENTERO ya parseado — un overwrite
+ciego.
+
+| blob | write | línea |
+|---|---|---|
+| ficha | `saveOwnedFicha` | `src/lib/leados/dossier.ts:271` |
+| chequeo | `saveOwnedSelfCheck` | `src/lib/leados/dossier.ts:352` |
+| progreso | `saveOwnedProgreso` | `src/lib/leados/dossier.ts:384` |
+| brief | `saveOwnedBrief` | `src/lib/leados/dossier.ts:452` |
+
+La diferencia no está en el server: está en QUIÉN llama y con qué base.
+
+- ficha — `ficha-form.tsx:128` `useState` + `ficha-form.tsx:144` `useAutosave`.
+- brief — `brief-form.tsx:97` `useState` + `brief-form.tsx:108` `useAutosave`.
+- chequeo — `chequeo-form.tsx:132` `useState` + `chequeo-form.tsx:145` `useAutosave`.
+- progreso — NO tenía dueño. Cada `FaseAutoReporte` era su propio escritor y
+  reconstruía el set completo desde la prop del server (`fase-auto-reporte.tsx:67`,
+  código viejo), la MISMA para los tres tildes (`m-construccion.tsx:195`).
+
+**2 · Por qué el chequeo no se pisa y el progreso sí — medido, no supuesto.**
+La hipótesis intuitiva (el payload del chequeo es superset y por eso sobrevive)
+es FALSA, y medirla fue lo que dio vuelta el sprint. Con escrituras realmente
+simultáneas contra la DB:
+
+| medición (in-process, Prisma directo) | resultado |
+|---|---|
+| progreso, ráfaga 3 con base stale (forma del cliente viejo) | 1/3 |
+| progreso, ráfaga 3 con payload SUPERSET | **2/3** |
+| chequeo, ráfaga 10 con payload superset (forma real) | **4/10** |
+| merge read-modify-write en el server, sin lock | 1/3 y 1/6 |
+
+El blob del chequeo NO es inmune: diez escrituras encimadas le comen seis. Lo
+que lo salva es que **su cliente nunca encima dos escrituras**: el `savingRef`
+de `use-autosave.ts:93` deja UNA en vuelo y las ediciones que llegan mientras
+se guarda se COALESCEN en la siguiente (`use-autosave.ts:125`). Son DOS
+mecanismos y hacen falta los dos: estado propio (mata la base stale) +
+serialización en vuelo (mata el encimado). El progreso no tenía ninguno.
+
+**3 · Cuáles tienen la carrera — con la ráfaga real, en la aplicación.**
+
+| blob | ráfaga | persistido | veredicto |
+|---|---|---|---|
+| progreso | 3 clics seguidos | **1/3** | TENÍA la carrera |
+| chequeo | 10 clics seguidos | 10/10 | no |
+| ficha | 3 ediciones seguidas | 3/3 | no |
+| brief | 3 ediciones seguidas | 3/3 | no |
+
+Uno solo de los cuatro. Los otros tres ya tenían el patrón.
+
+**4 · La ventana — un número.** La ventana ES el viaje redondo de la escritura:
+click, guardado, `router.refresh()`, prop fresca. Medido en la aplicación, tres
+muestras: **1038 / 1069 / 1333 ms** (mediana ~1.07 s). Barrido del ritmo de
+clics contra lo persistido:
+
+| ms entre clics | 0 | 100 | 300 | 600 | 900 | 1000 | 1300 | 1800 |
+|---|---|---|---|---|---|---|---|---|
+| persistidas de 3 | 1 | 1 | 1 | 2 | 2 | 3 | 3 | 3 |
+
+**Empieza a perderse por debajo de ~1 s entre clics; a 300 ms o menos queda 1 de 3.**
+(Números del dev-server; en prod la ventana se achica, la forma es la misma:
+cualquier clic más rápido que el viaje redondo escribe sobre una base vieja.)
+
+**5 · Qué más se va.** El cliente manda SOLO `completadas`, pero `ProgresoSchema`
+(`contracts.ts:161`) tiene tres campos. Medido sembrando el blob completo y
+tildando una vez:
+
+```
+antes:   {"marcadas":{"estructura":"..."},"faseActual":"personalizacion","completadas":["estructura"]}
+despues: {"completadas":["estructura","assets"]}
+```
+
+`faseActual` y `marcadas` se borran — y no solo en la carrera: en CADA escritura.
+Hoy es LATENTE: ningún código de producción los escribe ni los lee (solo el
+schema y `progreso-isolation.invariant.ts`), así que no se pierde nada real. Se
+deja anotado, no arreglado: tocarlo sin consumidor sería inventar contrato.
+
+### La salida elegida
+
+**Copiar el patrón del que funciona** — el del chequeo, con sus DOS mecanismos.
+Nace `construccion-tildes.tsx`: UN dueño del blob para los tres tildes de la
+pantalla, con `useState` sembrado UNA vez (nunca re-sembrado con la prop, que es
+donde estaba la base stale) y `useAutosave` con `delayMs: 0` — mismo criterio
+que el chequeo: un tilde es una acción TERMINADA, no una tecla en el medio de
+una frase. `FaseAutoReporte` queda PRESENTACIONAL: no escribe, no conoce el
+`leadId`, recibe si está marcada y avisa el toggle.
+
+El estado cubre **las seis** fases, no las tres de la pantalla: el payload es el
+set completo, así que mc1 arrastra intactas las de mc2 y al revés.
+
+**Qué se descarta.** Solo en el camino de ERROR: si el server rebota el
+guardado, la pantalla vuelve a lo último confirmado y la marca no guardada se
+descarta — el mismo efecto que el snap-back optimista de antes, y deja la
+pantalla mostrando exactamente lo que está persistido. En el camino feliz no se
+descarta nada.
+
+### FRENADA — la ventana del server queda abierta, y es decisión de Franco
+
+El merge server-side sin lock también pierde (1/3 y 1/6, tabla de arriba): dos
+requests realmente simultáneos sobre el MISMO dossier leen la misma base y el
+segundo pisa al primero. Cerrar ESA ventana pide serializar escrituras (lock de
+fila o `Serializable` con reintento), que es exactamente la condición de frenada
+del sprint. No se tocó. Es PRE-EXISTENTE, afecta a los cuatro blobs por igual
+(el chequeo incluido) y hoy es inalcanzable desde la UI: con un solo dueño por
+blob y el guard in-flight, el cliente ya no emite dos escrituras encimadas.
+
+### Verificado en la aplicación (1440), no solo compila
+
+1. Ráfaga de 3 en mc1: antes **1/3**, después **3/3**, releído del server.
+2. Ráfaga de 10 en el chequeo: **10/10** antes y después — el patrón sigue andando.
+3. Ráfaga de 10 sobre los tildes ciclando los tres: componen EXACTO, destildes
+   incluidos (el tilde con 4 clics queda apagado, los de 3 encendidos).
+4. Escrituras cruzadas: ráfaga en mc1 más ráfaga en mc2 dan **las seis**
+   sobrevivientes; la segunda no pisó a la primera.
+5. Mediciones fijas — `main.clientHeight`, mc1: desktop **788 a 788**, mobile
+   **688 a 688**. El HTML de la sección Registro quedó **idéntico byte a byte**
+   (3504 chars antes y después): este sprint no cambia una sola pantalla.
+
+### Los tests
+
+`tests/setter/14-progreso-rafaga.spec.ts` — tres casos, la ráfaga como método,
+**demostrados fallando contra el código viejo** (los tres en rojo; el recibido
+era exactamente el defecto: solo `assets` de tres tildadas). Afirman sobre
+`progresoJson` releído de la DB, NUNCA sobre la pantalla: el estado optimista
+pinta el tilde en verde antes de que conteste el server, que es el falso verde
+que se comió P24. `expect.poll` espera a que la escritura aterrice — no puede
+pasar antes de tiempo, y agota su tiempo con el defecto vivo.
+
+### Gates
+
+`tsc` limpio · invariantes **exit 0** · `test:setter` **63/63** ·
+`test:leados` **25/25** · `build` **exit 0** · `migrate status` sin drift.
+Sin cambio de schema, de transiciones ni de llaves de datos. `progresoJson`
+sigue sin cablearse a la transición EN_REVISION (§6-3) y el chequeo final sigue
+siendo el único gate de Construcción, intacto.
+
+### Fuera de scope — anotado, no implementado
+
+- La ventana del server (arriba): pide serializar escrituras, decisión de Franco.
+- `faseActual` / `marcadas` se borran en cada write del progreso. Latente: sin
+  consumidor en producción.
+- El diálogo compartido no se anuncia como diálogo (dos atributos, y lo arrastran
+  todos los modales).
+- La franja de conteos de la cartera.
+- La pantalla de revisión sale a internet sola.

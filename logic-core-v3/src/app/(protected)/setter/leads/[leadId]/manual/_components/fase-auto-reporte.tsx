@@ -1,86 +1,61 @@
 'use client'
 
-import { useOptimistic, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { FaseId } from '@/lib/leados/contracts'
-import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actions'
 
 /**
- * El tilde de auto-reporte de UNA fase. El MISMO camino de escritura que tenía
- * el checklist 6-en-uno del wizard (`guardarProgreso → saveOwnedProgreso →
- * progresoJson`). Desde el corte 5.6 esta es la única presentación; desde P6-B
- * se renderizan TRES por pantalla (mc1/mc2) — uno por fase, 1↔1 con su `FaseId`,
- * así el progreso persistido no cambia de forma. La explicación del auto-reporte
- * la sirve el grupo (`ConstruccionRegistro`) una sola vez, no cada tilde.
+ * El tilde de auto-reporte de UNA fase. Desde el corte 5.6 esta es la única
+ * presentación; desde P6-B se renderizan TRES por pantalla (mc1/mc2) — uno por
+ * fase, 1↔1 con su `FaseId`, así el progreso persistido no cambia de forma. La
+ * explicación del auto-reporte la sirve el grupo (`ConstruccionRegistro`) una
+ * sola vez, no cada tilde.
  *
  * NO es un gate (§6-3 del brief): tildar no bloquea nada ni hace avanzar —
  * `progresoJson` jamás se cablea a la transición. El único gate de Construcción
- * es el chequeo final (M14). La marca reconstruye el array completo que espera
- * la action (agrega/quita ESTA fase, preserva las demás) — mismo shape que el
- * wizard.
+ * es el chequeo final (M14).
  *
- * Optimista para feedback instantáneo (`useOptimistic`, patrón del checklist) +
- * `router.refresh()` tras el guardado: la action revalida `/setter` y
- * `/setter/leads/[leadId]` pero NO esta sub-ruta del manual, así que sin el
- * refresh la base optimista quedaría stale y el tilde volvería atrás al cerrar
- * la transición (mismo refresh que `OpenerForm`/`EscalarModal` en el manual).
+ * P25 — PRESENTACIONAL. Antes cada tilde era su propio escritor: llamaba
+ * `guardarProgreso` reconstruyendo el set completo desde la prop `completadas`
+ * del server, que es la MISMA para los tres y solo se refresca al volver el
+ * `router.refresh()`. Tres clics dentro de esa ventana calculaban sobre la misma
+ * base vieja y la última escritura pisaba a las otras: 3 clics → 1 marca.
+ * Ahora el dueño del blob es UNO solo (`ConstruccionTildes`, el patrón del
+ * chequeo final) y este componente no escribe ni conoce el `leadId`: recibe si
+ * está marcada y avisa el toggle. El markup, los aria y las clases quedan
+ * IDÉNTICOS — este sprint no cambia una sola pantalla.
  *
  * `puedeGuardar` (3.3, B-07): el server (`saveOwnedProgreso`, dossier.ts) YA
- * rechaza el guardado fuera de `stage === 'CONSTRUCCION'` — antes de esto el
- * tilde se ofrecía igual en BRIEF (con la CTA «Arrancar construcción» arriba)
- * y el click volvía con un toast de error recién al tocar el server. Acá se
- * ESPEJA esa regla, no se agrega una nueva: `puedeGuardar` no bloquea nada
- * fuera del submit del tilde (navegación, lectura y el resto de la pantalla
- * siguen intactos) y sigue sin ser un gate — tildar en CONSTRUCCION continúa
- * sin hacer avanzar ni bloquear nada (§6-3 intacto).
+ * rechaza el guardado fuera de `stage === 'CONSTRUCCION'`. Acá se ESPEJA esa
+ * regla, no se agrega una nueva: no bloquea nada fuera del submit del tilde
+ * (navegación, lectura y el resto de la pantalla siguen intactos) y sigue sin
+ * ser un gate.
  */
 export function FaseAutoReporte({
-  leadId,
   faseId,
   titulo,
-  completadas,
+  marcada,
+  guardando = false,
   puedeGuardar = true,
   motivo,
+  onToggle,
 }: {
-  leadId: string
   faseId: FaseId
   titulo: string
-  completadas: FaseId[]
+  /** Estado vivo del dueño del blob — no una derivación de la prop del server. */
+  marcada: boolean
+  /** Hay un guardado en vuelo que incluye ESTA fase. */
+  guardando?: boolean
   /** false cuando el server va a rechazar el guardado (stage !== CONSTRUCCION). */
   puedeGuardar?: boolean
   /** Motivo corto a mostrar cuando `puedeGuardar` es false. */
   motivo?: string
+  onToggle: (faseId: FaseId) => void
 }) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [marcada, setMarcada] = useOptimistic<boolean, boolean>(
-    completadas.includes(faseId),
-    (_prev, siguiente) => siguiente,
-  )
-
-  const toggle = () => {
-    const marcar = !marcada
-    const siguiente = marcar
-      ? [...completadas.filter((id) => id !== faseId), faseId]
-      : completadas.filter((id) => id !== faseId)
-    startTransition(async () => {
-      setMarcada(marcar)
-      const result = await guardarProgreso(leadId, { completadas: siguiente })
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      router.refresh()
-    })
-  }
-
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={() => onToggle(faseId)}
       disabled={!puedeGuardar}
       aria-pressed={marcada}
       aria-label={marcada ? `Desmarcar «${titulo}» como hecha` : `Marcar «${titulo}» como hecha`}
@@ -102,7 +77,7 @@ export function FaseAutoReporte({
             : 'border-white/20 bg-white/[0.03] text-zinc-500 group-hover:border-white/30',
         )}
       >
-        {isPending ? (
+        {guardando ? (
           <Loader2 size={13} strokeWidth={1.5} className="animate-spin" />
         ) : marcada ? (
           <Check size={14} strokeWidth={1.5} />

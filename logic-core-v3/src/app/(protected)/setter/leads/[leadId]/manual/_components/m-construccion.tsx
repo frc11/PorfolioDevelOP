@@ -8,7 +8,7 @@ import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { BadgeProvisorio } from '../../_components/badge-provisorio'
 import { ArrancarConstruccion } from './construccion-ctas'
 import { EscalamientoConstruccion } from './escalamiento-construccion'
-import { FaseAutoReporte } from './fase-auto-reporte'
+import { ConstruccionTildes } from './construccion-tildes'
 
 /**
  * MC1 / MC2 — las dos pantallas de Construcción (P6-B). Un solo módulo
@@ -185,20 +185,21 @@ export function ConstruccionRegistro({
         </p>
       )}
 
-      <ul className="space-y-2">
-        {fases.map((faseId) => (
-          <li key={faseId}>
-            <FaseAutoReporte
-              leadId={leadId}
-              faseId={faseId}
-              titulo={shellDeFase(faseId)?.titulo ?? faseId}
-              completadas={completadas}
-              puedeGuardar={puedeGuardar}
-              motivo="Primero arrancá la construcción — el botón está arriba."
-            />
-          </li>
-        ))}
-      </ul>
+      {/* P25: UN solo dueño del blob para los tres tildes. Antes cada tilde
+          escribía `progresoJson` por su cuenta reconstruyendo el set desde esta
+          misma prop `completadas`, y tres clics dentro de la ventana del refresh
+          se pisaban entre sí (3 clics → 1 marca). El título se resuelve acá y
+          baja resuelto: el dueño no necesita saber de `SHELL_CONSTRUCCION`. */}
+      <ConstruccionTildes
+        leadId={leadId}
+        fases={fases.map((faseId) => ({
+          id: faseId,
+          titulo: shellDeFase(faseId)?.titulo ?? faseId,
+        }))}
+        completadas={completadas}
+        puedeGuardar={puedeGuardar}
+        motivo="Primero arrancá la construcción — el botón está arriba."
+      />
 
       {stage === 'CONSTRUCCION' && (
         <EscalamientoConstruccion
