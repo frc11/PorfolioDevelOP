@@ -10979,3 +10979,169 @@ que no usa dos puntos.
   salvo en `p25/carrera-tildes`.
 - La corrida de CI sobre `main` va a ser la **primera** vez que el gate corre ahí. Queda para la
   verificación humana.
+
+---
+
+## P25 · La ráfaga — tres clics, tres marcas — 2026-09-06
+
+El defecto más viejo que seguía vivo. Confirmado en las dos corridas del novato: tres clics
+seguidos en los tildes de Construcción, las tres fases dicen «marcada como hecha», y al recargar
+quedaba **una**.
+
+### La re-medición, sobre el tronco
+
+El diagnóstico venía de otro árbol, así que no se heredó: se volvió a medir acá, con la app en un
+build de producción y un instrumento nuevo (`scripts/qa-corridas/medir-rafaga-progreso.ts`), que
+relee `progresoJson` de la base y lo pasa por `parseProgreso` — el mismo parseo del page loader.
+Sobre la pantalla no se mide nada: el estado optimista pintaba las tres marcas igual.
+
+**La carrera seguía viva.** Y la ventana resultó **más ancha** de lo que decía el diagnóstico
+heredado, que hablaba de «por debajo de ~1 segundo»:
+
+| intervalo entre clics | ANTES | DESPUÉS |
+|---|---|---|
+| 0 ms | 1 de 3 | **3 de 3** |
+| 150 / 300 / 600 ms | 1 de 3 | **3 de 3** |
+| 900 ms | 1 de 3 | **3 de 3** |
+| 1200 ms | 1 de 3 | **3 de 3** |
+| 1500 ms | 1 de 3 | **3 de 3** |
+
+Cada renglón es el **peor de dos pasadas**, con un lead nuevo por pasada. Esa decisión es parte del
+hallazgo: con una sola muestra el mismo intervalo de 1200 ms dio 3 de 3 en una corrida y 1 de 3 en la
+siguiente. **La ventana no es un umbral, es el RTT del `router.refresh()` contra Neon** — varía
+corrida a corrida. Una sola pasada habría publicado el número de la suerte de ese momento, y el
+«después» se estaría comparando contra algo que no se sostiene. El peor de N sí se sostiene: dice
+«a este ritmo SE PUEDE perder».
+
+Los controles, en la misma corrida: el chequeo final **10 de 10** a 0 ms y a 300 ms, y la ficha
+**3 de 3** campos. Ninguno tiene la carrera. El brief no se pudo medir con este instrumento —en su
+pantalla de captura alcanza un solo campo editable, y con uno solo no hay ráfaga posible— así que su
+inmunidad se afirma por lectura: usa el mismo `useAutosave` con dueño único que la ficha. Se anota
+como **no concluyente**, no como verde.
+
+### La salida: los DOS mecanismos, no uno
+
+El que funciona tiene dos, y hacían falta los dos:
+
+1. **Un dueño del conjunto.** El estado vive en `RegistroFases` (nuevo) y cada tilde lo modifica con
+   un updater funcional. El punto de partida de la marca N es el estado que dejó la N-1, no una prop
+   del server que todavía no se enteró. Es lo que hace que el resultado sea el **compuesto** de los
+   clics y no el último.
+2. **Autoguardado con coalescing** (`useAutosave`, `delayMs: 0`): deja UNA escritura en vuelo y
+   agrupa las que llegan mientras tanto. Tres clics producen **dos** escrituras, no tres, y la
+   segunda las lleva todas.
+
+`FaseAutoReporte` pasó a ser presentación pura: recibe `marcada`, devuelve `onToggle`. No sabe qué se
+persiste ni cuándo, y por eso no puede volver a competir consigo mismo.
+
+**El código del intento anterior no se reusó.** No por prolijidad: asumía el motivo del tilde
+**adentro** del `<button>`, y el tronco lo sacó a propósito a `MotivoDelTilde`, una vez arriba del
+grupo y con «Correcciones» enlazada — porque un `<a>` dentro de un `<button>` no es navegable.
+Reintroducirlo habría revivido esa limitación y duplicado el mensaje. Se copió el **patrón** del
+chequeo, no el diff viejo. Verificado con un censo del DOM en las cuatro combinaciones
+(BRIEF/RECHAZADA × mc1/mc2): motivo **x1**, nombre del botón **x1**, enlace a `mr` presente y
+navegable, **0** anclas dentro de un `<button>`, **0** motivos dentro de un tilde.
+
+### Qué se descarta
+
+Nada por carrera: no hay «gana el último» ni escrituras tiradas — la que quedó fuera del vuelo se
+reintenta entera. Lo único que **no** se reintenta solo es un guardado que el server rechazó (lead
+ajeno, stage movido): ahí el hook para —loopear sobre un fallo duro es peor— y el rebote queda
+**fijo** junto a los tildes con el toast al lado, en vez de irse solo. El trabajo sigue en pantalla y
+el reintento es tocar de nuevo. Mismo criterio que la ficha, el brief y el chequeo.
+
+### El refresh: de uno por clic a uno por ráfaga
+
+`progresoJson` alimenta la derivación, y la derivación pinta la franja del recorrido y la barra de
+acción, que son server. Sacar el refresh las habría dejado atrasadas. Antes había **uno por clic** —y
+su latencia ERA la ventana—; ahora hay uno por ráfaga asentada, y ya no puede revertir nada porque el
+estado es del componente, no de la prop.
+
+### Verificación
+
+Los tests **demostrados fallando contra el código de partida**, antes de tocar nada: 3 de 4 rojos
+(`1 de 3`, recibido `["assets"]` — la última marca), y el cuarto —el chequeo de referencia— verde.
+Con el arreglo, **4 de 4** en 2 a 5 s, contra los 20 s de timeout que agotaban antes.
+
+- Ráfaga de tres, con recarga: **3 de 3**, y las tres siguen marcadas al recargar.
+- Diez clics ciclando, tildes y destildes mezclados: **compone exacto** — el tilde que recibió cuatro
+  golpes queda apagado, los de tres encendidos. Que componga y no se pise es lo que distingue el
+  arreglo de un simple achique de la ventana.
+- Las dos pantallas cruzadas: **6 de 6**, mc2 no borra lo de mc1.
+- El chequeo final: **10 de 10**, intacto.
+
+**Las dos mediciones fijas, sin empeorar**: el pliegue de las catorce pantallas salió **idéntico byte
+por byte**, y el censo de destinos de la franja también. Ninguna se movió.
+
+### Lo que el invariante del acuse destapó — y por qué el sprint SÍ toca la pantalla
+
+Con el arreglo puesto y todo en verde, `check:invariant:acuse` se puso **rojo**. Tenía razón, y no
+por un tecnicismo: al pasar los tildes a escritura continua se les había sacado el acuse de recibo
+sin reemplazarlo. Antes el acuse era el tilde pintándose más el spinner de su transición —uno por
+clic—; con autoguardado la escritura ya no es 1↔1 con el clic y el setter se queda sin saber si su
+trabajo quedó. Faltaba la señal, no el permiso.
+
+Así que el sprint **sí agrega una cosa a la pantalla**, y hay que decirlo aunque el encargo dijera
+«nada visual»: `<AutosaveStatus>`, la misma pieza `role="status"` que ya usan la ficha, el brief y el
+chequeo. En reposo devuelve `null` —es silenciosa mientras no hay nada que decir— así que la pantalla
+quieta es idéntica; lo que aparece es «Guardando… / Guardado / Sin guardar» **después** de que el
+setter tilda. Lo confirman las mediciones: las **28** filas del pliegue y las **28** del censo de
+destinos salieron idénticas campo por campo, alto total incluido.
+
+Y el invariante destapó algo más grande que el caso propio. Su señal 1 se evaluaba contra el
+**archivo entero**, así que a los tres forms que ya autoguardan la venía firmando el `useStepAction`
+de **otra** acción del mismo archivo —el envío, el avance— que no toca el autoguardado: un archivo
+podía perder el control de su escritura continua y seguir en verde. Ahora, para un call-site de
+autoguardado, la señal 1 la tiene que dar el mecanismo que gobierna **esa** escritura (el call-site
+dentro de `useAutosave(`, que se resuelve por call-site y no por archivo) y la señal 2 su
+`<AutosaveStatus>`. Siguen siendo dos señales obligatorias para todos; lo que cambia es que las dos
+hablan de la escritura que se está mirando. **Más estricto, no más flojo.**
+
+Probado con **dos sabotajes**, porque un invariante que solo pasa no prueba que proteja:
+
+- sacarle el `<AutosaveStatus>` → rojo, «autoguarda sin `<AutosaveStatus>`»;
+- sacar la llamada del bloque de `useAutosave` a un `useCallback` de más arriba → rojo, «no está
+  dentro de startTransition()/run()/useAutosave()». Ese segundo sabotaje era el primer borrador de
+  este sprint: extraída, la llamada no rompía el invariante — lo dejaba **mirando otra cosa**, que es
+  peor. Por eso la llamada quedó inline.
+
+De paso, un número que ya mentía: la lista de eximidas bajó de dos a una (la del tilde murió con el
+`useOptimistic` que la sostenía, que es justo lo que su `prueba` estaba puesta para detectar) y el
+mensaje de éxito seguía diciendo «2» — estaba escrito a mano. Ahora sale de la lista. Es el mismo
+modo de fallar que el piso de `run-invariants` ya había mostrado: un número a mano se atrasa solo, y
+en verde.
+
+### Anotado, no hecho
+
+- **La ventana del servidor.** `saveOwnedProgreso` sigue escribiendo el blob entero sin delta, igual
+  que los otros tres. Es pre-existente, afecta a los cuatro por igual y hoy es inalcanzable desde la
+  interfaz porque ningún cliente encima dos escrituras. Cerrarla pide serializar escrituras.
+- **Dos campos del contrato sin escritor ni lector.** `ProgresoSchema` declara `faseActual` y
+  `marcadas`; el barrido no encontró **ningún** productor ni consumidor de producción — solo fixtures
+  de invariantes. Los `faseActual` de `recorrido.ts` y `manual.ts` son variables locales homónimas,
+  no el campo. Y como cada escritura persiste el blob parseado desde `{ completadas }`, los borraría
+  si alguna vez existieran.
+- El diálogo compartido que no se anuncia como diálogo · la franja de conteos de la cartera · la
+  clase que rompe el segundo build.
+
+### Notas de entorno
+
+- **El build no es idempotente**, y se respetó: el directorio de salida se borró antes de cada uno de
+  los dos builds. Los dos salieron en verde a la primera; el segundo BUILD_ID (`aTdcfhcTUzSCbpewQBgxf`)
+  se verificó distinto del primero para no estar midiendo el build viejo.
+- **Dos flakes, aislados y descartados — y lo que los descarta es que son DISTINTOS.** En las dos
+  primeras corridas enteras de la suite de setter: 190 pasados y 1 fallado en las dos, pero no el
+  mismo. La primera vez `26-cola-de-trabajo` P21-4, por *strict mode violation* (dos `section` con el
+  mismo `aria-label` — el DOM duplicado por streaming que el repo ya tiene documentado); la segunda
+  `16-municiones-salida` m5, sobre un `toBeHidden()`, la familia de aserciones de ausencia que este
+  repo ya midió como falso rojo/verde por timing de render. Una regresión falla **el mismo** test las
+  dos veces; estos rotaron. Aislados dieron 4/4 y 9/9, y la corrida final sobre el build definitivo
+  salió **191 de 191, sin ninguno de los dos**. Queda anotado que la suite arrastra ~1 flake por
+  corrida completa — no es de este sprint, pero conviene que alguien lo mire.
+
+### Cierre
+
+`tsc` **0** · invariantes **55/55** (56 descubiertos, 1 excluido de siempre) · `test:setter`
+**191/191** (187 de base + los 4 de la ráfaga) · `test:leados` **33/33** · `test:helpers` **28/28** ·
+`build` **verde** · `migrate status` **sin drift**. Sin cambios de schema, de transiciones ni de
+llaves de datos, y el chequeo final sin tocar.

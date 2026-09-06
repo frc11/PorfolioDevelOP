@@ -1,0 +1,77 @@
+{
+  "medidoEn": "2026-09-06T15:48:46.743Z",
+  "baseUrl": "http://127.0.0.1:3003",
+  "asentadoMs": 4000,
+  "progreso": [
+    {
+      "intervaloMs": 0,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 150,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 300,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 600,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 900,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 1200,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 1500,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    }
+  ],
+  "chequeo": [
+    {
+      "intervaloMs": 0,
+      "clics": 10,
+      "guardadas": 10,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 300,
+      "clics": 10,
+      "guardadas": 10,
+      "perdidas": 0
+    }
+  ],
+  "escritos": [
+    {
+      "intervaloMs": 0,
+      "clics": 3,
+      "guardadas": 3,
+      "perdidas": 0
+    },
+    {
+      "intervaloMs": 0,
+      "clics": 1,
+      "guardadas": 0,
+      "perdidas": 1
+    }
+  ]
+}

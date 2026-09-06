@@ -10,7 +10,7 @@ import { ArrancarConstruccion } from './construccion-ctas'
 import { EnlaceChequeoFinal } from './enlace-chequeo'
 import { EnlacePantalla } from './enlace-pantalla'
 import { EscalamientoConstruccion } from './escalamiento-construccion'
-import { FaseAutoReporte } from './fase-auto-reporte'
+import { RegistroFases } from './registro-fases'
 
 /**
  * MC1 / MC2 — las dos pantallas de Construcción (P6-B). Un solo módulo
@@ -23,8 +23,8 @@ import { FaseAutoReporte } from './fase-auto-reporte'
  *   - munición: los items de cada fase AGRUPADOS bajo el subtítulo de su fase,
  *     con el/los prompt(s) de diseño DENTRO del grupo que los usa
  *     (calidad→estética+motion, mobile→mobile) + el link a Claude Design;
- *   - registro: los tildes de auto-reporte, uno POR FASE (`FaseAutoReporte`,
- *     mismo `guardarProgreso` del wizard).
+ *   - registro: los tildes de auto-reporte, uno POR FASE, bajo un dueño único
+ *     del conjunto (`RegistroFases`, mismo `guardarProgreso` del wizard).
  *
  * Las seis fases y sus seis tildes SIGUEN EXISTIENDO — lo que se agrupó son las
  * pantallas. `progresoJson` no se entera: la unidad persistida es la fase.
@@ -41,6 +41,12 @@ import { FaseAutoReporte } from './fase-auto-reporte'
 /** El shell vigente de una fase (título + items), editable por Franco. */
 function shellDeFase(faseId: FaseId) {
   return SHELL_CONSTRUCCION.find((shell) => shell.id === faseId)
+}
+
+/** Los títulos de las fases de la pantalla, resueltos acá (server) para que el
+ * registro —que es cliente— no tenga que importar el shell entero. */
+function titulosDeFases(fases: readonly FaseId[]): Record<string, string> {
+  return Object.fromEntries(fases.map((faseId) => [faseId, shellDeFase(faseId)?.titulo ?? faseId]))
 }
 
 /** Contexto: el bloque de Construcción re-servido en CADA fase — así el brief y
@@ -299,19 +305,18 @@ export function ConstruccionRegistro({
         </p>
       )}
 
-      <ul className="space-y-2">
-        {fases.map((faseId) => (
-          <li key={faseId}>
-            <FaseAutoReporte
-              leadId={leadId}
-              faseId={faseId}
-              titulo={shellDeFase(faseId)?.titulo ?? faseId}
-              completadas={completadas}
-              puedeGuardar={puedeGuardar}
-            />
-          </li>
-        ))}
-      </ul>
+      {/* P25 — UN dueño del conjunto para las tres fases de la pantalla, en vez
+          de tres escritores que componían cada uno desde la misma prop del
+          server. `completadas` viaja ENTERO (las seis, no las tres de esta
+          pantalla): el blob persistido es el de las seis, y mandar solo las
+          visibles haría que mc2 borrara lo tildado en mc1. */}
+      <RegistroFases
+        leadId={leadId}
+        fases={fases}
+        completadas={completadas}
+        titulos={titulosDeFases(fases)}
+        puedeGuardar={puedeGuardar}
+      />
 
       {stage === 'CONSTRUCCION' && (
         <EscalamientoConstruccion

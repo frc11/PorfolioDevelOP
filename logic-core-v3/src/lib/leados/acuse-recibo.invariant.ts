@@ -154,10 +154,14 @@ const EXIMIDAS: Record<string, { motivo: string; prueba: RegExp }> = {
     motivo: 'los horarios ofrecidos REEMPLAZAN el buscador en la misma pantalla (onSuccess → setOferta)',
     prueba: /onSuccess\s*:\s*\([^)]*\)\s*=>\s*setOferta\s*\(/,
   },
-  'leads/[leadId]/manual/_components/fase-auto-reporte.tsx::guardarProgreso': {
-    motivo: 'el tilde se pinta EN EL LUGAR (useOptimistic + aria-pressed): el acuse es el tilde mismo',
-    prueba: /useOptimistic\s*</,
-  },
+  // P25 — `fase-auto-reporte.tsx::guardarProgreso` SE FUE de esta lista, y no por
+  // prolijidad: ese archivo ya no llama a la action. El tilde dejó de ser su
+  // propio escritor (tres escritores componiendo desde la misma prop del server
+  // era la carrera que perdía dos marcas de tres) y pasó a ser presentación; la
+  // escritura vive en `registro-fases.tsx`, que autoguarda y por lo tanto cae en
+  // la rama de escritura continua de más abajo, con su `<AutosaveStatus>`. La
+  // excusa del `useOptimistic` murió con el mecanismo que la sostenía, que es
+  // exactamente lo que la `prueba` estaba puesta para detectar.
 }
 
 // ── 3. TODA LLAMADA QUE ESCRIBE ACUSA RECIBO, EN SU PROPIO BLOQUE ────────────
@@ -182,12 +186,6 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
       callSites++
       revisados.add(nombre)
 
-      assert.ok(
-        RESPONDE_EN_EL_ACTO.some((patron) => patron.test(fuente)),
-        `${nombre} llama a ${accion}() y NO tiene señal 1: sin useStepAction()/useTransition() el ` +
-          'control no se apaga en el acto y el setter puede tocar dos veces',
-      )
-
       const envoltorio = envoltorioDe(fuente, idx)
       assert.ok(
         envoltorio,
@@ -195,7 +193,28 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
           'sin bloque de transición no hay señal 1 en el acto',
       )
 
-      // Escritura continua: su acuse es el indicador vivo, a nivel pantalla.
+      /*
+       * ESCRITURA CONTINUA: sus DOS señales son propias, y se exigen acá.
+       *
+       * P25. Hasta acá la señal 1 se pedía igual para todos —`useStepAction()` o
+       * `useTransition()` en el ARCHIVO— y para un autoguardado eso medía la
+       * cosa equivocada en las dos direcciones. De más: el primer componente
+       * cuyo ÚNICO camino de escritura es el autosave (`registro-fases`) salía
+       * en rojo por no tener una transición que no le corresponde tener — el
+       * vuelo lo gobierna el hook, no un `startTransition`. Y de MENOS, que es
+       * lo grave: como el patrón se evalúa contra el archivo entero, a los tres
+       * forms que ya autoguardan (ficha, brief, chequeo) la señal 1 se la venía
+       * firmando el `useStepAction` de OTRA acción del mismo archivo —el envío,
+       * el avance— que no toca el autoguardado. Un archivo podía perder el
+       * control de su escritura continua y seguir en verde.
+       *
+       * Ahora la señal 1 de un autoguardado la tiene que dar el mecanismo que
+       * realmente gobierna ESA escritura: el call-site DENTRO de `useAutosave(`
+       * (ya asegurado por el envoltorio de arriba, que es por call-site y no por
+       * archivo), y su acuse a nivel pantalla con `<AutosaveStatus>`. Siguen
+       * siendo dos señales obligatorias; lo que cambia es que las dos hablan de
+       * la escritura que se está mirando.
+       */
       if (envoltorio.tipo === 'autosave') {
         assert.ok(
           /<AutosaveStatus/.test(fuente),
@@ -204,6 +223,12 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
         )
         continue
       }
+
+      assert.ok(
+        RESPONDE_EN_EL_ACTO.some((patron) => patron.test(fuente)),
+        `${nombre} llama a ${accion}() y NO tiene señal 1: sin useStepAction()/useTransition() el ` +
+          'control no se apaga en el acto y el setter puede tocar dos veces',
+      )
 
       const clave = `${nombre}::${accion}`
       const eximida = EXIMIDAS[clave]
@@ -265,7 +290,12 @@ console.log(
     `${ACCIONES.size} acciones de _actions/*.actions.ts, en sus ${callSites} llamadas repartidas en ` +
     `${revisados.size} componentes, dan las dos señales del patrón. Se mide por CALL-SITE, no por ` +
     'archivo: cada llamada anuncia (toast/successToast) o navega (router.push) dentro de SU bloque ' +
-    'de transición, y el autosave acusa con <AutosaveStatus>. Las 2 eximidas pintan el resultado en ' +
+    'de transición, y el autosave acusa con <AutosaveStatus>. ' +
+    // El número SALE de la lista, no está escrito al lado: estaba fijo en «2», la
+    // lista bajó a una y el mensaje siguió diciendo dos. Es el mismo modo de
+    // fallar que el piso de `run-invariants` ya había mostrado — un número a
+    // mano se atrasa solo y en verde.
+    `${Object.keys(EXIMIDAS).length === 1 ? 'La única eximida pinta' : `Las ${Object.keys(EXIMIDAS).length} eximidas pintan`} el resultado en ` +
     'el lugar y su prueba sigue matcheando. El patrón es UNO: el hook conserva sus dos señales y el ' +
     'Toaster sigue montado.',
 )

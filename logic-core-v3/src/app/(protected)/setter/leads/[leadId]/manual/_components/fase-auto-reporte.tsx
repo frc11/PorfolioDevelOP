@@ -1,89 +1,64 @@
 'use client'
 
-import { useOptimistic, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { Check, Loader2 } from 'lucide-react'
-import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import type { FaseId } from '@/lib/leados/contracts'
-import { guardarProgreso } from '@/app/(protected)/setter/_actions/dossier.actions'
 
 /**
- * El tilde de auto-reporte de UNA fase. El MISMO camino de escritura que tenía
- * el checklist 6-en-uno del wizard (`guardarProgreso → saveOwnedProgreso →
- * progresoJson`). Desde el corte 5.6 esta es la única presentación; desde P6-B
- * se renderizan TRES por pantalla (mc1/mc2) — uno por fase, 1↔1 con su `FaseId`,
- * así el progreso persistido no cambia de forma. La explicación del auto-reporte
- * la sirve el grupo (`ConstruccionRegistro`) una sola vez, no cada tilde.
+ * El tilde de auto-reporte de UNA fase. Desde el corte 5.6 esta es la única
+ * presentación; desde P6-B se renderizan TRES por pantalla (mc1/mc2) — uno por
+ * fase, 1↔1 con su `FaseId`, así el progreso persistido no cambia de forma. La
+ * explicación del auto-reporte la sirve el grupo (`ConstruccionRegistro`) una
+ * sola vez, no cada tilde.
  *
  * NO es un gate (§6-3 del brief): tildar no bloquea nada ni hace avanzar —
  * `progresoJson` jamás se cablea a la transición. El único gate de Construcción
- * es el chequeo final (M14). La marca reconstruye el array completo que espera
- * la action (agrega/quita ESTA fase, preserva las demás) — mismo shape que el
- * wizard.
+ * es el chequeo final (M14).
  *
- * Optimista para feedback instantáneo (`useOptimistic`, patrón del checklist) +
- * `router.refresh()` tras el guardado: la action revalida `/setter` y
- * `/setter/leads/[leadId]` pero NO esta sub-ruta del manual, así que sin el
- * refresh la base optimista quedaría stale y el tilde volvería atrás al cerrar
- * la transición (mismo refresh que `OpenerForm`/`EscalarModal` en el manual).
+ * ── P25: esto es PRESENTACIÓN, ya no un escritor ─────────────────────────────
+ * Hasta acá cada tilde tenía su propio `useOptimistic` + su propia llamada a
+ * `guardarProgreso`, y componía el conjunto a persistir desde la prop
+ * `completadas` del server. Con tres tildes leyendo la MISMA prop, tres clics
+ * seguidos escribían tres veces la misma base vieja y quedaba una marca de tres.
  *
- * El MOTIVO de por qué el tilde está apagado ya no vive acá: iba dentro del
- * `<button>`, y el de RECHAZADA nombra otra pantalla («Correcciones») que ahí
- * adentro no se puede enlazar —un `<a>` dentro de un `<button>` no es navegable—.
- * Lo sirve `MotivoDelTilde` (m-construccion.tsx), una vez arriba del grupo y con
- * el destino enlazado.
+ * El estado y la escritura viven ahora en `RegistroFases`, uno solo para las
+ * fases de la pantalla — mismo reparto que el chequeo final, donde el form es
+ * dueño de la grilla y cada `Toggle` solo avisa. Este componente recibe
+ * `marcada` y devuelve `onToggle`: no sabe qué se persiste ni cuándo, y por eso
+ * no puede volver a competir consigo mismo.
  *
  * `puedeGuardar` (3.3, B-07): el server (`saveOwnedProgreso`, dossier.ts) YA
- * rechaza el guardado fuera de `stage === 'CONSTRUCCION'` — antes de esto el
- * tilde se ofrecía igual en BRIEF (con la CTA «Arrancar construcción» arriba)
- * y el click volvía con un toast de error recién al tocar el server. Acá se
- * ESPEJA esa regla, no se agrega una nueva: `puedeGuardar` no bloquea nada
- * fuera del submit del tilde (navegación, lectura y el resto de la pantalla
- * siguen intactos) y sigue sin ser un gate — tildar en CONSTRUCCION continúa
- * sin hacer avanzar ni bloquear nada (§6-3 intacto).
+ * rechaza el guardado fuera de `stage === 'CONSTRUCCION'`. Acá se ESPEJA esa
+ * regla, no se agrega una nueva — evita el viaje redondo con un toast de error.
+ *
+ * El MOTIVO de por qué el tilde está apagado NO vive acá: iba dentro del
+ * `<button>`, y el de RECHAZADA nombra otra pantalla («Correcciones») que ahí
+ * adentro no se puede enlazar —un `<a>` dentro de un `<button>` no es
+ * navegable—. Lo sirve `MotivoDelTilde` (m-construccion.tsx), una vez arriba del
+ * grupo y con el destino enlazado. No vuelve.
  */
 export function FaseAutoReporte({
-  leadId,
   faseId,
   titulo,
-  completadas,
+  marcada,
+  guardando,
   puedeGuardar = true,
+  onToggle,
 }: {
-  leadId: string
   faseId: FaseId
   titulo: string
-  completadas: FaseId[]
+  /** ¿Esta fase está tildada? Lo decide el dueño del conjunto, no este botón. */
+  marcada: boolean
+  /** ¿Hay una escritura en vuelo disparada por ESTE tilde? Solo para el spinner. */
+  guardando: boolean
   /** false cuando el server va a rechazar el guardado (stage !== CONSTRUCCION). */
   puedeGuardar?: boolean
+  onToggle: (faseId: FaseId) => void
 }) {
-  const router = useRouter()
-  const [isPending, startTransition] = useTransition()
-  const [marcada, setMarcada] = useOptimistic<boolean, boolean>(
-    completadas.includes(faseId),
-    (_prev, siguiente) => siguiente,
-  )
-
-  const toggle = () => {
-    const marcar = !marcada
-    const siguiente = marcar
-      ? [...completadas.filter((id) => id !== faseId), faseId]
-      : completadas.filter((id) => id !== faseId)
-    startTransition(async () => {
-      setMarcada(marcar)
-      const result = await guardarProgreso(leadId, { completadas: siguiente })
-      if (!result.success) {
-        toast.error(result.error)
-        return
-      }
-      router.refresh()
-    })
-  }
-
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={() => onToggle(faseId)}
       disabled={!puedeGuardar}
       aria-pressed={marcada}
       aria-label={marcada ? `Desmarcar «${titulo}» como hecha` : `Marcar «${titulo}» como hecha`}
@@ -105,7 +80,7 @@ export function FaseAutoReporte({
             : 'border-white/20 bg-white/[0.03] text-zinc-500 group-hover:border-white/30',
         )}
       >
-        {isPending ? (
+        {guardando ? (
           <Loader2 size={13} strokeWidth={1.5} className="animate-spin" />
         ) : marcada ? (
           <Check size={14} strokeWidth={1.5} />
