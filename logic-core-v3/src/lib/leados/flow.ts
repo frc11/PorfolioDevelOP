@@ -22,7 +22,7 @@ import type { DossierStage, LeadStatus } from '@prisma/client'
 // revision solo `import type`) — por eso `flow.invariant.ts` puede importar
 // `clasificarLead` de verdad. Es además el patrón ya usado por home.ts/foco.ts.
 import { calculateNextFollowUp } from '../follow-up.ts'
-import { TEXTO_TURNO, turnoDelLead } from './turno.ts'
+import { FALTA_LINK_PERMANENTE, TEXTO_TURNO, turnoDelLead, type Turno } from './turno.ts'
 import {
   AgendaSchema,
   BriefSchema,
@@ -140,10 +140,24 @@ export function parseRechazos(json: unknown): Rechazo[] {
   return parsed.success ? parsed.data : []
 }
 
+/**
+ * F2 — El historial partido para presentarlo: el ÚLTIMO rechazo es la guía de
+ * retrabajo vigente (va al frente) y los anteriores son contexto secundario, del
+ * más reciente al más viejo. Un solo parse, y una sola copia de la regla "cuál
+ * es el último" (`ultimoRechazo` delega acá).
+ */
+export function partirRechazos(json: unknown): { ultimo: Rechazo | null; previos: Rechazo[] } {
+  const rechazos = parseRechazos(json)
+  if (rechazos.length === 0) return { ultimo: null, previos: [] }
+  return {
+    ultimo: rechazos[rechazos.length - 1],
+    previos: rechazos.slice(0, -1).reverse(),
+  }
+}
+
 /** B5: el rechazo más reciente del historial — guía de retrabajo del setter. */
 export function ultimoRechazo(json: unknown): Rechazo | null {
-  const rechazos = parseRechazos(json)
-  return rechazos.length > 0 ? rechazos[rechazos.length - 1] : null
+  return partirRechazos(json).ultimo
 }
 
 /** B7: agenda de la reunión (booking Cal.com + traspaso + cierre). */
@@ -290,7 +304,7 @@ export function fichaFaltantes(ficha: Ficha | null | undefined): string[] {
     faltantes.push('Presencia digital: contá qué tienen (IG, web, Maps) y qué tan vivo está')
   }
   if (!ficha?.resenas && !ficha?.contenidoReal) {
-    faltantes.push('Reseñas o contenido real: al menos uno de los dos — es la materia prima del Evaluador')
+    faltantes.push('Reseñas o contenido real: al menos uno de los dos — sin eso no hay con qué juzgar')
   }
   return faltantes
 }
@@ -339,6 +353,32 @@ export type HomeLeadInput = {
    * del render), igual que `followUpVencido`.
    */
   postergadoVencido: boolean
+  /**
+   * `lead.reactivateAt` — CUÁNDO vuelve un POSTERGADO. Hasta este sprint el panel
+   * solo proyectaba el booleano de arriba, así que la tarjeta de cartera y el foco
+   * podían decir que el lead estaba postergado pero no cuándo volvía: para saberlo
+   * había que entrar al lead. Con setenta y seis en cartera eso no se sostiene.
+   *
+   * Opcional (`undefined` = la superficie no lo proyecta): la sugerencia cae a la
+   * frase sin fecha, igual que antes. Nullable porque la columna lo es — un
+   * POSTERGADO sin fecha es raro, pero no imposible, y no se inventa una.
+   */
+  reactivateAt?: Date | null
+  /**
+   * `dossier.finalUrl` — la URL permanente que Franco registra AL APROBAR. Es la
+   * CONDICIÓN del envío (`gateEnvioDemo`): sin ella no hay link que mandar.
+   *
+   * Hasta este sprint el panel no la proyectaba, así que la tarjeta de cartera
+   * de una demo aprobada-sin-link decía «mandá el link al negocio», en cyan
+   * accionable, y mandaba al setter a una pantalla que le explica que el link
+   * todavía no existe. El dato ya estaba persistido y ya venía en la query del
+   * dossier — cero queries nuevas.
+   *
+   * Opcional (`undefined` = la superficie no lo proyecta): sin él, la derivación
+   * se comporta EXACTAMENTE como antes. Sólo `null` afirma «no está cargado»;
+   * la columna es nullable, así que el null es el dato, no un placeholder.
+   */
+  finalUrl?: string | null
   /** B6: la demo aprobada ya se envió (dossier.enviadaAt). */
   demoEnviada: boolean
   /** B-beta: el setter fijó este lead en su cartera (organización propia, privada). */
@@ -388,6 +428,14 @@ function grupoPara(input: HomeLeadInput, gateAbierto: boolean): HomeGroupKey {
     return 'seguimiento'
   }
   if (input.stage === 'APROBADA') {
+    // Sin el link permanente de Franco NINGUNA rama de este stage es accionable
+    // antes de mandar la demo (`proximaAccionPara` cae siempre a la espera), así
+    // que el lead no es trabajo del setter: es una espera, y la espera es de
+    // Franco. El toque vencido tampoco lo rescata — la sugerencia de esta rama
+    // nunca ofrece el toque, y mandarlo a «Para trabajar» lo pondría en la cola
+    // (pudiendo ser el FOCO, con su CTA grande) con una card que dice «esperá».
+    // `undefined` (superficie que no proyecta el campo) no afirma nada.
+    if (input.finalUrl === null && !input.demoEnviada) return 'seguimiento'
     // B6: demo lista para enviar, o toque de seguimiento vencido → trabajo.
     if (!input.demoEnviada && gateAbierto) return 'trabajar'
     if (input.followUpVencido) return 'trabajar'
@@ -419,10 +467,15 @@ function esperaDe(
   input: HomeLeadInput,
   detalle: string,
 ): { proximaAccion: string; accionable: boolean } {
-  // El turno lo decide `turno.ts` — acá no se vuelve a decidir. El panel no
-  // proyecta `finalUrl`, así que la rama «aprobada sin el link de Franco» no se
-  // puede afirmar desde esta superficie y no se afirma (queda `undefined`).
-  const turno = turnoDelLead({ status: input.status, stage: input.stage, accionPendiente: false })
+  // El turno lo decide `turno.ts` — acá no se vuelve a decidir. `finalUrl` viaja
+  // tal cual: con `null` se afirma la rama «aprobada sin el link de Franco»; con
+  // `undefined` (superficie que no lo proyecta) esa rama no se afirma, como antes.
+  const turno = turnoDelLead({
+    status: input.status,
+    stage: input.stage,
+    finalUrl: input.finalUrl,
+    accionPendiente: false,
+  })
   return { proximaAccion: `${TEXTO_TURNO[turno].titulo} — ${detalle}`, accionable: false }
 }
 
@@ -439,9 +492,28 @@ function proximaAccionPara(
   if (input.status === 'POSTERGADO') {
     // 2.1b/D6: vencida la postergación, retomar el contacto es acción de ahora;
     // con la fecha aún en el futuro, sigue pausado a la espera de reactivarse.
-    return input.postergadoVencido
-      ? { proximaAccion: 'Se venció la postergación — retomá el contacto', accionable: true }
-      : { proximaAccion: 'Postergado — se retoma cuando se reactive', accionable: false }
+    //
+    // La FECHA reemplaza al texto vago, no se suma encima: la card ya está
+    // cargada y son setenta y seis. «se retoma cuando se reactive» no le servía
+    // a nadie —el setter le dijo al negocio «te escribo el 25» y para saber
+    // cuándo vuelve tenía que abrir el lead—; «vuelve el 25/08» ocupa menos y
+    // dice todo. Y hace verificable el rótulo: sin fecha en pantalla, un
+    // vencido rotulado como futuro (o al revés) era indetectable.
+    const fecha = input.reactivateAt ? formatFechaCorta(input.reactivateAt.toISOString()) : null
+    if (input.postergadoVencido) {
+      return {
+        proximaAccion: fecha
+          ? `Se venció el ${fecha} — retomá el contacto`
+          : 'Se venció la postergación — retomá el contacto',
+        accionable: true,
+      }
+    }
+    return {
+      proximaAccion: fecha
+        ? `Postergado — vuelve el ${fecha}`
+        : 'Postergado — se retoma cuando se reactive',
+      accionable: false,
+    }
   }
   // B8A/H3: el lead con reunión agendada lo cierra Franco — la próxima acción
   // es la reunión, no el paso del dossier (que puede estar atrás). Sin este
@@ -455,12 +527,22 @@ function proximaAccionPara(
     case 'EN_REVISION':
       return esperaDe(input, 'está revisando tu demo')
     case 'APROBADA': {
+      // Sin el link permanente no hay envío que ofrecer: pedirlo es mandar al
+      // setter a una acción imposible, y la pantalla a la que lo manda ya le dice
+      // que le toca a Franco. El texto corto es EL MISMO que el envío muestra con
+      // el gate cerrado (`FALTA_LINK_PERMANENTE`) — no uno nuevo.
+      const linkPendiente = input.finalUrl === null
       // El envío del link vive en «Envío» (m15) desde el corte 5.6.
-      if (!input.demoEnviada && gateAbierto) {
+      if (!input.demoEnviada && gateAbierto && !linkPendiente) {
         return { proximaAccion: 'Demo aprobada — mandá el link al negocio', accionable: true }
       }
       if (!input.demoEnviada) {
-        return esperaDe(input, 'la demo está aprobada y el link sale cuando conteste')
+        return esperaDe(
+          input,
+          linkPendiente
+            ? FALTA_LINK_PERMANENTE
+            : 'la demo está aprobada y el link sale cuando conteste',
+        )
       }
       if (input.followUpVencido) {
         return { proximaAccion: 'Demo enviada — te toca un toque', accionable: true }
@@ -503,7 +585,7 @@ function proximaAccionPara(
     }
     case 'FICHA':
       return fichaTieneSenal(input.ficha)
-        ? { proximaAccion: 'Pasala por el Evaluador', accionable: true }
+        ? { proximaAccion: 'Dejá tu veredicto', accionable: true }
         : { proximaAccion: 'Completá la ficha', accionable: true }
     default:
       return { proximaAccion: 'Completá la ficha', accionable: true }
@@ -765,19 +847,153 @@ export function particionarCartera(leads: HomeLead[]): CarteraParticion {
   return { fijados, pausados, grupos }
 }
 
-/** Órdenes elegibles. `colas` = vista agrupada por defecto; el resto, lista plana. */
-export type OrdenCartera = 'colas' | 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
+/**
+ * El desglose POR TURNO de los leads EN VUELO (seguimiento + revisión +
+ * agendadas) — el contador que el panel de inicio muestra cuando no hay foco.
+ *
+ * Vive acá y no en la página porque es una CLASIFICACIÓN, no presentación: el
+ * panel armaba el `TurnoInput` a mano, campo por campo, y se olvidaba de
+ * `finalUrl`. Consecuencia medida: las demos aprobadas a las que Franco todavía
+ * no les cargó el link contaban como «esperando al negocio» —el negocio ya
+ * había contestado y no tenía nada que hacer—, y ningún chequeo podía verlo
+ * porque el conteo no era una función: era diez líneas dentro de un componente.
+ *
+ * Ahora recibe el `HomeLead` COMPLETO y arma el input él: la superficie no puede
+ * volver a olvidarse de un campo, y el conteo es afirmable en frío.
+ *
+ * `finalUrl` viaja tal cual (sin `?? null`): `undefined` sigue significando «esta
+ * superficie no lo proyecta», que es distinto de «no está cargado».
+ */
+export function contarEnVueloPorTurno(enVuelo: readonly HomeLead[]): Record<Turno, number> {
+  const conteo: Record<Turno, number> = { negocio: 0, franco: 0, setter: 0 }
+  for (const lead of enVuelo) {
+    const turno = turnoDelLead({
+      status: lead.status,
+      stage: lead.stage,
+      finalUrl: lead.finalUrl,
+      accionPendiente: lead.accionable,
+    })
+    conteo[turno] += 1
+  }
+  return conteo
+}
+
+/**
+ * Órdenes elegibles de la cartera.
+ *
+ * P22 — acá vivía un quinto valor, `'colas'`, rotulado «vista agrupada por
+ * defecto». La vista agrupada nunca se construyó: el valor no figuraba entre las
+ * opciones del `<select>` (así que era inalcanzable), `filtrarYOrdenarCartera` lo
+ * excluía de su firma (`Exclude<OrdenCartera, 'colas'>`, dos veces) y la vista lo
+ * mapeaba a `'urgencia'` para satisfacer el tipo. O sea: un valor que no se podía
+ * elegir y que, si se elegía, no hacía nada. Se sacó, y el agrupamiento se
+ * construyó donde corresponde —como ESTRUCTURA de la lista (`agruparCartera`), no
+ * como un orden— porque agrupar no es una forma de ordenar: es otra dimensión, y
+ * los cuatro órdenes de acá siguen valiendo DENTRO de cada grupo.
+ */
+export type OrdenCartera = 'urgencia' | 'reciente' | 'antiguo' | 'alfabetico'
 
 /** Vista de un lead para el filtro por estado (la cola que el setter ve). A-09:
- * el archivo se filtra por causa real, no como bloque único sin categoría. */
-export type VistaCartera = Exclude<HomeGroupKey, 'archivo'> | `archivo-${ArchivoCausa}` | 'pausados'
+ * el archivo se filtra por causa real, no como bloque único sin categoría.
+ *
+ * VOCABULARIO — la pausa y la postergación son DOS cosas y tienen su vista cada
+ * una: `pausados` es la pausa PERSONAL del setter (`OsLeadSetterMeta.snoozedUntil`,
+ * privada, no toca el lead) y `postergados` es el estado COMERCIAL del lead
+ * (`status = POSTERGADO` + `reactivateAt`, global — lo ve el admin y lo levanta
+ * el cron). Antes solo existía la primera: postergar un lead lo mandaba a
+ * «En seguimiento» y el filtro de la pausa —el único que sonaba parecido— salía
+ * vacío. */
+export type VistaCartera =
+  | Exclude<HomeGroupKey, 'archivo'>
+  | `archivo-${ArchivoCausa}`
+  | 'pausados'
+  | 'postergados'
 export type EstadoFiltro = 'todos' | VistaCartera
 
 /** En qué cola cae el lead a ojos del setter (snooze pesa sobre la cola natural). */
 export function vistaDeLead(lead: HomeLead): VistaCartera {
   if (lead.grupo === 'archivo') return `archivo-${archivoCausaDe(lead)}`
+  // La pausa personal gana: si el setter lo escondió, lo busca donde lo escondió.
+  // Misma precedencia que `particionarCartera` (snooze pesa sobre la cola natural).
   if (lead.snoozed) return 'pausados'
+  // Postergado CON la fecha todavía por delante. El vencido NO entra acá: `grupoPara`
+  // ya lo devolvió a `trabajar` (el cron avisa, no reactiva) y esconderlo detrás de
+  // este filtro sacaría trabajo accionable de «Para trabajar».
+  if (lead.status === 'POSTERGADO' && lead.grupo === 'seguimiento') return 'postergados'
   return lead.grupo
+}
+
+/**
+ * P22 — LAS VISTAS DE LA CARTERA, en el orden en que se muestran y con el
+ * nombre que el setter lee. UNA sola fuente para los DOS consumidores: los
+ * encabezados de grupo de la cartera y las opciones del filtro por estado.
+ *
+ * Por qué una sola y no dos listas: hasta este sprint el rótulo de cada vista
+ * vivía sólo en `ESTADO_OPCIONES` (cartera-toolbar.tsx), y agrupar necesitaba
+ * los mismos nombres. Copiarlos habría dejado dos listas sobre el mismo dominio,
+ * que es exactamente cómo se separan (el filtro diciendo «Esperando revisión» y
+ * el grupo diciendo otra cosa para los mismos once leads). El `satisfies` obliga
+ * a que estén TODAS: si mañana se agrega una vista a `VistaCartera` y no se le da
+ * rótulo acá, no compila.
+ *
+ * El orden es deliberado y es el que ya tenía el filtro: primero el trabajo,
+ * después lo que está en vuelo, después las dos esperas con fecha, y el archivo
+ * al final. No es alfabético ni por tamaño: es el recorrido.
+ */
+export const VISTAS_CARTERA = [
+  { vista: 'trabajar', label: 'Para trabajar' },
+  { vista: 'seguimiento', label: 'En seguimiento' },
+  { vista: 'revision', label: 'Esperando revisión' },
+  { vista: 'agendadas', label: 'Agendadas' },
+  // Las dos esperas con fecha, separadas por QUIÉN la decidió: la de arriba la
+  // pidió el setter (pausa personal, privada); la de abajo la pidió el negocio
+  // (status POSTERGADO).
+  { vista: 'pausados', label: 'Pausados por vos' },
+  { vista: 'postergados', label: 'Postergados por el negocio' },
+  // A-09: el archivo se muestra por causa real, no como bloque único.
+  { vista: 'archivo-descartado', label: 'Descartados (antes de la demo)' },
+  { vista: 'archivo-perdido', label: 'Perdidos (cerrados por Franco)' },
+] as const satisfies readonly { vista: VistaCartera; label: string }[]
+
+/** La vista que la cartera abre sola: la del trabajo que le toca al setter. */
+export const VISTA_ABIERTA: VistaCartera = 'trabajar'
+
+export type GrupoCartera = {
+  vista: VistaCartera
+  label: string
+  leads: HomeLead[]
+}
+
+/**
+ * P22 — Reparte una lista YA filtrada y ordenada en los grupos de `VISTAS_CARTERA`.
+ *
+ * No es una taxonomía nueva: el que decide en qué grupo cae cada lead es
+ * `vistaDeLead`, el MISMO que ya decidía qué muestra el filtro por estado (y que
+ * `vista-cartera.invariant.ts` ya vigila). Por eso el conteo de un grupo y el
+ * conteo del filtro homónimo no pueden divergir — son la misma función.
+ *
+ * Preserva el orden de entrada dentro de cada grupo (recorrido único, `push`),
+ * así que los fijados siguen arriba de SU grupo y el orden elegido
+ * (`filtrarYOrdenarCartera`) sigue valiendo adentro: agrupar es otra dimensión,
+ * no reemplaza al orden.
+ *
+ * Devuelve SOLO los grupos con leads. Un grupo vacío no se dibuja: un encabezado
+ * «Agendadas 0» es cromo que ocupa lugar y no dice nada que el setter necesite.
+ */
+export function agruparCartera(leads: HomeLead[]): GrupoCartera[] {
+  const porVista = new Map<VistaCartera, HomeLead[]>()
+  for (const lead of leads) {
+    const vista = vistaDeLead(lead)
+    const actual = porVista.get(vista)
+    if (actual) actual.push(lead)
+    else porVista.set(vista, [lead])
+  }
+  const grupos: GrupoCartera[] = []
+  for (const { vista, label } of VISTAS_CARTERA) {
+    const suyos = porVista.get(vista)
+    if (suyos && suyos.length > 0) grupos.push({ vista, label, leads: suyos })
+  }
+  return grupos
 }
 
 /**
@@ -822,10 +1038,7 @@ export function leadCoincideBusqueda(lead: HomeLead, queryNorm: string): boolean
   return campos.some((campo) => campo != null && normalizar(campo).includes(queryNorm))
 }
 
-const COMPARADORES: Record<
-  Exclude<OrdenCartera, 'colas'>,
-  (a: HomeLead, b: HomeLead) => number
-> = {
+const COMPARADORES: Record<OrdenCartera, (a: HomeLead, b: HomeLead) => number> = {
   urgencia: ordenUrgencia,
   reciente: (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
   antiguo: (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
@@ -842,7 +1055,7 @@ export function filtrarYOrdenarCartera(
   leads: HomeLead[],
   query: string,
   estado: EstadoFiltro,
-  orden: Exclude<OrdenCartera, 'colas'>,
+  orden: OrdenCartera,
 ): HomeLead[] {
   const queryNorm = normalizar(query.trim())
   const filtrados = leads.filter(

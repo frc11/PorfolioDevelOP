@@ -1,10 +1,10 @@
 import Link from 'next/link'
-import { ArrowLeft, ArrowLeftRight, Check, ExternalLink, Flame } from 'lucide-react'
+import { ArrowLeftRight, CalendarClock, Check, ExternalLink, Flame } from 'lucide-react'
 import type { DossierStage, LeadStatus } from '@prisma/client'
 import { Badge } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import type { CopyBlockLead } from '@/lib/leados/copy-blocks'
-import { STAGE_LABELS, STATUS_LABELS } from '@/lib/leados/flow'
+import { formatFechaCorta, STAGE_LABELS, STATUS_LABELS } from '@/lib/leados/flow'
 import {
   PANTALLAS,
   PANTALLAS_CONSTRUCCION,
@@ -12,6 +12,7 @@ import {
   type PantallaId,
   type PosicionManual,
 } from '@/lib/leados/manual'
+import { SalidaDelManual } from './salida-manual'
 
 const STATUS_TONES: Record<LeadStatus, 'cyan' | 'emerald' | 'amber' | 'rose' | 'violet' | 'zinc' | 'blue'> = {
   PROSPECTO: 'cyan',
@@ -37,6 +38,15 @@ export type CabeceraLead = {
   notas: string | null
   /** ISO de la última asignación; null si no hay rastro. */
   asignadoEl: string | null
+  /**
+   * ISO de la reactivación de un POSTERGADO (`lead.reactivateAt`); null si no
+   * está postergado. Va en la cabecera —y no en una pantalla— porque es la única
+   * superficie que aparece en TODAS: el postergado aterriza donde lo deje su
+   * stage (m5, `espera`, …) y la fecha tiene que leerse ahí, sin buscarla.
+   */
+  reactivateAt: string | null
+  /** Esa fecha ya pasó (reloj request-time, resuelto en `_data.ts`). */
+  postergadoVencido: boolean
 }
 
 /**
@@ -46,7 +56,18 @@ export type CabeceraLead = {
  * vivía en el header de la página del wizard.
  */
 export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
-  const { lead, status, stage, caliente, contactName, phone, notas, asignadoEl } = cabecera
+  const {
+    lead,
+    status,
+    stage,
+    caliente,
+    contactName,
+    phone,
+    notas,
+    asignadoEl,
+    reactivateAt,
+    postergadoVencido,
+  } = cabecera
 
   const links = [
     { label: 'Instagram', href: lead.instagramUrl },
@@ -66,19 +87,10 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
 
   return (
     <header className="space-y-2 sm:space-y-3">
-      <Link
-        href="/setter"
-        className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-zinc-300"
-      >
-        <ArrowLeft size={13} strokeWidth={1.5} aria-hidden />
-        Volver a tu cartera
-      </Link>
-
-      {/* Eyebrow redundante en mobile: la instrucción de abajo ya nombra el paso.
-          Se oculta en mobile para subir la acción hacia el fold (7.1). */}
-      <p className="hidden text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500 sm:block">
-        Manual paso a paso
-      </p>
+      {/* P23: era un `<Link>` pelado y salir con el veredicto cargado lo perdía
+          sin avisar. El control pregunta SÓLO si la pantalla declaró trabajo sin
+          registrar; si no hay nada cargado se comporta igual que antes. */}
+      <SalidaDelManual />
 
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="line-clamp-2 text-2xl font-black leading-tight tracking-tight text-white sm:text-3xl">
@@ -97,6 +109,25 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
             <Badge tone="zinc" variant="outline">
               {STAGE_LABELS[stage]}
             </Badge>
+          )}
+          {/* Al lado de la etiqueta «Postergado», que sola no dice cuándo vuelve.
+              Vencido en ámbar (mismo tono que el toque vencido de m5): sin esta
+              distinción, un postergado que ya volvió y uno que todavía no se
+              leen igual — y con la fecha a la vista el rótulo es verificable. */}
+          {status === 'POSTERGADO' && reactivateAt && (
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-[11px] font-medium',
+                postergadoVencido
+                  ? 'bg-amber-500/10 text-amber-300/90'
+                  : 'bg-white/[0.04] text-zinc-400',
+              )}
+            >
+              <CalendarClock size={11} strokeWidth={1.5} aria-hidden className="shrink-0" />
+              {postergadoVencido
+                ? `Se venció el ${formatFechaCorta(reactivateAt)}`
+                : `Vuelve el ${formatFechaCorta(reactivateAt)}`}
+            </span>
           )}
         </div>
       </div>
@@ -121,76 +152,29 @@ export function ManualHeader({ cabecera }: { cabecera: CabeceraLead }) {
       )}
 
       {notas && (
-        <p className="line-clamp-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-xs leading-relaxed text-zinc-500">
+        /* P17 — deja de ser una tarjeta dentro de la cabecera (S1: un solo
+           nivel de superficie). El rótulo en negrita ya dice qué es; el marco
+           sólo agregaba un nivel más y 24 px. */
+        <p className="line-clamp-3 text-xs leading-relaxed text-zinc-500">
           <span className="font-semibold text-zinc-400">Notas del lead:</span> {notas}
         </p>
       )}
 
       {fechaAsignacion && (
-        <p className="flex items-center gap-2 rounded-xl border border-cyan-400/15 bg-cyan-500/[0.05] px-3 py-2 text-xs text-cyan-200/90">
+        <p className="flex items-center gap-2 text-xs text-zinc-500">
           <ArrowLeftRight
             size={13}
             strokeWidth={1.5}
             aria-hidden
-            className="shrink-0 text-cyan-300"
+            className="shrink-0 text-zinc-500"
           />
           <span>
             Te asignaron este lead{' '}
-            <span className="font-semibold text-cyan-100">el {fechaAsignacion}</span>
+            <span className="font-semibold text-zinc-300">el {fechaAsignacion}</span>
           </span>
         </p>
       )}
     </header>
-  )
-}
-
-/**
- * Navegación hacia atrás — SIEMPRE libre a pantallas completadas (contrato del
- * mapa): entrar a una completada no resetea nada, solo se mira/ajusta lo que
- * su pantalla permita. Sin completadas no se renderiza (lead recién arrancado).
- */
-export function NavAtras({
-  leadId,
-  pasoActivo,
-  posicion,
-}: {
-  leadId: string
-  pasoActivo: PantallaId
-  posicion: PosicionManual
-}) {
-  if (posicion.completadas.length === 0) return null
-
-  return (
-    <nav
-      aria-label="Pantallas completadas — navegación libre hacia atrás"
-      className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4"
-    >
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">
-        Completadas — podés volver cuando quieras
-      </p>
-      <ul className="mt-2.5 flex flex-wrap gap-2">
-        {posicion.completadas.map((id) => {
-          const activo = id === pasoActivo
-          return (
-            <li key={id}>
-              <Link
-                href={rutaManual(leadId, id)}
-                aria-current={activo ? 'page' : undefined}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
-                  activo
-                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
-                    : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
-                )}
-              >
-                <Check size={11} strokeWidth={1.5} aria-hidden className="text-cyan-400/80" />
-                {PANTALLAS[id].corto}
-              </Link>
-            </li>
-          )
-        })}
-      </ul>
-    </nav>
   )
 }
 
@@ -236,7 +220,7 @@ export function NavConstruccion({
                 className={cn(
                   'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium transition-colors',
                   activo
-                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-200'
+                    ? 'border-white/25 bg-white/[0.08] text-zinc-100'
                     : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:bg-white/[0.07] hover:text-zinc-200',
                 )}
               >
@@ -244,7 +228,7 @@ export function NavConstruccion({
                   aria-hidden
                   className={cn(
                     'text-[10px] font-semibold',
-                    activo ? 'text-cyan-300' : 'text-zinc-600',
+                    activo ? 'text-zinc-300' : 'text-zinc-600',
                   )}
                 >
                   {index + 1}

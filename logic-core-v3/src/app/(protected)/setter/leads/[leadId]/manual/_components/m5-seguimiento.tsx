@@ -14,8 +14,12 @@ import { CanalSeguridad } from '@/app/(protected)/setter/_components/canal-segur
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { GuardrailRol } from '@/app/(protected)/setter/_components/guardrail-rol'
 import { LineaRicaText, TeachPanel } from '@/app/(protected)/setter/_components/teach-panel'
-import { HerramientaLauncher } from '@/app/(protected)/setter/_components/tool-guide'
+import {
+  HerramientaLauncher,
+  SalidaLinkPendiente,
+} from '@/app/(protected)/setter/_components/tool-guide'
 import { resultadoEtiqueta, resultadoTono } from '../../_components/lead-timeline.helpers'
+import { EnlacePantalla } from './enlace-pantalla'
 import { SeguimientoForm } from './seguimiento-form'
 
 /**
@@ -39,12 +43,15 @@ export function M5Contexto({
   followUpCount,
   proximoToque,
   reactivateAt,
+  postergadoVencido,
   leadPhone,
 }: {
   status: LeadStatus
   followUpCount: number
   proximoToque: string | null
   reactivateAt: string | null
+  /** La fecha de reactivación ya pasó (reloj request-time, resuelto en `_data.ts`). */
+  postergadoVencido: boolean
   leadPhone: string | null
 }) {
   const respondio = leadRespondio(status)
@@ -84,11 +91,17 @@ export function M5Contexto({
             {PLANTILLAS_FOLLOW_UP.length}
           </span>
         </span>
+        {/* La FECHA de la postergación la dice el chip de la cabecera
+            (`ManualHeader`, presente en TODAS las pantallas del lead): repetirla
+            acá era decir lo mismo dos veces a diez centímetros. Queda sólo lo
+            que el chip no dice — que un postergado vencido es trabajo de ahora
+            (ámbar, mismo tratamiento que el toque vencido). La rama sigue
+            existiendo aunque no pinte nada en el caso futuro: sin ella un
+            POSTERGADO caería al «Próximo toque», que es la fecha equivocada. */}
         {status === 'POSTERGADO' && reactivateAt ? (
-          <span>
-            Postergado — se retoma el{' '}
-            <span className="font-semibold text-zinc-300">{formatFechaCorta(reactivateAt)}</span>
-          </span>
+          postergadoVencido ? (
+            <span className="text-amber-300/90">Retomá el contacto</span>
+          ) : null
         ) : toqueVencido ? (
           <span className="text-amber-300/90">
             Toque vencido — era para el{' '}
@@ -129,15 +142,26 @@ export function M5Contexto({
  * anti-spam (`CanalSeguridad`), el límite de rol (`GuardrailRol`) y el flujo de
  * objeciones (el Gem deflecta a reunión: nunca cotiza). */
 export function M5Municion({
+  leadId,
   status,
   followUpCount,
   lead,
   dmsHoy,
+  agendaAccesible,
 }: {
+  leadId: string
   status: LeadStatus
   followUpCount: number
   lead: CopyBlockLead
   dmsHoy: number
+  /**
+   * ¿La posición derivada alcanza «Agendá la reunión»? La munición nombraba esa
+   * pantalla desde que el negocio responde, y m16 no se habilita hasta APROBADA
+   * con la demo YA enviada: el nombre iba suelto, sin enlace, y buena parte de
+   * las veces sin destino alcanzable. Ahora el dato manda — con acceso es un
+   * salto, sin acceso dice qué falta.
+   */
+  agendaAccesible: boolean
 }) {
   const respondio = leadRespondio(status)
   const cadencia = cadenciaInfo(followUpCount)
@@ -145,7 +169,14 @@ export function M5Municion({
   const mensajeToque = respondio ? (
     <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
       El negocio respondió: la cadencia se frenó. De acá el objetivo es uno solo — la reunión, que
-      se agenda en «Agendá la reunión».
+      se agenda en{' '}
+      <EnlacePantalla
+        leadId={leadId}
+        destino="m16"
+        accesible={agendaAccesible}
+        cuandoFalta="se abre cuando la demo aprobada ya salió al negocio"
+      />
+      .
     </p>
   ) : status === 'POSTERGADO' ? (
     <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
@@ -186,9 +217,18 @@ export function M5Municion({
             instruccion="Pegale la objeción al final. El Gem deflecta a reunión: nunca cotiza."
             texto={buildObjecionInputBlock(lead)}
           />
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
-            <HerramientaLauncher id="gemOutreach" />
+          {/* La misma salida que m4 da al lado de su píldora. Acá faltaba, y es
+              el peor momento para chocar mudo contra «Link pendiente»: al setter
+              le acaban de tirar una objeción. La píldora vive dentro de este
+              plegable —la objeción es un caso, no el estado normal del toque—,
+              así que la salida va a su lado: nunca más adentro que la pared que
+              destraba. */}
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-zinc-600">Abrí el Gem para pegarlo:</span>
+              <HerramientaLauncher id="gemOutreach" />
+            </div>
+            <SalidaLinkPendiente id="gemOutreach" />
           </div>
         </div>
       </details>

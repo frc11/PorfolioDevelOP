@@ -165,6 +165,16 @@ function describirFoco(
     case 'APROBADA':
       // El envío del link también espera a que el lead responda (o sea caliente):
       // el step de Seguimiento lo libera con esa condición, no apenas se aprueba.
+      //
+      // ⚠️ Esta rama NO mira `finalUrl`, así que con el link todavía sin cargar
+      // diría «Enviá el link de la demo» sobre un link que no existe — la misma
+      // omisión que apareció en cinco superficies y que cierra
+      // `aprobada-sin-link.invariant.ts`. Hoy es inofensiva porque su salida no
+      // llega a ninguna pantalla: el único consumidor (`posicionDe`, manual.ts)
+      // lee `paso.foco`/`paso.anchor` SÓLO en la rama EVALUADA, y para APROBADA
+      // llama a `gateEnvioDemo` directo (que sí exige el link). El día que
+      // alguien renderice este descriptor para un aprobado, hay que pasarle
+      // `finalUrl` y censar la derivación — si no, es la sexta.
       return gateAbierto
         ? {
             tono: 'foco',

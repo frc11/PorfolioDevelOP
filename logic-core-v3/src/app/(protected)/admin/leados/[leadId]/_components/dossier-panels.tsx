@@ -10,6 +10,8 @@ import { adminHoverCls } from '@/lib/hover'
 import { Callout } from '@/components/ui'
 import type { Brief, Evaluacion, Ficha, Rechazo, SelfCheck } from '@/lib/leados/contracts'
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
+import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
+import { faltaPorHerramientaSinLink } from '@/lib/leados/herramientas'
 import { FichaAccordion } from './ficha-accordion'
 
 const IG_MANEJADO_LABELS: Record<(typeof IG_MANEJADO_POR_VALUES)[number], string> = {
@@ -128,6 +130,13 @@ export function BriefPanel({ brief }: { brief: Brief | null }) {
                 {brief.pegadoGem}
               </p>
             </details>
+          ) : faltaPorHerramientaSinLink('gemDiseno', brief.pegadoGem) ? (
+            /* El pegado del Gem dejó de ser obligatorio mientras la herramienta no
+               tenga link. Ausente y en silencio, la revisión no distingue «el setter
+               no lo trajo» de «no lo podía traer»: acá se nombra. */
+            <p className="rounded-2xl border border-amber-400/20 bg-amber-500/[0.06] p-3 text-xs leading-5 text-amber-200/80">
+              {GUIA_BRIEF.campos.pegadoGem.faltante}
+            </p>
           ) : null}
         </div>
       )}

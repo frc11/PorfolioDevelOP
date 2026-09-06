@@ -35,8 +35,8 @@ export function M14Contexto({
   return (
     <div className="space-y-3">
       {draftUrl ? (
-        <div className="rounded-xl border border-cyan-400/20 bg-cyan-500/[0.05] p-3">
-          <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-cyan-300/80">
+        <div>
+          <p className="text-[11px] font-medium text-zinc-600">
             Tu borrador
           </p>
           <a
@@ -50,12 +50,13 @@ export function M14Contexto({
           </a>
           <p className="mt-1.5 text-xs leading-relaxed text-zinc-500">
             Abrilo en otra pestaña —mejor en incógnito y en tu celular— y chequealo punto por punto
-            contra la lista de abajo.
+            contra la lista.
           </p>
         </div>
       ) : (
         <p className="text-xs leading-relaxed text-zinc-500">
-          Publicá el borrador (pantalla anterior) para poder chequearlo acá.
+          Todavía no hay borrador publicado — el salto a «Borrador» lo ofrece el
+          registro de esta pantalla.
         </p>
       )}
       {brief && brief.secciones.length > 0 && (
@@ -74,7 +75,15 @@ export function M14Contexto({
 export function M14Municion() {
   return (
     <div className="space-y-4">
-      <TeachPanel id="selfCheck" />
+      {/* El rótulo dice QUÉ vas a entender adentro, no que adentro hay un porqué:
+          «¿Por qué importa?» era el mismo título genérico en cualquier pantalla y
+          no prometía nada. El de acá es exactamente lo que dicen sus dos párrafos
+          (`GUIA_SELF_CHECK.porque`). Mismo estándar que el ejemplo de abajo, que
+          ya lo cumplía: «Ver ejemplo de un chequeo final bien hecho». */}
+      <TeachPanel
+        id="selfCheck"
+        titulo="Por qué marcar en verde sin mirar vuelve como rechazo"
+      />
       <SelfCheckEjemplo />
     </div>
   )

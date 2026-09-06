@@ -9,23 +9,27 @@ import { VEREDICTO_VALUES } from '@/lib/leados/contracts'
 import { gateBriefAbierto } from '@/lib/leados/flow'
 import { GUIA_EVALUACION } from '@/lib/leados/guidance-content'
 import { erroresPorCampo, useStepAction } from '@/lib/use-step-action'
-import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+import { useOlvidarTrabajoSinRegistrar, useUnsavedGuard } from '@/lib/use-unsaved-guard'
 import { registrarEvaluacion } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { EvaluacionInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
 import { cn } from '@/lib/utils'
+import { useAccionPrincipal } from '../manual/_components/barra-accion'
 
 /**
- * El REGISTRO de la evaluación (5.1, patrón 4.2): transcripción score +
- * veredicto + razonamiento con su gate triple (Zod), el descarte encadenado
- * por score 1–2 (modal + motivo) y la guardia de salida — extraído SIN cambio
- * de comportamiento del `EvaluacionStep` para que el wizard y el manual (m2)
- * sean dos presentaciones del MISMO camino de escritura: misma action
- * (`registrarEvaluacion`, ownership y stage=FICHA adentro), mismo schema
- * (`EvaluacionInputSchema`), misma guardia (`useUnsavedGuard`; A-24: la
- * evaluación es formulario de una sola pasada, SIN autosave a propósito — no
- * hay borrador que guardar a medias). El chrome (Card/intro/ToolGuide/criterios
- * en el wizard; layout-tipo en el manual) vive afuera.
+ * El REGISTRO del veredicto (5.1, patrón 4.2): score + veredicto + razonamiento
+ * con su gate triple (Zod), el descarte encadenado por score 1–2 (modal +
+ * motivo) y la guardia de salida. El camino de escritura es el de siempre y no
+ * se tocó: misma action (`registrarEvaluacion`, ownership y stage=FICHA
+ * adentro), mismo schema (`EvaluacionInputSchema`), mismo contrato persistido
+ * (`EvaluacionSchema`), misma guardia (`useUnsavedGuard`; A-24: es formulario
+ * de una sola pasada, SIN autosave a propósito — no hay borrador que guardar a
+ * medias). El chrome vive afuera.
+ *
+ * D15-bis cambió QUIÉN produce el dato, no su forma: antes los tres campos se
+ * transcribían de un chat de evaluación externo y este form vivía en m2; ahora
+ * los escribe el setter con su criterio, y el form se monta en la segunda mitad
+ * de m1, debajo de la ficha que acaba de cargar.
  *
  * Los TEXTOS del veredicto son parámetro de presentación: el default
  * (`VEREDICTO_LABELS`) ya usa lenguaje de prioridad post-3.1 (el veredicto
@@ -65,12 +69,12 @@ type EvaluacionFormProps = {
 }
 
 /**
- * Formulario vivo de transcripción. Solo se monta en el tramo editable real
- * (sin evaluación registrada y con la ficha en señal mínima): en el wizard lo
- * garantizan los early-return del step; en el manual, la guardia del server
- * (m2 no habilitada sin señal) + el branch por `evaluacion` de `M2Registro`.
- * Por eso la guardia de salida corre con cualquier campo tocado, sin espejar
- * condiciones de visibilidad acá adentro.
+ * Formulario vivo del veredicto. Solo se monta en el tramo editable real (sin
+ * veredicto registrado): lo garantiza el branch por `evaluacion` de
+ * `M1Registro`. El gate de señal mínima NO se espeja acá — vive server-side en
+ * `registrarEvaluacion`, que rechaza con «A la ficha le falta señal mínima»; la
+ * guardia de salida corre con cualquier campo tocado, sin condiciones de
+ * visibilidad duplicadas adentro.
  */
 export function EvaluacionForm({
   leadId,
@@ -92,7 +96,11 @@ export function EvaluacionForm({
   // del razonamiento lo pierde entero.
   const hayCambiosSinGuardar =
     score !== null || veredicto !== '' || razonamiento.trim() !== '' || motivoDescarte.trim() !== ''
-  useUnsavedGuard(hayCambiosSinGuardar)
+  // P23: y como no hay autosave detrás, la salida INTERNA («Volver a tu día»,
+  // navegación SPA que no dispara `beforeunload`) también tiene que avisar. Es
+  // el único de los siete formularios que lo pide, justamente por eso.
+  useUnsavedGuard(hayCambiosSinGuardar, { avisaEnSalidaInterna: true })
+  const olvidarTrabajoSinRegistrar = useOlvidarTrabajoSinRegistrar()
 
   const enviar = (motivo?: string) => {
     setServerError(null)
@@ -116,7 +124,12 @@ export function EvaluacionForm({
     setErrors({})
     run(() => registrarEvaluacion(leadId, parsed.data), {
       onError: setServerError,
-      onSuccess: () => setConfirmOpen(false),
+      onSuccess: () => {
+        setConfirmOpen(false)
+        // El veredicto ENTRÓ: baja la marca antes de que la revalidación
+        // navegue, para no preguntar por trabajo que ya está registrado.
+        olvidarTrabajoSinRegistrar()
+      },
       successToast: (data) =>
         data.descartado
           ? 'Lead descartado. Bien filtrado: a otra cosa.'
@@ -149,8 +162,27 @@ export function EvaluacionForm({
 
   const esDescarte = score !== null && score <= 2
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Nunca está
+  // bloqueada (la validación es un `safeParse` en el click y el gate real vive
+  // server-side), así que no hay motivo que mostrar. La etiqueta sí cambia con
+  // el score: con 1–2 el registro descarta en el mismo paso.
+  useAccionPrincipal({
+    etiqueta: esDescarte ? 'Registrar evaluación y descartar' : 'Registrar evaluación',
+    onClick: intentarEnviar,
+    loading: isPending && !confirmOpen,
+  })
+
   return (
     <div className="space-y-5">
+      {/* P23 — el veredicto DICE que no se guarda solo. La ficha de arriba sí, y
+          su fila de estado vive debajo de este bloque: sin esta línea el setter
+          leía la promesa de la ficha como si lo cubriera, cargaba los tres
+          campos, salía y perdía el juicio entero. Va antes del primer campo —
+          la advertencia sirve antes de escribir, no después. */}
+      <p className="rounded-xl border border-amber-400/20 bg-amber-500/[0.06] p-3 text-[11px] leading-relaxed text-amber-200/90">
+        Esto no se guarda solo: la decisión entra recién cuando registrás la
+        evaluación. Si salís antes, se pierde.
+      </p>
       <Field
         label={GUIA_EVALUACION.campos.score.label}
         required
@@ -192,9 +224,9 @@ export function EvaluacionForm({
           value={veredicto}
           onChange={(event) => setVeredicto(event.target.value)}
           invalid={Boolean(errors.veredicto)}
-          aria-label="Veredicto del Evaluador"
+          aria-label="Tu veredicto"
           options={[
-            { value: '', label: 'Elegí el veredicto que dio el Evaluador' },
+            { value: '', label: 'Elegí tu veredicto' },
             ...VEREDICTO_VALUES.map((valor) => ({
               value: valor,
               label: textos.veredictoLabels[valor],
@@ -232,15 +264,11 @@ export function EvaluacionForm({
         </p>
       )}
 
-      <Button onClick={intentarEnviar} loading={isPending && !confirmOpen}>
-        {esDescarte ? 'Registrar evaluación y descartar' : 'Registrar evaluación'}
-      </Button>
-
       <Modal
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
         title="Descartar este lead"
-        description="Score 1–2 descarta el lead en el mismo paso — vos no elegís, y está bien que sea así."
+        description="Un score de 1–2 descarta el lead en el mismo paso. El número lo pusiste vos; lo que sigue es automático, y está bien que sea así."
         footer={
           <>
             <Button variant="ghost" onClick={() => setConfirmOpen(false)} disabled={isPending}>
@@ -322,7 +350,7 @@ export function EvaluacionResumen({
 
       <div>
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500">
-          Razonamiento del Evaluador
+          Tu razonamiento
         </p>
         <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-zinc-400">
           {evaluacion.razonamiento}

@@ -101,7 +101,12 @@ test('corrida 1 — setter novato carga su primer prospecto (frío)', async ({ p
     await shot('ficha-guardada-evaluacion-desbloqueada')
 
     // ── 6. Paso 2 (Evaluación) — la herramienta "Evaluador" externa ──────────
-    const toolGuideToggle = page.getByText('Qué es y cómo se usa').first()
+    // El rótulo del plegable pasó a nombrar sus tres párrafos: «Qué es y cómo se
+    // usa» no prometía nada, y encima escondía la salida del link pendiente —
+    // que ahora se lee sin abrirlo, arriba de este toggle.
+    const toolGuideToggle = page
+      .getByText('Ver para qué sirve, qué le das y qué te devuelve')
+      .first()
     await toolGuideToggle.scrollIntoViewIfNeeded()
     await shot('evaluacion-herramienta-colapsada')
     await toolGuideToggle.click()

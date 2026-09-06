@@ -30,6 +30,24 @@
 import assert from 'node:assert/strict'
 import { Prisma } from '@prisma/client'
 import { ESCALADO_RESET, RELOOP_RESET, esReloopRechazo } from './escalamiento.ts'
+import { LEGAL_TRANSITIONS } from './dossier-stage.ts'
+
+// ── 0. LA ARITY DEL LOOP-BACK (P8, caso 2) ───────────────────────────────────
+// `esReloopRechazo` ya no codifica el destino: lo LEE de `LEGAL_TRANSITIONS`.
+// Eso cierra la divergencia vieja (el grafo cambiaba y la copia seguía diciendo
+// que sí), pero abre una que hay que vigilar acá: si RECHAZADA gana una SEGUNDA
+// salida, el predicado la aceptaría sola y `transitionDossier` aplicaría el
+// `RELOOP_RESET` —que borra el self-check— sobre una transición que nadie decidió
+// que fuera un re-loop. Esta aserción obliga a decidirlo.
+assert.deepEqual(
+  [...LEGAL_TRANSITIONS.RECHAZADA],
+  ['CONSTRUCCION'],
+  'RECHAZADA dejó de tener UNA sola salida.\n' +
+    '  `esReloopRechazo` lee `LEGAL_TRANSITIONS.RECHAZADA`, así que toda salida nueva pasa a\n' +
+    '  contar como re-loop y se lleva puesto el self-check del dossier (RELOOP_RESET).\n' +
+    '  Si la salida nueva es a propósito: decidí acá si dispara el reset o no, en el MISMO\n' +
+    '  commit. No borres esta aserción para seguir.',
+)
 
 // ── 1. esReloopRechazo: el re-loop es el ÚNICO loop-back que dispara el reset ──
 assert.equal(

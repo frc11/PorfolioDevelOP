@@ -63,7 +63,28 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await qaLogin(page, 'setter')
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
+    /* ADAPTADO EN P16 — qué verificaba y qué verifica.
+     *
+     * Verificaba: el nudge de calidad advisory sobre `presenciaDigital`, la
+     * señal mínima completándose con identidad + presencia + reseñas, y que
+     * guardar persista. Los tres campos estaban en una sola lista larga, así que
+     * se llenaban en cualquier orden con `getByPlaceholder`.
+     *
+     * Verifica lo MISMO, con los mismos campos y los mismos textos. Lo único que
+     * cambió es que la ficha ahora es un recorrido por fuentes y cada campo vive
+     * en el bloque de la fuente de la que se saca: hay que abrir el bloque para
+     * llegar al campo. Eso NO es ruido de test — es el comportamiento nuevo, y el
+     * test se pondría rojo si un campo apareciera fuera de su bloque.
+     *
+     * Se conservó `presenciaDigital` como sujeto del nudge (en vez de mover la
+     * prueba a un campo que ya estuviera abierto) justamente para no cambiar lo
+     * que se está verificando.
+     */
+    const abrirBloque = (nombre: string) =>
+      firstVisible(page.getByRole('button', { name: nombre })).click()
+
     // Nudge de CALIDAD (advisory, NO bloquea): input flojo en blur → CampoMejora.
+    await abrirBloque('4 · Mirando las tres juntas')
     const presencia = firstVisible(page.getByPlaceholder(/IG activo/i))
     await presencia.fill('tiene Instagram') // 15 < 40 chars → flojo
     await presencia.blur()
@@ -72,12 +93,19 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await presencia.fill('IG activo, publican 2-3 veces por semana, sin web, Maps sin fotos.')
     await expect(page.getByText(/Eso queda corto/i)).toHaveCount(0)
 
-    // Señal mínima: identidad + presencia + reseñas.
+    // Señal mínima: identidad (Instagram) + presencia (balance) + reseñas (Google).
+    await abrirBloque('1 · En Instagram')
     await firstVisible(page.getByPlaceholder(/la cuenta la firma/i)).fill('La firma "Marce", dueño visible en las fotos del local.')
+    await abrirBloque('2 · En Google y Maps')
     await firstVisible(page.getByPlaceholder(/Nunca contestan/i)).fill('★☆☆☆☆ "Nunca contestan el WhatsApp" (mar 2026). Repetida 3 veces.')
 
-    // Banner de señal completa.
-    await expect(firstVisible(page.getByText('✓ Señal mínima lista — guardá y pasala por el Evaluador.'))).toBeVisible()
+    /* Banner de señal completa. D15-bis sacó de la frase el viaje a una
+     * herramienta externa; P16 le sacó además la dirección («bajá a dejar tu
+     * veredicto»): con el recorrido por bloques, el veredicto es el último y el
+     * aviso vive DEBAJO del acordeón, así que «bajá» quedó apuntando al revés
+     * justo cuando el setter ya está parado en él. Lo que se verifica es lo
+     * mismo: que el gate de la ficha se dé por cumplido y lo diga. */
+    await expect(firstVisible(page.getByText('✓ Señal mínima lista — ya podés dejar tu veredicto.'))).toBeVisible()
 
     // Guardar → toast + persistencia en DB.
     await firstVisible(page.getByRole('button', { name: 'Guardar ficha' })).click()
@@ -89,20 +117,51 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     expectNoConsoleErrors(guard)
   })
 
-  test('B2 · EVALUACIÓN: registrar (AVANZAR) transiciona FICHA→EVALUADA', async ({ page }) => {
-    // Lead en FICHA con señal ya sembrada (habilita el form de evaluación).
+  test('B2 · VEREDICTO: registrarlo (AVANZAR) transiciona FICHA→EVALUADA', async ({ page }) => {
+    // Lead en FICHA con señal ya sembrada (habilita el registro del veredicto).
     const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B2 Eval', stage: 'FICHA' })
     await prisma.osLeadDossier.update({ where: { leadId }, data: { fichaJson: fichaConSenal() } })
 
     await qaLogin(page, 'setter')
-    // P4: con señal, la raíz aterriza en m2 — la pantalla fusionada donde se
-    // lleva la ficha a evaluar Y se transcribe el veredicto, sin navegar en el medio.
-    await page.goto(pantalla(leadId, 'm2'), { waitUntil: 'domcontentloaded' })
+    // D15-bis: la ficha y el veredicto son UNA pantalla (m1). La raíz de un lead
+    // en FICHA aterriza acá con o sin señal — no hay segundo destino al que ir.
+    await page.goto(pantalla(leadId, 'm1'), { waitUntil: 'domcontentloaded' })
 
-    // El form de evaluación está habilitado (la ficha tiene señal).
+    /* ADAPTADO EN P16 — qué verificaba y qué verifica.
+     *
+     * Verificaba: que las dos mitades de la fusión —la ficha y el veredicto—
+     * estuvieran en la MISMA pantalla y en orden, leyendo las dos `<section
+     * aria-label>` que las envolvían. Sin eso, el test pasaba igual navegando a
+     * cualquier lado que montara el formulario.
+     *
+     * Verifica lo mismo, y un poco más: la ficha dejó de ser una sección y pasó a
+     * ser un recorrido de cuatro bloques por fuente, con el veredicto como quinto
+     * y último. Se afirma sobre las cinco cabeceras —que están siempre, plegadas
+     * o no— y sobre el orden, que es lo que la fusión y el reordenamiento
+     * prometen juntos. Las dos `<section>` ya no existen en el camino editable;
+     * sobreviven en la vista congelada (post-veredicto), que no cambió.
+     */
+    const CABECERAS = [
+      '1 · En Instagram',
+      '2 · En Google y Maps',
+      '3 · En la web que ya tienen',
+      '4 · Mirando las tres juntas',
+      '5 · Tu decisión',
+    ]
+    for (const nombre of CABECERAS) {
+      await expect(vis(page.getByRole('button', { name: nombre })), `el bloque «${nombre}»`).toHaveCount(1)
+    }
+    // El orden se lee del DOM, no del texto accesible: el nombre accesible de la
+    // cabecera incluye su línea de estado («Falta: …»), que cambia con lo cargado.
+    const enPantalla = await vis(page.getByRole('button', { name: /^\s*[1-5] · / }))
+      .evaluateAll((botones) =>
+        botones.map((boton) => boton.querySelector('span')?.textContent?.trim() ?? ''),
+      )
+    expect(enPantalla, 'y en el orden del recorrido').toEqual(CABECERAS)
+
     await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' })
       .getByRole('radio', { name: '3' })).click()
-    await pickSelect(page, 'Veredicto del Evaluador', /^Avanzar$/i)
+    await pickSelect(page, 'Tu veredicto', /^Avanzar$/i)
     await firstVisible(fieldControl(page, 'Razonamiento')).fill('Negocio con presencia y reseñas reales — buen fit para una demo.')
 
     await firstVisible(page.getByRole('button', { name: /^Registrar evaluación$/i })).click()
@@ -225,8 +284,12 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     // El chequeo final vive en m14 (se habilita con el borrador publicado).
     await page.goto(pantalla(leadId, 'm14'), { waitUntil: 'domcontentloaded' })
 
-    // Self-check: TeachPanel + ejemplo presentes.
-    await expect(firstVisible(page.getByText('¿Por qué importa?'))).toBeVisible()
+    // Self-check: TeachPanel + ejemplo presentes. El rótulo del teach dejó de ser
+    // «¿Por qué importa?» (genérico, igual en cualquier pantalla): ahora nombra lo
+    // que hay adentro, como el ejemplo de la línea de abajo ya hacía.
+    await expect(
+      firstVisible(page.getByText('Por qué marcar en verde sin mirar vuelve como rechazo')),
+    ).toBeVisible()
     await expect(firstVisible(page.getByText('Ver ejemplo de un chequeo final bien hecho'))).toBeVisible()
 
     // P7 · los dos grupos están rotulados y separados en la pantalla.
@@ -291,7 +354,12 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     await page.goto(`/setter/leads/${leadId}`, { waitUntil: 'domcontentloaded' })
 
     await firstVisible(page.getByRole('button', { name: /Ya la envié — registrar/i })).click()
-    await expectToast(page, /Demo enviada|enviada/i).catch(() => undefined)
+    // El patrón era `/Demo enviada|enviada/i` y colgaba de un `.catch(() =>
+    // undefined)`: dos capas de nada. `/enviada/i` tiene 104 coincidencias en
+    // código vivo — es casi una tautología — y el `.catch()` se comía el fallo
+    // aunque no apareciera ningún aviso. `/Demo enviada registrada/i` tiene UNA
+    // (el toast de `envio-form.tsx`), y sin el `.catch()` la aserción afirma.
+    await expectToast(page, /Demo enviada registrada/i)
 
     await expect(async () => {
       const dossier = await getDossier(leadId)
@@ -312,21 +380,20 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
 
 // ── Ramas aparte (lead propio cada una) ──────────────────────────────────────
 
-test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al veredicto', async ({ page }) => {
+test('B9 · DESCARTADA: score bajo → modal → el manual colapsa al archivo', async ({ page }) => {
   const lead = await createLead(tracker, { setterId, businessName: 'Para Descartar', stage: 'FICHA' })
-  // Sembrar señal de ficha vía DB para llegar directo a la evaluación.
+  // Sembrar señal de ficha vía DB para llegar directo al veredicto.
   await prisma.osLeadDossier.update({
     where: { leadId: lead.id },
     data: { fichaJson: { identidad: { igManejadoPor: 'NO_SABE' }, presenciaDigital: 'IG muerto', resenas: 'sin reseñas reales' } },
   })
 
   await qaLogin(page, 'setter')
-  // P4: el veredicto se transcribe en m2, la pantalla fusionada (habilitada — la
-  // ficha tiene señal).
-  await page.goto(pantalla(lead.id, 'm2'), { waitUntil: 'domcontentloaded' })
+  // D15-bis: el veredicto se registra en m1, la pantalla fusionada.
+  await page.goto(pantalla(lead.id, 'm1'), { waitUntil: 'domcontentloaded' })
 
   await firstVisible(page.getByRole('radiogroup', { name: 'Score de la evaluación' }).getByRole('radio', { name: '2' })).click()
-  await pickSelect(page, 'Veredicto del Evaluador', /^Descartar$/i)
+  await pickSelect(page, 'Tu veredicto', /^Descartar$/i)
   await firstVisible(fieldControl(page, 'Razonamiento')).fill('Sin presencia ni materia prima — no hay con qué hacer demo.')
   await firstVisible(page.getByRole('button', { name: /Registrar evaluación y descartar/i })).click()
 
@@ -338,14 +405,22 @@ test('B9 · DESCARTADA: score bajo → modal → archivo + wizard colapsa al ver
     expect((await getDossier(lead.id))?.stage).toBe('DESCARTADA')
   }).toPass({ timeout: 15_000 })
 
-  // El manual colapsa al veredicto: DESCARTADA es terminal — la raíz aterriza en
-  // m2 (sin pantallas por delante) y nada de producción se renderiza.
+  // El manual colapsa al ARCHIVO: DESCARTADA es terminal — la raíz aterriza en la
+  // pantalla de cierre (antes de D15-bis aterrizaba en m2, que le pedía registrar
+  // el veredicto que acababa de registrar) y nada de producción se renderiza.
   await page.goto(`/setter/leads/${lead.id}`, { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m2$/)
+  await expect(page).toHaveURL(/\/manual\/archivo$/)
   await expect(page.getByRole('heading', { name: 'Self-check' })).toHaveCount(0)
-  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige a m2.
+  // Y dice qué pasó y por qué, con las palabras del descarte (no las del PERDIDO).
+  await expect(vis(page.getByText('Archivo — Descartado'))).toBeVisible()
+  await expect(vis(page.getByText('Negocio sin señal digital aprovechable.'))).toBeVisible()
+  // El veredicto completo no se perdió: queda en m1, y el archivo lo enlaza.
+  await firstVisible(page.getByRole('link', { name: /Mirá el negocio y decidí/i })).click()
+  await expect(page).toHaveURL(/\/manual\/m1$/)
+  await expect(vis(page.getByText('Veredicto registrado'))).toBeVisible()
+  // La guardia del server: el chequeo final (m14) NO es alcanzable — redirige al archivo.
   await page.goto(pantalla(lead.id, 'm14'), { waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/manual\/m2$/)
+  await expect(page).toHaveURL(/\/manual\/archivo$/)
 })
 
 test('B10 · ADMIN rechaza → EN_REVISION→RECHAZADA + novedad "Franco pidió cambios"', async ({ page }) => {

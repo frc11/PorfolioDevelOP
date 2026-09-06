@@ -33,6 +33,17 @@
  * de un selector no se desincronizan del dominio (ver `GUIA_FICHA.igManejadoPor`).
  */
 import { IG_MANEJADO_POR_VALUES } from '@/lib/leados/contracts'
+// El TIPO de la causa de espera (`turno.ts` es el único lugar donde se decide):
+// así el registro de palabras de abajo no puede quedarse corto cuando aparezca
+// una causa nueva. Y UNA cadena: el fragmento del link permanente, que la
+// tarjeta de cartera también muestra (ver `FALTA_LINK_PERMANENTE`) — vive en el
+// módulo hoja porque `flow.ts` no puede importar este archivo bajo ts-node.
+import { FALTA_LINK_PERMANENTE, type CausaEspera } from '@/lib/leados/turno'
+// [P16] El TIPO de los requisitos de la señal mínima (`ficha-bloques.ts` es el
+// único lugar donde se mapean a campos): así el nombre corto de cada requisito
+// que se lee en la cabecera de un bloque no puede quedarse corto si aparece uno
+// nuevo. Solo el tipo — este módulo sigue sin importar lógica.
+import type { RequisitoId } from '@/lib/leados/ficha-bloques'
 
 // ── Primitivas de copy ───────────────────────────────────────────────────────
 
@@ -78,6 +89,21 @@ export type CampoGuia = {
    * `ficha-calidad.ts` (heurística pura); acá viven solo las PALABRAS. [validación de calidad · 1.3]
    */
   mejora?: string
+  /**
+   * El MISMO campo cuando la herramienta externa que produce su contenido no
+   * tiene link cargado: ahí el campo deja de ser obligatorio y el hint tiene que
+   * decir por qué y qué hacer. Quién decide cuál de los dos se muestra es
+   * `herramientaSinLink()` (`herramientas.ts`), la misma lectura de la que sale
+   * la píldora «Link pendiente»; acá viven solo las PALABRAS.
+   */
+  hintSinHerramienta?: string
+  /**
+   * Cómo se NOMBRA este dato cuando falta por esa razón, para quien lo lee río
+   * abajo (la revisión de Franco, el resumen del setter, el bloque que se pega
+   * en la herramienta siguiente). Sin esto, el dato ausente se lee igual que uno
+   * que nadie quiso completar.
+   */
+  faltante?: string
   /** Opciones, si el campo es un selector. */
   opciones?: readonly CampoOpcion[]
 }
@@ -110,6 +136,27 @@ export type ValidacionGuia = {
   pendienteTitulo: string
   /** Mensaje cuando el paso ya alcanzó la señal/calidad mínima. */
   completo: string
+  /**
+   * [P16] Estado de UN bloque, en la línea que entra en su cabecera. Es el
+   * mismo criterio que `pendienteTitulo`/`completo` —sale de `fichaFaltantes`—
+   * dicho corto: la lista larga sigue estando entera abajo del acordeón, esto
+   * solo permite leer de un vistazo, con el bloque plegado, qué le falta.
+   * `requisitos` casa 1:1 con los `REQUISITOS` de `ficha-bloques.ts`.
+   */
+  bloque?: {
+    /** El bloque ya no debe nada y tiene algo escrito. */
+    completo: string
+    /** No debe nada y está vacío: se puede saltear, y conviene decirlo. */
+    opcional: string
+    /** El nombre corto de cada requisito de la señal mínima. */
+    requisitos: Readonly<Record<RequisitoId, string>>
+    /** Prefijo de la línea cuando falta algo (se le concatena la lista corta). */
+    faltaPrefijo: string
+    /** El cierre (el veredicto) todavía no se puede dejar: falta señal arriba. */
+    cierrePendiente: string
+    /** El cierre está habilitado: la ficha ya alcanza. */
+    cierreListo: string
+  }
 }
 
 /**
@@ -123,10 +170,10 @@ export type SelfCheckRazon = {
 }
 
 /**
- * Un criterio que mira una herramienta de evaluación externa, en el idioma del
- * setter: qué es y por qué pesa en el score. Lo consume m2 (la evaluación)
- * para mostrar «qué mira el Evaluador» sin hardcodear la lista en el componente.
- * El criterio REAL lo aplica el Evaluador externo; acá solo lo explicamos. [evaluación · 3.2]
+ * Un criterio del veredicto, en el idioma del setter: qué es y por qué pesa en
+ * el score. Lo consume m1 (la ficha y el veredicto, fusionadas) para mostrar en
+ * qué fijarse antes de decidir, sin hardcodear la lista en el componente.
+ * D15-bis: el criterio lo aplica el SETTER — esta lista es lo que mira. [3.2]
  */
 export type CriterioGuia = {
   /** Nombre del criterio (ej: «Dolor»). */
@@ -176,6 +223,14 @@ export type GrupoGuia = {
   titulo: string
   /** Una línea de encuadre: para qué sirve lo que se pide adentro. */
   intro: string
+  /**
+   * [P16] Lo que hay que BAJARSE mientras la pestaña de esa fuente está abierta.
+   * Es lo que evita el doble viaje: la ficha pedía los datos en un momento y el
+   * material en otro, así que el setter recorría Instagram, Google y la web dos
+   * veces. Solo lo declaran los grupos que son una FUENTE (una pestaña que se
+   * abre); el grupo de cierre no tiene material que bajar.
+   */
+  material?: string
 }
 
 // ── Guía completa de un paso ─────────────────────────────────────────────────
@@ -262,7 +317,7 @@ export const GUIA_FICHA = {
   intro: [
     'Anotá lo que ',
     { enfasis: 'ves' },
-    ', no lo que opinás: el diagnóstico lo hace el Evaluador después. Podés guardar a medias y volver.',
+    ', no lo que opinás. Primero juntás material; el veredicto lo dejás abajo, con todo esto a la vista. Podés guardar a medias y volver.',
   ],
   duracion: '~10 min. Si te pasaste, ya tenés de sobra.',
   campos: {
@@ -282,7 +337,7 @@ export const GUIA_FICHA = {
       hint: 'Nombre del dueño si aparece, hace cuánto existe el negocio, cualquier pista de quién decide.',
       ejemplo: "Ej: la cuenta la firma 'Marce', aparece en las fotos del local…",
       mejora:
-        'Podés sumar: ¿quién decide —dueño o encargado—? ¿su nombre si aparece? ¿hace cuánto abrió? Cuanto más concreto, mejor lo lee el Evaluador.',
+        'Podés sumar: ¿quién decide —dueño o encargado—? ¿su nombre si aparece? ¿hace cuánto abrió? Cuanto más concreto, más fácil te resulta decidir después.',
     },
     presenciaDigital: {
       label: 'Presencia digital',
@@ -344,45 +399,93 @@ export const GUIA_FICHA = {
       hint: 'Todo lo que viste y no entra arriba. Mejor que sobre a que falte.',
     },
   },
+  /**
+   * [P16] Los bloques de la ficha, en el orden del recorrido REAL: una entrada
+   * por fuente que se visita, más el balance que solo se puede escribir después
+   * de las tres. Las claves casan 1:1 con `BLOQUES_DE_FICHA` de
+   * `ficha-bloques.ts` (que decide qué campo cae en cuál); acá viven solo las
+   * palabras. `material` es la mitad que arregla el doble viaje: dice qué
+   * llevarse mientras esa pestaña está abierta, en vez de mandar a volver.
+   *
+   * Reemplazó al grupo único «material para construir la demo»: ese cajón
+   * juntaba links y textos de las TRES fuentes al final del formulario, que es
+   * exactamente lo que obligaba a recorrerlas de nuevo.
+   */
   grupos: {
-    materiales: {
-      titulo: 'Material para construir la demo',
+    instagram: {
+      titulo: 'En Instagram',
       intro:
-        'Esto viaja al bloque que pegás en la herramienta cuando construís. Todo es opcional: lo que no consigas, dejalo vacío — nada se inventa por vos.',
+        'Abrí el perfil y mirá quién contesta los comentarios, qué muestran en las fotos y cómo hablan.',
+      material:
+        'Antes de cerrar la pestaña: guardate el logo y las 3 o 4 mejores fotos, y copiá la bio tal cual está.',
+    },
+    google: {
+      titulo: 'En Google y Maps',
+      intro:
+        'Buscá el negocio y leé las reseñas — sobre todo las malas, y sobre todo la queja que se repite.',
+      material:
+        'Antes de cerrar la pestaña: copiá la dirección de la ficha, para volver a leerlas cuando armes la demo sin tener que buscarla de nuevo.',
+    },
+    web: {
+      titulo: 'En la web que ya tienen',
+      intro:
+        'Si tienen web, entrá y mirá qué ofrecen. Si no tienen, seguí de largo: que no tengan es un dato, y lo anotás en el balance.',
+      material:
+        'Antes de cerrar la pestaña: copiá los precios y los textos que sirvan tal cual — y si el logo en buena calidad está acá, esa es la dirección que va arriba.',
+    },
+    balance: {
+      titulo: 'Mirando las tres juntas',
+      intro:
+        'Ahora sí, el balance: qué tienen y qué les falta, cómo operan, y todo lo que viste y no entró arriba.',
     },
   },
   validacion: {
     pendienteTitulo:
-      'El Evaluador no puede juzgar a ciegas: necesita esta señal mínima para puntuar. Todavía falta:',
-    completo: '✓ Señal mínima lista — guardá y pasala por el Evaluador.',
+      'No se puede juzgar a ciegas: sin esta señal mínima no hay con qué decidir. Todavía falta:',
+    completo: '✓ Señal mínima lista — ya podés dejar tu veredicto.',
+    bloque: {
+      completo: 'Listo',
+      opcional: 'Opcional — podés seguir sin esto',
+      requisitos: {
+        identidad: 'quién está detrás',
+        presencia: 'qué tienen y qué no',
+        evidencia: 'reseñas o contenido real',
+      },
+      faltaPrefijo: 'Falta: ',
+      cierrePendiente: 'Falta la señal mínima de la ficha',
+      cierreListo: 'Te toca decidir',
+    },
   },
   copyBlock: {
-    titulo: 'Bloque para el Evaluador',
+    titulo: 'La ficha, en un bloque',
     instruccion:
-      'Se arma con lo último guardado. Copialo, pegalo en el Evaluador y volvé con el resultado a Evaluación.',
+      'Se arma con lo último guardado — lo que anotaste, junto y en orden, para releerlo de un saque antes de decidir.',
   },
   congelada: {
-    resumen: 'Ver la ficha de observación (congelada: el Evaluador ya la leyó)',
+    resumen: 'Ver la ficha de observación (congelada: el veredicto ya está registrado)',
     vacia: 'No hay ficha guardada.',
   },
 } satisfies PasoGuia
 
-// ── Contenido: m2 · Evaluación (transcribir el veredicto del Evaluador) ─────
+// ── Contenido: el veredicto del setter (segunda mitad de m1, fusionada) ────
 
 /**
- * Guía de la evaluación (m2). El setter NO juzga: pega la ficha en el
- * Evaluador externo y transcribe acá lo que devolvió (score, veredicto,
- * razonamiento). `campos` son los del formulario (score/veredicto/razonamiento);
- * `criterios` explica qué mira el Evaluador; `gate` explica el descarte
- * automático de score 1–2 (el criterio sigue en `dossier.actions.ts`, acá solo
- * el porqué). `porque`/`ejemplos` enseñan la disciplina de transcribir fiel.
+ * Guía del veredicto (m1, la pantalla fusionada). D15-bis: el juicio es DEL
+ * SETTER. Hasta acá el veredicto salía de un chat de evaluación externo y el
+ * setter transcribía la respuesta; el chat quedó afuera y los tres campos
+ * —score, veredicto, razonamiento— los escribe él, con la ficha que acaba de
+ * cargar a la vista. Los campos, sus tipos y su validación no cambiaron
+ * (`EvaluacionSchema`): cambió de dónde sale el dato. `criterios` es en qué
+ * fijarse; `gate` explica el descarte automático de score 1–2 (el criterio
+ * sigue en `dossier.actions.ts`, acá solo el porqué). `porque`/`ejemplos`
+ * enseñan la disciplina de puntuar honesto.
  */
 export const GUIA_EVALUACION = {
-  titulo: 'Evaluación',
+  titulo: 'Tu veredicto',
   intro: [
-    'No juzgás vos: pegás la ficha en el Evaluador (el bloque de esta pantalla), esperás su respuesta y la ',
-    { enfasis: 'transcribís acá tal cual' },
-    ' — score, veredicto y razonamiento. No hace falta interpretarla.',
+    'Con la ficha recién cargada a la vista, ',
+    { enfasis: 'decidís vos' },
+    ' — cuánto le ves al negocio, si avanza o se descarta, y por qué. Es tu lectura: nadie la puntuó antes que vos.',
   ],
   criterios: [
     { nombre: 'Rubro', porQue: 'hay rubros donde una demo web convierte mucho más que otros' },
@@ -394,43 +497,43 @@ export const GUIA_EVALUACION = {
   campos: {
     score: {
       label: 'Score',
-      hint: 'El número que dio el Evaluador. 1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad.',
+      hint: 'Cuánto le ves, de 1 a 5. 1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad.',
     },
     veredicto: {
       label: 'Veredicto',
-      hint: 'El que eligió el Evaluador: Descartar, Avanzar o Avanzar con prioridad. Copialo, no lo cambies.',
+      hint: 'Tu decisión: Descartar, Avanzar o Avanzar con prioridad. Que coincida con el score que pusiste.',
     },
     razonamiento: {
       label: 'Razonamiento',
-      hint: 'Pegá el razonamiento completo del Evaluador, sin resumirlo.',
+      hint: 'Por qué le pusiste ese número, con lo que viste. Un par de líneas concretas alcanzan — lo relee Franco y lo releés vos en el próximo toque.',
     },
   },
   gate: {
     titulo: 'Score 1–2 = descarte automático',
     detalle: [
-      'No lo elegís vos y no es un fracaso: ',
+      'El número lo ponés vos; lo que sigue no se elige. Y no es un fracaso: ',
       { enfasis: 'filtrar rápido un lead flojo es exactamente el laburo' },
       '. Te ahorrás horas de demo para un negocio que no iba a cerrar. Al confirmar te pedimos el motivo en una línea.',
     ],
   },
   porque: [
     [
-      'El que juzga es el Evaluador, no vos: tu trabajo es ',
-      { enfasis: 'transcribir fiel' },
-      ', no suavizar ni inflar el número para salvar un lead que te cayó simpático. Un score editado ensucia toda la cola que viene después.',
+      'El que juzga sos vos, y por eso importa que puntúes ',
+      { enfasis: 'lo que viste, no lo que te gustaría' },
+      ': inflar el número para salvar un negocio que te cayó simpático ensucia toda la cola que viene después — y la demo la vas a construir vos.',
     ],
     [
       'El score marca el camino: ',
       { enfasis: '1–2 descarta, 3 avanza, 4–5 sugiere avanzar con prioridad' },
-      ' (y deja producir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
+      ' (y deja construir la demo sin esperar respuesta). La mayoría son 3 —fríos— y eso está bien: es el caso normal.',
     ],
   ],
   ejemplos: [
     {
-      tema: 'Transcribir el veredicto',
-      asiSi: 'El Evaluador dio 2 → cargás 2 y descartás, aunque el lugar te guste.',
-      asiNo: 'Lo subís a 3 «para darle una chance» porque te cayó bien el negocio.',
-      porque: 'El score es del Evaluador; pisarlo mete leads flojos a la cola y te quema el tiempo.',
+      tema: 'Puntuar lo que viste',
+      asiSi: 'IG muerto hace ocho meses y cero reseñas → ponés 2 y descartás, aunque el lugar te guste.',
+      asiNo: 'Le ponés 3 «para darle una chance» porque te cayó bien el negocio.',
+      porque: 'El 3 te obliga a construirle una demo. Meter leads flojos a la cola te quema el tiempo a vos.',
     },
   ],
 } satisfies PasoGuia
@@ -453,7 +556,7 @@ export const GUIA_EVALUACION = {
 export const GUIA_BRIEF = {
   titulo: 'Brief de diseño',
   intro: [
-    'Copiá el bloque de abajo, pegalo en el ',
+    'Copiá el bloque de esta pantalla, pegalo en el ',
     { enfasis: 'Gem de diseño' },
     ' y traé su respuesta acá. El brief es el ',
     { enfasis: 'plano de la demo' },
@@ -462,7 +565,24 @@ export const GUIA_BRIEF = {
   campos: {
     pegadoGem: {
       label: 'Respuesta del Gem (pegado completo)',
-      hint: 'Pegala entera, sin editar. Los campos de abajo son el resumen estructurado.',
+      hint: 'Pegala entera, sin editar. Los demás campos son el resumen estructurado.',
+      /**
+       * El MISMO campo cuando el Gem de diseño todavía no tiene link cargado:
+       * ahí el campo deja de ser obligatorio, porque pedir que se transcriba la
+       * salida de algo que no se puede abrir solo se obedece inventándola.
+       * `herramientaSinLink('gemDiseno')` decide cuál de los dos hints se ve —
+       * el mismo dato del que sale la píldora «Link pendiente» de arriba.
+       */
+      hintSinHerramienta:
+        'Todavía no lo podés traer: el Gem de diseño no tiene link cargado (pedíselo a Franco). Guardá el brief con las secciones que armes vos, y cuando tengas el link volvé y pegalo acá.',
+      /**
+       * Lo que ve quien LEE el brief después —Franco en la revisión, el setter
+       * al volver, y Claude Design en el bloque de construcción— cuando el
+       * pegado no está porque la herramienta no se pudo abrir. Una sola frase
+       * para las tres superficies: el dato faltante se nombra igual en todas.
+       */
+      faltante:
+        'Sin la respuesta del Gem de diseño: cuando se guardó este brief la herramienta todavía no tenía link cargado.',
     },
     titulo: {
       label: 'Título del brief',
@@ -486,7 +606,7 @@ export const GUIA_BRIEF = {
     detalle: [
       'El lead avanza, pero el brief se abre cuando ',
       { enfasis: 'el negocio responde el primer contacto' },
-      ' —o si Franco le da prioridad—. Mientras tanto, mandá el opener y registrá la conversación en «Seguimiento»: apenas responda, este paso se abre solo.',
+      ' —o si Franco le da prioridad—. Mientras tanto, mandá el opener y registrá la conversación en «Registrá lo que pasó»: apenas responda, este paso se abre solo.',
     ],
   },
   porque: [
@@ -621,8 +741,8 @@ export const GUIA_DRAFT = {
   pasos: [
     'En Claude Design: Export → HTML standalone (o el .zip si lo ofrece).',
     'Asegurate de que el archivo se llame index.html (si bajó un .zip, que lo tenga adentro).',
-    'Abrí Netlify Drop (el botón de acá arriba) y arrastrá el archivo (o la carpeta) ahí.',
-    'Copiá la URL que te da Netlify y pegala acá abajo.',
+    'Abrí Netlify Drop (lo abre el botón «Netlify Drop») y arrastrá el archivo (o la carpeta) ahí.',
+    'Copiá la URL que te da Netlify y pegala en «URL del borrador».',
   ],
   campos: {
     draftUrl: {
@@ -631,6 +751,23 @@ export const GUIA_DRAFT = {
     },
   },
 } satisfies PasoGuia
+
+/**
+ * Los mismos pasos, para m13 con el borrador CONGELADO por un rechazo. El último
+ * de `GUIA_DRAFT.pasos` dice «pegala acá abajo», y en RECHAZADA abajo no hay
+ * campo: el motor guarda el link SOLO en CONSTRUCCION (`saveOwnedDraftUrl`), así
+ * que esa pantalla muestra el borrador congelado y el botón de reabrir. La
+ * munición prometía un campo que no existe — el mismo callejón que P3 cerró en
+ * el registro, un piso más arriba.
+ *
+ * Los tres pasos previos se DERIVAN de la lista viva, no se copian: si Franco
+ * edita el instructivo, esta variante lo sigue sola. Solo cambia el destino de
+ * la URL, que es lo único que el estado congelado desmiente.
+ */
+export const GUIA_DRAFT_PASOS_CONGELADO: readonly string[] = [
+  ...GUIA_DRAFT.pasos.slice(0, -1),
+  'Copiá la URL que te da Netlify — el campo para pegarla se abre cuando reabrís la construcción.',
+]
 
 export const GUIA_OPENER = {
   titulo: 'El opener (primer contacto)',
@@ -797,7 +934,7 @@ export const GUIA_AGENDA = {
     titulo: 'Se agenda cuando el negocio respondió y acepta reunirse',
     detalle: [
       'Esto no se abre solo: el paso se abre cuando ',
-      { enfasis: 'marcás «Respondió» en «Seguimiento»' },
+      { enfasis: 'marcás «Respondió» en «Registrá lo que pasó»' },
       ' y en la charla el negocio acepta la reunión. Hasta entonces espera — agendar antes sería ofrecer un turno que nadie pidió.',
     ],
   },
@@ -821,7 +958,7 @@ export const GUIA_REVISION = {
   aprobada: [
     'Demo ',
     { enfasis: 'aprobada' },
-    ' 🎉 — el envío del link vive en «Seguimiento»: el panel arma el mensaje cuando el flujo lo habilita.',
+    ' 🎉 — el envío del link vive en «Envío»: el panel arma el mensaje cuando el flujo lo habilita.',
   ],
 } satisfies Record<'enRevision' | 'aprobada', LineaRica>
 
@@ -897,13 +1034,13 @@ export const GUIA_ENVIO = {
     ],
     aprobadaSinLink: [
       'Franco aprobó la demo pero ',
-      { enfasis: 'todavía no cargó su link permanente' },
+      { enfasis: FALTA_LINK_PERMANENTE },
       ' — sin ese link no hay nada que mandar, y el negocio no tiene nada que ver con esto. Cuando lo registre, el envío se destraba solo.',
     ],
     engancheSinAprobar: [
       'El link se envía cuando ',
       { enfasis: 'Franco apruebe la demo' },
-      ' (la producción pasa por brief, construcción y chequeo final). Hasta ahí, este paso no lo ofrece.',
+      ' (la demo pasa por brief, construcción y chequeo final). Hasta ahí, este paso no lo ofrece.',
     ],
     niEngancheNiAprobada: [
       'El link de la demo se envía recién cuando el negocio ',
@@ -912,6 +1049,66 @@ export const GUIA_ENVIO = {
     ],
   },
 } satisfies EnvioGuia
+
+// ── Contenido: QUÉ se está esperando (las pantallas de estado) ───────────────
+
+/**
+ * Las palabras de cada CAUSA de espera (`causaDeEspera`, turno.ts). El turno ya
+ * dice de quién es la pelota; esto dice qué tiene que pasar para que vuelva.
+ *
+ * Existe porque las pantallas de estado nombraban el turno y nada más: la demo
+ * en la cola de revisión y la demo aprobada-sin-link-permanente son dos esperas
+ * muy distintas —una dura lo que tarde una revisión, la otra se destraba con un
+ * campo— y mostraban EL MISMO texto. El producto ya sabía distinguirlas: lo decía
+ * el envío (m15) con el gate cerrado, y el pie del wizard para la revisión. Ese
+ * texto no viajaba. Acá NO se reescribe: se referencia el que ya funciona.
+ *
+ * `null` = esta causa no tiene frase propia porque ya está dicha:
+ *   - `accionPropia` la dice entera `TEXTO_TURNO.setter.detalle`;
+ *   - `respuesta` la dice el DATO (cuándo es el próximo toque y en cuál va la
+ *     cadencia), que es más preciso que cualquier frase fija.
+ *
+ * `satisfies Record<CausaEspera, …>`: una causa nueva no compila hasta decidir
+ * sus palabras — o hasta decidir, explícitamente, que no lleva.
+ */
+export const GUIA_ESPERA = {
+  reunion: [
+    'La reunión ',
+    { enfasis: 'la corre Franco' },
+    ' — el resultado lo carga él cuando termine.',
+  ],
+  cierre: [
+    'El cierre ',
+    { enfasis: 'lo decide Franco' },
+    ' desde el panel — no se automatiza, y no hay nada del manual para hacer acá.',
+  ],
+  descarte: [
+    'La evaluación ',
+    { enfasis: 'descartó el negocio' },
+    ' — bien filtrado: el trabajo de este lead terminó acá.',
+  ],
+  // El pie del wizard para EN_REVISION, tal cual: ya dice qué está pasando y
+  // dónde te enterás. No se duplica.
+  revision: GUIA_REVISION.enRevision,
+  // El «todavía no» que m15 muestra con el gate cerrado. Es EL texto que este
+  // sprint vino a hacer viajar: nombra la causa exacta y descarta al negocio.
+  linkPermanente: GUIA_ENVIO.espera.aprobadaSinLink,
+  accionPropia: null,
+  // P19 — La pausa que puso el propio setter. Sin frase propia caía en la del
+  // negocio («puede contestar hoy, en dos semanas o no contestar nunca») más el
+  // estado de la cadencia, que en un postergado nombra un toque que no va a
+  // salir. La FECHA no se repite acá: la cabecera de toda pantalla ya la muestra
+  // al lado de la etiqueta «Postergado», y decirla dos veces no la hace más
+  // clara. Y dice «vuelve a tu cola», no «vuelve a tu foco»: el foco es UNO y lo
+  // decide el orden de la cola, así que prometerlo sería otra vez decir algo que
+  // no siempre pasa.
+  postergacion: [
+    'Lo postergaste vos: ',
+    { enfasis: 'el contacto está pausado' },
+    ' hasta la fecha que fijaste — cuando llegue, el lead vuelve a tu cola de trabajo. Si el negocio contesta antes, registralo acá y sigue.',
+  ],
+  respuesta: null,
+} satisfies Record<CausaEspera, LineaRica | null>
 
 // ── Contenido: ejemplos del ESTADO IDEAL (para las pantallas vacías) ─────────
 
@@ -942,7 +1139,7 @@ export type FichaEjemplar = {
 export const GUIA_FICHA_EJEMPLAR = {
   titulo: 'Café de barrio · Instagram activo, pero pierde consultas',
   porque:
-    'Anota lo que se VE, no opiniones: datos concretos de cada red, reseñas textuales con la queja que se repite y señales operativas. Con esto el Evaluador decide sin tener que adivinar.',
+    'Anota lo que se VE, no opiniones: datos concretos de cada red, reseñas textuales con la queja que se repite y señales operativas. Con esto se decide sin tener que adivinar.',
   campos: {
     igManejadoPor: 'DUENO',
     identidadNotas:

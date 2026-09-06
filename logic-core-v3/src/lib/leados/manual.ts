@@ -25,7 +25,6 @@ import type { Agenda, Ficha, Progreso } from './contracts.ts'
 import { FASE_IDS, type FaseId } from './contracts.ts'
 import {
   cadenciaInfo,
-  fichaTieneSenal,
   gateBriefAbierto,
   gateEnvioDemo,
   reunionAgendada,
@@ -35,16 +34,16 @@ import { derivarPasoDelLead } from './paso.ts'
 // ── El registro de pantallas (mapa v1) ───────────────────────────────────────
 
 /**
- * Ids de pantalla del mapa: once del manual, sin m3 — P4 fusionó el registro del
- * veredicto dentro de m2; sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) +
- * mr (reentrada re-loop) + los estados de espera. El `[paso]` de la URL es uno
- * de estos — cualquier otra cosa redirige a la actual (así el `m3` de un
- * bookmark viejo, o un `m9` de la galería, aterrizan solos en la pantalla
- * vigente: la posición se re-deriva, nunca se guarda).
+ * Ids de pantalla del mapa: diez del manual (sin m3 — P4 fusionó el registro del
+ * veredicto dentro de m2; sin m2 — D15-bis fusionó ESA pantalla dentro de m1;
+ * sin m7…m12 — P6-B agrupó las seis fases en mc1/mc2) + mr (reentrada re-loop) +
+ * los estados de espera. El `[paso]` de la URL es uno de estos — cualquier otra
+ * cosa redirige a la actual (así el `m3` de un bookmark viejo, el `m2` de uno
+ * de ayer, o un `m9` de la galería, aterrizan solos en la pantalla vigente: la
+ * posición se re-deriva, nunca se guarda).
  */
 export const PANTALLA_IDS = [
   'm1',
-  'm2',
   'm4',
   'm5',
   'm6',
@@ -76,7 +75,6 @@ export type PantallaTipo = 'manual' | 'reentrada' | 'estado'
 
 export type FaseManualId =
   | 'ficha'
-  | 'evaluacion'
   | 'opener'
   | 'seguimiento'
   | 'brief'
@@ -156,22 +154,20 @@ export function fasesDePantallaConstruccion(id: PantallaId): readonly FaseId[] {
 }
 
 export const PANTALLAS: Record<PantallaId, PantallaDef> = {
+  // D15-bis — la ficha y el veredicto son UNA pantalla. Antes el veredicto vivía
+  // en m2 y salía de una herramienta externa: el setter copiaba la ficha, la
+  // pegaba en un chat de evaluación y transcribía la respuesta. Esa herramienta
+  // no tiene link cargado, así que los tres campos —obligatorios, porque
+  // sostienen el gate— no se podían llenar sin inventarlos. Ahora el juicio es
+  // del setter: mira lo que acaba de anotar y lo cierra ahí mismo.
   m1: {
     id: 'm1',
     tipo: 'manual',
     fase: 'ficha',
-    titulo: 'Cargá los datos del negocio',
-    detalle: 'Completá la ficha de observación — es la materia prima del Evaluador.',
-    corto: 'Ficha',
-  },
-  m2: {
-    id: 'm2',
-    tipo: 'manual',
-    fase: 'evaluacion',
-    titulo: 'Llevá la ficha a evaluar y registrá el veredicto',
+    titulo: 'Mirá el negocio y decidí si vale una demo',
     detalle:
-      'Copiá el bloque, pasalo por el chat de evaluación y transcribí acá lo que te devolvió: score, veredicto y razonamiento.',
-    corto: 'Evaluación',
+      'Anotá lo que ves y, con eso a la vista, dejá tu veredicto: cuánto le ves, si avanza o se descarta, y por qué.',
+    corto: 'Ficha',
   },
   m4: {
     id: 'm4',
@@ -269,7 +265,13 @@ export const PANTALLAS: Record<PantallaId, PantallaDef> = {
     tipo: 'reentrada',
     fase: 'construccion',
     titulo: 'Aplicá las correcciones de Franco',
-    detalle: 'La nota del rechazo al frente — checklist y borrador quedan como estaban; el chequeo final se resetea.',
+    // P19 — Absorbe el párrafo que quedó suelto en la zona de trabajo cuando P18
+    // se llevó el botón a la barra. Y cambia lo que promete: hasta este sprint
+    // decía «después volvés a publicar y a pasar el chequeo» mientras la
+    // derivación aterrizaba DIRECTO en el chequeo. Ahora reabrir aterriza en la
+    // construcción, y la frase describe lo que de verdad pasa.
+    detalle:
+      'Reabrí y rehacé lo que marcó: aterrizás en la construcción, con el checklist y el borrador como estaban y el pedido a la vista en cada pantalla. Después republicás el borrador y volvés a pasar el chequeo final, que se reseteó.',
     corto: 'Correcciones',
   },
   espera: {
@@ -303,7 +305,6 @@ export const FASES_MANUAL: Record<
   { titulo: string; pantallas: readonly PantallaId[] }
 > = {
   ficha: { titulo: 'Ficha', pantallas: ['m1'] },
-  evaluacion: { titulo: 'Evaluación', pantallas: ['m2'] },
   opener: { titulo: 'Opener', pantallas: ['m4'] },
   seguimiento: { titulo: 'Seguimiento', pantallas: ['m5'] },
   brief: { titulo: 'Brief', pantallas: ['m6'] },
@@ -314,20 +315,14 @@ export const FASES_MANUAL: Record<
   agenda: { titulo: 'Agenda', pantallas: ['m16'] },
 }
 
-/**
- * Indicador "paso N de M" POR FASE (contrato del mapa: nunca global). Estados y
- * reentrada no llevan indicador → null.
+/*
+ * P20 — Acá vivía `indicadorDeFase`, el "paso N de M" por fase. Lo reemplazó la
+ * franja del recorrido (`recorrido.ts`): el indicador decía el nombre de la
+ * fase y, cuando la fase tenía más de una pantalla, en cuál ibas — nunca cuántas
+ * fases faltaban ni cuál venía. La franja dice las tres cosas y en el mismo
+ * lugar, así que el rótulo pasó a repetir la mitad de lo que ya se lee al lado.
+ * `FASES_MANUAL` sigue: es de donde la franja saca los nombres.
  */
-export function indicadorDeFase(
-  id: PantallaId,
-): { fase: string; n: number; m: number } | null {
-  const def = PANTALLAS[id]
-  if (def.tipo !== 'manual' || def.fase === null) return null
-  const fase = FASES_MANUAL[def.fase]
-  const n = fase.pantallas.indexOf(id) + 1
-  if (n === 0) return null
-  return { fase: fase.titulo, n, m: fase.pantallas.length }
-}
 
 /** Ruta canónica de una pantalla del manual (ruta paralela al wizard). */
 export function rutaManual(leadId: string, paso: PantallaId): string {
@@ -357,6 +352,31 @@ export type DerivacionManualInput = {
   followUpCount: number
   /** El toque agendado ya venció (nextFollowUpAt <= ahora) — reloj del caller. */
   followUpVencido: boolean
+  /**
+   * P19 — La POSTERGACIÓN comercial ya venció (`status = POSTERGADO` y
+   * `reactivateAt <= ahora`). Mismo nombre, mismo cálculo y mismo reloj del
+   * caller que `HomeLeadInput.postergadoVencido`, del que sale la decisión del
+   * panel de inicio.
+   *
+   * Sin este campo la derivación no podía distinguir un postergado VENCIDO —que
+   * ya volvió a ser trabajo— de uno con la fecha todavía por delante, porque el
+   * status solo dice que HAY una postergación, nunca cuándo termina. El barrido
+   * lo midió: cambiando únicamente el status, POSTERGADO daba la MISMA pantalla
+   * que PROSPECTO en los 20.736 escenarios, así que un lead pausado seguía
+   * mostrando el paso de trabajo que le tocara por stage («Agendá la reunión»,
+   * «Construí la demo», «Aplicá las correcciones»…). No es una fecha nueva: es
+   * el mismo dato que la cabecera de estas pantallas YA muestra.
+   */
+  postergadoVencido: boolean
+  /**
+   * P19 — El dossier tiene al menos un rechazo de Franco (`dossier.rechazos`).
+   * En CONSTRUCCION equivale a «esta vuelta es un re-loop», y no por
+   * aproximación: el único camino a CONSTRUCCION con rechazos registrados es
+   * RECHAZADA→CONSTRUCCION (`reabrirConstruccion`). Distingue el checklist
+   * TILDADO DE LA VUELTA ANTERIOR —que el re-loop preserva a propósito— del
+   * progreso de la vuelta en curso.
+   */
+  hayRechazo: boolean
   /** URL permanente que registra el admin al aprobar (gate del envío). */
   finalUrl: string | null
   /** La demo aprobada ya se envió (dossier.enviadaAt). */
@@ -378,9 +398,8 @@ export type PosicionManual = {
 }
 
 /** Orden canónico del manual — `completadas` se devuelve siempre en este orden. */
-const ORDEN_MANUAL = [
+export const ORDEN_MANUAL = [
   'm1',
-  'm2',
   'm4',
   'm5',
   'm6',
@@ -392,7 +411,7 @@ const ORDEN_MANUAL = [
   'm16',
 ] as const satisfies readonly PantallaId[]
 
-/** Stages donde la evaluación quedó registrada (m1–m2 atrás). */
+/** Stages donde el veredicto quedó registrado (m1, la pantalla fusionada, atrás). */
 const STAGES_POST_EVALUACION: readonly DossierStage[] = [
   'EVALUADA',
   'DESCARTADA',
@@ -428,11 +447,12 @@ function completadasDe(input: DerivacionManualInput): PantallaId[] {
   const done = new Set<PantallaId>()
   const { stage } = input
 
+  // D15-bis — m1 se completa con el VEREDICTO, no con la señal de la ficha.
+  // Antes eran dos pantallas: la ficha con señal cerraba m1 y el veredicto
+  // cerraba m2. Fusionadas, marcar m1 con la sola señal diría «hecho» sobre una
+  // pantalla cuya segunda mitad todavía está en blanco, y la pondría en el rail
+  // de completadas mientras es el paso de ahora.
   if (stage !== null && STAGES_POST_EVALUACION.includes(stage)) {
-    done.add('m1')
-    done.add('m2')
-  } else if (fichaTieneSenal(input.ficha)) {
-    // Todavía en FICHA pero con señal mínima: la ficha ya cumplió su gate.
     done.add('m1')
   }
 
@@ -500,6 +520,33 @@ function posicionDe(
   if (input.status === 'PERDIDO') {
     return { actual: 'archivo', habilitadas: [] }
   }
+  // P19 — PAUSA COMERCIAL vigente: postergado a una fecha que todavía no llegó.
+  // Va acá arriba, junto al otro corte por status, porque es la MISMA precedencia
+  // que el panel de inicio ya aplica (`grupoPara` decide por status antes que por
+  // stage: POSTERGADO no vencido → «seguimiento», y `proximaAccionPara` lo
+  // devuelve `accionable: false`). Sin esta rama el manual derivaba solo por
+  // stage y le proponía al setter el trabajo que le tocara —construir, corregir,
+  // agendar— sobre un negocio que él mismo decidió no tocar hasta esa fecha.
+  //
+  // `m5` queda alcanzable por la misma razón que en el resto de las esperas: la
+  // respuesta puede llegar antes de la fecha y hay que poder registrarla (y ese
+  // registro es, además, lo que saca al lead de la pausa). Las completadas
+  // siguen navegables como en cualquier otra pantalla.
+  //
+  // La PRECEDENCIA es la del panel (`grupoPara`) y la de la causa de espera
+  // (`causaDeEspera`), no una nueva: el cierre por stage (DESCARTADA) y la cola
+  // de Franco (EN_REVISION) ganan sobre la pausa. Sin esas dos exclusiones un
+  // descartado postergado aterrizaba en «espera» en vez del archivo, y una demo
+  // en revisión decía «esperá al negocio» mientras la pelota la tenía Franco —
+  // los dos los encontró el barrido de este mismo sprint, ya introducidos.
+  if (
+    input.status === 'POSTERGADO' &&
+    !input.postergadoVencido &&
+    stage !== 'DESCARTADA' &&
+    stage !== 'EN_REVISION'
+  ) {
+    return { actual: 'espera', habilitadas: ['espera', 'm5'] }
+  }
   const gateAbierto = gateBriefAbierto(input.status, input.caliente)
   const openerPendiente = stage === 'EVALUADA' && !gateAbierto && input.contactos === 0
   const paso = derivarPasoDelLead(stage, gateAbierto, openerPendiente)
@@ -507,19 +554,22 @@ function posicionDe(
     case null:
     case 'FICHA': {
       // La evaluación ocurre con stage=FICHA: registrar el veredicto ES la
-      // transición. Sin señal mínima, m2 es futuro (gate de la ficha).
-      if (!fichaTieneSenal(input.ficha)) {
-        return { actual: 'm1', habilitadas: ['m1'] }
-      }
-      // P4: el viaje a la herramienta y la vuelta con el resultado son UNA
-      // pantalla — no hace falta habilitar un destino aparte para la vuelta (no
-      // había dato que persistiera "ya fui a evaluar": la posición no se guarda).
-      return { actual: 'm2', habilitadas: ['m2'] }
+      // transición, y desde D15-bis ocurre en la MISMA pantalla que la ficha.
+      // Sin bifurcación por señal: no hay un segundo destino al que mandar. El
+      // gate de la señal mínima no se aflojó — sigue donde estaba, en
+      // `registrarEvaluacion` (server) y en el form, que no habilita el
+      // veredicto hasta que la ficha tenga con qué juzgar.
+      return { actual: 'm1', habilitadas: ['m1'] }
     }
     case 'DESCARTADA':
-      // Terminal del archivo: el manual muestra el veredicto registrado; no
-      // hay pantallas por delante. Con la fusión de P4 el veredicto vive en m2.
-      return { actual: 'm2', habilitadas: [] }
+      // Terminal del archivo. Hasta D15-bis aterrizaba en m2 «con el veredicto a
+      // la vista»: una pantalla titulada «llevá la ficha a evaluar y registrá el
+      // veredicto», que a un lead ya cerrado le proponía trabajo que no existe.
+      // Con la fusión el veredicto vive en m1, que queda completada y navegable;
+      // el aterrizaje es el ARCHIVO, la pantalla de cierre que ya sabía decir
+      // «Descartado» y mostrar el motivo (`causa`/`motivo` de la página, misma
+      // regla que el home: `archivoMotivo`).
+      return { actual: 'archivo', habilitadas: [] }
     case 'EVALUADA': {
       if (paso.anchor === 'opener') {
         return { actual: 'm4', habilitadas: ['m4'] }
@@ -550,9 +600,29 @@ function posicionDe(
       const primeraFase = FASE_IDS.find(
         (fase) => !input.progreso.completadas.includes(fase),
       )
+      // P19 — El re-loop reabre una construcción cuyo checklist quedó TILDADO
+      // de la vuelta anterior (`reabrirConstruccion` preserva checklist y
+      // borrador a propósito: son el punto de partida del retrabajo). Leer esos
+      // tildes como progreso DE ESTA vuelta hacía que «Reabrir construcción»
+      // aterrizara en el chequeo final —«Chequeá la demo antes de mandarla»—
+      // sin que se hubiera rehecho nada: la pantalla de correcciones promete
+      // «rehacer lo que Franco marcó, después publicar y después chequear», y la
+      // derivación mandaba directo al último paso de esa frase.
+      //
+      // Con un rechazo en el dossier la construcción reabierta arranca donde
+      // arranca el retrabajo: en la primera pantalla de Construcción. Nada se
+      // bloquea —mc2, el borrador y el chequeo siguen alcanzables, y el pie de
+      // Construcción sirve el enlace directo al chequeo—, y los seis tildes se
+      // conservan intactos (§6-3: auto-reporte, jamás gate).
+      //
+      // LÍMITE CONOCIDO, y es de datos: el producto no registra QUÉ correcciones
+      // se aplicaron, así que la derivación no puede saber cuándo el retrabajo
+      // terminó — mientras la vuelta siga abierta, el paso señalado sigue siendo
+      // la construcción. No se inventa el dato: se declara.
+      const reloop = enConstruccion && input.hayRechazo
       const actual: PantallaId = primeraFase
         ? pantallaDeFaseConstruccion(primeraFase)
-        : enConstruccion
+        : enConstruccion && !reloop
           ? input.draftUrl
             ? 'm14'
             : 'm13'
@@ -625,4 +695,31 @@ export function derivarPantalla(input: DerivacionManualInput): PosicionManual {
     completadas,
     habilitadas: actualAccesible ? habilitadas : [...habilitadas, actual],
   }
+}
+
+/**
+ * P23 — LA SALIDA QUE UNA PANTALLA DE ESTADO OFRECE.
+ *
+ * `espera` no es un paso: es el residuo honesto de un estado donde el setter no
+ * tiene trabajo. Pero ofrece UNA puerta —«¿Respondió o pasó algo antes?
+ * Registralo»— porque si el negocio contesta durante la pausa hay que poder
+ * registrarlo. Esa puerta es legítima y se queda.
+ *
+ * Existe acá, y no dentro del componente, por el ciclo que cerró: el bloque de
+ * avance de `PantallaManual` ofrece «Ir a tu paso actual» en TODA pantalla que
+ * no sea la actual, y en `m5` el paso actual es `espera` — la misma pantalla que
+ * acaba de mandar al setter a `m5`. Las dos derivaciones son correctas por
+ * separado; el ciclo lo hace la composición. Con el predicado en un solo lugar,
+ * la punta que ofrece y la punta que vuelve leen el MISMO dato: la vuelta no se
+ * pinta cuando la ida salió de la pantalla a la que volvería.
+ *
+ * `enlaces-manual.invariant.ts` barre este predicado contra el bloque de avance
+ * y falla si aparece un ciclo de dos nodos nuevo.
+ */
+export function ofreceSalida(
+  desde: PantallaId,
+  hacia: PantallaId,
+  posicion: PosicionManual,
+): boolean {
+  return desde === 'espera' && hacia === 'm5' && posicion.habilitadas.includes('m5')
 }

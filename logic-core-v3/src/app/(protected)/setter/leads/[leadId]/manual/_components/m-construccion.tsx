@@ -7,6 +7,8 @@ import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { ToolGuide } from '@/app/(protected)/setter/_components/tool-guide'
 import { BadgeProvisorio } from '../../_components/badge-provisorio'
 import { ArrancarConstruccion } from './construccion-ctas'
+import { EnlaceChequeoFinal } from './enlace-chequeo'
+import { EnlacePantalla } from './enlace-pantalla'
 import { EscalamientoConstruccion } from './escalamiento-construccion'
 import { FaseAutoReporte } from './fase-auto-reporte'
 
@@ -88,7 +90,7 @@ function BloqueDeFase({ faseId }: { faseId: FaseId }) {
             <li key={item} className="flex gap-2">
               <span
                 aria-hidden
-                className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-cyan-400/60"
+                className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-zinc-600"
               />
               <span>{item}</span>
             </li>
@@ -135,6 +137,95 @@ export function ConstruccionMunicion({ fases }: { fases: readonly FaseId[] }) {
   )
 }
 
+/**
+ * Munición de la REENTRADA (M-R). `mr` no llenaba este slot: servía el bloque
+ * copiable «Bloque para Claude Design» (su contexto, el mismo de mc1/mc2) sin la
+ * herramienta que lo recibe — sin lanzador, sin qué-le-das/qué-te-devuelve y, con
+ * el link todavía sin cargar, sin la salida. El bloque se copiaba y no había a
+ * dónde llevarlo. Es la MISMA pieza de las dos pantallas de Construcción: mr
+ * pertenece a esa fase y se corrige en la misma herramienta.
+ */
+export function ReentradaMunicion() {
+  return <ToolGuide id="claudeDesign" />
+}
+
+/**
+ * Por qué los tildes están apagados, y a QUÉ botón mandar — nombrándolo como se
+ * llama, diciendo dónde vive y, cuando vive en otra pantalla, ENLAZÁNDOLA.
+ *
+ * El motivo era uno solo y fijo: «Primero arrancá la construcción — el botón
+ * está arriba». P5 lo abrió en dos porque mentía en RECHAZADA: ahí el bloque de
+ * BRIEF no se monta —no hay botón arriba—, la reapertura se llama «Reabrir
+ * construcción» (otra action, otra transición: RECHAZADA→CONSTRUCCION) y vive en
+ * otra pantalla, «Correcciones», que además NO está en el rail de Construcción
+ * (`PANTALLAS_CONSTRUCCION` son mc1 y mc2).
+ *
+ * Lo que quedaba abierto es lo que cierra este sprint: nombrar «Correcciones» no
+ * la vuelve alcanzable. Desde mc1/mc2 no había un solo control que la nombrara —
+ * el único camino era el «Ir a tu paso actual» genérico del bloque de avance, que
+ * no dice a dónde lleva. Ahora el nombre ES el enlace (`EnlacePantalla`, que lo
+ * lee del registro de pantallas) y la accesibilidad la decide el server, no una
+ * suposición: RECHAZADA parecía garantizar `mr`, y NO lo hace — un lead PERDIDO
+ * con el dossier en RECHAZADA cae a `archivo` (`posicionDe` corta por status
+ * ANTES de derivar por stage), mc1/mc2 siguen navegables como completadas y el
+ * salto a `mr` habría rebotado. Lo encontró el invariante antes de que saliera:
+ * por eso `accesible` viaja como dato y, sin acceso, el nombre se dice igual con
+ * el motivo al lado.
+ *
+ * Y va UNA vez, arriba del grupo, no dentro de cada tilde: repetido en los tres
+ * era el mismo párrafo tres veces —y un `<a>` dentro de un `<button>` no es
+ * navegable—. Mismo criterio que la explicación del auto-reporte de más abajo.
+ */
+/*
+ * NOTA de redacción, y no es cosmética: `expectToast` de la suite busca el texto
+ * del toast con `page.getByText(...)` sobre la PÁGINA ENTERA, no dentro del
+ * contenedor de toasts. Una copy que contenga la frase de un toast la satisface
+ * antes del click y deja pasar la aserción que viene después (medido: «con la
+ * construcción arrancada» hacía verde el `expectToast(/Construcción arrancada/i)`
+ * de 01-flow · B5 y el test leía el dossier antes de la transición). Por eso el
+ * verbo va en subjuntivo —«cuando arranques», «cuando reabrís»—, que además deja
+ * las dos ramas paralelas. El agujero del helper queda reportado aparte.
+ */
+function MotivoDelTilde({
+  leadId,
+  stage,
+  correccionesAccesible,
+}: {
+  leadId: string
+  stage: DossierStage | null
+  correccionesAccesible: boolean
+}) {
+  if (stage === 'BRIEF') {
+    return (
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        Los tildes se abren cuando arranques la construcción, con el botón
+        «Arrancar construcción».
+      </p>
+    )
+  }
+  if (stage === 'RECHAZADA') {
+    return (
+      <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+        Los tildes se abren cuando reabrís la construcción — el botón «Reabrir construcción»
+        está en{' '}
+        <EnlacePantalla
+          leadId={leadId}
+          destino="mr"
+          accesible={correccionesAccesible}
+          cuandoFalta="este negocio ya está cerrado, no hay retrabajo que hacer"
+          etiqueta="corto"
+        />
+        .
+      </p>
+    )
+  }
+  return (
+    <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
+      Las fases se marcan mientras la demo está en construcción.
+    </p>
+  )
+}
+
 /** Registro: UN tilde de auto-reporte por fase de la pantalla (mismo camino que
  * el checklist del wizard, sin gatear nada) + las capas que el corte 5.6 trae
  * del wizard: el CTA «Arrancar construcción» mientras el dossier sigue en BRIEF
@@ -155,13 +246,22 @@ export function ConstruccionRegistro({
   fases,
   completadas,
   stage,
+  draftUrl,
   escaladoAt,
   escaladoNota,
+  correccionesAccesible,
+  chequeoAccesible,
 }: {
   leadId: string
   fases: readonly FaseId[]
   completadas: FaseId[]
   stage: DossierStage | null
+  /** ¿La posición derivada alcanza «Correcciones»? (lo decide el server). */
+  correccionesAccesible: boolean
+  /** ¿Alcanza el destino del enlace al chequeo final — m14 con borrador, m13 sin él? */
+  chequeoAccesible: boolean
+  /** Solo para el gate del enlace al chequeo final — acá no se escribe nada. */
+  draftUrl: string | null
   escaladoAt: string | null
   escaladoNota: string | null
 }) {
@@ -169,7 +269,7 @@ export function ConstruccionRegistro({
   return (
     <div className="space-y-4">
       {stage === 'BRIEF' && (
-        <div className="space-y-3 rounded-xl border border-cyan-400/20 bg-cyan-500/[0.05] p-4">
+        <div className="space-y-3">
           <p className="max-w-xl text-xs leading-relaxed text-zinc-300">
             El brief está listo — arrancá la construcción para habilitar el registro del
             borrador. Tildar fases no la arranca sola.
@@ -178,10 +278,24 @@ export function ConstruccionRegistro({
         </div>
       )}
 
+      {!puedeGuardar && (
+        <MotivoDelTilde
+          leadId={leadId}
+          stage={stage}
+          correccionesAccesible={correccionesAccesible}
+        />
+      )}
+
       {puedeGuardar && (
         <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
           Es auto-reporte: tildar no bloquea nada ni te hace avanzar — hacé las fases en el
-          orden que te sirva. El único chequeo que gatea es el final.
+          orden que te sirva. El único chequeo que gatea es{' '}
+          <EnlaceChequeoFinal
+            leadId={leadId}
+            draftUrl={draftUrl}
+            destinoAccesible={chequeoAccesible}
+          />
+          .
         </p>
       )}
 
@@ -194,7 +308,6 @@ export function ConstruccionRegistro({
               titulo={shellDeFase(faseId)?.titulo ?? faseId}
               completadas={completadas}
               puedeGuardar={puedeGuardar}
-              motivo="Primero arrancá la construcción — el botón está arriba."
             />
           </li>
         ))}

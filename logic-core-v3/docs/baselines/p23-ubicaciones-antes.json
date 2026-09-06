@@ -1,0 +1,135 @@
+{
+  "base": "http://127.0.0.1:3023",
+  "hallazgos": [
+    {
+      "ruta": "/setter",
+      "frase": "Quedan 42 más para trabajar, en tu cartera (acá abajo).",
+      "fraseTop": 805,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035eba00099fl8patqziox/manual/m5",
+      "frase": "INPUT PARA EL GEM DE OUTREACH — objeción de QA-W Evaluada Gate Cerrado Pedido: el negocio preguntó por precio/condiciones u objetó. Redactá una respuesta corta que NO cotice ni negocie nada: redirigí a coordinar una reunión con el equipo. OBJECIÓN RECIBIDA (pegala acá abajo antes de enviar): >>>",
+      "fraseTop": 1465,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035efw000d9fl8j70m1301/manual/m6",
+      "frase": "Qué le das: El bloque «para el Gem de diseño» que está acá arriba (la ficha y la evaluación juntas).",
+      "fraseTop": 868,
+      "referente": "para el Gem de diseño",
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035efw000d9fl8j70m1301/manual/m6",
+      "frase": "Qué te devuelve: El brief estructurado: título, concepto, secciones en orden y CTA. Lo pegás y completás los campos de abajo.",
+      "fraseTop": 896,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc1",
+      "frase": "Copiá el bloque «para Claude Design» (está acá arriba) y pegalo ahí como primer mensaje.",
+      "fraseTop": 830,
+      "referente": "para Claude Design",
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc1",
+      "frase": "Qué le das: El bloque «para Claude Design» de acá arriba (el brief + los materiales reales del negocio), como primer mensaje.",
+      "fraseTop": 1316,
+      "referente": "para Claude Design",
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc1",
+      "frase": "Los tildes se abren cuando arranques la construcción — el botón «Arrancar construcción» está acá arriba.",
+      "fraseTop": 1496,
+      "referente": "Arrancar construcción",
+      "referenteTop": 710,
+      "referentePosition": "sticky",
+      "referenteEncontrado": true,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc2",
+      "frase": "Qué le das: El bloque «para Claude Design» de acá arriba (el brief + los materiales reales del negocio), como primer mensaje.",
+      "fraseTop": 2183,
+      "referente": "para Claude Design",
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035ekl000h9fl8l7hn1j7r/manual/mc2",
+      "frase": "Los tildes se abren cuando arranques la construcción — el botón «Arrancar construcción» está acá arriba.",
+      "fraseTop": 2363,
+      "referente": "Arrancar construcción",
+      "referenteTop": 710,
+      "referentePosition": "sticky",
+      "referenteEncontrado": true,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035eyw000t9fl8qzhjluhh/manual/m13",
+      "frase": "3.Abrí Netlify Drop (el botón de acá arriba) y arrastrá el archivo (o la carpeta) ahí.",
+      "fraseTop": 856,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035eyw000t9fl8qzhjluhh/manual/m13",
+      "frase": "4.Copiá la URL que te da Netlify y pegala acá abajo.",
+      "fraseTop": 882,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035epe000l9fl87zbo742h/manual/m14",
+      "frase": "Abrilo en otra pestaña —mejor en incógnito y en tu celular— y chequealo punto por punto contra la lista de abajo.",
+      "fraseTop": 382,
+      "referente": null,
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    },
+    {
+      "ruta": "/setter/leads/cmr035f8m00119fl8d87obbrh/manual/mr",
+      "frase": "Qué le das: El bloque «para Claude Design» de acá arriba (el brief + los materiales reales del negocio), como primer mensaje.",
+      "fraseTop": 1049,
+      "referente": "para Claude Design",
+      "referenteTop": null,
+      "referentePosition": null,
+      "referenteEncontrado": false,
+      "pliegue": 788
+    }
+  ]
+}

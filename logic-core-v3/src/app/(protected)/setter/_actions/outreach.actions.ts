@@ -108,7 +108,9 @@ export async function registrarOpener(
 
     const dossier = await getOwnedDossier(leadId.data, userId)
     if (!dossier || dossier.stage === 'FICHA') {
-      return fail('Primero evaluá el lead (Evaluación) — el opener sale con veredicto')
+      // P9/este sprint: el paréntesis nombraba la pantalla y el mensaje ya dice
+      // qué falta. A dónde ir lo resuelve el panel, no un nombre interno.
+      return fail('Primero evaluá el lead — el opener sale con veredicto')
     }
     if (dossier.stage === 'DESCARTADA') {
       return fail('Este lead quedó descartado en la evaluación')

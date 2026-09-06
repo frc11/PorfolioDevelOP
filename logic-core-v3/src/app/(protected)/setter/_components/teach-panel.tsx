@@ -84,9 +84,18 @@ function EjemploContraste({ ejemplo }: { ejemplo: EjemploContrastado }) {
 export function TeachPanel({
   id,
   collapsible = true,
+  titulo = '¿Por qué importa?',
 }: {
   id: GuiaPasoId
   collapsible?: boolean
+  /**
+   * Rótulo del panel. El default sirve al uso INLINE (ya vive dentro de un
+   * plegable que promete: el bloque de objeciones de m5). Plegado, en cambio, el
+   * rótulo es la única promesa que hay: «¿Por qué importa?» dice que adentro hay
+   * un porqué, pero no de qué — y un título que no dice qué hay adentro es un
+   * plegable que no se abre. Ahí el llamador pasa el suyo.
+   */
+  titulo?: string
 }) {
   const guia = GUIA_PASOS[id]
   // Sin porqué ni ejemplos no hay nada que enseñar — no renderiza un panel vacío.
@@ -121,7 +130,7 @@ export function TeachPanel({
       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
         <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
           <Lightbulb size={13} strokeWidth={1.5} aria-hidden={true} className="text-zinc-400" />
-          ¿Por qué importa?
+          {titulo}
         </p>
         {cuerpo}
       </div>
@@ -132,7 +141,7 @@ export function TeachPanel({
     <details className="rounded-xl border border-white/10 bg-white/[0.02]">
       <summary className="flex cursor-pointer list-none items-center gap-1.5 px-4 py-3 text-xs font-semibold text-zinc-200 transition-colors hover:text-white [&::-webkit-details-marker]:hidden">
         <Lightbulb size={13} strokeWidth={1.5} aria-hidden={true} className="text-zinc-400" />
-        ¿Por qué importa?
+        {titulo}
       </summary>
       <div className="border-t border-white/[0.06] px-4 py-3.5">{cuerpo}</div>
     </details>

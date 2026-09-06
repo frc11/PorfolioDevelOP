@@ -48,6 +48,17 @@ export type TurnoInput = {
    */
   finalUrl?: string | null
   /**
+   * P19 — `status = POSTERGADO` cuya reactivación YA venció. Discrimina las dos
+   * postergaciones que el status solo no separa: la vencida ya volvió a ser
+   * trabajo; la que tiene la fecha por delante es una espera con nombre propio.
+   *
+   * `undefined` = la superficie no lo proyecta (el panel de inicio arma sus
+   * conteos sin él). Igual que con `finalUrl`: ahí esa rama no se puede afirmar
+   * y no se afirma — la causa se cae a la que indique el resto del estado, que
+   * es la que esas superficies ya venían mostrando.
+   */
+  postergadoVencido?: boolean
+  /**
    * Si hay algo para hacer AHORA, según lo que el producto YA decidió: en el
    * panel es `HomeLead.accionable`; en el manual, que la pantalla derivada sea
    * de acción y no de estado. Este módulo TRADUCE esa decisión a un turno — no
@@ -57,34 +68,115 @@ export type TurnoInput = {
 }
 
 /**
- * Status donde el lead ya no lo mueve el setter: la reunión la corre Franco, y
- * el cierre (ganado o perdido) lo decide él desde el admin — jamás se automatiza.
+ * QUÉ se está esperando. El turno dice de quién es la pelota; la causa dice qué
+ * tiene que pasar para que vuelva — y es lo que faltaba: cinco situaciones muy
+ * distintas caían todas en «Le toca a Franco» y mostraban su MISMA frase. El
+ * setter no podía saber si esperaba horas o días, ni si había algo destrabable.
+ *
+ * Un turno agrupa varias causas (`TURNO_DE_CAUSA`, abajo); la causa es el dato
+ * fino, y `turnoDelLead` se DERIVA de ella — así el turno y su porqué no pueden
+ * desincronizarse, que es exactamente lo que pasó cuando cada pantalla escribía
+ * su propia frase de espera.
  */
-const STATUS_DE_FRANCO: readonly LeadStatus[] = ['CALL_AGENDADA', 'CERRADO', 'PERDIDO']
+export type CausaEspera =
+  /** La reunión la corre Franco (el status ya está agendado o cerrado con call). */
+  | 'reunion'
+  /** El cierre —ganado o perdido— lo decide él desde el admin, jamás se automatiza. */
+  | 'cierre'
+  /** El veredicto ya descartó el negocio: no hay nada por delante. */
+  | 'descarte'
+  /** La demo está en la cola de revisión de Franco. */
+  | 'revision'
+  /** Aprobada, pero él todavía no cargó su link permanente: trabado de este lado. */
+  | 'linkPermanente'
+  /** No es espera: hay algo trabado esperando al setter. */
+  | 'accionPropia'
+  /** El propio setter pausó el contacto hasta una fecha que todavía no llegó. */
+  | 'postergacion'
+  /** La conversación está del lado del negocio. */
+  | 'respuesta'
 
 /**
- * De quién es el turno. El orden de los `if` ES la precedencia, y lo estructural
+ * Status donde el lead ya no lo mueve el setter, con SU causa: la reunión la
+ * corre Franco, y el cierre (ganado o perdido) lo decide él desde el admin.
+ * Antes era una lista plana de tres — la lista decía QUIÉN y perdía el QUÉ.
+ */
+const CAUSA_POR_STATUS: Partial<Record<LeadStatus, CausaEspera>> = {
+  CALL_AGENDADA: 'reunion',
+  CERRADO: 'cierre',
+  PERDIDO: 'cierre',
+}
+
+/** A qué turno pertenece cada causa. N:1 — varias causas, un solo turno. */
+export const TURNO_DE_CAUSA = {
+  reunion: 'franco',
+  cierre: 'franco',
+  descarte: 'franco',
+  revision: 'franco',
+  linkPermanente: 'franco',
+  accionPropia: 'setter',
+  // La pelota está afuera igual que en `respuesta` —el turno no cambia—, pero el
+  // porqué sí: acá el contacto no está esperando una respuesta, está pausado por
+  // decisión del setter hasta una fecha. Comparten turno y no texto: es
+  // exactamente para lo que la causa se separó del turno.
+  postergacion: 'negocio',
+  respuesta: 'negocio',
+} as const satisfies Record<CausaEspera, Turno>
+
+/**
+ * Qué se está esperando. El orden de los `if` ES la precedencia, y lo estructural
  * va primero: si la demo está en la cola de Franco, no importa qué más pase —
  * hasta que él la suelte no hay nada que el setter ni el negocio puedan hacer.
  */
-export function turnoDelLead(input: TurnoInput): Turno {
+export function causaDeEspera(input: TurnoInput): CausaEspera {
   // 1) Lo que corre por dentro. La revisión, el link permanente, la reunión y el
   //    cierre son de Franco: el setter no los apura y el negocio no los conoce.
-  if (STATUS_DE_FRANCO.includes(input.status)) return 'franco'
-  if (input.stage === 'DESCARTADA') return 'franco'
-  if (input.stage === 'EN_REVISION') return 'franco'
+  const porStatus = CAUSA_POR_STATUS[input.status]
+  if (porStatus) return porStatus
+  if (input.stage === 'DESCARTADA') return 'descarte'
+  if (input.stage === 'EN_REVISION') return 'revision'
   // El caso que el manual tuvo que enseñar a diagnosticar leyendo una etiqueta:
   // Franco aprobó la demo pero todavía no cargó su link permanente. El negocio
   // no tiene nada que hacer acá — decirle al setter que espere una respuesta es
   // mandarlo a mirar Instagram por algo que ya llegó.
-  if (input.stage === 'APROBADA' && input.finalUrl === null) return 'franco'
+  if (input.stage === 'APROBADA' && input.finalUrl === null) return 'linkPermanente'
 
-  // 2) Algo quedó trabado esperándolo a él. No es espera: es trabajo detenido.
-  if (input.accionPendiente) return 'setter'
+  // 2) La pausa que puso el propio setter. Va antes de `accionPendiente` porque
+  //    es justamente la razón por la que HOY no hay acción: postergar es decidir
+  //    no tocar el lead hasta esa fecha. Y va después del bloque de Franco, que
+  //    sigue ganando: una demo en su cola no la destraba ninguna postergación.
+  if (input.status === 'POSTERGADO' && input.postergadoVencido === false) {
+    return 'postergacion'
+  }
 
-  // 3) Resto: la conversación está del lado del negocio.
-  return 'negocio'
+  // 3) Algo quedó trabado esperándolo a él. No es espera: es trabajo detenido.
+  if (input.accionPendiente) return 'accionPropia'
+
+  // 4) Resto: la conversación está del lado del negocio.
+  return 'respuesta'
 }
+
+/**
+ * De quién es el turno. Una sola decisión: la causa. El turno es su traducción
+ * a las tres pelotas posibles — no una segunda cadena de `if` que pueda quedar
+ * diciendo otra cosa que la causa que la pantalla muestra al lado.
+ */
+export function turnoDelLead(input: TurnoInput): Turno {
+  return TURNO_DE_CAUSA[causaDeEspera(input)]
+}
+
+/**
+ * Lo que le falta a Franco cuando la demo ya está aprobada. Es UNA cadena y vive
+ * acá —módulo hoja, alcanzable desde `flow.ts` bajo el harness ts-node— porque
+ * la COMPARTEN dos superficies que no comparten grafo de imports: la frase larga
+ * del envío (`GUIA_ENVIO.espera.aprobadaSinLink`, que la enfatiza en el medio) y
+ * la sugerencia CORTA de la tarjeta de cartera, que no puede llevar la frase
+ * entera —son setenta y seis cards—. El texto no se reescribió: la frase larga
+ * ya lo decía bien, así que se extrajo el fragmento y las dos lo referencian. Si
+ * Franco lo edita, las dos lo siguen, y no puede quedar una diciendo una cosa y
+ * la otra otra.
+ */
+export const FALTA_LINK_PERMANENTE = 'todavía no cargó su link permanente'
 
 export type TextoTurno = {
   /**
@@ -109,13 +201,13 @@ export const TEXTO_TURNO: Record<Turno, TextoTurno> = {
     chip: 'esperando al negocio',
     titulo: 'Le toca al negocio',
     detalle:
-      'Puede contestar hoy, en dos semanas o no contestar nunca — eso no lo manejás vos. Cuando toque un toque te lo traemos al foco; mientras tanto, trabajá otro negocio.',
+      'Puede contestar hoy, en dos semanas o no contestar nunca — eso no lo manejás vos. Cuando toque un toque vuelve a tu cola de trabajo; mientras tanto, trabajá otro negocio.',
   },
   franco: {
     chip: 'esperando a Franco',
     titulo: 'Le toca a Franco',
     detalle:
-      'Está de este lado y va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas — cuando lo resuelva, el negocio vuelve solo a tu foco.',
+      'Está de este lado y va a salir: es cuestión de tiempo, no de suerte. No hace falta que le avises ni que lo persigas — cuando lo resuelva, el negocio vuelve solo a tu cola de trabajo.',
   },
   setter: {
     chip: 'esperándote a vos',

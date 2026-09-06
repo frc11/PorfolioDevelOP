@@ -1,0 +1,421 @@
+{
+  "base": "http://127.0.0.1:3021",
+  "filas": [
+    {
+      "pantalla": "m1",
+      "lead": "QA-W Ficha Completa",
+      "ancho": "1440",
+      "urlFinal": "m1",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener · todavía no | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "m4",
+      "lead": "QA-W Postergado Vencido",
+      "ancho": "1440",
+      "urlFinal": "m4",
+      "destinos": [
+        "m1",
+        "m4"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento · todavía no | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "m5",
+      "lead": "QA-W Evaluada Gate Cerrado",
+      "ancho": "1440",
+      "urlFinal": "m5",
+      "destinos": [
+        "m1",
+        "m4",
+        "m5"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief · todavía no | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "m6",
+      "lead": "QA-W Evaluada Gate Abierto",
+      "ancho": "1440",
+      "urlFinal": "m6",
+      "destinos": [
+        "m1",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción · todavía no | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "mc1",
+      "lead": "QA-W Brief",
+      "ancho": "1440",
+      "urlFinal": "mc1",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador · todavía no | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "mc2",
+      "lead": "QA-W Brief",
+      "ancho": "1440",
+      "urlFinal": "mc2",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador · todavía no | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "m13",
+      "lead": "QA-W Construccion",
+      "ancho": "1440",
+      "urlFinal": "m13",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío · todavía no | Agenda"
+    },
+    {
+      "pantalla": "m14",
+      "lead": "QA-W Construccion",
+      "ancho": "1440",
+      "urlFinal": "m14",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío · todavía no | Agenda"
+    },
+    {
+      "pantalla": "m15",
+      "lead": "QA-W Aprobada Gate Abierto",
+      "ancho": "1440",
+      "urlFinal": "m15",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda · todavía no"
+    },
+    {
+      "pantalla": "m16",
+      "lead": "QA-W Demo Enviada",
+      "ancho": "1440",
+      "urlFinal": "m16",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m16",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "mr",
+      "lead": "QA-W Rechazada",
+      "ancho": "1440",
+      "urlFinal": "mr",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final · todavía no | Envío | Agenda"
+    },
+    {
+      "pantalla": "espera",
+      "lead": "QA-W Aprobada Gate Cerrado",
+      "ancho": "1440",
+      "urlFinal": "espera",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "revision",
+      "lead": "QA-W En Revision",
+      "ancho": "1440",
+      "urlFinal": "revision",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "archivo",
+      "lead": "QA-W Descartada",
+      "ancho": "1440",
+      "urlFinal": "archivo",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | Seguimiento | Brief | Construcción | Borrador | Chequeo final | Envío | Agenda"
+    },
+    {
+      "pantalla": "m1",
+      "lead": "QA-W Ficha Completa",
+      "ancho": "390",
+      "urlFinal": "m1",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": "Ficha | Opener | 3 | 4 | 5 | 6 | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "m4",
+      "lead": "QA-W Postergado Vencido",
+      "ancho": "390",
+      "urlFinal": "m4",
+      "destinos": [
+        "m1",
+        "m4"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | Opener | Seguimiento | 4 | 5 | 6 | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "m5",
+      "lead": "QA-W Evaluada Gate Cerrado",
+      "ancho": "390",
+      "urlFinal": "m5",
+      "destinos": [
+        "m1",
+        "m4",
+        "m5"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " |  | Seguimiento | Brief | 5 | 6 | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "m6",
+      "lead": "QA-W Evaluada Gate Abierto",
+      "ancho": "390",
+      "urlFinal": "m6",
+      "destinos": [
+        "m1",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 | Brief | Construcción | 6 | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "mc1",
+      "lead": "QA-W Brief",
+      "ancho": "390",
+      "urlFinal": "mc1",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | Construcción | Borrador | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "mc2",
+      "lead": "QA-W Brief",
+      "ancho": "390",
+      "urlFinal": "mc2",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | Construcción | Borrador | 7 | 8 | 9"
+    },
+    {
+      "pantalla": "m13",
+      "lead": "QA-W Construccion",
+      "ancho": "390",
+      "urlFinal": "m13",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | Construcción |  | Chequeo final | 8 | 9"
+    },
+    {
+      "pantalla": "m14",
+      "lead": "QA-W Construccion",
+      "ancho": "390",
+      "urlFinal": "m14",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | Construcción |  | Chequeo final | 8 | 9"
+    },
+    {
+      "pantalla": "m15",
+      "lead": "QA-W Aprobada Gate Abierto",
+      "ancho": "390",
+      "urlFinal": "m15",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | 5 |  |  | Envío | Agenda"
+    },
+    {
+      "pantalla": "m16",
+      "lead": "QA-W Demo Enviada",
+      "ancho": "390",
+      "urlFinal": "m16",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m16",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | 5 |  |  |  | Agenda"
+    },
+    {
+      "pantalla": "mr",
+      "lead": "QA-W Rechazada",
+      "ancho": "390",
+      "urlFinal": "mr",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | Construcción |  | Chequeo final | 8 | 9"
+    },
+    {
+      "pantalla": "espera",
+      "lead": "QA-W Aprobada Gate Cerrado",
+      "ancho": "390",
+      "urlFinal": "espera",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | 5 |  |  | 8 | 9"
+    },
+    {
+      "pantalla": "revision",
+      "lead": "QA-W En Revision",
+      "ancho": "390",
+      "urlFinal": "revision",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 |  | 5 |  |  | 8 | 9"
+    },
+    {
+      "pantalla": "archivo",
+      "lead": "QA-W Descartada",
+      "ancho": "390",
+      "urlFinal": "archivo",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": true,
+      "altoFranja": 26,
+      "textoFranja": " | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9"
+    }
+  ]
+}

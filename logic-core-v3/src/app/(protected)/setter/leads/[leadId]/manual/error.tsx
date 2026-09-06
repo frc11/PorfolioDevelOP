@@ -38,7 +38,7 @@ export default function ManualDelLeadError({
       icon={AlertTriangle}
       size="lg"
       title="No se pudo abrir el manual de este lead"
-      description="No es culpa tuya. Probá de nuevo; si sigue pasando, volvé a tu cartera y seguí con otro lead mientras le avisás a Franco."
+      description="No es culpa tuya. Probá de nuevo; si sigue pasando, volvé a tu día y seguí con otro lead mientras le avisás a Franco."
       action={
         <div className="flex flex-wrap items-center justify-center gap-3">
           <Button variant="secondary" onClick={reset}>
@@ -48,7 +48,7 @@ export default function ManualDelLeadError({
             href="/setter"
             className="inline-flex items-center rounded-2xl px-4 py-2.5 text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-200"
           >
-            Volver a tu cartera
+            Volver a tu día
           </Link>
         </div>
       }

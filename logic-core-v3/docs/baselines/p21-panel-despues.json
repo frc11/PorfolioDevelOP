@@ -1,0 +1,158 @@
+[
+  {
+    "ancho": "1440",
+    "email": "setter-qa@develop.test",
+    "pliegue": 788,
+    "altoTotal": 1873,
+    "orden": [
+      "cabecera",
+      "cola",
+      "foco",
+      "cartera",
+      "novedades",
+      "misNumeros",
+      "progreso"
+    ],
+    "bloques": {
+      "cabecera": {
+        "top": 32,
+        "alto": 60,
+        "entra": true
+      },
+      "cola": {
+        "top": 124,
+        "alto": 697,
+        "entra": true
+      },
+      "foco": {
+        "top": 156,
+        "alto": 247,
+        "entra": true
+      },
+      "enEspera": null,
+      "novedades": {
+        "top": 930,
+        "alto": 582,
+        "entra": false
+      },
+      "cartera": {
+        "top": 853,
+        "alto": 45,
+        "entra": false
+      },
+      "misNumeros": {
+        "top": 1544,
+        "alto": 187,
+        "entra": false
+      },
+      "progreso": {
+        "top": 1763,
+        "alto": 79,
+        "entra": false
+      }
+    },
+    "censo": {
+      "itemsCola": 4,
+      "avisos": 4,
+      "numeros": 13,
+      "marcaLeadOS": 1,
+      "subtitulos": 0,
+      "eyebrows": 0,
+      "botonesTrabajar": 8,
+      "soltarFoco": 0
+    },
+    "numerosTexto": [
+      "49 para trabajar",
+      "84",
+      "37",
+      "hace 3 días",
+      "hace 3 días",
+      "hace 43 días",
+      "×32",
+      "hace 3 h",
+      "hace 83 días",
+      "77",
+      "6",
+      "3",
+      "2"
+    ]
+  },
+  {
+    "ancho": "390",
+    "email": "setter-qa@develop.test",
+    "pliegue": 688,
+    "altoTotal": 2208,
+    "orden": [
+      "cabecera",
+      "cola",
+      "foco",
+      "cartera",
+      "novedades",
+      "misNumeros",
+      "progreso"
+    ],
+    "bloques": {
+      "cabecera": {
+        "top": 32,
+        "alto": 52,
+        "entra": true
+      },
+      "cola": {
+        "top": 116,
+        "alto": 880,
+        "entra": true
+      },
+      "foco": {
+        "top": 148,
+        "alto": 234,
+        "entra": true
+      },
+      "enEspera": null,
+      "novedades": {
+        "top": 1105,
+        "alto": 710,
+        "entra": false
+      },
+      "cartera": {
+        "top": 1028,
+        "alto": 45,
+        "entra": false
+      },
+      "misNumeros": {
+        "top": 1847,
+        "alto": 187,
+        "entra": false
+      },
+      "progreso": {
+        "top": 2066,
+        "alto": 111,
+        "entra": false
+      }
+    },
+    "censo": {
+      "itemsCola": 4,
+      "avisos": 4,
+      "numeros": 13,
+      "marcaLeadOS": 1,
+      "subtitulos": 0,
+      "eyebrows": 0,
+      "botonesTrabajar": 8,
+      "soltarFoco": 0
+    },
+    "numerosTexto": [
+      "49 para trabajar",
+      "84",
+      "37",
+      "hace 3 días",
+      "hace 3 días",
+      "hace 43 días",
+      "×32",
+      "hace 3 h",
+      "hace 83 días",
+      "77",
+      "6",
+      "3",
+      "2"
+    ]
+  }
+]

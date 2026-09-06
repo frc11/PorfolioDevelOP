@@ -13,7 +13,7 @@ import {
   parseFicha,
   parseProgreso,
   parseSelfCheck,
-  ultimoRechazo,
+  partirRechazos,
 } from '@/lib/leados/flow'
 import { derivarPantalla, type PosicionManual } from '@/lib/leados/manual'
 import { contarDmsHoy, listOwnedLeadActivities } from '@/lib/leados/outreach'
@@ -33,8 +33,11 @@ export type ManualDelLead = {
   posicion: PosicionManual
   /** ISO del próximo toque agendado (estado de espera) — null si no hay. */
   proximoToque: string | null
-  /** Último rechazo de Franco — la nota al frente de la reentrada M-R. */
+  /** Último rechazo de Franco — la nota al frente de TODO el retrabajo (F2). */
   rechazo: Rechazo | null
+  /** F2 — Las vueltas ANTERIORES (más reciente primero), contexto secundario del
+   * bloque. `[]` si es la primera: sin previos el bloque no promete historial. */
+  rechazosPrevios: Rechazo[]
   /** M1 — identidad + links del negocio (mismo shape que consume el wizard). */
   leadCopy: CopyBlockLead
   /** M1 — la ficha guardada, re-servida tal cual llega al wizard. */
@@ -80,10 +83,18 @@ export type ManualDelLead = {
    * (toques hechos, próximo toque, cadencia agotada). MISMO `countFollowUps` que
    * la maquinaria; el manual solo PRESENTA la cadencia, jamás la calcula. */
   followUpCount: number
-  /** M5 — ISO de la reactivación de un lead POSTERGADO (`lead.reactivateAt`); null
-   * si no está postergado. El panel lo retoma en esa fecha por el reloj existente
-   * — el manual solo lo muestra, no re-implementa ese regreso al foco. */
+  /** M5 + cabecera — ISO de la reactivación de un lead POSTERGADO (`lead.reactivateAt`);
+   * null si no está postergado. El panel lo retoma en esa fecha por el reloj existente
+   * — el manual solo lo muestra, no re-implementa ese regreso al foco. Desde el
+   * sprint de los datos que viajan lo lee TAMBIÉN la cabecera: es la única
+   * superficie que está en todas las pantallas del lead, así que la fecha se lee
+   * caiga donde caiga el postergado (m5, `espera`, o donde lo deje su stage). */
   reactivateAt: string | null
+  /** Cabecera/M5 — esa fecha ya pasó. MISMO criterio de reloj request-time que
+   * `followUpVencido` (fuera del render): el cron avisa pero NO reactiva, así que
+   * el lead sigue POSTERGADO y las dos situaciones se ven idénticas si nadie las
+   * distingue. `false` cuando el lead no está postergado. */
+  postergadoVencido: boolean
   /** M5/M16 — teléfono del lead (A-14): re-servido para seguir la conversación o
    * coordinar el horario sin volver a la ficha. Mismo `lead.phone` que el wizard. */
   leadPhone: string | null
@@ -152,6 +163,11 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   const followUpVencido = lead.nextFollowUpAt
     ? lead.nextFollowUpAt.getTime() <= Date.now()
     : false
+  // Mismo reloj, misma regla que `buildHomeLeads`: postergado cuya fecha ya pasó.
+  const postergadoVencido =
+    lead.status === 'POSTERGADO' &&
+    lead.reactivateAt !== null &&
+    lead.reactivateAt.getTime() <= Date.now()
 
   const stage = dossier?.stage ?? null
   const ficha = parseFicha(dossier?.fichaJson ?? null)
@@ -167,6 +183,9 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
   // Hoisted: el booking alimenta la derivación (m16 completada) Y el resumen del
   // traspaso de M16. Un solo parse de `agendaJson`.
   const agenda = parseAgenda(dossier?.agendaJson ?? null)
+  // F2 — Un solo parse del historial de rechazos: el último es la guía vigente y
+  // los anteriores son el contexto secundario del bloque.
+  const rechazos = partirRechazos(dossier?.rechazos ?? null)
 
   // El opener queda como nota del PRIMER contacto (`registrarOpener`, prefijo
   // `Opener: `) — con `actividades` ordenada desc, es la más VIEJA (última del
@@ -203,6 +222,13 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     contactos,
     followUpCount,
     followUpVencido,
+    // P19 — El estado de la postergación, que hasta acá se calculaba tres líneas
+    // más arriba SOLO para la cabecera: la derivación no lo recibía y por eso un
+    // lead pausado seguía mostrando el paso de trabajo de su stage.
+    postergadoVencido,
+    // P19 — Un rechazo en el dossier: en CONSTRUCCION es la marca del re-loop
+    // (checklist tildado de la vuelta anterior). Ya está parseado arriba.
+    hayRechazo: rechazos.ultimo !== null,
     finalUrl: dossier?.finalUrl ?? null,
     demoEnviada: Boolean(dossier?.enviadaAt),
   })
@@ -212,7 +238,8 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     stage,
     posicion,
     proximoToque: lead.nextFollowUpAt?.toISOString() ?? null,
-    rechazo: ultimoRechazo(dossier?.rechazos ?? null),
+    rechazo: rechazos.ultimo,
+    rechazosPrevios: rechazos.previos,
     leadCopy: {
       businessName: lead.businessName,
       industry: lead.industry,
@@ -236,6 +263,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     demoEnviadaAt: dossier?.enviadaAt?.toISOString() ?? null,
     followUpCount,
     reactivateAt: lead.reactivateAt?.toISOString() ?? null,
+    postergadoVencido,
     leadPhone: lead.phone,
     agenda,
     contactName: lead.contactName,

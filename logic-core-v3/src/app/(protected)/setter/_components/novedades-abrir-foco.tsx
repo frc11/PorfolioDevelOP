@@ -15,17 +15,34 @@ import { anclarFoco } from '../_actions/foco.actions'
  * nada). No transiciona stages ni inventa prioridad — solo ancla el sticky
  * (`foco.actions`) y navega. Vive aparte del panel (server) porque necesita
  * transición/router del cliente.
+ *
+ * P23 — `anclar` es false cuando la ORDEN del aviso ya caducó. Abrir sigue
+ * abriendo (el setter quiere ver el negocio del que le hablan), pero un aviso
+ * viejo no puede reordenar el día: anclar el foco desde una orden que ya no
+ * corre era la novedad pisando al foco, y con un lead fuera de «trabajar» el
+ * anclaje se ignora en silencio (`seleccionarFoco`) — el setter tocaba «Abrir»,
+ * volvía al panel y el foco apuntaba a otra cosa, sin explicación.
  */
-export function AbrirFocoButton({ leadId, className }: { leadId: string; className?: string }) {
+export function AbrirFocoButton({
+  leadId,
+  className,
+  anclar = true,
+}: {
+  leadId: string
+  className?: string
+  anclar?: boolean
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
   const abrir = () => {
     startTransition(async () => {
-      const result = await anclarFoco(leadId)
-      if (!result.success) {
-        toast.error(result.error)
-        return
+      if (anclar) {
+        const result = await anclarFoco(leadId)
+        if (!result.success) {
+          toast.error(result.error)
+          return
+        }
       }
       router.push(`/setter/leads/${leadId}`)
     })

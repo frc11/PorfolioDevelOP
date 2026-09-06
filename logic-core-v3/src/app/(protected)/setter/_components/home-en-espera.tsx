@@ -99,7 +99,7 @@ export function HomeEnEspera({ enVueloPorTurno, pausados, fijados }: HomeEnEsper
           </div>
         )}
 
-        <p className="text-xs text-zinc-600">Tu cartera completa está más abajo.</p>
+        <p className="text-xs text-zinc-600">Tu cartera completa sigue disponible.</p>
 
         {/* Mientras no hay nada en la cola, adelantar trabajo propio SÍ tiene
             sentido. Link sobrio (no cyan): respeta la disciplina B9 — el acento

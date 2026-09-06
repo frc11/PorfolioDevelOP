@@ -34,6 +34,7 @@ import { DossierStage } from '@prisma/client'
 import { FASE_IDS, ProgresoSchema, type Progreso } from './contracts.ts'
 import { ownedLeadWhere, ownedListWhere } from './isolation.ts'
 import { SHELL_CONSTRUCCION } from './flow-content.ts'
+import { parseProgreso } from './flow.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -137,8 +138,50 @@ assert.deepEqual(
   'el set de ids del shell es EXACTAMENTE FASE_IDS (id estable, no índices)',
 )
 
+
+// ── 6. UN PROGRESO GUARDADO AYER TIENE QUE SEGUIR PARSEANDO ─────────────────
+// La aserción 5 ata `SHELL_CONSTRUCCION` contra `FASE_IDS` y lo hace bien, pero
+// las dos listas SE MUEVEN JUNTAS: un renombre coordinado de los ids —el refactor
+// natural, y el único que compila— la deja en verde. Y lo que quedaba afuera de
+// todo era el blob YA GUARDADO: `parseProgreso` (flow.ts:133) se traga cualquier
+// blob que no valide y devuelve un checklist fresco. Sin throw, sin log, sin señal.
+//
+// C0 lo midió: con `FASE_IDS` renombrado, un setter con cinco fases tildadas se
+// queda con cero. Es TODO-O-NADA — no se pierde la fase renombrada, se pierde el
+// checklist entero, para todos los setters a la vez.
+//
+// Este blob está congelado a mano: es lo que hay guardado en `progresoJson` hoy.
+// Mientras esta aserción esté verde, lo guardado sigue valiendo. Cuando se ponga en
+// rojo, el renombre es real y hay que decidir qué pasa con lo ya guardado —
+// migrarlo o aceptar la pérdida— en vez de decidirlo sin enterarse.
+const PROGRESO_GUARDADO_AYER = {
+  completadas: ['estructura', 'personalizacion', 'assets', 'cta', 'calidad'],
+  faseActual: 'mobile',
+}
+
+assert.deepEqual(
+  parseProgreso(PROGRESO_GUARDADO_AYER),
+  PROGRESO_GUARDADO_AYER,
+  'un progresoJson guardado con los ids vigentes DEJÓ DE PARSEAR: `parseProgreso` lo ' +
+    'descartó y devolvió un checklist fresco. Cambió `FASE_IDS` y los tildes de todos los ' +
+    'setters se pierden en silencio (todo-o-nada, no solo la fase renombrada). Si el ' +
+    'cambio es a propósito, migrá los blobs guardados y actualizá este fixture en el ' +
+    'mismo commit.',
+)
+
+// La contracara, para que la aserción de arriba no pueda pasar por accidente: un
+// blob con un id que NO está en la lista vigente se descarta ENTERO, y así es como
+// se pierde el checklist.
+assert.deepEqual(
+  parseProgreso({ completadas: [...PROGRESO_GUARDADO_AYER.completadas, 'fase-que-ya-no-existe'] }),
+  { completadas: [] },
+  'un blob con UN id fuera de FASE_IDS se descarta entero (no se filtra el id malo): eso ' +
+    'es lo que vuelve todo-o-nada a la pérdida, y es la razón de la aserción de arriba.',
+)
 console.log(
   '✓ invariante OK: saveOwnedProgreso aísla por (id + dueño) y su write es solo ' +
     '`{ progresoJson }` sin tocar `stage`; ProgresoSchema valida contra FASE_IDS y ' +
-    'el default es un checklist fresco; los ids del shell son exactamente FASE_IDS.',
+    'el default es un checklist fresco; los ids del shell son exactamente FASE_IDS. Y un ' +
+    'progresoJson guardado con los ids vigentes sigue parseando: si FASE_IDS cambia, la ' +
+    'pérdida silenciosa de los tildes ya guardados se cae acá.',
 )

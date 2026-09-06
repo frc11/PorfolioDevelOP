@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Field, Input, TextArea } from '@/components/ui'
+import { Field, Input, TextArea } from '@/components/ui'
 import { registrarResultado } from '@/app/(protected)/setter/_actions/outreach.actions'
 import {
   ResultadoInputSchema,
@@ -9,6 +9,7 @@ import {
 } from '@/app/(protected)/setter/_actions/outreach.schemas'
 import { useStepAction } from '@/lib/use-step-action'
 import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M5 — El REGISTRO de un toque de la conversación (5.5, tramo Seguimiento). Es
@@ -40,15 +41,14 @@ const OPCIONES: OpcionResultado[] = [
   {
     valor: 'RESPONDIO',
     etiqueta: 'Respondió',
-    // P11 — el último paréntesis con nombre de pantalla del recorrido, y con él
-    // «la producción de la demo», un tercer sinónimo de construir la demo.
     detalle:
-      'Frena los toques y te habilita a construir la demo. ¿Aceptó reunirse? Eso se agenda en «Agendá la reunión».',
+      'Frena los toques y te habilita a construir la demo. Si aceptó reunirse, la agenda se abre después de mandarle la demo aprobada.',
   },
   {
     valor: 'POSTERGADO',
     etiqueta: 'Postergar',
-    detalle: 'Pausa el contacto hasta la fecha que elijas; el panel lo retoma ahí.',
+    detalle:
+      'El negocio te pidió que lo contactes más adelante: elegí la fecha y el panel lo retoma ahí.',
   },
   {
     valor: 'RECHAZADO',
@@ -64,7 +64,7 @@ function toastDeResultado(resultado: string, proximoToque: string | null): strin
         ? 'Toque registrado — el próximo toque ya quedó agendado.'
         : 'Toque registrado — la cadencia ya cortó: sin más toques automáticos.'
     case 'RESPONDIO':
-      return 'Respondió 🎉 — se abrió el brief. A producir la demo.'
+      return 'Respondió 🎉 — se abrió el brief. A construir la demo.'
     case 'POSTERGADO':
       return 'Postergado — el panel lo retoma en la fecha que marcaste.'
     default:
@@ -123,6 +123,18 @@ export function SeguimientoForm({
       successToast: (data) => toastDeResultado(data.resultado, data.proximoToque),
     })
   }
+
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. El motivo
+  // viaja con ella: era el párrafo que estaba justo encima del botón y que
+  // existía sólo para que el disabled no quedara mudo (gap 3.6).
+  useAccionPrincipal({
+    etiqueta: 'Registrar resultado',
+    onClick: registrar,
+    loading: registro.isPending,
+    disabled: resultado === null,
+    variant: 'secondary',
+    motivo: 'Elegí arriba qué pasó en la conversación para habilitar el registro.',
+  })
 
   return (
     <div className="space-y-3">
@@ -186,22 +198,6 @@ export function SeguimientoForm({
         </p>
       )}
 
-      {/* El botón se habilita al elegir una opción: sin esto queda disabled sin
-          explicación (gap 3.6, mismo criterio que el seguimiento del wizard). */}
-      {resultado === null && (
-        <p className="text-[11px] leading-relaxed text-zinc-500">
-          Elegí arriba qué pasó en la conversación para habilitar el registro.
-        </p>
-      )}
-
-      <Button
-        onClick={registrar}
-        loading={registro.isPending}
-        disabled={resultado === null}
-        variant="secondary"
-      >
-        Registrar resultado
-      </Button>
     </div>
   )
 }

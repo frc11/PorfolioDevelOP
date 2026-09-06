@@ -15,7 +15,7 @@
  * línea roja "no setees stage con Prisma directo" aplica a `transitionDossier`
  * en la app, no al seed.
  *
- * Estados cubiertos (13), uno por lead:
+ * Estados cubiertos (14), uno por lead:
  *   FICHA incompleta · FICHA completa · EVALUADA gate-cerrado · EVALUADA
  *   gate-abierto · BRIEF · CONSTRUCCION (draft + self-check 6/6) · EN_REVISION ·
  *   APROBADA gate-abierto · APROBADA gate-cerrado · RECHAZADA · DESCARTADA ·
@@ -276,6 +276,18 @@ async function main() {
       caliente: false,
       reactivateAt: null,
       dossier: { stage: 'APROBADA', fichaJson: fichaCompleta('Estética'), evaluacionJson: evalAvanzar(4, fechaEval), briefJson: briefMinimo('Estética Aura'), selfCheckJson: selfCheck6de6(), draftUrl: 'https://qa-w-aprobada-abierto-draft.example.com', finalUrl: 'https://qa-w-aprobada-abierto.example.com', aprobadaAt: haceDias(1), enviadaAt: null, rechazos: null },
+    },
+    {
+      clave: 'APROBADA · demo ENVIADA (m16, agendar)',
+      businessName: 'QA-W Demo Enviada',
+      contactName: 'Ariel',
+      industry: 'Odontología',
+      zone: 'San Miguel de Tucumán',
+      notes: 'QA-W — APROBADA con la demo YA enviada y sin reunión agendada: el manual aterriza en M16 (agendar). Es el único estado que alcanza esa pantalla; sin él la medición de las catorce sale con trece.',
+      status: 'RESPONDIO',
+      caliente: false,
+      reactivateAt: null,
+      dossier: { stage: 'APROBADA', fichaJson: fichaCompleta('Odontología'), evaluacionJson: evalAvanzar(4, fechaEval), briefJson: briefMinimo('Consultorio Sonrisa'), selfCheckJson: selfCheck6de6(), draftUrl: 'https://qa-w-demo-enviada-draft.example.com', finalUrl: 'https://qa-w-demo-enviada.example.com', aprobadaAt: haceDias(2), enviadaAt: haceDias(1), rechazos: null },
     },
     {
       clave: 'APROBADA · gate CERRADO',

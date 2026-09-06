@@ -12,7 +12,7 @@ export default function SetterNotFound() {
       size="lg"
       title="Ese lead no está en tu cartera"
       description="O no existe, o no está asignado a vos. Volvé al inicio y seguí con los tuyos."
-      cta={{ label: 'Volver a tu cartera', href: '/setter' }}
+      cta={{ label: 'Volver a tu día', href: '/setter' }}
     />
   )
 }

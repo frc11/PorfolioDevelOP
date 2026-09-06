@@ -195,9 +195,16 @@ async function mapearError(res: Response, fallback: string): Promise<CalComV2Err
     )
   }
   if (res.status === 404) {
+    // Este `message` viaja al SETTER tal cual (`mapError` de agenda.actions.ts
+    // lo devuelve sin traducir). Decía «no encontró el event type — revisá el
+    // username y el slug cargados en la org (setup B7.0)»: un código de sprint y
+    // tres nombres de configuración, en imperativo, para alguien que no entra a
+    // la org. Lo que el setter necesita saber es que el paso no va y a quién
+    // avisarle; el detalle está en el log del servidor de `getCalConfigLeadOS`.
     return new CalComV2Error(
       'no_encontrado',
-      'Cal.com no encontró el event type — revisá el username y el slug cargados en la org (setup B7.0)',
+      'La agenda de Franco no devolvió la reunión que el panel esperaba — avisale antes de seguir; ' +
+        'hasta que lo revise, la reunión no se puede agendar desde acá',
     )
   }
   if (res.status === 400 || res.status === 422) {

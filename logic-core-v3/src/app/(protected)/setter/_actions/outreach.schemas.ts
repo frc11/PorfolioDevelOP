@@ -5,6 +5,7 @@
  * hace imposible Y el server lo rebota igual.
  */
 import { z } from 'zod'
+import { parseCalendarDayAR } from '@/lib/dates-ar'
 import { contieneLink } from '@/lib/leados/flow'
 
 export const RESULTADO_CONTACTO_VALUES = [
@@ -45,6 +46,22 @@ export const OpenerInputSchema = z.object({
 export type OpenerInput = z.infer<typeof OpenerInputSchema>
 
 /**
+ * El día que el setter elige en el date-picker es un día de CALENDARIO, no un
+ * instante: «el 25» significa el 25 acá, no las 00:00 UTC (que en AR son las
+ * 21:00 del 24). `z.coerce.date()` a secas hacía justo eso y el lead se mostraba
+ * —y se reactivaba— un día antes; `parseCalendarDayAR` lo ancla al día AR.
+ *
+ * El preprocess corre DOS veces sobre el mismo dato (el form valida antes de
+ * llamar y manda `parsed.data`; la action re-valida server-side) y por eso pasa
+ * de largo lo que ya es instante: solo un `YYYY-MM-DD` crudo se ancla. La
+ * segunda pasada no vuelve a mover el día.
+ */
+const reactivateAtSchema = z.preprocess(
+  (valor) => (typeof valor === 'string' ? parseCalendarDayAR(valor) ?? valor : valor),
+  z.coerce.date().optional(),
+)
+
+/**
  * Paso 9 — Resultado de un toque de la conversación. POSTERGADO exige cuándo
  * retomar (reactivateAt futura) — la fecha del PRÓXIMO follow-up normal, en
  * cambio, jamás viene del cliente: la calcula calculateNextFollowUp.
@@ -55,7 +72,7 @@ export const ResultadoInputSchema = z
       message: 'Elegí qué pasó con el mensaje',
     }),
     nota: notaOpcional,
-    reactivateAt: z.coerce.date().optional(),
+    reactivateAt: reactivateAtSchema,
   })
   .superRefine((value, ctx) => {
     if (value.resultado !== 'POSTERGADO') return

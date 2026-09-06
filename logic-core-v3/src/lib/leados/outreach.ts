@@ -9,7 +9,7 @@
  */
 import type { OsLeadActivity } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
-import { SOLO_CONTACTOS_COMERCIALES } from '@/lib/leados/isolation'
+import { SOLO_CONTACTOS_COMERCIALES, dmsMandadosHoyWhere } from '@/lib/leados/isolation'
 import { getOwnedLead } from '@/lib/leados/ownership'
 
 const ARGENTINA_TIME_ZONE = 'America/Argentina/Buenos_Aires'
@@ -53,16 +53,20 @@ export async function listOwnedLeadActivities(
 }
 
 /**
- * DMs de Instagram que ESTE setter registró hoy (día argentino, todos sus
- * leads). Conteo derivado para la capa de seguridad de canal.
+ * DMs de Instagram que ESTE setter MANDÓ hoy (día argentino, todos sus leads).
+ * Conteo derivado para la capa de seguridad de canal.
+ *
+ * El `where` NO se arma acá: sale entero de `dmsMandadosHoyWhere` (isolation.ts),
+ * que es lo que `contador-dms.invariant.ts` afirma. Antes el eje de canal estaba
+ * inline y el discriminador de resultado se spreadeaba en esta misma expresión;
+ * revertir esa línea —el bug que F1 arregló: sin el filtro de resultado, postergar
+ * un contacto subía el número sin que saliera un solo DM— dejaba el invariante en
+ * verde, porque afirmaba sobre una réplica y nunca sobre esta consulta.
+ * Sigue siendo informativo: nada acá bloquea.
  */
 export async function contarDmsHoy(userId: string): Promise<number> {
   const { desde, hasta } = limitesDelDiaArgentino(new Date())
   return prisma.osLeadActivity.count({
-    where: {
-      performedById: userId,
-      channel: 'INSTAGRAM_DM',
-      createdAt: { gte: desde, lte: hasta },
-    },
+    where: dmsMandadosHoyWhere(userId, desde, hasta),
   })
 }

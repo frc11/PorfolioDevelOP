@@ -6,6 +6,8 @@
  */
 import type { Brief, Evaluacion, Ficha } from '@/lib/leados/contracts'
 import { formatFechaHora } from '@/lib/leados/flow'
+import { GUIA_BRIEF } from '@/lib/leados/guidance-content'
+import { faltaPorHerramientaSinLink } from '@/lib/leados/herramientas'
 
 export type CopyBlockLead = {
   businessName: string
@@ -238,7 +240,21 @@ export function buildConstruccionBlock(
       ficha?.senalesOperativas,
     ),
     seccion('DE DÓNDE BAJAR EL LOGO Y LAS FOTOS REALES', assets || undefined),
-    seccion('BRIEF COMPLETO DEL GEM DE DISEÑO', brief.pegadoGem),
+    // ÚNICA excepción a la regla de arriba («lo que está vacío se OMITE; nunca
+    // se rellena ni se anuncia como faltante»), y por eso queda escrita: el
+    // pegado del Gem dejó de ser obligatorio mientras el Gem no tenga link
+    // cargado. Omitirlo en silencio manda a Claude Design un bloque más corto
+    // sin decir que le falta la pieza — y el setter, que lee este mismo bloque,
+    // tampoco se entera. Un campo que el setter dejó vacío A PROPÓSITO sigue
+    // omitiéndose: `faltaPorHerramientaSinLink` solo es cierto cuando la
+    // herramienta es la que no está.
+    seccion(
+      'BRIEF COMPLETO DEL GEM DE DISEÑO',
+      brief.pegadoGem ||
+        (faltaPorHerramientaSinLink('gemDiseno', brief.pegadoGem)
+          ? GUIA_BRIEF.campos.pegadoGem.faltante
+          : undefined),
+    ),
   ]
 
   return partes.filter(Boolean).join('\n\n')

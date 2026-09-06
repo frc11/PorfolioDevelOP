@@ -44,28 +44,60 @@ export function HerramientaLauncher({
 }
 
 /**
- * Explicación inline de una herramienta, en su paso: nombre + lanzador siempre
- * visibles, y un «qué es / qué le das / qué te devuelve» colapsable (concisa,
- * no agrega ruido al flujo). Clona la calidad de la ayuda embebida de la ficha
- * (m1): jerarquía clara, lenguaje concreto, cero jerga. Contenido y link
- * salen del registro editable (lib/leados/herramientas.ts).
+ * La SALIDA de una herramienta sin link cargado: la línea que dice qué hacer
+ * cuando se choca con la píldora «Link pendiente». Con el link cargado no
+ * renderiza nada — no es un aviso permanente, es el destrabe de una pared real.
+ *
+ * Vive FUERA de todo plegable a propósito. Hasta este sprint era el último
+ * párrafo del `<details>` «Qué es y cómo se usa» de acá abajo: un título que no
+ * prometía ninguna salida, así que nadie lo abría y la pared quedaba sin
+ * respuesta (24 choques contra ella en una sola corrida del recorrido). Lo que
+ * destraba no se pliega; el «qué es / qué le das / qué te devuelve» sí.
+ *
+ * Exportada porque la píldora aparece en dos formas: dentro de `ToolGuide` (m2,
+ * m4, m6, mc1/mc2, mr) y suelta como `HerramientaLauncher` (el bloque de
+ * objeciones de m5). Una sola copia del texto para las dos.
+ */
+export function SalidaLinkPendiente({ id }: { id: HerramientaId }) {
+  if (HERRAMIENTAS[id].url) return null
+  return (
+    <p className="text-[11px] leading-relaxed text-amber-200/70">
+      Todavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir desde acá.
+    </p>
+  )
+}
+
+/**
+ * Explicación inline de una herramienta, en su paso: nombre + lanzador + —si el
+ * link todavía no está— su salida, los tres siempre visibles; y un «qué es / qué
+ * le das / qué te devuelve» colapsable (concisa, no agrega ruido al flujo).
+ * Clona la calidad de la ayuda embebida de la ficha (m1): jerarquía clara,
+ * lenguaje concreto, cero jerga. Contenido y link salen del registro editable
+ * (lib/leados/herramientas.ts).
+ *
+ * El título del plegable nombra sus tres párrafos. «Qué es y cómo se usa» no
+ * prometía nada —y encima escondía la salida de arriba—: un título que no dice
+ * qué hay adentro es un plegable que no se abre.
  */
 export function ToolGuide({ id }: { id: HerramientaId }) {
   const herramienta = HERRAMIENTAS[id]
 
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.02]">
-      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-        <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
-          <Wrench size={13} strokeWidth={1.5} className="text-zinc-400" />
-          {herramienta.nombre}
-        </p>
-        <HerramientaLauncher id={id} />
+      <div className="space-y-1.5 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-zinc-200">
+            <Wrench size={13} strokeWidth={1.5} className="text-zinc-400" />
+            {herramienta.nombre}
+          </p>
+          <HerramientaLauncher id={id} />
+        </div>
+        <SalidaLinkPendiente id={id} />
       </div>
 
       <details className="border-t border-white/[0.06]">
         <summary className="flex cursor-pointer list-none items-center gap-1.5 px-4 py-2.5 text-[11px] font-medium text-zinc-500 transition-colors hover:text-zinc-300 [&::-webkit-details-marker]:hidden">
-          Qué es y cómo se usa
+          Ver para qué sirve, qué le das y qué te devuelve
         </summary>
         <div className="space-y-2 px-4 pb-4 text-xs leading-relaxed text-zinc-400">
           <p>{herramienta.queEs}</p>
@@ -77,12 +109,6 @@ export function ToolGuide({ id }: { id: HerramientaId }) {
             <span className="font-semibold text-zinc-300">Qué te devuelve:</span>{' '}
             {herramienta.queTeDevuelve}
           </p>
-          {!herramienta.url && (
-            <p className="text-[11px] leading-relaxed text-amber-200/70">
-              Todavía no tenés el link cargado — pedíselo a Franco y lo vas a poder abrir
-              desde acá.
-            </p>
-          )}
         </div>
       </details>
     </div>

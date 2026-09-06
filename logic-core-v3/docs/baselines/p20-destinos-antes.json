@@ -1,0 +1,401 @@
+{
+  "base": "http://127.0.0.1:3011",
+  "filas": [
+    {
+      "pantalla": "m1",
+      "lead": "QA-W Ficha Completa",
+      "ancho": "1440",
+      "urlFinal": "m1",
+      "destinos": [],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m4",
+      "lead": "QA-W Postergado Vencido",
+      "ancho": "1440",
+      "urlFinal": "m4",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m5",
+      "lead": "QA-W Evaluada Gate Cerrado",
+      "ancho": "1440",
+      "urlFinal": "m5",
+      "destinos": [
+        "m1",
+        "m4"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m6",
+      "lead": "QA-W Evaluada Gate Abierto",
+      "ancho": "1440",
+      "urlFinal": "m6",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mc1",
+      "lead": "QA-W Brief",
+      "ancho": "1440",
+      "urlFinal": "mc1",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mc2",
+      "lead": "QA-W Brief",
+      "ancho": "1440",
+      "urlFinal": "mc2",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m13",
+      "lead": "QA-W Construccion",
+      "ancho": "1440",
+      "urlFinal": "m13",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m14",
+      "lead": "QA-W Construccion",
+      "ancho": "1440",
+      "urlFinal": "m14",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m15",
+      "lead": "QA-W Aprobada Gate Abierto",
+      "ancho": "1440",
+      "urlFinal": "m15",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m16",
+      "lead": "QA-W Demo Enviada",
+      "ancho": "1440",
+      "urlFinal": "m16",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mr",
+      "lead": "QA-W Rechazada",
+      "ancho": "1440",
+      "urlFinal": "mr",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "espera",
+      "lead": "QA-W Aprobada Gate Cerrado",
+      "ancho": "1440",
+      "urlFinal": "espera",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "revision",
+      "lead": "QA-W En Revision",
+      "ancho": "1440",
+      "urlFinal": "revision",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "archivo",
+      "lead": "QA-W Descartada",
+      "ancho": "1440",
+      "urlFinal": "archivo",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m1",
+      "lead": "QA-W Ficha Completa",
+      "ancho": "390",
+      "urlFinal": "m1",
+      "destinos": [],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m4",
+      "lead": "QA-W Postergado Vencido",
+      "ancho": "390",
+      "urlFinal": "m4",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m5",
+      "lead": "QA-W Evaluada Gate Cerrado",
+      "ancho": "390",
+      "urlFinal": "m5",
+      "destinos": [
+        "m1",
+        "m4"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m6",
+      "lead": "QA-W Evaluada Gate Abierto",
+      "ancho": "390",
+      "urlFinal": "m6",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mc1",
+      "lead": "QA-W Brief",
+      "ancho": "390",
+      "urlFinal": "mc1",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mc2",
+      "lead": "QA-W Brief",
+      "ancho": "390",
+      "urlFinal": "mc2",
+      "destinos": [
+        "m1",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m13",
+      "lead": "QA-W Construccion",
+      "ancho": "390",
+      "urlFinal": "m13",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m14",
+      "lead": "QA-W Construccion",
+      "ancho": "390",
+      "urlFinal": "m14",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m15",
+      "lead": "QA-W Aprobada Gate Abierto",
+      "ancho": "390",
+      "urlFinal": "m15",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "m16",
+      "lead": "QA-W Demo Enviada",
+      "ancho": "390",
+      "urlFinal": "m16",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m15",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "mr",
+      "lead": "QA-W Rechazada",
+      "ancho": "390",
+      "urlFinal": "mr",
+      "destinos": [
+        "m1",
+        "m13",
+        "m6",
+        "mc1",
+        "mc2"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "espera",
+      "lead": "QA-W Aprobada Gate Cerrado",
+      "ancho": "390",
+      "urlFinal": "espera",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m5",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "revision",
+      "lead": "QA-W En Revision",
+      "ancho": "390",
+      "urlFinal": "revision",
+      "destinos": [
+        "m1",
+        "m13",
+        "m14",
+        "m6"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    },
+    {
+      "pantalla": "archivo",
+      "lead": "QA-W Descartada",
+      "ancho": "390",
+      "urlFinal": "archivo",
+      "destinos": [
+        "m1"
+      ],
+      "hayFranja": false,
+      "altoFranja": 0,
+      "textoFranja": ""
+    }
+  ]
+}

@@ -1,11 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { qaLogin, mintSessionCookie, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible, expandCartera } from '../helpers/setter-ui'
+import { firstVisible, expandirGruposCartera } from '../helpers/setter-ui'
 import {
   getSetterQa,
   createSetter,
   createLead,
   createNotice,
+  countNoticesFor,
   reassignLead,
   prisma,
   newTracker,
@@ -54,9 +55,15 @@ test('C1 · A no ve la cartera de B; abrir un lead ajeno da 404 sin leak', async
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
   // La cartera completa (donde figura el lead de A) quedó secundaria/colapsada
-  // tras 2.1a → expandir para poder afirmar visibilidad. El aislamiento (B no
-  // aparece) se sigue verificando sobre TODA la página, abierta o no.
-  await expandCartera(page)
+  // tras 2.1a → expandir para poder afirmar visibilidad.
+  //
+  // P22 — y desde que la cartera AGRUPA, no alcanza con abrirla: hay que abrir
+  // también cada grupo. Un grupo plegado no monta sus tarjetas, así que el
+  // aserto de abajo («A no ve el lead de B», `toHaveCount(0)`) pasaría en verde
+  // si el lead ajeno se hubiera filtrado dentro de un grupo cerrado — verde por
+  // no estar montado, no por no estar. `expandirGruposCartera` deja los ocho
+  // abiertos y falla si alguno quedó plegado.
+  await expandirGruposCartera(page)
   await expect(firstVisible(page.getByText(A_ONLY))).toBeVisible()
   await expect(page.getByText(B_ONLY), 'A no ve el lead de B').toHaveCount(0)
 
@@ -81,6 +88,11 @@ test('C2 · B (2º setter) ve SOLO lo suyo; no abre el lead de A', async ({ page
   await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
 
+  // P22 — abrir la cartera Y sus grupos ANTES de afirmar la ausencia. Sin esto
+  // el aserto de abajo mide una cartera colapsada: `toHaveCount(0)` sale verde
+  // porque no hay nada montado, no porque el lead de A no esté. Con los grupos
+  // abiertos, las 84 tarjetas están en el DOM y el 0 significa lo que dice.
+  await expandirGruposCartera(page)
   await expect(firstVisible(page.getByText(B_ONLY))).toBeVisible()
   await expect(page.getByText(A_ONLY), 'B no ve el lead de A').toHaveCount(0)
 
@@ -119,11 +131,28 @@ test('C4 · novedades dirigidas: B ve "te asignaron"; A (saliente) ve "te reasig
   await expect(firstVisible(page.getByText('Te reasignaron un lead'))).toBeVisible()
   await expect(page.getByRole('link', { name: /Te reasignaron un lead/i }), 'saliente NO linkea').toHaveCount(0)
 
-  // B (entrante): ve "Te asignaron un lead".
+  // B (entrante): recibe el handoff. P21 movió DÓNDE lo ve, no SI lo ve.
+  //
+  // Hasta P21 este aserto buscaba el aviso "Te asignaron un lead" en el bloque de
+  // novedades. Desde P21 el aviso de un lead que YA es una tarea en la cola no se
+  // repite abajo (`excludeLeadIds`) — mostrarlo en los dos lugares es la
+  // duplicación que el sprint prohíbe. El lead recién asignado entra a `trabajar`
+  // (sin dossier → grupo `trabajar`), así que la cara del handoff para B es su
+  // fila en la COLA, con lo que hay que hacer y el control que lleva a hacerlo.
+  //
+  // Lo que este test garantiza no cambió: el handoff LLEGA a B, dirigido, y no
+  // se cruza con el de A. Sólo se movió la superficie donde se afirma.
   await page.context().clearCookies()
   await mintSessionCookie(page.context(), baseURL ?? 'http://localhost:3001', { userId: bId, email: 'irrelevant', role: 'SETTER' })
   await page.goto('/setter', { waitUntil: 'domcontentloaded' })
-  await expect(firstVisible(page.getByText('Te asignaron un lead'))).toBeVisible()
+  const colaDeB = page.locator('section[aria-label="Tu cola de hoy"]')
+  await expect(firstVisible(colaDeB.getByText(B_ONLY)), 'el lead asignado le llega a B como trabajo').toBeVisible()
+  // Y el aviso sigue existiendo y contándose sin leer (el badge del topbar lo
+  // refleja): dedup es presentación, no borrado.
+  expect(await countNoticesFor(bId, 'LEAD_ASIGNADO'), 'el aviso dirigido a B existe').toBe(1)
   // A's saliente novedad no aparece en el feed de B (aislamiento por setterId).
+  // Ojo: NO se afirma acá que B no vea el NEGOCIO de A — C3, arriba, reasigna
+  // ese lead a B a propósito, así que a esta altura del archivo es suyo. La
+  // cartera de A frente a B ya la cubre C2, con su fixture intacta.
   await expect(page.getByText('Te reasignaron un lead'), 'B no ve la novedad de A').toHaveCount(0)
 })

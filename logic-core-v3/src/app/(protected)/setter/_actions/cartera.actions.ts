@@ -9,8 +9,12 @@
  *     setter sólo organiza leads de SU cartera.
  *   - el meta se escribe SIEMPRE keyed por (leadId, setterId) — un setter no
  *     puede pisar la organización de otro ni leer su nota.
- *   - esto NO toca status/reactivateAt comerciales (el "Postergar" del Paso 9 es
- *     otra cosa: pausa el lead para todos; esto es la vista privada del setter).
+ *   - esto NO toca status/reactivateAt comerciales. POSTERGAR es otra cosa y se
+ *     llama distinto a propósito: lo pide el NEGOCIO («contactame el 25»), mueve
+ *     `status`+`reactivateAt` del lead —lo ve el admin, lo levanta el cron— y
+ *     vive en `os-commercial.ts#postergarLead`. Esto de acá es la PAUSA personal:
+ *     privada del setter, no toca el lead, el cron no la mira. Dos palabras para
+ *     dos cosas; cada una tiene su filtro en la cartera (`vistaDeLead`).
  */
 import { revalidatePath } from 'next/cache'
 import { requireSetter } from '@/lib/auth-guards'
@@ -18,7 +22,7 @@ import { fail, ok, type ActionResult } from '@/lib/action-utils'
 import { getOwnedLead } from '@/lib/leados/ownership'
 import { upsertSetterMeta } from '@/lib/leados/setter-meta'
 import { LeadIdSchema } from './dossier.schemas'
-import { NotaSchema, PinSchema, SnoozeSchema } from './cartera.schemas'
+import { finDePausaAR, NotaSchema, PinSchema, SnoozeSchema } from './cartera.schemas'
 
 function mapError(error: unknown, fallback: string): ActionResult<never> {
   if (error instanceof Error && error.message === 'Unauthorized') {
@@ -81,8 +85,13 @@ export async function pausarLead(
       return fail(hasta.error.issues[0]?.message ?? 'Elegí una fecha válida')
     }
     // Fin del día elegido → pausado durante toda esa fecha, retoma al siguiente.
-    const until = new Date(`${hasta.data}T23:59:59`)
-    if (Number.isNaN(until.getTime()) || until.getTime() <= Date.now()) {
+    // El borde sale de la hora ARGENTINA (`finDePausaAR`), no del huso del proceso:
+    // el `new Date('...T23:59:59')` que estaba acá se parsea en hora local, así que
+    // daba lo correcto en la máquina de Franco y tres horas antes en el servidor.
+    // `null` = día de calendario imposible (31-feb), que el regex de SnoozeSchema
+    // deja pasar; cae en la misma rama que antes tomaba el `Invalid Date`.
+    const until = finDePausaAR(hasta.data)
+    if (until === null || until.getTime() <= Date.now()) {
       return fail('Elegí una fecha futura para la pausa')
     }
 

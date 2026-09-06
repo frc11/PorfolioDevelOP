@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { CheckCircle2, Eye, SendHorizonal, ShieldCheck, Wrench } from 'lucide-react'
-import { Button, Callout, Toggle } from '@/components/ui'
+import { Callout, Toggle } from '@/components/ui'
 import type { Brief, SelfCheck } from '@/lib/leados/contracts'
 import { GRUPOS_CHEQUEO, HARD_CHECKS, SOFT_CHECKS, type HardCheck } from '@/lib/leados/flow'
 import { GUIA_SELF_CHECK } from '@/lib/leados/guidance-content'
@@ -14,6 +14,7 @@ import { enviarARevision, guardarSelfCheck } from '@/app/(protected)/setter/_act
 import { AutosaveStatus } from '@/app/(protected)/setter/_components/autosave-status'
 import { CopyBlock } from '@/app/(protected)/setter/_components/copy-block'
 import { LineaRicaText } from '@/app/(protected)/setter/_components/teach-panel'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M14 — el chequeo final (5.4, tramo Chequeo). Presentación del manual sobre el
@@ -179,6 +180,23 @@ export function ChequeoForm({
     )
   }
 
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. El motivo es
+  // el MISMO conteo que ya calcula el gate proactivo de más arriba: la barra lo
+  // muestra al lado del control apagado, y el Callout se queda donde estaba
+  // porque además apunta al arreglo concreto de cada punto.
+  useAccionPrincipal({
+    etiqueta: 'Enviar a revisión',
+    onClick: enviar,
+    loading: accion.isPending,
+    disabled: !todosDurosOk,
+    icon: <SendHorizonal size={14} strokeWidth={1.5} />,
+    motivo: todosDurosOk
+      ? null
+      : faltantesDuros === 1
+        ? 'Queda 1 obligatorio en rojo.'
+        : `Quedan ${faltantesDuros} obligatorios en rojo.`,
+  })
+
   return (
     <div className="space-y-5">
       <p className="max-w-xl text-xs leading-relaxed text-zinc-500">
@@ -282,14 +300,6 @@ export function ChequeoForm({
       )}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Button
-          onClick={enviar}
-          loading={accion.isPending}
-          disabled={!todosDurosOk}
-          icon={<SendHorizonal size={14} strokeWidth={1.5} />}
-        >
-          Enviar a revisión
-        </Button>
         <AutosaveStatus
           phase={autosave.phase}
           isDirty={autosave.isDirty}

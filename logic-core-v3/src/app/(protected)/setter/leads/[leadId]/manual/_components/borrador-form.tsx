@@ -1,13 +1,16 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useId, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ExternalLink, PencilLine, UploadCloud } from 'lucide-react'
 import { Badge, Button, Field, Input, Toggle } from '@/components/ui'
+import { cn } from '@/lib/utils'
 import { GUIA_DRAFT } from '@/lib/leados/guidance-content'
 import { guardarDraftUrl } from '@/app/(protected)/setter/_actions/dossier.actions'
 import { DraftUrlInputSchema } from '@/app/(protected)/setter/_actions/dossier.schemas'
+import { EnlaceChequeoFinal } from './enlace-chequeo'
+import { useAccionPrincipal } from './barra-accion'
 
 /**
  * M13 — la captura del borrador (5.4, tramo Borrador). Presentación del manual
@@ -20,34 +23,90 @@ import { DraftUrlInputSchema } from '@/app/(protected)/setter/_actions/dossier.s
  * publicado con la opción de cambiarlo mientras siga en construcción). El resumen
  * de consulta post-construcción lo dibuja el módulo server (sin interacción).
  */
-export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: string | null }) {
+/**
+ * Los errores del form, POR CONTROL. Antes era un `string` plano que salía de
+ * `issues[0].message` y se colgaba siempre del campo de URL: el interruptor sin
+ * tildar pintaba de rojo un campo correcto y mandaba al lector de pantalla a
+ * corregir donde no estaba el problema. El `path` del issue ya decía de quién
+ * era el error — lo único que faltaba era no tirarlo.
+ */
+type ErroresBorrador = { draftUrl?: string; confirmoCarga?: string; general?: string }
+
+export function BorradorForm({
+  leadId,
+  draftUrl,
+  chequeoAccesible,
+}: {
+  leadId: string
+  draftUrl: string | null
+  /** ¿La posición derivada alcanza el chequeo final? (lo decide el server). */
+  chequeoAccesible: boolean
+}) {
   const router = useRouter()
   const [url, setUrl] = useState(draftUrl ?? '')
   const [confirmoCarga, setConfirmoCarga] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [errores, setErrores] = useState<ErroresBorrador>({})
   const [editando, setEditando] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const confirmoCargaId = useId()
+  const errorConfirmoId = `${confirmoCargaId}-error`
 
   const guardar = () => {
     const parsed = DraftUrlInputSchema.safeParse({ draftUrl: url, confirmoCarga })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Revisá la URL del borrador')
+      const siguientes: ErroresBorrador = {}
+      for (const issue of parsed.error.issues) {
+        const campo = issue.path[0]
+        if (campo === 'draftUrl' || campo === 'confirmoCarga') {
+          siguientes[campo] ??= issue.message
+        } else {
+          siguientes.general ??= issue.message
+        }
+      }
+      // Un issue sin path reconocible no puede quedar mudo: se muestra al pie.
+      if (!siguientes.draftUrl && !siguientes.confirmoCarga && !siguientes.general) {
+        siguientes.general = 'Revisá la URL del borrador'
+      }
+      setErrores(siguientes)
       return
     }
-    setError(null)
+    setErrores({})
     startTransition(async () => {
       const result = await guardarDraftUrl(leadId, parsed.data)
       if (!result.success) {
-        setError(result.error)
+        // El server re-parsea el MISMO schema: su mensaje puede ser el del
+        // interruptor. Sin path que leer, va al pie — nunca al campo de URL.
+        setErrores({ general: result.error })
         toast.error(result.error)
         return
       }
-      toast.success('Borrador guardado — ahora pasá el chequeo final.')
+      // El acuse dice lo que PASÓ. Nombrar acá el chequeo final era nombrar un
+      // destino sin poder enlazarlo: un toast no lleva a ninguna parte y se va
+      // solo a los pocos segundos. El paso siguiente vive abajo, en el panel que
+      // este mismo guardado deja en pantalla — nombrado Y enlazado.
+      toast.success('Borrador guardado.')
       setEditando(false)
       setConfirmoCarga(false)
       router.refresh()
     })
   }
+
+  // P18 — la acción se pinta en la barra fija de `PantallaManual`. Con el
+  // borrador ya publicado y sin editar no hay acción que AVANCE (la salida es el
+  // enlace al chequeo, y «Cambiar el link» abre la edición): ahí se declara
+  // `null` y la barra no aparece. El hook va antes del early-return porque las
+  // reglas de hooks no admiten llamadas condicionales.
+  const enConsulta = Boolean(draftUrl) && !editando
+  useAccionPrincipal(
+    enConsulta
+      ? null
+      : {
+          etiqueta: 'Guardar borrador',
+          onClick: guardar,
+          loading: isPending,
+          icon: <UploadCloud size={14} strokeWidth={1.5} />,
+        },
+  )
 
   // ── Borrador publicado (y sin editar): estado verificado con el link ────────
   if (draftUrl && !editando) {
@@ -66,8 +125,15 @@ export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: s
           {draftUrl}
         </a>
         <p className="text-xs leading-relaxed text-zinc-500">
-          Si rehiciste la demo, volvé a publicar en Netlify Drop y actualizá el link acá — el
-          chequeo final se hace siempre sobre el borrador vigente.
+          Ya podés pasar{' '}
+          <EnlaceChequeoFinal
+            leadId={leadId}
+            draftUrl={draftUrl}
+            destinoAccesible={chequeoAccesible}
+          />
+          . Si rehiciste
+          la demo, volvé a publicar en Netlify Drop y actualizá el link acá — se chequea siempre
+          el borrador vigente.
         </p>
         <Button
           variant="ghost"
@@ -90,39 +156,68 @@ export function BorradorForm({ leadId, draftUrl }: { leadId: string; draftUrl: s
       <Field
         label="URL del borrador"
         required
-        error={error ?? undefined}
+        error={errores.draftUrl}
         hint={GUIA_DRAFT.campos.draftUrl.hint}
       >
         <Input
           value={url}
           onChange={(event) => setUrl(event.target.value)}
-          invalid={Boolean(error)}
+          invalid={Boolean(errores.draftUrl)}
           placeholder="https://algo-unico.netlify.app"
           type="url"
         />
       </Field>
 
-      <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-        <Toggle
-          checked={confirmoCarga}
-          onChange={setConfirmoCarga}
-          label="Confirmo que abrí el link y carga"
-        />
-        <span className="text-xs leading-relaxed text-zinc-300">
-          Abrí el link en otra pestaña y confirmá que la demo carga bien antes de guardar.
-        </span>
-      </label>
+      {/* El interruptor es tan obligatorio como la URL — y hasta este sprint era
+          el único de los dos SIN asterisco, o sea que lo obligatorio se marcaba
+          como opcional. `Field` no lo envuelve porque su `label`+`htmlFor`
+          apunta a un control del kit; acá el nombre accesible ya lo pone el
+          propio `Toggle`, así que la marca y el error se arman al lado. */}
+      <div
+        className={cn(
+          'space-y-1.5 rounded-xl border p-3',
+          errores.confirmoCarga
+            ? 'border-red-400/40 bg-red-500/[0.04]'
+            : 'border-white/[0.06] bg-white/[0.02]',
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <Toggle
+            checked={confirmoCarga}
+            onChange={setConfirmoCarga}
+            label="Confirmo que abrí el link y carga"
+            required
+            invalid={Boolean(errores.confirmoCarga)}
+            describedBy={errores.confirmoCarga ? errorConfirmoId : undefined}
+          />
+          <span className="text-xs leading-relaxed text-zinc-300">
+            Abrí el link en otra pestaña y confirmá que la demo carga bien antes de guardar.
+            <span className="text-red-400" aria-hidden="true">
+              {' *'}
+            </span>
+            <span className="sr-only"> (obligatorio)</span>
+          </span>
+        </div>
+        {errores.confirmoCarga && (
+          <p id={errorConfirmoId} role="alert" className="text-xs text-red-400">
+            {errores.confirmoCarga}
+          </p>
+        )}
+      </div>
 
-      <div className="flex items-center gap-3">
-        <Button onClick={guardar} loading={isPending} icon={<UploadCloud size={14} strokeWidth={1.5} />}>
-          Guardar borrador
-        </Button>
-        {editando && (
+      {errores.general && (
+        <p role="alert" className="text-xs text-red-400">
+          {errores.general}
+        </p>
+      )}
+
+      {editando && (
+        <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={() => setEditando(false)} disabled={isPending}>
             Cancelar
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

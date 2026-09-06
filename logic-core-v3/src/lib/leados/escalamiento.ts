@@ -15,6 +15,12 @@
 // para limpiar un campo `Json?` (el cliente tipado no acepta `null` literal ahí).
 // `DossierStage` sigue type-only (modificador inline, como en tests/helpers/setter-db).
 import { Prisma, type DossierStage } from '@prisma/client'
+// El GRAFO, para no volver a escribir una arista que ya está escrita. Import
+// relativo con extensión, como el resto de este árbol: así lo cargan los
+// invariantes con ts-node, sin tsconfig-paths. `dossier-stage.ts` no tiene un
+// solo import de valor (solo `import type`), así que traerlo acá NO agrega
+// nada al árbol de runtime — la corrida sin DB de los invariantes sigue igual.
+import { LEGAL_TRANSITIONS } from './dossier-stage.ts'
 
 /** Tope de la nota persistida — espejo del max de `EscalamientoInputSchema`. */
 export const ESCALADO_NOTA_MAX = 1000
@@ -52,9 +58,25 @@ export const ESCALADO_RESET = { escaladoAt: null, escaladoNota: null } as const
  * `transitionDossier` (que aplica el reset del re-loop) y el chequeo de
  * invariante (`reloop-selfcheck-reset.invariant.ts`) — una sola copia de "qué
  * cuenta como re-loop", server e invariante no pueden divergir.
+ *
+ * ── Por qué LEE el grafo (P8, caso 2) ───────────────────────────────────────
+ * El destino salía de un literal `to === 'CONSTRUCCION'`: la arista
+ * RECHAZADA→CONSTRUCCION estaba escrita DOS veces —acá y en `LEGAL_TRANSITIONS`—
+ * sin nada que las atara. El invariante del grafo que C1c construyó no ve esta
+ * copia: si el grafo cambiaba y la copia no, este predicado seguía diciendo que
+ * sí a una arista que ya no existía, y `transitionDossier` aplicaba el
+ * `RELOOP_RESET` sobre una transición ilegal — todo con la suite en verde.
+ *
+ * Ahora el destino sale del grafo. Lo que queda literal es el ORIGEN, que es el
+ * concepto que esta función nombra («re-loop de RECHAZO»), no una arista.
+ *
+ * La arity de las salidas de RECHAZADA la vigila
+ * `reloop-selfcheck-reset.invariant.ts`: si mañana RECHAZADA gana una segunda
+ * salida, el reset del re-loop NO debe extenderse sola a ella — el invariante se
+ * cae y obliga a decidir.
  */
 export function esReloopRechazo(from: DossierStage, to: DossierStage): boolean {
-  return from === 'RECHAZADA' && to === 'CONSTRUCCION'
+  return from === 'RECHAZADA' && LEGAL_TRANSITIONS.RECHAZADA.includes(to)
 }
 
 /**

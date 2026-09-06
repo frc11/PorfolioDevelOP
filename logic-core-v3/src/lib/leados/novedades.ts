@@ -32,11 +32,31 @@ import {
   ownSetterNoticeWhere,
   type NovedadDirigida,
 } from '@/lib/leados/isolation'
+import {
+  agruparAvisos,
+  FILAS_NOVEDADES,
+  type AvisoView,
+  type FilaNovedad,
+} from '@/lib/leados/novedades-agrupar'
 import { formatEspera } from '@/lib/leados/revision'
 import type { OwnedLeadWithDossier } from '@/lib/leados/ownership'
+import {
+  indiceDeEstados,
+  vigenciaDeAviso,
+  type EstadoDelLead,
+  type Vigencia,
+} from '@/lib/leados/novedades-vigencia'
 
-/** Cuántos avisos sin leer se muestran en el panel (el contador puede ser mayor). */
-const AVISOS_VISIBLES = 12
+/**
+ * Cuántos avisos sin leer se LEEN de la base (el contador del badge puede ser
+ * mayor). P21 subió el número de 12 a 50 por una razón de honestidad, no de
+ * volumen: desde este sprint los avisos sin acción se AGRUPAN («y 31 más
+ * iguales»), y ese número sale de las filas leídas. Con `take: 12` el grupo
+ * decía «11 más» sobre 32 reales. Es la misma query, el mismo índice
+ * (`setterId, read`) y el mismo filtro por destinatario — sólo cambia el corte.
+ */
+const AVISOS_LEIDOS = 50
+
 
 /**
  * Copy de cada novedad — SNAPSHOT del momento del handoff (se guarda en
@@ -114,21 +134,11 @@ export async function emitirNovedadSetter(input: {
 
 // ── Lectura del feed (home) ──────────────────────────────────────────────────
 
-export type AvisoView = {
-  id: string
-  kind: OsSetterNoticeKind
-  title: string
-  body: string
-  /** "hace 20 min" / "hace 3 h" — antigüedad del aviso. */
-  hace: string
-  /**
-   * A-06 — el lead que "Abrir" ANCLA como foco (no un href de navegación
-   * directa): abrir desde un aviso pasa por el MISMO mecanismo del foco, no
-   * reconstituye una segunda cola. `null` cuando no hay lead abrible
-   * (reasignación-saliente: el setter ya no es dueño → el aviso solo informa).
-   */
-  leadId: string | null
-}
+// El agrupamiento vive en un módulo PURO (`novedades-agrupar.ts`) para que el
+// chequeo de invariante lo ejecute de verdad; se re-exporta acá para que los
+// call-sites que ya importaban desde `novedades` no cambien.
+export { agruparAvisos, FILAS_NOVEDADES }
+export type { AvisoView, FilaNovedad }
 
 /**
  * A-06 — RESUMEN (no lista navegable) de las demos del setter EN_REVISION.
@@ -144,10 +154,13 @@ export type ColaRevisionResumen = {
 }
 
 export type NovedadesView = {
-  avisos: AvisoView[]
+  /** Las filas ya agrupadas y acotadas — lo que el panel dibuja. */
+  filas: FilaNovedad[]
+  /** Avisos que no entraron en las filas visibles (ninguna acción se pierde). */
+  ocultos: number
   /** Resumen de la cola en revisión, o null si no hay ninguna. */
   revision: ColaRevisionResumen | null
-  /** Avisos sin leer (badge). Puede superar `avisos.length` (que está capado). */
+  /** Avisos sin leer (badge). Puede superar lo visible (que está acotado). */
   totalSinLeer: number
 }
 
@@ -159,6 +172,11 @@ export type NovedadesView = {
 function leadAbrible(kind: OsSetterNoticeKind, leadId: string | null): string | null {
   if (kind === 'LEAD_REASIGNADO_SALIENTE' || !leadId) return null
   return leadId
+}
+
+/** Aplana la `Vigencia` a los dos campos que viaja la vista. */
+function vigenciaComoCampos(v: Vigencia): { vigente: boolean; enSuLugar: string | null } {
+  return v.vigente ? { vigente: true, enSuLugar: null } : { vigente: false, enSuLugar: v.enSuLugar }
 }
 
 /**
@@ -195,26 +213,50 @@ export function derivarColaRevision(
  * avisos falla, el resumen (derivado de los leads) igual se muestra y la cartera
  * no se rompe.
  *
- * 2.2 — `excludeLeadId` deduplica contra el foco: el aviso cuyo lead YA es el
- * protagonista del home (el foco, arriba) NO se repite en la lista. Es solo
- * presentación: ese aviso sigue SIN LEER (el badge `totalSinLeer` lo cuenta igual)
- * — cuando el foco cambie, reaparece. El aislamiento (`setterId`) no se toca.
+ * 2.2 / P21 — `excludeLeadIds` deduplica contra LA COLA: el aviso cuyo lead ya
+ * aparece como tarea (arriba, en la cola de hoy) NO se repite abajo como
+ * noticia. Hasta P21 el dedup era contra UN lead —el foco— porque la cola no se
+ * renderizaba en ninguna parte; renderizarla sin ensanchar el dedup habría dado
+ * exactamente lo que este sprint prohíbe: un aviso y una tarea diciendo lo
+ * mismo. Se pasan los ids de lo VISIBLE en la cola, no el grupo `trabajar`
+ * entero: un lead que no llegó a mostrarse conserva su aviso (ver
+ * `cola.ts#idsEnCola`).
+ *
+ * Es solo presentación: esos avisos siguen SIN LEER (el badge `totalSinLeer` los
+ * cuenta igual) y reaparecen cuando el lead deja la cola. El aislamiento
+ * (`setterId`) no se toca.
  */
 export async function getNovedadesSetter(
   userId: string,
   leads: OwnedLeadWithDossier[],
-  opts?: { excludeLeadId?: string | null },
+  opts?: {
+    excludeLeadIds?: readonly string[]
+    /**
+     * P23 — los leads YA clasificados por el page (`buildHomeLeads`), para poder
+     * decir si la orden de cada aviso sigue en pie. Se pasan en vez de
+     * re-clasificar acá: el dato que decide es `proximaAccion`, el MISMO que
+     * ordena la cola, y calcularlo dos veces es exactamente cómo dos superficies
+     * terminan diciendo cosas distintas. Sin ellos, ningún aviso caduca (el
+     * comportamiento previo).
+     */
+    estados?: readonly (EstadoDelLead & { id: string })[]
+  },
 ): Promise<NovedadesView> {
   const ahora = new Date()
   const revision = derivarColaRevision(leads, ahora)
-  const excluido = opts?.excludeLeadId ?? null
+  const excluidos = new Set(opts?.excludeLeadIds ?? [])
+  // Sin `estados` no hay contra qué contrastar: TODO queda vigente (el
+  // comportamiento previo a P23). Un índice vacío diría lo contrario —«este lead
+  // ya no es tuyo» sobre cada aviso—, que es peor que no chequear.
+  const puedeCaducar = opts?.estados !== undefined
+  const estados = indiceDeEstados(opts?.estados ?? [])
 
   try {
     const [rows, totalSinLeer] = await Promise.all([
       prisma.osSetterNotice.findMany({
         where: { ...ownSetterNoticeWhere(userId), read: false },
         orderBy: { createdAt: 'desc' },
-        take: AVISOS_VISIBLES,
+        take: AVISOS_LEIDOS,
         select: {
           id: true,
           kind: true,
@@ -229,9 +271,12 @@ export async function getNovedadesSetter(
       }),
     ])
 
-    // Dedup del foco: se filtra solo lo VISIBLE (la lista), nunca el conteo del
-    // badge (que refleja lo realmente sin leer, foco incluido).
-    const visibles = excluido ? rows.filter((row) => row.leadId !== excluido) : rows
+    // Dedup contra la cola: se filtra solo lo VISIBLE (la lista), nunca el
+    // conteo del badge (que refleja lo realmente sin leer, cola incluida).
+    const visibles =
+      excluidos.size > 0
+        ? rows.filter((row) => !(row.leadId && excluidos.has(row.leadId)))
+        : rows
 
     const avisos: AvisoView[] = visibles.map((row) => ({
       id: row.id,
@@ -240,12 +285,23 @@ export async function getNovedadesSetter(
       body: row.body,
       hace: formatEspera(row.createdAt, ahora),
       leadId: leadAbrible(row.kind, row.leadId),
+      // P23 — la ORDEN del aviso se contrasta contra el estado de AHORA del
+      // lead. El aviso es un snapshot y no se entera de que el lead se movió:
+      // así es como «Enviá el link ya» sobrevivía sobre un lead que la cola
+      // mandaba a esperar, y como un rechazo viejo seguía pidiendo retrabajo al
+      // lado de la aprobación que lo dejó sin efecto.
+      ...vigenciaComoCampos(
+        puedeCaducar
+          ? vigenciaDeAviso(row.kind, estados.get(row.leadId ?? '') ?? null)
+          : { vigente: true },
+      ),
     }))
 
-    return { avisos, revision, totalSinLeer }
+    const { filas, ocultos } = agruparAvisos(avisos, FILAS_NOVEDADES)
+    return { filas, ocultos, revision, totalSinLeer }
   } catch (error) {
     console.error('[novedades] fallo no fatal al leer avisos:', error)
-    return { avisos: [], revision, totalSinLeer: 0 }
+    return { filas: [], ocultos: 0, revision, totalSinLeer: 0 }
   }
 }
 

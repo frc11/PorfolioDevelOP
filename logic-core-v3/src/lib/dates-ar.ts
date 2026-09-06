@@ -77,6 +77,58 @@ export function dayRangeAR(now: Date = new Date()): UTCRange {
   return { start, end: new Date(start.getTime() + DAY_MS) }
 }
 
+// ── Día de calendario elegido por una persona → instante ─────────────────────
+
+/**
+ * Un día de calendario elegido a mano (`YYYY-MM-DD`, lo que emite un
+ * `<input type="date">`) → el instante UTC de las 00:00 AR de ESE día.
+ *
+ * Por qué existe: `new Date('2026-08-25')` —y `z.coerce.date()`, que lo usa por
+ * dentro— interpreta el date-only como medianoche **UTC**, que en AR (UTC-3)
+ * todavía es el 24 a las 21:00. Formatear ese instante en AR muestra el día
+ * anterior, y cualquier comparación `<= ahora` se dispara la noche previa. La
+ * raíz no es el formateo: es tratar un día de calendario como si fuera un
+ * instante. Un día solo se vuelve instante cuando se lo ancla a una zona, y acá
+ * la zona es AR.
+ *
+ * El arreglo NO desplaza horas sobre un `Date` ya mal parseado (eso corre el día
+ * en la dirección contraria y se rompe distinto según la fecha): construye el
+ * instante desde los componentes del calendario, con la misma regla que
+ * `startOfMonthAR` — 00:00 AR ≡ 03:00 UTC del MISMO día calendario.
+ *
+ * Es idempotente por diseño: aplicarlo a un valor que ya es instante no lo mueve
+ * (no matchea el patrón date-only y devuelve `null`, así el llamador conserva el
+ * valor original). Eso importa porque el mismo payload se valida dos veces:
+ * en el cliente y de nuevo en el server.
+ *
+ * Devuelve `null` si el texto no es un día de calendario REAL — incluido el caso
+ * traicionero `2026-02-31`, que `Date.UTC` normalizaría en silencio al 3 de marzo.
+ */
+export function parseCalendarDayAR(isoDate: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(isoDate.trim())
+  if (!match) return null
+
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+
+  const instant = new Date(Date.UTC(year, month - 1, day, 3, 0, 0, 0))
+
+  // Round-trip contra los componentes pedidos: `Date.UTC` NORMALIZA los desbordes
+  // (31 de febrero → 3 de marzo, mes 13 → enero del año siguiente) en vez de
+  // fallar. A las 03:00Z el día calendario UTC coincide con el AR, así que
+  // comparar en UTC es comparar el día AR.
+  if (
+    instant.getUTCFullYear() !== year ||
+    instant.getUTCMonth() !== month - 1 ||
+    instant.getUTCDate() !== day
+  ) {
+    return null
+  }
+
+  return instant
+}
+
 // ── Límites de semana (ISO: arranca lunes) ────────────────────────────────────
 
 /**
