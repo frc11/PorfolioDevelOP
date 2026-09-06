@@ -18,6 +18,7 @@
 import { acotar01 } from '../../_lib/acotar'
 import { sizesPorColumnas } from '../../_lib/imagen'
 
+import { mesetaDeLosPlanos } from './asentamiento'
 import type { CajaDeLaCaptura } from './Proyecto'
 
 /**
@@ -83,6 +84,13 @@ export const GEOMETRIA = {
 } as const
 
 /**
+ * EL ASENTAMIENTO DE LOS PLANOS — la meseta, derivada. Se arma UNA vez acá
+ * porque `planos` vive en `GEOMETRIA` y el remapeo no depende de nada más; su
+ * derivación, y lo que no puede dar, están en `asentamiento.ts`.
+ */
+export const MESETA = mesetaDeLosPlanos(GEOMETRIA.planos)
+
+/**
  * EL REPARTO DE LOS TRES PLANOS SOBRE EL RECORRIDO. **[B2 · frente B]**
  *
  * ── El defecto, medido en el navegador ────────────────────────────────────
@@ -124,24 +132,45 @@ export const GEOMETRIA = {
  * pie del viewport y cierra cuando el pin suelta. Remapearlo al pin sería
  * pisar un ancla medida por la puerta de atrás.
  *
- * ⚠ **LO QUE ESTO NO PUEDE DAR, Y SE REPORTA: la meseta.** Para que cada
- * proyecto *se quede quieto* —el asentamiento que el frente C le construyó a
- * Servicios— el progreso local tendría que saturar donde TERMINA la llegada de
- * P7, que es `3 / 3,5` de su ventana. Ese número vive en
- * `_lib/motion/patrones-piezas.ts` y **una sección no puede importar un valor
- * del sistema de motion** (`s7-contrato` §3), ni escribirlo acá, que sería una
- * segunda fuente de un valor medido. Sin la meseta, lo que el censo registra de
- * cada plano es el final de su SALIDA. Queda reportado, no arreglado.
+ * ── ✅ **B4-A · LA MESETA, QUE B2 NO PUDO CONSTRUIR** ─────────────────────
+ *
+ * B2 dejó escrito acá que la meseta no se podía hacer porque el progreso local
+ * tendría que saturar donde termina la llegada de P7 —`3 / 3,5`—, ese número
+ * vive en `_lib/motion/patrones-piezas.ts` y **`s7-contrato` §3 prohíbe que una
+ * sección importe un valor del sistema de motion**. Frenó bien y dejó la salida
+ * escrita: *que el CONTRATO exponga el corte*.
+ *
+ * **Eso es lo que pasó, y la regla no se aflojó:** `_contrato/motion.ts` publica
+ * `CORTE_DE_TRAMOS` con su guardia —`corteDeTramos`, que el instrumento
+ * re-deriva del patrón real— y `asentamiento.ts` de esta carpeta arma la meseta
+ * con el MISMO `saturarEn` que usan Servicios, Tu panel y el Cierre. Acá quedó
+ * el reparto en tercios, que no cambió un bit; el remapeo de adentro del tramo
+ * está allá, con su derivación y con lo que no puede dar.
  */
 export function localDelPlano(progreso: number, indice: number): number {
-  return acotar01(acotar01(progreso) * GEOMETRIA.planos - indice)
+  // ⚠ `u` NO se acota arriba: el tramo del plano `i` llega hasta 1 y su salida
+  // se desborda al tramo siguiente, que es lo que hace que dos planos estén
+  // pintados a la vez en el cruce. Acotarlo acá era el defecto.
+  return MESETA.remapear(acotar01(progreso) * GEOMETRIA.planos - indice)
 }
 
-/** Los puntos del recorrido donde cada plano termina el suyo: 1/3, 2/3 y 1. Es
- *  lo que el censo mide como aterrizaje, y lo que el invariante compara. */
+/**
+ * LOS ATERRIZAJES — dónde cada plano TERMINA de llegar y se queda quieto.
+ *
+ * ⚠ **Cambiaron con la meseta, y es el dato que hay que mirar.** Eran 1/3, 2/3
+ * y 1 —el final de la SALIDA de cada plano, que es lo único que había cuando no
+ * había meseta— y ahora son el arranque de la meseta: `(i + llegada) / planos`.
+ * Un acontecimiento es un punto donde algo termina de cambiar y **se queda**, y
+ * eso ahora pasa antes, en el mismo tramo.
+ *
+ * A 1920×1080 el aterrizaje del primer plano se corre de `scrollY` 8640 a 8400,
+ * y el hueco contra el marco de la sección —que aterriza en 7800, medido con
+ * scroll real— baja de **0,78 a 0,56 pantallas**. El gate de B2 es el hueco
+ * MÁXIMO, así que la meseta lo mejora: no hay nada que compensar.
+ */
 export const ATERRIZAJES_DE_LOS_PLANOS: readonly number[] = Array.from(
   { length: GEOMETRIA.planos },
-  (_, i) => (i + 1) / GEOMETRIA.planos,
+  (_, i) => (i + MESETA.fraccionDeLaLlegada) / GEOMETRIA.planos,
 )
 
 /** El `sizes` real de las capturas. Exportado para que el instrumento afirme el

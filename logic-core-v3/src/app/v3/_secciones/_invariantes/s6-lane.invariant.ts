@@ -9,6 +9,7 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
+import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
 import { IDS_DE_SERVICIO } from '../_contrato/acento'
 import {
   ARCHIVO_EXCEPTUADO_DEL_ESCANEO,
@@ -264,15 +265,22 @@ titulo('7 · Ningún archivo pasa las 300 líneas')
  * que no coincide con la herramienta contra la que la gente la compara produce
  * discusiones sobre el contador en vez de sobre el archivo. Corregido en
  * SITIO-S7, donde apareció.
+ *
+ * ⚠ **B4-A: la cuenta ya no se escribe acá.** Este archivo tenía la forma
+ * correcta escrita a mano y por eso la corrección no viajó a los otros seis
+ * instrumentos que contaban líneas — B2 lo vio como «`s5-codigo` cuenta uno
+ * más». Ahora las nueve llamadas del repo entran por `contarLineas` de
+ * `s8-largos.ts`, que es donde está el porqué. El número no se mueve: los 374
+ * archivos de `src/app/v3` terminan en salto y ahí las dos formas coinciden.
  */
 const medidos = [...CODIGO, ...INSTRUMENTOS].map((archivo) => ({
   archivo,
-  lineas: (leer(archivo).match(/\n/g) ?? []).length,
+  lineas: contarLineas(leer(archivo)),
 }))
 afirmarIgual(
-  medidos.filter((m) => m.lineas > 300),
+  medidos.filter((m) => m.lineas > LIMITE_DE_LINEAS),
   [],
-  `ninguno de los ${medidos.length} archivos del lane pasa las 300 líneas`,
+  `ninguno de los ${medidos.length} archivos del lane pasa las ${LIMITE_DE_LINEAS} líneas`,
 )
 const masLargo = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
 console.log(`  el más largo: ${masLargo.archivo.replace(`${LANE}/`, '')} — ${masLargo.lineas} líneas`)

@@ -43,6 +43,7 @@ import {
   leer,
 } from './s5-archivos'
 import { afirmarLosOriginales } from './s5-originales'
+import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
 import {
   IMPORTS_PERMITIDOS,
   PROHIBIDOS,
@@ -259,11 +260,16 @@ const INSTRUMENTOS = instrumentosDeS5()
 /** Los binarios quedan afuera: contarle saltos de línea a un PNG no mide nada. */
 const TODOS = [...new Set([...ARCHIVOS_DE_CODIGO, ...INSTRUMENTOS])]
 
-const medidos = TODOS.map((archivo) => ({ archivo, lineas: leer(archivo).split('\n').length }))
+/** ⚠️ **B4-A · ÉSTE ERA EL CONTADOR QUE ESTABA MAL.** Contaba con
+ *  `split('\n').length` —uno de más en todo archivo terminado en salto— y por
+ *  eso publicaba `Hero.tsx — 300` donde `wc -l` dice 299, o sea **uno más** que
+ *  `s6-lane` §7 y `s7-contrato` §7. La cuenta buena ya existía y no la importaba
+ *  nadie: `contarLineas` de `s8-largos.ts`, con el porqué de la divergencia. */
+const medidos = TODOS.map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
 afirmarIgual(
-  medidos.filter((r) => r.lineas > 300),
+  medidos.filter((r) => r.lineas > LIMITE_DE_LINEAS),
   [],
-  `ninguno de los ${TODOS.length} archivos pasa las 300 líneas`,
+  `ninguno de los ${TODOS.length} archivos pasa las ${LIMITE_DE_LINEAS} líneas`,
 )
 
 const masLargo = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
@@ -277,8 +283,18 @@ afirmar(
 
 controlPositivo(
   'el medidor ve un archivo de más de 300 líneas',
-  { archivo: 'inventado.ts', lineas: 301 },
-  (r: { lineas: number }) => r.lineas <= 300,
+  { archivo: 'inventado.ts', lineas: LIMITE_DE_LINEAS + 1 },
+  (r: { lineas: number }) => r.lineas <= LIMITE_DE_LINEAS,
+)
+
+/** ⚠️ EL CONTROL DE LA CORRECCIÓN: que el contador nuevo pase no dice nada si el
+ *  viejo daba lo mismo. Acá se ve que NO daban lo mismo. */
+const TRES_LINEAS = 'a\nb\nc\n'
+afirmarIgual(contarLineas(TRES_LINEAS), 3, 'el contador del repo cuenta 3 donde `wc -l` cuenta 3')
+controlPositivo(
+  'y el viejo contaba 4: la divergencia con `s6-lane` y `s7-contrato` era exactamente ésta',
+  TRES_LINEAS,
+  (t: string) => t.split('\n').length === contarLineas(t),
 )
 
 cerrar('s5-codigo.invariant')

@@ -37,6 +37,7 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DE_CODIGO, ARCHIVOS_DEL_SPRINT, RAIZ, leer } from './s3-archivos'
 import { quitarComentarios } from './s3-escaneo'
+import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Los imports del sprint, uno por uno')
@@ -148,8 +149,9 @@ function instrumentosDeS3(): string[] {
 const INSTRUMENTOS = instrumentosDeS3()
 const TODOS = [...new Set([...ARCHIVOS_DEL_SPRINT, ...INSTRUMENTOS])]
 
-const medidos = TODOS.map((archivo) => ({ archivo, lineas: leer(archivo).split('\n').length }))
-const largos = medidos.filter((r) => r.lineas > 300)
+/** B4-A: la cuenta del repo, no una copia. Ver `contarLineas` en `s8-largos.ts`. */
+const medidos = TODOS.map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
+const largos = medidos.filter((r) => r.lineas > LIMITE_DE_LINEAS)
 
 afirmarIgual(largos, [], `ninguno de los ${TODOS.length} archivos pasa las 300 líneas`)
 

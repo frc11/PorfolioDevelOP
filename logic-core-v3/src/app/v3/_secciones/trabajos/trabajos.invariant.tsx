@@ -18,10 +18,13 @@
  *   · **El acento no puede ser texto**: los hex se LEEN del tema. · **Las tres
  *     capturas** (V3-D): que el ARCHIVO mida la relación declarada.
  *   · **B2 · el reparto de los tres planos** (§15), sobre la función pura.
+ *   · **B4-A · la meseta** (§16), en `soporte.ts`: barre el pin entero y afirma
+ *     que nunca quedan los tres planos invisibles a la vez.
  *
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en
- * `trabajos-piezas.ts`, que es su módulo de apoyo declarado. Donde hubo que
- * elegir se sacaron afirmaciones redundantes y NUNCA controles positivos.
+ * `trabajos-piezas.ts` y el arnés en `soporte.ts`, sus dos módulos de apoyo
+ * declarados. Donde hubo que elegir se sacaron afirmaciones redundantes y NUNCA
+ * controles positivos.
  */
 
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -39,9 +42,9 @@ import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
-import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, sinTres, veces } from './soporte'
-import { ancestrosDe, aterrizajesMedidos, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, desviosDelContrato, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, repartoMonotono, separacionMinima, type MedidasDeImagen } from './trabajos-piezas'
-import { ATERRIZAJES_DE_LOS_PLANOS, GEOMETRIA, SIZES_DE_LA_CAPTURA, localDelPlano } from './geometria'
+import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, afirmarElRepartoYLaMeseta, sinTres, veces } from './soporte'
+import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
+import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
 import { Trabajos } from './Trabajos'
 
 const seccion = seccionDe('trabajos')
@@ -188,7 +191,7 @@ controlPositivo('el chequeo de la métrica ve una métrica escondida en un `sr-o
 titulo('9 · Cero `three`: el efecto es HTML con perspectiva, no geometría 3D')
 
 for (const { archivo, texto } of FUENTES) afirmar(sinTres(texto), `${archivo} no importa three, @react-three ni drei`)
-afirmarIgual(FUENTES.length, 3, 'y se leyeron del disco los TRES archivos que se despachan, no cero — B1: la geometría salió a su archivo y también se despacha')
+afirmarIgual(FUENTES.length, 4, `y se leyeron del disco los CUATRO archivos que se despachan, no cero — B1 sacó la geometría a su archivo y B4-A el asentamiento al suyo: ${FUENTES.map((f) => f.archivo).join(' · ')}`)
 controlPositivo('el detector ve un import de three', "import * as T from 'three'", sinTres)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -204,7 +207,7 @@ controlPositivo('la cuenta de contraste ve un par que SÍ llega a 3:1', '#FFFFFF
 afirmar(razonDeContraste(TINTA_CLARA, ACENTOS[0]) >= 4.5, `el acento como RELLENO con el papel encima da ${razonDeContraste(TINTA_CLARA, ACENTOS[0]).toFixed(2)}: pasa AA`)
 afirmarIgual(veces(quieto, 'text-acento'), 0, 'cero `text-acento` en el marcado')
 afirmarIgual(veces(quieto, 'border-acento'), 0, 'y cero `border-acento`: el acento nunca marca un límite')
-afirmarIgual(veces(quieto, 'bg-acento'), 3, 'va como relleno, tres veces: una pastilla por métrica')
+afirmarIgual(veces(quieto, 'bg-acento'), CONTENIDO.proyectos.length + veces(quieto, 'data-pieza="prefijo-de-servicio"'), `va como RELLENO ${veces(quieto, 'bg-acento')} veces: una pastilla por métrica (${CONTENIDO.proyectos.length}) más el prefijo de la marca del rótulo (B4-A), y ninguna otra`)
 afirmarIgual(veces(quieto, 'border-borde-fuerte'), 0, 'ya no hay borde punteado (V3-D): el límite lo marca la captura, que ocupa el ancho entero')
 const conTamano = (html: string): boolean => /<span[^>]*text-fluido-micro[^>]*>\[MÉTRICA\]/.test(html)
 afirmar(conTamano(quieto), 'la pastilla conserva su tamaño micro: el color va afuera para que `tailwind-merge` no se lo coma')
@@ -276,24 +279,18 @@ afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))].sort(), ['metrica', 'prosa
 afirmarIgual(PEDIDO.filter((e) => e.marcador !== null).length, 3, '  tres con marcador visible: las tres métricas, y ninguna captura')
 afirmarIgual(PEDIDO.filter((e) => e.ruta.includes('captura')).map((e) => e.ruta), [], '  y no queda una sola entrada pidiendo algo de las capturas: llenar una casilla la SACA de la lista')
 afirmar(PEDIDO.every((e) => e.formato.length > 0), '  y todas dicen en qué formato entra el dato')
-afirmarIgual(PATRONES_DE_LA_SECCION, ['P7'], 'la tabla de `contenido.ts` declara P7, y nada más')
+/** ✅ **B4-A · LA DESINCRONIZACIÓN, CERRADA.** B2 no podía tocar `contenido.ts` y
+ *  publicó las dos cifras por separado con su dueño; hoy la tabla dice las dos y
+ *  la publicación vuelve a ser UNA afirmación de igualdad. */
 const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].map((m) => m[1]))].sort()
-afirmarIgual(patronesDelFuente, ['P2', 'P7'], '  y el componente consume DOS: P7 para los planos y P2 para el marco (B2)')
-console.log(
-  '  ⚠️ DESINCRONIZACIÓN REPORTADA, NO ARREGLADA [dueño: `trabajos/contenido.ts`] — `PATRONES_DE_LA_SECCION` sigue diciendo ' +
-    'sólo P7. `contenido.ts` está FUERA del scope del frente B de B2 (regla 3 de la instrucción: el contenido no se toca), así que ' +
-    'la tabla queda vieja y las dos afirmaciones de arriba dejan la diferencia a la vista en vez de esconderla en un igual que mienta.',
-)
+afirmarIgual(patronesDelFuente, ['P2', 'P7'], 'el componente consume DOS patrones: P7 para los planos y P2 para el marco (B2)')
+afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('15 · B2 · El reparto de los tres planos: cada proyecto, su tercio del scroll')
-
-const ATERRIZAJES = aterrizajesMedidos(localDelPlano, GEOMETRIA.planos)
-afirmarIgual(ATERRIZAJES, [...ATERRIZAJES_DE_LOS_PLANOS], 'los tres planos dejan de cambiar en 1/3, 2/3 y 1 del recorrido — con el escalonado de P7 haciendo el reparto terminaban en 0,814 · 0,907 · 1, amontonados en las últimas dos décimas, y el censo los leía como DOS grupos pegados al final')
-afirmar(separacionMinima(ATERRIZAJES) >= 1 / GEOMETRIA.planos - 1e-9, 'y entre dos aterrizajes hay al menos un tercio del recorrido', separacionMinima(ATERRIZAJES).toFixed(6))
-afirmar(repartoMonotono(localDelPlano, GEOMETRIA.planos), 'ningún plano retrocede: uno que volviera atrás se desarmaría solo mientras el visitante baja')
-afirmarIgual(desviosDelContrato(localDelPlano, GEOMETRIA.planos), [], 'y el plano vigente lee el MISMO `local` que `tramoDeSecuencia` del contrato: es la secuencia de Servicios, no una copia parecida')
-controlPositivo('el detector ve un reparto que NO separa: con los tres leyendo el progreso entero, los tres terminan en el mismo punto', (p: number) => p, (r: (p: number, i: number) => number) => separacionMinima(aterrizajesMedidos(r, GEOMETRIA.planos)) >= 1 / GEOMETRIA.planos - 1e-9)
-controlPositivo('  y ve un reparto que retrocede', (p: number) => 1 - p, (r: (p: number, i: number) => number) => repartoMonotono(r, GEOMETRIA.planos))
+// §15 y §16 viven en `soporte.ts`, juntas: el reparto de los planos y su
+// meseta son la misma pieza, y el barrido del pin necesita el fotograma de P7
+// —`PATRONES` de `_lib/motion/`— que este archivo, producto para
+// `s7-contrato` §3, no puede importar. El corte es por REGLA, no por tamaño.
+afirmarElRepartoYLaMeseta()
 
 cerrar('trabajos.invariant')

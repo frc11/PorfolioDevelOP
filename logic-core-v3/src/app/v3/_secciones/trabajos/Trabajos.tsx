@@ -48,13 +48,20 @@ import { Proyecto } from './Proyecto'
  *    empiece. Es el primer momento de la sección y llena el tramo de entrada.
  *
  * ⚠ **Y el marco sigue siendo el plano quieto contra el que se lee la
- * profundidad**, que es la decisión que traía escrita: su rango de scroll cierra
- * ANTES de que el pin arranque, así que durante las dos pantallas pinneadas
- * —que es cuando los planos vuelan— no se mueve un píxel.
+ * profundidad**: su rango de scroll cierra ANTES de que el pin arranque, así que
+ * durante las dos pantallas pinneadas no se mueve un píxel.
  *
- * ⚠ **`contenido.ts` sigue declarando `PATRONES_DE_LA_SECCION = ['P7']` y la
- * sección consume dos.** Esa tabla está fuera del scope de este frente; la
- * desincronización queda REPORTADA y el invariante la publica con su dueño.
+ * ✅ **B4-A: `contenido.ts` ya declara los DOS**, y §14 del invariante lo afirma
+ * como igualdad en vez de publicarlo como delta.
+ *
+ * ── ✅ B4-A · LA MESETA: cada proyecto llega, SE QUEDA, y sale ─────────────
+ *
+ * `localDelPlano` ya no acota el tramo arriba: cada plano llega en los primeros
+ * 840 px de su tramo, **se queda quieto 240** —el umbral con el que el censo
+ * funde dos acontecimientos— y recién ahí sale, **desbordándose 140 px al tramo
+ * del siguiente**. Ese desborde es el arreglo: mientras uno se va, el que viene
+ * ya está pintado, y los cuadros vacíos de `scrollY` 8640, 9720 y 10800→11880
+ * desaparecen. La derivación está en `asentamiento.ts`.
  *
  * ── EL EFECTO ES HTML CON PERSPECTIVA, NO GEOMETRÍA 3D ────────────────────
  *

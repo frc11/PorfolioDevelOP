@@ -139,6 +139,9 @@ export const ARCHIVOS_DE_APOYO = [
   // lo decidió y lo escribió, que es la regla de esta lista.
   `${RAIZ_DE_SECCIONES}/trabajos/geometria.ts`,
   `${RAIZ_DE_SECCIONES}/trabajos/soporte.ts`,
+  // B4-A · `asentamiento.ts` es la derivación de la meseta de los planos: el
+  // mismo corte que Servicios, Tu panel y el Cierre ya tienen para el suyo.
+  `${RAIZ_DE_SECCIONES}/trabajos/asentamiento.ts`,
 ]
 
 /**

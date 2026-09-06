@@ -29,86 +29,26 @@
  * `specDe` del demo multiplica duración y escalonado por los factores de la
  * mesa y puede forzar una curva. Acá no hay perillas: la sección corre en lo
  * medido. La calibración fina la hace el ojo sobre la mesa, no sobre el sitio.
+ *
+ * ── ⚠️ B4-A · QUÉ SE FUE DE ACÁ, Y POR QUÉ ERA UNA FUGA DE LA COMPUERTA ───
+ *
+ * Este módulo tenía DOS cosas de naturaleza distinta: lo que el árbol QUIETO
+ * consume —`deberiaAnimar`, que resuelve la compuerta, y `USOS_DECLARADOS`, el
+ * padrón— y **la glue del bloque ANIMADO**: `ANCLA_DEL_PIN`, `cronogramaDe`,
+ * `especificacionDe` e `inerciaDe`, que sólo usa `coreografia-animada.tsx`.
+ *
+ * Mezcladas, la glue viajaba en la carga inicial de `/v3` porque el módulo
+ * entero entra por `CompuertaDelHome` y por `registro.ts`: **503 B medidos sobre
+ * el chunk de la página del build** —`{declarado:"top top"…}`, la cuenta del
+ * cronograma y la especificación de pieza— del lado equivocado de la compuerta
+ * de 1025. No lo vio ningún instrumento: `s7-compuerta` busca las huellas del
+ * SISTEMA de motion (`_lib/motion/`) y esto es del CONTRATO.
+ *
+ * La glue se fue a `bloqueAnimado.ts`, que sólo importa el módulo perezoso. El
+ * corte llegada/salida de un patrón con tramos se fue a `asentamiento.ts`, con
+ * la primitiva que lo consume. Acá queda lo que el árbol quieto necesita.
  */
 
-import type { Ancla, ParDeAnclas } from '../../_lib/motion/anclas'
-import type { Cronograma } from '../../_lib/motion/cronograma'
-import type { EspecificacionDePieza } from '../../_lib/motion/fotograma'
-import type { Patron } from '../../_lib/motion/patrones'
-
-/**
- * EL ANCLA DEL PIN — `top top` → `bottom bottom`. **[derivado], no medido.**
- *
- * Las nueve anclas de `ANCLAS` describen los patrones de la referencia. Ésta
- * describe otra cosa: **nuestra** geometría de pinneado, la que sale de
- * `secciones.ts` y de `position: sticky`.
- *
- * La cuenta, con la fórmula de `posicionDeAncla`:
- *
- *     inicio = topDoc + alto·0 + 0  −  (viewport·0 + 0)  =  topDoc
- *     fin    = topDoc + alto·1 + 0  −  (viewport·1 + 0)  =  topDoc + alto − viewport
- *     rango  = alto − viewport
- *
- * Y `alto − viewport` es exactamente el recorrido del pin: una sección de
- * 300svh con un hijo `sticky` de 100svh queda clavada 200svh. El progreso vale
- * 0 cuando el pin empieza y 1 cuando termina, que es lo que la secuencia
- * necesita para repartirse en tramos iguales.
- *
- * `s6-servicios.invariant` afirma esa igualdad y la controla con dos anclas
- * mutiladas que no la reproducen.
- */
-const LADO_TOPE = { fraccion: 0, px: 0 } as const
-const LADO_FONDO = { fraccion: 1, px: 0 } as const
-
-const anclaDelPinInicio: Ancla = {
-  declarado: 'top top',
-  elemento: LADO_TOPE,
-  viewport: LADO_TOPE,
-}
-const anclaDelPinFin: Ancla = {
-  declarado: 'bottom bottom',
-  elemento: LADO_FONDO,
-  viewport: LADO_FONDO,
-}
-
-export const ANCLA_DEL_PIN: ParDeAnclas = { inicio: anclaDelPinInicio, fin: anclaDelPinFin }
-
-/**
- * El cronograma de un patrón con N piezas, en sus valores medidos.
- *
- * La duración APLICADA no es ésta: es `duracionDeclarada + escalonado·(N−1)`, y
- * la calcula `duracionAplicada` del sistema. Acá se declara lo declarado.
- */
-export function cronogramaDe(patron: Patron, cantidad: number): Cronograma {
-  return {
-    duracionDeclarada: patron.duracionDeclarada,
-    escalonado: patron.escalonado,
-    cantidad,
-  }
-}
-
-/** La especificación de pieza lista para `Pieza`, `Piezas` y `propiedadesDePieza`. */
-export function especificacionDe(patron: Patron, cantidad: number): EspecificacionDePieza {
-  return {
-    claves: patron.claves,
-    tramos: patron.tramos,
-    pointerEvents: patron.pointerEvents,
-    curva: patron.curva,
-    cronograma: cronogramaDe(patron, cantidad),
-  }
-}
-
-/**
- * La inercia del `scrub`, en segundos, o `null` si el patrón no declara una.
- *
- * `scrub: true` en la referencia significa "sin inercia": el cabezal sigue al
- * scroll sin retraso. Un número son los segundos que tarda en alcanzarlo, y el
- * sistema lo reproduce con un resorte sin rebote — misma familia de
- * comportamiento, no la misma matemática. Está declarado así en S2.
- */
-export function inerciaDe(patron: Patron): number | null {
-  return typeof patron.scrub === 'number' ? patron.scrub : null
-}
 
 /**
  * LA COMPUERTA DE ESTE LANE — pura, para poder afirmar la tabla de verdad sin

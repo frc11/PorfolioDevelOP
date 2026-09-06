@@ -17,12 +17,13 @@ import { useMotionValue } from 'motion/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
+import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { rangoDeScroll, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS } from '../../_lib/motion/lineas'
 import { IDS_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
 import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
-import { ANCLA_DEL_PIN } from '../_contrato/motion'
+import { ANCLA_DEL_PIN } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 import { cambiosDeTramo, canalesSincronizados, desincronizaciones, tramoDeSecuencia, type LectorDeCanales } from '../_contrato/secuencia'
@@ -58,11 +59,11 @@ const ARCHIVOS = codigoDeLaSeccion('servicios')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Qué se construyó, y las cifras que van al reporte')
 
-for (const a of ARCHIVOS) console.log(`  ${String(leer(a).split('\n').length).padStart(4)} líneas  ${a}`)
+for (const a of ARCHIVOS) console.log(`  ${String(contarLineas(leer(a))).padStart(4)} líneas  ${a}`)
 console.log(`  párrafos: ${IDS_DE_SERVICIO.map((id) => `${id} ${LONGITUDES[id]} palabras`).join(' · ')}`)
 console.log(`  marcado: rama quieta ${quieto.length} caracteres · rama animada ${animado.length}`)
 afirmar(ARCHIVOS.length > 0, `${ARCHIVOS.length} archivos de producto en la carpeta`, ARCHIVOS.map((a) => a.split('/').pop()).join(' · '))
-afirmar(ARCHIVOS.every((a) => leer(a).split('\n').length <= 300), 'ningún archivo pasa las 300 líneas')
+afirmar(ARCHIVOS.every((a) => contarLineas(leer(a)) <= LIMITE_DE_LINEAS), 'ningún archivo pasa las 300 líneas')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Abajo de 1025 la sección se lee entera y no se mueve nada')

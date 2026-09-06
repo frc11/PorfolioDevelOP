@@ -217,13 +217,32 @@ html:has([data-v3]) {
   transition-delay: var(--nav-retardo-reposo);
 }
 
-[data-v3] [data-pieza="nav-enlace"] [data-parte="marcador"] {
+/* ── B4-A · EL MARCADOR ES AHORA LA PIEZA `PrefijoDeServicio` ───────────────
+ *
+ * Era un `<span data-parte="marcador">` de esta hoja. El registro era el mismo
+ * que el prefijo del sistema de marca —un relleno que precede a un rótulo y
+ * marca lo que sigue— y tenía otro dueño: `Navegacion.tsx` monta la pieza y este
+ * selector la agarra por `data-pieza`.
+ *
+ * **El reparto entre la hoja y la pieza, escrito:** la pastilla pone LA
+ * GEOMETRÍA y EL MOVIMIENTO —tamaño de `--spacing-1`, el radio, la escala 0,8,
+ * los −16px y los 500 ms, todo medido en la referencia— y la marca pone EL
+ * RELLENO, que llega en la clase `bg-acento` de la pieza. Por eso este bloque ya
+ * no declara `background-color`: declararlo lo ganaría por especificidad y el
+ * retiñido por `data-servicio` quedaría muerto sin que nada avisara.
+ *
+ * ⚠ El tamaño SÍ se declara acá y gana por especificidad sobre el `size-*` que
+ * la pieza trae (8px): la pastilla mide 604,05 × 48 px a 1920 y ese número está
+ * aprobado por grabación. Medido después del cambio: **604,046875 × 48**, el
+ * mismo bit. Cambiar el tamaño acá mueve la pastilla.
+ * ------------------------------------------------------------------------- */
+
+[data-v3] [data-pieza="nav-enlace"] [data-pieza="prefijo-de-servicio"] {
   display: block;
   flex: none;
   inline-size: var(--spacing-1);
   block-size: var(--spacing-1);
   border-radius: var(--radius-circulo);
-  background-color: var(--color-tinta);
   opacity: 0;
   transform: scale(var(--nav-marcador-escala))
     translateX(var(--nav-marcador-desplazamiento));
@@ -250,7 +269,7 @@ html:has([data-v3]) {
     [data-forzado~="hover"],
     [data-forzado~="foco"]
   )
-  [data-parte="marcador"] {
+  [data-pieza="prefijo-de-servicio"] {
   opacity: 1;
   transform: none;
 }

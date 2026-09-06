@@ -22,6 +22,7 @@
  * declarado en `NUMEROS_PERMITIDOS`.
  */
 
+import { LOGOTIPO } from '../../_componentes/marca/sistema'
 import { IDS_DE_SECCION, seccionDe } from '../_contrato/forma'
 import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
@@ -205,9 +206,20 @@ export const NOVEDADES = {
  *
  * Fecha, razón social y legales no existen todavía y no se inventan: van con su
  * marcador, en texto, y la nota dice qué entra ahí.
+ *
+ * ── ⚠️ B4-A · LA MARCA SE DERIVA DEL SISTEMA, Y ANTES ERA UNA COPIA ────────
+ *
+ * Decía `marca: 'develOP'`, escrito acá. B3 construyó el sistema de marca y su
+ * `LOGOTIPO` es **la** palabra; dos cadenas iguales en dos archivos son dos
+ * cosas que se pueden desincronizar sin que nada avise. Ahora sale de ahí.
+ *
+ * Y lo que la renderiza ya no es este texto: es la pieza `Logotipo` del sistema,
+ * montada en `Cierre.tsx`. Este campo se queda porque el modelo de alto del pie
+ * (`s10-mobile-pie`) mide la línea entera como cadena, y esa medición sigue
+ * siendo la misma.
  */
 export const LINEA_DE_CIERRE = {
-  marca: 'develOP',
+  marca: LOGOTIPO,
   piezas: ['[FECHA]', '[NOMBRE]', '[ENLACE]'] as readonly Marcador[],
   nota: 'La fecha, la razón social y los legales entran acá cuando existan.',
 } as const

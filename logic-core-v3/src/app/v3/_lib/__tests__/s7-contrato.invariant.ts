@@ -26,6 +26,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
 import {
   CONTRATO,
   RAIZ,
@@ -254,7 +255,7 @@ titulo('7 · La regla de las 300 líneas, sobre lo que este sprint escribe')
  * canales son las formas concretas de colgar contenido de un progreso.** Se
  * cambian por razones distintas y por eso se leen por separado.
  */
-const LIMITE = 300
+const LIMITE = LIMITE_DE_LINEAS
 const DE_ESTE_SPRINT = [
   ...TODOS,
   ...readdirSync(path.join(RAIZ, 'src/app/v3/_lib/__tests__'))
@@ -270,8 +271,12 @@ const DE_ESTE_SPRINT = [
  * corrida, a tres archivos de exactamente 300. Un contador que no coincide con
  * la herramienta contra la que la gente lo compara produce discusiones sobre el
  * contador en vez de sobre el archivo.
+ *
+ * ⚠ **B4-A: la cuenta la trae `s8-largos.ts` y ya no se escribe acá.** Era la
+ * tercera copia de la misma expresión y por eso el arreglo de SITIO-S7 nunca
+ * llegó a los seis instrumentos que contaban distinto.
  */
-const lineasDe = (archivo: string): number => (leer(archivo).match(/\n/g) ?? []).length
+const lineasDe = (archivo: string): number => contarLineas(leer(archivo))
 const medidos = DE_ESTE_SPRINT.map((a) => ({ a, n: lineasDe(a) })).sort((x, y) => y.n - x.n)
 const largos = medidos.filter((f) => f.n > LIMITE).map((f) => `${f.a} — ${f.n} líneas`)
 

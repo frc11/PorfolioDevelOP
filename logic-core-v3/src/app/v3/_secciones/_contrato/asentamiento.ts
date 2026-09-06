@@ -41,6 +41,7 @@
  */
 
 import { acotar01 } from '../../_lib/acotar'
+import type { Patron } from '../../_lib/motion/patrones'
 
 /**
  * EL PASO DEL CENSO DE ACONTECIMIENTOS, en píxeles de scroll.
@@ -92,3 +93,59 @@ export function saturarEn(fraccion: number): (local: number) => number {
   }
   return (local: number): number => acotar01(acotar01(local) / fraccion)
 }
+
+/**
+ * ═══ EL CORTE LLEGADA/SALIDA DE UN PATRÓN CON TRAMOS ══════════════════════
+ *
+ * ── El hueco que esto cierra, con el defecto que lo forzó ─────────────────
+ *
+ * B2 midió que en Trabajos, a `scrollY` 8640 y 9720 —los dos bordes de tramo de
+ * la secuencia— **los tres planos quedaban invisibles a la vez**: la salida de
+ * uno terminaba en el píxel exacto donde arrancaba la llegada del siguiente. La
+ * meseta que lo arregla —*cada proyecto llega, se queda, y sale*— necesita saber
+ * DÓNDE, adentro de la ventana de P7, termina la llegada y empieza la salida:
+ * `3 / 3,5`.
+ *
+ * Ese número vive en `_lib/motion/patrones-piezas.ts`, y **`s7-contrato` §3
+ * prohíbe que un archivo de producto importe un valor de `_lib/motion/`** — la
+ * regla que hace que la compuerta de 1025 no sea decorativa. B2 frenó ahí, con
+ * razón, y dejó escrita la salida: *el contrato tiene que EXPONER el corte*.
+ * **Esto es esa salida, y la regla no se afloja: el corte lo intermedia el
+ * contrato.**
+ *
+ * ── Por qué el número se ESCRIBE acá y eso NO es una segunda fuente ───────
+ *
+ * Porque este archivo tampoco puede importar `PATRONES`: es producto y cae bajo
+ * la misma regla. **Es exactamente la forma que `ANCLA_DEL_PIN` ya tiene** —un
+ * dato de motion escrito acá con los tipos importados y el valor derivado a
+ * mano— y lo que la convierte en un espejo con guardia en vez de una segunda
+ * fuente es `corteDeTramos`: la función que RE-DERIVA el corte del patrón real,
+ * que la usa el instrumento —que sí puede importar `PATRONES`— y que falla si
+ * los dos dejan de decir lo mismo. Es la misma costura que `TOKENS_DEL_UMBRAL`
+ * tiene contra `theme-develop.css`: acá se publica, allá se releen los dos.
+ */
+
+/**
+ * El corte de un patrón con DOS tramos, leído del patrón. La usa el
+ * instrumento; el producto consume `CORTE_DE_TRAMOS`.
+ *
+ * Devuelve `null` cuando el patrón no es una línea de tiempo de dos tramos: no
+ * hay corte que publicar y decir 0 o 1 sería inventar uno.
+ */
+export function corteDeTramos(patron: Patron): number | null {
+  const tramos = patron.tramos
+  if (tramos === undefined || tramos.length !== 2) return null
+  return tramos[0].hasta
+}
+
+/**
+ * EL CORTE PUBLICADO, por id de patrón. Es lo que una sección puede importar.
+ *
+ * Sólo P7 está acá porque sólo P7 tiene tramos entre los nueve del padrón, y
+ * porque un mapa con entradas que nadie consume es una lista que se queda vieja
+ * sin que nada avise. `corteDeTramos` es lo que lo mantiene honesto.
+ */
+export const CORTE_DE_TRAMOS = {
+  /** `3 / 3,5` — donde la llegada de P7 termina y arranca la salida. */
+  P7: 3 / 3.5,
+} as const satisfies Partial<Record<Patron['id'], number>>

@@ -24,6 +24,7 @@ import { MARCA_ESCENARIO } from '../marcaEscenario'
 import { ENCHUFES, FRENTES, PUEDEN_IMPORTAR_LA_MARCA, SCRIPTS_DECLARADOS, archivosSinRegistrar, entregablesQueFaltan, existe, leer } from './s8-padron'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { quitarComentarios } from './s3-escaneo'
 // prettier-ignore
 import { TODO_SRC, afirmarQueNadaSumaAltoAfueraDelMain, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
 import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, propiosQuePasan, repartir, type Largo } from './s8-largos'
@@ -264,5 +265,35 @@ controlPositivo(
   [{ archivo: 'src/app/v3/_lib/escena/OrbitRig.tsx', lineas: 653 }],
   (l: Largo[]) => heredadosQueCrecieron(l).length === 0,
 )
+
+/**
+ * ⚠️ **B4-A · UNA SOLA CUENTA DE LÍNEAS EN TODO `/v3`, y acá se custodia.**
+ *
+ * B2 reportó que `s5-codigo` §8 daba **uno más** que `s6-lane` §7 y
+ * `s7-contrato` §7. La causa no eran tres criterios: eran **nueve copias de una
+ * expresión de una línea** en siete instrumentos, y la corrección de SITIO-S7
+ * sólo alcanzó a las dos que estaban al lado del archivo que la destapó. Una
+ * expresión copiada no tiene dónde recibir un arreglo.
+ *
+ * El detector es literal a propósito —`split('\n').length` es la forma exacta
+ * que estaba mal— y se aplica a TODO `src/app/v3`, instrumentos incluidos: el
+ * defecto no era de un archivo, era de que la cuenta no tuviera dueño.
+ */
+const CUENTA_PROHIBIDA = `split('${'\\'}n').length`
+const cuentaPropia = (fuente: string): boolean => quitarComentarios(fuente).includes(CUENTA_PROHIBIDA)
+/** El ÚNICO que puede escribirla, declarado uno por uno y no por heurística de
+ *  nombre: `s5-codigo` la CORRE en su control positivo, que es lo que muestra
+ *  que las dos cuentas no daban lo mismo. Sin ese control, el arreglo sería
+ *  indistinguible de no haber hecho nada. */
+const PUEDE_CORRER_LA_CUENTA_VIEJA = 'src/app/v3/_lib/__tests__/s5-codigo.invariant.ts'
+const DE_V3 = TODO_SRC.filter((a) => a.startsWith('src/app/v3/') && a !== PUEDE_CORRER_LA_CUENTA_VIEJA)
+afirmarIgual(
+  DE_V3.filter((a) => cuentaPropia(leer(a))),
+  [],
+  `ninguno de los ${DE_V3.length} archivos de /v3 cuenta líneas por su cuenta: todos miran \`contarLineas\``,
+)
+afirmar(cuentaPropia(leer(PUEDE_CORRER_LA_CUENTA_VIEJA)), `  y el detector NO está ciego: ve la cuenta vieja en \`${PUEDE_CORRER_LA_CUENTA_VIEJA.split('/').pop() ?? ''}\`, el único que la corre a propósito`)
+controlPositivo('el detector ve la cuenta vieja en código', `const n = t.split('${'\\'}n').length`, (t: string) => !cuentaPropia(t))
+controlPositivo('  y NO la ve en un comentario, que es donde se explica por qué ya no está', `/* era t.split('${'\\'}n').length */`, (t: string) => cuentaPropia(t))
 
 cerrar('s8-montaje.invariant')

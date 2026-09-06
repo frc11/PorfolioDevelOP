@@ -11,8 +11,11 @@
  * veces (es una propuesta con su razón, no una dependencia).
  *
  * ⚠ Renderiza el marcado real con `renderToStaticMarkup`; no mira el navegador.
- * Dónde se MONTAN las piezas en el home vivo es del sprint paralelo y va al
- * reporte, no acá.
+ *
+ * ⚠ **B4-A: el montaje YA no es del sprint paralelo.** Decía que dónde se montan
+ * las piezas en el home vivo iba al reporte y no acá; B4-A las montó en el rótulo
+ * de sección, en el pie y en la pastilla, así que §6 lo AFIRMA sobre el home
+ * entero renderizado, y §7 cuenta las apariciones de Instrument Serif.
  */
 
 import { readFileSync } from 'node:fs'
@@ -28,6 +31,9 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ALIAS_DE_ACENTO, CLASE_PREFIJO, CLASE_SEPARADOR, INSTRUMENT_SERIF_PROPUESTA, LOGOTIPO } from '../../_componentes/marca/sistema'
 import { Logotipo, MarcaLockup, PrefijoDeServicio, Separador } from '../../_componentes/marca/Marca'
+import { Home } from '../../_secciones/Home'
+import { REGISTRO } from '../../_secciones/_contrato/registro'
+import { marcar } from '../../_secciones/_invariantes/render'
 
 const RAIZ = process.cwd()
 const leer = (rel: string): string => readFileSync(path.join(RAIZ, rel), 'utf8')
@@ -105,5 +111,52 @@ const FUENTE_GALERIA = leer('src/app/v3/componentes/page.tsx')
 afirmar(FUENTE_GALERIA.includes('GaleriaMarca'), 'la galería de componentes monta la ficha de marca, para verla en el navegador')
 const FUENTE_BLOQUE = leer('src/app/v3/componentes/_bloques/GaleriaMarca.tsx')
 afirmar(FUENTE_BLOQUE.includes('data-seccion="invertida"'), '  y la muestra sobre papel Y sobre la sección invertida: la regla del acento sólo se ve con los dos fondos')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('6 · B4-A · LAS PIEZAS ESTÁN MONTADAS EN EL HOME VIVO')
+
+/**
+ * B3 dejó las tres construidas y **sin montar**: las superficies de marca del
+ * home caían en `_secciones/` y en la geometría de la pastilla, que eran del
+ * sprint paralelo. Acá se afirma que ya no: se renderiza el home entero, en las
+ * dos ramas, y se cuenta dónde aparece cada registro.
+ */
+const HOME = [false, true].map((anima) => marcar(<Home />, { anima }))
+const [QUIETO, ANIMADO] = HOME
+const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
+
+for (const [rama, html] of [['quieta', QUIETO], ['animada', ANIMADO]] as const) {
+  afirmar(veces(html, 'data-pieza="prefijo-de-servicio"') >= REGISTRO.length, `rama ${rama}: el PREFIJO aparece ${veces(html, 'data-pieza="prefijo-de-servicio"')} veces — al menos una por cada una de las ${REGISTRO.length} secciones (el rótulo) más el pie`)
+  afirmar(veces(html, 'data-pieza="separador"') > 0, `  el SEPARADOR aparece ${veces(html, 'data-pieza="separador"')} veces: los rótulos con número y nombre contiguos, más el pie`)
+  afirmar(veces(html, 'data-pieza="logotipo"') === 1, `  y el LOGOTIPO aparece UNA vez: el pie es la única superficie del home que lo tenía`)
+}
+
+/** ⚠️ **EL DEFECTO QUE EL MONTAJE ARREGLA, afirmado sobre el marcado.** La marca
+ *  del pie viajaba como texto adentro de un `Caption` con `uppercase`, así que
+ *  el sitio decía «DEVELOP». La pieza trae `normal-case` y la palabra sobrevive. */
+const enElPie = QUIETO.slice(QUIETO.indexOf('data-pieza="logotipo"'))
+afirmar(/normal-case/.test(enElPie.slice(0, 300)), 'el logotipo del pie lleva `normal-case`: la caja alta heredada no se come la `d` minúscula ni el `OP`')
+afirmar(QUIETO.includes(`>${LOGOTIPO}<`), `y la palabra llega al marcado sin transformar: «${LOGOTIPO}»`)
+controlPositivo('el detector vería el logotipo sin la protección', '<span data-pieza="logotipo" class="uppercase">develOP</span>', (h: string) => /normal-case/.test(h))
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('7 · INSTRUMENT SERIF sigue sin montarse — contado sobre el árbol renderizado')
+
+/**
+ * La regla del sistema es que tenga **UNA sola aparición en todo el sitio** y
+ * todavía no está decidida. B4-A **no la monta** —el `.woff2` no está en el
+ * repo y cargarla es una decisión de tipografía, no de montaje— así que lo que
+ * se cuenta acá es cero. **Con su control positivo**, para que ese cero no sea
+ * un verde por ceguera: el mismo contador tiene que ver una aparición cuando la
+ * hay. El día que alguien la monte, esto le dice cuántas van.
+ */
+const apariciones = (html: string): number =>
+  [...html.matchAll(/font-serif|font-instrument|Instrument\s*Serif/gi)].length
+for (const [rama, html] of [['quieta', QUIETO], ['animada', ANIMADO]] as const) {
+  afirmarIgual(apariciones(html), 0, `rama ${rama}: CERO apariciones de una serif en el árbol renderizado del home`)
+}
+afirmar(apariciones(QUIETO + ANIMADO) <= Number(INSTRUMENT_SERIF_PROPUESTA.usoMaximo.match(/\d+/)?.[0] ?? 1), `y el techo del sistema sigue siendo el declarado: «${INSTRUMENT_SERIF_PROPUESTA.usoMaximo}»`)
+controlPositivo('el contador NO está ciego: ve una aparición cuando la hay', '<span class="font-serif">x</span>', (h: string) => apariciones(h) === 0)
+controlPositivo('  y la ve escrita como familia', '<span style="font-family: Instrument Serif">x</span>', (h: string) => apariciones(h) === 0)
 
 cerrar('s17-marca')

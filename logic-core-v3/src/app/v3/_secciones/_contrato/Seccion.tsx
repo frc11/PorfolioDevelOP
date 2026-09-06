@@ -2,10 +2,19 @@ import { cn } from '@/lib/utils'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Panel } from '../../_componentes/Panel'
-import { EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 
 import { ATRIBUTO_DE_SECCION } from './forma'
+
+/**
+ * ⚠ **B4-A · EL RÓTULO SE MUDÓ A `Rotulo.tsx` y se re-exporta desde acá.**
+ * Este archivo pasó las 300 líneas al montarle la marca al rótulo, y la regla
+ * del repo es que se parte. El corte es por TEMA y no por tamaño: el envoltorio
+ * resuelve el panel, el alto y el pinneo; el rótulo es la pieza de marca de la
+ * sección. Se re-exportan para que las ocho secciones no cambien un import: lo
+ * que se movió es dónde está escrito, no de dónde se consume.
+ */
+export { EncabezadoDeSeccion, NumeroDeSeccion } from './Rotulo'
 
 /**
  * EL ENVOLTORIO DE UNA SECCIÓN — panel, superficie, alto y pinneo.
@@ -59,10 +68,9 @@ import { ATRIBUTO_DE_SECCION } from './forma'
  * contención** que dejó la unificación de S7: la rama pinneada del lane A se
  * sumó a la contención propia que Servicios ya traía, y nadie las restó.
  * Servicios pone adentro su `Bloque` de `min-height: 300svh` con los TRES
- * bloques apilados, así que eran tres pantallas de contenido dentro de una caja
- * clavada de una: abajo de 1025 los servicios 2 y 3 no subían nunca a cuadro.
- * `s10-mobile` §3 lo midió —963 px @375×667 (1,44×) · 942 @390×844 (1,12×) ·
- * 1583 @768×900 (1,76×) de tinta sola adentro de una caja de una pantalla—.
+ * bloques apilados, o sea tres pantallas de contenido dentro de una caja clavada
+ * de una: abajo de 1025 los servicios 2 y 3 no subían nunca a cuadro.
+ * `s10-mobile` §3 lo midió —963 px @375×667 · 942 @390×844 · 1583 @768×900—.
  *
  * **El envoltorio era el que estaba mal**, y el propio `servicios/geometria.ts`
  * ya tenía escrita la regla que violaba: *«el alto de un bloque es `min-h-svh`,
@@ -98,14 +106,13 @@ import { ATRIBUTO_DE_SECCION } from './forma'
  * ── Sin una línea de JavaScript, y por eso cruza la compuerta ─────────────
  *
  * El pinneo es CSS puro, así que **sobrevive abajo de 1025** igual que en el
- * esqueleto. Es la mitad del ritmo que mobile conserva gratis, sin bajar un
- * byte de más, y es la razón por la que las dos secciones más pesadas del sitio
- * siguen teniendo forma cuando la coreografía no corre.
+ * esqueleto: es la mitad del ritmo que mobile conserva gratis, sin bajar un byte
+ * de más, y por eso las dos secciones más pesadas siguen teniendo forma.
  *
  * ⚠ Con `min-h-svh` esa frase se acota: lo que sobrevive abajo del umbral es el
  * MECANISMO, no necesariamente el pin. Una sección `siempre` cuyo contenido
- * quieto mida más de una pantalla deja de clavarse abajo de 1025 — y eso es
- * exactamente lo que se quiere, porque clavarla ahí es esconderla.
+ * quieto mida más de una pantalla deja de clavarse abajo de 1025 — y es lo que
+ * se quiere, porque clavarla ahí es esconderla.
  */
 
 export interface SeccionProps {
@@ -168,95 +175,6 @@ export function Seccion({ seccion, className, children }: SeccionProps): React.J
         {children}
       </div>
     </Panel>
-  )
-}
-
-/**
- * EL NÚMERO DE LA SECCIÓN — el `01` de la columna lateral de 140px.
- *
- * ── Por qué este dígito sí, y no contradice la regla del contenido ────────
- *
- * Porque **no es un dato del negocio**: es el índice de la sección en el
- * recorrido, sale de `secciones.ts` y no de un `contenido.ts`, y no se puede
- * leer como un hecho sobre develOP. La regla dura prohíbe inventar cifras que
- * se lean como medidas; un ordinal de navegación no es una de ésas.
- *
- * Es además la pieza medida: la columna lateral mide 140px exactos en 92
- * contenedores de la referencia, y ahí es donde vive el número.
- *
- * ── ⚠️ EL NÚMERO VA EN TINTA PLENA, Y NO ES ESTÉTICA ─────────────────────
- *
- * **Es la divergencia entre los dos contratos con la respuesta medida.** El
- * lane A lo pintaba a `--opacity-casi` (0,6), copiando `RotuloDePanel` de S1; el
- * lane B lo midió y lo dejó en tinta plena. **Gana el lane B, con el número:**
- * la tinta al 60 % compuesta sobre `--color-superficie-3` da **4,4043:1**, por
- * debajo de AA (4,5:1). Sobre el papel sí pasa —4,83:1— así que el defecto sólo
- * aparece en un panel `papel-transparente`… que es exactamente la superficie
- * del Hero y de Por qué develOP.
- *
- * O sea que no era una diferencia de gusto entre dos lanes: **el número del
- * Hero del lane A estaba abajo de AA**, y sólo se vio al juntar su versión del
- * rótulo con su propio recorrido de superficies.
- *
- * Bajar la opacidad empeora (menos alfa = más fondo claro = menos contraste) y
- * el sistema no declara ningún escalón por encima de 0,6. Así que el número va
- * en tinta plena: **13,62:1** peor caso sobre el canvas y **18,00:1** sobre la
- * sección invertida. Lo que lo mantiene discreto es el tamaño —`text-micro`,
- * 10 px, monoespaciada y en mayúsculas—, no un alfa que no da.
- *
- * ⚠️ **Queda reportado, y NO se toca:** `RotuloDePanel` de `_componentes/Panel.tsx`
- * tiene el mismo `opacity-casi`. Después de este sprint `/v3` ya no lo
- * renderiza —las secciones traen su propio rótulo— así que el defecto deja de
- * estar en pantalla, pero el componente sigue ahí para quien lo use.
- */
-export function NumeroDeSeccion({
-  seccion,
-  className,
-}: {
-  readonly seccion: EntradaDeSeccion
-  readonly className?: string
-}): React.JSX.Element {
-  return (
-    // `font-codigo` va en `className` y no antes: `cn` resuelve el conflicto de
-    // familia quedándose con la última, así que ésta es la posición que gana.
-    <Micro como="p" className={cn('font-codigo uppercase', className)}>
-      {seccion.numero}
-    </Micro>
-  )
-}
-
-/**
- * El rótulo completo: el número en la columna lateral y la etiqueta con el
- * nombre de la sección.
- *
- * `EtiquetaDeSeccion` es la pieza más repetida del inventario —29 apariciones—
- * y trae su medición entera: `text.micro`, `leading.micro`, peso medio,
- * mayúsculas y la sangría de `--spacing-8`. Acá la sangría se apaga: la columna
- * lateral ya separa, y sumar las dos cosas la correría dos veces.
- */
-export function EncabezadoDeSeccion({
-  seccion,
-  nombre,
-  className,
-}: {
-  readonly seccion: EntradaDeSeccion
-  /** El nombre visible. Es contenido, y por eso entra como dato y no se lee de
-   *  la tabla: `secciones.ts` es el recorrido, no el copy. */
-  readonly nombre: string
-  readonly className?: string
-}): React.JSX.Element {
-  return (
-    <div
-      className={cn(
-        'grid w-full grid-cols-1 gap-[var(--grilla-canal-amplio)] tablet:grid-cols-[var(--columna-lateral)_minmax(0,1fr)]',
-        className,
-      )}
-    >
-      <NumeroDeSeccion seccion={seccion} />
-      <EtiquetaDeSeccion como="p" sangria={false}>
-        {nombre}
-      </EtiquetaDeSeccion>
-    </div>
   )
 }
 

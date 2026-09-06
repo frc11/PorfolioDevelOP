@@ -100,6 +100,33 @@ export interface Reparto {
  * archivo de 300 líneas. Se corrige la MEDICIÓN, que estaba mal por uno; el
  * límite no se toca. Es la misma cuenta que `s6-lane` declara —«cuenta SALTOS
  * igual que `wc`»—, así que además deja de haber dos varas en el repo.
+ *
+ * ── ⚠️ B4-A · ES LA ÚNICA CUENTA DEL REPO, Y ANTES NO LO ERA ───────────────
+ *
+ * B2 encontró que `s5-codigo` §8 contaba **uno más** que `s6-lane` §7 y
+ * `s7-contrato` §7, y que por eso dos cifras publicadas del mismo repo no se
+ * podían comparar. Buscada la causa, no eran tres cuentas sino **tres formas
+ * escritas nueve veces**:
+ *
+ *   A · `split('\n').length` — uno de más en todo archivo terminado en salto.
+ *       Estaba en `s3-codigo`, `s4-cobertura`, `s5-codigo`, `s6-servicios`,
+ *       `s6-tu-panel`, `s8-cierre` y `s7-pedido`. **Es la que estaba mal.**
+ *   B · `(texto.match(/\n/g) ?? []).length` — exactamente `wc -l`. La escribió
+ *       SITIO-S7 en `s6-lane` y S7 la copió a `s7-contrato`.
+ *   C · **ésta**, que ya existía acá y que no importaba nadie.
+ *
+ * **Por qué difería:** la corrección de SITIO-S7 se hizo donde apareció el
+ * problema —dos archivos del lane B parados en 300 exactos— y viajó por COPIA
+ * al instrumento de al lado. `s5-codigo` es de SITIO-S5, de otro lane, y nunca
+ * se enteró: cada instrumento llevaba su propia línea de una sola expresión, y
+ * una expresión copiada no tiene dónde recibir un arreglo. Que la forma
+ * correcta ya estuviera escrita acá, exportada y sin un solo importador, es la
+ * medida exacta del problema.
+ *
+ * B y C dan lo mismo mientras todo archivo termine en salto —hoy los **374**
+ * `.ts`/`.tsx`/`.css` de `src/app/v3` lo hacen, verificado— y se diferencian en
+ * el archivo sin salto final, donde `wc -l` no cuenta el último renglón y ésta
+ * sí. Se elige ésta: la que cuenta lo que hay.
  */
 export function contarLineas(texto: string): number {
   const partes = texto.split('\n')

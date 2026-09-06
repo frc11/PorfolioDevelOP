@@ -35,6 +35,7 @@ import { marcar } from '../../_secciones/_invariantes/render'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { RUTA_DEL_DOCUMENTO, documentoDePedidos } from './s7-documento'
+import { contarLineas } from './s8-largos'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 
@@ -175,7 +176,7 @@ const archivo = path.join(RAIZ, RUTA_DEL_DOCUMENTO)
 
 if (process.argv.includes('--escribir')) {
   writeFileSync(archivo, esperado, 'utf8')
-  console.log(`  ESCRITO ${RUTA_DEL_DOCUMENTO} (${esperado.split('\n').length} líneas)`)
+  console.log(`  ESCRITO ${RUTA_DEL_DOCUMENTO} (${contarLineas(esperado)} líneas)`)
 }
 
 let enDisco = ''
@@ -213,11 +214,11 @@ try {
  */
 const enLf = (texto: string): string => texto.replace(/\r\n/g, '\n')
 
-afirmar(enDisco.length > 0, `\`${RUTA_DEL_DOCUMENTO}\` existe`, `${enDisco.split('\n').length} líneas`)
+afirmar(enDisco.length > 0, `\`${RUTA_DEL_DOCUMENTO}\` existe`, `${contarLineas(enDisco)} líneas`)
 afirmar(
   enLf(enDisco) === enLf(esperado),
   'y dice exactamente lo que el dato produce: el documento no se puede quedar viejo',
-  `${enLf(enDisco).split('\n').length} renglones, ${enLf(enDisco).length} caracteres — en disco con ${(enDisco.match(/\r\n/g) ?? []).length} CRLF`,
+  `${contarLineas(enLf(enDisco))} renglones, ${enLf(enDisco).length} caracteres — en disco con ${(enDisco.match(/\r\n/g) ?? []).length} CRLF`,
 )
 controlPositivo(
   'el comparador ve un documento desactualizado — y NO confunde un fin de línea con un cambio',

@@ -212,12 +212,26 @@ export const PEDIDO: readonly EntradaDePedido[] = [
 ]
 
 /**
- * EL PATRÓN QUE ESTA SECCIÓN CONSUME — declarado, no inferido.
+ * LOS PATRONES QUE ESTA SECCIÓN CONSUME — declarados, no inferidos.
  *
- * **Uno solo, y es una decisión.** P7 —planos en profundidad— anima los tres
- * proyectos en un único bloque de tres piezas. El encabezado (etiqueta, número,
- * titular y bajada) NO se anima: es el marco quieto contra el que se lee el
- * vuelo. Si el encabezado también entrara, no quedaría nada fijo con qué medir
- * la profundidad, que es lo único que P7 tiene para decir.
+ * **P7** —planos en profundidad— anima los tres proyectos en un único bloque, y
+ * **P2** posa el marco (etiqueta, número, titular y bajada) una sola vez,
+ * mientras la sección todavía está entrando.
+ *
+ * ── ⚠️ DECÍA `['P7']` Y LA SECCIÓN CONSUMÍA DOS. Se sincroniza acá ────────
+ *
+ * La razón escrita era que *el encabezado NO se anima: es el marco quieto contra
+ * el que se lee el vuelo*, **y esa razón sigue en pie y no cambió**: el ancla de
+ * P2 sobre la caja del marco cierra ANTES de que el pin arranque, así que
+ * durante las dos pantallas pinneadas —que es cuando los planos vuelan— el marco
+ * no se mueve un píxel. Lo que cambió en B2 es que ahora ENTRA, y por eso la
+ * sección tiene un aterrizaje en su primera pantalla y media, donde antes no
+ * tenía ninguno.
+ *
+ * B2 midió la desincronización y **no la arregló, con la razón correcta**: no
+ * podía escribir en `contenido.ts`. La publicó desde `trabajos.invariant` §14,
+ * afirmando por separado lo que la tabla decía y lo que el fuente consumía. Con
+ * la tabla al día esas dos publicaciones vuelven a ser UNA afirmación de
+ * igualdad.
  */
-export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P7']
+export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P2', 'P7']

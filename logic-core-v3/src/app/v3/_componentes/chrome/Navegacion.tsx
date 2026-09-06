@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils'
 
 import { ENLACES_DE_MUESTRA, type EnlaceDeNavegacion } from '../../_lib/navegacion'
+import { PrefijoDeServicio } from '../marca/Marca'
 
 import type { EstadoForzado } from './Cta'
 
@@ -111,6 +112,22 @@ export function Navegacion({
  * `--duracion-lenta`. Va `aria-hidden` porque es un punto: no dice nada que el
  * rótulo no diga ya.
  *
+ * ═══ B4-A · EL MARCADOR **ES** EL PREFIJO DE LA MARCA ═════════════════════
+ *
+ * Era un `<span data-parte="marcador">` propio de esta hoja, con el mismo
+ * registro que el prefijo del sistema —un relleno que precede a un rótulo y
+ * marca lo que sigue— y con otro dueño. Ahora es la pieza: `PrefijoDeServicio`
+ * de `_componentes/marca/`, la misma que el rótulo de sección y el pie montan.
+ * La forma nk que este chrome no tiene —un logotipo arriba a la izquierda— sigue
+ * **sin inventarse**: eso es una aparición nueva y una decisión de composición.
+ *
+ * **La geometría de la pastilla no se mueve un píxel, y está medido.** Lo que
+ * cambia es de dónde sale el relleno: la hoja ya no escribe su color y lo trae
+ * la pieza (`bg-acento`, el ALIAS, que se retiñe por `data-servicio`). El
+ * tamaño, el radio, el desplazamiento de −16px, la escala 0,8 y los 500 ms
+ * siguen siendo de `_estilos/navegacion.css`, que es donde estaban: la pastilla
+ * pone la geometría y el movimiento, la marca pone el relleno.
+ *
  * Se exporta suelto porque la galería de estados lo necesita fuera de la
  * pastilla — una pastilla `sticky` de alto cero no se puede mostrar en una
  * ficha de 200px.
@@ -131,7 +148,7 @@ export function EnlaceDeNavegacionFlotante({
       data-forzado={forzado}
       className={cn('text-cuerpo tracking-texto leading-texto font-semi', className)}
     >
-      <span data-parte="marcador" aria-hidden="true" />
+      <PrefijoDeServicio />
       <span data-parte="rotulo">{enlace.rotulo}</span>
     </a>
   )

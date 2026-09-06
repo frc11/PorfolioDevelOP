@@ -28,13 +28,44 @@ import type { Diferencial, Testimonio } from './contenido'
  * detrás y publica el peor caso.
  */
 
+/**
+ * ── ⚠️ B4-A · LA SANGRÍA BAJA DE `--spacing-4` A `--spacing-2`, Y ES EL ARREGLO
+ *      DE LOS 24 px ────────────────────────────────────────────────────────
+ *
+ * **El número, primero.** A 1440×900 la sección renderizaba **923,70 px en una
+ * ventana de 900** —medido con scroll real, `[data-panel="por-que-develop"]`— y
+ * los 23,70 que sobraban salían enteros del bloque de P5: renderiza **475,19 px
+ * de contenido propio** contra un piso declarado de 450 (`50svh`). O sea que el
+ * piso dejó de gobernar y lo que gobierna es la lista.
+ *
+ * **Por qué se toca ESTA sangría y no el hueco entre tarjetas.** Las dos median
+ * `--spacing-4`, así que la regla de cada tarjeta quedaba **exactamente en el
+ * medio** de una banda de 32 px: 16 px la separaban del texto de la tarjeta de
+ * arriba y 16 de su propio título. Una regla equidistante no agrupa —no dice si
+ * cierra lo de arriba o abre lo de abajo—, y una separación que introduce tiene
+ * que estar más cerca de lo que introduce. Con la sangría en `--spacing-2` la
+ * regla queda a 8 px de su título y a 16 del bloque anterior: **el arreglo de
+ * composición y el de altura son el mismo**, y por eso no hay que elegir.
+ *
+ * **Qué compra, con la cuenta.** Cuatro tarjetas × 8 px = **32 px** menos de
+ * lista. El bloque baja de 475,19 a 443,2 de contenido propio, o sea **por
+ * debajo de su piso de 450**, y ahí vuelve a mandar el piso: la sección mide
+ * `48 + 48 + 11 + 276,13 + 65,39 + 450 = 898,52` y entra en su pantalla con
+ * 1,48 px de aire. Ése es el mínimo alcanzable sin tocar
+ * `ALTO_MINIMO_DEL_BLOQUE_SVH`, que es lo que impide que el rango de P5
+ * degenere; el modelo de `s7-por-que-develop.invariant` §8 lo publica.
+ *
+ * ⚠ A 1920 no cambia el alto de la sección: ahí el bloque nunca estuvo atado por
+ * su contenido —`content-between` reparte el sobrante— y la sección medía y
+ * sigue midiendo 1080 px exactos.
+ */
 export function TarjetaDeDiferencial({
   diferencial,
 }: {
   readonly diferencial: Diferencial
 }): React.JSX.Element {
   return (
-    <div className="border-borde flex flex-col gap-[var(--spacing-2)] border-t pt-[var(--spacing-4)]">
+    <div className="border-borde flex flex-col gap-[var(--spacing-2)] border-t pt-[var(--spacing-2)]">
       <Titular nivel="titulo-s" como="h3">
         {diferencial.titulo}
       </Titular>

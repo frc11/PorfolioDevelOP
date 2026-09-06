@@ -10,7 +10,7 @@
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { deberiaMontarseElCursor } from '../../_lib/cursor'
 import { rangoDeScroll, rangoDegenerado, type ParDeAnclas } from '../../_lib/motion/anclas'
-import { CONTENIDO_PROHIBIDO_DE_CONTROL } from './soporte'
+import { CONTENIDO_PROHIBIDO_DE_CONTROL, afirmarElCorteDeTramos } from './soporte'
 import {
   NOMBRES_REALES,
   cifrasSospechosas,
@@ -21,7 +21,8 @@ import {
   textoVisible,
 } from '../_contrato/escaneo'
 import { MARCADORES } from '../_contrato/marcadores'
-import { ANCLA_DEL_PIN, USOS_DECLARADOS, deberiaAnimar, especificacionDe, inerciaDe } from '../_contrato/motion'
+import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from '../_contrato/bloqueAnimado'
+import { USOS_DECLARADOS, deberiaAnimar } from '../_contrato/motion'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { duracionAplicada } from '../../_lib/motion/cronograma'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
@@ -286,5 +287,10 @@ controlPositivo(
   { ...PATRONES.P4, duracionDeclarada: 99 },
   (p) => especificacionDe(p, 11).cronograma.duracionDeclarada === PATRONES.P4.duracionDeclarada,
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+// §8 —el corte llegada/salida que el contrato publica— vive en `soporte.ts`:
+// este archivo cruzaba las 300 líneas y el corte es por tema.
+afirmarElCorteDeTramos()
 
 cerrar('s6-contrato.invariant')

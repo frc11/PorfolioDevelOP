@@ -259,13 +259,23 @@ export function repartoMonotono(
 export function desviosDelContrato(
   reparto: RepartoDePlanos,
   planos: number,
+  /**
+   * ⚠ **B4-A: el remapeo declarado de la sección, y por eso la afirmación se
+   * ENDURECE en vez de aflojarse.** Antes se exigía que el plano vigente leyera
+   * el `local` del contrato **tal cual**; con la meseta le pasa por encima un
+   * `saturarEn`, que es lo que hacen las otras tres secciones con asentamiento.
+   * Pasándolo acá, lo que se afirma pasa a ser **las dos cosas a la vez**: que
+   * el tramo sigue siendo el del contrato, y que encima corre exactamente el
+   * remapeo declarado y no otro. Sin él, sólo se afirmaba una.
+   */
+  remapear: (local: number) => number = (local) => local,
   muestras: number = MUESTRAS_DEL_REPARTO,
 ): number[] {
   const fuera: number[] = []
   for (let k = 0; k < muestras; k += 1) {
     const p = k / (muestras - 1)
     const esperado = tramoDeSecuencia(p, planos)
-    if (reparto(p, esperado.indice) !== esperado.local) fuera.push(p)
+    if (reparto(p, esperado.indice) !== remapear(esperado.local)) fuera.push(p)
   }
   return fuera
 }

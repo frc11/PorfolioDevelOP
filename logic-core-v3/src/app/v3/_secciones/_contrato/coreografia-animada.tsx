@@ -19,7 +19,7 @@ import type {
 import type { BloqueProps, PrimitivasDeCoreografia } from './coreografia'
 import { ATRIBUTO_DE_PANEL } from './forma'
 import { MARCA_COREOGRAFIA_DEL_HOME } from './marcaCoreografia'
-import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from './motion'
+import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from './bloqueAnimado'
 
 /**
  * LAS PRIMITIVAS ANIMADAS — el único módulo del home que importa el sistema.

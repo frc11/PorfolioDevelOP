@@ -20,6 +20,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
+import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
 import {
   apagadosDeFoco,
   arbitrariosSinVar,
@@ -100,7 +101,16 @@ titulo('2 · El texto es EL MISMO en las dos ramas — la guardia contra un mobi
 
 const textoQuieto = textoAccesible(QUIETO)
 afirmar(textoQuieto === textoAccesible(ANIMADO), 'el texto accesible de las dos ramas es idéntico, carácter por carácter', `${textoQuieto.length} caracteres`)
-afirmar(sinAriaHidden(QUIETO) === QUIETO, '  la rama quieta no esconde nada del árbol: no tiene un solo `aria-hidden`')
+/** ⚠️ **B4-A · LA RAMA QUIETA YA ESCONDE ALGO, y por eso la afirmación cambia de
+ *  forma en vez de aflojarse.** Decía «no tiene un solo `aria-hidden`»; hoy tiene
+ *  dos, y son las piezas DECORATIVAS de la marca del rótulo —el prefijo y el
+ *  separador—, que están `aria-hidden` por la razón correcta: no dicen nada que
+ *  el rótulo no diga. Lo que se afirma ahora es lo que la guardia protegía de
+ *  verdad —que ningún TEXTO se esconda— y encima que lo escondido sean
+ *  exactamente esas piezas, contadas. */
+const escondidoEnLaQuieta = [...QUIETO.matchAll(/<span data-pieza="(prefijo-de-servicio|separador)" aria-hidden="true"/g)].map((m) => m[1])
+afirmarIgual(cuentaDe(QUIETO, /aria-hidden="true"/g), escondidoEnLaQuieta.length, `  la rama quieta esconde ${escondidoEnLaQuieta.length} elementos del árbol y son TODOS piezas de marca decorativas: ${escondidoEnLaQuieta.join(' · ')}`)
+afirmarIgual(textoAccesible(sinAriaHidden(QUIETO)), textoQuieto, '  y esconderlas no le saca una sola letra al texto anunciado: son marcas, no palabras')
 afirmar(sinAriaHidden(ANIMADO).length < ANIMADO.length, '  y la animada sí — son las piezas visuales del divisor, fuera del árbol', `${ANIMADO.length - sinAriaHidden(ANIMADO).length} caracteres podados`)
 
 controlPositivo('el comparador ve una rama que dice algo que la otra no', { a: '<p>uno dos</p>', b: '<p>uno dos tres</p>' }, (par) => textoAccesible(par.a) === textoAccesible(par.b))
@@ -123,7 +133,7 @@ controlPositivo('y el detector de precios ve el suyo', 'desde $99.000 por mes', 
 titulo('4 · Cero valores fuera de los tokens, archivo por archivo')
 
 console.log(`  ${ARCHIVOS.length} archivos de producto, ${CODIGO.length} caracteres:`)
-for (const a of ARCHIVOS) console.log(`    ${a} — ${leer(a).split('\n').length} líneas`)
+for (const a of ARCHIVOS) console.log(`    ${a} — ${contarLineas(leer(a))} líneas`)
 
 for (const archivo of ARCHIVOS) {
   const fuente = quitarComentarios(leer(archivo))
@@ -132,7 +142,7 @@ for (const archivo of ARCHIVOS) {
   afirmarIgual(funcionesDeColorEncontradas(fuente), [], `${corto}: cero funciones de color`)
   afirmarIgual(literalesConUnidad(fuente), [], `${corto}: cero literales con unidad`)
   afirmarIgual(arbitrariosSinVar(fuente), [], `${corto}: toda clase arbitraria consume var(--token)`)
-  afirmar(leer(archivo).split('\n').length <= 300, `${corto}: no pasa las 300 líneas`)
+  afirmar(contarLineas(leer(archivo)) <= LIMITE_DE_LINEAS, `${corto}: no pasa las 300 líneas`)
 }
 afirmarIgual(cuentaDe(CODIGO, /style=\{\{/g), 0, 'ningún archivo del producto escribe un estilo inline propio — los dos que hay los ponen `Panel` y `HuecoDeMedio` desde el dato')
 

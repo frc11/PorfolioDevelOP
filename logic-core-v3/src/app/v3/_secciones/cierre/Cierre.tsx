@@ -5,19 +5,14 @@ import { useTransform, type MotionValue } from 'motion/react'
 import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Pie } from '../../_componentes/chrome/Pie'
-import { Caption, Micro } from '../../_componentes/tipografia/Textos'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDeTitular, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { EncabezadoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { asentar } from './asentamiento'
 import { ColumnasDelPie } from './ColumnasDelPie'
-import {
-  CTA_DE_CIERRE,
-  ETIQUETA_DE_SECCION,
-  LINEA_DE_CIERRE,
-  TITULAR_DE_CIERRE,
-} from './contenido'
+import { LineaDeCierre } from './LineaDeCierre'
+import { CTA_DE_CIERRE, ETIQUETA_DE_SECCION, TITULAR_DE_CIERRE } from './contenido'
 
 /**
  * EL CIERRE — el último cuadro del sitio. La mitad de DOM de "la cámara se
@@ -242,28 +237,6 @@ function TitularAsentado({
 }: PropsDeSeccion & { readonly progreso: MotionValue<number> }): React.JSX.Element {
   const asentado = useTransform(progreso, asentar)
   return <CajaDelTitular seccion={seccion} progreso={asentado} />
-}
-
-/**
- * La última línea del documento. Fecha, razón social y legales no existen y no
- * se inventan: van con su marcador y con la nota que dice qué entra ahí.
- *
- * `opacity-casi` sobre la tinta y no `text-tinta-tenue`: los tokens de tinta
- * secundaria NO se redefinen en `[data-seccion="invertida"]`, así que sobre el
- * fondo oscuro quedan gris medio sobre casi negro. La opacidad, en cambio, se
- * da vuelta con la tinta. El instrumento publica las dos razones de contraste.
- */
-function LineaDeCierre(): React.JSX.Element {
-  return (
-    <div className="flex flex-col gap-[var(--spacing-1)]">
-      <Caption como="p" className="font-codigo uppercase">
-        {[LINEA_DE_CIERRE.marca, ...LINEA_DE_CIERRE.piezas].join(' · ')}
-      </Caption>
-      <Micro como="p" className="opacity-casi uppercase">
-        {LINEA_DE_CIERRE.nota}
-      </Micro>
-    </div>
-  )
 }
 
 /**

@@ -18,16 +18,17 @@ import { cn } from '@/lib/utils'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { rangoDeScroll, rangoDegenerado } from '../../_lib/motion/anclas'
 import { propiedadesDePieza } from '../../_lib/motion/fotograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX } from '../../_lib/superficies'
 import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
-import { USOS_DECLARADOS, especificacionDe } from '../_contrato/motion'
+import { especificacionDe } from '../_contrato/bloqueAnimado'
+import { USOS_DECLARADOS } from '../_contrato/motion'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 import { SUPERFICIE_ACORDADA, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
+import { afirmarElAltoYElRango } from './soporte'
 import {
   ALTO_MINIMO_DEL_BLOQUE, ALTO_MINIMO_DEL_BLOQUE_SVH, DIFERENCIALES, ENTRADA,
   NOMBRE_DE_SECCION, PIEZAS_DE_P5, TESTIMONIO, TITULAR,
@@ -216,31 +217,30 @@ controlPositivo('ve un vidrio esmerilado', 'className="bg-white/[0.04] backdrop-
 controlPositivo('ve un gradiente', 'background: linear-gradient(180deg, #fff, #000)', (t: string) => pinturas(t).length === 0)
 controlPositivo('y ve una capa a pantalla completa', 'className="absolute inset-0"', (t: string) => pinturas(t).length === 0)
 
-/** El único `bg-` del marcado lo pone `Panel` desde la tabla, no esta sección. */
+/**
+ * ⚠️ **B4-A · UN DESCENDIENTE SÍ PINTA AHORA, Y LA AFIRMACIÓN SE ENDURECE.**
+ *
+ * El rótulo monta el PREFIJO de la marca, un relleno en `--color-acento`. Ya no
+ * es cierto que ningún descendiente pinte y un `[]` mentiría. Lo que lo
+ * reemplaza no es «acepto cualquier fondo»: **lo único que pinta afuera de la
+ * `<section>` son piezas de MARCA, y son marcas y no capas** —un cuadrado de
+ * `--spacing-2`, no una caja con `inset-0`—. La guardia que importa queda entera
+ * y ahora además dice de qué tamaño puede ser lo que pinta.
+ */
 const fondosEnElMarcado = pinturas(quieto)
-console.log(`  el marcado trae ${fondosEnElMarcado.length} utilidad(es) de fondo: ${fondosEnElMarcado.join(' · ') || '(ninguna)'} — las pone Panel desde _lib/secciones.ts`)
+console.log(`  el marcado trae ${fondosEnElMarcado.length} utilidad(es) de fondo: ${fondosEnElMarcado.join(' · ') || '(ninguna)'}`)
 const primeraEtiqueta = /<section\b[^>]*>/.exec(quieto)
-afirmar(primeraEtiqueta !== null && fondosEnElMarcado.every((f) => primeraEtiqueta[0].includes(f)), 'y todas están en la `<section>` del panel: ningún descendiente de esta sección pinta')
+const delPanel = fondosEnElMarcado.filter((f) => primeraEtiqueta !== null && primeraEtiqueta[0].includes(f))
+const deLaMarca = [...quieto.matchAll(/<span data-pieza="(?:prefijo-de-servicio|separador)"[^>]*class="([^"]*)"/g)].flatMap((m) => pinturas(m[1]))
+afirmarIgual(fondosEnElMarcado.filter((f) => !delPanel.includes(f) && !deLaMarca.includes(f)), [], 'lo único que pinta es la `<section>` del panel y las piezas de MARCA del rótulo: ningún otro descendiente')
+afirmar(deLaMarca.length > 0, `  y las de marca son ${deLaMarca.length}: ${deLaMarca.join(' · ')} — el prefijo va como RELLENO, que es lo que la instrucción manda`)
+afirmarIgual([...quieto.matchAll(/data-pieza="prefijo-de-servicio"[^>]*class="[^"]*size-\[var\(--spacing-2\)\][^"]*"/g)].length, 1, '  y el prefijo es una MARCA de `--spacing-2`, no una capa: nada con `inset-0` ni a pantalla completa')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · El rango de P5 no degenera con el alto declarado')
-
-const P5 = PATRONES.P5
-const P1 = PATRONES.P1
-const altoDelBloque = (VIEWPORT * ALTO_MINIMO_DEL_BLOQUE_SVH) / 100
-const caja = { topDoc: 5000, alto: altoDelBloque }
-const rango = rangoDeScroll(P5.anclas, caja, VIEWPORT)
-const PISO_SVH = 40
-
-console.log(`  a un viewport de ${VIEWPORT}px, ${ALTO_MINIMO_DEL_BLOQUE} son ${altoDelBloque}px de bloque`)
-console.log(`  el ancla de P5 mide alto − 0,4·viewport → rango de ${rango.fin - rango.inicio}px de scroll`)
-console.log(`  EL ALTO QUE HACE FALTA: más de ${PISO_SVH}svh. Por debajo de ahí el rango sale negativo y el patrón se lee como un salto.`)
-afirmar(!rangoDegenerado(P5.anclas, caja, VIEWPORT), `el bloque de ${ALTO_MINIMO_DEL_BLOQUE} no degenera`)
-afirmarIgual(rango.fin - rango.inicio, altoDelBloque - 0.4 * VIEWPORT, 'y el rango es exactamente `alto − 0,4·viewport`')
-afirmar(!rangoDegenerado(P1.anclas, { topDoc: 5000, alto: 120 }, VIEWPORT), 'P1 no puede degenerar: su rango es `alto + 160px`')
-
-controlPositivo('un bloque de 30svh SÍ degenera', { topDoc: 5000, alto: VIEWPORT * 0.3 }, (c: { topDoc: number; alto: number }) => !rangoDegenerado(P5.anclas, c, VIEWPORT))
-controlPositivo('y uno de exactamente 40svh también, porque el rango queda en cero', { topDoc: 5000, alto: VIEWPORT * 0.4 }, (c: { topDoc: number; alto: number }) => !rangoDegenerado(P5.anclas, c, VIEWPORT))
+// §8 —el rango de P5 y el ALTO de la sección— vive en `soporte.ts` con su
+// modelo: la comprobación y su aritmética son la misma pieza, y este archivo ya
+// estaba en 300 líneas. Ahí está por qué el modelo viejo no podía arbitrar.
+afirmarElAltoYElRango()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · Una pantalla, sin pinneado')
@@ -269,11 +269,11 @@ afirmarIgual([...declarados].sort(), usadosEnLaFuente, 'y son los que `_contrato
 controlPositivo('el detector ve un patrón que no está declarado', 'const x = <B patron="P9" />', (t: string) => [...t.matchAll(RE_PATRON)].map((m) => m[1]).every((p) => declarados.includes(p)))
 
 /** La firma de P5 en el marcado: el fotograma en 0 es `scale(0,8)` con opacidad 0. */
-const fotogramaCero = propiedadesDePieza(especificacionDe(P5, PIEZAS_DE_P5), 0, 0)
+const fotogramaCero = propiedadesDePieza(especificacionDe(PATRONES.P5, PIEZAS_DE_P5), 0, 0)
 console.log(`  P5 en progreso 0 escribe: transform "${String(fotogramaCero.transform)}" · opacity ${String(fotogramaCero.opacity)}`)
 afirmar(fotogramaCero.transform !== undefined && movido.includes(fotogramaCero.transform), 'y ese fotograma exacto está en el marcado animado')
 afirmarIgual(PIEZAS_DE_P5, DIFERENCIALES.length + 1, `el conjunto de P5 tiene ${PIEZAS_DE_P5} piezas: los ${DIFERENCIALES.length} diferenciales más el testimonio`)
-afirmarIgual(P5.escalonado, 0, 'con escalonado 0: las cinco arrancan juntas, como se midió')
+afirmarIgual(PATRONES.P5.escalonado, 0, 'con escalonado 0: las cinco arrancan juntas, como se midió')
 afirmar(movido.includes('data-lineas-accesible'), 'el canal de P1 emite su copia accesible del titular')
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -12,13 +12,14 @@
 
 import { Panel } from '../../_componentes/Panel'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
+import { contarLineas } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { ANCLAS } from '../../_lib/motion/anclas'
 import { ventanaDeHijo } from '../../_lib/motion/cronograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { FORMAS_PERMITIDAS_SOBRE_OSCURO } from '../_contrato/acento'
 import { escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
-import { cronogramaDe } from '../_contrato/motion'
+import { cronogramaDe } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
 import { ritmoDe } from '../_contrato/ritmo'
 import { marcar } from '../_invariantes/render'
@@ -87,27 +88,20 @@ console.log(`  la frase de control produce ${delProhibido.length} hallazgos: ${d
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Cero valores fuera de los tokens, en los archivos de producto')
 
-console.log(`  ${ARCHIVOS.length} archivos de producto, ${FUENTE.split('\n').length} líneas sin comentarios:`)
-for (const a of ARCHIVOS) console.log(`    ${a}`)
-/** ⚠️ ERAN TRES Y AHORA SON CINCO: la afirmación sube al valor NUEVO en vez de
- *  aflojarse a un `>= 3`. Los dos que entran los agrega B2: `asentamiento.ts`
- *  (el remapeo del progreso del titular, con su derivación) y `s8-entrada.ts`
- *  (§12, que salió de acá por la regla de las 300 líneas). El segundo no es un
- *  `*.invariant.*`: para la compuerta cuenta como producto y se escanea entero. */
-afirmarIgual(ARCHIVOS.length, 5, 'la sección son cinco archivos de producto')
+console.log(`  ${ARCHIVOS.length} archivos de producto, ${contarLineas(FUENTE)} líneas sin comentarios: ${ARCHIVOS.join(' · ')}`)
+/** ⚠️ ERAN TRES, DESPUÉS CINCO Y AHORA SEIS: la afirmación sube al valor NUEVO en
+ *  vez de aflojarse a un `>= 3`. B2 agregó `asentamiento.ts` y `s8-entrada.ts`;
+ *  B4-A agrega `LineaDeCierre.tsx`, que salió de `Cierre.tsx` cuando el montaje de
+ *  la marca lo pasó de 300 líneas. Ninguno es `*.invariant.*`. */
+afirmarIgual(ARCHIVOS.length, 6, 'la sección son seis archivos de producto')
 /**
- * ⚠️ LA EXCLUSIÓN DEL ARNÉS SE MUDÓ, Y LO QUE SE AFIRMA CAMBIÓ CON ELLA.
- *
- * Este invariante filtraba `soporte.ts` por su cuenta y afirmaba haber excluido
- * exactamente un archivo. Esa afirmación era sobre el MECANISMO —"mi filtro
- * sacó uno"— y dejó de valer cuando la exclusión pasó a `codigoDeLaSeccion`,
- * que ya no se lo entrega. Tres secciones tuvieron el mismo problema por
- * separado, así que la convención está declarada una vez en
- * `_invariantes/soporte.ts` (`MODULOS_DE_APOYO`).
- *
- * Lo que se afirma ahora es la PROPIEDAD, que es la que importa y sobrevive a
- * dónde viva el filtro: el arnés existe, y ningún escáner de este archivo lo
- * mira.
+ * ⚠️ LA EXCLUSIÓN DEL ARNÉS SE MUDÓ, Y LO QUE SE AFIRMA CAMBIÓ CON ELLA. Este
+ * invariante filtraba `soporte.ts` por su cuenta y afirmaba haber excluido
+ * exactamente un archivo: era una afirmación sobre el MECANISMO y dejó de valer
+ * cuando la exclusión pasó a `codigoDeLaSeccion`. Tres secciones tuvieron el
+ * mismo problema por separado, así que la convención vive una vez en
+ * `_invariantes/soporte.ts` (`MODULOS_DE_APOYO`). Lo que se afirma ahora es la
+ * PROPIEDAD: el arnés existe y ningún escáner de este archivo lo mira.
  */
 afirmar(
   existe(`${CARPETA}/${S.ARCHIVO_DE_APOYO}`),
@@ -169,8 +163,13 @@ titulo('8 · El acento NUNCA como texto — y por qué, medido contra el tema')
 
 const clases = clasesEscritas(SIN)
 afirmarIgual(S.comoTexto(clases), [], `cero acento como texto o como borde, sobre ${clases.length} clases revisadas`)
-afirmarIgual(S.conAcento(clases), [], 'y cero usos de acento a secas: la decisión de este lane es que el Cierre no usa acento')
-afirmar(S.conAcento(clases).every((c) => FORMAS_PERMITIDAS_SOBRE_OSCURO.includes(c)), 'todo uso de acento cae en las formas permitidas sobre oscuro', `permitidas: ${FORMAS_PERMITIDAS_SOBRE_OSCURO.join(' · ')}`)
+/** ⚠️ B4-A · «cero acento» lo REVIERTE la instrucción: el prefijo de marca que se
+ *  monta acá ES relleno en `--color-acento`. Lo que entra es más fuerte. */
+const conAcento = S.conAcento(clases)
+const prefijos = (SIN.match(/data-pieza="prefijo-de-servicio"/g) ?? []).length
+afirmar(conAcento.length > 0 && conAcento.length === prefijos, `los ${conAcento.length} usos de acento del Cierre son exactamente sus ${prefijos} piezas \`prefijo-de-servicio\`: no entra por ningún otro lado, y ya NO es cero`, conAcento.join(' · '))
+afirmar(conAcento.every((c) => FORMAS_PERMITIDAS_SOBRE_OSCURO.includes(c)), 'todo uso de acento cae en las formas permitidas sobre oscuro', `permitidas: ${FORMAS_PERMITIDAS_SOBRE_OSCURO.join(' · ')}`)
+controlPositivo('el contador ve un acento que NO viene de la pieza', clasesEscritas('<span class="bg-acento"></span>'), (l: readonly string[]) => S.conAcento(l).length === prefijos)
 controlPositivo('el detector VE un text-acento cuando lo hay', clasesEscritas(S.MARCADO_CON_ACENTO_DE_TEXTO), (l) => S.comoTexto(l).length === 0)
 controlPositivo('y también un border-acento', clasesEscritas(S.MARCADO_CON_ACENTO_DE_BORDE), (l) => S.comoTexto(l).length === 0)
 

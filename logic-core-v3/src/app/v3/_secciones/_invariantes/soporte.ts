@@ -28,6 +28,10 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import { afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
+import { PATRONES } from '../../_lib/motion/patrones'
+import { CORTE_DE_TRAMOS, corteDeTramos } from '../_contrato/asentamiento'
+
 /** Cinco niveles: _invariantes → _secciones → v3 → app → src → raíz. */
 export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 
@@ -265,4 +269,29 @@ export function valoresDeAcentoDelTema(): { readonly token: string; readonly val
     token: m[1],
     valor: m[2].trim(),
   }))
+}
+
+/**
+ * §8 DE `s6-contrato` — **la guardia que hace que `CORTE_DE_TRAMOS` no sea una
+ * segunda fuente.**
+ *
+ * El contrato no puede importar `PATRONES` —es producto y `s7-contrato` §3 lo
+ * prohíbe—, así que publica el corte llegada/salida escrito, igual que hace con
+ * `ANCLA_DEL_PIN`. Lo que separa un espejo de una segunda fuente es esto: acá,
+ * que sí puede leer el patrón, se RE-DERIVA con `corteDeTramos` y se exige la
+ * igualdad. El día que alguien mueva el `3 / 3,5` de `patrones-piezas.ts`, la
+ * meseta de Trabajos se entera.
+ *
+ * Vive acá y no en el invariante porque ése cruzaba las 300 líneas. El corte es
+ * por tema: la guardia y su derivación son la misma pieza.
+ */
+export function afirmarElCorteDeTramos(): void {
+  titulo('8 · B4-A · EL CORTE LLEGADA/SALIDA que el contrato publica es el del patrón')
+
+  const conTramos = Object.values(PATRONES).filter((p) => corteDeTramos(p) !== null)
+  afirmarIgual(corteDeTramos(PATRONES.P7), CORTE_DE_TRAMOS.P7, 'el corte que el contrato publica para P7 es el que el patrón declara — el mismo `3 / 3,5`')
+  afirmarIgual(conTramos.map((p) => p.id).sort(), Object.keys(CORTE_DE_TRAMOS).sort(), 'y la tabla publica exactamente los patrones con dos tramos: ni corta ni larga')
+  const movido = { ...PATRONES.P7, tramos: (PATRONES.P7.tramos ?? []).map((t, i) => (i === 0 ? { ...t, hasta: 0.5 } : t)) }
+  controlPositivo('el derivador ve un patrón con el corte movido', movido, (p) => corteDeTramos(p) === CORTE_DE_TRAMOS.P7)
+  controlPositivo('  y devuelve `null` para un patrón sin tramos, en vez de inventarle un corte', PATRONES.P2, (p) => corteDeTramos(p) !== null)
 }
