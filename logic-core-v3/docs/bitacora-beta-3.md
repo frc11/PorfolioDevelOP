@@ -10863,3 +10863,119 @@ Schema, transiciones (`LEGAL_TRANSITIONS`), llaves de datos: **nada**. `dossier-
 - El tope de la cola sigue en 5: un aviso **vigente** puede apuntar a un lead que es trabajo real y
   no entró en las cinco filas. No es una contradicción (las dos superficies coinciden en que es
   trabajo) y el panel lo dice: «Quedan N más para trabajar, en tu cartera».
+
+---
+
+## EL TRONCO — veinticinco sprints vuelven a ser una sola línea — 2026-09-06
+
+### El diagnóstico que cambió el camino
+
+La pregunta que decidía todo era una sola: **¿el commit de `main` está en `origin`?**
+
+No lo está. `origin/main` = `17727117` (18-ago). El commit de P25 —`d0b37c71`, la carrera de
+tildes— existía **únicamente en el disco de Franco**. Verificado con `fetch` en vivo, no contra un
+ref viejo: `git merge-base --is-ancestor d0b37c71 origin/main` → exit 1.
+
+Eso habilita el **camino limpio**: `main` no divergió en `origin`, divergió en local. No hace falta
+mergear ni resolver el conflicto semántico. `main` se mueve a la punta y el arreglo de P25 se rehace
+encima, adaptado, en su propio sprint.
+
+### Lo que estaba en un solo disco
+
+Antes de reconciliar nada: **trece ramas** tenían commits que no existían en ningún ref remoto — P16
+a P23 completos, más P25. Trece pushes con refspec explícito, verificados **0/0** uno por uno.
+
+`d0b37c71` **no** se pusheó a `main`. Se preservó en `p25/carrera-tildes`, rama propia, para que el
+commit exista en `origin` sin tocar la rama protegida.
+
+Después del paso: **cero** commits locales fuera de `origin` en todo el repo.
+
+### La punta real
+
+`ea94dbf8` (`fix/veredicto-y-ciclo`, P23). Verificado por barrido, no por confianza: se recorrieron
+**todas** las ramas locales y remotas midiendo `rev-list <rama> ^<punta>`. Ninguna rama del tronco
+aporta un commit que la punta no tenga.
+
+La cadena es lineal desde `leados/v1-a-main` hasta la punta —49 commits sobre `origin/main`— con un
+solo merge, y es el que corresponde: `7e18f9a7`, la integración del carril F (F1·F2·F3).
+
+### Las ramas que la punta NO contiene, y por qué no frenan
+
+El barrido las encontró: los audits de junio/julio, el carril del Motor (`b0`/`b1`/`b2`), y el carril
+vivo del rediseño del home (`rediseno/*`, `v3/*`, con trabajo del 4-sep).
+
+**El discriminador**: cada una de esas ramas tiene exactamente la misma cantidad de commits fuera de
+`origin/main` que fuera de la punta. Son carriles paralelos que **nunca** estuvieron en `main` —
+divergían antes y divergen igual después. Mover `main` a la punta no las incluye ni las excluye
+distinto de hoy. No se pierde nada; queda anotado que cuando el carril del home suba, va a reconciliar
+contra una `main` que avanzó.
+
+### El conflicto semántico: no se resolvió, no llegó a existir
+
+La cadena sacó `motivo` de adentro de `FaseAutoReporte` a propósito —un `<a>` dentro de un `<button>`
+no es navegable— y lo movió a `MotivoDelTilde`, una vez arriba del grupo y con el destino enlazado.
+`d0b37c71` editó ese mismo archivo sin ver el cambio.
+
+Como el camino es el limpio, **no hay merge**: la versión de la cadena queda intacta. Medido sobre el
+resultado: `motivo` como prop dentro de `fase-auto-reporte.tsx` → **0 ocurrencias** (en `origin/main`
+son 4). `MotivoDelTilde` definido **1** vez, usado **1** vez, con su `EnlacePantalla`. El mensaje
+queda una sola vez y con su enlace.
+
+### La trampa que apareció en el camino: el build se envenena a sí mismo
+
+El primer `npm run build` murió con `Cannot find module './&'`. No era la rama.
+
+`docs/bitacora-beta-3.md` cita —desde la Corrida G, y **ya estaba en `origin/main`**— una clase de
+Tailwind que embebe una URL arbitraria entre corchetes. Tailwind la levanta como candidata. Al
+prerenderizar, las comillas de esa URL salen escapadas como entidades HTML dentro de
+`.next/server/app/*.html`. En el build **siguiente**, Tailwind escanea ese HTML, se come su propia
+salida escapada y genera un `url()` que webpack no puede resolver.
+
+Es un lazo: **el primer build de un worktree limpio pasa; el segundo falla.** En un worktree `.git`
+es un archivo, así que el acotado por `.gitignore` no aplica y `.next/` entra al escaneo aunque esté
+ignorado (línea 17 del `.gitignore`).
+
+El discriminador empírico que lo cerró: los logs del propio P23, en este mismo worktree y sobre este
+mismo commit, decían `BUILD_EXIT=0`. La rama estaba bien; el árbol estaba sucio. Borrados los dos
+distDir contaminados (`.next` y `.next-p23`, 5,8 GB, sin un solo symlink adentro y con el `node_modules`
+—que es junction al repo base— verificado intacto antes y después), el build pasa.
+
+### Gates, sobre el resultado
+
+`tsc --noEmit` exit 0, **0 líneas** · `check:invariants` exit 0, **56 descubiertos / 1 excluido / 55
+corridos / 55 verdes** (el excluido es `client-monthly-report-pdf`, exclusión documentada del runner:
+pega a la DB, no es invariante puro) · `build` exit 0 · `migrate status` exit 0, 86 migraciones, sin
+drift.
+
+Suites: `test:setter` **187/187** · `test:leados` **33/33** · `test:helpers` **28/28**. Son los
+conteos de la punta. Los de agosto eran 63 y 25 — el mensaje de `d0b37c71` los declara, y es la prueba
+de que ese sprint midió sobre el árbol equivocado.
+
+### Que no se perdió nada
+
+Las **27** ramas del tronco —f1, f2, f3, `leados/v1-a-main`, `leados/v1-integracion`, `p11-turno`,
+`f0/reconciliacion` y toda la cadena— verificadas una por una: `git log --oneline <rama> ^<resultado>`
+**vacío** en las 27.
+
+Por contenido, las siete piezas, presencia medida en las **dos** puntas (ausentes en `origin/main`,
+presentes en el resultado): el gate de CI, el runner de invariantes, `LEGAL_TRANSITIONS`, la barra de
+acción, la franja del recorrido, la cola del panel y la cartera agrupada.
+
+Dos detalles que el instrumento reveló: el `.github` **anidado** que Actions nunca leyó desaparece
+(1 en `origin/main` → 0 en el resultado) y el gate queda en la raíz, 236 líneas. Y `LEGAL_TRANSITIONS`
+pasa de 1 archivo a 7, por la extracción de C2 a `dossier-stage.ts`.
+
+**Trampa del instrumento, anotada**: en Git Bash sobre Windows, `git show <ref>:<path>` con dos puntos
+se convierte a `<ref>;<path>` con backslashes y falla — genera **falsos negativos** de ausencia. El
+primer censo dio «no existe» sobre archivos que sí existían. Se rehizo con `ls-tree` + `grep -Fxc`,
+que no usa dos puntos.
+
+### Lo que este sprint NO hizo
+
+- **No se pusheó a `main`.** Ni una vez. El push es de Franco.
+- **No se rehizo el arreglo de la carrera de tildes.** Su diagnóstico sigue en pie —el dueño único del
+  blob y la serialización del autoguardado— pero su implementación asume una firma de componente que
+  la cadena eliminó a propósito. Se adapta sobre el tronco, en su propio sprint. El commit está a
+  salvo en `p25/carrera-tildes`.
+- La corrida de CI sobre `main` va a ser la **primera** vez que el gate corre ahí. Queda para la
+  verificación humana.
