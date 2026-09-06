@@ -1,0 +1,308 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-pines.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T19:19:19.458Z",
+    "nota": "barrido de scroll REAL con paso 60 px; «pegado» = el top de viewport queda a 1.5 px del offset declarado, y se exige recorrer más de un paso. Nunca por geometría. Sin estrangular. Emulado."
+  },
+  "b1CitadoNoComparable": {
+    "fuente": "B1, a 1920, con un instrumento que ya no existe en el repo",
+    "pines": [
+      {
+        "panel": "trabajos",
+        "deScrollY": 4320,
+        "aScrollY": 6480
+      },
+      {
+        "panel": "servicios",
+        "deScrollY": 7560,
+        "aScrollY": 9720
+      }
+    ],
+    "advertencia": "se cita; el 1920 de este JSON es el que se mide con este banco."
+  },
+  "reglaDelFuente": "compuerta.ts: «El `sticky` SÍ cruza» el umbral de 1025.",
+  "filas": [
+    {
+      "perfil": "375",
+      "ancho": 375,
+      "debajoDelUmbral": true,
+      "stickyEncontrados": 2,
+      "pinesQueAndan": 1,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -571,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 600,
+          "sueltaEnScrollY": 14520,
+          "recorrePx": 13920,
+          "recorrePantallas": 20.87,
+          "paradasPegado": 233,
+          "paradasTotales": 243
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 2940.84,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": null,
+          "sueltaEnScrollY": null,
+          "recorrePx": null,
+          "recorrePantallas": null,
+          "paradasPegado": 0,
+          "paradasTotales": 243
+        }
+      ]
+    },
+    {
+      "perfil": "393",
+      "ancho": 393,
+      "debajoDelUmbral": true,
+      "stickyEncontrados": 2,
+      "pinesQueAndan": 1,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -756,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 780,
+          "sueltaEnScrollY": 16260,
+          "recorrePx": 15480,
+          "recorrePantallas": 18.17,
+          "paradasPegado": 259,
+          "paradasTotales": 272
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 2885.95,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": null,
+          "sueltaEnScrollY": null,
+          "recorrePx": null,
+          "recorrePantallas": null,
+          "paradasPegado": 0,
+          "paradasTotales": 272
+        }
+      ]
+    },
+    {
+      "perfil": "768",
+      "ancho": 768,
+      "debajoDelUmbral": true,
+      "stickyEncontrados": 2,
+      "pinesQueAndan": 1,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -928,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 960,
+          "sueltaEnScrollY": 17760,
+          "recorrePx": 16800,
+          "recorrePantallas": 16.41,
+          "paradasPegado": 281,
+          "paradasTotales": 297
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 3133.19,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": null,
+          "sueltaEnScrollY": null,
+          "recorrePx": null,
+          "recorrePantallas": null,
+          "paradasPegado": 0,
+          "paradasTotales": 297
+        }
+      ]
+    },
+    {
+      "perfil": "1024",
+      "ancho": 1024,
+      "debajoDelUmbral": true,
+      "stickyEncontrados": 2,
+      "pinesQueAndan": 1,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -672,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 720,
+          "sueltaEnScrollY": 13920,
+          "recorrePx": 13200,
+          "recorrePantallas": 17.19,
+          "paradasPegado": 221,
+          "paradasTotales": 233
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 2370.44,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": null,
+          "sueltaEnScrollY": null,
+          "recorrePx": null,
+          "recorrePantallas": null,
+          "paradasPegado": 0,
+          "paradasTotales": 233
+        }
+      ]
+    },
+    {
+      "perfil": "1025",
+      "ancho": 1025,
+      "debajoDelUmbral": false,
+      "stickyEncontrados": 3,
+      "pinesQueAndan": 2,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -672,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 720,
+          "sueltaEnScrollY": 13510,
+          "recorrePx": 12790,
+          "recorrePantallas": 16.65,
+          "paradasPegado": 215,
+          "paradasTotales": 227
+        },
+        {
+          "panel": "trabajos",
+          "etiqueta": "div",
+          "clases": "w-full escritorio:sticky escritorio:top-0 escritorio:h-svh",
+          "offsetPx": 0,
+          "altoPx": 768,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 6180,
+          "sueltaEnScrollY": 7680,
+          "recorrePx": 1500,
+          "recorrePantallas": 1.95,
+          "paradasPegado": 26,
+          "paradasTotales": 227
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 2370.45,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": null,
+          "sueltaEnScrollY": null,
+          "recorrePx": null,
+          "recorrePantallas": null,
+          "paradasPegado": 0,
+          "paradasTotales": 227
+        }
+      ]
+    },
+    {
+      "perfil": "1920",
+      "ancho": 1920,
+      "debajoDelUmbral": false,
+      "stickyEncontrados": 3,
+      "pinesQueAndan": 2,
+      "pines": [
+        {
+          "panel": null,
+          "etiqueta": "header",
+          "clases": "",
+          "offsetPx": -984,
+          "altoPx": 0,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 1020,
+          "sueltaEnScrollY": 18360,
+          "recorrePx": 17340,
+          "recorrePantallas": 16.06,
+          "paradasPegado": 291,
+          "paradasTotales": 308
+        },
+        {
+          "panel": "trabajos",
+          "etiqueta": "div",
+          "clases": "w-full escritorio:sticky escritorio:top-0 escritorio:h-svh",
+          "offsetPx": 0,
+          "altoPx": 1080,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": true,
+          "arrancaEnScrollY": 8640,
+          "sueltaEnScrollY": 10800,
+          "recorrePx": 2160,
+          "recorrePantallas": 2,
+          "paradasPegado": 37,
+          "paradasTotales": 308
+        },
+        {
+          "panel": "servicios",
+          "etiqueta": "div",
+          "clases": "w-full sticky top-0 min-h-svh",
+          "offsetPx": 0,
+          "altoPx": 3324.78,
+          "ancestroQueRecorta": null,
+          "overflowDelAncestro": null,
+          "anda": false,
+          "arrancaEnScrollY": 11880,
+          "sueltaEnScrollY": 11880,
+          "recorrePx": 0,
+          "recorrePantallas": 0,
+          "paradasPegado": 1,
+          "paradasTotales": 308
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,288 @@
+{
+  "frente": "a",
+  "asunto": "el reparto del peso de la carga inicial de /v3, archivo por archivo",
+  "instrumento": "scripts-b4/a-peso.ts — `<script src>` del HTML prerenderizado + gzipSync de node:zlib",
+  "build": {
+    "cual": "prod (.next-probe)",
+    "buildId": "RNJ_7OrwmSYE84zZiWvNa",
+    "dist": ".next-probe",
+    "nota": "NO es el next dev del 3002: sin minificar y sin tree-shaking, una cifra de peso de dev no describe al sitio."
+  },
+  "emulado": false,
+  "totales": {
+    "archivos": 25,
+    "crudoKiB": 1174.7,
+    "gzipKiB": 380
+  },
+  "grupos": {
+    "piso-del-framework": {
+      "archivos": 4,
+      "crudoKiB": 320.9,
+      "gzipKiB": 106.1,
+      "deQuien": "Next (rootMainFiles + polyfillFiles) y el SDK de navegador de Sentry (instrumentation-client.ts)"
+    },
+    "sdk-de-sentry": {
+      "archivos": 1,
+      "crudoKiB": 466.7,
+      "gzipKiB": 142.1,
+      "portador": "static/chunks/7149-856f7f8d5033e57a.js",
+      "huella": "browserTracingIntegration"
+    },
+    "chrome-del-layout-raiz": {
+      "archivos": 16,
+      "crudoKiB": 325.8,
+      "gzipKiB": 112.4
+    },
+    "propio-de-v3": {
+      "archivos": 4,
+      "crudoKiB": 61.3,
+      "gzipKiB": 19.4
+    }
+  },
+  "contraElPresupuesto": {
+    "techoDeclaradoKiB": 300,
+    "totalGzipKiB": 380,
+    "sinElSdkGzipKiB": 238,
+    "pisoPublicadoEnPresupuestoTsGzipKiB": 248.3,
+    "sdkPublicadoEnPresupuestoTsGzipKiB": 142.1
+  },
+  "css": {
+    "hojas": [
+      "static/css/226f4571965e8b3e.css",
+      "static/css/52d9d8cad04e6092.css",
+      "static/css/783b95c3c4f0391b.css",
+      "static/css/cc10f52a1a08cc2d.css"
+    ],
+    "crudoKiB": 525.7,
+    "gzipKiB": 68.5,
+    "nota": "el presupuesto declarado es de JS; el CSS se publica aparte y no entra en la suma de arriba."
+  },
+  "controlesPositivos": [
+    {
+      "nombre": "el buscador de huella NO encuentra una huella inventada",
+      "esperado": "0 archivos",
+      "obtenido": "0 archivos",
+      "pasa": true
+    },
+    {
+      "nombre": "y SÍ encuentra la huella real del SDK en la carga inicial",
+      "esperado": "exactamente 1 portador",
+      "obtenido": "static/chunks/7149-856f7f8d5033e57a.js",
+      "pasa": true
+    },
+    {
+      "nombre": "`descontarElSdk` devuelve null con un portador que no está en el conjunto",
+      "esperado": "null",
+      "obtenido": "null",
+      "pasa": true
+    },
+    {
+      "nombre": "el extractor de `<script src>` NO ve scripts en una ruta que no existe",
+      "esperado": "0 archivos",
+      "obtenido": "0 archivos",
+      "pasa": true
+    }
+  ],
+  "filas": [
+    {
+      "archivo": "static/chunks/7149-856f7f8d5033e57a.js",
+      "crudoBytes": 477877,
+      "gzipBytes": 145473,
+      "crudoKiB": 466.7,
+      "gzipKiB": 142.1,
+      "grupo": "sdk-de-sentry"
+    },
+    {
+      "archivo": "static/chunks/4bd1b696-6eaa2cedfc308a4d.js",
+      "crudoBytes": 200218,
+      "gzipBytes": 63018,
+      "crudoKiB": 195.5,
+      "gzipKiB": 61.5,
+      "grupo": "piso-del-framework"
+    },
+    {
+      "archivo": "static/chunks/5354-5635e3d3364e25ea.js",
+      "crudoBytes": 131869,
+      "gzipBytes": 43750,
+      "crudoKiB": 128.8,
+      "gzipKiB": 42.7,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/polyfills-42372ed130431b0a.js",
+      "crudoBytes": 112594,
+      "gzipBytes": 39627,
+      "crudoKiB": 110,
+      "gzipKiB": 38.7,
+      "grupo": "piso-del-framework"
+    },
+    {
+      "archivo": "static/chunks/app/v3/page-90dd6dfed1b30f69.js",
+      "crudoBytes": 48576,
+      "gzipBytes": 14415,
+      "crudoKiB": 47.4,
+      "gzipKiB": 14.1,
+      "grupo": "propio-de-v3"
+    },
+    {
+      "archivo": "static/chunks/app/layout-e5dee4af75ee44ab.js",
+      "crudoBytes": 34207,
+      "gzipBytes": 11196,
+      "crudoKiB": 33.4,
+      "gzipKiB": 10.9,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/6609-c1cd5c7dca01854d.js",
+      "crudoBytes": 33943,
+      "gzipBytes": 9440,
+      "crudoKiB": 33.1,
+      "gzipKiB": 9.2,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/6861-e0720a0bb24aa88b.js",
+      "crudoBytes": 22413,
+      "gzipBytes": 8987,
+      "crudoKiB": 21.9,
+      "gzipKiB": 8.8,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/8409-70da2dd8abb785bd.js",
+      "crudoBytes": 28627,
+      "gzipBytes": 8952,
+      "crudoKiB": 28,
+      "gzipKiB": 8.7,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/9752-6d99b73d8d47623a.js",
+      "crudoBytes": 19181,
+      "gzipBytes": 5620,
+      "crudoKiB": 18.7,
+      "gzipKiB": 5.5,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/8437-73cac7b3801b6f65.js",
+      "crudoBytes": 14214,
+      "gzipBytes": 5558,
+      "crudoKiB": 13.9,
+      "gzipKiB": 5.4,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/2229-3a11874c3981dbd4.js",
+      "crudoBytes": 8644,
+      "gzipBytes": 3956,
+      "crudoKiB": 8.4,
+      "gzipKiB": 3.9,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/webpack-83f80be98f8805b1.js",
+      "crudoBytes": 7182,
+      "gzipBytes": 3464,
+      "crudoKiB": 7,
+      "gzipKiB": 3.4,
+      "grupo": "piso-del-framework"
+    },
+    {
+      "archivo": "static/chunks/4210-3019a11558e98a0c.js",
+      "crudoBytes": 7527,
+      "gzipBytes": 3216,
+      "crudoKiB": 7.4,
+      "gzipKiB": 3.1,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/4610-668f86cdac0089f3.js",
+      "crudoBytes": 8188,
+      "gzipBytes": 3075,
+      "crudoKiB": 8,
+      "gzipKiB": 3,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/5681-4842ffa115d7eb5b.js",
+      "crudoBytes": 5744,
+      "gzipBytes": 2694,
+      "crudoKiB": 5.6,
+      "gzipKiB": 2.6,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/193-1b35fef0c87a1a6f.js",
+      "crudoBytes": 6963,
+      "gzipBytes": 2646,
+      "crudoKiB": 6.8,
+      "gzipKiB": 2.6,
+      "grupo": "propio-de-v3"
+    },
+    {
+      "archivo": "static/chunks/main-app-16b790332cae1a84.js",
+      "crudoBytes": 8624,
+      "gzipBytes": 2587,
+      "crudoKiB": 8.4,
+      "gzipKiB": 2.5,
+      "grupo": "piso-del-framework"
+    },
+    {
+      "archivo": "static/chunks/657-d974ab75327b831f.js",
+      "crudoBytes": 5153,
+      "gzipBytes": 2363,
+      "crudoKiB": 5,
+      "gzipKiB": 2.3,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/8500-975c2913d78cf40b.js",
+      "crudoBytes": 4642,
+      "gzipBytes": 2027,
+      "crudoKiB": 4.5,
+      "gzipKiB": 2,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/app/not-found-de24ad90243e88c7.js",
+      "crudoBytes": 4607,
+      "gzipBytes": 1922,
+      "crudoKiB": 4.5,
+      "gzipKiB": 1.9,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/app/v3/layout-cfc193662e684e8b.js",
+      "crudoBytes": 5116,
+      "gzipBytes": 1889,
+      "crudoKiB": 5,
+      "gzipKiB": 1.8,
+      "grupo": "propio-de-v3"
+    },
+    {
+      "archivo": "static/chunks/app/error-54c54b204a104a3d.js",
+      "crudoBytes": 2904,
+      "gzipBytes": 1401,
+      "crudoKiB": 2.8,
+      "gzipKiB": 1.4,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/app/global-error-918280a7fd81a840.js",
+      "crudoBytes": 1772,
+      "gzipBytes": 943,
+      "crudoKiB": 1.7,
+      "gzipKiB": 0.9,
+      "grupo": "chrome-del-layout-raiz"
+    },
+    {
+      "archivo": "static/chunks/9279-db7d413fc0261821.js",
+      "crudoBytes": 2102,
+      "gzipBytes": 923,
+      "crudoKiB": 2.1,
+      "gzipKiB": 0.9,
+      "grupo": "propio-de-v3"
+    }
+  ]
+}

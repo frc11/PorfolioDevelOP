@@ -1,0 +1,961 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-vigilia.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T15:31:43.930Z",
+    "nota": "cuenta de <canvas> (document + shadow roots abiertos) una vez por segundo durante 90 s, a 768 y a 1024. Sin estrangular. Emulado."
+  },
+  "filas": [
+    {
+      "perfil": "768",
+      "serie": [
+        {
+          "t": 8,
+          "canvas": 1,
+          "perfNow": 1812
+        },
+        {
+          "t": 1014,
+          "canvas": 0,
+          "perfNow": 2819
+        },
+        {
+          "t": 2031,
+          "canvas": 0,
+          "perfNow": 3834
+        },
+        {
+          "t": 3035,
+          "canvas": 0,
+          "perfNow": 4840
+        },
+        {
+          "t": 4044,
+          "canvas": 0,
+          "perfNow": 5849
+        },
+        {
+          "t": 5056,
+          "canvas": 0,
+          "perfNow": 6861
+        },
+        {
+          "t": 6093,
+          "canvas": 0,
+          "perfNow": 7898
+        },
+        {
+          "t": 7104,
+          "canvas": 0,
+          "perfNow": 8909
+        },
+        {
+          "t": 8113,
+          "canvas": 0,
+          "perfNow": 9919
+        },
+        {
+          "t": 9123,
+          "canvas": 0,
+          "perfNow": 10928
+        },
+        {
+          "t": 10131,
+          "canvas": 0,
+          "perfNow": 11936
+        },
+        {
+          "t": 11139,
+          "canvas": 0,
+          "perfNow": 12944
+        },
+        {
+          "t": 12141,
+          "canvas": 0,
+          "perfNow": 13946
+        },
+        {
+          "t": 13150,
+          "canvas": 0,
+          "perfNow": 14955
+        },
+        {
+          "t": 14155,
+          "canvas": 0,
+          "perfNow": 15960
+        },
+        {
+          "t": 15163,
+          "canvas": 0,
+          "perfNow": 16968
+        },
+        {
+          "t": 16170,
+          "canvas": 0,
+          "perfNow": 17975
+        },
+        {
+          "t": 17180,
+          "canvas": 0,
+          "perfNow": 18985
+        },
+        {
+          "t": 18194,
+          "canvas": 0,
+          "perfNow": 19999
+        },
+        {
+          "t": 19205,
+          "canvas": 0,
+          "perfNow": 21010
+        },
+        {
+          "t": 20219,
+          "canvas": 0,
+          "perfNow": 22024
+        },
+        {
+          "t": 21230,
+          "canvas": 0,
+          "perfNow": 23036
+        },
+        {
+          "t": 22244,
+          "canvas": 0,
+          "perfNow": 24049
+        },
+        {
+          "t": 23253,
+          "canvas": 0,
+          "perfNow": 25058
+        },
+        {
+          "t": 24265,
+          "canvas": 0,
+          "perfNow": 26070
+        },
+        {
+          "t": 25276,
+          "canvas": 0,
+          "perfNow": 27080
+        },
+        {
+          "t": 26288,
+          "canvas": 0,
+          "perfNow": 28093
+        },
+        {
+          "t": 27300,
+          "canvas": 0,
+          "perfNow": 29105
+        },
+        {
+          "t": 28308,
+          "canvas": 0,
+          "perfNow": 30112
+        },
+        {
+          "t": 29310,
+          "canvas": 0,
+          "perfNow": 31115
+        },
+        {
+          "t": 30369,
+          "canvas": 0,
+          "perfNow": 32174
+        },
+        {
+          "t": 31385,
+          "canvas": 0,
+          "perfNow": 33190
+        },
+        {
+          "t": 32400,
+          "canvas": 0,
+          "perfNow": 34205
+        },
+        {
+          "t": 33413,
+          "canvas": 0,
+          "perfNow": 35218
+        },
+        {
+          "t": 34417,
+          "canvas": 0,
+          "perfNow": 36222
+        },
+        {
+          "t": 35422,
+          "canvas": 0,
+          "perfNow": 37227
+        },
+        {
+          "t": 36436,
+          "canvas": 0,
+          "perfNow": 38241
+        },
+        {
+          "t": 37449,
+          "canvas": 0,
+          "perfNow": 39254
+        },
+        {
+          "t": 38452,
+          "canvas": 0,
+          "perfNow": 40257
+        },
+        {
+          "t": 39456,
+          "canvas": 0,
+          "perfNow": 41261
+        },
+        {
+          "t": 40458,
+          "canvas": 0,
+          "perfNow": 42263
+        },
+        {
+          "t": 41461,
+          "canvas": 0,
+          "perfNow": 43266
+        },
+        {
+          "t": 42466,
+          "canvas": 0,
+          "perfNow": 44271
+        },
+        {
+          "t": 43471,
+          "canvas": 0,
+          "perfNow": 45276
+        },
+        {
+          "t": 44481,
+          "canvas": 0,
+          "perfNow": 46286
+        },
+        {
+          "t": 45489,
+          "canvas": 0,
+          "perfNow": 47294
+        },
+        {
+          "t": 46508,
+          "canvas": 0,
+          "perfNow": 48313
+        },
+        {
+          "t": 47517,
+          "canvas": 0,
+          "perfNow": 49322
+        },
+        {
+          "t": 48530,
+          "canvas": 0,
+          "perfNow": 50335
+        },
+        {
+          "t": 49533,
+          "canvas": 1,
+          "perfNow": 836
+        },
+        {
+          "t": 50545,
+          "canvas": 1,
+          "perfNow": 1848
+        },
+        {
+          "t": 51549,
+          "canvas": 0,
+          "perfNow": 2853
+        },
+        {
+          "t": 52562,
+          "canvas": 0,
+          "perfNow": 3865
+        },
+        {
+          "t": 53570,
+          "canvas": 0,
+          "perfNow": 4873
+        },
+        {
+          "t": 54579,
+          "canvas": 0,
+          "perfNow": 5882
+        },
+        {
+          "t": 55580,
+          "canvas": 0,
+          "perfNow": 6884
+        },
+        {
+          "t": 56594,
+          "canvas": 0,
+          "perfNow": 7898
+        },
+        {
+          "t": 57604,
+          "canvas": 0,
+          "perfNow": 8907
+        },
+        {
+          "t": 58608,
+          "canvas": 0,
+          "perfNow": 9909
+        },
+        {
+          "t": 60211,
+          "canvas": 0,
+          "perfNow": 11513
+        },
+        {
+          "t": 61217,
+          "canvas": 0,
+          "perfNow": 12520
+        },
+        {
+          "t": 62230,
+          "canvas": 0,
+          "perfNow": 13533
+        },
+        {
+          "t": 63243,
+          "canvas": 0,
+          "perfNow": 14544
+        },
+        {
+          "t": 64250,
+          "canvas": 0,
+          "perfNow": 15553
+        },
+        {
+          "t": 65266,
+          "canvas": 0,
+          "perfNow": 16569
+        },
+        {
+          "t": 66284,
+          "canvas": 0,
+          "perfNow": 17587
+        },
+        {
+          "t": 67293,
+          "canvas": 0,
+          "perfNow": 18596
+        },
+        {
+          "t": 68299,
+          "canvas": 0,
+          "perfNow": 19602
+        },
+        {
+          "t": 69302,
+          "canvas": 0,
+          "perfNow": 20606
+        },
+        {
+          "t": 70335,
+          "canvas": 0,
+          "perfNow": 21638
+        },
+        {
+          "t": 71338,
+          "canvas": 0,
+          "perfNow": 22641
+        },
+        {
+          "t": 72350,
+          "canvas": 0,
+          "perfNow": 23654
+        },
+        {
+          "t": 73361,
+          "canvas": 0,
+          "perfNow": 24664
+        },
+        {
+          "t": 74366,
+          "canvas": 0,
+          "perfNow": 25669
+        },
+        {
+          "t": 75373,
+          "canvas": 0,
+          "perfNow": 26676
+        },
+        {
+          "t": 76378,
+          "canvas": 0,
+          "perfNow": 27681
+        },
+        {
+          "t": 77383,
+          "canvas": 0,
+          "perfNow": 28686
+        },
+        {
+          "t": 78392,
+          "canvas": 0,
+          "perfNow": 29694
+        },
+        {
+          "t": 79499,
+          "canvas": 0,
+          "perfNow": 30801
+        },
+        {
+          "t": 80597,
+          "canvas": 0,
+          "perfNow": 31900
+        },
+        {
+          "t": 81606,
+          "canvas": 0,
+          "perfNow": 32908
+        },
+        {
+          "t": 82612,
+          "canvas": 0,
+          "perfNow": 33915
+        },
+        {
+          "t": 83627,
+          "canvas": 0,
+          "perfNow": 34930
+        },
+        {
+          "t": 84644,
+          "canvas": 0,
+          "perfNow": 35947
+        },
+        {
+          "t": 85651,
+          "canvas": 0,
+          "perfNow": 36954
+        },
+        {
+          "t": 87026,
+          "canvas": 0,
+          "perfNow": 38329
+        },
+        {
+          "t": 88030,
+          "canvas": 0,
+          "perfNow": 39333
+        },
+        {
+          "t": 89033,
+          "canvas": 0,
+          "perfNow": 40336
+        },
+        {
+          "t": 90040,
+          "canvas": 0,
+          "perfNow": 41343
+        },
+        {
+          "t": 91048,
+          "canvas": 0,
+          "perfNow": 42351
+        },
+        {
+          "t": 92063,
+          "canvas": 0,
+          "perfNow": 43366
+        }
+      ],
+      "recargasDetectadas": 1,
+      "primeraAparicionMs": 8,
+      "detalleDeLaAparicion": [
+        {
+          "ruta": "document",
+          "ancho": 0,
+          "alto": 0,
+          "clases": "pointer-events-none absolute inset-0 h-full w-full",
+          "padre": "DIV.pointer-events-none fixed inset-0 z-[9999]",
+          "abuelo": "DIV.__variable_da61d5 __variable_912422 font-cuerpo bg-fondo text-tinta relative min-h-svh"
+        }
+      ],
+      "matchMediaFinal": false,
+      "recursosConEscenaFinal": 0
+    },
+    {
+      "perfil": "1024",
+      "serie": [
+        {
+          "t": 16,
+          "canvas": 1,
+          "perfNow": 1437
+        },
+        {
+          "t": 1032,
+          "canvas": 0,
+          "perfNow": 2454
+        },
+        {
+          "t": 2035,
+          "canvas": 0,
+          "perfNow": 3457
+        },
+        {
+          "t": 3049,
+          "canvas": 0,
+          "perfNow": 4470
+        },
+        {
+          "t": 4052,
+          "canvas": 0,
+          "perfNow": 5474
+        },
+        {
+          "t": 5064,
+          "canvas": 0,
+          "perfNow": 6486
+        },
+        {
+          "t": 6068,
+          "canvas": 0,
+          "perfNow": 7490
+        },
+        {
+          "t": 7081,
+          "canvas": 0,
+          "perfNow": 8502
+        },
+        {
+          "t": 8095,
+          "canvas": 0,
+          "perfNow": 9517
+        },
+        {
+          "t": 9109,
+          "canvas": 0,
+          "perfNow": 10530
+        },
+        {
+          "t": 10115,
+          "canvas": 0,
+          "perfNow": 11537
+        },
+        {
+          "t": 11117,
+          "canvas": 0,
+          "perfNow": 12539
+        },
+        {
+          "t": 12125,
+          "canvas": 0,
+          "perfNow": 13546
+        },
+        {
+          "t": 13127,
+          "canvas": 0,
+          "perfNow": 14548
+        },
+        {
+          "t": 14134,
+          "canvas": 0,
+          "perfNow": 15556
+        },
+        {
+          "t": 15145,
+          "canvas": 0,
+          "perfNow": 16567
+        },
+        {
+          "t": 16154,
+          "canvas": 0,
+          "perfNow": 17575
+        },
+        {
+          "t": 17165,
+          "canvas": 0,
+          "perfNow": 18587
+        },
+        {
+          "t": 18180,
+          "canvas": 0,
+          "perfNow": 19601
+        },
+        {
+          "t": 19187,
+          "canvas": 0,
+          "perfNow": 20608
+        },
+        {
+          "t": 20202,
+          "canvas": 0,
+          "perfNow": 21623
+        },
+        {
+          "t": 21213,
+          "canvas": 0,
+          "perfNow": 22635
+        },
+        {
+          "t": 22223,
+          "canvas": 0,
+          "perfNow": 23645
+        },
+        {
+          "t": 23233,
+          "canvas": 0,
+          "perfNow": 24654
+        },
+        {
+          "t": 24241,
+          "canvas": 0,
+          "perfNow": 25662
+        },
+        {
+          "t": 25252,
+          "canvas": 0,
+          "perfNow": 26674
+        },
+        {
+          "t": 26263,
+          "canvas": 0,
+          "perfNow": 27684
+        },
+        {
+          "t": 27271,
+          "canvas": 0,
+          "perfNow": 28693
+        },
+        {
+          "t": 28279,
+          "canvas": 0,
+          "perfNow": 29701
+        },
+        {
+          "t": 29292,
+          "canvas": 0,
+          "perfNow": 30713
+        },
+        {
+          "t": 30306,
+          "canvas": 0,
+          "perfNow": 31727
+        },
+        {
+          "t": 31315,
+          "canvas": 0,
+          "perfNow": 32737
+        },
+        {
+          "t": 32321,
+          "canvas": 0,
+          "perfNow": 33742
+        },
+        {
+          "t": 33332,
+          "canvas": 0,
+          "perfNow": 34753
+        },
+        {
+          "t": 34342,
+          "canvas": 0,
+          "perfNow": 35763
+        },
+        {
+          "t": 35358,
+          "canvas": 0,
+          "perfNow": 36779
+        },
+        {
+          "t": 36370,
+          "canvas": 0,
+          "perfNow": 37792
+        },
+        {
+          "t": 37374,
+          "canvas": 0,
+          "perfNow": 38795
+        },
+        {
+          "t": 38379,
+          "canvas": 0,
+          "perfNow": 39800
+        },
+        {
+          "t": 39384,
+          "canvas": 0,
+          "perfNow": 40805
+        },
+        {
+          "t": 40386,
+          "canvas": 0,
+          "perfNow": 41807
+        },
+        {
+          "t": 41394,
+          "canvas": 0,
+          "perfNow": 42815
+        },
+        {
+          "t": 42396,
+          "canvas": 0,
+          "perfNow": 43817
+        },
+        {
+          "t": 43406,
+          "canvas": 0,
+          "perfNow": 44827
+        },
+        {
+          "t": 44422,
+          "canvas": 0,
+          "perfNow": 45843
+        },
+        {
+          "t": 45429,
+          "canvas": 0,
+          "perfNow": 46850
+        },
+        {
+          "t": 46431,
+          "canvas": 0,
+          "perfNow": 47853
+        },
+        {
+          "t": 47447,
+          "canvas": 0,
+          "perfNow": 48868
+        },
+        {
+          "t": 48458,
+          "canvas": 0,
+          "perfNow": 49879
+        },
+        {
+          "t": 49472,
+          "canvas": 0,
+          "perfNow": 50893
+        },
+        {
+          "t": 50483,
+          "canvas": 0,
+          "perfNow": 51904
+        },
+        {
+          "t": 51494,
+          "canvas": 0,
+          "perfNow": 52915
+        },
+        {
+          "t": 52501,
+          "canvas": 0,
+          "perfNow": 53922
+        },
+        {
+          "t": 53516,
+          "canvas": 0,
+          "perfNow": 54937
+        },
+        {
+          "t": 54529,
+          "canvas": 0,
+          "perfNow": 55950
+        },
+        {
+          "t": 55537,
+          "canvas": 0,
+          "perfNow": 56958
+        },
+        {
+          "t": 56549,
+          "canvas": 0,
+          "perfNow": 57970
+        },
+        {
+          "t": 57565,
+          "canvas": 0,
+          "perfNow": 58986
+        },
+        {
+          "t": 58575,
+          "canvas": 0,
+          "perfNow": 59996
+        },
+        {
+          "t": 59587,
+          "canvas": 0,
+          "perfNow": 61008
+        },
+        {
+          "t": 60602,
+          "canvas": 0,
+          "perfNow": 62023
+        },
+        {
+          "t": 61613,
+          "canvas": 0,
+          "perfNow": 63034
+        },
+        {
+          "t": 62617,
+          "canvas": 0,
+          "perfNow": 64038
+        },
+        {
+          "t": 63630,
+          "canvas": 0,
+          "perfNow": 65050
+        },
+        {
+          "t": 64639,
+          "canvas": 0,
+          "perfNow": 66059
+        },
+        {
+          "t": 65644,
+          "canvas": 0,
+          "perfNow": 67065
+        },
+        {
+          "t": 66657,
+          "canvas": 0,
+          "perfNow": 68078
+        },
+        {
+          "t": 67669,
+          "canvas": 0,
+          "perfNow": 69089
+        },
+        {
+          "t": 68673,
+          "canvas": 0,
+          "perfNow": 70094
+        },
+        {
+          "t": 69688,
+          "canvas": 0,
+          "perfNow": 71109
+        },
+        {
+          "t": 70699,
+          "canvas": 0,
+          "perfNow": 72120
+        },
+        {
+          "t": 71709,
+          "canvas": 0,
+          "perfNow": 73130
+        },
+        {
+          "t": 72718,
+          "canvas": 0,
+          "perfNow": 74139
+        },
+        {
+          "t": 73728,
+          "canvas": 0,
+          "perfNow": 75150
+        },
+        {
+          "t": 74742,
+          "canvas": 0,
+          "perfNow": 76163
+        },
+        {
+          "t": 75753,
+          "canvas": 0,
+          "perfNow": 77174
+        },
+        {
+          "t": 76761,
+          "canvas": 0,
+          "perfNow": 78182
+        },
+        {
+          "t": 77766,
+          "canvas": 0,
+          "perfNow": 79187
+        },
+        {
+          "t": 78779,
+          "canvas": 0,
+          "perfNow": 80201
+        },
+        {
+          "t": 79787,
+          "canvas": 0,
+          "perfNow": 81208
+        },
+        {
+          "t": 80801,
+          "canvas": 0,
+          "perfNow": 82223
+        },
+        {
+          "t": 81814,
+          "canvas": 0,
+          "perfNow": 83235
+        },
+        {
+          "t": 82830,
+          "canvas": 0,
+          "perfNow": 84251
+        },
+        {
+          "t": 83840,
+          "canvas": 0,
+          "perfNow": 85261
+        },
+        {
+          "t": 84849,
+          "canvas": 0,
+          "perfNow": 86271
+        },
+        {
+          "t": 85862,
+          "canvas": 0,
+          "perfNow": 87284
+        },
+        {
+          "t": 86864,
+          "canvas": 0,
+          "perfNow": 88285
+        },
+        {
+          "t": 87871,
+          "canvas": 0,
+          "perfNow": 89293
+        },
+        {
+          "t": 88879,
+          "canvas": 0,
+          "perfNow": 90300
+        },
+        {
+          "t": 89882,
+          "canvas": 0,
+          "perfNow": 91304
+        },
+        {
+          "t": 90892,
+          "canvas": 0,
+          "perfNow": 92314
+        }
+      ],
+      "recargasDetectadas": 0,
+      "primeraAparicionMs": 16,
+      "detalleDeLaAparicion": [
+        {
+          "ruta": "document",
+          "ancho": 0,
+          "alto": 0,
+          "clases": "pointer-events-none absolute inset-0 h-full w-full",
+          "padre": "DIV.pointer-events-none fixed inset-0 z-[9999]",
+          "abuelo": "DIV.__variable_da61d5 __variable_912422 font-cuerpo bg-fondo text-tinta relative min-h-svh"
+        }
+      ],
+      "matchMediaFinal": false,
+      "recursosConEscenaFinal": 0
+    }
+  ]
+}

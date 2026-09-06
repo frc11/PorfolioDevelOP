@@ -1,0 +1,446 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-layout.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T15:11:12.881Z",
+    "nota": "inventario de layout previo a las capturas. Sin estrangular. Todo emulado con Emulation.setDeviceMetricsOverride sobre Chrome de escritorio: no es un teléfono."
+  },
+  "techoDelRasterizadorPx": 16384,
+  "filas": [
+    {
+      "perfil": "375",
+      "ancho": 375,
+      "alto": 667,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 15199,
+        "ventanaPx": 667,
+        "pantallas": 22.79,
+        "anchoDelDocumento": 375,
+        "anchoDeLaVentana": 375
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 667,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 2001,
+          "top": 667,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 2691,
+          "top": 2668,
+          "pantallas": 4.03,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 2282.22,
+          "top": 5359,
+          "pantallas": 3.42,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 2940.84,
+          "top": 7641.22,
+          "pantallas": 4.41,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 2206.17,
+          "top": 10582.06,
+          "pantallas": 3.31,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 1334.63,
+          "top": 12788.23,
+          "pantallas": 2,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 1076.25,
+          "top": 14122.86,
+          "pantallas": 1.61,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    },
+    {
+      "perfil": "393",
+      "ancho": 393,
+      "alto": 852,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 17148,
+        "ventanaPx": 852,
+        "pantallas": 20.13,
+        "anchoDelDocumento": 393,
+        "anchoDeLaVentana": 393
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 852,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 2556,
+          "top": 852,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 3431,
+          "top": 3408,
+          "pantallas": 4.03,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 2813.75,
+          "top": 6839,
+          "pantallas": 3.3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 2885.95,
+          "top": 9652.75,
+          "pantallas": 3.39,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 2218.06,
+          "top": 12538.7,
+          "pantallas": 2.6,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 1314.28,
+          "top": 14756.77,
+          "pantallas": 1.54,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 1077.09,
+          "top": 16071.05,
+          "pantallas": 1.26,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    },
+    {
+      "perfil": "768",
+      "ancho": 768,
+      "alto": 1024,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 18805,
+        "ventanaPx": 1024,
+        "pantallas": 18.36,
+        "anchoDelDocumento": 768,
+        "anchoDeLaVentana": 768
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 1024,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 3072,
+          "top": 1024,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 4096,
+          "top": 4096,
+          "pantallas": 4,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 3293.5,
+          "top": 8192,
+          "pantallas": 3.22,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 3133.19,
+          "top": 11485.5,
+          "pantallas": 3.06,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 2138.56,
+          "top": 14618.69,
+          "pantallas": 2.09,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 1024,
+          "top": 16757.25,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 1024,
+          "top": 17781.25,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    },
+    {
+      "perfil": "1024",
+      "ancho": 1024,
+      "alto": 768,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 14721,
+        "ventanaPx": 768,
+        "pantallas": 19.17,
+        "anchoDelDocumento": 1024,
+        "anchoDeLaVentana": 1024
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 768,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 2366.56,
+          "top": 768,
+          "pantallas": 3.08,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 3072,
+          "top": 3134.56,
+          "pantallas": 4,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 2508.81,
+          "top": 6206.56,
+          "pantallas": 3.27,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 2370.44,
+          "top": 8715.38,
+          "pantallas": 3.09,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 1954.88,
+          "top": 11085.81,
+          "pantallas": 2.55,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 815.13,
+          "top": 13040.69,
+          "pantallas": 1.06,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 865.11,
+          "top": 13855.81,
+          "pantallas": 1.13,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    },
+    {
+      "perfil": "1025",
+      "ancho": 1025,
+      "alto": 768,
+      "debajoDelUmbral": false,
+      "documento": {
+        "alturaPx": 14345,
+        "ventanaPx": 768,
+        "pantallas": 18.68,
+        "anchoDelDocumento": 1025,
+        "anchoDeLaVentana": 1025
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 768,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 2304,
+          "top": 768,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 3072,
+          "top": 3072,
+          "pantallas": 4,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 2304,
+          "top": 6144,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 2370.45,
+          "top": 8448,
+          "pantallas": 3.09,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 1663.83,
+          "top": 10818.45,
+          "pantallas": 2.17,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 997.25,
+          "top": 12482.28,
+          "pantallas": 1.3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 865.16,
+          "top": 13479.53,
+          "pantallas": 1.13,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    },
+    {
+      "perfil": "1920",
+      "ancho": 1920,
+      "alto": 1080,
+      "debajoDelUmbral": false,
+      "documento": {
+        "alturaPx": 19525,
+        "ventanaPx": 1080,
+        "pantallas": 18.08,
+        "anchoDelDocumento": 1920,
+        "anchoDeLaVentana": 1920
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 1080,
+          "top": 0,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 3240,
+          "top": 1080,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "numeros",
+          "alto": 4320,
+          "top": 4320,
+          "pantallas": 4,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "trabajos",
+          "alto": 3240,
+          "top": 8640,
+          "pantallas": 3,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "servicios",
+          "alto": 3324.78,
+          "top": 11880,
+          "pantallas": 3.08,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "tu-panel",
+          "alto": 2160,
+          "top": 15204.78,
+          "pantallas": 2,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 1080,
+          "top": 17364.78,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        },
+        {
+          "id": "cierre",
+          "alto": 1080,
+          "top": 18444.78,
+          "pantallas": 1,
+          "cabeEnUnaCaptura": true
+        }
+      ],
+      "secciones": 8
+    }
+  ]
+}

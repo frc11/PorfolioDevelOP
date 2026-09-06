@@ -1,0 +1,55 @@
+{
+  "que": "por qué `prefers-reduced-motion` no cambió nada a 1920 con la preferencia puesta antes de navegar",
+  "instrumento": "scripts-b4/c-reducido-discriminador.ts",
+  "emulado": true,
+  "perfil": "1920",
+  "lasTresCausasPosibles": {
+    "A": "la emulación no llega al árbol de React — defecto del instrumento",
+    "B": "el sitio no lee la preferencia INICIAL, sólo su CAMBIO — defecto del sitio",
+    "C": "`useMovimientoReducido()` devuelve `false` SIEMPRE: `useReducedMotionConfig` corta en el contexto, cuyo default es `reducedMotion: \"never\"`, y /v3 no monta ningún `<MotionConfig>` — defecto del sitio"
+  },
+  "escenaConYSinLaPreferencia": [
+    {
+      "reducido": false,
+      "a": 75,
+      "b": 75,
+      "delta": 0,
+      "hayCanvas": true
+    },
+    {
+      "reducido": true,
+      "a": 75,
+      "b": 75,
+      "delta": 0,
+      "hayCanvas": true
+    }
+  ],
+  "discriminador": "poner la preferencia DESPUÉS de cargar, sin recargar, y volver a contar",
+  "filas": [
+    {
+      "caso": "1 · sin la preferencia",
+      "conTransform": 2380,
+      "piezasDeLineas": 5,
+      "matchMedia": false
+    },
+    {
+      "caso": "2 · con la preferencia ANTES de navegar",
+      "conTransform": 2380,
+      "piezasDeLineas": 5,
+      "matchMedia": true
+    },
+    {
+      "caso": "3a · cargada SIN la preferencia",
+      "conTransform": 2380,
+      "piezasDeLineas": 5,
+      "matchMedia": false
+    },
+    {
+      "caso": "3b · la MISMA página, preferencia puesta después",
+      "conTransform": 2450,
+      "piezasDeLineas": 5,
+      "matchMedia": true
+    }
+  ],
+  "veredicto": "C · la emulación llega (matchMedia lo confirma en las cuatro filas) pero NO llega del media query al árbol: `useReducedMotionConfig` corta en el contexto, cuyo default es `reducedMotion: \"never\"`, y en /v3 no hay ningún `<MotionConfig>`. Defecto DEL SITIO, en `_lib/motion/reducido.ts`."
+}

@@ -1,0 +1,125 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-compuerta.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T15:19:42.895Z",
+    "nota": "discriminador empírico de la compuerta de 1025: cuenta canvas y lee matchMedia con la misma consulta que usa `useAnchoMinimo`. Sin estrangular. Emulado."
+  },
+  "afirmacionDelFuente": "compuerta.ts: «Abajo de 1025: sin canvas y sin coreografía»",
+  "filas": [
+    {
+      "perfil": "375",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": false,
+      "innerWidth": 375,
+      "canvas": [],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": false,
+      "pedidosDeChunk": 0,
+      "barridoMaxCanvas": 0,
+      "barridoDondeAparece": null
+    },
+    {
+      "perfil": "393",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": false,
+      "innerWidth": 393,
+      "canvas": [],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": false,
+      "pedidosDeChunk": 0,
+      "barridoMaxCanvas": 0,
+      "barridoDondeAparece": null
+    },
+    {
+      "perfil": "768",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": false,
+      "innerWidth": 768,
+      "canvas": [],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": false,
+      "pedidosDeChunk": 0,
+      "barridoMaxCanvas": 0,
+      "barridoDondeAparece": null
+    },
+    {
+      "perfil": "1024",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": false,
+      "innerWidth": 1024,
+      "canvas": [],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": false,
+      "pedidosDeChunk": 0,
+      "barridoMaxCanvas": 0,
+      "barridoDondeAparece": null
+    },
+    {
+      "perfil": "1025",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": true,
+      "innerWidth": 1025,
+      "canvas": [
+        {
+          "ancho": 1025,
+          "alto": 768,
+          "clases": "",
+          "padre": "",
+          "posicion": "static",
+          "visible": true
+        }
+      ],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": true,
+      "pedidosDeChunk": 1,
+      "barridoMaxCanvas": 1,
+      "barridoDondeAparece": 0
+    },
+    {
+      "perfil": "1440",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": true,
+      "innerWidth": 1440,
+      "canvas": [
+        {
+          "ancho": 1440,
+          "alto": 900,
+          "clases": "",
+          "padre": "",
+          "posicion": "static",
+          "visible": true
+        }
+      ],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": true,
+      "pedidosDeChunk": 1,
+      "barridoMaxCanvas": 1,
+      "barridoDondeAparece": 0
+    },
+    {
+      "perfil": "1920",
+      "consulta": "(min-width: 1025px)",
+      "matchMedia": true,
+      "innerWidth": 1920,
+      "canvas": [
+        {
+          "ancho": 1920,
+          "alto": 1080,
+          "clases": "",
+          "padre": "",
+          "posicion": "static",
+          "visible": true
+        }
+      ],
+      "marcaDeIntroPuesta": true,
+      "hayEscudoDeEscena": true,
+      "pedidosDeChunk": 1,
+      "barridoMaxCanvas": 1,
+      "barridoDondeAparece": 0
+    }
+  ]
+}

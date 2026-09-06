@@ -1,0 +1,26 @@
+{
+  "frente": "a",
+  "asunto": "Lighthouse — las cuatro categorías, móvil y escritorio",
+  "instrumento": "scripts-b4/a-lighthouse.ts — el bundle de Lighthouse de chrome-devtools-mcp, importado directo, con `page: undefined` para que se conecte por CDP al Chrome del banco (perfil `a`)",
+  "build": {
+    "cual": "prod (.next-probe, 3005)",
+    "url": "http://localhost:3005/v3"
+  },
+  "emulado": true,
+  "sePudo": false,
+  "error": "puppeteer_core_default.connect is not a function",
+  "causa": {
+    "fuente": "C:/Users/Valentino/AppData/Local/npm-cache/_npx/15c61037b1978c83/node_modules/chrome-devtools-mcp/build/src/third_party/lighthouse-devtools-mcp-bundle.js:57537",
+    "linea": "var puppeteer_core_default = {};",
+    "explicacion": "puppeteer-core está stubbeado a un objeto vacío en el bundle: el servidor MCP le inyecta su propio `page`, así que la rama `!page` de `navigationGather` (línea 58303) es código muerto y `connect` no existe.",
+    "descartes": [
+      "no hay `puppeteer-core` en node_modules de este repo (verificado)",
+      "no hay `puppeteer-core` en el _npx del paquete chrome-devtools-mcp (verificado)",
+      "no hay lighthouse ni puppeteer instalados globalmente (npm ls -g: netlify-cli, npm, pnpm)",
+      "traer cualquiera de los dos sería sumar una dependencia, prohibido por la instrucción",
+      "el servidor MCP `chrome-devtools-mcp` está tomado por el lane de C:\\v3-costura, y su `lighthouse_audit` excluye la categoría performance por diseño"
+    ]
+  },
+  "notaSobreLaCifra": "si corriera, sería modo `simulate` (Lantern): la carga es sin estrangular y la red y la CPU se simulan sobre el grafo. NO es el reloj de pared; para eso está a-vitales.json.",
+  "corridas": []
+}
