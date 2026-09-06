@@ -29,6 +29,7 @@ import {
   quitarComentarios,
 } from '../../_lib/__tests__/s3-escaneo'
 import { sizesPorColumnas } from '../../_lib/imagen'
+import { ANCLAS, rangoDeScroll } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS, ATRIBUTO_TEXTO_ACCESIBLE } from '../../_lib/motion/lineas'
 import { CLASE_PESO } from '../../_lib/tipografia'
 import { NOMBRES_REALES, escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
@@ -61,6 +62,8 @@ import {
   TITULO_DE_CAPACIDADES,
 } from './contenido'
 import { PIEZAS_POR_PATRON, TuPanel } from './TuPanel'
+import * as A from './asentamiento'
+import { MUESTRAS_DEL_RANGO, esMonotono, fraccionAsentada } from '../_invariantes/asentamiento'
 
 // ── Las dos ramas, renderizadas una sola vez ───────────────────────────────
 
@@ -249,5 +252,33 @@ afirmar(seccion.pinneada === undefined, 'esta sección NO va pinneada: la única
 afirmarIgual(/<section id="([^"]*)"/.exec(QUIETO)?.[1], ID, '  la `<section>` sale con el id de la tabla')
 afirmarIgual(valorDe(QUIETO, 'data-superficie'), seccion.superficie, '  y su superficie sale de la tabla del sitio: la sección no pinta un solo color')
 controlPositivo('el contador de tiempos ve un marcado con menos pantallas de las declaradas', '<div class="flex min-h-svh flex-col"></div>', (h) => clasesIguales(h, 'min-h-svh') === PANTALLAS_DE_LA_SECCION)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('11 · B2 · La lista ATERRIZA — y el punto de asentamiento sale del ancla')
+
+/**
+ * ⚠️ AFIRMACIÓN NUEVA. No reemplaza ni afloja ninguna: las diez de arriba
+ * siguen valiendo carácter por carácter. Lo que se agrega es la propiedad que
+ * `B2-DELTAS.md` §0 mide y que ningún instrumento de este repo tenía: **existe
+ * una banda del rango en la que el progreso no se mueve**. Para el
+ * comportamiento anterior —el progreso pelado— esa banda es CERO.
+ */
+const RANGO_P4 = rangoDeScroll(ANCLAS.P4, { topDoc: 0, alto: A.ALTO_DE_LA_LISTA }, A.ALTO_DE_CALIBRACION)
+const ANCHO_P4 = RANGO_P4.fin - RANGO_P4.inicio
+console.log(`  bloque de la lista ${A.ALTO_DE_LA_LISTA} px sobre una ventana de ${A.ALTO_DE_CALIBRACION} · rango de P4 ${ANCHO_P4} · armada ${A.FRACCION_DE_ARMADO.toFixed(5)}`)
+afirmarIgual(ANCLAS.P2.fin.viewport.fraccion, 1, 'el punto de ENTRADA es el fin de P2 (`bottom bottom`): el bloque terminó de entrar al cuadro')
+afirmarIgual(A.SOBREPASO_DE_LA_LISTA, (ANCLAS.P2.fin.viewport.fraccion - ANCLAS.P4.fin.viewport.fraccion) * A.ALTO_DE_CALIBRACION, '  y P4 se pasa de ahí un viewport entero: `bottom top` contra `bottom bottom`, leído de las anclas')
+afirmarIgual(A.RANGO_DE_LA_LISTA, ANCHO_P4, '  el rango declarado es el que `rangoDeScroll` calcula con el ancla de P4')
+afirmarIgual(A.FRACCION_DE_ARMADO, (ANCHO_P4 - A.SOBREPASO_DE_LA_LISTA) / ANCHO_P4, 'la fracción de armada está DERIVADA del ancla y del alto medido, no elegida')
+afirmarIgual(A.asentar(0), 0, 'en el borde del rango la armada arranca en cero: la lista entra desde su estado inicial')
+afirmarIgual(A.asentar(A.FRACCION_DE_ARMADO), 1, `  llega a 1 cuando el bloque terminó de entrar, y de ahí no se mueve más`)
+afirmarIgual(A.asentar(1), 1, '  ni en el último píxel del ancla')
+afirmar(esMonotono(A.asentar), 'el remapeo nunca retrocede: ningún ítem se desarma mientras el visitante baja')
+const QUIETA = fraccionAsentada(A.asentar)
+afirmar(Math.abs(QUIETA - (1 - A.FRACCION_DE_ARMADO)) <= 1 / (MUESTRAS_DEL_RANGO - 1), `${(100 * QUIETA).toFixed(1)} % del rango pasa SIN que nada cambie — eso es el aterrizaje, medido sobre el remapeo`, `derivado: ${(100 * (1 - A.FRACCION_DE_ARMADO)).toFixed(1)} %, con ${MUESTRAS_DEL_RANGO} muestras`)
+afirmar(QUIETA * ANCHO_P4 > A.FUSION_DEL_CENSO, `la banda quieta mide ${(QUIETA * ANCHO_P4).toFixed(0)} px y supera el umbral de fusión del censo (${A.FUSION_DEL_CENSO}): el grupo siguiente NO se lee como la cola de éste`)
+controlPositivo('el progreso pelado —lo que la sección hacía— NO deja una sola banda quieta', (l: number) => l, (r) => fraccionAsentada(r) > 0)
+console.log('  [medido en el navegador, 1920×1080, receta de MEDICION-NAVEGADOR.md] los once aterrizajes pasan de 16320–17280 a 15720–16200,')
+console.log('  y el hueco contra el grupo del primer tiempo baja de 1.200 px (1,11 pantallas) a 600 (0,56). El grupo sigue siendo UNO: son once ítems escalonados.')
 
 cerrar('s6-tu-panel.invariant')

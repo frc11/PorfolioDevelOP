@@ -1,8 +1,11 @@
 'use client'
 
+import { useTransform, type MotionValue } from 'motion/react'
+
 import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { type Progreso } from '../_contrato/coreografia'
 import { CanalDePieza } from '../_contrato/canales'
+import { asentar } from './asentamiento'
 import { CAPACIDADES } from './contenido'
 
 /**
@@ -53,7 +56,41 @@ export interface CapacidadesProps {
   readonly progreso: Progreso
 }
 
+/**
+ * ── B2 · LOS MOMENTOS: la lista ATERRIZA y se queda quieta ─────────────────
+ *
+ * El progreso del bloque pasa por `asentar` antes de llegar a los once ítems.
+ * De dónde sale la fracción —de las propias anclas, no de un gusto— y qué se
+ * midió para necesitarla está en `asentamiento.ts`. En una línea: el ancla de
+ * P4 termina en `bottom top`, así que **la lista seguía armándose mientras se
+ * iba por arriba del cuadro** y el censo de acontecimientos la leía como un
+ * único grupo de 960 px con once aterrizajes seguidos, uno cada 97,9 px.
+ *
+ * El remapeo se aplica ACÁ y en un solo lugar, que es la condición de que los
+ * once sigan leyendo el mismo número: remapear ítem por ítem daría once relojes
+ * que se ven parecidos y no lo son.
+ */
 export function Capacidades({ progreso }: CapacidadesProps): React.JSX.Element {
+  if (progreso === null) return <ListaDeCapacidades progreso={null} />
+  return <CapacidadesAsentadas progreso={progreso} />
+}
+
+/**
+ * La rama con coreografía. Existe como componente aparte —y no como una rama
+ * adentro de `Capacidades`— porque `useTransform` es un hook: llamarlo detrás
+ * de un `if` sería llamarlo condicionalmente. Es la misma forma que
+ * `ServiciosEnSecuencia` ya usa para su propio asentamiento.
+ */
+function CapacidadesAsentadas({
+  progreso,
+}: {
+  readonly progreso: MotionValue<number>
+}): React.JSX.Element {
+  const asentado = useTransform(progreso, asentar)
+  return <ListaDeCapacidades progreso={asentado} />
+}
+
+function ListaDeCapacidades({ progreso }: CapacidadesProps): React.JSX.Element {
   return (
     <ul className="grid flex-1 grid-cols-1 content-between gap-x-[var(--grilla-canal-amplio)] gap-y-[var(--spacing-6)] tablet:grid-cols-2 escritorio:grid-cols-1">
       {CAPACIDADES.map((capacidad, indice) => (

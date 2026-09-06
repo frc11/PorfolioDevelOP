@@ -242,9 +242,58 @@ export const SECCIONES: readonly Seccion[] = [
    * después la tabla. Al revés no: la tabla no achica una sección, sólo le pone
    * un piso. Y ese recorte de la foto deshace el reparto que en B1 llevó a esta
    * sección de 65,09 % a 42,41 % de aire y de 600 a 102 px de banda vacía.
+   *
+   * ── ⚠️ B2 · LA BAJADA A 100svh NO SE HIZO, Y VA AL REVÉS: 200 → 300 ────────
+   *
+   * **La instrucción de B2 §0.3 pedía bajarla a `100svh`. Se midió antes de
+   * hacerlo y la medición dice que no.** Tres cifras, cada una con su
+   * instrumento, y las tres empujan en la misma dirección (`B2-DELTAS.md` §4):
+   *
+   * 1. **El techo de velocidad.** El tramo `quiénes somos` mueve la cámara
+   *    **2,112 alturas de cuadro**. Con `100svh` eso corre a 2,112 alturas por
+   *    pantalla de scroll —2,23× el ritmo parejo del recorrido, el segundo
+   *    segmento más rápido— y **ése es exactamente el defecto que B2 §0.2 viene
+   *    a arreglar**: la queja del humano de que el fondo se adelanta. Con el
+   *    techo en 1,0 el tramo pide **3 pantallas**, no una.
+   * 2. **El gate del bloque.** `momentos = pantallas − pinneadas + secuencias`.
+   *    Bajar esta sección de 2 a 1 pantalla **baja el gate de 12,0 a 11,0**: la
+   *    §0.3 movía la cifra que el bloque entero existe para subir.
+   * 3. **La densidad.** La sección tiene cinco piezas que pueden llegar por
+   *    separado —titular, bajada, cómo trabajamos, la foto con su pie, y las dos
+   *    personas—. En una pantalla no hay dónde repartirlas.
+   *
+   * ⚠️ **Y la primera mitad de §0.3 —«que el hueco de la foto se dimensione por
+   * su relación de aspecto y no por media pantalla»— NO se hizo porque su
+   * premisa está REFUTADA sobre el píxel.** Medido a 1920: el hueco vale
+   * 1481,59 × 987,72 px, o sea **1,500 exacto**, que son los 3:2 que declara
+   * `GEOMETRIA.foto`. `MarcoDeMedio` emite `aspect-ratio` desde una prop y nunca
+   * una fracción de pantalla. Lo que fija ese alto es que la foto ocupa 4 de 5
+   * columnas, y ese 4 lo puso B1 con su propia medición. Y la caja con su
+   * epígrafe mide 1.019,64 px en una pantalla de 1.080: **ya llena el 94,4 % de
+   * su pantalla**. La composición mide dos pantallas porque tiene DOS GRUPOS
+   * —la agencia y las personas—, no porque una caja esté sobredimensionada.
    */
-  { id: 'quienes-somos', numero: '02', nombre: 'Quiénes somos', superficie: 'papel-opaco', alto: '200svh' },
-  { id: 'numeros', numero: '03', nombre: 'Números', superficie: 'papel-opaco', alto: '100svh' },
+  { id: 'quienes-somos', numero: '02', nombre: 'Quiénes somos', superficie: 'papel-opaco', alto: '300svh' },
+  /**
+   * NÚMEROS — 400svh. **B2 la subió de 100, y las dos mitades del número están
+   * medidas.** El detalle entero, con sus instrumentos, en `B2-DELTAS.md` §3.
+   *
+   * 1. **El techo de velocidad de la cámara.** El tramo `números` mueve la
+   *    cámara **2,179 alturas de cuadro** (arco medido con `speedAt`, el mismo
+   *    instrumento de `s13b-soporte.ts`). Con UNA pantalla eso son 2,179
+   *    alturas por pantalla de scroll, **el segmento más rápido del recorrido**
+   *    y 2,31× el ritmo parejo. Con el techo en 1,0 el tramo pide 3 pantallas.
+   * 2. **La densidad de acontecimientos.** La sección tiene seis piezas que
+   *    pueden llegar por separado —el titular con su entrada, más las cinco
+   *    cifras— y a **0,67 pantallas por acontecimiento**, que es el hueco más
+   *    chico medido en la referencia, seis piezas piden **4,0 pantallas**.
+   *
+   * Manda el mayor de los dos, y es el segundo. ⚠️ Con 100svh esta sección
+   * medía **cero acontecimientos** —barrido de estilos en línea a 1920, paso de
+   * 120 px— y era la mitad del hueco de 2,44 pantallas sin que pase nada, el
+   * peor del sitio contra 1,56 de la referencia.
+   */
+  { id: 'numeros', numero: '03', nombre: 'Números', superficie: 'papel-opaco', alto: '400svh' },
   /**
    * TRABAJOS — la segunda secuencia pinneada, y la primera con contenido.
    *

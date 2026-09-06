@@ -24,6 +24,7 @@ import { ritmoDe } from '../_contrato/ritmo'
 import { marcar } from '../_invariantes/render'
 import { CARPETAS_DE_SECCION, clasesEscritas, codigoDeLaSeccion, existe, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { Cierre, ContenidoDelCierre, GEOMETRIA } from './Cierre'
+import { afirmarComoEntraElCierre } from './s8-entrada'
 import { ANCLAS_QUE_EXISTEN, COLUMNAS, CTA_DE_CIERRE, DESTINOS_DE_LA_RUTA, ETIQUETA_DE_SECCION, LINEA_DE_CIERRE, NOVEDADES, PEDIDOS_DE_CONTACTO, TITULAR_DE_CIERRE } from './contenido'
 import * as S from './soporte'
 
@@ -88,7 +89,12 @@ titulo('4 · Cero valores fuera de los tokens, en los archivos de producto')
 
 console.log(`  ${ARCHIVOS.length} archivos de producto, ${FUENTE.split('\n').length} líneas sin comentarios:`)
 for (const a of ARCHIVOS) console.log(`    ${a}`)
-afirmarIgual(ARCHIVOS.length, 3, 'la sección son tres archivos de producto')
+/** ⚠️ ERAN TRES Y AHORA SON CINCO: la afirmación sube al valor NUEVO en vez de
+ *  aflojarse a un `>= 3`. Los dos que entran los agrega B2: `asentamiento.ts`
+ *  (el remapeo del progreso del titular, con su derivación) y `s8-entrada.ts`
+ *  (§12, que salió de acá por la regla de las 300 líneas). El segundo no es un
+ *  `*.invariant.*`: para la compuerta cuenta como producto y se escanea entero. */
+afirmarIgual(ARCHIVOS.length, 5, 'la sección son cinco archivos de producto')
 /**
  * ⚠️ LA EXCLUSIÓN DEL ARNÉS SE MUDÓ, Y LO QUE SE AFIRMA CAMBIÓ CON ELLA.
  *
@@ -213,16 +219,10 @@ afirmarIgual(S.familiasComidas(SIN), [], `ninguno de los ${S.nivelesVistos(SIN)}
 controlPositivo('el detector de familia comida no está ciego', '<p data-nivel="micro" class="text-micro leading-micro font-medio">x</p>', (h: string) => S.familiasComidas(h).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('12 · Las columnas suben ESCALONADAS — la desviación declarada de P2')
-
+// §12 vive en `s8-entrada.ts` — el único tema que afirma sobre CUÁNDO entra cada
+// pieza. Los valores de motion van por parámetro: ese archivo cuenta como producto.
 const crono = cronogramaDe(PATRONES.P2, COLUMNAS.length)
-const ventanas = COLUMNAS.map((_, i) => ventanaDeHijo(i, crono))
-afirmarIgual(crono.cantidad, COLUMNAS.length, `el conjunto tiene ${COLUMNAS.length} piezas, que es cuántas columnas hay`)
-afirmar(S.escalonan(ventanas), 'las ventanas arrancan escalonadas y no todas en cero', ventanas.map((v) => v.desde.toFixed(4)).join(' · '))
-afirmarIgual(ventanas[0].desde, 0, 'la primera arranca en cero y las otras después')
-afirmarIgual(crono.escalonado, PATRONES.P2.escalonado, 'el escalonado es el medido, sin factor')
-controlPositivo('un cronograma con escalonado 0 NO escalona: todas arrancan juntas', COLUMNAS.map((_, i) => ventanaDeHijo(i, { ...crono, escalonado: 0 })), S.escalonan)
-console.log(`  ⚠️ P2 mide UN target por instancia y ahí su escalonado queda inerte. Acá son ${COLUMNAS.length} piezas de un mismo conjunto, así que se aplica: la duración pasa de ${PATRONES.P2.duracionDeclarada} a ${(PATRONES.P2.duracionDeclarada + PATRONES.P2.escalonado * (COLUMNAS.length - 1)).toFixed(1)} s. Es la desviación que pide la instrucción.`)
+afirmarComoEntraElCierre({ inicioDeP1: ANCLAS.P1.inicio, finDeP1: ANCLAS.P1.fin, finDeP2: ANCLAS.P2.fin, ventanas: COLUMNAS.map((_, i) => ventanaDeHijo(i, crono)), ventanasSinEscalonado: COLUMNAS.map((_, i) => ventanaDeHijo(i, { ...crono, escalonado: 0 })), escalonadoDeP2: PATRONES.P2.escalonado, duracionDeP2: PATRONES.P2.duracionDeclarada, escalonadoDelCronograma: crono.escalonado, cantidad: crono.cantidad, escalonan: S.escalonan })
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('13 · El mismo subárbol es correcto con las DOS superficies')

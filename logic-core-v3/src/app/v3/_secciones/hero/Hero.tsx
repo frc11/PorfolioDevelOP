@@ -23,11 +23,11 @@ import { CONTENIDO } from './contenido'
  * tres cosas se leen con `seccionDeA('hero')` y ninguna se declara acá: el
  * alto, la superficie y el pinneo son del recorrido, no de la sección.
  *
- * Es la primera de las tres pantallas del sitio que dejan ver el canvas —Hero,
- * Por qué develOP y nada más— y por eso **esta sección no pinta fondo**. No hay
- * un `bg-` en toda la composición, y no es un olvido: el panel es transparente
- * y la sala se ve a través suyo. Un fondo puesto acá para que el texto se lea
- * mejor apagaría la única cosa que esta pantalla tiene y ninguna otra tiene.
+ * Es la primera de las dos pantallas del sitio que dejan ver el canvas —Hero y
+ * Por qué develOP— y por eso **esta sección no pinta fondo**. No hay un `bg-` en
+ * toda la composición, y no es un olvido: el panel es transparente y la sala se ve
+ * a través suyo. Un fondo puesto acá para que el texto se lea mejor apagaría lo
+ * único que esta pantalla tiene y ninguna otra tiene.
  *
  * ── El texto va sobre la escena: qué se midió y qué NO ─────────────────────
  *
@@ -37,10 +37,10 @@ import { CONTENIDO } from './contenido'
  * abajo — y ésa es la razón por la que no la tiene.
  *
  * ⚠ **Esa cifra vale para el MARCADOR DE POSICIÓN, no para la escena real.** El
- * marcador son dos tokens planos; la sala 3D es un gradiente con luces y no
- * hereda el número. El día que la escena exista hay que volver a medir sobre la
- * pose real, y si ahí no diera AA la salida NO es inventar una capa de fondo en
- * esta sección: es la escena, que es de otro sprint. Queda reportado.
+ * marcador son dos tokens planos; la sala 3D es un gradiente con luces y no hereda
+ * el número. El día que la escena exista hay que volver a medir sobre la pose real,
+ * y si ahí no diera AA la salida NO es una capa de fondo acá: es la escena, que es
+ * de otro sprint. Queda reportado.
  *
  * ── Los últimos 72 px de esta pantalla no son míos ─────────────────────────
  *
@@ -51,22 +51,31 @@ import { CONTENIDO } from './contenido'
  * los 72 px de `DESCUENTO_NACIMIENTO_PX`, y el invariante compara los dos
  * números en vez de confiar en que alguien se acuerde.
  *
- * El `pt-20` de arriba NO es la simetría del de abajo: son dos decisiones que
- * hoy dan el mismo valor. El de abajo está atado a la geometría de la pastilla
- * y el invariante lo afirma contra ella; el de arriba es aire.
+ * El `pt-20` de arriba NO es la simetría del de abajo: son dos decisiones que hoy
+ * dan el mismo valor. El de abajo está atado a la geometría de la pastilla y el
+ * invariante lo afirma contra ella; el de arriba es aire.
  *
  * ── La coreografía: un P1, un P2, y una cosa que no se mueve ───────────────
  *
- * P1 para el titular, con `TextoPorLineas`, que ya trae la rama quieta y el
- * árbol de encabezados. P2 para el bloque de bajada y CTA, que entra después
- * porque resuelve su ancla contra su propia caja — no hay un `stagger`
- * coordinándolos, y no hace falta.
+ * P1 para el titular, con `TextoPorLineas`, que ya trae la rama quieta y el árbol
+ * de encabezados. P2 para el bloque de bajada y CTA, cada uno resolviendo su ancla
+ * contra su propia caja — no hay un `stagger` coordinándolos, y no hace falta.
+ *
+ * ⚠️ **B2 · LOS DOS LLEGAN A DESTINO ANTES DE `scrollY` 0, Y ESO NO ES UN
+ * DEFECTO ARREGLABLE ACÁ: ES LA ARITMÉTICA DE UNA PANTALLA.** El rango de P2
+ * cierra en `fondo del bloque − alto de ventana` y el de P1 en eso más 240 px;
+ * en una sección de UNA pantalla el fondo de cualquier bloque es ≤ la ventana,
+ * así que los dos cierran en negativo. Medido a 1920×1080: el titular en −295 y
+ * la bajada en −360, y el censo de acontecimientos no ve UN SOLO elemento del
+ * hero cambiando en todo el documento. B2 pedía dos aterrizajes acá y se frenó:
+ * la aritmética, las tres salidas y su costo están en `hero.invariant.tsx` §13.
  *
  * **El slogan queda quieto**, y es una decisión de composición: es la línea de
- * marca, la constante, y lo único que sostiene la pantalla mientras el
- * preloader todavía está saliendo. Animar las tres cosas dejaría el primer
- * cuadro completamente vacío, que es exactamente el defecto que una coreografía
- * de entrada existe para evitar.
+ * marca, la constante, y lo único que sostiene la pantalla mientras el preloader
+ * todavía está saliendo. Animar las tres cosas dejaría el primer cuadro
+ * completamente vacío, que es exactamente el defecto que una coreografía de
+ * entrada existe para evitar — y es también lo que costaría el único aterrizaje
+ * que el hero podría tener (§13, salida (a)): el h1 servido a media entrada.
  *
  * ⚠ **El logo que el preloader deja acá NO lo monta esta sección.** El traspaso
  * es chrome —vive entre el preloader y el layout— y componerlo es del sprint
@@ -82,23 +91,19 @@ import { CONTENIDO } from './contenido'
  * que corresponde.
  */
 
-/**
- * LA GEOMETRÍA — todos los números de la sección, juntos y fuera del contenido.
- *
- * Están acá y no en `contenido.ts` porque son técnicos: los decide quien
- * construye la sección y no cambian el día que llegue el copy definitivo.
- * Mezclarlos con el contenido obligaría a exceptuarlos del escáner de cifras, y
- * una excepción es por donde vuelve a entrar la primera cifra inventada.
- */
+/** LA GEOMETRÍA — todos los números de la sección, juntos y fuera del contenido.
+ *  Están acá y no en `contenido.ts` porque son técnicos: los decide quien construye
+ *  la sección y no cambian el día que llegue el copy definitivo. Mezclarlos con el
+ *  contenido obligaría a exceptuarlos del escáner de cifras, y una excepción es por
+ *  donde vuelve a entrar la primera cifra inventada. */
 export const GEOMETRIA = {
   /**
    * LA MEDIDA DEL TITULAR: 3 columnas de 5. [derivado]
    *
-   * No es estética: es la condición de que P1 tenga algo que coreografiar. A
-   * 1920 la columna fluida de la grilla lateral mide ~1700 px y el titular a
-   * `titulo-xl` (56 px) ocupa ~1180, o sea que **a ancho completo entraría en
-   * una sola línea** y el patrón de línea por línea se quedaría sin gesto. Tres
-   * de cinco dan ~1000 px, que lo parten en dos.
+   * No es estética: es la condición de que P1 tenga algo que coreografiar. A 1920 la
+   * columna fluida de la grilla lateral mide ~1700 px y el titular a `titulo-xl`
+   * (56 px) ocupa ~1180, o sea que **a ancho completo entraría en una sola línea** y
+   * el patrón de línea por línea se quedaría sin gesto. Tres de cinco dan ~1000 px.
    *
    * La grilla de 5 es además la única del sistema que colapsa en 1025 —la firma
    * estructural del breakpoint, 40 apariciones arriba y cero abajo—, o sea el
@@ -107,14 +112,11 @@ export const GEOMETRIA = {
    */
   columnasDeLaMedida: 3,
   columnasTotales: 5,
-  /**
-   * La clase, escrita ENTERA y literal. Tailwind escanea el código fuente: una
-   * armada como `escritorio:col-span-` más el número no la ve nadie y su regla
-   * no se emite nunca —el atributo queda en el HTML, el navegador no encuentra
-   * nada, y la página se ve casi bien sin un solo error—. El invariante afirma
-   * que este literal y el número de arriba dicen lo mismo, que es lo que impide
-   * que se desincronicen.
-   */
+  /** La clase, escrita ENTERA y literal. Tailwind escanea el código fuente: una
+   *  armada como `escritorio:col-span-` más el número no la ve nadie y su regla no se
+   *  emite nunca —el atributo queda en el HTML, el navegador no encuentra nada, y la
+   *  página se ve casi bien sin un solo error—. El invariante afirma que este literal
+   *  y el número de arriba dicen lo mismo, que es lo que impide que se desincronicen. */
   claseDeLaMedida: 'escritorio:col-span-3',
   /**
    * ── B1 · LA CAJA DEL TITULAR: 2 de 3 de la medida. [medido] ─────────────

@@ -17,7 +17,7 @@
  * copia de la tabla, que es como se desincronizan.
  */
 
-import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../choreography'
+import { CHOREO_KEYFRAMES, CHOREO_SCREENS, CHOREO_TRAMOS } from '../choreography'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
 import { ANCLAJE, TRAMOS_ANCLADOS, pantallaDeScroll, type Nudo } from '../anclaje'
 // prettier-ignore
@@ -49,32 +49,30 @@ afirmarIgual(
 )
 afirmarIgual(
   ANCLAJE.nudos.map((n) => Number(n.pantalla.toFixed(6))),
-  [0, 1, 3, 4, 7, 11.305085, 13],
+  [0, 1, 4, 8, 11, 15.305085, 17],
   '  y sus pantallas son los bordes de las secciones SALVO el quinto: el diferencial declara su ancla y `demos` cierra adentro de tu-panel',
 )
 afirmarIgual(RITMO_POR_SEGMENTO.length, CHOREO_TRAMOS.length, 'hay un ritmo por tramo: SEIS, no una cifra de estiramiento')
 afirmarIgual(RITMO_COMPUESTO, 0.125, 'el ritmo compuesto es 1 / CHOREO_SCREENS, leído de la coreografía')
 
 const ritmo = veredictoDelRitmo()
-afirmar(
-  ritmo.alCompuesto.length === 3,
-  'TRES de los seis segmentos corren al ritmo compuesto EXACTO (0,125 por pantalla)',
-  `${ritmo.alCompuesto.join(' · ')} — los otros: ${ritmo.fueraDelCompuesto.join(' · ')}`,
-)
+// ⚠ B2 · de TRES al ritmo compuesto a UNO, y es el arreglo: correr al ritmo
+// compuesto es correr RÁPIDO. Ver `techoDeVelocidad.ts` y `B2-DELTAS.md` §2.
+afirmar(ritmo.alCompuesto.length === 1 && ritmo.alCompuesto[0] === 'hero',
+  'UN solo segmento corre al ritmo compuesto EXACTO (0,125 por pantalla) — el hero, trabado por la pastilla',
+  `${ritmo.alCompuesto.join(' · ')} — los otros: ${ritmo.fueraDelCompuesto.join(' · ')}`)
 afirmar(
   RITMO_POR_SEGMENTO.every((r) => r.porPantalla > 0),
   '  y ninguno es cero ni negativo: no hay segmento que no avance',
 )
+// ⚠ B2 · se DERIVA y ya no se escribe. Decía `8 / 13`: un literal que iba a
+// fallar el día que la tabla creciera, y no por una propiedad rota.
 afirmar(
-  Math.abs(RITMO_DEL_PROVISIONAL / RITMO_COMPUESTO - 8 / 13) < 1e-12,
-  'ESCALA · el provisional corría a ×0,615 del ritmo compuesto en TODO el recorrido',
-  `${RITMO_DEL_PROVISIONAL.toFixed(4)} por pantalla = ×${(RITMO_DEL_PROVISIONAL / RITMO_COMPUESTO).toFixed(3)} — el recíproco del ×1,625 de §7.2`,
+  Math.abs(RITMO_DEL_PROVISIONAL / RITMO_COMPUESTO - CHOREO_SCREENS / PANTALLAS_DE_SCROLL) < 1e-12,
+  `ESCALA · el provisional corría a ×${(CHOREO_SCREENS / PANTALLAS_DE_SCROLL).toFixed(3)} del ritmo compuesto en TODO el recorrido`,
+  `${RITMO_DEL_PROVISIONAL.toFixed(4)} por pantalla = ×${(RITMO_DEL_PROVISIONAL / RITMO_COMPUESTO).toFixed(3)} — ${CHOREO_SCREENS} pantallas compuestas sobre ${PANTALLAS_DE_SCROLL} de scroll`,
 )
-afirmar(
-  ritmo.distintos === 4,
-  '  y el anclaje tiene CUATRO ritmos distintos donde el provisional tenía UNO para las trece',
-  ritmo.multiplos.join(' · '),
-)
+afirmar(ritmo.distintos === 6, `  y el anclaje tiene SEIS ritmos distintos donde el provisional tenía UNO para las ${PANTALLAS_DE_SCROLL}`, ritmo.multiplos.join(' · '))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · LA TABLA NUEVA CONTRA LA VIEJA, sección por sección')

@@ -125,8 +125,8 @@ for (const s of SECCIONES) {
 
 afirmarIgual(
   SECCIONES.map((s) => pantallasDe(s)),
-  [1, 2, 1, 3, 3, 2, 1, 1],
-  'cada sección ocupa lo que la tabla declara, con las tres correcciones de este sprint',
+  [1, 3, 4, 3, 3, 2, 1, 1],
+  'cada sección ocupa lo que la tabla declara, con las DOS subidas que B2 derivó del techo de velocidad',
 )
 
 controlPositivo(

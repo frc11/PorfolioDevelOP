@@ -6,30 +6,24 @@
  * ── Qué comprueba, y por qué cada mitad necesita a la otra ─────────────────
  *
  * La sección se renderiza DE VERDAD, tres veces, en el mismo proceso y sin
- * navegador: en su rama quieta (`modo="nunca"` — lo que ocurre abajo de 1025 y
- * con `prefers-reduced-motion`), con la coreografía forzada, y con la
- * preferencia mandando sobre el modo forzado. Todas las afirmaciones son sobre
- * el MARCADO que sale, no sobre la intención del componente.
- *
- * Las dos ramas están porque cada una sola miente: "abajo de 1025 no se escribe
- * una transformada" pasa en verde si el sistema no anima NUNCA, y "el contenido
- * llega completo" pasa en verde si el marcado está vacío.
- *
- * ⚠ En un render de servidor no corren los efectos, así que **P1 sale en su
- * fase de medición**: texto plano, sin transformada. El control positivo de "se
- * escribe una transformada" lo da el bloque P2, que sí la escribe en el primer
- * cuadro. P1 se comprueba por el atributo del divisor, que sí cambia.
+ * navegador: en su rama quieta (abajo de 1025 y con `prefers-reduced-motion`), con
+ * la coreografía forzada, y con la preferencia mandando sobre el modo. Todas las
+ * afirmaciones son sobre el MARCADO que sale, no sobre la intención del componente.
+ * Las dos ramas están porque cada una sola miente: "abajo de 1025 no se escribe una
+ * transformada" pasa en verde si el sistema no anima NUNCA, y "el contenido llega
+ * completo" pasa en verde si el marcado está vacío. ⚠ En un render de servidor no
+ * corren los efectos, así que **P1 sale en su fase de medición**: texto plano, sin
+ * transformada. El control positivo de "se escribe una transformada" lo da el
+ * bloque P2; P1 se comprueba por el atributo del divisor, que sí cambia.
  *
  * ── Los detectores son los del repo, no copias ────────────────────────────
  *
- * `hexEncontrados`, `arbitrariosSinVar` y `apagadosDeFoco` salen de
- * `s3-escaneo`; el contraste, de `razonDeContraste`; el nombre accesible, de
- * `_lib/cta`. Un detector reescrito acá se estaría probando contra sí mismo.
- *
- * ⚠ El literal del apagado de foco se ARMA (`['outline','none'].join('-')`) en
- * vez de escribirse: `s5-codigo` escanea TODO el lane —invariantes incluidos—
- * buscando esa cadena, así que escribirla haría que este archivo se delatara a
- * sí mismo.
+ * `hexEncontrados`, `arbitrariosSinVar` y `apagadosDeFoco` salen de `s3-escaneo`;
+ * el contraste, de `razonDeContraste`; el nombre accesible, de `_lib/cta`; y las
+ * anclas de §13, de `_lib/motion/anclas`. Un detector reescrito acá se estaría
+ * probando contra sí mismo. ⚠ El literal del apagado de foco se ARMA
+ * (`['outline','none'].join('-')`) en vez de escribirse: `s5-codigo` escanea TODO
+ * el lane buscando esa cadena, y escribirla delataría a este archivo.
  */
 
 import { readFileSync } from 'node:fs'
@@ -39,6 +33,7 @@ import { fileURLToPath } from 'node:url'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, arbitrariosSinVar, hexEncontrados } from '../../_lib/__tests__/s3-escaneo'
 import { rotuloAccesible } from '../../_lib/cta'
+import { ANCLAS, progresoEnRango, rangoDeScroll } from '../../_lib/motion/anclas'
 import { ALTO_PASTILLA_PX, DESCUENTO_NACIMIENTO_PX } from '../../_lib/navegacion'
 import { seccionPorId } from '../../_lib/secciones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, TINTA_HEX } from '../../_lib/superficies'
@@ -51,43 +46,30 @@ import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
 import { GEOMETRIA, Hero, TIPOGRAFIA_DEL_TITULAR } from './Hero'
 
 const seccion = seccionDe('hero')
-
 const seccionMontada = <Hero seccion={seccion} />
 
 /** La rama de abajo de 1025 — y la misma que produce la preferencia de S2. */
 const quieto = marcar(seccionMontada, { anima: false })
 /** El control positivo: la coreografía forzada, sin la preferencia. */
 const conMotion = marcar(seccionMontada, { anima: true })
-/** Y la preferencia mandando sobre el modo forzado: la política de S2 es total. */
-/**
- * ⚠ QUÉ SIGNIFICA `conPreferencia` DESPUÉS DE SITIO-S7.
- *
- * Antes, la sección consultaba la compuerta por su cuenta y la política de
- * movimiento reducido de S2 la apagaba desde adentro: por eso el render forzaba
- * el modo Y la preferencia, para ver quién ganaba.
- *
- * Ahora la compuerta se resuelve UNA vez, arriba de las ocho, y **la preferencia
- * se lee ahí**: con `prefers-reduced-motion` puesto, `CompuertaDelHome` no
- * instala una sola primitiva animada. O sea que lo que una persona con la
- * preferencia recibe **es el árbol quieto**, y eso es lo que este render
- * reproduce. La política de S2 no cambió de fuerza: cambió de lugar, y ahora se
- * aplica antes de que exista un árbol animado que apagar.
- *
- * La tabla de verdad que lo decide es `deberiaAnimar`, que es pura y se afirma
- * abajo — sin montar React, sin navegador y sin depender de esta sección.
- */
+/** ⚠ QUÉ SIGNIFICA `conPreferencia` DESPUÉS DE SITIO-S7. Antes la sección consultaba
+ *  la compuerta por su cuenta y la política de movimiento reducido de S2 la apagaba
+ *  desde adentro. Ahora la compuerta se resuelve UNA vez arriba de las ocho y **la
+ *  preferencia se lee ahí**: con `prefers-reduced-motion`, `CompuertaDelHome` no
+ *  instala una sola primitiva animada, así que esa persona recibe **el árbol
+ *  quieto**. La política de S2 no cambió de fuerza: cambió de lugar. */
 const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'always' })
 
 const veces = (texto: string, aguja: string): number => texto.split(aguja).length - 1
 const TEXTOS = textosDe(CONTENIDO)
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 const FUENTE = readFileSync(path.join(AQUI, 'Hero.tsx'), 'utf8')
-/** El tema, leído: los tokens no se transcriben. Si `--spacing-20` cambia de
- *  valor, la cuenta del aire del pie se mueve con él o falla. */
+/** El tema, leído: los tokens no se transcriben. Si `--spacing-20` cambia de valor,
+ *  la cuenta del aire del pie se mueve con él o falla. */
 const TEMA = readFileSync(path.join(AQUI, '../../../../..', 'src/app/theme-develop.css'), 'utf8')
 
-/** Un escalón de espaciado, en px. La raíz de 16 la declara el propio tema al
- *  lado del token, en el comentario que traduce cada rem a su píxel. */
+/** Un escalón de espaciado, en px. La raíz de 16 la declara el propio tema al lado
+ *  del token, en el comentario que traduce cada rem a su píxel. */
 function pxDeEspaciado(escalon: string): number {
   const m = new RegExp(`--spacing-${escalon}:\\s*([\\d.]+)rem`).exec(TEMA)
   if (m === null) throw new Error(`--spacing-${escalon} no está declarado en el tema`)
@@ -123,13 +105,10 @@ controlPositivo('el detector ve un [METRICA] sin tilde', { a: 'subimos [METRICA]
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · CERO marcadores, y el extractor NO está ciego')
 
-/**
- * El Hero es la única de las cuatro sin un marcador, y el cero es un RESULTADO:
- * no muestra ninguna cifra, foto, captura ni testimonio, así que no hay dónde
- * declarar un dato ausente. Lo provisional que tiene son dos TEXTOS, y los dos
- * están en `PEDIDO`. Sin el control positivo, "cero marcadores" y "el extractor
- * no mira" se leerían idénticos.
- */
+/** El Hero es la única de las cuatro sin un marcador, y el cero es un RESULTADO: no
+ *  muestra ninguna cifra, foto, captura ni testimonio, así que no hay dónde declarar
+ *  un dato ausente. Lo provisional que tiene son dos TEXTOS, los dos en `PEDIDO`. Sin
+ *  el control positivo, "cero marcadores" y "el extractor no mira" se leerían igual. */
 afirmarIgual(marcadoresPedidos(CONTENIDO), [], 'el contenido no deja ningún marcador pedido')
 afirmarIgual(cuentaDeMarcadores(CONTENIDO).size, 0, '  y la cuenta por marcador está vacía')
 controlPositivo('el extractor ve un contenido que SÍ tiene marcadores', { a: 'subimos [CIFRA]', b: '[TESTIMONIO]' }, (c) => marcadoresPedidos(c).length === 0)
@@ -141,18 +120,14 @@ for (const [nombre, literal] of [['titular', CONTENIDO.titular], ['slogan', CONT
   afirmar(quieto.includes(literal), `el ${nombre} aparece literal en la rama quieta`, literal)
   afirmar(conMotion.includes(literal), `  y también con la coreografía puesta`)
 }
-controlPositivo('el chequeo de los literales ve un marcado sin ellos', '<div>una agencia</div>', (h: string) =>
-  [CONTENIDO.titular, CONTENIDO.slogan].every((l) => h.includes(l)),
-)
+controlPositivo('el chequeo de los literales ve un marcado sin ellos', '<div>una agencia</div>', (h: string) => [CONTENIDO.titular, CONTENIDO.slogan].every((l) => h.includes(l)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Abajo de 1025 el contenido está COMPLETO y no se mueve')
 
 const faltantes = TEXTOS.filter((h) => !quieto.includes(h.valor))
 afirmarIgual(faltantes.map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
-controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Ingeniería para negocios reales.</div>', (h: string) =>
-  TEXTOS.every((t) => h.includes(t.valor)),
-)
+controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Ingeniería para negocios reales.</div>', (h: string) => TEXTOS.every((t) => h.includes(t.valor)))
 afirmar(!quieto.includes('transform:'), 'la rama quieta no escribe una sola transformada')
 afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición')
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
@@ -163,10 +138,7 @@ titulo('6 · CONTROL POSITIVO — con la coreografía puesta, SÍ se anima')
 
 afirmar(conMotion.includes('transform:'), 'con coreografía el bloque P2 SÍ escribe transformada')
 afirmarIgual(veces(conMotion, 'will-change-transform'), GEOMETRIA.piezasDelBloqueDeEntrada, 'y es exactamente la pieza declarada del bloque P2: la bajada con su CTA')
-afirmar(
-  quieto.includes('data-texto-por-lineas="entero"') && conMotion.includes('data-texto-por-lineas="partido"'),
-  'el titular P1 sale entero en la rama quieta y partido con coreografía',
-)
+afirmar(quieto.includes('data-texto-por-lineas="entero"') && conMotion.includes('data-texto-por-lineas="partido"'), 'el titular P1 sale entero en la rama quieta y partido con coreografía')
 afirmarIgual(veces(conPreferencia, 'data-texto-por-lineas="entero"'), 1, '  y con la preferencia el titular sale entero: es el árbol quieto, no una versión apagada')
 afirmar(quieto.includes(TIPOGRAFIA_DEL_TITULAR), 'el titular lleva la tipografía de display con la que P1 mide las líneas', TIPOGRAFIA_DEL_TITULAR)
 
@@ -179,9 +151,8 @@ afirmarIgual(veces(quieto, '<h2'), 0, 'y ningún h2: los h2 son de las otras tre
 afirmar(/<h1[^>]*class="sr-only"/.test(conMotion), 'en la rama partida el h1 es el nodo accesible')
 afirmar(conMotion.includes('<div aria-hidden="true">'), '  y el bloque visual queda fuera del árbol de accesibilidad')
 
-/** El nombre accesible de la sección entera: `rotuloAccesible` borra los
- *  subárboles `aria-hidden` y las etiquetas. Si el titular apareciera dos veces
- *  acá, un lector de pantalla lo leería dos veces. */
+/** El nombre accesible de la sección entera: `rotuloAccesible` borra los subárboles
+ *  `aria-hidden` y las etiquetas. Un titular duplicado acá se leería dos veces. */
 const anuncia = (html: string, texto: string): number => veces(rotuloAccesible(html), texto)
 afirmarIgual(anuncia(quieto, CONTENIDO.titular), 1, 'el titular se anuncia una vez en la rama quieta')
 afirmarIgual(anuncia(conMotion, CONTENIDO.titular), 1, '  y una sola vez con el texto partido en líneas')
@@ -204,8 +175,8 @@ controlPositivo('y la cuenta del rótulo ve las dos copias sin ocultar', `<span>
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('9 · El pie de la pantalla es de la pastilla, y el aire alcanza')
 
-/** El escalón del padding inferior. La clase que se busca en el marcado y el
- *  token que se mide salen de acá: son UNA fuente, no dos que se desincronizan. */
+/** El escalón del padding inferior. La clase que se busca en el marcado y el token
+ *  que se mide salen de acá: son UNA fuente, no dos que se desincronizan. */
 const ESCALON_DEL_PIE = '20'
 const AIRE_DEL_PIE_PX = pxDeEspaciado(ESCALON_DEL_PIE)
 
@@ -218,13 +189,10 @@ controlPositivo('y el chequeo de la clase ve un contenedor sin ella', '<div clas
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('10 · El contraste de la tinta sobre el canvas — producido, no citado')
 
-/**
- * ⚠ ESTA CIFRA VALE PARA EL MARCADOR DE POSICIÓN DEL CANVAS, no para la escena.
- * `COLORES_DEL_CANVAS_DE_PRUEBA` son dos tokens planos —`--color-superficie-2`
- * y `--color-superficie-3`—; la sala 3D es un gradiente con luces y NO hereda
- * este número. Cuando la escena exista hay que volver a medir sobre la pose
- * real, y si ahí no diera AA la salida no es una capa de fondo en esta sección.
- */
+/** ⚠ ESTA CIFRA VALE PARA EL MARCADOR DE POSICIÓN DEL CANVAS, no para la escena.
+ *  `COLORES_DEL_CANVAS_DE_PRUEBA` son dos tokens planos; la sala 3D es un gradiente
+ *  con luces y NO hereda este número. Cuando la escena exista hay que volver a medir
+ *  sobre la pose real, y si ahí no diera AA la salida no es una capa de fondo acá. */
 const AA_TEXTO = 4.5
 const razones = COLORES_DEL_CANVAS_DE_PRUEBA.map((c) => ({ token: c.token, razon: razonDeContraste(TINTA_HEX, c.hex) }))
 afirmar(razones.length > 0, `la cuenta mira ${razones.length} colores del canvas de prueba`)
@@ -251,33 +219,23 @@ afirmarIgual(apagadosDeFoco(FUENTE), [], '  ni en la fuente de la sección')
 controlPositivo('el detector de apagados lo ve', `class="${APAGADO}"`, (t: string) => apagadosDeFoco(t).length === 0)
 
 /** La sección no escribe estados de puntero: la coreografía del CTA vive en
- *  `_estilos/cta.css`, que nombra `:hover` y `:focus-visible` juntos y ya tiene
- *  su instrumento en S3. Lo que se afirma acá es la PARIDAD: si esta sección
- *  escribiera una `hover:`, tendría que traer su gemela. */
+ *  `_estilos/cta.css`, con su instrumento en S3. Acá se afirma la PARIDAD. */
 afirmarIgual(veces(FUENTE, 'hover:'), veces(FUENTE, 'focus-visible:'), 'toda `hover:` con su gemela `focus-visible:`')
 afirmarIgual(veces(FUENTE, 'onClick'), 0, 'cero `onClick`: ningún div haciendo de botón')
 afirmarIgual(veces(FUENTE, 'motion/_componentes'), 0, 'la única puerta a las piezas de motion es `_contrato/piezas`')
 controlPositivo('el chequeo de paridad ve un marcado desparejo', '<i class="hover:opacity-casi">', (t: string) => veces(t, 'hover:') === veces(t, 'focus-visible:'))
-/** ⚠ La entrada equivocada es la RUTA pelada y no un `import … from …` escrito
- *  entero, por la misma razón que el apagado de foco se arma: `s5-codigo`
- *  extrae los imports de todo el lane con una expresión regular sobre
- *  `from '…'`, y un import de mentira adentro de un string se lee igual que uno
- *  de verdad. El detector que se prueba acá mira la ruta, así que la ruta sola
- *  alcanza — y así este archivo no se delata a sí mismo. */
+/** ⚠ La entrada equivocada es la RUTA pelada y no un `import … from …` entero, por la
+ *  misma razón que el apagado de foco se arma: `s5-codigo` extrae los imports del lane
+ *  con una regular sobre `from '…'`. */
 controlPositivo('el de la puerta ve una ruta a las piezas del demo', "'../../motion/_componentes/Pieza'", (t: string) => veces(t, 'motion/_componentes') === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('12 · La geometría, el pedido y los patrones declarados')
 
-afirmar(
-  GEOMETRIA.claseDeLaMedida.endsWith(String(GEOMETRIA.columnasDeLaMedida)),
-  'la clase de la medida y el número declarado dicen lo mismo',
-  `${GEOMETRIA.claseDeLaMedida} sobre ${GEOMETRIA.columnasTotales} columnas`,
-)
+afirmar(GEOMETRIA.claseDeLaMedida.endsWith(String(GEOMETRIA.columnasDeLaMedida)), 'la clase de la medida y el número declarado dicen lo mismo', `${GEOMETRIA.claseDeLaMedida} sobre ${GEOMETRIA.columnasTotales} columnas`)
 afirmar(quieto.includes(GEOMETRIA.claseDeLaMedida), '  y esa clase llega al marcado')
 controlPositivo('el chequeo de la medida ve una clase que no coincide con el número', { claseDeLaMedida: 'escritorio:col-span-4', columnasDeLaMedida: 3 }, (g) => g.claseDeLaMedida.endsWith(String(g.columnasDeLaMedida)))
 
-/**
 /** ── B1 · LAS DOS CAJAS DE LA MEDIDA. La aritmética, no el píxel (`GEOMETRIA` y `B1-DELTAS.md` §4). Las grillas se cuentan por `data-columnas`, que emite `Grilla`. */
 afirmar(GEOMETRIA.claseDelTitular.endsWith(String(GEOMETRIA.columnasDelTitular)), 'la clase del titular y el número declarado dicen lo mismo', GEOMETRIA.claseDelTitular)
 afirmar(quieto.includes(GEOMETRIA.claseDelTitular), '  y esa clase llega al marcado')
@@ -285,15 +243,57 @@ afirmar(GEOMETRIA.columnasDelTitular < GEOMETRIA.columnasDeLaCajaDelTitular, 'la
 afirmarIgual(GEOMETRIA.columnasDeLaCajaDeLaBajada, 2, 'la bajada vive en media medida: una sub-grilla de DOS')
 controlPositivo('el chequeo del titular ve una clase que no coincide con el número', { claseDelTitular: 'tablet:col-span-3', columnasDelTitular: 2 }, (g) => g.claseDelTitular.endsWith(String(g.columnasDelTitular)))
 controlPositivo('  y el de la angostura ve una caja que NO acota', { columnasDelTitular: 3, columnasDeLaCajaDelTitular: 3 }, (g) => g.columnasDelTitular < g.columnasDeLaCajaDelTitular)
-afirmarIgual(
-  [GEOMETRIA.columnasTotales, GEOMETRIA.columnasDeLaCajaDelTitular, GEOMETRIA.columnasDeLaCajaDeLaBajada].map((n) => veces(quieto, `data-columnas="${n}"`)),
-  [1, 1, 1],
-  'las TRES grillas del hero salen una vez cada una: la medida, la del titular y la de la bajada',
-)
+afirmarIgual([GEOMETRIA.columnasTotales, GEOMETRIA.columnasDeLaCajaDelTitular, GEOMETRIA.columnasDeLaCajaDeLaBajada].map((n) => veces(quieto, `data-columnas="${n}"`)), [1, 1, 1], 'las TRES grillas del hero salen una vez cada una: la medida, la del titular y la de la bajada')
 afirmar(PEDIDO.length > 0, `el pedido tiene ${PEDIDO.length} entradas: no es una lista vacía`)
 afirmarIgual(entradasColgadas(CONTENIDO, PEDIDO).map((e) => e.ruta), [], 'ninguna apunta a una ruta que no existe')
 controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta: 'no.existe', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'nada', formato: 'texto plano' }], (p) => entradasColgadas(CONTENIDO, p).length === 0)
 afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))], ['prosa'], 'y las dos son `prosa`: el relleno que NO se ve como agujero')
 afirmarIgual(PATRONES_DE_LA_SECCION, ['P1', 'P2'], 'la sección declara consumir P1 y P2, y nada más')
+
+// ═════════════════════════════════════════════════════════════════════════
+titulo('13 · B2 · POR QUÉ EL HERO NO PUEDE APORTAR UN ATERRIZAJE — el freno, con su aritmética')
+
+/**
+ * ⚠ **FRENO DECLARADO.** B2 pedía dos acontecimientos acá —«la bajada y el CTA
+ * entran DESPUÉS del titular»— y **no se hizo**. Ésta es la razón, y no es una
+ * opinión: es el ancla de cada patrón evaluada sobre la caja medida del bloque. Un
+ * acontecimiento es un ATERRIZAJE: el píxel donde un bloque deja de cambiar, o sea
+ * el `fin` de su rango. Con `fondo = topDoc + alto` y ventana `V`, P2 (`bottom
+ * bottom`) cierra en `fondo − V` y P1 (`bottom bottom-=240px`) en `fondo − V + 240`.
+ * **El hero mide UNA pantalla** —`s8-chrome` §2 lo clava y §1 lo afirma— así que el
+ * fondo de cualquier bloque suyo es ≤ V: **un P2 del hero nunca aterriza adentro de
+ * la pantalla**, y un P1 sólo si su fondo pasa de `V − 240` = 840 px, o sea con el
+ * texto en los últimos 240 px del cuadro, que son los de la pastilla (§9). Las cajas
+ * de abajo están MEDIDAS a 1920×1080, pestaña visible, con `offsetTop`/`offsetHeight`
+ * —que la transformada no contamina—, y el censo de `B2-DELTAS.md` §0 (de `y` 0 a
+ * 4800, paso 120) lo confirma del otro lado: **cero elementos del hero cambian de
+ * estilo en todo el recorrido**; el «1 acontecimiento» que la Fase 0 le atribuía es
+ * el grupo de `y` 600, de Quiénes somos.
+ *
+ * Las tres salidas, para que quien lo reabra no las vuelva a recorrer:
+ * (a) `anclaje="seccion"` sube el P1 a `fin` 240 y deja el h1 a 0,8065 de progreso
+ * en el PRIMER CUADRO —servido a media entrada, que es lo que la composición del
+ * hero decidió no hacer—, y el P2 sigue cerrando en 0; (b) un patrón con fracción
+ * de viewport chica en su `fin` sí aterriza adentro (P3 → `fondo − 540`; P4 y P6 →
+ * `fondo`), pero `contenido.ts` declara `PATRONES_DE_LA_SECCION = ['P1','P2']` y
+ * ese archivo está fuera de este frente; (c) darle dos pantallas al hero, que §1 y
+ * `s8-chrome` §2 prohíben.
+ */
+const VENTANA_MEDIDA = 1080
+const CAJAS_DEL_HERO = [
+  { nombre: 'titular (P1)', par: ANCLAS.P1, topDoc: 403, alto: 142 },
+  { nombre: 'bajada + CTA (P2)', par: ANCLAS.P2, topDoc: 577, alto: 143 },
+] as const
+for (const c of CAJAS_DEL_HERO) {
+  const fin = rangoDeScroll(c.par, { topDoc: c.topDoc, alto: c.alto }, VENTANA_MEDIDA).fin
+  afirmar(fin <= 0, `el ${c.nombre} cierra su rango en y ${fin}: ARRIBA del documento, así que no hay aterrizaje que medir`, `fondo ${c.topDoc + c.alto} px en una ventana de ${VENTANA_MEDIDA}`)
+}
+const SECCION_ENTERA = { topDoc: 0, alto: VENTANA_MEDIDA }
+afirmarIgual(rangoDeScroll(ANCLAS.P2, SECCION_ENTERA, VENTANA_MEDIDA).fin, 0, 'y ni con la SECCIÓN entera como caja un P2 pasa de cero: es el techo aritmético de una pantalla')
+afirmarIgual(rangoDeScroll(ANCLAS.P1, SECCION_ENTERA, VENTANA_MEDIDA).fin, 240, '  el P1 sí llegaría a 240 con esa caja — el único aterrizaje posible, y uno solo')
+const PROGRESO_AL_CARGAR = progresoEnRango(0, rangoDeScroll(ANCLAS.P1, SECCION_ENTERA, VENTANA_MEDIDA))
+afirmar(PROGRESO_AL_CARGAR < 1, `  y lo que cuesta: el titular llegaría al primer cuadro con ${PROGRESO_AL_CARGAR.toFixed(4)} de progreso`, 'servido a media entrada — la salida (a) del docblock')
+controlPositivo('la cuenta ve un bloque que SÍ aterriza adentro: uno de dos pantallas', { topDoc: 0, alto: 2 * VENTANA_MEDIDA }, (c) => rangoDeScroll(ANCLAS.P2, c, VENTANA_MEDIDA).fin <= 0)
+controlPositivo('  y ve un patrón cuyo `fin` no descuenta viewport: P4 aterriza en el fondo del bloque', ANCLAS.P4, (par) => rangoDeScroll(par, CAJAS_DEL_HERO[1], VENTANA_MEDIDA).fin <= 0)
 
 cerrar('hero.invariant')

@@ -74,7 +74,7 @@ afirmar(
 )
 afirmarIgual(
   ANCLAJE_HEREDADO.nudos.map((n) => [n.pantalla, n.progreso]),
-  [[0, 0], [1, 0.125], [3, 0.375], [4, 0.5], [7, 0.625], [12, 0.75], [13, 1]],
+  [[0, 0], [1, 0.125], [4, 0.375], [8, 0.5], [11, 0.625], [16, 0.75], [17, 1]],
   'CONTROL DEL ANTES — sin la declaración, la MISMA función de producción devuelve el anclaje cuantizado',
 )
 controlPositivo(

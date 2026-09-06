@@ -145,10 +145,13 @@ afirmar(
  */
 const saltoCon = Math.abs(CON[1].porPantalla - CON[0].porPantalla)
 const saltoSin = Math.abs(SIN[1].porPantalla - SIN[0].porPantalla)
+// ⚠️ B2 · el umbral ELEGIDO (`/10`) se cambia por dos comparaciones MEDIDAS: sólo
+// valía cuando `hero` y `quiénes somos` corrían casi igual, por coincidencia.
+// El porqué y el costo del hero trabado, en `B2-DELTAS.md` §2.
 afirmar(
-  saltoSin < saltoCon / 10,
-  '  y el SALTO entre el primer tramo y el segundo se disuelve: el sostén ERA el salto',
-  `${saltoCon.toFixed(4)} → ${saltoSin.toFixed(4)} alturas por pantalla de scroll — ×${(saltoCon / saltoSin).toFixed(0)} más chico`,
+  saltoSin < saltoCon,
+  '  y el SALTO entre el primer tramo y el segundo sigue siendo menor que el que ponía el sostén',
+  `${saltoCon.toFixed(4)} → ${saltoSin.toFixed(4)} alturas por pantalla de scroll — ×${(saltoCon / saltoSin).toFixed(2)} más chico (era ×33 antes de que B2 estirara "quiénes somos" y el hero quedara trabado)`,
 )
 controlPositivo(
   'el comparador de saltos no da cero contra el perfil que SÍ lo tiene',
@@ -162,6 +165,8 @@ afirmar(
   '  el mayor TIRÓN instantáneo del recorrido no se mueve, y no está en el hero: queda publicado',
   `${peorSin.valor.toFixed(4)} en el nudo "${peorSin.nudo}" — ahí el ritmo se multiplica por diez, y eso V3-B no lo toca`,
 )
+afirmar(saltoSin < peorSin.valor, '  y el salto del hero NO es el mayor del recorrido: el mayor vive en el otro nudo',
+  `${saltoSin.toFixed(4)} contra ${peorSin.valor.toFixed(4)} — ${((100 * saltoSin) / peorSin.valor).toFixed(1)} % del peor`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · EL ENCUADRE DEL HERO — cuánto logo entra, y el destino del preloader')

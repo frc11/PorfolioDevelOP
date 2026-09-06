@@ -46,6 +46,13 @@ import { clasesDeNivel } from './geometria'
  * canales continuos —párrafo, lista y filas— se reinician juntos en cada
  * límite: no es que estén coordinados, es que leen el mismo número.
  *
+ * ⚠️ **Y ese número satura a mitad del tramo (B2 · frente C).** `asentar`, en
+ * `asentamiento.ts`, lo remapea UNA vez arriba: la armada de los tres canales
+ * ocupa la primera mitad del tercio y la segunda mitad el servicio se queda
+ * quieto, entero, para que se lea. Ningún valor de P2, P3 ni P4 cambió — lo que
+ * cambió es sobre cuánto scroll se consumen. Acá abajo no hay nada que hacer:
+ * los canales reciben el progreso y no saben de dónde viene, que es el punto.
+ *
  * ── Los tres canales, y qué patrón les toca ───────────────────────────────
  *
  *   filas    P2 · `yPercent` 60 → 0 · un target por fila, el escalonado inerte

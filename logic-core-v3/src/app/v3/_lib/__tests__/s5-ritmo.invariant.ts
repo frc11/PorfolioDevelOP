@@ -59,8 +59,8 @@ const DEL_LANE = IDS_DE_S5.map((id) => seccionPorId(id))
 
 const ESPERADO: readonly { id: string; pantallas: number; pinneada: string }[] = [
   { id: 'hero', pantallas: 1, pinneada: 'no' },
-  { id: 'quienes-somos', pantallas: 2, pinneada: 'no' },
-  { id: 'numeros', pantallas: 1, pinneada: 'no' },
+  { id: 'quienes-somos', pantallas: 3, pinneada: 'no' },
+  { id: 'numeros', pantallas: 4, pinneada: 'no' },
   { id: 'trabajos', pantallas: 3, pinneada: 'desde-escritorio' },
 ]
 
@@ -96,10 +96,10 @@ const ritmo = ritmoDe(DEL_LANE)
  * Consecuencia: el ritmo de estas cuatro pasa de 5 a 6 momentos. No es que el
  * tramo haya cambiado — es que una de las dos cuentas estaba mal.
  */
-afirmarIgual(ritmo.pantallas, 7, 'pantallas nominales del tramo')
+afirmarIgual(ritmo.pantallas, 11, 'pantallas nominales del tramo')
 afirmarIgual(ritmo.pantallasPinneadas, 2, 'de las cuales pinneadas: las que consume el pin de Trabajos')
 afirmarIgual(ritmo.secuencias, 1, 'una secuencia pinneada — Trabajos')
-afirmarIgual(ritmo.momentos, 6, 'MOMENTOS REALES de las cuatro primeras')
+afirmarIgual(ritmo.momentos, 10, 'MOMENTOS REALES de las cuatro primeras')
 
 const compresion = compresionDe(ritmo)
 const compresionDeLaReferencia = compresionDe({

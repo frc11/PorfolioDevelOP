@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { SERVICIOS } from '../_contrato/acento'
 import { tramoDeSecuencia } from '../_contrato/secuencia'
+import { asentar } from './asentamiento'
 import { CabeceraDeServicios } from './CabeceraDeServicios'
 import { ContenidoDeServicio } from './ContenidoDeServicio'
 import { CLASE_DEL_STICKY, CLASE_DE_LA_PILA, clasesDeCapa, formaDeCapa } from './geometria'
@@ -23,6 +24,22 @@ import { CLASE_DEL_STICKY, CLASE_DE_LA_PILA, clasesDeCapa, formaDeCapa } from '.
  * que toca estado de React; `local` es el que corre, y no dispara ni un render.
  *
  * Esa es toda la diferencia entre una secuencia y un `setState` por cuadro.
+ *
+ * ── EL ASENTAMIENTO: cada servicio ATERRIZA y se queda quieto (B2 · frente C) ──
+ *
+ * `local` ya no es el progreso pelado del tramo: pasa por `asentar`, que lo
+ * satura en la mitad del tramo. La armada de los tres canales ocupa esa primera
+ * mitad y la segunda es **el servicio terminado, quieto y legible**.
+ *
+ * Antes no lo estaba nunca, y está medido: las ventanas de P2, P3 y P4 cierran
+ * todas en `local = 1`, que es el píxel exacto donde la secuencia cambia de
+ * servicio. A 1920×1080, en el primer tramo, la palabra 33 de 33 se terminaba
+ * de encender a 20 px del reemplazo. El censo de acontecimientos leía la
+ * secuencia entera como **UN** aterrizaje de 2.040 px con 131 piezas — porque
+ * nada se detenía nunca.
+ *
+ * De dónde sale la mitad —del paso y del umbral de fusión del censo, no de un
+ * gusto— y por qué esto NO cambia un valor de ningún patrón: `asentamiento.ts`.
  *
  * ── Por qué el tramo activo SÍ es estado de React ─────────────────────────
  *
@@ -130,7 +147,14 @@ export function ServiciosEnSecuencia({
   progreso,
 }: ServiciosEnSecuenciaProps): React.JSX.Element {
   const indice = useTransform(progreso, (p) => tramoDeSecuencia(p, CANTIDAD_DE_TRAMOS).indice)
-  const local = useTransform(progreso, (p) => tramoDeSecuencia(p, CANTIDAD_DE_TRAMOS).local)
+  // ⚠️ **`asentar` se aplica ACÁ y en ningún otro lado, y es la condición de que
+  // la secuencia siga siendo UNA.** Los cinco canales cuelgan de este único
+  // número: remapearlo una vez los mueve a los cinco a la vez. Remapear canal
+  // por canal daría cinco relojes que se ven parecidos y no lo son — que es
+  // exactamente el control positivo que `s6-servicios` §8 ya corre.
+  const local = useTransform(progreso, (p) =>
+    asentar(tramoDeSecuencia(p, CANTIDAD_DE_TRAMOS).local),
+  )
   const [activo, setActivo] = useState(0)
 
   useMotionValueEvent(indice, 'change', setActivo)
