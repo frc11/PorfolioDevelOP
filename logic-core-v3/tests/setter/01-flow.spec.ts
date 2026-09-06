@@ -212,6 +212,38 @@ test.describe('Recorrido completo del lead (FICHA → APROBADA → envío)', () 
     expect(count2, 'sigue habiendo 1 contacto').toBe(1)
   })
 
+  /*
+   * ⚠ FLAKE CONOCIDO — P26. NO está apagado ni aflojado: corre como todos y su
+   * aserto es el mismo. Esto es la marca, para que el próximo rojo acá no cueste
+   * un sprint de atribución.
+   *
+   * Qué falla: `expectToast(page, /Brief guardado/i)` de la línea de abajo, con
+   * «element(s) not found» tras 15 s. En el call log de Playwright se ve por qué:
+   *
+   *     - waiting for ".../manual/m6" navigation to finish...
+   *     - navigated to ".../manual/m6"
+   *
+   * El toast es efímero y `useStepAction` hace `router.refresh()` después de
+   * mostrarlo; el refresh re-deriva el wizard y lo manda a m6. El aserto no mide
+   * mal: su SUJETO se lo lleva puesto una navegación concurrente.
+   *
+   * Cuándo aparece (medido en P26, mismo build y mismo código):
+   *   · 8 corridas con UN server ya caliente (SETTER_EXTERNAL_SERVER=1):
+   *     1.528 ejecuciones, 0 rojas. Nunca.
+   *   · 2 corridas en modo webServer (build + `next start` nuevos por corrida):
+   *     1 roja de 2. Y las frías corren 30-45% más lento (392-446 s contra
+   *     290-310 s) — cada ruta paga su primer render, y ahí se abre la ventana.
+   *
+   * Para reproducirlo: `npm run test:setter` a secas (modo webServer). Para NO
+   * verlo: server aparte + SETTER_EXTERNAL_SERVER=1.
+   *
+   * Por qué no se arregló acá: envolver el aserto o cambiarlo por la navegación
+   * lo AFLOJA (de «hay exactamente esto» a «hay algo»), y hacerlo sin decidir
+   * antes si el setter TAMBIÉN pierde ese acuse sería taparlo. Esa decisión es de
+   * producto —el toast que una navegación se come es la familia de defecto que
+   * P25 arregló para los tildes— y el encargo de P26 prohíbe tocar producto.
+   * Queda para su sprint. Detalle y evidencia en docs/bitacora-beta-3.md (P26).
+   */
   test('B4 · respuesta del negocio abre el BRIEF (gate) + transición EVALUADA→BRIEF', async ({ page }) => {
     // Lead EVALUADO que YA respondió (status RESPONDIO abre gateBriefAbierto).
     const { id: leadId } = await createLead(tracker, { setterId, businessName: 'B4 Brief', stage: 'EVALUADA', status: 'RESPONDIO' })

@@ -11145,3 +11145,312 @@ en verde.
 **191/191** (187 de base + los 4 de la ráfaga) · `test:leados` **33/33** · `test:helpers` **28/28** ·
 `build` **verde** · `migrate status` **sin drift**. Sin cambios de schema, de transiciones ni de
 llaves de datos, y el chequeo final sin tocar.
+
+
+## P26 · Las tres fuentes de ruido — el flake, el segundo build y los invariantes que firman de más — 2026-09-06
+
+Un sprint sin producto: lo único que cambia es cuánto vale un rojo. Tres frentes, y **los tres
+terminaron en un lugar distinto del que el encargo suponía**.
+
+### 1 · El flake — ocho corridas limpias, y el eje que faltaba
+
+El encargo lo daba por medido: «~1 test en rojo por corrida, distinto cada vez, y verde aislado».
+La base de ese número eran **dos** observaciones de P25.
+
+**Ocho corridas completas, y ninguna falló.**
+
+| corrida | esperados | inesperados | flaky | duración |
+|---|---|---|---|---|
+| 1 | 191 | 0 | 0 | 298 s |
+| 2 | 191 | 0 | 0 | 299 s |
+| 3 | 191 | 0 | 0 | 303 s |
+| 4 | 191 | 0 | 0 | 290 s |
+| 5 | 191 | 0 | 0 | 296 s |
+| 6 | 191 | 0 | 0 | 302 s |
+| 7 | 191 | 0 | 0 | 305 s |
+| 8 | 191 | 0 | 0 | 310 s |
+
+**1.528 ejecuciones, 0 rojas, 0 flaky.** Los números salen del `.last-run.json` de cada corrida,
+no del resumen de consola — el resumen de este proyecto ya informó salida cero sobre un archivo
+que decía uno.
+
+#### Lo que las ocho descartan, y el eje que dejaron fijo
+
+Las ocho corrieron contra **un build y un servidor ya calientes** (`SETTER_EXTERNAL_SERVER=1`),
+en serie, `workers: 1` (lo fija el config, igual que en P25). Eso es deliberado: aísla el flake a
+nivel test, y con ocho repeticiones descarta las tres causas que dependen de la corrida —estado
+compartido entre tests, datos que otro test mutó, y paralelización—.
+
+Y deja **un eje sin tocar**: P25 corrió en modo `webServer`, o sea `npm run start:setter` —build de
+producción nuevo y `next start` nuevo por corrida—. Cerrar el sprint con «ocho verdes, no existe»
+habría sido publicar un falso verde en el sprint que vino a sacarlos.
+
+#### Se replicó la condición de P25, y el flake apareció
+
+| corrida webServer | resultado | duración |
+|---|---|---|
+| 1 | **190 pasados · 1 FALLADO** | 446 s |
+| 2 | 191 pasados | 392 s |
+
+`190 pasados y 1 fallado` es **exactamente** la firma que P25 vio dos veces. Y el test es un
+**tercero**, distinto de los dos de aquel sprint: `01-flow.spec.ts:215`, «B4 · respuesta del
+negocio abre el BRIEF» — el noveno de la corrida.
+
+**El discriminador está en el reloj.** Mismo build, mismo código, misma paralelización: lo único
+que cambia es el servidor. Las frías corren **392 y 446 s** contra **290-310 s** de las tibias —
+entre 30 y 45 % más lento. Un `next start` recién levantado paga el primer render de cada ruta, y
+cada spec es el primero en tocar alguna. Por eso el flake no tiene posición fija en la corrida:
+P25 lo vio en el 16 y en el 26, acá salió en el 9.
+
+#### La causa, del propio call log de Playwright
+
+```
+Locator: locator('[data-sonner-toast]').filter({ hasText: /Brief guardado/i })…
+Expected: visible — Error: element(s) not found
+Call log:
+  - waiting for ".../manual/m6" navigation to finish...
+  - navigated to ".../manual/m6"
+```
+
+El aserto espera un toast. Entre que lo pide y los 15 s de timeout, la página **navega**. El
+mecanismo está en el producto y es intencional: `useStepAction` muestra el toast de éxito y
+después hace `router.refresh()`; el refresh re-deriva el wizard desde el estado persistido —el
+brief guardado movió el stage EVALUADA→BRIEF— y el setter aterriza en `m6`.
+
+O sea: **el aserto no mide mal, su SUJETO se lo lleva puesto una navegación concurrente.** Con el
+servidor caliente el toast se alcanza a ver; con el servidor frío la ventana se corre y no.
+
+Y ahí está la pregunta que decide de quién es el defecto, que este sprint **no** contesta: si el
+toast se pierde para el test, **¿se pierde también para el setter?** Un acuse que una navegación se
+come es exactamente la familia de defecto que P25 arregló para los tildes. Contestarla pide tocar
+producto, y el encargo lo prohíbe explícitamente («si arreglar el flake exigiera tocar producto,
+FRENÁ y reportá — eso significaría que el flake es un bug real y es otro sprint»). Se frena acá.
+
+#### Marcado como conocido, no apagado
+
+**Ningún test se borró, se salteó ni se aflojó.** Lo que se agregó es una **marca**: un comentario
+sobre `B4` en `01-flow.spec.ts` con el síntoma, el call log, los números de las diez corridas, la
+receta para reproducirlo (`npm run test:setter` a secas) y la receta para no verlo (server aparte
+con `SETTER_EXTERNAL_SERVER=1`). El aserto quedó idéntico.
+
+No se envolvió el aserto en `firstVisible` ni se cambió por la navegación, y es una decisión: las
+dos cosas lo **aflojan** —de «hay exactamente esto» a «hay algo»— y hacerlo antes de saber si el
+setter también pierde el acuse sería taparlo, que es el error que este sprint vino a corregir.
+
+#### Los dos flakes de P25 no reprodujeron
+
+Ni `26-cola-de-trabajo` P21-4 ni `16-municiones-salida` m5 fallaron en **ninguna** de las diez
+corridas. Queda anotado lo que sí se les encontró leyéndolos, porque explica cómo fallan cuando
+fallan. `tests/helpers/setter-ui.ts` abre diciendo por qué existe: *«El wizard se DUPLICA para
+responsive (una copia vive bajo `display:none`), así que casi todo texto/rol matchea DOS veces»*.
+Con dos copias, un locator crudo es violación de strict mode. Los dos tests tienen asertos **sin**
+ese filtro pegados a otros que sí lo tienen:
+
+| archivo:línea | aserto | ¿filtrado? |
+|---|---|---|
+| `16-municiones-salida.spec.ts:215` | `expect(page.getByText(PILDORA)).toBeHidden()` | **no** |
+| `16-municiones-salida.spec.ts:223` | `expect(firstVisible(page.getByText(PILDORA))).toBeVisible()` | sí |
+| `26-cola-de-trabajo.spec.ts:295` | `expect(espera).toBeVisible()` | **no** |
+| `26-cola-de-trabajo.spec.ts:296` | `expect(firstVisible(espera.getByText(/…/i))).toBeVisible()` | sí |
+
+Las dos secciones se renderizan en **un solo lugar** del código (`home-en-espera.tsx:52` y
+`cola-del-dia.tsx:96`), así que un segundo match sólo puede venir de una duplicación transitoria
+del DOM — que es justo lo que P25 reportó. No se tocaron: sin haber reproducido el rojo, envolver
+el aserto es aflojar a ciegas.
+
+#### El saldo
+
+El rojo de esta suite vuelve a significar algo, y ahora se sabe **cuándo desconfiar**: si el rojo
+salió de `npm run test:setter` a secas y es uno solo, mirá primero la marca de B4 y el reloj de la
+corrida. Si salió contra un server caliente, es tuyo.
+
+### 2 · El segundo build — no reprodujo, y eso es el hallazgo
+
+El encargo lo daba por diagnosticado: «una clase con una URL entre corchetes deja sus comillas
+escapadas en la salida del prerender, y el build siguiente se come la salida del primero. El
+primero en un directorio limpio pasa; el segundo falla.»
+
+**No falla.** Cuatro builds para intentarlo, en los dos árboles donde el defecto está documentado:
+
+| dónde | build | resultado |
+|---|---|---|
+| checkout principal, `.next-setter` borrado | 1º | `exit 0` — `Compiled successfully in 108s` |
+| checkout principal, **sin borrar nada** | 2º | `exit 0` — `Compiled successfully in 34.1s` |
+| worktree limpio (`C:/tmp/wt-p26-build`), `.next` borrado | 1º | `exit 0` |
+| worktree, **sin borrar nada** | 2º | `exit 0` |
+
+El worktree importa porque la nota heredada decía que ahí es donde rompe: en un worktree `.git`
+es un **archivo**, no un directorio, y el acotado por `.gitignore` de la auto-detección de
+Tailwind no aplicaba — así que `.next/` entraba al escaneo aunque estuviera gitignoreado. Con
+Tailwind **4.3.1** ese agujero está cerrado: medido, no supuesto.
+
+#### Cómo se midió, porque «no reprodujo» no es un diagnóstico
+
+Se plantaron **sondas**: archivos con una clase arbitraria única (`mt-[1337px]`, `mt-[1338px]`…)
+en cada lugar que el escáner podría alcanzar, y después se buscó cada una en el CSS que el build
+realmente emitió. Una sonda que aparece en el CSS prueba que ese directorio se escanea; una que
+no aparece, que no. Es el discriminador que faltaba.
+
+| dónde estaba la sonda | ¿el build la levantó? |
+|---|---|
+| `.next/` (gitignoreado) | **no** |
+| `.next-setter/` (gitignoreado) | **no** |
+| `.next-p26arm/` (un distDir **sin** gitignorear) | **SÍ** |
+| `docs/**/*.md` | **SÍ** |
+| `src/`, `src/app/`, raíz del paquete | sí (esperado) |
+
+Y en el `.next/` de la sonda se plantó además la forma exacta que rompe —
+`bg-[ url(&#x27;https://example.com/probe-next.svg&#x27;) ]`, la clase ya escapada a entidades — para
+que no quedara duda de que el que no la ve es el escáner y no la regex: tampoco la levantó.
+
+Así que el lazo no está roto, está **fuera de alcance por ahora**. Las dos puertas que siguen
+abiertas son las que no dependen de la versión de Tailwind: un distDir que nadie gitignoreó (el
+`.next-<sprint>` que invente el próximo A/B) y `docs/**`.
+
+#### El defecto que sí estaba vivo, y que nadie estaba midiendo
+
+`docs/**` se escanea. Eso no es una amenaza teórica: es CSS que se estaba **enviando a
+producción**. El barrido de la prosa de la bitácora extraía tokens con forma de clase y Tailwind
+los emitía. Medido comparando el CSS de un build contra el otro:
+
+- **78 clases** que salían del CSS al acotar el escaneo;
+- **8.408 bytes** de CSS menos (515.896 → 507.488);
+- de las 78, **ninguna** existe como token de clase dentro de `src/`.
+
+Las que salieron dicen solas de dónde venían: `bg-white/[0.0x]`, `max-h-[Nrem]`, `rounded-[Npx]`,
+`z-[100..130]`, `text-[10px|11px]`, `[seed:matsu-chat]`, `text-zinc-500/600`, y una
+—un `hover:shadow-` con el carácter de reemplazo U+FFFD adentro del corchete— construida a partir
+de **mojibake** de un doc. Son placeholders y prosa de bitácora convertidos en reglas CSS.
+
+La verificación de que no se perdió nada real fue el paso más caro y el que importaba: siete de
+las 78 parecían clases de verdad (`w-[320px]`, `scale-[1.02]`, `ring-white/15`, `bottom-20`,
+`h-[calc(100vh-12.5rem)]`, `p-14`, `drop-shadow`) porque `grep` las encontraba en `src/`. Ninguna
+lo era: en `src/` están **con prefijo** (`min-w-[320px]`, `hover:scale-[1.02]`,
+`hover:ring-white/15`, `-bottom-20`, `xl:h-[calc(...)]`, `gap-14`), y `drop-shadow` aparece 25
+veces como la **función CSS** `drop-shadow(…)` dentro de `style={{ filter }}`, nunca como clase.
+La forma sin prefijo la aportaba la prosa. Comprobado con un chequeo por **token completo**, no
+por substring — que es lo que hacía parecer usadas a las siete.
+
+#### El arreglo
+
+Una línea en `src/app/globals.css`, más el comentario que explica por qué está:
+
+```
+@import "tailwindcss" source("../");
+```
+
+Acota la auto-detección a `src/`, que es la única fuente real —no hay un solo `className=` fuera
+de ahí—. Cierra las dos puertas de una, y cierra también las que todavía no existen: un distDir
+nuevo ya no depende de que alguien se acuerde de gitignorearlo.
+
+Se eligió el **allowlist** (`source(...)`) y no el denylist (`@source not "…/.next*"` +
+`@source not "…/docs"`) justamente por eso: la lista de lo que hay que excluir crece sola y se
+atrasa en silencio; la de lo que hay que incluir es una y no se mueve.
+
+**Verificación:** tres builds seguidos **sin borrar nada en el medio**, los tres `exit 0`, con
+tres `BUILD_ID` distintos (`lBMgUCf4S4klckqGyXyIf`, `ArzVLvdLON-uwJiDvkBO9`,
+`9ffGM0bYcAASMO9nKx8Ck`) — el ID distinto es lo que prueba que cada uno rebuildeó de verdad y no
+se estaba midiendo el anterior. Con las sondas puestas y el arreglo aplicado, las cuatro de
+afuera de `src/` quedaron **cerradas** y el control de adentro sigue entrando.
+
+#### Las otras clases con la misma forma
+
+Censo sobre las 231 salidas del prerender:
+
+| clase | dónde nace | en el prerender sale | ¿rompe? |
+|---|---|---|---|
+| `bg-[ url('https://grainy-gradients.vercel.app/noise.svg') ]` | `src/app/web-development/page.tsx:87` | `bg-[ url(&#x27;…&#x27;) ]` | **sí** — `css-loader` resuelve el `url()` y muere buscando el módulo `./&` |
+| `[&::-webkit-scrollbar]:hidden` y familia (20 usos, 15 archivos) | varios | `[&amp;::-webkit-scrollbar]:hidden` | no — sin `url()` no hay módulo que resolver; sólo emitiría un selector basura |
+
+Es **la única** clase del repo con la forma que rompe: `-[url(…)]` aparece una sola vez en todo
+`src/`. No se tocó — con el escaneo acotado ya no llega a ningún lado.
+
+Aparte, hay dos `style="background-image:url(&#x27;…&#x27;)"` en `process-automation.html` y
+`software-development.html`: atributos, no clases. No son candidatos para el extractor.
+
+
+> Los espacios adentro de los corchetes en las clases citadas arriba son **a propósito**: sin ellos el token tiene forma de clase real y el extractor de Tailwind lo levanta de este mismo archivo. Ya pasó dos veces en este repo — la documentación del bug reintrodujo el bug. El `source(...)` de este sprint lo vuelve inofensivo, pero la nota vale igual: no depende de que nadie lo saque.
+
+### 3 · El censo de los 55 — el hallazgo de P25 es real y es la minoría
+
+Solo lectura: no se arregló ninguno. La tabla completa está en
+[`docs/censo-invariantes-p26.md`](censo-invariantes-p26.md).
+
+**33 de 55 son sobre-satisfacibles** — su aserción puede firmarla algo que no es lo que dicen
+proteger. Pero la forma que P25 encontró (afirmar contra el archivo entero) explica **5**. Las
+otras cuatro formas son más comunes:
+
+| forma | cuántos |
+|---|---|
+| helper suelto: se prueba que la función devuelve el filtro, nada prueba que la query lo llame | **9** |
+| fixture derivada de la constante vigilada: mover la lista mueve el caso con ella | **7** |
+| aguja demasiado ancha: un `includes` de una palabra, un vocabulario cerrado de cinco verbos | **5** |
+| espejo a mano de un sujeto que nunca se lee | **5** |
+| afirma por archivo (el caso de P25) | **5** |
+| tautología o round-trip de la propia fixture: la aserción no puede fallar | **3** |
+
+La más común no es la que P25 encontró: es **el helper suelto**. Nueve invariantes prueban que
+una función devuelve el filtro de aislamiento correcto y ninguno prueba que la query lo llame. Un
+`where` reescrito a mano en el call-site —sin el filtro— los deja a los nueve en verde. Y son
+justo los del aislamiento entre setters y entre orgs.
+
+Tres se verificaron a mano contra el código, uno por forma, para que el número no sea un resumen
+de otro:
+
+- **`report-eligible-plan`** promete coincidir «EXACTAMENTE con el gate real de `build.ts`» y
+  compara contra tres literales escritos a mano. No importa ni lee `build.ts`. Si el gate cambia,
+  esto sigue verde.
+- **`setter-meta`** promete que «toda lectura del meta se filtra por `setterId`». Sus cinco
+  aserciones son sobre el helper puro, en aislado; ninguna toca una query. Un `findMany` por
+  `leadId` no lo despierta.
+- **`upsell-dedup`** deriva sus fixtures de la propia ventana (`WINDOW - 1` / `WINDOW`). La ventana
+  puede achicarse de días a ~6 segundos y todo sigue verde: el único piso real son los 1.500 ms
+  del rage-click, escritos a mano.
+
+**Y el propio `acuse-recibo`, el que P25 arregló, sigue teniendo la forma — en otro lado.** El
+envoltorio (qué call-site) sí quedó por símbolo, pero dos de sus cuatro aserciones se evalúan
+contra el archivo entero: la señal 1 de todo call-site que **no** autoguarda (línea 228) la firma
+cualquier `useStepAction()` del archivo, y la señal 2 de un autoguardado (línea 220) la firma un
+solo `<AutosaveStatus>` aunque el archivo tenga dos forms y uno lo haya perdido. P25 cerró el caso
+que tenía delante; la forma quedó viva en las dos ramas que no miró.
+
+El modelo a copiar existe y está en el repo: **`dossier-stage.invariant.ts`** también lee la
+fuente, pero acota al bloque del `case` antes de afirmar, y su propio comentario explica por qué
+—«`dossier.ts` está lleno de `throw new DossierTransitionError`, así que buscar en el archivo
+entero daría verde sobre un `case` vaciado»—.
+
+Lo que el censo **no** mide, y queda dicho: cuáles de los 33 importan, y ningún sabotaje. La
+columna «de más» es lectura de código, no medición. Convertir cada «sí» en un hecho pide un
+sabotaje por invariante — que es exactamente el trabajo que P25 hizo para uno solo.
+
+### Las dos mediciones fijas
+
+**Sin empeorar, y de la forma más fuerte: idénticas byte por byte.** El pliegue de las catorce
+pantallas (28 filas) y el censo de destinos de la franja (28 filas) salieron con el mismo md5
+antes y después (`a5ae93fd…` y `b20be541…`). Y las dos reprodujeron **exactamente** los números
+que dejó P25 sobre este mismo commit, lo que además dice que el instrumento es determinista.
+
+Que no se movieran es lo que cierra el riesgo de los 8.408 bytes de CSS: si alguna de las 78
+clases hubiera sido real, el pliegue lo habría visto.
+
+### Anotado, no hecho
+
+- **La versión de Tailwind flota.** `package.json` declara `"tailwindcss": "^4"`. El agujero del
+  worktree se cerró en algún punto entre la nota heredada y la 4.3.1 instalada; con un rango
+  abierto puede volver a abrirse sin que nadie lo decida. El `source(...)` lo hace no importar,
+  pero el rango sigue ahí.
+- **`docs/` sigue fuera del escaneo por acotamiento, no por regla.** Si alguien saca el
+  `source(...)`, la prosa vuelve a emitir CSS. Está dicho en el comentario del archivo.
+- Los 33 invariantes sobre-satisfacibles, con su forma, en el censo. El primero que conviene
+  mirar no es el más viejo: son los nueve del helper suelto, porque los nueve custodian
+  aislamiento.
+
+### Cierre
+
+`tsc` **0** · invariantes **55/55** · `test:setter` **191/191** (ocho veces contra server caliente
++ una de dos contra server frío) · `test:leados` **33/33** · `test:helpers` **28/28** · `build`
+**verde tres veces seguidas sin borrar nada** (más las dos del modo webServer, que son otras dos
+consecutivas) · `migrate status` **sin drift**.
+
+Sin cambios de schema, de transiciones ni de llaves de datos. Una sola línea de producto tocada
+—el `source(...)` de `globals.css`—, y ningún test borrado, salteado ni aflojado.

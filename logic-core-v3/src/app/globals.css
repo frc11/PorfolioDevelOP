@@ -1,4 +1,21 @@
-@import "tailwindcss";
+/* El escaneo de fuentes queda ACOTADO a `src/` a proposito.
+   Sin `source(...)`, la auto-deteccion de Tailwind 4 arranca en la raiz del
+   paquete y toma como codigo todo lo que no este gitignoreado. Medido con
+   sondas contra un build real (P26): entraban `docs/**` y cualquier distDir
+   que no estuviera anclado en `.gitignore`. Las dos puertas terminan en el
+   mismo lugar: un valor arbitrario entre corchetes que Tailwind extrae de
+   prosa o de HTML prerenderizado, emite como regla, y `css-loader` intenta
+   resolver como modulo -- muriendo con `Module not found` ATRIBUIDO a este
+   archivo, que no tiene nada que ver. En el HTML prerenderizado las comillas
+   ya salieron escapadas a entidades, asi que el modulo que busca es `./&`.
+
+   `src/` es la unica fuente real: no hay un solo `className=` fuera de ahi.
+   Acotarlo cierra las dos puertas de una, y cierra tambien las que todavia no
+   existen (el `.next-<sprint>` que invente el proximo A/B).
+
+   Si alguna vez hace falta una clase que viva fuera de `src/`, se agrega con
+   un `@source` explicito -- nunca sacando este `source(...)`. */
+@import "tailwindcss" source("../");
 @plugin "@tailwindcss/typography";
 
 @theme {
