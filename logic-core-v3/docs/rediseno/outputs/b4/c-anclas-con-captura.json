@@ -1,0 +1,2661 @@
+{
+  "capturando": true,
+  "que": "el aterrizaje real de las siete anclas del pie de /v3, con scroll real",
+  "instrumento": "scripts-b4/c-anclas.ts · CDP directo (scripts-b4/cdp.ts), Page/Runtime, sin estrangular",
+  "emulado": true,
+  "nota": "TODO viewport es EMULADO con Emulation.setDeviceMetricsOverride sobre el Chrome de esta máquina: es un viewport de layout, no un dispositivo.",
+  "vara": {
+    "px": 72,
+    "deDonde": "_lib/navegacion.ts · BORDE_INFERIOR_EN_REPOSO_PX = 24 (--spacing-6) + 48 (alto de la pastilla)"
+  },
+  "navegacion": "Element.click() sobre el <a href=\"#id\"> del pie, partiendo desde el fondo del documento",
+  "esperas": "asentamiento del scroll (4 lecturas iguales de 32 ms) + 1200 ms de gracia de escena antes de leer cajas",
+  "filas": [
+    {
+      "perfil": "1440",
+      "ancla": "hero",
+      "scrollAntes": 15399,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16299,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12674.953125,
+            "por-que-develop": 14474.953125,
+            "cierre": 15398.65625
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 351.89999997615814
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#hero",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 0,
+          "bottom": 900,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 900
+        },
+        "pastilla": {
+          "top": 828,
+          "bottom": 876,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Ingeniería para negocios reales.",
+          "caja": {
+            "top": 249.453125,
+            "bottom": 260.453125,
+            "left": 188,
+            "right": 913.59375,
+            "ancho": 725.59375,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 248.453125,
+            "bottom": 260.453125,
+            "left": 220,
+            "right": 409.5,
+            "ancho": 189.5,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 249.453125,
+            "bottom": 259.453125,
+            "left": 220,
+            "right": 409.5,
+            "ancho": 189.5,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 1,
+        "ventana": 900,
+        "scrollY": 0,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "despejeDelGlifo": 568.55,
+      "solapeConLaPastilla": {
+        "x": -8.4765625,
+        "y": -568.546875,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1440-ancla-hero.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "quienes-somos",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 828,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 150.30000001192093
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#quienes-somos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2772,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 2700
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 02",
+          "caja": {
+            "top": 72,
+            "bottom": 972,
+            "left": 32,
+            "right": 172,
+            "ancho": 140,
+            "alto": 900
+          },
+          "tinta": {
+            "top": 71,
+            "bottom": 83,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73,
+            "bottom": 80,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 900,
+        "scrollY": 828,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 1,
+      "solapeConLaPastilla": {
+        "x": -373.1640625,
+        "y": -1,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1440-ancla-quienes-somos.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "numeros",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 3528,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 192.4000000357628
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#numeros",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 3672,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 3600
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 03",
+          "caja": {
+            "top": 72,
+            "bottom": 3672,
+            "left": 32,
+            "right": 172,
+            "ancho": 140,
+            "alto": 3600
+          },
+          "tinta": {
+            "top": 71,
+            "bottom": 83,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73,
+            "bottom": 80,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 900,
+        "scrollY": 3528,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 1,
+      "solapeConLaPastilla": {
+        "x": -373.1640625,
+        "y": -1,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1440-ancla-numeros.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "trabajos",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 7128,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 191.30000001192093
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#trabajos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2772,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 2700
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Trabajos",
+          "caja": {
+            "top": 136,
+            "bottom": 147,
+            "left": 188,
+            "right": 1408,
+            "ancho": 1220,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 135,
+            "bottom": 147,
+            "left": 220,
+            "right": 273.21875,
+            "ancho": 53.21875,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 136,
+            "bottom": 146,
+            "left": 220,
+            "right": 273.21875,
+            "ancho": 53.21875,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 6,
+        "ventana": 900,
+        "scrollY": 7128,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 64,
+      "solapeConLaPastilla": {
+        "x": -144.7578125,
+        "y": -64,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "servicios",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 9828,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 184
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#servicios",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2772,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 2700
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Servicios",
+          "caja": {
+            "top": 125.90625,
+            "bottom": 136.90625,
+            "left": 188,
+            "right": 1408,
+            "ancho": 1220,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 124.90625,
+            "bottom": 136.90625,
+            "left": 188,
+            "right": 243.609375,
+            "ancho": 55.609375,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 125.90625,
+            "bottom": 133.90625,
+            "left": 188,
+            "right": 243.609375,
+            "ancho": 55.609375,
+            "alto": 8
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 17,
+        "ventana": 900,
+        "scrollY": 9828,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 53.91,
+      "solapeConLaPastilla": {
+        "x": -174.3671875,
+        "y": -53.90625,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "tu-panel",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 12528,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 177.10000002384186
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#tu-panel",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 1872,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 1800
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Tu panel",
+          "caja": {
+            "top": 152,
+            "bottom": 163,
+            "left": 188,
+            "right": 1408,
+            "ancho": 1220,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 151,
+            "bottom": 163,
+            "left": 188,
+            "right": 235.90625,
+            "ancho": 47.90625,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 152,
+            "bottom": 162,
+            "left": 188,
+            "right": 235.90625,
+            "ancho": 47.90625,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 11,
+        "ventana": 900,
+        "scrollY": 12528,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 80,
+      "solapeConLaPastilla": {
+        "x": -182.0703125,
+        "y": -80,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "por-que-develop",
+      "scrollAntes": 15324,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16224,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15323.703125
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 14328,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 157
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#por-que-develop",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 995.703125,
+          "left": 0,
+          "right": 1440,
+          "ancho": 1440,
+          "alto": 923.703125
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 417.9765625,
+          "right": 1022.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Por qué develOP",
+          "caja": {
+            "top": 88,
+            "bottom": 99,
+            "left": 188,
+            "right": 1408,
+            "ancho": 1220,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 87,
+            "bottom": 99,
+            "left": 188,
+            "right": 279.640625,
+            "ancho": 91.640625,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 88,
+            "bottom": 98,
+            "left": 188,
+            "right": 279.640625,
+            "ancho": 91.640625,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 11,
+        "ventana": 900,
+        "scrollY": 14328,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 16,
+      "solapeConLaPastilla": {
+        "x": -138.3359375,
+        "y": -16,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "hero",
+      "scrollAntes": 18445,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19525,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15204.78125,
+            "por-que-develop": 17364.78125,
+            "cierre": 18444.78125
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19525,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15204.78125,
+            "por-que-develop": 17364.78125,
+            "cierre": 18444.78125
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 166.10000002384186
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#hero",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 0,
+          "bottom": 1080,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 1080
+        },
+        "pastilla": {
+          "top": 1008,
+          "bottom": 1056,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Ingeniería para negocios reales.",
+          "caja": {
+            "top": 360.140625,
+            "bottom": 371.140625,
+            "left": 188,
+            "right": 1201.59375,
+            "ancho": 1013.59375,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 359.140625,
+            "bottom": 371.140625,
+            "left": 220,
+            "right": 409.5,
+            "ancho": 189.5,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 360.140625,
+            "bottom": 370.140625,
+            "left": 220,
+            "right": 409.5,
+            "ancho": 189.5,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 1,
+        "ventana": 1080,
+        "scrollY": 0,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "despejeDelGlifo": 637.86,
+      "solapeConLaPastilla": {
+        "x": -248.4765625,
+        "y": -637.859375,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1920-ancla-hero.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "quienes-somos",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 1008,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 163.69999998807907
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#quienes-somos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 3312,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 3240
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 02",
+          "caja": {
+            "top": 72,
+            "bottom": 1152,
+            "left": 32,
+            "right": 172,
+            "ancho": 140,
+            "alto": 1080
+          },
+          "tinta": {
+            "top": 71,
+            "bottom": 83,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73,
+            "bottom": 80,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 1080,
+        "scrollY": 1008,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 1,
+      "solapeConLaPastilla": {
+        "x": -613.1640625,
+        "y": -1,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1920-ancla-quienes-somos.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "numeros",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 4248,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 177.10000002384186
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#numeros",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 4392,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 4320
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 03",
+          "caja": {
+            "top": 72,
+            "bottom": 4392,
+            "left": 32,
+            "right": 172,
+            "ancho": 140,
+            "alto": 4320
+          },
+          "tinta": {
+            "top": 71,
+            "bottom": 83,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73,
+            "bottom": 80,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 1080,
+        "scrollY": 4248,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 1,
+      "solapeConLaPastilla": {
+        "x": -613.1640625,
+        "y": -1,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/1920-ancla-numeros.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "trabajos",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 8568,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 171.0999999642372
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#trabajos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 3312,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 3240
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Trabajos",
+          "caja": {
+            "top": 136,
+            "bottom": 147,
+            "left": 188,
+            "right": 1888,
+            "ancho": 1700,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 135,
+            "bottom": 147,
+            "left": 220,
+            "right": 273.21875,
+            "ancho": 53.21875,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 136,
+            "bottom": 146,
+            "left": 220,
+            "right": 273.21875,
+            "ancho": 53.21875,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 6,
+        "ventana": 1080,
+        "scrollY": 8568,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 64,
+      "solapeConLaPastilla": {
+        "x": -384.7578125,
+        "y": -64,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "servicios",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 11808,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 182.39999997615814
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#servicios",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 3312,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 3240
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Servicios",
+          "caja": {
+            "top": 166.96875,
+            "bottom": 177.96875,
+            "left": 188,
+            "right": 1888,
+            "ancho": 1700,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 165.96875,
+            "bottom": 177.96875,
+            "left": 188,
+            "right": 243.609375,
+            "ancho": 55.609375,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 166.96875,
+            "bottom": 174.96875,
+            "left": 188,
+            "right": 243.609375,
+            "ancho": 55.609375,
+            "alto": 8
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 17,
+        "ventana": 1080,
+        "scrollY": 11808,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 94.97,
+      "solapeConLaPastilla": {
+        "x": -414.3671875,
+        "y": -94.96875,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "tu-panel",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 15048,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 175.79999995231628
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#tu-panel",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2232,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 2160
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Tu panel",
+          "caja": {
+            "top": 152,
+            "bottom": 163,
+            "left": 188,
+            "right": 1888,
+            "ancho": 1700,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 151,
+            "bottom": 163,
+            "left": 188,
+            "right": 235.90625,
+            "ancho": 47.90625,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 152,
+            "bottom": 162,
+            "left": 188,
+            "right": 235.90625,
+            "ancho": 47.90625,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 11,
+        "ventana": 1080,
+        "scrollY": 15048,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 80,
+      "solapeConLaPastilla": {
+        "x": -422.0703125,
+        "y": -80,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "por-que-develop",
+      "scrollAntes": 18360,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 17208,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 152.80000001192093
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#por-que-develop",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 1152,
+          "left": 0,
+          "right": 1920,
+          "ancho": 1920,
+          "alto": 1080
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 657.9765625,
+          "right": 1262.0234375,
+          "ancho": 604.046875,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · Por qué develOP",
+          "caja": {
+            "top": 88,
+            "bottom": 99,
+            "left": 188,
+            "right": 1888,
+            "ancho": 1700,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 87,
+            "bottom": 99,
+            "left": 188,
+            "right": 279.640625,
+            "ancho": 91.640625,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 88,
+            "bottom": 98,
+            "left": 188,
+            "right": 279.640625,
+            "ancho": 91.640625,
+            "alto": 10
+          },
+          "metricas": {
+            "font": "500 10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 8,
+            "descensoDelGlifo": 2
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 11,
+        "ventana": 1080,
+        "scrollY": 17208,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 16,
+      "solapeConLaPastilla": {
+        "x": -378.3359375,
+        "y": -16,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "hero",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 181.20000004768372
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#hero",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 0,
+          "bottom": 667,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 667
+        },
+        "pastilla": {
+          "top": 595,
+          "bottom": 643,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 01",
+          "caja": {
+            "top": 142.140625,
+            "bottom": 153.140625,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 141.140625,
+            "bottom": 153.140625,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 143.140625,
+            "bottom": 150.140625,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 1,
+        "ventana": 667,
+        "scrollY": 0,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "despejeDelGlifo": 444.86,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -444.859375,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/375-ancla-hero.png"
+    },
+    {
+      "perfil": "375",
+      "ancla": "quienes-somos",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 595,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 148.5
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#quienes-somos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2073,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 2001
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 02",
+          "caja": {
+            "top": 120,
+            "bottom": 232.546875,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 112.546875
+          },
+          "tinta": {
+            "top": 119,
+            "bottom": 131,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 121,
+            "bottom": 128,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 595,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 49,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -49,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "numeros",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 2596,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 183.80000001192093
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#numeros",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2763,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 2691
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 03",
+          "caja": {
+            "top": 72,
+            "bottom": 83,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 71,
+            "bottom": 83,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73,
+            "bottom": 80,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 2596,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 1,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -1,
+        "seTapan": false
+      },
+      "captura": "docs/rediseno/capturas/b4/c/375-ancla-numeros.png"
+    },
+    {
+      "perfil": "375",
+      "ancla": "trabajos",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 5287,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 152.39999997615814
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#trabajos",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72,
+          "bottom": 2354.21875,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 2282.21875
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 04",
+          "caja": {
+            "top": 88,
+            "bottom": 99,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 87,
+            "bottom": 99,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 89,
+            "bottom": 96,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 5287,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "despejeDelGlifo": 17,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -17,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "servicios",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 7569,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 164.89999997615814
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#servicios",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72.21875,
+          "bottom": 3013.0625,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 2940.84375
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 05",
+          "caja": {
+            "top": 72.21875,
+            "bottom": 83.21875,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 71.21875,
+            "bottom": 83.21875,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 73.21875,
+            "bottom": 80.21875,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 7569,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72.22,
+      "desvioContraLaVara": 0.22,
+      "despejeDelGlifo": 1.22,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -1.21875,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "tu-panel",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 10510,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 179.20000004768372
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#tu-panel",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72.0625,
+          "bottom": 2278.234375,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 2206.171875
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 06",
+          "caja": {
+            "top": 152.0625,
+            "bottom": 163.0625,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 151.0625,
+            "bottom": 163.0625,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 153.0625,
+            "bottom": 160.0625,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 10510,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72.06,
+      "desvioContraLaVara": 0.06,
+      "despejeDelGlifo": 81.06,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -81.0625,
+        "seTapan": false
+      },
+      "captura": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "por-que-develop",
+      "scrollAntes": 14532,
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15199,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14122.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 12716,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 230.60000002384186
+      },
+      "lectura": {
+        "clickeado": true,
+        "hash": "#por-que-develop",
+        "elDestinoEsElPanel": true,
+        "panel": {
+          "top": 72.234375,
+          "bottom": 1406.859375,
+          "left": 0,
+          "right": 375,
+          "ancho": 375,
+          "alto": 1334.625
+        },
+        "pastilla": {
+          "top": 24,
+          "bottom": 72,
+          "left": 32,
+          "right": 343,
+          "ancho": 311,
+          "alto": 48
+        },
+        "posicionDeLaPastilla": "absolute",
+        "contenido": {
+          "descripcion": "p · 07",
+          "caja": {
+            "top": 88.234375,
+            "bottom": 99.234375,
+            "left": 32,
+            "right": 343,
+            "ancho": 311,
+            "alto": 11
+          },
+          "tinta": {
+            "top": 87.234375,
+            "bottom": 99.234375,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 12
+          },
+          "glifo": {
+            "top": 89.234375,
+            "bottom": 96.234375,
+            "left": 32,
+            "right": 44.8125,
+            "ancho": 12.8125,
+            "alto": 7
+          },
+          "metricas": {
+            "font": "10px / 11px Chivo, \"Chivo Fallback\"",
+            "ascensoDeLaFuente": 9,
+            "ascensoDelGlifo": 7,
+            "descensoDelGlifo": 0
+          },
+          "opacidadEfectiva": 1,
+          "transform": "none"
+        },
+        "candidatosDescartados": 0,
+        "ventana": 667,
+        "scrollY": 12716,
+        "scrollPaddingTop": "72px",
+        "scrollBehavior": "auto"
+      },
+      "topDelPanel": 72.23,
+      "desvioContraLaVara": 0.23,
+      "despejeDelGlifo": 17.23,
+      "solapeConLaPastilla": {
+        "x": 12.8125,
+        "y": -17.234375,
+        "seTapan": false
+      },
+      "captura": null
+    }
+  ]
+}

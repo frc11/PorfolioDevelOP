@@ -1,0 +1,217 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-desbordes.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T19:17:22.740Z",
+    "nota": "dos detectores: scrollWidth del documento contra innerWidth, y un barrido del DOM con paso de media pantalla quedándose con el ancestro más alto cuya caja cruza el borde (tolerancia 0.5 px). Sin estrangular. Emulado."
+  },
+  "porQueDosDetectores": "un ancestro con overflow-x distinto de visible recorta al hijo que se pasa, y scrollWidth no se entera: el primer detector puede decir «no hay desborde» y haberlo igual. `recortadoPorAncestro` distingue los dos casos fila por fila.",
+  "filas": [
+    {
+      "perfil": "375",
+      "ancho": 375,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 15199,
+        "ventanaPx": 667,
+        "pantallas": 22.79,
+        "anchoDelDocumento": 375,
+        "anchoDeLaVentana": 375
+      },
+      "desbordeDeDocumento": false,
+      "excesoDeDocumentoPx": 0,
+      "culpables": [
+        {
+          "etiqueta": "ul",
+          "clases": "",
+          "panel": null,
+          "ruta": "body:1/div:1/header:1/nav:0/ul:0",
+          "derechaPx": 619.05,
+          "izquierdaPx": 49,
+          "anchoPx": 570.05,
+          "excesoDerechaPx": 244.05,
+          "excesoIzquierdaPx": 0,
+          "documentoY": 606,
+          "vistoEnScrollY": 0,
+          "recortadoPorAncestro": true
+        }
+      ],
+      "capturas": [
+        "docs/rediseno/capturas/b4/b/375-desborde.png"
+      ]
+    },
+    {
+      "perfil": "393",
+      "ancho": 393,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 17148,
+        "ventanaPx": 852,
+        "pantallas": 20.13,
+        "anchoDelDocumento": 393,
+        "anchoDeLaVentana": 393
+      },
+      "desbordeDeDocumento": false,
+      "excesoDeDocumentoPx": 0,
+      "culpables": [
+        {
+          "etiqueta": "ul",
+          "clases": "",
+          "panel": null,
+          "ruta": "body:1/div:1/header:1/nav:0/ul:0",
+          "derechaPx": 619.05,
+          "izquierdaPx": 49,
+          "anchoPx": 570.05,
+          "excesoDerechaPx": 226.05,
+          "excesoIzquierdaPx": 0,
+          "documentoY": 791,
+          "vistoEnScrollY": 0,
+          "recortadoPorAncestro": true
+        }
+      ],
+      "capturas": [
+        "docs/rediseno/capturas/b4/b/393-desborde.png"
+      ]
+    },
+    {
+      "perfil": "768",
+      "ancho": 768,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 18805,
+        "ventanaPx": 1024,
+        "pantallas": 18.36,
+        "anchoDelDocumento": 768,
+        "anchoDeLaVentana": 768
+      },
+      "desbordeDeDocumento": false,
+      "excesoDeDocumentoPx": 0,
+      "culpables": [],
+      "capturas": []
+    },
+    {
+      "perfil": "1024",
+      "ancho": 1024,
+      "debajoDelUmbral": true,
+      "documento": {
+        "alturaPx": 14721,
+        "ventanaPx": 768,
+        "pantallas": 19.17,
+        "anchoDelDocumento": 1024,
+        "anchoDeLaVentana": 1024
+      },
+      "desbordeDeDocumento": false,
+      "excesoDeDocumentoPx": 0,
+      "culpables": [],
+      "capturas": []
+    },
+    {
+      "perfil": "1920",
+      "ancho": 1920,
+      "debajoDelUmbral": false,
+      "documento": {
+        "alturaPx": 19525,
+        "ventanaPx": 1080,
+        "pantallas": 18.08,
+        "anchoDelDocumento": 1920,
+        "anchoDeLaVentana": 1920
+      },
+      "desbordeDeDocumento": false,
+      "excesoDeDocumentoPx": 0,
+      "culpables": [
+        {
+          "etiqueta": "div",
+          "clases": "sr-only",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:1",
+          "derechaPx": 0,
+          "izquierdaPx": -1,
+          "anchoPx": 1,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 1,
+          "documentoY": 12091,
+          "vistoEnScrollY": 7560,
+          "recortadoPorAncestro": false
+        },
+        {
+          "etiqueta": "figcaption",
+          "clases": "max-w-tope",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:1/div:0/div:0/div:1/div:1/div:0/figure:0/figcaption:1",
+          "derechaPx": 286.52,
+          "izquierdaPx": -158.5,
+          "anchoPx": 445.02,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 158.5,
+          "documentoY": 12316,
+          "vistoEnScrollY": 7560,
+          "recortadoPorAncestro": true
+        },
+        {
+          "etiqueta": "div",
+          "clases": "sr-only",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:2",
+          "derechaPx": 0,
+          "izquierdaPx": -1,
+          "anchoPx": 1,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 1,
+          "documentoY": 12091,
+          "vistoEnScrollY": 7560,
+          "recortadoPorAncestro": false
+        },
+        {
+          "etiqueta": "figcaption",
+          "clases": "max-w-tope",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:2/div:0/div:0/div:1/div:1/div:0/figure:0/figcaption:1",
+          "derechaPx": 232.88,
+          "izquierdaPx": -104.86,
+          "anchoPx": 337.73,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 104.86,
+          "documentoY": 12316,
+          "vistoEnScrollY": 7560,
+          "recortadoPorAncestro": true
+        },
+        {
+          "etiqueta": "div",
+          "clases": "sr-only",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:0",
+          "derechaPx": 0,
+          "izquierdaPx": -1,
+          "anchoPx": 1,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 1,
+          "documentoY": 13171,
+          "vistoEnScrollY": 12960,
+          "recortadoPorAncestro": false
+        },
+        {
+          "etiqueta": "figcaption",
+          "clases": "max-w-tope",
+          "panel": "servicios",
+          "ruta": "body:1/div:1/main:4/section:4/div:0/div:0/div:0/div:1/div:0/div:0/div:0/div:1/div:1/div:0/figure:0/figcaption:1",
+          "derechaPx": 257.94,
+          "izquierdaPx": -129.94,
+          "anchoPx": 387.88,
+          "excesoDerechaPx": 0,
+          "excesoIzquierdaPx": 129.94,
+          "documentoY": 13396,
+          "vistoEnScrollY": 12960,
+          "recortadoPorAncestro": true
+        }
+      ],
+      "capturas": [
+        "docs/rediseno/capturas/b4/b/1920-desborde-1.png",
+        "docs/rediseno/capturas/b4/b/1920-desborde-2.png",
+        "docs/rediseno/capturas/b4/b/1920-desborde-3.png"
+      ]
+    }
+  ]
+}

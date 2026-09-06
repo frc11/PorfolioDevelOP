@@ -1,0 +1,189 @@
+{
+  "procedencia": {
+    "frente": "b",
+    "instrumento": "scripts-b4/b-replica.ts",
+    "origen": "http://localhost:3002",
+    "estrangulamiento": "ninguno",
+    "emulado": true,
+    "fecha": "2026-09-06T15:33:22.999Z",
+    "nota": "réplica de la secuencia de `capturarRegion` a 1024, pidiendo el detalle del canvas en vez del booleano. Sin estrangular. Emulado."
+  },
+  "filas": [
+    {
+      "seccion": "hero",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 0,
+      "perfNow": 3539
+    },
+    {
+      "seccion": "hero",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 0,
+      "perfNow": 5317
+    },
+    {
+      "seccion": "quienes-somos",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 768,
+      "perfNow": 7180
+    },
+    {
+      "seccion": "quienes-somos",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 768,
+      "perfNow": 7671
+    },
+    {
+      "seccion": "numeros",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 3135,
+      "perfNow": 8915
+    },
+    {
+      "seccion": "numeros",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 3135,
+      "perfNow": 9128
+    },
+    {
+      "seccion": "trabajos",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 6207,
+      "perfNow": 10365
+    },
+    {
+      "seccion": "trabajos",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 6207,
+      "perfNow": 11097
+    },
+    {
+      "seccion": "servicios",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 8715,
+      "perfNow": 12319
+    },
+    {
+      "seccion": "servicios",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 8715,
+      "perfNow": 12487
+    },
+    {
+      "seccion": "tu-panel",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 11086,
+      "perfNow": 13727
+    },
+    {
+      "seccion": "tu-panel",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 11086,
+      "perfNow": 13874
+    },
+    {
+      "seccion": "por-que-develop",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 13041,
+      "perfNow": 15110
+    },
+    {
+      "seccion": "por-que-develop",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 13041,
+      "perfNow": 15226
+    },
+    {
+      "seccion": "cierre",
+      "momento": "antes de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 13856,
+      "perfNow": 16462
+    },
+    {
+      "seccion": "cierre",
+      "momento": "después de capturar",
+      "hayEscenario": false,
+      "canvas": [],
+      "introMontado": false,
+      "innerWidth": 1024,
+      "innerHeight": 768,
+      "scrollY": 13856,
+      "perfNow": 16600
+    }
+  ]
+}

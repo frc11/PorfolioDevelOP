@@ -1,0 +1,70 @@
+{
+  "frente": "a",
+  "asunto": "el gate pre-paint del preloader bajo el Chrome del banco",
+  "instrumento": "scripts-b4/a-gate-del-intro.ts — lectura de las cuatro condiciones de HOME_INTRO_BOOT_JS",
+  "build": {
+    "cual": "prod (.next-probe, 3005)",
+    "url": "http://localhost:3005/v3"
+  },
+  "emulado": true,
+  "controlesPositivos": [
+    {
+      "nombre": "el lector de atributos ve uno que existe (`lang`) y no ve uno inventado",
+      "pasa": true,
+      "detalle": "lang=true · inventado=false"
+    },
+    {
+      "nombre": "con el gate restituido el intro SÍ arma — el override hace lo que dice",
+      "pasa": true,
+      "detalle": "restituido.intoArmo=true · sin restituir=false · webdriver restituido=false"
+    }
+  ],
+  "filas": [
+    {
+      "carga": "primera-visita",
+      "lectura": {
+        "pathname": "/v3",
+        "enLaListaDeRutas": true,
+        "webdriver": true,
+        "movimientoReducido": false,
+        "marcaDeSesion": null,
+        "intoArmo": false,
+        "controlAtributoQueExiste": true,
+        "controlAtributoInventado": false,
+        "overlayEnElDom": true,
+        "overlayVisible": false
+      }
+    },
+    {
+      "carga": "visita-repetida",
+      "lectura": {
+        "pathname": "/v3",
+        "enLaListaDeRutas": true,
+        "webdriver": true,
+        "movimientoReducido": false,
+        "marcaDeSesion": "1",
+        "intoArmo": false,
+        "controlAtributoQueExiste": true,
+        "controlAtributoInventado": false,
+        "overlayEnElDom": false,
+        "overlayVisible": false
+      }
+    },
+    {
+      "carga": "primera-visita-con-el-gate-restituido",
+      "lectura": {
+        "pathname": "/v3",
+        "enLaListaDeRutas": true,
+        "webdriver": false,
+        "movimientoReducido": false,
+        "marcaDeSesion": null,
+        "intoArmo": true,
+        "controlAtributoQueExiste": true,
+        "controlAtributoInventado": false,
+        "overlayEnElDom": true,
+        "overlayVisible": true
+      }
+    }
+  ],
+  "consecuencia": "el intro NO armó porque `navigator.webdriver === true`: el gate lo apaga bajo automatización por diseño (introBoot.tsx). Toda cifra de carga de este frente EXCLUYE el preloader — es la carga que ve un visitante repetido, no la primera visita real."
+}

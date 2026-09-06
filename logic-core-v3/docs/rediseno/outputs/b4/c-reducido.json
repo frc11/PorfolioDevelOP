@@ -1,0 +1,170 @@
+{
+  "que": "`prefers-reduced-motion: reduce`, emulado con Emulation.setEmulatedMedia",
+  "instrumento": "scripts-b4/c-reducido.ts — barrido del documento entero parando cada media pantalla",
+  "emulado": true,
+  "politicaDeclarada": "`_lib/motion/reducido.ts`: «no se montan». El motor de progreso no se instancia, el divisor de líneas no corre, y el contenido se renderiza directamente en su estado final.",
+  "porQueBarreYNoMiraArriba": "el sistema de movimiento se monta al entrar al viewport: una lectura hecha sólo arriba de todo daría cero transformadas aunque el sistema estuviera vivo más abajo.",
+  "filas": [
+    {
+      "perfil": "1920",
+      "conLaPreferencia": {
+        "elementosConTransform": 2380,
+        "elementosConWillChange": 0,
+        "elementosConEstiloEnLinea": 4387,
+        "piezasDeLineas": 5,
+        "textoAccesibleMarcado": 5,
+        "paneles": 8,
+        "alturaDelDocumento": 19525,
+        "caracteresDeTexto": 7783
+      },
+      "sinLaPreferencia": {
+        "elementosConTransform": 2380,
+        "elementosConWillChange": 0,
+        "elementosConEstiloEnLinea": 4387,
+        "piezasDeLineas": 5,
+        "textoAccesibleMarcado": 5,
+        "paneles": 8,
+        "alturaDelDocumento": 19525,
+        "caracteresDeTexto": 7783,
+        "ejemplosDeTransform": [
+          {
+            "y": 540,
+            "tag": "span",
+            "estilo": "transform: translate(0%, 120%);"
+          },
+          {
+            "y": 540,
+            "tag": "span",
+            "estilo": "transform: translate(0%, 120%);"
+          },
+          {
+            "y": 540,
+            "tag": "div",
+            "estilo": "transform: translate(0%, 60%);"
+          },
+          {
+            "y": 540,
+            "tag": "span",
+            "estilo": "transform: translate(0%, 120%);"
+          },
+          {
+            "y": 540,
+            "tag": "span",
+            "estilo": "transform: translate(0%, 120%);"
+          },
+          {
+            "y": 540,
+            "tag": "span",
+            "estilo": "transform: translate(0%, 120%);"
+          }
+        ]
+      },
+      "afirmaciones": [
+        {
+          "que": "con la preferencia NO se escribe una sola transformada en línea",
+          "pasa": false,
+          "detalle": "2380"
+        },
+        {
+          "que": "ni un solo `will-change`",
+          "pasa": true,
+          "detalle": "0"
+        },
+        {
+          "que": "y el divisor de líneas NO corrió",
+          "pasa": false,
+          "detalle": "5 piezas"
+        },
+        {
+          "que": "las ocho secciones están",
+          "pasa": true,
+          "detalle": "8 paneles"
+        },
+        {
+          "que": "y el contenido está COMPLETO: ninguna palabra que se vea sin la preferencia falta con ella",
+          "pasa": true,
+          "detalle": "ninguna"
+        }
+      ],
+      "controlesPositivos": [
+        {
+          "nombre": "SIN la preferencia el sistema SÍ escribe transformadas — la primera mitad no es verde por vacío",
+          "pasa": true,
+          "detalle": "2380 elementos con transform en línea"
+        },
+        {
+          "nombre": "y SÍ parte el texto en líneas",
+          "pasa": true,
+          "detalle": "5 piezas"
+        }
+      ],
+      "relacionDeTexto": 1,
+      "palabrasQueFaltanConLaPreferencia": []
+    },
+    {
+      "perfil": "375",
+      "conLaPreferencia": {
+        "elementosConTransform": 0,
+        "elementosConWillChange": 0,
+        "elementosConEstiloEnLinea": 924,
+        "piezasDeLineas": 0,
+        "textoAccesibleMarcado": 0,
+        "paneles": 8,
+        "alturaDelDocumento": 15199,
+        "caracteresDeTexto": 7438
+      },
+      "sinLaPreferencia": {
+        "elementosConTransform": 0,
+        "elementosConWillChange": 0,
+        "elementosConEstiloEnLinea": 924,
+        "piezasDeLineas": 0,
+        "textoAccesibleMarcado": 0,
+        "paneles": 8,
+        "alturaDelDocumento": 15199,
+        "caracteresDeTexto": 7438,
+        "ejemplosDeTransform": []
+      },
+      "afirmaciones": [
+        {
+          "que": "con la preferencia NO se escribe una sola transformada en línea",
+          "pasa": true,
+          "detalle": "0"
+        },
+        {
+          "que": "ni un solo `will-change`",
+          "pasa": true,
+          "detalle": "0"
+        },
+        {
+          "que": "y el divisor de líneas NO corrió",
+          "pasa": true,
+          "detalle": "0 piezas"
+        },
+        {
+          "que": "las ocho secciones están",
+          "pasa": true,
+          "detalle": "8 paneles"
+        },
+        {
+          "que": "y el contenido está COMPLETO: ninguna palabra que se vea sin la preferencia falta con ella",
+          "pasa": true,
+          "detalle": "ninguna"
+        }
+      ],
+      "controlesPositivos": [
+        {
+          "nombre": "SIN la preferencia el sistema SÍ escribe transformadas — la primera mitad no es verde por vacío",
+          "pasa": false,
+          "detalle": "0 elementos con transform en línea"
+        },
+        {
+          "nombre": "y SÍ parte el texto en líneas",
+          "pasa": false,
+          "detalle": "0 piezas"
+        }
+      ],
+      "relacionDeTexto": 1,
+      "palabrasQueFaltanConLaPreferencia": []
+    }
+  ]
+}

@@ -1,0 +1,708 @@
+{
+  "frente": "a",
+  "asunto": "LCP, CLS, TBT y FCP — las dos cargas, con estrangulamiento",
+  "instrumento": "scripts-b4/a-vitales.ts + a-observador.ts — PerformanceObserver instalado con Page.addScriptToEvaluateOnNewDocument ANTES de navegar",
+  "build": {
+    "cual": "prod (.next-probe, 3005)",
+    "url": "http://localhost:3005/v3"
+  },
+  "emulado": true,
+  "porQueEmulado": "viewport y puntero por Emulation.setDeviceMetricsOverride, red y CPU por Network.emulateNetworkConditions y Emulation.setCPUThrottlingRate, sobre el Chrome de esta máquina (Blink). No es un teléfono: ni el motor, ni el dpr real, ni la GPU, ni la térmica.",
+  "cache": "DESHABILITADA en las tres cargas (Network.setCacheDisabled), para que la única variable sea el gate del intro.",
+  "gateDelIntro": "la fila `primera-visita` inyecta `Object.defineProperty(navigator,\"webdriver\",{get:()=>false})` antes del primer script, porque el gate pre-paint (introBoot.tsx) apaga el intro bajo automatización. Sin eso el preloader NO corre y las tres filas serían la misma. Evidencia y control positivo en a-gate-del-intro.json.",
+  "asentamientoMs": 14000,
+  "repeticiones": 2,
+  "inp": null,
+  "porQueInpEsNull": "INP se mide sobre interacciones reales y sostenidas. Una carga sin un solo click no produce una entrada que califique; un 0 sería la ausencia de clicks, no la latencia del sitio.",
+  "presupuestoDeclarado": {
+    "lcpMs": 2500,
+    "jsGzipKiB": 300,
+    "lighthouse": 80
+  },
+  "filas": [
+    {
+      "perfil": "375",
+      "viewport": "375x667x1",
+      "estrangulamiento": "movil — latencia 562.5 ms · bajada 204800 B/s · CPU 4x",
+      "carga": "primera-visita",
+      "repeticiones": 2,
+      "lcpMs": [
+        2232,
+        2524
+      ],
+      "lcpMedianaMs": 2378,
+      "fcpMs": [
+        2232,
+        2524
+      ],
+      "fcpMedianaMs": 2378,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        171,
+        368
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        600,
+        778
+      ],
+      "loadEventEndMs": [
+        5958,
+        5198
+      ],
+      "tareasLargas": [
+        7,
+        9
+      ],
+      "tareaMasLargaMs": [
+        268,
+        266
+      ],
+      "recursos": [
+        37,
+        37
+      ],
+      "bytesTransferidos": [
+        713167,
+        713167
+      ],
+      "elementoLcp": {
+        "startTime": 2524,
+        "renderTime": 2524,
+        "loadTime": 0,
+        "size": 34892,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 32,
+            "y": 208,
+            "ancho": 311,
+            "alto": 118
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "375",
+      "viewport": "375x667x1",
+      "estrangulamiento": "movil — latencia 562.5 ms · bajada 204800 B/s · CPU 4x",
+      "carga": "visita-repetida",
+      "repeticiones": 2,
+      "lcpMs": [
+        2080,
+        2308
+      ],
+      "lcpMedianaMs": 2194,
+      "fcpMs": [
+        2080,
+        2308
+      ],
+      "fcpMedianaMs": 2194,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        369,
+        293
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        377,
+        293
+      ],
+      "loadEventEndMs": [
+        5175,
+        5377
+      ],
+      "tareasLargas": [
+        6,
+        3
+      ],
+      "tareaMasLargaMs": [
+        318,
+        324
+      ],
+      "recursos": [
+        29,
+        29
+      ],
+      "bytesTransferidos": [
+        461825,
+        461825
+      ],
+      "elementoLcp": {
+        "startTime": 2308,
+        "renderTime": 2308,
+        "loadTime": 0,
+        "size": 34892,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 32,
+            "y": 208,
+            "ancho": 311,
+            "alto": 118
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "375",
+      "viewport": "375x667x1",
+      "estrangulamiento": "movil — latencia 562.5 ms · bajada 204800 B/s · CPU 4x",
+      "carga": "sin-marca-bajo-automatizacion",
+      "repeticiones": 2,
+      "lcpMs": [
+        2216,
+        2084
+      ],
+      "lcpMedianaMs": 2150,
+      "fcpMs": [
+        2216,
+        2084
+      ],
+      "fcpMedianaMs": 2150,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        269,
+        263
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        269,
+        263
+      ],
+      "loadEventEndMs": [
+        5238,
+        5174
+      ],
+      "tareasLargas": [
+        3,
+        3
+      ],
+      "tareaMasLargaMs": [
+        297,
+        294
+      ],
+      "recursos": [
+        29,
+        29
+      ],
+      "bytesTransferidos": [
+        461825,
+        461825
+      ],
+      "elementoLcp": {
+        "startTime": 2084,
+        "renderTime": 2084,
+        "loadTime": 0,
+        "size": 34892,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 32,
+            "y": 208,
+            "ancho": 311,
+            "alto": 118
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1920",
+      "viewport": "1920x1080x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "primera-visita",
+      "repeticiones": 2,
+      "lcpMs": [
+        472,
+        468
+      ],
+      "lcpMedianaMs": 470,
+      "fcpMs": [
+        472,
+        468
+      ],
+      "fcpMedianaMs": 470,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        14,
+        0
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        1001,
+        290
+      ],
+      "loadEventEndMs": [
+        923,
+        940
+      ],
+      "tareasLargas": [
+        7,
+        4
+      ],
+      "tareaMasLargaMs": [
+        791,
+        284
+      ],
+      "recursos": [
+        42,
+        42
+      ],
+      "bytesTransferidos": [
+        737079,
+        737079
+      ],
+      "elementoLcp": {
+        "startTime": 468,
+        "renderTime": 468,
+        "loadTime": 0,
+        "size": 96200,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 403,
+            "ancho": 670,
+            "alto": 142
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1920",
+      "viewport": "1920x1080x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "visita-repetida",
+      "repeticiones": 2,
+      "lcpMs": [
+        436,
+        408
+      ],
+      "lcpMedianaMs": 422,
+      "fcpMs": [
+        436,
+        408
+      ],
+      "fcpMedianaMs": 422,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        1,
+        0
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        24,
+        33
+      ],
+      "loadEventEndMs": [
+        930,
+        919
+      ],
+      "tareasLargas": [
+        3,
+        2
+      ],
+      "tareaMasLargaMs": [
+        63,
+        71
+      ],
+      "recursos": [
+        41,
+        41
+      ],
+      "bytesTransferidos": [
+        734805,
+        734805
+      ],
+      "elementoLcp": {
+        "startTime": 408,
+        "renderTime": 408,
+        "loadTime": 0,
+        "size": 96200,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 403,
+            "ancho": 670,
+            "alto": 142
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1920",
+      "viewport": "1920x1080x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "sin-marca-bajo-automatizacion",
+      "repeticiones": 2,
+      "lcpMs": [
+        444,
+        404
+      ],
+      "lcpMedianaMs": 424,
+      "fcpMs": [
+        444,
+        404
+      ],
+      "fcpMedianaMs": 424,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        0,
+        0
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        463,
+        517
+      ],
+      "loadEventEndMs": [
+        933,
+        1341
+      ],
+      "tareasLargas": [
+        3,
+        2
+      ],
+      "tareaMasLargaMs": [
+        509,
+        562
+      ],
+      "recursos": [
+        41,
+        41
+      ],
+      "bytesTransferidos": [
+        734805,
+        734805
+      ],
+      "elementoLcp": {
+        "startTime": 404,
+        "renderTime": 404,
+        "loadTime": 0,
+        "size": 96200,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 403,
+            "ancho": 670,
+            "alto": 142
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1440",
+      "viewport": "1440x900x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "primera-visita",
+      "repeticiones": 2,
+      "lcpMs": [
+        464,
+        512
+      ],
+      "lcpMedianaMs": 488,
+      "fcpMs": [
+        464,
+        512
+      ],
+      "fcpMedianaMs": 488,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        0,
+        0
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        294,
+        718
+      ],
+      "loadEventEndMs": [
+        905,
+        999
+      ],
+      "tareasLargas": [
+        5,
+        5
+      ],
+      "tareaMasLargaMs": [
+        201,
+        545
+      ],
+      "recursos": [
+        42,
+        42
+      ],
+      "bytesTransferidos": [
+        737079,
+        737079
+      ],
+      "elementoLcp": {
+        "startTime": 512,
+        "renderTime": 512,
+        "loadTime": 0,
+        "size": 84360,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 292,
+            "ancho": 478,
+            "alto": 183
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1440",
+      "viewport": "1440x900x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "visita-repetida",
+      "repeticiones": 2,
+      "lcpMs": [
+        1412,
+        468
+      ],
+      "lcpMedianaMs": 940,
+      "fcpMs": [
+        1412,
+        468
+      ],
+      "fcpMedianaMs": 940,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        4,
+        18
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        479,
+        45
+      ],
+      "loadEventEndMs": [
+        1979,
+        953
+      ],
+      "tareasLargas": [
+        3,
+        3
+      ],
+      "tareaMasLargaMs": [
+        517,
+        68
+      ],
+      "recursos": [
+        41,
+        41
+      ],
+      "bytesTransferidos": [
+        734805,
+        734805
+      ],
+      "elementoLcp": {
+        "startTime": 468,
+        "renderTime": 468,
+        "loadTime": 0,
+        "size": 84360,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 292,
+            "ancho": 478,
+            "alto": 183
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    },
+    {
+      "perfil": "1440",
+      "viewport": "1440x900x1",
+      "estrangulamiento": "escritorio — latencia 85 ms · bajada 1125000 B/s · CPU 1x",
+      "carga": "sin-marca-bajo-automatizacion",
+      "repeticiones": 2,
+      "lcpMs": [
+        420,
+        424
+      ],
+      "lcpMedianaMs": 422,
+      "fcpMs": [
+        420,
+        424
+      ],
+      "fcpMedianaMs": 422,
+      "cls": [
+        0,
+        0
+      ],
+      "clsMediana": 0,
+      "tbtDesdeFcpHastaLoadMs": [
+        0,
+        0
+      ],
+      "tbtDesdeFcpHastaElFinDeLaVentanaMs": [
+        9,
+        13
+      ],
+      "loadEventEndMs": [
+        947,
+        951
+      ],
+      "tareasLargas": [
+        1,
+        2
+      ],
+      "tareaMasLargaMs": [
+        59,
+        62
+      ],
+      "recursos": [
+        41,
+        41
+      ],
+      "bytesTransferidos": [
+        734805,
+        734805
+      ],
+      "elementoLcp": {
+        "startTime": 424,
+        "renderTime": 424,
+        "loadTime": 0,
+        "size": 84360,
+        "url": null,
+        "elemento": {
+          "tag": "H1",
+          "id": "titular-hero",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "panel": "hero",
+          "texto": "Tu negocio vendiendo en piloto automático.",
+          "caja": {
+            "x": 188,
+            "y": 292,
+            "ancho": 478,
+            "alto": 183
+          },
+          "fuente": null
+        }
+      },
+      "lcpCandidatos": [
+        1,
+        1
+      ],
+      "erroresDelObservador": []
+    }
+  ]
+}
