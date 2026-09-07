@@ -36,6 +36,7 @@ import {
   SOLO_CONTACTOS_COMERCIALES,
 } from './isolation.ts'
 import { agruparAvisos, type AvisoView } from './novedades-agrupar.ts'
+import { cuerpoDeFuncion } from '../invariant-call-site.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -212,6 +213,51 @@ const plegado = agruparAvisos(treintaYDos, 6)
 assert.equal(plegado.filas.length, 1, '32 avisos del mismo tipo sin acción son UNA fila')
 assert.equal(plegado.filas[0].cantidad, 32, 'y la fila dice que son 32')
 assert.equal(plegado.ocultos, 0, 'plegados no es lo mismo que ocultos: no se perdió ninguno')
+
+// ── 6. P27 — LAS TRES SUPERFICIES DEL FEED FILTRAN POR DESTINATARIO ─────────
+// La aserción 1 mira `ownSetterNoticeWhere` en aislado. El censo de P26: «el
+// aislamiento se afirma sobre el helper suelto». `OsSetterNotice` es un modelo
+// ADDRESSED —no se deriva de la cartera— así que su `setterId` es el ÚNICO
+// filtro que existe: una consulta que lo omita devuelve las novedades de TODO el
+// equipo. Se leen las tres funciones que lo consultan, una por una.
+const SUPERFICIES: readonly [string, string][] = [
+  ['getNovedadesSetter', 'el feed que el setter ve (lista + badge total)'],
+  ['contarNovedadesSinLeer', 'el contador del badge del topbar'],
+  ['marcarNovedadesVistas', 'la marca de «vistas» (una ESCRITURA)'],
+]
+for (const [fn, que] of SUPERFICIES) {
+  const cuerpo = cuerpoDeFuncion(['src', 'lib', 'leados', 'novedades.ts'], fn)
+  assert.match(
+    cuerpo,
+    /where:\s*\{\s*\.\.\.ownSetterNoticeWhere\(userId\),\s*read:\s*false\s*\}/,
+    `${fn} — ${que} — dejó de filtrar por \`ownSetterNoticeWhere(userId)\`.\n` +
+      '  `OsSetterNotice` es addressed: no cuelga de `assignedToId`, así que NADA más lo\n' +
+      '  aísla. Sin ese spread, un `where: { read: false }` devuelve las novedades sin leer\n' +
+      '  de TODOS los setters — y en `marcarNovedadesVistas`, las MARCA como vistas: el\n' +
+      '  setter le apaga los avisos al equipo entero.\n' +
+      '  La aserción 1 de arriba no lo ve: prueba que el helper devuelve `{ setterId }`, no\n' +
+      '  que estas tres consultas lo llamen.',
+  )
+}
+
+// La CREACIÓN es el otro extremo del eje: la fila nace con el destinatario que
+// decide la regla única, no con el dueño actual ni con un id del cliente.
+const crearNovedad = cuerpoDeFuncion(['src', 'lib', 'leados', 'novedades.ts'], 'emitirNovedadSetter')
+assert.match(
+  crearNovedad,
+  /const setterId = destinatarioNovedad\(input\.evento\)/,
+  'la creación de novedades dejó de derivar el destinatario de `destinatarioNovedad`.\n' +
+    '  Las aserciones 2-2d prueban que esa regla dirige bien cada tipo de aviso; si la\n' +
+    '  creación no la llama, prueban una función que nadie usa. Y el caso que se pierde\n' +
+    '  primero es el cabo 0.5.8: la reasignación-saliente va al dueño PREVIO, que ya no es\n' +
+    '  `assignedToId` — cualquier atajo «al dueño actual» se lo manda al setter equivocado.',
+)
+assert.match(
+  crearNovedad,
+  /data:\s*\{\s*\n?\s*setterId,/,
+  'la fila de novedad dejó de estampar `setterId` como primer campo del `data`: sin ' +
+    'destinatario no hay eje de aislamiento que la alcance.',
+)
 
 console.log(
   `✓ invariante OK: novedades aisladas por destinatario (setterId), dirección ` +

@@ -35,6 +35,7 @@ import { FASE_IDS, ProgresoSchema, type Progreso } from './contracts.ts'
 import { ownedLeadWhere, ownedListWhere } from './isolation.ts'
 import { SHELL_CONSTRUCCION } from './flow-content.ts'
 import { parseProgreso } from './flow.ts'
+import { clavesDeObjeto, cuerpoDeFuncion, valorDeClave } from '../invariant-call-site.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -55,14 +56,61 @@ assert.notEqual(
 )
 assert.deepEqual(ownedListWhere(SETTER_A), { assignedToId: SETTER_A })
 
+// ── 1b. P27 — EL WRITE REAL TIENE EL GATE ───────────────────────────────────
+// La aserción 1 mira `ownedLeadWhere` en aislado: prueba que el helper devuelve
+// (id + dueño), no que `saveOwnedProgreso` lo alcance. El censo de P26 lo midió:
+// si el write resolviera el dossier con un `findUnique({ where: { leadId } })`
+// —sin `getOwnedDossier`— la aserción 1 seguiría verde y el setter escribiría el
+// progreso en el dossier de otro. Se lee la fuente del write, acotada a su función.
+const saveOwnedProgreso = cuerpoDeFuncion(
+  ['src', 'lib', 'leados', 'dossier.ts'],
+  'saveOwnedProgreso',
+)
+assert.match(
+  saveOwnedProgreso,
+  /const dossier = await getOwnedDossier\(leadId, userId\)\s*\n\s*if \(!dossier\) return null/,
+  'el write del progreso perdió el gate `getOwnedDossier(leadId, userId)`.\n' +
+    '  Esa llamada es la ÚNICA que resuelve el dossier por (id + dueño) — `ownedLeadWhere` no\n' +
+    '  se usa en ningún otro punto de este camino. Sin ella, el `updateMany` de abajo escribe\n' +
+    '  por `leadId` pelado: un leadId ajeno (los ids viajan al cliente) y el progreso del\n' +
+    '  checklist de otro setter queda pisado. La aserción 1 de arriba NO lo ve: prueba que el\n' +
+    '  helper devuelve el filtro correcto, no que el write lo llame.',
+)
+assert.match(
+  saveOwnedProgreso,
+  /where:\s*\{\s*leadId:\s*dossier\.leadId,/,
+  'el `updateMany` del progreso dejó de keyear por `dossier.leadId` (el del dossier YA ' +
+    'verificado) y volvió al `leadId` crudo del parámetro: el gate de arriba deja de proteger ' +
+    'la escritura de abajo.',
+)
+
 // ── 2. Stage nunca muta: el payload del write es {progresoJson}, sin `stage` ──
 const fresco: Progreso = ProgresoSchema.parse({ completadas: [] })
-// Espejo EXACTO del payload que saveOwnedProgreso pasa a updateMany({ data }).
-const writeData = { progresoJson: fresco }
-assert.deepEqual(Object.keys(writeData), ['progresoJson'], 'el write toca SOLO progresoJson')
+// P27 — el payload YA NO es un espejo escrito acá: es el `data:` recortado de la
+// fuente del write. El espejo a mano («const writeData = { progresoJson: fresco }»)
+// se satisfacía a sí mismo — el censo de P26 lo listó como tal: «un guardado que
+// agregue el stage pasa igual», porque el objeto que se inspeccionaba lo escribía
+// este archivo. Ahora se inspecciona el que va a Prisma.
+const writeData = valorDeClave(saveOwnedProgreso, 'data', 'el updateMany de saveOwnedProgreso')
+assert.deepEqual(
+  clavesDeObjeto(writeData),
+  ['progresoJson'],
+  'el write toca SOLO progresoJson.\n' +
+    `  data = ${writeData}\n` +
+    '  Es la MISMA exactitud que antes («las claves del payload son exactamente\n' +
+    '  [progresoJson]»), ahora sobre el objeto que va a Prisma en vez de sobre un espejo\n' +
+    '  escrito dentro de este archivo. Cualquier campo de más —sea `stage` o no— cambia lo\n' +
+    '  que el guardado del checklist toca, y eso se decide, no se cuela.',
+)
 assert.ok(
-  !Object.prototype.hasOwnProperty.call(writeData, 'stage'),
-  'persistir el progreso no toca `stage` — no es una transición (esa es transitionDossier)',
+  !/\bstage\s*:/.test(writeData),
+  'el write del progreso agregó `stage` a su payload.\n' +
+    `  data = ${writeData}\n` +
+    '  Persistir el progreso NO es una transición: la única puerta del stage es\n' +
+    '  `transitionDossier`, que valida contra LEGAL_TRANSITIONS. Un `stage` mergeado acá\n' +
+    '  mueve el dossier saltándose el grafo — sin validar la transición, sin appendear el\n' +
+    '  rechazo, sin el reset del escalamiento. Es la misma clase de bug que el patch del\n' +
+    '  escalamiento tiene vigilada en su propio invariante.',
 )
 // El blob mismo es stage-free: ni clave `stage`, ni fase que sea un DossierStage.
 const lleno: Progreso = ProgresoSchema.parse({

@@ -23,6 +23,7 @@ import assert from 'node:assert/strict'
 import { DossierStage } from '@prisma/client'
 import { buildEscaladoPatch, estaEscalado, ESCALADO_RESET } from './escalamiento.ts'
 import { ownedLeadWhere, ownedListWhere, ownSetterMetaWhere } from './isolation.ts'
+import { cuerpoDeFuncion, valorDeClave } from '../invariant-call-site.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -85,6 +86,51 @@ assert.notEqual(
 )
 assert.deepEqual(ownedLeadWhere(LEAD, SETTER_A), { id: LEAD, assignedToId: SETTER_A })
 assert.deepEqual(ownedListWhere(SETTER_A), { assignedToId: SETTER_A })
+
+// ── 3. P27 — EL CALL-SITE QUE PERSISTE, NO SOLO LAS CLAVES DEL PATCH ────────
+// Todo lo de arriba mira `buildEscaladoPatch` en aislado. El censo de P26 lo
+// anotó exacto: «afirma sobre las claves del patch, no sobre el call-site que
+// persiste: un update que mergee el patch junto con el stage pasa igual». Las
+// dos garantías del encabezado son del WRITE, así que se leen del write.
+const marcarEscaladoOwned = cuerpoDeFuncion(
+  ['src', 'lib', 'leados', 'dossier.ts'],
+  'marcarEscaladoOwned',
+)
+
+// 3a. No dispara transiciones: el `data` del update es el patch ENTERO y NADA MÁS.
+const dataDelWrite = valorDeClave(
+  marcarEscaladoOwned,
+  'data',
+  'el updateMany de marcarEscaladoOwned',
+)
+assert.equal(
+  dataDelWrite,
+  'buildEscaladoPatch(descripcion, new Date())',
+  'el payload del write del escalamiento dejó de ser exactamente `buildEscaladoPatch(…)`.\n' +
+    `  data = ${dataDelWrite}\n` +
+    '  Las aserciones 1-1c de arriba prueban que el PATCH no tiene `stage`; no pueden ver lo\n' +
+    '  que el call-site le mergea encima. Un `data: { ...buildEscaladoPatch(…), stage: … }`\n' +
+    '  mueve el dossier sin pasar por `transitionDossier` —sin validar contra\n' +
+    '  LEGAL_TRANSITIONS, sin el reset, sin appendear nada— y las cinco aserciones de arriba\n' +
+    '  siguen verdes. Si el write necesita componer algo más, decidilo acá en el mismo commit.',
+)
+
+// 3b. No toca el aislamiento: el write llega por (id + dueño) y keyea por el
+//     dossier YA verificado. Es la contracara de 2c, que mira los filtros solos.
+assert.match(
+  marcarEscaladoOwned,
+  /const dossier = await getOwnedDossier\(leadId, userId\)\s*\n\s*if \(!dossier\) return null/,
+  'el write del escalamiento perdió el gate `getOwnedDossier(leadId, userId)`: sin él, un ' +
+    'leadId ajeno estampa «me trabé» sobre el dossier de otro setter, y el escalamiento que ' +
+    'Franco ve en el panel apunta al lead equivocado.',
+)
+assert.match(
+  marcarEscaladoOwned,
+  /where:\s*\{\s*leadId:\s*dossier\.leadId,\s*stage:\s*'CONSTRUCCION'\s*\}/,
+  'el `where` del write del escalamiento dejó de ser (dossier verificado + CONSTRUCCION). El ' +
+    'stage en el WHERE es el guard optimista y es legítimo; lo que no puede aparecer es en el ' +
+    '`data` (aserción 3a).',
+)
 
 console.log(
   '✓ invariante OK: persistir el escalamiento no dispara transiciones (sin `stage` en el ' +

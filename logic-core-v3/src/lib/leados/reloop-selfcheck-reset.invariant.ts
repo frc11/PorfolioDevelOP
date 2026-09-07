@@ -31,6 +31,7 @@ import assert from 'node:assert/strict'
 import { Prisma } from '@prisma/client'
 import { ESCALADO_RESET, RELOOP_RESET, esReloopRechazo } from './escalamiento.ts'
 import { LEGAL_TRANSITIONS } from './dossier-stage.ts'
+import { cuerpoDeFuncion, objetoAsignadoA } from '../invariant-call-site.ts'
 
 // ── 0. LA ARITY DEL LOOP-BACK (P8, caso 2) ───────────────────────────────────
 // `esReloopRechazo` ya no codifica el destino: lo LEE de `LEGAL_TRANSITIONS`.
@@ -107,6 +108,55 @@ assert.deepEqual(
   ESCALADO_RESET,
   { escaladoAt: null, escaladoNota: null },
   'ESCALADO_RESET no cambió: sigue siendo solo la marca de escalamiento',
+)
+
+// ── 5. P27 — LA COMPOSICIÓN REAL, NO LA DEL COMENTARIO ──────────────────────
+// El encabezado dice que `transitionDossier` compone
+//   data = { stage, ...ESCALADO_RESET, ...(esReloopRechazo ? RELOOP_RESET : {}) }
+// y las aserciones 1-4 verifican las tres piezas por separado. El censo de P26
+// nombró el hueco: «la composición real vive SÓLO en el comentario de cabecera:
+// una transición que deje de spreadear la constante —o que nadie la importe—
+// satisface igual sus claves». Un `RELOOP_RESET` perfecto que nadie aplica deja
+// las cuatro aserciones verdes y el self-check del rechazo sobrevive al re-loop:
+// el setter reenvía con los seis hard-checks en verde de la vuelta anterior, sin
+// haber corregido nada. Que es exactamente el bug que B6.2 vino a matar.
+const transitionDossier = cuerpoDeFuncion(
+  ['src', 'lib', 'leados', 'dossier.ts'],
+  'transitionDossier',
+)
+const dataCompuesta = objetoAsignadoA(
+  transitionDossier,
+  'data',
+  'la composición de transitionDossier',
+)
+
+assert.match(
+  dataCompuesta,
+  /\.\.\.\(\s*esReloopRechazo\(from, input\.to\)\s*\?\s*RELOOP_RESET\s*:\s*\{\}\s*\)/,
+  'la transición dejó de aplicar `RELOOP_RESET` gated por `esReloopRechazo`.\n' +
+    `  data = ${dataCompuesta}\n` +
+    '  Las aserciones 1-3 de arriba siguen verdes —`RELOOP_RESET` sigue limpiando sólo\n' +
+    '  `selfCheckJson`, `esReloopRechazo` sigue marcando sólo RECHAZADA→CONSTRUCCION— pero\n' +
+    '  nadie las usa. El self-check sobrevive al re-loop y el setter reenvía la demo con los\n' +
+    '  hard-checks tildados de la vuelta que fue rechazada.\n' +
+    '  El gate importa tanto como el spread: aplicarlo SIEMPRE borraría el self-check en\n' +
+    '  CONSTRUCCION→EN_REVISION y el panel de revisión del admin lo daría por anomalía.',
+)
+assert.match(
+  dataCompuesta,
+  /\.\.\.ESCALADO_RESET/,
+  'la transición dejó de spreadear `ESCALADO_RESET`.\n' +
+    `  data = ${dataCompuesta}\n` +
+    '  La aserción 4 prueba que esa constante NO lleva `selfCheckJson` (para que el\n' +
+    '  self-check sobreviva a las transiciones normales); si el spread se va, lo que se\n' +
+    '  pierde es lo otro: la marca «me trabé» sobrevive al cambio de stage y Franco ve un\n' +
+    '  escalamiento vigente sobre una construcción que ya no existe.',
+)
+assert.match(
+  dataCompuesta,
+  /stage:\s*input\.to,/,
+  'la composición de la transición dejó de setear `stage: input.to` — es LA puerta del ' +
+    'stage; sin eso la transición valida el grafo y no mueve nada.',
 )
 
 console.log(

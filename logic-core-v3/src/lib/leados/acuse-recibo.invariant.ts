@@ -36,6 +36,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
+import { bloqueTopLevelDe } from '../invariant-call-site.ts'
 
 const SETTER_DIR = join(process.cwd(), 'src', 'app', '(protected)', 'setter')
 const ACTIONS_DIR = join(SETTER_DIR, '_actions')
@@ -194,6 +195,29 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
       )
 
       /*
+       * P27 — EL COMPONENTE QUE CONTIENE LA LLAMADA, NO EL ARCHIVO.
+       *
+       * P25 arregló el ENVOLTORIO (ya es por call-site) pero dejó las dos
+       * señales evaluándose contra `fuente` —el archivo entero—, y el censo de
+       * P26 lo volvió a encontrar acá: «arreglar el caso que se tiene delante no
+       * arregla la forma». Las dos ramas de abajo usan este recorte.
+       *
+       * El sujeto es la declaración de nivel superior que contiene la llamada:
+       * en un `.tsx` eso es el componente, que es exactamente quien tiene que
+       * dar las señales. Un archivo con dos forms deja de poder prestarle a uno
+       * el `<AutosaveStatus>` o el `useStepAction()` del otro.
+       */
+      const componente = bloqueTopLevelDe(fuente, idx)
+      assert.ok(
+        componente,
+        `${nombre}: la llamada a ${accion}() no cae dentro de ninguna declaración de nivel ` +
+          'superior. O el archivo cambió de forma o el recorte dejó de servir — sin sujeto, ' +
+          'las señales volverían a evaluarse contra el archivo entero, que es el falso verde ' +
+          'que esto vino a cerrar.',
+      )
+      const ambito = `${nombre}::${componente.nombre}`
+
+      /*
        * ESCRITURA CONTINUA: sus DOS señales son propias, y se exigen acá.
        *
        * P25. Hasta acá la señal 1 se pedía igual para todos —`useStepAction()` o
@@ -217,17 +241,28 @@ for (const ruta of tsxDelSetter(SETTER_DIR)) {
        */
       if (envoltorio.tipo === 'autosave') {
         assert.ok(
-          /<AutosaveStatus/.test(fuente),
-          `${nombre}: ${accion}() autoguarda sin <AutosaveStatus> — el setter no tiene forma de ` +
-            'saber si su trabajo quedó',
+          /<AutosaveStatus/.test(componente.texto),
+          `${ambito}: ${accion}() autoguarda sin <AutosaveStatus> EN SU PROPIO COMPONENTE — el ` +
+            'setter no tiene forma de saber si su trabajo quedó.\n' +
+            '  P27: esto se evaluaba contra el archivo entero, así que en un archivo con dos ' +
+            'forms el `<AutosaveStatus>` de uno le firmaba la señal al otro. Un form podía ' +
+            'perder su acuse de escritura continua y seguir en verde.\n' +
+            '  El acuse es a nivel PANTALLA y el componente es el que la pinta: si el estado ' +
+            'del autosave se muestra desde un padre, pasale el `phase`/`isDirty` y renderizá ' +
+            'el `<AutosaveStatus>` acá — o el setter mira un form que no dice nada.',
         )
         continue
       }
 
       assert.ok(
-        RESPONDE_EN_EL_ACTO.some((patron) => patron.test(fuente)),
-        `${nombre} llama a ${accion}() y NO tiene señal 1: sin useStepAction()/useTransition() el ` +
-          'control no se apaga en el acto y el setter puede tocar dos veces',
+        RESPONDE_EN_EL_ACTO.some((patron) => patron.test(componente.texto)),
+        `${ambito} llama a ${accion}() y NO tiene señal 1 EN SU PROPIO COMPONENTE: sin ` +
+          'useStepAction()/useTransition() el control no se apaga en el acto y el setter puede ' +
+          'tocar dos veces.\n' +
+          '  P27: esto se evaluaba contra el archivo entero, así que el `useStepAction()` de ' +
+          'OTRA acción del mismo archivo —el envío, el avance— le firmaba la señal a una ' +
+          'acción que no lo tiene. El pending es del componente que dispara la acción: es ahí ' +
+          'donde tiene que declararse.',
       )
 
       const clave = `${nombre}::${accion}`

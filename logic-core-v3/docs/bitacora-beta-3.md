@@ -11454,3 +11454,337 @@ consecutivas) · `migrate status` **sin drift**.
 
 Sin cambios de schema, de transiciones ni de llaves de datos. Una sola línea de producto tocada
 —el `source(...)` de `globals.css`—, y ningún test borrado, salteado ni aflojado.
+
+## P27 · El aislamiento probado donde ocurre — 2026-09-07
+
+El censo de P26 dejó nueve invariantes marcados con la misma forma, y la peor: **probar que un
+helper devuelve el filtro de aislamiento, y no probar que la consulta lo llame.**
+
+```ts
+assert.deepEqual(ownSetterMetaWhere(SETTER_A), { setterId: SETTER_A })   // ✓ verde
+// …y ninguna aserción sobre la lectura del meta. Un `findMany({ where: { leadId } })`
+// escrito a mano en el call-site deja esto en verde con la fuga abierta.
+```
+
+La promesa del encabezado («toda lectura del meta se filtra por `setterId`») es sobre las
+**lecturas**; la aserción era sobre la **función**. Este sprint no cambia ninguna consulta: cambia
+dónde se prueba que están aisladas.
+
+---
+
+### 1 · El censo, primero — y no hubo frenada
+
+Antes de tocar un invariante había que medir el terreno, con la condición de frenada explícita: si
+aparecía una consulta sobre datos del setter que no filtra y no es una superficie de administración
+declarada, eso no era este sprint sino un hallazgo de seguridad.
+
+**No apareció ninguna.** El censo completo, con archivo:línea:
+
+| eje | llamadas | funciones | dónde |
+|---|---|---|---|
+| **setter** | **61** | 43 | `src/lib/leados/**` (47) · `setter/**` (5) · `os-commercial.ts` (9) |
+| **administración** | **38** | — | `admin/**` (36) · `api/cron/os-follow-up` (1) · `chatbot/hardDeleteClient` (1) |
+| total de producción | **99** | | |
+
+Fuera del censo, a propósito: 109 llamadas en `scripts/`, 78 en `tests/` y 9 en `prisma/` — semillas,
+herramientas de dev y fixtures, ninguna alcanzable por una sesión.
+
+#### 1.1 · El eje del setter — las 43 funciones
+
+Las seis columnas: dónde · qué consulta · el `where` · el helper de `isolation.ts` que usa · el gate
+de ownership que resuelve · cómo queda clasificada.
+
+| archivo:línea | función | consulta | `where` | helper | gate | clase |
+|---|---|---|---|---|---|---|
+| `agenda.ts:214` | marcarAgendandoOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, OR: PARTIDA_RECLAMABLE }` | — | `getOwnedDossier` | GATE |
+| `agenda.ts:252` | revertirAgendandoOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, agendaJson… }` | — | `getOwnedDossier` | GATE |
+| `agenda.ts:284` | guardarHorariosOfrecidosOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, OR: PARTIDA_RECLAMABLE }` | — | `getOwnedDossier` | GATE |
+| `agenda.ts:307` | revertirAgendaConfirmadaOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, AND: […] }` | — | `getOwnedDossier` | GATE |
+| `agenda.ts:333` | guardarAgendaOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, agendaJson… }` | — | `getOwnedDossier` | GATE |
+| `agenda.ts:353` | marcarReunionRealizadaAdmin | osLeadDossier.updateMany | `{ leadId, agendaJson… }` | — | — | **ADMIN** |
+| `agenda.ts:377` | guardarResultadoReunionAdmin | osLeadDossier.updateMany | `{ leadId, agendaJson… }` | — | — | **ADMIN** |
+| `agenda.ts:385` | leerAgendaAgendada | osLeadDossier.findUnique | `{ leadId }` | — | — | **ADMIN** |
+| `assignment-trail.ts:45` | registrarReasignacion | osLeadActivity.create | sin where | — | — | **ADMIN** |
+| `assignment-trail.ts:75` | getUltimaAsignacion | osLeadActivity.findFirst | `{ leadId: lead.id, channel: SISTEMA }` | — | `getOwnedLead` | GATE |
+| `dossier.ts:75` | getOwnedDossier | osLeadDossier.findUnique | `{ leadId: lead.id }` | — | `getOwnedLead` | GATE |
+| `dossier.ts:89` | ensureOwnedDossier | osLeadDossier.upsert | `{ leadId: lead.id }` | — | `getOwnedLead` | GATE |
+| `dossier.ts:120,228,238` | transitionDossier | findUnique · updateMany · findUnique | `{ leadId }` ⁄ `{ leadId, stage: from }` | — | — | **GATE_EN_CALLER** |
+| `dossier.ts:266,273` | saveOwnedFicha | updateMany · findUnique | `{ leadId: dossier.leadId, stage: 'FICHA' }` | — | `ensureOwnedDossier` | GATE |
+| `dossier.ts:291,298` | saveOwnedDraftUrl | updateMany · findUnique | `{ leadId: dossier.leadId, stage: 'CONSTRUCCION' }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:319,326` | marcarEscaladoOwned | updateMany · findUnique | `{ leadId: dossier.leadId, stage: 'CONSTRUCCION' }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:345,352` | saveOwnedSelfCheck | updateMany · findUnique | `{ leadId: dossier.leadId, stage: 'CONSTRUCCION' }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:377,384` | saveOwnedProgreso | updateMany · findUnique | `{ leadId: dossier.leadId, stage: 'CONSTRUCCION' }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:404` | marcarDemoEnviadaOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, stage: 'APROBADA', enviadaAt: null }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:422` | revertirDemoEnviadaOwned | osLeadDossier.updateMany | `{ leadId: dossier.leadId, stage: 'APROBADA' }` | — | `getOwnedDossier` | GATE |
+| `dossier.ts:445,452` | saveOwnedBrief | updateMany · findUnique | `{ leadId: dossier.leadId, stage: dossier.stage }` | — | `getOwnedDossier` | GATE |
+| `notify.ts:41` | notificarEscalamientoConstruccion | osLeadDossier.findUnique | `{ leadId: params.leadId }` | — | — | **GATE_EN_CALLER** |
+| `notify.ts:81` | notificarReunionAgendada | osLeadDossier.findUnique | `{ leadId }` | — | — | **GATE_EN_CALLER** |
+| `notify.ts:130,165` | notificarEvaluacionScoreAlto | findUnique · update | `{ leadId }` | — | — | **GATE_EN_CALLER** |
+| `novedades.ts:120` | emitirNovedadSetter | osSetterNotice.create | sin where (`data.setterId`) | — | — | **DESTINATARIO** |
+| `novedades.ts:256,269` | getNovedadesSetter | findMany · count | `{ ...ownSetterNoticeWhere(userId), read: false }` | `ownSetterNoticeWhere` | — | HELPER |
+| `novedades.ts:314` | contarNovedadesSinLeer | osSetterNotice.count | `{ ...ownSetterNoticeWhere(userId), read: false }` | `ownSetterNoticeWhere` | — | HELPER |
+| `novedades.ts:328` | marcarNovedadesVistas | osSetterNotice.updateMany | `{ ...ownSetterNoticeWhere(userId), read: false }` | `ownSetterNoticeWhere` | — | HELPER |
+| `outreach.ts:49` | listOwnedLeadActivities | osLeadActivity.findMany | `{ leadId: lead.id, ...SOLO_CONTACTOS_COMERCIALES }` | `SOLO_CONTACTOS_COMERCIALES` | `getOwnedLead` | HELPER |
+| `outreach.ts:69` | contarDmsHoy | osLeadActivity.count | `dmsMandadosHoyWhere(userId, desde, hasta)` | `dmsMandadosHoyWhere` | — | HELPER |
+| `ownership.ts:28` | getOwnedLead | osLead.findFirst | `ownedLeadWhere(leadId, userId)` | `ownedLeadWhere` | — | HELPER |
+| `ownership.ts:53` | listOwnedLeads | osLead.findMany | `ownedListWhere(userId)` + `_count` filtrado + `setterMetas` filtrado | `ownedListWhere` · `SOLO_CONTACTOS_COMERCIALES` · `ownSetterMetaWhere` | — | HELPER |
+| `progreso.ts:114` | getProgresoSemana | osLeadActivity.count | `{ performedById: userId, ...SOLO_CONTACTOS_COMERCIALES, createdAt }` | `SOLO_CONTACTOS_COMERCIALES` | — | HELPER |
+| `setter-carga.ts:63,73` | cargarCargaSetters | groupBy · findMany | `{ assignedToId: { in: setterIds } }` | — | — | **ADMIN** |
+| `setter-meta.ts:58` | upsertSetterMeta | osLeadSetterMeta.upsert | `{ leadId_setterId: { leadId, setterId } }` | — | — | **UNIQUE_COMPUESTA** |
+| `timeline.ts:51` | listOwnedLeadTimeline | osLeadActivity.findMany | `timelineActivityWhere(lead.id)` | `timelineActivityWhere` | `getOwnedLead` | HELPER |
+| `prospecto-bulk.actions.ts:83,109` | importarProspectos | findMany · create | `ownedListWhere(userId)` | `ownedListWhere` · `construirAltasLote` | — | HELPER |
+| `prospecto-bulk.actions.ts:144` | **nombresEnSistema** | osLead.findMany | **sin where** | — | — | **EXCEPCION_DECLARADA** |
+| `prospecto.actions.ts:28` | cargarProspecto | osLead.create | sin where (`ownedLeadCreateData`) | `ownedLeadCreateData` | — | HELPER |
+| `nuevo/page.tsx:22` | NuevoProspectoPage | osLead.findMany | `ownedListWhere(userId)` | `ownedListWhere` | — | HELPER |
+| `os-commercial.ts:57,69,79,86,97,111` | registrarContactoComercial | create · findMany · update ×4 | `{ leadId: input.leadId }` ⁄ `{ id: input.leadId }` | — | — | **GATE_EN_CALLER** |
+| `os-commercial.ts:137,165` | crearDemoComercial | osDemo.create · osLead.update | `{ id: demo.leadId }` | — | — | **GATE_EN_CALLER** |
+| `os-commercial.ts:185` | postergarLead | osLead.update | `{ id: leadId }` | — | — | **GATE_EN_CALLER** |
+
+#### 1.2 · La única que no filtra, y por qué no es una frenada
+
+`prospecto-bulk.actions.ts:144` lee **todos** los `businessName` del sistema, sin dueño. Es la única
+consulta del eje del setter que cruza el aislamiento de lectura, y **está declarada**, con su alcance
+y su límite escritos arriba:
+
+> «EXCEPCIÓN DELIBERADA y ACOTADA al aislamiento de LECTURA que A.1 blindó. […] Cruza el aislamiento
+> de lectura SOLO en lo mínimo: un bit de EXISTENCIA por nombre. NO expone de quién es el lead […]
+> el reporte al cliente solo señala los nombres que el PROPIO setter intentó importar.»
+
+Se verificó que el límite sigue siendo cierto: el resultado se consume como `enSistema.has(u.norm)`
+sobre los nombres del archivo que el setter subió, así que ningún nombre ajeno sale. Queda censada
+como `EXCEPCION_DECLARADA`, y el invariante nuevo exige que **la declaración siga estando**: una
+consulta que cruza el aislamiento sin el comentario que dice por qué es, para el que la lea después,
+indistinguible de un descuido.
+
+#### 1.3 · El eje de administración — alcance global a propósito
+
+Las 38 restantes son globales por diseño (métricas de Franco, digest de follow-up, borrado de
+cliente). Se recorrieron una por una buscando exactamente una cosa: **alguna alcanzable por un setter
+común**. Ninguna.
+
+| superficie | llamadas | guard | verificado |
+|---|---|---|---|
+| páginas RSC de `admin/**` | 15 | `admin/layout.tsx:41-49` — `auth()` + `redirect('/dashboard')` si el rol no es `SUPER_ADMIN` | no hay `middleware.ts` ni `(protected)/layout.tsx` en el repo: ése es el único gate, y está |
+| server actions de `admin/**` | 21 | `requireSuperAdmin()` **dentro de cada action** | contadas una por una sobre 20 archivos: `export async function` vs `requireSuperAdmin()` — todas cubiertas |
+| `api/cron/os-follow-up` | 1 | `CRON_SECRET` por `Authorization: Bearer` o `x-cron-secret`, **fail-closed** | sin el env var devuelve 401 siempre; no hay modo «sin secreto = pasa» |
+| `chatbot/hardDeleteClient` | 1 | `requireSuperAdmin()` en las dos funciones exportadas | envuelto en `unsafeGlobalQuery` con motivo declarado |
+
+Lo que importa de esa tabla es el segundo renglón: los ids de server action de Next **son invocables
+por cualquier sesión**, así que el gate del layout no las cubre. El `requireSuperAdmin()` de adentro
+sí, y está en las 21.
+
+#### 1.4 · La barrera estructural existe — en el otro módulo, y no se puede traer acá
+
+Sí existe, y es exactamente el patrón que el encargo suponía: `src/lib/isolation/` (registry +
+`scoped-model` + accessors `forOrg(orgId)`), con **eslint prohibiendo importar `@/lib/prisma`** en
+`src/modules/motor` y en todo el árbol del chatbot. Su propio encabezado dice que se generalizó
+*desde* LeadOS.
+
+Traerla al eje del setter significa que toda consulta pase por un `forSetter(userId)`. **Son 99
+llamadas de producción** (61 del eje del setter, 38 del de administración, que también tendrían que
+declarar su escape) más las 187 de `scripts/` y `tests/` que la regla del chatbot cubre
+explícitamente. Es un sprint entero y cambia el comportamiento de cada consulta. **Medido, anotado y
+no hecho** — es la condición de frenada del encargo para esa opción.
+
+Y hay una diferencia de diseño que no es sólo de tamaño: LeadOS es un módulo **puro** —exporta
+fragmentos y el caller los pasa a su propio prisma— mientras `src/lib/isolation/` **fusiona** el
+filtro con el acceso a datos. Portarlo no es mudar una regla de lint: es invertir de qué lado vive
+la consulta.
+
+---
+
+### 2 · Los nueve, uno por uno
+
+Ninguno perdió una aserción. Cada uno **suma** una que habla de la consulta real, leída de la fuente
+y **acotada al bloque** — el modelo es `dossier-stage.invariant.ts`, que ya lo hacía a mano para un
+`case` («buscar en el archivo entero daría verde sobre un `case` vaciado»).
+
+| # | invariante | forma elegida | qué quedó verdadero | fundamento |
+|---|---|---|---|---|
+| 1 | `setter-meta` | **A** (call-site atado) | `listOwnedLeads` adjunta el meta con `ownSetterMetaWhere` y arma su lista con `ownedListWhere`; `upsertSetterMeta` direcciona por la unique `(leadId, setterId)` | hay **una sola** lectura del meta y una sola escritura: atarlas es exhaustivo, y un censo sería andamiaje sobre dos filas |
+| 2 | `timeline` | **A** | `listOwnedLeadTimeline` resuelve `getOwnedLead` y corta con `null` **antes** de leer, y keyea por `lead.id` | el where es lead-scoped a propósito, así que el gate es el **único** filtro de dueño: no hay nada más que atar |
+| 3 | `assignment-trail` | **A**, en las dos puntas | el rastro se **escribe** con `channel: SISTEMA` / `result: null`, y el `_count` de la cartera lo **excluye** con `SOLO_CONTACTOS_COMERCIALES` | el censo de P26 dijo que «nada ata el evento al canal SISTEMA»; la promesa tiene dos mitades (escritura y lectura) y las dos son un call-site |
+| 4 | `novedades` | **A**, sobre las 4 | las tres lecturas/escrituras del feed spreadean `ownSetterNoticeWhere(userId)`, y la creación deriva el destinatario de `destinatarioNovedad` | `OsSetterNotice` es **addressed**: no cuelga de `assignedToId`, así que ese spread es lo único que lo aísla. Cuatro call-sites es poco: enumerarlos es más fuerte que un censo |
+| 5 | `mis-numeros` | **A**, sobre la página | `SetterHomePage` deriva `userId` de `requireSetter()`, alimenta con `listOwnedLeads(userId)` y atribuye con `derivarMisNumeros(leads, userId)` | los números son un derivado **puro**: su aislamiento no vive en el módulo sino en qué leads recibe y con qué id — o sea, en la página |
+| 6 | `progreso-isolation` | **A** + payload leído de la fuente | `saveOwnedProgreso` gatea con `getOwnedDossier` y su `data` es exactamente `{ progresoJson }` | el espejo del payload estaba **escrito dentro del propio invariante**: se satisfacía a sí mismo. Ahora se recorta el `data:` que va a Prisma — y la aserción conserva su exactitud original (las claves son **exactamente** `[progresoJson]`), no sólo la ausencia de `stage` |
+| 7 | `escalamiento` | **A** + payload | el `data` del write es **exactamente** `buildEscaladoPatch(descripcion, new Date())`, sin nada mergeado | el censo lo dijo textual: «un update que mergee el patch junto con el stage pasa igual». Recortar el `data:` es lo único que lo ve |
+| 8 | `reloop-selfcheck` | **A** + objeto compuesto | `transitionDossier` compone `{ stage, ...ESCALADO_RESET, ...(esReloopRechazo ? RELOOP_RESET : {}) }` | «la composición real vive sólo en el comentario de cabecera». Se lee el objeto, no el comentario |
+| 9 | `mask-secret` | **A** + barrido de una sola copia | los dos call-sites importan **y llaman** `maskSecret`, y el literal de la máscara vive en tres dueños declarados | la promesa no es «esta función enmascara bien» —trivial— sino «hay UNA copia». Barrer por el literal de bullets es el discriminador: toda re-implementación tiene que escribirlo |
+
+**Ninguno pidió la Forma B individualmente**, y por una razón que vale anotar: cada uno de los nueve
+custodia entre una y cuatro consultas, todas conocidas. Un censo por invariante habría sido
+andamiaje. Lo que **sí** pedía censo es lo que ninguno de los nueve puede ver, y va aparte.
+
+---
+
+### 3 · El invariante nuevo — lo que los nueve no pueden ver
+
+Atar cada invariante a su call-site cierra «alguien reescribe **esta** consulta a mano». Deja abierta
+la otra, que es la más probable: **alguien escribe una consulta nueva, en otra función, sin filtro.**
+Ninguno de los nueve la vería — no miran donde no está escrito que miren.
+
+`check:invariant:aislamiento` congela las 43 funciones del eje con su clase, y falla en las **dos**
+direcciones (una consulta nueva sin censar, y una censada que desapareció) — el mismo criterio que
+`run-invariants.mjs` aprendió con su piso. Además verifica los **25 callers** de las funciones que
+delegan el gate, y que no aparezca uno nuevo sin declarar.
+
+Esa última parte es la que más importa, y sale del censo: **`os-commercial.ts` es el eslabón más
+débil del eje.** Escribe `osLead`/`osDemo`/`osLeadActivity` con `where: { id }` puro, **no recibe
+`userId`**, y su invariante de ownership vive sólo en un comentario de cabecera («acá NO hay auth ni
+revalidación — cada caller pone su guard»). El tipo no la fuerza. Hoy los cinco call-sites del setter
+gatean; un sexto que se olvide produce un IDOR de **escritura** sobre el lead de otro setter, sin
+error de tipos, sin log y sin síntoma.
+
+---
+
+### 4 · Las demostraciones
+
+Cada sabotaje se aplica **sobre la consulta**, nunca sobre el helper: sabotear el helper ya da rojo
+hoy, y eso es justo lo que no prueba nada. En los once casos el **ANTES** es la versión del
+invariante en `HEAD` corriendo contra la misma consulta saboteada.
+
+| invariante | sabotaje sobre la consulta | ANTES | DESPUÉS | el rojo salió por |
+|---|---|---|---|---|
+| `setter-meta` | `setterMetas: { where: ownSetterMetaWhere(userId) }` → `setterMetas: true` | verde | **rojo** | «la lectura del meta en `listOwnedLeads` dejó de filtrar por `ownSetterMetaWhere`» |
+| `timeline` | se borra `const lead = await getOwnedLead(leadId, userId)` | verde | **rojo** | «la lectura del timeline perdió el GATE DE OWNERSHIP» |
+| `assignment-trail` | `channel: SISTEMA` → `channel: WHATSAPP` | verde | **rojo** | «el rastro dejó de escribirse con `channel: ActivityChannel.SISTEMA`» |
+| `novedades` | se quita `...ownSetterNoticeWhere(userId)` del `updateMany` de `marcarNovedadesVistas` | verde | **rojo** | «`marcarNovedadesVistas` — la marca de «vistas» (una ESCRITURA) — dejó de filtrar…» |
+| `mis-numeros` | `derivarMisNumeros(leads, userId)` → `(leads, leads[0]?.assignedToId ?? userId)` | verde | **rojo** | «la home dejó de atribuir los números al `userId` de la sesión» |
+| `progreso-isolation` | se agrega `stage: 'EN_REVISION'` al `data` del write | verde | **rojo** | «el write toca SOLO progresoJson» — las claves reales del payload dejaron de ser `[progresoJson]` |
+| `escalamiento` | `data: buildEscaladoPatch(…)` → `data: { ...buildEscaladoPatch(…), stage: 'EN_REVISION' }` | verde | **rojo** | «el payload del write del escalamiento dejó de ser exactamente `buildEscaladoPatch(…)`» |
+| `reloop-selfcheck` | se borra el spread `...(esReloopRechazo(…) ? RELOOP_RESET : {})` | verde | **rojo** | «la transición dejó de aplicar `RELOOP_RESET` gated por `esReloopRechazo`» |
+| `mask-secret` | `settings-console.tsx` cambia el import por una re-implementación local con los bullets | verde | **rojo** | «dejó de importar `maskSecret` de @/lib/mask-secret» |
+| `acuse-recibo` rama 1 | el `<AutosaveStatus>` se **muda** de `BriefForm` a `BriefResumen` (mismo archivo) | verde | **rojo** | «`BriefForm`: `guardarBrief()` autoguarda sin `<AutosaveStatus>` EN SU PROPIO COMPONENTE» |
+| `acuse-recibo` rama 2 | el `useStepAction()` se **muda** de `BriefForm` a `BriefResumen` | verde | **rojo** | «`BriefForm` llama a `guardarBrief()` y NO tiene señal 1 EN SU PROPIO COMPONENTE» |
+
+**El control, en los once: un cambio inocuo sobre la misma consulta —un comentario al final de la
+línea, un `orderBy` anotado— deja el invariante en verde.** Uno que se pone rojo con todo tampoco
+discrimina.
+
+#### 4.1 · Las dos ramas del acuse: por qué el sabotaje es una MUDANZA
+
+P25 arregló el envoltorio de `acuse-recibo` (ya era por call-site) y dejó las dos señales
+evaluándose contra `fuente` — el archivo entero. Para distinguir «por archivo» de «por componente»
+el sabotaje no puede ser borrar la señal: eso pone en rojo a los dos. Tiene que **moverla a un
+hermano del mismo archivo**. `brief-form.tsx` sirve para las dos ramas porque tiene `BriefForm`
+(autoguarda con `<AutosaveStatus>` y además escribe por `run()` con su `useStepAction()`) y
+`BriefResumen` al lado.
+
+Con la señal mudada, el archivo la sigue teniendo —**ANTES: verde**— y el componente que escribe la
+perdió —**DESPUÉS: rojo**—. Es exactamente el falso verde que el censo describía: «la señal 1 de un
+autoguardado la firma cualquier `useStepAction()` del archivo».
+
+El sujeto nuevo es la **declaración de nivel superior** que contiene la llamada: en un `.tsx` eso es
+el componente, que es exactamente quien tiene que dar las señales. Sobre el árbol real no hubo ni un
+falso rojo: las 31 llamadas repartidas en 19 componentes siguen dando sus dos señales en su propio
+componente.
+
+#### 4.2 · El censo nuevo, y el contraste que lo justifica
+
+| sabotaje | los nueve | el censo |
+|---|---|---|
+| una consulta **nueva** sin filtro (`leadsDelEquipo()` → `osLead.findMany({ where: { status } })` en `progreso.ts`) | **9/9 en VERDE** | **rojo** — «CONSULTA NUEVA SIN CENSAR: `progreso.ts::leadsDelEquipo` → osLead.findMany» |
+| `registrarOpener` pierde sus **dos** gates antes de `registrarContactoComercial()` | **9/9 en VERDE** | **rojo** — «PERDIÓ EL GATE DE OWNERSHIP» |
+
+Nueve sobre nueve en verde es el argumento entero del invariante nuevo.
+
+**Y un tercer resultado, que salió del propio sabotaje:** quitar **un solo** gate de
+`registrarOpener` —el `getOwnedLead`, dejando el `getOwnedDossier`— **no** pone el censo en rojo. Y
+está bien que no: `getOwnedDossier` llama a `getOwnedLead` por dentro, así que el ownership sigue
+resuelto. El hueco es real recién cuando se van los dos. El primer intento pasó en verde y el
+reflejo era aflojar el chequeo; medirlo mostró que el chequeo tenía razón.
+
+---
+
+### 5 · Dos fallas del instrumento, encontradas antes de creerle
+
+Vale anotarlas porque las dos son la misma forma —**fallar en silencio devolviendo el bloque
+equivocado**— que es lo que este sprint vino a cerrar.
+
+**1. `sed -i` reescribe los finales de línea del archivo entero.** Estos archivos son CRLF, así que
+un `diff` posterior marca *todo* como cambiado y el guard de «el sabotaje aplicó» se satisface
+aunque el patrón nunca haya matcheado. Pasó: una indentación de más (6 espacios donde había 4) dio
+un DESPUÉS **verde** que parecía un invariante flojo y era el instrumento. El harness se pasó a un
+reemplazo **literal** por node, que exige exactamente una ocurrencia y falla ruidoso.
+
+**2. «el primer `{` después de la firma» no es el cuerpo de la función.** Dos formas comunes de
+este repo lo rompen:
+
+```ts
+getNovedadesSetter(userId, leads, opts?: { excludeLeadIds?: … })   // el { es del parámetro
+cargarProspecto(…): Promise<ActionResult<{ id: string }>> { … }    // el { es del tipo de retorno
+```
+
+El primero recortaba **551 caracteres de la lista de parámetros**, sin una sola consulta adentro; el
+segundo recortaba `{ id: string }`. Los dos se detectaron cruzando el recorte contra un **mecanismo
+independiente** —el censo por declaraciones de nivel superior, que atribuía consultas a funciones
+cuyo «cuerpo» no tenía ninguna—. Ese cruce quedó como chequeo: **0 discrepancias sobre las 43**.
+Faltaba también `export default async function` (las páginas), que el `mis-numeros` nuevo necesita.
+
+Y una tercera, en el mismo `data:`: en `transitionDossier` la composición es
+`const data: Prisma.OsLeadDossierUpdateManyMutationInput = { … }`, y buscar `data:` devolvía el
+**tipo**, no el valor — el recorte se pasaba del objeto y seguía leyendo el `switch` de abajo. Con
+eso, un `...RELOOP_RESET` escrito en cualquier otro lado de la función lo habría satisfecho: el mismo
+falso verde por granularidad, una capa más adentro.
+
+---
+
+### 6 · La red de conducta
+
+Leer la fuente prueba que el programa **dice** lo correcto. Falta que **haga** lo correcto:
+`tests/leados/aislamiento-superficies.spec.ts` corre las funciones de producción contra la DB con
+dos setters de verdad, una vez por superficie que el censo marcó.
+
+| test | superficie | qué afirma |
+|---|---|---|
+| la CARTERA de A no trae ningún lead de B | `listOwnedLeads` | toda fila es de A |
+| el META PRIVADO no viaja cruzado | `listOwnedLeads` + `upsertSetterMeta` | A escribe su meta sobre un lead **de B**; B no ve esa nota |
+| un LEAD ajeno es indistinguible de inexistente | `getOwnedLead` | `null` en las dos direcciones |
+| el TIMELINE ajeno no se abre | `listOwnedLeadTimeline` | `null` para el no-dueño |
+| las ACTIVIDADES ajenas no se leen | `listOwnedLeadActivities` | `null` para el no-dueño |
+| los CONTADORES son por performer | `contarDmsHoy` · `getProgresoSemana` | el DM de B no suma a A |
+| las NOVEDADES de B no las ve **ni las marca** A | `contarNovedadesSinLeer` · `marcarNovedadesVistas` | A marcando «vistas» no apaga los avisos de B |
+| MIS NÚMEROS se calculan con la cartera propia | `listOwnedLeads` + `derivarMisNumeros` | las dos carteras **particionan** los leads |
+
+El de la nota privada es el que vale más: es el único caso donde la fila **existe** y es de otro, así
+que un `include` sin filtro la traería. Los demás confirman el `null`.
+
+---
+
+Y el test de conducta también se demostró fallando. Con `setterMetas: { where: ownSetterMetaWhere(userId) }`
+cambiado por `setterMetas: true`, el rojo sale por el aserto de aislamiento —no por otro—:
+
+```
+x  el META PRIVADO de A no viaja en la cartera de B, ni al revés (setterMetas)
+   Error: toda fila de meta que B recibe es SUYA
+     123 |     filaB?.setterMetas.every((meta) => meta.setterId === setterB),
+```
+
+---
+
+### 7 · Estado
+
+| chequeo | antes | después |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `check:invariants` | 56 descubiertos · 55 corridos · **55 pasaron** | 57 descubiertos · 56 corridos · **56 pasaron** · 0 fallaron |
+| `test:setter` | 191 | **191 pasados** (7,1 min) |
+| `test:leados` | 33 | **41 pasados** (33 + los 8 nuevos de aislamiento) |
+| `test:helpers` | 28 | **28 pasados** |
+| `npx prisma migrate status` | — | 86 migraciones · **schema up to date, sin drift** |
+
+Ninguna consulta cambió su comportamiento. Ningún invariante perdió una aserción. El único cambio de
+producción es un archivo nuevo de invariante y su registro en el runner.
+
+### Lo que queda anotado
+
+- **Los otros 24 sobre-satisfacibles**, con su censo ya hecho en `docs/censo-invariantes-p26.md`: 7
+  por fixture derivada de la constante vigilada, 5 por aguja demasiado ancha, 5 por espejo a mano, 3
+  por tautología, y los restantes de la forma «afirma por archivo» que P25/P27 no tocaron.
+- **`os-commercial.ts` sin ownership en el tipo.** El censo lo vigila por call-site; cerrarlo
+  *estructuralmente* pide que la firma reciba el `userId` (o un `assertOwned`), que es cambiar el
+  comportamiento de la consulta — fuera del alcance de este sprint, y la decisión es de Franco.
+- **La barrera estructural del eje del setter**: 99 llamadas de producción. Medida, no hecha.
+- La ventana del servidor, el diálogo sin rol y la franja de conteos siguen pendientes.
+- El flake de P26 quedó **caracterizado, no arreglado**: sólo aparece con servidor frío
+  (`webServer`), y las ocho corridas tibias dieron 0 rojas.

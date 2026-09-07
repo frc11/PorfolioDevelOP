@@ -34,6 +34,7 @@ import {
   SOLO_CONTACTOS_COMERCIALES,
   timelineActivityWhere,
 } from './isolation.ts'
+import { cuerpoDeFuncion } from '../invariant-call-site.ts'
 
 const LEAD = 'lead-1'
 const SETTER_A = 'setter-a'
@@ -90,6 +91,40 @@ assert.equal(contarComercial(sinSistema), 2)
 assert.equal(contarComercial(conSistema), contarComercial(sinSistema))
 // Y un lead con SOLO eventos de sistema NO abre Seguimiento (conteo comercial 0).
 assert.equal(contarComercial([sistema, sistema]), 0)
+
+// ── (c) P27 — LA LECTURA REAL TIENE EL GATE Y USA EL FILTRO ─────────────────
+// (a) y (b) miran los helpers en aislado: prueban que `timelineActivityWhere`
+// devuelve `{ leadId }` y que el gate DEVUELVE `{ id, assignedToId }`. Nada
+// probaba que la lectura los llame. El censo de P26 lo midió: un
+// `findMany({ where: { leadId } })` sin el `getOwnedLead` de arriba deja este
+// invariante en verde y el timeline de CUALQUIER lead abierto por leadId — que
+// es justo el anti-IDOR que el encabezado promete.
+const listOwnedLeadTimeline = cuerpoDeFuncion(
+  ['src', 'lib', 'leados', 'timeline.ts'],
+  'listOwnedLeadTimeline',
+)
+
+assert.match(
+  listOwnedLeadTimeline,
+  /const lead = await getOwnedLead\(leadId, userId\)\s*\n\s*if \(!lead\) return null/,
+  'la lectura del timeline perdió el GATE DE OWNERSHIP.\n' +
+    '  `listOwnedLeadTimeline` tiene que resolver `getOwnedLead(leadId, userId)` y cortar con\n' +
+    '  `null` ANTES de leer las actividades. El where del timeline es lead-scoped a propósito\n' +
+    '  (keyear por performer perdería la reasignación SISTEMA), así que SIN ese gate un leadId\n' +
+    '  cualquiera —los ids viajan al cliente— abre el historial completo de un lead ajeno:\n' +
+    '  con quién habló otro setter, cuándo y qué anotó. El gate no es opcional acá: es el\n' +
+    '  ÚNICO filtro de dueño de esta lectura.',
+)
+
+assert.match(
+  listOwnedLeadTimeline,
+  /where:\s*timelineActivityWhere\(lead\.id\)/,
+  'el where del timeline dejó de armarse con `timelineActivityWhere(lead.id)`.\n' +
+    '  Dos cosas se pierden a la vez: la fuente única del filtro (la aserción (a) de arriba\n' +
+    '  pasa a hablar de una función que nadie llama), y el ANCLAJE al lead ya verificado —\n' +
+    '  keyear por el `leadId` crudo del parámetro en vez de por `lead.id` (el que devolvió el\n' +
+    '  gate) vuelve a poner la lectura en manos de un id del cliente.',
+)
 
 console.log(
   '✓ invariante OK: timeline lead-scoped (gate ownership + where por leadId, no ' +

@@ -31,6 +31,7 @@ import {
 } from './mis-numeros.ts'
 import { calcularRatioSetters } from './revision.ts'
 import { ownedListWhere } from './isolation.ts'
+import { cuerpoDeFuncion } from '../invariant-call-site.ts'
 
 const SETTER_A = 'setter-a'
 const SETTER_B = 'setter-b'
@@ -124,6 +125,48 @@ const vacios = calcularMisNumeros([], SETTER_A, AHORA)
 assert.equal(vacios.activos, 0)
 assert.equal(vacios.enCartera, 0)
 assert.equal(vacios.criterio, null)
+
+// ── 6. P27 — LA PÁGINA REAL ENGANCHA LOS DOS CANDADOS ───────────────────────
+// La aserción 1 mira `ownedListWhere` en aislado y la 2 mira `filasCriterioPropio`
+// con un `userId` que este archivo elige. El censo de P26 nombró las dos mitades
+// del hueco: «el candado de query se afirma sobre el helper en aislado y NADA ATA
+// LA PÁGINA A ÉL». Los números son un derivado puro: su aislamiento no vive acá,
+// vive en QUÉ leads recibe y con QUÉ id se los atribuye. Eso pasa en la página.
+const paginaSetter = cuerpoDeFuncion(
+  ['src', 'app', '(protected)', 'setter', 'page.tsx'],
+  'SetterHomePage',
+)
+
+// 6a. Candado de query: los leads salen de la ÚNICA puerta aislada, no de una
+//     consulta propia de la página.
+assert.match(
+  paginaSetter,
+  /const leads = await listOwnedLeads\(userId\)/,
+  'la home del setter dejó de alimentar sus números con `listOwnedLeads(userId)`.\n' +
+    '  Ese es el candado de query entero: `listOwnedLeads` es la única lectura de listas que\n' +
+    '  filtra por `ownedListWhere`. Si la página arma su propia consulta —o recibe los leads\n' +
+    '  de otra fuente— «Mis números» pasa a contar leads que no son del setter, y la\n' +
+    '  aserción 1 de arriba sigue verde: prueba que el helper devuelve `{ assignedToId }`,\n' +
+    '  no que estos números vengan de él.',
+)
+
+// 6b. Candado de cálculo: la atribución sale del `userId` DE LA SESIÓN.
+assert.match(
+  paginaSetter,
+  /const userId = await requireSetter\(\)/,
+  '`SetterHomePage` dejó de derivar `userId` de `requireSetter()`. Ése es el origen de los ' +
+    'dos candados a la vez: el mismo id filtra la query y atribuye las filas del ratio. Un ' +
+    'id que venga de otro lado (un search param, un prop) los abre los dos de una vez.',
+)
+assert.match(
+  paginaSetter,
+  /derivarMisNumeros\(leads, userId\)/,
+  'la home dejó de atribuir los números al `userId` de la sesión.\n' +
+    '  Las aserciones 2-2c prueban que `filasCriterioPropio` etiqueta cada fila con el id que\n' +
+    '  se le pasa, y que por eso el resultado tiene a lo sumo UN setter. Cuál id se le pasa\n' +
+    '  lo decide ESTA línea: con un id leído del lead (`leads[0].assignedToId`) el cálculo\n' +
+    '  seguiría produciendo un solo bucket —verde en 2c— pero el bucket sería el de OTRO.',
+)
 
 console.log(
   '✓ invariante OK: "Mis números" aislados — entrada por cartera propia ' +

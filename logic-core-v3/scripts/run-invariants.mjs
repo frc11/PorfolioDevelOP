@@ -78,7 +78,15 @@
 // mandar cosas distintas sobre el mismo lead. Un aviso es un snapshot congelado
 // en el handoff; cuando el lead se mueve, la orden caduca y el aviso pasa a decir
 // lo que la cola dice (`proximaAccion`, la misma fuente).
-const INVARIANTES_ESPERADOS = 56;
+// 57 desde P27 («el aislamiento probado donde ocurre»): suma
+// `check:invariant:aislamiento` — el censo congelado de TODA consulta sobre los
+// modelos con dueño del setter (43 funciones en 140 archivos del eje), con el
+// mecanismo de aislamiento que cada una declara y con los callers de las que
+// delegan el gate. Es la mitad que los nueve invariantes de aislamiento no
+// pueden cubrir: cada uno de ellos mira SU call-site, así que una consulta NUEVA
+// sin filtro —escrita en otra función— no la ve ninguno. Falla en las dos
+// direcciones (una consulta nueva sin censar y una censada que desapareció).
+const INVARIANTES_ESPERADOS = 57;
 
 // ── Exclusiones ──────────────────────────────────────────────────────────────
 // Scripts que se DESCUBREN pero no se corren, con el motivo al lado. Se imprimen
