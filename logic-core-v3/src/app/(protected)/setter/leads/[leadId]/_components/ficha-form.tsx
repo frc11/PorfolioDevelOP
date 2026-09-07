@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useRef, useState, useTransition, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Save } from 'lucide-react'
 import { Button, Field, Input, Select, TextArea } from '@/components/ui'
@@ -162,7 +161,6 @@ type FichaFormProps = {
 }
 
 export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
-  const router = useRouter()
   const [form, setForm] = useState<FichaFormState>(() => estadoInicial(ficha))
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -279,7 +277,9 @@ export function FichaForm({ leadId, ficha, cierre }: FichaFormProps) {
           : 'Borrador guardado — podés volver cuando quieras',
       )
       autosave.markSaved()
-      router.refresh()
+      // P28 — Sin `router.refresh()`: la respuesta del POST de la action (que
+      // revalida) ya trae el árbol nuevo y React lo aplica sola. Ver la nota
+      // larga en `use-step-action.ts`.
     })
   }
 

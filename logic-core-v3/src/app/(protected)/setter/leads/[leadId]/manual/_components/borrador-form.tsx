@@ -1,7 +1,6 @@
 'use client'
 
 import { useId, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { ExternalLink, PencilLine, UploadCloud } from 'lucide-react'
 import { Badge, Button, Field, Input, Toggle } from '@/components/ui'
@@ -42,7 +41,6 @@ export function BorradorForm({
   /** ¿La posición derivada alcanza el chequeo final? (lo decide el server). */
   chequeoAccesible: boolean
 }) {
-  const router = useRouter()
   const [url, setUrl] = useState(draftUrl ?? '')
   const [confirmoCarga, setConfirmoCarga] = useState(false)
   const [errores, setErrores] = useState<ErroresBorrador>({})
@@ -87,7 +85,9 @@ export function BorradorForm({
       toast.success('Borrador guardado.')
       setEditando(false)
       setConfirmoCarga(false)
-      router.refresh()
+      // P28 — Sin `router.refresh()`: la respuesta del POST de la action (que
+      // revalida) ya trae el árbol nuevo y React lo aplica sola. Ver la nota
+      // larga en `use-step-action.ts`.
     })
   }
 

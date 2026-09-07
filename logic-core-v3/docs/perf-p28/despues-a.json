@@ -1,0 +1,4359 @@
+{
+  "generado": "2026-09-07T20:13:06.515Z",
+  "pasadas": 3,
+  "filas": [
+    {
+      "clave": "alta",
+      "accion": "Cargar el prospecto",
+      "pantalla": "alta",
+      "acuseControl": {
+        "mediana": 3,
+        "peor": 4
+      },
+      "acuseResultado": {
+        "mediana": 242,
+        "peor": 304
+      },
+      "reflejo": {
+        "mediana": 1272,
+        "peor": 1885
+      },
+      "escrituraDb": {
+        "mediana": 114,
+        "peor": 463
+      },
+      "renderServidor": {
+        "mediana": 179,
+        "peor": 179
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 3,
+      "viajesPrefetch": 4,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 471,
+        "peor": 472
+      },
+      "msAccion": {
+        "mediana": 456,
+        "peor": 466
+      },
+      "msRsc": {
+        "mediana": 785,
+        "peor": 1397
+      },
+      "redCritica": {
+        "mediana": 1231,
+        "peor": 1844
+      },
+      "sinExplicar": {
+        "mediana": 41,
+        "peor": 41
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "foco",
+      "accion": "Trabajar este lead (anclar el foco)",
+      "pantalla": "panel",
+      "acuseControl": {
+        "mediana": 2,
+        "peor": 2
+      },
+      "acuseResultado": null,
+      "reflejo": {
+        "mediana": 1133,
+        "peor": 1691
+      },
+      "escrituraDb": {
+        "mediana": 63,
+        "peor": 530
+      },
+      "renderServidor": {
+        "mediana": 422,
+        "peor": 823
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 4,
+      "viajesPrefetch": 5,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 384,
+        "peor": 385
+      },
+      "msAccion": {
+        "mediana": 639,
+        "peor": 1113
+      },
+      "msRsc": {
+        "mediana": 915,
+        "peor": 1475
+      },
+      "redCritica": {
+        "mediana": 1115,
+        "peor": 1676
+      },
+      "sinExplicar": {
+        "mediana": 15,
+        "peor": 18
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m1-ficha",
+      "accion": "Guardar la ficha",
+      "pantalla": "m1",
+      "acuseControl": {
+        "mediana": 3,
+        "peor": 3
+      },
+      "acuseResultado": {
+        "mediana": 671,
+        "peor": 889
+      },
+      "reflejo": {
+        "mediana": 4678,
+        "peor": 4897
+      },
+      "escrituraDb": {
+        "mediana": 576,
+        "peor": 920
+      },
+      "renderServidor": {
+        "mediana": 309,
+        "peor": 390
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 2,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 3,
+        "peor": 3
+      },
+      "msAccion": {
+        "mediana": 949,
+        "peor": 1170
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 949,
+        "peor": 1170
+      },
+      "sinExplicar": {
+        "mediana": 3727,
+        "peor": 3729
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m1-veredicto",
+      "accion": "Registrar el veredicto",
+      "pantalla": "m1",
+      "acuseControl": {
+        "mediana": 12,
+        "peor": 12
+      },
+      "acuseResultado": {
+        "mediana": 723,
+        "peor": 743
+      },
+      "reflejo": {
+        "mediana": 4735,
+        "peor": 4752
+      },
+      "escrituraDb": {
+        "mediana": 527,
+        "peor": 689
+      },
+      "renderServidor": {
+        "mediana": 286,
+        "peor": 291
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 4,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 4735,
+        "peor": 4752
+      },
+      "msAccion": {
+        "mediana": 994,
+        "peor": 1016
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 994,
+        "peor": 1016
+      },
+      "sinExplicar": {
+        "mediana": 3737,
+        "peor": 3741
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m4-opener",
+      "accion": "Registrar el opener",
+      "pantalla": "m4",
+      "acuseControl": {
+        "mediana": 12,
+        "peor": 13
+      },
+      "acuseResultado": {
+        "mediana": 782,
+        "peor": 891
+      },
+      "reflejo": {
+        "mediana": 4802,
+        "peor": 4902
+      },
+      "escrituraDb": {
+        "mediana": 493,
+        "peor": 752
+      },
+      "renderServidor": {
+        "mediana": 327,
+        "peor": 343
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 6,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 4802,
+        "peor": 4902
+      },
+      "msAccion": {
+        "mediana": 1164,
+        "peor": 1270
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 1164,
+        "peor": 1270
+      },
+      "sinExplicar": {
+        "mediana": 3638,
+        "peor": 3677
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m5-respondio",
+      "accion": "Registrar «Respondió»",
+      "pantalla": "m5",
+      "acuseControl": {
+        "mediana": 11,
+        "peor": 13
+      },
+      "acuseResultado": {
+        "mediana": 578,
+        "peor": 578
+      },
+      "reflejo": {
+        "mediana": 1271,
+        "peor": 1312
+      },
+      "escrituraDb": {
+        "mediana": 302,
+        "peor": 471
+      },
+      "renderServidor": {
+        "mediana": 384,
+        "peor": 393
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 1,
+      "viajesPrefetch": 7,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 11,
+        "peor": 13
+      },
+      "msAccion": {
+        "mediana": 903,
+        "peor": 950
+      },
+      "msRsc": {
+        "mediana": 338,
+        "peor": 341
+      },
+      "redCritica": {
+        "mediana": 1244,
+        "peor": 1288
+      },
+      "sinExplicar": {
+        "mediana": 25,
+        "peor": 27
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m5-postergar",
+      "accion": "Postergar el lead",
+      "pantalla": "m5",
+      "acuseControl": {
+        "mediana": 1,
+        "peor": 2
+      },
+      "acuseResultado": {
+        "mediana": 498,
+        "peor": 613
+      },
+      "reflejo": {
+        "mediana": 4507,
+        "peor": 4631
+      },
+      "escrituraDb": {
+        "mediana": 238,
+        "peor": 288
+      },
+      "renderServidor": {
+        "mediana": 338,
+        "peor": 339
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 2,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 498,
+        "peor": 613
+      },
+      "msAccion": {
+        "mediana": 823,
+        "peor": 967
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 823,
+        "peor": 967
+      },
+      "sinExplicar": {
+        "mediana": 3672,
+        "peor": 3684
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m6-brief",
+      "accion": "Guardar el brief",
+      "pantalla": "m6",
+      "acuseControl": {
+        "mediana": 1,
+        "peor": 2
+      },
+      "acuseResultado": {
+        "mediana": 1025,
+        "peor": 1066
+      },
+      "reflejo": {
+        "mediana": 5033,
+        "peor": 5081
+      },
+      "escrituraDb": {
+        "mediana": 473,
+        "peor": 577
+      },
+      "renderServidor": {
+        "mediana": 287,
+        "peor": 287
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 4,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 1,
+        "peor": 2
+      },
+      "msAccion": {
+        "mediana": 1338,
+        "peor": 1354
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 1338,
+        "peor": 1354
+      },
+      "sinExplicar": {
+        "mediana": 3679,
+        "peor": 3743
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "mc-arrancar",
+      "accion": "Arrancar la construcción",
+      "pantalla": "mc1",
+      "acuseControl": {
+        "mediana": 13,
+        "peor": 13
+      },
+      "acuseResultado": {
+        "mediana": 611,
+        "peor": 706
+      },
+      "reflejo": {
+        "mediana": 4619,
+        "peor": 4720
+      },
+      "escrituraDb": {
+        "mediana": 463,
+        "peor": 577
+      },
+      "renderServidor": {
+        "mediana": 291,
+        "peor": 305
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 14,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 4619,
+        "peor": 4720
+      },
+      "msAccion": {
+        "mediana": 990,
+        "peor": 994
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 990,
+        "peor": 994
+      },
+      "sinExplicar": {
+        "mediana": 3726,
+        "peor": 3728
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "mc1-tilde",
+      "accion": "Tildar una fase (mc1)",
+      "pantalla": "mc1",
+      "acuseControl": {
+        "mediana": 1,
+        "peor": 1
+      },
+      "acuseResultado": {
+        "mediana": 518,
+        "peor": 520
+      },
+      "reflejo": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "escrituraDb": {
+        "mediana": 350,
+        "peor": 466
+      },
+      "renderServidor": {
+        "mediana": 286,
+        "peor": 288
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 7,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 1,
+        "peor": 1
+      },
+      "msAccion": {
+        "mediana": 779,
+        "peor": 782
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 779,
+        "peor": 782
+      },
+      "sinExplicar": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "mc2-tilde",
+      "accion": "Tildar una fase (mc2)",
+      "pantalla": "mc2",
+      "acuseControl": {
+        "mediana": 1,
+        "peor": 1
+      },
+      "acuseResultado": {
+        "mediana": 541,
+        "peor": 545
+      },
+      "reflejo": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "escrituraDb": {
+        "mediana": 350,
+        "peor": 401
+      },
+      "renderServidor": {
+        "mediana": 295,
+        "peor": 296
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 7,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 1,
+        "peor": 1
+      },
+      "msAccion": {
+        "mediana": 808,
+        "peor": 865
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 808,
+        "peor": 865
+      },
+      "sinExplicar": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "mc-escalar",
+      "accion": "Escalar «me trabé»",
+      "pantalla": "mc1",
+      "acuseControl": {
+        "mediana": 4732,
+        "peor": 4949
+      },
+      "acuseResultado": {
+        "mediana": 939,
+        "peor": 1042
+      },
+      "reflejo": {
+        "mediana": 4732,
+        "peor": 4949
+      },
+      "escrituraDb": {
+        "mediana": 359,
+        "peor": 458
+      },
+      "renderServidor": {
+        "mediana": 290,
+        "peor": 294
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 1,
+      "viajesPrefetch": 5,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 4732,
+        "peor": 4949
+      },
+      "msAccion": {
+        "mediana": 935,
+        "peor": 1036
+      },
+      "msRsc": {
+        "mediana": 313,
+        "peor": 322
+      },
+      "redCritica": {
+        "mediana": 1238,
+        "peor": 1349
+      },
+      "sinExplicar": {
+        "mediana": 3704,
+        "peor": 3711
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m13-borrador",
+      "accion": "Guardar el link del borrador",
+      "pantalla": "m13",
+      "acuseControl": {
+        "mediana": 1,
+        "peor": 1
+      },
+      "acuseResultado": {
+        "mediana": 678,
+        "peor": 767
+      },
+      "reflejo": {
+        "mediana": 995,
+        "peor": 4784
+      },
+      "escrituraDb": {
+        "mediana": 348,
+        "peor": 457
+      },
+      "renderServidor": {
+        "mediana": 297,
+        "peor": 299
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 6,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 4685,
+        "peor": 4784
+      },
+      "msAccion": {
+        "mediana": 1016,
+        "peor": 1626
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 1016,
+        "peor": 1626
+      },
+      "sinExplicar": {
+        "mediana": -20,
+        "peor": 3158
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m14-tilde",
+      "accion": "Tildar un chequeo",
+      "pantalla": "m14",
+      "acuseControl": {
+        "mediana": 3,
+        "peor": 3
+      },
+      "acuseResultado": {
+        "mediana": 550,
+        "peor": 705
+      },
+      "reflejo": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "escrituraDb": {
+        "mediana": 350,
+        "peor": 461
+      },
+      "renderServidor": {
+        "mediana": 299,
+        "peor": 354
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 7,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 3,
+        "peor": 3
+      },
+      "msAccion": {
+        "mediana": 924,
+        "peor": 1073
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 924,
+        "peor": 1073
+      },
+      "sinExplicar": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m14-enviar",
+      "accion": "Enviar a revisión",
+      "pantalla": "m14",
+      "acuseControl": {
+        "mediana": 3,
+        "peor": 4
+      },
+      "acuseResultado": {
+        "mediana": 1134,
+        "peor": 1152
+      },
+      "reflejo": {
+        "mediana": 5144,
+        "peor": 5159
+      },
+      "escrituraDb": {
+        "mediana": 533,
+        "peor": 1047
+      },
+      "renderServidor": {
+        "mediana": 339,
+        "peor": 494
+      },
+      "viajesAccion": 2,
+      "viajesRsc": 0,
+      "viajesPrefetch": 31,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 3,
+        "peor": 4
+      },
+      "msAccion": {
+        "mediana": 1708,
+        "peor": 1759
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 1424,
+        "peor": 1425
+      },
+      "sinExplicar": {
+        "mediana": 3720,
+        "peor": 3734
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "m15-envio",
+      "accion": "Registrar el envío de la demo",
+      "pantalla": "m15",
+      "acuseControl": {
+        "mediana": 12,
+        "peor": 14
+      },
+      "acuseResultado": {
+        "mediana": 1175,
+        "peor": 1188
+      },
+      "reflejo": {
+        "mediana": 5185,
+        "peor": 5198
+      },
+      "escrituraDb": {
+        "mediana": 334,
+        "peor": 495
+      },
+      "renderServidor": {
+        "mediana": 289,
+        "peor": 290
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 0,
+      "viajesPrefetch": 20,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 5185,
+        "peor": 5198
+      },
+      "msAccion": {
+        "mediana": 1455,
+        "peor": 1473
+      },
+      "msRsc": {
+        "mediana": 0,
+        "peor": 0
+      },
+      "redCritica": {
+        "mediana": 1455,
+        "peor": 1473
+      },
+      "sinExplicar": {
+        "mediana": 3729,
+        "peor": 3746
+      },
+      "registradoSiempre": true
+    },
+    {
+      "clave": "mr-reabrir",
+      "accion": "Reabrir la construcción (re-loop)",
+      "pantalla": "mr",
+      "acuseControl": {
+        "mediana": 12,
+        "peor": 12
+      },
+      "acuseResultado": {
+        "mediana": 600,
+        "peor": 659
+      },
+      "reflejo": {
+        "mediana": 1264,
+        "peor": 1281
+      },
+      "escrituraDb": {
+        "mediana": 450,
+        "peor": 553
+      },
+      "renderServidor": {
+        "mediana": 295,
+        "peor": 305
+      },
+      "viajesAccion": 1,
+      "viajesRsc": 1,
+      "viajesPrefetch": 15,
+      "cambioPantalla": 3,
+      "cambioTexto": {
+        "mediana": 959,
+        "peor": 961
+      },
+      "msAccion": {
+        "mediana": 941,
+        "peor": 942
+      },
+      "msRsc": {
+        "mediana": 295,
+        "peor": 296
+      },
+      "redCritica": {
+        "mediana": 1237,
+        "peor": 1237
+      },
+      "sinExplicar": {
+        "mediana": 41,
+        "peor": 44
+      },
+      "registradoSiempre": true
+    }
+  ],
+  "crudo": {
+    "alta": {
+      "muestras": [
+        {
+          "acuseControlMs": 4,
+          "acuseResultadoMs": 304,
+          "reflejoMs": 1885,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 64,
+              "desdeClicMs": 13
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 25,
+              "desdeClicMs": 76
+            },
+            {
+              "tipo": "rsc",
+              "ms": 19,
+              "desdeClicMs": 298
+            },
+            {
+              "tipo": "accion",
+              "ms": 466,
+              "desdeClicMs": 7
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 602
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 610
+            },
+            {
+              "tipo": "rsc",
+              "ms": 866,
+              "desdeClicMs": 477
+            },
+            {
+              "tipo": "rsc",
+              "ms": 512,
+              "desdeClicMs": 1354
+            }
+          ],
+          "accionMs": 466,
+          "rscMs": 1397,
+          "viajesAccion": 1,
+          "viajesRsc": 3,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 471,
+          "redCriticaMs": 1844,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 177,
+          "reflejoMs": 1045,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 13
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 19
+            },
+            {
+              "tipo": "rsc",
+              "ms": 9,
+              "desdeClicMs": 177
+            },
+            {
+              "tipo": "accion",
+              "ms": 347,
+              "desdeClicMs": 5
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 479
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 486
+            },
+            {
+              "tipo": "rsc",
+              "ms": 338,
+              "desdeClicMs": 354
+            },
+            {
+              "tipo": "rsc",
+              "ms": 344,
+              "desdeClicMs": 702
+            }
+          ],
+          "accionMs": 347,
+          "rscMs": 691,
+          "viajesAccion": 1,
+          "viajesRsc": 3,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 350,
+          "redCriticaMs": 1029,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 242,
+          "reflejoMs": 1272,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 13
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 19
+            },
+            {
+              "tipo": "rsc",
+              "ms": 10,
+              "desdeClicMs": 241
+            },
+            {
+              "tipo": "accion",
+              "ms": 456,
+              "desdeClicMs": 4
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 546
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 553
+            },
+            {
+              "tipo": "rsc",
+              "ms": 292,
+              "desdeClicMs": 477
+            },
+            {
+              "tipo": "rsc",
+              "ms": 483,
+              "desdeClicMs": 790
+            }
+          ],
+          "accionMs": 456,
+          "rscMs": 785,
+          "viajesAccion": 1,
+          "viajesRsc": 3,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 472,
+          "redCriticaMs": 1231,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        463,
+        112,
+        114
+      ],
+      "renderServidor": [
+        179,
+        178,
+        179
+      ]
+    },
+    "foco": {
+      "muestras": [
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": null,
+          "reflejoMs": 1691,
+          "viajes": [
+            {
+              "tipo": "rsc",
+              "ms": 10,
+              "desdeClicMs": 188
+            },
+            {
+              "tipo": "rsc",
+              "ms": 175,
+              "desdeClicMs": 198
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 497
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 503
+            },
+            {
+              "tipo": "accion",
+              "ms": 1113,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "rsc",
+              "ms": 771,
+              "desdeClicMs": 388
+            },
+            {
+              "tipo": "rsc",
+              "ms": 519,
+              "desdeClicMs": 1172
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 1699
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1699
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1710
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1711
+            }
+          ],
+          "accionMs": 1113,
+          "rscMs": 1475,
+          "viajesAccion": 1,
+          "viajesRsc": 4,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 384,
+          "redCriticaMs": 1676,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": null,
+          "reflejoMs": 1133,
+          "viajes": [
+            {
+              "tipo": "rsc",
+              "ms": 10,
+              "desdeClicMs": 190
+            },
+            {
+              "tipo": "rsc",
+              "ms": 176,
+              "desdeClicMs": 200
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 498
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 505
+            },
+            {
+              "tipo": "accion",
+              "ms": 639,
+              "desdeClicMs": 4
+            },
+            {
+              "tipo": "rsc",
+              "ms": 384,
+              "desdeClicMs": 390
+            },
+            {
+              "tipo": "rsc",
+              "ms": 345,
+              "desdeClicMs": 785
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1149
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1157
+            }
+          ],
+          "accionMs": 639,
+          "rscMs": 915,
+          "viajesAccion": 1,
+          "viajesRsc": 4,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 385,
+          "redCriticaMs": 1115,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": null,
+          "reflejoMs": 1127,
+          "viajes": [
+            {
+              "tipo": "rsc",
+              "ms": 9,
+              "desdeClicMs": 173
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 478
+            },
+            {
+              "tipo": "accion",
+              "ms": 624,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "rsc",
+              "ms": 323,
+              "desdeClicMs": 349
+            },
+            {
+              "tipo": "rsc",
+              "ms": 444,
+              "desdeClicMs": 683
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1133
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1133
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1143
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1143
+            }
+          ],
+          "accionMs": 624,
+          "rscMs": 776,
+          "viajesAccion": 1,
+          "viajesRsc": 3,
+          "viajesPrefetch": 5,
+          "cambioPantalla": true,
+          "cambioTextoMs": 344,
+          "redCriticaMs": 1113,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        530,
+        57,
+        63
+      ],
+      "renderServidor": [
+        377,
+        422,
+        823
+      ]
+    },
+    "m1-ficha": {
+      "muestras": [
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 889,
+          "reflejoMs": 4897,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1170,
+              "desdeClicMs": 5
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 1191
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 1198
+            }
+          ],
+          "accionMs": 1170,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 1170,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 671,
+          "reflejoMs": 948,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 946,
+              "desdeClicMs": 4
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 975
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 981
+            }
+          ],
+          "accionMs": 946,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 946,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 671,
+          "reflejoMs": 4678,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 949,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 970
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 981
+            }
+          ],
+          "accionMs": 949,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 949,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        920,
+        573,
+        576
+      ],
+      "renderServidor": [
+        390,
+        287,
+        309
+      ]
+    },
+    "m1-veredicto": {
+      "muestras": [
+        {
+          "acuseControlMs": 11,
+          "acuseResultadoMs": 723,
+          "reflejoMs": 4735,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 994,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1027
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1035
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 4748
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 4756
+            }
+          ],
+          "accionMs": 994,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4735,
+          "redCriticaMs": 994,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 743,
+          "reflejoMs": 4752,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1016,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1046
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 1052
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 4763
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4771
+            }
+          ],
+          "accionMs": 1016,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4752,
+          "redCriticaMs": 1016,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 616,
+          "reflejoMs": 4627,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 890,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 917
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 923
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 4632
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 4640
+            }
+          ],
+          "accionMs": 890,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4627,
+          "redCriticaMs": 890,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        689,
+        510,
+        527
+      ],
+      "renderServidor": [
+        285,
+        286,
+        291
+      ]
+    },
+    "m4-opener": {
+      "muestras": [
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 891,
+          "reflejoMs": 4902,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1195
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1201
+            },
+            {
+              "tipo": "accion",
+              "ms": 1270,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 4913
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 4913
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4925
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4925
+            }
+          ],
+          "accionMs": 1270,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4902,
+          "redCriticaMs": 1270,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 13,
+          "acuseResultadoMs": 782,
+          "reflejoMs": 4802,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 1094
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 1101
+            },
+            {
+              "tipo": "accion",
+              "ms": 1164,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4816
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4816
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4827
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 4827
+            }
+          ],
+          "accionMs": 1164,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4802,
+          "redCriticaMs": 1164,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 10,
+          "acuseResultadoMs": 667,
+          "reflejoMs": 4675,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 976
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 984
+            },
+            {
+              "tipo": "accion",
+              "ms": 998,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 4680
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 4680
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 4693
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 4693
+            }
+          ],
+          "accionMs": 998,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4675,
+          "redCriticaMs": 998,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        752,
+        493,
+        476
+      ],
+      "renderServidor": [
+        343,
+        327,
+        299
+      ]
+    },
+    "m5-respondio": {
+      "muestras": [
+        {
+          "acuseControlMs": 11,
+          "acuseResultadoMs": 578,
+          "reflejoMs": 1312,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 879
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 886
+            },
+            {
+              "tipo": "accion",
+              "ms": 950,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "rsc",
+              "ms": 338,
+              "desdeClicMs": 970
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1315
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 1315
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 1315
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 1332
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1333
+            }
+          ],
+          "accionMs": 950,
+          "rscMs": 338,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 11,
+          "redCriticaMs": 1288,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 11,
+          "acuseResultadoMs": 578,
+          "reflejoMs": 1271,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 879
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 887
+            },
+            {
+              "tipo": "accion",
+              "ms": 903,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "rsc",
+              "ms": 341,
+              "desdeClicMs": 924
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1279
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1279
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1279
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1293
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1293
+            }
+          ],
+          "accionMs": 903,
+          "rscMs": 341,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 11,
+          "redCriticaMs": 1244,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 13,
+          "acuseResultadoMs": 557,
+          "reflejoMs": 1229,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 863
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 868
+            },
+            {
+              "tipo": "accion",
+              "ms": 874,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "rsc",
+              "ms": 330,
+              "desdeClicMs": 894
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1233
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1233
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1233
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 1248
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 1248
+            }
+          ],
+          "accionMs": 874,
+          "rscMs": 330,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 13,
+          "redCriticaMs": 1204,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        471,
+        302,
+        294
+      ],
+      "renderServidor": [
+        384,
+        393,
+        338
+      ]
+    },
+    "m5-postergar": {
+      "muestras": [
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": 613,
+          "reflejoMs": 4631,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 914
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 921
+            },
+            {
+              "tipo": "accion",
+              "ms": 967,
+              "desdeClicMs": 2
+            }
+          ],
+          "accionMs": 967,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 613,
+          "redCriticaMs": 967,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 498,
+          "reflejoMs": 4507,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 807
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 813
+            },
+            {
+              "tipo": "accion",
+              "ms": 823,
+              "desdeClicMs": 2
+            }
+          ],
+          "accionMs": 823,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 498,
+          "redCriticaMs": 823,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 441,
+          "reflejoMs": 4452,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 743
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 749
+            },
+            {
+              "tipo": "accion",
+              "ms": 780,
+              "desdeClicMs": 2
+            }
+          ],
+          "accionMs": 780,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 441,
+          "redCriticaMs": 780,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        288,
+        237,
+        238
+      ],
+      "renderServidor": [
+        339,
+        338,
+        335
+      ]
+    },
+    "m6-brief": {
+      "muestras": [
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 1066,
+          "reflejoMs": 5081,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1338,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1365
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1371
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 5088
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 5094
+            }
+          ],
+          "accionMs": 1338,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 1338,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 1017,
+          "reflejoMs": 1295,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1294,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1319
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1319
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 1327
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1327
+            }
+          ],
+          "accionMs": 1294,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 1294,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": 1025,
+          "reflejoMs": 5033,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 1328
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1333
+            },
+            {
+              "tipo": "accion",
+              "ms": 1354,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 5046
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 5053
+            }
+          ],
+          "accionMs": 1354,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 2,
+          "redCriticaMs": 1354,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        577,
+        473,
+        465
+      ],
+      "renderServidor": [
+        282,
+        287,
+        287
+      ]
+    },
+    "mc-arrancar": {
+      "muestras": [
+        {
+          "acuseControlMs": 13,
+          "acuseResultadoMs": 706,
+          "reflejoMs": 4720,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 994,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1006
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1006
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1006
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1006
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1019
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1020
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1020
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 4732
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 4739
+            }
+          ],
+          "accionMs": 994,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 9,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4720,
+          "redCriticaMs": 994,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 13,
+          "acuseResultadoMs": 560,
+          "reflejoMs": 4568,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 840,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 867
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 867
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 867
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 867
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 880
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 881
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 882
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4584
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 4589
+            }
+          ],
+          "accionMs": 840,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 14,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4568,
+          "redCriticaMs": 840,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 13,
+          "acuseResultadoMs": 611,
+          "reflejoMs": 4619,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 928
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 928
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 929
+            },
+            {
+              "tipo": "accion",
+              "ms": 990,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 4631
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4638
+            }
+          ],
+          "accionMs": 990,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 14,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4619,
+          "redCriticaMs": 990,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        577,
+        463,
+        460
+      ],
+      "renderServidor": [
+        291,
+        305,
+        289
+      ]
+    },
+    "mc1-tilde": {
+      "muestras": [
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 520,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 782,
+              "desdeClicMs": 15
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 822
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 822
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 830
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 831
+            }
+          ],
+          "accionMs": 782,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 782,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 518,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 779,
+              "desdeClicMs": 15
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 831
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 831
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 839
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 840
+            }
+          ],
+          "accionMs": 779,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 779,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 500,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 756,
+              "desdeClicMs": 15
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 800
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 800
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 811
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 812
+            }
+          ],
+          "accionMs": 756,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 11,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 756,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        466,
+        350,
+        345
+      ],
+      "renderServidor": [
+        286,
+        288,
+        283
+      ]
+    },
+    "mc2-tilde": {
+      "muestras": [
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 541,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 808,
+              "desdeClicMs": 16
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 847
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 847
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 859
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 860
+            }
+          ],
+          "accionMs": 808,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 4,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 808,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 491,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 751,
+              "desdeClicMs": 13
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 796
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 796
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 805
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 806
+            }
+          ],
+          "accionMs": 751,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 751,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 545,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 846
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 846
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 854
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 854
+            },
+            {
+              "tipo": "accion",
+              "ms": 865,
+              "desdeClicMs": 14
+            }
+          ],
+          "accionMs": 865,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1,
+          "redCriticaMs": 865,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        401,
+        343,
+        350
+      ],
+      "renderServidor": [
+        295,
+        296,
+        291
+      ]
+    },
+    "mc-escalar": {
+      "muestras": [
+        {
+          "acuseControlMs": 1352,
+          "acuseResultadoMs": 1042,
+          "reflejoMs": 1352,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1036,
+              "desdeClicMs": 4
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 23,
+              "desdeClicMs": 1040
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 23,
+              "desdeClicMs": 1040
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 23,
+              "desdeClicMs": 1040
+            },
+            {
+              "tipo": "rsc",
+              "ms": 313,
+              "desdeClicMs": 1040
+            }
+          ],
+          "accionMs": 1036,
+          "rscMs": 313,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 3,
+          "cambioPantalla": true,
+          "cambioTextoMs": 1352,
+          "redCriticaMs": 1349,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 4949,
+          "acuseResultadoMs": 939,
+          "reflejoMs": 4949,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 935,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 21,
+              "desdeClicMs": 938
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 22,
+              "desdeClicMs": 938
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 22,
+              "desdeClicMs": 938
+            },
+            {
+              "tipo": "rsc",
+              "ms": 303,
+              "desdeClicMs": 938
+            }
+          ],
+          "accionMs": 935,
+          "rscMs": 303,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 5,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4949,
+          "redCriticaMs": 1238,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 4732,
+          "acuseResultadoMs": 711,
+          "reflejoMs": 4732,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 706,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 25,
+              "desdeClicMs": 709
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 25,
+              "desdeClicMs": 709
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 26,
+              "desdeClicMs": 709
+            },
+            {
+              "tipo": "rsc",
+              "ms": 322,
+              "desdeClicMs": 709
+            }
+          ],
+          "accionMs": 706,
+          "rscMs": 322,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 5,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4732,
+          "redCriticaMs": 1028,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        458,
+        359,
+        351
+      ],
+      "renderServidor": [
+        294,
+        281,
+        290
+      ]
+    },
+    "m13-borrador": {
+      "muestras": [
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 530,
+          "reflejoMs": 795,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 815,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 829
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 829
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 838
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 838
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 4547
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 4554
+            }
+          ],
+          "accionMs": 815,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4544,
+          "redCriticaMs": 815,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 767,
+          "reflejoMs": 4784,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1066
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1066
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 1074
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 1074
+            },
+            {
+              "tipo": "accion",
+              "ms": 1626,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4798
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4804
+            }
+          ],
+          "accionMs": 1626,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4784,
+          "redCriticaMs": 1626,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 1,
+          "acuseResultadoMs": 678,
+          "reflejoMs": 995,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 984
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 984
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 992
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 991
+            },
+            {
+              "tipo": "accion",
+              "ms": 1016,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4697
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 4703
+            }
+          ],
+          "accionMs": 1016,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 6,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4685,
+          "redCriticaMs": 1016,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        457,
+        348,
+        345
+      ],
+      "renderServidor": [
+        292,
+        297,
+        299
+      ]
+    },
+    "m14-tilde": {
+      "muestras": [
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 550,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 818,
+              "desdeClicMs": 16
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 858
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 4,
+              "desdeClicMs": 866
+            }
+          ],
+          "accionMs": 818,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 2,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 818,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 705,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 21,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 21,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 22,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 21,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 26,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 1005
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 1013
+            },
+            {
+              "tipo": "accion",
+              "ms": 1073,
+              "desdeClicMs": 17
+            }
+          ],
+          "accionMs": 1073,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 1073,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": 548,
+          "reflejoMs": null,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 4,
+              "desdeClicMs": 851
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 855
+            },
+            {
+              "tipo": "accion",
+              "ms": 924,
+              "desdeClicMs": 16
+            }
+          ],
+          "accionMs": 924,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 7,
+          "cambioPantalla": true,
+          "cambioTextoMs": 2,
+          "redCriticaMs": 924,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        461,
+        350,
+        347
+      ],
+      "renderServidor": [
+        354,
+        299,
+        299
+      ]
+    },
+    "m14-enviar": {
+      "muestras": [
+        {
+          "acuseControlMs": 4,
+          "acuseResultadoMs": 1120,
+          "reflejoMs": 5127,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 746
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 746
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 746
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 746
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 761
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 761
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 762
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 763
+            },
+            {
+              "tipo": "accion",
+              "ms": 774,
+              "desdeClicMs": 6
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 773
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 776
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 780
+            },
+            {
+              "tipo": "accion",
+              "ms": 985,
+              "desdeClicMs": 442
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1424
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1424
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1424
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1424
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1438
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1438
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1438
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1439
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1455
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1455
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1455
+            }
+          ],
+          "accionMs": 1759,
+          "rscMs": 0,
+          "viajesAccion": 2,
+          "viajesRsc": 0,
+          "viajesPrefetch": 22,
+          "cambioPantalla": true,
+          "cambioTextoMs": 4,
+          "redCriticaMs": 1421,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 2,
+          "acuseResultadoMs": 1152,
+          "reflejoMs": 5159,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 27,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 28,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 28,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 28,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 16
+            },
+            {
+              "tipo": "accion",
+              "ms": 759,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 780
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 780
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 780
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 780
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 794
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 794
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 796
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 795
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 809
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 810
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 809
+            },
+            {
+              "tipo": "accion",
+              "ms": 949,
+              "desdeClicMs": 479
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1462
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1462
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1462
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1462
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1475
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1475
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1475
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1476
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1490
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1490
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1491
+            }
+          ],
+          "accionMs": 1708,
+          "rscMs": 0,
+          "viajesAccion": 2,
+          "viajesRsc": 0,
+          "viajesPrefetch": 31,
+          "cambioPantalla": true,
+          "cambioTextoMs": 2,
+          "redCriticaMs": 1425,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 3,
+          "acuseResultadoMs": 1134,
+          "reflejoMs": 5144,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 29,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 31,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 30,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 30,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 19
+            },
+            {
+              "tipo": "accion",
+              "ms": 714,
+              "desdeClicMs": 6
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 748
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 748
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 748
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 748
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 763
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 763
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 765
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 764
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 778
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 778
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 778
+            },
+            {
+              "tipo": "accion",
+              "ms": 991,
+              "desdeClicMs": 439
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1436
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1436
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1436
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1436
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1449
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1448
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1450
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1449
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1461
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1462
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1462
+            }
+          ],
+          "accionMs": 1705,
+          "rscMs": 0,
+          "viajesAccion": 2,
+          "viajesRsc": 0,
+          "viajesPrefetch": 31,
+          "cambioPantalla": true,
+          "cambioTextoMs": 3,
+          "redCriticaMs": 1424,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        1047,
+        533,
+        443
+      ],
+      "renderServidor": [
+        494,
+        284,
+        339
+      ]
+    },
+    "m15-envio": {
+      "muestras": [
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 1188,
+          "reflejoMs": 5198,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 1473,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1499
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1498
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1498
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1498
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1510
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1510
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1510
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1511
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 1524
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 1525
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1524
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 10,
+              "desdeClicMs": 5214
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 5214
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 5225
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 5224
+            }
+          ],
+          "accionMs": 1473,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 15,
+          "cambioPantalla": true,
+          "cambioTextoMs": 5198,
+          "redCriticaMs": 1473,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 14,
+          "acuseResultadoMs": 1166,
+          "reflejoMs": 5185,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 1439,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1478
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 1478
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 1478
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 1478
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1495
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1496
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1496
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1496
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1512
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1512
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1512
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 5200
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 5200
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 5208
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 9,
+              "desdeClicMs": 5208
+            }
+          ],
+          "accionMs": 1439,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 20,
+          "cambioPantalla": true,
+          "cambioTextoMs": 5185,
+          "redCriticaMs": 1439,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 1175,
+          "reflejoMs": 5184,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 20,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 1455,
+              "desdeClicMs": 3
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1481
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1481
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1481
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1481
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1495
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1496
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 1496
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1497
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1513
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 1512
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 1513
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 5199
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 5199
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 5210
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 11,
+              "desdeClicMs": 5210
+            }
+          ],
+          "accionMs": 1455,
+          "rscMs": 0,
+          "viajesAccion": 1,
+          "viajesRsc": 0,
+          "viajesPrefetch": 20,
+          "cambioPantalla": true,
+          "cambioTextoMs": 5184,
+          "redCriticaMs": 1455,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        495,
+        332,
+        334
+      ],
+      "renderServidor": [
+        287,
+        289,
+        290
+      ]
+    },
+    "mr-reabrir": {
+      "muestras": [
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 659,
+          "reflejoMs": 1281,
+          "viajes": [
+            {
+              "tipo": "accion",
+              "ms": 942,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 962
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 8,
+              "desdeClicMs": 974
+            },
+            {
+              "tipo": "rsc",
+              "ms": 295,
+              "desdeClicMs": 962
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1285
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1285
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1285
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1285
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1299
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1300
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1299
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1300
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 5,
+              "desdeClicMs": 1315
+            }
+          ],
+          "accionMs": 942,
+          "rscMs": 295,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 11,
+          "cambioPantalla": true,
+          "cambioTextoMs": 961,
+          "redCriticaMs": 1237,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 10,
+          "acuseResultadoMs": 589,
+          "reflejoMs": 1207,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "accion",
+              "ms": 875,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 12,
+              "desdeClicMs": 891
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 902
+            },
+            {
+              "tipo": "rsc",
+              "ms": 291,
+              "desdeClicMs": 891
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1215
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1216
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1216
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 1216
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1230
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1231
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 1231
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 1232
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 6,
+              "desdeClicMs": 1245
+            }
+          ],
+          "accionMs": 875,
+          "rscMs": 291,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 15,
+          "cambioPantalla": true,
+          "cambioTextoMs": 889,
+          "redCriticaMs": 1166,
+          "registrado": true
+        },
+        {
+          "acuseControlMs": 12,
+          "acuseResultadoMs": 600,
+          "reflejoMs": 1264,
+          "viajes": [
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 0
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 13,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 14,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 15,
+              "desdeClicMs": 912
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 926
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 16,
+              "desdeClicMs": 927
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 926
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 17,
+              "desdeClicMs": 926
+            },
+            {
+              "tipo": "accion",
+              "ms": 941,
+              "desdeClicMs": 2
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 19,
+              "desdeClicMs": 942
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 18,
+              "desdeClicMs": 943
+            },
+            {
+              "tipo": "rsc",
+              "ms": 296,
+              "desdeClicMs": 961
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 1266
+            },
+            {
+              "tipo": "prefetch",
+              "ms": 7,
+              "desdeClicMs": 1273
+            }
+          ],
+          "accionMs": 941,
+          "rscMs": 296,
+          "viajesAccion": 1,
+          "viajesRsc": 1,
+          "viajesPrefetch": 16,
+          "cambioPantalla": true,
+          "cambioTextoMs": 959,
+          "redCriticaMs": 1237,
+          "registrado": true
+        }
+      ],
+      "escrituras": [
+        553,
+        450,
+        440
+      ],
+      "renderServidor": [
+        295,
+        289,
+        305
+      ]
+    }
+  }
+}

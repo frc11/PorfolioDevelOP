@@ -108,13 +108,14 @@ export function AgendaForm({
     setError(null)
     setSlotElegido(null)
     setPorConfirmar(null)
-    // La búsqueda carga slots (y desde 6.1 los persiste): sin toast y sin
-    // refresh — la oferta nueva REEMPLAZA a la anterior, acá y en el dossier.
+    // La búsqueda carga slots (y desde 6.1 los persiste) sin toast: la oferta
+    // nueva REEMPLAZA a la anterior, acá y en el dossier. Tampoco pide el árbol
+    // de nuevo — desde P28 no lo pide ninguna, y `ofrecerHorarios` además no
+    // revalida: lo que la pantalla muestra sale del `onSuccess` de acá.
     busqueda.run(() => ofrecerHorarios(leadId), {
       onError: setError,
       // Recién buscados: sin `ofrecidosAt` — todavía no son "los que ofreciste".
       onSuccess: (data) => setOferta({ horarios: data.slots }),
-      refresh: false,
     })
   }
 

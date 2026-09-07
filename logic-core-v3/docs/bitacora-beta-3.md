@@ -11788,3 +11788,282 @@ producción es un archivo nuevo de invariante y su registro en el runner.
 - La ventana del servidor, el diálogo sin rol y la franja de conteos siguen pendientes.
 - El flake de P26 quedó **caracterizado, no arreglado**: sólo aparece con servidor frío
   (`webServer`), y las ocho corridas tibias dieron 0 rojas.
+
+---
+
+## P28 · Dónde se va el tiempo — el segundo render que sobraba, y los tres segundos que no son del servidor — 2026-09-07
+
+**Objetivo único.** El último defecto de agosto vivo: el acuse llega en ~200 ms y la pantalla tarda
+~4,4 s en mostrar el estado nuevo. Medir las diecisiete acciones con registro del recorrido,
+descomponer la latencia, arreglar lo que la medición señale.
+
+**Resultado en una línea.** De los ~4,7 s hasta el reflejo, **el servidor pone ~1 s y el cliente
+~3,7 s**. Este sprint sacó un render de servidor entero por acción (13 de 17 acciones pasaron de dos
+a uno) y aceleró el render que queda un 20 %. **El número que el setter siente no se movió**, y el
+motivo está medido con un discriminador: la pantalla espera a que el aviso flotante se vaya.
+
+### 1 · El instrumento, y las cuatro veces que midió la nada
+
+`npm run test:perf` (`playwright.perf.config.ts` · `tests/perf/`) corre las diecisiete acciones,
+tres pasadas cada una, contra un `next start` TIBIO en su propio build (`.next-perf`, puerto 3005) y
+escribe la tabla en JSON. Reporta mediana y peor: este proyecto ya midió 3 de 3 y después 1 de 3
+sobre lo mismo (P25).
+
+Por acción mide: la primera repintada tras el clic (señal 1 del acuse), el aviso del resultado
+(señal 2), el reflejo, la escritura contra la base sola (el MISMO camino de dominio corrido en
+proceso contra un lead gemelo), el render del servidor solo (un GET de árbol a la misma URL en el
+mismo estado) y cada viaje al servidor con su duración.
+
+**Se equivocó cuatro veces antes de servir, y las cuatro dieron un número tranquilizador:**
+
+| lo que midió mal | qué mostraba | el discriminador |
+|---|---|---|
+| Selector a nivel `page` | 0 mutaciones, 0 viajes, sin fallar | El riel de navegación tiene una entrada «Cargar prospecto»: el clic aterrizaba en un botón real (`isTrusted`) y no pasaba nada. Ámbito: `main`. |
+| Reflejo = «última ráfaga de mutaciones» | 2 ms en casi todas | Framer Motion escribe `style` a 60 fps: toda la acción cae en una ráfaga continua. Reflejo = primera repintada POSTERIOR al último árbol. |
+| Cosecha por quietud del DOM | acciones con 0 viajes | Cuando la pantalla no cambia con el clic, el DOM se aquieta a los 12 ms y la cosecha volvía antes de que terminara el POST. |
+| Cosecha por quietud de DOM + red | «la pantalla no cambió» en 5 de 17 | Entre que el POST termina y sale el `router.refresh()` hay un hueco: nada en vuelo, pantalla quieta. Piso de observación de 6 s. |
+
+Con el piso de 6 s aparecieron los 4,5–5,2 s reales. **Sin él, el instrumento habría cerrado el
+sprint diciendo que el reflejo era instantáneo.**
+
+### 2 · La tabla de las diecisiete — antes → después
+
+Servidor tibio, 1440, tres pasadas por acción. `mediana / peor` en ms. JSON crudo en
+`docs/perf-p28/antes.json` y `docs/perf-p28/despues.json`.
+
+| acción | pantalla | clic→acuse (med/peor) | clic→reflejo (med/peor) | base sola | render solo | viajes | sin explicar |
+|---|---|---|---|---|---|---|---|
+| Cargar el prospecto | alta | 187 / 304 → 249 / 256 | 1333 / 1565 → 1383 / 1482 | 109 → 108 | 181 → 186 | 1+3 → 1+3 | 299 → 316 |
+| Trabajar este lead (anclar el foco) | panel | — → — | 1106 / 1671 → 1069 / 1209 | 56 → 54 | 601 → 763 | 1+3 → 1+4 | 20 → 11 |
+| Guardar la ficha | m1 | 741 / 957 → 896 / 938 | 4747 / 4965 → 4905 / 4944 | 564 → 534 | 355 → 297 | 1+1 → 1+0 | 3169 → 3783 |
+| Registrar el veredicto | m1 | 714 / 1160 → 728 / 769 | 4726 / 5169 → 4737 / 4784 | 515 → 487 | 355 → 240 | 1+1 → 1+0 | 3630 → 3787 |
+| Registrar el opener | m4 | 1221 / 1525 → 830 / 912 | 5230 / 5532 → 4843 / 4918 | 464 → 617 | 301 → 240 | 1+1 → 1+0 | 3538 → 3679 |
+| Registrar «Respondió» | m5 | 702 / 907 → 560 / 574 | 1644 / 1797 → 1174 / 1231 | 284 → 264 | 342 → 278 | 1+2 → 1+1 | 22 → 38 |
+| Postergar el lead | m5 | 541 / 655 → 503 / 641 | 4550 / 4667 → 4517 / 4649 | 228 → 216 | 343 → 280 | 1+1 → 1+0 | 3587 → 3730 |
+| Guardar el brief | m6 | 995 / 1170 → 1026 / 1026 | 4953 / 5177 → 4936 / 5032 | 452 → 405 | 321 → 231 | 1+1 → 1+0 | 3665 → 3746 |
+| Arrancar la construcción | mc1 | 593 / 645 → 567 / 651 | 4602 / 4654 → 4587 / 4666 | 451 → 414 | 306 → 228 | 1+1 → 1+0 | 3196 → 3786 |
+| Tildar una fase (mc1) | mc1 | 515 / 598 → 526 / 541 | 0 / 0 → 0 / 0 | 342 → 312 | 283 → 228 | 1+1 → 1+0 | 0 → 0 |
+| Tildar una fase (mc2) | mc2 | 484 / 538 → 483 / 507 | 0 / 0 → 0 / 0 | 355 → 349 | 301 → 242 | 1+1 → 1+0 | 0 → 0 |
+| Escalar «me trabé» | mc1 | 1053 / 1136 → 968 / 987 | 5059 / 5146 → 4987 / 4994 | 345 → 308 | 297 → 229 | 1+1 → 1+1 | 3689 → 3759 |
+| Guardar el link del borrador | m13 | 518 / 536 → 522 / 597 | 844 / 845 → 778 / 844 | 342 → 313 | 296 → 390 | 1+1 → 1+0 | -27 → -24 |
+| Tildar un chequeo | m14 | 489 / 602 → 724 / 825 | 0 / 0 → 0 / 0 | 344 → 309 | 287 → 237 | 1+0 → 1+0 | 0 → 0 |
+| Enviar a revisión | m14 | 1108 / 1119 → 1199 / 1212 | 5116 / 5128 → 5224 / 5226 | 481 → 451 | 356 → 279 | 2+1 → 2+0 | 3663 → 3789 |
+| Registrar el envío de la demo | m15 | 998 / 1221 → 1188 / 1231 | 5236 / 5236 → 5196 / 5247 | 354 → 345 | 469 → 242 | 1+1 → 1+0 | 3230 → 3732 |
+| Reabrir la construcción (re-loop) | mr | 688 / 1269 → 678 / 758 | 1410 / 1997 → 1252 / 1381 | 470 → 450 | 299 → 241 | 1+2 → 1+1 | 25 → 103 |
+
+**Cómo se leen los ceros.** `reflejo 0/0` y `sin explicar 0` en los tres tildes NO es «instantáneo»:
+es que el árbol volvió del servidor y no repintó nada en `main` — lo que había que mostrar ya estaba
+(el acuse del autoguardado, que es estado local). Las tres cambiaron la pantalla en 3/3 pasadas.
+
+**Ruido de la medición.** Entre dos corridas del mismo build las medianas se mueven ±100 ms. Las
+diferencias por debajo de eso (`m14-tilde`, `m15-envio`, `alta`) no son distinguibles del ruido, y
+por eso lo que se afirma es lo estructural: **cuántos viajes** y **cuánto cuesta un render**.
+
+**Las diecisiete registraron en la base en las tres pasadas, antes y después.** El instrumento no
+publica una fila sin releer el efecto de la base.
+
+**Qué NO entró en las diecisiete y por qué.** `ofrecerHorarios` y `confirmarReunion` (m16) cruzan a
+Cal.com: su latencia no es de este sistema, y `confirmarReunion` además CREA una reunión real en la
+agenda de Franco — no es algo que un instrumento pueda hacer cincuenta veces. Comparten
+`revalidarSetter` con las demás, así que el cambio A las alcanza igual. Las diecisiete medidas son el
+recorrido de punta a punta: alta, foco, ficha, veredicto, opener, resultado, postergación, brief,
+arranque, los dos tildes de Construcción, escalamiento, borrador, chequeo, envío a revisión, envío de
+la demo y la vuelta del re-loop.
+
+### 3 · Dónde se iba el tiempo
+
+Para una acción típica («Arrancar construcción», medida tres veces):
+
+```
+t=0      clic
+t=13     el control responde (spinner) — señal 1 del acuse
+t=611    el POST devuelve el resultado → toast — señal 2 del acuse
+t=990    el POST termina de streamear: EL ÁRBOL NUEVO YA ESTÁ EN EL CLIENTE
+t=4619   la pantalla lo muestra
+```
+
+**Los 3,6 s del medio no son del servidor y no son trabajo.** `PerformanceObserver` sobre
+`longtask`: **cero tareas largas**. El hilo principal está OCIOSO mientras la pantalla muestra lo
+viejo.
+
+**El discriminador.** El reflejo cae exactamente 4.000 ms después del aviso (medido: 4005, 4011,
+4013, 4018 y 4006 ms). 4.000 ms es la duración por defecto de un toast de sonner. Se bajó a 800 ms
+en un build y el reflejo bajó con él, 1:1: **4.636 → 1.998 ms**, 3 de 3. La pantalla espera a que el
+aviso se vaya.
+
+Lo que hay debajo: sonner monta y desmonta cada aviso con `ReactDOM.flushSync` (`sonner@2.0.7`,
+comentado en su propia fuente como *«Prevent batching, temp solution»*). El árbol del servidor queda
+pendiente y se aplica en el siguiente commit de React — que, sin otra cosa que lo empuje, es el
+`flushSync` del desmonte del aviso, 4 s después. **Los tildes de Construcción no tienen toast, tienen
+`AutosaveStatus`: su cambio de estado ES ese commit, y por eso reflejan en ~0,5 s.** El producto ya
+tiene la familia que no colisiona.
+
+### 3-bis · Las cuatro preguntas del encargo, contestadas
+
+**¿Hay acciones que revalidan más de lo que necesitan?** No, y no cuesta nada. Todas llaman
+`revalidatePath('/setter')` + `revalidatePath('/setter/leads/<id>')`, y las de revisión suman
+`/admin/leados`. Sobre rutas `force-dynamic` eso son MARCAS de invalidación, no renders: el único
+render que se paga es el de la pantalla actual. Medido: sacar un `revalidatePath` no aparece en
+ningún número; sacar el `router.refresh()` sí.
+
+**¿Hay acciones que hacen más de un viaje cuando podrían hacer uno?** Sí: **dieciséis de
+diecisiete**. Era 1 POST + 1 GET de árbol; **trece pasaron a 1 POST** (§4-A). Las cuatro que quedan:
+el tilde del chequeo final ya hacía uno solo (nunca tuvo refresh); `mc-escalar` conserva el suyo a
+propósito, porque `escalarConstruccion` NO revalida y ahí el refresh sí es el mecanismo; y `alta` y
+`foco` navegan — sus GET son de navegación, no un árbol pedido dos veces.
+
+**¿El acuse y el reflejo son dos mecanismos distintos?** Sí — y más que distintos: **el acuse es la
+CAUSA de la espera del reflejo** (§3). No es que estén desacoplados; es que uno bloquea al otro.
+
+**¿Cuántas superan los dos segundos hasta reflejar?** **Nueve de diecisiete antes. Las mismas nueve
+después** (`m1-ficha`, `m1-veredicto`, `m4-opener`, `m5-postergar`, `m6-brief`, `mc-arrancar`,
+`mc-escalar`, `m14-enviar`, `m15-envio`). Son exactamente las que muestran un aviso flotante y no
+navegan: las ocho que quedan por debajo o navegan (`alta`, `foco`, `m5-respondio`, `mr-reabrir`) o no
+tienen toast (los tres tildes, y `m13` que refleja en ~0,8 s).
+
+### 4 · Qué se cambió, y qué movió cada cambio
+
+**A · El segundo render, que sobraba.** Toda action del dominio llama `revalidatePath`, y la
+respuesta del POST YA TRAE el árbol re-renderizado de la pantalla: el `router.refresh()` que había al
+lado pedía **ese mismo árbol una segunda vez**. Se sacó de `useStepAction` y de los cuatro
+call-sites directos (`ficha-form`, `opener-form`, `borrador-form`, `registro-fases`).
+
+- **13 de 17 acciones pasaron de 1 POST + 1 GET de árbol a 1 POST.**
+- Camino crítico de red, suma de las diecisiete: **20.242 → 17.842 ms** (−2.400, ~141 ms por acción).
+- **La pantalla sigue mostrando lo mismo**: `cambió 3/3` en las diecisiete, antes y después, y las
+  capturas del antes y el después de las tres que más mejoraron son la misma pantalla
+  (`docs/proof-screenshots/p28/`).
+- Se conservó donde la action NO revalida: `escalar-modal` (`escalarConstruccion` no llama
+  `revalidatePath`) y las del panel, fuera del recorrido.
+
+**B · La ola de consultas en serie.** `cargarManualDelLead` pedía el lead en un `await` suelto y las
+otras cinco lecturas esperaban a que volviera, aunque **ninguna lo necesita**. Entró en el mismo
+`Promise.all`. El guard de pertenencia no se movió ni se aflojó: sigue siendo `lead === null → null`
+por la misma puerta.
+
+- **Render del servidor de una pantalla del manual: ~300 → ~235 ms** (−20 %), y ese render corre en
+  cada acción con registro.
+
+**C · Lo que NO movió el número, dicho sin maquillar.**
+
+- **El `auth()` duplicado no existía.** Era el sospechoso obvio —tres llamadas por request, cada una
+  con su consulta contra `User`— y **está refutado por lectura**: `src/auth.ts:275` ya exporta
+  `React.cache(nextAuthResult.auth)`. No se tocó nada.
+- **El reflejo no bajó.** Las nueve acciones que superaban los 2 s siguen siendo nueve. Sacar el
+  segundo render acortó el trabajo del servidor sin tocar la espera del cliente, que es la que manda.
+
+### 5 · La frenada: los 3,6 s del cliente
+
+Se probaron cinco salidas, un build cada una, y **ninguna es shippable**:
+
+| intento | resultado |
+|---|---|
+| `router.refresh()` fuera de la transición (`setTimeout 0`) | 4.968 · 4.776 · 1.045 — no reproduce |
+| Sin `useTransition` (bandera de estado propia) | 4.955 · 4.729 · 4.914 — no mueve |
+| `router.refresh()` dos cuadros después del toast (`rAF` doble) | 4.868 · 4.898 · 4.766 — no mueve |
+| Sin `router.refresh()` (el cambio A) | 5.017 · 4.600 · 4.667 — no mueve, **y prueba que el árbol llega igual** |
+| Un empujón de render a los 1.200 ms | 1.983 y 1.974 en dos acciones, **4.866 en la tercera** |
+
+El último anda 2 de 3 veces y con un número mágico. **No se shippeó.**
+
+Cerrar los 3,6 s pide tocar el acuse, y eso es decisión de Franco. Las dos salidas reales:
+
+1. **Acortar el aviso.** Está medido que el reflejo lo sigue 1:1. Baratísimo y reversible — y es
+   exactamente el riesgo que el encargo nombra al final: un acuse que no se llega a leer es el
+   problema opuesto.
+2. **Acusar en la pantalla, no flotando.** Es lo que ya hacen los tildes (`AutosaveStatus`,
+   `role="status"`), la familia que refleja en ~0,5 s. Cumple mejor la regla del acuse («acusa donde
+   se hizo el clic»), pero es un rediseño de ~10 call-sites: otro sprint.
+
+Una tercera, que no depende de nosotros: sonner desmonta con `flushSync` desde su propia fuente. La
+última publicada es 2.0.8 (parche sobre la instalada); subirla es un cambio de dependencia sin
+evidencia de que arregle esto.
+
+### 6 · Los tests, demostrados fallando
+
+`tests/setter/30-un-solo-viaje.spec.ts` — dos casos: «Arrancar construcción» y tildar una fase.
+Afirman **un POST de server action y ningún GET de árbol de más**.
+
+- **Rojos contra el código de partida**, en el aserto correcto: `Expected 0 · Received 1` los dos.
+- **Verdes contra el arreglado.**
+- La ventana no se cierra por tiempo: la cierran **dos condiciones positivas** (la escritura releída
+  de la base y la pantalla mostrando el estado nuevo) más `networkidle`. Sin el tercer paso el caso
+  del tilde daba VERDE contra el código de partida — su refresh salía un instante después del acuse,
+  y la ventana se cerraba justo antes del viaje que venía a contar. Un test que cierra la ventana
+  antes de tiempo no mide de menos: mide otra cosa.
+- No fija umbral de latencia hasta el reflejo: ese número no lo movió este sprint, y fijar uno que el
+  producto no cumple sería un rojo permanente.
+
+### 6-bis · Los rojos de las corridas frías, y la única prueba que hubo que arreglar
+
+`npm run test:setter` levanta un servidor **frío** por corrida, que es la condición donde P26 dejó
+caracterizado el flake del acuse. Las tres corridas frías de este sprint:
+
+| corrida | rojas | cuáles |
+|---|---|---|
+| base (código de partida, al arrancar) | 1 | `01-flow` **B4** — el flake que P26 documentó, textual |
+| con el cambio puesto | 2 | `01-flow` **B8** · `16-municiones-salida` **m5** |
+| tras arreglar m5 | 3 | `01-flow` **B1** · `01-flow` **B8** · `26-cola-de-trabajo` **P21-4** |
+
+**Verificación tibia: los cuatro tests, cinco corridas cada uno, 20 ejecuciones, 0 rojas.** Es la
+receta que P26 dejó escrita para no verlo (`SETTER_EXTERNAL_SERVER=1` contra un servidor ya
+levantado), y la suite entera tibia sale verde.
+
+**B1 / B4 / B8 son el mismo flake, con la misma firma exacta** en el call log de Playwright:
+
+```
+Locator: locator('[data-sonner-toast]').filter({ hasText: /…/i })…
+Expected: visible — Error: element(s) not found
+Call log:
+  - waiting for ".../manual/m1" navigation to finish...
+  - navigated to ".../manual/m1"
+```
+
+El aserto no mide mal: su SUJETO se lo lleva puesto una navegación concurrente. **No se tocó ninguno
+de los tres** — igual que en P26, aflojarlos antes de decidir si el setter TAMBIÉN pierde ese acuse
+sería taparlo. Y ahora hay un dato nuevo para esa decisión: §3 mide que el acuse dura 4 s y que el
+reflejo llega justo cuando se va, así que el humano lo alcanza a leer — el que no lo alcanza es el
+test. `26-cola-de-trabajo` P21-4 es el otro flake que P25 dejó anotado; tampoco se tocó.
+
+**`16-municiones-salida` m5 SÍ era frágil, y la aceleró este sprint.** Hacía
+`expect(page.getByText(PILDORA)).toBeHidden()` a nivel `page`. El manual se DUPLICA para responsive,
+así que ese texto matchea DOS veces y `toBeHidden` revienta por **strict mode** antes de afirmar
+nada. Pasaba sólo cuando la aserción llegaba antes que la segunda copia: **le estaba ganando una
+carrera a la hidratación**. Con el render un 20 % más rápido la carrera se dio vuelta — 2 rojas de 5
+corridas tibias, siempre por strict mode, nunca por el producto.
+
+Se arregló el test, no el producto: `vis(...)` + `toHaveCount(0)` — «ninguna copia VISIBLE» en vez de
+«la copia está oculta». Afirma lo mismo que promete el comentario que ya estaba arriba y cubre las
+dos copias en vez de suponer que hay una; la contraparte positiva (al abrir el plegable las dos
+APARECEN) sigue tres líneas más abajo, así que una pantalla que no renderizó se cae ahí igual. **6 de
+6 verdes** después del arreglo, y 5 de 5 en la verificación de arriba.
+
+### 7 · Estado
+
+| chequeo | antes | después |
+|---|---|---|
+| `tsc --noEmit` | exit 0 | **exit 0** |
+| `check:invariants` | 57 descubiertos · 56 corridos · 56 pasaron | 57 descubiertos · 56 corridos · **56 pasaron** · 0 fallaron |
+| `test:setter` | 191 (190 + el flake conocido de servidor frío) | **193 pasados** (191 + los 2 nuevos) con servidor tibio, 5,0 min. En frío: 190/193, las 3 rojas de familias de flake ya documentadas — verificadas verdes 5 de 5 en tibio (§6-bis) |
+| `test:leados` | 41 | **41 pasados** |
+| `test:helpers` | 28 | **28 pasados** |
+| `npm run build` | verde | **verde** |
+| `npx prisma migrate status` | — | **schema up to date, sin drift** |
+
+**Superficies fijas:** `medir-pliegue-manual.ts` y `capturar-franja.ts` corridos contra los dos
+builds → los dos JSON salieron **idénticos byte a byte** (`docs/perf-p28/pliegue-*.json`,
+`docs/perf-p28/franja-*.json`). No empeoraron: no cambiaron.
+
+**Lo que escribe cada acción no cambió**: las diecisiete siguen registrando en la base en las tres
+pasadas (el instrumento lo relee caso por caso), y las suites que afirman sobre el contenido
+persistido siguen verdes.
+
+**Ningún acuse se perdió**: el instrumento mide las dos señales por acción y las diecisiete conservan
+la suya. La única sin señal 2 es «Trabajar este lead», que acusa navegando — la vía que el invariante
+del acuse admite, y que este sprint no tocó.
+
+### Lo que queda para la verificación humana
+
+- **Si la herramienta se siente más rápida.** Los números dicen que el servidor trabaja un tercio
+  menos por acción y que el reflejo no se movió. Lo cierra Franco usándola.
+- **La decisión sobre el aviso** (§5). Está medida, no tomada.

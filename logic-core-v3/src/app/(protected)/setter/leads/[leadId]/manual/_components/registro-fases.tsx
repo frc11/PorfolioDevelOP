@@ -1,7 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { FASE_IDS, type FaseId } from '@/lib/leados/contracts'
 import { useAutosave } from '@/lib/use-autosave'
@@ -52,14 +51,20 @@ import { FaseAutoReporte } from './fase-auto-reporte'
  * nunca encima dos escrituras — que es exactamente lo que lo salvaba al chequeo.
  * Cerrarla pide serializar escrituras y es otra decisión.
  *
- * ── Por qué el refresh sigue existiendo, y por qué UNO ───────────────────────
+ * ── P28: el refresh ya no está, y la franja se actualiza igual ─────────────
  * `progresoJson` alimenta la derivación (`manual.ts`): una pantalla de
  * Construcción se marca completada cuando sus tres fases lo están, y el paso
  * destacado es la primera fase sin tildar. Eso lo pintan la franja del recorrido
- * y la barra de acción, que son server. Sin refresh quedarían atrasadas. Antes
- * había uno POR CLIC —y su latencia ERA la ventana de la carrera—; ahora hay uno
- * por ráfaga asentada: el efecto de más abajo espera a que no quede nada sucio.
- * Y ya no puede revertir nada: el estado es de este componente, no de la prop.
+ * y la barra de acción, que son server. Hasta P25 había un `router.refresh()`
+ * POR CLIC —y su latencia ERA la ventana de la carrera—; P25 lo dejó en uno por
+ * ráfaga asentada.
+ *
+ * P28 lo saca del todo: `guardarProgreso` revalida, y la respuesta del POST de
+ * la server action YA TRAE el árbol re-renderizado — el refresh pedía ese mismo
+ * árbol una segunda vez, que son ~290 ms de servidor por tilde. Está medido con
+ * el instrumento de P28 (`npm run test:perf`), que compara el texto de `main`
+ * antes y después del tilde: sin el refresh la pantalla sigue cambiando en las
+ * tres pasadas, con un viaje menos.
  */
 export function RegistroFases({
   leadId,
@@ -76,8 +81,6 @@ export function RegistroFases({
   titulos: Record<string, string>
   puedeGuardar: boolean
 }) {
-  const router = useRouter()
-
   // El estado arranca en orden canónico de `FASE_IDS` y se mantiene así en cada
   // toggle: sin eso, agregar y quitar la misma fase devolvería el mismo conjunto
   // con otro orden, el serializador lo leería como "sucio" y el autosave
@@ -110,18 +113,6 @@ export function RegistroFases({
       return resultado
     },
   })
-
-  // El refresh de la derivación, UNO por ráfaga asentada (ver cabecera). La ref
-  // corta el bucle: `router.refresh()` re-renderiza, y sin ella el efecto
-  // volvería a dispararse sobre el mismo estado ya refrescado.
-  const refrescado = useRef<string | null>(null)
-  useEffect(() => {
-    if (autosave.phase !== 'saved' || autosave.isDirty) return
-    const firma = marcadas.join(',')
-    if (refrescado.current === firma) return
-    refrescado.current = firma
-    router.refresh()
-  }, [autosave.phase, autosave.isDirty, marcadas, router])
 
   const toggle = useCallback((faseId: FaseId) => {
     setUltimoTocado(faseId)

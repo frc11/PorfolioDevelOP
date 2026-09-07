@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import { qaLogin, attachConsoleGuard, expectNoConsoleErrors } from '../helpers/setter-auth'
-import { firstVisible } from '../helpers/setter-ui'
+import { firstVisible, vis } from '../helpers/setter-ui'
 import { HERRAMIENTAS, HERRAMIENTAS_ORDEN } from '../../src/lib/leados/herramientas'
 import {
   getSetterQa,
@@ -212,8 +212,27 @@ test('m5 · la salida nunca queda más adentro que la pared que destraba', async
   // que la salida esté a la MISMA profundidad que la pared, nunca una más
   // abajo: sin abrir nada, ninguna de las dos se ve.
   await nadaDesplegado(page, 'm5')
-  await expect(page.getByText(PILDORA)).toBeHidden()
-  await expect(page.getByText(SALIDA)).toBeHidden()
+  // P28 — «ninguna copia VISIBLE», no «la copia está oculta».
+  //
+  // Acá decía `expect(page.getByText(PILDORA)).toBeHidden()`, y eso dependía de
+  // que el texto matcheara UNA sola vez. El manual se DUPLICA para responsive
+  // (lo dice la cabecera de `setter-ui.ts`): con las dos copias montadas, el
+  // locator resuelve a dos y `toBeHidden` revienta por strict mode ANTES de
+  // afirmar nada. Pasaba sólo cuando la aserción llegaba antes que la segunda
+  // copia — le estaba ganando una carrera a la hidratación.
+  //
+  // P28 aceleró el render de estas pantallas (~300 → ~235 ms) y la carrera se
+  // dio vuelta: 2 rojas de 5 corridas tibias, siempre por strict mode. El test
+  // era frágil, no hay regresión de producto detrás — el DOM duplicado es
+  // pre-existente y no lo tocó nadie.
+  //
+  // La forma nueva afirma lo MISMO que promete el comentario de arriba («sin
+  // abrir nada, ninguna de las dos se ve») y además cubre las dos copias en vez
+  // de suponer que hay una. No se afloja nada: la contraparte positiva —que al
+  // abrir el plegable las dos APAREZCAN— está tres líneas más abajo, así que una
+  // pantalla que no hubiera renderizado se caería ahí.
+  await expect(vis(page.getByText(PILDORA)), 'sin abrir, ninguna copia de la píldora se ve').toHaveCount(0)
+  await expect(vis(page.getByText(SALIDA)), 'sin abrir, ninguna copia de la salida se ve').toHaveCount(0)
 
   // Al abrirlo aparecen LAS DOS. Contra el código viejo salía la píldora sola:
   // «Abrí el Gem para pegarlo» y nada más, en el peor momento posible — al setter

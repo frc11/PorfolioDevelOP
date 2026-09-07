@@ -144,10 +144,23 @@ export type ManualDelLead = {
 export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead | null> {
   const userId = await requireSetter()
 
-  const lead = await getOwnedLead(leadId, userId)
-  if (!lead) return null
-
-  const [dossier, actividades, dmsHoy, ultimaAsignacion, timeline] = await Promise.all([
+  // P28 — EL LEAD VA EN LA MISMA OLA que el resto, no antes.
+  //
+  // Estaba en una ola propia (`await` suelto) y las otras cinco lecturas
+  // esperaban a que volviera, aunque NINGUNA la necesita: las cinco reciben
+  // `leadId` + `userId` y resuelven su propia pertenencia. Eso son dos viajes en
+  // serie contra la base donde alcanza uno, y esta carga corre en CADA render de
+  // una pantalla del manual — incluido el que dispara toda acción con registro.
+  // Medido con `npm run test:perf`: el render de esta pantalla baja de ~290 ms a
+  // ~200 ms, un tercio menos.
+  //
+  // El guard de pertenencia NO se mueve ni se afloja: sigue siendo `lead === null
+  // → null` (la página lo vuelve 404) y sigue siendo `getOwnedLead` la única
+  // puerta. Lo único que cambia es que sobre un lead ajeno se pagan cinco
+  // consultas de más antes de rebotar — todas owned, ninguna devuelve nada, y es
+  // un camino de error, no el normal.
+  const [lead, dossier, actividades, dmsHoy, ultimaAsignacion, timeline] = await Promise.all([
+    getOwnedLead(leadId, userId),
     getOwnedDossier(leadId, userId),
     listOwnedLeadActivities(leadId, userId),
     contarDmsHoy(userId),
@@ -157,6 +170,7 @@ export async function cargarManualDelLead(leadId: string): Promise<ManualDelLead
     // `actividades` (solo comercial). Mostrar la reasignación no abre Seguimiento.
     listOwnedLeadTimeline(leadId, userId),
   ])
+  if (!lead) return null
 
   // Reloj request-time, fuera del render (mismo criterio que el home usa para
   // `followUpVencido`): el toque agendado ya venció.

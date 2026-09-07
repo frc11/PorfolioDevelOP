@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MessageCircle, Send } from 'lucide-react'
 import { Badge, Card, Field, TextArea } from '@/components/ui'
@@ -28,7 +27,6 @@ import { useUnsavedGuard } from '@/lib/use-unsaved-guard'
  * escritura con su guardrail de rol y la instrucción de envío por DM.
  */
 export function OpenerForm({ leadId }: { leadId: string }) {
-  const router = useRouter()
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -62,7 +60,9 @@ export function OpenerForm({ leadId }: { leadId: string }) {
           ? `Opener registrado — próximo toque el ${formatFechaCorta(result.data.proximoToque)}.`
           : 'Opener registrado — quedó en seguimiento.',
       )
-      router.refresh()
+      // P28 — Sin `router.refresh()`: la respuesta del POST de la action (que
+      // revalida) ya trae el árbol nuevo y React lo aplica sola. Ver la nota
+      // larga en `use-step-action.ts`.
     })
   }
 
