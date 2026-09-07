@@ -1,5 +1,6 @@
 import localFont from 'next/font/local'
 
+import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
 
 /* ── LAS HOJAS DEL CHROME (S3) ───────────────────────────────────────────────
@@ -122,10 +123,28 @@ import './_estilos/foco.css'
  * Es el alcance del anillo de foco. La regla vive en `theme-develop.css` y
  * está acotada a este árbol; el porqué está escrito ahí, con el número.
  *
+ * ── ⚠️ EL SCROLL SUAVE, DESDE B5 ───────────────────────────────────────────
+ *
+ * `CompuertaDelScrollSuave` va acá y no en `page.tsx` por la misma razón que el
+ * escenario: **es permanente, no una sección**. El motor de scroll no puede
+ * apagarse y prenderse al navegar entre páginas de /v3 — sería un cambio de
+ * física a mitad de un gesto.
+ *
+ * Va ANTES del escenario en el JSX y eso no cambia una caja: los dos montan
+ * `null` o algo fuera del flujo, y el orden entre ellos lo resuelve el
+ * `z-index`. Va primero porque es el que decide qué valor de scroll leen los
+ * demás.
+ *
+ * ⚠ **`src/app/layout.tsx` NO se toca.** `SmoothScroll` sigue saliéndose de
+ * /v3 con su `return` temprano y sigue construyendo lo mismo, cuando lo
+ * construía, en las seis rutas de producto. El porqué completo —y por qué eso
+ * deja a `TransitionContext` congelado y viendo `null`— está en
+ * `_lib/scrollSuave.ts`.
+ *
  * ── Lo que NO hay acá ──────────────────────────────────────────────────────
  *
- * Ninguna animación. Ni la escena 3D. Ni contenido. Ni GSAP, ni Lenis, ni
- * Sanity: ninguna decidida. Este layout es un hueco y una tipografía.
+ * Ninguna animación. Ni la escena 3D. Ni contenido. Ni GSAP ni Sanity: ninguna
+ * decidida. Este layout es un hueco, una tipografía y dos compuertas.
  */
 
 const chivo = localFont({
@@ -150,6 +169,7 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
       data-v3=""
       className={`${chivo.variable} ${chivoMono.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
     >
+      <CompuertaDelScrollSuave />
       <EscenarioCompuerta />
       {children}
     </div>

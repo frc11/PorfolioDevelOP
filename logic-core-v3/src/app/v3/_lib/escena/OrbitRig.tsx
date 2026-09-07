@@ -12,10 +12,6 @@ import {
   DUST_BOB_AMPLITUDE,
   DUST_BOB_PERIOD_S,
   DUST_SPIN_DEG_S,
-  MOUSE_ANGLE_DEG,
-  MOUSE_EPSILON,
-  MOUSE_HEIGHT_FACTOR,
-  MOUSE_TAU,
   SETTLE_EPSILON,
   SETTLE_TAU,
   VIRA_PITCH_DEG,
@@ -26,6 +22,17 @@ import {
   VIRA_YAW_PERIOD_S,
 } from './choreographyPhysics'
 import type { ChoreoEditor } from './choreographyEditorTypes'
+import { driftShells } from './derivaDelAire'
+import {
+  crearDesplazamiento,
+  crearPuntero,
+  desplazamientoDelMouse,
+  perseguirAlPuntero,
+  sinDesplazamiento,
+  soltarElPuntero,
+  type DesplazamientoDePose,
+  type PunteroAmortiguado,
+} from './modulacionDeLaPose'
 import {
   dampTowards,
   nearestKeyframeIndex,
@@ -120,39 +127,6 @@ const DUST_SPIN_RAD_S = DUST_SPIN_DEG_S.map((deg) => THREE.MathUtils.degToRad(de
 const BOKEH_SPIN_RAD_S = BOKEH_SPIN_DEG_S.map((deg) => THREE.MathUtils.degToRad(deg))
 const TWO_PI = Math.PI * 2
 
-/**
- * La deriva diferencial de un campo de partículas: cada CONCHA gira y cabecea con
- * su propio período, la interior más rápido.
- *
- * Recorre los hijos del grupo en vez de recibir un ref por concha, y eso no es
- * pereza: mantiene el contrato del rig en dos refs —uno por campo— aunque el
- * componente cambie de cuántas capas tiene, y no asigna nada por frame. Si el
- * grupo trae más hijos que constantes, las de más se ignoran; se verifica que las
- * cantidades coincidan en `s10-escena.invariant.ts`.
- */
-function driftShells(
-  group: THREE.Group,
-  elapsed: number,
-  spin: readonly number[],
-  amplitude: readonly number[],
-  period: readonly number[],
-  reducedMotion: boolean
-): void {
-  const shells = group.children
-  for (let i = 0; i < shells.length; i += 1) {
-    const shell = shells[i]
-    if (reducedMotion) {
-      if (shell.rotation.y !== 0) shell.rotation.y = 0
-      if (shell.position.y !== 0) shell.position.y = 0
-      continue
-    }
-    const index = i < spin.length ? i : spin.length - 1
-    shell.rotation.y = elapsed * spin[index]
-    shell.position.y =
-      Math.sin((elapsed / period[index]) * TWO_PI) * amplitude[index]
-  }
-}
-
 /** Ventana de promediado del contador de FPS. */
 const FPS_WINDOW_S = 0.5
 
@@ -189,7 +163,9 @@ type RigScratch = {
   /** Lo que el arco dicta en este progreso. */
   readonly arc: MutableLightLevels
   /** Puntero amortiguado, en el rango [−1, 1] de r3f. */
-  readonly mouse: { x: number; y: number }
+  readonly mouse: PunteroAmortiguado
+  /** Lo que el mouse le SUMA a la pose del progreso. Ver `modulacionDeLaPose.ts`. */
+  readonly desplazamiento: DesplazamientoDePose
   readonly lightTargets: LightRigTargets
   readonly lightInput: LightRigInput
   readonly lightCache: LightRigCache
@@ -285,7 +261,8 @@ export function OrbitRig({
       azimuthDeg: KEY_AZIMUTH_DEG,
       elevationDeg: KEY_ELEVATION_DEG,
     },
-    mouse: { x: 0, y: 0 },
+    mouse: crearPuntero(),
+    desplazamiento: crearDesplazamiento(),
     lightTargets: createLightRigTargets(),
     lightInput: createLightRigInput(),
     lightCache: createLightRigCache(),
@@ -472,24 +449,22 @@ export function OrbitRig({
     //
     // El feed es `state.pointer` de r3f — sin listener propio, por la lección ya
     // documentada del repo: r3f v9 lo actualiza por su cuenta sobre la caja del
-    // canvas. Se amortigua con su propia constante de tiempo para que arrastre
-    // en vez de saltar.
+    // canvas.
     //
-    // La altura se escala por la distancia: así el desplazamiento EN PANTALLA es
-    // el mismo a 6,3 que a 30. Un offset fijo en unidades de mundo sería un
-    // cimbronazo de cerca y nada de lejos.
-    const { mouse } = scratch
+    // ⚠️ **La cuenta se mudó a `modulacionDeLaPose.ts` en B5, y no por
+    // prolijidad**: ahí adentro no llega el store, así que el desplazamiento
+    // **no puede** tocar el progreso. Acá vivía a tres líneas del
+    // `rig.set('progress', …)` de arriba.
+    const { mouse, desplazamiento } = scratch
     if (physics) {
-      mouse.x = dampTowards(mouse.x, state.pointer.x, MOUSE_TAU, MOUSE_EPSILON, delta)
-      mouse.y = dampTowards(mouse.y, state.pointer.y, MOUSE_TAU, MOUSE_EPSILON, delta)
-
-      const magnitude = rigValues.mouseScale
-      angleDeg += mouse.x * MOUSE_ANGLE_DEG * magnitude
-      height += mouse.y * MOUSE_HEIGHT_FACTOR * distance * magnitude
+      perseguirAlPuntero(mouse, state.pointer.x, state.pointer.y, delta)
+      desplazamientoDelMouse(desplazamiento, mouse, distance, rigValues.mouseScale, rigValues.progress)
     } else {
-      mouse.x = 0
-      mouse.y = 0
+      soltarElPuntero(mouse)
+      sinDesplazamiento(desplazamiento)
     }
+    angleDeg += desplazamiento.angleDeg
+    height += desplazamiento.height
 
     // 3 · Cámara sobre la órbita. Ángulo 0° = de frente al logo (se lee bien);
     // 90° y 270° son los perfiles; 180° es de atrás, con el logo espejado.

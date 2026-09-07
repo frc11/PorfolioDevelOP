@@ -59,30 +59,37 @@
  */
 
 /**
- * ⚠️ **QUE EL HOME NUEVO TENGA CURSOR PROPIO ES UNA DECISIÓN QUE NADIE TOMÓ.**
+ * ⚠️ **LA DECISIÓN ESTÁ TOMADA: EL HOME NUEVO LLEVA CURSOR PROPIO (B5).**
  *
- * Está en `false` a propósito y **este sprint no la prende**. La constante
- * existe para que la decisión sea de una línea el día que se tome, y para que
- * mientras tanto sea VISIBLE: un cursor que no se monta porque nadie escribió
- * el componente y un cursor que no se monta porque se decidió que no, se ven
- * igual en la pantalla y son cosas distintas. Esta línea las distingue.
+ * Nació en `false` en SITIO-S8, y ese `false` no era una preferencia: era la
+ * forma de dejar ESCRITO que nadie había decidido. *«Un cursor que no se monta
+ * porque nadie escribió el componente y un cursor que no se monta porque se
+ * decidió que no se ven igual en la pantalla y son cosas distintas»* — la
+ * constante existía para distinguirlas, y ahora existe para registrar cuál fue
+ * la decisión y quién la tomó.
  *
- * ── Qué costaría prenderla ─────────────────────────────────────────────────
+ * **La toma B5, con las tres cosas que faltaban medidas:**
  *
- * El subagente lo mide y lo reporta con números: el peso del chunk perezoso que
- * pasaría a pedirse arriba de 1025, y qué cambia en pantalla. Lo que ya se sabe
- * sin medir, porque está escrito en `_lib/cursor.ts`, es que **el cursor nativo
- * nunca se oculta** —`cursor: none` no aparece en un solo archivo del sprint— y
- * que el propio se dibuja encima, no en su lugar. O sea que prenderlo no tiene
- * el costo de accesibilidad del cursor custom clásico; el costo es de
- * composición y de bytes.
+ *   · **Qué cuesta en bytes**: el chunk perezoso pasa a pedirse arriba de 1025 y
+ *     no viajaba antes. La cifra la publica `s3-peso` sobre el build.
+ *   · **Qué cuesta en accesibilidad**: nada, y estaba escrito desde S3 — **el
+ *     cursor nativo nunca se oculta**, `cursor: none` no aparece en un solo
+ *     archivo del árbol, y el propio se dibuja ENCIMA, no en su lugar. Hay un
+ *     instrumento que lo afirma.
+ *   · **Con qué retardo**: el hueco `[decidido]` de `SEGUIMIENTO` se cerró
+ *     midiendo el transitorio de la referencia. Ver `_lib/cursor.ts`.
+ *
+ * Las dos compuertas de S3 siguen adelante de ésta y no se tocaron: **abajo de
+ * 1025 no se monta** y **con `prefers-reduced-motion` tampoco**. Esta constante
+ * es la tercera condición y es de otra naturaleza — las de S3 preguntan si el
+ * cursor CORRESPONDE en este dispositivo; ésta pregunta si el home lo lleva.
  *
  * ⚠ El `CustomCursor` del sitio VIEJO se desmontó en B2-S2 y se borró en B2-S4
  * por la razón contraria —escondía el del sistema con `cursor:none` global— y
  * el layout raíz lo documenta. **No son la misma pieza y el precedente no
- * decide ésta**, pero quien tome la decisión tiene que saber que existe.
+ * decidió ésta**, pero quien la tomó tenía que saber que existe.
  */
-export const CURSOR_PROPIO_EN_EL_HOME = false
+export const CURSOR_PROPIO_EN_EL_HOME = true
 
 /** El módulo que se monta, con su ruta exacta. Para poder afirmar que existe. */
 export const MODULO_DEL_CHROME = 'src/app/v3/_chrome/ChromeDelHome.tsx'

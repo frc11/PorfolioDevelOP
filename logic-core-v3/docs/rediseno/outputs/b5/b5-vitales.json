@@ -1,0 +1,195 @@
+{
+  "sinLasTresPiezas": {
+    "lcp": {
+      "ms": 352,
+      "elemento": "H1.font-titulo text-fluido-titulo-xl leadin"
+    },
+    "motor": null,
+    "sinPiezas": [
+      {
+        "cuadros": 901,
+        "duracionMs": 12004.7,
+        "fpsMediana": 75.18796992480586,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 74.07407407407408,
+        "indiceDelPeor": 145,
+        "cuadrosLargos": 0,
+        "scrollFinal": 15300
+      },
+      {
+        "cuadros": 901,
+        "duracionMs": 12004.7,
+        "fpsMediana": 75.18796992479558,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 74.07407407407408,
+        "indiceDelPeor": 3,
+        "cuadrosLargos": 0,
+        "scrollFinal": 15300
+      },
+      {
+        "cuadros": 900,
+        "duracionMs": 11991.300000000003,
+        "fpsMediana": 75.18796992479558,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 73.52941176471376,
+        "indiceDelPeor": 420,
+        "cuadrosLargos": 0,
+        "scrollFinal": 15300
+      }
+    ]
+  },
+  "que": "FPS, LCP, el aterrizaje de las siete anclas y el progreso con la página quieta",
+  "instrumento": "scripts-b5/d-vitales.ts",
+  "perfil": "1440",
+  "estrangulamiento": "ninguno",
+  "lineasDeBase": {
+    "fpsMinimoB4B": 73.5,
+    "lcpMedianaB4Bms": 2378,
+    "lcpTechoMs": 2500
+  },
+  "estadoDeLaPagina": {
+    "visibilityState": "visible",
+    "hasFocus": true,
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "dpr": 1,
+    "alturaDelDocumento": 16275,
+    "rafCorre": true
+  },
+  "lcp": {
+    "ms": 364,
+    "elemento": "H1.font-titulo text-fluido-titulo-xl leadin"
+  },
+  "progreso": {
+    "antes": {
+      "scrollY": 4000,
+      "arriba": 0,
+      "abajo": 16200,
+      "ventana": 900
+    },
+    "despues": {
+      "scrollY": 4000,
+      "arriba": 0,
+      "abajo": 16200,
+      "ventana": 900
+    },
+    "pAntes": 0.3888888888888889,
+    "pDespues": 0.3888888888888889,
+    "identico": true,
+    "entradasIdenticas": true,
+    "controlPositivo": {
+      "unPixel": {
+        "scrollY": 4001,
+        "arriba": 0,
+        "abajo": 16200,
+        "ventana": 900
+      },
+      "pUnPixel": 0.38892361111111107,
+      "cambia": true,
+      "deltaDelProgreso": 0.00003472222222217214
+    }
+  },
+  "quieta": {
+    "cuadros": 226,
+    "duracionMs": 3001.2000000000007,
+    "fpsMediana": 75.18796992480586,
+    "fpsP05": 74.62686567163368,
+    "fpsMinimo": 74.07407407407408,
+    "indiceDelPeor": 9,
+    "cuadrosLargos": 0,
+    "scrollFinal": 0
+  },
+  "recorrido": {
+    "cuadros": 898,
+    "duracionMs": 11991.3,
+    "fpsMediana": 75.18796992479558,
+    "fpsP05": 74.62686567163368,
+    "fpsMinimo": 37.45318352059823,
+    "indiceDelPeor": 439,
+    "cuadrosLargos": 2,
+    "scrollFinal": 15300
+  },
+  "recorridos": [
+    {
+      "cuadros": 898,
+      "duracionMs": 11991.3,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 37.45318352059823,
+      "indiceDelPeor": 439,
+      "cuadrosLargos": 2,
+      "scrollFinal": 15300
+    },
+    {
+      "cuadros": 900,
+      "duracionMs": 11991.300000000003,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 68.96551724137932,
+      "indiceDelPeor": 204,
+      "cuadrosLargos": 0,
+      "scrollFinal": 15300
+    },
+    {
+      "cuadros": 899,
+      "duracionMs": 11991.199999999997,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 37.45318352059313,
+      "indiceDelPeor": 439,
+      "cuadrosLargos": 1,
+      "scrollFinal": 15300
+    }
+  ],
+  "anclas": [
+    {
+      "ancla": "#hero",
+      "topDelPanel": 0,
+      "scrollY": 0,
+      "topeDelDocumento": true,
+      "ok": true
+    },
+    {
+      "ancla": "#quienes-somos",
+      "topDelPanel": 72,
+      "scrollY": 828,
+      "topeDelDocumento": false,
+      "ok": true
+    },
+    {
+      "ancla": "#numeros",
+      "topDelPanel": 72,
+      "scrollY": 3528,
+      "topeDelDocumento": false,
+      "ok": true
+    },
+    {
+      "ancla": "#trabajos",
+      "topDelPanel": 72,
+      "scrollY": 7128,
+      "topeDelDocumento": false,
+      "ok": true
+    },
+    {
+      "ancla": "#servicios",
+      "topDelPanel": 72,
+      "scrollY": 9828,
+      "topeDelDocumento": false,
+      "ok": true
+    },
+    {
+      "ancla": "#tu-panel",
+      "topDelPanel": 72,
+      "scrollY": 12528,
+      "topeDelDocumento": false,
+      "ok": true
+    },
+    {
+      "ancla": "#por-que-develop",
+      "topDelPanel": 72,
+      "scrollY": 14328,
+      "topeDelDocumento": false,
+      "ok": true
+    }
+  ]
+}

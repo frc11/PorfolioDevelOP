@@ -95,17 +95,66 @@ export const CAPAS_MEDIDAS = {
 /**
  * Cuánto se acerca cada capa al puntero por fotograma.
  *
- * `[decidido]`, y es lo único de este componente que no sale de una medición:
- * la referencia interpola —con un `mousemove` sintético el núcleo avanzaba
- * ~10px cada 300ms con la razón decreciendo, y a los 3,1s no había convergido—
- * pero el coeficiente exacto no se midió, porque hacía falta movimiento real
- * sostenido y el instrumento de CDP no lo produce.
+ * ── ⚠️ B5 CERRÓ EL `[decidido]`: AHORA SON DOS NÚMEROS MEDIDOS ────────────
  *
- * Lo que sí está medido y acá se respeta es la RELACIÓN: **el halo va
- * sistemáticamente por detrás del núcleo**. Por eso son dos coeficientes y no
- * uno, y el del halo es menor.
+ * Hasta B5 esto decía, textual: *«es lo único de este componente que no sale de
+ * una medición … el coeficiente exacto no se midió, porque hacía falta
+ * movimiento real sostenido y el instrumento de CDP no lo produce»*. El hueco
+ * era real y S0 lo había declarado (`COMPONENTS.md` §4.3). **Se cerró con otro
+ * instrumento**: en vez de perseguir el movimiento sostenido, se muestrea el
+ * TRANSITORIO — un salto único del puntero y la posición de las dos capas leída
+ * por `rAF` hasta que convergen. La curva de una interpolación exponencial se
+ * identifica entera con su tiempo al 63 %.
+ *
+ * Medido sobre la referencia, salto de **1.276,5 px** a 60 Hz, 124 muestras:
+ *
+ * | capa | t63 | t90 | t95 | t99 | coeficiente por cuadro |
+ * |---|---|---|---|---|---|
+ * | núcleo | **336,5 ms** | 814 | 1.082,6 | 1.623,3 | **0,0483** |
+ * | halo | **517,2 ms** | 1.053,3 | 1.337 | 1.969,4 | **0,0317** |
+ *
+ * El coeficiente sale de `k = 1 − e^(−Δt/τ)` con `Δt = 16,67 ms` y `τ = t63`.
+ * Y cierra con lo que S0 había podido ver a ojo: *«a los 3,1 s todavía no había
+ * convergido»* — con 0,0483, un salto así tarda ~3,4 s en llegar a
+ * `EPSILON_PX`.
+ *
+ * ── Lo que cambió, y por qué se fue HACIA la referencia ───────────────────
+ *
+ * Los valores propios eran **0,22 y 0,12**: 4,6× más rápido que el núcleo de la
+ * referencia y 3,8× más rápido que su halo. Un cursor más pegado al puntero se
+ * lee más barato —se acerca a dibujar un puntero en vez de acompañarlo— y la
+ * decisión del bloque fue calibrar hacia el número medido.
+ *
+ * ── Lo que NO cambió, y sigue estando medido ──────────────────────────────
+ *
+ * La RELACIÓN: **el halo va sistemáticamente por detrás del núcleo**. Era la
+ * mitad que S0 sí había medido, y los dos números nuevos la conservan — la
+ * razón halo/núcleo pasa de 0,545 a 0,656, o sea que el arrastre relativo del
+ * halo queda apenas más marcado que antes y casi exactamente en el de la
+ * referencia.
+ *
+ * ⚠️ **La perilla queda.** Son dos constantes en un módulo sin React,
+ * importadas por un solo componente: mover el retardo es mover estos dos
+ * números y nada más.
  */
-export const SEGUIMIENTO = { nucleo: 0.22, halo: 0.12 } as const
+export const SEGUIMIENTO = { nucleo: 0.0483, halo: 0.0317 } as const
+
+/**
+ * Los dos coeficientes de la REFERENCIA, para que la calibración se pueda
+ * volver a juzgar sin volver a abrir su sitio.
+ *
+ * Están acá y no en un comentario porque `b5-cursor.invariant.ts` los consume:
+ * afirma que `SEGUIMIENTO` cae adentro de la tolerancia de estos, y con eso la
+ * cifra deja de vivir sólo en una tabla de un reporte.
+ */
+export const SEGUIMIENTO_DE_LA_REFERENCIA = {
+  nucleo: 0.0483,
+  halo: 0.0317,
+  /** El salto con el que se midió, en px. */
+  saltoPx: 1276.5,
+  /** Los dos tiempos al 63 %, en ms, de los que salen los coeficientes. */
+  t63Ms: { nucleo: 336.5, halo: 517.2 },
+} as const
 
 /** Distancia en px por debajo de la cual se considera convergido y se corta
  *  el bucle de animación. Evita un `requestAnimationFrame` eterno con el

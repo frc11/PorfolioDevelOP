@@ -16,7 +16,7 @@
  *   3. **La cadena de ancestros sigue sin `overflow` recortado.** `sticky` se
  *      apaga en silencio si un ancestro lo tiene.
  *   4. **El pie enlaza las OCHO, derivadas**, y ningún `href` lleva a la nada.
- *   5. **El cursor está detrás de la constante, y la constante está en `false`.**
+ *   5. **El cursor está detrás de la constante, TOMADA en B5.**
  *   6. **El rodeo de `peso` está restaurado, y se dice DÓNDE estaba.**
  *
  * Los detectores y las entradas rotas viven en `./soporte.ts`, afuera de este
@@ -161,18 +161,10 @@ for (const archivo of LAYOUTS) {
 controlPositivo('el detector ve un `overflow-x-hidden` de Tailwind', S.TSX_CON_OVERFLOW, (f: string) => S.clasesDeOverflow(f).length === 0)
 controlPositivo('y NO lo confunde con el comentario que lo explica', '// reemplazó al overflow:hidden de EarlyScrollLock', (f: string) => S.clasesDeOverflow(f).length > 0)
 
-/**
- * ⚠️ LA ÚNICA COSA QUE PODRÍA PONER `overflow: clip` EN EL `<html>` DE /v3.
- *
- * `lenis/dist/lenis.css` viaja en el bundle del sitio entero y trae
- * `.lenis…lenis-stopped { overflow: clip }` sobre el `<html>`. La regla necesita
- * la clase, y la clase la escribe Lenis al construirse: `SmoothScroll` **se sale
- * antes para `/v3`**, así que nunca se aplica. Esa salida temprana no es una
- * optimización — es lo que sostiene el `sticky` de la pastilla y el de las dos
- * secciones pinneadas.
- */
+/** ⚠️ `lenis.css` cuelga `overflow: clip` de **`lenis-stopped`**, no de `lenis`; desde
+ *  B5 la garantía es que nadie llame `stop()` (`s18-compuertas`, y el `<html>` vivo). */
 const SMOOTH = S.sinComentarios(S.leer('src/components/layout/SmoothScroll.tsx'))
-afirmar(/pathname\.startsWith\('\/v3'\)/.test(SMOOTH) && /return/.test(SMOOTH), 'Lenis NO corre en /v3: `SmoothScroll` se sale antes, así que su clase —y su `overflow: clip`— nunca llegan al `<html>`')
+afirmar(/pathname\.startsWith\('\/v3'\)/.test(SMOOTH) && /return/.test(SMOOTH), '`SmoothScroll` —el del layout RAÍZ— sigue saliendose de /v3: el sitio vivo no cambió de camino')
 controlPositivo('el lector ve un SmoothScroll sin esa salida', "if (isPortal) { return }", (f: string) => /pathname\.startsWith\('\/v3'\)/.test(f))
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -231,15 +223,22 @@ controlPositivo('el lector de clases ve la pieza SIN el peso', S.MARCADO_SIN_PES
 console.log('  ⚠️ QUÉ CAMBIA EN PANTALLA: los dos marcadores `[ENLACE]` de la columna de contacto pasan de `--font-weight-normal` (400) a `--font-weight-medio` (500). Es composición, y por eso se reporta. Queda ASIMÉTRICO con la línea de cierre de `Cierre.tsx`, que tiene la misma forma y sigue en 400: ese archivo no es de este frente.')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('6 · El cursor propio, detrás de la constante — y la constante en `false`')
+titulo('6 · El cursor propio, detrás de la constante — y la constante, TOMADA (B5)')
 
-// Se ensancha a `boolean` para poder AFIRMARLO: con el literal, `tsc` sabe la
-// respuesta y la comparación no podría fallar nunca.
+/** ⚠️ Se dio vuelta en B5 sin aflojar nada (`_chrome/contrato.ts`): sigue
+ *  vigilando una constante, leída por el chrome, con las compuertas de S3
+ *  adelante. Se ensancha a `boolean` o `tsc` sabe la respuesta. */
 const decision: boolean = CURSOR_PROPIO_EN_EL_HOME
-afirmar(decision === false, 'la decisión que nadie tomó SIGUE sin tomarse: `CURSOR_PROPIO_EN_EL_HOME` está en `false`')
+afirmar(decision === true, 'la decisión está TOMADA: `CURSOR_PROPIO_EN_EL_HOME` en `true` (B5)')
 afirmar(CHROME_LIMPIO.includes('CURSOR_PROPIO_EN_EL_HOME'), 'y el chrome la LEE: el montaje del cursor cuelga de ella, no de un comentario')
 afirmar(S.importsDe(CHROME).includes('../_componentes/chrome/CursorCompuerta'), '  montando la compuerta que YA EXISTE desde S3, no una nueva')
-afirmar(!MARCADO.includes(MARCA_CURSOR), 'con la constante en `false` el cursor no aparece en el marcado')
+
+/** ⚠️ **Verde por vacío, corregido:** el `!MARCADO.includes(MARCA_CURSOR)` de antes
+ *  pasaba con la constante en los DOS valores. Se afirma junto con su causa. */
+afirmar(
+  !MARCADO.includes(MARCA_CURSOR) && S.leer('src/app/v3/_componentes/chrome/CursorCompuerta.tsx').includes('ssr: false'),
+  'la marca no viaja en el marcado del SERVIDOR, y la causa es el `ssr: false` de la compuerta — no la constante',
+)
 controlPositivo('el buscador de la marca no está ciego', `<div data-marca="${MARCA_CURSOR}"></div>`, (h: string) => !h.includes(MARCA_CURSOR))
 
 /** Las dos compuertas de S3 siguen enteras: el chrome agrega una tercera, no las reemplaza. */

@@ -1,0 +1,235 @@
+{
+  "que": "¿los píxeles bajo AA del método viejo caen sobre el LOGO o sobre el fondo de la sala?",
+  "instrumento": "scripts-b5/e-discriminador.ts — método viejo de B1 (|C−A|>24 con |B−A|≤10) y tres clasificaciones independientes",
+  "cajaDelTitular": {
+    "x": 188,
+    "y": 289.453125,
+    "ancho": 450.5625,
+    "alto": 189.0625
+  },
+  "cajasPorElemento": [
+    {
+      "x": 188,
+      "y": 289.453125,
+      "ancho": 450.5625,
+      "alto": 189.0625
+    }
+  ],
+  "nodosSalteadosPorRecorte": 1,
+  "siluetaDelLogo": {
+    "area": 79759,
+    "caja": [
+      682,
+      283,
+      1192,
+      629
+    ]
+  },
+  "controlDeSilueta": {
+    "unPixelDelCentroDelLogo": true,
+    "unPixelDelPapel": false
+  },
+  "papelDeLaMascaraBuena": 247,
+  "mascaraVieja": 15322,
+  "culpables": 18,
+  "sobreElLogo": 0,
+  "sonTintaDeVerdad": 1,
+  "conFondoOscuro": 0,
+  "losPeores": [
+    {
+      "x": 594,
+      "y": 463,
+      "contraste": 2.56,
+      "fondo": [
+        86,
+        86,
+        82
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 86
+    },
+    {
+      "x": 590,
+      "y": 332,
+      "contraste": 2.6,
+      "fondo": [
+        87,
+        87,
+        83
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 87
+    },
+    {
+      "x": 591,
+      "y": 332,
+      "contraste": 2.6,
+      "fondo": [
+        87,
+        87,
+        83
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 87
+    },
+    {
+      "x": 566,
+      "y": 352,
+      "contraste": 2.64,
+      "fondo": [
+        88,
+        88,
+        84
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 88
+    },
+    {
+      "x": 566,
+      "y": 353,
+      "contraste": 2.64,
+      "fondo": [
+        88,
+        88,
+        84
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 88
+    },
+    {
+      "x": 568,
+      "y": 356,
+      "contraste": 2.68,
+      "fondo": [
+        89,
+        89,
+        85
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 89
+    },
+    {
+      "x": 567,
+      "y": 357,
+      "contraste": 2.68,
+      "fondo": [
+        89,
+        89,
+        85
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 89
+    },
+    {
+      "x": 478,
+      "y": 376,
+      "contraste": 2.73,
+      "fondo": [
+        90,
+        90,
+        86
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": true,
+      "luminanciaDelFondo": 90
+    },
+    {
+      "x": 573,
+      "y": 476,
+      "contraste": 2.73,
+      "fondo": [
+        90,
+        90,
+        86
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 90
+    },
+    {
+      "x": 574,
+      "y": 476,
+      "contraste": 2.73,
+      "fondo": [
+        90,
+        90,
+        86
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 90
+    },
+    {
+      "x": 623,
+      "y": 328,
+      "contraste": 2.77,
+      "fondo": [
+        91,
+        91,
+        87
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 91
+    },
+    {
+      "x": 622,
+      "y": 329,
+      "contraste": 2.77,
+      "fondo": [
+        91,
+        91,
+        87
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 91
+    },
+    {
+      "x": 568,
+      "y": 357,
+      "contraste": 2.9,
+      "fondo": [
+        94,
+        94,
+        91
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 94
+    },
+    {
+      "x": 558,
+      "y": 397,
+      "contraste": 2.9,
+      "fondo": [
+        94,
+        94,
+        90
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 94
+    },
+    {
+      "x": 543,
+      "y": 296,
+      "contraste": 2.94,
+      "fondo": [
+        95,
+        95,
+        91
+      ],
+      "dentroDelLogo": false,
+      "esTintaDeVerdad": false,
+      "luminanciaDelFondo": 95
+    }
+  ]
+}

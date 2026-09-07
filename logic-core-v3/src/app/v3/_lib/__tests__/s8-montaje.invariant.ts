@@ -162,11 +162,12 @@ afirmar(
 afirmarQueNadaSumaAltoAfueraDelMain()
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · LAS DOS DECISIONES QUE NADIE TOMÓ, sin tomar')
+titulo('5 · LAS DOS DECISIONES DE COMPOSICIÓN — una tomada en B5, la otra vigente')
 
+/** B5 tomó la primera (ver `_chrome/contrato.ts`); la propiedad no cambió. */
 afirmar(
-  CURSOR_PROPIO_EN_EL_HOME === false,
-  'el cursor propio del home está APAGADO: es una decisión de composición y la toma el humano',
+  CURSOR_PROPIO_EN_EL_HOME === true,
+  'el cursor propio del home está PRENDIDO: la decisión de composición se tomó en B5',
 )
 
 /** Y la del sitio vivo: sacar `'/'` de la lista haría desaparecer el

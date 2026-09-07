@@ -120,7 +120,21 @@ afirmar(m1080 !== null && m720 !== null && m1080 !== m720, '  y las dos máscara
 titulo('5 · POSE-SAFE Y CABLEADO — cambia CÓMO se revela, no la pose ni el progreso')
 
 const FUENTE_REVELADO = leer('src/app/v3/_lib/escena/revelado.ts')
-const FUENTE_ESCENA = leer('src/app/v3/_lib/escena/EscenaDelHome.tsx')
+/**
+ * ⚠️ **EL FUENTE DE LA ESCENA SON DOS ARCHIVOS DESDE B5.** `EscenaDelHome.tsx`
+ * estaba en 300 líneas exactas —el límite del repo— y B5 tenía que agregarle la
+ * fuente de eventos del puntero, así que el hook `useEscenaAtadaAlScroll` se
+ * mudó entero a `ataduraAlScroll.ts`, verbatim. El cableado del revelado viajó
+ * con él, porque sale de la misma lectura de scroll.
+ *
+ * Se concatenan: lo que esta sección afirma —que el revelado esté importado,
+ * gateado por la misma retención que la pose, y DESPUÉS de fijar el progreso—
+ * es una propiedad del módulo de la escena, no del archivo donde hoy vive.
+ */
+const FUENTE_ESCENA = [
+  leer('src/app/v3/_lib/escena/EscenaDelHome.tsx'),
+  leer('src/app/v3/_lib/escena/ataduraAlScroll.ts'),
+].join('\n')
 
 for (const [prohibido, motivo] of [
   ["from 'three'", 'no importa `three`: no monta ni toca el árbol 3D'],

@@ -1,0 +1,884 @@
+{
+  "que": "el paralaje de mouse y el contraste bajo el glifo, en las cinco posiciones del puntero",
+  "instrumento": "scripts-b5/b-paralaje.ts — puntero movido por Input.dispatchMouseEvent, tres capturas por posición (B1-DELTAS §4-bis)",
+  "perfil": "1440",
+  "estrangulamiento": "ninguno",
+  "motorDeScroll": null,
+  "etapaDelIntro": "(sin escena)",
+  "estadoDeLaPagina": {
+    "visibilityState": "visible",
+    "hasFocus": true,
+    "innerWidth": 1440,
+    "innerHeight": 900,
+    "dpr": 1,
+    "alturaDelDocumento": 16275,
+    "rafCorre": true
+  },
+  "punteros": [
+    {
+      "id": "centro",
+      "x": 720,
+      "y": 450
+    },
+    {
+      "id": "sup-izq",
+      "x": 24,
+      "y": 24
+    },
+    {
+      "id": "sup-der",
+      "x": 1416,
+      "y": 24
+    },
+    {
+      "id": "inf-izq",
+      "x": 24,
+      "y": 876
+    },
+    {
+      "id": "inf-der",
+      "x": 1416,
+      "y": 876
+    },
+    {
+      "id": "medio-izq",
+      "x": 24,
+      "y": 450
+    },
+    {
+      "id": "medio-der",
+      "x": 1416,
+      "y": 450
+    }
+  ],
+  "filas": [
+    {
+      "seccion": "hero-titular",
+      "puntero": "centro",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15816,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.56,
+      "p1Contraste": 13.64,
+      "medianaContraste": 14.82,
+      "bajoAA": 5,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "sup-izq",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 3.08,
+      "p1Contraste": 13.21,
+      "medianaContraste": 15.84,
+      "bajoAA": 0,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "sup-der",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.73,
+      "p1Contraste": 11.15,
+      "medianaContraste": 14.85,
+      "bajoAA": 11,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "inf-izq",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.9,
+      "p1Contraste": 7.47,
+      "medianaContraste": 16.09,
+      "bajoAA": 5,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "inf-der",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.56,
+      "p1Contraste": 10.69,
+      "medianaContraste": 13.87,
+      "bajoAA": 27,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "medio-izq",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 3.13,
+      "p1Contraste": 14,
+      "medianaContraste": 16.09,
+      "bajoAA": 0,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "puntero": "medio-der",
+      "scrollY": 0,
+      "caja": {
+        "x": 188,
+        "y": 289.453125,
+        "ancho": 450.5625,
+        "alto": 189.0625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Tu negocio vendiendo en piloto automático.Tu negociovendiend",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 15065,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.56,
+      "p1Contraste": 13.09,
+      "medianaContraste": 14.14,
+      "bajoAA": 9,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "hero-titular",
+      "paralaje": "alta",
+      "medio": {
+        "px": 1,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 1,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 1,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "hero-titular",
+      "paralaje": "media",
+      "medio": {
+        "px": 17,
+        "saturado": false,
+        "ssdMin": 0.01,
+        "ssdEnCero": 0.02
+      },
+      "arriba": {
+        "px": 16,
+        "saturado": false,
+        "ssdMin": 0.01,
+        "ssdEnCero": 0.02
+      },
+      "abajo": {
+        "px": 17,
+        "saturado": false,
+        "ssdMin": 0.01,
+        "ssdEnCero": 0.02
+      }
+    },
+    {
+      "seccion": "hero-titular",
+      "paralaje": "baja",
+      "medio": {
+        "px": 16,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 13,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "centro",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 41668,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.32,
+      "p1Contraste": 3.49,
+      "medianaContraste": 6.72,
+      "bajoAA": 160,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "sup-izq",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.22,
+      "p1Contraste": 3.4,
+      "medianaContraste": 6.47,
+      "bajoAA": 195,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "sup-der",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.22,
+      "p1Contraste": 3.67,
+      "medianaContraste": 6.8,
+      "bajoAA": 144,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "inf-izq",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.19,
+      "p1Contraste": 3.54,
+      "medianaContraste": 6.63,
+      "bajoAA": 155,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "inf-der",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.15,
+      "p1Contraste": 3.66,
+      "medianaContraste": 6.94,
+      "bajoAA": 104,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "medio-izq",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.19,
+      "p1Contraste": 3.14,
+      "medianaContraste": 6.56,
+      "bajoAA": 318,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "puntero": "medio-der",
+      "scrollY": 14400,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "nodosSalteadosPorRecorte": 1,
+      "pixelesDeGlifo": 39459,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 2.44,
+      "p1Contraste": 3.61,
+      "medianaContraste": 6.87,
+      "bajoAA": 93,
+      "umbralAA": 3
+    },
+    {
+      "seccion": "diferencial-titular",
+      "paralaje": "alta",
+      "medio": {
+        "px": 20,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 20,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 19,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-titular",
+      "paralaje": "media",
+      "medio": {
+        "px": 1,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 5,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 20,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-titular",
+      "paralaje": "baja",
+      "medio": {
+        "px": -47,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 87,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 132,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "centro",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "medianaContraste": 4.65,
+      "bajoAA": 7573,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "sup-izq",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "medianaContraste": 4.52,
+      "bajoAA": 10523,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "sup-der",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.04,
+      "medianaContraste": 4.71,
+      "bajoAA": 6397,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "inf-izq",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "medianaContraste": 4.64,
+      "bajoAA": 8082,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "inf-der",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.05,
+      "medianaContraste": 4.77,
+      "bajoAA": 5873,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "medio-izq",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22612,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "medianaContraste": 4.58,
+      "bajoAA": 8457,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "puntero": "medio-der",
+      "scrollY": 14800,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "nodosSalteadosPorRecorte": 0,
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "peorContraste": 1,
+      "p1Contraste": 1.04,
+      "medianaContraste": 4.73,
+      "bajoAA": 5789,
+      "umbralAA": 4.5
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "paralaje": "alta",
+      "medio": {
+        "px": 19,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 20,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 19,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "paralaje": "media",
+      "medio": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    },
+    {
+      "seccion": "diferencial-cuerpo",
+      "paralaje": "baja",
+      "medio": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "arriba": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      },
+      "abajo": {
+        "px": 0,
+        "saturado": false,
+        "ssdMin": 0,
+        "ssdEnCero": 0
+      }
+    }
+  ]
+}

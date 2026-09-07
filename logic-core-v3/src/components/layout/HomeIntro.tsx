@@ -136,7 +136,40 @@ export function HomeIntro() {
   // ── El aviso a la escena, derivado del mismo progreso ─────────────────────
   // Dos comparaciones por frame, cero `setState` (el store del contrato no pasa
   // por React). La escena queda retenida hasta que el fondo empieza a irse.
+  //
+  // ⚠️ **SÓLO MIENTRAS LA SECUENCIA CORRE, Y ESA GUARDA ES EL ARREGLO DE UN
+  // DEFECTO QUE ESTUVO VIVO DESDE QUE EXISTE EL AVISO** (B5, hallazgo «la
+  // escena congelada en la visita repetida»).
+  //
+  // Sin la guarda, esta suscripción publicaba etapa **también cuando el intro
+  // NO corría**. El disparador es `nudge(progress)` de `useIntroEngine`: vive
+  // en un efecto con dependencias `[plan, timeline, progress]` que corre en
+  // cada render, no sólo con la secuencia andando, y mueve el valor lo
+  // suficiente para emitir un `'change'`. Ese `'change'` entraba acá con
+  // `value ≈ 0`, o sea `revealing = false`, y publicaba **`'covering'`**.
+  //
+  // La consecuencia estaba tres módulos más allá y era total: `escenaRetenida`
+  // devuelve `true` para `'covering'` **siempre**, así que `EscenaDelHome`
+  // escribía `progress = 0` en cada cuadro de scroll y `physicsEnabled` quedaba
+  // en `false`. La cámara no se movía con el scroll, y no había inercia, ni
+  // offset de mouse, ni vira. **La escena entera, congelada** — en toda visita
+  // repetida de la sesión, con `prefers-reduced-motion`, y bajo automatización.
+  //
+  // Que nadie lo viera en catorce sprints tiene una causa y conviene que quede
+  // escrita: el gate pre-paint no arma el intro cuando `navigator.webdriver` es
+  // `true`, así que **toda medición automatizada de este repo cayó siempre en
+  // la rama del intro salteado** — la rama rota— sin tener con qué compararla.
+  //
+  // Lo que la guarda restaura es el contrato que `markIntroPlayed` ya tenía
+  // ESCRITO: *«cuando el intro NO corrió, el estado se queda en `idle` — que
+  // significa "no hay intro", no "el intro terminó"»*. Con la secuencia
+  // andando no cambia nada: la etapa inicial `'covering'` la publica el efecto
+  // de decisión de arriba, no ésta, y el `'clear'` del final lo publica
+  // `markIntroPlayed()` **antes** de que `state` pase a `'finished'`, o sea con
+  // la suscripción todavía viva.
+  const secuenciaCorriendo = state === 'running'
   useEffect(() => {
+    if (!secuenciaCorriendo) return
     return progress.on('change', (value) => {
       const revealing = value * timelineRef.current.totalS >= timelineRef.current.veilOutStartS
       setIntroStage(revealing ? 'revealing' : 'covering')
@@ -150,7 +183,7 @@ export function HomeIntro() {
       // haberse movido hasta este instante.
       markIntroEntry()
     })
-  }, [progress, timelineRef])
+  }, [secuenciaCorriendo, progress, timelineRef])
 
   // Si el visitante navega a otra ruta a mitad de secuencia, el intro cuenta
   // como visto: no se repite al volver dentro de la misma sesión.

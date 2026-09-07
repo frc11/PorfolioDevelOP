@@ -37,6 +37,14 @@
 # Se agrega ACÁ ANTES de correr cualquier build, por la misma lección que
 # `.next-probe/`.
 /.next-s1-control/
+# `.next-b5/`: build aislado de B5 (que se sienta vivo), para medir el peso neto
+# de prender Lenis en /v3 sin pisar el `.next/` del `next dev` que corre al lado.
+# Se agrega ACA ANTES de correr el build, por la misma leccion que `.next-probe/`.
+/.next-b5/
+# `.b5-capturas/`: las 63 capturas intermedias por corrida de los instrumentos de
+# B5 (52 MB). Son insumo del calculo, no evidencia: lo que se commitea son las
+# cuatro capturas del reporte y el JSON con las cifras.
+/.b5-capturas/
 
 # production
 /build

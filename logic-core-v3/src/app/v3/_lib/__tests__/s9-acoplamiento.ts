@@ -190,21 +190,41 @@ titulo('2 · EL ACOPLAMIENTO DE TIPO HACIA /probe-escena — CERRADO (SITIO-S11,
   console.log(`  · ${CONSUMIDORES.map((ruta) => path.basename(ruta)).join(' · ')}`)
 
   /**
-   * LO QUE NO CAMBIÓ, y se conserva porque sigue siendo verdad y sigue importando.
+   * LA GUARDIA DE UN IMPORT ROTO — **la propiedad, no el literal (regla 15).**
    *
-   * ⚠ **El día que `/probe-escena` se borre, el build sigue sin quejarse.**
-   * `next.config.ts` declara `typescript.ignoreBuildErrors`, así que la única
-   * guardia de un import roto es `tsc --noEmit`, que hay que correr aparte. Lo que
-   * el arreglo cambió no es esa guardia —que sigue sin existir— sino **qué
-   * quedaría roto**: antes, tres módulos de producción; ahora, ninguno.
+   * ⚠ **ESTA AFIRMACIÓN SE DIO VUELTA EN B5, Y NO ES UN AFLOJE: EL MUNDO
+   * MEJORÓ.** Decía, textual, *«el build sigue ignorando los errores de tipo»*,
+   * y lo comprobaba exigiendo `ignoreBuildErrors: true` en `next.config.ts`. Era
+   * verdad cuando se escribió: la única guardia contra un import roto era correr
+   * `tsc --noEmit` aparte, y la afirmación existía para que eso quedara escrito.
+   *
+   * **El merge con `main` lo cambió.** El otro socio apagó
+   * `typescript.ignoreBuildErrors` —`next.config.ts` lo declara con su motivo:
+   * *«C1 midió la deuda en CERO … apagarlo no cuesta más que los ~84 s que el
+   * chequeo suma al build»*— así que hoy **el build también falla ante un error
+   * de tipos**. La afirmación vieja describía un mundo que ya no existe y salía
+   * roja por eso, no por un defecto.
+   *
+   * Lo que se afirma ahora es la PROPIEDAD que las dos versiones perseguían —que
+   * un import roto tenga quién lo vea— y se afirma en su forma fuerte: que la
+   * puerta de tipos NO esté apagada. Un `ignoreBuildErrors: true` que volviera
+   * pone esto en rojo, que es exactamente lo que hace falta.
+   *
+   * Y la nota que sobrevive intacta: lo que el arreglo de S9 cambió nunca fue la
+   * guardia sino **qué quedaría roto** el día que `/probe-escena` se borre —
+   * antes, tres módulos de producción; ahora, ninguno.
    */
   afirmar(
     leer('tsconfig.json').includes('"isolatedModules": true'),
     'con `isolatedModules` el borrado del `import type` no depende de mirar el módulo del otro lado',
   )
   afirmar(
-    /ignoreBuildErrors:\s*true/.test(leer('next.config.ts')),
-    'el build sigue ignorando los errores de tipo: un import roto sólo se ve corriendo `tsc --noEmit`',
+    !/ignoreBuildErrors:\s*true/.test(leer('next.config.ts')),
+    'la puerta de tipos del build NO está apagada: un import roto lo rompe, y además lo ve `tsc --noEmit`',
+  )
+  afirmar(
+    /ignoreBuildErrors/.test(leer('next.config.ts')),
+    '  y el motivo está escrito en `next.config.ts`, no deducido de su ausencia',
   )
   afirmar(
     existe(EDITOR),

@@ -265,6 +265,10 @@
     "test:s17-revelado": "npx tsx src/app/v3/_lib/escena/__tests__/s17-revelado.invariant.ts",
     "test:s17-marca": "npx tsx src/app/v3/_lib/__tests__/s17-marca.invariant.tsx",
     "test:s17": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s17",
+    "test:s18-modulacion": "npx tsx src/app/v3/_lib/escena/__tests__/s18-modulacion.invariant.ts",
+    "test:s18-azimut": "npx tsx src/app/v3/_lib/escena/__tests__/s18-azimut.invariant.ts",
+    "test:s18-compuertas": "npx tsx src/app/v3/_lib/__tests__/s18-compuertas.invariant.ts",
+    "test:s18": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s18",
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },

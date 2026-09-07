@@ -169,6 +169,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
     },
   ],
   [
+    'CompuertaDelScrollSuave',
+    {
+      emite: null,
+      porQue:
+        '`ssr: false` como el escenario, y además el módulo perezoso **no renderiza nada**: `ScrollSuaveDeV3` devuelve `null` y todo lo que hace vive en un efecto. O sea que no aporta un elemento al documento ni con el árbol montado — dos ceros por dos razones distintas, las dos declaradas (B5)',
+    },
+  ],
+  [
     'Navegacion',
     {
       emite: () => createElement(Navegacion, {}),

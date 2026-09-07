@@ -12,6 +12,57 @@ interface SmoothScrollProps {
 // Tipar el contexto correctamente
 const LenisContext = createContext<Lenis | null>(null);
 
+/**
+ * LA CONFIGURACIÓN DE LENIS — sacada del `new Lenis({…})` de abajo en B5, sin
+ * cambiarle un valor.
+ *
+ * ⚠️ **Es el ÚNICO cambio que B5 le hace a este archivo, y es aditivo a
+ * propósito**: `src/app/layout.tsx` monta `SmoothScroll` en TODA ruta del sitio
+ * vivo, así que acá no se toca ni qué se construye ni cuándo. El literal se
+ * mudó cuatro líneas más arriba y la llamada lo pasa entero; el objeto que
+ * recibe el constructor es idéntico, propiedad por propiedad.
+ *
+ * ── Por qué se saca ───────────────────────────────────────────────────────
+ *
+ * Porque desde B5 hay un SEGUNDO lugar que construye Lenis:
+ * `app/v3/_componentes/CompuertaDelScrollSuave.tsx`, con las compuertas de /v3
+ * —1025 y `prefers-reduced-motion`— que este componente no tiene. Sin exportar
+ * la configuración, ese segundo lugar la copiaría, y **dos copias de una
+ * calibración es una que se queda vieja**: el `duration` de acá ya se movió una
+ * vez (1,5 → 1,1 en S2-motion, Bloque 4b) y el porqué está escrito abajo.
+ *
+ * `b5-lenis.invariant.ts` afirma que el objeto que `/v3` pasa es EXACTAMENTE
+ * éste, y que este archivo sigue construyendo con él.
+ *
+ * ── Los valores, con su procedencia (el comentario original) ──────────────
+ *
+ * S2-motion, Bloque 4b: `duration` bajó de 1.5s a 1.1s. 1.5s es un 25% más
+ * lento que el default documentado de la propia librería (1.2s) — cada gesto de
+ * scroll tardaba más en asentar de lo que Lenis considera su propio punto de
+ * referencia. Con la identidad "precisa y sólida, no lánguida" del sistema
+ * (Bloque 2), 1.1s queda apenas MÁS ajustado que el default, no solo revertido
+ * a él. `easing` no se tocó: la fórmula ya era el expo-out default de Lenis (no
+ * un valor propio a recalibrar).
+ *
+ * ⚠️ **Y B5 lo midió contra la referencia, que era la pregunta abierta.** Un
+ * paso de rueda de 1000 px, muestreado por `rAF`: nuestro asentamiento da t63
+ * **202 ms**, t95 **543**, t99 **771**; el de la referencia —que corre en modo
+ * `lerp 0.1`, sin `duration`— da **166 / 557 / 753**. Las dos curvas caen una
+ * encima de la otra. **No había nada que recalibrar**, y por eso B5 no tocó un
+ * número de acá.
+ */
+export const OPCIONES_DE_LENIS = {
+    duration: 1.1,
+    easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    orientation: 'vertical',
+    gestureOrientation: 'vertical',
+    smoothWheel: true,
+    syncTouch: false,
+    wheelMultiplier: 1,
+    touchMultiplier: 1,
+    overscroll: false,
+} as const;
+
 export function useLenis() {
     return useContext(LenisContext);
 }
@@ -90,24 +141,10 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
             return;
         }
 
-        // S2-motion, Bloque 4b: `duration` bajó de 1.5s a 1.1s. 1.5s es un 25%
-        // más lento que el default documentado de la propia librería (1.2s) —
-        // cada gesto de scroll tardaba más en asentar de lo que Lenis considera
-        // su propio punto de referencia. Con la identidad "precisa y sólida, no
-        // lánguida" del sistema (Bloque 2), 1.1s queda apenas MÁS ajustado que
-        // el default, no solo revertido a él. `easing` no se tocó: la fórmula
-        // ya era el expo-out default de Lenis (no un valor propio a recalibrar).
-        const lenis = new Lenis({
-            duration: 1.1,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            syncTouch: false,
-            wheelMultiplier: 1,
-            touchMultiplier: 1,
-            overscroll: false,
-        });
+        // La configuración —con su procedencia y con la medición de B5 contra la
+        // referencia— vive arriba, en `OPCIONES_DE_LENIS`. Se sacó de acá sin
+        // cambiarle un valor: el objeto que recibe el constructor es el mismo.
+        const lenis = new Lenis({ ...OPCIONES_DE_LENIS });
 
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setLenisInstance(lenis);

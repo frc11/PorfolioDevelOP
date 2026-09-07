@@ -51,9 +51,44 @@ export function afirmarElScrollPadding(): void {
     leer('src/app/layout.tsx').includes('./globals.css'),
     'el layout raíz importa `globals.css`, así que la regla del `<html>` alcanza también a `/v3`',
   )
+  /**
+   * ⚠️ **B5: LENIS SÍ CORRE EN /v3, Y EL ATERRIZAJE SIGUE GOBERNADO POR
+   * `scroll-padding-top`. LA AFIRMACIÓN CAMBIA DE PROPIEDAD, NO DE EXIGENCIA.**
+   *
+   * Decía *«y Lenis NO corre en /v3: el scroll es NATIVO, así que
+   * `scroll-padding-top` gobierna de verdad el aterrizaje»*. La premisa se
+   * venció: /v3 construye su propia instancia desde B5.
+   *
+   * Lo que hace que la conclusión sobreviva son **dos** propiedades de la
+   * configuración, y las dos se afirman acá:
+   *
+   *   1. **`anchors` no se declara**, así que cae en su default `false` y Lenis
+   *      **no intercepta el click de un ancla**: el salto lo resuelve el
+   *      navegador, y ahí `scroll-padding-top` es la regla que manda. Si alguien
+   *      prendiera `anchors`, el aterrizaje pasaría a decidirlo la librería y
+   *      esta sección entera dejaría de describir lo que ocurre.
+   *   2. **Conduce el scroll nativo**: la posición que el navegador usa para
+   *      aterrizar es la misma que Lenis escribe.
+   *
+   * ⚠️ **Y el hueco que S9 dejó declarado se cierra en B5, no acá.** La
+   * comprobación de abajo —«el aterrizaje REAL de las siete anclas»— salía
+   * `noCorre` porque aquel sprint tenía prohibido abrir un navegador. B5 lo
+   * abre: `scripts-b5/c-anclas-b5.ts` mide dónde queda el borde de cada sección
+   * después de cada salto, con la pestaña al frente y con el motor prendido.
+   */
+  const OPCIONES = leer('src/components/layout/SmoothScroll.tsx')
   afirmar(
-    /pathname\.startsWith\('\/v3'\)/.test(leer('src/components/layout/SmoothScroll.tsx')),
-    'y Lenis NO corre en /v3: el scroll es NATIVO, así que `scroll-padding-top` gobierna de verdad el aterrizaje',
+    /pathname\.startsWith\('\/v3'\)/.test(OPCIONES),
+    'el `SmoothScroll` del layout raíz sigue sin construir en /v3 — el motor de /v3 es propio',
+  )
+  afirmar(
+    !/\banchors\s*:/.test(OPCIONES),
+    'y `anchors` no se declara: cae en `false`, Lenis no intercepta el click de un ancla y `scroll-padding-top` gobierna el aterrizaje',
+  )
+  controlPositivo(
+    'el detector de `anchors` no está ciego',
+    'const o = { duration: 1.1, anchors: true }',
+    (f: string) => !/\banchors\s*:/.test(f),
   )
 
   /**

@@ -78,13 +78,99 @@ export const SETTLE_EPSILON: Record<ChoreoChannel, number> = {
  *
  * El feed del puntero es `state.pointer` de r3f — **no se agrega un listener
  * propio**: por la lección ya documentada del repo, r3f v9 lo actualiza por su
- * cuenta sobre la caja del canvas.
+ * cuenta. ⚠️ **Pero en el home NO le llegaba, y B5 lo arregló en el `<Canvas>`**:
+ * el div de eventos de r3f vive en `z-0` debajo de las ocho secciones, que son
+ * `pointer-events: auto`. El porqué completo, con su control positivo, está en
+ * los props `eventSource` / `eventPrefix` de `ProbeStage.tsx`.
  *
  * El signo es "mirar alrededor": mouse a la derecha → la cámara se corre a la
  * derecha y se ve más del costado derecho del objeto. Invertirlo es cambiarle
  * el signo a estas dos constantes.
+ *
+ * ── ⚠️ EL AZIMUT ES VARIABLE POR TRAMO, Y CADA TECHO ES SUYO ─────────
+ *
+ * El paralaje de mouse es **lo único que separaba a la referencia de nosotros**
+ * —no una deriva autónoma, que ninguno de los dos tiene— y estaba medido en
+ * **≥120 px de corrimiento contra nuestros 12**. Amplificarlo mueve dónde cae la
+ * sala sobre el texto, así que el techo lo pone el contraste bajo el glifo.
+ *
+ * **Pero el contraste no es el mismo en todo el recorrido, y un techo único es
+ * el mínimo global aplicado donde no hace falta.** Los dos lugares donde la
+ * escena se ve son el hero y el diferencial, y aguantan cosas muy distintas:
+ *
+ * | tramo | qué texto cae sobre la sala | techo medido |
+ * |---|---|---|
+ * | **hero** | el titular, 56 px sobre la pared clara | **22°** — y todavía sobra |
+ * | **cierre** | el cuerpo de 15 px del diferencial | **8°** — al borde de AA |
+ *
+ * Por eso `MOUSE_ANGLE_DEG` dejó de ser un escalar: es una tabla de nudos sobre
+ * el progreso, y el muestreador vive en `modulacionDeLaPose.ts`. La primera
+ * pantalla —la que se juzga— recibe el paralaje entero.
+ *
+ * ⚠️ **Y la rampa entre los dos vive donde la escena NO dibuja.** Entre el
+ * final del tramo del hero y el principio del cierre la escena está suspendida
+ * en casi todo el recorrido (`visibilidad.ts`), así que el cambio de amplitud no
+ * se ve: no hay un salto de cámara al cruzar un borde de tramo.
+ * `s18-modulacion.invariant.ts` lo verifica muestreando la ventana de
+ * visibilidad, no suponiéndolo.
+ *
+ * ── De dónde sale cada techo ──────────────────────────────────
+ *
+ * Medido con `scripts-b5/b-paralaje.ts` —máscara de glifo sin escena, cinco
+ * posiciones de puntero más el par de media altura, mouse real por CDP— la
+ * MEDIANA de contraste en la PEOR posición del puntero. El piso de AA es 3:1
+ * para el titular (texto grande) y 4,5:1 para el cuerpo del diferencial.
+ *
+ * El del cierre se buscó por bisección: 2,2° → 4,58:1 · 8° → 4,52:1 ·
+ * 22° → **4,35:1, bajo AA**. La caída es de ≈**0,011 por grado**, así que el
+ * cruce está en ~9,5° y 8 es el último valor redondo por debajo.
+ *
+ * ⚠️ **Y la razón por la que el cierre no llega más arriba no es la cámara**:
+ * es que el cuerpo del diferencial **ya arranca al borde de AA** —mediana
+ * 4,65:1 con 33 % de sus píxeles bajo 4,5:1, con el puntero quieto en el centro
+ * y sin tocar nada—. Es el defecto heredado D-B5.1; el día que se arregle, este
+ * techo sube solo.
  */
-export const MOUSE_ANGLE_DEG = 2.2
+export const AZIMUT_DEL_MOUSE_POR_PROGRESO: readonly (readonly [number, number])[] = [
+  /**
+   * ⚠️ **LOS DOS NUDOS DEL MEDIO SALEN DE LA VENTANA DE VISIBILIDAD, NO DE LA
+   * TABLA DE TRAMOS.** Muestreando `escenaEnCuadro` sobre el documento entero, la
+   * escena dibuja en **[0 · 0,1354]** y en **[0,7375 · 1]**; entre esas dos bandas
+   * el lazo está suspendido y no se pinta un cuadro.
+   *
+   * Los bordes de TRAMO —0,125 y 0,75— caen del lado equivocado de los dos: el
+   * hero se ve **hasta 0,1354**, o sea 0,0104 después de terminar su tramo, y el
+   * cierre empieza a verse **en 0,7375**, o sea 0,0125 antes de empezar el suyo.
+   * Con la rampa apoyada en los tramos, la amplitud cambiaba a la vista en **19
+   * posiciones** del barrido — medido, y es lo que puso en rojo a
+   * `s18-modulacion` §4b la primera vez.
+   *
+   * 0,14 y 0,73 son los primeros valores redondos ADENTRO de la banda
+   * suspendida. El invariante no los da por buenos: vuelve a muestrear la
+   * ventana y comprueba que cada nudo cae de su lado.
+   */
+  [0, 22],
+  [0.14, 22],
+  [0.73, 8],
+  [1, 8],
+]
+
+/**
+ * El valor de referencia del canal, para quien necesite UNO. Es el del hero —el
+ * máximo de la tabla— y existe para que la excursión del peor caso se pueda
+ * acotar sin muestrear: nada del recorrido pasa de acá.
+ */
+export const MOUSE_ANGLE_DEG_MAXIMO = 22
+
+/**
+ * ⚠️ **NO SE TOCÓ, Y TIENE UN TECHO GEOMÉTRICO CASI TOCADO.** En el keyframe
+ * más bajo del recorrido —«quiénes somos», `height −3,6`, `distance 11,5`— la
+ * cámara queda a `(height − FLOOR_Y) / distance` = **0,061217** de irse abajo
+ * del papel. Con 0,045 quedan **1,36×** de holgura y nada más. Por eso B5
+ * amplificó el AZIMUT y no la altura: el paralaje que falta es horizontal, y el
+ * canal vertical no tiene de dónde sacarlo. `b5-modulacion.invariant.ts`
+ * recalcula ese techo contra los keyframes y el `FLOOR_Y` reales.
+ */
 export const MOUSE_HEIGHT_FACTOR = 0.045
 /** El mouse ARRASTRA, no salta: constante de tiempo propia, más lenta que la del track. */
 export const MOUSE_TAU = 0.45

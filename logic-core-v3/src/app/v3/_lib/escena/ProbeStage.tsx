@@ -1,6 +1,13 @@
 'use client'
 
 import { Canvas } from '@react-three/fiber'
+
+import {
+  CAMARA_DEL_CANVAS,
+  CONTEXTO_DEL_CANVAS,
+  DPR_DEL_CANVAS,
+  SOMBRAS_DEL_CANVAS,
+} from './configuracionDelCanvas'
 import { Suspense, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
@@ -27,13 +34,9 @@ import { ProbeLogo } from './ProbeLogo'
 import { StudioFloor } from './StudioFloor'
 import {
   BOUNCE_COLOR,
-  CAMERA_FAR,
-  CAMERA_FOV,
-  CAMERA_NEAR,
   PAPER_COLOR,
 } from './probeScene'
 import {
-  PROBE_DEFAULTS,
   type ProbeMode,
   type ProbeParamsStore,
   type ProbeRigStore,
@@ -103,6 +106,15 @@ type ProbeStageProps = {
   onReady: () => void
   /** El lazo de r3f. `'never'` suspende sin desmontar — el porqué, en `visibilidad.ts`. */
   frameloop?: 'always' | 'demand' | 'never'
+  /**
+   * ⚠️ **DE DÓNDE SALEN LOS EVENTOS DE PUNTERO. Sin esto, el offset de mouse
+   * NO existe en el home.** Los dos props van juntos y el porqué completo —con
+   * la medición y su control positivo— vive en `fuenteDeEventos.ts`, que es
+   * quién los produce. Opcionales: el probe no los pasa y se comporta como
+   * siempre.
+   */
+  eventSource?: HTMLElement
+  eventPrefix?: 'client'
 }
 
 export default function ProbeStage({
@@ -119,6 +131,8 @@ export default function ProbeStage({
   keyFollowsCamera,
   onReady,
   frameloop = 'always',
+  eventSource,
+  eventPrefix,
 }: ProbeStageProps) {
   const keyLightRef = useRef<THREE.DirectionalLight>(null)
   const fillLightRef = useRef<THREE.DirectionalLight>(null)
@@ -153,34 +167,15 @@ export default function ProbeStage({
     <Canvas
       className="h-full w-full"
       frameloop={frameloop}
-      // `PCFShadowMap` explícito, y NO el `PCFSoftShadowMap` que r3f pone con
-      // `shadows` en `true`. Suena al revés y no lo es: en three 0.182 el "soft" no
-      // tiene entrada en la tabla de defines del shader y compila como
-      // `SHADOWMAP_TYPE_BASIC`, o sea una sola muestra sin filtrar. El PCF común es
-      // el único que da un disco de muestreo, y su tamaño es `shadow.radius`. La
-      // cita del código de three está en `SHADOW_RADIUS`.
-      shadows={{ type: THREE.PCFShadowMap }}
-      // La posición inicial la pisa `OrbitRig` en el primer frame; se declara
-      // igual para que el primer render no salga desde el origen.
-      camera={{
-        fov: CAMERA_FOV,
-        near: CAMERA_NEAR,
-        far: CAMERA_FAR,
-        position: [0, PROBE_DEFAULTS.height, PROBE_DEFAULTS.distance],
-      }}
-      gl={{
-        // Canvas opaco: el fondo lo pinta la escena, no el CSS de atrás.
-        alpha: false,
-        // El hero lo tiene en false. Acá va en true a propósito: lo que se juzga
-        // son los cantos de un objeto negro contra papel blanco, y sin
-        // antialias el escalonado del borde se confunde con el objeto.
-        antialias: true,
-        powerPreference: 'high-performance',
-        // r3f pone ACES por default. Neutral (Khronos PBR Neutral) conserva el blanco
-        // del papel y mantiene el matiz de la luz de color al mover la temperatura.
-        toneMapping: THREE.NeutralToneMapping,
-      }}
-      dpr={[1, 1.5]}
+      // Ver `eventSource` en los props: sin esto el offset de mouse no llega.
+      eventSource={eventSource}
+      eventPrefix={eventPrefix}
+      // Sombras, cámara inicial, contexto y `dpr`: `configuracionDelCanvas.ts`,
+      // con sus razones. Salieron de acá en B5 sin cambiar un valor.
+      shadows={SOMBRAS_DEL_CANVAS}
+      camera={CAMARA_DEL_CANVAS}
+      gl={CONTEXTO_DEL_CANVAS}
+      dpr={DPR_DEL_CANVAS}
     >
       {/*
         Fondo y niebla salen de la MISMA constante, y el rig les escribe el mismo

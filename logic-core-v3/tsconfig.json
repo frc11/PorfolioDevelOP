@@ -47,7 +47,9 @@
     ".next-perf-base/types/**/*.ts",
     ".next-perf-base/dev/types/**/*.ts",
     ".next-probe/types/**/*.ts",
-    ".next-probe/dev/types/**/*.ts"
+    ".next-probe/dev/types/**/*.ts",
+    ".next-b5/types/**/*.ts",
+    ".next-b5/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

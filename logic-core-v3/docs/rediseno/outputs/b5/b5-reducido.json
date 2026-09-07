@@ -1,0 +1,84 @@
+{
+  "que": "las tres fuentes de movimiento de B5 contra la preferencia del entorno y contra el umbral de 1025",
+  "instrumento": "scripts-b5/c-reducido.ts — la preferencia la pone Emulation.setEmulatedMedia, no el árbol",
+  "porQueNoEsUnInvariante": "la preferencia es una entrada de AFUERA del árbol; forzarla en un render y después afirmarla es verde por arnés (regla de B4-B). Acá el instrumento sólo pone la preferencia y verifica que la página la LEE; todo lo demás lo puso el producto.",
+  "controlPositivo": "los casos `1440-normal` y `1025-normal` tienen que ver las TRES montadas. Sin ellos, «no hay cursor» pasaría también si el cursor no existiera.",
+  "filas": [
+    {
+      "caso": "1440-normal",
+      "esperado": "las tres, y la escena viva",
+      "cumple": true,
+      "problemas": [],
+      "scrollSuave": "v3-scroll-suave-b5",
+      "claseLenis": true,
+      "claseLenisStopped": false,
+      "overflowDelHtml": "visible",
+      "cursor": "v3-cursor-dos-capas-s3",
+      "capasDelCursor": 2,
+      "escena": "v3-escena-3d-del-home-s8",
+      "preferenciaLeidaPorLaPagina": false,
+      "ancho": 1440,
+      "quietud": {
+        "pctPixeles": 31.46,
+        "mediaDelta": 10.248
+      }
+    },
+    {
+      "caso": "1440-reducido",
+      "esperado": "sin scroll ni cursor, escena QUIETA",
+      "cumple": true,
+      "problemas": [],
+      "scrollSuave": null,
+      "claseLenis": false,
+      "claseLenisStopped": false,
+      "overflowDelHtml": "visible",
+      "cursor": null,
+      "capasDelCursor": 0,
+      "escena": "v3-escena-3d-del-home-s8",
+      "preferenciaLeidaPorLaPagina": true,
+      "ancho": 1440,
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      }
+    },
+    {
+      "caso": "1024-normal",
+      "esperado": "ninguna de las tres",
+      "cumple": true,
+      "problemas": [],
+      "scrollSuave": null,
+      "claseLenis": false,
+      "claseLenisStopped": false,
+      "overflowDelHtml": "visible",
+      "cursor": null,
+      "capasDelCursor": 0,
+      "escena": null,
+      "preferenciaLeidaPorLaPagina": false,
+      "ancho": 1024,
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      }
+    },
+    {
+      "caso": "1025-normal",
+      "esperado": "las tres montadas",
+      "cumple": true,
+      "problemas": [],
+      "scrollSuave": "v3-scroll-suave-b5",
+      "claseLenis": true,
+      "claseLenisStopped": false,
+      "overflowDelHtml": "visible",
+      "cursor": "v3-cursor-dos-capas-s3",
+      "capasDelCursor": 2,
+      "escena": "v3-escena-3d-del-home-s8",
+      "preferenciaLeidaPorLaPagina": false,
+      "ancho": 1025,
+      "quietud": {
+        "pctPixeles": 34.18,
+        "mediaDelta": 11.111
+      }
+    }
+  ]
+}

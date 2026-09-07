@@ -148,7 +148,42 @@ const pinneado = leer('src/app/v3/_componentes/PanelPinneado.tsx')
 afirmar(pinneado.includes('sticky top-0'), 'usa `position: sticky` de CSS')
 afirmar(!/use client|useEffect|useState|scroll|ScrollTrigger|gsap|lenis/i.test(pinneado.replace(/\/\*[\s\S]*?\*\//g, '')), 'sin `use client`, sin hooks, sin librería de scroll: cero JS')
 
+/**
+ * ⚠️ **B5: EL PINNEADO SIGUE SIENDO CSS, PERO YA NO SE JUZGA SIN JS.**
+ *
+ * Esta afirmación decía *«/v3 queda fuera de Lenis: el pinneado se juzga con
+ * scroll nativo»*, y era la mitad de una decisión de S1 — excluir Lenis para
+ * poder juzgar el `sticky` sin un motor de scroll de por medio. Se juzgó: los
+ * tres pines recorren lo que tienen que recorrer, con scroll real, y la
+ * afirmación de arriba —cero JS en `PanelPinneado`— no se movió ni se moverá.
+ *
+ * **B5 revisó la otra mitad y la dio vuelta.** El pinneado ya no necesita que no
+ * haya JS para poder juzgarse: se juzga cada vez, con scroll REAL, contra la
+ * línea de base que se midió ANTES de prender el motor. La propiedad que
+ * reemplaza a la exclusión es más fuerte, porque no depende de que nadie prenda
+ * nada — depende del MODO en el que la librería mueve el scroll:
+ *
+ *   · **conduce el scroll nativo** (`wrapper` cae en `window` y `setScroll` hace
+ *     `wrapper.scrollTo`), así que `position: sticky` sigue leyendo la misma
+ *     posición de siempre. Medido sobre el DOM renderizado: `window.scrollY`
+ *     interpola y el `transform` del `<html>`, del `<body>` y del primer hijo
+ *     lee `none` en las 138 muestras, con control positivo;
+ *   · **el `overflow: clip` de `lenis.css` cuelga de `lenis-stopped`**, y nadie
+ *     en /v3 llama `stop()`. Lo afirma `s8-chrome` §3 sobre los tres archivos.
+ */
 const smooth = leer('src/components/layout/SmoothScroll.tsx')
-afirmar(smooth.includes("pathname.startsWith('/v3')"), '/v3 queda fuera de Lenis: el pinneado se juzga con scroll nativo')
+afirmar(smooth.includes("pathname.startsWith('/v3')"), '`SmoothScroll` —el del layout raíz— sigue sin construir en /v3: el sitio vivo no cambió')
+
+const compuertaDelScroll = leer('src/app/v3/_lib/scrollSuave.ts')
+afirmar(
+  compuertaDelScroll.includes('ESCENARIO_MIN_ANCHO_PX'),
+  'y el motor propio de /v3 cuelga del MISMO umbral que el escenario, importado y no reescrito',
+)
+afirmar(
+  /const\s+lenis\s*=\s*new\s+Lenis\(\s*\{\s*\.\.\.OPCIONES_DE_LENIS\s*\}\s*\)/.test(
+    leer('src/app/v3/_componentes/ScrollSuaveDeV3.tsx'),
+  ),
+  '  y construye con la configuración del sitio vivo IMPORTADA, no con una copia',
+)
 
 cerrar('compuerta.invariant')

@@ -49,7 +49,24 @@ import {
 
 const LAZO = fuenteDelLazo()
 const CANVAS = fuenteDelCanvas()
-const ESCENA = leerRepo('src/app/v3/_lib/escena/EscenaDelHome.tsx')
+/**
+ * ⚠️ **EL FUENTE DE LA ESCENA SON DOS ARCHIVOS DESDE B5, Y SE LEEN JUNTOS.**
+ *
+ * `EscenaDelHome.tsx` estaba en **300 líneas exactas** —el límite del repo— y B5
+ * tenía que agregarle la fuente de eventos del puntero, así que se partió: el
+ * hook `useEscenaAtadaAlScroll` se mudó entero a `ataduraAlScroll.ts`, verbatim.
+ * Ahí viven el pulso de la reanudación y la lectura del scroll; acá quedó el
+ * montaje, que es de donde sale el `frameloop`.
+ *
+ * Se concatenan en vez de partir la comprobación en dos porque **la propiedad es
+ * del módulo de la escena, no de un archivo**: lo que §5 afirma es que el pulso
+ * vive en un efecto pasivo y que el `frameloop` sale de la misma fase, y eso
+ * sigue siendo cierto de la escena aunque hoy esté escrita en dos lugares.
+ */
+const ESCENA = [
+  leerRepo('src/app/v3/_lib/escena/EscenaDelHome.tsx'),
+  leerRepo('src/app/v3/_lib/escena/ataduraAlScroll.ts'),
+].join('\n')
 const STAGE = leerRepo('src/app/v3/_lib/escena/ProbeStage.tsx')
 
 // ═══════════════════════════════════════════════════════════════════════════
