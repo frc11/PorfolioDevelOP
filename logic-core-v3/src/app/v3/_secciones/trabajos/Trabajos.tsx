@@ -235,15 +235,15 @@ export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
         {/* ── EL ESCENARIO ────────────────────────────────────────────────
             `relative` porque las tres piezas se posicionan contra él, y
             `min-h-0 flex-1` para que ocupe lo que queda de la pantalla sin
-            empujar al marco. La perspectiva de 1000px la escribe el `Bloque`
-            acá mismo, en el ancestro de los tres planos.
+            empujar al marco. La perspectiva la escribe el `Bloque` acá mismo, en el ancestro
+            de los tres planos: desde B6-A es el lente de la escena (`_lib/motion/lente.ts`).
 
             `anclaje="seccion"` es lo que hace que el gesto exista (B1): el ancla
             de P7 se resuelve contra la `<section>` de 300svh y no contra este
             bloque de 826 px, que adentro de un hijo `sticky` no se mueve. Sin
             eso los tres planos terminaban su vuelo 50 px ANTES de que la sección
             tocara el tope. El porqué está en `AnclajeDelBloque`. */}
-        <Bloque patron="P7" anclaje="seccion" className="relative min-h-0 flex-1">
+        <Bloque patron="P7" anclaje="seccion" lente="escena" className="relative min-h-0 flex-1">
           {(progreso) => {
             if (progreso === null) {
               /**

@@ -71,8 +71,31 @@ export function medirBanda(): Banda {
   const total = Math.round(DOCUMENTO - VENTANA) + 1
   let vistos = 0
   for (let y = 0; y < total; y += 1) if (escenaEnCuadro(y, 0, DOCUMENTO, VENTANA)) vistos += 1
-  const ancho = ANCLAJE.ventanasDeLaEscena.reduce((n, [a, b]) => n + (b - a), 0)
+  const ancho = ventanasFundidas(ANCLAJE.ventanasDeLaEscena).reduce((n, [a, b]) => n + (b - a), 0)
   return { conMargen: 1 - vistos / total, sinMargen: 1 - ancho / ANCLAJE.pantallasDeScroll }
+}
+
+/**
+ * LAS VENTANAS FUNDIDAS — una banda por tramo continuo de escena visible.
+ *
+ * ⚠ B6-A: la derivación lista UNA ventana por sección transparente, y con el
+ * Cierre abierto la suya ([16, 17]) cae adentro de la de Por qué develOP
+ * ([15, 17]). Sumar las dos sin fundir contaba esa pantalla dos veces y la
+ * banda «sin margen» daba 52,9 % donde la escena se ve 7 de 17 pantallas
+ * (58,8 %). `escenaEnCuadro` no lo sufre —pregunta por cualquiera—, el
+ * instrumento sí. Se funden acá, ordenadas, y el invariante lo controla.
+ */
+export function ventanasFundidas(
+  ventanas: readonly (readonly [number, number])[],
+): readonly (readonly [number, number])[] {
+  const ordenadas = [...ventanas].sort((v, w) => v[0] - w[0])
+  const salida: [number, number][] = []
+  for (const [a, b] of ordenadas) {
+    const ultima = salida[salida.length - 1]
+    if (ultima !== undefined && a <= ultima[1]) ultima[1] = Math.max(ultima[1], b)
+    else salida.push([a, b])
+  }
+  return salida
 }
 
 /**
@@ -100,7 +123,7 @@ export function cuadrosDeUnaPasada(banda: Banda): number {
 export const CUADROS_DE_UN_MINUTO_QUIETO = HZ * 60
 
 /** Cuántas veces se reanuda en una pasada de punta a punta. */
-export const REANUDACIONES_POR_PASADA = ANCLAJE.ventanasDeLaEscena.length - 1
+export const REANUDACIONES_POR_PASADA = ventanasFundidas(ANCLAJE.ventanasDeLaEscena).length - 1
 
 export function imprimirCuadros(banda: Banda): void {
   const costo = 100 * (banda.sinMargen - banda.conMargen)

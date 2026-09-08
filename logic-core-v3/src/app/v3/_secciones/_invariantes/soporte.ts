@@ -192,7 +192,8 @@ export const SUPERFICIE_ACORDADA: Readonly<Record<string, string>> = {
   servicios: 'papel-opaco',
   'tu-panel': 'papel-opaco',
   'por-que-develop': 'papel-transparente',
-  cierre: 'oscuro-opaco',
+  // B6-A abrió el Cierre sobre la escena, con el velo: la vara se mueve con la decisión.
+  cierre: 'oscuro-transparente',
 }
 
 export const PROHIBIDOS_EN_EL_LANE: readonly (readonly [string, RegExp])[] = [

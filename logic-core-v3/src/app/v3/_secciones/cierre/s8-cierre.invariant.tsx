@@ -239,7 +239,7 @@ afirmar(S.pelar(oscuro) === S.pelar(papel), 'el marcado es el MISMO salvo el atr
 afirmar(oscuro.includes('data-seccion="invertida"') && !papel.includes('data-seccion="invertida"'), 'y el atributo sí cambia — el mecanismo de S0 está puesto y lo pone `Panel` desde la tabla')
 afirmar(!SIN.includes('<footer data-pieza="pie" data-seccion'), 'el <footer> no lleva un `data-seccion` propio encima del de la sección')
 controlPositivo('el comparador ve una diferencia de verdad', papel.replace('bg-fondo', 'bg-white'), (h: string) => S.pelar(h) === S.pelar(papel))
-console.log(`  la tabla del lane A declara HOY \`${seccionDe('cierre').superficie}\`; el contrato acordó \`oscuro-opaco\`. Las dos andan y este lane no toca la tabla.`)
+console.log(`  la tabla del lane A declara HOY \`${seccionDe('cierre').superficie}\`; el contrato acordó \`oscuro-opaco\` y B6-A la abrió a \`oscuro-transparente\`. Las dos opacas andan y este lane no toca la tabla.`)
 
 /** ⚠️ HALLAZGO: la tinta secundaria NO se da vuelta. Se mide, no se supone. */
 const TENUE = hexDe(/--color-tinta-tenue\s*:\s*(#[0-9A-Fa-f]{6})/)

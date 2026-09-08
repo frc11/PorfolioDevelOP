@@ -1,0 +1,58 @@
+{
+  "que": "El peso propio de /v3 antes y después de B6-A, con el MISMO build: los cinco chunks de la carga inicial, en bytes crudos, medidos por `s5-peso.invariant.ts` sobre dos builds de producción hechos el mismo día, con el mismo node_modules, `CIRCLE_NODE_TOTAL=2` y `--max-old-space-size=6144`.",
+  "instrumento": "src/app/v3/_lib/__tests__/s5-peso.invariant.ts (la resta del preámbulo de Sentry incluida) · los bytes por chunk, `wc -c` sobre .next/static/chunks",
+  "antes": {
+    "arbol": "HEAD (5ecfbe55, «B5: que se sienta vivo»), extraído con `git archive` a una carpeta temporal con `node_modules` enlazado",
+    "propioCrudoKiB": 64.3,
+    "propioGzipKiB": 20.6,
+    "sinPreambuloKiB": 62.6,
+    "aireContraElTechoKiB": -1.31,
+    "chunks": {
+      "3335": 2102,
+      "5315": 1870,
+      "8785": 6964,
+      "app/v3/layout": 6391,
+      "app/v3/page": 48477
+    },
+    "totalBytes": 65804,
+    "s5peso": "2 fallas: 62,6 KiB contra 61,25 y 61,3 contra 60 sin la marca"
+  },
+  "despues": {
+    "arbol": "el árbol de trabajo de B6-A",
+    "propioCrudoKiB": 64.5,
+    "propioGzipKiB": 20.7,
+    "sinPreambuloKiB": 62.8,
+    "aireContraElTechoKiB": -1.53,
+    "chunks": {
+      "3786": 2319,
+      "6843": 1872,
+      "193": 6963,
+      "app/v3/layout": 6456,
+      "app/v3/page": 48419
+    },
+    "totalBytes": 66029,
+    "s5peso": "2 fallas: 62,8 KiB contra 61,25 y 61,5 contra 60 sin la marca"
+  },
+  "delta": {
+    "bytes": 225,
+    "KiB": 0.22,
+    "gzipKiB": 0.1,
+    "porChunk": {
+      "secciones+superficies (3335→3786)": "+217 B: la cuarta superficie y la lista derivada de las que dejan ver la escena",
+      "layout": "+65 B: la referencia a la hoja velo.css",
+      "page": "−58 B: el rótulo sin opacity-casi, la prop lente en el bloque de P7",
+      "los otros dos": "+1 B"
+    },
+    "lente.ts y revelado.ts": "no están en la carga inicial: viven en el chunk perezoso de la coreografía y en el de la escena"
+  },
+  "lectura": "El techo de 61,25 KiB ya estaba roto en HEAD, en este entorno de build, por 1,31 KiB: no es de B6-A y se publica (regla 13). B6-A agrega 0,22 KiB, que es lo que se afirma.",
+  "decision": {
+    "quien": "el humano, en la PARADA 2 de B6-A",
+    "forma": "la de B7: el techo se parte en s5-presupuesto.ts, una línea por dueño",
+    "MONTAJE_DE_B6A_KIB": 0.25,
+    "HEREDADO_SIN_DECLARAR_KIB": 1.35,
+    "techoFinalKiB": 62.85,
+    "cuenta": "60 del lane + 1,25 de B4-A + 0,25 de B6-A + 1,35 heredados = 62,85 contra 62,78 medidos",
+    "discrepanciaEntreEntornos": "B7 midió el mismo commit (5ecfbe55) en 61,40 en su worktree: 1,16 KiB menos que acá, con las mismas versiones de next, @sentry/nextjs y react y sin NEXT_PUBLIC_* inlineadas. No está atribuida; es la línea que se borra el día que se atribuya y se devuelva."
+  }
+}
