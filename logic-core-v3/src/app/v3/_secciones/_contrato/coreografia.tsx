@@ -203,6 +203,16 @@ export interface BloqueProps {
    * de la sección que lo usa lo afirma contra la tabla.
    */
   readonly anclaje?: AnclajeDelBloque
+  /**
+   * Con qué lente se miran los planos del patrón (B6-A). `'escena'` pone la
+   * `perspective` en el foco de la cámara de la sala y el punto de fuga en el
+   * centro del viewport, para que un plano que viene de `translateZ −3000`
+   * venga de la pared del fondo y no flote por delante. Sin lente, la
+   * perspectiva es la que el patrón declara, con el punto de fuga en el centro
+   * del bloque. Sólo tiene sentido en una sección que deja ver la escena, y la
+   * rama quieta lo ignora: ahí no hay nada que poner en perspectiva.
+   */
+  readonly lente?: 'escena'
   readonly className?: string
   readonly style?: React.CSSProperties
   /** Recibe el progreso, o `null` cuando no hay coreografía. */

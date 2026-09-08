@@ -29,13 +29,15 @@ export const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 
 const V3 = 'src/app/v3'
 
-/** Las cinco hojas del chrome. Todo el movimiento de estado vive acá. */
+/** Las cinco hojas del chrome —todo el movimiento de estado vive acá— y la
+ *  del velo de B6-A, que es la única que pinta una SUPERFICIE. */
 export const ARCHIVOS_DE_ESTILO = [
   `${V3}/_estilos/cta.css`,
   `${V3}/_estilos/navegacion.css`,
   `${V3}/_estilos/cursor.css`,
   `${V3}/_estilos/pie.css`,
   `${V3}/_estilos/foco.css`,
+  `${V3}/_estilos/velo.css`,
 ]
 
 /** Los componentes. Ninguno importa un `.css`: por eso los instrumentos los

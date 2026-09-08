@@ -15,6 +15,14 @@
  * sección opaca la sala igual asomara, este invariante se pondría rojo ahí y el
  * resto del sprint no tendría base.
  *
+ * ── ⚠️ B6-A: CUATRO opacas, TRES bandas visibles ──────────────────────────
+ *
+ * B6-A abrió Trabajos y el Cierre sobre la escena (`oscuro-transparente`). Las
+ * cuentas de §1.2, las ventanas de §2 y la banda de §4 se reescriben contra la
+ * tabla nueva —no se aflojan: se derivan de la misma tabla que antes— y el
+ * control «no dice que se ve detrás de Trabajos» pasa a Servicios y a Números,
+ * que siguen opacas.
+ *
  * ── Los tres controles positivos que hacen que esto no sea verde por vacío ──
  *
  * 1. **El detector de relleno VE un panel transparente donde lo hay** (§1): si
@@ -39,31 +47,17 @@ import { SECCIONES } from '../../secciones'
 import { SUPERFICIES, type DefinicionSuperficie } from '../../superficies'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { ANCLAJE } from '../anclaje'
+import { CUADROS_DE_REANUDACION, MARGEN_DE_REANUDACION, escenaEnCuadro } from '../visibilidad'
+import { afirmarLaMaquina } from './s9-visibilidad-maquina'
 import {
-  CUADROS_DE_REANUDACION,
-  ESTADO_INICIAL,
-  MARGEN_DE_REANUDACION,
-  escenaEnCuadro,
-  fisicaEn,
-  frameloopDe,
-  siguiente,
-  type EstadoDeLaEscena,
-  type EventoDeLaEscena,
-} from '../visibilidad'
-import {
-  CASILLAS,
-  CORRIENDO,
   DOCUMENTO,
-  ENTRA,
-  PINTADO,
-  SALE,
-  SUSPENDIDA,
   VENTANA,
   cuadrosDeUnaPasada,
   enPantalla,
   imprimirCuadros,
   marcadoDelPanel,
   medirBanda,
+  ventanasFundidas,
 } from './visibilidadMedida'
 
 // ── §1 · LA PREMISA, MEDIDA ANTES DE CONSTRUIR ──────────────────────────────
@@ -86,36 +80,37 @@ const falsa = (clases: string, dejaVerElCanvas: boolean): DefinicionSuperficie =
 controlPositivo('una superficie que dice tapar SIN pintar relleno se detecta', falsa('text-tinta', false), coherente)
 controlPositivo('una que dice dejar ver Y pinta relleno se detecta', falsa('bg-fondo text-tinta', true), coherente)
 
-// §1.2 · La cuenta real, contra la que la instrucción del sprint declara.
+// §1.2 · La cuenta real. B6-A: cuatro y cuatro.
 const transparentes = ANCLAJE.geometria.filter((g) => g.dejaVerLaEscena)
 const opacas = ANCLAJE.geometria.filter((g) => !g.dejaVerLaEscena)
 afirmarIgual(
   [transparentes.length, opacas.length],
-  [2, 6],
-  '⚠ CORRECCIÓN: son SEIS opacas de las ocho, no cinco (transparentes, opacas)',
+  [4, 4],
+  'B6-A: son CUATRO transparentes y CUATRO opacas de las ocho (transparentes, opacas)',
 )
 console.log(`  transparentes: ${transparentes.map((g) => g.id).join(', ')}`)
 console.log(`  opacas:        ${opacas.map((g) => g.id).join(', ')}`)
 
 /**
- * De dónde sale el «cinco» de la instrucción, para que la corrección no se lea
- * como un desacuerdo: **cinco es la cuenta sobre las SIETE que llevan recorrido
- * de scroll**, o sea sin el Cierre, que mide una pantalla y es donde el
- * recorrido termina. Sobre las ocho son seis.
+ * De dónde salía el «cinco» de la instrucción de S9, para que la corrección no
+ * se lea como un desacuerdo: **cinco era la cuenta sobre las SIETE que llevan
+ * recorrido de scroll**, o sea sin el Cierre, que mide una pantalla y es donde
+ * el recorrido termina. Sobre las ocho eran seis. Desde B6-A, con Trabajos
+ * abierta, son cuatro sobre las siete y cuatro sobre las ocho.
  */
 const conRecorrido = ANCLAJE.geometria.filter((g) => g.desdePantalla < ANCLAJE.pantallasDeScroll)
 const opacasConRecorrido = conRecorrido.filter((g) => !g.dejaVerLaEscena)
 afirmarIgual(
   [conRecorrido.length, opacasConRecorrido.length],
-  [7, 5],
-  'el «cinco» de la instrucción es la cuenta sobre las que llevan recorrido (con recorrido, opacas)',
+  [7, 4],
+  'sobre las SIETE que llevan recorrido, CUATRO son opacas (con recorrido, opacas)',
 )
 
 const pantallasOpacas = opacas.reduce((n, g) => n + g.altoEnPantallas, 0)
 afirmarIgual(
   [pantallasOpacas, ANCLAJE.pantallasDelDocumento],
-  [16, 18],
-  'pantallas de panel opaco sobre pantallas del documento',
+  [12, 18],
+  'pantallas de panel opaco sobre pantallas del documento — eran 16 de 18 hasta B6-A',
 )
 console.log(
   `  el ${((100 * pantallasOpacas) / ANCLAJE.pantallasDelDocumento).toFixed(1)}% del documento es panel opaco`,
@@ -136,6 +131,8 @@ titulo('§1.4 · el marcado REAL que emite cada panel, no la intención del comp
  * una forma de puncionar un relleno sólido** —un margen abre un hueco entre
  * paneles, un radio recorta las esquinas, un alfa lo vuelve translúcido, un
  * modo de mezcla lo compone con lo de atrás— y ninguna de las ocho las usa hoy.
+ * El velo de B6-A no es una punción: es una clase de la hoja `velo.css` sobre
+ * un panel que DECLARA dejar ver, y §1 ya afirmó que ese panel no pinta relleno.
  */
 const PUNCIONES = /(^|\s)(m[trblxy]?-|rounded|opacity-|bg-transparent|mix-blend-)/
 const sinPuncion = (clases: string): boolean => !PUNCIONES.test(clases)
@@ -167,13 +164,36 @@ afirmar(
 
 titulo('§2 · las ventanas de scroll en las que la escena se ve')
 
+/**
+ * La derivación lista UNA ventana por sección transparente, en pantallas: el
+ * Cierre ([16, 17]) cae adentro de la de Por qué develOP ([15, 17]) porque las
+ * dos son contiguas y la primera mide dos pantallas de cuadro. Fundidas son
+ * tres bandas; `escenaEnCuadro` pregunta por cualquiera, así que el solape no
+ * cambia lo que la escena hace.
+ */
 afirmarIgual(
   ANCLAJE.ventanasDeLaEscena,
   [
     [0, 1],
+    [7, 11],
+    [15, 17],
+    [16, 17],
+  ],
+  'las ventanas salen de la derivación, no de una lista escrita a mano: una por sección transparente',
+)
+afirmarIgual(
+  ventanasFundidas(ANCLAJE.ventanasDeLaEscena),
+  [
+    [0, 1],
+    [7, 11],
     [15, 17],
   ],
-  'las ventanas salen de la derivación, no de una lista escrita a mano',
+  '  y fundidas son TRES bandas: el hero, Trabajos, y el diferencial con el Cierre',
+)
+controlPositivo(
+  'el fundido ve un solape y no cuenta dos veces la misma pantalla',
+  [[0, 1], [15, 17], [16, 17]] as const,
+  (v) => ventanasFundidas(v).length === v.length,
 )
 
 const M = MARGEN_DE_REANUDACION
@@ -182,21 +202,28 @@ for (const [p, esperado, porQue] of [
   [1 - 0.001, true, 'el hero todavía entrega el cuadro'],
   [1 + M, true, 'el borde exterior del margen de la primera ventana'],
   [1 + M + 0.001, false, 'un pelo más allá del margen: se suspende'],
-  [6, false, 'el medio de la banda opaca — cuatro paneles de distancia'],
-  [15 - M - 0.001, false, 'un pelo antes del margen de la segunda ventana'],
+  [5, false, 'el medio de Números — tres paneles de distancia'],
+  [7 - M - 0.001, false, 'un pelo antes del margen de Trabajos'],
+  [7 - M, true, 'el margen enciende la escena antes de que Trabajos asome (B6-A)'],
+  [9, true, 'el pin de Trabajos: la sala detrás del velo'],
+  [11 + M, true, 'el borde exterior del margen al salir de Trabajos'],
+  [11 + M + 0.001, false, 'y un pelo más allá: Servicios tapa'],
+  [13, false, 'el medio de Servicios y Tu panel — dos paneles opacos'],
+  [15 - M - 0.001, false, 'un pelo antes del margen de la tercera ventana'],
   [15 - M, true, 'el margen enciende la escena antes de que el diferencial asome'],
   [16, true, 'el diferencial llena el cuadro'],
+  [16.5, true, 'el Cierre asoma: sigue transparente, sin costura (B6-A)'],
   [17, true, 'el final del scroll'],
 ] as const) {
   afirmar(enPantalla(p) === esperado, `pantalla ${String(p).padEnd(9)} → ${esperado ? 'se ve' : 'suspendida'}`, porQue)
 }
 
-controlPositivo('el detector NO dice «se ve» en el medio de la banda opaca', 6, enPantalla)
-controlPositivo('el detector NO dice «se ve» detrás de Trabajos', 9.5, enPantalla)
+controlPositivo('el detector NO dice «se ve» detrás de Números', 5, enPantalla)
+controlPositivo('el detector NO dice «se ve» detrás de Servicios', 12.5, enPantalla)
 
 afirmar(
-  enPantalla(0.5) && enPantalla(16.5),
-  'y SÍ ve las dos secciones transparentes donde están — el detector no es un «false» constante',
+  enPantalla(0.5) && enPantalla(9) && enPantalla(16.5),
+  'y SÍ ve las tres bandas transparentes donde están — el detector no es un «false» constante',
 )
 
 afirmar(
@@ -207,77 +234,45 @@ afirmar(
   'el lado seguro es el comportamiento de hoy, no una pantalla apagada',
 )
 
-// ── §3 · LA MÁQUINA ─────────────────────────────────────────────────────────
+// ── §3 · LA MÁQUINA — vive en `s9-visibilidad-maquina.ts` desde B6-A ──────
 
-titulo('§3 · las nueve transiciones')
-
-for (const [estado, evento, fase, mismo, nombre] of CASILLAS) {
-  const salida = siguiente(estado, evento)
-  afirmar(salida.fase === fase, `${nombre.padEnd(46)} → ${fase}`)
-  afirmar(
-    (salida === estado) === mismo,
-    `${nombre.padEnd(46)} → ${mismo ? 'MISMO objeto (===)' : 'objeto nuevo'}`,
-  )
-}
-
-controlPositivo(
-  'la comparación de arriba es por IDENTIDAD y no por forma',
-  { fase: 'corriendo', cuadros: 0 } as EstadoDeLaEscena,
-  (copia) => copia === ESTADO_INICIAL,
-)
-
-titulo('§3.3 · de suspendida NO se puede pasar a corriendo directo')
-
-const TODOS: readonly EventoDeLaEscena[] = [ENTRA, SALE, PINTADO]
-const sinAtajo = (paso: (e: EstadoDeLaEscena, v: EventoDeLaEscena) => EstadoDeLaEscena): boolean =>
-  TODOS.every((v) => paso(SUSPENDIDA, v).fase !== 'corriendo')
-afirmar(sinAtajo(siguiente), 'ningún evento lleva de suspendida a corriendo sin pasar por reanudando')
-controlPositivo('un atajo de suspendida a corriendo se detecta', () => CORRIENDO, sinAtajo)
-
-let estado = SUSPENDIDA
-let pintados = 0
-estado = siguiente(estado, ENTRA)
-while (estado.fase !== 'corriendo' && pintados < 10) {
-  estado = siguiente(estado, PINTADO)
-  pintados += 1
-}
-afirmarIgual(
-  [estado.fase, pintados],
-  ['corriendo', CUADROS_DE_REANUDACION],
-  'volver cuesta exactamente CUADROS_DE_REANUDACION cuadros pintados (fase, cuadros)',
-)
-
-titulo('§3.5 · qué le pide cada fase al canvas')
-
-for (const [fase, lazo, fisica] of [
-  ['corriendo', 'always', true],
-  ['suspendida', 'never', false],
-  ['reanudando', 'always', false],
-] as const) {
-  const e: EstadoDeLaEscena = { fase, cuadros: 0 }
-  afirmarIgual([frameloopDe(e), fisicaEn(e)], [lazo, fisica], `${fase.padEnd(10)} → lazo y física`)
-}
-controlPositivo(
-  'el lazo NO se apaga en reanudando — si se apagara, el cuadro exacto no se pintaría nunca',
-  { fase: 'reanudando', cuadros: 0 } as EstadoDeLaEscena,
-  (e) => frameloopDe(e) === 'never',
-)
-controlPositivo(
-  'la física NO corre en reanudando — si corriera, volvería el latigazo desde la pose vieja',
-  { fase: 'reanudando', cuadros: 0 } as EstadoDeLaEscena,
-  fisicaEn,
-)
+afirmarLaMaquina()
 
 // ── §4 · LOS CUADROS AHORRADOS ──────────────────────────────────────────────
 
 titulo('§4 · cuántos cuadros se ahorran, y con qué supuestos')
 
+/**
+ * ⚠️ **B6-A: la banda se DERIVA, no se compara con un 70 % escrito.** Hasta
+ * B6-A se afirmaba «más del 70 %» sobre una tabla con dos ventanas. Con tres
+ * bandas el número baja —55,9 % con margen, 58,8 % sin margen— y lo que se
+ * afirma es la cuenta que lo produce: la banda sin margen es el complemento de
+ * las ventanas FUNDIDAS sobre el recorrido, y el margen cuesta exactamente un
+ * `MARGEN_DE_REANUDACION` por cada borde de ventana que no sea el del
+ * documento. Cuatro bordes: el pie del hero, los dos de Trabajos y la cabeza del
+ * diferencial. El del Cierre es el final del scroll y no cuesta nada.
+ */
 const banda = medirBanda()
 imprimirCuadros(banda)
+const fundidas = ventanasFundidas(ANCLAJE.ventanasDeLaEscena)
+const visibleEnPantallas = fundidas.reduce((n, [a, b]) => n + (b - a), 0)
+const esperadoSinMargen = 1 - visibleEnPantallas / ANCLAJE.pantallasDeScroll
+const bordesInteriores = fundidas.reduce((n, [a, b]) => n + (a > 0 ? 1 : 0) + (b < ANCLAJE.pantallasDeScroll ? 1 : 0), 0)
+const costoEsperado = (bordesInteriores * M) / ANCLAJE.pantallasDeScroll
 afirmar(
-  banda.conMargen > 0.7 && banda.conMargen < banda.sinMargen,
-  'más del 70% del recorrido queda suspendido, y el margen cuesta algo — no es gratis ni es cero',
-  `${(100 * banda.conMargen).toFixed(1)}% contra ${(100 * banda.sinMargen).toFixed(1)}% sin margen`,
+  Math.abs(banda.sinMargen - esperadoSinMargen) < 1e-9,
+  `la banda sin margen es el complemento de las ventanas fundidas: ${(100 * esperadoSinMargen).toFixed(1)}% del recorrido`,
+  `${visibleEnPantallas} pantallas visibles de ${ANCLAJE.pantallasDeScroll}`,
+)
+afirmar(
+  Math.abs(banda.sinMargen - banda.conMargen - costoEsperado) < 0.002,
+  `y el margen cuesta un octavo por borde interior: ${bordesInteriores} bordes → ${(100 * costoEsperado).toFixed(1)} puntos`,
+  `${(100 * banda.sinMargen).toFixed(1)}% → ${(100 * banda.conMargen).toFixed(1)}%`,
+)
+afirmar(
+  banda.conMargen > 0.5 && banda.conMargen < banda.sinMargen,
+  'más de la mitad del recorrido sigue suspendido, y el margen cuesta algo — no es gratis ni es cero',
+  `${(100 * banda.conMargen).toFixed(1)}% contra ${(100 * banda.sinMargen).toFixed(1)}% sin margen — era 80,9 % con dos ventanas`,
 )
 const ahorro = cuadrosDeUnaPasada(banda)
 afirmar(

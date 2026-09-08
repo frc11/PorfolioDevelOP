@@ -57,6 +57,7 @@ import { gzipSync } from 'node:zlib'
 
 import { MARCA_ESCENARIO } from '../marcaEscenario'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, titulo } from './afirmar'
+import { cardinalidadEsperada, comoSeDeriva } from './padron-de-tokens'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
 const DIST = path.join(RAIZ, process.argv[2] ?? '.next')
@@ -299,7 +300,7 @@ noCorre(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('CSS — los 90 tokens llegan al :root en el CSS que se sirve')
+titulo('CSS — los tokens del padrón llegan al :root en el CSS que se sirve')
 
 const cssDir = path.join(DIST, 'static', 'css')
 const hojas = existsSync(cssDir) ? readdirSync(cssDir).filter((f) => f.endsWith('.css')) : []
@@ -312,12 +313,15 @@ const faltantes = tokens.filter((t) => !new RegExp(`${t}\\s*:`).test(cssServido)
 
 /**
  * 90 y no 89 desde S3 (2026-08-29): entró `--color-superficie-translucida`,
- * la superficie que le faltaba a `--blur-panel`. El nombre de la excepción lo
- * afirma `tokens.invariant.ts`; acá sólo importa que TODOS lleguen al CSS que
- * se sirve, sean 89 o 90.
+ * la superficie que le faltaba a `--blur-panel`. Y 93 desde B6-A: el velo.
+ * ⚠ La cuenta ya no es un literal: sale de `padron-de-tokens.ts`, el mismo
+ * padrón que `tokens.invariant.ts` y `tokens-de-uso` consumen. Un literal
+ * acá se rompía cada vez que el sistema crecía bien. El nombre de cada
+ * excepción lo afirma `tokens.invariant.ts`; acá sólo importa que TODOS
+ * lleguen al CSS que se sirve.
  */
-afirmarIgual(tokens.length, 90, 'el tema declara 90 tokens — los 89 de S0 más la corrección de S3')
-afirmarIgual(faltantes, [], 'los 90 llegan al CSS servido — `@theme static` hace lo que promete')
+afirmarIgual(tokens.length, cardinalidadEsperada(), `el tema declara ${tokens.length} tokens — ${comoSeDeriva()}`)
+afirmarIgual(faltantes, [], `los ${tokens.length} llegan al CSS servido — \`@theme static\` hace lo que promete`)
 
 controlPositivo(
   'el buscador de tokens ve uno que NO está en el CSS servido',

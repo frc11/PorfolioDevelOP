@@ -7,9 +7,11 @@
  * Mide que el revelado (1) produzca una máscara ESPACIAL —no un `opacity` de cero
  * a uno—, (2) devuelva `null` cuando no hay costura que ablandar (sin máscara
  * permanente), (3) derive los bordes de las ventanas transparentes sin ablandar
- * el borde del DOCUMENTO, (4) escale la rampa con el viewport en vez de un píxel
- * fijo, y (5) esté cableado en `EscenaDelHome` **gateado por la misma retención
- * que ya usa la escena** y sin tocar la pose ni el progreso.
+ * el borde del DOCUMENTO, (3b) no fabrique una costura entre dos transparentes
+ * contiguas —B6-A, cuando el recorrido pasó a tenerlas—, (4) escale la rampa con
+ * el viewport en vez de un píxel fijo, y (5) esté cableado en `EscenaDelHome`
+ * **gateado por la misma retención que ya usa la escena** y sin tocar la pose ni
+ * el progreso.
  *
  * ⚠ NO mide cómo se VE el reingreso en el navegador: eso es captura y va al
  * reporte. Acá se afirma el mecanismo, que es lo que un instrumento puede.
@@ -22,11 +24,13 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__
 import {
   REVELADO_FRACCION,
   type BordeDeRevelado,
+  type PanelDelRecorrido,
   bordesDeRevelado,
   maskDeRevelado,
 } from '../revelado'
 import { MARGEN_DE_REANUDACION } from '../visibilidad'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../../secciones'
+import { SUPERFICIES } from '../../superficies'
 import { ATRIBUTO_DEL_PANEL } from '../extensionDeLasSecciones'
 
 const RAIZ = process.cwd()
@@ -73,6 +77,22 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · LOS BORDES — de las ventanas transparentes, sin el borde del documento')
 
+/**
+ * El recorrido que recibe el detector: las ocho EN ORDEN con si cada una deja
+ * ver el canvas. Se deriva acá de las dos tablas —igual que lo hace `revelado.ts`
+ * por su cuenta— y se afirma contra la constante derivada de `secciones.ts`,
+ * para que las tres lecturas no puedan decir cosas distintas.
+ */
+const RECORRIDO: readonly PanelDelRecorrido[] = SECCIONES.map((s) => ({
+  id: s.id,
+  dejaVerElCanvas: SUPERFICIES[s.superficie].dejaVerElCanvas,
+}))
+afirmarIgual(
+  RECORRIDO.filter((p) => p.dejaVerElCanvas).map((p) => p.id),
+  SECCIONES_QUE_DEJAN_VER_LA_ESCENA,
+  'el recorrido del revelado dice lo mismo que `SECCIONES_QUE_DEJAN_VER_LA_ESCENA`',
+)
+
 // Doc falso: Hero (primera, arriba de todo) y Por qué develOP (interior), a mitad del reingreso.
 const docFalso = {
   querySelector: (s: string) => {
@@ -82,9 +102,9 @@ const docFalso = {
   },
 }
 const idPrimera = SECCIONES[0].id
-const idUltima = SECCIONES[SECCIONES.length - 1].id
-const bordes = bordesDeRevelado(docFalso, SECCIONES_QUE_DEJAN_VER_LA_ESCENA, ATRIBUTO_DEL_PANEL, idPrimera, idUltima)
+const bordes = bordesDeRevelado(docFalso, RECORRIDO, ATRIBUTO_DEL_PANEL)
 afirmar(idPrimera === 'hero', 'el Hero es la PRIMERA sección del recorrido', idPrimera)
+afirmar(RECORRIDO[0].dejaVerElCanvas, '  y deja ver el canvas: su borde de arriba es el caso que NO debe ablandarse')
 afirmar(
   !bordes.some((b) => b.tipo === 'entra' && b.row < -1000),
   'el borde de ARRIBA del Hero NO se ablanda: es el borde del documento, no una costura contra un opaco',
@@ -100,7 +120,79 @@ controlPositivo(
   'si `por-que-develop` no existiera en el DOM, no habría costura (el detector no la fabrica)',
   { querySelector: () => null },
   (doc: { querySelector: () => null }) =>
-    maskDeRevelado(bordesDeRevelado(doc, SECCIONES_QUE_DEJAN_VER_LA_ESCENA, ATRIBUTO_DEL_PANEL, idPrimera, idUltima), VENTANA, RAMPA) !== null,
+    maskDeRevelado(bordesDeRevelado(doc, RECORRIDO, ATRIBUTO_DEL_PANEL), VENTANA, RAMPA) !== null,
+)
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('3b · VECINDADES (B6-A) — dos transparentes contiguas NO tienen costura; con un opaco entre medio, sí')
+
+/**
+ * Hasta B6-A el recorrido nunca puso dos transparentes seguidas, y el detector
+ * emitía un `sale` al pie y un `entra` a la cabeza de TODA transparente interior.
+ * Con dos contiguas eso fabricaba, en la fila donde se tocan, una rampa a cero y
+ * otra desde cero: una banda de papel de 0,25 pantallas cruzando la escena donde
+ * el recorrido sigue continuo. Un doc falso de cuatro paneles apilados, con la
+ * frontera a mitad del cuadro (540), y dos recorridos sobre las MISMAS cajas: el
+ * de dos transparentes contiguas y el que mete un opaco entre medio.
+ */
+const CAJAS: Readonly<Record<string, { top: number; bottom: number }>> = {
+  arriba: { top: -1080, bottom: 0 },
+  a: { top: 0, bottom: 540 },
+  b: { top: 540, bottom: 1080 },
+  abajo: { top: 1080, bottom: 2160 },
+}
+const docApilado = {
+  querySelector: (s: string) => {
+    const id = Object.keys(CAJAS).find((k) => s.includes(`="${k}"`))
+    return id === undefined ? null : { getBoundingClientRect: () => CAJAS[id] }
+  },
+}
+const contiguas: readonly PanelDelRecorrido[] = [
+  { id: 'arriba', dejaVerElCanvas: false },
+  { id: 'a', dejaVerElCanvas: true },
+  { id: 'b', dejaVerElCanvas: true },
+  { id: 'abajo', dejaVerElCanvas: false },
+]
+const conOpacoEntreMedio: readonly PanelDelRecorrido[] = [
+  { id: 'arriba', dejaVerElCanvas: false },
+  { id: 'a', dejaVerElCanvas: true },
+  { id: 'b', dejaVerElCanvas: false },
+  { id: 'abajo', dejaVerElCanvas: true },
+]
+
+const bordesContiguas = bordesDeRevelado(docApilado, contiguas, ATRIBUTO_DEL_PANEL)
+afirmarIgual(
+  bordesContiguas,
+  [{ row: 0, tipo: 'entra' }, { row: 1080, tipo: 'sale' }],
+  'dos transparentes contiguas: UNA costura arriba de la primera y UNA abajo de la segunda — ninguna en la frontera (540)',
+)
+const maskContiguas = maskDeRevelado(bordesContiguas, VENTANA, RAMPA)
+afirmar(
+  maskContiguas !== null && !maskContiguas.includes(' 540px'),
+  '  y la máscara no tiene un stop en 540: la escena cruza la frontera plena',
+  maskContiguas ?? 'null',
+)
+afirmar(
+  maskContiguas !== null && maskContiguas.includes(`#000 ${RAMPA}px`) && maskContiguas.includes(`#000 ${VENTANA - RAMPA}px`),
+  '  con la rampa de entrada arriba y la de salida abajo, donde SÍ hay opaco',
+)
+
+const bordesConOpaco = bordesDeRevelado(docApilado, conOpacoEntreMedio, ATRIBUTO_DEL_PANEL)
+afirmar(
+  bordesConOpaco.some((b) => b.row === 540 && b.tipo === 'sale') && bordesConOpaco.some((b) => b.row === 1080 && b.tipo === 'entra'),
+  'con un opaco entre medio, la frontera de 540 SÍ es costura (`sale`), y la de 1080 también (`entra`): las mismas cajas, otro recorrido',
+  JSON.stringify(bordesConOpaco),
+)
+controlPositivo(
+  'el detector de «sin costura en la frontera» la vería si hubiera un opaco entre las dos',
+  conOpacoEntreMedio,
+  (recorrido) => !bordesDeRevelado(docApilado, recorrido, ATRIBUTO_DEL_PANEL).some((b) => b.row === 540),
+)
+controlPositivo(
+  'y una transparente a la que le falta el vecino en el DOM no fabrica la costura del vecino',
+  { querySelector: (s: string) => (s.includes('="a"') ? { getBoundingClientRect: () => CAJAS.a } : null) },
+  (doc: { querySelector: (s: string) => { getBoundingClientRect: () => { top: number; bottom: number } } | null }) =>
+    bordesDeRevelado(doc, conOpacoEntreMedio, ATRIBUTO_DEL_PANEL).some((b) => b.row === 1080),
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

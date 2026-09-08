@@ -10,6 +10,12 @@
  * build**. Un presupuesto es una decisión con recibo, y una decisión con recibo
  * se lee entera de una sentada: por eso los docblocks viajan con las constantes
  * y no con las afirmaciones.
+ * Sale de `s5-peso.invariant.ts` en B6-A, con la forma que B7 le dio en su
+ * lane al mismo problema: **una línea por dueño**. El corte es por naturaleza
+ * y no por tamaño: acá viven **los números y por qué valen lo que valen**; allá
+ * vive **la medición que los compara contra el build**. Un presupuesto es una
+ * decisión con recibo, y una decisión con recibo se lee entera de una sentada:
+ * por eso los docblocks viajan con las constantes y no con las afirmaciones.
  *
  * ⚠️ **Un presupuesto que se sube cada vez que se pasa no es un presupuesto.**
  * Cada aumento es **una línea con nombre y con su dueño**, y el techo original
@@ -148,6 +154,59 @@ export const MONTAJE_DE_B4A_KIB = 1.25
  * `/v3`, evitaría que webpack ice el núcleo compartido de `_lib` a un chunk
  * propio. **Y dejaría `/v3/motion` sin el arreglo**, o sea el mismo defecto de
  * accesibilidad de vuelta en una ruta. Se descartó por eso, no por el peso.
+ * ═══ B6-A · EL TECHO SUBE OTRA VEZ, EN DOS LÍNEAS DE DUEÑOS DISTINTOS ═════
+ *
+ * ⚠️ **Lo decidió el humano en la PARADA 2 de B6-A, con las tres cosas que B4-A
+ * exige: la causa medida, lo que se achicó antes, y la alternativa escrita.** Y
+ * con la cuarta que B7 estrenó en su lane: **el excedente se PARTE por dueño**,
+ * porque no todo es de este bloque.
+ *
+ * ── El recibo, con los dos builds ─────────────────────────────────────────
+ *
+ * Dos builds de producción el mismo día, con el MISMO `node_modules`, las
+ * mismas banderas (`CIRCLE_NODE_TOTAL=2`, heap de 6 GB) y los cinco chunks
+ * propios pesados byte a byte (`docs/rediseno/outputs/b6/peso.json`):
+ *
+ *     (1) HEAD, 5ecfbe55 (B5), extraído con `git archive`   62,563 KiB   (64.064 B)
+ *     (2) el árbol de B6-A                                    62,782 KiB   (64.289 B)
+ *
+ * De donde salen las dos líneas:
+ *
+ *   · **PROPIO de B6-A, se AFIRMA: 0,25 KiB.** El delta entre (1) y (2) son
+ *     **225 bytes** (0,22 KiB): +217 en el chunk de `secciones` y `superficies`
+ *     —la cuarta superficie y la lista derivada de las que dejan ver la escena—,
+ *     +65 en `layout` —la referencia a `_estilos/velo.css`— y −58 en `page` —el
+ *     rótulo sin `opacity-casi`, la prop `lente` en el bloque de P7—. Se declara
+ *     0,25: los 0,22 medidos más 0,03 de aire, el mismo margen con el que B7
+ *     declaró sus 0,52 como 0,55. Es lo que cuesta que Trabajos y el Cierre
+ *     dejen ver la sala.
+ *   · **HEREDADO, se PUBLICA con su dueño y NO se afirma: 1,35 KiB.** El punto
+ *     (1) es HEAD **antes de que B6-A tocara una línea de producto**, y ya daba
+ *     **62,56 contra 61,25: rojo, por 1,31**. B6-A no lo produjo y no se lo
+ *     apropia. ⚠️ **B7 midió el MISMO commit en 61,40 en su worktree** —0,11 de
+ *     rojo, su `HEREDADO_SIN_DECLARAR_KIB`—, con las mismas versiones de `next`,
+ *     `@sentry/nextjs` y `react`, y sin `NEXT_PUBLIC_*` inlineadas en los chunks
+ *     propios de ninguno de los dos. **La diferencia de 1,16 KiB entre los dos
+ *     entornos NO está atribuida**, y por eso esta línea lleva el número de ESTE
+ *     entorno y no el de aquél: 1,31 medidos más 0,04 de aire, el mismo margen
+ *     con el que B7 declaró sus 0,11 como 0,15.
+ *
+ * ── Lo que se achicó ANTES de subirlo ─────────────────────────────────────
+ *
+ * El lente de P7 (`_lib/motion/lente.ts`) y la vecindad del revelado
+ * (`revelado.ts`) **no están en la carga inicial**: el primero entra con el
+ * chunk perezoso de la coreografía y el segundo con el de la escena. La prop
+ * `lente` del contrato es un tipo y pesa cero. Lo único que llegó al chunk
+ * inicial es el dato: la cuarta superficie.
+ *
+ * ── La alternativa, escrita, con lo que cuesta ────────────────────────────
+ *
+ * No agregar la cuarta superficie como dato y ponerle la clase `velo` a mano a
+ * las dos secciones ahorraría los 217 bytes del chunk de `superficies`. Y
+ * rompería lo que S1 construyó a propósito: que cambiar el recorrido de
+ * superficies del sitio sea editar ocho valores en una tabla, con el revelado,
+ * la visibilidad y el anclaje derivándose de ella. Se descartó por eso, no por
+ * el peso.
  *
  * ── Por qué DOS constantes y no una sola más grande ───────────────────────
  *
@@ -158,6 +217,13 @@ export const MONTAJE_DE_B4A_KIB = 1.25
  */
 export const ARREGLO_DE_B7_KIB = 0.55
 export const HEREDADO_SIN_DECLARAR_KIB = 0.15
+ * atribuya el desvío de HEAD entre los dos entornos y lo devuelva, **el techo
+ * baja solo** al borrar esa línea, sin tener que re-derivar nada. Un número
+ * único habría enterrado la distinción, que es exactamente lo que la regla 13
+ * prohíbe.
+ */
+export const MONTAJE_DE_B6A_KIB = 0.25
+export const HEREDADO_SIN_DECLARAR_KIB = 1.35
 
 /**
  * ⚠️ **TODO AUMENTO ES UNA LÍNEA CON NOMBRE, Y EL TECHO VIEJO LAS RESTA TODAS.**
@@ -168,4 +234,5 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.15
  * pone la comprobación en rojo igual.
  */
 export const MONTAJES_DECLARADOS_KIB = MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + HEREDADO_SIN_DECLARAR_KIB
+export const MONTAJES_DECLARADOS_KIB = MONTAJE_DE_B4A_KIB + MONTAJE_DE_B6A_KIB + HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

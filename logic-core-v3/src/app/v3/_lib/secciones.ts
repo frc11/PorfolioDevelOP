@@ -27,7 +27,7 @@
  * entre bloques. Ningún panel declara margen.
  */
 
-import type { ModoSuperficie } from './superficies'
+import { SUPERFICIES, type ModoSuperficie } from './superficies'
 
 export interface Seccion {
   /** Ancla y `data-panel`. Estable: la coreografía va a apuntar acá. */
@@ -306,7 +306,10 @@ export const SECCIONES: readonly Seccion[] = [
     id: 'trabajos',
     numero: '04',
     nombre: 'Trabajos',
-    superficie: 'oscuro-opaco',
+    // B6-A: se abre sobre la escena con el velo. Medido con la sala real
+    // detrás (docs/rediseno/outputs/b6/): todo lo pleno pasa AA, y el rótulo
+    // secundario pasó a tinta plena por decisión de la PARADA 1.
+    superficie: 'oscuro-transparente',
     alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
     pinneada: 'desde-escritorio',
     pasosDeLaSecuencia: PASOS_DE_TRABAJOS,
@@ -401,15 +404,24 @@ export const SECCIONES: readonly Seccion[] = [
    * recorta nada en ningún ancho; y declarar dos altos por ancho no existe en
    * la tabla —el `alto` es uno y es un mínimo—. Se queda como está.
    */
-  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-opaco', alto: '100svh' },
+  // B6-A: el último cuadro del sitio deja ver la sala. Los 25 bloques del
+  // pie pasan AA con la escena real detrás; lo que se ve es poco porque en esa
+  // pose el sol ya se puso (decisión de S11): la palanca es el arco del sol.
+  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-transparente', alto: '100svh' },
 ]
 
 /**
  * Cuántas secciones dejan ver el canvas. Es la cifra del recorrido —tres
  * momentos de escena— y la produce esta línea, no la prosa de un reporte.
+ *
+ * ⚠️ **B6-A: se deriva de `dejaVerElCanvas`, no del literal `papel-transparente`.**
+ * Con tres modos las dos preguntas eran la misma; con `oscuro-transparente` en la
+ * tabla de superficies dejan de serlo, y un filtro por nombre habría dejado a la
+ * escena SUSPENDIDA detrás de un panel que la deja ver — sin un solo error. El
+ * revelado, la visibilidad y el anclaje leen esta lista o la misma propiedad.
  */
 export const SECCIONES_QUE_DEJAN_VER_LA_ESCENA: readonly string[] = SECCIONES.filter(
-  (s) => s.superficie === 'papel-transparente',
+  (s) => SUPERFICIES[s.superficie].dejaVerElCanvas,
 ).map((s) => s.id)
 
 /** Una sección por id. Tira si no existe: un id inventado es un error, no un

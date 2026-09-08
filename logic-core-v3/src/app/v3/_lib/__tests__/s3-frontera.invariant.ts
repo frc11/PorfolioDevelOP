@@ -145,8 +145,11 @@ const valoresMovidos = [...temaAntes.entries()]
   .filter(([n, v]) => temaAhora.has(n) && temaAhora.get(n) !== v)
   .map(([n, v]) => ({ token: n, antes: v, ahora: temaAhora.get(n) }))
 
+/** ⚠ B6-A: el padrón ACUMULA agregados de varios sprints; la frontera compara contra HEAD, así que lo que
+ *  tiene que entrar en esta ventana es lo aprobado que HEAD todavía no tiene — ni uno más, ni uno menos. */
+const aprobadosPendientes = CORRECCION_APROBADA.filter((token) => !temaAntes.has(token))
 if (ventana.dentro) {
-  afirmarIgual(nombresNuevos, CORRECCION_APROBADA, 'el único token nuevo es la corrección declarada')
+  afirmarIgual(nombresNuevos, aprobadosPendientes, 'los tokens nuevos contra HEAD son exactamente los agregados aprobados que HEAD no tenía')
   afirmarIgual(nombresPerdidos, [], 'no se perdió ninguno')
   afirmarIgual(valoresMovidos, [], 'y ningún valor previo se movió')
 } else {

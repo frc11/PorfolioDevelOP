@@ -67,7 +67,8 @@
  * cosas que PUEDEN querer moverse por separado— pero la coincidencia es
  * deliberada y está escrita: el ablandado dura lo que dura la reanudación.
  */
-import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA } from '../secciones'
+import { SECCIONES } from '../secciones'
+import { SUPERFICIES } from '../superficies'
 import { ATRIBUTO_DEL_PANEL } from './extensionDeLasSecciones'
 
 export const REVELADO_FRACCION = 0.125
@@ -166,35 +167,57 @@ export interface FuenteDePaneles {
   querySelector(selector: string): CajaDePanel | null
 }
 
+/** Un panel del recorrido, con lo único que el revelado necesita saber de él. */
+export interface PanelDelRecorrido {
+  readonly id: string
+  readonly dejaVerElCanvas: boolean
+}
+
 /**
  * LOS BORDES DE REVELADO DE UN DOCUMENTO — la capa fina que le pide las cajas al
  * DOM. El núcleo puro es `maskDeRevelado`; esto sólo traduce paneles a bordes.
  *
- * `transparentes` es la lista de ids que dejan ver el canvas —`SECCIONES_QUE_DEJAN_
- * VER_LA_ESCENA` de `secciones.ts`, LEÍDA, no escrita— y `primeroYultimo` marca la
- * primera y la última sección del recorrido: el borde de arriba de la PRIMERA y el
- * de abajo de la ÚLTIMA son bordes del DOCUMENTO, no costuras contra un opaco, y no
- * se ablandan (arriba del Hero está el intro, no un panel). Los demás bordes de una
- * ventana transparente SIEMPRE lindan con un opaco —el recorrido no pone dos
- * transparentes seguidas—, así que son costuras y se ablandan.
+ * `recorrido` son las ocho, EN ORDEN, con si cada una deja ver el canvas —de
+ * `secciones.ts` y `superficies.ts`, LEÍDAS, no escritas—. Un borde es una
+ * COSTURA sólo donde un panel transparente toca uno opaco: el de arriba de un
+ * transparente se ablanda si el panel anterior es opaco, y el de abajo si el
+ * siguiente lo es. El de arriba de la PRIMERA y el de abajo de la ÚLTIMA son
+ * bordes del DOCUMENTO, no costuras (arriba del Hero está el intro, no un panel).
+ *
+ * ⚠️ **B6-A: dos transparentes contiguas NO tienen costura entre sí.** Hasta B6-A
+ * el recorrido no ponía dos seguidas y esta función lo daba por hecho: emitía un
+ * `sale` en el pie de toda transparente interior y un `entra` en la cabeza de toda
+ * transparente interior. Con Por qué develOP y el Cierre abiertas las dos, esa
+ * regla fabricaba en su frontera un `sale` y un `entra` en LA MISMA fila —una
+ * rampa a cero y otra desde cero—, o sea una banda de papel de 0,25 pantallas
+ * cruzando la escena justo donde el recorrido sigue continuo. `s17-revelado` §3b
+ * lo afirma con las dos vecindades: la que tiene costura y la que no.
  */
 export function bordesDeRevelado(
   documento: FuenteDePaneles,
-  transparentes: readonly string[],
+  recorrido: readonly PanelDelRecorrido[],
   atributoDelPanel: string,
-  idPrimera: string,
-  idUltima: string,
 ): BordeDeRevelado[] {
   const bordes: BordeDeRevelado[] = []
-  for (const id of transparentes) {
-    const nodo = documento.querySelector(`[${atributoDelPanel}="${id}"]`)
+  for (let i = 0; i < recorrido.length; i += 1) {
+    const panel = recorrido[i]
+    if (!panel.dejaVerElCanvas) continue
+    const nodo = documento.querySelector(`[${atributoDelPanel}="${panel.id}"]`)
     if (nodo === null) continue
     const caja = nodo.getBoundingClientRect()
-    if (id !== idPrimera) bordes.push({ row: caja.top, tipo: 'entra' })
-    if (id !== idUltima) bordes.push({ row: caja.bottom, tipo: 'sale' })
+    const anterior = recorrido[i - 1]
+    const siguiente = recorrido[i + 1]
+    if (anterior !== undefined && !anterior.dejaVerElCanvas) bordes.push({ row: caja.top, tipo: 'entra' })
+    if (siguiente !== undefined && !siguiente.dejaVerElCanvas) bordes.push({ row: caja.bottom, tipo: 'sale' })
   }
   return bordes
 }
+
+/** El recorrido, derivado UNA vez de las dos tablas. Ni un id ni una superficie escrita acá. */
+const RECORRIDO: readonly PanelDelRecorrido[] = SECCIONES.map((s) => ({
+  id: s.id,
+  dejaVerElCanvas: SUPERFICIES[s.superficie].dejaVerElCanvas,
+}))
 
 /**
  * EL PEGAMENTO — lee las cajas de los paneles transparentes y escribe la máscara
@@ -210,13 +233,7 @@ export function aplicarRevelado(el: HTMLElement | null, ventana: number, activo:
   if (el === null) return
   const mask = activo
     ? maskDeRevelado(
-        bordesDeRevelado(
-          document,
-          SECCIONES_QUE_DEJAN_VER_LA_ESCENA,
-          ATRIBUTO_DEL_PANEL,
-          SECCIONES[0].id,
-          SECCIONES[SECCIONES.length - 1].id,
-        ),
+        bordesDeRevelado(document, RECORRIDO, ATRIBUTO_DEL_PANEL),
         ventana,
         ventana * REVELADO_FRACCION,
       )

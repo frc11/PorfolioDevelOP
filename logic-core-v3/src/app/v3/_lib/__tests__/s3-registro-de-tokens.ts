@@ -133,6 +133,26 @@ export const REGISTRO: readonly PropiedadDeComponente[] = [
     evidencia: 'medido',
     procedencia: 'COMPONENTS.md §4.1 — blur(4px), que es un tercio de la única escala de desenfoque del sistema',
   },
+
+  // ── Velo (B6-A) ─────────────────────────────────────────────────────────
+  {
+    nombre: '--velo-columna',
+    valor: 'calc(var(--pad-lateral-compacto) + var(--columna-lateral) + var(--grilla-canal-amplio) + var(--breakpoint-medio))',
+    evidencia: 'derivado',
+    procedencia: '32 + 140 + 16 + 860 = 1048 px: el borde derecho medido del texto de Trabajos a 1440 (c-las-seis-abierto.json, «el texto termina en x=1048»)',
+  },
+  {
+    nombre: '--velo-rampa',
+    valor: 'var(--columna-lateral)',
+    evidencia: 'decidido',
+    procedencia: 'la rampa entre las dos alfas mide una columna lateral (140 px); el barrido de la PARADA 1 usó 240 px y dio 60,6 %, y con 140 la franja desnuda a 1440 crece de 152 a 252 px. Se re-midió con el velo puesto',
+  },
+  {
+    nombre: '--velo-borde',
+    valor: 'var(--velo-columna)',
+    evidencia: 'derivado',
+    procedencia: 'sólo Trabajos declara su franja desnuda; sin esta propiedad el gradiente cae en var(--container-tope) por el fallback del var() y el velo es denso entero, que es lo que el pie del Cierre necesita (su texto llega a x=1407 de 1440)',
+  },
 ]
 
 /** Índice por nombre, para que el invariante compare sin recorrer. */

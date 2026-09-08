@@ -173,12 +173,13 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('4 · LAS DOS SECCIONES TRANSPARENTES, con el ANCLAJE puesto')
+titulo('4 · LAS SECCIONES TRANSPARENTES, con el ANCLAJE puesto')
 
 const transparentes = MAPEO_DE_LAS_SECCIONES.filter((f) => f.dejaVerLaEscena)
+// B6-A abrió Trabajos y el Cierre: eran dos, son cuatro, y siguen saliendo de la tabla.
 afirmar(
-  transparentes.length === 2,
-  'son dos y salen de la tabla del home',
+  transparentes.map((f) => f.id).join(' · ') === 'hero · trabajos · por-que-develop · cierre',
+  'son cuatro y salen de la tabla del home: el hero, Trabajos, el diferencial y el Cierre',
   transparentes.map((f) => f.id).join(' · '),
 )
 

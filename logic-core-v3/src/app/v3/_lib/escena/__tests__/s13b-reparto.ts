@@ -31,24 +31,29 @@
  */
 
 import { SECCIONES } from '../../secciones'
-import { SUPERFICIES } from '../../superficies'
 import { CHOREO_TRAMOS } from '../choreography'
 import { derivarAnclaje, type Anclaje, type TramoAnclado } from '../anclajeDerivacion'
 import { progresoEnNudos } from '../recorrido'
 
 /**
- * LA SECCIÓN CUYO ANCLA SE ESTÁ DECIDIENDO — la última que deja ver la sala.
+ * LA SECCIÓN CUYO ANCLA SE ESTÁ DECIDIENDO — por su id.
  *
- * No se escribe `'por-que-develop'`: sale de cruzar `secciones.ts` con
- * `superficies.ts`, que es de donde sale en todo el resto del repo. Si mañana el
- * recorrido de superficies cambia, este módulo mide la que corresponda en vez de
- * medir una que ya no es el diferencial.
+ * ⚠️ **B6-A la escribe por NOMBRE, y antes se derivaba.** Decía «la última
+ * sección que deja ver la sala», cruzando `secciones.ts` con `superficies.ts`,
+ * con el argumento de que si el recorrido cambiaba el módulo mediría la que
+ * correspondiera. Pasó lo contrario: B6-A abrió el Cierre y la derivación pasó
+ * a devolver `'cierre'` —una sección que no declara ancla ninguna— y
+ * `s16-anclaje` §1 se puso rojo sin que el anclaje se hubiera movido un bit.
+ * Un instrumento que se rompe solo cuando cambia algo que no es él no mide.
+ *
+ * La sección se llama por su id. Lo que SÍ se afirma —en `s16-anclaje` §1, con
+ * control positivo— es que ese id es la sección del tramo que declara su ancla
+ * en `TRAMOS_ANCLADOS`: una propiedad del anclaje, no de las superficies.
  */
-export const EL_DIFERENCIAL: string = (() => {
-  const transparentes = SECCIONES.filter((s) => SUPERFICIES[s.superficie].dejaVerElCanvas)
-  if (transparentes.length === 0) throw new Error('reparto: ninguna sección deja ver la escena.')
-  return transparentes[transparentes.length - 1].id
-})()
+export const EL_DIFERENCIAL = 'por-que-develop'
+if (!SECCIONES.some((s) => s.id === EL_DIFERENCIAL)) {
+  throw new Error(`reparto: la tabla no tiene la sección "${EL_DIFERENCIAL}".`)
+}
 
 /** Particiones ordenadas de `n` elementos en exactamente `grupos` bloques contiguos. */
 export function particiones(n: number, grupos: number): readonly (readonly number[])[] {

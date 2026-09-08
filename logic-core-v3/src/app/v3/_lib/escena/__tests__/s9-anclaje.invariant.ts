@@ -92,7 +92,7 @@ afirmar(
 afirmarIgual(
   MAPEO_DE_LAS_SECCIONES.filter((f) => f.dejaVerLaEscena).map((f) => f.id),
   [...SECCIONES_QUE_DEJAN_VER_LA_ESCENA],
-  'las dos secciones que dejan ver la escena salen de la tabla de superficies, no de acá',
+  'las CUATRO secciones que dejan ver la escena salen de la tabla de superficies, no de acá (B6-A abrió Trabajos y el Cierre)',
 )
 afirmarIgual(
   CUATRO_DE_LA_72.map((id) => tramoEn(llenaEn(MAPEO_PROVISIONAL_HISTORICO, id))),
@@ -255,14 +255,14 @@ const ventanas = ventanasEnProgreso()
  * ancla CUANTIZADA. Ahora el panel del diferencial asoma en **0,7411** —la escena
  * se enciende 0,0161 más tarde—. La primera ventana no se mueve un bit.
  */
+/** ⚠ B6-A: CUATRO ventanas, una por transparente. Trabajos asoma en 0,4688 (una pantalla antes de llenar el
+ *  cuadro) y se va en 0,625; el Cierre asoma en el ancla del diferencial y cae ADENTRO de su ventana: contiguas
+ *  y transparentes, sin costura ni suspensión entre las dos. Las dos ventanas de siempre no se movieron un bit. */
 // prettier-ignore
-afirmarIgual(ventanas.map((v) => v.map((p) => Number(p.toFixed(6)))), [[0, 0.125], [0.741142, 1]],
-  'son DOS ventanas de progreso, una por sección transparente')
-afirmar(
-  ventanas[1][0] > ventanas[0][1],
-  '  y no se solapan: el hueco es real, no un artefacto de redondeo',
-  `hueco p=[${ventanas[0][1].toFixed(3)}, ${ventanas[1][0].toFixed(3)}] = ${(ventanas[1][0] - ventanas[0][1]).toFixed(3)} de progreso sin panel transparente`,
-)
+afirmarIgual(ventanas.map((v) => v.map((p) => Number(p.toFixed(6)))), [[0, 0.125], [0.46875, 0.625], [0.741142, 1], [0.8525, 1]],
+  'son CUATRO ventanas de progreso, una por sección transparente (B6-A: Trabajos y el Cierre)')
+afirmar(ventanas[1][0] > ventanas[0][1] && ventanas[2][0] > ventanas[1][1], '  las tres bandas no se solapan: los dos huecos son reales', `p=[${ventanas[0][1].toFixed(3)}, ${ventanas[1][0].toFixed(3)}] y p=[${ventanas[1][1].toFixed(3)}, ${ventanas[2][0].toFixed(3)}]`)
+afirmar(ventanas[3][0] >= ventanas[2][0] && ventanas[3][1] <= ventanas[2][1], '  y la del Cierre cae adentro de la del diferencial: sin costura entre las dos', `p=[${ventanas[3][0].toFixed(4)}, ${ventanas[3][1]}] en [${ventanas[2][0].toFixed(4)}, ${ventanas[2][1]}]`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · LA REASIGNACIÓN DEL KEYFRAME `demos`, consumida como dato')
