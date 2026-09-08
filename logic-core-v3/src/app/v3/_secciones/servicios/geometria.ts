@@ -20,11 +20,76 @@
  * contenido de un servicio —párrafo, once ítems y el hueco del video— puede
  * pasarse de una pantalla en un viewport bajo, y un alto fijo lo recortaría.
  *
- * ⚠️ DECLARADO, NO MEDIDO: el rango del pin es `alto de la sección − alto del
- * `sticky``, y vale `alto − viewport` mientras el contenido entre en UNA
- * pantalla. Nadie lo miró todavía. Si el contenido se pasa, el pin recorre
- * menos de lo que declara `ANCLA_DEL_PIN` y la secuencia termina antes. Es la
- * primera cosa a mirar cuando alguien abra la página.
+ * ── ✅ MEDIDO (B7 · frente B) — el rango del pin, y lo que cuesta el piso ──
+ *
+ * Este bloque decía *«DECLARADO, NO MEDIDO: el rango del pin es `alto de la
+ * sección − alto del sticky` … Nadie lo miró todavía. Es la primera cosa a mirar
+ * cuando alguien abra la página.»* Se miró, con scroll REAL —paso de 120 px— y
+ * los dos bordes afinados por bisección a 2 px:
+ * `npx tsx scripts-b7/b-pin.ts` → `docs/rediseno/outputs/b7/b-pin.json`. Las
+ * cifras se tomaron contra el **build de producción** (`B7_ORIGEN` en el 3005,
+ * que no se recarga) y se reprodujeron al píxel y al `scrollY` contra el dev del
+ * 3002 en una corrida limpia; el origen queda escrito en el propio JSON.
+ *
+ * ⚠️ **LA TABLA SEPARA LO MEDIDO DE LO DERIVADO, columna por columna.** No es
+ * pedantería: la primera versión de este bloque mezcló las dos en la misma fila
+ * y publicó como «recorrido medido» un `contenedor − hijo` leído con el scroll
+ * en cero. A 1920 y 1440 los dos números coinciden dentro de la bisección y la
+ * mezcla no se nota; a 1025 difieren en 27,45 px, que es el hijo creciendo.
+ *
+ *     perfil      hijo @scrollY 0   hijo DURANTE el pin   contenedor
+ *     1920×1080       1080                1080              3240
+ *     1440×900         900                 900              2700
+ *     1025×768       774,55              798,55             2304
+ *     1024×768      abajo de la compuerta la rama apilada no monta ningún `sticky`
+ *
+ *     perfil      rango MEDIDO (bisección)   pegado entre        desborde MEDIDO
+ *     1920×1080        2158 px              11.882 → 14.040          0 px
+ *     1440×900         1798 px               9.902 → 11.700          0 px
+ *     1025×768         1502 px               8.451 →  9.953       30,55 px
+ *
+ * A 1920 y a 1440 el rango medido es `alto − viewport` menos los 2 px de la
+ * bisección, o sea las dos pantallas que declara `ANCLA_DEL_PIN`, y el
+ * contenedor mide los tres pasos al píxel.
+ *
+ * ⚠️ **A 1025×768 el contenido SÍ se pasa de una pantalla, y se pasa por 30,55
+ * px.** Es el caso que la advertencia describía. El pin recorre **1.502 px
+ * medidos** en vez de los 1.536 derivados de la tabla —**pierde 34 px, el
+ * 2,21 % de su recorrido**— y la secuencia termina eso antes.
+ *
+ * ⚠️ **Y el hijo NO mide lo mismo durante todo el pin: crece de 774,55 a 798,55
+ * px a mitad del recorrido**, porque la secuencia cambia de servicio y los tres
+ * no tienen el mismo alto. Un censo leído a `scrollY = 0` publica 6,55 px de
+ * desborde donde la medición durante el pin da 30,55: **casi cinco veces**. La
+ * regla que sale de eso —una altura que puede cambiar durante el recorrido se
+ * mide durante el recorrido— está escrita en `scripts-b7/b-pin-lectores.ts`.
+ *
+ * **No se arregló**: achicar la cabecera o el `gap` es un cambio de composición
+ * y este bloque cierra defectos. Queda medido, con su instrumento, y reportado.
+ * Lo que `s6-pin.ts` afirma no es «el contenido entra en una pantalla» —esto es
+ * un PISO, y nunca se prometió eso— sino la identidad entre lo que el hijo
+ * desborda y lo que el pin pierde, **medidas por caminos distintos**: la primera
+ * leyendo cajas parada por parada, la segunda moviendo el scroll.
+ *
+ * ── ⚠️ Y HAY UN SEGUNDO `sticky` ARRIBA DE ÉSTE, QUE ES INERTE ────────────
+ *
+ * `Seccion.tsx` envuelve a una sección `pinneada: 'siempre'` en un `div` con
+ * `w-full sticky top-0 min-h-svh`, y adentro `Servicios.tsx` pone su `Bloque`
+ * con el alto de la sección ENTERA. Ese envoltorio **mide lo mismo que su
+ * padre** y su rango de pegado es **cero por construcción**: 3240 de 3240 a
+ * 1920, 2700 de 2700 a 1440, 2304 de 2304 a 1025, 2370,44 de 2370,44 a 1024.
+ * En todos los perfiles y para siempre. **No está roto: nunca tuvo recorrido.**
+ *
+ * **Cómo se discrimina —y hace falta decirlo, porque esto ya engañó a un
+ * instrumento con Fase 0 y controles positivos—:** un `sticky` son DOS
+ * elementos, el hijo que se pega y el padre que le da recorrido, y el recorrido
+ * disponible es `alto del padre − alto propio`. Mirar sólo la posición del hijo
+ * devuelve el MISMO cero en los dos casos: el que está roto y el que nunca tuvo
+ * recorrido. B4-B midió el envoltorio y publicó «el pin de `servicios` NO pinea
+ * en ningún perfil, ni siquiera a 1920 — 0 paradas pegado de 243»; el pin
+ * andaba, y anda byte por byte igual desde B1 (`git diff 8ab34b36 HEAD --
+ * servicios/geometria.ts servicios/Servicios.tsx` devuelve vacío). **La cifra
+ * que discrimina es el recorrido disponible, y va SIEMPRE al lado del cero.**
  */
 
 import {
@@ -46,11 +111,24 @@ export const CLASE_DE_BLOQUE_DE_SERVICIO = 'flex min-h-svh w-full items-center'
 /**
  * EL PANEL PINNEADO — la misma pantalla de piso, pegada al tope, EN COLUMNA.
  *
- * `sticky top-0` es todo el pinneado: ni una línea de JavaScript, y por eso
- * sobrevive abajo del umbral de la compuerta — mobile conserva el ritmo gratis.
+ * `sticky top-0` es todo el pinneado: ni una línea de JavaScript, así que el
+ * MECANISMO no depende de que baje un bundle.
+ *
+ * ⚠️ **Lo que este bloque decía y hay que corregir:** *«y por eso sobrevive abajo
+ * del umbral de la compuerta — mobile conserva el ritmo gratis»*. **Es falso
+ * para esta clase, y está medido.** El mecanismo cruza el umbral; ESTA clase no,
+ * porque la monta `PanelDeSecuencia` y esa pieza sólo existe en la rama
+ * coreografiada. A 1024 el barrido de `scripts-b7/b-pin.ts` encuentra 2
+ * elementos `sticky` en todo el documento y **ninguno es este** —la rama apilada
+ * no monta pin— mientras que a 1025, 1440 y 1920 encuentra 4 y éste recorre 1.502 px medidos,
+ * 1.800 y 2.160 px. Abajo del umbral el ritmo del pinneado no se conserva: no hay pin.
+ *
  * `position: sticky` deja de funcionar en silencio si cualquier ancestro tiene
  * `overflow` distinto de `visible`; la cadena hasta `body` se verificó limpia
- * cuando se escribió `PanelPinneado` y este lane no agrega ninguno.
+ * cuando se escribió `PanelPinneado`, este lane no agrega ninguno, y ahora
+ * además está medido en el navegador: `ancestroQueRecorta` es `null` para este
+ * elemento en los tres perfiles donde se monta (el arnés del barrido prueba que
+ * ese campo SÍ detecta un ancestro que recorta cuando lo hay).
  *
  * ── Por qué dejó de ser `CLASE_DE_BLOQUE_DE_SERVICIO` con un `sticky` adelante ──
  *
@@ -62,6 +140,13 @@ export const CLASE_DE_BLOQUE_DE_SERVICIO = 'flex min-h-svh w-full items-center'
  * (`items-center`) al principal (`justify-center`), que es donde ahora vive el
  * centrado vertical. La caja es la misma: `min-h-svh`, a lo ancho, un piso y no
  * un techo.
+ *
+ * ⚠️ **ÉSTE es el `sticky` que pinea** —el otro, el del envoltorio de
+ * `Seccion`, es inerte; ver el docblock del archivo— y por eso
+ * `scripts-b7/b-pin.ts` **deriva de esta constante** la huella del elemento que
+ * busca en el DOM, en vez de escribirla. Si alguien le cambia una clase, el
+ * instrumento no encuentra el elemento y **falla**, en lugar de medir cero y
+ * llamarlo defecto: es exactamente el modo de falla que B7 vino a cerrar.
  */
 export const CLASE_DEL_STICKY =
   'sticky top-0 flex min-h-svh w-full flex-col justify-center gap-[var(--spacing-8)]'

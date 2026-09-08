@@ -98,16 +98,28 @@ import {
  *      del bloque; el testimonio pasa a la segunda, apoyado abajo. Saca los
  *      diferenciales de arriba del logo —era el 26,69 % de sus píxeles bajo AA—
  *      y de paso reparte los **443,06 px de banda vacía** que el bloque de P5
- *      tenía adentro (301,3 a 1440): su `min-height` de 55svh son 594 px con
- *      189 de contenido.
+ *      tenía adentro (301,3 a 1440). ⚠️ Ese `min-height` era de 55svh cuando se
+ *      midió; hoy vale 50 (`contenido.ts:184`), así que las cifras de esta
+ *      viñeta describen el estado de entonces y no el de hoy.
  *
- * ⚠️ **LO QUE NO SE PUDO CERRAR, con su número.** A 1440 la sección sigue sin
- * entrar en una pantalla, y la cuenta dice por qué: 72 px de despeje de la
- * pastilla + 13 del rótulo + 244 del titular (cuatro líneas) + 96 de la bajada
- * acotada + **495 del piso de 55svh del bloque de P5** ya son 920 de los 900, y
- * todavía faltan cuatro costuras y el pie. El número que lo desbloquea es
- * `ALTO_MINIMO_DEL_BLOQUE_SVH` en `contenido.ts` —hoy 55, con piso duro en 40—
- * y **este frente no toca `contenido.ts`**. Queda reportado.
+ * ⚠️ **ESTE PÁRRAFO DESCRIBÍA UN MUNDO QUE YA NO EXISTE, Y SE REESCRIBE CONTRA
+ * LA PROPIEDAD NUEVA (B7).** Decía que a 1440 la sección «sigue sin entrar en
+ * una pantalla», con una cuenta que sumaba 920 de los 900 apoyada en **«495 del
+ * piso de 55svh del bloque de P5»**. Las dos mitades caducaron: el piso vale
+ * **50** (`contenido.ts:184`), no 55; y **B4-A cerró el desborde** bajando la
+ * sangría de la tarjeta del diferencial de `--spacing-4` a `--spacing-2`, con lo
+ * que la sección pasó de **923,70 a 898,52 px** de alto intrínseco a 1440×900
+ * —**1,48 px de aire**, y renderiza sus 900 declarados—. El modelo que lo
+ * arbitra vive en `soporte.ts` §8 y publica esa cuenta pieza por pieza,
+ * declarando cuál es medida y cuál sale de un token.
+ *
+ * ═══ B7 · `D-B5.1` — EL CUERPO DE 15 px SOBRE LA PARED ════════════
+ *
+ * El defecto medido, las tres palancas que no alcanzan, la que sí existe —la
+ * POSICIÓN del testimonio, aplicada abajo— y por qué esto NO reabre `D-B5.4`:
+ * **todo en `soporte.ts`**, que es donde vive el modelo de esta sección. Va ahí
+ * y no acá por la regla de las 300 líneas del repo, y el corte es el mismo que
+ * B4-A ya había usado: el componente compone, el soporte mide y publica.
  */
 
 export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
@@ -210,17 +222,28 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
                   </li>
                 ))}
               </ul>
-              {/* El testimonio se apoya ABAJO de su columna: es la franja del
-                  cuadro que la escena deja limpia —medido, el borde seguro de
-                  las bandas de abajo es 1275 y 1920 a 1920 px de ancho— y de
-                  paso cierra el bloque contra el pie en vez de dejar la columna
-                  colgada del tope. */}
+              {/* El testimonio se apoya ABAJO de su columna, y desde B7 arranca
+                  en la TERCERA. Las dos mitades son la misma razón —caer donde la
+                  escena deja el cuadro limpio— y la segunda es el arreglo de la
+                  primera: B1 escribió que el borde seguro de las bandas de abajo
+                  es x 1275 a 1920 px de ancho, y con auto-colocación el
+                  testimonio caía en la columna 2, o sea x 715..1217 a 1920 y
+                  x 513..917 a 1440 — ENTERO del lado malo de su propio número.
+                  Medido hoy sobre el fondo, con el mismo instrumento que mide el
+                  contraste: en la columna 2 a 1440 la escena pone el logo debajo
+                  del texto y cuatro franjas de 40 px caen en 1,10 · 1,97 · 1,10 ·
+                  4,22:1; la columna 3, que estaba vacía, no tiene ninguna. El
+                  `col-start` no toca el alto: la fila del bloque la fija el `ul`,
+                  que es más alto, y las tres columnas son `1fr` iguales — así que
+                  el ancla 0,8525 de la escena no se entera. A `tablet` ya caía en
+                  la tercera por auto-colocación (el `ul` ocupa dos), y abajo de
+                  1025 no hay escena: la variante es de escritorio y nada más. */}
               <CanalDePieza
                 progreso={progreso}
                 patron="P5"
                 cantidad={PIEZAS_DE_P5}
                 indice={INDICE_DEL_TESTIMONIO}
-                className="escritorio:self-end"
+                className="escritorio:col-start-3 escritorio:self-end"
               >
                 <BloqueDeTestimonio testimonio={TESTIMONIO} />
               </CanalDePieza>

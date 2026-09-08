@@ -1,0 +1,1361 @@
+{
+  "que": "las 13 capturas de anclas que B4-B no tomó, con las 21 filas RE-MEDIDAS contra lo que B4-B publicó",
+  "instrumento": "scripts-b7/d-anclas.ts · CDP propio, perfil de Chrome `b7-d-anclas`, sin estrangular",
+  "origen": "http://localhost:3002/v3",
+  "heredado": "docs/rediseno/outputs/b4/c-anclas-con-captura.json (leído, no transcrito)",
+  "vara": {
+    "px": 72,
+    "deDonde": "_lib/navegacion.ts · BORDE_INFERIOR_EN_REPOSO_PX = 24 (--spacing-6) + 48 (alto de la pastilla)"
+  },
+  "navegacion": "Element.click() sobre el <a href=\"#id\"> del pie, partiendo desde el fondo del documento",
+  "esperas": "asentamiento del scroll (4 lecturas iguales de 32 ms) + 1200 ms de gracia de escena antes de leer cajas",
+  "reglaDeCaptura": "se captura SÓLO donde B4-B dejó `captura: null` — las 13 que faltaban. Al temporal, y se mudan con el navegador cerrado",
+  "capturasTomadas": 13,
+  "filasQueNoReproducen": 0,
+  "filas": [
+    {
+      "perfil": "1440",
+      "ancla": "hero",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 3441.7999999523163
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "topDeB4B": 0,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 568.55,
+      "seTapan": false,
+      "scrollY": 0,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1440-ancla-hero.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "quienes-somos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 828,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 142.60000002384186
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1,
+      "seTapan": false,
+      "scrollY": 828,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1440-ancla-quienes-somos.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "numeros",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 3528,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 176.5
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1,
+      "seTapan": false,
+      "scrollY": 3528,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1440-ancla-numeros.png"
+    },
+    {
+      "perfil": "1440",
+      "ancla": "trabajos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 7128,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 152.10000002384186
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 64,
+      "seTapan": false,
+      "scrollY": 7128,
+      "captura": "docs/rediseno/capturas/b7/1440-ancla-trabajos.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "servicios",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 9828,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 155
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 53.91,
+      "seTapan": false,
+      "scrollY": 9828,
+      "captura": "docs/rediseno/capturas/b7/1440-ancla-servicios.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "tu-panel",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 12528,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 194.39999997615814
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 80,
+      "seTapan": false,
+      "scrollY": 12528,
+      "captura": "docs/rediseno/capturas/b7/1440-ancla-tu-panel.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1440",
+      "ancla": "por-que-develop",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 16200,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 900,
+            "numeros": 3600,
+            "trabajos": 7200,
+            "servicios": 9900,
+            "tu-panel": 12600,
+            "por-que-develop": 14400,
+            "cierre": 15300
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 14328,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 186
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 16,
+      "seTapan": false,
+      "scrollY": 14328,
+      "captura": "docs/rediseno/capturas/b7/1440-ancla-por-que-develop.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "hero",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 151.70000004768372
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "topDeB4B": 0,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 637.86,
+      "seTapan": false,
+      "scrollY": 0,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1920-ancla-hero.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "quienes-somos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 1008,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 157.70000004768372
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1,
+      "seTapan": false,
+      "scrollY": 1008,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1920-ancla-quienes-somos.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "numeros",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 4248,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 157.89999997615814
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1,
+      "seTapan": false,
+      "scrollY": 4248,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/1920-ancla-numeros.png"
+    },
+    {
+      "perfil": "1920",
+      "ancla": "trabajos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 8568,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 140.69999992847443
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 64,
+      "seTapan": false,
+      "scrollY": 8568,
+      "captura": "docs/rediseno/capturas/b7/1920-ancla-trabajos.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "servicios",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 11808,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 139.80000007152557
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 94.97,
+      "seTapan": false,
+      "scrollY": 11808,
+      "captura": "docs/rediseno/capturas/b7/1920-ancla-servicios.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "tu-panel",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 15048,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 145
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 80,
+      "seTapan": false,
+      "scrollY": 15048,
+      "captura": "docs/rediseno/capturas/b7/1920-ancla-tu-panel.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "1920",
+      "ancla": "por-que-develop",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 19440,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 1080,
+            "numeros": 4320,
+            "trabajos": 8640,
+            "servicios": 11880,
+            "tu-panel": 15120,
+            "por-que-develop": 17280,
+            "cierre": 18360
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 17208,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 204.79999995231628
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 16,
+      "seTapan": false,
+      "scrollY": 17208,
+      "captura": "docs/rediseno/capturas/b7/1920-ancla-por-que-develop.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "hero",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 0,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 168.30000007152557
+      },
+      "topDelPanel": 0,
+      "desvioContraLaVara": -72,
+      "topDeB4B": 0,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 444.86,
+      "seTapan": false,
+      "scrollY": 0,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/375-ancla-hero.png"
+    },
+    {
+      "perfil": "375",
+      "ancla": "quienes-somos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 595,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 178.5
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 49,
+      "seTapan": false,
+      "scrollY": 595,
+      "captura": "docs/rediseno/capturas/b7/375-ancla-quienes-somos.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "numeros",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 2596,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 144.39999997615814
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1,
+      "seTapan": false,
+      "scrollY": 2596,
+      "captura": null,
+      "capturaDeB4B": "docs/rediseno/capturas/b4/c/375-ancla-numeros.png"
+    },
+    {
+      "perfil": "375",
+      "ancla": "trabajos",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 5287,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 146.5
+      },
+      "topDelPanel": 72,
+      "desvioContraLaVara": 0,
+      "topDeB4B": 72,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 17,
+      "seTapan": false,
+      "scrollY": 5287,
+      "captura": "docs/rediseno/capturas/b7/375-ancla-trabajos.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "servicios",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 7569,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 153.39999997615814
+      },
+      "topDelPanel": 72.22,
+      "desvioContraLaVara": 0.22,
+      "topDeB4B": 72.22,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 1.22,
+      "seTapan": false,
+      "scrollY": 7569,
+      "captura": "docs/rediseno/capturas/b7/375-ancla-servicios.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "tu-panel",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 10510,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 144.29999995231628
+      },
+      "topDelPanel": 72.06,
+      "desvioContraLaVara": 0.06,
+      "topDeB4B": 72.06,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 81.06,
+      "seTapan": false,
+      "scrollY": 10510,
+      "captura": "docs/rediseno/capturas/b7/375-ancla-tu-panel.png",
+      "capturaDeB4B": null
+    },
+    {
+      "perfil": "375",
+      "ancla": "por-que-develop",
+      "fotos": [
+        {
+          "momento": "en el pie, antes de clickear",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al asentarse el scroll",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        },
+        {
+          "momento": "al leer las cajas (+1200 ms)",
+          "alturaDelDocumento": 15167,
+          "topsEnElDocumento": {
+            "hero": 0,
+            "quienes-somos": 667,
+            "numeros": 2668,
+            "trabajos": 5359,
+            "servicios": 7641.21875,
+            "tu-panel": 10582.0625,
+            "por-que-develop": 12788.234375,
+            "cierre": 14090.859375
+          }
+        }
+      ],
+      "asentamiento": {
+        "y": 12716,
+        "lecturas": 4,
+        "seAsento": true,
+        "ms": 163.10000002384186
+      },
+      "topDelPanel": 72.23,
+      "desvioContraLaVara": 0.23,
+      "topDeB4B": 72.23,
+      "deltaContraB4B": 0,
+      "reproduce": true,
+      "despejeDelGlifo": 17.23,
+      "seTapan": false,
+      "scrollY": 12716,
+      "captura": "docs/rediseno/capturas/b7/375-ancla-por-que-develop.png",
+      "capturaDeB4B": null
+    }
+  ]
+}

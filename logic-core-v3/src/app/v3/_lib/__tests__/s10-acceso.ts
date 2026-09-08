@@ -30,44 +30,31 @@
  *     entran en el modelo, y el home no usa ninguno de los tres.
  */
 
-import { atributo, nodosDe, textoDe, type Nodo } from './s10-recorrido'
+import { atributo, nodosDe, textoDe } from './s10-recorrido'
 import type { Parada } from './s10-lectura'
-
-// ── El texto que un lector ANUNCIA ──────────────────────────────────────────
-
-const mascaras = new Map<string, string>()
+import { textoAnunciado } from './s10-acceso-anunciado'
 
 /**
- * El marcado con el contenido de todo subárbol `aria-hidden="true"` reemplazado
- * por espacios **de la misma longitud**.
+ * ── ⚠️ LA PUERTA SIGUE SIENDO ÉSTA (B7) ───────────────────────────────────
  *
- * Los espacios y no un borrado: así todos los offsets de `nodosDe` siguen
- * valiendo sobre la cadena enmascarada, y `textoDe` se puede usar tal cual para
- * cualquier nodo. Borrar movería cada offset posterior y habría que mantener
- * un segundo mapa de posiciones, que es una fuente de error por nada.
+ * El arreglo del censo de marcadores cruzaba este archivo las 300 líneas del
+ * repo, así que **el texto anunciado y su censo se mudaron** a
+ * `./s10-acceso-anunciado`, con el corte por tema: allá está *qué se anuncia*,
+ * acá los detectores que leen el árbol de accesibilidad. Lo que este archivo
+ * exportaba, lo sigue exportando —`s10-acceso-tablas.ts` y
+ * `s10-acceso-landmarks.ts` importan de acá y no cambiaron un import—, y por eso
+ * la reexportación es explícita en vez de una estrella: quien lea esta lista ve
+ * exactamente qué sale por esta puerta.
  */
-export function enmascararOcultos(html: string): string {
-  const guardado = mascaras.get(html)
-  if (guardado !== undefined) return guardado
-  const caracteres = [...html]
-  for (const nodo of nodosDe(html)) {
-    if (!/\baria-hidden="true"/.test(nodo.atributos)) continue
-    for (let i = nodo.desde; i < nodo.hasta; i += 1) caracteres[i] = ' '
-  }
-  const producido = caracteres.join('')
-  mascaras.set(html, producido)
-  return producido
-}
-
-/** El texto que un lector de pantalla anuncia para el subárbol de un nodo. */
-export function textoAnunciado(html: string, nodo: Nodo): string {
-  return textoDe(enmascararOcultos(html), nodo)
-}
-
-/** El texto anunciado del documento entero. */
-export function documentoAnunciado(html: string): string {
-  return textoAnunciado(html, nodosDe(html)[0])
-}
+export {
+  documentoAnunciado,
+  enmascararOcultos,
+  marcadoresAnunciados,
+  marcadoresAnunciadosSoloHojas,
+  textoAnunciado,
+  FORMAS_DEL_CENSO,
+  type MarcadorAnunciado,
+} from './s10-acceso-anunciado'
 
 // ── La duplicación del rollover y del divisor de líneas ─────────────────────
 
@@ -172,63 +159,6 @@ export function rotuloDeParada(html: string, parada: Parada): RotuloDeParada {
   return contenido === ''
     ? { rotulo: '', via: 'ninguna' }
     : { rotulo: contenido, via: 'contenido' }
-}
-
-// ── Los marcadores de contenido, tal como suenan ────────────────────────────
-
-/** Las etiquetas que cuentan como «la frase» alrededor de un marcador. */
-const BLOQUES: ReadonlySet<string> = new Set([
-  'p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-  'figcaption', 'blockquote', 'dd', 'dt', 'td', 'th', 'button', 'a', 'label',
-])
-
-export interface MarcadorAnunciado {
-  readonly marcador: string
-  readonly seccion: string | null
-  /** La frase entera en la que cae, tal como se anuncia. */
-  readonly contexto: string
-}
-
-/**
- * Los marcadores que un lector de pantalla LEE EN VOZ ALTA, con la frase en la
- * que caen.
- *
- * Se buscan sobre el texto ANUNCIADO y no sobre el marcado crudo: un marcador
- * adentro de un subárbol `aria-hidden` no se escucha, y contarlo inflaría el
- * pedido a Franco con casillas que nadie oye. En este home no hay ninguno así,
- * y eso es un resultado — no un supuesto.
- */
-export function marcadoresAnunciados(html: string): MarcadorAnunciado[] {
-  const enmascarado = enmascararOcultos(html)
-  const nodos = nodosDe(html)
-  const salida: MarcadorAnunciado[] = []
-
-  for (const nodo of nodos) {
-    if (nodo.hasta === nodo.desde) continue
-    // Sólo hojas: si el subárbol tiene otra etiqueta adentro, el marcador se
-    // va a contar en el nodo de adentro y contarlo acá lo duplicaría.
-    if (enmascarado.slice(nodo.desde, nodo.hasta).includes('<')) continue
-
-    for (const encontrado of textoDe(enmascarado, nodo).matchAll(/\[[^\]]*\]/g)) {
-      salida.push({
-        marcador: encontrado[0],
-        seccion: nodo.seccion,
-        contexto: fraseQueContiene(html, nodos, nodo),
-      })
-    }
-  }
-  return salida
-}
-
-/** La frase anunciada más chica que contiene al nodo. El nodo mismo si no hay. */
-function fraseQueContiene(html: string, nodos: readonly Nodo[], hoja: Nodo): string {
-  let mejor: Nodo = hoja
-  for (const candidato of nodos) {
-    if (!BLOQUES.has(candidato.etiqueta)) continue
-    if (candidato.desde > hoja.desde || candidato.hasta < hoja.hasta) continue
-    if (candidato.hasta - candidato.desde < mejor.hasta - mejor.desde || mejor === hoja) mejor = candidato
-  }
-  return textoAnunciado(html, mejor)
 }
 
 // ── El movimiento, leído del marcado ────────────────────────────────────────

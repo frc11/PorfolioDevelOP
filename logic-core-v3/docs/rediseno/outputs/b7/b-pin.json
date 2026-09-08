@@ -1,0 +1,1117 @@
+{
+  "instrumento": {
+    "origen": "http://localhost:3002",
+    "cuando": "2026-09-07T21:46:44.831Z",
+    "pasoPx": 120,
+    "precisionPx": 2,
+    "predicado": "el de LECTURA_DE_PEGADO de scripts-b7/lectores-layout.ts, sin tocarle un umbral",
+    "controlesDelSitio": [
+      "section[data-panel=\"servicios\"]",
+      "[data-seccion-id=\"servicios\"] > div",
+      "[data-seccion-id=\"trabajos\"][data-pinneado=\"desde-escritorio\"]"
+    ],
+    "controlInyectado": "[data-arnes=\"quieto\"]",
+    "huellaDelPinDerivadaDe": "CLASE_DEL_STICKY de src/app/v3/_secciones/servicios/geometria.ts, no escrita a mano"
+  },
+  "perfiles": {
+    "1024": {
+      "perfil": "1024",
+      "viewport": "1024×768",
+      "altoDelViewport": 768,
+      "arribaDeLaCompuerta": false,
+      "documento": 14721,
+      "paradas": 117,
+      "filas": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "clase": "pegado",
+          "porQue": "111 de 117 paradas pegado, de scrollY 674 → 13920 (13246 px afinados), moviéndose 13248 px de los 14720.92 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "header[data-pieza=navegacion]",
+              "posicion": "sticky",
+              "top": "-672px",
+              "altoPropio": 0,
+              "altoDelPadre": 14720.92,
+              "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+              "recorridoDisponible": 14720.92,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 117,
+            "paradasPegado": 111,
+            "desdeY": 720,
+            "hastaY": 13920,
+            "entraEnY": 674,
+            "saleEnY": 13920,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 13248,
+            "amplitud": 13248,
+            "altoPegadoMin": 0,
+            "altoPegadoMax": 0,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "clase": "inerte-sin-recorrido",
+          "porQue": "llena a su padre (2370.44 de 2370.44 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 2370.44,
+              "altoDelPadre": 2370.44,
+              "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 117,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 117 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2370.44,
+              "altoDelPadre": 14720.92,
+              "huellaDelPadre": "main .relative.z-10",
+              "recorridoDisponible": 12350.48,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 117,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 8715.38,
+            "desplazamientoMax": 8715.38,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-arbol=v3-home-quieto-2026-08-30] .relative",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 117 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-arbol=v3-home-quieto-2026-08-30] .relative",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2370.44,
+              "altoDelPadre": 2370.44,
+              "huellaDelPadre": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 117,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "clase": "no-sticky",
+          "porQue": "position: static — no hay pin que medir. Se movió 0 px respecto de su padre en 117 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+              "posicion": "static",
+              "top": "auto",
+              "altoPropio": 2508.81,
+              "altoDelPadre": 2508.81,
+              "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 117,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        }
+      ],
+      "censoDelPadre": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-672px",
+          "altoPropio": 0,
+          "altoDelPadre": 14720.92,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 14720.92,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 2370.44,
+          "altoDelPadre": 2370.44,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        }
+      ],
+      "desacuerdosConElPadre": [],
+      "recorridoDerivadoDeLaTabla": 1536
+    },
+    "1025": {
+      "perfil": "1025",
+      "viewport": "1025×768",
+      "altoDelViewport": 768,
+      "arribaDeLaCompuerta": true,
+      "documento": 14246,
+      "paradas": 113,
+      "filas": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "clase": "pegado",
+          "porQue": "107 de 113 paradas pegado, de scrollY 674 → 13440 (12766 px afinados), moviéndose 12768 px de los 14246.23 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "header[data-pieza=navegacion]",
+              "posicion": "sticky",
+              "top": "-672px",
+              "altoPropio": 0,
+              "altoDelPadre": 14246.23,
+              "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+              "recorridoDisponible": 14246.23,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 107,
+            "desdeY": 720,
+            "hastaY": 13440,
+            "entraEnY": 674,
+            "saleEnY": 13440,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 12768,
+            "amplitud": 12768,
+            "altoPegadoMin": 0,
+            "altoPegadoMax": 0,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "clase": "pegado",
+          "porQue": "13 de 113 paradas pegado, de scrollY 6147 → 7680 (1533 px afinados), moviéndose 1536 px de los 1536 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 768,
+              "altoDelPadre": 2304,
+              "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 1536,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 13,
+            "desdeY": 6240,
+            "hastaY": 7680,
+            "entraEnY": 6147,
+            "saleEnY": 7680,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 1536,
+            "amplitud": 1536,
+            "altoPegadoMin": 768,
+            "altoPegadoMax": 768,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "clase": "inerte-sin-recorrido",
+          "porQue": "llena a su padre (2304 de 2304 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 2304,
+              "altoDelPadre": 2304,
+              "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "clase": "pegado",
+          "porQue": "12 de 113 paradas pegado, de scrollY 8451 → 9953 (1502 px afinados), moviéndose 1505.45 px de los 1529.45 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 774.55,
+              "altoDelPadre": 2304,
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "recorridoDisponible": 1529.45,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 12,
+            "desdeY": 8520,
+            "hastaY": 9840,
+            "entraEnY": 8451,
+            "saleEnY": 9953,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 1505.45,
+            "amplitud": 1505.45,
+            "altoPegadoMin": 774.55,
+            "altoPegadoMax": 798.55,
+            "altoCambiaEnY": 9000,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 113 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2304,
+              "altoDelPadre": 14246.23,
+              "huellaDelPadre": "main .relative.z-10",
+              "recorridoDisponible": 11942.23,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 8448,
+            "desplazamientoMax": 8448,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 113 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2304,
+              "altoDelPadre": 2304,
+              "huellaDelPadre": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 113,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        }
+      ],
+      "censoDelPadre": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-672px",
+          "altoPropio": 0,
+          "altoDelPadre": 14246.23,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 14246.23,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "top": "0px",
+          "altoPropio": 768,
+          "altoDelPadre": 2304,
+          "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 1536,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 2304,
+          "altoDelPadre": 2304,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "top": "0px",
+          "altoPropio": 774.55,
+          "altoDelPadre": 2304,
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "recorridoDisponible": 1529.45,
+          "ancestroQueRecorta": null
+        }
+      ],
+      "desacuerdosConElPadre": [],
+      "recorridoDerivadoDeLaTabla": 1536
+    },
+    "1440": {
+      "perfil": "1440",
+      "viewport": "1440×900",
+      "altoDelViewport": 900,
+      "arribaDeLaCompuerta": true,
+      "documento": 16200,
+      "paradas": 128,
+      "filas": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "clase": "pegado",
+          "porQue": "121 de 128 paradas pegado, de scrollY 807 → 15240 (14433 px afinados), moviéndose 14436 px de los 16200 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "header[data-pieza=navegacion]",
+              "posicion": "sticky",
+              "top": "-804px",
+              "altoPropio": 0,
+              "altoDelPadre": 16200,
+              "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+              "recorridoDisponible": 16200,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 121,
+            "desdeY": 840,
+            "hastaY": 15240,
+            "entraEnY": 807,
+            "saleEnY": 15240,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 14436,
+            "amplitud": 14436,
+            "altoPegadoMin": 0,
+            "altoPegadoMax": 0,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "clase": "pegado",
+          "porQue": "15 de 128 paradas pegado, de scrollY 7202 → 9000 (1798 px afinados), moviéndose 1800 px de los 1800 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 900,
+              "altoDelPadre": 2700,
+              "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 1800,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 15,
+            "desdeY": 7320,
+            "hastaY": 9000,
+            "entraEnY": 7202,
+            "saleEnY": 9000,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 1800,
+            "amplitud": 1800,
+            "altoPegadoMin": 900,
+            "altoPegadoMax": 900,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "clase": "inerte-sin-recorrido",
+          "porQue": "llena a su padre (2700 de 2700 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 2700,
+              "altoDelPadre": 2700,
+              "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "clase": "pegado",
+          "porQue": "15 de 128 paradas pegado, de scrollY 9902 → 11700 (1798 px afinados), moviéndose 1800 px de los 1800 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 900,
+              "altoDelPadre": 2700,
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "recorridoDisponible": 1800,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 15,
+            "desdeY": 9960,
+            "hastaY": 11640,
+            "entraEnY": 9902,
+            "saleEnY": 11700,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 1800,
+            "amplitud": 1800,
+            "altoPegadoMin": 900,
+            "altoPegadoMax": 900,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 128 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2700,
+              "altoDelPadre": 16200,
+              "huellaDelPadre": "main .relative.z-10",
+              "recorridoDisponible": 13500,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 9900,
+            "desplazamientoMax": 9900,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 128 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 2700,
+              "altoDelPadre": 2700,
+              "huellaDelPadre": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 128,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        }
+      ],
+      "censoDelPadre": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-804px",
+          "altoPropio": 0,
+          "altoDelPadre": 16200,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 16200,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "top": "0px",
+          "altoPropio": 900,
+          "altoDelPadre": 2700,
+          "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 1800,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 2700,
+          "altoDelPadre": 2700,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "top": "0px",
+          "altoPropio": 900,
+          "altoDelPadre": 2700,
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "recorridoDisponible": 1800,
+          "ancestroQueRecorta": null
+        }
+      ],
+      "desacuerdosConElPadre": [],
+      "recorridoDerivadoDeLaTabla": 1800
+    },
+    "1920": {
+      "perfil": "1920",
+      "viewport": "1920×1080",
+      "altoDelViewport": 1080,
+      "arribaDeLaCompuerta": true,
+      "documento": 19440,
+      "paradas": 154,
+      "filas": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "clase": "pegado",
+          "porQue": "145 de 154 paradas pegado, de scrollY 987 → 18360 (17373 px afinados), moviéndose 17376 px de los 19440 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "header[data-pieza=navegacion]",
+              "posicion": "sticky",
+              "top": "-984px",
+              "altoPropio": 0,
+              "altoDelPadre": 19440,
+              "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+              "recorridoDisponible": 19440,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 145,
+            "desdeY": 1080,
+            "hastaY": 18360,
+            "entraEnY": 987,
+            "saleEnY": 18360,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 17376,
+            "amplitud": 17376,
+            "altoPegadoMin": 0,
+            "altoPegadoMax": 0,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "clase": "pegado",
+          "porQue": "18 de 154 paradas pegado, de scrollY 8642 → 10800 (2158 px afinados), moviéndose 2160 px de los 2160 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 1080,
+              "altoDelPadre": 3240,
+              "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 2160,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 18,
+            "desdeY": 8760,
+            "hastaY": 10800,
+            "entraEnY": 8642,
+            "saleEnY": 10800,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 2160,
+            "amplitud": 2160,
+            "altoPegadoMin": 1080,
+            "altoPegadoMax": 1080,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "clase": "inerte-sin-recorrido",
+          "porQue": "llena a su padre (3240 de 3240 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 3240,
+              "altoDelPadre": 3240,
+              "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "clase": "pegado",
+          "porQue": "18 de 154 paradas pegado, de scrollY 11882 → 14040 (2158 px afinados), moviéndose 2160 px de los 2160 disponibles.",
+          "barrido": {
+            "ficha": {
+              "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+              "posicion": "sticky",
+              "top": "0px",
+              "altoPropio": 1080,
+              "altoDelPadre": 3240,
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "recorridoDisponible": 2160,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 18,
+            "desdeY": 12000,
+            "hastaY": 14040,
+            "entraEnY": 11882,
+            "saleEnY": 14040,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 2160,
+            "amplitud": 2160,
+            "altoPegadoMin": 1080,
+            "altoPegadoMax": 1080,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 154 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 3240,
+              "altoDelPadre": 19440,
+              "huellaDelPadre": "main .relative.z-10",
+              "recorridoDisponible": 16200,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 1,
+            "desdeY": 11880,
+            "hastaY": 11880,
+            "entraEnY": 11880,
+            "saleEnY": 11880,
+            "desplazamientoMin": 11880,
+            "desplazamientoMax": 11880,
+            "amplitud": 0,
+            "altoPegadoMin": 3240,
+            "altoPegadoMax": 3240,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        },
+        {
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "clase": "no-sticky",
+          "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 154 paradas.",
+          "barrido": {
+            "ficha": {
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "posicion": "relative",
+              "top": "0px",
+              "altoPropio": 3240,
+              "altoDelPadre": 3240,
+              "huellaDelPadre": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+              "recorridoDisponible": 0,
+              "ancestroQueRecorta": null
+            },
+            "paradas": 154,
+            "paradasPegado": 0,
+            "desdeY": null,
+            "hastaY": null,
+            "entraEnY": null,
+            "saleEnY": null,
+            "desplazamientoMin": 0,
+            "desplazamientoMax": 0,
+            "amplitud": 0,
+            "altoPegadoMin": null,
+            "altoPegadoMax": null,
+            "altoCambiaEnY": null,
+            "huellasDistintas": 0
+          }
+        }
+      ],
+      "censoDelPadre": [
+        {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-984px",
+          "altoPropio": 0,
+          "altoDelPadre": 19440,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 19440,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "top": "0px",
+          "altoPropio": 1080,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 2160,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 3240,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        },
+        {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "top": "0px",
+          "altoPropio": 1080,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "recorridoDisponible": 2160,
+          "ancestroQueRecorta": null
+        }
+      ],
+      "desacuerdosConElPadre": [],
+      "recorridoDerivadoDeLaTabla": 2160
+    }
+  },
+  "arnes": {
+    "desdeY": 19440,
+    "alto": 9000,
+    "paradas": 67,
+    "recorridoDeclarado": 2500,
+    "filas": [
+      {
+        "marca": "bueno",
+        "clase": "pegado",
+        "porQue": "20 de 67 paradas pegado, de scrollY 19442 → 21940 (2498 px afinados), moviéndose 2500 px de los 2500 disponibles.",
+        "barrido": {
+          "ficha": {
+            "huella": "div[data-arnes=bueno]",
+            "posicion": "sticky",
+            "top": "0px",
+            "altoPropio": 500,
+            "altoDelPadre": 3000,
+            "huellaDelPadre": "div",
+            "recorridoDisponible": 2500,
+            "ancestroQueRecorta": null
+          },
+          "paradas": 67,
+          "paradasPegado": 20,
+          "desdeY": 19560,
+          "hastaY": 21840,
+          "entraEnY": 19442,
+          "saleEnY": 21940,
+          "desplazamientoMin": 0,
+          "desplazamientoMax": 2500,
+          "amplitud": 2500,
+          "altoPegadoMin": 500,
+          "altoPegadoMax": 500,
+          "altoCambiaEnY": null,
+          "huellasDistintas": 0
+        }
+      },
+      {
+        "marca": "roto",
+        "clase": "roto-con-recorrido",
+        "porQue": "tenía 2500 px de recorrido y no se movió un píxel de su lugar en el flujo en 67 paradas, y hay un ancestro que recorta el scroll: div",
+        "barrido": {
+          "ficha": {
+            "huella": "div[data-arnes=roto]",
+            "posicion": "sticky",
+            "top": "0px",
+            "altoPropio": 500,
+            "altoDelPadre": 3000,
+            "huellaDelPadre": "div",
+            "recorridoDisponible": 2500,
+            "ancestroQueRecorta": "div"
+          },
+          "paradas": 67,
+          "paradasPegado": 0,
+          "desdeY": null,
+          "hastaY": null,
+          "entraEnY": null,
+          "saleEnY": null,
+          "desplazamientoMin": 0,
+          "desplazamientoMax": 0,
+          "amplitud": 0,
+          "altoPegadoMin": null,
+          "altoPegadoMax": null,
+          "altoCambiaEnY": null,
+          "huellasDistintas": 0
+        }
+      },
+      {
+        "marca": "quieto",
+        "clase": "no-sticky",
+        "porQue": "position: static — no hay pin que medir. Se movió 0 px respecto de su padre en 67 paradas.",
+        "barrido": {
+          "ficha": {
+            "huella": "div[data-arnes=quieto]",
+            "posicion": "static",
+            "top": "auto",
+            "altoPropio": 500,
+            "altoDelPadre": 3000,
+            "huellaDelPadre": "div",
+            "recorridoDisponible": 2500,
+            "ancestroQueRecorta": null
+          },
+          "paradas": 67,
+          "paradasPegado": 0,
+          "desdeY": null,
+          "hastaY": null,
+          "entraEnY": null,
+          "saleEnY": null,
+          "desplazamientoMin": 0,
+          "desplazamientoMax": 0,
+          "amplitud": 0,
+          "altoPegadoMin": null,
+          "altoPegadoMax": null,
+          "altoCambiaEnY": null,
+          "huellasDistintas": 0
+        }
+      }
+    ],
+    "separa": true
+  },
+  "comprobaciones": [
+    {
+      "que": "1920×1080 · el pin real de Servicios se pega",
+      "ok": true,
+      "obtenido": "pegado — 18 de 154 paradas pegado, de scrollY 11882 → 14040 (2158 px afinados), moviéndose 2160 px de los 2160 disponibles."
+    },
+    {
+      "que": "1920×1080 ·   su rango MEDIDO (bisección a 2 px) cae a menos de 4 px del recorrido disponible con el alto medido DURANTE el pin",
+      "ok": true,
+      "obtenido": "2158 px medidos (scrollY 11882 → 14040) contra 2160 disponibles con el hijo en su alto máximo (1080); el censo a scrollY 0 habría dicho 2160"
+    },
+    {
+      "que": "1920×1080 ·   el contenedor mide exactamente los 3 pasos declarados: el alto de la tabla se cumple al píxel",
+      "ok": true,
+      "obtenido": "3240 px de contenedor contra 3 × 1080 = 3240"
+    },
+    {
+      "que": "1920×1080 ·   el hijo no se recorta, y lo que el pin pierde de recorrido MEDIDO es lo que el hijo desborda MEDIDO",
+      "ok": true,
+      "obtenido": "hijo 1080 sobre 1080 de viewport → desborda 0 px · el pin recorre 2158 de los 2160 declarados → pierde 2 px (0.09 %) · el censo a scrollY 0 leía 1080 y habría dicho 0"
+    },
+    {
+      "que": "1920×1080 · el envoltorio de `Seccion` es INERTE — cero recorrido, y no está roto",
+      "ok": true,
+      "obtenido": "llena a su padre (3240 de 3240 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil."
+    },
+    {
+      "que": "1440×900 · el pin real de Servicios se pega",
+      "ok": true,
+      "obtenido": "pegado — 15 de 128 paradas pegado, de scrollY 9902 → 11700 (1798 px afinados), moviéndose 1800 px de los 1800 disponibles."
+    },
+    {
+      "que": "1440×900 ·   su rango MEDIDO (bisección a 2 px) cae a menos de 4 px del recorrido disponible con el alto medido DURANTE el pin",
+      "ok": true,
+      "obtenido": "1798 px medidos (scrollY 9902 → 11700) contra 1800 disponibles con el hijo en su alto máximo (900); el censo a scrollY 0 habría dicho 1800"
+    },
+    {
+      "que": "1440×900 ·   el contenedor mide exactamente los 3 pasos declarados: el alto de la tabla se cumple al píxel",
+      "ok": true,
+      "obtenido": "2700 px de contenedor contra 3 × 900 = 2700"
+    },
+    {
+      "que": "1440×900 ·   el hijo no se recorta, y lo que el pin pierde de recorrido MEDIDO es lo que el hijo desborda MEDIDO",
+      "ok": true,
+      "obtenido": "hijo 900 sobre 900 de viewport → desborda 0 px · el pin recorre 1798 de los 1800 declarados → pierde 2 px (0.11 %) · el censo a scrollY 0 leía 900 y habría dicho 0"
+    },
+    {
+      "que": "1440×900 · el envoltorio de `Seccion` es INERTE — cero recorrido, y no está roto",
+      "ok": true,
+      "obtenido": "llena a su padre (2700 de 2700 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil."
+    },
+    {
+      "que": "1025×768 · el pin real de Servicios se pega",
+      "ok": true,
+      "obtenido": "pegado — 12 de 113 paradas pegado, de scrollY 8451 → 9953 (1502 px afinados), moviéndose 1505.45 px de los 1529.45 disponibles."
+    },
+    {
+      "que": "1025×768 ·   su rango MEDIDO (bisección a 2 px) cae a menos de 4 px del recorrido disponible con el alto medido DURANTE el pin",
+      "ok": true,
+      "obtenido": "1502 px medidos (scrollY 8451 → 9953) contra 1505.45 disponibles con el hijo en su alto máximo (798.55); el censo a scrollY 0 habría dicho 1529.45"
+    },
+    {
+      "que": "1025×768 ·   el contenedor mide exactamente los 3 pasos declarados: el alto de la tabla se cumple al píxel",
+      "ok": true,
+      "obtenido": "2304 px de contenedor contra 3 × 768 = 2304"
+    },
+    {
+      "que": "1025×768 ·   el hijo no se recorta, y lo que el pin pierde de recorrido MEDIDO es lo que el hijo desborda MEDIDO",
+      "ok": true,
+      "obtenido": "hijo 798.55 sobre 768 de viewport → desborda 30.55 px · el pin recorre 1502 de los 1536 declarados → pierde 34 px (2.21 %) · el censo a scrollY 0 leía 774.55 y habría dicho 6.55"
+    },
+    {
+      "que": "1025×768 · el envoltorio de `Seccion` es INERTE — cero recorrido, y no está roto",
+      "ok": true,
+      "obtenido": "llena a su padre (2304 de 2304 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil."
+    },
+    {
+      "que": "1024×768 · abajo de 1025 la secuencia no monta su `sticky`: la rama apilada no lo tiene",
+      "ok": true,
+      "obtenido": "ausente, como la rama declara"
+    },
+    {
+      "que": "1024×768 · el envoltorio de `Seccion` es INERTE — cero recorrido, y no está roto",
+      "ok": true,
+      "obtenido": "llena a su padre (2370.44 de 2370.44 px): recorrido disponible 0 px. NO está roto — nunca tuvo recorrido, y no lo va a tener en ningún perfil."
+    },
+    {
+      "que": "CONTROL DEL PREDICADO · con el alto del hijo alterado 40 px, la identidad desborde↔pérdida da ROJO",
+      "ok": true,
+      "obtenido": "con 1080 → verde · con 1120 → rojo"
+    },
+    {
+      "que": "CONTROL DEL SITIO · el pin de Trabajos, que anda, sale con su rango",
+      "ok": true,
+      "obtenido": "18 de 154 paradas pegado, de scrollY 8642 → 10800 (2158 px afinados), moviéndose 2160 px de los 2160 disponibles."
+    },
+    {
+      "que": "CONTROL DEL SITIO · abajo de 1025 la compuerta lo apaga: deja de ser `sticky`",
+      "ok": true,
+      "obtenido": "position: static — no hay pin que medir. Se movió 0 px respecto de su padre en 117 paradas."
+    },
+    {
+      "que": "CONTROL DEL SITIO · el `<section>` no es `sticky`, y sale clasificado como tal",
+      "ok": true,
+      "obtenido": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 154 paradas."
+    },
+    {
+      "que": "CONTROL DEL SITIO · el PADRE del pin —el que le da el recorrido— tampoco lo es",
+      "ok": true,
+      "obtenido": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje= → no-sticky"
+    },
+    {
+      "que": "ARNÉS · el barrido separa `pegado`, `roto-con-recorrido` y `no-sticky`",
+      "ok": true,
+      "obtenido": "bueno=pegado · roto=roto-con-recorrido · quieto=no-sticky"
+    },
+    {
+      "que": "ninguna huella se movió en ninguna parada de ninguna corrida",
+      "ok": true,
+      "obtenido": "0 desajustes"
+    },
+    {
+      "que": "los dos censos —el de acá y `CENSO_DE_STICKIES`— dicen lo mismo",
+      "ok": true,
+      "obtenido": "sin desacuerdos"
+    }
+  ],
+  "fallas": 0
+}

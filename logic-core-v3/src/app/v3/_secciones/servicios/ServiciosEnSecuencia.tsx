@@ -13,6 +13,14 @@ import { CLASE_DEL_STICKY, CLASE_DE_LA_PILA, clasesDeCapa, formaDeCapa } from '.
 /**
  * LA SECUENCIA — un progreso, cinco canales, un solo `sticky`.
  *
+ * ⚠️ «Un solo `sticky`» es de ESTE componente, y hay que decirlo con esa
+ * precisión: el marcado de la sección emite DOS. El otro es el envoltorio que
+ * `Seccion.tsx` le pone a una `pinneada: 'siempre'`, y es INERTE —llena a su
+ * padre, recorrido cero por construcción—. **El que pinea es el de acá**, y
+ * está medido: 2.160 px de recorrido a 1920, pegado entre scrollY 11.882 y
+ * 14.040 (`scripts-b7/b-pin.ts` → `docs/rediseno/outputs/b7/b-pin.json`). La
+ * distinción no es cosmética: medir el otro fue el defecto D2 de B4-B.
+ *
  * ── Dos números derivados, no un objeto ───────────────────────────────────
  *
  * `indice` y `local` salen de dos `useTransform` separados sobre el MISMO
@@ -62,8 +70,8 @@ import { CLASE_DEL_STICKY, CLASE_DE_LA_PILA, clasesDeCapa, formaDeCapa } from '.
  * (`clasesDeCapa`, en `geometria.ts`, con las cinco formas de esconder que NO
  * sirven enumeradas ahí). **Lo que se ve es idéntico**: un servicio a la vez,
  * el del tramo activo, cambiando en el mismo punto del recorrido. El mecanismo
- * tampoco cambió — sigue habiendo un `sticky` largo, UN progreso y los cinco
- * canales colgando de él. Lo único que cambió es de dónde sale el que se ve:
+ * tampoco cambió — sigue habiendo un `sticky` largo que pinea, UN progreso y
+ * los cinco canales colgando de él. Lo único que cambió es de dónde sale el que se ve:
  * antes del montaje, ahora de la pintura.
  *
  * ── El progreso lo recibe SÓLO la capa vigente, y no es un detalle ────────

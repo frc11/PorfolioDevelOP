@@ -105,14 +105,65 @@ export { EncabezadoDeSeccion, NumeroDeSeccion } from './Rotulo'
  *
  * ── Sin una línea de JavaScript, y por eso cruza la compuerta ─────────────
  *
- * El pinneo es CSS puro, así que **sobrevive abajo de 1025** igual que en el
- * esqueleto: es la mitad del ritmo que mobile conserva gratis, sin bajar un byte
- * de más, y por eso las dos secciones más pesadas siguen teniendo forma.
+ * El pinneo es CSS puro, así que el MECANISMO no depende de que baje un byte de
+ * JavaScript y sigue existiendo abajo de 1025.
  *
- * ⚠ Con `min-h-svh` esa frase se acota: lo que sobrevive abajo del umbral es el
- * MECANISMO, no necesariamente el pin. Una sección `siempre` cuyo contenido
- * quieto mida más de una pantalla deja de clavarse abajo de 1025 — y es lo que
- * se quiere, porque clavarla ahí es esconderla.
+ * ⚠ **Lo que decía este bloque, y por qué se corrige (B7 · frente B):**
+ * *«sobrevive abajo de 1025 … es la mitad del ritmo que mobile conserva gratis,
+ * y por eso las dos secciones más pesadas siguen teniendo forma»*. Lo que
+ * sobrevive es el mecanismo; **el pin no**, y ahora está medido con scroll real
+ * en los dos lados del umbral (`scripts-b7/b-pin.ts` →
+ * `docs/rediseno/outputs/b7/b-pin.json`):
+ *
+ *   · **A 1024 hay 2 elementos `sticky` en todo el documento y ninguno es un pin
+ *     del recorrido.** El de `trabajos` es `escritorio:sticky`, o sea
+ *     `position: static` abajo del umbral —la compuerta lo apaga, y es lo
+ *     buscado—; el de `servicios` es este envoltorio, con recorrido cero por
+ *     construcción; y el `sticky` de la secuencia directamente **no se monta**,
+ *     porque la rama apilada no lo tiene.
+ *   · **A 1025, 1440 y 1920 hay 4**, y los dos pines de verdad recorren
+ *     2.160 px cada uno a 1920 (Trabajos entre scrollY 8.642 y 10.800;
+ *     Servicios entre 11.882 y 14.040).
+ *
+ * O sea que las dos secciones más pesadas conservan su ALTO abajo del umbral
+ * —el `min-height` de la tabla— y no su pinneo. Y con `min-h-svh` eso es lo que
+ * se quiere: una sección `siempre` cuyo contenido quieto mida más de una
+ * pantalla clavada abajo de 1025 sería una sección escondida.
+ *
+ * ── ⚠️ ESTE ENVOLTORIO ES INERTE PARA `servicios`, Y HAY QUE SABERLO (B7) ──
+ *
+ * La consecuencia de arriba tiene un caso concreto, medido, y es una **trampa
+ * para cualquier instrumento que mida este elemento**:
+ *
+ * `Servicios.tsx` pone adentro de este envoltorio un `Bloque` con
+ * `style={{ minHeight: ALTO_DECLARADO }}` —el alto de la sección ENTERA— y es su
+ * único hijo. Entonces el envoltorio **mide lo mismo que su padre** y su rango
+ * de pegado es `alto − alto` = **cero, por construcción, en todos los perfiles y
+ * para siempre**. Medido con scroll real en cuatro perfiles: 3240 de 3240 a
+ * 1920, 2700 de 2700 a 1440, 2304 de 2304 a 1025 y 2370,44 de 2370,44 a 1024,
+ * con desplazamiento cero en las 512 paradas del barrido
+ * (`scripts-b7/b-pin.ts` → `docs/rediseno/outputs/b7/b-pin.json`).
+ * **No está roto: nunca tuvo recorrido.** El pin de esa sección es el hijo
+ * `sticky` de su secuencia, que recorre 2.160 px a 1920.
+ *
+ * **Cómo se distingue el que pinea del que no, sin adivinar:** un `sticky` son
+ * DOS elementos —el hijo que se pega y el padre que le da recorrido— y el
+ * recorrido disponible es `alto del padre − alto propio`. Mirar sólo la posición
+ * del hijo devuelve el MISMO cero para el que está roto y para el que nunca tuvo
+ * recorrido; B4-B midió este envoltorio así y publicó «el pin de `servicios` NO
+ * pinea en ningún perfil», con el pin andando. **La cifra que discrimina es el
+ * recorrido disponible, y va siempre al lado del cero.**
+ *
+ * Y la asimetría con el otro modo es exactamente ésta: en `desde-escritorio` el
+ * hijo pegado es ESTE `div` —`escritorio:h-svh`, una pantalla contra las tres de
+ * su sección: 1080 de 3240 a 1920, 2.160 px de recorrido, y ahí pinea de verdad—
+ * mientras que en `siempre` el hijo pegado lo declara la sección. **El
+ * envoltorio no cambia; cambia quién declara el alto adentro.**
+ *
+ * Se deja como está a propósito: el mecanismo del modo `siempre` es correcto
+ * para una sección cuyo contenido pinneado NO declare el alto entero, y sacarlo
+ * sería un cambio de composición sobre el archivo que sirve a las dos secciones
+ * pinneadas. Lo que faltaba no era código: era esta nota.
  */
 
 export interface SeccionProps {

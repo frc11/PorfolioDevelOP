@@ -1,0 +1,141 @@
+{
+  "filas": [
+    {
+      "id": "diferencial-cuerpo-1440",
+      "perfil": "1440",
+      "scrollY": 14800,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .font-cuerpo",
+      "textoGrande": false,
+      "scrollYReal": 14800,
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "cajas": 6,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 22387,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "medianaContraste": 4.65,
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "bajoAA": 7811,
+      "umbralAA": 4.5,
+      "porcientoBajoAA": 34.8908
+    },
+    {
+      "id": "diferencial-titular-1440",
+      "perfil": "1440",
+      "scrollY": 14400,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .text-fluido-titulo-xl",
+      "textoGrande": true,
+      "scrollYReal": 14400,
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "cajas": 1,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 41668,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "medianaContraste": 6.72,
+      "peorContraste": 2.26,
+      "p1Contraste": 3.5,
+      "bajoAA": 140,
+      "umbralAA": 3,
+      "porcientoBajoAA": 0.336
+    },
+    {
+      "id": "diferencial-cuerpo-1920",
+      "perfil": "1920",
+      "scrollY": 17600,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .font-cuerpo",
+      "textoGrande": false,
+      "scrollYReal": 17600,
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "cajas": 6,
+      "caja": {
+        "x": 77.02239990234375,
+        "y": -305,
+        "ancho": 1139.8787231445312,
+        "alto": 1023.8758544921875
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 11402,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "medianaContraste": 5.83,
+      "peorContraste": 1.5,
+      "p1Contraste": 1.88,
+      "bajoAA": 1303,
+      "umbralAA": 4.5,
+      "porcientoBajoAA": 11.4278
+    },
+    {
+      "id": "tu-panel-1920",
+      "perfil": "1920",
+      "scrollY": 15120,
+      "selectorDelTexto": "[data-panel=\"tu-panel\"] .font-cuerpo",
+      "textoGrande": false,
+      "scrollYReal": 15120,
+      "texto": "Tu panel [CAPTURA DEL PANEL] Pantalla principal del panel de",
+      "elementos": 20,
+      "cajas": 20,
+      "caja": {
+        "x": 32,
+        "y": 79,
+        "ancho": 1848.984375,
+        "alto": 2097.90625
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 28074,
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "medianaContraste": 17.6,
+      "peorContraste": 17.6,
+      "p1Contraste": 17.6,
+      "bajoAA": 0,
+      "umbralAA": 4.5,
+      "porcientoBajoAA": 0
+    }
+  ],
+  "temp": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\b7-contraste"
+}

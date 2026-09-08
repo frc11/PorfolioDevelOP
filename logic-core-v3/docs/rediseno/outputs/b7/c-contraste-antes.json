@@ -1,0 +1,1730 @@
+{
+  "filas": [
+    {
+      "id": "diferencial-cuerpo-1440",
+      "perfil": "1440",
+      "scrollY": 14800,
+      "scrollYReal": 14800,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .font-cuerpo",
+      "textoGrande": false,
+      "umbralAA": 4.5,
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "cajas": 6,
+      "caja": {
+        "x": 32,
+        "y": -385,
+        "ancho": 885.03125,
+        "alto": 849.984375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 22387,
+      "medianaContraste": 4.64,
+      "peorContraste": 1,
+      "p1Contraste": 1.03,
+      "bajoAA": 7773,
+      "porcientoBajoAA": 34.721,
+      "porElemento": [
+        {
+          "indice": 0,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "etiqueta-de-seccion",
+            "nivel": "micro",
+            "tamano": "10px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Por qué develOP"
+          },
+          "caja": {
+            "x": 197,
+            "y": -385,
+            "ancho": 91.64,
+            "alto": 12,
+            "derecha": 288.64
+          },
+          "pixelesDeGlifo": 0,
+          "medianaContraste": null,
+          "peorContraste": null,
+          "p1Contraste": null,
+          "bajoAA": 0,
+          "porcientoBajoAA": 0,
+          "franjas": []
+        },
+        {
+          "indice": 1,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "El código que corre tu operación lo escrib"
+          },
+          "caja": {
+            "x": 32,
+            "y": 59.8,
+            "ancho": 445.59,
+            "alto": 66,
+            "derecha": 477.59
+          },
+          "pixelesDeGlifo": 4511,
+          "medianaContraste": 4.71,
+          "peorContraste": 1.95,
+          "p1Contraste": 2.7,
+          "bajoAA": 1141,
+          "porcientoBajoAA": 25.2937,
+          "franjas": [
+            {
+              "x": 32,
+              "pixelesDeGlifo": 591,
+              "medianaContraste": 4.64,
+              "peorContraste": 2.65,
+              "p1Contraste": 2.67,
+              "bajoAA": 96,
+              "porcientoBajoAA": 16.2437
+            },
+            {
+              "x": 72,
+              "pixelesDeGlifo": 513,
+              "medianaContraste": 4.66,
+              "peorContraste": 2.1,
+              "p1Contraste": 2.74,
+              "bajoAA": 136,
+              "porcientoBajoAA": 26.5107
+            },
+            {
+              "x": 112,
+              "pixelesDeGlifo": 361,
+              "medianaContraste": 4.71,
+              "peorContraste": 1.95,
+              "p1Contraste": 2.16,
+              "bajoAA": 97,
+              "porcientoBajoAA": 26.8698
+            },
+            {
+              "x": 152,
+              "pixelesDeGlifo": 342,
+              "medianaContraste": 4.71,
+              "peorContraste": 2.74,
+              "p1Contraste": 2.74,
+              "bajoAA": 109,
+              "porcientoBajoAA": 31.8713
+            },
+            {
+              "x": 192,
+              "pixelesDeGlifo": 361,
+              "medianaContraste": 4.71,
+              "peorContraste": 2.04,
+              "p1Contraste": 2.58,
+              "bajoAA": 74,
+              "porcientoBajoAA": 20.4986
+            },
+            {
+              "x": 232,
+              "pixelesDeGlifo": 363,
+              "medianaContraste": 4.71,
+              "peorContraste": 2.07,
+              "p1Contraste": 2.39,
+              "bajoAA": 110,
+              "porcientoBajoAA": 30.303
+            },
+            {
+              "x": 272,
+              "pixelesDeGlifo": 396,
+              "medianaContraste": 4.73,
+              "peorContraste": 2.82,
+              "p1Contraste": 2.82,
+              "bajoAA": 108,
+              "porcientoBajoAA": 27.2727
+            },
+            {
+              "x": 312,
+              "pixelesDeGlifo": 416,
+              "medianaContraste": 4.73,
+              "peorContraste": 2.83,
+              "p1Contraste": 2.83,
+              "bajoAA": 117,
+              "porcientoBajoAA": 28.125
+            },
+            {
+              "x": 352,
+              "pixelesDeGlifo": 359,
+              "medianaContraste": 4.73,
+              "peorContraste": 2.87,
+              "p1Contraste": 2.92,
+              "bajoAA": 58,
+              "porcientoBajoAA": 16.156
+            },
+            {
+              "x": 392,
+              "pixelesDeGlifo": 477,
+              "medianaContraste": 4.77,
+              "peorContraste": 2.91,
+              "p1Contraste": 2.91,
+              "bajoAA": 118,
+              "porcientoBajoAA": 24.7379
+            },
+            {
+              "x": 432,
+              "pixelesDeGlifo": 306,
+              "medianaContraste": 4.79,
+              "peorContraste": 2.42,
+              "p1Contraste": 2.58,
+              "bajoAA": 103,
+              "porcientoBajoAA": 33.6601
+            },
+            {
+              "x": 472,
+              "pixelesDeGlifo": 21,
+              "medianaContraste": 3.93,
+              "peorContraste": 3.76,
+              "p1Contraste": 3.76,
+              "bajoAA": 15,
+              "porcientoBajoAA": 71.4286
+            }
+          ]
+        },
+        {
+          "indice": 2,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Lo que entregamos no termina en un documen"
+          },
+          "caja": {
+            "x": 32,
+            "y": 188.86,
+            "ancho": 440.7,
+            "alto": 42,
+            "derecha": 472.7
+          },
+          "pixelesDeGlifo": 4027,
+          "medianaContraste": 4.6,
+          "peorContraste": 2.1,
+          "p1Contraste": 2.62,
+          "bajoAA": 1007,
+          "porcientoBajoAA": 25.0062,
+          "franjas": [
+            {
+              "x": 32,
+              "pixelesDeGlifo": 359,
+              "medianaContraste": 4.58,
+              "peorContraste": 2.58,
+              "p1Contraste": 2.58,
+              "bajoAA": 89,
+              "porcientoBajoAA": 24.7911
+            },
+            {
+              "x": 72,
+              "pixelesDeGlifo": 338,
+              "medianaContraste": 4.58,
+              "peorContraste": 2.1,
+              "p1Contraste": 2.27,
+              "bajoAA": 106,
+              "porcientoBajoAA": 31.3609
+            },
+            {
+              "x": 112,
+              "pixelesDeGlifo": 449,
+              "medianaContraste": 4.58,
+              "peorContraste": 2.78,
+              "p1Contraste": 2.78,
+              "bajoAA": 142,
+              "porcientoBajoAA": 31.6258
+            },
+            {
+              "x": 152,
+              "pixelesDeGlifo": 355,
+              "medianaContraste": 4.6,
+              "peorContraste": 2.7,
+              "p1Contraste": 2.7,
+              "bajoAA": 47,
+              "porcientoBajoAA": 13.2394
+            },
+            {
+              "x": 192,
+              "pixelesDeGlifo": 443,
+              "medianaContraste": 4.64,
+              "peorContraste": 2.74,
+              "p1Contraste": 2.74,
+              "bajoAA": 53,
+              "porcientoBajoAA": 11.9639
+            },
+            {
+              "x": 232,
+              "pixelesDeGlifo": 337,
+              "medianaContraste": 4.64,
+              "peorContraste": 2.57,
+              "p1Contraste": 2.78,
+              "bajoAA": 96,
+              "porcientoBajoAA": 28.4866
+            },
+            {
+              "x": 272,
+              "pixelesDeGlifo": 372,
+              "medianaContraste": 4.64,
+              "peorContraste": 2.28,
+              "p1Contraste": 2.78,
+              "bajoAA": 175,
+              "porcientoBajoAA": 47.043
+            },
+            {
+              "x": 312,
+              "pixelesDeGlifo": 370,
+              "medianaContraste": 4.65,
+              "peorContraste": 2.1,
+              "p1Contraste": 2.39,
+              "bajoAA": 141,
+              "porcientoBajoAA": 38.1081
+            },
+            {
+              "x": 352,
+              "pixelesDeGlifo": 400,
+              "medianaContraste": 4.71,
+              "peorContraste": 2.95,
+              "p1Contraste": 2.96,
+              "bajoAA": 89,
+              "porcientoBajoAA": 22.25
+            },
+            {
+              "x": 392,
+              "pixelesDeGlifo": 416,
+              "medianaContraste": 4.71,
+              "peorContraste": 2.78,
+              "p1Contraste": 2.86,
+              "bajoAA": 50,
+              "porcientoBajoAA": 12.0192
+            },
+            {
+              "x": 432,
+              "pixelesDeGlifo": 187,
+              "medianaContraste": 4.72,
+              "peorContraste": 2.91,
+              "p1Contraste": 2.91,
+              "bajoAA": 19,
+              "porcientoBajoAA": 10.1604
+            },
+            {
+              "x": 472,
+              "pixelesDeGlifo": 1,
+              "medianaContraste": 4.72,
+              "peorContraste": 4.72,
+              "p1Contraste": 4.72,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            }
+          ]
+        },
+        {
+          "indice": 3,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Esquina, El Garage y Banú trabajan así hoy"
+          },
+          "caja": {
+            "x": 32,
+            "y": 293.92,
+            "ancho": 397.78,
+            "alto": 42,
+            "derecha": 429.78
+          },
+          "pixelesDeGlifo": 3671,
+          "medianaContraste": 4.46,
+          "peorContraste": 1.91,
+          "p1Contraste": 2.57,
+          "bajoAA": 2335,
+          "porcientoBajoAA": 63.6066,
+          "franjas": [
+            {
+              "x": 32,
+              "pixelesDeGlifo": 444,
+              "medianaContraste": 4.45,
+              "peorContraste": 2.54,
+              "p1Contraste": 2.57,
+              "bajoAA": 421,
+              "porcientoBajoAA": 94.8198
+            },
+            {
+              "x": 72,
+              "pixelesDeGlifo": 364,
+              "medianaContraste": 4.4,
+              "peorContraste": 1.91,
+              "p1Contraste": 2.07,
+              "bajoAA": 364,
+              "porcientoBajoAA": 100
+            },
+            {
+              "x": 112,
+              "pixelesDeGlifo": 417,
+              "medianaContraste": 4.41,
+              "peorContraste": 2.57,
+              "p1Contraste": 2.74,
+              "bajoAA": 417,
+              "porcientoBajoAA": 100
+            },
+            {
+              "x": 152,
+              "pixelesDeGlifo": 426,
+              "medianaContraste": 4.4,
+              "peorContraste": 1.94,
+              "p1Contraste": 2.17,
+              "bajoAA": 422,
+              "porcientoBajoAA": 99.061
+            },
+            {
+              "x": 192,
+              "pixelesDeGlifo": 361,
+              "medianaContraste": 4.46,
+              "peorContraste": 2.66,
+              "p1Contraste": 2.66,
+              "bajoAA": 321,
+              "porcientoBajoAA": 88.9197
+            },
+            {
+              "x": 232,
+              "pixelesDeGlifo": 435,
+              "medianaContraste": 4.52,
+              "peorContraste": 2.06,
+              "p1Contraste": 2.38,
+              "bajoAA": 217,
+              "porcientoBajoAA": 49.8851
+            },
+            {
+              "x": 272,
+              "pixelesDeGlifo": 358,
+              "medianaContraste": 4.52,
+              "peorContraste": 2.74,
+              "p1Contraste": 2.74,
+              "bajoAA": 61,
+              "porcientoBajoAA": 17.0391
+            },
+            {
+              "x": 312,
+              "pixelesDeGlifo": 381,
+              "medianaContraste": 4.53,
+              "peorContraste": 2.75,
+              "p1Contraste": 2.75,
+              "bajoAA": 53,
+              "porcientoBajoAA": 13.9108
+            },
+            {
+              "x": 352,
+              "pixelesDeGlifo": 266,
+              "medianaContraste": 4.58,
+              "peorContraste": 2.91,
+              "p1Contraste": 2.91,
+              "bajoAA": 34,
+              "porcientoBajoAA": 12.782
+            },
+            {
+              "x": 392,
+              "pixelesDeGlifo": 219,
+              "medianaContraste": 4.64,
+              "peorContraste": 2.82,
+              "p1Contraste": 2.99,
+              "bajoAA": 25,
+              "porcientoBajoAA": 11.4155
+            }
+          ]
+        },
+        {
+          "indice": 4,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "[MÉTRICA] más rápido que el camino tradici"
+          },
+          "caja": {
+            "x": 32,
+            "y": 398.98,
+            "ancho": 439.59,
+            "alto": 66,
+            "derecha": 471.59
+          },
+          "pixelesDeGlifo": 4568,
+          "medianaContraste": 7.22,
+          "peorContraste": 3.81,
+          "p1Contraste": 4.27,
+          "bajoAA": 118,
+          "porcientoBajoAA": 2.5832,
+          "franjas": [
+            {
+              "x": 32,
+              "pixelesDeGlifo": 675,
+              "medianaContraste": 8.62,
+              "peorContraste": 4.03,
+              "p1Contraste": 4.27,
+              "bajoAA": 34,
+              "porcientoBajoAA": 5.037
+            },
+            {
+              "x": 72,
+              "pixelesDeGlifo": 493,
+              "medianaContraste": 8.4,
+              "peorContraste": 3.81,
+              "p1Contraste": 3.99,
+              "bajoAA": 20,
+              "porcientoBajoAA": 4.0568
+            },
+            {
+              "x": 112,
+              "pixelesDeGlifo": 376,
+              "medianaContraste": 6.54,
+              "peorContraste": 4.46,
+              "p1Contraste": 4.58,
+              "bajoAA": 1,
+              "porcientoBajoAA": 0.266
+            },
+            {
+              "x": 152,
+              "pixelesDeGlifo": 445,
+              "medianaContraste": 6.95,
+              "peorContraste": 3.97,
+              "p1Contraste": 4.27,
+              "bajoAA": 11,
+              "porcientoBajoAA": 2.4719
+            },
+            {
+              "x": 192,
+              "pixelesDeGlifo": 382,
+              "medianaContraste": 6.62,
+              "peorContraste": 3.93,
+              "p1Contraste": 4.03,
+              "bajoAA": 12,
+              "porcientoBajoAA": 3.1414
+            },
+            {
+              "x": 232,
+              "pixelesDeGlifo": 399,
+              "medianaContraste": 7.68,
+              "peorContraste": 4.41,
+              "p1Contraste": 4.6,
+              "bajoAA": 1,
+              "porcientoBajoAA": 0.2506
+            },
+            {
+              "x": 272,
+              "pixelesDeGlifo": 367,
+              "medianaContraste": 7.22,
+              "peorContraste": 3.99,
+              "p1Contraste": 4.11,
+              "bajoAA": 8,
+              "porcientoBajoAA": 2.1798
+            },
+            {
+              "x": 312,
+              "pixelesDeGlifo": 425,
+              "medianaContraste": 7.05,
+              "peorContraste": 4.09,
+              "p1Contraste": 4.35,
+              "bajoAA": 9,
+              "porcientoBajoAA": 2.1176
+            },
+            {
+              "x": 352,
+              "pixelesDeGlifo": 365,
+              "medianaContraste": 6.55,
+              "peorContraste": 4.21,
+              "p1Contraste": 4.41,
+              "bajoAA": 6,
+              "porcientoBajoAA": 1.6438
+            },
+            {
+              "x": 392,
+              "pixelesDeGlifo": 355,
+              "medianaContraste": 6.4,
+              "peorContraste": 4.04,
+              "p1Contraste": 4.33,
+              "bajoAA": 11,
+              "porcientoBajoAA": 3.0986
+            },
+            {
+              "x": 432,
+              "pixelesDeGlifo": 286,
+              "medianaContraste": 6.31,
+              "peorContraste": 4.45,
+              "p1Contraste": 4.47,
+              "bajoAA": 5,
+              "porcientoBajoAA": 1.7483
+            }
+          ]
+        },
+        {
+          "indice": 5,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Dos o tres oraciones de quien abre el pane"
+          },
+          "caja": {
+            "x": 513,
+            "y": 363.81,
+            "ancho": 404.03,
+            "alto": 66,
+            "derecha": 917.03
+          },
+          "pixelesDeGlifo": 5610,
+          "medianaContraste": 4.34,
+          "peorContraste": 1,
+          "p1Contraste": 1,
+          "bajoAA": 3172,
+          "porcientoBajoAA": 56.5419,
+          "franjas": [
+            {
+              "x": 513,
+              "pixelesDeGlifo": 610,
+              "medianaContraste": 5.25,
+              "peorContraste": 1.01,
+              "p1Contraste": 1.16,
+              "bajoAA": 224,
+              "porcientoBajoAA": 36.7213
+            },
+            {
+              "x": 553,
+              "pixelesDeGlifo": 568,
+              "medianaContraste": 1.1,
+              "peorContraste": 1,
+              "p1Contraste": 1,
+              "bajoAA": 561,
+              "porcientoBajoAA": 98.7676
+            },
+            {
+              "x": 593,
+              "pixelesDeGlifo": 497,
+              "medianaContraste": 4.96,
+              "peorContraste": 1,
+              "p1Contraste": 1.06,
+              "bajoAA": 228,
+              "porcientoBajoAA": 45.8753
+            },
+            {
+              "x": 633,
+              "pixelesDeGlifo": 578,
+              "medianaContraste": 5.12,
+              "peorContraste": 1.11,
+              "p1Contraste": 2.81,
+              "bajoAA": 204,
+              "porcientoBajoAA": 35.2941
+            },
+            {
+              "x": 673,
+              "pixelesDeGlifo": 577,
+              "medianaContraste": 4.9,
+              "peorContraste": 1,
+              "p1Contraste": 1.01,
+              "bajoAA": 263,
+              "porcientoBajoAA": 45.5806
+            },
+            {
+              "x": 713,
+              "pixelesDeGlifo": 573,
+              "medianaContraste": 1.97,
+              "peorContraste": 1,
+              "p1Contraste": 1,
+              "bajoAA": 540,
+              "porcientoBajoAA": 94.2408
+            },
+            {
+              "x": 753,
+              "pixelesDeGlifo": 549,
+              "medianaContraste": 4.83,
+              "peorContraste": 1,
+              "p1Contraste": 1,
+              "bajoAA": 261,
+              "porcientoBajoAA": 47.541
+            },
+            {
+              "x": 793,
+              "pixelesDeGlifo": 638,
+              "medianaContraste": 4.99,
+              "peorContraste": 1.07,
+              "p1Contraste": 2.66,
+              "bajoAA": 227,
+              "porcientoBajoAA": 35.5799
+            },
+            {
+              "x": 833,
+              "pixelesDeGlifo": 602,
+              "medianaContraste": 4.85,
+              "peorContraste": 1,
+              "p1Contraste": 1.01,
+              "bajoAA": 247,
+              "porcientoBajoAA": 41.0299
+            },
+            {
+              "x": 873,
+              "pixelesDeGlifo": 406,
+              "medianaContraste": 1.1,
+              "peorContraste": 1,
+              "p1Contraste": 1,
+              "bajoAA": 405,
+              "porcientoBajoAA": 99.7537
+            },
+            {
+              "x": 913,
+              "pixelesDeGlifo": 12,
+              "medianaContraste": 4.22,
+              "peorContraste": 2.87,
+              "p1Contraste": 2.87,
+              "bajoAA": 12,
+              "porcientoBajoAA": 100
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diferencial-titular-1440",
+      "perfil": "1440",
+      "scrollY": 14400,
+      "scrollYReal": 14400,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .text-fluido-titulo-xl",
+      "textoGrande": true,
+      "umbralAA": 3,
+      "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistem",
+      "elementos": 1,
+      "cajas": 1,
+      "caja": {
+        "x": 32,
+        "y": 72.5,
+        "ancho": 884.640625,
+        "alto": 250.09375
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 41668,
+      "medianaContraste": 6.72,
+      "peorContraste": 2.26,
+      "p1Contraste": 3.5,
+      "bajoAA": 144,
+      "porcientoBajoAA": 0.3456,
+      "porElemento": [
+        {
+          "indice": 0,
+          "rotulo": {
+            "etiqueta": "h2",
+            "pieza": "titular",
+            "nivel": "titulo-xl",
+            "tamano": "56.0002px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Cualquiera te entrega una web. Nosotros en"
+          },
+          "caja": {
+            "x": 32,
+            "y": 72.5,
+            "ancho": 884.64,
+            "alto": 250.09,
+            "derecha": 916.64
+          },
+          "pixelesDeGlifo": 41668,
+          "medianaContraste": 6.72,
+          "peorContraste": 2.26,
+          "p1Contraste": 3.5,
+          "bajoAA": 144,
+          "porcientoBajoAA": 0.3456,
+          "franjas": [
+            {
+              "x": 32,
+              "pixelesDeGlifo": 2682,
+              "medianaContraste": 6.63,
+              "peorContraste": 3.44,
+              "p1Contraste": 3.45,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 72,
+              "pixelesDeGlifo": 2227,
+              "medianaContraste": 6.69,
+              "peorContraste": 3.45,
+              "p1Contraste": 3.51,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 112,
+              "pixelesDeGlifo": 2336,
+              "medianaContraste": 6.63,
+              "peorContraste": 2.39,
+              "p1Contraste": 3.49,
+              "bajoAA": 11,
+              "porcientoBajoAA": 0.4709
+            },
+            {
+              "x": 152,
+              "pixelesDeGlifo": 2517,
+              "medianaContraste": 6.71,
+              "peorContraste": 3.51,
+              "p1Contraste": 3.55,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 192,
+              "pixelesDeGlifo": 2350,
+              "medianaContraste": 6.71,
+              "peorContraste": 3.55,
+              "p1Contraste": 3.61,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 232,
+              "pixelesDeGlifo": 1918,
+              "medianaContraste": 6.78,
+              "peorContraste": 3.61,
+              "p1Contraste": 3.66,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 272,
+              "pixelesDeGlifo": 1723,
+              "medianaContraste": 6.78,
+              "peorContraste": 3.25,
+              "p1Contraste": 3.93,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 312,
+              "pixelesDeGlifo": 1636,
+              "medianaContraste": 6.78,
+              "peorContraste": 2.66,
+              "p1Contraste": 3.75,
+              "bajoAA": 3,
+              "porcientoBajoAA": 0.1834
+            },
+            {
+              "x": 352,
+              "pixelesDeGlifo": 1407,
+              "medianaContraste": 6.78,
+              "peorContraste": 3.35,
+              "p1Contraste": 3.77,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 392,
+              "pixelesDeGlifo": 2044,
+              "medianaContraste": 6.79,
+              "peorContraste": 2.66,
+              "p1Contraste": 3.29,
+              "bajoAA": 14,
+              "porcientoBajoAA": 0.6849
+            },
+            {
+              "x": 432,
+              "pixelesDeGlifo": 2105,
+              "medianaContraste": 6.8,
+              "peorContraste": 2.77,
+              "p1Contraste": 3.64,
+              "bajoAA": 3,
+              "porcientoBajoAA": 0.1425
+            },
+            {
+              "x": 472,
+              "pixelesDeGlifo": 1800,
+              "medianaContraste": 6.79,
+              "peorContraste": 2.7,
+              "p1Contraste": 3.77,
+              "bajoAA": 7,
+              "porcientoBajoAA": 0.3889
+            },
+            {
+              "x": 512,
+              "pixelesDeGlifo": 2164,
+              "medianaContraste": 6.79,
+              "peorContraste": 2.7,
+              "p1Contraste": 3.71,
+              "bajoAA": 6,
+              "porcientoBajoAA": 0.2773
+            },
+            {
+              "x": 552,
+              "pixelesDeGlifo": 1705,
+              "medianaContraste": 6.87,
+              "peorContraste": 2.69,
+              "p1Contraste": 3.82,
+              "bajoAA": 4,
+              "porcientoBajoAA": 0.2346
+            },
+            {
+              "x": 592,
+              "pixelesDeGlifo": 1874,
+              "medianaContraste": 6.79,
+              "peorContraste": 2.33,
+              "p1Contraste": 3.8,
+              "bajoAA": 10,
+              "porcientoBajoAA": 0.5336
+            },
+            {
+              "x": 632,
+              "pixelesDeGlifo": 1866,
+              "medianaContraste": 6.71,
+              "peorContraste": 2.45,
+              "p1Contraste": 3.48,
+              "bajoAA": 6,
+              "porcientoBajoAA": 0.3215
+            },
+            {
+              "x": 672,
+              "pixelesDeGlifo": 1841,
+              "medianaContraste": 6.7,
+              "peorContraste": 2.33,
+              "p1Contraste": 3.18,
+              "bajoAA": 13,
+              "porcientoBajoAA": 0.7061
+            },
+            {
+              "x": 712,
+              "pixelesDeGlifo": 2070,
+              "medianaContraste": 6.7,
+              "peorContraste": 3.48,
+              "p1Contraste": 3.82,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 752,
+              "pixelesDeGlifo": 2029,
+              "medianaContraste": 6.62,
+              "peorContraste": 2.26,
+              "p1Contraste": 2.82,
+              "bajoAA": 36,
+              "porcientoBajoAA": 1.7743
+            },
+            {
+              "x": 792,
+              "pixelesDeGlifo": 1553,
+              "medianaContraste": 6.54,
+              "peorContraste": 2.3,
+              "p1Contraste": 2.56,
+              "bajoAA": 25,
+              "porcientoBajoAA": 1.6098
+            },
+            {
+              "x": 832,
+              "pixelesDeGlifo": 904,
+              "medianaContraste": 6.46,
+              "peorContraste": 2.63,
+              "p1Contraste": 3.39,
+              "bajoAA": 6,
+              "porcientoBajoAA": 0.6637
+            },
+            {
+              "x": 872,
+              "pixelesDeGlifo": 849,
+              "medianaContraste": 6.38,
+              "peorContraste": 3.28,
+              "p1Contraste": 3.66,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 912,
+              "pixelesDeGlifo": 68,
+              "medianaContraste": 6.37,
+              "peorContraste": 3.28,
+              "p1Contraste": 3.28,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "diferencial-cuerpo-1920",
+      "perfil": "1920",
+      "scrollY": 17600,
+      "scrollYReal": 17600,
+      "selectorDelTexto": "[data-panel=\"por-que-develop\"] .font-cuerpo",
+      "textoGrande": false,
+      "umbralAA": 4.5,
+      "texto": "Por qué develOP El código que corre tu operación lo escribim",
+      "elementos": 6,
+      "cajas": 6,
+      "caja": {
+        "x": 77.02239990234375,
+        "y": -305,
+        "ancho": 1139.8787231445312,
+        "alto": 1023.8758544921875
+      },
+      "tinta": [
+        17,
+        17,
+        17
+      ],
+      "pixelesDeGlifo": 11402,
+      "medianaContraste": 5.83,
+      "peorContraste": 1.5,
+      "p1Contraste": 1.88,
+      "bajoAA": 1283,
+      "porcientoBajoAA": 11.2524,
+      "porElemento": [
+        {
+          "indice": 0,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "etiqueta-de-seccion",
+            "nivel": "micro",
+            "tamano": "10px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Por qué develOP"
+          },
+          "caja": {
+            "x": 197,
+            "y": -305,
+            "ancho": 91.64,
+            "alto": 12,
+            "derecha": 288.64
+          },
+          "pixelesDeGlifo": 0,
+          "medianaContraste": null,
+          "peorContraste": null,
+          "p1Contraste": null,
+          "bajoAA": 0,
+          "porcientoBajoAA": 0,
+          "franjas": []
+        },
+        {
+          "indice": 1,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "El código que corre tu operación lo escrib"
+          },
+          "caja": {
+            "x": 77.02,
+            "y": 231.41,
+            "ancho": 500.61,
+            "alto": 35.78,
+            "derecha": 577.63
+          },
+          "pixelesDeGlifo": 2355,
+          "medianaContraste": 5.32,
+          "peorContraste": 2.47,
+          "p1Contraste": 2.96,
+          "bajoAA": 432,
+          "porcientoBajoAA": 18.3439,
+          "franjas": [
+            {
+              "x": 77.02,
+              "pixelesDeGlifo": 264,
+              "medianaContraste": 5.32,
+              "peorContraste": 2.88,
+              "p1Contraste": 2.88,
+              "bajoAA": 42,
+              "porcientoBajoAA": 15.9091
+            },
+            {
+              "x": 117.02,
+              "pixelesDeGlifo": 239,
+              "medianaContraste": 5.32,
+              "peorContraste": 2.92,
+              "p1Contraste": 2.92,
+              "bajoAA": 25,
+              "porcientoBajoAA": 10.4603
+            },
+            {
+              "x": 157.02,
+              "pixelesDeGlifo": 224,
+              "medianaContraste": 5.32,
+              "peorContraste": 3.11,
+              "p1Contraste": 3.3,
+              "bajoAA": 7,
+              "porcientoBajoAA": 3.125
+            },
+            {
+              "x": 197.02,
+              "pixelesDeGlifo": 243,
+              "medianaContraste": 5.32,
+              "peorContraste": 3.11,
+              "p1Contraste": 3.11,
+              "bajoAA": 86,
+              "porcientoBajoAA": 35.3909
+            },
+            {
+              "x": 237.02,
+              "pixelesDeGlifo": 248,
+              "medianaContraste": 5.34,
+              "peorContraste": 3.15,
+              "p1Contraste": 3.16,
+              "bajoAA": 32,
+              "porcientoBajoAA": 12.9032
+            },
+            {
+              "x": 277.02,
+              "pixelesDeGlifo": 231,
+              "medianaContraste": 5.34,
+              "peorContraste": 3.05,
+              "p1Contraste": 3.1,
+              "bajoAA": 21,
+              "porcientoBajoAA": 9.0909
+            },
+            {
+              "x": 317.02,
+              "pixelesDeGlifo": 235,
+              "medianaContraste": 5.39,
+              "peorContraste": 2.47,
+              "p1Contraste": 3,
+              "bajoAA": 18,
+              "porcientoBajoAA": 7.6596
+            },
+            {
+              "x": 357.02,
+              "pixelesDeGlifo": 186,
+              "medianaContraste": 5.39,
+              "peorContraste": 3.24,
+              "p1Contraste": 3.24,
+              "bajoAA": 50,
+              "porcientoBajoAA": 26.8817
+            },
+            {
+              "x": 397.02,
+              "pixelesDeGlifo": 129,
+              "medianaContraste": 5.32,
+              "peorContraste": 3.14,
+              "p1Contraste": 3.14,
+              "bajoAA": 55,
+              "porcientoBajoAA": 42.6357
+            },
+            {
+              "x": 437.02,
+              "pixelesDeGlifo": 121,
+              "medianaContraste": 4.22,
+              "peorContraste": 3.15,
+              "p1Contraste": 3.15,
+              "bajoAA": 67,
+              "porcientoBajoAA": 55.3719
+            },
+            {
+              "x": 477.02,
+              "pixelesDeGlifo": 105,
+              "medianaContraste": 5.48,
+              "peorContraste": 3.19,
+              "p1Contraste": 3.19,
+              "bajoAA": 22,
+              "porcientoBajoAA": 20.9524
+            },
+            {
+              "x": 517.02,
+              "pixelesDeGlifo": 128,
+              "medianaContraste": 5.54,
+              "peorContraste": 3.4,
+              "p1Contraste": 3.4,
+              "bajoAA": 16,
+              "porcientoBajoAA": 12.5
+            },
+            {
+              "x": 557.02,
+              "pixelesDeGlifo": 54,
+              "medianaContraste": 5.54,
+              "peorContraste": 5.19,
+              "p1Contraste": 5.19,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            }
+          ]
+        },
+        {
+          "indice": 2,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Lo que entregamos no termina en un documen"
+          },
+          "caja": {
+            "x": 77.02,
+            "y": 381.97,
+            "ancho": 510.14,
+            "alto": 35.78,
+            "derecha": 587.16
+          },
+          "pixelesDeGlifo": 2057,
+          "medianaContraste": 5.25,
+          "peorContraste": 2.14,
+          "p1Contraste": 2.96,
+          "bajoAA": 403,
+          "porcientoBajoAA": 19.5916,
+          "franjas": [
+            {
+              "x": 77.02,
+              "pixelesDeGlifo": 246,
+              "medianaContraste": 5.47,
+              "peorContraste": 3.01,
+              "p1Contraste": 3.01,
+              "bajoAA": 29,
+              "porcientoBajoAA": 11.7886
+            },
+            {
+              "x": 117.02,
+              "pixelesDeGlifo": 241,
+              "medianaContraste": 5.39,
+              "peorContraste": 2.96,
+              "p1Contraste": 3.05,
+              "bajoAA": 67,
+              "porcientoBajoAA": 27.8008
+            },
+            {
+              "x": 157.02,
+              "pixelesDeGlifo": 247,
+              "medianaContraste": 5.27,
+              "peorContraste": 3.1,
+              "p1Contraste": 3.1,
+              "bajoAA": 82,
+              "porcientoBajoAA": 33.1984
+            },
+            {
+              "x": 197.02,
+              "pixelesDeGlifo": 226,
+              "medianaContraste": 5.14,
+              "peorContraste": 2.14,
+              "p1Contraste": 2.31,
+              "bajoAA": 93,
+              "porcientoBajoAA": 41.1504
+            },
+            {
+              "x": 237.02,
+              "pixelesDeGlifo": 233,
+              "medianaContraste": 5.14,
+              "peorContraste": 3.44,
+              "p1Contraste": 3.56,
+              "bajoAA": 11,
+              "porcientoBajoAA": 4.721
+            },
+            {
+              "x": 277.02,
+              "pixelesDeGlifo": 133,
+              "medianaContraste": 5.19,
+              "peorContraste": 2.96,
+              "p1Contraste": 2.96,
+              "bajoAA": 25,
+              "porcientoBajoAA": 18.797
+            },
+            {
+              "x": 317.02,
+              "pixelesDeGlifo": 125,
+              "medianaContraste": 5.25,
+              "peorContraste": 3.15,
+              "p1Contraste": 3.19,
+              "bajoAA": 22,
+              "porcientoBajoAA": 17.6
+            },
+            {
+              "x": 357.02,
+              "pixelesDeGlifo": 111,
+              "medianaContraste": 5.27,
+              "peorContraste": 3.2,
+              "p1Contraste": 3.24,
+              "bajoAA": 12,
+              "porcientoBajoAA": 10.8108
+            },
+            {
+              "x": 397.02,
+              "pixelesDeGlifo": 119,
+              "medianaContraste": 5.32,
+              "peorContraste": 3.05,
+              "p1Contraste": 3.05,
+              "bajoAA": 17,
+              "porcientoBajoAA": 14.2857
+            },
+            {
+              "x": 437.02,
+              "pixelesDeGlifo": 105,
+              "medianaContraste": 5.33,
+              "peorContraste": 5.32,
+              "p1Contraste": 5.32,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 477.02,
+              "pixelesDeGlifo": 93,
+              "medianaContraste": 5.33,
+              "peorContraste": 3.11,
+              "p1Contraste": 3.11,
+              "bajoAA": 16,
+              "porcientoBajoAA": 17.2043
+            },
+            {
+              "x": 517.02,
+              "pixelesDeGlifo": 133,
+              "medianaContraste": 5.33,
+              "peorContraste": 3.09,
+              "p1Contraste": 3.3,
+              "bajoAA": 21,
+              "porcientoBajoAA": 15.7895
+            },
+            {
+              "x": 557.02,
+              "pixelesDeGlifo": 90,
+              "medianaContraste": 5.33,
+              "peorContraste": 2.86,
+              "p1Contraste": 2.86,
+              "bajoAA": 19,
+              "porcientoBajoAA": 21.1111
+            }
+          ]
+        },
+        {
+          "indice": 3,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Esquina, El Garage y Banú trabajan así hoy"
+          },
+          "caja": {
+            "x": 77.02,
+            "y": 532.53,
+            "ancho": 508,
+            "alto": 35.78,
+            "derecha": 585.02
+          },
+          "pixelesDeGlifo": 1847,
+          "medianaContraste": 5.78,
+          "peorContraste": 2.95,
+          "p1Contraste": 3.7,
+          "bajoAA": 100,
+          "porcientoBajoAA": 5.4142,
+          "franjas": [
+            {
+              "x": 77.02,
+              "pixelesDeGlifo": 224,
+              "medianaContraste": 6.37,
+              "peorContraste": 4.79,
+              "p1Contraste": 4.99,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 117.02,
+              "pixelesDeGlifo": 243,
+              "medianaContraste": 6.23,
+              "peorContraste": 3.6,
+              "p1Contraste": 3.78,
+              "bajoAA": 21,
+              "porcientoBajoAA": 8.642
+            },
+            {
+              "x": 157.02,
+              "pixelesDeGlifo": 233,
+              "medianaContraste": 6.21,
+              "peorContraste": 4.77,
+              "p1Contraste": 4.89,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 197.02,
+              "pixelesDeGlifo": 112,
+              "medianaContraste": 6,
+              "peorContraste": 4.11,
+              "p1Contraste": 4.16,
+              "bajoAA": 9,
+              "porcientoBajoAA": 8.0357
+            },
+            {
+              "x": 237.02,
+              "pixelesDeGlifo": 132,
+              "medianaContraste": 5.99,
+              "peorContraste": 3.76,
+              "p1Contraste": 3.76,
+              "bajoAA": 16,
+              "porcientoBajoAA": 12.1212
+            },
+            {
+              "x": 277.02,
+              "pixelesDeGlifo": 116,
+              "medianaContraste": 5.84,
+              "peorContraste": 4.04,
+              "p1Contraste": 5.83,
+              "bajoAA": 1,
+              "porcientoBajoAA": 0.8621
+            },
+            {
+              "x": 317.02,
+              "pixelesDeGlifo": 128,
+              "medianaContraste": 5.76,
+              "peorContraste": 3.7,
+              "p1Contraste": 3.7,
+              "bajoAA": 13,
+              "porcientoBajoAA": 10.1563
+            },
+            {
+              "x": 357.02,
+              "pixelesDeGlifo": 150,
+              "medianaContraste": 5.63,
+              "peorContraste": 4.71,
+              "p1Contraste": 4.72,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 397.02,
+              "pixelesDeGlifo": 137,
+              "medianaContraste": 5.55,
+              "peorContraste": 3.6,
+              "p1Contraste": 3.61,
+              "bajoAA": 7,
+              "porcientoBajoAA": 5.1095
+            },
+            {
+              "x": 437.02,
+              "pixelesDeGlifo": 117,
+              "medianaContraste": 5.47,
+              "peorContraste": 5.39,
+              "p1Contraste": 5.4,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 477.02,
+              "pixelesDeGlifo": 109,
+              "medianaContraste": 5.39,
+              "peorContraste": 3.59,
+              "p1Contraste": 3.7,
+              "bajoAA": 8,
+              "porcientoBajoAA": 7.3394
+            },
+            {
+              "x": 517.02,
+              "pixelesDeGlifo": 120,
+              "medianaContraste": 5.32,
+              "peorContraste": 3.28,
+              "p1Contraste": 3.38,
+              "bajoAA": 17,
+              "porcientoBajoAA": 14.1667
+            },
+            {
+              "x": 557.02,
+              "pixelesDeGlifo": 72,
+              "medianaContraste": 5.32,
+              "peorContraste": 2.95,
+              "p1Contraste": 2.95,
+              "bajoAA": 11,
+              "porcientoBajoAA": 15.2778
+            }
+          ]
+        },
+        {
+          "indice": 4,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "[MÉTRICA] más rápido que el camino tradici"
+          },
+          "caja": {
+            "x": 77.02,
+            "y": 683.1,
+            "ancho": 513.15,
+            "alto": 35.78,
+            "derecha": 590.17
+          },
+          "pixelesDeGlifo": 2324,
+          "medianaContraste": 11.74,
+          "peorContraste": 10.36,
+          "p1Contraste": 11.15,
+          "bajoAA": 0,
+          "porcientoBajoAA": 0,
+          "franjas": [
+            {
+              "x": 77.02,
+              "pixelesDeGlifo": 274,
+              "medianaContraste": 11.99,
+              "peorContraste": 11.15,
+              "p1Contraste": 11.17,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 117.02,
+              "pixelesDeGlifo": 252,
+              "medianaContraste": 12.84,
+              "peorContraste": 11.15,
+              "p1Contraste": 11.15,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 157.02,
+              "pixelesDeGlifo": 242,
+              "medianaContraste": 11.9,
+              "peorContraste": 11.27,
+              "p1Contraste": 11.4,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 197.02,
+              "pixelesDeGlifo": 230,
+              "medianaContraste": 11.86,
+              "peorContraste": 11.27,
+              "p1Contraste": 11.39,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 237.02,
+              "pixelesDeGlifo": 227,
+              "medianaContraste": 11.86,
+              "peorContraste": 11.16,
+              "p1Contraste": 11.19,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 277.02,
+              "pixelesDeGlifo": 232,
+              "medianaContraste": 11.86,
+              "peorContraste": 11.15,
+              "p1Contraste": 11.19,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 317.02,
+              "pixelesDeGlifo": 193,
+              "medianaContraste": 11.77,
+              "peorContraste": 11.15,
+              "p1Contraste": 11.15,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 357.02,
+              "pixelesDeGlifo": 125,
+              "medianaContraste": 11.5,
+              "peorContraste": 11.04,
+              "p1Contraste": 11.04,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 397.02,
+              "pixelesDeGlifo": 127,
+              "medianaContraste": 11.5,
+              "peorContraste": 11.04,
+              "p1Contraste": 11.04,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 437.02,
+              "pixelesDeGlifo": 122,
+              "medianaContraste": 11.5,
+              "peorContraste": 11.04,
+              "p1Contraste": 11.04,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 477.02,
+              "pixelesDeGlifo": 119,
+              "medianaContraste": 11.5,
+              "peorContraste": 11.15,
+              "p1Contraste": 11.15,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 517.02,
+              "pixelesDeGlifo": 123,
+              "medianaContraste": 11.42,
+              "peorContraste": 10.92,
+              "p1Contraste": 10.92,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 557.02,
+              "pixelesDeGlifo": 113,
+              "medianaContraste": 11.41,
+              "peorContraste": 10.36,
+              "p1Contraste": 10.47,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            }
+          ]
+        },
+        {
+          "indice": 5,
+          "rotulo": {
+            "etiqueta": "p",
+            "pieza": "texto",
+            "nivel": "cuerpo",
+            "tamano": "15px",
+            "color": "rgb(17, 17, 17)",
+            "texto": "Dos o tres oraciones de quien abre el pane"
+          },
+          "caja": {
+            "x": 715.5,
+            "y": 649.94,
+            "ancho": 501.4,
+            "alto": 35.78,
+            "derecha": 1216.9
+          },
+          "pixelesDeGlifo": 2819,
+          "medianaContraste": 8.42,
+          "peorContraste": 1.5,
+          "p1Contraste": 1.64,
+          "bajoAA": 348,
+          "porcientoBajoAA": 12.3448,
+          "franjas": [
+            {
+              "x": 715.5,
+              "pixelesDeGlifo": 227,
+              "medianaContraste": 8.71,
+              "peorContraste": 4.51,
+              "p1Contraste": 4.51,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 755.5,
+              "pixelesDeGlifo": 215,
+              "medianaContraste": 9.84,
+              "peorContraste": 8.12,
+              "p1Contraste": 8.12,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 795.5,
+              "pixelesDeGlifo": 249,
+              "medianaContraste": 9.71,
+              "peorContraste": 7.77,
+              "p1Contraste": 7.86,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 835.5,
+              "pixelesDeGlifo": 212,
+              "medianaContraste": 8.5,
+              "peorContraste": 7.84,
+              "p1Contraste": 7.95,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 875.5,
+              "pixelesDeGlifo": 233,
+              "medianaContraste": 8.42,
+              "peorContraste": 5.98,
+              "p1Contraste": 6.05,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 915.5,
+              "pixelesDeGlifo": 252,
+              "medianaContraste": 8.39,
+              "peorContraste": 5.9,
+              "p1Contraste": 5.97,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 955.5,
+              "pixelesDeGlifo": 224,
+              "medianaContraste": 8.68,
+              "peorContraste": 4.7,
+              "p1Contraste": 4.76,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 995.5,
+              "pixelesDeGlifo": 228,
+              "medianaContraste": 7.5,
+              "peorContraste": 1.64,
+              "p1Contraste": 1.64,
+              "bajoAA": 111,
+              "porcientoBajoAA": 48.6842
+            },
+            {
+              "x": 1035.5,
+              "pixelesDeGlifo": 226,
+              "medianaContraste": 1.94,
+              "peorContraste": 1.5,
+              "p1Contraste": 1.54,
+              "bajoAA": 226,
+              "porcientoBajoAA": 100
+            },
+            {
+              "x": 1075.5,
+              "pixelesDeGlifo": 224,
+              "medianaContraste": 8.3,
+              "peorContraste": 1.64,
+              "p1Contraste": 1.69,
+              "bajoAA": 24,
+              "porcientoBajoAA": 10.7143
+            },
+            {
+              "x": 1115.5,
+              "pixelesDeGlifo": 233,
+              "medianaContraste": 8.13,
+              "peorContraste": 7.14,
+              "p1Contraste": 7.38,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 1155.5,
+              "pixelesDeGlifo": 240,
+              "medianaContraste": 9.22,
+              "peorContraste": 4.96,
+              "p1Contraste": 6.76,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            },
+            {
+              "x": 1195.5,
+              "pixelesDeGlifo": 121,
+              "medianaContraste": 7.91,
+              "peorContraste": 7.14,
+              "p1Contraste": 7.2,
+              "bajoAA": 0,
+              "porcientoBajoAA": 0
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "temp": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\b7-c-contraste"
+}

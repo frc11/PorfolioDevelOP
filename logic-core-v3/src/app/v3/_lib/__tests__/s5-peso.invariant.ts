@@ -77,93 +77,15 @@ afirmar(heredados.length > 0, 'y el heredado se pudo medir: la partición no est
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · EL PRESUPUESTO PROPIO, con la cuenta a la vista')
 
-/**
- * No es un número elegido: es la suma de dos medidos, y la cuenta cambió con la
- * compuerta.
- *
- *   · S1 fijó **30 KiB** para lo propio de `/v3` cuando era el esqueleto.
- *   · Las ocho secciones, con su árbol quieto, agregan lo que agregan — y **ya
- *     no agregan los 28,2 KiB del sistema de motion**, que era la mitad del
- *     presupuesto viejo de este lane: ese chunk ahora entra por la compuerta.
- *
- * 60 KiB es el mismo techo que este invariante tenía, y ahora cubre OCHO
- * secciones en vez de cuatro **porque lo que salió del bundle hizo lugar**.
- * Está escrito acá con la cuenta a la vista para que se pueda discutir el
- * número y no la intención.
- *
- * ═══ B4-A · DE DÓNDE SALÍAN LOS 1,3 KiB QUE B2 REPORTÓ ════════════════════
- *
- * B2 midió **61,3 KiB contra 60** y no lo aflojó: lo dejó anotado como lo único
- * que impedía que `verificar` cerrara en cero. Buscada la causa antes de tocar
- * el número, **son 1,36 KiB de preámbulo de Sentry**, y no hay que estimarlo:
- * `@sentry/nextjs` le inyecta a **cada chunk del build** un bloque idéntico de
- * **348 bytes** que registra un `_sentryDebugId`. Cuatro chunks propios × 348 B
- * = 1.392 B = **1,36 KiB**, que es exactamente el desvío que B2 publicó.
- *
- * ── Por qué esto NO es aflojar el techo (regla 13) ────────────────────────
- *
- * Porque **no es peso del lane y el lane no lo puede tocar**: lo inyecta la
- * integración de Sentry declarada en la configuración RAÍZ, que estos sprints
- * tienen prohibida —la misma razón por la que 21 chunks heredados traen otros
- * 5,10 KiB del mismo preámbulo—. Un techo que lo cuenta pone al lane a fallar
- * por bytes que no escribió, que es exactamente lo que la regla 13 nació para
- * no hacer (`s3-peso`, 24 archivos del layout raíz).
- *
- * **El techo NO se mueve: sigue en 60 KiB.** Lo que cambia es QUÉ se mide
- * contra él: los bytes que el lane escribe, con el preámbulo heredado restado y
- * **publicado aparte, con su dueño**. Si el preámbulo crece, se ve en la línea
- * de al lado; si lo propio crece, el techo lo caza igual.
- */
-const PRESUPUESTO_DEL_LANE_KIB = 60
+import {
+  ARREGLO_DE_B7_KIB,
+  HEREDADO_SIN_DECLARAR_KIB,
+  MONTAJE_DE_B4A_KIB,
+  MONTAJES_DECLARADOS_KIB,
+  PRESUPUESTO_DEL_LANE_KIB,
+  PRESUPUESTO_PROPIO_KIB,
+} from './s5-presupuesto'
 
-/**
- * ═══ EL TECHO SUBE A 61,25 KiB — LA DECISIÓN, CON SU RECIBO ═══════════════
- *
- * ⚠️ **Lo decidió el humano en la parada de B4-A, con el número a la vista**, y
- * queda escrito acá para que la decisión sea **revocable**: la alternativa
- * medida era **no montar la marca**.
- *
- * ── Qué compró el aumento ─────────────────────────────────────────────────
- *
- * B4-A montó en el home vivo la marca que B3 había construido y dejado sin
- * montar —el prefijo en los ocho rótulos de sección, el logotipo y el separador
- * en el pie, el prefijo en los cinco enlaces de la pastilla— y construyó la
- * meseta de Trabajos. Con eso cierra el diagnóstico que abrió el bloque: *lo que
- * lo haría funcionar es el SISTEMA, no el objeto*.
- *
- *     lo que ESCRIBE el lane hoy            61,140 KiB
- *     − lo que escribía antes de B4-A       59,940 KiB  (B2, 61,3 menos el preámbulo)
- *     = lo que B4-A monta                    1,200 KiB   ← lo que el techo sube
- *
- * El techo queda en **61,25 KiB**: los 1,200 medidos más 0,11 KiB de aire, que
- * es el mismo margen apretado con el que el 60 venía corriendo (59,94 contra 60).
- * **Sigue mordiendo**: cualquier byte que crezca después de esto lo caza igual.
- *
- * ── Lo que se achicó ANTES de subirlo, y por eso no sube más ──────────────
- *
- * La glue del bloque animado —`ANCLA_DEL_PIN`, `cronogramaDe`,
- * `especificacionDe`, `inerciaDe`— viajaba en la carga inicial por compartir
- * archivo con `deberiaAnimar`, que sí consume el árbol quieto. **503 B medidos**,
- * del lado equivocado de la compuerta de 1025 y **sin que ningún instrumento lo
- * viera** (`s7-compuerta` busca las huellas de `_lib/motion/` y esto era del
- * CONTRATO). Se fue a `_contrato/bloqueAnimado.ts`. Sin ese arreglo el aumento
- * habría sido de 1,70 KiB en vez de 1,20.
- *
- * ── Cómo se revoca, y qué queda vigilando el número viejo ─────────────────
- *
- * `PRESUPUESTO_DEL_LANE_KIB` **no se borró**: sigue en 60 y se afirma aparte,
- * restándole lo que B4-A monta. O sea que el techo viejo sigue vivo como
- * comprobación sobre todo lo que NO es la marca. Desmontar la marca tiene que
- * devolver el número a 59,94 y este archivo lo va a decir.
- *
- * ⚠️ **Un presupuesto que se sube cada vez que se pasa no es un presupuesto.**
- * Éste subió UNA vez, con la causa medida byte por byte —1,36 KiB heredados que
- * salieron de la cuenta, 503 B propios que se achicaron, 1,20 KiB propios que se
- * declararon— y con la alternativa escrita. El próximo que lo quiera mover tiene
- * que traer las tres cosas.
- */
-const MONTAJE_DE_B4A_KIB = 1.25
-const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJE_DE_B4A_KIB
 
 /** El preámbulo que `@sentry/nextjs` le pone a la cabeza de cada chunk. Se
  *  detecta por su forma, no por su largo: si cambiara de tamaño, la resta se
@@ -185,7 +107,12 @@ afirmar(
   preambuloPropio > 0,
   `  y el detector del preámbulo NO está ciego: lo encontró en ${propios.filter((f) => preambuloDe(f) > 0).length} de los ${propios.length} chunks propios`,
 )
-console.log(`  EL TECHO: ${PRESUPUESTO_PROPIO_KIB} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta).`)
+console.log(
+  `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
+    ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
+    ` + ${ARREGLO_DE_B7_KIB} que B7 monta (el proveedor de \`prefers-reduced-motion\`, 0,52 medidos A/B)` +
+    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 0,11 medidos que ya estaban en rojo antes de que B7 tocara producto.`,
+)
 console.log('    Lo subió el humano en la parada, con el número medido. La alternativa era no montar la marca: por eso la decisión es revocable.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
@@ -193,9 +120,9 @@ afirmar(
   `${kib(escritoPorElLane)} — ${(PRESUPUESTO_PROPIO_KIB - escritoPorElLane / 1024).toFixed(2)} KiB de aire · ${kib(pesoPropio.crudo)} con el preámbulo heredado adentro`,
 )
 afirmar(
-  escritoPorElLane / 1024 - MONTAJE_DE_B4A_KIB < PRESUPUESTO_DEL_LANE_KIB,
-  `  y el techo VIEJO sigue vigilando todo lo que NO es la marca: sin lo que B4-A monta, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
-  `${kib(escritoPorElLane - MONTAJE_DE_B4A_KIB * 1024)} — desmontar la marca tiene que devolver el número a 59,94`,
+  escritoPorElLane / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
+  `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB} KiB de montajes con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
+  `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y desmontar los montajes declarados tiene que devolverla a 59,94`,
 )
 
 controlPositivo(

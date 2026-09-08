@@ -40,6 +40,15 @@ import { useReducedMotionConfig } from 'motion/react'
  * ninguna transformada ni el texto partido, y —el control positivo— que SIN la
  * preferencia las dos cosas SÍ aparecen. Sin esa segunda mitad, la primera
  * pasaría en verde aunque el sistema estuviera roto y no montara nada nunca.
+ *
+ * ⚠️ **Y aun con las dos mitades eso probaba el ARNÉS, no el sitio.** El
+ * instrumento renderizaba a través de `<MotionConfig reducedMotion={preferencia}>`
+ * y después afirmaba sobre esa misma `preferencia`: inyectaba el valor bajo
+ * prueba. Estuvo en verde —46 afirmaciones, 0 fallas— **mientras el sitio
+ * ignoraba la preferencia**. De ahí sale la regla «verde por arnés» del
+ * proyecto, y de ahí sale la segunda mitad que B7 le agregó (R7·R8·R9·R10):
+ * afirmar, por un camino distinto, que **el camino de producción produce esa
+ * entrada**. Las R1…R6 valen y se conservan enteras: prueban el mecanismo.
  */
 
 /** Qué monta el sistema, según la preferencia. Es la política, como dato. */
@@ -75,10 +84,42 @@ export function politicaDeMovimiento(reducido: boolean): PoliticaDeMovimiento {
 /**
  * La preferencia del usuario, respetando `MotionConfig`.
  *
- * `useReducedMotionConfig` y no `useReducedMotion`: el segundo lee solo el media
- * query y no ve el contexto, con lo cual no se podría forzar en una comprobación.
+ * ── ⚠️ ESTE DOCBLOQUE ESTABA AL REVÉS, Y LA CAUSA SE ESCRIBE ACÁ ──────────
+ *
+ * Decía, textual: *«`useReducedMotionConfig` y no `useReducedMotion`: el segundo
+ * lee solo el media query y no ve el contexto, con lo cual no se podría forzar
+ * en una comprobación.»* La frase era cierta y la conclusión era falsa, porque
+ * le faltaba la otra mitad: **`useReducedMotionConfig` tampoco lee el media
+ * query si nadie pone el contexto**, y nadie lo ponía. El default de
+ * `MotionConfigContext` es `reducedMotion: "never"`, que corta ANTES de mirar
+ * la preferencia:
+ *
+ *     if (reducedMotion === "never")  return false        ← cortaba acá
+ *     else if (reducedMotion === "always") return true
+ *     else return reducedMotionPreference                 ← nunca se llegaba
+ *
+ * Resultado medido (B7 · Fase 0, 1920, preferencia emulada por CDP y verificada
+ * con `matchMedia` desde la página): **2450 transformadas acumuladas con la
+ * preferencia y 2450 sin ella.** Se eligió testeabilidad y se perdió la
+ * función. Queda dicho.
+ *
+ * ── Y la otra frase que estaba al revés, en `CompuertaDelHome.tsx` ────────
+ *
+ * Ahí dice *«Usar otro hook para la misma preferencia sería tener dos
+ * políticas»*. Ya había dos: la de `MotionConfig` (default `"never"`, que no
+ * llegaba) y la de `_lib/usePrefiereMenosMovimiento` (que sí llega, y de la que
+ * leen el cursor y el scroll suave). La que no llegaba era la del sistema de
+ * motion. **El arreglo fue unificar hacia la que ya funciona, no escribir una
+ * tercera**: `_lib/motion/ProveedorDeMovimiento.tsx` toma
+ * `usePrefiereMenosMovimiento()` y lo expresa en el vocabulario de
+ * `MotionConfig`. Este hook NO cambió una línea: le llegó la entrada.
+ * (La corrección del docblock de `CompuertaDelHome.tsx` queda pendiente: ese
+ * archivo está fuera de la zona de escritura del frente que hizo el arreglo.)
+ *
  * Devuelve `null` cuando todavía no se resolvió; se trata como "no reducido",
- * que es el valor por defecto del sistema operativo.
+ * que es el valor por defecto del sistema operativo. Con el proveedor montado
+ * ese `null` ya no puede aparecer en `/v3`: el contexto siempre trae `'always'`
+ * o `'never'`, y las dos ramas devuelven un booleano sin consultar nada más.
  */
 export function useMovimientoReducido(): boolean {
   return useReducedMotionConfig() ?? false

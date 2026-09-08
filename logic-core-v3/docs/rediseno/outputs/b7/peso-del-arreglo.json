@@ -1,0 +1,53 @@
+{
+  "que": "el peso del arreglo de D1 en la carga inicial de /v3, chunk por chunk",
+  "instrumento": "npm run test:s5-peso sobre dos builds de produccion: el de B4-B (docs/rediseno/outputs/b4/a-peso.json, sobre 9777d233) y el de B7 (este arbol, .next)",
+  "comoSeEmparejan": "por nombre de chunk SIN el hash de contenido: el hash cambia en cada build y emparejar por el nombre completo no encontraria ninguno",
+  "filas": [
+    {
+      "chunk": "static/chunks/193.js",
+      "antesB": 6963,
+      "hoyB": 6963,
+      "deltaB": 0,
+      "nuevo": false
+    },
+    {
+      "chunk": "static/chunks/9279.js",
+      "antesB": 2102,
+      "hoyB": 2102,
+      "deltaB": 0,
+      "nuevo": false
+    },
+    {
+      "chunk": "static/chunks/5930.js",
+      "antesB": null,
+      "hoyB": 1575,
+      "deltaB": 1575,
+      "nuevo": true
+    },
+    {
+      "chunk": "static/chunks/app/v3/layout.js",
+      "antesB": 5116,
+      "hoyB": 5685,
+      "deltaB": 569,
+      "nuevo": false
+    },
+    {
+      "chunk": "static/chunks/app/v3/page.js",
+      "antesB": 48576,
+      "hoyB": 48750,
+      "deltaB": 174,
+      "nuevo": false
+    }
+  ],
+  "totalAntesB": 62757,
+  "totalHoyB": 65075,
+  "deltaTotalB": 2318,
+  "preambuloHeredadoDeSentryPorChunkB": 348,
+  "chunksNuevos": 1,
+  "deltaPropioB": 1970,
+  "deltaPropioKiB": 1.92,
+  "loQueEscribeElLaneKiB": 61.9,
+  "techoKiB": 61.25,
+  "aireKiB": -0.6,
+  "veredicto": "el arreglo de D1 cuesta 1.92 KiB crudo propios y CRUZA el techo de 61,25 por 0,60 KiB. NO se toco s5-peso: un presupuesto se sube UNA vez, con tres cosas en la mano, y es una decision del dueno del proyecto."
+}

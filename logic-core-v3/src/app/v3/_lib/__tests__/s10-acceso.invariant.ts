@@ -29,6 +29,11 @@
  * líneas del repo, así que §5 (los landmarks) vive en `./s10-acceso-landmarks` y
  * §10 (el contraste) en `./s10-acceso-contraste`, que es la única sección que
  * resuelve COLOR. El corte es por tema, no por tamaño.
+ *
+ * ⚠️ **B7 lo partió otra vez, por lo mismo.** Arreglar el punto ciego del censo
+ * de marcadores volvió a cruzar las 300 líneas, así que §7 —y los dos controles
+ * de §1 que la habilitan— viven en `./s10-acceso-censo`. Van juntas a propósito:
+ * el censo y la prueba de que su detector no está ciego son una sola pieza.
  */
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
@@ -36,16 +41,16 @@ import { ALTOS, HUECOS, RAMAS, SUPUESTOS_DEL_BANCO, marcadoConMovimientoReducido
 import { candidatosALandmark, encabezados, paradasDeTabulacion, saltosDeNivel, tabindexPositivos } from './s10-lectura'
 import { atributo, nodosDe } from './s10-recorrido'
 import {
-  ROTOS, documentoAnunciado, esRepeticionExacta, esRolDeLandmark, marcadoresAnunciados,
-  piezasDelDivisor, rotuloDeParada, textoAnunciado, transformadasDe, willChangeDe,
+  ROTOS, documentoAnunciado, esRepeticionExacta, esRolDeLandmark, piezasDelDivisor,
+  rotuloDeParada, textoAnunciado, transformadasDe, willChangeDe,
 } from './s10-acceso'
+import { afirmarElCenso, afirmarQueElCensoNoEstaCiego } from './s10-acceso-censo'
 import { COLOR, razon } from './s10-acceso-color'
 import {
-  imprimirArbol, imprimirInventario, imprimirMarcadores, imprimirParadas, publicados, publicar,
+  imprimirArbol, imprimirInventario, imprimirParadas, publicados, publicar,
  afirmarElInventario } from './s10-acceso-tablas'
 import { afirmarElContraste, afirmarElFoco } from './s10-acceso-contraste'
 import { afirmarLosLandmarks } from './s10-acceso-landmarks'
-import { MARCADORES } from '../../_secciones/_contrato/marcadores'
 import { deberiaAnimar } from '../../_secciones/_contrato/motion'
 import { DESCUENTO_NACIMIENTO_PX } from '../navegacion'
 
@@ -68,6 +73,9 @@ controlPositivo('ve un `tabindex` positivo', ROTOS.tabindexPositivo, (h) => tabi
 controlPositivo('ve un documento sin `<main>`', ROTOS.sinMain, (h) => candidatosALandmark(h).some((l) => l.rol === 'main'))
 controlPositivo('ve un `<input>` sin rótulo', ROTOS.campoSinRotulo, (h) => paradasDeTabulacion(h).every((p) => rotuloDeParada(h, p).rotulo !== ''))
 controlPositivo('no confunde un rol cualquiera con un landmark', ROTOS.rolQueNoEsLandmark, esRolDeLandmark)
+// Los dos controles del censo de marcadores viven en `s10-acceso-censo.ts`,
+// con la sección §7 que los consume. Ver su docblock: el arreglo de B7.
+afirmarQueElCensoNoEstaCiego()
 controlPositivo('ve una transformada', ROTOS.conTransformada, (h) => transformadasDe(h).length === 0)
 controlPositivo('ve un `will-change` por utilidad', ROTOS.conWillChange, (h) => willChangeDe(h).length === 0)
 controlPositivo('la razón de contraste distingue dos colores', '#F7F7F5', (c) => razon(c, COLOR.oscuro) < 3)
@@ -230,27 +238,11 @@ for (const rama of RAMAS) {
 afirmarIgual(piezasDelDivisor(QUIETA).length, 0, 'en la rama quieta el divisor no monta: no hay nada que ocultar')
 afirmar(piezasDelDivisor(ANIMADA).length > 0, `en la animada monta ${piezasDelDivisor(ANIMADA).length} bloques partidos`, 'es el control de la línea de arriba')
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · LOS MARCADORES — cómo suena el recorrido')
-
-const MARCAS = marcadoresAnunciados(QUIETA)
-imprimirMarcadores(MARCAS)
-/**
- * ⚠️ **ERAN 43 Y AHORA SON 40 (V3-D), Y LA BAJA ES LO QUE SE BUSCABA.** Los
- * tres que se fueron son los `[CAPTURA]` de Trabajos: las capturas de los tres
- * sitios llegaron y el hueco dejó de existir. Un marcador menos en este censo
- * es un pedido cerrado — el único sentido en el que este número tiene que
- * bajar—, y por eso se afirma la CIFRA y no un «al menos».
- */
-afirmarIgual(MARCAS.length, 40, 'son 40 marcadores ANUNCIADOS en la rama quieta — eran 43 hasta que V3-D cerró las tres capturas')
-afirmarIgual(marcadoresAnunciados(ANIMADA).map((m) => m.marcador).sort(), MARCAS.map((m) => m.marcador).sort(), 'y los MISMOS 40 en la animada, marcador por marcador: no falta ninguno')
-afirmarIgual(MARCAS.map((m) => m.marcador).filter((m) => !(MARCADORES as readonly string[]).includes(m)), [], 'ninguno queda fuera del vocabulario cerrado de `marcadores.ts`')
-afirmarIgual(MARCAS.filter((m) => m.contexto === '').length, 0, 'los 40 caen adentro de una frase anunciada: ninguno vive en un subárbol oculto')
-publicar({
-  n: 9, gravedad: 'media', clase: 'decisión',
-  dueño: 'el contenido de relleno — `_contrato/marcadores.ts` declara la forma como deliberada',
-  que: 'los 43 se LEEN EN VOZ ALTA. Números anuncia cinco veces seguidas «CIFRA · Proyectos entregados / CIFRA · Clientes activos / …» y Trabajos tres «Lo que cambió · MÉTRICA». NO SE ARREGLA: la regla del sprint es que el contenido inventado parezca inventado',
-})
+// ═════════════════════════════════════════════════════════════════════════
+// §7 vive en `s10-acceso-censo.ts`, junto con los controles de §1 que lo
+// habilitan: el censo y la prueba de que su detector no está ciego son una
+// sola pieza, y B7 la reescribió entera.
+afirmarElCenso(QUIETA, ANIMADA)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · `prefers-reduced-motion` sobre el home ENTERO')

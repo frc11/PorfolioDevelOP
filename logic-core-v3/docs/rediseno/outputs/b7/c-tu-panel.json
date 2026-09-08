@@ -1,0 +1,191 @@
+{
+  "escenario": {
+    "id": "tu-panel-1920",
+    "perfil": "1920",
+    "scrollY": 15120,
+    "selectorDelTexto": "[data-panel=\"tu-panel\"] .font-cuerpo",
+    "textoGrande": false
+  },
+  "medicion": {
+    "scrollYReal": 15120,
+    "texto": "Tu panel [CAPTURA DEL PANEL] Pantalla principal del panel de",
+    "elementos": 20,
+    "tinta": [
+      17,
+      17,
+      17
+    ],
+    "papel": [
+      247,
+      247,
+      245
+    ],
+    "umbralAA": 4.5,
+    "caja": {
+      "x": 32,
+      "y": 79,
+      "ancho": 1848.984375,
+      "alto": 2097.90625
+    },
+    "cajas": 20,
+    "rotulos": [
+      {
+        "etiqueta": "p",
+        "nivel": "micro",
+        "tamano": "10px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Tu panel"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "caption",
+        "tamano": "12.4509px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "[CAPTURA DEL PANEL]"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "micro",
+        "tamano": "10px",
+        "color": "rgb(83, 83, 83)",
+        "texto": "Pantalla principal del panel de un cliente"
+      },
+      {
+        "etiqueta": "h3",
+        "nivel": "micro",
+        "tamano": "10px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Qué es"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(83, 83, 83)",
+        "texto": "Un tablero por proyecto, con acceso propio"
+      },
+      {
+        "etiqueta": "h3",
+        "nivel": "micro",
+        "tamano": "10px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Qué se ve adentro"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(83, 83, 83)",
+        "texto": "El avance de cada entrega y qué falta para"
+      },
+      {
+        "etiqueta": "h3",
+        "nivel": "micro",
+        "tamano": "10px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Quién entra"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(83, 83, 83)",
+        "texto": "Un usuario por persona del equipo, y cada "
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Seguir el avance de una entrega sin pregun"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Abrir un pedido y verlo pasar de pendiente"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Leer una conversación del asistente entera"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Corregir una respuesta del asistente y que"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Bajar los contactos que dejó el formulario"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Ver qué campaña trajo cada visita y cuál n"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Revisar la facturación del proyecto, compr"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Sumar a alguien del equipo y elegir qué pa"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Editar textos, fotos y fichas del sitio si"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Exportar lo que hay en pantalla para lleva"
+      },
+      {
+        "etiqueta": "p",
+        "nivel": "cuerpo",
+        "tamano": "15px",
+        "color": "rgb(17, 17, 17)",
+        "texto": "Mirar [MÉTRICA] de la semana al lado de la"
+      }
+    ],
+    "rutaDeLaMascara": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\b7-c-tu-panel\\tu-panel-1920-T.png",
+    "rutaDelFondo": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\b7-c-tu-panel\\tu-panel-1920-A.png",
+    "agregado": {
+      "papel": [
+        247,
+        247,
+        245
+      ],
+      "pixelesDeGlifo": 28074,
+      "medianaContraste": 17.6,
+      "peorContraste": 17.6,
+      "p1Contraste": 17.6,
+      "bajoAA": 0,
+      "porcientoBajoAA": 0
+    }
+  },
+  "pisoDeGlifo": 3000,
+  "temp": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\b7-c-tu-panel"
+}

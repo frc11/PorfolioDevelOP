@@ -38,6 +38,68 @@
  * modelo con sus entradas declaradas, que se puede discutir número por número.
  */
 
+/**
+ * ═══ B7 · `D-B5.1` — EL CUERPO DE 15 px SOBRE LA PARED ════════════
+ *
+ * El defecto, con `scripts-b7/c-contraste.ts` —el método de las tres capturas de
+ * B5 (`scripts-b5/glifo.ts`), puntero quieto en el centro—: `.font-cuerpo` del
+ * panel a 1440, scrollY 14.800, **mediana 4,64:1 y 7.773 de 22.387 píxeles de
+ * glifo bajo AA, o sea 34,72 %**.
+ *
+ * ⚠️ **NADA DE ESTE FRENTE MUEVE UN PÍXEL DE ALTO, Y ESTÁ MEDIDO.** Caja por
+ * caja, las seis del panel son idénticas salvo la del testimonio, que cambia
+ * sólo su `x` (`y` 363,81 · 404,03 × 66 · 5.610 px de glifo, iguales a 1440 y a
+ * 1920), y el titular a scrollY 14.400 queda en `x 32 · y 72,5 · 884,64 ×
+ * 250,09`, byte por byte.
+ *
+ * ⚠️ **DE LAS CUATRO PALANCAS QUE LA INSTRUCCIÓN ENUMERA, TRES ESTÁN MEDIDAS Y
+ * NO ALCANZAN, Y ESO SE PUBLICA ANTES QUE EL ARREGLO.** Los techos salen de
+ * `c-palancas.ts` —le pasa a la MISMA función las mismas capturas con otra tinta
+ * o con otro umbral— y de `c-mapa.ts`. **Las cifras son las de HOY**, sobre el
+ * estado que el sitio sirve, a 1440:
+ *
+ *   · **TAMAÑO.** El contraste no depende del cuerpo: el tamaño mueve el UMBRAL,
+ *     y WCAG lo baja a 3:1 recién en 24 px (18,66 en negrita). Con los MISMOS
+ *     píxeles contra 3:1 queda **7,26 %** abajo: no cierra ni así. Y vive en
+ *     `--text-cuerpo`, que gobierna las ocho secciones. **Frenado dos veces.**
+ *   · **COLOR.** Negro puro —que acota por arriba a cualquier tinta más oscura
+ *     que `--color-tinta`— deja **21,66 %**; el registro invertido, **80,91 %**;
+ *     `--color-tinta-media`, **99,22 %**. La pared es gris medio: las dos
+ *     direcciones empeoran o casi no mueven. (El acento ya estaba descartado:
+ *     2,71 · 2,99 · 2,46.)
+ *
+ *   ⚠️ **LA COLUMNA «ANTES» DE LAS PALANCAS SE RETIRA: no se puede re-derivar.**
+ *   `c-palancas` leía la geometría del JSON versionado y los píxeles de
+ *   `os.tmpdir()`, que se pisa; re-correrlo cruzaba la caja de una corrida con
+ *   los píxeles de otra sin fallar ni advertir. Arreglado con un sello de
+ *   contenido que **tira** (`scripts-b7/c-sello.ts`, con el número). Sobrevive
+ *   la columna de hoy, que es la que sostiene la conclusión.
+ *   · **ANCHO DE COLUMNA.** El fondo da lo mismo franja por franja de 40 px
+ *     bajo las tarjetas: no hay un lado limpio que recortar.
+ *
+ * **La que sí existe es la POSICIÓN, y sólo para el testimonio** —aplicada y
+ * explicada abajo—. El cuerpo baja de **34,72 % a 33,61 %** (1440) y de **11,25 %
+ * a 8,05 %** (1920), con la MISMA masa de glifo (22.387 y 11.402 píxeles,
+ * idéntica en las dos columnas: ninguna es verde por vacío), y el peor píxel sube
+ * de 1,00:1 a 1,91:1 y de 1,50:1 a 2,14:1. El testimonio solo pasa de **56,54 %
+ * a 52,01 %** y de **12,34 % a 0,00 %**.
+ *
+ * Las tarjetas se quedan como están y son casi todo lo que queda: el mapa del
+ * fondo, celda por celda, dice que **la única banda donde TODA su columna llega
+ * a AA mide 90 px de alto a 1440** (150 a 1920) y ellas ocupan **405,2 px**
+ * (487,5). No entran, y no hay una segunda banda. Faltaría una superficie
+ * detrás del texto o cambiar la pared de la escena, y las dos están fuera del
+ * frente: la sección no pinta fondo por regla y la escena es zona prohibida.
+ * **Queda abierto.**
+ *
+ * ⚠️ **Y por lo tanto NO reabre `D-B5.4`.** El techo del paralaje lo pone el
+ * peor caso, y sigue siendo el de las tarjetas: a 1440 no se movieron —25,71 ·
+ * 24,81 · 63,42 · 2,61 % contra 25,29 · 25,01 · 63,61 · 2,58 %, el ruido de una
+ * escena que se mueve—. Mejoró el testimonio, que no acotaba. El hero aguanta
+ * 22° con 0,18 % bajo AA y mediana 13,87:1; acá la mediana es 4,64:1.
+ */
+
+
 import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { tokenPx } from '../../_lib/__tests__/s10-css'
 import { rangoDeScroll, rangoDegenerado } from '../../_lib/motion/anclas'

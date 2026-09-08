@@ -31,6 +31,7 @@ import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from 
 import { cuentaDeAtributo, hayAnidamiento, valoresDeAtributo } from '../_invariantes/marcado'
 import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinDeclararSuForma, capasSinPantalla, cuenta, elementosTipograficos, familiasDeCuerpoPerdidas, familiasDeTituloPerdidas, focalizablesDe, interiorDe, serviciosApagados, serviciosVigentes, tamanosPerdidos, textoPegado } from './deteccion'
 import { afirmarElAsentamiento } from './s6-asentamiento'
+import { afirmarElPin } from './s6-pin'
 import { afirmarLaTipografia } from './s6-tipografia'
 import { CONTENIDO, ITEMS_POR_SERVICIO, LONGITUDES, palabrasDelParrafo } from './contenido'
 import { Servicios } from './Servicios'
@@ -185,6 +186,11 @@ for (const par of MUTILADAS) {
     return r.fin - r.inicio === CAJA.alto - VIEWPORT
   })
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// §9 bis vive en `s6-pin.ts` — cierra la advertencia que `geometria.ts` tenía
+// abierta desde S1 y necesita su propio docblock largo. Regla de las 300.
+afirmarElPin(quieto, animado, seccionDeServicios.alto)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('10 · Los TRES en el árbol, y UN acento por cuadro')

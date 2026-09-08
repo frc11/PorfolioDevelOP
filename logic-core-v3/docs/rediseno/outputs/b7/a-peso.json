@@ -1,0 +1,46 @@
+{
+  "build": ".next-probe",
+  "esBuildAnteriorAlCambio": true,
+  "contextoYaEnLaCargaInicial": {
+    "chunks": [
+      "static/chunks/5354-65da9ee1e425716e.js"
+    ],
+    "cuantos": 1
+  },
+  "cegueraDelBuild": [
+    {
+      "huella": "resolveTransition",
+      "chunks": 0
+    },
+    {
+      "huella": "loadExternalIsValidProp",
+      "chunks": 0
+    },
+    {
+      "huella": "isValidMotionProp",
+      "chunks": 0
+    }
+  ],
+  "imports": {
+    "proveedor": [
+      "motion/react",
+      "react",
+      "../usePrefiereMenosMovimiento"
+    ],
+    "motionConfig": [
+      "react/jsx-runtime",
+      "react",
+      "motion-dom",
+      "../../context/MotionConfigContext.mjs",
+      "../../render/dom/utils/filter-props.mjs",
+      "../../utils/use-constant.mjs"
+    ]
+  },
+  "cotaDelFuente": {
+    "archivo": "src/app/v3/_lib/motion/ProveedorDeMovimiento.tsx",
+    "crudoConComentarios": 7692,
+    "crudoEjecutable": 821,
+    "gzipEjecutable": 354
+  },
+  "cifraDefinitiva": "npm run test:s5-peso, después del build de la Fase 2"
+}

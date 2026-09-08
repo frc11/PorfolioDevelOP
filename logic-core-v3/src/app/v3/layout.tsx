@@ -2,6 +2,7 @@ import localFont from 'next/font/local'
 
 import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
+import { ProveedorDeMovimiento } from './_lib/motion/ProveedorDeMovimiento'
 
 /* ── LAS HOJAS DEL CHROME (S3) ───────────────────────────────────────────────
  * Cinco archivos y no uno: la regla del repo parte a las 300 líneas, y cada
@@ -141,10 +142,39 @@ import './_estilos/foco.css'
  * deja a `TransitionContext` congelado y viendo `null`— está en
  * `_lib/scrollSuave.ts`.
  *
+ * ── ⚠️ LA PREFERENCIA DE MOVIMIENTO, DESDE B7 — Y POR QUÉ ENVUELVE A TODO ──
+ *
+ * `ProveedorDeMovimiento` es la tercera pieza permanente, y va acá por la misma
+ * razón que las otras dos: **es del árbol, no de una sección**. Pone
+ * `prefers-reduced-motion` —leída de `usePrefiereMenosMovimiento`, la misma
+ * fuente que el cursor y el scroll suave— en el contexto que el sistema de
+ * motion ya consultaba y encontraba vacío. Sin él, `useReducedMotionConfig()`
+ * cortaba en el default `"never"` de `MotionConfigContext` y el media query
+ * **nunca se leía**: 2450 transformadas acumuladas con la preferencia puesta
+ * contra 2450 sin ella (B7 · Fase 0). El porqué completo, con las alternativas
+ * descartadas y sus números, está en `_lib/motion/ProveedorDeMovimiento.tsx`.
+ *
+ * ⚠ **Va AFUERA del `<div data-v3>`, y es deliberado.** Dos razones, y ninguna
+ * es de conveniencia:
+ *
+ *   1. **De alcance.** La política tiene que cubrir el árbol ENTERO, incluidas
+ *      las dos compuertas de arriba. Adentro del `div` cubriría a sus hermanos
+ *      por accidente de orden; afuera los cubre por construcción.
+ *   2. **De instrumento, y queda declarado.** `s10-banco` deriva el documento
+ *      del esqueleto que este layout declara **desde el elemento que lleva
+ *      `data-v3`**, y su modelo sólo sabe montar HOJAS: un componente con hijos
+ *      lo hace tirar, a propósito. Este proveedor **no emite un solo elemento**
+ *      —es un contexto de React— así que el documento modelado es exactamente
+ *      el mismo con él y sin él, y quedando afuera de la raíz el modelo sigue
+ *      siendo cierto sin tocarlo. El día que se mueva adentro hay que darle su
+ *      línea en `PIEZAS_MONTABLES` con `emite: null` **y** enseñarle al modelo a
+ *      componer hijos adentro de un componente.
+ *
  * ── Lo que NO hay acá ──────────────────────────────────────────────────────
  *
  * Ninguna animación. Ni la escena 3D. Ni contenido. Ni GSAP ni Sanity: ninguna
- * decidida. Este layout es un hueco, una tipografía y dos compuertas.
+ * decidida. Este layout es un hueco, una tipografía, dos compuertas y la
+ * política de movimiento.
  */
 
 const chivo = localFont({
@@ -165,13 +195,15 @@ const chivoMono = localFont({
 
 export default function DisposicionV3({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      data-v3=""
-      className={`${chivo.variable} ${chivoMono.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
-    >
-      <CompuertaDelScrollSuave />
-      <EscenarioCompuerta />
-      {children}
-    </div>
+    <ProveedorDeMovimiento>
+      <div
+        data-v3=""
+        className={`${chivo.variable} ${chivoMono.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
+      >
+        <CompuertaDelScrollSuave />
+        <EscenarioCompuerta />
+        {children}
+      </div>
+    </ProveedorDeMovimiento>
   )
 }

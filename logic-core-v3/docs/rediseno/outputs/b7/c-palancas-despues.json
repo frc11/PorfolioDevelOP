@@ -1,0 +1,184 @@
+{
+  "diferencial-cuerpo-1440": {
+    "perfil": "1440",
+    "cajas": 5,
+    "porPalanca": [
+      {
+        "id": "hoy",
+        "tinta": [
+          17,
+          17,
+          17
+        ],
+        "textoGrande": false,
+        "que": "lo que el sitio hace: --color-tinta #111111 contra AA 4,5:1",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 22387,
+        "medianaContraste": 4.64,
+        "peorContraste": 1.91,
+        "p1Contraste": 2.58,
+        "bajoUmbral": 7517,
+        "porcientoBajoUmbral": 33.5775
+      },
+      {
+        "id": "tamano-grande",
+        "tinta": [
+          17,
+          17,
+          17
+        ],
+        "textoGrande": true,
+        "que": "PALANCA TAMAÑO — la misma tinta contra el umbral de texto grande (3:1), que exige 24 px o 18,66 px en negrita",
+        "umbral": 3,
+        "pixelesDeGlifo": 22387,
+        "medianaContraste": 4.64,
+        "peorContraste": 1.91,
+        "p1Contraste": 2.58,
+        "bajoUmbral": 1627,
+        "porcientoBajoUmbral": 7.2676
+      },
+      {
+        "id": "tinta-negra",
+        "tinta": [
+          0,
+          0,
+          0
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR, hacia abajo — negro puro, que acota por arriba a cualquier tinta más oscura que #111111",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 22387,
+        "medianaContraste": 5.16,
+        "peorContraste": 2.13,
+        "p1Contraste": 2.87,
+        "bajoUmbral": 4850,
+        "porcientoBajoUmbral": 21.6644
+      },
+      {
+        "id": "tinta-papel",
+        "tinta": [
+          247,
+          247,
+          245
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR, hacia arriba — el papel del sistema como tinta, o sea el registro invertido",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 22387,
+        "medianaContraste": 3.79,
+        "peorContraste": 1.32,
+        "p1Contraste": 1.65,
+        "bajoUmbral": 18119,
+        "porcientoBajoUmbral": 80.9354
+      },
+      {
+        "id": "tinta-media",
+        "tinta": [
+          83,
+          83,
+          83
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR — --color-tinta-media #535353, el token secundario",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 22387,
+        "medianaContraste": 1.89,
+        "peorContraste": 1,
+        "p1Contraste": 1.07,
+        "bajoUmbral": 22214,
+        "porcientoBajoUmbral": 99.2272
+      }
+    ]
+  },
+  "diferencial-cuerpo-1920": {
+    "perfil": "1920",
+    "cajas": 5,
+    "porPalanca": [
+      {
+        "id": "hoy",
+        "tinta": [
+          17,
+          17,
+          17
+        ],
+        "textoGrande": false,
+        "que": "lo que el sitio hace: --color-tinta #111111 contra AA 4,5:1",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 11402,
+        "medianaContraste": 6.09,
+        "peorContraste": 2.14,
+        "p1Contraste": 3.1,
+        "bajoUmbral": 948,
+        "porcientoBajoUmbral": 8.3143
+      },
+      {
+        "id": "tamano-grande",
+        "tinta": [
+          17,
+          17,
+          17
+        ],
+        "textoGrande": true,
+        "que": "PALANCA TAMAÑO — la misma tinta contra el umbral de texto grande (3:1), que exige 24 px o 18,66 px en negrita",
+        "umbral": 3,
+        "pixelesDeGlifo": 11402,
+        "medianaContraste": 6.09,
+        "peorContraste": 2.14,
+        "p1Contraste": 3.1,
+        "bajoUmbral": 61,
+        "porcientoBajoUmbral": 0.535
+      },
+      {
+        "id": "tinta-negra",
+        "tinta": [
+          0,
+          0,
+          0
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR, hacia abajo — negro puro, que acota por arriba a cualquier tinta más oscura que #111111",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 11402,
+        "medianaContraste": 6.77,
+        "peorContraste": 2.38,
+        "p1Contraste": 3.44,
+        "bajoUmbral": 816,
+        "porcientoBajoUmbral": 7.1566
+      },
+      {
+        "id": "tinta-papel",
+        "tinta": [
+          247,
+          247,
+          245
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR, hacia arriba — el papel del sistema como tinta, o sea el registro invertido",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 11402,
+        "medianaContraste": 2.89,
+        "peorContraste": 1.29,
+        "p1Contraste": 1.31,
+        "bajoUmbral": 10638,
+        "porcientoBajoUmbral": 93.2994
+      },
+      {
+        "id": "tinta-media",
+        "tinta": [
+          83,
+          83,
+          83
+        ],
+        "textoGrande": false,
+        "que": "PALANCA COLOR — --color-tinta-media #535353, el token secundario",
+        "umbral": 4.5,
+        "pixelesDeGlifo": 11402,
+        "medianaContraste": 2.48,
+        "peorContraste": 1,
+        "p1Contraste": 1.26,
+        "bajoUmbral": 9097,
+        "porcientoBajoUmbral": 79.7842
+      }
+    ]
+  }
+}

@@ -41,6 +41,12 @@
 # de prender Lenis en /v3 sin pisar el `.next/` del `next dev` que corre al lado.
 # Se agrega ACA ANTES de correr el build, por la misma leccion que `.next-probe/`.
 /.next-b5/
+# `.next-b7/`: build aislado de B7 (los defectos abiertos), para medir el peso
+# NETO del arreglo de `prefers-reduced-motion` — o sea el mismo arbol con el
+# proveedor montado y sin montar, sin pisar el `.next` del build de produccion
+# que `verificar` lee. Se agrega ACA ANTES de correr el build, por la misma
+# leccion de agosto que `.next-probe/` y `.next-b5/`.
+/.next-b7/
 # `.b5-capturas/`: las 63 capturas intermedias por corrida de los instrumentos de
 # B5 (52 MB). Son insumo del calculo, no evidencia: lo que se commitea son las
 # cuatro capturas del reporte y el JSON con las cifras.

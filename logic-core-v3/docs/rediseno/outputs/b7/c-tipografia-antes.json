@@ -1,0 +1,295 @@
+{
+  "desborde-muestra": {
+    "ruta": "/v3/tipografia/muestra",
+    "innerWidth": 638,
+    "outerWidth": 375,
+    "visualWidth": 375,
+    "docWidth": 638,
+    "bodyWidth": 638,
+    "culpables": [
+      {
+        "etiqueta": "html",
+        "muestra": "",
+        "clase": "__variable_9299cd __variable_46b309",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "v3 · muestra tipográfica — instrum"
+      },
+      {
+        "etiqueta": "body",
+        "muestra": "",
+        "clase": "antialiased",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "__variable_da61d5 __variable_912422 font-cuerpo bg-fondo text-tinta re",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "bg-fondo text-tinta relative z-10 min-h-svh py-[var(--spacing-8)]",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "w-full max-w-full px-[var(--pad-lateral-compacto)]",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "mx-auto w-full max-w-tope",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-12)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "section",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-6)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "article",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "cap height · Chivo 686 contra 720 "
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 495,
+        "overflowX": "visible",
+        "texto": "abcdefghijklmnñopqrstuvwxyz"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 404,
+        "overflowX": "visible",
+        "texto": "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 330,
+        "overflowX": "visible",
+        "texto": "abcdefghijklmnñopqrstuvwxyz"
+      }
+    ]
+  },
+  "desborde-madre": {
+    "ruta": "/v3/tipografia",
+    "innerWidth": 375,
+    "outerWidth": 375,
+    "visualWidth": 375,
+    "docWidth": 375,
+    "bodyWidth": 375,
+    "culpables": [
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "flex w-max items-start gap-[var(--spacing-8)] px-[var(--pad-lateral-co",
+        "derecha": 4755,
+        "ancho": 4755,
+        "scrollWidth": 4755,
+        "overflowX": "visible",
+        "texto": "375px · var(--fluido-piso)860px · "
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1920,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1920,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--container-tope)] border-borde h-svh border",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1918,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 2972,
+        "ancho": 169,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1440,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1440,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--fluido-techo)] border-borde h-svh border",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1438,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 1486,
+        "ancho": 155,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 860,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 860,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--breakpoint-medio)] border-borde h-svh border",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 858,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 616,
+        "ancho": 177,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 407,
+        "ancho": 375,
+        "scrollWidth": 375,
+        "overflowX": "visible",
+        "texto": "375px · var(--fluido-piso)"
+      }
+    ]
+  },
+  "gate": {
+    "error": "la página no está en condiciones de medirse — innerWidth=638, se pidió 375 · innerHeight=1135, se pidió 667"
+  }
+}

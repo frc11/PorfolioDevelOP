@@ -123,6 +123,24 @@ export const PASOS_DE_LA_SECUENCIA = SERVICIOS.length
  * es `ventana × (pasos − 1)` y cada tramo se lleva su parte:
  *
  *     tramo = ventana × (pasos − 1) / pasos = 1080 × 2 / 3 = 720
+ *
+ * ✅ **MEDIDO (B7 · frente B).** «El pin recorre `alto − ventana`» era una
+ * derivación declarada y ahora tiene su número, con scroll real:
+ * `scripts-b7/b-pin.ts` → **2.160 px exactos a 1920×1080**, que es la ventana de
+ * calibración de arriba, y 1.800 exactos a 1440×900.
+ *
+ * ⚠️ La igualdad es exacta **mientras el contenido entre en una pantalla**, y
+ * hay un perfil donde no entra: a **1025×768** el hijo pegado llega a **798,55
+ * px** —desborda **30,55**— y el pin recorre **1.502 px medidos** en vez de
+ * 1.536, o sea que cada tramo real se acorta **11,33 px** sobre los 512 px que
+ * le tocarían. Es el **2,21 %**, y no mueve ninguna de las constantes de acá,
+ * que están calibradas a 1080: queda anotado para que nadie vuelva a leer la
+ * derivación como exacta en todo ancho.
+ *
+ * ⚠️ **Y el alto del hijo no es uno solo: a 1025 crece de 774,55 a 798,55 px a
+ * mitad del pin**, porque la secuencia cambia de servicio. La primera versión de
+ * esta nota publicó 6,55 px de desborde porque lo leyó con el scroll en cero;
+ * la cifra buena sale de medir el alto **en cada parada del barrido**.
  */
 export const TRAMO_CALIBRADO =
   (ALTO_DE_CALIBRACION * (PASOS_DE_LA_SECUENCIA - 1)) / PASOS_DE_LA_SECUENCIA

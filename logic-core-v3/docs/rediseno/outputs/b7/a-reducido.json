@@ -1,0 +1,40 @@
+{
+  "perfil": "1920",
+  "consultas": {
+    "sinLaPreferencia": {
+      "laNuestra": false,
+      "laDeLaLibreria": false
+    },
+    "conLaPreferencia": {
+      "laNuestra": true,
+      "laDeLaLibreria": true
+    }
+  },
+  "definicion": "transformadas ACUMULADAS sobre un barrido de media pantalla del documento entero (CENSO_BARRIDO), la definición de scripts-b4/c-reducido-discriminador.ts",
+  "f0": {
+    "transformadasSinLaPreferencia": 2450,
+    "piezasDeLineaSinLaPreferencia": 5,
+    "caracteresVisibles": 7104
+  },
+  "sinLaPreferencia": {
+    "matchMedia": false,
+    "conTransform": 2450,
+    "piezasDeLineas": 5,
+    "paradas": 35,
+    "caracteresVisibles": 7104,
+    "caracteresInvisibles": 0,
+    "nodosInvisibles": 0,
+    "ejemplosInvisibles": []
+  },
+  "conLaPreferencia": {
+    "matchMedia": true,
+    "conTransform": 0,
+    "piezasDeLineas": 0,
+    "paradas": 35,
+    "caracteresVisibles": 7115,
+    "caracteresInvisibles": 0,
+    "nodosInvisibles": 0,
+    "ejemplosInvisibles": []
+  },
+  "veredicto": "ARREGLADO — con la preferencia no se monta nada y el contenido queda entero"
+}

@@ -21,6 +21,46 @@
  * 10,1% escalonado— y emitir `clamp()` para los ocho sería tan falso como no
  * emitir ninguno.
  *
+ * ── ✅ B7 · LA JERARQUÍA A 375: ACEPTADA. Es una DECISIÓN, no un límite ────
+ *
+ * **Decisión del dueño del proyecto, en la parada de B7.** B4-B lo publicó como
+ * defecto `D8` —«a 375 la escala se comprime a un píxel entre cuatro niveles»—
+ * y se cierra como decisión tomada, no como deuda.
+ *
+ * **La medición, con el instrumento** (`b4/b-tipografia.json`, una sonda por
+ * nivel en el DOM vivo leyendo el `font-size` computado). A 375 la banda fluida
+ * resuelve `cuerpo 15 → base 16 → titulo-s 17 → titulo-m 18`: **cuatro niveles
+ * en tres píxeles**. Los saltos `base → titulo-s` y `titulo-s → titulo-m` valen
+ * **×1,06 y ×1,06** a 375, contra **×1,33 y ×1,79** a 1920. Ningún nivel
+ * colapsa —no hay dos con el mismo px— pero la jerarquía por TAMAÑO
+ * prácticamente desaparece en el piso de la banda.
+ *
+ * **Y no es un descuido: es la consecuencia de tres restricciones que ya están
+ * en su mínimo.** El piso de `titulo-s` es **17 px**, y `theme-develop.css` lo
+ * declara como *«el ÚNICO entero que a la vez pasa `--text-base` (16) y se queda
+ * abajo del piso de `titulo-m` (18)»* — con 18 los dos niveles colisionarían en
+ * el otro extremo, que es el defecto de vuelta.
+ *
+ * **Las tres salidas, con su número, para que la decisión sea revocable:**
+ *
+ *   1. **Bajar `--text-cuerpo` (15 px).** Abriría el salto por abajo, y gobierna
+ *      las ocho secciones. ⚠️ **Es el mismo texto que `D-B5.1` tiene al borde
+ *      del contraste**: 33,61 % de sus píxeles bajo AA a 1440 con el cuerpo
+ *      actual. Achicarlo empeora un defecto de accesibilidad abierto para
+ *      arreglar uno de composición. **Descartada por eso.**
+ *   2. **Subir el piso de `titulo-m` (18 px).** Aplanaría su banda: los seis
+ *      techos salen de medición y están anclados a 1440, así que subir el piso
+ *      acorta el recorrido fluido del nivel que más recorre (×1,79 a 1920).
+ *      **Descartada por eso.**
+ *   3. **Aceptarlo.** A 375 la jerarquía la llevan **el peso, el color y el
+ *      aire**, que es lo que de hecho pasa, y **una diferencia de un píxel no la
+ *      ve nadie**. Es la que se tomó.
+ *
+ * ⚠️ **Esto NO es un umbral aflojado ni un pendiente reetiquetado.** La cifra
+ * sigue publicada y sigue siendo la misma; lo que cambió es que hay una decisión
+ * escrita al lado. Si algún día el criterio es otro, las tres salidas están acá
+ * con lo que cuesta cada una.
+ *
  * ── El pendiente óptico que la ruta /v3/tipografia destraba ────────────────
  *
  * Nadie miró los ocho niveles renderizados, ni en la familia original ni en

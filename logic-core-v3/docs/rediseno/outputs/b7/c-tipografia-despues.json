@@ -1,0 +1,491 @@
+{
+  "desborde-muestra": {
+    "ruta": "/v3/tipografia/muestra",
+    "innerWidth": 375,
+    "outerWidth": 375,
+    "visualWidth": 375,
+    "docWidth": 375,
+    "bodyWidth": 375,
+    "culpables": [
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "bg-fondo text-tinta relative z-10 min-h-svh overflow-x-auto py-[var(--",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "auto",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "w-full max-w-full px-[var(--pad-lateral-compacto)]",
+        "derecha": 375,
+        "ancho": 375,
+        "scrollWidth": 638,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "mx-auto w-full max-w-tope",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-12)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "section",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-6)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "micro · --text-micro · 10px · flui"
+      },
+      {
+        "etiqueta": "article",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "cap height · Chivo 686 contra 720 "
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 606,
+        "overflowX": "visible",
+        "texto": "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 495,
+        "overflowX": "visible",
+        "texto": "abcdefghijklmnñopqrstuvwxyz"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 404,
+        "overflowX": "visible",
+        "texto": "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+      },
+      {
+        "etiqueta": "p",
+        "muestra": "",
+        "clase": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+        "derecha": 343,
+        "ancho": 311,
+        "scrollWidth": 330,
+        "overflowX": "visible",
+        "texto": "abcdefghijklmnñopqrstuvwxyz"
+      }
+    ]
+  },
+  "desborde-madre": {
+    "ruta": "/v3/tipografia",
+    "innerWidth": 375,
+    "outerWidth": 375,
+    "visualWidth": 375,
+    "docWidth": 375,
+    "bodyWidth": 375,
+    "culpables": [
+      {
+        "etiqueta": "div",
+        "muestra": "",
+        "clase": "flex w-max items-start gap-[var(--spacing-8)] px-[var(--pad-lateral-co",
+        "derecha": 4755,
+        "ancho": 4755,
+        "scrollWidth": 4755,
+        "overflowX": "visible",
+        "texto": "375px · var(--fluido-piso)860px · "
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1920,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1920,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--container-tope)] border-borde h-svh border",
+        "derecha": 4723,
+        "ancho": 1920,
+        "scrollWidth": 1918,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 2972,
+        "ancho": 169,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "1920px · var(--container-tope)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1440,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1440,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--fluido-techo)] border-borde h-svh border",
+        "derecha": 2771,
+        "ancho": 1440,
+        "scrollWidth": 1438,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 1486,
+        "ancho": 155,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "1440px · var(--fluido-techo)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 860,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "figcaption",
+        "muestra": "",
+        "clase": "",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 860,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "iframe",
+        "muestra": "",
+        "clase": "w-[var(--breakpoint-medio)] border-borde h-svh border",
+        "derecha": 1299,
+        "ancho": 860,
+        "scrollWidth": 858,
+        "overflowX": "clip",
+        "texto": ""
+      },
+      {
+        "etiqueta": "span",
+        "muestra": "",
+        "clase": "text-fluido-micro leading-micro tracking-micro font-normal font-codigo",
+        "derecha": 616,
+        "ancho": 177,
+        "scrollWidth": 0,
+        "overflowX": "visible",
+        "texto": "860px · var(--breakpoint-medio)"
+      },
+      {
+        "etiqueta": "figure",
+        "muestra": "",
+        "clase": "flex flex-col gap-[var(--spacing-2)]",
+        "derecha": 407,
+        "ancho": 375,
+        "scrollWidth": 375,
+        "overflowX": "visible",
+        "texto": "375px · var(--fluido-piso)"
+      }
+    ]
+  },
+  "gate": {
+    "innerWidth": 375,
+    "tabla": [
+      {
+        "nivel": "micro",
+        "token": "--text-fluido-micro",
+        "fluido": true,
+        "pisoDeclarado": 10,
+        "medidoPx": 10,
+        "coincide": true,
+        "derivadoA638": 10
+      },
+      {
+        "nivel": "caption",
+        "token": "--text-fluido-caption",
+        "fluido": true,
+        "pisoDeclarado": 11,
+        "medidoPx": 11,
+        "coincide": true,
+        "derivadoA638": 11.25
+      },
+      {
+        "nivel": "cuerpo",
+        "token": "--text-cuerpo",
+        "fluido": false,
+        "pisoDeclarado": 15,
+        "medidoPx": 15,
+        "coincide": true,
+        "derivadoA638": 15
+      },
+      {
+        "nivel": "base",
+        "token": "--text-base",
+        "fluido": false,
+        "pisoDeclarado": 16,
+        "medidoPx": 16,
+        "coincide": true,
+        "derivadoA638": 16
+      },
+      {
+        "nivel": "titulo-s",
+        "token": "--text-fluido-titulo-s",
+        "fluido": true,
+        "pisoDeclarado": 17,
+        "medidoPx": 17,
+        "coincide": true,
+        "derivadoA638": 17.74
+      },
+      {
+        "nivel": "titulo-m",
+        "token": "--text-fluido-titulo-m",
+        "fluido": true,
+        "pisoDeclarado": 18,
+        "medidoPx": 18,
+        "coincide": true,
+        "derivadoA638": 21.46
+      },
+      {
+        "nivel": "titulo-l",
+        "token": "--text-fluido-titulo-l",
+        "fluido": true,
+        "pisoDeclarado": 24,
+        "medidoPx": 24,
+        "coincide": true,
+        "derivadoA638": 28.94
+      },
+      {
+        "nivel": "titulo-xl",
+        "token": "--text-fluido-titulo-xl",
+        "fluido": true,
+        "pisoDeclarado": 36,
+        "medidoPx": 36,
+        "coincide": true,
+        "derivadoA638": 40.94
+      }
+    ],
+    "formas": {
+      "titulo": [
+        {
+          "nivel": "micro",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-cuerpo text-fluido-micro leading-micro tracking-micro",
+          "fontSizePx": 10
+        },
+        {
+          "nivel": "caption",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-cuerpo text-fluido-caption leading-texto tracking-texto",
+          "fontSizePx": 11.0001
+        },
+        {
+          "nivel": "cuerpo",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-cuerpo text-cuerpo leading-texto tracking-texto",
+          "fontSizePx": 15
+        },
+        {
+          "nivel": "base",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-cuerpo text-base leading-texto tracking-texto",
+          "fontSizePx": 16
+        },
+        {
+          "nivel": "titulo-s",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-titulo text-fluido-titulo-s leading-titulo tracking-texto",
+          "fontSizePx": 17.0004
+        },
+        {
+          "nivel": "titulo-m",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-titulo text-fluido-titulo-m leading-titulo tracking-texto",
+          "fontSizePx": 18.0002
+        },
+        {
+          "nivel": "titulo-l",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+          "fontSizePx": 24.0005
+        },
+        {
+          "nivel": "titulo-xl",
+          "texto": "Construimos Software que Trabaja",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "fontSizePx": 36.0005
+        }
+      ],
+      "minusculas": [
+        {
+          "nivel": "micro",
+          "texto": "construimos software que trabaja",
+          "clases": "font-cuerpo text-fluido-micro leading-micro tracking-micro",
+          "fontSizePx": 10
+        },
+        {
+          "nivel": "caption",
+          "texto": "construimos software que trabaja",
+          "clases": "font-cuerpo text-fluido-caption leading-texto tracking-texto",
+          "fontSizePx": 11.0001
+        },
+        {
+          "nivel": "cuerpo",
+          "texto": "construimos software que trabaja",
+          "clases": "font-cuerpo text-cuerpo leading-texto tracking-texto",
+          "fontSizePx": 15
+        },
+        {
+          "nivel": "base",
+          "texto": "construimos software que trabaja",
+          "clases": "font-cuerpo text-base leading-texto tracking-texto",
+          "fontSizePx": 16
+        },
+        {
+          "nivel": "titulo-s",
+          "texto": "construimos software que trabaja",
+          "clases": "font-titulo text-fluido-titulo-s leading-titulo tracking-texto",
+          "fontSizePx": 17.0004
+        },
+        {
+          "nivel": "titulo-m",
+          "texto": "construimos software que trabaja",
+          "clases": "font-titulo text-fluido-titulo-m leading-titulo tracking-texto",
+          "fontSizePx": 18.0002
+        },
+        {
+          "nivel": "titulo-l",
+          "texto": "construimos software que trabaja",
+          "clases": "font-titulo text-fluido-titulo-l leading-titulo tracking-titulo",
+          "fontSizePx": 24.0005
+        },
+        {
+          "nivel": "titulo-xl",
+          "texto": "construimos software que trabaja",
+          "clases": "font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo",
+          "fontSizePx": 36.0005
+        }
+      ]
+    }
+  },
+  "d9": [
+    {
+      "nivel": "micro",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "caption",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "cuerpo",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "base",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "titulo-s",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "titulo-m",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "titulo-l",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    },
+    {
+      "nivel": "titulo-xl",
+      "tieneLasDos": true,
+      "esOtraForma": true,
+      "mismasClases": true
+    }
+  ]
+}

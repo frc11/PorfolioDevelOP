@@ -1,0 +1,227 @@
+{
+  "d1": {
+    "sinLaPreferencia": {
+      "matchMedia": false,
+      "conTransform": 2450,
+      "piezasDeLineas": 5,
+      "paradas": 35,
+      "caracteresVisibles": 7104,
+      "caracteresInvisibles": 0,
+      "nodosInvisibles": 0,
+      "ejemplosInvisibles": []
+    },
+    "conLaPreferencia": {
+      "matchMedia": true,
+      "conTransform": 2450,
+      "piezasDeLineas": 5,
+      "paradas": 35,
+      "caracteresVisibles": 7104,
+      "caracteresInvisibles": 0,
+      "nodosInvisibles": 0,
+      "ejemplosInvisibles": []
+    },
+    "identicas": true,
+    "veredicto": "SE REPRODUCE — el sitio ignora la preferencia"
+  },
+  "pines1920": {
+    "documento": 19440,
+    "paradas": 154,
+    "stickies": [
+      {
+        "ficha": {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-984px",
+          "altoPropio": 0,
+          "altoDelPadre": 19440,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 19440,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 145,
+        "recorridoRealPx": 17280
+      },
+      {
+        "ficha": {
+          "huella": "div[data-seccion-id=trabajos][data-pinneado=desde-escritorio] .w-full.escritorio:sticky.escritorio:top-0.escritorio:h-svh",
+          "top": "0px",
+          "altoPropio": 1080,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "section[data-panel=trabajos][data-superficie=oscuro-opaco][data-seccion=invertida] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 2160,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 18,
+        "recorridoRealPx": 2040
+      },
+      {
+        "ficha": {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 3240,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 0,
+        "recorridoRealPx": 0
+      },
+      {
+        "ficha": {
+          "huella": "div .sticky.top-0.flex.min-h-svh.w-full.flex-col.justify-center.gap-[var(--spacing-8)]",
+          "top": "0px",
+          "altoPropio": 1080,
+          "altoDelPadre": 3240,
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "recorridoDisponible": 2160,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 18,
+        "recorridoRealPx": 2040
+      }
+    ]
+  },
+  "pines1024": {
+    "documento": 14721,
+    "paradas": 117,
+    "stickies": [
+      {
+        "ficha": {
+          "huella": "header[data-pieza=navegacion]",
+          "top": "-672px",
+          "altoPropio": 0,
+          "altoDelPadre": 14720.92,
+          "huellaDelPadre": "div[data-v3=] .__variable_da61d5.__variable_912422.font-cuerpo.bg-fondo.text-tinta.relative.min-h-svh",
+          "recorridoDisponible": 14720.92,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 111,
+        "recorridoRealPx": 13200
+      },
+      {
+        "ficha": {
+          "huella": "div[data-seccion-id=servicios][data-pinneado=siempre] .w-full.sticky.top-0.min-h-svh",
+          "top": "0px",
+          "altoPropio": 2370.44,
+          "altoDelPadre": 2370.44,
+          "huellaDelPadre": "section[data-panel=servicios][data-superficie=papel-opaco] .relative.z-10.w-full.bg-fondo.text-tinta",
+          "recorridoDisponible": 0,
+          "ancestroQueRecorta": null
+        },
+        "paradasPegado": 0,
+        "recorridoRealPx": 0
+      }
+    ]
+  },
+  "toque1920y0": {
+    "total": 21,
+    "bajoVeinticuatro": [
+      {
+        "huella": "button .fixed.bottom-2.left-2.z-[10000].rounded.bg-black/70.px-2.py-1.font-mono.text-[10px].text-white/70.backdrop-blur",
+        "ancho": 67.02,
+        "alto": 23,
+        "texto": "intro ⌥I"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 11.99,
+        "alto": 3.75,
+        "texto": "Esquina"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 14.45,
+        "alto": 3.75,
+        "texto": "El Garage"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 7.77,
+        "alto": 3.75,
+        "texto": "Banú"
+      }
+    ]
+  },
+  "toque1920y9720": {
+    "total": 21,
+    "bajoVeinticuatro": [
+      {
+        "huella": "button .fixed.bottom-2.left-2.z-[10000].rounded.bg-black/70.px-2.py-1.font-mono.text-[10px].text-white/70.backdrop-blur",
+        "ancho": 67.02,
+        "alto": 23,
+        "texto": "intro ⌥I"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 7.77,
+        "alto": 3.75,
+        "texto": "Banú"
+      }
+    ]
+  },
+  "toque375y0": {
+    "total": 21,
+    "bajoVeinticuatro": [
+      {
+        "huella": "button .fixed.bottom-2.left-2.z-[10000].rounded.bg-black/70.px-2.py-1.font-mono.text-[10px].text-white/70.backdrop-blur",
+        "ancho": 67.02,
+        "alto": 23,
+        "texto": "intro ⌥I"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 63.63,
+        "alto": 20,
+        "texto": "Esquina"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 76.73,
+        "alto": 20,
+        "texto": "El Garage"
+      },
+      {
+        "huella": "a[data-pieza=enlace-de-proyecto]",
+        "ancho": 41.27,
+        "alto": 20,
+        "texto": "Banú"
+      }
+    ]
+  },
+  "desbordes375": [
+    {
+      "ruta": "/v3",
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "visualViewport": 375,
+      "outerWidth": 375,
+      "desborda": false
+    },
+    {
+      "ruta": "/v3/tipografia",
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "visualViewport": 375,
+      "outerWidth": 375,
+      "desborda": false
+    },
+    {
+      "ruta": "/v3/tipografia/muestra",
+      "desborda": true,
+      "laRecetaTiro": "la página no está en condiciones de medirse — innerWidth=638, se pidió 375 · innerHeight=1135, se pidió 667"
+    }
+  ],
+  "titular1920": {
+    "h1Clase": "sr-only",
+    "h1Caja": {
+      "ancho": 1,
+      "alto": 1,
+      "area": 1
+    },
+    "divTitularCaja": {
+      "ancho": 670.39,
+      "alto": 141.72,
+      "area": 95007
+    }
+  }
+}

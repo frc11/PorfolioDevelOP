@@ -18,10 +18,12 @@ import { ServiciosEnSecuencia } from './ServiciosEnSecuencia'
  * > panel y el párrafo con resaltado progresivo. **No son tres animaciones: es
  * > una.**
  *
- * Un solo `sticky` largo, un solo progreso, cinco canales colgando de él. Es el
- * mismo patrón que la escena de este proyecto ya usa: un número alimentando
- * varios canales. La matemática entera —el reparto en tramos— es
- * `tramoDeSecuencia`, del contrato, y no se reescribe acá.
+ * Un solo `sticky` largo QUE PINEA, un solo progreso, cinco canales colgando de
+ * él. Es el mismo patrón que la escena de este proyecto ya usa: un número
+ * alimentando varios canales. (El marcado emite DOS `sticky`: el envoltorio de
+ * `Seccion` es el otro, y es inerte — la sección de abajo lo mide y lo explica.)
+ * La matemática entera —el reparto en tramos— es `tramoDeSecuencia`, del
+ * contrato, y no se reescribe acá.
  *
  * ── Por qué el `Bloque` lleva el alto y no sólo el `Panel` ────────────────
  *
@@ -36,6 +38,33 @@ import { ServiciosEnSecuencia } from './ServiciosEnSecuencia'
  * Por eso el mismo valor aparece dos veces —en el `Panel` y en el `Bloque`— y
  * las dos veces sale de la MISMA fuente, `seccionDe('servicios').alto`. No se
  * escribe: se lee.
+ *
+ * ── ⚠️ LA CONSECUENCIA: EL `sticky` DE `Seccion` QUEDA INERTE ACÁ ─────────
+ *
+ * `Seccion.tsx` emite, para una sección `pinneada: 'siempre'`, un envoltorio con
+ * `w-full sticky top-0 min-h-svh`. Como el `Bloque` de acá abajo declara el alto
+ * de la sección ENTERA y es su único hijo, ese envoltorio **mide lo mismo que su
+ * padre**: su rango de pegado es `alto − alto` = **cero, por construcción, en
+ * todos los perfiles y para siempre**. No está roto — nunca tuvo recorrido.
+ *
+ * El pin de esta sección es el hijo `sticky` de `ServiciosEnSecuencia`
+ * (`CLASE_DEL_STICKY`), que mide UNA pantalla adentro del `Bloque` de tres.
+ * Medido con scroll real, con los dos bordes bisectados a 2 px: **2.158 px de
+ * recorrido a 1920** (pegado entre scrollY 11.882 y 14.040), 1.798 a 1440 y
+ * 1.502 a 1025 — donde el hijo desborda 30,55 px y el pin pierde el 2,21 % de su
+ * recorrido. `scripts-b7/b-pin.ts` → `docs/rediseno/outputs/b7/b-pin.json`.
+ *
+ * **Se deja como está, y la decisión va escrita porque el costo de las
+ * alternativas no es cero:** sacarle el pinneo al envoltorio es tocar la rama
+ * `'siempre'` de un archivo que sirve a las DOS secciones pinneadas, y este
+ * bloque cierra defectos, no cambia composición. El envoltorio inerte no le
+ * cuesta nada al layout —no desplaza un píxel en ninguna de las 512 paradas del
+ * barrido— y adentro de él **la única clase posicionada de todo el marcado es el
+ * `sticky` del pin**: ni un `absolute`, ni un `fixed`, ni un `z-index` que
+ * dependa del contexto de apilamiento que `position: sticky` crea (el único
+ * `z-10` de la sección es el del `Panel`, que es su PADRE y queda afuera).
+ * Lo que SÍ cuesta es medirlo mal, y eso se arregla acá: quedó documentado
+ * en los tres archivos y hay un instrumento que no puede volver a confundirlos.
  *
  * ── `inerciaSegundos: null` es una decisión, y va declarada ───────────────
  *

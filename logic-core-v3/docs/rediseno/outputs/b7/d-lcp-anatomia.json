@@ -1,0 +1,552 @@
+{
+  "que": "de qué está hecho el LCP de /v3 a 375 con el preset móvil: el camino crítico completo, tramo por tramo",
+  "instrumento": "scripts-b7/d-lcp-anatomia.ts · las MISMAS fuentes de `scripts-b4/a-observador.ts` que usaron B4-B y `f0-lcp.ts`",
+  "url": "http://localhost:3005/v3",
+  "perfil": "375",
+  "estrangulamiento": "movil — latencia 562.5 ms · bajada 204800 B/s · CPU 4x",
+  "carga": "visita repetida, caché deshabilitado (`Network.setCacheDisabled`)",
+  "laObservacionQueOrdenaTodo": "FCP === LCP en las tres cargas y en las seis filas de `f0-lcp.json`. El elemento LCP es TEXTO del HTML del servidor, así que el LCP es el PRIMER PINTADO: nada posterior (TBT, tarea más larga, `load`) entra en la cifra.",
+  "fcpMs": [
+    2104,
+    2044,
+    2048
+  ],
+  "lcpMs": [
+    2104,
+    2044,
+    2048
+  ],
+  "fcpMedianaMs": 2048,
+  "lcpEsTexto": true,
+  "navegacion": {
+    "redirectEnd": 0,
+    "dnsFin": 0.4,
+    "conexionFin": 0.4,
+    "pedidoInicio": 1.4,
+    "primerByte": 6.7,
+    "htmlCompleto": 648.2,
+    "domInteractivo": 2074.3,
+    "domContentLoaded": 2074.6,
+    "domCompleto": 5241.4,
+    "loadFin": 5241.5,
+    "htmlTransferido": 15133,
+    "htmlCodificado": 14833,
+    "htmlDecodificado": 103151
+  },
+  "recursosAntesDelFcp": 30,
+  "bytesAntesDelFcp": 463756,
+  "bloqueantesDelRender": [
+    {
+      "nombre": "/_next/static/css/cc10f52a1a08cc2d.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 609.5,
+      "finDeCabecera": 614.3,
+      "fin": 1234,
+      "esperaDeRed": 2.8,
+      "transferidos": 933,
+      "codificados": 633
+    },
+    {
+      "nombre": "/_next/static/css/0b99883d55ab3220.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.5,
+      "finDeCabecera": 615.6,
+      "fin": 1580.4,
+      "esperaDeRed": 2.6,
+      "transferidos": 67373,
+      "codificados": 67073
+    },
+    {
+      "nombre": "/_next/static/css/226f4571965e8b3e.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.8,
+      "finDeCabecera": 614.8,
+      "fin": 1203.2,
+      "esperaDeRed": 1.7,
+      "transferidos": 756,
+      "codificados": 456
+    },
+    {
+      "nombre": "/_next/static/css/7faddd17ac1c3e0f.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.9,
+      "finDeCabecera": 615.2,
+      "fin": 1250,
+      "esperaDeRed": 2,
+      "transferidos": 2784,
+      "codificados": 2484
+    }
+  ],
+  "tramosDelCaminoCritico": [
+    {
+      "tramo": "conexión (DNS + TCP), desde 0",
+      "hasta": 0.4,
+      "ms": 0.4
+    },
+    {
+      "tramo": "HTML — pedido → primer byte",
+      "hasta": 6.7,
+      "ms": 5.3
+    },
+    {
+      "tramo": "HTML — primer byte → completo",
+      "hasta": 648.2,
+      "ms": 641.5
+    },
+    {
+      "tramo": "bloqueante /_next/static/css/cc10f52a1a08cc2d.css (0.9 KiB, espera de red 2.8 ms)",
+      "hasta": 1234,
+      "ms": 624.5
+    },
+    {
+      "tramo": "bloqueante /_next/static/css/0b99883d55ab3220.css (65.8 KiB, espera de red 2.6 ms)",
+      "hasta": 1580.4,
+      "ms": 969.9
+    },
+    {
+      "tramo": "bloqueante /_next/static/css/226f4571965e8b3e.css (0.7 KiB, espera de red 1.7 ms)",
+      "hasta": 1203.2,
+      "ms": 592.4
+    },
+    {
+      "tramo": "bloqueante /_next/static/css/7faddd17ac1c3e0f.css (2.7 KiB, espera de red 2 ms)",
+      "hasta": 1250,
+      "ms": 639.1
+    },
+    {
+      "tramo": "último bloqueante → FCP",
+      "hasta": 2048,
+      "ms": 467.6
+    }
+  ],
+  "latenciaEmulada": {
+    "msPorVuelta": 562.5,
+    "advertencia": "la latencia del preset del panel (562,5 ms) es casi cuatro veces la del preset «mobile» de Lighthouse (150 ms). Toda cifra de vuelta de red de esta tabla es CONSERVADORA: el sitio real paga menos."
+  },
+  "contencionDeAnchoDeBanda": {
+    "que": "cuánto del FCP es competencia por el caño con los chunks de JS, que no participan del primer pintado",
+    "como": "`Network.setBlockedURLs` sobre `*/_next/static/chunks/*`, TODO lo demás igual, mismas repeticiones y mismo observador",
+    "fcpConTodoMs": [
+      2104,
+      2044,
+      2048
+    ],
+    "fcpSinLosChunksMs": [
+      2056,
+      2044,
+      2096
+    ],
+    "medianaConTodoMs": 2048,
+    "medianaSinLosChunksMs": 2056,
+    "techoMedidoMs": -8,
+    "rangoConTodoMs": [
+      2044,
+      2104
+    ],
+    "rangoSinLosChunksMs": [
+      2044,
+      2096
+    ],
+    "veredicto": "INDISTINGUIBLE DE CERO con n=3: el techo mide -8 ms y la dispersión de un solo brazo llega a 60 ms. Diferir el JS no es la palanca del FCP, y ésta es la forma honesta de decirlo",
+    "elLcpSigueSiendoElMismoElemento": true,
+    "advertencia": "NO es una propuesta: una página sin sus chunks no hidrata. Es el TECHO medido de cualquier palanca que cambie el orden o la prioridad de descarga, y hay que restarle lo que esa palanca no pueda recuperar."
+  },
+  "fuentes": [
+    {
+      "familia": "Chivo",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo",
+      "estado": "loaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo Fallback",
+      "estado": "loaded",
+      "display": "auto"
+    },
+    {
+      "familia": "Chivo Mono",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo Mono",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo Mono",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "Chivo Mono Fallback",
+      "estado": "unloaded",
+      "display": "auto"
+    },
+    {
+      "familia": "chivo",
+      "estado": "loaded",
+      "display": "swap"
+    },
+    {
+      "familia": "chivo Fallback",
+      "estado": "loaded",
+      "display": "auto"
+    },
+    {
+      "familia": "chivoMono",
+      "estado": "unloaded",
+      "display": "swap"
+    },
+    {
+      "familia": "chivoMono Fallback",
+      "estado": "unloaded",
+      "display": "auto"
+    }
+  ],
+  "recursos": [
+    {
+      "nombre": "/_next/static/css/cc10f52a1a08cc2d.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 609.5,
+      "finDeCabecera": 614.3,
+      "fin": 1234,
+      "esperaDeRed": 2.8,
+      "transferidos": 933,
+      "codificados": 633
+    },
+    {
+      "nombre": "/_next/static/css/0b99883d55ab3220.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.5,
+      "finDeCabecera": 615.6,
+      "fin": 1580.4,
+      "esperaDeRed": 2.6,
+      "transferidos": 67373,
+      "codificados": 67073
+    },
+    {
+      "nombre": "/_next/static/css/226f4571965e8b3e.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.8,
+      "finDeCabecera": 614.8,
+      "fin": 1203.2,
+      "esperaDeRed": 1.7,
+      "transferidos": 756,
+      "codificados": 456
+    },
+    {
+      "nombre": "/_next/static/css/7faddd17ac1c3e0f.css",
+      "tipo": "link",
+      "bloqueante": "blocking",
+      "inicio": 610.9,
+      "finDeCabecera": 615.2,
+      "fin": 1250,
+      "esperaDeRed": 2,
+      "transferidos": 2784,
+      "codificados": 2484
+    },
+    {
+      "nombre": "/_next/static/chunks/webpack-26436779f4d534ce.js",
+      "tipo": "link",
+      "bloqueante": "non-blocking",
+      "inicio": 611.4,
+      "finDeCabecera": 1254.1,
+      "fin": 1845.1,
+      "esperaDeRed": 2.6,
+      "transferidos": 3819,
+      "codificados": 3519
+    },
+    {
+      "nombre": "/_next/static/chunks/4bd1b696-6eaa2cedfc308a4d.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 611.8,
+      "finDeCabecera": 1584.7,
+      "fin": 3270.3,
+      "esperaDeRed": 2.3,
+      "transferidos": 63318,
+      "codificados": 63018
+    },
+    {
+      "nombre": "/_next/static/chunks/7149-7557275e4deb1c2f.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 612,
+      "finDeCabecera": 1618.8,
+      "fin": 3804,
+      "esperaDeRed": 2.9,
+      "transferidos": 145776,
+      "codificados": 145476
+    },
+    {
+      "nombre": "/_next/static/chunks/main-app-d9c33d2397e0a31c.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 612.2,
+      "finDeCabecera": 1618,
+      "fin": 2269.9,
+      "esperaDeRed": 2,
+      "transferidos": 2887,
+      "codificados": 2587
+    },
+    {
+      "nombre": "/_next/static/chunks/5354-65da9ee1e425716e.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 612.6,
+      "finDeCabecera": 1619.1,
+      "fin": 3100.9,
+      "esperaDeRed": 3,
+      "transferidos": 44050,
+      "codificados": 43750
+    },
+    {
+      "nombre": "/_next/static/chunks/5681-4842ffa115d7eb5b.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 612.8,
+      "finDeCabecera": 1618,
+      "fin": 2284.8,
+      "esperaDeRed": 1.8,
+      "transferidos": 2994,
+      "codificados": 2694
+    },
+    {
+      "nombre": "/_next/static/chunks/8500-975c2913d78cf40b.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 613,
+      "finDeCabecera": 2272.1,
+      "fin": 2912.3,
+      "esperaDeRed": 1.3,
+      "transferidos": 2327,
+      "codificados": 2027
+    },
+    {
+      "nombre": "/_next/static/chunks/6609-c1cd5c7dca01854d.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 613.5,
+      "finDeCabecera": 2287.3,
+      "fin": 3116.5,
+      "esperaDeRed": 1.6,
+      "transferidos": 9740,
+      "codificados": 9440
+    },
+    {
+      "nombre": "/_next/static/chunks/4210-3019a11558e98a0c.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 613.6,
+      "finDeCabecera": 2914.1,
+      "fin": 3537.4,
+      "esperaDeRed": 1.4,
+      "transferidos": 3516,
+      "codificados": 3216
+    },
+    {
+      "nombre": "/_next/static/chunks/8437-73cac7b3801b6f65.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 614,
+      "finDeCabecera": 3103.6,
+      "fin": 3771.8,
+      "esperaDeRed": 1.4,
+      "transferidos": 5858,
+      "codificados": 5558
+    },
+    {
+      "nombre": "/_next/static/chunks/9752-6d99b73d8d47623a.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 614.3,
+      "finDeCabecera": 3119.1,
+      "fin": 3819.8,
+      "esperaDeRed": 2.2,
+      "transferidos": 5920,
+      "codificados": 5620
+    },
+    {
+      "nombre": "/_next/static/chunks/2229-3a11874c3981dbd4.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 614.7,
+      "finDeCabecera": 3149.8,
+      "fin": 3820,
+      "esperaDeRed": 1.4,
+      "transferidos": 4256,
+      "codificados": 3956
+    },
+    {
+      "nombre": "/_next/static/chunks/4610-668f86cdac0089f3.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 614.8,
+      "finDeCabecera": 3273.1,
+      "fin": 3881,
+      "esperaDeRed": 1.5,
+      "transferidos": 3375,
+      "codificados": 3075
+    },
+    {
+      "nombre": "/_next/static/chunks/657-d974ab75327b831f.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 615.2,
+      "finDeCabecera": 3539.5,
+      "fin": 4130.7,
+      "esperaDeRed": 1.3,
+      "transferidos": 2663,
+      "codificados": 2363
+    },
+    {
+      "nombre": "/_next/static/chunks/6861-f3e01480c6f87ed6.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 615.4,
+      "finDeCabecera": 3773.9,
+      "fin": 4444.9,
+      "esperaDeRed": 1.7,
+      "transferidos": 9302,
+      "codificados": 9002
+    },
+    {
+      "nombre": "/_next/static/chunks/app/layout-81b9845acff046a2.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 615.4,
+      "finDeCabecera": 3806.9,
+      "fin": 4522.3,
+      "esperaDeRed": 1.6,
+      "transferidos": 11512,
+      "codificados": 11212
+    },
+    {
+      "nombre": "/_next/static/chunks/app/error-b939ddafb61d1244.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 615.6,
+      "finDeCabecera": 3825.6,
+      "fin": 4444.1,
+      "esperaDeRed": 1.8,
+      "transferidos": 1702,
+      "codificados": 1402
+    },
+    {
+      "nombre": "/_next/static/chunks/app/not-found-abc0bce8045bb824.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 616.1,
+      "finDeCabecera": 3825.7,
+      "fin": 4444.5,
+      "esperaDeRed": 1.9,
+      "transferidos": 2223,
+      "codificados": 1923
+    },
+    {
+      "nombre": "/_next/static/chunks/app/v3/layout-5faa42609550ff80.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 616.3,
+      "finDeCabecera": 3883.6,
+      "fin": 4491.2,
+      "esperaDeRed": 1.7,
+      "transferidos": 2610,
+      "codificados": 2310
+    },
+    {
+      "nombre": "/_next/static/chunks/app/global-error-d8f48ed1b2c567ce.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 616.7,
+      "finDeCabecera": 4132.9,
+      "fin": 4712.5,
+      "esperaDeRed": 1.2,
+      "transferidos": 1242,
+      "codificados": 942
+    },
+    {
+      "nombre": "/_next/static/chunks/8409-70da2dd8abb785bd.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 616.9,
+      "finDeCabecera": 4446.7,
+      "fin": 5138.3,
+      "esperaDeRed": 1.9,
+      "transferidos": 9252,
+      "codificados": 8952
+    },
+    {
+      "nombre": "/_next/static/chunks/193-1b35fef0c87a1a6f.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 617.1,
+      "finDeCabecera": 4446.5,
+      "fin": 5075.7,
+      "esperaDeRed": 1.4,
+      "transferidos": 2946,
+      "codificados": 2646
+    },
+    {
+      "nombre": "/_next/static/chunks/9279-db7d413fc0261821.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 617.4,
+      "finDeCabecera": 4446.4,
+      "fin": 5044.6,
+      "esperaDeRed": 1.1,
+      "transferidos": 1223,
+      "codificados": 923
+    },
+    {
+      "nombre": "/_next/static/chunks/6843-8a004faef7bdcc54.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 617.7,
+      "finDeCabecera": 4494.3,
+      "fin": 5091.6,
+      "esperaDeRed": 2,
+      "transferidos": 1238,
+      "codificados": 938
+    },
+    {
+      "nombre": "/_next/static/chunks/app/v3/page-d9777644c9ccd7e4.js",
+      "tipo": "script",
+      "bloqueante": "non-blocking",
+      "inicio": 617.8,
+      "finDeCabecera": 4524.6,
+      "fin": 5200,
+      "esperaDeRed": 1.9,
+      "transferidos": 14609,
+      "codificados": 14309
+    },
+    {
+      "nombre": "/_next/static/media/f04c3881ee3d9785-s.p.woff2",
+      "tipo": "css",
+      "bloqueante": "non-blocking",
+      "inicio": 1663.7,
+      "finDeCabecera": 1847,
+      "fin": 3147,
+      "esperaDeRed": 1.7,
+      "transferidos": 33552,
+      "codificados": 33252
+    }
+  ]
+}

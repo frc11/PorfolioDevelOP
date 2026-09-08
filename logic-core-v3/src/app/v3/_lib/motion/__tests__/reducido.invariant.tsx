@@ -17,6 +17,30 @@
  * sistema está roto y no anima nunca. Por eso cada afirmación tiene su gemela:
  * SIN la preferencia, la transformada TIENE que estar. Las dos juntas dicen algo;
  * cada una sola, no.
+ *
+ * ═══ ⚠️ B7 · LO QUE R1…R6 NO PODÍAN DECIR, Y POR QUÉ ══════════════════════
+ *
+ * **Este archivo estuvo en verde —46 afirmaciones, 0 fallas— mientras el sitio
+ * ignoraba la preferencia.** No por un error de cálculo: porque `marcar()`
+ * renderiza a través de `<MotionConfig reducedMotion={preferencia}>` y después
+ * afirma sobre esa misma `preferencia`. **Inyecta el valor bajo prueba.** Prueba
+ * que el árbol respeta el contexto —que es cierto y es útil— y no puede decir
+ * nada sobre si producción PONE ese contexto. Producción no lo ponía: el default
+ * de `MotionConfigContext` es `reducedMotion: "never"`, que corta antes del media
+ * query. Medido en el navegador por la Fase 0 de B7: 2450 transformadas
+ * acumuladas con la preferencia puesta contra 2450 sin ella, a 1920.
+ *
+ * De ahí sale la regla «verde por arnés» del proyecto, y su discriminador: *¿qué
+ * parte de esta afirmación la puso el instrumento?* Si la respuesta incluye la
+ * entrada bajo prueba, se está midiendo el arnés.
+ *
+ * **R1…R6 se conservan enteras: ninguna se aflojó ni se borró.** Lo que B7 agrega
+ * es la segunda mitad, por un camino distinto, en `reducido-produccion.tsx`
+ * (R7·R7b·R8·R9·R10): que el camino de producción PRODUCE esa entrada, que sin el
+ * proveedor el mismo árbol vuelve a animar —el defecto de hoy, capturado como
+ * control negativo— y que el forzado por contexto de R1…R6 sigue ganando adentro
+ * de la composición de producción. La tercera mitad es del navegador y vive en
+ * `scripts-b7/a-reducido.ts`.
  */
 
 import { MotionConfig } from 'motion/react'
@@ -37,6 +61,7 @@ import { altoDelBloqueSvh } from '../escenografia'
 import { ATRIBUTO_PIEZAS, palabrasDe } from '../lineas'
 import { ORDEN_DE_PATRONES, PATRONES, type IdDePatron } from '../patrones'
 import { politicaDeMovimiento } from '../reducido'
+import { afirmarElCaminoDeProduccion } from './reducido-produccion'
 
 type Contenido = (props: { estado: EstadoDelBloque }) => React.JSX.Element
 
@@ -240,5 +265,11 @@ afirmar(
   `y esta comprobación renderiza ${CASOS.length} de los nueve`,
   CASOS.map((c) => c.id).join(' · '),
 )
+
+// ═══════════════════════════════════════════════════════════════════════════
+// R7 · R7b · R8 · R9 · R10 — la segunda mitad, en `reducido-produccion.tsx`.
+// Se llama desde acá para que `test:s2-reducido` corra las dos y el resumen sea
+// uno solo: son dos caminos hacia la misma propiedad, no dos comprobaciones.
+afirmarElCaminoDeProduccion(CASOS, CASOS[0], 'Seis líneas, que es el bloque más largo')
 
 cerrar('reducido.invariant')
