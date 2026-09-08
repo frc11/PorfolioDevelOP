@@ -145,6 +145,27 @@ export interface Seccion {
  * lo que la hace valer. Si los ocho paneles dejaran ver el canvas, el canvas
  * dejaría de ser un acontecimiento y pasaría a ser el fondo.
  *
+ * ── ⚠️ B6-A Y B8 LO REESCRIBIERON: SEIS VEN LA SALA, DOS NO ────────────────
+ *
+ *     01 Hero              papel-transparente   ← la escena, de corrido…
+ *     02 Quiénes somos     papel-transparente      (B8)
+ *     03 Números           papel-transparente      (B8)
+ *     04 Trabajos          oscuro-transparente  ← …hasta la noche (B6-A abrió, B8 sacó el velo)
+ *     05 Servicios         papel-opaco          ← opaca por pedido del humano
+ *     06 Tu panel          papel-opaco          ← opaca por pedido del humano
+ *     07 Por qué develOP   papel-transparente   ← la escena vuelve, amanecida
+ *     08 Cierre            oscuro-transparente     (B6-A abrió, B8 sacó el velo)
+ *
+ * El humano fijó el orden del trabajo: **primero la luz, después la
+ * información**. Abrir Quiénes somos y Números rompe el contraste a propósito
+ * —el logo pasa detrás de su texto, medido en B6-A: 12 de 17 y 12 de 13
+ * bloques— y ese estado es intermedio y deliberado: las afirmaciones que
+ * fallan pasan a deuda declarada con su número y cierran en el bloque
+ * siguiente, que acomoda el contenido a la coreografía. El acontecimiento que
+ * §0.2 protegía ya no es «la escena aparece»: es **la luz**, que atardece
+ * cuando Trabajos entra y amanece detrás de las dos opacas
+ * (`_lib/escena/lightArc.ts`).
+ *
  * ── Las alturas de las cuatro primeras, y de dónde salen ───────────────────
  *
  * De SITIO-S5, que es el sprint que les puso contenido:
@@ -273,7 +294,7 @@ export const SECCIONES: readonly Seccion[] = [
    * su pantalla**. La composición mide dos pantallas porque tiene DOS GRUPOS
    * —la agencia y las personas—, no porque una caja esté sobredimensionada.
    */
-  { id: 'quienes-somos', numero: '02', nombre: 'Quiénes somos', superficie: 'papel-opaco', alto: '300svh' },
+  { id: 'quienes-somos', numero: '02', nombre: 'Quiénes somos', superficie: 'papel-transparente', alto: '300svh' },
   /**
    * NÚMEROS — 400svh. **B2 la subió de 100, y las dos mitades del número están
    * medidas.** El detalle entero, con sus instrumentos, en `B2-DELTAS.md` §3.
@@ -293,7 +314,7 @@ export const SECCIONES: readonly Seccion[] = [
    * 120 px— y era la mitad del hueco de 2,44 pantallas sin que pase nada, el
    * peor del sitio contra 1,56 de la referencia.
    */
-  { id: 'numeros', numero: '03', nombre: 'Números', superficie: 'papel-opaco', alto: '400svh' },
+  { id: 'numeros', numero: '03', nombre: 'Números', superficie: 'papel-transparente', alto: '400svh' },
   /**
    * TRABAJOS — la segunda secuencia pinneada, y la primera con contenido.
    *
@@ -306,9 +327,9 @@ export const SECCIONES: readonly Seccion[] = [
     id: 'trabajos',
     numero: '04',
     nombre: 'Trabajos',
-    // B6-A: se abre sobre la escena con el velo. Medido con la sala real
-    // detrás (docs/rediseno/outputs/b6/): todo lo pleno pasa AA, y el rótulo
-    // secundario pasó a tinta plena por decisión de la PARADA 1.
+    // B6-A la abrió sobre la escena con un velo; B8 sacó el velo y puso la
+    // noche detrás: el arco del sol baja a 0,08 mientras esta sección entra
+    // (`_lib/escena/lightArc.ts`). Los tres proyectos vienen del fondo oscuro.
     superficie: 'oscuro-transparente',
     alto: altoDeSecuenciaPinneada(PASOS_DE_TRABAJOS),
     pinneada: 'desde-escritorio',
@@ -404,9 +425,11 @@ export const SECCIONES: readonly Seccion[] = [
    * recorta nada en ningún ancho; y declarar dos altos por ancho no existe en
    * la tabla —el `alto` es uno y es un mínimo—. Se queda como está.
    */
-  // B6-A: el último cuadro del sitio deja ver la sala. Los 25 bloques del
-  // pie pasan AA con la escena real detrás; lo que se ve es poco porque en esa
-  // pose el sol ya se puso (decisión de S11): la palanca es el arco del sol.
+  // B6-A: el último cuadro del sitio deja ver la sala, y con el velo y el sol
+  // en 0,34 quedaba negro. B8 sacó el velo y dejó el arco en 0,643 —la luz de
+  // mañana del diferencial— así que la sala se ve detrás del pie; lo que eso le
+  // hace a la tinta clara del pie queda como deuda declarada, y la pregunta de
+  // si el Cierre sigue siendo una sección oscura es del bloque siguiente.
   { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-transparente', alto: '100svh' },
 ]
 

@@ -59,6 +59,7 @@ import {
 import { celosiaSunSpread } from './celosiaPenumbra'
 import { writeCelosiaLayers, type CelosiaUniforms } from './celosiaShader'
 import type { MoireHandle } from './MoireScreen'
+import { BRILLO_DE_LA_NOCHE, brilloDeLaNocheEn } from './particleGlow'
 import { celosiaSkyFactor } from './probeCelosia'
 import { MOIRE_DRIFT_PERIOD_S } from './probeMoire'
 import { KEY_AZIMUTH_DEG, KEY_ELEVATION_DEG, KEY_INTENSITY } from './probeLighting'
@@ -543,6 +544,8 @@ export function OrbitRig({
     lightInput.celosiaSpread = celosiaSunSpread(params.celosiaSunRadiusDeg)
 
     applyLightRig(targets, lightInput, scratch.lightCache)
+    // B8: las partículas brillan con la noche del arco, en el mismo cuadro que la luz — `particleGlow.ts`.
+    BRILLO_DE_LA_NOCHE.uNoche.value = brilloDeLaNocheEn(arc.level)
 
     // 5 · Vira en reposo: balanceo lento y continuo del logo. Dos senos de
     // período inconmensurable (13 y 9,5 s) para que la combinación no se lea

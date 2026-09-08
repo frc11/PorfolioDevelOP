@@ -34,6 +34,7 @@
 let fallas = 0
 let afirmaciones = 0
 let fueraDeVentana = 0
+let deudas = 0
 
 export function afirmar(condicion: boolean, descripcion: string, detalle?: string): void {
   afirmaciones += 1
@@ -88,16 +89,54 @@ export function noCorre(descripcion: string, razon: string): void {
   console.warn(`            fuera de ventana — ${razon}`)
 }
 
+/**
+ * LA CUARTA CATEGORÍA — la DEUDA DECLARADA (B8).
+ *
+ * Una comprobación cuya condición sigue siendo la correcta y que HOY falla por
+ * una decisión tomada a propósito, con su cierre en un bloque siguiente. B8 saca
+ * el velo y abre seis secciones sobre la escena para que el humano vea la
+ * coreografía ANTES de acomodar el contenido; el contraste de ese texto se rompe
+ * a sabiendas, y la instrucción manda que ninguna afirmación se afloje ni se
+ * borre: pasan a deuda, con su número y su fecha de cierre.
+ *
+ * ── Por qué no es un `afirmar` que se comenta, ni un `noCorre` ─────────────
+ *
+ * La condición corre INTACTA: el día que el bloque siguiente mueva el texto, la
+ * misma línea pasa a `ok` sola y la deuda desaparece del resumen sin que nadie
+ * la busque. Y no es `noCorre`: acá la comprobación SÍ corrió y SÍ falló, y eso
+ * se imprime con el número medido. Lo que cambia es la cuenta: no es una falla
+ * —el árbol no está roto, está en un estado intermedio decidido— y no es un ok.
+ * Es la diferencia entre saber que algo está roto y esconderlo. El agregado la
+ * cuenta aparte (`s4-corrida.ts`) y `verificar` la publica en su resumen.
+ */
+export function deudaDeclarada(condicion: boolean, descripcion: string, detalle: string, cierre: string): void {
+  afirmaciones += 1
+  if (condicion) {
+    console.log(`  ok   ${descripcion}  — ${detalle} · la deuda que cerraba en ${cierre} está saldada`)
+    return
+  }
+  deudas += 1
+  console.warn(`  DEUDA ${descripcion}  — ${detalle}`)
+  console.warn(`        declarada, cierra en ${cierre}`)
+}
+
 export function titulo(texto: string): void {
   console.log(`\n${texto}`)
 }
 
 export function cerrar(nombre: string): never {
-  const cola = fueraDeVentana > 0 ? `, ${fueraDeVentana} fuera de ventana` : ''
+  const cola =
+    (fueraDeVentana > 0 ? `, ${fueraDeVentana} fuera de ventana` : '') +
+    (deudas > 0 ? `, ${deudas} deudas declaradas` : '')
   console.log(`\n${nombre}: ${afirmaciones} afirmaciones, ${fallas} fallas${cola}`)
   if (afirmaciones === 0 && fueraDeVentana === 0) {
     console.error('FALLA: cero afirmaciones. Un invariante sin afirmaciones es verde por vacío.')
     process.exit(1)
+  }
+  if (deudas > 0) {
+    console.warn(
+      `${nombre}: ${deudas} comprobación(es) en DEUDA DECLARADA — este verde carga una deuda con fecha de cierre, no está limpio.`,
+    )
   }
   if (fueraDeVentana > 0) {
     console.warn(

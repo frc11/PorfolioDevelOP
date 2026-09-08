@@ -79,23 +79,40 @@ afirmar(
 afirmarIgual(total.afirmaciones, 4, 'suma 4 afirmaciones: 1 + 1 + (1 + 1 control positivo)')
 afirmarIgual(total.controles, 1, 'y 1 control positivo, el del fixture que pasa')
 afirmarIgual(total.fueraDeVentana, 0, 'ningún fixture está fuera de ventana')
+afirmarIgual(total.deudas, 0, '  ni declara una deuda: los tres de siempre no usan `deudaDeclarada()`')
+
+// ═══════════════════════════════════════════════════════════════════════════
+titulo('4 · Una deuda declarada se cuenta aparte, y NO es una falla (B8)')
+
+/**
+ * B8 rompe contraste a propósito y lo declara con `deudaDeclarada()`: la
+ * condición corre intacta, el rojo no aparece y la cuenta sale en el resumen.
+ * El fixture `deuda` declara una y pasa una; el agregado tiene que reportarlo
+ * como pasado, con UNA deuda, y el total tiene que sumarla. Sin esto, «deuda»
+ * y «falla» serían la misma cosa con dos nombres.
+ */
+const conDeuda = correrSuite({ nombre: 'fixtures-deuda', invariantes: [fixture('deuda'), fixture('pasa')] }, false)
+afirmarIgual(conDeuda.filter(fallo).map((r) => r.script), [], 'un invariante con una deuda declarada NO cuenta como falla')
+afirmarIgual(totalizar(conDeuda).deudas, 1, '  y la deuda se cuenta: una')
+afirmarIgual(conDeuda[0].afirmaciones, 2, '  y es una afirmación MÁS, no una menos: el fixture cierra con 2')
+controlPositivo('el contador de deudas no da uno contra cualquier salida: el fixture que pasa declara cero', conDeuda[1], (r) => r.deudas === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Los controles del propio corredor')
 
 controlPositivo(
   'el corredor cuenta como falla un invariante que NO llegó a resumir',
-  { script: 'x', comando: '', codigo: 0, afirmaciones: 0, fallas: 0, fueraDeVentana: 0, controles: 0, resumio: false, ms: 0, salida: '' },
+  { script: 'x', comando: '', codigo: 0, afirmaciones: 0, fallas: 0, fueraDeVentana: 0, deudas: 0, controles: 0, resumio: false, ms: 0, salida: '' },
   (r) => !fallo(r),
 )
 controlPositivo(
   'y uno que salió en cero pero reportó fallas',
-  { script: 'x', comando: '', codigo: 0, afirmaciones: 3, fallas: 1, fueraDeVentana: 0, controles: 0, resumio: true, ms: 0, salida: '' },
+  { script: 'x', comando: '', codigo: 0, afirmaciones: 3, fallas: 1, fueraDeVentana: 0, deudas: 0, controles: 0, resumio: true, ms: 0, salida: '' },
   (r) => !fallo(r),
 )
 controlPositivo(
   'y uno que resumió limpio pero salió distinto de cero',
-  { script: 'x', comando: '', codigo: 1, afirmaciones: 3, fallas: 0, fueraDeVentana: 0, controles: 0, resumio: true, ms: 0, salida: '' },
+  { script: 'x', comando: '', codigo: 1, afirmaciones: 3, fallas: 0, fueraDeVentana: 0, deudas: 0, controles: 0, resumio: true, ms: 0, salida: '' },
   (r) => !fallo(r),
 )
 

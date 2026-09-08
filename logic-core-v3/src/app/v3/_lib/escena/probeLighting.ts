@@ -202,6 +202,37 @@ export const HEMI_DIM_GAMMA = 1.45
 export const RIM_DIM_SHARE = 0.62
 export const FOG_DIM_GAMMA = 1.2
 
+/**
+ * ── B8 · EL CONTRALUZ SE APAGA CON LA SALA POR DEBAJO DE 0,34 ─────────────
+ *
+ * El freno de arriba (`RIM_DIM_SHARE`) se calibró para un arco cuyo mínimo era
+ * 0,34: a ese nivel el rim queda en 0,59 y es lo que dibuja el filo del logo en
+ * la penumbra del cierre. B8 lleva la sala a 0,08 en Trabajos —la noche— y ahí
+ * el freno se vuelve un defecto: el rim es del OBSERVADOR y una direccional
+ * también pega en el piso (`rim.y / |rim|` = 0,21 con la cámara de Trabajos),
+ * así que con el sol en el horizonte la losa seguía en **78** de 255. Medido
+ * con `scripts-b8/modelo-de-luz.ts`, la misma cadena que `shading.ts`: con el
+ * rim apagándose junto con la sala, a 0,08 el piso da 33 y la pared 23.
+ *
+ * La regla: **hasta 0,34 el rim es exactamente el de S6; por debajo, baja en
+ * proporción al nivel desde el valor que tenía en 0,34.** Es continua en la
+ * frontera y deja intacto todo lo que S6–S12 midieron, porque ninguno de esos
+ * arcos bajó de 0,34. `RIM_NIGHT_LEVEL` es ese mínimo, y `rimIntensityAt` es
+ * la ÚNICA cuenta: `lightRig.ts` (el runtime) y
+ * `probe-escena/__tests__/shading.ts` (el modelo) la importan de acá, para que
+ * el calibrador mida la misma luz que la pantalla pinta.
+ */
+export const RIM_NIGHT_LEVEL = 0.34
+
+/** El contraluz en un nivel del arco. Ver el docblock de arriba. */
+export function rimIntensityAt(level: number): number {
+  const deS6 = RIM_INTENSITY * (1 - (1 - level) * RIM_DIM_SHARE)
+  if (level >= RIM_NIGHT_LEVEL) return deS6
+  const enLaFrontera = RIM_INTENSITY * (1 - (1 - RIM_NIGHT_LEVEL) * RIM_DIM_SHARE)
+  return enLaFrontera * (Math.max(0, level) / RIM_NIGHT_LEVEL)
+}
+
+
 // ── El toggle "la luz sigue a la cámara" ────────────────────────────────────
 
 /**

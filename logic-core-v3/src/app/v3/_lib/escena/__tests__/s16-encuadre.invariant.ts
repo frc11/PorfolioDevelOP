@@ -59,6 +59,7 @@
  */
 
 import { afirmar, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
+import { NOCHE } from '../lightArc'
 import { CHOREO_KEYFRAMES } from '../choreography'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 import { muestrearLogo } from './s10-logo'
@@ -240,9 +241,18 @@ afirmar(
   '  y en toda la ventana en que el Hero se ve, que es donde la pregunta existe',
   `peor de [0 · 0,125]: ${peorDeLaVentana.toFixed(2)}:1 — la misma cifra que publicaba §4 de \`s8-tinta\` con 0,68`,
 )
+/**
+ * ⚠️ **B8 MOVIÓ LA ENTRADA DE ESTE CONTROL, no el criterio.** Decía «al final
+ * del recorrido la misma escena no llega a AA», y era cierto porque el arco
+ * viejo seguía bajando hasta 0,34 en p=1. B8 sostiene la mañana (0,643) desde el
+ * ancla del diferencial hasta el final, así que en p=1 la tinta SÍ pasa AA —es
+ * lo que `s8-tinta` §5 afirma ahora—. Donde la misma escena no llega es la NOCHE
+ * de Trabajos (`lightArc.ts`, `NOCHE`): tinta oscura sobre una sala a oscuras.
+ * El control mide lo mismo que antes: que el medidor sabe reprobar.
+ */
 controlPositivo(
-  'el medidor de contraste sabe reprobar: al final del recorrido la misma escena no llega a AA',
-  1,
+  'el medidor de contraste sabe reprobar: en la noche de Trabajos la misma escena no llega a AA',
+  (NOCHE.desde + NOCHE.hasta) / 2,
   (p: number) => contrasteSobreElFondo(p) >= AA,
 )
 

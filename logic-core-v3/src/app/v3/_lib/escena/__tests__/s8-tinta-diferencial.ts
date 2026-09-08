@@ -28,8 +28,10 @@ export interface InstrumentosDeTinta {
   readonly contrasteEn: (progreso: number, cuantil: number) => number
   /** Dónde el recorrido cruza un umbral de contraste, por bisección. */
   readonly bisecar: (umbral: number, cuantil?: number) => number
-  /** Dónde cruza AA el peor píxel. Lo mide §3 y no se vuelve a bisecar. */
+  /** Dónde cruza AA hacia abajo el peor píxel (B8: adentro del atardecer). Lo mide §3 y no se vuelve a bisecar. */
   readonly cruceAA: number
+  /** B8: dónde VUELVE a pasar AA mientras el diferencial entra. También de §3. */
+  readonly vueltaAA: number
   readonly AA: number
   readonly AAA: number
 }
@@ -63,15 +65,26 @@ export function afirmarElDiferencial(
     `POR QUÉ DEVELOP — la tinta PASA AA donde la sección llena el cuadro (p=${diferencial.llenaDesde.toFixed(3)})`,
     `${difLlena.toFixed(2)}:1 (mín) · ${difP05.toFixed(2)}:1 (p05) · ${difMedia.toFixed(2)}:1 (mediana), contra ${i.AA}:1`,
   )
+  /**
+   * ⚠️ **B8 · LAS DOS DE ABAJO CAMBIARON DE RAZÓN, NO DE VARA.** Custodiaban «llena
+   * el cuadro ANTES del cruce de AA» y «ganó contraste contra el provisional
+   * (0,941)»: las dos describían un arco que se apagaba después del ancla. B8
+   * sostiene la mañana hasta el final, así que el cruce que importa es el de
+   * SUBIDA —la tinta vuelve a AA mientras el diferencial entra— y el provisional
+   * hoy daría tanto o más contraste que el ancla. Lo que se afirma es lo que
+   * sigue teniendo dientes: que el ancla llena el cuadro DESPUÉS de esa vuelta, y
+   * que el ancla no se sostiene por contraste sino por el titular limpio
+   * (`s13b` §4) y el corrimiento de `tu-panel` (`s16` §5) — las dos pasan AA.
+   */
   afirmar(
-    diferencial.llenaDesde < i.cruceAA,
-    '  y no por poco: llena el cuadro ANTES del cruce de AA de la escena',
-    `p=${diferencial.llenaDesde.toFixed(4)} contra el cruce en p=${i.cruceAA.toFixed(4)}`,
+    diferencial.llenaDesde > i.vueltaAA,
+    '  y no por poco: llena el cuadro DESPUÉS de que la tinta vuelve a pasar AA (B8)',
+    `p=${diferencial.llenaDesde.toFixed(4)} contra la vuelta en p=${i.vueltaAA.toFixed(4)} — la entrada, entre ${i.vueltaAA.toFixed(4)} y el cruce de bajada de antes, es la deuda D-B8.3`,
   )
   afirmar(
-    difLlena > difViejo,
-    `  contra el provisional, que la ponía en p=${viejo.llenaDesde.toFixed(3)}`,
-    `${difViejo.toFixed(2)}:1 → ${difLlena.toFixed(2)}:1 — la sección se movió ${(viejo.llenaDesde - diferencial.llenaDesde).toFixed(3)} de progreso hacia atrás`,
+    difLlena >= i.AA && difViejo >= i.AA,
+    `  y el provisional (p=${viejo.llenaDesde.toFixed(3)}) también pasaría hoy: desde B8 el ancla no se sostiene por contraste`,
+    `${difViejo.toFixed(2)}:1 en el provisional contra ${difLlena.toFixed(2)}:1 en el ancla — hasta B8 el provisional daba menos porque el arco seguía apagándose`,
   )
   /**
    * ⚠ **REESCRITA EN V3-E — LA MEDIANA YA NO PASA AAA, Y NO SE AFLOJA: SE MIDE.**
@@ -87,17 +100,24 @@ export function afirmarElDiferencial(
    * que alguien la devuelva antes de p=0,8227 esto se pone en rojo, y ese rojo dice
    * «volvió el defecto 7».
    */
-  const cruceAAAdeLaMediana = i.bisecar(i.AAA, 0.5)
   afirmar(
     difMedia >= i.AA,
     '  y la mediana del cuadro pasa AA con margen donde la sección llena el cuadro',
-    `${difMedia.toFixed(2)}:1 contra ${i.AA}:1 — el provisional no alcanzaba ni AA (${i.contrasteEn(viejo.llenaDesde, 0.5).toFixed(2)}:1)`,
+    `${difMedia.toFixed(2)}:1 contra ${i.AA}:1 — con el arco viejo el provisional no alcanzaba ni AA en la mediana; hoy da ${i.contrasteEn(viejo.llenaDesde, 0.5).toFixed(2)}:1`,
   )
+  /**
+   * ⚠️ **B8 · «el cruce de AAA de la mediana quedó ATRÁS del ancla» ya no tiene
+   * un cruce que medir**: con la mañana sostenida la mediana no llega a AAA en
+   * ningún punto de la ventana del diferencial —sube de la entrada al ancla y
+   * ahí se queda—. Lo que V3-E quiso fijar sigue en pie y se afirma directo:
+   * en el ancla la mediana pasa AA y NO pasa AAA, porque la luz del ancla es la
+   * misma de entonces (0,643) y el AAA se gastó en cerrar el defecto 7. Si un
+   * día la mediana vuelve a AAA ahí, la razón de V3-E cambió y esto lo dice.
+   */
   afirmar(
-    cruceAAAdeLaMediana < diferencial.llenaDesde,
-    '  EL AAA DE LA MEDIANA SE GASTÓ EN EL RE-ANCLAJE: el cruce quedó ATRÁS del ancla declarada',
-    `la mediana cruza AAA (${i.AAA}:1) en p=${cruceAAAdeLaMediana.toFixed(4)} y el ancla está en p=${diferencial.llenaDesde.toFixed(4)}` +
-      `, ${(diferencial.llenaDesde - cruceAAAdeLaMediana).toFixed(4)} después — con el ancla cuantizada en 0,7500 la mediana daba 7,58:1 y el titular se superponía con el logo`,
+    difMedia < i.AAA,
+    '  EL AAA DE LA MEDIANA SE GASTÓ EN EL RE-ANCLAJE: en el ancla la mediana pasa AA y no llega a AAA',
+    `${difMedia.toFixed(2)}:1 contra ${i.AAA}:1 — con el ancla cuantizada en 0,7500 la mediana daba 7,58:1 y el titular se superponía con el logo`,
   )
 
   /**
@@ -114,10 +134,8 @@ export function afirmarElDiferencial(
    * reserva (b) que la parada de SITIO-S8 ya había nombrado.
    */
   const finDeLaVentana = i.contrasteEn(diferencial.seVeHasta, 0)
-  const cruceEnPantallas = pantallaDeProgreso(i.cruceAA)
   const geometria = ANCLAJE.geometria.find((g) => g.id === diferencial.id)
   if (geometria === undefined) throw new Error('la geometría no tiene al diferencial')
-  const enCuadroAlCruzar = Math.max(0, Math.min(1, geometria.hastaPantalla - cruceEnPantallas))
 
   afirmar(
     geometria.hastaPantalla === ANCLAJE.pantallasDeScroll,
@@ -133,9 +151,8 @@ export function afirmarElDiferencial(
     },
   )
   console.log(
-    `  la cola, publicada con su dueño (§7.4): la tinta cruza AA en p=${i.cruceAA.toFixed(4)}, que es la pantalla ` +
-      `${cruceEnPantallas.toFixed(3)} de ${ANCLAJE.pantallasDeScroll}. Ahí el diferencial todavía ocupa el ` +
-      `${(enCuadroAlCruzar * 100).toFixed(1)}% del cuadro —el resto ya es el Cierre, que es opaco— y al terminar de salir ` +
-      `da ${finDeLaVentana.toFixed(2)}:1. El mapeo no puede moverlo; componer la salida de la escena, sí.`,
+    `  la cola (§7.4), desde B8: la mañana sostiene ${finDeLaVentana.toFixed(2)}:1 hasta p=1 — la tinta ya no cruza AA al salir ` +
+      `(con el arco viejo cruzaba en la pantalla ${pantallaDeProgreso(0.878).toFixed(3)} de ${ANCLAJE.pantallasDeScroll} y terminaba en 2,34:1). ` +
+      'Lo que tapa al diferencial al final es el Cierre, transparente y de tinta clara: ésa es la deuda D-B8.4, no ésta.',
   )
 }

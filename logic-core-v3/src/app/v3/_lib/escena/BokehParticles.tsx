@@ -16,6 +16,7 @@ import {
   BOKEH_SPRITE_SIZE,
   buildParticleField,
 } from './probeParticles'
+import { conBrilloDeNoche } from './particleGlow'
 import { createBokehSpriteData } from './particleTextures'
 
 /**
@@ -132,6 +133,10 @@ export function BokehParticles() {
               encima de ella.
             */}
             <pointsMaterial
+              ref={(material) => {
+                // B8: en la noche el bokeh brilla con el polvo (mezcla hacia el blanco, sin color) — `particleGlow.ts`.
+                if (material !== null) conBrilloDeNoche(material)
+              }}
               map={sprite}
               size={BOKEH_SIZE}
               sizeAttenuation

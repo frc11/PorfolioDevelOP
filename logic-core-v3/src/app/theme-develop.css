@@ -236,20 +236,6 @@
    * para sus dos colores con alfa, y no depende de soporte de navegador. */
   --color-superficie-translucida: rgba(247, 247, 245, 0.60);
 
-  /* --- El velo: la quinta superficie, en gradiente (B6-A) ---------------
-   * Dos colores del papel con dos alfas de la escala, para el fondo en
-   * gradiente de una sección transparente sobre la escena: DENSO detrás de
-   * la columna de texto y RALO en la zona desnuda. Las alfas no se
-   * inventaron: 0,40 es `--opacity-media`, que ya estaba; 0,80 es
-   * `--opacity-densa`, el escalón agregado arriba con su medición.
-   *
-   * Se declaran en los dos temas por la misma razón que la superficie
-   * translúcida, pero el único consumidor de hoy es la sección invertida:
-   * Trabajos y el Cierre en `oscuro-transparente`. La forma del gradiente
-   * —dónde termina la columna, cuánto mide la rampa— vive en
-   * `v3/_estilos/velo.css` sobre tokens de layout. [derivado, B6-A] */
-  --color-velo-denso: rgba(247, 247, 245, 0.80);
-  --color-velo-ralo: rgba(247, 247, 245, 0.40);
 
   /* Las tres tintas. La primaria es [decidido]; las otras dos [derivado],
    * con el mismo método espejado: se midieron las razones de SUS tintas
@@ -761,11 +747,6 @@
   --opacity-media: 0.4;
   --opacity-alta: 0.5;
   --opacity-casi: 0.6;
-  /* ⚠ B6-A: el escalón DENSO, el primero con el que el texto secundario pasa
-   * AA sobre el velo. Medido en la pose de Trabajos con la escena real detrás
-   * (docs/rediseno/outputs/b6/d-velo.json): 0,70 → 4,09:1 · 0,80 → 4,84:1.
-   * Y desde los tokens, con blanco detrás: 0,80 → 5,0:1. [derivado] */
-  --opacity-densa: 0.8;
 
   --container-dominante: 100%;   /* envoltorio dominante — valor USADO, no declarado */
   --container-tope: 1920px;      /* envoltorio tope */
@@ -968,13 +949,6 @@
    * translúcida del tema claro. [derivado, CORRECCIÓN A S0 por S3] */
   --color-superficie-translucida: rgba(14, 14, 14, 0.60);
 
-  /* El velo, dado vuelta: el oscuro con las MISMAS dos alfas. Con blanco
-   * detrás —el peor píxel que la sala puede pintar— la tinta clara sobre el
-   * denso da 9,9:1 y a `opacity-casi` 5,0:1; sobre el ralo la tinta plena
-   * daría 2,47:1, y por eso el ralo va sólo donde no hay texto. Las dos
-   * cifras las recalcula `superficies.invariant` §3b. [derivado, B6-A] */
-  --color-velo-denso: rgba(14, 14, 14, 0.80);
-  --color-velo-ralo: rgba(14, 14, 14, 0.40);
 
   /* NO se redefinen --color-superficie-1/2/3. [pendiente]
    * La sección invertida es UNA superficie: el brief de develOP declara

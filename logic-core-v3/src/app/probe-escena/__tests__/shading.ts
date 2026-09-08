@@ -10,11 +10,10 @@ import {
   HEMI_INTENSITY,
   KEY_INTENSITY,
   RIM_AZIMUTH_OFFSET_DEG,
-  RIM_DIM_SHARE,
   RIM_DISTANCE,
   RIM_HEIGHT_BASE,
   RIM_HEIGHT_TRACK,
-  RIM_INTENSITY,
+  rimIntensityAt,
 } from '@/app/v3/_lib/escena/probeLighting'
 import { BOUNCE_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 
@@ -154,7 +153,7 @@ export function shadeSurface(
   const direct =
     (KEY_INTENSITY * level * dotSun * keyGobo +
       FILL_INTENSITY * level * dotFill +
-      RIM_INTENSITY * (1 - (1 - level) * RIM_DIM_SHARE) * dotRim) /
+      rimIntensityAt(level) * dotRim) /
     Math.PI
 
   const skyColor = hexToLinear(PAPER_COLOR)

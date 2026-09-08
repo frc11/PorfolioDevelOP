@@ -215,3 +215,25 @@ juzga es el humano, mirando las capturas.
 referencia en producción (nk.studio): **una navegación, una medición, y se
 cierra la pestaña.** Se miden números y se escriben con nuestras palabras. No se
 copia un selector, ni una clase, ni un valor de CSS, ni un asset.
+
+---
+
+## 5. La máscara de glifo necesita un fondo PLANO detrás de la tinta (B8)
+
+El contraste bajo el glifo (`scripts-b6/glifo-alfa.ts` y su copia de B8) saca la
+máscara de la captura **T** —la escena oculta— comparando cada píxel con la
+mediana de su caja: lo que difiere es tinta. Eso supone que, sin la escena, el
+panel deja detrás del texto un fondo plano DISTINTO de la tinta. **Un panel
+transparente de tinta clara no lo cumple:** sin la escena deja ver el papel
+(#F7F7F5), la tinta es #F7F7F5, y la máscara sale vacía —el bloque «no
+existe»—. B8 lo sufrió dos veces antes de verlo: 1 bloque de 9 en la noche de
+Trabajos (el único con relleno propio) y 2 de 25 en el Cierre con el pie sin
+relleno. B6-A no lo sufría porque el velo pintaba el panel.
+
+**La regla:** para la captura T, el panel recibe —sólo mientras se captura— el
+relleno plano que su superficie pintaría si fuera opaca (`var(--color-fondo)`,
+que la invertida ya dio vuelta), y se le saca antes de la siguiente captura
+(`ESTILAR_EL_PANEL`). El resto de las capturas (C, A, S, V) no se toca. Y el
+síntoma que lo delata: **una sección con texto a la vista que reporta un solo
+bloque, o ninguno.** Si aparece, no es que la sección tenga un bloque: es que
+la máscara no tiene fondo.

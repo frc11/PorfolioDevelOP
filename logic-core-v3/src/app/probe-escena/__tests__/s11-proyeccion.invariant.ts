@@ -121,14 +121,40 @@ section('El alcance: hasta dónde de la losa llega la celosía')
     return both / total
   }
 
-  const reach = [0, 0.25, 0.5, 0.625, 0.75, 0.875, 1].map(reachAt)
-  // La tolerancia es de la GRILLA, no del fenómeno: durante la meseta la elevación
-  // no se mueve, así que el alcance es constante y lo único que varía es qué
-  // muestras del tablero de 90×90 caen adentro del disco cuando el azimut rota.
+  const PROGRESOS = [0, 0.25, 0.5, 0.625, 0.75, 0.875, 1]
+  const reach = PROGRESOS.map(reachAt)
+  const elevacion = PROGRESOS.map((p) => {
+    sampleLightArc(p, arc)
+    return arc.elevationDeg
+  })
+  /**
+   * ⚠️ **B8 · CUSTODIABA «el alcance nunca se achica: se abre con el atardecer».**
+   * Era cierto para una tarde monótona. B8 pone la noche en Trabajos —un sol
+   * rasante a 2,7°— y ahí el rayo desde media losa sale por encima de la capa
+   * cercana: el alcance cae al 52 % y vuelve al 100 % con la mañana. Lo que la
+   * afirmación siempre custodió es que el alcance sea GEOMETRÍA y no un
+   * artefacto: es función de la elevación y de nada más —a igual elevación,
+   * igual alcance, de a pares—, en las poses con luz no se achica, y en la
+   * noche se publica: con la key al 8 %, la creciente de sol abierto no se ve.
+   *
+   * La tolerancia de los pares es de la GRILLA, no del fenómeno: a elevación
+   * fija lo único que varía es qué muestras del tablero de 90×90 caen adentro
+   * del disco cuando el azimut rota.
+   */
   check(
-    'el alcance nunca se achica: se abre con el atardecer',
-    reach.every((value, i) => i === 0 || value >= reach[i - 1] - 0.005),
-    reach.map((value) => `${(value * 100).toFixed(1)}%`).join(' → ')
+    'el alcance es función de la elevación y de nada más: a igual elevación, igual alcance (la meseta y la noche, de a pares)',
+    Math.abs(reach[0] - reach[1]) < 0.005 && Math.abs(reach[2] - reach[3]) < 0.005 && elevacion[0] === elevacion[1] && elevacion[2] === elevacion[3],
+    PROGRESOS.map((p, i) => `p=${p} ${elevacion[i].toFixed(1)}° → ${(reach[i] * 100).toFixed(1)}%`).join(' · ')
+  )
+  check(
+    'en las poses con luz no se achica: 82 % en la meseta y la losa entera desde que amanece',
+    reach[0] > 0.8 && reach.slice(4).every((value) => value > 0.999),
+    `${(reach[0] * 100).toFixed(1)}% a 36° → ${reach.slice(4).map((value) => `${(value * 100).toFixed(1)}%`).join(' → ')} a ${elevacion.slice(4).map((e) => `${e.toFixed(1)}°`).join(' → ')}`
+  )
+  check(
+    '  y en la noche el sol rasante cruza las dos capas sólo desde media losa: se publica, y no se ve — la key está al 8 %',
+    reach[2] < reach[0] && reach[2] > 0.4,
+    `${(reach[2] * 100).toFixed(1)}% a ${elevacion[2].toFixed(1)}° — el rayo desde el lado opuesto al sol sale por encima de la capa cercana antes de cruzarla`
   )
   check(
     'y termina cubriendo la losa entera antes del cierre',
@@ -183,10 +209,27 @@ section('Lo que la celosía dibuja sobre el piso')
       beats[0],
     `la relación de pasos proyectados es (${MOIRE_FAR_RADIUS}/${MOIRE_COARSE_CELLS})·(${fineCells(MOIRE_MISMATCH)}/${MOIRE_NEAR_RADIUS}) = ${(((MOIRE_FAR_RADIUS / MOIRE_COARSE_CELLS) * fineCells(MOIRE_MISMATCH)) / MOIRE_NEAR_RADIUS).toFixed(3)}, lejos de 2 con desajuste o sin él`
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «se alargan con el arco ×3,5 de punta a punta».** Con
+   * la noche en el medio (p=0,5, el segundo de los cuatro progresos) la banda
+   * más larga está ahí —un sol rasante la estira más de ×10— y en el cierre
+   * queda más larga que a mediodía sin volver a la de la noche. La razón sigue
+   * siendo la de la sombra del logo: 1/tan(elevación), y se afirma como cuenta.
+   */
+  const tanDe = (p: number): number => {
+    sampleLightArc(p, arc)
+    return Math.tan(arc.elevationDeg * RAD)
+  }
   check(
-    'las bandas se ALARGAN con el arco, y la razón es la de la sombra del logo',
-    fineRadial[fineRadial.length - 1] / fineRadial[0] > 3.5,
-    `de ${fineRadial[0].toFixed(2)} a ${fineRadial[fineRadial.length - 1].toFixed(2)} de largo · ×${(fineRadial[fineRadial.length - 1] / fineRadial[0]).toFixed(1)}`
+    'las bandas se ALARGAN hasta la noche —un sol rasante— y ahí son las más largas',
+    fineRadial[1] === Math.max(...fineRadial) && fineRadial[1] > fineRadial[0] * 10,
+    `de ${fineRadial[0].toFixed(2)} a ${fineRadial[1].toFixed(2)} de largo · ×${(fineRadial[1] / fineRadial[0]).toFixed(1)}`
+  )
+  check(
+    '  y en el cierre quedan más largas que a mediodía, con la razón de la sombra del logo: 1/tan(elevación)',
+    fineRadial[fineRadial.length - 1] > fineRadial[0] &&
+      Math.abs(fineRadial[fineRadial.length - 1] / fineRadial[0] - tanDe(0) / tanDe(1)) < 0.02,
+    `×${(fineRadial[fineRadial.length - 1] / fineRadial[0]).toFixed(2)} medido contra ×${(tanDe(0) / tanDe(1)).toFixed(2)} de la cuenta · era ×3,6 con el arco viejo`
   )
 }
 
@@ -195,20 +238,34 @@ section('Lo que la celosía dibuja sobre el piso')
 section('El barrido: cuántas bandas le pasan por encima a un punto del piso')
 
 {
-  function sweptCells(point: Vec3): number {
+  /**
+   * ⚠️ **B8 · EL BARRIDO SE PARTE EN SUS DOS EJES.** Custodiaba que la fase total
+   * (u + v) barrida sobre el centro fuera la de los 180° de azimut, 51 celdas
+   * ±1: con el arco viejo la elevación apenas movía la fase vertical. B8 lleva
+   * el sol a 2,7° y lo vuelve a subir: la fase VERTICAL hace un viaje de ida y
+   * vuelta que se suma al total. La propiedad se afirma por eje, que es lo que
+   * siempre fue: el barrido tangencial es del AZIMUT —los 180° del arco— y el
+   * vertical es de la ELEVACIÓN, la noche bajando y volviendo a subir.
+   */
+  function sweptCells(point: Vec3): { readonly u: number; readonly v: number; readonly total: number } {
+    let u = 0
+    let v = 0
     let total = 0
-    let previous: number | null = null
+    let previous: { u: number; v: number } | null = null
     for (let i = 0; i <= 400; i += 1) {
       const crossing = celosiaCrossings(point, sunDirectionAt(i / 400), LAYERS[0], 0)[0]
       if (!crossing) {
         previous = null
         continue
       }
-      const value = crossing.u + crossing.v
-      if (previous !== null) total += Math.abs(value - previous)
-      previous = value
+      if (previous !== null) {
+        u += Math.abs(crossing.u - previous.u)
+        v += Math.abs(crossing.v - previous.v)
+        total += Math.abs(crossing.u + crossing.v - (previous.u + previous.v))
+      }
+      previous = { u: crossing.u, v: crossing.v }
     }
-    return total
+    return { u, v, total }
   }
 
   const center = sweptCells([0, FLOOR_Y, 0])
@@ -216,18 +273,23 @@ section('El barrido: cuántas bandas le pasan por encima a un punto del piso')
   const cellWidth = (2 * Math.PI * MOIRE_NEAR_RADIUS) / fineCells(MOIRE_MISMATCH)
   check(
     'sobre el centro de la losa pasan decenas de bandas: es un barrido, no una deriva',
-    center > 40,
-    `${center.toFixed(1)} celdas finas = ${(center * cellWidth).toFixed(0)} unidades de mundo de banda pasando por encima`
+    center.total > 40,
+    `${center.total.toFixed(1)} celdas finas = ${(center.total * cellWidth).toFixed(0)} unidades de mundo de banda pasando por encima`
   )
   check(
-    'y el barrido es del ARCO: sale de los 180° de azimut, no de la deriva',
-    Math.abs(center - (180 / 360) * fineCells(MOIRE_MISMATCH)) < 1,
-    `${center.toFixed(1)} contra las ${((180 / 360) * fineCells(MOIRE_MISMATCH)).toFixed(1)} que predicen los 180° de barrido — el patrón está anclado al azimut del sol`
+    'y el barrido TANGENCIAL es del ARCO: sale de los 180° de azimut, no de la deriva',
+    Math.abs(center.u - (180 / 360) * fineCells(MOIRE_MISMATCH)) < 1,
+    `${center.u.toFixed(1)} contra las ${((180 / 360) * fineCells(MOIRE_MISMATCH)).toFixed(1)} que predicen los 180° de barrido — el patrón está anclado al azimut del sol`
+  )
+  check(
+    '  y el VERTICAL es de la ELEVACIÓN: la noche baja la fase y la mañana la vuelve a subir (B8)',
+    center.v > 1 && center.total <= center.u + center.v + 1e-9,
+    `${center.v.toFixed(1)} celdas de fase vertical, ida y vuelta · con el arco viejo eran menos de 1`
   )
   check(
     'también barre lejos del centro, aunque menos',
-    rim > 15 && rim < center,
-    `${rim.toFixed(1)} celdas a 25 de radio contra ${center.toFixed(1)} en el centro`
+    rim.total > 15 && rim.total < center.total,
+    `${rim.total.toFixed(1)} celdas a 25 de radio contra ${center.total.toFixed(1)} en el centro`
   )
 
   /**

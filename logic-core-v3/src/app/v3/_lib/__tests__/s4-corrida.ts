@@ -40,6 +40,8 @@ export interface Resultado {
   readonly afirmaciones: number
   readonly fallas: number
   readonly fueraDeVentana: number
+  /** Comprobaciones en DEUDA DECLARADA (B8): corrieron, fallaron a sabiendas, y tienen cierre. */
+  readonly deudas: number
   readonly controles: number
   /** Si se encontró la línea de resumen de `cerrar()`. */
   readonly resumio: boolean
@@ -73,11 +75,14 @@ export interface Resultado {
  * concepto —`noCorre()` es del otro—, así que sus corridas reportan 0 y eso es
  * exacto: no hay huecos declarados ahí, no es que no se midieran.
  */
-const RE_RESUMEN_SITIO = /^.+: (\d+) afirmaciones, (\d+) fallas(?:, (\d+) fuera de ventana)?\s*$/gm
+const RE_RESUMEN_SITIO =
+  /^.+: (\d+) afirmaciones, (\d+) fallas(?:, (\d+) fuera de ventana)?(?:, (\d+) deudas declaradas)?\s*$/gm
 const RE_RESUMEN_ESCENA = /^.+: (\d+) en verde, (\d+) en rojo\s*$/gm
 
 /** La última línea de resumen de la salida, en cualquiera de los dos dialectos. */
-export function leerResumen(salida: string): { afirmaciones: number; fallas: number; fueraDeVentana: number } | null {
+export function leerResumen(
+  salida: string,
+): { afirmaciones: number; fallas: number; fueraDeVentana: number; deudas: number } | null {
   const ultimo = (re: RegExp): RegExpExecArray | null => {
     re.lastIndex = 0
     let visto: RegExpExecArray | null = null
@@ -94,6 +99,7 @@ export function leerResumen(salida: string): { afirmaciones: number; fallas: num
       afirmaciones: Number.parseInt(delSitio[1], 10),
       fallas: Number.parseInt(delSitio[2], 10),
       fueraDeVentana: delSitio[3] === undefined ? 0 : Number.parseInt(delSitio[3], 10),
+      deudas: delSitio[4] === undefined ? 0 : Number.parseInt(delSitio[4], 10),
     }
   }
   const deLaEscena = ultimo(RE_RESUMEN_ESCENA)
@@ -102,6 +108,7 @@ export function leerResumen(salida: string): { afirmaciones: number; fallas: num
     afirmaciones: Number.parseInt(deLaEscena[1], 10),
     fallas: Number.parseInt(deLaEscena[2], 10),
     fueraDeVentana: 0,
+    deudas: 0,
   }
 }
 
@@ -151,6 +158,7 @@ export function correr(script: string, comando: string): Resultado {
     afirmaciones: resumen?.afirmaciones ?? 0,
     fallas: resumen?.fallas ?? 0,
     fueraDeVentana: resumen?.fueraDeVentana ?? 0,
+    deudas: resumen?.deudas ?? 0,
     controles: contarControles(salida),
     resumio: resumen !== null,
     ms,

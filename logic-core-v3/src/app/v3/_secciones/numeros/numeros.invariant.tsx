@@ -125,7 +125,9 @@ const nivelesDe = (html: string): string[][] =>
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
 
-afirmarIgual(seccion.superficie, 'papel-opaco', 'la superficie es papel-opaco: el canvas no se ve')
+/** ⚠️ B8 · Custodiaba `papel-opaco` (S5; B6-A midió que el logo quedaba detrás del 39,9 % del cuerpo). El humano la abrió igual —«las secciones
+ *  1, 2, 3, 4, 7 y 8 ven la sala»— y lo que eso rompe se DECLARA, no se tapa: `s10-acceso` §10 lo cita, `s8-tinta` §4 lo mide, y lo que no llega a AA es deuda declarada. */
+afirmarIgual(seccion.superficie, 'papel-transparente', 'la superficie es papel-transparente: el canvas se ve (B8, por decisión)')
 afirmarIgual(pantallasDe(seccion), 4, 'ocupa CUATRO pantallas — B2 la subió de una, ver el docblock de su fila en `secciones.ts`')
 afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: la pantalla scrollea')
 afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')

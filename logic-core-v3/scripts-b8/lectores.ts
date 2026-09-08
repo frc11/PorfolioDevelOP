@@ -269,6 +269,44 @@ export function ESTILAR_EL_PANEL(idPanel: string, estilos: Readonly<Record<strin
 })()`
 }
 
+export type VarianteDelCierre = 'oscuro-transparente' | 'papel-transparente' | 'papel-opaco'
+
+/**
+ * LA PREGUNTA DE LA PARADA 2 — el Cierre en sus tres variantes, sólo mientras se mide.
+ *
+ * ⚠️ **Lo que el barrido destapó (B8):** el Cierre declara `oscuro-transparente`
+ * pero NO deja ver la sala: su `<footer data-pieza="pie">` (`chrome/Pie.tsx`)
+ * pinta `var(--color-fondo)`, que dentro de `[data-seccion="invertida"]` es
+ * #0E0E0E, y el pie envuelve toda la sección. Abierta en la tabla, cerrada por
+ * su pie. Por eso B6-A midió 18:1 «detrás del velo» —era el pie— y por eso las
+ * tres variantes le quitan al pie ese relleno cuando la sala tiene que verse:
+ *
+ *   · `oscuro-transparente`: tinta clara sobre la sala iluminada (lo que la
+ *     tabla dice hoy, con el pie sin relleno).
+ *   · `papel-transparente`: sin `data-seccion` (tinta oscura) y el pie sin relleno.
+ *   · `papel-opaco`: sin `data-seccion`, el panel con `bg-fondo` — el pie
+ *     pinta papel, como cualquier sección opaca.
+ *
+ * No toca el producto: es la entrada del instrumento, igual que
+ * `ESTILAR_EL_PANEL`. Escribe `data-superficie` para que el lector de paneles y
+ * el chequeo del fondo pintado midan lo que se pidió.
+ */
+export function VARIAR_EL_CIERRE(variante: VarianteDelCierre): string {
+  return `(() => {
+  const el = document.querySelector('[data-panel="cierre"]')
+  if (el === null) return false
+  const pie = el.querySelector('[data-pieza="pie"]')
+  if (pie === null) return false
+  const variante = ${JSON.stringify(variante)}
+  if (variante !== 'oscuro-transparente') el.removeAttribute('data-seccion')
+  el.dataset.superficie = variante
+  if (variante === 'papel-opaco') el.classList.add('bg-fondo')
+  else pie.style.setProperty('background-color', 'transparent', 'important')
+  const cs = getComputedStyle(pie)
+  return el.dataset.superficie === variante && (variante === 'papel-opaco' ? cs.backgroundColor === 'rgb(247, 247, 245)' : cs.backgroundColor === 'rgba(0, 0, 0, 0)')
+})()`
+}
+
 /** Las ocho, con su posición en el documento. `data-panel` lo emite `Panel.tsx`. */
 export const LECTOR_DE_PANELES = `[...document.querySelectorAll('[data-panel]')].map((el) => {
   const r = el.getBoundingClientRect()

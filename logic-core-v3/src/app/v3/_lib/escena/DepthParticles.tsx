@@ -16,6 +16,7 @@ import {
   PARTICLE_SPRITE_SIZE,
   buildParticleField,
 } from './probeParticles'
+import { conBrilloDeNoche } from './particleGlow'
 import { createDotSpriteData } from './particleTextures'
 import type { ProbeParamsStore } from './probeStore'
 
@@ -178,6 +179,10 @@ export function DepthParticles({ store }: DepthParticlesProps) {
               `depthTest` sigue activo, así que el logo SÍ las tapa.
             */}
             <pointsMaterial
+              ref={(material) => {
+                // B8: en la noche las motas brillan (mezcla hacia el blanco, sin color) — `particleGlow.ts`.
+                if (material !== null) conBrilloDeNoche(material)
+              }}
               map={sprite}
               size={PARTICLE_SIZE}
               sizeAttenuation

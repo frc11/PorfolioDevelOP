@@ -50,6 +50,7 @@ import { muestrearLogo } from './s10-logo'
 import { ESCENA_REAL, VENTANAS, barridoVertical, cobertura, contrasteSobreElFondo, fraccionDentro, mayorCaja, type Ventana } from './s10-logo-lectura'
 // prettier-ignore
 import { EL_DIFERENCIAL, anclasAlcanzables, particiones, repartosPosibles, tablaDeRepartos } from './s13b-reparto'
+import { cruceDeAA } from './s13b-ventana'
 
 /** AA para texto normal, igual que en `s8-tinta`. */
 export const AA = 4.5
@@ -136,17 +137,7 @@ export function limpioDesde(caja: CajaEnElCuadro, desde: number, hasta: number, 
   return hi
 }
 
-/** El progreso en el que el peor píxel del fondo deja de llegar a AA. */
-export function cruceDeAA(umbral = AA): number {
-  let lo = 0
-  let hi = 1
-  for (let i = 0; i < 16; i += 1) {
-    const m = (lo + hi) / 2
-    if (contrasteSobreElFondo(m) >= umbral) lo = m
-    else hi = m
-  }
-  return (lo + hi) / 2
-}
+/** ⚠️ B8: `cruceDeAA` vive en `s13b-ventana.ts` — el contraste dejó de ser monótono y la bisección sobre [0, 1] caía en el atardecer. */
 
 export interface VentanaDelDiferencial {
   /** El borde de abajo: el último cuadro en quedar limpio manda. */
@@ -163,7 +154,7 @@ export function ventanaDelDiferencial(cajas: readonly CajaEnElCuadro[]): Ventana
     (c): readonly [string, number] => [c.ventana.etiqueta, limpioDesde(c, 0.625, 1)],
   )
   const desde = limpioPorCuadro.reduce((m, [, p]) => Math.max(m, p), 0)
-  const hasta = cruceDeAA()
+  const hasta = cruceDeAA(AA, 0.625)
   return { desde, hasta, existe: desde < hasta, limpioPorCuadro }
 }
 
@@ -249,7 +240,7 @@ export function afirmarLaVentanaDelDiferencial(): void {
   afirmar(
     ventana.existe,
     `LA VENTANA EXISTE — p=[${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}]`,
-    `desde donde el titular puede quedar limpio en los ${CAJAS_DEL_DIFERENCIAL.length} cuadros, hasta donde el peor píxel del fondo deja de llegar a AA (${AA}:1)`,
+    `desde donde el titular puede quedar limpio en los ${CAJAS_DEL_DIFERENCIAL.length} cuadros, hasta donde el peor píxel del fondo deja de llegar a AA (${AA}:1)${ventana.hasta === 1 ? ' — que desde B8 es el final del recorrido: la mañana no vuelve a cruzarlo' : ''}`,
   )
   controlPositivo(
     'el criterio del logo no es un `true` constante: en la pose `demos` el titular NO puede quedar limpio',
@@ -275,10 +266,18 @@ export function afirmarLaVentanaDelDiferencial(): void {
     [0.75, 0.916667],
     'EL REPARTO SOLO SIGUE CUANTIZANDO: sin la perilla del ancla, `TRAMOS_ANCLADOS` produce DOS valores y nada más',
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «NINGUNO DE LOS DOS CAE ADENTRO», y la mitad cambió de razón.**
+   * El de arriba (0,9167) quedaba AFUERA porque el arco viejo seguía apagándose después del ancla y el fondo caía
+   * bajo AA en 0,878. B8 sostiene la mañana (0,643) hasta el final: el fondo no vuelve a cruzar AA, la ventana
+   * termina con el recorrido y 0,9167 cae ADENTRO por contraste. Lo que lo sigue descartando lo mide
+   * `s16-anclaje` §5: paga más corrimiento de `tu-panel` que el ancla declarada. El heredado sigue afuera por el
+   * titular. La descuantización sigue haciendo falta; lo que cambió es cuál de los tres márgenes cierra arriba.
+   */
   afirmar(
-    anclas.every((a) => a < ventana.desde || a > ventana.hasta),
-    '  y NINGUNO DE LOS DOS CAE ADENTRO DE LA VENTANA — por eso hubo que descuantizar',
-    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}] · el heredado queda ${(ventana.desde - anclas[0]).toFixed(4)} corto y el otro se pasa ${(anclas[anclas.length - 1] - ventana.hasta).toFixed(4)}`,
+    anclas[0] < ventana.desde && anclas[anclas.length - 1] > ventana.desde && anclas[anclas.length - 1] <= ventana.hasta,
+    '  el HEREDADO sigue afuera por el titular; el otro (0,9167) cae ADENTRO desde B8 y lo descarta el corrimiento, no el fondo',
+    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}] · el heredado queda ${(ventana.desde - anclas[0]).toFixed(4)} corto · en el otro el fondo da ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1`,
   )
   const declarada = TRAMOS_ANCLADOS.find((t) => t.ancla !== undefined)?.ancla ?? Number.NaN
   afirmar(
@@ -294,7 +293,7 @@ export function afirmarLaVentanaDelDiferencial(): void {
   )
   console.log(
     '  LAS TRES SALIDAS QUE V3-B MIDIÓ: (a) dejarlo en el ancla heredada — es el defecto 7, DESCARTADA; (b) moverlo al otro\n' +
-      `   valor del reparto (${anclas[anclas.length - 1].toFixed(4)}) — el fondo cae a ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1 y pone \`s8-tinta\` §5 en ROJO, DESCARTADA;\n` +
+      `   valor del reparto (${anclas[anclas.length - 1].toFixed(4)}) — hasta B8 el fondo caía a 4,46:1 y ponía \`s8-tinta\` §5 en ROJO; desde B8 da ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1 y lo que lo descarta es el corrimiento de \`tu-panel\` (\`s16-anclaje\` §5), DESCARTADA;\n` +
       '   (c) que exista un ancla ADENTRO de la ventana. ✅ CONSTRUIDA en V3-E — ver `anclaje.ts`.',
   )
 }

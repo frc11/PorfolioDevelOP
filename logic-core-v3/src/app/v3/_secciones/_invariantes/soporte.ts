@@ -192,7 +192,7 @@ export const SUPERFICIE_ACORDADA: Readonly<Record<string, string>> = {
   servicios: 'papel-opaco',
   'tu-panel': 'papel-opaco',
   'por-que-develop': 'papel-transparente',
-  // B6-A abrió el Cierre sobre la escena, con el velo: la vara se mueve con la decisión.
+  // B6-A abrió el Cierre sobre la escena (con velo); B8 le sacó el velo: la vara se mueve con la decisión.
   cierre: 'oscuro-transparente',
 }
 

@@ -56,10 +56,13 @@ import {
 import { leerImagen } from './glifo-alfa'
 import {
   APAGAR_LA_TINTA,
+  ESTILAR_EL_PANEL,
   FONDO_DEL_PANEL,
   LECTOR_DE_BLOQUES,
   LECTOR_DE_PANELES,
   LECTOR_DEL_DOCUMENTO,
+  VARIAR_EL_CIERRE,
+  type VarianteDelCierre,
   raicesDelPanel,
   type Bloque,
   type FondoDelPanel,
@@ -102,6 +105,22 @@ const argumento = (nombre: string, defecto: string): string => {
 const ETIQUETA = argumento('etiqueta', 'antes')
 const SOLO = argumento('solo', '').split(',').filter((s) => s.length > 0)
 const PASO = Number(argumento('paso', '0.5'))
+/** La pregunta de la PARADA 2: `--cierre=oscuro-transparente|papel-transparente|papel-opaco` mide el Cierre en esa variante, sin tocar el producto (ver `VARIAR_EL_CIERRE`). */
+const VARIANTES_DEL_CIERRE: readonly VarianteDelCierre[] = ['oscuro-transparente', 'papel-transparente', 'papel-opaco']
+const variantePedida = argumento('cierre', '')
+const VARIANTE_DEL_CIERRE: VarianteDelCierre | null = VARIANTES_DEL_CIERRE.find((v) => v === variantePedida) ?? null
+if (variantePedida !== '' && VARIANTE_DEL_CIERRE === null) {
+  throw new Error(`--cierre sólo acepta ${VARIANTES_DEL_CIERRE.join(', ')}, no «${variantePedida}»`)
+}
+/**
+ * El contenido de cada sección entra con un revelado (Framer, `whileInView`).
+ * Con la escena dibujando detrás, el primer cuadro llega antes de que el
+ * revelado termine y el lector de bloques —que salta lo que está a opacidad
+ * cero— se pierde los bloques que todavía no entraron: en la noche de Trabajos
+ * leyó 1 bloque de 9. Se le da al contenido un tiempo fijo para asentarse
+ * ANTES de leer los bloques; las capturas de la sala no dependen de esto.
+ */
+const ASENTAMIENTO_DE_BLOQUES_MS = 1500
 
 /**
  * Lo que el navegador PINTÓ tiene que ser lo que la superficie declara. Se lee
@@ -143,6 +162,10 @@ async function principal(): Promise<void> {
     async (s) => {
       const { pagina } = s
       await asentarElHome(s)
+      if (VARIANTE_DEL_CIERRE !== null) {
+        if (!(await medir<boolean>(pagina, VARIAR_EL_CIERRE(VARIANTE_DEL_CIERRE)))) throw new Error(`no se pudo variar el Cierre a ${VARIANTE_DEL_CIERRE}`)
+        console.log(`⚠ el Cierre se mide como ${VARIANTE_DEL_CIERRE} con el pie sin relleno (la pregunta de la PARADA 2), sin tocar el producto`)
+      }
       const doc = await medir<{ altoDelDocumento: number; ventana: number; ancho: number }>(pagina, LECTOR_DEL_DOCUMENTO)
       const paneles = (await medir<PanelLeido[]>(pagina, LECTOR_DE_PANELES)).filter((p) => SOLO.length === 0 || SOLO.includes(p.id))
       console.log(`documento ${doc.altoDelDocumento} px · ventana ${doc.ventana} · ${paneles.length} paneles · etiqueta «${ETIQUETA}» · paso ${PASO} pantallas`)
@@ -155,6 +178,7 @@ async function principal(): Promise<void> {
           const logrado = await scrollA(pagina, y)
           if (Math.abs(logrado - y) > 1) throw new Error(`${panel.id}: se pidió y=${y} y el scroll quedó en ${logrado}`)
           await esperarElPrimerCuadro(pagina)
+          await new Promise((r) => setTimeout(r, ASENTAMIENTO_DE_BLOQUES_MS))
           const fondo = await medir<FondoDelPanel>(pagina, FONDO_DEL_PANEL(panel.id))
           afirmarElFondoPintado(panel, fondo)
           const bloques = await medir<Bloque[]>(pagina, LECTOR_DE_BLOQUES(panel.id))
@@ -166,7 +190,19 @@ async function principal(): Promise<void> {
           await capturar(pagina, rutas.A)
           await medir(pagina, APAGAR_LA_TINTA(false))
           if (!(await ocultarPorSelector(pagina, SELECTOR_DE_LA_ESCENA, true))) throw new Error('la escena no quedó oculta')
+          /**
+           * T: el panel con el relleno PLANO que su superficie pintaría si fuera
+           * opaca (`var(--color-fondo)`, que la invertida ya dio vuelta), sólo
+           * mientras se captura la máscara. Sin la escena, un panel transparente
+           * deja ver el papel, y la tinta CLARA sobre papel no tiene glifo que
+           * enmascarar: la primera corrida de B8 leyó 1 bloque de 9 en la noche de
+           * Trabajos —el único con relleno propio— y 2 de 25 en el Cierre sin pie.
+           * B6-A no lo necesitaba porque el velo pintaba el panel.
+           */
+          const fondoPlano = await medir<string>(pagina, ESTILAR_EL_PANEL(panel.id, { 'background-color': 'var(--color-fondo)' }))
+          if (fondoPlano === 'rgba(0, 0, 0, 0)') throw new Error(`${panel.id}: el relleno plano para la máscara no tomó`)
           await capturar(pagina, rutas.T)
+          await medir(pagina, ESTILAR_EL_PANEL(panel.id, { 'background-color': null }))
           await ocultarPorSelector(pagina, SELECTOR_DE_LA_ESCENA, false)
           if (!(await medir<boolean>(pagina, OCULTAR_TODO_MENOS('[]', ESCENA_NUESTRA, true)))) throw new Error('no quedó sólo la escena')
           await esperarElPrimerCuadro(pagina, 300)

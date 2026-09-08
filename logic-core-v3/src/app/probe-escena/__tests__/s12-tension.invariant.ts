@@ -21,13 +21,14 @@
 import { celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
 import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from '@/app/v3/_lib/escena/celosiaPenumbra'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { RIM_NIGHT_LEVEL } from '@/app/v3/_lib/escena/probeLighting'
 import { MOIRE_FADE, MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { BEAT_POSES, celosiaBeatAt } from './celosiaBeat'
 import { floorPenumbraAt } from './celosiaFloor'
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
 import { sampleFrame } from './frameProbe'
-import { sunDirectionAt, type ViewContext } from './shading'
+import { levelAt, sunDirectionAt, type ViewContext } from './shading'
 
 const SKY = celosiaSkyFactor(CELOSIA_BAR)
 const SPREAD = celosiaSunSpread(CELOSIA_SUN_RADIUS_DEG)
@@ -91,26 +92,50 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
    * siguen contra el entero de S11 **con la misma tolerancia de antes**. Si
    * mañana se mueve una de esas cinco, esto se pone en rojo igual que siempre.
    */
+  /**
+   * ⚠️ **B8 · CUSTODIABA «las CINCO poses que V3-E no tocó siguen siendo las de
+   * S11».** B8 volvió a iluminar cuatro de esas cinco —la noche en Números y
+   * Trabajos, la mañana en Demos y el Cierre— y sus números de S11 son la luz
+   * del arco viejo. Queda UNA intacta, Quiénes somos, y es la que ata este
+   * instrumento a S11; las otras cuatro se afirman por la DIRECCIÓN en que la
+   * luz las movió, que es exactamente la decisión de B8: la noche las apaga,
+   * Demos entra con el amanecer a medio hacer y la mañana deja al Cierre más
+   * claro que el atardecer de antes.
+   */
   const HERO = 0
+  const QUIENES = 1
   check(
-    'control positivo — con α = 0 las CINCO poses que V3-E no tocó siguen siendo las de S11',
-    control.every((value, i) => i === HERO || Math.abs(value - S11_MEAN[i]) < 1),
-    control
-      .filter((_, i) => i !== HERO)
-      .map((value, i) => `${POSES[i + 1][0]} ${value.toFixed(1)} (S11 ${S11_MEAN[i + 1]})`)
-      .join(' · ')
+    'control positivo — con α = 0 la pose cuya luz no tocó nadie (quiénes somos) sigue siendo la de S11',
+    Math.abs(control[QUIENES] - S11_MEAN[QUIENES]) < 1,
+    `${POSES[QUIENES][0]} ${control[QUIENES].toFixed(1)} (S11 ${S11_MEAN[QUIENES]})`
+  )
+  check(
+    '  y las cuatro que B8 volvió a iluminar se movieron en la dirección de la decisión: noche en Números y Trabajos, Demos más bajo, el Cierre más claro',
+    control[2] < 60 && control[3] < 60 && control[4] < S11_MEAN[4] && control[5] > S11_MEAN[5],
+    [2, 3, 4, 5].map((i) => `${POSES[i][0]} ${control[i].toFixed(1)} (S11 ${S11_MEAN[i]}) a nivel ${levelAt(POSES[i][1]).toFixed(2)}`).join(' · ')
   )
   check(
     '  y el hero se movió, que es lo que V3-E hizo: sólo por el encuadre, y hacia arriba',
     control[HERO] > S11_MEAN[HERO] && control[HERO] - S11_MEAN[HERO] < 2,
     `${control[HERO].toFixed(1)} contra los ${S11_MEAN[HERO]} de S11 — +${(control[HERO] - S11_MEAN[HERO]).toFixed(1)} por \`frameX\` 0,68 → 0,5, la única pose cuyo encuadre V3-E tocó`
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «las poses con piso suben»: el hero Y Trabajos.**
+   * Trabajos está en la noche, y la penumbra es una propiedad de la KEY: sin
+   * key no hay borde que ablandar y el sol de tamaño real no mueve nada. Se
+   * afirma en el hero, que tiene piso y sol, y se afirma lo otro en la noche.
+   */
   check(
-    'y el instrumento se mueve: con el sol de tamaño real las poses con piso suben',
-    withSun[0] > control[0] + 1 && withSun[3] > control[3] + 1,
+    'y el instrumento se mueve: con el sol de tamaño real la pose con piso y sol (el hero) sube',
+    withSun[0] > control[0] + 1,
     withSun
       .map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} (${(value - control[i] >= 0 ? '+' : '') + (value - control[i]).toFixed(1)})`)
       .join(' · ')
+  )
+  check(
+    '  y en la noche no mueve nada: la penumbra es de la key, y la key está al 8 %',
+    Math.abs(withSun[2] - control[2]) < 0.2 && Math.abs(withSun[3] - control[3]) < 0.2,
+    `números ${(withSun[2] - control[2]).toFixed(2)} · trabajos ${(withSun[3] - control[3]).toFixed(2)} — contra +${(withSun[0] - control[0]).toFixed(1)} en el hero`
   )
 
   check(
@@ -118,10 +143,28 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
     withSun[0] < HERO_CEILING,
     `${withSun[0].toFixed(1)} contra el techo de ${HERO_CEILING} · con un sol cuatro veces más grande (α = 1°) llegaría a 208,2, así que el margen alcanza todo el slider útil`
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «ninguna vuelve a la escena SIN celosía» contra la
+   * tabla de S10**, que es la luz del arco viejo (el Cierre da 152 en la mañana
+   * contra 120 de S10, y es la luz, no la celosía). La escena sin celosía se
+   * calcula a la luz de hoy con el mismo instrumento; en las dos poses intactas
+   * reproduce S10, y en la noche se pide «por debajo», no «dos puntos por debajo».
+   */
+  const sinCelosia = POSES.map(
+    ([, at, azimuth, height], i) =>
+      sampleFrame(at, { progress: at, cameraAzimuthDeg: azimuth, cameraHeight: height }, { backdrop: true, mismatch: MOIRE_MISMATCH }, 200, 113)
+        .mean - PARTICLE_DELTA[i]
+  )
+  const conLuz = POSES.map(([, at]) => levelAt(at) >= RIM_NIGHT_LEVEL)
   check(
-    'y ninguna de las seis vuelve a la escena SIN celosía que midió S10',
-    withSun.every((value, i) => value < S10_MEAN[i] - 2),
-    withSun.map((value, i) => `${POSES[i][0]} ${value.toFixed(0)} < ${S10_MEAN[i]}`).join(' · ')
+    'la escena sin celosía, a la luz de hoy, reproduce S10 en las dos poses intactas',
+    Math.abs(sinCelosia[0] - S10_MEAN[0]) < 2 && Math.abs(sinCelosia[1] - S10_MEAN[1]) < 1,
+    `hero ${sinCelosia[0].toFixed(1)} (S10 ${S10_MEAN[0]}) · quiénes somos ${sinCelosia[1].toFixed(1)} (S10 ${S10_MEAN[1]})`
+  )
+  check(
+    'y ninguna de las seis vuelve a la escena SIN celosía, a la MISMA luz',
+    withSun.every((value, i) => (conLuz[i] ? value < sinCelosia[i] - 2 : value < sinCelosia[i])),
+    withSun.map((value, i) => `${POSES[i][0]} ${value.toFixed(0)} < ${sinCelosia[i].toFixed(0)}${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
   )
 }
 
@@ -199,10 +242,17 @@ section('⚠️ Tres cosas que el diagnóstico daba por ciertas y la medición c
     early !== null && late !== null && late.t < early.t * 0.9,
     `t = ${early?.t.toFixed(1)} en p=0 contra ${late?.t.toFixed(1)} en p=1 · el rayo llega ANTES a la celosía, no después`
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «se achica ~32 %»**: era el cierre a 11,5° del arco
+   * viejo. B8 cierra a 22,2° (nivel 0,643): la celda se estira menos y la
+   * fracción se achica menos. Lo que la corrección decía —y sigue diciendo— es
+   * la DIRECCIÓN: en mundo parece ensancharse, como fracción de la banda se
+   * ACHICA, y el cierre no se ablanda solo. El porcentaje se publica.
+   */
   check(
-    'y por eso la penumbra, como fracción de la banda, se achica ~32%',
-    early !== null && late !== null && late.cellsV < early.cellsV * 0.75,
-    `${early?.cellsV.toFixed(3)} → ${late?.cellsV.toFixed(3)} celdas (${(((late!.cellsV - early!.cellsV) / early!.cellsV) * 100).toFixed(0)}%) mientras la celda se estira de ${early?.cellWorldV.toFixed(2)} a ${late?.cellWorldV.toFixed(2)} · en mundo parece ensancharse ×${(late!.worldV / early!.worldV).toFixed(1)}, pero es la celda la que creció debajo`
+    'y por eso la penumbra, como fracción de la banda, se ACHICA hacia el cierre aunque en mundo se ensanche',
+    early !== null && late !== null && late.cellsV < early.cellsV && late.worldV > early.worldV,
+    `${early?.cellsV.toFixed(3)} → ${late?.cellsV.toFixed(3)} celdas (${(((late!.cellsV - early!.cellsV) / early!.cellsV) * 100).toFixed(0)}%; era −32 % cerrando a 11,5°) mientras la celda se estira de ${early?.cellWorldV.toFixed(2)} a ${late?.cellWorldV.toFixed(2)} · en mundo ×${(late!.worldV / early!.worldV).toFixed(1)}, pero es la celda la que creció debajo`
   )
 
   /**

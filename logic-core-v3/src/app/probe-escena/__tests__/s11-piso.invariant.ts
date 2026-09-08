@@ -29,6 +29,9 @@ import {
   CELOSIA_SKY_SHARE,
   celosiaSkyFactor,
 } from '@/app/v3/_lib/escena/probeCelosia'
+import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
+import { RIM_NIGHT_LEVEL } from '@/app/v3/_lib/escena/probeLighting'
 import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 import { MARK_COLOR, PAPER_COLOR } from '@/app/v3/_lib/escena/probeScene'
 import {
@@ -62,6 +65,22 @@ const POSES: readonly [string, number, number, number][] = [
 
 /** Los seis que S10 publicó en §2, ya con sus partículas adentro. */
 const S10_MEAN = [216, 172, 222, 208, 136, 120]
+/**
+ * ⚠️ **B8 · LAS POSES CUYA LUZ NO SE TOCÓ.** El hero y Quiénes somos caen en la
+ * meseta de luz (p ≤ 0,4688), que B8 dejó exactamente como estaba: nivel 1 y la
+ * misma recta de azimut de S9. Las otras cuatro las volvió a iluminar —la noche
+ * en Números y Trabajos, la mañana en Demos y el Cierre—, así que sus valores
+ * de S10/S11 ya no son la escena de hoy. Los de las dos intactas SÍ, y son el
+ * control de que el instrumento sigue siendo el mismo.
+ */
+const INTACTAS: readonly string[] = ['hero', 'quiénes somos']
+const arco: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
+const nivelEn = (p: number): number => {
+  sampleLightArc(p, arco)
+  return arco.level
+}
+/** Con luz: por encima de la frontera de la noche del contraluz (0,34). */
+const conLuz = (p: number): boolean => nivelEn(p) >= RIM_NIGHT_LEVEL
 /**
  * Cuánto bajan las partículas el valor medio en cada pose. Sale de la propia
  * tabla de S10 §2 —la diferencia entre su columna "+ envolvente" y su columna
@@ -163,8 +182,9 @@ section('El valor medio del cuadro en las seis poses, contra S10')
 
 {
   const rows: string[] = []
-  const deltas: number[] = []
+  const contraLaMismaLuz: number[] = []
   let baselineOk = true
+  let reiluminadasSeMovieron = true
   let heroDelta = 0
   let numerosDelta = 0
 
@@ -179,36 +199,56 @@ section('El valor medio del cuadro en las seis poses, contra S10')
       113
     )
     // El instrumento sin celosía tiene que devolver la columna "+ envolvente" de
-    // S10: es el control de que estamos midiendo la misma escena que aquel reporte.
-    if (Math.abs(s10.mean - PARTICLE_DELTA[i] - S10_MEAN[i]) > 1) baselineOk = false
+    // S10 en las poses cuya luz B8 no tocó: es el control de que estamos midiendo
+    // la misma escena que aquel reporte. En las otras cuatro NO puede devolverla.
+    const reproduceS10 = Math.abs(s10.mean - PARTICLE_DELTA[i] - S10_MEAN[i]) <= 1
+    if (INTACTAS.includes(name) && !reproduceS10) baselineOk = false
+    if (!INTACTAS.includes(name) && reproduceS10) reiluminadasSeMovieron = false
     const published = s11.mean - PARTICLE_DELTA[i]
-    deltas.push(published - S10_MEAN[i])
-    if (name === 'hero') heroDelta = published - S10_MEAN[i]
-    if (name === 'números') numerosDelta = published - S10_MEAN[i]
+    contraLaMismaLuz.push(s11.mean - s10.mean)
+    if (name === 'hero') heroDelta = s11.mean - s10.mean
+    if (name === 'números') numerosDelta = s11.mean - s10.mean
     rows.push(
-      `${name} ${published.toFixed(0)} (S10 ${S10_MEAN[i]}, ${(published - S10_MEAN[i]).toFixed(0)}) piso ${(s11.floor * 100).toFixed(0)}% sombra ${(s11.floorShaded * 100).toFixed(0)}%`
+      `${name} ${published.toFixed(0)} (S10 ${S10_MEAN[i]}, ${(published - S10_MEAN[i]).toFixed(0)}; celosía ${(s11.mean - s10.mean).toFixed(1)} a igual luz) piso ${(s11.floor * 100).toFixed(0)}% sombra ${(s11.floorShaded * 100).toFixed(0)}%`
     )
   })
 
+  /**
+   * ⚠️ **B8 · CUSTODIABAN «reproduce los SEIS de S10» y «la celosía baja el
+   * valor medio en las seis poses» CONTRA S10.** Las dos comparaban con una
+   * tabla medida a la luz del arco viejo. B8 cambió la luz de cuatro poses, así
+   * que la reproducción se afirma sobre las dos intactas —y se afirma que las
+   * otras cuatro NO reproducen, que es la prueba de que la luz las movió— y el
+   * efecto de la celosía se mide contra la MISMA luz, que es lo que siempre
+   * quiso decir: sin celosía contra con celosía, en el mismo cuadro.
+   */
   check(
-    'el instrumento sin celosía sigue reproduciendo los seis valores de S10',
+    'el instrumento sin celosía sigue reproduciendo los valores de S10 en las poses cuya luz B8 no tocó (hero y quiénes somos)',
     baselineOk,
     'es el control: si esto se corriera, la comparación de abajo no valdría nada'
   )
   check(
-    'la celosía baja el valor medio en las seis poses',
-    deltas.every((delta) => delta < 0),
+    '  y en las cuatro que B8 volvió a iluminar NO los reproduce: la luz las movió, y se publican contra S10 con su delta',
+    reiluminadasSeMovieron,
     rows.join(' · ')
+  )
+  check(
+    'la celosía baja el valor medio en las seis poses, contra la MISMA luz',
+    contraLaMismaLuz.every((delta) => delta < 0),
+    contraLaMismaLuz.map((delta, i) => `${POSES[i][0]} ${delta.toFixed(1)}`).join(' · ')
   )
   /**
    * ⚠️ **LAS DOS QUE IMPORTAN.** Hero y Números son las poses donde el cuadro es
    * 60% y 73% piso, o sea las que la envolvente no podía tocar. Es el pendiente
-   * que S10 anotó en su §4.1 y el motivo de este sprint.
+   * que S10 anotó en su §4.1 y el motivo de este sprint. **B8:** custodiaba
+   * «números < −5» a pleno sol; B8 puso a Números en la noche (nivel 0,08) y
+   * ahí la celosía sólo puede bajar lo que la key ilumina. El hero, intacto,
+   * sigue contra su cifra; el de Números se publica con la dirección afirmada.
    */
   check(
-    'y en HERO y NÚMEROS —las dos que el fondo no podía tocar— baja de verdad',
-    heroDelta < -8 && numerosDelta < -5,
-    `hero ${heroDelta.toFixed(0)} · números ${numerosDelta.toFixed(0)} · con la proyección sola habrían sido −5 y −3: el resto lo pone el cielo tapado`
+    'y en HERO —intacto— baja de verdad; en NÚMEROS, ya en la noche, baja lo que la key deja',
+    heroDelta < -8 && numerosDelta < 0,
+    `hero ${heroDelta.toFixed(1)} · números ${numerosDelta.toFixed(1)} a nivel ${nivelEn(POSES[2][1]).toFixed(2)} — a pleno sol eran −14 y −9: con la proyección sola habrían sido −5 y −3, el resto lo pone el cielo tapado`
   )
 }
 
@@ -267,19 +307,34 @@ section('Las 48 marcas: cuánto del replanteo cae adentro de una banda')
 
   const marked = POSES.map(([name, at]) => {
     const result = markedShare(at)
-    return { name, ...result }
+    return { name, at, conLuz: conLuz(at), ...result }
   })
   const withMarks = marked.filter((row) => row.inFrame > 1e-6)
+  /**
+   * ⚠️ **B8 · CUSTODIABA «en TODA pose con replanteo en cuadro».** Con el arco
+   * viejo todas tenían sol. B8 pone a Números y Trabajos en la noche, y un sol
+   * rasante a 2,7° no proyecta la celosía sobre el piso —sus rayos salen por las
+   * paredes, no por las rendijas— y a nivel 0,08 no habría banda que leer. La
+   * propiedad se afirma donde existe: en las poses CON luz. Las de la noche se
+   * publican con su cero, y se afirma que hay al menos dos con luz y marcas para
+   * que esto no sea verde por vacío.
+   */
+  const iluminadas = withMarks.filter((row) => row.conLuz)
   check(
-    'en toda pose con replanteo en cuadro, una parte grande cae adentro de una banda',
-    withMarks.length > 0 && withMarks.every((row) => row.shaded > 0.4),
+    'en toda pose CON LUZ y con replanteo en cuadro, una parte grande cae adentro de una banda',
+    iluminadas.length >= 2 && iluminadas.every((row) => row.shaded > 0.4),
     marked
       .map((row) =>
         row.inFrame > 1e-6
-          ? `${row.name} ${(row.shaded * 100).toFixed(0)}%`
+          ? `${row.name} ${(row.shaded * 100).toFixed(0)}%${row.conLuz ? '' : ' (noche: sol rasante, sin proyección)'}`
           : `${row.name} sin marcas en cuadro`
       )
       .join(' · ')
+  )
+  check(
+    '  y en la noche la celosía no llega al piso: el sol rasante no proyecta nada que una marca pueda destapar',
+    withMarks.filter((row) => !row.conLuz).every((row) => row.shaded < 0.05),
+    withMarks.filter((row) => !row.conLuz).map((row) => `${row.name} ${(row.shaded * 100).toFixed(0)}% a nivel ${nivelEn(row.at).toFixed(2)}`).join(' · ')
   )
 }
 

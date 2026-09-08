@@ -26,7 +26,7 @@
  *      justifica, no con una opinión.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -36,15 +36,12 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Panel } from '../../_componentes/Panel'
 import { SECCIONES, SECCIONES_QUE_DEJAN_VER_LA_ESCENA, type Seccion } from '../secciones'
 import {
-  CLASE_DEL_VELO,
   COLORES_DEL_CANVAS_DE_PRUEBA,
   SUPERFICIES,
   TINTA_HEX,
-  TOKENS_DEL_VELO,
   type ModoSuperficie,
 } from '../superficies'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from './afirmar'
-import { afirmarElVelo } from './superficies-velo'
 import { SECCION_INVERTIDA, tokensDelBloque, tokensDelTema } from './s3-css'
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..')
@@ -79,46 +76,39 @@ afirmar(salida['oscuro-opaco'].includes('data-seccion="invertida"'), 'oscuro-opa
 afirmar(salida['oscuro-opaco'].includes('bg-fondo'), '  con las MISMAS utilidades que papel-opaco: cambia el atributo, no la clase')
 
 /**
- * B6-A · LA CUARTA. La define lo que no tiene y lo que sí: sin `bg-fondo` (la
- * escena se ve), con `data-seccion="invertida"` (la tinta se da vuelta, y los
- * tokens del velo con ella), con el velo como CLASE DE FONDO que declara la
- * hoja `_estilos/velo.css`, y sin `opacity-` en el panel. El velo atenúa lo
- * que hay DETRÁS del texto; el texto va pleno.
+ * LA CUARTA, DESDE B8 SIN VELO. La define lo que no tiene y lo que sí: sin
+ * `bg-fondo` (la escena se ve), con `data-seccion="invertida"` (la tinta se da
+ * vuelta), con la MISMA clase que `papel-transparente` y sin `opacity-` en el
+ * panel. B6-A le había puesto un fondo en gradiente, y el humano lo grabó: un
+ * velo oscuro sobre una sala de papel blanco da gris, nunca negro. La oscuridad
+ * detrás de esta superficie la pone el arco del sol (`_lib/escena/lightArc.ts`),
+ * y por eso acá se afirma la AUSENCIA: ni clase de velo, ni imagen de fondo, ni
+ * token propio, ni hoja `_estilos/velo.css` en el disco.
  */
-const velo = salida['oscuro-transparente']
-afirmar(velo.includes('data-seccion="invertida"'), 'oscuro-transparente escribe `data-seccion="invertida"`: es banda oscura')
-afirmar(!velo.includes('bg-fondo'), '  y NO pinta `bg-fondo`: la escena se ve')
-afirmar(clasesDe(velo).includes(CLASE_DEL_VELO), `  pinta el velo como clase — \`${CLASE_DEL_VELO}\``)
-afirmar(velo.includes('text-tinta'), '  con la tinta plena encima')
+const oscura = salida['oscuro-transparente']
+afirmar(oscura.includes('data-seccion="invertida"'), 'oscuro-transparente escribe `data-seccion="invertida"`: es banda oscura')
+afirmar(!oscura.includes('bg-fondo'), '  y NO pinta `bg-fondo`: la escena se ve')
+afirmar(oscura.includes('text-tinta'), '  con la tinta plena encima')
+afirmarIgual(
+  clasesDe(oscura).filter((c) => c !== 'text-tinta').sort(),
+  clasesDe(salida['papel-transparente']).filter((c) => c !== 'text-tinta').sort(),
+  '  y fuera de la tinta pinta EXACTAMENTE las clases de `papel-transparente`: cambia el atributo, no la clase (B8: sin velo)',
+)
+afirmar(!/\bvelo\b/.test(oscura), '  ni una clase de velo: la oscuridad la da la luz, no un fondo')
 const SIN_OPACIDAD_DE_PANEL = /(^|[\s"])opacity-/
-afirmar(!SIN_OPACIDAD_DE_PANEL.test(velo), '  y sin `opacity-` en el panel: el velo NO es una opacidad del panel')
+afirmar(!SIN_OPACIDAD_DE_PANEL.test(oscura), '  y sin `opacity-` en el panel: abrir una sección no es atenuar su texto')
 controlPositivo(
   'el detector de «sin opacity- en el panel» vería una',
   '<section class="relative z-10 w-full opacity-casi text-tinta">',
   (html) => !SIN_OPACIDAD_DE_PANEL.test(html),
 )
-
-/**
- * La clase es de la HOJA, no de Tailwind: un gradiente con dos tokens y una
- * frontera derivada de tokens de layout no cabe en una utilidad. Lo que se
- * afirma acá es que la hoja la define colgada de `[data-v3]`, que enciende el
- * gradiente sólo con la escena montada, y que consume los dos tokens del velo,
- * que existen en el tema y se dan vuelta en la invertida. La forma del
- * gradiente y sus propiedades las custodia `s3-tokens` (§3 a §6).
- */
-const HOJA = leer('src/app/v3/_estilos/velo.css').replace(/\/\*[\s\S]*?\*\//g, '')
-const defineLaClase = (css: string, clase: string): boolean => new RegExp(`\\[data-v3\\][^{]*\\.${clase}\\s*\\{`).test(css)
-afirmar(defineLaClase(HOJA, CLASE_DEL_VELO), 'la hoja `_estilos/velo.css` define la clase del velo, colgada de `[data-v3]`')
-afirmar(/\[data-v3\]:has\(\[data-escena\]\)\s+\.velo\s*\{/.test(HOJA), '  y enciende el gradiente SÓLO con la escena montada: sin escena, sin velo')
-afirmar(/\[data-v3\]\s+\.velo\s*\{[^}]*background-color:\s*var\(--color-fondo\)/.test(HOJA), '  sin escena el panel es el sólido de siempre, `--color-fondo`')
-for (const token of TOKENS_DEL_VELO) {
-  afirmar(HOJA.includes(`var(${token})`), `  la hoja consume ${token}`)
-  afirmar(tokensDelTema().has(token), `  ${token} existe en \`@theme static\``)
-  afirmar(tokensDelBloque(SECCION_INVERTIDA).has(token), `  y la sección invertida lo redefine`)
-}
-afirmar(HOJA.includes('var(--velo-borde, var(--container-tope))'), 'sin borde propio el velo es denso hasta el tope del envoltorio')
-afirmar(/\[data-panel="trabajos"\]\.velo\s*\{[^}]*--velo-borde:/.test(HOJA), '  y Trabajos declara su franja desnuda donde termina su columna de texto')
-controlPositivo('el detector de «la hoja define la clase» no ve una que nadie define', 'velo-que-nadie-define', (c) => defineLaClase(HOJA, c))
+afirmar(!existsSync(path.join(RAIZ, 'src/app/v3/_estilos/velo.css')), 'la hoja `_estilos/velo.css` de B6-A ya no existe en el disco')
+afirmarIgual(
+  ['--color-velo-denso', '--color-velo-ralo', '--opacity-densa'].filter((t) => tokensDelTema().has(t) || tokensDelBloque(SECCION_INVERTIDA).has(t)),
+  [],
+  '  y sus tres tokens tampoco están en el tema ni en la invertida: cero color fuera de los tokens, y cero token sin dueño',
+)
+controlPositivo('el detector de tokens ve uno que SÍ existe', '--color-fondo', (t: string) => !tokensDelTema().has(t))
 
 const distintos = new Set(Object.values(salida))
 afirmarIgual(distintos.size, 4, 'los cuatro marcados son distintos entre sí')
@@ -158,7 +148,7 @@ afirmarIgual(new Set(SECCIONES.map((s) => s.id)).size, 8, 'con ocho ids distinto
 
 /**
  * EL RECORRIDO ESPERADO — la tabla de SITIO-S5 §0.2, con las dos que B6-A
- * abrió en su PARADA 1, transcrita acá.
+ * abrió y las dos que B8 abrió, transcrita acá.
  *
  * Está en el instrumento y no en `secciones.ts` a propósito: si saliera del
  * mismo archivo que verifica, la comparación sería una tautología. Son dos
@@ -166,17 +156,19 @@ afirmarIgual(new Set(SECCIONES.map((s) => s.id)).size, 8, 'con ocho ids distinto
  * decidirlo.
  *
  * ⚠ S1 afirmaba "las ocho en `papel-opaco`", que era verdad mientras la
- * decisión estética no estuviera tomada. SITIO-S5 la tomó; B6-A la movió en
- * dos filas con la escena real medida detrás (`docs/rediseno/outputs/b6/`):
- * Trabajos y el Cierre pasan a `oscuro-transparente`. Quiénes somos y Números
- * NO se abren en B6-A —el logo pasa detrás de su texto: 39,9 % del cuerpo y
- * 100 % del rótulo— y son el insumo de B6-B. Lo que se afirma es EL
- * RECORRIDO, no un valor único.
+ * decisión estética no estuviera tomada. SITIO-S5 la tomó; B6-A la movió en dos
+ * filas —Trabajos y el Cierre— y **B8 en dos más: Quiénes somos y Números**,
+ * por decisión del humano y a sabiendas de lo que rompe (el logo pasa detrás de
+ * su texto: 39,9 % del cuerpo y 100 % del rótulo, medido en B6-A). Es un
+ * estado INTERMEDIO —primero la luz, después la información— y lo que falla
+ * queda como deuda declarada con su número, insumo del bloque siguiente.
+ * **Servicios y Tu panel quedan opacas por pedido del humano.** Lo que se
+ * afirma es EL RECORRIDO, no un valor único.
  */
 const RECORRIDO_ESPERADO: readonly [string, ModoSuperficie][] = [
   ['hero', 'papel-transparente'],
-  ['quienes-somos', 'papel-opaco'],
-  ['numeros', 'papel-opaco'],
+  ['quienes-somos', 'papel-transparente'],
+  ['numeros', 'papel-transparente'],
   ['trabajos', 'oscuro-transparente'],
   ['servicios', 'papel-opaco'],
   ['tu-panel', 'papel-opaco'],
@@ -187,15 +179,20 @@ const RECORRIDO_ESPERADO: readonly [string, ModoSuperficie][] = [
 afirmarIgual(
   SECCIONES.map((s) => [s.id, s.superficie]),
   RECORRIDO_ESPERADO,
-  'el recorrido de superficies es el de SITIO-S5 §0.2 con las dos que B6-A abrió',
+  'el recorrido de superficies es el de SITIO-S5 §0.2 con las dos de B6-A y las dos de B8: seis ven la sala, dos no',
 )
 
-/** Cinco momentos de escena, no ocho: la cifra la produce esta cuenta. */
+/** Seis de ocho: la cifra la produce esta cuenta, y las dos que faltan son un pedido. */
 const dejanVer = SECCIONES.filter((s) => SUPERFICIES[s.superficie].dejaVerElCanvas)
 afirmarIgual(
   dejanVer.map((s) => s.id),
-  ['hero', 'trabajos', 'por-que-develop', 'cierre'],
-  'CUATRO paneles dejan ver el canvas — aparece, desaparece, vuelve en Trabajos, desaparece y vuelve al final',
+  ['hero', 'quienes-somos', 'numeros', 'trabajos', 'por-que-develop', 'cierre'],
+  'SEIS paneles dejan ver el canvas — de corrido del hero a Trabajos, se apaga tras Servicios y Tu panel, y vuelve para el diferencial y el Cierre',
+)
+afirmarIgual(
+  SECCIONES.filter((s) => !SUPERFICIES[s.superficie].dejaVerElCanvas).map((s) => s.id),
+  ['servicios', 'tu-panel'],
+  '  y las dos opacas son Servicios y Tu panel, por pedido explícito del humano en B6-A y B8',
 )
 afirmarIgual(
   SECCIONES_QUE_DEJAN_VER_LA_ESCENA,
@@ -203,7 +200,7 @@ afirmarIgual(
   '  y la constante derivada de `secciones.ts` dice lo mismo que la tabla de superficies',
 )
 const invertidas = SECCIONES.filter((s) => SUPERFICIES[s.superficie].invertida)
-afirmarIgual(invertidas.map((s) => s.id), ['trabajos', 'cierre'], 'y DOS son la banda oscura — las mismas dos, ahora con velo')
+afirmarIgual(invertidas.map((s) => s.id), ['trabajos', 'cierre'], 'y DOS son la banda oscura — las mismas dos, ahora sin velo')
 
 afirmar(SECCIONES.every((s) => /^\d+svh$/.test(s.alto)), 'las ocho declaran su altura en `svh`, no en `vh`')
 
@@ -259,7 +256,6 @@ controlPositivo(
   ([a, b]) => razonDeContraste(a, b) >= 4.5,
 )
 
-afirmarElVelo()
 
 titulo('4 · El anillo de foco: por qué está acotado a /v3')
 

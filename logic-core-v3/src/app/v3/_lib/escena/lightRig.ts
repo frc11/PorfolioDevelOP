@@ -15,11 +15,10 @@ import {
   KEY_FOLLOW_AZIMUTH_OFFSET_DEG,
   KEY_INTENSITY,
   RIM_AZIMUTH_OFFSET_DEG,
-  RIM_DIM_SHARE,
   RIM_DISTANCE,
   RIM_HEIGHT_BASE,
   RIM_HEIGHT_TRACK,
-  RIM_INTENSITY,
+  rimIntensityAt,
 } from './probeLighting'
 import { FOG_COLOR } from './probeAtmosphere'
 import type { CelosiaUniforms } from './celosiaShader'
@@ -294,7 +293,7 @@ export function applyLightRig(
   //     ambiente, que es lo que lo despega.
   const rim = targets.rim
   if (rim) {
-    rim.intensity = RIM_INTENSITY * (1 - (1 - level) * RIM_DIM_SHARE)
+    rim.intensity = rimIntensityAt(level)
 
     const azimuth = cameraAzimuth + RIM_AZIMUTH_OFFSET_DEG * RAD
     rim.position.set(

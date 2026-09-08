@@ -10,34 +10,38 @@
  * foco— se mudó con §10 y por la misma razón: también es una razón de contraste,
  * y consume los mismos colores leídos del tema.
  *
- * ── ⚠️ B6-A: el texto sobre el VELO tiene dos varas, y las dos se escriben ──
+ * ── ⚠️ B8: SIN VELO NO HAY PISO, y cada tinta sobre la escena se CITA ─────────
  *
- * Con Trabajos y el Cierre en `oscuro-transparente` hay texto cuyo fondo es la
- * escena detrás de un velo, y la escena no es un token. Dos varas:
+ * B6-A tenía dos varas para el texto sobre la escena: la tinta primaria se
+ * afirmaba contra el PISO (el velo denso sobre blanco, un número de los tokens) y
+ * las otras se citaban medidas. B8 sacó el velo —un velo oscuro sobre una sala
+ * de papel da gris, nunca negro— y con él se fue el piso: **detrás del texto
+ * está la sala con la luz que el arco le dé, y eso no es un token.** Queda una
+ * sola vara, la de siempre para el hero y el diferencial: **cada (sección,
+ * tinta) sobre la escena tiene su fila en `CONTRASTE_CONTRA_LA_ESCENA`, medida
+ * sobre la escena real por el instrumento que la firma.** Sin fila, rojo.
  *
- *   · **La tinta primaria (`--color-tinta`, a cualquier alfa) se afirma contra
- *     el PISO**: el velo denso compuesto sobre BLANCO, el píxel más claro que
- *     una sala puede pintar. Es propio —sale de los tokens— y vale pinte lo
- *     que pinte la escena.
- *   · **Las otras tintas (media, tenue) el piso NO las garantiza** (3,2:1 la
- *     tenue sobre el denso con blanco detrás) y por eso se CITAN: cada una
- *     necesita su fila en `CONTRASTE_CONTRA_LA_ESCENA`, medida sobre la escena
- *     real por el instrumento que la firma, y ≥ AA. Sin fila, rojo.
+ * Y lo que B8 rompió a propósito no se tapa: una fila por debajo de AA lleva su
+ * deuda (`deudas-b8.ts`), corre con la condición intacta como `deudaDeclarada`
+ * y el agregado la publica aparte. Una fila bajo AA SIN deuda es rojo; una fila
+ * con deuda que ya pasa AA también, para que la lista no se quede vieja.
  */
 
-import { afirmar, afirmarIgual, titulo } from './afirmar'
+import { afirmar, afirmarIgual, deudaDeclarada, titulo } from './afirmar'
+import { DEUDAS_DE_B8 } from './deudas-b8'
 import { AA, ALFA_CASI, COLOR, cajasDeColor, componer, loRedefineLaInvertida, razon, superficiesDelDocumento, type CajaDeColor } from './s10-acceso-color'
 import { CONTRASTE_CONTRA_LA_ESCENA } from './s10-acceso-escena'
 import { anillosFlojos, imprimirAnillos, imprimirContraste, type CaidaDelAnillo } from './s10-acceso-tablas'
-import { valorDeToken } from './s10-css'
 import { HUECOS } from './s10-banco'
 
-/** El píxel más claro que la escena puede pintar detrás de un velo oscuro. */
-const BLANCO = '#FFFFFF'
-/** La alfa DENSA del velo, la mitad que va detrás del texto. Leída del tema. */
-const ALFA_DENSA = Number.parseFloat(valorDeToken('--opacity-densa'))
-/** El piso: el velo denso sobre blanco. Sobre `[data-seccion="invertida"]` el velo es el fondo oscuro. */
-const VELO_DENSO_SOBRE_BLANCO = componer(COLOR.oscuro, BLANCO, ALFA_DENSA)
+const etiquetaDe = (f: (typeof CONTRASTE_CONTRA_LA_ESCENA)[number]): string =>
+  `${f.seccion}${f.tinta === undefined ? '' : ` (${f.tinta})`}`
+
+function imprimirLasCitas(): void {
+  for (const c of CONTRASTE_CONTRA_LA_ESCENA) {
+    console.log(`     ${etiquetaDe(c)}: ${c.razon.toFixed(2)}:1${c.deuda === undefined ? '' : ` — deuda ${DEUDAS_DE_B8[c.deuda].numero}`} — ${c.instrumento}`)
+  }
+}
 
 export function afirmarElFoco(): void {
   titulo('9 · EL FOCO — qué regla lo pinta, y sobre qué superficie cae cada parada')
@@ -45,16 +49,17 @@ export function afirmarElFoco(): void {
   console.log('  regla única, en `theme-develop.css`: `[data-v3] :focus-visible { outline: var(--foco-grosor) solid')
   console.log('  var(--color-foco); outline-offset: var(--foco-desplazamiento) }`, y `--color-foco` ES `var(--color-tinta)`,')
   console.log('  así que `[data-seccion="invertida"]` lo da vuelta sin mencionarlo.')
+  /** ⚠️ B8: las paradas 7–15 caían sobre «el velo denso con blanco detrás»; sin velo caen sobre LA ESCENA, como el CTA del Hero. */
   const CAIDAS: readonly CaidaDelAnillo[] = [
     { paradas: '1–5', donde: 'la pastilla, flotando sobre una sección clara', anillo: COLOR.tintaClara, sobre: COLOR.papel },
     { paradas: '1–5', donde: 'la pastilla, flotando sobre una invertida (superficie translúcida al 0,6 encima del oscuro)', anillo: COLOR.tintaClara, sobre: componer(COLOR.papel, COLOR.oscuro, ALFA_CASI) },
     { paradas: '6', donde: 'el CTA del Hero — `papel-transparente`', anillo: COLOR.tintaClara, sobre: null },
-    { paradas: '7–15', donde: 'el CTA, los 7 enlaces del pie y el campo del Cierre — `oscuro-transparente`: el velo denso con el peor píxel (blanco) detrás', anillo: COLOR.tintaInvertida, sobre: VELO_DENSO_SOBRE_BLANCO },
+    { paradas: '7–15', donde: 'el CTA, los 7 enlaces del pie y el campo del Cierre — `oscuro-transparente` sin velo (B8): la tinta invertida sobre la sala', anillo: COLOR.tintaInvertida, sobre: null },
   ]
   imprimirAnillos(CAIDAS)
-  afirmarIgual(anillosFlojos(CAIDAS), [], 'las 15 paradas reciben un anillo de ≥3:1 contra su superficie — el mínimo de un componente de interfaz')
+  afirmarIgual(anillosFlojos(CAIDAS), [], 'las paradas sobre un token reciben un anillo de ≥3:1 contra su superficie — el mínimo de un componente de interfaz')
   console.log('  sobre la escena el anillo es la MISMA tinta que el texto, así que hereda las cifras de OTRO instrumento:')
-  for (const c of CONTRASTE_CONTRA_LA_ESCENA) console.log(`     ${c.seccion}${c.tinta === undefined ? '' : ` (${c.tinta})`}: ${c.razon.toFixed(2)}:1 — ${c.instrumento}`)
+  imprimirLasCitas()
   console.log(`  ⚠ HUECO declarado del sprint («${HUECOS[2].nombre}»): ${HUECOS[2].porQue}.`)
   console.log(`     Lo cerraría: ${HUECOS[2].queLoCerraria}. Este frente NO afirma que el anillo se vea; afirma su contraste.`)
 }
@@ -69,50 +74,73 @@ export function afirmarElContraste(QUIETA: string): void {
   const CAJAS = cajasDeColor(QUIETA)
   imprimirContraste(CAJAS)
   console.log('  ── las transparentes NO se recalculan contra un token: su fondo es la escena')
-  for (const c of CONTRASTE_CONTRA_LA_ESCENA) console.log(`     ${c.seccion}${c.tinta === undefined ? '' : ` (${c.tinta})`}: ${c.razon.toFixed(2)}:1 — ${c.instrumento}`)
+  imprimirLasCitas()
 
   const modoDe = new Map(superficies.map((s) => [s.id, s.modo]))
   const sobreLaEscena = CAJAS.filter((c) => c.fondo === null)
-  const claras = sobreLaEscena.filter((c) => modoDe.get(c.seccion) === 'papel-transparente')
-  const veladas = sobreLaEscena.filter((c) => modoDe.get(c.seccion) === 'oscuro-transparente')
+  const seccionesSobreLaEscena = [...new Set(sobreLaEscena.map((c) => c.seccion))]
   afirmarIgual(
-    [...new Set(claras.map(tinta))],
-    ['--color-tinta@1'],
-    '  y la cita de S9 vale para TODO su texto: las dos claras usan una sola tinta, plena y sin alfa',
-  )
-  afirmar(veladas.length > 0, `hay texto sobre el velo — ${veladas.length} cajas en ${[...new Set(veladas.map((c) => c.seccion))].join(' y ')} (B6-A)`)
-
-  // ── la vara propia: la tinta primaria contra el piso ──────────────────────
-  const conPiso = veladas.filter((c) => c.tinta.token === '--color-tinta')
-  const razonesDelPiso = conPiso.map((c) => ({ c, r: razon(componer(c.tinta.hex, VELO_DENSO_SOBRE_BLANCO, c.tinta.alfa), VELO_DENSO_SOBRE_BLANCO) }))
-  const peorDelPiso = razonesDelPiso.reduce((a, b) => (b.r < a.r ? b : a), { c: conPiso[0], r: Number.POSITIVE_INFINITY })
-  console.log(`  velo denso (${ALFA_DENSA}) sobre blanco: ${VELO_DENSO_SOBRE_BLANCO} — el piso de la tinta primaria a cualquier alfa`)
-  afirmarIgual(
-    razonesDelPiso.filter(({ r }) => r < AA).map(({ c }) => `${c.seccion}/${tinta(c)}`),
-    [],
-    `la tinta primaria pasa AA sobre el velo con blanco detrás en las ${conPiso.length} cajas — peor ${peorDelPiso.r.toFixed(2)}:1 (${peorDelPiso.c.seccion}, ${tinta(peorDelPiso.c)})`,
-  )
-  afirmar(
-    razon(componer(COLOR.tintaInvertida, VELO_DENSO_SOBRE_BLANCO, 0.3), VELO_DENSO_SOBRE_BLANCO) < AA,
-    '  [control positivo] el piso no es «pasa siempre»: la misma tinta a 0,3 no pasa',
+    seccionesSobreLaEscena.filter((s) => modoDe.get(s) === 'oscuro-transparente').sort(),
+    ['cierre', 'trabajos'],
+    `hay texto en tinta invertida sobre la sala en Trabajos y el Cierre (B6-A, sin velo desde B8) — ${seccionesSobreLaEscena.length} secciones escriben sobre la escena en total`,
   )
 
-  // ── la vara citada: las otras tintas, medidas sobre la escena real ────────
-  const sinPiso = [...new Set(veladas.filter((c) => c.tinta.token !== '--color-tinta').map((c) => `${c.seccion}/${tinta(c)}`))].sort()
-  const citadas = new Map(CONTRASTE_CONTRA_LA_ESCENA.filter((f) => f.tinta !== undefined).map((f) => [`${f.seccion}/${f.tinta}`, f]))
+  // ── la única vara: cada (sección, tinta) sobre la escena, citada ──────────
+  const tintasPorSeccion = new Map<string, string[]>()
+  for (const c of sobreLaEscena) {
+    const lista = tintasPorSeccion.get(c.seccion) ?? []
+    if (!lista.includes(tinta(c))) lista.push(tinta(c))
+    tintasPorSeccion.set(c.seccion, lista)
+  }
+  const claves = [...tintasPorSeccion.entries()].flatMap(([s, ts]) => ts.map((t) => `${s}/${t}`)).sort()
+  const cubierta = (clave: string): boolean => {
+    const [seccion, t] = clave.split('/')
+    return CONTRASTE_CONTRA_LA_ESCENA.some((f) => f.seccion === seccion && (f.tinta === undefined || f.tinta === t))
+  }
   afirmarIgual(
-    sinPiso.filter((k) => !citadas.has(k)),
+    claves.filter((k) => !cubierta(k)),
     [],
-    `cada tinta secundaria sobre el velo tiene su cifra MEDIDA sobre la escena real: ${sinPiso.join(' · ') || 'ninguna'}`,
+    `cada tinta sobre la escena tiene su cifra MEDIDA sobre la escena real, por el instrumento que la firma: ${claves.join(' · ')}`,
+  )
+  /**
+   * La cita de S9 vale para TODO el texto de una sección sólo si esa sección usa
+   * UNA tinta: una fila sin tinta sobre una sección de dos tintas escondería la
+   * segunda. Es la afirmación de S9 («las claras usan una sola tinta»), puesta
+   * donde hace falta desde que las transparentes son seis.
+   */
+  const filasSinTinta = CONTRASTE_CONTRA_LA_ESCENA.filter((f) => f.tinta === undefined)
+  afirmarIgual(
+    filasSinTinta.filter((f) => (tintasPorSeccion.get(f.seccion) ?? []).length !== 1).map((f) => f.seccion),
+    [],
+    `una fila sin tinta sólo vale para una sección de UNA tinta — ${filasSinTinta.map((f) => `${f.seccion}: ${(tintasPorSeccion.get(f.seccion) ?? []).join(' ')}`).join(' · ')}`,
   )
   afirmarIgual(
-    sinPiso.filter((k) => (citadas.get(k)?.razon ?? 0) < AA),
+    CONTRASTE_CONTRA_LA_ESCENA.filter((f) => !seccionesSobreLaEscena.includes(f.seccion)).map(etiquetaDe),
     [],
-    '  y todas las citas pasan AA',
+    '  y ninguna fila cita una sección que NO escribe sobre la escena: la tabla no tiene citas huérfanas',
+  )
+
+  // ── las citas contra AA: lo que pasa se afirma, lo que B8 rompió se declara ─
+  for (const f of CONTRASTE_CONTRA_LA_ESCENA) {
+    if (f.deuda === undefined) {
+      afirmar(f.razon >= AA, `${etiquetaDe(f)}: la cita pasa AA — ${f.razon.toFixed(2)}:1`, f.instrumento)
+    } else {
+      deudaDeclarada(
+        f.razon >= AA,
+        `${etiquetaDe(f)}: la cita pasa AA`,
+        `${DEUDAS_DE_B8[f.deuda].numero}: ${f.razon.toFixed(2)}:1 — ${f.instrumento}`,
+        DEUDAS_DE_B8[f.deuda].cierre,
+      )
+    }
+  }
+  afirmarIgual(
+    CONTRASTE_CONTRA_LA_ESCENA.filter((f) => f.deuda !== undefined && f.razon >= AA).map(etiquetaDe),
+    [],
+    'ninguna fila declarada como deuda está ya saldada: el día que una pase AA, se le saca la deuda y vuelve a ser afirmación',
   )
   afirmar(
-    razon(COLOR.tenueInvertida, VELO_DENSO_SOBRE_BLANCO) < AA,
-    `  [control positivo] la tinta tenue NO la garantiza el piso — ${razon(COLOR.tenueInvertida, VELO_DENSO_SOBRE_BLANCO).toFixed(2)}:1: por eso se cita y no se supone`,
+    razon(COLOR.tintaInvertida, COLOR.papel) < 3,
+    `  [control positivo] la tinta invertida sobre el papel a pleno sol no llega ni a 3:1 (${razon(COLOR.tintaInvertida, COLOR.papel).toFixed(2)}:1): sin la noche, la banda oscura no se lee`,
   )
 
   /**
@@ -130,7 +158,7 @@ export function afirmarElContraste(QUIETA: string): void {
   afirmarIgual(
     [...new Set(CAJAS.filter((c) => c.razon !== null && c.razon < AA).map((c) => `${c.seccion}/${c.tinta.token}`))],
     [],
-    'el inventario de fallas de AA está VACÍO: ningún texto del home queda abajo de 4,5:1 contra su superficie',
+    'el inventario de fallas de AA sobre un TOKEN está VACÍO: ningún texto sobre papel u oscuro queda abajo de 4,5:1 contra su superficie',
   )
   afirmar(loRedefineLaInvertida('--color-tinta'), 'la invertida redefine `--color-tinta`, que es lo que hacía pasar a todo el resto')
   afirmar(loRedefineLaInvertida('--color-tinta-media'), '  y desde SITIO-S11 también `--color-tinta-media`')
