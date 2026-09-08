@@ -264,7 +264,7 @@ export function Numeros({ seccion }: PropsDeSeccion): React.JSX.Element {
                 {pantalla.cabecera ? (
                   <>
                     <EtiquetaDeSeccion className={GEOMETRIA.etiqueta}>{seccion.nombre}</EtiquetaDeSeccion>
-                    <Bloque patron="P2" className={cn(GEOMETRIA.cabecera, GEOMETRIA.medida)}>
+                    <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.cabecera, GEOMETRIA.medida)}>
                       {(progreso) => (
                         <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-4">
                           <Titular nivel="titulo-l" como="h2" id={idDelTitularDeSeccion(seccion.id)}>

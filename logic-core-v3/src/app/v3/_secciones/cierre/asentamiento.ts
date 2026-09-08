@@ -34,6 +34,39 @@
  * exactamente 240 px** —los que su propia ancla declara— y ésos son los que se
  * devuelven al asentamiento.
  *
+ * ═══ ⚠️ B9 · ESTA REGLA ESTÁ MEDIDA CONTRA LA VARA EQUIVOCADA, Y ACÁ NO SE
+ *      CORRIGE — QUEDA DIFERIDA CON SU NÚMERO (`D-B9.C1`) ══════════════════
+ *
+ * B9 midió la referencia (`scripts-b9/b9-referencia.ts`, una navegación a
+ * `https://www.nk.studio/`, 1920×1080, 202 elementos animados sin pinnear) y el
+ * punto de llegada real cae en **p25 0,58 · p50 0,70 · p75 0,77** de pantalla —
+ * no en el 1,00 que `bottom bottom` produce. El punto correcto es
+ * `bottom bottom-=240px`, y está publicado como `DESCANSO_ANTES_DE_SALIR_PX` en
+ * `_contrato/asentamiento.ts`. `tu-panel/asentamiento.ts` ya se re-derivó
+ * contra él.
+ *
+ * **Acá NO, y el motivo es que este remapeo compra otra cosa.** Bajo la regla
+ * corregida el sobrepaso de P1 vale **0**, o sea que `FRACCION_DE_REVELADO`
+ * valdría 1 y este módulo sería la identidad: hay que sacarlo, no re-derivarlo.
+ * Y sacarlo toca la propiedad que B2 midió y que este archivo existe para
+ * sostener —que el Cierre tenga un acontecimiento propio—, junto con la sección
+ * «B2 · el asentamiento del titular» de `s8-entrada.ts` y sus dos afirmaciones
+ * load-bearing (`SOBREPASO === FUSION_DEL_CENSO` y la separación de 375 px).
+ *
+ * **Lo medido, para que el que lo cierre no tenga que volver a medir:**
+ *
+ *   · hoy el titular aterriza con su borde inferior en **0,967** del cuadro a
+ *     1920 y **0,827** a 1440; la regla lo pondría en 0,778 / 0,733.
+ *   · con la regla aplicada al vecino, `por-que-develop#1` se adelanta 272 px
+ *     (aterriza en 17.488 en vez de 17.760), así que la separación que este
+ *     asentamiento compraba **la da ahora el vecino**: 476 px entre el grupo de
+ *     `por-que-develop` y el del Cierre, muy por encima del umbral de fusión de
+ *     240. O sea que el motivo por el que existe pudo haber caducado — pero eso
+ *     hay que comprobarlo con el censo, no suponerlo.
+ *
+ * Cambiar la cosa que se mide y la razón por la que se mide en la misma pasada
+ * es exactamente cómo se fabrica un verde por arnés. Va aparte.
+ *
  * **No toca un solo valor del patrón.** P1 conserva su `yPercent` 120 → 0, su
  * curva principal, su duración declarada y su escalonado de 0,2. Lo único que
  * cambia es el recorrido de scroll sobre el que se consume.

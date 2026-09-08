@@ -1,0 +1,434 @@
+{
+  "etiqueta": "antes",
+  "instrumento": "scripts-b4/censo.ts (el de B2-DELTAS §0), paso 120 px, 8 esperas de 140 ms, sin estrangular, emulado",
+  "varaDeLaReferencia": {
+    "huecoMaximoPantallas": 1.56,
+    "publicadoPorB2": 1.11,
+    "nota": "el 1,11 de B2 salió de OTRO instrumento; la resta válida es antes/después de éste."
+  },
+  "filas": [
+    {
+      "perfil": "1920",
+      "ancho": 1920,
+      "alto": 1080,
+      "documento": {
+        "alturaPx": 19525,
+        "ventanaPx": 1080,
+        "pantallas": 18.08,
+        "anchoDelDocumento": 1920,
+        "anchoDeLaVentana": 1920
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 1080,
+          "top": 0
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 3240,
+          "top": 1080
+        },
+        {
+          "id": "numeros",
+          "alto": 4320,
+          "top": 4320
+        },
+        {
+          "id": "trabajos",
+          "alto": 3240,
+          "top": 8640
+        },
+        {
+          "id": "servicios",
+          "alto": 3324.78125,
+          "top": 11880
+        },
+        {
+          "id": "tu-panel",
+          "alto": 2160,
+          "top": 15204.78125
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 1080,
+          "top": 17364.78125
+        },
+        {
+          "id": "cierre",
+          "alto": 1080,
+          "top": 18444.78125
+        }
+      ],
+      "paso": 120,
+      "ventanaDeFusionPx": 240,
+      "paradas": 154,
+      "estiloPorParadaMin": 21,
+      "estiloPorParadaMax": 129,
+      "sinSistemaDeMovimiento": false,
+      "acontecimientos": 22,
+      "piezasTotales": 193,
+      "huecoMaximoPantallas": 1.33,
+      "huecoMedioPantallas": 0.67,
+      "huecosPantallas": [
+        0.56,
+        0.33,
+        1.11,
+        0.78,
+        0.67,
+        0.33,
+        0.67,
+        0.33,
+        1,
+        0.44,
+        1,
+        1,
+        0.56,
+        1.33,
+        0.44,
+        0.44,
+        0.78,
+        0.56,
+        0.44,
+        0.89,
+        0.33
+      ],
+      "montajes": 4,
+      "grupos": [
+        {
+          "ini": 600,
+          "fin": 840,
+          "piezas": 6,
+          "seccion": "hero"
+        },
+        {
+          "ini": 1440,
+          "fin": 1680,
+          "piezas": 2,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 2040,
+          "fin": 2040,
+          "piezas": 1,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 3240,
+          "fin": 3240,
+          "piezas": 1,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 4080,
+          "fin": 4080,
+          "piezas": 1,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 4800,
+          "fin": 4800,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 5160,
+          "fin": 5160,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 5880,
+          "fin": 5880,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 6240,
+          "fin": 6240,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 7320,
+          "fin": 7320,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 7800,
+          "fin": 7800,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 8880,
+          "fin": 8880,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 9960,
+          "fin": 9960,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 10560,
+          "fin": 10560,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 12000,
+          "fin": 12240,
+          "piezas": 47,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 12720,
+          "fin": 12960,
+          "piezas": 47,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 13440,
+          "fin": 13680,
+          "piezas": 45,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 14520,
+          "fin": 15120,
+          "piezas": 6,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 15720,
+          "fin": 16200,
+          "piezas": 11,
+          "seccion": "tu-panel"
+        },
+        {
+          "ini": 16680,
+          "fin": 16800,
+          "piezas": 3,
+          "seccion": "tu-panel"
+        },
+        {
+          "ini": 17760,
+          "fin": 17760,
+          "piezas": 9,
+          "seccion": "por-que-develop"
+        },
+        {
+          "ini": 18120,
+          "fin": 18360,
+          "piezas": 5,
+          "seccion": "por-que-develop"
+        }
+      ]
+    },
+    {
+      "perfil": "1440",
+      "ancho": 1440,
+      "alto": 900,
+      "documento": {
+        "alturaPx": 16275,
+        "ventanaPx": 900,
+        "pantallas": 18.08,
+        "anchoDelDocumento": 1440,
+        "anchoDeLaVentana": 1440
+      },
+      "paneles": [
+        {
+          "id": "hero",
+          "alto": 900,
+          "top": 0
+        },
+        {
+          "id": "quienes-somos",
+          "alto": 2700,
+          "top": 900
+        },
+        {
+          "id": "numeros",
+          "alto": 3600,
+          "top": 3600
+        },
+        {
+          "id": "trabajos",
+          "alto": 2700,
+          "top": 7200
+        },
+        {
+          "id": "servicios",
+          "alto": 2774.953125,
+          "top": 9900
+        },
+        {
+          "id": "tu-panel",
+          "alto": 1800,
+          "top": 12674.953125
+        },
+        {
+          "id": "por-que-develop",
+          "alto": 900,
+          "top": 14474.953125
+        },
+        {
+          "id": "cierre",
+          "alto": 900,
+          "top": 15374.953125
+        }
+      ],
+      "paso": 120,
+      "ventanaDeFusionPx": 240,
+      "paradas": 129,
+      "estiloPorParadaMin": 21,
+      "estiloPorParadaMax": 129,
+      "sinSistemaDeMovimiento": false,
+      "acontecimientos": 19,
+      "piezasTotales": 182,
+      "huecoMaximoPantallas": 1.2,
+      "huecoMedioPantallas": 0.73,
+      "huecosPantallas": [
+        0.53,
+        1.07,
+        0.93,
+        0.53,
+        0.4,
+        0.67,
+        1.07,
+        0.53,
+        0.8,
+        1.07,
+        0.67,
+        1.2,
+        0.53,
+        0.53,
+        0.93,
+        0.53,
+        0.53,
+        0.67
+      ],
+      "montajes": 3,
+      "grupos": [
+        {
+          "ini": 600,
+          "fin": 720,
+          "piezas": 5,
+          "seccion": "hero"
+        },
+        {
+          "ini": 1200,
+          "fin": 1680,
+          "piezas": 3,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 2640,
+          "fin": 2640,
+          "piezas": 1,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 3480,
+          "fin": 3480,
+          "piezas": 1,
+          "seccion": "quienes-somos"
+        },
+        {
+          "ini": 3960,
+          "fin": 3960,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 4320,
+          "fin": 4320,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 4920,
+          "fin": 5160,
+          "piezas": 2,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 6120,
+          "fin": 6120,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 6600,
+          "fin": 6600,
+          "piezas": 1,
+          "seccion": "numeros"
+        },
+        {
+          "ini": 7320,
+          "fin": 7320,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 8280,
+          "fin": 8280,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 8880,
+          "fin": 8880,
+          "piezas": 1,
+          "seccion": "trabajos"
+        },
+        {
+          "ini": 9960,
+          "fin": 10200,
+          "piezas": 47,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 10680,
+          "fin": 10800,
+          "piezas": 42,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 11280,
+          "fin": 11400,
+          "piezas": 40,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 12240,
+          "fin": 12600,
+          "piezas": 6,
+          "seccion": "servicios"
+        },
+        {
+          "ini": 13080,
+          "fin": 13440,
+          "piezas": 11,
+          "seccion": "tu-panel"
+        },
+        {
+          "ini": 13920,
+          "fin": 14160,
+          "piezas": 4,
+          "seccion": "tu-panel"
+        },
+        {
+          "ini": 14760,
+          "fin": 15300,
+          "piezas": 13,
+          "seccion": "por-que-develop"
+        }
+      ]
+    }
+  ]
+}

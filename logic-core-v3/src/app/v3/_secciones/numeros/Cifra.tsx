@@ -127,7 +127,7 @@ export function CifraDeLaComposicion({
   readonly celda: Celda
 }): React.JSX.Element {
   return (
-    <Bloque patron="P2" className={cn(celda.celda, celda.desplome)}>
+    <Bloque patron="P2" rango="ventana-visible" className={cn(celda.celda, celda.desplome)}>
       {(progreso) => (
         <CanalDeUnaPieza progreso={progreso} patron="P2">
           <Cifra clave={clave} nivel={celda.nivel} valor={valor} rotulo={rotulo} />

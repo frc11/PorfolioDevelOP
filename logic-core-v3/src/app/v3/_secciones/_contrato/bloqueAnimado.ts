@@ -23,6 +23,8 @@ import type { Cronograma } from '../../_lib/motion/cronograma'
 import type { EspecificacionDePieza } from '../../_lib/motion/fotograma'
 import type { Patron } from '../../_lib/motion/patrones'
 
+import { DESCANSO_ANTES_DE_SALIR_PX, ENTRADA_EN_CUADRO_PX } from './asentamiento'
+
 /**
  * EL ANCLA DEL PIN — `top top` → `bottom bottom`. **[derivado], no medido.**
  *
@@ -59,6 +61,66 @@ const anclaDelPinFin: Ancla = {
 }
 
 export const ANCLA_DEL_PIN: ParDeAnclas = { inicio: anclaDelPinInicio, fin: anclaDelPinFin }
+
+/**
+ * EL ANCLA DE LA VENTANA VISIBLE — **la regla de B9**, y es la segunda ancla
+ * que este archivo escribe a mano por la misma razón que la primera.
+ *
+ * ── La regla, en una línea ────────────────────────────────────────────────
+ *
+ * > **El rango de una instancia se deriva de la ventana visible de SU caja:
+ * > arranca cuando su borde superior está `ENTRADA_EN_CUADRO_PX` adentro del
+ * > cuadro, y llega a su estado final cuando su borde inferior está a
+ * > `DESCANSO_ANTES_DE_SALIR_PX` del borde de abajo.**
+ *
+ * La cuenta, con la fórmula de `posicionDeAncla`:
+ *
+ *     inicio = topDoc + alto·0 + 0  −  (viewport·1 − 80)   =  topDoc − viewport + 80
+ *     fin    = topDoc + alto·1 + 0  −  (viewport·1 − 240)  =  topDoc + alto − viewport + 240
+ *     rango  = alto + 160
+ *
+ * ── ⚠️ Y por qué NO se toca `ANCLAS` ni se rediseña un patrón ─────────────
+ *
+ * `ANCLAS` es la **medición de la referencia**: nueve pares leídos de su
+ * `ScrollTrigger` y comprobados contra sus píxeles en `anclas.invariant.ts`.
+ * Cambiar ahí sería reescribir lo que se midió del sitio ajeno. Lo que B9
+ * cambia es **contra qué recorrido de scroll consume su patrón cada instancia
+ * NUESTRA** — que es exactamente lo que un ancla hace, y lo que
+ * `_contrato/asentamiento.ts` ya declaraba legítimo: *«no toca un solo valor de
+ * un patrón… lo único que cambia es el RECORRIDO DE SCROLL sobre el que se
+ * consumen»*. Claves, curva, duración y escalonado quedan intactos.
+ *
+ * ── ⚠️ Y el hallazgo, que es lo que hace que esto no sea un número nuevo ──
+ *
+ * **Este par ES `ANCLAS.P1`**, carácter por carácter. No se importa de ahí
+ * —`s7-contrato` §3 prohíbe que un archivo de producto tome un valor de
+ * `_lib/motion/`— sino que se escribe con las dos constantes que
+ * `_contrato/asentamiento.ts` publica, y `s19-sincronia` afirma la igualdad
+ * contra `ANCLAS.P1` con su control positivo. Es la misma costura de
+ * `ANCLA_DEL_PIN` y de `CORTE_DE_TRAMOS`.
+ *
+ * Que la regla coincida con el ancla del patrón más usado de la referencia —142
+ * de 244 instancias— no es una casualidad cómoda: **es el resultado.** La
+ * referencia ancla su gesto dominante a la ventana visible del elemento, y las
+ * 6 instancias nuestras que ya usaban P1 son las 6 que la medición de B9
+ * encontró en regla. Aplicarles esta ancla es un no-op comprobable, y el
+ * invariante lo comprueba.
+ */
+const anclaEnCuadroInicio: Ancla = {
+  declarado: `top bottom-=${ENTRADA_EN_CUADRO_PX}px`,
+  elemento: LADO_TOPE,
+  viewport: { fraccion: 1, px: -ENTRADA_EN_CUADRO_PX },
+}
+const anclaEnCuadroFin: Ancla = {
+  declarado: `bottom bottom-=${DESCANSO_ANTES_DE_SALIR_PX}px`,
+  elemento: LADO_FONDO,
+  viewport: { fraccion: 1, px: -DESCANSO_ANTES_DE_SALIR_PX },
+}
+
+export const ANCLA_DE_LA_VENTANA_VISIBLE: ParDeAnclas = {
+  inicio: anclaEnCuadroInicio,
+  fin: anclaEnCuadroFin,
+}
 
 /**
  * El cronograma de un patrón con N piezas, en sus valores medidos.

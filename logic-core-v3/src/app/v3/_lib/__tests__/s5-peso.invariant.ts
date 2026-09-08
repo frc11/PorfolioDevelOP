@@ -80,6 +80,7 @@ titulo('3 · EL PRESUPUESTO PROPIO, con la cuenta a la vista')
 import {
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
+  MONTAJE_DE_B9_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJES_DECLARADOS_KIB,
   PRESUPUESTO_DEL_LANE_KIB,
@@ -111,9 +112,10 @@ console.log(
   `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
     ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
     ` + ${ARREGLO_DE_B7_KIB} que B7 monta (el proveedor de \`prefers-reduced-motion\`, 0,52 medidos A/B)` +
+    ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 0,11 medidos que ya estaban en rojo antes de que B7 tocara producto.`,
 )
-console.log('    Lo subió el humano en la parada, con el número medido. La alternativa era no montar la marca: por eso la decisión es revocable.')
+console.log('    Cada línea la subió el humano en su parada, con el número medido y con su alternativa escrita en `s5-presupuesto.ts` — por eso las tres son revocables: B4-A, no montar la marca; B7, montar el proveedor abajo y dejar `/v3/motion` sin el arreglo; B9, no aplicar la regla del rango.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
   `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,

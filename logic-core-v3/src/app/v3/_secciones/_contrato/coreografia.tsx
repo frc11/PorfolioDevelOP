@@ -193,6 +193,45 @@ export type FuenteDelBloque = IdDePatron | 'pin'
  */
 export type AnclajeDelBloque = 'propia' | 'seccion'
 
+/**
+ * DE DÓNDE SALE EL RANGO DE SCROLL DEL BLOQUE. **[B9]**
+ *
+ *   `'del-patron'`       el par de anclas que el patrón declara. Es el defecto,
+ *                        y es lo que reproduce la medición de la referencia
+ *                        patrón por patrón.
+ *   `'ventana-visible'`  `ANCLA_DE_LA_VENTANA_VISIBLE`: arranca cuando la caja
+ *                        entra en cuadro y llega antes de que salga.
+ *
+ * ── Por qué es una propiedad APARTE de `anclaje`, y no un valor suyo ──────
+ *
+ * Porque contestan dos preguntas distintas y encimarlas sería el mismo error
+ * que `AnclajeDelBloque` ya cometió una vez y declara arriba: `anclaje` dice
+ * **QUÉ CAJA se mide** y esto dice **QUÉ ANCLA se resuelve sobre ella**. La
+ * primera forma de aquella propiedad mezcló las dos —`'pin'` cambiaba el ancla
+ * y seguía midiendo la caja del bloque— y empeoró lo que venía a arreglar, con
+ * el número escrito arriba. Dos preguntas, dos propiedades.
+ *
+ * ── Por qué se OPTA y no es el defecto ────────────────────────────────────
+ *
+ * Por dos razones medidas, no por prudencia:
+ *
+ *   1. **La regla tiene un borde donde no se puede cumplir.** Un bloque de la
+ *      última pantalla puede tener su punto de llegada **después del último
+ *      píxel de scroll del documento**: la pieza no llegaría nunca a su estado
+ *      final. Medido en `cierre#2` —las columnas del pie—: la regla lo pondría
+ *      55 px (a 1920) y 76 px (a 1440) más allá del final del scroll. Un
+ *      defecto por ancla que se aplicara solo dejaría eso roto en silencio.
+ *   2. **`patron: 'pin'` y `anclaje: 'seccion'` no son casos de ventana
+ *      visible.** El pin resuelve el recorrido del `sticky` y la sección
+ *      pinneada mide una caja que no es la del bloque; en las dos, la ventana
+ *      visible del bloque no es la vara.
+ *
+ * El padrón de quién la declara y quién no —cada exclusión con su motivo y su
+ * número— vive en `_invariantes/s19-sincronia.invariant.ts`, no en un
+ * comentario.
+ */
+export type RangoDelBloque = 'del-patron' | 'ventana-visible'
+
 export interface BloqueProps {
   /** Qué mide. Por NOMBRE: ningún objeto del sistema cruza el seam. */
   readonly patron: FuenteDelBloque
@@ -203,6 +242,11 @@ export interface BloqueProps {
    * de la sección que lo usa lo afirma contra la tabla.
    */
   readonly anclaje?: AnclajeDelBloque
+  /**
+   * Qué ancla se resuelve sobre esa caja. Por defecto, la del patrón. Ver
+   * `RangoDelBloque`.
+   */
+  readonly rango?: RangoDelBloque
   readonly className?: string
   readonly style?: React.CSSProperties
   /** Recibe el progreso, o `null` cuando no hay coreografía. */

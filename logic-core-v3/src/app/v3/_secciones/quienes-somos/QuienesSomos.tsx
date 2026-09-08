@@ -193,7 +193,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
         <div data-composicion="agencia" className={CLASES_DEL_REPARTO}>
           <EtiquetaDeSeccion className={GEOMETRIA.reparto.etiqueta}>{CONTENIDO.etiqueta}</EtiquetaDeSeccion>
 
-          <Bloque patron="P1" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
+          <Bloque patron="P1" rango="ventana-visible" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
             {(progreso) => (
               <TextoPorLineas
                 texto={CONTENIDO.titular}
@@ -207,7 +207,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
           </Bloque>
 
-          <Bloque patron="P2" className={cn(GEOMETRIA.reparto.bajada, GEOMETRIA.medida)}>
+          <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.reparto.bajada, GEOMETRIA.medida)}>
             {(progreso) => (
               <CanalDeUnaPieza progreso={progreso} patron="P2">
                 <Cuerpo>{CONTENIDO.bajada}</Cuerpo>
@@ -234,7 +234,7 @@ function ElEquipo(): React.JSX.Element {
       <Grilla columnas="lateral" className="grow">
         <div />
         <div data-composicion="equipo" className={CLASES_DEL_REPARTO}>
-          <Bloque patron="P2" className={cn(GEOMETRIA.reparto.comoTrabajamos, GEOMETRIA.medida)}>
+          <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.reparto.comoTrabajamos, GEOMETRIA.medida)}>
             {(progreso) => (
               <CanalDeUnaPieza progreso={progreso} patron="P2">
                 <Cuerpo>{CONTENIDO.comoTrabajamos}</Cuerpo>
@@ -243,7 +243,7 @@ function ElEquipo(): React.JSX.Element {
           </Bloque>
 
           {CONTENIDO.personas.map((persona, indice) => (
-            <Bloque key={persona.nombre} patron="P2" className={indice === 0 ? GEOMETRIA.reparto.primeraPersona : GEOMETRIA.reparto.segundaPersona}>
+            <Bloque key={persona.nombre} patron="P2" rango="ventana-visible" className={indice === 0 ? GEOMETRIA.reparto.primeraPersona : GEOMETRIA.reparto.segundaPersona}>
               {(progreso) => (
                 <CanalDeUnaPieza progreso={progreso} patron="P2">
                   <Persona persona={persona} rotulo={CONTENIDO.rotuloDelPedido} />
@@ -264,7 +264,7 @@ function LaFoto(): React.JSX.Element {
   return (
     <div data-pantalla="foto" className="flex min-h-svh w-full flex-col justify-center py-20 escritorio:py-2">
       <Grilla columnas={GEOMETRIA.foto.columnasTotales}>
-        <Bloque patron="P2" className="escritorio:col-span-4">
+        <Bloque patron="P2" rango="ventana-visible" className="escritorio:col-span-4">
           {(progreso) => (
             <CanalDeUnaPieza progreso={progreso} patron="P2">
               <figure className="flex flex-col gap-3">

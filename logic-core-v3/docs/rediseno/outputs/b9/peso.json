@@ -1,0 +1,74 @@
+{
+  "que": "PESO NETO DE LA REGLA DE B9 sobre la carga inicial de /v3",
+  "instrumento": "dos builds de produccion del MISMO arbol, la unica variable son los 13 `rango=\"ventana-visible\"` de las secciones. El de `sin` corre con E2E_DIST_DIR=.next-b9, agregado a .gitignore ANTES del build.",
+  "con": {
+    "dist": ".next",
+    "archivos": 5,
+    "bytes": 65423,
+    "kib": 63.8896,
+    "ocurrenciasDelProp": 13,
+    "detalle": [
+      {
+        "archivo": "static/chunks/5930-ed0b544011857bd2.js",
+        "bytes": 1575
+      },
+      {
+        "archivo": "static/chunks/app/v3/layout-46a6aacf6fc434a6.js",
+        "bytes": 5685
+      },
+      {
+        "archivo": "static/chunks/193-1b35fef0c87a1a6f.js",
+        "bytes": 6963
+      },
+      {
+        "archivo": "static/chunks/9279-db7d413fc0261821.js",
+        "bytes": 2102
+      },
+      {
+        "archivo": "static/chunks/app/v3/page-c0edb2fd1e85794d.js",
+        "bytes": 49098
+      }
+    ]
+  },
+  "sin": {
+    "dist": ".next-b9",
+    "archivos": 5,
+    "bytes": 65111,
+    "kib": 63.585,
+    "ocurrenciasDelProp": 0,
+    "detalle": [
+      {
+        "archivo": "static/chunks/5930-ed0b544011857bd2.js",
+        "bytes": 1575
+      },
+      {
+        "archivo": "static/chunks/app/v3/layout-46a6aacf6fc434a6.js",
+        "bytes": 5685
+      },
+      {
+        "archivo": "static/chunks/193-1b35fef0c87a1a6f.js",
+        "bytes": 6963
+      },
+      {
+        "archivo": "static/chunks/9279-db7d413fc0261821.js",
+        "bytes": 2102
+      },
+      {
+        "archivo": "static/chunks/app/v3/page-69a5c0ee1fae63a1.js",
+        "bytes": 48786
+      }
+    ]
+  },
+  "deltaBytes": 312,
+  "deltaKiB": 0.3047,
+  "porInstancia": 24,
+  "lectura": "el delta coincide byte por byte con 13 x 24 B del literal `rango:\"ventana-visible\",` minificado: no hay efecto de segundo orden del minificador.",
+  "techoDeS5Peso": {
+    "kib": 61.95,
+    "composicion": "60 del lane + 1.25 (B4-A) + 0.55 (B7) + 0.15 heredados"
+  },
+  "aire": {
+    "sinB9": 0.064,
+    "nota": "aproximado: s5-peso resta el preambulo de Sentry (348 B por chunk propio). Las cifras que manda son las que imprime el invariante: 61,9 KiB sin B9 (+0,06 de aire) y 62,2 con B9 (-0,24)."
+  }
+}

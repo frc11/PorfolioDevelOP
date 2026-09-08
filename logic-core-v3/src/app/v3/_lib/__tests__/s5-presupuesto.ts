@@ -160,6 +160,71 @@ export const ARREGLO_DE_B7_KIB = 0.55
 export const HEREDADO_SIN_DECLARAR_KIB = 0.15
 
 /**
+ * ═══ B9 · LA REGLA DEL RANGO, EN 13 SITIOS — 0,31 KiB ═════════════════════
+ *
+ * ⚠️ **Lo decidió el humano en la parada de B9**, y las tres cosas que B4-A
+ * exige para mover este número están abajo, más el reparto por dueño que B7
+ * agregó.
+ *
+ * ── La causa, medida DOS VECES y coincidiendo a la unidad ─────────────────
+ *
+ * Dos builds de producción del **mismo árbol**, con `E2E_DIST_DIR` aislado
+ * (`.next-b9`, agregado a `.gitignore` ANTES del build), sobre la única variable
+ * que cambia entre uno y otro — los 13 `rango="ventana-visible"` que las
+ * secciones declaran (`docs/rediseno/outputs/b9/peso.json`):
+ *
+ *     sin los 13   65.111 B de chunks propios   61,9 KiB de lane   +0,06 de aire
+ *     con los 13   65.423 B                     62,2 KiB           −0,24
+ *
+ * **312 B exactos.** Y contados por el otro camino, con `grep` sobre el chunk
+ * minificado: **13 ocurrencias × 24 B** del literal `rango:"ventana-visible",`.
+ * Las dos cuentas dan lo mismo a la unidad, o sea que **no hay efecto de segundo
+ * orden del minificador**: el aumento es el literal y nada más.
+ *
+ * ── Qué compró ───────────────────────────────────────────────────────────
+ *
+ * Que **17 instancias** dejen de llegar a su estado final con el borde inferior
+ * de su caja al ras del borde de abajo del cuadro. La mediana de aterrizaje del
+ * sitio pasa de 0,932 a **0,737** a 1920 y de 0,911 a **0,700** a 1440; la
+ * referencia aterriza en **0,70** (`B9-DELTAS.md` §2 y §4). Y el caso que lo
+ * abrió: los cuatro bloques del diferencial estaban en opacidad **0** en el
+ * `scrollY` donde su sección llena el cuadro exacto.
+ *
+ * ── ⚠️ LO QUE SE ACHICÓ ANTES: CINCO FORMAS, CADA UNA CON SU NÚMERO ───────
+ *
+ * Ninguna cierra, y por eso se paga. El ahorro de cada una está calculado sobre
+ * el mismo literal minificado, contra un déficit de **246 B**:
+ *
+ *     `rango="en-cuadro"`                       −52 B   →  62,15   no cierra
+ *     `rango="cuadro"`                          −91 B   →  62,11   no cierra, y pierde la palabra
+ *     prop booleana `enCuadro`                 −156 B   →  62,05   no cierra, y deja
+ *                                                                  `'del-patron'` sin nombre:
+ *                                                                  el tipo pierde la mitad
+ *                                                                  de su vocabulario
+ *     no declararla en los 4 sitios donde es    −96 B   →  62,10   no cierra, y deja el
+ *     un no-op comprobable                                         padrón con cuatro huecos
+ *                                                                  sin motivo
+ *     un envoltorio `<BloqueEnCuadro>`         ~−250 B  →  ~61,94  cierra por ~0,01 KiB
+ *
+ * **La quinta es la única que cierra, y por un margen de ~10 bytes.** Lo que
+ * cuesta: una **segunda forma de declarar un bloque**, conviviendo con `Bloque`,
+ * para que las dos hagan lo mismo con distinto nombre — y un margen tan fino que
+ * el próximo byte lo vuelve a romper. Se descartó por eso, no por el ahorro.
+ *
+ * ── La alternativa, escrita ──────────────────────────────────────────────
+ *
+ * No aplicar la regla. Cuesta las 17 instancias de arriba y el caso capturado.
+ * Por eso la decisión es **revocable**: revertir los 13 sitios devuelve los
+ * 312 B y esta línea se borra.
+ *
+ * ── El reparto por dueño ─────────────────────────────────────────────────
+ *
+ * **Los 312 B son enteros de B9.** No hay una segunda línea como la de B7,
+ * porque no hay nada heredado que separar.
+ */
+export const MONTAJE_DE_B9_KIB = 0.31
+
+/**
  * ⚠️ **TODO AUMENTO ES UNA LÍNEA CON NOMBRE, Y EL TECHO VIEJO LAS RESTA TODAS.**
  *
  * Es lo que impide que esto se convierta en un número que sube solo: el
@@ -167,5 +232,6 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.15
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  */
-export const MONTAJES_DECLARADOS_KIB = MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + HEREDADO_SIN_DECLARAR_KIB
+export const MONTAJES_DECLARADOS_KIB =
+  MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + HEREDADO_SIN_DECLARAR_KIB + MONTAJE_DE_B9_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB
