@@ -23,7 +23,7 @@ export interface CajaDeLaCaptura {
 }
 
 /**
- * UN PROYECTO — la captura, el nombre y la métrica pegada al nombre.
+ * UN PROYECTO — el nombre con la métrica pegada, y la captura debajo.
  *
  * Una sola definición para las dos ramas. Lo único que cambia entre la rama
  * coreografiada y la quieta es DÓNDE se pone esta tarjeta —apilada con las otras
@@ -32,6 +32,21 @@ export interface CajaDeLaCaptura {
  * La métrica va en la misma línea de base que el nombre y con el rótulo que
  * explica qué se está pidiendo. `flex-wrap` para que en una columna angosta baje
  * de renglón en vez de desbordar: baja, pero sigue pegada.
+ *
+ * ── ⚠️ B11 · EL RENGLÓN DEL NOMBRE VA ARRIBA DE LA CAPTURA, y está medido ────
+ *
+ * Iba debajo. En la noche de Trabajos el piso más cercano a la cámara queda
+ * iluminado en una franja al pie del cuadro —el 8–10 % inferior, medido con
+ * `scripts-b11/a-logo.ts` sobre el pin entero—, y con la tarjeta centrada en el
+ * escenario el renglón caía adentro de esa franja **sólo a 1920**: y 989–1000 de
+ * 1080 (a 1440, 803–813 de 900, y a 2560, 1181–1192 de 1440, quedan arriba).
+ * Ahí «Lo que cambió», «[MÉTRICA]» y los nombres daban **2,04–3,82:1 con el 85,7–100 %
+ * de su caja bajo AA** («Banú» 449 de 455 px; `bloques-antes-1920.json`), sin una
+ * partícula de por medio: tinta clara sobre piso claro. Con el renglón arriba, la tarjeta no
+ * cambia de alto —la captura baja lo que el renglón sube— y el nombre queda
+ * contra la pared oscura en los tres anchos. Es un cambio de orden, no de
+ * contenido: el nombre sigue siendo el `h3` y el enlace, la métrica sigue
+ * pegada a él y afuera del enlace, y el marcador `[CAPTURA]` sigue donde estaba.
  */
 export function Proyecto({
   proyecto,
@@ -44,20 +59,6 @@ export function Proyecto({
 }): React.JSX.Element {
   return (
     <article data-proyecto={proyecto.nombre} className="flex w-full flex-col gap-3">
-      {/* ⚠ `marcador` va literal y HOY NO SE RENDERIZA: `MarcoDeMedio` lo usa
-          sólo en su rama sin archivo, y las tres capturas ya existen. Se deja
-          escrito porque es la identidad del hueco: el día que una `fuente`
-          vuelva a `null` —un cliente que pide bajar su captura— la caja se
-          convierte sola en el pedido, con su relación de aspecto y su `sizes`
-          intactos. Sacarlo obligaría a reconstruir esa rama a mano. */}
-      <MarcoDeMedio
-        marcador="[CAPTURA]"
-        fuente={proyecto.captura.fuente}
-        alt={proyecto.captura.alt}
-        ancho={caja.ancho}
-        alto={caja.alto}
-        sizes={caja.sizes}
-      />
       <div className="flex flex-wrap items-baseline gap-3">
         {/* EL NOMBRE ES EL ENLACE, y no la tarjeta entera: envolver todo dejaría
             al `[MÉTRICA]` adentro del nombre accesible del enlace —"Esquina Lo
@@ -100,6 +101,20 @@ export function Proyecto({
           </span>
         </p>
       </div>
+      {/* ⚠ `marcador` va literal y HOY NO SE RENDERIZA: `MarcoDeMedio` lo usa
+          sólo en su rama sin archivo, y las tres capturas ya existen. Se deja
+          escrito porque es la identidad del hueco: el día que una `fuente`
+          vuelva a `null` —un cliente que pide bajar su captura— la caja se
+          convierte sola en el pedido, con su relación de aspecto y su `sizes`
+          intactos. Sacarlo obligaría a reconstruir esa rama a mano. */}
+      <MarcoDeMedio
+        marcador="[CAPTURA]"
+        fuente={proyecto.captura.fuente}
+        alt={proyecto.captura.alt}
+        ancho={caja.ancho}
+        alto={caja.alto}
+        sizes={caja.sizes}
+      />
     </article>
   )
 }

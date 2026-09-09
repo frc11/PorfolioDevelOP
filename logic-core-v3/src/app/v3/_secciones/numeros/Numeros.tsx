@@ -18,65 +18,50 @@ import { CONTENIDO, type ClaveDeCifra } from './contenido'
  * 03 · NÚMEROS — CUATRO pantallas de papel, y las cifras NO en una barra.
  *
  * ── El hallazgo que decide la composición entera ───────────────────────────
- *
  * Medido y observado sobre la referencia: *"Están dispersos en posiciones
  * asimétricas y tamaños distintos. Reproducirlos como una barra de cuatro
  * columnas pierde el efecto entero."* N columnas iguales dicen **"estos datos
- * valen lo mismo"** y el efecto copiado dice lo contrario, así que ahí el gesto
- * no se degrada: desaparece. Por eso hay una grilla de DOCE columnas usada como
+ * valen lo mismo"** y el efecto copiado dice lo contrario: el gesto no se
+ * degrada, desaparece. Por eso hay una grilla de DOCE columnas usada como
  * **primitiva de posición** —no una fila de columnas iguales ni una `<Grilla>`—
- * y cada cifra declara arranque, ancho y fila sin compartir las tres con otra.
- * Un instrumento afirma que en el marcado no existe ni un `grid-cols-4` ni un
- * `grid-cols-5`, y que las cinco celdas difieren en las tres coordenadas.
+ * y cada cifra declara arranque, ancho y fila sin compartir las tres con otra;
+ * un instrumento afirma que no hay `grid-cols-4` ni `grid-cols-5` en el marcado.
  *
  * ── B2 · LOS MOMENTOS. La sección medía CERO acontecimientos. [medido] ─────
  *
- * La Fase 0 de B2 subió esta sección de `100svh` a **`400svh`** —del techo de
- * velocidad de la cámara y de la densidad de la referencia, `B2-DELTAS.md`
- * §3.1— y la composición se quedó como estaba: **una sola caja `min-h-svh` con
- * los seis bloques adentro y tres pantallas de scroll vacío detrás.** Las dos
- * consecuencias, medidas a 1920×1080 con el censo de `B2-DELTAS.md` §0:
- *
- * 1. **`s10-mobile` §2 en rojo** — `numeros: el flujo llena las 4 pantallas
- *    declaradas` fallaba en los cuatro anchos: el marcado componía UNA.
- * 2. **Cero acontecimientos adentro de la sección.** El ancla de P2 es
- *    `top bottom → bottom bottom`: un bloque aterriza cuando su borde inferior
- *    toca el pie del viewport. Con los seis apretados en la primera pantalla,
- *    aterrizaban entre `scrollY` **3720 y 4320** —ANTES de que la sección
- *    llegue al tope, fundidos con el último grupo de Quiénes somos— y adentro
- *    de `[4320, 8640]` el censo medía **0 grupos**: de ahí salían las **5,44
- *    pantallas** de hueco máximo del documento entero.
+ * La Fase 0 de B2 subió esta sección de `100svh` a **`400svh`** (el techo de
+ * velocidad de la cámara y la densidad de la referencia, `B2-DELTAS.md` §3.1) y
+ * la composición se quedó como estaba: **una sola caja `min-h-svh` con los seis
+ * bloques adentro y tres pantallas de scroll vacío detrás.** Medido a 1920×1080
+ * con el censo de `B2-DELTAS.md` §0: `s10-mobile` §2 en rojo (el marcado
+ * componía UNA pantalla de las 4 declaradas) y **cero acontecimientos adentro
+ * de la sección** — el ancla de P2 es `top bottom → bottom bottom`, los seis
+ * aterrizaban entre `scrollY` **3720 y 4320**, ANTES del tope y fundidos con el
+ * último grupo de Quiénes somos, y en `[4320, 8640]` el censo medía **0
+ * grupos**: de ahí salían las **5,44 pantallas** de hueco máximo del documento.
  *
  * **El arreglo es geométrico y no agrega una sola pieza:** la misma composición
- * dispersa se reparte en **cuatro cajas `min-h-svh`**, una por pantalla
- * declarada, y las filas que ya tenía pasan a ser las de cada caja. Como cada
- * bloque aterriza donde está su caja, repartirlos en vertical reparte los
- * aterrizajes; `GEOMETRIA.pantallas` es esa tabla.
- *
- * ⚠ Es el mismo defecto que el frente C encontró en Servicios, del otro lado:
- * allá el progreso no se detenía nunca, acá se detenía todo junto y fuera de
- * cuadro. La cura es la misma: que algo TERMINE de moverse donde alguien mire.
- * ⚠ **Y el costo se declara:** seis bloques en cuatro pantallas dejan más aire
- * por pantalla que seis en una — consecuencia directa de *"repartí lo que YA
- * HAY: ni contenido ni relleno"*—; por eso el reparto de B1 se conserva caja
- * por caja.
+ * se reparte en **cuatro cajas `min-h-svh`**, una por pantalla declarada, y las
+ * filas que ya tenía pasan a ser las de cada caja: cada bloque aterriza donde
+ * está su caja (`GEOMETRIA.pantallas` es esa tabla). Es el mismo defecto que el
+ * frente C encontró en Servicios, del otro lado —allá el progreso no se detenía
+ * nunca—, y la misma cura: que algo TERMINE de moverse donde alguien mire.
+ * ⚠ **El costo se declara:** seis bloques en cuatro pantallas dejan más aire por
+ * pantalla que seis en una (*"repartí lo que YA HAY: ni contenido ni relleno"*);
+ * por eso el reparto de B1 se conserva caja por caja.
  *
  * ── Los tamaños, y el escalonado que ya no sale de un desplome ─────────────
  * La escala de display tiene EXACTAMENTE cuatro niveles —`titulo-s` 20px,
  * `titulo-m` 32, `titulo-l` 44, `titulo-xl` 56—, así que cinco tamaños
- * distintos exigirían un quinto: un token que no existe. Uno se repite, en las
- * dos de peso medio. Los rótulos son TODOS `micro`: dos variables a la vez no
- * son jerarquía, son ruido.
- *
- * El escalonado sale de la GEOMETRÍA y no del cronograma —el porqué está en
- * `CifraDeLaComposicion`—, y **B2 cambia de dónde sale la distinta altura que
- * lo produce.** Antes eran las cinco filas de UNA grilla de una pantalla, y las
- * dos que compartían fila se separaban con un desplome de la escala de
- * espaciado (`tablet:mt-20`, 80 px): **menos de un paso del censo** (120 px),
- * así que el instrumento las leía como un solo aterrizaje. Ahora las dos cifras
- * de una pantalla están en **filas distintas de su grilla**, que con
- * `content-evenly` las separa cerca de un tercio de la caja. **Los desplomes se
- * van con el motivo que los puso.**
+ * distintos exigirían un token que no existe: uno se repite, en las dos de peso
+ * medio. Los rótulos son TODOS `micro`: dos variables a la vez no son
+ * jerarquía, son ruido. El escalonado sale de la GEOMETRÍA y no del cronograma
+ * (el porqué está en `CifraDeLaComposicion`), y **B2 cambia de dónde sale la
+ * distinta altura que lo produce**: antes, las cinco filas de UNA grilla, con
+ * las dos que compartían fila separadas por un desplome de 80 px (`tablet:mt-20`,
+ * menos de un paso del censo de 120: un solo aterrizaje). Ahora las dos cifras
+ * de una pantalla están en **filas distintas de su grilla**, que `content-evenly`
+ * separa cerca de un tercio de la caja. **Los desplomes se van con su motivo.**
  *
  * ── Abajo de 1025, y abajo de 768 ─────────────────────────────────────────
  *
@@ -86,21 +71,32 @@ import { CONTENIDO, type ClaveDeCifra } from './contenido'
  * visitante de tablet sería un diseño que nadie compuso—: las primitivas
  * entregan `progreso: null` y las seis piezas salen enteras, sin transformada y
  * sin `will-change`. **Abajo de 768 la grilla colapsa a UNA columna**
- * (`grid-cols-1`) y las posiciones se van con ella, porque también son
- * `tablet:`: las cajas caen en orden de documento —el de lectura de
- * `contenido.ts`— y lo que sobrevive de la asimetría son los TAMAÑOS, que los
- * `clamp()` comprimen a 36 · 24 · 18 · 17px en 375. **Las cuatro cajas de
- * pantalla sí sobreviven**: `min-h-svh` no lleva variante, y es lo que hace que
- * el flujo llene las cuatro pantallas declaradas en los cuatro anchos.
+ * (`grid-cols-1`) y las posiciones se van con ella —también son `tablet:`—: las
+ * cajas caen en el orden de lectura de `contenido.ts` y sobreviven la asimetría
+ * de TAMAÑOS (los `clamp()` dan 36 · 24 · 18 · 17px en 375) y las cuatro cajas
+ * de pantalla (`min-h-svh` no lleva variante). ⚠ La última cifra era 16px hasta
+ * SITIO-S11 —EXACTAMENTE `--text-base`, un píxel arriba de `--text-cuerpo`—: S11
+ * subió el piso de `--text-fluido-titulo-s` de 16 a 17px (el único entero que
+ * pasa `base` y queda abajo del piso de `titulo-m`, 18) sin tocar su techo;
+ * `s10-mobile` §4 lo reproduce. Y nada se rompe al angostar: **ni una posición
+ * absoluta** y **ningún ancho en píxeles** —doce `minmax(0, 1fr)`, canaletas de
+ * tokens—.
  *
- * ⚠ **La última cifra era 16px hasta SITIO-S11, y eso era el defecto.** 16 es
- * EXACTAMENTE `--text-base` y un píxel arriba de `--text-cuerpo`: la cifra más
- * chica dejaba de leerse como cifra justo en el ancho donde vive la mitad de
- * los visitantes. S11 subió el piso de `--text-fluido-titulo-s` de 16 a 17px
- * —el único entero que pasa `base` y se queda abajo del piso de `titulo-m`
- * (18)— sin tocar su techo. `s10-mobile` §4 lo reproduce leyendo el token. Y
- * nada se rompe al angostar: **ni una posición absoluta** y **ningún ancho en
- * píxeles** —las doce columnas son `minmax(0, 1fr)`, las canaletas son tokens—.
+ * ═══ B11 · LA DISPERSIÓN, EN LA MITAD QUE EL LOGO DEJA LIBRE [medido] ═══════
+ *
+ * **La coreografía manda y el texto se mueve.** B8 abrió la sección sobre la
+ * sala y el logo pasaba por detrás de 8–10 de sus 13 bloques (1,00:1) a lo largo
+ * del TRAMO, no en una pose: la silueta cada 1/16 de pantalla (`scripts-b11/`,
+ * `a-logo.ts` cruzado con estas columnas por `h-columnas.ts`) tapa las columnas
+ * 1–5 en las cuatro pantallas y en los tres anchos, la 6 a medias, y **de la 7 a
+ * la 12 queda libre** (0–7 % alguna vez; la tabla, en `B11-ACOMODAMIENTO.md` §3).
+ * Por eso la composición vive desde la 7 (`primeraColumnaLibre`) y la dispersión
+ * se conserva adentro de esa mitad: arranques 7 · 9 · 8 · 10 · 7, anchos 6 · 4 · 3,
+ * fila y pantalla propias, los cuatro tamaños. **Lo que se pierde:** la amplitud,
+ * de 1.220 a 594 px a 1440 (PARADA 1 de B11). Lo que NO cierra —la última cifra
+ * bajo el atardecer, que no sube a la fila 1 porque ahí deja 1,47 pantallas hasta
+ * Trabajos contra el gate de 1,33 de B9— y el piso de motas que ninguna columna
+ * baja (0,45–0,48 % del cuadro bajo AA) llevan número en `deudas-b11.ts` (D-B11.3).
  */
 
 /**
@@ -128,6 +124,7 @@ export interface PantallaDeNumeros {
  */
 export const GEOMETRIA: {
   readonly columnas: number
+  readonly primeraColumnaLibre: number
   readonly etiqueta: string
   readonly cabecera: string
   readonly medida: string
@@ -139,19 +136,22 @@ export const GEOMETRIA: {
    *  fracción rara. Con 10 los tercios no existen; con 16 los anchos chicos
    *  quedan abajo de la línea de texto más corta. */
   columnas: 12,
+  /** SIETE — [medido, B11]: la primera columna que el logo NO tapa en ninguna
+   *  parada del tramo, en las cuatro pantallas y en los tres anchos. Ninguna
+   *  pieza arranca antes, y el invariante lo afirma leyendo el marcado. */
+  primeraColumnaLibre: 7,
   /**
-   * ⚠ **B1: el rótulo entró a la composición y no es cosmético.** Estaba
-   * afuera, separado por un `gap` fijo, así que el hueco de arriba era
-   * `padding + gap` y no participaba del reparto: 232,72 px contra los 32 de
-   * las junturas de adentro. Va sin `col-start` a propósito: con la fila
-   * declarada cae en la columna 1, y **el instrumento que cuenta las celdas
-   * sólo levanta las clases con `col-start`** — el rótulo no se cuenta como una
-   * sexta cifra.
+   * ⚠ **B1: el rótulo entró a la composición y no es cosmético.** Estaba afuera,
+   * con un `gap` fijo: el hueco de arriba (`padding + gap`, 232,72 px contra los 32
+   * de las junturas de adentro) no participaba del reparto.
+   * ⚠ **B11: arranca en la 7 con `col-start`, y eso destapó un defecto del
+   * instrumento**: `celdasDe` contaba toda clase con `tablet:col-start-` y un
+   * rótulo posicionado era una sexta cifra. Se ARREGLA (salta la pieza por su
+   * `data-pieza`), no se afloja. Sin `col-span`: «Números» mide 51 px.
    */
-  etiqueta: 'tablet:col-span-3 tablet:row-start-1',
-  /** El titular y la bajada arrancan en la columna 1, en la segunda fila de la
-   *  primera pantalla. El ancho lo manda `medida` arriba de ~1025. */
-  cabecera: 'tablet:col-start-1 tablet:col-span-7 tablet:row-start-2',
+  etiqueta: 'tablet:col-start-7 tablet:row-start-1',
+  /** El titular y la bajada: primera columna libre, segunda fila de la primera pantalla; el ancho lo manda `medida`. */
+  cabecera: 'tablet:col-start-7 tablet:col-span-6 tablet:row-start-2',
   /**
    * LA MEDIDA DE LECTURA de la cabecera. [medido] Siete de doce columnas valen
    * 985 px a 1920: la bajada salía en **2 líneas de 74 caracteres** y el
@@ -172,15 +172,15 @@ export const GEOMETRIA: {
     { id: 'escala', cabecera: false, cifras: ['procesos'] },
   ],
   celdas: {
-    /** La que manda: nivel más grande, al margen y sola en su fila. */
+    /** La que manda: nivel más grande, de la primera columna libre al margen
+     *  derecho, sola en su fila (B11: era la 1–5, 100 % bajo el logo). */
     proyectos: {
       nivel: 'titulo-xl',
-      celda: 'tablet:col-start-1 tablet:col-span-5 tablet:row-start-1',
+      celda: 'tablet:col-start-7 tablet:col-span-6 tablet:row-start-1',
       desplome: '',
     },
-    /** El contrapeso, en la fila de abajo y contra el margen derecho: las dos
-     *  coordenadas cambian a la vez, que es la asimetría.
-     *  ⚠ B1: arranca en la 9 y no en la 8, medido: a 1920 la pastilla de
+    /** El contrapeso, abajo y sangrada dos columnas respecto de la de arriba: las
+     *  dos coordenadas cambian a la vez. ⚠ B1: en la 9 y no en la 8, medido: a 1920 la pastilla de
      *  navegación ocupa de x 658 a x 1262, y desde la columna 8 esta cifra
      *  empezaba en x 1189 —73 px por dentro de la pastilla, que en una parada
      *  de scroll le tapaba 38,11 px de los 51,75 que mide—. Desde la 9 empieza
@@ -190,17 +190,18 @@ export const GEOMETRIA: {
       celda: 'tablet:col-start-9 tablet:col-span-4 tablet:row-start-2',
       desplome: '',
     },
-    /** La más chica, sangrada dos columnas: ese hueco a la izquierda es lo que
-     *  impide que la pantalla se lea como una grilla. */
+    /** La más chica, sangrada una columna desde el borde libre: ese hueco es lo
+     *  que impide que se lea como grilla (B11: era la 3–5, bajo el logo). */
     anios: {
       nivel: 'titulo-s',
-      celda: 'tablet:col-start-3 tablet:col-span-3 tablet:row-start-1',
+      celda: 'tablet:col-start-8 tablet:col-span-3 tablet:row-start-1',
       desplome: '',
     },
-    /** Segundo nivel, ancha y a la derecha, debajo de la más chica. */
+    /** Segundo nivel, contra el margen derecho, debajo de la más chica. Tres
+     *  columnas (B11): 290 px a 1440 para 177 de cifra; la 10 es el cuarto arranque. */
     respuesta: {
       nivel: 'titulo-l',
-      celda: 'tablet:col-start-7 tablet:col-span-6 tablet:row-start-2',
+      celda: 'tablet:col-start-10 tablet:col-span-3 tablet:row-start-2',
       desplome: '',
     },
     /** Cierra sola su pantalla, en la fila DE ABAJO: las tres pantallas de
@@ -208,10 +209,11 @@ export const GEOMETRIA: {
      *  cifra. ⚠ **Y ahí hay un número:** en la fila de arriba su aterrizaje
      *  caía cerca de `scrollY` 7053 y dejaba **1,47 pantallas** hasta el primer
      *  aterrizaje de Trabajos —el hueco más grande del tramo—; en la de abajo
-     *  baja al final de la sección y el hueco se acorta. */
+     *  baja al final de la sección y el hueco se acorta. B11 la corre a la 7 y la
+     *  deja abajo aunque la alcance el atardecer: docblock de arriba, D-B11.3. */
     procesos: {
       nivel: 'titulo-m',
-      celda: 'tablet:col-start-2 tablet:col-span-4 tablet:row-start-2',
+      celda: 'tablet:col-start-7 tablet:col-span-4 tablet:row-start-2',
       desplome: '',
     },
   },
@@ -222,15 +224,12 @@ export const GEOMETRIA: {
  * propia caja de pantalla. Las canaletas son los MISMOS tokens del canal
  * `conmutado` de `Grilla` —12px abajo de 1025, 16px arriba—: una composición
  * que inventa su canaleta se ve de otro sistema.
- *
  * **B1 · el hueco se reparte, no se acumula. [medido]** Antes: 614,56 px de
  * composición centrados en 1080, o sea **232,72 px de nada arriba y otros
  * 232,72 abajo** mientras las junturas de adentro medían 32. `content-evenly`
- * sobre una caja de pantalla reparte lo que sobra **por igual entre las
- * junturas**; un `gap` fijo no puede, y por eso `gap-y` se apaga arriba de 1025
- * —sumado al reparto daría junturas desparejas— y vuelve abajo del umbral,
- * donde la caja no sobra: sobra tinta.
- *
+ * reparte lo que sobra **por igual entre las junturas**; un `gap` fijo no puede,
+ * y por eso `gap-y` se apaga arriba de 1025 —sumado al reparto daría junturas
+ * desparejas— y vuelve abajo del umbral, donde no sobra caja: sobra tinta.
  * ⚠ **B2: el `min-h-svh` se mudó del envoltorio único a cada pantalla.**
  * `escritorio:py-0` y no un relleno fijo: arriba de 1025 el borde lo pone el
  * propio reparto y sumarle un `padding` lo duplicaría.

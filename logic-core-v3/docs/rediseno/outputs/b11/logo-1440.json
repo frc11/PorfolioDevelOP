@@ -1,0 +1,9003 @@
+{
+  "perfil": "1440",
+  "ancho": 1440,
+  "ventana": 900,
+  "documento": 16200,
+  "paso": 56.25,
+  "escalaDelMapa": 4,
+  "siluetaMaximaValida": 0.35,
+  "paneles": [
+    {
+      "id": "hero",
+      "superficie": "papel-transparente",
+      "alto": 900,
+      "top": 0
+    },
+    {
+      "id": "quienes-somos",
+      "superficie": "papel-transparente",
+      "alto": 2700,
+      "top": 900
+    },
+    {
+      "id": "numeros",
+      "superficie": "papel-transparente",
+      "alto": 3600,
+      "top": 3600
+    },
+    {
+      "id": "trabajos",
+      "superficie": "oscuro-transparente",
+      "alto": 2700,
+      "top": 7200
+    },
+    {
+      "id": "servicios",
+      "superficie": "papel-opaco",
+      "alto": 2700,
+      "top": 9900
+    },
+    {
+      "id": "tu-panel",
+      "superficie": "papel-opaco",
+      "alto": 1800,
+      "top": 12600
+    },
+    {
+      "id": "por-que-develop",
+      "superficie": "papel-transparente",
+      "alto": 900,
+      "top": 14400
+    },
+    {
+      "id": "cierre",
+      "superficie": "oscuro-transparente",
+      "alto": 900,
+      "top": 15300
+    }
+  ],
+  "posiciones": [
+    {
+      "scrollY": 0,
+      "pantalla": 0,
+      "progreso": 0,
+      "gris": 212.5,
+      "luminancia": 0.7265,
+      "medianaGris": 225,
+      "estado": "logo",
+      "logo": {
+        "area": 79931,
+        "caja": [
+          682,
+          284,
+          1191,
+          629
+        ],
+        "fraccionDelCuadro": 0.0617,
+        "fraccionDelAncho": 0.3542,
+        "fraccionDelAlto": 0.3844,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 566,
+          "fraccionDelArea": 0.003792
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 56,
+      "pantalla": 0.062,
+      "progreso": 0.0078,
+      "gris": 212.5,
+      "luminancia": 0.7258,
+      "medianaGris": 225,
+      "estado": "logo",
+      "logo": {
+        "area": 79714,
+        "caja": [
+          682,
+          283,
+          1191,
+          629
+        ],
+        "fraccionDelCuadro": 0.0615,
+        "fraccionDelAncho": 0.3542,
+        "fraccionDelAlto": 0.3856,
+        "valida": true
+      },
+      "motasPx": 5,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 567,
+          "fraccionDelArea": 0.00381
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000051000000000000006
+        }
+      }
+    },
+    {
+      "scrollY": 113,
+      "pantalla": 0.126,
+      "progreso": 0.0157,
+      "gris": 212.3,
+      "luminancia": 0.7245,
+      "medianaGris": 225,
+      "estado": "logo",
+      "logo": {
+        "area": 79793,
+        "caja": [
+          680,
+          282,
+          1190,
+          629
+        ],
+        "fraccionDelCuadro": 0.0616,
+        "fraccionDelAncho": 0.3549,
+        "fraccionDelAlto": 0.3867,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 567,
+          "fraccionDelArea": 0.0038229999999999996
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 169,
+      "pantalla": 0.188,
+      "progreso": 0.0235,
+      "gris": 211.9,
+      "luminancia": 0.7224,
+      "medianaGris": 225,
+      "estado": "logo",
+      "logo": {
+        "area": 80135,
+        "caja": [
+          677,
+          281,
+          1187,
+          629
+        ],
+        "fraccionDelCuadro": 0.0618,
+        "fraccionDelAncho": 0.3549,
+        "fraccionDelAlto": 0.3878,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 579,
+          "fraccionDelArea": 0.003991
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 225,
+      "pantalla": 0.25,
+      "progreso": 0.0313,
+      "gris": 211.7,
+      "luminancia": 0.7208,
+      "medianaGris": 224,
+      "estado": "logo",
+      "logo": {
+        "area": 80609,
+        "caja": [
+          671,
+          280,
+          1183,
+          630
+        ],
+        "fraccionDelCuadro": 0.0622,
+        "fraccionDelAncho": 0.3563,
+        "fraccionDelAlto": 0.39,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 575,
+          "fraccionDelArea": 0.003977
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 281,
+      "pantalla": 0.312,
+      "progreso": 0.039,
+      "gris": 211.4,
+      "luminancia": 0.7187,
+      "medianaGris": 224,
+      "estado": "logo",
+      "logo": {
+        "area": 81275,
+        "caja": [
+          664,
+          278,
+          1178,
+          631
+        ],
+        "fraccionDelCuadro": 0.0627,
+        "fraccionDelAncho": 0.3576,
+        "fraccionDelAlto": 0.3933,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 582,
+          "fraccionDelArea": 0.004124
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 338,
+      "pantalla": 0.376,
+      "progreso": 0.0469,
+      "gris": 210.8,
+      "luminancia": 0.7149,
+      "medianaGris": 223,
+      "estado": "logo",
+      "logo": {
+        "area": 82001,
+        "caja": [
+          654,
+          276,
+          1171,
+          632
+        ],
+        "fraccionDelCuadro": 0.0633,
+        "fraccionDelAncho": 0.3597,
+        "fraccionDelAlto": 0.3967,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 571,
+          "fraccionDelArea": 0.004137
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 394,
+      "pantalla": 0.438,
+      "progreso": 0.0547,
+      "gris": 210.4,
+      "luminancia": 0.7123,
+      "medianaGris": 222,
+      "estado": "logo",
+      "logo": {
+        "area": 82777,
+        "caja": [
+          643,
+          272,
+          1161,
+          633
+        ],
+        "fraccionDelCuadro": 0.0639,
+        "fraccionDelAncho": 0.3604,
+        "fraccionDelAlto": 0.4022,
+        "valida": true
+      },
+      "motasPx": 8,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 572,
+          "fraccionDelArea": 0.004218
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 450,
+      "pantalla": 0.5,
+      "progreso": 0.0625,
+      "gris": 209.9,
+      "luminancia": 0.7091,
+      "medianaGris": 222,
+      "estado": "logo",
+      "logo": {
+        "area": 84188,
+        "caja": [
+          631,
+          268,
+          1150,
+          636
+        ],
+        "fraccionDelCuadro": 0.065,
+        "fraccionDelAncho": 0.3611,
+        "fraccionDelAlto": 0.41,
+        "valida": true
+      },
+      "motasPx": 12,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 579,
+          "fraccionDelArea": 0.004279
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.0000029999999999999997
+        }
+      }
+    },
+    {
+      "scrollY": 506,
+      "pantalla": 0.562,
+      "progreso": 0.0703,
+      "gris": 209,
+      "luminancia": 0.7041,
+      "medianaGris": 221,
+      "estado": "logo",
+      "logo": {
+        "area": 86483,
+        "caja": [
+          617,
+          264,
+          1137,
+          640
+        ],
+        "fraccionDelCuadro": 0.0667,
+        "fraccionDelAncho": 0.3618,
+        "fraccionDelAlto": 0.4189,
+        "valida": true
+      },
+      "motasPx": 10,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 577,
+          "fraccionDelArea": 0.004424
+        },
+        "clara": {
+          "cantidad": 9,
+          "fraccionDelArea": 0.000008
+        }
+      }
+    },
+    {
+      "scrollY": 563,
+      "pantalla": 0.626,
+      "progreso": 0.0782,
+      "gris": 207.8,
+      "luminancia": 0.6979,
+      "medianaGris": 220,
+      "estado": "logo",
+      "logo": {
+        "area": 89446,
+        "caja": [
+          602,
+          259,
+          1119,
+          644
+        ],
+        "fraccionDelCuadro": 0.069,
+        "fraccionDelAncho": 0.3597,
+        "fraccionDelAlto": 0.4289,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 576,
+          "fraccionDelArea": 0.004464
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 619,
+      "pantalla": 0.688,
+      "progreso": 0.086,
+      "gris": 206.4,
+      "luminancia": 0.6902,
+      "medianaGris": 219,
+      "estado": "logo",
+      "logo": {
+        "area": 93249,
+        "caja": [
+          584,
+          254,
+          1098,
+          649
+        ],
+        "fraccionDelCuadro": 0.072,
+        "fraccionDelAncho": 0.3576,
+        "fraccionDelAlto": 0.44,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 571,
+          "fraccionDelArea": 0.004685
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        }
+      }
+    },
+    {
+      "scrollY": 675,
+      "pantalla": 0.75,
+      "progreso": 0.0938,
+      "gris": 204.3,
+      "luminancia": 0.6789,
+      "medianaGris": 219,
+      "estado": "logo",
+      "logo": {
+        "area": 97898,
+        "caja": [
+          565,
+          249,
+          1072,
+          655
+        ],
+        "fraccionDelCuadro": 0.0755,
+        "fraccionDelAncho": 0.3528,
+        "fraccionDelAlto": 0.4522,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 576,
+          "fraccionDelArea": 0.00493
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 731,
+      "pantalla": 0.812,
+      "progreso": 0.1015,
+      "gris": 201.9,
+      "luminancia": 0.6653,
+      "medianaGris": 218,
+      "estado": "logo",
+      "logo": {
+        "area": 104189,
+        "caja": [
+          547,
+          244,
+          1041,
+          661
+        ],
+        "fraccionDelCuadro": 0.0804,
+        "fraccionDelAncho": 0.3438,
+        "fraccionDelAlto": 0.4644,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 551,
+          "fraccionDelArea": 0.005138
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 788,
+      "pantalla": 0.876,
+      "progreso": 0.1094,
+      "gris": 199.4,
+      "luminancia": 0.6503,
+      "medianaGris": 216,
+      "estado": "logo",
+      "logo": {
+        "area": 108822,
+        "caja": [
+          536,
+          240,
+          1003,
+          670
+        ],
+        "fraccionDelCuadro": 0.084,
+        "fraccionDelAncho": 0.325,
+        "fraccionDelAlto": 0.4789,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 550,
+          "fraccionDelArea": 0.00536
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 844,
+      "pantalla": 0.938,
+      "progreso": 0.1172,
+      "gris": 197.4,
+      "luminancia": 0.6376,
+      "medianaGris": 214,
+      "estado": "logo",
+      "logo": {
+        "area": 109021,
+        "caja": [
+          532,
+          237,
+          957,
+          679
+        ],
+        "fraccionDelCuadro": 0.0841,
+        "fraccionDelAncho": 0.2958,
+        "fraccionDelAlto": 0.4922,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 560,
+          "fraccionDelArea": 0.005728
+        },
+        "clara": {
+          "cantidad": 5,
+          "fraccionDelArea": 0.000004
+        }
+      }
+    },
+    {
+      "scrollY": 900,
+      "pantalla": 1,
+      "progreso": 0.125,
+      "gris": 196.3,
+      "luminancia": 0.6277,
+      "medianaGris": 213,
+      "estado": "logo",
+      "logo": {
+        "area": 105748,
+        "caja": [
+          534,
+          225,
+          903,
+          687
+        ],
+        "fraccionDelCuadro": 0.0816,
+        "fraccionDelAncho": 0.2569,
+        "fraccionDelAlto": 0.5144,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 537,
+          "fraccionDelArea": 0.005659
+        },
+        "clara": {
+          "cantidad": 7,
+          "fraccionDelArea": 0.000005
+        }
+      }
+    },
+    {
+      "scrollY": 956,
+      "pantalla": 1.062,
+      "progreso": 0.1302,
+      "gris": 195.9,
+      "luminancia": 0.6225,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 101273,
+        "caja": [
+          538,
+          217,
+          865,
+          692
+        ],
+        "fraccionDelCuadro": 0.0781,
+        "fraccionDelAncho": 0.2278,
+        "fraccionDelAlto": 0.5289,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 530,
+          "fraccionDelArea": 0.005790999999999999
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000005
+        }
+      }
+    },
+    {
+      "scrollY": 1013,
+      "pantalla": 1.126,
+      "progreso": 0.1355,
+      "gris": 195.5,
+      "luminancia": 0.6164,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 96462,
+        "caja": [
+          539,
+          208,
+          828,
+          696
+        ],
+        "fraccionDelCuadro": 0.0744,
+        "fraccionDelAncho": 0.2014,
+        "fraccionDelAlto": 0.5433,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 539,
+          "fraccionDelArea": 0.006138
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 1069,
+      "pantalla": 1.188,
+      "progreso": 0.1406,
+      "gris": 195.4,
+      "luminancia": 0.6134,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 91767,
+        "caja": [
+          539,
+          199,
+          796,
+          700
+        ],
+        "fraccionDelCuadro": 0.0708,
+        "fraccionDelAncho": 0.1792,
+        "fraccionDelAlto": 0.5578,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 502,
+          "fraccionDelArea": 0.006042
+        },
+        "clara": {
+          "cantidad": 6,
+          "fraccionDelArea": 0.000292
+        }
+      }
+    },
+    {
+      "scrollY": 1125,
+      "pantalla": 1.25,
+      "progreso": 0.1458,
+      "gris": 195.7,
+      "luminancia": 0.6115,
+      "medianaGris": 209,
+      "estado": "logo",
+      "logo": {
+        "area": 85857,
+        "caja": [
+          540,
+          190,
+          767,
+          704
+        ],
+        "fraccionDelCuadro": 0.0662,
+        "fraccionDelAncho": 0.1583,
+        "fraccionDelAlto": 0.5722,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 511,
+          "fraccionDelArea": 0.006228
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 1181,
+      "pantalla": 1.312,
+      "progreso": 0.151,
+      "gris": 196.4,
+      "luminancia": 0.6105,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 76010,
+        "caja": [
+          544,
+          181,
+          736,
+          707
+        ],
+        "fraccionDelCuadro": 0.0586,
+        "fraccionDelAncho": 0.134,
+        "fraccionDelAlto": 0.5856,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 517,
+          "fraccionDelArea": 0.006332
+        },
+        "clara": {
+          "cantidad": 5,
+          "fraccionDelArea": 0.000004
+        }
+      }
+    },
+    {
+      "scrollY": 1238,
+      "pantalla": 1.376,
+      "progreso": 0.1563,
+      "gris": 197.9,
+      "luminancia": 0.6131,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 61504,
+        "caja": [
+          553,
+          173,
+          697,
+          709
+        ],
+        "fraccionDelCuadro": 0.0475,
+        "fraccionDelAncho": 0.1007,
+        "fraccionDelAlto": 0.5967,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 536,
+          "fraccionDelArea": 0.006606
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 1294,
+      "pantalla": 1.438,
+      "progreso": 0.1615,
+      "gris": 199.9,
+      "luminancia": 0.6172,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 44612,
+        "caja": [
+          563,
+          165,
+          655,
+          712
+        ],
+        "fraccionDelCuadro": 0.0344,
+        "fraccionDelAncho": 0.0646,
+        "fraccionDelAlto": 0.6089,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 498,
+          "fraccionDelArea": 0.006448000000000001
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 1350,
+      "pantalla": 1.5,
+      "progreso": 0.1667,
+      "gris": 200.1,
+      "luminancia": 0.6156,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 40023,
+        "caja": [
+          540,
+          158,
+          620,
+          714
+        ],
+        "fraccionDelCuadro": 0.0309,
+        "fraccionDelAncho": 0.0563,
+        "fraccionDelAlto": 0.6189,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 43,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 504,
+          "fraccionDelArea": 0.006559000000000001
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 1406,
+      "pantalla": 1.562,
+      "progreso": 0.1719,
+      "gris": 198.2,
+      "luminancia": 0.6064,
+      "medianaGris": 206,
+      "estado": "logo",
+      "logo": {
+        "area": 41307,
+        "caja": [
+          508,
+          151,
+          605,
+          716
+        ],
+        "fraccionDelCuadro": 0.0319,
+        "fraccionDelAncho": 0.0681,
+        "fraccionDelAlto": 0.6289,
+        "valida": true
+      },
+      "motasPx": 4705,
+      "brillantesPx": 7799,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 504,
+          "fraccionDelArea": 0.006789
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 1463,
+      "pantalla": 1.626,
+      "progreso": 0.1771,
+      "gris": 196.3,
+      "luminancia": 0.6001,
+      "medianaGris": 204,
+      "estado": "logo",
+      "logo": {
+        "area": 41818,
+        "caja": [
+          458,
+          146,
+          585,
+          720
+        ],
+        "fraccionDelCuadro": 0.0323,
+        "fraccionDelAncho": 0.0889,
+        "fraccionDelAlto": 0.6389,
+        "valida": true
+      },
+      "motasPx": 14047,
+      "brillantesPx": 71575,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 488,
+          "fraccionDelArea": 0.006425999999999999
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        }
+      }
+    },
+    {
+      "scrollY": 1519,
+      "pantalla": 1.688,
+      "progreso": 0.1823,
+      "gris": 194.8,
+      "luminancia": 0.5932,
+      "medianaGris": 203,
+      "estado": "logo",
+      "logo": {
+        "area": 42482,
+        "caja": [
+          430,
+          140,
+          573,
+          722
+        ],
+        "fraccionDelCuadro": 0.0328,
+        "fraccionDelAncho": 0.1,
+        "fraccionDelAlto": 0.6478,
+        "valida": true
+      },
+      "motasPx": 18724,
+      "brillantesPx": 92062,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 464,
+          "fraccionDelArea": 0.006155000000000001
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.00004
+        }
+      }
+    },
+    {
+      "scrollY": 1575,
+      "pantalla": 1.75,
+      "progreso": 0.1875,
+      "gris": 193.2,
+      "luminancia": 0.5861,
+      "medianaGris": 202,
+      "estado": "logo",
+      "logo": {
+        "area": 43936,
+        "caja": [
+          407,
+          134,
+          565,
+          723
+        ],
+        "fraccionDelCuadro": 0.0339,
+        "fraccionDelAncho": 0.1104,
+        "fraccionDelAlto": 0.6556,
+        "valida": true
+      },
+      "motasPx": 22265,
+      "brillantesPx": 108453,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 456,
+          "fraccionDelArea": 0.0062970000000000005
+        },
+        "clara": {
+          "cantidad": 21,
+          "fraccionDelArea": 0.00003
+        }
+      }
+    },
+    {
+      "scrollY": 1631,
+      "pantalla": 1.812,
+      "progreso": 0.1927,
+      "gris": 191,
+      "luminancia": 0.5759,
+      "medianaGris": 201,
+      "estado": "logo",
+      "logo": {
+        "area": 48039,
+        "caja": [
+          379,
+          127,
+          574,
+          724
+        ],
+        "fraccionDelCuadro": 0.0371,
+        "fraccionDelAncho": 0.1361,
+        "fraccionDelAlto": 0.6644,
+        "valida": true
+      },
+      "motasPx": 25805,
+      "brillantesPx": 127523,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 469,
+          "fraccionDelArea": 0.00741
+        },
+        "clara": {
+          "cantidad": 20,
+          "fraccionDelArea": 0.000302
+        }
+      }
+    },
+    {
+      "scrollY": 1688,
+      "pantalla": 1.876,
+      "progreso": 0.198,
+      "gris": 189.3,
+      "luminancia": 0.5688,
+      "medianaGris": 200,
+      "estado": "logo",
+      "logo": {
+        "area": 82439,
+        "caja": [
+          350,
+          122,
+          657,
+          724
+        ],
+        "fraccionDelCuadro": 0.0636,
+        "fraccionDelAncho": 0.2139,
+        "fraccionDelAlto": 0.67,
+        "valida": true
+      },
+      "motasPx": 15,
+      "brillantesPx": 137397,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 452,
+          "fraccionDelArea": 0.006239
+        },
+        "clara": {
+          "cantidad": 21,
+          "fraccionDelArea": 0.000023
+        }
+      }
+    },
+    {
+      "scrollY": 1744,
+      "pantalla": 1.938,
+      "progreso": 0.2031,
+      "gris": 187.3,
+      "luminancia": 0.56,
+      "medianaGris": 200,
+      "estado": "logo",
+      "logo": {
+        "area": 93685,
+        "caja": [
+          322,
+          117,
+          674,
+          725
+        ],
+        "fraccionDelCuadro": 0.0723,
+        "fraccionDelAncho": 0.2451,
+        "fraccionDelAlto": 0.6767,
+        "valida": true
+      },
+      "motasPx": 22,
+      "brillantesPx": 129647,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 450,
+          "fraccionDelArea": 0.006019
+        },
+        "clara": {
+          "cantidad": 14,
+          "fraccionDelArea": 0.000042
+        }
+      }
+    },
+    {
+      "scrollY": 1800,
+      "pantalla": 2,
+      "progreso": 0.2083,
+      "gris": 185.2,
+      "luminancia": 0.5508,
+      "medianaGris": 199,
+      "estado": "logo",
+      "logo": {
+        "area": 100686,
+        "caja": [
+          302,
+          112,
+          687,
+          726
+        ],
+        "fraccionDelCuadro": 0.0777,
+        "fraccionDelAncho": 0.2681,
+        "fraccionDelAlto": 0.6833,
+        "valida": true
+      },
+      "motasPx": 3237,
+      "brillantesPx": 136387,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 437,
+          "fraccionDelArea": 0.0060929999999999995
+        },
+        "clara": {
+          "cantidad": 9,
+          "fraccionDelArea": 0.000009
+        }
+      }
+    },
+    {
+      "scrollY": 1856,
+      "pantalla": 2.062,
+      "progreso": 0.2135,
+      "gris": 182.9,
+      "luminancia": 0.5413,
+      "medianaGris": 198,
+      "estado": "logo",
+      "logo": {
+        "area": 112477,
+        "caja": [
+          287,
+          108,
+          694,
+          726
+        ],
+        "fraccionDelCuadro": 0.0868,
+        "fraccionDelAncho": 0.2833,
+        "fraccionDelAlto": 0.6878,
+        "valida": true
+      },
+      "motasPx": 10,
+      "brillantesPx": 138811,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 431,
+          "fraccionDelArea": 0.005906
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000019
+        }
+      }
+    },
+    {
+      "scrollY": 1913,
+      "pantalla": 2.126,
+      "progreso": 0.2188,
+      "gris": 181,
+      "luminancia": 0.5349,
+      "medianaGris": 198,
+      "estado": "logo",
+      "logo": {
+        "area": 111947,
+        "caja": [
+          276,
+          103,
+          695,
+          599
+        ],
+        "fraccionDelCuadro": 0.0864,
+        "fraccionDelAncho": 0.2917,
+        "fraccionDelAlto": 0.5522,
+        "valida": true
+      },
+      "motasPx": 8344,
+      "brillantesPx": 134454,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 461,
+          "fraccionDelArea": 0.006328
+        },
+        "clara": {
+          "cantidad": 12,
+          "fraccionDelArea": 0.000011999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 1969,
+      "pantalla": 2.188,
+      "progreso": 0.224,
+      "gris": 179.8,
+      "luminancia": 0.5307,
+      "medianaGris": 198,
+      "estado": "logo",
+      "logo": {
+        "area": 122517,
+        "caja": [
+          266,
+          99,
+          696,
+          601
+        ],
+        "fraccionDelCuadro": 0.0945,
+        "fraccionDelAncho": 0.2993,
+        "fraccionDelAlto": 0.5589,
+        "valida": true
+      },
+      "motasPx": 7108,
+      "brillantesPx": 130392,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 460,
+          "fraccionDelArea": 0.006327
+        },
+        "clara": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.000053
+        }
+      }
+    },
+    {
+      "scrollY": 2025,
+      "pantalla": 2.25,
+      "progreso": 0.2292,
+      "gris": 178,
+      "luminancia": 0.525,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 135166,
+        "caja": [
+          253,
+          96,
+          701,
+          603
+        ],
+        "fraccionDelCuadro": 0.1043,
+        "fraccionDelAncho": 0.3118,
+        "fraccionDelAlto": 0.5644,
+        "valida": true
+      },
+      "motasPx": 4777,
+      "brillantesPx": 136864,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 458,
+          "fraccionDelArea": 0.006083
+        },
+        "clara": {
+          "cantidad": 21,
+          "fraccionDelArea": 0.000083
+        }
+      }
+    },
+    {
+      "scrollY": 2081,
+      "pantalla": 2.312,
+      "progreso": 0.2344,
+      "gris": 175.8,
+      "luminancia": 0.5194,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 156305,
+        "caja": [
+          236,
+          93,
+          709,
+          726
+        ],
+        "fraccionDelCuadro": 0.1206,
+        "fraccionDelAncho": 0.3292,
+        "fraccionDelAlto": 0.7044,
+        "valida": true
+      },
+      "motasPx": 59,
+      "brillantesPx": 132797,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 443,
+          "fraccionDelArea": 0.005927
+        },
+        "clara": {
+          "cantidad": 16,
+          "fraccionDelArea": 0.00009599999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 2138,
+      "pantalla": 2.376,
+      "progreso": 0.2396,
+      "gris": 173.6,
+      "luminancia": 0.5165,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 168816,
+        "caja": [
+          218,
+          91,
+          718,
+          726
+        ],
+        "fraccionDelCuadro": 0.1303,
+        "fraccionDelAncho": 0.3479,
+        "fraccionDelAlto": 0.7067,
+        "valida": true
+      },
+      "motasPx": 879,
+      "brillantesPx": 133669,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 420,
+          "fraccionDelArea": 0.00596
+        },
+        "clara": {
+          "cantidad": 14,
+          "fraccionDelArea": 0.000028999999999999997
+        }
+      }
+    },
+    {
+      "scrollY": 2194,
+      "pantalla": 2.438,
+      "progreso": 0.2448,
+      "gris": 173.3,
+      "luminancia": 0.5155,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 172760,
+        "caja": [
+          203,
+          89,
+          724,
+          726
+        ],
+        "fraccionDelCuadro": 0.1333,
+        "fraccionDelAncho": 0.3625,
+        "fraccionDelAlto": 0.7089,
+        "valida": true
+      },
+      "motasPx": 50,
+      "brillantesPx": 132220,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 443,
+          "fraccionDelArea": 0.0059440000000000005
+        },
+        "clara": {
+          "cantidad": 20,
+          "fraccionDelArea": 0.00007000000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 2250,
+      "pantalla": 2.5,
+      "progreso": 0.25,
+      "gris": 172.4,
+      "luminancia": 0.5133,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 180507,
+        "caja": [
+          193,
+          87,
+          726,
+          727
+        ],
+        "fraccionDelCuadro": 0.1393,
+        "fraccionDelAncho": 0.3708,
+        "fraccionDelAlto": 0.7122,
+        "valida": true
+      },
+      "motasPx": 131,
+      "brillantesPx": 127169,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 426,
+          "fraccionDelArea": 0.006047
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000043
+        }
+      }
+    },
+    {
+      "scrollY": 2306,
+      "pantalla": 2.562,
+      "progreso": 0.2552,
+      "gris": 172.6,
+      "luminancia": 0.5139,
+      "medianaGris": 197,
+      "estado": "logo",
+      "logo": {
+        "area": 177973,
+        "caja": [
+          189,
+          84,
+          726,
+          728
+        ],
+        "fraccionDelCuadro": 0.1373,
+        "fraccionDelAncho": 0.3736,
+        "fraccionDelAlto": 0.7167,
+        "valida": true
+      },
+      "motasPx": 383,
+      "brillantesPx": 125795,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 430,
+          "fraccionDelArea": 0.0055000000000000005
+        },
+        "clara": {
+          "cantidad": 26,
+          "fraccionDelArea": 0.000086
+        }
+      }
+    },
+    {
+      "scrollY": 2363,
+      "pantalla": 2.626,
+      "progreso": 0.2605,
+      "gris": 172.9,
+      "luminancia": 0.5162,
+      "medianaGris": 198,
+      "estado": "logo",
+      "logo": {
+        "area": 176374,
+        "caja": [
+          187,
+          81,
+          725,
+          728
+        ],
+        "fraccionDelCuadro": 0.1361,
+        "fraccionDelAncho": 0.3743,
+        "fraccionDelAlto": 0.72,
+        "valida": true
+      },
+      "motasPx": 142,
+      "brillantesPx": 117144,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 485,
+          "fraccionDelArea": 0.005544
+        },
+        "clara": {
+          "cantidad": 15,
+          "fraccionDelArea": 0.000085
+        }
+      }
+    },
+    {
+      "scrollY": 2419,
+      "pantalla": 2.688,
+      "progreso": 0.2656,
+      "gris": 171.9,
+      "luminancia": 0.5134,
+      "medianaGris": 198,
+      "estado": "logo",
+      "logo": {
+        "area": 185445,
+        "caja": [
+          182,
+          79,
+          726,
+          728
+        ],
+        "fraccionDelCuadro": 0.1431,
+        "fraccionDelAncho": 0.3785,
+        "fraccionDelAlto": 0.7222,
+        "valida": true
+      },
+      "motasPx": 82,
+      "brillantesPx": 113174,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 409,
+          "fraccionDelArea": 0.005641
+        },
+        "clara": {
+          "cantidad": 6,
+          "fraccionDelArea": 0.000025
+        }
+      }
+    },
+    {
+      "scrollY": 2475,
+      "pantalla": 2.75,
+      "progreso": 0.2708,
+      "gris": 172.2,
+      "luminancia": 0.5143,
+      "medianaGris": 199,
+      "estado": "logo",
+      "logo": {
+        "area": 182172,
+        "caja": [
+          173,
+          78,
+          730,
+          729
+        ],
+        "fraccionDelCuadro": 0.1406,
+        "fraccionDelAncho": 0.3875,
+        "fraccionDelAlto": 0.7244,
+        "valida": true
+      },
+      "motasPx": 46,
+      "brillantesPx": 97664,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 429,
+          "fraccionDelArea": 0.00599
+        },
+        "clara": {
+          "cantidad": 34,
+          "fraccionDelArea": 0.00031600000000000004
+        }
+      }
+    },
+    {
+      "scrollY": 2531,
+      "pantalla": 2.812,
+      "progreso": 0.276,
+      "gris": 171.5,
+      "luminancia": 0.5133,
+      "medianaGris": 200,
+      "estado": "logo",
+      "logo": {
+        "area": 187877,
+        "caja": [
+          161,
+          78,
+          736,
+          729
+        ],
+        "fraccionDelCuadro": 0.145,
+        "fraccionDelAncho": 0.4,
+        "fraccionDelAlto": 0.7244,
+        "valida": true
+      },
+      "motasPx": 1487,
+      "brillantesPx": 83787,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 527,
+          "fraccionDelArea": 0.006249
+        },
+        "clara": {
+          "cantidad": 17,
+          "fraccionDelArea": 0.000015
+        }
+      }
+    },
+    {
+      "scrollY": 2588,
+      "pantalla": 2.876,
+      "progreso": 0.2813,
+      "gris": 170.5,
+      "luminancia": 0.511,
+      "medianaGris": 200,
+      "estado": "logo",
+      "logo": {
+        "area": 201700,
+        "caja": [
+          150,
+          78,
+          742,
+          730
+        ],
+        "fraccionDelCuadro": 0.1556,
+        "fraccionDelAncho": 0.4118,
+        "fraccionDelAlto": 0.7256,
+        "valida": true
+      },
+      "motasPx": 50,
+      "brillantesPx": 80297,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 446,
+          "fraccionDelArea": 0.0065980000000000006
+        },
+        "clara": {
+          "cantidad": 17,
+          "fraccionDelArea": 0.000044999999999999996
+        }
+      }
+    },
+    {
+      "scrollY": 2644,
+      "pantalla": 2.938,
+      "progreso": 0.2865,
+      "gris": 170.2,
+      "luminancia": 0.5109,
+      "medianaGris": 201,
+      "estado": "logo",
+      "logo": {
+        "area": 204669,
+        "caja": [
+          143,
+          77,
+          746,
+          730
+        ],
+        "fraccionDelCuadro": 0.1579,
+        "fraccionDelAncho": 0.4194,
+        "fraccionDelAlto": 0.7267,
+        "valida": true
+      },
+      "motasPx": 123,
+      "brillantesPx": 63267,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 461,
+          "fraccionDelArea": 0.0064800000000000005
+        },
+        "clara": {
+          "cantidad": 9,
+          "fraccionDelArea": 0.00017999999999999998
+        }
+      }
+    },
+    {
+      "scrollY": 2700,
+      "pantalla": 3,
+      "progreso": 0.2917,
+      "gris": 170.1,
+      "luminancia": 0.5115,
+      "medianaGris": 202,
+      "estado": "logo",
+      "logo": {
+        "area": 208647,
+        "caja": [
+          141,
+          75,
+          746,
+          730
+        ],
+        "fraccionDelCuadro": 0.161,
+        "fraccionDelAncho": 0.4208,
+        "fraccionDelAlto": 0.7289,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 43967,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 436,
+          "fraccionDelArea": 0.0055969999999999995
+        },
+        "clara": {
+          "cantidad": 17,
+          "fraccionDelArea": 0.000047000000000000004
+        }
+      }
+    },
+    {
+      "scrollY": 2756,
+      "pantalla": 3.062,
+      "progreso": 0.2969,
+      "gris": 170.6,
+      "luminancia": 0.5135,
+      "medianaGris": 204,
+      "estado": "logo",
+      "logo": {
+        "area": 202479,
+        "caja": [
+          142,
+          73,
+          744,
+          730
+        ],
+        "fraccionDelCuadro": 0.1562,
+        "fraccionDelAncho": 0.4188,
+        "fraccionDelAlto": 0.7311,
+        "valida": true
+      },
+      "motasPx": 38,
+      "brillantesPx": 14128,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 440,
+          "fraccionDelArea": 0.005793
+        },
+        "clara": {
+          "cantidad": 14,
+          "fraccionDelArea": 0.00046499999999999997
+        }
+      }
+    },
+    {
+      "scrollY": 2813,
+      "pantalla": 3.126,
+      "progreso": 0.3021,
+      "gris": 170.9,
+      "luminancia": 0.5148,
+      "medianaGris": 205,
+      "estado": "logo",
+      "logo": {
+        "area": 200627,
+        "caja": [
+          142,
+          71,
+          741,
+          731
+        ],
+        "fraccionDelCuadro": 0.1548,
+        "fraccionDelAncho": 0.4167,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 44,
+      "brillantesPx": 3372,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 457,
+          "fraccionDelArea": 0.005755
+        },
+        "clara": {
+          "cantidad": 14,
+          "fraccionDelArea": 0.000041
+        }
+      }
+    },
+    {
+      "scrollY": 2869,
+      "pantalla": 3.188,
+      "progreso": 0.3073,
+      "gris": 171.3,
+      "luminancia": 0.5169,
+      "medianaGris": 206,
+      "estado": "logo",
+      "logo": {
+        "area": 199366,
+        "caja": [
+          138,
+          71,
+          742,
+          731
+        ],
+        "fraccionDelCuadro": 0.1538,
+        "fraccionDelAncho": 0.4201,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 955,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 418,
+          "fraccionDelArea": 0.0053890000000000006
+        },
+        "clara": {
+          "cantidad": 16,
+          "fraccionDelArea": 0.000593
+        }
+      }
+    },
+    {
+      "scrollY": 2925,
+      "pantalla": 3.25,
+      "progreso": 0.3125,
+      "gris": 171.6,
+      "luminancia": 0.519,
+      "medianaGris": 207,
+      "estado": "logo",
+      "logo": {
+        "area": 203748,
+        "caja": [
+          131,
+          71,
+          747,
+          731
+        ],
+        "fraccionDelCuadro": 0.1572,
+        "fraccionDelAncho": 0.4285,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 13,
+      "brillantesPx": 54,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 425,
+          "fraccionDelArea": 0.005963
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000032
+        }
+      }
+    },
+    {
+      "scrollY": 2981,
+      "pantalla": 3.312,
+      "progreso": 0.3177,
+      "gris": 170.7,
+      "luminancia": 0.5175,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 214378,
+        "caja": [
+          124,
+          71,
+          753,
+          731
+        ],
+        "fraccionDelCuadro": 0.1654,
+        "fraccionDelAncho": 0.4375,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 5,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 413,
+          "fraccionDelArea": 0.005795
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000038
+        }
+      }
+    },
+    {
+      "scrollY": 3038,
+      "pantalla": 3.376,
+      "progreso": 0.323,
+      "gris": 170.8,
+      "luminancia": 0.5189,
+      "medianaGris": 209,
+      "estado": "logo",
+      "logo": {
+        "area": 216322,
+        "caja": [
+          119,
+          71,
+          757,
+          731
+        ],
+        "fraccionDelCuadro": 0.1669,
+        "fraccionDelAncho": 0.4438,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 391,
+          "fraccionDelArea": 0.005592000000000001
+        },
+        "clara": {
+          "cantidad": 19,
+          "fraccionDelArea": 0.000035000000000000004
+        }
+      }
+    },
+    {
+      "scrollY": 3094,
+      "pantalla": 3.438,
+      "progreso": 0.3281,
+      "gris": 171.1,
+      "luminancia": 0.5206,
+      "medianaGris": 209,
+      "estado": "logo",
+      "logo": {
+        "area": 214964,
+        "caja": [
+          117,
+          71,
+          756,
+          731
+        ],
+        "fraccionDelCuadro": 0.1659,
+        "fraccionDelAncho": 0.4444,
+        "fraccionDelAlto": 0.7344,
+        "valida": true
+      },
+      "motasPx": 6,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 398,
+          "fraccionDelArea": 0.005772
+        },
+        "clara": {
+          "cantidad": 20,
+          "fraccionDelArea": 0.000033
+        }
+      }
+    },
+    {
+      "scrollY": 3150,
+      "pantalla": 3.5,
+      "progreso": 0.3333,
+      "gris": 171.5,
+      "luminancia": 0.5225,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 213680,
+        "caja": [
+          120,
+          70,
+          752,
+          732
+        ],
+        "fraccionDelCuadro": 0.1649,
+        "fraccionDelAncho": 0.4396,
+        "fraccionDelAlto": 0.7367,
+        "valida": true
+      },
+      "motasPx": 8,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 381,
+          "fraccionDelArea": 0.0061470000000000006
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000091
+        }
+      }
+    },
+    {
+      "scrollY": 3206,
+      "pantalla": 3.562,
+      "progreso": 0.3385,
+      "gris": 172,
+      "luminancia": 0.5251,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 208140,
+        "caja": [
+          122,
+          69,
+          749,
+          732
+        ],
+        "fraccionDelCuadro": 0.1606,
+        "fraccionDelAncho": 0.4361,
+        "fraccionDelAlto": 0.7378,
+        "valida": true
+      },
+      "motasPx": 70,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 368,
+          "fraccionDelArea": 0.005600000000000001
+        },
+        "clara": {
+          "cantidad": 11,
+          "fraccionDelArea": 0.000039
+        }
+      }
+    },
+    {
+      "scrollY": 3263,
+      "pantalla": 3.626,
+      "progreso": 0.3438,
+      "gris": 172.1,
+      "luminancia": 0.5264,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 212466,
+        "caja": [
+          122,
+          68,
+          749,
+          732
+        ],
+        "fraccionDelCuadro": 0.1639,
+        "fraccionDelAncho": 0.4361,
+        "fraccionDelAlto": 0.7389,
+        "valida": true
+      },
+      "motasPx": 4,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 360,
+          "fraccionDelArea": 0.005673
+        },
+        "clara": {
+          "cantidad": 20,
+          "fraccionDelArea": 0.000022000000000000003
+        }
+      }
+    },
+    {
+      "scrollY": 3319,
+      "pantalla": 3.688,
+      "progreso": 0.349,
+      "gris": 171.9,
+      "luminancia": 0.5272,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 217253,
+        "caja": [
+          119,
+          68,
+          753,
+          731
+        ],
+        "fraccionDelCuadro": 0.1676,
+        "fraccionDelAncho": 0.441,
+        "fraccionDelAlto": 0.7378,
+        "valida": true
+      },
+      "motasPx": 10,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 356,
+          "fraccionDelArea": 0.005674
+        },
+        "clara": {
+          "cantidad": 12,
+          "fraccionDelArea": 0.000047999999999999994
+        }
+      }
+    },
+    {
+      "scrollY": 3375,
+      "pantalla": 3.75,
+      "progreso": 0.3542,
+      "gris": 172,
+      "luminancia": 0.528,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 218848,
+        "caja": [
+          113,
+          69,
+          758,
+          732
+        ],
+        "fraccionDelCuadro": 0.1689,
+        "fraccionDelAncho": 0.4486,
+        "fraccionDelAlto": 0.7378,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 357,
+          "fraccionDelArea": 0.005701
+        },
+        "clara": {
+          "cantidad": 12,
+          "fraccionDelArea": 0.00004
+        }
+      }
+    },
+    {
+      "scrollY": 3431,
+      "pantalla": 3.812,
+      "progreso": 0.3594,
+      "gris": 172.1,
+      "luminancia": 0.5292,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 218534,
+        "caja": [
+          108,
+          71,
+          760,
+          732
+        ],
+        "fraccionDelCuadro": 0.1686,
+        "fraccionDelAncho": 0.4535,
+        "fraccionDelAlto": 0.7356,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 349,
+          "fraccionDelArea": 0.005869999999999999
+        },
+        "clara": {
+          "cantidad": 6,
+          "fraccionDelArea": 0.000005999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 3488,
+      "pantalla": 3.876,
+      "progreso": 0.3646,
+      "gris": 171.9,
+      "luminancia": 0.529,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 222026,
+        "caja": [
+          108,
+          71,
+          760,
+          732
+        ],
+        "fraccionDelCuadro": 0.1713,
+        "fraccionDelAncho": 0.4535,
+        "fraccionDelAlto": 0.7356,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 366,
+          "fraccionDelArea": 0.006131999999999999
+        },
+        "clara": {
+          "cantidad": 7,
+          "fraccionDelArea": 0.000005
+        }
+      }
+    },
+    {
+      "scrollY": 3544,
+      "pantalla": 3.938,
+      "progreso": 0.3698,
+      "gris": 172.5,
+      "luminancia": 0.5312,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 220390,
+        "caja": [
+          111,
+          70,
+          758,
+          732
+        ],
+        "fraccionDelCuadro": 0.1701,
+        "fraccionDelAncho": 0.45,
+        "fraccionDelAlto": 0.7367,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 347,
+          "fraccionDelArea": 0.006106
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000015
+        }
+      }
+    },
+    {
+      "scrollY": 3600,
+      "pantalla": 4,
+      "progreso": 0.375,
+      "gris": 172.9,
+      "luminancia": 0.5334,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 219129,
+        "caja": [
+          115,
+          67,
+          754,
+          732
+        ],
+        "fraccionDelCuadro": 0.1691,
+        "fraccionDelAncho": 0.4444,
+        "fraccionDelAlto": 0.74,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 341,
+          "fraccionDelArea": 0.006111
+        },
+        "clara": {
+          "cantidad": 15,
+          "fraccionDelArea": 0.000052
+        }
+      }
+    },
+    {
+      "scrollY": 3656,
+      "pantalla": 4.062,
+      "progreso": 0.3769,
+      "gris": 173.2,
+      "luminancia": 0.5347,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 215811,
+        "caja": [
+          118,
+          66,
+          752,
+          731
+        ],
+        "fraccionDelCuadro": 0.1665,
+        "fraccionDelAncho": 0.441,
+        "fraccionDelAlto": 0.74,
+        "valida": true
+      },
+      "motasPx": 5,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 339,
+          "fraccionDelArea": 0.006226000000000001
+        },
+        "clara": {
+          "cantidad": 17,
+          "fraccionDelArea": 0.00008800000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 3713,
+      "pantalla": 4.126,
+      "progreso": 0.3789,
+      "gris": 173.5,
+      "luminancia": 0.5358,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 217393,
+        "caja": [
+          117,
+          68,
+          753,
+          732
+        ],
+        "fraccionDelCuadro": 0.1677,
+        "fraccionDelAncho": 0.4424,
+        "fraccionDelAlto": 0.7389,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 333,
+          "fraccionDelArea": 0.0057020000000000005
+        },
+        "clara": {
+          "cantidad": 17,
+          "fraccionDelArea": 0.000015
+        }
+      }
+    },
+    {
+      "scrollY": 3769,
+      "pantalla": 4.188,
+      "progreso": 0.3809,
+      "gris": 173.5,
+      "luminancia": 0.5362,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 219779,
+        "caja": [
+          111,
+          71,
+          757,
+          732
+        ],
+        "fraccionDelCuadro": 0.1696,
+        "fraccionDelAncho": 0.4493,
+        "fraccionDelAlto": 0.7356,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 322,
+          "fraccionDelArea": 0.0055179999999999995
+        },
+        "clara": {
+          "cantidad": 15,
+          "fraccionDelArea": 0.000017
+        }
+      }
+    },
+    {
+      "scrollY": 3825,
+      "pantalla": 4.25,
+      "progreso": 0.3828,
+      "gris": 173.3,
+      "luminancia": 0.5361,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 221601,
+        "caja": [
+          107,
+          74,
+          762,
+          732
+        ],
+        "fraccionDelCuadro": 0.171,
+        "fraccionDelAncho": 0.4556,
+        "fraccionDelAlto": 0.7322,
+        "valida": true
+      },
+      "motasPx": 4,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 332,
+          "fraccionDelArea": 0.00584
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000011000000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 3881,
+      "pantalla": 4.312,
+      "progreso": 0.3848,
+      "gris": 173.2,
+      "luminancia": 0.5368,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 222041,
+        "caja": [
+          105,
+          75,
+          765,
+          732
+        ],
+        "fraccionDelCuadro": 0.1713,
+        "fraccionDelAncho": 0.459,
+        "fraccionDelAlto": 0.7311,
+        "valida": true
+      },
+      "motasPx": 4,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 348,
+          "fraccionDelArea": 0.005806
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000009
+        }
+      }
+    },
+    {
+      "scrollY": 3938,
+      "pantalla": 4.376,
+      "progreso": 0.3867,
+      "gris": 173.6,
+      "luminancia": 0.5384,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 221397,
+        "caja": [
+          106,
+          77,
+          765,
+          731
+        ],
+        "fraccionDelCuadro": 0.1708,
+        "fraccionDelAncho": 0.4583,
+        "fraccionDelAlto": 0.7278,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 347,
+          "fraccionDelArea": 0.006
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000011999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 3994,
+      "pantalla": 4.438,
+      "progreso": 0.3887,
+      "gris": 173.8,
+      "luminancia": 0.5398,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 219972,
+        "caja": [
+          109,
+          79,
+          762,
+          731
+        ],
+        "fraccionDelCuadro": 0.1697,
+        "fraccionDelAncho": 0.4542,
+        "fraccionDelAlto": 0.7256,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 349,
+          "fraccionDelArea": 0.006492
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000011999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 4050,
+      "pantalla": 4.5,
+      "progreso": 0.3906,
+      "gris": 174.2,
+      "luminancia": 0.542,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 217859,
+        "caja": [
+          109,
+          83,
+          760,
+          731
+        ],
+        "fraccionDelCuadro": 0.1681,
+        "fraccionDelAncho": 0.4528,
+        "fraccionDelAlto": 0.7211,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 326,
+          "fraccionDelArea": 0.006029
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000011000000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 4106,
+      "pantalla": 4.562,
+      "progreso": 0.3926,
+      "gris": 174.3,
+      "luminancia": 0.5428,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 216937,
+        "caja": [
+          107,
+          89,
+          763,
+          730
+        ],
+        "fraccionDelCuadro": 0.1674,
+        "fraccionDelAncho": 0.4563,
+        "fraccionDelAlto": 0.7133,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 333,
+          "fraccionDelArea": 0.005897
+        },
+        "clara": {
+          "cantidad": 15,
+          "fraccionDelArea": 0.000014
+        }
+      }
+    },
+    {
+      "scrollY": 4163,
+      "pantalla": 4.626,
+      "progreso": 0.3945,
+      "gris": 174.5,
+      "luminancia": 0.5442,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 217588,
+        "caja": [
+          103,
+          95,
+          769,
+          729
+        ],
+        "fraccionDelCuadro": 0.1679,
+        "fraccionDelAncho": 0.4632,
+        "fraccionDelAlto": 0.7056,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 348,
+          "fraccionDelArea": 0.00582
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000005
+        }
+      }
+    },
+    {
+      "scrollY": 4219,
+      "pantalla": 4.688,
+      "progreso": 0.3965,
+      "gris": 174.7,
+      "luminancia": 0.5459,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 217495,
+        "caja": [
+          98,
+          103,
+          776,
+          731
+        ],
+        "fraccionDelCuadro": 0.1678,
+        "fraccionDelAncho": 0.4715,
+        "fraccionDelAlto": 0.6989,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 352,
+          "fraccionDelArea": 0.00594
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 4275,
+      "pantalla": 4.75,
+      "progreso": 0.3984,
+      "gris": 175.1,
+      "luminancia": 0.5473,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 215752,
+        "caja": [
+          96,
+          111,
+          782,
+          732
+        ],
+        "fraccionDelCuadro": 0.1665,
+        "fraccionDelAncho": 0.4771,
+        "fraccionDelAlto": 0.6911,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 355,
+          "fraccionDelArea": 0.005998
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4331,
+      "pantalla": 4.812,
+      "progreso": 0.4004,
+      "gris": 175.4,
+      "luminancia": 0.5482,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 211497,
+        "caja": [
+          95,
+          121,
+          784,
+          732
+        ],
+        "fraccionDelCuadro": 0.1632,
+        "fraccionDelAncho": 0.4792,
+        "fraccionDelAlto": 0.68,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 343,
+          "fraccionDelArea": 0.006185
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4388,
+      "pantalla": 4.876,
+      "progreso": 0.4024,
+      "gris": 176.4,
+      "luminancia": 0.5517,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 207678,
+        "caja": [
+          97,
+          131,
+          784,
+          731
+        ],
+        "fraccionDelCuadro": 0.1602,
+        "fraccionDelAncho": 0.4778,
+        "fraccionDelAlto": 0.6678,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 366,
+          "fraccionDelArea": 0.005988
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4444,
+      "pantalla": 4.938,
+      "progreso": 0.4043,
+      "gris": 177.9,
+      "luminancia": 0.5586,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 200437,
+        "caja": [
+          101,
+          142,
+          783,
+          730
+        ],
+        "fraccionDelCuadro": 0.1547,
+        "fraccionDelAncho": 0.4743,
+        "fraccionDelAlto": 0.6544,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 353,
+          "fraccionDelArea": 0.005745
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        }
+      }
+    },
+    {
+      "scrollY": 4500,
+      "pantalla": 5,
+      "progreso": 0.4063,
+      "gris": 179.4,
+      "luminancia": 0.5664,
+      "medianaGris": 210,
+      "estado": "logo",
+      "logo": {
+        "area": 195926,
+        "caja": [
+          104,
+          154,
+          785,
+          728
+        ],
+        "fraccionDelCuadro": 0.1512,
+        "fraccionDelAncho": 0.4736,
+        "fraccionDelAlto": 0.6389,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 377,
+          "fraccionDelArea": 0.005734
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4556,
+      "pantalla": 5.062,
+      "progreso": 0.4082,
+      "gris": 181.3,
+      "luminancia": 0.5757,
+      "medianaGris": 211,
+      "estado": "logo",
+      "logo": {
+        "area": 188807,
+        "caja": [
+          107,
+          167,
+          789,
+          725
+        ],
+        "fraccionDelCuadro": 0.1457,
+        "fraccionDelAncho": 0.4743,
+        "fraccionDelAlto": 0.6211,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 383,
+          "fraccionDelArea": 0.005422
+        },
+        "clara": {
+          "cantidad": 13,
+          "fraccionDelArea": 0.000043
+        }
+      }
+    },
+    {
+      "scrollY": 4613,
+      "pantalla": 5.126,
+      "progreso": 0.4102,
+      "gris": 183.6,
+      "luminancia": 0.5873,
+      "medianaGris": 212,
+      "estado": "logo",
+      "logo": {
+        "area": 180554,
+        "caja": [
+          111,
+          181,
+          794,
+          720
+        ],
+        "fraccionDelCuadro": 0.1393,
+        "fraccionDelAncho": 0.475,
+        "fraccionDelAlto": 0.6,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 388,
+          "fraccionDelArea": 0.005431
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000011999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 4669,
+      "pantalla": 5.188,
+      "progreso": 0.4121,
+      "gris": 186.2,
+      "luminancia": 0.6005,
+      "medianaGris": 213,
+      "estado": "logo",
+      "logo": {
+        "area": 171435,
+        "caja": [
+          116,
+          195,
+          796,
+          715
+        ],
+        "fraccionDelCuadro": 0.1323,
+        "fraccionDelAncho": 0.4729,
+        "fraccionDelAlto": 0.5789,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 401,
+          "fraccionDelArea": 0.0051459999999999995
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000014
+        }
+      }
+    },
+    {
+      "scrollY": 4725,
+      "pantalla": 5.25,
+      "progreso": 0.4141,
+      "gris": 188.8,
+      "luminancia": 0.6142,
+      "medianaGris": 214,
+      "estado": "logo",
+      "logo": {
+        "area": 162211,
+        "caja": [
+          124,
+          207,
+          797,
+          709
+        ],
+        "fraccionDelCuadro": 0.1252,
+        "fraccionDelAncho": 0.4681,
+        "fraccionDelAlto": 0.5589,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 396,
+          "fraccionDelArea": 0.004949
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4781,
+      "pantalla": 5.312,
+      "progreso": 0.416,
+      "gris": 191.3,
+      "luminancia": 0.6257,
+      "medianaGris": 215,
+      "estado": "logo",
+      "logo": {
+        "area": 153688,
+        "caja": [
+          133,
+          219,
+          795,
+          702
+        ],
+        "fraccionDelCuadro": 0.1186,
+        "fraccionDelAncho": 0.4604,
+        "fraccionDelAlto": 0.5378,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 407,
+          "fraccionDelArea": 0.00491
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 4838,
+      "pantalla": 5.376,
+      "progreso": 0.418,
+      "gris": 193.6,
+      "luminancia": 0.6373,
+      "medianaGris": 217,
+      "estado": "logo",
+      "logo": {
+        "area": 145921,
+        "caja": [
+          143,
+          223,
+          792,
+          696
+        ],
+        "fraccionDelCuadro": 0.1126,
+        "fraccionDelAncho": 0.4514,
+        "fraccionDelAlto": 0.5267,
+        "valida": true
+      },
+      "motasPx": 4,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 437,
+          "fraccionDelArea": 0.0053490000000000005
+        },
+        "clara": {
+          "cantidad": 7,
+          "fraccionDelArea": 0.000052
+        }
+      }
+    },
+    {
+      "scrollY": 4894,
+      "pantalla": 5.438,
+      "progreso": 0.4199,
+      "gris": 196.3,
+      "luminancia": 0.6504,
+      "medianaGris": 218,
+      "estado": "logo",
+      "logo": {
+        "area": 138410,
+        "caja": [
+          152,
+          227,
+          790,
+          690
+        ],
+        "fraccionDelCuadro": 0.1068,
+        "fraccionDelAncho": 0.4438,
+        "fraccionDelAlto": 0.5156,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 452,
+          "fraccionDelArea": 0.004992
+        },
+        "clara": {
+          "cantidad": 8,
+          "fraccionDelArea": 0.00008999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 4950,
+      "pantalla": 5.5,
+      "progreso": 0.4219,
+      "gris": 198.8,
+      "luminancia": 0.6637,
+      "medianaGris": 220,
+      "estado": "logo",
+      "logo": {
+        "area": 131707,
+        "caja": [
+          161,
+          232,
+          788,
+          684
+        ],
+        "fraccionDelCuadro": 0.1016,
+        "fraccionDelAncho": 0.4361,
+        "fraccionDelAlto": 0.5033,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 444,
+          "fraccionDelArea": 0.004922
+        },
+        "clara": {
+          "cantidad": 11,
+          "fraccionDelArea": 0.000011000000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 5006,
+      "pantalla": 5.562,
+      "progreso": 0.4238,
+      "gris": 200.9,
+      "luminancia": 0.6749,
+      "medianaGris": 222,
+      "estado": "logo",
+      "logo": {
+        "area": 125310,
+        "caja": [
+          170,
+          237,
+          788,
+          679
+        ],
+        "fraccionDelCuadro": 0.0967,
+        "fraccionDelAncho": 0.4299,
+        "fraccionDelAlto": 0.4922,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 450,
+          "fraccionDelArea": 0.004661
+        },
+        "clara": {
+          "cantidad": 9,
+          "fraccionDelArea": 0.000009
+        }
+      }
+    },
+    {
+      "scrollY": 5063,
+      "pantalla": 5.626,
+      "progreso": 0.4258,
+      "gris": 203.1,
+      "luminancia": 0.6867,
+      "medianaGris": 224,
+      "estado": "logo",
+      "logo": {
+        "area": 119523,
+        "caja": [
+          179,
+          241,
+          788,
+          673
+        ],
+        "fraccionDelCuadro": 0.0922,
+        "fraccionDelAncho": 0.4236,
+        "fraccionDelAlto": 0.4811,
+        "valida": true
+      },
+      "motasPx": 10,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 463,
+          "fraccionDelArea": 0.004687
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 5119,
+      "pantalla": 5.688,
+      "progreso": 0.4277,
+      "gris": 205.1,
+      "luminancia": 0.698,
+      "medianaGris": 225,
+      "estado": "logo",
+      "logo": {
+        "area": 114719,
+        "caja": [
+          186,
+          246,
+          788,
+          666
+        ],
+        "fraccionDelCuadro": 0.0885,
+        "fraccionDelAncho": 0.4188,
+        "fraccionDelAlto": 0.4678,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 467,
+          "fraccionDelArea": 0.004532
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 5175,
+      "pantalla": 5.75,
+      "progreso": 0.4297,
+      "gris": 207,
+      "luminancia": 0.7092,
+      "medianaGris": 228,
+      "estado": "logo",
+      "logo": {
+        "area": 110404,
+        "caja": [
+          193,
+          250,
+          786,
+          661
+        ],
+        "fraccionDelCuadro": 0.0852,
+        "fraccionDelAncho": 0.4125,
+        "fraccionDelAlto": 0.4578,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 477,
+          "fraccionDelArea": 0.004397
+        },
+        "clara": {
+          "cantidad": 6,
+          "fraccionDelArea": 0.000008
+        }
+      }
+    },
+    {
+      "scrollY": 5231,
+      "pantalla": 5.812,
+      "progreso": 0.4316,
+      "gris": 208.7,
+      "luminancia": 0.7186,
+      "medianaGris": 230,
+      "estado": "logo",
+      "logo": {
+        "area": 106714,
+        "caja": [
+          199,
+          254,
+          784,
+          658
+        ],
+        "fraccionDelCuadro": 0.0823,
+        "fraccionDelAncho": 0.4069,
+        "fraccionDelAlto": 0.45,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 465,
+          "fraccionDelArea": 0.004143
+        },
+        "clara": {
+          "cantidad": 7,
+          "fraccionDelArea": 0.000007
+        }
+      }
+    },
+    {
+      "scrollY": 5288,
+      "pantalla": 5.876,
+      "progreso": 0.4336,
+      "gris": 209.9,
+      "luminancia": 0.7254,
+      "medianaGris": 231,
+      "estado": "logo",
+      "logo": {
+        "area": 103343,
+        "caja": [
+          205,
+          257,
+          782,
+          655
+        ],
+        "fraccionDelCuadro": 0.0797,
+        "fraccionDelAncho": 0.4014,
+        "fraccionDelAlto": 0.4433,
+        "valida": true
+      },
+      "motasPx": 21,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 481,
+          "fraccionDelArea": 0.004157
+        },
+        "clara": {
+          "cantidad": 8,
+          "fraccionDelArea": 0.00002
+        }
+      }
+    },
+    {
+      "scrollY": 5344,
+      "pantalla": 5.938,
+      "progreso": 0.4356,
+      "gris": 211,
+      "luminancia": 0.7311,
+      "medianaGris": 231,
+      "estado": "logo",
+      "logo": {
+        "area": 100464,
+        "caja": [
+          211,
+          260,
+          780,
+          652
+        ],
+        "fraccionDelCuadro": 0.0775,
+        "fraccionDelAncho": 0.3958,
+        "fraccionDelAlto": 0.4367,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 472,
+          "fraccionDelArea": 0.003951
+        },
+        "clara": {
+          "cantidad": 5,
+          "fraccionDelArea": 0.000005999999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 5400,
+      "pantalla": 6,
+      "progreso": 0.4375,
+      "gris": 211.9,
+      "luminancia": 0.7358,
+      "medianaGris": 232,
+      "estado": "logo",
+      "logo": {
+        "area": 97866,
+        "caja": [
+          216,
+          264,
+          779,
+          648
+        ],
+        "fraccionDelCuadro": 0.0755,
+        "fraccionDelAncho": 0.3917,
+        "fraccionDelAlto": 0.4278,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 495,
+          "fraccionDelArea": 0.004046
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000008
+        }
+      }
+    },
+    {
+      "scrollY": 5456,
+      "pantalla": 6.062,
+      "progreso": 0.4394,
+      "gris": 212.9,
+      "luminancia": 0.741,
+      "medianaGris": 232,
+      "estado": "logo",
+      "logo": {
+        "area": 95511,
+        "caja": [
+          221,
+          268,
+          779,
+          643
+        ],
+        "fraccionDelCuadro": 0.0737,
+        "fraccionDelAncho": 0.3882,
+        "fraccionDelAlto": 0.4178,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 503,
+          "fraccionDelArea": 0.004022
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.00001
+        }
+      }
+    },
+    {
+      "scrollY": 5513,
+      "pantalla": 6.126,
+      "progreso": 0.4414,
+      "gris": 213.9,
+      "luminancia": 0.7465,
+      "medianaGris": 233,
+      "estado": "logo",
+      "logo": {
+        "area": 93138,
+        "caja": [
+          226,
+          271,
+          778,
+          640
+        ],
+        "fraccionDelCuadro": 0.0719,
+        "fraccionDelAncho": 0.384,
+        "fraccionDelAlto": 0.4111,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 502,
+          "fraccionDelArea": 0.003848
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000011000000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 5569,
+      "pantalla": 6.188,
+      "progreso": 0.4434,
+      "gris": 214.8,
+      "luminancia": 0.7522,
+      "medianaGris": 233,
+      "estado": "logo",
+      "logo": {
+        "area": 91398,
+        "caja": [
+          231,
+          274,
+          777,
+          638
+        ],
+        "fraccionDelCuadro": 0.0705,
+        "fraccionDelAncho": 0.3799,
+        "fraccionDelAlto": 0.4056,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 497,
+          "fraccionDelArea": 0.0038190000000000003
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000057
+        }
+      }
+    },
+    {
+      "scrollY": 5625,
+      "pantalla": 6.25,
+      "progreso": 0.4453,
+      "gris": 215.7,
+      "luminancia": 0.7577,
+      "medianaGris": 234,
+      "estado": "logo",
+      "logo": {
+        "area": 89762,
+        "caja": [
+          235,
+          276,
+          776,
+          636
+        ],
+        "fraccionDelCuadro": 0.0693,
+        "fraccionDelAncho": 0.3764,
+        "fraccionDelAlto": 0.4011,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 510,
+          "fraccionDelArea": 0.003856
+        },
+        "clara": {
+          "cantidad": 5,
+          "fraccionDelArea": 0.000062
+        }
+      }
+    },
+    {
+      "scrollY": 5681,
+      "pantalla": 6.312,
+      "progreso": 0.4473,
+      "gris": 216.6,
+      "luminancia": 0.7636,
+      "medianaGris": 235,
+      "estado": "logo",
+      "logo": {
+        "area": 88268,
+        "caja": [
+          239,
+          278,
+          775,
+          635
+        ],
+        "fraccionDelCuadro": 0.0681,
+        "fraccionDelAncho": 0.3729,
+        "fraccionDelAlto": 0.3978,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 515,
+          "fraccionDelArea": 0.003855
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 5738,
+      "pantalla": 6.376,
+      "progreso": 0.4492,
+      "gris": 217.4,
+      "luminancia": 0.768,
+      "medianaGris": 236,
+      "estado": "logo",
+      "logo": {
+        "area": 86760,
+        "caja": [
+          242,
+          280,
+          774,
+          632
+        ],
+        "fraccionDelCuadro": 0.0669,
+        "fraccionDelAncho": 0.3701,
+        "fraccionDelAlto": 0.3922,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 526,
+          "fraccionDelArea": 0.003765
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 5794,
+      "pantalla": 6.438,
+      "progreso": 0.4512,
+      "gris": 217.8,
+      "luminancia": 0.7705,
+      "medianaGris": 237,
+      "estado": "logo",
+      "logo": {
+        "area": 85411,
+        "caja": [
+          245,
+          282,
+          773,
+          629
+        ],
+        "fraccionDelCuadro": 0.0659,
+        "fraccionDelAncho": 0.3674,
+        "fraccionDelAlto": 0.3867,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 521,
+          "fraccionDelArea": 0.003725
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.00016199999999999998
+        }
+      }
+    },
+    {
+      "scrollY": 5850,
+      "pantalla": 6.5,
+      "progreso": 0.4531,
+      "gris": 218.1,
+      "luminancia": 0.7713,
+      "medianaGris": 236,
+      "estado": "logo",
+      "logo": {
+        "area": 84279,
+        "caja": [
+          249,
+          284,
+          773,
+          627
+        ],
+        "fraccionDelCuadro": 0.065,
+        "fraccionDelAncho": 0.3646,
+        "fraccionDelAlto": 0.3822,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 521,
+          "fraccionDelArea": 0.0036880000000000003
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 5906,
+      "pantalla": 6.562,
+      "progreso": 0.4551,
+      "gris": 218.4,
+      "luminancia": 0.7725,
+      "medianaGris": 236,
+      "estado": "logo",
+      "logo": {
+        "area": 83263,
+        "caja": [
+          252,
+          286,
+          772,
+          626
+        ],
+        "fraccionDelCuadro": 0.0642,
+        "fraccionDelAncho": 0.3618,
+        "fraccionDelAlto": 0.3789,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 520,
+          "fraccionDelArea": 0.003647
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.000004
+        }
+      }
+    },
+    {
+      "scrollY": 5963,
+      "pantalla": 6.626,
+      "progreso": 0.457,
+      "gris": 218.7,
+      "luminancia": 0.7746,
+      "medianaGris": 236,
+      "estado": "logo",
+      "logo": {
+        "area": 82268,
+        "caja": [
+          256,
+          288,
+          772,
+          625
+        ],
+        "fraccionDelCuadro": 0.0635,
+        "fraccionDelAncho": 0.359,
+        "fraccionDelAlto": 0.3756,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 529,
+          "fraccionDelArea": 0.003629
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000005
+        }
+      }
+    },
+    {
+      "scrollY": 6019,
+      "pantalla": 6.688,
+      "progreso": 0.459,
+      "gris": 219.2,
+      "luminancia": 0.7774,
+      "medianaGris": 237,
+      "estado": "logo",
+      "logo": {
+        "area": 80995,
+        "caja": [
+          258,
+          289,
+          771,
+          623
+        ],
+        "fraccionDelCuadro": 0.0625,
+        "fraccionDelAncho": 0.3569,
+        "fraccionDelAlto": 0.3722,
+        "valida": true
+      },
+      "motasPx": 29,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 524,
+          "fraccionDelArea": 0.003579
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.0000029999999999999997
+        }
+      }
+    },
+    {
+      "scrollY": 6075,
+      "pantalla": 6.75,
+      "progreso": 0.4609,
+      "gris": 219.5,
+      "luminancia": 0.7795,
+      "medianaGris": 237,
+      "estado": "logo",
+      "logo": {
+        "area": 80329,
+        "caja": [
+          260,
+          291,
+          771,
+          621
+        ],
+        "fraccionDelCuadro": 0.062,
+        "fraccionDelAncho": 0.3556,
+        "fraccionDelAlto": 0.3678,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 519,
+          "fraccionDelArea": 0.003526
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 6131,
+      "pantalla": 6.812,
+      "progreso": 0.4629,
+      "gris": 219.9,
+      "luminancia": 0.782,
+      "medianaGris": 237,
+      "estado": "logo",
+      "logo": {
+        "area": 79179,
+        "caja": [
+          261,
+          292,
+          770,
+          620
+        ],
+        "fraccionDelCuadro": 0.0611,
+        "fraccionDelAncho": 0.3542,
+        "fraccionDelAlto": 0.3656,
+        "valida": true
+      },
+      "motasPx": 2,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 530,
+          "fraccionDelArea": 0.003542
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 6188,
+      "pantalla": 6.876,
+      "progreso": 0.4649,
+      "gris": 220.4,
+      "luminancia": 0.7849,
+      "medianaGris": 238,
+      "estado": "logo",
+      "logo": {
+        "area": 78703,
+        "caja": [
+          263,
+          292,
+          769,
+          620
+        ],
+        "fraccionDelCuadro": 0.0607,
+        "fraccionDelAncho": 0.3521,
+        "fraccionDelAlto": 0.3656,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 530,
+          "fraccionDelArea": 0.0035299999999999997
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 6244,
+      "pantalla": 6.938,
+      "progreso": 0.4668,
+      "gris": 220.7,
+      "luminancia": 0.7871,
+      "medianaGris": 238,
+      "estado": "logo",
+      "logo": {
+        "area": 78152,
+        "caja": [
+          265,
+          293,
+          769,
+          620
+        ],
+        "fraccionDelCuadro": 0.0603,
+        "fraccionDelAncho": 0.3507,
+        "fraccionDelAlto": 0.3644,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 543,
+          "fraccionDelArea": 0.003507
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000034
+        }
+      }
+    },
+    {
+      "scrollY": 6300,
+      "pantalla": 7,
+      "progreso": 0.4688,
+      "gris": 220.8,
+      "luminancia": 0.7877,
+      "medianaGris": 238,
+      "estado": "logo",
+      "logo": {
+        "area": 77552,
+        "caja": [
+          267,
+          294,
+          769,
+          618
+        ],
+        "fraccionDelCuadro": 0.0598,
+        "fraccionDelAncho": 0.3493,
+        "fraccionDelAlto": 0.3611,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 549,
+          "fraccionDelArea": 0.003495
+        },
+        "clara": {
+          "cantidad": 4,
+          "fraccionDelArea": 0.00046399999999999995
+        }
+      }
+    },
+    {
+      "scrollY": 6356,
+      "pantalla": 7.062,
+      "progreso": 0.4707,
+      "gris": 216.4,
+      "luminancia": 0.7529,
+      "medianaGris": 231,
+      "estado": "logo",
+      "logo": {
+        "area": 77277,
+        "caja": [
+          269,
+          296,
+          768,
+          616
+        ],
+        "fraccionDelCuadro": 0.0596,
+        "fraccionDelAncho": 0.3472,
+        "fraccionDelAlto": 0.3567,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 558,
+          "fraccionDelArea": 0.0035759999999999998
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 6413,
+      "pantalla": 7.126,
+      "progreso": 0.4727,
+      "gris": 211.4,
+      "luminancia": 0.7142,
+      "medianaGris": 222,
+      "estado": "logo",
+      "logo": {
+        "area": 76731,
+        "caja": [
+          271,
+          297,
+          768,
+          615
+        ],
+        "fraccionDelCuadro": 0.0592,
+        "fraccionDelAncho": 0.3458,
+        "fraccionDelAlto": 0.3544,
+        "valida": true
+      },
+      "motasPx": 4,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 566,
+          "fraccionDelArea": 0.003691
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000009
+        }
+      }
+    },
+    {
+      "scrollY": 6469,
+      "pantalla": 7.188,
+      "progreso": 0.4746,
+      "gris": 206.3,
+      "luminancia": 0.6763,
+      "medianaGris": 215,
+      "estado": "logo",
+      "logo": {
+        "area": 76258,
+        "caja": [
+          272,
+          298,
+          768,
+          614
+        ],
+        "fraccionDelCuadro": 0.0588,
+        "fraccionDelAncho": 0.3451,
+        "fraccionDelAlto": 0.3522,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 578,
+          "fraccionDelArea": 0.003755
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        }
+      }
+    },
+    {
+      "scrollY": 6525,
+      "pantalla": 7.25,
+      "progreso": 0.4766,
+      "gris": 200.1,
+      "luminancia": 0.6324,
+      "medianaGris": 208,
+      "estado": "logo",
+      "logo": {
+        "area": 76077,
+        "caja": [
+          273,
+          297,
+          768,
+          615
+        ],
+        "fraccionDelCuadro": 0.0587,
+        "fraccionDelAncho": 0.3444,
+        "fraccionDelAlto": 0.3544,
+        "valida": true
+      },
+      "motasPx": 20,
+      "brillantesPx": 365,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 577,
+          "fraccionDelArea": 0.003745
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000032
+        }
+      }
+    },
+    {
+      "scrollY": 6581,
+      "pantalla": 7.312,
+      "progreso": 0.4785,
+      "gris": 193.4,
+      "luminancia": 0.587,
+      "medianaGris": 200,
+      "estado": "logo",
+      "logo": {
+        "area": 76016,
+        "caja": [
+          273,
+          296,
+          768,
+          616
+        ],
+        "fraccionDelCuadro": 0.0587,
+        "fraccionDelAncho": 0.3444,
+        "fraccionDelAlto": 0.3567,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 607,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 600,
+          "fraccionDelArea": 0.003841
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 6638,
+      "pantalla": 7.376,
+      "progreso": 0.4805,
+      "gris": 186.6,
+      "luminancia": 0.5426,
+      "medianaGris": 193,
+      "estado": "logo",
+      "logo": {
+        "area": 75759,
+        "caja": [
+          274,
+          297,
+          768,
+          615
+        ],
+        "fraccionDelCuadro": 0.0585,
+        "fraccionDelAncho": 0.3438,
+        "fraccionDelAlto": 0.3544,
+        "valida": true
+      },
+      "motasPx": 5,
+      "brillantesPx": 96809,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 642,
+          "fraccionDelArea": 0.004988
+        },
+        "clara": {
+          "cantidad": 2,
+          "fraccionDelArea": 0.000015
+        }
+      }
+    },
+    {
+      "scrollY": 6694,
+      "pantalla": 7.438,
+      "progreso": 0.4824,
+      "gris": 179.3,
+      "luminancia": 0.4962,
+      "medianaGris": 185,
+      "estado": "logo",
+      "logo": {
+        "area": 75429,
+        "caja": [
+          275,
+          298,
+          768,
+          614
+        ],
+        "fraccionDelCuadro": 0.0582,
+        "fraccionDelAncho": 0.3431,
+        "fraccionDelAlto": 0.3522,
+        "valida": true
+      },
+      "motasPx": 11,
+      "brillantesPx": 102030,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 637,
+          "fraccionDelArea": 0.004376
+        },
+        "clara": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000002
+        }
+      }
+    },
+    {
+      "scrollY": 6750,
+      "pantalla": 7.5,
+      "progreso": 0.4844,
+      "gris": 171.1,
+      "luminancia": 0.4467,
+      "medianaGris": 178,
+      "estado": "logo",
+      "logo": {
+        "area": 75104,
+        "caja": [
+          276,
+          299,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.058,
+        "fraccionDelAncho": 0.3417,
+        "fraccionDelAlto": 0.35,
+        "valida": true
+      },
+      "motasPx": 46,
+      "brillantesPx": 1084,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 662,
+          "fraccionDelArea": 0.004748
+        },
+        "clara": {
+          "cantidad": 3,
+          "fraccionDelArea": 0.000032
+        }
+      }
+    },
+    {
+      "scrollY": 6806,
+      "pantalla": 7.562,
+      "progreso": 0.4863,
+      "gris": 161.5,
+      "luminancia": 0.392,
+      "medianaGris": 169,
+      "estado": "logo",
+      "logo": {
+        "area": 75203,
+        "caja": [
+          277,
+          300,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.058,
+        "fraccionDelAncho": 0.341,
+        "fraccionDelAlto": 0.3489,
+        "valida": true
+      },
+      "motasPx": 76,
+      "brillantesPx": 1077,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 693,
+          "fraccionDelArea": 0.005069000000000001
+        },
+        "clara": {
+          "cantidad": 21,
+          "fraccionDelArea": 0.001035
+        }
+      }
+    },
+    {
+      "scrollY": 6863,
+      "pantalla": 7.626,
+      "progreso": 0.4883,
+      "gris": 152.2,
+      "luminancia": 0.343,
+      "medianaGris": 161,
+      "estado": "logo",
+      "logo": {
+        "area": 75251,
+        "caja": [
+          278,
+          299,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.0581,
+        "fraccionDelAncho": 0.3403,
+        "fraccionDelAlto": 0.35,
+        "valida": true
+      },
+      "motasPx": 46,
+      "brillantesPx": 1064,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 707,
+          "fraccionDelArea": 0.0057079999999999995
+        },
+        "clara": {
+          "cantidad": 42,
+          "fraccionDelArea": 0.002191
+        }
+      }
+    },
+    {
+      "scrollY": 6919,
+      "pantalla": 7.688,
+      "progreso": 0.4902,
+      "gris": 143.6,
+      "luminancia": 0.3019,
+      "medianaGris": 153,
+      "estado": "logo",
+      "logo": {
+        "area": 75135,
+        "caja": [
+          277,
+          299,
+          767,
+          614
+        ],
+        "fraccionDelCuadro": 0.058,
+        "fraccionDelAncho": 0.341,
+        "fraccionDelAlto": 0.3511,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 1033,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 686,
+          "fraccionDelArea": 0.0058130000000000005
+        },
+        "clara": {
+          "cantidad": 48,
+          "fraccionDelArea": 0.001987
+        }
+      }
+    },
+    {
+      "scrollY": 6975,
+      "pantalla": 7.75,
+      "progreso": 0.4922,
+      "gris": 132.3,
+      "luminancia": 0.2525,
+      "medianaGris": 142,
+      "estado": "logo",
+      "logo": {
+        "area": 75113,
+        "caja": [
+          277,
+          299,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.058,
+        "fraccionDelAncho": 0.341,
+        "fraccionDelAlto": 0.35,
+        "valida": true
+      },
+      "motasPx": 239,
+      "brillantesPx": 1047,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 736,
+          "fraccionDelArea": 0.005941999999999999
+        },
+        "clara": {
+          "cantidad": 63,
+          "fraccionDelArea": 0.0021449999999999998
+        }
+      }
+    },
+    {
+      "scrollY": 7031,
+      "pantalla": 7.812,
+      "progreso": 0.4941,
+      "gris": 116.8,
+      "luminancia": 0.1926,
+      "medianaGris": 127,
+      "estado": "logo",
+      "logo": {
+        "area": 75240,
+        "caja": [
+          277,
+          299,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.0581,
+        "fraccionDelAncho": 0.341,
+        "fraccionDelAlto": 0.35,
+        "valida": true
+      },
+      "motasPx": 1811,
+      "brillantesPx": 1072,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 552,
+          "fraccionDelArea": 0.005685
+        },
+        "clara": {
+          "cantidad": 92,
+          "fraccionDelArea": 0.003006
+        }
+      }
+    },
+    {
+      "scrollY": 7088,
+      "pantalla": 7.876,
+      "progreso": 0.4961,
+      "gris": 99.9,
+      "luminancia": 0.1383,
+      "medianaGris": 110,
+      "estado": "logo",
+      "logo": {
+        "area": 76119,
+        "caja": [
+          276,
+          299,
+          767,
+          613
+        ],
+        "fraccionDelCuadro": 0.0587,
+        "fraccionDelAncho": 0.3417,
+        "fraccionDelAlto": 0.35,
+        "valida": true
+      },
+      "motasPx": 18881,
+      "brillantesPx": 1022,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 451,
+          "fraccionDelArea": 0.007961000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 7144,
+      "pantalla": 7.938,
+      "progreso": 0.4981,
+      "gris": 78.8,
+      "luminancia": 0.0843,
+      "medianaGris": 87,
+      "estado": "logo",
+      "logo": {
+        "area": 76429,
+        "caja": [
+          277,
+          299,
+          767,
+          614
+        ],
+        "fraccionDelCuadro": 0.059,
+        "fraccionDelAncho": 0.341,
+        "fraccionDelAlto": 0.3511,
+        "valida": true
+      },
+      "motasPx": 69663,
+      "brillantesPx": 986,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 800,
+          "fraccionDelArea": 0.005665
+        }
+      }
+    },
+    {
+      "scrollY": 7200,
+      "pantalla": 8,
+      "progreso": 0.5,
+      "gris": 48,
+      "luminancia": 0.0321,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1262062,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9738,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9198,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 792,
+          "fraccionDelArea": 0.005345
+        }
+      }
+    },
+    {
+      "scrollY": 7256,
+      "pantalla": 8.062,
+      "progreso": 0.5026,
+      "gris": 48,
+      "luminancia": 0.0321,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1262113,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9739,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9333,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 795,
+          "fraccionDelArea": 0.005375
+        }
+      }
+    },
+    {
+      "scrollY": 7313,
+      "pantalla": 8.126,
+      "progreso": 0.5052,
+      "gris": 47.9,
+      "luminancia": 0.0321,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1262449,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9741,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9266,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 805,
+          "fraccionDelArea": 0.005801
+        }
+      }
+    },
+    {
+      "scrollY": 7369,
+      "pantalla": 8.188,
+      "progreso": 0.5078,
+      "gris": 47.8,
+      "luminancia": 0.0319,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1263682,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9751,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8722,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 804,
+          "fraccionDelArea": 0.005386999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 7425,
+      "pantalla": 8.25,
+      "progreso": 0.5104,
+      "gris": 47.7,
+      "luminancia": 0.0317,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1263732,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9751,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8457,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 800,
+          "fraccionDelArea": 0.005253
+        }
+      }
+    },
+    {
+      "scrollY": 7481,
+      "pantalla": 8.312,
+      "progreso": 0.513,
+      "gris": 47.5,
+      "luminancia": 0.0315,
+      "medianaGris": 52,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1265034,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9761,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8306,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 799,
+          "fraccionDelArea": 0.004999
+        }
+      }
+    },
+    {
+      "scrollY": 7538,
+      "pantalla": 8.376,
+      "progreso": 0.5156,
+      "gris": 47.3,
+      "luminancia": 0.0312,
+      "medianaGris": 51,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1265547,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9765,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8403,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 798,
+          "fraccionDelArea": 0.005066
+        }
+      }
+    },
+    {
+      "scrollY": 7594,
+      "pantalla": 8.438,
+      "progreso": 0.5182,
+      "gris": 47,
+      "luminancia": 0.031,
+      "medianaGris": 51,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1264768,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9759,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8524,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 798,
+          "fraccionDelArea": 0.005372
+        }
+      }
+    },
+    {
+      "scrollY": 7650,
+      "pantalla": 8.5,
+      "progreso": 0.5208,
+      "gris": 46.6,
+      "luminancia": 0.0306,
+      "medianaGris": 51,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1264801,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9759,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8491,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 795,
+          "fraccionDelArea": 0.005285
+        }
+      }
+    },
+    {
+      "scrollY": 7706,
+      "pantalla": 8.562,
+      "progreso": 0.5234,
+      "gris": 46.2,
+      "luminancia": 0.0301,
+      "medianaGris": 51,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1267304,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9779,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8528,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 786,
+          "fraccionDelArea": 0.005345
+        }
+      }
+    },
+    {
+      "scrollY": 7763,
+      "pantalla": 8.626,
+      "progreso": 0.5261,
+      "gris": 45.6,
+      "luminancia": 0.0295,
+      "medianaGris": 50,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1269930,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9799,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8393,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 802,
+          "fraccionDelArea": 0.005272
+        }
+      }
+    },
+    {
+      "scrollY": 7819,
+      "pantalla": 8.688,
+      "progreso": 0.5287,
+      "gris": 44.9,
+      "luminancia": 0.0287,
+      "medianaGris": 50,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1271003,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9807,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8259,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 797,
+          "fraccionDelArea": 0.005103
+        }
+      }
+    },
+    {
+      "scrollY": 7875,
+      "pantalla": 8.75,
+      "progreso": 0.5313,
+      "gris": 44.2,
+      "luminancia": 0.028,
+      "medianaGris": 49,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1272436,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9818,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8379,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 813,
+          "fraccionDelArea": 0.005264
+        }
+      }
+    },
+    {
+      "scrollY": 7931,
+      "pantalla": 8.812,
+      "progreso": 0.5338,
+      "gris": 43.4,
+      "luminancia": 0.0272,
+      "medianaGris": 49,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1273367,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9825,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8686,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 806,
+          "fraccionDelArea": 0.005439
+        }
+      }
+    },
+    {
+      "scrollY": 7988,
+      "pantalla": 8.876,
+      "progreso": 0.5365,
+      "gris": 42.5,
+      "luminancia": 0.0264,
+      "medianaGris": 48,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1274343,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9833,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8829,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 808,
+          "fraccionDelArea": 0.0055049999999999995
+        }
+      }
+    },
+    {
+      "scrollY": 8044,
+      "pantalla": 8.938,
+      "progreso": 0.5391,
+      "gris": 41.8,
+      "luminancia": 0.0256,
+      "medianaGris": 47,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1274503,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9834,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8849,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 799,
+          "fraccionDelArea": 0.005554
+        }
+      }
+    },
+    {
+      "scrollY": 8100,
+      "pantalla": 9,
+      "progreso": 0.5417,
+      "gris": 41,
+      "luminancia": 0.0249,
+      "medianaGris": 46,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1275055,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9838,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9021,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 795,
+          "fraccionDelArea": 0.0055179999999999995
+        }
+      }
+    },
+    {
+      "scrollY": 8156,
+      "pantalla": 9.062,
+      "progreso": 0.5443,
+      "gris": 40.3,
+      "luminancia": 0.0242,
+      "medianaGris": 46,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1275625,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9843,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9151,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 794,
+          "fraccionDelArea": 0.005436
+        }
+      }
+    },
+    {
+      "scrollY": 8213,
+      "pantalla": 9.126,
+      "progreso": 0.5469,
+      "gris": 39.7,
+      "luminancia": 0.0236,
+      "medianaGris": 45,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1276392,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9849,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9072,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        },
+        "clara": {
+          "cantidad": 789,
+          "fraccionDelArea": 0.005627999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 8269,
+      "pantalla": 9.188,
+      "progreso": 0.5495,
+      "gris": 39.1,
+      "luminancia": 0.0231,
+      "medianaGris": 45,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1277386,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9856,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8871,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 790,
+          "fraccionDelArea": 0.005508
+        }
+      }
+    },
+    {
+      "scrollY": 8325,
+      "pantalla": 9.25,
+      "progreso": 0.5521,
+      "gris": 38.6,
+      "luminancia": 0.0226,
+      "medianaGris": 44,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1278718,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9867,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8772,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 782,
+          "fraccionDelArea": 0.005444
+        }
+      }
+    },
+    {
+      "scrollY": 8381,
+      "pantalla": 9.312,
+      "progreso": 0.5547,
+      "gris": 38.2,
+      "luminancia": 0.0221,
+      "medianaGris": 44,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1279354,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9872,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8838,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 790,
+          "fraccionDelArea": 0.0054269999999999995
+        }
+      }
+    },
+    {
+      "scrollY": 8438,
+      "pantalla": 9.376,
+      "progreso": 0.5573,
+      "gris": 37.7,
+      "luminancia": 0.0217,
+      "medianaGris": 43,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1279835,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9875,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8738,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 781,
+          "fraccionDelArea": 0.005376
+        }
+      }
+    },
+    {
+      "scrollY": 8494,
+      "pantalla": 9.438,
+      "progreso": 0.5599,
+      "gris": 37.5,
+      "luminancia": 0.0215,
+      "medianaGris": 43,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1279235,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9871,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9412,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        },
+        "clara": {
+          "cantidad": 767,
+          "fraccionDelArea": 0.005123
+        }
+      }
+    },
+    {
+      "scrollY": 8550,
+      "pantalla": 9.5,
+      "progreso": 0.5625,
+      "gris": 37.2,
+      "luminancia": 0.0213,
+      "medianaGris": 42,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1280483,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.988,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9520,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 766,
+          "fraccionDelArea": 0.0050149999999999995
+        }
+      }
+    },
+    {
+      "scrollY": 8606,
+      "pantalla": 9.562,
+      "progreso": 0.5651,
+      "gris": 36.9,
+      "luminancia": 0.0211,
+      "medianaGris": 42,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1280773,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9883,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9418,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 762,
+          "fraccionDelArea": 0.004874
+        }
+      }
+    },
+    {
+      "scrollY": 8663,
+      "pantalla": 9.626,
+      "progreso": 0.5677,
+      "gris": 36.7,
+      "luminancia": 0.0208,
+      "medianaGris": 42,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1281624,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9889,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 9261,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 767,
+          "fraccionDelArea": 0.004832
+        }
+      }
+    },
+    {
+      "scrollY": 8719,
+      "pantalla": 9.688,
+      "progreso": 0.5703,
+      "gris": 36.5,
+      "luminancia": 0.0205,
+      "medianaGris": 41,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1282161,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9893,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8766,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 765,
+          "fraccionDelArea": 0.005102
+        }
+      }
+    },
+    {
+      "scrollY": 8775,
+      "pantalla": 9.75,
+      "progreso": 0.5729,
+      "gris": 35.8,
+      "luminancia": 0.02,
+      "medianaGris": 41,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1283341,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9902,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8663,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 757,
+          "fraccionDelArea": 0.005115
+        }
+      }
+    },
+    {
+      "scrollY": 8831,
+      "pantalla": 9.812,
+      "progreso": 0.5755,
+      "gris": 35.7,
+      "luminancia": 0.0199,
+      "medianaGris": 40,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1282986,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.99,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8931,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 762,
+          "fraccionDelArea": 0.004912000000000001
+        }
+      }
+    },
+    {
+      "scrollY": 8888,
+      "pantalla": 9.876,
+      "progreso": 0.5781,
+      "gris": 35.5,
+      "luminancia": 0.0198,
+      "medianaGris": 40,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1282510,
+        "caja": [
+          0,
+          0,
+          1439,
+          899
+        ],
+        "fraccionDelCuadro": 0.9896,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 1,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 8799,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 767,
+          "fraccionDelArea": 0.004889
+        }
+      }
+    },
+    {
+      "scrollY": 8944,
+      "pantalla": 9.938,
+      "progreso": 0.5807,
+      "gris": 41.9,
+      "luminancia": 0.0399,
+      "medianaGris": 40,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1209023,
+        "caja": [
+          0,
+          0,
+          1439,
+          850
+        ],
+        "fraccionDelCuadro": 0.9329,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 0.9456,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 74279,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 752,
+          "fraccionDelArea": 0.004877
+        }
+      }
+    },
+    {
+      "scrollY": 9000,
+      "pantalla": 10,
+      "progreso": 0.5833,
+      "gris": 48.2,
+      "luminancia": 0.0598,
+      "medianaGris": 41,
+      "estado": "oscuro",
+      "logo": {
+        "area": 1136085,
+        "caja": [
+          0,
+          0,
+          1439,
+          800
+        ],
+        "fraccionDelCuadro": 0.8766,
+        "fraccionDelAncho": 1,
+        "fraccionDelAlto": 0.89,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 138184,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 1,
+          "fraccionDelArea": 0.000001
+        },
+        "clara": {
+          "cantidad": 735,
+          "fraccionDelArea": 0.004836
+        }
+      }
+    },
+    {
+      "scrollY": 13500,
+      "pantalla": 15,
+      "progreso": 0.7411,
+      "gris": 246.9,
+      "luminancia": 0.9289,
+      "medianaGris": 247,
+      "estado": "vacio",
+      "logo": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0,
+        "fraccionDelAncho": 0,
+        "fraccionDelAlto": 0,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 13556,
+      "pantalla": 15.062,
+      "progreso": 0.7429,
+      "gris": 244.2,
+      "luminancia": 0.9095,
+      "medianaGris": 247,
+      "estado": "vacio",
+      "logo": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0,
+        "fraccionDelAncho": 0,
+        "fraccionDelAlto": 0,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 6,
+          "fraccionDelArea": 0.000059
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 13613,
+      "pantalla": 15.126,
+      "progreso": 0.7448,
+      "gris": 240.5,
+      "luminancia": 0.8833,
+      "medianaGris": 247,
+      "estado": "vacio",
+      "logo": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0,
+        "fraccionDelAncho": 0,
+        "fraccionDelAlto": 0,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 11,
+          "fraccionDelArea": 0.000478
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 13669,
+      "pantalla": 15.188,
+      "progreso": 0.7466,
+      "gris": 232.5,
+      "luminancia": 0.8349,
+      "medianaGris": 247,
+      "estado": "vacio",
+      "logo": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0,
+        "fraccionDelAncho": 0,
+        "fraccionDelAlto": 0,
+        "valida": false
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 24,
+          "fraccionDelArea": 0.000719
+        },
+        "clara": {
+          "cantidad": 0,
+          "fraccionDelArea": 0
+        }
+      }
+    },
+    {
+      "scrollY": 13725,
+      "pantalla": 15.25,
+      "progreso": 0.7484,
+      "gris": 223.4,
+      "luminancia": 0.7858,
+      "medianaGris": 247,
+      "estado": "logo",
+      "logo": {
+        "area": 9450,
+        "caja": [
+          886,
+          760,
+          1045,
+          825
+        ],
+        "fraccionDelCuadro": 0.0073,
+        "fraccionDelAncho": 0.1111,
+        "fraccionDelAlto": 0.0733,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 26,
+          "fraccionDelArea": 0.0005870000000000001
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000128
+        }
+      }
+    },
+    {
+      "scrollY": 13781,
+      "pantalla": 15.312,
+      "progreso": 0.7511,
+      "gris": 215,
+      "luminancia": 0.7397,
+      "medianaGris": 247,
+      "estado": "logo",
+      "logo": {
+        "area": 16769,
+        "caja": [
+          889,
+          704,
+          1048,
+          818
+        ],
+        "fraccionDelCuadro": 0.0129,
+        "fraccionDelAncho": 0.1111,
+        "fraccionDelAlto": 0.1278,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.000503
+        },
+        "clara": {
+          "cantidad": 28,
+          "fraccionDelArea": 0.00122
+        }
+      }
+    },
+    {
+      "scrollY": 13838,
+      "pantalla": 15.376,
+      "progreso": 0.7604,
+      "gris": 209.6,
+      "luminancia": 0.7032,
+      "medianaGris": 247,
+      "estado": "logo",
+      "logo": {
+        "area": 15701,
+        "caja": [
+          932,
+          647,
+          1072,
+          765
+        ],
+        "fraccionDelCuadro": 0.0121,
+        "fraccionDelAncho": 0.0979,
+        "fraccionDelAlto": 0.1322,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 71,
+          "fraccionDelArea": 0.0023
+        },
+        "clara": {
+          "cantidad": 15,
+          "fraccionDelArea": 0.000404
+        }
+      }
+    },
+    {
+      "scrollY": 13894,
+      "pantalla": 15.438,
+      "progreso": 0.7696,
+      "gris": 202.1,
+      "luminancia": 0.6589,
+      "medianaGris": 247,
+      "estado": "logo",
+      "logo": {
+        "area": 16292,
+        "caja": [
+          953,
+          591,
+          1135,
+          725
+        ],
+        "fraccionDelCuadro": 0.0126,
+        "fraccionDelAncho": 0.1271,
+        "fraccionDelAlto": 0.15,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 146,
+          "fraccionDelArea": 0.0044009999999999995
+        },
+        "clara": {
+          "cantidad": 9,
+          "fraccionDelArea": 0.000086
+        }
+      }
+    },
+    {
+      "scrollY": 13950,
+      "pantalla": 15.5,
+      "progreso": 0.7788,
+      "gris": 193.9,
+      "luminancia": 0.6142,
+      "medianaGris": 247,
+      "estado": "logo",
+      "logo": {
+        "area": 21204,
+        "caja": [
+          957,
+          535,
+          1189,
+          695
+        ],
+        "fraccionDelCuadro": 0.0164,
+        "fraccionDelAncho": 0.1618,
+        "fraccionDelAlto": 0.1789,
+        "valida": true
+      },
+      "motasPx": 6041,
+      "brillantesPx": 0,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 152,
+          "fraccionDelArea": 0.001722
+        },
+        "clara": {
+          "cantidad": 11,
+          "fraccionDelArea": 0.000387
+        }
+      }
+    },
+    {
+      "scrollY": 14006,
+      "pantalla": 15.562,
+      "progreso": 0.7879,
+      "gris": 186.5,
+      "luminancia": 0.5746,
+      "medianaGris": 187,
+      "estado": "logo",
+      "logo": {
+        "area": 46327,
+        "caja": [
+          666,
+          479,
+          1204,
+          671
+        ],
+        "fraccionDelCuadro": 0.0357,
+        "fraccionDelAncho": 0.3743,
+        "fraccionDelAlto": 0.2144,
+        "valida": true
+      },
+      "motasPx": 202,
+      "brillantesPx": 589870,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 228,
+          "fraccionDelArea": 0.002591
+        },
+        "clara": {
+          "cantidad": 10,
+          "fraccionDelArea": 0.000395
+        }
+      }
+    },
+    {
+      "scrollY": 14063,
+      "pantalla": 15.626,
+      "progreso": 0.7973,
+      "gris": 178.7,
+      "luminancia": 0.5317,
+      "medianaGris": 172,
+      "estado": "logo",
+      "logo": {
+        "area": 31240,
+        "caja": [
+          936,
+          422,
+          1191,
+          653
+        ],
+        "fraccionDelCuadro": 0.0241,
+        "fraccionDelAncho": 0.1778,
+        "fraccionDelAlto": 0.2578,
+        "valida": true
+      },
+      "motasPx": 25385,
+      "brillantesPx": 526126,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 262,
+          "fraccionDelArea": 0.002753
+        },
+        "clara": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.000279
+        }
+      }
+    },
+    {
+      "scrollY": 14119,
+      "pantalla": 15.688,
+      "progreso": 0.8064,
+      "gris": 171.9,
+      "luminancia": 0.4916,
+      "medianaGris": 162,
+      "estado": "logo",
+      "logo": {
+        "area": 32102,
+        "caja": [
+          919,
+          366,
+          1164,
+          639
+        ],
+        "fraccionDelCuadro": 0.0248,
+        "fraccionDelAncho": 0.1708,
+        "fraccionDelAlto": 0.3044,
+        "valida": true
+      },
+      "motasPx": 30724,
+      "brillantesPx": 456006,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 304,
+          "fraccionDelArea": 0.002682
+        },
+        "clara": {
+          "cantidad": 11,
+          "fraccionDelArea": 0.000611
+        }
+      }
+    },
+    {
+      "scrollY": 14175,
+      "pantalla": 15.75,
+      "progreso": 0.8156,
+      "gris": 166.5,
+      "luminancia": 0.4598,
+      "medianaGris": 158,
+      "estado": "logo",
+      "logo": {
+        "area": 75043,
+        "caja": [
+          641,
+          310,
+          1136,
+          627
+        ],
+        "fraccionDelCuadro": 0.0579,
+        "fraccionDelAncho": 0.3444,
+        "fraccionDelAlto": 0.3533,
+        "valida": true
+      },
+      "motasPx": 282,
+      "brillantesPx": 395229,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 392,
+          "fraccionDelArea": 0.004954
+        },
+        "clara": {
+          "cantidad": 30,
+          "fraccionDelArea": 0.003503
+        }
+      }
+    },
+    {
+      "scrollY": 14231,
+      "pantalla": 15.812,
+      "progreso": 0.8248,
+      "gris": 161.8,
+      "luminancia": 0.4288,
+      "medianaGris": 152,
+      "estado": "logo",
+      "logo": {
+        "area": 76572,
+        "caja": [
+          633,
+          275,
+          1108,
+          617
+        ],
+        "fraccionDelCuadro": 0.0591,
+        "fraccionDelAncho": 0.3306,
+        "fraccionDelAlto": 0.3811,
+        "valida": true
+      },
+      "motasPx": 118,
+      "brillantesPx": 345459,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 485,
+          "fraccionDelArea": 0.005405999999999999
+        },
+        "clara": {
+          "cantidad": 40,
+          "fraccionDelArea": 0.004375
+        }
+      }
+    },
+    {
+      "scrollY": 14288,
+      "pantalla": 15.876,
+      "progreso": 0.8341,
+      "gris": 157.2,
+      "luminancia": 0.3941,
+      "medianaGris": 148,
+      "estado": "logo",
+      "logo": {
+        "area": 68570,
+        "caja": [
+          624,
+          285,
+          1079,
+          610
+        ],
+        "fraccionDelCuadro": 0.0529,
+        "fraccionDelAncho": 0.3167,
+        "fraccionDelAlto": 0.3622,
+        "valida": true
+      },
+      "motasPx": 36,
+      "brillantesPx": 305323,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 585,
+          "fraccionDelArea": 0.004973
+        },
+        "clara": {
+          "cantidad": 67,
+          "fraccionDelArea": 0.003529
+        }
+      }
+    },
+    {
+      "scrollY": 14344,
+      "pantalla": 15.938,
+      "progreso": 0.8433,
+      "gris": 152.9,
+      "luminancia": 0.3619,
+      "medianaGris": 149,
+      "estado": "logo",
+      "logo": {
+        "area": 62610,
+        "caja": [
+          614,
+          293,
+          1053,
+          603
+        ],
+        "fraccionDelCuadro": 0.0483,
+        "fraccionDelAncho": 0.3056,
+        "fraccionDelAlto": 0.3456,
+        "valida": true
+      },
+      "motasPx": 5,
+      "brillantesPx": 223805,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 748,
+          "fraccionDelArea": 0.004528
+        },
+        "clara": {
+          "cantidad": 54,
+          "fraccionDelArea": 0.00527
+        }
+      }
+    },
+    {
+      "scrollY": 14400,
+      "pantalla": 16,
+      "progreso": 0.8525,
+      "gris": 148.4,
+      "luminancia": 0.3288,
+      "medianaGris": 150,
+      "estado": "logo",
+      "logo": {
+        "area": 57976,
+        "caja": [
+          604,
+          299,
+          1028,
+          598
+        ],
+        "fraccionDelCuadro": 0.0447,
+        "fraccionDelAncho": 0.2951,
+        "fraccionDelAlto": 0.3333,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 146973,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 761,
+          "fraccionDelArea": 0.004116
+        },
+        "clara": {
+          "cantidad": 38,
+          "fraccionDelArea": 0.005417999999999999
+        }
+      }
+    },
+    {
+      "scrollY": 14456,
+      "pantalla": 16.062,
+      "progreso": 0.8617,
+      "gris": 146.6,
+      "luminancia": 0.3163,
+      "medianaGris": 149,
+      "estado": "logo",
+      "logo": {
+        "area": 54242,
+        "caja": [
+          594,
+          304,
+          1006,
+          594
+        ],
+        "fraccionDelCuadro": 0.0419,
+        "fraccionDelAncho": 0.2868,
+        "fraccionDelAlto": 0.3233,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 110940,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 811,
+          "fraccionDelArea": 0.004204
+        },
+        "clara": {
+          "cantidad": 32,
+          "fraccionDelArea": 0.004088
+        }
+      }
+    },
+    {
+      "scrollY": 14513,
+      "pantalla": 16.126,
+      "progreso": 0.871,
+      "gris": 144.7,
+      "luminancia": 0.3034,
+      "medianaGris": 149,
+      "estado": "logo",
+      "logo": {
+        "area": 51257,
+        "caja": [
+          584,
+          307,
+          986,
+          590
+        ],
+        "fraccionDelCuadro": 0.0396,
+        "fraccionDelAncho": 0.2799,
+        "fraccionDelAlto": 0.3156,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 71588,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 777,
+          "fraccionDelArea": 0.003745
+        },
+        "clara": {
+          "cantidad": 43,
+          "fraccionDelArea": 0.004458
+        }
+      }
+    },
+    {
+      "scrollY": 14569,
+      "pantalla": 16.188,
+      "progreso": 0.8802,
+      "gris": 145.7,
+      "luminancia": 0.3071,
+      "medianaGris": 150,
+      "estado": "logo",
+      "logo": {
+        "area": 48793,
+        "caja": [
+          575,
+          311,
+          969,
+          587
+        ],
+        "fraccionDelCuadro": 0.0376,
+        "fraccionDelAncho": 0.2743,
+        "fraccionDelAlto": 0.3078,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 69117,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 796,
+          "fraccionDelArea": 0.003555
+        },
+        "clara": {
+          "cantidad": 30,
+          "fraccionDelArea": 0.0052910000000000006
+        }
+      }
+    },
+    {
+      "scrollY": 14625,
+      "pantalla": 16.25,
+      "progreso": 0.8894,
+      "gris": 146.2,
+      "luminancia": 0.3087,
+      "medianaGris": 150,
+      "estado": "logo",
+      "logo": {
+        "area": 46734,
+        "caja": [
+          567,
+          314,
+          955,
+          584
+        ],
+        "fraccionDelCuadro": 0.0361,
+        "fraccionDelAncho": 0.2701,
+        "fraccionDelAlto": 0.3011,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 68950,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 769,
+          "fraccionDelArea": 0.0036
+        },
+        "clara": {
+          "cantidad": 23,
+          "fraccionDelArea": 0.002445
+        }
+      }
+    },
+    {
+      "scrollY": 14681,
+      "pantalla": 16.312,
+      "progreso": 0.8986,
+      "gris": 146.6,
+      "luminancia": 0.3101,
+      "medianaGris": 150,
+      "estado": "logo",
+      "logo": {
+        "area": 45022,
+        "caja": [
+          560,
+          317,
+          942,
+          582
+        ],
+        "fraccionDelCuadro": 0.0347,
+        "fraccionDelAncho": 0.266,
+        "fraccionDelAlto": 0.2956,
+        "valida": true
+      },
+      "motasPx": 3,
+      "brillantesPx": 66046,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 725,
+          "fraccionDelArea": 0.003255
+        },
+        "clara": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.002154
+        }
+      }
+    },
+    {
+      "scrollY": 14738,
+      "pantalla": 16.376,
+      "progreso": 0.9079,
+      "gris": 147,
+      "luminancia": 0.3116,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 43780,
+        "caja": [
+          554,
+          318,
+          931,
+          581
+        ],
+        "fraccionDelCuadro": 0.0338,
+        "fraccionDelAncho": 0.2625,
+        "fraccionDelAlto": 0.2933,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 65243,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 695,
+          "fraccionDelArea": 0.0030470000000000002
+        },
+        "clara": {
+          "cantidad": 22,
+          "fraccionDelArea": 0.0031929999999999997
+        }
+      }
+    },
+    {
+      "scrollY": 14794,
+      "pantalla": 16.438,
+      "progreso": 0.9171,
+      "gris": 147.3,
+      "luminancia": 0.3126,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 42813,
+        "caja": [
+          549,
+          320,
+          922,
+          579
+        ],
+        "fraccionDelCuadro": 0.033,
+        "fraccionDelAncho": 0.2597,
+        "fraccionDelAlto": 0.2889,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 67840,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 694,
+          "fraccionDelArea": 0.0029620000000000002
+        },
+        "clara": {
+          "cantidad": 22,
+          "fraccionDelArea": 0.002918
+        }
+      }
+    },
+    {
+      "scrollY": 14850,
+      "pantalla": 16.5,
+      "progreso": 0.9263,
+      "gris": 147.7,
+      "luminancia": 0.3142,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 42047,
+        "caja": [
+          544,
+          321,
+          914,
+          578
+        ],
+        "fraccionDelCuadro": 0.0324,
+        "fraccionDelAncho": 0.2576,
+        "fraccionDelAlto": 0.2867,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 68379,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 698,
+          "fraccionDelArea": 0.003019
+        },
+        "clara": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.0039689999999999994
+        }
+      }
+    },
+    {
+      "scrollY": 14906,
+      "pantalla": 16.562,
+      "progreso": 0.9354,
+      "gris": 147.8,
+      "luminancia": 0.3142,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 41389,
+        "caja": [
+          541,
+          322,
+          908,
+          577
+        ],
+        "fraccionDelCuadro": 0.0319,
+        "fraccionDelAncho": 0.2556,
+        "fraccionDelAlto": 0.2844,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 64653,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 723,
+          "fraccionDelArea": 0.0029170000000000003
+        },
+        "clara": {
+          "cantidad": 31,
+          "fraccionDelArea": 0.004566
+        }
+      }
+    },
+    {
+      "scrollY": 14963,
+      "pantalla": 16.626,
+      "progreso": 0.9448,
+      "gris": 147.7,
+      "luminancia": 0.3133,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 40973,
+        "caja": [
+          538,
+          322,
+          904,
+          576
+        ],
+        "fraccionDelCuadro": 0.0316,
+        "fraccionDelAncho": 0.2549,
+        "fraccionDelAlto": 0.2833,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 59997,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 748,
+          "fraccionDelArea": 0.003051
+        },
+        "clara": {
+          "cantidad": 47,
+          "fraccionDelArea": 0.004049
+        }
+      }
+    },
+    {
+      "scrollY": 15019,
+      "pantalla": 16.688,
+      "progreso": 0.9539,
+      "gris": 147.5,
+      "luminancia": 0.3122,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 40832,
+        "caja": [
+          537,
+          323,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0315,
+        "fraccionDelAncho": 0.2542,
+        "fraccionDelAlto": 0.2822,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 60936,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 735,
+          "fraccionDelArea": 0.002983
+        },
+        "clara": {
+          "cantidad": 36,
+          "fraccionDelArea": 0.004254
+        }
+      }
+    },
+    {
+      "scrollY": 15075,
+      "pantalla": 16.75,
+      "progreso": 0.9631,
+      "gris": 147.9,
+      "luminancia": 0.3142,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 40767,
+        "caja": [
+          537,
+          323,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0315,
+        "fraccionDelAncho": 0.2542,
+        "fraccionDelAlto": 0.2822,
+        "valida": true
+      },
+      "motasPx": 0,
+      "brillantesPx": 63443,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 709,
+          "fraccionDelArea": 0.0028060000000000003
+        },
+        "clara": {
+          "cantidad": 25,
+          "fraccionDelArea": 0.003786
+        }
+      }
+    },
+    {
+      "scrollY": 15131,
+      "pantalla": 16.812,
+      "progreso": 0.9723,
+      "gris": 148.1,
+      "luminancia": 0.3153,
+      "medianaGris": 152,
+      "estado": "logo",
+      "logo": {
+        "area": 40723,
+        "caja": [
+          538,
+          322,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0314,
+        "fraccionDelAncho": 0.2535,
+        "fraccionDelAlto": 0.2833,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 64606,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 694,
+          "fraccionDelArea": 0.002747
+        },
+        "clara": {
+          "cantidad": 21,
+          "fraccionDelArea": 0.002736
+        }
+      }
+    },
+    {
+      "scrollY": 15188,
+      "pantalla": 16.876,
+      "progreso": 0.9816,
+      "gris": 148.2,
+      "luminancia": 0.3156,
+      "medianaGris": 152,
+      "estado": "logo",
+      "logo": {
+        "area": 40757,
+        "caja": [
+          538,
+          322,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0314,
+        "fraccionDelAncho": 0.2535,
+        "fraccionDelAlto": 0.2833,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 67900,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 709,
+          "fraccionDelArea": 0.002848
+        },
+        "clara": {
+          "cantidad": 33,
+          "fraccionDelArea": 0.005109
+        }
+      }
+    },
+    {
+      "scrollY": 15244,
+      "pantalla": 16.938,
+      "progreso": 0.9908,
+      "gris": 147.8,
+      "luminancia": 0.3137,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 40822,
+        "caja": [
+          538,
+          323,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0315,
+        "fraccionDelAncho": 0.2535,
+        "fraccionDelAlto": 0.2822,
+        "valida": true
+      },
+      "motasPx": 8,
+      "brillantesPx": 63753,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 719,
+          "fraccionDelArea": 0.002825
+        },
+        "clara": {
+          "cantidad": 49,
+          "fraccionDelArea": 0.0037180000000000004
+        }
+      }
+    },
+    {
+      "scrollY": 15300,
+      "pantalla": 17,
+      "progreso": 1,
+      "gris": 147.6,
+      "luminancia": 0.3127,
+      "medianaGris": 151,
+      "estado": "logo",
+      "logo": {
+        "area": 40903,
+        "caja": [
+          537,
+          323,
+          902,
+          576
+        ],
+        "fraccionDelCuadro": 0.0316,
+        "fraccionDelAncho": 0.2542,
+        "fraccionDelAlto": 0.2822,
+        "valida": true
+      },
+      "motasPx": 1,
+      "brillantesPx": 57008,
+      "motasDeAA": {
+        "oscura": {
+          "cantidad": 705,
+          "fraccionDelArea": 0.002865
+        },
+        "clara": {
+          "cantidad": 29,
+          "fraccionDelArea": 0.003526
+        }
+      }
+    }
+  ],
+  "secciones": {
+    "hero": {
+      "tipo": "documento",
+      "top": 0,
+      "alto": 900,
+      "barrido": {
+        "desde": 0,
+        "hasta": 900,
+        "paradas": 34,
+        "conSiluetaValida": 17,
+        "aOscuras": 17
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 600,
+            "libreDerechaPx": 248,
+            "algunaVez": 0.2492,
+            "delTiempo": 0.0796
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 600,
+            "libreDerechaPx": 244,
+            "algunaVez": 0.2501,
+            "delTiempo": 0.0836
+          },
+          "brilloAlgunaVez": 0,
+          "oscuroAlgunaVez": 0
+        }
+      ],
+      "tinta": "oscura",
+      "motasDeAAMedia": 0.004502,
+      "motasDeAAMaxima": 0.005728,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.094,
+            0.415,
+            0.359,
+            0.404,
+            0.317,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.558,
+            1,
+            1,
+            1,
+            0.847,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.094,
+            0.417,
+            0.363,
+            0.405,
+            0.321,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.562,
+            1,
+            1,
+            1,
+            0.852,
+            0,
+            0
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.001,
+            0.013,
+            0.002,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.097,
+            0.415,
+            0.365,
+            0.395,
+            0.363,
+            0.03,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.001,
+            0.577,
+            1,
+            1,
+            1,
+            0.967,
+            0.068,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.097,
+            0.417,
+            0.37,
+            0.396,
+            0.365,
+            0.032,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.002,
+            0.581,
+            1,
+            1,
+            1,
+            0.967,
+            0.073,
+            0
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-hero-1440.png",
+        "motas": "mapa-motas-hero-1440.png",
+        "brillo": "mapa-brillo-hero-1440.png",
+        "oscuridad": "mapa-oscuridad-hero-1440.png",
+        "aaOscura": "mapa-aa-oscura-hero-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-hero-1440.png",
+        "aaClara": "mapa-aa-clara-hero-1440.png",
+        "aa3Clara": "mapa-aa3-clara-hero-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-hero-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-hero-1440.png"
+      }
+    },
+    "quienes-somos": {
+      "tipo": "documento",
+      "top": 900,
+      "alto": 2700,
+      "barrido": {
+        "desde": 0,
+        "hasta": 3600,
+        "paradas": 130,
+        "conSiluetaValida": 65,
+        "aOscuras": 65
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 396,
+            "libreDerechaPx": 284,
+            "algunaVez": 0.3001,
+            "delTiempo": 0.0861
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.3673,
+            "delTiempo": 0.104
+          },
+          "brilloAlgunaVez": 0.0032,
+          "oscuroAlgunaVez": 0
+        },
+        {
+          "pantalla": 2,
+          "logo": {
+            "libreIzquierdaPx": 180,
+            "libreDerechaPx": 712,
+            "algunaVez": 0.3026,
+            "delTiempo": 0.1093
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.4651,
+            "delTiempo": 0.15
+          },
+          "brilloAlgunaVez": 0.725,
+          "oscuroAlgunaVez": 0
+        },
+        {
+          "pantalla": 3,
+          "logo": {
+            "libreIzquierdaPx": 112,
+            "libreDerechaPx": 680,
+            "algunaVez": 0.4249,
+            "delTiempo": 0.1888
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.5217,
+            "delTiempo": 0.2225
+          },
+          "brilloAlgunaVez": 0.9889,
+          "oscuroAlgunaVez": 0
+        }
+      ],
+      "tinta": "oscura",
+      "motasDeAAMedia": 0.005651000000000001,
+      "motasDeAAMaxima": 0.00741,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 6,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.439,
+            1,
+            1,
+            1,
+            0.809,
+            0.195,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0.146,
+            0.773,
+            0.991,
+            0.642,
+            0.206,
+            0.002,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.43,
+            0.98,
+            1,
+            0.648,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.274,
+            0.995,
+            1,
+            1,
+            0.915,
+            0.019,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.768,
+            1,
+            1,
+            1,
+            1,
+            0.144,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.018,
+            0.99,
+            1,
+            1,
+            1,
+            1,
+            0.277,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.048,
+            0.044,
+            0.042,
+            0.041,
+            0.446,
+            1,
+            1,
+            1,
+            0.812,
+            0.252,
+            0.015,
+            0
+          ],
+          [
+            0.251,
+            0.095,
+            0.083,
+            0.22,
+            0.795,
+            1,
+            0.884,
+            0.354,
+            0.07,
+            0.121,
+            0.19,
+            0.05
+          ],
+          [
+            0.808,
+            0.18,
+            0.475,
+            0.981,
+            1,
+            0.864,
+            0.086,
+            0,
+            0,
+            0.023,
+            0.106,
+            0.345
+          ],
+          [
+            0.996,
+            0.878,
+            0.997,
+            1,
+            1,
+            0.928,
+            0.055,
+            0.052,
+            0.066,
+            0.073,
+            0.073,
+            0.178
+          ],
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.157,
+            0,
+            0,
+            0.019,
+            0.032,
+            0.035
+          ],
+          [
+            0.999,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.278,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.039,
+            0.038,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.314,
+            0.359,
+            0.357,
+            0.386,
+            0.858,
+            0.655,
+            0.379,
+            0.403,
+            0.423,
+            0.413,
+            0.435,
+            0.476
+          ],
+          [
+            1,
+            1,
+            1,
+            0.991,
+            0.982,
+            1,
+            1,
+            1,
+            0.999,
+            1,
+            0.997,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            0.979,
+            0.98,
+            0.984,
+            0.986,
+            0.98,
+            0.975,
+            0.977,
+            0.98,
+            0.977,
+            0.961,
+            0.967,
+            0.99
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.004,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.118,
+            0.086,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.012,
+            0.004,
+            0.614,
+            0.385,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.077,
+            0.111,
+            0.179,
+            0.138,
+            0.097,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.049,
+            0,
+            0.155,
+            0.037,
+            0.008,
+            0.001,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.006,
+            0,
+            0.196,
+            0,
+            0.005,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 6,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.506,
+            1,
+            1,
+            1,
+            0.859,
+            0.283,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0.198,
+            0.81,
+            0.991,
+            0.65,
+            0.231,
+            0.006,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.006,
+            0.578,
+            0.995,
+            1,
+            0.636,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.47,
+            1,
+            1,
+            1,
+            0.912,
+            0.019,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.049,
+            0.943,
+            1,
+            1,
+            1,
+            1,
+            0.149,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.249,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.286,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.046,
+            0.042,
+            0.046,
+            0.038,
+            0.511,
+            1,
+            1,
+            1,
+            0.861,
+            0.34,
+            0.02,
+            0
+          ],
+          [
+            0.151,
+            0.096,
+            0.079,
+            0.27,
+            0.828,
+            1,
+            0.891,
+            0.391,
+            0.076,
+            0.124,
+            0.185,
+            0.081
+          ],
+          [
+            0.708,
+            0.077,
+            0.614,
+            0.995,
+            1,
+            0.859,
+            0.089,
+            0,
+            0,
+            0.019,
+            0.085,
+            0.312
+          ],
+          [
+            0.993,
+            0.877,
+            1,
+            1,
+            1,
+            0.925,
+            0.056,
+            0.052,
+            0.064,
+            0.074,
+            0.073,
+            0.074
+          ],
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.162,
+            0,
+            0,
+            0.009,
+            0.036,
+            0.034
+          ],
+          [
+            0.999,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.287,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-quienes-somos-1440.png",
+        "motas": "mapa-motas-quienes-somos-1440.png",
+        "brillo": "mapa-brillo-quienes-somos-1440.png",
+        "oscuridad": "mapa-oscuridad-quienes-somos-1440.png",
+        "aaOscura": "mapa-aa-oscura-quienes-somos-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-quienes-somos-1440.png",
+        "aaClara": "mapa-aa-clara-quienes-somos-1440.png",
+        "aa3Clara": "mapa-aa3-clara-quienes-somos-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-quienes-somos-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-quienes-somos-1440.png"
+      }
+    },
+    "numeros": {
+      "tipo": "documento",
+      "top": 3600,
+      "alto": 3600,
+      "barrido": {
+        "desde": 2700,
+        "hasta": 7200,
+        "paradas": 161,
+        "conSiluetaValida": 80,
+        "aOscuras": 81
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 96,
+            "libreDerechaPx": 672,
+            "algunaVez": 0.4542,
+            "delTiempo": 0.2021
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 668,
+            "algunaVez": 0.5089,
+            "delTiempo": 0.216
+          },
+          "brilloAlgunaVez": 0.0648,
+          "oscuroAlgunaVez": 0
+        },
+        {
+          "pantalla": 2,
+          "logo": {
+            "libreIzquierdaPx": 92,
+            "libreDerechaPx": 640,
+            "algunaVez": 0.4706,
+            "delTiempo": 0.1749
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 640,
+            "algunaVez": 0.4741,
+            "delTiempo": 0.1772
+          },
+          "brilloAlgunaVez": 0,
+          "oscuroAlgunaVez": 0
+        },
+        {
+          "pantalla": 3,
+          "logo": {
+            "libreIzquierdaPx": 160,
+            "libreDerechaPx": 648,
+            "algunaVez": 0.3972,
+            "delTiempo": 0.1156
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 160,
+            "libreDerechaPx": 648,
+            "algunaVez": 0.3976,
+            "delTiempo": 0.1348
+          },
+          "brilloAlgunaVez": 0,
+          "oscuroAlgunaVez": 0
+        },
+        {
+          "pantalla": 4,
+          "logo": {
+            "libreIzquierdaPx": 248,
+            "libreDerechaPx": 664,
+            "algunaVez": 0.352,
+            "delTiempo": 0.0939
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.647,
+            "delTiempo": 0.1591
+          },
+          "brilloAlgunaVez": 0.1781,
+          "oscuroAlgunaVez": 0.0311
+        }
+      ],
+      "tinta": "oscura",
+      "motasDeAAMedia": 0.004806,
+      "motasDeAAMaxima": 0.006492,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 8,
+        "logoAlgunaVez": [
+          [
+            0.083,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.329,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.131,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.359,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.189,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.529,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.033,
+            0.909,
+            1,
+            1,
+            1,
+            1,
+            0.635,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.426,
+            1,
+            1,
+            1,
+            1,
+            0.559,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.072,
+            0.992,
+            1,
+            1,
+            1,
+            0.484,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.845,
+            1,
+            1,
+            1,
+            0.44,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.74,
+            1,
+            1,
+            1,
+            0.422,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.971,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.336,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.547,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.36,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.234,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.531,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.068,
+            0.91,
+            1,
+            1,
+            1,
+            1,
+            0.636,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.429,
+            1,
+            1,
+            1,
+            1,
+            0.561,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.074,
+            0.993,
+            1,
+            1,
+            1,
+            0.484,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.849,
+            1,
+            1,
+            1,
+            0.442,
+            0.002,
+            0.031,
+            0.085,
+            0.093,
+            0.082
+          ],
+          [
+            0.742,
+            0.681,
+            0.918,
+            1,
+            1,
+            1,
+            0.86,
+            0.855,
+            0.931,
+            0.966,
+            0.988,
+            0.984
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0.151,
+            0.122,
+            0.121,
+            0.169,
+            0.135,
+            0.075,
+            0.119,
+            0.124,
+            0.108,
+            0.119,
+            0.132,
+            0.173
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.499,
+            0.373,
+            0.15,
+            0.347,
+            0.296,
+            0.517,
+            0.327,
+            0.228,
+            0.312,
+            0.441,
+            0.426,
+            0.34
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0.03,
+            0,
+            0.004,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0.002,
+            0,
+            0.014,
+            0.002,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.001,
+            0,
+            0,
+            0.008,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.002,
+            0,
+            0,
+            0.002,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.005,
+            0.002,
+            0.008,
+            0.006,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.003,
+            0,
+            0.001,
+            0,
+            0.004,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.001,
+            0,
+            0.001,
+            0.008,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.214,
+            0.19,
+            0.188,
+            0.138,
+            0.07,
+            0.081,
+            0.153,
+            0.224,
+            0.275,
+            0.31,
+            0.314,
+            0.324
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 8,
+        "logoAlgunaVez": [
+          [
+            0.327,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.34,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.377,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.371,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.437,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.547,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.19,
+            0.987,
+            1,
+            1,
+            1,
+            1,
+            0.657,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.626,
+            1,
+            1,
+            1,
+            1,
+            0.579,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.264,
+            1,
+            1,
+            1,
+            1,
+            0.501,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.047,
+            0.989,
+            1,
+            1,
+            1,
+            0.455,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0.906,
+            1,
+            1,
+            1,
+            0.437,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.97,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.347,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.644,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.373,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.47,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0.549,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0.212,
+            0.987,
+            1,
+            1,
+            1,
+            1,
+            0.658,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.629,
+            1,
+            1,
+            1,
+            1,
+            0.58,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.267,
+            1,
+            1,
+            1,
+            1,
+            0.501,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0.05,
+            0.992,
+            1,
+            1,
+            1,
+            0.458,
+            0.001,
+            0.03,
+            0.07,
+            0.1,
+            0.08
+          ],
+          [
+            0.715,
+            0.682,
+            0.971,
+            1,
+            1,
+            1,
+            0.862,
+            0.852,
+            0.915,
+            0.966,
+            0.985,
+            0.987
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-numeros-1440.png",
+        "motas": "mapa-motas-numeros-1440.png",
+        "brillo": "mapa-brillo-numeros-1440.png",
+        "oscuridad": "mapa-oscuridad-numeros-1440.png",
+        "aaOscura": "mapa-aa-oscura-numeros-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-numeros-1440.png",
+        "aaClara": "mapa-aa-clara-numeros-1440.png",
+        "aa3Clara": "mapa-aa3-clara-numeros-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-numeros-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-numeros-1440.png"
+      }
+    },
+    "trabajos": {
+      "tipo": "viewport",
+      "top": 7200,
+      "alto": 2700,
+      "barrido": {
+        "desde": 7200,
+        "hasta": 9000,
+        "paradas": 33,
+        "conSiluetaValida": 0,
+        "aOscuras": 33
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 1440,
+            "libreDerechaPx": 1440,
+            "algunaVez": null,
+            "delTiempo": null
+          },
+          "aaDeSuTinta": {
+            "tinta": "clara",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.0876,
+            "delTiempo": 0.004
+          },
+          "brilloAlgunaVez": 0.5723,
+          "oscuroAlgunaVez": 1
+        }
+      ],
+      "tinta": "clara",
+      "motasDeAAMedia": 0.0052510000000000005,
+      "motasDeAAMaxima": 0.005801,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0,
+            0.014,
+            0.01,
+            0.025,
+            0.008,
+            0.009,
+            0.003,
+            0.023,
+            0,
+            0.011,
+            0,
+            0
+          ],
+          [
+            0.159,
+            0.159,
+            0.16,
+            0.166,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0.651,
+            0.694,
+            0.719,
+            0.706,
+            0.656,
+            0.692,
+            0.697,
+            0.65,
+            0.507,
+            0.381,
+            0.296,
+            0.284
+          ],
+          [
+            0.679,
+            0.674,
+            0.58,
+            0.521,
+            0.536,
+            0.639,
+            0.655,
+            0.622,
+            0.574,
+            0.514,
+            0.422,
+            0.38
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ],
+          [
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0,
+            0.014,
+            0.024,
+            0.02,
+            0.004,
+            0.01,
+            0.003,
+            0.021,
+            0.004,
+            0.006,
+            0.006,
+            0
+          ],
+          [
+            0.159,
+            0.159,
+            0.16,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168,
+            0.168
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-trabajos-1440.png",
+        "motas": "mapa-motas-trabajos-1440.png",
+        "brillo": "mapa-brillo-trabajos-1440.png",
+        "oscuridad": "mapa-oscuridad-trabajos-1440.png",
+        "aaOscura": "mapa-aa-oscura-trabajos-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-trabajos-1440.png",
+        "aaClara": "mapa-aa-clara-trabajos-1440.png",
+        "aa3Clara": "mapa-aa3-clara-trabajos-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-trabajos-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-trabajos-1440.png"
+      }
+    },
+    "por-que-develop": {
+      "tipo": "documento",
+      "top": 14400,
+      "alto": 900,
+      "barrido": {
+        "desde": 13500,
+        "hasta": 15300,
+        "paradas": 66,
+        "conSiluetaValida": 33,
+        "aOscuras": 33
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 540,
+            "libreDerechaPx": 232,
+            "algunaVez": 0.2952,
+            "delTiempo": 0.0709
+          },
+          "aaDeSuTinta": {
+            "tinta": "oscura",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 0.9414,
+            "delTiempo": 0.3929
+          },
+          "brilloAlgunaVez": 0.5986,
+          "oscuroAlgunaVez": 0
+        }
+      ],
+      "tinta": "oscura",
+      "motasDeAAMedia": 0.0028239999999999997,
+      "motasDeAAMaxima": 0.005405999999999999,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.005,
+            0.694,
+            0.876,
+            0.879,
+            0.842,
+            0.423,
+            0.004,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.324,
+            1,
+            1,
+            0.895,
+            0.144,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.855,
+            0.86,
+            0.862,
+            0.859,
+            0.861,
+            0.915,
+            0.947,
+            0.947,
+            0.943,
+            0.94,
+            0.887,
+            0.879
+          ],
+          [
+            0.992,
+            0.949,
+            0.973,
+            0.998,
+            0.999,
+            1,
+            1,
+            1,
+            0.994,
+            0.965,
+            0.976,
+            1
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0.268,
+            0.269,
+            0.272,
+            0.274,
+            0.279,
+            0.271,
+            0.295,
+            0.301,
+            0.293,
+            0.304,
+            0.328,
+            0.34
+          ],
+          [
+            0.872,
+            0.846,
+            0.811,
+            0.872,
+            0.852,
+            0.881,
+            0.888,
+            0.937,
+            0.945,
+            0.975,
+            0.972,
+            0.989
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.258,
+            0.526,
+            0.433,
+            0.019,
+            0.004,
+            0.001,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0.001,
+            0.011,
+            0.142,
+            0.028,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.017,
+            0.714,
+            0.876,
+            0.879,
+            0.864,
+            0.501,
+            0.046,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.391,
+            1,
+            1,
+            0.927,
+            0.204,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            0.853,
+            0.862,
+            0.86,
+            0.859,
+            0.861,
+            0.917,
+            0.947,
+            0.947,
+            0.944,
+            0.94,
+            0.899,
+            0.878
+          ],
+          [
+            0.99,
+            0.94,
+            0.983,
+            0.998,
+            0.999,
+            1,
+            1,
+            1,
+            0.995,
+            0.973,
+            0.964,
+            0.999
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-por-que-develop-1440.png",
+        "motas": "mapa-motas-por-que-develop-1440.png",
+        "brillo": "mapa-brillo-por-que-develop-1440.png",
+        "oscuridad": "mapa-oscuridad-por-que-develop-1440.png",
+        "aaOscura": "mapa-aa-oscura-por-que-develop-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-por-que-develop-1440.png",
+        "aaClara": "mapa-aa-clara-por-que-develop-1440.png",
+        "aa3Clara": "mapa-aa3-clara-por-que-develop-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-por-que-develop-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-por-que-develop-1440.png"
+      }
+    },
+    "cierre": {
+      "tipo": "documento",
+      "top": 15300,
+      "alto": 900,
+      "barrido": {
+        "desde": 14400,
+        "hasta": 15300,
+        "paradas": 34,
+        "conSiluetaValida": 17,
+        "aOscuras": 17
+      },
+      "contenido": {
+        "x": 32,
+        "ancho": 1376
+      },
+      "porPantalla": [
+        {
+          "pantalla": 1,
+          "logo": {
+            "libreIzquierdaPx": 536,
+            "libreDerechaPx": 524,
+            "algunaVez": 0.1536,
+            "delTiempo": 0.0398
+          },
+          "aaDeSuTinta": {
+            "tinta": "clara",
+            "libreIzquierdaPx": 0,
+            "libreDerechaPx": 0,
+            "algunaVez": 1,
+            "delTiempo": 0.9948
+          },
+          "brilloAlgunaVez": 0.8651,
+          "oscuroAlgunaVez": 0
+        }
+      ],
+      "tinta": "clara",
+      "motasDeAAMedia": 0.0038629999999999997,
+      "motasDeAAMaxima": 0.005417999999999999,
+      "reticulaViewport": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.53,
+            1,
+            1,
+            0.548,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.081,
+            0.195,
+            0.263,
+            0.08,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        ],
+        "brilloAlgunaVez": [
+          [
+            0.945,
+            0.94,
+            0.899,
+            0.905,
+            0.94,
+            0.958,
+            0.968,
+            0.999,
+            0.999,
+            0.993,
+            0.997,
+            0.999
+          ],
+          [
+            0.566,
+            0.668,
+            0.758,
+            0.866,
+            0.858,
+            0.631,
+            0.832,
+            0.906,
+            0.884,
+            0.689,
+            0.856,
+            0.711
+          ]
+        ],
+        "motasAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.004,
+            0.001,
+            0.003,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      },
+      "reticulaContenido": {
+        "columnas": 12,
+        "filas": 2,
+        "logoAlgunaVez": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0.597,
+            1,
+            1,
+            0.615,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0.095,
+            0.195,
+            0.265,
+            0.094,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "aaDeSuTintaAlgunaVez": [
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+          ]
+        ]
+      },
+      "mapas": {
+        "logo": "mapa-logo-cierre-1440.png",
+        "motas": "mapa-motas-cierre-1440.png",
+        "brillo": "mapa-brillo-cierre-1440.png",
+        "oscuridad": "mapa-oscuridad-cierre-1440.png",
+        "aaOscura": "mapa-aa-oscura-cierre-1440.png",
+        "aa3Oscura": "mapa-aa3-oscura-cierre-1440.png",
+        "aaClara": "mapa-aa-clara-cierre-1440.png",
+        "aa3Clara": "mapa-aa3-clara-cierre-1440.png",
+        "aaMotasOscura": "mapa-aa-motas-oscura-cierre-1440.png",
+        "aaMotasClara": "mapa-aa-motas-clara-cierre-1440.png"
+      }
+    }
+  }
+}

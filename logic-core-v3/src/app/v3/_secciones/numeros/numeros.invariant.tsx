@@ -1,34 +1,17 @@
 /**
  * INVARIANTE — 03 · Números.
  *
- * Corre con `npx tsx src/app/v3/_secciones/numeros/numeros.invariant.tsx`.
- *
- * La sección se renderiza DE VERDAD tres veces en el mismo proceso: en su rama
- * quieta (`modo="nunca"` — lo que pasa abajo de 1025 y con
- * `prefers-reduced-motion`), con la coreografía forzada, y con la preferencia
- * mandando sobre el modo forzado. Todo se afirma sobre el MARCADO.
- *
- * ── Por qué la mitad interesante es geométrica ─────────────────────────────
- *
- * El requisito central —*"dispersos en posiciones asimétricas y tamaños
- * distintos; una barra de cuatro columnas pierde el efecto entero"*— es una
- * propiedad de la FORMA, y una forma se puede afirmar. Por eso las celdas no se
- * leen de `GEOMETRIA`: se **parsean de las clases renderizadas**, y sobre esos
- * números se comprueba que no hay barra de columnas iguales, que ninguna se
- * sale de las doce y que ninguna se superpone. Leer la constante en vez del
- * marcado quedaría verde el día que una clase armada por interpolación dejara
- * de emitirse — el modo de falla que `GEOMETRIA` documenta.
- *
- * ⚠ **B2 le agrega una coordenada a esa forma: la PANTALLA.** La sección se
- * compone en cuatro cajas de pantalla y las filas son locales a su caja, así
- * que una celda sin su pantalla ya no ubica nada. El censo corta por
- * `data-pantalla` y afirma que **ninguna cifra comparte renglón con otra** —más
- * fuerte que las tres filas distintas que se pedían cuando las cinco vivían en
- * una sola pantalla—.
- *
- * ⚠ Acá no hay P1, así que no hay fase de medición que esperar: los seis bloques
- * son P2 y escriben transformada en el primer cuadro — ése es el control
- * positivo de "abajo de 1025 no se mueve nada". */
+ * Corre con `npx tsx src/app/v3/_secciones/numeros/numeros.invariant.tsx`. La
+ * sección se renderiza DE VERDAD tres veces: quieta (`modo="nunca"`, abajo de
+ * 1025 y con `prefers-reduced-motion`), con la coreografía forzada, y con la
+ * preferencia mandando sobre el modo forzado. Todo se afirma sobre el MARCADO, y
+ * la mitad interesante es geométrica: la dispersión es una propiedad de la FORMA,
+ * así que las celdas se **parsean de las clases renderizadas** —no de `GEOMETRIA`,
+ * que quedaría verde si una clase interpolada dejara de emitirse— y sobre esos
+ * números se comprueba que no hay barra, que nada desborda y nada se pisa. B2 le
+ * agregó la PANTALLA (las filas son locales a su caja) y afirma que ninguna cifra
+ * comparte renglón. Sin P1: los seis bloques son P2 y escriben transformada en el
+ * primer cuadro — el control positivo de "abajo de 1025 no se mueve nada". */
 
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
@@ -46,6 +29,7 @@ import {
 } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { claseDe, etiquetasDeAperturaCon } from '../_invariantes/marcado'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, type ClaveDeCifra } from './contenido'
@@ -59,17 +43,9 @@ const seccionMontada = <Numeros seccion={seccion} />
 const quieto = marcar(seccionMontada, { anima: false })
 /** El control positivo: la coreografía forzada, sin la preferencia. */
 const conMotion = marcar(seccionMontada, { anima: true })
-/**
- * ⚠ QUÉ SIGNIFICA `conPreferencia` DESPUÉS DE SITIO-S7. Antes la sección
- * consultaba la compuerta por su cuenta y la política de movimiento reducido la
- * apagaba desde adentro. Ahora la compuerta se resuelve UNA vez arriba de las
- * ocho y **la preferencia se lee ahí**: con `prefers-reduced-motion` puesto,
- * `CompuertaDelHome` no instala una sola primitiva animada, o sea que esa
- * persona recibe **el árbol quieto** — que es lo que este render reproduce. La
- * política no cambió de fuerza: cambió de lugar, y se aplica antes de que
- * exista un árbol animado que apagar. La tabla de verdad es `deberiaAnimar`,
- * pura y afirmada abajo, sin montar React ni depender de esta sección.
- */
+/** ⚠ Desde SITIO-S7 la compuerta se resuelve UNA vez arriba de las ocho y la preferencia
+ *  se lee ahí: con `prefers-reduced-motion`, `CompuertaDelHome` no instala una primitiva
+ *  animada y esa persona recibe **el árbol quieto** (`deberiaAnimar`, pura y afirmada aparte). */
 const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'always' })
 
 const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
@@ -78,14 +54,8 @@ const TEXTOS = textosDe(CONTENIDO)
 const ROTULOS = CONTENIDO.cifras.map((c) => c.rotulo)
 const FUENTE = readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), 'Numeros.tsx'), 'utf8')
 
-/** Una celda de la composición, leída del marcado y no de la constante. */
-interface CeldaLeida {
-  /** La caja de pantalla en la que cae. B2: la fila es local a su caja. */
-  readonly pantalla: string
-  readonly col: number
-  readonly ancho: number
-  readonly fila: number
-}
+/** Una celda de la composición, leída del marcado y no de la constante; `pantalla` es la caja en la que cae (B2: la fila es local a su caja). */
+interface CeldaLeida { readonly pantalla: string; readonly col: number; readonly ancho: number; readonly fila: number }
 
 function celdaDe(clases: string, pantalla: string): CeldaLeida {
   const n = (re: RegExp): number => {
@@ -96,16 +66,35 @@ function celdaDe(clases: string, pantalla: string): CeldaLeida {
   return { pantalla, col: n(/tablet:col-start-(\d+)/), ancho: n(/tablet:col-span-(\d+)/), fila: n(/tablet:row-start-(\d+)/) }
 }
 
-/** Los ítems posicionados, POR PANTALLA y en orden de documento: la cabecera y
- *  las cinco cifras. Sin el corte por `data-pantalla` la fila no ubica nada. */
+/** La pieza que `EtiquetaDeSeccion` emite en el marcado: distingue al rótulo de una celda. */
+const MARCA_DEL_ROTULO = 'data-pieza="etiqueta-de-seccion"'
+const posicionados = (t: string): string[] => etiquetasDeAperturaCon(t, 'tablet:col-start-')
+
+/**
+ * Los ítems posicionados, POR PANTALLA y en orden de documento: la cabecera y
+ * las cinco cifras. ⚠ **B11 · EL CONTADOR TENÍA UN DEFECTO Y SE ARREGLA, NO SE
+ * AFLOJA:** levantaba toda clase con `tablet:col-start-`, y por eso el rótulo iba
+ * sin `col-start` (posicionado, era una sexta cifra). Ahora salta el rótulo POR
+ * SU PIEZA, no por su clase; el control positivo prueba que sólo la marca lo salva.
+ */
 const celdasDe = (html: string): CeldaLeida[] =>
   html.split('data-pantalla="').slice(1).flatMap((t) => {
     const pantalla = t.slice(0, t.indexOf('"'))
-    return [...t.matchAll(/class="([^"]*tablet:col-start-\d+[^"]*)"/g)].map((m) => celdaDe(m[1], pantalla))
+    return posicionados(t)
+      .filter((tag) => !tag.includes(MARCA_DEL_ROTULO))
+      .map((tag) => celdaDe(claseDe(tag), pantalla))
   })
 
-/** Dos celdas de la MISMA pantalla y fila cuyas columnas se pisan. Pantallas
- *  distintas nunca se pisan: son cajas distintas del flujo. */
+/** La columna de arranque del rótulo de sección, leída del marcado; `null` si no está posicionado. */
+const rotuloDe = (html: string): { readonly pantalla: string; readonly col: number } | null => {
+  for (const t of html.split('data-pantalla="').slice(1)) {
+    const tag = posicionados(t).find((x) => x.includes(MARCA_DEL_ROTULO))
+    if (tag !== undefined) return { pantalla: t.slice(0, t.indexOf('"')), col: Number.parseInt(/tablet:col-start-(\d+)/.exec(claseDe(tag))?.[1] ?? '0', 10) }
+  }
+  return null
+}
+
+/** Dos celdas de la MISMA pantalla y fila cuyas columnas se pisan; pantallas distintas nunca (son cajas distintas del flujo). */
 const seSuperponen = (c: readonly CeldaLeida[]): boolean =>
   c.some((a, i) => c.some((b, j) => i !== j && a.pantalla === b.pantalla && a.fila === b.fila && a.col < b.col + b.ancho && b.col < a.col + a.ancho))
 
@@ -131,10 +120,8 @@ afirmarIgual(seccion.superficie, 'papel-transparente', 'la superficie es papel-t
 afirmarIgual(pantallasDe(seccion), 4, 'ocupa CUATRO pantallas — B2 la subió de una, ver el docblock de su fila en `secciones.ts`')
 afirmarIgual(seccion.pinneada, undefined, 'y NO es pinneada: la pantalla scrollea')
 afirmarIgual(veces(quieto, 'data-pinneado="sticky"'), 0, '  no hay un solo hijo sticky en el marcado')
-/** ⚠ **B2 · ERA `1` Y AHORA SON CUATRO, atadas a la tabla.** La Fase 0 subió la
- *  sección a 400svh y la composición seguía siendo UNA caja: `s10-mobile` §2 lo
- *  publicaba en rojo y el censo medía CERO grupos adentro de `[4320, 8640]`,
- *  porque los seis bloques aterrizaban entre 3720 y 4320, fuera de la sección. */
+/** ⚠ B2 · ERA `1` Y AHORA SON CUATRO, atadas a la tabla: la Fase 0 subió la sección a
+ *  400svh con UNA caja, `s10-mobile` §2 en rojo y CERO grupos del censo en `[4320, 8640]`. */
 afirmarIgual(veces(quieto, 'min-h-svh'), pantallasDe(seccion), 'y CUATRO cajas de pantalla, una por pantalla declarada: la composición se reparte sobre las cuatro')
 afirmarIgual(veces(quieto, 'data-pantalla='), pantallasDe(seccion), '  y las cuatro se declaran en el marcado — la cuenta sale de la tabla, no de un número escrito acá')
 afirmarIgual(GEOMETRIA.pantallas.length, pantallasDe(seccion), '  y la tabla de la composición declara las mismas cuatro')
@@ -191,11 +178,9 @@ afirmarIgual(CIFRAS.length, 5, '  y cinco de ellos son cifras: la cuenta no es v
 afirmarIgual(CIFRAS, CONTENIDO.cifras.map((c) => celdaDe(GEOMETRIA.celdas[c.clave].celda, pantallaDe(c.clave))), '  y son las que declara GEOMETRIA, en la pantalla que le toca a cada una y en el orden de lectura')
 afirmar(distintos(CIFRAS.map((c) => c.col)) >= 4, 'al menos cuatro columnas de arranque distintas', CIFRAS.map((c) => c.col).join(' · '))
 afirmar(distintos(CIFRAS.map((c) => c.ancho)) >= 3, 'al menos tres anchos distintos: no son iguales', CIFRAS.map((c) => c.ancho).join(' · '))
-/** ⚠ **B2 · REEMPLAZA A «al menos tres filas distintas», y es más exigente.**
- *  Aquélla toleraba que dos cifras compartieran renglón, y las dos que lo
- *  compartían se separaban con 80 px de desplome —menos de un paso del censo,
- *  así que aterrizaban juntas—. Ahora las CINCO tienen renglón propio en
- *  pantalla propia: cinco pares `(pantalla, fila)` distintos. */
+/** ⚠ **B2 · REEMPLAZA A «al menos tres filas distintas», y es más exigente:** aquélla
+ *  toleraba dos cifras en un renglón separadas por 80 px de desplome (menos de un paso
+ *  del censo: aterrizaban juntas). Ahora: cinco pares `(pantalla, fila)` distintos. */
 afirmar(distintos(CIFRAS.map((c) => `${c.pantalla}·${c.fila}`)) === 5, 'ninguna cifra comparte renglón con otra: cada una tiene su fila en su pantalla', CIFRAS.map((c) => `${c.pantalla}·${c.fila}`).join(' · '))
 afirmar(distintos(CIFRAS.map((c) => c.pantalla)) === 3, '  y se reparten en TRES pantallas: la cuarta es la de la cabecera', CIFRAS.map((c) => c.pantalla).join(' · '))
 controlPositivo('ve cinco celdas idénticas', Array.from({ length: 5 }, () => ({ pantalla: 'volumen', col: 1, ancho: 3, fila: 1 })), (c: readonly CeldaLeida[]) => distintos(c.map((x) => x.col)) >= 4 && distintos(c.map((x) => x.ancho)) >= 3)
@@ -203,6 +188,22 @@ controlPositivo('ve dos cifras compartiendo renglón en la misma pantalla', [{ p
 const desborda = (c: readonly CeldaLeida[]): number => c.filter((x) => x.col + x.ancho - 1 > GEOMETRIA.columnas).length
 afirmarIgual(desborda(CELDAS), 0, 'ninguna celda se sale de las doce columnas: nada desborda al angostar')
 afirmar(!seSuperponen(CELDAS), 'ninguna celda se superpone con otra: nada tapa a nada')
+
+/** ⚠ B11 · La composición entera vive desde la primera columna que el logo deja libre a lo largo
+ *  del tramo (`GEOMETRIA.primeraColumnaLibre`, medido con `scripts-b11/h-columnas.ts`), rótulo incluido. */
+const ROTULO = rotuloDe(quieto)
+afirmar(ROTULO !== null && ROTULO.pantalla === GEOMETRIA.pantallas[0].id, 'el rótulo de sección está posicionado, en la pantalla de la cabecera (B11)', ROTULO === null ? 'sin rótulo posicionado' : `${ROTULO.pantalla} · columna ${ROTULO.col}`)
+afirmarIgual(ROTULO?.col, CELDAS[0].col, '  y arranca en la misma columna que la cabecera: la composición tiene UN borde izquierdo')
+afirmar(
+  CELDAS.every((c) => c.col >= GEOMETRIA.primeraColumnaLibre) && (ROTULO?.col ?? 0) >= GEOMETRIA.primeraColumnaLibre,
+  `ninguna pieza arranca antes de la primera columna libre (${GEOMETRIA.primeraColumnaLibre}): el logo tapa las columnas 1–5 en las cuatro pantallas y en los tres anchos (B11)`,
+  `arranques ${[ROTULO?.col ?? 0, ...CELDAS.map((c) => c.col)].join(' · ')}`,
+)
+const FIXTURA_DE_ROTULO = (conPieza: boolean): string =>
+  `<div data-pantalla="entrada"><p ${conPieza ? `${MARCA_DEL_ROTULO} ` : ''}class="tablet:col-start-7 tablet:col-span-1 tablet:row-start-1">N</p><div class="tablet:col-start-7 tablet:col-span-6 tablet:row-start-2">c</div></div>`
+afirmarIgual(celdasDe(FIXTURA_DE_ROTULO(true)).length, 1, 'el contador salta el rótulo posicionado POR SU PIEZA y cuenta la celda que queda')
+controlPositivo('  y la misma clase SIN la pieza sigue contando: lo que lo salva es la marca, no la clase', FIXTURA_DE_ROTULO(false), (h: string) => celdasDe(h).length === 1)
+controlPositivo('ve una pieza que arranca antes de la primera columna libre', [{ pantalla: 'volumen', col: 1, ancho: 5, fila: 1 }], (c: readonly CeldaLeida[]) => c.every((x) => x.col >= GEOMETRIA.primeraColumnaLibre))
 controlPositivo('ve dos celdas pisadas', [{ pantalla: 'volumen', col: 1, ancho: 6, fila: 1 }, { pantalla: 'volumen', col: 4, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => !seSuperponen(c))
 controlPositivo('  y NO las ve en pantallas distintas: son cajas distintas del flujo', [{ pantalla: 'volumen', col: 1, ancho: 6, fila: 1 }, { pantalla: 'tiempo', col: 4, ancho: 4, fila: 1 }], (c: readonly CeldaLeida[]) => seSuperponen(c))
 
@@ -235,9 +236,8 @@ afirmar(!quieto.includes('will-change'), '  ni promueve una capa de composición
 afirmar(!conPreferencia.includes('transform:'), 'y con `prefers-reduced-motion` tampoco: la compuerta no instala nada')
 controlPositivo('ve un style con transform', '<div style="transform:translateY(10%)"></div>', (h: string) => !h.includes('transform:'))
 
-/** Abajo de 768 la composición se apila: TODO desplazamiento vive en `tablet:`.
- *  Un `col-start` sin prefijo posicionaría en un viewport de 375, donde la
- *  grilla tiene UNA columna, y la cifra caería fuera de lugar en silencio. */
+/** Abajo de 768 la composición se apila: TODO desplazamiento vive en `tablet:`. Un
+ *  `col-start` sin prefijo posicionaría en 375, donde la grilla tiene UNA columna. */
 const SIN_PREFIJO = /(?<!tablet:)\b(col-start|col-span|row-start|mt)-\d+/
 afirmar(!SIN_PREFIJO.test(quieto), 'ningún desplazamiento se aplica abajo de 768: todos son `tablet:`')
 afirmar(quieto.includes('grid-cols-1'), '  y abajo de 768 la composición cae a UNA columna')
@@ -266,10 +266,8 @@ afirmar(!/-\[\d+(px|rem)\]/.test(quieto), 'cero px o rem suelto en un valor arbi
 controlPositivo('el chequeo del hex ve un hex', '<i style="color:#ff0000">', (h: string) => !/#[0-9a-fA-F]{3,8}\b/.test(h))
 controlPositivo('el chequeo del px suelto ve un mt-[7px]', '<i class="mt-[7px]">', (h: string) => !/-\[\d+(px|rem)\]/.test(h))
 
-/** Esta sección no tiene un solo elemento interactivo, y es una decisión: el CTA
- *  del recorrido vive en el Hero y en el Cierre. La afirmación se hace igual
- *  porque lo que comprueba no es que haya cero controles, sino que si apareciera
- *  uno sería nativo y focalizable. */
+/** Sin elementos interactivos, y es una decisión (el CTA vive en el Hero y en el
+ *  Cierre): lo que se comprueba es que si apareciera uno sería nativo y focalizable. */
 const hovers = veces(quieto, 'hover:')
 afirmarIgual(hovers, veces(quieto, 'focus-visible:'), 'toda `hover:` tiene su gemela `focus-visible:`')
 afirmarIgual(hovers, 0, '  y acá son cero: no hay nada interactivo')
@@ -278,11 +276,9 @@ afirmarIgual(veces(quieto, '<a '), 0, 'cero enlaces')
 afirmarIgual(veces(FUENTE, 'onClick'), 0, 'cero `onClick` en la fuente: ningún div haciendo de botón')
 controlPositivo('ve un div clickeable', '<div onClick={ir}>ir</div>', (s: string) => veces(s, 'onClick') === 0)
 afirmarIgual(veces(FUENTE, 'motion/_componentes'), 0, 'la única puerta a las piezas es `_contrato/piezas`')
-/** ⚠ La entrada equivocada es el ESPECIFICADOR solo, sin la palabra `from`
- *  delante. Escrito como un import completo, el escáner de imports de
- *  `s5-codigo.invariant.ts` lo levantaría de ESTE archivo y reportaría que el
- *  invariante importa de `motion/_componentes` — un falso positivo en un
- *  instrumento transversal, causado por el control positivo de otro. */
+/** ⚠ La entrada equivocada es el ESPECIFICADOR solo, sin `from`: escrito como import
+ *  completo, el escáner de `s5-codigo.invariant.ts` lo levantaría de ESTE archivo y
+ *  reportaría un falso positivo en un instrumento transversal. */
 controlPositivo('ve un especificador a motion/_componentes', '../../motion/_componentes/Pieza', (s: string) =>
   veces(s, 'motion/_componentes') === 0,
 )

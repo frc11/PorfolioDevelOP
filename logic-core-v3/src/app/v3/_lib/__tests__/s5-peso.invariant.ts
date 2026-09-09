@@ -45,6 +45,7 @@ import {
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
+  MONTAJE_DE_B11_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
@@ -123,11 +124,13 @@ console.log(
     ` + ${MONTAJE_DE_B6A_KIB} que B6-A monta (la cuarta superficie: 225 B medidos entre dos builds)` +
     ` + ${MONTAJE_DE_B8_KIB} que B8 monta (el arco con la noche, el contraluz atado y el brillo de las partículas)` +
     ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
+    ` + ${MONTAJE_DE_B11_KIB} que B11 monta (el texto corrido de donde pasa el logo y dos tintas a plena: 25 B netos medidos A/B entre dos builds del mismo árbol, atribuidos byte a byte)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
 console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
 console.log('    ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un árbol SIN B9. El candidato —el producto que B9 tocó fuera de los 13 literales del rango— está escrito con su número en `s5-presupuesto-recibos-del-merge.ts`, sin apropiárselo.')
-console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los dos archivos de recibos: por eso cada una es revocable por separado.')
+console.log('    B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: declaró su montaje con su A/B, su reparto byte a byte y su alternativa escrita (`s5-presupuesto-recibos-de-b11.ts`). El 60 no se movió.')
+console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los tres archivos de recibos: por eso cada una es revocable por separado.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
   `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
@@ -138,7 +141,7 @@ afirmar(
 afirmar(
   escritoPorElLane / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
   `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB.toFixed(2)} KiB de líneas con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
-  `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y devolver lo declarado tiene que devolverla a 59,94`,
+  `${((escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024) / 1024).toFixed(3)} KiB — es la cifra que la afirmación mira: lo escrito menos las líneas con nombre, y tiene que quedar abajo de ${PRESUPUESTO_DEL_LANE_KIB}`,
 )
 
 controlPositivo(

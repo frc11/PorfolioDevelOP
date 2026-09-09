@@ -1,28 +1,32 @@
 /**
- * EL PRESUPUESTO DE PESO DE `/v3` — LAS SIETE LÍNEAS, UNA POR DUEÑO.
+ * EL PRESUPUESTO DE PESO DE `/v3` — LAS OCHO LÍNEAS, UNA POR DUEÑO.
  *
  * Acá viven **los números**; en `s5-peso.invariant.ts`, **la medición que los
  * compara contra el build**. Cada constante lleva un docblock corto —qué es,
  * cuánto, quién lo decidió— y **un puntero a su recibo completo**, que es donde
  * está la medición, lo que se achicó antes de subirla, la alternativa descartada
  * y el reparto por dueño. Los recibos viven en `s5-presupuesto-recibos.ts` (el
- * techo, B4-A, B7 y B6-A) y en `s5-presupuesto-recibos-del-merge.ts` (B9, B8 y
- * el heredado); se mudaron ahí en B10, cuando este archivo llegó a 356 líneas al
- * resolverse a mano el merge de las cuatro ramas. **Se mudó el texto: las
- * constantes y sus valores no se tocaron.**
+ * techo, B4-A, B7 y B6-A), en `s5-presupuesto-recibos-del-merge.ts` (B9, B8 y
+ * el heredado) y en `s5-presupuesto-recibos-de-b11.ts` (B11); se mudaron ahí en
+ * B10, cuando este archivo llegó a 356 líneas al resolverse a mano el merge de
+ * las cuatro ramas. **Se mudó el texto: las constantes y sus valores no se
+ * tocaron.**
  *
  * ⚠️ **Un presupuesto que se sube cada vez que se pasa no es un presupuesto.**
  * Cada aumento es **una línea con nombre y con su dueño**, y el techo original
  * de 60 KiB sigue vivo restándolas todas: un byte que crezca sin declararse no
  * tiene línea que lo cubra y pone la comprobación en rojo igual.
  *
- * ⚠️⚠️ **EL MARGEN DE HOY SON 2,9 BYTES** —62,367 escritos contra 62,37 de
- * techo, medido por B10—, **el más fino de la historia de este presupuesto: el
- * próximo byte lo rompe.** Es lo que tiene que pasar. Si estás acá porque
- * agregaste una línea de producto y `s5-peso` se puso en rojo, las dos salidas
- * son **declarar tu montaje** (con su A/B, lo que achicaste antes y la
- * alternativa escrita) o **re-medir el heredado** sobre tu árbol. **Subir el
- * techo de 60 no es una salida.** Está desarrollado en
+ * ⚠️⚠️ **EL MARGEN ERA DE 2,9 BYTES, Y B11 FUE EL SPRINT QUE CHOCÓ CON ÉL:**
+ * movió tres piezas de texto de donde pasa el logo, subió dos tintas a plena y
+ * el lane creció 25 B netos. Hizo lo que estas líneas piden —declaró su montaje
+ * con su A/B sobre el mismo árbol, su reparto byte a byte y su alternativa
+ * escrita (`s5-presupuesto-recibos-de-b11.ts`)— y **el techo de 60 no se
+ * movió.** El margen de hoy son **8,6 B** —63.889 escritos contra 62,40 de
+ * techo—, fino a propósito. Si estás acá porque agregaste una línea de producto y `s5-peso` se
+ * puso en rojo, las dos salidas son **declarar tu montaje** (con su A/B, lo que
+ * achicaste antes y la alternativa escrita) o **re-medir el heredado** sobre tu
+ * árbol. **Subir el techo de 60 no es una salida.** Está desarrollado en
  * `s5-presupuesto-recibos-del-merge.ts`.
  */
 
@@ -90,11 +94,30 @@ export const MONTAJE_DE_B9_KIB = 0.31
 export const MONTAJE_DE_B8_KIB = -0.09
 
 /**
+ * **+0,03 KiB** — lo que B11 monta: el texto corrido de donde pasa el logo, con
+ * dos tintas de Quiénes somos subidas a plena. 25 B netos medidos A/B entre dos
+ * builds del MISMO árbol y el mismo entorno —`.next-b11` antes de tocar producto
+ * (63.864 B escritos, los mismos que midió B10) y `.next` después (63.889)— con
+ * la única variable que cambia, y atribuidos byte a byte sobre el chunk
+ * minificado: +27 la caja de la foto, +34 su epígrafe alineado a la derecha, +2
+ * las celdas de Números, 0 el renglón de Trabajos, −38 las dos clases
+ * `opacity-casi` que se fueron. Declarados 0,03 con la convención de B8 y B10
+ * (al centésimo de arriba). **Lo decidió el humano en las dos paradas de B11**,
+ * con la alternativa escrita: no mover la foto ni su epígrafe (−61 B, y el
+ * marcador de la foto se queda el 100 % bajo el logo en los tres anchos).
+ *
+ * Recibo completo, con las formas más baratas medidas y con por qué el primer
+ * build de B11 dio 63 B: `s5-presupuesto-recibos-de-b11.ts`.
+ */
+export const MONTAJE_DE_B11_KIB = 0.03
+
+/**
  * **+0,10 KiB** — lo que queda SIN DUEÑO después de restarle a lo escrito las
  * seis líneas de arriba. No es un montaje: es el residuo, y por eso **se publica
  * con atribución y no se afirma** (regla 13). **Medido por B10 sobre ESTE árbol,
  * el de las cuatro ramas mergeadas**: 63.864 B escritos − 62,27 KiB de líneas
- * con nombre = 99,5 B.
+ * con nombre = 99,5 B. B11 no lo re-midió y no hacía falta: el «antes» de su
+ * A/B es exactamente el árbol que B10 midió, con los mismos 63.864 B.
  *
  * ⚠️ Va por su cuarta medición —0,15 en el worktree de B7, 1,35 en el de B6-A,
  * 0,07 en el árbol mergeado sin B9 que midió B8—, y **las tres primeras se
@@ -112,12 +135,12 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  *
- * ⚠️ Son **los cinco montajes más el heredado**, sin repetir ni faltar; la sexta
+ * ⚠️ Son **los seis montajes más el heredado**, sin repetir ni faltar; la octava
  * línea con nombre es el techo de 60, y se la suma `PRESUPUESTO_PROPIO_KIB`.
  * El merge de las cuatro ramas dejó este sumatorio con la forma que traía B8
  * —que se escribió cuando B9 todavía no estaba en el árbol— y **`MONTAJE_DE_B9_KIB`
  * quedó afuera**: la constante existía, con su valor de origen, y no se sumaba.
- * B10 la volvió a poner.
+ * B10 la volvió a poner. B11 agregó la suya en el mismo acto en que la declaró.
  */
 export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B4A_KIB +
@@ -125,5 +148,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B6A_KIB +
   MONTAJE_DE_B9_KIB +
   MONTAJE_DE_B8_KIB +
+  MONTAJE_DE_B11_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

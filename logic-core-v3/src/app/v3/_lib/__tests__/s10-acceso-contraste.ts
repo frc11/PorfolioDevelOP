@@ -25,10 +25,22 @@
  * deuda (`deudas-b8.ts`), corre con la condición intacta como `deudaDeclarada`
  * y el agregado la publica aparte. Una fila bajo AA SIN deuda es rojo; una fila
  * con deuda que ya pasa AA también, para que la lista no se quede vieja.
+ *
+ * ── ⚠️ B11: EL LOGO YA NO ESTÁ DETRÁS DE NINGUNA FILA, y las deudas cambian de dueño ─
+ *
+ * B11 movió el texto de donde pasa el logo y re-derivó las filas en tres anchos
+ * y a lo largo del tramo entero (`s10-acceso-escena.ts`). Lo que sigue abajo de
+ * AA ya no es el logo —0 % del tramo en las cuatro secciones que lo tenían— sino
+ * el piso de motas, la pared del diferencial y el atardecer sobre la última
+ * cifra: cada fila apunta a la deuda que la explica, en UN registro que junta
+ * las seis de B8 con las de B11 (`DEUDAS_DECLARADAS`, `deudas-b11.ts`). **La
+ * condición no cambió**: `f.razon >= AA`, intacta, y el día que la escena baje
+ * el piso las filas pasan a verde solas y el guardia de abajo pide sacarles la
+ * deuda.
  */
 
 import { afirmar, afirmarIgual, deudaDeclarada, titulo } from './afirmar'
-import { DEUDAS_DE_B8 } from './deudas-b8'
+import { DEUDAS_DECLARADAS } from './deudas-b11'
 import { AA, ALFA_CASI, COLOR, cajasDeColor, componer, loRedefineLaInvertida, razon, superficiesDelDocumento, type CajaDeColor } from './s10-acceso-color'
 import { CONTRASTE_CONTRA_LA_ESCENA } from './s10-acceso-escena'
 import { anillosFlojos, imprimirAnillos, imprimirContraste, type CaidaDelAnillo } from './s10-acceso-tablas'
@@ -39,7 +51,7 @@ const etiquetaDe = (f: (typeof CONTRASTE_CONTRA_LA_ESCENA)[number]): string =>
 
 function imprimirLasCitas(): void {
   for (const c of CONTRASTE_CONTRA_LA_ESCENA) {
-    console.log(`     ${etiquetaDe(c)}: ${c.razon.toFixed(2)}:1${c.deuda === undefined ? '' : ` — deuda ${DEUDAS_DE_B8[c.deuda].numero}`} — ${c.instrumento}`)
+    console.log(`     ${etiquetaDe(c)}: ${c.razon.toFixed(2)}:1${c.deuda === undefined ? '' : ` — deuda ${DEUDAS_DECLARADAS[c.deuda].numero}`} — ${c.instrumento}`)
   }
 }
 
@@ -128,8 +140,8 @@ export function afirmarElContraste(QUIETA: string): void {
       deudaDeclarada(
         f.razon >= AA,
         `${etiquetaDe(f)}: la cita pasa AA`,
-        `${DEUDAS_DE_B8[f.deuda].numero}: ${f.razon.toFixed(2)}:1 — ${f.instrumento}`,
-        DEUDAS_DE_B8[f.deuda].cierre,
+        `${DEUDAS_DECLARADAS[f.deuda].numero}: ${f.razon.toFixed(2)}:1 — ${f.instrumento}`,
+        DEUDAS_DECLARADAS[f.deuda].cierre,
       )
     }
   }

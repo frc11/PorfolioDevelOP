@@ -159,3 +159,17 @@ export function hayAnidamiento(html: string, atributo: string): boolean {
   return false
 }
 
+/**
+ * Las etiquetas de apertura ENTERAS que contienen una aguja —una clase, un
+ * atributo—, en orden de documento. B11: `numeros.invariant` necesita leer los
+ * OTROS atributos de una etiqueta posicionada (su `data-pieza`) y no sólo su
+ * clase, para distinguir el rótulo de sección de una celda de la composición.
+ */
+export function etiquetasDeAperturaCon(html: string, aguja: string): string[] {
+  return [...html.matchAll(/<[a-z][a-z0-9-]*\b[^>]*>/g)].map((m) => m[0]).filter((tag) => tag.includes(aguja))
+}
+
+/** El valor del `class` de una etiqueta de apertura, o vacío si no tiene. */
+export function claseDe(tag: string): string {
+  return /class="([^"]*)"/.exec(tag)?.[1] ?? ''
+}

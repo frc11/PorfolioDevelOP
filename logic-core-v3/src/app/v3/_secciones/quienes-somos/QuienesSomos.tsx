@@ -18,51 +18,57 @@ import { CONTENIDO } from './contenido'
 /**
  * 02 · QUIÉNES SOMOS — TRES pantallas de papel, sin canvas y sin pinneo.
  *
- * `secciones.ts` le da `papel-opaco` y **300svh**, sin `pinneada`, y ninguna de
- * las tres se declara acá. Es el tramo más largo del sitio en el que el canvas
- * NO se ve: la escena vale porque desaparece un rato largo.
+ * `secciones.ts` le da la superficie —`papel-transparente` desde B8— y **300svh**,
+ * sin `pinneada`, y ninguna de las tres se declara acá.
  *
  * ── B2 · POR QUÉ SON TRES, Y POR QUÉ EL CORTE CAE DONDE CAE ───────────────
  *
  * La Fase 0 subió la tabla de 200 a 300svh por dos números medidos —el techo de
  * velocidad de la cámara y la densidad de la referencia (cinco piezas a 0,67
- * pantallas = 3,35)—. **La composición se quedó en DOS, así que la tercera
- * pantalla quedó vacía**: a 1920×1080 el panel iba de `y` 1080 a 4320 y el flujo
- * terminaba en 3240: 1080 px de nada, y `s10-mobile` §2 en rojo.
- *
- * El corte sale de las CINCO piezas que enumera la fila de `secciones.ts`:
+ * pantallas = 3,35)—. **La composición se quedó en DOS y la tercera pantalla
+ * quedó vacía**: a 1920×1080 el panel iba de `y` 1080 a 4320 y el flujo terminaba
+ * en 3240 (1080 px de nada, `s10-mobile` §2 en rojo). El corte sale de las CINCO
+ * piezas que enumera la fila de `secciones.ts`:
  *
  *     01 la agencia   etiqueta · titular (P1) · bajada (P2) · el lugar
  *     02 el equipo    cómo trabajamos (P2) · Franco (P2) · Valentino (P2)
  *     03 la foto      el [FOTO DEL EQUIPO] con su epígrafe (P2)
  *
  * **La foto entra sola, que es lo que la instrucción pide.** Ya llenaba el 94,4 %
- * de su pantalla con su epígrafe (1.019,64 px de 1.080): no le sobraba lugar para
- * nadie al lado, y darle el suyo no le cambia un píxel — sigue en 4 de 5 columnas,
- * la decisión que B1 midió (`B2-DELTAS.md` §4.1).
- *
- * ── Lo que el corte hace con los ATERRIZAJES, que es el gate del bloque ───
- *
- * El ancla de P2 es `top bottom` → `bottom bottom`: un bloque **aterriza** en
- * `borde inferior del bloque − alto de ventana`, o sea cuando termina de entrar
- * al cuadro. Con dos pantallas los aterrizajes caían en `y` 600–1200 y 2160, y
- * no pasaba nada más hasta el primero de Números, en 3720: **1,44 pantallas de
- * hueco**, el segundo pozo del sitio. Con tres, cada pantalla pone su grupo.
- *
- * **Las tres decisiones medidas de B1 siguen en pie y no se tocan**, cada una
- * en su docblock: la medida de lectura que no crece con la ventana (`medida`),
- * el hueco repartido en vez de acumulado (`CLASES_DEL_REPARTO`) y la foto en
- * 4 de 5 columnas (`GEOMETRIA.foto.columnas`).
+ * de su pantalla con su epígrafe (1.019,64 px de 1.080): seguía en 4 de 5, la
+ * decisión de B1 (`B2-DELTAS.md` §4.1) que B11 revisó con el logo medido (abajo).
+ * **Los aterrizajes, que son el gate del bloque:** el ancla de P2 es `top bottom`
+ * → `bottom bottom` (un bloque aterriza cuando termina de entrar al cuadro). Con
+ * dos pantallas caían en `y` 600–1200 y 2160, y nada más hasta el primero de
+ * Números, en 3720: **1,44 pantallas de hueco**, el segundo pozo del sitio. Con
+ * tres, cada pantalla pone su grupo. Las otras dos decisiones medidas de B1 siguen
+ * en pie: `medida` (no crece con la ventana) y `CLASES_DEL_REPARTO` (el hueco repartido).
  *
  * P1 para el titular; P2 para los cinco bloques de cuerpo, cada uno en **su
- * propio `Bloque`**, porque P2 tiene un solo target por instancia y el
- * escalonado no sale de un `stagger` sino de la GEOMETRÍA. Abajo de 1025 `Bloque`
- * entrega `progreso: null` y sale el árbol quieto; el reparto vive en la variante
- * `escritorio:`, así que ahí las piezas caen en una columna con el `gap-y` fijo.
+ * propio `Bloque`** (P2 tiene un solo target por instancia y el escalonado sale
+ * de la GEOMETRÍA, no de un `stagger`). Abajo de 1025 `Bloque` entrega
+ * `progreso: null` y sale el árbol quieto; el reparto vive en `escritorio:`.
+ *
+ * ═══ B11 · EL TEXTO SE CORRE DE DONDE PASA EL LOGO [medido] ═════════════════
+ *
+ * B8 abrió la sección sobre la sala y el logo cruza el tramo en diagonal: arriba
+ * a la derecha en la pantalla 1, al centro en la 2, abajo a la izquierda en la 3
+ * (la silueta cada 1/16 de pantalla, `scripts-b11/a-logo.ts` con `h-columnas.ts`;
+ * la tabla, en `B11-ACOMODAMIENTO.md` §3). Tres movimientos, ninguno cambia lo
+ * que dice el texto: (1) «Cómo trabajamos» y la primera persona van a c7–c10 —en
+ * c1–c6 el logo pasaba por detrás del 49 % (1440), 18 % (1920) y 77 % (2560) de
+ * su glifo, 1,00:1; c7–c10 tiene ≤ 10 %—; la segunda persona SE QUEDA en la 9
+ * (fila de abajo: la 7 cae en la pastilla, B1), con la celosía en c11–c12 (19–23 %
+ * de su caja, 1 % del tiempo). (2) La foto baja de 4 a 3 columnas y va a c3–c5:
+ * con 4 de 5 el marcador quedaba 100 % bajo el logo en los tres anchos (1,11:1) y
+ * el epígrafe el 76,6 %; en c3–c5 el marcador cae en c4 (0 %) y el epígrafe va a
+ * la derecha, a c4–c5. (3) El titular y la bajada no se mueven (0–5 %). **Lo que
+ * cuesta:** la foto vuelve al ancho que B1 descartó y reabre **~310 px de hueco**
+ * (PARADA 1 de B11: legibilidad antes que aire). El piso de motas (0,54–0,57 % del
+ * cuadro) lleva número en `deudas-b11.ts` (D-B11.2); las dos tintas al 0,6, ver `Persona`.
  */
 
-/** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los decide
- *  quien construye la sección y no cambian cuando llegue la foto real. */
+/** LA GEOMETRÍA — los números técnicos de la sección, fuera del contenido: los decide quien la construye y no cambian con la foto real. */
 export const GEOMETRIA = {
   foto: {
     /** 3:2 apaisado — [decidido]. Es una foto de DOS personas una al lado de la
@@ -75,25 +81,25 @@ export const GEOMETRIA = {
      * Cuántas columnas ocupa, de cuántas. **Es la entrada del `sizes`**, y por
      * eso la grilla de la tercera pantalla es de CINCO: `sizesPorColumnas` compone
      * su condición desde el breakpoint de escritorio (1025) y de las grillas del
-     * sistema **la de 5 es la única que colapsa ahí**; las de 2, 3 y 4 colapsan en
-     * 768, con lo cual el `sizes` MENTIRÍA entre 768 y 1024.
-     *
-     * ⚠ **B1 · de 3 a 4 columnas [medido]. B2 NO lo toca.** Con 3 la caja valía
-     * 1107,2 px a 1920 y la foto medía 738,1 px en una pantalla de 1080: 310 px de
-     * hueco. Con 4 vale 1481,6 px y la foto mide 987,7 px. Darle su propia pantalla
-     * no cambia ni la caja ni la relación: cambia con quién la comparte. */
-    columnas: 4,
+     * sistema **la de 5 es la única que colapsa ahí** (las de 2, 3 y 4 colapsan en
+     * 768, y el `sizes` MENTIRÍA entre 768 y 1024).
+     * ⚠ **B1 · de 3 a 4 [medido]; B11 · de 4 a 3, en c3–c5 [medido].** Con 3 la
+     * caja valía 1107,2 px a 1920 y la foto 738,1 en 1080: 310 px de hueco que B1
+     * cerró con 4 (1481,6 / 987,7). B11 midió las columnas 1 y 2 bajo el logo el
+     * 100 % del tramo en los tres anchos y la 3 entre el 34 y el 60 %: con 3 en
+     * c3–c5 el marcador queda en la 4 (0–1 %). Los 310 px vuelven (PARADA 1). */
+    columnas: 3,
     columnasTotales: 5,
+    claseDeLaCaja: 'escritorio:col-start-3 escritorio:col-span-3', // literal: Tailwind escanea el fuente
   },
   /**
    * LA MEDIDA DE LECTURA — una sola para las tres piezas de texto. [medido]
    *
    * ⚠ **No es un ancho de columna: es un TOPE.** La columna sigue siendo fluida
    * y el tope sólo manda arriba de ~1025, donde se vuelve demasiado ancha para
-   * una línea. Es la forma medida en la referencia externa: *la caja de texto no
-   * acompaña al viewport*. `--fluido-piso` menos un escalón de espaciado:
-   * 375 − 48 = 327 px, sacado de comparar en el navegador, a 1920, los altos que
-   * produce cada tope — que es lo que decide cuánta tinta hay para repartir:
+   * una línea (la referencia: *la caja de texto no acompaña al viewport*).
+   * `--fluido-piso` menos un escalón: 375 − 48 = 327 px, de comparar a 1920 los
+   * altos que produce cada tope, que es lo que decide cuánta tinta se reparte:
    *
    *     tope   titular   bajada   cómo   tinta    juntura
    *     375     288,91       96     96   519,8      93,4
@@ -104,48 +110,43 @@ export const GEOMETRIA = {
    * em de línea, contra los 6,67 em de la referencia (480 px sobre 72). */
   medida: 'max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]',
   /**
-   * EL REPARTO de las dos pantallas de texto: doce columnas usadas como
-   * primitiva de posición, una fila por pieza. Mismo instrumento que usa
-   * Números, y las cadenas van enteras porque Tailwind escanea el código fuente.
-   *
-   * La columna 9 no es una preferencia: a 1920 la pastilla de navegación ocupa de
-   * x 658 a x 1262 y una caja que arranca en la 9 empieza en x 1332, por fuera de
-   * la pastilla en todo su recorrido. Por eso **la última fila de cada pantalla
-   * arranca en la 9**: con `content-evenly` queda contra el pie del cuadro.
+   * EL REPARTO de las dos pantallas de texto: doce columnas como primitiva de
+   * posición, una fila por pieza (el instrumento de Números; las cadenas van
+   * enteras porque Tailwind escanea el fuente). La columna 9 no es una preferencia:
+   * a 1920 la pastilla ocupa de x 658 a x 1262 y una caja que arranca en la 9
+   * empieza en x 1332, afuera en todo su recorrido; por eso **la última fila de
+   * cada pantalla arranca en la 9**, contra el pie del cuadro con `content-evenly`.
+   * ⚠ B11: en la pantalla del equipo, «cómo trabajamos» (fila 1) y la primera
+   * persona (fila 2) arrancan en la 7, la primera columna que el logo deja libre
+   * ahí (c7–c10 ≤ 10 % en los tres anchos); la segunda sigue en la 9 (pastilla).
    */
   reparto: {
     etiqueta: 'escritorio:col-start-1 escritorio:col-span-3 escritorio:row-start-1',
     titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
     lugar: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-4',
-    comoTrabajamos: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-1',
-    primeraPersona: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-2',
+    comoTrabajamos: 'escritorio:col-start-7 escritorio:col-span-4 escritorio:row-start-1',
+    primeraPersona: 'escritorio:col-start-7 escritorio:col-span-4 escritorio:row-start-2',
     segundaPersona: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-3',
   },
-  /** Cuántas líneas promete el titular. Es inerte para P1 —`LineasDeTexto` las
-   *  recalcula midiendo— y va declarado porque hace comparable la sección con el
-   *  rango medido del patrón (1 a 6): cinco a 1920, cuatro a 1440. */
+  /** Cuántas líneas promete el titular. Inerte para P1 (`LineasDeTexto` mide); va
+   *  declarado para compararla con el rango del patrón (1 a 6): cinco a 1920, cuatro a 1440. */
   lineasDelTitular: 5,
 } as const
 
-/** El `sizes` real de la foto. Exportado para que el instrumento afirme el MISMO
- *  valor que se pasa al marco y no una copia escrita a mano. */
+/** El `sizes` real de la foto, exportado para que el instrumento afirme el MISMO valor que recibe el marco. */
 export const SIZES_DE_LA_FOTO = sizesPorColumnas(GEOMETRIA.foto.columnas, GEOMETRIA.foto.columnasTotales)
 
-/** LA GRILLA DE LAS DOS PANTALLAS DE TEXTO — doce columnas desde 1025, UNA abajo,
- *  y el hueco repartido en vez de acumulado. `grow` + `content-evenly` es el par
- *  que hace la resta: la grilla crece hasta el alto de la pantalla y reparte lo
- *  que le sobra **por igual entre todas las junturas**. Por eso `gap-y` se apaga
- *  arriba de 1025: sumado al reparto daría junturas desparejas. */
+/** LA GRILLA DE LAS DOS PANTALLAS DE TEXTO — doce columnas desde 1025, UNA abajo, y el
+ *  hueco repartido en vez de acumulado: `grow` + `content-evenly` crece hasta el alto de
+ *  la pantalla y reparte lo que sobra **por igual entre las junturas** (por eso `gap-y` se apaga arriba de 1025). */
 const CLASES_DEL_REPARTO = cn(
   'grid w-full grow grid-cols-1 content-evenly items-start gap-y-12',
   'escritorio:grid-cols-12 escritorio:gap-y-0',
   'gap-x-[var(--grilla-canal-compacto)] escritorio:gap-x-[var(--grilla-canal-amplio)]',
 )
 
-/** El contenedor de una pantalla de texto. `escritorio:py-0` y no un relleno fijo:
- *  arriba de 1025 el borde lo pone el propio reparto —la juntura de arriba mide lo
- *  mismo que las de adentro— y un `padding` lo duplicaría. */
+/** El contenedor de una pantalla de texto. `escritorio:py-0` y no un relleno fijo: arriba de 1025 el borde lo pone el reparto. */
 function Pantalla(props: {
   readonly nombre: string
   readonly children: React.ReactNode
@@ -160,9 +161,9 @@ function Pantalla(props: {
   )
 }
 
-/** Una persona: nombre en h3, rol real, y el hueco rotulado al lado del rol.
- *  El borde punteado es el mismo lenguaje de `MarcoDeMedio`: un pedido se ve
- *  igual en toda la sección. */
+/** Una persona: nombre en h3, rol real, y el hueco rotulado al lado del rol (el borde punteado es el lenguaje de `MarcoDeMedio`).
+ *  ⚠ B11: el rótulo del pedido y «Tucumán, Argentina» van a tinta PLENA, no a `opacity-casi` (la palanca de B6-A, PARADA 2): al 0,6 sobre
+ *  el gris de la pared daban mediana 4,06–4,30 con TODO el glifo bajo AA; a plena, mediana 7,4–13,2 y 5–21 px de ~550 bajo AA: motas. §6. */
 function Persona({
   persona,
   rotulo,
@@ -175,7 +176,7 @@ function Persona({
       <Titular nivel="titulo-s" como="h3">{persona.nombre}</Titular>
       <Caption como="p">{persona.rol}</Caption>
       <p className="border-borde-fuerte flex flex-wrap items-baseline gap-2 border border-dashed px-3 py-2">
-        <Micro como="span" className="uppercase opacity-casi">{rotulo}</Micro>
+        <Micro como="span" className="uppercase">{rotulo}</Micro>
         <Micro como="span" className="font-codigo uppercase">{persona.enUnProyecto}</Micro>
       </p>
     </div>
@@ -183,8 +184,7 @@ function Persona({
 }
 
 /** PANTALLA 1 · LA AGENCIA — quiénes somos y qué somos, repartido sobre la pantalla
- *  entera. El lugar cierra abajo a la derecha: deja la juntura pareja y esquiva la
- *  pastilla. */
+ *  entera. El lugar cierra abajo a la derecha: juntura pareja, y esquiva la pastilla. */
 function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Pantalla nombre="agencia">
@@ -215,7 +215,7 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
             )}
           </Bloque>
 
-          <Caption como="p" className={cn(GEOMETRIA.reparto.lugar, 'opacity-casi')}>{CONTENIDO.lugar}</Caption>
+          <Caption como="p" className={GEOMETRIA.reparto.lugar}>{CONTENIDO.lugar}</Caption>
         </div>
       </Grilla>
     </Pantalla>
@@ -223,11 +223,9 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
 }
 
 /** PANTALLA 2 · EL EQUIPO — cómo trabajamos, y quiénes son «la misma gente de punta
- *  a punta» que ese párrafo nombra. Las dos personas llegan en filas distintas: cada
- *  una resuelve su ancla contra su propia caja, así que son dos aterrizajes y no uno.
- *  El `div` vacío de la columna lateral no es un descuido: reserva los 156 px que en
- *  la pantalla 1 lleva el número, y sin él el reparto de doce arrancaría a la
- *  izquierda del de la otra pantalla de texto. */
+ *  a punta» que ese párrafo nombra. Las dos personas llegan en filas distintas (cada
+ *  una resuelve su ancla contra su caja: dos aterrizajes, no uno). El `div` vacío de
+ *  la columna lateral reserva los 156 px que en la pantalla 1 lleva el número. */
 function ElEquipo(): React.JSX.Element {
   return (
     <Pantalla nombre="equipo">
@@ -257,14 +255,17 @@ function ElEquipo(): React.JSX.Element {
   )
 }
 
-/** PANTALLA 3 · LA FOTO — cuatro columnas de cinco y su epígrafe, solos.
- *  `escritorio:py-2` es un hilo y está medido: la caja con el epígrafe mide 1.019,64
- *  px en una pantalla de 1.080, así que un `py-20` la desbordaría. */
+/** PANTALLA 3 · LA FOTO — tres columnas de cinco, en c3–c5, y su epígrafe, solos.
+ *  `escritorio:py-2` es un hilo medido con 4 columnas (1.019,64 px en 1.080); con 3
+ *  (B11) la caja mide ~757 y lo que sobra es hueco, publicado arriba. ⚠ B11: el
+ *  epígrafe va a la derecha desde 1025 y no es estética: sus 372 px arrancaban en
+ *  la columna 3 (el logo la tapa hasta el 60 % del tramo) y a la derecha viven en
+ *  c4–c5, libres. Abajo de 1025 no hay escena y sigue a la izquierda. */
 function LaFoto(): React.JSX.Element {
   return (
     <div data-pantalla="foto" className="flex min-h-svh w-full flex-col justify-center py-20 escritorio:py-2">
       <Grilla columnas={GEOMETRIA.foto.columnasTotales}>
-        <Bloque patron="P2" rango="ventana-visible" className="escritorio:col-span-4">
+        <Bloque patron="P2" rango="ventana-visible" className={GEOMETRIA.foto.claseDeLaCaja}>
           {(progreso) => (
             <CanalDeUnaPieza progreso={progreso} patron="P2">
               <figure className="flex flex-col gap-3">
@@ -276,7 +277,7 @@ function LaFoto(): React.JSX.Element {
                   alto={GEOMETRIA.foto.alto}
                   sizes={SIZES_DE_LA_FOTO}
                 />
-                <figcaption><Caption como="p">{CONTENIDO.equipo.pie}</Caption></figcaption>
+                <figcaption><Caption como="p" className="escritorio:text-right">{CONTENIDO.equipo.pie}</Caption></figcaption>
               </figure>
             </CanalDeUnaPieza>
           )}
