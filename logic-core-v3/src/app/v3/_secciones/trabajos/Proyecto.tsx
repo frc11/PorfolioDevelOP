@@ -79,7 +79,10 @@ export function Proyecto({
             SIEMPRE visibles. Nada de `hidden`, `opacity-0` ni `sr-only` acá ni
             en ningún ancestro — el invariante recorre la cadena y lo afirma. */}
         <p className="flex flex-wrap items-baseline gap-2">
-          <Micro como="span" className="uppercase opacity-casi">
+          {/* B6-A: a tinta PLENA. Con la sala detrás del velo el rótulo a
+              `opacity-casi` daba 2,71:1 en su peor píxel y 5,36:1 pleno
+              (docs/rediseno/outputs/b6/c-las-seis-abierto.json). */}
+          <Micro como="span" className="uppercase">
             {rotulo}
           </Micro>
           {/* ⚠ EL COLOR VA EN EL ENVOLTORIO Y NO EN EL `className` DEL `Micro`, y

@@ -51,6 +51,14 @@
 # B5 (52 MB). Son insumo del calculo, no evidencia: lo que se commitea son las
 # cuatro capturas del reporte y el JSON con las cifras.
 /.b5-capturas/
+# `.next-b6/`: build aislado de B6-A (la escena persistente), para medir el peso del
+# lane sin pisar el `.next` del `next dev` del 3001. Se agrega ACA ANTES de correr
+# el build, por la misma leccion que `.next-probe/`.
+/.next-b6/
+# `.b6-capturas/`: las capturas intermedias de los instrumentos de B6-A (T/A/C por
+# bloque de texto y por candidato de velo). Insumo del calculo, no evidencia: lo
+# que se commitea son las capturas del reporte y el JSON con las cifras.
+/.b6-capturas/
 
 # production
 /build

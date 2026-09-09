@@ -1,0 +1,96 @@
+{
+  "que": "la escena no se mueve con prefers-reduced-motion, en las tres poses donde se ve, y sí se mueve sin la preferencia",
+  "instrumento": "scripts-b6/f-reducido.ts — la preferencia la pone Emulation.setEmulatedMedia, no el árbol",
+  "filas": [
+    {
+      "caso": "reducido",
+      "pose": "hero",
+      "scrollY": 0,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "trabajos",
+      "scrollY": 8100,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "cierre",
+      "scrollY": 15300,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "hero",
+      "scrollY": 0,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 21.68,
+        "mediaDelta": 6.52
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "trabajos",
+      "scrollY": 8100,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 20.4,
+        "mediaDelta": 6.42
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "cierre",
+      "scrollY": 15300,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 10.44,
+        "mediaDelta": 2.4
+      },
+      "problemas": []
+    }
+  ]
+}

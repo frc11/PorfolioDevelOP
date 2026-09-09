@@ -41,6 +41,14 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import {
+  HEREDADO_SIN_DECLARAR_KIB,
+  MONTAJES_DECLARADOS_KIB,
+  MONTAJE_DE_B4A_KIB,
+  MONTAJE_DE_B6A_KIB,
+  PRESUPUESTO_DEL_LANE_KIB,
+  PRESUPUESTO_PROPIO_KIB,
+} from './s5-presupuesto'
 import { DIST, conjuntoInicial, exigirBuild, htmlDe, kib, partirCargaInicial, pesar } from './s3-bundle'
 import { RUTAS_BORRADAS } from './s4-rutas-de-demo'
 
@@ -86,6 +94,7 @@ import {
   PRESUPUESTO_PROPIO_KIB,
 } from './s5-presupuesto'
 
+/** El presupuesto y su recibo viven en `s5-presupuesto.ts`, una línea por dueño (B6-A, con la forma de B7). */
 
 /** El preámbulo que `@sentry/nextjs` le pone a la cabeza de cada chunk. Se
  *  detecta por su forma, no por su largo: si cambiara de tamaño, la resta se
@@ -114,6 +123,12 @@ console.log(
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 0,11 medidos que ya estaban en rojo antes de que B7 tocara producto.`,
 )
 console.log('    Lo subió el humano en la parada, con el número medido. La alternativa era no montar la marca: por eso la decisión es revocable.')
+  `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB.toFixed(2)} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
+    ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
+    ` + ${MONTAJE_DE_B6A_KIB} que B6-A monta (la cuarta superficie: 225 B medidos entre dos builds)` +
+    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 1,31 medidos en HEAD antes de que B6-A tocara producto, en este entorno.`,
+)
+console.log('    Cada línea la subió el humano en su parada, con el número medido y la alternativa escrita: por eso cada una es revocable por separado.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
   `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
@@ -123,6 +138,8 @@ afirmar(
   escritoPorElLane / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
   `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB} KiB de montajes con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
   `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y desmontar los montajes declarados tiene que devolverla a 59,94`,
+  `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB.toFixed(2)} KiB de líneas con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
+  `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y devolver lo declarado tiene que devolverla a 59,94`,
 )
 
 controlPositivo(

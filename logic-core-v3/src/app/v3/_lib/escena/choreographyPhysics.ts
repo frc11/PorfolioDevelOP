@@ -95,23 +95,26 @@ export const SETTLE_EPSILON: Record<ChoreoChannel, number> = {
  * sala sobre el texto, así que el techo lo pone el contraste bajo el glifo.
  *
  * **Pero el contraste no es el mismo en todo el recorrido, y un techo único es
- * el mínimo global aplicado donde no hace falta.** Los dos lugares donde la
- * escena se ve son el hero y el diferencial, y aguantan cosas muy distintas:
+ * el mínimo global aplicado donde no hace falta.** Los lugares donde la escena
+ * se ve son el hero, Trabajos (desde B6-A) y el diferencial con el Cierre, y
+ * aguantan cosas muy distintas:
  *
  * | tramo | qué texto cae sobre la sala | techo medido |
  * |---|---|---|
  * | **hero** | el titular, 56 px sobre la pared clara | **22°** — y todavía sobra |
+ * | **trabajos** (B6-A) | titular y bajada sobre el velo denso | **8°** — heredado del diferencial, sin medir con puntero |
  * | **cierre** | el cuerpo de 15 px del diferencial | **8°** — al borde de AA |
  *
  * Por eso `MOUSE_ANGLE_DEG` dejó de ser un escalar: es una tabla de nudos sobre
  * el progreso, y el muestreador vive en `modulacionDeLaPose.ts`. La primera
  * pantalla —la que se juzga— recibe el paralaje entero.
  *
- * ⚠️ **Y la rampa entre los dos vive donde la escena NO dibuja.** Entre el
- * final del tramo del hero y el principio del cierre la escena está suspendida
- * en casi todo el recorrido (`visibilidad.ts`), así que el cambio de amplitud no
- * se ve: no hay un salto de cámara al cruzar un borde de tramo.
- * `s18-modulacion.invariant.ts` lo verifica muestreando la ventana de
+ * ⚠️ **Y la rampa entre los dos valores vive donde la escena NO dibuja.** Entre
+ * el final del hero y el principio de Trabajos la escena está suspendida
+ * (`visibilidad.ts`), así que el cambio de amplitud no se ve: no hay un salto
+ * de cámara al cruzar un borde de tramo. Desde Trabajos hasta el final el valor
+ * ya es el del piso, 8°: Trabajos, el diferencial y el Cierre lo comparten.
+ * `s18-azimut.invariant.ts` lo verifica muestreando la ventana de
  * visibilidad, no suponiéndolo.
  *
  * ── De dónde sale cada techo ──────────────────────────────────
@@ -135,23 +138,28 @@ export const AZIMUT_DEL_MOUSE_POR_PROGRESO: readonly (readonly [number, number])
   /**
    * ⚠️ **LOS DOS NUDOS DEL MEDIO SALEN DE LA VENTANA DE VISIBILIDAD, NO DE LA
    * TABLA DE TRAMOS.** Muestreando `escenaEnCuadro` sobre el documento entero, la
-   * escena dibuja en **[0 · 0,1354]** y en **[0,7375 · 1]**; entre esas dos bandas
-   * el lazo está suspendido y no se pinta un cuadro.
+   * escena dibuja en **[0 · 0,1354]**, en **[0,4648 · 0,6286]** (Trabajos, desde
+   * B6-A) y en **[0,7375 · 1]**; entre esas bandas el lazo está suspendido y no
+   * se pinta un cuadro.
    *
-   * Los bordes de TRAMO —0,125 y 0,75— caen del lado equivocado de los dos: el
-   * hero se ve **hasta 0,1354**, o sea 0,0104 después de terminar su tramo, y el
-   * cierre empieza a verse **en 0,7375**, o sea 0,0125 antes de empezar el suyo.
-   * Con la rampa apoyada en los tramos, la amplitud cambiaba a la vista en **19
+   * Los bordes de TRAMO —0,125 y 0,75— caen del lado equivocado: el hero se ve
+   * **hasta 0,1354**, o sea 0,0104 después de terminar su tramo, y el cierre
+   * empieza a verse **en 0,7375**, o sea 0,0125 antes de empezar el suyo. Con la
+   * rampa apoyada en los tramos, la amplitud cambiaba a la vista en **19
    * posiciones** del barrido — medido, y es lo que puso en rojo a
    * `s18-modulacion` §4b la primera vez.
    *
-   * 0,14 y 0,73 son los primeros valores redondos ADENTRO de la banda
-   * suspendida. El invariante no los da por buenos: vuelve a muestrear la
-   * ventana y comprueba que cada nudo cae de su lado.
+   * ⚠️ **B6-A movió el segundo nudo de 0,73 a 0,46.** Con Trabajos abierta, la
+   * rampa 0,14 → 0,73 cruzaba su banda visible y la amplitud cambiaba a la vista
+   * en **918 posiciones** —medido con la tabla abierta—. La rampa entera vive
+   * ahora en la PRIMERA banda suspendida, [0,1354 · 0,4648]: 0,14 y 0,46 son los
+   * primeros valores redondos adentro. Trabajos recibe el piso de 8° desde su
+   * primer cuadro visible. El invariante no los da por buenos: vuelve a
+   * muestrear la ventana y comprueba que cada nudo cae de su lado.
    */
   [0, 22],
   [0.14, 22],
-  [0.73, 8],
+  [0.46, 8],
   [1, 8],
 ]
 

@@ -18,7 +18,7 @@
  */
 
 import { CHOREO_TRAMOS } from '../choreography'
-import { ANCLAJE } from '../anclaje'
+import { ANCLAJE, TRAMOS_ANCLADOS } from '../anclaje'
 import { progresoEntre } from '../anclajeDerivacion'
 // prettier-ignore
 import { PANTALLAS_DE_SCROLL, RITMO_POR_SEGMENTO, pantallaDeProgreso, progresoDePantalla, progresoEnNudos } from '../recorrido'
@@ -45,6 +45,12 @@ for (const g of ANCLAJE.geometria) {
   )
 }
 
+/** ⚠ B6-A (condición 5): `EL_DIFERENCIAL` se llama por su id —se derivaba como «la última
+ *  transparente» y al abrir el Cierre pasó a ser el Cierre, sin que el anclaje se moviera—. Lo que
+ *  se afirma es que ese id es una sección del tramo que DECLARA su ancla: propiedad del anclaje. */
+const conAncla = (id: string): boolean => TRAMOS_ANCLADOS[I_DECLARADO]?.secciones.includes(id) ?? false
+afirmar(conAncla(EL_DIFERENCIAL), `\`EL_DIFERENCIAL\` («${EL_DIFERENCIAL}») es una sección del tramo que declara su ancla («${TRAMOS_ANCLADOS[I_DECLARADO]?.tramo}»)`)
+controlPositivo('el guardián del id vería una sección que NO declara ancla — el Cierre, la última transparente desde B6-A', 'cierre', conAncla)
 afirmarIgual(
   anclaDe(ANCLAJE, EL_DIFERENCIAL),
   DECLARADA,

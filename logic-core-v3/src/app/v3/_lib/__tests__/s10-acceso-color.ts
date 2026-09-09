@@ -33,8 +33,24 @@
  * que la asimetría se sigue VIENDO donde está.
  */
 
+import { SUPERFICIES, type ModoSuperficie } from '../superficies'
 import { TEMA, valorDeToken } from './s10-css'
 import { atributo, nodosDe, textoDe, type Nodo } from './s10-recorrido'
+
+/**
+ * Si un modo deja ver la escena — leído de la tabla de superficies y no de un
+ * nombre. **B6-A**: hasta acá el modelo comparaba contra el literal
+ * `papel-transparente`, y con `oscuro-transparente` en la tabla ese literal
+ * habría dado a un panel con velo un fondo de token (#0E0E0E) que no es lo que
+ * hay detrás de su texto. Un modo que la tabla no conoce TIRA: no se le adivina
+ * un fondo a una superficie que nadie declaró.
+ */
+function dejaVerElCanvas(modo: string): boolean {
+  if (!Object.hasOwn(SUPERFICIES, modo)) {
+    throw new Error(`s10-acceso-color: el marcado declara una superficie que la tabla no tiene: "${modo}"`)
+  }
+  return SUPERFICIES[modo as ModoSuperficie].dejaVerElCanvas
+}
 
 /** Los umbrales de WCAG 2.x para texto normal. */
 export const AA = 4.5
@@ -121,7 +137,7 @@ export function superficiesDelDocumento(html: string): SuperficieDeSeccion[] {
         id: atributo(n, 'id') ?? '',
         modo,
         invertida,
-        fondo: modo === 'papel-transparente' ? null : invertida ? COLOR.oscuro : COLOR.papel,
+        fondo: dejaVerElCanvas(modo) ? null : invertida ? COLOR.oscuro : COLOR.papel,
       }
     })
 }
@@ -280,20 +296,3 @@ export function razon(colorA: string, colorB: string): number {
   const b = luminancia(colorB)
   return a > b ? (a + 0.05) / (b + 0.05) : (b + 0.05) / (a + 0.05)
 }
-
-/**
- * LO QUE MIDIÓ OTRO INSTRUMENTO — las dos secciones transparentes.
- *
- * No se vuelve a calcular acá y no se puede: su fondo es la escena, que es un
- * gradiente y no un token. SITIO-S9 lo midió con su propio instrumento y sus
- * dos cifras se CITAN, con la atribución adentro del dato para que no se
- * puedan copiar sin ella.
- */
-export const CONTRASTE_CONTRA_LA_ESCENA: readonly {
-  readonly seccion: string
-  readonly razon: number
-  readonly instrumento: string
-}[] = [
-  { seccion: 'hero', razon: 9.73, instrumento: 'SITIO-S9 — la tinta sobre la escena en el Hero' },
-  { seccion: 'por-que-develop', razon: 6.07, instrumento: 'SITIO-S9 — el diferencial, el peor punto del recorrido' },
-]

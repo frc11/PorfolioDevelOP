@@ -46,6 +46,7 @@ import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, afirmarElRepartoYLaMeseta
 import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
 import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
 import { Trabajos } from './Trabajos'
+import { perspectivaDeLaEscena } from '../../_lib/motion/lente'
 
 const seccion = seccionDe('trabajos')
 
@@ -70,7 +71,7 @@ const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS } = coloresDel
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
 
-afirmarIgual(seccion.superficie, 'oscuro-opaco', 'la superficie es oscuro-opaco: la banda oscura')
+afirmarIgual(seccion.superficie, 'oscuro-transparente', 'la superficie es oscuro-transparente: la banda oscura, con velo sobre la escena desde B6-A')
 afirmarIgual(pantallasDe(seccion), 3, 'ocupa TRES pantallas — la secuencia más larga del lane')
 afirmarIgual(seccion.pinneada, 'desde-escritorio', 'y es PINNEADA DESDE 1025: abajo no se clava, y cada proyecto toma su pantalla')
 afirmarIgual(veces(quieto, 'data-pinneado="desde-escritorio"'), 1, '  y hay UN solo hijo pinneado en el marcado')
@@ -176,8 +177,11 @@ afirmarIgual(veces(conMotion, 'pointer-events:none'), 3, 'y lo que está lejos n
 /** ⚠ DESDE SITIO-S7 la perspectiva vive sólo en la rama animada: sin
  *  transformada 3D no hay nada que poner en perspectiva. Su efecto secundario
  *  —crear bloque contenedor— lo cubre `s7-arboles`. */
-afirmarIgual(veces(conMotion, 'perspective:1000px'), 1, 'la perspectiva va UNA vez, en el ancestro de los planos')
-afirmarIgual(veces(quieto, 'perspective:1000px'), 0, '  y NO en la rama quieta, donde no hay nada que poner en perspectiva')
+/** ⚠ B6-A · LA PERSPECTIVA ES EL LENTE DE LA ESCENA (el foco de la cámara en `svh`), no los 1000 px
+ *  del patrón, que sigue declarándolos sin cambiar un valor: lo afirma `s19-lente`. Acá, lo que llega al marcado. */
+afirmarIgual(veces(conMotion, `perspective:${perspectivaDeLaEscena()}`), 1, 'la perspectiva va UNA vez, en el ancestro de los planos — y es el lente de la escena')
+afirmarIgual(veces(conMotion, 'perspective:1000px'), 0, '  los 1000 px del patrón ya no llegan al marcado: los reemplaza el lente')
+afirmarIgual(veces(quieto, 'perspective:'), 0, '  y NO en la rama quieta, donde no hay nada que poner en perspectiva')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · LA MÉTRICA NUNCA ESTÁ OCULTA — ni ella ni ninguno de sus ancestros')

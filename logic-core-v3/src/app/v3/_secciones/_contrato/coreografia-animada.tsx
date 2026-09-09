@@ -4,6 +4,7 @@ import { useCallback, useRef } from 'react'
 
 import { Titular } from '../../_componentes/tipografia/Titular'
 import type { ParDeAnclas } from '../../_lib/motion/anclas'
+import { perspectivaDeLaEscena, useOrigenDeLaLente } from '../../_lib/motion/lente'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { useProgresoDePatron } from '../../_lib/motion/useProgresoDePatron'
 import { LineasDeTexto } from '../../motion/_componentes/LineasDeTexto'
@@ -113,12 +114,20 @@ function inerciaDelBloque(props: BloqueProps): number | null {
  * ancestro** de los 44 planos de la referencia, no en cada plano. Es la
  * diferencia entre doce planos compartiendo un punto de fuga y doce planos con
  * doce puntos de fuga distintos.
+ *
+ * ⚠️ **B6-A: con `lente="escena"` la perspectiva es el FOCO DE LA CÁMARA de
+ * la sala** (`_lib/motion/lente.ts`) y no los 1000 px que el patrón declara:
+ * P7 se calibró contra un fondo plano, y con la sala real detrás los planos
+ * tienen que converger al punto de fuga de la sala y a la profundidad de su
+ * pared. El patrón no cambia un valor; cambia el lente. El ORIGEN del lente
+ * —el centro del viewport en coordenadas del bloque— no cabe en un estilo
+ * estático: lo escribe `useOrigenDeLaLente` en el montaje y en cada resize.
  */
 function estiloDelBloque(props: BloqueProps): React.CSSProperties | undefined {
   if (props.patron === 'pin') return props.style
   const perspectivaPx = PATRONES[props.patron].perspectivaPx
   if (perspectivaPx === undefined) return props.style
-  return { ...props.style, perspective: `${perspectivaPx}px` }
+  return { ...props.style, perspective: props.lente === 'escena' ? perspectivaDeLaEscena() : `${perspectivaPx}px` }
 }
 
 function BloqueConMotor(props: BloqueProps): React.JSX.Element {
@@ -127,6 +136,8 @@ function BloqueConMotor(props: BloqueProps): React.JSX.Element {
   // propiedad que contiene un `ref` durante el render dispara
   // `react-hooks/refs`.
   const refDeMedida = useRef<HTMLElement | null>(null)
+  /** El propio `div`, para el origen del lente: es él quien lleva la `perspective`. */
+  const refDelBloque = useRef<HTMLElement | null>(null)
   const anclaje = props.anclaje
 
   /**
@@ -139,10 +150,15 @@ function BloqueConMotor(props: BloqueProps): React.JSX.Element {
    */
   const montar = useCallback(
     (el: HTMLDivElement | null) => {
+      refDelBloque.current = el
       refDeMedida.current = el === null ? null : elementoMedido(el, anclaje)
     },
     [anclaje],
   )
+
+  // El origen del lente se escribe sobre el nodo, en el montaje y por época de
+  // medición: cero `setState`, y nunca por cuadro. Sin lente, no escribe nada.
+  useOrigenDeLaLente(refDelBloque, props.lente === 'escena' && props.patron !== 'pin')
 
   const progreso = useProgresoDePatron({
     ref: refDeMedida,

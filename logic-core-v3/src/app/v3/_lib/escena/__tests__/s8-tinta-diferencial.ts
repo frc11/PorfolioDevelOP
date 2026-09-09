@@ -19,6 +19,7 @@
 import { ANCLAJE } from '../anclaje'
 import { pantallaDeProgreso, type TramoDeSeccion } from '../recorrido'
 import { afirmar, controlPositivo, titulo } from '../../__tests__/afirmar'
+import { EL_DIFERENCIAL } from './s13b-reparto'
 import { MAPEO_PROVISIONAL_HISTORICO } from './tablas'
 
 /** Lo que el §5 necesita del archivo que lo llama, y que por eso no importa. */
@@ -39,7 +40,9 @@ export function afirmarElDiferencial(
 ): void {
   titulo('5 · 🔴 EL DIFERENCIAL — la cifra que decide §7.29, y la que no la decide')
 
-  const diferencial = transparentes[1]
+  // ⚠ B6-A: por id, no «la segunda transparente» — con Trabajos abierta la segunda es Trabajos.
+  const diferencial = transparentes.find((t) => t.id === EL_DIFERENCIAL)
+  if (diferencial === undefined) throw new Error(`el diferencial (${EL_DIFERENCIAL}) no está entre las transparentes`)
   const difLlena = i.contrasteEn(diferencial.llenaDesde, 0)
   const difP05 = i.contrasteEn(diferencial.llenaDesde, 0.05)
   const difMedia = i.contrasteEn(diferencial.llenaDesde, 0.5)

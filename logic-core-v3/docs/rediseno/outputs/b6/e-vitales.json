@@ -1,0 +1,91 @@
+{
+  "perfil": "1440",
+  "quieta": {
+    "cuadros": 226,
+    "duracionMs": 3001.2000000000007,
+    "fpsMediana": 75.18796992480586,
+    "fpsP05": 74.62686567163368,
+    "fpsMinimo": 72.4637681159363,
+    "indiceDelPeor": 156,
+    "cuadrosLargos": 0,
+    "scrollFinal": 0
+  },
+  "recorridos": [
+    {
+      "cuadros": 899,
+      "duracionMs": 11991.4,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 37.45318352059823,
+      "indiceDelPeor": 439,
+      "cuadrosLargos": 1,
+      "scrollFinal": 15300
+    },
+    {
+      "cuadros": 900,
+      "duracionMs": 11991.299999999996,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 64.9350649350588,
+      "indiceDelPeor": 170,
+      "cuadrosLargos": 0,
+      "scrollFinal": 15300
+    },
+    {
+      "cuadros": 900,
+      "duracionMs": 11991.5,
+      "fpsMediana": 75.18796992479558,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 72.46376811596495,
+      "indiceDelPeor": 265,
+      "cuadrosLargos": 0,
+      "scrollFinal": 15300
+    }
+  ],
+  "lineaDeBase": {
+    "de": "docs/rediseno/outputs/b5/b5-vitales.json",
+    "quieta": {
+      "cuadros": 226,
+      "duracionMs": 3001.2000000000007,
+      "fpsMediana": 75.18796992480586,
+      "fpsP05": 74.62686567163368,
+      "fpsMinimo": 74.07407407407408,
+      "indiceDelPeor": 9,
+      "cuadrosLargos": 0,
+      "scrollFinal": 0
+    },
+    "recorridos": [
+      {
+        "cuadros": 898,
+        "duracionMs": 11991.3,
+        "fpsMediana": 75.18796992479558,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 37.45318352059823,
+        "indiceDelPeor": 439,
+        "cuadrosLargos": 2,
+        "scrollFinal": 15300
+      },
+      {
+        "cuadros": 900,
+        "duracionMs": 11991.300000000003,
+        "fpsMediana": 75.18796992479558,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 68.96551724137932,
+        "indiceDelPeor": 204,
+        "cuadrosLargos": 0,
+        "scrollFinal": 15300
+      },
+      {
+        "cuadros": 899,
+        "duracionMs": 11991.199999999997,
+        "fpsMediana": 75.18796992479558,
+        "fpsP05": 74.62686567163368,
+        "fpsMinimo": 37.45318352059313,
+        "indiceDelPeor": 439,
+        "cuadrosLargos": 1,
+        "scrollFinal": 15300
+      }
+    ],
+    "fpsMinimoB4B": 73.5
+  }
+}
