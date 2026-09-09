@@ -35,7 +35,7 @@ export const DEUDAS_DE_B8 = {
   diferencial: {
     numero: 'D-B8.3',
     que: 'Por qué develOP — dos mitades: asoma (p=0,7411) con el amanecer a nivel 0,504 y la tinta oscura no llega a AA hasta p=0,816, mientras el panel entra (modelo); y donde llena el cuadro (el ancla, 0,8525, a 0,643) el logo queda detrás del titular: 5 de 7 bajo AA, peor 1,11:1 (captura; B6-A ya medía 6 de 7)',
-    cierre: 'B9 (el bloque siguiente): mover el titular de donde está el logo, que es lo que la captura ve. La salida barata para la entrada —terminar el amanecer en 0,643 antes de la reanudación— está medida y NO aplicada en B8-LUZ.md §6.4: acorta la entrada bajo AA de 0,075 a 0,028 de progreso, no toca la captura, y esconde el amanecer entero. La decide el humano con el número',
+    cierre: 'B9 (el bloque siguiente), con las otras cinco, donde el texto se mueve fuera del logo. La salida barata para la entrada —terminar el amanecer en 0,643 antes de la reanudación— está medida y NO se aplica (decisión de la PARADA 2, B8-LUZ.md §6.4): acorta la entrada bajo AA de 0,075 a 0,028 de progreso pero no la elimina, y los 5 de 7 de la captura son el logo a plena mañana; cambiar la curva aprobada para arreglar a medias algo cuya causa está en otro lado es mal negocio. La tabla queda para que la decisión sea revocable',
   },
   cierre: {
     numero: 'D-B8.4',

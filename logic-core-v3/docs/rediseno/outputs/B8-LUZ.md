@@ -322,6 +322,35 @@ la misma deuda que las otras cinco: dónde está el texto.
   `s12-tension`/`s12-barrido` cambian la cifra publicada de `demos` y nada
   más. Ninguno se pondría en rojo; los números publicados se re-citarían.
 
+**La decisión (PARADA 2): NO se aplica.** Acorta la entrada bajo AA de 0,075 a
+0,028 de progreso pero no la elimina, y la medición de arriba dice que los 5 de
+7 de la captura son EL LOGO a plena mañana, a la misma luz con cualquiera de
+las dos curvas. **Cambiar la curva aprobada para arreglar a medias algo cuya
+causa está en otro lado es mal negocio.** D-B8.3 se cierra con las otras cinco
+deudas en el bloque de acomodamiento, donde el texto se mueve fuera del logo.
+La tabla queda tal cual, para que la decisión sea revocable con el número.
+
+### 6.5 · Dos correcciones que salieron de medir D-B8.3, con nombre
+
+1. **y=14400 es la pantalla 16, o sea el ANCLA (p=0,8525, nivel 0,643 en las
+   dos curvas), no la entrada.** El barrido (`c-las-ocho`) mide el diferencial
+   desde que llena el cuadro; la entrada (0,7411 → 0,8525) sólo la ve el modelo.
+   Este reporte había escrito «entra a nivel 0,5» sobre una captura tomada a
+   0,643, y la primera lectura de la salida barata dio «idéntica» por eso. **Es
+   la clase de cosa que hace que dos cifras del mismo defecto no se puedan
+   comparar**: el modelo y la captura miden posiciones distintas del mismo
+   panel, y hasta que se dice cuál, sus números se contradicen sin que ninguno
+   esté mal. Las citas (§3, §6.1, `s10-acceso-escena.ts`) llevan ahora la
+   posición y el nivel.
+2. **Las bajas del hero (0,734 → 0,726) y del diferencial (0,361 → 0,323) NO son
+   la luz ni `SHADOW_FAR`** —medido con 64: idéntico—: son el REVELADO, una
+   costura de 135 px en el pie del cuadro contra las secciones opacas (Quiénes
+   somos y el Cierre lo eran antes), que enmascaraba la escena y dejaba ver el
+   papel. Arriba de la franja las capturas son iguales al milésimo (0,7141 /
+   0,7139 y 0,3322 / 0,3308). Va con nombre **porque atribuir un cambio a la luz
+   cuando es de otra cosa es exactamente lo que este proyecto persigue**: la
+   tabla de §3 lo decía como «entra a nivel 0,5», y era la costura.
+
 ---
 
 ## 6b · 🔴 EL PIE — la sala nunca se vio detrás del Cierre, ni con velo ni sin él
@@ -615,8 +644,10 @@ cuenta aparte (`afirmar.ts`, `deudaDeclarada`; `s4-ventana` §4 y `s4-agregado`
    ya fallaba en B6-A (6 de 7). El barrido mide el panel desde que llena el
    cuadro y por eso no ve la entrada; el modelo barre la ventana entera y por
    eso la ve. La salida barata —terminar el amanecer en 0,643 antes de la
-   reanudación— está MEDIDA y NO aplicada en §6.4, con lo que le hace al
-   diferencial y al resto de la curva: la decisión es tuya, con el número.
+   reanudación— está MEDIDA y NO aplicada en §6.4, y la decisión de la PARADA
+   2 es que no se aplica: acorta pero no elimina, y la causa de lo que la
+   captura ve está en el logo. Se cierra con las otras cinco en el bloque de
+   acomodamiento.
 5. ⚠️ **LA LÍNEA 19, FUERA DE LAS 18 AUTORIZADAS** en `/probe-escena/__tests__`:
    `shading.ts` consume `rimIntensityAt(level)` en vez de la fórmula de S6
    inline. Sin ella el calibrador y el rig escribirían dos contraluces
