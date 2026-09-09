@@ -43,9 +43,9 @@ export function suitesDelPaquete(): ReturnType<typeof derivarSuites> {
 }
 
 function linea(r: Resultado): string {
-  const estado = fallo(r) ? 'FALLA' : r.fueraDeVentana > 0 ? 'parcial' : 'ok'
+  const estado = fallo(r) ? 'FALLA' : r.deudas > 0 ? 'deuda' : r.fueraDeVentana > 0 ? 'parcial' : 'ok'
   const cifras = r.resumio
-    ? `${r.afirmaciones} afirm · ${r.controles} ctrl+ · ${r.fallas} fallas${r.fueraDeVentana > 0 ? ` · ${r.fueraDeVentana} fuera de ventana` : ''}`
+    ? `${r.afirmaciones} afirm · ${r.controles} ctrl+ · ${r.fallas} fallas${r.fueraDeVentana > 0 ? ` · ${r.fueraDeVentana} fuera de ventana` : ''}${r.deudas > 0 ? ` · ${r.deudas} deudas declaradas` : ''}`
     : 'SIN RESUMEN — el invariante no llegó a cerrar'
   return `  ${estado.padEnd(7)} ${r.script.padEnd(24)} ${cifras}  (${(r.ms / 1000).toFixed(1)}s, exit ${r.codigo})`
 }
@@ -56,6 +56,7 @@ export interface Totales {
   readonly afirmaciones: number
   readonly controles: number
   readonly fueraDeVentana: number
+  readonly deudas: number
 }
 
 export function totalizar(resultados: readonly Resultado[]): Totales {
@@ -65,6 +66,7 @@ export function totalizar(resultados: readonly Resultado[]): Totales {
     afirmaciones: resultados.reduce((n, r) => n + r.afirmaciones, 0),
     controles: resultados.reduce((n, r) => n + r.controles, 0),
     fueraDeVentana: resultados.reduce((n, r) => n + r.fueraDeVentana, 0),
+    deudas: resultados.reduce((n, r) => n + r.deudas, 0),
   }
 }
 

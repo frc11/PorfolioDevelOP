@@ -1,7 +1,10 @@
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { ANCLAJE } from '../anclaje'
 import { CHOREO_KEYFRAMES, CHOREO_TRAMOS } from '../choreography'
-import { AZIMUT_DEL_MOUSE_POR_PROGRESO, MOUSE_ANGLE_DEG_MAXIMO, MOUSE_HEIGHT_FACTOR } from '../choreographyPhysics'
+import { AZIMUT_DEL_MOUSE_POR_PROGRESO, MOUSE_ANGLE_DEG_MAXIMO, MOUSE_ANGLE_DEG_PISO, MOUSE_HEIGHT_FACTOR } from '../choreographyPhysics'
+import { sampleLightArc } from '../choreographySampler'
+import type { MutableLightLevels } from '../choreographyTypes'
+import { ATARDECER } from '../lightArc'
 import { azimutDelMouseEn, excursionDeAltura, excursionDeAzimut } from '../modulacionDeLaPose'
 import { FLOOR_Y } from '../probeScene'
 import { progresoDelScroll } from '../recorrido'
@@ -114,9 +117,24 @@ afirmar(
   AZIMUT_DEL_MOUSE_POR_PROGRESO[1][0] > CHOREO_TRAMOS[0].to,
   `el nudo del hero (${AZIMUT_DEL_MOUSE_POR_PROGRESO[1][0]}) va MÁS ALLÁ del borde de su tramo (${CHOREO_TRAMOS[0].to})`,
 )
-afirmar(
-  AZIMUT_DEL_MOUSE_POR_PROGRESO[2][0] < TRAMO_DE_TRABAJOS.from,
-  `  y el de la rampa termina ANTES del tramo de Trabajos (${AZIMUT_DEL_MOUSE_POR_PROGRESO[2][0]} < ${TRAMO_DE_TRABAJOS.from})`,
+/**
+ * ⚠️ **B8 · LA RAMPA SE MUDÓ AL ATARDECER.** Custodiaba que terminara ANTES del
+ * tramo de Trabajos, adentro de la banda suspendida entre el hero y Trabajos.
+ * B8 abrió Quiénes somos y Números y esa banda no existe. La rampa vive ahora
+ * en el atardecer del arco (`lightArc.ts`, `ATARDECER`): sus dos nudos SON los
+ * bordes del atardecer —los lee, no los copia— y el segundo coincide con el
+ * arranque del tramo de Trabajos, que es cuando la sección llena el cuadro y
+ * la noche ya está puesta.
+ */
+afirmarIgual(
+  [AZIMUT_DEL_MOUSE_POR_PROGRESO[1][0], AZIMUT_DEL_MOUSE_POR_PROGRESO[2][0]],
+  [ATARDECER.desde, ATARDECER.hasta],
+  '  y los dos nudos de la rampa son los bordes del ATARDECER del arco (B8): leídos, no copiados',
+)
+afirmarIgual(
+  AZIMUT_DEL_MOUSE_POR_PROGRESO[2][0],
+  TRAMO_DE_TRABAJOS.from,
+  `  y la rampa termina EXACTAMENTE donde arranca el tramo de Trabajos (${TRAMO_DE_TRABAJOS.from}): con la noche puesta, el piso`,
 )
 afirmarIgual(azimutDelMouseEn(0), MOUSE_ANGLE_DEG_MAXIMO, `en el hero el azimut es el máximo: ${MOUSE_ANGLE_DEG_MAXIMO}°`)
 afirmarIgual(azimutDelMouseEn(0.125), MOUSE_ANGLE_DEG_MAXIMO, '  y se mantiene hasta el final de su tramo')
@@ -155,12 +173,15 @@ const ABAJO = ANCLAJE.pantallasDelDocumento * VENTANA
 interface Barrido {
   readonly visibles: number
   readonly visiblesConCambio: number
+  /** De los cambios a la vista, los que caen FUERA del atardecer del arco (B8). */
+  readonly cambiosFueraDelAtardecer: number
   readonly bandas: readonly { readonly desde: number; readonly hasta: number }[]
 }
 
 /** El MISMO barrido para la tabla real y para las tablas de control: una sola escritura. */
 function barrer(azimutEn: (p: number) => number, paso: number): Barrido {
   let visiblesConCambio = 0
+  let cambiosFueraDelAtardecer = 0
   let visibles = 0
   let azimutPrevio: number | null = null
   let visiblePrevio = false
@@ -174,7 +195,10 @@ function barrer(azimutEn: (p: number) => number, paso: number): Barrido {
       visibles += 1
       if (abierta === null) abierta = { desde: progreso, hasta: progreso }
       else abierta.hasta = progreso
-      if (visiblePrevio && azimutPrevio !== null && Math.abs(azimut - azimutPrevio) > 1e-9) visiblesConCambio += 1
+      if (visiblePrevio && azimutPrevio !== null && Math.abs(azimut - azimutPrevio) > 1e-9) {
+        visiblesConCambio += 1
+        if (progreso < ATARDECER.desde || progreso > ATARDECER.hasta) cambiosFueraDelAtardecer += 1
+      }
     } else if (abierta !== null) {
       bandas.push(abierta)
       abierta = null
@@ -183,7 +207,7 @@ function barrer(azimutEn: (p: number) => number, paso: number): Barrido {
     visiblePrevio = enCuadro
   }
   if (abierta !== null) bandas.push(abierta)
-  return { visibles, visiblesConCambio, bandas }
+  return { visibles, visiblesConCambio, cambiosFueraDelAtardecer, bandas }
 }
 
 /** Interpola una tabla cualquiera igual que `azimutDelMouseEn` interpola la real. */
@@ -201,44 +225,74 @@ function enTabla(tabla: readonly (readonly [number, number])[]): (p: number) => 
   }
 }
 
+/**
+ * ⚠️ **B8 · CUSTODIABA «la amplitud NO cambia en ninguna posición donde la
+ * escena dibuja», y esa propiedad dejó de poder existir.** Vivía en la banda
+ * suspendida entre el hero y Trabajos (0,14 → 0,46); B8 abrió Quiénes somos y
+ * Números por decisión del humano y la escena dibuja de corrido de la pantalla
+ * 0 a la 11: no queda banda suspendida antes de Trabajos. La rampa se mudó al
+ * ATARDECER del arco (`lightArc.ts`), aprobado en la PARADA 1 de B8, y lo que
+ * se afirma ahora es lo que lo vuelve invisible: que TODO cambio a la vista
+ * caiga adentro del atardecer, donde el sol pierde más del 90 % de su nivel en
+ * la misma pantalla —un evento adentro de otro—, y que fuera de él la amplitud
+ * no se mueva. Los dos controles de antes siguen: una rampa en el hero y la
+ * tabla de B5 tienen cambios FUERA del atardecer, y el detector los ve.
+ */
 const real = barrer(azimutDelMouseEn, 5)
 afirmar(real.visibles > 50, `el barrido vio la escena dibujando en ${real.visibles} posiciones: no esta midiendo el vacio`)
 afirmar(
-  real.bandas.length === 3,
-  `y vio TRES bandas visibles: ${real.bandas.map((b) => `[${b.desde.toFixed(4)} · ${b.hasta.toFixed(4)}]`).join(' y ')}`,
+  real.bandas.length === 2,
+  `y vio DOS bandas visibles (B8: del hero a Trabajos de corrido, y el diferencial con el Cierre): ${real.bandas.map((b) => `[${b.desde.toFixed(4)} · ${b.hasta.toFixed(4)}]`).join(' y ')}`,
 )
 afirmar(
-  AZIMUT_DEL_MOUSE_POR_PROGRESO[1][0] > real.bandas[0].hasta && AZIMUT_DEL_MOUSE_POR_PROGRESO[2][0] < real.bandas[1].desde,
-  `los dos nudos de la rampa caen ADENTRO de la PRIMERA banda suspendida (${real.bandas[0].hasta.toFixed(4)} · ${real.bandas[1].desde.toFixed(4)})`,
+  real.bandas[0].desde <= ATARDECER.desde && real.bandas[0].hasta >= ATARDECER.hasta,
+  `el atardecer entero cae ADENTRO de la primera banda visible: la rampa se ve, y se ve mientras el sol se pone (${ATARDECER.desde} · ${ATARDECER.hasta})`,
+)
+afirmar(
+  real.visiblesConCambio > 0,
+  'la amplitud SÍ cambia a la vista: desde B8 no hay banda suspendida donde esconder la rampa',
+  `${real.visiblesConCambio} posiciones con cambio, de ${real.visibles} visibles`,
 )
 afirmarIgual(
-  real.visiblesConCambio,
+  real.cambiosFueraDelAtardecer,
   0,
-  'y la amplitud NO cambia en ninguna posición donde la escena dibuja: la rampa entera vive en la banda suspendida',
+  '  y NINGÚN cambio cae fuera del atardecer: la rampa entera vive donde la luz se va',
+)
+const arco: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
+const nivelEn = (p: number): number => {
+  sampleLightArc(p, arco)
+  return arco.level
+}
+afirmar(
+  nivelEn(ATARDECER.desde) - nivelEn(ATARDECER.hasta) > 0.9 && MOUSE_ANGLE_DEG_MAXIMO - MOUSE_ANGLE_DEG_PISO === 14,
+  'y es un evento adentro de otro: en la misma pantalla en que la amplitud baja 14°, el sol pierde más del 90 % de su nivel',
+  `nivel ${nivelEn(ATARDECER.desde)} → ${nivelEn(ATARDECER.hasta)} · azimut ${MOUSE_ANGLE_DEG_MAXIMO}° → ${MOUSE_ANGLE_DEG_PISO}°`,
 )
 afirmar(
-  real.bandas.slice(1).every((b) => azimutDelMouseEn(b.desde) === 8 && azimutDelMouseEn(b.hasta) === 8),
-  '  y en las dos bandas visibles después del hero el azimut es el piso, de punta a punta',
+  azimutDelMouseEn(real.bandas[0].desde) === MOUSE_ANGLE_DEG_MAXIMO &&
+    azimutDelMouseEn(real.bandas[0].hasta) === MOUSE_ANGLE_DEG_PISO &&
+    real.bandas.slice(1).every((b) => azimutDelMouseEn(b.desde) === MOUSE_ANGLE_DEG_PISO && azimutDelMouseEn(b.hasta) === MOUSE_ANGLE_DEG_PISO),
+  '  la primera banda entra con el máximo y sale con el piso; la segunda es el piso de punta a punta',
 )
 controlPositivo(
-  'el detector de cambio a la vista no está ciego: con la rampa corrida al hero, lo ve',
+  'el detector de cambio a la vista no está ciego: con la rampa corrida al hero, la ve FUERA del atardecer',
   [
     [0, 22],
     [0.02, 22],
     [0.06, 8],
     [1, 8],
   ] as const,
-  (tabla: readonly (readonly [number, number])[]) => barrer(enTabla(tabla), 30).visiblesConCambio === 0,
+  (tabla: readonly (readonly [number, number])[]) => barrer(enTabla(tabla), 30).cambiosFueraDelAtardecer === 0,
 )
 controlPositivo(
-  'y ve fallar la tabla de B5 (0,14 → 0,73): con Trabajos abierta, su rampa cruzaba la segunda banda a la vista',
+  'y ve fallar la tabla de B5 (0,14 → 0,73): cruzaba Quiénes somos, Números y Trabajos a la vista, fuera del atardecer',
   [
     [0, 22],
     [0.14, 22],
     [0.73, 8],
     [1, 8],
   ] as const,
-  (tabla: readonly (readonly [number, number])[]) => barrer(enTabla(tabla), 30).visiblesConCambio === 0,
+  (tabla: readonly (readonly [number, number])[]) => barrer(enTabla(tabla), 30).cambiosFueraDelAtardecer === 0,
 )
 
 cerrar('s18-azimut.invariant')

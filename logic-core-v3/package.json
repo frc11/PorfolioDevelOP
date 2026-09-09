@@ -272,6 +272,9 @@
     "test:s18": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s18",
     "test:s19-lente": "npx tsx src/app/v3/_lib/motion/__tests__/s19-lente.invariant.ts",
     "test:s19": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s19",
+    "test:s20-arco": "npx tsx src/app/v3/_lib/escena/__tests__/s20-arco.invariant.ts",
+    "test:s20-brillo": "npx tsx src/app/v3/_lib/escena/__tests__/s20-brillo.invariant.ts",
+    "test:s20": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s20",
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },

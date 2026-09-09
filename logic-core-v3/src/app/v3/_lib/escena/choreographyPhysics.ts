@@ -1,4 +1,5 @@
 import type { ChoreoChannel } from './choreographyTypes'
+import { ATARDECER } from './lightArc'
 
 /**
  * LA FÍSICA DEL RIG — inercia, mouse, vira, deriva del aire y reproducción.
@@ -59,6 +60,15 @@ export const SETTLE_EPSILON: Record<ChoreoChannel, number> = {
 }
 
 // ── Offset de mouse ─────────────────────────────────────────────────────────
+
+/**
+ * El valor de referencia del canal, para quien necesite UNO. Es el del hero —el
+ * máximo de la tabla— y existe para que la excursión del peor caso se pueda
+ * acotar sin muestrear: nada del recorrido pasa de acá.
+ */
+export const MOUSE_ANGLE_DEG_MAXIMO = 22
+/** El piso del diferencial (8°, bisección de B5): Trabajos, el diferencial y el Cierre lo comparten. */
+export const MOUSE_ANGLE_DEG_PISO = 8
 
 /**
  * El mouse MODULA la posición que determina el progreso, no la reemplaza.
@@ -136,39 +146,27 @@ export const SETTLE_EPSILON: Record<ChoreoChannel, number> = {
  */
 export const AZIMUT_DEL_MOUSE_POR_PROGRESO: readonly (readonly [number, number])[] = [
   /**
-   * ⚠️ **LOS DOS NUDOS DEL MEDIO SALEN DE LA VENTANA DE VISIBILIDAD, NO DE LA
-   * TABLA DE TRAMOS.** Muestreando `escenaEnCuadro` sobre el documento entero, la
-   * escena dibuja en **[0 · 0,1354]**, en **[0,4648 · 0,6286]** (Trabajos, desde
-   * B6-A) y en **[0,7375 · 1]**; entre esas bandas el lazo está suspendido y no
-   * se pinta un cuadro.
+   * ⚠️ **B8 · LA RAMPA SE MUDÓ AL ATARDECER, y ya no puede vivir donde la escena
+   * NO dibuja.** Hasta B6-A los dos nudos del medio se apoyaban en una banda
+   * suspendida (0,14 → 0,46, entre el hero y Trabajos): con la escena apagada
+   * el cambio de amplitud no se veía. B8 abrió Quiénes somos y Números, y la
+   * escena dibuja de corrido de la pantalla 0 a la 11 (`visibilidad.ts`): no
+   * queda banda suspendida antes de Trabajos donde esconder una rampa.
    *
-   * Los bordes de TRAMO —0,125 y 0,75— caen del lado equivocado: el hero se ve
-   * **hasta 0,1354**, o sea 0,0104 después de terminar su tramo, y el cierre
-   * empieza a verse **en 0,7375**, o sea 0,0125 antes de empezar el suyo. Con la
-   * rampa apoyada en los tramos, la amplitud cambiaba a la vista en **19
-   * posiciones** del barrido — medido, y es lo que puso en rojo a
-   * `s18-modulacion` §4b la primera vez.
-   *
-   * ⚠️ **B6-A movió el segundo nudo de 0,73 a 0,46.** Con Trabajos abierta, la
-   * rampa 0,14 → 0,73 cruzaba su banda visible y la amplitud cambiaba a la vista
-   * en **918 posiciones** —medido con la tabla abierta—. La rampa entera vive
-   * ahora en la PRIMERA banda suspendida, [0,1354 · 0,4648]: 0,14 y 0,46 son los
-   * primeros valores redondos adentro. Trabajos recibe el piso de 8° desde su
-   * primer cuadro visible. El invariante no los da por buenos: vuelve a
-   * muestrear la ventana y comprueba que cada nudo cae de su lado.
+   * Se pone donde el ojo ya está mirando otra cosa: **el atardecer del arco**
+   * (`lightArc.ts`, `ATARDECER`), la única pantalla de scroll en la que el sol
+   * se pone mientras Trabajos entra. Un cambio de amplitud de 14° encima de un
+   * cambio de luz de 36° a 2,7° es un evento adentro de otro, no un salto de
+   * cámara que nadie pidió. Los dos nudos LEEN los bordes del atardecer, no los
+   * copian: si el arco se mueve, la rampa se mueve con él. Aprobado en la
+   * PARADA 1 de B8; `s18-azimut.invariant.ts` afirma que la rampa entera cae
+   * adentro del atardecer y que fuera de él la amplitud no cambia a la vista.
    */
-  [0, 22],
-  [0.14, 22],
-  [0.46, 8],
-  [1, 8],
+  [0, MOUSE_ANGLE_DEG_MAXIMO],
+  [ATARDECER.desde, MOUSE_ANGLE_DEG_MAXIMO],
+  [ATARDECER.hasta, MOUSE_ANGLE_DEG_PISO],
+  [1, MOUSE_ANGLE_DEG_PISO],
 ]
-
-/**
- * El valor de referencia del canal, para quien necesite UNO. Es el del hero —el
- * máximo de la tabla— y existe para que la excursión del peor caso se pueda
- * acotar sin muestrear: nada del recorrido pasa de acá.
- */
-export const MOUSE_ANGLE_DEG_MAXIMO = 22
 
 /**
  * ⚠️ **NO SE TOCÓ, Y TIENE UN TECHO GEOMÉTRICO CASI TOCADO.** En el keyframe

@@ -121,9 +121,18 @@ afirmar(vacio.salida.includes('verde por vacío'), '  y dice por qué', 'la excu
 titulo('4 · El resumen lleva la cuenta aparte, y el corredor la lee')
 
 const conVentana = leerResumen('algo.invariant: 12 afirmaciones, 0 fallas, 5 fuera de ventana')
-afirmarIgual(conVentana, { afirmaciones: 12, fallas: 0, fueraDeVentana: 5 }, 'el corredor lee las tres cifras')
+afirmarIgual(conVentana, { afirmaciones: 12, fallas: 0, fueraDeVentana: 5, deudas: 0 }, 'el corredor lee las tres cifras — y la cuarta, la de deudas (B8), en cero cuando no está')
 const sinVentana = leerResumen('algo.invariant: 12 afirmaciones, 0 fallas')
-afirmarIgual(sinVentana, { afirmaciones: 12, fallas: 0, fueraDeVentana: 0 }, 'y el formato viejo sigue leyéndose')
+afirmarIgual(sinVentana, { afirmaciones: 12, fallas: 0, fueraDeVentana: 0, deudas: 0 }, 'y el formato viejo sigue leyéndose')
+/**
+ * B8 · LA CUARTA CIFRA. `deudaDeclarada()` corre la condición intacta y, si no
+ * se cumple, cuenta aparte: ni falla ni hueco. El resumen la escribe al final,
+ * con o sin la de ventana adelante, y el corredor tiene que leer las dos formas.
+ */
+const conDeudas = leerResumen('algo.invariant: 12 afirmaciones, 0 fallas, 2 deudas declaradas')
+afirmarIgual(conDeudas, { afirmaciones: 12, fallas: 0, fueraDeVentana: 0, deudas: 2 }, 'y la cuenta de deudas declaradas (B8) se lee sola')
+const conLasDos = leerResumen('algo.invariant: 12 afirmaciones, 0 fallas, 5 fuera de ventana, 2 deudas declaradas')
+afirmarIgual(conLasDos, { afirmaciones: 12, fallas: 0, fueraDeVentana: 5, deudas: 2 }, '  y con la de ventana adelante, las dos')
 controlPositivo(
   'el lector de resumen no inventa uno donde no lo hay',
   'una salida cualquiera sin línea de cierre',

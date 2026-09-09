@@ -4,7 +4,8 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  * LA COREOGRAFÍA DEFINITIVA — datos, no lógica.
  *
  * Este archivo es el que se abre para calibrar el movimiento: los keyframes de
- * cámara, los tramos y la curva de luz. El vocabulario que los describe está en
+ * cámara y los tramos; la curva de luz vive en `lightArc.ts` desde B8. El
+ * vocabulario que los describe está en
  * `choreographyTypes.ts`, la matemática que los consume en
  * `choreographySampler.ts` y la física que los modula en
  * `choreographyPhysics.ts`. Ninguno de los tres hay que tocarlo para mover la
@@ -350,122 +351,15 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
   },
 ]
 
-// ── El arco del sol (S6 · reescrito en S7 · reapuntado en S9) ───────────────
+// ── El arco del sol ─────────────────────────────────────────────────────────
 
 /**
- * EL SOL Y LA LUZ PRINCIPAL SON LA MISMA COSA, Y ESTA ES SU TABLA.
- *
- * `probeSun.ts` dibuja el cuerpo; `lightRig.ts` coloca la luz; los dos leen de
- * acá. Lo que ilumina, lo que proyecta la sombra y lo que se ve en el cuadro
- * son el mismo objeto en la misma posición: un sol dibujado por un lado y una
- * key por el otro son **dos soles**, y en cuanto uno se mueve el espacio deja
- * de ser creíble.
- *
- * ── La relación que ata el nivel con la elevación ──────────────────────────
- *
- * > **`level` = sin(elevación) / sin(36°)**
- *
- * No es una coincidencia bonita: es la definición. La irradiancia que una
- * fuente lejana deposita sobre una superficie horizontal es proporcional al
- * seno de su elevación, así que **la sala no se apaga porque bajamos un
- * número: se apaga porque el sol baja.** Los cinco niveles —1 · 1 · 0,84 ·
- * 0,60 · 0,34— salen de las cinco elevaciones, y 36° es la que S6 había
- * calibrado para la principal.
- *
- * ⚠️ Si se mueve un `level` hay que mover su `elevationDeg`, y al revés.
- *
- * ── Qué cambió en S9, y qué NO ─────────────────────────────────────────────
- *
- * **Solo el azimut, más un stop nuevo en 0,125.** Nivel, kelvin y elevación
- * quedaron exactamente como los dejó S7, así que la relación de arriba sigue
- * valiendo carácter por carácter y el descenso sigue coincidiendo con el arco
- * de luz: cuando la intensidad baja hacia el cierre, el sol está bajo.
- *
- * El recorrido nuevo obligó: con las poses de S9 y el azimut viejo, el
- * contraluz caía sobre **Quiénes somos (γ 157°) y Trabajos (γ 133°)** —dos
- * pantallas que se leen— y Demos se quedaba sin él (γ 71–77°), justo donde el
- * sprint lo pide. El azimut se reapuntó para dar vuelta esas dos cosas:
- *
- * | | S7 | S9 |
- * |---|---:|---:|
- * | azimut | −42 → −32 → +6 → +38 → +50 | **−42 → −42 → 115 → 132 → 136 → 138** |
- * | barrido total | 92° | **180°** |
- * | γ mínimo de todo el track | 29° | **35,5°** |
- * | sol en cuadro | 4,2% | **33,4%** (núcleo 32,0%) |
- * | ventana | p = [0,684 → 0,726] | **p = [0,666 → 1,000]** |
- *
- * ── Por qué 180° de barrido, cuando S7 lo había acotado a 92° ──────────────
- *
- * El límite de S7 tenía una razón concreta: en el recorrido viejo **la cámara
- * vivía en azimut 0 durante más de medio track**, y un sol que barriera de más
- * dejaba tramos con la cara vista a oscuras. Ese recorrido ya no existe: el
- * definitivo lee contenido en seis azimuts repartidos por toda la vuelta.
- *
- * Con la cámara barriendo 360° y el sol barriendo 180°, **el ángulo relativo
- * tiene que recorrer 180° sí o sí**, así que el contraluz cae en algún lado. Se
- * lo puso donde el sprint lo pide —el fondo de Demos, con la cámara abajo
- * mirando hacia arriba— y el precio es que a partir de ahí el recorrido va cada
- * vez más a contraluz hasta el final. Eso es exactamente atardecer.
- *
- * 180° no es una vuelta: es un día, de un horizonte al otro.
- *
- * ── Lo que el arco NO es, y hay que decirlo ────────────────────────────────
- *
- * La tabla de S9 describía la luz como un día entero —bajo al hero, alto en
- * Números, poniéndose al cierre—. **Este arco es una tarde**, con descenso
- * monótono. La diferencia no es de gusto: con `level = sin(elev)/sin(36°)`, un
- * sol rasante en el hero da **nivel 0,26–0,35**, o sea que el home arrancaría
- * más oscuro que su propio cierre. Se frenó y quedó registrado.
- *
- * ── El γ que se protege ────────────────────────────────────────────────────
- *
- * γ es el ángulo entre la luz y el observador medido desde el objeto: 0 = luz
- * plana desde atrás de la cámara, 45–70 = tres cuartos, ≈90 = lateral, >130 =
- * contraluz. Con este arco, las cinco ventanas que llevan contenido quedan en
- * **41° · 83–90° · 60–66° · 64–66° · 137°**, y Demos —la única que no lleva
- * texto— en **155–166°**, que es el contraluz pedido. El mínimo de todo el
- * track es 35,5°: **no hay un solo punto con luz plana.**
- *
- * ── La temperatura ────────────────────────────────────────────────────────
- *
- * Sigue subiendo hacia el azul y sigue siendo la decisión más opinable del rig.
- * **Para el cierre ámbar: cambiar el 7700 de abajo por ~2200.** Un número.
- *
- * ── Lo que NO está acá ─────────────────────────────────────────────────────
- *
- * Cómo se reparte el nivel entre las tres luces, el hemisférico, la niebla y el
- * cuerpo del sol está en `probeLighting.ts`, y no es un reparto plano: el
- * ambiente se apaga más rápido que la principal y el contraluz se resiste. Es
- * lo que hace que la escena gane contraste al oscurecerse en vez de volverse
- * gris.
+ * **Desde B8 el arco vive en `lightArc.ts` y acá sólo se re-exporta.** Salió
+ * por la regla de las 300 líneas —este archivo está en su base heredada exacta
+ * y el arco creció de seis a ocho paradas— y porque dejó de ser una tarde: es
+ * una tarde, una noche en Trabajos y la mañana siguiente. La relación
+ * `nivel = sin(elevación)/sin(36°)`, el porqué de cada parada y lo que la noche
+ * obligó a cambiar fuera del arco están allá. Ningún consumidor cambió de
+ * import: `sampleLightArc`, `s7-sol` y el rig lo siguen leyendo de acá.
  */
-export const LIGHT_ARC: readonly LightStop[] = [
-  // Mediodía. La elevación es la que S6 calibró para la key: el arco arranca ahí.
-  { at: 0, level: 1, kelvin: 6500, azimuthDeg: -42, elevationDeg: 36 },
-  // S9 · el sol se queda quieto en la primera pantalla. Sin este stop el barrido
-  // arranca en p=0 y el sol se corre hacia el lado de la cámara: γ se caía a 17°,
-  // o sea luz plana en la primera pantalla del sitio.
-  //
-  // ⚠️ V3-B · **el VALOR no se tocó y la razón se re-midió**: la que estaba escrita
-  // —«el sol se queda quieto mientras el hero se queda quieto»— dejó de ser cierta
-  // al sacar `hero · sostén`. El stop sigue ganándose el lugar con otro número: γ
-  // en la ventana del hero da **40,8–95,2°** con él y **34,3–63,7°** sin él. Lo
-  // mide `s7-modelado.invariant.ts`, donde además el γ mínimo de TODO el track
-  // sube de 35,5° a 40,8°: la cámara que se mueve en la primera pantalla MEJORA
-  // el modelado.
-  { at: 0.125, level: 1, kelvin: 6500, azimuthDeg: -42, elevationDeg: 36, ease: 'linear' },
-  // Meseta de luz: el nivel y la elevación no se mueven hasta el final de Números.
-  // El azimut sí, y ahora rápido — la cámara está dando media vuelta debajo y el
-  // sol tiene que quedarse de su lado para seguir modelando.
-  { at: 0.5, level: 1, kelvin: 6500, azimuthDeg: 115, elevationDeg: 36, ease: 'linear' },
-  // Trabajos y Demos. El nivel baja apenas: al giro no se le apaga la luz. El
-  // azimut termina de cruzarse detrás del logo — acá es donde el sol entra en
-  // cuadro y ya no se va.
-  { at: 0.75, level: 0.84, kelvin: 6850, azimuthDeg: 132, elevationDeg: 29.6, ease: 'shift' },
-  // El cierre empieza, ya en penumbra y con la sombra alargándose.
-  { at: 0.875, level: 0.6, kelvin: 7300, azimuthDeg: 136, elevationDeg: 20.7, ease: 'linear' },
-  // El cierre. `arrive` = llega apagado temprano y sostiene. El sol se pone dentro
-  // del cuadro: a esta altura queda a 42° del eje óptico, así que el núcleo sale
-  // del encuadre (necesita 35,2°) y solo asoma el halo por el borde.
-  { at: 1, level: 0.34, kelvin: 7700, azimuthDeg: 138, elevationDeg: 11.5, ease: 'arrive' },
-]
+export { LIGHT_ARC } from './lightArc'

@@ -86,24 +86,6 @@ export const AGREGADOS: readonly Agregado[] = [
     motivo:
       'La superficie sobre la cual `--blur-panel` significa algo. S0 había emitido el desenfoque sin emitir la superficie, así que era un token muerto que parecía vivo.',
   },
-  {
-    token: '--opacity-densa',
-    sprint: 'B6-A',
-    motivo:
-      'El escalón denso del velo: el primero de la escala con el que el texto secundario pasa AA sobre el velo con la escena detrás (0,70 → 4,09:1; 0,80 → 4,84:1, medido en la pose de Trabajos).',
-  },
-  {
-    token: '--color-velo-denso',
-    sprint: 'B6-A',
-    motivo:
-      'La mitad densa del velo en gradiente de `oscuro-transparente`: el fondo detrás de la columna de texto. Aprobado en la PARADA 1 de B6-A con los números de d-velo.json.',
-  },
-  {
-    token: '--color-velo-ralo',
-    sprint: 'B6-A',
-    motivo:
-      'La mitad rala del velo: la zona desnuda por la que se ve la sala. Su alfa es `--opacity-media`, que ya estaba en la escala.',
-  },
 ]
 
 /** Los tokens que declara el original de S0, leídos del archivo. */

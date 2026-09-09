@@ -20,13 +20,14 @@
  */
 import { celosiaSunSpread, CELOSIA_SUN_RADIUS_DEG, CELOSIA_SUN_RADIUS_MAX_DEG } from '@/app/v3/_lib/escena/celosiaPenumbra'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
+import { RIM_NIGHT_LEVEL } from '@/app/v3/_lib/escena/probeLighting'
 import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { BEAT_POSES, celosiaBeatAt } from './celosiaBeat'
 import { framePenumbraSpread } from './celosiaFloor'
 import { check, report, section } from './harness'
 import { sampleFrame } from './frameProbe'
-import type { ViewContext } from './shading'
+import { levelAt, type ViewContext } from './shading'
 
 /** El barrido que publica el reporte. El 0 es el control. */
 const RADII = [0, 0.133, 0.266, 0.5, 0.75, 1, CELOSIA_SUN_RADIUS_MAX_DEG]
@@ -143,13 +144,36 @@ for (const row of sweep) {
    * anterior ni en su extremo, que es la garantía que hace que sea seguro
    * calibrar mirando.
    */
+  /**
+   * ⚠️ **B8 · CUSTODIABA «ninguna pose vuelve a la escena sin celosía» CONTRA LA
+   * TABLA DE S10.** Esa tabla es la luz del arco viejo: B8 volvió a iluminar
+   * cuatro poses, y la mañana deja al Cierre en 152, arriba de los 120 de S10 —
+   * no es la celosía, es la luz—. La escena SIN celosía se calcula con el mismo
+   * instrumento a la luz de hoy y contra ésa se afirma; en las dos poses
+   * intactas (hero, quiénes somos) tiene que dar los números de S10, que es lo
+   * que ata esta tabla a aquélla. En la noche la celosía sólo puede bajar lo que
+   * la key deja: ahí se pide «por debajo», no «dos puntos por debajo».
+   */
   const S10_MEAN = [216, 172, 222, 208, 136, 120]
-  const top = sweep[sweep.length - 1].mean
+  const SIN_CELOSIA = POSES.map(
+    ([, at, azimuth, height], i) =>
+      sampleFrame(at, { progress: at, cameraAzimuthDeg: azimuth, cameraHeight: height }, { backdrop: true, mismatch: MOIRE_MISMATCH }, 200, 113)
+        .mean - PARTICLE_DELTA[i]
+  )
+  const conLuzEnPose = POSES.map(([, at]) => levelAt(at) >= RIM_NIGHT_LEVEL)
   check(
-    'ni en el tope del slider ninguna pose vuelve a la escena sin celosía de S10',
-    top.every((value, i) => value < S10_MEAN[i] - 2),
-    top.map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} < ${S10_MEAN[i]}`).join(' · ') +
-      ` · la que más se mueve en todo el rango es ${POSES[3][0]}, +${(top[3] - sweep[0].mean[3]).toFixed(1)}`
+    'la escena sin celosía, a la luz de hoy, reproduce los números de S10 en las dos poses cuya luz B8 no tocó',
+    Math.abs(SIN_CELOSIA[0] - S10_MEAN[0]) < 2 && Math.abs(SIN_CELOSIA[1] - S10_MEAN[1]) < 1,
+    `hero ${SIN_CELOSIA[0].toFixed(1)} (S10 ${S10_MEAN[0]}, +1,3 por el encuadre de V3-E) · quiénes somos ${SIN_CELOSIA[1].toFixed(1)} (S10 ${S10_MEAN[1]})`
+  )
+  const top = sweep[sweep.length - 1].mean
+  const movimientos = top.map((value, i) => value - sweep[0].mean[i])
+  const queMasSeMueve = movimientos.indexOf(Math.max(...movimientos))
+  check(
+    'ni en el tope del slider ninguna pose vuelve a la escena sin celosía, a la MISMA luz',
+    top.every((value, i) => (conLuzEnPose[i] ? value < SIN_CELOSIA[i] - 2 : value < SIN_CELOSIA[i])),
+    top.map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} < ${SIN_CELOSIA[i].toFixed(1)}${conLuzEnPose[i] ? '' : ' (noche)'}`).join(' · ') +
+      ` · la que más se mueve en todo el rango es ${POSES[queMasSeMueve][0]}, +${movimientos[queMasSeMueve].toFixed(1)}`
   )
 }
 
@@ -181,16 +205,32 @@ for (const row of sweep) {
    * contraste de banda sobre el papel: los 29,6 puntos que S11 compró, vistos
    * donde caen. Mientras no se mueva, ablandar el borde sale gratis.
    */
+  /**
+   * ⚠️ **B8 · CUSTODIABAN la portadora en las CUATRO poses con piso.** Dos de
+   * ellas (Números y Trabajos) están ahora en la noche: la portadora es el
+   * contraste de banda sobre el papel, y con la key al 8 % es una fracción de la
+   * del día —un cambio de décimas se lee como −17 %—. Se afirma donde la banda
+   * existe, las poses con luz (hero y cierre), y en la noche se afirma y publica
+   * lo otro: que la portadora es una fracción de la del hero. El techo práctico
+   * del parámetro lo marca el hero, la pose de calibración: aguanta 0,75° y cae
+   * en 1°. Antes lo marcaban Números y Trabajos a pleno sol, desde 0,75°.
+   */
+  const conLuz = BEAT_POSES.map((pose) => levelAt(pose[1]) >= RIM_NIGHT_LEVEL)
+  const portadoraDeControl = (i: number): number => sweep[0].beat[i]?.carrier ?? NaN
   check(
-    'la portadora NO se mueve hasta 0,5°: hasta ahí ablandar el borde sale gratis',
-    BEAT_POSES.every((_, i) => Math.abs(carrierAt(0.5, i)) < 0.02),
-    BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.5, i) * 100).toFixed(1)}%`).join(' · ')
+    'la portadora NO se mueve hasta 0,5° en las poses con luz: hasta ahí ablandar el borde sale gratis',
+    conLuz.some((v) => v) && BEAT_POSES.every((_, i) => !conLuz[i] || Math.abs(carrierAt(0.5, i)) < 0.02),
+    BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.5, i) * 100).toFixed(1)}%${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
   )
   check(
-    'y desde 0,75° empieza a caer: ahí el sprint sí estaría deshaciendo a S11',
-    BEAT_POSES.slice(0, 3).some((_, i) => carrierAt(0.75, i) < -0.05) &&
-      BEAT_POSES.every((_, i) => carrierAt(1, i) < -0.02),
-    `en 0,75° ${BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.75, i) * 100).toFixed(0)}%`).join(' · ')} · en 1° ${BEAT_POSES.map((pose, i) => `${(carrierAt(1, i) * 100).toFixed(0)}%`).join('/')}`
+    '  y en la noche la portadora es una fracción de la del hero: no hay banda que cuidar',
+    BEAT_POSES.every((_, i) => conLuz[i] || portadoraDeControl(i) < portadoraDeControl(0) / 2),
+    BEAT_POSES.map((pose, i) => `${pose[0]} ${portadoraDeControl(i).toFixed(1)}${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
+  )
+  check(
+    'y en el hero —la pose de calibración— aguanta 0,75° y cae en 1°: ahí el sprint sí estaría deshaciendo a S11',
+    Math.abs(carrierAt(0.75, 0)) < 0.02 && carrierAt(1, 0) < -0.05,
+    `en 0,75° ${BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.75, i) * 100).toFixed(0)}%`).join(' · ')} · en 1° ${BEAT_POSES.map((_, i) => `${(carrierAt(1, i) * 100).toFixed(0)}%`).join('/')}`
   )
   check(
     'en el valor elegido el batido no pierde más del 11% en ninguna pose',

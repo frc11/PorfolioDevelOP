@@ -160,14 +160,40 @@ check(
  * roto — que es exactamente la clase de defecto que un control positivo ve.
  */
 type Tramo = { readonly elevationDeg: number; readonly azimuthDeg: number }
-const baja = (arco: readonly Tramo[]): boolean =>
-  arco.every((stop, i) => i === 0 || stop.elevationDeg <= arco[i - 1].elevationDeg)
+/**
+ * ⚠️ **B8 · CUSTODIABA «la elevación nunca sube: el sol baja y no vuelve».** Era
+ * la forma del arco viejo —una tarde monótona hasta 0,34— y B8 la cambió por
+ * decisión del humano: la sala se apaga en Trabajos y vuelve a tener luz en el
+ * cierre. La propiedad que queda es la de UN DÍA: la elevación baja una vez
+ * hasta la noche, la sostiene, sube una vez, y nunca vuelve al mediodía del
+ * arranque. Un arco que subiera antes de la noche, o que tuviera dos noches,
+ * sería un péndulo, y el detector tiene que verlos. `s20-arco.invariant.ts`
+ * afirma lo mismo desde el lado del nivel; acá se mira la elevación, que es lo
+ * que la key y la celosía reciben.
+ */
+const unaNoche = (arco: readonly Tramo[]): boolean => {
+  const piso = Math.min(...arco.map((s) => s.elevationDeg))
+  const a = arco.findIndex((s) => s.elevationDeg === piso)
+  const b = arco.length - 1 - [...arco].reverse().findIndex((s) => s.elevationDeg === piso)
+  const cae = (t: readonly Tramo[]): boolean => t.every((s, i) => i === 0 || s.elevationDeg <= t[i - 1].elevationDeg)
+  const sube = (t: readonly Tramo[]): boolean => t.every((s, i) => i === 0 || s.elevationDeg >= t[i - 1].elevationDeg)
+  return (
+    cae(arco.slice(0, a + 1)) &&
+    sube(arco.slice(b)) &&
+    arco.slice(a, b + 1).every((s) => s.elevationDeg === piso) &&
+    arco[arco.length - 1].elevationDeg < arco[0].elevationDeg
+  )
+}
 const barreEnUnSentido = (arco: readonly Tramo[]): boolean =>
   arco.every((stop, i) => i === 0 || stop.azimuthDeg >= arco[i - 1].azimuthDeg)
 const sobreElHorizonte = (arco: readonly Tramo[]): boolean =>
   arco.every((stop) => stop.elevationDeg > 0)
 
-check('la elevación nunca sube: el sol baja y no vuelve', baja(LIGHT_ARC))
+check(
+  'la elevación baja UNA vez, sostiene la noche y sube UNA vez sin volver al mediodía: un día con una noche, no un péndulo (B8)',
+  unaNoche(LIGHT_ARC),
+  LIGHT_ARC.map((s) => `${s.elevationDeg}°`).join(' → ')
+)
 check('el azimut barre en un solo sentido: es un día, no un péndulo', barreEnUnSentido(LIGHT_ARC))
 check(
   'el sol nunca baja del horizonte',
@@ -181,7 +207,16 @@ const ARCO_ROTO: readonly Tramo[] = [
   { elevationDeg: 20, azimuthDeg: -30 },
   { elevationDeg: -5, azimuthDeg: 90 },
 ]
-check('control positivo — el detector de descenso VE una elevación que vuelve a subir', !baja(ARCO_ROTO))
+/** Dos noches: baja, sube, vuelve a bajar y vuelve a subir. Es lo que «un día» no puede ser. */
+const DOS_NOCHES: readonly Tramo[] = [
+  { elevationDeg: 36, azimuthDeg: 0 },
+  { elevationDeg: 3, azimuthDeg: 40 },
+  { elevationDeg: 20, azimuthDeg: 80 },
+  { elevationDeg: 3, azimuthDeg: 120 },
+  { elevationDeg: 20, azimuthDeg: 160 },
+]
+check('control positivo — el detector VE un sol que sube antes de la noche', !unaNoche(ARCO_ROTO))
+check('control positivo — y VE un arco con DOS noches', !unaNoche(DOS_NOCHES), 'baja, sube, baja y sube: cada mitad es monótona y el conjunto no es un día')
 check('control positivo — el del barrido VE un azimut que se devuelve', !barreEnUnSentido(ARCO_ROTO))
 check('control positivo — y el del horizonte VE un sol bajo tierra', !sobreElHorizonte(ARCO_ROTO), 'el tramo del medio está en −5°')
 

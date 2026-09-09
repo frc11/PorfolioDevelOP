@@ -42,10 +42,12 @@ import path from 'node:path'
 
 import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
 import {
+  ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
+  MONTAJE_DE_B8_KIB,
   PRESUPUESTO_DEL_LANE_KIB,
   PRESUPUESTO_PROPIO_KIB,
 } from './s5-presupuesto'
@@ -125,10 +127,13 @@ console.log(
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 0,11 medidos que ya estaban en rojo antes de que B7 tocara producto.`,
 )
 console.log('    Lo subió el humano en la parada, con el número medido. La alternativa era no montar la marca: por eso la decisión es revocable.')
+
   `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB.toFixed(2)} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
     ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
+    ` + ${ARREGLO_DE_B7_KIB} que B7 arregla (reduced-motion unificado)` +
     ` + ${MONTAJE_DE_B6A_KIB} que B6-A monta (la cuarta superficie: 225 B medidos entre dos builds)` +
-    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 1,31 medidos en HEAD antes de que B6-A tocara producto, en este entorno.`,
+    ` + ${MONTAJE_DE_B8_KIB} que B8 monta (el arco con la noche, el contraluz atado y el brillo de las partículas)` +
+    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 71 B medidos sobre el árbol mergeado antes de que B8 tocara producto, en este entorno (\`scripts-b8/peso.ts\`).`,
 )
 console.log('    Cada línea la subió el humano en su parada, con el número medido y la alternativa escrita: por eso cada una es revocable por separado.')
 console.log('    Cada línea la subió el humano en su parada, con el número medido y con su alternativa escrita en `s5-presupuesto.ts` — por eso las tres son revocables: B4-A, no montar la marca; B7, montar el proveedor abajo y dejar `/v3/motion` sin el arreglo; B9, no aplicar la regla del rango.')

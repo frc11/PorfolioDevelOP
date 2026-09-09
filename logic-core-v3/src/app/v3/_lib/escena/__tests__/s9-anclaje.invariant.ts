@@ -255,14 +255,16 @@ const ventanas = ventanasEnProgreso()
  * ancla CUANTIZADA. Ahora el panel del diferencial asoma en **0,7411** —la escena
  * se enciende 0,0161 más tarde—. La primera ventana no se mueve un bit.
  */
-/** ⚠ B6-A: CUATRO ventanas, una por transparente. Trabajos asoma en 0,4688 (una pantalla antes de llenar el
- *  cuadro) y se va en 0,625; el Cierre asoma en el ancla del diferencial y cae ADENTRO de su ventana: contiguas
- *  y transparentes, sin costura ni suspensión entre las dos. Las dos ventanas de siempre no se movieron un bit. */
+/** ⚠ **B8: SEIS ventanas, y las cuatro primeras se encadenan.** Custodiaba cuatro (B6-A: hero, Trabajos, el
+ *  diferencial y el Cierre) con dos huecos reales entre tres bandas. B8 abrió Quiénes somos ([0, 0,375]) y Números
+ *  ([0,2917, 0,5]) por decisión del humano: cada una asoma ANTES de que la anterior se vaya, así que la escena se ve
+ *  de corrido desde p=0 hasta que Trabajos se va (0,625). El único hueco que queda es Servicios y Tu panel; el
+ *  diferencial y el Cierre no se movieron un bit. */
 // prettier-ignore
-afirmarIgual(ventanas.map((v) => v.map((p) => Number(p.toFixed(6)))), [[0, 0.125], [0.46875, 0.625], [0.741142, 1], [0.8525, 1]],
-  'son CUATRO ventanas de progreso, una por sección transparente (B6-A: Trabajos y el Cierre)')
-afirmar(ventanas[1][0] > ventanas[0][1] && ventanas[2][0] > ventanas[1][1], '  las tres bandas no se solapan: los dos huecos son reales', `p=[${ventanas[0][1].toFixed(3)}, ${ventanas[1][0].toFixed(3)}] y p=[${ventanas[1][1].toFixed(3)}, ${ventanas[2][0].toFixed(3)}]`)
-afirmar(ventanas[3][0] >= ventanas[2][0] && ventanas[3][1] <= ventanas[2][1], '  y la del Cierre cae adentro de la del diferencial: sin costura entre las dos', `p=[${ventanas[3][0].toFixed(4)}, ${ventanas[3][1]}] en [${ventanas[2][0].toFixed(4)}, ${ventanas[2][1]}]`)
+afirmarIgual(ventanas.map((v) => v.map((p) => Number(p.toFixed(6)))), [[0, 0.125], [0, 0.375], [0.291667, 0.5], [0.46875, 0.625], [0.741142, 1], [0.8525, 1]],
+  'son SEIS ventanas de progreso, una por sección transparente (B8: Quiénes somos y Números se suman a las cuatro de B6-A)')
+afirmar(ventanas.slice(1, 4).every((v, i) => v[0] <= ventanas[i][1]) && ventanas[4][0] > ventanas[3][1], '  las cuatro primeras se encadenan y el ÚNICO hueco es el de Servicios y Tu panel', `p=[${ventanas[3][1].toFixed(3)}, ${ventanas[4][0].toFixed(3)}]`)
+afirmar(ventanas[5][0] >= ventanas[4][0] && ventanas[5][1] <= ventanas[4][1], '  y la del Cierre cae adentro de la del diferencial: sin costura entre las dos', `p=[${ventanas[5][0].toFixed(4)}, ${ventanas[5][1]}] en [${ventanas[4][0].toFixed(4)}, ${ventanas[4][1]}]`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · LA REASIGNACIÓN DEL KEYFRAME `demos`, consumida como dato')

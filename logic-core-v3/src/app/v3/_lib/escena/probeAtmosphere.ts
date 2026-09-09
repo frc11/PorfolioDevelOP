@@ -70,7 +70,22 @@ export const SHADOW_MAP_SIZE = 1024
  * profundidad, no el ancho.
  */
 export const SHADOW_NEAR = 12
-export const SHADOW_FAR = 64
+/**
+ * ⚠️ **`SHADOW_FAR` subió de 64 a 200 en B8, y tampoco es holgura.** El arco
+ * pasó a tener una noche: en Trabajos el sol baja a 2,7° (`lightArc.ts`), y a
+ * esa elevación el borde superior del logo proyecta a **167 unidades** del
+ * objeto —su punta cae a profundidad **189** desde la cámara de sombra— contra
+ * los 38,8 / 60,9 del cierre de S7. Con 64 la sombra se cortaba en seco a mitad
+ * del piso, que es exactamente el tajo que la tabla de arriba describe. Lo
+ * encontró `s7-sol.invariant.ts` §3 corriendo sobre el arco candidato.
+ *
+ * El precio, otra vez, es precisión: el slab pasa de 52 a 188 de rango y el
+ * `SHADOW_BIAS` normalizado equivale ahora a 0,056 de mundo (era 0,016). Sobre
+ * un logo de 7 unidades que además flota 0,72 sobre el papel sigue siendo
+ * despreciable, y `SHADOW_NORMAL_BIAS` —el que hace el trabajo fino— se mide en
+ * mundo y no cambia. La ortográfica no se toca por la misma razón de siempre.
+ */
+export const SHADOW_FAR = 200
 
 /**
  * El par que decide entre acné y peter-panning.

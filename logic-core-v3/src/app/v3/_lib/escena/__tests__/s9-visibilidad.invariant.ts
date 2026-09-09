@@ -80,13 +80,17 @@ const falsa = (clases: string, dejaVerElCanvas: boolean): DefinicionSuperficie =
 controlPositivo('una superficie que dice tapar SIN pintar relleno se detecta', falsa('text-tinta', false), coherente)
 controlPositivo('una que dice dejar ver Y pinta relleno se detecta', falsa('bg-fondo text-tinta', true), coherente)
 
-// §1.2 · La cuenta real. B6-A: cuatro y cuatro.
+/**
+ * §1.2 · La cuenta real. ⚠️ **B8: seis y dos.** Custodiaba «cuatro y cuatro» (B6-A). B8 abrió Quiénes somos y
+ * Números por decisión del humano —«las secciones 1, 2, 3, 4, 7 y 8 ven la sala»— y las únicas opacas que quedan
+ * son Servicios y Tu panel, que él pidió así. La cuenta sale de la tabla: si mañana se cierra una, esto lo dice.
+ */
 const transparentes = ANCLAJE.geometria.filter((g) => g.dejaVerLaEscena)
 const opacas = ANCLAJE.geometria.filter((g) => !g.dejaVerLaEscena)
 afirmarIgual(
   [transparentes.length, opacas.length],
-  [4, 4],
-  'B6-A: son CUATRO transparentes y CUATRO opacas de las ocho (transparentes, opacas)',
+  [6, 2],
+  'B8: son SEIS transparentes y DOS opacas de las ocho (transparentes, opacas)',
 )
 console.log(`  transparentes: ${transparentes.map((g) => g.id).join(', ')}`)
 console.log(`  opacas:        ${opacas.map((g) => g.id).join(', ')}`)
@@ -96,21 +100,22 @@ console.log(`  opacas:        ${opacas.map((g) => g.id).join(', ')}`)
  * se lea como un desacuerdo: **cinco era la cuenta sobre las SIETE que llevan
  * recorrido de scroll**, o sea sin el Cierre, que mide una pantalla y es donde
  * el recorrido termina. Sobre las ocho eran seis. Desde B6-A, con Trabajos
- * abierta, son cuatro sobre las siete y cuatro sobre las ocho.
+ * abierta, eran cuatro sobre las siete; desde B8 son DOS sobre las siete y dos
+ * sobre las ocho: las mismas dos, Servicios y Tu panel.
  */
 const conRecorrido = ANCLAJE.geometria.filter((g) => g.desdePantalla < ANCLAJE.pantallasDeScroll)
 const opacasConRecorrido = conRecorrido.filter((g) => !g.dejaVerLaEscena)
 afirmarIgual(
   [conRecorrido.length, opacasConRecorrido.length],
-  [7, 4],
-  'sobre las SIETE que llevan recorrido, CUATRO son opacas (con recorrido, opacas)',
+  [7, 2],
+  'sobre las SIETE que llevan recorrido, DOS son opacas (con recorrido, opacas)',
 )
 
 const pantallasOpacas = opacas.reduce((n, g) => n + g.altoEnPantallas, 0)
 afirmarIgual(
   [pantallasOpacas, ANCLAJE.pantallasDelDocumento],
-  [12, 18],
-  'pantallas de panel opaco sobre pantallas del documento — eran 16 de 18 hasta B6-A',
+  [5, 18],
+  'pantallas de panel opaco sobre pantallas del documento — eran 16 de 18 hasta B6-A y 12 de 18 hasta B8',
 )
 console.log(
   `  el ${((100 * pantallasOpacas) / ANCLAJE.pantallasDelDocumento).toFixed(1)}% del documento es panel opaco`,
@@ -165,30 +170,31 @@ afirmar(
 titulo('§2 · las ventanas de scroll en las que la escena se ve')
 
 /**
- * La derivación lista UNA ventana por sección transparente, en pantallas: el
- * Cierre ([16, 17]) cae adentro de la de Por qué develOP ([15, 17]) porque las
- * dos son contiguas y la primera mide dos pantallas de cuadro. Fundidas son
- * tres bandas; `escenaEnCuadro` pregunta por cualquiera, así que el solape no
- * cambia lo que la escena hace.
+ * La derivación lista UNA ventana por sección transparente, en pantallas: cada panel se ve desde una pantalla
+ * antes de llegar arriba hasta que se va; el Cierre ([16, 17]) cae adentro de la del diferencial ([15, 17]).
+ * ⚠️ **B8: seis ventanas y DOS bandas.** Custodiaba cuatro ventanas y tres bandas (B6-A). Con Quiénes somos
+ * ([0, 4]) y Números ([3, 8]) abiertas, las cuatro primeras se encadenan en una sola banda de la pantalla 0 a la
+ * 11: la escena dibuja de corrido hasta que Trabajos se va. `escenaEnCuadro` pregunta por cualquiera.
  */
 afirmarIgual(
   ANCLAJE.ventanasDeLaEscena,
   [
     [0, 1],
+    [0, 4],
+    [3, 8],
     [7, 11],
     [15, 17],
     [16, 17],
   ],
-  'las ventanas salen de la derivación, no de una lista escrita a mano: una por sección transparente',
+  'las ventanas salen de la derivación, no de una lista escrita a mano: una por sección transparente (B8: seis)',
 )
 afirmarIgual(
   ventanasFundidas(ANCLAJE.ventanasDeLaEscena),
   [
-    [0, 1],
-    [7, 11],
+    [0, 11],
     [15, 17],
   ],
-  '  y fundidas son TRES bandas: el hero, Trabajos, y el diferencial con el Cierre',
+  '  y fundidas son DOS bandas: del hero a Trabajos de corrido, y el diferencial con el Cierre',
 )
 controlPositivo(
   'el fundido ve un solape y no cuenta dos veces la misma pantalla',
@@ -200,16 +206,15 @@ const M = MARGEN_DE_REANUDACION
 for (const [p, esperado, porQue] of [
   [0, true, 'el primer píxel: el hero es transparente'],
   [1 - 0.001, true, 'el hero todavía entrega el cuadro'],
-  [1 + M, true, 'el borde exterior del margen de la primera ventana'],
-  [1 + M + 0.001, false, 'un pelo más allá del margen: se suspende'],
-  [5, false, 'el medio de Números — tres paneles de distancia'],
-  [7 - M - 0.001, false, 'un pelo antes del margen de Trabajos'],
-  [7 - M, true, 'el margen enciende la escena antes de que Trabajos asome (B6-A)'],
-  [9, true, 'el pin de Trabajos: la sala detrás del velo'],
+  [1 + M, true, 'donde B6-A cerraba la primera ventana: desde B8 Quiénes somos sigue transparente'],
+  [2.5, true, 'el medio de Quiénes somos, abierta en B8'],
+  [5, true, 'el medio de Números, abierta en B8 — hasta B8 era el medio de tres paneles opacos'],
+  [7 - M, true, 'Trabajos asoma con la escena ya encendida: no hay margen que encender (B6-A lo encendía acá)'],
+  [9, true, 'el pin de Trabajos: la sala a oscuras, sin velo (B8)'],
   [11 + M, true, 'el borde exterior del margen al salir de Trabajos'],
   [11 + M + 0.001, false, 'y un pelo más allá: Servicios tapa'],
-  [13, false, 'el medio de Servicios y Tu panel — dos paneles opacos'],
-  [15 - M - 0.001, false, 'un pelo antes del margen de la tercera ventana'],
+  [13, false, 'el medio de Servicios y Tu panel — los dos paneles opacos que quedan'],
+  [15 - M - 0.001, false, 'un pelo antes del margen de la segunda banda'],
   [15 - M, true, 'el margen enciende la escena antes de que el diferencial asome'],
   [16, true, 'el diferencial llena el cuadro'],
   [16.5, true, 'el Cierre asoma: sigue transparente, sin costura (B6-A)'],
@@ -218,12 +223,13 @@ for (const [p, esperado, porQue] of [
   afirmar(enPantalla(p) === esperado, `pantalla ${String(p).padEnd(9)} → ${esperado ? 'se ve' : 'suspendida'}`, porQue)
 }
 
-controlPositivo('el detector NO dice «se ve» detrás de Números', 5, enPantalla)
+// ⚠️ B8: «detrás de Números» dejó de ser un control —Números se abrió—; los dos opacos que quedan son el control.
 controlPositivo('el detector NO dice «se ve» detrás de Servicios', 12.5, enPantalla)
+controlPositivo('el detector NO dice «se ve» detrás de Tu panel', 14, enPantalla)
 
 afirmar(
-  enPantalla(0.5) && enPantalla(9) && enPantalla(16.5),
-  'y SÍ ve las tres bandas transparentes donde están — el detector no es un «false» constante',
+  enPantalla(0.5) && enPantalla(5) && enPantalla(9) && enPantalla(16.5),
+  'y SÍ ve las dos bandas transparentes donde están, de punta a punta — el detector no es un «false» constante',
 )
 
 afirmar(
@@ -249,8 +255,15 @@ titulo('§4 · cuántos cuadros se ahorran, y con qué supuestos')
  * afirma es la cuenta que lo produce: la banda sin margen es el complemento de
  * las ventanas FUNDIDAS sobre el recorrido, y el margen cuesta exactamente un
  * `MARGEN_DE_REANUDACION` por cada borde de ventana que no sea el del
- * documento. Cuatro bordes: el pie del hero, los dos de Trabajos y la cabeza del
- * diferencial. El del Cierre es el final del scroll y no cuesta nada.
+ * documento. Hasta B8, cuatro bordes: el pie del hero, los dos de Trabajos y la
+ * cabeza del diferencial. ⚠️ **B8: DOS bordes** —el pie de Trabajos y la cabeza
+ * del diferencial—, porque las cuatro primeras ventanas se fundieron en una.
+ *
+ * ⚠️ **B8 · «MÁS DE LA MITAD SIGUE SUSPENDIDO» DEJÓ DE SER CIERTO, Y NO SE ESCONDE.** Custodiaba que la banda con
+ * margen pasara del 50 % (55,9 % en B6-A). Abrir Quiénes somos y Números —decisión del humano— deja suspendidas
+ * sólo las pantallas de Servicios y Tu panel menos dos márgenes: 22,1 %. Lo que se afirma es la CUENTA: la banda es
+ * exactamente lo que tapan las dos opacas, el margen cuesta un octavo por borde y el mecanismo sigue ahorrando más
+ * de cien veces lo que cuesta. El número se publica con su derivación, no contra un umbral que la decisión dejó sin razón.
  */
 const banda = medirBanda()
 imprimirCuadros(banda)
@@ -269,10 +282,11 @@ afirmar(
   `y el margen cuesta un octavo por borde interior: ${bordesInteriores} bordes → ${(100 * costoEsperado).toFixed(1)} puntos`,
   `${(100 * banda.sinMargen).toFixed(1)}% → ${(100 * banda.conMargen).toFixed(1)}%`,
 )
+const hueco = fundidas.length === 2 ? fundidas[1][0] - fundidas[0][1] : Number.NaN
 afirmar(
-  banda.conMargen > 0.5 && banda.conMargen < banda.sinMargen,
-  'más de la mitad del recorrido sigue suspendido, y el margen cuesta algo — no es gratis ni es cero',
-  `${(100 * banda.conMargen).toFixed(1)}% contra ${(100 * banda.sinMargen).toFixed(1)}% sin margen — era 80,9 % con dos ventanas`,
+  Math.abs(banda.sinMargen - hueco / ANCLAJE.pantallasDeScroll) < 1e-9 && banda.conMargen > 0 && banda.conMargen < banda.sinMargen,
+  `lo suspendido es EXACTAMENTE el único hueco —de que Trabajos se va a que el diferencial asoma, ${hueco} pantallas— menos el margen: no es gratis ni es cero`,
+  `${(100 * banda.conMargen).toFixed(1)}% contra ${(100 * banda.sinMargen).toFixed(1)}% sin margen — era 80,9 % con dos ventanas y 55,9 % con cuatro (B6-A)`,
 )
 const ahorro = cuadrosDeUnaPasada(banda)
 afirmar(

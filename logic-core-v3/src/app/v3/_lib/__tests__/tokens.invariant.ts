@@ -179,14 +179,6 @@ async function principal(): Promise<void> {
     // token se declara en el tema claro y se redefine en la sección invertida.
     '--color-superficie-translucida: rgba(247, 247, 245, 0.60);',
     '--color-superficie-translucida: rgba(14, 14, 14, 0.60);',
-    // ⚠ B6-A, aprobado en su PARADA 1: el velo en gradiente de la superficie
-    // `oscuro-transparente`. Un escalón nuevo de la escala de opacidad y dos
-    // colores declarados en el tema claro y redefinidos en la invertida.
-    '--opacity-densa: 0.8;',
-    '--color-velo-denso: rgba(247, 247, 245, 0.80);',
-    '--color-velo-ralo: rgba(247, 247, 245, 0.40);',
-    '--color-velo-denso: rgba(14, 14, 14, 0.80);',
-    '--color-velo-ralo: rgba(14, 14, 14, 0.40);',
     // La regla de foco que agrega S1. Su `}` de cierre NO aparece acá porque
     // esa línea ya existe idéntica en el archivo de S0 — el comparador es de
     // conjuntos, no de posiciones.

@@ -1,0 +1,167 @@
+{
+  "que": "la escena no se mueve con prefers-reduced-motion, en cinco poses donde se ve (la noche de Trabajos incluida), y sí se mueve sin la preferencia",
+  "instrumento": "scripts-b8/f-reducido.ts — la preferencia la pone Emulation.setEmulatedMedia, no el árbol",
+  "fueraDeGrilla": [
+    {
+      "caso": "reducido",
+      "paneles": [
+        {
+          "id": "servicios",
+          "alto": 2775
+        }
+      ]
+    }
+  ],
+  "filas": [
+    {
+      "caso": "reducido",
+      "pose": "hero",
+      "scrollY": 0,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "quienes-somos",
+      "scrollY": 900,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "numeros",
+      "scrollY": 3600,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "trabajos",
+      "scrollY": 8100,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "reducido",
+      "pose": "cierre",
+      "scrollY": 15375,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": true,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 0,
+        "mediaDelta": 0
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "hero",
+      "scrollY": 0,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 23.38,
+        "mediaDelta": 7.04
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "quienes-somos",
+      "scrollY": 900,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 20.57,
+        "mediaDelta": 8.45
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "numeros",
+      "scrollY": 3600,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 14.08,
+        "mediaDelta": 6.26
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "trabajos",
+      "scrollY": 8100,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 6.19,
+        "mediaDelta": 2.19
+      },
+      "problemas": []
+    },
+    {
+      "caso": "normal",
+      "pose": "cierre",
+      "scrollY": 15300,
+      "leido": {
+        "preferenciaLeidaPorLaPagina": false,
+        "escena": true,
+        "ancho": 1440
+      },
+      "quietud": {
+        "pctPixeles": 14.76,
+        "mediaDelta": 5.59
+      },
+      "problemas": []
+    }
+  ]
+}

@@ -141,7 +141,7 @@ function paso3Agregados(completo: boolean): Paso[] {
     return {
       nombre: `3 · agregado ${suite.nombre}`,
       ok: t.fallados === 0,
-      detalle: `${t.corridos} invariantes · ${t.afirmaciones} afirmaciones · ${t.controles} controles positivos · ${t.fueraDeVentana} fuera de ventana · ${t.fallados} con falla`,
+      detalle: `${t.corridos} invariantes · ${t.afirmaciones} afirmaciones · ${t.controles} controles positivos · ${t.fueraDeVentana} fuera de ventana · ${t.deudas} deudas declaradas · ${t.fallados} con falla`,
     }
   })
 }

@@ -55,9 +55,13 @@ import { MOIRE_MISMATCH } from '../probeMoire'
 import { MAPEO_DE_LAS_SECCIONES } from '../recorrido'
 import { TINTA_HEX } from '../../superficies'
 import { sampleFrame } from '@/app/probe-escena/__tests__/frameProbe'
-import { afirmar, cerrar, controlPositivo, razonDeContraste, titulo } from '../../__tests__/afirmar'
+import { afirmar, cerrar, controlPositivo, deudaDeclarada, razonDeContraste, titulo } from '../../__tests__/afirmar'
+import { DEUDAS_DE_B8 } from '../../__tests__/deudas-b8'
+import { COLOR } from '../../__tests__/s10-acceso-color'
+import { AMANECER, ANCLA_DEL_DIFERENCIAL, ATARDECER, NOCHE } from '../lightArc'
 import { grisHex, muestrearCuadro, percentil, vistaEn } from './cuadro'
 import { afirmarElDiferencial } from './s8-tinta-diferencial'
+import { contrasteDeLaSeccion, cruceEn, esInvertida, peorDeLaVentana } from './s8-tinta-ventanas'
 
 /** La escena real: envolvente puesta, desajuste del panel y celosía con su cielo. */
 const ESCENA_REAL = {
@@ -127,44 +131,63 @@ for (const [nombre, at] of POSES) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · LA CURVA — el contraste cae monótono con el atardecer, y dónde cruza AA')
+titulo('3 · LA CURVA — el contraste sigue a la luz: cae en el atardecer, vuelve con el sol, y dónde cruza AA')
 
 /**
  * Es una PROPIEDAD DE LA ESCENA y no del mapeo: vale sea cual sea la función que
  * ate el scroll al progreso, porque sólo depende del progreso. Por eso ésta sí
  * se afirma.
+ *
+ * ⚠️ **B8 · CUSTODIABA «cae monótono con el atardecer y cruza AA en la última
+ * pantalla (p entre 0,85 y 0,9)».** Era la forma del arco viejo: una tarde que
+ * se apagaba de punta a punta hasta 0,34 en p=1, y una sola bisección sobre
+ * [0, 1] bastaba. B8 pone la noche en Trabajos y sostiene la mañana (0,643)
+ * desde el ancla del diferencial hasta el final (`lightArc.ts`): la curva tiene
+ * DOS cruces —uno hacia abajo adentro del ATARDECER y uno hacia arriba mientras
+ * el diferencial entra— y en p=1 queda arriba de AA. La bisección recibe el
+ * tramo, porque sobre [0, 1] ya no hay monotonía que la sostenga; lo que se
+ * afirma es DÓNDE están los cruces, que es lo que decide qué texto queda
+ * debajo (§4), y que la mañana no vuelve a caer.
  */
-const bisecar = (umbral: number, cuantil = 0): number => {
-  let lo = 0
-  let hi = 1
-  for (let i = 0; i < 16; i += 1) {
-    const m = (lo + hi) / 2
-    if (contrasteEn(m, cuantil) >= umbral) lo = m
-    else hi = m
-  }
-  return (lo + hi) / 2
-}
+const bisecar = (umbral: number, cuantil = 0, desde = 0, hasta = 1): number =>
+  cruceEn((p) => contrasteEn(p, cuantil), umbral, desde, hasta)
 
-const cruceAA = bisecar(AA)
-const cruceAAA = bisecar(AAA)
+const cruceAA = bisecar(AA, 0, ATARDECER.desde, ATARDECER.hasta)
+const cruceAAA = bisecar(AAA, 0, ATARDECER.desde, ATARDECER.hasta)
+const vueltaAA = bisecar(AA, 0, AMANECER.desde, ANCLA_DEL_DIFERENCIAL)
 console.log(
-  `  el peor píxel del cuadro cruza AA (${AA}:1) en p=${cruceAA.toFixed(4)} y AAA (${AAA}:1) en p=${cruceAAA.toFixed(4)}`,
+  `  el peor píxel del cuadro cruza AA (${AA}:1) hacia abajo en p=${cruceAA.toFixed(4)} —AAA (${AAA}:1) en p=${cruceAAA.toFixed(4)}— y vuelve a pasarlo en p=${vueltaAA.toFixed(4)}`,
 )
 
 afirmar(
   contrasteEn(0, 0) > contrasteEn(1, 0),
-  'el contraste del peor píxel baja de punta a punta del recorrido',
+  'el contraste del peor píxel baja de punta a punta del recorrido: el día termina con menos luz de la que empezó',
   `${contrasteEn(0, 0).toFixed(2)}:1 en p=0 → ${contrasteEn(1, 0).toFixed(2)}:1 en p=1`,
 )
 afirmar(
-  cruceAA > 0.85 && cruceAA < 0.9,
-  `y cruza AA en la última pantalla del recorrido, no antes`,
-  `p=${cruceAA.toFixed(4)} — o sea que TODO el tramo de cierre está abajo de 4,5:1`,
+  cruceAA > ATARDECER.desde && cruceAA < ATARDECER.hasta,
+  'cruza AA hacia abajo ADENTRO del atardecer: la pantalla en que Trabajos entra y Números todavía se va',
+  `p=${cruceAA.toFixed(4)} en [${ATARDECER.desde}, ${ATARDECER.hasta}] — o sea que la noche entera de Trabajos está abajo de 4,5:1 para la tinta OSCURA, que ahí no se usa`,
 )
 afirmar(
-  contrasteEn(0.87, 0) >= AA && contrasteEn(0.89, 0) < AA,
-  '  el umbral es real en las dos direcciones: pasa en p=0,87 y no pasa en p=0,89',
-  `${contrasteEn(0.87, 0).toFixed(2)}:1 contra ${contrasteEn(0.89, 0).toFixed(2)}:1`,
+  contrasteEn(cruceAA - 0.01, 0) >= AA && contrasteEn(cruceAA + 0.01, 0) < AA,
+  '  el cruce de bajada es real en las dos direcciones: pasa un centésimo antes y no pasa un centésimo después',
+  `${contrasteEn(cruceAA - 0.01, 0).toFixed(2)}:1 contra ${contrasteEn(cruceAA + 0.01, 0).toFixed(2)}:1`,
+)
+afirmar(
+  vueltaAA > AMANECER.hasta && vueltaAA < ANCLA_DEL_DIFERENCIAL,
+  'vuelve a pasar AA DESPUÉS de que la escena reanuda y ANTES del ancla del diferencial: mientras el diferencial entra',
+  `p=${vueltaAA.toFixed(4)} en (${AMANECER.hasta}, ${ANCLA_DEL_DIFERENCIAL}) — la entrada del diferencial queda abajo, y es la deuda ${DEUDAS_DE_B8.diferencial.numero} de §4`,
+)
+afirmar(
+  contrasteEn(vueltaAA - 0.01, 0) < AA && contrasteEn(vueltaAA + 0.01, 0) >= AA,
+  '  y el de subida también es real en las dos direcciones',
+  `${contrasteEn(vueltaAA - 0.01, 0).toFixed(2)}:1 contra ${contrasteEn(vueltaAA + 0.01, 0).toFixed(2)}:1`,
+)
+afirmar(
+  contrasteEn(ANCLA_DEL_DIFERENCIAL, 0) >= AA && contrasteEn(1, 0) >= AA,
+  'y desde el ancla del diferencial hasta el final la mañana sostiene AA: la tinta oscura no vuelve a caer',
+  `${contrasteEn(ANCLA_DEL_DIFERENCIAL, 0).toFixed(2)}:1 en el ancla · ${contrasteEn(1, 0).toFixed(2)}:1 en p=1 — con el arco viejo p=1 daba 2,34:1`,
 )
 controlPositivo(
   'razonDeContraste sabe reprobar: la tinta contra sí misma no pasa AA',
@@ -176,49 +199,95 @@ controlPositivo(
 titulo('4 · LAS SECCIONES TRANSPARENTES, con el ANCLAJE puesto')
 
 const transparentes = MAPEO_DE_LAS_SECCIONES.filter((f) => f.dejaVerLaEscena)
-// B6-A abrió Trabajos y el Cierre: eran dos, son cuatro, y siguen saliendo de la tabla.
+/** ⚠️ B8: eran cuatro (B6-A) y son SEIS — el humano abrió Quiénes somos y Números. Siguen saliendo de la tabla. */
 afirmar(
-  transparentes.map((f) => f.id).join(' · ') === 'hero · trabajos · por-que-develop · cierre',
-  'son cuatro y salen de la tabla del home: el hero, Trabajos, el diferencial y el Cierre',
+  transparentes.map((f) => f.id).join(' · ') === 'hero · quienes-somos · numeros · trabajos · por-que-develop · cierre',
+  'son seis y salen de la tabla del home: las ocho menos Servicios y Tu panel (B8)',
   transparentes.map((f) => f.id).join(' · '),
 )
 
-const bordesDe = (f: (typeof transparentes)[number]): readonly number[] => [
-  f.seVeDesde,
-  f.llenaDesde,
-  f.llenaHasta,
-  f.seVeHasta,
-]
-
-console.log('  sección           se ve en p=[…]        llena   C(mín)  C(p05)  C(p50)   peor de la ventana')
-for (const fila of transparentes) {
-  const peor = Math.min(...bordesDe(fila).map((p) => contrasteEn(p, 0)))
+/**
+ * ⚠️ **B8 · LA PEOR LECTURA YA NO ESTÁ EN LOS BORDES, Y HAY DOS TINTAS.**
+ * Custodiaba el peor de los cuatro bordes de cada ventana con la tinta oscura,
+ * y alcanzaba porque el contraste era monótono y las transparentes eran de
+ * papel. Ahora cada ventana se barre entera (`s8-tinta-ventanas.ts`) y cada
+ * sección se mide con la tinta que lleva: la oscura contra el píxel más oscuro,
+ * la invertida (Trabajos, Cierre) contra el más claro.
+ */
+const lecturas = transparentes.map((f) => ({ f, invertida: esInvertida(f.id), ...peorDeLaVentana(f, ESCENA_REAL) }))
+console.log('  sección           tinta    se ve en p=[…]        peor de la ventana      en p=')
+for (const l of lecturas) {
   console.log(
-    `  ${fila.id.padEnd(16)} [${fila.seVeDesde.toFixed(3)}, ${fila.seVeHasta.toFixed(3)}]` +
-      `   ${fila.llenaDesde.toFixed(3)}   ${contrasteEn(fila.llenaDesde, 0).toFixed(2).padStart(6)}` +
-      `  ${contrasteEn(fila.llenaDesde, 0.05).toFixed(2).padStart(6)}` +
-      `  ${contrasteEn(fila.llenaDesde, 0.5).toFixed(2).padStart(6)}   ${peor.toFixed(2)}:1`,
+    `  ${l.f.id.padEnd(16)}  ${(l.invertida ? 'clara' : 'oscura').padEnd(7)} [${l.f.seVeDesde.toFixed(4)}, ${l.f.seVeHasta.toFixed(4)}]` +
+      `   ${l.peor.toFixed(2).padStart(6)}:1 ${l.peor >= AA ? 'pasa AA' : 'NO pasa'}   ${l.en.toFixed(4)}  (${l.muestras} muestras)`,
   )
 }
+const lectura = (id: string) => {
+  const l = lecturas.find((x) => x.f.id === id)
+  if (l === undefined) throw new Error(`sin lectura de "${id}"`)
+  return l
+}
 
-/**
- * ⚠ **LA RAZÓN DE ESTA AFIRMACIÓN SE CAYÓ CON `hero · sostén` (V3-B).** Decía que
- * la ventana del Hero era un SOSTÉN y que por eso *«el cuadro no cambia en toda
- * la ventana y el peor caso es el mismo en los cuatro bordes»*. V3-B sacó ese
- * keyframe: el cuadro **sí** cambia —la cámara va de azimut 0°/altura
- * 6,40/distancia 19,00 a 59,4°/1,83/15,57 entre p=0 y p=0,125— así que el
- * `Math.min` de abajo dejó de ser una formalidad. El peor caso bajó de **9,73:1 a
- * 8,71:1**: es lo que cuesta que la escena se mueva desde el primer píxel.
- */
-const hero = transparentes[0]
-const heroPeor = Math.min(...bordesDe(hero).map((p) => contrasteEn(p, 0)))
+const hero = lectura('hero')
 afirmar(
-  heroPeor >= AA,
+  hero.peor >= AA,
   'HERO — la tinta pasa AA sobre la escena real en toda la ventana en que el Hero se ve',
-  `peor caso ${heroPeor.toFixed(2)}:1 · también pasa AAA (${AAA}:1): ${heroPeor >= AAA ? 'sí' : 'no'}`,
+  `peor caso ${hero.peor.toFixed(2)}:1 · también pasa AAA (${AAA}:1): ${hero.peor >= AAA ? 'sí' : 'no'}`,
+)
+const quienes = lectura('quienes-somos')
+afirmar(
+  quienes.peor >= AA,
+  'QUIÉNES SOMOS (B8) — la tinta pasa AA sobre la escena real en toda su ventana: la meseta de luz la cubre entera',
+  `peor caso ${quienes.peor.toFixed(2)}:1 en p=${quienes.en.toFixed(4)} · también pasa AAA: ${quienes.peor >= AAA ? 'sí' : 'no'}`,
 )
 
-afirmarElDiferencial({ contrasteEn, bisecar, cruceAA, AA, AAA }, transparentes)
+/**
+ * ⚠️ **LAS CUATRO DEUDAS DE B8 — la condición corre intacta y no se afloja.**
+ * Cada una es la MISMA afirmación que las dos de arriba, y B8 la rompió a
+ * propósito al abrir la sala y poner la noche en Trabajos. Se declara con su
+ * número y con el bloque que la cierra (`deudas-b8.ts`); el agregado la
+ * publica aparte de las fallas, y el día que se cierre esto pasa a verde solo.
+ */
+const numeros = lectura('numeros')
+deudaDeclarada(
+  numeros.peor >= AA,
+  'NÚMEROS (B8) — la tinta pasa AA sobre la escena real en toda su ventana',
+  `${DEUDAS_DE_B8.numeros.numero}: peor ${numeros.peor.toFixed(2)}:1 en p=${numeros.en.toFixed(4)} — ${DEUDAS_DE_B8.numeros.que}; pasa AA hasta p=${cruceAA.toFixed(4)}, ${(ATARDECER.hasta - cruceAA).toFixed(4)} de progreso antes de irse`,
+  DEUDAS_DE_B8.numeros.cierre,
+)
+const trabajos = lectura('trabajos')
+const trabajosLegible = cruceEn((p) => contrasteDeLaSeccion('trabajos', p, ESCENA_REAL), AA, ATARDECER.desde, ATARDECER.hasta)
+deudaDeclarada(
+  trabajos.peor >= AA,
+  'TRABAJOS (B6-A, sin velo desde B8) — la tinta CLARA pasa AA sobre la sala en toda su ventana',
+  `${DEUDAS_DE_B8.trabajos.numero}: peor ${trabajos.peor.toFixed(2)}:1 en p=${trabajos.en.toFixed(4)} — ${DEUDAS_DE_B8.trabajos.que}; se lee desde p=${trabajosLegible.toFixed(4)} y en la noche da ${contrasteDeLaSeccion('trabajos', NOCHE.hasta, ESCENA_REAL).toFixed(2)}:1`,
+  DEUDAS_DE_B8.trabajos.cierre,
+)
+const diferencial = lectura('por-que-develop')
+deudaDeclarada(
+  diferencial.peor >= AA,
+  'POR QUÉ DEVELOP — la tinta pasa AA sobre la escena real en toda su ventana',
+  `${DEUDAS_DE_B8.diferencial.numero}: peor ${diferencial.peor.toFixed(2)}:1 en p=${diferencial.en.toFixed(4)} — ${DEUDAS_DE_B8.diferencial.que}: llega a AA en p=${vueltaAA.toFixed(4)} y en el ancla da ${contrasteEn(ANCLA_DEL_DIFERENCIAL, 0).toFixed(2)}:1`,
+  DEUDAS_DE_B8.diferencial.cierre,
+)
+const cierre = lectura('cierre')
+deudaDeclarada(
+  cierre.peor >= AA,
+  'CIERRE (B6-A, sin velo desde B8) — la tinta CLARA pasa AA sobre la sala en toda su ventana',
+  `${DEUDAS_DE_B8.cierre.numero}: ${cierre.peor.toFixed(2)}:1 en p=${cierre.en.toFixed(4)}, y no pasa de ${Math.max(...[cierre.f.seVeDesde, 1].map((p) => contrasteDeLaSeccion('cierre', p, ESCENA_REAL))).toFixed(2)}:1 en toda la ventana — ${DEUDAS_DE_B8.cierre.que}`,
+  DEUDAS_DE_B8.cierre.cierre,
+)
+controlPositivo(
+  'el medidor de la tinta clara sabe reprobar: contra el papel a pleno sol (248) no llega a 3:1',
+  '#F8F8F8',
+  (papel: string) => razonDeContraste(COLOR.tintaInvertida, papel) >= 3,
+)
+afirmar(
+  lecturas.filter((l) => l.peor < AA).map((l) => l.f.id).join(' · ') === 'numeros · trabajos · por-que-develop · cierre',
+  'y las deudas son EXACTAMENTE esas cuatro: ni una más sin declarar, ni una declarada que ya esté saldada',
+  lecturas.filter((l) => l.peor < AA).map((l) => `${l.f.id} ${l.peor.toFixed(2)}:1`).join(' · '),
+)
 
+afirmarElDiferencial({ contrasteEn, bisecar, cruceAA, vueltaAA, AA, AAA }, transparentes)
 
 cerrar('s8-tinta.invariant')

@@ -202,7 +202,7 @@ const VENTANA = ventanaDelDiferencial(CAJAS_DEL_DIFERENCIAL)
 afirmar(
   DECLARADA > VENTANA.desde && DECLARADA < VENTANA.hasta,
   `el ancla cae ADENTRO de la ventana medida p=[${VENTANA.desde.toFixed(4)}, ${VENTANA.hasta.toFixed(4)}]`,
-  `+${(DECLARADA - VENTANA.desde).toFixed(4)} del borde de abajo y −${(VENTANA.hasta - DECLARADA).toFixed(4)} del cruce de AA`,
+  `+${(DECLARADA - VENTANA.desde).toFixed(4)} del borde de abajo y −${(VENTANA.hasta - DECLARADA).toFixed(4)} del borde de arriba${VENTANA.hasta === 1 ? ' — que desde B8 es el final del recorrido: la mañana sostenida no vuelve a cruzar AA' : ' (el cruce de AA)'}`,
 )
 
 /**
@@ -244,7 +244,9 @@ afirmar(
  * la razón por la que adentro de la ventana se elige el valor más bajo que
  * despeja el escalón, y no el más alto ni el centro.
  */
-const CANDIDATOS = [0.8375, DECLARADA, 0.875]
+// ⚠️ B8: se suma 0,9167, el reparto cuantizado de arriba. Desde B8 cae adentro de la ventana por contraste (la
+// mañana no vuelve a cruzar AA) y lo que lo descarta es ESTE corrimiento, el más alto de los cuatro — `s13b` §4.
+const CANDIDATOS = [0.8375, DECLARADA, 0.875, 0.916667]
 const corrimientos = CANDIDATOS.map((a) => corrimientoDe('tu-panel', a))
 console.log(
   `  el corrimiento de tu-panel según el ancla: ${CANDIDATOS.map((a, i) => `${a.toFixed(4)} → +${corrimientos[i].toFixed(4)}`).join(' · ')}`,

@@ -71,7 +71,7 @@ const { fondo: FONDO_OSCURO, tinta: TINTA_CLARA, acentos: ACENTOS } = coloresDel
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
 
-afirmarIgual(seccion.superficie, 'oscuro-transparente', 'la superficie es oscuro-transparente: la banda oscura, con velo sobre la escena desde B6-A')
+afirmarIgual(seccion.superficie, 'oscuro-transparente', 'la superficie es oscuro-transparente: la banda oscura sobre la escena — abierta en B6-A, sin velo desde B8: la noche la pone el arco')
 afirmarIgual(pantallasDe(seccion), 3, 'ocupa TRES pantallas — la secuencia más larga del lane')
 afirmarIgual(seccion.pinneada, 'desde-escritorio', 'y es PINNEADA DESDE 1025: abajo no se clava, y cada proyecto toma su pantalla')
 afirmarIgual(veces(quieto, 'data-pinneado="desde-escritorio"'), 1, '  y hay UN solo hijo pinneado en el marcado')

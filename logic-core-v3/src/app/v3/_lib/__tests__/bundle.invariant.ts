@@ -313,7 +313,8 @@ const faltantes = tokens.filter((t) => !new RegExp(`${t}\\s*:`).test(cssServido)
 
 /**
  * 90 y no 89 desde S3 (2026-08-29): entró `--color-superficie-translucida`,
- * la superficie que le faltaba a `--blur-panel`. Y 93 desde B6-A: el velo.
+ * la superficie que le faltaba a `--blur-panel`. 93 durante B6-A (el velo) y
+ * de vuelta a 90 desde B8, que sacó el velo y sus tres tokens.
  * ⚠ La cuenta ya no es un literal: sale de `padron-de-tokens.ts`, el mismo
  * padrón que `tokens.invariant.ts` y `tokens-de-uso` consumen. Un literal
  * acá se rompía cada vez que el sistema crecía bien. El nombre de cada

@@ -1,0 +1,123 @@
+{
+  "lente": [
+    {
+      "scrollY": 7200,
+      "leido": {
+        "perspective": "1427.22px",
+        "perspectiveOrigin": "688px 209px",
+        "rect": {
+          "left": 32,
+          "top": 240.75,
+          "width": 1376,
+          "height": 627.25
+        },
+        "pegado": {
+          "top": 0,
+          "height": 900,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1440,
+          "alto": 900
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1427.2176610634456,
+        "origen": "688.0px 209.3px"
+      },
+      "capturaC": ".b8-capturas/b8-trabajos-7200-C.png"
+    },
+    {
+      "scrollY": 8100,
+      "leido": {
+        "perspective": "1427.22px",
+        "perspectiveOrigin": "688px 209px",
+        "rect": {
+          "left": 32,
+          "top": 240.75,
+          "width": 1376,
+          "height": 627.25
+        },
+        "pegado": {
+          "top": 0,
+          "height": 900,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1440,
+          "alto": 900
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1427.2176610634456,
+        "origen": "688.0px 209.3px"
+      },
+      "capturaC": ".b8-capturas/b8-trabajos-8100-C.png"
+    },
+    {
+      "scrollY": 9000,
+      "leido": {
+        "perspective": "1427.22px",
+        "perspectiveOrigin": "688px 209px",
+        "rect": {
+          "left": 32,
+          "top": 240.75,
+          "width": 1376,
+          "height": 627.25
+        },
+        "pegado": {
+          "top": 0,
+          "height": 900,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1440,
+          "alto": 900
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1427.2176610634456,
+        "origen": "688.0px 209.3px"
+      },
+      "capturaC": ".b8-capturas/b8-trabajos-9000-C.png"
+    }
+  ],
+  "revelado": [
+    {
+      "frontera": "hero → quienes-somos",
+      "scrollY": 450,
+      "mascara": "",
+      "espera": "ninguna"
+    },
+    {
+      "frontera": "quienes-somos → numeros",
+      "scrollY": 3150,
+      "mascara": "",
+      "espera": "ninguna"
+    },
+    {
+      "frontera": "numeros → trabajos",
+      "scrollY": 6750,
+      "mascara": "",
+      "espera": "ninguna"
+    },
+    {
+      "frontera": "trabajos → servicios",
+      "scrollY": 9450,
+      "mascara": "linear-gradient(rgb(0, 0, 0) 0px, rgb(0, 0, 0) 337.5px, transparent 450px, transparent 900px)",
+      "espera": "sale"
+    },
+    {
+      "frontera": "tu-panel → por-que-develop",
+      "scrollY": 13950,
+      "mascara": "linear-gradient(transparent 0px, transparent 450px, rgb(0, 0, 0) 562.5px, rgb(0, 0, 0) 900px)",
+      "espera": "entra"
+    },
+    {
+      "frontera": "por-que-develop → cierre",
+      "scrollY": 14850,
+      "mascara": "",
+      "espera": "ninguna"
+    }
+  ]
+}

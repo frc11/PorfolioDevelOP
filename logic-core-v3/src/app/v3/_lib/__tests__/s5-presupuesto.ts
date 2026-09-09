@@ -154,6 +154,17 @@ export const MONTAJE_DE_B4A_KIB = 1.25
  * `/v3`, evitaría que webpack ice el núcleo compartido de `_lib` a un chunk
  * propio. **Y dejaría `/v3/motion` sin el arreglo**, o sea el mismo defecto de
  * accesibilidad de vuelta en una ruta. Se descartó por eso, no por el peso.
+ *
+ * ── Por qué DOS constantes y no una sola más grande ───────────────────────
+ *
+ * Porque son de dueños distintos y se comportan distinto. El día que alguien
+ * encuentre de dónde salieron los 0,11 heredados y los devuelva, **el techo baja
+ * solo** al borrar esa línea, sin tener que re-derivar nada. Un número único
+ * habría enterrado la distinción, que es exactamente lo que la regla 13 prohíbe.
+ */
+export const ARREGLO_DE_B7_KIB = 0.55
+
+/**
  * ═══ B6-A · EL TECHO SUBE OTRA VEZ, EN DOS LÍNEAS DE DUEÑOS DISTINTOS ═════
  *
  * ⚠️ **Lo decidió el humano en la PARADA 2 de B6-A, con las tres cosas que B4-A
@@ -291,10 +302,51 @@ export const HEREDADO_SIN_DECLARAR_KIB = 1.35
 export const MONTAJE_DE_B9_KIB = 0.31
 
 /**
+ * ═══ B8 · LAS DOS LÍNEAS HEREDADAS SE VUELVEN UNA, medida sobre el árbol mergeado ═
+ *
+ * B7 y B6-A corrieron en paralelo sobre el MISMO commit (5ecfbe55) y cada uno
+ * publicó su propio heredado —0,15 en el worktree de B7, 1,35 en el de B6-A—
+ * porque midieron en dos entornos que dieron 1,16 KiB de diferencia sin
+ * atribuir. El merge de las dos ramas (`cda07be1`) no puede llevar dos líneas
+ * heredadas: es UN árbol y tiene UN peso. B8 lo re-midió con un build aislado
+ * del árbol mergeado ANTES de tocar producto (`.next-b8`) y deja UNA línea con
+ * el número de este entorno.
+ *
+ * **El recibo** (`scripts-b8/peso.ts .next-b8`, el mismo reparto y la misma
+ * resta del preámbulo que este invariante): 5 chunks propios · 65.350 B crudos
+ * · 1.740 B de preámbulo de Sentry · **63.610 B escritos por el lane = 62,119
+ * KiB**. Las líneas con nombre suman 60 + 1,25 + 0,55 + 0,25 = 62,05 KiB =
+ * 63.539 B. Lo que queda sin dueño en este entorno son **71 B = 0,07 KiB**: ni
+ * los 0,15 de B7 ni los 1,35 de B6-A, que eran de otros entornos.
+ */
+export const HEREDADO_SIN_DECLARAR_KIB = 0.07
+
+/**
+ * ═══ B8 · LO QUE B8 MONTA — y es NEGATIVO: el velo pesaba más que la noche ═══
+ *
+ * El recibo, con el mismo instrumento que la línea heredada
+ * (`scripts-b8/peso.ts`, los mismos 5 chunks propios, el mismo preámbulo de
+ * Sentry restado):
+ *
+ *   · `.next-b8` (el árbol mergeado antes de tocar producto): 65.350 B crudos,
+ *     1.740 B de preámbulo → **63.610 B escritos por el lane**.
+ *   · `.next` (el build final de B8): 65.258 B crudos, 1.740 B de preámbulo →
+ *     **63.518 B escritos por el lane**.
+ *
+ * B8 SACÓ 92 B = 0,09 KiB: se fueron el velo (`velo.css` y su import en el
+ * layout, la clase y los tokens) y entraron el arco con la noche (`lightArc.ts`),
+ * el contraluz atado a la sala (`rimIntensityAt`), el brillo de las partículas
+ * (`particleGlow.ts` y su uniform) y `SHADOW_FAR`. La línea va con su signo,
+ * porque el techo viejo las resta todas: un montaje negativo que no se declarara
+ * dejaría 92 B de aire sin dueño, que es exactamente lo que la regla no permite.
+ */
+export const MONTAJE_DE_B8_KIB = -0.09
+
+/**
  * ⚠️ **TODO AUMENTO ES UNA LÍNEA CON NOMBRE, Y EL TECHO VIEJO LAS RESTA TODAS.**
  *
  * Es lo que impide que esto se convierta en un número que sube solo: el
- * presupuesto original de 60 KiB sigue vivo y se afirma **restando cada montaje
+ * presupuesto original de 60 KiB sigue vivo y se afirma **restando cada montaje**
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  */
@@ -302,4 +354,6 @@ export const MONTAJES_DECLARADOS_KIB = MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + 
 export const MONTAJES_DECLARADOS_KIB = MONTAJE_DE_B4A_KIB + MONTAJE_DE_B6A_KIB + HEREDADO_SIN_DECLARAR_KIB
 export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + HEREDADO_SIN_DECLARAR_KIB + MONTAJE_DE_B9_KIB
+export const MONTAJES_DECLARADOS_KIB =
+  MONTAJE_DE_B4A_KIB + ARREGLO_DE_B7_KIB + MONTAJE_DE_B6A_KIB + MONTAJE_DE_B8_KIB + HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

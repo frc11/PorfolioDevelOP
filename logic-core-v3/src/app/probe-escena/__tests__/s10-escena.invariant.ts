@@ -220,25 +220,39 @@ section('La sombra se alarga, que es la otra mitad del tiempo pasando')
   }
   const crece = (xs: readonly number[]): boolean =>
     xs.every((value, i) => i === 0 || value >= xs[i - 1])
-  const grows = crece(lengths)
   check(
     'control positivo — el detector de crecimiento VE la MISMA lista dada vuelta',
     !crece([...lengths].reverse()),
     'la sombra recorrida al revés se acorta, y eso es exactamente lo que tiene que ver'
   )
+  /**
+   * ⚠️ **B8 · CUSTODIABA «la sombra crece de punta a punta del recorrido (×3,6)».**
+   * Era el arco viejo, una tarde que se apagaba hasta 0,34. B8 pone la noche
+   * en Trabajos (p=0,5 a 0,625, el segundo punto de la lista) y una mañana más
+   * baja que la tarde: la sombra más larga está en el MEDIO —un sol rasante a
+   * 2,7° la estira ×15— y del amanecer al cierre se acorta sin volver a la de
+   * mediodía. Las dos mitades del reloj se afirman por separado; la lista de
+   * progresos es la misma de S10, y la razón con las bandas sigue abajo.
+   */
   check(
-    'la sombra del borde superior del logo crece de punta a punta del recorrido',
-    grows && lengths[lengths.length - 1] > lengths[0] * 3,
-    `${lengths.map((value) => value.toFixed(1)).join(' → ')} unidades de mundo · ×${(lengths[lengths.length - 1] / lengths[0]).toFixed(1)}`
+    'la sombra crece hasta la noche, y ahí es la más larga del recorrido: un sol rasante (B8)',
+    lengths[1] === Math.max(...lengths) && lengths[1] > lengths[0] * 10,
+    `${lengths.map((value) => value.toFixed(1)).join(' → ')} unidades de mundo · ×${(lengths[1] / lengths[0]).toFixed(1)} en la noche`
+  )
+  check(
+    '  y del amanecer al cierre se acorta sin volver a la de mediodía: la mañana es más baja que la tarde',
+    crece([...lengths.slice(2)].reverse()) && lengths[lengths.length - 1] > lengths[0],
+    `${lengths.slice(2).map((value) => value.toFixed(1)).join(' → ')} · el cierre queda ×${(lengths[lengths.length - 1] / lengths[0]).toFixed(1)} del arranque`
   )
 
   /**
    * ⚠️ **Y las bandas de la celosía se alargan con la MISMA cuenta.** El chequeo
    * de "el halo del sol nunca entra entero" se fue con el halo; lo que ocupa su
    * lugar es esto: la celda proyectada sobre el piso mide 2,34 de ancho por
-   * 3,22 de largo en la meseta y por 11,51 en el cierre — el mismo ×3,6 que la
-   * sombra de arriba, porque las dos son 1/tan(elevación). La sombra del logo y
-   * las bandas del piso crecen juntas o no crece ninguna.
+   * 3,22 de largo en la meseta y por 5,73 en el cierre (B8: 11,51 con el arco
+   * viejo) — la misma razón que la sombra de arriba, porque las dos son
+   * 1/tan(elevación). La sombra del logo y las bandas del piso crecen juntas o
+   * no crece ninguna.
    */
   const bandLengths = [0, 0.5, 0.75, 0.875, 0.95, 1].map((p) => {
     sampleLightArc(p, arc)
