@@ -48,6 +48,7 @@ import {
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
+  MONTAJE_DE_B9_KIB,
   PRESUPUESTO_DEL_LANE_KIB,
   PRESUPUESTO_PROPIO_KIB,
 } from './s5-presupuesto'
@@ -87,17 +88,9 @@ afirmar(heredados.length > 0, 'y el heredado se pudo medir: la partición no est
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · EL PRESUPUESTO PROPIO, con la cuenta a la vista')
 
-import {
-  ARREGLO_DE_B7_KIB,
-  HEREDADO_SIN_DECLARAR_KIB,
-  MONTAJE_DE_B9_KIB,
-  MONTAJE_DE_B4A_KIB,
-  MONTAJES_DECLARADOS_KIB,
-  PRESUPUESTO_DEL_LANE_KIB,
-  PRESUPUESTO_PROPIO_KIB,
-} from './s5-presupuesto'
-
-/** El presupuesto y su recibo viven en `s5-presupuesto.ts`, una línea por dueño (B6-A, con la forma de B7). */
+/** Las siete líneas del presupuesto viven en `s5-presupuesto.ts`, una por dueño
+ *  (B6-A, con la forma de B7); el recibo completo de cada una, en
+ *  `s5-presupuesto-recibos.ts` y `s5-presupuesto-recibos-del-merge.ts`. */
 
 /** El preámbulo que `@sentry/nextjs` le pone a la cabeza de cada chunk. Se
  *  detecta por su forma, no por su largo: si cambiara de tamaño, la resta se
@@ -119,33 +112,31 @@ afirmar(
   preambuloPropio > 0,
   `  y el detector del preámbulo NO está ciego: lo encontró en ${propios.filter((f) => preambuloDe(f) > 0).length} de los ${propios.length} chunks propios`,
 )
+// ⚠ B10 · acá había DOS bloques `EL TECHO`, uno abajo del otro: el merge de las
+// cuatro ramas conservó los dos lados del conflicto. El de arriba era el de B9 y
+// **le faltaban dos montajes** (B6-A y B8), o sea que imprimía un reparto que no
+// sumaba el número que él mismo publicaba al lado. Queda el completo.
 console.log(
-  `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
-    ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
-    ` + ${ARREGLO_DE_B7_KIB} que B7 monta (el proveedor de \`prefers-reduced-motion\`, 0,52 medidos A/B)` +
-    ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
-    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 0,11 medidos que ya estaban en rojo antes de que B7 tocara producto.`,
-)
-console.log('    Lo subió el humano en la parada, con el número medido. La alternativa era no montar la marca: por eso la decisión es revocable.')
-
   `  EL TECHO: ${PRESUPUESTO_PROPIO_KIB.toFixed(2)} KiB = ${PRESUPUESTO_DEL_LANE_KIB} del lane` +
     ` + ${MONTAJE_DE_B4A_KIB} que B4-A monta (la marca en sus tres superficies + la meseta)` +
-    ` + ${ARREGLO_DE_B7_KIB} que B7 arregla (reduced-motion unificado)` +
+    ` + ${ARREGLO_DE_B7_KIB} que B7 arregla (el proveedor de \`prefers-reduced-motion\`, 0,52 medidos A/B)` +
     ` + ${MONTAJE_DE_B6A_KIB} que B6-A monta (la cuarta superficie: 225 B medidos entre dos builds)` +
     ` + ${MONTAJE_DE_B8_KIB} que B8 monta (el arco con la noche, el contraluz atado y el brillo de las partículas)` +
-    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño: 71 B medidos sobre el árbol mergeado antes de que B8 tocara producto, en este entorno (\`scripts-b8/peso.ts\`).`,
+    ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
+    ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
-console.log('    Cada línea la subió el humano en su parada, con el número medido y la alternativa escrita: por eso cada una es revocable por separado.')
-console.log('    Cada línea la subió el humano en su parada, con el número medido y con su alternativa escrita en `s5-presupuesto.ts` — por eso las tres son revocables: B4-A, no montar la marca; B7, montar el proveedor abajo y dejar `/v3/motion` sin el arreglo; B9, no aplicar la regla del rango.')
+console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
+console.log('    ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un árbol SIN B9. El candidato —el producto que B9 tocó fuera de los 13 literales del rango— está escrito con su número en `s5-presupuesto-recibos-del-merge.ts`, sin apropiárselo.')
+console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los dos archivos de recibos: por eso cada una es revocable por separado.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
   `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
-  `${kib(escritoPorElLane)} — ${(PRESUPUESTO_PROPIO_KIB - escritoPorElLane / 1024).toFixed(2)} KiB de aire · ${kib(pesoPropio.crudo)} con el preámbulo heredado adentro`,
+  // ⚠ B10 · el aire va TAMBIÉN en bytes: con 2,9 B de margen, `toFixed(2)` sobre
+  // KiB imprime `0.00` y eso se lee como "no queda aire", que no es lo medido.
+  `${kib(escritoPorElLane)} — ${(PRESUPUESTO_PROPIO_KIB * 1024 - escritoPorElLane).toFixed(1)} B de aire · ${kib(pesoPropio.crudo)} con el preámbulo heredado adentro`,
 )
 afirmar(
   escritoPorElLane / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
-  `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB} KiB de montajes con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
-  `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y desmontar los montajes declarados tiene que devolverla a 59,94`,
   `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB.toFixed(2)} KiB de líneas con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
   `${kib(escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024)} — es la cifra que la afirmación mira, y devolver lo declarado tiene que devolverla a 59,94`,
 )

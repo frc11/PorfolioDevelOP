@@ -138,3 +138,10 @@ src/modules/chatbot/evals/reports/
 # este listado envenena la auto-deteccion de fuentes de Tailwind 4 y tira
 # `Can't resolve './&'` sobre un CSS intacto (CLAUDE.md, Aug 2026).
 /.next-b9/
+# `.next-b10/`: build aislado de B10 (cerrar el merge), para RE-MEDIR el heredado
+# del presupuesto de /v3 sobre el arbol mergeado de las cuatro ramas, sin pisar el
+# `.next/` del build de produccion ni el del `next dev` que corre al lado. Se
+# agrega ACA ANTES de correr el build: un distDir alternativo que no este listado
+# envenena la auto-deteccion de fuentes de Tailwind 4 y tira `Can't resolve './&'`
+# sobre un CSS intacto (CLAUDE.md, Aug 2026).
+/.next-b10/
