@@ -20,7 +20,7 @@ import type {
 import type { BloqueProps, PrimitivasDeCoreografia } from './coreografia'
 import { ATRIBUTO_DE_PANEL } from './forma'
 import { MARCA_COREOGRAFIA_DEL_HOME } from './marcaCoreografia'
-import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from './bloqueAnimado'
+import { ANCLA_DEL_PIN, ANCLA_DE_LA_VENTANA_VISIBLE, especificacionDe, inerciaDe } from './bloqueAnimado'
 
 /**
  * LAS PRIMITIVAS ANIMADAS — el único módulo del home que importa el sistema.
@@ -62,9 +62,17 @@ import { ANCLA_DEL_PIN, especificacionDe, inerciaDe } from './bloqueAnimado'
 /**
  * De dónde salen las anclas del bloque, resuelto acá porque es acá donde se
  * puede: el seam quieto sólo maneja la palabra.
+ *
+ * ⚠️ **El orden de las dos ramas no es indiferente [B9].** El pin va primero
+ * porque `patron: 'pin'` no nombra un patrón de los nueve: `PATRONES['pin']` no
+ * existe y `ANCLA_DE_LA_VENTANA_VISIBLE` sobre un bloque que YA mide la sección
+ * entera daría `rango = alto + 160` en vez del recorrido del `sticky`. Un
+ * bloque pinneado no declara `rango` —el invariante lo afirma— y esta rama es
+ * la que lo hace imposible aunque alguien lo declarara.
  */
 function anclasDe(props: BloqueProps): ParDeAnclas {
   if (props.patron === 'pin') return ANCLA_DEL_PIN
+  if (props.rango === 'ventana-visible') return ANCLA_DE_LA_VENTANA_VISIBLE
   return PATRONES[props.patron].anclas
 }
 
@@ -175,6 +183,12 @@ function BloqueConMotor(props: BloqueProps): React.JSX.Element {
       ref={montar}
       data-arbol={MARCA_COREOGRAFIA_DEL_HOME}
       data-anclaje={anclaje ?? 'propia'}
+      // `data-rango` es el hermano de `data-anclaje` y existe por lo mismo: el
+      // instrumento de B9 encuentra las instancias por `[data-arbol]` y tiene
+      // que poder decir, sobre el DOM renderizado y no sobre el fuente, cuál
+      // resuelve su rango por la ventana visible. Sin él, la tabla del
+      // «después» tendría que confiar en que el diff se aplicó donde dice.
+      data-rango={props.rango ?? 'del-patron'}
       className={props.className}
       style={estiloDelBloque(props)}
     >

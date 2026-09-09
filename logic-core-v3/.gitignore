@@ -122,3 +122,10 @@ docs/proof-screenshots/
 src/modules/chatbot/evals/results/
 # Evals — reportes de evaluación (Q1.2). Combinan asserts + juez; artefactos.
 src/modules/chatbot/evals/reports/
+# `.next-b9/`: build aislado de B9 (cada cosa a su tiempo), para medir el peso
+# NETO de la regla del rango — el mismo arbol con y sin los 13 `rango="ventana-visible"`
+# — sin pisar el `.next/` del build de produccion ni el del `next dev` que corre
+# al lado. Se agrega ACA ANTES de correr el build: un distDir alternativo que no
+# este listado envenena la auto-deteccion de fuentes de Tailwind 4 y tira
+# `Can't resolve './&'` sobre un CSS intacto (CLAUDE.md, Aug 2026).
+/.next-b9/

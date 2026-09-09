@@ -54,6 +54,69 @@ import type { Patron } from '../../_lib/motion/patrones'
 export const PASO_DEL_CENSO = 120
 
 /**
+ * ═══ B9 · EL PUNTO DE LLEGADA, Y LA CORRECCIÓN QUE TRAE ═══════════════════
+ *
+ * ── ⚠️ LA REGLA QUE ESTE ARCHIVO Y SUS DOS CONSUMIDORES TENÍAN ESTABA
+ *      MEDIDA CONTRA EL PATRÓN EQUIVOCADO, Y SE REESCRIBE (regla 15) ───────
+ *
+ * `tu-panel/asentamiento.ts` y `cierre/asentamiento.ts` publicaron, con estas
+ * palabras, la misma regla:
+ *
+ * > *«Un patrón se completa cuando su bloque terminó de ENTRAR al cuadro
+ * > —`bottom` sobre el borde inferior del viewport—.»*
+ *
+ * Y la justificaron diciendo que ése **es el ancla de P2 escrita como regla**.
+ * La derivación es correcta; **la elección de P2 como vara no lo era**, y B9 lo
+ * midió contra la referencia en vez de contra otro patrón nuestro.
+ *
+ * **La medición** (`scripts-b9/b9-referencia.ts`, `https://www.nk.studio/`,
+ * 1920×1080, una navegación, 202 elementos animados que no están pinneados):
+ * el borde inferior de la caja, en el píxel de scroll donde el elemento llega a
+ * su estado final, expresado en fracción de pantalla desde el tope del cuadro.
+ *
+ *     referencia   p25 0,58   ·   p50 0,70   ·   p75 0,77
+ *     nosotros     p25 0,69   ·   p50 0,84   ·   p75 0,94
+ *
+ * O sea: **terminábamos de entrar 0,14 pantallas —151 px— demasiado abajo.**
+ * `bottom bottom` deja la caja con su borde inferior al ras del borde de abajo
+ * del cuadro (fracción **1,00**), que es el extremo de la distribución de la
+ * referencia y no su centro. Lo que cae sobre su centro es
+ * `bottom bottom-=240px`: **0,778 a 1080 y 0,733 a 900**.
+ *
+ * ── Y los 240 tampoco se eligen: ya estaban medidos ───────────────────────
+ *
+ * Son el desplazamiento del fin de **P1** (`ANCLAS.P1`), el patrón con 142 de
+ * las 244 instancias del corpus de la referencia — el 58 %. La referencia usa
+ * este punto de llegada en la mayoría de su sitio; nosotros lo teníamos en 6 de
+ * 28 instancias, y esas 6 son justamente las que la medición encontró en regla
+ * (aterrizaje 0,715 … 0,778).
+ *
+ * **Estos dos números se escriben acá y se re-derivan de `ANCLAS.P1` en el
+ * instrumento**, que es la misma costura de espejo-con-guardia que
+ * `CORTE_DE_TRAMOS` tiene con `corteDeTramos` unas líneas más abajo: el
+ * producto no puede importar un valor de `_lib/motion/` sin romper la compuerta
+ * de 1025, así que se publica de este lado y se afirma la igualdad del otro.
+ */
+
+/**
+ * CUÁNTO ENTRA EL BLOQUE ANTES DE QUE EMPIECE A MOVERSE, en píxeles.
+ * Es `-ANCLAS.P1.inicio.viewport.px`. La referencia arranca en la mediana a
+ * 0,05 pantallas de su borde inferior; 80 px sobre 1080 son 0,074.
+ */
+export const ENTRADA_EN_CUADRO_PX = 80
+
+/**
+ * A QUÉ DISTANCIA DEL BORDE DE ABAJO DEL CUADRO QUEDA EL BORDE INFERIOR DE LA
+ * CAJA CUANDO EL PATRÓN LLEGA, en píxeles. Es `-ANCLAS.P1.fin.viewport.px`.
+ *
+ * ⚠️ Es también el número que las dos secciones con asentamiento tenían como
+ * «sobrepaso»: lo que P1 se pasaba de `bottom bottom` y ellas le devolvían al
+ * asentamiento. B9 lo invierte — ese tramo **no era sobrepaso, era el punto de
+ * llegada** —, así que el sobrepaso de cada sección se re-deriva restándolo.
+ */
+export const DESCANSO_ANTES_DE_SALIR_PX = 240
+
+/**
  * EL UMBRAL DE FUSIÓN DEL CENSO. Dos grupos de aterrizajes separados por dos
  * pasos o menos **se leen como uno solo**. O sea: una banda quieta más corta
  * que esto no separa dos acontecimientos, los une — que es exactamente el

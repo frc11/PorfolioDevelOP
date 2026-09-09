@@ -51,10 +51,41 @@ import {
  *     usos, y `_contrato/motion.ts` ya lo declara para esta sección en
  *     `USOS_DECLARADOS`. Su escalonado medido es 0: las cinco arrancan juntas.
  *
- * P5 es también el único cuyo rango puede salir NEGATIVO —mide
- * `alto − 0,4·viewport`—, así que su bloque declara un alto mínimo. De dónde
- * sale ese número está escrito en `contenido.ts`, y el invariante lo verifica
- * con `rangoDegenerado` en las dos direcciones.
+ * ═══ B9 · LOS DOS BLOQUES DISPARAN POR SU VENTANA VISIBLE ═════════════════
+ *
+ * **El defecto, fotografiado.** En el `scrollY` donde esta sección llena el
+ * cuadro exacto —17.280 a 1920×1080— los cuatro diferenciales y el testimonio
+ * estaban en opacidad **0**, y el 60 % inferior de la pantalla vacío. Llegaban
+ * a opacidad 1 recién en 17.755, con la sección **44 % fuera por arriba**. La
+ * primera tarjeta pasaba **el 10 % de su ventana visible** a opacidad 1.
+ *
+ * **La causa, aislada midiendo** (`scripts-b9/b9-desfases.ts`, y las tres
+ * alternativas refutadas con número en el reporte de B9):
+ *
+ *     ventana visible del bloque   [16.708 · 18.328]   1.620 px
+ *       864 px (53,3 %)  en cuadro y sin que pase nada
+ *       108 px ( 6,7 %)  toda la animación
+ *       648 px (40,0 %)  quieto hasta que sale
+ *
+ * No era el anclaje a la sección —el motor medía la caja del bloque, y su
+ * predicción reproduce la ventana observada con 132 px de error sobre una
+ * grilla de 120—, no era el escalonado —las cinco piezas arrancan y terminan en
+ * el mismo `scrollY`, desparramo **0 px**— y no era un alto declarado que no
+ * coincidiera con lo renderizado —el bloque mide **540,0 px** a 1080 y
+ * **450,0** a 900, exactamente su piso—. Era **el ancla de P5**:
+ * `top top+=20%` pide que el borde superior del bloque haya bajado al 20 % del
+ * cuadro, y para un bloque que vive al pie de una sección de una pantalla eso
+ * ocurre 864 px después de que entró.
+ *
+ * **Los dos bloques declaran `rango="ventana-visible"`.** Para el titular (P1)
+ * es un no-op comprobable: el ancla de la regla ES `ANCLAS.P1`. Para el bloque
+ * de P5 el arranque pasa de 864 px a **80** después de entrar en cuadro.
+ *
+ * ⚠️ **Lo que NO cambia: ni una línea de contenido ni de composición.** El
+ * `min-height` de `ALTO_MINIMO_DEL_BLOQUE` se queda donde estaba; lo que
+ * cambió es POR QUÉ está, y eso se reescribió en `contenido.ts` — ya no lo
+ * sostiene la aritmética de P5 (el rango de la regla es `alto + 160` y no puede
+ * degenerar) sino el reparto del `<ul>` con `content-between`.
  *
  * ── `anima` entra como propiedad y no se consulta acá ─────────────────────
  *
@@ -136,7 +167,7 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
             los 72 px queda debajo suyo. El rótulo no lo necesita —vive en la
             columna lateral, a la izquierda de la pastilla— y por eso el despeje
             va acá y no en el `pt` del contenido, donde costaría 64 px más. */}
-        <Bloque patron="P1" className="pt-[var(--spacing-8)]">
+        <Bloque patron="P1" rango="ventana-visible" className="pt-[var(--spacing-8)]">
           {(progreso) => (
             <Grilla columnas={3} canal="amplio">
               <div className="tablet:col-span-2">
@@ -194,6 +225,7 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
             carpeta. Su derivación está en `contenido.ts`. */}
         <Bloque
           patron="P5"
+          rango="ventana-visible"
           style={{ minHeight: ALTO_MINIMO_DEL_BLOQUE }}
           className="flex flex-col"
         >

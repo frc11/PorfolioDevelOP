@@ -23,11 +23,24 @@
  *
  * ── La geometría declarada, y por qué está acá y no en el JSX ─────────────
  *
- * `ALTO_MINIMO_DEL_BLOQUE` no es una decisión estética: sale de la aritmética
- * del ancla de P5, que mide `alto − 0,4·viewport` y es la única del sistema que
- * puede dar rango negativo. Vive acá, como dato, por la misma razón que la
- * altura de un panel vive en `_lib/secciones.ts`: para que el instrumento lea
- * el MISMO valor que aplica la pantalla, y no una copia suya.
+ * `ALTO_MINIMO_DEL_BLOQUE` no es una decisión estética. Vive acá, como dato,
+ * por la misma razón que la altura de un panel vive en `_lib/secciones.ts`:
+ * para que el instrumento lea el MISMO valor que aplica la pantalla, y no una
+ * copia suya.
+ *
+ * ⚠️ **DE DÓNDE SALÍA Y DE DÓNDE SALE AHORA (regla 15, B9).** Salía de la
+ * aritmética del ancla de P5 —`alto − 0,4·viewport`, la única del sistema que
+ * puede dar rango negativo—: el piso existía para que el rango no degenerara.
+ * **Desde B9 el bloque ya no resuelve el ancla de P5**: declara
+ * `rango="ventana-visible"` y su rango es `alto + 160`, que no puede degenerar
+ * con ningún alto. Esa razón caducó.
+ *
+ * **El piso se queda, y el motivo que lo sostiene es el otro que ya tenía:**
+ * es lo que le da al `<ul>` un alto contra el cual repartir con
+ * `content-between` —sin él la lista se apila arriba y vuelven los 443,06 px de
+ * banda vacía que B1 midió— y es la pieza con la que `soporte.ts` §8 arbitra el
+ * alto de la sección. **La composición no se toca en este bloque**, así que el
+ * número no se mueve: lo que se reescribe es por qué está.
  */
 
 import type { Marcador } from '../_contrato/marcadores'

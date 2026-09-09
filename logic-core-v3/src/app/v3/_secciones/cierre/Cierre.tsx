@@ -136,6 +136,14 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
     <Pie className="grid" claseDeEnvoltorio="grid" claseDeContenido="grid content-between">
       <EncabezadoDeSeccion seccion={seccion} nombre={ETIQUETA_DE_SECCION} />
 
+      {/* ⚠️ B9 · ESTE BLOQUE **NO** DECLARA `rango="ventana-visible"`, y es una
+          omisión con número: `D-B9.C1`. Su ancla de P1 YA es la de la regla, así
+          que la prop sería un no-op — pero `asentar` lo devuelve a
+          `bottom bottom` y ahí aterriza con su borde inferior en 0,967 del
+          cuadro (1920) en vez de 0,778. Declarar la regla acá sería afirmar algo
+          que el remapeo desmiente. Sacar el remapeo es lo que hay que hacer, y
+          toca la propiedad de B2 que `asentamiento.ts` sostiene: va aparte, con
+          lo medido escrito ahí. */}
       <Bloque patron="P1">
         {(progreso) => <TitularDelCierre seccion={seccion} progreso={progreso} />}
       </Bloque>
@@ -157,7 +165,7 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
           `inline-flex` del CTA se estire a lo ancho del apilado del pie— y la
           pieza pone otro adentro: dos cajas de bloque donde había una, ninguna
           con medida propia. */}
-      <Bloque patron="P1">
+      <Bloque patron="P1" rango="ventana-visible">
         {(progreso) => (
           <CanalDeUnaPieza progreso={progreso} patron="P1">
             <CtaEnlace href={CTA_DE_CIERRE.destino} rotulo={CTA_DE_CIERRE.rotulo} />
@@ -165,6 +173,22 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
         )}
       </Bloque>
 
+      {/* ⚠️ B9 · ESTE BLOQUE **NO** DECLARA `rango="ventana-visible"` PORQUE LA
+          REGLA NO SE PUEDE CUMPLIR ACÁ, y está medido: `D-B9.C2`.
+
+          El punto de llegada de la regla —borde inferior de la caja a 240 px
+          del borde de abajo del cuadro— le cae a este bloque en `scrollY`
+          **18.415 a 1920 y 15.376 a 1440**, y el último píxel de scroll del
+          documento es **18.360 y 15.300**. Son **55 px y 76 px DESPUÉS del
+          final del scroll**: las tres columnas del pie se quedarían al 87 % de
+          su entrada, para siempre, sin un solo error en consola.
+
+          El Cierre es la última pantalla y el scroll se termina antes que él
+          —`asentamiento.ts` ya lo tenía medido: la sección ocupa el documento
+          de 18.360 a 19.440 y el último píxel de scroll es 18.360—. Eso no lo
+          arregla un ancla: lo arreglaría mover el bloque en el documento, que
+          es composición y no es de este bloque. Queda con el ancla de P2, que
+          es la única que ahí adentro llega. */}
       <Bloque patron="P2">
         {(progreso) => <ColumnasDelPie progreso={progreso} />}
       </Bloque>

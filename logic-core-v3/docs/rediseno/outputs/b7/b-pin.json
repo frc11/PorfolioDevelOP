@@ -1,7 +1,7 @@
 {
   "instrumento": {
     "origen": "http://localhost:3002",
-    "cuando": "2026-09-07T21:46:44.831Z",
+    "cuando": "2026-09-08T21:56:44.794Z",
     "pasoPx": 120,
     "precisionPx": 2,
     "predicado": "el de LECTURA_DE_PEGADO de scripts-b7/lectores-layout.ts, sin tocarle un umbral",
@@ -305,7 +305,7 @@
               "top": "0px",
               "altoPropio": 774.55,
               "altoDelPadre": 2304,
-              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "recorridoDisponible": 1529.45,
               "ancestroQueRecorta": null
             },
@@ -355,12 +355,12 @@
           }
         },
         {
-          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "clase": "no-sticky",
           "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 113 paradas.",
           "barrido": {
             "ficha": {
-              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "posicion": "relative",
               "top": "0px",
               "altoPropio": 2304,
@@ -418,7 +418,7 @@
           "top": "0px",
           "altoPropio": 774.55,
           "altoDelPadre": 2304,
-          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "recorridoDisponible": 1529.45,
           "ancestroQueRecorta": null
         }
@@ -535,7 +535,7 @@
               "top": "0px",
               "altoPropio": 900,
               "altoDelPadre": 2700,
-              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "recorridoDisponible": 1800,
               "ancestroQueRecorta": null
             },
@@ -585,12 +585,12 @@
           }
         },
         {
-          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "clase": "no-sticky",
           "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 128 paradas.",
           "barrido": {
             "ficha": {
-              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "posicion": "relative",
               "top": "0px",
               "altoPropio": 2700,
@@ -648,7 +648,7 @@
           "top": "0px",
           "altoPropio": 900,
           "altoDelPadre": 2700,
-          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "recorridoDisponible": 1800,
           "ancestroQueRecorta": null
         }
@@ -765,7 +765,7 @@
               "top": "0px",
               "altoPropio": 1080,
               "altoDelPadre": 3240,
-              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "recorridoDisponible": 2160,
               "ancestroQueRecorta": null
             },
@@ -815,12 +815,12 @@
           }
         },
         {
-          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "clase": "no-sticky",
           "porQue": "position: relative — no hay pin que medir. Se movió 0 px respecto de su padre en 154 paradas.",
           "barrido": {
             "ficha": {
-              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+              "huella": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
               "posicion": "relative",
               "top": "0px",
               "altoPropio": 3240,
@@ -878,7 +878,7 @@
           "top": "0px",
           "altoPropio": 1080,
           "altoDelPadre": 3240,
-          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia] .relative",
+          "huellaDelPadre": "div[data-arbol=v3-coreografia-del-home-2026-08-30][data-anclaje=propia][data-rango=del-patron] .relative",
           "recorridoDisponible": 2160,
           "ancestroQueRecorta": null
         }

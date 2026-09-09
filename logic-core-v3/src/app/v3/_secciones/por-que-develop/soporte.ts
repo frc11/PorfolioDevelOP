@@ -104,6 +104,8 @@ import { afirmar, afirmarIgual, controlPositivo, titulo } from '../../_lib/__tes
 import { tokenPx } from '../../_lib/__tests__/s10-css'
 import { rangoDeScroll, rangoDegenerado } from '../../_lib/motion/anclas'
 import { PATRONES } from '../../_lib/motion/patrones'
+import { PASO_DEL_CENSO } from '../_contrato/asentamiento'
+import { ANCLA_DE_LA_VENTANA_VISIBLE } from '../_contrato/bloqueAnimado'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { ALTO_MINIMO_DEL_BLOQUE, ALTO_MINIMO_DEL_BLOQUE_SVH } from './contenido'
 
@@ -201,13 +203,43 @@ export function afirmarElAltoYElRango(): void {
 
   console.log(`  a un viewport de ${VIEWPORT}px, ${ALTO_MINIMO_DEL_BLOQUE} son ${pisoDelBloque()}px de PISO; el bloque renderiza ${MEDIDO.bloqueDespues}px de contenido, así que mide ${alto}`)
   console.log(`  el ancla de P5 mide alto − 0,4·viewport → rango de ${rango.fin - rango.inicio}px de scroll`)
-  console.log(`  EL ALTO QUE HACE FALTA: más de ${PISO_DE_P5_SVH}svh. Por debajo de ahí el rango sale negativo y el patrón se lee como un salto.`)
+  console.log(`  EL ALTO QUE HACE FALTA para P5: más de ${PISO_DE_P5_SVH}svh. Por debajo de ahí el rango sale negativo y el patrón se lee como un salto.`)
 
-  afirmar(!rangoDegenerado(P5.anclas, caja, VIEWPORT), `el bloque de ${alto}px no degenera`)
-  afirmarIgual(rango.fin - rango.inicio, alto - 0.4 * VIEWPORT, 'y el rango es exactamente `alto − 0,4·viewport`')
+  afirmar(!rangoDegenerado(P5.anclas, caja, VIEWPORT), `el bloque de ${alto}px no degenera bajo el ancla de P5`)
+  afirmarIgual(rango.fin - rango.inicio, alto - 0.4 * VIEWPORT, 'y el rango de P5 es exactamente `alto − 0,4·viewport`')
   afirmar(!rangoDegenerado(P1.anclas, { topDoc: 5000, alto: 120 }, VIEWPORT), 'P1 no puede degenerar: su rango es `alto + 160px`')
   controlPositivo('un bloque de 30svh SÍ degenera', { topDoc: 5000, alto: VIEWPORT * 0.3 }, (c: { topDoc: number; alto: number }) => !rangoDegenerado(P5.anclas, c, VIEWPORT))
   controlPositivo(`y uno de exactamente ${PISO_DE_P5_SVH}svh también, porque el rango queda en cero`, { topDoc: 5000, alto: (VIEWPORT * PISO_DE_P5_SVH) / 100 }, (c: { topDoc: number; alto: number }) => !rangoDegenerado(P5.anclas, c, VIEWPORT))
+
+  /**
+   * ── ⚠️ B9 · LO DE ARRIBA SIGUE SIENDO VERDAD Y YA NO ES LA RAZÓN DEL PISO ─
+   *
+   * Las cinco afirmaciones anteriores describen **el ancla de P5**, y ninguna
+   * se afloja: el ancla sigue midiendo `alto − 0,4·viewport` y sigue siendo la
+   * única del sistema que puede degenerar. Lo que cambió es que **el bloque de
+   * esta sección ya no la resuelve**: declara `rango="ventana-visible"` y su
+   * recorrido es el de `ANCLA_DE_LA_VENTANA_VISIBLE`, `alto + 160`.
+   *
+   * El motivo: con el ancla de P5 el bloque arrancaba **864 px después de
+   * entrar en cuadro** (medido a 1920×1080, `scripts-b9/b9-desfases.ts`), o sea
+   * con la sección ya un 27 % fuera por arriba, y las cuatro tarjetas estaban
+   * en opacidad **0** en el `scrollY` donde la sección llena el cuadro exacto.
+   *
+   * Así que el piso de ${ALTO_MINIMO_DEL_BLOQUE_SVH}svh **ya no lo sostiene la
+   * aritmética de P5** —la sostiene la composición, ver `contenido.ts`—, y esto
+   * lo afirma en vez de dejarlo implícito.
+   */
+  const REGLA = ANCLA_DE_LA_VENTANA_VISIBLE
+  const rangoDeLaRegla = rangoDeScroll(REGLA, caja, VIEWPORT)
+  console.log(`  el bloque resuelve la REGLA de B9 (${REGLA.inicio.declarado} → ${REGLA.fin.declarado}) → rango de ${rangoDeLaRegla.fin - rangoDeLaRegla.inicio}px`)
+  afirmarIgual(rangoDeLaRegla.fin - rangoDeLaRegla.inicio, alto + 160, 'el rango de la regla es `alto + 160`, la diferencia entre los dos desplazamientos de su ancla')
+  afirmar(!rangoDegenerado(REGLA, { topDoc: 5000, alto: 1 }, VIEWPORT), 'y no puede degenerar ni con un bloque de 1 px: el piso ya no lo sostiene el rango')
+  afirmarIgual(
+    rangoDeLaRegla.inicio - (caja.topDoc - VIEWPORT),
+    -REGLA.inicio.viewport.px,
+    `arranca ${-REGLA.inicio.viewport.px}px después de que el bloque entra en cuadro, y no ${(rango.inicio - (caja.topDoc - VIEWPORT)).toFixed(0)} como con el ancla de P5`,
+  )
+  controlPositivo('con el ancla de P5 el arranque NO cae dentro de un paso del censo desde la entrada en cuadro', P5.anclas, (a: typeof P5.anclas) => Math.abs(rangoDeScroll(a, caja, VIEWPORT).inicio - (caja.topDoc - VIEWPORT)) <= PASO_DEL_CENSO)
 
   // ── EL ALTO, que es lo que el modelo viejo no podía arbitrar ──────────────
   const declarado = pantallasDe(seccionDe('por-que-develop')) * VIEWPORT

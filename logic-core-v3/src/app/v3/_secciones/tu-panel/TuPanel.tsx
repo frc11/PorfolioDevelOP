@@ -97,7 +97,7 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
       >
         <EncabezadoDeSeccion seccion={seccion} nombre={NOMBRE} />
 
-        <Bloque patron="P1">
+        <Bloque patron="P1" rango="ventana-visible">
           {(progreso) => (
             /* ⚠ El envoltorio existe por UNA razón y está de paso: es el que lleva
                el `id` con el que la `<section>` se nombra (S11, defecto 10). El `h2`
@@ -128,7 +128,7 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
           {/* La captura ocupa tres de las cinco columnas arriba de 1025 y el ancho
               entero abajo, que es la geometría exacta que declara su `sizes`. */}
           <div className="escritorio:col-span-3">
-            <Bloque patron="P2">
+            <Bloque patron="P2" rango="ventana-visible">
               {(progreso) => (
                 <CanalDeUnaPieza progreso={progreso} patron="P2">
                   <MarcoDeMedio
@@ -187,7 +187,7 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
  */
 function ParrafoDelPanel({ bloque }: { readonly bloque: BloqueDeTexto }): React.JSX.Element {
   return (
-    <Bloque patron="P2">
+    <Bloque patron="P2" rango="ventana-visible">
       {(progreso) => (
         <CanalDeUnaPieza
           progreso={progreso}

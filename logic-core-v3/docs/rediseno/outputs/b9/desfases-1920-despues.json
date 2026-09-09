@@ -1,0 +1,1467 @@
+{
+  "perfil": "1920",
+  "etiqueta": "despues",
+  "paso": 120,
+  "ventana": 1080,
+  "alturaDelDocumento": 19440,
+  "paneles": [
+    {
+      "id": "hero",
+      "top": 0,
+      "alto": 1080
+    },
+    {
+      "id": "quienes-somos",
+      "top": 1080,
+      "alto": 3240
+    },
+    {
+      "id": "numeros",
+      "top": 4320,
+      "alto": 4320
+    },
+    {
+      "id": "trabajos",
+      "top": 8640,
+      "alto": 3240
+    },
+    {
+      "id": "servicios",
+      "top": 11880,
+      "alto": 3240
+    },
+    {
+      "id": "tu-panel",
+      "top": 15120,
+      "alto": 2160
+    },
+    {
+      "id": "por-que-develop",
+      "top": 17280,
+      "alto": 1080
+    },
+    {
+      "id": "cierre",
+      "top": 18360,
+      "alto": 1080
+    }
+  ],
+  "instancias": [
+    {
+      "bloque": {
+        "indice": 0,
+        "seccion": "hero",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "tablet:col-span-2",
+        "texto": "Tu negocio vendiendo en piloto automático.Tu negocio vendiendo en piloto automático.Tu neg",
+        "topDeFlujo": 403,
+        "altoDeFlujo": 142
+      },
+      "entraEnCuadro": 0,
+      "saleDeCuadro": 480,
+      "empiezaAMoverse": null,
+      "terminaDeMoverse": null,
+      "desfaseDeEntradaPx": null,
+      "desfaseDeEntradaPantallas": null,
+      "desfaseDeSalidaPx": null,
+      "desfaseDeSalidaPantallas": null,
+      "fraccionFueraDeCuadro": null,
+      "cuadroAlEmpezar": null,
+      "cuadroAlTerminar": null,
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": null,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": -597,
+          "fin": -295,
+          "error": null
+        },
+        {
+          "patron": "P2",
+          "inicio": -677,
+          "fin": -535,
+          "error": null
+        },
+        {
+          "patron": "P3",
+          "inicio": -569,
+          "fin": 5,
+          "error": null
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 1,
+        "seccion": "hero",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Conectamos tu sitio, tu chat y tu seguimiento en un solo sistema, y lo dejamos andando. Vo",
+        "topDeFlujo": 577,
+        "altoDeFlujo": 143
+      },
+      "entraEnCuadro": 0,
+      "saleDeCuadro": 600,
+      "empiezaAMoverse": null,
+      "terminaDeMoverse": null,
+      "desfaseDeEntradaPx": null,
+      "desfaseDeEntradaPantallas": null,
+      "desfaseDeSalidaPx": null,
+      "desfaseDeSalidaPantallas": null,
+      "fraccionFueraDeCuadro": null,
+      "cuadroAlEmpezar": null,
+      "cuadroAlTerminar": null,
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": null,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": -423,
+          "fin": -120,
+          "error": null
+        },
+        {
+          "patron": "P2",
+          "inicio": -503,
+          "fin": -360,
+          "error": null
+        },
+        {
+          "patron": "P3",
+          "inicio": -395,
+          "fin": 180,
+          "error": null
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 2,
+        "seccion": "quienes-somos",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2 max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]",
+        "texto": "Somos dos personas y las dos trabajan en tu proyecto.Somos dos personas y las dos trabajan",
+        "topDeFlujo": 1347,
+        "altoDeFlujo": 289
+      },
+      "entraEnCuadro": 360,
+      "saleDeCuadro": 1560,
+      "empiezaAMoverse": 240,
+      "terminaDeMoverse": 840,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.167,
+      "cuadroAlEmpezar": {
+        "top": 1.025,
+        "fondo": 1.293
+      },
+      "cuadroAlTerminar": {
+        "top": 0.47,
+        "fondo": 0.737
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 347,
+          "fin": 796,
+          "error": 151
+        },
+        {
+          "patron": "P8",
+          "inicio": 483,
+          "fin": 880,
+          "error": 283
+        },
+        {
+          "patron": "P2",
+          "inicio": 267,
+          "fin": 556,
+          "error": 311
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 3,
+        "seccion": "quienes-somos",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3 max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]",
+        "texto": "develOP es una agencia chica, y eso es una decisión y no una etapa. No hay un ejecutivo de",
+        "topDeFlujo": 1764,
+        "altoDeFlujo": 120
+      },
+      "entraEnCuadro": 720,
+      "saleDeCuadro": 1800,
+      "empiezaAMoverse": 720,
+      "terminaDeMoverse": 1080,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.967,
+        "fondo": 1.078
+      },
+      "cuadroAlTerminar": {
+        "top": 0.633,
+        "fondo": 0.744
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 764,
+          "fin": 1044,
+          "error": 80
+        },
+        {
+          "patron": "P8",
+          "inicio": 900,
+          "fin": 1128,
+          "error": 228
+        },
+        {
+          "patron": "P2",
+          "inicio": 684,
+          "fin": 804,
+          "error": 312
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 4,
+        "seccion": "quienes-somos",
+        "ordinal": 2,
+        "anclaje": "propia",
+        "clase": "escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-1 max-w-[calc(var(--fluido-piso)_-_var(--spacing-12))]",
+        "texto": "Trabajamos desde Tucumán, con clientes de todo el país y en remoto. El relevamiento, la co",
+        "topDeFlujo": 2356,
+        "altoDeFlujo": 120
+      },
+      "entraEnCuadro": 1320,
+      "saleDeCuadro": 2400,
+      "empiezaAMoverse": 1320,
+      "terminaDeMoverse": 1680,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.959,
+        "fondo": 1.07
+      },
+      "cuadroAlTerminar": {
+        "top": 0.626,
+        "fondo": 0.737
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 1356,
+          "fin": 1636,
+          "error": 80
+        },
+        {
+          "patron": "P8",
+          "inicio": 1492,
+          "fin": 1720,
+          "error": 212
+        },
+        {
+          "patron": "P3",
+          "inicio": 1384,
+          "fin": 1936,
+          "error": 320
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 5,
+        "seccion": "quienes-somos",
+        "ordinal": 3,
+        "anclaje": "propia",
+        "clase": "escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-2",
+        "texto": "FrancoEstrategia · Comercial · PlanificaciónQué hace en un proyecto[TEXTO]",
+        "topDeFlujo": 2672,
+        "altoDeFlujo": 88
+      },
+      "entraEnCuadro": 1680,
+      "saleDeCuadro": 2640,
+      "empiezaAMoverse": 1560,
+      "terminaDeMoverse": 1920,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.25,
+      "cuadroAlEmpezar": {
+        "top": 1.029,
+        "fondo": 1.111
+      },
+      "cuadroAlTerminar": {
+        "top": 0.696,
+        "fondo": 0.778
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 1672,
+          "fin": 1920,
+          "error": 112
+        },
+        {
+          "patron": "P2",
+          "inicio": 1592,
+          "fin": 1680,
+          "error": 272
+        },
+        {
+          "patron": "P7",
+          "inicio": 1592,
+          "fin": 1680,
+          "error": 272
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 6,
+        "seccion": "quienes-somos",
+        "ordinal": 4,
+        "anclaje": "propia",
+        "clase": "escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-3",
+        "texto": "ValentinoEjecución técnicaQué hace en un proyecto[TEXTO]",
+        "topDeFlujo": 2956,
+        "altoDeFlujo": 88
+      },
+      "entraEnCuadro": 1920,
+      "saleDeCuadro": 3000,
+      "empiezaAMoverse": 1920,
+      "terminaDeMoverse": 2280,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.959,
+        "fondo": 1.041
+      },
+      "cuadroAlTerminar": {
+        "top": 0.626,
+        "fondo": 0.708
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 1956,
+          "fin": 2204,
+          "error": 112
+        },
+        {
+          "patron": "P8",
+          "inicio": 2092,
+          "fin": 2288,
+          "error": 180
+        },
+        {
+          "patron": "P3",
+          "inicio": 1984,
+          "fin": 2504,
+          "error": 288
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 7,
+        "seccion": "quienes-somos",
+        "ordinal": 5,
+        "anclaje": "propia",
+        "clase": "escritorio:col-span-4",
+        "texto": "[FOTO DEL EQUIPO]Los dos, en Tucumán. No hay un tercero al que derivarle el trabajo.",
+        "topDeFlujo": 3270,
+        "altoDeFlujo": 1020
+      },
+      "entraEnCuadro": 2280,
+      "saleDeCuadro": 4200,
+      "empiezaAMoverse": 2160,
+      "terminaDeMoverse": 3480,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.083,
+      "cuadroAlEmpezar": {
+        "top": 1.028,
+        "fondo": 1.972
+      },
+      "cuadroAlTerminar": {
+        "top": -0.194,
+        "fondo": 0.75
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 2270,
+          "fin": 3450,
+          "error": 140
+        },
+        {
+          "patron": "P2",
+          "inicio": 2190,
+          "fin": 3210,
+          "error": 300
+        },
+        {
+          "patron": "P7",
+          "inicio": 2190,
+          "fin": 3210,
+          "error": 300
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 8,
+        "seccion": "numeros",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-1 tablet:col-span-7 tablet:row-start-2 max-w-[var(--fluido-piso)]",
+        "texto": "Lo que se puede contarPreferimos pocos números, y que cada uno se pueda rastrear hasta la ",
+        "topDeFlujo": 4908,
+        "altoDeFlujo": 204
+      },
+      "entraEnCuadro": 3840,
+      "saleDeCuadro": 5040,
+      "empiezaAMoverse": 3840,
+      "terminaDeMoverse": 4320,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.989,
+        "fondo": 1.177
+      },
+      "cuadroAlTerminar": {
+        "top": 0.544,
+        "fondo": 0.733
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 3908,
+          "fin": 4272,
+          "error": 116
+        },
+        {
+          "patron": "P8",
+          "inicio": 4044,
+          "fin": 4356,
+          "error": 240
+        },
+        {
+          "patron": "P2",
+          "inicio": 3828,
+          "fin": 4032,
+          "error": 300
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 9,
+        "seccion": "numeros",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-1 tablet:col-span-5 tablet:row-start-1",
+        "texto": "[CIFRA]Proyectos entregados",
+        "topDeFlujo": 5703,
+        "altoDeFlujo": 100
+      },
+      "entraEnCuadro": 4680,
+      "saleDeCuadro": 5760,
+      "empiezaAMoverse": 4680,
+      "terminaDeMoverse": 5040,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.947,
+        "fondo": 1.04
+      },
+      "cuadroAlTerminar": {
+        "top": 0.614,
+        "fondo": 0.706
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 4703,
+          "fin": 4963,
+          "error": 100
+        },
+        {
+          "patron": "P8",
+          "inicio": 4839,
+          "fin": 5047,
+          "error": 166
+        },
+        {
+          "patron": "P3",
+          "inicio": 4731,
+          "fin": 5263,
+          "error": 274
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 10,
+        "seccion": "numeros",
+        "ordinal": 2,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-9 tablet:col-span-4 tablet:row-start-2",
+        "texto": "[CIFRA]Clientes activos",
+        "topDeFlujo": 6106,
+        "altoDeFlujo": 71
+      },
+      "entraEnCuadro": 5040,
+      "saleDeCuadro": 6120,
+      "empiezaAMoverse": 5040,
+      "terminaDeMoverse": 5400,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.987,
+        "fondo": 1.053
+      },
+      "cuadroAlTerminar": {
+        "top": 0.654,
+        "fondo": 0.719
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 5106,
+          "fin": 5337,
+          "error": 129
+        },
+        {
+          "patron": "P8",
+          "inicio": 5242,
+          "fin": 5421,
+          "error": 223
+        },
+        {
+          "patron": "P2",
+          "inicio": 5026,
+          "fin": 5097,
+          "error": 317
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 11,
+        "seccion": "numeros",
+        "ordinal": 3,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-3 tablet:col-span-3 tablet:row-start-1",
+        "texto": "[CIFRA]Años en el mercado",
+        "topDeFlujo": 6794,
+        "altoDeFlujo": 52
+      },
+      "entraEnCuadro": 5760,
+      "saleDeCuadro": 6840,
+      "empiezaAMoverse": 5760,
+      "terminaDeMoverse": 6120,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.957,
+        "fondo": 1.005
+      },
+      "cuadroAlTerminar": {
+        "top": 0.624,
+        "fondo": 0.672
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 5794,
+          "fin": 6006,
+          "error": 148
+        },
+        {
+          "patron": "P8",
+          "inicio": 5930,
+          "fin": 6090,
+          "error": 200
+        },
+        {
+          "patron": "P3",
+          "inicio": 5822,
+          "fin": 6306,
+          "error": 248
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 12,
+        "seccion": "numeros",
+        "ordinal": 4,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-7 tablet:col-span-6 tablet:row-start-2",
+        "texto": "[CIFRA]Tiempo de respuesta",
+        "topDeFlujo": 7160,
+        "altoDeFlujo": 87
+      },
+      "entraEnCuadro": 6120,
+      "saleDeCuadro": 7200,
+      "empiezaAMoverse": 6120,
+      "terminaDeMoverse": 6480,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.963,
+        "fondo": 1.043
+      },
+      "cuadroAlTerminar": {
+        "top": 0.629,
+        "fondo": 0.71
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 6160,
+          "fin": 6407,
+          "error": 113
+        },
+        {
+          "patron": "P8",
+          "inicio": 6296,
+          "fin": 6491,
+          "error": 187
+        },
+        {
+          "patron": "P3",
+          "inicio": 6188,
+          "fin": 6707,
+          "error": 295
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 13,
+        "seccion": "numeros",
+        "ordinal": 5,
+        "anclaje": "propia",
+        "clase": "tablet:col-start-2 tablet:col-span-4 tablet:row-start-2",
+        "texto": "[CIFRA]Procesos automatizados",
+        "topDeFlujo": 8233,
+        "altoDeFlujo": 71
+      },
+      "entraEnCuadro": 7200,
+      "saleDeCuadro": 8280,
+      "empiezaAMoverse": 7200,
+      "terminaDeMoverse": 7560,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.956,
+        "fondo": 1.022
+      },
+      "cuadroAlTerminar": {
+        "top": 0.623,
+        "fondo": 0.689
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 7233,
+          "fin": 7464,
+          "error": 129
+        },
+        {
+          "patron": "P8",
+          "inicio": 7369,
+          "fin": 7548,
+          "error": 181
+        },
+        {
+          "patron": "P3",
+          "inicio": 7261,
+          "fin": 7764,
+          "error": 265
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 14,
+        "seccion": "trabajos",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "TrabajosTres proyectos, y al lado de cada nombre la medida de lo que cambió.Los nombres so",
+        "topDeFlujo": 8704,
+        "altoDeFlujo": 159
+      },
+      "entraEnCuadro": 7680,
+      "saleDeCuadro": 10920,
+      "empiezaAMoverse": 7560,
+      "terminaDeMoverse": 7800,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -3120,
+      "desfaseDeSalidaPantallas": -2.889,
+      "fraccionFueraDeCuadro": 0.333,
+      "cuadroAlEmpezar": {
+        "top": 1.059,
+        "fondo": 1.206
+      },
+      "cuadroAlTerminar": {
+        "top": 0.837,
+        "fondo": 0.984
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 2.889,
+      "candidatos": [
+        {
+          "patron": "P2",
+          "inicio": 7624,
+          "fin": 7783,
+          "error": 81
+        },
+        {
+          "patron": "P7",
+          "inicio": 7624,
+          "fin": 7783,
+          "error": 81
+        },
+        {
+          "patron": "P1",
+          "inicio": 7704,
+          "fin": 8023,
+          "error": 367
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 15,
+        "seccion": "trabajos",
+        "ordinal": 1,
+        "anclaje": "seccion",
+        "clase": "relative min-h-0 flex-1",
+        "texto": "EsquinaLo que cambió[MÉTRICA]El GarageLo que cambió[MÉTRICA]BanúLo que cambió[MÉTRICA]",
+        "topDeFlujo": 8895,
+        "altoDeFlujo": 794
+      },
+      "entraEnCuadro": 7920,
+      "saleDeCuadro": 11760,
+      "empiezaAMoverse": 7560,
+      "terminaDeMoverse": 10560,
+      "desfaseDeEntradaPx": -360,
+      "desfaseDeEntradaPantallas": -0.333,
+      "desfaseDeSalidaPx": -1200,
+      "desfaseDeSalidaPantallas": -1.111,
+      "fraccionFueraDeCuadro": 0.115,
+      "cuadroAlEmpezar": {
+        "top": 1.236,
+        "fondo": 1.97
+      },
+      "cuadroAlTerminar": {
+        "top": 0.236,
+        "fondo": 0.97
+      },
+      "opacidadAlCentro": 0,
+      "peorDesfasePantallas": 1.111,
+      "candidatos": [
+        {
+          "patron": "P4",
+          "inicio": 7815,
+          "fin": 9689,
+          "error": 1126
+        },
+        {
+          "patron": "P6",
+          "inicio": 7815,
+          "fin": 9689,
+          "error": 1126
+        },
+        {
+          "patron": "P3",
+          "inicio": 7923,
+          "fin": 9149,
+          "error": 1774
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 16,
+        "seccion": "servicios",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "relative",
+        "texto": "05ServiciosTres frentes, y el mismo equipo detrás de los tres.Sitios y tiendasDesarrollo w",
+        "topDeFlujo": 11880,
+        "altoDeFlujo": 3240
+      },
+      "entraEnCuadro": 10920,
+      "saleDeCuadro": 15000,
+      "empiezaAMoverse": 11880,
+      "terminaDeMoverse": 13680,
+      "desfaseDeEntradaPx": 960,
+      "desfaseDeEntradaPantallas": 0.889,
+      "desfaseDeSalidaPx": -1320,
+      "desfaseDeSalidaPantallas": -1.222,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0,
+        "fondo": 3
+      },
+      "cuadroAlTerminar": {
+        "top": -1.667,
+        "fondo": 1.333
+      },
+      "opacidadAlCentro": 1,
+      "peorDesfasePantallas": 1.222,
+      "candidatos": [
+        {
+          "patron": "P5",
+          "inicio": 11664,
+          "fin": 14472,
+          "error": 1008
+        },
+        {
+          "patron": "P2",
+          "inicio": 10800,
+          "fin": 14040,
+          "error": 1440
+        },
+        {
+          "patron": "P7",
+          "inicio": 10800,
+          "fin": 14040,
+          "error": 1440
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 17,
+        "seccion": "tu-panel",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Cada proyecto viene con su panel: la misma pantalla que miramos nosotros, abierta para qui",
+        "topDeFlujo": 15296,
+        "altoDeFlujo": 116
+      },
+      "entraEnCuadro": 14280,
+      "saleDeCuadro": 15360,
+      "empiezaAMoverse": 14280,
+      "terminaDeMoverse": 14640,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.941,
+        "fondo": 1.048
+      },
+      "cuadroAlTerminar": {
+        "top": 0.608,
+        "fondo": 0.715
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 14296,
+          "fin": 14572,
+          "error": 84
+        },
+        {
+          "patron": "P8",
+          "inicio": 14432,
+          "fin": 14656,
+          "error": 168
+        },
+        {
+          "patron": "P3",
+          "inicio": 14324,
+          "fin": 14872,
+          "error": 276
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 18,
+        "seccion": "tu-panel",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "[CAPTURA DEL PANEL]Pantalla principal del panel de un cliente, a ancho completo, con el es",
+        "topDeFlujo": 15497,
+        "altoDeFlujo": 623
+      },
+      "entraEnCuadro": 14520,
+      "saleDeCuadro": 16080,
+      "empiezaAMoverse": 14400,
+      "terminaDeMoverse": 15360,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.111,
+      "cuadroAlEmpezar": {
+        "top": 1.016,
+        "fondo": 1.593
+      },
+      "cuadroAlTerminar": {
+        "top": 0.127,
+        "fondo": 0.704
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 14497,
+          "fin": 15280,
+          "error": 177
+        },
+        {
+          "patron": "P8",
+          "inicio": 14633,
+          "fin": 15364,
+          "error": 237
+        },
+        {
+          "patron": "P2",
+          "inicio": 14417,
+          "fin": 15040,
+          "error": 337
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 19,
+        "seccion": "tu-panel",
+        "ordinal": 2,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Qué esUn tablero por proyecto, con acceso propio. No es un informe que llega por mail y qu",
+        "topDeFlujo": 15497,
+        "altoDeFlujo": 91
+      },
+      "entraEnCuadro": 14520,
+      "saleDeCuadro": 15480,
+      "empiezaAMoverse": 14400,
+      "terminaDeMoverse": 14760,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.25,
+      "cuadroAlEmpezar": {
+        "top": 1.016,
+        "fondo": 1.1
+      },
+      "cuadroAlTerminar": {
+        "top": 0.683,
+        "fondo": 0.767
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 14497,
+          "fin": 14748,
+          "error": 109
+        },
+        {
+          "patron": "P2",
+          "inicio": 14417,
+          "fin": 14508,
+          "error": 269
+        },
+        {
+          "patron": "P7",
+          "inicio": 14417,
+          "fin": 14508,
+          "error": 269
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 20,
+        "seccion": "tu-panel",
+        "ordinal": 3,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Qué se ve adentroEl avance de cada entrega y qué falta para cerrarla. Los pedidos abiertos",
+        "topDeFlujo": 15775,
+        "altoDeFlujo": 91
+      },
+      "entraEnCuadro": 14760,
+      "saleDeCuadro": 15840,
+      "empiezaAMoverse": 14760,
+      "terminaDeMoverse": 15120,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.94,
+        "fondo": 1.024
+      },
+      "cuadroAlTerminar": {
+        "top": 0.607,
+        "fondo": 0.691
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 14775,
+          "fin": 15026,
+          "error": 109
+        },
+        {
+          "patron": "P8",
+          "inicio": 14911,
+          "fin": 15110,
+          "error": 161
+        },
+        {
+          "patron": "P3",
+          "inicio": 14803,
+          "fin": 15326,
+          "error": 249
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 21,
+        "seccion": "tu-panel",
+        "ordinal": 4,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Quién entraUn usuario por persona del equipo, y cada uno ve lo que le toca. Los datos de E",
+        "topDeFlujo": 16053,
+        "altoDeFlujo": 67
+      },
+      "entraEnCuadro": 15000,
+      "saleDeCuadro": 16080,
+      "empiezaAMoverse": 15000,
+      "terminaDeMoverse": 15360,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.975,
+        "fondo": 1.037
+      },
+      "cuadroAlTerminar": {
+        "top": 0.642,
+        "fondo": 0.704
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 15053,
+          "fin": 15280,
+          "error": 133
+        },
+        {
+          "patron": "P8",
+          "inicio": 15189,
+          "fin": 15364,
+          "error": 193
+        },
+        {
+          "patron": "P3",
+          "inicio": 15081,
+          "fin": 15580,
+          "error": 301
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 22,
+        "seccion": "tu-panel",
+        "ordinal": 5,
+        "anclaje": "propia",
+        "clase": "flex flex-1 flex-col",
+        "texto": "Seguir el avance de una entrega sin preguntar por dónde va.Abrir un pedido y verlo pasar d",
+        "topDeFlujo": 16323,
+        "altoDeFlujo": 877
+      },
+      "entraEnCuadro": 15360,
+      "saleDeCuadro": 17160,
+      "empiezaAMoverse": 15240,
+      "terminaDeMoverse": 16440,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.091,
+      "cuadroAlEmpezar": {
+        "top": 1.003,
+        "fondo": 1.815
+      },
+      "cuadroAlTerminar": {
+        "top": -0.109,
+        "fondo": 0.704
+      },
+      "opacidadAlCentro": 0.998,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 15323,
+          "fin": 16360,
+          "error": 163
+        },
+        {
+          "patron": "P8",
+          "inicio": 15459,
+          "fin": 16444,
+          "error": 223
+        },
+        {
+          "patron": "P2",
+          "inicio": 15243,
+          "fin": 16120,
+          "error": 323
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 23,
+        "seccion": "por-que-develop",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "pt-[var(--spacing-8)]",
+        "texto": "Cualquiera te entrega una web. Nosotros entregamos el sistema que la opera y el panel desd",
+        "topDeFlujo": 17370,
+        "altoDeFlujo": 245
+      },
+      "entraEnCuadro": 16320,
+      "saleDeCuadro": 17520,
+      "empiezaAMoverse": 16320,
+      "terminaDeMoverse": 16800,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.972,
+        "fondo": 1.199
+      },
+      "cuadroAlTerminar": {
+        "top": 0.528,
+        "fondo": 0.755
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 16370,
+          "fin": 16775,
+          "error": 75
+        },
+        {
+          "patron": "P8",
+          "inicio": 16506,
+          "fin": 16859,
+          "error": 245
+        },
+        {
+          "patron": "P2",
+          "inicio": 16290,
+          "fin": 16535,
+          "error": 295
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 24,
+        "seccion": "por-que-develop",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "flex flex-col",
+        "texto": "Software propioEl código que corre tu operación lo escribimos y lo mantenemos nosotros. No",
+        "topDeFlujo": 17788,
+        "altoDeFlujo": 540
+      },
+      "entraEnCuadro": 16800,
+      "saleDeCuadro": 18240,
+      "empiezaAMoverse": 16680,
+      "terminaDeMoverse": 17520,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -720,
+      "desfaseDeSalidaPantallas": -0.667,
+      "fraccionFueraDeCuadro": 0.125,
+      "cuadroAlEmpezar": {
+        "top": 1.026,
+        "fondo": 1.526
+      },
+      "cuadroAlTerminar": {
+        "top": 0.248,
+        "fondo": 0.748
+      },
+      "opacidadAlCentro": 1,
+      "peorDesfasePantallas": 0.667,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 16788,
+          "fin": 17488,
+          "error": 140
+        },
+        {
+          "patron": "P8",
+          "inicio": 16924,
+          "fin": 17572,
+          "error": 296
+        },
+        {
+          "patron": "P2",
+          "inicio": 16708,
+          "fin": 17248,
+          "error": 300
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 25,
+        "seccion": "cierre",
+        "ordinal": 0,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Lo que sigue lo armamos con vosLo quesigue loarmamoscon vos",
+        "topDeFlujo": 18521,
+        "altoDeFlujo": 283
+      },
+      "entraEnCuadro": 17520,
+      "saleDeCuadro": 18360,
+      "empiezaAMoverse": 17520,
+      "terminaDeMoverse": 17760,
+      "desfaseDeEntradaPx": 0,
+      "desfaseDeEntradaPantallas": 0,
+      "desfaseDeSalidaPx": -600,
+      "desfaseDeSalidaPantallas": -0.556,
+      "fraccionFueraDeCuadro": 0,
+      "cuadroAlEmpezar": {
+        "top": 0.927,
+        "fondo": 1.189
+      },
+      "cuadroAlTerminar": {
+        "top": 0.705,
+        "fondo": 0.967
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.556,
+      "candidatos": [
+        {
+          "patron": "P2",
+          "inicio": 17441,
+          "fin": 17724,
+          "error": 115
+        },
+        {
+          "patron": "P7",
+          "inicio": 17441,
+          "fin": 17724,
+          "error": 115
+        },
+        {
+          "patron": "P1",
+          "inicio": 17521,
+          "fin": 17964,
+          "error": 205
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 26,
+        "seccion": "cierre",
+        "ordinal": 1,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "Ver los serviciosVer los servicios",
+        "topDeFlujo": 18874,
+        "altoDeFlujo": 47
+      },
+      "entraEnCuadro": 17880,
+      "saleDeCuadro": 18360,
+      "empiezaAMoverse": 17760,
+      "terminaDeMoverse": 18120,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -240,
+      "desfaseDeSalidaPantallas": -0.222,
+      "fraccionFueraDeCuadro": 0.25,
+      "cuadroAlEmpezar": {
+        "top": 1.032,
+        "fondo": 1.075
+      },
+      "cuadroAlTerminar": {
+        "top": 0.698,
+        "fondo": 0.742
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.222,
+      "candidatos": [
+        {
+          "patron": "P1",
+          "inicio": 17874,
+          "fin": 18081,
+          "error": 153
+        },
+        {
+          "patron": "P8",
+          "inicio": 18010,
+          "fin": 18165,
+          "error": 295
+        },
+        {
+          "patron": "P2",
+          "inicio": 17794,
+          "fin": 17841,
+          "error": 313
+        }
+      ]
+    },
+    {
+      "bloque": {
+        "indice": 27,
+        "seccion": "cierre",
+        "ordinal": 2,
+        "anclaje": "propia",
+        "clase": "",
+        "texto": "El recorridoHeroQuiénes somosNúmerosTrabajosServiciosTu panelPor qué develOPContacto[ENLAC",
+        "topDeFlujo": 18991,
+        "altoDeFlujo": 264
+      },
+      "entraEnCuadro": 18000,
+      "saleDeCuadro": 18360,
+      "empiezaAMoverse": 17880,
+      "terminaDeMoverse": 18240,
+      "desfaseDeEntradaPx": -120,
+      "desfaseDeEntradaPantallas": -0.111,
+      "desfaseDeSalidaPx": -120,
+      "desfaseDeSalidaPantallas": -0.111,
+      "fraccionFueraDeCuadro": 0.25,
+      "cuadroAlEmpezar": {
+        "top": 1.029,
+        "fondo": 1.273
+      },
+      "cuadroAlTerminar": {
+        "top": 0.696,
+        "fondo": 0.94
+      },
+      "opacidadAlCentro": null,
+      "peorDesfasePantallas": 0.111,
+      "candidatos": [
+        {
+          "patron": "P2",
+          "inicio": 17911,
+          "fin": 18175,
+          "error": 96
+        },
+        {
+          "patron": "P7",
+          "inicio": 17911,
+          "fin": 18175,
+          "error": 96
+        },
+        {
+          "patron": "P1",
+          "inicio": 17991,
+          "fin": 18415,
+          "error": 286
+        }
+      ]
+    }
+  ]
+}

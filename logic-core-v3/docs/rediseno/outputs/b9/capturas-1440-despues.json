@@ -1,0 +1,78 @@
+{
+  "perfil": "1440",
+  "etiqueta": "despues",
+  "alturaDelDocumento": 16275,
+  "panel": {
+    "top": 14400,
+    "alto": 900
+  },
+  "graciaDeEscenaMs": 1200,
+  "nota": "si el scrollHeight del documento cambia entre antes y después, el mismo scrollY deja de ser el mismo lugar y el par no se puede restar.",
+  "filas": [
+    {
+      "fraccion": -0.45,
+      "scrollPedido": 13995,
+      "scrollLogrado": 13995,
+      "archivo": "docs\\rediseno\\capturas\\b9\\por-que-develop-1440-despues-y13995.png",
+      "bytes": 360477,
+      "opacidadDelDiferencial": 0,
+      "cajaDelBloque": {
+        "top": 823,
+        "alto": 450
+      },
+      "topEnPantallas": 0.914
+    },
+    {
+      "fraccion": 0,
+      "scrollPedido": 14400,
+      "scrollLogrado": 14400,
+      "archivo": "docs\\rediseno\\capturas\\b9\\por-que-develop-1440-despues-y14400.png",
+      "bytes": 599772,
+      "opacidadDelDiferencial": 0.659,
+      "cajaDelBloque": {
+        "top": 418,
+        "alto": 450
+      },
+      "topEnPantallas": 0.464
+    },
+    {
+      "fraccion": 0.22,
+      "scrollPedido": 14598,
+      "scrollLogrado": 14598,
+      "archivo": "docs\\rediseno\\capturas\\b9\\por-que-develop-1440-despues-y14598.png",
+      "bytes": 497313,
+      "opacidadDelDiferencial": 0.984,
+      "cajaDelBloque": {
+        "top": 220,
+        "alto": 450
+      },
+      "topEnPantallas": 0.244
+    },
+    {
+      "fraccion": 0.33,
+      "scrollPedido": 14697,
+      "scrollLogrado": 14697,
+      "archivo": "docs\\rediseno\\capturas\\b9\\por-que-develop-1440-despues-y14697.png",
+      "bytes": 414331,
+      "opacidadDelDiferencial": 1,
+      "cajaDelBloque": {
+        "top": 121,
+        "alto": 450
+      },
+      "topEnPantallas": 0.134
+    },
+    {
+      "fraccion": 0.44,
+      "scrollPedido": 14796,
+      "scrollLogrado": 14796,
+      "archivo": "docs\\rediseno\\capturas\\b9\\por-que-develop-1440-despues-y14796.png",
+      "bytes": 354104,
+      "opacidadDelDiferencial": 1,
+      "cajaDelBloque": {
+        "top": 22,
+        "alto": 450
+      },
+      "topEnPantallas": 0.024
+    }
+  ]
+}
