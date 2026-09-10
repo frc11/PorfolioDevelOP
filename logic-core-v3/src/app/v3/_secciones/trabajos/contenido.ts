@@ -75,6 +75,7 @@
  */
 
 import type { IdDePatron } from '../../_lib/motion/patrones'
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -123,7 +124,7 @@ export const CONTENIDO = {
     {
       nombre: 'Esquina',
       enlace: 'https://esquinaweb.com.ar',
-      metrica: '[MÉTRICA]',
+      metrica: conLlave(INVENTOS.trabajosEsquina),
       captura: {
         fuente: '/capturas/esquina.webp',
         alt: 'Sitio de Esquina, un estudio de diseño: pantalla clara, casi vacía, con la marca escrita a mano arriba a la izquierda y una frase grande en el centro.',
@@ -132,7 +133,7 @@ export const CONTENIDO = {
     {
       nombre: 'El Garage',
       enlace: 'https://elgarageautomoviles.com.ar',
-      metrica: '[MÉTRICA]',
+      metrica: conLlave(INVENTOS.trabajosGarage),
       captura: {
         fuente: '/capturas/el-garage.webp',
         alt: 'Sitio de El Garage, una concesionaria: una camioneta sobre una ruta costera al atardecer ocupa la pantalla entera, con el nombre en letras grandes encima.',
@@ -141,7 +142,7 @@ export const CONTENIDO = {
     {
       nombre: 'Banú',
       enlace: 'https://banupage.com.ar',
-      metrica: '[MÉTRICA]',
+      metrica: conLlave(INVENTOS.trabajosBanu),
       captura: {
         fuente: '/capturas/banu.webp',
         alt: 'Sitio de Banú, una tienda de perfumes: fondo oscuro, un frasco de vidrio tallado iluminado en el centro y un botón para ver el catálogo.',

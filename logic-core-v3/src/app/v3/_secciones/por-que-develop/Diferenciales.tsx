@@ -78,9 +78,14 @@ export function TarjetaDeDiferencial({
  * EL TESTIMONIO QUE FALTA, con la forma del que va a ir.
  *
  * Es un `<blockquote>` de verdad con su `<footer>`: el día que entre la cita,
- * lo único que cambia es el texto. El marcador va en la familia monoespaciada
- * —el mismo tratamiento que `_contrato/HuecoDeMedio.tsx` le da a los suyos—
- * para que se lea como lo que es: un hueco, no una cita.
+ * lo único que cambia es el texto. La primera línea va en la familia
+ * monoespaciada —el mismo tratamiento que `_contrato/HuecoDeMedio.tsx` le da a
+ * los suyos— para que un hueco se lea como un hueco.
+ *
+ * ⚠️ **B12 §4:** con la llave del contenido inventado prendida esa línea no es
+ * un marcador sino una CITA inventada, y la monoespaciada pasa a ser lo que la
+ * distingue de una cita de verdad. Por eso el campo se llama `cita` y no
+ * `marcador`, y por eso el tratamiento no cambia con la llave.
  */
 export function BloqueDeTestimonio({
   testimonio,
@@ -90,7 +95,7 @@ export function BloqueDeTestimonio({
   return (
     <blockquote className="border-borde-fuerte flex flex-col gap-[var(--spacing-4)] border-l pl-[var(--spacing-4)]">
       <Titular nivel="titulo-s" como="p" className="font-codigo">
-        {testimonio.marcador}
+        {testimonio.cita}
       </Titular>
       <Cuerpo como="p">{testimonio.forma}</Cuerpo>
       <footer>

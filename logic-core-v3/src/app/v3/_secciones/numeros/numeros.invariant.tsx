@@ -20,11 +20,7 @@ import { fileURLToPath } from 'node:url'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import {
   cuentaDeMarcadores,
-  hallazgosDeCifraConSimbolo,
-  hallazgosDeDigito,
-  hallazgosDeMarcadorDesconocido,
   marcadoresPedidos,
-  numerosDe,
   textosDe,
 } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
@@ -33,6 +29,7 @@ import { claseDe, etiquetasDeAperturaCon } from '../_invariantes/marcado'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, type ClaveDeCifra } from './contenido'
+import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
 import { GEOMETRIA, Numeros } from './Numeros'
 
 const seccion = seccionDe('numeros')
@@ -134,27 +131,24 @@ afirmarIgual(GEOMETRIA.pantallas.filter((p) => p.cabecera).map((p) => p.id), ['e
 controlPositivo('el reparto vería una cifra perdida', GEOMETRIA.pantallas.map((p) => ({ ...p, cifras: p.cifras.slice(1) })), (ps: readonly { readonly cifras: readonly ClaveDeCifra[] }[]) => ps.flatMap((p) => p.cifras).length === CONTENIDO.cifras.length)
 controlPositivo('la lectura del alto ve un alto distinto', { ...seccion, alto: '200svh' }, (s) => pantallasDe(s) === 4)
 
+/** ⚠️ B12 §4 · esta sección muestra contenido INVENTADO; todo se afirma sobre
+ *  estas vistas con la llave apagada. El porqué, en `_invariantes/llave.ts`. */
+const { SIN_LLAVE, quietoSinLlave, animadoSinLlave } = conLaLlaveApagada(CONTENIDO, quieto, conMotion)
+
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El contenido no se puede leer como un dato — la sección donde más cuesta')
 
 afirmar(TEXTOS.length > 0, `el contenido tiene ${TEXTOS.length} textos: la cuenta no es vacía`)
-afirmarIgual(hallazgosDeCifraConSimbolo(CONTENIDO).length, 0, 'cero cifras con símbolo')
-controlPositivo('el detector ve un +340%', { a: 'crecimos +340%' }, (c) => hallazgosDeCifraConSimbolo(c).length === 0)
-afirmarIgual(hallazgosDeDigito(CONTENIDO).length, 0, 'cero dígitos, punto')
-controlPositivo('el detector ve un 12 sin símbolo', { a: '12 proyectos' }, (c) => hallazgosDeDigito(c).length === 0)
-afirmarIgual(numerosDe(CONTENIDO).length, 0, 'cero hojas numéricas: nada que el escáner de cadenas no vea')
-controlPositivo('el detector ve un { clientes: 12 }', { clientes: 12 }, (c) => numerosDe(c).length === 0)
-afirmarIgual(hallazgosDeMarcadorDesconocido(CONTENIDO).length, 0, 'cero marcadores fuera del conjunto cerrado')
-controlPositivo('ve un [METRICA] sin tilde', { a: '[METRICA]' }, (c) => hallazgosDeMarcadorDesconocido(c).length === 0)
+afirmarQueElContenidoNoEsUnDato(CONTENIDO, SIN_LLAVE)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · CINCO cifras y CINCO rótulos, y los diez llegan a la pantalla')
 
 afirmarIgual(CONTENIDO.cifras.length, 5, 'son exactamente cinco casillas')
-afirmarIgual(marcadoresPedidos(CONTENIDO), ['[CIFRA]'], 'el único marcador pedido es [CIFRA]')
-afirmarIgual(cuentaDeMarcadores(CONTENIDO).get('[CIFRA]'), 5, '  y son cinco casillas vacías, no una')
-afirmarIgual(veces(quieto, '[CIFRA]'), 5, 'los cinco [CIFRA] llegan al marcado quieto')
-afirmarIgual(veces(conMotion, '[CIFRA]'), 5, '  y también con la coreografía puesta')
+afirmarIgual(marcadoresPedidos(SIN_LLAVE), ['[CIFRA]'], 'el único marcador pedido es [CIFRA]')
+afirmarIgual(cuentaDeMarcadores(SIN_LLAVE).get('[CIFRA]'), 5, '  y son cinco casillas vacías, no una')
+afirmarIgual(veces(quietoSinLlave, '[CIFRA]'), 5, 'los cinco [CIFRA] llegan al marcado quieto')
+afirmarIgual(veces(animadoSinLlave, '[CIFRA]'), 5, '  y también con la coreografía puesta')
 controlPositivo('ve un marcado sin marcadores', '<div>nada</div>', (h: string) => veces(h, '[CIFRA]') === 5)
 afirmarIgual(distintos(ROTULOS), 5, 'los cinco rótulos son distintos entre sí')
 afirmarIgual(ROTULOS.filter((r) => !quieto.includes(r)), [], 'y los cinco llegan: cada hueco dice QUÉ falta')

@@ -20,6 +20,7 @@ import {
   type MarcadorAnunciado,
 } from './s10-acceso'
 import { imprimirMarcadores, publicar } from './s10-acceso-tablas'
+import { sinLoInventadoEnMarcado } from '../../_secciones/_contrato/restauracion'
 import { MARCADORES } from '../../_secciones/_contrato/marcadores'
 
 /**
@@ -87,8 +88,22 @@ export function afirmarQueElCensoNoEstaCiego(): void {
  * silencio y AHORA se cuenta. **La cifra 40 dejó de depender de la forma del
  * marcado.**
  */
-export function afirmarElCenso(quieta: string, animada: string): readonly MarcadorAnunciado[] {
+/**
+ * ⚠️ **B12 §4 · EL CENSO CORRE SOBRE EL MARCADO RESTAURADO, y la cifra 40 no se
+ * movió** — que es exactamente lo que tenía que pasar.
+ *
+ * La llave del contenido inventado tapa 24 de estos marcadores con una cifra
+ * falsa. Contarlos sobre el marcado crudo daría 16 y se leería como *«se
+ * cerraron 24 pedidos»*, que es lo contrario de la verdad: no se cerró ninguno,
+ * se taparon. `sinLoInventadoEnMarcado` los devuelve —sólo en los nodos de
+ * texto, no en los atributos— y el censo vuelve a medir lo que este bloque
+ * existe para medir: **cuántos pedidos siguen abiertos**. La cifra baja cuando
+ * llegue un dato real, no cuando se prenda la llave.
+ */
+export function afirmarElCenso(marcadoQuieto: string, marcadoAnimado: string): readonly MarcadorAnunciado[] {
   titulo('7 · LOS MARCADORES — cómo suena el recorrido')
+  const quieta = sinLoInventadoEnMarcado(marcadoQuieto)
+  const animada = sinLoInventadoEnMarcado(marcadoAnimado)
   const marcas = marcadoresAnunciados(quieta)
   imprimirMarcadores(marcas)
   afirmarIgual(marcas.length, 40, 'son 40 marcadores ANUNCIADOS en la rama quieta — eran 43 hasta que V3-D cerró las tres capturas')

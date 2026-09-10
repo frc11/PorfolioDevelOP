@@ -148,16 +148,46 @@ export function afirmarQueNadaSumaAltoAfueraDelMain(): void {
     return /position:\s*(absolute|fixed)/.test(bloque[1]) || /block-size:\s*0/.test(bloque[1])
   }
 
+  /**
+   * ⚠️ **LA SEGUNDA FUENTE, DESDE B12 §4 — y es una REESCRITURA, no un
+   * aflojamiento** (regla 15).
+   *
+   * La propiedad que este bloque custodia no cambió y no se toca: **ningún
+   * hermano del `<main>` le suma alto al documento**, porque el progreso de la
+   * escena sale de `scrollHeight` y el anclaje se deriva de la tabla. Lo que
+   * cambió es de dónde sale la evidencia para UN hermano nuevo.
+   *
+   * Los tres hermanos que existían cuando esto se escribió eran chrome, y su
+   * posición vivía en una hoja; por eso el detector leía la hoja. La marca de la
+   * llave (`MarcaDeLaLlave.tsx`) se posiciona con utilidades en el elemento, y
+   * exigirle una hoja habría significado abrir una sexta hoja de `_estilos/` sólo
+   * para satisfacer al instrumento —con sus tres padrones detrás— para declarar
+   * lo que el elemento ya dice de sí mismo.
+   *
+   * Así que el detector mira las DOS: la hoja, y la clase del propio elemento.
+   * La segunda es, si acaso, más fuerte: está en el nodo que se está mirando y
+   * no en una tabla nombre→hoja que se puede desincronizar. Lo que NO cambia es
+   * qué pasa cuando no hay ninguna de las dos: **falla**, y los dos controles
+   * positivos siguen siendo los mismos.
+   */
+  const POSICION_FUERA_DEL_FLUJO = /(?:^|\s)(?:fixed|absolute)(?:\s|$)/
+
   const DOCUMENTO = marcadoDelDocumento('quieta')
-  const hermanosDelMain = nodosDe(DOCUMENTO)
+  const hermanos = nodosDe(DOCUMENTO)
     .filter((n) => n.profundidad === 1 && n.etiqueta !== 'main')
-    .map((n) => atributo(n, 'data-pieza') ?? n.etiqueta)
+    .map((n) => ({
+      pieza: atributo(n, 'data-pieza') ?? n.etiqueta,
+      clases: atributo(n, 'class') ?? '',
+    }))
+  const hermanosDelMain = hermanos.map((h) => h.pieza)
 
   console.log(`  hermanos del \`<main>\` en el documento: ${hermanosDelMain.join(' · ')}`)
   afirmarIgual(
-    hermanosDelMain.filter((pieza) => !fueraDelFlujo(pieza)),
+    hermanos
+      .filter((h) => !fueraDelFlujo(h.pieza) && !POSICION_FUERA_DEL_FLUJO.test(h.clases))
+      .map((h) => h.pieza),
     [],
-    `los ${hermanosDelMain.length} hermanos del \`<main>\` están FUERA DEL FLUJO por hoja: ninguno le suma alto al documento`,
+    `los ${hermanos.length} hermanos del \`<main>\` están FUERA DEL FLUJO —por hoja o por su propia clase—: ninguno le suma alto al documento`,
   )
   afirmar(
     hermanosDelMain.length > 0,
@@ -166,12 +196,14 @@ export function afirmarQueNadaSumaAltoAfueraDelMain(): void {
   )
   controlPositivo(
     'el detector ve una pieza que SÍ está en el flujo',
-    'pie',
-    (pieza: string) => fueraDelFlujo(pieza),
+    { pieza: 'pie', clases: 'relative z-10' },
+    (h: { pieza: string; clases: string }) =>
+      fueraDelFlujo(h.pieza) || POSICION_FUERA_DEL_FLUJO.test(h.clases),
   )
   controlPositivo(
-    '  y también una que la hoja no menciona',
-    'una-pieza-que-no-existe',
-    (pieza: string) => fueraDelFlujo(pieza),
+    '  y también una que ni la hoja menciona ni la clase declara',
+    { pieza: 'una-pieza-que-no-existe', clases: 'flex flex-col' },
+    (h: { pieza: string; clases: string }) =>
+      fueraDelFlujo(h.pieza) || POSICION_FUERA_DEL_FLUJO.test(h.clases),
   )
 }

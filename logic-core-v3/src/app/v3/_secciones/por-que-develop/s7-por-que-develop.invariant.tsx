@@ -21,10 +21,10 @@ import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEnco
 import { propiedadesDePieza } from '../../_lib/motion/fotograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { COLORES_DEL_CANVAS_DE_PRUEBA, SUPERFICIES, TINTA_HEX } from '../../_lib/superficies'
-import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
 import { especificacionDe } from '../_contrato/bloqueAnimado'
 import { USOS_DECLARADOS } from '../_contrato/motion'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { SUPERFICIE_ACORDADA, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import { PorQueDevelop } from './PorQueDevelop'
@@ -99,7 +99,7 @@ afirmarIgual(sinCopiaVisual(quieto).length, quieto.length, 'y no saca nada de la
 afirmarIgual(sinCopiaVisual('<span data-lineas-piezas=""><span>a</span><span>b</span></span>c'), 'c', 'el removedor saca el subárbol entero, no solo la etiqueta')
 
 // ⚠️ B12 · `NOMBRE_DE_SECCION` sale de acá y se afirma al revés abajo (regla 15).
-const TEXTOS_ESPERADOS: readonly string[] = [TITULAR, ENTRADA, TESTIMONIO.marcador, TESTIMONIO.forma, TESTIMONIO.firma, ...DIFERENCIALES.flatMap((d) => [d.titulo, d.cuerpo])]
+const TEXTOS_ESPERADOS: readonly string[] = [TITULAR, ENTRADA, TESTIMONIO.cita, TESTIMONIO.forma, TESTIMONIO.firma, ...DIFERENCIALES.flatMap((d) => [d.titulo, d.cuerpo])]
 const faltantes = TEXTOS_ESPERADOS.filter((t) => !textoQuieto.includes(t))
 afirmarIgual(faltantes, [], `los ${TEXTOS_ESPERADOS.length} textos de la sección se leen enteros sin una sola animación`)
 controlPositivo('el buscador de textos ve uno que falta', 'una frase que la sección no dice', (t: string) => textoQuieto.includes(t))
@@ -111,18 +111,18 @@ titulo('3 · Contenido — ningún número que se pueda leer como un hecho')
 /** La frase que este lane existe para no escribir. Vive acá, en el instrumento. */
 const CONTENIDO_PROHIBIDO_DE_CONTROL = 'Crecimos +340% en 3 meses, con planes desde $99.000 por mes y ×2 de leads.'
 
-const hallazgos = escanearContenido(textoQuieto)
+const hallazgos = escanearLoReal(textoQuieto)
 console.log(`  escaneados ${textoQuieto.length} caracteres de texto visible`)
 afirmarIgual(hallazgos, [], 'cero cifras sospechosas, cero precios y cero números sin declarar')
-afirmarIgual(escanearContenido(textoMovido), [], 'y lo mismo en la rama animada')
+afirmarIgual(escanearLoReal(textoMovido), [], 'y lo mismo en la rama animada')
 
-const marcadores = marcadoresEn(textoQuieto)
+const marcadores = marcadoresRealesEn(textoQuieto)
 console.log(`  marcadores en pantalla: ${marcadores.join(' · ')}`)
 afirmar(marcadores.length >= 4, `hay ${marcadores.length} marcadores distintos — "cero hallazgos" no es "cero contenido"`)
 afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), 'los nombres reales están escritos derecho, sin marcador. DERIVADOS de NOMBRES_REALES: escritos acá, la lista y la afirmación eran la misma copia y no se podían contradecir', NOMBRES_REALES.join(' · '))
 
-controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t: string) => escanearContenido(t).length === 0)
-console.log(`  la frase de control dispara ${escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
+controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t: string) => escanearLoReal(t).length === 0)
+console.log(`  la frase de control dispara ${escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Tokens — cero color y cero literales con unidad')

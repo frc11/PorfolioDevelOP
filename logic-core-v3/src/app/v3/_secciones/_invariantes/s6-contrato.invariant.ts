@@ -14,7 +14,7 @@ import { CONTENIDO_PROHIBIDO_DE_CONTROL, afirmarElCorteDeTramos } from './soport
 import {
   NOMBRES_REALES,
   cifrasSospechosas,
-  escanearContenido,
+  escanearLoReal,
   marcadoresEn,
   numerosSinDeclarar,
   preciosEncontrados,
@@ -240,7 +240,7 @@ controlPositivo('el lector de alturas rechaza una unidad que no es svh', '100vh'
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('6 · El escáner de contenido — con su control positivo')
 
-const hallazgosDelProhibido = escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL)
+const hallazgosDelProhibido = escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL)
 afirmar(
   hallazgosDelProhibido.length > 0,
   `la frase de control produce ${hallazgosDelProhibido.length} hallazgos`,
@@ -251,7 +251,7 @@ afirmar(preciosEncontrados(CONTENIDO_PROHIBIDO_DE_CONTROL).length > 0, '  el det
 afirmar(numerosSinDeclarar(CONTENIDO_PROHIBIDO_DE_CONTROL).length > 0, '  el detector de números sueltos la ve')
 
 const LIMPIO = `El panel muestra [MÉTRICA] por proyecto y [CIFRA] de ahorro. Lo usan ${NOMBRES_REALES.join(', ')}.`
-afirmarIgual(escanearContenido(LIMPIO), [], 'un texto con marcadores y nombres reales pasa limpio')
+afirmarIgual(escanearLoReal(LIMPIO), [], 'un texto con marcadores y nombres reales pasa limpio')
 afirmar(marcadoresEn(LIMPIO).length === 2, `el contrapeso: el escáner miró un texto con ${marcadoresEn(LIMPIO).length} marcadores`)
 afirmar(MARCADORES.length > 0, `${MARCADORES.length} marcadores declarados en el vocabulario`)
 
@@ -261,7 +261,7 @@ afirmarIgual(
   'el extractor de texto saca las etiquetas y normaliza el espacio',
 )
 controlPositivo('el extractor no se queda con el contenido de un <script>', '<script>var x = "+340%"</script>', (html) =>
-  escanearContenido(textoVisible(html)).length > 0,
+  escanearLoReal(textoVisible(html)).length > 0,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

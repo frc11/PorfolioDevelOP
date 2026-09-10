@@ -28,7 +28,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { MARCADORES, marcadoresDe } from '../../_secciones/_contrato/marcadores'
-import { escanearContenido, textoVisible } from '../../_secciones/_contrato/escaneo'
+import { escanearLoReal, textoVisible } from '../../_secciones/_contrato/escaneo'
+import { sinLoInventado } from '../../_secciones/_contrato/restauracion'
 import { marcadoresDelPedido } from '../../_secciones/_contrato/pedido'
 import { REGISTRO } from '../../_secciones/_contrato/registro'
 import { marcar } from '../../_secciones/_invariantes/render'
@@ -58,9 +59,26 @@ for (const [id, texto] of TEXTO_POR_SECCION) {
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Todo marcador que se VE está pedido')
 
+/**
+ * ⚠️ **DESDE B12 §4 SE MIRA EL TEXTO RESTAURADO, y es una reescritura contra la
+ * propiedad nueva** (regla 15). La llave del contenido inventado reemplaza
+ * veinte casillas por cifras falsas; `sinLoInventado` las devuelve a su
+ * marcador, o sea que lo que estos dos bloques miran es **el home con la llave
+ * apagada**, que es donde el pedido tiene que cerrar.
+ *
+ * Lo que se gana no es comodidad: con el texto crudo, §3 diría *«el pedido
+ * nombra un marcador que ya no está»* —cierto y sin valor— y §2 quedaría
+ * mirando la mitad de los marcadores. Con el texto restaurado, las dos siguen
+ * afirmando lo mismo que antes de §4 **y además prueban que la llave devuelve
+ * todo lo que declara devolver**, sección por sección.
+ */
+const RESTAURADO_POR_SECCION = new Map(
+  [...TEXTO_POR_SECCION].map(([id, texto]) => [id, sinLoInventado(texto)]),
+)
+
 const sinPedir: string[] = []
 for (const { id, pedido } of REGISTRO) {
-  const enPantalla = [...new Set(marcadoresDe(TEXTO_POR_SECCION.get(id) ?? ''))]
+  const enPantalla = [...new Set(marcadoresDe(RESTAURADO_POR_SECCION.get(id) ?? ''))]
   const pedidos = marcadoresDelPedido(pedido)
   for (const m of enPantalla) {
     if (!pedidos.includes(m as (typeof MARCADORES)[number])) sinPedir.push(`${id}: ${m}`)
@@ -73,12 +91,16 @@ titulo('3 · Y todo marcador PEDIDO se ve — la lista no se quedó vieja')
 
 const yaNoSeVe: string[] = []
 for (const { id, pedido } of REGISTRO) {
-  const texto = TEXTO_POR_SECCION.get(id) ?? ''
+  const texto = RESTAURADO_POR_SECCION.get(id) ?? ''
   for (const m of marcadoresDelPedido(pedido)) {
     if (!texto.includes(m)) yaNoSeVe.push(`${id}: ${m}`)
   }
 }
-afirmarIgual(yaNoSeVe, [], 'ninguna entrada del pedido nombra un marcador que ya no está en pantalla')
+afirmarIgual(
+  yaNoSeVe,
+  [],
+  'ninguna entrada del pedido nombra un marcador que ya no está en pantalla — con la llave apagada, los del pedido vuelven TODOS',
+)
 
 controlPositivo(
   'el detector ve un marcador pedido que no aparece',
@@ -150,7 +172,7 @@ titulo('5 · El escáner de contenido inventado, sobre LAS OCHO')
  * home existe.
  */
 for (const { id } of REGISTRO) {
-  const hallazgos = escanearContenido(TEXTO_POR_SECCION.get(id) ?? '')
+  const hallazgos = escanearLoReal(TEXTO_POR_SECCION.get(id) ?? '')
   afirmarIgual(
     hallazgos.map((h) => `${h.fragmento} — ${h.razon}`),
     [],
@@ -161,9 +183,9 @@ for (const { id } of REGISTRO) {
 const CONTENIDO_PROHIBIDO =
   'Crecimos +340% en 3 meses, con planes desde $99.000 por mes y ×2 de leads.'
 afirmar(
-  escanearContenido(CONTENIDO_PROHIBIDO).length > 0,
-  `el escáner SÍ ve la deuda real de develOP: ${escanearContenido(CONTENIDO_PROHIBIDO).length} hallazgos`,
-  escanearContenido(CONTENIDO_PROHIBIDO)
+  escanearLoReal(CONTENIDO_PROHIBIDO).length > 0,
+  `el escáner SÍ ve la deuda real de develOP: ${escanearLoReal(CONTENIDO_PROHIBIDO).length} hallazgos`,
+  escanearLoReal(CONTENIDO_PROHIBIDO)
     .map((h) => h.fragmento)
     .join(' · '),
 )

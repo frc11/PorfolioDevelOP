@@ -43,6 +43,7 @@
  * número no se mueve: lo que se reescribe es por qué está.
  */
 
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
@@ -91,24 +92,33 @@ export const DIFERENCIALES: readonly Diferencial[] = [
     clave: 'clientes',
     titulo: 'Clientes con nombre',
     cuerpo:
-      'Esquina, El Garage y Banú trabajan así hoy, entre [CIFRA] negocios ' +
-      'que ya operan con lo que construimos.',
+      'Esquina, El Garage y Banú trabajan así hoy, entre ' +
+      conLlave(INVENTOS.diferencialClientes) +
+      ' negocios que ya operan con lo que construimos.',
   },
   {
     clave: 'entrega',
     titulo: 'Entrega medida',
     cuerpo:
-      '[MÉTRICA] más rápido que el camino tradicional, medido sobre entregas reales. ' +
-      'Hasta que la medición exista, la cifra no se escribe.',
+      conLlave(INVENTOS.diferencialEntrega),
   },
 ]
 
 export interface Testimonio {
-  /** El marcador del vocabulario. Es lo que se lee, en grande. */
-  readonly marcador: Marcador
+  /**
+   * Lo que se lee en grande.
+   *
+   * ⚠️ **Se llamaba `marcador` y era de tipo `Marcador` (B12 §4).** Con la
+   * llave del contenido inventado prendida, acá va una CITA; con la llave
+   * apagada vuelve `[TESTIMONIO]`, que es lo que había. El campo dejó de poder
+   * declararse del conjunto cerrado y el nombre pasó a decir qué es, no de qué
+   * vocabulario sale: un campo llamado `marcador` con una cita adentro es
+   * exactamente la clase de nombre que hace que alguien lea mal el archivo.
+   */
+  readonly cita: string
   /** La forma y la longitud de lo que va a ir ahí. Es el pedido. */
   readonly forma: string
-  /** La firma entera como marcador: la persona Y de qué empresa es. */
+  /** La firma entera: la persona Y de qué empresa es. */
   readonly firma: string
 }
 
@@ -133,13 +143,29 @@ export interface Testimonio {
  * Ahora la firma es **el marcador solo**. De quién es el testimonio es parte de
  * lo que falta, no del molde — y lo dice el PEDIDO, que pide *nombre · cargo ·
  * empresa*. Elegir el cliente es una decisión comercial, no una de este archivo.
+ *
+ * ── ⚠️ B12 §4 · LAS TRES LÍNEAS ESTÁN INVENTADAS, Y LA FIRMA NO ES UN NOMBRE ─
+ *
+ * Con la llave prendida el bloque muestra una cita, un cuerpo y una firma que
+ * **nadie dijo**. Los tres salen de `INVENTOS`, y apagar la llave devuelve
+ * exactamente este molde.
+ *
+ * La firma dice `Persona Inventada · testimonio de muestra` y no un nombre
+ * creíble, por lo mismo que este archivo ya había aprendido con Matsu: la
+ * instrucción pide *«un nombre inventado que no pueda confundirse con una
+ * persona real»*, y **cualquier nombre rioplatense plausible ES el nombre de
+ * alguien**. Escribirlo abajo de una cita inventada le pone palabras en la boca
+ * a una persona que existe. Éste tiene el largo y el lugar de una firma —la
+ * composición se juzga igual— y no se puede leer como alguien.
+ *
+ * Y la empresa sigue sin aparecer: elegir cuál de los tres clientes reales dio
+ * el testimonio sería un hecho inventado sobre un cliente real, que es peor que
+ * una cifra inventada. Esa parte del molde no la abre la llave.
  */
 export const TESTIMONIO: Testimonio = {
-  marcador: '[TESTIMONIO]',
-  forma:
-    'Dos o tres oraciones de quien abre el panel todos los días: qué hacía antes, ' +
-    'qué hace ahora, y qué dejó de hacer. Sin cifras adentro — la cifra va aparte, como [MÉTRICA].',
-  firma: '[NOMBRE]',
+  cita: conLlave(INVENTOS.testimonioCita),
+  forma: conLlave(INVENTOS.testimonioCuerpo),
+  firma: conLlave(INVENTOS.testimonioFirma),
 }
 
 /**

@@ -74,6 +74,28 @@ export interface MarcoDeMedioProps {
   readonly marcador: Marcador
   /** El archivo, cuando exista. `null` mientras el pedido esté abierto. */
   readonly fuente: string | null
+  /**
+   * ⚠️ **B12 §4.3 · EL TERCER ESTADO: hay archivo, y es un PLACEHOLDER.**
+   *
+   * Los dos estados de arriba no alcanzaban para lo que §4.3 pide. `fuente:
+   * null` deja un marco vacío que no dice nada del peso ni del encuadre; una
+   * fuente a secas se lee como la foto definitiva. El pedido del humano es el
+   * medio exacto: *«placeholders que respeten la relación de aspecto y el peso
+   * de una foto real… y QUE SE VEAN COMO PLACEHOLDERS»*.
+   *
+   * Con `provisional`, el marco monta la `<Imagen>` de verdad —con su `sizes`,
+   * su ancho intrínseco y su peso, así que la página carga como va a cargar— y
+   * **le deja el marcador escrito encima, en texto**. La composición se juzga
+   * con una caja del tamaño y el tono correctos, y nadie la confunde con una
+   * foto: el archivo es un rayado, y arriba dice `[FOTO DEL EQUIPO]`.
+   *
+   * ⚠ En este estado el `alt` de la imagen va VACÍO —decorativa— y el nombre
+   * accesible lo da el texto del marcador. Anunciar «Franco y Valentino, juntos,
+   * en el lugar donde trabajan» sobre un rayado sería contarle a quien no ve una
+   * foto que no existe: la misma clase de mentira que este contrato entero
+   * existe para no escribir.
+   */
+  readonly provisional?: boolean
   /** Obligatorio. `''` sólo si la imagen es decorativa — eso es una decisión. */
   readonly alt: string
   /** Ancho intrínseco pedido. Con `alto`, da la relación de aspecto. */
@@ -102,6 +124,7 @@ export function MarcoDeMedio({
   sizes,
   descripcion,
   poster,
+  provisional = false,
   className,
 }: MarcoDeMedioProps): React.JSX.Element {
   if (sizes.trim().length === 0) {
@@ -111,9 +134,42 @@ export function MarcoDeMedio({
     )
   }
 
-  if (fuente !== null) {
+  if (fuente !== null && !provisional) {
     return (
       <Imagen src={fuente} alt={alt} ancho={ancho} alto={alto} sizes={sizes} className={className} />
+    )
+  }
+
+  if (fuente !== null) {
+    return (
+      <figure
+        data-medio="placeholder"
+        data-marcador={marcador}
+        data-clase={clase}
+        data-sizes={sizes}
+        data-relacion={`${ancho} / ${alto}`}
+        style={{ aspectRatio: `${ancho} / ${alto}` }}
+        className={cn('border-borde-fuerte relative w-full border border-dashed', className)}
+      >
+        <Imagen src={fuente} alt="" ancho={ancho} alto={alto} sizes={sizes} />
+        <figcaption className="absolute inset-0 flex flex-col items-center justify-center gap-[var(--spacing-2)] p-[var(--spacing-4)]">
+          <Caption como="p" peso="medio" className="text-center uppercase">
+            {marcador}
+          </Caption>
+          {/* ⚠ Tinta PLENA y no `--color-tinta-media`: este rótulo puede caer sobre
+              un panel transparente —Quiénes somos lo es— y las tintas secundarias
+              están calculadas contra las cuatro superficies de papel, no contra la
+              sala. Es la misma regla que `Diferenciales.tsx` ya aplica. */}
+          <Micro como="p" className="max-w-tope text-center uppercase">
+            {descripcion ?? alt}
+          </Micro>
+          {poster !== undefined && (
+            <Micro como="p" className="text-center uppercase">
+              {poster}
+            </Micro>
+          )}
+        </figcaption>
+      </figure>
     )
   }
 

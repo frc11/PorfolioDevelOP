@@ -24,6 +24,7 @@
  */
 
 import { sizesPorColumnas } from '../../_lib/imagen'
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { Marcador } from '../_contrato/marcadores'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
@@ -83,7 +84,7 @@ export const BLOQUES: readonly BloqueDeTexto[] = [
     texto:
       'El avance de cada entrega y qué falta para cerrarla. Los pedidos abiertos, con quién los tomó y cuándo. ' +
       'Las conversaciones que atendió el asistente, enteras. La facturación del proyecto, comprobante por ' +
-      'comprobante. Y cada dato con su fecha: [MÉTRICA] al día, [CIFRA] acumulada.',
+      'comprobante. Y cada dato con su fecha: ' + conLlave(INVENTOS.panelFechas),
   },
   {
     rotulo: 'Quién entra',
@@ -120,7 +121,7 @@ export const CAPACIDADES: readonly string[] = [
   'Sumar a alguien del equipo y elegir qué parte del panel ve.',
   'Editar textos, fotos y fichas del sitio sin pedir una publicación.',
   'Exportar lo que hay en pantalla para llevarlo a otra herramienta.',
-  'Mirar [MÉTRICA] de la semana al lado de la del período anterior.',
+  conLlave(INVENTOS.panelComparacion),
 ]
 
 /**
@@ -166,6 +167,10 @@ export const MARCADOR_DE_LA_CAPTURA: Marcador = '[CAPTURA DEL PANEL]'
 
 export const CAPTURA = {
   marcador: MARCADOR_DE_LA_CAPTURA,
+  /** ⚠️ B12 §4.3 · el PLACEHOLDER propio, no la captura: rayado y grano en
+   *  escala de grises, con la medida y el peso de una captura de verdad
+   *  (`scripts-b12/placeholders.ts`). El marcador se sigue leyendo encima. */
+  fuente: '/placeholders/panel.png',
   ancho: ANCHO_DE_LA_CAPTURA,
   alto: ALTO_DE_LA_CAPTURA,
   sizes: sizesPorColumnas(COLUMNAS_DE_LA_CAPTURA, COLUMNAS_DE_LA_GRILLA),

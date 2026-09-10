@@ -60,6 +60,7 @@ import { createElement } from 'react'
 
 import { SaltarAlContenido } from '../../_chrome/SaltarAlContenido'
 import { Navegacion } from '../../_componentes/chrome/Navegacion'
+import { MarcaDeLaLlave } from '../../_secciones/_contrato/MarcaDeLaLlave'
 import { marcar } from '../../_secciones/_invariantes/render'
 import { RAIZ } from './s5-archivos'
 import {
@@ -182,6 +183,14 @@ export const PIEZAS_MONTABLES: ReadonlyMap<string, PiezaMontable> = new Map<stri
       emite: () => createElement(Navegacion, {}),
       porQue:
         'la pastilla. Desde SITIO-S12 la monta la PÁGINA afuera del `<main>` (defecto 15); si algún día pasa al layout, el modelo la ve por acá sin cambiar una línea',
+    },
+  ],
+  [
+    'MarcaDeLaLlave',
+    {
+      emite: () => createElement(MarcaDeLaLlave),
+      porQue:
+        'la franja de B12 §4 que avisa que las cifras son inventadas. Emite un elemento mientras `CONTENIDO_INVENTADO` esté prendida y `null` cuando se apague, asi que el documento modelado cambia con la llave — que es exactamente lo que tiene que pasar',
     },
   ],
   [

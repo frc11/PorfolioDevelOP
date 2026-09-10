@@ -35,6 +35,7 @@
  */
 
 import { SECCIONES } from '../../_lib/secciones'
+import { sinLoInventado } from './restauracion'
 import { MARCADORES, type Marcador } from './marcadores'
 
 /**
@@ -165,6 +166,36 @@ export function escanearContenido(
 }
 
 /**
+ * ⚠️ **EL ESCÁNER SOBRE EL CONTENIDO REAL — lo que corre desde B12 §4.**
+ *
+ * §4 mete cifras inventadas a propósito, detrás de `CONTENIDO_INVENTADO`. La
+ * instrucción es explícita sobre qué NO puede pasar con este archivo: *«el
+ * escáner de contenido inventado no se afloja: sigue corriendo sobre el
+ * contenido real. Lo que cambia es que el contenido de mentira es otro archivo
+ * y él lo sabe.»*
+ *
+ * Eso es exactamente lo que hace esta función, y conviene leer lo que **no**
+ * hace: no toca un solo detector. `cifrasSospechosas`, `preciosEncontrados` y
+ * `numerosSinDeclarar` siguen con su condición intacta y sin una excepción
+ * nueva. Lo único que cambia es la ENTRADA: antes de escanear, las mentiras
+ * declaradas en `inventado.ts` se devuelven a su marcador, o sea que lo que se
+ * escanea es **el sitio tal como queda cuando la llave se apaga**.
+ *
+ * ⚠ La resta es una lista cerrada de literales exactos, no una clase de patrón,
+ * y de ahí sale la garantía: una cifra escrita a mano en un `contenido.ts`
+ * —sin pasar por la lista— llega entera al detector y lo pone en rojo igual que
+ * antes de §4. `s21-llave` lo afirma con control positivo, y los controles
+ * positivos de cada sección siguen corriendo esta función contra la deuda real
+ * de develOP, que no está en la lista y por eso sigue disparando.
+ */
+export function escanearLoReal(
+  texto: string,
+  permitidos: readonly Excepcion[] = NUMEROS_PERMITIDOS,
+): Hallazgo[] {
+  return escanearContenido(sinLoInventado(texto), permitidos)
+}
+
+/**
  * ⚠️ LA ENTRADA DEL CONTROL POSITIVO **NO VIVE ACÁ**, y es a propósito.
  *
  * La frase que hace saltar a los tres detectores contiene, por definición,
@@ -203,4 +234,15 @@ export function textoVisible(html: string): string {
  *  esto, "cero hallazgos" sería compatible con "cero contenido". */
 export function marcadoresEn(texto: string): readonly Marcador[] {
   return MARCADORES.filter((m) => texto.includes(m))
+}
+
+/**
+ * El mismo contrapeso, sobre el contenido REAL (B12 §4). Con la llave prendida
+ * hay marcadores que están tapados por una cifra inventada; contarlos sobre el
+ * texto crudo daría un número más bajo que se leería como «se cerraron
+ * pedidos», y no se cerró ninguno: se taparon. Va con `escanearLoReal`, y por
+ * la misma razón.
+ */
+export function marcadoresRealesEn(texto: string): readonly Marcador[] {
+  return marcadoresEn(sinLoInventado(texto))
 }

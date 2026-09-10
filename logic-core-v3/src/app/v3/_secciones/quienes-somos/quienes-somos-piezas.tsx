@@ -37,6 +37,7 @@ import { fileURLToPath } from 'node:url'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { seccionDe } from '../_contrato/forma'
+import { sinLoInventadoEn, sinLoInventadoEnMarcado } from '../_contrato/restauracion'
 import { marcadoresPedidos, textosDe } from '../_contrato/marcadores'
 import { MarcoDeMedio } from '../_contrato/medios'
 import { marcar } from '../_invariantes/render'
@@ -73,13 +74,35 @@ export const conPreferencia = marcar(seccionMontada, { anima: false, preferencia
 
 export const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
 export const TEXTOS = textosDe(CONTENIDO)
+/** ⚠ `equipo.fuente` es una RUTA DE ARCHIVO y no un texto de pantalla: el
+ *  optimizador la reescribe a `/_next/image?url=…`, así que se exime de la
+ *  cuenta de textos y se comprueba CODIFICADA. Mismo trato que las tres
+ *  capturas de Trabajos. */
+export const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => h.ruta !== 'equipo.fuente')
 export const FUENTE = readFileSync(
   path.join(path.dirname(fileURLToPath(import.meta.url)), 'QuienesSomos.tsx'),
   'utf8',
 )
 
 /** Los marcadores que el contenido pide, y el chequeo de que TODOS se ven. */
-export const PEDIDOS = marcadoresPedidos(CONTENIDO)
+/**
+ * ⚠️ **B12 §4 · LO QUE SE MIRA ES EL CONTENIDO CON LA LLAVE APAGADA.**
+ *
+ * Los dos `[TEXTO]` de las personas hoy tienen una frase INVENTADA adentro
+ * (`_contrato/inventado.ts`). `sinLoInventadoEn` los devuelve a su marcador, y
+ * `sinLoInventadoEnMarcado` hace lo mismo con el marcado **sin tocar los
+ * atributos** —sobre el HTML crudo, una casilla que vale `4` se comería el `4`
+ * de un `gap-4`—. El pedido y los marcadores se cuentan sobre eso: es el sitio
+ * como queda al apagar, y es donde el pedido tiene que cerrar.
+ */
+export const SIN_LLAVE = sinLoInventadoEn(CONTENIDO)
+export const quietoSinLlave = sinLoInventadoEnMarcado(quieto)
+export const conMotionSinLlave = sinLoInventadoEnMarcado(conMotion)
+
+/** Las dos personas con la llave apagada: `enUnProyecto` vuelve a `[TEXTO]`. */
+export const personasSinLlave = (SIN_LLAVE as { personas: readonly { enUnProyecto: string }[] }).personas
+
+export const PEDIDOS = marcadoresPedidos(SIN_LLAVE)
 export const todosSeVen = (html: string): boolean => PEDIDOS.every((m) => html.includes(m))
 
 /** Lo verdadero declarado por el sprint: tiene que estar escrito, literal. */

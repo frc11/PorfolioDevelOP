@@ -16,6 +16,7 @@ import {
   ANCHO_DEL_MEDIO,
   CONTENIDO,
   ITEMS_POR_SERVICIO,
+  POSTER_PROVISIONAL,
   SIZES_DEL_MEDIO,
   palabrasDelParrafo,
 } from './contenido'
@@ -203,7 +204,8 @@ export function ContenidoDeServicio({
               clase="video"
               marcador="[VIDEO]"
               poster="[PÓSTER]"
-              fuente={null}
+              fuente={POSTER_PROVISIONAL}
+              provisional
               alt={contenido.medio}
               ancho={ANCHO_DEL_MEDIO}
               alto={ALTO_DEL_MEDIO}

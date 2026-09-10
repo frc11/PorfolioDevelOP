@@ -33,6 +33,7 @@
 import { sizesPorTresTramos } from '../../_lib/imagen'
 import { palabrasDe } from '../../_lib/palabras'
 import { IDS_DE_SERVICIO, type IdDeServicio } from '../_contrato/acento'
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -98,8 +99,7 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
     rubro: 'Sitios y tiendas',
     parrafo:
       'Sitios que cargan rápido y se leen igual en un teléfono que en un escritorio. ' +
-      'Diseñamos, escribimos y medimos: [MÉTRICA] de velocidad y [CIFRA] de conversión ' +
-      'quedan a la vista en tu panel.',
+      'Diseñamos, escribimos y medimos: ' + conLlave(INVENTOS.serviciosWeb),
     items: [
       'Diseño y maquetado a medida',
       'Sitio institucional o tienda',
@@ -121,7 +121,7 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
     parrafo:
       'Automatizamos lo que hoy alguien copia y pega: turnos, seguimientos, avisos. ' +
       'El asistente responde con los datos de tu negocio y deriva cuando corresponde. ' +
-      '[MÉTRICA] de consultas resueltas y [CIFRA] de horas devueltas.',
+      conLlave(INVENTOS.serviciosIa),
     items: [
       'Asistente entrenado con tus datos',
       'Respuestas en el sitio y en WhatsApp',
@@ -143,7 +143,7 @@ export const CONTENIDO: Readonly<Record<IdDeServicio, ContenidoDeUnServicio>> = 
     parrafo:
       'Cuando la planilla ya no alcanza, construimos el sistema que tu operación necesita: ' +
       'stock, remitos, permisos por rol, historial de cada cambio. ' +
-      '[MÉTRICA] de procesos migrados y [CIFRA] de errores evitados.',
+      conLlave(INVENTOS.serviciosSoftware),
     items: [
       'Relevamiento de tu operación actual',
       'Modelo de datos y permisos por rol',
@@ -177,6 +177,8 @@ export const ALTO_DEL_MEDIO = 1080
  * necesario justo en la banda del medio.
  */
 export const SIZES_DEL_MEDIO = sizesPorTresTramos(50, 50, 100)
+/** ⚠️ B12 §4.3 · el PÓSTER provisional. El video sigue sin existir: uno que se reproduce se leería como el recorrido definitivo. */
+export const POSTER_PROVISIONAL = '/placeholders/poster.png'
 
 /** Las palabras de un párrafo. Es la `cantidad` del canal P3. */
 export function palabrasDelParrafo(id: IdDeServicio): readonly string[] {

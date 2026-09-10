@@ -6,6 +6,7 @@
     "check-env": "node scripts/check-env.js",
     "dev": "next dev --webpack",
     "dev:qa": "cross-env QA_ALLOW_LOCALHOST=1 next dev --webpack -p 3002",
+    "prebuild": "node scripts/llave-contenido-inventado.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "start:qa": "npm run build && cross-env QA_ALLOW_LOCALHOST=1 next start -p 3001",
@@ -274,7 +275,10 @@
     "test:s19": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s19",
     "test:s20-arco": "npx tsx src/app/v3/_lib/escena/__tests__/s20-arco.invariant.ts",
     "test:s20-brillo": "npx tsx src/app/v3/_lib/escena/__tests__/s20-brillo.invariant.ts",
+    "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
+    "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",
     "test:s20": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s20",
+    "test:s21": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s21",
     "test:frontera": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts frontera",
     "verificar": "npx tsx src/app/v3/_lib/__tests__/s4-verificar.ts"
   },

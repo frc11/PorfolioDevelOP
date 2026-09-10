@@ -31,7 +31,7 @@ import { sizesPorColumnas } from '../../_lib/imagen'
 import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
 import { NOMBRES_REALES } from '../_contrato/escaneo'
 import { ATRIBUTO_DE_PANEL } from '../_contrato/forma'
-import { cuentaDeMarcadores, hallazgosDeCifraConSimbolo, hallazgosDeDigito, hallazgosDeMarcadorDesconocido, marcadoresPedidos, numerosDe, textosDe } from '../_contrato/marcadores'
+import { cuentaDeMarcadores, marcadoresPedidos, textosDe } from '../_contrato/marcadores'
 import { MarcoDeMedio } from '../_contrato/medios'
 import { entradasColgadas } from '../_contrato/pedido'
 import { ritmoDe } from '../_contrato/ritmo'
@@ -39,6 +39,7 @@ import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
+import { afirmarQueElContenidoNoEsUnDato, conLaLlaveApagada } from '../_invariantes/llave'
 import { CSS, FUENTES, FUENTE_DEL_PANEL, FUENTE_DE_LA_COMPOSICION, abrirCaptura, afirmarElRepartoYLaMeseta, sinTres, veces } from './soporte'
 import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
 import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
@@ -111,29 +112,26 @@ controlPositivo('la cuenta de momentos ve una sección que NO está pinneada', [
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · El contenido no se puede leer como un dato')
 
+/** ⚠️ B12 §4 · esta sección muestra contenido INVENTADO; todo se afirma sobre
+ *  estas vistas con la llave apagada. El porqué, en `_invariantes/llave.ts`. */
+const { SIN_LLAVE, quietoSinLlave, animadoSinLlave } = conLaLlaveApagada(CONTENIDO, quieto, conMotion)
+
 afirmar(TEXTOS.length > 0, `el contenido tiene ${TEXTOS.length} textos: la cuenta no es vacía`)
-afirmarIgual(hallazgosDeCifraConSimbolo(CONTENIDO).length, 0, 'cero cifras con símbolo')
-controlPositivo('el detector de cifras con símbolo ve un +340%', { a: 'vendieron +340% mas' }, (c) => hallazgosDeCifraConSimbolo(c).length === 0)
-afirmarIgual(hallazgosDeDigito(CONTENIDO).length, 0, 'cero dígitos, punto')
-controlPositivo('el detector de dígitos ve un 12 sin símbolo', { a: '12 proyectos entregados' }, (c) => hallazgosDeDigito(c).length === 0)
-afirmarIgual(numerosDe(CONTENIDO).length, 0, 'cero hojas numéricas: nada que el escáner de cadenas no vea')
-controlPositivo('el detector de hojas numéricas ve un { clientes: 12 }', { clientes: 12 }, (c) => numerosDe(c).length === 0)
-afirmarIgual(hallazgosDeMarcadorDesconocido(CONTENIDO).length, 0, 'cero marcadores fuera del conjunto cerrado')
-controlPositivo('el detector de marcadores ve un [METRICA] sin tilde', { a: 'subimos [METRICA]' }, (c) => hallazgosDeMarcadorDesconocido(c).length === 0)
+afirmarQueElContenidoNoEsUnDato(CONTENIDO, SIN_LLAVE)
 afirmar(CONTENIDO.titular.includes('Tres proyectos') && !/\d/.test(CONTENIDO.titular), 'la única cantidad del contenido va con letras y no con cifra', CONTENIDO.titular)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El marcador que queda se VE, y el que se cerró YA NO')
 
-const pedidos = marcadoresPedidos(CONTENIDO)
+const pedidos = marcadoresPedidos(SIN_LLAVE)
 afirmarIgual(pedidos, ['[MÉTRICA]'], 'el único marcador que el contenido deja pedido')
-const cuenta = cuentaDeMarcadores(CONTENIDO)
+const cuenta = cuentaDeMarcadores(SIN_LLAVE)
 afirmarIgual(cuenta.get('[MÉTRICA]'), 3, 'tres métricas pedidas: una por proyecto')
 afirmarIgual(cuenta.get('[CAPTURA]'), undefined, 'y CERO capturas pedidas (V3-D): los tres archivos existen, y §13 cuenta las tres imágenes')
-afirmarIgual(veces(quieto, '[MÉTRICA]'), 3, 'las tres métricas llegan al marcado de la rama quieta')
+afirmarIgual(veces(quietoSinLlave, '[MÉTRICA]'), 3, 'las tres métricas llegan al marcado de la rama quieta')
 afirmarIgual(veces(quieto, 'data-marcador="[CAPTURA]"'), 0, 'y no queda un solo marco de captura vacío')
 const todosSeVen = (html: string): boolean => pedidos.every((m) => html.includes(m))
-afirmar(todosSeVen(conMotion), 'el marcador también está con la coreografía puesta')
+afirmar(todosSeVen(animadoSinLlave), 'el marcador también está con la coreografía puesta')
 controlPositivo('el chequeo de "el marcador se ve" ve un marcado sin marcadores', '<div>nada</div>', todosSeVen)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -184,8 +182,8 @@ afirmarIgual(veces(quieto, 'perspective:'), 0, '  y NO en la rama quieta, donde 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · LA MÉTRICA NUNCA ESTÁ OCULTA — ni ella ni ninguno de sus ancestros')
 
-afirmar(ancestrosDe(quieto, '[MÉTRICA]').length > 0, 'la métrica tiene una cadena de ancestros real, no vacía')
-afirmar(metricaVisible(quieto), 'ningún ancestro de la métrica lleva hidden, opacity-0 ni sr-only')
+afirmar(ancestrosDe(quietoSinLlave, '[MÉTRICA]').length > 0, 'la métrica tiene una cadena de ancestros real, no vacía')
+afirmar(metricaVisible(quietoSinLlave), 'ningún ancestro de la métrica lleva hidden, opacity-0 ni sr-only')
 afirmarIgual(veces(quieto, 'sr-only'), 0, 'y en toda la sección no hay un solo `sr-only`')
 controlPositivo('el chequeo de la métrica ve una métrica escondida en un `sr-only`', '<div class="sr-only"><p>[MÉTRICA]</p></div>', metricaVisible)
 
@@ -212,7 +210,7 @@ afirmarIgual(veces(quieto, 'border-acento'), 0, 'y cero `border-acento`: el acen
 afirmarIgual(veces(quieto, 'bg-acento'), CONTENIDO.proyectos.length + veces(quieto, 'data-pieza="prefijo-de-servicio"'), `va como RELLENO ${veces(quieto, 'bg-acento')} veces: una pastilla por métrica (${CONTENIDO.proyectos.length}) más el prefijo de la marca del rótulo (B4-A), y ninguna otra`)
 afirmarIgual(veces(quieto, 'border-borde-fuerte'), 0, 'ya no hay borde punteado (V3-D): el límite lo marca la captura, que ocupa el ancho entero')
 const conTamano = (html: string): boolean => /<span[^>]*text-fluido-micro[^>]*>\[MÉTRICA\]/.test(html)
-afirmar(conTamano(quieto), 'la pastilla conserva su tamaño micro: el color va afuera para que `tailwind-merge` no se lo coma')
+afirmar(conTamano(quietoSinLlave), 'la pastilla conserva su tamaño micro: el color va afuera para que `tailwind-merge` no se lo coma')
 controlPositivo('el chequeo del tamaño ve una métrica a la que `text-tinta` le comió la escala', '<span class="text-tinta">[MÉTRICA]</span>', conTamano)
 
 // ═══════════════════════════════════════════════════════════════════════════

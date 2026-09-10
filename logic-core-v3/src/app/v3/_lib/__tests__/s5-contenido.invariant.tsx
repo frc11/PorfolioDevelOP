@@ -44,9 +44,9 @@ import {
   numerosDe,
   textosDe,
 } from '../../_secciones/_contrato/marcadores'
-import { NOMBRES_REALES } from '../../_secciones/_contrato/escaneo'
-import { entradasColgadas, pedidoPorClase, type EntradaDePedido } from '../../_secciones/_contrato/pedido'
+import { sinLoInventado, sinLoInventadoEn, sinLoInventadoEnMarcado } from '../../_secciones/_contrato/restauracion'
 import { MODULOS_DE_S5 as REGISTRO } from './s5-modulos'
+import { afirmarElPedidoYLasVerdades } from './s5-contenido-piezas'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 
@@ -60,6 +60,25 @@ const LA_DEUDA = {
   multiplicador: '3× más ventas',
   clientes: { activos: 50 },
 }
+
+/**
+ * ⚠️ **EL CONTENIDO CON LA LLAVE APAGADA — B12 §4.** §4 mete veinte casillas
+ * inventadas detrás de `CONTENIDO_INVENTADO`, y éste es justo el invariante que
+ * dice «ni un dígito». Conviven así: **los tres detectores corren sobre el
+ * contenido RESTAURADO** —ninguna condición se tocó, cambió la entrada— y hay
+ * **un segundo pase sobre el contenido CRUDO** que impide que esto sea
+ * circular: cada dígito de hoy tiene que salir de una casilla declarada, y un
+ * `12` escrito a mano en un `contenido.ts` no lo cambia la restauración, así
+ * que aparece en ese pase y da rojo — que es lo que pasaba antes de §4.
+ */
+const RESTAURADO = REGISTRO.map((m) => ({ id: m.id, contenido: sinLoInventadoEn(m.contenido) }))
+const contenidoRestaurado = (id: string): unknown =>
+  RESTAURADO.find((r) => r.id === id)?.contenido
+
+/** Las hojas de texto del contenido crudo que la restauración NO toca: si
+ *  llevan un dígito, se escribieron a mano y el detector las tiene que ver. */
+const escritoAMano = (hallazgos: readonly { ruta: string; texto: string }[]) =>
+  hallazgos.filter((h) => sinLoInventado(h.texto) === h.texto)
 
 /** Renderiza una sección en su rama QUIETA — la de abajo de 1025. */
 function marcarQuieto(indice: number): string {
@@ -87,8 +106,12 @@ afirmar(totalDeTextos > 0, `${totalDeTextos} cadenas de contenido en total`)
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Cero cifras con símbolo — la forma exacta de la deuda')
 
-for (const { id, contenido } of REGISTRO) {
-  afirmarIgual(hallazgosDeCifraConSimbolo(contenido), [], `\`${id}\` — ninguna cifra con %, + o ×`)
+for (const { id } of REGISTRO) {
+  afirmarIgual(
+    hallazgosDeCifraConSimbolo(contenidoRestaurado(id)),
+    [],
+    `\`${id}\` — ninguna cifra con %, + o ×`,
+  )
 }
 
 const ciego = (texto: string): boolean => cifrasConSimboloDe(texto).length === 0
@@ -101,7 +124,16 @@ controlPositivo('y `3× más ventas`', LA_DEUDA.multiplicador, ciego)
 titulo('3 · Cero dígitos, punto — porque `12 proyectos` también se lee como un hecho')
 
 for (const { id, contenido } of REGISTRO) {
-  afirmarIgual(hallazgosDeDigito(contenido), [], `\`${id}\` — ni un dígito en el contenido`)
+  afirmarIgual(
+    hallazgosDeDigito(contenidoRestaurado(id)),
+    [],
+    `\`${id}\` — ni un dígito en el contenido con la llave apagada`,
+  )
+  afirmarIgual(
+    escritoAMano(hallazgosDeDigito(contenido)),
+    [],
+    `  ⚠️ y ningún dígito ESCRITO A MANO: los ${hallazgosDeDigito(contenido).length} que hay hoy en \`${id}\` salen de una casilla de \`inventado.ts\``,
+  )
 }
 
 controlPositivo(
@@ -135,9 +167,9 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Los marcadores salen del conjunto cerrado')
 
-for (const { id, contenido } of REGISTRO) {
+for (const { id } of REGISTRO) {
   afirmarIgual(
-    hallazgosDeMarcadorDesconocido(contenido),
+    hallazgosDeMarcadorDesconocido(contenidoRestaurado(id)),
     [],
     `\`${id}\` — ningún marcador fuera de la lista cerrada`,
   )
@@ -178,12 +210,19 @@ titulo('6 · Los marcadores LLEGAN A LA PANTALLA')
  * **nada provisional queda sin pedir**, sea como marcador visible o como
  * entrada del pedido. Y la garantía de que el extractor no está ciego se toma
  * del total del lane y de su control positivo, no de cada sección.
+ *
+ * ⚠️ **DESDE B12 §4 SE CUENTA SOBRE EL CONTENIDO Y EL MARCADO RESTAURADOS**, o
+ * sea sobre el sitio con la llave apagada. La propiedad no cambió —el marcador
+ * que el dato declara tiene que llegar a la pantalla— y ahora dice además algo
+ * que antes no podía decir: **que la llave los devuelve TODOS, casilla por
+ * casilla y sección por sección.** Con la llave prendida esas casillas muestran
+ * una cifra inventada; el día que se apague, esto ya afirmó que vuelven.
  */
 const censo = new Map<string, number>()
 for (let i = 0; i < REGISTRO.length; i++) {
-  const { id, contenido, pedido } = REGISTRO[i]
-  const html = marcarQuieto(i)
-  const esperados = cuentaDeMarcadores(contenido)
+  const { id, pedido } = REGISTRO[i]
+  const html = sinLoInventadoEnMarcado(marcarQuieto(i))
+  const esperados = cuentaDeMarcadores(contenidoRestaurado(id))
   afirmar(
     esperados.size > 0 || pedido.length > 0,
     `\`${id}\` — lo provisional está pedido: ${esperados.size} clase(s) de marcador y ${pedido.length} entrada(s) de pedido`,
@@ -222,68 +261,6 @@ for (const marcador of MARCADORES) {
   console.log(`  ${marcador.padEnd(20)} ${String(total).padStart(2)}   ${donde}`)
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · El pedido de prosa: declarado, y sin entradas colgadas')
-
-for (const { id, contenido, pedido } of REGISTRO) {
-  afirmarIgual(
-    entradasColgadas(contenido, pedido),
-    [],
-    `\`${id}\` — cada entrada del pedido apunta a una ruta que existe en el contenido`,
-  )
-  afirmar(pedido.length > 0, `  y declara ${pedido.length} entrada(s) de pedido`)
-}
-
-controlPositivo(
-  'el detector ve una entrada del pedido que apunta a una ruta inexistente',
-  { contenido: { titular: 'x' }, pedido: [{ ruta: 'bajada', clase: 'prosa' as const, marcador: null, quienLoTrae: 'valentino' as const, que: 'la bajada', formato: 'texto plano' }] },
-  (caso: { contenido: unknown; pedido: readonly EntradaDePedido[] }) =>
-    entradasColgadas(caso.contenido, caso.pedido).length === 0,
-)
-
-console.log('\n  ── EL PEDIDO A FRANCO — prosa y datos declarados ──')
-for (const { id, pedido } of REGISTRO) {
-  for (const [clase, entradas] of pedidoPorClase(pedido)) {
-    for (const e of entradas) console.log(`  ${id.padEnd(15)} ${clase.padEnd(10)} ${e.ruta.padEnd(28)} ${e.que}`)
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Los nombres que SÍ son verdad sobreviven')
-
-/**
- * La regla no es "no escribir nada": es no inventar. Lo verdadero se usa, y hay
- * que comprobar que sigue estando — un escáner demasiado celoso que empujara a
- * borrar los nombres reales convertiría una sección honesta en una vacía.
- */
-/**
- * ⚠️ **LOS NOMBRES DE CLIENTE SE DERIVAN (V3-D).** Estaban escritos acá, uno
- * por fila, y lo mismo pasaba en otros tres instrumentos: cuatro copias del
- * mismo trío. Por eso `Matsu Automotores` —que NO es un cliente: ese trabajo no
- * se hizo— pasó cinco revisiones en verde. Las copias no se pueden contradecir
- * entre sí, así que ninguna comprobación estaba comprobando nada sobre la
- * realidad: sólo que las cuatro decían lo mismo.
- *
- * Ahora salen de `NOMBRES_REALES`, que es la única lista. Eso NO prueba que los
- * nombres sean reales —ningún instrumento puede probarlo— pero convierte
- * corregir la realidad en una línea en vez de nueve, y deja un solo lugar donde
- * una persona tiene que mirar y decir "sí, ése es cliente".
- */
-const VERDADES: readonly { texto: string; donde: string }[] = [
-  ...NOMBRES_REALES.map((texto) => ({ texto, donde: 'trabajos' })),
-  { texto: 'Tucumán', donde: 'quienes-somos' },
-]
-
-for (const { texto, donde } of VERDADES) {
-  const indice = REGISTRO.findIndex((m) => m.id === donde)
-  const html = marcarQuieto(indice)
-  afirmar(html.includes(texto), `\`${texto}\` aparece en \`${donde}\` — es verdad y se usa`)
-}
-
-controlPositivo(
-  'el buscador de verdades vería una ausente',
-  '<section>sin nombres</section>',
-  (html: string) => VERDADES.every((v) => html.includes(v.texto)),
-)
+afirmarElPedidoYLasVerdades(marcarQuieto)
 
 cerrar('s5-contenido.invariant')

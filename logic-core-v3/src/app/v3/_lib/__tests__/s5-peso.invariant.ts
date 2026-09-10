@@ -40,7 +40,8 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { afirmar, cerrar, controlPositivo, titulo } from './afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
+import { PESO_DE_LA_LLAVE_EN_BYTES, RECIBOS_DE_LA_LLAVE } from './s5-presupuesto-recibos-de-la-llave'
 import {
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
@@ -52,6 +53,7 @@ import {
   MONTAJE_DE_B8_KIB,
   MONTAJE_DE_B9_KIB,
   PRESUPUESTO_DEL_LANE_KIB,
+  PESO_DE_LA_LLAVE_KIB,
   PRESUPUESTO_PROPIO_KIB,
 } from './s5-presupuesto'
 import { DIST, conjuntoInicial, exigirBuild, htmlDe, kib, partirCargaInicial, pesar } from './s3-bundle'
@@ -134,17 +136,48 @@ console.log('    ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un á
 console.log('    B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: declaró su montaje con su A/B, su reparto byte a byte y su alternativa escrita (`s5-presupuesto-recibos-de-b11.ts`). El 60 no se movió.')
 console.log('    B12 es la línea más grande que este techo llevó, y las DOS piezas que la componen son nuevas y pedidas por su nombre: la gota («un efecto de gota o algo exótico y deluxe») y el velo local del pie. El resto del bloque DEVUELVE 87 B (`s5-presupuesto-recibos-de-b12.ts`).')
 console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los CUATRO archivos de recibos: por eso cada una es revocable por separado.')
+/**
+ * ⚠️ **EL PESO DE LA LLAVE SE RESTA APARTE, Y EN VOZ ALTA (B12 §4).**
+ *
+ * Lo que el contenido inventado agrega **no es producto**: es andamio que se va
+ * el día que llegue el contenido real. Meterlo adentro del techo del lane lo
+ * volvería indistinguible de un montaje, y el 60 dejaría de poder leerse solo.
+ * Así que se resta como una línea propia, con su nombre, y el techo del lane
+ * queda exactamente donde B12 §1–§3 lo dejó.
+ *
+ * ⚠ La cifra que la afirmación mira es `escritoPorElLane − PESO_DE_LA_LLAVE`, y
+ * el día que la llave se apague y las veinte casillas se borren, esta resta
+ * tiene que volver a cero. Mientras tanto se publica en cada corrida.
+ */
+const escritoSinLaLlave = escritoPorElLane - PESO_DE_LA_LLAVE_KIB * 1024
+console.log(
+  `  ⚠️ LA LLAVE (B12 §4): ${PESO_DE_LA_LLAVE_KIB} KiB de contenido INVENTADO se restan APARTE del techo del lane — ${kib(escritoPorElLane)} escritos, ${kib(escritoSinLaLlave)} sin el andamio.`,
+)
+console.log('    No es un montaje y no entra en `MONTAJES_DECLARADOS_KIB`: el techo no se movió por §4. Reparto en `s5-presupuesto-recibos-de-la-llave.ts`.')
+console.log('    ⚠️ Y apagar la llave devuelve 0 bytes, medido: lo que devuelve los bytes es borrar las veinte entradas de `_contrato/inventado.ts` (1.064 B).')
+
 afirmar(
-  escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
-  `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
+  escritoSinLaLlave / 1024 < PRESUPUESTO_PROPIO_KIB,
+  `lo que ESCRIBE el lane, sin el andamio de la llave, entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,
   // ⚠ B10 · el aire va TAMBIÉN en bytes: con 2,9 B de margen, `toFixed(2)` sobre
   // KiB imprime `0.00` y eso se lee como "no queda aire", que no es lo medido.
-  `${kib(escritoPorElLane)} — ${(PRESUPUESTO_PROPIO_KIB * 1024 - escritoPorElLane).toFixed(1)} B de aire · ${kib(pesoPropio.crudo)} con el preámbulo heredado adentro`,
+  `${kib(escritoSinLaLlave)} — ${(PRESUPUESTO_PROPIO_KIB * 1024 - escritoSinLaLlave).toFixed(1)} B de aire · ${kib(pesoPropio.crudo)} con el preámbulo heredado adentro`,
 )
 afirmar(
-  escritoPorElLane / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
+  escritoSinLaLlave / 1024 - MONTAJES_DECLARADOS_KIB < PRESUPUESTO_DEL_LANE_KIB,
   `  y el techo VIEJO sigue vigilando todo lo que NO está declarado: sin los ${MONTAJES_DECLARADOS_KIB.toFixed(2)} KiB de líneas con nombre, el lane entra en ${PRESUPUESTO_DEL_LANE_KIB} KiB`,
-  `${((escritoPorElLane - MONTAJES_DECLARADOS_KIB * 1024) / 1024).toFixed(3)} KiB — es la cifra que la afirmación mira: lo escrito menos las líneas con nombre, y tiene que quedar abajo de ${PRESUPUESTO_DEL_LANE_KIB}`,
+  `${((escritoSinLaLlave - MONTAJES_DECLARADOS_KIB * 1024) / 1024).toFixed(3)} KiB — es la cifra que la afirmación mira: lo escrito, menos el andamio de la llave, menos las líneas con nombre, y tiene que quedar abajo de ${PRESUPUESTO_DEL_LANE_KIB}`,
+)
+
+afirmarIgual(PRESUPUESTO_PROPIO_KIB.toFixed(2), '63.76', '⚠️ y el techo del lane es EL MISMO que B12 §1–§3 dejó: §4 no lo movió ni un centésimo')
+afirmarIgual(PESO_DE_LA_LLAVE_EN_BYTES, 4303, `  la línea de la llave la sostiene su recibo: ${RECIBOS_DE_LA_LLAVE.length} renglones medidos que suman ${PESO_DE_LA_LLAVE_EN_BYTES} B`)
+/** ⚠ La suma de los renglones es un MODELO del reparto —cada A/B se midió
+ *  sobre un árbol intermedio distinto— y **la cifra que manda es la del árbol
+ *  que se commitea**, que es la que la afirmación de arriba mira. La diferencia
+ *  no se apropia: se publica, como B10 hizo con los 28,5 B del heredado. */
+afirmar(
+  Math.abs(PESO_DE_LA_LLAVE_EN_BYTES - PESO_DE_LA_LLAVE_KIB * 1024) < 64,
+  `  y el modelo y la línea no se contradicen: ${(PESO_DE_LA_LLAVE_KIB * 1024 - PESO_DE_LA_LLAVE_EN_BYTES).toFixed(1)} B de diferencia, publicados y no apropiados`,
 )
 
 controlPositivo(

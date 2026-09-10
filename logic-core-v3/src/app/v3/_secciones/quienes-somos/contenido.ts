@@ -47,6 +47,7 @@
  */
 
 import type { IdDePatron } from '../../_lib/motion/patrones'
+import { INVENTOS, conLlave } from '../_contrato/inventado'
 import type { EntradaDePedido } from '../_contrato/pedido'
 
 /**
@@ -94,6 +95,15 @@ export const CONTENIDO = {
      * en esa lista. El componente se lo pasa a `MarcoDeMedio` desde acá.
      */
     marcador: '[FOTO DEL EQUIPO]',
+    /**
+     * ⚠️ **B12 §4.3 · EL PLACEHOLDER, no la foto.** Es un archivo PROPIO
+     * —generado por `scripts-b12/placeholders.ts`, rayado y grano en escala de
+     * grises— con la relación de aspecto y el peso de una foto de verdad, para
+     * que la composición y la carga se puedan juzgar. Se ve como lo que es y el
+     * marcador sigue escrito encima. El día de la foto, esta ruta cambia y
+     * `provisional` se va. Ninguna imagen de terceros: regla 6.
+     */
+    fuente: '/placeholders/equipo.png',
     /** [relleno] Describe lo que va a haber. Va al `alt` y al nombre accesible. */
     alt: 'Franco y Valentino, juntos, en el lugar donde trabajan.',
     /** [relleno] El epígrafe. */
@@ -115,12 +125,12 @@ export const CONTENIDO = {
     {
       nombre: 'Franco',
       rol: 'Estrategia · Comercial · Planificación',
-      enUnProyecto: '[TEXTO]',
+      enUnProyecto: conLlave(INVENTOS.equipoFranco),
     },
     {
       nombre: 'Valentino',
       rol: 'Ejecución técnica',
-      enUnProyecto: '[TEXTO]',
+      enUnProyecto: conLlave(INVENTOS.equipoValentino),
     },
   ],
 } as const

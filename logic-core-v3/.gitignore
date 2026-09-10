@@ -162,6 +162,11 @@ src/modules/chatbot/evals/reports/
 # este listado envenena la auto-deteccion de fuentes de Tailwind 4 y tira
 # `Can't resolve './&'` sobre un CSS intacto (CLAUDE.md, Aug 2026).
 /.next-b12/
+
+# `.next-b12llave/`: el MISMO arbol con `CONTENIDO_INVENTADO` en false, para
+# medir el peso de la llave por A/B (B12 §4.4). Se agrega ACA ANTES de correr
+# el build, por la leccion de `distDir` fuera de .gitignore.
+/.next-b12llave/
 # `.b12-capturas/`: las capturas intermedias de los instrumentos de B12 (el censo
 # de rotulos, los bloques del pie y el negro de Trabajos). Insumo del calculo, no
 # evidencia: lo que se commitea son las capturas del reporte en

@@ -26,7 +26,7 @@ import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO }
 import { GEOMETRIA, SIZES_DE_LA_FOTO } from './QuienesSomos'
 import {
   conFoto, conMotion, conPreferencia, FUENTE, LITERALES,
-  PEDIDOS, quieto, seccion, TEXTOS, todosSeVen, veces,
+  PEDIDOS, personasSinLlave, quieto, TEXTOS_DE_PANTALLA, quietoSinLlave, conMotionSinLlave, seccion, SIN_LLAVE, TEXTOS, todosSeVen, veces,
 } from './quienes-somos-piezas'
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -99,26 +99,25 @@ titulo('3 · Los marcadores se VEN: un pedido que no llega a la pantalla no es u
 
 afirmarIgual(PEDIDOS, ['[FOTO DEL EQUIPO]', '[TEXTO]'], 'los marcadores del contenido, en orden')
 
-const cuenta = cuentaDeMarcadores(CONTENIDO)
+const cuenta = cuentaDeMarcadores(SIN_LLAVE)
 afirmarIgual(cuenta.get('[FOTO DEL EQUIPO]'), 1, 'hay exactamente UNA foto del equipo pedida')
 afirmarIgual(cuenta.get('[TEXTO]'), 2, 'y exactamente DOS [TEXTO]: uno por persona')
 
-afirmar(todosSeVen(quieto), 'los dos marcadores llegan al marcado en la rama quieta')
-afirmar(todosSeVen(conMotion), '  y también con la coreografía puesta')
+afirmar(todosSeVen(quietoSinLlave), 'los dos marcadores llegan al marcado en la rama quieta')
+afirmar(todosSeVen(conMotionSinLlave), '  y también con la coreografía puesta')
 controlPositivo('el chequeo de "el marcador se ve" ve un marcado sin marcadores', '<div>nada</div>', todosSeVen)
 
-afirmarIgual(
-  veces(quieto, 'data-marcador="[FOTO DEL EQUIPO]"'),
-  1,
-  'y hay UN solo marco de foto en la pantalla, no dos',
-)
-afirmarIgual(veces(quieto, '[TEXTO]'), 2, 'y dos huecos de persona, uno por cada una')
+afirmarIgual(veces(quieto, 'data-marcador="[FOTO DEL EQUIPO]"'), 1, 'y hay UN solo marco de foto en la pantalla, no dos')
+afirmarIgual(veces(quietoSinLlave, '[TEXTO]'), 2, 'y dos huecos de persona, uno por cada una')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · Abajo de 1025 el contenido está COMPLETO y no se mueve')
 
-const faltantes = TEXTOS.filter((h) => !quieto.includes(h.valor))
+afirmarIgual(TEXTOS.length - TEXTOS_DE_PANTALLA.length, 1, 'se eximió exactamente UNA ruta de archivo, ni una más')
+const faltantes = TEXTOS_DE_PANTALLA.filter((h) => !quieto.includes(h.valor))
 afirmarIgual(faltantes.map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
+afirmar(quieto.includes(encodeURIComponent(CONTENIDO.equipo.fuente)), '  y el placeholder de la foto llega, codificado por el optimizador', CONTENIDO.equipo.fuente)
+controlPositivo('el detector del placeholder ve un marcado con otra ruta', '<img src="/_next/image?url=%2Fotra.png"/>', (html: string) => html.includes(encodeURIComponent(CONTENIDO.equipo.fuente)))
 /** ⚠️ B12 · `CONTENIDO.etiqueta` estaba en esta cuenta y ahora se afirma al revés. Regla 15. */
 afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee: el título toma su lugar (B12)`)
 controlPositivo(
@@ -172,9 +171,9 @@ controlPositivo(
 
 afirmarIgual(CONTENIDO.personas.length, 2, 'son exactamente DOS personas')
 afirmarIgual(
-  CONTENIDO.personas.filter((p) => p.enUnProyecto === '[TEXTO]').length,
+  personasSinLlave.filter((p) => p.enUnProyecto === '[TEXTO]').length,
   2,
-  '  y cada una tiene su marcador [TEXTO]: no inventamos qué hace cada uno')
+  '  y cada una tiene su marcador [TEXTO] con la llave apagada: qué hace cada uno sigue pedido')
 afirmarIgual(
   CONTENIDO.personas.map((p) => p.rol),
   ['Estrategia · Comercial · Planificación', 'Ejecución técnica'],

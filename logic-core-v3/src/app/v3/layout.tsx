@@ -3,6 +3,7 @@ import localFont from 'next/font/local'
 import { CompuertaDelScrollSuave } from './_componentes/CompuertaDelScrollSuave'
 import { EscenarioCompuerta } from './_componentes/EscenarioCompuerta'
 import { ProveedorDeMovimiento } from './_lib/motion/ProveedorDeMovimiento'
+import { MarcaDeLaLlave } from './_secciones/_contrato/MarcaDeLaLlave'
 
 /* ── LAS HOJAS DEL CHROME (S3) ───────────────────────────────────────────────
  * Cinco archivos y no uno: la regla del repo parte a las 300 líneas, y cada
@@ -170,6 +171,23 @@ import './_estilos/foco.css'
  *      línea en `PIEZAS_MONTABLES` con `emite: null` **y** enseñarle al modelo a
  *      componer hijos adentro de un componente.
  *
+ * ── ⚠️ LA MARCA DE LA LLAVE, DESDE B12 §4 ─────────────────────────────────
+ *
+ * `MarcaDeLaLlave` es la franja que avisa, en pantalla, que las cifras que se
+ * ven abajo son inventadas. Va acá y no en `page.tsx` por dos razones, y la
+ * segunda es la que manda:
+ *
+ *   1. **Es del árbol, no de una sección**, como el escenario y las dos
+ *      compuertas: mientras la llave esté prendida tiene que verse en toda
+ *      página de /v3, no en la que alguien se acordó de marcar.
+ *   2. **`page.tsx` es un archivo PROHIBIDO** por la frontera de S3
+ *      (`s3-frontera` §1 lo lista junto al home y a los congelados). Este
+ *      layout no lo está.
+ *
+ * No suma alto de documento —es `fixed`, y el invariante lo afirma— así que el
+ * anclaje y el progreso, que salen de `scrollHeight`, no se mueven un bit. Con
+ * la llave apagada el componente devuelve `null` y de esto no queda nada.
+ *
  * ── Lo que NO hay acá ──────────────────────────────────────────────────────
  *
  * Ninguna animación. Ni la escena 3D. Ni contenido. Ni GSAP ni Sanity: ninguna
@@ -203,6 +221,7 @@ export default function DisposicionV3({ children }: { children: React.ReactNode 
         <CompuertaDelScrollSuave />
         <EscenarioCompuerta />
         {children}
+        <MarcaDeLaLlave />
       </div>
     </ProveedorDeMovimiento>
   )

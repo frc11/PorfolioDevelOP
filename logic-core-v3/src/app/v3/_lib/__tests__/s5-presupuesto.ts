@@ -143,6 +143,39 @@ export const MONTAJE_DE_B11_KIB = 0.03
 export const MONTAJE_DE_B12_KIB = 1.36
 
 /**
+ * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
+ *
+ * Es lo que agrega el contenido inventado de B12 §4: las veinte casillas
+ * falsas, la maquinaria que las hace reversibles y el tercer estado del marco de
+ * medio. **4.303 B**, medidos A/B entre builds del MISMO árbol, apagando cada
+ * pieza y restaurándola byte a byte. El reparto completo, con su método y con la
+ * corrección que hay que leer, en `s5-presupuesto-recibos-de-la-llave.ts`:
+ *
+ *     LA MAQUINARIA        +2.422 B   las dos caras de cada casilla y sus 20 usos
+ *     EL TEXTO INVENTADO   +1.064 B   las 20 cadenas de `mentira`
+ *     LOS PLACEHOLDERS       +817 B   el tercer estado del marco y sus tres usos
+ *     LA MARCA EN PANTALLA      0 B   es un componente de SERVIDOR
+ *
+ * ⚠️ **NO se suma a `MONTAJES_DECLARADOS_KIB`, y ésa es toda la idea.** El techo
+ * del lane —60 del original más los siete montajes con nombre— **no se movió ni
+ * un byte por §4** y se puede seguir leyendo solo: `s5-peso` resta esta línea
+ * APARTE y dice en voz alta que la resta es andamio. La instrucción lo pide con
+ * esas palabras: *«se declara como PESO DE LA LLAVE, aparte del montaje de B12…
+ * No subas el techo.»*
+ *
+ * ⚠️ **Y la corrección, publicada: apagar la llave devuelve 0 bytes.** El A/B
+ * con `CONTENIDO_INVENTADO` en `false` da **la misma cifra al byte**, porque
+ * `INVENTOS` es un objeto en tiempo de ejecución y sus cadenas viajan igual.
+ * Apagar devuelve la PANTALLA —los marcadores, la franja, el build— y lo que
+ * devuelve los BYTES es borrar las veinte entradas de `_contrato/inventado.ts`.
+ * Está medido: 1.064 B.
+ *
+ * Al centésimo de arriba, con la convención de B8, B10, B11 y B12: 4.303 / 1024
+ * = 4,2021 → **4,20**, que deja **6,0 B de aire** bajo la línea.
+ */
+export const PESO_DE_LA_LLAVE_KIB = 4.2
+
+/**
  * **+0,10 KiB** — lo que queda SIN DUEÑO después de restarle a lo escrito las
  * seis líneas de arriba. No es un montaje: es el residuo, y por eso **se publica
  * con atribución y no se afirma** (regla 13). **Medido por B10 sobre ESTE árbol,

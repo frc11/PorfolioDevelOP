@@ -134,7 +134,8 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
                   <MarcoDeMedio
                     clase="imagen"
                     marcador={CAPTURA.marcador}
-                    fuente={null}
+                    fuente={CAPTURA.fuente}
+                    provisional
                     alt={CAPTURA.descripcion}
                     ancho={CAPTURA.ancho}
                     alto={CAPTURA.alto}

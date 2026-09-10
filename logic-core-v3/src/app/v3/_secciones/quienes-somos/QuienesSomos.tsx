@@ -270,7 +270,8 @@ function LaFoto(): React.JSX.Element {
               <figure className="flex flex-col gap-3">
                 <MarcoDeMedio
                   marcador={CONTENIDO.equipo.marcador}
-                  fuente={null}
+                  fuente={CONTENIDO.equipo.fuente}
+                  provisional
                   alt={CONTENIDO.equipo.alt}
                   ancho={GEOMETRIA.foto.ancho}
                   alto={GEOMETRIA.foto.alto}

@@ -26,9 +26,9 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_l
 import { apagadosDeFoco } from '../../_lib/__tests__/s3-escaneo'
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../../_lib/tipografia'
 import { cn } from '@/lib/utils'
-import { escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { seccionDe } from '../_contrato/forma'
 import { REGISTRO } from '../_contrato/registro'
+import { escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { Cierre } from '../cierre/Cierre'
 // Los detectores de capa son de Servicios y se consumen tal cual: una segunda
 // lectura del mismo marcado se desviaría de la de la sección sin que nada avise.
@@ -147,11 +147,11 @@ controlPositivo(
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El contenido inventado PARECE inventado — el escáner de §0.4')
 
-const hallazgos = escanearContenido(textoQuieto)
+const hallazgos = escanearLoReal(textoQuieto)
 afirmarIgual(hallazgos, [], `cero cifras, cero precios y cero números sin declarar en ${textoQuieto.length} caracteres`)
 afirmarIgual(preciosEncontrados(textoQuieto), [], 'cero precios, mirado aparte: no están cerrados y no se inventan')
 
-const marcadores = marcadoresEn(textoQuieto)
+const marcadores = marcadoresRealesEn(textoQuieto)
 afirmar(
   marcadores.length > 0,
   `el contrapeso: ${marcadores.length} marcadores distintos en pantalla`,
@@ -159,14 +159,14 @@ afirmar(
 )
 console.log(`  el pedido a Franco, tal como se lee: ${marcadores.join(' · ')}`)
 
-const hallazgosDelControl = escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL)
+const hallazgosDelControl = escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL)
 afirmar(
   hallazgosDelControl.length > 0,
   `[control positivo] la frase prohibida produce ${hallazgosDelControl.length} hallazgos`,
   hallazgosDelControl.map((h) => h.fragmento).join(' · '),
 )
 controlPositivo('y el escáner la vería aunque llegara adentro del marcado', `<p>${CONTENIDO_PROHIBIDO_DE_CONTROL}</p>`, (html) =>
-  escanearContenido(textoVisible(html)).length === 0,
+  escanearLoReal(textoVisible(html)).length === 0,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

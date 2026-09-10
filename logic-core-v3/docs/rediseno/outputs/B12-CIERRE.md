@@ -1,13 +1,18 @@
 # B12 — El último de la etapa
 
-Trabajos como tiene que ser, el pie transparente, los rótulos afuera. Rama
-`v3/cierre-etapa`, worktree `C:\v3-cierre-etapa`, dev server en el 3000.
+Trabajos como tiene que ser, el pie transparente, los rótulos afuera, y el sitio
+poblado detrás de una llave. Rama `v3/cierre-etapa`, worktree
+`C:\v3-cierre-etapa`, dev server en el 3000.
 
-> ⚠️ **§4 —el contenido de mentira y su llave— NO SE HIZO.** La PARADA 1 se
-> cerró con las cinco decisiones del humano y la orden de commitear. Lo que
-> sigue es §1, §2 y §3. **No se escribió una sola cifra falsa**, y la constante
-> `CONTENIDO_INVENTADO` no existe todavía: el día que §4 arranque, arranca por
-> ahí.
+> ⚠️ **EL SITIO TIENE CIFRAS INVENTADAS ADENTRO, Y NO SE PUEDE PUBLICAR.**
+> `CONTENIDO_INVENTADO` está en `true` (`_secciones/_contrato/llave.ts`) y
+> `npm run build` **falla** mientras lo esté. Veinte casillas de contenido falso,
+> todas declaradas en un archivo, todas con el marcador al que vuelven. Apagar la
+> llave es cambiar un token: vuelven `[CIFRA]`, `[MÉTRICA]` y `[TESTIMONIO]` en
+> las ocho, la franja de aviso desaparece y el build pasa. Está en §6.
+>
+> Las secciones §1 a §5 son las que se cerraron en la PARADA 1, con las cinco
+> decisiones del humano.
 
 ---
 
@@ -307,37 +312,398 @@ propiedad que el sistema custodiaba sería peor que perderla escrita**.
 
 ---
 
-## 6 · Los gates
+## 6 · El contenido de mentira, y la llave que lo apaga
+
+> *«develOP tiene deuda registrada por cifras fabricadas y esto las mete a
+> propósito.»*
+
+### 6.1 · La llave: qué es, y las cuatro propiedades
+
+**`CONTENIDO_INVENTADO`**, en `_secciones/_contrato/llave.ts`. El módulo **exporta
+esa constante y nada más** y **no importa nada**: apagar todo el contenido
+inventado del sitio es cambiar un token en un archivo que no hace otra cosa.
+
+| propiedad que pide la instrucción | dónde vive | cómo se comprueba |
+|---|---|---|
+| una constante en su módulo propio | `_contrato/llave.ts` | `s21-llave` §1 — exporta 1 símbolo, importa 0 |
+| todo lo inventado detrás de ella | `_contrato/inventado.ts`, 20 casillas | `s21-llave` §2–§4 |
+| apagarla devuelve los marcadores | `conLlave(invento, llave)` | `s21-llave` §2 y §5, **las dos ramas en la misma corrida** |
+| una marca visible en pantalla | `_contrato/MarcaDeLaLlave.tsx` | `s21-llave` §7 — prendida se ve, apagada **no existe** |
+| el build de producción FALLA | `scripts/llave-contenido-inventado.mjs`, enganchado como `prebuild` | `s21-llave` §8 — **diez casos**, con el árbol real |
+
+**El tipo está anotado `boolean` y no inferido**, y no es cosmético: con el
+literal `true`, TypeScript estrecha cada ternario a una rama y el invariante que
+comprueba **las dos** no compilaría.
+
+**No es una variable de entorno**, y las dos razones son del sistema: un
+`process.env` que no empiece con `NEXT_PUBLIC_` llega al cliente como `undefined`
+mientras el servidor lee el valor de verdad —desajuste de hidratación en la
+sección de Números—, y una llave de ambiente no se lee en el diff.
+
+### 6.2 · La comprobación de lanzamiento, con sus diez casos
+
+`npm run build` corre `prebuild` solo, acá y en el deploy: el comando que
+`netlify.toml` declara termina en `npm run build`. **Medido en primer plano, con
+Chrome cerrado:**
+
+```
+$ npm run build                      →  exit 1
+  BUILD DE PRODUCCION CON CONTENIDO INVENTADO ADENTRO. NO SE PUBLICA.
+$ MEDIR_CON_LA_LLAVE_PRENDIDA=1 npm run build   →  exit 0, con su cartel
+```
+
+| # | caso | esperado | medido |
+|---|---|---|---|
+| 1 | la llave APAGADA | pasa | exit 0 |
+| 2 | la llave PRENDIDA | **falla** | exit 1 |
+| 3 | ⚠️ **sin la constante** — renombrada, borrada o el archivo movido | **falla** | exit 1 |
+| 4 | con la constante DUPLICADA (dos declaraciones) | **falla** | exit 1 |
+| 5 | declarada sólo adentro de un comentario | **falla** | exit 1 |
+| 6 | el archivo de la llave no existe | **falla** | exit 1 |
+| 7 | prendida + `MEDIR_CON_LA_LLAVE_PRENDIDA=1`, en una máquina de desarrollo | pasa, con cartel | exit 0 |
+| 8 | ⚠️ **prendida + la salida + `NETLIFY`** | **falla** | exit 1 |
+| 9 | ⚠️ **prendida + la salida + `VERCEL`** | **falla** | exit 1 |
+| 10 | ⚠️ **prendida + la salida + `CI`** | **falla** | exit 1 |
+
+Los diez corren en `s21-llave` §8, cada uno lanzando el guardián de verdad en un
+proceso aparte, con un ambiente armado desde cero —`PATH` y lo que el caso
+agregue— para que la máquina que corre esto no se mida a sí misma. Y el
+undécimo compara contra el ÁRBOL REAL: el guardián y TypeScript tienen que decir
+lo mismo sobre la llave que hay hoy.
+
+**⚠️ Los dos casos que convierten esto en una llave y no en un recordatorio:**
+
+**El 3 — un renombre la hace FALLAR.** El guardián no puede importar el módulo
+—es TypeScript—, así que lee el fuente y busca la constante. Eso sería una
+segunda copia peligrosa si el modo de falla fuera *«no la encuentro y sigo»*: la
+regla es la contraria. **Si no la encuentra, da rojo.** Un renombre, un borrado o
+un archivo movido no lo dejan pasar en silencio, y la única forma de que este
+script pase es que alguien haya escrito `false`. (El script se comprueba a sí
+mismo además: si su expresión dejara de nombrar `CONTENIDO_INVENTADO`, muere
+antes de mirar nada.)
+
+**El 8, 9 y 10 — en un deploy la salida de emergencia NO EXISTE.** Con `NETLIFY`,
+`VERCEL` o `CI` en el ambiente, la llave prendida falla y **no hay variable que
+lo evite**. La salida existe por una razón acotada y escrita —sin un build con la
+llave prendida no hay forma de medir cuánto pesa— y vive sólo en una máquina de
+desarrollo, gritando en la salida del build. Para publicar esto habría que
+editar `netlify.toml`, que es un archivo commiteado y revisado por una persona.
+Eso es un mecanismo; acordarse no lo es.
+
+### 6.3 · ⚠️ El escáner NO se aflojó, y así se prueba
+
+Los detectores de `escaneo.ts` y de `marcadores.ts` **no cambiaron una sola
+condición**. Lo único que cambió es la ENTRADA: antes de escanear, las mentiras
+declaradas se devuelven a su marcador, o sea que **lo que se escanea es el sitio
+tal como queda cuando la llave se apaga** (`escanearLoReal`, `marcadoresRealesEn`,
+`_contrato/restauracion.ts`).
+
+De ahí sale la garantía, y está afirmada con control positivo:
+
+- **la resta es una lista cerrada de literales exactos, no una clase de patrón.**
+  Con la resta puesta, el escáner **sigue viendo la deuda real de develOP**
+  (`+340% en consultas`, `86% más económico`, `2+ años`): 9 hallazgos;
+- y sigue viendo **una cifra que nadie declaró** (`Entregamos 47 proyectos el año
+  pasado`);
+- y hay un **segundo pase, sobre el contenido CRUDO**, que impide que esto sea
+  circular: `escritoAMano()` filtra los hallazgos que la restauración NO cambia.
+  Un `12` tecleado en un `contenido.ts` no sale de ninguna casilla declarada, así
+  que sobrevive al filtro y pone el invariante en rojo — igual que antes de §4.
+
+**Dos trampas de la restauración, las dos medidas sobre este home:**
+
+1. **Sobre el HTML crudo, la casilla que vale `4` se come el `4` de un `gap-4`.**
+   Medido: cinco `[CIFRA]` esperados contra **nueve** encontrados.
+2. **Restaurando nodo por nodo no aparecen las frases que Servicios parte en un
+   `<span>` por palabra.** Medido: el censo de `s10-acceso` devolvía **34**
+   marcadores donde hay **40**, y los seis que faltaban eran los tres párrafos de
+   Servicios.
+
+Las dos se cierran igual: el emparejamiento va contra el **texto visible** —los
+nodos de texto concatenados, sin una etiqueta adentro— y la escritura vuelve a
+los nodos de texto, dejando las etiquetas intactas. Y la sustitución respeta el
+**límite de palabra**: el `4` de «14» no es la casilla que vale `4`.
+
+### 6.4 · Qué se inventó: las veinte casillas
+
+| sección | casillas | marcador que vuelve |
+|---|---|---|
+| Números | `23` · `9` · `4` · `6 h` · `31` | `[CIFRA]` ×5 |
+| Trabajos | de 3 a 14 consultas por semana · de 2 a 11 visitas agendadas · de 40 a 260 pedidos al mes | `[MÉTRICA]` ×3 |
+| Quiénes somos | qué hace Franco y qué hace Valentino en un proyecto | `[TEXTO]` ×2 |
+| Servicios | la frase de prueba de los tres frentes | `[MÉTRICA]` + `[CIFRA]` ×3 |
+| Tu panel | «la última semana al día, 2.140 consultas acumuladas» · «Mirar las 34 consultas de la semana…» | `[MÉTRICA]` + `[CIFRA]` |
+| Por qué develOP | «entre **nueve** negocios» · «**Un mes** más rápido…» · la cita · el cuerpo · la firma | `[CIFRA]` `[MÉTRICA]` `[TESTIMONIO]` `[NOMBRE]` |
+
+**Las veinte llegan a la pantalla** —ninguna casilla muerta— y **los 24
+marcadores vuelven** al apagar, sección por sección. Afirmado en `s21-llave` §5.
+
+**El nombre del testimonio no es un nombre.** Dice `Persona Inventada ·
+testimonio de muestra`. La instrucción pide *«un nombre inventado que no pueda
+confundirse con una persona real»*, y cualquier nombre rioplatense plausible **es
+el nombre de alguien**: escribirlo abajo de una cita inventada le pone palabras
+en la boca a una persona que existe. Éste tiene el largo y el lugar de una firma
+—la composición se juzga igual— y no se puede leer como alguien.
+
+### 6.5 · ⚠️ LAS CUATRO COSAS QUE NO SE INVENTARON, Y POR QUÉ
+
+Con la llave prendida hay veinte casillas llenas. **Estas cuatro quedaron
+vacías a propósito**, y ninguna es un olvido: cada una es una decisión, con su
+razón escrita en `_contrato/inventado.ts` al lado de la lista.
+
+**1 · ⚠️ EL CASO DE REFERENCIA DE SERVICIOS** — `[TESTIMONIO]` ×3, uno por
+frente. **Es la que más importa.** Los tres clientes son REALES: Esquina, El
+Garage y Banú. Elegir cuál de ellos dio el caso **es un hecho inventado sobre
+alguien que existe**, y eso es peor que una cifra inventada — una cifra falsa la
+desmiente una medición, un hecho falso sobre un cliente lo desmiente el cliente.
+La línea de caso es la misma en los tres a propósito y ofrece los tres nombres
+verdaderos *«con el cliente que corresponda»*: declara el hueco y deja la
+decisión donde va, que es comercial y no de este archivo. **El propio archivo ya
+lo decía antes de §4, y §4 no lo tocó.**
+
+Es además la lección que este lane ya pagó: `Matsu Automotores` estuvo publicado
+como cliente durante cinco revisiones en verde, porque un nombre propio no lleva
+dígitos, no lleva símbolo y no es un precio — **el escáner cuida las cifras; los
+hechos no los cuidaba nadie.**
+
+**2 · LOS PRECIOS.** No están cerrados y no se inventan ni de ejemplo.
+`preciosEncontrados` no admite lista blanca —ninguna, ni declarada— y §4 no
+cambió eso. Un precio inventado en una pantalla se convierte en la expectativa
+de alguien.
+
+**3 · LOS DESTINOS DEL PIE** — `[ENLACE]`, `[FECHA]`, `[NOMBRE]`. Un enlace
+falso **se puede clickear**: no es una composición que se juzga mirando, es una
+acción que falla. Una dirección de contacto inventada es peor todavía: manda un
+mensaje a ningún lado.
+
+**4 · EL VIDEO DE SERVICIOS.** Uno de relleno que se reproduce se leería como el
+recorrido definitivo. Entra el PÓSTER —que es lo que ocupa la caja mientras el
+video no arranca, con su medida y su peso— y no el video.
+
+Y una quinta que no es una casilla: **la prosa mejorada no vive detrás de la
+llave.** Un párrafo sin cifras no afirma un hecho falso, y lo provisional que
+tiene ya está declarado en el `PEDIDO` de cada sección con su ruta y su formato.
+Además **no tiene marcador al que volver**: una casilla detrás de la llave sin
+marcador sería texto que DESAPARECE al apagar, y eso no es «devolver los
+marcadores».
+
+> ### ⚠️ EL CENSO DE MARCADORES ANUNCIADOS SIGUE EN **40**
+>
+> Es la misma cifra que antes de §4, y es lo único que impide leer mal el sitio
+> poblado: **no se cerró un solo pedido. Se taparon 24 y vuelven todos.**
+>
+> Un pedido se cierra cuando llega el dato real —como pasó con las tres capturas
+> de Trabajos, que bajaron el censo de 43 a 40— y esa cifra tiene que bajar por
+> eso y nunca porque alguien prendió una llave. Por eso `s10-acceso` cuenta sobre
+> el marcado RESTAURADO: contarlos sobre el crudo daría **16** y se leería como
+> «se cerraron 24 pedidos», que es exactamente lo contrario de la verdad.
+
+**Lo que sigue siendo verdad y se escribe derecho:** los tres clientes, las dos
+personas del equipo, Tucumán, y qué hace develOP.
+
+### 6.6 · Las fotos: placeholders propios, con peso y con relación
+
+**Ninguna imagen de terceros** (regla 6). Los tres archivos se **generan** con
+`scripts-b12/placeholders.ts` —PNG de 8 bits en **escala de grises**, escrito a
+mano con `zlib`, sin una dependencia nueva— y `s21-fotos` los **regenera en
+memoria y los compara byte a byte**: si alguien reemplazara uno por una foto
+bajada de algún lado, el sha1 no coincide.
+
+| archivo | medida | peso | quién lo declara |
+|---|---|---|---|
+| `public/placeholders/equipo.png` | 1800 × 1200 (3:2) | 355,0 KiB | `GEOMETRIA.foto` de Quiénes somos |
+| `public/placeholders/panel.png` | 1920 × 1080 (16:9) | 339,4 KiB | `CAPTURA` de Tu panel |
+| `public/placeholders/poster.png` | 1920 × 1080 (16:9) | 339,4 KiB | el medio de Servicios |
+
+Las tres capturas **reales** de Trabajos, para comparar: 166,5 · 21,8 · 95,7 KiB
+(webp, ya optimizadas).
+
+- **Sin color, y por FORMATO:** tipo de color 0, un canal. No es que no se haya
+  usado color: **el formato no tiene dónde ponerlo**. Se lee de la cabecera.
+- **El peso sale de un grano determinista** con semilla por archivo — el rayado
+  solo comprime a nada, y sin peso el placeholder no dice nada sobre cómo carga
+  la página. La semilla no es cosmética: sin ella, el panel y el póster —los dos
+  de 1920×1080— salían con el **mismo sha1**.
+- ⚠️ **Y se ven como placeholders:** rayado diagonal, filete y cruz de encuadre,
+  con el **marcador escrito ENCIMA en texto de verdad** (`[FOTO DEL EQUIPO]`,
+  `[CAPTURA DEL PANEL]`, `[VIDEO]` + `[PÓSTER]`). No se quema en el píxel.
+- **El `alt` de la imagen va VACÍO** y el nombre accesible lo da el marcador:
+  anunciar *«Franco y Valentino, juntos, en el lugar donde trabajan»* sobre un
+  rayado sería contarle a quien no ve una foto que no existe.
+
+El marco de medio tiene ahora **tres estados** —`fuente: null`, `fuente` a secas,
+y `fuente` + `provisional`— y el tercero monta la `<Imagen>` de verdad, con su
+`sizes` y su relación de aspecto declarada en el marcado.
+
+### 6.7 · El peso de la llave — y una corrección que hay que leer
+
+**4.303 B**, medidos A/B entre builds del MISMO árbol, apagando cada pieza y
+restaurándola byte a byte (SHA-1 antes y después de los seis archivos).
+
+| pieza | bytes | cómo se midió |
+|---|---:|---|
+| LA MAQUINARIA — las 20 casillas con sus dos caras, `conLlave`, los 20 usos | **2.422** | por diferencia |
+| EL TEXTO INVENTADO — las 20 cadenas de `mentira` | **1.064** | vaciando las veinte: 71.325 → 70.261 B |
+| LOS PLACEHOLDERS — el tercer estado del marco y sus tres usos | **817** | sacando la rama: 71.325 → 70.508 B |
+| LA MARCA EN PANTALLA | **0** | sacándola del layout: 71.325 → 71.325 B |
+
+⚠️ **La marca sale CERO y no es un redondeo: es un componente de SERVIDOR.** El
+aviso viaja en el HTML y su código no llega al navegador. La propiedad más
+visible de §4 es la más barata.
+
+⚠️ **Y hay una corrección de la instrucción que sale de esta medición: apagar la
+llave devuelve 0 BYTES.** Tiene sección propia — **§7**, abajo.
+
+**El techo del lane no se movió.** `PESO_DE_LA_LLAVE_KIB = 4,20` va en su propia
+línea, **fuera de `MONTAJES_DECLARADOS_KIB`**, y `s5-peso` la resta aparte y lo
+dice en voz alta:
+
+```
+LA LLAVE (B12 §4): 4.2 KiB de contenido INVENTADO se restan APARTE del techo
+  68,0 KiB escritos · 63,8 KiB sin el andamio · techo 63,76 · 6,0 B de aire
+```
+
+El techo del lane sigue en **63,76 KiB** —el mismo que B12 §1–§3 dejó, afirmado
+al centésimo— y el de 60 sigue vigilando todo lo que no está declarado. Los
+1,03 MiB de los tres PNG **no entran acá**: `s5-peso` mide lo que el lane
+ESCRIBE en JS, y una imagen de `public/` no es un chunk. Se publican arriba.
+
+⚠️ La suma del recibo (4.303 B) y la medición del árbol final (4.294,8 B) se
+llevan **8,2 B**, que **se publican y no se apropian** — cada A/B se midió
+apagando una pieza distinta, así que la suma es un MODELO y la cifra que manda es
+la del árbol que se commitea.
+
+### 6.8 · Las capturas de las ocho, con la llave y sin ella
+
+`scripts-b12/fotos-de-la-llave.ts`, a 1440 y 1920, al medio de cada panel —la
+primera pantalla de una sección de cuatro es escena y ahí no hay ninguna cifra
+que mirar—. **32 capturas**, `con-llave-*` y `sin-llave-*` en `capturas/b12/`.
+
+Es el «antes y después» que §4 puede producir sin romper la regla 1: reconstruir
+el árbol de HEAD pediría un `checkout`. Apagar la llave es editar un token y
+volver a editarlo, con el SHA-1 del archivo antes y después (`4d63fb2a…`).
+
+Lo que se ve en el par, sección por sección: con la llave, `9 CLIENTES ACTIVOS` y
+`4 AÑOS EN EL MERCADO`; sin ella, `[CIFRA]` y `[CIFRA]`. Y la franja negra de
+arriba, que con la llave apagada **no existe**.
+
+---
+
+## 7 · ⚠️ UNA CORRECCIÓN DE LA INSTRUCCIÓN
+
+La instrucción dice, en §4.4:
+
+> *«Todo lo que agregue el contenido de mentira se declara aparte — no como
+> montaje del lane, sino como **peso de la llave, que se va cuando la llave se
+> apaga.***»
+
+**La primera mitad se cumplió. La segunda es falsa, y está medida.**
+
+```
+CONTENIDO_INVENTADO = true     71.325 B de carga inicial propia de /v3
+CONTENIDO_INVENTADO = false    71.325 B — LA MISMA CIFRA, AL BYTE
+```
+
+Dos builds del mismo árbol, mismo entorno y misma orden, cambiando una sola cosa:
+el token de la llave. **Apagarla no devuelve un byte.**
+
+### Por qué, y por qué no es un defecto que se arregle
+
+`INVENTOS` es **un objeto en tiempo de ejecución**. Sus veinte cadenas viajan en
+el chunk aunque `conLlave` devuelva siempre la otra cara: ningún minificador
+puede borrar una propiedad de un objeto que alguien importa, y no hay forma de
+que un `import` estático desaparezca según el valor de una constante.
+
+**Lo que la llave apagada SÍ devuelve es la pantalla**, que es lo que la
+instrucción le pide en las otras tres viñetas: vuelven los marcadores en las
+ocho, la franja de aviso deja de existir y `npm run build` pasa. **Lo que
+devuelve los BYTES es borrar las veinte entradas de `_contrato/inventado.ts`** —
+una edición en un archivo, a la vista, con las dos caras de cada casilla escritas
+al lado. Está medido: **1.064 B**.
+
+### ⚠️ Lo que NO se hizo: cambiar el diseño para que la frase fuera cierta
+
+Había una forma de hacer que apagar la llave devolviera los bytes, y es la única:
+**escribir cada mentira adentro de su `contenido.ts`**, en un ternario contra la
+constante, para que el minificador pudiera plegarlo.
+
+Eso es exactamente **lo que la llave existe para impedir**. Con las veinte
+cifras repartidas en seis archivos de contenido:
+
+- no se pueden **enumerar** —y lo que no se enumera se publica—;
+- no se puede afirmar que ninguna sección escribe la suya;
+- el escáner no tiene una lista cerrada que restar, así que o se afloja o se
+  llena de excepciones;
+- y «apagar» pasa a ser buscar y reemplazar a mano en seis archivos.
+
+Entre **cumplir la frase** y **cumplir lo que la frase protege**, el bloque
+eligió lo segundo y publica la diferencia. Es la misma regla con la que B9
+publicó que la hipótesis de su instrucción era falsa y con la que B10 publicó que
+el diagnóstico de la suya no reproducía: **una instrucción que se cumple al pie
+de la letra y rompe lo que buscaba no está cumplida.**
+
+### Qué queda escrito, y dónde
+
+La corrección vive en tres lugares, con el número:
+`s5-presupuesto-recibos-de-la-llave.ts` (el recibo, con el A/B completo),
+`s5-presupuesto.ts` (la línea declarada) y la salida de `s5-peso` en cada corrida:
+
+```
+⚠️ Y apagar la llave devuelve 0 bytes, medido: lo que devuelve los bytes es
+   borrar las veinte entradas de `_contrato/inventado.ts` (1.064 B).
+```
+
+---
+
+## 8 · Los gates
 
 | gate | resultado |
 |---|---|
-| `npm run verificar` | **28 pasos, 0 con falla** |
-| `npm run build` (primer plano, `CIRCLE_NODE_TOTAL=2`, `--max-old-space-size=6144`, Chrome cerrado) | exit 0 |
-| `npm run test:frontera` | 2 invariantes, 0 fallas |
+| `npm run verificar` | **29 pasos, 0 con falla** — la suite `s21` (la llave y las fotos) entró por existir |
+| `npm run build` (primer plano, Chrome cerrado, `CIRCLE_NODE_TOTAL=2`, `--max-old-space-size=6144`) | ⚠️ **exit 1 — y ES EL RESULTADO CORRECTO**: la llave está prendida y el guardián no deja publicar |
+| `MEDIR_CON_LA_LLAVE_PRENDIDA=1 npm run build` (el mismo, con la salida de medición) | exit 0, con su cartel de cuatro renglones |
+| `npm run test:frontera` | 2 invariantes, 0 fallas, 12 fuera de ventana |
 | `npx tsc --noEmit` | limpio |
 | `npx prisma migrate status` | *Database schema is up to date* |
 
 ---
 
-## 7 · Lo que frenó
+## 9 · Lo que frenó
 
-1. **§4 no se hizo.** El contenido de mentira, la llave `CONTENIDO_INVENTADO`, la
-   marca en pantalla, la comprobación que falla en producción y los placeholders
-   de foto quedan sin arrancar. La PARADA 1 se cerró con la orden de commitear.
-2. **`D-B12.2`** — el titular del Cierre sobre la sala: 4 bloques a 1920 y 2 a
+1. ⚠️ **Apagar la llave no devuelve un solo byte, y la instrucción decía que sí.**
+   Medido, publicado y con **sección propia: §7**, incluida la razón por la que
+   el diseño NO se cambió para que la frase fuera cierta.
+2. **El caso de referencia de Servicios sigue con su `[TESTIMONIO]`**, y es una
+   decisión, no un olvido: elegir cuál de los tres clientes REALES dio el caso
+   sería un hecho inventado sobre alguien que existe. Lo mismo con los tres
+   destinos del pie y con los precios. La lista completa, con su razón, en §6.5.
+3. **La franja de la llave es un hermano del `<main>` y no tiene hoja propia.**
+   `s8-montaje` §4b leía la posición de los dos `.css` del chrome; ahora lee
+   **también la clase del elemento**, que es una fuente más fuerte y no más
+   floja. Abrir una sexta hoja de `_estilos/` sólo para satisfacer al
+   instrumento habría movido tres padrones.
+4. **Seis instrumentos cruzaron las 300 líneas** al entrar §4 —cuatro estaban
+   exactamente en el límite— y se partieron o se consolidaron: `inventado.ts` →
+   `restauracion.ts`, `s5-contenido` → `s5-contenido-piezas.ts`, `s21-llave` →
+   su soporte, y las cuatro capas de «el contenido no es un dato» que Números y
+   Trabajos escribían **dos veces** ahora viven una sola vez en
+   `_invariantes/llave.ts`. Dos copias del mismo control se desincronizan, y §4
+   lo demostró: cuando la llave entró, una quedó mirando el contenido crudo
+   donde la otra miraba el restaurado.
+5. **`D-B12.2`** — el titular del Cierre sobre la sala: 4 bloques a 1920 y 2 a
    1440. Queda declarada por decisión del humano: es donde quiere que la sala se
    vea.
-3. **`D-B12.1`** — las motas blancas sobre el nombre de los proyectos. Queda
+6. **`D-B12.1`** — las motas blancas sobre el nombre de los proyectos. Queda
    declarada; volver a 0,25 es un número.
-4. **`D-B12.3`** — el moiré del piso en la noche, con su umbral derivado.
-5. **La banda del pie no sangra arriba de 1920.** Queda del ancho del contenido
+7. **`D-B12.3`** — el moiré del piso en la noche, con su umbral derivado.
+8. **La banda del pie no sangra arriba de 1920.** Queda del ancho del contenido
    más los dos rellenos. Sangrarla de verdad pediría sacarla del `Envoltorio`,
    que es de `chrome/Pie.tsx` y lo comparten la galería y el arnés de piezas.
-6. **El instrumento lee el cuadro entero como «logo» en la noche.**
+9. **El instrumento lee el cuadro entero como «logo» en la noche.**
    `siluetaMasGrande` toma todo lo que está bajo 60 de gris, y con la sala en 11
    eso es el cuadro. El `sobreElLogo` de 93–100 % que Trabajos publica **no es
    una atribución**: está declarado en `D-B12.1`.
-7. **La trampa del módulo fantasma**, en `MEDICION-NAVEGADOR.md` §6: `./gota`
+10. **La trampa del módulo fantasma**, en `MEDICION-NAVEGADOR.md` §6: `./gota`
    resolvía a `Gota.tsx` por la caja insensible de Windows, con `tsc` en verde,
    la página en 200 y el censo en cero. El archivo se llama `CapaDeLaGota.tsx`
    por eso.

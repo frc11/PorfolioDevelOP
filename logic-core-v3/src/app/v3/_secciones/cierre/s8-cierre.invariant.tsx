@@ -18,10 +18,10 @@ import { ANCLAS } from '../../_lib/motion/anclas'
 import { ventanaDeHijo } from '../../_lib/motion/cronograma'
 import { PATRONES } from '../../_lib/motion/patrones'
 import { FORMAS_PERMITIDAS_SOBRE_OSCURO } from '../_contrato/acento'
-import { escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
 import { cronogramaDe } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
 import { ritmoDe } from '../_contrato/ritmo'
+import { escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { CARPETAS_DE_SECCION, clasesEscritas, codigoDeLaSeccion, existe, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { Cierre, ContenidoDelCierre, GEOMETRIA } from './Cierre'
@@ -77,13 +77,13 @@ titulo('3 · El contenido inventado PARECE inventado')
 
 for (const [rama, html] of [['quieta', SIN], ['animada', CON]] as const) {
   const texto = textoVisible(html)
-  const hallazgos = escanearContenido(texto)
+  const hallazgos = escanearLoReal(texto)
   afirmar(hallazgos.length === 0, `rama ${rama}: cero hallazgos sobre ${texto.length} caracteres escaneados`, hallazgos.map((h) => h.fragmento).join(' · ') || 'ninguno')
 }
-const marcadores = marcadoresEn(visibleSin)
+const marcadores = marcadoresRealesEn(visibleSin)
 afirmar(marcadores.length > 0, `el contrapeso: ${marcadores.length} marcadores distintos en pantalla — "cero hallazgos" no es "cero contenido"`, marcadores.join(' · '))
-const delProhibido = escanearContenido(S.CONTENIDO_PROHIBIDO)
-controlPositivo('el escáner ve la frase prohibida', S.CONTENIDO_PROHIBIDO, (t) => escanearContenido(t).length === 0)
+const delProhibido = escanearLoReal(S.CONTENIDO_PROHIBIDO)
+controlPositivo('el escáner ve la frase prohibida', S.CONTENIDO_PROHIBIDO, (t) => escanearLoReal(t).length === 0)
 console.log(`  la frase de control produce ${delProhibido.length} hallazgos: ${delProhibido.map((h) => h.fragmento).join(' · ')}`)
 
 // ═══════════════════════════════════════════════════════════════════════════

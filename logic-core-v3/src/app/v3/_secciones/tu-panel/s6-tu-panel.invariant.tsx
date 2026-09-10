@@ -33,8 +33,8 @@ import { sizesPorColumnas } from '../../_lib/imagen'
 import { ANCLAS, rangoDeScroll } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS, ATRIBUTO_TEXTO_ACCESIBLE } from '../../_lib/motion/lineas'
 import { CLASE_PESO } from '../../_lib/tipografia'
-import { NOMBRES_REALES, escanearContenido, marcadoresEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
+import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, preciosEncontrados, textoVisible } from '../_contrato/escaneo'
 import { marcar } from '../_invariantes/render'
 import { clasesEscritas, codigoDeLaSeccion, leer } from '../_invariantes/soporte'
 import {
@@ -83,7 +83,16 @@ console.log(`  marcado: ${QUIETO.length} caracteres sin coreografía · ${ANIMAD
 afirmarIgual(cuentaDe(QUIETO, /transform:/g), 0, 'sin coreografía no se escribe una sola transformada')
 afirmarIgual(cuentaDe(QUIETO, /will-change/g), 0, '  ni se promueve una capa de composición')
 afirmar(!QUIETO.includes(ATRIBUTO_PIEZAS), '  ni corre el divisor de líneas: el titular es un texto, no piezas')
-afirmarIgual(cuentaDe(QUIETO, /style="/g), 2, 'los dos únicos estilos inline vienen del DATO: el `min-height` de la tabla y la relación de aspecto del hueco')
+/** ⚠️ **ERAN DOS Y SON TRES (B12 §4.3), y la propiedad no cambió: NINGUNO sale
+ *  de una decisión escrita a mano.** Dos vienen del DATO —el `min-height` de la
+ *  tabla y la relación de aspecto del hueco— y el tercero lo escribe
+ *  `next/image` sobre su `<img>` (`color:transparent`), que apareció cuando la
+ *  captura pasó a tener un placeholder de verdad. Se afirma la cuenta Y de quién
+ *  es cada uno: una cuenta sola no distingue un estilo del optimizador de uno
+ *  que alguien tecleó. */
+afirmarIgual(cuentaDe(QUIETO, /style="/g), 3, 'tres estilos inline, y ninguno escrito a mano')
+afirmarIgual(cuentaDe(QUIETO, /style="color:transparent"/g), 1, '  uno es el que `next/image` le pone a su `<img>`: viene del optimizador, no del lane')
+afirmarIgual(cuentaDe(QUIETO, /style="[^"]*(min-height|aspect-ratio)/g), 2, '  y los otros dos salen del DATO: el `min-height` de la tabla y la relación de aspecto del hueco')
 
 const TEXTOS = [TITULAR, TITULO_DE_CAPACIDADES, ...BLOQUES.map((b) => b.texto), ...CAPACIDADES]
 afirmarIgual(TEXTOS.filter((t) => !textoVisible(QUIETO).includes(t)), [], `los ${TEXTOS.length} textos de la sección están enteros sin una sola animación`)
@@ -123,13 +132,13 @@ controlPositivo('y el extractor no deja pasar el texto de un subárbol aria-hidd
 titulo('3 · El contenido inventado PARECE inventado — cero cifras, cero precios')
 
 const visible = textoVisible(ANIMADO)
-afirmarIgual(escanearContenido(visible), [], `cero hallazgos sobre ${visible.length} caracteres de texto renderizado`)
+afirmarIgual(escanearLoReal(visible), [], `cero hallazgos sobre ${visible.length} caracteres de texto renderizado`)
 afirmarIgual(preciosEncontrados(visible), [], '  y cero formas de precio: no están cerrados y no se inventan ni de ejemplo')
-console.log(`  marcadores en pantalla: ${marcadoresEn(visible).join(' · ')}`)
-afirmar(marcadoresEn(visible).length > 0, `  el contrapeso: ${marcadoresEn(visible).length} marcadores distintos — cero hallazgos no es cero contenido`)
+console.log(`  marcadores en pantalla: ${marcadoresRealesEn(visible).join(' · ')}`)
+afirmar(marcadoresRealesEn(visible).length > 0, `  el contrapeso: ${marcadoresRealesEn(visible).length} marcadores distintos — cero hallazgos no es cero contenido`)
 afirmar(NOMBRES_REALES.every((n) => visible.includes(n)), '  los nombres reales están escritos: son clientes verificables, no testimonios inventados. DERIVADOS de NOMBRES_REALES', NOMBRES_REALES.join(' · '))
 
-controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearContenido(t).length === 0)
+controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearLoReal(t).length === 0)
 controlPositivo('y el detector de precios ve el suyo', 'desde $99.000 por mes', (t) => preciosEncontrados(t).length === 0)
 
 // ═══════════════════════════════════════════════════════════════════════════

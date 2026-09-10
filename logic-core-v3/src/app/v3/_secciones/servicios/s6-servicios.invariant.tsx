@@ -22,11 +22,11 @@ import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEnco
 import { rangoDeScroll, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS } from '../../_lib/motion/lineas'
 import { IDS_DE_SERVICIO, SERVICIOS } from '../_contrato/acento'
-import { NOMBRES_REALES, escanearContenido, marcadoresEn, textoVisible } from '../_contrato/escaneo'
 import { ANCLA_DEL_PIN } from '../_contrato/bloqueAnimado'
 import { seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 import { cambiosDeTramo, canalesSincronizados, desincronizaciones, tramoDeSecuencia, type LectorDeCanales } from '../_contrato/secuencia'
+import { NOMBRES_REALES, escanearLoReal, marcadoresRealesEn, textoVisible } from '../_contrato/escaneo'
 import { clasesEscritas, codigoDeLaSeccion, leer, valoresDeAcentoDelTema } from '../_invariantes/soporte'
 import { cuentaDeAtributo, hayAnidamiento, valoresDeAtributo } from '../_invariantes/marcado'
 import { acentosConcretos, capasDeServicio, capasFueraDelArbol, capasSinDeclararSuForma, capasSinPantalla, cuenta, elementosTipograficos, familiasDeCuerpoPerdidas, familiasDeTituloPerdidas, focalizablesDe, interiorDe, serviciosApagados, serviciosVigentes, tamanosPerdidos, textoPegado } from './deteccion'
@@ -103,14 +103,14 @@ afirmar(!textoQuieto.includes(`>${SECCION_DE_LA_TABLA.numero}<`) && !/(^|\s)05(\
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El contenido no tiene un solo número que se pueda leer como un hecho')
 
-const hallazgos = escanearContenido(textoQuieto)
+const hallazgos = escanearLoReal(textoQuieto)
 afirmarIgual(hallazgos, [], `cero hallazgos sobre ${textoQuieto.length} caracteres escaneados`)
-const marcadores = marcadoresEn(textoQuieto)
+const marcadores = marcadoresRealesEn(textoQuieto)
 afirmar(marcadores.length >= 4, `el contrapeso: el escáner miró un texto con ${marcadores.length} marcadores`, marcadores.join(' · '))
 afirmar(IDS_DE_SERVICIO.every((id) => textoQuieto.includes(CONTENIDO[id].rubro)), 'los tres rubros están en el documento')
 afirmar(NOMBRES_REALES.every((n) => textoQuieto.includes(n)), `y los ${NOMBRES_REALES.length} clientes REALES también, DERIVADOS de NOMBRES_REALES y no escritos acá`, NOMBRES_REALES.join(' · '))
-controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearContenido(t).length === 0)
-afirmar(escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length > 0, `  y le encuentra ${escanearContenido(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
+controlPositivo('el escáner ve la frase prohibida', CONTENIDO_PROHIBIDO_DE_CONTROL, (t) => escanearLoReal(t).length === 0)
+afirmar(escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL).length > 0, `  y le encuentra ${escanearLoReal(CONTENIDO_PROHIBIDO_DE_CONTROL).length} hallazgos`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Cero valores fuera de los tokens')
