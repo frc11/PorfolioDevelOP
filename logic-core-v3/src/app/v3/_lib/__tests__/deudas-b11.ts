@@ -47,6 +47,7 @@
  */
 
 import { DEUDAS_DE_B8, type DeudaDeclarada } from './deudas-b8'
+import { DEUDAS_DE_B12 } from './deudas-b12'
 
 export const DEUDAS_DE_B11 = {
   motasHero: {
@@ -82,10 +83,10 @@ export const DEUDAS_DE_B11 = {
 } as const satisfies Record<string, DeudaDeclarada>
 
 /**
- * Las dos listas en UN registro: es lo que consumen las filas de
- * `s10-acceso-escena.ts`. B8 sigue siendo el dueño de sus seis números y B11 de
- * los suyos; ninguna clave se repite.
+ * Las TRES listas en UN registro: es lo que consumen las filas de
+ * `s10-acceso-escena.ts`. B8 sigue siendo el dueño de sus seis números, B11 de
+ * los suyos y B12 de los tres que abre; ninguna clave se repite.
  */
-export const DEUDAS_DECLARADAS = { ...DEUDAS_DE_B8, ...DEUDAS_DE_B11 } as const
+export const DEUDAS_DECLARADAS = { ...DEUDAS_DE_B8, ...DEUDAS_DE_B11, ...DEUDAS_DE_B12 } as const
 
 export const LISTA_DE_DEUDAS_DE_B11: readonly DeudaDeclarada[] = Object.values(DEUDAS_DE_B11)

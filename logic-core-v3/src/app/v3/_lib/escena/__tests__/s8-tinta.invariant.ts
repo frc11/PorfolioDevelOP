@@ -270,12 +270,16 @@ deudaDeclarada(
   `${DEUDAS_DE_B8.diferencial.numero}: peor ${diferencial.peor.toFixed(2)}:1 en p=${diferencial.en.toFixed(4)} — ${DEUDAS_DE_B8.diferencial.que}: llega a AA en p=${vueltaAA.toFixed(4)} y en el ancla da ${contrasteEn(ANCLA_DEL_DIFERENCIAL, 0).toFixed(2)}:1`,
   DEUDAS_DE_B8.diferencial.cierre,
 )
+/** ⚠️ **B12 · `D-B8.4` SE SALDA Y LA AFIRMACIÓN SE DA VUELTA (regla 15).** Era
+ *  deuda por la tinta CLARA sobre una sala iluminada; B12 le sacó el relleno al
+ *  pie y le dio vuelta la tinta: la oscura da 4,98:1 en el ancla y no baja. Lo
+ *  que el modelo NO ve —la varianza de la celosía bajo el glifo— la captura sí:
+ *  8 de 24 bloques bajo AA a 1920 con las tres palancas. Es `D-B12.2`. */
 const cierre = lectura('cierre')
-deudaDeclarada(
+afirmar(
   cierre.peor >= AA,
-  'CIERRE (B6-A, sin velo desde B8) — la tinta CLARA pasa AA sobre la sala en toda su ventana',
-  `${DEUDAS_DE_B8.cierre.numero}: ${cierre.peor.toFixed(2)}:1 en p=${cierre.en.toFixed(4)}, y no pasa de ${Math.max(...[cierre.f.seVeDesde, 1].map((p) => contrasteDeLaSeccion('cierre', p, ESCENA_REAL))).toFixed(2)}:1 en toda la ventana — ${DEUDAS_DE_B8.cierre.que}`,
-  DEUDAS_DE_B8.cierre.cierre,
+  'CIERRE (B12: `papel-transparente`, con el pie sin relleno) — la tinta OSCURA pasa AA sobre la sala en toda su ventana',
+  `${cierre.peor.toFixed(2)}:1 en p=${cierre.en.toFixed(4)}, y no baja de ahí en toda la ventana — la deuda ${DEUDAS_DE_B8.cierre.numero} de la tinta clara queda saldada; lo que la CAPTURA ve (la varianza de la celosía bajo el glifo) es D-B12.2`,
 )
 controlPositivo(
   'el medidor de la tinta clara sabe reprobar: contra el papel a pleno sol (248) no llega a 3:1',
@@ -283,8 +287,8 @@ controlPositivo(
   (papel: string) => razonDeContraste(COLOR.tintaInvertida, papel) >= 3,
 )
 afirmar(
-  lecturas.filter((l) => l.peor < AA).map((l) => l.f.id).join(' · ') === 'numeros · trabajos · por-que-develop · cierre',
-  'y las deudas son EXACTAMENTE esas cuatro: ni una más sin declarar, ni una declarada que ya esté saldada',
+  lecturas.filter((l) => l.peor < AA).map((l) => l.f.id).join(' · ') === 'numeros · trabajos · por-que-develop',
+  'y las deudas son EXACTAMENTE esas TRES: ni una más sin declarar, ni una declarada que ya esté saldada — el Cierre se saldó en B12 al darle vuelta la tinta',
   lecturas.filter((l) => l.peor < AA).map((l) => `${l.f.id} ${l.peor.toFixed(2)}:1`).join(' · '),
 )
 

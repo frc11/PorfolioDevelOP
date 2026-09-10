@@ -9,7 +9,7 @@ import { Grilla } from '../../_componentes/layout/Grilla'
 import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza, TextoPorLineas } from '../_contrato/canales'
-import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
+import { MarcaDeSeccion, Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
 import { CONTENIDO } from './contenido'
@@ -239,15 +239,14 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
           className="flex min-h-svh w-full flex-col justify-center pt-20 pb-20"
         >
           <Grilla columnas="lateral">
-            <NumeroDeSeccion seccion={seccion} />
+            <MarcaDeSeccion />
             <Grilla columnas={GEOMETRIA.columnasTotales}>
               <div className={cn('flex flex-col gap-8', GEOMETRIA.claseDeLaMedida)}>
-                {/* El slogan ocupa el lugar que en las otras tres lleva el nombre
-                    de la sección. El Hero no se anuncia —Hero es el nombre del
-                    bloque en el recorrido, no una palabra que el visitante lea—
-                    así que ese registro tipográfico, medido y con su sangría de
-                    32 px, queda libre para la línea de marca. Mismo lugar, misma
-                    escala, otra función, declarada. */}
+                {/* ⚠️ B12 · EL SLOGAN SE QUEDA. Lo que se fue de las ocho es el
+                    RÓTULO DE SECCIÓN —número y nombre— y el Hero nunca tuvo
+                    ninguno de los dos como texto: este registro lo ocupa la
+                    LÍNEA DE MARCA, copy aprobado (`contenido.ts`, `[verdad]`).
+                    Sacarla sería borrar contenido que nadie pidió borrar. */}
                 <EtiquetaDeSeccion>{CONTENIDO.slogan}</EtiquetaDeSeccion>
 
                 {/* La caja del titular: 2 de 3 de la medida. El porqué —y los

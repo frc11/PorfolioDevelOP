@@ -4,13 +4,13 @@ import { cn } from '@/lib/utils'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Caption, Cuerpo, EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
+import { Caption, Cuerpo, Micro } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { sizesPorColumnas } from '../../_lib/imagen'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza, TextoPorLineas } from '../_contrato/canales'
 import { MarcoDeMedio } from '../_contrato/medios'
-import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
+import { MarcaDeSeccion, Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
 import { CONTENIDO } from './contenido'
@@ -121,7 +121,8 @@ export const GEOMETRIA = {
    * ahí (c7–c10 ≤ 10 % en los tres anchos); la segunda sigue en la 9 (pastilla).
    */
   reparto: {
-    etiqueta: 'escritorio:col-start-1 escritorio:col-span-3 escritorio:row-start-1',
+    // ⚠️ B12: la fila 1 quedó vacía —era el rótulo— y su celda se borra con él.
+    // Las otras NO se re-numeran: correrlas movería lo que B11 acomodó.
     titular: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-2',
     bajada: 'escritorio:col-start-1 escritorio:col-span-6 escritorio:row-start-3',
     lugar: 'escritorio:col-start-9 escritorio:col-span-4 escritorio:row-start-4',
@@ -189,11 +190,9 @@ function LaAgencia({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Pantalla nombre="agencia">
       <Grilla columnas="lateral" className="grow">
-        <NumeroDeSeccion seccion={seccion} />
+        <MarcaDeSeccion />
         <div data-composicion="agencia" className={CLASES_DEL_REPARTO}>
-          <EtiquetaDeSeccion className={GEOMETRIA.reparto.etiqueta}>{CONTENIDO.etiqueta}</EtiquetaDeSeccion>
-
-          <Bloque patron="P1" rango="ventana-visible" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
+          {/* ⚠️ B12: el rótulo y su celda se fueron; el titular NO se mueve. */}          <Bloque patron="P1" rango="ventana-visible" className={cn(GEOMETRIA.reparto.titular, GEOMETRIA.medida)}>
             {(progreso) => (
               <TextoPorLineas
                 texto={CONTENIDO.titular}

@@ -59,7 +59,9 @@
     ".next-b10/types/**/*.ts",
     ".next-b10/dev/types/**/*.ts",
     ".next-b11/types/**/*.ts",
-    ".next-b11/dev/types/**/*.ts"
+    ".next-b11/dev/types/**/*.ts",
+    ".next-b12/types/**/*.ts",
+    ".next-b12/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

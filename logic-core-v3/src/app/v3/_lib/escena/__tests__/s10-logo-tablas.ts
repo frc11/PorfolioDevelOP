@@ -18,7 +18,8 @@
  */
 
 import { razonDeContraste } from '../../__tests__/afirmar'
-import { TINTA_HEX } from '../../superficies'
+import { SUPERFICIES, TINTA_HEX } from '../../superficies'
+import { seccionPorId } from '../../secciones'
 import {
   TRANSPARENTES,
   VENTANAS,
@@ -140,12 +141,35 @@ export function tablaDeContraste(): readonly string[] {
   })
 }
 
-/** El mejor píxel del logo, sobre las dos secciones transparentes. */
+/**
+ * ⚠️ **B12 · LAS DOS POBLACIONES SE MIDEN SOBRE LAS SECCIONES CUYA TINTA ES
+ * `TINTA_HEX`, y ésa es la corrección — no una exclusión de conveniencia.**
+ *
+ * Las dos cifras comparan «la tinta #111111 contra el logo» con «la tinta
+ * #111111 contra el fondo», y le pedían las dos a las SEIS transparentes. Dos de
+ * esas seis —Trabajos y el Cierre— son secciones INVERTIDAS: su tinta no es
+ * #111111, es el papel. Mientras la sala estuvo clara eso no se notaba, porque
+ * el fondo daba contra la tinta oscura de todos modos.
+ *
+ * B12 baja la noche de Trabajos a 0,04 (`lightArc.ts`) y ahí la sala vale ~11 de
+ * gris: contra #111111 da **1,00:1**, o sea que la población del «fondo» se
+ * mete adentro de la del «logo» — pero con una tinta que esa sección NO usa.
+ * Filtrar por `invertida`, leído de `superficies.ts`, es medir a cada sección
+ * con SU tinta. Lo que las invertidas tienen debajo se mide con la captura, en
+ * `s10-acceso-escena`, y ahí la tinta es la que la sección declara.
+ */
+const CON_TINTA_OSCURA = TRANSPARENTES.filter((f) => !SUPERFICIES[seccionPorId(f.id).superficie].invertida)
+
+/** El mejor píxel del logo, sobre las secciones cuya tinta es `TINTA_HEX`. */
 export const MEJOR_SOBRE_EL_LOGO = Math.max(
-  ...TRANSPARENTES.map((f) => contrasteSobreElLogo(muestra(f.llenaDesde, VENTANAS[0].aspecto), 1)),
+  ...CON_TINTA_OSCURA.map((f) => contrasteSobreElLogo(muestra(f.llenaDesde, VENTANAS[0].aspecto), 1)),
 )
 /** El PEOR píxel del fondo, que es la cifra que `s8-tinta` publica. */
-export const PEOR_SOBRE_EL_FONDO = Math.min(...TRANSPARENTES.map((f) => contrasteSobreElFondo(f.llenaDesde)))
+export const PEOR_SOBRE_EL_FONDO = Math.min(...CON_TINTA_OSCURA.map((f) => contrasteSobreElFondo(f.llenaDesde)))
+/** Las invertidas, publicadas aparte: su tinta es el papel y no `TINTA_HEX`. */
+export const INVERTIDAS_TRANSPARENTES: readonly string[] = TRANSPARENTES.filter(
+  (f) => SUPERFICIES[seccionPorId(f.id).superficie].invertida,
+).map((f) => f.id)
 /** La tinta del texto contra la del logo, sin sombrear. */
 export const TINTA_CONTRA_TINTA = (tintaDelLogo: string): number => razonDeContraste(TINTA_HEX, tintaDelLogo)
 

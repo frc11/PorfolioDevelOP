@@ -4,11 +4,10 @@
  * Corre con `npx tsx src/app/v3/_secciones/trabajos/trabajos.invariant.tsx`.
  *
  * La sección se renderiza DE VERDAD tres veces, en el mismo proceso y sin
- * navegador: rama quieta (la de abajo de 1025), coreografía forzada, y la
- * preferencia de movimiento reducido mandando sobre el modo forzado. Todo se
- * afirma sobre el MARCADO que sale. Las dos ramas están porque cada una sola
- * miente: "abajo de 1025 no se escribe una transformada" pasa en verde si el
- * sistema no anima nunca, y el control es la rama con coreografía.
+ * navegador: rama quieta (abajo de 1025), coreografía forzada, y movimiento
+ * reducido mandando sobre el modo forzado. Todo se afirma sobre el MARCADO que
+ * sale. Las dos ramas están porque cada una sola miente: "abajo de 1025 no se
+ * escribe una transformada" pasa en verde si el sistema no anima nunca.
  *
  * Lo propio de esta sección, además de lo que el lane pide a las cuatro:
  *
@@ -17,14 +16,12 @@
  *     UN momento. · **El despinneo.** · **Los pasos = los proyectos** (B1).
  *   · **El acento no puede ser texto**: los hex se LEEN del tema. · **Las tres
  *     capturas** (V3-D): que el ARCHIVO mida la relación declarada.
- *   · **B2 · el reparto de los tres planos** (§15), sobre la función pura.
- *   · **B4-A · la meseta** (§16), en `soporte.ts`: barre el pin entero y afirma
- *     que nunca quedan los tres planos invisibles a la vez.
+ *   · **B2 · el reparto** (§15) y **B4-A · la meseta** (§16), en `soporte.ts`:
+ *     barre el pin entero, y nunca quedan los tres planos invisibles a la vez.
  *
  * ⚠ Entra en 300 líneas por la regla del lane: los detectores puros viven en
- * `trabajos-piezas.ts` y el arnés en `soporte.ts`, sus dos módulos de apoyo
- * declarados. Donde hubo que elegir se sacaron afirmaciones redundantes y NUNCA
- * controles positivos.
+ * `trabajos-piezas.ts` y el arnés en `soporte.ts`. Donde hubo que elegir se
+ * sacaron afirmaciones redundantes y NUNCA controles positivos.
  */
 
 import { renderToStaticMarkup } from 'react-dom/server'
@@ -41,8 +38,8 @@ import { ritmoDe } from '../_contrato/ritmo'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
-import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
-import { CSS, FUENTES, FUENTE_DEL_PANEL, abrirCaptura, afirmarElRepartoYLaMeseta, sinTres, veces } from './soporte'
+import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
+import { CSS, FUENTES, FUENTE_DEL_PANEL, FUENTE_DE_LA_COMPOSICION, abrirCaptura, afirmarElRepartoYLaMeseta, sinTres, veces } from './soporte'
 import { ancestrosDe, capturasConOtraRelacion, capturasQueNoLlegan, coloresDelTema, enlacesConNombreSucio, enlacesFueraDelContenido, metricaVisible, nombresQueNoSonEncabezado, type MedidasDeImagen } from './trabajos-piezas'
 import { GEOMETRIA, SIZES_DE_LA_CAPTURA } from './geometria'
 import { Trabajos } from './Trabajos'
@@ -155,6 +152,7 @@ const RUTAS_DE_ARCHIVO = new Set(CONTENIDO.proyectos.map((_, i) => `proyectos[${
 const TEXTOS_DE_PANTALLA = TEXTOS.filter((h) => !RUTAS_DE_ARCHIVO.has(h.ruta))
 afirmarIgual(RUTAS_DE_ARCHIVO.size, 3, 'se eximieron exactamente las TRES rutas de archivo, ni una más')
 afirmarIgual(TEXTOS_DE_PANTALLA.filter((h) => !quieto.includes(h.valor)).map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
+afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee: el título toma su lugar (B12, regla 15 — la cadena no se borra, se da vuelta)`)
 controlPositivo('el chequeo de "está completo" ve un marcado al que le falta un texto', '<div>Trabajos</div>', (html: string) => TEXTOS_DE_PANTALLA.every((h) => html.includes(h.valor)))
 afirmarIgual(capturasQueNoLlegan(quieto, PROYECTOS), [], '  y las tres capturas llegan, codificadas por el optimizador')
 controlPositivo('el detector de capturas ve un marcado sin la ruta codificada', '<img src="/_next/image?url=%2Fotra.webp"/>', (html: string) => capturasQueNoLlegan(html, PROYECTOS).length === 0)
@@ -195,7 +193,7 @@ controlPositivo('el chequeo de la métrica ve una métrica escondida en un `sr-o
 titulo('9 · Cero `three`: el efecto es HTML con perspectiva, no geometría 3D')
 
 for (const { archivo, texto } of FUENTES) afirmar(sinTres(texto), `${archivo} no importa three, @react-three ni drei`)
-afirmarIgual(FUENTES.length, 4, `y se leyeron del disco los CUATRO archivos que se despachan, no cero — B1 sacó la geometría a su archivo y B4-A el asentamiento al suyo: ${FUENTES.map((f) => f.archivo).join(' · ')}`)
+afirmarIgual(FUENTES.length, 7, `y se leyeron del disco los SIETE archivos que se despachan, no cero — B1 sacó la geometría, B4-A el asentamiento y B12 las piezas y la gota: ${FUENTES.map((f) => f.archivo).join(' · ')}`)
 controlPositivo('el detector ve un import de three', "import * as T from 'three'", sinTres)
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -235,7 +233,7 @@ afirmarIgual(enlacesFueraDelContenido(quieto, PROYECTOS.map((p) => p.enlace)), [
 afirmarIgual(enlacesConNombreSucio(quieto, PROYECTOS), [], '  el nombre accesible de cada uno es el del cliente y nada más: la métrica queda AFUERA')
 controlPositivo('el detector ve un enlace inventado', '<a href="https://inventado.example">Esquina</a>', (html: string) => enlacesFueraDelContenido(html, PROYECTOS.map((p) => p.enlace)).length === 0)
 controlPositivo('el chequeo de `hover:` sin gemela ve un marcado desparejo', '<i class="hover:opacity-casi">', (html: string) => veces(html, 'hover:') === veces(html, 'focus-visible:'))
-const FUENTE = FUENTES[0].texto
+const FUENTE = FUENTE_DE_LA_COMPOSICION
 afirmarIgual(veces(FUENTE, 'onClick'), 0, 'cero `onClick` en la fuente: ningún div haciendo de botón')
 afirmarIgual(veces(FUENTE, 'motion/_componentes'), 0, 'la única puerta a las piezas es `_contrato/piezas`')
 controlPositivo('el chequeo de la puerta ve un import directo', "import { Pieza } from '../../motion/_componentes/Pieza'", (src: string) => veces(src, 'motion/_componentes') === 0)
@@ -287,12 +285,14 @@ afirmar(PEDIDO.every((e) => e.formato.length > 0), '  y todas dicen en qué form
  *  publicó las dos cifras por separado con su dueño; hoy la tabla dice las dos y
  *  la publicación vuelve a ser UNA afirmación de igualdad. */
 const patronesDelFuente = [...new Set([...FUENTE.matchAll(/patron="(P\d)"/g)].map((m) => m[1]))].sort()
-afirmarIgual(patronesDelFuente, ['P2', 'P7'], 'el componente consume DOS patrones: P7 para los planos y P2 para el marco (B2)')
+// ⚠️ B12 · UN SOLO PATRÓN: el MARCO con P2 dejó de estar arriba y pasó a ser la
+// PORTADA, el plano de índice −1 del mismo reparto (P7). La igualdad se conserva.
+afirmarIgual(patronesDelFuente, ['P7'], 'el componente consume UN patrón: P7, para los tres planos y para la portada (B12)')
 afirmarIgual([...PATRONES_DE_LA_SECCION].sort(), patronesDelFuente, '  y `PATRONES_DE_LA_SECCION` de `contenido.ts` dice exactamente los mismos: la tabla dejó de estar vieja')
 
 // ═══════════════════════════════════════════════════════════════════════════
-// §15 y §16 viven en `soporte.ts`, juntas: el reparto de los planos y su
-// meseta son la misma pieza, y el barrido del pin necesita el fotograma de P7
+// §15 y §16 viven en `soporte.ts`: el reparto de los planos y su meseta son la
+// misma pieza, y el barrido del pin necesita el fotograma de P7
 // —`PATRONES` de `_lib/motion/`— que este archivo, producto para
 // `s7-contrato` §3, no puede importar. El corte es por REGLA, no por tamaño.
 afirmarElRepartoYLaMeseta()

@@ -22,6 +22,7 @@
  *   · `captura.fuente` y `enlace` — los archivos y los dominios existen y se
  *     verificaron uno por uno. Ver abajo.
  *   · `etiqueta` = el nombre de la sección en el recorrido de `secciones.ts`.
+ *     ⚠️ B12: se retiró de `CONTENIDO` — ver `ROTULO_DE_SECCION_RETIRADO`.
  *
  * ⚠️ **EL TERCER NOMBRE ERA FALSO, Y ESTUVO PUBLICADO (V3-D).** Decía **Matsu
  * Automotores**, y ese trabajo no se hizo. No era relleno —no llevaba
@@ -84,10 +85,17 @@ import type { EntradaDePedido } from '../_contrato/pedido'
  * —un rojo que no dice nada— o, peor, alguien la relajaría a una búsqueda
  * aproximada y dejaría de comprobar lo que dice comprobar.
  */
-export const CONTENIDO = {
-  /** El rótulo chico de arriba. Es el `nombre` de la sección en `secciones.ts`. */
-  etiqueta: 'Trabajos',
+/**
+ * ⚠️ **B12 · EL RÓTULO DE SECCIÓN, RETIRADO.** Era `CONTENIDO.etiqueta` y se
+ * renderizaba arriba del título, en micro. El humano pidió sacarlo en las ocho
+ * («directamente llega el título con su respectiva sección»), así que la cadena
+ * SALE de `CONTENIDO` —donde `textosDe` la contaba como texto que tiene que
+ * llegar a pantalla— y queda acá, exportada, para que el invariante afirme su
+ * AUSENCIA sin escribir la cadena a mano. No se borra: se da vuelta.
+ */
+export const ROTULO_DE_SECCION_RETIRADO = 'Trabajos'
 
+export const CONTENIDO = {
   /** [relleno] El h2. Una línea, que es lo que entra arriba de una secuencia. */
   titular: 'Tres proyectos, y al lado de cada nombre la medida de lo que cambió.',
 
@@ -234,4 +242,4 @@ export const PEDIDO: readonly EntradaDePedido[] = [
  * la tabla al día esas dos publicaciones vuelven a ser UNA afirmación de
  * igualdad.
  */
-export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P2', 'P7']
+export const PATRONES_DE_LA_SECCION: readonly IdDePatron[] = ['P7']

@@ -222,19 +222,35 @@ for (const row of sweep) {
     conLuz.some((v) => v) && BEAT_POSES.every((_, i) => !conLuz[i] || Math.abs(carrierAt(0.5, i)) < 0.02),
     BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.5, i) * 100).toFixed(1)}%${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
   )
+  /**
+   * ⚠️ **B12 · EN LA NOCHE NO HAY PORTADORA, Y ES GEOMETRÍA.** B8 la medía «una
+   * fracción de la del hero» con la noche a 0,08 (2,70°). B12 la baja a **0,04
+   * (1,35°)** —«full negro atrás»— y ahí el rayo del piso al sol **no llega al
+   * borde inferior de la capa lejana**: `MOIRE_FAR_BOTTOM` (−2,5) a radio
+   * `MOIRE_FAR_RADIUS` (44) sobre un piso en −4,304 pide **2,348°**. Sin dos
+   * capas no hay batido ni portadora, y `celosiaBeatAt` devuelve `null` con
+   * razón (lo mismo que afirman `s11-proyeccion` §1 y `s12-tension` §2).
+   *
+   * Se afirma entonces lo exacto —que la pose de la noche NO devuelve lectura y
+   * que es exactamente UNA— en vez de una desigualdad sobre un `NaN`, que
+   * pasaría en verde por accidente.
+   */
   check(
-    '  y en la noche la portadora es una fracción de la del hero: no hay banda que cuidar',
-    BEAT_POSES.every((_, i) => conLuz[i] || portadoraDeControl(i) < portadoraDeControl(0) / 2),
-    BEAT_POSES.map((pose, i) => `${pose[0]} ${portadoraDeControl(i).toFixed(1)}${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
+    '  y en la noche NO hay portadora: el sol rasante no cruza la capa lejana, así que no hay banda que cuidar (B12)',
+    BEAT_POSES.every((_, i) => conLuz[i] || Number.isNaN(portadoraDeControl(i))) && conLuz.filter((v) => !v).length === 1,
+    BEAT_POSES.map((pose, i) => `${pose[0]} ${Number.isNaN(portadoraDeControl(i)) ? 'sin portadora' : portadoraDeControl(i).toFixed(1)}${conLuz[i] ? '' : ' (noche)'}`).join(' · ')
   )
   check(
     'y en el hero —la pose de calibración— aguanta 0,75° y cae en 1°: ahí el sprint sí estaría deshaciendo a S11',
     Math.abs(carrierAt(0.75, 0)) < 0.02 && carrierAt(1, 0) < -0.05,
     `en 0,75° ${BEAT_POSES.map((pose, i) => `${pose[0]} ${(carrierAt(0.75, i) * 100).toFixed(0)}%`).join(' · ')} · en 1° ${BEAT_POSES.map((_, i) => `${(carrierAt(1, i) * 100).toFixed(0)}%`).join('/')}`
   )
+  // ⚠️ B12: la pose de la noche no tiene batido que perder (ver arriba), así que
+  // la vara se le pide a las poses CON LUZ — con el mismo −11,5 % de siempre.
   check(
-    'en el valor elegido el batido no pierde más del 11% en ninguna pose',
+    'en el valor elegido el batido no pierde más del 11% en ninguna pose con luz',
     BEAT_POSES.every((_, i) => {
+      if (!conLuz[i]) return true
       const row = sweep.find((entry) => entry.deg === 0.266)
       const base = sweep[0].beat[i]
       return row && row.beat[i] && base ? row.beat[i]!.beat / base.beat - 1 > -0.115 : false

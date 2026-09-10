@@ -18,7 +18,10 @@
 import { acotar01 } from '../../_lib/acotar'
 import { sizesPorColumnas } from '../../_lib/imagen'
 
+import { ALTO_DE_CALIBRACION, FUSION_DEL_CENSO } from '../_contrato/asentamiento'
+import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { mesetaDeLosPlanos } from './asentamiento'
+import type { VentanaDeLaGota } from './gota'
 import type { CajaDeLaCaptura } from './Proyecto'
 
 /**
@@ -81,7 +84,57 @@ export const GEOMETRIA = {
    * cierta por construcción.
    */
   planos: 3,
+  /**
+   * ── ⚠️ B12 · LA MEDIDA DEL PLANO, AHORA CENTRADA ─────────────────────────
+   *
+   * > *«Que esté centrado todo lo del portfolio.»*
+   *
+   * **El ancho no cambia un píxel**: siguen siendo las 2 de 3 columnas que B1
+   * midió —1232 px a 1920, con la banda vacía de abajo en 121 px— y por eso
+   * `columnasDelPlano` y `SIZES_DE_LA_CAPTURA` quedan intactos. Lo que cambia
+   * es que la caja deja de ser una CELDA de la grilla y pasa a ser un
+   * `max-width` centrado, **porque una celda de 2 en una grilla de 3 no tiene
+   * posición centrada**: ocupa 1–2 (izquierda) o 2–3 (derecha), y no hay
+   * tercera opción sin partir la grilla.
+   *
+   * La cuenta es la de la propia grilla, escrita con sus tokens y no con un
+   * número: `(100% − 2 canaletas) / 3 × 2 + 1 canaleta`. Sale exactamente el
+   * mismo ancho que emitía `tablet:col-span-2`, y el invariante lo afirma
+   * reconstruyendo la cuenta.
+   *
+   * ⚠ Sin prefijo de breakpoint **y no es un descuido**: esta clase sólo la
+   * renderiza la rama ANIMADA, que la compuerta de 1025 no monta abajo del
+   * umbral. La rama quieta sigue con su `Grilla`, que colapsa como siempre.
+   */
+  claseDeLaMedidaDelPlano:
+    'mx-auto w-full max-w-[calc((100%_-_2_*_var(--grilla-canal-amplio))_/_3_*_2_+_var(--grilla-canal-amplio))]',
 } as const
+
+/**
+ * ── ⚠️ B12 · LA VENTANA DE LA GOTA DE ENTRADA — derivada, no elegida ───────
+ *
+ * `expansionHasta` es **una pantalla de scroll del recorrido del bloque**:
+ * el ancla de P7 con `anclaje: 'seccion'` corre de «la sección toca el pie del
+ * cuadro» a «el pin suelta», o sea las pantallas 7 → 10, tres en total. La
+ * primera de esas tres es exactamente la que Trabajos tarda en subir a cuadro,
+ * y es exactamente el ATARDECER del arco (`lightArc.ts`, 0,46875 → 0,5, «una
+ * pantalla»). O sea: **la gota se abre mientras el sol se pone**, y llega a
+ * cubrir el cuadro cuando la sala ya está en la noche. Ni la gota espera a la
+ * luz ni la luz espera a la gota: comparten la pantalla por construcción.
+ *
+ * `disolucionHasta` le suma los **240 px de `FUSION_DEL_CENSO`**, que es la
+ * banda de scroll más corta que el censo de acontecimientos lee como que algo
+ * pasó — el mismo número del que sale la meseta de los planos. Menos que eso y
+ * la disolución no se leería como un momento; más, y se comería el aterrizaje
+ * del primer proyecto (que cae en 0,2593 del recorrido).
+ *
+ * Las dos cifras se publican en píxeles al lado, a la altura de calibración.
+ */
+export const PANTALLAS_DE_LA_SECCION = pantallasDe(seccionDe('trabajos'))
+export const VENTANA_DE_LA_GOTA: VentanaDeLaGota = {
+  expansionHasta: 1 / PANTALLAS_DE_LA_SECCION,
+  disolucionHasta: 1 / PANTALLAS_DE_LA_SECCION + FUSION_DEL_CENSO / (PANTALLAS_DE_LA_SECCION * ALTO_DE_CALIBRACION),
+}
 
 /**
  * EL ASENTAMIENTO DE LOS PLANOS — la meseta, derivada. Se arma UNA vez acá
@@ -152,6 +205,42 @@ export function localDelPlano(progreso: number, indice: number): number {
   // se desborda al tramo siguiente, que es lo que hace que dos planos estén
   // pintados a la vez en el cruce. Acotarlo acá era el defecto.
   return MESETA.remapear(acotar01(progreso) * GEOMETRIA.planos - indice)
+}
+
+/**
+ * ── ⚠️ B12 · LA PORTADA ES EL PLANO DE ÍNDICE −1, y no un cuarto paso ──────
+ *
+ * El título y la bajada dejaron de estar clavados arriba y entraron al
+ * escenario. Para que **vengan como las imágenes** sin tocar nada de lo
+ * calibrado, se consumen con la MISMA función de reparto en el índice
+ * inmediatamente anterior al primer proyecto.
+ *
+ * Qué produce eso, derivado y no elegido (con `MESETA` de tres planos):
+ *
+ *     progreso 0      →  local = CORTE de P7      la portada YA aterrizó
+ *     progreso 1/3    →  local = 1                terminó de irse
+ *
+ * o sea que la portada está compuesta cuando la sección asoma por el pie del
+ * cuadro y se va por delante de la cámara durante la pantalla en que la sección
+ * sube, **cruzándose con la llegada del primer proyecto** exactamente como se
+ * cruzan dos planos consecutivos. Es el cruce que la meseta de B4-A ya
+ * garantiza, aplicado un índice antes.
+ *
+ * ⚠ **Por qué NO puede ser un cuarto paso.** `pasosDeLaSecuencia` es de dónde
+ * sale el ALTO de la sección (`altoDeSecuenciaPinneada`), así que un cuarto paso
+ * la llevaría de 300svh a 400svh y con eso se movería el anclaje entero del
+ * recorrido —los nudos, el arco del sol, la ventana de la escena—. La regla 3
+ * del sprint lo prohíbe y la medición de B2 lo desaconseja igual. El índice −1
+ * usa scroll que YA existe: el que la sección tarda en subir a cuadro.
+ *
+ * ⚠ **Y por qué no rompe §16.** El barrido de la meseta arranca en el progreso
+ * del pin (`progresoDelPin`), que es 1/3: ahí la portada ya vale 1 y no está.
+ * `GEOMETRIA.planos` sigue siendo 3 y `MESETA` se deriva de 3.
+ */
+export const INDICE_DE_LA_PORTADA = -1
+
+export function localDeLaPortada(progreso: number): number {
+  return localDelPlano(progreso, INDICE_DE_LA_PORTADA)
 }
 
 /**

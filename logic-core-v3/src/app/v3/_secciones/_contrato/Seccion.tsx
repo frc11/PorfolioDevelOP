@@ -13,8 +13,14 @@ import { ATRIBUTO_DE_SECCION } from './forma'
  * resuelve el panel, el alto y el pinneo; el rótulo es la pieza de marca de la
  * sección. Se re-exportan para que las ocho secciones no cambien un import: lo
  * que se movió es dónde está escrito, no de dónde se consume.
+ *
+ * ⚠ **B12: `NumeroDeSeccion` y `EncabezadoDeSeccion` ya no existen.** El número
+ * y el rótulo de texto se fueron de las ocho por pedido del humano; lo que queda
+ * —la marca y la columna lateral de 140 px que sostiene el cierre estructural de
+ * B11— vive en `MarcaDeSeccion` y `CabeceraDeSeccion`. El porqué de cada
+ * conservación está en `Rotulo.tsx`.
  */
-export { EncabezadoDeSeccion, NumeroDeSeccion } from './Rotulo'
+export { CabeceraDeSeccion, MarcaDeSeccion } from './Rotulo'
 
 /**
  * EL ENVOLTORIO DE UNA SECCIÓN — panel, superficie, alto y pinneo.

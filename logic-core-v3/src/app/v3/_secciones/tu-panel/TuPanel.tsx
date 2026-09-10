@@ -7,7 +7,7 @@ import { Bloque } from '../_contrato/coreografia'
 import { CanalDeTitular, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
 import { MarcoDeMedio } from '../_contrato/medios'
-import { ContenidoDeSeccion, EncabezadoDeSeccion, Seccion } from '../_contrato/Seccion'
+import { CabeceraDeSeccion, ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { Capacidades } from './Capacidades'
 import {
   BLOQUES,
@@ -15,7 +15,6 @@ import {
   CAPTURA,
   COLUMNAS_DE_LA_GRILLA,
   ID,
-  NOMBRE,
   TITULAR,
   TITULO_DE_CAPACIDADES,
   type BloqueDeTexto,
@@ -95,7 +94,8 @@ export function TuPanel({ seccion }: PropsDeSeccion): React.JSX.Element {
         className="flex min-h-svh flex-col py-[var(--spacing-20)]"
         claseDeContenido="flex flex-1 flex-col justify-between gap-[var(--spacing-12)]"
       >
-        <EncabezadoDeSeccion seccion={seccion} nombre={NOMBRE} />
+        {/* ⚠️ B12: era el `06` con «Tu panel». Los dos se fueron de las ocho. */}
+        <CabeceraDeSeccion />
 
         <Bloque patron="P1" rango="ventana-visible">
           {(progreso) => (

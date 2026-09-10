@@ -1,0 +1,130 @@
+{
+  "perfil": "1920",
+  "lente": [
+    {
+      "scrollY": 8640,
+      "leido": {
+        "perspective": "1712.66px",
+        "perspectiveOrigin": "960px 540px",
+        "rect": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "pegado": {
+          "top": 0,
+          "height": 1080,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1920,
+          "alto": 1080
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1712.6611932761348,
+        "origen": "960.0px 540.0px"
+      },
+      "coincide": true
+    },
+    {
+      "scrollY": 9180,
+      "leido": {
+        "perspective": "1712.66px",
+        "perspectiveOrigin": "960px 540px",
+        "rect": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "pegado": {
+          "top": 0,
+          "height": 1080,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1920,
+          "alto": 1080
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1712.6611932761348,
+        "origen": "960.0px 540.0px"
+      },
+      "coincide": true
+    },
+    {
+      "scrollY": 9720,
+      "leido": {
+        "perspective": "1712.66px",
+        "perspectiveOrigin": "960px 540px",
+        "rect": {
+          "left": 0,
+          "top": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "pegado": {
+          "top": 0,
+          "height": 1080,
+          "position": "sticky"
+        },
+        "ventana": {
+          "ancho": 1920,
+          "alto": 1080
+        }
+      },
+      "esperado": {
+        "perspectivePx": 1712.6611932761348,
+        "origen": "960.0px 540.0px"
+      },
+      "coincide": true
+    }
+  ],
+  "revelado": [
+    {
+      "frontera": "hero → quienes-somos",
+      "scrollY": 540,
+      "mascara": "",
+      "espera": "ninguna",
+      "coincide": true
+    },
+    {
+      "frontera": "quienes-somos → numeros",
+      "scrollY": 3780,
+      "mascara": "",
+      "espera": "ninguna",
+      "coincide": true
+    },
+    {
+      "frontera": "numeros → trabajos",
+      "scrollY": 8100,
+      "mascara": "",
+      "espera": "ninguna",
+      "coincide": true
+    },
+    {
+      "frontera": "trabajos → servicios",
+      "scrollY": 11340,
+      "mascara": "linear-gradient(rgb(0, 0, 0) 0px, rgb(0, 0, 0) 405px, transparent 540px, transparent 1080px)",
+      "espera": "sale",
+      "coincide": true
+    },
+    {
+      "frontera": "tu-panel → por-que-develop",
+      "scrollY": 16740,
+      "mascara": "linear-gradient(transparent 0px, transparent 540px, rgb(0, 0, 0) 675px, rgb(0, 0, 0) 1080px)",
+      "espera": "entra",
+      "coincide": true
+    },
+    {
+      "frontera": "por-que-develop → cierre",
+      "scrollY": 17820,
+      "mascara": "",
+      "espera": "ninguna",
+      "coincide": true
+    }
+  ]
+}

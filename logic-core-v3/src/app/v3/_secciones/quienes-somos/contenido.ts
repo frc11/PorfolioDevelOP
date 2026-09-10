@@ -20,6 +20,7 @@
  *     técnica". Son las mismas dos cadenas del archivo vivo.
  *   · `lugar` = "Tucumán, Argentina" — la primera mitad de su `UBICACION`.
  *   · `etiqueta` = el nombre de la sección en el recorrido de `secciones.ts`.
+ *     ⚠️ B12: se retiró de `CONTENIDO` — ver `ROTULO_DE_SECCION_RETIRADO`.
  *
  * Relleno, y por eso va TODO en `PEDIDO` con clase `prosa`: `titular`,
  * `bajada`, `comoTrabajamos`, `equipo.alt`, `equipo.pie` y `rotuloDelPedido`.
@@ -56,10 +57,17 @@ import type { EntradaDePedido } from '../_contrato/pedido'
  * —un rojo que no dice nada— o, peor, alguien la relajaría a una búsqueda
  * aproximada y dejaría de comprobar lo que dice comprobar.
  */
-export const CONTENIDO = {
-  /** El rótulo chico de arriba. Es el `nombre` de la sección en `secciones.ts`. */
-  etiqueta: 'Quiénes somos',
+/**
+ * ⚠️ **B12 · EL RÓTULO DE SECCIÓN, RETIRADO.** Era `CONTENIDO.etiqueta` y se
+ * renderizaba arriba del título, en micro. El humano pidió sacarlo en las ocho
+ * («directamente llega el título con su respectiva sección»), así que la cadena
+ * SALE de `CONTENIDO` —donde `textosDe` la contaba como texto que tiene que
+ * llegar a pantalla— y queda acá, exportada, para que el invariante afirme su
+ * AUSENCIA sin escribir la cadena a mano. No se borra: se da vuelta.
+ */
+export const ROTULO_DE_SECCION_RETIRADO = 'Quiénes somos'
 
+export const CONTENIDO = {
   /** [verdad] Primera mitad de `UBICACION` del sitio vivo. */
   lugar: 'Tucumán, Argentina',
 

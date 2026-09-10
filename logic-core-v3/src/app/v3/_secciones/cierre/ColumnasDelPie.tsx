@@ -152,7 +152,15 @@ function ColumnaDePedido(): React.JSX.Element {
           <Caption como="span" peso="medio" className="font-codigo uppercase">
             {pedido.marcador}
           </Caption>
-          <Micro como="span" className="opacity-casi uppercase">
+          {/* ⚠️ B12 · A TINTA PLENA, y es la tercera palanca del pie con su número.
+              Iba a `opacity-casi` (0,6) porque sobre un pie que pintaba su propio
+              fondo eso pasaba AA en las dos superficies. Con el pie transparente
+              el fondo es la SALA, que tiene varianza, y el peor píxel manda: la
+              nota daba **1,84:1** al 0,6 y **2,45:1** a plena en la pose (1920,
+              `bloques-cierre-papel`). Subirla no la salva sola —la causa que
+              queda es la luz— pero es lo único que esta pieza puede aportar, y
+              dejarla al 0,6 sería regalar medio punto de contraste. */}
+          <Micro como="span" className="uppercase">
             {pedido.descripcion}
           </Micro>
         </li>

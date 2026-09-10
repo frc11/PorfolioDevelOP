@@ -98,13 +98,12 @@ afirmar(sinCopiaVisual(movido).length < movido.length, `el removedor sacó ${mov
 afirmarIgual(sinCopiaVisual(quieto).length, quieto.length, 'y no saca nada de la rama quieta, que no tiene copia visual')
 afirmarIgual(sinCopiaVisual('<span data-lineas-piezas=""><span>a</span><span>b</span></span>c'), 'c', 'el removedor saca el subárbol entero, no solo la etiqueta')
 
-const TEXTOS_ESPERADOS: readonly string[] = [
-  NOMBRE_DE_SECCION, TITULAR, ENTRADA, TESTIMONIO.marcador, TESTIMONIO.forma, TESTIMONIO.firma,
-  ...DIFERENCIALES.flatMap((d) => [d.titulo, d.cuerpo]),
-]
+// ⚠️ B12 · `NOMBRE_DE_SECCION` sale de acá y se afirma al revés abajo (regla 15).
+const TEXTOS_ESPERADOS: readonly string[] = [TITULAR, ENTRADA, TESTIMONIO.marcador, TESTIMONIO.forma, TESTIMONIO.firma, ...DIFERENCIALES.flatMap((d) => [d.titulo, d.cuerpo])]
 const faltantes = TEXTOS_ESPERADOS.filter((t) => !textoQuieto.includes(t))
 afirmarIgual(faltantes, [], `los ${TEXTOS_ESPERADOS.length} textos de la sección se leen enteros sin una sola animación`)
 controlPositivo('el buscador de textos ve uno que falta', 'una frase que la sección no dice', (t: string) => textoQuieto.includes(t))
+afirmar(!textoQuieto.includes(NOMBRE_DE_SECCION) && !textoMovido.includes(NOMBRE_DE_SECCION), `y el RÓTULO DE SECCIÓN («${NOMBRE_DE_SECCION}») ya NO se lee en ninguna de las dos ramas: se fue de las ocho en B12 y el título toma su lugar`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('3 · Contenido — ningún número que se pueda leer como un hecho')

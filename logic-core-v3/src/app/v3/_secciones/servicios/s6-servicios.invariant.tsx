@@ -93,6 +93,12 @@ afirmarIgual(textoVisible(animado), textoQuieto, 'las DOS ramas dicen EXACTAMENT
 afirmarIgual(textosDeTramo.map((t) => t === textoQuieto), [true, true, true], '  y los tres tramos también: entre ellos cambia cuál se PINTA, no lo que dicen')
 afirmar(textoQuieto.length > 0, `${textoQuieto.length} caracteres de texto visible`, textosDeTramo.map((t) => `${t.length}`).join(' · '))
 controlPositivo('el comparador ve una rama a la que le falta una palabra', textoQuieto.replace('turnos, ', ''), (t) => t === textoQuieto)
+/** ⚠️ B12 · La cabecera montaba el `05` y el nombre de la sección leídos de la
+ *  tabla del recorrido. Los dos se fueron de las ocho: se afirma la AUSENCIA con
+ *  la misma fuente que los emitía, no con una cadena escrita a mano. Regla 15. */
+const SECCION_DE_LA_TABLA = seccionDe('servicios')
+afirmar(!textoQuieto.includes(SECCION_DE_LA_TABLA.nombre), `el RÓTULO DE SECCIÓN («${SECCION_DE_LA_TABLA.nombre}») ya NO se lee: el título toma su lugar (B12)`)
+afirmar(!textoQuieto.includes(`>${SECCION_DE_LA_TABLA.numero}<`) && !/(^|\s)05(\s|$)/.test(textoQuieto), `  y el NÚMERO («${SECCION_DE_LA_TABLA.numero}») tampoco`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El contenido no tiene un solo número que se pueda leer como un hecho')

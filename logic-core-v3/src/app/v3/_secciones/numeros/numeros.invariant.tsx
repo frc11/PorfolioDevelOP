@@ -85,6 +85,10 @@ const celdasDe = (html: string): CeldaLeida[] =>
       .map((tag) => celdaDe(claseDe(tag), pantalla))
   })
 
+/** Fixtura con y sin la marca del rótulo: mantiene honestos a los dos lectores. */
+const FIXTURA_DE_ROTULO = (conPieza: boolean): string =>
+  `<div data-pantalla="entrada"><p ${conPieza ? `${MARCA_DEL_ROTULO} ` : ''}class="tablet:col-start-7 tablet:col-span-1 tablet:row-start-1">N</p><div class="tablet:col-start-7 tablet:col-span-6 tablet:row-start-2">c</div></div>`
+
 /** La columna de arranque del rótulo de sección, leída del marcado; `null` si no está posicionado. */
 const rotuloDe = (html: string): { readonly pantalla: string; readonly col: number } | null => {
   for (const t of html.split('data-pantalla="').slice(1)) {
@@ -189,18 +193,16 @@ const desborda = (c: readonly CeldaLeida[]): number => c.filter((x) => x.col + x
 afirmarIgual(desborda(CELDAS), 0, 'ninguna celda se sale de las doce columnas: nada desborda al angostar')
 afirmar(!seSuperponen(CELDAS), 'ninguna celda se superpone con otra: nada tapa a nada')
 
-/** ⚠ B11 · La composición entera vive desde la primera columna que el logo deja libre a lo largo
- *  del tramo (`GEOMETRIA.primeraColumnaLibre`, medido con `scripts-b11/h-columnas.ts`), rótulo incluido. */
+/** ⚠️ B12 · La afirmación del rótulo se da vuelta (regla 15): estaba posicionado
+ *  y ahora se afirma que NO está, con el MISMO lector. */
 const ROTULO = rotuloDe(quieto)
-afirmar(ROTULO !== null && ROTULO.pantalla === GEOMETRIA.pantallas[0].id, 'el rótulo de sección está posicionado, en la pantalla de la cabecera (B11)', ROTULO === null ? 'sin rótulo posicionado' : `${ROTULO.pantalla} · columna ${ROTULO.col}`)
-afirmarIgual(ROTULO?.col, CELDAS[0].col, '  y arranca en la misma columna que la cabecera: la composición tiene UN borde izquierdo')
+afirmarIgual(ROTULO, null, 'NO hay rótulo de sección en el marcado: el número y el nombre se fueron de las ocho (B12)')
 afirmar(
-  CELDAS.every((c) => c.col >= GEOMETRIA.primeraColumnaLibre) && (ROTULO?.col ?? 0) >= GEOMETRIA.primeraColumnaLibre,
+  CELDAS.every((c) => c.col >= GEOMETRIA.primeraColumnaLibre),
   `ninguna pieza arranca antes de la primera columna libre (${GEOMETRIA.primeraColumnaLibre}): el logo tapa las columnas 1–5 en las cuatro pantallas y en los tres anchos (B11)`,
-  `arranques ${[ROTULO?.col ?? 0, ...CELDAS.map((c) => c.col)].join(' · ')}`,
+  `arranques ${CELDAS.map((c) => c.col).join(' · ')}`,
 )
-const FIXTURA_DE_ROTULO = (conPieza: boolean): string =>
-  `<div data-pantalla="entrada"><p ${conPieza ? `${MARCA_DEL_ROTULO} ` : ''}class="tablet:col-start-7 tablet:col-span-1 tablet:row-start-1">N</p><div class="tablet:col-start-7 tablet:col-span-6 tablet:row-start-2">c</div></div>`
+controlPositivo('  y el lector de rótulos NO está ciego: sobre una fixtura con rótulo lo encuentra', FIXTURA_DE_ROTULO(true), (h: string) => rotuloDe(h) === null)
 afirmarIgual(celdasDe(FIXTURA_DE_ROTULO(true)).length, 1, 'el contador salta el rótulo posicionado POR SU PIEZA y cuenta la celda que queda')
 controlPositivo('  y la misma clase SIN la pieza sigue contando: lo que lo salva es la marca, no la clase', FIXTURA_DE_ROTULO(false), (h: string) => celdasDe(h).length === 1)
 controlPositivo('ve una pieza que arranca antes de la primera columna libre', [{ pantalla: 'volumen', col: 1, ancho: 5, fila: 1 }], (c: readonly CeldaLeida[]) => c.every((x) => x.col >= GEOMETRIA.primeraColumnaLibre))

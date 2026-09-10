@@ -22,7 +22,7 @@ import {
 import { entradasColgadas } from '../_contrato/pedido'
 import { pantallasDe } from '../_contrato/forma'
 
-import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
+import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO, ROTULO_DE_SECCION_RETIRADO } from './contenido'
 import { GEOMETRIA, SIZES_DE_LA_FOTO } from './QuienesSomos'
 import {
   conFoto, conMotion, conPreferencia, FUENTE, LITERALES,
@@ -119,6 +119,8 @@ titulo('4 · Abajo de 1025 el contenido está COMPLETO y no se mueve')
 
 const faltantes = TEXTOS.filter((h) => !quieto.includes(h.valor))
 afirmarIgual(faltantes.map((h) => h.ruta), [], 'los textos del contenido llegan enteros a la rama quieta')
+/** ⚠️ B12 · `CONTENIDO.etiqueta` estaba en esta cuenta y ahora se afirma al revés. Regla 15. */
+afirmar(!quieto.includes(ROTULO_DE_SECCION_RETIRADO), `y el RÓTULO DE SECCIÓN («${ROTULO_DE_SECCION_RETIRADO}») ya NO se lee: el título toma su lugar (B12)`)
 controlPositivo(
   'el chequeo de "está completo" ve un marcado al que le falta un texto',
   '<div>Quiénes somos</div>',

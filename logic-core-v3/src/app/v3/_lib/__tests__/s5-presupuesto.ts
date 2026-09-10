@@ -112,6 +112,37 @@ export const MONTAJE_DE_B8_KIB = -0.09
 export const MONTAJE_DE_B11_KIB = 0.03
 
 /**
+ * **+1,36 KiB** — lo que B12 monta, y es la línea más grande que este techo
+ * llevó. **1.393 B**, medidos A/B entre builds del MISMO árbol y el mismo
+ * entorno, apagando cada pieza en el árbol de trabajo sólo durante la medición y
+ * restaurándola byte a byte (SHA-1 de `Trabajos.tsx` antes y después:
+ * `79484340…`). El reparto completo, con la alternativa de cada renglón y la
+ * medición que se descartó, en `s5-presupuesto-recibos-de-b12.ts`:
+ *
+ *     LA GOTA            +1.304 B   la transición de entrada a la noche
+ *     LA BANDA DEL PIE     +176 B   el velo local que cierra 16 bloques del pie
+ *     EL RESTO, NETO         −87 B  los rótulos afuera, el pie sin relleno,
+ *                                   la portada, el centrado, el corte de piezas
+ *
+ * ⚠️ **Las dos piezas que pagan son NUEVAS y las dos las pidió el humano por su
+ * nombre** —«un efecto de gota o algo exótico y deluxe» y «un velo LOCAL en la
+ * banda del pie»—; el resto del bloque DEVUELVE bytes. Que la resta de §1, §2 y
+ * §3 dé −87 es lo que hace que la decisión sea limpia: lo único que se paga es
+ * lo que se agregó.
+ *
+ * ⚠️ **Autorizado en 1,28 KiB y declarado en 1,36, con la diferencia escrita.**
+ * El humano subió el techo en la PARADA 1 con la cifra que había ahí: la gota
+ * sola. En la misma parada pidió probar la banda y dejarla si cerraba —cerró, de
+ * 8 bloques bajo AA a 4 y 2— y la banda son 176 B más. No se esconde en el
+ * redondeo ni en el heredado: es su propio renglón del recibo.
+ *
+ * Al centésimo de arriba, con la convención de B8, B10 y B11: 1.384,4 B de
+ * desvío / 1024 = 1,3520 → **1,36**, que deja 8,2 B de aire, los mismos 8,6 que
+ * B11 dejó dentro del redondeo.
+ */
+export const MONTAJE_DE_B12_KIB = 1.36
+
+/**
  * **+0,10 KiB** — lo que queda SIN DUEÑO después de restarle a lo escrito las
  * seis líneas de arriba. No es un montaje: es el residuo, y por eso **se publica
  * con atribución y no se afirma** (regla 13). **Medido por B10 sobre ESTE árbol,
@@ -135,7 +166,7 @@ export const HEREDADO_SIN_DECLARAR_KIB = 0.10
  * declarado**. Un byte que crezca sin declararse no tiene línea que lo cubra y
  * pone la comprobación en rojo igual.
  *
- * ⚠️ Son **los seis montajes más el heredado**, sin repetir ni faltar; la octava
+ * ⚠️ Son **los SIETE montajes más el heredado**, sin repetir ni faltar; la novena
  * línea con nombre es el techo de 60, y se la suma `PRESUPUESTO_PROPIO_KIB`.
  * El merge de las cuatro ramas dejó este sumatorio con la forma que traía B8
  * —que se escribió cuando B9 todavía no estaba en el árbol— y **`MONTAJE_DE_B9_KIB`
@@ -149,5 +180,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B9_KIB +
   MONTAJE_DE_B8_KIB +
   MONTAJE_DE_B11_KIB +
+  MONTAJE_DE_B12_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

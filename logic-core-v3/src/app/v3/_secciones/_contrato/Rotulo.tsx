@@ -1,123 +1,103 @@
 import { cn } from '@/lib/utils'
 
-import { PrefijoDeServicio, Separador } from '../../_componentes/marca/Marca'
-import { EtiquetaDeSeccion, Micro } from '../../_componentes/tipografia/Textos'
-import type { Seccion as EntradaDeSeccion } from '../../_lib/secciones'
+import { PrefijoDeServicio } from '../../_componentes/marca/Marca'
+import { Grilla } from '../../_componentes/layout/Grilla'
 
 /**
- * EL RÓTULO DE UNA SECCIÓN — el número, la etiqueta, y la MARCA.
+ * LA MARCA DE UNA SECCIÓN — lo que queda del rótulo cuando el rótulo se va.
  *
  * Salió de `Seccion.tsx` en B4-A, cuando montarle la marca al rótulo pasó ese
  * archivo de 300 líneas. El corte es por tema: allá vive el envoltorio —panel,
- * superficie, alto y pinneo—, acá el rótulo, que es la superficie de marca que
- * las ocho secciones comparten.
+ * superficie, alto y pinneo—, acá la superficie de marca que las ocho secciones
+ * comparten.
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ B12 · EL NÚMERO Y EL RÓTULO SE FUERON. LA MARCA Y LA COLUMNA SE QUEDAN.
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * Pedido del humano, textual: *«sacar los textitos como "quiénes somos" y el
+ * número de sección "02", ya que no será necesario ubicarlo así: directamente
+ * llega el título con su respectiva sección»*. Se fueron las dos piezas de
+ * TEXTO en las ocho: `NumeroDeSeccion` (el `01`) y la `EtiquetaDeSeccion` con
+ * el nombre de la sección. **El título de cada sección es ahora lo primero que
+ * aparece.**
+ *
+ * Lo que NO se fue, y las dos razones están medidas:
+ *
+ * 1. **El PREFIJO DE LA MARCA.** `NumeroDeSeccion` era «la única pieza del
+ *    rótulo que las ocho comparten», o sea el único lugar donde el cuadrado de
+ *    `--color-acento` aparecía una vez y aparecía siempre (B4-A). Borrarlo con
+ *    el número habría sacado la marca de las ocho secciones del sitio, y
+ *    `s17-marca.invariant` §5 lo cuenta: *«el PREFIJO aparece al menos una vez
+ *    por cada una de las 8 secciones (el rótulo) más el pie»*. La afirmación NO
+ *    se aflojó: sigue contando lo mismo, y lo que cambió es de qué pieza sale.
+ * 2. **LA COLUMNA LATERAL DE 140 px.** Es una medida de la referencia —140 px
+ *    exactos en 92 contenedores— y, más importante, **es la que sostiene el
+ *    cierre estructural de B11**: las cuatro deudas del logo se cerraron
+ *    poniendo el texto en columnas concretas (c7–c12 en Quiénes somos, c3–c5 la
+ *    foto) y esas columnas se cuentan desde el borde de la grilla, no desde el
+ *    borde de la pantalla. Sacar la columna correría toda la composición 140 px
+ *    + canaleta a la izquierda y **reabriría D-B8.1, D-B8.2 y D-B8.6 sin que
+ *    nada se quejara**. La columna se queda; lo que se va es su texto.
+ *
+ * Con eso, la resta de este sprint sobre la composición es exactamente las DOS
+ * líneas de texto de arriba de cada sección, que es lo que se pidió, y no un
+ * cambio de grilla que ningún pedido menciona.
+ *
+ * ── ⚠️ LO QUE SE LLEVÓ EL NÚMERO, Y ESTÁ REESCRITO Y NO BORRADO ───────────
+ *
+ * El docblock que este archivo tenía publicaba una medición que ya no aplica y
+ * que **no se pierde**: el número iba en TINTA PLENA porque a `--opacity-casi`
+ * (0,6) daba **4,4043:1** sobre `--color-superficie-3`, por debajo de AA, y ésa
+ * era la divergencia entre los dos contratos que S7 resolvió con el número. Sin
+ * número no hay tinta que medir, así que la afirmación que la sostenía
+ * (`s6-contraste` §—) se reescribe contra la propiedad NUEVA: que ningún
+ * archivo del lane monta `RotuloDePanel`. `RotuloDePanel` de
+ * `_componentes/Panel.tsx` sigue teniendo el mismo `opacity-casi` y sigue sin
+ * renderizarse en `/v3`: eso no cambió.
  */
 
 /**
- * EL NÚMERO DE LA SECCIÓN — el `01` de la columna lateral de 140px.
+ * LA MARCA EN LA COLUMNA LATERAL — el cuadrado de `--color-acento`, solo.
  *
- * ── Por qué este dígito sí, y no contradice la regla del contenido ────────
+ * ⚠ `self-start`: como ítem de grilla este elemento se ESTIRA a la fila, y con
+ * `items-center` el cuadrado se iba al medio de una fila de 1000 px — medido a
+ * 1920 con el número, que bajaba de y 5 a y 539. Con la caja en su alto natural
+ * la marca vuelve arriba y se alinea con el primer renglón de al lado.
  *
- * Porque **no es un dato del negocio**: es el índice de la sección en el
- * recorrido, sale de `secciones.ts` y no de un `contenido.ts`, y no se puede
- * leer como un hecho sobre develOP. La regla dura prohíbe inventar cifras que
- * se lean como medidas; un ordinal de navegación no es una de ésas.
- *
- * Es además la pieza medida: la columna lateral mide 140px exactos en 92
- * contenedores de la referencia, y ahí es donde vive el número.
- *
- * ── ⚠️ EL NÚMERO VA EN TINTA PLENA, Y NO ES ESTÉTICA ─────────────────────
- *
- * **Es la divergencia entre los dos contratos con la respuesta medida.** El
- * lane A lo pintaba a `--opacity-casi` (0,6), copiando `RotuloDePanel` de S1; el
- * lane B lo midió y lo dejó en tinta plena. **Gana el lane B, con el número:**
- * la tinta al 60 % compuesta sobre `--color-superficie-3` da **4,4043:1**, por
- * debajo de AA (4,5:1). Sobre el papel sí pasa —4,83:1— así que el defecto sólo
- * aparece en un panel `papel-transparente`… que es exactamente la superficie
- * del Hero y de Por qué develOP.
- *
- * O sea que no era una diferencia de gusto entre dos lanes: **el número del
- * Hero del lane A estaba abajo de AA**, y sólo se vio al juntar su versión del
- * rótulo con su propio recorrido de superficies.
- *
- * Bajar la opacidad empeora (menos alfa = más fondo claro = menos contraste) y
- * el sistema no declara ningún escalón por encima de 0,6. Así que el número va
- * en tinta plena: **13,62:1** peor caso sobre el canvas y **18,00:1** sobre la
- * sección invertida. Lo que lo mantiene discreto es el tamaño —`text-micro`,
- * 10 px, monoespaciada y en mayúsculas—, no un alfa que no da.
- *
- * ⚠️ **Queda reportado, y NO se toca:** `RotuloDePanel` de `_componentes/Panel.tsx`
- * tiene el mismo `opacity-casi`. Después de este sprint `/v3` ya no lo
- * renderiza —las secciones traen su propio rótulo— así que el defecto deja de
- * estar en pantalla, pero el componente sigue ahí para quien lo use.
+ * `aria-hidden` lo trae el propio prefijo: es un registro visual, no un dato, y
+ * un lector de pantalla no tiene nada que anunciar acá.
  */
-export function NumeroDeSeccion({
-  seccion,
-  className,
-}: {
-  readonly seccion: EntradaDeSeccion
-  readonly className?: string
-}): React.JSX.Element {
+export function MarcaDeSeccion({ className }: { readonly className?: string }): React.JSX.Element {
   return (
-    // `font-codigo` va en `className` y no antes: `cn` resuelve el conflicto de
-    // familia quedándose con la última, así que ésta es la posición que gana.
-    <Micro como="p" className={cn('flex items-center gap-[var(--spacing-2)] self-start font-codigo uppercase', className)}>
-      {/* ── B4-A · EL PREFIJO DE LA MARCA, en las OCHO secciones ────────────
-          `NumeroDeSeccion` es la única pieza del rótulo que las ocho comparten
-          —cuatro por `EncabezadoDeSeccion` y cuatro suelta—, así que es donde el
-          prefijo aparece una vez y aparece siempre. La referencia resuelve ese
-          registro con un glifo; acá el vocabulario es propio: un RELLENO en
-          `--color-acento`, el alias que se retiñe. Nunca como texto.
-          ⚠ `self-start`: como ítem de grilla este `<p>` se ESTIRA a la fila, y
-          con `items-center` el número se iba al medio de una fila de 1000 px —
-          medido a 1920, el `02` de Quiénes somos bajaba de y 5 a y 539. Con la
-          caja en su alto natural el número vuelve arriba y el cuadrado se
-          alinea con su renglón, que es lo que `items-center` tiene que hacer. */}
+    <div data-pieza="marca-de-seccion" className={cn('flex items-center self-start', className)}>
       <PrefijoDeServicio />
-      {seccion.numero}
-    </Micro>
+    </div>
   )
 }
 
 /**
- * El rótulo completo: el número en la columna lateral y la etiqueta con el
- * nombre de la sección.
+ * LA CABECERA DE UNA SECCIÓN — la columna lateral con la marca, y la fluida con
+ * lo que la sección quiera poner (o nada).
  *
- * `EtiquetaDeSeccion` es la pieza más repetida del inventario —29 apariciones—
- * y trae su medición entera: `text.micro`, `leading.micro`, peso medio,
- * mayúsculas y la sangría de `--spacing-8`. Acá la sangría se apaga: la columna
- * lateral ya separa, y sumar las dos cosas la correría dos veces.
+ * Era `EncabezadoDeSeccion` y componía el número + separador + nombre. Con las
+ * dos piezas de texto afuera, lo único que queda es **reservar la columna
+ * lateral**, que es lo que mantiene la composición en su lugar. Se conserva como
+ * componente —y no se reemplaza por un `<div>` suelto en cada sección— porque
+ * las cuatro que la usaban comparten exactamente esta caja, y una copia por
+ * sección serían cuatro oportunidades de que una se desalinee.
  */
-export function EncabezadoDeSeccion({
-  seccion,
-  nombre,
+export function CabeceraDeSeccion({
+  children,
   className,
 }: {
-  readonly seccion: EntradaDeSeccion
-  /** El nombre visible. Es contenido, y por eso entra como dato y no se lee de
-   *  la tabla: `secciones.ts` es el recorrido, no el copy. */
-  readonly nombre: string
+  readonly children?: React.ReactNode
   readonly className?: string
 }): React.JSX.Element {
   return (
-    <div
-      className={cn(
-        'grid w-full grid-cols-1 gap-[var(--grilla-canal-amplio)] tablet:grid-cols-[var(--columna-lateral)_minmax(0,1fr)]',
-        className,
-      )}
-    >
-      <NumeroDeSeccion seccion={seccion} />
-      {/* ── B4-A · EL SEPARADOR, donde hay una relación que marcar ──────────
-          La regla de 1px del sistema entre el número y el nombre: el registro que
-          declara que hay un SISTEMA y no un símbolo suelto. Va acá y no en
-          `NumeroDeSeccion` porque acá las dos cosas son contiguas; en las cuatro
-          que reparten el rótulo por su cuenta no hay nada pegado que separar. */}
-      <div className="flex items-center gap-[var(--spacing-2)]">
-        <Separador />
-        <EtiquetaDeSeccion como="p" sangria={false}>
-          {nombre}
-        </EtiquetaDeSeccion>
-      </div>
-    </div>
+    <Grilla columnas="lateral" className={className}>
+      <MarcaDeSeccion />
+      {children === undefined ? <div /> : children}
+    </Grilla>
   )
 }

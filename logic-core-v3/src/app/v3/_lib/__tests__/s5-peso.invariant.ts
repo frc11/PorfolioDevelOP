@@ -46,6 +46,7 @@ import {
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
   MONTAJE_DE_B11_KIB,
+  MONTAJE_DE_B12_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
@@ -125,12 +126,14 @@ console.log(
     ` + ${MONTAJE_DE_B8_KIB} que B8 monta (el arco con la noche, el contraluz atado y el brillo de las partículas)` +
     ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
     ` + ${MONTAJE_DE_B11_KIB} que B11 monta (el texto corrido de donde pasa el logo y dos tintas a plena: 25 B netos medidos A/B entre dos builds del mismo árbol, atribuidos byte a byte)` +
+    ` + ${MONTAJE_DE_B12_KIB} que B12 monta (la GOTA de entrada a la noche, 1.304 B, y la BANDA local del pie, 176 B, contra −87 B que devuelve todo el resto del bloque: 1.393 B netos, apagando cada pieza y restaurándola byte a byte)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
 console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
 console.log('    ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un árbol SIN B9. El candidato —el producto que B9 tocó fuera de los 13 literales del rango— está escrito con su número en `s5-presupuesto-recibos-del-merge.ts`, sin apropiárselo.')
 console.log('    B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: declaró su montaje con su A/B, su reparto byte a byte y su alternativa escrita (`s5-presupuesto-recibos-de-b11.ts`). El 60 no se movió.')
-console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los tres archivos de recibos: por eso cada una es revocable por separado.')
+console.log('    B12 es la línea más grande que este techo llevó, y las DOS piezas que la componen son nuevas y pedidas por su nombre: la gota («un efecto de gota o algo exótico y deluxe») y el velo local del pie. El resto del bloque DEVUELVE 87 B (`s5-presupuesto-recibos-de-b12.ts`).')
+console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los CUATRO archivos de recibos: por eso cada una es revocable por separado.')
 afirmar(
   escritoPorElLane / 1024 < PRESUPUESTO_PROPIO_KIB,
   `lo que ESCRIBE el lane entra en ${PRESUPUESTO_PROPIO_KIB} KiB crudo`,

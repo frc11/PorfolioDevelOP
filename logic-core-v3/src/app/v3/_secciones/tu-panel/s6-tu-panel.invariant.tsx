@@ -56,6 +56,7 @@ import {
   COLUMNAS_DE_LA_CAPTURA,
   COLUMNAS_DE_LA_GRILLA,
   ID,
+  NOMBRE,
   PANTALLAS_DE_LA_SECCION,
   ALTO_DE_LA_CAPTURA,
   ANCHO_DE_LA_CAPTURA,
@@ -86,6 +87,9 @@ afirmarIgual(cuentaDe(QUIETO, /style="/g), 2, 'los dos únicos estilos inline vi
 
 const TEXTOS = [TITULAR, TITULO_DE_CAPACIDADES, ...BLOQUES.map((b) => b.texto), ...CAPACIDADES]
 afirmarIgual(TEXTOS.filter((t) => !textoVisible(QUIETO).includes(t)), [], `los ${TEXTOS.length} textos de la sección están enteros sin una sola animación`)
+/** ⚠️ B12 · `NOMBRE` estaba en esta lista y ahora se afirma al revés: el rótulo
+ *  de sección se fue de las ocho y no se lee. No se borra la cadena. Regla 15. */
+afirmar(!textoVisible(QUIETO).includes(NOMBRE), `y el RÓTULO DE SECCIÓN («${NOMBRE}») ya NO se lee: el título toma su lugar (B12)`)
 
 titulo('1b · CONTROL POSITIVO — con coreografía esas mismas cosas SÍ aparecen')
 

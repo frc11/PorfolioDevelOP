@@ -26,10 +26,60 @@
    contenido del envoltorio, que es la que tiene los hijos. Una regla de `gap`
    sobre el `<footer>` —cuyo único hijo es el envoltorio— no haría nada, y una
    regla que no hace nada es exactamente lo que este sprint no deja pasar. */
+/* ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ B12 · EL RELLENO SE FUE, Y ERA LA CAUSA REAL DE QUE LA SALA NUNCA SE VIERA
+ * ══════════════════════════════════════════════════════════════════════════
+ * Esta regla pintaba `background-color: var(--color-fondo)`, que adentro de
+ * `[data-seccion="invertida"]` vale #0E0E0E, y el `<footer>` ENVUELVE la
+ * sección entera del Cierre. Diagnosticado en el navegador con
+ * `elementsFromPoint` (`scripts-b8/h-cierre-negro.ts`, B8-LUZ.md §11.1): en los
+ * cuatro puntos del viewport el único elemento que pintaba era este pie, con la
+ * escena visible, sin máscara y a opacidad 1 detrás.
+ *
+ * O sea: **la sala nunca se vio detrás del Cierre, ni con velo ni sin él**, y
+ * ninguna cantidad de trabajo sobre la SUPERFICIE del panel lo iba a arreglar.
+ * B8 lo dejó anotado como decisión de dirección; el humano la tomó: *«el footer
+ * también, sigue con el fondo oscuro, tiene que ser transparente»*.
+ *
+ * `color` se queda: el pie hereda la tinta de su sección, y es lo que hace que
+ * el mismo marcado sirva invertido y sobre papel. `padding-block` también.
+ * El pie sigue pudiendo pintarse a sí mismo cuando lo pidan: `Pie` acepta
+ * `className`, y la galería de componentes lo usa sobre papel opaco.
+ * ══════════════════════════════════════════════════════════════════════════ */
 [data-v3] [data-pieza="pie"] {
   padding-block: var(--spacing-20);
-  background-color: var(--color-fondo);
   color: var(--color-tinta);
+}
+
+/* =========================================================================
+ * ⚠️ B12 · LA BANDA DEL PIE — el velo LOCAL, no el de la sección entera.
+ * =========================================================================
+ * El relleno del pie se fue (arriba) y la sala apareció. La banda devuelve el
+ * fondo **sólo donde el pie tiene el texto chico** —el CTA, las tres columnas y
+ * la línea de cierre: 20 de los 24 bloques, todos entre 10 y 15 px— y deja
+ * la sala entera arriba, donde está el titular y donde el gesto de la cámara
+ * alejándose se lee. Por qué acá y no en la sección: `cierre/Cierre.tsx`.
+ *
+ * `var(--color-fondo)` es el token de la sección, no un gris nuevo: con el
+ * Cierre en `papel-transparente` vale el papel, y el día que la tabla lo dé
+ * vuelta la banda se da vuelta con ella sin tocar esta regla.
+ * ========================================================================= */
+
+[data-v3] [data-pieza="banda-del-pie"] {
+  /* ⚠️ **EL RELLENO SE COMPENSA CON UN MARGEN NEGATIVO, Y NO ES UN TRUCO: ES LO
+     QUE IMPIDE QUE LA BANDA MUEVA EL ANCLAJE.** Medido a 1440 con el relleno
+     suelto: el Cierre pasó de 900 px a **952,3** y el documento con él (16.200
+     → 16.252). Una sección que no mide un número entero de pantallas estira el
+     mapeo de `pantallaDeScroll` y cada nudo del anclaje cae en otro lugar del
+     scroll real — el defecto que `secciones.ts` documenta para Quiénes somos,
+     con hasta 900 px de desvío. Con `margin-block` igual y opuesto la caja de
+     margen mide lo mismo que el contenido: la fila no crece y la sección vuelve
+     a 900 / 1080. Abajo el margen es el relleno ENTERO del pie para que la
+     banda llegue al borde del documento en vez de dejar 48 px de sala debajo de
+     la línea de cierre. El porqué de la banda: `cierre/BandaDelPie.tsx`. */
+  padding-block: var(--spacing-8) var(--spacing-20);
+  margin-block: calc(var(--spacing-8) * -1) calc(var(--spacing-20) * -1);
+  background-color: var(--color-fondo);
 }
 
 /* =========================================================================
@@ -162,7 +212,28 @@
 
 /* =========================================================================
  * FORMULARIO DE NOVEDADES — campo en píldora y botón de envío.
+ * =========================================================================
+ * ⚠️ **B12 · EL FORMULARIO LLEVA SU PROPIO FONDO SÓLIDO, y es la palanca que la
+ * instrucción autoriza con su nombre**: *«un campo de texto sobre una escena en
+ * movimiento es lo más difícil de este bloque, y darle fondo es legítimo».**
+ *
+ * El número que lo fuerza: con el pie sin relleno y la sala detrás (gris 145,5,
+ * luminancia 0,303 en la pose), los DOS bloques del formulario son los peores de
+ * la sección en las dos variantes de tinta — «El envío está deshabilitado…»
+ * (2.354 px de glifo) da **1,01–1,04:1** y el marcador del campo
+ * («nombre@dominio») **1,09–1,52:1**, con el 100 % de su caja bajo AA. Los dos
+ * son `--color-tinta-tenue` sobre una escena con varianza: no hay tinta que los
+ * salve, porque lo que falla no es el contraste medio sino el peor píxel.
+ *
+ * El fondo es `var(--color-fondo)` —el token de la sección, no un gris nuevo— y
+ * el relleno lo separa del borde del texto. Sólo lo lleva el `<form>`: el resto
+ * del pie sigue viendo la sala, que es lo que el humano pidió.
  * ========================================================================= */
+
+[data-v3] [data-pieza="novedades-forma"] {
+  padding: var(--spacing-4);
+  background-color: var(--color-fondo);
+}
 
 [data-v3] [data-pieza="novedades"] {
   display: flex;

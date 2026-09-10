@@ -2,7 +2,7 @@
 
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { seccionDe } from '../_contrato/forma'
-import { ContenidoDeSeccion, EncabezadoDeSeccion } from '../_contrato/Seccion'
+import { CabeceraDeSeccion, ContenidoDeSeccion } from '../_contrato/Seccion'
 import { TITULAR } from './contenido'
 
 /**
@@ -93,7 +93,10 @@ export const ID_DEL_TITULAR = idDelTitularDeSeccion(SECCION.id)
 export function CabeceraDeServicios(): React.JSX.Element {
   return (
     <ContenidoDeSeccion claseDeContenido="flex w-full flex-col gap-[var(--spacing-4)]">
-      <EncabezadoDeSeccion seccion={SECCION} nombre={SECCION.nombre} />
+      {/* ⚠️ B12: era `EncabezadoDeSeccion` con el `05` y «Servicios». Los dos se
+          fueron de las ocho; queda la columna lateral con la marca, que es lo
+          que mantiene la composición en su lugar (ver `Rotulo.tsx`). */}
+      <CabeceraDeSeccion />
       <Titular nivel="titulo-l" como="h2" id={ID_DEL_TITULAR}>
         {TITULAR}
       </Titular>

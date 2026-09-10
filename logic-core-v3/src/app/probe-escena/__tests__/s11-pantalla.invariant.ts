@@ -23,7 +23,8 @@ import { CHOREO_VARIANTS } from '../_components/choreographyVariants'
 import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
 import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import { CELOSIA_BAR } from '@/app/v3/_lib/escena/probeCelosia'
-import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
+import { MOIRE_FAR_BOTTOM, MOIRE_FAR_RADIUS, MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
+import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import {
   TAN_HALF_V,
   cameraAt,
@@ -184,9 +185,31 @@ section('El batido proyectado, en píxeles de pantalla')
  * píxeles con el mundo-por-píxel de esa profundidad, sobre 1920×1080.
  */
 {
+  /**
+   * ⚠️ **B12 · «números» SALE DE LA LISTA Y LA AFIRMACIÓN SE PARTE EN DOS.**
+   *
+   * Esta pose es `at = 0,5`, o sea la parada donde termina el atardecer, y B12
+   * bajó la noche de 0,08 a 0,04 por pedido del humano («debe quedar full negro
+   * atrás»). A esa elevación —1,35°— **el rayo del piso al sol ya no llega al
+   * borde inferior de la capa LEJANA de la celosía** y `phaseGradient` devuelve
+   * `NaN`: no hay batido que medir porque no hay dos capas cruzadas.
+   *
+   * **No es un defecto del instrumento ni una tolerancia que se afloja: es
+   * geometría, y tiene su número.** La capa lejana vive en radio
+   * `MOIRE_FAR_RADIUS` (44) con su borde inferior en `MOIRE_FAR_BOTTOM` (−2,5),
+   * y el piso está en `FLOOR_Y` (−4,304): un rayo que sale del piso llega a ese
+   * borde sólo si `tan(elevación) ≥ 1,804 / 44`, o sea **elevación ≥ 2,348°**,
+   * que por la ley `level = sin(elev)/sin(36°)` es **nivel ≥ 0,0697**. El 0,08
+   * de B8 estaba a un escalón del borde; 0,04 está debajo.
+   *
+   * Lo que se hace es partir la afirmación, no aflojarla: **las poses con luz
+   * siguen midiéndose igual y con el mismo rango**, y la noche se afirma con lo
+   * que SÍ es cierto ahí —que no hay batido— con su control positivo. Sobre una
+   * sala de 11 de gris (`scripts-b8/modelo-de-luz.ts`, nivel 0,04) no hay piso
+   * iluminado en el que un batido pudiera verse.
+   */
   const POSES: readonly [string, number][] = [
     ['hero', 0],
-    ['números', 0.5],
     ['trabajos', 0.625],
     ['cierre', 0.95],
   ]
@@ -231,9 +254,41 @@ section('El batido proyectado, en píxeles de pantalla')
     bestBands > 1.5 && worstBands < 6,
     rows.join(' · ')
   )
+  /**
+   * ⚠️ **B12 · LA MITAD QUE FALTABA: en la noche NO hay batido, y se afirma.**
+   * Es la contracara exacta de la de arriba. Con el sol a 1,35° la capa lejana
+   * no se cruza desde el piso, así que el gradiente de fase no existe y el
+   * batido tampoco. Se afirma como `NaN` —no como «un número grande»— porque es
+   * lo que la geometría produce, y el control positivo prueba que el mismo
+   * lector SÍ devuelve un número cuando hay dos capas.
+   */
+  {
+    const at = (NOCHE.desde + NOCHE.hasta) / 2
+    const cam = cameraAt(track, at, ASPECT, emptyPose())
+    const sun = sunDirectionAt(at)
+    const azimuth = sunAzimuthAt(at)
+    const tangent: Vec3 = [Math.cos(azimuth), 0, -Math.sin(azimuth)]
+    const origen: Vec3 = [cam.position[0], -(0.007 * 1024) / 2 - 0.72, cam.position[2]]
+    const g = LAYERS.map((layer) => phaseGradient(origen, sun, layer, tangent))
+    sampleLightArc(at, arc)
+    check(
+      'y en la noche NO hay batido, porque la capa lejana no se cruza desde el piso: geometría, no tolerancia',
+      Number.isFinite(g[0]) && !Number.isFinite(g[1]),
+      `a ${arc.elevationDeg.toFixed(2)}° (nivel ${arc.level}) la capa cercana cruza y la lejana no — el borde está en elevación 2,348° por MOIRE_FAR_BOTTOM ${MOIRE_FAR_BOTTOM} y MOIRE_FAR_RADIUS ${MOIRE_FAR_RADIUS}`
+    )
+    sampleLightArc(0, arc)
+    const gDia = LAYERS.map((layer) => phaseGradient(origen, sunDirectionAt(0), layer, tangent))
+    check(
+      '  control positivo — el MISMO lector, con el sol de mediodía, devuelve las dos',
+      gDia.every((v) => Number.isFinite(v)),
+      `a ${arc.elevationDeg.toFixed(1)}° las dos capas dan gradiente`
+    )
+  }
   check(
     'y la celda proyectada mide decenas de píxeles: la trama del piso es GRANDE',
-    rows.length === 4,
+    // ⚠️ B12: contaba 4 poses; son 3 desde que «números» se fue a la afirmación
+    // de la noche (ver arriba). La cuenta se deriva de la lista, no de un literal.
+    rows.length === POSES.length,
     'contra las 24,9 celdas a lo ancho del cuadro que la capa fina dibuja sobre la pared'
   )
 }

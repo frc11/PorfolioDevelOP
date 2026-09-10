@@ -50,14 +50,15 @@ for (const marca of MARCAS) {
 }
 controlPositivo('el detector de coreografía ve la rama animada', CON, (h) => MARCAS.every((m) => !h.includes(m)))
 
-const TEXTOS = [
-  ETIQUETA_DE_SECCION, TITULAR_DE_CIERRE, CTA_DE_CIERRE.rotulo, NOVEDADES.rotulo, NOVEDADES.ayuda,
+// ⚠️ B12 · `ETIQUETA_DE_SECCION` sale de acá y se afirma al revés abajo (regla 15).
+const TEXTOS = [TITULAR_DE_CIERRE, CTA_DE_CIERRE.rotulo, NOVEDADES.rotulo, NOVEDADES.ayuda,
   LINEA_DE_CIERRE.marca, LINEA_DE_CIERRE.nota, ...COLUMNAS.map((c) => c.titulo),
   ...DESTINOS_DE_LA_RUTA.map((d) => d.rotulo), ...PEDIDOS_DE_CONTACTO.map((p) => p.descripcion),
 ]
 const visibleSin = textoVisible(SIN)
 afirmarIgual(TEXTOS.filter((t) => !visibleSin.includes(t)), [], `las ${TEXTOS.length} cadenas de contenido se leen enteras sin una sola animación`)
 controlPositivo('el buscador de cadenas ve una que falta', 'una frase que no está', (t: string) => visibleSin.includes(t))
+afirmar(!visibleSin.includes(ETIQUETA_DE_SECCION) && !textoVisible(CON).includes(ETIQUETA_DE_SECCION), `y el RÓTULO DE SECCIÓN («${ETIQUETA_DE_SECCION}») ya NO se lee en ninguna de las dos ramas: se fue de las ocho en B12 y el título toma su lugar`)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · El texto es el mismo en las dos ramas')
@@ -89,10 +90,10 @@ console.log(`  la frase de control produce ${delProhibido.length} hallazgos: ${d
 titulo('4 · Cero valores fuera de los tokens, en los archivos de producto')
 
 console.log(`  ${ARCHIVOS.length} archivos de producto, ${contarLineas(FUENTE)} líneas sin comentarios: ${ARCHIVOS.join(' · ')}`)
-/** ⚠️ ERAN TRES, DESPUÉS CINCO Y AHORA SEIS: la afirmación sube al valor NUEVO en
- *  vez de aflojarse a un `>= 3`. B2 agregó `asentamiento.ts` y `s8-entrada.ts`;
- *  B4-A agrega `LineaDeCierre.tsx`, que salió de `Cierre.tsx` cuando el montaje de
- *  la marca lo pasó de 300 líneas. Ninguno es `*.invariant.*`. */
+/** ⚠️ ERAN TRES, DESPUÉS CINCO Y AHORA SEIS: sube al valor NUEVO en vez de
+ *  aflojarse a un `>= 3`. B2 agregó `asentamiento.ts` y `s8-entrada.ts`; B4-A
+ *  `LineaDeCierre.tsx`. ⚠️ B12 **no agrega un séptimo**: la banda del pie es un
+ *  `<div>` y no un componente — sacarla costaba 81 B (recibos de B12). */
 afirmarIgual(ARCHIVOS.length, 6, 'la sección son seis archivos de producto')
 /**
  * ⚠️ LA EXCLUSIÓN DEL ARNÉS SE MUDÓ, Y LO QUE SE AFIRMA CAMBIÓ CON ELLA. Este

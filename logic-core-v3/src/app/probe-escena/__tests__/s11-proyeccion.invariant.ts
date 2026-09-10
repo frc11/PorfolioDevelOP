@@ -19,11 +19,13 @@ import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import {
   MOIRE_COARSE_CELLS,
   MOIRE_DRIFT_PERIOD_S,
+  MOIRE_FAR_BOTTOM,
   MOIRE_FAR_RADIUS,
   MOIRE_MISMATCH,
   MOIRE_NEAR_RADIUS,
   fineCells,
 } from '@/app/v3/_lib/escena/probeMoire'
+import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import { FLOOR_Y, check, report, section, type Vec3 } from './harness'
 import { sunDirectionAt } from './shading'
 
@@ -76,14 +78,58 @@ section('El alcance: hasta dónde de la losa llega la celosía')
     `las bandas terminan en y = ${LAYERS[0].top} y ${LAYERS[1].top}`
   )
 
-  let centerAlwaysBoth = true
+  /**
+   * ⚠️ **B12 · LA AFIRMACIÓN SE PARTE EN DOS, Y LA MITAD NUEVA TIENE SU NÚMERO.**
+   *
+   * Decía «cruza las DOS capas en TODO el arco» y era cierta con la noche de B8
+   * (nivel 0,08, sol a 2,70°). B12 la baja a **0,04 (1,35°)** por pedido del
+   * humano —«debe quedar full negro atrás»— y ahí el rayo del piso al sol **no
+   * llega al borde inferior de la capa LEJANA**.
+   *
+   * No es una tolerancia que se afloja: es geometría con su cuenta. La capa
+   * lejana vive en radio `MOIRE_FAR_RADIUS` (44) con su borde inferior en
+   * `MOIRE_FAR_BOTTOM` (−2,5) y el piso está en `FLOOR_Y` (−4,304), así que el
+   * rayo la alcanza sólo si `tan(elev) ≥ (MOIRE_FAR_BOTTOM − FLOOR_Y) /
+   * MOIRE_FAR_RADIUS`, o sea **elevación ≥ 2,348°** → por la ley
+   * `level = sin(elev)/sin(36°)`, **nivel ≥ 0,0697**. El 0,08 de B8 estaba a un
+   * escalón del borde.
+   *
+   * **Lo que esta afirmación custodiaba antes:** que el moiré del piso existe en
+   * TODO el arco, o sea que en cualquier pose hay dos tramas interfiriendo. Eso
+   * dejó de ser cierto por debajo del umbral, y la pérdida está declarada con su
+   * número en `deudas-b12.ts` (`D-B12.3`): no se pierde en silencio.
+   *
+   * Se afirma entonces lo que hay: **fuera de la noche cruzan las dos, siempre**
+   * —con el mismo barrido de 201 muestras— y **en la noche cruza sólo la
+   * cercana**, con el umbral derivado de la geometría y no escrito a mano. Lo
+   * que eso significa en pantalla: en la noche la sala está en 11 de gris
+   * (`scripts-b8/modelo-de-luz.ts`, nivel 0,04), o sea que no hay piso
+   * iluminado donde un moiré pudiera verse.
+   */
+  const UMBRAL_DE_LA_CAPA_LEJANA_RAD = Math.atan((MOIRE_FAR_BOTTOM - FLOOR_Y) / MOIRE_FAR_RADIUS)
+  let fueraDeLaNocheSiempreDos = true
+  let enLaNocheSoloLaCercana = true
+  let muestrasDeNoche = 0
   for (let i = 0; i <= 200; i += 1) {
-    if (crossedFrom([0, FLOOR_Y, 0], sunDirectionAt(i / 200)) !== 2) centerAlwaysBoth = false
+    const p = i / 200
+    sampleLightArc(p, arc)
+    const cruces = crossedFrom([0, FLOOR_Y, 0], sunDirectionAt(p))
+    if (arc.elevationDeg * RAD < UMBRAL_DE_LA_CAPA_LEJANA_RAD) {
+      muestrasDeNoche += 1
+      if (cruces !== 1) enLaNocheSoloLaCercana = false
+    } else if (cruces !== 2) {
+      fueraDeLaNocheSiempreDos = false
+    }
   }
   check(
-    'desde el centro de la losa el rayo cruza las DOS capas en todo el arco',
-    centerAlwaysBoth,
+    'desde el centro de la losa el rayo cruza las DOS capas en todo el arco por encima del umbral de la capa lejana',
+    fueraDeLaNocheSiempreDos,
     'con una sola capa habría bandas pero no moiré'
+  )
+  check(
+    '  y por debajo de ese umbral cruza SÓLO la cercana: en la noche no hay moiré de piso, y la sala está en 11 de gris (B12)',
+    enLaNocheSoloLaCercana && muestrasDeNoche > 0,
+    `el umbral es ${((UMBRAL_DE_LA_CAPA_LEJANA_RAD * 180) / Math.PI).toFixed(3)}° —(${MOIRE_FAR_BOTTOM} − ${FLOOR_Y.toFixed(3)}) / ${MOIRE_FAR_RADIUS}— y ${muestrasDeNoche} de 201 muestras del arco caen debajo`
   )
 
   /**
@@ -121,7 +167,16 @@ section('El alcance: hasta dónde de la losa llega la celosía')
     return both / total
   }
 
-  const PROGRESOS = [0, 0.25, 0.5, 0.625, 0.75, 0.875, 1]
+  /**
+   * ⚠️ **B12 · LOS DOS PROGRESOS DE LA NOCHE SE DERIVAN, NO SE ESCRIBEN.**
+   * Eran `0.5` y `0.625` porque ésa era la ventana de la noche de B8. B12 la
+   * corre a `[NOCHE.desde, NOCHE.hasta]` —el pin entero— y le devuelve luz a
+   * 0,625 con la VUELTA, que es la «previa al blanco» que pidió el humano. Los
+   * dos progresos de la noche salen ahora de esa ventana, así que la afirmación
+   * de los pares («a igual elevación, igual alcance») mide lo que dice medir el
+   * día que la ventana se vuelva a mover.
+   */
+  const PROGRESOS = [0, 0.25, NOCHE.desde, NOCHE.hasta, 0.75, 0.875, 1]
   const reach = PROGRESOS.map(reachAt)
   const elevacion = PROGRESOS.map((p) => {
     sampleLightArc(p, arc)
@@ -143,7 +198,7 @@ section('El alcance: hasta dónde de la losa llega la celosía')
    */
   check(
     'el alcance es función de la elevación y de nada más: a igual elevación, igual alcance (la meseta y la noche, de a pares)',
-    Math.abs(reach[0] - reach[1]) < 0.005 && Math.abs(reach[2] - reach[3]) < 0.005 && elevacion[0] === elevacion[1] && elevacion[2] === elevacion[3],
+    Math.abs(reach[0] - reach[1]) < 0.005 && Math.abs(reach[2] - reach[3]) < 0.005 && elevacion[0] === elevacion[1] && Math.abs(elevacion[2] - elevacion[3]) < 1e-9,
     PROGRESOS.map((p, i) => `p=${p} ${elevacion[i].toFixed(1)}° → ${(reach[i] * 100).toFixed(1)}%`).join(' · ')
   )
   check(
@@ -151,10 +206,19 @@ section('El alcance: hasta dónde de la losa llega la celosía')
     reach[0] > 0.8 && reach.slice(4).every((value) => value > 0.999),
     `${(reach[0] * 100).toFixed(1)}% a 36° → ${reach.slice(4).map((value) => `${(value * 100).toFixed(1)}%`).join(' → ')} a ${elevacion.slice(4).map((e) => `${e.toFixed(1)}°`).join(' → ')}`
   )
+  /**
+   * ⚠️ **B12 · LA AFIRMACIÓN SE DA VUELTA, CON LA MISMA VARA.** B8 medía «cruza
+   * sólo desde media losa» con la noche a 0,08 (2,70°), un escalón por encima
+   * del umbral de la capa lejana (2,348°). Con la noche en 0,04 (1,35°) el
+   * alcance no es «medio»: es **cero**, en toda la losa, y por geometría. Se
+   * afirma la igualdad exacta —no un «menor que», que dejaría pasar cualquier
+   * cosa— y se publica qué significa: no hay moiré de piso en la noche, y no se
+   * ve porque no hay piso iluminado.
+   */
   check(
-    '  y en la noche el sol rasante cruza las dos capas sólo desde media losa: se publica, y no se ve — la key está al 8 %',
-    reach[2] < reach[0] && reach[2] > 0.4,
-    `${(reach[2] * 100).toFixed(1)}% a ${elevacion[2].toFixed(1)}° — el rayo desde el lado opuesto al sol sale por encima de la capa cercana antes de cruzarla`
+    '  y en la noche el sol rasante NO cruza la capa lejana desde NINGÚN punto de la losa: cero moiré de piso (B12)',
+    reach[2] < 0.005 && reach[3] < 0.005,
+    `${(reach[2] * 100).toFixed(2)}% de la losa a ${elevacion[2].toFixed(2)}° —contra el 95 % que B8 medía a 2,70°—: lo que queda son los puntos casi debajo del borde de la capa, y el rayo del resto no llega a los 2,348° que pide`
   )
   check(
     'y termina cubriendo la losa entera antes del cierre',
@@ -172,7 +236,9 @@ section('Lo que la celosía dibuja sobre el piso')
   const beats: number[] = []
   const fineRadial: number[] = []
 
-  for (const p of [0, 0.5, 0.75, 1]) {
+  // ⚠️ B12: el segundo progreso era `0.5` —la noche de B8— y ahora sale de la
+  // ventana de la noche, que B12 corrió. La lista no cambia de largo.
+  for (const p of [0, (NOCHE.desde + NOCHE.hasta) / 2, 0.75, 1]) {
     const sun = sunDirectionAt(p)
     const azimuth = sunAzimuthAt(p)
     const tangent: Vec3 = [Math.cos(azimuth), 0, -Math.sin(azimuth)]
@@ -189,10 +255,24 @@ section('Lo que la celosía dibuja sobre el piso')
     )
   }
 
+  /**
+   * ⚠️ **B12 · EL BATIDO DE LA NOCHE ES `NaN`, Y ESO ES LO CORRECTO.** Con el
+   * sol a 1,35° la capa lejana no se cruza desde el piso (ver §1), así que no
+   * hay dos gradientes que interferir y el batido no existe. Se afirma
+   * explícitamente cuál es la muestra que no tiene batido —**exactamente una, la
+   * de la noche**— en vez de saltarla en silencio, y las que sí lo tienen se
+   * siguen midiendo con la MISMA tolerancia de antes.
+   */
+  const conBatido = beats.filter((value) => Number.isFinite(value))
   check(
     'la celda proyectada mide su propio paso a lo ancho, y ése no cambia con el arco',
-    beats.every((value) => Math.abs(value - beats[0]) < 0.05),
+    conBatido.length === beats.length - 1 && conBatido.every((value) => Math.abs(value - conBatido[0]) < 0.05),
     rows.join(' · ')
+  )
+  check(
+    '  y la única muestra sin batido es la de la noche: no hay dos capas que interferir (B12)',
+    !Number.isFinite(beats[1]) && Number.isFinite(beats[0]) && Number.isFinite(beats[2]) && Number.isFinite(beats[3]),
+    `las cuatro: ${beats.map((v) => (Number.isFinite(v) ? v.toFixed(1) : 'sin batido')).join(' · ')}`
   )
   check(
     'el batido tangencial cae donde entran unas pocas bandas en la losa',

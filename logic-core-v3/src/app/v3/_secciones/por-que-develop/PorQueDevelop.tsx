@@ -5,14 +5,13 @@ import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Ti
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDePieza, CanalDeTitular } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
-import { ContenidoDeSeccion, EncabezadoDeSeccion, Seccion } from '../_contrato/Seccion'
+import { CabeceraDeSeccion, ContenidoDeSeccion, Seccion } from '../_contrato/Seccion'
 import { BloqueDeTestimonio, TarjetaDeDiferencial } from './Diferenciales'
 import {
   ALTO_MINIMO_DEL_BLOQUE,
   DIFERENCIALES,
   ENTRADA,
   INDICE_DEL_TESTIMONIO,
-  NOMBRE_DE_SECCION,
   PIEZAS_DE_P5,
   TESTIMONIO,
   TITULAR,
@@ -160,7 +159,8 @@ export function PorQueDevelop({ seccion }: PropsDeSeccion): React.JSX.Element {
         className="flex min-h-svh flex-col"
         claseDeContenido="flex flex-1 flex-col justify-between gap-[var(--spacing-4)] pt-[var(--spacing-4)] pb-[var(--spacing-8)]"
       >
-        <EncabezadoDeSeccion seccion={seccion} nombre={NOMBRE_DE_SECCION} />
+        {/* ⚠️ B12: era el `07` con «Por qué develOP». Los dos se fueron de las ocho. */}
+        <CabeceraDeSeccion />
 
         {/* El `pt` es el despeje de la pastilla, no simetría: la pastilla nace a
             `24px` del tope y mide 48 de alto, así que lo que empiece antes de

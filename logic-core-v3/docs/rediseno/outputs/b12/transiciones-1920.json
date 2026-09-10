@@ -1,0 +1,957 @@
+{
+  "perfil": "1920",
+  "instrumento": "Page.captureScreenshot cada 1/8 de pantalla entre la 6,5 y la 11,5; el mismo paso con el que se midió la salida de la referencia",
+  "filas": [
+    {
+      "scrollY": 7020,
+      "pantalla": 6.5,
+      "cuadro": {
+        "gris": 218,
+        "luminancia": 0.7692
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": -12.5,
+        "borde": 0,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) -12.5%, transparent 0%)"
+      },
+      "panelTrabajos": {
+        "top": 1620,
+        "bottom": 4860
+      }
+    },
+    {
+      "scrollY": 7155,
+      "pantalla": 6.625,
+      "cuadro": {
+        "gris": 218.8,
+        "luminancia": 0.7732
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": -12.5,
+        "borde": 0,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) -12.5%, transparent 0%)"
+      },
+      "panelTrabajos": {
+        "top": 1485,
+        "bottom": 4725
+      }
+    },
+    {
+      "scrollY": 7290,
+      "pantalla": 6.75,
+      "cuadro": {
+        "gris": 219.5,
+        "luminancia": 0.7773
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": -12.5,
+        "borde": 0,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) -12.5%, transparent 0%)"
+      },
+      "panelTrabajos": {
+        "top": 1350,
+        "bottom": 4590
+      }
+    },
+    {
+      "scrollY": 7425,
+      "pantalla": 6.875,
+      "cuadro": {
+        "gris": 220.4,
+        "luminancia": 0.7828
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": -12.5,
+        "borde": 0,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) -12.5%, transparent 0%)"
+      },
+      "panelTrabajos": {
+        "top": 1215,
+        "bottom": 4455
+      }
+    },
+    {
+      "scrollY": 7560,
+      "pantalla": 7,
+      "cuadro": {
+        "gris": 221,
+        "luminancia": 0.7867
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": -12.5,
+        "borde": 0,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) -12.5%, transparent 0%)"
+      },
+      "panelTrabajos": {
+        "top": 1080,
+        "bottom": 4320
+      }
+    },
+    {
+      "scrollY": 7695,
+      "pantalla": 7.125,
+      "cuadro": {
+        "gris": 211.2,
+        "luminancia": 0.7105
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 1.56,
+        "borde": 14.06,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 1.56%, transparent 14.06%)"
+      },
+      "panelTrabajos": {
+        "top": 945,
+        "bottom": 4185
+      }
+    },
+    {
+      "scrollY": 7830,
+      "pantalla": 7.25,
+      "cuadro": {
+        "gris": 198.8,
+        "luminancia": 0.6219
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 15.63,
+        "borde": 28.13,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 15.63%, transparent 28.13%)"
+      },
+      "panelTrabajos": {
+        "top": 810,
+        "bottom": 4050
+      }
+    },
+    {
+      "scrollY": 7965,
+      "pantalla": 7.375,
+      "cuadro": {
+        "gris": 174,
+        "luminancia": 0.4842
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 29.69,
+        "borde": 42.19,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 29.69%, transparent 42.19%)"
+      },
+      "panelTrabajos": {
+        "top": 675,
+        "bottom": 3915
+      }
+    },
+    {
+      "scrollY": 8100,
+      "pantalla": 7.5,
+      "cuadro": {
+        "gris": 155.7,
+        "luminancia": 0.3996
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 43.75,
+        "borde": 56.25,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 43.75%, transparent 56.25%)"
+      },
+      "panelTrabajos": {
+        "top": 540,
+        "bottom": 3780
+      }
+    },
+    {
+      "scrollY": 8235,
+      "pantalla": 7.625,
+      "cuadro": {
+        "gris": 145.7,
+        "luminancia": 0.3775
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 57.81,
+        "borde": 70.31,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 57.81%, transparent 70.31%)"
+      },
+      "panelTrabajos": {
+        "top": 405,
+        "bottom": 3645
+      }
+    },
+    {
+      "scrollY": 8370,
+      "pantalla": 7.75,
+      "cuadro": {
+        "gris": 134,
+        "luminancia": 0.3858
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 71.88,
+        "borde": 84.38,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 71.88%, transparent 84.38%)"
+      },
+      "panelTrabajos": {
+        "top": 270,
+        "bottom": 3510
+      }
+    },
+    {
+      "scrollY": 8505,
+      "pantalla": 7.875,
+      "cuadro": {
+        "gris": 116.2,
+        "luminancia": 0.379
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 85.94,
+        "borde": 98.44,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 85.94%, transparent 98.44%)"
+      },
+      "panelTrabajos": {
+        "top": 135,
+        "bottom": 3375
+      }
+    },
+    {
+      "scrollY": 8640,
+      "pantalla": 8,
+      "cuadro": {
+        "gris": 109.2,
+        "luminancia": 0.371
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 1,
+        "visible": true,
+        "opaco": 100,
+        "borde": 112.5,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 100%, transparent 112.5%)"
+      },
+      "panelTrabajos": {
+        "top": 0,
+        "bottom": 3240
+      }
+    },
+    {
+      "scrollY": 8775,
+      "pantalla": 8.125,
+      "cuadro": {
+        "gris": 35.9,
+        "luminancia": 0.0216
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 943,
+        "diametroMediano": 3.74,
+        "picoMediano": 137,
+        "fondoGris": 33.9
+      },
+      "gota": {
+        "opacidad": 0.437,
+        "visible": true,
+        "opaco": 100,
+        "borde": 112.5,
+        "mask": "radial-gradient(circle, rgb(0, 0, 0) 100%, transparent 112.5%)"
+      },
+      "panelTrabajos": {
+        "top": -135,
+        "bottom": 3105
+      }
+    },
+    {
+      "scrollY": 8910,
+      "pantalla": 8.25,
+      "cuadro": {
+        "gris": 24.5,
+        "luminancia": 0.0166
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1035,
+        "diametroMediano": 4.07,
+        "picoMediano": 217,
+        "fondoGris": 20.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -270,
+        "bottom": 2970
+      }
+    },
+    {
+      "scrollY": 9045,
+      "pantalla": 8.375,
+      "cuadro": {
+        "gris": 25.5,
+        "luminancia": 0.0187
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1035,
+        "diametroMediano": 3.91,
+        "picoMediano": 217,
+        "fondoGris": 20.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -405,
+        "bottom": 2835
+      }
+    },
+    {
+      "scrollY": 9180,
+      "pantalla": 8.5,
+      "cuadro": {
+        "gris": 27,
+        "luminancia": 0.0226
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 847,
+        "diametroMediano": 4.22,
+        "picoMediano": 217,
+        "fondoGris": 20.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -540,
+        "bottom": 2700
+      }
+    },
+    {
+      "scrollY": 9315,
+      "pantalla": 8.625,
+      "cuadro": {
+        "gris": 28.9,
+        "luminancia": 0.028
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 684,
+        "diametroMediano": 4.22,
+        "picoMediano": 217,
+        "fondoGris": 19.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -675,
+        "bottom": 2565
+      }
+    },
+    {
+      "scrollY": 9450,
+      "pantalla": 8.75,
+      "cuadro": {
+        "gris": 29.7,
+        "luminancia": 0.0314
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 634,
+        "diametroMediano": 4.22,
+        "picoMediano": 217,
+        "fondoGris": 18.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -810,
+        "bottom": 2430
+      }
+    },
+    {
+      "scrollY": 9585,
+      "pantalla": 8.875,
+      "cuadro": {
+        "gris": 29.3,
+        "luminancia": 0.0315
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 687,
+        "diametroMediano": 4.22,
+        "picoMediano": 217,
+        "fondoGris": 18.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -945,
+        "bottom": 2295
+      }
+    },
+    {
+      "scrollY": 9720,
+      "pantalla": 9,
+      "cuadro": {
+        "gris": 28.8,
+        "luminancia": 0.0313
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 679,
+        "diametroMediano": 4.22,
+        "picoMediano": 217,
+        "fondoGris": 17.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1080,
+        "bottom": 2160
+      }
+    },
+    {
+      "scrollY": 9855,
+      "pantalla": 9.125,
+      "cuadro": {
+        "gris": 22.3,
+        "luminancia": 0.0148
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 963,
+        "diametroMediano": 3.91,
+        "picoMediano": 203.8,
+        "fondoGris": 17.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1215,
+        "bottom": 2025
+      }
+    },
+    {
+      "scrollY": 9990,
+      "pantalla": 9.25,
+      "cuadro": {
+        "gris": 20.3,
+        "luminancia": 0.0142
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1148,
+        "diametroMediano": 3.57,
+        "picoMediano": 215.9,
+        "fondoGris": 16.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1350,
+        "bottom": 1890
+      }
+    },
+    {
+      "scrollY": 10125,
+      "pantalla": 9.375,
+      "cuadro": {
+        "gris": 21.3,
+        "luminancia": 0.0154
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1239,
+        "diametroMediano": 3.39,
+        "picoMediano": 207.9,
+        "fondoGris": 15.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1485,
+        "bottom": 1755
+      }
+    },
+    {
+      "scrollY": 10260,
+      "pantalla": 9.5,
+      "cuadro": {
+        "gris": 23.3,
+        "luminancia": 0.0177
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1100,
+        "diametroMediano": 3.39,
+        "picoMediano": 205,
+        "fondoGris": 15.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1620,
+        "bottom": 1620
+      }
+    },
+    {
+      "scrollY": 10395,
+      "pantalla": 9.625,
+      "cuadro": {
+        "gris": 25.8,
+        "luminancia": 0.0206
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 870,
+        "diametroMediano": 3.57,
+        "picoMediano": 208,
+        "fondoGris": 16.1
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1755,
+        "bottom": 1485
+      }
+    },
+    {
+      "scrollY": 10530,
+      "pantalla": 9.75,
+      "cuadro": {
+        "gris": 27.1,
+        "luminancia": 0.0225
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 839,
+        "diametroMediano": 3.57,
+        "picoMediano": 206,
+        "fondoGris": 16.2
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -1890,
+        "bottom": 1350
+      }
+    },
+    {
+      "scrollY": 10665,
+      "pantalla": 9.875,
+      "cuadro": {
+        "gris": 27.1,
+        "luminancia": 0.0226
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 992,
+        "diametroMediano": 2.99,
+        "picoMediano": 80.7,
+        "fondoGris": 16.2
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2025,
+        "bottom": 1215
+      }
+    },
+    {
+      "scrollY": 10800,
+      "pantalla": 10,
+      "cuadro": {
+        "gris": 41.4,
+        "luminancia": 0.0597
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 999,
+        "diametroMediano": 3.19,
+        "picoMediano": 82.1,
+        "fondoGris": 19.2
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2160,
+        "bottom": 1080
+      }
+    },
+    {
+      "scrollY": 10935,
+      "pantalla": 10.125,
+      "cuadro": {
+        "gris": 76.7,
+        "luminancia": 0.1817
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 826,
+        "diametroMediano": 2.76,
+        "picoMediano": 94.9,
+        "fondoGris": 37.9
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2295,
+        "bottom": 945
+      }
+    },
+    {
+      "scrollY": 11070,
+      "pantalla": 10.25,
+      "cuadro": {
+        "gris": 106.4,
+        "luminancia": 0.2973
+      },
+      "sala": null,
+      "particulas": {
+        "cantidad": 1018,
+        "diametroMediano": 1.95,
+        "picoMediano": 114.2,
+        "fondoGris": 62.1
+      },
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2430,
+        "bottom": 810
+      }
+    },
+    {
+      "scrollY": 11205,
+      "pantalla": 10.375,
+      "cuadro": {
+        "gris": 133.8,
+        "luminancia": 0.4108
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2565,
+        "bottom": 675
+      }
+    },
+    {
+      "scrollY": 11340,
+      "pantalla": 10.5,
+      "cuadro": {
+        "gris": 159.1,
+        "luminancia": 0.5206
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2700,
+        "bottom": 540
+      }
+    },
+    {
+      "scrollY": 11475,
+      "pantalla": 10.625,
+      "cuadro": {
+        "gris": 186.2,
+        "luminancia": 0.6334
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2835,
+        "bottom": 405
+      }
+    },
+    {
+      "scrollY": 11610,
+      "pantalla": 10.75,
+      "cuadro": {
+        "gris": 212.1,
+        "luminancia": 0.7479
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -2970,
+        "bottom": 270
+      }
+    },
+    {
+      "scrollY": 11745,
+      "pantalla": 10.875,
+      "cuadro": {
+        "gris": 234.9,
+        "luminancia": 0.858
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3105,
+        "bottom": 135
+      }
+    },
+    {
+      "scrollY": 11880,
+      "pantalla": 11,
+      "cuadro": {
+        "gris": 243.5,
+        "luminancia": 0.9124
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3240,
+        "bottom": 0
+      }
+    },
+    {
+      "scrollY": 12015,
+      "pantalla": 11.125,
+      "cuadro": {
+        "gris": 242.9,
+        "luminancia": 0.9088
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3375,
+        "bottom": -135
+      }
+    },
+    {
+      "scrollY": 12150,
+      "pantalla": 11.25,
+      "cuadro": {
+        "gris": 242.4,
+        "luminancia": 0.9062
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3510,
+        "bottom": -270
+      }
+    },
+    {
+      "scrollY": 12285,
+      "pantalla": 11.375,
+      "cuadro": {
+        "gris": 242.3,
+        "luminancia": 0.9062
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3645,
+        "bottom": -405
+      }
+    },
+    {
+      "scrollY": 12420,
+      "pantalla": 11.5,
+      "cuadro": {
+        "gris": 242.3,
+        "luminancia": 0.9062
+      },
+      "sala": null,
+      "particulas": null,
+      "gota": {
+        "opacidad": 0,
+        "visible": false,
+        "opaco": null,
+        "borde": null,
+        "mask": "none"
+      },
+      "panelTrabajos": {
+        "top": -3780,
+        "bottom": -540
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import type { LightStop } from './choreographyTypes'
-import { KEY_ELEVATION_DEG } from './probeLighting'
+import { KEY_ELEVATION_DEG, RIM_NIGHT_LEVEL } from './probeLighting'
 
 /**
  * EL ARCO DEL SOL — el dato, en su propio archivo desde B8.
@@ -65,9 +65,10 @@ import { KEY_ELEVATION_DEG } from './probeLighting'
  * | at | qué pasa | nivel | elevación |
  * |---|---|---|---|
  * | 0 → 0,469 | hero · Quiénes somos · Números: la tarde de S9, intacta | 1 | 36° |
- * | 0,469 → 0,5 | Trabajos entra por el pie del cuadro: atardece en UNA pantalla | 1 → 0,08 | 36° → 2,7° |
- * | 0,5 → 0,625 | Trabajos llena el cuadro y se pinnea: noche | **0,08** | 2,7° |
- * | 0,625 → 0,7375 | oculto tras Servicios y Tu panel: amanece | 0,08 → 0,5 | → 17,1° |
+ * | 0,469 → 0,5 | Trabajos entra por el pie del cuadro: atardece en UNA pantalla | 1 → 0,04 | 36° → 1,35° |
+ * | 0,5 → 0,60 | Trabajos llena el cuadro y se pinnea: **la noche** | **0,04** | 1,35° |
+ * | 0,60 → 0,625 | **la vuelta**: el sol asoma antes del blanco de Servicios (B12) | 0,04 → 0,22 | → 7,4° |
+ * | 0,625 → 0,7375 | oculto tras Servicios y Tu panel: amanece | 0,22 → 0,5 | → 17,1° |
  * | 0,7375 → 0,8525 | el diferencial entra con el sol subiendo | 0,5 → 0,643 | → 22,2° |
  * | 0,8525 → 1 | el diferencial en su ancla y el Cierre: media luz de mañana | 0,643 | 22,2° |
  *
@@ -79,7 +80,10 @@ import { KEY_ELEVATION_DEG } from './probeLighting'
  * ancla declarada del diferencial. `s20-arco.invariant.ts` afirma que cada uno
  * coincide con lo que las otras tablas derivan, con su control positivo.
  *
- * **El nivel de la noche, 0,08, sale del modelo y de la referencia.**
+ * **El nivel de la noche sale del modelo y de la referencia.** ⚠️ B12 lo bajó de
+ * 0,08 a **0,04** por pedido del humano —*«debe quedar full negro atrás»*— con
+ * la tabla entera en la constante. Lo que sigue es la derivación de B8, que
+ * vale igual porque el instrumento es el mismo:
  * `scripts-b8/modelo-de-luz.ts` —la misma cadena de shading que
  * `probe-escena/__tests__/shading.ts`, con el nivel por parámetro y el control
  * de S11 reproducido (248,3 / 218,7)— da para la pose de Trabajos un piso de
@@ -132,17 +136,111 @@ export function elevacionDe(level: number): number {
   return Math.asin(level * Math.sin(KEY_ELEVATION_DEG * RAD)) / RAD
 }
 
-/** El nivel de la sala en la noche de Trabajos. Ver el docblock de arriba. */
-export const NIVEL_DE_LA_NOCHE = 0.08
+/**
+ * El nivel de la sala en la noche de Trabajos.
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ B12 · BAJA DE 0,08 A 0,04, Y ES EL PEDIDO DEL HUMANO CON SU NÚMERO
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * *«Debe quedar full negro atrás»*. B8 eligió 0,08 y lo dejó explícitamente a
+ * juicio del humano grabando —*«es el gate real del bloque»*—; el humano lo
+ * grabó y dijo que no alcanza. **La oscuridad la da la luz, no un velo**: es la
+ * lección de B8 y no se toca.
+ *
+ * Con `scripts-b8/modelo-de-luz.ts` —la misma cadena de shading, con su control
+ * positivo de S11 (248,3 / 218,7) reproducido— en la pose de Trabajos y con el
+ * contraluz apagándose por debajo de 0,34 (tabla B):
+ *
+ * | nivel | elev | piso medio | pared del fondo | lum piso | lum pared | FAR que pide |
+ * |---:|---:|---:|---:|---:|---:|---:|
+ * | 0,08 (B8) | 2,70° | 32,8 | 23,1 | 0,0150 | 0,0086 | 190 |
+ * | **0,04** | **1,35°** | **11,2** | **10,8** | **0,0034** | **0,0033** | **357** |
+ * | 0,02 | 0,67° | 2,9 | 5,6 | 0,0009 | 0,0017 | 693 |
+ *
+ * La referencia tiene su sala de proyectos en **0,0010** de luminancia media
+ * (gris 0,6) y sus pantallas oscuras con texto entre 0,032 y 0,067
+ * (`outputs/b8/a-referencia.json`, pantallas 4 a 9). O sea: 0,08 estaba ARRIBA
+ * de la banda oscura de la referencia y 0,04 cae adentro, cerca de su piso.
+ *
+ * **Por qué 0,04 y no 0,02, que sería la cifra exacta de la referencia.** Por
+ * la sombra: la elevación sale del nivel por ley (`elevacionDe`), y a 0,67° la
+ * punta de la sombra del logo cae a profundidad **693** de la cámara de sombra
+ * contra los 357 de 0,04. `SHADOW_FAR` tendría que ir de 200 a 720 y el
+ * `SHADOW_BIAS` normalizado equivaldría a 0,21 unidades de MUNDO sobre un logo
+ * que flota 0,72 sobre el papel: la sombra se despegaría **a pleno sol**, que es
+ * donde sí se ve. Con 0,04 el FAR va a 380 y el bias se re-escala para dejar el
+ * equivalente de mundo donde B8 lo dejó (ver `probeAtmosphere.ts`).
+ *
+ * Queda dicho, porque es la decisión del humano y tiene que ser revocable: **si
+ * lo quiere todavía más negro, la cifra es 0,02 y el precio es esa sombra.**
+ */
+export const NIVEL_DE_LA_NOCHE = 0.04
 
 /** El nivel con el que el diferencial se lee en su ancla y el Cierre termina. Es el de S9 en 0,8525. */
 export const NIVEL_DE_LA_MANANA = 0.643
 
-/** Dónde atardece: de la pantalla 7 a la 8, o sea mientras Trabajos entra por el pie del cuadro. */
+/**
+ * ⚠️ **B12 · EL NIVEL AL QUE LLEGA LA VUELTA — NO SE ELIGE, SE IMPORTA.**
+ * Es `RIM_NIGHT_LEVEL`, la frontera de la noche que S6/B8 ya tenían declarada:
+ * el contraluz se apaga por debajo y las motas empiezan a brillar por debajo. La
+ * vuelta lleva la sala exactamente hasta ahí, o sea hasta el punto en que el
+ * propio sistema deja de llamar noche a la noche.
+ */
+export const NIVEL_DE_LA_VUELTA: number = RIM_NIGHT_LEVEL
+
+/**
+ * Dónde atardece: de la pantalla 7 a la 8, o sea mientras Trabajos entra por el
+ * pie del cuadro. **No se movió en B12**: la noche llega exactamente cuando la
+ * sección llena el cuadro y cuando la gota termina de cubrirlo
+ * (`trabajos/geometria.ts`, `VENTANA_DE_LA_GOTA.expansionHasta` = 1/3 del
+ * recorrido del bloque, que es esta misma pantalla). Lo que cambió es a QUÉ
+ * nivel llega.
+ */
 export const ATARDECER = { desde: 0.46875, hasta: 0.5 } as const
 
-/** La noche: el pin de Trabajos entero. */
-export const NOCHE = { desde: 0.5, hasta: 0.625 } as const
+/**
+ * ⚠️ **B12 · UNA PANTALLA DE PROGRESO, DERIVADA Y NO ELEGIDA.** Los nudos del
+ * anclaje (`anclaje.ts`) ponen la pantalla 8 en 0,5 y la 11 en 0,625: tres
+ * pantallas sobre 0,125 de progreso, o sea **1/24 = 0,0416666…** por pantalla en
+ * el tramo de Trabajos. Es la unidad con la que se corta la noche.
+ */
+const PANTALLA_EN_EL_TRAMO_DE_TRABAJOS = (0.625 - 0.5) / 3
+
+/**
+ * ⚠️ **B12 · LA NOCHE TERMINA UNA PANTALLA ANTES, Y LA PANTALLA QUE CEDE ES
+ * EXACTAMENTE LA QUE EL PIN YA NO USA.**
+ *
+ * Un `sticky` de una pantalla adentro de una sección de tres se clava mientras
+ * `top ≤ 0` y `bottom ≥ ventana`, o sea entre las pantallas **8 y 10**; en la
+ * 10 → 11 el panel de Trabajos SE VA hacia arriba y Servicios —papel opaco—
+ * sube desde el pie del cuadro. Esa pantalla es la única del tramo en la que el
+ * visitante ve las dos cosas a la vez, y es donde el humano pidió *«una previa
+ * al blanco»*: **del negro no se puede saltar al papel de golpe.**
+ *
+ * Así que la noche se sostiene el pin ENTERO (8 → 10) y la vuelta se lleva la
+ * pantalla que el pin ya soltó (10 → 11). El negro de los tres proyectos no
+ * pierde un solo píxel de scroll.
+ */
+export const NOCHE = { desde: ATARDECER.hasta, hasta: 0.625 - PANTALLA_EN_EL_TRAMO_DE_TRABAJOS } as const
+
+/**
+ * ⚠️ **B12 · LA VUELTA — la previa al blanco, en la pantalla en que Trabajos se
+ * va y Servicios llega.**
+ *
+ * A dónde llega **no se elige: es la frontera de la noche que el sistema ya
+ * tenía declarada.** `RIM_NIGHT_LEVEL` (0,34) es el nivel por debajo del cual el
+ * contraluz se apaga (`probeLighting.ts`, B8) y por debajo del cual las motas
+ * empiezan a brillar (`particleGlow.ts`, B8): es, literalmente, dónde el
+ * proyecto declara que empieza y termina la noche. La vuelta lleva la sala
+ * hasta ese borde y ni un punto más — el amanecer sigue después, escondido, y
+ * llega a 0,5 en 0,7375 exactamente como lo dejó B8.
+ *
+ * Con el modelo de luz en la pose de Trabajos, la vuelta lleva el piso medio de
+ * **11,2 a 134,5 sRGB** (luminancia 0,0034 → 0,2402) en una pantalla de scroll:
+ * el papel de Servicios (247) deja de aparecer contra un negro absoluto.
+ */
+export const VUELTA = { desde: NOCHE.hasta, hasta: 0.625 } as const
 
 /** Dónde amanece: escondido detrás de Servicios y Tu panel, hasta el margen de reanudación de la escena. */
 export const AMANECER = { desde: 0.625, hasta: 0.7375 } as const
@@ -166,10 +264,15 @@ export const LIGHT_ARC: readonly LightStop[] = [
   // La meseta de luz llega hasta que Trabajos toca el pie del cuadro (pantalla
   // 7). El azimut sigue la recta de S9: −42 → 115 entre 0,125 y 0,5.
   parada(ATARDECER.desde, 1, 6500, 101.9167, 'linear'),
-  // Atardece en una pantalla de scroll: Trabajos trae la noche.
+  // Atardece en una pantalla de scroll: Trabajos trae la noche, y la gota
+  // termina de cubrir el cuadro exactamente acá.
   parada(ATARDECER.hasta, NIVEL_DE_LA_NOCHE, 6500, 115, 'linear'),
-  // La noche, sostenida durante el pin. Azimut y kelvin de S9 en 0,625.
-  parada(NOCHE.hasta, NIVEL_DE_LA_NOCHE, 6675, 123.5, 'linear'),
+  // La noche, sostenida durante el PIN entero (pantallas 8 → 10). Azimut y
+  // kelvin de S9 interpolados en el `at` nuevo: la recta de azimut no cambia.
+  parada(NOCHE.hasta, NIVEL_DE_LA_NOCHE, 6616.6667, 120.6667, 'linear'),
+  // ⚠️ B12 · LA VUELTA: el sol asoma en la pantalla en que Trabajos se va y
+  // Servicios llega. Sube hasta la frontera declarada de la noche (0,34).
+  parada(VUELTA.hasta, NIVEL_DE_LA_VUELTA, 6675, 123.5, 'linear'),
   // Amanece escondido: la escena no dibuja entre 0,625 y 0,7375 (visibilidad).
   parada(AMANECER.hasta, 0.5, 6832.5, 131.15, 'shift'),
   // El diferencial entra con el sol subiendo y llega a su ancla con la luz de S9.

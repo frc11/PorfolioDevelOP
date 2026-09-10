@@ -66,7 +66,10 @@ export function afirmarElFoco(): void {
     { paradas: '1–5', donde: 'la pastilla, flotando sobre una sección clara', anillo: COLOR.tintaClara, sobre: COLOR.papel },
     { paradas: '1–5', donde: 'la pastilla, flotando sobre una invertida (superficie translúcida al 0,6 encima del oscuro)', anillo: COLOR.tintaClara, sobre: componer(COLOR.papel, COLOR.oscuro, ALFA_CASI) },
     { paradas: '6', donde: 'el CTA del Hero — `papel-transparente`', anillo: COLOR.tintaClara, sobre: null },
-    { paradas: '7–15', donde: 'el CTA, los 7 enlaces del pie y el campo del Cierre — `oscuro-transparente` sin velo (B8): la tinta invertida sobre la sala', anillo: COLOR.tintaInvertida, sobre: null },
+    /** ⚠️ B12: el Cierre pasó a `papel-transparente` (el pie dejó de pintar y la
+     *  sala al final es clara), así que sus paradas llevan la tinta OSCURA sobre
+     *  la sala, como el CTA del Hero. Las de Trabajos siguen invertidas. */
+    { paradas: '7–15', donde: 'el CTA, los 7 enlaces del pie y el campo del Cierre — `papel-transparente` desde B12: la tinta oscura sobre la sala', anillo: COLOR.tintaClara, sobre: null },
   ]
   imprimirAnillos(CAIDAS)
   afirmarIgual(anillosFlojos(CAIDAS), [], 'las paradas sobre un token reciben un anillo de ≥3:1 contra su superficie — el mínimo de un componente de interfaz')
@@ -91,10 +94,24 @@ export function afirmarElContraste(QUIETA: string): void {
   const modoDe = new Map(superficies.map((s) => [s.id, s.modo]))
   const sobreLaEscena = CAJAS.filter((c) => c.fondo === null)
   const seccionesSobreLaEscena = [...new Set(sobreLaEscena.map((c) => c.seccion))]
+  /**
+   * ⚠️ **B12 · LA TINTA INVERTIDA SOBRE LA SALA QUEDA EN UNA SECCIÓN, NO EN DOS.**
+   * B8 abrió las dos oscuras sobre la sala; B12 le saca el relleno al pie —lo que
+   * tapaba la sala detrás del Cierre— y con la sala clara al final la sección se
+   * da vuelta: `papel-transparente`, tinta oscura. La afirmación cuenta lo mismo
+   * con el número nuevo, y **se le agrega la contraparte**: las que escriben
+   * tinta OSCURA sobre la escena son ahora cinco, y eso también se afirma para
+   * que la cuenta no se pueda cumplir por vacío.
+   */
   afirmarIgual(
     seccionesSobreLaEscena.filter((s) => modoDe.get(s) === 'oscuro-transparente').sort(),
-    ['cierre', 'trabajos'],
-    `hay texto en tinta invertida sobre la sala en Trabajos y el Cierre (B6-A, sin velo desde B8) — ${seccionesSobreLaEscena.length} secciones escriben sobre la escena en total`,
+    ['trabajos'],
+    `hay texto en tinta invertida sobre la sala en Trabajos (B6-A, sin velo desde B8) — ${seccionesSobreLaEscena.length} secciones escriben sobre la escena en total`,
+  )
+  afirmarIgual(
+    seccionesSobreLaEscena.filter((s) => modoDe.get(s) === 'papel-transparente').sort(),
+    ['cierre', 'hero', 'numeros', 'por-que-develop', 'quienes-somos'],
+    '  y en tinta oscura sobre la sala, CINCO: las cuatro de siempre más el Cierre, que B12 dio vuelta al sacarle el relleno al pie',
   )
 
   // ── la única vara: cada (sección, tinta) sobre la escena, citada ──────────

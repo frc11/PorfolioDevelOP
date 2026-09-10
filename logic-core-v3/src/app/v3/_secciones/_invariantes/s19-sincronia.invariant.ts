@@ -145,12 +145,12 @@ const EXCLUIDOS: readonly { readonly archivo: string; readonly marca: string; re
     motivo:
       'HERO · la bajada y el CTA. Mismo motivo que el titular: la sección mide una pantalla, así que el rango de este bloque cierra en `scrollY` −120 (1920) y −9 (1440) y llega a su estado final antes del primer píxel de scroll. Es aritmética declarada en `Hero.tsx`, no un defecto de sincronía.',
   },
-  {
-    archivo: 'trabajos/Trabajos.tsx',
-    marca: '<Bloque patron="P2">',
-    motivo:
-      'TRABAJOS · el marco. ZONA PROHIBIDA de B9 — la carpeta es de la sesión vecina. Aterriza con su borde inferior en 0,984 del cuadro contra el 0,778 de la regla: el mismo desvío que los demás. DIFERIDO como `D-B9.T1`.',
-  },
+  // ⚠️ B12 · `D-B9.T1` SE CIERRA SIN ARREGLARSE, y hay que decir cómo: el bloque
+  // que la llevaba era el MARCO de Trabajos —`<Bloque patron="P2">`, el título y
+  // la bajada clavados arriba— y el humano pidió que deje de estar arriba. El
+  // marco ya no existe: título y bajada son ahora la PORTADA, el plano de índice
+  // −1 del mismo `<Bloque patron="P7" anclaje="seccion">` de acá abajo, que ya
+  // estaba excluido por su ancla. **No se arregló la sincronía: se fue el bloque.**
   {
     archivo: 'trabajos/Trabajos.tsx',
     marca: '<Bloque patron="P7" anclaje="seccion"',

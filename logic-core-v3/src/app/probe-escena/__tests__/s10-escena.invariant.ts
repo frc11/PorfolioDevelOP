@@ -18,6 +18,7 @@
 import { LOGO_INK_VIEWBOX } from '@/components/ui/LogoMark'
 
 import { sampleLightArc } from '@/app/v3/_lib/escena/choreographySampler'
+import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import type { MutableLightLevels } from '@/app/v3/_lib/escena/choreographyTypes'
 import { MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
@@ -214,7 +215,11 @@ section('La sombra se alarga, que es la otra mitad del tiempo pasando')
   const top = INK_HEIGHT / 2
   const floor = -(0.007 * 1024) / 2 - 0.72
   const lengths: number[] = []
-  for (const p of [0, 0.5, 0.75, 0.875, 0.95, 1]) {
+  // ⚠️ B12: el segundo progreso era `0.5` porque ésa era la noche de B8. La
+  // noche ahora es la ventana `NOCHE` del arco —el pin entero— y su punto medio
+  // sale de ahí: la afirmación mide la noche donde la noche está, no donde
+  // estaba. La lista no cambia de largo ni de orden.
+  for (const p of [0, (NOCHE.desde + NOCHE.hasta) / 2, 0.75, 0.875, 0.95, 1]) {
     sampleLightArc(p, arc)
     lengths.push((top - floor) / Math.tan(arc.elevationDeg * RAD))
   }

@@ -425,12 +425,31 @@ export const SECCIONES: readonly Seccion[] = [
    * recorta nada en ningún ancho; y declarar dos altos por ancho no existe en
    * la tabla —el `alto` es uno y es un mínimo—. Se queda como está.
    */
-  // B6-A: el último cuadro del sitio deja ver la sala, y con el velo y el sol
-  // en 0,34 quedaba negro. B8 sacó el velo y dejó el arco en 0,643 —la luz de
-  // mañana del diferencial— así que la sala se ve detrás del pie; lo que eso le
-  // hace a la tinta clara del pie queda como deuda declarada, y la pregunta de
-  // si el Cierre sigue siendo una sección oscura es del bloque siguiente.
-  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'oscuro-transparente', alto: '100svh' },
+  /**
+   * ⚠️ **B12 · LA TINTA DEL PIE SE DA VUELTA: `oscuro-transparente` →
+   * `papel-transparente`. Es la palanca elegida, y va con su número.**
+   *
+   * B6-A abrió el Cierre sobre la sala y B8 dejó el arco en 0,643 —la luz de
+   * mañana— pero la sala NUNCA se vio: `chrome/Pie.tsx` pintaba
+   * `var(--color-fondo)` por hoja y el `<footer>` envuelve la sección entera
+   * (B8-LUZ.md §11.1). B12 le saca el relleno por pedido del humano («el footer
+   * sigue con el fondo oscuro, tiene que ser transparente») y ahí aparece lo que
+   * estaba tapado: **la sala al final es CLARA** —gris 145,5, luminancia 0,303
+   * medida en la pose— y sobre eso la tinta clara del pie no se lee.
+   *
+   * Medido con el mismo instrumento, en la pose y en los dos anchos
+   * (`docs/rediseno/outputs/b12/bloques-cierre-*.json`):
+   *
+   *     variante                          @1920            @1440
+   *     oscuro-transparente (tinta clara) 24 de 24 ✗ 1,00   23 de 23 ✗ 1,02
+   *     papel-transparente  (tinta oscura) 12 de 24 ✗ 1,04   10 de 23 ✗ 1,01
+   *
+   * Se elige `papel-transparente`: la mitad de los bloques pasa a estar bien y
+   * los que quedan tienen una causa nombrada (el formulario y los marcadores en
+   * tinta al 0,6), no «la superficie». El resto de la resolución está en
+   * `_estilos/pie.css` y en el reporte de B12.
+   */
+  { id: 'cierre', numero: '08', nombre: 'Cierre', superficie: 'papel-transparente', alto: '100svh' },
 ]
 
 /**

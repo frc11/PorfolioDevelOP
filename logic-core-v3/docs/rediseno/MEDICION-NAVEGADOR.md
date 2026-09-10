@@ -237,3 +237,44 @@ que la invertida ya dio vuelta), y se le saca antes de la siguiente captura
 síntoma que lo delata: **una sección con texto a la vista que reporta un solo
 bloque, o ninguno.** Si aparece, no es que la sección tenga un bloque: es que
 la máscara no tiene fondo.
+
+---
+
+## 6. El módulo fantasma: dos archivos que difieren sólo en la CAJA (B12)
+
+**El síntoma es el peor que puede tener un defecto de medición: la página se
+sirve con 200, el HTML llega entero, `tsc --noEmit` da limpio, y el censo
+devuelve CERO acontecimientos y CERO piezas sin un solo error en pantalla.**
+
+B12 creó `trabajos/gota.ts` —el núcleo puro de la transición— y, al lado,
+`trabajos/Gota.tsx` —la capa que la escribe—. En un checkout
+case-insensitive (Windows) esos dos nombres **son el mismo para el
+resolvedor**: `import … from './gota'` puede resolver al `.tsx` en vez de al
+`.ts`, y entonces el módulo que se importa no exporta lo que se le pide. Next
+lo reporta como `Attempted import error: 'estadoDeLaGota' is not exported from
+'./gota'`, **en el log del dev server y no en la página**: el árbol de la
+sección se cae, la compuerta entrega la rama quieta y el instrumento mide un
+home sin coreografía creyendo que mide el home.
+
+Lo que lo hace especialmente traicionero:
+
+- **`tsc` lo caza y el navegador no.** TypeScript avisa (`File name … differs
+  from already included file name … only in casing`), pero el dev server ya
+  tenía el módulo resuelto en su caché de webpack y **siguió sirviendo la
+  versión rota después de renombrar el archivo**. El rename no alcanza: hay
+  que reiniciar el dev server y borrar `.next`.
+- **La página responde 200 y con el largo esperado.** Lo único que cambia es
+  que `[data-arbol]` trae la marca del árbol quieto y los `[style]` bajan de
+  ~130 por parada a 3.
+
+**La regla, que ya estaba escrita y hay que leer dos veces:** *dos módulos del
+mismo directorio no pueden tener nombres que difieran sólo en la caja*
+(`_secciones/_contrato/forma.ts`, que la pagó con `seccion.ts` / `Seccion.tsx`).
+**La extensión no cuenta como diferencia**: `gota.ts` y `Gota.tsx` chocan igual.
+El archivo de B12 se llama `CapaDeLaGota.tsx` por esto.
+
+**El discriminador, para no volver a perder una hora:** si un censo devuelve
+cero piezas o el estilo por parada se desploma, **antes de tocar el producto
+mirar el log del dev server**. Un `Attempted import error` ahí explica una
+página que se ve entera. Y si el rename ya está hecho y el error sigue: el
+caché. `rm -rf .next` y reiniciar.

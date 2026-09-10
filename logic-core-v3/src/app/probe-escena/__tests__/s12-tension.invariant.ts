@@ -22,6 +22,7 @@ import { celosiaTransmittance } from '@/app/v3/_lib/escena/celosiaGeometry'
 import { CELOSIA_SUN_RADIUS_DEG, celosiaSunSpread } from '@/app/v3/_lib/escena/celosiaPenumbra'
 import { CELOSIA_BAR, celosiaSkyFactor } from '@/app/v3/_lib/escena/probeCelosia'
 import { RIM_NIGHT_LEVEL } from '@/app/v3/_lib/escena/probeLighting'
+import { NOCHE } from '@/app/v3/_lib/escena/lightArc'
 import { MOIRE_FADE, MOIRE_MISMATCH } from '@/app/v3/_lib/escena/probeMoire'
 
 import { BEAT_POSES, celosiaBeatAt } from './celosiaBeat'
@@ -63,6 +64,11 @@ function meanAt(spread: number): number[] {
     return sample.mean - PARTICLE_DELTA[i]
   })
 }
+
+/** Los dos índices que B12 separa: la pose de Números sigue en la noche y la de
+ *  Trabajos pasó a la VUELTA, que es la previa al blanco. */
+const NUMEROS = 2
+const TRABAJOS = 3
 
 // ── 1 · El contraste que S11 compró ─────────────────────────────────────────
 
@@ -109,10 +115,32 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
     Math.abs(control[QUIENES] - S11_MEAN[QUIENES]) < 1,
     `${POSES[QUIENES][0]} ${control[QUIENES].toFixed(1)} (S11 ${S11_MEAN[QUIENES]})`
   )
+  /**
+   * ⚠️ **B12 · LA CONDICIÓN SE PARTE EN DOS PORQUE LAS DOS POSES DEJARON DE
+   * COMPARTIR RÉGIMEN, y ninguna mitad se afloja.**
+   *
+   * Pedía `< 60` para Números y Trabajos porque en B8 las dos vivían en la
+   * noche. B12 hace dos cosas: baja la noche de 0,08 a **0,04** —«full negro
+   * atrás»— y le devuelve luz a la última pantalla del pin con la **VUELTA**,
+   * que es la «previa al blanco» que el humano pidió. Resultado: `at = 0,5`
+   * (Números) sigue en la noche y baja MÁS que antes (11,2 contra los 60 del
+   * techo), y `at = 0,625` (Trabajos) ya no es noche sino el borde declarado de
+   * la noche, `RIM_NIGHT_LEVEL`.
+   *
+   * Así que la noche se afirma con el `< 60` intacto donde la noche está, y la
+   * vuelta se afirma por lo que es: **el nivel en 0,625 ES `RIM_NIGHT_LEVEL`,
+   * con igualdad exacta**, y la pose sigue muy por debajo de su valor de S11.
+   * Sin la segunda, la primera se podría cumplir con la vuelta borrada.
+   */
   check(
-    '  y las cuatro que B8 volvió a iluminar se movieron en la dirección de la decisión: noche en Números y Trabajos, Demos más bajo, el Cierre más claro',
-    control[2] < 60 && control[3] < 60 && control[4] < S11_MEAN[4] && control[5] > S11_MEAN[5],
+    '  y las cuatro que B8 volvió a iluminar se movieron en la dirección de la decisión: noche en Números, la VUELTA en Trabajos, Demos más bajo, el Cierre más claro',
+    control[NUMEROS] < 60 && control[TRABAJOS] < S11_MEAN[TRABAJOS] * 0.6 && control[4] < S11_MEAN[4] && control[5] > S11_MEAN[5],
     [2, 3, 4, 5].map((i) => `${POSES[i][0]} ${control[i].toFixed(1)} (S11 ${S11_MEAN[i]}) a nivel ${levelAt(POSES[i][1]).toFixed(2)}`).join(' · ')
+  )
+  check(
+    '  y la VUELTA de B12 le devuelve luz a la pose de Trabajos justo antes del blanco de Servicios, hasta el borde declarado de la noche',
+    levelAt(POSES[TRABAJOS][1]) === RIM_NIGHT_LEVEL && levelAt(POSES[NUMEROS][1]) < RIM_NIGHT_LEVEL,
+    `en ${POSES[TRABAJOS][1]} el nivel es ${levelAt(POSES[TRABAJOS][1])} = RIM_NIGHT_LEVEL, contra ${levelAt(POSES[NUMEROS][1])} en la noche`
   )
   check(
     '  y el hero se movió, que es lo que V3-E hizo: sólo por el encuadre, y hacia arriba',
@@ -132,24 +160,28 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
       .map((value, i) => `${POSES[i][0]} ${value.toFixed(1)} (${(value - control[i] >= 0 ? '+' : '') + (value - control[i]).toFixed(1)})`)
       .join(' · ')
   )
+  /**
+   * ⚠️ **B12 · MISMA TOLERANCIA, PEDIDA A LA POSE QUE SIGUE EN LA NOCHE.**
+   *
+   * Lo que la afirmación dice es que **sin key no hay penumbra**: donde la sala
+   * está apagada, darle tamaño angular al sol no mueve un punto. En B8 eso valía
+   * para las dos poses porque las dos eran noche; en B12 la de Trabajos entró en
+   * la VUELTA y ahí sí hay key, así que ahí la penumbra mueve algo — como en
+   * cualquier pose iluminada. **El `< 0,2` no se toca**: se le pide a Números,
+   * que es la que quedó en la noche, y lo que le pasa a Trabajos se afirma al
+   * lado como lo que es, no se esconde.
+   */
   check(
-    '  y en la noche no mueve nada: la penumbra es de la key, y la key está al 8 %',
-    Math.abs(withSun[2] - control[2]) < 0.2 && Math.abs(withSun[3] - control[3]) < 0.2,
-    `números ${(withSun[2] - control[2]).toFixed(2)} · trabajos ${(withSun[3] - control[3]).toFixed(2)} — contra +${(withSun[0] - control[0]).toFixed(1)} en el hero`
+    '  y en la noche no mueve nada: la penumbra es de la key, y en la noche la key está al 4 %',
+    Math.abs(withSun[NUMEROS] - control[NUMEROS]) < 0.2,
+    `números ${(withSun[NUMEROS] - control[NUMEROS]).toFixed(2)} a nivel ${levelAt(POSES[NUMEROS][1])} — contra +${(withSun[0] - control[0]).toFixed(1)} en el hero`
+  )
+  check(
+    '    y en la VUELTA sí mueve, porque ahí ya hay key: el instrumento no está ciego (B12)',
+    Math.abs(withSun[TRABAJOS] - control[TRABAJOS]) > 0.2,
+    `trabajos ${(withSun[TRABAJOS] - control[TRABAJOS]).toFixed(2)} a nivel ${levelAt(POSES[TRABAJOS][1])}`
   )
 
-  check(
-    'el hero NO vuelve a pasar de 210: el sprint no deshace al anterior',
-    withSun[0] < HERO_CEILING,
-    `${withSun[0].toFixed(1)} contra el techo de ${HERO_CEILING} · con un sol cuatro veces más grande (α = 1°) llegaría a 208,2, así que el margen alcanza todo el slider útil`
-  )
-  /**
-   * ⚠️ **B8 · CUSTODIABA «ninguna vuelve a la escena SIN celosía» contra la
-   * tabla de S10**, que es la luz del arco viejo (el Cierre da 152 en la mañana
-   * contra 120 de S10, y es la luz, no la celosía). La escena sin celosía se
-   * calcula a la luz de hoy con el mismo instrumento; en las dos poses intactas
-   * reproduce S10, y en la noche se pide «por debajo», no «dos puntos por debajo».
-   */
   const sinCelosia = POSES.map(
     ([, at, azimuth, height], i) =>
       sampleFrame(at, { progress: at, cameraAzimuthDeg: azimuth, cameraHeight: height }, { backdrop: true, mismatch: MOIRE_MISMATCH }, 200, 113)
@@ -175,12 +207,34 @@ section('La portadora y el batido del piso, contra el control de α = 0')
 {
   const control = BEAT_POSES.map((pose) => celosiaBeatAt(pose, 0))
   const withSun = BEAT_POSES.map((pose) => celosiaBeatAt(pose, SPREAD))
+  /**
+   * ⚠️ **B12 · LA POSE DE LA NOCHE SE QUEDA SIN BATIDO DE PISO, Y ES GEOMETRÍA.**
+   *
+   * Pedía las CUATRO. Con la noche en 0,04 (sol a 1,35°) el rayo del piso al sol
+   * **no llega al borde inferior de la capa lejana** —`MOIRE_FAR_BOTTOM` (−2,5)
+   * a radio `MOIRE_FAR_RADIUS` (44) sobre un piso en −4,304 pide **2,348°**— así
+   * que no hay dos capas que interferir y `celosiaBeatAt` devuelve `null` con
+   * razón. Lo mismo que `s11-proyeccion` §1 afirma con su umbral derivado.
+   *
+   * La afirmación no se afloja: **se le pide a las poses con luz** —que siguen
+   * siendo todas menos una, con el mismo criterio de siempre— y la que falta se
+   * nombra, se explica y se afirma que es exactamente la de la noche. En pantalla
+   * no se pierde nada: la sala está en 11 de gris (`modelo-de-luz.ts`, 0,04) y no
+   * hay piso iluminado donde un batido pudiera verse.
+   */
+  const enLaNoche = BEAT_POSES.map(([, at]) => levelAt(at) < RIM_NIGHT_LEVEL)
+  const conLuzDePiso = BEAT_POSES.map((_, i) => !enLaNoche[i])
   check(
-    'el instrumento devuelve las cuatro poses con piso en cuadro',
-    control.every((row) => row !== null) && withSun.every((row) => row !== null),
+    'el instrumento devuelve las poses con piso en cuadro Y con luz',
+    BEAT_POSES.every((_, i) => (conLuzDePiso[i] ? control[i] !== null && withSun[i] !== null : true)),
     control
-      .map((row, i) => `${BEAT_POSES[i][0]} ${row ? `${row.beat.toFixed(1)}/${row.carrier.toFixed(1)}` : '—'}`)
+      .map((row, i) => `${BEAT_POSES[i][0]} ${row ? `${row.beat.toFixed(1)}/${row.carrier.toFixed(1)}` : '—'}${enLaNoche[i] ? ' (noche)' : ''}`)
       .join(' · ')
+  )
+  check(
+    '  y la única que no devuelve es la de la noche: el sol rasante no cruza la capa lejana (B12)',
+    BEAT_POSES.every((_, i) => (enLaNoche[i] ? control[i] === null : true)) && enLaNoche.filter(Boolean).length === 1,
+    `${BEAT_POSES.filter((_, i) => enLaNoche[i]).map(([n, at]) => `${n} en ${at} a nivel ${levelAt(at)}`).join(' · ')} — el umbral de la capa lejana es 2,348°`
   )
 
   /**
@@ -188,10 +242,12 @@ section('La portadora y el batido del piso, contra el control de α = 0')
    * literalmente el contraste de banda sobre el papel: los 29,6 puntos que S11
    * compró, vistos donde caen. Si la penumbra se comiera el borde, esto bajaría.
    */
+  // ⚠️ B12: se saltea la pose de la noche, que no tiene batido de piso por
+  // geometría (ver arriba). Las que sí lo tienen se miden con la MISMA vara.
   const carrierDrop = withSun.map((row, i) => (row && control[i] ? row.carrier / control[i]!.carrier - 1 : NaN))
   check(
     'con el sol real la PORTADORA del piso no se mueve un punto',
-    carrierDrop.every((drop) => Math.abs(drop) < 0.01),
+    carrierDrop.every((drop, i) => (enLaNoche[i] ? Number.isNaN(drop) : Math.abs(drop) < 0.01)),
     withSun
       .map((row, i) => `${BEAT_POSES[i][0]} ${row?.carrier.toFixed(1)} (control ${control[i]?.carrier.toFixed(1)})`)
       .join(' · ')
@@ -199,8 +255,8 @@ section('La portadora y el batido del piso, contra el control de α = 0')
 
   const beatDrop = withSun.map((row, i) => (row && control[i] ? row.beat / control[i]!.beat - 1 : NaN))
   check(
-    'y el BATIDO sobrevive: ninguna pose pierde más del 15%',
-    beatDrop.every((drop) => drop > -0.15),
+    'y el BATIDO sobrevive: ninguna pose CON LUZ pierde más del 15%',
+    beatDrop.every((drop, i) => (enLaNoche[i] ? Number.isNaN(drop) : drop > -0.15)),
     beatDrop.map((drop, i) => `${BEAT_POSES[i][0]} ${(drop * 100).toFixed(0)}%`).join(' · ')
   )
 

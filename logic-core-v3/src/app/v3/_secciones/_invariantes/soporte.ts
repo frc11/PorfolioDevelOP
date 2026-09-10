@@ -192,8 +192,10 @@ export const SUPERFICIE_ACORDADA: Readonly<Record<string, string>> = {
   servicios: 'papel-opaco',
   'tu-panel': 'papel-opaco',
   'por-que-develop': 'papel-transparente',
-  // B6-A abrió el Cierre sobre la escena (con velo); B8 le sacó el velo: la vara se mueve con la decisión.
-  cierre: 'oscuro-transparente',
+  // B6-A abrió el Cierre (con velo); B8 le sacó el velo; **B12 le dio vuelta la
+  // tinta**: sin el relleno del pie la sala al final es CLARA (gris 145,5) y la
+  // tinta clara rompía 24 de 24 bloques contra 12 de 24 de la oscura.
+  cierre: 'papel-transparente',
 }
 
 export const PROHIBIDOS_EN_EL_LANE: readonly (readonly [string, RegExp])[] = [

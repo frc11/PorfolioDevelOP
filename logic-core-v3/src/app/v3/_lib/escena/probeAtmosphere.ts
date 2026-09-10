@@ -84,8 +84,25 @@ export const SHADOW_NEAR = 12
  * un logo de 7 unidades que además flota 0,72 sobre el papel sigue siendo
  * despreciable, y `SHADOW_NORMAL_BIAS` —el que hace el trabajo fino— se mide en
  * mundo y no cambia. La ortográfica no se toca por la misma razón de siempre.
+ *
+ * ⚠️ **B12 · SUBE DE 200 A 380, Y ESTA VEZ EL PRECIO SE PAGA EN OTRO LADO.**
+ * La noche de Trabajos bajó de 0,08 a 0,04 (`lightArc.ts`, pedido del humano:
+ * *«debe quedar full negro atrás»*), y la elevación sale del nivel por ley:
+ * **1,35° en vez de 2,70°**. A esa elevación el borde superior del logo proyecta
+ * a **335,4 unidades** y su punta cae a profundidad **357,4** del mapa. Con 200
+ * la sombra volvía a cortarse en seco a mitad del piso — el tajo que la tabla de
+ * arriba describe. Lo mide `s7-sol.invariant.ts` §3 sobre el arco real, y por
+ * eso el número tiene 22 unidades de aire y no más.
+ *
+ * **Lo que NO se paga es la precisión, y por eso `SHADOW_BIAS` se re-escala.**
+ * El slab pasa de 188 a 368 de rango, o sea que el MISMO `-0,0003` normalizado
+ * equivaldría a 0,110 de mundo en vez de 0,056: el doble de peter-panning **a
+ * pleno sol**, que es donde la sombra se ve. La ortográfica es lineal en
+ * profundidad, así que el bias normalizado se divide por el mismo factor que el
+ * slab creció y el equivalente de mundo queda **exactamente donde B8 lo dejó**.
+ * Ver `SHADOW_BIAS`.
  */
-export const SHADOW_FAR = 200
+export const SHADOW_FAR = 380
 
 /**
  * El par que decide entre acné y peter-panning.
@@ -99,7 +116,25 @@ export const SHADOW_FAR = 200
  * `FLOOR_Y`— pero la oclusión de contacto se apoya justo en esa zona, así que el
  * valor se mantiene chico igual.
  */
-export const SHADOW_BIAS = -0.0003
+/**
+ * ⚠️ **B12 · SE RE-ESCALA CON EL SLAB, Y ESO DEJA EL BIAS DE MUNDO IGUAL.**
+ *
+ * `shadow.bias` de three es una constante en **profundidad normalizada** del
+ * mapa, así que lo que corre la sombra en el mundo es `bias × (far − near)`.
+ * B8 lo dejó en `-0,0003` con un slab de 188 → **0,0564 de mundo**. B12 sube
+ * `SHADOW_FAR` a 380 por la noche más profunda (ver arriba) y el slab pasa a
+ * 368: con el mismo `-0,0003` el corrimiento se duplicaría **a pleno sol**, que
+ * es el único régimen donde la sombra se ve.
+ *
+ * Se declara al revés: **el bias de MUNDO es la constante** —el número que S7
+ * calibró y B8 conservó— y el normalizado se deriva del slab. Así, la próxima
+ * vez que la noche empuje el `FAR`, esto no hay que acordárselo.
+ *
+ *     -0,0003 × (200 − 12) = -0,0564 de mundo   ← B8
+ *     BIAS_DE_MUNDO / (380 − 12) = -0,00015326  ← B12, el mismo 0,0564
+ */
+export const SHADOW_BIAS_EN_MUNDO = -0.0564
+export const SHADOW_BIAS = SHADOW_BIAS_EN_MUNDO / (SHADOW_FAR - SHADOW_NEAR)
 export const SHADOW_NORMAL_BIAS = 0.018
 
 /**

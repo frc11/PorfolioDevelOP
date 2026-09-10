@@ -47,7 +47,10 @@ export function LineaDeCierre(): React.JSX.Element {
         <Separador />
         <span data-parte="continuacion">{LINEA_DE_CIERRE.piezas.join(' · ')}</span>
       </Caption>
-      <Micro como="p" className="opacity-casi uppercase">
+      {/* ⚠️ B12 · A TINTA PLENA: el pie dejó de pintar su propio fondo, así que
+          debajo hay sala y el peor píxel manda. Medido en la pose: 2,78:1 al 0,6
+          contra 4,97:1 a plena (1920). Misma decisión que la nota de contacto. */}
+      <Micro como="p" className="uppercase">
         {LINEA_DE_CIERRE.nota}
       </Micro>
     </div>

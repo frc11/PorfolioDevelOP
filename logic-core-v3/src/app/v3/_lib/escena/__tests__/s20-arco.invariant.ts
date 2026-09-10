@@ -34,6 +34,7 @@ import {
   NIVEL_DE_LA_MANANA,
   NIVEL_DE_LA_NOCHE,
   NOCHE,
+  VUELTA,
   elevacionDe,
 } from '../lightArc'
 import { SHADOW_FAR } from '../probeAtmosphere'
@@ -60,7 +61,7 @@ const monotona = (xs: readonly number[], sentido: 'baja' | 'sube'): boolean =>
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · LA FORMA — ocho paradas, la elevación derivada, un descenso y un ascenso')
 
-afirmarIgual(LIGHT_ARC.length, 8, 'ocho paradas: mediodía, fin del hero, dos del atardecer, fin de la noche, fin del amanecer, el ancla y el final')
+afirmarIgual(LIGHT_ARC.length, 9, 'NUEVE paradas: mediodía, fin del hero, dos del atardecer, fin de la noche, fin de la VUELTA (B12), fin del amanecer, el ancla y el final')
 afirmar(
   LIGHT_ARC.every((s, i) => i === 0 || s.at > LIGHT_ARC[i - 1].at) && LIGHT_ARC[0].at === 0 && LIGHT_ARC[LIGHT_ARC.length - 1].at === 1,
   'ordenadas por progreso, de 0 a 1',
@@ -126,8 +127,30 @@ const diferencial = geometria('por-que-develop')
 afirmarIgual(ATARDECER.desde, progresoDePantalla(trabajos.desdePantalla - 1), 'el atardecer empieza cuando Trabajos toca el pie del cuadro: una pantalla antes de llenarlo')
 afirmarIgual(ATARDECER.hasta, progresoDePantalla(trabajos.desdePantalla), '  y termina cuando Trabajos llena el cuadro — una pantalla de scroll, la de la costura')
 afirmarIgual(NOCHE.desde, ATARDECER.hasta, 'la noche empieza donde termina el atardecer')
-afirmarIgual(NOCHE.hasta, progresoDePantalla(trabajos.hastaPantalla), '  y dura EXACTAMENTE el pin de Trabajos: la meseta de B4-A, a oscuras')
-afirmarIgual(AMANECER.desde, NOCHE.hasta, 'el amanecer empieza donde termina la noche')
+/**
+ * ⚠️ **B12 · LA NOCHE DURA EL PIN, Y EL PIN NO ES LA SECCIÓN ENTERA.**
+ *
+ * Decía que la noche dura hasta `hastaPantalla`, o sea las tres pantallas de la
+ * sección. **Un `sticky` de una pantalla adentro de una sección de tres se clava
+ * entre la primera y la ANTEÚLTIMA**: en la última el panel se va hacia arriba y
+ * Servicios —papel opaco— sube desde el pie del cuadro. Esa pantalla es la
+ * «previa al blanco» que pidió el humano, y se la lleva la VUELTA.
+ *
+ * O sea: la afirmación no se afloja, se **corrige** —la noche dura el pin de
+ * verdad, que es una pantalla menos— y la que falta se afirma abajo como lo que
+ * es. Las dos siguen leyendo el anclaje, no un literal.
+ */
+const ultimaPantallaDelPin = trabajos.hastaPantalla - 1
+afirmarIgual(NOCHE.hasta, progresoDePantalla(ultimaPantallaDelPin), '  y dura EXACTAMENTE el pin de Trabajos —de la primera pantalla a la anteúltima—: la meseta de B4-A, a oscuras')
+afirmarIgual(VUELTA.desde, NOCHE.hasta, 'la VUELTA empieza donde termina la noche (B12)')
+afirmarIgual(VUELTA.hasta, progresoDePantalla(trabajos.hastaPantalla), '  y se lleva la ÚLTIMA pantalla de la sección: la única en la que Trabajos se va y Servicios llega — «una previa al blanco»')
+afirmarIgual(en(VUELTA.hasta).level, RIM_NIGHT_LEVEL, '  y llega al borde declarado de la noche, no a un número elegido: `RIM_NIGHT_LEVEL`')
+afirmar(
+  monotona(muestras(VUELTA.desde, VUELTA.hasta).map((p) => en(p).level), 'sube'),
+  '  y sube sin volver atrás en toda la pantalla',
+  `${en(VUELTA.desde).level} → ${en(VUELTA.hasta).level}`,
+)
+afirmarIgual(AMANECER.desde, VUELTA.hasta, 'el amanecer empieza donde termina la vuelta')
 const reanudacion = progresoDePantalla(diferencial.desdePantalla - 1 - MARGEN_DE_REANUDACION)
 afirmar(
   AMANECER.hasta <= reanudacion && reanudacion - AMANECER.hasta < 1e-4,
@@ -141,8 +164,8 @@ afirmarIgual(
 )
 afirmarIgual(
   LIGHT_ARC.map((s) => s.at),
-  [0, progresoDePantalla(1), ATARDECER.desde, ATARDECER.hasta, NOCHE.hasta, AMANECER.hasta, ANCLA_DEL_DIFERENCIAL, 1],
-  'y las ocho paradas son exactamente esos nudos: el arco no inventa un progreso propio',
+  [0, progresoDePantalla(1), ATARDECER.desde, ATARDECER.hasta, NOCHE.hasta, VUELTA.hasta, AMANECER.hasta, ANCLA_DEL_DIFERENCIAL, 1],
+  'y las NUEVE paradas son exactamente esos nudos: el arco no inventa un progreso propio',
 )
 afirmar(
   muestras(0, ATARDECER.desde).every((p) => en(p).level === 1),

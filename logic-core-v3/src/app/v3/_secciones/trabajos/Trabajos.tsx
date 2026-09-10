@@ -1,19 +1,13 @@
 'use client'
 
-import { useTransform, type MotionValue } from 'motion/react'
-
-import { Envoltorio } from '../../_componentes/layout/Envoltorio'
-import { Grilla } from '../../_componentes/layout/Grilla'
-import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
-import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
-import { Bloque } from '../_contrato/coreografia'
-import { CanalDePieza, CanalDeUnaPieza } from '../_contrato/canales'
-import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
+import { Bloque, type Progreso } from '../_contrato/coreografia'
+import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
 import { CONTENIDO } from './contenido'
-import { CAJA_DE_LA_CAPTURA, localDelPlano } from './geometria'
-import { Proyecto } from './Proyecto'
+import { VENTANA_DE_LA_GOTA } from './geometria'
+import { CapaDeLaGota } from './CapaDeLaGota'
+import { PlanoDelProyecto, PortadaDeTrabajos, RamaQuieta } from './piezas'
 
 /**
  * 04 · TRABAJOS — la banda oscura, pinneada, con tres planos que vienen de atrás.
@@ -151,150 +145,52 @@ import { Proyecto } from './Proyecto'
  * AFUERA del enlace — adentro entraría en su nombre accesible. */
 
 
-/**
- * UN PLANO — el proyecto `indice`, con SU tercio del recorrido. **[B2]**
- *
- * El progreso del bloque es uno solo y los tres planos cuelgan de él; lo que
- * cambia es que cada uno lo lee por `localDelPlano`, que le da su tramo. Es el
- * mismo mecanismo que Servicios usa para su secuencia —un número, N canales— y
- * la cuenta vive en `geometria.ts`, con la medición que la fuerza.
- *
- * `cantidad = 1` e `indice = 0` en el canal: **el escalonado de P7 queda inerte
- * a propósito** (`cantidad − 1 = 0`), porque el reparto ya no es del cronograma
- * sino del scroll. Ningún valor de P7 se toca.
- *
- * ⚠ Un componente y no un `useTransform` adentro del `children` del bloque: ese
- * `children` corre durante el render de OTRO componente, así que un hook ahí
- * sería un hook condicional del bloque. Acá cada plano tiene el suyo, en orden
- * fijo y con cantidad fija.
- */
-function PlanoDelProyecto({
-  progreso,
-  indice,
-  proyecto,
-}: {
-  readonly progreso: MotionValue<number>
-  readonly indice: number
-  readonly proyecto: (typeof CONTENIDO.proyectos)[number]
-}): React.JSX.Element {
-  const local = useTransform(progreso, (p) => localDelPlano(p, indice))
-  return (
-    <CanalDePieza progreso={local} patron="P7" cantidad={1} indice={0} className="absolute inset-0 flex items-center">
-      {/* La MISMA grilla de tres, y el plano ocupa DOS de sus tres columnas
-          —ver `columnasDelPlano`—: con una sola, la tarjeta medía 394 px adentro
-          de una pantalla que le deja 825 y quedaban 463 px de banda vacía
-          debajo. La clase va literal porque Tailwind escanea el fuente. */}
-      <Grilla columnas={3}>
-        <div className="tablet:col-span-2">
-          <Proyecto proyecto={proyecto} rotulo={CONTENIDO.rotuloDeLaMetrica} caja={CAJA_DE_LA_CAPTURA} />
-        </div>
-      </Grilla>
-    </CanalDePieza>
-  )
-}
-
 export function Trabajos({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Seccion seccion={seccion}>
-      {/* ── EL DESPEJE DE LA PASTILLA, arriba de 1025 ───────────────────────
-          `escritorio:pt-16` y no `escritorio:py-8`, y el número sale de la
-          pastilla: `BORDE_INFERIOR_EN_REPOSO_PX` son **72 px** —24 de reposo
-          más 48 de alto— y esta sección es pinneada, así que su hijo se queda
-          apoyado en el tope DOS pantallas enteras. Con 32 px de relleno el
-          titular arrancaba en y 48 a 1920 y en y 49 a 1440, o sea **debajo** de
-          la pastilla: 24 px de solape sobre el renglón, el 20,31 % de su alto,
-          durante todo el pinneo. Con 64 arranca en 83 y 81. El costo es del
-          escenario, que pierde 32 px de 825; la tarjeta mide 736 y entra. */}
-      <Envoltorio
-        className="flex h-full flex-col py-4 escritorio:pt-16 escritorio:pb-8"
-        claseDeContenido="flex h-full flex-col gap-4 escritorio:gap-8"
-      >
-        {/* ── EL MARCO ────────────────────────────────────────────────────
-            `shrink-0` para que el escenario se quede con lo que sobre y no al
-            revés. **B2: entra con P2 y después se queda quieto** — el rango de
-            P2 sobre su propia caja cierra antes de que el pin arranque, así que
-            durante las dos pantallas pinneadas sigue siendo el plano quieto
-            contra el que se lee la profundidad. Antes no se movía nunca, y por
-            eso la sección no tenía un solo aterrizaje en su primera pantalla y
-            media. */}
-        <Grilla columnas="lateral" className="shrink-0">
-          <NumeroDeSeccion seccion={seccion} />
-          <Bloque patron="P2">
-            {(progreso) => (
-              <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-2">
-                <EtiquetaDeSeccion>{CONTENIDO.etiqueta}</EtiquetaDeSeccion>
-                <Titular nivel="titulo-m" como="h2" id={idDelTitularDeSeccion(seccion.id)} className="max-w-[var(--breakpoint-medio)]">
-                  {CONTENIDO.titular}
-                </Titular>
-                <Cuerpo className="max-w-[var(--breakpoint-medio)]">{CONTENIDO.bajada}</Cuerpo>
-              </CanalDeUnaPieza>
-            )}
-          </Bloque>
-        </Grilla>
+      {/* ── ⚠️ B12 · EL ESCENARIO ES LA PANTALLA ENTERA, Y ESO ES EL CAMBIO ──
+          Antes el hijo pinneado se repartía en dos: un MARCO clavado arriba
+          —número, rótulo, titular y bajada— y el escenario con lo que sobraba.
+          Los dos primeros se fueron con los rótulos (§1) y los dos segundos se
+          mudaron al escenario como la PORTADA, así que acá ya no hay nada que
+          repartir: el bloque de P7 ocupa la pantalla completa y todo lo que
+          entra, entra centrado.
 
-        {/* ── EL ESCENARIO ────────────────────────────────────────────────
-            `relative` porque las tres piezas se posicionan contra él, y
-            `min-h-0 flex-1` para que ocupe lo que queda de la pantalla sin
-            empujar al marco. La perspectiva la escribe el `Bloque` acá mismo, en el ancestro
-            de los tres planos: desde B6-A es el lente de la escena (`_lib/motion/lente.ts`).
+          El `Envoltorio` —relleno lateral y tope de 1920— bajó a cada pieza, y
+          es lo que permite que la GOTA llegue a los bordes del cuadro: una capa
+          `absolute inset-0` adentro de un envoltorio con 32 px de relleno
+          dejaría una banda sin cubrir en los cuatro lados.
 
-            `anclaje="seccion"` es lo que hace que el gesto exista (B1): el ancla
-            de P7 se resuelve contra la `<section>` de 300svh y no contra este
-            bloque de 826 px, que adentro de un hijo `sticky` no se mueve. Sin
-            eso los tres planos terminaban su vuelo 50 px ANTES de que la sección
-            tocara el tope. El porqué está en `AnclajeDelBloque`. */}
-        <Bloque patron="P7" anclaje="seccion" lente="escena" className="relative min-h-0 flex-1">
-          {(progreso) => {
-            if (progreso === null) {
-              /**
-               * ── LA RAMA QUIETA, Y POR QUÉ CADA PROYECTO TOMA UNA PANTALLA ──
-               *
-               * Abajo de 1025 la sección **no se pinnea** —lo declara
-               * `secciones.ts`— así que acá no hay una caja clavada de `100svh`
-               * que respetar: hay 300svh de documento que scrollean. Con la
-               * grilla en UNA columna hasta 1025 los tres proyectos caen uno
-               * abajo del otro, y `min-h-svh` le da a cada uno **su** pantalla:
-               * tres proyectos por tres pantallas es el alto declarado.
-               *
-               * Desde 1025 pasan las dos a la vez y por la misma razón: vuelve
-               * la fila (`escritorio:grid-cols-3`) y la pantalla por proyecto se
-               * suelta (`escritorio:min-h-0`). Ahí esta rama sólo aparece con
-               * `prefers-reduced-motion` y el panel SÍ está clavado en una
-               * pantalla: tres cajas de `svh` adentro de una es el mismo
-               * desborde, del otro lado.
-               *
-               * ⚠ `columnas={1}` con la fila en `className` y no `columnas={3}`
-               * porque la tabla de `Grilla` no tiene una entrada de tres que
-               * conmute en 1025 —la de `5` sí— y `Grilla` la comparten las otras
-               * secciones: el pedido queda anotado. La clase va literal porque
-               * Tailwind escanea el fuente: una armada por template no se emite.
-               */
-              return (
-                <Grilla
-                  columnas={1}
-                  className="content-center escritorio:h-full escritorio:grid-cols-3"
-                >
-                  {CONTENIDO.proyectos.map((proyecto) => (
-                    <div
-                      key={proyecto.nombre}
-                      className="flex min-h-svh flex-col justify-center escritorio:min-h-0"
-                    >
-                      <Proyecto
-                        proyecto={proyecto}
-                        rotulo={CONTENIDO.rotuloDeLaMetrica}
-                        caja={CAJA_DE_LA_CAPTURA}
-                      />
-                    </div>
-                  ))}
-                </Grilla>
-              )
-            }
-            return CONTENIDO.proyectos.map((proyecto, indice) => (
-              <PlanoDelProyecto key={proyecto.nombre} progreso={progreso} indice={indice} proyecto={proyecto} />
-            ))
-          }}
-        </Bloque>
-      </Envoltorio>
+          ⚠ **El despeje de la pastilla (`escritorio:pt-16`) se fue con el marco,
+          y es correcto que se vaya:** existía porque el titular arrancaba en
+          y 48 y quedaba DEBAJO de la pastilla de navegación durante todo el
+          pinneo. Ahora lo que ocupa el tope del cuadro es el borde superior de
+          una captura centrada verticalmente, no un renglón. La rama quieta lo
+          conserva, porque ahí el encabezado sigue arriba. */}
+      <Bloque patron="P7" anclaje="seccion" lente="escena" className="relative h-full w-full">
+        {(progreso: Progreso) => {
+          if (progreso === null) return <RamaQuieta seccion={seccion} />
+          return (
+            <>
+              {/* ── LA GOTA, y por qué va PRIMERA en el marcado ─────────────
+                  Los hermanos posicionados se pintan en orden de documento, así
+                  que la gota queda DEBAJO de la portada y de los planos: la
+                  transición tapa la sala, nunca el contenido. Su color es
+                  `var(--color-fondo)`, que adentro de la sección invertida vale
+                  #0E0E0E — el color de la noche, no un color nuevo. */}
+              <CapaDeLaGota
+                progreso={progreso}
+                ventana={VENTANA_DE_LA_GOTA}
+                className="bg-fondo pointer-events-none absolute inset-0"
+              />
+              <PortadaDeTrabajos seccion={seccion} progreso={progreso} />
+              {CONTENIDO.proyectos.map((proyecto, indice) => (
+                <PlanoDelProyecto key={proyecto.nombre} progreso={progreso} indice={indice} proyecto={proyecto} />
+              ))}
+            </>
+          )
+        }}
+      </Bloque>
     </Seccion>
   )
 }

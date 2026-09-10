@@ -156,3 +156,14 @@ src/modules/chatbot/evals/reports/
 # calculo, no evidencia: lo que se commitea son las capturas del reporte en
 # `docs/rediseno/capturas/b11/` y el JSON con las cifras en `outputs/b11/`.
 /.b11-capturas/
+# `.next-b12/`: build aislado de B12 (el cierre de la etapa), para medir el peso
+# de la llave del contenido inventado sin pisar el `.next/` del `next dev` del
+# 3000. Se agrega ACA ANTES de correr el build: un distDir alternativo que no
+# este listado envenena la auto-deteccion de fuentes de Tailwind 4 y tira
+# `Can't resolve './&'` sobre un CSS intacto (CLAUDE.md, Aug 2026).
+/.next-b12/
+# `.b12-capturas/`: las capturas intermedias de los instrumentos de B12 (el censo
+# de rotulos, los bloques del pie y el negro de Trabajos). Insumo del calculo, no
+# evidencia: lo que se commitea son las capturas del reporte en
+# `docs/rediseno/capturas/b12/` y el JSON con las cifras en `outputs/b12/`.
+/.b12-capturas/

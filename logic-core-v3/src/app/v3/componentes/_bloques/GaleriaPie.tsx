@@ -190,7 +190,13 @@ export function GaleriaPie() {
 function PieDeMuestra({ invertido = false }: { readonly invertido?: boolean }) {
   return (
     <div className="border-borde w-full border">
-      <Pie invertido={invertido}>
+      {/* ⚠️ B12: el pie dejó de pintar `var(--color-fondo)` por hoja —era lo que
+          tapaba la sala detrás del Cierre— así que la GALERÍA, que es la que
+          demuestra las dos superficies, pinta el relleno ella misma con la
+          MISMA utilidad que la regla tenía. Sin esto la muestra «invertido»
+          sería tinta clara sobre el papel de la ficha: una demo que no
+          demuestra. En el home nadie pasa `className` y el pie no pinta. */}
+      <Pie invertido={invertido} className="bg-fondo">
         <BloqueDeColumnasDelPie>
           <div className="flex flex-col gap-[var(--spacing-2)]">
             <EtiquetaDeSeccion como="h4" sangria={false}>

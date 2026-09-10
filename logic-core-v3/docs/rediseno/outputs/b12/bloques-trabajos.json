@@ -1,0 +1,2131 @@
+{
+  "etiqueta": "trabajos",
+  "varianteDelCierre": null,
+  "instrumento": "scripts-b8/{c-bloques,lectores,glifo-alfa,ocultar,particulas}.ts — los MISMOS módulos que firmaron las deudas de B8 y las re-mediciones de B11, importados, no copiados. Origen 3000.",
+  "filas": [
+    {
+      "perfil": "1920",
+      "ancho": 1920,
+      "alto": 1080,
+      "documento": {
+        "altoDelDocumento": 19440,
+        "ventana": 1080,
+        "ancho": 1920
+      },
+      "paso": 0.5,
+      "secciones": [
+        {
+          "id": "trabajos",
+          "superficieAlMedir": "oscuro-transparente",
+          "fondo": {
+            "superficie": "oscuro-transparente",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "backgroundImage": "none",
+            "backdropFilter": "none",
+            "velo": "",
+            "veloBorde": "",
+            "tokens": {
+              "pad": 32,
+              "columna": 140,
+              "canal": 16,
+              "medio": 860,
+              "tope": 1920
+            },
+            "rect": {
+              "x": 0,
+              "y": -2160,
+              "ancho": 1920,
+              "alto": 3240
+            }
+          },
+          "posiciones": [
+            {
+              "scrollY": 8640,
+              "pantalla": 8,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Esquina",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Esquina",
+                  "tamanoPx": 21.3526,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8640,
+                  "pixelesDeGlifo": 670,
+                  "peorContraste": 18,
+                  "p1Contraste": 18,
+                  "medianaContraste": 18,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9821,
+                  "peorAPlena": 18,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8640,
+                  "pixelesDeGlifo": 405,
+                  "peorContraste": 18,
+                  "p1Contraste": 18,
+                  "medianaContraste": 18,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9778,
+                  "peorAPlena": 18,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8640,
+                  "pixelesDeGlifo": 303,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.7063,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1920,
+                  "y1": 1080
+                },
+                "sinPanel": {
+                  "pixeles": 2072222,
+                  "media": 0.011658035725860367,
+                  "varianza": 0.0023605990110666477,
+                  "desvio": 0.04858599603863903,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.84794923858178,
+                  "grisDesvio": 16.36790500470212
+                },
+                "soloElPanel": {
+                  "pixeles": 2072222,
+                  "media": 0.011695127311717688,
+                  "varianza": 0.0023830581557857744,
+                  "desvio": 0.048816576649594906,
+                  "minimo": 0,
+                  "maximo": 0.846873231509858,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.856494828581273,
+                  "grisDesvio": 16.43438308554987
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 2072222,
+                  "media": 0.3709320485717484,
+                  "varianza": 0.18941998826001974,
+                  "desvio": 0.4352240667288744,
+                  "minimo": 0.0007978510289564742,
+                  "maximo": 1,
+                  "p01": 0.004391442037410293,
+                  "p99": 0.8962693533742663,
+                  "grisMedio": 109.16194602152493,
+                  "grisDesvio": 111.84043152270243
+                },
+                "varianzaQuePasa": 1.0095141718749507,
+                "varianzaConContenido": 80.24233991965853,
+                "desvioDeGrisQuePasa": 1.0040614898992055,
+                "zonas": null,
+                "logo": {
+                  "area": 2038158,
+                  "caja": [
+                    0,
+                    0,
+                    1919,
+                    1079
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1920-trabajos-8640-C.png",
+                "A": ".b12-capturas/trabajos-1920-trabajos-8640-A.png",
+                "T": ".b12-capturas/trabajos-1920-trabajos-8640-T.png",
+                "S": ".b12-capturas/trabajos-1920-trabajos-8640-S.png",
+                "V": ".b12-capturas/trabajos-1920-trabajos-8640-V.png"
+              }
+            },
+            {
+              "scrollY": 9180,
+              "pantalla": 8.5,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "El Garage",
+                  "tamanoPx": 21.3526,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 9180,
+                  "pixelesDeGlifo": 565,
+                  "peorContraste": 7.61,
+                  "p1Contraste": 7.61,
+                  "medianaContraste": 12.82,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.8442,
+                  "peorAPlena": 9.38,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 9180,
+                  "pixelesDeGlifo": 269,
+                  "peorContraste": 1.27,
+                  "p1Contraste": 3.18,
+                  "medianaContraste": 12.82,
+                  "bajoAA": 3,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9926,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 9180,
+                  "pixelesDeGlifo": 362,
+                  "peorContraste": 4.44,
+                  "p1Contraste": 4.65,
+                  "medianaContraste": 6.26,
+                  "bajoAA": 2,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.6133,
+                  "peorAPlena": 5.27,
+                  "pasaAA": false,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1920,
+                  "y1": 1080
+                },
+                "sinPanel": {
+                  "pixeles": 2072404,
+                  "media": 0.01154799082208274,
+                  "varianza": 0.002500985703854058,
+                  "desvio": 0.05000985606711999,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.054248455377903945,
+                  "grisMedio": 21.26731015175992,
+                  "grisDesvio": 16.772151017188172
+                },
+                "soloElPanel": {
+                  "pixeles": 2072404,
+                  "media": 0.011537358619663941,
+                  "varianza": 0.0024941696180543543,
+                  "desvio": 0.04994166214749319,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.054248455377903945,
+                  "grisMedio": 21.26014682096135,
+                  "grisDesvio": 16.761236322868267
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 2072404,
+                  "media": 0.022669742776057947,
+                  "varianza": 0.006498568337849633,
+                  "desvio": 0.08061369820228838,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0.00121410793419535,
+                  "p99": 0.5205567482591847,
+                  "grisMedio": 27.135736272320603,
+                  "grisDesvio": 28.45987102426684
+                },
+                "varianzaQuePasa": 0.9972746402391665,
+                "varianzaConContenido": 2.598402832865153,
+                "desvioDeGrisQuePasa": 0.9993492370591751,
+                "zonas": null,
+                "logo": {
+                  "area": 2039512,
+                  "caja": [
+                    0,
+                    0,
+                    1919,
+                    1079
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1920-trabajos-9180-C.png",
+                "A": ".b12-capturas/trabajos-1920-trabajos-9180-A.png",
+                "T": ".b12-capturas/trabajos-1920-trabajos-9180-T.png",
+                "S": ".b12-capturas/trabajos-1920-trabajos-9180-S.png",
+                "V": ".b12-capturas/trabajos-1920-trabajos-9180-V.png"
+              }
+            },
+            {
+              "scrollY": 9720,
+              "pantalla": 9,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "El Garage",
+                  "tamanoPx": 21.3526,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9720,
+                  "pixelesDeGlifo": 832,
+                  "peorContraste": 1.42,
+                  "p1Contraste": 18.24,
+                  "medianaContraste": 18.24,
+                  "bajoAA": 3,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9952,
+                  "peorAPlena": 1.42,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9720,
+                  "pixelesDeGlifo": 408,
+                  "peorContraste": 14.3,
+                  "p1Contraste": 14.5,
+                  "medianaContraste": 18.14,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 14.3,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9720,
+                  "pixelesDeGlifo": 298,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9732,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1920,
+                  "y1": 1080
+                },
+                "sinPanel": {
+                  "pixeles": 2072062,
+                  "media": 0.010161034156798766,
+                  "varianza": 0.0023649331228578394,
+                  "desvio": 0.048630578064195774,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 18.72663799690634,
+                  "grisDesvio": 16.57437858082368
+                },
+                "soloElPanel": {
+                  "pixeles": 2072062,
+                  "media": 0.01016580894829561,
+                  "varianza": 0.002369534569474485,
+                  "desvio": 0.04867786529290787,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 18.720343404370134,
+                  "grisDesvio": 16.59095046818728
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 2072062,
+                  "media": 0.031063569489835567,
+                  "varianza": 0.013509544357557772,
+                  "desvio": 0.1162305655047663,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0.0021246888848418626,
+                  "p99": 0.7862193630385261,
+                  "grisMedio": 28.769829260773776,
+                  "grisDesvio": 35.86454425266291
+                },
+                "varianzaQuePasa": 1.001945698409892,
+                "varianzaConContenido": 5.71244244794226,
+                "desvioDeGrisQuePasa": 1.0009998496946833,
+                "zonas": null,
+                "logo": {
+                  "area": 2043029,
+                  "caja": [
+                    0,
+                    0,
+                    1919,
+                    1079
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1920-trabajos-9720-C.png",
+                "A": ".b12-capturas/trabajos-1920-trabajos-9720-A.png",
+                "T": ".b12-capturas/trabajos-1920-trabajos-9720-T.png",
+                "S": ".b12-capturas/trabajos-1920-trabajos-9720-S.png",
+                "V": ".b12-capturas/trabajos-1920-trabajos-9720-V.png"
+              }
+            },
+            {
+              "scrollY": 10260,
+              "pantalla": 9.5,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Banú",
+                  "tamanoPx": 21.3526,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 10260,
+                  "pixelesDeGlifo": 309,
+                  "peorContraste": 1.3,
+                  "p1Contraste": 1.32,
+                  "medianaContraste": 13.76,
+                  "bajoAA": 8,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9806,
+                  "peorAPlena": 1.34,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 10260,
+                  "pixelesDeGlifo": 280,
+                  "peorContraste": 13.67,
+                  "p1Contraste": 13.67,
+                  "medianaContraste": 13.76,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 18.01,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 10260,
+                  "pixelesDeGlifo": 357,
+                  "peorContraste": 4.44,
+                  "p1Contraste": 5.91,
+                  "medianaContraste": 6.34,
+                  "bajoAA": 1,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9832,
+                  "peorAPlena": 5.27,
+                  "pasaAA": false,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1920,
+                  "y1": 1080
+                },
+                "sinPanel": {
+                  "pixeles": 2072654,
+                  "media": 0.009369921136592047,
+                  "varianza": 0.0023347049977049147,
+                  "desvio": 0.04831878514309848,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.04795626247435378,
+                  "grisMedio": 17.101305957348014,
+                  "grisDesvio": 16.45725060009047
+                },
+                "soloElPanel": {
+                  "pixeles": 2072654,
+                  "media": 0.009362388132341437,
+                  "varianza": 0.0023303606258674226,
+                  "desvio": 0.048273808901592,
+                  "minimo": 0,
+                  "maximo": 0.854406389132676,
+                  "p01": 0,
+                  "p99": 0.04795626247435378,
+                  "grisMedio": 17.100739456813685,
+                  "grisDesvio": 16.443045781031834
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 2072654,
+                  "media": 0.017501798687344704,
+                  "varianza": 0.0034866965597226116,
+                  "desvio": 0.05904825619544248,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0,
+                  "p99": 0.33648598072152325,
+                  "grisMedio": 23.28415495064671,
+                  "grisDesvio": 25.29050739300448
+                },
+                "varianzaQuePasa": 0.9981392202262116,
+                "varianzaConContenido": 1.4934206090920006,
+                "desvioDeGrisQuePasa": 0.9991368656038719,
+                "zonas": null,
+                "logo": {
+                  "area": 2047178,
+                  "caja": [
+                    0,
+                    0,
+                    1919,
+                    1079
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1920-trabajos-10260-C.png",
+                "A": ".b12-capturas/trabajos-1920-trabajos-10260-A.png",
+                "T": ".b12-capturas/trabajos-1920-trabajos-10260-T.png",
+                "S": ".b12-capturas/trabajos-1920-trabajos-10260-S.png",
+                "V": ".b12-capturas/trabajos-1920-trabajos-10260-V.png"
+              }
+            },
+            {
+              "scrollY": 10800,
+              "pantalla": 10,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Banú",
+                  "tamanoPx": 21.3526,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 10800,
+                  "pixelesDeGlifo": 455,
+                  "peorContraste": 10.44,
+                  "p1Contraste": 10.44,
+                  "medianaContraste": 18.09,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 10.44,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 10800,
+                  "pixelesDeGlifo": 415,
+                  "peorContraste": 8.37,
+                  "p1Contraste": 8.63,
+                  "medianaContraste": 13.2,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.8795,
+                  "peorAPlena": 8.37,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 10800,
+                  "pixelesDeGlifo": 288,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9792,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1920,
+                  "y1": 1080
+                },
+                "sinPanel": {
+                  "pixeles": 2072442,
+                  "media": 0.04618451715023127,
+                  "varianza": 0.020874004815621978,
+                  "desvio": 0.1444783887493973,
+                  "minimo": 0,
+                  "maximo": 0.9203601830451149,
+                  "p01": 0,
+                  "p99": 0.7824268758092723,
+                  "grisMedio": 30.449994430654215,
+                  "grisDesvio": 47.30713632575215
+                },
+                "soloElPanel": {
+                  "pixeles": 2072442,
+                  "media": 0.04619906727236707,
+                  "varianza": 0.020872383265300425,
+                  "desvio": 0.14447277690035734,
+                  "minimo": 0,
+                  "maximo": 0.9203601830451149,
+                  "p01": 0,
+                  "p99": 0.7824268758092723,
+                  "grisMedio": 30.458992439573088,
+                  "grisDesvio": 47.31315413843263
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 2072442,
+                  "media": 0.05905559084089148,
+                  "varianza": 0.02127670083369184,
+                  "desvio": 0.14586535172443058,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0,
+                  "p99": 0.7824268758092723,
+                  "grisMedio": 41.24101820935493,
+                  "grisDesvio": 49.45500640846618
+                },
+                "varianzaQuePasa": 0.9999223172392708,
+                "varianzaConContenido": 1.0192917469180849,
+                "desvioDeGrisQuePasa": 1.000127207291497,
+                "zonas": null,
+                "logo": {
+                  "area": 1843241,
+                  "caja": [
+                    0,
+                    0,
+                    1919,
+                    972
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1920-trabajos-10800-C.png",
+                "A": ".b12-capturas/trabajos-1920-trabajos-10800-A.png",
+                "T": ".b12-capturas/trabajos-1920-trabajos-10800-T.png",
+                "S": ".b12-capturas/trabajos-1920-trabajos-10800-S.png",
+                "V": ".b12-capturas/trabajos-1920-trabajos-10800-V.png"
+              }
+            }
+          ],
+          "sala": [
+            {
+              "scrollY": 8640,
+              "gris": 21.9,
+              "luminancia": 0.0117,
+              "particulas": {
+                "fondoGris": 20.9,
+                "umbral": 60.9,
+                "cantidad": 929,
+                "porCienMilPx": 44.8,
+                "fraccionDelArea": 0.01378,
+                "areaMediana": 14,
+                "areaP90": 39,
+                "diametroMediano": 4.22,
+                "diametroP90": 7.05,
+                "picoMediano": 217.9,
+                "picoP90": 218,
+                "descartadosGrandes": 9,
+                "porTamano": {
+                  "hasta3": 28,
+                  "hasta10": 310,
+                  "hasta30": 465,
+                  "mas": 126
+                }
+              }
+            },
+            {
+              "scrollY": 9180,
+              "gris": 21.3,
+              "luminancia": 0.0116,
+              "particulas": {
+                "fondoGris": 20.9,
+                "umbral": 60.9,
+                "cantidad": 924,
+                "porCienMilPx": 44.56,
+                "fraccionDelArea": 0.01381,
+                "areaMediana": 14,
+                "areaP90": 43,
+                "diametroMediano": 4.22,
+                "diametroP90": 7.4,
+                "picoMediano": 217,
+                "picoP90": 218,
+                "descartadosGrandes": 6,
+                "porTamano": {
+                  "hasta3": 39,
+                  "hasta10": 297,
+                  "hasta30": 449,
+                  "mas": 139
+                }
+              }
+            },
+            {
+              "scrollY": 9720,
+              "gris": 18.7,
+              "luminancia": 0.0102,
+              "particulas": {
+                "fondoGris": 17.9,
+                "umbral": 57.9,
+                "cantidad": 903,
+                "porCienMilPx": 43.55,
+                "fraccionDelArea": 0.01281,
+                "areaMediana": 14,
+                "areaP90": 39,
+                "diametroMediano": 4.22,
+                "diametroP90": 7.05,
+                "picoMediano": 217,
+                "picoP90": 218,
+                "descartadosGrandes": 15,
+                "porTamano": {
+                  "hasta3": 38,
+                  "hasta10": 301,
+                  "hasta30": 431,
+                  "mas": 133
+                }
+              }
+            },
+            {
+              "scrollY": 10260,
+              "gris": 17.1,
+              "luminancia": 0.0094,
+              "particulas": {
+                "fondoGris": 15.9,
+                "umbral": 55.9,
+                "cantidad": 873,
+                "porCienMilPx": 42.1,
+                "fraccionDelArea": 0.01267,
+                "areaMediana": 13,
+                "areaP90": 42,
+                "diametroMediano": 4.07,
+                "diametroP90": 7.31,
+                "picoMediano": 217,
+                "picoP90": 217.9,
+                "descartadosGrandes": 12,
+                "porTamano": {
+                  "hasta3": 40,
+                  "hasta10": 333,
+                  "hasta30": 368,
+                  "mas": 132
+                }
+              }
+            },
+            {
+              "scrollY": 10800,
+              "gris": 30.4,
+              "luminancia": 0.0462,
+              "particulas": {
+                "fondoGris": 15.1,
+                "umbral": 55.1,
+                "cantidad": 831,
+                "porCienMilPx": 40.08,
+                "fraccionDelArea": 0.01094,
+                "areaMediana": 12,
+                "areaP90": 35,
+                "diametroMediano": 3.91,
+                "diametroP90": 6.68,
+                "picoMediano": 217,
+                "picoP90": 217.2,
+                "descartadosGrandes": 14,
+                "porTamano": {
+                  "hasta3": 46,
+                  "hasta10": 327,
+                  "hasta30": 354,
+                  "mas": 104
+                }
+              }
+            }
+          ],
+          "peorPorBloque": [
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|Esquina",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "Esquina",
+              "tamanoPx": 21.3526,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 1,
+              "scrollY": 8640,
+              "pixelesDeGlifo": 670,
+              "peorContraste": 18,
+              "p1Contraste": 18,
+              "medianaContraste": 18,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9821,
+              "peorAPlena": 18,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|texto|micro|Lo que cambió",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "Lo que cambió",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 9180,
+              "pixelesDeGlifo": 269,
+              "peorContraste": 1.27,
+              "p1Contraste": 3.18,
+              "medianaContraste": 12.82,
+              "bajoAA": 3,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9926,
+              "peorAPlena": 1.32,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|texto|micro|[MÉTRICA]",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "[MÉTRICA]",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 9180,
+              "pixelesDeGlifo": 362,
+              "peorContraste": 4.44,
+              "p1Contraste": 4.65,
+              "medianaContraste": 6.26,
+              "bajoAA": 2,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.6133,
+              "peorAPlena": 5.27,
+              "pasaAA": false,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "El Garage",
+              "tamanoPx": 21.3526,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 1,
+              "scrollY": 9720,
+              "pixelesDeGlifo": 832,
+              "peorContraste": 1.42,
+              "p1Contraste": 18.24,
+              "medianaContraste": 18.24,
+              "bajoAA": 3,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9952,
+              "peorAPlena": 1.42,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "Banú",
+              "tamanoPx": 21.3526,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 10260,
+              "pixelesDeGlifo": 309,
+              "peorContraste": 1.3,
+              "p1Contraste": 1.32,
+              "medianaContraste": 13.76,
+              "bajoAA": 8,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9806,
+              "peorAPlena": 1.34,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            }
+          ],
+          "veredicto": "no abre",
+          "salaMediaMinima": 0.0094,
+          "salaMediaMaxima": 0.0462
+        }
+      ]
+    },
+    {
+      "perfil": "1440",
+      "ancho": 1440,
+      "alto": 900,
+      "documento": {
+        "altoDelDocumento": 16200,
+        "ventana": 900,
+        "ancho": 1440
+      },
+      "paso": 0.5,
+      "secciones": [
+        {
+          "id": "trabajos",
+          "superficieAlMedir": "oscuro-transparente",
+          "fondo": {
+            "superficie": "oscuro-transparente",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "backgroundImage": "none",
+            "backdropFilter": "none",
+            "velo": "",
+            "veloBorde": "",
+            "tokens": {
+              "pad": 32,
+              "columna": 140,
+              "canal": 16,
+              "medio": 860,
+              "tope": 1920
+            },
+            "rect": {
+              "x": 0,
+              "y": -1800,
+              "ancho": 1440,
+              "alto": 2700
+            }
+          },
+          "posiciones": [
+            {
+              "scrollY": 7200,
+              "pantalla": 8,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Esquina",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Esquina",
+                  "tamanoPx": 20.0005,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 7200,
+                  "pixelesDeGlifo": 603,
+                  "peorContraste": 18,
+                  "p1Contraste": 18,
+                  "medianaContraste": 18,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9735,
+                  "peorAPlena": 18,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 7200,
+                  "pixelesDeGlifo": 416,
+                  "peorContraste": 18,
+                  "p1Contraste": 18,
+                  "medianaContraste": 18,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.8846,
+                  "peorAPlena": 18,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 7200,
+                  "pixelesDeGlifo": 288,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.8785,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1440,
+                  "y1": 900
+                },
+                "sinPanel": {
+                  "pixeles": 1294693,
+                  "media": 0.011937569476888897,
+                  "varianza": 0.0025109609242572935,
+                  "desvio": 0.05010948936336603,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.9288767510047,
+                  "grisDesvio": 16.887630963038166
+                },
+                "soloElPanel": {
+                  "pixeles": 1294693,
+                  "media": 0.011940918115929807,
+                  "varianza": 0.0025113102745366604,
+                  "desvio": 0.05011297511160818,
+                  "minimo": 0,
+                  "maximo": 0.846873231509858,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.9270536377262,
+                  "grisDesvio": 16.89755588885739
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 1294693,
+                  "media": 0.32939307858633693,
+                  "varianza": 0.17921595706977783,
+                  "desvio": 0.4233390568678702,
+                  "minimo": 0.0009105809506465124,
+                  "maximo": 1,
+                  "p01": 0.004391442037410293,
+                  "p99": 0.8962693533742663,
+                  "grisMedio": 99.09349782875414,
+                  "grisDesvio": 109.03900646936293
+                },
+                "varianzaQuePasa": 1.0001391301138907,
+                "varianzaConContenido": 71.37345521328149,
+                "desvioDeGrisQuePasa": 1.0005877038550255,
+                "zonas": null,
+                "logo": {
+                  "area": 1271890,
+                  "caja": [
+                    0,
+                    0,
+                    1439,
+                    899
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1440-trabajos-7200-C.png",
+                "A": ".b12-capturas/trabajos-1440-trabajos-7200-A.png",
+                "T": ".b12-capturas/trabajos-1440-trabajos-7200-T.png",
+                "S": ".b12-capturas/trabajos-1440-trabajos-7200-S.png",
+                "V": ".b12-capturas/trabajos-1440-trabajos-7200-V.png"
+              }
+            },
+            {
+              "scrollY": 7650,
+              "pantalla": 8.5,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "El Garage",
+                  "tamanoPx": 20.0005,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 7650,
+                  "pixelesDeGlifo": 486,
+                  "peorContraste": 1.27,
+                  "p1Contraste": 1.31,
+                  "medianaContraste": 12.82,
+                  "bajoAA": 9,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9815,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 7650,
+                  "pixelesDeGlifo": 256,
+                  "peorContraste": 1.27,
+                  "p1Contraste": 7.61,
+                  "medianaContraste": 12.82,
+                  "bajoAA": 2,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 7650,
+                  "pixelesDeGlifo": 159,
+                  "peorContraste": 6.26,
+                  "p1Contraste": 6.26,
+                  "medianaContraste": 6.26,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 7.64,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1440,
+                  "y1": 900
+                },
+                "sinPanel": {
+                  "pixeles": 1295099,
+                  "media": 0.011581992790800728,
+                  "varianza": 0.0024946975616045673,
+                  "desvio": 0.049946947470336636,
+                  "minimo": 0,
+                  "maximo": 0.846873231509858,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.279517944057012,
+                  "grisDesvio": 16.87221735161602
+                },
+                "soloElPanel": {
+                  "pixeles": 1295099,
+                  "media": 0.011610781101093814,
+                  "varianza": 0.0025141360302291652,
+                  "desvio": 0.050141161037905425,
+                  "minimo": 0,
+                  "maximo": 0.846873231509858,
+                  "p01": 0,
+                  "p99": 0.054363339198371635,
+                  "grisMedio": 21.287782048345594,
+                  "grisDesvio": 16.919021753861248
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 1295099,
+                  "media": 0.02398720175410104,
+                  "varianza": 0.006634514134460903,
+                  "desvio": 0.08145252687584899,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0,
+                  "p99": 0.41520848591796233,
+                  "grisMedio": 27.722295399635733,
+                  "grisDesvio": 29.62303125415758
+                },
+                "varianzaQuePasa": 1.0077919139072293,
+                "varianzaConContenido": 2.659446273797471,
+                "desvioDeGrisQuePasa": 1.0027740516418102,
+                "zonas": null,
+                "logo": {
+                  "area": 1273388,
+                  "caja": [
+                    0,
+                    0,
+                    1439,
+                    899
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1440-trabajos-7650-C.png",
+                "A": ".b12-capturas/trabajos-1440-trabajos-7650-A.png",
+                "T": ".b12-capturas/trabajos-1440-trabajos-7650-T.png",
+                "S": ".b12-capturas/trabajos-1440-trabajos-7650-S.png",
+                "V": ".b12-capturas/trabajos-1440-trabajos-7650-V.png"
+              }
+            },
+            {
+              "scrollY": 8100,
+              "pantalla": 9,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "El Garage",
+                  "tamanoPx": 20.0005,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8100,
+                  "pixelesDeGlifo": 737,
+                  "peorContraste": 1.32,
+                  "p1Contraste": 2.22,
+                  "medianaContraste": 18.01,
+                  "bajoAA": 11,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9973,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8100,
+                  "pixelesDeGlifo": 416,
+                  "peorContraste": 1.32,
+                  "p1Contraste": 1.32,
+                  "medianaContraste": 17.89,
+                  "bajoAA": 11,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9808,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 8100,
+                  "pixelesDeGlifo": 298,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9765,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1440,
+                  "y1": 900
+                },
+                "sinPanel": {
+                  "pixeles": 1294549,
+                  "media": 0.010179472971965694,
+                  "varianza": 0.002367604156656518,
+                  "desvio": 0.0486580328070969,
+                  "minimo": 0,
+                  "maximo": 0.8549926081242338,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 18.741244657757573,
+                  "grisDesvio": 16.626070846914036
+                },
+                "soloElPanel": {
+                  "pixeles": 1294549,
+                  "media": 0.010218668252529995,
+                  "varianza": 0.0023839138577360004,
+                  "desvio": 0.04882534032381137,
+                  "minimo": 0,
+                  "maximo": 0.854406389132676,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 18.75548804275114,
+                  "grisDesvio": 16.69494563974062
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 1294549,
+                  "media": 0.031155286676010818,
+                  "varianza": 0.012399523546846926,
+                  "desvio": 0.11135314789823827,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0.0018211619012930248,
+                  "p99": 0.6938717612919899,
+                  "grisMedio": 28.97950425708462,
+                  "grisDesvio": 35.968141267140645
+                },
+                "varianzaQuePasa": 1.0068886942243396,
+                "varianzaConContenido": 5.237160744115806,
+                "desvioDeGrisQuePasa": 1.0041425778502182,
+                "zonas": null,
+                "logo": {
+                  "area": 1276344,
+                  "caja": [
+                    0,
+                    0,
+                    1439,
+                    899
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1440-trabajos-8100-C.png",
+                "A": ".b12-capturas/trabajos-1440-trabajos-8100-A.png",
+                "T": ".b12-capturas/trabajos-1440-trabajos-8100-T.png",
+                "S": ".b12-capturas/trabajos-1440-trabajos-8100-S.png",
+                "V": ".b12-capturas/trabajos-1440-trabajos-8100-V.png"
+              }
+            },
+            {
+              "scrollY": 8550,
+              "pantalla": 9.5,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Banú",
+                  "tamanoPx": 20.0005,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 8550,
+                  "pixelesDeGlifo": 284,
+                  "peorContraste": 13.76,
+                  "p1Contraste": 13.76,
+                  "medianaContraste": 13.85,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 18.14,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 8550,
+                  "pixelesDeGlifo": 248,
+                  "peorContraste": 8.53,
+                  "p1Contraste": 8.53,
+                  "medianaContraste": 13.76,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 10.62,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 0.872,
+                  "scrollY": 8550,
+                  "pixelesDeGlifo": 327,
+                  "peorContraste": 4.44,
+                  "p1Contraste": 4.44,
+                  "medianaContraste": 6.35,
+                  "bajoAA": 9,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9969,
+                  "peorAPlena": 5.27,
+                  "pasaAA": false,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1440,
+                  "y1": 900
+                },
+                "sinPanel": {
+                  "pixeles": 1295141,
+                  "media": 0.00973558597991218,
+                  "varianza": 0.002525101949167168,
+                  "desvio": 0.050250392527493436,
+                  "minimo": 0,
+                  "maximo": 0.854406389132676,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 17.25844833131704,
+                  "grisDesvio": 17.081464712899074
+                },
+                "soloElPanel": {
+                  "pixeles": 1295141,
+                  "media": 0.009723444901658362,
+                  "varianza": 0.0025194543355448666,
+                  "desvio": 0.05019416634973497,
+                  "minimo": 0,
+                  "maximo": 0.854406389132676,
+                  "p01": 0,
+                  "p99": 0.04959575762925466,
+                  "grisMedio": 17.262766137640565,
+                  "grisDesvio": 17.051996803070622
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 1295141,
+                  "media": 0.018913205209396065,
+                  "varianza": 0.004000039411462113,
+                  "desvio": 0.0632458647775656,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0,
+                  "p99": 0.33648598072152325,
+                  "grisMedio": 23.568318939739264,
+                  "grisDesvio": 26.997706983611696
+                },
+                "varianzaQuePasa": 0.9977634116419877,
+                "varianzaConContenido": 1.58411006445954,
+                "desvioDeGrisQuePasa": 0.9982748604804248,
+                "zonas": null,
+                "logo": {
+                  "area": 1277796,
+                  "caja": [
+                    0,
+                    0,
+                    1439,
+                    899
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1440-trabajos-8550-C.png",
+                "A": ".b12-capturas/trabajos-1440-trabajos-8550-A.png",
+                "T": ".b12-capturas/trabajos-1440-trabajos-8550-T.png",
+                "S": ".b12-capturas/trabajos-1440-trabajos-8550-S.png",
+                "V": ".b12-capturas/trabajos-1440-trabajos-8550-V.png"
+              }
+            },
+            {
+              "scrollY": 9000,
+              "pantalla": 10,
+              "bloques": [
+                {
+                  "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+                  "etiqueta": "a",
+                  "pieza": "enlace-de-proyecto",
+                  "nivel": "titulo-s",
+                  "texto": "Banú",
+                  "tamanoPx": 20.0005,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9000,
+                  "pixelesDeGlifo": 421,
+                  "peorContraste": 1.32,
+                  "p1Contraste": 1.32,
+                  "medianaContraste": 18.01,
+                  "bajoAA": 10,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9691,
+                  "peorAPlena": 1.32,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|Lo que cambió",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "Lo que cambió",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9000,
+                  "pixelesDeGlifo": 412,
+                  "peorContraste": 1.33,
+                  "p1Contraste": 17.46,
+                  "medianaContraste": 18,
+                  "bajoAA": 2,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 1,
+                  "peorAPlena": 1.33,
+                  "pasaAA": false,
+                  "pasariaAPlena": false
+                },
+                {
+                  "clave": "span|texto|micro|[MÉTRICA]",
+                  "etiqueta": "span",
+                  "pieza": "texto",
+                  "nivel": "micro",
+                  "texto": "[MÉTRICA]",
+                  "tamanoPx": 10,
+                  "peso": 400,
+                  "grande": false,
+                  "tinta": [
+                    247,
+                    247,
+                    245
+                  ],
+                  "opacidad": 1,
+                  "scrollY": 9000,
+                  "pixelesDeGlifo": 289,
+                  "peorContraste": 6.65,
+                  "p1Contraste": 6.65,
+                  "medianaContraste": 6.65,
+                  "bajoAA": 0,
+                  "umbralAA": 4.5,
+                  "sobreElLogo": 0.9896,
+                  "peorAPlena": 6.65,
+                  "pasaAA": true,
+                  "pasariaAPlena": true
+                }
+              ],
+              "escena": {
+                "region": {
+                  "x0": 0,
+                  "y0": 0,
+                  "x1": 1440,
+                  "y1": 900
+                },
+                "sinPanel": {
+                  "pixeles": 1294878,
+                  "media": 0.04661241836794835,
+                  "varianza": 0.021070474630910815,
+                  "desvio": 0.14515672437372928,
+                  "minimo": 0,
+                  "maximo": 0.9203601830451149,
+                  "p01": 0,
+                  "p99": 0.7901805932031323,
+                  "grisMedio": 30.65967789189263,
+                  "grisDesvio": 47.49925809288758
+                },
+                "soloElPanel": {
+                  "pixeles": 1294878,
+                  "media": 0.046626862436845426,
+                  "varianza": 0.021078075602591062,
+                  "desvio": 0.14518290396114503,
+                  "minimo": 0,
+                  "maximo": 0.9203601830451149,
+                  "p01": 0,
+                  "p99": 0.7901805932031323,
+                  "grisMedio": 30.6601319376018,
+                  "grisDesvio": 47.509105770667574
+                },
+                "conPanelSinTinta": {
+                  "pixeles": 1294878,
+                  "media": 0.06041684110430833,
+                  "varianza": 0.021799001127012562,
+                  "desvio": 0.14764484795282415,
+                  "minimo": 0,
+                  "maximo": 1,
+                  "p01": 0,
+                  "p99": 0.7901805932031323,
+                  "grisMedio": 41.404636136123095,
+                  "grisDesvio": 50.29626231744929
+                },
+                "varianzaQuePasa": 1.0003607404110915,
+                "varianzaConContenido": 1.0345757041007981,
+                "desvioDeGrisQuePasa": 1.000207322770405,
+                "zonas": null,
+                "logo": {
+                  "area": 1150581,
+                  "caja": [
+                    0,
+                    0,
+                    1439,
+                    810
+                  ]
+                }
+              },
+              "capturas": {
+                "C": ".b12-capturas/trabajos-1440-trabajos-9000-C.png",
+                "A": ".b12-capturas/trabajos-1440-trabajos-9000-A.png",
+                "T": ".b12-capturas/trabajos-1440-trabajos-9000-T.png",
+                "S": ".b12-capturas/trabajos-1440-trabajos-9000-S.png",
+                "V": ".b12-capturas/trabajos-1440-trabajos-9000-V.png"
+              }
+            }
+          ],
+          "sala": [
+            {
+              "scrollY": 7200,
+              "gris": 21.9,
+              "luminancia": 0.0119,
+              "particulas": {
+                "fondoGris": 20.9,
+                "umbral": 60.9,
+                "cantidad": 896,
+                "porCienMilPx": 69.14,
+                "fraccionDelArea": 0.0162,
+                "areaMediana": 9,
+                "areaP90": 30,
+                "diametroMediano": 3.39,
+                "diametroP90": 6.18,
+                "picoMediano": 217.9,
+                "picoP90": 218,
+                "descartadosGrandes": 4,
+                "porTamano": {
+                  "hasta3": 72,
+                  "hasta10": 437,
+                  "hasta30": 300,
+                  "mas": 87
+                }
+              }
+            },
+            {
+              "scrollY": 7650,
+              "gris": 21.3,
+              "luminancia": 0.0116,
+              "particulas": {
+                "fondoGris": 20.9,
+                "umbral": 60.9,
+                "cantidad": 866,
+                "porCienMilPx": 66.82,
+                "fraccionDelArea": 0.0148,
+                "areaMediana": 9,
+                "areaP90": 28,
+                "diametroMediano": 3.39,
+                "diametroP90": 5.97,
+                "picoMediano": 217,
+                "picoP90": 218,
+                "descartadosGrandes": 4,
+                "porTamano": {
+                  "hasta3": 64,
+                  "hasta10": 428,
+                  "hasta30": 295,
+                  "mas": 79
+                }
+              }
+            },
+            {
+              "scrollY": 8100,
+              "gris": 18.7,
+              "luminancia": 0.0102,
+              "particulas": {
+                "fondoGris": 17.9,
+                "umbral": 57.9,
+                "cantidad": 867,
+                "porCienMilPx": 66.9,
+                "fraccionDelArea": 0.01652,
+                "areaMediana": 9,
+                "areaP90": 36,
+                "diametroMediano": 3.39,
+                "diametroP90": 6.77,
+                "picoMediano": 217,
+                "picoP90": 218,
+                "descartadosGrandes": 1,
+                "porTamano": {
+                  "hasta3": 85,
+                  "hasta10": 417,
+                  "hasta30": 274,
+                  "mas": 91
+                }
+              }
+            },
+            {
+              "scrollY": 8550,
+              "gris": 17.3,
+              "luminancia": 0.0097,
+              "particulas": {
+                "fondoGris": 15.9,
+                "umbral": 55.9,
+                "cantidad": 846,
+                "porCienMilPx": 65.28,
+                "fraccionDelArea": 0.01409,
+                "areaMediana": 9,
+                "areaP90": 27,
+                "diametroMediano": 3.39,
+                "diametroP90": 5.86,
+                "picoMediano": 217,
+                "picoP90": 217.9,
+                "descartadosGrandes": 8,
+                "porTamano": {
+                  "hasta3": 97,
+                  "hasta10": 417,
+                  "hasta30": 257,
+                  "mas": 75
+                }
+              }
+            },
+            {
+              "scrollY": 9000,
+              "gris": 30.6,
+              "luminancia": 0.0466,
+              "particulas": {
+                "fondoGris": 15.1,
+                "umbral": 55.1,
+                "cantidad": 828,
+                "porCienMilPx": 63.89,
+                "fraccionDelArea": 0.01488,
+                "areaMediana": 8,
+                "areaP90": 29,
+                "diametroMediano": 3.19,
+                "diametroP90": 6.08,
+                "picoMediano": 217,
+                "picoP90": 217.9,
+                "descartadosGrandes": 4,
+                "porTamano": {
+                  "hasta3": 94,
+                  "hasta10": 417,
+                  "hasta30": 236,
+                  "mas": 81
+                }
+              }
+            }
+          ],
+          "peorPorBloque": [
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|Esquina",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "Esquina",
+              "tamanoPx": 20.0005,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 1,
+              "scrollY": 7200,
+              "pixelesDeGlifo": 603,
+              "peorContraste": 18,
+              "p1Contraste": 18,
+              "medianaContraste": 18,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9735,
+              "peorAPlena": 18,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|texto|micro|Lo que cambió",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "Lo que cambió",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 7650,
+              "pixelesDeGlifo": 256,
+              "peorContraste": 1.27,
+              "p1Contraste": 7.61,
+              "medianaContraste": 12.82,
+              "bajoAA": 2,
+              "umbralAA": 4.5,
+              "sobreElLogo": 1,
+              "peorAPlena": 1.32,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|texto|micro|[MÉTRICA]",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "[MÉTRICA]",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 8550,
+              "pixelesDeGlifo": 327,
+              "peorContraste": 4.44,
+              "p1Contraste": 4.44,
+              "medianaContraste": 6.35,
+              "bajoAA": 9,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9969,
+              "peorAPlena": 5.27,
+              "pasaAA": false,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|El Garage",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "El Garage",
+              "tamanoPx": 20.0005,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 0.872,
+              "scrollY": 7650,
+              "pixelesDeGlifo": 486,
+              "peorContraste": 1.27,
+              "p1Contraste": 1.31,
+              "medianaContraste": 12.82,
+              "bajoAA": 9,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9815,
+              "peorAPlena": 1.32,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "a|enlace-de-proyecto|titulo-s|Banú",
+              "etiqueta": "a",
+              "pieza": "enlace-de-proyecto",
+              "nivel": "titulo-s",
+              "texto": "Banú",
+              "tamanoPx": 20.0005,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                247,
+                247,
+                245
+              ],
+              "opacidad": 1,
+              "scrollY": 9000,
+              "pixelesDeGlifo": 421,
+              "peorContraste": 1.32,
+              "p1Contraste": 1.32,
+              "medianaContraste": 18.01,
+              "bajoAA": 10,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0.9691,
+              "peorAPlena": 1.32,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            }
+          ],
+          "veredicto": "no abre",
+          "salaMediaMinima": 0.0097,
+          "salaMediaMaxima": 0.0466
+        }
+      ]
+    }
+  ]
+}

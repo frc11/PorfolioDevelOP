@@ -4,12 +4,12 @@ import { cn } from '@/lib/utils'
 
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
+import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Titular, idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Bloque } from '../_contrato/coreografia'
 import { CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
-import { NumeroDeSeccion, Seccion } from '../_contrato/Seccion'
+import { MarcaDeSeccion, Seccion } from '../_contrato/Seccion'
 
 import { CifraDeLaComposicion, type Celda } from './Cifra'
 import { CONTENIDO, type ClaveDeCifra } from './contenido'
@@ -125,7 +125,6 @@ export interface PantallaDeNumeros {
 export const GEOMETRIA: {
   readonly columnas: number
   readonly primeraColumnaLibre: number
-  readonly etiqueta: string
   readonly cabecera: string
   readonly medida: string
   readonly pantallas: readonly PantallaDeNumeros[]
@@ -141,16 +140,16 @@ export const GEOMETRIA: {
    *  pieza arranca antes, y el invariante lo afirma leyendo el marcado. */
   primeraColumnaLibre: 7,
   /**
-   * ⚠ **B1: el rótulo entró a la composición y no es cosmético.** Estaba afuera,
-   * con un `gap` fijo: el hueco de arriba (`padding + gap`, 232,72 px contra los 32
-   * de las junturas de adentro) no participaba del reparto.
-   * ⚠ **B11: arranca en la 7 con `col-start`, y eso destapó un defecto del
-   * instrumento**: `celdasDe` contaba toda clase con `tablet:col-start-` y un
-   * rótulo posicionado era una sexta cifra. Se ARREGLA (salta la pieza por su
-   * `data-pieza`), no se afloja. Sin `col-span`: «Números» mide 51 px.
+   * El titular y la bajada: primera columna libre, segunda fila de la primera
+   * pantalla; el ancho lo manda `medida`.
+   *
+   * ⚠️ **B12: la fila 1 quedó vacía y la celda del rótulo se borró.** Llevaba
+   * `etiqueta: 'tablet:col-start-7 tablet:row-start-1'` —el «Números» que B1
+   * metió a la composición y que B11 corrió a la columna 7— y el rótulo se fue
+   * de las ocho por pedido del humano. **La cabecera NO sube a la fila 1**: la
+   * fila vacía no ocupa lugar (`grid` no reserva filas sin ítems) y renumerar
+   * sería mover una posición declarada por otra razón.
    */
-  etiqueta: 'tablet:col-start-7 tablet:row-start-1',
-  /** El titular y la bajada: primera columna libre, segunda fila de la primera pantalla; el ancho lo manda `medida`. */
   cabecera: 'tablet:col-start-7 tablet:col-span-6 tablet:row-start-2',
   /**
    * LA MEDIDA DE LECTURA de la cabecera. [medido] Siete de doce columnas valen
@@ -244,10 +243,12 @@ export function Numeros({ seccion }: PropsDeSeccion): React.JSX.Element {
   return (
     <Seccion seccion={seccion}>
       <Envoltorio>
-        {/* La columna lateral con el `03` abarca las cuatro pantallas: es el
-            rótulo de la SECCIÓN, no el de una caja. */}
+        {/* La columna lateral abarca las cuatro pantallas: es la marca de la
+            SECCIÓN, no la de una caja. ⚠️ B12: llevaba el `03`, que se fue con
+            los rótulos; la columna se queda porque es la que sostiene la
+            posición de todo lo de al lado. */}
         <Grilla columnas="lateral">
-          <NumeroDeSeccion seccion={seccion} />
+          <MarcaDeSeccion />
           <div className="flex w-full flex-col">
             {GEOMETRIA.pantallas.map((pantalla) => (
               <div
@@ -256,13 +257,11 @@ export function Numeros({ seccion }: PropsDeSeccion): React.JSX.Element {
                 data-composicion="dispersa"
                 className={CLASES_DE_LA_PANTALLA}
               >
-                {/* El rótulo sale de la tabla del recorrido y no del contenido:
-                    escribir `Números` también en `contenido.ts` sería una
-                    segunda fuente que se desincroniza. Y el `h2` nombra la
-                    región de la sección (S11, defecto 10). */}
+                {/* ⚠️ B12 · EL RÓTULO `Números` SE FUE y el `h2` queda solo
+                    arriba de la sección, que es lo que se pidió. El `h2` sigue
+                    nombrando la región (S11, defecto 10). */}
                 {pantalla.cabecera ? (
                   <>
-                    <EtiquetaDeSeccion className={GEOMETRIA.etiqueta}>{seccion.nombre}</EtiquetaDeSeccion>
                     <Bloque patron="P2" rango="ventana-visible" className={cn(GEOMETRIA.cabecera, GEOMETRIA.medida)}>
                       {(progreso) => (
                         <CanalDeUnaPieza progreso={progreso} patron="P2" className="flex flex-col gap-4">

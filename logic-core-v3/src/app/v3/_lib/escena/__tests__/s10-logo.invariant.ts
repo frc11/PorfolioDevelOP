@@ -35,7 +35,7 @@
  * esa decisión hay que escribirla, igual que §7.29 hizo con `s8-tinta`.
  */
 
-import { afirmar, cerrar, controlPositivo, noCorre, razonDeContraste, titulo } from '../../__tests__/afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, noCorre, razonDeContraste, titulo } from '../../__tests__/afirmar'
 import { ANCHOS } from '../../__tests__/s10-banco'
 import { tokenPx, variantesActivas } from '../../__tests__/s10-css'
 import { TINTA_HEX } from '../../superficies'
@@ -51,7 +51,7 @@ import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, fraccionDentro, muestra, superpo
 import { SUPUESTOS_DE_LAS_CAJAS } from './s10-logo-cajas'
 import { afirmarLaPalancaDeLayout } from './s10-logo-columna'
 // prettier-ignore
-import { MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraElRecorte, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
+import { INVERTIDAS_TRANSPARENTES, MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraElRecorte, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
 const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
@@ -159,11 +159,11 @@ console.log(
 titulo('5 · 🔴 EL CONTRASTE DONDE SE SUPERPONEN — el número que nadie tenía')
 
 for (const linea of tablaDeContraste()) console.log(`  ${linea}`)
-afirmar(
-  MEJOR_SOBRE_EL_LOGO < PEOR_SOBRE_EL_FONDO,
-  'las dos poblaciones son DISJUNTAS: el mejor píxel del logo es peor que el peor del fondo',
-  `${MEJOR_SOBRE_EL_LOGO.toFixed(2)}:1 contra ${PEOR_SOBRE_EL_FONDO.toFixed(2)}:1 — la exclusión de \`sinLogo\` no es conservadora`,
-)
+afirmar(MEJOR_SOBRE_EL_LOGO < PEOR_SOBRE_EL_FONDO, 'las dos poblaciones son DISJUNTAS en las secciones cuya tinta ES `TINTA_HEX`: el mejor píxel del logo es peor que el peor del fondo', `${MEJOR_SOBRE_EL_LOGO.toFixed(2)}:1 contra ${PEOR_SOBRE_EL_FONDO.toFixed(2)}:1 — la exclusión de \`sinLogo\` no es conservadora`)
+/** ⚠️ B12 · La INVERTIDA queda afuera —su tinta es el papel, no `TINTA_HEX`, y
+ *  con la noche en 0,04 la sala da 1,00:1 contra una tinta que no usa— y hoy es
+ *  UNA: el Cierre pasó a `papel-transparente` cuando el pie dejó de pintar. */
+afirmarIgual([...INVERTIDAS_TRANSPARENTES].sort(), ['trabajos'], '  y la invertida se mide aparte, con SU tinta: la exclusión sale de `superficies.ts`')
 afirmar(
   TINTA_CONTRA_TINTA(TINTA_DEL_LOGO) < 3 && MEJOR_SOBRE_EL_LOGO < AA,
   '  y es por construcción: la tinta del texto y la del logo son el mismo negro',

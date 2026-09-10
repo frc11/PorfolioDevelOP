@@ -173,13 +173,24 @@ const RECORRIDO_ESPERADO: readonly [string, ModoSuperficie][] = [
   ['servicios', 'papel-opaco'],
   ['tu-panel', 'papel-opaco'],
   ['por-que-develop', 'papel-transparente'],
-  ['cierre', 'oscuro-transparente'],
+  /**
+   * ⚠️ **B12 · EL CIERRE PASA DE `oscuro-transparente` A `papel-transparente`, y
+   * es la palanca de la §2 con su número.** El pie dejó de pintar
+   * `var(--color-fondo)` por hoja —era lo que tapaba la sala, B8-LUZ.md §11.1—
+   * y ahí apareció lo que estaba debajo: la sala al final es CLARA (gris 145,5,
+   * luminancia 0,303 en la pose) y la tinta clara del pie no se lee sobre ella.
+   * Medido con el mismo instrumento en la pose y en los dos anchos: la tinta
+   * clara rompe **24 de 24** bloques a 1920 (peor 1,00:1) y la oscura **12 de
+   * 24** (peor 1,04:1). Se da vuelta la tinta; la derivación entera está en
+   * `secciones.ts`, en la fila del Cierre.
+   */
+  ['cierre', 'papel-transparente'],
 ]
 
 afirmarIgual(
   SECCIONES.map((s) => [s.id, s.superficie]),
   RECORRIDO_ESPERADO,
-  'el recorrido de superficies es el de SITIO-S5 §0.2 con las dos de B6-A y las dos de B8: seis ven la sala, dos no',
+  'el recorrido de superficies es el de SITIO-S5 §0.2 con las dos de B6-A, las dos de B8 y el Cierre dado vuelta en B12: seis ven la sala, dos no',
 )
 
 /** Seis de ocho: la cifra la produce esta cuenta, y las dos que faltan son un pedido. */
@@ -199,8 +210,14 @@ afirmarIgual(
   dejanVer.map((s) => s.id),
   '  y la constante derivada de `secciones.ts` dice lo mismo que la tabla de superficies',
 )
+/** ⚠️ **B12 · LA BANDA OSCURA ES UNA, NO DOS.** B8 dejaba a Trabajos y al Cierre
+ *  invertidas «ahora sin velo», y el Cierre lo era porque su pie pintaba negro
+ *  por hoja. Sacado el relleno, la sala al final es clara y la sección se da
+ *  vuelta con ella: la banda oscura del recorrido queda donde la luz la puso,
+ *  que es la noche de Trabajos. La afirmación no se afloja — cuenta lo mismo,
+ *  con el número nuevo. */
 const invertidas = SECCIONES.filter((s) => SUPERFICIES[s.superficie].invertida)
-afirmarIgual(invertidas.map((s) => s.id), ['trabajos', 'cierre'], 'y DOS son la banda oscura — las mismas dos, ahora sin velo')
+afirmarIgual(invertidas.map((s) => s.id), ['trabajos'], 'y UNA sola es la banda oscura: la noche de Trabajos (B12 dio vuelta el Cierre)')
 
 afirmar(SECCIONES.every((s) => /^\d+svh$/.test(s.alto)), 'las ocho declaran su altura en `svh`, no en `vh`')
 

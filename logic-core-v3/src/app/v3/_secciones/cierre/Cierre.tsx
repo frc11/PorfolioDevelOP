@@ -8,11 +8,11 @@ import { Pie } from '../../_componentes/chrome/Pie'
 import { Bloque, type Progreso } from '../_contrato/coreografia'
 import { CanalDeTitular, CanalDeUnaPieza } from '../_contrato/canales'
 import type { PropsDeSeccion } from '../_contrato/forma'
-import { EncabezadoDeSeccion, Seccion } from '../_contrato/Seccion'
+import { CabeceraDeSeccion, Seccion } from '../_contrato/Seccion'
 import { asentar } from './asentamiento'
 import { ColumnasDelPie } from './ColumnasDelPie'
 import { LineaDeCierre } from './LineaDeCierre'
-import { CTA_DE_CIERRE, ETIQUETA_DE_SECCION, TITULAR_DE_CIERRE } from './contenido'
+import { CTA_DE_CIERRE, TITULAR_DE_CIERRE } from './contenido'
 
 /**
  * EL CIERRE — el último cuadro del sitio. La mitad de DOM de "la cámara se
@@ -70,34 +70,21 @@ export const GEOMETRIA = {
    * ── B1 · LA MEDIDA DEL TITULAR: SEIS CUERPOS, Y NO ACOMPAÑA A LA VENTANA ──
    *
    * **El titular de cierre entraba en UNA línea y flotaba en el tercio de
-   * arriba de una pantalla vacía.** Medido en el navegador, con la receta de
-   * `docs/rediseno/MEDICION-NAVEGADOR.md`:
-   *
-   *     ancho   caja del titular   líneas   tinta del titular
-   *     1440    1376 px (entera)     1          61,03 px
-   *     1920    1856 px (entera)     1          70,86 px
-   *
-   * Una línea de 957,4 px sobre un cuadro de 1856 con 210,78 px (1440) y
-   * 380,22 px (1920) de banda vacía debajo del último renglón. La tabla de
-   * deltas (`docs/rediseno/sprints/B1-DELTAS.md` §1) publica de dónde sale la
-   * corrección: **las cajas de texto de la referencia son angostas y FIJAS**
-   * —480 px a 1440 y a 1920, 0,25 del viewport— y las nuestras crecían con la
-   * ventana. Acá se acota igual, y por eso la medida NO es una columna de
-   * grilla: una columna fluida vuelve a crecer.
+   * arriba de una pantalla vacía.** Medido en el navegador (la receta de
+   * `MEDICION-NAVEGADOR.md`): la caja entera —1376 px a 1440 y 1856 a 1920— con
+   * el titular en UNA línea de 957,4 px y 210,78 / 380,22 px de banda vacía
+   * debajo. La corrección sale de `B1-DELTAS.md` §1: **las cajas de texto de la
+   * referencia son angostas y FIJAS** —480 px a 1440 y a 1920, 0,25 del
+   * viewport— y las nuestras crecían con la ventana. Por eso la medida NO es una
+   * columna de grilla: una columna fluida vuelve a crecer.
    *
    * **Seis cuerpos del titular** —`calc(var(--text-titulo-xl) * 6)` = 336 px,
    * al lado de los 6,67 cuerpos de la referencia (480 / 72)—. El 6 no es un
-   * gusto: es la única banda que parte el titular en 3 líneas a 1440 y en 4 a
-   * 1920 sin que la sección se pase de su pantalla. Barrida de 4 en 4 px sobre
-   * el titular real, con su tipografía y con `text-wrap: balance` puestos:
-   *
-   *     ancho   4 líneas       3 líneas       2 líneas
-   *     1440    192 – 315 px   316 – 447 px   448 – 827 px
-   *     1920    224 – 363 px   364 – 519 px   520 – 959 px
-   *
-   * La intersección «3 a 1440 · 4 a 1920» es **[316, 363]**; 336 cae en el
-   * medio, con 20 px de margen abajo y 27 arriba. Y la palabra más larga del
-   * titular mide 243,5 px a 1440 y 282,7 a 1920: entra en la caja en los dos.
+   * gusto: barrida de 4 en 4 px sobre el titular real, con su tipografía y su
+   * `text-wrap: balance`, las bandas de 3 líneas a 1440 (316–447) y de 4 a 1920
+   * (224–363) se cruzan en **[316, 363]**; 336 cae en el medio, con 20 px de
+   * margen abajo y 27 arriba. La palabra más larga mide 243,5 px a 1440 y 282,7
+   * a 1920: entra en los dos.
    *
    * ⚠ El NIVEL tipográfico no se toca: `titulo-xl` sigue siendo el más grande
    * de la escala. Lo que se acota es la caja, no la letra — la misma decisión
@@ -134,7 +121,8 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
        porque la caja de contenido es una GRILLA de una columna: reparte las
        filas, que es lo mismo que el `justify` hace en un flex. */
     <Pie className="grid" claseDeEnvoltorio="grid" claseDeContenido="grid content-between">
-      <EncabezadoDeSeccion seccion={seccion} nombre={ETIQUETA_DE_SECCION} />
+      {/* ⚠️ B12: era el `08` con «Cierre». Los dos se fueron de las ocho. */}
+      <CabeceraDeSeccion />
 
       {/* ⚠️ B9 · ESTE BLOQUE **NO** DECLARA `rango="ventana-visible"`, y es una
           omisión con número: `D-B9.C1`. Su ancla de P1 YA es la de la regla, así
@@ -165,14 +153,6 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
           `inline-flex` del CTA se estire a lo ancho del apilado del pie— y la
           pieza pone otro adentro: dos cajas de bloque donde había una, ninguna
           con medida propia. */}
-      <Bloque patron="P1" rango="ventana-visible">
-        {(progreso) => (
-          <CanalDeUnaPieza progreso={progreso} patron="P1">
-            <CtaEnlace href={CTA_DE_CIERRE.destino} rotulo={CTA_DE_CIERRE.rotulo} />
-          </CanalDeUnaPieza>
-        )}
-      </Bloque>
-
       {/* ⚠️ B9 · ESTE BLOQUE **NO** DECLARA `rango="ventana-visible"` PORQUE LA
           REGLA NO SE PUEDE CUMPLIR ACÁ, y está medido: `D-B9.C2`.
 
@@ -189,11 +169,42 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
           arregla un ancla: lo arreglaría mover el bloque en el documento, que
           es composición y no es de este bloque. Queda con el ancla de P2, que
           es la única que ahí adentro llega. */}
-      <Bloque patron="P2">
-        {(progreso) => <ColumnasDelPie progreso={progreso} />}
-      </Bloque>
+      {/* ⚠️ **B12 · LA BANDA DEL PIE — el velo LOCAL**, decidido por el humano en
+          la PARADA 1 y no listado entre las tres palancas de la instrucción.
+          Sacado el relleno del pie, la sala al final es CLARA (gris 145,5) y con
+          VARIANZA, así que ninguna tinta única cierra; y repintar la sección es
+          `papel-opaco`, o sea lo contrario de lo pedido. La salida es partirla en
+          dos registros: **arriba la sala entera** —el titular, donde el gesto de
+          la cámara alejándose se lee— y **abajo fondo donde el pie tiene el texto
+          chico**: el CTA, las columnas y la línea, 20 de los 24 bloques y todos
+          entre 10 y 15 px. De 8 bloques bajo AA a **4 a 1920 y 2 a 1440, y los
+          seis son el titular** (`D-B12.2`). Las cuatro variantes medidas y el
+          sangrado, en `docs/rediseno/outputs/B12-CIERRE.md` §2; el fondo, el
+          relleno y el margen que impide que la banda mueva el anclaje, en
+          `_estilos/pie.css`.
+          ⚠ Es un `<div>` y no un componente, y es peso medido: envolverlo en uno
+          con `props` y `cn()` cuesta **81 B** de carga inicial (A/B).
+          ⚠ La caja de contenido pasa de CINCO filas a TRES; el censo se volvió a
+          correr por eso y quedó en 1,33 y 1,20, la vara de B9. */}
+      <div
+        data-pieza="banda-del-pie"
+        className="grid gap-[var(--spacing-12)] mx-[calc(var(--pad-lateral-compacto)*-1)] px-[var(--pad-lateral-compacto)]"
+      >
+        <Bloque patron="P1" rango="ventana-visible">
+          {(progreso) => (
+            <CanalDeUnaPieza progreso={progreso} patron="P1">
+              <CtaEnlace href={CTA_DE_CIERRE.destino} rotulo={CTA_DE_CIERRE.rotulo} />
+            </CanalDeUnaPieza>
+          )}
+        </Bloque>
 
-      <LineaDeCierre />
+        <Bloque patron="P2">
+          {(progreso) => <ColumnasDelPie progreso={progreso} />}
+        </Bloque>
+
+        <LineaDeCierre />
+      </div>
+
     </Pie>
   )
 }

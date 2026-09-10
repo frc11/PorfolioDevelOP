@@ -143,7 +143,7 @@ const queLoMontan = codigoDelLane().filter((a) => /<RotuloDePanel\b/.test(leer(a
 afirmarIgual(
   queLoMontan,
   [],
-  `ninguno de los ${codigoDelLane().length} archivos de producto del lane monta \`RotuloDePanel\`: usan \`EncabezadoDeSeccion\`, que va en tinta plena`,
+  `ninguno de los ${codigoDelLane().length} archivos de producto del lane monta \`RotuloDePanel\` —el rótulo del esqueleto, con su \`opacity-casi\`—. ⚠️ B12: las ocho ya no montan NINGÚN rótulo de texto (ni número ni nombre); lo que queda de \`Rotulo.tsx\` es la marca en la columna lateral, que no lleva tinta`,
 )
 /**
  * ⚠ EL CONTRAPESO CAMBIÓ DE LUGAR, Y ESO ES UNA NOTICIA.

@@ -48,10 +48,21 @@ export const abrirCaptura = (rutaWeb: string): Uint8Array =>
  */
 export const FUENTES: readonly { readonly archivo: string; readonly texto: string }[] = [
   'Trabajos.tsx',
+  // B12: las piezas y la capa de la gota salieron de `Trabajos.tsx` al mudar el
+  // título y la bajada al escenario. Se despachan igual, así que se leen igual.
+  'piezas.tsx',
+  'CapaDeLaGota.tsx',
+  'gota.ts',
   'geometria.ts',
   'asentamiento.ts',
   'contenido.ts',
 ].map((f) => ({ archivo: f, texto: leer(f) }))
+
+/** El fuente de la COMPOSICIÓN y el de las PIEZAS, juntos: desde B12 los
+ *  `patron="…"` viven en el segundo y el marcado de la sección en los dos. */
+export const FUENTE_DE_LA_COMPOSICION: string = FUENTES.filter((f) => f.archivo === 'Trabajos.tsx' || f.archivo === 'piezas.tsx')
+  .map((f) => f.texto)
+  .join(String.fromCharCode(10))
 
 /** El CSS del tema, de donde salen el fondo invertido, la tinta y los acentos. */
 export const CSS = leer('../../../theme-develop.css')

@@ -84,13 +84,13 @@ export const CARPETAS_DE_SECCION: readonly CarpetaDeSeccion[] = [
  *
  * La regla del repo es que un archivo de más de 300 líneas se parte, y partir
  * una sección no es una excepción a la carpeta cerrada: la pieza queda ADENTRO
- * de su sección y se declara acá. `numeros/Cifra.tsx` salió de `Numeros.tsx`
- * cuando su docblock del defecto de `tailwind-merge` lo pasó de largo.
+ * de su sección y se declara acá.
  *
- * ⚠ Estas piezas SÍ pintan pantalla, así que entran en `ARCHIVOS_ESCANEABLES`
- * —a diferencia de `ARCHIVOS_DE_APOYO`, que son instrumentos.
- */
-export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`]
+ * ⚠ Estas piezas SÍ pintan pantalla: entran en `ARCHIVOS_ESCANEABLES`. */
+// B12 · `piezas.tsx` (plano, portada y rama quieta) y `CapaDeLaGota.tsx` (la
+// máscara de la entrada) salieron de `Trabajos.tsx` al mudar el título al
+// escenario. PINTAN PANTALLA: van acá y no en `ARCHIVOS_DE_APOYO`.
+export const ARCHIVOS_DE_PIEZA = [`${RAIZ_DE_SECCIONES}/numeros/Cifra.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/Proyecto.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/piezas.tsx`, `${RAIZ_DE_SECCIONES}/trabajos/CapaDeLaGota.tsx`]
 
 /**
  * La ruta de demostración del lane. **Borrada en SITIO-S7**, que es lo que su
@@ -121,10 +121,8 @@ export const ARCHIVOS_DE_INVARIANTE = CARPETAS_DE_SECCION.map((c) => c.invariant
  * que entran en el padrón (para que el disco cierre) y quedan FUERA de
  * `ARCHIVOS_ESCANEABLES`.
  *
- * ⚠ Se declaran a mano y no se detectan por el nombre. Una heurística de
- * sufijo (`-piezas`) sería exactamente la clase de exclusión silenciosa que
- * este proyecto viene cazando: un archivo se saca del escaneo porque alguien
- * lo decidió y lo escribió acá, no porque se llame de una manera.
+ * ⚠ Se declaran a mano y no por el nombre: una heurística de sufijo (`-piezas`)
+ * sería la clase de exclusión silenciosa que este proyecto viene cazando.
  *
  * ⚠ Ninguno puede terminar en `.invariant.ts(x)`: sería un instrumento sin
  * script, y `s4-cobertura` lo marcaría como huérfano.
@@ -142,6 +140,8 @@ export const ARCHIVOS_DE_APOYO = [
   // B4-A · `asentamiento.ts` es la derivación de la meseta de los planos: el
   // mismo corte que Servicios, Tu panel y el Cierre ya tienen para el suyo.
   `${RAIZ_DE_SECCIONES}/trabajos/asentamiento.ts`,
+  // B12 · `gota.ts`: el núcleo PURO de la entrada (máscara radial, sin DOM).
+  `${RAIZ_DE_SECCIONES}/trabajos/gota.ts`,
 ]
 
 /**
