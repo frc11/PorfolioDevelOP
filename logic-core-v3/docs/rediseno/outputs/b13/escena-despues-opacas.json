@@ -1,0 +1,268 @@
+{
+  "etiqueta": "despues",
+  "cuando": "2026-09-11T10:25:30.917Z",
+  "secciones": {
+    "1440": [
+      {
+        "seccion": "servicios",
+        "ancho": "1440",
+        "opaca": true,
+        "aporteDeLaEscena": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "cuadroQuieto": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "scrollY": 9900,
+        "progreso": 0.625,
+        "medianaDelCuadro": 247,
+        "regimen": "ninguno",
+        "cajaPredicha": [
+          117,
+          297,
+          615,
+          637
+        ],
+        "desvioDelCentroPct": null,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          },
+          {
+            "regimen": "clara",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          }
+        ],
+        "logo": null,
+        "fraccionDelCuadro": 0,
+        "caja": null,
+        "degradado": null,
+        "sala": {
+          "p05": 246.9,
+          "p50": 246.9,
+          "p95": 246.9
+        },
+        "contrasteLogoSala": null,
+        "huecos": {
+          "cuantos": 0,
+          "p50": null
+        },
+        "contrasteTrazoHueco": null
+      },
+      {
+        "seccion": "tu-panel",
+        "ancho": "1440",
+        "opaca": true,
+        "aporteDeLaEscena": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "cuadroQuieto": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "scrollY": 12600,
+        "progreso": 0.7121062992125984,
+        "medianaDelCuadro": 113,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          753,
+          163,
+          1185,
+          677
+        ],
+        "desvioDelCentroPct": 0.7,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 60726,
+            "fraccionDelCuadro": 4.69,
+            "caja": [
+              762,
+              159,
+              1196,
+              683
+            ],
+            "desvioDelCentroPct": 0.7
+          },
+          {
+            "regimen": "clara",
+            "area": 50897,
+            "fraccionDelCuadro": 3.93,
+            "caja": [
+              0,
+              699,
+              1439,
+              750
+            ],
+            "desvioDelCentroPct": 27.34
+          }
+        ],
+        "logo": {
+          "p05": 0,
+          "p50": 0,
+          "p95": 50.6
+        },
+        "fraccionDelCuadro": 4.69,
+        "caja": [
+          762,
+          159,
+          1196,
+          683
+        ],
+        "degradado": 50.6,
+        "sala": {
+          "p05": 79,
+          "p50": 113.9,
+          "p95": 165.4
+        },
+        "contrasteLogoSala": 4.36,
+        "huecos": {
+          "cuantos": 320,
+          "p50": 76.9
+        },
+        "contrasteTrazoHueco": 2.48
+      }
+    ],
+    "1920": [
+      {
+        "seccion": "servicios",
+        "ancho": "1920",
+        "opaca": true,
+        "aporteDeLaEscena": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "cuadroQuieto": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "scrollY": 11880,
+        "progreso": 0.625,
+        "medianaDelCuadro": 247,
+        "regimen": "ninguno",
+        "cajaPredicha": [
+          156,
+          364,
+          764,
+          772
+        ],
+        "desvioDelCentroPct": null,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          },
+          {
+            "regimen": "clara",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          }
+        ],
+        "logo": null,
+        "fraccionDelCuadro": 0,
+        "caja": null,
+        "degradado": null,
+        "sala": {
+          "p05": 246.9,
+          "p50": 246.9,
+          "p95": 246.9
+        },
+        "contrasteLogoSala": null,
+        "huecos": {
+          "cuantos": 0,
+          "p50": null
+        },
+        "contrasteTrazoHueco": null
+      },
+      {
+        "seccion": "tu-panel",
+        "ancho": "1920",
+        "opaca": true,
+        "aporteDeLaEscena": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "cuadroQuieto": {
+          "pixeles": 0,
+          "pct": 0
+        },
+        "scrollY": 15120,
+        "progreso": 0.7121062992125984,
+        "medianaDelCuadro": 114,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          1076,
+          188,
+          1596,
+          812
+        ],
+        "desvioDelCentroPct": 0.5,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 70167,
+            "fraccionDelCuadro": 3.38,
+            "caja": [
+              1083,
+              184,
+              1608,
+              817
+            ],
+            "desvioDelCentroPct": 0.5
+          },
+          {
+            "regimen": "clara",
+            "area": 78134,
+            "fraccionDelCuadro": 3.77,
+            "caja": [
+              0,
+              840,
+              1919,
+              901
+            ],
+            "desvioDelCentroPct": 27.51
+          }
+        ],
+        "logo": {
+          "p05": 0,
+          "p50": 0,
+          "p95": 50.8
+        },
+        "fraccionDelCuadro": 3.38,
+        "caja": [
+          1083,
+          184,
+          1608,
+          817
+        ],
+        "degradado": 50.8,
+        "sala": {
+          "p05": 78.2,
+          "p50": 114.9,
+          "p95": 167.6
+        },
+        "contrasteLogoSala": 4.42,
+        "huecos": {
+          "cuantos": 27,
+          "p50": 72.1
+        },
+        "contrasteTrazoHueco": 2.3
+      }
+    ]
+  }
+}

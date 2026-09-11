@@ -1,0 +1,383 @@
+{
+  "etiqueta": "despues-1920",
+  "cuando": "2026-09-10T23:19:54.379Z",
+  "secciones": {
+    "1920": [
+      {
+        "seccion": "hero",
+        "ancho": "1920",
+        "scrollY": 0,
+        "progreso": 0,
+        "medianaDelCuadro": 225,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          956,
+          348,
+          1564,
+          756
+        ],
+        "desvioDelCentroPct": 0.21,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 116575,
+            "fraccionDelCuadro": 5.62,
+            "caja": [
+              956,
+              343,
+              1572,
+              761
+            ],
+            "desvioDelCentroPct": 0.21
+          },
+          {
+            "regimen": "clara",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          }
+        ],
+        "logo": {
+          "p05": 0.9,
+          "p50": 1.2,
+          "p95": 5.1
+        },
+        "fraccionDelCuadro": 5.62,
+        "caja": [
+          956,
+          343,
+          1572,
+          761
+        ],
+        "degradado": 4.2,
+        "sala": {
+          "p05": 185.6,
+          "p50": 226.9,
+          "p95": 247.7
+        },
+        "contrasteLogoSala": 16.23,
+        "huecos": {
+          "cuantos": 457,
+          "p50": 77.8
+        },
+        "contrasteTrazoHueco": 2.5
+      },
+      {
+        "seccion": "quienes-somos",
+        "ancho": "1920",
+        "scrollY": 1080,
+        "progreso": 0.125,
+        "medianaDelCuadro": 214,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          740,
+          292,
+          1148,
+          804
+        ],
+        "desvioDelCentroPct": 0.09,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 130412,
+            "fraccionDelCuadro": 6.29,
+            "caja": [
+              738,
+              290,
+              1147,
+              804
+            ],
+            "desvioDelCentroPct": 0.09
+          },
+          {
+            "regimen": "clara",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          }
+        ],
+        "logo": {
+          "p05": 0.9,
+          "p50": 0.9,
+          "p95": 3.9
+        },
+        "fraccionDelCuadro": 6.29,
+        "caja": [
+          738,
+          290,
+          1147,
+          804
+        ],
+        "degradado": 3,
+        "sala": {
+          "p05": 160.6,
+          "p50": 214.9,
+          "p95": 245.9
+        },
+        "contrasteLogoSala": 14.5,
+        "huecos": {
+          "cuantos": 18795,
+          "p50": 237.7
+        },
+        "contrasteTrazoHueco": 17.95
+      },
+      {
+        "seccion": "numeros",
+        "ancho": "1920",
+        "scrollY": 4320,
+        "progreso": 0.375,
+        "medianaDelCuadro": 216,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          228,
+          156,
+          828,
+          804
+        ],
+        "desvioDelCentroPct": 0.87,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 211969,
+            "fraccionDelCuadro": 10.22,
+            "caja": [
+              202,
+              146,
+              821,
+              809
+            ],
+            "desvioDelCentroPct": 0.87
+          },
+          {
+            "regimen": "clara",
+            "area": 0,
+            "fraccionDelCuadro": 0,
+            "caja": null,
+            "desvioDelCentroPct": null
+          }
+        ],
+        "logo": {
+          "p05": 0,
+          "p50": 0,
+          "p95": 16
+        },
+        "fraccionDelCuadro": 10.22,
+        "caja": [
+          202,
+          146,
+          821,
+          809
+        ],
+        "degradado": 16,
+        "sala": {
+          "p05": 162.8,
+          "p50": 217.1,
+          "p95": 243.7
+        },
+        "contrasteLogoSala": 14.89,
+        "huecos": {
+          "cuantos": 45307,
+          "p50": 211.8
+        },
+        "contrasteTrazoHueco": 14.14
+      },
+      {
+        "seccion": "trabajos",
+        "ancho": "1920",
+        "scrollY": 8640,
+        "progreso": 0.5,
+        "medianaDelCuadro": 21,
+        "regimen": "clara",
+        "cajaPredicha": [
+          396,
+          364,
+          988,
+          740
+        ],
+        "desvioDelCentroPct": 0,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 1923373,
+            "fraccionDelCuadro": 92.76,
+            "caja": [
+              0,
+              0,
+              1919,
+              1079
+            ],
+            "desvioDelCentroPct": 13.95
+          },
+          {
+            "regimen": "clara",
+            "area": 116873,
+            "fraccionDelCuadro": 5.64,
+            "caja": [
+              385,
+              357,
+              999,
+              747
+            ],
+            "desvioDelCentroPct": 0
+          }
+        ],
+        "logo": {
+          "p05": 97,
+          "p50": 97,
+          "p95": 101
+        },
+        "fraccionDelCuadro": 5.64,
+        "caja": [
+          385,
+          357,
+          999,
+          747
+        ],
+        "degradado": 4,
+        "sala": {
+          "p05": 13.9,
+          "p50": 20.9,
+          "p95": 24.9
+        },
+        "contrasteLogoSala": 2.95,
+        "huecos": {
+          "cuantos": 1,
+          "p50": 62.9
+        },
+        "contrasteTrazoHueco": 1.7
+      },
+      {
+        "seccion": "por-que-develop",
+        "ancho": "1920",
+        "scrollY": 17280,
+        "progreso": 0.8525,
+        "medianaDelCuadro": 151,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          852,
+          372,
+          1332,
+          708
+        ],
+        "desvioDelCentroPct": 0.18,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 76595,
+            "fraccionDelCuadro": 3.69,
+            "caja": [
+              853,
+              366,
+              1336,
+              709
+            ],
+            "desvioDelCentroPct": 0.18
+          },
+          {
+            "regimen": "clara",
+            "area": 133337,
+            "fraccionDelCuadro": 6.43,
+            "caja": [
+              0,
+              0,
+              1919,
+              81
+            ],
+            "desvioDelCentroPct": 26.92
+          }
+        ],
+        "logo": {
+          "p05": 1,
+          "p50": 1.1,
+          "p95": 1.1
+        },
+        "fraccionDelCuadro": 3.69,
+        "caja": [
+          853,
+          366,
+          1336,
+          709
+        ],
+        "degradado": 0.1,
+        "sala": {
+          "p05": 117.9,
+          "p50": 151.9,
+          "p95": 207.9
+        },
+        "contrasteLogoSala": 7.22,
+        "huecos": {
+          "cuantos": 324,
+          "p50": 79.8
+        },
+        "contrasteTrazoHueco": 2.58
+      },
+      {
+        "seccion": "cierre",
+        "ancho": "1920",
+        "scrollY": 18360,
+        "progreso": 1,
+        "medianaDelCuadro": 151,
+        "regimen": "oscura",
+        "cajaPredicha": [
+          748,
+          388,
+          1172,
+          692
+        ],
+        "desvioDelCentroPct": 0.06,
+        "candidatos": [
+          {
+            "regimen": "oscura",
+            "area": 58940,
+            "fraccionDelCuadro": 2.84,
+            "caja": [
+              741,
+              387,
+              1178,
+              691
+            ],
+            "desvioDelCentroPct": 0.06
+          },
+          {
+            "regimen": "clara",
+            "area": 2529,
+            "fraccionDelCuadro": 0.12,
+            "caja": [
+              1537,
+              816,
+              1696,
+              844
+            ],
+            "desvioDelCentroPct": 37.38
+          }
+        ],
+        "logo": {
+          "p05": 2,
+          "p50": 2,
+          "p95": 4.1
+        },
+        "fraccionDelCuadro": 2.84,
+        "caja": [
+          741,
+          387,
+          1178,
+          691
+        ],
+        "degradado": 2.1,
+        "sala": {
+          "p05": 117.9,
+          "p50": 151.8,
+          "p95": 189.1
+        },
+        "contrasteLogoSala": 7.17,
+        "huecos": {
+          "cuantos": 262,
+          "p50": 80.8
+        },
+        "contrasteTrazoHueco": 2.61
+      }
+    ]
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "perfil": "1920",
+  "filas": [
+    {
+      "scrollY": 8100,
+      "medianaDeLaSala": 173,
+      "siluetaClaraPx": 1066,
+      "visiblePx": 0,
+      "fraccionVisible": 0,
+      "fraccionDelCuadro": 0.05
+    },
+    {
+      "scrollY": 8640,
+      "medianaDeLaSala": 21,
+      "siluetaClaraPx": 147241,
+      "visiblePx": 116,
+      "fraccionVisible": 0.1,
+      "fraccionDelCuadro": 7.1
+    },
+    {
+      "scrollY": 9180,
+      "medianaDeLaSala": 21,
+      "siluetaClaraPx": 148422,
+      "visiblePx": 27535,
+      "fraccionVisible": 18.6,
+      "fraccionDelCuadro": 7.16
+    },
+    {
+      "scrollY": 9720,
+      "medianaDeLaSala": 18,
+      "siluetaClaraPx": 152084,
+      "visiblePx": 14334,
+      "fraccionVisible": 9.4,
+      "fraccionDelCuadro": 7.33
+    },
+    {
+      "scrollY": 10260,
+      "medianaDeLaSala": 16,
+      "siluetaClaraPx": 154752,
+      "visiblePx": 61476,
+      "fraccionVisible": 39.7,
+      "fraccionDelCuadro": 7.46
+    },
+    {
+      "scrollY": 10800,
+      "medianaDeLaSala": 16,
+      "siluetaClaraPx": 365807,
+      "visiblePx": 248025,
+      "fraccionVisible": 67.8,
+      "fraccionDelCuadro": 17.64
+    },
+    {
+      "scrollY": 11340,
+      "medianaDeLaSala": 247,
+      "siluetaClaraPx": 0,
+      "visiblePx": 0,
+      "fraccionVisible": 0,
+      "fraccionDelCuadro": 0
+    },
+    {
+      "scrollY": 11880,
+      "medianaDeLaSala": 247,
+      "siluetaClaraPx": 0,
+      "visiblePx": 0,
+      "fraccionVisible": 0,
+      "fraccionDelCuadro": 0
+    }
+  ]
+}

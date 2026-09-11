@@ -158,22 +158,29 @@ export const CONTRASTE_CONTRA_LA_ESCENA: readonly {
     instrumento: 'B11 — b-bloques despues, 2560×, paso 0,25: 8 bloques en 2 posiciones, 7 bajo AA; el peor es «Lo que entregamos no termina en un docum» en y=23040 (4430 px de glifo, 69 bajo AA, a plena 2.99). Por ancho: 2560: 2.46 (7/8) · en tránsito del revelado: la pared',
     deuda: 'diferencialPared',
   },
+  /**
+   * ⚠️ **B13 · LAS TRES FILAS DEL CIERRE SE RE-ESCRIBEN: DESCRIBÍAN UN PIE QUE YA
+   * NO EXISTE.** Decían «sobre el pie que pinta #0E0E0E» y publicaban 18,00 /
+   * 6,85 / 6,44 — o sea la medición de B11, con el pie RELLENO. B12 le sacó el
+   * relleno y puso una banda local; **B13 revirtió la banda por pedido del
+   * humano** («el footer sigue siendo sólido, no transparente»). Las tres
+   * estaban verdes describiendo un estado de hace dos bloques: verde por vacío.
+   * Lo que corre ahora son las filas derivadas del barrido de B13 con el mismo
+   * `d-filas.ts` de B11, la peor de los dos anchos, y la primera carga
+   * `D-B13.3`. La fila de `@0,6` desaparece: ya no hay ningún bloque a esa
+   * opacidad en la sección.
+   */
   {
     seccion: 'cierre',
     tinta: '--color-tinta@1',
-    razon: 18.0,
-    instrumento: 'B11 — b-bloques despues, 1440×, paso 0,25: 20 bloques en 1 posiciones, 0 bajo AA; el peor es «08» en y=15300 (75 px de glifo, 0 bajo AA). Por ancho: 1440: 18.00 (0/20) · 1920: 18.00 (0/21) · 2560: 18.00 (0/21) · sobre el pie que pinta #0E0E0E; con el pie sin relleno, papel-transparente 13 de 25 y oscuro-transparente 25 de 25 bajo AA a 1440 (sin-recorte/bloques-antes-cierre-*.json, B8-LUZ.md §6.3)',
-  },
-  {
-    seccion: 'cierre',
-    tinta: '--color-tinta@0.6',
-    razon: 6.85,
-    instrumento: 'B11 — b-bloques despues, 1440×, paso 0,25: 3 bloques en 1 posiciones, 0 bajo AA; el peor es «la dirección de contacto, cuando exista» en y=15300 (1299 px de glifo, 0 bajo AA, a plena 18.00). Por ancho: 1440: 6.85 (0/3) · 1920: 6.85 (0/3) · 2560: 6.85 (0/3) · sobre el pie que pinta #0E0E0E',
+    razon: 2.41,
+    instrumento: 'B13 — b-bloques b13-cierre, 1440×, paso 0,25: 21 bloques en 1 posiciones, 8 bajo AA; el peor es «la dirección de contacto, cuando exista» en y=15300 (895 px de glifo, 14 bajo AA). Por ancho: 1440: 2.41 (8/21) · 1920: 2.44 (7/22) · con el pie SIN banda y sin relleno: los cuatro del titular son D-B12.2 (la varianza de la sala) y los tres de texto chico son lo que la banda tapaba',
+    deuda: 'pieSinBanda',
   },
   {
     seccion: 'cierre',
     tinta: '--color-tinta-tenue@1',
-    razon: 6.44,
-    instrumento: 'B11 — b-bloques despues, 1440×, paso 0,25: 2 bloques en 1 posiciones, 0 bajo AA; el peor es «El envío está deshabilitado: todavía no » en y=15300 (2989 px de glifo, 0 bajo AA). Por ancho: 1440: 6.44 (0/2) · 1920: 6.44 (0/2) · 2560: 6.44 (0/2) · sobre el pie que pinta #0E0E0E',
+    razon: 6.43,
+    instrumento: 'B13 — b-bloques b13-cierre, 1440×, paso 0,25: 2 bloques en 1 posiciones, 0 bajo AA; el peor es «El envío está deshabilitado: todavía no » en y=15300 (2355 px de glifo, 0 bajo AA). Por ancho: 1440: 6.43 (0/2) · 1920: 6.43 (0/2) · es el FORMULARIO, y pasa porque lleva su propio fondo: la excepción que la instrucción de B13 §4 nombra («es un control, no una superficie»)',
   },
 ]

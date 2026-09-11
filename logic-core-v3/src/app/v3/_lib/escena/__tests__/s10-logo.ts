@@ -79,8 +79,10 @@ import {
   type Track,
   type Vec3,
 } from '@/app/probe-escena/__tests__/harness'
-import { shadeSurface, sunDirectionAt, type ViewContext } from '@/app/probe-escena/__tests__/shading'
+import { levelAt, sunDirectionAt, type ViewContext } from '@/app/probe-escena/__tests__/shading'
+import { emisionDelLogoEn } from '../logoEmision'
 import { camaraEnCuadro } from './camaraDelCuadro'
+import { shadeConEmision } from './logoEmitido'
 
 /** Una caja en coordenadas de cuadro: −1 es el borde izquierdo/inferior, +1 el otro. */
 export interface CajaEnCuadro {
@@ -127,6 +129,13 @@ export interface MuestraDelLogo {
  * armado con `makeTrack` sobre una copia de los keyframes y se lee cuánto
  * cambiaría la cifra. `CHOREO_KEYFRAMES` no se toca; el default es el track
  * real, y todo lo que se publique con otra pista se rotula como hipotético.
+ *
+ * ⚠ **B13 · `emisiva` es la misma palanca para el MATERIAL.** Su default no es
+ * cero: es `emisionDelLogoEn(nivel del arco en este progreso)`, o sea **lo que
+ * el logo emite de verdad en la escena**. Un default en cero dejaría al
+ * instrumento midiendo un objeto que ya no existe —verde por vacío—, y toda la
+ * lectura del contraste sobre el logo volvería a ser la de antes de B13. Se
+ * pasa explícita sólo para barrer valores hipotéticos, y eso se rotula.
  */
 export function muestrearLogo(
   progreso: number,
@@ -136,6 +145,7 @@ export function muestrearLogo(
   filas: number,
   factor = 1,
   pista: Track = track,
+  emisiva: number = emisionDelLogoEn(levelAt(progreso)),
 ): MuestraDelLogo {
   const pose = emptyPose()
   const cam = camaraEnCuadro(pista, progreso, aspecto, pose)
@@ -209,7 +219,7 @@ export function muestrearLogo(
 
       x[celdasDeLogo] = cx
       y[celdasDeLogo] = cy
-      valor[celdasDeLogo] = shadeSurface(INK_COLOR, normal, vista, tTinta, gobo, cielo)
+      valor[celdasDeLogo] = shadeConEmision(INK_COLOR, normal, vista, tTinta, gobo, cielo, emisiva)
       celdasDeLogo += 1
       if (Math.abs(cx) <= 1 && Math.abs(cy) <= 1) enCuadro += 1
       if (ix === 0 || ix === columnas - 1 || iy === 0 || iy === filas - 1) tocaElBorde = true

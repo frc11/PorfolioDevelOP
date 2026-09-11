@@ -275,6 +275,8 @@
     "test:s19": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s19",
     "test:s20-arco": "npx tsx src/app/v3/_lib/escena/__tests__/s20-arco.invariant.ts",
     "test:s20-brillo": "npx tsx src/app/v3/_lib/escena/__tests__/s20-brillo.invariant.ts",
+    "test:s22-emision": "npx tsx src/app/v3/_lib/escena/__tests__/s22-emision.invariant.ts",
+    "test:s22": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s22",
     "test:s21-fotos": "npx tsx src/app/v3/_lib/__tests__/s21-fotos.invariant.tsx",
     "test:s21-llave": "npx tsx src/app/v3/_lib/__tests__/s21-llave.invariant.tsx",
     "test:s20": "npx tsx src/app/v3/_lib/__tests__/s4-agregado.ts s20",

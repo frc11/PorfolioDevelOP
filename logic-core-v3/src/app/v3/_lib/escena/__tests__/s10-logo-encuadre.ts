@@ -61,11 +61,14 @@ export const CAMARAS: readonly Camara[] = [
   { id: 'rig', anchoDeLaCaja: SCENE_LOGO_MESH_WORLD.width },
 ]
 
-/** La distancia ojo-objeto de un keyframe. Es lo que fija el tamaño del cuadro. */
-function distanciaAlOjo(nombreDelKeyframe: string): number {
+/** La distancia ojo-objeto de un keyframe: lo que fija el tamaño del cuadro.
+ *  ⚠ **B13 · `distanciaHipotetica` NO es una perilla de composición**: deja que
+ *  los controles de §7 pregunten por la distancia VIEJA de `demos` (9), la única
+ *  con la que el codo todavía muerde. `CHOREO_KEYFRAMES` no se toca. */
+function distanciaAlOjo(nombreDelKeyframe: string, distanciaHipotetica?: number): number {
   const k = CHOREO_KEYFRAMES.find((f) => f.name === nombreDelKeyframe)
   if (k === undefined) throw new Error(`keyframe desconocido: ${nombreDelKeyframe}`)
-  return Math.hypot(k.pose.distance, k.pose.height)
+  return Math.hypot(distanciaHipotetica ?? k.pose.distance, k.pose.height)
 }
 
 /**
@@ -78,8 +81,8 @@ function distanciaAlOjo(nombreDelKeyframe: string): number {
  * `recorridoDeEncuadre` el cero es sólo este aspecto, y la función es continua a
  * los dos lados.
  */
-export function aspectoDeRecorridoNulo(nombreDelKeyframe: string, anchoDeLaCaja: number): number {
-  return anchoDeLaCaja / 2 / (TAN_HALF_V * distanciaAlOjo(nombreDelKeyframe))
+export function aspectoDeRecorridoNulo(nombreDelKeyframe: string, anchoDeLaCaja: number, distanciaHipotetica?: number): number {
+  return anchoDeLaCaja / 2 / (TAN_HALF_V * distanciaAlOjo(nombreDelKeyframe, distanciaHipotetica))
 }
 
 export interface RecorridoMedido {
@@ -95,8 +98,8 @@ export interface RecorridoMedido {
 }
 
 /** El recorrido de una pose en las cuatro ventanas, con las dos fórmulas al lado. */
-export function recorridosDe(nombreDelKeyframe: string, anchoDeLaCaja: number): RecorridoMedido[] {
-  const medioAlto = TAN_HALF_V * distanciaAlOjo(nombreDelKeyframe)
+export function recorridosDe(nombreDelKeyframe: string, anchoDeLaCaja: number, distanciaHipotetica?: number): RecorridoMedido[] {
+  const medioAlto = TAN_HALF_V * distanciaAlOjo(nombreDelKeyframe, distanciaHipotetica)
   return VENTANAS.map((ventana) => {
     const medioAncho = medioAlto * ventana.aspecto
     const corregido = recorridoDeEncuadre(medioAncho, anchoDeLaCaja)

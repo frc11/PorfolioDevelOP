@@ -88,6 +88,81 @@ import type { ChoreoKeyframe, ChoreoTramo, LightStop } from './choreographyTypes
  * solo existe cuando ese texto se pega acá. Ya costó una sesión entera de
  * trabajo humano. Ver el aviso grande en `choreographyEditor.ts`.
  *
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ B13 · DOS POSES SE ALEJARON — Y EL PORQUÉ VIVE ACÁ, NO AL LADO DE ELLAS
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * **`quiénes somos` pasa de 11,5 a 14 y `demos` de 9 a 14.** Es lo único que
+ * B13 cambió de este archivo: ni un ángulo, ni una altura, ni un encuadre.
+ *
+ * ⚠️ **Por qué el porqué está en esta cabecera y no adentro del array.** Los
+ * comentarios de adentro los emite el exportador desde `choreographyNotes.ts`
+ * —lo dice el bloque de arriba— y `s7-export.invariant.ts` compara el
+ * round-trip **byte por byte** contra este archivo. Escribir ahí obligaría a
+ * tocar `/probe-escena/_components/`, que está fuera de lo autorizado. Esta
+ * cabecera es «comentario de verdad» y el editor no la toca: es el único lugar
+ * donde una decisión de sprint puede vivir sin pelearse con el exportador.
+ *
+ * ── Qué lo pidió, y con qué número ─────────────────────────────────────────
+ *
+ * *«En los tramos donde el logo compite con el texto, la cámara se aleja: de
+ * ~40 % del cuadro a ~15 %.»* El 40 % existe y está localizado: medido sobre el
+ * cuadro más angosto donde la escena existe (1025×900) y sobre la ventana
+ * ENTERA de cada sección, el logo llega al **36,10 % del cuadro en p≈0,746**,
+ * que es el máximo de todo el recorrido y es la pose `demos`
+ * (`scripts-b13/d-tamano.ts`). Con las dos poses a 14:
+ *
+ * | sección | antes | después |
+ * |---|---:|---:|
+ * | hero | 11,85 % | 10,68 % |
+ * | quiénes somos | 21,97 % | **15,17 %** |
+ * | números | 22,06 % | **15,50 %** |
+ * | trabajos | 8,70 % | 8,64 % |
+ * | el diferencial | **36,10 %** | **15,40 %** |
+ * | cierre | 6,26 % | 5,80 % |
+ *
+ * ── ⚠️ LAS DOS RESTRICCIONES QUE FIJABAN ESOS NÚMEROS ESTÁN VENCIDAS ───────
+ *
+ * - **11,5 lo imponía el anillo de planos suspendidos** (radio 11,8–22): fuera
+ *   de la cuña frontal, una cámara más lejos siempre tenía un plano por delante.
+ *   **S10 borró ese anillo entero**, archivo incluido (`probeScene.ts`, «Lo que
+ *   S10 borró»). La restricción quedó vencida tres sprints antes de que a
+ *   alguien le sirviera.
+ * - **9 lo imponía «sol visible en cuadro»**, que pedía `altura ≤ −0,214 ×
+ *   distancia`. **S11 borró el cuerpo del sol** —sus dos sprites, el disco y su
+ *   washout (`lightRig.ts`)—: no hay sol que encuadrar y la desigualdad no
+ *   aplica. La altura no se toca igual; sólo la distancia estaba autorizada.
+ *
+ * ── Lo que se llevó puesto, con su cifra ───────────────────────────────────
+ *
+ * - **«`demos` llena el cuadro» quedó REVOCADO.** SITIO-S11 lo había declarado
+ *   como decisión —y con él el recorte por arriba del 0,9 % del área—. A 14 el
+ *   logo entra ENTERO en las 32 muestras. `s10-logo.invariant.ts` §3 y §6 lo
+ *   afirman ahora al revés, y su control positivo usa la distancia VIEJA.
+ * - **Ningún tramo se aceleró.** El pico de velocidad del recorrido BAJA de
+ *   4,6198 a **3,4126** alturas de cuadro por pantalla de scroll; el hero baja
+ *   de 3,4643 a 3,4126 y el cierre de 4,62 a 2,74. El arranque queda como el
+ *   tramo más rápido porque los otros se frenaron, no porque él subiera
+ *   (`s13b-escena.invariant.ts` §1, con la pista de antes al lado).
+ * - **El aterrizaje del preloader no se movió**: la pose del hero no se tocó,
+ *   así que `scene-framing` sigue dando 445 × 310 px en 1440×810.
+ * - **El censo de B9 no se movió**: 1,33 a 1920 y 1,20 a 1440. La cámara no
+ *   mueve una caja de texto.
+ *
+ * ── ⚠️ EL MARGEN QUE QUEDA, para el próximo que venga a mover esto ─────────
+ *
+ * `quiénes somos` es la pose que roza el piso. La altura mínima segura es
+ * `FLOOR_Y + 0,045 × distancia`, así que con la altura de −3,60 **la distancia
+ * a la que la cámara TOCA el papel con el puntero en el extremo es
+ * `(−3,60 − FLOOR_Y) / 0,045` = 15,64**. A 11,5 la holgura era 0,187 de mundo
+ * (**×1,360** sobre `MOUSE_HEIGHT_FACTOR`); a 14 es **0,074** (**×1,118**).
+ * Sigue del lado bueno y `s18-azimut.invariant.ts` §4 lo recalcula y lo publica,
+ * pero el margen es la mitad: **quedan 1,64 de distancia**, y ni un centímetro
+ * más sin mover también la altura o `MOUSE_HEIGHT_FACTOR`. Pasado ese número el
+ * invariante se pone en rojo; no se degrada en silencio. **La alternativa
+ * medida, por si se prefiere el margen: 13,0 deja ×1,203 y el logo en
+ * 16,3–16,7 %.**
+ *
  * ── Lo que este recorrido le entrega al preloader ──────────────────────────
  *
  * `scene-framing.ts` proyecta **el primer keyframe** para saber a qué tamaño y
@@ -209,7 +284,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     name: 'quiénes somos',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 130, height: -3.6, distance: 11.5, frameX: -0.8, frameY: 0 },
+    pose: { angleDeg: 130, height: -3.6, distance: 14, frameX: -0.8, frameY: 0 },
   },
 
   // ── Tramo 3 · Números ────────────────────────────────────────────────────
@@ -304,7 +379,7 @@ export const CHOREO_KEYFRAMES: readonly ChoreoKeyframe[] = [
     name: 'demos',
     ease: 'shift',
     turn: 'literal',
-    pose: { angleDeg: 310, height: -2.6, distance: 9, frameX: 1, frameY: 0 },
+    pose: { angleDeg: 310, height: -2.6, distance: 14, frameX: 1, frameY: 0 },
   },
 
   // ── Tramo 6 · Cierre ─────────────────────────────────────────────────────

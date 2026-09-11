@@ -1,7 +1,7 @@
 'use client'
 
 import { useLoader } from '@react-three/fiber'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, type RefObject } from 'react'
 import { SVGLoader } from 'three-stdlib'
 import * as THREE from 'three'
 
@@ -42,9 +42,19 @@ type ProbeLogoProps = {
    * —difuso y lóbulo— y la banda cruza el brillo del canto.
    */
   celosia: CelosiaUniforms
+  /**
+   * B13 · Por dónde sale el material para que el rig le escriba la emisiva.
+   *
+   * El material lo arma este componente —es suyo, y lo libera al desmontar—,
+   * así que el ref se PUBLICA, no se recibe armado. Quien escribe es
+   * `OrbitRig`, en el mismo cuadro que la luz; acá no hay `useFrame` a
+   * propósito: un segundo lazo leyendo un valor de módulo llegaría un cuadro
+   * tarde, y la emisión y el nivel del arco tienen que ser del mismo frame.
+   */
+  materialRef?: RefObject<THREE.MeshStandardMaterial | null>
 }
 
-export function ProbeLogo({ stats, onReady, celosia }: ProbeLogoProps) {
+export function ProbeLogo({ stats, onReady, celosia, materialRef }: ProbeLogoProps) {
   const svgData = useLoader(SVGLoader, '/logodevelOP.svg')
 
   /**
@@ -126,6 +136,18 @@ export function ProbeLogo({ stats, onReady, celosia }: ProbeLogoProps) {
     applyCelosia(built, celosia)
     return built
   }, [celosia])
+
+  // El material sale por el ref para que el rig le escriba la emisiva (B13). Un
+  // efecto y no el render: escribir un ref durante el render es un efecto
+  // secundario, y la limpieza tiene que devolverlo a `null` para que el rig no
+  // le escriba a un material ya liberado.
+  useEffect(() => {
+    if (materialRef === undefined) return
+    materialRef.current = material
+    return () => {
+      materialRef.current = null
+    }
+  }, [material, materialRef])
 
   // r3f solo libera lo que declara el JSX; estas las creó `useMemo`.
   useEffect(() => {

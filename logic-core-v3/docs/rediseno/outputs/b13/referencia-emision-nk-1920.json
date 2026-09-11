@@ -1,0 +1,1491 @@
+{
+  "origen": "https://www.nk.studio",
+  "perfil": "1920",
+  "cuando": "2026-09-10T22:28:33.940Z",
+  "anillos": [
+    [
+      1,
+      5
+    ],
+    [
+      6,
+      15
+    ],
+    [
+      16,
+      40
+    ],
+    [
+      41,
+      100
+    ]
+  ],
+  "paso": 540,
+  "paradas": [
+    {
+      "scrollY": 0,
+      "pantalla": 0,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 27640,
+        "caja": [
+          851,
+          323,
+          1068,
+          696
+        ],
+        "fraccionDelCuadro": 0.0133
+      },
+      "barra": {
+        "p05": 0.03018,
+        "p50": 0.0965,
+        "p95": 0.77786
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00119,
+        "media": 0.00097
+      },
+      "contrasteBarraSala": 2.93,
+      "anillos": [
+        0.01898,
+        0.01011,
+        0.00455,
+        0.00217
+      ],
+      "lejos": 0.0008,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 540,
+      "pantalla": 0.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 80747,
+        "caja": [
+          908,
+          206,
+          1627,
+          769
+        ],
+        "fraccionDelCuadro": 0.0389
+      },
+      "barra": {
+        "p05": 0.07261,
+        "p50": 0.12654,
+        "p95": 0.76994
+      },
+      "sala": {
+        "p05": 0.00275,
+        "p50": 0.01325,
+        "p95": 0.09572,
+        "media": 0.03544
+      },
+      "contrasteBarraSala": 2.79,
+      "anillos": [
+        0.05567,
+        0.04614,
+        0.0386,
+        0.037
+      ],
+      "lejos": 0.03445,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 1080,
+      "pantalla": 1,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 60120,
+        "caja": [
+          48,
+          319,
+          859,
+          716
+        ],
+        "fraccionDelCuadro": 0.029
+      },
+      "barra": {
+        "p05": 0.0681,
+        "p50": 0.12851,
+        "p95": 0.76686
+      },
+      "sala": {
+        "p05": 0.00272,
+        "p50": 0.01161,
+        "p95": 0.07744,
+        "media": 0.0279
+      },
+      "contrasteBarraSala": 2.9,
+      "anillos": [
+        0.05002,
+        0.0424,
+        0.03601,
+        0.03935
+      ],
+      "lejos": 0.02618,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 1620,
+      "pantalla": 1.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 68068,
+        "caja": [
+          8,
+          328,
+          836,
+          713
+        ],
+        "fraccionDelCuadro": 0.0328
+      },
+      "barra": {
+        "p05": 0.06594,
+        "p50": 0.12722,
+        "p95": 0.76219
+      },
+      "sala": {
+        "p05": 0.00301,
+        "p50": 0.01111,
+        "p95": 0.06837,
+        "media": 0.02684
+      },
+      "contrasteBarraSala": 2.9,
+      "anillos": [
+        0.04842,
+        0.04153,
+        0.03481,
+        0.03663
+      ],
+      "lejos": 0.02517,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 2160,
+      "pantalla": 2,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 62679,
+        "caja": [
+          105,
+          317,
+          907,
+          715
+        ],
+        "fraccionDelCuadro": 0.0302
+      },
+      "barra": {
+        "p05": 0.07114,
+        "p50": 0.13549,
+        "p95": 0.76979
+      },
+      "sala": {
+        "p05": 0.00293,
+        "p50": 0.0127,
+        "p95": 0.07505,
+        "media": 0.0285
+      },
+      "contrasteBarraSala": 2.96,
+      "anillos": [
+        0.05076,
+        0.04413,
+        0.0377,
+        0.0343
+      ],
+      "lejos": 0.02713,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 2700,
+      "pantalla": 2.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 90682,
+        "caja": [
+          299,
+          287,
+          1576,
+          732
+        ],
+        "fraccionDelCuadro": 0.0437
+      },
+      "barra": {
+        "p05": 0.03498,
+        "p50": 0.04972,
+        "p95": 0.69455
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0.00143,
+        "p95": 0.02609,
+        "media": 0.00651
+      },
+      "contrasteBarraSala": 1.94,
+      "anillos": [
+        0.02926,
+        0.02557,
+        0.01751,
+        0.01143
+      ],
+      "lejos": 0.00445,
+      "glifosSobreElObjeto": 0.0772,
+      "bloquesSobreElObjeto": 2,
+      "peorSobreElObjeto": 9.76,
+      "error": null
+    },
+    {
+      "scrollY": 3240,
+      "pantalla": 3,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 112386,
+        "caja": [
+          331,
+          216,
+          1524,
+          778
+        ],
+        "fraccionDelCuadro": 0.0542
+      },
+      "barra": {
+        "p05": 0.03231,
+        "p50": 0.04774,
+        "p95": 0.76375
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0.00096,
+        "p95": 0.02343,
+        "media": 0.0055
+      },
+      "contrasteBarraSala": 1.92,
+      "anillos": [
+        0.02741,
+        0.02385,
+        0.01685,
+        0.00998
+      ],
+      "lejos": 0.00343,
+      "glifosSobreElObjeto": 0.027,
+      "bloquesSobreElObjeto": 1,
+      "peorSobreElObjeto": 1.23,
+      "error": null
+    },
+    {
+      "scrollY": 3780,
+      "pantalla": 3.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0.00071
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 4320,
+      "pantalla": 4,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00072
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 4860,
+      "pantalla": 4.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00076
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 5400,
+      "pantalla": 5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00075
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 5940,
+      "pantalla": 5.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00071
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 6480,
+      "pantalla": 6,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00073
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 7020,
+      "pantalla": 6.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00076
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 7560,
+      "pantalla": 7,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00072
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 8100,
+      "pantalla": 7.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00072
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 8640,
+      "pantalla": 8,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00074
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 9180,
+      "pantalla": 8.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00078
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 9720,
+      "pantalla": 9,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00022,
+        "media": 0.00072
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 10260,
+      "pantalla": 9.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 335245,
+        "caja": [
+          279,
+          169,
+          1804,
+          891
+        ],
+        "fraccionDelCuadro": 0.1617
+      },
+      "barra": {
+        "p05": 0.06158,
+        "p50": 0.11644,
+        "p95": 0.37337
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0.00408,
+        "p95": 0.05186,
+        "media": 0.01376
+      },
+      "contrasteBarraSala": 3.08,
+      "anillos": [
+        0.0351,
+        0.02855,
+        0.02359,
+        0.0201
+      ],
+      "lejos": 0.00895,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 10800,
+      "pantalla": 10,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 335414,
+        "caja": [
+          279,
+          169,
+          1804,
+          890
+        ],
+        "fraccionDelCuadro": 0.1618
+      },
+      "barra": {
+        "p05": 0.06161,
+        "p50": 0.11644,
+        "p95": 0.37307
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0.00408,
+        "p95": 0.05186,
+        "media": 0.01377
+      },
+      "contrasteBarraSala": 3.08,
+      "anillos": [
+        0.03508,
+        0.02846,
+        0.02359,
+        0.02013
+      ],
+      "lejos": 0.00896,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 11340,
+      "pantalla": 10.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 142862,
+        "caja": [
+          401,
+          175,
+          1680,
+          716
+        ],
+        "fraccionDelCuadro": 0.0689
+      },
+      "barra": {
+        "p05": 0.09344,
+        "p50": 0.12928,
+        "p95": 0.41427
+      },
+      "sala": {
+        "p05": 0,
+        "p50": 0.01919,
+        "p95": 0.09929,
+        "media": 0.0323
+      },
+      "contrasteBarraSala": 2.59,
+      "anillos": [
+        0.055,
+        0.04253,
+        0.03809,
+        0.03612
+      ],
+      "lejos": 0.03013,
+      "glifosSobreElObjeto": 0.2901,
+      "bloquesSobreElObjeto": 8,
+      "peorSobreElObjeto": 2.7,
+      "error": null
+    },
+    {
+      "scrollY": 11880,
+      "pantalla": 11,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 633732,
+        "caja": [
+          0,
+          0,
+          1919,
+          365
+        ],
+        "fraccionDelCuadro": 0.3056
+      },
+      "barra": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.00115
+      },
+      "sala": {
+        "p05": 0.00946,
+        "p50": 0.05765,
+        "p95": 0.21435,
+        "media": 0.07451
+      },
+      "contrasteBarraSala": 2.15,
+      "anillos": [
+        0.03571,
+        0.03638,
+        0.06407,
+        0.05412
+      ],
+      "lejos": 0.07806,
+      "glifosSobreElObjeto": 0.9925,
+      "bloquesSobreElObjeto": 14,
+      "peorSobreElObjeto": 1.17,
+      "error": null
+    },
+    {
+      "scrollY": 12420,
+      "pantalla": 11.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 42001,
+        "caja": [
+          1583,
+          601,
+          1919,
+          826
+        ],
+        "fraccionDelCuadro": 0.0203
+      },
+      "barra": {
+        "p05": 0.09939,
+        "p50": 0.38109,
+        "p95": 0.5543
+      },
+      "sala": {
+        "p05": 0.00306,
+        "p50": 0.01512,
+        "p95": 0.09665,
+        "media": 0.03406
+      },
+      "contrasteBarraSala": 6.62,
+      "anillos": [
+        0.0574,
+        0.04695,
+        0.03256,
+        0.02013
+      ],
+      "lejos": 0.03432,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 12960,
+      "pantalla": 12,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 42300,
+        "caja": [
+          1583,
+          601,
+          1919,
+          827
+        ],
+        "fraccionDelCuadro": 0.0204
+      },
+      "barra": {
+        "p05": 0.09687,
+        "p50": 0.37832,
+        "p95": 0.55389
+      },
+      "sala": {
+        "p05": 0.0031,
+        "p50": 0.01475,
+        "p95": 0.12151,
+        "media": 0.03501
+      },
+      "contrasteBarraSala": 6.61,
+      "anillos": [
+        0.05648,
+        0.04626,
+        0.0324,
+        0.01995
+      ],
+      "lejos": 0.03533,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 13500,
+      "pantalla": 12.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 14040,
+      "pantalla": 13,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 14580,
+      "pantalla": 13.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 15120,
+      "pantalla": 14,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 15660,
+      "pantalla": 14.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 16200,
+      "pantalla": 15,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 16740,
+      "pantalla": 15.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 17280,
+      "pantalla": 16,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 17820,
+      "pantalla": 16.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 18360,
+      "pantalla": 17,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 18900,
+      "pantalla": 17.5,
+      "canvasEnCuadro": 0,
+      "objeto": {
+        "area": 0,
+        "caja": [],
+        "fraccionDelCuadro": 0
+      },
+      "barra": null,
+      "sala": {
+        "p05": 0,
+        "p50": 0,
+        "p95": 0,
+        "media": 0
+      },
+      "contrasteBarraSala": null,
+      "anillos": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "lejos": null,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 19440,
+      "pantalla": 18,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 49816,
+        "caja": [
+          566,
+          279,
+          843,
+          631
+        ],
+        "fraccionDelCuadro": 0.024
+      },
+      "barra": {
+        "p05": 0.07772,
+        "p50": 0.12841,
+        "p95": 0.19383
+      },
+      "sala": {
+        "p05": 0.0031,
+        "p50": 0.01512,
+        "p95": 0.12184,
+        "media": 0.03858
+      },
+      "contrasteBarraSala": 2.74,
+      "anillos": [
+        0.05335,
+        0.04754,
+        0.03703,
+        0.03389
+      ],
+      "lejos": 0.03864,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 19980,
+      "pantalla": 18.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 129893,
+        "caja": [
+          506,
+          250,
+          1450,
+          779
+        ],
+        "fraccionDelCuadro": 0.0626
+      },
+      "barra": {
+        "p05": 0.07913,
+        "p50": 0.13611,
+        "p95": 0.6607
+      },
+      "sala": {
+        "p05": 0.00297,
+        "p50": 0.01488,
+        "p95": 0.0804,
+        "media": 0.031
+      },
+      "contrasteBarraSala": 2.87,
+      "anillos": [
+        0.05545,
+        0.04504,
+        0.03593,
+        0.0289
+      ],
+      "lejos": 0.03009,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 20520,
+      "pantalla": 19,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 63831,
+        "caja": [
+          791,
+          318,
+          1323,
+          702
+        ],
+        "fraccionDelCuadro": 0.0308
+      },
+      "barra": {
+        "p05": 0.0856,
+        "p50": 0.15604,
+        "p95": 0.62794
+      },
+      "sala": {
+        "p05": 0.0032,
+        "p50": 0.01596,
+        "p95": 0.13562,
+        "media": 0.03832
+      },
+      "contrasteBarraSala": 3.12,
+      "anillos": [
+        0.05028,
+        0.04189,
+        0.03962,
+        0.04761
+      ],
+      "lejos": 0.03757,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 21060,
+      "pantalla": 19.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 57296,
+        "caja": [
+          1493,
+          633,
+          1919,
+          870
+        ],
+        "fraccionDelCuadro": 0.0276
+      },
+      "barra": {
+        "p05": 0.11161,
+        "p50": 0.34689,
+        "p95": 0.61799
+      },
+      "sala": {
+        "p05": 0.00343,
+        "p50": 0.01987,
+        "p95": 0.11124,
+        "media": 0.03728
+      },
+      "contrasteBarraSala": 5.68,
+      "anillos": [
+        0.06208,
+        0.05111,
+        0.03187,
+        0.02053
+      ],
+      "lejos": 0.03772,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 21600,
+      "pantalla": 20,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 93560,
+        "caja": [
+          142,
+          309,
+          964,
+          738
+        ],
+        "fraccionDelCuadro": 0.0451
+      },
+      "barra": {
+        "p05": 0.07081,
+        "p50": 0.13578,
+        "p95": 0.74268
+      },
+      "sala": {
+        "p05": 0.00263,
+        "p50": 0.01283,
+        "p95": 0.09059,
+        "media": 0.03089
+      },
+      "contrasteBarraSala": 2.96,
+      "anillos": [
+        0.05028,
+        0.04381,
+        0.03709,
+        0.03448
+      ],
+      "lejos": 0.02968,
+      "glifosSobreElObjeto": 0,
+      "bloquesSobreElObjeto": 0,
+      "peorSobreElObjeto": null,
+      "error": null
+    },
+    {
+      "scrollY": 22140,
+      "pantalla": 20.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 101779,
+        "caja": [
+          669,
+          149,
+          1535,
+          824
+        ],
+        "fraccionDelCuadro": 0.0491
+      },
+      "barra": {
+        "p05": 0.07523,
+        "p50": 0.14038,
+        "p95": 0.7758
+      },
+      "sala": {
+        "p05": 0.00327,
+        "p50": 0.01406,
+        "p95": 0.06663,
+        "media": 0.02582
+      },
+      "contrasteBarraSala": 2.97,
+      "anillos": [
+        0.05663,
+        0.0451,
+        0.03698,
+        0.03313
+      ],
+      "lejos": 0.0231,
+      "glifosSobreElObjeto": 0.0412,
+      "bloquesSobreElObjeto": 2,
+      "peorSobreElObjeto": 5.71,
+      "error": null
+    },
+    {
+      "scrollY": 22680,
+      "pantalla": 21,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 145969,
+        "caja": [
+          657,
+          46,
+          1570,
+          896
+        ],
+        "fraccionDelCuadro": 0.0704
+      },
+      "barra": {
+        "p05": 0.07411,
+        "p50": 0.13408,
+        "p95": 0.77707
+      },
+      "sala": {
+        "p05": 0.00329,
+        "p50": 0.01311,
+        "p95": 0.06318,
+        "media": 0.0232
+      },
+      "contrasteBarraSala": 2.92,
+      "anillos": [
+        0.05612,
+        0.04361,
+        0.03471,
+        0.03316
+      ],
+      "lejos": 0.01927,
+      "glifosSobreElObjeto": 0.5386,
+      "bloquesSobreElObjeto": 2,
+      "peorSobreElObjeto": 1.22,
+      "error": null
+    },
+    {
+      "scrollY": 23220,
+      "pantalla": 21.5,
+      "canvasEnCuadro": 1,
+      "objeto": {
+        "area": 156451,
+        "caja": [
+          132,
+          681,
+          1128,
+          1079
+        ],
+        "fraccionDelCuadro": 0.0754
+      },
+      "barra": {
+        "p05": 0.08388,
+        "p50": 0.45505,
+        "p95": 0.7734
+      },
+      "sala": {
+        "p05": 0.00319,
+        "p50": 0.01395,
+        "p95": 0.07436,
+        "media": 0.02761
+      },
+      "contrasteBarraSala": 7.9,
+      "anillos": [
+        0.06187,
+        0.04962,
+        0.03892,
+        0.03585
+      ],
+      "lejos": 0.02603,
+      "glifosSobreElObjeto": 0.0413,
+      "bloquesSobreElObjeto": 3,
+      "peorSobreElObjeto": 2.9,
+      "error": null
+    }
+  ]
+}

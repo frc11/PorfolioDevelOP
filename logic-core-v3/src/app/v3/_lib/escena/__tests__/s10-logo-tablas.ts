@@ -207,11 +207,21 @@ export const TINTA_CONTRA_TINTA = (tintaDelLogo: string): number => razonDeContr
  * podía leerse como «el docblock falta» durante tres sprints. Queda anotado acá
  * porque el arreglo del detector sin el arreglo del control no cierra nada.
  */
-export function declaraElRecorte(fuente: string, nombreDelKeyframe: string): boolean {
+export function declaraEnElBloque(fuente: string, nombreDelKeyframe: string, patron: RegExp): boolean {
   const normalizado = fuente.replace(/\r\n/g, '\n')
   const fin = normalizado.lastIndexOf(`name: '${nombreDelKeyframe}'`)
   if (fin < 0) return false
   const inicio = normalizado.lastIndexOf('\n  {\n', fin)
   if (inicio < 0) return false
-  return /recorte por arriba/i.test(normalizado.slice(inicio, fin))
+  return patron.test(normalizado.slice(inicio, fin))
+}
+
+/**
+ * ⚠️ **B13 · el caso que S11 escribió, ahora como envoltorio del genérico.**
+ * Nadie que lo llamara cambió, y B13 pudo preguntar por otra marca —el
+ * alejamiento de la pose— sin duplicar el recorte del bloque, que es la parte
+ * delicada de este detector.
+ */
+export function declaraElRecorte(fuente: string, nombreDelKeyframe: string): boolean {
+  return declaraEnElBloque(fuente, nombreDelKeyframe, /recorte por arriba/i)
 }

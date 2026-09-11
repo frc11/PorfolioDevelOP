@@ -172,3 +172,13 @@ src/modules/chatbot/evals/reports/
 # evidencia: lo que se commitea son las capturas del reporte en
 # `docs/rediseno/capturas/b12/` y el JSON con las cifras en `outputs/b12/`.
 /.b12-capturas/
+# `.next-b13/`: build aislado de B13 (que el logo emita), para medir el peso del
+# bloque sin pisar el `.next/` del `next dev` que corre al lado. Se agrega ACA
+# ANTES de correr el build, por la misma leccion de agosto que `.next-probe/`:
+# un distDir alternativo fuera de `.gitignore` envenena la auto-deteccion de
+# fuentes de Tailwind 4 y tira la ruta entera con el CSS intacto.
+/.next-b13/
+# `.b13-capturas/`: las capturas intermedias de los instrumentos de B13 (A/T/S de
+# la referencia y del home). No se commitean: lo que va al reporte se mueve a
+# `docs/rediseno/capturas/b13/` y las cifras a `outputs/b13/`.
+/.b13-capturas/

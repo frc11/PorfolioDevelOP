@@ -1,0 +1,112 @@
+{
+  "seccion": "numeros",
+  "perfil": "1440",
+  "aspecto": 1.6,
+  "grilla": {
+    "pieza": "composicion",
+    "nombre": "dispersa",
+    "pantalla": "entrada",
+    "x": 188,
+    "ancho": 1220,
+    "topDoc": 3600,
+    "columnas": 12,
+    "canal": 16,
+    "bordes": [
+      {
+        "desde": 188,
+        "hasta": 275
+      },
+      {
+        "desde": 291,
+        "hasta": 378
+      },
+      {
+        "desde": 394,
+        "hasta": 481
+      },
+      {
+        "desde": 497,
+        "hasta": 584
+      },
+      {
+        "desde": 600,
+        "hasta": 687
+      },
+      {
+        "desde": 703,
+        "hasta": 790
+      },
+      {
+        "desde": 806,
+        "hasta": 893
+      },
+      {
+        "desde": 909,
+        "hasta": 996
+      },
+      {
+        "desde": 1012,
+        "hasta": 1099
+      },
+      {
+        "desde": 1115,
+        "hasta": 1202
+      },
+      {
+        "desde": 1218,
+        "hasta": 1305
+      },
+      {
+        "desde": 1321,
+        "hasta": 1408
+      }
+    ]
+  },
+  "paso": 0.0078125,
+  "antesDeB13": {
+    "quiénes somos": 11.5,
+    "demos": 9
+  },
+  "filas": [
+    {
+      "cuando": "antes",
+      "paradas": 27,
+      "porColumna": [
+        89,
+        100,
+        100,
+        100,
+        100,
+        100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "primeraColumnaLibre": 7,
+      "amplitudPx": 602
+    },
+    {
+      "cuando": "despues",
+      "paradas": 27,
+      "porColumna": [
+        89,
+        100,
+        100,
+        100,
+        100,
+        48,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "primeraColumnaLibre": 7,
+      "amplitudPx": 602
+    }
+  ]
+}

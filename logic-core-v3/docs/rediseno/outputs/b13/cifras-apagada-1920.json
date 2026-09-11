@@ -1,0 +1,116 @@
+{
+  "perfil": "1920",
+  "llave": "apagada",
+  "panel": {
+    "id": "numeros",
+    "superficie": "papel-transparente",
+    "alto": 4320,
+    "top": 4320
+  },
+  "niveles": [
+    21.4,
+    38.3,
+    53,
+    65
+  ],
+  "razones": [
+    2.14,
+    3.83,
+    5.3,
+    6.5
+  ],
+  "pantallas": [
+    {
+      "pantalla": 1,
+      "scrollY": 4320,
+      "cifras": [],
+      "areaDeLasCifrasPct": 0
+    },
+    {
+      "pantalla": 2,
+      "scrollY": 5400,
+      "cifras": [
+        {
+          "clave": "proyectos",
+          "valor": "[CIFRA]",
+          "rotulo": "Proyectos entregados",
+          "nivelPx": 65,
+          "rotuloPx": 10,
+          "razon": 6.5,
+          "x": 1046,
+          "anchoPx": 842,
+          "altoPx": 99.9,
+          "marcaAnchoPx": 243.4,
+          "desborda": false
+        },
+        {
+          "clave": "clientes",
+          "valor": "[CIFRA]",
+          "rotulo": "Clientes activos",
+          "nivelPx": 38.3,
+          "rotuloPx": 10,
+          "razon": 3.83,
+          "x": 1332,
+          "anchoPx": 556,
+          "altoPx": 70.8,
+          "marcaAnchoPx": 159.5,
+          "desborda": false
+        }
+      ],
+      "areaDeLasCifrasPct": 5.95
+    },
+    {
+      "pantalla": 3,
+      "scrollY": 6480,
+      "cifras": [
+        {
+          "clave": "anios",
+          "valor": "[CIFRA]",
+          "rotulo": "Años en el mercado",
+          "nivelPx": 21.4,
+          "rotuloPx": 10,
+          "razon": 2.14,
+          "x": 1189,
+          "anchoPx": 413,
+          "altoPx": 52.3,
+          "marcaAnchoPx": 100.4,
+          "desborda": false
+        },
+        {
+          "clave": "respuesta",
+          "valor": "[CIFRA]",
+          "rotulo": "Tiempo de respuesta",
+          "nivelPx": 53,
+          "rotuloPx": 10,
+          "razon": 5.3,
+          "x": 1475,
+          "anchoPx": 413,
+          "altoPx": 86.8,
+          "marcaAnchoPx": 203.3,
+          "desborda": false
+        }
+      ],
+      "areaDeLasCifrasPct": 2.77
+    },
+    {
+      "pantalla": 4,
+      "scrollY": 7560,
+      "cifras": [
+        {
+          "clave": "procesos",
+          "valor": "[CIFRA]",
+          "rotulo": "Procesos automatizados",
+          "nivelPx": 38.3,
+          "rotuloPx": 10,
+          "razon": 3.83,
+          "x": 1046,
+          "anchoPx": 556,
+          "altoPx": 70.8,
+          "marcaAnchoPx": 159.5,
+          "desborda": false
+        }
+      ],
+      "areaDeLasCifrasPct": 1.9
+    }
+  ]
+}

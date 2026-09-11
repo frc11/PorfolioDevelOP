@@ -108,12 +108,52 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
    * Demos entra con el amanecer a medio hacer y la mañana deja al Cierre más
    * claro que el atardecer de antes.
    */
+  /**
+   * ══════════════════════════════════════════════════════════════════════════
+   * ⚠️ **B13 · SE FUE LA ÚLTIMA POSE QUE ESTABA CLAVADA EN S11, Y HAY QUE DECIR
+   * QUE SE FUE.** Autorizado por el dueño al cerrar la PARADA 1 de B13; se
+   * reescribe contra la propiedad nueva, no se afloja ni se borra.
+   * ══════════════════════════════════════════════════════════════════════════
+   *
+   * **Qué custodiaba.** Que con α = 0 —el sol sin tamaño angular— `quiénes somos`
+   * devolviera EXACTAMENTE los 166 que S11 publicó, con menos de 1 de desvío. Era
+   * el ancla histórica de este archivo: la prueba de que la cadena que mide acá
+   * sigue siendo la de S11 y de que la penumbra en cero es un no-op.
+   *
+   * **Por qué cambió.** B13 alejó su CÁMARA de 11,5 a 14 para bajar el logo del
+   * 21,97 % al 15,17 % del cuadro. Su luz no se tocó —el nivel del arco en
+   * p=0,375 sigue en 1— y lo que se movió es qué mira: alejarse a la misma altura
+   * mete más sala clara en cuadro y el valor medio SUBE de **166 a 177**.
+   *
+   * **Por qué el 166 NO se actualiza.** `S11_MEAN` es lo que S11 **publicó**: es
+   * historia. Pisarlo con 177 borraría el dato contra el que se comparó durante
+   * cuatro sprints y dejaría la afirmación diciendo «hoy da lo que da».
+   *
+   * **Qué corre en su lugar, y por qué es más fuerte.** Las SEIS poses quedan
+   * clasificadas por CAUSA, y cada una se afirma contra S11 con la suya: el hero
+   * por el encuadre (V3-E), `quiénes somos` por la distancia (B13) y las otras
+   * cuatro por la luz (B8/B12). La cota del movimiento por cámara no es un número
+   * elegido: **tiene que ser menor que el más chico de los cuatro movimientos por
+   * LUZ**, que es lo que separa las dos causas. Si algún día mover una cámara
+   * moviera el cuadro tanto como apagar la sala, esto se pone en rojo.
+   *
+   * ⚠️ **Lo que se pierde, dicho:** este archivo ya no tiene ninguna pose sentada
+   * EXACTAMENTE sobre una cifra publicada. El ancla exacta viva del repo quedó en
+   * `s11-piso.invariant.ts`, en el hero contra los 216 de S10 — la única pose que
+   * ni B8 re-iluminó ni B13 movió.
+   */
   const HERO = 0
   const QUIENES = 1
+  const MOVIDAS_POR_LA_LUZ = [2, 3, 4, 5]
+  const menorMovimientoPorLuz = Math.min(
+    ...MOVIDAS_POR_LA_LUZ.map((i) => Math.abs(control[i] - S11_MEAN[i]))
+  )
+  const movimientoPorCamara = control[QUIENES] - S11_MEAN[QUIENES]
   check(
-    'control positivo — con α = 0 la pose cuya luz no tocó nadie (quiénes somos) sigue siendo la de S11',
-    Math.abs(control[QUIENES] - S11_MEAN[QUIENES]) < 1,
-    `${POSES[QUIENES][0]} ${control[QUIENES].toFixed(1)} (S11 ${S11_MEAN[QUIENES]})`
+    'B13 — `quiénes somos` se movió por la DISTANCIA y no por la luz: hacia arriba, y menos que cualquiera de las cuatro que B8 re-iluminó',
+    movimientoPorCamara > 0 && movimientoPorCamara < menorMovimientoPorLuz,
+    `${POSES[QUIENES][0]} ${control[QUIENES].toFixed(1)} contra los ${S11_MEAN[QUIENES]} de S11 — +${movimientoPorCamara.toFixed(1)} por distancia 11,5 → 14 ` +
+      `(\`choreography.ts\`, B13 §2), con el nivel del arco en ${levelAt(POSES[QUIENES][1]).toFixed(2)}, el mismo de S9 · el menor movimiento por LUZ es ${menorMovimientoPorLuz.toFixed(1)}`
   )
   /**
    * ⚠️ **B12 · LA CONDICIÓN SE PARTE EN DOS PORQUE LAS DOS POSES DEJARON DE
@@ -188,10 +228,26 @@ section('Los seis valores medios: cuánto devuelve la penumbra de lo que S11 gan
         .mean - PARTICLE_DELTA[i]
   )
   const conLuz = POSES.map(([, at]) => levelAt(at) >= RIM_NIGHT_LEVEL)
+  /**
+   * ⚠️ **B13 · LA REPRODUCCIÓN DE S10 QUEDA EN UNA POSE, POR LA MISMA RAZÓN.**
+   * Custodiaba que la escena SIN celosía devolviera los valores de S10 en las
+   * dos poses que B8 no re-iluminó —el hero con tolerancia 2 por el `frameX` de
+   * V3-E, y `quiénes somos` con tolerancia 1—. B13 movió la cámara de la segunda
+   * (11,5 → 14) y su cifra pasa de **172 a 186**. El 172 no se pisa: es lo que
+   * S10 publicó. Se afirma el hero con SU tolerancia de siempre —intacta— y se
+   * afirma aparte que la otra se movió y en qué dirección, con la causa. La
+   * tolerancia del hero es la que decide si el instrumento se corrió, y ésa no se
+   * tocó.
+   */
   check(
-    'la escena sin celosía, a la luz de hoy, reproduce S10 en las dos poses intactas',
-    Math.abs(sinCelosia[0] - S10_MEAN[0]) < 2 && Math.abs(sinCelosia[1] - S10_MEAN[1]) < 1,
-    `hero ${sinCelosia[0].toFixed(1)} (S10 ${S10_MEAN[0]}) · quiénes somos ${sinCelosia[1].toFixed(1)} (S10 ${S10_MEAN[1]})`
+    'la escena sin celosía, a la luz de hoy, reproduce S10 en la única pose que nadie re-iluminó ni movió: el hero',
+    Math.abs(sinCelosia[0] - S10_MEAN[0]) < 2,
+    `hero ${sinCelosia[0].toFixed(1)} (S10 ${S10_MEAN[0]}) — la tolerancia de 2 es la de V3-E, por su \`frameX\`, y no se tocó`
+  )
+  check(
+    '  B13 — y `quiénes somos` ya NO lo reproduce: se alejó, y por eso entra más sala clara en cuadro',
+    sinCelosia[1] > S10_MEAN[1] && sinCelosia[1] - S10_MEAN[1] < menorMovimientoPorLuz,
+    `quiénes somos ${sinCelosia[1].toFixed(1)} (S10 ${S10_MEAN[1]}) — +${(sinCelosia[1] - S10_MEAN[1]).toFixed(1)} por distancia 11,5 → 14, con su luz intacta`
   )
   check(
     'y ninguna de las seis vuelve a la escena SIN celosía, a la MISMA luz',

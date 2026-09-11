@@ -47,6 +47,7 @@ import { TRAMOS_ANCLADOS } from '../anclaje'
 import { aCuadroAlto, aCuadroX } from './s10-logo-cajas'
 import { muestrearLogo } from './s10-logo'
 // prettier-ignore
+import { superposicionMinimaAntesDeB13 } from './s13b-antes'
 import { ESCENA_REAL, VENTANAS, barridoVertical, cobertura, contrasteSobreElFondo, fraccionDentro, mayorCaja, type Ventana } from './s10-logo-lectura'
 // prettier-ignore
 import { EL_DIFERENCIAL, anclasAlcanzables, particiones, repartosPosibles, tablaDeRepartos } from './s13b-reparto'
@@ -242,11 +243,8 @@ export function afirmarLaVentanaDelDiferencial(): void {
     `LA VENTANA EXISTE — p=[${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}]`,
     `desde donde el titular puede quedar limpio en los ${CAJAS_DEL_DIFERENCIAL.length} cuadros, hasta donde el peor píxel del fondo deja de llegar a AA (${AA}:1)${ventana.hasta === 1 ? ' — que desde B8 es el final del recorrido: la mañana no vuelve a cruzarlo' : ''}`,
   )
-  controlPositivo(
-    'el criterio del logo no es un `true` constante: en la pose `demos` el titular NO puede quedar limpio',
-    0.75,
-    (p: number) => CAJAS_DEL_DIFERENCIAL.every((c) => superposicionMinima(c, p) === 0),
-  )
+  const limpioAntesDeB13 = (p: number) => CAJAS_DEL_DIFERENCIAL.every((c) => superposicionMinimaAntesDeB13(c, p) === 0)
+  controlPositivo('el criterio del logo no es un `true` constante: con la distancia VIEJA (9) el titular NO podía quedar limpio en p=0,750', 0.75, limpioAntesDeB13)
 
   const repartos = repartosPosibles(TRAMOS_ANCLADOS.map((a) => a.secciones.join('+')).join(' | '))
   for (const linea of tablaDeRepartos(repartos)) console.log(`  ${linea}`)
@@ -274,11 +272,14 @@ export function afirmarLaVentanaDelDiferencial(): void {
    * `s16-anclaje` §5: paga más corrimiento de `tu-panel` que el ancla declarada. El heredado sigue afuera por el
    * titular. La descuantización sigue haciendo falta; lo que cambió es cuál de los tres márgenes cierra arriba.
    */
+  /** ⚠️ **B13 · los dos cuantizados caen ADENTRO:** con `demos` a 14 la ventana abre
+   *  en 0,7245 —antes del heredado— y el único que los descarta es el corrimiento. */
   afirmar(
-    anclas[0] < ventana.desde && anclas[anclas.length - 1] > ventana.desde && anclas[anclas.length - 1] <= ventana.hasta,
-    '  el HEREDADO sigue afuera por el titular; el otro (0,9167) cae ADENTRO desde B8 y lo descarta el corrimiento, no el fondo',
-    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}] · el heredado queda ${(ventana.desde - anclas[0]).toFixed(4)} corto · en el otro el fondo da ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1`,
+    anclas.every((a) => a >= ventana.desde && a <= ventana.hasta),
+    '  B13 — los DOS cuantizados caen ADENTRO: ni el titular ni el fondo los descartan ya, sólo el corrimiento',
+    `${anclas.map((a) => a.toFixed(4)).join(' y ')} contra [${ventana.desde.toFixed(4)}, ${ventana.hasta.toFixed(4)}] · el heredado entra por ${(anclas[0] - ventana.desde).toFixed(4)} · en el otro el fondo da ${contrasteSobreElFondo(anclas[anclas.length - 1]).toFixed(2)}:1`,
   )
+  controlPositivo('  y la ventana no se abrió sola: con la distancia VIEJA el heredado quedaba afuera por el titular', anclas[0], limpioAntesDeB13)
   const declarada = TRAMOS_ANCLADOS.find((t) => t.ancla !== undefined)?.ancla ?? Number.NaN
   afirmar(
     declarada > ventana.desde && declarada < ventana.hasta,

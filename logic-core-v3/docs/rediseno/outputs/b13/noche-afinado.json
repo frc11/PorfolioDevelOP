@@ -1,0 +1,385 @@
+{
+  "referencia": {
+    "min": 1.92,
+    "mediana": 2.9,
+    "max": 7.9
+  },
+  "trabajos": 0.5,
+  "afinado": [
+    {
+      "emisiva": 0.16,
+      "logoP50": 97.2,
+      "salaP50": 19.9,
+      "logoContraLaSala": 2.97,
+      "tintaClaraEncima": 5.77,
+      "enLaBandaDeLaReferencia": true,
+      "tintaClaraPasaAA": true
+    }
+  ],
+  "rampa": [
+    {
+      "progreso": 0.45875,
+      "nivel": 1,
+      "emisiva": 0,
+      "coberturaPct": 6.09,
+      "logoP50": 0.4,
+      "salaP50": 226.8,
+      "logoContraLaSala": 16.36,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.46375,
+      "nivel": 1,
+      "emisiva": 0,
+      "coberturaPct": 5.97,
+      "logoP50": 0.3,
+      "salaP50": 227.6,
+      "logoContraLaSala": 16.52,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.46875,
+      "nivel": 1,
+      "emisiva": 0,
+      "coberturaPct": 5.82,
+      "logoP50": 0.3,
+      "salaP50": 228.5,
+      "logoContraLaSala": 16.52,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.47375,
+      "nivel": 0.8464,
+      "emisiva": 0,
+      "coberturaPct": 5.68,
+      "logoP50": 0.3,
+      "salaP50": 209.9,
+      "logoContraLaSala": 13.89,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.47875,
+      "nivel": 0.6928,
+      "emisiva": 0,
+      "coberturaPct": 5.61,
+      "logoP50": 0.2,
+      "salaP50": 191.2,
+      "logoContraLaSala": 11.42,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.48375,
+      "nivel": 0.5392,
+      "emisiva": 0,
+      "coberturaPct": 5.55,
+      "logoP50": 0.1,
+      "salaP50": 171.1,
+      "logoContraLaSala": 9.14,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.48875,
+      "nivel": 0.3856,
+      "emisiva": 0,
+      "coberturaPct": 5.53,
+      "logoP50": 0.1,
+      "salaP50": 149.1,
+      "logoContraLaSala": 7.01,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.49375,
+      "nivel": 0.232,
+      "emisiva": 0.0473,
+      "coberturaPct": 5.55,
+      "logoP50": 31.6,
+      "salaP50": 116.6,
+      "logoContraLaSala": 3.54,
+      "tintaClaraEncima": 15.19
+    },
+    {
+      "progreso": 0.49875,
+      "nivel": 0.0784,
+      "emisiva": 0.1528,
+      "coberturaPct": 5.57,
+      "logoP50": 94.4,
+      "salaP50": 47.5,
+      "logoContraLaSala": 2.04,
+      "tintaClaraEncima": 6.05
+    },
+    {
+      "progreso": 0.50375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.55,
+      "logoP50": 97.2,
+      "salaP50": 19.9,
+      "logoContraLaSala": 2.97,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.50875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.53,
+      "logoP50": 97.2,
+      "salaP50": 19.8,
+      "logoContraLaSala": 2.97,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.51375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.49,
+      "logoP50": 97.2,
+      "salaP50": 19.7,
+      "logoContraLaSala": 2.97,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.51875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.63,
+      "logoP50": 97.2,
+      "salaP50": 19.5,
+      "logoContraLaSala": 3,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.52375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.49,
+      "logoP50": 97.2,
+      "salaP50": 19.1,
+      "logoContraLaSala": 3,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.52875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.7,
+      "logoP50": 97.2,
+      "salaP50": 18.6,
+      "logoContraLaSala": 3,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.53375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.72,
+      "logoP50": 97.2,
+      "salaP50": 17.9,
+      "logoContraLaSala": 3.02,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.53875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.82,
+      "logoP50": 97.2,
+      "salaP50": 17.1,
+      "logoContraLaSala": 3.05,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.54375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.7,
+      "logoP50": 97.2,
+      "salaP50": 16.4,
+      "logoContraLaSala": 3.07,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.54875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.72,
+      "logoP50": 97.2,
+      "salaP50": 15.7,
+      "logoContraLaSala": 3.07,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.55375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.95,
+      "logoP50": 97.2,
+      "salaP50": 15.1,
+      "logoContraLaSala": 3.1,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.55875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.93,
+      "logoP50": 97.2,
+      "salaP50": 14.7,
+      "logoContraLaSala": 3.1,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.56375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.84,
+      "logoP50": 97.2,
+      "salaP50": 14.4,
+      "logoContraLaSala": 3.12,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.56875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.95,
+      "logoP50": 97.2,
+      "salaP50": 14.2,
+      "logoContraLaSala": 3.12,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.57375,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.91,
+      "logoP50": 97.2,
+      "salaP50": 14,
+      "logoContraLaSala": 3.12,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.57875,
+      "nivel": 0.04,
+      "emisiva": 0.16,
+      "coberturaPct": 5.76,
+      "logoP50": 97.2,
+      "salaP50": 13.9,
+      "logoContraLaSala": 3.12,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.58375,
+      "nivel": 0.043,
+      "emisiva": 0.16,
+      "coberturaPct": 5.93,
+      "logoP50": 97.2,
+      "salaP50": 15.2,
+      "logoContraLaSala": 3.1,
+      "tintaClaraEncima": 5.77
+    },
+    {
+      "progreso": 0.58875,
+      "nivel": 0.079,
+      "emisiva": 0.1526,
+      "coberturaPct": 5.91,
+      "logoP50": 94.3,
+      "salaP50": 34.8,
+      "logoContraLaSala": 2.42,
+      "tintaClaraEncima": 6.05
+    },
+    {
+      "progreso": 0.59375,
+      "nivel": 0.115,
+      "emisiva": 0.135,
+      "coberturaPct": 5.95,
+      "logoP50": 86.9,
+      "salaP50": 54.4,
+      "logoContraLaSala": 1.67,
+      "tintaClaraEncima": 6.74
+    },
+    {
+      "progreso": 0.59875,
+      "nivel": 0.151,
+      "emisiva": 0.1105,
+      "coberturaPct": 5.89,
+      "logoP50": 75.1,
+      "salaP50": 70.5,
+      "logoContraLaSala": 1.08,
+      "tintaClaraEncima": 8.13
+    },
+    {
+      "progreso": 0.60375,
+      "nivel": 0.187,
+      "emisiva": 0.0824,
+      "coberturaPct": 6.05,
+      "logoP50": 58.2,
+      "salaP50": 83,
+      "logoContraLaSala": 1.48,
+      "tintaClaraEncima": 10.44
+    },
+    {
+      "progreso": 0.60875,
+      "nivel": 0.223,
+      "emisiva": 0.054,
+      "coberturaPct": 5.88,
+      "logoP50": 36.9,
+      "salaP50": 92.5,
+      "logoContraLaSala": 2.33,
+      "tintaClaraEncima": 14.11
+    },
+    {
+      "progreso": 0.61375,
+      "nivel": 0.259,
+      "emisiva": 0.0287,
+      "coberturaPct": 5.88,
+      "logoP50": 16.2,
+      "salaP50": 102.1,
+      "logoContraLaSala": 3.31,
+      "tintaClaraEncima": 17.6
+    },
+    {
+      "progreso": 0.61875,
+      "nivel": 0.295,
+      "emisiva": 0.0097,
+      "coberturaPct": 5.88,
+      "logoP50": 2.1,
+      "salaP50": 111.3,
+      "logoContraLaSala": 4.13,
+      "tintaClaraEncima": 19.23
+    },
+    {
+      "progreso": 0.62375,
+      "nivel": 0.331,
+      "emisiva": 0.0004,
+      "coberturaPct": 5.89,
+      "logoP50": 0.1,
+      "salaP50": 119.7,
+      "logoContraLaSala": 4.76,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.62875,
+      "nivel": 0.3404,
+      "emisiva": 0,
+      "coberturaPct": 5.93,
+      "logoP50": 0.1,
+      "salaP50": 121.8,
+      "logoContraLaSala": 4.89,
+      "tintaClaraEncima": 19.58
+    },
+    {
+      "progreso": 0.63375,
+      "nivel": 0.3424,
+      "emisiva": 0,
+      "coberturaPct": 5.95,
+      "logoP50": 0.1,
+      "salaP50": 121.7,
+      "logoContraLaSala": 4.89,
+      "tintaClaraEncima": 19.58
+    }
+  ],
+  "peor": {
+    "progreso": 0.59875,
+    "contraste": 1.0819268739725596
+  }
+}

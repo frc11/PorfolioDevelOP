@@ -1,0 +1,1768 @@
+{
+  "poses": [
+    {
+      "at": 0,
+      "name": "hero",
+      "pose": {
+        "angleDeg": 0,
+        "height": 6.4,
+        "distance": 19,
+        "frameX": 0.5,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 0.375,
+      "name": "quiénes somos",
+      "ease": "shift",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 130,
+        "height": -3.6,
+        "distance": 14,
+        "frameX": -0.8,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 0.5,
+      "name": "números",
+      "ease": "shift",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 185,
+        "height": 9,
+        "distance": 18.5,
+        "frameX": -0.45,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 0.625,
+      "name": "trabajos",
+      "ease": "shift",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 195,
+        "height": 4.5,
+        "distance": 20,
+        "frameX": -0.85,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 0.75,
+      "name": "demos",
+      "ease": "shift",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 310,
+        "height": -2.6,
+        "distance": 14,
+        "frameX": 1,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 0.95,
+      "name": "cierre",
+      "ease": "arrive",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 360,
+        "height": -1.4,
+        "distance": 27,
+        "frameX": 0,
+        "frameY": 0
+      }
+    },
+    {
+      "at": 1,
+      "name": "cierre · sostén",
+      "ease": "arrive",
+      "turn": "literal",
+      "pose": {
+        "angleDeg": 360,
+        "height": -1.4,
+        "distance": 27,
+        "frameX": 0,
+        "frameY": 0
+      }
+    }
+  ],
+  "paso": 0.00390625,
+  "secciones": [
+    {
+      "seccion": "hero",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0,
+        0.125
+      ],
+      "n": 33,
+      "min": 8.56,
+      "max": 10.68,
+      "media": 9.43,
+      "donde": 0.109375,
+      "puntos": [
+        {
+          "progreso": 0,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.003906,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.007813,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.011719,
+          "coberturaPct": 8.62
+        },
+        {
+          "progreso": 0.015625,
+          "coberturaPct": 8.7
+        },
+        {
+          "progreso": 0.019531,
+          "coberturaPct": 8.7
+        },
+        {
+          "progreso": 0.023438,
+          "coberturaPct": 8.72
+        },
+        {
+          "progreso": 0.027344,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.03125,
+          "coberturaPct": 8.83
+        },
+        {
+          "progreso": 0.035156,
+          "coberturaPct": 8.91
+        },
+        {
+          "progreso": 0.039063,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.042969,
+          "coberturaPct": 8.79
+        },
+        {
+          "progreso": 0.046875,
+          "coberturaPct": 8.83
+        },
+        {
+          "progreso": 0.050781,
+          "coberturaPct": 8.85
+        },
+        {
+          "progreso": 0.054688,
+          "coberturaPct": 9.06
+        },
+        {
+          "progreso": 0.058594,
+          "coberturaPct": 9.01
+        },
+        {
+          "progreso": 0.0625,
+          "coberturaPct": 9.08
+        },
+        {
+          "progreso": 0.066406,
+          "coberturaPct": 9.29
+        },
+        {
+          "progreso": 0.070313,
+          "coberturaPct": 9.31
+        },
+        {
+          "progreso": 0.074219,
+          "coberturaPct": 9.66
+        },
+        {
+          "progreso": 0.078125,
+          "coberturaPct": 9.72
+        },
+        {
+          "progreso": 0.082031,
+          "coberturaPct": 9.89
+        },
+        {
+          "progreso": 0.085938,
+          "coberturaPct": 10.08
+        },
+        {
+          "progreso": 0.089844,
+          "coberturaPct": 10.2
+        },
+        {
+          "progreso": 0.09375,
+          "coberturaPct": 10.31
+        },
+        {
+          "progreso": 0.097656,
+          "coberturaPct": 10.48
+        },
+        {
+          "progreso": 0.101563,
+          "coberturaPct": 10.46
+        },
+        {
+          "progreso": 0.105469,
+          "coberturaPct": 10.58
+        },
+        {
+          "progreso": 0.109375,
+          "coberturaPct": 10.68
+        },
+        {
+          "progreso": 0.113281,
+          "coberturaPct": 10.41
+        },
+        {
+          "progreso": 0.117188,
+          "coberturaPct": 10.43
+        },
+        {
+          "progreso": 0.121094,
+          "coberturaPct": 10.35
+        },
+        {
+          "progreso": 0.125,
+          "coberturaPct": 10
+        }
+      ]
+    },
+    {
+      "seccion": "quienes-somos",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0,
+        0.375
+      ],
+      "n": 97,
+      "min": 2.65,
+      "max": 15.17,
+      "media": 10.91,
+      "donde": 0.351563,
+      "puntos": [
+        {
+          "progreso": 0,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.003906,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.007813,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.011719,
+          "coberturaPct": 8.62
+        },
+        {
+          "progreso": 0.015625,
+          "coberturaPct": 8.7
+        },
+        {
+          "progreso": 0.019531,
+          "coberturaPct": 8.7
+        },
+        {
+          "progreso": 0.023438,
+          "coberturaPct": 8.72
+        },
+        {
+          "progreso": 0.027344,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.03125,
+          "coberturaPct": 8.83
+        },
+        {
+          "progreso": 0.035156,
+          "coberturaPct": 8.91
+        },
+        {
+          "progreso": 0.039063,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.042969,
+          "coberturaPct": 8.79
+        },
+        {
+          "progreso": 0.046875,
+          "coberturaPct": 8.83
+        },
+        {
+          "progreso": 0.050781,
+          "coberturaPct": 8.85
+        },
+        {
+          "progreso": 0.054688,
+          "coberturaPct": 9.06
+        },
+        {
+          "progreso": 0.058594,
+          "coberturaPct": 9.01
+        },
+        {
+          "progreso": 0.0625,
+          "coberturaPct": 9.08
+        },
+        {
+          "progreso": 0.066406,
+          "coberturaPct": 9.29
+        },
+        {
+          "progreso": 0.070313,
+          "coberturaPct": 9.31
+        },
+        {
+          "progreso": 0.074219,
+          "coberturaPct": 9.66
+        },
+        {
+          "progreso": 0.078125,
+          "coberturaPct": 9.72
+        },
+        {
+          "progreso": 0.082031,
+          "coberturaPct": 9.89
+        },
+        {
+          "progreso": 0.085938,
+          "coberturaPct": 10.08
+        },
+        {
+          "progreso": 0.089844,
+          "coberturaPct": 10.2
+        },
+        {
+          "progreso": 0.09375,
+          "coberturaPct": 10.31
+        },
+        {
+          "progreso": 0.097656,
+          "coberturaPct": 10.48
+        },
+        {
+          "progreso": 0.101563,
+          "coberturaPct": 10.46
+        },
+        {
+          "progreso": 0.105469,
+          "coberturaPct": 10.58
+        },
+        {
+          "progreso": 0.109375,
+          "coberturaPct": 10.68
+        },
+        {
+          "progreso": 0.113281,
+          "coberturaPct": 10.41
+        },
+        {
+          "progreso": 0.117188,
+          "coberturaPct": 10.43
+        },
+        {
+          "progreso": 0.121094,
+          "coberturaPct": 10.35
+        },
+        {
+          "progreso": 0.125,
+          "coberturaPct": 10
+        },
+        {
+          "progreso": 0.128906,
+          "coberturaPct": 9.62
+        },
+        {
+          "progreso": 0.132813,
+          "coberturaPct": 9.31
+        },
+        {
+          "progreso": 0.136719,
+          "coberturaPct": 8.72
+        },
+        {
+          "progreso": 0.140625,
+          "coberturaPct": 8.16
+        },
+        {
+          "progreso": 0.144531,
+          "coberturaPct": 7.35
+        },
+        {
+          "progreso": 0.148438,
+          "coberturaPct": 6.89
+        },
+        {
+          "progreso": 0.152344,
+          "coberturaPct": 5.8
+        },
+        {
+          "progreso": 0.15625,
+          "coberturaPct": 4.95
+        },
+        {
+          "progreso": 0.160156,
+          "coberturaPct": 4.03
+        },
+        {
+          "progreso": 0.164063,
+          "coberturaPct": 2.65
+        },
+        {
+          "progreso": 0.167969,
+          "coberturaPct": 3.23
+        },
+        {
+          "progreso": 0.171875,
+          "coberturaPct": 4.03
+        },
+        {
+          "progreso": 0.175781,
+          "coberturaPct": 5.11
+        },
+        {
+          "progreso": 0.179688,
+          "coberturaPct": 5.91
+        },
+        {
+          "progreso": 0.183594,
+          "coberturaPct": 6.66
+        },
+        {
+          "progreso": 0.1875,
+          "coberturaPct": 7.26
+        },
+        {
+          "progreso": 0.191406,
+          "coberturaPct": 8.08
+        },
+        {
+          "progreso": 0.195313,
+          "coberturaPct": 8.68
+        },
+        {
+          "progreso": 0.199219,
+          "coberturaPct": 9.33
+        },
+        {
+          "progreso": 0.203125,
+          "coberturaPct": 9.87
+        },
+        {
+          "progreso": 0.207031,
+          "coberturaPct": 10.16
+        },
+        {
+          "progreso": 0.210938,
+          "coberturaPct": 10.5
+        },
+        {
+          "progreso": 0.214844,
+          "coberturaPct": 10.89
+        },
+        {
+          "progreso": 0.21875,
+          "coberturaPct": 11.31
+        },
+        {
+          "progreso": 0.222656,
+          "coberturaPct": 11.73
+        },
+        {
+          "progreso": 0.226563,
+          "coberturaPct": 11.79
+        },
+        {
+          "progreso": 0.230469,
+          "coberturaPct": 12
+        },
+        {
+          "progreso": 0.234375,
+          "coberturaPct": 12.27
+        },
+        {
+          "progreso": 0.238281,
+          "coberturaPct": 12.56
+        },
+        {
+          "progreso": 0.242188,
+          "coberturaPct": 12.79
+        },
+        {
+          "progreso": 0.246094,
+          "coberturaPct": 12.86
+        },
+        {
+          "progreso": 0.25,
+          "coberturaPct": 13.13
+        },
+        {
+          "progreso": 0.253906,
+          "coberturaPct": 13.34
+        },
+        {
+          "progreso": 0.257813,
+          "coberturaPct": 13.52
+        },
+        {
+          "progreso": 0.261719,
+          "coberturaPct": 13.65
+        },
+        {
+          "progreso": 0.265625,
+          "coberturaPct": 13.84
+        },
+        {
+          "progreso": 0.269531,
+          "coberturaPct": 13.82
+        },
+        {
+          "progreso": 0.273438,
+          "coberturaPct": 14
+        },
+        {
+          "progreso": 0.277344,
+          "coberturaPct": 14.07
+        },
+        {
+          "progreso": 0.28125,
+          "coberturaPct": 14.11
+        },
+        {
+          "progreso": 0.285156,
+          "coberturaPct": 14.23
+        },
+        {
+          "progreso": 0.289063,
+          "coberturaPct": 14.38
+        },
+        {
+          "progreso": 0.292969,
+          "coberturaPct": 14.5
+        },
+        {
+          "progreso": 0.296875,
+          "coberturaPct": 14.67
+        },
+        {
+          "progreso": 0.300781,
+          "coberturaPct": 14.73
+        },
+        {
+          "progreso": 0.304688,
+          "coberturaPct": 14.75
+        },
+        {
+          "progreso": 0.308594,
+          "coberturaPct": 14.88
+        },
+        {
+          "progreso": 0.3125,
+          "coberturaPct": 14.96
+        },
+        {
+          "progreso": 0.316406,
+          "coberturaPct": 15.03
+        },
+        {
+          "progreso": 0.320313,
+          "coberturaPct": 15.09
+        },
+        {
+          "progreso": 0.324219,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.328125,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.332031,
+          "coberturaPct": 15.05
+        },
+        {
+          "progreso": 0.335938,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.339844,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.34375,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.347656,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.351563,
+          "coberturaPct": 15.17
+        },
+        {
+          "progreso": 0.355469,
+          "coberturaPct": 15.17
+        },
+        {
+          "progreso": 0.359375,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.363281,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.367188,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.371094,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.375,
+          "coberturaPct": 15.15
+        }
+      ]
+    },
+    {
+      "seccion": "numeros",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0.29166666666666663,
+        0.5
+      ],
+      "n": 54,
+      "min": 8.43,
+      "max": 15.5,
+      "media": 12.82,
+      "donde": 0.397135,
+      "puntos": [
+        {
+          "progreso": 0.291667,
+          "coberturaPct": 14.5
+        },
+        {
+          "progreso": 0.295573,
+          "coberturaPct": 14.59
+        },
+        {
+          "progreso": 0.299479,
+          "coberturaPct": 14.75
+        },
+        {
+          "progreso": 0.303385,
+          "coberturaPct": 14.75
+        },
+        {
+          "progreso": 0.307292,
+          "coberturaPct": 14.84
+        },
+        {
+          "progreso": 0.311198,
+          "coberturaPct": 14.92
+        },
+        {
+          "progreso": 0.315104,
+          "coberturaPct": 15.03
+        },
+        {
+          "progreso": 0.31901,
+          "coberturaPct": 15.05
+        },
+        {
+          "progreso": 0.322917,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.326823,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.330729,
+          "coberturaPct": 15.07
+        },
+        {
+          "progreso": 0.334635,
+          "coberturaPct": 15.11
+        },
+        {
+          "progreso": 0.338542,
+          "coberturaPct": 15.09
+        },
+        {
+          "progreso": 0.342448,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.346354,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.35026,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.354167,
+          "coberturaPct": 15.17
+        },
+        {
+          "progreso": 0.358073,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.361979,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.365885,
+          "coberturaPct": 15.13
+        },
+        {
+          "progreso": 0.369792,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.373698,
+          "coberturaPct": 15.15
+        },
+        {
+          "progreso": 0.377604,
+          "coberturaPct": 15.21
+        },
+        {
+          "progreso": 0.38151,
+          "coberturaPct": 15.21
+        },
+        {
+          "progreso": 0.385417,
+          "coberturaPct": 15.28
+        },
+        {
+          "progreso": 0.389323,
+          "coberturaPct": 15.28
+        },
+        {
+          "progreso": 0.393229,
+          "coberturaPct": 15.34
+        },
+        {
+          "progreso": 0.397135,
+          "coberturaPct": 15.5
+        },
+        {
+          "progreso": 0.401042,
+          "coberturaPct": 15.4
+        },
+        {
+          "progreso": 0.404948,
+          "coberturaPct": 15.17
+        },
+        {
+          "progreso": 0.408854,
+          "coberturaPct": 14.9
+        },
+        {
+          "progreso": 0.41276,
+          "coberturaPct": 14.27
+        },
+        {
+          "progreso": 0.416667,
+          "coberturaPct": 13.44
+        },
+        {
+          "progreso": 0.420573,
+          "coberturaPct": 12.63
+        },
+        {
+          "progreso": 0.424479,
+          "coberturaPct": 11.71
+        },
+        {
+          "progreso": 0.428385,
+          "coberturaPct": 11.04
+        },
+        {
+          "progreso": 0.432292,
+          "coberturaPct": 10.48
+        },
+        {
+          "progreso": 0.436198,
+          "coberturaPct": 10.2
+        },
+        {
+          "progreso": 0.440104,
+          "coberturaPct": 9.72
+        },
+        {
+          "progreso": 0.44401,
+          "coberturaPct": 9.47
+        },
+        {
+          "progreso": 0.447917,
+          "coberturaPct": 9.47
+        },
+        {
+          "progreso": 0.451823,
+          "coberturaPct": 9.27
+        },
+        {
+          "progreso": 0.455729,
+          "coberturaPct": 9.02
+        },
+        {
+          "progreso": 0.459635,
+          "coberturaPct": 8.89
+        },
+        {
+          "progreso": 0.463542,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.467448,
+          "coberturaPct": 8.66
+        },
+        {
+          "progreso": 0.471354,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.47526,
+          "coberturaPct": 8.43
+        },
+        {
+          "progreso": 0.479167,
+          "coberturaPct": 8.45
+        },
+        {
+          "progreso": 0.483073,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.486979,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.490885,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.494792,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.498698,
+          "coberturaPct": 8.47
+        }
+      ]
+    },
+    {
+      "seccion": "trabajos",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0.46875,
+        0.625
+      ],
+      "n": 41,
+      "min": 8.41,
+      "max": 8.64,
+      "media": 8.52,
+      "donde": 0.59375,
+      "puntos": [
+        {
+          "progreso": 0.46875,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.472656,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.476563,
+          "coberturaPct": 8.41
+        },
+        {
+          "progreso": 0.480469,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.484375,
+          "coberturaPct": 8.51
+        },
+        {
+          "progreso": 0.488281,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.492188,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.496094,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.5,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.503906,
+          "coberturaPct": 8.45
+        },
+        {
+          "progreso": 0.507813,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.511719,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.515625,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.519531,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.523438,
+          "coberturaPct": 8.51
+        },
+        {
+          "progreso": 0.527344,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.53125,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.535156,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.539063,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.542969,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.546875,
+          "coberturaPct": 8.54
+        },
+        {
+          "progreso": 0.550781,
+          "coberturaPct": 8.49
+        },
+        {
+          "progreso": 0.554688,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.558594,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.5625,
+          "coberturaPct": 8.41
+        },
+        {
+          "progreso": 0.566406,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.570313,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.574219,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.578125,
+          "coberturaPct": 8.43
+        },
+        {
+          "progreso": 0.582031,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.585938,
+          "coberturaPct": 8.54
+        },
+        {
+          "progreso": 0.589844,
+          "coberturaPct": 8.62
+        },
+        {
+          "progreso": 0.59375,
+          "coberturaPct": 8.64
+        },
+        {
+          "progreso": 0.597656,
+          "coberturaPct": 8.6
+        },
+        {
+          "progreso": 0.601563,
+          "coberturaPct": 8.62
+        },
+        {
+          "progreso": 0.605469,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.609375,
+          "coberturaPct": 8.53
+        },
+        {
+          "progreso": 0.613281,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.617188,
+          "coberturaPct": 8.6
+        },
+        {
+          "progreso": 0.621094,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.625,
+          "coberturaPct": 8.58
+        }
+      ]
+    },
+    {
+      "seccion": "servicios",
+      "dejaVerLaEscena": false,
+      "ventana": [
+        0.5833333333333334,
+        0.7121062992125984
+      ],
+      "n": 12,
+      "min": 8.47,
+      "max": 8.64,
+      "media": 8.58,
+      "donde": 0.591146,
+      "puntos": [
+        {
+          "progreso": 0.583333,
+          "coberturaPct": 8.47
+        },
+        {
+          "progreso": 0.58724,
+          "coberturaPct": 8.62
+        },
+        {
+          "progreso": 0.591146,
+          "coberturaPct": 8.64
+        },
+        {
+          "progreso": 0.595052,
+          "coberturaPct": 8.64
+        },
+        {
+          "progreso": 0.598958,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.602865,
+          "coberturaPct": 8.6
+        },
+        {
+          "progreso": 0.606771,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.610677,
+          "coberturaPct": 8.54
+        },
+        {
+          "progreso": 0.614583,
+          "coberturaPct": 8.56
+        },
+        {
+          "progreso": 0.61849,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.622396,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.626302,
+          "coberturaPct": 8.58
+        }
+      ]
+    },
+    {
+      "seccion": "tu-panel",
+      "dejaVerLaEscena": false,
+      "ventana": [
+        0.6830708661417323,
+        0.8525
+      ],
+      "n": 30,
+      "min": 5.84,
+      "max": 15.4,
+      "media": 9.86,
+      "donde": 0.749477,
+      "puntos": [
+        {
+          "progreso": 0.737758,
+          "coberturaPct": 15.17
+        },
+        {
+          "progreso": 0.741665,
+          "coberturaPct": 15.36
+        },
+        {
+          "progreso": 0.745571,
+          "coberturaPct": 15.36
+        },
+        {
+          "progreso": 0.749477,
+          "coberturaPct": 15.4
+        },
+        {
+          "progreso": 0.753383,
+          "coberturaPct": 14.73
+        },
+        {
+          "progreso": 0.75729,
+          "coberturaPct": 13.92
+        },
+        {
+          "progreso": 0.761196,
+          "coberturaPct": 13.08
+        },
+        {
+          "progreso": 0.765102,
+          "coberturaPct": 12.62
+        },
+        {
+          "progreso": 0.769008,
+          "coberturaPct": 12
+        },
+        {
+          "progreso": 0.772915,
+          "coberturaPct": 11.54
+        },
+        {
+          "progreso": 0.776821,
+          "coberturaPct": 10.98
+        },
+        {
+          "progreso": 0.780727,
+          "coberturaPct": 10.54
+        },
+        {
+          "progreso": 0.784633,
+          "coberturaPct": 10.2
+        },
+        {
+          "progreso": 0.78854,
+          "coberturaPct": 9.72
+        },
+        {
+          "progreso": 0.792446,
+          "coberturaPct": 9.24
+        },
+        {
+          "progreso": 0.796352,
+          "coberturaPct": 8.89
+        },
+        {
+          "progreso": 0.800258,
+          "coberturaPct": 8.58
+        },
+        {
+          "progreso": 0.804165,
+          "coberturaPct": 8.14
+        },
+        {
+          "progreso": 0.808071,
+          "coberturaPct": 7.91
+        },
+        {
+          "progreso": 0.811977,
+          "coberturaPct": 7.76
+        },
+        {
+          "progreso": 0.815883,
+          "coberturaPct": 7.35
+        },
+        {
+          "progreso": 0.81979,
+          "coberturaPct": 7.26
+        },
+        {
+          "progreso": 0.823696,
+          "coberturaPct": 6.76
+        },
+        {
+          "progreso": 0.827602,
+          "coberturaPct": 6.64
+        },
+        {
+          "progreso": 0.831508,
+          "coberturaPct": 6.47
+        },
+        {
+          "progreso": 0.835415,
+          "coberturaPct": 6.26
+        },
+        {
+          "progreso": 0.839321,
+          "coberturaPct": 6.18
+        },
+        {
+          "progreso": 0.843227,
+          "coberturaPct": 5.95
+        },
+        {
+          "progreso": 0.847133,
+          "coberturaPct": 5.86
+        },
+        {
+          "progreso": 0.85104,
+          "coberturaPct": 5.84
+        }
+      ]
+    },
+    {
+      "seccion": "por-que-develop",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0.7411417322834646,
+        1
+      ],
+      "n": 67,
+      "min": 4.49,
+      "max": 15.4,
+      "media": 6.89,
+      "donde": 0.748954,
+      "puntos": [
+        {
+          "progreso": 0.741142,
+          "coberturaPct": 15.34
+        },
+        {
+          "progreso": 0.745048,
+          "coberturaPct": 15.36
+        },
+        {
+          "progreso": 0.748954,
+          "coberturaPct": 15.4
+        },
+        {
+          "progreso": 0.75286,
+          "coberturaPct": 14.77
+        },
+        {
+          "progreso": 0.756767,
+          "coberturaPct": 14.09
+        },
+        {
+          "progreso": 0.760673,
+          "coberturaPct": 13.23
+        },
+        {
+          "progreso": 0.764579,
+          "coberturaPct": 12.73
+        },
+        {
+          "progreso": 0.768485,
+          "coberturaPct": 12.04
+        },
+        {
+          "progreso": 0.772392,
+          "coberturaPct": 11.64
+        },
+        {
+          "progreso": 0.776298,
+          "coberturaPct": 11.06
+        },
+        {
+          "progreso": 0.780204,
+          "coberturaPct": 10.56
+        },
+        {
+          "progreso": 0.78411,
+          "coberturaPct": 10.23
+        },
+        {
+          "progreso": 0.788017,
+          "coberturaPct": 9.74
+        },
+        {
+          "progreso": 0.791923,
+          "coberturaPct": 9.27
+        },
+        {
+          "progreso": 0.795829,
+          "coberturaPct": 8.95
+        },
+        {
+          "progreso": 0.799735,
+          "coberturaPct": 8.77
+        },
+        {
+          "progreso": 0.803642,
+          "coberturaPct": 8.2
+        },
+        {
+          "progreso": 0.807548,
+          "coberturaPct": 7.99
+        },
+        {
+          "progreso": 0.811454,
+          "coberturaPct": 7.85
+        },
+        {
+          "progreso": 0.81536,
+          "coberturaPct": 7.43
+        },
+        {
+          "progreso": 0.819267,
+          "coberturaPct": 7.22
+        },
+        {
+          "progreso": 0.823173,
+          "coberturaPct": 6.95
+        },
+        {
+          "progreso": 0.827079,
+          "coberturaPct": 6.66
+        },
+        {
+          "progreso": 0.830985,
+          "coberturaPct": 6.53
+        },
+        {
+          "progreso": 0.834892,
+          "coberturaPct": 6.18
+        },
+        {
+          "progreso": 0.838798,
+          "coberturaPct": 6.07
+        },
+        {
+          "progreso": 0.842704,
+          "coberturaPct": 5.99
+        },
+        {
+          "progreso": 0.84661,
+          "coberturaPct": 5.88
+        },
+        {
+          "progreso": 0.850517,
+          "coberturaPct": 5.74
+        },
+        {
+          "progreso": 0.854423,
+          "coberturaPct": 5.7
+        },
+        {
+          "progreso": 0.858329,
+          "coberturaPct": 5.47
+        },
+        {
+          "progreso": 0.862235,
+          "coberturaPct": 5.38
+        },
+        {
+          "progreso": 0.866142,
+          "coberturaPct": 5.34
+        },
+        {
+          "progreso": 0.870048,
+          "coberturaPct": 5.09
+        },
+        {
+          "progreso": 0.873954,
+          "coberturaPct": 5.07
+        },
+        {
+          "progreso": 0.87786,
+          "coberturaPct": 5.09
+        },
+        {
+          "progreso": 0.881767,
+          "coberturaPct": 4.88
+        },
+        {
+          "progreso": 0.885673,
+          "coberturaPct": 4.86
+        },
+        {
+          "progreso": 0.889579,
+          "coberturaPct": 4.86
+        },
+        {
+          "progreso": 0.893485,
+          "coberturaPct": 4.92
+        },
+        {
+          "progreso": 0.897392,
+          "coberturaPct": 4.78
+        },
+        {
+          "progreso": 0.901298,
+          "coberturaPct": 4.69
+        },
+        {
+          "progreso": 0.905204,
+          "coberturaPct": 4.63
+        },
+        {
+          "progreso": 0.90911,
+          "coberturaPct": 4.65
+        },
+        {
+          "progreso": 0.913017,
+          "coberturaPct": 4.61
+        },
+        {
+          "progreso": 0.916923,
+          "coberturaPct": 4.57
+        },
+        {
+          "progreso": 0.920829,
+          "coberturaPct": 4.53
+        },
+        {
+          "progreso": 0.924735,
+          "coberturaPct": 4.61
+        },
+        {
+          "progreso": 0.928642,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.932548,
+          "coberturaPct": 4.49
+        },
+        {
+          "progreso": 0.936454,
+          "coberturaPct": 4.51
+        },
+        {
+          "progreso": 0.94036,
+          "coberturaPct": 4.51
+        },
+        {
+          "progreso": 0.944267,
+          "coberturaPct": 4.53
+        },
+        {
+          "progreso": 0.948173,
+          "coberturaPct": 4.57
+        },
+        {
+          "progreso": 0.952079,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.955985,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.959892,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.963798,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.967704,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.97161,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.975517,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.979423,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.983329,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.987235,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.991142,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.995048,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.998954,
+          "coberturaPct": 4.55
+        }
+      ]
+    },
+    {
+      "seccion": "cierre",
+      "dejaVerLaEscena": true,
+      "ventana": [
+        0.8525,
+        1
+      ],
+      "n": 38,
+      "min": 4.49,
+      "max": 5.8,
+      "media": 4.76,
+      "donde": 0.8525,
+      "puntos": [
+        {
+          "progreso": 0.8525,
+          "coberturaPct": 5.8
+        },
+        {
+          "progreso": 0.856406,
+          "coberturaPct": 5.68
+        },
+        {
+          "progreso": 0.860313,
+          "coberturaPct": 5.26
+        },
+        {
+          "progreso": 0.864219,
+          "coberturaPct": 5.36
+        },
+        {
+          "progreso": 0.868125,
+          "coberturaPct": 5.18
+        },
+        {
+          "progreso": 0.872031,
+          "coberturaPct": 5.11
+        },
+        {
+          "progreso": 0.875938,
+          "coberturaPct": 5.15
+        },
+        {
+          "progreso": 0.879844,
+          "coberturaPct": 5.03
+        },
+        {
+          "progreso": 0.88375,
+          "coberturaPct": 4.88
+        },
+        {
+          "progreso": 0.887656,
+          "coberturaPct": 4.9
+        },
+        {
+          "progreso": 0.891563,
+          "coberturaPct": 4.84
+        },
+        {
+          "progreso": 0.895469,
+          "coberturaPct": 4.93
+        },
+        {
+          "progreso": 0.899375,
+          "coberturaPct": 4.74
+        },
+        {
+          "progreso": 0.903281,
+          "coberturaPct": 4.7
+        },
+        {
+          "progreso": 0.907188,
+          "coberturaPct": 4.67
+        },
+        {
+          "progreso": 0.911094,
+          "coberturaPct": 4.65
+        },
+        {
+          "progreso": 0.915,
+          "coberturaPct": 4.53
+        },
+        {
+          "progreso": 0.918906,
+          "coberturaPct": 4.57
+        },
+        {
+          "progreso": 0.922813,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.926719,
+          "coberturaPct": 4.57
+        },
+        {
+          "progreso": 0.930625,
+          "coberturaPct": 4.53
+        },
+        {
+          "progreso": 0.934531,
+          "coberturaPct": 4.51
+        },
+        {
+          "progreso": 0.938438,
+          "coberturaPct": 4.49
+        },
+        {
+          "progreso": 0.942344,
+          "coberturaPct": 4.51
+        },
+        {
+          "progreso": 0.94625,
+          "coberturaPct": 4.57
+        },
+        {
+          "progreso": 0.950156,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.954063,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.957969,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.961875,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.965781,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.969688,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.973594,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.9775,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.981406,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.985313,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.989219,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.993125,
+          "coberturaPct": 4.55
+        },
+        {
+          "progreso": 0.997031,
+          "coberturaPct": 4.55
+        }
+      ]
+    }
+  ],
+  "global": {
+    "n": 229,
+    "min": 2.65,
+    "max": 15.51,
+    "media": 9.46,
+    "donde": 0.394531
+  },
+  "porAspecto": [
+    {
+      "cuadro": "1025×667",
+      "aspecto": 1.5367,
+      "n": 229,
+      "min": 2.09,
+      "max": 12.06,
+      "media": 7.18,
+      "donde": 0.390625
+    },
+    {
+      "cuadro": "1025×844",
+      "aspecto": 1.2145,
+      "n": 229,
+      "min": 2.61,
+      "max": 14.61,
+      "media": 8.89,
+      "donde": 0.398438
+    },
+    {
+      "cuadro": "1025×900",
+      "aspecto": 1.1389,
+      "n": 229,
+      "min": 2.65,
+      "max": 15.51,
+      "media": 9.46,
+      "donde": 0.394531
+    },
+    {
+      "cuadro": "1440×900",
+      "aspecto": 1.6,
+      "n": 229,
+      "min": 1.86,
+      "max": 11.73,
+      "media": 6.93,
+      "donde": 0.398438
+    },
+    {
+      "cuadro": "1440x900",
+      "aspecto": 1.6,
+      "n": 229,
+      "min": 1.86,
+      "max": 11.73,
+      "media": 6.93,
+      "donde": 0.398438
+    },
+    {
+      "cuadro": "1920x1080",
+      "aspecto": 1.7778,
+      "n": 229,
+      "min": 1.71,
+      "max": 10.75,
+      "media": 6.34,
+      "donde": 0.394531
+    }
+  ],
+  "hipoteticas": []
+}

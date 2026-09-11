@@ -1,0 +1,1818 @@
+{
+  "tramos": [
+    {
+      "id": "hero",
+      "progreso": 0,
+      "nivel": 1,
+      "emisionDeHoy": 0
+    },
+    {
+      "id": "quienes-somos",
+      "progreso": 0.125,
+      "nivel": 1,
+      "emisionDeHoy": 0
+    },
+    {
+      "id": "numeros",
+      "progreso": 0.375,
+      "nivel": 1,
+      "emisionDeHoy": 0
+    },
+    {
+      "id": "trabajos",
+      "progreso": 0.5,
+      "nivel": 0.04,
+      "emisionDeHoy": 0.62
+    },
+    {
+      "id": "por-que-develop",
+      "progreso": 0.8525,
+      "nivel": 0.643,
+      "emisionDeHoy": 0
+    },
+    {
+      "id": "cierre",
+      "progreso": 1,
+      "nivel": 0.643,
+      "emisionDeHoy": 0
+    }
+  ],
+  "filas": [
+    {
+      "tramo": "hero",
+      "progreso": 0,
+      "nivel": 1,
+      "tinta": "#111111",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 0.4,
+            "p05": 0.4,
+            "p50": 0.6,
+            "p95": 1.3,
+            "max": 1.3
+          },
+          "degradado": 0.9,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.11,
+            "p05": 1.11,
+            "p50": 1.11
+          },
+          "logoContraLaSala": 15.08,
+          "logoContraElPapel": 19.65
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 11,
+            "p05": 11,
+            "p50": 11.9,
+            "p95": 14.7,
+            "max": 14.7
+          },
+          "degradado": 3.7,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.02,
+            "p05": 1.04,
+            "p50": 1.04
+          },
+          "logoContraLaSala": 14.13,
+          "logoContraElPapel": 18.42
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 35.9,
+            "p05": 35.9,
+            "p50": 36.7,
+            "p95": 39.2,
+            "max": 39.2
+          },
+          "degradado": 3.3,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.22,
+            "p05": 1.22,
+            "p50": 1.23
+          },
+          "logoContraLaSala": 11.07,
+          "logoContraElPapel": 14.43
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 71,
+            "p05": 71,
+            "p50": 71.5,
+            "p95": 73.3,
+            "max": 73.3
+          },
+          "degradado": 2.3,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 2.03,
+            "p05": 2.03,
+            "p50": 2.06
+          },
+          "logoContraLaSala": 6.61,
+          "logoContraElPapel": 8.61
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 112.3,
+            "p05": 112.3,
+            "p50": 112.6,
+            "p95": 113.6,
+            "max": 113.7
+          },
+          "degradado": 1.3,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 3.81,
+            "p05": 3.81,
+            "p50": 3.87
+          },
+          "logoContraLaSala": 3.53,
+          "logoContraElPapel": 4.6
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 140.2,
+            "p05": 140.2,
+            "p50": 140.4,
+            "p95": 141.2,
+            "max": 141.2
+          },
+          "degradado": 1,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 5.62,
+            "p05": 5.62,
+            "p50": 5.62
+          },
+          "logoContraLaSala": 2.43,
+          "logoContraElPapel": 3.17
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 172.1,
+            "p05": 172.1,
+            "p50": 172.3,
+            "p95": 172.9,
+            "max": 172.9
+          },
+          "degradado": 0.8,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 8.32,
+            "p05": 8.32,
+            "p50": 8.32
+          },
+          "logoContraLaSala": 1.64,
+          "logoContraElPapel": 2.14
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 200.8,
+            "p05": 200.8,
+            "p50": 201,
+            "p95": 201.5,
+            "max": 201.5
+          },
+          "degradado": 0.6,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 11.4,
+            "p05": 11.4,
+            "p50": 11.4
+          },
+          "logoContraLaSala": 1.2,
+          "logoContraElPapel": 1.56
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 226.3,
+            "p05": 226.3,
+            "p50": 226.4,
+            "p95": 226.8,
+            "max": 226.8
+          },
+          "degradado": 0.5,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 14.58,
+            "p05": 14.58,
+            "p50": 14.58
+          },
+          "logoContraLaSala": 1.07,
+          "logoContraElPapel": 1.22
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 239.8,
+            "p05": 239.8,
+            "p50": 239.9,
+            "p95": 240,
+            "max": 240
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 16.57,
+            "p05": 16.57,
+            "p50": 16.57
+          },
+          "logoContraLaSala": 1.21,
+          "logoContraElPapel": 1.07
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 245.4,
+            "p05": 245.4,
+            "p50": 245.5,
+            "p95": 245.5,
+            "max": 245.5
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 17.32,
+            "p05": 17.32,
+            "p50": 17.32
+          },
+          "logoContraLaSala": 1.27,
+          "logoContraElPapel": 1.03
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 5.7,
+          "logo": {
+            "min": 248,
+            "p05": 248,
+            "p50": 248,
+            "p95": 248.1,
+            "max": 248.1
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 193.8,
+            "p50": 218.9,
+            "p95": 248.3
+          },
+          "textoSobreElLogo": {
+            "peor": 17.78,
+            "p05": 17.78,
+            "p50": 17.78
+          },
+          "logoContraLaSala": 1.3,
+          "logoContraElPapel": 1
+        }
+      ]
+    },
+    {
+      "tramo": "quienes-somos",
+      "progreso": 0.125,
+      "nivel": 1,
+      "tinta": "#111111",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 0.4,
+            "p05": 0.4,
+            "p50": 0.7,
+            "p95": 1.3,
+            "max": 1.3
+          },
+          "degradado": 0.9,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.11,
+            "p05": 1.11,
+            "p50": 1.11
+          },
+          "logoContraLaSala": 13.26,
+          "logoContraElPapel": 19.48
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 11,
+            "p05": 11,
+            "p50": 12.4,
+            "p95": 14.7,
+            "max": 14.7
+          },
+          "degradado": 3.7,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.02,
+            "p05": 1.04,
+            "p50": 1.04
+          },
+          "logoContraLaSala": 12.43,
+          "logoContraElPapel": 18.26
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 35.9,
+            "p05": 35.9,
+            "p50": 37.1,
+            "p95": 39.2,
+            "max": 39.2
+          },
+          "degradado": 3.3,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.22,
+            "p05": 1.22,
+            "p50": 1.23
+          },
+          "logoContraLaSala": 9.74,
+          "logoContraElPapel": 14.31
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 71,
+            "p05": 71,
+            "p50": 71.8,
+            "p95": 73.3,
+            "max": 73.3
+          },
+          "degradado": 2.3,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 2.03,
+            "p05": 2.03,
+            "p50": 2.06
+          },
+          "logoContraLaSala": 5.81,
+          "logoContraElPapel": 8.54
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 112.3,
+            "p05": 112.3,
+            "p50": 112.8,
+            "p95": 113.6,
+            "max": 113.6
+          },
+          "degradado": 1.3,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 3.81,
+            "p05": 3.81,
+            "p50": 3.87
+          },
+          "logoContraLaSala": 3.1,
+          "logoContraElPapel": 4.56
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 140.2,
+            "p05": 140.2,
+            "p50": 140.5,
+            "p95": 141.2,
+            "max": 141.2
+          },
+          "degradado": 1,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 5.62,
+            "p05": 5.62,
+            "p50": 5.69
+          },
+          "logoContraLaSala": 2.11,
+          "logoContraElPapel": 3.1
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 172.1,
+            "p05": 172.1,
+            "p50": 172.4,
+            "p95": 172.9,
+            "max": 172.9
+          },
+          "degradado": 0.8,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 8.32,
+            "p05": 8.32,
+            "p50": 8.32
+          },
+          "logoContraLaSala": 1.44,
+          "logoContraElPapel": 2.12
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 200.8,
+            "p05": 200.8,
+            "p50": 201.1,
+            "p95": 201.5,
+            "max": 201.5
+          },
+          "degradado": 0.6,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 11.4,
+            "p05": 11.4,
+            "p50": 11.4
+          },
+          "logoContraLaSala": 1.05,
+          "logoContraElPapel": 1.55
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 226.3,
+            "p05": 226.3,
+            "p50": 226.5,
+            "p95": 226.8,
+            "max": 226.8
+          },
+          "degradado": 0.5,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 14.58,
+            "p05": 14.58,
+            "p50": 14.71
+          },
+          "logoContraLaSala": 1.23,
+          "logoContraElPapel": 1.2
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 239.8,
+            "p05": 239.8,
+            "p50": 239.9,
+            "p95": 240,
+            "max": 240
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 16.57,
+            "p05": 16.57,
+            "p50": 16.57
+          },
+          "logoContraLaSala": 1.38,
+          "logoContraElPapel": 1.06
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 245.4,
+            "p05": 245.4,
+            "p50": 245.5,
+            "p95": 245.5,
+            "max": 245.5
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 17.32,
+            "p05": 17.32,
+            "p50": 17.32
+          },
+          "logoContraLaSala": 1.44,
+          "logoContraElPapel": 1.02
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 7.42,
+          "logo": {
+            "min": 248,
+            "p05": 248,
+            "p50": 248,
+            "p95": 248.1,
+            "max": 248.1
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 197.6,
+            "p50": 205.8,
+            "p95": 247.2
+          },
+          "textoSobreElLogo": {
+            "peor": 17.78,
+            "p05": 17.78,
+            "p50": 17.78
+          },
+          "logoContraLaSala": 1.48,
+          "logoContraElPapel": 1.01
+        }
+      ]
+    },
+    {
+      "tramo": "numeros",
+      "progreso": 0.375,
+      "nivel": 1,
+      "tinta": "#111111",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 0.3,
+            "p05": 0.3,
+            "p50": 0.3,
+            "p95": 0.3,
+            "max": 0.3
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.11,
+            "p05": 1.11,
+            "p50": 1.11
+          },
+          "logoContraLaSala": 13.75,
+          "logoContraElPapel": 14.17
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 10,
+            "p05": 10,
+            "p50": 10,
+            "p95": 10,
+            "max": 10
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.05,
+            "p05": 1.05,
+            "p50": 1.05
+          },
+          "logoContraLaSala": 12.96,
+          "logoContraElPapel": 13.36
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 35.1,
+            "p05": 35.1,
+            "p50": 35.1,
+            "p95": 35.1,
+            "max": 35.1
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 1.2,
+            "p05": 1.2,
+            "p50": 1.2
+          },
+          "logoContraLaSala": 10.29,
+          "logoContraElPapel": 10.6
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 70.4,
+            "p05": 70.4,
+            "p50": 70.4,
+            "p95": 70.4,
+            "max": 70.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 2,
+            "p05": 2,
+            "p50": 2
+          },
+          "logoContraLaSala": 6.18,
+          "logoContraElPapel": 6.37
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 112,
+            "p05": 112,
+            "p50": 112,
+            "p95": 112,
+            "max": 112
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 3.81,
+            "p05": 3.81,
+            "p50": 3.81
+          },
+          "logoContraLaSala": 3.24,
+          "logoContraElPapel": 3.34
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 139.9,
+            "p05": 139.9,
+            "p50": 139.9,
+            "p95": 139.9,
+            "max": 139.9
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 5.62,
+            "p05": 5.62,
+            "p50": 5.62
+          },
+          "logoContraLaSala": 2.2,
+          "logoContraElPapel": 2.27
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 171.9,
+            "p05": 171.9,
+            "p50": 171.9,
+            "p95": 171.9,
+            "max": 171.9
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 8.32,
+            "p05": 8.32,
+            "p50": 8.32
+          },
+          "logoContraLaSala": 1.49,
+          "logoContraElPapel": 1.53
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 200.7,
+            "p05": 200.7,
+            "p50": 200.7,
+            "p95": 200.7,
+            "max": 200.7
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 11.4,
+            "p05": 11.4,
+            "p50": 11.4
+          },
+          "logoContraLaSala": 1.08,
+          "logoContraElPapel": 1.12
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 226.2,
+            "p05": 226.2,
+            "p50": 226.2,
+            "p95": 226.2,
+            "max": 226.2
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 14.58,
+            "p05": 14.58,
+            "p50": 14.58
+          },
+          "logoContraLaSala": 1.18,
+          "logoContraElPapel": 1.14
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 239.8,
+            "p05": 239.8,
+            "p50": 239.8,
+            "p95": 239.8,
+            "max": 239.8
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 16.57,
+            "p05": 16.57,
+            "p50": 16.57
+          },
+          "logoContraLaSala": 1.34,
+          "logoContraElPapel": 1.3
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 245.4,
+            "p05": 245.4,
+            "p50": 245.4,
+            "p95": 245.4,
+            "max": 245.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 17.32,
+            "p05": 17.32,
+            "p50": 17.32
+          },
+          "logoContraLaSala": 1.4,
+          "logoContraElPapel": 1.36
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 15.01,
+          "logo": {
+            "min": 248,
+            "p05": 248,
+            "p50": 248,
+            "p95": 248,
+            "max": 248
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 175.5,
+            "p50": 208.8,
+            "p95": 212.3
+          },
+          "textoSobreElLogo": {
+            "peor": 17.78,
+            "p05": 17.78,
+            "p50": 17.78
+          },
+          "logoContraLaSala": 1.44,
+          "logoContraElPapel": 1.4
+        }
+      ]
+    },
+    {
+      "tramo": "trabajos",
+      "progreso": 0.5,
+      "nivel": 0.04,
+      "tinta": "#F7F7F5",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 0,
+            "p05": 0,
+            "p50": 0,
+            "p95": 0,
+            "max": 0
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 19.58,
+            "p05": 19.58,
+            "p50": 19.58
+          },
+          "logoContraLaSala": 1.14,
+          "logoContraElPapel": 1.16
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 8.3,
+            "p05": 8.3,
+            "p50": 8.3,
+            "p95": 8.4,
+            "max": 8.4
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 18.67,
+            "p05": 18.67,
+            "p50": 18.67
+          },
+          "logoContraLaSala": 1.09,
+          "logoContraElPapel": 1.11
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 33.5,
+            "p05": 33.5,
+            "p50": 33.6,
+            "p95": 33.6,
+            "max": 33.6
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 14.83,
+            "p05": 14.83,
+            "p50": 14.83
+          },
+          "logoContraLaSala": 1.16,
+          "logoContraElPapel": 1.14
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 69.3,
+            "p05": 69.3,
+            "p50": 69.3,
+            "p95": 69.4,
+            "max": 69.4
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 8.94,
+            "p05": 8.94,
+            "p50": 8.94
+          },
+          "logoContraLaSala": 1.92,
+          "logoContraElPapel": 1.89
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 111.3,
+            "p05": 111.3,
+            "p50": 111.4,
+            "p95": 111.4,
+            "max": 111.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 4.68,
+            "p05": 4.68,
+            "p50": 4.68
+          },
+          "logoContraLaSala": 3.67,
+          "logoContraElPapel": 3.6
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 139.4,
+            "p05": 139.5,
+            "p50": 139.5,
+            "p95": 139.5,
+            "max": 139.5
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 3.18,
+            "p05": 3.18,
+            "p50": 3.18
+          },
+          "logoContraLaSala": 5.41,
+          "logoContraElPapel": 5.31
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 171.5,
+            "p05": 171.5,
+            "p50": 171.5,
+            "p95": 171.5,
+            "max": 171.5
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 2.12,
+            "p05": 2.12,
+            "p50": 2.12
+          },
+          "logoContraLaSala": 8.12,
+          "logoContraElPapel": 7.97
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 200.3,
+            "p05": 200.4,
+            "p50": 200.4,
+            "p95": 200.4,
+            "max": 200.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.56,
+            "p05": 1.56,
+            "p50": 1.56
+          },
+          "logoContraLaSala": 11.01,
+          "logoContraElPapel": 10.82
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 225.9,
+            "p05": 225.9,
+            "p50": 225.9,
+            "p95": 225.9,
+            "max": 225.9
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.21,
+            "p05": 1.21,
+            "p50": 1.21
+          },
+          "logoContraLaSala": 14.22,
+          "logoContraElPapel": 13.97
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 239.6,
+            "p05": 239.7,
+            "p50": 239.7,
+            "p95": 239.7,
+            "max": 239.7
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.06,
+            "p05": 1.06,
+            "p50": 1.06
+          },
+          "logoContraLaSala": 16.17,
+          "logoContraElPapel": 15.88
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 245.3,
+            "p05": 245.4,
+            "p50": 245.4,
+            "p95": 245.4,
+            "max": 245.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.02,
+            "p05": 1.02,
+            "p50": 1.02
+          },
+          "logoContraLaSala": 16.9,
+          "logoContraElPapel": 16.6
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 5.48,
+          "logo": {
+            "min": 247.9,
+            "p05": 248,
+            "p50": 248,
+            "p95": 248,
+            "max": 248
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 19.6,
+            "p50": 19.9,
+            "p95": 22.2
+          },
+          "textoSobreElLogo": {
+            "peor": 1.01,
+            "p05": 1.01,
+            "p50": 1.01
+          },
+          "logoContraLaSala": 17.35,
+          "logoContraElPapel": 17.04
+        }
+      ]
+    },
+    {
+      "tramo": "por-que-develop",
+      "progreso": 0.8525,
+      "nivel": 0.643,
+      "tinta": "#111111",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 0.4,
+            "p05": 0.4,
+            "p50": 0.5,
+            "p95": 0.6,
+            "max": 0.7
+          },
+          "degradado": 0.2,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.11,
+            "p05": 1.11,
+            "p50": 1.11
+          },
+          "logoContraLaSala": 7.28,
+          "logoContraElPapel": 12.17
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 10,
+            "p05": 10,
+            "p50": 10,
+            "p95": 10.2,
+            "max": 10.2
+          },
+          "degradado": 0.2,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.05,
+            "p05": 1.05,
+            "p50": 1.05
+          },
+          "logoContraLaSala": 6.86,
+          "logoContraElPapel": 11.47
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 35,
+            "p05": 35,
+            "p50": 35.1,
+            "p95": 35.2,
+            "max": 35.3
+          },
+          "degradado": 0.2,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.2,
+            "p05": 1.2,
+            "p50": 1.2
+          },
+          "logoContraLaSala": 5.45,
+          "logoContraElPapel": 9.11
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 70.4,
+            "p05": 70.4,
+            "p50": 70.4,
+            "p95": 70.5,
+            "max": 70.5
+          },
+          "degradado": 0.2,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 2,
+            "p05": 2,
+            "p50": 2
+          },
+          "logoContraLaSala": 3.27,
+          "logoContraElPapel": 5.47
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 112,
+            "p05": 112,
+            "p50": 112,
+            "p95": 112.1,
+            "max": 112.1
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 3.81,
+            "p05": 3.81,
+            "p50": 3.81
+          },
+          "logoContraLaSala": 1.72,
+          "logoContraElPapel": 2.87
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 139.9,
+            "p05": 139.9,
+            "p50": 139.9,
+            "p95": 140,
+            "max": 140
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 5.62,
+            "p05": 5.62,
+            "p50": 5.62
+          },
+          "logoContraLaSala": 1.17,
+          "logoContraElPapel": 1.95
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 171.9,
+            "p05": 171.9,
+            "p50": 171.9,
+            "p95": 171.9,
+            "max": 171.9
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 8.32,
+            "p05": 8.32,
+            "p50": 8.32
+          },
+          "logoContraLaSala": 1.27,
+          "logoContraElPapel": 1.32
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 200.6,
+            "p05": 200.6,
+            "p50": 200.6,
+            "p95": 200.6,
+            "max": 200.6
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 11.4,
+            "p05": 11.4,
+            "p50": 11.4
+          },
+          "logoContraLaSala": 1.74,
+          "logoContraElPapel": 1.04
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 226.1,
+            "p05": 226.1,
+            "p50": 226.1,
+            "p95": 226.1,
+            "max": 226.1
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 14.58,
+            "p05": 14.58,
+            "p50": 14.58
+          },
+          "logoContraLaSala": 2.23,
+          "logoContraElPapel": 1.33
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 239.7,
+            "p05": 239.7,
+            "p50": 239.7,
+            "p95": 239.7,
+            "max": 239.7
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 16.57,
+            "p05": 16.57,
+            "p50": 16.57
+          },
+          "logoContraLaSala": 2.53,
+          "logoContraElPapel": 1.51
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 245.3,
+            "p05": 245.3,
+            "p50": 245.3,
+            "p95": 245.4,
+            "max": 245.4
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 17.32,
+            "p05": 17.32,
+            "p50": 17.32
+          },
+          "logoContraLaSala": 2.65,
+          "logoContraElPapel": 1.58
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 4.02,
+          "logo": {
+            "min": 247.9,
+            "p05": 247.9,
+            "p50": 247.9,
+            "p95": 248,
+            "max": 248
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 131.2,
+            "p50": 151.9,
+            "p95": 197.1
+          },
+          "textoSobreElLogo": {
+            "peor": 17.78,
+            "p05": 17.78,
+            "p50": 17.78
+          },
+          "logoContraLaSala": 2.72,
+          "logoContraElPapel": 1.63
+        }
+      ]
+    },
+    {
+      "tramo": "cierre",
+      "progreso": 1,
+      "nivel": 0.643,
+      "tinta": "#111111",
+      "lecturas": [
+        {
+          "emisiva": 0,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 1.7,
+            "p05": 1.7,
+            "p50": 1.7,
+            "p95": 1.8,
+            "max": 1.8
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.1,
+            "p05": 1.1,
+            "p50": 1.1
+          },
+          "logoContraLaSala": 7.46,
+          "logoContraElPapel": 12.15
+        },
+        {
+          "emisiva": 0.02,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 11.2,
+            "p05": 11.2,
+            "p50": 11.2,
+            "p95": 11.3,
+            "max": 11.3
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.04,
+            "p05": 1.04,
+            "p50": 1.04
+          },
+          "logoContraLaSala": 7.08,
+          "logoContraElPapel": 11.52
+        },
+        {
+          "emisiva": 0.05,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 36.1,
+            "p05": 36.1,
+            "p50": 36.1,
+            "p95": 36.2,
+            "max": 36.2
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 1.22,
+            "p05": 1.22,
+            "p50": 1.22
+          },
+          "logoContraLaSala": 5.58,
+          "logoContraElPapel": 9.09
+        },
+        {
+          "emisiva": 0.1,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 71.2,
+            "p05": 71.2,
+            "p50": 71.2,
+            "p95": 71.2,
+            "max": 71.3
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 2.03,
+            "p05": 2.03,
+            "p50": 2.03
+          },
+          "logoContraLaSala": 3.34,
+          "logoContraElPapel": 5.44
+        },
+        {
+          "emisiva": 0.2,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 112.5,
+            "p05": 112.5,
+            "p50": 112.5,
+            "p95": 112.5,
+            "max": 112.5
+          },
+          "degradado": 0.1,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 3.81,
+            "p05": 3.81,
+            "p50": 3.87
+          },
+          "logoContraLaSala": 1.76,
+          "logoContraElPapel": 2.86
+        },
+        {
+          "emisiva": 0.3,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 140.2,
+            "p05": 140.2,
+            "p50": 140.3,
+            "p95": 140.3,
+            "max": 140.3
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 5.62,
+            "p05": 5.62,
+            "p50": 5.62
+          },
+          "logoContraLaSala": 1.21,
+          "logoContraElPapel": 1.97
+        },
+        {
+          "emisiva": 0.45,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 172,
+            "p05": 172,
+            "p50": 172,
+            "p95": 172,
+            "max": 172
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 8.32,
+            "p05": 8.32,
+            "p50": 8.32
+          },
+          "logoContraLaSala": 1.22,
+          "logoContraElPapel": 1.33
+        },
+        {
+          "emisiva": 0.62,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 200.5,
+            "p05": 200.5,
+            "p50": 200.5,
+            "p95": 200.5,
+            "max": 200.5
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 11.4,
+            "p05": 11.4,
+            "p50": 11.4
+          },
+          "logoContraLaSala": 1.68,
+          "logoContraElPapel": 1.03
+        },
+        {
+          "emisiva": 0.8,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 225.8,
+            "p05": 225.8,
+            "p50": 225.8,
+            "p95": 225.9,
+            "max": 225.9
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 14.58,
+            "p05": 14.58,
+            "p50": 14.58
+          },
+          "logoContraLaSala": 2.15,
+          "logoContraElPapel": 1.32
+        },
+        {
+          "emisiva": 1,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 239.3,
+            "p05": 239.4,
+            "p50": 239.4,
+            "p95": 239.4,
+            "max": 239.4
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 16.42,
+            "p05": 16.42,
+            "p50": 16.42
+          },
+          "logoContraLaSala": 2.42,
+          "logoContraElPapel": 1.49
+        },
+        {
+          "emisiva": 1.25,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 244.9,
+            "p05": 244.9,
+            "p50": 245,
+            "p95": 245,
+            "max": 245
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 17.32,
+            "p05": 17.32,
+            "p50": 17.32
+          },
+          "logoContraLaSala": 2.55,
+          "logoContraElPapel": 1.57
+        },
+        {
+          "emisiva": 1.5,
+          "coberturaPct": 2.82,
+          "logo": {
+            "min": 247.5,
+            "p05": 247.5,
+            "p50": 247.5,
+            "p95": 247.6,
+            "max": 247.6
+          },
+          "degradado": 0,
+          "sala": {
+            "p05": 132.9,
+            "p50": 154.8,
+            "p95": 198.1
+          },
+          "textoSobreElLogo": {
+            "peor": 17.78,
+            "p05": 17.78,
+            "p50": 17.78
+          },
+          "logoContraLaSala": 2.62,
+          "logoContraElPapel": 1.61
+        }
+      ]
+    }
+  ]
+}

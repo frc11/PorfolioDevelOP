@@ -52,35 +52,33 @@
 }
 
 /* =========================================================================
- * ⚠️ B12 · LA BANDA DEL PIE — el velo LOCAL, no el de la sección entera.
+ * ⚠️ B13 · LA BANDA DEL PIE SE REVIRTIÓ. Lo que queda es el agrupador.
  * =========================================================================
- * El relleno del pie se fue (arriba) y la sala apareció. La banda devuelve el
- * fondo **sólo donde el pie tiene el texto chico** —el CTA, las tres columnas y
- * la línea de cierre: 20 de los 24 bloques, todos entre 10 y 15 px— y deja
- * la sala entera arriba, donde está el titular y donde el gesto de la cámara
- * alejándose se lee. Por qué acá y no en la sección: `cierre/Cierre.tsx`.
+ * **Qué era.** B12 le devolvió el fondo al pie **sólo donde tiene el texto
+ * chico** —el CTA, las tres columnas y la línea de cierre: 20 de los 24
+ * bloques— y dejó la sala arriba, donde está el titular. Compró legibilidad
+ * con número: de 24 de 24 bloques bajo AA a **4 a 1920 y 2 a 1440**.
  *
- * `var(--color-fondo)` es el token de la sección, no un gris nuevo: con el
- * Cierre en `papel-transparente` vale el papel, y el día que la tabla lo dé
- * vuelta la banda se da vuelta con ella sin tocar esta regla.
+ * **Por qué se fue.** *«El footer sigue siendo sólido, no transparente.»* La
+ * banda es exactamente lo que el humano NO quería: un fondo opaco tapando la
+ * sala en la parte del pie que más superficie de texto tiene. B13 la revierte
+ * por pedido explícito, y **lo que la reversión destapa se declara con su
+ * número en vez de volver a taparlo** (`deudas-b13.ts`, D-B13.3).
+ *
+ * **Qué se conserva, y por qué.** El `<div data-pieza="banda-del-pie">` sigue
+ * existiendo en `cierre/Cierre.tsx` con su `grid gap-12`: **es el agrupador,
+ * no el velo.** Sacarlo devolvería la caja de contenido de TRES filas a CINCO
+ * y movería el censo de B9, que está en su vara (1,33 y 1,20) y no es de este
+ * bloque. Lo que se va de acá es **sólo lo que pinta**: el `background-color` y
+ * el relleno con su margen negativo, que existía nada más que para que el
+ * fondo llegara más lejos que el contenido — sin fondo, la pareja
+ * relleno/margen neta cero y la geometría queda idéntica.
+ *
+ * ⚠️ **El formulario SÍ se queda con el suyo**, y es la excepción que la
+ * instrucción nombra: *«el formulario es el caso difícil; si es lo único que no
+ * cierra, ése sí puede llevar fondo propio — es un control, no una
+ * superficie»*. Su regla está más abajo, con su medición.
  * ========================================================================= */
-
-[data-v3] [data-pieza="banda-del-pie"] {
-  /* ⚠️ **EL RELLENO SE COMPENSA CON UN MARGEN NEGATIVO, Y NO ES UN TRUCO: ES LO
-     QUE IMPIDE QUE LA BANDA MUEVA EL ANCLAJE.** Medido a 1440 con el relleno
-     suelto: el Cierre pasó de 900 px a **952,3** y el documento con él (16.200
-     → 16.252). Una sección que no mide un número entero de pantallas estira el
-     mapeo de `pantallaDeScroll` y cada nudo del anclaje cae en otro lugar del
-     scroll real — el defecto que `secciones.ts` documenta para Quiénes somos,
-     con hasta 900 px de desvío. Con `margin-block` igual y opuesto la caja de
-     margen mide lo mismo que el contenido: la fila no crece y la sección vuelve
-     a 900 / 1080. Abajo el margen es el relleno ENTERO del pie para que la
-     banda llegue al borde del documento en vez de dejar 48 px de sala debajo de
-     la línea de cierre. El porqué de la banda: `cierre/BandaDelPie.tsx`. */
-  padding-block: var(--spacing-8) var(--spacing-20);
-  margin-block: calc(var(--spacing-8) * -1) calc(var(--spacing-20) * -1);
-  background-color: var(--color-fondo);
-}
 
 /* =========================================================================
  * LINK CON ICONO — 42 apariciones. El icono se adelanta.

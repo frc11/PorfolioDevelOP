@@ -161,10 +161,27 @@ for (const row of sweep) {
         .mean - PARTICLE_DELTA[i]
   )
   const conLuzEnPose = POSES.map(([, at]) => levelAt(at) >= RIM_NIGHT_LEVEL)
+  /**
+   * ⚠️ **B13 · LA REPRODUCCIÓN QUEDA EN UNA POSE, POR LA CÁMARA Y NO POR LA LUZ.**
+   * Autorizado por el dueño al cerrar la PARADA 1 de B13; se reescribe contra la
+   * propiedad nueva. **Qué custodiaba:** que la escena SIN celosía devolviera los
+   * números de S10 en las DOS poses que B8 no re-iluminó — el ancla de esta tabla
+   * con aquélla. **Por qué cambió:** B13 alejó la cámara de `quiénes somos` (11,5
+   * → 14) y su valor medio pasa de **172 a 186**; su luz sigue intacta. El 172 no
+   * se pisa: es lo que S10 publicó. Se afirma el hero **con su tolerancia de
+   * siempre** —la de 2, que es la del `frameX` de V3-E, sin tocar— y aparte que la
+   * otra se movió, hacia arriba, con la causa nombrada. Es la misma reescritura
+   * que `s12-tension` y `s11-piso`, y por la misma razón.
+   */
   check(
-    'la escena sin celosía, a la luz de hoy, reproduce los números de S10 en las dos poses cuya luz B8 no tocó',
-    Math.abs(SIN_CELOSIA[0] - S10_MEAN[0]) < 2 && Math.abs(SIN_CELOSIA[1] - S10_MEAN[1]) < 1,
-    `hero ${SIN_CELOSIA[0].toFixed(1)} (S10 ${S10_MEAN[0]}, +1,3 por el encuadre de V3-E) · quiénes somos ${SIN_CELOSIA[1].toFixed(1)} (S10 ${S10_MEAN[1]})`
+    'la escena sin celosía, a la luz de hoy, reproduce el número de S10 en la única pose que nadie re-iluminó ni movió: el hero',
+    Math.abs(SIN_CELOSIA[0] - S10_MEAN[0]) < 2,
+    `hero ${SIN_CELOSIA[0].toFixed(1)} (S10 ${S10_MEAN[0]}, +1,3 por el encuadre de V3-E)`
+  )
+  check(
+    '  B13 — y `quiénes somos` ya NO lo reproduce: se alejó, y alejarse a la misma altura mete más sala clara en cuadro',
+    SIN_CELOSIA[1] > S10_MEAN[1] && SIN_CELOSIA[1] - S10_MEAN[1] < Math.abs(SIN_CELOSIA[2] - S10_MEAN[2]),
+    `quiénes somos ${SIN_CELOSIA[1].toFixed(1)} (S10 ${S10_MEAN[1]}) — +${(SIN_CELOSIA[1] - S10_MEAN[1]).toFixed(1)} por distancia 11,5 → 14, con su luz intacta · para comparar, lo que la LUZ le hizo a Números es ${(SIN_CELOSIA[2] - S10_MEAN[2]).toFixed(1)}`
   )
   const top = sweep[sweep.length - 1].mean
   const movimientos = top.map((value, i) => value - sweep[0].mean[i])

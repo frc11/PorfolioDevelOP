@@ -47,6 +47,7 @@ import {
   type MutableChoreoPose,
   type MutableLightLevels,
 } from './choreographyTypes'
+import { escribirEmisionDelLogo } from './logoEmision'
 import {
   applyLightRig,
   createLightRigCache,
@@ -196,6 +197,15 @@ type OrbitRigProps = {
   hemiLightRef: RefObject<THREE.HemisphereLight | null>
   /** El grupo que envuelve al logo. Es lo que balancea la vira. */
   logoGroupRef: RefObject<THREE.Group | null>
+  /**
+   * B13 · El material del logo. El rig le escribe la EMISIVA en el mismo cuadro
+   * en el que alimenta a las luces y al brillo de las motas: la luz de la sala,
+   * el polvo y la pieza salen del mismo nivel del arco y no se pueden
+   * desincronizar. Por qué un ref y no un uniform compartido: el material ya
+   * lleva `onBeforeCompile` puesto por la celosía, y un segundo parche lo
+   * pisaría (`applyCelosia` asigna la propiedad, no la encadena).
+   */
+  logoMaterialRef: RefObject<THREE.MeshStandardMaterial | null>
   /** Los dos campos de partículas. Es lo que deriva (ver `choreographyPhysics.ts`). */
   dustGroupRef: RefObject<THREE.Group | null>
   bokehGroupRef: RefObject<THREE.Group | null>
@@ -227,6 +237,7 @@ export function OrbitRig({
   rimLightRef,
   hemiLightRef,
   logoGroupRef,
+  logoMaterialRef,
   dustGroupRef,
   bokehGroupRef,
   celosia,
@@ -546,6 +557,8 @@ export function OrbitRig({
     applyLightRig(targets, lightInput, scratch.lightCache)
     // B8: las partículas brillan con la noche del arco, en el mismo cuadro que la luz — `particleGlow.ts`.
     BRILLO_DE_LA_NOCHE.uNoche.value = brilloDeLaNocheEn(arc.level)
+    // B13: y el logo EMITE con la misma noche, en el mismo cuadro — `logoEmision.ts`.
+    escribirEmisionDelLogo(logoMaterialRef.current, arc.level)
 
     // 5 · Vira en reposo: balanceo lento y continuo del logo. Dos senos de
     // período inconmensurable (13 y 9,5 s) para que la combinación no se lea

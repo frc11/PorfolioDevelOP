@@ -44,14 +44,15 @@ import { CHOREO_KEYFRAMES } from '../choreography'
 import { fuenteDe } from './s8-escena-soporte'
 import { muestrearCuadro, vistaEn } from './cuadro'
 // prettier-ignore
-import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, RECORRIDOS, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, parrafoDelDefecto7, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
+import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRIDO, PISTA_CON_FRAME_Y, PISTA_REAL, aspectoDeRecorridoNulo, coincidenLasCamaras, frameYMaximo, palancasDeComposicion, parrafoDelDefecto7, recorridosDe, tablaDeRecorridos, type RecorridoMedido } from './s10-logo-encuadre'
 import { muestrearLogo } from './s10-logo'
 // prettier-ignore
-import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
+import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, conPose, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
 import { SUPUESTOS_DE_LAS_CAJAS } from './s10-logo-cajas'
 import { afirmarLaPalancaDeLayout } from './s10-logo-columna'
+import { afirmarElEncuadreLateral } from './s10-logo-lateral'
 // prettier-ignore
-import { INVERTIDAS_TRANSPARENTES, MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraElRecorte, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
+import { INVERTIDAS_TRANSPARENTES, MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraEnElBloque, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
 const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
@@ -125,15 +126,26 @@ afirmar(
   'HERO — el logo entra ENTERO en el cuadro en los cuatro aspectos y en toda su ventana',
   'la premisa «queda cortado por el borde del cuadro» NO se reproduce con este instrumento',
 )
+/**
+ * ⚠️ **B13 · EL LOGO YA NO SE SALE, Y POR ESO ESTA AFIRMACIÓN SE DIO VUELTA.**
+ * Hasta B12 el control positivo le daba de comer `demos` esperando que NO diera
+ * 1,000. Con la pose a distancia 14 el logo entra entero y ese control quedaría
+ * CIEGO, así que se afirma lo contrario y el control pasa a ser la distancia
+ * VIEJA (9), la única que todavía lo recorta.
+ */
+afirmar(
+  FRACCION.peorFraccionDentro >= 1,
+  'B13 — el logo entra ENTERO en las 32 muestras: ninguna pose lo recorta ya',
+  `el peor cuadro entra al ${(FRACCION.peorFraccionDentro * 100).toFixed(1)}% y la caja llega a y=${FRACCION.arribaMaxima.toFixed(2)} con el borde en +1,00`,
+)
 controlPositivo(
-  'y el detector sabe ver un logo que se sale: el diferencial en su pose no da 1,000',
-  0.75,
-  (p: number) => fraccionDentro(muestra(p, VENTANAS[0].aspecto)) >= 1,
+  'y el detector no está ciego: con la distancia VIEJA de `demos` (9) el logo SÍ se sale',
+  9,
+  (d: number) => fraccionDentro(conPose('demos', { distance: d }, 0.75, VENTANAS[0].aspecto)) >= 1,
 )
 console.log(
-  `  EL DIFERENCIAL SÍ SE SALE, por arriba: la caja del logo llega a y=${FRACCION.arribaMaxima.toFixed(2)} con el borde del cuadro en\n` +
-    `  +1,00, y entra al ${(FRACCION.peorFraccionDentro * 100).toFixed(1)}% en el peor cuadro. Es poca ÁREA y mucha MASA: ocupa hasta el ` +
-    `${(FRACCION.mayorCobertura.valor * 100).toFixed(1)}% del cuadro a\n  ${FRACCION.mayorCobertura.cuadro}. Desde SITIO-S11 es una DECISIÓN escrita, no un defecto: ver §6.`,
+  `  LA MASA, que es la otra mitad: el logo ocupa hasta el ${(FRACCION.mayorCobertura.valor * 100).toFixed(1)}% del cuadro a ${FRACCION.mayorCobertura.cuadro}.\n` +
+    '  Con las distancias viejas eran 36,1% en 1025×900 —el máximo de todo el recorrido—, y bajarlo es lo que §2 de B13 pidió.',
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -189,102 +201,44 @@ const CHOREO = fuenteDe('src/app/v3/_lib/escena/choreography.ts')
 const CHOREO_LF = CHOREO.replace(/\r\n/g, '\n')
 afirmar(
   CHOREO_KEYFRAMES.some((k) => k.name === 'demos' && k.pose.frameX === 1),
-  'DECISIÓN — que `demos` LLENE el cuadro está escrito en `choreography.ts` y en §2.2',
-  '«Es la única pose donde el logo llena el cuadro —81% del alto en tinta— y es la excepción que la arquitectónica se reserva»',
+  'la perilla de encuadre de `demos` sigue en su extremo: `frameX` = 1',
+  'lo que B13 revocó es «llena el cuadro», no el encuadre lateral: el logo sigue pegado al costado, más chico',
 )
-afirmar(
-  declaraElRecorte(CHOREO, 'demos') && declaraElRecorte(CHOREO_LF, 'demos'),
-  'DECISIÓN — y que se SALGA por arriba también está declarado ahora, en el docblock de esa pose',
-  `y=${FRACCION.arribaMaxima.toFixed(2)} contra el borde en +1,00, ${(100 - FRACCION.peorFraccionDentro * 100).toFixed(1)}% del área afuera · lo encuentra con los DOS finales de línea (era el rojo que V3-B arregló)`,
-)
-controlPositivo(
-  'el detector del recorte no da verde contra cualquier keyframe: el del Hero no lo declara',
-  'hero',
-  (nombre: string) => declaraElRecorte(CHOREO, nombre),
-)
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('7 · EL ENCUADRE LATERAL — el codo en cero, sacado (SITIO-S11, defecto 14)')
-
 /**
- * ⚠ **ESTA SECCIÓN CAMBIÓ DE SUJETO EN SITIO-S11.** En SITIO-S10 afirmaba que la
- * palanca `frameX` de `demos` estaba **INERTE** en el cuadro más alto: `travelX =
- * max(0, medioAncho − LOGO_W/2) × 0,88` tenía un codo en cero en aspecto 1,213
- * (arnés) y 1,162 (rig), y 1025×900 da 1,139 — abajo de los dos. Era el censo de
- * un DEFECTO, y el defecto se arregló en `_lib/escena/encuadre.ts`.
+ * ⚠️ **B13 · LA DECISIÓN SE REVOCÓ, Y LA DECLARACIÓN CAMBIÓ DE LUGAR.** S11
+ * declaró que `demos` llena el cuadro y se sale por arriba; el humano lo revocó
+ * —«de ~40 % a ~15 %»— y la pose se alejó a 14. Afirmar que el recorte sigue
+ * declarado sería verde por vacío: no existe.
  *
- * **Ahora custodia las DOS mitades del arreglo**, y hacen falta las dos: que la
- * perilla vuelva a mover el logo en los cuatro cuadros y en las dos cámaras, y
- * que **donde ya funcionaba no se haya movido nada** — que es lo que garantiza
- * que ninguna pose calibrada a ojo cambió. Sin la segunda, esto sería un retoque
- * de composición disfrazado de arreglo.
+ * ⚠️ **Y la declaración nueva NO puede vivir adentro del array.** Esos
+ * comentarios los emite el exportador desde `choreographyNotes.ts`
+ * (`/probe-escena/_components/`) y `s7-export.invariant.ts` compara el
+ * round-trip byte por byte: escribir ahí obligaría a tocar un directorio que la
+ * instrucción protege. Vive en la CABECERA del archivo, que es «comentario de
+ * verdad» y el editor no toca. Así que se afirman las dos cosas: que la cabecera
+ * lo declara **y que el bloque del keyframe NO lo lleva** —o sea que el
+ * round-trip sigue pudiendo cerrar—.
  */
-for (const linea of tablaDeRecorridos()) console.log(`  ${linea}`)
-
+const CABECERA = CHOREO.slice(0, CHOREO.indexOf('export const CHOREO_SCREENS'))
 afirmar(
-  PEOR_RECORRIDO > 0,
-  'PALANCA `frameX` de `demos` — vuelve a MOVER el logo en los CUATRO cuadros y en las DOS cámaras',
-  `el más chico de los ocho recorridos es ${PEOR_RECORRIDO.toFixed(4)} de mundo, y en ${MAS_ANGOSTO.etiqueta} era 0,0000`,
+  /de 11,5 a 14 y `demos` de 9 a 14/.test(CABECERA) && /15,64/.test(CABECERA),
+  'DECISIÓN — la CABECERA de `choreography.ts` declara el alejamiento de B13, su porqué y el margen que queda',
+  `y la medición lo confirma: el logo entra al ${(FRACCION.peorFraccionDentro * 100).toFixed(1)}% en el peor cuadro`,
 )
 afirmar(
-  ARRIBA_DEL_CERO.length === 6 && ARRIBA_DEL_CERO.every((f) => f.corregido === f.conCodo),
-  '  y donde la perilla YA funcionaba no se movió un bit: las dos fórmulas dan el MISMO número',
-  `${ARRIBA_DEL_CERO.length} de los 8 cuadros caen arriba del aspecto de recorrido nulo, y en los ${ARRIBA_DEL_CERO.length} coinciden`,
+  !declaraEnElBloque(CHOREO, 'demos', /B13/) && !declaraEnElBloque(CHOREO_LF, 'demos', /B13/),
+  '  y el bloque del keyframe NO la lleva: es del exportador, y el round-trip de `s7-export` tiene que poder cerrar',
+  'lo encuentra con los DOS finales de línea (era el rojo que V3-B arregló)',
 )
 controlPositivo(
-  'el comparador no mide la fórmula nueva contra sí misma: con el codo, el cuadro más alto daba CERO',
-  RECORRIDOS[0].filas.filter((f) => f.ventana.etiqueta === MAS_ANGOSTO.etiqueta),
-  (filas: readonly RecorridoMedido[]) => filas.length > 0 && filas.every((f) => f.conCodo > 0),
-)
-afirmar(
-  CAMARAS.every((c) => MAS_ANGOSTO.aspecto < aspectoDeRecorridoNulo('demos', c.anchoDeLaCaja)),
-  '  el cuadro más alto SIGUE estando abajo del aspecto de recorrido nulo: por eso el codo lo mataba',
-  `${MAS_ANGOSTO.etiqueta} da ${MAS_ANGOSTO.aspecto.toFixed(3)} contra ` +
-    CAMARAS.map((c) => `${aspectoDeRecorridoNulo('demos', c.anchoDeLaCaja).toFixed(3)} (${c.id})`).join(' y '),
-)
-afirmar(
-  aspectoDeRecorridoNulo('hero', CAMARAS[0].anchoDeLaCaja) < MAS_ANGOSTO.aspecto,
-  '  el Hero nunca estuvo inerte: su aspecto de recorrido nulo queda abajo de todos los medidos',
-  `${aspectoDeRecorridoNulo('hero', CAMARAS[0].anchoDeLaCaja).toFixed(3)} contra ${MAS_ANGOSTO.aspecto.toFixed(3)}`,
+  'el detector del bloque no está ciego: el del `demos` SÍ lleva el recorte que S11 declaró',
+  'demos',
+  (nombre: string) => !declaraEnElBloque(CHOREO, nombre, /recorte por arriba/i),
 )
 
-/**
- * ⚠ **LA CÁMARA CON LA QUE SE MIDE ES LA DE PRODUCCIÓN, Y ESO SE COMPRUEBA.**
- * `harness.ts:93-94` conserva su copia de la fórmula —con el codo— y este frente
- * no puede escribir en `/probe-escena`, así que el muestreo pasó a
- * `camaraEnCuadro`, que le pide el recorrido a `encuadre.ts`. Las dos tienen que
- * coincidir **bit a bit** arriba del recorrido nulo y separarse SÓLO abajo: si
- * coincidieran abajo, el arreglo no habría llegado al muestreo; si se separaran
- * arriba, la composición del encuadre estaría mal armada.
- */
-afirmar(
-  CUADROS_SIN_CAMBIO.length === 3 && CUADROS_SIN_CAMBIO.every((v) => coincidenLasCamaras(v.aspecto)),
-  'la cámara del muestreo ES la del arnés donde la corrección es un no-op: coinciden bit a bit',
-  `posición y las tres direcciones de pantalla, en los ${CUADROS_SIN_CAMBIO.length} cuadros de arriba del recorrido nulo`,
-)
-controlPositivo(
-  'y NO coinciden en el cuadro donde el codo mataba la perilla: el arreglo sí llega al muestreo',
-  MAS_ANGOSTO.aspecto,
-  coincidenLasCamaras,
-)
-
-/**
- * ⚠ **EL EJE VERTICAL SE ARREGLÓ IGUAL, Y ES UN NO-OP COMPROBADO.** El codo
- * estaba en los dos ejes, así que la corrección va en los dos. En el vertical no
- * puede mover nada: `frameY` es cero en los ocho keyframes **y entre ellos**, y
- * el término `frameY × travelY` es cero valga lo que valga `travelY`. Se afirma
- * sobre el MUESTREO del track, que es donde una interpolación podría sorprender.
- */
-afirmar(
-  frameYMaximo(PISTA_REAL) === 0,
-  'el arreglo del eje VERTICAL no puede mover una composición: `frameY` es 0 en todo el recorrido',
-  'máximo de |frameY| sobre 2001 progresos muestreados del track real',
-)
-controlPositivo(
-  'el barrido de `frameY` SÍ ve una perilla vertical distinta de cero',
-  PISTA_CON_FRAME_Y,
-  (pista: typeof PISTA_REAL) => frameYMaximo(pista, 50) === 0,
-)
+// §7 vive en `s10-logo-lateral.ts` desde B13: la regla de las 300 líneas, y el
+// mismo corte que ya se le hizo al §9.
+afirmarElEncuadreLateral()
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · EL DEFECTO 7 — su estado, derivado, y las palancas con su número')

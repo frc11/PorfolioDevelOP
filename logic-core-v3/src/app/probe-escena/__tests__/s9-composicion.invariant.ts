@@ -153,7 +153,8 @@ function amplitude(keyframes: readonly { pose: { height: number; distance: numbe
     jump = Math.max(jump, Math.abs(keyframes[i].pose.height - keyframes[i - 1].pose.height))
   }
   const distances = keyframes.map((keyframe) => keyframe.pose.distance)
-  return { jump, span: Math.max(...distances) - Math.min(...distances) }
+  const near = Math.min(...distances)
+  return { jump, near, span: Math.max(...distances) - near }
 }
 
 const mine = amplitude(CHOREO_KEYFRAMES)
@@ -166,10 +167,49 @@ check(
   others.every((other) => mine.jump > other.jump),
   `${mine.jump.toFixed(1)} contra ${others.map((o) => `${o.label} ${o.jump.toFixed(1)}`).join(' · ')}`
 )
+/**
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ **B13 · ESTA AFIRMACIÓN PERDIÓ SU OBJETO, Y SE REEMPLAZA POR LA QUE EL
+ * SPRINT SÍ COMPRÓ.** Autorizado por el dueño del proyecto al cerrar la PARADA 1
+ * de B13; se REESCRIBE contra la propiedad nueva, no se afloja ni se borra.
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * **Qué custodiaba.** «Y el rango de distancias también [es el más grande de los
+ * cinco]»: con las poses de S9 el track iba de **9 a 27**, o sea 18,0 de rango,
+ * contra los 17,5 de la arquitectónica. Ganaba por medio punto, y junto con el
+ * salto de altura era la evidencia de que el mix elegido tiene MÁS amplitud que
+ * cualquiera de los cuatro candidatos — que es de lo que trata esta sección.
+ *
+ * **Por qué cambió.** B13 alejó las dos poses más cercanas —`quiénes somos` de
+ * 11,5 a 14 y `demos` de 9 a 14— porque el logo llegaba al **36,10 % del cuadro**
+ * en 1025×900 y el humano pidió bajarlo a ~15 %. El extremo CERCANO del rango es
+ * exactamente lo que ese pedido mueve: el mínimo pasa de 9 a 14 y el rango de
+ * **18,0 a 13,0**, así que la arquitectónica (17,5) lo pasa.
+ *
+ * **Por qué no alcanza con actualizar la cifra.** «Rango grande» era un proxy de
+ * «la cámara recorre», y el recorrido no se acortó: `s9-composicion` mide dos
+ * líneas más abajo que la cámara hace **121,7 unidades de mundo** contra las
+ * 119,1 de la calibrada. Lo que se comprimió es el rango porque su punta cercana
+ * se retiró A PROPÓSITO. Afirmar «el rango es el mayor» con otro número sería
+ * afirmar lo contrario de lo que el sprint hizo.
+ *
+ * **Contra qué compara ahora, y por qué ésa es la comparación que vale.** Contra
+ * los mismos cuatro candidatos y sobre el mismo eje —la distancia— pero en el
+ * extremo que B13 movió: **nuestro punto MÁS CERCANO es el más lejano de los
+ * cinco.** Ninguna de las otras cuatro coreografías mantiene la cámara tan lejos
+ * del logo en su acercamiento máximo, y eso es literalmente «el objeto no tapa el
+ * cuadro», que es el pedido. La amplitud sigue afirmada arriba, sobre el eje que
+ * no se tocó: el salto de altura de 12,6 sigue siendo el mayor de los cinco.
+ */
 check(
-  'y el rango de distancias también',
-  others.every((other) => mine.span > other.span),
-  `${mine.span.toFixed(1)} contra ${others.map((o) => `${o.label} ${o.span.toFixed(1)}`).join(' · ')}`
+  'B13 — y la cámara nunca se acerca tanto como en ninguno de los otros cuatro: nuestro MÍNIMO es el mayor de los cinco',
+  others.every((other) => mine.near > other.near),
+  `${mine.near.toFixed(1)} contra ${others.map((o) => `${o.label} ${o.near.toFixed(1)}`).join(' · ')}`
+)
+check(
+  '  y el rango de distancias YA NO es el mayor, porque se retiró su punta cercana: se publica, no se afirma',
+  mine.span < Math.max(...others.map((o) => o.span)),
+  `${mine.span.toFixed(1)} (era 18,0 con las poses de S9) contra ${others.map((o) => `${o.label} ${o.span.toFixed(1)}`).join(' · ')}`
 )
 
 section('Velocidad: menos pico y menos tirón que la calibrada')

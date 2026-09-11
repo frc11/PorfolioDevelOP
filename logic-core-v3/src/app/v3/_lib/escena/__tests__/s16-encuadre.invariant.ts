@@ -63,7 +63,7 @@ import { NOCHE } from '../lightArc'
 import { CHOREO_KEYFRAMES } from '../choreography'
 import { SCENE_ENTRY_POSE } from '@/lib/scene-framing'
 import { muestrearLogo } from './s10-logo'
-import { ESCENA_REAL, contrasteSobreElFondo, fraccionDentro } from './s10-logo-lectura'
+import { conPose, ESCENA_REAL, contrasteSobreElFondo, fraccionDentro } from './s10-logo-lectura'
 import { CUADROS_DE_V3B, cuantoSeMovio, destinoEn } from './s13b-encuadre'
 // prettier-ignore
 import { FRAME_X_ANTES, FRAME_X_HOY, PENDIENTES, cumpleElCriterio, derechaNoAprieta, desvioDelEje, ejeAdentro, lineasDeLaBarrida, lineasDeLaTabla, medioCampo, medir, pistaCon, sigueAbierto, tabla, type Pendiente } from './s16-encuadre-soporte'
@@ -83,11 +83,16 @@ afirmar(
   `con \`frameX: ${FRAME_X_ANTES}\` el logo YA entraba ENTERO en las ${ANTES.length} muestras`,
   'siete cuadros × tres progresos · 100,00% dentro · ninguna celda de tinta en el anillo de la grilla extendida, que es lo que avisaría que el total está truncado',
 )
+/**
+ * ⚠️ **B13 · EL CONTROL CAMBIA DE ENTRADA.** Hasta B12 le daba de comer `demos`
+ * en p=0,750 esperando que NO diera 100%. B13 la alejó de 9 a 14 y el logo entra
+ * entero en todas las poses, así que ese control pasaría por no encontrar nada.
+ * Se lo alimenta con la distancia VIEJA, que sigue recortándolo.
+ */
 controlPositivo(
-  'y el medidor sabe ver un logo que se sale: la pose del diferencial no da 100%',
-  0.75,
-  (p: number) =>
-    fraccionDentro(muestrearLogo(p, DEL_HUMANO.aspecto, ESCENA_REAL, 300, 220, 2.6)) >= 1,
+  'y el medidor sabe ver un logo que se sale: con la distancia VIEJA de `demos` (9) no da 100%',
+  9,
+  (d: number) => fraccionDentro(conPose('demos', { distance: d }, 0.75, DEL_HUMANO.aspecto)) >= 1,
 )
 
 const antes16 = medir(pistaCon(FRAME_X_ANTES), DEL_HUMANO, 0)

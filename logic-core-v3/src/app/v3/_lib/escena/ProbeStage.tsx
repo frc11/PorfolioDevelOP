@@ -144,6 +144,9 @@ export default function ProbeStage({
    * escala y el volteo del SVG, y esta rotación se compone por afuera.
    */
   const logoGroupRef = useRef<THREE.Group>(null)
+  /** B13 · el material del logo: lo publica `ProbeLogo` y `OrbitRig` le escribe la
+   *  emisiva en el mismo cuadro que las luces (`logoEmision.ts`). */
+  const logoMaterialRef = useRef<THREE.MeshStandardMaterial>(null)
   /** Los dos campos de partículas. Mismo patrón: el rig los deriva por afuera. */
   const dustGroupRef = useRef<THREE.Group>(null)
   const bokehGroupRef = useRef<THREE.Group>(null)
@@ -229,7 +232,7 @@ export default function ProbeStage({
         */}
 
         <group ref={logoGroupRef}>
-          <ProbeLogo stats={stats} onReady={onReady} celosia={celosia} />
+          <ProbeLogo stats={stats} onReady={onReady} celosia={celosia} materialRef={logoMaterialRef} />
         </group>
 
         <StudioFloor celosia={celosia} />
@@ -284,6 +287,7 @@ export default function ProbeStage({
           rimLightRef={rimLightRef}
           hemiLightRef={hemiLightRef}
           logoGroupRef={logoGroupRef}
+          logoMaterialRef={logoMaterialRef}
           dustGroupRef={dustGroupRef}
           bokehGroupRef={bokehGroupRef}
           celosia={celosia}

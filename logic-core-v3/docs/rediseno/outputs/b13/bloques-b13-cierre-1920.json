@@ -1,0 +1,2090 @@
+{
+  "etiqueta": "b13-cierre",
+  "perfil": "1920",
+  "paso": 0.25,
+  "varianteDelCierre": null,
+  "origen": "http://localhost:3000",
+  "documento": {
+    "altoDelDocumento": 19440,
+    "ventana": 1080,
+    "ancho": 1920
+  },
+  "secciones": [
+    {
+      "id": "cierre",
+      "superficieAlMedir": "papel-transparente",
+      "top": 18360,
+      "alto": 1080,
+      "posiciones": [
+        {
+          "scrollY": 18360,
+          "pantalla": 17,
+          "bloques": [
+            {
+              "clave": "span|titular|titulo-xl|Lo que",
+              "etiqueta": "span",
+              "pieza": "titular",
+              "nivel": "titulo-xl",
+              "texto": "Lo que",
+              "tamanoPx": 65.0141,
+              "peso": 400,
+              "grande": true,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 2940,
+              "peorContraste": 2.49,
+              "p1Contraste": 2.54,
+              "medianaContraste": 6.79,
+              "bajoAA": 78,
+              "umbralAA": 3,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.49,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|titular|titulo-xl|sigue lo",
+              "etiqueta": "span",
+              "pieza": "titular",
+              "nivel": "titulo-xl",
+              "texto": "sigue lo",
+              "tamanoPx": 65.0141,
+              "peso": 400,
+              "grande": true,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 3872,
+              "peorContraste": 2.49,
+              "p1Contraste": 2.62,
+              "medianaContraste": 6.88,
+              "bajoAA": 79,
+              "umbralAA": 3,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.49,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|titular|titulo-xl|armamos",
+              "etiqueta": "span",
+              "pieza": "titular",
+              "nivel": "titulo-xl",
+              "texto": "armamos",
+              "tamanoPx": 65.0141,
+              "peso": 400,
+              "grande": true,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 4599,
+              "peorContraste": 2.5,
+              "p1Contraste": 3.45,
+              "medianaContraste": 6.96,
+              "bajoAA": 38,
+              "umbralAA": 3,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.5,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|titular|titulo-xl|con vos",
+              "etiqueta": "span",
+              "pieza": "titular",
+              "nivel": "titulo-xl",
+              "texto": "con vos",
+              "tamanoPx": 65.0141,
+              "peso": 400,
+              "grande": true,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 3232,
+              "peorContraste": 2.66,
+              "p1Contraste": 2.91,
+              "medianaContraste": 7.3,
+              "bajoAA": 35,
+              "umbralAA": 3,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.66,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|cta||Ver los servicios",
+              "etiqueta": "span",
+              "pieza": "cta",
+              "nivel": null,
+              "texto": "Ver los servicios",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 753,
+              "peorContraste": 5.77,
+              "p1Contraste": 6,
+              "medianaContraste": 9.01,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 5.77,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|El recorrido",
+              "etiqueta": "h3",
+              "pieza": "etiqueta-de-seccion",
+              "nivel": "micro",
+              "texto": "El recorrido",
+              "tamanoPx": 10,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 318,
+              "peorContraste": 9.3,
+              "p1Contraste": 9.3,
+              "medianaContraste": 10.07,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 9.3,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Hero",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Hero",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 205,
+              "peorContraste": 8.59,
+              "p1Contraste": 8.59,
+              "medianaContraste": 9.1,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 8.59,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Quiénes somos",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Quiénes somos",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 655,
+              "peorContraste": 5.53,
+              "p1Contraste": 5.53,
+              "medianaContraste": 5.68,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 5.53,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Números",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Números",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 393,
+              "peorContraste": 4.9,
+              "p1Contraste": 5.18,
+              "medianaContraste": 5.19,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.9,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Trabajos",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Trabajos",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 387,
+              "peorContraste": 5.04,
+              "p1Contraste": 5.04,
+              "medianaContraste": 9.96,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 5.04,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Servicios",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Servicios",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 393,
+              "peorContraste": 4.97,
+              "p1Contraste": 4.97,
+              "medianaContraste": 4.97,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.97,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Tu panel",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Tu panel",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 350,
+              "peorContraste": 4.97,
+              "p1Contraste": 4.97,
+              "medianaContraste": 7.57,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.97,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|pie-enlace-icono||Por qué develOP",
+              "etiqueta": "span",
+              "pieza": "pie-enlace-icono",
+              "nivel": null,
+              "texto": "Por qué develOP",
+              "tamanoPx": 15,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 682,
+              "peorContraste": 4.97,
+              "p1Contraste": 4.97,
+              "medianaContraste": 10.06,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.97,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|Contacto",
+              "etiqueta": "h3",
+              "pieza": "etiqueta-de-seccion",
+              "nivel": "micro",
+              "texto": "Contacto",
+              "tamanoPx": 10,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 232,
+              "peorContraste": 8.5,
+              "p1Contraste": 8.51,
+              "medianaContraste": 8.99,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 8.5,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|texto|caption|[ENLACE]",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "caption",
+              "texto": "[ENLACE]",
+              "tamanoPx": 12.4509,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 306,
+              "peorContraste": 2.86,
+              "p1Contraste": 3.7,
+              "medianaContraste": 9.42,
+              "bajoAA": 5,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.86,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|texto|micro|la dirección de contacto, cuando exista",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "la dirección de contacto, cuando exista",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 895,
+              "peorContraste": 2.49,
+              "p1Contraste": 6.54,
+              "medianaContraste": 9.09,
+              "bajoAA": 7,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.49,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|texto|caption|[ENLACE]",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "caption",
+              "texto": "[ENLACE]",
+              "tamanoPx": 12.4509,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 306,
+              "peorContraste": 2.45,
+              "p1Contraste": 4.59,
+              "medianaContraste": 5.62,
+              "bajoAA": 3,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.45,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "span|texto|micro|las redes, una por red",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "las redes, una por red",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 487,
+              "peorContraste": 2.44,
+              "p1Contraste": 2.56,
+              "medianaContraste": 5.53,
+              "bajoAA": 21,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 2.44,
+              "pasaAA": false,
+              "pasariaAPlena": false
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|Novedades",
+              "etiqueta": "h3",
+              "pieza": "etiqueta-de-seccion",
+              "nivel": "micro",
+              "texto": "Novedades",
+              "tamanoPx": 10,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 277,
+              "peorContraste": 7.22,
+              "p1Contraste": 7.22,
+              "medianaContraste": 7.83,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 7.22,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "label|novedades-forma||Tu correo",
+              "etiqueta": "label",
+              "pieza": "novedades-forma",
+              "nivel": null,
+              "texto": "Tu correo",
+              "tamanoPx": 10,
+              "peso": 500,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 232,
+              "peorContraste": 17.6,
+              "p1Contraste": 17.6,
+              "medianaContraste": 17.6,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 17.6,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "p|novedades-forma||El envío está deshabilitado: todavía no hay destin",
+              "etiqueta": "p",
+              "pieza": "novedades-forma",
+              "nivel": null,
+              "texto": "El envío está deshabilitado: todavía no hay destin",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                90,
+                90,
+                90
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 2353,
+              "peorContraste": 6.43,
+              "p1Contraste": 6.43,
+              "medianaContraste": 6.43,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 6.43,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|logotipo|caption|develOP",
+              "etiqueta": "span",
+              "pieza": "logotipo",
+              "nivel": "caption",
+              "texto": "develOP",
+              "tamanoPx": 12.4509,
+              "peso": 600,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 302,
+              "peorContraste": 4.97,
+              "p1Contraste": 4.97,
+              "medianaContraste": 5.18,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.97,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "span|texto|caption|[FECHA] · [NOMBRE] · [ENLACE]",
+              "etiqueta": "span",
+              "pieza": "texto",
+              "nivel": "caption",
+              "texto": "[FECHA] · [NOMBRE] · [ENLACE]",
+              "tamanoPx": 12.4509,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 1037,
+              "peorContraste": 5.98,
+              "p1Contraste": 6.07,
+              "medianaContraste": 8.12,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 5.98,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "p|texto|micro|La fecha, la razón social y los legales entran acá",
+              "etiqueta": "p",
+              "pieza": "texto",
+              "nivel": "micro",
+              "texto": "La fecha, la razón social y los legales entran acá",
+              "tamanoPx": 10,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                17,
+                17,
+                17
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 1717,
+              "peorContraste": 4.97,
+              "p1Contraste": 4.97,
+              "medianaContraste": 6.15,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 4.97,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            },
+            {
+              "clave": "input::placeholder|novedades||nombre@dominio",
+              "etiqueta": "input::placeholder",
+              "pieza": "novedades",
+              "nivel": null,
+              "texto": "nombre@dominio",
+              "tamanoPx": 16,
+              "peso": 400,
+              "grande": false,
+              "tinta": [
+                90,
+                90,
+                90
+              ],
+              "opacidad": 1,
+              "scrollY": 18360,
+              "pixelesDeGlifo": 693,
+              "peorContraste": 6.43,
+              "p1Contraste": 6.43,
+              "medianaContraste": 6.43,
+              "bajoAA": 0,
+              "umbralAA": 4.5,
+              "sobreElLogo": 0,
+              "peorAPlena": 6.43,
+              "pasaAA": true,
+              "pasariaAPlena": true
+            }
+          ],
+          "escena": {
+            "region": {
+              "x0": 0,
+              "y0": 0,
+              "x1": 1920,
+              "y1": 1080
+            },
+            "sinPanel": {
+              "pixeles": 2046056,
+              "media": 0.30275110671067573,
+              "varianza": 0.011222086068321523,
+              "desvio": 0.10593434791568561,
+              "minimo": 0.0003035269835488375,
+              "maximo": 0.8713671191987972,
+              "p01": 0.000607053967097675,
+              "p99": 0.5582402754032535,
+              "grisMedio": 145.46826719808436,
+              "grisDesvio": 31.829107216797706
+            },
+            "soloElPanel": {
+              "pixeles": 2046056,
+              "media": 0.30240492136159786,
+              "varianza": 0.01118077342678696,
+              "desvio": 0.10573917640490188,
+              "minimo": 0.0003035269835488375,
+              "maximo": 0.8796223968878317,
+              "p01": 0.000607053967097675,
+              "p99": 0.5582402754032535,
+              "grisMedio": 145.40048874132026,
+              "grisDesvio": 31.78274607175316
+            },
+            "conPanelSinTinta": {
+              "pixeles": 2046056,
+              "media": 0.3187748089006979,
+              "varianza": 0.028005594747471732,
+              "desvio": 0.1673487219774078,
+              "minimo": 0.0003035269835488375,
+              "maximo": 1,
+              "p01": 0.000607053967097675,
+              "p99": 0.9288825770602029,
+              "grisMedio": 145.80432231309518,
+              "grisDesvio": 42.501860432257146
+            },
+            "varianzaQuePasa": 0.9963186308425148,
+            "varianzaConContenido": 2.4955783244728313,
+            "desvioDeGrisQuePasa": 0.9985434355815019,
+            "zonas": null,
+            "logo": {
+              "area": 58595,
+              "caja": [
+                741,
+                387,
+                1178,
+                691
+              ]
+            }
+          },
+          "capturas": {
+            "C": ".b11-capturas/b13-cierre-1920-cierre-18360-C.png",
+            "A": ".b11-capturas/b13-cierre-1920-cierre-18360-A.png",
+            "T": ".b11-capturas/b13-cierre-1920-cierre-18360-T.png",
+            "S": ".b11-capturas/b13-cierre-1920-cierre-18360-S.png",
+            "V": ".b11-capturas/b13-cierre-1920-cierre-18360-V.png"
+          }
+        }
+      ],
+      "sala": [
+        {
+          "scrollY": 18360,
+          "gris": 145.6,
+          "luminancia": 0.3033
+        }
+      ],
+      "peorPorBloque": [
+        {
+          "clave": "span|titular|titulo-xl|Lo que",
+          "etiqueta": "span",
+          "pieza": "titular",
+          "nivel": "titulo-xl",
+          "texto": "Lo que",
+          "tamanoPx": 65.0141,
+          "peso": 400,
+          "grande": true,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 2940,
+          "peorContraste": 2.49,
+          "p1Contraste": 2.54,
+          "medianaContraste": 6.79,
+          "bajoAA": 78,
+          "umbralAA": 3,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.49,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|titular|titulo-xl|sigue lo",
+          "etiqueta": "span",
+          "pieza": "titular",
+          "nivel": "titulo-xl",
+          "texto": "sigue lo",
+          "tamanoPx": 65.0141,
+          "peso": 400,
+          "grande": true,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 3872,
+          "peorContraste": 2.49,
+          "p1Contraste": 2.62,
+          "medianaContraste": 6.88,
+          "bajoAA": 79,
+          "umbralAA": 3,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.49,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|titular|titulo-xl|armamos",
+          "etiqueta": "span",
+          "pieza": "titular",
+          "nivel": "titulo-xl",
+          "texto": "armamos",
+          "tamanoPx": 65.0141,
+          "peso": 400,
+          "grande": true,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 4599,
+          "peorContraste": 2.5,
+          "p1Contraste": 3.45,
+          "medianaContraste": 6.96,
+          "bajoAA": 38,
+          "umbralAA": 3,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.5,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|titular|titulo-xl|con vos",
+          "etiqueta": "span",
+          "pieza": "titular",
+          "nivel": "titulo-xl",
+          "texto": "con vos",
+          "tamanoPx": 65.0141,
+          "peso": 400,
+          "grande": true,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 3232,
+          "peorContraste": 2.66,
+          "p1Contraste": 2.91,
+          "medianaContraste": 7.3,
+          "bajoAA": 35,
+          "umbralAA": 3,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.66,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|cta||Ver los servicios",
+          "etiqueta": "span",
+          "pieza": "cta",
+          "nivel": null,
+          "texto": "Ver los servicios",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 753,
+          "peorContraste": 5.77,
+          "p1Contraste": 6,
+          "medianaContraste": 9.01,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 5.77,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|El recorrido",
+          "etiqueta": "h3",
+          "pieza": "etiqueta-de-seccion",
+          "nivel": "micro",
+          "texto": "El recorrido",
+          "tamanoPx": 10,
+          "peso": 500,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 318,
+          "peorContraste": 9.3,
+          "p1Contraste": 9.3,
+          "medianaContraste": 10.07,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 9.3,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Hero",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Hero",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 205,
+          "peorContraste": 8.59,
+          "p1Contraste": 8.59,
+          "medianaContraste": 9.1,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 8.59,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Quiénes somos",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Quiénes somos",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 655,
+          "peorContraste": 5.53,
+          "p1Contraste": 5.53,
+          "medianaContraste": 5.68,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 5.53,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Números",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Números",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 393,
+          "peorContraste": 4.9,
+          "p1Contraste": 5.18,
+          "medianaContraste": 5.19,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.9,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Trabajos",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Trabajos",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 387,
+          "peorContraste": 5.04,
+          "p1Contraste": 5.04,
+          "medianaContraste": 9.96,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 5.04,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Servicios",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Servicios",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 393,
+          "peorContraste": 4.97,
+          "p1Contraste": 4.97,
+          "medianaContraste": 4.97,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.97,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Tu panel",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Tu panel",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 350,
+          "peorContraste": 4.97,
+          "p1Contraste": 4.97,
+          "medianaContraste": 7.57,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.97,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|pie-enlace-icono||Por qué develOP",
+          "etiqueta": "span",
+          "pieza": "pie-enlace-icono",
+          "nivel": null,
+          "texto": "Por qué develOP",
+          "tamanoPx": 15,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 682,
+          "peorContraste": 4.97,
+          "p1Contraste": 4.97,
+          "medianaContraste": 10.06,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.97,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|Contacto",
+          "etiqueta": "h3",
+          "pieza": "etiqueta-de-seccion",
+          "nivel": "micro",
+          "texto": "Contacto",
+          "tamanoPx": 10,
+          "peso": 500,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 232,
+          "peorContraste": 8.5,
+          "p1Contraste": 8.51,
+          "medianaContraste": 8.99,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 8.5,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|texto|caption|[ENLACE]",
+          "etiqueta": "span",
+          "pieza": "texto",
+          "nivel": "caption",
+          "texto": "[ENLACE]",
+          "tamanoPx": 12.4509,
+          "peso": 500,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 306,
+          "peorContraste": 2.45,
+          "p1Contraste": 4.59,
+          "medianaContraste": 5.62,
+          "bajoAA": 3,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.45,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|texto|micro|la dirección de contacto, cuando exista",
+          "etiqueta": "span",
+          "pieza": "texto",
+          "nivel": "micro",
+          "texto": "la dirección de contacto, cuando exista",
+          "tamanoPx": 10,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 895,
+          "peorContraste": 2.49,
+          "p1Contraste": 6.54,
+          "medianaContraste": 9.09,
+          "bajoAA": 7,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.49,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "span|texto|micro|las redes, una por red",
+          "etiqueta": "span",
+          "pieza": "texto",
+          "nivel": "micro",
+          "texto": "las redes, una por red",
+          "tamanoPx": 10,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 487,
+          "peorContraste": 2.44,
+          "p1Contraste": 2.56,
+          "medianaContraste": 5.53,
+          "bajoAA": 21,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 2.44,
+          "pasaAA": false,
+          "pasariaAPlena": false
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|Novedades",
+          "etiqueta": "h3",
+          "pieza": "etiqueta-de-seccion",
+          "nivel": "micro",
+          "texto": "Novedades",
+          "tamanoPx": 10,
+          "peso": 500,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 277,
+          "peorContraste": 7.22,
+          "p1Contraste": 7.22,
+          "medianaContraste": 7.83,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 7.22,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "label|novedades-forma||Tu correo",
+          "etiqueta": "label",
+          "pieza": "novedades-forma",
+          "nivel": null,
+          "texto": "Tu correo",
+          "tamanoPx": 10,
+          "peso": 500,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 232,
+          "peorContraste": 17.6,
+          "p1Contraste": 17.6,
+          "medianaContraste": 17.6,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 17.6,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "p|novedades-forma||El envío está deshabilitado: todavía no hay destin",
+          "etiqueta": "p",
+          "pieza": "novedades-forma",
+          "nivel": null,
+          "texto": "El envío está deshabilitado: todavía no hay destin",
+          "tamanoPx": 10,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            90,
+            90,
+            90
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 2353,
+          "peorContraste": 6.43,
+          "p1Contraste": 6.43,
+          "medianaContraste": 6.43,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 6.43,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|logotipo|caption|develOP",
+          "etiqueta": "span",
+          "pieza": "logotipo",
+          "nivel": "caption",
+          "texto": "develOP",
+          "tamanoPx": 12.4509,
+          "peso": 600,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 302,
+          "peorContraste": 4.97,
+          "p1Contraste": 4.97,
+          "medianaContraste": 5.18,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.97,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "span|texto|caption|[FECHA] · [NOMBRE] · [ENLACE]",
+          "etiqueta": "span",
+          "pieza": "texto",
+          "nivel": "caption",
+          "texto": "[FECHA] · [NOMBRE] · [ENLACE]",
+          "tamanoPx": 12.4509,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 1037,
+          "peorContraste": 5.98,
+          "p1Contraste": 6.07,
+          "medianaContraste": 8.12,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 5.98,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "p|texto|micro|La fecha, la razón social y los legales entran acá",
+          "etiqueta": "p",
+          "pieza": "texto",
+          "nivel": "micro",
+          "texto": "La fecha, la razón social y los legales entran acá",
+          "tamanoPx": 10,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            17,
+            17,
+            17
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 1717,
+          "peorContraste": 4.97,
+          "p1Contraste": 4.97,
+          "medianaContraste": 6.15,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 4.97,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        },
+        {
+          "clave": "input::placeholder|novedades||nombre@dominio",
+          "etiqueta": "input::placeholder",
+          "pieza": "novedades",
+          "nivel": null,
+          "texto": "nombre@dominio",
+          "tamanoPx": 16,
+          "peso": 400,
+          "grande": false,
+          "tinta": [
+            90,
+            90,
+            90
+          ],
+          "opacidad": 1,
+          "scrollY": 18360,
+          "pixelesDeGlifo": 693,
+          "peorContraste": 6.43,
+          "p1Contraste": 6.43,
+          "medianaContraste": 6.43,
+          "bajoAA": 0,
+          "umbralAA": 4.5,
+          "sobreElLogo": 0,
+          "peorAPlena": 6.43,
+          "pasaAA": true,
+          "pasariaAPlena": true
+        }
+      ],
+      "veredicto": "no abre",
+      "cajasAterrizadas": [
+        {
+          "clave": "span|titular|titulo-xl|Lo que",
+          "texto": "Lo que",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 18537.31,
+          "ancho": 192,
+          "alto": 77,
+          "tamanoPx": 65.0141,
+          "grande": true
+        },
+        {
+          "clave": "span|titular|titulo-xl|sigue lo",
+          "texto": "sigue lo",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 18608.17,
+          "ancho": 222.47,
+          "alto": 77,
+          "tamanoPx": 65.0141,
+          "grande": true
+        },
+        {
+          "clave": "span|titular|titulo-xl|armamos",
+          "texto": "armamos",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 18679.03,
+          "ancho": 282.67,
+          "alto": 77,
+          "tamanoPx": 65.0141,
+          "grande": true
+        },
+        {
+          "clave": "span|titular|titulo-xl|con vos",
+          "texto": "con vos",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 18749.89,
+          "ancho": 221.86,
+          "alto": 77,
+          "tamanoPx": 65.0141,
+          "grande": true
+        },
+        {
+          "clave": "span|cta||Ver los servicios",
+          "texto": "Ver los servicios",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 40,
+          "y": 18929.06,
+          "ancho": 117.33,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|El recorrido",
+          "texto": "El recorrido",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 19012.06,
+          "ancho": 74.28,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Hero",
+          "texto": "Hero",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19043.06,
+          "ancho": 34.92,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Quiénes somos",
+          "texto": "Quiénes somos",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19078.06,
+          "ancho": 107.59,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Números",
+          "texto": "Números",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19113.06,
+          "ancho": 65.11,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Trabajos",
+          "texto": "Trabajos",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19148.06,
+          "ancho": 62.97,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Servicios",
+          "texto": "Servicios",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19183.06,
+          "ancho": 66.66,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Tu panel",
+          "texto": "Tu panel",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19218.06,
+          "ancho": 59.64,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "span|pie-enlace-icono||Por qué develOP",
+          "texto": "Por qué develOP",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 64,
+          "y": 19253.06,
+          "ancho": 115.88,
+          "alto": 18,
+          "tamanoPx": 15,
+          "grande": false
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|Contacto",
+          "texto": "Contacto",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 656,
+          "y": 19012.06,
+          "ancho": 54.16,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "span|texto|caption|[ENLACE]",
+          "texto": "[ENLACE]",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 656,
+          "y": 19080.98,
+          "ancho": 53.53,
+          "alto": 15,
+          "tamanoPx": 12.4509,
+          "grande": false
+        },
+        {
+          "clave": "span|texto|micro|la dirección de contacto, cuando exista",
+          "texto": "la dirección de contacto, cuando exista",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 656,
+          "y": 19058.98,
+          "ancho": 230.28,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "span|texto|micro|las redes, una por red",
+          "texto": "las redes, una por red",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 656,
+          "y": 19097.91,
+          "ancho": 127.2,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "h3|etiqueta-de-seccion|micro|Novedades",
+          "texto": "Novedades",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 1280,
+          "y": 19012.06,
+          "ancho": 61.03,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "label|novedades-forma||Tu correo",
+          "texto": "Tu correo",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 1296,
+          "y": 19055.06,
+          "ancho": 57.25,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "p|novedades-forma||El envío está deshabilitado: todavía no hay destin",
+          "texto": "El envío está deshabilitado: todavía no hay destin",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 1296,
+          "y": 19132.06,
+          "ancho": 560.42,
+          "alto": 23,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "span|logotipo|caption|develOP",
+          "texto": "develOP",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 48,
+          "y": 19327.23,
+          "ancho": 46.14,
+          "alto": 15,
+          "tamanoPx": 12.4509,
+          "grande": false
+        },
+        {
+          "clave": "span|texto|caption|[FECHA] · [NOMBRE] · [ENLACE]",
+          "texto": "[FECHA] · [NOMBRE] · [ENLACE]",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 111.14,
+          "y": 19327.06,
+          "ancho": 175.83,
+          "alto": 15,
+          "tamanoPx": 12.4509,
+          "grande": false
+        },
+        {
+          "clave": "p|texto|micro|La fecha, la razón social y los legales entran acá",
+          "texto": "La fecha, la razón social y los legales entran acá",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 32,
+          "y": 19347.98,
+          "ancho": 379.95,
+          "alto": 12,
+          "tamanoPx": 10,
+          "grande": false
+        },
+        {
+          "clave": "p|texto|caption|Persona Inventada · testimonio de muestra",
+          "texto": "Persona Inventada · testimonio de muestra",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 1297,
+          "y": 18310.08,
+          "ancho": 290.73,
+          "alto": 15,
+          "tamanoPx": 12.4509,
+          "grande": false
+        },
+        {
+          "clave": "input::placeholder|novedades||nombre@dominio",
+          "texto": "nombre@dominio",
+          "opacidad": 1,
+          "scrollY": 18360,
+          "espacio": "documento",
+          "x": 1305,
+          "y": 19088.06,
+          "ancho": 518,
+          "alto": 24,
+          "tamanoPx": 16,
+          "grande": false
+        }
+      ],
+      "recortes": [
+        {
+          "pastilla": {
+            "x": 657.9765625,
+            "y": 24,
+            "ancho": 604.046875,
+            "alto": 48
+          },
+          "bloquesRecortados": 0,
+          "pixelesDescontados": 0,
+          "scrollY": 18360
+        }
+      ],
+      "bloquesPorPosicion": [
+        {
+          "scrollY": 18360,
+          "bloques": [
+            {
+              "clave": "span|titular|titulo-xl|Lo que",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 177.3125,
+                  "ancho": 192,
+                  "alto": 77
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|titular|titulo-xl|sigue lo",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 248.171875,
+                  "ancho": 222.46875,
+                  "alto": 77
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|titular|titulo-xl|armamos",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 319.03125,
+                  "ancho": 282.671875,
+                  "alto": 77
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|titular|titulo-xl|con vos",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 389.890625,
+                  "ancho": 221.859375,
+                  "alto": 77
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|cta||Ver los servicios",
+              "cajas": [
+                {
+                  "x": 40,
+                  "y": 569.0625,
+                  "ancho": 117.328125,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|El recorrido",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 652.0625,
+                  "ancho": 74.28125,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Hero",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 683.0625,
+                  "ancho": 34.921875,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Quiénes somos",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 718.0625,
+                  "ancho": 107.59375,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Números",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 753.0625,
+                  "ancho": 65.109375,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Trabajos",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 788.0625,
+                  "ancho": 62.96875,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Servicios",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 823.0625,
+                  "ancho": 66.65625,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Tu panel",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 858.0625,
+                  "ancho": 59.640625,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|pie-enlace-icono||Por qué develOP",
+              "cajas": [
+                {
+                  "x": 64,
+                  "y": 893.0625,
+                  "ancho": 115.875,
+                  "alto": 18
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|Contacto",
+              "cajas": [
+                {
+                  "x": 656,
+                  "y": 652.0625,
+                  "ancho": 54.15625,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|texto|caption|[ENLACE]",
+              "cajas": [
+                {
+                  "x": 656,
+                  "y": 682.0625,
+                  "ancho": 53.53125,
+                  "alto": 15
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|texto|micro|la dirección de contacto, cuando exista",
+              "cajas": [
+                {
+                  "x": 656,
+                  "y": 698.984375,
+                  "ancho": 230.28125,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|texto|caption|[ENLACE]",
+              "cajas": [
+                {
+                  "x": 656,
+                  "y": 720.984375,
+                  "ancho": 53.53125,
+                  "alto": 15
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|texto|micro|las redes, una por red",
+              "cajas": [
+                {
+                  "x": 656,
+                  "y": 737.90625,
+                  "ancho": 127.203125,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "h3|etiqueta-de-seccion|micro|Novedades",
+              "cajas": [
+                {
+                  "x": 1280,
+                  "y": 652.0625,
+                  "ancho": 61.03125,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "label|novedades-forma||Tu correo",
+              "cajas": [
+                {
+                  "x": 1296,
+                  "y": 695.0625,
+                  "ancho": 57.25,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "p|novedades-forma||El envío está deshabilitado: todavía no hay destin",
+              "cajas": [
+                {
+                  "x": 1296,
+                  "y": 772.0625,
+                  "ancho": 560.421875,
+                  "alto": 12
+                },
+                {
+                  "x": 1296,
+                  "y": 783.0625,
+                  "ancho": 164.75,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|logotipo|caption|develOP",
+              "cajas": [
+                {
+                  "x": 48,
+                  "y": 967.234375,
+                  "ancho": 46.140625,
+                  "alto": 15
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "span|texto|caption|[FECHA] · [NOMBRE] · [ENLACE]",
+              "cajas": [
+                {
+                  "x": 111.140625,
+                  "y": 967.0625,
+                  "ancho": 175.828125,
+                  "alto": 15
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "p|texto|micro|La fecha, la razón social y los legales entran acá",
+              "cajas": [
+                {
+                  "x": 32,
+                  "y": 987.984375,
+                  "ancho": 379.953125,
+                  "alto": 12
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "p|texto|caption|Persona Inventada · testimonio de muestra",
+              "cajas": [
+                {
+                  "x": 1297,
+                  "y": -49.921875,
+                  "ancho": 290.734375,
+                  "alto": 15
+                }
+              ],
+              "opacidad": 1
+            },
+            {
+              "clave": "input::placeholder|novedades||nombre@dominio",
+              "cajas": [
+                {
+                  "x": 1305,
+                  "y": 728.0625,
+                  "ancho": 518,
+                  "alto": 24
+                }
+              ],
+              "opacidad": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

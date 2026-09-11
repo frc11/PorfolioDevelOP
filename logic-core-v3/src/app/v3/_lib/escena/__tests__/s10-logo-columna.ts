@@ -238,7 +238,7 @@ export function tablaDeHuecos(): string[] {
  * cero**—, reserva si el ancla se mueve. El guardián del defecto 7 vive en §4 y §8.
  */
 export function afirmarLaPalancaDeLayout(): void {
-  titulo('9 · LA PALANCA DE LAYOUT DE §7.43, MEDIDA — y NO alcanza')
+  titulo('9 · LA PALANCA DE LAYOUT DE §7.43 — B13 la abrió: ahora SÍ alcanza')
 
   /**
    * ⚠ **SITIO-S12 FUE A EJECUTAR LA DECISIÓN DE §7.43 Y LA MEDICIÓN LA
@@ -264,23 +264,22 @@ export function afirmarLaPalancaDeLayout(): void {
       `  (izquierda ${MEJOR.izquierdaPx}px · ancho ${MEJOR.anchoPx}px · ${MEJOR.porCuadro.map((m) => `${(m * 100).toFixed(0)}%`).join(' / ')}), ` +
       `contra el ${(HOY.peor * 100).toFixed(1)}% de hoy.`,
   )
+  /**
+   * ⚠️ **B13 · ACÁ ESTABA EL 🔴 MÁS VIEJO DEL FRENTE Y SE CERRÓ SIN TOCAR UNA
+   * COLUMNA.** S12 midió que la palanca de §7.43 no existía —81 bandas, ninguna
+   * en cero— con la causa al lado: *«el hueco libre más grande a 1025×900 mide
+   * 197 px»*. Era el TAMAÑO del logo. Con `demos` a 14 el hueco se abrió. **Que
+   * exista no es que se haya usado**: acá no se mueve una columna.
+   */
   afirmar(
-    MEJOR.peor > 0,
-    '🔴 NINGUNA banda horizontal lleva la superposición a 0 en los cuatro cuadros: la palanca de LAYOUT de §7.43 no cierra el defecto 7',
-    `la mejor de ${BANDAS.length} deja ${(MEJOR.peor * 100).toFixed(1)}%, y el hueco libre más grande a 1025×900 mide 197 px`,
+    MEJOR.peor === 0,
+    'B13 — la palanca de LAYOUT de §7.43 EXISTE: hay banda que lleva la superposición a 0 en los cuatro cuadros',
+    `de ${BANDAS.length} bandas, la mejor (izquierda ${MEJOR.izquierdaPx}px · ancho ${MEJOR.anchoPx}px) deja ${(MEJOR.peor * 100).toFixed(1)}% — con la distancia vieja dejaba 11,2%`,
   )
-  controlPositivo(
-    'el barrido SÍ sabe encontrar un cero: una banda metida entera en el hueco libre da 0 en toda posición vertical',
-    0,
-    (i: number) => minimaDeColumna(0, 30, i).minima > 0,
-  )
-  afirmar(
-    candidatosDeGrilla().every((c) => c.peor > 0),
-    '  y tampoco lo cierra ninguna de las formas que la `Grilla` puede emitir',
-    candidatosDeGrilla()
-      .map((c) => `${c.etiqueta} → ${(c.peor * 100).toFixed(0)}%`)
-      .join(' · '),
-  )
+  controlPositivo('el barrido no devuelve cero para todo: la PEOR de las bandas sigue cruzando el logo', BANDAS[BANDAS.length - 1], (b: BandaBarrida) => b.peor === 0)
+  const CIERRAN = candidatosDeGrilla().filter((c) => c.peor === 0)
+  afirmar(CIERRAN.length > 0, '  y varias de las formas que la `Grilla` YA puede emitir lo cierran solas',
+    `${CIERRAN.length} de ${candidatosDeGrilla().length}: ${CIERRAN.map((c) => c.etiqueta).join(' · ')}`)
   /**
    * ⚠ **LA PREMISA DE §7.43 NO SE REPRODUCE, y va afirmada porque es la que
    * sostenía la decisión.** *«Es lo que el Hero ya hace»* — no lo es: la columna

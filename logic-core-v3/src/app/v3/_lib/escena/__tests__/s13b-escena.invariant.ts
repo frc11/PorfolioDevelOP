@@ -30,6 +30,7 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 import { CHOREO_KEYFRAMES } from '../choreography'
+import { afirmarQueNadaSeAcelero } from './s13b-antes'
 // prettier-ignore
 import { PISTA_CON_SOSTEN, PISTA_SIN_SOSTEN, SOSTEN_DEL_HERO, afirmarLosAcoplamientosConElDom, azimutEn, cierreDelTramo, mayorEscalonEnLosNudos, mismaPose, perfilDeSegmentos, picoPorPantalla, poseEn, reconstruirSosten } from './s13b-soporte'
 // prettier-ignore
@@ -40,7 +41,7 @@ import { afirmarLaVentanaDelDiferencial } from './s13b-diferencial'
 import { afirmarLosPendientes } from './s13b-pendientes'
 import { EL_DIFERENCIAL } from './s13b-reparto'
 import { muestrearLogo } from './s10-logo'
-import { ESCENA_REAL } from './s10-logo-lectura'
+import { ESCENA_REAL, conPose } from './s10-logo-lectura'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · EL SOSTÉN DEL HERO, SACADO — y qué velocidad deja en el arranque')
@@ -111,16 +112,8 @@ afirmar(
  */
 const picoCon = picoPorPantalla(CON)
 const picoSin = picoPorPantalla(SIN)
-afirmar(
-  SIN[0].porPantalla < picoSin,
-  'EL ARRANQUE NO ES LO MÁS RÁPIDO DEL RECORRIDO — ni de lejos',
-  `arranque ${SIN[0].porPantalla.toFixed(4)} contra el pico ${picoSin.toFixed(4)} del tramo "${SIN.find((s) => s.porPantalla === picoSin)?.tramo}" = ${((100 * SIN[0].porPantalla) / picoSin).toFixed(1)}% del pico`,
-)
-afirmar(
-  picoSin === picoCon,
-  '  y el pico del recorrido no se movió: lo que cambia es dónde EMPIEZA a moverse',
-  `${picoCon.toFixed(4)} → ${picoSin.toFixed(4)} alturas por pantalla de scroll`,
-)
+// B13 · lo que el alejamiento de dos poses le hizo al ritmo: `s13b-antes.ts`.
+afirmarQueNadaSeAcelero(CON, SIN, picoCon, picoSin)
 afirmar(
   SIN[1].porPantalla < CON[1].porPantalla,
   '  el tramo SIGUIENTE se descomprime: los 130° dejan de estar apretados en dos pantallas',
@@ -221,11 +214,12 @@ afirmar(
   '  y no por un pelo: el borde derecho de la caja queda lejos del borde del cuadro',
   `el margen más chico es ${Math.min(...HERO.map((f) => f.margen)).toFixed(3)} del medio ancho, en ${HERO.reduce((a, b) => (b.margen < a.margen ? b : a)).ventana.etiqueta}`,
 )
+/** ⚠️ B13 · con `demos` a 14 el logo entra entero: el control usa la distancia VIEJA (9). */
 controlPositivo(
-  'el medidor SÍ sabe ver un logo que se sale: la pose del diferencial no da 100%',
-  0.75,
-  (p: number) => {
-    const m = muestrearLogo(p, CUADROS[0].aspecto, ESCENA_REAL, 300, 220, 2.6)
+  'el medidor SÍ sabe ver un logo que se sale: con la distancia VIEJA de `demos` (9) no da 100%',
+  9,
+  (d: number) => {
+    const m = conPose('demos', { distance: d }, 0.75, CUADROS[0].aspecto)
     return m.enCuadro / m.celdasDeLogo >= 1
   },
 )

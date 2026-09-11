@@ -169,27 +169,17 @@ export function ContenidoDelCierre({ seccion }: PropsDeSeccion): React.JSX.Eleme
           arregla un ancla: lo arreglaría mover el bloque en el documento, que
           es composición y no es de este bloque. Queda con el ancla de P2, que
           es la única que ahí adentro llega. */}
-      {/* ⚠️ **B12 · LA BANDA DEL PIE — el velo LOCAL**, decidido por el humano en
-          la PARADA 1 y no listado entre las tres palancas de la instrucción.
-          Sacado el relleno del pie, la sala al final es CLARA (gris 145,5) y con
-          VARIANZA, así que ninguna tinta única cierra; y repintar la sección es
-          `papel-opaco`, o sea lo contrario de lo pedido. La salida es partirla en
-          dos registros: **arriba la sala entera** —el titular, donde el gesto de
-          la cámara alejándose se lee— y **abajo fondo donde el pie tiene el texto
-          chico**: el CTA, las columnas y la línea, 20 de los 24 bloques y todos
-          entre 10 y 15 px. De 8 bloques bajo AA a **4 a 1920 y 2 a 1440, y los
-          seis son el titular** (`D-B12.2`). Las cuatro variantes medidas y el
-          sangrado, en `docs/rediseno/outputs/B12-CIERRE.md` §2; el fondo, el
-          relleno y el margen que impide que la banda mueva el anclaje, en
-          `_estilos/pie.css`.
-          ⚠ Es un `<div>` y no un componente, y es peso medido: envolverlo en uno
-          con `props` y `cn()` cuesta **81 B** de carga inicial (A/B).
-          ⚠ La caja de contenido pasa de CINCO filas a TRES; el censo se volvió a
-          correr por eso y quedó en 1,33 y 1,20, la vara de B9. */}
-      <div
-        data-pieza="banda-del-pie"
-        className="grid gap-[var(--spacing-12)] mx-[calc(var(--pad-lateral-compacto)*-1)] px-[var(--pad-lateral-compacto)]"
-      >
+      {/* ⚠️ **B13 · LA BANDA SE REVIRTIÓ Y ESTO QUEDÓ COMO AGRUPADOR.** El pedido
+          fue textual —*«el footer sigue siendo sólido, no transparente»*— y lo que
+          la reversión destapa se declara (`D-B13.3`) en vez de taparse otra vez.
+          Se conserva el `<div>` con su `grid gap-12` porque es lo que deja la caja
+          de contenido en TRES filas: sacarlo la devuelve a CINCO y mueve el censo
+          de B9, que está en su vara. El sangrado horizontal (`mx-` negativo +
+          `px-`) se fue con el fondo: existía sólo para que el fondo llegara más
+          lejos que el contenido. Lo que B12 puso acá y por qué: `_estilos/pie.css`
+          y `docs/rediseno/outputs/B12-CIERRE.md` §2. ⚠ Es un `<div>` y no un
+          componente, y es peso medido: envolverlo cuesta **81 B** (A/B). */}
+      <div data-pieza="banda-del-pie" className="grid gap-[var(--spacing-12)]">
         <Bloque patron="P1" rango="ventana-visible">
           {(progreso) => (
             <CanalDeUnaPieza progreso={progreso} patron="P1">

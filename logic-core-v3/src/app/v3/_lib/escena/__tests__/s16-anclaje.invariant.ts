@@ -24,6 +24,7 @@ import { progresoEntre } from '../anclajeDerivacion'
 import { PANTALLAS_DE_SCROLL, RITMO_POR_SEGMENTO, pantallaDeProgreso, progresoDePantalla, progresoEnNudos } from '../recorrido'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../__tests__/afirmar'
 // prettier-ignore
+import { superposicionMinimaAntesDeB13 } from './s13b-antes'
 import { AA, CAJAS_DEL_DIFERENCIAL, superposicionMinima, ventanaDelDiferencial } from './s13b-diferencial'
 import { EL_DIFERENCIAL } from './s13b-reparto'
 import { contrasteSobreElFondo } from './s10-logo-lectura'
@@ -189,11 +190,9 @@ afirmar(
   `LA SUPERPOSICIÓN MÍNIMA DEL TITULAR ES CERO EN LOS ${CAJAS_DEL_DIFERENCIAL.length} CUADROS, en las DOS rejillas`,
   `publicación (300×220): ${fina.map((s) => `${(100 * s).toFixed(2)}%`).join(' · ')} · barrido (160×118): ${gruesa.map((s) => `${(100 * s).toFixed(2)}%`).join(' · ')}`,
 )
-controlPositivo(
-  'el medidor NO devuelve cero siempre: en el ancla heredada la superposición existe en los cuatro cuadros',
-  anclaDe(ANCLAJE_HEREDADO, EL_DIFERENCIAL),
-  (p: number) => CAJAS_DEL_DIFERENCIAL.every((c) => superposicionFina(c, p) === 0),
-)
+/** ⚠️ **B13 · en el ancla heredada ya no hay superposición** (la ventana abre en 0,7245): el control usa la distancia VIEJA. */
+controlPositivo('el medidor NO devuelve cero siempre: con la distancia VIEJA (9), en el ancla heredada la superposición existe',
+  anclaDe(ANCLAJE_HEREDADO, EL_DIFERENCIAL), (p: number) => CAJAS_DEL_DIFERENCIAL.every((c) => superposicionMinimaAntesDeB13(c, p) === 0))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · POR QUÉ ESE VALOR — los tres márgenes, medidos')

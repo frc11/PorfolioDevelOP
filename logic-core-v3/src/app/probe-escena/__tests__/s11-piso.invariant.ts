@@ -72,8 +72,37 @@ const S10_MEAN = [216, 172, 222, 208, 136, 120]
  * en Números y Trabajos, la mañana en Demos y el Cierre—, así que sus valores
  * de S10/S11 ya no son la escena de hoy. Los de las dos intactas SÍ, y son el
  * control de que el instrumento sigue siendo el mismo.
+ *
+ * ══════════════════════════════════════════════════════════════════════════
+ * ⚠️ **B13 · QUIÉNES SOMOS SALE DE ESTA LISTA, Y NO POR LA LUZ.** Autorizado por
+ * el dueño al cerrar la PARADA 1 de B13; se reescribe contra la propiedad nueva.
+ * ══════════════════════════════════════════════════════════════════════════
+ *
+ * **Qué custodiaba.** Que el instrumento sin celosía siguiera devolviendo la
+ * columna «+ envolvente» de S10 en las DOS poses que B8 no re-iluminó. Era el
+ * control de que se mide la misma escena que aquel reporte.
+ *
+ * **Por qué cambió.** B13 alejó la CÁMARA de `quiénes somos` —de 11,5 a 14— para
+ * bajar el logo del 21,97 % al 15,17 % del cuadro. Su luz sigue intacta; lo que
+ * se movió es qué mira. El valor medio del cuadro pasa de **172 a 186**, así que
+ * su cifra de S10 dejó de describir esta escena por una causa distinta de la de
+ * las otras cuatro.
+ *
+ * **Por qué el 172 NO se actualiza.** `S10_MEAN` es lo que S10 **publicó**: es
+ * historia, no un parámetro. Pisarlo borraría el dato con el que se comparó tres
+ * sprints. Lo que se reescribe es la CLASIFICACIÓN —quién sirve de control— y se
+ * agrega la afirmación que faltaba: que `quiénes somos` ya NO reproduce, y que
+ * eso separa las dos causas. Una pose que se mueve y una pose que se re-ilumina
+ * dejan de reproducir por motivos distintos, y el instrumento ahora lo dice.
+ *
+ * **El control queda en UNA pose, y alcanza.** El hero no se re-iluminó (B8) ni
+ * se movió (B13): su cifra de S10 tiene que salir clavada, y si el instrumento
+ * se corriera, saldría de ahí. Lo que se pierde es una segunda muestra; lo que se
+ * gana es que la lista diga lo que significa.
  */
-const INTACTAS: readonly string[] = ['hero', 'quiénes somos']
+const INTACTAS: readonly string[] = ['hero']
+/** Las que dejaron de reproducir S10 por la CÁMARA y no por la luz (B13). */
+const MOVIDAS_POR_B13: readonly string[] = ['quiénes somos']
 const arco: MutableLightLevels = { level: 1, kelvin: 6500, azimuthDeg: 0, elevationDeg: 0 }
 const nivelEn = (p: number): number => {
   sampleLightArc(p, arco)
@@ -184,6 +213,15 @@ section('El valor medio del cuadro en las seis poses, contra S10')
   const rows: string[] = []
   const contraLaMismaLuz: number[] = []
   let baselineOk = true
+  interface MovidaPorLaCamara {
+    readonly nombre: string
+    readonly antes: number
+    readonly ahora: number
+  }
+  // Un objeto y no un `let`: la asignación ocurre adentro del `forEach` y el
+  // análisis de flujo de TypeScript no la ve, así que el `let` quedaría
+  // estrechado a `null` en el punto de lectura.
+  const movida: { valor: MovidaPorLaCamara | null } = { valor: null }
   let reiluminadasSeMovieron = true
   let heroDelta = 0
   let numerosDelta = 0
@@ -204,6 +242,7 @@ section('El valor medio del cuadro en las seis poses, contra S10')
     const reproduceS10 = Math.abs(s10.mean - PARTICLE_DELTA[i] - S10_MEAN[i]) <= 1
     if (INTACTAS.includes(name) && !reproduceS10) baselineOk = false
     if (!INTACTAS.includes(name) && reproduceS10) reiluminadasSeMovieron = false
+    if (MOVIDAS_POR_B13.includes(name)) movida.valor = { nombre: name, antes: S10_MEAN[i], ahora: s10.mean - PARTICLE_DELTA[i] }
     const published = s11.mean - PARTICLE_DELTA[i]
     contraLaMismaLuz.push(s11.mean - s10.mean)
     if (name === 'hero') heroDelta = s11.mean - s10.mean
@@ -223,9 +262,16 @@ section('El valor medio del cuadro en las seis poses, contra S10')
    * quiso decir: sin celosía contra con celosía, en el mismo cuadro.
    */
   check(
-    'el instrumento sin celosía sigue reproduciendo los valores de S10 en las poses cuya luz B8 no tocó (hero y quiénes somos)',
+    'el instrumento sin celosía sigue reproduciendo el valor de S10 en la pose que nadie tocó: el hero (ni B8 la luz, ni B13 la cámara)',
     baselineOk,
     'es el control: si esto se corriera, la comparación de abajo no valdría nada'
+  )
+  check(
+    '  B13 — y `quiénes somos` ya NO lo reproduce, por la CÁMARA y no por la luz: su nivel sigue en 1 y lo que cambió es la distancia',
+    movida.valor !== null && Math.abs(movida.valor.ahora - movida.valor.antes) > 1,
+    movida.valor === null
+      ? 'no se midió'
+      : `${movida.valor.nombre} ${movida.valor.antes} (S10) → ${movida.valor.ahora.toFixed(0)} · distancia 11,5 → 14 (\`choreography.ts\`, B13 §2) · nivel del arco ${nivelEn(0.375).toFixed(2)}, el mismo de S9`
   )
   check(
     '  y en las cuatro que B8 volvió a iluminar NO los reproduce: la luz las movió, y se publican contra S10 con su delta',

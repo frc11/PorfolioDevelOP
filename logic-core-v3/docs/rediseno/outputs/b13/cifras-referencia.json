@@ -1,0 +1,231 @@
+{
+  "fuente": "docs/rediseno/outputs/b11/referencia-nk-1920.json (la navegación de B11)",
+  "pantalla": 2.5,
+  "cifras": [
+    {
+      "etiqueta": "p",
+      "texto": "200",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1056,
+      "y": 127.55,
+      "ancho": 103.27,
+      "alto": 73,
+      "pixelesDeGlifo": 1708,
+      "sobreElObjeto": 0,
+      "peorContraste": 20.3,
+      "medianaContraste": 20.5,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "5",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1677,
+      "y": 127.55,
+      "ancho": 32.48,
+      "alto": 73,
+      "pixelesDeGlifo": 555,
+      "sobreElObjeto": 0,
+      "peorContraste": 20.59,
+      "medianaContraste": 20.59,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "97",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1470,
+      "y": 151.55,
+      "ancho": 60.27,
+      "alto": 73,
+      "pixelesDeGlifo": 993,
+      "sobreElObjeto": 0,
+      "peorContraste": 20.5,
+      "medianaContraste": 20.59,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "12",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1263,
+      "y": 207.55,
+      "ancho": 46.38,
+      "alto": 73,
+      "pixelesDeGlifo": 743,
+      "sobreElObjeto": 0,
+      "peorContraste": 20.5,
+      "medianaContraste": 20.59,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "10",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1061.73,
+      "y": 384.55,
+      "ancho": 52.42,
+      "alto": 73,
+      "pixelesDeGlifo": 893,
+      "sobreElObjeto": 0,
+      "peorContraste": 16.2,
+      "medianaContraste": 17.17,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "6",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1677,
+      "y": 384.55,
+      "ancho": 33.5,
+      "alto": 73,
+      "pixelesDeGlifo": 628,
+      "sobreElObjeto": 0,
+      "peorContraste": 19.31,
+      "medianaContraste": 19.51,
+      "pasaAA": true
+    },
+    {
+      "etiqueta": "p",
+      "texto": "150",
+      "tamanoPx": 56,
+      "opacidad": 1,
+      "x": 1263,
+      "y": 464.55,
+      "ancho": 84.91,
+      "alto": 73,
+      "pixelesDeGlifo": 1455,
+      "sobreElObjeto": 0.0014,
+      "peorContraste": 12.31,
+      "medianaContraste": 14.61,
+      "pasaAA": true
+    }
+  ],
+  "tamanos": [
+    56
+  ],
+  "rotulos": [
+    {
+      "cifra": "200",
+      "rotulo": "+",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -60,
+      "desfaseX": 107.3
+    },
+    {
+      "cifra": "5",
+      "rotulo": "%",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -36,
+      "desfaseX": -142.7
+    },
+    {
+      "cifra": "97",
+      "rotulo": "%",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -60,
+      "desfaseX": 64.3
+    },
+    {
+      "cifra": "12",
+      "rotulo": "weeks",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -29,
+      "desfaseX": 50.4
+    },
+    {
+      "cifra": "10",
+      "rotulo": "x",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -29,
+      "desfaseX": -9.7
+    },
+    {
+      "cifra": "6",
+      "rotulo": "+ years",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -29,
+      "desfaseX": 37.5
+    },
+    {
+      "cifra": "150",
+      "rotulo": "Awards.",
+      "tamanoPx": 12,
+      "razon": 4.67,
+      "desfaseY": -66,
+      "desfaseX": 123.9
+    }
+  ],
+  "amplitudPx": 654.5,
+  "columnas": 5,
+  "filas": 4,
+  "escalonado": [
+    24,
+    0,
+    0,
+    0
+  ],
+  "objeto": {
+    "area": 75952,
+    "caja": [
+      348,
+      287,
+      1632,
+      732
+    ],
+    "fraccionDelAncho": 0.6693,
+    "fraccionDelAlto": 0.413,
+    "fraccionDelCuadro": 0.0366
+  },
+  "glifosSobreLaSilueta": 0.03,
+  "vecinas": [
+    {
+      "pantalla": 1.5,
+      "cifras": []
+    },
+    {
+      "pantalla": 2,
+      "cifras": [
+        "10",
+        "12",
+        "200",
+        "5",
+        "6",
+        "97"
+      ]
+    },
+    {
+      "pantalla": 2.5,
+      "cifras": [
+        "10",
+        "12",
+        "150",
+        "200",
+        "5",
+        "6",
+        "97"
+      ]
+    },
+    {
+      "pantalla": 3,
+      "cifras": []
+    },
+    {
+      "pantalla": 3.5,
+      "cifras": []
+    }
+  ]
+}
