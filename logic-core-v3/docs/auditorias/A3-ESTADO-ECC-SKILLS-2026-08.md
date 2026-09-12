@@ -278,6 +278,20 @@ Y `.claude/skills/prototype/SKILL.md:4` usa `disable-model-invocation: true` (sk
 | 9 | `~/.claude/mcp-configs/mcp-servers.json` describe 28 servidores MCP | **Ninguno está activo.** Es una plantilla; `~/.claude.json` tiene `mcpServers: []` a nivel global y en los 6 registros del proyecto |
 | 10 | `~/.claude/settings.json` | **Sin `hooks`, sin `env`, sin `mcpServers`.** Todo el harness automático del repo depende del único `settings.local.json` de la raíz — que hoy no ejecuta nada (ver #4) |
 
+> **⚠️ CORRECCIÓN · 2026-09-12 (sprint H2).** Las filas **#4** y **#5** describen
+> el checkout `C:\PorfolioDevelOP`, **no** el worktree `C:\rediseno-home`
+> (`rediseno/home`). En `C:\rediseno-home` lo medido fue otra cosa: el
+> `settings.local.json` del proyecto contenía sólo `{"enabledPlugins": …}` y
+> **cero hooks**, y el `settings.json` global tampoco tenía ninguno de
+> `impeccable` — el único manifiesto presente era `.github/hooks/impeccable.json`,
+> que según `reference/hooks.md:17` de la propia skill es el de **GitHub
+> Copilot**, no el de Claude Code. O sea: **en este worktree el hook del detector
+> nunca corrió en Claude Code.** En H2 se eliminaron las cuatro rutas de
+> `impeccable` (las dos copias de la skill, ese manifiesto y el mirror
+> `.impeccable/design.json`) y se limpió su entrada de `skills-lock.json`.
+> Detalle y evidencia en `docs/rediseno/outputs/H1-HERRAMIENTAS.md` §3 y §11.
+> El resto de este documento no se tocó.
+
 ---
 
 ## 6. Lo que hace falta saber para escribir la primera skill
