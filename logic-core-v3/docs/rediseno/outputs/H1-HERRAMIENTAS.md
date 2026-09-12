@@ -932,3 +932,96 @@ ningún frontmatter.
 
 Y de paso, el control de `impeccable` confirma §11.1 desde el otro lado: no es que
 se borraron unos archivos, es que **el runtime ya no la conoce**.
+
+### 11.12 · PASO 6 — commit y push
+
+**Commit `b52c2856` · push `faa26bab..b52c2856` → `origin/rediseno/home`.**
+148 archivos, **1.080 inserciones, 69.131 eliminaciones**.
+
+Mensaje:
+
+```
+H1-H2: auditoria de herramientas — sale impeccable, entran animate y review-animations
+```
+
+#### Lo que se stageó, nombrando cada ruta
+
+| # | ruta | estado en el índice |
+|---|---|---|
+| 1 | `logic-core-v3/docs/rediseno/outputs/H1-HERRAMIENTAS.md` | `A` (nuevo) |
+| 2 | `logic-core-v3/docs/rediseno/LICENCIA-BOOKOFSHAPES.md` | `A` (nuevo) |
+| 3 | `logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md` | `M` (la corrección del PASO 3) |
+| — | las **145** eliminaciones que `git rm` había dejado en el índice | `D` |
+
+**`skills-lock.json` NO se stageó**, y la condición de la instrucción («si está
+trackeado») se resolvió midiéndola: **no lo está** — `git check-ignore` lo ubica
+en `.gitignore:4`. Su limpieza (§11.2) queda local, que es donde corresponde.
+
+Las 145 eliminaciones se reparten: **143** de `.github/skills/impeccable/`, **1**
+de `.github/hooks/impeccable.json` y **1** de `.impeccable/design.json`.
+
+#### `git status` ANTES del commit
+
+```
+On branch rediseno/home
+Your branch is up to date with 'origin/rediseno/home'.
+
+Changes to be committed:
+	deleted:    .github/hooks/impeccable.json
+	deleted:    .github/skills/impeccable/SKILL.md
+	…  (143 más de .github/skills/impeccable/)
+	deleted:    .impeccable/design.json
+
+Changes not staged for commit:
+	modified:   logic-core-v3/docs/auditorias/A3-ESTADO-ECC-SKILLS-2026-08.md
+	modified:   logic-core-v3/docs/rediseno/CONTENIDO-PENDIENTE.md
+
+Untracked files:
+	logic-core-v3/docs/rediseno/LICENCIA-BOOKOFSHAPES.md
+	logic-core-v3/docs/rediseno/outputs/H1-HERRAMIENTAS.md
+```
+
+Control corrido **antes** de commitear, no después: `CONTENIDO-PENDIENTE.md`
+aparecía **0 veces** en `git diff --cached --name-only`.
+
+#### `git status` DESPUÉS del push
+
+```
+On branch rediseno/home
+Your branch is up to date with 'origin/rediseno/home'.
+
+Changes not staged for commit:
+	modified:   logic-core-v3/docs/rediseno/CONTENIDO-PENDIENTE.md
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+
+En `--porcelain`, una sola línea:
+
+```
+ M logic-core-v3/docs/rediseno/CONTENIDO-PENDIENTE.md
+```
+
+🔴 **`CONTENIDO-PENDIENTE.md` quedó exactamente como tenía que quedar: modificado
+y sin stagear** (` M`, con el espacio en la primera columna). No se tocó, no se
+stageó, y **no entró al commit** — verificado también sobre el commit ya hecho:
+`git show --stat --name-only HEAD | grep -c CONTENIDO-PENDIENTE` devuelve **0**.
+
+Y el push quedó confirmado por las dos puntas: `git log -1` local y
+`git log -1 origin/rediseno/home` devuelven **el mismo `b52c2856`**.
+
+---
+
+## 12 · Estado final de H1-H2
+
+| | |
+|---|---|
+| **`impeccable`** | **fuera**, las cuatro rutas en cero (disco y trackeados), más la entrada del lockfile. El runtime ya no la conoce: `Unknown skill: impeccable` |
+| **`find-skills`** | **fuera** (era sólo para la corrida de A2). `Unknown skill: find-skills` |
+| **Entraron** | `animate` y `review-animations`, de `emilkowalski/skills`. Ninguna de las otras diez |
+| **Regla nueva, cumplida y verificada con instrumento** | **cinco** skills declaran `disable-model-invocation: true` — `animate`, `review-animations`, `copy-editing`, `copywriting`, `cro`. Ninguna instalada sin él. Las cuatro probadas contra el runtime responden con el rechazo por opt-out |
+| **Gates** | `verificar` **30 pasos · 0 fallas · 16 deudas** (= HEAD) · `test:frontera` **23 afirmaciones · 0 fallas** (= HEAD) |
+| **Commiteado y pusheado** | `b52c2856` → `origin/rediseno/home` |
+| **Queda abierto, con su número** | el **§6 de `LICENCIA-BOOKOFSHAPES.md`**: qué patrón de bookofshapes se eligió. Si es uno de los tres excluidos, no se puede usar. Es lo único que falta para cerrar la licencia |
+| **Anotado sin atribuir** | las dos discrepancias de la prosa de B13 (total +7, `s10-logo` −1). No son del repo; el árbol reproduce HEAD en los tres números del gate |
+| **Riesgo residual** | `npx skills update` sobrescribiría las tres de `coreyhaines31/marketingskills` y se llevaría su declaración (§11.10) |
