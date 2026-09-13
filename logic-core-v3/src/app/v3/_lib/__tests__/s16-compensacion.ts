@@ -12,7 +12,7 @@
  * Chivo tiene la x-height de Instrument Sans (511 contra 510) y NO tiene su cap
  * height (686 contra 720). Un solo factor no puede igualar las dos: el que pone
  * la cap en cero se lleva la x a +5,16%. Este archivo resuelve las dos
- * compensaciones, las aplica a los ocho niveles en los cuatro anchos, y publica
+ * compensaciones, las aplica a los DIEZ niveles en los cuatro anchos, y publica
  * lo que cada una le hace a la escala. **No decide nada.**
  *
  * ⚠ **ESTO ES UN MODELO, NO UNA MEDICIÓN ÓPTICA.** No hay navegador: se
@@ -86,19 +86,48 @@ export function desviosBajo(factor: number): { cap: number; x: number; peor: num
 export type Alcance = readonly Nivel[]
 
 /**
- * LOS NIVELES DE DISPLAY, DERIVADOS DE LA TABLA Y NO ESCRITOS.
+ * LOS NIVELES DE DISPLAY QUE §2.1 MIDIÓ, DERIVADOS DE LA TABLA Y NO ESCRITOS.
  *
  * El discriminador es el interletrado por defecto: `titulo` es el que
  * `COMPONENTS.md` §2.1 midió sobre los componentes de display, y `texto` el del
  * régimen de lectura. Escribir `['titulo-l','titulo-xl']` a mano habría sido una
  * cardinalidad de las que ya se rompieron tres veces en este proyecto.
+ *
+ * ⚠️ **EL NOVENO NIVEL NO ESTÁ ACÁ, Y ES CORRECTO QUE NO ESTÉ.** `display`
+ * lleva `interletrado: 'display'`, así que el discriminador lo deja afuera solo
+ * — y eso es lo que este constante SIGNIFICA: los niveles de display que §2.1
+ * midió. `display` no lo midió §2.1: lo agregó el rehecho del titular, después.
+ * El censo de mayúsculas de `s16-afirmaciones` mira esta lista y tiene que
+ * seguir mirando ESTA, porque su afirmación es sobre lo que se midió.
  */
 export const NIVELES_DE_DISPLAY: Alcance = NIVELES.filter(
   (n) => NIVELES_TIPOGRAFICOS[n].interletrado === 'titulo',
 )
 
 export const NINGUNO: Alcance = []
-export const LOS_OCHO: Alcance = NIVELES
+
+/**
+ * EL ALCANCE DE LA HIPÓTESIS «compensar sólo los display» — y por qué NO es
+ * `NIVELES_DE_DISPLAY`.
+ *
+ * La hipótesis pregunta qué pasaría si el factor de cap se aplicara a los
+ * niveles grandes. Con `display` afuera del alcance, el factor sube `titulo-xl`
+ * de 56 a 58,78 px y deja `display` en 58: **la escala se da vuelta**, y no por
+ * una propiedad de la compensación sino porque el alcance se habría quedado
+ * viejo. Una hipótesis que nadie aplicaría así no se puede evaluar: se arregla
+ * el alcance.
+ *
+ * O sea: el discriminador de `NIVELES_DE_DISPLAY` era un PROXY de «los
+ * grandes», y el noveno nivel rompió el proxy. Las dos cosas se separan —el
+ * censo mira lo medido, la hipótesis mira lo que tocaría— en vez de estirar una
+ * para que sirva de las dos.
+ */
+export const ALCANCE_DE_LA_COMPENSACION: Alcance = NIVELES.filter(
+  (n) => NIVELES_TIPOGRAFICOS[n].interletrado === 'titulo' || n === 'display',
+)
+
+/** Todos los niveles de la escala. Eran ocho hasta el rehecho del titular. */
+export const TODOS_LOS_NIVELES: Alcance = NIVELES
 
 /** La escala resuelta a un ancho con el factor aplicado sólo dentro del alcance. */
 export function escalaCompensadaA(ancho: number, factor: number, alcance: Alcance): NivelResuelto[] {
@@ -107,7 +136,7 @@ export function escalaCompensadaA(ancho: number, factor: number, alcance: Alcanc
   )
 }
 
-// ── Los catorce valores declarados ──────────────────────────────────────────
+// ── Los valores declarados: los tokens fijos y los pisos ───────────────────
 
 export interface ValorDeclarado {
   readonly donde: string
@@ -115,10 +144,17 @@ export interface ValorDeclarado {
 }
 
 /**
- * LOS CATORCE VALORES QUE UNA COMPENSACIÓN TOCARÍA — los ocho tokens fijos y
- * los seis pisos de `clamp()`. **Derivados de la hoja**, no transcritos: es la
+ * LOS VALORES QUE UNA COMPENSACIÓN TOCARÍA — un token fijo por nivel y un piso
+ * por `clamp()`. **Derivados de la hoja y de la tabla**, no transcritos: es la
  * misma cuenta que `REPORTE-S0.md` §(b) publicó como «se mueven 0 de 14», y
  * reproducirla con el instrumento es lo que la convierte en verificable.
+ *
+ * ⚠ Eran CATORCE (8 tokens + 6 pisos) hasta el rehecho del titular y son
+ * DIECISÉIS (9 + 7). La cuenta no se escribió nunca acá —sale de `NIVELES`—
+ * así que el cambio de cardinalidad no tocó una línea de esta función; lo que
+ * sí hay que mover es el literal del invariante, que es donde la cuenta se
+ * AFIRMA. Es el mismo reparto que el repo ya usa: el modelo deriva, la
+ * afirmación clava.
  *
  * Los techos NO entran: salen de la recta, así que se mueven solos con el piso
  * y el ancla. Contarlos sería contar dos veces el mismo grado de libertad.

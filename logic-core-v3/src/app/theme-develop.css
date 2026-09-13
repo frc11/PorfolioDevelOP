@@ -398,14 +398,44 @@
   --font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;      /* "Chivo" */
   --font-codigo: var(--font-v3-chivo-mono), ui-monospace, monospace; /* "Chivo Mono" */
 
-  /* CUATRO pesos. [medido] Los cuatro que Franco declara existen los cuatro
+  /* ═══ LA CUARTA FAMILIA — Archivo, y SÓLO para el registro de display ═══
+   *
+   * [decidido] Archivo, de Omnibus-Type: la MISMA fundición que hizo Chivo, así
+   * que el emparejamiento no es un encuentro casual de dos grotescas. Las dos
+   * miden `unitsPerEm` 1000 y **cap height 686**, el mismo número —leído de los
+   * dos binarios, no transcrito—, de modo que al mismo `font-size` las
+   * mayúsculas de las dos caras tienen exactamente la misma altura. Eso es lo
+   * que permite que la línea 1 y la línea 2 del titular del hero sean dos caras
+   * distintas y sigan siendo un solo bloque óptico.
+   *
+   * Lo que Chivo no tiene y esta familia sí es un **eje de ancho**: `wdth`
+   * 62→125. La cara que se sirve está pinchada en 62 —el mínimo del eje— y el
+   * porqué de pinchar en vez de dejar el eje vivo está en
+   * `scripts-titular/subsetear-fuentes.py`: son 15,43 KiB y, sobre todo, es que
+   * `hmtx` publica la instancia por defecto y el repo mide texto leyendo `hmtx`.
+   *
+   * ⚠ **Es una cara de MAYÚSCULAS.** El `.woff2` que se sirve trae 68 puntos de
+   * código y ninguna minúscula. Cualquier consumidor nuevo tiene que llevar
+   * `uppercase`, o las minúsculas caen al fallback y se ve otra letra. */
+
+  --font-display: var(--font-v3-archivo), system-ui, sans-serif;   /* "Archivo" */
+
+  /* CINCO pesos. [medido] Los cuatro que Franco declara existen los cuatro
    * en Chivo, así que transfieren sin hueco.
    * DATO QUE CAMBIA respecto de su archivo: el eje de Chivo arranca en 100,
    * no en 400. El peso 300 (Light) que él documenta como INEXISTENTE en
-   * Instrument Sans SÍ EXISTE acá. No se agrega un quinto token porque
-   * agregarlo es una decisión de sistema y no una consecuencia de la
-   * medición; queda escrito para que la decisión se pueda tomar con el dato. */
+   * Instrument Sans SÍ EXISTE acá.
+   *
+   * ⚠️ **EL QUINTO TOKEN ENTRÓ, Y CIERRA LA DECISIÓN QUE ESTE BLOQUE DEJÓ
+   * ABIERTA.** Decía: «No se agrega un quinto token porque agregarlo es una
+   * decisión de sistema y no una consecuencia de la medición; queda escrito para
+   * que la decisión se pueda tomar con el dato.» La decisión llegó con el
+   * pedido de la línea 2 del titular del hero —Chivo **Light** itálica— que
+   * nombra el peso 300 por su nombre. El dato con el que se tomó es el que ya
+   * estaba escrito acá: el eje de Chivo arranca en 100, así que el 300 no se
+   * sintetiza, existe en el binario. */
 
+  --font-weight-liviano: 300; /* instancia nombrada Light */
   --font-weight-normal: 400;  /* instancia nombrada Regular */
   --font-weight-medio: 500;   /* instancia nombrada Medium — defecto del binario */
   --font-weight-semi: 600;    /* instancia nombrada SemiBold */
@@ -503,6 +533,57 @@
   --text-titulo-m: 32px;
   --text-titulo-l: 44px;
   --text-titulo-xl: 56px;
+
+  /* ═══ EL NOVENO NIVEL — `display`, 58 px. [derivado] ═══════════════════
+   *
+   * No es un paso más de la escala porque haga falta un tamaño más grande: es
+   * **el mayor entero que entra en UNA línea en la caja medida del titular del
+   * hero**, con la cara y el interletrado con los que se pinta. Los tres
+   * números que lo fijan, ninguno elegido:
+   *
+   *   caja del titular a 1440   478,40 px   (`GEOMETRIA` del Hero, 2 de 3 de la
+   *                                          medida; leído con `cajasDeLaSeccion`)
+   *   avance de la línea 1      8,5670 em   ("TU NEGOCIO VENDIENDO" en Archivo
+   *                                          wdth 62 · wght 700, del `.woff2`)
+   *   interletrado del nivel   −0,02 em     (`--tracking-display`)
+   *
+   *   58 × (8,5670 − 19 × 0,02) = 474,85 px  →  entra, con 3,55 px de margen
+   *   59 × (8,5670 − 19 × 0,02) = 483,04 px  →  se pasa
+   *
+   * O sea: 58 es un techo, no una preferencia. El día que cambie la caja, la
+   * cara o el texto, este número se vuelve a derivar con la misma cuenta —que
+   * `hero.invariant.tsx` §12b corre contra el binario— y no se ajusta a ojo.
+   *
+   * ⚠ Es el único nivel de la escala que se pinta con `--font-display`, y por
+   * eso es el único cuyo tamaño depende de la métrica de OTRA familia. */
+
+  --text-display: 58px;
+
+  /* ═══ EL DÉCIMO NIVEL — `display-xl`, 104 px. [derivado] ════════════════
+   *
+   * La línea 2 del titular, con EL MISMO método que el noveno: el mayor entero
+   * que entra en UNA línea en la caja medida del titular, con la cara y el
+   * interletrado con los que se pinta. Los tres números, ninguno elegido:
+   *
+   *   caja del titular a 1440   478,39 px   (la misma que la línea 1)
+   *   avance de la línea 2       4,58409 em  ("LAS 24 HS" en Chivo Light
+   *                                           itálica, medido en el navegador)
+   *   interletrado del nivel    −0,03 em     (`--tracking-titulo`)
+   *
+   *   104 × 4,58409 = 476,75 px  →  entra, con 1,64 px de margen
+   *   105 × 4,58409 = 481,33 px  →  se pasa
+   *
+   * ⚠️ **ES EL NIVEL MÁS GRANDE DE LA ESCALA, Y ESO INVIERTE EL TITULAR.** La
+   * línea 2 pasa de 44 a 104 px y queda al 179 % de la línea 1, que se queda en
+   * 58. No es una consecuencia del método: es lo que el método da cuando se le
+   * pide el máximo que entra, y la línea 1 está congelada en 58 por decisión.
+   *
+   * ⚠ La tinta termina en x 664,75 a 1440 y el borde seguro del logo está en
+   * x 683: quedan **18,25 px**. Es el margen más fino de la composición —la
+   * línea 1 termina en 661,69— y por eso 105 no es una opción aunque el
+   * redondeo pareciera permitirlo. */
+
+  --text-display-xl: 104px;
 
   /* Seis expresiones fluidas [medido, transferido]. Transferidas sin tocar.
    * Método, verificado en este sprint reproduciendo las seis publicadas:
@@ -609,6 +690,56 @@
   --text-fluido-titulo-m: clamp(18px, 0.8169rem + 1.3146vw, 38.3107px);
   --text-fluido-titulo-l: clamp(24px, 1.0599rem + 1.8779vw, 53.0141px);
   --text-fluido-titulo-xl: clamp(36px, 1.8099rem + 1.8779vw, 65.0141px);
+
+  /* La SÉPTIMA expresión fluida — `display`, con EL MISMO MÉTODO de arriba y
+   * ni una excepción: piso a 375, el token fijo a 1440, la recta evaluada en
+   * 1920 como techo.
+   *
+   *   a = (58 − 37) / (1440 − 375) = 21/1065 → 1,9718 vw
+   *   b = 37 − a × 375 = 29,6056 px         → 1,8504 rem
+   *   techo = b + a × 1920                  = 67,4648 px
+   *
+   * Reproducción con los coeficientes ya redondeados a cuatro decimales:
+   * 37,00065 · 58,00032 · 67,46496. Error máximo 0,00065 px, abajo de la
+   * tolerancia de 0,001 px con la que `s3-banda` compara las anclas.
+   *
+   * ── EL PISO ES FORZADO, y es el mismo modo de razonamiento que subió el de
+   *    `titulo-s` en SITIO-S11: **37 es el único entero que a la vez** pasa el
+   *    piso de `titulo-xl` (36 — con 36 los dos niveles colisionarían a 375 y
+   *    la escala dejaría de ser una escala) **y entra en una línea en la caja
+   *    medida a 375** (311,00 px: 37 × 8,1870 = 302,9 px entra, 38 da 311,1 y
+   *    se pasa). No hay un tercer valor en esa banda.
+   *
+   * ⚠ ENTRE 1025 Y ~1426 LA LÍNEA 1 SE PARTE EN DOS, y está medido: la caja
+   * del titular crece 0,4 px por píxel de ventana y el tamaño crece 1,9718 vw,
+   * o sea más rápido que su caja. El cruce cae en 1425,5 px. A 1440 entra con
+   * 3,55 px; a 1025 no entra y son dos líneas. **Los anchos que no son 1440 no
+   * están verificados en este sprint** — degradan, no reventan. */
+
+  --text-fluido-display: clamp(37px, 1.8504rem + 1.9718vw, 67.4648px);
+
+  /* La OCTAVA expresión fluida — `display-xl`, con el mismo método y las mismas
+   * tres anclas: piso a 375, el token fijo a 1440, la recta evaluada en 1920.
+   *
+   *   a = (104 − 67) / (1440 − 375) = 37/1065 → 3,4742 vw
+   *   b = 67 − a × 375 = 53,9718 px          → 3,3732 rem
+   *   techo = b + a × 1920                   = 120,6761 px
+   *
+   * Reproducción con los coeficientes ya redondeados a cuatro decimales:
+   * 66,99945 · 103,99968 · 120,67584. Error máximo 0,00055 px, abajo de la
+   * tolerancia de 0,001 px con la que `s3-banda` compara las anclas.
+   *
+   * ── EL PISO TAMBIÉN ES FORZADO: **67 es el mayor entero que entra en una
+   *    línea en la caja medida a 375** (311,00 px: 67 × 4,58409 = 306,8 px
+   *    entra, 68 da 311,7 y se pasa). Y pasa de sobra el piso del nivel de
+   *    abajo (`display`, 37), así que la escala sigue siendo estrictamente
+   *    creciente en los cuatro anchos.
+   *
+   * ⚠ A 1920 y 2560 el techo deja la tinta en 553,19 px sobre cajas de 670,39
+   * y 696,00: **entra con holgura en los dos**. Los anchos que no son 1440 y
+   * 1920 siguen sin verificar. */
+
+  --text-fluido-display-xl: clamp(67px, 3.3732rem + 3.4742vw, 120.6761px);
 
   /* =====================================================================
    * TIPOGRAFÍA — interlineado [medido, transferido]
@@ -1019,4 +1150,75 @@
 [data-v3]:focus-visible {
   outline: var(--foco-grosor) solid var(--color-foco);
   outline-offset: var(--foco-desplazamiento);
+}
+
+/* =========================================================================
+ * 🔴 LAS CUATRO FAMILIAS, RE-DECLARADAS EN EL ÁRBOL — Y ES UN ARREGLO, NO UNA
+ *    DUPLICACIÓN. Lo encontró el rehecho del titular del hero.
+ *
+ * ── El defecto, con su medición ─────────────────────────────────────────
+ *
+ * Los cuatro tokens de familia se declaran arriba, en el `@theme static`, como
+ * `var(--font-v3-…), system-ui, sans-serif`. Las variables `--font-v3-*` las
+ * escribe `next/font/local` **en la CLASE que el layout de /v3 pone en su
+ * envoltorio**, o sea en `[data-v3]` — no en `:root`.
+ *
+ * El layout dice, por escrito, que eso alcanza: *«una custom property se
+ * sustituye en el elemento que la USA, así que adentro de este árbol la cadena
+ * resuelve»*. **Esa premisa es FALSA, y está medida en el navegador sobre el
+ * build de producción:** el valor computado de una custom property se resuelve
+ * en el elemento donde se DECLARA —acá `:root`—, y desde ahí se hereda ya
+ * resuelto. En `:root` no existe ningún `--font-v3-*`, así que los cuatro
+ * computan al valor inválido garantizado y se heredan vacíos.
+ *
+ * Lo medido, a 1440, en `next start` sobre el build:
+ *
+ *   getComputedStyle('[data-v3]')['--font-titulo']      ""   (vacío)
+ *   getComputedStyle('[data-v3]')['--font-display']     ""   (vacío)
+ *   un <div class="font-titulo">   → font-family: Chivo, "Chivo Fallback"
+ *   un <div class="font-display">  → font-family: Chivo, "Chivo Fallback"
+ *   un <div style="font-family: var(--font-v3-archivo)">
+ *                                  → font-family: archivo, "archivo Fallback"
+ *
+ * O sea: `.font-titulo` y `.font-display` no aplican nada —la declaración es
+ * inválida y la familia se HEREDA— y lo que /v3 venía pintando es la Chivo de
+ * `next/font/google` que baja por el layout RAÍZ (`--font-sans`). Las dos
+ * últimas líneas son el control: la variable de `next/font` sí resuelve cuando
+ * se la usa directamente, así que el eslabón roto es el token del tema.
+ *
+ * ── Las tres consecuencias, dichas ──────────────────────────────────────
+ *
+ *   1. **`/v3` no estaba sirviendo los binarios de S0**, que es justo lo que la
+ *      trazabilidad de `fuentes.invariant.ts` existe para garantizar: el sha256
+ *      de esos archivos se afirma, pero la página pintaba con otros.
+ *   2. **Los instrumentos y la página no medían lo mismo.** `s10-woff2` lee los
+ *      `.woff2` de `_fuentes/`, así que todo el modelo de composición del repo
+ *      —líneas, superposición, alto de tinta— describía una letra que la página
+ *      no dibujaba. Este arreglo los pone de acuerdo.
+ *   3. **Sin esto el titular rehecho no existe**: la línea 1 caía a Chivo (y no
+ *      entraba en una línea, medido: 2 renglones) y la línea 2 a una oblicua
+ *      SINTETIZADA sobre la romana de Google, que es exactamente lo que el
+ *      pedido de la línea 2 descarta.
+ *
+ * ── Por qué acá y no en el `@theme static` ──────────────────────────────
+ *
+ * Porque el arreglo es de ALCANCE, no de valor: los mismos cuatro valores, pero
+ * declarados en el elemento donde las variables de `next/font` existen. Los
+ * tokens de arriba NO se tocan —siguen siendo los del padrón, con su nombre y
+ * su valor— y afuera de `[data-v3]` siguen cayendo al fallback, que es lo que
+ * el layout quiere. Es la misma forma que el anillo de foco de acá arriba: una
+ * regla del tema acotada a este árbol, con su motivo escrito.
+ *
+ * DISPARADOR para borrar este bloque: el día que el layout RAÍZ sirva estas
+ * familias con `next/font/local` y sus variables lleguen al `:root`. Ese día
+ * los cuatro tokens del `@theme static` resuelven solos y esto es peso muerto.
+ *
+ * Sin `@layer`, por lo mismo que el foco: tiene que ganarle a los defaults.
+ * ========================================================================= */
+
+[data-v3] {
+  --font-titulo: var(--font-v3-chivo), system-ui, sans-serif;
+  --font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;
+  --font-codigo: var(--font-v3-chivo-mono), ui-monospace, monospace;
+  --font-display: var(--font-v3-archivo), system-ui, sans-serif;
 }

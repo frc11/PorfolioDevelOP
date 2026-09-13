@@ -43,11 +43,20 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { PESO_DE_LA_LLAVE_EN_BYTES, RECIBOS_DE_LA_LLAVE } from './s5-presupuesto-recibos-de-la-llave'
 import {
+  AIRE_MINIMO_UTIL_BYTES,
+  BUILDS_QUE_FALTAN_PARA_EL_REPARTO,
+  DESVIO_DEL_TITULAR_BYTES,
+  INVENTARIO_DEL_TITULAR,
+  PROPUESTA_DEL_TITULAR_KIB,
+  aireDe,
+} from './s5-presupuesto-recibos-del-titular'
+import {
   ARREGLO_DE_B7_KIB,
   HEREDADO_SIN_DECLARAR_KIB,
   MONTAJES_DECLARADOS_KIB,
   MONTAJE_DE_B11_KIB,
   MONTAJE_DE_B12_KIB,
+  MONTAJE_DEL_TITULAR_KIB,
   MONTAJE_DE_B4A_KIB,
   MONTAJE_DE_B6A_KIB,
   MONTAJE_DE_B8_KIB,
@@ -129,13 +138,33 @@ console.log(
     ` + ${MONTAJE_DE_B9_KIB} que B9 monta (la regla del rango en 13 sitios, 312 B contados dos veces)` +
     ` + ${MONTAJE_DE_B11_KIB} que B11 monta (el texto corrido de donde pasa el logo y dos tintas a plena: 25 B netos medidos A/B entre dos builds del mismo árbol, atribuidos byte a byte)` +
     ` + ${MONTAJE_DE_B12_KIB} que B12 monta (la GOTA de entrada a la noche, 1.304 B, y la BANDA local del pie, 176 B, contra −87 B que devuelve todo el resto del bloque: 1.393 B netos, apagando cada pieza y restaurándola byte a byte)` +
+    ` + ${MONTAJE_DEL_TITULAR_KIB} que monta el TITULAR rehecho (los DOS niveles nuevos de la escala, el quinto peso, las dos cadenas de clase y el atributo del CTA, contra lo que devuelven la bajada, el cepillo y la pieza quieta: 706 B de desvio en dos pasadas (614 + 91,6) medidos por este mismo invariante contra el techo que fijo el build de B12)` +
     ` + ${HEREDADO_SIN_DECLARAR_KIB} HEREDADOS y publicados con su dueño.`,
 )
 console.log(`    EL HEREDADO se RE-MIDIÓ en B10 sobre este árbol, el de las cuatro ramas mergeadas: 63.864 B escritos − 62,27 KiB de líneas con nombre = 99,5 B, declarados ${HEREDADO_SIN_DECLARAR_KIB}.`)
 console.log('    ⚠️ Creció 28,5 B contra los 71 B que B8 midió sobre un árbol SIN B9. El candidato —el producto que B9 tocó fuera de los 13 literales del rango— está escrito con su número en `s5-presupuesto-recibos-del-merge.ts`, sin apropiárselo.')
 console.log('    B11 fue el sprint que chocó contra los 2,9 B que B10 dejó: declaró su montaje con su A/B, su reparto byte a byte y su alternativa escrita (`s5-presupuesto-recibos-de-b11.ts`). El 60 no se movió.')
 console.log('    B12 es la línea más grande que este techo llevó, y las DOS piezas que la componen son nuevas y pedidas por su nombre: la gota («un efecto de gota o algo exótico y deluxe») y el velo local del pie. El resto del bloque DEVUELVE 87 B (`s5-presupuesto-recibos-de-b12.ts`).')
+console.log(`    EL TITULAR es la primera linea cuyo REPARTO POR PIEZA no esta medido, y se declara: el total son ${DESVIO_DEL_TITULAR_BYTES} B medidos, el inventario tiene ${INVENTARIO_DEL_TITULAR.length} piezas derivadas del codigo, y cerrarlo cuesta ${BUILDS_QUE_FALTAN_PARA_EL_REPARTO} builds. El precio del pendiente esta escrito en s5-presupuesto-recibos-del-titular.ts.`)
+console.log('    Y los dos `.woff2` nuevos (21.352 B) NO entran en esta cuenta: `conjuntoInicial()` mide los `<script src>` de la ruta, o sea SOLO JavaScript. Las dos fuentes de S0 tampoco estan. Se publican aparte, en el reporte y en `scripts-titular/manifiesto-fuentes.json`.')
 console.log('    Cada línea la subió el humano en su parada, con el número medido y su alternativa escrita en los CUATRO archivos de recibos: por eso cada una es revocable por separado.')
+/**
+ * 🟡 **UNA PROPUESTA, IMPRESA Y NO APLICADA.** El aire de una línea es la parte
+ * ÚTIL del redondeo al centésimo de arriba, y la del titular cayó en 0,4 B por
+ * dónde quedó el 614 respecto del límite del centésimo. Se publica acá —en la
+ * salida que alguien lee cuando corre `verificar`— en vez de esconderse en un
+ * archivo, porque una propuesta que nadie ve no es una propuesta. **La constante
+ * NO entra en `MONTAJES_DECLARADOS_KIB`: el techo de hoy sigue siendo el de
+ * 0,60.** El recibo está al lado del actual.
+ */
+console.log(
+  `    🟡 PROPUESTA SIN APLICAR, para la parada: subir ESTA línea de ${MONTAJE_DEL_TITULAR_KIB} a ${PROPUESTA_DEL_TITULAR_KIB} KiB. ` +
+    `Razón en una línea: con ${MONTAJE_DEL_TITULAR_KIB} el aire queda en ${aireDe(MONTAJE_DEL_TITULAR_KIB).toFixed(1)} B —más chico que el ruido de redondeo del propio build— y con ${PROPUESTA_DEL_TITULAR_KIB} queda en ${aireDe(PROPUESTA_DEL_TITULAR_KIB).toFixed(1)} B, ` +
+    `el mismo orden que B11 (8,6) y B12 (8,2). El techo de ${PRESUPUESTO_DEL_LANE_KIB} NO se mueve; cuesta ${(aireDe(PROPUESTA_DEL_TITULAR_KIB) - aireDe(MONTAJE_DEL_TITULAR_KIB)).toFixed(1)} B de techo que este sprint no usa.`,
+)
+console.log(
+  `    El umbral de aire útil declarado son ${AIRE_MINIMO_UTIL_BYTES} B y hoy la línea del titular deja ${aireDe(MONTAJE_DEL_TITULAR_KIB).toFixed(1)} B: es la PRIMERA que cae abajo. No se aplica nada sin aprobación.`,
+)
 /**
  * ⚠️ **EL PESO DE LA LLAVE SE RESTA APARTE, Y EN VOZ ALTA (B12 §4).**
  *
@@ -169,7 +198,27 @@ afirmar(
   `${((escritoSinLaLlave - MONTAJES_DECLARADOS_KIB * 1024) / 1024).toFixed(3)} KiB — es la cifra que la afirmación mira: lo escrito, menos el andamio de la llave, menos las líneas con nombre, y tiene que quedar abajo de ${PRESUPUESTO_DEL_LANE_KIB}`,
 )
 
-afirmarIgual(PRESUPUESTO_PROPIO_KIB.toFixed(2), '63.76', '⚠️ y el techo del lane es EL MISMO que B12 §1–§3 dejó: §4 no lo movió ni un centésimo')
+/**
+ * ⚠️ **EL TECHO PASÓ DE 63,76 A 64,36 Y LA DIFERENCIA ES UNA LÍNEA CON NOMBRE.**
+ *
+ * Este renglón afirmaba que §4 de B12 no había movido el techo ni un centésimo,
+ * y eso sigue siendo cierto: lo movió el titular rehecho, con
+ * `MONTAJE_DEL_TITULAR_KIB` (0,60), su recibo y su alternativa escrita. Lo que
+ * la afirmación protege es que el techo NO se mueva sin línea, así que se
+ * reescribe para que siga protegiendo eso: **el número de hoy es el 60 del
+ * lane más la suma de las líneas declaradas, y ni un centésimo más.**
+ *
+ * Puesto así es más fuerte que antes: la versión vieja clavaba una cifra y
+ * había que acordarse de moverla; ésta compara el techo contra el reparto que
+ * el propio archivo publica, así que un centésimo que aparezca sin línea que lo
+ * cubra la pone en rojo sola.
+ */
+afirmarIgual(
+  PRESUPUESTO_PROPIO_KIB.toFixed(2),
+  (PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB).toFixed(2),
+  `⚠️ el techo del lane es EXACTAMENTE el 60 del original más las líneas con nombre: ${PRESUPUESTO_PROPIO_KIB.toFixed(2)} KiB, sin un centésimo sin dueño`,
+)
+afirmarIgual(PRESUPUESTO_DEL_LANE_KIB, 60, '  y el 60 NO se movió: las nueve líneas se le SUMAN y se pueden revocar una por una')
 afirmarIgual(PESO_DE_LA_LLAVE_EN_BYTES, 4303, `  la línea de la llave la sostiene su recibo: ${RECIBOS_DE_LA_LLAVE.length} renglones medidos que suman ${PESO_DE_LA_LLAVE_EN_BYTES} B`)
 /** ⚠ La suma de los renglones es un MODELO del reparto —cada A/B se midió
  *  sobre un árbol intermedio distinto— y **la cifra que manda es la del árbol

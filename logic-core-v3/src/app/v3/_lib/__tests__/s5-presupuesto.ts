@@ -143,6 +143,52 @@ export const MONTAJE_DE_B11_KIB = 0.03
 export const MONTAJE_DE_B12_KIB = 1.36
 
 /**
+ * **+0,69 KiB** — lo que monta el hilo del titular del hero, en sus DOS pasadas.
+ * **706 B**, y es el que chocó contra el margen que B12 dejó y después contra el
+ * suyo propio: la primera pasada midió **614 B** (el noveno nivel, el quinto
+ * peso, las dos cadenas de clase, el atributo del CTA) y el ajuste de la línea 2
+ * agregó **91,6 B** más —el décimo nivel de la escala, con su fila de seis
+ * campos en la tabla que las ocho secciones importan— medidos por el mismo
+ * invariante sobre el mismo árbol.
+ *
+ * El reparto por pieza y el método —con lo que NO se pudo medir y por qué— está
+ * en `s5-presupuesto-recibos-del-titular.ts`. En una línea: son DOS niveles de
+ * escala viajando en la tabla de `tipografia.ts` que los componentes importan,
+ * el quinto peso, las dos cadenas de clase del titular y el atributo
+ * `data-registro` del CTA con su default; menos lo que devuelven la bajada
+ * —que bajó de tres renglones a uno— y la línea 1, que dejó de pasar por un
+ * canal al volverse la pieza quieta.
+ *
+ * ⚠️ **LO QUE ESTA LÍNEA COMPRA, Y POR QUÉ NO HABÍA UNA MÁS BARATA.** Las dos
+ * piezas que pagan son las dos que el pedido nombra por su nombre —«la línea 1
+ * en Archivo, peso alto y ancho condensado» y «la línea 2 en Chivo Light
+ * itálica»— y cada una necesita, para existir, un token que el sistema no tenía:
+ * un nivel de tamaño y un peso. Las dos alternativas medidas y descartadas:
+ *
+ *   · **Usar `titulo-xl` (56 px) para la línea 1** y no agregar el noveno nivel.
+ *     Devuelve el nivel entero, pero deja 30,6 px de la caja sin usar y rompe el
+ *     pedido, que dice «el más grande que entre en UNA línea». Es la alternativa
+ *     barata y NO es la pedida.
+ *   · **No traer la itálica de Chivo** y dejar que el navegador sintetice la
+ *     oblicua. Devuelve el quinto peso y los 10,91 KiB del binario, pero a 44 px
+ *     una oblicua falsa no es la itálica de Omnibus-Type (−8,05° declarados y
+ *     dibujos propios), que es lo que el pedido nombra.
+ *
+ * ⚠️ **Y el techo de 60 NO se movió**, como en B11 y B12: esto es una línea con
+ * nombre que se le resta. Al centésimo de arriba, con la convención de B8, B10,
+ * B11 y B12: 706 / 1024 = 0,6895 → **0,69**, que deja **0,6 B de aire**.
+ *
+ * ⚠️⚠️ **ES LA SEGUNDA VEZ QUE ESTA LÍNEA SE MUEVE, Y SE DICE.** La primera
+ * pasada la dejó en 0,60 con 0,4 B de aire; el ajuste de la línea 2 se la comió
+ * entera y 91,2 B más. Que el margen vuelva a quedar en menos de un byte NO es
+ * un descuido de método: es la convención del centésimo de arriba cayendo dos
+ * veces seguidas del lado malo. La propuesta de subirla a **0,70** —10,8 B de
+ * aire, el orden de B11 y B12— sigue SIN APLICAR y sigue esperando la parada,
+ * con su criterio declarado en `s5-presupuesto-recibos-del-titular.ts`.
+ */
+export const MONTAJE_DEL_TITULAR_KIB = 0.69
+
+/**
  * ⚠️ **+4,20 KiB — EL PESO DE LA LLAVE, Y NO ES UN MONTAJE DEL LANE.**
  *
  * Es lo que agrega el contenido inventado de B12 §4: las veinte casillas
@@ -214,5 +260,6 @@ export const MONTAJES_DECLARADOS_KIB =
   MONTAJE_DE_B8_KIB +
   MONTAJE_DE_B11_KIB +
   MONTAJE_DE_B12_KIB +
+  MONTAJE_DEL_TITULAR_KIB +
   HEREDADO_SIN_DECLARAR_KIB
 export const PRESUPUESTO_PROPIO_KIB = PRESUPUESTO_DEL_LANE_KIB + MONTAJES_DECLARADOS_KIB

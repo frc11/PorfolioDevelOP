@@ -6,13 +6,18 @@ import { CtaEnlace } from '../../_componentes/chrome/Cta'
 import { idDelTitularDeSeccion } from '../../_componentes/tipografia/Titular'
 import { Envoltorio } from '../../_componentes/layout/Envoltorio'
 import { Grilla } from '../../_componentes/layout/Grilla'
-import { Cuerpo, EtiquetaDeSeccion } from '../../_componentes/tipografia/Textos'
+import { Cuerpo } from '../../_componentes/tipografia/Textos'
 import { Bloque } from '../_contrato/coreografia'
-import { CanalDePieza, TextoPorLineas } from '../_contrato/canales'
-import { MarcaDeSeccion, Seccion } from '../_contrato/Seccion'
+import { CanalDePieza } from '../_contrato/canales'
+import { Seccion } from '../_contrato/Seccion'
 import type { PropsDeSeccion } from '../_contrato/forma'
 
 import { CONTENIDO } from './contenido'
+import {
+  GEOMETRIA,
+  TIPOGRAFIA_DEL_TITULAR,
+  TIPOGRAFIA_DE_LA_SEGUNDA_LINEA,
+} from './geometria'
 
 /**
  * 01 · HERO — una pantalla, la escena a la vista, y el aire del pie reservado.
@@ -57,9 +62,23 @@ import { CONTENIDO } from './contenido'
  *
  * ── La coreografía: un P1, un P2, y una cosa que no se mueve ───────────────
  *
- * P1 para el titular, con `TextoPorLineas`, que ya trae la rama quieta y el árbol
- * de encabezados. P2 para el bloque de bajada y CTA, cada uno resolviendo su ancla
- * contra su propia caja — no hay un `stagger` coordinándolos, y no hace falta.
+ * P1 para el titular y P2 para el bloque de bajada y CTA, cada uno resolviendo su
+ * ancla contra su propia caja — no hay un `stagger` coordinándolos, y no hace
+ * falta.
+ *
+ * ⚠️ **EL TITULAR DEJÓ DE SALIR POR `TextoPorLineas`, Y NO ES UNA PREFERENCIA.**
+ * Ese componente reparte UNA cadena en líneas MIDIENDO dónde cortan, con UNA
+ * tipografía heredada. Desde el rehecho las dos líneas del titular son dos
+ * registros distintos —Archivo condensado 700 en mayúsculas arriba, Chivo Light
+ * itálica abajo— y **dos caras no pueden salir de un divisor que reparte una
+ * sola cadena con una sola métrica**. Así que el corte pasa a ser declarado y
+ * cada línea es una pieza de P1 con su `indice`: el gesto del patrón es el
+ * mismo, cambia quién decide dónde termina cada línea.
+ *
+ * Lo que se gana además: el `h1` vuelve a ser un encabezado con contenido de
+ * frase y se cae el par `sr-only` + `aria-hidden` que `TextoPorLineas` necesita
+ * —su docblock lo declara como desviación— porque `LineasDeTexto` emite un
+ * `<div>`. `quienes-somos` sigue usándolo y la desviación sigue reportada ahí.
  *
  * ⚠️ **B2 · LOS DOS LLEGAN A DESTINO ANTES DE `scrollY` 0, Y ESO NO ES UN
  * DEFECTO ARREGLABLE ACÁ: ES LA ARITMÉTICA DE UNA PANTALLA.** El rango de P2
@@ -70,12 +89,14 @@ import { CONTENIDO } from './contenido'
  * hero cambiando en todo el documento. B2 pedía dos aterrizajes acá y se frenó:
  * la aritmética, las tres salidas y su costo están en `hero.invariant.tsx` §13.
  *
- * **El slogan queda quieto**, y es una decisión de composición: es la línea de
- * marca, la constante, y lo único que sostiene la pantalla mientras el preloader
- * todavía está saliendo. Animar las tres cosas dejaría el primer cuadro
- * completamente vacío, que es exactamente el defecto que una coreografía de
- * entrada existe para evitar — y es también lo que costaría el único aterrizaje
- * que el hero podría tener (§13, salida (a)): el h1 servido a media entrada.
+ * ⚠️ **EL SLOGAN SE FUE, Y CON ÉL LA ÚNICA PIEZA QUIETA DE LA PANTALLA.** Hasta
+ * este ajuste la línea de marca iba arriba del titular y NO se animaba, con un
+ * motivo escrito: era «lo único que sostiene la pantalla mientras el preloader
+ * todavía está saliendo», y animar las tres cosas dejaba el primer cuadro
+ * vacío. El pedido del humano la elimina como elemento propio, así que la
+ * columna arranca ahora en el titular y **las cuatro piezas de la columna se
+ * animan**. El primer cuadro del hero queda sin nada quieto: es una consecuencia
+ * de la resta, está medida en `hero.invariant.tsx` §6, y no se compensa acá.
  *
  * ⚠ **El logo que el preloader deja acá NO lo monta esta sección.** El traspaso
  * es chrome —vive entre el preloader y el layout— y componerlo es del sprint
@@ -89,120 +110,14 @@ import { CONTENIDO } from './contenido'
  * La grilla de cinco columnas colapsa a una —es la firma estructural medida del
  * breakpoint— así que el titular usa el ancho entero, que a 36 px es la medida
  * que corresponde.
- */
-
-/** LA GEOMETRÍA — todos los números de la sección, juntos y fuera del contenido.
- *  Están acá y no en `contenido.ts` porque son técnicos: los decide quien construye
- *  la sección y no cambian el día que llegue el copy definitivo. Mezclarlos con el
- *  contenido obligaría a exceptuarlos del escáner de cifras, y una excepción es por
- *  donde vuelve a entrar la primera cifra inventada. */
-export const GEOMETRIA = {
-  /**
-   * LA MEDIDA DEL TITULAR: 3 columnas de 5. [derivado]
-   *
-   * No es estética: es la condición de que P1 tenga algo que coreografiar. A 1920 la
-   * columna fluida de la grilla lateral mide ~1700 px y el titular a `titulo-xl`
-   * (56 px) ocupa ~1180, o sea que **a ancho completo entraría en una sola línea** y
-   * el patrón de línea por línea se quedaría sin gesto. Tres de cinco dan ~1000 px.
-   *
-   * La grilla de 5 es además la única del sistema que colapsa en 1025 —la firma
-   * estructural del breakpoint, 40 apariciones arriba y cero abajo—, o sea el
-   * mismo píxel en el que se apaga la coreografía. La medida y el gesto
-   * conmutan juntos y no queda una banda donde uno esté sin el otro.
-   */
-  columnasDeLaMedida: 3,
-  columnasTotales: 5,
-  /** La clase, escrita ENTERA y literal. Tailwind escanea el código fuente: una
-   *  armada como `escritorio:col-span-` más el número no la ve nadie y su regla no se
-   *  emite nunca —el atributo queda en el HTML, el navegador no encuentra nada, y la
-   *  página se ve casi bien sin un solo error—. El invariante afirma que este literal
-   *  y el número de arriba dicen lo mismo, que es lo que impide que se desincronicen. */
-  claseDeLaMedida: 'escritorio:col-span-3',
-  /**
-   * ── B1 · LA CAJA DEL TITULAR: 2 de 3 de la medida. [medido] ─────────────
-   *
-   * **Es forzado, no estético: con la medida entera el titular se mete adentro
-   * del logo.** Medido sobre el píxel real —captura del hero con el texto
-   * ocultado en runtime, tinta `rgb(17,17,17)` contra el fondo capturado—:
-   *
-   *     ancho   borde seguro    fin del titular    peor contraste   % bajo AA
-   *     1440    x = 683         x = 803  (+120)        1,00:1         12,66 %
-   *     1920    x = 957         x = 1077 (+120)        1,00:1          9,22 %
-   *     2560    x = 1275        x = 1365 (+90)         1,00:1         10,22 %
-   *
-   * **1,00:1 no es poco contraste: es tinta negra sobre el logo negro.** El
-   * «borde seguro» es la primera columna de píxeles en la que más del 10 % de
-   * la banda vertical del texto deja la tinta por debajo de AA (4,5:1); no es
-   * «el primer píxel oscuro», porque la escena tiene partículas sueltas por
-   * toda la pantalla y un punto de 3 px no vuelve ilegible un renglón. En los
-   * tres anchos ese borde coincide al píxel con el arranque de la masa oscura.
-   *
-   * Con 2 de 3 la caja queda en 478,4 · 670,4 · 732,8 px y termina en 666 ·
-   * 858 · 1209: **por dentro del borde seguro en los tres**, con 16,6 · 98,6 ·
-   * 66,2 px de margen. La sub-grilla de 3 reproduce EXACTO las columnas de la
-   * grilla de 5 —la medida son 3 columnas más 2 canaletas, así que dividirla en
-   * 3 con la misma canaleta devuelve la misma columna— o sea que esto no
-   * inventa una grilla nueva: usa la que ya está.
-   *
-   * ⚠ El NIVEL tipográfico no cambia y está verificado: `titulo-xl` es el más
-   * grande de los cuatro (`Titular.tsx`) y el hero ya lo usa en su familia
-   * fluida — 56 px a 1440 y 65,01 px a 1920 y 2560, medidos en el navegador.
-   * Lo que se acota es la caja, no la letra.
-   */
-  columnasDeLaCajaDelTitular: 3,
-  columnasDelTitular: 2,
-  claseDelTitular: 'tablet:col-span-2',
-  /**
-   * ── B1 · LA BAJADA: MEDIA MEDIA COLUMNA. [decidido por el humano] ────────
-   *
-   * *«La bajada se acota a media columna. Que termine antes de donde empieza el
-   * logo: así se arreglan el ancho de línea y la colisión de una.»*
-   *
-   * «La columna» es **la medida del hero** —3 de 5— y no la columna fluida de
-   * la grilla lateral, y la propia instrucción lo decide: media columna fluida
-   * daría 610 px a 1440 y terminaría en x 798, **afuera** del borde seguro de
-   * 683. Media medida da 354,8 · 498,8 · 545,6 px y termina en 543 · 687 · 1022:
-   * por dentro en los tres, con 140 · 270 · 253 px de margen.
-   *
-   * Lo que arregla, medido:
-   *
-   *     antes   1440  2 líneas de 70,5 caracteres · termina en x 902 (+219)
-   *             1920  1 línea  de 141  caracteres · termina en x 1169 (+212)
-   *             2560  1 línea  de 141  caracteres · termina en x 1457 (+182)
-   *
-   * Una línea de 141 caracteres es casi el doble del techo de lectura, y en
-   * `nk.studio` —medido con el mismo instrumento— **la caja de texto del hero
-   * mide 480 px y no crece con la ventana**: 0,25 del viewport a 1920 contra
-   * 0,53 que teníamos. La resta va en esa dirección sin copiarle un valor.
-   *
-   * Una sub-grilla de 2 es la mitad exacta de la medida, canaleta incluida.
-   */
-  columnasDeLaCajaDeLaBajada: 2,
-  /**
-   * Cuántas líneas promete el titular. Es inerte para P1 —`LineasDeTexto`
-   * recalcula la cantidad con las líneas que MIDE, que es el punto entero del
-   * divisor— y va declarado igual porque es lo que el bloque promete y lo que
-   * hace comparable esta sección con el rango medido del patrón (1 a 6).
-   */
-  lineasDelTitular: 2,
-  /**
-   * Un solo target en el bloque P2, que es lo que mide el patrón: con una pieza
-   * el escalonado queda inerte y la duración aplicada coincide con la
-   * declarada. Es el único patrón donde las dos coinciden.
-   */
-  piezasDelBloqueDeEntrada: 1,
-} as const
-
-/**
- * La tipografía definitiva del titular, como constante.
  *
- * `TextoPorLineas` la exige y no por prolijidad: el divisor mide dónde corta
- * cada línea, y una medición tomada sin la tipografía final agrupa las palabras
- * con la métrica equivocada. Exportada para que el invariante afirme el MISMO
- * valor que se renderiza y no una copia escrita a mano.
+ * ── Dónde están los números ───────────────────────────────────────────────
+ *
+ * En `geometria.ts`, junto con las dos constantes de tipografía del titular.
+ * Salieron de acá cuando este archivo cruzó las 300 líneas del repo al
+ * rehacerse el titular; el corte, y por qué las tipografías van con la
+ * geometría y no con el marcado, están escritos allá.
  */
-export const TIPOGRAFIA_DEL_TITULAR =
-  'font-titulo text-fluido-titulo-xl leading-titulo tracking-titulo'
 
 /**
  * La bajada y el CTA, escritos una sola vez.
@@ -221,7 +136,17 @@ function BajadaYCta(): React.JSX.Element {
           paradas de tabulación para un solo control. `Cta` (botón) y `CtaEnlace`
           (enlace) están separados justamente para que anidarlos haya que
           escribirlo a propósito. */}
-      <CtaEnlace href={CONTENIDO.cta.destino} rotulo={CONTENIDO.cta.rotulo} />
+      {/* `registro="rotulo"`: mayúsculas, `--tracking-micro` —el único
+          interletrado positivo del sistema— y la regla horizontal en tinta
+          puesta en reposo. El rótulo NO cambia. Las tres cosas salen de tokens
+          que ya existían y el porqué de que sea un atributo aparte y no una
+          tercera `VarianteCta` está en `Cta.tsx`: esa tabla son las dos formas
+          MEDIDAS y no se le agrega una decisión nuestra. */}
+      <CtaEnlace
+        href={CONTENIDO.cta.destino}
+        rotulo={CONTENIDO.cta.rotulo}
+        registro="rotulo"
+      />
     </>
   )
 }
@@ -239,16 +164,21 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
           className="flex min-h-svh w-full flex-col justify-center pt-20 pb-20"
         >
           <Grilla columnas="lateral">
-            <MarcaDeSeccion />
+            {/* ⚠️ LA COLUMNA LATERAL SE QUEDA VACÍA, Y NO ES UN `MarcaDeSeccion`
+                MENOS: es un `<div>` que RESERVA la celda. La grilla `lateral`
+                tiene dos celdas —140 px fijos y una fluida— y si el Hero pasara
+                un solo hijo, la sub-grilla de 5 caería en la celda de 140 y la
+                composición entera se correría. Es la misma forma que
+                `CabeceraDeSeccion` ya usa cuando no le dan contenido.
+
+                Lo que se fue es el CUADRADO de `--color-acento` que la marca
+                pintaba ahí: pedido del humano, «muy afuera de la columna». La
+                pieza no se toca —las otras tres secciones y el pie la siguen
+                montando— y la columna de 140 px tampoco, porque es la que
+                sostiene el cierre estructural de B11 (`Rotulo.tsx`). */}
+            <div />
             <Grilla columnas={GEOMETRIA.columnasTotales}>
               <div className={cn('flex flex-col gap-8', GEOMETRIA.claseDeLaMedida)}>
-                {/* ⚠️ B12 · EL SLOGAN SE QUEDA. Lo que se fue de las ocho es el
-                    RÓTULO DE SECCIÓN —número y nombre— y el Hero nunca tuvo
-                    ninguno de los dos como texto: este registro lo ocupa la
-                    LÍNEA DE MARCA, copy aprobado (`contenido.ts`, `[verdad]`).
-                    Sacarla sería borrar contenido que nadie pidió borrar. */}
-                <EtiquetaDeSeccion>{CONTENIDO.slogan}</EtiquetaDeSeccion>
-
                 {/* La caja del titular: 2 de 3 de la medida. El porqué —y los
                     tres bordes seguros medidos sobre el píxel— están en
                     `GEOMETRIA.columnasDeLaCajaDelTitular`. La clase del tramo va
@@ -257,15 +187,53 @@ export function Hero({ seccion }: PropsDeSeccion): React.JSX.Element {
                 <Grilla columnas={GEOMETRIA.columnasDeLaCajaDelTitular}>
                   <Bloque patron="P1" className={GEOMETRIA.claseDelTitular}>
                     {(progreso) => (
-                      <TextoPorLineas
-                        texto={CONTENIDO.titular}
-                        progreso={progreso}
-                        patron="P1"
-                        como="h1"
-                        className={TIPOGRAFIA_DEL_TITULAR}
-                        // El `h1` es el nombre accesible de la región del Hero (S11, defecto 10).
+                      // El `h1` es el nombre accesible de la región del Hero (S11,
+                      // defecto 10), y acá es además el que junta los dos registros
+                      // en UN nombre: «Tu negocio vendiendo las 24 hs». Las dos
+                      // piezas son `<span>` —contenido de frase, que es lo único
+                      // que un encabezado admite— así que no hace falta el par
+                      // `sr-only` + `aria-hidden` que `TextoPorLineas` necesita
+                      // para poder emitir un `<div>` adentro del `h1`.
+                      <h1
                         id={idDelTitularDeSeccion(seccion.id)}
-                      />
+                        data-titular="dos-registros"
+                        className="flex flex-col items-start"
+                      >
+                        {/* ⚠️ **LA LÍNEA 1 ES LA PIEZA QUIETA, Y NO PASA POR UN
+                            CANAL.** Sin coreografía de entrada, presente en el
+                            primer cuadro. Devuelve lo que el hero perdió al
+                            irse el cepillo, que era la única pieza sin entrada
+                            y estaba ahí por un motivo escrito: **sostiene la
+                            pantalla mientras el preloader todavía está
+                            saliendo**. Sin nada quieto, el primer cuadro del
+                            hero queda vacío, que es exactamente el defecto que
+                            una coreografía de entrada existe para evitar.
+
+                            No es «P1 con duración cero»: es OTRO árbol, sin
+                            primitiva montada, sin suscripción al progreso y sin
+                            una transformada por cuadro. La línea 2 se queda con
+                            P1 y es su única pieza. */}
+                        <span className={TIPOGRAFIA_DEL_TITULAR}>{CONTENIDO.titularLinea1}</span>
+                        {/* ⚠️ ESTE ESPACIO NO ES FORMATO: es el separador del
+                            NOMBRE ACCESIBLE. Las dos piezas son hermanas y sin
+                            nada en medio el h1 se anuncia «Tu negocio
+                            vendiendolas 24 hs» — el mismo defecto que
+                            `_lib/cta.ts` documenta para las dos copias del
+                            rollover de la referencia. Lo encontró
+                            `hero.invariant.tsx` §7 y no se ve: las dos piezas
+                            son ítems de un contenedor `flex-col`. */}
+                        {' '}
+                        <CanalDePieza
+                          progreso={progreso}
+                          patron="P1"
+                          cantidad={GEOMETRIA.piezasAnimadasDelTitular}
+                          indice={0}
+                          como="span"
+                          className={TIPOGRAFIA_DE_LA_SEGUNDA_LINEA}
+                        >
+                          {CONTENIDO.titularLinea2}
+                        </CanalDePieza>
+                      </h1>
                     )}
                   </Bloque>
                 </Grilla>

@@ -99,9 +99,28 @@ afirmar(
 const porAtributo = cajas.filter((c) => c.via === 'atributo')
 const porClase = cajas.filter((c) => c.via === 'clase')
 afirmar(porAtributo.length > 0 && porClase.length > 0, `  y por las DOS vías: ${porAtributo.length} por \`data-nivel\` y ${porClase.length} deducidas de la utilidad de tamaño`)
+/**
+ * ⚠️ **EL TITULAR DEL HERO YA NO ES UN `h1` CON CLASE DE TAMAÑO: SON DOS
+ * `span`.** El rehecho lo partió en dos registros declarados —la cara de
+ * display en mayúsculas arriba, la itálica liviana abajo— y cada línea lleva su
+ * propia clase de tamaño. El `h1` quedó como contenedor, sin clase de tamaño y
+ * sin `data-nivel`, así que la caja que este extractor tiene que ver son las
+ * DOS de adentro y no la de afuera.
+ *
+ * La propiedad que la afirmación protege no cambió: **el texto más grande de la
+ * sección más importante tiene que estar en la lista.** Lo que cambió es por
+ * cuántas cajas. Y la vía sigue siendo la deducida de la utilidad de tamaño,
+ * que es el arreglo que el frente del logo trajo.
+ */
+const CAJAS_DEL_HERO = cajasDeTexto(marcadoDeSeccion('hero', 'quieta'))
 afirmar(
-  cajasDeTexto(marcadoDeSeccion('hero', 'quieta')).some((c) => c.nodo.etiqueta === 'h1'),
-  '  y el titular del Hero —que sale por `TextoPorLineas`, sin `data-nivel`— YA se ve',
+  CAJAS_DEL_HERO.some((c) => c.nivel === 'display' && c.via === 'clase'),
+  '  y la línea 1 del titular del Hero —`display`, sin `data-nivel`— se ve por su utilidad de tamaño',
+  CAJAS_DEL_HERO.filter((c) => c.via === 'clase').map((c) => `${c.nodo.etiqueta}:${c.nivel}`).join(' · '),
+)
+afirmar(
+  CAJAS_DEL_HERO.some((c) => c.nivel === 'display-xl' && c.via === 'clase'),
+  '  y la línea 2 también, con su propio nivel: son DOS cajas y no una',
 )
 afirmarIgual(
   cajasDeTexto('<h1 data-texto-por-lineas="entero" class="text-fluido-titulo-xl leading-titulo">x</h1>').map((c) => `${c.nivel}:${c.via}`),

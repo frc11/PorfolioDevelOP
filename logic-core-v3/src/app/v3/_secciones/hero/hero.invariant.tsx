@@ -30,20 +30,29 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { afirmar, afirmarIgual, cerrar, controlPositivo, razonDeContraste, titulo } from '../../_lib/__tests__/afirmar'
+import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, arbitrariosSinVar, hexEncontrados } from '../../_lib/__tests__/s3-escaneo'
 import { rotuloAccesible } from '../../_lib/cta'
-import { ANCLAS, progresoEnRango, rangoDeScroll } from '../../_lib/motion/anclas'
-import { ALTO_PASTILLA_PX, DESCUENTO_NACIMIENTO_PX } from '../../_lib/navegacion'
 import { seccionPorId } from '../../_lib/secciones'
-import { COLORES_DEL_CANVAS_DE_PRUEBA, TINTA_HEX } from '../../_lib/superficies'
 import { cuentaDeMarcadores, hallazgosDeCifraConSimbolo, hallazgosDeDigito, hallazgosDeMarcadorDesconocido, marcadoresPedidos, numerosDe, textosDe } from '../_contrato/marcadores'
 import { entradasColgadas } from '../_contrato/pedido'
 import { pantallasDe, seccionDe } from '../_contrato/forma'
 import { marcar } from '../_invariantes/render'
 
 import { CONTENIDO, PATRONES_DE_LA_SECCION, PEDIDO } from './contenido'
-import { GEOMETRIA, Hero, TIPOGRAFIA_DEL_TITULAR } from './Hero'
+import {
+  ATRIBUTO_DEL_TITULAR,
+  GEOMETRIA,
+  TIPOGRAFIA_DEL_TITULAR,
+  TIPOGRAFIA_DE_LA_SEGUNDA_LINEA,
+} from './geometria'
+import { Hero } from './Hero'
+import {
+  afirmarElAjusteDeLaLinea1,
+  afirmarElContrasteSobreElCanvas,
+  afirmarElFrenoDeB2,
+  afirmarElPieDeLaPantalla,
+} from './soporte'
 
 const seccion = seccionDe('hero')
 const seccionMontada = <Hero seccion={seccion} />
@@ -63,18 +72,12 @@ const conPreferencia = marcar(seccionMontada, { anima: false, preferencia: 'alwa
 const veces = (texto: string, aguja: string): number => texto.split(aguja).length - 1
 const TEXTOS = textosDe(CONTENIDO)
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
-const FUENTE = readFileSync(path.join(AQUI, 'Hero.tsx'), 'utf8')
-/** El tema, leído: los tokens no se transcriben. Si `--spacing-20` cambia de valor,
- *  la cuenta del aire del pie se mueve con él o falla. */
-const TEMA = readFileSync(path.join(AQUI, '../../../../..', 'src/app/theme-develop.css'), 'utf8')
-
-/** Un escalón de espaciado, en px. La raíz de 16 la declara el propio tema al lado
- *  del token, en el comentario que traduce cada rem a su píxel. */
-function pxDeEspaciado(escalon: string): number {
-  const m = new RegExp(`--spacing-${escalon}:\\s*([\\d.]+)rem`).exec(TEMA)
-  if (m === null) throw new Error(`--spacing-${escalon} no está declarado en el tema`)
-  return Number.parseFloat(m[1]) * 16
-}
+/** La fuente de la sección: los DOS archivos. `geometria.ts` salió de `Hero.tsx`
+ *  al partirlo, y §11 escanea la FUENTE — mirando uno solo, la mitad que se
+ *  mudó dejaría de estar cubierta sin que nada se ponga rojo. */
+const FUENTE = ['Hero.tsx', 'geometria.ts']
+  .map((archivo) => readFileSync(path.join(AQUI, archivo), 'utf8'))
+  .join(' ')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · El alto, la superficie y el pinneo salen de la tabla, no de acá')
@@ -116,11 +119,18 @@ controlPositivo('el extractor ve un contenido que SÍ tiene marcadores', { a: 's
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · El copy dictado va LITERAL a la pantalla, en las dos ramas')
 
-for (const [nombre, literal] of [['titular', CONTENIDO.titular], ['slogan', CONTENIDO.slogan]] as const) {
+/** ⚠ Los literales se buscan EN MINÚSCULAS y eso ES la comprobación: la
+ *  mayusculación del titular la pone `uppercase` —el CSS— y el texto del
+ *  documento sigue siendo prosa. Subirla al dato pondría esto en rojo. */
+const DICTADOS = [
+  ['titular · línea 1', CONTENIDO.titularLinea1],
+  ['titular · línea 2', CONTENIDO.titularLinea2],
+] as const
+for (const [nombre, literal] of DICTADOS) {
   afirmar(quieto.includes(literal), `el ${nombre} aparece literal en la rama quieta`, literal)
   afirmar(conMotion.includes(literal), `  y también con la coreografía puesta`)
 }
-controlPositivo('el chequeo de los literales ve un marcado sin ellos', '<div>una agencia</div>', (h: string) => [CONTENIDO.titular, CONTENIDO.slogan].every((l) => h.includes(l)))
+controlPositivo('el chequeo de los literales ve un marcado sin ellos', '<div>una agencia</div>', (h: string) => DICTADOS.every(([, l]) => h.includes(l)))
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · Abajo de 1025 el contenido está COMPLETO y no se mueve')
@@ -137,10 +147,48 @@ controlPositivo('el chequeo de "no hay transformada" ve un style con transform',
 titulo('6 · CONTROL POSITIVO — con la coreografía puesta, SÍ se anima')
 
 afirmar(conMotion.includes('transform:'), 'con coreografía el bloque P2 SÍ escribe transformada')
-afirmarIgual(veces(conMotion, 'will-change-transform'), GEOMETRIA.piezasDelBloqueDeEntrada, 'y es exactamente la pieza declarada del bloque P2: la bajada con su CTA')
-afirmar(quieto.includes('data-texto-por-lineas="entero"') && conMotion.includes('data-texto-por-lineas="partido"'), 'el titular P1 sale entero en la rama quieta y partido con coreografía')
-afirmarIgual(veces(conPreferencia, 'data-texto-por-lineas="entero"'), 1, '  y con la preferencia el titular sale entero: es el árbol quieto, no una versión apagada')
-afirmar(quieto.includes(TIPOGRAFIA_DEL_TITULAR), 'el titular lleva la tipografía de display con la que P1 mide las líneas', TIPOGRAFIA_DEL_TITULAR)
+/** LA PIEZA QUIETA: el titular tiene DOS líneas y sólo UNA entra. Los dos
+ *  números van juntos y ninguno se deriva del otro. */
+afirmarIgual(
+  veces(conMotion, 'will-change-transform'),
+  GEOMETRIA.piezasAnimadasDelTitular + GEOMETRIA.piezasDelBloqueDeEntrada,
+  `y son exactamente las ${GEOMETRIA.piezasAnimadasDelTitular + GEOMETRIA.piezasDelBloqueDeEntrada} piezas declaradas: la línea 2 (P1) y el bloque de bajada y CTA (P2) — la línea 1 NO promueve capa porque es la pieza quieta`,
+)
+afirmar(GEOMETRIA.piezasAnimadasDelTitular < GEOMETRIA.lineasDelTitular, `el titular tiene ${GEOMETRIA.lineasDelTitular} líneas y entran ${GEOMETRIA.piezasAnimadasDelTitular}: la línea 1 está en el primer cuadro sin coreografía`)
+afirmar(quieto.includes(`<span class="${TIPOGRAFIA_DEL_TITULAR}"`), '  y sale como un `<span>` pelado, sin canal: es OTRO árbol, no P1 con duración cero')
+/**
+ * ⚠️ **EL TITULAR YA NO SE COMPRUEBA POR `data-texto-por-lineas`.** Ese atributo
+ * lo emitía `TextoPorLineas`, y el rehecho lo saca del hero: un divisor que
+ * reparte UNA cadena con UNA métrica no puede producir dos caras. Lo que se
+ * afirma es la PROPIEDAD y no el atributo viejo — que las dos piezas del
+ * escalonado estén, con su tipografía, en las tres ramas.
+ */
+const HANDLE = `${ATRIBUTO_DEL_TITULAR}="dos-registros"`
+for (const [rama, html] of [['quieta', quieto], ['animada', conMotion], ['con la preferencia', conPreferencia]] as const) afirmarIgual(veces(html, HANDLE), 1, `el titular es UNA pieza de dos registros en la rama ${rama}`)
+afirmar(quieto.includes(TIPOGRAFIA_DEL_TITULAR), 'la línea 1 lleva la tipografía de display: la cara condensada, en mayúsculas', TIPOGRAFIA_DEL_TITULAR)
+afirmar(quieto.includes(TIPOGRAFIA_DE_LA_SEGUNDA_LINEA), '  y la línea 2 la itálica liviana, en el nivel MÁS GRANDE de la escala', TIPOGRAFIA_DE_LA_SEGUNDA_LINEA)
+afirmar(conMotion.includes(TIPOGRAFIA_DEL_TITULAR) && conMotion.includes(TIPOGRAFIA_DE_LA_SEGUNDA_LINEA), '  y las dos sobreviven a la coreografía: P1 envuelve, no reemplaza la tipografía')
+/** Las dos piezas son `<span>` y NO `<div>`: el modelo de contenido de un `h1`
+ *  es contenido de FRASE. Es la desviación que `TextoPorLineas` declara y
+ *  compensa con `sr-only` + `aria-hidden`, y acá no existe. */
+const adentroDelH1 = (html: string): string => {
+  const desde = html.indexOf('<h1')
+  const hasta = html.indexOf('</h1>', desde)
+  return desde < 0 || hasta < 0 ? '' : html.slice(desde, hasta)
+}
+afirmar(adentroDelH1(quieto).length > 0, 'el h1 de la rama quieta se pudo aislar para mirarlo por dentro')
+afirmarIgual(veces(adentroDelH1(quieto), '<div'), 0, '  y no tiene un solo `<div>` adentro: contenido de frase, que es lo único que un encabezado admite')
+afirmarIgual(veces(adentroDelH1(conMotion), '<div'), 0, '  ni con la coreografía puesta: P1 envuelve en `<span>` porque la sección lo pide así')
+afirmarIgual(veces(adentroDelH1(quieto), '<span'), GEOMETRIA.lineasDelTitular, `  y son exactamente ${GEOMETRIA.lineasDelTitular} spans: las dos líneas declaradas`)
+controlPositivo('el aislador del h1 ve un div adentro cuando lo hay', '<h1><div>x</div></h1>', (h: string) => veces(adentroDelH1(h), '<div') === 0)
+controlPositivo('el contador del handle del titular ve un marcado sin él', '<h1>x</h1>', (h: string) => veces(h, HANDLE) === 1)
+/** El uppercase es la condición de que se vea la letra que se eligió: los dos
+ *  `.woff2` son subsets de MAYÚSCULAS y sin él las minúsculas caen al fallback. */
+afirmarIgual(
+  [TIPOGRAFIA_DEL_TITULAR, TIPOGRAFIA_DE_LA_SEGUNDA_LINEA].filter((t) => !t.split(/\s+/).includes('uppercase')),
+  [],
+  'las dos tipografías del titular llevan `uppercase`: sus binarios no tienen minúsculas',
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('7 · Un h1, y el titular se anuncia UNA sola vez')
@@ -148,15 +196,34 @@ titulo('7 · Un h1, y el titular se anuncia UNA sola vez')
 afirmarIgual(veces(quieto, '<h1'), 1, 'exactamente UN h1 en la sección — el h1 del sitio es de acá')
 afirmarIgual(veces(conMotion, '<h1'), 1, '  y sigue siendo uno con la coreografía partiendo el texto')
 afirmarIgual(veces(quieto, '<h2'), 0, 'y ningún h2: los h2 son de las otras tres')
-afirmar(/<h1[^>]*class="sr-only"/.test(conMotion), 'en la rama partida el h1 es el nodo accesible')
-afirmar(conMotion.includes('<div aria-hidden="true">'), '  y el bloque visual queda fuera del árbol de accesibilidad')
+
+/**
+ * ⚠️ **DESAPARECIÓ EL PAR `sr-only` + `aria-hidden`, Y ES UNA MEJORA MEDIBLE.**
+ * Hasta el rehecho, la rama partida servía el titular DOS veces —el texto entero
+ * en un `sr-only` y el bloque visual en un `<div aria-hidden>`— porque
+ * `LineasDeTexto` emite un `<div>` y `<h1><div>` es marcado inválido. Con las dos
+ * líneas declaradas en `<span>`, el `h1` es el nodo accesible en las DOS ramas y
+ * el texto viaja UNA sola vez. Las dos afirmaciones que exigían el par se
+ * reemplazan por las que afirman que ya no hace falta.
+ */
+afirmarIgual(veces(conMotion, 'sr-only'), 0, 'la rama animada no necesita una copia `sr-only` del titular: el h1 ES el nodo accesible')
+afirmarIgual(veces(adentroDelH1(conMotion), 'aria-hidden'), 0, '  y nada del titular queda fuera del árbol de accesibilidad')
 
 /** El nombre accesible de la sección entera: `rotuloAccesible` borra los subárboles
  *  `aria-hidden` y las etiquetas. Un titular duplicado acá se leería dos veces. */
 const anuncia = (html: string, texto: string): number => veces(rotuloAccesible(html), texto)
-afirmarIgual(anuncia(quieto, CONTENIDO.titular), 1, 'el titular se anuncia una vez en la rama quieta')
-afirmarIgual(anuncia(conMotion, CONTENIDO.titular), 1, '  y una sola vez con el texto partido en líneas')
-controlPositivo('la cuenta del anuncio ve un titular duplicado', `<h1>${CONTENIDO.titular}</h1><p>${CONTENIDO.titular}</p>`, (h: string) => anuncia(h, CONTENIDO.titular) === 1)
+for (const [nombre, literal] of DICTADOS.slice(0, 2)) {
+  afirmarIgual(anuncia(quieto, literal), 1, `el ${nombre} se anuncia una vez en la rama quieta`)
+  afirmarIgual(anuncia(conMotion, literal), 1, `  y una sola vez con la coreografía puesta`)
+}
+/** Y el nombre accesible del h1 es LAS DOS LÍNEAS, con un espacio en medio: es el
+ *  h1 del sitio y tiene que leerse como una frase, no como dos fragmentos. */
+afirmarIgual(
+  rotuloAccesible(adentroDelH1(quieto) + '</h1>').trim(),
+  `${CONTENIDO.titularLinea1} ${CONTENIDO.titularLinea2}`,
+  'el nombre accesible del h1 son las dos líneas separadas por UN espacio',
+)
+controlPositivo('la cuenta del anuncio ve un titular duplicado', `<h1>${CONTENIDO.titularLinea1}</h1><p>${CONTENIDO.titularLinea1}</p>`, (h: string) => anuncia(h, CONTENIDO.titularLinea1) === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('8 · El CTA: un enlace nativo, a un ancla que existe, sin anidar')
@@ -173,37 +240,14 @@ controlPositivo('el detector ve un button adentro de un enlace', '<a href="#x"><
 controlPositivo('y la cuenta del rótulo ve las dos copias sin ocultar', `<span>${CONTENIDO.cta.rotulo}</span><span>${CONTENIDO.cta.rotulo}</span>`, (h: string) => anuncia(h, CONTENIDO.cta.rotulo) === 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('9 · El pie de la pantalla es de la pastilla, y el aire alcanza')
+// ⚠️ §9, §10, §12b Y §13 VIVEN EN `soporte.ts` — las CUENTAS del frente, contra
+// las que miran el MARCADO, que quedan acá. Salieron cuando este archivo cruzó
+// las 300 líneas al rehacerse el titular, y se llaman EN SU LUGAR para que la
+// salida siga leyéndose §1 → §13 de arriba a abajo.
+afirmarElPieDeLaPantalla(quieto)
+afirmarElContrasteSobreElCanvas()
 
-/** El escalón del padding inferior. La clase que se busca en el marcado y el token
- *  que se mide salen de acá: son UNA fuente, no dos que se desincronizan. */
-const ESCALON_DEL_PIE = '20'
-const AIRE_DEL_PIE_PX = pxDeEspaciado(ESCALON_DEL_PIE)
 
-afirmar(quieto.includes(`pb-${ESCALON_DEL_PIE}`), `el contenedor de pantalla lleva pb-${ESCALON_DEL_PIE}`)
-afirmar(DESCUENTO_NACIMIENTO_PX > 0, `la pastilla ocupa ${DESCUENTO_NACIMIENTO_PX} px del pie`, `alto ${ALTO_PASTILLA_PX} px más su margen`)
-afirmar(AIRE_DEL_PIE_PX >= DESCUENTO_NACIMIENTO_PX, 'y el aire declarado los cubre', `${AIRE_DEL_PIE_PX} px de aire contra ${DESCUENTO_NACIMIENTO_PX} px de pastilla`)
-controlPositivo('la cuenta ve un escalón que NO alcanza', '4', (e: string) => pxDeEspaciado(e) >= DESCUENTO_NACIMIENTO_PX)
-controlPositivo('y el chequeo de la clase ve un contenedor sin ella', '<div class="flex min-h-svh"></div>', (h: string) => h.includes(`pb-${ESCALON_DEL_PIE}`))
-
-// ═══════════════════════════════════════════════════════════════════════════
-titulo('10 · El contraste de la tinta sobre el canvas — producido, no citado')
-
-/** ⚠ ESTA CIFRA VALE PARA EL MARCADOR DE POSICIÓN DEL CANVAS, no para la escena.
- *  `COLORES_DEL_CANVAS_DE_PRUEBA` son dos tokens planos; la sala 3D es un gradiente
- *  con luces y NO hereda este número. Cuando la escena exista hay que volver a medir
- *  sobre la pose real, y si ahí no diera AA la salida no es una capa de fondo acá. */
-const AA_TEXTO = 4.5
-const razones = COLORES_DEL_CANVAS_DE_PRUEBA.map((c) => ({ token: c.token, razon: razonDeContraste(TINTA_HEX, c.hex) }))
-afirmar(razones.length > 0, `la cuenta mira ${razones.length} colores del canvas de prueba`)
-for (const { token, razon } of razones) {
-  afirmar(razon >= AA_TEXTO, `la tinta sobre ${token} da ${razon.toFixed(2)}:1`, `mínimo AA ${AA_TEXTO}:1`)
-}
-const peor = Math.min(...razones.map((r) => r.razon))
-afirmar(peor >= AA_TEXTO, `el PEOR caso es ${peor.toFixed(2)}:1 y pasa AA para texto normal`)
-controlPositivo('la calculadora ve dos colores que no se separan', ['#E8E8E6', '#DBDBD9'] as const, ([a, b]) => razonDeContraste(a, b) >= AA_TEXTO)
-
-// ═══════════════════════════════════════════════════════════════════════════
 titulo('11 · Higiene del lane: color, foco, estado y puertas')
 
 afirmarIgual(veces(quieto, 'text-acento'), 0, 'cero `text-acento`: sobre fondo oscuro no llega a 3:1')
@@ -250,50 +294,7 @@ controlPositivo('el chequeo de entradas colgadas ve una ruta inventada', [{ ruta
 afirmarIgual([...new Set(PEDIDO.map((e) => e.clase))], ['prosa'], 'y las dos son `prosa`: el relleno que NO se ve como agujero')
 afirmarIgual(PATRONES_DE_LA_SECCION, ['P1', 'P2'], 'la sección declara consumir P1 y P2, y nada más')
 
-// ═════════════════════════════════════════════════════════════════════════
-titulo('13 · B2 · POR QUÉ EL HERO NO PUEDE APORTAR UN ATERRIZAJE — el freno, con su aritmética')
-
-/**
- * ⚠ **FRENO DECLARADO.** B2 pedía dos acontecimientos acá —«la bajada y el CTA
- * entran DESPUÉS del titular»— y **no se hizo**. Ésta es la razón, y no es una
- * opinión: es el ancla de cada patrón evaluada sobre la caja medida del bloque. Un
- * acontecimiento es un ATERRIZAJE: el píxel donde un bloque deja de cambiar, o sea
- * el `fin` de su rango. Con `fondo = topDoc + alto` y ventana `V`, P2 (`bottom
- * bottom`) cierra en `fondo − V` y P1 (`bottom bottom-=240px`) en `fondo − V + 240`.
- * **El hero mide UNA pantalla** —`s8-chrome` §2 lo clava y §1 lo afirma— así que el
- * fondo de cualquier bloque suyo es ≤ V: **un P2 del hero nunca aterriza adentro de
- * la pantalla**, y un P1 sólo si su fondo pasa de `V − 240` = 840 px, o sea con el
- * texto en los últimos 240 px del cuadro, que son los de la pastilla (§9). Las cajas
- * de abajo están MEDIDAS a 1920×1080, pestaña visible, con `offsetTop`/`offsetHeight`
- * —que la transformada no contamina—, y el censo de `B2-DELTAS.md` §0 (de `y` 0 a
- * 4800, paso 120) lo confirma del otro lado: **cero elementos del hero cambian de
- * estilo en todo el recorrido**; el «1 acontecimiento» que la Fase 0 le atribuía es
- * el grupo de `y` 600, de Quiénes somos.
- *
- * Las tres salidas, para que quien lo reabra no las vuelva a recorrer:
- * (a) `anclaje="seccion"` sube el P1 a `fin` 240 y deja el h1 a 0,8065 de progreso
- * en el PRIMER CUADRO —servido a media entrada, que es lo que la composición del
- * hero decidió no hacer—, y el P2 sigue cerrando en 0; (b) un patrón con fracción
- * de viewport chica en su `fin` sí aterriza adentro (P3 → `fondo − 540`; P4 y P6 →
- * `fondo`), pero `contenido.ts` declara `PATRONES_DE_LA_SECCION = ['P1','P2']` y
- * ese archivo está fuera de este frente; (c) darle dos pantallas al hero, que §1 y
- * `s8-chrome` §2 prohíben.
- */
-const VENTANA_MEDIDA = 1080
-const CAJAS_DEL_HERO = [
-  { nombre: 'titular (P1)', par: ANCLAS.P1, topDoc: 403, alto: 142 },
-  { nombre: 'bajada + CTA (P2)', par: ANCLAS.P2, topDoc: 577, alto: 143 },
-] as const
-for (const c of CAJAS_DEL_HERO) {
-  const fin = rangoDeScroll(c.par, { topDoc: c.topDoc, alto: c.alto }, VENTANA_MEDIDA).fin
-  afirmar(fin <= 0, `el ${c.nombre} cierra su rango en y ${fin}: ARRIBA del documento, así que no hay aterrizaje que medir`, `fondo ${c.topDoc + c.alto} px en una ventana de ${VENTANA_MEDIDA}`)
-}
-const SECCION_ENTERA = { topDoc: 0, alto: VENTANA_MEDIDA }
-afirmarIgual(rangoDeScroll(ANCLAS.P2, SECCION_ENTERA, VENTANA_MEDIDA).fin, 0, 'y ni con la SECCIÓN entera como caja un P2 pasa de cero: es el techo aritmético de una pantalla')
-afirmarIgual(rangoDeScroll(ANCLAS.P1, SECCION_ENTERA, VENTANA_MEDIDA).fin, 240, '  el P1 sí llegaría a 240 con esa caja — el único aterrizaje posible, y uno solo')
-const PROGRESO_AL_CARGAR = progresoEnRango(0, rangoDeScroll(ANCLAS.P1, SECCION_ENTERA, VENTANA_MEDIDA))
-afirmar(PROGRESO_AL_CARGAR < 1, `  y lo que cuesta: el titular llegaría al primer cuadro con ${PROGRESO_AL_CARGAR.toFixed(4)} de progreso`, 'servido a media entrada — la salida (a) del docblock')
-controlPositivo('la cuenta ve un bloque que SÍ aterriza adentro: uno de dos pantallas', { topDoc: 0, alto: 2 * VENTANA_MEDIDA }, (c) => rangoDeScroll(ANCLAS.P2, c, VENTANA_MEDIDA).fin <= 0)
-controlPositivo('  y ve un patrón cuyo `fin` no descuenta viewport: P4 aterriza en el fondo del bloque', ANCLAS.P4, (par) => rangoDeScroll(par, CAJAS_DEL_HERO[1], VENTANA_MEDIDA).fin <= 0)
+afirmarElAjusteDeLaLinea1()
+afirmarElFrenoDeB2()
 
 cerrar('hero.invariant')

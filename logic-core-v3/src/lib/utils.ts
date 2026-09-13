@@ -73,14 +73,23 @@ const V3_FONT_SIZE_CLASSES = [
   'text-fluido-titulo-m',
   'text-fluido-titulo-l',
   'text-fluido-titulo-xl',
+  // El noveno nivel, del titular del hero rehecho. Las DOS entran: sin la
+  // fija, `cn('text-display', 'text-tinta')` se come el tamaño.
+  'text-display',
+  'text-fluido-display',
+  // El décimo nivel, la línea 2 del titular. Mismo motivo que el noveno.
+  'text-display-xl',
+  'text-fluido-display-xl',
 ] as const
 
 /**
- * Los tres pesos de `/v3` cuyo nombre no está en la lista de `tailwind-merge`.
- * `font-normal` NO entra: ése sí lo reconoce, y agregarlo sería declarar dos
- * veces lo mismo.
+ * Los CUATRO pesos de `/v3` cuyo nombre no está en la lista de
+ * `tailwind-merge`. `font-normal` NO entra: ése sí lo reconoce, y agregarlo
+ * sería declarar dos veces lo mismo. `font-liviano` (300) entró con la línea 2
+ * del titular del hero: sin él, `cn('font-liviano', 'font-titulo')` lo
+ * clasifica como FAMILIA y la itálica sale en el peso equivocado.
  */
-const V3_FONT_WEIGHT_CLASSES = ['font-medio', 'font-semi', 'font-fuerte'] as const
+const V3_FONT_WEIGHT_CLASSES = ['font-liviano', 'font-medio', 'font-semi', 'font-fuerte'] as const
 
 /** Para el instrumento: las listas, sin que tenga que releer este archivo. */
 export const CLASES_DE_TAMANO_DECLARADAS: readonly string[] = [

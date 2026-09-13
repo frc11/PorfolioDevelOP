@@ -61,12 +61,12 @@ const tokens = tokensDelTema()
 const fuenteDelSprint = ARCHIVOS_DE_CODIGO.map((a) => leer(a)).join('\n')
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('1 · Los ocho niveles, y los seis que además son fluidos')
+titulo('1 · Los DIEZ niveles, y los OCHO que además son fluidos')
 
-afirmarIgual(NIVELES.length, 8, 'la tabla declara ocho niveles')
+afirmarIgual(NIVELES.length, 10, 'la tabla declara DIEZ niveles — los ocho medidos de S0 y los dos DERIVADOS del titular del hero: `display` (58) y `display-xl` (104)')
 
 const tokensQueFaltan = NIVELES.filter((n) => !tokens.has(NIVELES_TIPOGRAFICOS[n].token))
-afirmarIgual(tokensQueFaltan, [], 'los ocho tokens existen en theme-develop.css')
+afirmarIgual(tokensQueFaltan, [], 'los diez tokens existen en theme-develop.css')
 
 const valoresDistintos = NIVELES.filter(
   (n) => tokens.get(NIVELES_TIPOGRAFICOS[n].token) !== NIVELES_TIPOGRAFICOS[n].valorFijo,
@@ -75,11 +75,11 @@ afirmarIgual(valoresDistintos, [], 'y valen lo que la tabla del sprint dice')
 
 const conFluido = NIVELES.filter((n) => NIVELES_TIPOGRAFICOS[n].claseFluida !== null)
 const sinFluido = NIVELES.filter((n) => NIVELES_TIPOGRAFICOS[n].claseFluida === null)
-afirmarIgual(conFluido.length, 6, 'seis niveles tienen contraparte fluida')
+afirmarIgual(conFluido.length, 8, 'OCHO niveles tienen contraparte fluida')
 afirmarIgual(sinFluido, ['cuerpo', 'base'], 'y los dos que no son los medidos INVARIANTES')
 
 const fluidosQueFaltan = conFluido.filter((n) => !tokens.has(`--text-fluido-${n}`))
-afirmarIgual(fluidosQueFaltan, [], 'los seis --text-fluido-* existen en el tema')
+afirmarIgual(fluidosQueFaltan, [], 'los ocho --text-fluido-* existen en el tema')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Las TRES anclas de cada clamp(): el piso, el token fijo y el tope')

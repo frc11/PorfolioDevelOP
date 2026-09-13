@@ -1,5 +1,5 @@
 /**
- * LOS OCHO NIVELES TIPOGRÁFICOS — la tabla, sin React.
+ * LOS DIEZ NIVELES TIPOGRÁFICOS — la tabla, sin React.
  *
  * Vive aparte de los componentes por la misma razón que `compuerta.ts`: los
  * instrumentos la importan y la afirman sin montar nada. Un nivel que sólo
@@ -11,14 +11,14 @@
  * como `text-${nivel}` no la ve nadie y la regla no se emite: el atributo
  * queda en el HTML, el navegador no encuentra nada, y la página se ve "casi
  * bien" sin un solo error en consola. Por eso cada nivel escribe sus clases
- * completas y literales, aunque se repita el prefijo ocho veces.
+ * completas y literales, aunque se repita el prefijo diez veces.
  *
- * ── Seis fluidos y dos que no ──────────────────────────────────────────────
+ * ── Ocho fluidos y dos que no ──────────────────────────────────────────────
  *
  * `cuerpo` (15px) y `base` (1rem) **no tienen contraparte fluida**, y no es un
  * olvido: se midieron INVARIANTES entre 768 y 1920 (`LAYOUT.md`, hueco 7). El
  * sistema tiene tres regímenes conviviendo —53,9% fluido, 21,8% invariante,
- * 10,1% escalonado— y emitir `clamp()` para los ocho sería tan falso como no
+ * 10,1% escalonado— y emitir `clamp()` para todos sería tan falso como no
  * emitir ninguno.
  *
  * ── ✅ B7 · LA JERARQUÍA A 375: ACEPTADA. Es una DECISIÓN, no un límite ────
@@ -63,13 +63,29 @@
  *
  * ── El pendiente óptico que la ruta /v3/tipografia destraba ────────────────
  *
- * Nadie miró los ocho niveles renderizados, ni en la familia original ni en
+ * Nadie miró los diez niveles renderizados, ni en la familia original ni en
  * Chivo. Y hay una razón concreta para que urja: la cap height de Chivo es más
  * chica. Los números están en `METRICAS_DE_CHIVO`, y no están transcritos de
  * un reporte: `s3-tipografia.invariant.ts` los lee del `.woff2` que /v3 sirve.
  */
 
-/** Los ocho nombres. No hay un noveno, y el instrumento lo afirma. */
+/**
+ * Los DIEZ nombres, en orden creciente. El instrumento afirma la cardinalidad
+ * y, en los cuatro anchos de la banda, que la escala es estrictamente creciente
+ * en ESTE orden.
+ *
+ * ⚠️ **`display` ES EL NOVENO, y entró con el titular del hero rehecho.** Los
+ * ocho de S0 son la escala MEDIDA de una sola familia; `display` es un nivel
+ * [derivado] de OTRA —Archivo, la cara condensada— y su valor sale de una
+ * cuenta, no de un barrido: el mayor entero que entra en una línea en la caja
+ * medida del titular. La cuenta entera está en `theme-develop.css`, al lado del
+ * token, y `hero.invariant.tsx` la vuelve a correr.
+ *
+ * Está último porque es el más grande en los cuatro anchos, y eso NO es una
+ * coincidencia que haya que vigilar a mano: `s3-tipografia` §6 afirma que los
+ * diez crecen estrictamente en el orden de esta lista, así que si algún día
+ * `display` cayera abajo de `titulo-xl` la comprobación se pone roja.
+ */
 export const NIVELES = [
   'micro',
   'caption',
@@ -79,6 +95,8 @@ export const NIVELES = [
   'titulo-m',
   'titulo-l',
   'titulo-xl',
+  'display',
+  'display-xl',
 ] as const
 
 export type Nivel = (typeof NIVELES)[number]
@@ -87,8 +105,10 @@ export type Nivel = (typeof NIVELES)[number]
 export const INTERLINEADOS = ['micro', 'texto', 'titulo'] as const
 export type Interlineado = (typeof INTERLINEADOS)[number]
 
-/** Los cuatro de interletrado. `display` es el único que ningún componente
- *  medido consume: se ejercita en la ruta de demostración. */
+/** Los cuatro de interletrado. `display` era el único que ningún componente
+ *  medido consumía —se ejercitaba sólo en la ruta de demostración— y desde el
+ *  titular del hero rehecho es el default del nivel `display`, o sea que tiene
+ *  un consumidor en una de las ocho secciones. */
 export const INTERLETRADOS = ['micro', 'texto', 'titulo', 'display'] as const
 export type Interletrado = (typeof INTERLETRADOS)[number]
 
@@ -192,14 +212,48 @@ export const NIVELES_TIPOGRAFICOS: Readonly<Record<Nivel, DefinicionDeNivel>> = 
     interlineado: 'titulo',
     interletrado: 'titulo',
   },
+  /**
+   * EL NIVEL DE DISPLAY. Su interletrado por defecto es `display` y eso le da
+   * al único token de interletrado que el sistema declaraba **sin un solo
+   * consumidor medido** su primer consumidor de verdad (ver `INTERLETRADOS`).
+   * No es una casualidad aprovechada: −0,02 em es el valor con el que se derivó
+   * el 58, así que el default de la tabla y la cuenta del token son el MISMO
+   * número. Si alguien lo cambia acá, el 58 deja de entrar y el invariante del
+   * hero lo dice.
+   */
+  display: {
+    claseFija: 'text-display',
+    claseFluida: 'text-fluido-display',
+    token: '--text-display',
+    valorFijo: '58px',
+    interlineado: 'titulo',
+    interletrado: 'display',
+  },
+  /**
+   * EL DÉCIMO NIVEL — la línea 2 del titular, y **el más grande de la escala**.
+   * Su interletrado por defecto es `titulo` (−0,03 em) y NO `display`: es con el
+   * que se derivó el 104, así que el default de la tabla y la cuenta del token
+   * son el MISMO número. Los dos registros llevan interletrados distintos
+   * porque son dos caras distintas, y cada cuenta salió del suyo. */
+  'display-xl': {
+    claseFija: 'text-display-xl',
+    claseFluida: 'text-fluido-display-xl',
+    token: '--text-display-xl',
+    valorFijo: '104px',
+    interlineado: 'titulo',
+    interletrado: 'titulo',
+  },
 }
 
-/** Los cuatro pesos que el sistema declara. El 300 de Chivo NO está: ver
- *  `REPORTE-S3` y la parada — es un token que falta y no se inventa acá. */
-export const PESOS = ['normal', 'medio', 'semi', 'fuerte'] as const
+/** Los CINCO pesos que el sistema declara. El 300 de Chivo entró con la línea 2
+ *  del titular del hero, que lo pide por su nombre —Light itálica—; hasta ese
+ *  pedido era un token que faltaba y que `REPORTE-S3` dejó escrito sin
+ *  inventar. El porqué completo, en `theme-develop.css`. */
+export const PESOS = ['liviano', 'normal', 'medio', 'semi', 'fuerte'] as const
 export type Peso = (typeof PESOS)[number]
 
 export const CLASE_PESO: Readonly<Record<Peso, string>> = {
+  liviano: 'font-liviano',
   normal: 'font-normal',
   medio: 'font-medio',
   semi: 'font-semi',
