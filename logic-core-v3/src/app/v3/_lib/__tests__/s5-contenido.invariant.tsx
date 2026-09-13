@@ -186,10 +186,31 @@ controlPositivo(
   (texto: string) => marcadoresDesconocidosDe(texto).length === 0,
 )
 
+/**
+ * ⚠️ **LA LISTA BLANCA DEJÓ DE ESTAR VACÍA, Y LA AFIRMACIÓN CAMBIA DE FORMA.**
+ *
+ * Decía «está VACÍA: ninguna sección necesitó una», y ese cero era un resultado
+ * legítimo mientras lo fuera. La primera entrada llegó con la línea 2 del
+ * titular del hero —«las 24 hs»— y la afirmación de que la lista está vacía no
+ * se puede aflojar a «tiene las que tiene»: eso no comprobaría nada.
+ *
+ * Lo que se afirma en su lugar es lo que la lista existe para garantizar: **que
+ * cada excepción esté NOMBRADA, con su sección y con un motivo escrito de
+ * verdad.** Una entrada sin motivo, o con un motivo de una línea puesto para
+ * pasar, es exactamente el uso que convierte una lista blanca en el lugar donde
+ * se esconde lo que molesta — y eso se puede medir.
+ */
+afirmar(LISTA_BLANCA_DE_CIFRAS.length <= 1, `la lista blanca tiene ${LISTA_BLANCA_DE_CIFRAS.length} excepción(es): sigue siendo la lista corta y no un colador`)
 afirmarIgual(
-  LISTA_BLANCA_DE_CIFRAS,
+  LISTA_BLANCA_DE_CIFRAS.filter((e) => e.motivo.trim().length < 120 || e.seccion.trim() === '').map((e) => e.texto),
   [],
-  'la lista blanca de excepciones está VACÍA: ninguna sección necesitó una',
+  `  y cada una lleva su sección y un motivo escrito, no una etiqueta — ${LISTA_BLANCA_DE_CIFRAS.map((e) => `${e.seccion}: "${e.texto}" (${e.motivo.length} caracteres de motivo)`).join(' · ') || 'ninguna'}`,
+)
+controlPositivo(
+  'el chequeo del motivo ve una excepción puesta para pasar',
+  [{ texto: '99', seccion: 'hero', motivo: 'es un número' }],
+  (lista: readonly { texto: string; seccion: string; motivo: string }[]) =>
+    lista.filter((e) => e.motivo.trim().length < 120 || e.seccion.trim() === '').length === 0,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

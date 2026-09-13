@@ -1,0 +1,54 @@
+{
+  "generadoPor": "scripts-titular/subsetear-fuentes.py",
+  "archivoWdth": 62,
+  "caras": [
+    {
+      "cara": "archivo-display",
+      "familia": "Archivo",
+      "enElRepo": "archivo-display-latin.woff2",
+      "bytes": 10180,
+      "sha256": "d7667df26f2dd1b674354658140835300abf238aee678d5afc65fc311e120611",
+      "upstream": {
+        "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/archivo/Archivo%5Bwdth%2Cwght%5D.ttf",
+        "archivo": "Archivo[wdth,wght].ttf",
+        "sha256": "0e094a7d3c7c4c25cf1310c4b30014f1dae9332220b1c2c88f4fa996f0b05053"
+      },
+      "licencia": {
+        "nombre": "OFL-1.1",
+        "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/archivo/OFL.txt",
+        "enElRepo": "OFL-archivo.txt",
+        "sha256": "108b4e57c9c796d3d38d0428ca7ee39de47ad93187302718d9b2d8864b9b716b"
+      },
+      "pines": [
+        "wdth=62"
+      ],
+      "ejesVivos": [
+        "wght"
+      ],
+      "puntosDeCodigo": 68
+    },
+    {
+      "cara": "chivo-italic",
+      "familia": "Chivo Italic",
+      "enElRepo": "chivo-italic-latin.woff2",
+      "bytes": 11172,
+      "sha256": "6688f4b1a7184a3ab5bac8db1fbcbf6a93183a28886b38258db9bd67f5dc782e",
+      "upstream": {
+        "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/chivo/Chivo-Italic%5Bwght%5D.ttf",
+        "archivo": "Chivo-Italic[wght].ttf",
+        "sha256": "502339e1cda77e24b5cd46a1a875e4c5e6f20ea019c248f57f23423527030ff3"
+      },
+      "licencia": {
+        "nombre": "OFL-1.1",
+        "url": "https://raw.githubusercontent.com/google/fonts/main/ofl/chivo/OFL.txt",
+        "enElRepo": "OFL-chivo.txt",
+        "sha256": "c9b69fa18c372df2b187b49efc57b1ea643b86a938e5af32f6b5a7af1017c891"
+      },
+      "pines": [],
+      "ejesVivos": [
+        "wght"
+      ],
+      "puntosDeCodigo": 68
+    }
+  ]
+}

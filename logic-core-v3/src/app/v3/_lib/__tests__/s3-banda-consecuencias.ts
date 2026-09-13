@@ -26,7 +26,7 @@
  * tres empujan para el mismo lado, así que **lo que se reporta es un PISO**.
  */
 
-import { GEOMETRIA, TIPOGRAFIA_DEL_TITULAR } from '../../_secciones/hero/Hero'
+import { GEOMETRIA, TIPOGRAFIA_DEL_TITULAR } from '../../_secciones/hero/geometria'
 import { CONTENIDO as HERO } from '../../_secciones/hero/contenido'
 import { SECCIONES } from '../secciones'
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../tipografia'
@@ -34,7 +34,7 @@ import { FLUIDOS } from './s3-banda'
 import { anchoDeTexto, lineasDeTexto } from './s10-avance'
 import { marcadoDelHome } from './s10-banco'
 import { BREAKPOINTS, anchoDeContenido, tokenPx } from './s10-css'
-import { CHIVO, altoDeTinta, tokenDeCaja, tracking } from './s10-mobile'
+import { CHIVO, altoDeTinta, caraDelNivel, tokenDeCaja, tracking } from './s10-mobile'
 import { atributo, nodosDe } from './s10-recorrido'
 
 /**
@@ -62,6 +62,23 @@ export function medidaDelTitular(ancho: number): number {
   const n = GEOMETRIA.columnasDeLaMedida
   return n * columna + (n - 1) * canal
 }
+
+/**
+ * EL TEXTO QUE MIDE EL TITULAR — la línea 1, no las dos.
+ *
+ * Desde el rehecho el titular son dos registros tipográficos y esta pieza mide
+ * UNO: el dominante, el que fija la caja y el que decide si entra en una línea.
+ * La línea 2 va en otro nivel (`titulo-l`), con otra cara y otro peso, y sumar
+ * los dos textos daría una «tinta en una sola línea» que no corresponde a
+ * ninguna línea que exista.
+ *
+ * ⚠ Se mide en MAYÚSCULAS porque así se pinta —`uppercase` está en
+ * `TIPOGRAFIA_DEL_TITULAR`— y en Archivo las mayúsculas son más anchas que las
+ * minúsculas: medir el dato crudo subestimaría. El `.woff2` que se sirve, de
+ * hecho, **no tiene minúsculas**, así que medir el dato crudo daría el avance
+ * del `.notdef`.
+ */
+export const TEXTO_DEL_TITULAR = HERO.titularLinea1.toUpperCase()
 
 export interface TitularMedido {
   readonly ancho: number
@@ -95,23 +112,26 @@ export function titularDelHero(ancho: number): TitularMedido {
   const tamano = tokenPx(`--text-fluido-${nivel}`, ancho)
   const medida = medidaDelTitular(ancho)
   const em = tracking(NIVELES_TIPOGRAFICOS[nivel].interletrado)
-  const tinta = anchoDeTexto(CHIVO, HERO.titular, tamano, em)
+  const cara = caraDelNivel(nivel)
+  const tinta = anchoDeTexto(cara, TEXTO_DEL_TITULAR, tamano, em)
   return {
     ancho,
     tamano,
     medida,
     tinta,
     fraccion: tinta / ancho,
-    lineas: lineasDeTexto(CHIVO, HERO.titular, medida, tamano, em),
+    lineas: lineasDeTexto(cara, TEXTO_DEL_TITULAR, medida, tamano, em),
   }
 }
 
 /**
  * El nivel del titular, LEÍDO de la constante que el Hero renderiza.
  *
- * `TIPOGRAFIA_DEL_TITULAR` es la cadena de clases que el componente pasa a
- * `TextoPorLineas`. Sacar el nivel de ahí —en vez de escribir `titulo-xl`—
- * significa que el día que el Hero cambie de nivel esta medición lo sigue sola.
+ * `TIPOGRAFIA_DEL_TITULAR` es la cadena de clases con la que el componente
+ * pinta la línea 1. Sacar el nivel de ahí —en vez de escribir `titulo-xl`—
+ * significa que el día que el Hero cambie de nivel esta medición lo sigue sola,
+ * y es lo que pasó: el rehecho del titular la movió de `titulo-xl` a `display`
+ * sin tocar una línea de este archivo.
  */
 export function nivelDelTitular(): Nivel {
   const clases = TIPOGRAFIA_DEL_TITULAR.split(/\s+/)

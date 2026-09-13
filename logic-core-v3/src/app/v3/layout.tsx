@@ -91,6 +91,14 @@ import './_estilos/foco.css'
  * Chivo y Chivo Mono AUTO-HOSPEDADAS con `next/font/local`, con los binarios
  * EXACTOS de S0 (`_fuentes/`). No `next/font/google`.
  *
+ * ⚠ **Desde el rehecho del titular son CUATRO archivos y TRES familias**: las
+ * dos de S0, más la itálica de Chivo (que entra a la MISMA familia, por `style`)
+ * y Archivo como cara de display. Las dos nuevas no vienen de S0 y por eso NO
+ * se comparan contra su manifiesto: traen el suyo, generado por el script que
+ * las construye (`scripts-titular/manifiesto-fuentes.json`), con el sha256 del
+ * TTF de entrada, el del `.woff2` de salida y el de la licencia. La traza es la
+ * misma clase de traza; lo que cambia es qué la produjo.
+ *
  * La razón es de trazabilidad, no de rendimiento: las métricas sobre las que
  * descansa el sistema —x-height 511, cap height 686, factor 0,998 contra
  * Instrument Sans— se midieron sobre ESOS archivos. Si el proyecto sirviera
@@ -195,11 +203,33 @@ import './_estilos/foco.css'
  * política de movimiento.
  */
 
+/**
+ * ⚠️ DOS ARCHIVOS Y UNA SOLA FAMILIA — la itálica entró con el titular del hero.
+ *
+ * `src` acepta un arreglo con un `style` por archivo, y las dos caras quedan
+ * bajo el MISMO `font-family` que `next/font` genera. Eso es lo que hace que
+ * `italic` funcione como utilidad de Tailwind sin un token de familia nuevo:
+ * el navegador elige la cara por `font-style`, como corresponde.
+ *
+ * La alternativa —declarar la itálica como una familia aparte— obligaba a un
+ * `--font-*` más en el tema y a que cada consumidor eligiera la familia a mano;
+ * y la otra alternativa, no traerla, deja al navegador **sintetizando** la
+ * inclinación sobre la romana. Eso último es lo que había hasta este sprint, y
+ * a 44 px se ve: una oblicua falsa no es la itálica de Omnibus-Type, que tiene
+ * −8,05° de ángulo declarado y dibujos propios.
+ *
+ * El binario de la itálica NO es el subset latino completo: son las mismas 68
+ * posiciones de mayúsculas que Archivo (`scripts-titular/`), porque la única
+ * cosa que se pinta en itálica es la línea 2 del titular. Consecuencia
+ * declarada: **cualquier `italic` nuevo con minúsculas cae al fallback.**
+ */
 const chivo = localFont({
-  src: './_fuentes/chivo-latin.woff2',
+  src: [
+    { path: './_fuentes/chivo-latin.woff2', style: 'normal' },
+    { path: './_fuentes/chivo-italic-latin.woff2', style: 'italic' },
+  ],
   variable: '--font-v3-chivo',
   weight: '100 900',
-  style: 'normal',
   display: 'swap',
 })
 
@@ -211,12 +241,34 @@ const chivoMono = localFont({
   display: 'swap',
 })
 
+/**
+ * LA CARA DE DISPLAY — Archivo, mayúsculas, con el ancho ya pinchado.
+ *
+ * OFL 1.1 sin nombre reservado, auto-hospedada, subseteada a 68 posiciones y
+ * con el eje `wdth` pinchado en 62. Los dos porqués —el peso y, sobre todo, que
+ * `hmtx` es lo que el repo lee para medir texto— están en
+ * `scripts-titular/subsetear-fuentes.py`, y el manifiesto con los sha256 de
+ * entrada y salida en `scripts-titular/manifiesto-fuentes.json`.
+ *
+ * `weight: '100 900'` porque el eje `wght` **queda vivo**: es el único que se
+ * declara, igual que en las dos caras de Chivo. Lo que no queda vivo es el
+ * ancho, y por eso no hay `font-stretch` en ninguna parte: la cara ES
+ * condensada, no se le pide que lo sea.
+ */
+const archivo = localFont({
+  src: './_fuentes/archivo-display-latin.woff2',
+  variable: '--font-v3-archivo',
+  weight: '100 900',
+  style: 'normal',
+  display: 'swap',
+})
+
 export default function DisposicionV3({ children }: { children: React.ReactNode }) {
   return (
     <ProveedorDeMovimiento>
       <div
         data-v3=""
-        className={`${chivo.variable} ${chivoMono.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
+        className={`${chivo.variable} ${chivoMono.variable} ${archivo.variable} font-cuerpo bg-fondo text-tinta relative min-h-svh`}
       >
         <CompuertaDelScrollSuave />
         <EscenarioCompuerta />

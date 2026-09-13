@@ -82,7 +82,7 @@ Las mismas cosas de arriba, repartidas. Cada lista se puede mandar sola: nadie t
 
 ### Valentino — 25
 
-- **01 · Hero** · `bajada` — Los dos renglones abajo del titular: qué hacemos y qué te queda a vos. Sin plazos ni porcentajes.
+- **01 · Hero** · `bajada` — EL renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Bajó de dos renglones a uno en el rehecho del titular, porque el titular ahora dice en dos registros lo que la segunda oración decía en prosa.
 - **01 · Hero** · `cta.rotulo` — Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover.
 - **02 · Quiénes somos** · `titular` — La frase que abre la sección. Una idea, dos líneas, dicha como la decís vos.
 - **02 · Quiénes somos** · `bajada` — Qué es develOP, en tres o cuatro renglones. Sin plazos ni porcentajes.
@@ -133,7 +133,7 @@ Se edita en `src/app/v3/_secciones/hero/contenido.ts`.
 
 | marcador | dónde | quién lo trae | qué dato es | formato |
 |---|---|---|---|---|
-| *(prosa)* | `bajada` | Valentino | Los dos renglones abajo del titular: qué hacemos y qué te queda a vos. Sin plazos ni porcentajes. | Dos renglones, ~180 caracteres. Texto plano. |
+| *(prosa)* | `bajada` | Valentino | EL renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Bajó de dos renglones a uno en el rehecho del titular, porque el titular ahora dice en dos registros lo que la segunda oración decía en prosa. | UN renglón, 53 caracteres COMO MÁXIMO — es el largo que entra en una línea en media medida (354,80 px a 1440, medido en el navegador: 6,682 px por carácter). Texto plano. |
 | *(prosa)* | `cta.rotulo` | Valentino | Cómo se invita a mirar los trabajos. Tres palabras: es lo que entra en la ventana del rollover. | Tres palabras como máximo. Texto plano. |
 
 

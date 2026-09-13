@@ -18,7 +18,7 @@
 
 import { CONTENIDO as HERO } from '../../_secciones/hero/contenido'
 import { SECCIONES } from '../secciones'
-import { NIVELES, type Nivel } from '../tipografia'
+import { NIVELES, NIVELES_TIPOGRAFICOS, type Nivel } from '../tipografia'
 import { afirmar, afirmarIgual, controlPositivo, titulo } from './afirmar'
 import {
   ANCHOS_DE_LA_BANDA,
@@ -37,6 +37,7 @@ import {
   type Separacion,
 } from './s3-banda'
 import {
+  TEXTO_DEL_TITULAR,
   medidaDelTitular,
   nivelDelTitular,
   tintaPorSeccion,
@@ -51,7 +52,7 @@ import {
 import { palabrasQueNoEntran } from './s10-avance'
 import { ALTOS } from './s10-banco'
 import { tokenPx } from './s10-css'
-import { CHIVO, tokenDeCaja, tracking } from './s10-mobile'
+import { CHIVO, caraDelNivel, tokenDeCaja, tracking } from './s10-mobile'
 
 /** El alto de referencia de escritorio de S0. Sale de la tabla del banco. */
 const ALTO_DE_ESCRITORIO = ALTOS[ALTOS.length - 1]
@@ -173,14 +174,20 @@ export function afirmarLaBanda(): void {
         `**${(t.fraccion * 100).toFixed(1)} % de la ventana** · corta en ${t.lineas} línea(s)`,
     )
   }
+  // ⚠ La cara y el interletrado salen del NIVEL, no están escritos: desde el
+  // rehecho del titular el nivel es `display`, que se pinta con Archivo y lleva
+  // `--tracking-display`. Con `CHIVO` y `tracking('titulo')` escritos a mano
+  // esto habría seguido en verde midiendo una letra que la página no dibuja.
+  const caraDelTitular = caraDelNivel(nivelDelTitular())
+  const emDelTitular = tracking(NIVELES_TIPOGRAFICOS[nivelDelTitular()].interletrado)
   const sinEntrar = ANCHOS_DE_LA_BANDA.flatMap(({ px }) =>
-    palabrasQueNoEntran(CHIVO, HERO.titular, medidaDelTitular(px), tokenPx(`--text-fluido-${nivelDelTitular()}`, px), tracking('titulo')).map((p) => `@${px} ${p}`),
+    palabrasQueNoEntran(caraDelTitular, TEXTO_DEL_TITULAR, medidaDelTitular(px), tokenPx(`--text-fluido-${nivelDelTitular()}`, px), emDelTitular).map((p) => `@${px} ${p}`),
   )
   afirmarIgual(sinEntrar, [], 'con la escala extendida NI UNA palabra del titular desborda su medida, en ninguno de los cuatro anchos')
   controlPositivo(
     'el detector de desbordes no está ciego: con la medida de un teléfono y el tamaño del tope, sí desbordan',
     170,
-    (medida: number) => palabrasQueNoEntran(CHIVO, HERO.titular, medida, tokenPx(`--text-fluido-${nivelDelTitular()}`, TOPE_DE_LA_BANDA), tracking('titulo')).length === 0,
+    (medida: number) => palabrasQueNoEntran(caraDelTitular, TEXTO_DEL_TITULAR, medida, tokenPx(`--text-fluido-${nivelDelTitular()}`, TOPE_DE_LA_BANDA), emDelTitular).length === 0,
   )
   console.log(
     '  ⚠️ la tinta es la del titular EN UNA SOLA LÍNEA y es un PISO: sale del modelo de composición de `s10-avance.ts`, ' +

@@ -68,6 +68,14 @@
 # bloque de texto y por candidato de velo). Insumo del calculo, no evidencia: lo
 # que se commitea son las capturas del reporte y el JSON con las cifras.
 /.b6-capturas/
+# `.next-titular/`: build aislado del A/B de peso del titular rehecho — el MISMO
+# arbol con el titular nuevo y con el de HEAD, para medir el neto sin pisar el
+# `.next` que `verificar` lee. Se agrega ACA ANTES de correr el build, por la
+# leccion de agosto: un distDir alternativo cuyo nombre no este listado en este
+# archivo deja megabytes de JS minificado a la vista de la auto-deteccion de
+# fuentes de Tailwind 4 —que respeta `.gitignore`— y la ruta entera cae en 500
+# con un error que senala un CSS sano.
+/.next-titular/
 
 # production
 /build
@@ -182,3 +190,7 @@ src/modules/chatbot/evals/reports/
 # la referencia y del home). No se commitean: lo que va al reporte se mueve a
 # `docs/rediseno/capturas/b13/` y las cifras a `outputs/b13/`.
 /.b13-capturas/
+# `scripts-titular/_upstream/`: los TTF de Google Fonts que el script de subset
+# baja para producir las dos caras del titular. Son INSUMO, no evidencia: el
+# manifiesto publica su sha256 y `subsetear-fuentes.py` los vuelve a bajar solo.
+/scripts-titular/_upstream/

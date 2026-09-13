@@ -210,6 +210,48 @@ async function principal(): Promise<void> {
     // formulario de novedades pasa de 2,80:1 a 6,44:1.
     '--color-tinta-media: #9E9E9E;',
     '--color-tinta-tenue: #959595;',
+    // ⚠ EL REHECHO DEL TITULAR DEL HERO — cuatro líneas, y las cuatro están en
+    // `AGREGADOS` con su motivo. Son la cuarta FAMILIA (Archivo, la cara de
+    // display, servida con el eje `wdth` pinchado en 62), el QUINTO PESO (300,
+    // que cierra la decisión que el propio bloque de pesos del tema dejó
+    // abierta por escrito) y el NOVENO NIVEL con su par fluido.
+    //
+    // Los dos tamaños son [derivado] y no [medido], y ésa es la diferencia con
+    // los ocho de S0: no salen de un barrido sobre la referencia, salen de una
+    // cuenta sobre la caja del titular y el avance del binario. 58 es el mayor
+    // entero que entra en una línea a 1440 (478,40 px de caja) y 37 el único
+    // que a 375 pasa el piso de `titulo-xl` sin partirse. Las dos cuentas
+    // están escritas al lado de cada token y `hero.invariant.tsx` §12b corre
+    // la primera contra el `.woff2`.
+    '--font-display: var(--font-v3-archivo), system-ui, sans-serif;',
+    '--font-weight-liviano: 300;',
+    '--text-display: 58px;',
+    '--text-fluido-display: clamp(37px, 1.8504rem + 1.9718vw, 67.4648px);',
+    // El DÉCIMO nivel, la línea 2 del titular: mismo método que el noveno, y el
+    // más grande de la escala. Su derivación está al lado del token.
+    '--text-display-xl: 104px;',
+    '--text-fluido-display-xl: clamp(67px, 3.3732rem + 3.4742vw, 120.6761px);',
+    // 🔴 Y LAS CUATRO FAMILIAS RE-DECLARADAS EN `[data-v3]`. No es una
+    // duplicación: es un ARREGLO de alcance, medido en el navegador sobre el
+    // build. Las variables que `next/font` escribe viven en la clase del
+    // envoltorio, no en `:root`, y una custom property se resuelve donde se
+    // DECLARA — así que los cuatro tokens del `@theme static` computaban vacíos
+    // y `/v3` pintaba con la Chivo de Google del layout raíz. El porqué
+    // completo, las cinco mediciones y el disparador para borrar el bloque
+    // están al lado de la regla, en `theme-develop.css`.
+    //
+    // ⚠ **EL COMPARADOR NO DEDUPLICA, y eso es lo que hace que este renglón sea
+    // una comprobación y no una formalidad.** Las cuatro familias aparecen DOS
+    // veces en el repo —una en el `@theme static` y una en el bloque de arriba—
+    // y el diff es de LÍNEAS, no de conjuntos, así que las cuatro entran
+    // repetidas. Si alguien borrara una de las dos declaraciones, la cuenta
+    // baja y esto se pone rojo: el arreglo de alcance no se puede deshacer en
+    // silencio. El selector entra una sola vez.
+    '[data-v3] {',
+    '--font-titulo: var(--font-v3-chivo), system-ui, sans-serif;',
+    '--font-cuerpo: var(--font-v3-chivo), system-ui, sans-serif;',
+    '--font-codigo: var(--font-v3-chivo-mono), ui-monospace, monospace;',
+    '--font-display: var(--font-v3-archivo), system-ui, sans-serif;',
   ]
   afirmarIgual(soloEnS0.sort(), [...ESPERADO_FUERA].sort(), `las ${ESPERADO_FUERA.length} líneas que salieron son las previstas`)
   afirmarIgual(soloEnRepo.sort(), [...ESPERADO_DENTRO].sort(), `las ${ESPERADO_DENTRO.length} líneas que entraron son las previstas`)

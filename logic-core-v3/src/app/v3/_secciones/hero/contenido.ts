@@ -14,9 +14,19 @@
  *
  * Verdad, y por eso NO va en `PEDIDO`:
  *
- *   · `titular` y `slogan` — las dos frases llegaron dictadas por el sprint,
- *     con la instrucción de no cambiarlas ni mejorarlas. Son copy aprobado, no
- *     una aproximación con la cadencia correcta.
+ *   · `titularLinea1` y `titularLinea2` — las dos frases llegaron dictadas por
+ *     el sprint, con la instrucción de no cambiarlas ni mejorarlas. Son copy
+ *     aprobado, no una aproximación con la cadencia correcta. Hasta el rehecho
+ *     del titular eran UNA (`titular`), cortada por medición.
+ *
+ * ⚠️ **EL `slogan` SE FUE DE ESTA TABLA, Y ES UN BORRADO DE COPY APROBADO.**
+ * «Ingeniería para negocios reales.» era `[verdad]` y se pintaba arriba del
+ * titular, en el registro chico. El ajuste de estructura del hero lo elimina
+ * como elemento propio por pedido del humano, y **la frase no se mudó a ningún
+ * lado**: la instrucción descarta explícitamente ponerla en la bajada, porque
+ * el titular ya dice la promesa y la bajada tiene que decir qué se compra. Así
+ * que la línea de marca deja de estar en el hero. Queda dicho acá porque un
+ * borrado de copy aprobado no se deduce de un `git diff`.
  *   · `cta.destino` — `#trabajos` es el id de la sección 04 en `secciones.ts`,
  *     o sea el único ancla de este lane que existe DE VERDAD hoy y que va a
  *     seguir existiendo cuando el home componga las ocho. Un ancla inventada
@@ -60,29 +70,53 @@ import type { EntradaDePedido } from '../_contrato/pedido'
  */
 export const CONTENIDO = {
   /**
-   * [verdad] La línea de marca. Va arriba del titular, en el registro chico:
-   * es la constante de develOP, no la promesa de esta pantalla, y ponerla del
-   * mismo tamaño que el titular sería dos titulares peleándose.
+   * [verdad] El h1, EN DOS REGISTROS, y por eso son dos cadenas y no una.
+   *
+   * ── Por qué se partió ──────────────────────────────────────────────────
+   *
+   * Hasta este sprint era una sola frase —«Tu negocio vendiendo en piloto
+   * automático.»— que `TextoPorLineas` cortaba MIDIENDO: dónde caía el salto lo
+   * decidía el ancho de la caja, no nadie. Eso es correcto mientras las líneas
+   * sean del mismo registro tipográfico. Acá no lo son: la línea 1 se pinta en
+   * Archivo condensado, mayúsculas, peso 700, y la línea 2 en Chivo Light
+   * itálica a un nivel más chico. **Dos caras distintas no pueden salir de un
+   * divisor que reparte una sola cadena**, así que el corte pasa a ser una
+   * decisión de composición y se escribe.
+   *
+   * ── Y por qué siguen siendo `[verdad]` ─────────────────────────────────
+   *
+   * Las dos frases llegaron dictadas por el sprint, con su reparto, igual que
+   * llegó la frase anterior. No son una aproximación con la cadencia correcta:
+   * son el copy. Por eso ninguna de las dos va en `PEDIDO`.
+   *
+   * ⚠ Se escriben en minúsculas y las pone en mayúsculas el CSS (`uppercase`),
+   * no el dato. Es deliberado: el texto del documento —lo que copia quien
+   * selecciona— sigue siendo prosa, y la mayusculación es la forma. Los
+   * `.woff2` de las dos caras son subsets de MAYÚSCULAS, así que si alguien
+   * saca el `uppercase` las minúsculas caen al fallback y se ve otra letra;
+   * está anotado también en el componente y en el tema.
    */
-  slogan: 'Ingeniería para negocios reales.',
+  titularLinea1: 'Tu negocio vendiendo',
+  titularLinea2: 'las 24 hs',
 
   /**
-   * [verdad] El h1. Es lo primero que se lee y lo único que el visitante se
-   * lleva si no scrollea. Varias líneas a propósito: es el lugar natural de P1
-   * —línea por línea, el 58 % del corpus medido— y con una sola línea el patrón
-   * queda sin gesto.
+   * [relleno] UN renglón, y bajó de tres.
+   *
+   * Medido a 1440 en media medida (354,80 px de caja): la bajada anterior
+   * ocupaba **3 líneas**. El pedido de este sprint es una sola, conservando lo
+   * que dice QUÉ se vende —sitio, chat y seguimiento en un sistema—, que es
+   * justamente la mitad que sobrevive. Lo que se fue es la segunda oración
+   * («Vos seguís con lo que sabés hacer…»), que decía qué te queda a vos: eso
+   * ya lo dice el titular en dos registros.
+   *
+   * ⚠ **Y se fue también un «solo», por medición y no por gusto.** El primer
+   * intento —«…en un solo sistema.», 54 caracteres— mide **360,84 px** en el
+   * navegador y la caja son 354,80: se partía en dos renglones, que es
+   * exactamente lo que este cambio existe para evitar. Sin el «solo» son 49
+   * caracteres y **327,4 px**, con 27,4 de margen. El techo, medido: 53
+   * caracteres a 6,682 px cada uno.
    */
-  titular: 'Tu negocio vendiendo en piloto automático.',
-
-  /**
-   * [relleno] Dos renglones: qué hacemos y qué te queda a vos. La estructura
-   * retórica es la que la composición necesita —promesa concreta, después la
-   * consecuencia para quien lee— y por eso el largo importa más que las
-   * palabras.
-   */
-  bajada:
-    'Conectamos tu sitio, tu chat y tu seguimiento en un solo sistema, y lo ' +
-    'dejamos andando. Vos seguís con lo que sabés hacer, que es tu negocio.',
+  bajada: 'Tu sitio, tu chat y tu seguimiento en un sistema.',
 
   cta: {
     /** [relleno] Tres palabras. Un rótulo largo rompe el rollover: la ventana
@@ -117,8 +151,8 @@ export const PEDIDO: readonly EntradaDePedido[] = [
     clase: 'prosa',
     marcador: null,
     quienLoTrae: 'valentino',
-    que: 'Los dos renglones abajo del titular: qué hacemos y qué te queda a vos. Sin plazos ni porcentajes.',
-    formato: 'Dos renglones, ~180 caracteres. Texto plano.',
+    que: 'EL renglón abajo del titular: qué se vende. Sin plazos ni porcentajes. Bajó de dos renglones a uno en el rehecho del titular, porque el titular ahora dice en dos registros lo que la segunda oración decía en prosa.',
+    formato: 'UN renglón, 53 caracteres COMO MÁXIMO — es el largo que entra en una línea en media medida (354,80 px a 1440, medido en el navegador: 6,682 px por carácter). Texto plano.',
   },
   {
     ruta: 'cta.rotulo',

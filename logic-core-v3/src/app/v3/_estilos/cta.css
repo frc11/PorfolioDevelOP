@@ -187,6 +187,42 @@
   transition-delay: var(--cta-subrayado-retardo);
 }
 
+/* ═══ EL REGISTRO `rotulo` — mayúsculas, interletrado abierto y la regla ═══
+ *
+ * Dos reglas y ni un valor nuevo: las tres cosas que pide salen de tokens que el
+ * sistema ya declara. No hay una propiedad de alcance de componente nueva, así
+ * que el padrón de `s3-registro-de-tokens.ts` no se mueve.
+ *
+ *   `text-transform`  mayúsculas. Se pone acá y no por utilidad heredada
+ *                     porque la ventana declara su propio interletrado y las
+ *                     dos cosas viajan juntas: separarlas dejaría el rótulo en
+ *                     mayúsculas con el interletrado del párrafo, que es
+ *                     exactamente el defecto que el interletrado abierto
+ *                     existe para arreglar.
+ *   `letter-spacing`  `--tracking-micro`, 0,025 em — el ÚNICO positivo del
+ *                     sistema, el mismo que llevan las etiquetas de sección.
+ *   la regla          `scaleX(1)` en reposo, o sea el subrayado que ya
+ *                     existía, en tinta (`--color-tinta`) y con su alto
+ *                     medido (3 filetes). Cero color, cero degradado, cero
+ *                     brillo: es la raya que el componente ya tenía, siempre
+ *                     puesta.
+ *
+ * ⚠ `transform` y no `inline-size`: el subrayado ya mide el 100 % de la
+ * ventana y su `transform-origin` es el borde izquierdo, así que soltar la
+ * escala lo deja terminando donde termina la palabra. Tocar el ancho en vez de
+ * la escala habría dejado dos formas de decir lo mismo. */
+[data-v3] [data-pieza="cta"][data-registro="rotulo"] [data-parte="ventana"] {
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-micro);
+}
+
+/* La regla, ya puesta. Sin `transition` que la mueva: el rollover de las dos
+   copias sigue entero y esta raya deja de participar. */
+[data-v3] [data-pieza="cta"][data-registro="rotulo"] [data-parte="subrayado"] {
+  transform: scaleX(1);
+  transition-property: none;
+}
+
 /* --- Deshabilitado ------------------------------------------------------
  * El `:not(:disabled)` de las reglas de estado ya apaga el rollover; esto es
  * la señal visible. `:hover` en CSS SÍ matcha un botón deshabilitado, así que

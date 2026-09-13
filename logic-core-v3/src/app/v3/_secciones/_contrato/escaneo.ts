@@ -96,6 +96,14 @@ export const NUMEROS_PERMITIDOS: readonly Excepcion[] = [
       'el umbral de la compuerta, en el aviso de que la coreografía no baja acá. ' +
       'Sale de ESCENARIO_MIN_ANCHO_PX, que un invariante ata a --breakpoint-escritorio.',
   },
+  {
+    valor: '24',
+    motivo:
+      'las horas que tiene un día, en la línea 2 del titular del hero. No es una ' +
+      'medición sobre develOP: nadie las contó. El motivo largo —y lo que la frase ' +
+      'SÍ afirma, que es disponibilidad continua— está en `LISTA_BLANCA_DE_CIFRAS` ' +
+      'de `marcadores.ts`, que es la lista blanca del otro detector.',
+  },
 ]
 
 /**

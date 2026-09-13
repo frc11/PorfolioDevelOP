@@ -48,9 +48,34 @@ import type { VarianteCta } from '../../_lib/cta'
 /** Estados que la galería de `/v3/componentes` puede forzar sin un puntero. */
 export type EstadoForzado = 'hover' | 'foco'
 
+/**
+ * EL REGISTRO TIPOGRÁFICO del rótulo. NO es una variante.
+ *
+ * `VarianteCta` son las DOS formas MEDIDAS en la referencia (`inline-block`,
+ * 17 ejemplares · `block`, 9) y esa tabla no se contamina con una decisión
+ * nuestra: agregarle una tercera entrada volvería una medición en una mezcla.
+ * El registro es otro eje —qué tipografía lleva el rótulo— y viaja por su
+ * propio atributo, así que las dos variantes medidas siguen siendo dos.
+ *
+ *   `cuerpo`  el medido: `--text-cuerpo` 15 px, `--tracking-texto`, peso semi.
+ *             De ahí sale el alto de reposo de la ventana (15 × 1,6 = 24 px).
+ *   `rotulo`  mayúsculas, `--tracking-micro` —el único interletrado positivo
+ *             del sistema— y **la regla horizontal visible en reposo**. Es el
+ *             registro con el que el CTA del hero deja de parecer un enlace de
+ *             párrafo y pasa a ser un pie de bloque.
+ *
+ * ⚠ `rotulo` **apaga el crecimiento del subrayado**, y se declara: la raya ya
+ * está en `scaleX(1)` en reposo, así que no tiene a dónde crecer. El rollover
+ * de las dos copias —que es el gesto principal— sigue entero. Cambia una
+ * animación paralela, no el componente.
+ */
+export type RegistroDeCta = 'cuerpo' | 'rotulo'
+
 interface CtaComun {
   readonly rotulo: string
   readonly variante?: VarianteCta
+  /** El registro tipográfico. Por defecto el medido. */
+  readonly registro?: RegistroDeCta
   readonly forzado?: EstadoForzado
   readonly className?: string
 }
@@ -63,6 +88,7 @@ export interface CtaProps extends CtaComun {
 export function Cta({
   rotulo,
   variante = 'linea',
+  registro = 'cuerpo',
   forzado,
   deshabilitado = false,
   type = 'button',
@@ -73,6 +99,7 @@ export function Cta({
       type={type}
       data-pieza="cta"
       data-variante={variante}
+      data-registro={registro}
       data-forzado={forzado}
       disabled={deshabilitado}
       className={cn('text-base', className)}
@@ -86,12 +113,20 @@ export interface CtaEnlaceProps extends CtaComun {
   readonly href: string
 }
 
-export function CtaEnlace({ href, rotulo, variante = 'linea', forzado, className }: CtaEnlaceProps) {
+export function CtaEnlace({
+  href,
+  rotulo,
+  variante = 'linea',
+  registro = 'cuerpo',
+  forzado,
+  className,
+}: CtaEnlaceProps) {
   return (
     <a
       href={href}
       data-pieza="cta"
       data-variante={variante}
+      data-registro={registro}
       data-forzado={forzado}
       className={cn('text-base no-underline', className)}
     >

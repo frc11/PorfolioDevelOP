@@ -102,7 +102,29 @@ afirmar(INSTRUMENT_SERIF_PROPUESTA.razon.length > 40, '  y viene con su razón e
 const FUENTE_LAYOUT = leer('src/app/v3/layout.tsx')
 const sinComentarios = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')
 afirmar(!/serif/i.test(sinComentarios(FUENTE_MARCA_TSX)), 'ninguna pieza referencia una familia serif EN EL CÓDIGO: hoy el separador es la regla del sistema (la palabra sólo vive en el comentario de la propuesta)')
-afirmar((FUENTE_LAYOUT.match(/localFont\(/g) ?? []).length === 2, 'el layout sigue con DOS familias locales (Chivo y Chivo Mono), no una tercera')
+/**
+ * ⚠️ **ERA «DOS FAMILIAS LOCALES, NO UNA TERCERA» Y HOY SON TRES.** La tercera
+ * entró con el rehecho del titular del hero y **no es la serif que este frente
+ * vigila**: es Archivo, una grotesca de la misma fundición que Chivo, pedida
+ * por su nombre para la cara de display.
+ *
+ * La afirmación se reescribe para que siga vigilando LO QUE VIGILABA —que
+ * nadie cargue una serif por la ventana— en vez de contar familias, que era el
+ * proxy. El contador se mantiene igual de duro: la tercera está NOMBRADA, así
+ * que una cuarta sin declarar sigue rompiendo esto.
+ */
+const FAMILIAS_LOCALES_DECLARADAS = ['chivo-latin.woff2', 'chivo-mono-latin.woff2', 'archivo-display-latin.woff2'] as const
+afirmarIgual((FUENTE_LAYOUT.match(/localFont\(/g) ?? []).length, FAMILIAS_LOCALES_DECLARADAS.length, `el layout carga exactamente las ${FAMILIAS_LOCALES_DECLARADAS.length} familias locales declaradas, ni una más`)
+afirmarIgual(
+  FAMILIAS_LOCALES_DECLARADAS.filter((f) => !FUENTE_LAYOUT.includes(f)),
+  [],
+  '  y son esas tres por nombre de binario: Chivo, Chivo Mono y Archivo (la cara de display)',
+)
+afirmar(
+  !/serif/i.test(sinComentarios(FUENTE_LAYOUT).replace(/sans-serif/g, '')),
+  '  y NINGUNA es una serif: el separador sigue siendo la regla del sistema, no una letra nueva',
+  'la única aparición de «serif» en el código del layout es el `sans-serif` del fallback',
+)
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('5 · CABLEADO EN EL INSTRUMENTO — se demuestra y se puede mirar')
@@ -125,8 +147,27 @@ const HOME = [false, true].map((anima) => marcar(<Home />, { anima }))
 const [QUIETO, ANIMADO] = HOME
 const veces = (html: string, aguja: string): number => html.split(aguja).length - 1
 
+/**
+ * ⚠️ **LAS SECCIONES SIN MARCA SE NOMBRAN UNA POR UNA, NO SE BAJA EL PISO.**
+ *
+ * Este renglón afirmaba «al menos una por cada una de las 8 secciones», y el
+ * ajuste de estructura del hero lo puso en rojo: la rama animada pasó de 8 a 7.
+ * Bajar el número a 7 habría dejado la comprobación pasando por una razón que
+ * nadie puede leer. Lo que se declara es la EXCEPCIÓN, con su motivo, y el piso
+ * se deriva de ella — así que una segunda sección que pierda su marca sin
+ * declararse vuelve a poner esto en rojo.
+ *
+ * El cuadrado de `--color-acento` de la columna lateral del hero se sacó por
+ * pedido del humano («muy afuera de la columna»). La pieza NO se tocó: las
+ * otras tres secciones que la montaban y el pie la siguen mostrando, y la
+ * columna de 140 px del hero sigue reservada con un `<div>` vacío, porque es la
+ * que sostiene el cierre estructural de B11.
+ */
+const SECCIONES_SIN_MARCA = ['hero'] as const
+const PISO_DEL_PREFIJO = REGISTRO.length - SECCIONES_SIN_MARCA.length
+
 for (const [rama, html] of [['quieta', QUIETO], ['animada', ANIMADO]] as const) {
-  afirmar(veces(html, 'data-pieza="prefijo-de-servicio"') >= REGISTRO.length, `rama ${rama}: el PREFIJO aparece ${veces(html, 'data-pieza="prefijo-de-servicio"')} veces — al menos una por cada una de las ${REGISTRO.length} secciones (el rótulo) más el pie`)
+  afirmar(veces(html, 'data-pieza="prefijo-de-servicio"') >= PISO_DEL_PREFIJO, `rama ${rama}: el PREFIJO aparece ${veces(html, 'data-pieza="prefijo-de-servicio"')} veces — al menos una por cada una de las ${PISO_DEL_PREFIJO} secciones que lo montan (${REGISTRO.length} menos ${SECCIONES_SIN_MARCA.join(', ')}, declarada arriba) más el pie`)
   afirmar(veces(html, 'data-pieza="separador"') > 0, `  el SEPARADOR aparece ${veces(html, 'data-pieza="separador"')} veces: los rótulos con número y nombre contiguos, más el pie`)
   afirmar(veces(html, 'data-pieza="logotipo"') === 1, `  y el LOGOTIPO aparece UNA vez: el pie es la única superficie del home que lo tenía`)
 }

@@ -138,16 +138,16 @@ export function digitosDe(texto: string): string[] {
 }
 
 /**
- * LA LISTA BLANCA — declarada, y hoy vacía.
+ * LA LISTA BLANCA — declarada, y con UNA entrada desde el titular rehecho.
  *
- * §0.4 admite excepciones "que estén en una lista blanca declarada". Ninguna
- * hizo falta: las cuatro secciones se escribieron sin un solo dígito en el
- * contenido, así que la lista está vacía **y eso es un resultado, no un
- * descuido**. El día que una haga falta se agrega acá con su motivo, y el
- * instrumento la nombra en su salida — nunca en silencio.
+ * §0.4 admite excepciones "que estén en una lista blanca declarada". Hasta el
+ * rehecho del titular del hero no había hecho falta ninguna: las ocho secciones
+ * se habían escrito sin un solo dígito en el contenido, y ese cero era un
+ * resultado y no un descuido. La primera entra con su motivo y el instrumento
+ * la nombra en su salida — nunca en silencio.
  *
- * ⚠ La lista vacía NO es lo que hace pasar la comprobación: lo que la hace
- * pasar es que no hay hallazgos. Que el detector no esté ciego lo prueban los
+ * ⚠ La lista NO es lo que hace pasar la comprobación: lo que la hace pasar es
+ * que no queden hallazgos. Que el detector no esté ciego lo prueban los
  * controles positivos, no esta constante.
  */
 export interface ExcepcionDeCifra {
@@ -159,7 +159,14 @@ export interface ExcepcionDeCifra {
   readonly motivo: string
 }
 
-export const LISTA_BLANCA_DE_CIFRAS: readonly ExcepcionDeCifra[] = []
+export const LISTA_BLANCA_DE_CIFRAS: readonly ExcepcionDeCifra[] = [
+  {
+    texto: 'las 24 hs',
+    seccion: 'hero',
+    motivo:
+      'El 24 son las horas que tiene un día, no una medición sobre develOP. La regla que este detector protege es «ningún número que se pueda leer como un HECHO puede ser inventado», y lo que se inventa es una cifra de resultado —«+340 %», «12 proyectos», «3 semanas»—: algo que alguien tendría que haber contado. Las horas del día no las contó nadie. ⚠️ QUEDA DICHO LO QUE SÍ AFIRMA: la frase promete disponibilidad continua, y eso es una afirmación sobre el servicio que el humano tiene que poder sostener. No es una cifra fabricada; es una promesa, y la promesa llegó dictada como copy aprobado en el sprint del titular. Si algún día develOP decide que no la sostiene, lo que cambia es el copy y esta entrada se va con él.',
+  },
+]
 
 const TEXTOS_EN_LISTA_BLANCA: ReadonlySet<string> = new Set(
   LISTA_BLANCA_DE_CIFRAS.map((e) => e.texto),
