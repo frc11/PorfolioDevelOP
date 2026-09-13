@@ -26,7 +26,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineasDeCodigo, medir } from './s8-largos'
 import {
   CONTRATO,
   RAIZ,
@@ -255,7 +255,7 @@ titulo('7 · La regla de las 300 líneas, sobre lo que este sprint escribe')
  * canales son las formas concretas de colgar contenido de un progreso.** Se
  * cambian por razones distintas y por eso se leen por separado.
  */
-const LIMITE = LIMITE_DE_LINEAS
+const LIMITE = LIMITE_DE_LINEAS_DE_CODIGO
 const DE_ESTE_SPRINT = [
   ...TODOS,
   ...readdirSync(path.join(RAIZ, 'src/app/v3/_lib/__tests__'))
@@ -264,7 +264,8 @@ const DE_ESTE_SPRINT = [
 ]
 
 /**
- * Igual que `wc -l`: las líneas TERMINADAS, o sea los saltos.
+ * Las dos cuentas, juntas: `medir` devuelve las TOTALES —las de `wc -l`, o sea
+ * los saltos— y las de CÓDIGO. Se afirma la segunda y se publica la primera.
  *
  * `split('\n').length` cuenta una de más en un archivo que termina en salto —
  * que es todo archivo del repo— y ese uno de más puso en rojo, en la primera
@@ -275,24 +276,37 @@ const DE_ESTE_SPRINT = [
  * ⚠ **B4-A: la cuenta la trae `s8-largos.ts` y ya no se escribe acá.** Era la
  * tercera copia de la misma expresión y por eso el arreglo de SITIO-S7 nunca
  * llegó a los seis instrumentos que contaban distinto.
+ *
+ * ⚠ **HERO-4: y por eso el cambio de UNIDAD fue un archivo y no siete.** El
+ * límite pasó a medirse en líneas de código; como la cuenta tenía dueño, acá
+ * sólo cambió qué campo se lee.
  */
-const lineasDe = (archivo: string): number => contarLineas(leer(archivo))
-const medidos = DE_ESTE_SPRINT.map((a) => ({ a, n: lineasDe(a) })).sort((x, y) => y.n - x.n)
-const largos = medidos.filter((f) => f.n > LIMITE).map((f) => `${f.a} — ${f.n} líneas`)
+const medidos = DE_ESTE_SPRINT.map((a) => medir(a, leer(a))).sort((x, y) => y.codigo - x.codigo)
+const largos = medidos
+  .filter((f) => f.codigo > LIMITE)
+  .map((f) => `${f.archivo} — ${f.codigo} líneas de código`)
 
 afirmar(DE_ESTE_SPRINT.length > 0, `se miraron ${DE_ESTE_SPRINT.length} archivos`)
-afirmarIgual(largos, [], `ninguno pasa las ${LIMITE} líneas`)
+afirmarIgual(largos, [], `ninguno pasa las ${LIMITE} líneas de código`)
 console.log(
   `  los tres más largos: ${medidos
     .slice(0, 3)
-    .map((f) => `${f.a.split('/').pop()} ${f.n}`)
+    .map((f) => `${f.archivo.split('/').pop()} ${f.codigo}/${f.lineas}`)
     .join(' · ')}`,
 )
 
 controlPositivo(
-  'el contador de líneas ve un archivo largo',
+  'el contador de líneas de código ve un archivo largo',
   `${Array.from({ length: LIMITE + 1 }, () => 'x').join('\n')}\n`,
-  (texto: string) => (texto.match(/\n/g) ?? []).length <= LIMITE,
+  (texto: string) => contarLineasDeCodigo(texto) <= LIMITE,
+)
+/** ⚠️ HERO-4 · Y que lo que cuenta es CÓDIGO. Sin este segundo control el cambio
+ *  de unidad sería indistinguible de no haber hecho nada: los MISMOS renglones,
+ *  comentados, tienen que dejar de contar. */
+controlPositivo(
+  '  y NO lo ve cuando esos mismos renglones son comentarios',
+  `${Array.from({ length: LIMITE + 1 }, () => '// x').join('\n')}\n`,
+  (texto: string) => contarLineasDeCodigo(texto) > LIMITE,
 )
 
 cerrar('s7-contrato.invariant')

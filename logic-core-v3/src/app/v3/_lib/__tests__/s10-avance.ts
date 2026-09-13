@@ -27,9 +27,42 @@
 
 import { avanceDeCaracter, type TablasDeAvance } from './s10-woff2'
 
-/** Las dos familias que `/v3` sirve, por `next/font/local`. */
+/** Las CUATRO caras que `/v3` sirve, por `next/font/local`. */
 export const FUENTE_TITULO = 'src/app/v3/_fuentes/chivo-latin.woff2'
 export const FUENTE_CODIGO = 'src/app/v3/_fuentes/chivo-mono-latin.woff2'
+/**
+ * La cara de display — Archivo, con el eje `wdth` ya pinchado en 62.
+ *
+ * ⚠️ **EL PINCHAZO ES LO QUE HACE QUE ESTE MODELO SIRVA PARA ELLA.** El
+ * supuesto 1 de arriba dice que se lee la instancia POR DEFECTO de la variable;
+ * con el eje de ancho vivo, el defecto habría sido `wdth` 100 y este archivo
+ * habría reportado la línea 1 del titular **47,6 % más ancha de lo que se
+ * pinta** (12,5070 em contra 8,4750). No es el error de fracciones de
+ * porcentaje que los tres supuestos declaran: es otro ancho. Pinchado, lo que
+ * `hmtx` publica ES lo que el navegador dibuja, salvo el eje de peso —que
+ * queda vivo y cuyo defecto (600) es un escalón abajo del 700 con el que se
+ * pinta: 8,4750 contra 8,5670 em, un 1,08 % para el lado del PISO, que es
+ * exactamente la dirección que el supuesto 1 declara.
+ *
+ * `scripts-titular/subsetear-fuentes.py` es donde vive esa decisión con su
+ * número.
+ */
+export const FUENTE_DISPLAY = 'src/app/v3/_fuentes/archivo-display-latin.woff2'
+/**
+ * La itálica de Chivo: la CUARTA cara auto-hospedada, y la única de las cuatro
+ * que ningún medidor abre.
+ *
+ * Es una constante de RUTA y nada más. La tabla de avances que llegó a existir
+ * con ella —`CHIVO_ITALICA` en `s10-mobile.ts`— se borró: no la consumía nadie
+ * y hacía parsear un `.woff2` de más a cada instrumento que importa el módulo.
+ *
+ * ⚠ **Lo que queda declarado con ella es un límite del medidor, no un olvido.**
+ * `caraDelNivel` elige la cara por NIVEL, y el nivel no sabe de estilo: la
+ * línea 2 del Hero (`display-xl`) es Chivo itálica en pantalla y se mide con la
+ * Chivo ROMANA. El día que esa diferencia importe, la ruta está acá y la
+ * tabla se lee con `leerAvancesDe`.
+ */
+export const FUENTE_ITALICA = 'src/app/v3/_fuentes/chivo-italic-latin.woff2'
 
 /** Los caracteres del texto que la fuente NO tiene. Vacío o el ancho miente. */
 export function caracteresSinGlifo(tablas: TablasDeAvance, texto: string): string[] {

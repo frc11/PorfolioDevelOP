@@ -23,7 +23,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, medir } from './s8-largos'
 import { suitesDelPaquete } from './s4-agregado'
 import { RAIZ } from './s4-corrida'
 import { CHECKS_DE_FRONTERA, derivarSuites, instrumentosSinScript, scriptsDe } from './s4-suites'
@@ -118,7 +118,7 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('5 · Los instrumentos de S4 no pasan las 300 líneas')
+titulo('5 · Los instrumentos de S4 no pasan las 300 líneas de CÓDIGO')
 
 const DIR = 'src/app/v3/_lib/__tests__'
 const DE_S4 = readdirSync(path.join(RAIZ, DIR))
@@ -126,18 +126,16 @@ const DE_S4 = readdirSync(path.join(RAIZ, DIR))
   .map((n) => `${DIR}/${n}`)
   .sort()
 
-/** B4-A: la cuenta del repo, no una copia. Ver `contarLineas` en `s8-largos.ts`. */
-const medidos = DE_S4.map((archivo) => ({
-  archivo,
-  lineas: contarLineas(readFileSync(path.join(RAIZ, archivo), 'utf8')),
-}))
-afirmarIgual(medidos.filter((m) => m.lineas > LIMITE_DE_LINEAS), [], `ninguno de los ${DE_S4.length} archivos de S4 pasa las 300 líneas`)
-afirmar(DE_S4.length > 0, `${DE_S4.length} archivos medidos`, medidos.map((m) => `${path.basename(m.archivo)}:${m.lineas}`).join(' · '))
+/** B4-A: la cuenta del repo, no una copia. Ver `contarLineas` en `s8-largos.ts`.
+ *  HERO-4: se AFIRMA el código y se PUBLICAN las dos cifras, código y totales. */
+const medidos = DE_S4.map((archivo) => medir(archivo, readFileSync(path.join(RAIZ, archivo), 'utf8')))
+afirmarIgual(medidos.filter((m) => m.codigo > LIMITE_DE_LINEAS_DE_CODIGO), [], `ninguno de los ${DE_S4.length} archivos de S4 pasa las ${LIMITE_DE_LINEAS_DE_CODIGO} líneas de código`)
+afirmar(DE_S4.length > 0, `${DE_S4.length} archivos medidos`, medidos.map((m) => `${path.basename(m.archivo)}:${m.codigo}/${m.lineas}`).join(' · '))
 
 controlPositivo(
-  'el medidor ve un archivo de 301 líneas',
-  { archivo: 'inventado.ts', lineas: 301 },
-  (m) => m.lineas <= 300,
+  'el medidor ve un archivo de 301 líneas de CÓDIGO',
+  { archivo: 'inventado.ts', lineas: 301, codigo: 301 },
+  (m) => m.codigo <= LIMITE_DE_LINEAS_DE_CODIGO,
 )
 
 // ═══════════════════════════════════════════════════════════════════════════

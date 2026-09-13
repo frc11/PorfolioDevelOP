@@ -48,12 +48,15 @@ import { ARRIBA_DEL_CERO, CAMARAS, CUADROS_SIN_CAMBIO, MAS_ANGOSTO, PEOR_RECORRI
 import { muestrearLogo } from './s10-logo'
 // prettier-ignore
 import { ESCENA_REAL, TINTA_DEL_LOGO, VENTANAS, conPose, fraccionDentro, muestra, superposicion } from './s10-logo-lectura'
-import { SUPUESTOS_DE_LAS_CAJAS } from './s10-logo-cajas'
+import { SUPUESTOS_DE_LAS_CAJAS, cajasDeLaSeccion, renglonesEnLaCaja } from './s10-logo-cajas'
 import { afirmarLaPalancaDeLayout } from './s10-logo-columna'
 import { afirmarElEncuadreLateral } from './s10-logo-lateral'
 // prettier-ignore
 import { INVERTIDAS_TRANSPARENTES, MEJOR_SOBRE_EL_LOGO, PEOR_SOBRE_EL_FONDO, TINTA_CONTRA_TINTA, declaraEnElBloque, tablaDeContraste, tablaDeFraccion, tablaDeSuperposicion } from './s10-logo-tablas'
 
+/** El ancho contra el que se leen las cajas de esta sección: el mismo de la
+ *  última ventana del barrido, que es `--fluido-techo`. Derivado, no escrito. */
+const ANCHO_DE_REFERENCIA = VENTANAS[VENTANAS.length - 1].ancho
 const AA = 4.5
 const pct = (v: number, n = 1): string => `${(v * 100).toFixed(n).padStart(n === 0 ? 4 : 6)}%`
 
@@ -150,6 +153,48 @@ console.log(
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('4 · CUÁNTO SE SUPERPONE CON EL TEXTO — banda derivada, alto modelado, y la posición vertical BARRIDA en vez de inventada')
+
+/**
+ * ⚠️ **ANTES DE LA TABLA: QUE EL TEXTO SE MIDA COMO SE PINTA.**
+ *
+ * Toda cifra de esta sección sale de una caja de texto, y el ancho de una caja
+ * sale de los avances de los glifos QUE SE DIBUJAN. `uppercase` es una clase:
+ * el marcado dice `Tu negocio vendiendo` y la pantalla dibuja
+ * `TU NEGOCIO VENDIENDO`. Hasta HERO-3 el lector medía el crudo, y con una cara
+ * de display que es un subset de mayúsculas cada minúscula caía al `.notdef`:
+ * la línea 1 del Hero se reportaba en DOS renglones.
+ *
+ * **El arreglo cambió la medida de TODA caja en mayúsculas de las ocho
+ * secciones, no sólo la del Hero**, así que necesita su control. El de abajo
+ * corre la misma función del recorrido —`renglonesEnLaCaja`— sobre una caja
+ * REAL con la clase `uppercase` sacada: si el lector no dependiera de ella, el
+ * número no se movería y el control quedaría en rojo.
+ */
+const CAJAS_DEL_HERO = cajasDeLaSeccion('hero', ANCHO_DE_REFERENCIA)
+const LINEA_1 = CAJAS_DEL_HERO.find((c) => c.clases.includes('font-display'))
+afirmar(LINEA_1 !== undefined, 'la línea 1 del Hero es una caja medible y se la encuentra por su clase de familia')
+if (LINEA_1 !== undefined) {
+  const CLASES = LINEA_1.clases.split(' ')
+  afirmarIgual(
+    LINEA_1.texto,
+    LINEA_1.crudo.toUpperCase(),
+    'y se mide COMO SE PINTA: el marcado trae minúsculas y la medida usa las mayúsculas',
+  )
+  afirmarIgual(
+    renglonesEnLaCaja(LINEA_1, LINEA_1.crudo, CLASES),
+    LINEA_1.lineas,
+    `  la cuenta del recorrido y la del control dan lo mismo: ${LINEA_1.lineas} renglón/es a ${ANCHO_DE_REFERENCIA}`,
+  )
+  controlPositivo(
+    '  y el lector SÍ depende de la clase: sin `uppercase` la misma caja cambia de renglones',
+    CLASES.filter((c) => c !== 'uppercase'),
+    (clases: string[]) => renglonesEnLaCaja(LINEA_1, LINEA_1.crudo, clases) === LINEA_1.lineas,
+  )
+  console.log(
+    `  sin la clase, esa caja daría ${renglonesEnLaCaja(LINEA_1, LINEA_1.crudo, CLASES.filter((c) => c !== 'uppercase'))} renglones: ` +
+      'las minúsculas no existen en el subset de la cara de display y caen al `.notdef`.',
+  )
+}
 
 const SUPERPOSICIONES = tablaDeSuperposicion()
 for (const linea of SUPERPOSICIONES.lineas) console.log(`  ${linea}`)

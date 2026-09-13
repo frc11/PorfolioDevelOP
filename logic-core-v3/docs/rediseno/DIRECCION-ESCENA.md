@@ -1913,3 +1913,38 @@ Está acá para que nadie lo dé por resuelto.
     ── **DOS CORRECCIONES QUE SALIERON DE MEDIR D-B8.3, con nombre (reporte §6.5):** (1) y=14400 es la pantalla 16, o sea el ANCLA (p=0,8525, nivel 0,643 en las dos curvas), no la entrada: el barrido mide el diferencial desde que llena el cuadro y la entrada sólo la ve el modelo — dos cifras del mismo defecto que no se pueden comparar hasta decir qué posición mide cada instrumento. (2) Las bajas del hero (0,734 → 0,726) y del diferencial (0,361 → 0,323) NO son la luz ni `SHADOW_FAR` (medido con 64, idéntico): son el revelado, una costura de 135 px en el pie del cuadro contra las secciones que eran opacas; arriba de la franja las capturas son iguales al milésimo. Atribuir un cambio a la luz cuando es de otra cosa es exactamente lo que este proyecto persigue.
 
     ── **TRES TRAMPAS DE INSTRUMENTO, escritas para que no vuelvan:** la máscara de glifo necesita un fondo PLANO detrás de la tinta clara (`MEDICION-NAVEGADOR.md` §5); con la escena dibujando, el revelado de Framer no termina antes del primer cuadro (asentar antes de leer bloques); y con la preferencia de movimiento reducido Servicios mide 2775 y no 2700 (B7), así que la grilla de B5 no es precondición ahí.
+
+52. 🔴 **LOS CUATRO TOKENS DE FAMILIA COMPUTABAN VACÍOS: `/v3` NO PINTABA CON SUS PROPIOS BINARIOS (HERO-1, encontrado en HERO-3).**
+
+    **La causa.** `theme-develop.css` declaraba las cuatro familias dentro de `@theme static` como `--font-titulo: var(--font-v3-chivo), …`, y `--font-v3-chivo` es la variable que `next/font/local` emite **sobre el nodo que lleva la clase**, o sea `[data-v3]`. Una custom property se sustituye **donde se declara**, no donde se usa: al resolverse en `:root`, `var(--font-v3-chivo)` no existía y las cuatro familias quedaban en su valor de reserva. `/v3` venía pintando con la **Chivo de `next/font/google`** que el layout raíz aplica al `<body>`, que se parece lo suficiente como para que nadie lo viera.
+
+    **La premisa falsa, citada.** El docblock de `src/app/v3/layout.tsx` afirmaba que *«una custom property se sustituye en el elemento que la usa»*. Es exactamente al revés, y de ahí salía la confianza en que el arreglo no hacía falta.
+
+    **Lo que esto vuelve tramposo:** `fuentes.invariant` afirma el `sha256` de los binarios de S0 y seguía en verde, porque afirma que los archivos **están y se declaran**, no que el navegador los **pinte**. Es un verde por vacío de la familia de §7.41.
+
+    **El arreglo** es una re-declaración de las cuatro familias sobre `[data-v3]`, fuera de `@theme`. Está aplicado. Lo que queda anotado y **no** hecho: ningún instrumento afirma todavía que la familia computada en `/v3` sea la auto-hospedada. Hasta que exista, este defecto puede volver sin que nada se ponga rojo.
+
+53. 🔴 **EL LECTOR DE CAJAS MEDÍA EL TEXTO CRUDO Y NO EL PINTADO — ALCANCE: LAS OCHO SECCIONES (HERO-3).**
+
+    **La causa.** `s10-logo-cajas.ts` tomaba el texto del marcado y lo medía tal cual, ignorando la clase `uppercase`. Mientras todas las caras tuvieran minúsculas el error era chico y para el lado del piso; con una cara de display que es un **subset de mayúsculas** dejó de serlo, porque cada minúscula cae al `.notdef`. La línea 1 del hero se reportaba en **dos** renglones.
+
+    **El alcance, medido (HERO-4).** Hay **100 cajas con `uppercase`** en las ocho secciones a 1025 y 1440 px — 80 en Chivo, 18 en Chivo Mono, 2 en la de display. De ésas:
+
+    - **1 cambió de RENGLONES**: la línea 1 del hero a 1440 (2 → 1; la tinta pasó de 612,2 a 468,4 px contra una caja de 478,4). Es la única celda publicada que el arreglo movió, porque todo lo que §7.40 publica se deriva del conteo de renglones y no del ancho.
+    - **65 cambiaron de ANCHO sin cambiar de renglones**, o sea que venían mal medidas y no lo suficiente como para cruzar un corte. La mayor: la bajada de Tu panel, **+143,9 px** (854,3 → 998,2) — en Chivo las mayúsculas son más anchas, así que el error iba para el lado del PISO y por eso ningún guardián lo vio.
+    - **34 no se mueven**: ya estaban en mayúsculas en el marcado.
+
+    **El arreglo** está aplicado, con la decisión partida en dos funciones exportadas (`textoComoSePinta` y `caraDeLaClase`) y un **control positivo** que corre la medición real sobre una caja real con la clase sacada: sin `uppercase` esa caja vuelve a dar 2 renglones, y si el lector dejara de depender de la clase el control se pone rojo.
+
+54. ⚠️ **`techo === recta(--container-tope)` ESTÁ EN VERDE CON UNA PREMISA FALSA — MEDIDO Y **NO** EJECUTADO (HERO-3).**
+
+    **La causa.** Las bandas fluidas se cierran afirmando que el techo del `clamp` es la recta evaluada en `--container-tope` (1920). Pero `--container-tope` es el tope del **contenido**, y `Envoltorio` le suma `--pad-lateral` (32 px) **por lado**: la caja deja de crecer cuando el viewport llega a **1984**, no a 1920. O sea que el techo se evalúa **64 px antes** de donde la caja realmente se congela, y entre 1920 y 1984 la banda está achatada contra su techo mientras la caja todavía crece.
+
+    **El costo de corregirlo, medido:** **+1,26 px** arriba de 1984, y **dos afirmaciones reescritas** que hoy comparten los **ocho** niveles fluidos. Ninguna composición cambia por debajo de 1984.
+
+    **Queda numerado y sin ejecutar, por decisión del humano.** No es una deuda de implementación: es que el arreglo toca la vara de todos los niveles a la vez y eso es su propio sprint.
+
+55. ⚠️ **«Ingeniería para negocios reales.» — COPY APROBADO, SIN DESTINO (HERO-3).**
+
+    Salió del hero cuando el titular pasó a dos registros (`TU NEGOCIO VENDIENDO` / `LAS 24 HS`) y la bajada quedó en un renglón. **No está pendiente de redacción: está aprobada.** Lo que falta es **dónde va**. Mientras no tenga lugar, no está en ninguna pantalla y no la cuenta ningún censo de contenido.
+

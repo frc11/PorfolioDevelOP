@@ -27,8 +27,8 @@
  *   1. Ningún archivo del sprint importa fuera de una lista blanca corta.
  *   2. Cero base de datos, cero zonas del otro socio, cero `any`, cero
  *      `router.push`.
- *   3. Ningún archivo pasa las 300 líneas — la regla del repo, aplicada
- *      también a los instrumentos.
+ *   3. Ningún archivo pasa las 300 líneas de CÓDIGO — la regla del repo,
+ *      aplicada también a los instrumentos.
  */
 
 import { readdirSync } from 'node:fs'
@@ -37,7 +37,7 @@ import path from 'node:path'
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
 import { ARCHIVOS_DE_CODIGO, ARCHIVOS_DEL_SPRINT, RAIZ, leer } from './s3-archivos'
 import { quitarComentarios } from './s3-escaneo'
-import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, medir } from './s8-largos'
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Los imports del sprint, uno por uno')
@@ -122,7 +122,7 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('3 · Ningún archivo pasa las 300 líneas')
+titulo('3 · Ningún archivo pasa las 300 líneas de CÓDIGO')
 
 /**
  * ⚠ CAMBIO DE FUENTE, S4 — y es un endurecimiento, no una relajación.
@@ -149,14 +149,16 @@ function instrumentosDeS3(): string[] {
 const INSTRUMENTOS = instrumentosDeS3()
 const TODOS = [...new Set([...ARCHIVOS_DEL_SPRINT, ...INSTRUMENTOS])]
 
-/** B4-A: la cuenta del repo, no una copia. Ver `contarLineas` en `s8-largos.ts`. */
-const medidos = TODOS.map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
-const largos = medidos.filter((r) => r.lineas > LIMITE_DE_LINEAS)
+/** B4-A: la cuenta del repo, no una copia. Ver `contarLineas` en `s8-largos.ts`.
+ *  HERO-4: lo que se AFIRMA son las líneas de CÓDIGO; las totales se publican al
+ *  lado para que el número grande no quede escondido detrás del chico. */
+const medidos = TODOS.map((archivo) => medir(archivo, leer(archivo)))
+const largos = medidos.filter((r) => r.codigo > LIMITE_DE_LINEAS_DE_CODIGO)
 
-afirmarIgual(largos, [], `ninguno de los ${TODOS.length} archivos pasa las 300 líneas`)
+afirmarIgual(largos, [], `ninguno de los ${TODOS.length} archivos pasa las ${LIMITE_DE_LINEAS_DE_CODIGO} líneas de código`)
 
-const masLargo = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
-console.log(`  el más largo: ${masLargo.archivo} — ${masLargo.lineas} líneas`)
+const masLargo = [...medidos].sort((a, b) => b.codigo - a.codigo)[0]
+console.log(`  el más largo: ${masLargo.archivo} — ${masLargo.codigo} de código, ${masLargo.lineas} totales`)
 
 afirmar(
   INSTRUMENTOS.length > 0,
@@ -165,9 +167,16 @@ afirmar(
 )
 
 controlPositivo(
-  'el medidor ve un archivo de más de 300 líneas',
-  { archivo: 'inventado.ts', lineas: 301 },
-  (r) => r.lineas <= 300,
+  'el medidor ve un archivo de más de 300 líneas DE CÓDIGO',
+  { archivo: 'inventado.ts', lineas: 301, codigo: 301 },
+  (r) => r.codigo <= LIMITE_DE_LINEAS_DE_CODIGO,
+)
+/** ⚠️ HERO-4 · Y el control de que la unidad CAMBIÓ: 900 líneas de prosa y una
+ *  de código pasan, que es exactamente lo que la regla vieja no dejaba. */
+controlPositivo(
+  '  y la unidad es CÓDIGO: un archivo de 900 renglones con una sola línea de código pasa',
+  { archivo: 'inventado.ts', lineas: 900, codigo: 1 },
+  (r) => r.lineas <= LIMITE_DE_LINEAS_DE_CODIGO,
 )
 
 cerrar('s3-codigo.invariant')

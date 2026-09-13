@@ -43,7 +43,7 @@ import {
   leer,
 } from './s5-archivos'
 import { afirmarLosOriginales } from './s5-originales'
-import { LIMITE_DE_LINEAS, contarLineas } from './s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, medir } from './s8-largos'
 import {
   IMPORTS_PERMITIDOS,
   PROHIBIDOS,
@@ -254,7 +254,7 @@ controlPositivo(
 )
 
 // ═══════════════════════════════════════════════════════════════════════════
-titulo('8 · Ningún archivo pasa las 300 líneas')
+titulo('8 · Ningún archivo pasa las 300 líneas de CÓDIGO')
 
 const INSTRUMENTOS = instrumentosDeS5()
 /** Los binarios quedan afuera: contarle saltos de línea a un PNG no mide nada. */
@@ -265,15 +265,17 @@ const TODOS = [...new Set([...ARCHIVOS_DE_CODIGO, ...INSTRUMENTOS])]
  *  eso publicaba `Hero.tsx — 300` donde `wc -l` dice 299, o sea **uno más** que
  *  `s6-lane` §7 y `s7-contrato` §7. La cuenta buena ya existía y no la importaba
  *  nadie: `contarLineas` de `s8-largos.ts`, con el porqué de la divergencia. */
-const medidos = TODOS.map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
+const medidos = TODOS.map((archivo) => medir(archivo, leer(archivo)))
 afirmarIgual(
-  medidos.filter((r) => r.lineas > LIMITE_DE_LINEAS),
+  medidos.filter((r) => r.codigo > LIMITE_DE_LINEAS_DE_CODIGO),
   [],
-  `ninguno de los ${TODOS.length} archivos pasa las ${LIMITE_DE_LINEAS} líneas`,
+  `ninguno de los ${TODOS.length} archivos pasa las ${LIMITE_DE_LINEAS_DE_CODIGO} líneas de código`,
 )
 
-const masLargo = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
-console.log(`  el más largo: ${masLargo.archivo} — ${masLargo.lineas} líneas`)
+const masLargo = [...medidos].sort((a, b) => b.codigo - a.codigo)[0]
+console.log(`  el más largo: ${masLargo.archivo} — ${masLargo.codigo} de código, ${masLargo.lineas} totales`)
+const masTotal = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
+console.log(`  el de más RENGLONES: ${masTotal.archivo} — ${masTotal.lineas} totales, ${masTotal.codigo} de código`)
 
 afirmar(
   INSTRUMENTOS.length > 0,
@@ -282,9 +284,9 @@ afirmar(
 )
 
 controlPositivo(
-  'el medidor ve un archivo de más de 300 líneas',
-  { archivo: 'inventado.ts', lineas: LIMITE_DE_LINEAS + 1 },
-  (r: { lineas: number }) => r.lineas <= LIMITE_DE_LINEAS,
+  'el medidor ve un archivo de más de 300 líneas DE CÓDIGO',
+  { archivo: 'inventado.ts', lineas: 0, codigo: LIMITE_DE_LINEAS_DE_CODIGO + 1 },
+  (r: { codigo: number }) => r.codigo <= LIMITE_DE_LINEAS_DE_CODIGO,
 )
 
 /** ⚠️ EL CONTROL DE LA CORRECCIÓN: que el contador nuevo pase no dice nada si el

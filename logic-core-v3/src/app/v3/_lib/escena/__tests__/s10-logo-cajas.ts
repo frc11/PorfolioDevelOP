@@ -41,7 +41,7 @@
 import { NIVELES_TIPOGRAFICOS, type Nivel } from '../../tipografia'
 import { marcadoDeSeccion } from '../../__tests__/s10-banco'
 import { clasesEfectivas, tokenPx, valorDeToken } from '../../__tests__/s10-css'
-import { FUENTE_CODIGO, FUENTE_TITULO, lineasDeTexto } from '../../__tests__/s10-avance'
+import { FUENTE_CODIGO, FUENTE_DISPLAY, FUENTE_TITULO, lineasDeTexto } from '../../__tests__/s10-avance'
 import { leerAvancesDe } from '../../__tests__/s10-woff2'
 import { atributo, nodosDe, textoDe, type Nodo } from '../../__tests__/s10-recorrido'
 
@@ -53,7 +53,11 @@ export interface BandaPx {
 
 export interface CajaMedida {
   readonly etiqueta: string
+  /** El texto COMO SE PINTA: con `uppercase` ya aplicado si la clase está. */
   readonly texto: string
+  /** El texto como está ESCRITO en el marcado. Los dos, porque la diferencia
+   *  entre ellos es lo que un control positivo tiene que poder mover. */
+  readonly crudo: string
   readonly clases: string
   /** La banda de CONTENIDO del elemento: donde el texto puede cortar. */
   readonly banda: BandaPx
@@ -146,6 +150,60 @@ function conTope(banda: BandaPx, clases: readonly string[], ancho: number): Band
     ? banda.izquierda + (banda.ancho - w) / 2
     : banda.izquierda
   return { izquierda, ancho: w }
+}
+
+/**
+ * ⚠️ **EL TEXTO COMO SE PINTA, Y ESO INCLUYE LA CAJA DE LA LETRA.**
+ *
+ * `uppercase` es una CLASE, no un dato del contenido: el marcado dice
+ * `Tu negocio vendiendo` y la pantalla dibuja `TU NEGOCIO VENDIENDO`. Medir lo
+ * primero era un error chico y para el lado del piso mientras todas las caras
+ * tuvieran minúsculas; con una cara de display que es un subset de MAYÚSCULAS
+ * deja de ser chico, porque cada minúscula cae al `.notdef`. La línea 1 del
+ * Hero se reportaba en DOS renglones por eso. `s10-mobile.ts` ya lo hacía.
+ *
+ * Va como función exportada y no como una expresión adentro del recorrido para
+ * que el control positivo pueda correr **ésta**, con la clase sacada, y no otra
+ * copia del mismo condicional.
+ */
+export function textoComoSePinta(crudo: string, clases: readonly string[]): string {
+  return clases.includes('uppercase') ? crudo.toUpperCase() : crudo
+}
+
+/**
+ * LA CARA SALE DE LA CLASE DE FAMILIA, y son TRES desde el titular rehecho.
+ *
+ * `font-display` se pregunta primero: es la única cara cuyo avance NO se parece
+ * al de Chivo (8,4750 em contra 11,8330 en el mismo texto), o sea que medirla
+ * con la equivocada la reportaría 39,6 % más ancha — no el error de fracciones
+ * de porcentaje que los supuestos declaran.
+ */
+export function caraDeLaClase(clases: readonly string[]): string {
+  if (clases.includes('font-display')) return FUENTE_DISPLAY
+  return clases.includes('font-codigo') ? FUENTE_CODIGO : FUENTE_TITULO
+}
+
+/**
+ * Los renglones que ocupa un texto CRUDO en la caja de una `CajaMedida` ya
+ * medida, con las clases que se le pasen.
+ *
+ * Es la misma cuenta que hace el recorrido, expuesta para poder repetirla con
+ * una entrada deliberadamente rota: cambiarle las clases a una caja real y ver
+ * cuántos renglones da. Sin esto, el control positivo del `uppercase` tendría
+ * que reescribir la medición, y una medición reescrita no prueba la de al lado.
+ */
+export function renglonesEnLaCaja(
+  caja: CajaMedida,
+  crudo: string,
+  clases: readonly string[],
+): number {
+  return lineasDeTexto(
+    leerAvancesDe(caraDeLaClase(clases)),
+    textoComoSePinta(crudo, clases),
+    caja.banda.ancho,
+    caja.tamanoPx,
+    interletradoEm(clases),
+  )
 }
 
 /** El interletrado en `em` de una clase `tracking-*`. 0 si no declara ninguna. */
@@ -253,13 +311,18 @@ export function cajasDeLaSeccion(id: string, ancho: number): CajaMedida[] {
         ancho,
       )
       const tamanoPx = tokenPx(token, ancho)
-      const texto = textoDe(html, n)
-      const fuente = clases.includes('font-codigo') ? FUENTE_CODIGO : FUENTE_TITULO
+      /** El texto y la cara salen de las CLASES, no del contenido crudo. Las dos
+       *  decisiones están arriba, en `textoComoSePinta` y `caraDeLaClase`, para
+       *  que el control positivo pueda correr las mismas funciones. */
+      const crudo = textoDe(html, n)
+      const texto = textoComoSePinta(crudo, clases)
+      const fuente = caraDeLaClase(clases)
       const tracking = interletradoEm(clases)
       const lineas = lineasDeTexto(leerAvancesDe(fuente), texto, interno[i].ancho, tamanoPx, tracking)
       return {
         etiqueta: n.etiqueta,
         texto,
+        crudo,
         clases: clases.join(' '),
         banda: interno[i],
         tamanoPx,

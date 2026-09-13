@@ -25,7 +25,7 @@ import path from 'node:path'
 
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirmar'
-import { LARGOS_HEREDADOS, heredadosQueCrecieron } from './s8-largos'
+import { LARGOS_HEREDADOS, heredadosQueCrecieron, medir, type Largo } from './s8-largos'
 import { afirmarElAcoplamientoCerrado } from './s9-acoplamiento'
 import { afirmarElCensoDelLane } from './s9-censoDelLane'
 import { afirmarElScrollPadding } from './s9-scrollPadding'
@@ -98,7 +98,7 @@ afirmarIgual(
  * 13 (lo heredado se publica con atribución y se vigila), y va abajo con el Δ
  * de cada uno. Un Δ negativo no es una falla: es un aviso de que la base sobra.
  */
-const medidos = heredados.map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
+const medidos = heredados.map((archivo) => medir(archivo, leer(archivo)))
 afirmarIgual(
   heredadosQueCrecieron(medidos),
   [],
@@ -116,12 +116,11 @@ console.log(
 )
 controlPositivo(
   'la vigilancia ve un heredado que ENGORDÓ',
-  [{ archivo: heredados[0], lineas: LARGOS_HEREDADOS[heredados[0]] + 1 }],
-  (lista: readonly { readonly archivo: string; readonly lineas: number }[]) =>
-    heredadosQueCrecieron(lista).length === 0,
+  [{ archivo: heredados[0], lineas: LARGOS_HEREDADOS[heredados[0]] + 1, codigo: 0 }],
+  (lista: readonly Largo[]) => heredadosQueCrecieron(lista).length === 0,
 )
 afirmarIgual(
-  heredadosQueCrecieron([{ archivo: heredados[0], lineas: LARGOS_HEREDADOS[heredados[0]] - 1 }]),
+  heredadosQueCrecieron([{ archivo: heredados[0], lineas: LARGOS_HEREDADOS[heredados[0]] - 1, codigo: 0 }]),
   [],
   '  y NO se pone en rojo con uno que ADELGAZÓ, que es exactamente lo que hará el sprint de limpieza de §7.13',
 )

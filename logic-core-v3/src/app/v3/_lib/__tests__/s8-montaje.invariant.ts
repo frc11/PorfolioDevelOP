@@ -27,7 +27,7 @@ import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from './afirma
 import { quitarComentarios } from './s3-escaneo'
 // prettier-ignore
 import { TODO_SRC, afirmarQueNadaSumaAltoAfueraDelMain, importanLaMarca, invariantesSueltos, largosDelSprint, scriptsDelPaquete, veLaMarca } from './s8-montaje-soporte'
-import { LIMITE_DE_LINEAS, contarLineas, heredadosQueCrecieron, propiosQuePasan, repartir, type Largo } from './s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, heredadosQueCrecieron, lineasDeCodigo, propiosQuePasan, repartir, type Largo } from './s8-largos'
 
 const RUTAS_DEL_INTRO = ['/', '/v3']
 
@@ -243,18 +243,29 @@ afirmar(medidos.length > 0, `el medidor miró ${medidos.length} archivos del spr
 afirmarIgual(
   propiosQuePasan(reparto),
   [],
-  `ninguno de los ${reparto.propios.length} archivos que S8 ESCRIBIÓ pasa las ${LIMITE_DE_LINEAS} líneas`,
+  `ninguno de los ${reparto.propios.length} archivos que S8 ESCRIBIÓ pasa las ${LIMITE_DE_LINEAS_DE_CODIGO} líneas de código`,
 )
 
 console.log(`  HEREDADO de la mudanza — deuda de §7.13, publicada con atribución (regla 13):`)
-for (const m of reparto.heredados) console.log(`    ${m.archivo}  ${m.lineas} líneas`)
+for (const m of reparto.heredados) {
+  console.log(
+    `    ${m.archivo}  ${m.codigo} de código · ${m.lineas} totales  ${m.codigo > LIMITE_DE_LINEAS_DE_CODIGO ? '🔴 pasa el límite' : 'ok con la unidad de HERO-4'}`,
+  )
+}
 console.log('    llegaron así: la mudanza no cambió una línea que no fuera un import.')
 afirmarIgual(heredadosQueCrecieron(medidos), [], '  y ninguno engordó contra su línea de base')
 
 controlPositivo(
-  'el medidor ve un archivo propio de 301 líneas',
-  [{ archivo: 'inventado.ts', lineas: 301 }],
+  'el medidor ve un archivo propio de 301 líneas de CÓDIGO',
+  [{ archivo: 'inventado.ts', lineas: 301, codigo: 301 }],
   (l: Largo[]) => propiosQuePasan(repartir(l)).length === 0,
+)
+/** ⚠️ HERO-4 · El control de que la unidad CAMBIÓ de verdad: los mismos 301
+ *  renglones, si son prosa, NO pueden aparecer en la lista. */
+controlPositivo(
+  '  y NO ve uno de 301 renglones con 12 de código: la unidad es código, no prosa',
+  [{ archivo: 'inventado.ts', lineas: 301, codigo: 12 }],
+  (l: Largo[]) => propiosQuePasan(repartir(l)).length > 0,
 )
 controlPositivo(
   'y la cuenta de líneas no le suma una al salto final: 300 líneas son 300',
@@ -263,7 +274,7 @@ controlPositivo(
 )
 controlPositivo(
   'y la vigilancia ve un heredado que engordó una línea',
-  [{ archivo: 'src/app/v3/_lib/escena/OrbitRig.tsx', lineas: 653 }],
+  [{ archivo: 'src/app/v3/_lib/escena/OrbitRig.tsx', lineas: 653, codigo: 0 }],
   (l: Largo[]) => heredadosQueCrecieron(l).length === 0,
 )
 
@@ -296,5 +307,48 @@ afirmarIgual(
 afirmar(cuentaPropia(leer(PUEDE_CORRER_LA_CUENTA_VIEJA)), `  y el detector NO está ciego: ve la cuenta vieja en \`${PUEDE_CORRER_LA_CUENTA_VIEJA.split('/').pop() ?? ''}\`, el único que la corre a propósito`)
 controlPositivo('el detector ve la cuenta vieja en código', `const n = t.split('${'\\'}n').length`, (t: string) => !cuentaPropia(t))
 controlPositivo('  y NO la ve en un comentario, que es donde se explica por qué ya no está', `/* era t.split('${'\\'}n').length */`, (t: string) => cuentaPropia(t))
+
+/**
+ * ⚠️ **HERO-4 · Y LA SEGUNDA CUENTA TAMPOCO SE PUEDE SEPARAR DE LA PRIMERA.**
+ *
+ * El límite pasó a medirse en líneas de CÓDIGO, y eso obligó a escribir qué es
+ * un comentario. Ese criterio YA existía —`quitarComentarios` de `s3-escaneo`,
+ * con 67 consumidores— y `lineasDeCodigo` es el MISMO criterio conservando los
+ * renglones, que es lo único que aquél no hace. Dos criterios de «comentario»
+ * en un repo que ya se quemó con nueve copias de una cuenta de líneas vuelven a
+ * divergir; acá se afirma, archivo por archivo, que ven lo mismo.
+ *
+ * ⚠ **La afirmación es sobre los CARACTERES que quedan en pie, no sobre en qué
+ * renglón quedan, y la diferencia la midió este mismo control.** Aquél BORRA el
+ * bloque y con eso pega lo de antes con lo de después: un `{` de JSX, un bloque
+ * de dos renglones y un `}` le quedan como un solo `{}`, y a ésta como un `{` y
+ * un `}` separados — pasa en 24 archivos de `/v3`, todos `.tsx`. Dónde cae el
+ * corte de renglón difiere por construcción, que es lo único que ésta agrega; el
+ * código que sobrevive no puede diferir sin que sean dos criterios.
+ */
+const soloCaracteres = (xs: readonly string[]): string =>
+  [...xs.join('')].filter((c) => c.trim().length > 0).join('')
+const discrepan = DE_V3.filter((a) => {
+  const fuente = leer(a)
+  const mia = lineasDeCodigo(fuente)
+  const suya = quitarComentarios(fuente)
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((t) => t.length > 0)
+  return soloCaracteres(mia) !== soloCaracteres(suya)
+})
+afirmarIgual(
+  discrepan,
+  [],
+  `los ${DE_V3.length} archivos de /v3 dejan EL MISMO código en pie con las dos: \`lineasDeCodigo\` y \`quitarComentarios\` son UN criterio`,
+)
+controlPositivo(
+  'y el lector no devuelve el archivo entero: un texto que es SÓLO comentario no deja código en pie',
+  '// const a = 1',
+  (t: string) => soloCaracteres(lineasDeCodigo(t)) === soloCaracteres([t]),
+)
+console.log(
+  `  la unidad del límite es CÓDIGO (${LIMITE_DE_LINEAS_DE_CODIGO}); la cuenta de renglones sigue viva y se publica al lado.`,
+)
 
 cerrar('s8-montaje.invariant')

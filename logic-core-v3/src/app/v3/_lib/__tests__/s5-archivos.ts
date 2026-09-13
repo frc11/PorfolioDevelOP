@@ -142,6 +142,11 @@ export const ARCHIVOS_DE_APOYO = [
   `${RAIZ_DE_SECCIONES}/trabajos/asentamiento.ts`,
   // B12 · `gota.ts`: el núcleo PURO de la entrada (máscara radial, sin DOM).
   `${RAIZ_DE_SECCIONES}/trabajos/gota.ts`,
+  // TITULAR · los DOS que salieron del Hero al pasar las 300 líneas, mismo corte que Trabajos:
+  // `geometria.ts` los números y las dos tipografías (el nivel `display` DERIVA del ancho de la
+  // caja) y `soporte.ts` las cuatro cuentas. §11 del invariante escanea el primero, y lo dice.
+  `${RAIZ_DE_SECCIONES}/hero/geometria.ts`,
+  `${RAIZ_DE_SECCIONES}/hero/soporte.ts`,
 ]
 
 /**

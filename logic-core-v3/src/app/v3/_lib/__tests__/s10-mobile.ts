@@ -36,13 +36,27 @@
  */
 
 import { NIVELES, NIVELES_TIPOGRAFICOS, type Nivel } from '../tipografia'
-import { FUENTE_CODIGO, FUENTE_TITULO, lineasDeTexto } from './s10-avance'
+import { FUENTE_CODIGO, FUENTE_DISPLAY, FUENTE_TITULO, lineasDeTexto } from './s10-avance'
 import { anchoDeContenido, clasesEfectivas, tokenPx } from './s10-css'
 import { atributo, nodosDe, textoDe, type Nodo } from './s10-recorrido'
 import { leerAvancesDe, type TablasDeAvance } from './s10-woff2'
 
 export const CHIVO: TablasDeAvance = leerAvancesDe(FUENTE_TITULO)
 export const CHIVO_MONO: TablasDeAvance = leerAvancesDe(FUENTE_CODIGO)
+/** La cara de display. Sólo la consume el nivel `display`, o sea la línea 1
+ *  del titular del Hero: es la única cosa del sitio que se pinta con ella. */
+export const ARCHIVO: TablasDeAvance = leerAvancesDe(FUENTE_DISPLAY)
+
+/**
+ * LA CARA CON LA QUE SE MIDE UN NIVEL — derivada de la tabla, no listada.
+ *
+ * El nivel `display` es el único que se pinta con `--font-display`, y eso NO es
+ * un detalle del Hero: es una propiedad del nivel, declarada en
+ * `NIVELES_TIPOGRAFICOS`. Medir la línea 1 con Chivo daría 11,8330 em contra
+ * 8,4750 —un 39,6 % de más— y el error no empujaría para el lado del piso.
+ */
+export const caraDelNivel = (nivel: Nivel): TablasDeAvance =>
+  nivel === 'display' ? ARCHIVO : CHIVO
 
 /** Los interletrados, como fracción de `em`. Salen del tema y no se escriben. */
 export const tracking = (nombre: string): number => tokenPx(`--tracking-${nombre}`, 0) / 16
@@ -174,7 +188,14 @@ export function altoDeTinta(html: string, desde: number, hasta: number, ancho: n
     const tam = tokenPx(tokenDeCaja(nivel, clases), ancho)
     const crudo = textoDe(html, n)
     const texto = clases.includes('uppercase') ? crudo.toUpperCase() : crudo
-    const tablas = clases.includes('font-codigo') ? CHIVO_MONO : CHIVO
+    // La cara sale de la clase de familia. Son TRES desde el titular rehecho, y
+    // la de display se pregunta primero: es la única cuyo avance no se parece al
+    // de Chivo (8,4750 em contra 11,8330 en el mismo texto).
+    const tablas = clases.includes('font-display')
+      ? ARCHIVO
+      : clases.includes('font-codigo')
+        ? CHIVO_MONO
+        : CHIVO
     const lineas = lineasDeTexto(tablas, texto, disponible, tam, tracking(d.interletrado))
     total += lineas * tam * tokenPx(`--leading-${d.interlineado}`, ancho)
   }

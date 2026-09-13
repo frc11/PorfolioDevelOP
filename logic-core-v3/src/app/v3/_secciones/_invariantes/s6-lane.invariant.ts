@@ -9,7 +9,7 @@
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
 import { apagadosDeFoco, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
-import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, medir } from '../../_lib/__tests__/s8-largos'
 import { IDS_DE_SERVICIO } from '../_contrato/acento'
 import {
   ARCHIVO_EXCEPTUADO_DEL_ESCANEO,
@@ -273,19 +273,21 @@ titulo('7 · Ningún archivo pasa las 300 líneas')
  * `s8-largos.ts`, que es donde está el porqué. El número no se mueve: los 374
  * archivos de `src/app/v3` terminan en salto y ahí las dos formas coinciden.
  */
-const medidos = [...CODIGO, ...INSTRUMENTOS].map((archivo) => ({
-  archivo,
-  lineas: contarLineas(leer(archivo)),
-}))
+/** ⚠ **HERO-4 · Y la UNIDAD tampoco se escribe acá.** El límite pasó a medirse
+ *  en líneas de CÓDIGO; como la cuenta ya tenía dueño, lo único que cambió en
+ *  este archivo es qué campo se lee. Los renglones se siguen publicando. */
+const medidos = [...CODIGO, ...INSTRUMENTOS].map((archivo) => medir(archivo, leer(archivo)))
 afirmarIgual(
-  medidos.filter((m) => m.lineas > LIMITE_DE_LINEAS),
+  medidos.filter((m) => m.codigo > LIMITE_DE_LINEAS_DE_CODIGO),
   [],
-  `ninguno de los ${medidos.length} archivos del lane pasa las ${LIMITE_DE_LINEAS} líneas`,
+  `ninguno de los ${medidos.length} archivos del lane pasa las ${LIMITE_DE_LINEAS_DE_CODIGO} líneas de código`,
 )
-const masLargo = [...medidos].sort((a, b) => b.lineas - a.lineas)[0]
-console.log(`  el más largo: ${masLargo.archivo.replace(`${LANE}/`, '')} — ${masLargo.lineas} líneas`)
+const masLargo = [...medidos].sort((a, b) => b.codigo - a.codigo)[0]
+console.log(
+  `  el más largo: ${masLargo.archivo.replace(`${LANE}/`, '')} — ${masLargo.codigo} de código, ${masLargo.lineas} totales`,
+)
 afirmar(INSTRUMENTOS.length > 0, `${INSTRUMENTOS.length} instrumentos incluidos en la cuenta`)
 
-controlPositivo('el medidor ve un archivo de 301 líneas', { archivo: 'inventado.ts', lineas: 301 }, (m) => m.lineas <= 300)
+controlPositivo('el medidor ve un archivo de 301 líneas de CÓDIGO', { archivo: 'inventado.ts', lineas: 301, codigo: 301 }, (m) => m.codigo <= LIMITE_DE_LINEAS_DE_CODIGO)
 
 cerrar('s6-lane.invariant')

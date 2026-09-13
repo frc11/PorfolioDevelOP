@@ -20,7 +20,7 @@
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import {
   apagadosDeFoco,
   arbitrariosSinVar,
@@ -145,7 +145,7 @@ controlPositivo('y el detector de precios ve el suyo', 'desde $99.000 por mes', 
 titulo('4 · Cero valores fuera de los tokens, archivo por archivo')
 
 console.log(`  ${ARCHIVOS.length} archivos de producto, ${CODIGO.length} caracteres:`)
-for (const a of ARCHIVOS) console.log(`    ${a} — ${contarLineas(leer(a))} líneas`)
+for (const a of ARCHIVOS) console.log(`    ${a} — ${contarLineasDeCodigo(leer(a))} de código, ${contarLineas(leer(a))} totales`)
 
 for (const archivo of ARCHIVOS) {
   const fuente = quitarComentarios(leer(archivo))
@@ -154,7 +154,7 @@ for (const archivo of ARCHIVOS) {
   afirmarIgual(funcionesDeColorEncontradas(fuente), [], `${corto}: cero funciones de color`)
   afirmarIgual(literalesConUnidad(fuente), [], `${corto}: cero literales con unidad`)
   afirmarIgual(arbitrariosSinVar(fuente), [], `${corto}: toda clase arbitraria consume var(--token)`)
-  afirmar(contarLineas(leer(archivo)) <= LIMITE_DE_LINEAS, `${corto}: no pasa las 300 líneas`)
+  afirmar(contarLineasDeCodigo(leer(archivo)) <= LIMITE_DE_LINEAS_DE_CODIGO, `${corto}: no pasa las 300 líneas de código`)
 }
 afirmarIgual(cuentaDe(CODIGO, /style=\{\{/g), 0, 'ningún archivo del producto escribe un estilo inline propio — los dos que hay los ponen `Panel` y `HuecoDeMedio` desde el dato')
 

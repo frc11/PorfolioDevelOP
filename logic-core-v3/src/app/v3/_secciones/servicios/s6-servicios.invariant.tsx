@@ -17,7 +17,7 @@ import { useMotionValue } from 'motion/react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
 import { afirmar, afirmarIgual, cerrar, controlPositivo, titulo } from '../../_lib/__tests__/afirmar'
-import { LIMITE_DE_LINEAS, contarLineas } from '../../_lib/__tests__/s8-largos'
+import { LIMITE_DE_LINEAS_DE_CODIGO, contarLineas, contarLineasDeCodigo } from '../../_lib/__tests__/s8-largos'
 import { apagadosDeFoco, arbitrariosSinVar, funcionesDeColorEncontradas, hexEncontrados, literalesConUnidad, quitarComentarios } from '../../_lib/__tests__/s3-escaneo'
 import { rangoDeScroll, type ParDeAnclas } from '../../_lib/motion/anclas'
 import { ATRIBUTO_PIEZAS } from '../../_lib/motion/lineas'
@@ -60,11 +60,11 @@ const ARCHIVOS = codigoDeLaSeccion('servicios')
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('1 · Qué se construyó, y las cifras que van al reporte')
 
-for (const a of ARCHIVOS) console.log(`  ${String(contarLineas(leer(a))).padStart(4)} líneas  ${a}`)
+for (const a of ARCHIVOS) console.log(`  ${String(contarLineasDeCodigo(leer(a))).padStart(4)} de código · ${String(contarLineas(leer(a))).padStart(4)} totales  ${a}`)
 console.log(`  párrafos: ${IDS_DE_SERVICIO.map((id) => `${id} ${LONGITUDES[id]} palabras`).join(' · ')}`)
 console.log(`  marcado: rama quieta ${quieto.length} caracteres · rama animada ${animado.length}`)
 afirmar(ARCHIVOS.length > 0, `${ARCHIVOS.length} archivos de producto en la carpeta`, ARCHIVOS.map((a) => a.split('/').pop()).join(' · '))
-afirmar(ARCHIVOS.every((a) => contarLineas(leer(a)) <= LIMITE_DE_LINEAS), 'ningún archivo pasa las 300 líneas')
+afirmar(ARCHIVOS.every((a) => contarLineasDeCodigo(leer(a)) <= LIMITE_DE_LINEAS_DE_CODIGO), 'ningún archivo pasa las 300 líneas de código')
 
 // ═══════════════════════════════════════════════════════════════════════════
 titulo('2 · Abajo de 1025 la sección se lee entera y no se mueve nada')

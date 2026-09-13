@@ -66,6 +66,27 @@
  * y el delta es prosa. El día que crezca por otra razón, la base sigue en 471 y
  * el censo se pone rojo igual.
  */
+/**
+ * ⚠️ **HERO-4 · CINCO DE LOS SEIS DEJARON DE SER DEUDA, Y NO SE TOCÓ NINGUNO.**
+ *
+ * Con el límite medido en líneas de CÓDIGO, lo que estos seis archivos pasan es
+ * esto —totales → código, contra el límite de 300—:
+ *
+ *     OrbitRig.tsx      642 → 367   🔴 el ÚNICO que sigue pasando
+ *     choreography.ts   440 →  60   es una tabla de keyframes con su porqué
+ *     probeStore.ts     406 → 159
+ *     lightRig.ts       356 → 205
+ *     probeScene.ts     348 →  50
+ *     probeMoire.ts     ≤300 →  —   ya había bajado solo
+ *
+ * O sea que «el sprint de limpieza» de §7.13 tiene **un** archivo, no seis, y
+ * los otros cinco nunca hicieron demasiadas cosas: estaban documentados.
+ *
+ * El mapa se deja ENTERO igual, y a propósito. Es una línea de base de
+ * regresión escrita en totales: sacar una fila acá no cierra una deuda, apaga
+ * una vigilancia. Quién la saca y con qué prueba es una decisión del humano, no
+ * un efecto colateral de cambiarle la unidad al límite.
+ */
 export const LARGOS_HEREDADOS: Readonly<Record<string, number>> = {
   'src/app/v3/_lib/escena/OrbitRig.tsx': 651,
   'src/app/v3/_lib/escena/choreography.ts': 471,
@@ -75,12 +96,41 @@ export const LARGOS_HEREDADOS: Readonly<Record<string, number>> = {
   'src/app/v3/_lib/escena/probeMoire.ts': 300,
 }
 
-/** El límite del repo. Una sola definición. */
-export const LIMITE_DE_LINEAS = 300
+/**
+ * EL LÍMITE DEL REPO — 300, y desde HERO-4 se mide en líneas de **CÓDIGO**.
+ *
+ * ── Por qué cambió la unidad y no el número ────────────────────────────────
+ *
+ * El límite existe contra el archivo que hace demasiadas cosas: «componente de
+ * más de 300 líneas sin separación de responsabilidades» es como `CLAUDE.md` lo
+ * escribe, y lo que ahí se mide es cuánto código convive. Contando líneas
+ * TOTALES medía otra cosa: **la prosa**. Y este repo pide prosa —cada decisión
+ * con su porqué al lado del valor— así que la vara castigaba exactamente la
+ * práctica que el método exige. La evidencia está escrita arriba, en este mismo
+ * archivo: la línea de base de `choreography.ts` se movió de 462 a 471 por
+ * **«9 líneas de comentario y ni una de código»**, y hubo que argumentar por
+ * escrito que eso no era aflojar el umbral. Con la unidad correcta no habría
+ * habido nada que argumentar.
+ *
+ * El número se queda en 300 a propósito: mover los dos a la vez haría
+ * incomparable todo lo publicado hasta acá.
+ *
+ * ⚠ **Qué es una línea de código, y qué se decidió sobre las vacías.** Es la que
+ * no es comentario y no está vacía. La vacía queda AFUERA porque es formato:
+ * contarla ataría la vara a cómo agrupa `prettier`, y un renglón en blanco no
+ * es una cosa más que el archivo hace. La consecuencia se dice sin adornos: un
+ * archivo puede tener 700 líneas en disco y pasar. El censo publica las dos
+ * cifras —código y totales— en todos lados justamente para que eso no quede
+ * escondido.
+ */
+export const LIMITE_DE_LINEAS_DE_CODIGO = 300
 
 export interface Largo {
   readonly archivo: string
+  /** Las que cuenta `wc -l`. Se publican. */
   readonly lineas: number
+  /** Las que NO son comentario ni están vacías. Son las que se afirman. */
+  readonly codigo: number
 }
 
 export interface Reparto {
@@ -133,6 +183,44 @@ export function contarLineas(texto: string): number {
   return partes.length > 0 && partes[partes.length - 1] === '' ? partes.length - 1 : partes.length
 }
 
+/**
+ * LAS LÍNEAS DE CÓDIGO, ya recortadas. La que afirma el límite.
+ *
+ * ⚠ **La definición de «comentario» NO es nueva: es la de `quitarComentarios`
+ * de `s3-escaneo.ts`**, que ya la usan 67 lugares del repo. Escribir acá un
+ * segundo criterio sería repetir el defecto que este mismo archivo documenta
+ * más arriba —nueve copias de una cuenta de líneas, y el arreglo llegando sólo
+ * a dos—. Lo único que cambia es que ésta **conserva los renglones**: aquélla
+ * junta lo que queda y un bloque de siete líneas se vuelve una sola, que para
+ * buscar patrones da igual y para contar renglones no. `s8-montaje` afirma que
+ * las dos ven el mismo conjunto de líneas, archivo por archivo, y por eso no
+ * pueden separarse en silencio.
+ *
+ * Los tres pasos, en orden:
+ *   1 · los comentarios de BLOQUE se vacían **conservando sus saltos**;
+ *   2 · se tira la línea que arranca con `//` o con `*` —la continuación de un
+ *       bloque que la regex no haya cerrado—;
+ *   3 · se tira la vacía.
+ *
+ * Lo que NO hace, dicho para poder desconfiar: no entiende literales. Un `/*`
+ * adentro de un string sin su cierre en el mismo archivo se comería código de
+ * verdad. Es el mismo riesgo que corre `quitarComentarios` desde que existe, y
+ * la salida del censo —que publica código y totales lado a lado— es donde se
+ * vería: un archivo con 700 líneas y 12 de código no pasa desapercibido.
+ */
+export function lineasDeCodigo(texto: string): string[] {
+  return texto
+    .replace(/\/\*[\s\S]*?\*\//g, (bloque) => '\n'.repeat((bloque.match(/\n/g) ?? []).length))
+    .split('\n')
+    .map((linea) => linea.trim())
+    .filter((t) => t.length > 0 && !t.startsWith('//') && !t.startsWith('*'))
+}
+
+/** Cuántas líneas de código tiene un texto. Lo que el límite mide. */
+export function contarLineasDeCodigo(texto: string): number {
+  return lineasDeCodigo(texto).length
+}
+
 /** Mide los `.ts`/`.tsx` de una lista de rutas que existan en disco. */
 export function medirLargos(
   rutas: readonly string[],
@@ -142,7 +230,12 @@ export function medirLargos(
   return [...new Set(rutas)]
     .filter((a) => /\.tsx?$/.test(a) && existe(a))
     .sort()
-    .map((archivo) => ({ archivo, lineas: contarLineas(leer(archivo)) }))
+    .map((archivo) => medir(archivo, leer(archivo)))
+}
+
+/** Las dos cuentas de un archivo, juntas: nunca se publica una sin la otra. */
+export function medir(archivo: string, fuente: string): Largo {
+  return { archivo, lineas: contarLineas(fuente), codigo: contarLineasDeCodigo(fuente) }
 }
 
 /** Parte una lista de archivos medidos en lo propio y lo heredado. */
@@ -156,8 +249,8 @@ export function repartir(medidos: readonly Largo[]): Reparto {
 /** Los propios que pasan el límite. Vacío o el invariante falla. */
 export function propiosQuePasan(reparto: Reparto): string[] {
   return reparto.propios
-    .filter((m) => m.lineas > LIMITE_DE_LINEAS)
-    .map((m) => `${m.archivo}:${m.lineas}`)
+    .filter((m) => m.codigo > LIMITE_DE_LINEAS_DE_CODIGO)
+    .map((m) => `${m.archivo}:${m.codigo} de código (${m.lineas} totales)`)
 }
 
 /**
@@ -166,11 +259,18 @@ export function propiosQuePasan(reparto: Reparto): string[] {
  * por eso salen juntas.
  */
 export function heredadosQueCrecieron(medidos: readonly Largo[]): string[] {
+  /** ⚠ **La vigilancia sigue en líneas TOTALES y el límite no.** No es un
+   *  descuido: son dos preguntas distintas. El límite pregunta «¿este archivo
+   *  hace demasiadas cosas?», y eso se contesta con código. La línea de base
+   *  pregunta «¿esta deuda engordó desde que la declaramos?», y las bases están
+   *  escritas en totales —una por una, con su historia— desde S8. Pasarlas a
+   *  código las reescribiría todas y borraría la única cosa que la tabla sabe:
+   *  cómo llegaron. */
   const crecidos = medidos
     .filter((m) => m.archivo in LARGOS_HEREDADOS && m.lineas > LARGOS_HEREDADOS[m.archivo])
     .map((m) => `${m.archivo}:${m.lineas} (base ${LARGOS_HEREDADOS[m.archivo]})`)
   const nuevos = medidos
-    .filter((m) => m.lineas > LIMITE_DE_LINEAS && !(m.archivo in LARGOS_HEREDADOS))
-    .map((m) => `${m.archivo}:${m.lineas} (sin declarar)`)
+    .filter((m) => m.codigo > LIMITE_DE_LINEAS_DE_CODIGO && !(m.archivo in LARGOS_HEREDADOS))
+    .map((m) => `${m.archivo}:${m.codigo} de código (sin declarar)`)
   return [...crecidos, ...nuevos].sort()
 }
