@@ -1,0 +1,745 @@
+{
+  "cuando": "2026-09-15T21:42:56.096Z",
+  "ventana": {
+    "ancho": 390,
+    "alto": 844
+  },
+  "banderas": [
+    "--disable-gpu-vsync",
+    "--disable-frame-rate-limit"
+  ],
+  "duracionMs": 3000,
+  "repeticiones": 4,
+  "instrumento": {
+    "desacoplado": true,
+    "controlGraduadoDeRellenoDeGpu": false,
+    "ruidoPct": 3.78,
+    "separacionPct": 34.85,
+    "separaContraElRuido": true,
+    "valido": true,
+    "queMide": "ritmo del hilo principal con el vsync apagado; ciego al relleno de GPU (el control graduado de desenfoque da 0 %)"
+  },
+  "resumen": [
+    {
+      "id": "base",
+      "que": "la escena de hoy a 390, tal cual",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1325.53,
+      "p50Mediano": 0.6,
+      "p95Mediano": 2.1,
+      "largosMedianos": 8,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "dpr-1",
+      "que": "RECIBO (no control): a 390 el producto ya clava dpr [1,1], así que el lienzo no cambia",
+      "dpr": 1,
+      "corridas": 4,
+      "fpsMediano": 1246.39,
+      "p50Mediano": 0.5,
+      "p95Mediano": 3.5,
+      "largosMedianos": 7,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "sin-escena",
+      "que": "CONTROL negativo: la escena oculta, el piso de la página sin WebGL",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1359.24,
+      "p50Mediano": 0.6,
+      "p95Mediano": 1.6,
+      "largosMedianos": 11,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "blur-8",
+      "que": "CONTROL positivo graduado (1/2): backdrop-filter blur(8px) a pantalla completa",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1345.29,
+      "p50Mediano": 0.6,
+      "p95Mediano": 1.9,
+      "largosMedianos": 7,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "blur-64",
+      "que": "CONTROL positivo graduado (2/2): blur(64px) — tiene que dar PEOR que blur-8",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1375.57,
+      "p50Mediano": 0.6,
+      "p95Mediano": 2.1,
+      "largosMedianos": 7,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "blend-trabado",
+      "que": "(b) el blend sobre el árbol de hoy: la cadena está cortada, el fondo del grupo es estático",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1358.24,
+      "p50Mediano": 0.6,
+      "p95Mediano": 2,
+      "largosMedianos": 5,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "destrabado",
+      "que": "(b) la inyección del destrabe SOLA, para poder restarla",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1366.29,
+      "p50Mediano": 0.6,
+      "p95Mediano": 2.2,
+      "largosMedianos": 9,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "blend-destrabado",
+      "que": "(b) EL NÚMERO DE LA PREGUNTA: el blend en los 289 bloques de texto, mezclando contra el canvas vivo",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 863.61,
+      "p50Mediano": 1.2,
+      "p95Mediano": 2,
+      "largosMedianos": 0,
+      "factorDelLienzo": 1
+    },
+    {
+      "id": "blend-un-nodo",
+      "que": "(b) EL DISCRIMINADOR DEL COSTO: UN solo nodo a pantalla completa con difference sobre el canvas vivo",
+      "dpr": 3,
+      "corridas": 4,
+      "fpsMediano": 1320.78,
+      "p50Mediano": 0.6,
+      "p95Mediano": 2,
+      "largosMedianos": 7,
+      "factorDelLienzo": 1
+    }
+  ],
+  "costoDelBlend": {
+    "fpsSinBlend": 1366.29,
+    "fpsConBlend": 863.61,
+    "msPorCuadroSinBlend": 0.73,
+    "msPorCuadroConBlend": 1.16,
+    "deltaMs": 0.426,
+    "caidaDeFpsPct": 36.79
+  },
+  "corridas": [
+    {
+      "config": "base",
+      "que": "la escena de hoy a 390, tal cual",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3671,
+        "msTotal": 3000,
+        "fps": 1223.6666666666667,
+        "p50Ms": 0.4000000000014552,
+        "p95Ms": 3.6999999999989086,
+        "p99Ms": 5,
+        "peorMs": 17.700000000000728,
+        "largos": 9
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "dpr-1",
+      "que": "RECIBO (no control): a 390 el producto ya clava dpr [1,1], así que el lienzo no cambia",
+      "dpr": 1,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3530,
+        "msTotal": 3000.2999999970198,
+        "fps": 1176.5490117666589,
+        "p50Ms": 0.4000000000014552,
+        "p95Ms": 3.8000000000010914,
+        "p99Ms": 5.100000000000364,
+        "peorMs": 37.400000000001455,
+        "largos": 13
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "sin-escena",
+      "que": "CONTROL negativo: la escena oculta, el piso de la página sin WebGL",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3901,
+        "msTotal": 3000.0999999940395,
+        "fps": 1300.2899903362388,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.6000000000003638,
+        "p99Ms": 2.6999999999989086,
+        "peorMs": 18.700000000000728,
+        "largos": 11
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-8",
+      "que": "CONTROL positivo graduado (1/2): backdrop-filter blur(8px) a pantalla completa",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3967,
+        "msTotal": 3000.5,
+        "fps": 1322.1129811698052,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.9000000000014552,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 18.700000000000728,
+        "largos": 8
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-64",
+      "que": "CONTROL positivo graduado (2/2): blur(64px) — tiene que dar PEOR que blur-8",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3981,
+        "msTotal": 3004.5,
+        "fps": 1325.0124812780828,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.6000000000021828,
+        "p99Ms": 3.5,
+        "peorMs": 18.5,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-trabado",
+      "que": "(b) el blend sobre el árbol de hoy: la cadena está cortada, el fondo del grupo es estático",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3963,
+        "msTotal": 3000.3999999910593,
+        "fps": 1320.823890151916,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 1.8999999999978172,
+        "p99Ms": 3.600000000002183,
+        "peorMs": 18.200000000000728,
+        "largos": 5
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "destrabado",
+      "que": "(b) la inyección del destrabe SOLA, para poder restarla",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3848,
+        "msTotal": 3000.4000000059605,
+        "fps": 1282.4956672418198,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.099999999998545,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 18.5,
+        "largos": 11
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-destrabado",
+      "que": "(b) EL NÚMERO DE LA PREGUNTA: el blend en los 289 bloques de texto, mezclando contra el canvas vivo",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 2462,
+        "msTotal": 3001.199999988079,
+        "fps": 820.3385312574234,
+        "p50Ms": 1.2000000000007276,
+        "p95Ms": 2,
+        "p99Ms": 2.599999999998545,
+        "peorMs": 5.299999999999272,
+        "largos": 0
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-un-nodo",
+      "que": "(b) EL DISCRIMINADOR DEL COSTO: UN solo nodo a pantalla completa con difference sobre el canvas vivo",
+      "dpr": 3,
+      "repeticion": 1,
+      "lectura": {
+        "cuadros": 3963,
+        "msTotal": 3000.5,
+        "fps": 1320.779870021663,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 18.200000000000728,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "base",
+      "que": "la escena de hoy a 390, tal cual",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3947,
+        "msTotal": 3000.2000000029802,
+        "fps": 1315.5789614012663,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2,
+        "p99Ms": 3.6000000000058208,
+        "peorMs": 18.400000000001455,
+        "largos": 8
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "dpr-1",
+      "que": "RECIBO (no control): a 390 el producto ya clava dpr [1,1], así que el lienzo no cambia",
+      "dpr": 1,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3754,
+        "msTotal": 3011.8999999910593,
+        "fps": 1246.3893223583598,
+        "p50Ms": 0.5,
+        "p95Ms": 3.5,
+        "p99Ms": 4.899999999999636,
+        "peorMs": 18.5,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "sin-escena",
+      "que": "CONTROL negativo: la escena oculta, el piso de la página sin WebGL",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3931,
+        "msTotal": 3010.2999999970198,
+        "fps": 1305.8499152921277,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.6000000000003638,
+        "p99Ms": 2.8000000000010914,
+        "peorMs": 18.700000000000728,
+        "largos": 12
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-8",
+      "que": "CONTROL positivo graduado (1/2): backdrop-filter blur(8px) a pantalla completa",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 4036,
+        "msTotal": 3000.1000000089407,
+        "fps": 1345.2884903796446,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.8999999999996362,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 18.69999999999891,
+        "largos": 6
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-64",
+      "que": "CONTROL positivo graduado (2/2): blur(64px) — tiene que dar PEOR que blur-8",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3898,
+        "msTotal": 3000.5,
+        "fps": 1299.116813864356,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 2.100000000000364,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 17.600000000002183,
+        "largos": 9
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-trabado",
+      "que": "(b) el blend sobre el árbol de hoy: la cadena está cortada, el fondo del grupo es estático",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 4112,
+        "msTotal": 3000.2999999970198,
+        "fps": 1370.5296137066575,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 1.7000000000007276,
+        "p99Ms": 3.5,
+        "peorMs": 17.799999999999272,
+        "largos": 4
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "destrabado",
+      "que": "(b) la inyección del destrabe SOLA, para poder restarla",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3926,
+        "msTotal": 3000.2999999970198,
+        "fps": 1308.535813086658,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.2000000000007276,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 17.799999999999272,
+        "largos": 9
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-destrabado",
+      "que": "(b) EL NÚMERO DE LA PREGUNTA: el blend en los 289 bloques de texto, mezclando contra el canvas vivo",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 2292,
+        "msTotal": 3000.8999999910593,
+        "fps": 763.7708687416537,
+        "p50Ms": 1.2999999999992724,
+        "p95Ms": 2.099999999998545,
+        "p99Ms": 2.5,
+        "peorMs": 5.400000000001455,
+        "largos": 0
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-un-nodo",
+      "que": "(b) EL DISCRIMINADOR DEL COSTO: UN solo nodo a pantalla completa con difference sobre el canvas vivo",
+      "dpr": 3,
+      "repeticion": 2,
+      "lectura": {
+        "cuadros": 3956,
+        "msTotal": 3000.4000000059605,
+        "fps": 1318.490867881663,
+        "p50Ms": 0.6000000000021828,
+        "p95Ms": 1.8999999999978172,
+        "p99Ms": 3.400000000001455,
+        "peorMs": 18,
+        "largos": 1
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "base",
+      "que": "la escena de hoy a 390, tal cual",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 3977,
+        "msTotal": 3000.300000011921,
+        "fps": 1325.5341132500744,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 1.8000000000029104,
+        "p99Ms": 3.5,
+        "peorMs": 17.799999999995634,
+        "largos": 8
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "dpr-1",
+      "que": "RECIBO (no control): a 390 el producto ya clava dpr [1,1], así que el lienzo no cambia",
+      "dpr": 1,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 3858,
+        "msTotal": 3000.2999999970198,
+        "fps": 1285.8714128599913,
+        "p50Ms": 0.4000000000014552,
+        "p95Ms": 3.5,
+        "p99Ms": 4.699999999998909,
+        "peorMs": 32.70000000000073,
+        "largos": 6
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "sin-escena",
+      "que": "CONTROL negativo: la escena oculta, el piso de la página sin WebGL",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 4078,
+        "msTotal": 3000.2000000029802,
+        "fps": 1359.2427171508396,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.6000000000003638,
+        "p99Ms": 2.900000000001455,
+        "peorMs": 18.5,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-8",
+      "que": "CONTROL positivo graduado (1/2): backdrop-filter blur(8px) a pantalla completa",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 4185,
+        "msTotal": 3000.4000000059605,
+        "fps": 1394.814024793923,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.7999999999992724,
+        "p99Ms": 3.600000000000364,
+        "peorMs": 17.799999999999272,
+        "largos": 3
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-64",
+      "que": "CONTROL positivo graduado (2/2): blur(64px) — tiene que dar PEOR que blur-8",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 4127,
+        "msTotal": 3000.2000000029802,
+        "fps": 1375.5749616678556,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.2000000000007276,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 18.200000000000728,
+        "largos": 5
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-trabado",
+      "que": "(b) el blend sobre el árbol de hoy: la cadena está cortada, el fondo del grupo es estático",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 3893,
+        "msTotal": 3000.0999999940395,
+        "fps": 1297.6234125554931,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.2000000000007276,
+        "p99Ms": 4.5,
+        "peorMs": 31.299999999999272,
+        "largos": 12
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "destrabado",
+      "que": "(b) la inyección del destrabe SOLA, para poder restarla",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 4124,
+        "msTotal": 3000.2999999970198,
+        "fps": 1374.5292137466574,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.100000000002183,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 18.399999999997817,
+        "largos": 5
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-destrabado",
+      "que": "(b) EL NÚMERO DE LA PREGUNTA: el blend en los 289 bloques de texto, mezclando contra el canvas vivo",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 2602,
+        "msTotal": 3000.9000000059605,
+        "fps": 867.0732113682002,
+        "p50Ms": 1.0999999999985448,
+        "p95Ms": 1.9000000000014552,
+        "p99Ms": 2.399999999997817,
+        "peorMs": 4.5,
+        "largos": 0
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-un-nodo",
+      "que": "(b) EL DISCRIMINADOR DEL COSTO: UN solo nodo a pantalla completa con difference sobre el canvas vivo",
+      "dpr": 3,
+      "repeticion": 3,
+      "lectura": {
+        "cuadros": 4164,
+        "msTotal": 3000.4000000059605,
+        "fps": 1387.8149580028423,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 1.8999999999978172,
+        "p99Ms": 3.599999999998545,
+        "peorMs": 17.200000000000728,
+        "largos": 3
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "base",
+      "que": "la escena de hoy a 390, tal cual",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 4054,
+        "msTotal": 3000.2000000029802,
+        "fps": 1351.2432504486278,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.099999999998545,
+        "p99Ms": 3.5,
+        "peorMs": 17.799999999995634,
+        "largos": 3
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "dpr-1",
+      "que": "RECIBO (no control): a 390 el producto ya clava dpr [1,1], así que el lienzo no cambia",
+      "dpr": 1,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 3582,
+        "msTotal": 3000.3999999910593,
+        "fps": 1193.8408212273944,
+        "p50Ms": 0.5,
+        "p95Ms": 3.3000000000010914,
+        "p99Ms": 5,
+        "peorMs": 18.299999999999272,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "sin-escena",
+      "que": "CONTROL negativo: la escena oculta, el piso de la página sin WebGL",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 4081,
+        "msTotal": 3000.2999999970198,
+        "fps": 1360.1973136033243,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 1.5,
+        "p99Ms": 2.7999999999992724,
+        "peorMs": 18.5,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-8",
+      "que": "CONTROL positivo graduado (1/2): backdrop-filter blur(8px) a pantalla completa",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 3987,
+        "msTotal": 3000.2000000029802,
+        "fps": 1328.911405904953,
+        "p50Ms": 0.6000000000003638,
+        "p95Ms": 2,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 18.5,
+        "largos": 7
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blur-64",
+      "que": "CONTROL positivo graduado (2/2): blur(64px) — tiene que dar PEOR que blur-8",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 4173,
+        "msTotal": 3000.4000000059605,
+        "fps": 1390.8145580561627,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 1.8999999999996362,
+        "p99Ms": 3.5,
+        "peorMs": 18.19999999999709,
+        "largos": 3
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-trabado",
+      "que": "(b) el blend sobre el árbol de hoy: la cadena está cortada, el fondo del grupo es estático",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 4075,
+        "msTotal": 3000.2000000029802,
+        "fps": 1358.2427838130632,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2,
+        "p99Ms": 3.7999999999992724,
+        "peorMs": 18.099999999998545,
+        "largos": 5
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "destrabado",
+      "que": "(b) la inyección del destrabe SOLA, para poder restarla",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 4099,
+        "msTotal": 3000.1000000089407,
+        "fps": 1366.2877904029147,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.2000000000007276,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 18,
+        "largos": 3
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-destrabado",
+      "que": "(b) EL NÚMERO DE LA PREGUNTA: el blend en los 289 bloques de texto, mezclando contra el canvas vivo",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 2591,
+        "msTotal": 3000.2000000029802,
+        "fps": 863.6090927262937,
+        "p50Ms": 1.0999999999985448,
+        "p95Ms": 2,
+        "p99Ms": 2.5,
+        "peorMs": 4.700000000000728,
+        "largos": 0
+      },
+      "factorDelLienzo": 1
+    },
+    {
+      "config": "blend-un-nodo",
+      "que": "(b) EL DISCRIMINADOR DEL COSTO: UN solo nodo a pantalla completa con difference sobre el canvas vivo",
+      "dpr": 3,
+      "repeticion": 4,
+      "lectura": {
+        "cuadros": 3778,
+        "msTotal": 3006.2000000029802,
+        "fps": 1256.7360787692949,
+        "p50Ms": 0.5999999999985448,
+        "p95Ms": 2.100000000002183,
+        "p99Ms": 3.7000000000007276,
+        "peorMs": 18.5,
+        "largos": 11
+      },
+      "factorDelLienzo": 1
+    }
+  ]
+}

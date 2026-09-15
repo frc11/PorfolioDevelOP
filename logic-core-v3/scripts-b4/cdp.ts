@@ -166,6 +166,22 @@ export async function lanzarChrome(opciones: {
   /** Dónde poner la ventana. Con tres frentes a la vez, tres ventanas encimadas. */
   readonly x?: number
   readonly y?: number
+  /**
+   * Banderas ADICIONALES, con su motivo en el llamador.
+   *
+   * ⚠️ **Existe para no duplicar el lanzador, no para aflojar `BANDERAS`.** Las
+   * de arriba son las que hacen comparables a todos los bancos y no se tocan;
+   * ésta deja que UNA medición agregue lo que sólo ella necesita. El caso que la
+   * pidió: BLEND-1 necesita `--disable-gpu-vsync` y `--disable-frame-rate-limit`
+   * porque con el vsync puesto el monitor de esta máquina clava todo en 74,9 fps
+   * y el instrumento de MOVIL-1 no podía distinguir dos configuraciones (la
+   * pregunta (a) que ese bloque dejó abierta). La alternativa era copiar
+   * `lanzarChrome` a `scripts-blend/`, y el repo ya tiene el instrumento del
+   * contraste por triplicado y su número de deuda (D-B11.5): no se agrega otro.
+   *
+   * Por defecto vacío: ninguna corrida existente cambia.
+   */
+  readonly banderasExtra?: readonly string[]
 }): Promise<ChromeLanzado> {
   const { perfil } = opciones
   if (opciones.limpiarPerfil === true && existsSync(perfil)) rmSync(perfil, { recursive: true, force: true })
@@ -180,6 +196,7 @@ export async function lanzarChrome(opciones: {
       `--window-size=${opciones.ancho},${opciones.alto}`,
       `--window-position=${opciones.x ?? 0},${opciones.y ?? 0}`,
       ...BANDERAS,
+      ...(opciones.banderasExtra ?? []),
       'about:blank',
     ],
     { stdio: 'ignore', windowsHide: false },

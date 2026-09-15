@@ -1,0 +1,715 @@
+{
+  "cuando": "2026-09-15T21:22:10.493Z",
+  "zonaMuerta": {
+    "desde": 102,
+    "hasta": 153
+  },
+  "perfil": {
+    "id": "1440",
+    "nombre": "1440",
+    "procedencia": "el ancho donde el proyecto define el ritmo (`MEDICION-NAVEGADOR.md` §1). Es además `--fluido-techo`, el ancla de arriba de la banda tipográfica.",
+    "ancho": 1440,
+    "alto": 900,
+    "dpr": 1,
+    "movil": false,
+    "tactil": false,
+    "debajoDelUmbral": false
+  },
+  "canvas": {
+    "hay": true,
+    "ancho": 1440,
+    "alto": 900
+  },
+  "documento": {
+    "altoDelDocumento": 16200,
+    "ventana": 900,
+    "ancho": 1440
+  },
+  "paneles": [
+    {
+      "id": "hero",
+      "superficie": "papel-transparente",
+      "alto": 900,
+      "top": 0
+    },
+    {
+      "id": "quienes-somos",
+      "superficie": "papel-transparente",
+      "alto": 2700,
+      "top": 900
+    },
+    {
+      "id": "numeros",
+      "superficie": "papel-transparente",
+      "alto": 3600,
+      "top": 3600
+    },
+    {
+      "id": "trabajos",
+      "superficie": "oscuro-transparente",
+      "alto": 2700,
+      "top": 7200
+    },
+    {
+      "id": "servicios",
+      "superficie": "papel-opaco",
+      "alto": 2700,
+      "top": 9900
+    },
+    {
+      "id": "tu-panel",
+      "superficie": "papel-opaco",
+      "alto": 1800,
+      "top": 12600
+    },
+    {
+      "id": "por-que-develop",
+      "superficie": "papel-transparente",
+      "alto": 900,
+      "top": 14400
+    },
+    {
+      "id": "cierre",
+      "superficie": "papel-transparente",
+      "alto": 900,
+      "top": 15300
+    }
+  ],
+  "secciones": {
+    "arriba": 0,
+    "abajo": 16200
+  },
+  "cuadros": [
+    {
+      "keyframe": "hero",
+      "progreso": 0,
+      "scrollY": 0,
+      "seccionesEnCuadro": [
+        {
+          "id": "hero",
+          "superficie": "papel-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 11,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1167,
+        "y1": 900,
+        "anchoPx": 1151,
+        "fraccionDelAncho": 0.7993
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 7,
+        "x1": 1167,
+        "y1": 886
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 18324,
+          "fraccion": 0.0141
+        },
+        "banda": {
+          "pixeles": 1035900,
+          "muertos": 15351,
+          "fraccion": 0.0148
+        },
+        "cajaDelTexto": {
+          "pixeles": 1011729,
+          "muertos": 14732,
+          "fraccion": 0.0146
+        },
+        "histograma": [
+          0.0606,
+          0.0007,
+          0.0009,
+          0.0028,
+          0.007,
+          0.007,
+          0.019,
+          0.0664,
+          0.4054,
+          0.4302
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 16084,
+          "fraccion": 0.0124
+        },
+        "banda": {
+          "pixeles": 1035900,
+          "muertos": 14005,
+          "fraccion": 0.0135
+        },
+        "cajaDelTexto": {
+          "pixeles": 1011729,
+          "muertos": 13902,
+          "fraccion": 0.0137
+        },
+        "histograma": [
+          0.0908,
+          0.0016,
+          0.0018,
+          0.0027,
+          0.0068,
+          0.0055,
+          0.0146,
+          0.0615,
+          0.3767,
+          0.4379
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-hero-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-hero-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-hero-F.png"
+      }
+    },
+    {
+      "keyframe": "quiénes somos",
+      "progreso": 0.375,
+      "scrollY": 3600,
+      "seccionesEnCuadro": [
+        {
+          "id": "numeros",
+          "superficie": "papel-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 9,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1176,
+        "y1": 900,
+        "anchoPx": 1160,
+        "fraccionDelAncho": 0.8056
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 7,
+        "x1": 1176,
+        "y1": 886
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 32490,
+          "fraccion": 0.0251
+        },
+        "banda": {
+          "pixeles": 1044000,
+          "muertos": 27371,
+          "fraccion": 0.0262
+        },
+        "cajaDelTexto": {
+          "pixeles": 1019640,
+          "muertos": 24925,
+          "fraccion": 0.0244
+        },
+        "histograma": [
+          0.1036,
+          0.0037,
+          0.0048,
+          0.0052,
+          0.0054,
+          0.0194,
+          0.0861,
+          0.1624,
+          0.484,
+          0.1254
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 30996,
+          "fraccion": 0.0239
+        },
+        "banda": {
+          "pixeles": 1044000,
+          "muertos": 26062,
+          "fraccion": 0.025
+        },
+        "cajaDelTexto": {
+          "pixeles": 1019640,
+          "muertos": 24073,
+          "fraccion": 0.0236
+        },
+        "histograma": [
+          0.1338,
+          0.0047,
+          0.0067,
+          0.004,
+          0.0051,
+          0.0185,
+          0.0801,
+          0.1575,
+          0.4497,
+          0.1397
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-qui-nes-somos-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-qui-nes-somos-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-qui-nes-somos-F.png"
+      }
+    },
+    {
+      "keyframe": "números",
+      "progreso": 0.5,
+      "scrollY": 7200,
+      "seccionesEnCuadro": [
+        {
+          "id": "trabajos",
+          "superficie": "oscuro-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 18,
+      "banda": {
+        "x0": 0,
+        "y0": 0,
+        "x1": 1440,
+        "y1": 900,
+        "anchoPx": 1440,
+        "fraccionDelAncho": 1
+      },
+      "cajaDelTexto": {
+        "x0": 0,
+        "y0": 7,
+        "x1": 2208,
+        "y1": 886
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 6167,
+          "fraccion": 0.0048
+        },
+        "banda": {
+          "pixeles": 1296000,
+          "muertos": 6167,
+          "fraccion": 0.0048
+        },
+        "cajaDelTexto": {
+          "pixeles": 1265760,
+          "muertos": 6153,
+          "fraccion": 0.0049
+        },
+        "histograma": [
+          0.8974,
+          0.019,
+          0.0151,
+          0.0581,
+          0.004,
+          0.0007,
+          0.0004,
+          0.0004,
+          0.0048,
+          0
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 3221,
+          "fraccion": 0.0025
+        },
+        "banda": {
+          "pixeles": 1296000,
+          "muertos": 3221,
+          "fraccion": 0.0025
+        },
+        "cajaDelTexto": {
+          "pixeles": 1265760,
+          "muertos": 3221,
+          "fraccion": 0.0025
+        },
+        "histograma": [
+          0.6126,
+          0.0007,
+          0.0007,
+          0.0056,
+          0.0009,
+          0.0015,
+          0.0212,
+          0.0019,
+          0.0016,
+          0.3533
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-n-meros-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-n-meros-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-n-meros-F.png"
+      }
+    },
+    {
+      "keyframe": "trabajos",
+      "progreso": 0.625,
+      "scrollY": 9900,
+      "seccionesEnCuadro": [
+        {
+          "id": "servicios",
+          "superficie": "papel-opaco"
+        }
+      ],
+      "bloquesEnCuadro": 70,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1262,
+        "y1": 900,
+        "anchoPx": 1246,
+        "fraccionDelAncho": 0.8653
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 7,
+        "x1": 1262,
+        "y1": 886
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 0,
+          "fraccion": 0
+        },
+        "banda": {
+          "pixeles": 1121400,
+          "muertos": 0,
+          "fraccion": 0
+        },
+        "cajaDelTexto": {
+          "pixeles": 1095234,
+          "muertos": 0,
+          "fraccion": 0
+        },
+        "histograma": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 20432,
+          "fraccion": 0.0158
+        },
+        "banda": {
+          "pixeles": 1121400,
+          "muertos": 16414,
+          "fraccion": 0.0146
+        },
+        "cajaDelTexto": {
+          "pixeles": 1095234,
+          "muertos": 15749,
+          "fraccion": 0.0144
+        },
+        "histograma": [
+          0.03,
+          0.0007,
+          0.0108,
+          0.0344,
+          0.0084,
+          0.0061,
+          0.0067,
+          0.0075,
+          0.0146,
+          0.8807
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-trabajos-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-trabajos-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-trabajos-F.png"
+      }
+    },
+    {
+      "keyframe": "demos",
+      "progreso": 0.75,
+      "scrollY": 13775,
+      "seccionesEnCuadro": [
+        {
+          "id": "tu-panel",
+          "superficie": "papel-opaco"
+        },
+        {
+          "id": "por-que-develop",
+          "superficie": "papel-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 19,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1167,
+        "y1": 900,
+        "anchoPx": 1151,
+        "fraccionDelAncho": 0.7993
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1167,
+        "y1": 936
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 136668,
+          "fraccion": 0.1055
+        },
+        "banda": {
+          "pixeles": 1035900,
+          "muertos": 107468,
+          "fraccion": 0.1037
+        },
+        "cajaDelTexto": {
+          "pixeles": 1035900,
+          "muertos": 107468,
+          "fraccion": 0.1037
+        },
+        "histograma": [
+          0,
+          0.0003,
+          0.0029,
+          0.0049,
+          0.075,
+          0.0292,
+          0.1112,
+          0.0417,
+          0.0249,
+          0.7099
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 134954,
+          "fraccion": 0.1041
+        },
+        "banda": {
+          "pixeles": 1035900,
+          "muertos": 105867,
+          "fraccion": 0.1022
+        },
+        "cajaDelTexto": {
+          "pixeles": 1035900,
+          "muertos": 105867,
+          "fraccion": 0.1022
+        },
+        "histograma": [
+          0.0306,
+          0.0013,
+          0.003,
+          0.005,
+          0.0734,
+          0.0296,
+          0.1106,
+          0.0418,
+          0.0361,
+          0.6686
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-demos-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-demos-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-demos-F.png"
+      }
+    },
+    {
+      "keyframe": "cierre",
+      "progreso": 0.95,
+      "scrollY": 14995,
+      "seccionesEnCuadro": [
+        {
+          "id": "por-que-develop",
+          "superficie": "papel-transparente"
+        },
+        {
+          "id": "cierre",
+          "superficie": "papel-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 28,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1402,
+        "y1": 900,
+        "anchoPx": 1386,
+        "fraccionDelAncho": 0.9625
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1402,
+        "y1": 918
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 649078,
+          "fraccion": 0.5008
+        },
+        "banda": {
+          "pixeles": 1247400,
+          "muertos": 620216,
+          "fraccion": 0.4972
+        },
+        "cajaDelTexto": {
+          "pixeles": 1247400,
+          "muertos": 620216,
+          "fraccion": 0.4972
+        },
+        "histograma": [
+          0.0307,
+          0.0008,
+          0.0009,
+          0.0085,
+          0.0662,
+          0.4283,
+          0.3504,
+          0.1113,
+          0.0029,
+          0
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 616183,
+          "fraccion": 0.4754
+        },
+        "banda": {
+          "pixeles": 1247400,
+          "muertos": 588511,
+          "fraccion": 0.4718
+        },
+        "cajaDelTexto": {
+          "pixeles": 1247400,
+          "muertos": 588511,
+          "fraccion": 0.4718
+        },
+        "histograma": [
+          0.0612,
+          0.0019,
+          0.0011,
+          0.0097,
+          0.0564,
+          0.4136,
+          0.3184,
+          0.1137,
+          0.0231,
+          0.0008
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-F.png"
+      }
+    },
+    {
+      "keyframe": "cierre · sostén",
+      "progreso": 1,
+      "scrollY": 15300,
+      "seccionesEnCuadro": [
+        {
+          "id": "cierre",
+          "superficie": "papel-transparente"
+        }
+      ],
+      "bloquesEnCuadro": 31,
+      "banda": {
+        "x0": 16,
+        "y0": 0,
+        "x1": 1354,
+        "y1": 900,
+        "anchoPx": 1338,
+        "fraccionDelAncho": 0.9292
+      },
+      "cajaDelTexto": {
+        "x0": 16,
+        "y0": 7,
+        "x1": 1354,
+        "y1": 886
+      },
+      "sala": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 643863,
+          "fraccion": 0.4968
+        },
+        "banda": {
+          "pixeles": 1204200,
+          "muertos": 579713,
+          "fraccion": 0.4814
+        },
+        "cajaDelTexto": {
+          "pixeles": 1176102,
+          "muertos": 567159,
+          "fraccion": 0.4822
+        },
+        "histograma": [
+          0.0307,
+          0.0008,
+          0.0008,
+          0.0085,
+          0.0667,
+          0.4234,
+          0.3524,
+          0.1138,
+          0.0028,
+          0
+        ]
+      },
+      "fondoReal": {
+        "cuadro": {
+          "pixeles": 1296000,
+          "muertos": 603858,
+          "fraccion": 0.4659
+        },
+        "banda": {
+          "pixeles": 1204200,
+          "muertos": 544583,
+          "fraccion": 0.4522
+        },
+        "cajaDelTexto": {
+          "pixeles": 1176102,
+          "muertos": 536123,
+          "fraccion": 0.4558
+        },
+        "histograma": [
+          0.0612,
+          0.0021,
+          0.0009,
+          0.0082,
+          0.0608,
+          0.3999,
+          0.3005,
+          0.1007,
+          0.0217,
+          0.0439
+        ]
+      },
+      "capturas": {
+        "C": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-sost-n-C.png",
+        "S": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-sost-n-S.png",
+        "F": "C:\\Users\\VALENT~1\\AppData\\Local\\Temp\\blend-capturas/zm-1440-cierre-sost-n-F.png"
+      }
+    }
+  ]
+}
